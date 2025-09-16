@@ -1,56 +1,123 @@
 /**
- * L5R4 Actor document - Foundry VTT v13
+ * L5R4 Actor document implementation for Foundry VTT v13+.
+ * 
+ * This class extends the base Foundry Actor document to provide L5R4-specific
+ * functionality including derived data computation, experience tracking, and
+ * token configuration.
  *
- * Responsibilities
- * - Set sensible token defaults on create.
- * - Compute derived fields in prepareDerivedData() for sheets and rolls:
- *   - Rings (PC): air, earth, fire, water from traits; void rank is user data.
- *   - Initiative (PC): roll = IR + Ref + rollMod, keep = Ref + keepMod
- *   - Armor TN (PC): base = 5*Ref + 5, then + mod and armor bonus (stacking optional).
- *   - Wounds (PC): thresholds per Earth ring and multiplier; current level, penalty, heal rate.
- *   - Insight (PC): points and optional auto rank.
- *   - NPC: wounds value and current wound level(s).
+ * ## Core Responsibilities:
+ * - **Token Configuration**: Set appropriate defaults for PC/NPC tokens on creation
+ * - **Derived Data Computation**: Calculate all derived statistics during data preparation
+ * - **Experience Tracking**: Automatic XP cost calculation and logging for character advancement
+ * - **Wound System**: Complex wound level tracking with penalties and healing rates
+ * - **Family/School Integration**: Handle creation bonuses and trait modifications
  *
- * API refs:
- * - Actor: https://foundryvtt.com/api/classes/documents.Actor.html
- * - TokenDocument.prototypeToken: https://foundryvtt.com/api/classes/documents.Actor.html#prototypeToken
+ * ## Derived Data Features:
+ * ### Player Characters (PC):
+ * - **Rings**: Computed from trait pairs (Air=Ref+Awa, Earth=Sta+Wil, etc.)
+ * - **Initiative**: Roll=InsightRank+Reflexes+mods, Keep=Reflexes+mods
+ * - **Armor TN**: Base=5×Reflexes+5, plus armor bonuses (stackable via setting)
+ * - **Wounds**: Earth-based thresholds, current level tracking, penalties, heal rate
+ * - **Insight**: Points from rings×10 + skills×1, optional auto-rank calculation
+ * - **Experience**: Comprehensive XP tracking with automatic cost calculation
  *
- * Reading map (for new contributors)
- * 1) _preCreate        → Token defaults and initial actor img.
- * 2) prepareDerivedData→ Branches to PCs (stats & XP) or NPCs.
- * 3) _preparePc        → Traits→Rings, Initiative, Armor TN, Wounds, Insight.
- * 4) _preparePcExperience → XP totals/spend by RAW.
- * 5) _prepareNpc       → Lightweight wounds/levels.
- * 6) _calculateInsightRank → Insight points → Rank thresholds.
+ * ### Non-Player Characters (NPC):
+ * - **Simplified Wounds**: Earth-based with optional manual max override
+ * - **Initiative**: Effective values with fallbacks to Reflexes
+ * - **Shared Logic**: Uses same trait/ring calculations as PCs
  *
- * Glossary (traits shorthand)
- *  sta Stamina, wil Willpower, str Strength, per Perception,
- *  ref Reflexes, awa Awareness, agi Agility, int Intelligence
+ * ## API References:
+ * @see {@link https://foundryvtt.com/api/classes/documents.Actor.html|Actor Document}
+ * @see {@link https://foundryvtt.com/api/classes/documents.Actor.html#prototypeToken|Prototype Token}
+ * @see {@link https://foundryvtt.com/api/classes/documents.Actor.html#applyActiveEffects|Active Effects}
+ *
+ * ## Code Navigation Guide:
+ * 1. `_preCreate()` - Token defaults and initial actor image setup
+ * 2. `_preUpdate()` - XP delta tracking for trait/void/skill changes
+ * 3. `prepareDerivedData()` - Main entry point, branches to PC/NPC preparation
+ * 4. `_preparePc()` - PC-specific derived data (traits, rings, initiative, armor, wounds, insight)
+ * 5. `_preparePcExperience()` - XP totals and breakdown calculation
+ * 6. `_prepareNpc()` - NPC-specific derived data (simplified wound system)
+ * 7. `_prepareTraitsAndRings()` - Shared trait normalization and ring calculation
+ * 8. `_calculateInsightRank()` - Insight points to rank conversion
+ * 9. `_creationFreeBonus()` - Family/School bonus detection and summation
+ * 10. `_xpStepCostForTrait()` - XP cost calculation for trait advancement
+ *
+ * ## Trait Key Glossary:
+ * - `sta`: Stamina, `wil`: Willpower, `str`: Strength, `per`: Perception
+ * - `ref`: Reflexes, `awa`: Awareness, `agi`: Agility, `int`: Intelligence
  */
 
 import { SYS_ID, iconPath } from "../config.js";
 import { toInt } from "../utils.js";
 
 /**
- * Minimal shape of the actor.system we read/write here.
- * This is intentionally partial—only the keys touched in this file.
- * See the system's JSON schema/sheets for full details.
+ * Type definition for the L5R4 actor system data structure.
+ * This represents the shape of `actor.system` as used by this document class.
+ * Intentionally partial - only includes properties accessed in this file.
+ * 
  * @typedef {object} L5R4ActorSystem
- * @property {object} traits - e.g. { sta,wil,str,per,ref,awa,agi,int }
- * @property {{air:number,earth:number,fire:number,water:number,void?:{rank?:number,value?:number,max?:number}}} rings
- * @property {{roll?:number,keep?:number,rollMod?:number,keepMod?:number}} initiative
- * @property {{base?:number,bonus?:number,reduction?:number,current?:number,mod?:number}} armorTn
- * @property {{max?:number,value?:number,healRate?:number,mod?:number}} wounds
- * @property {Record<"healthy"|"nicked"|"grazed"|"hurt"|"injure...", {value:number, penalty:number, current:boolean}>} woundLevels
- * @property {number} suffered
- * @property {{points?:number,rank?:number}} insight
- * @property {number} woundsPenaltyMod
- * @property {number} woundsMultiplier
- * @property {number} woundsMod
+ * @property {Record<string, number|{rank?: number}>} traits - Character traits (sta, wil, str, per, ref, awa, agi, int)
+ * @property {object} rings - Elemental rings derived from traits
+ * @property {number} rings.air - Air ring (min of Reflexes and Awareness)
+ * @property {number} rings.earth - Earth ring (min of Stamina and Willpower)
+ * @property {number} rings.fire - Fire ring (min of Agility and Intelligence)
+ * @property {number} rings.water - Water ring (min of Strength and Perception)
+ * @property {object} [rings.void] - Void ring (user-controlled)
+ * @property {number} [rings.void.rank] - Void ring rank
+ * @property {number} [rings.void.value] - Current void points
+ * @property {number} [rings.void.max] - Maximum void points
+ * @property {object} [initiative] - Initiative calculation data
+ * @property {number} [initiative.roll] - Initiative roll dice
+ * @property {number} [initiative.keep] - Initiative keep dice
+ * @property {number} [initiative.rollMod] - Roll modifier
+ * @property {number} [initiative.keepMod] - Keep modifier
+ * @property {object} [armorTn] - Armor Target Number data
+ * @property {number} [armorTn.base] - Base TN from Reflexes
+ * @property {number} [armorTn.bonus] - Armor bonus to TN
+ * @property {number} [armorTn.reduction] - Damage reduction from armor
+ * @property {number} [armorTn.current] - Final effective TN
+ * @property {number} [armorTn.mod] - Manual TN modifier
+ * @property {object} [wounds] - Wound tracking data
+ * @property {number} [wounds.max] - Maximum wound points
+ * @property {number} [wounds.value] - Current wound points
+ * @property {number} [wounds.healRate] - Daily healing rate
+ * @property {number} [wounds.mod] - Healing rate modifier
+ * @property {number} [wounds.penalty] - Current wound penalty
+ * @property {Record<string, WoundLevel>} [woundLevels] - Individual wound level thresholds
+ * @property {number} [suffered] - Total damage suffered
+ * @property {object} [insight] - Insight rank and points
+ * @property {number} [insight.points] - Total insight points
+ * @property {number} [insight.rank] - Current insight rank
+ * @property {number} [woundsPenaltyMod] - Global wound penalty modifier
+ * @property {number} [woundsMultiplier] - Wound threshold multiplier
+ * @property {number} [woundsMod] - Wound threshold additive modifier
+ * @property {string} [school] - Current school name (derived from items)
+ * @property {object} [_derived] - Computed derived data (non-persistent)
+ * @property {Record<string, number>} [_derived.traitsEff] - Effective trait values post-AE
+ * @property {object} [_xp] - Experience point breakdown (computed during prep)
+ */
+
+/**
+ * Individual wound level definition.
+ * @typedef {object} WoundLevel
+ * @property {number} value - Damage threshold for this level
+ * @property {number} penalty - Dice penalty at this level
+ * @property {boolean} current - Whether this is the character's current level
+ * @property {number} [penaltyEff] - Effective penalty including modifiers
  */
 
 export default class L5R4Actor extends Actor {
-  /** @override */
+  /**
+   * Configure token defaults and initial actor image on creation.
+   * Sets appropriate token bars, display modes, and disposition based on actor type.
+   * 
+   * @param {object} data - The initial data object provided to the document creation
+   * @param {object} options - Additional options which modify the creation request
+   * @param {User} user - The User requesting the document creation
+   * @returns {Promise<void>}
+   * @override
+   */
   async _preCreate(data, options, user) {
     await super._preCreate(data, options, user);
 
@@ -79,9 +146,16 @@ export default class L5R4Actor extends Actor {
   }
 
   /**
-   * Compute XP deltas when traits/void/skills increase and append to flags[SYS_ID].xpSpent.
-   * Runs on any update source (sheet, macro, import), keeping behavior consistent.
-   * @see https://foundryvtt.com/api/classes/foundry.abstract.Document.html#_preUpdate
+   * Track experience point expenditure automatically when traits or void increase.
+   * Calculates XP costs for trait/void advancement and logs them to the actor's flags
+   * for display in the experience log. Handles Family/School bonuses and discounts.
+   * 
+   * @param {object} changed - The differential data that is being updated
+   * @param {object} options - Additional options which modify the update request
+   * @param {User} user - The User requesting the document update
+   * @returns {Promise<void>}
+   * @override
+   * @see {@link https://foundryvtt.com/api/classes/foundry.abstract.Document.html#_preUpdate|Document._preUpdate}
    */
   async _preUpdate(changed, options, user) {
     await super._preUpdate(changed, options, user);
@@ -127,7 +201,7 @@ export default class L5R4Actor extends Actor {
           }
 
           if (deltaXP > 0) {
-            /** JSDoc: push localized log entry for sheet XP log */
+            // Create localized log entry for experience tracking
             const label = game.i18n?.localize?.(`l5r4.mechanics.traits.${k}`) || k.toUpperCase();
             pushNote(deltaXP, game.i18n.format("l5r4.character.experience.log.traitChange", { label, from: oldBase, to: newBase }));
           }
@@ -160,7 +234,15 @@ export default class L5R4Actor extends Actor {
     }
   }
 
-  /** @override */
+  /**
+   * Compute all derived data for the actor based on type.
+   * Called automatically by Foundry after Active Effects are applied.
+   * Branches to PC or NPC-specific preparation methods.
+   * 
+   * @returns {void}
+   * @override
+   * @see {@link https://foundryvtt.com/api/classes/documents.Actor.html#prepareDerivedData|Actor.prepareDerivedData}
+   */
   prepareDerivedData() {
     super.prepareDerivedData();
     /** @type {L5R4ActorSystem} */
@@ -175,13 +257,24 @@ export default class L5R4Actor extends Actor {
   }
 
   /**
-   * Compute normalized effective traits (post-AE) and elemental rings from traits.
-   * This is shared between PCs and NPCs to keep the same rules logic.
-   * - TraitsEff are simply the current post-Active-Effects ranks (no Family math here;
-   *   Family bonuses must be modeled as AEs on the Family Item).
-   * - Rings are the minimum of their two traits; Void remains user-controlled.
-   * @param {object} sys - actor.system
-   * @see https://foundryvtt.com/api/classes/documents.Actor.html#applyActiveEffects
+   * Compute effective traits and elemental rings from base trait values.
+   * Shared logic between PC and NPC preparation to ensure consistency.
+   * 
+   * **Trait Processing:**
+   * - Extracts effective trait values after Active Effects are applied
+   * - Stores normalized values in `sys._derived.traitsEff` for sheet access
+   * - Handles both simple numeric values and `{rank: number}` objects
+   * 
+   * **Ring Calculation:**
+   * - Air = min(Reflexes, Awareness)
+   * - Earth = min(Stamina, Willpower) 
+   * - Fire = min(Agility, Intelligence)
+   * - Water = min(Strength, Perception)
+   * - Void remains user-controlled (not derived)
+   * 
+   * @param {L5R4ActorSystem} sys - The actor's system data object
+   * @returns {void}
+   * @see {@link https://foundryvtt.com/api/classes/documents.Actor.html#applyActiveEffects|Actor.applyActiveEffects}
    */
   _prepareTraitsAndRings(sys) {
     const TRAIT_KEYS = ["sta","wil","str","per","ref","awa","agi","int"];
@@ -215,15 +308,28 @@ export default class L5R4Actor extends Actor {
   }
 
   /**
-   * Derived data for PCs.
-   * @param {object} sys - actor.system
+   * Compute all derived data specific to Player Characters.
+   * Handles complex PC mechanics including Family bonuses, initiative, armor TN,
+   * wound system, insight calculation, and school name derivation.
+   * 
+   * **Major Computations:**
+   * - School name from embedded school item
+   * - Family trait bonuses (via Active Effects or legacy flags)
+   * - Initiative: roll = Insight Rank + Reflexes + mods, keep = Reflexes + mods
+   * - Armor TN: base = 5×Reflexes + 5, plus armor bonuses (stacking configurable)
+   * - Wound system: Earth-based thresholds, current level, penalties, heal rate
+   * - Insight: rings×10 + skills×1, optional auto-rank from points
+   * 
+   * @param {L5R4ActorSystem} sys - The actor's system data object
+   * @returns {void}
    */
   _preparePc(sys) {
     /**
-     * Ensure the header "School" label mirrors the embedded School item.
-     * Render-only: do not persist here. This guarantees the header clears
-     * immediately when the School item is deleted from the Bio section.
-     * @see https://foundryvtt.com/api/classes/documents.Actor.html#prepareDerivedData
+     * Derive school name from embedded school item for header display.
+     * This is computed during data preparation to ensure the header updates
+     * immediately when school items are added/removed. Not persisted to database.
+     * 
+     * @see {@link https://foundryvtt.com/api/classes/documents.Actor.html#prepareDerivedData|Actor.prepareDerivedData}
      */
     try {
       const schoolItem = (this.items?.contents ?? this.items).find(i => i.type === "school");
@@ -235,15 +341,18 @@ export default class L5R4Actor extends Actor {
 
     const TRAIT_KEYS = ["sta","wil","str","per","ref","awa","agi","int"];
     /**
-     * Normalize a Family trait label/key into a system trait key ("ref", "awa", ...).
-     * Accepts:
-     *  - short keys ("ref")
-     *  - English labels ("Reflexes")
-     *  - i18n keys ("l5r4.traits.ref")
-     *  - localized labels in other languages (via game.i18n.localize)
-     *
-     * @param {string} raw
-     * @returns {string} One of "sta","wil","str","per","ref","awa","agi","int" or "" when unknown.
+     * Normalize various trait identifier formats to standard system keys.
+     * Handles multiple input formats for maximum compatibility with different
+     * data sources and user input methods.
+     * 
+     * **Supported Input Formats:**
+     * - Short keys: "ref", "awa", "sta", etc.
+     * - English labels: "Reflexes", "Awareness", "Stamina", etc.
+     * - Localization keys: "l5r4.mechanics.traits.ref", etc.
+     * - Localized labels: Any language via game.i18n.localize
+     * 
+     * @param {string} raw - The trait identifier to normalize
+     * @returns {string} Standard trait key ("sta"|"wil"|"str"|"per"|"ref"|"awa"|"agi"|"int") or "" if unknown
      */
     const normalizeTraitKey = (raw) => {
       const known = ["sta","wil","str","per","ref","awa","agi","int"];
@@ -290,13 +399,21 @@ export default class L5R4Actor extends Actor {
     };
 
     /**
-     * Effective traits = base + Family bonus (do not mutate base).
-     * Prefer the live Family item (uuid) so edits to that item are reflected.
-     * Fall back to the cached flag to support older actors.
-     *
-     * API refs:
-     * - Document#getFlag: https://foundryvtt.com/api/classes/foundry.abstract.Document.html#getFlag
-     * - fromUuidSync:     https://foundryvtt.com/api/functions/global.html#fromUuidSync
+     * Resolve Family trait bonuses from multiple sources with fallback chain.
+     * Prioritizes live Family item references to ensure real-time updates when
+     * Family items are modified. Falls back to cached flags for compatibility.
+     * 
+     * **Resolution Priority:**
+     * 1. Live Family item via UUID (preferred - reflects real-time changes)
+     * 2. Cached family bonus flags (compatibility with older actors)
+     * 3. First embedded family item (legacy fallback)
+     * 
+     * **Family Bonus Integration:**
+     * Family bonuses should be implemented as Active Effects on the Family item
+     * that transfer to the actor, rather than being handled here directly.
+     * 
+     * @see {@link https://foundryvtt.com/api/classes/foundry.abstract.Document.html#getFlag|Document.getFlag}
+     * @see {@link https://foundryvtt.com/api/functions/global.html#fromUuidSync|fromUuidSync}
      */
     let fam = {};
     try {
@@ -345,9 +462,11 @@ export default class L5R4Actor extends Actor {
     sys._derived.traitsEff = traitsEff;
 
     /**
-     * Use post-AE trait ranks directly.
-     * Foundry applies Active Effects before prepareDerivedData:
-     * https://foundryvtt.com/api/classes/documents.Actor.html#applyActiveEffects
+     * Extract effective trait values after Active Effects processing.
+     * Foundry applies Active Effects before calling prepareDerivedData, so
+     * system.traits contains the final effective values including all bonuses.
+     * 
+     * @see {@link https://foundryvtt.com/api/classes/documents.Actor.html#applyActiveEffects|Actor.applyActiveEffects}
      */
     const TR = k => toInt(sys.traits?.[k]);
 
@@ -365,17 +484,22 @@ export default class L5R4Actor extends Actor {
     const baseTN = 5 * ref + 5;
     const modTN  = toInt(sys.armorTn.mod);
 
-    /*
-     * Sum armor bonuses. Some tables stack all bonuses, others take only the
-     * largest. Respect a world setting if present; default to stack all.
-     * Setting is registered in l5r4.js → registerSystemSettings() as "allowArmorStacking".
-     * See: https://foundryvtt.com/api/classes/client.settings.Settings.html#register
-      */
-    let allowStack = true;
+    /**
+     * Calculate armor bonuses with configurable stacking behavior.
+     * Some gaming tables prefer stacking all armor bonuses, while others use
+     * only the highest bonus. Behavior controlled by world setting.
+     * 
+     * **Stacking Modes:**
+     * - Enabled: Sum all equipped armor bonuses and reductions
+     * - Disabled (default): Use highest armor bonus and reduction only
+     * 
+     * @see {@link https://foundryvtt.com/api/classes/client.settings.Settings.html#register|Settings.register}
+     */
+    let allowStack = false;
     try {
       allowStack = game.settings.get(SYS_ID, "allowArmorStacking");
     } catch (_) {
-      /* setting not registered: default true */
+      /* setting not registered: default false */
     }
 
     let bonusTN = 0;
@@ -424,34 +548,34 @@ export default class L5R4Actor extends Actor {
     sys.wounds.max = sys.woundLevels.out.value;
     sys.wounds.value = toInt(sys.wounds.max) - toInt(sys.suffered);
 
-    // Cap comparisons at the Out threshold so "current" never exceeds Out
-    const outMax = toInt(sys.wound_lvl?.out?.value);
+    // Cap damage at the "Out" threshold to prevent overflow in wound level calculations
+    const outMax = toInt(sys.woundLevels?.out?.value);
     const sCapped = Math.min(toInt(sys.suffered), outMax || toInt(sys.suffered));
 
-    // Current wound level - first level whose threshold is >= suffered and larger than previous
+    // Determine current wound level based on damage suffered
+    // Character is at the first level whose threshold encompasses their current damage
     let current = sys.woundLevels.healthy;
     let lastVal = -1;
     for (const key of order) {
       const lvl = sys.woundLevels[key];
-      const s = sCapped;
       const upper = toInt(lvl.value);
-      // Current iff suffered is > previous threshold and <= this level
-      const within = s <= upper && s > lastVal;
+      // Current level if damage is within this threshold range
+      const within = sCapped <= upper && sCapped > lastVal;
       lvl.current = within;
       if (within) {
         current = lvl;
       }
       lastVal = upper;
     }
-    // Normalize actor-level penalty mod and compute per-rank effective penalties
+    // Calculate effective wound penalties including global modifiers
     sys.woundsPenaltyMod = toInt(sys.woundsPenaltyMod);
     for (const [, lvl] of Object.entries(sys.woundLevels ?? {})) {
       const eff = toInt(lvl.penalty) + toInt(sys.woundsPenaltyMod);
-      // Expose a read-only effective value for UI; never below 0.
+      // Store effective penalty for UI display, minimum 0
       lvl.penaltyEff = Math.max(0, eff);
     }
     sys.currentWoundLevel = current;
-    // Current wound penalty (effective) and NPC-compatible mirror
+    // Set current wound penalty for rolls (effective penalty, minimum 0)
     const curEffPenalty = Math.max(0, toInt(current.penalty) + toInt(sys.woundsPenaltyMod));
     sys.woundPenalty = curEffPenalty;
     sys.wounds.penalty = curEffPenalty;
@@ -482,13 +606,27 @@ export default class L5R4Actor extends Actor {
   }
 
   /**
-   * Compute PC experience totals and breakdown.
-   * Populates `system._xp` for display (mutates `sys` during data prep; does not persist the document).
-   *
-   * API refs:
-   * - Actor#prepareData (items are ready by this stage):
-   *   https://foundryvtt.com/api/classes/documents.Actor.html#prepareData
-   * @param {object} sys - actor.system
+   * Calculate comprehensive experience point totals and breakdown for PCs.
+   * Computes XP from all sources (base, disadvantages, manual adjustments) and
+   * calculates spent XP across all advancement categories with proper cost formulas.
+   * 
+   * **XP Sources:**
+   * - Base XP (typically 40 at character creation)
+   * - Disadvantage XP (capped at +10 total)
+   * - Manual adjustments from GM or special circumstances
+   * 
+   * **XP Expenditure Categories:**
+   * - Traits: 4 × new effective rank per step, with Family/School bonuses
+   * - Void: 6 × new rank per step
+   * - Skills: Triangular progression (1+2+3+...+rank), School skills get rank 1 free
+   * - Emphases: 2 XP each (comma/semicolon separated)
+   * - Advantages: Direct cost from item
+   * 
+   * Results stored in `sys._xp` for sheet display (not persisted to database).
+   * 
+   * @param {L5R4ActorSystem} sys - The actor's system data object
+   * @returns {void}
+   * @see {@link https://foundryvtt.com/api/classes/documents.Actor.html#prepareData|Actor.prepareData}
    */
   _preparePcExperience(sys) {
     const flags = this.flags?.[SYS_ID] ?? {};
@@ -591,68 +729,115 @@ export default class L5R4Actor extends Actor {
   }
 
   /**
-   * Derived data for NPCs.
-   * @param {object} sys - actor.system
+   * Compute derived data specific to Non-Player Characters.
+   * Uses simplified mechanics compared to PCs while maintaining compatibility
+   * with the same core systems (traits, rings, wounds).
+   * 
+   * **NPC-Specific Features:**
+   * - Initiative: Manual roll/keep values with Reflexes fallback
+   * - Wounds: Earth-based calculation with optional manual max override
+   * - Scaling: Wound thresholds scale proportionally if manual max is set
+   * - Simplified: No XP tracking, insight calculation, or armor stacking
+   * 
+   * @param {L5R4ActorSystem} sys - The actor's system data object
+   * @returns {void}
    */
   _prepareNpc(sys) {
     // Keep NPC traits and rings identical to PCs
     this._prepareTraitsAndRings(sys);
 
-    // Use the same wound calculation as PCs for consistency.
+    // Initiative (NPC): leave roll/keep empty unless user sets them; compute effective values; normalize totalMod
+    sys.initiative = sys.initiative || {};
+    const ref = toInt(sys.traits?.ref);
+    sys.initiative.effRoll = toInt(sys.initiative.roll) > 0 ? toInt(sys.initiative.roll) : ref;
+    sys.initiative.effKeep = toInt(sys.initiative.keep) > 0 ? toInt(sys.initiative.keep) : ref;
+    sys.initiative.totalMod = toInt(sys.initiative.totalMod);
+
+    // Calculate wound thresholds using same formula as PCs for consistency
     const earth = sys.rings.earth;
-    const mult = toInt(sys.woundsMultiplier, 2); // Default multiplier for NPCs if not set
-    const add = toInt(sys.woundsMod, 0);
+    const mult = toInt(sys.woundsMultiplier) || 2; // Default multiplier for NPCs
+    const add = toInt(sys.woundsMod) || 0;
 
     sys.woundLevels = sys.woundLevels || {};
     const order = ["healthy", "nicked", "grazed", "hurt", "injured", "crippled", "down", "out"];
     let prev = 0;
     for (const key of order) {
-        const lvl = sys.woundLevels[key] ?? (sys.woundLevels[key] = { value: 0, penalty: 0, current: false });
-        if (key === "healthy") {
-            lvl.value = 5 * earth + add;
-        } else {
-            lvl.value = earth * mult + prev + add;
-        }
-        prev = lvl.value;
+      const lvl = sys.woundLevels[key] ?? (sys.woundLevels[key] = { value: 0, penalty: 0, current: false });
+      if (key === "healthy") {
+        lvl.value = 5 * earth + add;
+      } else {
+        lvl.value = earth * mult + prev + add;
+      }
+      prev = lvl.value;
     }
 
-    // Wounds state and penalty
-    sys.wounds = sys.wounds || {};
-    sys.wounds.max = sys.woundLevels.out.value;
-    sys.wounds.value = toInt(sys.wounds.max) - toInt(sys.suffered);
+    // Scale wound thresholds if NPC has manual max wounds override
+    // This allows NPCs to have custom wound totals while maintaining proper level progression
+    const npcMax = toInt(sys.wounds?.max);
+    const outDerived = toInt(sys.woundLevels.out?.value);
+    if (npcMax > 0 && outDerived > 0) {
+      const factor = npcMax / outDerived;
+      let prevScaled = 0;
+      for (const key of order) {
+        const lvl = sys.woundLevels[key];
+        const orig = toInt(lvl.value);
+        let scaled = Math.ceil(orig * factor);
+        // Ensure thresholds remain strictly increasing and positive
+        scaled = key === "healthy" ? Math.max(1, scaled) : Math.max(prevScaled + 1, scaled);
+        lvl.value = scaled;
+        prevScaled = scaled;
+      }
+    }
 
+    // Calculate current wound state and penalties
+    sys.wounds = sys.wounds || {};
+    // Use manual max if set, otherwise use calculated 'out' threshold
+    const effMax = npcMax > 0 ? npcMax : outDerived;
+    sys.wounds.value = toInt(effMax) - toInt(sys.suffered);
+
+    // Determine current wound level (same logic as PCs)
     const outMax = toInt(sys.woundLevels.out.value);
     const sCapped = Math.min(toInt(sys.suffered), outMax || toInt(sys.suffered));
 
     let current = sys.woundLevels.healthy;
     let lastVal = -1;
     for (const key of order) {
-        const lvl = sys.woundLevels[key];
-        const upper = toInt(lvl.value);
-        const within = sCapped <= upper && sCapped > lastVal;
-        lvl.current = within;
-        if (within) {
-            current = lvl;
-        }
-        lastVal = upper;
+      const lvl = sys.woundLevels[key];
+      const upper = toInt(lvl.value);
+      const within = sCapped <= upper && sCapped > lastVal;
+      lvl.current = within;
+      if (within) {
+        current = lvl;
+      }
+      lastVal = upper;
     }
 
+    // Calculate effective wound penalties including global modifier
     sys.woundsPenaltyMod = toInt(sys.woundsPenaltyMod);
     for (const [, lvl] of Object.entries(sys.woundLevels ?? {})) {
-        const eff = toInt(lvl.penalty) + toInt(sys.woundsPenaltyMod);
-        lvl.penaltyEff = Math.max(0, eff);
+      const eff = toInt(lvl.penalty) + toInt(sys.woundsPenaltyMod);
+      lvl.penaltyEff = Math.max(0, eff);
     }
 
+    // Set current wound penalty for rolls
     const curEffPenalty = Math.max(0, toInt(current.penalty) + toInt(sys.woundsPenaltyMod));
     sys.woundPenalty = curEffPenalty;
     sys.wounds.penalty = curEffPenalty;
   }
 
   /**
-   * Insight rank from insight points.
-   * Thresholds: 150, 175, 200, 225 then every +25.
-   * @param {number} insight
-   * @returns {number} rank
+   * Convert insight points to insight rank using L5R4 progression table.
+   * Uses the standard thresholds with accelerating progression after rank 4.
+   * 
+   * **Rank Thresholds:**
+   * - Rank 1: 0-149 points
+   * - Rank 2: 150-174 points  
+   * - Rank 3: 175-199 points
+   * - Rank 4: 200-224 points
+   * - Rank 5+: Every 25 points above 225
+   * 
+   * @param {number} insight - Total insight points
+   * @returns {number} Corresponding insight rank (minimum 1)
    */
   _calculateInsightRank(insight) {
     const t = [150, 175, 200, 225];
@@ -669,13 +854,22 @@ export default class L5R4Actor extends Actor {
   }
 
   /**
-   * Sum Family/School creation freebies for a given trait key.
-   * Prefers transferred AEs that ADD to system.traits.<key>; if none, falls back to legacy
-   * doc.system.trait + doc.system.bonus. De-dupes the same doc if seen via flag+embedded.
-   * @param {string} key
-   * @returns {number}
-   * @see https://foundryvtt.com/api/classes/documents.ActiveEffect.html
-   * @see https://foundryvtt.com/api/functions/client.fromUuidSync.html
+   * Calculate total creation bonuses for a specific trait from Family/School items.
+   * Handles both modern Active Effect transfers and legacy direct bonuses with
+   * deduplication to prevent double-counting items seen via multiple paths.
+   * 
+   * **Resolution Priority:**
+   * 1. Active Effects that transfer and ADD to system.traits.<key>
+   * 2. Legacy direct bonuses from item.system.trait + item.system.bonus
+   * 
+   * **Sources Checked:**
+   * - Flagged Family/School items via UUID (preferred)
+   * - Embedded Family/School items (fallback for older actors)
+   * 
+   * @param {string} key - Trait key to check bonuses for ("sta", "ref", etc.)
+   * @returns {number} Total bonus amount from all creation sources
+   * @see {@link https://foundryvtt.com/api/classes/documents.ActiveEffect.html|ActiveEffect}
+   * @see {@link https://foundryvtt.com/api/functions/client.fromUuidSync.html|fromUuidSync}
    */
   _creationFreeBonus(key) {
     try {
@@ -726,14 +920,23 @@ export default class L5R4Actor extends Actor {
   }
 
   /**
-   * XP cost for purchasing the step that reaches base rank r.
-   * Prices by *effective* new rank: r + freeEff (NOT “free early steps”).
-   * Example: Family +1 via AE → buying base 3 (eff 4) costs 4×4 = 16.
-   * @param {number} r        New base rank you reach with this step (integer >= 3 usually)
-   * @param {number} freeEff  Creation freebies from AEs/legacy; 0 if baked into base
-   * @param {number} discount Per-step modifier (can be negative)
-   * @returns {number}
-   * @see https://foundryvtt.com/api/classes/documents.Actor.html#prepareData
+   * Calculate experience cost for advancing a trait to a specific rank.
+   * Uses L5R4 trait advancement formula: 4 × effective new rank, with bonuses and discounts.
+   * 
+   * **Cost Calculation:**
+   * - Base cost: 4 × (new base rank + creation bonuses)
+   * - Modified by: per-step discounts (can be negative)
+   * - Minimum: 0 XP (free if discounts exceed base cost)
+   * 
+   * **Example:** 
+   * Family +1 bonus via AE, buying base rank 3:
+   * Cost = 4 × (3 + 1) = 16 XP
+   * 
+   * @param {number} r - New base rank being purchased (typically 3+)
+   * @param {number} freeEff - Creation bonuses from Family/School (0 if already baked into base)
+   * @param {number} discount - Per-step cost modifier (negative reduces cost)
+   * @returns {number} XP cost for this advancement step (minimum 0)
+   * @see {@link https://foundryvtt.com/api/classes/documents.Actor.html#prepareData|Actor.prepareData}
    */
   _xpStepCostForTrait(r, freeEff, discount) {
     const d = Number.isFinite(+discount) ? Number(discount) : 0;

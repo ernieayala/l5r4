@@ -1,18 +1,33 @@
 /**
- * L5R4 Item document for Foundry VTT v13
+ * L5R4 Item document implementation for Foundry VTT v13+.
+ * 
+ * This class extends the base Foundry Item document to provide L5R4-specific
+ * functionality including derived data computation, experience tracking, and
+ * chat card rendering for all item types in the system.
  *
- * Responsibilities
- * - Provide default images per type at create time.
- * - Normalize rich-text fields so {{editor}} never sees null.
- * - Compute lightweight derived data in prepareDerivedData() (e.g., bow damage from arrow type).
- * - Render compact chat cards via partials.
+ * ## Core Responsibilities:
+ * - **Default Icons**: Assign appropriate type-specific icons on item creation
+ * - **Data Normalization**: Ensure rich-text fields are never null for template safety
+ * - **Derived Data**: Calculate roll formulas, bow damage, and other computed values
+ * - **Experience Tracking**: Automatic XP logging for skill creation and advancement
+ * - **Chat Integration**: Render type-specific chat cards with proper templates
+ * - **Cost Validation**: Enforce advantage/disadvantage cost constraints
  *
- * See Foundry VTT API:
- * - Item: https://foundryvtt.com/api/Item.html
- * - Document lifecycle (_preCreate): https://foundryvtt.com/api/Document.html#_preCreate
- * - Data preparation: https://foundryvtt.com/api/Document.html#prepareData
- * - ChatMessage: https://foundryvtt.com/api/ChatMessage.html
- * - renderTemplate: https://foundryvtt.com/api/ui.html#renderTemplate
+ * ## Item Type Support:
+ * - **Skills**: Roll formula calculation, XP tracking, school skill benefits
+ * - **Weapons/Bows**: Damage calculation with arrow modifiers and strength requirements
+ * - **Armor**: Special properties and equipped state tracking
+ * - **Spells**: Effect descriptions and raise effect documentation
+ * - **Advantages/Disadvantages**: Cost validation and XP integration
+ * - **Techniques/Kata/Kiho**: Effect descriptions and mechanical benefits
+ * - **Family/Clan/School**: Background items with trait bonuses
+ *
+ * ## API References:
+ * @see {@link https://foundryvtt.com/api/classes/documents.Item.html|Item Document}
+ * @see {@link https://foundryvtt.com/api/classes/foundry.abstract.Document.html#_preCreate|Document._preCreate}
+ * @see {@link https://foundryvtt.com/api/classes/foundry.abstract.Document.html#prepareData|Document.prepareData}
+ * @see {@link https://foundryvtt.com/api/classes/documents.ChatMessage.html|ChatMessage}
+ * @see {@link https://foundryvtt.com/api/functions/foundry.applications.handlebars.renderTemplate.html|renderTemplate}
  */
 
 import { TEMPLATE, ARROW_MODS, SYS_ID, iconPath } from "../config.js";
@@ -20,10 +35,16 @@ import { on, toInt } from "../utils.js";
 import { TenDiceRule } from "../services/dice.js";
 
 /**
- * @extends Item
+ * L5R4 Item document class extending Foundry's base Item.
+ * Handles all item types in the L5R4 system with type-specific logic.
+ * @extends {Item}
  */
 export default class L5R4Item extends Item {
-  /** Handlebars partials used for chat cards by item type. */
+  /**
+   * Chat template paths for rendering item-specific chat cards.
+   * Maps each item type to its corresponding Handlebars template.
+   * @type {Record<string, string>}
+   */
   chatTemplate = {
     advantage:    TEMPLATE("cards/advantage-disadvantage.hbs"),
     armor:        TEMPLATE("cards/armor.hbs"),
@@ -42,7 +63,12 @@ export default class L5R4Item extends Item {
     weapon:       TEMPLATE("cards/weapon.hbs")
   };
 
-  /** Default icons by type (fallback if the user did not set one). */
+  /**
+   * Default icon paths by item type for automatic assignment.
+   * Used when items are created without explicit icons or with the generic bag icon.
+   * @type {Record<string, string>}
+   * @static
+   */
   static DEFAULT_ICONS = {
     advantage:    iconPath("yin-yang.png"),
     armor:        iconPath("hat.png"),
@@ -66,28 +92,35 @@ export default class L5R4Item extends Item {
   /* -------------------------------------------- */
 
   /**
-   * @override Assign a default icon on item creation if none is provided,
-   * and enforce cost bounds for Advantages/Disadvantages.
-   * @see https://foundryvtt.com/api/Document.html#_preCreate
+   * Configure item defaults and validate data on creation.
+   * Assigns type-appropriate icons and enforces cost constraints for
+   * advantages (≥0) and disadvantages (≤0).
+   * 
+   * @param {object} data - The initial data object provided to the document creation
+   * @param {object} options - Additional options which modify the creation request
+   * @param {string} userId - The ID of the User requesting the document creation
+   * @returns {Promise<void>}
+   * @override
+   * @see {@link https://foundryvtt.com/api/classes/foundry.abstract.Document.html#_preCreate|Document._preCreate}
    */
   async _preCreate(data, options, userId) {
     await super._preCreate(data, options, userId);
 
-    // existing icon logic...
+    // Assign default icon if none provided or using generic bag icon
     const isUnsetOrBag = !this.img || this.img === "icons/svg/item-bag.svg";
     if (isUnsetOrBag) {
       const icon = L5R4Item.DEFAULT_ICONS[this.type] ?? "icons/svg/item-bag.svg";
       this.updateSource({ img: icon });
     }
 
-    /** Enforce: Advantage cost >= 0. */
+    // Enforce advantage cost constraints (must be non-negative)
     if (this.type === "advantage") {
       const raw     = data?.system?.cost ?? this.system?.cost;
       const clamped = Math.max(0, toInt(raw, 0));
       this.updateSource({ "system.cost": clamped });
     }
 
-    /** Enforce: Disadvantage cost <= 0. */
+    // Enforce disadvantage cost constraints (must be non-positive)
     if (this.type === "disadvantage") {
       const raw     = data?.system?.cost ?? this.system?.cost;
       const clamped = Math.min(0, toInt(raw, 0));
@@ -96,10 +129,20 @@ export default class L5R4Item extends Item {
   }
 
   /**
-   * Log XP when a new Skill item is created on an Actor.
-   * - Uses L5R 4e Skill costs (next rank costs its value: 1, then +2, +3, ...).
-   * - If marked as a School Skill, rank 1 is free and does not count toward XP.
-   * @see https://foundryvtt.com/api/classes/documents.Item.html#_onCreate
+   * Track experience expenditure when skills are created on actors.
+   * Automatically calculates and logs XP costs using L5R4 skill progression:
+   * triangular costs (1+2+3+...+rank) with school skills getting rank 1 free.
+   * 
+   * **Cost Formula:**
+   * - Regular skills: 1+2+3+...+rank XP
+   * - School skills: 2+3+4+...+rank XP (rank 1 free)
+   * 
+   * @param {object} data - The data object of the created document
+   * @param {object} options - Additional options which modify the creation request
+   * @param {string} userId - The ID of the User who triggered the creation
+   * @returns {void}
+   * @override
+   * @see {@link https://foundryvtt.com/api/classes/documents.Item.html#_onCreate|Item._onCreate}
    */
   _onCreate(data, options, userId) {
     super._onCreate(data, options, userId);
@@ -120,25 +163,40 @@ export default class L5R4Item extends Item {
           note: game.i18n.format("l5r4.character.experience.log.skillCreate", { name: this.name ?? "Skill", rank: r }),
           ts: Date.now()
         });
-        // Fire and forget. Do not block create if this fails.
+        // Async flag update - don't block creation if XP logging fails
         this.actor.setFlag(SYS_ID, "xpSpent", spent);
       }
     } catch (_) { /* no-op */ }
   }
 
   /**
-   * Log XP when a Skill rank increases on update.
-   * - Only logs when rank actually goes up.
-   * - Applies the School Skill free first rank based on the *new* school flag.
-   * @see https://foundryvtt.com/api/classes/documents.Item.html#_preUpdate
+   * Track experience expenditure and validate costs on item updates.
+   * Handles skill rank advancement XP logging and enforces advantage/disadvantage
+   * cost constraints during updates.
+   * 
+   * **Skill XP Tracking:**
+   * - Only logs XP when skill ranks increase
+   * - Uses updated school flag to determine if rank 1 is free
+   * - Calculates delta cost between old and new total costs
+   * 
+   * **Cost Validation:**
+   * - Advantages: Clamps cost to non-negative values
+   * - Disadvantages: Clamps cost to non-positive values
+   * 
+   * @param {object} changes - The differential data that is being updated
+   * @param {object} options - Additional options which modify the update request
+   * @param {string} userId - The ID of the User requesting the document update
+   * @returns {Promise<void>}
+   * @override
+   * @see {@link https://foundryvtt.com/api/classes/documents.Item.html#_preUpdate|Item._preUpdate}
    */
   async _preUpdate(changes, options, userId) {
-    // Advantage: force non-negative
+    // Validate advantage costs (must be non-negative)
     if (this.type === "advantage" && changes?.system?.cost !== undefined) {
       changes.system.cost = Math.max(0, toInt(changes.system.cost, 0));
     }
 
-    // Disadvantage: force non-positive
+    // Validate disadvantage costs (must be non-positive)
     if (this.type === "disadvantage" && changes?.system?.cost !== undefined) {
       changes.system.cost = Math.min(0, toInt(changes.system.cost, 0));
     }
@@ -148,7 +206,7 @@ export default class L5R4Item extends Item {
     try {
       const oldRank   = toInt(this.system?.rank);
       const newRank   = toInt(changes?.system?.rank ?? oldRank);
-      if (!(Number.isFinite(newRank) && newRank > oldRank)) return; // only on increase
+      if (!(Number.isFinite(newRank) && newRank > oldRank)) return; // Only track XP on rank increases
 
       const newSchool = (changes?.system?.school ?? this.system?.school) ? true : false;
       const baseline  = newSchool ? 1 : 0;
@@ -171,27 +229,37 @@ export default class L5R4Item extends Item {
   }
 
   /**
-   * @override Initialize base data for items and normalize defaults.
-   * Normalize base data so templates and helpers never see null for rich-text fields.
+   * Initialize and normalize base item data for template safety.
+   * Ensures all rich-text fields are strings (never null/undefined) and sets
+   * appropriate defaults for type-specific fields like bow properties.
+   * 
+   * **Normalization Tasks:**
+   * - Convert null/undefined rich-text fields to empty strings
+   * - Set bow defaults (strength rating, arrow type)
+   * - Assign default icons for items without custom images
+   * - Ensure system object exists and is mutable
+   * 
+   * @returns {void}
+   * @override
    */
   prepareBaseData() {
     super.prepareBaseData();
 
-    // Ensure a system object exists and is mutable.
+    // Ensure system data object exists and is mutable for further processing
     const sys = (this.system ??= {});
 
-    // Bow defaults so derived math works even on legacy items missing fields.
+    // Set bow-specific defaults for damage calculation compatibility
     if (this.type === "bow") {
-      if (sys.str == null) sys.str = 0;            // bow strength rating if you use it
-      if (sys.arrow == null) sys.arrow = "willow"; // valid keys in ARROW_MODS
+      if (sys.str == null) sys.str = 0;            // Bow strength rating for damage calculation
+      if (sys.arrow == null) sys.arrow = "willow"; // Default arrow type (must match ARROW_MODS keys)
     }
 
-    // Safe img and prefer per-type default over the global bag
+    // Ensure valid image path, preferring type-specific defaults over generic bag icon
     if (!this.img || typeof this.img !== "string" || this.img === "icons/svg/item-bag.svg") {
       this.img = L5R4Item.DEFAULT_ICONS[this.type] ?? "icons/svg/item-bag.svg";
     }
 
-    // helper inside prepareBaseData
+    // Helper function to normalize rich-text fields to strings
     const ensureString = (obj, keys) => {
       for (const k of keys) {
         if (obj[k] == null) obj[k] = "";
@@ -199,10 +267,10 @@ export default class L5R4Item extends Item {
       }
     };
 
-    // global common fields used by your templates
+    // Normalize common rich-text fields used across multiple item types
     ensureString(sys, ["description", "specialRules", "demands", "notes", "text"]);
 
-    // per-type frequent editor fields
+    // Normalize type-specific rich-text fields for template editors
     switch (this.type) {
       case "spell":       ensureString(sys, ["effect", "raiseEffects"]); break;
       case "weapon":      ensureString(sys, ["special"]); break;
@@ -215,19 +283,29 @@ export default class L5R4Item extends Item {
   }
 
   /**
-   * @override Compute derived data; e.g., bow damage based on STR and arrow mods.
+   * Compute derived data for items based on type and context.
+   * Calculates roll formulas for skills and damage formulas for bows using
+   * actor traits and item properties.
+   * 
+   * **Skill Calculations:**
+   * - Roll dice: Skill rank + effective trait value
+   * - Keep dice: Effective trait value
+   * - Formula: "XkY" format for display
+   * 
+   * **Bow Calculations:**
+   * - Damage roll: min(bow strength, actor strength) + arrow modifier
+   * - Damage keep: Arrow modifier keep value
+   * - Formula: "XkY" format for damage rolls
+   * 
+   * @returns {void}
+   * @override
    */
   prepareDerivedData() {
     super.prepareDerivedData();
     const sys = this.system ?? {};
 
-    /**
-     * Skill roll display (e.g., "7k3").
-     * Rule: (Skill + Trait)k(Trait).
-     * Uses effective trait if the item is owned by an Actor.
-     * Foundry: runs during data prep so sheets can render without recomputing.
-     * @see https://foundryvtt.com/api/Document.html#prepareData
-     */
+    // Calculate skill roll formula: (Skill Rank + Trait)k(Trait)
+    // Uses effective trait values from actor if available
     if (this.type === "skill") {
       try {
         const traitKey = String(sys.trait ?? "").toLowerCase();
@@ -246,12 +324,12 @@ export default class L5R4Item extends Item {
       }
     }
 
-    // Derived values for bows (ranged weapons with arrow types)
+    // Calculate bow damage formula based on strength and arrow type
     if (this.type === "bow") {
       const actorStr = this.actor ? toInt(this.actor.system?.traits?.str) : toInt(sys.str);
       const bowStr   = toInt(sys.str);
 
-      // Arrow modifiers keyed by stored value (not localized label)
+      // Apply arrow type modifiers (stored as system keys, not localized labels)
       const key = String(sys.arrow || "willow");
       const mod = ARROW_MODS[key] ?? { r: 0, k: 0 };
 
@@ -266,19 +344,21 @@ export default class L5R4Item extends Item {
   /* -------------------------------------------- */
 
   /**
-   * Render and send a chat card for this item.
-   * Uses per-type partials declared above.
-   * @returns {Promise<ChatMessage|void>}
+   * Create and send a chat message with an item-specific card.
+   * Renders the appropriate template for the item type and posts it to chat
+   * with proper speaker attribution and roll mode settings.
+   * 
+   * @returns {Promise<ChatMessage|void>} The created chat message, or void if no template
    */
   async roll() {
     const templatePath = this.chatTemplate[this.type];
     if (!templatePath) return;
 
-    // Hand the live document to the template; it can read this.system safely.
-    /** @see https://foundryvtt.com/api/functions/foundry.applications.handlebars.renderTemplate.html */
+    // Render template with full item context (templates can access this.system)
+    // @see https://foundryvtt.com/api/functions/foundry.applications.handlebars.renderTemplate.html
     const html = await foundry.applications.handlebars.renderTemplate(templatePath, this);
 
-    // Capitalized type label if available; else show the raw id.
+    // Get localized item type label for chat flavor text
     const typeKey   = `TYPES.Item.${this.type}`;
     const typeLabel = game.i18n.has?.(typeKey) ? game.i18n.localize(typeKey) : this.type;
 
@@ -291,11 +371,16 @@ export default class L5R4Item extends Item {
   }
 
   /**
-   * @override Include CONFIG.l5r4 to template context for lookups.
+   * Enhance template data with system configuration for item sheets.
+   * Provides access to CONFIG.l5r4 constants and lookups in item sheet templates.
+   * 
+   * @param {object} options - Sheet rendering options
+   * @returns {Promise<object>} Enhanced data object with config access
+   * @override
    */
   async getData(options) {
     const data = await super.getData(options);
-    // For item sheets that expect @root.config
+    // Provide system config to templates for dropdown options and constants
     data.config = CONFIG.l5r4 ?? CONFIG;
     return data;
   }

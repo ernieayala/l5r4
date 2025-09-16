@@ -19,7 +19,8 @@
     &.-technique,
     &.-kata,
     &.-kiho,
-    &.-tattoo {
+    &.-tattoo,
+    &.-attacks {
       .item {
         grid-template-columns: 1fr 1fr 1fr 1fr 24px;
       }
@@ -66,10 +67,15 @@
     &.is-expanded {
       .expanded-text {
         display: block;
+
+        &.-npc {
+          display: flex;
+        }
       }
     }
 
-    select {
+    select,
+    input[type="number"] {
       border: 1px solid var(--input-border-color);
       height: 2em;
       min-height: 2em;
@@ -85,6 +91,16 @@
       font-size: var(--font-size-14);
       grid-column: ~"1 / -1";
       grid-row: 2;
+
+      &.-npc {
+        background: var(--table-header-bg-color);
+        flex-direction: column;
+        padding: 0.5rem;
+
+        h5 {
+          margin: 0;
+        }
+      }
     }
   }
 }

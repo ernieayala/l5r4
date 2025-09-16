@@ -181,6 +181,11 @@
           "humming": "Bulbo Zumbador",
           "rope": "Corta Cuerdas",
           "willow": "Hoja de Sauce"
+        },
+        "sizes": {
+          "small": "Pequeño",
+          "medium": "Mediano",
+          "large": "Grande"
         }
       },
       "armor": {
@@ -235,6 +240,7 @@
         "action": "Acción",
         "edit": "Editar",
         "delete": "Borrar",
+        "enableDisable": "Habilitar/Deshabilitar",
         "new": "Nuevo",
         "apply": "Aplicar",
         "name": "Nombre",
@@ -286,7 +292,8 @@
         "unlock": "Desbloquear Hoja"
       },
       "hints": {
-        "leftRightToAdjust": "Izquierda y Derecha para Ajustar"
+        "leftRightToAdjust": "Izquierda y Derecha para Ajustar",
+        "leftClickPlusRightClickMinus": "Clic izquierdo: +1, Clic derecho: -1"
       }
     },
     "system": {

@@ -1,28 +1,59 @@
 /**
- * L5R4 — One-off migration helpers
- * -----------------------------------------------------------------------------
- * Rewrites stored document image paths (actor.img, item.img) if icons were
- * reorganized into semantic subfolders (e.g., rings/, status/).
+ * L5R4 Migration System - Data Migration and Schema Updates for Foundry VTT v13+.
+ * 
+ * This module provides comprehensive migration functionality for the L5R4 system,
+ * handling schema updates, icon path migrations, and data structure changes
+ * across system versions. Migrations are applied automatically during system
+ * initialization and are designed to be idempotent and safe.
  *
- * This module is side-effect free until called from the system entrypoint.
+ * ## Migration Types:
+ * - **Schema Migrations**: Update document data structures using SCHEMA_MAP rules
+ * - **Icon Path Migrations**: Relocate icon files to new organizational structure
+ * - **Compendium Migrations**: Apply migrations to unlocked compendium packs
+ * - **World Document Migrations**: Update actors and items in the world
  *
- * Foundry v13 API: https://foundryvtt.com/api/
+ * ## Safety Features:
+ * - **GM-Only Execution**: Migrations only run for Game Master users
+ * - **Idempotent Operations**: Safe to run multiple times without side effects
+ * - **Error Isolation**: Individual document failures don't stop the migration
+ * - **Minimal Updates**: Only changed fields are updated to preserve performance
+ * - **Backup-Friendly**: Uses Foundry's diff system for efficient updates
+ *
+ * ## Schema Migration System:
+ * Uses SCHEMA_MAP rules to define field relocations and transformations:
+ * - Supports dot-notation paths for nested properties
+ * - Handles type-specific and universal migrations
+ * - Preserves existing data when destination already exists
+ * - Cleans up old fields after successful migration
+ *
+ * ## Icon Migration System:
+ * Relocates icon files from flat structure to organized subfolders:
+ * - `rings/`: Elemental ring icons (air.png, earth.png, etc.)
+ * - `status/`: Combat stance and status icons
+ * - Validates target file existence before migration
+ * - Maintains backward compatibility with old paths
+ *
+ * @see {@link https://foundryvtt.com/api/classes/foundry.abstract.Document.html#update|Document.update}
+ * @see {@link https://foundryvtt.com/api/classes/client.FilePicker.html#browse|FilePicker.browse}
  */
 
 import { SYS_ID, PATHS } from "../config.js";
 
-/**
- * Helpers to safely remap schema keys during migrations.
- * Foundry v13: Documents are updated via Document.update(); ensure awaits.
- */
+// Schema migration utilities for safe data structure updates
 
 import { SCHEMA_MAP } from "./schema-map.js";
 
 /**
- * Read a value from an object using a dot-path.
- * @param {object} obj
- * @param {string} path
- * @returns {any}
+ * Safely retrieve a nested property value using dot-notation path.
+ * Handles missing intermediate objects gracefully without throwing errors.
+ * 
+ * @param {object} obj - Source object to read from
+ * @param {string} path - Dot-notation path (e.g., "system.traits.strength")
+ * @returns {any} Property value or undefined if path doesn't exist
+ * 
+ * @example
+ * const value = getByPath(actor, "system.rings.fire.rank");
+ * // Returns actor.system.rings.fire.rank or undefined
  */
 function getByPath(obj, path) {
   try {
@@ -33,10 +64,16 @@ function getByPath(obj, path) {
 }
 
 /**
- * Set a value on an object using a dot-path. Creates missing objects along the path.
- * @param {object} obj
- * @param {string} path
- * @param {any} value
+ * Set a nested property value using dot-notation path.
+ * Creates missing intermediate objects as needed to ensure the path exists.
+ * 
+ * @param {object} obj - Target object to modify
+ * @param {string} path - Dot-notation path (e.g., "system.traits.strength")
+ * @param {any} value - Value to set at the specified path
+ * 
+ * @example
+ * setByPath(updateData, "system.rings.fire.rank", 3);
+ * // Creates updateData.system.rings.fire.rank = 3
  */
 function setByPath(obj, path, value) {
   const parts = path.split(".");
@@ -50,9 +87,15 @@ function setByPath(obj, path, value) {
 }
 
 /**
- * Delete a key at a dot-path if present.
- * @param {object} obj
- * @param {string} path
+ * Remove a nested property using dot-notation path.
+ * Safely handles missing intermediate objects without throwing errors.
+ * 
+ * @param {object} obj - Target object to modify
+ * @param {string} path - Dot-notation path to property to delete
+ * 
+ * @example
+ * deleteByPath(updateData, "system.deprecated.oldField");
+ * // Removes updateData.system.deprecated.oldField if it exists
  */
 function deleteByPath(obj, path) {
   const parts = path.split(".");
@@ -68,9 +111,16 @@ function deleteByPath(obj, path) {
 }
 
 /**
- * Apply schema remaps to a single Document based on SCHEMA_MAP.
- * @param {Actor|Item} doc
- * @returns {object|null} minimal update object or null if no changes
+ * Generate schema migration update data for a single document.
+ * Applies all applicable SCHEMA_MAP rules based on document type and subtype.
+ * Returns minimal update object containing only changed fields.
+ * 
+ * @param {Actor|Item} doc - Document to analyze for migration needs
+ * @returns {object|null} Update object for Document.update() or null if no changes needed
+ * 
+ * @example
+ * const update = buildSchemaUpdate(actor);
+ * if (update) await actor.update(update);
  */
 function buildSchemaUpdate(doc) {
   const { documentName: docType } = doc; // "Actor" | "Item"
@@ -103,9 +153,13 @@ function buildSchemaUpdate(doc) {
 }
 
 /**
- * Run schema remaps over a collection of Documents.
- * @param {Array<Actor|Item>} docs
- * @param {string} label
+ * Apply schema migrations to a collection of documents.
+ * Processes each document individually with error isolation to prevent
+ * single document failures from stopping the entire migration.
+ * 
+ * @param {Array<Actor|Item>} docs - Documents to migrate
+ * @param {string} label - Descriptive label for logging purposes
+ * @returns {Promise<void>}
  */
 async function applySchemaMapToDocs(docs, label) {
   for (const doc of docs) {
@@ -121,11 +175,15 @@ async function applySchemaMapToDocs(docs, label) {
 }
 
 /**
- * Map of flat filenames -> new relative subpaths under PATHS.icons.
- * Keep this minimal and focused on known, moved files.
- * NOTE: Duplicates the intent of config icon aliases to avoid a hard dependency.
- * De-duplicate later if we promote iconPath() centrally.
- * @type {Readonly<Record<string, string>>}
+ * Icon file relocation mapping for migration from flat to organized structure.
+ * Maps original filenames to their new subfolder locations under PATHS.icons.
+ * This maintains the migration logic independently of config aliases to avoid
+ * circular dependencies during system initialization.
+ * 
+ * @type {Readonly<Record<string, string>>} filename -> subfolder/filename
+ * 
+ * @example
+ * ICON_MIGRATION_MAP["air.png"] // Returns "rings/air.png"
  */
 const ICON_MIGRATION_MAP = Object.freeze({
   // Rings
@@ -148,7 +206,14 @@ const ICON_MIGRATION_MAP = Object.freeze({
 /** @type {Map<string, Set<string>>} dir -> filenames */
 const dirCache = new Map();
 
-/** Browse a directory once and memoize its file list. */
+/**
+ * Browse directory contents with caching for performance.
+ * Memoizes file listings to avoid repeated FilePicker.browse calls
+ * during migration of multiple documents with similar icon paths.
+ * 
+ * @param {string} dirPath - Directory path to browse
+ * @returns {Promise<Set<string>>} Set of filenames in the directory
+ */
 async function listDir(dirPath) {
   if (dirCache.has(dirPath)) return dirCache.get(dirPath);
   try {
@@ -168,10 +233,16 @@ async function listDir(dirPath) {
 }
 
 /**
- * If `img` lives under PATHS.icons and maps to a known moved filename,
- * and the target exists, return the new absolute path. Else null.
- * @param {string} img
- * @returns {Promise<string|null>}
+ * Compute new icon path for migrated files.
+ * Checks if the given image path corresponds to a file that has been
+ * relocated according to ICON_MIGRATION_MAP, and verifies the target exists.
+ * 
+ * @param {string} img - Current image path to check for migration
+ * @returns {Promise<string|null>} New path if migration available and target exists, null otherwise
+ * 
+ * @example
+ * const newPath = await computeNewIconPath("systems/l5r4/assets/icons/air.png");
+ * // Returns "systems/l5r4/assets/icons/rings/air.png" if target exists
  */
 async function computeNewIconPath(img) {
   if (typeof img !== "string" || !img.startsWith(PATHS.icons + "/")) return null;
@@ -188,9 +259,16 @@ async function computeNewIconPath(img) {
 }
 
 /**
- * Migrate img fields for world Actors and Items.
- * Only GM runs; only minimal updates are applied.
+ * Execute icon path migration for world documents.
+ * Updates actor.img and item.img fields for documents that reference
+ * relocated icon files. Only runs for GM users and applies minimal updates
+ * using Foundry's diff system for optimal performance.
+ * 
  * @returns {Promise<void>}
+ * 
+ * @example
+ * // Called during system initialization
+ * await runIconPathMigration();
  */
 export async function runIconPathMigration() {
   if (!game.user?.isGM) return;
@@ -226,10 +304,16 @@ export async function runIconPathMigration() {
 }
 
 /**
- * Iterate unlocked Actor/Item compendium packs and migrate their img fields
- * using the same icon path logic as world documents.
- * Skips locked packs and ignores failures per document.
+ * Apply icon path migration to compendium packs.
+ * Processes all unlocked Actor and Item compendium packs using the same
+ * icon migration logic as world documents. Locked packs are skipped to
+ * prevent permission errors.
+ * 
  * @returns {Promise<void>}
+ * 
+ * @example
+ * // Migrates icons in all unlocked compendiums
+ * await migrateCompendiumIconPaths();
  */
 async function migrateCompendiumIconPaths() {
   let changed = 0;
@@ -268,24 +352,40 @@ async function migrateCompendiumIconPaths() {
 }
 
 /**
- * Orchestrator for one-off migrations.
- * Call from system ready hook with previous and current versions.
- * Delegates to idempotent steps.
- *
- * Foundry v13 API: https://foundryvtt.com/api/
- *
- * @param {string} fromVersion
- * @param {string} toVersion
+ * Main migration orchestrator for system version updates.
+ * Coordinates all migration types in the correct order and handles errors gracefully.
+ * Designed to be called during system initialization with version information.
+ * 
+ * **Migration Order:**
+ * 1. Schema migrations for world documents (actors, items)
+ * 2. Schema migrations for compendium documents
+ * 3. Icon path migrations for world documents
+ * 4. Icon path migrations for compendium documents
+ * 
+ * **Safety Features:**
+ * - GM-only execution prevents permission issues
+ * - Error isolation prevents single failures from stopping migration
+ * - Idempotent design allows safe re-execution
+ * - Comprehensive logging for troubleshooting
+ * 
+ * @param {string} fromVersion - Previous system version (for logging)
+ * @param {string} toVersion - Current system version (for logging)
  * @returns {Promise<void>}
+ * 
+ * @example
+ * // Called from system ready hook
+ * Hooks.once("ready", () => {
+ *   runMigrations("1.0.0", "1.1.0");
+ * });
  */
 export async function runMigrations(fromVersion, toVersion) {
   if (!game.user?.isGM) return;
 
-  // 1) World Actors & Items
+  // Phase 1: Schema migrations for world documents
   await applySchemaMapToDocs(game.actors.contents, "world-actors");
   await applySchemaMapToDocs(game.items.contents, "world-items");
 
-  // 2) Compendium packs (Actor/Item only)
+  // Phase 2: Schema migrations for compendium packs
   for (const pack of game.packs) {
     const meta = pack.metadata || pack.documentName ? pack : null;
     const docType = meta?.documentName ?? meta?.type; // v13 uses metadata.documentName
@@ -299,10 +399,11 @@ export async function runMigrations(fromVersion, toVersion) {
     }
   }
 
+  // Phase 3: Icon path migrations
   try {
     await runIconPathMigration();
     await migrateCompendiumIconPaths();
   } catch (err) {
-    console.warn("L5R4", "runMigrations failed", { fromVersion, toVersion, err });
+    console.warn("L5R4 | Migration failed", { fromVersion, toVersion, error: err });
   }
 }

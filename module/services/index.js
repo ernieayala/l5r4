@@ -1,16 +1,36 @@
 /**
- * L5R4 — Services Barrel
- * -----------------------------------------------------------------------------
- * Purpose: provide a stable import path for services.
- * During pre-move phase, proxy to existing module locations.
- * After moving files into module/services/, update these re-exports to local.
+ * L5R4 Services Module - Centralized Service Exports for Foundry VTT v13+.
+ * 
+ * This barrel module provides a stable import interface for all L5R4 system services,
+ * enabling clean dependency management and consistent API access across the codebase.
+ * All services are re-exported as namespaced modules to prevent naming conflicts.
  *
- * Notes:
- * - No side effects; exports only.
- * - Consumers should localize UI strings via game.i18n in their own modules.
+ * ## Available Services:
+ * - **dice**: Roll mechanics, Ten Dice Rule, and dialog systems
+ * - **chat**: Item creation dialogs and chat utilities
  *
- * Foundry v13 API: https://foundryvtt.com/api/
+ * ## Usage Examples:
+ * ```javascript
+ * import { dice, chat } from "./services/index.js";
+ * 
+ * // Execute a skill roll
+ * await dice.SkillRoll({ actor, skillName: "kenjutsu", ... });
+ * 
+ * // Show item creation dialog
+ * const result = await chat.getItemOptions("advantage");
+ * ```
+ *
+ * ## Design Principles:
+ * - **No Side Effects**: Pure re-exports without initialization logic
+ * - **Namespace Isolation**: Each service maintains its own namespace
+ * - **Stable API**: Consistent import paths regardless of internal restructuring
+ * - **Localization**: Services handle their own i18n via game.i18n API
+ *
+ * @see {@link https://foundryvtt.com/api/|Foundry VTT v13 API Documentation}
  */
 
+/** Dice rolling mechanics and dialog systems. */
 export * as dice from "./dice.js";
+
+/** Chat utilities and item creation dialogs. */
 export * as chat from "./chat.js";

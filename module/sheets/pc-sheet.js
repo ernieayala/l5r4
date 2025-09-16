@@ -1,14 +1,18 @@
 /**
  * L5R4 PC Sheet — ApplicationV2 conversion (Foundry VTT v13+)
+ * Extends BaseActorSheet for shared functionality with NPC sheet.
+ * 
+ * Features:
  * - Migrated from Application V1 (FormApplication/ActorSheet) to ActorSheetV2
  * - Uses HandlebarsApplicationMixin for template rendering
  * - Replaces getData -> _prepareContext, activateListeners -> _onRender
  * - Keeps drag/drop (clan/family) with TextEditor.getDragEventData
- * - Enforces Family prefix and bonus at submit-time via _prepareSubmitData/_processSubmitData
+ * - Complex trait adjustment with family bonuses and XP logic
+ * - Advanced sorting and filtering for skills, spells, advantages
  *
  * API refs: https://foundryvtt.com/api/
  * - ActorSheetV2: https://foundryvtt.com/api/classes/foundry.applications.sheets.ActorSheetV2.html
- * - DocumentSheetV2: https://foundryvtt.com/api/classes/foundry.applications.api.DocumentSheetV2.html
+ * - BaseActorSheet: ./base-actor-sheet.js (provides shared roll methods and CRUD operations)
  * - TextEditor.getDragEventData: https://foundryvtt.com/api/classes/foundry.applications.ux.TextEditor.html#static-getDragEventData
  */
 
@@ -44,49 +48,6 @@ function _advComparable(item) {
   return { name, type, cost };
 }
 
-/**
- * Normalize a Family trait label/key into a system trait key ("ref", "awa", ...).
- * Accepts:
- *  - short keys ("ref")
- *  - English labels ("Reflexes")
- *  - i18n keys ("l5r4.traits.ref")
- *  - localized labels in other languages (via game.i18n.localize)
- */
-const normalizeTraitKey = (raw) => {
-  const known = ["sta","wil","str","per","ref","awa","agi","int"];
-  if (raw == null) return "";
-  let k = String(raw).trim();
-
-  // If given an i18n key like "l5r4.traits.ref"
-  const m = /^l5r4\.mechanics\.traits\.(\w+)$/i.exec(k);
-  if (m && known.includes(m[1].toLowerCase())) return m[1].toLowerCase();
-
-  // Plain short key?
-  if (known.includes(k.toLowerCase())) return k.toLowerCase();
-
-  // English labels -> keys
-  const english = {
-    stamina: "sta",
-    willpower: "wil",
-    strength: "str",
-    perception: "per",
-    reflexes: "ref",
-    awareness: "awa",
-    agility: "agi",
-    intelligence: "int"
-  };
-  if (english[k.toLowerCase()]) return english[k.toLowerCase()];
-
-  // Localized labels (any language): compare against localized names
-  try {
-    for (const key of known) {
-      const label = game.i18n?.localize?.(`l5r4.mechanics.traits.${key}`) ?? "";
-      if (label && label.toLowerCase() === k.toLowerCase()) return key;
-    }
-  } catch (_) { /* ignore if i18n not ready here */ }
-
-  return "";
-};
 
 /**
  * Return the Family AE bonus for a trait if (and only if) it comes from the
@@ -166,7 +127,7 @@ export default class L5R4PcSheet extends BaseActorSheet {
       case "clan-link": return this._onClanLink(event);
       case "family-open": return this._onFamilyOpen(event);
       case "inline-edit": return this._onInlineItemEdit(event, element);
-      case "item-chat": return this._onAdvHeaderToChat(event, element);
+      case "item-chat": return this._onItemHeaderToChat(event, element);
       case "item-create": return this._onItemCreate(event, element);
       case "item-delete": return this._onItemDelete(event, element);
       case "item-edit": return this._onItemEdit(event, element);
@@ -261,15 +222,8 @@ export default class L5R4PcSheet extends BaseActorSheet {
 
 
   /**
-   * Render and return the actual <form> as the "form" part so DocumentSheetV2
-   * can auto-handle submitOnChange and submitOnClose.
-   * @see https://foundryvtt.com/api/classes/foundry.applications.api.HandlebarsApplicationMixin.html#_renderHTML
-   * @returns {Promise<Record<string, HTMLElement>>}
-   */
-  /** @override get classes to dynamically add is-locked */
-
-  /**
    * Toggle the sheet's locked state.
+   * Updates both the actor flag and provides immediate visual feedback.
    * @returns {Promise<void>}
    */
   async _onToggleSheetLock() {
@@ -299,6 +253,13 @@ export default class L5R4PcSheet extends BaseActorSheet {
     this.render();
   }
 
+  /**
+   * @override
+   * Render HTML for PC sheet using the pc.hbs template.
+   * @param {object} context - Template context
+   * @param {object} _options - Render options (unused)
+   * @returns {Promise<{form: HTMLElement}>}
+   */
   async _renderHTML(context, _options) {
     context = { ...context, usetabs: false };
     const path = TEMPLATE("actor/pc.hbs");
@@ -351,7 +312,10 @@ export default class L5R4PcSheet extends BaseActorSheet {
   /**
    * @override
    * Prepare the context passed to the Handlebars template.
-   * Foundry v13 context hook: https://foundryvtt.com/api/classes/foundry.applications.api.HandlebarsApplicationMixin.html#_prepareContext
+   * Handles complex PC-specific data like sorted items, effective traits, and family bonuses.
+   * @param {object} _options - Context preparation options (unused)
+   * @returns {Promise<object>} Template context
+   * @see https://foundryvtt.com/api/classes/foundry.applications.api.HandlebarsApplicationMixin.html#_prepareContext
    */
   async _prepareContext(_options) {
     const base = await super._prepareContext(_options);
@@ -493,7 +457,13 @@ export default class L5R4PcSheet extends BaseActorSheet {
     };
   }
 
-  /** Bind UI events (replaces activateListeners) */
+  /**
+   * @override
+   * Bind UI events and setup post-render functionality.
+   * Replaces the old activateListeners pattern from ApplicationV1.
+   * @param {object} context - Template context
+   * @param {object} options - Render options
+   */
   async _onRender(context, options) {
     await super._onRender(context, options);
     const root = this.element;
@@ -592,49 +562,8 @@ export default class L5R4PcSheet extends BaseActorSheet {
     on(root, "[data-action='xp-add']", "click", (ev) => this._onXpAdd(ev));
     on(root, "[data-action='xp-log']", "click", (ev) => this._onXpLog(ev));
 
-    /**
-     * Right-click context menu for item rows (Foundry v13 API).
-     * @see https://foundryvtt.com/api/classes/foundry.applications.ux.ContextMenu.html
-     */
-    try {
-      // Avoid duplicate menus on re-render. Only close if a menu element exists.
-      if (this._itemContextMenu?.element) {
-        try {
-          await this._itemContextMenu.close({ animate: false });
-        } catch (err) {
-          console.warn("L5R4", "ContextMenu.close failed (stale element)", { err });
-        }
-        this._itemContextMenu = null;
-      }
-      const Menu = foundry.applications.ux.ContextMenu;
-      this._itemContextMenu = new Menu(root, ".item", [
-        {
-          name: game.i18n.localize("l5r4.ui.common.edit"),
-          icon: '<i class="fas fa-edit"></i>',
-          callback: (target) => {
-            const el = target instanceof HTMLElement ? target : target?.[0];
-            const id = el?.dataset?.itemId || el?.dataset?.documentId || el?.dataset?.id;
-            this.actor.items.get(id)?.sheet?.render(true);
-          }
-        },
-        {
-          name: game.i18n.localize("l5r4.ui.common.delete"),
-          icon: '<i class="fas fa-trash"></i>',
-          callback: async (target) => {
-            const el = target instanceof HTMLElement ? target : target?.[0];
-            const id = el?.dataset?.itemId || el?.dataset?.documentId || el?.dataset?.id;
-            if (!id) return;
-            try {
-              await this.actor.deleteEmbeddedDocuments("Item", [id]);
-            } catch (err) {
-              console.warn("L5R4", "actor.deleteEmbeddedDocuments failed in PcSheet", { err });
-            }
-          }
-        }
-      ], { jQuery: false });
-    } catch (e) {
-      console.warn("L5R4PcSheet: context menu init failed", e);
-    }
+    // Setup shared context menu for item rows
+    await this._setupItemContextMenu(root);
   }
 
 
@@ -709,7 +638,6 @@ export default class L5R4PcSheet extends BaseActorSheet {
 
     // Work in *effective* space, then convert back to base
     const effNow = base + fam;
-
     // Effective caps
     const effMin = 2 + Math.max(0, fam); // if Family gives +1 to Strength, min displayed is 3
     const effMax = 9;                    // global cap
@@ -756,50 +684,6 @@ export default class L5R4PcSheet extends BaseActorSheet {
         console.warn("L5R4", "actor.update failed in PcSheet", { err });
       }
     }
-
-  /**
-   * Render the 9-dot Void Points control by swapping ○/● up to current value.
-   * Safe to call after every render.
-   * @param {HTMLElement} root
-   */
-  _paintVoidPointsDots(root) {
-    const node = root.querySelector(".void-points-dots");
-    if (!node) return;
-    const cur = Number(this.actor.system?.rings?.void?.value ?? 0) || 0;
-    node.querySelectorAll(".void-dot").forEach((d) => {
-      const idx = Number(d.getAttribute("data-idx") || "0") || 0;
-      d.classList.toggle("-filled", idx <= cur);
-    });
-    node.setAttribute("data-value", String(cur));
-  }
-
-
-  /**
-   * Adjust Void Points via clicks on the 9-dot control.
-   * Right click = +1, Left click = -1, clamped to 0..9.
-   * Uses Document.update to persist the value.
-   * @see https://foundryvtt.com/api/classes/foundry.abstract.Document.html#update
-   *
-   * @param {MouseEvent} event
-   * @param {HTMLElement} element - .void-points-dots
-   * @param {number} delta - +1 or -1 (we pass +1 for contextmenu, -1 for click)
-   */
-  async _onVoidPointsAdjust(event, element, delta) {
-    event?.preventDefault?.();
-
-    const cur = Number(this.actor.system?.rings?.void?.value ?? 0) || 0;
-    const next = Math.min(9, Math.max(0, cur + (delta > 0 ? 1 : -1)));
-    if (next === cur) return;
-
-    try {
-      await this.actor.update({ "system.rings.void.value": next }, { diff: true });
-    } catch (err) {
-      console.warn("L5R4", "actor.update failed in PcSheet", { err });
-    }
-
-    // Repaint from authoritative actor state to avoid stale DOM edge-cases
-    this._paintVoidPointsDots(this.element);
-  }
 
   /**
    * Adjust a spell slot value by +1/-1 within [0..9].
@@ -879,6 +763,10 @@ export default class L5R4PcSheet extends BaseActorSheet {
   /* Drag & Drop                         */
   /* ---------------------------------- */
 
+  /**
+   * Handle drop of a Clan item: set actor.system.clan and remember the source item UUID.
+   * @param {Item} itemDoc - The dropped clan item
+   */
   async _handleClanDrop(itemDoc) {
     const clanName = String(itemDoc.name ?? "").trim();
     const data = { "system.clan": clanName };
@@ -907,8 +795,9 @@ export default class L5R4PcSheet extends BaseActorSheet {
   }
 
   /**
-   * Handle Family drop without renaming the Actor.
+   * Handle drop of a Family item: set flags and embed the item.
    * Kept for backwards compatibility; primary flow embeds via _onDrop above.
+   * @param {Item} itemDoc - The dropped family item
    */
   async _handleFamilyDrop(itemDoc) {
     try {
@@ -930,8 +819,9 @@ export default class L5R4PcSheet extends BaseActorSheet {
   }
 
   /**
-   * If you have a "clear family" UI action, also remove embedded Family items
-   * so their transferred AEs are removed immediately.
+   * Clear the family assignment and remove embedded Family items.
+   * Removes family bonuses and active effects immediately.
+   * @param {Event} event - The click event
    */
   async _onFamilyClear(event) {
     event?.preventDefault?.();
@@ -955,6 +845,11 @@ export default class L5R4PcSheet extends BaseActorSheet {
   /* Rolls                               */
   /* ---------------------------------- */
 
+  /**
+   * Handle item roll for simple item chat display.
+   * @param {Event} event - The click event
+   * @param {HTMLElement} element - The clicked element
+   */
   _onItemRoll(event, element) {
     event.preventDefault();
     const row = element.closest(".item");
@@ -967,8 +862,8 @@ export default class L5R4PcSheet extends BaseActorSheet {
 
   /**
    * Handle Ring rolls from the rings wheel.
-   * @param {MouseEvent} event
-   * @param {HTMLElement} el - The <a.ring-roll> element found by the delegated listener.
+   * @param {MouseEvent} event - The click event
+   * @param {HTMLElement} el - The ring roll element with dataset attributes
    */
   _onRingRoll(event, el) {
     event.preventDefault();
@@ -990,40 +885,10 @@ export default class L5R4PcSheet extends BaseActorSheet {
   }
 
   /**
-   * Trait roll handler for delegated clicks.
-   * Reads the short key from `.trait-rank[data-trait]`, with safe fallbacks.
-   * @param {Event} event
-   * @param {HTMLElement} el - The clicked `.trait-roll` element (from delegation).
-   * @see https://foundryvtt.com/api/classes/foundry.applications.sheets.ActorSheetV2.html
-   */
-  _onTraitRoll(event, el) {
-    event.preventDefault();
-    const block = el.closest(".trait");
-    const traitKey = normalizeTraitKey(
-      block?.querySelector(".trait-rank")?.dataset.trait
-      || el.dataset.traitName
-      || "ref"
-    );
-
-    const val = toInt(
-      this.actor.system?._derived?.traitsEff?.[traitKey],
-      toInt(this.actor.system?.traits?.[traitKey])
-    );
-
-    return Dice.TraitRoll({
-      traitRank: val,
-      traitName: traitKey,
-      askForOptions: event.shiftKey,
-      actor: this.actor
-    });
-  }
-
-  /**
-   * Weapon roll handler — rolls the weapon's stored damage (system.damageRoll/system.damageKeep).
-   * Shift-click to open options if the setting allows it.
-   * @param {MouseEvent} event
-   * @param {HTMLElement} element - The clicked element in the weapon row.
-   * @see https://foundryvtt.com/api/classes/foundry.applications.sheets.ActorSheetV2.html
+   * Handle weapon damage rolls using stored damage dice.
+   * Shift-click to open roll options dialog.
+   * @param {MouseEvent} event - The click event
+   * @param {HTMLElement} element - The clicked element in the weapon row
    */
   _onWeaponRoll(event, element) {
     event.preventDefault();
@@ -1043,123 +908,26 @@ export default class L5R4PcSheet extends BaseActorSheet {
       askForOptions: event.shiftKey
     });
   }
-
-  _onSkillRoll(event, element) {
-    event.preventDefault();
-    const row = element.closest(".item");
-    const item = row ? this.actor.items.get(row.dataset.itemId) : null;
-    if (!item) return;
-
-    const traitKey = normalizeTraitKey(item.system?.trait);
-    if (!traitKey) {
-      console.warn("[L5R4] Skill is missing system.trait; cannot roll:", item?.name);
-      return;
-    }
-    // Prefer Actor-derived effective trait; fallback resolves from actor if missing.
-    const traitVal =
-      toInt(this.actor.system?._derived?.traitsEff?.[traitKey]) ??
-      toInt(this.actor.system?.traits?.[traitKey]);
-
-    Dice.SkillRoll({
-      actor: this.actor,
-      actorTrait: traitVal,
-      skillName: item.name,
-      skillTrait: traitKey,
-      skillRank: toInt(item.system?.rank),
-      askForOptions: event.shiftKey
-    });
-  }
-
   /* ---------------------------------- */
   /* Item CRUD                           */
   /* ---------------------------------- */
 
   /**
-   * Create a new embedded Item from a "+" button on the sheet.
-   * For the Advantages section, prompt for Advantage vs. Disadvantage first.
-   *
-   * Foundry API:
-   * - Actor#createEmbeddedDocuments: https://foundryvtt.com/api/classes/foundry.abstract.Document.html#createEmbeddedDocuments
-   * - DialogV2#prompt: https://foundryvtt.com/api/classes/foundry.applications.api.DialogV2.html#prompt
-   *
-   * @param {Event} event   The originating click event.
-   * @param {HTMLElement} element  The clicked anchor element with data-type.
+   * @override
+   * Handle inline item editing with enhanced dtype support for PC sheet.
+   * Supports checkboxes, numbers, booleans, and string values.
+   * @param {Event} event - The input event
+   * @param {HTMLElement} element - The input element
    */
-  async _onItemCreate(event, element) {
+  async _onInlineItemEdit(event, element) {
     event.preventDefault();
-    const type = element.dataset.type;
-
-    // Advantage or Disadvantage dialog
-    if (type === "advantage") {
-      const result = await Chat.getItemOptions("advantage");
-      if (!result || result.cancelled) return;
-      const { name, type: chosenType } = result; // "advantage" | "disadvantage"
-      return this.actor.createEmbeddedDocuments("Item", [{ name, type: chosenType }]);
-    }
-
-    /**
-     * Equipment dialog - lets the user choose a valid subtype.
-     * Uses templates/chat/create-equipment-dialog.hbs via Chat.getItemOptions("equipment")
-     */
-    if (type === "equipment") {
-      const result = await Chat.getItemOptions("equipment");
-      if (!result || result.cancelled) return;
-      const { name, type: chosenType } = result; // "armor" | "bow" | "item" | "weapon"
-      return this.actor.createEmbeddedDocuments("Item", [{ name, type: chosenType }]);
-    }
-
-    // Optional: also route "spell" through its chooser (technique/spell/kata/kiho/tattoo)
-    if (type === "spell") {
-      const result = await Chat.getItemOptions("spell");
-      if (!result || result.cancelled) return;
-      const { name, type: chosenType } = result; // "technique" | "spell" | "kata" | "kiho" | "tattoo"
-      return this.actor.createEmbeddedDocuments("Item", [{ name, type: chosenType }]);
-    }
-
-    // Default: create the exact typed item
-    return this.actor.createEmbeddedDocuments("Item", [{
-      name: game.i18n.localize(`l5r4.ui.common.new`) + ` ${type}` || `New ${type}`,
-      type
-    }]);
-  }
-
-
-  _onItemEdit(event, element) {
-    event.preventDefault();
-    const row = element.closest(".item");
-    const rid = row?.dataset?.itemId || row?.dataset?.documentId || row?.dataset?.id;
-    const item = rid ? this.actor.items.get(rid) : null;
-    item?.sheet?.render(true);
-  }
-
-  async _onItemDelete(event, element) {
-    event.preventDefault();
-    const row = element.closest(".item");
-    const id  = row?.dataset?.itemId || row?.dataset?.documentId || row?.dataset?.id;
-    if (!id) return;
-    try {
-      await this.actor.deleteEmbeddedDocuments("Item", [id]);
-    } catch (err) {
-      console.warn("L5R4", "actor.deleteEmbeddedDocuments failed in PcSheet", { err });
-    }
-  }
-
-  /**
-   * Inline edit for common item fields shown on the PC sheet (rank, TN mods, etc).
-   * @param {Event} event
-   * @see https://foundryvtt.com/api/classes/foundry.abstract.Document.html#update
-   */
-  _onInlineItemEdit(event, element) {
-    event.preventDefault();
-    const el = /** @type {HTMLInputElement} */ (element);
-    const row = el.closest(".item");
-    const id  = row?.dataset?.itemId || row?.dataset?.documentId || row?.dataset?.id;
-    if (!id) return;
-
+    const el = /** @type {HTMLInputElement} */ (element || event.currentTarget);
+    const row = el?.closest?.(".item");
+    const id = row?.dataset?.itemId || row?.dataset?.documentId || row?.dataset?.id;
     const field = el.dataset.field;
-    if (!field) return;
+    if (!id || !field) return;
 
-    // dtype coercion; support data-dtype and data-type; checkboxes use .checked
+    // Handle checkbox values and extended dtype support
     let value = el.type === "checkbox" ? el.checked : el.value;
     const dtype = el.dataset.dtype ?? el.dataset.type;
     switch (dtype) {
@@ -1174,31 +942,15 @@ export default class L5R4PcSheet extends BaseActorSheet {
     return this.actor.items.get(id)?.update({ [field]: value });
   }
 
-  /**
-   * Toggle inline expansion of an item row to reveal its details.
-   * Finds the closest .item row and toggles the "is-expanded" class.
-   * @param {MouseEvent} event
-   * @param {HTMLElement} element - The clicked control within the item row.
-   */
-  _onItemExpand(event, element) {
-    event?.preventDefault?.();
-    const row = /** @type {HTMLElement|null} */ (element.closest(".item"));
-    if (!row) return;
-    row.classList.toggle("is-expanded");
-    const icon = /** @type {HTMLElement|null} */ (element.querySelector("i"));
-    if (icon) {
-      icon.classList.toggle("fa-chevron-down");
-      icon.classList.toggle("fa-chevron-up");
-    }
-  }
 
   /* ---------------------------------- */
   /* Experience: manual adjustments and log */
   /* ---------------------------------- */
 
   /**
-   * Prompt to add or remove XP manually.
-   * Stores entries under flags[SYS_ID].xpManual.
+   * Prompt to add or remove XP manually with a reason note.
+   * Stores entries in the actor's manual XP log under flags.
+   * @param {Event} event - The click event
    * @see https://foundryvtt.com/api/classes/foundry.abstract.Document.html#setFlag
    * @see https://foundryvtt.com/api/classes/client.Dialog.html#static-prompt
    */
@@ -1244,8 +996,9 @@ export default class L5R4PcSheet extends BaseActorSheet {
   }
 
   /**
-   * Show a simple breakdown of current XP.
-   * Uses computed system._xp and the manual log from flags.
+   * Display a detailed XP breakdown dialog showing spent, earned, and available XP.
+   * Includes manual XP adjustments from the log.
+   * @param {Event} event - The click event
    * @see https://foundryvtt.com/api/classes/client.Dialog.html#static-prompt
    */
   async _onXpLog(event) {
@@ -1322,6 +1075,10 @@ export default class L5R4PcSheet extends BaseActorSheet {
   /* Clan / Family helpers               */
   /* ---------------------------------- */
 
+  /**
+   * Open the linked Clan item sheet by UUID.
+   * @param {Event} event - The click event
+   */
   async _onClanLink(event) {
     event.preventDefault();
     const uuid = event.currentTarget?.dataset?.uuid || this.actor.getFlag(SYS_ID, "clanItemUuid");
@@ -1330,6 +1087,10 @@ export default class L5R4PcSheet extends BaseActorSheet {
     doc?.sheet?.render(true);
   }
 
+  /**
+   * Clear the Clan selection and remove the stored UUID flag.
+   * @param {Event} event - The click event
+   */
   async _onClanClear(event) {
     event.preventDefault();
     try {
@@ -1344,7 +1105,7 @@ export default class L5R4PcSheet extends BaseActorSheet {
 
   /**
    * Open the linked School item sheet by UUID.
-   * @param {MouseEvent} event
+   * @param {Event} event - The click event
    * @see https://foundryvtt.com/api/global.html#fromUuid
    */
   async _onSchoolLink(event) {
@@ -1356,8 +1117,8 @@ export default class L5R4PcSheet extends BaseActorSheet {
   }
 
   /**
-   * Clear the School selection on the Actor and remove the stored UUID flag.
-   * @param {MouseEvent} event
+   * Clear the School selection and remove the stored UUID flag.
+   * @param {Event} event - The click event
    */
   async _onSchoolClear(event) {
     event.preventDefault();
@@ -1371,6 +1132,10 @@ export default class L5R4PcSheet extends BaseActorSheet {
     }
   }
 
+  /**
+   * Open the linked Family item sheet by UUID.
+   * @param {Event} event - The click event
+   */
   async _onFamilyOpen(event) {
     event.preventDefault();
     const uuid = event.currentTarget?.dataset?.uuid || this.actor.getFlag(SYS_ID, "familyItemUuid");
@@ -1379,6 +1144,11 @@ export default class L5R4PcSheet extends BaseActorSheet {
     doc?.sheet?.render(true);
   }
 
+  /**
+   * Clear the Family selection and remove name prefix.
+   * Removes the family name from the actor's display name.
+   * @param {Event} event - The click event
+   */
   async _onFamilyClear(event) {
     event.preventDefault();
     // Remove prefix from name when clearing the family
@@ -1398,9 +1168,11 @@ export default class L5R4PcSheet extends BaseActorSheet {
   }
 
   /**
-   * Extract "BaseName" from "Family BaseName" (case-insensitive).
-   * @param {string} current
-   * @param {string} fam
+   * Extract base name by removing family prefix from the current name.
+   * Handles case-insensitive family name removal.
+   * @param {string} current - The current actor name
+   * @param {string} fam - The family name to remove
+   * @returns {string} The base name without family prefix
    */
   _extractBaseName(current, fam) {
     const famPrefix = (String(fam) + " ").toLowerCase();
@@ -1414,8 +1186,14 @@ export default class L5R4PcSheet extends BaseActorSheet {
   /* ---------------------------------- */
 
   /**
+   * @override
    * Convert trait inputs that display "effective" (base + family) back to base before submit.
-   * We use Actor flags directly (sync) so this stays lightweight.
+   * Handles family bonus calculations to maintain proper trait values.
+   * @param {Event} event - The submit event
+   * @param {HTMLFormElement} form - The form element
+   * @param {FormData} formData - The form data
+   * @param {object} updateData - Additional update data
+   * @returns {object} Processed submit data
    * @see https://foundryvtt.com/api/classes/foundry.applications.sheets.ActorSheetV2.html#_prepareSubmitData
    */
   _prepareSubmitData(event, form, formData, updateData = {}) {
@@ -1437,7 +1215,16 @@ export default class L5R4PcSheet extends BaseActorSheet {
     return data;
   }
 
-  /** Side-effects for submit (set family flags) then delegate to super. */
+  /**
+   * @override
+   * Process submit data with family-specific side effects.
+   * Handles family base name persistence and delegates to parent.
+   * @param {Event} event - The submit event
+   * @param {HTMLFormElement} form - The form element
+   * @param {object} submitData - The processed submit data
+   * @param {object} options - Submit options
+   * @returns {Promise<void>}
+   */
   async _processSubmitData(event, form, submitData, options) {
     // Persist base name if we prefixed during _prepareSubmitData
     if (submitData.__familyBaseName) {
@@ -1460,10 +1247,6 @@ export default class L5R4PcSheet extends BaseActorSheet {
    *
    * @param {MouseEvent} event
    * @param {HTMLElement} el  <a class="item-sort-by" data-sortby="name|rank|trait|type|school|emphasis">
-   *
-   * Uses standard Foundry document updates:
-   * - ApplicationV2/ActorSheetV2 listener attach point: _onRender. :contentReference[oaicite:0]{index=0}
-   * - Update embedded Items on an Actor (inherited from Document): updateEmbeddedDocuments. :contentReference[oaicite:1]{index=1}
    */
   async _onSkillHeaderSort(event, el) {
     event.preventDefault();
@@ -1518,27 +1301,6 @@ export default class L5R4PcSheet extends BaseActorSheet {
     }
   }
 
-  /**
-   * Post an Advantage/Disadvantage as a chat card when its header (name) is clicked.
-   * Uses Item#roll(), which renders the appropriate partial and calls ChatMessage.create().
-   * @see https://foundryvtt.com/api/ChatMessage.html#create
-   * @param {MouseEvent} ev
-   * @param {HTMLElement} el - The clicked <a.item-chat>.
-   */
-  async _onAdvHeaderToChat(ev, el) {
-    ev.preventDefault();
-
-    // Walk up to the .item container that carries data-document-id
-    const row = el.closest(".item");
-    const id  = row?.dataset?.documentId || row?.dataset?.itemId;
-    if (!id) return;
-
-    const item = this.actor?.items?.get(id);
-    if (!item) return;
-
-    // Leverage the system's existing chat-card flow.
-    await item.roll();
-  }
 
   /**
    * Adjust a Rank/Points pair via a single chip control.

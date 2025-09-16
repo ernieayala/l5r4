@@ -52,6 +52,7 @@
         "armorReduction": "Reduction",
         "woundLevel": "Wounds Level",
         "woundsSuffered": "Wounds Suffered",
+        "maxWounds": "Max Wounds",
         "penalty": "Penalty",
         "woundHealRate": "Rate of Wound Heal",
         "healthy": "Healthy",
@@ -181,6 +182,11 @@
           "humming": "Humming Bulb",
           "rope": "Rope Cutter",
           "willow": "Willow Leaf"
+        },
+        "sizes": {
+          "small": "Small",
+          "medium": "Medium",
+          "large": "Large"
         }
       },
       "armor": {
@@ -235,6 +241,7 @@
         "action": "Action",
         "edit": "Edit",
         "delete": "Delete",
+        "enableDisable": "Enable/Disable",
         "new": "New",
         "apply": "Apply",
         "name": "Name",
@@ -286,7 +293,8 @@
         "unlock": "Unlock Sheet"
       },
       "hints": {
-        "leftRightToAdjust": "Left and Right to Adjust"
+        "leftRightToAdjust": "Left and Right to Adjust",
+        "leftClickPlusRightClickMinus": "Left click: +1, Right click: -1"
       }
     },
     "system": {

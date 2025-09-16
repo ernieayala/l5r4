@@ -5,6 +5,10 @@
   <div class="grid">
     <span>{{localize "l5r4.mechanics.wounds.woundsSuffered"}}</span>
     <div class="flexrow"><input type="number" name="system.suffered" value="{{system.suffered}}" data-type="Number" /></div>
+    {{#if (eq actor.type "npc")}}
+      <span>{{localize "l5r4.mechanics.wounds.maxWounds"}}</span>
+      <div class="flexrow"><input type="number" name="system.wounds.max" placeholder="" value="{{#if (gt system.wounds.max 0)}}{{system.wounds.max}}{{/if}}" data-type="Number" /></div>
+    {{/if}}
     <span>{{localize "l5r4.mechanics.wounds.wounds"}} {{localize "l5r4.ui.common.mod"}}</span>
     <div class="flexrow"><input type="number" name="system.woundsMod" value="{{system.woundsMod}}" data-type="Number" /></div>
     <span>{{localize "l5r4.mechanics.wounds.wounds"}} {{localize "l5r4.mechanics.combat.multiplier"}}</span>
@@ -27,16 +31,18 @@
     </div>
   </div>
 </section>
-<section class="wounds">
-  <div class="flexrow -gap-sm section-title">
-    <h4 class="title -compact">{{localize "l5r4.mechanics.wounds.woundHealRate"}}</h4>
-  </div>
-  <div class="grid">
-    <span>{{localize "l5r4.mechanics.traits.sta"}} x 2 + {{localize "l5r4.character.ranks.insightRank"}}</span>
-    <div class="flexrow"><span>{{math (math system.traits.sta "*" 2) "+" system.insight.rank}}</span></div>
-    <span>{{localize "l5r4.ui.common.mod"}}</span>
-    <div class="flexrow"><input type="text" name="system.wounds.mod" value="{{system.wounds.mod}}" data-type="Number" /></div>
-    <span>{{localize "l5r4.ui.common.current"}} {{localize "l5r4.ui.common.rate"}}</span>
-    <div class="flexrow"><span>{{system.wounds.healRate}}</span></div>
-  </div>
-</section>
+{{#if (eq actor.type "pc")}}
+  <section class="wounds">
+    <div class="flexrow -gap-sm section-title">
+      <h4 class="title -compact">{{localize "l5r4.mechanics.wounds.woundHealRate"}}</h4>
+    </div>
+    <div class="grid">
+      <span>{{localize "l5r4.mechanics.traits.sta"}} x 2 + {{localize "l5r4.character.ranks.insightRank"}}</span>
+      <div class="flexrow"><span>{{math (math system.traits.sta "*" 2) "+" system.insight.rank}}</span></div>
+      <span>{{localize "l5r4.ui.common.mod"}}</span>
+      <div class="flexrow"><input type="text" name="system.wounds.mod" value="{{system.wounds.mod}}" data-type="Number" /></div>
+      <span>{{localize "l5r4.ui.common.current"}} {{localize "l5r4.ui.common.rate"}}</span>
+      <div class="flexrow"><span>{{system.wounds.healRate}}</span></div>
+    </div>
+  </section>
+{{/if}}

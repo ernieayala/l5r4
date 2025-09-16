@@ -1,12 +1,25 @@
 /**
- * L5R4 system configuration - Foundry VTT v13
- * Pure data and helpers only. Safe to import anywhere.
- * API: https://foundryvtt.com/api/
+ * L5R4 System Configuration Module for Foundry VTT v13+
+ * 
+ * Provides centralized configuration data and utilities including:
+ * - System constants (SYS_ID, paths, templates)
+ * - Icon path resolution and aliasing system
+ * - Localization key mappings for rings, traits, skills, emphases
+ * - Chat template definitions
+ * - Game rules constants (arrows, sizes, status effects)
+ * - Legacy config object for template compatibility
+ * 
+ * Pure data and helpers only - safe to import anywhere without side effects.
+ * 
+ * @see https://foundryvtt.com/api/
  */
 
 const freeze = Object.freeze;
 
-/** System id and common paths */
+/**
+ * System identifier and common path constants.
+ * Used throughout the system for consistent path resolution.
+ */
 export const SYS_ID = "l5r4";
 export const ROOT = `systems/${SYS_ID}`;
 export const PATHS = freeze({
@@ -16,34 +29,34 @@ export const PATHS = freeze({
 });
 
 /**
- * Icon path alias map and resolver (Step 8.24).
+ * Icon path alias system for future-proofing asset organization.
  *
- * Goal: allow reorganizing icons into semantic subfolders (e.g., rings/, skills/, status/)
- * without breaking older code or stored references that still assume a flat icons directory.
+ * Allows reorganizing icons into semantic subfolders (e.g., rings/, skills/, status/)
+ * without breaking existing code or stored references that assume a flat directory.
  *
- * Usage: call {@link iconPath} with either a bare filename (e.g., "air.png"),
- * or an existing system-relative path (e.g., `${PATHS.icons}/air.png`).
- * The resolver returns a stable path under the current structure.
+ * Usage: call iconPath() with either a bare filename ("air.png") or an existing
+ * system-relative path. The resolver returns a stable path under the current structure.
  *
- * This block is inert until assets are actually moved; it simply returns
- * the original path when no alias is defined.
- *
- * Foundry API: none (pure helper)
- * DRY note: keep this centralized; do not re-implement per module.
+ * Currently inert - returns original paths when no alias is defined.
+ * This maintains backward compatibility while enabling future reorganization.
  */
 
-/** @type {Readonly<Record<string, string>>} filename-only -> relative subpath under PATHS.icons */
+/**
+ * Icon filename aliases mapping bare filenames to subfolder paths.
+ * @type {Readonly<Record<string, string>>} filename -> relative subpath under PATHS.icons
+ */
 export const ICON_FILENAME_ALIASES = freeze({
   // No aliases right now — icons live flat under assets/icons.
 });
 
 /**
  * Resolve an icon filename or system path to the current canonical path.
- * - Leaves external/core Foundry icons like "icons/svg/..." unchanged.
- * - Accepts bare filenames or `${PATHS.icons}/...` paths.
- *
- * @param {string} nameOrPath
- * @returns {string}
+ * - Leaves external/core Foundry icons like "icons/svg/..." unchanged
+ * - Accepts bare filenames or full system paths
+ * - Returns aliased path if mapping exists, otherwise returns normalized path
+ * 
+ * @param {string} nameOrPath - Icon filename or path to resolve
+ * @returns {string} Canonical icon path
  */
 export function iconPath(nameOrPath) {
   const n = nameOrPath ?? "";
@@ -64,9 +77,10 @@ export function iconPath(nameOrPath) {
 }
 
 /**
- * i18n label keys centralized for UI and chat.
- * Keep these as passive maps so both documents and sheets share one source of truth.
- * Do not localize here - pass the keys through game.i18n.localize/format in consumers.
+ * Centralized i18n label keys for UI and chat consistency.
+ * These are passive maps providing a single source of truth for localization keys.
+ * Do not localize here - pass keys through game.i18n.localize/format in consumers.
+ * 
  * @see https://foundryvtt.com/api/classes/client.i18n.Localization.html
  * @typedef {{ air: string, earth: string, fire: string, water: string, void: string }} RingLabelMap
  */
@@ -81,10 +95,10 @@ export const RING_LABELS = freeze({
 });
 
 /**
- * Skill label keys.
- * L5R4e skills are often data-driven in sheets - start empty and extend as we stabilize the list.
- * Example keys when added: "l5r4.skills.courtier", "l5r4.skills.etiquette".
- * Keep alphabetical.
+ * Skill label keys for L5R4 system.
+ * Comprehensive mapping of skill identifiers to localization keys.
+ * Used by sheets and templates for consistent skill name display.
+ * Maintained in alphabetical order for easy reference.
  * @type {Readonly<Record<string, string>>}
  */
 export const SKILL_LABELS = freeze({
@@ -133,9 +147,9 @@ export const SKILL_LABELS = freeze({
 });
 
 /**
- * Emphasis label keys - optional, mirrors how sheets and chat present emphasis names.
- * Example: "l5r4.emphases.iaijutsu", "l5r4.emphases.kenjutsu".
- * Keep alphabetical.
+ * Emphasis label keys for skill specializations.
+ * Maps emphasis identifiers to localization keys for consistent presentation
+ * across sheets and chat. Maintained in alphabetical order.
  * @type {Readonly<Record<string, string>>}
  */
 export const EMPHASIS_LABELS = freeze({
@@ -261,10 +275,17 @@ export const EMPHASIS_LABELS = freeze({
   weaving: "l5r4.world.emphases.weaving"
 });
 
-/** Build a template path consistently */
+/**
+ * Build a template path consistently from a relative path.
+ * @param {string} relPath - Relative path within the templates directory
+ * @returns {string} Full template path
+ */
 export const TEMPLATE = (relPath) => `${PATHS.templates}/${relPath}`;
 
-/** Centralized chat templates used by dialogs and chat cards */
+/**
+ * Centralized chat template paths used by dialogs and chat cards.
+ * Provides consistent template resolution for chat functionality.
+ */
 export const CHAT_TEMPLATES = freeze({
   simpleRoll:     TEMPLATE("chat/simple-roll.hbs"),
   rollModifiers:  TEMPLATE("chat/roll-modifiers-dialog.hbs"),
@@ -276,9 +297,14 @@ export const CHAT_TEMPLATES = freeze({
   createEquip:    TEMPLATE("chat/create-equipment-dialog.hbs")
 });
 
-/** Rules-facing constants */
+/* ---------------------------------- */
+/* Game Rules Constants                */
+/* ---------------------------------- */
 
-/** Arrow type localization keys for UI select */
+/**
+ * Arrow type localization keys for UI select elements.
+ * Maps arrow type identifiers to their display labels.
+ */
 const ARROWS = freeze({
   armor:   "l5r4.equipment.weapons.arrows.armor",
   flesh:   "l5r4.equipment.weapons.arrows.flesh",
@@ -287,7 +313,21 @@ const ARROWS = freeze({
   willow:  "l5r4.equipment.weapons.arrows.willow"
 });
 
-/** Optional: arrow damage modifiers (roll, keep) keyed by system value */
+/**
+ * Weapon size localization keys for UI select elements.
+ * Maps size identifiers to their display labels.
+ */
+const SIZES = freeze({
+  small:  "l5r4.equipment.weapons.sizes.small",
+  medium: "l5r4.equipment.weapons.sizes.medium",
+  large:  "l5r4.equipment.weapons.sizes.large"
+});
+
+/**
+ * Arrow damage modifiers (roll, keep dice) keyed by arrow type.
+ * Used for calculating damage bonuses based on arrow selection.
+ * @type {Readonly<Record<string, {r: number, k: number}>>}
+ */
 export const ARROW_MODS = freeze({
   armor:   { r: 1, k: 1 },
   flesh:   { r: 2, k: 3 },
@@ -296,9 +336,14 @@ export const ARROW_MODS = freeze({
   willow:  { r: 2, k: 2 }
 });
 
-/** Legacy-shaped config object used throughout the system and templates */
+/**
+ * Legacy-shaped config object for backward compatibility.
+ * Used throughout the system and templates. Maintains the structure
+ * expected by existing code while providing centralized configuration.
+ */
 const _l5r4 = {
   arrows: ARROWS,
+  sizes: SIZES,
 
   rings: freeze({
     fire: "l5r4.mechanics.rings.fire",
@@ -308,7 +353,7 @@ const _l5r4 = {
     void: "l5r4.mechanics.rings.void"
   }),
 
-  /** Rings available to spells */
+  /** Ring options available for spell casting */
   spellRings: freeze({
     fire: "l5r4.mechanics.rings.fire",
     water: "l5r4.mechanics.rings.water",
@@ -318,7 +363,7 @@ const _l5r4 = {
     all: "l5r4.mechanics.rings.all"
   }),
 
-  /** Trait labels (PC) */
+  /** PC trait localization keys */
   traits: freeze({
     sta: "l5r4.mechanics.traits.sta",
     wil: "l5r4.mechanics.traits.wil",
@@ -330,7 +375,7 @@ const _l5r4 = {
     int: "l5r4.mechanics.traits.int"
   }),
 
-  /** NPC trait labels (kept same keys for simplicity) */
+  /** NPC trait localization keys (same as PC for consistency) */
   npcTraits: freeze({
     sta: "l5r4.mechanics.traits.sta",
     wil: "l5r4.mechanics.traits.wil",
@@ -342,7 +387,7 @@ const _l5r4 = {
     int: "l5r4.mechanics.traits.int"
   }),
 
-  /** Skill families */
+  /** Skill category/family localization keys */
   skillTypes: freeze({
     high: "l5r4.character.skillTypes.high",
     bugei: "l5r4.character.skillTypes.bugei",
@@ -350,14 +395,14 @@ const _l5r4 = {
     low: "l5r4.character.skillTypes.low"
   }),
 
-  /** Action economy labels */
+  /** Action economy type localization keys */
   actionTypes: freeze({
-    simple: "l5r4.mechanics.actionTypes.simple",
-    complex: "l5r4.mechanics.actionTypes.complex",
-    free: "l5r4.mechanics.actionTypes.free"
+    simple: "l5r4.ui.common.simple",
+    complex: "l5r4.ui.common.complex",
+    free: "l5r4.ui.common.free"
   }),
 
-  /** Kiho types */
+  /** Kiho category localization keys */
   kihoTypes: freeze({
     internal: "l5r4.magic.kiho.internal",
     karmic: "l5r4.magic.kiho.karmic",
@@ -365,7 +410,7 @@ const _l5r4 = {
     mystic: "l5r4.magic.kiho.mystic"
   }),
 
-  /** Advantage categories */
+  /** Advantage category localization keys */
   advantageTypes: freeze({
     physical: "l5r4.character.advantages.physical",
     mental: "l5r4.character.advantages.mental",
@@ -375,10 +420,10 @@ const _l5r4 = {
     ancestor: "l5r4.character.advantages.ancestor"
   }),
 
-  /** Wound levels by NPC rank */
+  /** Number of wound levels by NPC rank (1-8) */
   npcNumberWoundLvls: freeze({ 1:1, 2:2, 3:3, 4:4, 5:5, 6:6, 7:7, 8:8 }),
 
-  /** Registered status effects */
+  /** Registered status effects for the system */
   statusEffects: freeze([
     // Stances
     { id: "attackStance",      name: "EFFECT.attackStance",      img: iconPath("attackstance.png") },
@@ -400,9 +445,17 @@ const _l5r4 = {
   ])
 };
 
+/**
+ * Frozen legacy config object for system-wide use.
+ * @type {Readonly<typeof _l5r4>}
+ */
 export const l5r4 = freeze(_l5r4);
 
-/** Optional structured alias if you prefer named helpers alongside the legacy object */
+/**
+ * Structured config alias providing named helpers alongside the legacy object.
+ * Combines system constants with the legacy config for comprehensive access.
+ * @type {Readonly<{SYS_ID: string, ROOT: string, PATHS: object, TEMPLATE: function, CHAT_TEMPLATES: object}>}
+ */
 export const L5R4 = freeze({
   SYS_ID,
   ROOT,
@@ -412,4 +465,7 @@ export const L5R4 = freeze({
   ...l5r4
 });
 
+/**
+ * Default export of the legacy config object for backward compatibility.
+ */
 export default l5r4;

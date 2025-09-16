@@ -1,25 +1,43 @@
 /**
- * L5R4 dice & roll utilities (Foundry VTT v13)
+ * L5R4 Dice Service - Roll Mechanics and Dialog System for Foundry VTT v13+.
+ * 
+ * This service module provides comprehensive dice rolling functionality for the L5R4 system,
+ * including roll formula construction, Ten Dice Rule enforcement, modifier dialogs, and
+ * chat card rendering with target number evaluation.
  *
- * Responsibilities
- * - Build roll formulas (Xd10kY) with emphasis, wound penalties, and modifiers.
- * - Enforce the Ten Dice Rule conversion for dice/keeps/bonus.
- * - Prompt for modifiers using DialogV2 and shared dialog templates.
- * - Render chat cards via Handlebars templates.
+ * ## Core Responsibilities:
+ * - **Roll Formula Construction**: Build L5R4 dice formulas (XkY) with modifiers and special rules
+ * - **Ten Dice Rule Enforcement**: Convert excess dice to bonuses per L5R4 rules
+ * - **Modifier Dialogs**: Interactive dialogs for roll options using DialogV2 API
+ * - **Chat Integration**: Render roll results with custom templates and TN evaluation
+ * - **Void Point Management**: Automatic void point spending and validation
+ * - **Active Effects Integration**: Apply bonuses from actor effects to rolls
  *
- * Dependencies
- * - Foundry VTT v13 client API: https://foundryvtt.com/api/
- * - ./config.js: CHAT_TEMPLATES with simpleRoll, rollModifiers, weaponCard
- * - ./utils.js: R (renderTemplate wrapper), toInt, T (localize helper)
+ * ## Roll Types Supported:
+ * - **Skill Rolls**: (Trait + Skill + mods)k(Trait + mods) with emphasis and wound penalties
+ * - **Ring Rolls**: Ring-based tests and spell casting with affinity/deficiency
+ * - **Trait Rolls**: Pure trait tests with unskilled and void point options
+ * - **Weapon Rolls**: Damage rolls with weapon-specific modifiers
+ * - **NPC Rolls**: Simplified rolls for NPCs with optional void point restrictions
  *
- * Exports
- * - SkillRoll, RingRoll, TraitRoll, WeaponRoll, NpcRoll
- * - TenDiceRule, roll_parser
+ * ## Special Mechanics:
+ * - **Emphasis**: Reroll 1s on skill rolls (r1 modifier)
+ * - **Unskilled**: No exploding dice on trait rolls
+ * - **Void Points**: +1k1 bonus with automatic point deduction
+ * - **Wound Penalties**: Applied to target numbers when enabled
+ * - **Ten Dice Rule**: Excess dice converted to bonuses and kept dice
+ *
+ * ## API References:
+ * @see {@link https://foundryvtt.com/api/classes/foundry.dice.Roll.html|Roll}
+ * @see {@link https://foundryvtt.com/api/classes/foundry.applications.api.DialogV2.html|DialogV2}
+ * @see {@link https://foundryvtt.com/api/classes/documents.ChatMessage.html|ChatMessage}
+ * @see {@link https://foundryvtt.com/api/functions/foundry.applications.handlebars.renderTemplate.html|renderTemplate}
  */
 
 import { CHAT_TEMPLATES, SYS_ID } from "../config.js";
 import { R, toInt, T } from "../utils.js";
 
+/** Foundry's DialogV2 API for creating modal roll option dialogs. */
 const DIALOG = foundry.applications.api.DialogV2;
 
 // ---------------------------------------------------------------------------
@@ -27,19 +45,32 @@ const DIALOG = foundry.applications.api.DialogV2;
 // ---------------------------------------------------------------------------
 
 /**
- * Roll a Skill: (Trait + Skill + rollMod)d10k(Trait + keepMod) x10 + totalMod
- * @param {Object} opts
- * @param {number} [opts.woundPenalty=0] - Subtracted from total if applyWoundPenalty is true.
- * @param {number} opts.actorTrait - Base trait dice/keep value.
- * @param {number} opts.skillRank - Skill ranks to add to rolled dice.
- * @param {string} opts.skillName - I18n key suffix for the skill (e.g., "kenjutsu").
- * @param {"str"|"ref"|"agi"|"awa"|"int"|"per"|"sta"|"wil"|"voi"|"void"} opts.skillTrait
- * @param {boolean} [opts.askForOptions=true] - If true (and setting permits), show dialog.
- * @param {boolean} [opts.npc=false] - When true, honor allowNpcVoidPoints setting.
- * @param {number} [opts.rollBonus=0] - Pre-supplied +R (rolled) modifier.
- * @param {number} [opts.keepBonus=0] - Pre-supplied +K (kept) modifier.
- * @param {number} [opts.totalBonus=0] - Pre-supplied flat bonus to total.
- * @returns {Promise<void>}
+ * Execute a skill roll with L5R4 mechanics and optional modifier dialog.
+ * Combines trait and skill ranks with modifiers, applies Ten Dice Rule, and
+ * renders results to chat with target number evaluation.
+ * 
+ * **Roll Formula:** (Trait + Skill + rollMod)k(Trait + keepMod) x10 + totalMod
+ * 
+ * **Special Features:**
+ * - Emphasis: Rerolls 1s when enabled (adds r1 to formula)
+ * - Void Points: +1k1 bonus with automatic point deduction
+ * - Wound Penalties: Applied to effective target numbers
+ * - Active Effects: Automatic bonus integration from actor effects
+ * - Target Numbers: Success/failure evaluation with raise calculation
+ * 
+ * @param {object} opts - Roll configuration options
+ * @param {number} [opts.woundPenalty=0] - Wound penalty applied to target numbers
+ * @param {number} opts.actorTrait - Base trait value for dice pool and keep
+ * @param {number} opts.skillRank - Skill ranks added to rolled dice
+ * @param {string} opts.skillName - Skill name for localization and display
+ * @param {string} opts.skillTrait - Trait key ("str"|"ref"|"agi"|"awa"|"int"|"per"|"sta"|"wil"|"void")
+ * @param {boolean} [opts.askForOptions=true] - Whether to show modifier dialog
+ * @param {boolean} [opts.npc=false] - Apply NPC void point restrictions
+ * @param {number} [opts.rollBonus=0] - Bonus dice to roll
+ * @param {number} [opts.keepBonus=0] - Bonus dice to keep
+ * @param {number} [opts.totalBonus=0] - Flat bonus to total
+ * @param {Actor} [opts.actor=null] - Actor for void point spending and effects
+ * @returns {Promise<ChatMessage|void>} Created chat message or void if cancelled
  */
 export async function SkillRoll({
   woundPenalty = 0,
@@ -60,7 +91,7 @@ export async function SkillRoll({
   // Prefer an i18n key if it exists; otherwise use the item’s display name
   const tryKey = typeof skillName === "string" ? `l5r4.skills.${skillName.toLowerCase()}` : "";
   const skillLabel = (tryKey && game.i18n?.has?.(tryKey)) ? game.i18n.localize(tryKey) : String(skillName ?? game.i18n.localize("l5r4.ui.common.skill"));
-  let label = `${game.i18n.localize("l5r4.ui.rolls.skillRoll")}: ${skillLabel} / ${game.i18n.localize(traitI18nKey)}`;
+  let label = `${game.i18n.localize("l5r4.mechanics.rolls.skillRoll")}: ${skillLabel} / ${game.i18n.localize(traitI18nKey)}`;
 
   let emphasis = false;
   let rollMod = 0;
@@ -70,7 +101,7 @@ export async function SkillRoll({
   let __tnInput = 0, __raisesInput = 0;
 
   if (askForOptions !== optionsSetting) {
-    /** Active Effects: fold AE defaults into dialog inputs (skill + trait). */
+    // Apply Active Effects bonuses before showing dialog
     const bb = actor?.system?.bonuses;
     if (bb) {
       const kSkill = String(skillName).toLowerCase?.();
@@ -95,19 +126,11 @@ export async function SkillRoll({
     __raisesInput = toInt(check.raises);
     if (__tnInput || __raisesInput) {
       const __effTN = __tnInput + (__raisesInput * 5);
-      label += ` [TN ${__effTN}${__raisesInput ? ` (${game.i18n.localize("l5r4.ui.rolls.raises")}: ${__raisesInput})` : ""}]`;
+      label += ` [TN ${__effTN}${__raisesInput ? ` (${game.i18n.localize("l5r4.mechanics.rolls.raises")}: ${__raisesInput})` : ""}]`;
     }
 
     if (check.void) {
-      /**
-       * Spend 1 Void Point if available, otherwise warn and abort the roll.
-       * Foundry API:
-       * - ChatMessage.getSpeaker(): https://foundryvtt.com/api/classes/documents.ChatMessage.html#static-getSpeaker
-       * - game.actors.get(id):     https://foundryvtt.com/api/classes/foundry.collections.WorldCollection.html#get
-       * - Actor.update():          https://foundryvtt.com/api/classes/foundry.abstract.Document.html#update
-       * - ui.notifications.warn(): https://foundryvtt.com/api/classes/client.ui.Notifications.html#warn
-       * @returns {void}
-       */
+      // Handle void point spending with validation and actor resolution
       const spendActor = actor
         ?? canvas?.tokens?.controlled?.[0]?.actor
         ?? game.user?.character
@@ -125,10 +148,10 @@ export async function SkillRoll({
         return;
       }
 
-      // Deduct 1 point immediately so the UI stays in sync.
+      // Deduct void point immediately for UI synchronization
       await spendActor.update({ "system.rings.void.value": curVoid - 1 }, { diff: true });
 
-      // Apply +1k1 and annotate the label.
+      // Apply void point bonus (+1k1) and update label
       rollMod += 1; keepMod += 1;
       label += ` ${game.i18n.localize("l5r4.mechanics.rings.void")}!`;
     }
@@ -144,17 +167,18 @@ export async function SkillRoll({
 
   let rollFormula = `${diceRoll}d10k${diceKeep}x10+${bonus}`;
   if (emphasis) {
-    label += ` (${game.i18n.localize("l5r4.ui.rolls.emphasis")})`;
+    label += ` (${game.i18n.localize("l5r4.mechanics.rolls.emphasis")})`;
     rollFormula = `${diceRoll}d10r1k${diceKeep}x10+${bonus}`;
   }
   if (rollMod || keepMod || totalMod) {
-    label += ` ${game.i18n.localize("l5r4.ui.rolls.mod")} (${rollMod}k${keepMod}${totalMod < 0 ? totalMod : "+" + totalMod})`;
+    label += ` ${game.i18n.localize("l5r4.mechanics.rolls.mod")} (${rollMod}k${keepMod}${totalMod < 0 ? totalMod : "+" + totalMod})`;
   }
 
-  /** @added: Render roll, then inject into our wrapper template. */
+  // Execute roll and render with custom template wrapper
   const roll = new Roll(rollFormula);
-  const rollHtml = await roll.render(); // Foundry core dice card
-  /** @added: Compute and package TN outcome for the template. */
+  const rollHtml = await roll.render(); // Foundry's core dice visualization
+  
+  // Calculate effective target number and success/failure
   let __effTN = toInt(__tnInput) + (toInt(__raisesInput) * 5);
   if (applyWoundPenalty && __effTN > 0) {
     __effTN += toInt(woundPenalty);
@@ -173,17 +197,29 @@ export async function SkillRoll({
 // ---------------------------------------------------------------------------
 
 /**
- * Roll a Ring test or Spell casting check driven by a Ring.
- * If the options dialog chooses the Spell path, affinity/deficiency flags are applied.
- * @param {Object} opts
- * @param {number} [opts.woundPenalty=0]
- * @param {number} opts.ringRank
- * @param {string} opts.ringName - Localized label to show in chat (e.g., "Water").
- * @param {string} [opts.systemRing] - Internal key if needed by templates.
- * @param {number} [opts.schoolRank] - For shugenja calculations, if used by templates.
- * @param {boolean} [opts.askForOptions=true]
- * @param {boolean} [opts.unskilled=false]
- * @returns {Promise<void|false>}
+ * Execute a ring roll for elemental tests or spell casting.
+ * Supports both normal ring tests and spell casting with affinity/deficiency modifiers.
+ * Dialog allows choosing between ring test and spell casting paths.
+ * 
+ * **Roll Types:**
+ * - Normal Ring Roll: Standard ring-based test
+ * - Spell Casting: Ring roll with spell-specific modifiers
+ * 
+ * **Spell Modifiers:**
+ * - Affinity: Bonus for favorable elemental alignment
+ * - Deficiency: Penalty for unfavorable elemental alignment
+ * - School Rank: Shugenja school progression bonuses
+ * 
+ * @param {object} opts - Roll configuration options
+ * @param {number} [opts.woundPenalty=0] - Wound penalty for target numbers
+ * @param {number} opts.ringRank - Ring rank for dice pool
+ * @param {string} opts.ringName - Localized ring name for display
+ * @param {string} [opts.systemRing] - Internal ring key for effects lookup
+ * @param {number} [opts.schoolRank] - Shugenja school rank for spell bonuses
+ * @param {boolean} [opts.askForOptions=true] - Whether to show modifier dialog
+ * @param {boolean} [opts.unskilled=false] - Apply unskilled penalties
+ * @param {Actor} [opts.actor=null] - Actor for effects and void point spending
+ * @returns {Promise<ChatMessage|false>} Created chat message or false if cancelled
  */
 export async function RingRoll({
   woundPenalty = 0,
@@ -196,7 +232,7 @@ export async function RingRoll({
   actor = null
 } = {}) {
   const messageTemplate = CHAT_TEMPLATES.simpleRoll;
-  let label = `${game.i18n.localize("l5r4.ui.rolls.ringRoll")}: ${ringName}`;
+  let label = `${game.i18n.localize("l5r4.mechanics.rolls.ringRoll")}: ${ringName}`;
 
   const optionsSetting = game.settings.get(SYS_ID, "showSpellRollOptions");
 
@@ -228,7 +264,7 @@ export async function RingRoll({
     __raisesInput = toInt(choice.raises);
     if (__tnInput || __raisesInput) {
       const __effTN = __tnInput + (__raisesInput * 5);
-      label += ` [TN ${__effTN}${__raisesInput ? ` (${game.i18n.localize("l5r4.ui.rolls.raises")}: ${__raisesInput})` : ""}]`;
+      label += ` [TN ${__effTN}${__raisesInput ? ` (${game.i18n.localize("l5r4.mechanics.rolls.raises")}: ${__raisesInput})` : ""}]`;
     }
   }
 
@@ -239,21 +275,13 @@ export async function RingRoll({
   totalMod += toInt(bRing.total);
 
   if (voidRoll) {
-    /** Active Effects: add ring-based bonuses (system.bonuses.ring[systemRing]). */
+    // Apply ring-specific Active Effects bonuses
     const bRing = actor?.system?.bonuses?.ring?.[String(systemRing).toLowerCase?.()] || {};
     rollMod  += toInt(bRing.roll);
     keepMod  += toInt(bRing.keep);
     totalMod += toInt(bRing.total);
 
-    /**
-     * Spend 1 Void Point if available, otherwise warn and abort the roll.
-     * Foundry API:
-     * - ChatMessage.getSpeaker(): https://foundryvtt.com/api/classes/documents.ChatMessage.html#static-getSpeaker
-     * - game.actors.get(id):     https://foundryvtt.com/api/classes/foundry.collections.WorldCollection.html#get
-     * - Actor.update():          https://foundryvtt.com/api/classes/foundry.abstract.Document.html#update
-     * - ui.notifications.warn(): https://foundryvtt.com/api/classes/client.ui.Notifications.html#warn
-     * @returns {void}
-     */
+    // Handle void point spending with validation
     const spendActor = actor
       ?? canvas?.tokens?.controlled?.[0]?.actor
       ?? game.user?.character
@@ -271,10 +299,10 @@ export async function RingRoll({
       return false;
     }
 
-    // Deduct 1 point immediately so the UI stays in sync.
+    // Deduct void point immediately for UI synchronization
     await spendActor.update({ "system.rings.void.value": curVoid - 1 }, { diff: true });
 
-    // Apply +1k1 and annotate the label.
+    // Apply void point bonus (+1k1) and update label
     rollMod += 1; keepMod += 1;
     label += ` ${game.i18n.localize("l5r4.mechanics.rings.void")}!`;
   }
@@ -283,7 +311,7 @@ export async function RingRoll({
     const diceToRoll = toInt(ringRank) + rollMod;
     const diceToKeep = toInt(ringRank) + keepMod;
     const { diceRoll, diceKeep, bonus } = TenDiceRule(diceToRoll, diceToKeep, totalMod);
-    /** @added: Render via wrapper template with TN result. */
+    // Execute roll and render with target number evaluation
     const roll = new Roll(`${diceRoll}d10k${diceKeep}x10+${bonus}`);
     const rollHtml = await roll.render();
     let __effTN = toInt(__tnInput) + (toInt(__raisesInput) * 5);
@@ -299,8 +327,8 @@ export async function RingRoll({
     return roll.toMessage({ speaker: ChatMessage.getSpeaker(), content });
   }
 
-  // If the spell path were extended to custom logic, place it here.
-  // Currently, the dialog returns modifiers which are already used above.
+  // Spell casting path would be implemented here if extended beyond normal ring rolls
+  // Current implementation uses standard ring roll with spell-specific modifiers
   return false;
 }
 
@@ -309,16 +337,26 @@ export async function RingRoll({
 // ---------------------------------------------------------------------------
 
 /**
- * Roll a Trait test: (Trait + R)d10k(Trait + K) x10 + bonus
- * If the user selects "Void" in the dialog, this will only roll when the actor
- * has at least 1 Void Point remaining and will automatically deduct 1 point.
- * @param {Object} opts
- * @param {number} [opts.woundPenalty=0]
- * @param {number} [opts.traitRank=null]
- * @param {string} [opts.traitName=null] - short key: "ref","awa","agi","int","per","sta","wil","str","void"
- * @param {boolean} [opts.askForOptions=true]
- * @param {boolean} [opts.unskilled=false]
- * @param {Actor|null} [opts.actor=null] - Actor whose Void Points are spent; if null, defaults to ChatMessage speaker or game.user.character
+ * Execute a pure trait roll for attribute tests.
+ * Supports unskilled rolls (no exploding dice) and void point spending for bonuses.
+ * Automatically resolves actor for void point deduction and wound penalty application.
+ * 
+ * **Roll Formula:** (Trait + rollMod)k(Trait + keepMod) x10 + totalMod
+ * 
+ * **Special Features:**
+ * - Unskilled: Removes exploding dice (no x10 modifier)
+ * - Void Points: +1k1 bonus with automatic point deduction
+ * - Actor Resolution: Finds actor from token, user character, or chat speaker
+ * - Wound Penalties: Applied to effective target numbers from actor data
+ * 
+ * @param {object} opts - Roll configuration options
+ * @param {number} [opts.woundPenalty=0] - Base wound penalty (overridden by actor data)
+ * @param {number} [opts.traitRank=null] - Trait rank for dice pool
+ * @param {string} [opts.traitName=null] - Trait key ("ref"|"awa"|"agi"|"int"|"per"|"sta"|"wil"|"str"|"void")
+ * @param {boolean} [opts.askForOptions=true] - Whether to show modifier dialog
+ * @param {boolean} [opts.unskilled=false] - Remove exploding dice
+ * @param {Actor} [opts.actor=null] - Actor for void points and wound penalties
+ * @returns {Promise<ChatMessage|void>} Created chat message or void if cancelled
  */
 export async function TraitRoll({
   woundPenalty = 0,
@@ -337,7 +375,7 @@ export async function TraitRoll({
   let label = `${game.i18n.localize(traitKey)} ${game.i18n.localize("l5r4.ui.common.roll")}`;
   let __tnInput = 0, __raisesInput = 0;
 
-  // Resolve the actor to get wound penalty from.
+  // Resolve actor for void point spending and wound penalty lookup
   const targetActor = actor
     ?? canvas?.tokens?.controlled?.[0]?.actor
     ?? game.user?.character
@@ -360,23 +398,23 @@ export async function TraitRoll({
     __raisesInput = toInt(check.raises);
     if (__tnInput || __raisesInput) {
       const __effTN = __tnInput + (__raisesInput * 5);
-      label += ` [TN ${__effTN}${__raisesInput ? ` (${game.i18n.localize("l5r4.ui.rolls.raises")}: ${__raisesInput})` : ""}]`;
+      label += ` [TN ${__effTN}${__raisesInput ? ` (${game.i18n.localize("l5r4.mechanics.rolls.raises")}: ${__raisesInput})` : ""}]`;
     }
 
-    /** Active Effects: add trait-based bonuses (system.bonuses.trait[traitName]). */
+    // Apply Active Effects bonuses for this trait
     const bTrait = targetActor?.system?.bonuses?.trait?.[String(traitName).toLowerCase?.()] || {};
     rollMod  += toInt(bTrait.roll);
     keepMod  += toInt(bTrait.keep);
     totalMod += toInt(bTrait.total);
 
     if (check.void) {
-      /** Active Effects: add trait-based bonuses (system.bonuses.trait[traitName]). */
+      // Apply trait-specific Active Effects bonuses for void roll
       const bTrait = targetActor?.system?.bonuses?.trait?.[String(traitName).toLowerCase?.()] || {};
       rollMod  += toInt(bTrait.roll);
       keepMod  += toInt(bTrait.keep);
       totalMod += toInt(bTrait.total);
 
-      // If we can't resolve an actor, be conservative and block the Void spend.
+      // Validate actor availability for void point spending
       if (!targetActor) {
         ui.notifications?.warn(T("l5r4.ui.notifications.noActorForVoid"));
         return;
@@ -384,16 +422,15 @@ export async function TraitRoll({
 
       const curVoid = Number(targetActor.system?.rings?.void?.value ?? 0) || 0;
       if (curVoid <= 0) {
-        // Warn and do not roll.
         const labelVP = game.i18n?.localize?.("l5r4.mechanics.rings.voidPoints") || "Void Points";
         ui.notifications?.warn(`${labelVP}: 0`);
         return;
       }
 
-      // Deduct 1 point immediately so the UI stays in sync.
+      // Deduct void point immediately for UI synchronization
       await targetActor.update({ "system.rings.void.value": curVoid - 1 }, { diff: true });
 
-      // Apply +1k1 to the roll label and math.
+      // Apply void point bonus (+1k1) and update label
       rollMod += 1;
       keepMod += 1;
       label += ` ${game.i18n.localize("l5r4.mechanics.rings.void")}!`;
@@ -409,10 +446,10 @@ export async function TraitRoll({
 
   if (unskilled) {
     rollFormula = `${diceRoll}d10k${diceKeep}+${bonus}`;
-    flavor += ` (${game.i18n.localize("l5r4.ui.rolls.unskilledRoll")})`;
+    flavor += ` (${game.i18n.localize("l5r4.mechanics.rolls.unskilledRoll")})`;
   }
 
-  /** @added: Render via wrapper template with TN result. */
+  // Execute roll and render with target number evaluation
   const roll = new Roll(rollFormula);
   const rollHtml = await roll.render();
   let __effTN = toInt(__tnInput) + (toInt(__raisesInput) * 5);
@@ -433,15 +470,26 @@ export async function TraitRoll({
 // ---------------------------------------------------------------------------
 
 /**
- * Weapon damage roll: (R)d10k(K) x10 + bonus, with dialog modifiers.
- * @param {Object} opts
- * @param {number} opts.diceRoll
- * @param {number} opts.diceKeep
- * @param {number} [opts.explodesOn=10] - Kept for compatibility; always x10.
- * @param {string} opts.weaponName
- * @param {string} [opts.description]
- * @param {boolean} [opts.askForOptions=true]
- * @returns {Promise<void>}
+ * Execute a weapon damage roll with optional modifier dialog.
+ * Uses weapon-specific dice pool with Ten Dice Rule application and
+ * renders results using weapon chat template.
+ * 
+ * **Roll Formula:** (diceRoll + rollMod)k(diceKeep + keepMod) x10 + bonus
+ * 
+ * **Features:**
+ * - Ten Dice Rule: Automatic conversion of excess dice to bonuses
+ * - Modifier Dialog: Optional roll, keep, and flat bonuses
+ * - Weapon Template: Uses weapon-specific chat card template
+ * - Description: Optional weapon description in chat flavor
+ * 
+ * @param {object} opts - Roll configuration options
+ * @param {number} opts.diceRoll - Base dice to roll
+ * @param {number} opts.diceKeep - Base dice to keep
+ * @param {number} [opts.explodesOn=10] - Legacy parameter (always explodes on 10)
+ * @param {string} opts.weaponName - Weapon name for display
+ * @param {string} [opts.description] - Optional weapon description
+ * @param {boolean} [opts.askForOptions=true] - Whether to show modifier dialog
+ * @returns {Promise<ChatMessage|void>} Created chat message or void if cancelled
  */
 export async function WeaponRoll({
   diceRoll = null,
@@ -477,16 +525,31 @@ export async function WeaponRoll({
 // ---------------------------------------------------------------------------
 
 /**
- * NPC numeric/simple rolls. Uses the same chat wrapper as PC rolls.
- * Supports optional trait/ring inputs, but sheet ring/trait buttons now call the PC functions directly.
- * @param {Object} opts
- * @param {string|null} opts.rollName - Display name for simple/attack rolls.
- * @param {number|null} opts.diceRoll - Numeric R (for simple/attack).
- * @param {number|null} opts.diceKeep - Numeric K (for simple/attack).
- * @param {string|null} opts.traitName
- * @param {number|null} opts.traitRank
- * @param {string|null} opts.ringName
- * @param {number|null} opts.ringRank
+ * Execute NPC rolls with simplified mechanics and optional void restrictions.
+ * Supports both numeric dice pools and trait/ring-based rolls with the same
+ * chat template as PC rolls but with NPC-specific void point handling.
+ * 
+ * **Roll Types:**
+ * - Numeric Rolls: Direct dice pool specification (diceRoll/diceKeep)
+ * - Trait Rolls: Trait-based with unskilled option
+ * - Ring Rolls: Ring-based tests
+ * 
+ * **NPC Features:**
+ * - Void Restrictions: Configurable void point availability
+ * - Simplified Mechanics: No resource tracking for void points
+ * - Unified Template: Uses same chat template as PC rolls
+ * - Target Numbers: Full TN evaluation like PC rolls
+ * 
+ * @param {object} opts - Roll configuration options
+ * @param {boolean} [opts.npc=true] - NPC flag for void point restrictions
+ * @param {string} [opts.rollName=null] - Display name for numeric rolls
+ * @param {number} [opts.diceRoll=null] - Dice to roll for numeric rolls
+ * @param {number} [opts.diceKeep=null] - Dice to keep for numeric rolls
+ * @param {string} [opts.traitName=null] - Trait name for trait-based rolls
+ * @param {number} [opts.traitRank=null] - Trait rank for trait-based rolls
+ * @param {string} [opts.ringName=null] - Ring name for ring-based rolls
+ * @param {number} [opts.ringRank=null] - Ring rank for ring-based rolls
+ * @returns {Promise<ChatMessage|void>} Created chat message or void if cancelled
  */
 export async function NpcRoll({
   npc = true,
@@ -501,11 +564,11 @@ export async function NpcRoll({
   const messageTemplate = CHAT_TEMPLATES.simpleRoll;
   const noVoid = !game.settings.get(SYS_ID, "allowNpcVoidPoints");
 
-  // Dialog uses the same modifier partial; we pass 'trait' to show Unskilled when appropriate.
+  // Use shared modifier dialog with trait flag for unskilled option
   const check = await getNpcRollOptions(String(rollName ?? ringName ?? traitName ?? ""), noVoid, Boolean(traitName));
   if (check?.cancelled) return;
 
-  // Build label to mirror PC wording.
+  // Build display label matching PC roll format
   let label = "";
   if (traitName) {
     const traitKey = (String(traitName).toLowerCase() === "void") ? "l5r4.mechanics.rings.void" : `l5r4.mechanics.traits.${String(traitName).toLowerCase()}`;
@@ -523,11 +586,12 @@ export async function NpcRoll({
 
   if (check.void && !noVoid) {
     // NPCs don’t track resource spending here — just mirror +1k1 like PCs and annotate.
-    rollMod += 1; keepMod += 1;
+    rollMod += 1; 
+    keepMod += 1;
     label += ` ${game.i18n.localize("l5r4.mechanics.rings.void")}!`;
   }
 
-  // Compute dice pool: prefer numeric R/K for simple/attack; else trait/ring.
+  // Determine dice pool: numeric values take precedence over trait/ring
   let Rn, Kn, bonus;
   const hasRK = (diceRoll !== undefined && diceRoll !== null) && (diceKeep !== undefined && diceKeep !== null);
   if (hasRK && Number.isFinite(Number(diceRoll)) && Number.isFinite(Number(diceKeep))) {
@@ -538,12 +602,12 @@ export async function NpcRoll({
     ({ diceRoll: Rn, diceKeep: Kn, bonus } = TenDiceRule(toInt(ringRank) + rollMod, toInt(ringRank) + keepMod, totalMod));
   }
 
-  // Unskilled trait rolls do not explode.
+  // Apply unskilled modifier (removes exploding dice)
   const formula = unskilled ? `${Rn}d10k${Kn}+${bonus}` : `${Rn}d10k${Kn}x10+${bonus}`;
   const roll = new Roll(formula);
   const rollHtml = await roll.render();
 
-  // Show TN/Raises result like PCs if provided.
+  // Calculate target number result matching PC roll format
   const effTN = toInt(check.tn) + (toInt(check.raises) * 5);
   const tnResult = (effTN > 0)
     ? { effective: effTN, raises: toInt(check.raises) || 0, outcome: ((roll.total ?? 0) >= effTN) ? T("l5r4.mechanics.rolls.success") : T("l5r4.mechanics.rolls.failure") }
@@ -588,7 +652,7 @@ function _processSkillRollOptions(form) {
 async function GetTraitRollOptions(traitName) {
   const content = await R(CHAT_TEMPLATES.rollModifiers, { trait: true });
   try {
-    /** Localize trait label for dialog title. */
+    // Localize trait label for dialog title
     const traitKey = String(traitName).toLowerCase() === "void" ? "l5r4.mechanics.rings.void" : `l5r4.mechanics.traits.${String(traitName).toLowerCase()}`;
     const traitLabel = game.i18n.localize(traitKey);
     const result = await DIALOG.prompt({
@@ -724,11 +788,21 @@ function _processNpcRollOptions(form) {
 // ---------------------------------------------------------------------------
 
 /**
- * Convert excess rolled and kept dice per L5R Ten Dice Rule and house rules.
- * @param {number} diceRoll - Rolled dice (R)
- * @param {number} diceKeep - Kept dice (K)
- * @param {number} [bonus=0] - Flat modifier to total
- * @returns {{diceRoll:number,diceKeep:number,bonus:number}}
+ * Apply the L5R4 Ten Dice Rule to convert excess dice to bonuses.
+ * Implements the core L5R4 mechanic where dice pools are capped at 10k10
+ * with excess dice converted to kept dice and flat bonuses.
+ * 
+ * **Ten Dice Rule Logic:**
+ * 1. Cap rolled dice at 10, convert excess to "extras"
+ * 2. Every 3 extras become +2 kept dice
+ * 3. Cap kept dice at 10, convert excess pairs to "rises"
+ * 4. Apply Lieutenant Exception bonus if enabled
+ * 5. Convert remaining extras to flat bonuses
+ * 
+ * @param {number} diceRoll - Initial rolled dice count
+ * @param {number} diceKeep - Initial kept dice count
+ * @param {number} [bonus=0] - Base flat modifier
+ * @returns {{diceRoll: number, diceKeep: number, bonus: number}} Normalized dice pool
  */
 export function TenDiceRule(diceRoll, diceKeep, bonus = 0) {
   let extras = 0;
@@ -748,11 +822,21 @@ export function TenDiceRule(diceRoll, diceKeep, bonus = 0) {
 }
 
 /**
- * Parse a compact roll string like "6k3x10+4", with optional flags:
- *  - "u" for unskilled, "e" for emphasis
- * Returns normalized roll parts after applying Ten Dice Rule.
- * @param {string} roll
- * @returns {{dice_count:number, kept:number, explode_bonus:number, bonus:number, unskilled:boolean, emphasis:boolean}}
+ * Parse L5R4 roll notation strings into normalized dice pool components.
+ * Supports compact roll notation with special flags and applies Ten Dice Rule.
+ * 
+ * **Supported Formats:**
+ * - Basic: "6k3" (6 dice, keep 3)
+ * - With exploding: "6k3x10" (explode on 10s)
+ * - With bonus: "6k3x10+4" (flat +4 bonus)
+ * - With flags: "6k3x10+4u" (unskilled), "6k3x10+4e" (emphasis)
+ * 
+ * **Special Flags:**
+ * - "u": Unskilled roll (no exploding dice)
+ * - "e": Emphasis (reroll 1s)
+ * 
+ * @param {string} roll - Roll notation string to parse
+ * @returns {{dice_count: number, kept: number, explode_bonus: number, bonus: number, unskilled: boolean, emphasis: boolean}} Parsed roll components
  */
 export function roll_parser(roll) {
   let unskilled = false;
@@ -829,7 +913,13 @@ function calculate_bonus({ rises, bonus } = roll) {
   return bonus + rises * 2;
 }
 
-// Legacy helpers kept for parity with existing parser utilities
+/**
+ * Legacy roll calculation helpers maintained for backward compatibility.
+ * These functions provide alternative roll parsing logic that may be used
+ * by existing templates or external integrations.
+ * 
+ * @deprecated Use TenDiceRule() and roll_parser() for new implementations
+ */
 function calculate_roll(roll) {
   let calculated_roll = roll;
   let { dices, rises: rises1 } = calculate_rises(roll);

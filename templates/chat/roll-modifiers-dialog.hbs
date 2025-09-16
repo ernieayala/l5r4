@@ -37,15 +37,15 @@
   {{else}}
     <div class="form-group">
       <label>{{localize "l5r4.ui.common.roll"}} {{localize "l5r4.ui.common.mod"}}</label>
-      <input type="number" name="rollMod" value="0" />
+      <input type="number" name="rollMod" />
     </div>
     <div class="form-group">
       <label>{{localize "l5r4.ui.common.keep"}} {{localize "l5r4.ui.common.mod"}}</label>
-      <input type="number" name="keepMod" value="0" />
+      <input type="number" name="keepMod" />
     </div>
     <div class="form-group">
       <label>{{localize "l5r4.ui.common.total"}} {{localize "l5r4.ui.common.mod"}}</label>
-      <input type="number" name="totalMod" value="0" />
+      <input type="number" name="totalMod" />
     </div>
   {{/if}}
   {{#if spell}}
@@ -69,11 +69,11 @@
   {{#unless weapon}}
     <div class="form-group">
       <label>{{localize "l5r4.ui.common.tn"}}</label>
-      <input type="number" name="tn" placeholder="15" />
+      <input type="number" name="tn" />
     </div>
     <div class="form-group">
       <label>{{localize "l5r4.magic.spells.raises"}}</label>
-      <input type="number" name="raises" value="0" min="0" />
+      <input type="number" name="raises" min="0" />
     </div>
   {{/unless}}
 </form>

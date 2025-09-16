@@ -1,37 +1,52 @@
-// Shared config (system id, paths)
-// Import order: external → shared internal (config, utils) → feature modules → file-local helpers
-// @see https://foundryvtt.com/api/
+/**
+ * L5R4 Utilities Module for Foundry VTT v13+
+ * 
+ * Provides shared utility functions used across the L5R4 system including:
+ * - Localization helpers (T, F, R)
+ * - Type coercion and math utilities (toInt, clamp, sum)
+ * - DOM manipulation helpers (on, qs, qsa)
+ * - Sorting and preference management
+ * - Rank/points conversion utilities
+ * - Actor trait and wound penalty calculations
+ * 
+ * Import order: external → shared internal (config, utils) → feature modules → file-local helpers
+ * No side effects on import.
+ *
+ * @see https://foundryvtt.com/api/
+ */
+
 import { SYS_ID } from "./config.js";
 
 /**
- * L5R4 utilities for Foundry VTT v13
- * Scope: small, fast helpers used across modules and sheets.
- * No side effects on import.
- *
- * Foundry API index: https://foundryvtt.com/api/
+ * Localize a translation key.
+ * @param {string} key - The i18n key to localize
+ * @returns {string} The localized string
  */
-
-/** Localize a key. */
 export const T = (key) => game.i18n.localize(key);
 
-/** Localize with formatting data. */
+/**
+ * Localize a translation key with formatting data.
+ * @param {string} key - The i18n key to localize
+ * @param {object} data - Data object for string interpolation
+ * @returns {string} The formatted localized string
+ */
 export const F = (key, data) => game.i18n.format(key, data);
 
 /**
  * Render a Handlebars template using Foundry's v13+ namespaced API.
- * @param {string} path
- * @param {object} data
- * @returns {Promise<string>}
+ * @param {string} path - Template path relative to the system
+ * @param {object} data - Template context data
+ * @returns {Promise<string>} Rendered HTML string
  * @see https://foundryvtt.com/api/functions/foundry.applications.handlebars.renderTemplate.html
  */
 export const R = (path, data) => foundry.applications.handlebars.renderTemplate(path, data);
 
 /**
- * Safe integer coercion.
+ * Safe integer coercion with fallback.
  * Accepts string or number; trims strings; returns fallback on NaN.
- * @param {unknown} v
- * @param {number} [fallback=0]
- * @returns {number}
+ * @param {unknown} v - Value to convert to integer
+ * @param {number} [fallback=0] - Fallback value if conversion fails
+ * @returns {number} Parsed integer or fallback
  */
 export function toInt(v, fallback = 0) {
   const s = typeof v === "string" ? v.trim() : v;
@@ -40,18 +55,18 @@ export function toInt(v, fallback = 0) {
 }
 
 /**
- * Clamp a number into [min, max].
- * @param {number} n
- * @param {number} min
- * @param {number} max
- * @returns {number}
+ * Clamp a number within the specified range [min, max].
+ * @param {number} n - Number to clamp
+ * @param {number} min - Minimum allowed value
+ * @param {number} max - Maximum allowed value
+ * @returns {number} Clamped number
  */
 export const clamp = (n, min, max) => Math.min(max, Math.max(min, n));
 
 /**
- * Sum numbers quickly. Non-numeric values are ignored.
- * @param {...unknown} nums
- * @returns {number}
+ * Sum multiple numbers efficiently. Non-numeric values are ignored.
+ * @param {...unknown} nums - Numbers to sum
+ * @returns {number} Sum of all finite numbers
  */
 export function sum(...nums) {
   let t = 0;
@@ -63,11 +78,13 @@ export function sum(...nums) {
 }
 
 /**
- * Update a document safely with typical options for derived-data flows.
- * @param {Document} doc
- * @param {object} data
- * @param {{render?: boolean, diff?: boolean}} [opts]
- * @returns {Promise<Document>}
+ * Update a Foundry document safely with optimized options for derived-data flows.
+ * @param {Document} doc - The document to update
+ * @param {object} data - Update data object
+ * @param {{render?: boolean, diff?: boolean}} [opts] - Update options
+ * @param {boolean} [opts.render=false] - Whether to trigger a render
+ * @param {boolean} [opts.diff=true] - Whether to use differential updates
+ * @returns {Promise<Document>} The updated document
  * @see https://foundryvtt.com/api/classes/foundry.abstract.Document.html#update
  */
 export function safeUpdate(doc, data, { render = false, diff = true } = {}) {
@@ -81,10 +98,10 @@ export function safeUpdate(doc, data, { render = false, diff = true } = {}) {
 /**
  * Delegate an event to a selector within a root element.
  * Useful in DocumentSheet.activateListeners to avoid binding per-row handlers.
- * @param {HTMLElement} root
- * @param {string} selector
- * @param {string} type - event type like "click"
- * @param {(ev:Event, el:Element)=>void} handler
+ * @param {HTMLElement} root - Root element to attach the listener to
+ * @param {string} selector - CSS selector to match target elements
+ * @param {string} type - Event type like "click", "change", etc.
+ * @param {(ev:Event, el:Element)=>void} handler - Event handler function
  */
 export function on(root, selector, type, handler) {
   root.addEventListener(type, (ev) => {
@@ -93,8 +110,20 @@ export function on(root, selector, type, handler) {
   });
 }
 
-/** Query helpers */
+/**
+ * Query selector helper - find first matching element.
+ * @param {Element|Document} root - Root element to search within
+ * @param {string} sel - CSS selector
+ * @returns {Element|null} First matching element or null
+ */
 export const qs = (root, sel) => root.querySelector(sel);
+
+/**
+ * Query selector all helper - find all matching elements.
+ * @param {Element|Document} root - Root element to search within
+ * @param {string} sel - CSS selector
+ * @returns {Element[]} Array of matching elements
+ */
 export const qsa = (root, sel) => Array.from(root.querySelectorAll(sel));
 
 /* --------------------------------------------------------------------------
@@ -103,13 +132,13 @@ export const qsa = (root, sel) => Array.from(root.querySelectorAll(sel));
  * --------------------------------------------------------------------------*/
 
 /**
- * Read a sort preference, validating against allowed keys.
+ * Read a sort preference for an actor's items, validating against allowed keys.
  * Falls back to legacy advSortByActor when scope === "advDis".
- * @param {string} actorId
- * @param {string} scope  eg "advDis", "weapons", "items"
- * @param {string[]} allowedKeys
- * @param {string} [defaultKey="name"]
- * @returns {{key: string, dir: "asc"|"desc"}}
+ * @param {string} actorId - Actor ID for preference storage
+ * @param {string} scope - Scope identifier (e.g., "advDis", "weapons", "items")
+ * @param {string[]} allowedKeys - Valid sort keys for this scope
+ * @param {string} [defaultKey="name"] - Default sort key if none found
+ * @returns {{key: string, dir: "asc"|"desc"}} Sort preference object
  * @see https://foundryvtt.com/api/classes/foundry.documents.BaseUser.html#getFlag
  */
 export function getSortPref(actorId, scope, allowedKeys, defaultKey="name") {
@@ -129,11 +158,12 @@ export function getSortPref(actorId, scope, allowedKeys, defaultKey="name") {
 }
 
 /**
- * Write a sort preference. If switching to a new key, reset dir to asc.
- * @param {string} actorId
- * @param {string} scope
- * @param {string} key
- * @param {{toggleFrom?: {key:string, dir:"asc"|"desc"}}} [opts]
+ * Write a sort preference for an actor's items. If switching to a new key, reset dir to asc.
+ * @param {string} actorId - Actor ID for preference storage
+ * @param {string} scope - Scope identifier for the sort preference
+ * @param {string} key - Sort key to set
+ * @param {{toggleFrom?: {key:string, dir:"asc"|"desc"}}} [opts] - Options for toggling behavior
+ * @param {object} [opts.toggleFrom] - Previous preference to toggle from
  * @returns {Promise<void>}
  * @see https://foundryvtt.com/api/classes/foundry.documents.BaseUser.html#setFlag
  */
@@ -147,15 +177,15 @@ export async function setSortPref(actorId, scope, key, opts={}) {
 }
 
 /**
- * Sort a list by a column map and a preference.
+ * Sort a list by a column map and preference with locale-aware comparison.
  * Each column accessor returns either a string or a number.
- * Primary column honors dir; tie-breakers ascend.
+ * Primary column honors direction; tie-breakers always ascend.
  * @template T
- * @param {T[]} list
- * @param {{[key:string]: (it:T)=>string|number}} columns
- * @param {{key:string, dir:"asc"|"desc"}} pref
- * @param {string} [locale]
- * @returns {T[]}
+ * @param {T[]} list - Array of items to sort
+ * @param {{[key:string]: (it:T)=>string|number}} columns - Column accessor functions
+ * @param {{key:string, dir:"asc"|"desc"}} pref - Sort preference (key and direction)
+ * @param {string} [locale] - Locale for string comparison (defaults to game.i18n.lang)
+ * @returns {T[]} Sorted array
  */
 export function sortWithPref(list, columns, pref, locale=game.i18n?.lang) {
   const primary = pref.key;
@@ -175,9 +205,11 @@ export function sortWithPref(list, columns, pref, locale=game.i18n?.lang) {
 }
 
 /**
- * Convert a rank/points pair to a single decimal value (e.g., 5.6).
- * @param {{rank:number, points:number}} rp
- * @returns {number}
+ * Convert a rank/points pair to a single decimal value (e.g., rank 5, points 6 = 5.6).
+ * @param {{rank:number, points:number}} rp - Rank/points object
+ * @param {number} rp.rank - The rank value (0-10)
+ * @param {number} rp.points - The points value (0-9)
+ * @returns {number} Combined decimal value
  */
 export function rankPointsToValue(rp) {
   const r = Number(rp?.rank ?? 0) || 0;
@@ -187,11 +219,11 @@ export function rankPointsToValue(rp) {
 
 /**
  * Convert a decimal value (0.0..10.0) to normalized rank/points.
- * Ensures points ∈ 0..9, and 10.0 => { rank:10, points:0 }.
- * @param {number} value
- * @param {number} [minRank=0]
- * @param {number} [maxRank=10]
- * @returns {{rank:number, points:number, value:number}}
+ * Ensures points ∈ [0,9], and 10.0 => { rank:10, points:0 }.
+ * @param {number} value - Decimal value to convert
+ * @param {number} [minRank=0] - Minimum allowed rank
+ * @param {number} [maxRank=10] - Maximum allowed rank
+ * @returns {{rank:number, points:number, value:number}} Normalized rank/points object
  */
 export function valueToRankPoints(value, minRank = 0, maxRank = 10) {
   const min = Number(minRank) || 0;
@@ -206,14 +238,128 @@ export function valueToRankPoints(value, minRank = 0, maxRank = 10) {
 
 /**
  * Apply a decimal delta (e.g., +0.1, -1.0) to a rank/points pair and normalize.
- * @param {{rank:number, points:number}} rp
- * @param {number} delta
- * @param {number} [minRank=0]
- * @param {number} [maxRank=10]
- * @returns {{rank:number, points:number, value:number}}
+ * @param {{rank:number, points:number}} rp - Current rank/points object
+ * @param {number} delta - Delta to apply (positive or negative)
+ * @param {number} [minRank=0] - Minimum allowed rank
+ * @param {number} [maxRank=10] - Maximum allowed rank
+ * @returns {{rank:number, points:number, value:number}} Updated and normalized rank/points object
  */
 export function applyRankPointsDelta(rp, delta, minRank = 0, maxRank = 10) {
   const now = rankPointsToValue(rp);
   const next = now + Number(delta || 0);
   return valueToRankPoints(next, minRank, maxRank);
+}
+
+/* --------------------------------------------------------------------------
+ * Shared Actor Sheet Utilities
+ * --------------------------------------------------------------------------*/
+
+/**
+ * Compute the current wound penalty from an actor, handling legacy data shapes.
+ * Works for both PC and NPC actors with different wound tracking systems.
+ * @param {Actor} actor - The actor to read wound penalty from
+ * @returns {number} Current wound penalty (0 or negative number)
+ */
+export function readWoundPenalty(actor) {
+  // Newer shape
+  if (actor.system?.wounds?.penalty != null) return toInt(actor.system.wounds.penalty, 0);
+  // Fallback to woundLvlsUsed shape if present
+  const levels = Object.values(actor.system?.woundLvlsUsed || {});
+  const current = levels
+    .filter((w) => w?.current)
+    .reduce((a, b) => (toInt(a?.penalty, -999) > toInt(b?.penalty, -999) ? a : b), null);
+  return toInt(current?.penalty, 0);
+}
+
+/**
+ * Normalize a trait label/key into a system trait key ("ref", "awa", etc.).
+ * Accepts multiple input formats:
+ * - Short keys ("ref")
+ * - English labels ("Reflexes")
+ * - i18n keys ("l5r4.mechanics.traits.ref")
+ * - Localized labels in any language (via game.i18n.localize)
+ * @param {string|null|undefined} raw - Raw trait identifier to normalize
+ * @returns {string} Normalized trait key or empty string if not found
+ */
+export function normalizeTraitKey(raw) {
+  const known = ["sta","wil","str","per","ref","awa","agi","int"];
+  if (raw == null) return "";
+  let k = String(raw).trim();
+
+  // If given an i18n key like "l5r4.mechanics.traits.ref"
+  const m = /^l5r4\.mechanics\.traits\.(\w+)$/i.exec(k);
+  if (m && known.includes(m[1].toLowerCase())) return m[1].toLowerCase();
+
+  // Plain short key?
+  if (known.includes(k.toLowerCase())) return k.toLowerCase();
+
+  // English labels -> keys
+  const english = {
+    stamina: "sta",
+    willpower: "wil",
+    strength: "str",
+    perception: "per",
+    reflexes: "ref",
+    awareness: "awa",
+    agility: "agi",
+    intelligence: "int"
+  };
+  if (english[k.toLowerCase()]) return english[k.toLowerCase()];
+
+  // Localized labels (any language): compare against localized names
+  try {
+    for (const key of known) {
+      const label = game.i18n?.localize?.(`l5r4.mechanics.traits.${key}`) ?? "";
+      if (label && label.toLowerCase() === k.toLowerCase()) return key;
+    }
+  } catch (_) { /* ignore if i18n not ready here */ }
+
+  return "";
+}
+
+/**
+ * Get the effective trait value for an actor, handling both PC and NPC cases.
+ * For PCs: uses derived effective traits if available, falls back to base traits.
+ * For NPCs: uses base traits directly.
+ * @param {Actor} actor - The actor to read traits from
+ * @param {string} traitKey - Trait identifier ("sta","wil","str","per","ref","awa","agi","int","void")
+ * @returns {number} Effective trait value
+ */
+export function getEffectiveTrait(actor, traitKey) {
+  if (traitKey === "void") {
+    return toInt(actor.system?.rings?.void?.rank, 0);
+  }
+  
+  // Try derived effective traits first (PC sheets)
+  const derived = actor.system?._derived?.traitsEff?.[traitKey];
+  if (derived != null) return toInt(derived, 0);
+  
+  // Fall back to base traits (both PC and NPC)
+  return toInt(actor.system?.traits?.[traitKey], 0);
+}
+
+/**
+ * Extract roll parameters from a dataset element, handling trait bonuses.
+ * Common pattern used in both PC and NPC attack/damage rolls.
+ * @param {HTMLElement} el - Element with dataset properties (roll, keep, trait, label, description)
+ * @param {Actor} actor - Actor for trait lookups and bonus calculations
+ * @returns {{diceRoll: number, diceKeep: number, traitBonus: number, label: string, description: string}} Roll parameters object
+ */
+export function extractRollParams(el, actor) {
+  const diceRoll = toInt(el.dataset.roll, 0);
+  const diceKeep = toInt(el.dataset.keep, 0);
+  const label = String(el.dataset.label ?? "");
+  const description = String(el.dataset.description ?? "");
+  
+  const hasTrait = Object.prototype.hasOwnProperty.call(el.dataset, "trait");
+  const traitKey = hasTrait ? String(el.dataset.trait || "").toLowerCase() : "";
+  const traitBonus = hasTrait ? getEffectiveTrait(actor, traitKey) : 0;
+  
+  return {
+    diceRoll,
+    diceKeep,
+    traitBonus,
+    label,
+    description
+  };
 }

@@ -327,7 +327,9 @@ body > * {
 .l5r4.pc .item-list.-kiho .item,
 .l5r4.npc .item-list.-kiho .item,
 .l5r4.pc .item-list.-tattoo .item,
-.l5r4.npc .item-list.-tattoo .item {
+.l5r4.npc .item-list.-tattoo .item,
+.l5r4.pc .item-list.-attacks .item,
+.l5r4.npc .item-list.-attacks .item {
   grid-template-columns: 1fr 1fr 1fr 1fr 24px;
 }
 .l5r4.pc .item-list.-skill .item,
@@ -364,8 +366,14 @@ body > * {
 .l5r4.npc .item.is-expanded .expanded-text {
   display: block;
 }
+.l5r4.pc .item.is-expanded .expanded-text.-npc,
+.l5r4.npc .item.is-expanded .expanded-text.-npc {
+  display: flex;
+}
 .l5r4.pc .item select,
-.l5r4.npc .item select {
+.l5r4.npc .item select,
+.l5r4.pc .item input[type="number"],
+.l5r4.npc .item input[type="number"] {
   border: 1px solid var(--input-border-color);
   height: 2em;
   min-height: 2em;
@@ -381,6 +389,16 @@ body > * {
   font-size: var(--font-size-14);
   grid-column: 1 / -1;
   grid-row: 2;
+}
+.l5r4.pc .item .expanded-text.-npc,
+.l5r4.npc .item .expanded-text.-npc {
+  background: var(--table-header-bg-color);
+  flex-direction: column;
+  padding: 0.5rem;
+}
+.l5r4.pc .item .expanded-text.-npc h5,
+.l5r4.npc .item .expanded-text.-npc h5 {
+  margin: 0;
 }
 .l5r4.pc .ranks,
 .l5r4.npc .ranks {

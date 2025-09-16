@@ -181,6 +181,11 @@
           "humming": "Pointe sifflante",
           "rope": "Tranche-corde",
           "willow": "Feuille de saule"
+        },
+        "sizes": {
+          "small": "Petit",
+          "medium": "Moyen",
+          "large": "Grand"
         }
       },
       "armor": {
@@ -235,6 +240,7 @@
         "action": "Action",
         "edit": "Modifier",
         "delete": "Supprimer",
+        "enableDisable": "Activer/Désactiver",
         "new": "Nouveau",
         "apply": "Appliquer",
         "name": "Nom",
@@ -286,7 +292,8 @@
         "unlock": "Déverrouiller la Fiche"
       },
       "hints": {
-        "leftRightToAdjust": "Gauche et Droite pour Ajuster"
+        "leftRightToAdjust": "Gauche et Droite pour Ajuster",
+        "leftClickPlusRightClickMinus": "Clic gauche : +1, Clic droit : -1"
       }
     },
     "system": {

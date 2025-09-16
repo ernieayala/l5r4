@@ -181,6 +181,11 @@
           "humming": "Assobiadora",
           "rope": "Corta-Corda",
           "willow": "Folha de Salgueiro"
+        },
+        "sizes": {
+          "small": "Pequeno",
+          "medium": "Médio",
+          "large": "Grande"
         }
       },
       "armor": {
@@ -235,6 +240,7 @@
         "action": "Ação",
         "edit": "Editar",
         "delete": "Deletar",
+        "enableDisable": "Ativar/Desativar",
         "new": "Novo",
         "apply": "Aplicar",
         "name": "Nome",
@@ -286,7 +292,8 @@
         "unlock": "Desbloquear Ficha"
       },
       "hints": {
-        "leftRightToAdjust": "Esquerda e Direita para Ajustar"
+        "leftRightToAdjust": "Esquerda e Direita para Ajustar",
+        "leftClickPlusRightClickMinus": "Clique esquerdo: +1, Clique direito: -1"
       }
     },
     "system": {

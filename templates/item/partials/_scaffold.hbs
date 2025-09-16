@@ -40,11 +40,11 @@
             {{#if e.disabled}}<em>(disabled)</em>{{/if}}
           </div>
           <div class="flexrow -gap-md flex0 effect-controls">
-            <a class="effect-edit" title="Edit"><i class="fas fa-edit"></i></a>
-            <a class="effect-toggle" title="Enable/Disable">
+            <a class="effect-edit" title="{{localize "l5r4.ui.common.edit"}}"><i class="fas fa-edit"></i></a>
+            <a class="effect-toggle" title="{{localize "l5r4.ui.common.enableDisable"}}">
               <i class="fas {{#if e.disabled}}fa-toggle-off{{else}}fa-toggle-on{{/if}}"></i>
             </a>
-            <a class="effect-delete" title="Delete"><i class="fas fa-trash"></i></a>
+            <a class="effect-delete" title="{{localize "l5r4.ui.common.delete"}}"><i class="fas fa-trash"></i></a>
           </div>
         </li>
       {{/each}}

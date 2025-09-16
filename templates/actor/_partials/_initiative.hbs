@@ -3,16 +3,30 @@
     <h4 class="title -compact">{{localize "l5r4.ui.common.init"}}</h4>
   </div>
   <div class="grid">
-    <span>{{localize "l5r4.character.ranks.insightRank"}}/{{localize "l5r4.mechanics.traits.ref"}}</span>
-    <div class="flexrow"><span>{{system.insight.rank}}+{{system.traits.ref}}</span></div>
-    <span>{{localize "l5r4.ui.common.roll"}}/{{localize "l5r4.ui.common.keep"}} {{localize "l5r4.ui.common.bonus"}}</span>
-    <div class="flexrow -gap-xs">
-      <input type="number" name="system.initiative.rollMod" value="{{system.initiative.rollMod}}" data-type="Number" />
-      <input type="number" name="system.initiative.keepMod" value="{{system.initiative.keepMod}}" data-type="Number" />
-    </div>
-    <span>{{localize "l5r4.ui.common.mod"}}</span>
-    <div class="flexrow"><input type="number" name="system.initiative.totalMod" value="{{system.initiative.totalMod}}" data-type="Number" /></div>
-    <span></span>
-    <div class="flexrow"><span>{{system.initiative.roll}}k{{system.initiative.keep}}+{{system.initiative.totalMod}}</span></div>
+    {{#if (eq actor.type "pc")}}
+      <span>{{localize "l5r4.character.ranks.insightRank"}}/{{localize "l5r4.mechanics.traits.ref"}}</span>
+      <div class="flexrow"><span>{{system.insight.rank}}+{{system.traits.ref}}</span></div>
+      <span>{{localize "l5r4.ui.common.roll"}}/{{localize "l5r4.ui.common.keep"}} {{localize "l5r4.ui.common.bonus"}}</span>
+      <div class="flexrow -gap-xs">
+        <input type="number" name="system.initiative.rollMod" value="{{system.initiative.rollMod}}" data-type="Number" />
+        <input type="number" name="system.initiative.keepMod" value="{{system.initiative.keepMod}}" data-type="Number" />
+      </div>
+      <span>{{localize "l5r4.ui.common.mod"}}</span>
+      <div class="flexrow"><input type="number" name="system.initiative.totalMod" value="{{system.initiative.totalMod}}" data-type="Number" /></div>
+      <span></span>
+      <div class="flexrow"><span>{{system.initiative.roll}}k{{system.initiative.keep}}+{{system.initiative.totalMod}}</span></div>
+    {{else}}
+      <span>{{localize "l5r4.mechanics.traits.ref"}}</span>
+      <div class="flexrow"><span>{{system.traits.ref}}</span></div>
+      <span>{{localize "l5r4.ui.common.roll"}}/{{localize "l5r4.ui.common.keep"}}</span>
+      <div class="flexrow -gap-xs">
+        <input type="number" name="system.initiative.roll" value="{{#if (gt system.initiative.roll 0)}}{{system.initiative.roll}}{{/if}}" data-type="Number" />
+        <input type="number" name="system.initiative.keep" value="{{#if (gt system.initiative.keep 0)}}{{system.initiative.keep}}{{/if}}" data-type="Number" />
+      </div>
+      <span>{{localize "l5r4.ui.common.mod"}}</span>
+      <div class="flexrow"><input type="number" name="system.initiative.totalMod" value="{{system.initiative.totalMod}}" data-type="Number" /></div>
+      <span></span>
+      <div class="flexrow"><span>{{system.initiative.effRoll}}k{{system.initiative.effKeep}}+{{system.initiative.totalMod}}</span></div>
+    {{/if}}
   </div>
 </section>

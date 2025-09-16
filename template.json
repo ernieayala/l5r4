@@ -24,7 +24,7 @@
         },
         "wounds": {
           "value": 0,
-          "max": 20,
+          "max": 0,
           "mod": 0,
           "healRate": 0
         },
@@ -226,7 +226,7 @@
         "itemDescription"
       ],
       "str": 1,
-      "size": "Large",
+      "size": "large",
       "range": 100,
       "arrow": "willow",
       "damageRoll": 0,
@@ -325,7 +325,7 @@
       ],
       "damageRoll": 0,
       "damageKeep": 0,
-      "size": "Medium",
+      "size": "medium",
       "damageFormula": "",
       "explodesOn": 10
     }
