@@ -4,6 +4,8 @@
 
 ### Major System Refactor
 
+- **Removed PC Tabs Feature**: Completely removed the alternative PC sheet layout with tabs functionality and all related code, settings, and translations
+
 - **Code Structure Reorganization**: Restructured the module directory to improve separation of concerns:
   - `module/documents/` - Actor and Item document classes with pure rule logic
   - `module/sheets/` - UI rendering classes extending ActorSheetV2/ItemSheetV2
@@ -90,7 +92,7 @@ Major bugfixes for pc and npc rolls caused in version 0.8.8
 
 ## Version 0.8.7
 
-- Alternative sheet layout using tabs. This can be toggled client side in the system settings
+- ~~Alternative sheet layout using tabs. This can be toggled client side in the system settings~~ (Removed in v1.0.0)
 - Fix formatting of action types for npc attacks
 
 ## Version 0.8.6

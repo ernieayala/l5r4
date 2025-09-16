@@ -21,7 +21,7 @@ export default class L5R4NpcSheet extends BaseActorSheet {
       root: true,
       classes: ["flexcol"],
       template: `systems/${SYS_ID}/templates/actor/npc.hbs`,
-      scrollable: [".tabs-content"]
+      scrollable: [".scrollable-content"]
     }
   };
 

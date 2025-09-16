@@ -470,10 +470,6 @@
       "name": "Utiliser la règle modifiée des Dix Dés des Petites Vérités.",
       "label": "S'il y a un nombre impair de dés en excès et moins de 10 dés gardés, ajoutez 2 au total du jet pour que le dé \"supplémentaire\" donne un avantage."
     },
-    "usePcTabs": {
-      "name": "Affichage alternatif pour la fiche de PJ",
-      "label": "Utiliser une fiche alternative avec des sections divisées en onglets"
-    },
     "calculateRank": {
       "name": "Calculer le Rang de Perspicacité automatiquement",
       "label": "Le Rang de Perspicacité est mis à jour automatiquement en fonction du total des Points de Perspicacité"

@@ -50,6 +50,7 @@
 
 import { SYS_ID, iconPath } from "../config.js";
 import { toInt } from "../utils.js";
+import { applyStanceAutomation } from "../services/stance.js";
 
 /**
  * Type definition for the L5R4 actor system data structure.
@@ -525,6 +526,9 @@ export default class L5R4Actor extends Actor {
     sys.armorTn.reduction = reduction;
     sys.armorTn.current = baseTN + modTN + bonusTN;
 
+    // Apply stance automation effects
+    applyStanceAutomation(this, sys);
+
     // Wound thresholds
     const earth = sys.rings.earth;
     const mult  = toInt(sys.woundsMultiplier);
@@ -823,6 +827,9 @@ export default class L5R4Actor extends Actor {
     const curEffPenalty = Math.max(0, toInt(current.penalty) + toInt(sys.woundsPenaltyMod));
     sys.woundPenalty = curEffPenalty;
     sys.wounds.penalty = curEffPenalty;
+
+    // Apply stance automation effects for NPCs
+    applyStanceAutomation(this, sys);
   }
 
   /**

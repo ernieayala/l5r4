@@ -8,16 +8,23 @@
  * ## Available Services:
  * - **dice**: Roll mechanics, Ten Dice Rule, and dialog systems
  * - **chat**: Item creation dialogs and chat utilities
+ * - **stance**: Combat stance automation, effects, and roll modifications
  *
  * ## Usage Examples:
  * ```javascript
- * import { dice, chat } from "./services/index.js";
+ * import { dice, chat, stance } from "./services/index.js";
  * 
  * // Execute a skill roll
  * await dice.SkillRoll({ actor, skillName: "kenjutsu", ... });
  * 
  * // Show item creation dialog
  * const result = await chat.getItemOptions("advantage");
+ * 
+ * // Apply stance automation during actor preparation
+ * stance.applyStanceAutomation(actor, actor.system);
+ * 
+ * // Create a stance effect
+ * const effect = stance.createFullAttackStanceEffect(actor);
  * ```
  *
  * ## Design Principles:
@@ -34,3 +41,6 @@ export * as dice from "./dice.js";
 
 /** Chat utilities and item creation dialogs. */
 export * as chat from "./chat.js";
+
+/** Combat stance automation, effects, and roll modifications. */
+export * as stance from "./stance.js";

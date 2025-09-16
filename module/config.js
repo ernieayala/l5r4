@@ -290,6 +290,7 @@ export const CHAT_TEMPLATES = freeze({
   simpleRoll:     TEMPLATE("chat/simple-roll.hbs"),
   rollModifiers:  TEMPLATE("chat/roll-modifiers-dialog.hbs"),
   weaponCard:     TEMPLATE("chat/weapon-chat.hbs"),
+  fullDefenseRoll: TEMPLATE("chat/full-defense-roll.hbs"),
 
   // item creation dialogs
   createSpell:    TEMPLATE("chat/create-spell-dialog.hbs"),

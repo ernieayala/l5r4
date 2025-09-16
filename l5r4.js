@@ -8,7 +8,7 @@
  * ## Core Responsibilities:
  * - **System Configuration**: Wire CONFIG objects, document classes, and sheet registrations
  * - **Template Management**: Preload Handlebars templates and register custom helpers
- * - **Initiative System**: Provide L5R4-specific initiative formula with Ten Dice Rule
+ * - **Initiative System**: Fallback formula with L5R4-specific rolls handled by Combatant.getInitiativeRoll() override
  * - **Chat Integration**: Parse inline roll notation (KxY format) in chat messages
  * - **Migration Management**: Handle data structure updates and legacy compatibility
  * - **Status Effect Logic**: Enforce mutually exclusive stance mechanics
@@ -19,7 +19,7 @@
  * 3. **Ready Hook**: Execute data migrations and finalize system state
  *
  * ## Key Features:
- * - **L5R4 Initiative**: Dynamic formula generation using actor initiative stats
+ * - **L5R4 Initiative**: Actor-specific initiative rolls with Ten Dice Rule (via Combatant.getInitiativeRoll override)
  * - **Inline Roll Parsing**: Converts "3k2+1" notation to proper Foundry rolls
  * - **Stance Enforcement**: Automatically removes conflicting combat stances
  * - **Sheet Registration**: Configures custom actor and item sheets for all types
@@ -39,6 +39,7 @@ import { TenDiceRule, roll_parser } from "./module/services/dice.js";
 import { preloadTemplates } from "./module/setup/preload-templates.js";
 import { runMigrations } from "./module/setup/migrations.js";
 import { registerSettings } from "./module/setup/register-settings.js";
+import { onCreateActiveEffect, onUpdateActiveEffect, onDeleteActiveEffect, initializeStanceService } from "./module/services/stance.js";
 
 // =============================================================================
 // SYSTEM INITIALIZATION
@@ -65,17 +66,55 @@ Hooks.once("init", async () => {
   CONFIG.l5r4.TRAIT_CHOICES = CONFIG.l5r4.traits;
 
   // Phase 4: Configure L5R4 initiative system with Ten Dice Rule integration
-  CONFIG.Combat.initiative = {
-    formula: (combatant) => {
-      const a = combatant.actor;
-      if (!a) return "1d10";
-      const roll  = a.system?.initiative?.roll ?? 0;
-      const keep  = a.system?.initiative?.keep ?? 0;
-      const bonus = a.system?.initiative?.totalMod ?? 0;
-      const { diceRoll, diceKeep, bonus: flat } = TenDiceRule(roll, keep, bonus);
-      return `${diceRoll}d10k${diceKeep}x10+${flat}`;
-    }
-  };
+  // Important: Foundry v13 expects a STRING here, not a function. We'll override
+  // Combatant.prototype.getInitiativeRoll to build a dynamic formula.
+  CONFIG.Combat.initiative = { formula: "1d10", decimals: 0 };
+
+  // Override Combatant.getInitiativeRoll to compute L5R4 initiative safely
+  try {
+    const { Combatant } = foundry.documents;
+    const __origGetInit = Combatant.prototype.getInitiativeRoll;
+    Combatant.prototype.getInitiativeRoll = function(formula) {
+      try {
+        const a = this.actor;
+        if (!a) return new Roll(CONFIG.Combat.initiative.formula);
+        const toInt = (v) => Number.isFinite(+v) ? Math.trunc(Number(v)) : 0;
+        // Start with PC values
+        let roll  = toInt(a.system?.initiative?.roll);
+        let keep  = toInt(a.system?.initiative?.keep);
+        if (a.type === "npc") {
+          const effR = toInt(a.system?.initiative?.effRoll);
+          const effK = toInt(a.system?.initiative?.effKeep);
+          if (effR > 0) roll = effR;
+          if (effK > 0) keep = effK;
+        }
+        let bonus = toInt(a.system?.initiative?.totalMod);
+
+        // Ten Dice Rule inline
+        let extras = 0;
+        if (roll > 10) { extras = roll - 10; roll = 10; }
+        while (extras >= 3) { keep += 2; extras -= 3; }
+        while (keep > 10) { keep -= 2; bonus += 2; }
+        if (keep === 10 && extras >= 0) { bonus += extras * 2; }
+
+        const diceRoll = (Number.isFinite(roll) && roll > 0) ? roll : 1;
+        const diceKeep = (Number.isFinite(keep) && keep > 0) ? keep : 1;
+        const flat     = Number.isFinite(bonus) ? bonus : 0;
+        const flatStr  = flat === 0 ? "" : (flat > 0 ? `+${flat}` : `${flat}`);
+
+        // Foundry core syntax: keep highest = kh, exploding d10s = !10
+        const formulaStr = `${diceRoll}d10kh${diceKeep}!10${flatStr}`;
+        // Log once to help diagnose
+        console.log("L5R4 Initiative Formula:", { name: a.name, type: a.type, formula: formulaStr });
+        return new Roll(formulaStr);
+      } catch (e) {
+        console.warn("L5R4 | getInitiativeRoll override failed, using default", e);
+        return __origGetInit.call(this, formula);
+      }
+    };
+  } catch (e) {
+    console.warn("L5R4 | Unable to patch Combatant.getInitiativeRoll", e);
+  }
 
   // Phase 5: Register custom document sheets (Foundry v13 ApplicationV2 system)
   const { DocumentSheetConfig } = foundry.applications.apps;
@@ -127,6 +166,9 @@ Hooks.once("init", async () => {
   // Phase 6: Initialize template system and Handlebars helpers
   preloadTemplates();
   registerHandlebarsHelpers();
+
+  // Phase 7: Initialize stance service (hooks and automation)
+  initializeStanceService();
 });
 
 // =============================================================================
@@ -355,6 +397,9 @@ function registerHandlebarsHelpers() {
     const chosen = ids.find(id => STANCE_IDS.has(id));
     if (!chosen) return;
     removeOtherStances(actor, chosen, effect.id).catch(console.error);
+    
+    // Apply stance automation
+    onCreateActiveEffect(effect, _opts, _userId);
   });
 
   // Hook: ActiveEffect re-enablement
@@ -367,6 +412,21 @@ function registerHandlebarsHelpers() {
     const chosen = ids.find(id => STANCE_IDS.has(id));
     if (!chosen) return;
     removeOtherStances(actor, chosen, effect.id).catch(console.error);
+    
+    // Apply stance automation
+    onUpdateActiveEffect(effect, changes, _opts, _userId);
+  });
+
+  // Hook: ActiveEffect deletion
+  // Handles stance effects being removed
+  Hooks.on("deleteActiveEffect", (effect, _opts, _userId) => {
+    const actor = effect?.parent;
+    const ids = getEffectStatusIds(effect);
+    const hasStance = ids.some(id => STANCE_IDS.has(id));
+    if (!hasStance) return;
+    
+    // Apply stance automation cleanup
+    onDeleteActiveEffect(effect, _opts, _userId);
   });
 })();
 

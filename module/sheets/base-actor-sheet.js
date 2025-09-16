@@ -366,7 +366,7 @@ export class BaseActorSheet extends HandlebarsApplicationMixin(foundry.applicati
 
   /**
    * Shared attack roll handler using extractRollParams utility.
-   * Extracts roll parameters from dataset and applies trait bonuses.
+   * Extracts roll parameters from dataset and applies trait bonuses and stance bonuses.
    * @param {Event} event - The triggering event (shift-click for options)
    * @param {HTMLElement} element - The element with roll dataset attributes
    * @returns {Promise<any>} Roll result from Dice.NpcRoll
@@ -375,17 +375,52 @@ export class BaseActorSheet extends HandlebarsApplicationMixin(foundry.applicati
     event.preventDefault();
     const el = /** @type {HTMLElement} */ (element || event.currentTarget);
     const params = extractRollParams(el, this.actor);
-    const rollName = `${this.actor.name}: ${params.label}`.trim();
+    
+    // Apply stance bonuses to attack rolls
+    const stanceBonuses = this._getStanceAttackBonuses();
+    let rollName = `${this.actor.name}: ${params.label}`.trim();
+    let description = params.description;
+    
+    // Add stance bonus information to description
+    if (stanceBonuses.roll > 0 || stanceBonuses.keep > 0) {
+      const bonusText = `+${stanceBonuses.roll}k${stanceBonuses.keep}`;
+      description = description ? `${description} (Full Attack: ${bonusText})` : `Full Attack: ${bonusText}`;
+    }
 
     return Dice.NpcRoll({
       woundPenalty: readWoundPenalty(this.actor),
-      diceRoll: params.diceRoll + params.traitBonus,
-      diceKeep: params.diceKeep + params.traitBonus,
+      diceRoll: params.diceRoll + params.traitBonus + stanceBonuses.roll,
+      diceKeep: params.diceKeep + params.traitBonus + stanceBonuses.keep,
       rollName,
-      description: params.description,
+      description,
       toggleOptions: event.shiftKey,
       rollType: "attack"
     });
+  }
+
+  /**
+   * Get stance bonuses for attack rolls from active effects.
+   * @returns {{roll: number, keep: number}} Attack roll bonuses from stances
+   */
+  _getStanceAttackBonuses() {
+    let rollBonus = 0;
+    let keepBonus = 0;
+
+    // Check for Full Attack Stance
+    for (const effect of this.actor.effects) {
+      if (effect.disabled) continue;
+      
+      const isFullAttack = effect.statuses?.has?.("fullAttackStance") || 
+                          effect.getFlag?.("core", "statusId") === "fullAttackStance";
+      
+      if (isFullAttack) {
+        rollBonus += 2;
+        keepBonus += 1;
+        break; // Only one Full Attack stance can be active
+      }
+    }
+
+    return { roll: rollBonus, keep: keepBonus };
   }
 
   /**

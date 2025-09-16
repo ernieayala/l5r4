@@ -1,15 +1,20 @@
-# Unofficial L5R 4th Edition System for Foundry VTT
+# Legend of the Five Rings 4th Edition for Foundry VTT
 
 ![Banner](banner.webp)
+
 [![FoundryVTT version](https://img.shields.io/badge/FVTT-v13.x-informational)](https://foundryvtt.com/)
-[![Version](https://img.shields.io/badge/Version-1.0.0-blue)]()
-[![License](https://img.shields.io/badge/License-GPL%20v3-green)]()
+[![Version](https://img.shields.io/badge/Version-1.0.0-blue)](https://github.com/ernieayala/l5r4/releases)
+[![License](https://img.shields.io/badge/License-GPL%20v3-green)](https://github.com/ernieayala/l5r4/blob/main/COPYING)
+[![GitHub Issues](https://img.shields.io/github/issues/ernieayala/l5r4)](https://github.com/ernieayala/l5r4/issues)
 
-A comprehensive implementation of the Legend of the Five Rings 4th Edition TTRPG for Foundry VTT. Features complete character sheets for PCs and NPCs, integrated dice mechanics, and full L5R4e rule support.
+An unofficial, comprehensive implementation of the Legend of the Five Rings 4th Edition tabletop RPG for Foundry VTT. Experience the world of Rokugan with complete character management, authentic dice mechanics, and full L5R4e rule support.
 
-## Version 1.0.0 - Major System Refactor
+## ✨ What's New in v1.0.0
 
-This version introduces a complete architectural overhaul with improved code organization, Foundry v13 compatibility, and enhanced maintainability.
+This major release features a complete system overhaul with:
+- **Foundry v13 Compatibility**: Built on the latest Foundry architecture
+- **Enhanced Performance**: Streamlined code organization and improved maintainability  
+- **Seamless Migration**: Automatic upgrade from previous versions with data preservation
 
 ## Core Features
 
@@ -20,8 +25,8 @@ This version introduces a complete architectural overhaul with improved code org
 - **Insight Rank Tracking**: Automatic insight rank calculation based on total insight points
 - **Wound System**: Dynamic wound level tracking with penalties applied automatically
 
-### Dice & Rolling System
-- **L5R4e Dice Mechanics**: Full implementation of the Roll & Keep system (XkY)
+### 🎲 Authentic L5R Dice System
+- **Roll & Keep Mechanics**: Full implementation of the iconic XkY system
 - **Ten Dice Rule**: Automatic enforcement with Little Truths variant support
 - **Exploding Dice**: Configurable explosion thresholds for weapons and techniques
 - **Emphasis Support**: Reroll 1s on first roll for emphasized skills
@@ -29,140 +34,156 @@ This version introduces a complete architectural overhaul with improved code org
 - **Raises**: Declare raises before rolling for enhanced effects (+5 TN each)
 - **Void Points**: Spend Void for +1k1 bonus to rolls
 
-### Spellcasting
-- **Complete Spell System**: Ring-based spellcasting with TN calculations
-- **Maho Support**: Toggle for maho spells with appropriate warnings
+### ⚔️ Combat & Equipment
+- **Weapon Integration**: Rollable weapons with damage calculations and special properties
+- **Armor System**: Automatic TN calculations with proper stacking rules
+- **Stance Management**: Mutually exclusive stance status effects
+- **Initiative System**: Automated initiative tracking with proper modifiers
+
+### 🔮 Spellcasting System
+- **Ring-Based Magic**: Complete spell system with automatic TN calculations
+- **Maho Support**: Toggle for maho spells with appropriate warnings and effects
 - **Multi-Ring Spells**: Support for spells usable with multiple rings
 - **Raise Effects**: Spell-specific raise options for enhanced casting
 
-### Combat & Equipment
-- **Weapon Integration**: Rollable weapons with damage, special properties
-- **Armor System**: Automatic TN calculations with stacking options
-- **Stance Management**: Mutually exclusive stance status effects
-- **Initiative System**: Automated initiative with proper modifiers
+## 🎯 Integrated Dice Roller
 
-## Integrated Dice Roller
+Built-in L5R4e dice parser that seamlessly converts chat messages into authentic Foundry rolls with beautiful L5R styling.
 
-Built-in L5R4e dice parser that automatically converts chat messages to proper Foundry rolls with L5R styling.
+### Quick Syntax Guide
+| Roll Type | Syntax | Example | Description |
+|-----------|--------|---------|-------------|
+| Standard | `XkY` | `5k3` | Roll 5 dice, keep 3 highest |
+| Custom Explosion | `XkYxZ` | `5k3x9` | Explode on 9+ instead of 10 |
+| Unskilled | `uXkY` | `u4k2` | No exploding dice |
+| Emphasis | `eXkY` | `e5k3` | Reroll 1s once |
+| With Modifier | `XkY±A` | `5k3+2` | Add/subtract bonus |
 
-### Syntax Support
-- **Standard Rolls**: `XkY` (e.g., `5k3` = roll 5 dice, keep 3)
-- **Custom Explosion**: `XkYxZ` (e.g., `5k3x9` = explode on 9+)
-- **Unskilled Rolls**: `uXkY` (e.g., `u4k2` = no explosions)
-- **Emphasis Rolls**: `eXkY` (e.g., `e5k3` = reroll 1s once)
-- **Modifiers**: Add `+A` or `-A` for bonuses (e.g., `5k3+2`)
+### Foundry Integration
+Works seamlessly with all Foundry roll commands:
+- `/roll 6k4` - Public roll
+- `/gmroll 6k4` - GM-only roll  
+- `/selfroll 6k4` - Private roll
+- `/blindroll 6k4` - Hidden roll
+- `[[6k4]]` - Inline rolls in chat or journals
 
-### Roll Integration
-Works with all Foundry roll commands:
-- `/roll 6k4` or `/r 6k4`
-- `/gmroll 6k4` (GM only)
-- `/selfroll 6k4` (self only) 
-- `/blindroll 6k4` (hidden)
-- Inline: `Rolling [[6k4]] for initiative`
-- Chat: `[[6k4]]` (auto-converted)
+### Visual Experience
+- 🎨 Custom L5R4e-themed roll cards
+- ✨ Exploding dice animations and effects
+- 📊 Clear success/failure indicators
+- 🎯 Automatic raise tracking and TN display
 
-### Visual Features
-- Custom L5R4e roll cards with clan styling
-- Exploding dice animations
-- Success/failure indicators
-- Raise tracking and TN display
+## 🚀 Installation
 
-![L5R Dice Roll Example](assets/roll-l5r.gif)
-
-## System Requirements & Compatibility
-
-- **Foundry VTT**: v13.x (fully compatible)
-- **Architecture**: Built on Foundry v13 ActorSheetV2/ItemSheetV2
-- **Migration Safe**: Automatic world data migration from previous versions
-
-## Localization
-
-Full internationalization support with complete translations:
-- **English** (en)
-- **Español** (es) 
-- **Français** (fr)
-- **Português (Brasil)** (pt-BR)
-
-*Community translations welcome via GitLab merge requests.* 
-
-## Installation
-
-### Recommended Method
-Install directly through Foundry VTT's system browser:
+### Method 1: Foundry System Browser (Recommended)
 1. Launch Foundry VTT
-2. Go to "Game Systems" tab
-3. Click "Install System"
-4. Search for "Legend of the Five Rings 4th Edition"
-5. Click "Install"
+2. Navigate to **Game Systems** tab
+3. Click **Install System**
+4. Search for **"Legend of the Five Rings 4th Edition"**
+5. Click **Install**
 
-### Manual Installation
-**Manifest URL**: `https://gitlab.com/team-l5r4/l5r4/-/raw/master/system.json`
-
-### Development Installation
-Clone directly to your Foundry systems directory:
-```bash
-cd [foundry-data-path]/systems/
-git clone https://gitlab.com/team-l5r4/l5r4.git
+### Method 2: Manual Installation
+Use this manifest URL in Foundry's system installer:
+```
+https://github.com/ernieayala/l5r4/releases/latest/download/system.json
 ```
 
-## Recommended Modules
+### Method 3: Development Installation
+Clone the repository directly to your Foundry systems directory:
+```bash
+cd [foundry-data-path]/systems/
+git clone https://github.com/ernieayala/l5r4.git
+```
 
-### Essential
-- **[Dice So Nice!](https://gitlab.com/riccisi/foundryvtt-dice-so-nice)**: Beautiful 3D dice animations for L5R rolls
+## 🌍 Localization
 
-### Quality of Life
-- **Token Action HUD**: Quick access to character actions
-- **Drag Ruler**: Measure movement with terrain consideration
-- **Combat Utility Belt**: Enhanced combat management
+Full internationalization support with complete translations:
+- 🇺🇸 **English** (en)
+- 🇪🇸 **Español** (es) 
+- 🇫🇷 **Français** (fr)
+- 🇧🇷 **Português (Brasil)** (pt-BR)
 
-## Migration & Compatibility
+*Community translations welcome! Submit pull requests on [GitHub](https://github.com/ernieayala/l5r4).*
 
-### Upgrading from v0.9.x
-- **Automatic Migration**: World data automatically migrated on first load
-- **Backup Recommended**: Always backup your world before major updates
-- **Kill Switch**: Migration can be disabled in system settings if issues arise
-- **Backwards Compatible**: Existing characters and items remain functional
+## ⚙️ System Requirements
 
+- **Foundry VTT**: v13.x or later
+- **Architecture**: Modern Foundry v13 ActorSheetV2/ItemSheetV2 framework
+- **Migration**: Automatic world data migration from previous versions
 
-## Development & Contributing
+## 🔧 Recommended Modules
 
-### Architecture (v1.0.0+)
-- **`module/documents/`**: Actor/Item classes with pure rule logic
-- **`module/sheets/`**: UI rendering with ActorSheetV2/ItemSheetV2
-- **`module/services/`**: Dice mechanics, chat rendering, game services
-- **`module/setup/`**: Settings, templates, migrations
-- **Separation of Concerns**: Documents handle rules, sheets handle UI
-- **Migration Safe**: Robust upgrade system for world compatibility
+### Essential Companions
+- **[Dice So Nice!](https://foundryvtt.com/packages/dice-so-nice)** - Beautiful 3D dice animations that work perfectly with L5R rolls
+- **[Token Action HUD](https://foundryvtt.com/packages/token-action-hud)** - Quick access to character actions and rolls
 
-### Contributing
-Contributions welcome! Please:
-1. Fork the repository on GitLab
-2. Follow the established code style (JSDoc, kebab-case files, PascalCase classes)
-3. Test thoroughly with existing worlds
-4. Submit merge requests with clear descriptions
+### Quality of Life Enhancements  
+- **[Drag Ruler](https://foundryvtt.com/packages/drag-ruler)** - Enhanced movement measurement
+- **[Combat Utility Belt](https://foundryvtt.com/packages/combat-utility-belt)** - Advanced combat management tools
+- **[Monk's Enhanced Journal](https://foundryvtt.com/packages/monks-enhanced-journal)** - Better organization for campaign notes
 
-### Bug Reports
-Report issues on [GitLab Issues](https://gitlab.com/team-l5r4/l5r4/-/issues) with:
-- Foundry version
-- System version  
+## 🔄 Migration & Upgrading
+
+### From Previous Versions
+- ✅ **Automatic Migration**: World data seamlessly upgraded on first load
+- 💾 **Backup Recommended**: Always backup your world before major updates  
+- 🛑 **Safety Controls**: Migration can be disabled in system settings if needed
+- 🔒 **Data Preservation**: Existing characters and items remain fully functional
+
+## 🛠️ Development & Contributing
+
+### Project Architecture
+```
+module/
+├── documents/     # Actor/Item classes with game rule logic
+├── sheets/        # UI rendering with ActorSheetV2/ItemSheetV2  
+├── services/      # Dice mechanics, chat rendering, utilities
+└── setup/         # Settings, templates, migrations
+```
+
+### How to Contribute
+We welcome contributions! Here's how to get started:
+
+1. **Fork** the repository on [GitHub](https://github.com/ernieayala/l5r4)
+2. **Clone** your fork locally
+3. **Create** a feature branch (`git checkout -b feature/amazing-feature`)
+4. **Follow** our code style:
+   - JSDoc comments for functions
+   - kebab-case for file names
+   - PascalCase for class names
+5. **Test** thoroughly with existing worlds
+6. **Submit** a pull request with a clear description
+
+### 🐛 Bug Reports
+Found an issue? Report it on [GitHub Issues](https://github.com/ernieayala/l5r4/issues) with:
+- Foundry VTT version
+- System version
 - Steps to reproduce
-- Console errors (F12)
+- Console errors (press F12 → Console tab)
+- Screenshots if applicable
 
-## License & Attribution
+## 📄 License & Attribution
 
 ### Code License
-This work is licensed under [GNU General Public License v3.0](https://www.gnu.org/licenses/gpl-3.0.en.html) and [Foundry Virtual Tabletop EULA - Limited License Agreement for module development](https://foundryvtt.com/article/license/).
+This project is licensed under the [GNU General Public License v3.0](https://www.gnu.org/licenses/gpl-3.0.en.html) and complies with the [Foundry Virtual Tabletop EULA](https://foundryvtt.com/article/license/) for system development.
 
-### Art & Icons
-All icons and images are property of their respective owners:
-- [Samurai icons by Freepik, shmai, photo3idea_studio, juicy_fish, Flaticon, Handicon, berkahicon, cube29](https://www.flaticon.com/free-icons/samurai)
-- [Samurai icons by Hey Rabbit from Noun Project (CC BY 3.0)](https://thenounproject.com/browse/icons/term/samurai/)
+### Assets & Icons
+All visual assets are used with proper attribution:
+- **Samurai Icons**: [Freepik, shmai, photo3idea_studio, juicy_fish, Flaticon, Handicon, berkahicon, cube29](https://www.flaticon.com/free-icons/samurai)
+- **Additional Icons**: [Hey Rabbit from Noun Project (CC BY 3.0)](https://thenounproject.com/browse/icons/term/samurai/)
 
-### Original Project
-This system is a major refactor of the original L5R 4th Edition system developed by the contributors at [team-l5r4 on GitLab](https://gitlab.com/team-l5r4/l5r4). While this version includes a significant overhaul, it is built upon the foundational work and features they created. We extend our gratitude for their pioneering efforts in bringing Legend of the Five Rings to Foundry VTT.
+### Acknowledgments
+This system builds upon the foundational work of the original L5R 4th Edition contributors. While significantly refactored and modernized, we acknowledge and appreciate their pioneering efforts in bringing Legend of the Five Rings to Foundry VTT.
 
-### Disclaimer
-This is an unofficial fan-made system. Legend of the Five Rings is a trademark of Fantasy Flight Games. This system is not affiliated with or endorsed by Fantasy Flight Games.
+### Legal Disclaimer
+This is an **unofficial fan-made system**. Legend of the Five Rings is a trademark of Fantasy Flight Games. This system is not affiliated with, endorsed by, or sponsored by Fantasy Flight Games.
 
+---
 
+## 🌸 Experience Rokugan
 
+*"In a land where honor is stronger than steel, your story awaits..."*
+
+Ready to begin your journey in the Emerald Empire? Install the system and let the kami guide your dice! 
+
+**Questions?** Join our community discussions on [GitHub](https://github.com/ernieayala/l5r4/discussions) or report issues on our [issue tracker](https://github.com/ernieayala/l5r4/issues).

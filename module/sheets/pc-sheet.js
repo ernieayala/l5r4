@@ -91,7 +91,7 @@ export default class L5R4PcSheet extends BaseActorSheet {
       root: true,
       classes: ["flexcol"],
       template: `systems/${SYS_ID}/templates/actor/pc.hbs`,
-      scrollable: [".tabs-content"],
+      scrollable: [".scrollable-content"],
       submitOnChange: true,
       submitOnClose: true
     }
@@ -261,7 +261,6 @@ export default class L5R4PcSheet extends BaseActorSheet {
    * @returns {Promise<{form: HTMLElement}>}
    */
   async _renderHTML(context, _options) {
-    context = { ...context, usetabs: false };
     const path = TEMPLATE("actor/pc.hbs");
     const html = await foundry.applications.handlebars.renderTemplate(path, context);
     const host = document.createElement("div");
@@ -290,20 +289,6 @@ export default class L5R4PcSheet extends BaseActorSheet {
     };
   }
 
-  /** Configure tab groups */
-  static TABS = {
-    primary: {
-      initial: "skill-tab",
-      tabs: [
-        { id: "skill-tab", label: "l5r4.ui.sheets.skills" },
-        { id: "equipment-tab", label: "l5r4.ui.sheets.equipment" },
-        // Your template shows a combined label Tech/Spells; any one key is fine here.
-        { id: "spells-techniques-tab", label: "l5r4.ui.sheets.spells" },
-        { id: "advantages-tab", label: "l5r4.ui.sheets.advantages" },
-        { id: "notes-tab", label: "l5r4.ui.sheets.notes" }
-      ]
-    }
-  };
 
   /* ---------------------------------- */
   /* Data Prep                           */
@@ -425,7 +410,6 @@ export default class L5R4PcSheet extends BaseActorSheet {
       enriched: { notes: enrichedNotes },
       traitsEff,
       config: CONFIG[SYS_ID] || CONFIG.l5r4 || {},
-      usetabs: false,
       /**
        * One combined, sorted list for the Advantages/Disadvantages panel.
        * Primary honors direction; tie-breakers ascend.

@@ -36,14 +36,17 @@
         "unskilledRoll": "Unskilled Roll",
         "emphasis": "Emphasis",
         "raise": "Raise",
-        "raises": "Raises"
+        "raises": "Raises",
+        "formula": "Formula",
+        "result": "Result"
       },
       "combat": {
         "attack": "Attack",
         "melee": "Melee",
         "ranged": "Ranged",
         "multiplier": "Multiplier",
-        "woundPenalty": "Wound Penalty"
+        "woundPenalty": "Wound Penalty",
+        "armorTnBonus": "Armor TN Bonus"
       },
       "wounds": {
         "wounds": "Wounds",
@@ -63,6 +66,10 @@
         "crippled": "Crippled",
         "down": "Down",
         "out": "Out"
+      },
+      "stances": {
+        "fullDefense": "Full Defense",
+        "fullDefenseDescription": "Make a Defense/Reflexes roll. Add half the result (rounded up) to your Armor TN for the duration of this stance."
       }
     },
     "character": {
@@ -470,10 +477,6 @@
     "useLtTenDiceRule": {
       "name": "Use the modified Ten Dice Rule from Little Truths.",
       "label": "If there are an odd number of excess rolled dice and fewer than 10 kept dice, add 2 to the roll total so the \"extra\" die gives a benefit."
-    },
-    "usePcTabs": {
-      "name": "Alternative layout for the pc sheet",
-      "label": "Use an alternative sheet with sections divided in tabs"
     },
     "calculateRank": {
       "name": "Calculate Insight Rank automatically",

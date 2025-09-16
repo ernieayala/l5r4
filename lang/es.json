@@ -470,10 +470,6 @@
       "name": "Usar la Regla de Diez Dados modificada de Pequeñas Verdades.",
       "label": "Si hay un número impar de dados de exceso y menos de 10 dados guardados, añade 2 al total de la tirada para que el dado \"extra\" dé un beneficio."
     },
-    "usePcTabs": {
-      "name": "Diseño alternativo para la hoja de PJ",
-      "label": "Usa una hoja alternativa con secciones divididas en pestañas"
-    },
     "calculateRank": {
       "name": "Calcular Rango de Perspicacia automáticamente",
       "label": "El Rango de Perspicacia se actualiza automáticamente basado en los Puntos de Perspicacia totales"

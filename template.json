@@ -72,7 +72,7 @@
           }
         },
         "armor": {
-          "armorTn": 0,
+          "armorTn": 10,
           "reduction": 0
         },
         "notes": "",

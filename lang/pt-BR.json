@@ -470,10 +470,6 @@
       "name": "Usar a regra modificada de Dez Dados das Pequenas Verdades.",
       "label": "Se houver um número ímpar de dados em excesso e menos de 10 dados mantidos, adicione 2 ao total da rolagem para que o dado \"extra\" dê um benefício."
     },
-    "usePcTabs": {
-      "name": "Layout alternativo para a ficha de PC",
-      "label": "Usar uma ficha alternativa com seções divididas em abas"
-    },
     "calculateRank": {
       "name": "Calcular Graduação de Intuição automaticamente",
       "label": "A Graduação de Intuição é atualizada automaticamente com base no total de Pontos de Intuição"
