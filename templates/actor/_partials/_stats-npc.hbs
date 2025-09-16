@@ -104,21 +104,23 @@
         <img src="{{iconPath 'void.png'}}" title="{{localize "l5r4.ui.rolls.ringRoll"}}" class="void-ring-img" />
       </a>
     </div>
-    <div class="void-points">
-      <div class="void-points-dots" data-action="void-points-dots" data-value="{{system.rings.void.value}}" role="button"
-           title="Left click: +1, Right click: -1">
-        <span class="void-dot" data-idx="1"></span>
-        <span class="void-dot" data-idx="2"></span>
-        <span class="void-dot" data-idx="3"></span>
-        <span class="void-dot" data-idx="4"></span>
-        <span class="void-dot" data-idx="5"></span>
-        <span class="void-dot" data-idx="6"></span>
-        <span class="void-dot" data-idx="7"></span>
-        <span class="void-dot" data-idx="8"></span>
-        <span class="void-dot" data-idx="9"></span>
+    {{#if @root.showNpcVoidPoints}}
+      <div class="void-points">
+        <div class="void-points-dots" data-action="void-points-dots" data-value="{{system.rings.void.value}}" role="button"
+            title="Left click: +1, Right click: -1">
+          <span class="void-dot" data-idx="1"></span>
+          <span class="void-dot" data-idx="2"></span>
+          <span class="void-dot" data-idx="3"></span>
+          <span class="void-dot" data-idx="4"></span>
+          <span class="void-dot" data-idx="5"></span>
+          <span class="void-dot" data-idx="6"></span>
+          <span class="void-dot" data-idx="7"></span>
+          <span class="void-dot" data-idx="8"></span>
+          <span class="void-dot" data-idx="9"></span>
+        </div>
+        <p class="void-points-name">{{localize "l5r4.mechanics.rings.voidPoints"}}</p>
       </div>
-      <p class="void-points-name">{{localize "l5r4.mechanics.rings.voidPoints"}}</p>
-    </div>
+    {{/if}}
   </div>
 
   {{> "systems/l5r4/templates/actor/_partials/_skills.hbs"}}

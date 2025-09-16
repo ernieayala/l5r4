@@ -227,6 +227,9 @@ export default class L5R4NpcSheet extends BaseActorSheet {
       actor: this.actor,
       system: actorObj.system,
 
+      // Add the setting to the context
+      showNpcVoidPoints: game.settings.get(SYS_ID, "allowNpcVoidPoints"),
+
       // Effective traits for template parity with PC sheet
       traitsEff: foundry.utils.duplicate(this.actor.system?._derived?.traitsEff ?? {}),
 

@@ -158,6 +158,9 @@ All icons and images are property of their respective owners:
 - [Samurai icons by Freepik, shmai, photo3idea_studio, juicy_fish, Flaticon, Handicon, berkahicon, cube29](https://www.flaticon.com/free-icons/samurai)
 - [Samurai icons by Hey Rabbit from Noun Project (CC BY 3.0)](https://thenounproject.com/browse/icons/term/samurai/)
 
+### Original Project
+This system is a major refactor of the original L5R 4th Edition system developed by the contributors at [team-l5r4 on GitLab](https://gitlab.com/team-l5r4/l5r4). While this version includes a significant overhaul, it is built upon the foundational work and features they created. We extend our gratitude for their pioneering efforts in bringing Legend of the Five Rings to Foundry VTT.
+
 ### Disclaimer
 This is an unofficial fan-made system. Legend of the Five Rings is a trademark of Fantasy Flight Games. This system is not affiliated with or endorsed by Fantasy Flight Games.
 
