@@ -1,0 +1,40 @@
+<div class="item -{{type}}{{#if system.description}} -expandable{{/if}}"
+  data-item-id="{{coalesce docId this.id _id}}"
+  data-document-id="{{coalesce docId this.id _id}}">
+  <h4 class="flexrow -gap-sm title">
+    {{#if inSheet}}
+      <a data-action="item-chat" title="{{localize "l5r4.ui.common.toChat"}}">{{name}}</a>
+    {{/if}}
+    {{#unless inSheet}}
+      {{name}}
+    {{/unless}}
+  </h4>
+  {{#if inSheet}}
+    <div><a class="button" data-action="roll-weapon" title="{{localize "l5r4.mechanics.rolls.damageRoll"}}">{{system.damageRoll}}k{{system.damageKeep}}</a></div>
+    <div>{{system.size}}</div>
+    {{#if ranged}}
+        <select data-action="inline-edit" data-field="system.arrow">{{selectOptions @root.config.arrows selected=system.arrow localize=true}}</select>
+    {{/if}}
+    {{#unless ranged}}
+      <span></span>
+    {{/unless}}
+    {{> "systems/l5r4/templates/cards/_partials/_expand.hbs"}}
+    {{#if system.description}}
+      <div class="expanded-text">
+        <p>{{{system.description}}}</p>
+      </div>
+    {{/if}}
+  {{/if}}
+  {{#unless inSheet}}
+    <p><strong>{{localize "l5r4.ui.common.damage"}}:</strong> {{system.damageRoll}}k{{system.damageKeep}}</p>
+    {{#if ranged}}
+      <p><strong> {{localize "l5r4.mechanics.traits.str"}}:</strong> {{system.str}}</p>
+    {{/if}}
+    {{#if system.description}}
+      <h5>{{localize "l5r4.ui.sheets.description"}}</h5>
+      <p>
+        {{{system.description}}}
+      </p>
+    {{/if}}
+  {{/unless}}
+</div>

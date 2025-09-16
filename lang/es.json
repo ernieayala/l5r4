@@ -1,0 +1,274 @@
+{
+  "l5r4": {
+    "chat": {
+      "traitRoll": "Tirada rasgo {trait}",
+      "ringRoll": "Tirada anillo {ring}",
+      "skillRoll": "Tirada habilidad {skill}",
+      "damageRoll": "Tirada daño {weapon}",
+      "useSpellSlot": "Usar espacio de conjuro",
+      "voidSlot": "Usar espacio de Vacío?",
+      "explodesOn": "Explota",
+      "withEmphasis": "con Especialidad",
+      "unskilled": "sin habilidad"
+    },
+    "errors": {
+      "scoolRankZero": "No puedes lanzar ningún conjuro con rango de escuela reducido a cero.",
+      "noSpellSlots": "No tienes suficientes espacios para conjuro de este anillo"
+    },
+    "mech": {
+      "roll": "Tirada",
+      "cancel": "Cancelar",
+      "ok": "OK",
+      "keep": "Guardar",
+      "raise": "Aumentar",
+      "init": "Iniciativa",
+      "bonus": "Bonificador",
+      "mod": "Modificador",
+      "rate": "Velocidad",
+      "current": "Actual",
+      "total": "Total",
+      "ringRoll": "Tirada anillo",
+      "traitRoll": "Tirada característica",
+      "skillRoll": "Tirada habilidad",
+      "damageRoll": "Tirada daño",
+      "attackRoll": "Tirada ataque",
+      "spellCasting": "Tirada para Lanzamiento de Conjuro",
+      "unskilledRoll": "Tirada sin habilidad",
+      "woundPenalty": "Penalizadores por heridas",
+      "emphasis": "Especialidad",
+      "toChat": "Al chat",
+      "effect": "Efecto",
+      "simple": "Simple",
+      "complex": "Compleja",
+      "free": "Gratuita",
+      "attack": "Ataque",
+      "action": "Acción",
+      "multiplier": "Multiplicador"
+    },
+    "attack": {
+      "melee": "Cuerpo a cuerpo",
+      "ranged": "A distancia"
+    },
+    "weapon": {
+      "attackType": "Tipo de Ataque",
+      "size": "Tamaño",
+      "damageRoll": "Tirada daño",
+      "damageKeep": "Guardar daño",
+      "str": "Fuerza",
+      "range": "Alcance",
+      "arrow": "Flecha",
+      "typeWeapon": "Arma",
+      "typeBow": "Arco",
+      "damage": "Daño",
+      "explodesOn": "Explota en"
+    },
+    "armor": {
+      "name": "Armadura",
+      "bonus": "Bonificador",
+      "reduction": "Reducción",
+      "equipped": "Equipado"
+    },
+    "spell": {
+      "ring": "Anillo",
+      "mastery": "Maestría",
+      "range": "Alcance",
+      "aoe": "Área de Efecto",
+      "duration": "Duración",
+      "raises": "Aumentos",
+      "affinity": "Afinidad",
+      "deficiency": "Deficiencia",
+      "maho": "Maho"
+    },
+    "rings": {
+      "Ring": "Anillo",
+      "fire": "Fuego",
+      "water": "Agua",
+      "air": "Aire",
+      "earth": "Tierra",
+      "void": "Vacío",
+      "voidPoints": "Puntos de Vacío Gastados",
+      "all": "Todos"
+    },
+    "skill": {
+      "rank": "Rango",
+      "type": "Tipo",
+      "trait": "Característica",
+      "emphasis": "Especialidad",
+      "school": "Habilidad de escuela",
+      "mastery3": "Maestría Rango 3",
+      "mastery5": "Maestría Rango 5",
+      "mastery7": "Maestría Rango 7",
+      "insightbonus": "Bono de Reconocimiento"
+    },
+    "traits": {
+      "name": "Nombre",
+      "clan": "Clan",
+      "school": "Escuela",
+      "rank": "Rango",
+      "xp": "Puntos de Experiencia",
+      "insight": "Reconocimiento",
+      "sta": "Resistencia",
+      "wil": "Voluntad",
+      "str": "Fuerza",
+      "per": "Percepción",
+      "ref": "Reflejos",
+      "awa": "Consciencia",
+      "agi": "Agilidad",
+      "int": "Inteligencia",
+      "wounds": "Heridas",
+      "armorTn": "NO de Armadura",
+      "armorTnBase": "NO Base Armadura",
+      "armorReduction": "Reducción",
+      "woundLevel": "Nivel Heridas",
+      "woundsSuffered": "Heridas sufridas",
+      "penalty": "Penalización",
+      "total": "Total",
+      "current": "Actual",
+      "woundHealRate": "Velocidad de Curación de Heridas",
+      "healthy": "Saludable",
+      "nicked": "Magullado",
+      "grazed": "Lesionado",
+      "hurt": "Herido",
+      "injured": "Malherido",
+      "crippled": "Tullido",
+      "down": "Caído",
+      "out": "Inconsciente"
+    },
+    "sheet": {
+      "skills": "Habilidades",
+      "addSkill": "Añadir habilidad",
+      "skillName": "Nombre habilidad",
+      "edit": "Editar",
+      "delete": "Borrar",
+      "weapons": "Armas",
+      "addWeapon": "Añadir arma",
+      "addEquipment": "Añadir equipamiento",
+      "new": "Nuevo",
+      "notes": "Notas",
+      "spell": "Conjuro",
+      "spells": "Conjuros",
+      "armors": "Armaduras",
+      "addArmor": "Añadir Armadura",
+      "effect": "Efecto",
+      "technique": "Técnica",
+      "techniques": "Técnicas",
+      "advantage": "Ventaja",
+      "advantages": "Ventajas",
+      "disadvantage": "Desventaja",
+      "disadvantages": "Desventajas",
+      "kata": "Kata",
+      "katas": "Katas",
+      "kiho": "Kiho",
+      "kihos": "Kihos",
+      "addTechSpell": "Añadir técnica/conjuro",
+      "addAdv/Dis": "Añadir ventaja/desventaja",
+      "shugenja": "Shugenja",
+      "equipment": "Equipamiento",
+      "rulesSummary": "Resumen Reglas",
+      "description": "Descripción",
+      "nrWoundLvls": "Número niveles de herida",
+      "spellSlots": "Espacios para Conjuros",
+      "demands": "Demándas",
+      "tattoo": "Tatuaje",
+      "tattoos": "Tatuajes"
+    },
+    "skillTypes": {
+      "high": "Alto",
+      "bugei": "Bugei",
+      "merch": "Comerciante",
+      "low": "Bajo"
+    },
+    "ranks": {
+      "honorRank": "Rango Honor",
+      "honorPoints": "Puntos Honor",
+      "gloryRank": "Rango Gloria",
+      "gloryPoints": "Puntos Gloria",
+      "statusRank": "Rango Estatus",
+      "statusPoints": "Puntos Estatus",
+      "shadowRank": "Mancha de las Tierras Sombrías",
+      "shadowPoints": "Puntos Sombra",
+      "insightRank": "Rango Reconocimiento",
+      "insightPoints": "Puntos Reconocimiento"
+    },
+    "arrows": {
+      "armor": "Perforarmaduras",
+      "flesh": "Desgarracarne",
+      "humming": "Zumbadora",
+      "rope": "Cortacuerdas",
+      "willow": "Hoja de Sauce"
+    },
+    "wealth": {
+      "koku": "Koku",
+      "bu": "Bu",
+      "zeni": "Zeni"
+    },
+    "special": {
+      "cost": "Costo"
+    },
+    "kiho": {
+      "type": "Tipo",
+      "internal": "Interna",
+      "karmic": "Kármico",
+      "martial": "Marcial",
+      "mystic": "Místico"
+    },
+    "advantage": {
+      "physical": "Físico",
+      "mental": "Mental",
+      "social": "Social",
+      "material": "Material",
+      "spiritual": "Espiritual",
+      "ancestor": "Ancestro"
+    }
+  },
+  "SETTINGS": {
+    "showTraitRollOptions": {
+      "name": "Preguntar por defecto por opciones de Tiradas de Característica.",
+      "label": "Mantener pulsada tecla Mayús para alternar."
+    },
+    "showSpellRollOptions": {
+      "name": "Preguntar por defecto si Tirada de Anillo es un conjuro.",
+      "label": "Mantener pulsada tecla Mayús para alternar."
+    },
+    "showSkillRollOptions": {
+      "name": "Preguntar por defecto por Tiradas de Habilidad y opciones de Tiradas de Daño.",
+      "label": "Mantener pulsada tecla Mayús para alternar."
+    },
+    "allowNpcVoidPoints": {
+      "name": "Mostrar la casilla de verificación Puntos de Vacío Gastados para las tiradas de PNJ.",
+      "label": "Los PNJ normalmente carecen de Vacío."
+    },
+    "useLtTenDiceRule": {
+      "name": "Usa la Regla de los Diez Dados modificada de Little Truths.",
+      "label": "Si hay un número impar de dados lanzados en exceso y menos de 10 dados guardados, suma +2 al total de la tirada para que el dado \"extra\" dé un beneficio."
+    },
+    "usePcTabs": {
+      "name": "Diseño alternativo para la hoja de PC",
+      "label": "Usar un diseño alternativo para la hoja de PC con secciones divididas en pestañas"
+    },
+    "calculateRank": {
+      "name": "Calcular el Rango de reconocimiento automaticamente",
+      "label": "El Rango de reconocimiento se calcula automáticamente basado en el reconocimiento total del PC" 
+    },
+    "allowArmorStacking": {
+      "name": "Permitir apilamiento de armadura",
+      "label": "Se pueden apilar varias piezas de \"armadura\" (para representar mejoras, etc.)"
+    }
+  },
+  "EFFECT": {
+    "attackStance": "Posición de Ataque",
+    "fullAttackStance": "Posición de Ataque Total",
+    "defenseStance": "Posición de Defensa",
+    "fullDefenseStance": "Posición de Defensa Total",
+    "centerStance": "Posición Centrada",
+    "blinded": "Cegado",
+    "dazed": "Atontado",
+    "entangled": "Atrapado",
+    "fasting": "Ayuno",
+    "fatigued": "Fatigado",
+    "grappled": "Apresado",
+    "mounted": "Montado/Posición Elevada",
+    "prone": "Tendido",
+    "stunned": "Aturdido"
+  }
+}

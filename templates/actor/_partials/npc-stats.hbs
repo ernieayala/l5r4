@@ -1,0 +1,76 @@
+
+
+<div class="npc-stats-list npc-init">
+  {{localize "l5r4.ui.common.init"}}:
+  <input name="system.initiative.roll" type="number" value="{{system.initiative.roll}}" data-type="Number" />
+  k
+  <input name="system.initiative.keep" type="number" value="{{system.initiative.keep}}" data-type="Number" />
+</div>
+<div class="npc-stats-list npc-attack1">
+  <a class="icon-item attack1-roll" data-roll="{{system.attack1.roll}}" data-keep="{{system.attack1.keep}}"
+    data-desc="{{system.attack1.type}}" data-dmgdesc="{{system.damage1.type}}">
+    <img title="{{localize "l5r4.mechanics.rolls.attackRoll"}}" src="icons/dice/d10black.svg" />
+  </a>
+  {{localize "l5r4.mechanics.combat.attack"}}:
+  <input name="system.attack1.roll" type="number" value="{{system.attack1.roll}}" data-type="Number" />
+  k
+  <input name="system.attack1.keep" type="number" value="{{system.attack1.keep}}" data-type="Number" />
+  {{localize "l5r4.ui.common.action"}}:
+  <select name="system.attack1.type">
+    {{selectOptions config.actionTypes selected=system.attack1.type localize=true}}
+  </select>
+</div>
+<div class="npc-stats-list npc-damage1">
+  <a class="icon-item damage1-roll" data-roll="{{system.damage1.roll}}" data-keep="{{system.damage1.keep}}"
+    data-desc="{{system.damage1.type}}">
+    <img title="{{localize "l5r4.mechanics.rolls.damageRoll"}}" src="icons/dice/d10black.svg" />
+  </a>
+  {{localize "l5r4.ui.common.damage"}}:
+  <input name="system.damage1.roll" type="number" value="{{system.damage1.roll}}" data-type="Number" />
+  k
+  <input name="system.damage1.keep" type="number" value="{{system.damage1.keep}}" data-type="Number" />
+  {{localize "l5r4.ui.common.type"}}:
+  <input class="damage-type" name="system.damage1.type" type="text" value="{{system.damage1.type}}" data-type="string" />
+</div>
+<div class="npc-stats-list npc-attack2">
+  <a class="icon-item attack2-roll" data-roll="{{system.attack2.roll}}" data-keep="{{system.attack2.keep}}"
+    data-desc="{{system.attack2.type}}">
+    <img title="{{localize "l5r4.mechanics.rolls.attackRoll"}}" src="icons/dice/d10black.svg" />
+  </a>
+  {{localize "l5r4.mechanics.combat.attack"}}:
+  <input name="system.attack2.roll" type="number" value="{{system.attack2.roll}}" data-type="Number" />
+  k
+  <input name="system.attack2.keep" type="number" value="{{system.attack2.keep}}" data-type="Number" />
+   {{localize "l5r4.ui.common.action"}}:
+  <select name="system.attack2.type">
+    {{selectOptions config.actionTypes selected=system.attack2.type localize=true}}
+  </select>
+</div>
+<div class="npc-stats-list npc-damage2">
+  <a class="icon-item damage2-roll" data-roll="{{system.damage2.roll}}" data-keep="{{system.damage2.keep}}"
+    data-desc="{{system.damage2.type}}">
+    <img title="{{localize "l5r4.mechanics.rolls.damageRoll"}}" src="icons/dice/d10black.svg" />
+  </a>
+  {{localize "l5r4.ui.common.damage"}}:
+  <input name="system.damage2.roll" type="number" value="{{system.damage2.roll}}" data-type="Number" />
+  k
+  <input name="system.damage2.keep" type="number" value="{{system.damage2.keep}}" data-type="Number" />
+  {{localize "l5r4.ui.common.type"}}:
+  <input class="damage-type" name="system.damage2.type" type="text" value="{{system.damage2.type}}" data-type="string" />
+</div>
+<div class="npc-stats-list npc-armor-tn">
+  {{localize "l5r4.mechanics.wounds.armorTn"}}:
+  <input name="system.armor.armorTn" type="number" value="{{system.armor.armorTn}}" data-type="Number" />
+</div>
+<div class="npc-stats-list npc-reduction">
+  {{localize "l5r4.equipment.armor.reduction"}}:
+  <input name="system.armor.reduction" type="number" value="{{system.armor.reduction}}" data-type="Number" />
+</div>
+<div class="npc-stats-list npc-suffered">
+  {{localize "l5r4.mechanics.wounds.woundsSuffered"}}:
+  <input name="system.suffered" type="number" value="{{system.suffered}}" data-type="Number" />
+</div>
+<div class="npc-stats-list npc-max-wounds">
+  {{localize "l5r4.mechanics.wounds.wounds"}}:
+  <input name="system.wounds.max" type="number" value="{{system.wounds.max}}" data-type="Number" />
+</div>

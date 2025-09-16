@@ -1,0 +1,28 @@
+<section class="flexcol -gap-sm">
+  <div class="flexrow -gap-sm section-title">
+    <h4 class="title">{{localize "l5r4.ui.sheets.skills"}}</h4>
+    <a class="button icon" data-action="item-create" data-type="skill" title="{{localize "l5r4.ui.sheets.addSkill"}}">
+      <i class="fas fa-plus"></i>
+    </a>
+  </div>
+  {{#if skills.length}}
+    <section class="item-list -skill -header" data-scope="skills">
+      <div class="item">
+        <a class="item-sort-by" data-sortby="name">{{localize "l5r4.ui.common.name"}}</a>
+        <a class="item-sort-by" data-sortby="rank">{{localize "l5r4.character.skills.properties.rank"}}</a>
+        <a class="item-sort-by" data-sortby="trait">{{localize "l5r4.character.skills.properties.trait"}}</a>
+        <a class="item-sort-by" data-sortby="roll">{{localize "l5r4.ui.common.roll"}}</a>
+        <a class="item-sort-by" data-sortby="emphasis">{{localize "l5r4.character.skills.properties.emphasis"}}</a>
+        <span></span>
+      </div>
+    </section>
+    <section class="item-list -skill">
+      {{#each skills as |skill id|}}
+        {{> "systems/l5r4/templates/cards/skill.hbs"
+            system=skill.system
+            inSheet=true
+            docId=skill.id}}
+      {{/each}}
+    </section>
+  {{/if}}
+</section>

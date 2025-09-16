@@ -1,0 +1,228 @@
+.l5r4.pc,
+.l5r4.npc {
+  display: flex;
+  flex-direction: column;
+
+  &.is-locked {
+    .trait-rank,
+    .ring-rank,
+    .ranks {
+      pointer-events: none;
+    }
+
+    .-bio-section {
+      display: none;
+    }
+
+    .window-header {
+      .header-control[data-action="toggle-is-editable"] {
+        background: var(--button-hover-background-color);
+        color: var(--button-hover-text-color);
+      }
+    }
+  }
+
+  .window-content {
+    flex-flow: row;
+    gap: 1rem;
+    overflow: auto;
+    padding: 0;
+
+    > .flexcol {
+      flex: 1 1 100%;
+
+      &.sidebar {
+        flex: 0;
+      }
+    }
+  }
+
+  .main-sheet {
+    column-gap: 1rem;
+    display: grid;
+    grid-template-columns: 1fr min-content;
+    width: 100%;
+  }
+
+  input,
+  select,
+  textarea {
+    border: none;
+    box-shadow: none;
+    margin: 0;
+    resize: none;
+  }
+
+  .input-placeholder {
+    align-items: center;
+    color: var(--color-text-dark-primary);
+    display: inline-flex;
+    font-family: inherit;
+    font-size: inherit;
+    height: var(--input-height);
+    line-height: var(--input-height);
+    margin: 0;
+    min-width: 20px;
+    padding: 0 0.5rem;
+    text-align: inherit;
+    user-select: text;
+    width: calc(100% - 2px);
+  }
+
+  .section-title {
+    align-items: center;
+    background: var(--color-header-background);
+    color: var(--color-light-1);
+    flex-wrap: nowrap;
+    margin: 0;
+    padding: 0.5rem;
+
+    .title,
+    .button,
+    input,
+    input::placeholder {
+      color: inherit;
+    }
+
+    input[type=text] {
+      max-width: 46px;
+      width: auto;
+    }
+
+    span {
+      text-wrap: nowrap;
+    }
+
+    .flexrow.wealth,
+    .flexrow.spells {
+      flex-wrap: nowrap;
+    }
+
+    .slots {
+      position: relative;
+
+      img {
+        height: 32px;
+        width: 32px;
+      }
+
+      > span {
+        align-items: center;
+        background: rgba(0, 0, 0, 0.4);
+        border-radius: 50%;
+        cursor: pointer;
+        display: inline-flex;
+        height: 32px;
+        justify-content: center;
+        left: 0;
+        padding: 0;
+        position: absolute;
+        text-shadow: 1px 1px 1px #000, -1px -1px 1px #000;
+        top: 0;
+        width: 32px;
+      }
+    }
+  }
+
+  .section-container {
+    padding: 0 0.5rem;
+  }
+
+  .title {
+    align-items: center;
+    display: inline-flex;
+    font-size: var(--font-size-18);
+    margin: 0;
+    min-height: var(--input-height);
+    text-wrap: nowrap;
+
+    &.-compact {
+      min-height: auto;
+    }
+  }
+
+  .info-group {
+    flex-wrap: nowrap;
+    transition-delay: 2000ms;
+
+    &:hover {
+      transition-delay: 0;
+
+      .clear-btn {
+        opacity: 1;
+      }
+    }
+
+    .clear-btn {
+      opacity: 0;
+    }
+  }
+
+  .clear-btn {
+    align-items: center;
+    display: inline-flex;
+    height: var(--form-field-height);
+    justify-content: center;
+    min-width: 20px;
+  }
+
+  .button {
+    display: inline-flex;
+  }
+
+  .grid {
+    border: 1px solid var(--table-header-border-color);
+    border-block-end: none;
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+
+    > span,
+    > div {
+      border-block-end: 1px solid var(--table-header-border-color);
+    }
+
+    > span {
+      align-items: center;
+      background: var(--table-header-bg-color);
+      border-inline-end: 1px solid var(--table-header-border-color);
+      display: inline-flex;
+      font-family: var(--font-h4);
+      font-size: var(--font-size-16);
+      height: 100%;
+      padding: 0.25rem;
+    }
+
+    > div {
+      align-items: center;
+      font-size: var(--font-size-16);
+      padding: 0 0.1rem;
+
+      > input {
+        height: auto;
+        line-height: 1;
+      }
+
+      > span {
+        padding: 0 0.5rem;
+      }
+    }
+  }
+}
+
+.l5r4.pc {
+  .actor-img {
+    height: 240px;
+    max-width: 240px;
+    min-width: 240px;
+    width: 240px;
+  }
+}
+
+.l5r4.npc {
+  .actor-img {
+    height: 210px;
+    max-width: 210px;
+    min-width: 210px;
+    width: 210px;
+  }
+}

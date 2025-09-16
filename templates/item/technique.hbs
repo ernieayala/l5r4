@@ -1,0 +1,36 @@
+<section class="standard-form">
+  {{#unless item.system.shugenja}}
+  <div class="form-group">
+    <label>{{localize "l5r4.character.skills.properties.rank"}}</label>
+    <div class="form-fields">
+      <input name="system.rank" type="number" value="{{system.rank}}" data-type="Number" />
+    </div>
+  </div>
+  {{/unless}}
+  <div class="form-group">
+    <label>{{localize "l5r4.world.emphases.shugenja"}}</label>
+    <div class="form-fields">
+      <input type="checkbox" name="system.shugenja" {{checked system.shugenja}} data-type="Boolean" />
+    </div>
+  </div>
+  {{#if item.system.shugenja}}
+    <div class="form-group">
+      <label>{{localize "l5r4.magic.spells.affinity"}}</label>
+      <div class="form-fields">
+        <select name="system.affinity">
+          {{selectOptions config.rings selected=system.affinity localize=true}}
+        </select>
+        {{log system.affinity}}
+      </div>
+    </div>
+    <div class="form-group">
+      <label>{{localize "l5r4.magic.spells.deficiency"}}</label>
+      <div class="form-fields">
+        <select name="system.deficiency">
+          {{selectOptions config.rings selected=system.deficiency localize=true}}
+        </select>
+      </div>
+    </div>
+  {{/if}}
+</section>
+{{> (concat "systems/" SYS_ID "/templates/item/partials/_rules-summary.hbs") }}

@@ -1,0 +1,13 @@
+<form class="{{cssClass}}" autocomplete="off">
+  <div class="main-sheet">
+    {{log usetabs}}
+    {{> "systems/l5r4/templates/actor/_partials/_stats.hbs"}}
+    <div class="flexcol -gap-sm sidebar">
+      <img class="actor-img" src="{{actor.img}}" data-edit="img" title="{{actor.name}}" />
+      {{> "systems/l5r4/templates/actor/_partials/_ranks.hbs"}}
+      {{> "systems/l5r4/templates/actor/_partials/_initiative.hbs"}}
+      {{> "systems/l5r4/templates/actor/_partials/_armor.hbs"}}
+      {{> "systems/l5r4/templates/actor/_partials/_wounds.hbs"}}
+    </div>
+  </div>
+</form>

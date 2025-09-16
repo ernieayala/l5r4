@@ -1,0 +1,333 @@
+{
+  "Actor": {
+    "types": [
+      "pc",
+      "npc"
+    ],
+    "templates": {
+      "common": {
+        "traits": {
+          "sta": 2,
+          "wil": 2,
+          "str": 2,
+          "per": 2,
+          "ref": 2,
+          "awa": 2,
+          "agi": 2,
+          "int": 2
+        },
+        "rings": {
+          "fire": 2,
+          "air": 2,
+          "water": 2,
+          "earth": 2
+        },
+        "wounds": {
+          "value": 0,
+          "max": 20,
+          "mod": 0,
+          "healRate": 0
+        },
+        "suffered": 0,
+        "woundLevels": {
+          "healthy": {
+            "value": 0,
+            "penalty": 0,
+            "current": true
+          },
+          "nicked": {
+            "value": 0,
+            "penalty": 3,
+            "current": false
+          },
+          "grazed": {
+            "value": 0,
+            "penalty": 5,
+            "current": false
+          },
+          "hurt": {
+            "value": 0,
+            "penalty": 10,
+            "current": false
+          },
+          "injured": {
+            "value": 0,
+            "penalty": 15,
+            "current": false
+          },
+          "crippled": {
+            "value": 0,
+            "penalty": 20,
+            "current": false
+          },
+          "down": {
+            "value": 0,
+            "penalty": 40,
+            "current": false
+          },
+          "out": {
+            "value": 0,
+            "penalty": 40,
+            "current": false
+          }
+        },
+        "armor": {
+          "armorTn": 0,
+          "reduction": 0
+        },
+        "notes": "",
+        "bonuses": {
+          "skill": {},
+          "trait": {},
+          "ring": {}
+        }
+      }
+    },
+    "npc": {
+      "templates": [
+        "common"
+      ],
+      "rings": {
+        "void": {
+          "rank": 0
+        }
+      },
+      "initiative": {
+        "roll": 2,
+        "keep": 2
+      },
+      "attack1": {
+        "roll": 2,
+        "keep": 2,
+        "type": ""
+      },
+      "attack2": {
+        "roll": 2,
+        "keep": 2,
+        "type": ""
+      },
+      "damage1": {
+        "roll": 2,
+        "keep": 2,
+        "type": ""
+      },
+      "damage2": {
+        "roll": 2,
+        "keep": 2,
+        "type": ""
+      },
+      "nrWoundLvls": 1
+    },
+    "pc": {
+      "templates": [
+        "common"
+      ],
+      "rings": {
+        "void": {
+          "rank": 2,
+          "value": 0
+        }
+      },
+      "xp": 0,
+      "clan": "",
+      "school": "",
+      "honor": {
+        "rank": 2,
+        "points": 0
+      },
+      "glory": {
+        "rank": 1,
+        "points": 0
+      },
+      "status": {
+        "rank": 1,
+        "points": 0
+      },
+      "shadowTaint": {
+        "rank": 0,
+        "points": 0
+      },
+      "initiative": {
+        "roll": 2,
+        "keep": 2,
+        "rollMod": 0,
+        "keepMod": 0,
+        "totalMod": 0
+      },
+      "insight": {
+        "rank": 1,
+        "points": 0
+      },
+      "armorTn": {
+        "type": "",
+        "reduction": 0,
+        "current": 0,
+        "mod": 0
+      },
+      "woundsMod": 0,
+      "woundsMultiplier": 2,
+      "woundsPenaltyMod": 0,
+      "wealth": {
+        "koku": 0,
+        "bu": 0,
+        "zeni": 0
+      },
+      "spellSlots": {
+        "water": 2,
+        "fire": 2,
+        "earth": 2,
+        "air": 2,
+        "void": 2
+      }
+    }
+  },
+  "Item": {
+    "types": [
+      "advantage",
+      "armor",
+      "bow",
+      "clan",
+      "disadvantage",
+      "family",
+      "school",
+      "item",
+      "kata",
+      "kiho",
+      "skill",
+      "spell",
+      "tattoo",
+      "technique",
+      "weapon"
+    ],
+    "templates": {
+      "itemDescription": {
+        "description": "",
+        "specialRules": ""
+      }
+    },
+    "advantage": {
+      "templates": [
+        "itemDescription"
+      ],
+      "cost": 0,
+      "type": "physical"
+    },
+    "armor": {
+      "templates": [
+        "itemDescription"
+      ],
+      "bonus": 0,
+      "equipped": false,
+      "reduction": 0,
+      "specialRules": ""
+    },
+    "bow": {
+      "templates": [
+        "itemDescription"
+      ],
+      "str": 1,
+      "size": "Large",
+      "range": 100,
+      "arrow": "willow",
+      "damageRoll": 0,
+      "damageKeep": 0,
+      "explodesOn": 10
+    },
+    "clan": {
+      "templates": [
+        "itemDescription"
+      ]
+    },
+    "disadvantage": {
+      "templates": [
+        "itemDescription"
+      ],
+      "cost": 0,
+      "type": "physical"
+    },
+    "kata": {
+      "templates": [
+        "itemDescription"
+      ],
+      "ring": "earth",
+      "mastery": 1
+    },
+    "kiho": {
+      "templates": [
+        "itemDescription"
+      ],
+      "ring": "earth",
+      "mastery": 1,
+      "type": "internal"
+    },
+    "family": {
+      "templates": [
+        "itemDescription"
+      ]
+    },
+    "school": {
+      "templates": [
+        "itemDescription"
+      ]
+    },
+    "item": {
+      "templates": [
+        "itemDescription"
+      ]
+    },
+    "skill": {
+      "templates": [
+        "itemDescription"
+      ],
+      "rank": 0,
+      "type": "high",
+      "trait": "sta",
+      "emphasis": "",
+      "mastery3": "",
+      "mastery5": "",
+      "mastery7": "",
+      "insightBonus": 0,
+      "school": false,
+      "rollBonus": 0,
+      "keepBonus": 0,
+      "totalBonus": 0
+    },
+    "spell": {
+      "templates": [
+        "itemDescription"
+      ],
+      "ring": "earth",
+      "mastery": 1,
+      "keywords": [],
+      "range": "",
+      "aoe": "",
+      "duration": "",
+      "raises": ""
+    },
+    "tattoo": {
+      "templates": [
+        "itemDescription"
+      ],
+      "effect": ""
+    },
+    "technique": {
+      "templates": [
+        "itemDescription"
+      ],
+      "rank": 1,
+      "shugenja": false,
+      "affinity": "",
+      "deficiency": ""
+    },
+    "weapon": {
+      "templates": [
+        "itemDescription"
+      ],
+      "damageRoll": 0,
+      "damageKeep": 0,
+      "size": "Medium",
+      "damageFormula": "",
+      "explodesOn": 10
+    }
+  }
+}

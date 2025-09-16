@@ -1,0 +1,19 @@
+<div class="item -bio{{#if system.description}} -expandable{{/if}}"
+  data-item-id="{{coalesce docId this.id _id}}"
+  data-document-id="{{coalesce docId this.id _id}}">
+  <h4 class="flexrow -gap-sm title">
+    {{#if inSheet}}
+      <a data-action="item-chat" title="{{localize "l5r4.ui.common.toChat"}}">{{name}}</a>
+    {{else}}
+      {{name}}
+    {{/if}}
+  </h4>
+  {{#if inSheet}}
+    {{> "systems/l5r4/templates/cards/_partials/_expand.hbs"}}
+    {{#if system.description}}
+      <div class="expanded-text">
+        <p>{{{system.description}}}</p>
+      </div>
+    {{/if}}
+  {{/if}}
+</div>

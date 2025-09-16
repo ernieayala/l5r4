@@ -1,0 +1,13 @@
+<section class="armor">
+  <div class="flexrow -gap-sm section-title">
+    <h4 class="title -compact">{{localize "l5r4.mechanics.wounds.armorTn"}}</h4>
+  </div>
+  <div class="grid">
+    <span>{{localize "l5r4.mechanics.wounds.armorTn"}}</span>
+    <div class="flexrow"><span>{{system.armorTn.current}}</span></div>
+    <span>{{localize "l5r4.mechanics.wounds.armorReduction"}}</span>
+    <div class="flexrow"><span>{{system.armorTn.reduction}}</span></div>
+    <span>{{localize "l5r4.ui.common.mod"}}</span>
+    <div class="flexrow"><input type="number" name="system.armorTn.mod" value="{{system.armorTn.mod}}" data-type="Number" /></div>
+  </div>
+</section>

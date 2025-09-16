@@ -1,0 +1,79 @@
+<section class="standard-form">
+  <div class="form-group">
+    <label>{{localize "l5r4.character.skills.properties.rank"}}</label>
+    <div class="form-fields">
+      <input name="system.rank" type="number" value="{{system.rank}}" data-type="Number" />
+    </div>
+  </div>
+  <div class="form-group">
+    <label>{{localize "l5r4.character.skills.properties.school"}}</label>
+    <div class="form-fields">
+      <input name="system.school" type="checkbox" {{checked system.school}} data-type="Boolean" />
+    </div>
+  </div>
+  <div class="form-group">
+    <label>{{localize "l5r4.character.skills.properties.emphasis"}}</label>
+    <div class="form-fields">
+      <textarea name="system.emphasis">{{system.emphasis}}</textarea>
+    </div>
+  </div>
+  <div class="form-group">
+    <label>{{localize "l5r4.character.skills.properties.type"}}</label>
+    <div class="form-fields">
+      <select name="system.type">
+        {{selectOptions config.skillTypes selected=system.type localize=true}}
+      </select>
+    </div>
+  </div>
+  <div class="form-group">
+    <label>{{localize "l5r4.character.skills.properties.trait"}}</label>
+    <div class="form-fields">
+      <select name="system.trait">
+        {{selectOptions config.traits selected=system.trait localize=true}}
+      </select>
+    </div>
+  </div>
+  <div class="form-group">
+    <label>{{localize "l5r4.character.skills.properties.mastery3"}}</label>
+    <div class="form-fields">
+      <textarea name="system.mastery3">{{system.mastery3}}</textarea>
+    </div>
+  </div>
+  <div class="form-group">
+    <label>{{localize "l5r4.character.skills.properties.mastery5"}}</label>
+    <div class="form-fields">
+      <textarea name="system.mastery5">{{system.mastery5}}</textarea>
+    </div>
+  </div>
+  <div class="form-group">
+    <label>{{localize "l5r4.character.skills.properties.mastery7"}}</label>
+    <div class="form-fields">
+      <textarea name="system.mastery7">{{system.mastery7}}</textarea>
+    </div>
+  </div>
+  <div class="form-group">
+    <label>{{localize "l5r4.character.skills.properties.insightbonus"}}</label>
+    <div class="form-fields">
+      <input name="system.insightBonus" type="number" value="{{system.insightBonus}}" data-type="Number" />
+    </div>
+  </div>
+  <div class="form-group">
+    <label>{{localize "l5r4.ui.common.roll"}} {{localize "l5r4.ui.common.bonus"}}</label>
+    <div class="form-fields">
+      <input name="system.rollBonus" type="number" value="{{system.rollBonus}}" data-type="Number" />
+    </div>
+  </div>
+  <div class="form-group">
+    <label>{{localize "l5r4.ui.common.keep"}} {{localize "l5r4.ui.common.bonus"}}</label>
+    <div class="form-fields">
+      <input name="system.keepBonus" type="number" value="{{system.keepBonus}}" data-type="Number" />
+    </div>
+  </div>
+  <div class="form-group">
+    <label>{{localize "l5r4.ui.common.total"}} {{localize "l5r4.ui.common.bonus"}}</label>
+    <div class="form-fields">
+      <input name="system.totalBonus" type="number" value="{{system.totalBonus}}" data-type="Number" />
+    </div>
+  </div>
+</section>
+{{> (concat "systems/" SYS_ID "/templates/item/partials/_rules-summary.hbs") }}

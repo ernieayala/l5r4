@@ -1,0 +1,26 @@
+.l5r4.pc,
+.l5r4.npc {
+  .ranks {
+    display: grid;
+    gap: 0.2rem;
+    grid-template-columns: 1fr 1fr;
+    grid-template-rows: 1fr 1fr;
+  }
+
+  .rank-name {
+    background: var(--table-header-bg-color);
+    border: 1px solid var(--table-header-border-color);
+    color: var(--table-header-text-color);
+    cursor: pointer;
+    display: flex;
+    font-size: var(--font-size-16);
+    padding: 0.25rem 0;
+    text-align: center;
+
+    span:first-child {
+      font-family: var(--font-h4);
+      font-size: var(--font-size-18);
+      font-weight: 600;
+    }
+  }
+}

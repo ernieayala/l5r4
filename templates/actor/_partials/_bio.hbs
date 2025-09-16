@@ -1,0 +1,28 @@
+<section class="flexcol -gap-sm -bio-section">
+  <div class="flexrow -gap-sm section-title">
+    <h4 class="title">{{localize "l5r4.ui.sheets.bio"}}</h4>
+  </div>
+  <section class="item-list -bio">
+    {{#if bioClan}}
+      {{> "systems/l5r4/templates/cards/clan.hbs"
+          inSheet=true
+          name=bioClan.name
+          system=bioClan.system
+          docId=bioClan.id}}
+    {{/if}}
+    {{#if bioFamily}}
+      {{> "systems/l5r4/templates/cards/family.hbs"
+          inSheet=true
+          name=bioFamily.name
+          system=bioFamily.system
+          docId=bioFamily.id}}
+    {{/if}}
+    {{#if bioSchool}}
+      {{> "systems/l5r4/templates/cards/school.hbs"
+          inSheet=true
+          name=bioSchool.name
+          system=bioSchool.system
+          docId=bioSchool.id}}
+    {{/if}}
+  </section>
+</section>

@@ -1,0 +1,80 @@
+<section class="flexcol -gap-sm">
+  <div class="flexrow -gap-sm section-title">
+    <h4 class="title">{{localize "l5r4.ui.sheets.equipment"}}</h4>
+    <div class="flexrow flex0 wealth">
+      <span>{{localize "l5r4.world.wealth.koku"}}:</span>
+      <input type="text" name="system.wealth.koku" value="{{system.wealth.koku}}" placeholder="0" />
+    </div>
+    <div class="flexrow flex0 wealth">
+      <span>{{localize "l5r4.world.wealth.bu"}}:</span>
+      <input type="text" name="system.wealth.bu" value="{{system.wealth.bu}}" placeholder="0" />
+    </div>
+    <div class="flexrow flex0 wealth">
+      <span>{{localize "l5r4.world.wealth.zeni"}}:</span>
+      <input type="text" name="system.wealth.zeni" value="{{system.wealth.zeni}}" placeholder="0" />
+    </div>
+    <a class="button icon" data-action="item-create" data-type="equipment" title="{{localize "l5r4.ui.sheets.addEquipment"}}">
+      <i class="fas fa-plus"></i>
+    </a>
+  </div>
+  {{#if armors.length}}
+    <section class="item-list -equipment -header" data-scope="armors">
+      <div class="item">
+        <a class="item-sort-by" data-sortby="name">{{localize "l5r4.ui.common.name"}}</a>
+        <a class="item-sort-by" data-sortby="bonus">{{localize "l5r4.ui.common.bonus"}}</a>
+        <a class="item-sort-by" data-sortby="reduction">{{localize "l5r4.equipment.armor.reduction"}}</a>
+        <a class="item-sort-by" data-sortby="equipped">{{localize "l5r4.equipment.armor.equipped"}}</a>
+        <span></span>
+      </div>
+    </section>
+    <section class="item-list -equipment">
+      {{#each armors as |armor id|}}
+        {{> "systems/l5r4/templates/cards/armor.hbs"
+            system=armor.system
+            inSheet=true
+            docId=armor.id}}
+      {{/each}}
+    </section>
+  {{/if}}
+  {{#if (or weapons.length bows.length)}}
+    <section class="item-list -equipment -header" data-scope="weapons">
+      <div class="item">
+        <a class="item-sort-by" data-sortby="name">{{localize "l5r4.ui.common.name"}}</a>
+        <a class="item-sort-by" data-sortby="damage">{{localize "l5r4.ui.common.damage"}}</a>
+        <a class="item-sort-by" data-sortby="size">{{localize "l5r4.equipment.weapons.size"}}</a>
+        <span></span>
+      </div>
+    </section>
+    <section class="item-list -equipment" data-scope="weapons">
+      {{#each weapons as |weapon id|}}
+        {{> "systems/l5r4/templates/cards/weapon.hbs"
+            system=weapon.system
+            inSheet=true
+            ranged=false
+            docId=weapon.id}}
+      {{/each}}
+      {{#each bows as |weapon id|}}
+        {{> "systems/l5r4/templates/cards/weapon.hbs"
+            system=weapon.system
+            inSheet=true
+            ranged=true
+            docId=weapon.id}}
+      {{/each}}
+    </section>
+  {{/if}}
+  {{#if items.length}}
+    <section class="item-list -equipment -header" data-scope="items">
+      <div class="item">
+        <a class="item-sort-by" data-sortby="name">{{localize "l5r4.ui.common.name"}}</a>
+      </div>
+    </section>
+    <section class="item-list -equipment">
+      {{#each items as |item id|}}
+        {{> "systems/l5r4/templates/cards/item.hbs"
+            system=item.system
+            inSheet=true
+            docId=item.id}}
+      {{/each}}
+    </section>
+  {{/if}}
+</section>

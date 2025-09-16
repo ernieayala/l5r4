@@ -1,0 +1,44 @@
+{
+  "id": "l5r4",
+  "title": "Legend of the Five Rings 4th Edition",
+  "description": "System to play L5R 4th edition",
+  "version": "1.0.0",
+  "compatibility": {
+    "minimum": 13,
+    "verified": 13,
+    "maximum": 13
+  },
+  "esmodules": [
+    "l5r4.js"
+  ],
+  "styles": [
+    "l5r4.css"
+  ],
+  "background": "systems/l5r4/l5r4cover.webp",
+  "packs": [],
+  "languages": [
+    {
+      "lang": "en",
+      "name": "English",
+      "path": "lang/en.json"
+    },
+    {
+      "lang": "es",
+      "name": "Español",
+      "path": "lang/es.json"
+    },
+    {
+      "lang": "fr",
+      "name": "Français",
+      "path": "lang/fr.json"
+    },
+    {
+      "lang": "pt-BR",
+      "name": "Português (Brasil)",
+      "path": "lang/pt-BR.json"
+    }
+  ],
+  "gridDistance": 5,
+  "gridUnits": "ft",
+  "license": "GPL v3"
+}

@@ -1,0 +1,274 @@
+{
+  "l5r4": {
+    "chat": {
+      "traitRoll": "Jet de trait {trait}",
+      "ringRoll": "Jet d'anneau {ring}",
+      "skillRoll": "Jet de compétence {skill}",
+      "damageRoll": "Jet de dégat {weapon}",
+      "useSpellSlot": "Utiliser l'emplacement de sort",
+      "voidSlot": "Utiliser l'emplacement de vide?",
+      "explodesOn": "Explose",
+      "withEmphasis": "avec Spécialisation",
+      "unskilled": "sans Compétence"
+    },
+    "errors": {
+      "scoolRankZero": "Vous ne pouvez lancer un sort avec un Rang d'École réduit à zéro",
+      "noSpellSlots": "Vous n'avez pas assez d'emplacements pour les sorts de cet anneau"
+    },
+    "mech": {
+      "roll": "Jeter",
+      "cancel": "Annuler",
+      "ok": "Ok",
+      "keep": "Garder",
+      "raise": "Augmentation",
+      "init": "Initiative",
+      "bonus": "Bonus",
+      "mod": "Modificateur",
+      "rate": "Taux",
+      "current": "Actuel",
+      "total": "Total",
+      "ringRoll": "Jet d'Anneau",
+      "traitRoll": "Jet de Trait",
+      "skillRoll": "Jet de Compétence",
+      "damageRoll": "Jet de Dégats",
+      "attackRoll": "Jet d'Attaque",
+      "spellCasting": "Jet d'Incantation",
+      "unskilledRoll": "Jet sans Compétence",
+      "woundPenalty": "Pénalité de blessure",
+      "emphasis": "Spécialisation",
+      "toChat": "Envoyer au chat",
+      "effect": "Effet",
+      "simple": "Simple",
+      "complex": "Complexe",
+      "free": "Gratuite",
+      "attack": "Attaque",
+      "action": "Action",
+      "multiplier": "Multiplicateur"
+    },
+    "attack": {
+      "melee": "Corps-à-corps",
+      "ranged": "À distance"
+    },
+    "weapon": {
+      "attackType": "Type d'attaque",
+      "size": "Taille",
+      "damageRoll": "Jet de Dégats",
+      "damageKeep": "Garder Dégats",
+      "str": "Force",
+      "range": "Portée",
+      "arrow": "Flèches",
+      "typeWeapon": "Arme",
+      "typeBow": "Arc",
+      "damage": "Dégats",
+      "explodesOn": "Explose en"
+    },
+    "armor": {
+      "name": "Armure",
+      "bonus": "Bonus",
+      "reduction": "Réduction",
+      "equipped": "Équipée"
+    },
+    "spell": {
+      "ring": "Anneau",
+      "mastery": "Maîtrise",
+      "range": "Portée",
+      "aoe": "Zone d'effet",
+      "duration": "Durée",
+      "raises": "Augmentations",
+      "affinity": "Affinité",
+      "deficiency": "Déficience",
+      "maho": "Maho"
+    },
+    "rings": {
+      "Ring": "Anneau",
+      "fire": "Feu",
+      "water": "Eau",
+      "air": "Air",
+      "earth": "Terre",
+      "void": "Vide",
+      "voidPoints": "Points de Vide",
+      "all": "Tous"
+    },
+    "skill": {
+      "rank": "Rang",
+      "type": "Type",
+      "trait": "Trait",
+      "emphasis": "Spécialisation",
+      "school": "École",
+      "mastery3": "Maîtrise Rang 3",
+      "mastery5": "Maîtrise Rang 5",
+      "mastery7": "Maîtrise Rang 7",
+      "insightbonus": "Prime de Réputation"
+    },
+    "traits": {
+      "name": "Nom",
+      "clan": "Clan",
+      "school": "École",
+      "rank": "Rang",
+      "xp": "Expérience",
+      "insight": "Réputation",
+      "sta": "Constitution",
+      "wil": "Volonté",
+      "str": "Force",
+      "per": "Perception",
+      "ref": "Réflexes",
+      "awa": "Intuition",
+      "agi": "Agilité",
+      "int": "Intelligence",
+      "wounds": "Blessures",
+      "armorTn": "ND Armure",
+      "armorTnBase": "Base ND Armure",
+      "armorReduction": "Réduction",
+      "woundLevel": "Niveau de Blessure",
+      "woundsSuffered": "Blessures subies",
+      "penalty": "Pénalité",
+      "total": "Total",
+      "current": "Actuel",
+      "woundHealRate": "Récupération des Blessures",
+      "healthy": "Indemne",
+      "nicked": "Égratiné ",
+      "grazed": "Légèrement Blessé",
+      "hurt": "Blessé",
+      "injured": "Gravement Blessé",
+      "crippled": "Impotent",
+      "down": "Épuisé",
+      "out": "Hors de Combat"
+    },
+    "sheet": {
+      "skills": "Compétences",
+      "addSkill": "Ajouter une compétence",
+      "skillName": "Nom de la Compétence",
+      "edit": "Éditer",
+      "delete": "Supprimer",
+      "weapons": "Armes",
+      "addWeapon": "Ajouter une Arme",
+      "addEquipment": "Ajouter un équippement",
+      "new": "Nouveau",
+      "notes": "Notes",
+      "spell": "Sort",
+      "spells": "Sorts",
+      "armors": "Armures",
+      "addArmor": "Ajouter une Armure",
+      "effect": "Effet",
+      "technique": "Technique",
+      "techniques": "Techniques",
+      "advantage": "Avantage",
+      "advantages": "Avantages",
+      "disadvantage": "Désavantage",
+      "disadvantages": "Désavantages",
+      "kata": "Kata",
+      "katas": "Katas",
+      "kiho": "Kiho",
+      "kihos": "Kihos",
+      "addTechSpell": "Ajoute un technique/sort/kata/kiho",
+      "addAdv/Dis": "Ajoute un avantage/désavantage",
+      "shugenja": "Shugenja",
+      "equipment": "Équipement",
+      "rulesSummary": "Résumés des règles",
+      "description": "Description",
+      "nrWoundLvls": "Nombre de niveaux de blessure",
+      "spellSlots": "Emplacements de Sorts",
+      "demands": "Demandes",
+      "tattoos": "Tatouages",
+      "tattoo": "Tatouage"
+    },
+    "skillTypes": {
+      "high": "Noble",
+      "bugei": "Bugei",
+      "merch": "Marchand",
+      "low": "Dégradante"
+    },
+    "ranks": {
+      "honorRank": "Honneur",
+      "honorPoints": "Pts. Honneur",
+      "gloryRank": "Gloire",
+      "gloryPoints": "Pts. Gloire",
+      "statusRank": "Status",
+      "statusPoints": "Pts. Status",
+      "shadowRank": "Souillure",
+      "shadowPoints": "Pts. Souillure",
+      "insightRank": "Réputation",
+      "insightPoints": "Pts. Réputation"
+    },
+    "arrows": {
+      "armor": "Perce-Armure",
+      "flesh": "Déchireuses",
+      "humming": "Boule Sifflante",
+      "rope": "Tranche-Cordes",
+      "willow": "Feuille de Saule"
+    },
+    "wealth": {
+      "koku": "Koku",
+      "bu": "Bu",
+      "zeni": "Zeni"
+    },
+    "special": {
+      "cost": "Coût"
+    },
+    "kiho": {
+      "type": "Type",
+      "internal": "Interne",
+      "karmic": "Karmique",
+      "martial": "Martial",
+      "mystic": "Mystique"
+    },
+    "advantage": {
+      "physical": "Physique",
+      "mental": "Mental",
+      "social": "Social",
+      "material": "Matériel",
+      "spiritual": "Spirituel",
+      "ancestor": "Ancestor"
+    }
+  },
+  "SETTINGS": {
+    "showTraitRollOptions": {
+      "name": "Demander les options des jets de Trait par défaut.",
+      "label": "Appuyer sur MAJ pour inverser."
+    },
+    "showSpellRollOptions": {
+      "name": "Demander si le jet d'Anneau est un sort, par defaut.",
+      "label": "Appuyer sur MAJ pour inverser."
+    },
+    "showSkillRollOptions": {
+      "name": "Demander les options des jets de Compétences et de Dégâts par défaut.",
+      "label": "Appuyer sur MAJ pour inverser."
+    },
+    "allowNpcVoidPoints": {
+      "name": "Afficher la case à cocher Points de Vide pour les lancers de PNJ.",
+      "label": "Les PNJ manquent normalement de Vide."
+    },
+    "useLtTenDiceRule": {
+      "name": "Utilise la Règle des Dix Dés modifiée de Little Truths.",
+      "label": "S'il y a un nombre impair de dés lancés en excès et moins de 10 dés conservés, ajoute +2 au total du lancer pour que le dé «supplémentaire» donne un avantage."
+    },
+    "usePcTabs": {
+      "name": "Disposition alternative pour la feuille PC",
+      "label": "Utilisez une feuille alternative avec des sections divisées en onglets"
+    },
+    "calculateRank": {
+      "name": "Calculer automatiquement le rang de Répuation",
+      "label": "Le rang de Réputation est automatiquement calculé en fonction du total de points de réputation"
+    },
+    "allowArmorStacking": {
+      "name": "Autoriser l'empilement d'armures",
+      "label": "Plusieurs pièces d'« armure » peuvent être empilées (pour représenter des buffs, etc.)"
+    }
+  },
+  "EFFECT": {
+    "attackStance": "Position d'Attaque",
+    "fullAttackStance": "Position d'Attaque Complète",
+    "defenseStance": "Position de Défense",
+    "fullDefenseStance": "FPosition de Défense Complète",
+    "centerStance": "Position Centrée",
+    "blinded": "Aveugle",
+    "dazed": "Stupéfié",
+    "entangled": "Empêtrée",
+    "fasting": "Jeûne",
+    "fatigued": "Fatigué",
+    "grappled": "Aux prises",
+    "mounted": "Montée/Position Élevée",
+    "prone": "Prostré",
+    "stunned": "Étourdie"
+  }
+}

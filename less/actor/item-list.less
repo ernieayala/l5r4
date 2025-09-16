@@ -1,0 +1,90 @@
+.l5r4.pc,
+.l5r4.npc {
+  .item-list {
+    &.-header {
+      background: var(--table-header-bg-color);
+      border: 1px solid var(--table-header-border-color);
+      border-inline-start: none;
+      color: var(--table-header-text-color);
+      font-weight: 600;
+      padding: 0.5rem;
+
+      .item {
+        padding: 0;
+      }
+    }
+
+    &.-advantages,
+    &.-equipment,
+    &.-technique,
+    &.-kata,
+    &.-kiho,
+    &.-tattoo {
+      .item {
+        grid-template-columns: 1fr 1fr 1fr 1fr 24px;
+      }
+    }
+
+    &.-skill {
+      .item {
+        grid-template-columns: 1fr 1fr 1fr 1fr 1fr 24px;
+      }
+    }
+
+    &.-spell {
+      .item {
+        grid-template-columns: 1fr 1fr 1fr 1fr 1fr 1fr 24px;
+      }
+    }
+
+    &.-bio {
+      .item {
+        grid-template-columns: 1fr 24px;
+      }
+    }
+  }
+
+  .item {
+    align-items: center;
+    column-gap: 0.25rem;
+    display: grid;
+    grid-template-rows: min-content min-content;
+    padding: 0 0.5rem;
+    text-transform: capitalize;
+
+    &.-bio {
+      background: var(--table-header-bg-color);
+    }
+
+    &.-expandable {
+      .inline-control {
+        opacity: 1;
+        pointer-events: all;
+      }
+    }
+
+    &.is-expanded {
+      .expanded-text {
+        display: block;
+      }
+    }
+
+    select {
+      border: 1px solid var(--input-border-color);
+      height: 2em;
+      min-height: 2em;
+    }
+
+    .inline-control {
+      opacity: 0;
+      pointer-events: none;
+    }
+
+    .expanded-text {
+      display: none;
+      font-size: var(--font-size-14);
+      grid-column: ~"1 / -1";
+      grid-row: 2;
+    }
+  }
+}

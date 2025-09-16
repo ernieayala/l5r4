@@ -1,0 +1,40 @@
+<section class="standard-form">
+  <div class="form-group">
+    <label>{{localize "l5r4.equipment.weapons.size"}}</label>
+    <div class="form-fields">
+      <input name="system.size" type="text" value="{{system.size}}" />
+    </div>
+  </div>
+  <div class="form-group">
+    <label>{{localize "l5r4.mechanics.traits.str"}}</label>
+    <div class="form-fields">
+      <input name="system.str" type="number" value="{{system.str}}" data-type="Number" />
+    </div>
+  </div>
+  <div class="form-group">
+    <label>{{localize "l5r4.equipment.weapons.range"}}</label>
+    <div class="form-fields">
+      <input name="system.range" type="number" value="{{system.range}}" data-type="Number" />
+    </div>
+  </div>
+  <div class="form-group">
+    <label>{{localize "l5r4.equipment.weapons.arrow"}}</label>
+    <div class="form-fields">
+      <select name="system.arrow">
+        {{selectOptions config.arrows selected=system.arrow localize=true}}
+      </select>
+    </div>
+  </div>
+  <div class="form-group">
+    <label>{{localize "l5r4.mechanics.rolls.damageRoll"}}</label>
+    <div class="form-fields">
+      <input name="system.damageRoll" type="number" data-type="Number" value="{{system.damageRoll}}" />
+    </div>
+  </div>
+  <div class="form-group">
+    <label>{{localize "l5r4.mechanics.rolls.explodesOn"}}</label>
+    <div class="form-fields">
+      <input name="system.explodesOn" type="number" data-type="Number" value="{{system.explodesOn}}" />
+    </div>
+  </div>
+</section>

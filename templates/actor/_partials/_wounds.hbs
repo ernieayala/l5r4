@@ -1,0 +1,42 @@
+<section class="wounds">
+  <div class="flexrow -gap-sm section-title">
+    <h4 class="title -compact">{{localize "l5r4.mechanics.wounds.wounds"}}</h4>
+  </div>
+  <div class="grid">
+    <span>{{localize "l5r4.mechanics.wounds.woundsSuffered"}}</span>
+    <div class="flexrow"><input type="number" name="system.suffered" value="{{system.suffered}}" data-type="Number" /></div>
+    <span>{{localize "l5r4.mechanics.wounds.wounds"}} {{localize "l5r4.ui.common.mod"}}</span>
+    <div class="flexrow"><input type="number" name="system.woundsMod" value="{{system.woundsMod}}" data-type="Number" /></div>
+    <span>{{localize "l5r4.mechanics.wounds.wounds"}} {{localize "l5r4.mechanics.combat.multiplier"}}</span>
+    <div class="flexrow"><input type="number" name="system.woundsMultiplier" value="{{system.woundsMultiplier}}" data-type="Number" /></div>
+    <div class="wound-grid">
+      <span>{{localize "l5r4.mechanics.wounds.woundLevel"}}</span>
+      <span>{{localize "l5r4.mechanics.wounds.penalty"}}</span>
+      <span>{{localize "l5r4.ui.common.total"}}</span>
+      <span>{{localize "l5r4.ui.common.current"}}</span>
+      {{#each system.woundLevels as |lvl name|}}
+        <div>{{localize (concat "l5r4.mechanics.wounds." (name))}}</div>
+        <div>{{penaltyEff}}</div>
+        <div>{{value}}</div>
+        <div>
+          {{#if current}}
+            <input type="checkbox" disabled {{checked current}} data-type="Boolean"/>
+          {{/if}}
+        </div>
+      {{/each}}
+    </div>
+  </div>
+</section>
+<section class="wounds">
+  <div class="flexrow -gap-sm section-title">
+    <h4 class="title -compact">{{localize "l5r4.mechanics.wounds.woundHealRate"}}</h4>
+  </div>
+  <div class="grid">
+    <span>{{localize "l5r4.mechanics.traits.sta"}} x 2 + {{localize "l5r4.character.ranks.insightRank"}}</span>
+    <div class="flexrow"><span>{{math (math system.traits.sta "*" 2) "+" system.insight.rank}}</span></div>
+    <span>{{localize "l5r4.ui.common.mod"}}</span>
+    <div class="flexrow"><input type="text" name="system.wounds.mod" value="{{system.wounds.mod}}" data-type="Number" /></div>
+    <span>{{localize "l5r4.ui.common.current"}} {{localize "l5r4.ui.common.rate"}}</span>
+    <div class="flexrow"><span>{{system.wounds.healRate}}</span></div>
+  </div>
+</section>

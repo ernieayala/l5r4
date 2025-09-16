@@ -1,0 +1,17 @@
+<section class="standard-form">
+  <div class="form-group">
+    <label>{{localize "l5r4.ui.common.ring"}}</label>
+    <div class="form-fields">
+      <select name="system.ring">
+        {{selectOptions config.rings selected=system.ring localize=true}}
+      </select>
+    </div>
+  </div>
+  <div class="form-group">
+    <label>{{localize "l5r4.ui.common.mastery"}}</label>
+    <div class="form-fields">
+      <input name="system.mastery" type="number" value="{{system.mastery}}" data-type="Number" />
+    </div>
+  </div>
+</section>
+{{> (concat "systems/" SYS_ID "/templates/item/partials/_rules-summary.hbs") }}

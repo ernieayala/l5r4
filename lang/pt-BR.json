@@ -1,0 +1,274 @@
+{
+  "l5r4": {
+    "chat": {
+      "traitRoll": "Rolagem de atributo {trait}",
+      "ringRoll": "Rolagem de anel {ring}",
+      "skillRoll": "Rolagem de perícia {skill}",
+      "damageRoll": "Rolagem de dano {weapon}",
+      "useSpellSlot": "Usar espaço de magia",
+      "voidSlot": "Usar espaço de magia do Vazio?",
+      "explodesOn": "Explode",
+      "withEmphasis": "com Ênfase",
+      "unskilled": "Sem perícia"
+    },
+    "errors": {
+      "schoolRankZero": "Você não pode lançar uma magia com nível de Escola reduzido a zero",
+      "noSpellSlots": "Você ficou sem espaços de magia para este anel"
+    },
+    "mech": {
+      "roll": "Rolar",
+      "cancel": "Cancelar",
+      "ok": "Ok",
+      "keep": "Manter",
+      "raise": "Aumentar",
+      "init": "Iniciativa",
+      "bonus": "Bônus",
+      "mod": "Modificador",
+      "rate": "Taxa",
+      "current": "Atual",
+      "total": "Total",
+      "ringRoll": "Rolagem de anel",
+      "traitRoll": "Rolagem de atributo",
+      "skillRoll": "Rolagem de perícia",
+      "damageRoll": "Rolagem de dano",
+      "attackRoll": "Rolagem de ataque",
+      "spellCasting": "Rolagem de conjuração de magia",
+      "unskilledRoll": "Rolagem sem perícia",
+      "woundPenalty": "Penalidade por ferimento",
+      "emphasis": "Ênfase",
+      "toChat": "Para o chat",
+      "effect": "Efeito",
+      "simple": "Simples",
+      "complex": "Complexo",
+      "free": "Livre",
+      "attack": "Ataque",
+      "action": "Ação",
+      "multiplier": "Multiplicador"
+    },
+    "attack": {
+      "melee": "Corpo a corpo",
+      "ranged": "À distância"
+    },
+    "weapon": {
+      "attackType": "Tipo de ataque",
+      "size": "Tamanho",
+      "damageRoll": "Rolagem de dano",
+      "damageKeep": "Manter dano",
+      "str": "Força",
+      "range": "Alcance",
+      "arrow": "Flecha",
+      "typeWeapon": "Arma",
+      "typeBow": "Arco",
+      "damage": "Dano",
+      "explodesOn": "Explode em"
+    },
+    "armor": {
+      "name": "Armadura",
+      "bonus": "Bônus",
+      "reduction": "Redução",
+      "equipped": "Equipado"
+    },
+    "spell": {
+      "ring": "Anel",
+      "mastery": "Maestria",
+      "range": "Alcance",
+      "aoe": "Área de Efeito",
+      "duration": "Duração",
+      "raises": "Aumentos",
+      "affinity": "Afinidade",
+      "deficiency": "Deficiência",
+      "maho": "Maho"
+    },
+    "rings": {
+      "Ring": "Anel",
+      "fire": "Fogo",
+      "water": "Água",
+      "air": "Ar",
+      "earth": "Terra",
+      "void": "Vazio",
+      "voidPoints": "Pontos de Vazio",
+      "all": "Todos"
+    },
+    "skill": {
+      "rank": "Nível",
+      "type": "Tipo",
+      "trait": "Atributo",
+      "emphasis": "Ênfase",
+      "school": "Perícia da Escola",
+      "mastery3": "Maestria no Nível 3",
+      "mastery5": "Maestria no Nível 5",
+      "mastery7": "Maestria no Nível 7",
+      "insightbonus": "Bônus de Sabedoria"
+    },
+    "traits": {
+      "name": "Nome",
+      "clan": "Clã",
+      "school": "Escola",
+      "rank": "Nível",
+      "xp": "Pontos de Experiência",
+      "insight": "Sabedoria",
+      "sta": "Vigor",
+      "wil": "Determinação",
+      "str": "Força",
+      "per": "Percepção",
+      "ref": "Reflexos",
+      "awa": "Astúcia",
+      "agi": "Agilidade",
+      "int": "Inteligência",
+      "wounds": "Ferimentos",
+      "armorTn": "NA da Armadura",
+      "armorTnBase": "NA Base da Armadura",
+      "armorReduction": "Redução",
+      "woundLevel": "Nível de Ferimento",
+      "woundsSuffered": "Ferimentos sofridos",
+      "penalty": "Penalidade",
+      "total": "Total",
+      "current": "Atual",
+      "woundHealRate": "Taxa de Cura de Ferimento",
+      "healthy": "Saudável",
+      "nicked": "Escoriado",
+      "grazed": "Machucado",
+      "hurt": "Ferido",
+      "injured": "Seriamente Ferido",
+      "crippled": "Incapacitado",
+      "down": "Abatido",
+      "out": "Inconsciente"
+    },
+    "sheet": {
+      "skills": "Perícias",
+      "addSkill": "Adicionar perícia",
+      "skillName": "Nome da perícia",
+      "edit": "Editar",
+      "delete": "Excluir",
+      "weapons": "Armas",
+      "addWeapon": "Adicionar arma",
+      "addEquipment": "Adicionar Equipamento",
+      "new": "Novo",
+      "notes": "Notas",
+      "spell": "Magia",
+      "spells": "Magias",
+      "armors": "Armaduras",
+      "addArmor": "Adicionar Armadura",
+      "effect": "Efeito",
+      "technique": "Técnica",
+      "techniques": "Técnicas",
+      "advantage": "Vantagem",
+      "advantages": "Vantagens",
+      "disadvantage": "Desvantagem",
+      "disadvantages": "Desvantagens",
+      "kata": "Kata",
+      "katas": "Katas",
+      "kiho": "Kiho",
+      "kihos": "Kihos",
+      "addTechSpell": "Adicionar técnica/magia",
+      "addAdv/Dis": "Adicionar vantagem/desvantagem",
+      "shugenja": "Shugenja",
+      "equipment": "Equipamento",
+      "rulesSummary": "Resumo das Regras",
+      "description": "Descrição",
+      "nrWoundLvls": "Número de níveis de Ferimento",
+      "spellSlots": "Espaços de magia",
+      "demands": "Demands",
+      "tattoos": "Tatuagens",
+      "tattoo": "Tatuagem"
+    },
+    "skillTypes": {
+      "high": "Alta",
+      "bugei": "Bugei",
+      "merch": "Mercante",
+      "low": "Baixa"
+    },
+    "ranks": {
+      "honorRank": "Nível de Honra",
+      "honorPoints": "Pontos de Honra",
+      "gloryRank": "Nível de Glória",
+      "gloryPoints": "Pontos de Glória",
+      "statusRank": "Nível de Status",
+      "statusPoints": "Pontos de Status",
+      "shadowRank": "Mácula das Terras Sombrias",
+      "shadowPoints": "Pontos de Mácula",
+      "insightRank": "Nível de Sabedoria",
+      "insightPoints": "Pontos de Sabedoria"
+    },
+    "arrows": {
+      "armor": "Perfuradora de Armadura",
+      "flesh": "Cortadora de Carne",
+      "humming": "Bulbo Sibilante",
+      "rope": "Cortadora de Corda",
+      "willow": "Folha de Salgueiro (Ya)"
+    },
+    "wealth": {
+      "koku": "Koku",
+      "bu": "Bu",
+      "zeni": "Zeni"
+    },
+    "special": {
+      "cost": "Custo"
+    },
+    "kiho": {
+      "type": "Tipo",
+      "internal": "Interno",
+      "karmic": "Kármico",
+      "martial": "Marcial",
+      "mystic": "Místico"
+    },
+    "advantage": {
+      "physical": "Físico",
+      "mental": "Mental",
+      "social": "Social",
+      "material": "Material",
+      "spiritual": "Espiritual",
+      "ancestor": "Ancestral"
+    }
+  },
+   "SETTINGS": {
+    "showTraitRollOptions": {
+      "name": "Perguntar pelas opções de Rolagens de Atributos por padrão.",
+      "label": "Segure Shift para Alternar."
+    },
+    "showSpellRollOptions": {
+      "name": "Perguntar se a Rolagem de Anel é uma magia por padrão.",
+      "label": "Segure Shift para Alternar."
+    },
+    "showSkillRollOptions": {
+      "name": "Perguntar pelas opções de Rolagens de Perícia e Rolagem de Dano por padrão.",
+      "label": "Segure Shift para Alternar."
+    },
+    "allowNpcVoidPoints": {
+      "name": "Exibir caixa de seleção para Pontos de Vazio para NPCs.",
+      "label": "Normalmente, NPCs não têm Pontos de Vazio."
+    },
+    "useLtTenDiceRule": {
+      "name": "Usar a regra modificada dos Dez Dados de Little Truths.",
+      "label": "Se houver um número ímpar de dados rolados em excesso e menos de 10 dados mantidos, adicione +2 ao total da rolagem para que o \"dado extra\" proporcione um benefício."
+    },
+    "usePcTabs": {
+      "name": "Leiaute alternativo para a ficha de personagem.",
+      "label": "Usar uma ficha alternativa com seções divididas em abas."
+    },
+    "calculateRank": {
+      "name": "Calcular automaticamente o Nível de Sabedoria.",
+      "label": "O Nível de Sabedoria é atualizado automaticamente com base no total de Pontos de Sabedoria."
+    },
+    "allowArmorStacking": {
+      "name": "Permitir acúmulo de armaduras.",
+      "label": "Múltiplas \"peças de armadura\" podem ser acumuladas (para representar bônus, etc.)."
+    }
+  },
+  "EFFECT": {
+    "attackStance": "Postura de Ataque",
+    "fullAttackStance": "Postura de Ataque Total",
+    "defenseStance": "Postura de Defesa",
+    "fullDefenseStance": "Postura de Defesa Total",
+    "centerStance": "Postura Centrada",
+    "blinded": "Cego",
+    "dazed": "Deslumbrado",
+    "entangled": "Emaranhado",
+    "fasting": "Jejum",
+    "fatigued": "Fatigado",
+    "grappled": "Agarrado",
+    "mounted": "Montado/Postura Elevada",
+    "prone": "Caído",
+    "stunned": "Atordoado"
+  }
+}

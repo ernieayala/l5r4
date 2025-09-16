@@ -1,0 +1,131 @@
+<section class="flexcol -gap-sm">
+  <div class="flexrow -gap-sm section-title">
+    <h4 class="title">{{localize "l5r4.ui.sheets.spells"}}/{{localize "l5r4.magic.techniques.techniques"}}</h4>
+    {{#if spells.length}}
+      <div class="flexrow -gap-sm spells">
+          <span>{{localize "l5r4.ui.sheets.spellSlots"}}:</span>
+          <div class="slots">
+            <img src="{{iconPath 'water.png'}}" title="{{localize "l5r4.mechanics.rings.water"}}" />
+            <span
+              data-action="spell-slot"
+              data-path="system.spellSlots.water"
+              title="{{localize "l5r4.mechanics.rings.water"}} ({{localize "l5r4.ui.hints.leftRightToAdjust"}})">
+              {{system.spellSlots.water}}
+            </span>
+          </div>
+          <div class="slots">
+              <img src="{{iconPath 'air.png'}}" title="{{localize "l5r4.mechanics.rings.air"}}" />
+              <span
+                data-action="spell-slot"
+                data-path="system.spellSlots.air"
+                title="{{localize "l5r4.mechanics.rings.air"}} ({{localize "l5r4.ui.hints.leftRightToAdjust"}})">
+                {{system.spellSlots.air}}
+              </span>
+          </div>
+          <div class="slots">
+              <img src="{{iconPath 'fire.png'}}" title="{{localize "l5r4.mechanics.rings.fire"}}" />
+              <span
+                data-action="spell-slot"
+                data-path="system.spellSlots.fire"
+                title="{{localize "l5r4.mechanics.rings.fire"}} ({{localize "l5r4.ui.hints.leftRightToAdjust"}})">
+                {{system.spellSlots.fire}}
+              </span>
+          </div>
+          <div class="slots">
+              <img src="{{iconPath 'earth.png'}}" title="{{localize "l5r4.mechanics.rings.earth"}}" />
+              <span
+                data-action="spell-slot"
+                data-path="system.spellSlots.earth"
+                title="{{localize "l5r4.mechanics.rings.earth"}} ({{localize "l5r4.ui.hints.leftRightToAdjust"}})">
+                {{system.spellSlots.earth}}
+              </span>
+          </div>
+          <div class="slots">
+              <img src="{{iconPath 'void.png'}}" title="{{localize "l5r4.mechanics.rings.void"}}" />
+              <span
+                data-action="spell-slot"
+                data-path="system.spellSlots.void"
+                title="{{localize "l5r4.mechanics.rings.void"}} ({{localize "l5r4.ui.hints.leftRightToAdjust"}})">
+                {{system.spellSlots.void}}
+              </span>
+          </div>
+      </div>
+    {{/if}}
+    <a class="button icon" data-action="item-create" data-type="spell" title="{{localize "l5r4.ui.sheets.addTechSpell"}}">
+      <i class="fas fa-plus"></i>
+    </a>
+  </div>
+  {{#if spells.length}}
+    <section class="item-list -spell -header" data-scope="spells">
+      <div class="item">
+        <a class="item-sort-by" data-sortby="name">{{localize "l5r4.ui.common.name"}}</a>
+        <a class="item-sort-by" data-sortby="ring">{{localize "l5r4.ui.common.ring"}}</a>
+        <a class="item-sort-by" data-sortby="mastery">{{localize "l5r4.ui.common.mastery"}}</a>
+        <a class="item-sort-by" data-sortby="range">{{localize "l5r4.magic.spells.range"}}</a>
+        <a class="item-sort-by" data-sortby="aoe">{{localize "l5r4.magic.spells.aoe"}}</a>
+        <a class="item-sort-by" data-sortby="duration">{{localize "l5r4.magic.spells.duration"}}</a>
+        <span></span>
+      </div>
+    </section>
+    <section class="item-list -spell">
+      {{#each spells as |spell id|}}
+        {{> "systems/l5r4/templates/cards/spell.hbs" system=spell.system inSheet=true docId=spell.id}}
+      {{/each}}
+    </section>
+  {{/if}}
+  {{#if techniques.length}}
+    <section class="item-list -technique -header" data-scope="technique">
+      <div class="item">
+        <a class="item-sort-by" data-sortby="name">{{localize "l5r4.ui.common.name"}}</a>
+      </div>
+    </section>
+    <section class="item-list -technique">
+      {{#each techniques as |technique id|}}
+        {{> "systems/l5r4/templates/cards/technique.hbs" system=technique.system inSheet=true docId=technique.id}}
+      {{/each}}
+    </section>
+  {{/if}}
+  {{#if katas.length}}
+    <section class="item-list -kata -header" data-scope="katas">
+      <div class="item">
+        <a class="item-sort-by" data-sortby="name">{{localize "l5r4.ui.common.name"}}</a>
+        <a class="item-sort-by" data-sortby="ring">{{localize "l5r4.ui.common.ring"}}</a>
+        <a class="item-sort-by" data-sortby="mastery">{{localize "l5r4.ui.common.mastery"}}</a>
+        <span></span>
+      </div>
+    </section>
+    <section class="item-list -kata">
+      {{#each katas as |kata id|}}
+        {{> "systems/l5r4/templates/cards/kata.hbs" system=kata.system inSheet=true docId=kata.id}}
+      {{/each}}
+    </section>
+  {{/if}}
+  {{#if kihos.length}}
+    <section class="item-list -kata -header" data-scope="kihos">
+      <div class="item">
+        <a class="item-sort-by" data-sortby="name">{{localize "l5r4.ui.common.name"}}</a>
+        <a class="item-sort-by" data-sortby="ring">{{localize "l5r4.ui.common.ring"}}</a>
+        <a class="item-sort-by" data-sortby="mastery">{{localize "l5r4.ui.common.mastery"}}</a>
+        <a class="item-sort-by" data-sortby="type">{{localize "l5r4.ui.common.type"}}</a>
+        <span></span>
+      </div>
+    </section>
+    <section class="item-list -kiho">
+      {{#each kihos as |kiho id|}}
+        {{> "systems/l5r4/templates/cards/kiho.hbs" system=kiho.system inSheet=true docId=kiho.id}}
+      {{/each}}
+    </section>
+  {{/if}}
+  {{#if tattoos.length}}
+    <section class="item-list -kata -header" data-scope="tattoos">
+      <div class="item">
+        <a class="item-sort-by" data-sortby="name">{{localize "l5r4.ui.common.name"}}</a>
+      </div>
+    </section>
+    <section class="item-list -tattoo">
+      {{#each tattoos as |tattoo id|}}
+        {{> "systems/l5r4/templates/cards/tattoo.hbs" system=tattoo.system inSheet=true docId=tattoo.id}}
+      {{/each}}
+    </section>
+  {{/if}}
+</section>

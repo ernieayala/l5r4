@@ -1,0 +1,53 @@
+<header class="flexrow -gap-md sheet-header">
+  <img class="flex0 profile" src="{{item.img}}" data-edit="img" title="{{item.name}}" height="64" width="64"/>
+  <div class="header-fields">
+    <h1 class="document-name">
+      <input type="text" name="name" value="{{item.name}}" placeholder="{{localize 'Name'}}"/>
+    </h1>
+  </div>
+</header>
+
+<section class="sheet-content">
+  {{!-- Per-type details --}}
+  {{> (concat "systems/" SYS_ID "/templates/item/" item.type ".hbs") }}
+
+  {{!-- Description --}}
+  <h4 class="prose-title">{{localize "l5r4.ui.sheets.description"}}</h4>
+  {{#if editable}}
+    <prose-mirror name="system.description" value="{{ system.description }}" document-uuid="{{ item.uuid }}" class="sized" compact>
+      {{{ enriched.description }}}
+    </prose-mirror>
+  {{else}}
+    <div class="editor editor-content">
+      {{{ enriched.description }}}
+    </div>
+  {{/if}}
+
+  {{!-- Active Effects --}}
+  <h4>Active Effects</h4>
+  <div class="effects">
+    {{#if editable}}
+      <button type="button" class="effect-create">
+        <i class="fas fa-plus"></i> New
+      </button>
+    {{/if}}
+
+    <ol class="effects-list">
+      {{#each effects as |e|}}
+        <li class="flexrow -gap-sm effect" data-effect-id="{{e.id}}">
+          <div class="flex1 effect-name">
+            {{#if e.label}}{{e.label}}{{else}}{{e.name}}{{/if}}
+            {{#if e.disabled}}<em>(disabled)</em>{{/if}}
+          </div>
+          <div class="flexrow -gap-md flex0 effect-controls">
+            <a class="effect-edit" title="Edit"><i class="fas fa-edit"></i></a>
+            <a class="effect-toggle" title="Enable/Disable">
+              <i class="fas {{#if e.disabled}}fa-toggle-off{{else}}fa-toggle-on{{/if}}"></i>
+            </a>
+            <a class="effect-delete" title="Delete"><i class="fas fa-trash"></i></a>
+          </div>
+        </li>
+      {{/each}}
+    </ol>
+  </div>
+</section>

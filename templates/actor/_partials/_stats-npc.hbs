@@ -1,0 +1,147 @@
+<section class="flexcol -gap-sm stats">
+  <div class="flexrow -gap-lg pc-info">
+    <div class="flexcol flex1">
+      <div class="flexrow -gap-sm">
+        <h4 class="flex0 title">{{localize "l5r4.ui.common.name"}}</h4>
+        <div class="flexrow -gap-xs info-group">
+          <input class="flex1" type="text" name="name" value="{{actor.name}}" placeholder="{{localize 'l5r4.ui.common.name'}}" />
+        </div>
+      </div>
+    </div>
+  </div>
+  <div class="traits-rings">
+    <!-- Earth ring -->
+    <h4 class="ring-name ring-name-earth">{{localize "l5r4.mechanics.rings.earth"}}</h4>
+    <h4 class="ring-rank ring-rank-earth">{{system.rings.earth}}</h4>
+    <div class="earth-ring">
+      <a class="ring-roll" data-action="roll-ring" data-ring-rank="{{system.rings.earth}}" data-ring-name="{{localize "l5r4.mechanics.rings.earth"}}" data-system-ring="earth">
+        <img src="{{iconPath 'earth.png'}}" title="{{localize "l5r4.ui.rolls.ringRoll"}}" class="earth-ring-img" />
+      </a>
+    </div>
+    <div class="trait trait-stamina">
+      <a class="trait-roll" data-action="roll-trait" data-trait-rank="{{system.traits.sta}}" data-trait-name="{{localize "l5r4.mechanics.traits.sta"}}">
+        <p title="{{localize "l5r4.ui.rolls.traitRoll"}}">{{localize "l5r4.mechanics.traits.sta"}}</p>
+      </a>
+      <a class="trait-rank" data-action="trait-rank" data-trait="sta" role="button" title="Left click: +1, Right click: -1">{{@root.traitsEff.sta}}</a>
+    </div>
+    <div class="trait trait-willpower">
+      <a class="trait-roll" data-action="roll-trait" data-trait-rank="{{system.traits.wil}}" data-trait-name="{{localize "l5r4.mechanics.traits.wil"}}">
+        <p title="{{localize "l5r4.ui.rolls.traitRoll"}}">{{localize "l5r4.mechanics.traits.wil"}}</p>
+      </a>
+      <a class="trait-rank" data-action="trait-rank" data-trait="wil" role="button" title="Left click: +1, Right click: -1">{{@root.traitsEff.wil}}</a>
+    </div>
+
+    <!-- Air ring -->
+    <h4 class="ring-name ring-name-air">{{localize "l5r4.mechanics.rings.air"}}</h4>
+    <h4 class="ring-rank ring-rank-air">{{system.rings.air}}</h4>
+    <div class="air-ring">
+      <a class="ring-roll" data-action="roll-ring" data-ring-rank="{{system.rings.air}}" data-ring-name="{{localize "l5r4.mechanics.rings.air"}}" data-system-ring="air">
+        <img src="{{iconPath 'air.png'}}" title="{{localize "l5r4.ui.rolls.ringRoll"}}" class="air-ring-img" />
+      </a>
+    </div>
+    <div class="trait trait-reflex">
+      <a class="trait-roll" data-action="roll-trait" data-trait-rank="{{system.traits.ref}}" data-trait-name="{{localize "l5r4.mechanics.traits.ref"}}">
+        <p title="{{localize "l5r4.ui.rolls.traitRoll"}}">{{localize "l5r4.mechanics.traits.ref"}}</p>
+      </a>
+      <a class="trait-rank" data-action="trait-rank" data-trait="ref" role="button" title="Left click: +1, Right click: -1">{{@root.traitsEff.ref}}</a>
+    </div>
+    <div class="trait trait-awarness">
+      <a class="trait-roll" data-action="roll-trait" data-trait-rank="{{system.traits.awa}}" data-trait-name="{{localize "l5r4.mechanics.traits.awa"}}">
+        <p title="{{localize "l5r4.ui.rolls.traitRoll"}}">{{localize "l5r4.mechanics.traits.awa"}}</p>
+      </a>
+      <a class="trait-rank" data-action="trait-rank" data-trait="awa" role="button" title="Left click: +1, Right click: -1">{{@root.traitsEff.awa}}</a>
+    </div>
+
+    <!-- Water ring -->
+    <h4 class="ring-name ring-name-water">{{localize "l5r4.mechanics.rings.water"}}</h4>
+    <h4 class="ring-rank ring-rank-water">{{system.rings.water}}</h4>
+    <div class="water-ring">
+      <a class="ring-roll" data-action="roll-ring" data-ring-rank="{{system.rings.water}}" data-ring-name="{{localize "l5r4.mechanics.rings.water"}}" data-system-ring="water">
+        <img src="{{iconPath 'water.png'}}" title="{{localize "l5r4.ui.rolls.ringRoll"}}" class="water-ring-img" />
+      </a>
+    </div>
+    <div class="trait trait-strength">
+      <a class="trait-roll" data-action="roll-trait" data-trait-rank="{{system.traits.str}}" data-trait-name="{{localize "l5r4.mechanics.traits.str"}}">
+        <p title="{{localize "l5r4.ui.rolls.traitRoll"}}">{{localize "l5r4.mechanics.traits.str"}}</p>
+      </a>
+      <a class="trait-rank" data-action="trait-rank" data-trait="str" role="button" title="Left click: +1, Right click: -1">{{@root.traitsEff.str}}</a>
+    </div>
+    <div class="trait trait-perception">
+      <a class="trait-roll" data-action="roll-trait" data-trait-rank="{{system.traits.per}}" data-trait-name="{{localize "l5r4.mechanics.traits.per"}}">
+        <p title="{{localize "l5r4.ui.rolls.traitRoll"}}">{{localize "l5r4.mechanics.traits.per"}}</p>
+      </a>
+      <a class="trait-rank" data-action="trait-rank" data-trait="per" role="button" title="Left click: +1, Right click: -1">{{@root.traitsEff.per}}</a>
+    </div>
+
+    <!-- Fire ring -->
+    <h4 class="ring-name ring-name-fire">{{localize "l5r4.mechanics.rings.fire"}}</h4>
+    <h4 class="ring-rank ring-rank-fire">{{system.rings.fire}}</h4>
+    <div class="fire-ring">
+      <div>
+        <a class="ring-roll" data-action="roll-ring" data-ring-rank="{{system.rings.fire}}" data-ring-name="{{localize "l5r4.mechanics.rings.fire"}}" data-system-ring="fire">
+          <img src="{{iconPath 'fire.png'}}" title="{{localize "l5r4.ui.rolls.ringRoll"}}" class="fire-ring-img" />
+        </a>
+      </div>
+    </div>
+    <div class="trait trait-agility">
+      <a class="trait-roll" data-action="roll-trait" data-trait-rank="{{system.traits.agi}}" data-trait-name="{{localize "l5r4.mechanics.traits.agi"}}">
+        <p title="{{localize "l5r4.ui.rolls.traitRoll"}}">{{localize "l5r4.mechanics.traits.agi"}}</p>
+      </a>
+      <a class="trait-rank" data-action="trait-rank" data-trait="agi" role="button" title="Left click: +1, Right click: -1">{{@root.traitsEff.agi}}</a>
+    </div>
+    <div class="trait trait-intelligence">
+      <a class="trait-roll" data-action="roll-trait" data-trait-rank="{{system.traits.int}}" data-trait-name="{{localize "l5r4.mechanics.traits.int"}}">
+        <p title="{{localize "l5r4.ui.rolls.traitRoll"}}">{{localize "l5r4.mechanics.traits.int"}}</p>
+      </a>
+      <a class="trait-rank" data-action="trait-rank" data-trait="int" role="button" title="Left click: +1, Right click: -1">{{@root.traitsEff.int}}</a>
+    </div>
+
+    <!-- Void ring -->
+    <h4 class="ring-name ring-name-void">{{localize "l5r4.mechanics.rings.void"}}</h4>
+    <a class="ring-rank ring-rank-void" data-action="ring-rank-void" data-ring="void" role="button" title="Left click: +1, Right click: -1">{{system.rings.void.rank}}</a>
+    <div class="void-ring">
+      <a class="ring-roll" data-action="roll-ring" data-ring-rank="{{system.rings.void.rank}}" data-ring-name="{{localize "l5r4.mechanics.rings.void"}}" data-system-ring="void">
+        <img src="{{iconPath 'void.png'}}" title="{{localize "l5r4.ui.rolls.ringRoll"}}" class="void-ring-img" />
+      </a>
+    </div>
+    <div class="void-points">
+      <div class="void-points-dots" data-action="void-points-dots" data-value="{{system.rings.void.value}}" role="button"
+           title="Left click: +1, Right click: -1">
+        <span class="void-dot" data-idx="1"></span>
+        <span class="void-dot" data-idx="2"></span>
+        <span class="void-dot" data-idx="3"></span>
+        <span class="void-dot" data-idx="4"></span>
+        <span class="void-dot" data-idx="5"></span>
+        <span class="void-dot" data-idx="6"></span>
+        <span class="void-dot" data-idx="7"></span>
+        <span class="void-dot" data-idx="8"></span>
+        <span class="void-dot" data-idx="9"></span>
+      </div>
+      <p class="void-points-name">{{localize "l5r4.mechanics.rings.voidPoints"}}</p>
+    </div>
+  </div>
+
+  {{> "systems/l5r4/templates/actor/_partials/_skills.hbs"}}
+
+  <section class="flexcol -gap-sm">
+    <div class="flexrow -gap-sm section-title">
+      <h4 class="title">{{localize "l5r4.ui.sheets.notes"}}</h4>
+    </div>
+    <div class="section-container">
+      {{#if editable}}
+        <prose-mirror
+          name="system.notes"
+          value="{{ system.notes }}"
+          document-uuid="{{ actor.uuid }}"
+          class="sized"
+          compact>
+          {{{ enriched.notes }}}
+        </prose-mirror>
+      {{else}}
+        <div class="editor editor-content">
+          {{{ enriched.notes }}}
+        </div>
+      {{/if}}
+    </div>
+  </section>
+</section>

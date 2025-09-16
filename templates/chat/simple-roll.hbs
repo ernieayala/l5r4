@@ -1,0 +1,12 @@
+<div class="chat-card l5r4-roll">
+  {{#if flavor}}
+    <div class="dice-flavor">{{flavor}}</div>
+  {{/if}}
+  {{{roll}}}
+  {{#if tnResult}}
+    <p class="l5r4-tn-result">
+      {{tnResult.outcome}} vs TN {{tnResult.effective}}
+      {{#if tnResult.raises}} ({{localize "l5r4.magic.spells.raises"}}: {{tnResult.raises}}){{/if}}
+    </p>
+  {{/if}}
+</div>
