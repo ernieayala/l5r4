@@ -81,23 +81,6 @@ body > * {
   display: flex;
   flex-direction: column;
 }
-.l5r4.pc.is-locked .trait-rank,
-.l5r4.npc.is-locked .trait-rank,
-.l5r4.pc.is-locked .ring-rank,
-.l5r4.npc.is-locked .ring-rank,
-.l5r4.pc.is-locked .ranks,
-.l5r4.npc.is-locked .ranks {
-  pointer-events: none;
-}
-.l5r4.pc.is-locked .-bio-section,
-.l5r4.npc.is-locked .-bio-section {
-  display: none;
-}
-.l5r4.pc.is-locked .window-header .header-control[data-action="toggle-is-editable"],
-.l5r4.npc.is-locked .window-header .header-control[data-action="toggle-is-editable"] {
-  background: var(--button-hover-background-color);
-  color: var(--button-hover-text-color);
-}
 .l5r4.pc .window-content,
 .l5r4.npc .window-content {
   flex-flow: row;
@@ -210,6 +193,10 @@ body > * {
 .l5r4.npc .section-container {
   padding: 0 0.5rem;
 }
+.l5r4.pc .section-container .editor-container,
+.l5r4.npc .section-container .editor-container {
+  min-height: 300px;
+}
 .l5r4.pc .title,
 .l5r4.npc .title {
   align-items: center;
@@ -292,12 +279,14 @@ body > * {
   padding: 0 0.5rem;
 }
 .l5r4.pc .actor-img {
+  cursor: pointer;
   height: 240px;
   max-width: 240px;
   min-width: 240px;
   width: 240px;
 }
 .l5r4.npc .actor-img {
+  cursor: pointer;
   height: 210px;
   max-width: 210px;
   min-width: 210px;
