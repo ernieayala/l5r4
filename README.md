@@ -24,6 +24,10 @@ This major release features a complete system overhaul with:
 - **Automatic Calculations**: Derived attributes (Initiative, Armor TN, Rings, Wound Levels) calculated automatically
 - **Insight Rank Tracking**: Automatic insight rank calculation based on total insight points
 - **Wound System**: Dynamic wound level tracking with penalties applied automatically
+- **Experience Tracking**: Comprehensive XP system with automatic cost calculation for trait/skill advancement
+- **Family/School Integration**: Active Effects system for creation bonuses and trait modifications
+- **Sheet Locking**: Toggle edit mode to prevent accidental changes during gameplay
+- **Sorting Preferences**: Per-user, per-actor item sorting with persistent preferences
 
 ### 🎲 Authentic L5R Dice System
 - **Roll & Keep Mechanics**: Full implementation of the iconic XkY system
@@ -33,18 +37,27 @@ This major release features a complete system overhaul with:
 - **Unskilled Rolls**: Ctrl+click rings for unskilled rolls (especially useful for Void)
 - **Raises**: Declare raises before rolling for enhanced effects (+5 TN each)
 - **Void Points**: Spend Void for +1k1 bonus to rolls
+- **Auto-Targeting**: Automatically sets target numbers from selected tokens' Armor TN
+- **Modifier Dialogs**: Interactive roll option dialogs with customizable settings
+- **Wound Penalties**: Automatic application of wound penalties to target numbers
 
 ### ⚔️ Combat & Equipment
 - **Weapon Integration**: Rollable weapons with damage calculations and special properties
 - **Armor System**: Automatic TN calculations with proper stacking rules
-- **Stance Management**: Mutually exclusive stance status effects
+- **Stance Management**: Mutually exclusive stance status effects with automation
 - **Initiative System**: Automated initiative tracking with proper modifiers
+- **Combat Stances**: Full Attack (+2k1 attack, -10 Armor TN), Defense (Air+Defense to TN), Full Defense (roll for TN bonus)
+- **Weapon-Skill Association**: Dynamic skill detection and attack roll calculation
+- **Arrow Types**: Support for specialized arrow types with damage modifiers
 
 ### 🔮 Spellcasting System
 - **Ring-Based Magic**: Complete spell system with automatic TN calculations
 - **Maho Support**: Toggle for maho spells with appropriate warnings and effects
 - **Multi-Ring Spells**: Support for spells usable with multiple rings
 - **Raise Effects**: Spell-specific raise options for enhanced casting
+ - **Spell Slots**: Optional "Use Spell Slot" checkbox deducts spell slots automatically from the caster. Prevents casting when no slots remain and updates chat to reflect slot usage
+ - **Void Slots**: Supports spending and tracking Void spell slots alongside elemental slots
+ - **School & Affinity Modifiers**: Applies school rank bonuses and affinity/deficiency modifiers to casting rolls
 
 ## 🎯 Integrated Dice Roller
 
@@ -111,6 +124,20 @@ Full internationalization support with complete translations:
 - **Architecture**: Modern Foundry v13 ActorSheetV2/ItemSheetV2 framework
 - **Migration**: Automatic world data migration from previous versions
 
+## 🔧 System Settings & Configuration
+
+### Automation Settings
+- **Stance Automation**: Toggle automatic stance effect application
+- **Roll Dialog Visibility**: Control when modifier dialogs appear
+- **Little Truths Ten Dice Rule**: Enable alternate Ten Dice Rule interpretation
+- **Insight Rank Calculation**: Automatic vs manual insight rank management
+- **Multiple Armor Stacking**: Allow multiple armor pieces for technique bonuses
+
+### Migration & Data Management
+- **Automatic Migration**: Seamless world data upgrades with safety controls
+- **Schema Updates**: Field name normalization and structure improvements
+- **Icon Path Management**: Organized asset structure with backward compatibility
+
 ## 🔧 Recommended Modules
 
 ### Essential Companions
@@ -129,6 +156,10 @@ Full internationalization support with complete translations:
 - 💾 **Backup Recommended**: Always backup your world before major updates  
 - 🛑 **Safety Controls**: Migration can be disabled in system settings if needed
 - 🔒 **Data Preservation**: Existing characters and items remain fully functional
+
+## ⚠️ Known Issues & Limitations
+
+- **PC Weapon/Bow Chat Cards**: On some PC sheets, clicking weapon and bow items may not generate a chat card, while other item types work correctly. This appears related to event propagation or CSS preventing clicks from registering. Tracking and fixes are ongoing. If you encounter this, please report details on the [issue tracker](https://github.com/ernieayala/l5r4/issues).
 
 ## 🛠️ Development & Contributing
 
