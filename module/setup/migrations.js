@@ -1,38 +1,41 @@
 /**
- * L5R4 Migration System - Data Migration and Schema Updates for Foundry VTT v13+.
+ * @fileoverview L5R4 Migration System - Data Migration and Schema Updates for Foundry VTT v13+
  * 
  * This module provides comprehensive migration functionality for the L5R4 system,
  * handling schema updates, icon path migrations, and data structure changes
  * across system versions. Migrations are applied automatically during system
  * initialization and are designed to be idempotent and safe.
  *
- * ## Migration Types:
+ * **Migration Types:**
  * - **Schema Migrations**: Update document data structures using SCHEMA_MAP rules
  * - **Icon Path Migrations**: Relocate icon files to new organizational structure
  * - **Compendium Migrations**: Apply migrations to unlocked compendium packs
  * - **World Document Migrations**: Update actors and items in the world
  *
- * ## Safety Features:
+ * **Safety Features:**
  * - **GM-Only Execution**: Migrations only run for Game Master users
  * - **Idempotent Operations**: Safe to run multiple times without side effects
  * - **Error Isolation**: Individual document failures don't stop the migration
  * - **Minimal Updates**: Only changed fields are updated to preserve performance
  * - **Backup-Friendly**: Uses Foundry's diff system for efficient updates
  *
- * ## Schema Migration System:
+ * **Schema Migration System:**
  * Uses SCHEMA_MAP rules to define field relocations and transformations:
  * - Supports dot-notation paths for nested properties
  * - Handles type-specific and universal migrations
  * - Preserves existing data when destination already exists
  * - Cleans up old fields after successful migration
  *
- * ## Icon Migration System:
+ * **Icon Migration System:**
  * Relocates icon files from flat structure to organized subfolders:
  * - `rings/`: Elemental ring icons (air.png, earth.png, etc.)
  * - `status/`: Combat stance and status icons
  * - Validates target file existence before migration
  * - Maintains backward compatibility with old paths
  *
+ * @author L5R4 System Team
+ * @since 1.0.0
+ * @version 2.1.0
  * @see {@link https://foundryvtt.com/api/classes/foundry.abstract.Document.html#update|Document.update}
  * @see {@link https://foundryvtt.com/api/classes/client.FilePicker.html#browse|FilePicker.browse}
  */

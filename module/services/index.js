@@ -1,16 +1,16 @@
 /**
- * L5R4 Services Module - Centralized Service Exports for Foundry VTT v13+.
+ * @fileoverview L5R4 Services Module - Centralized Service Exports for Foundry VTT v13+
  * 
  * This barrel module provides a stable import interface for all L5R4 system services,
  * enabling clean dependency management and consistent API access across the codebase.
  * All services are re-exported as namespaced modules to prevent naming conflicts.
  *
- * ## Available Services:
+ * **Available Services:**
  * - **dice**: Roll mechanics, Ten Dice Rule, and dialog systems
  * - **chat**: Item creation dialogs and chat utilities
  * - **stance**: Combat stance automation, effects, and roll modifications
  *
- * ## Usage Examples:
+ * **Usage Examples:**
  * ```javascript
  * import { dice, chat, stance } from "./services/index.js";
  * 
@@ -27,12 +27,15 @@
  * const effect = stance.createFullAttackStanceEffect(actor);
  * ```
  *
- * ## Design Principles:
+ * **Design Principles:**
  * - **No Side Effects**: Pure re-exports without initialization logic
  * - **Namespace Isolation**: Each service maintains its own namespace
  * - **Stable API**: Consistent import paths regardless of internal restructuring
  * - **Localization**: Services handle their own i18n via game.i18n API
  *
+ * @author L5R4 System Team
+ * @since 1.0.0
+ * @version 2.1.0
  * @see {@link https://foundryvtt.com/api/|Foundry VTT v13 API Documentation}
  */
 

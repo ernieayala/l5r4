@@ -1,34 +1,36 @@
 /**
- * L5R4 Chat Service - Item Creation Dialogs for Foundry VTT v13+.
+ * @fileoverview L5R4 Chat Service - Item Creation Dialogs for Foundry VTT v13+
  * 
  * This service module provides utilities for creating interactive dialogs that allow
  * users to specify item details before creation. Uses Foundry's DialogV2 API with
  * custom Handlebars templates for a consistent user experience.
  *
- * ## Core Functionality:
+ * **Core Functionality:**
  * - **Dialog Management**: Creates modal dialogs using Foundry's DialogV2 API
  * - **Template Integration**: Renders custom Handlebars templates for different item types
  * - **Form Processing**: Extracts and validates user input from dialog forms
  * - **Type Mapping**: Routes different element types to appropriate dialog templates
  * - **Error Handling**: Graceful fallbacks for cancelled or failed dialog interactions
  *
- * ## Supported Dialog Types:
+ * **Supported Dialog Types:**
  * - **Spell Creation**: Technical spells and magical abilities
  * - **Advantage Creation**: Character advantages and disadvantages
  * - **Equipment Creation**: General items, weapons, armor, and gear
  *
- * ## Template Contract:
+ * **Template Contract:**
  * All dialog templates must implement the following form structure:
  * - `<input name="itemName" />` - Required text input for item name
  * - `<select name="itemType">...</select>` - Required dropdown for item type selection
  *
- * ## Dependencies:
- * @requires {object} CHAT_TEMPLATES - Template path mappings from config.js
- * @requires {function} R - Template rendering utility from utils.js
- * @requires {function} T - Localization helper from utils.js
- * @requires {object} foundry.applications.api.DialogV2 - Foundry's dialog API
+ * **Dependencies:**
+ * - `CHAT_TEMPLATES` - Template path mappings from config.js
+ * - `R()` - Template rendering utility from utils.js
+ * - `T()` - Localization helper from utils.js
+ * - `foundry.applications.api.DialogV2` - Foundry's dialog API
  *
- * ## API References:
+ * @author L5R4 System Team
+ * @since 1.0.0
+ * @version 2.1.0
  * @see {@link https://foundryvtt.com/api/classes/foundry.applications.api.DialogV2.html|DialogV2}
  * @see {@link https://foundryvtt.com/api/functions/foundry.applications.handlebars.renderTemplate.html|renderTemplate}
  */

@@ -1,11 +1,11 @@
 /**
- * L5R4 Item document implementation for Foundry VTT v13+.
+ * @fileoverview L5R4 Item Document Implementation for Foundry VTT v13+
  * 
  * This class extends the base Foundry Item document to provide L5R4-specific
  * functionality including derived data computation, experience tracking, and
  * chat card rendering for all item types in the system.
  *
- * ## Core Responsibilities:
+ * **Core Responsibilities:**
  * - **Default Icons**: Assign appropriate type-specific icons on item creation
  * - **Data Normalization**: Ensure rich-text fields are never null for template safety
  * - **Derived Data**: Calculate roll formulas, bow damage, and other computed values
@@ -13,7 +13,7 @@
  * - **Chat Integration**: Render type-specific chat cards with proper templates
  * - **Cost Validation**: Enforce advantage/disadvantage cost constraints
  *
- * ## Item Type Support:
+ * **Item Type Support:**
  * - **Skills**: Roll formula calculation, XP tracking, school skill benefits
  * - **Weapons/Bows**: Damage calculation with arrow modifiers and strength requirements
  * - **Armor**: Special properties and equipped state tracking
@@ -22,7 +22,9 @@
  * - **Techniques/Kata/Kiho**: Effect descriptions and mechanical benefits
  * - **Family/Clan/School**: Background items with trait bonuses
  *
- * ## API References:
+ * @author L5R4 System Team
+ * @since 1.0.0
+ * @version 2.1.0
  * @see {@link https://foundryvtt.com/api/classes/documents.Item.html|Item Document}
  * @see {@link https://foundryvtt.com/api/classes/foundry.abstract.Document.html#_preCreate|Document._preCreate}
  * @see {@link https://foundryvtt.com/api/classes/foundry.abstract.Document.html#prepareData|Document.prepareData}

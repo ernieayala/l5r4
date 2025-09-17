@@ -1,11 +1,11 @@
 /**
- * L5R4 System Bootstrap - Main Entry Point for Foundry VTT v13+.
+ * @fileoverview L5R4 System Bootstrap - Main Entry Point for Foundry VTT v13+
  * 
  * This is the primary system initialization module that coordinates all L5R4 system
  * components during Foundry VTT startup. It handles configuration, registration,
- * and integration with Foundry's core systems.
+ * and integration with Foundry's core systems to provide a complete L5R4 gaming experience.
  *
- * ## Core Responsibilities:
+ * **Core Responsibilities:**
  * - **System Configuration**: Wire CONFIG objects, document classes, and sheet registrations
  * - **Template Management**: Preload Handlebars templates and register custom helpers
  * - **Initiative System**: Fallback formula with L5R4-specific rolls handled by Combatant.getInitiativeRoll() override
@@ -13,18 +13,27 @@
  * - **Migration Management**: Handle data structure updates and legacy compatibility
  * - **Status Effect Logic**: Enforce mutually exclusive stance mechanics
  *
- * ## Initialization Sequence:
+ * **Initialization Sequence:**
  * 1. **Init Hook**: Register settings, configure documents, preload templates
  * 2. **Setup Hook**: Handle one-time legacy item type migrations
  * 3. **Ready Hook**: Execute data migrations and finalize system state
  *
- * ## Key Features:
+ * **Key Features:**
  * - **L5R4 Initiative**: Actor-specific initiative rolls with Ten Dice Rule (via Combatant.getInitiativeRoll override)
  * - **Inline Roll Parsing**: Converts "3k2+1" notation to proper Foundry rolls
  * - **Stance Enforcement**: Automatically removes conflicting combat stances
  * - **Sheet Registration**: Configures custom actor and item sheets for all types
  * - **Migration Safety**: Handles version updates with data structure changes
  *
+ * **Performance Considerations:**
+ * - Templates are preloaded during initialization for faster rendering
+ * - Settings are registered early to ensure availability during data preparation
+ * - Migrations are batched and run efficiently during system startup
+ * - Hook registration is optimized to minimize performance impact
+ *
+ * @author L5R4 System Team
+ * @since 1.0.0
+ * @version 2.1.0
  * @see {@link https://foundryvtt.com/api/|Foundry VTT v13 API Documentation}
  */
 

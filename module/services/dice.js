@@ -1,11 +1,11 @@
 /**
- * L5R4 Dice Service - Roll Mechanics and Dialog System for Foundry VTT v13+.
+ * @fileoverview L5R4 Dice Service - Roll Mechanics and Dialog System for Foundry VTT v13+
  * 
  * This service module provides comprehensive dice rolling functionality for the L5R4 system,
  * including roll formula construction, Ten Dice Rule enforcement, modifier dialogs, and
  * chat card rendering with target number evaluation.
  *
- * ## Core Responsibilities:
+ * **Core Responsibilities:**
  * - **Roll Formula Construction**: Build L5R4 dice formulas (XkY) with modifiers and special rules
  * - **Ten Dice Rule Enforcement**: Convert excess dice to bonuses per L5R4 rules
  * - **Modifier Dialogs**: Interactive dialogs for roll options using DialogV2 API
@@ -14,14 +14,14 @@
  * - **Active Effects Integration**: Apply bonuses from actor effects to rolls
  * - **Targeting System**: Auto-populate target numbers from selected tokens
  *
- * ## Roll Types Supported:
+ * **Roll Types Supported:**
  * - **Skill Rolls**: (Trait + Skill + mods)k(Trait + mods) with emphasis and wound penalties
  * - **Ring Rolls**: Ring-based tests and spell casting with affinity/deficiency
  * - **Trait Rolls**: Pure trait tests with unskilled and void point options
  * - **Weapon Rolls**: Damage rolls with weapon-specific modifiers
  * - **NPC Rolls**: Simplified rolls for NPCs with optional void point restrictions
  *
- * ## Special Mechanics:
+ * **Special Mechanics:**
  * - **Emphasis**: Reroll 1s on skill rolls (r1 modifier)
  * - **Unskilled**: No exploding dice on trait rolls
  * - **Void Points**: +1k1 bonus with automatic point deduction
@@ -29,24 +29,18 @@
  * - **Ten Dice Rule**: Excess dice converted to bonuses and kept dice
  * - **Auto-Targeting**: Automatically sets TN from targeted token's Armor TN
  *
- * ## Dialog System:
+ * **Dialog System:**
  * The service provides interactive dialogs for roll customization using Foundry's DialogV2 API.
  * Dialogs support modifier input, void point spending, emphasis selection, and target number setting.
  * All dialogs respect user preferences for automatic display vs. shift-click activation.
  *
- * ## Ten Dice Rule Implementation:
+ * **Ten Dice Rule Implementation:**
  * L5R4's Ten Dice Rule is automatically applied to all rolls:
  * - Dice pools > 10: Excess dice become flat bonuses
  * - Keep values > 10: Excess keep becomes flat bonuses (2 per excess keep)
  * - Special case: 10k10 + extras becomes 10k10 + (extras × 2)
  *
- * ## API References:
- * @see {@link https://foundryvtt.com/api/classes/foundry.dice.Roll.html|Roll}
- * @see {@link https://foundryvtt.com/api/classes/foundry.applications.api.DialogV2.html|DialogV2}
- * @see {@link https://foundryvtt.com/api/classes/documents.ChatMessage.html|ChatMessage}
- * @see {@link https://foundryvtt.com/api/functions/foundry.applications.handlebars.renderTemplate.html|renderTemplate}
- *
- * ## Code Navigation Guide:
+ * **Code Navigation Guide:**
  * 1. `SkillRoll()` - Main skill roll function with targeting and void point support
  * 2. `RingRoll()` - Ring-based rolls for elemental tests and spell casting
  * 3. `TraitRoll()` - Pure trait tests with unskilled option
@@ -56,6 +50,14 @@
  * 7. `GetSpellOptions()` - Ring/spell roll modifier dialog
  * 8. `GetTraitRollOptions()` - Trait roll modifier dialog
  * 9. `roll_parser()` - Inline roll notation parser for chat
+ *
+ * @author L5R4 System Team
+ * @since 1.0.0
+ * @version 2.1.0
+ * @see {@link https://foundryvtt.com/api/classes/foundry.dice.Roll.html|Roll}
+ * @see {@link https://foundryvtt.com/api/classes/foundry.applications.api.DialogV2.html|DialogV2}
+ * @see {@link https://foundryvtt.com/api/classes/documents.ChatMessage.html|ChatMessage}
+ * @see {@link https://foundryvtt.com/api/functions/foundry.applications.handlebars.renderTemplate.html|renderTemplate}
  */
 
 import { CHAT_TEMPLATES, SYS_ID } from "../config.js";
@@ -129,25 +131,16 @@ export async function SkillRoll({
 
   // Check for targeting and auto-populate TN for attack rolls
   if (rollType === "attack" && actor) {
-    console.log("L5R4 Targeting: SkillRoll attack detected, checking targets...");
     const targetedTokens = Array.from(game.user.targets || []);
-    console.log("L5R4 Targeting: Found", targetedTokens.length, "targets");
     if (targetedTokens.length === 1) {
       const targetActor = targetedTokens[0].actor;
-      console.log("L5R4 Targeting: Target actor:", targetActor?.name, "Armor TN:", targetActor?.system?.armorTn?.current);
       if (targetActor?.system?.armorTn?.current) {
         autoTN = toInt(targetActor.system.armorTn.current);
         targetInfo = ` vs ${targetActor.name} (Armor TN ${autoTN})`;
-        console.log("L5R4 Targeting: Set autoTN to", autoTN);
       }
     } else if (targetedTokens.length > 1) {
       targetInfo = ` (Multiple targets - TN not auto-set)`;
-      console.log("L5R4 Targeting: Multiple targets, TN not set");
-    } else {
-      console.log("L5R4 Targeting: No target selected for attack roll");
     }
-  } else {
-    console.log("L5R4 Targeting: SkillRoll - Not an attack roll or no actor provided. rollType:", rollType, "actor:", !!actor);
   }
 
   // Declare check variable at function scope

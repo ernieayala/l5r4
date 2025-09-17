@@ -1,19 +1,20 @@
 /**
- * L5R4 Actor document implementation for Foundry VTT v13+.
+ * @fileoverview L5R4 Actor Document Implementation for Foundry VTT v13+
  * 
  * This class extends the base Foundry Actor document to provide L5R4-specific
  * functionality including derived data computation, experience tracking, and
- * token configuration.
+ * token configuration for both Player Characters and Non-Player Characters.
  *
- * ## Core Responsibilities:
+ * **Core Responsibilities:**
  * - **Token Configuration**: Set appropriate defaults for PC/NPC tokens on creation
  * - **Derived Data Computation**: Calculate all derived statistics during data preparation
  * - **Experience Tracking**: Automatic XP cost calculation and logging for character advancement
  * - **Wound System**: Complex wound level tracking with penalties and healing rates
  * - **Family/School Integration**: Handle creation bonuses and trait modifications
  *
- * ## Derived Data Features:
- * ### Player Characters (PC):
+ * **Derived Data Features:**
+ * 
+ * **Player Characters (PC):**
  * - **Rings**: Computed from trait pairs (Air=Ref+Awa, Earth=Sta+Wil, etc.)
  * - **Initiative**: Roll=InsightRank+Reflexes+mods, Keep=Reflexes+mods
  * - **Armor TN**: Base=5×Reflexes+5, plus armor bonuses (stackable via setting)
@@ -21,17 +22,12 @@
  * - **Insight**: Points from rings×10 + skills×1, optional auto-rank calculation
  * - **Experience**: Comprehensive XP tracking with automatic cost calculation
  *
- * ### Non-Player Characters (NPC):
+ * **Non-Player Characters (NPC):**
  * - **Simplified Wounds**: Earth-based with optional manual max override
  * - **Initiative**: Effective values with fallbacks to Reflexes
  * - **Shared Logic**: Uses same trait/ring calculations as PCs
  *
- * ## API References:
- * @see {@link https://foundryvtt.com/api/classes/documents.Actor.html|Actor Document}
- * @see {@link https://foundryvtt.com/api/classes/documents.Actor.html#prototypeToken|Prototype Token}
- * @see {@link https://foundryvtt.com/api/classes/documents.Actor.html#applyActiveEffects|Active Effects}
- *
- * ## Code Navigation Guide:
+ * **Code Navigation Guide:**
  * 1. `_preCreate()` - Token defaults and initial actor image setup
  * 2. `_preUpdate()` - XP delta tracking for trait/void/skill changes
  * 3. `prepareDerivedData()` - Main entry point, branches to PC/NPC preparation
@@ -43,9 +39,16 @@
  * 9. `_creationFreeBonus()` - Family/School bonus detection and summation
  * 10. `_xpStepCostForTrait()` - XP cost calculation for trait advancement
  *
- * ## Trait Key Glossary:
+ * **Trait Key Glossary:**
  * - `sta`: Stamina, `wil`: Willpower, `str`: Strength, `per`: Perception
  * - `ref`: Reflexes, `awa`: Awareness, `agi`: Agility, `int`: Intelligence
+ *
+ * @author L5R4 System Team
+ * @since 1.0.0
+ * @version 2.1.0
+ * @see {@link https://foundryvtt.com/api/classes/documents.Actor.html|Actor Document}
+ * @see {@link https://foundryvtt.com/api/classes/documents.Actor.html#prototypeToken|Prototype Token}
+ * @see {@link https://foundryvtt.com/api/classes/documents.Actor.html#applyActiveEffects|Active Effects}
  */
 
 import { SYS_ID, iconPath } from "../config.js";

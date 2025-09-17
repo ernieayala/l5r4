@@ -1,11 +1,11 @@
 /**
- * L5R4 Utilities Module for Foundry VTT v13+.
+ * @fileoverview L5R4 Utilities Module for Foundry VTT v13+
  * 
  * This module provides shared utility functions used across the L5R4 system including
  * localization helpers, type coercion, DOM manipulation, sorting preferences, and
  * actor-specific calculations. Designed as a pure utility module with no side effects.
  *
- * ## Core Responsibilities:
+ * **Core Responsibilities:**
  * - **Localization**: Translation key resolution and template rendering (T, F, R)
  * - **Type Safety**: Safe type coercion with fallbacks (toInt, clamp, sum)
  * - **DOM Utilities**: Event delegation and element selection helpers (on, qs, qsa)
@@ -13,7 +13,7 @@
  * - **Data Conversion**: Rank/points decimal conversion for skill advancement
  * - **Actor Utilities**: Trait normalization, wound penalty calculation, weapon skill resolution
  *
- * ## Sorting Preference System:
+ * **Sorting Preference System:**
  * The module implements a sophisticated sorting system that:
  * - Stores preferences per-user, per-actor, per-scope (e.g., "skills", "weapons")
  * - Supports multiple sort keys with primary/secondary ordering
@@ -21,28 +21,30 @@
  * - Provides backward compatibility with legacy preference storage
  * - Allows toggling between ascending/descending on repeated clicks
  *
- * ## Rank/Points System:
+ * **Rank/Points System:**
  * L5R4 uses a decimal rank system (e.g., 3.7 = Rank 3, 7 points toward Rank 4):
  * - `rankPointsToValue()`: Converts {rank: 3, points: 7} → 3.7
  * - `valueToRankPoints()`: Converts 3.7 → {rank: 3, points: 7, value: 3.7}
  * - `applyRankPointsDelta()`: Applies +/-0.1 increments with normalization
  * - Handles edge cases like 10.0 (max rank) and point overflow
  *
- * ## Actor Trait System:
+ * **Actor Trait System:**
  * Provides utilities for L5R4's complex trait system:
  * - `normalizeTraitKey()`: Converts various trait formats to system keys
  * - `getEffectiveTrait()`: Gets post-Active Effects trait values
  * - `resolveWeaponSkillTrait()`: Determines weapon attack dice pools
  * - Supports both PC (derived traits) and NPC (base traits) actors
  *
- * ## Design Principles:
+ * **Design Principles:**
  * - **Pure Functions**: No side effects on import or function calls
  * - **Defensive Programming**: Safe fallbacks for all type coercion
  * - **Internationalization**: Locale-aware string operations throughout
  * - **Performance**: Efficient algorithms for sorting and data conversion
  * - **Compatibility**: Backward compatibility with legacy data structures
  *
- * ## API References:
+ * @author L5R4 System Team
+ * @since 1.0.0
+ * @version 2.1.0
  * @see {@link https://foundryvtt.com/api/classes/foundry.abstract.Document.html#update|Document.update}
  * @see {@link https://foundryvtt.com/api/classes/foundry.documents.BaseUser.html#getFlag|User.getFlag}
  * @see {@link https://foundryvtt.com/api/classes/foundry.documents.BaseUser.html#setFlag|User.setFlag}

@@ -1,30 +1,30 @@
 /**
- * L5R4 Schema Migration Map - Field Remapping Rules for Data Structure Updates.
+ * @fileoverview L5R4 Schema Migration Map - Field Remapping Rules for Data Structure Updates
  * 
  * This module defines the mapping rules used by the migration system to update
  * document data structures when field names or locations change between system versions.
  * Each rule specifies how to move data from old field paths to new field paths.
  *
- * ## Migration Rule Structure:
+ * **Migration Rule Structure:**
  * Each rule is an object with the following properties:
  * - **docType**: Document type ("Actor" or "Item")
  * - **type**: Document subtype ("pc", "npc", "skill", etc.) or "*" for all types
  * - **from**: Source field path using dot-notation (e.g., "system.old_field")
  * - **to**: Target field path using dot-notation (e.g., "system.newField")
  *
- * ## Migration Categories:
+ * **Migration Categories:**
  * - **Naming Convention Updates**: snake_case → camelCase conversions
  * - **Field Relocations**: Moving fields to new parent objects
  * - **Structure Reorganization**: Flattening or nesting data structures
  * - **Legacy Cleanup**: Removing deprecated field names
  *
- * ## Safety Features:
+ * **Safety Features:**
  * - **Idempotent Operations**: Safe to run multiple times
  * - **Type-Specific Rules**: Apply only to matching document types
  * - **Universal Rules**: Use "*" type to apply to all subtypes
  * - **Non-Destructive**: Only migrates when source exists and target doesn't
  *
- * ## Usage Examples:
+ * **Usage Examples:**
  * ```javascript
  * // Rename a field for all Actor types
  * { docType: "Actor", type: "*", from: "system.old_name", to: "system.newName" }
@@ -33,6 +33,9 @@
  * { docType: "Item", type: "weapon", from: "system.damage_roll", to: "system.damageRoll" }
  * ```
  *
+ * @author L5R4 System Team
+ * @since 1.0.0
+ * @version 2.1.0
  * @see {@link ./migrations.js} Migration system that processes these rules
  */
 

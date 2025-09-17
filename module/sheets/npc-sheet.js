@@ -1,11 +1,79 @@
 /**
- * L5R4 NPC Sheet — ApplicationV2 conversion (Foundry VTT v13+)
- * Extends BaseActorSheet for shared functionality with PC sheet.
- * Handles NPC-specific features like simple void adjustment and limited templates.
- *
- * API refs: https://foundryvtt.com/api/
- * - ActorSheetV2: https://foundryvtt.com/api/classes/foundry.applications.sheets.ActorSheetV2.html
- * - BaseActorSheet: ./base-actor-sheet.js (provides shared roll methods and CRUD operations)
+ * @fileoverview L5R4 NPC Sheet Implementation for Foundry VTT v13+
+ * 
+ * This class provides a specialized actor sheet for Non-Player Characters in the L5R4 system,
+ * extending BaseActorSheet to inherit shared functionality while implementing NPC-specific
+ * features such as simplified trait management, limited view templates, and streamlined
+ * roll interfaces optimized for GM use during gameplay.
+ * 
+ * **Core Responsibilities:**
+ * - **Simplified Trait Management**: Direct rank adjustment without XP calculations
+ * - **Limited View Support**: Restricted templates for player-visible NPCs
+ * - **Streamlined Rolling**: Quick roll interfaces for common NPC actions
+ * - **Void Point Integration**: Optional void point tracking for important NPCs
+ * - **Item Organization**: Categorized item display matching PC sheet structure
+ * - **Context Menu Support**: Right-click operations for efficient item management
+ * 
+ * **NPC vs PC Differences:**
+ * - **No XP System**: Traits adjust directly without experience point costs
+ * - **Simplified Void**: Basic void rank adjustment without complex point management
+ * - **Limited Templates**: Separate templates for GM and player views
+ * - **Quick Rolls**: Dataset-driven simple rolls for rapid gameplay
+ * - **No Family Bonuses**: Direct trait values without Active Effects complexity
+ * - **Streamlined UI**: Focused interface for essential NPC information
+ * 
+ * **ApplicationV2 Architecture:**
+ * - **Template System**: Uses HandlebarsApplicationMixin for rendering
+ * - **Action Delegation**: Event handling via data-action attributes
+ * - **Context Preparation**: Modern _prepareContext() replaces legacy getData()
+ * - **Render Pipeline**: _onRender() handles post-render setup and event binding
+ * - **Form Integration**: Seamless form handling with submitOnChange support
+ * 
+ * **Template Integration:**
+ * - **Full Template**: `templates/actor/npc.hbs` for GM view
+ * - **Limited Template**: `templates/actor/limited-npc-sheet.hbs` for player view
+ * - **Shared Partials**: Reuses PC sheet partials for consistent item display
+ * - **Dynamic Selection**: Template chosen based on user permissions and ownership
+ * 
+ * **Roll System Integration:**
+ * - **NPC Rolls**: Specialized roll handling via Dice.NpcRoll()
+ * - **Simple Rolls**: Dataset-driven rolls for basic actions
+ * - **Trait Rolls**: Ring and trait rolling with wound penalty integration
+ * - **Weapon Rolls**: Attack and damage rolls using shared base class methods
+ * - **Skill Rolls**: Skill-based rolls with emphasis and modifier support
+ * 
+ * **Event Handling:**
+ * ```javascript
+ * // Action delegation examples
+ * <button data-action="roll-ring" data-ring-name="Fire" data-system-ring="fire" data-ring-rank="3">
+ * <div data-action="trait-rank" data-trait="stamina">
+ * <span data-action="void-points-dots" class="dot">
+ * ```
+ * 
+ * **Usage Examples:**
+ * ```javascript
+ * // Create NPC sheet instance
+ * const npcSheet = new L5R4NpcSheet(npcActor, options);
+ * 
+ * // Render with limited view for players
+ * await npcSheet.render(true, { limited: true });
+ * 
+ * // Quick trait adjustment
+ * await npcSheet._onTraitAdjust(event, element, +1);
+ * ```
+ * 
+ * **Performance Considerations:**
+ * - **Template Caching**: Templates are preloaded and cached for fast rendering
+ * - **Event Delegation**: Single event listener per action type reduces memory usage
+ * - **Conditional Rendering**: Limited templates reduce DOM complexity for players
+ * - **Lazy Loading**: Item context menus created only when needed
+ * 
+ * @author L5R4 System Team
+ * @since 2.0.0
+ * @version 2.1.0
+ * @extends {BaseActorSheet}
+ * @see {@link https://foundryvtt.com/api/classes/foundry.applications.sheets.ActorSheetV2.html|ActorSheetV2}
+ * @see {@link ./base-actor-sheet.js|BaseActorSheet} - Shared functionality and roll methods
  */
 
 import * as Dice from "../services/dice.js";
@@ -74,10 +142,35 @@ export default class L5R4NpcSheet extends BaseActorSheet {
 
   /**
    * Ring roll handler for NPCs.
-   * Reads dataset: data-ring-name, data-system-ring, data-ring-rank.
-   * @param {Event} event
-   * @param {HTMLElement} el
-   * @see https://foundryvtt.com/api/classes/foundry.applications.sheets.ActorSheetV2.html
+   * Processes ring-based rolls using dataset attributes for roll parameters.
+   * Provides a streamlined interface for GM ring rolls without complex trait resolution.
+   * 
+   * **Dataset Attributes:**
+   * - `data-ring-name`: Display name for the ring (e.g., "Fire", "Water")
+   * - `data-system-ring`: System ring identifier for localization lookup
+   * - `data-ring-rank`: Numeric rank value for the ring (1-9)
+   * 
+   * **Roll Processing:**
+   * - Uses Dice.NpcRoll() for specialized NPC roll handling
+   * - Applies localized ring names from translation keys
+   * - Defaults to "void" ring if no system ring specified
+   * - Bypasses complex PC trait calculation systems
+   * 
+   * @param {Event} event - Click event from ring roll element
+   * @param {HTMLElement} el - Element containing dataset attributes
+   * @returns {Promise<void>} Roll result processed by dice service
+   * 
+   * @example
+   * // Template usage
+   * <button data-action="roll-ring" 
+   *         data-ring-name="Fire" 
+   *         data-system-ring="fire" 
+   *         data-ring-rank="3">
+   *   Roll Fire Ring
+   * </button>
+   * 
+   * @see {@link https://foundryvtt.com/api/classes/foundry.applications.sheets.ActorSheetV2.html|ActorSheetV2}
+   * @see {@link ../services/dice.js|Dice.NpcRoll} - NPC-specific roll processing
    */
   _onRingRoll(event, el) {
     event?.preventDefault?.();
@@ -93,11 +186,34 @@ export default class L5R4NpcSheet extends BaseActorSheet {
   }
 
   /**
-   * Adjust NPC Void Ring rank by ±1 (no XP logic, unlike PC sheet).
-   * Clamped to [1,9] range.
-   * @param {Event} event
-   * @param {HTMLElement} element
-   * @param {number} delta - +1 or -1
+   * Adjust NPC Void Ring rank by ±1 without XP calculations.
+   * Provides direct trait manipulation for NPCs, bypassing the complex
+   * experience point system used by player characters. Values are clamped
+   * to the standard L5R4 trait range of 1-9.
+   * 
+   * **NPC vs PC Differences:**
+   * - No XP cost calculations or tracking
+   * - Direct rank modification without family bonus considerations
+   * - Immediate update without confirmation dialogs
+   * - Simple range clamping without advancement rules
+   * 
+   * **Update Process:**
+   * 1. Read current void rank from actor system data
+   * 2. Apply delta (+1 or -1) with range clamping
+   * 3. Update actor document if value changed
+   * 4. Handle errors gracefully with console warnings
+   * 
+   * @param {Event} event - Click event (prevented to avoid form submission)
+   * @param {HTMLElement} element - Element containing trait data (unused)
+   * @param {number} delta - Adjustment value: +1 for increment, -1 for decrement
+   * @returns {Promise<void>} Resolves when update completes or fails
+   * 
+   * @example
+   * // Increment void rank on left-click
+   * await npcSheet._onVoidAdjust(event, element, +1);
+   * 
+   * // Decrement void rank on right-click
+   * await npcSheet._onVoidAdjust(event, element, -1);
    */
   async _onVoidAdjust(event, element, delta) {
     event?.preventDefault?.();
@@ -192,8 +308,46 @@ export default class L5R4NpcSheet extends BaseActorSheet {
 
   /**
    * Handle simple dice rolls from dataset attributes.
-   * Used for basic NPC rolls that don't require complex trait resolution.
-   * @param {Event} event - Click event
+   * Processes basic NPC rolls using data attributes for roll parameters,
+   * providing a streamlined interface for common NPC actions that don't
+   * require the complex trait resolution used by player characters.
+   * 
+   * **Dataset Attributes:**
+   * - `data-roll`: Number of dice to roll (e.g., "5" for 5d10)
+   * - `data-keep`: Number of dice to keep (e.g., "3" for keep 3)
+   * - `data-rolllabel`: Display label for the roll type
+   * - `data-trait`: Trait name being rolled (for display)
+   * - `data-rolltype`: Roll category ("simple", "attack", "damage", etc.)
+   * 
+   * **Roll Processing:**
+   * - Extracts roll parameters from element dataset
+   * - Constructs descriptive roll name from actor and action
+   * - Applies wound penalties automatically
+   * - Supports shift-click for roll options dialog
+   * - Uses NpcRoll() for specialized NPC roll handling
+   * 
+   * **Usage Examples:**
+   * ```html
+   * <!-- Basic trait roll -->
+   * <div class="simple-roll" 
+   *      data-roll="4" 
+   *      data-keep="2" 
+   *      data-rolllabel="Agility" 
+   *      data-trait="agility">
+   * 
+   * <!-- Attack roll -->
+   * <div class="simple-roll" 
+   *      data-roll="6" 
+   *      data-keep="3" 
+   *      data-rolllabel="Katana Attack" 
+   *      data-rolltype="attack">
+   * ```
+   * 
+   * @param {Event} event - Click event from simple roll element
+   * @returns {Promise<void>} Roll result processed by dice service
+   * 
+   * @see {@link ../services/dice.js|Dice.NpcRoll} - NPC roll processing
+   * @see {@link ../utils.js|readWoundPenalty} - Wound penalty calculation
    */
   async _onSimpleRoll(event) {
     event.preventDefault();

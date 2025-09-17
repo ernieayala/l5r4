@@ -1,25 +1,25 @@
 /**
- * L5R4 Stance Service Module for Foundry VTT v13+
+ * @fileoverview L5R4 Stance Service Module for Foundry VTT v13+
  * 
  * Provides comprehensive combat stance automation and management for the L5R4 system.
  * Handles all aspects of stance mechanics from effect creation to roll modifications
  * and integrates seamlessly with actor data preparation and the dice service.
  *
- * ## Core Responsibilities:
+ * **Core Responsibilities:**
  * - **Stance Automation**: Apply mechanical effects during actor data preparation
  * - **Active Effect Management**: Create and configure stance status effects
  * - **Roll Integration**: Modify attack rolls based on active stances
  * - **Hook Management**: Handle effect lifecycle events and state changes
  * - **Flag Management**: Persist stance-specific data like Full Defense rolls
  *
- * ## Key Features:
+ * **Key Features:**
  * - **Full Attack Stance**: +2k1 attack rolls, -10 Armor TN penalty
  * - **Defense Stance**: Air Ring + Defense Skill bonus to Armor TN, no attacks
  * - **Full Defense Stance**: Defense/Reflexes roll + half result to Armor TN, Free Actions only
  * - **Attack/Center Stance**: Visual indicators with no mechanical effects
  * - **Mutually Exclusive**: Stance enforcement handled by separate system
  *
- * ## Usage Examples:
+ * **Usage Examples:**
  * ```javascript
  * import { stance } from "./services/index.js";
  * 
@@ -36,12 +36,15 @@
  * rollData.diceKeep += bonuses.keep;
  * ```
  *
- * ## Initialization Sequence:
+ * **Initialization Sequence:**
  * 1. **System Init**: Call `initializeStanceService()` to register all hooks
  * 2. **Actor Preparation**: `applyStanceAutomation()` called during `prepareData()`
  * 3. **Effect Creation**: Status effects created via UI or programmatically
  * 4. **Roll Integration**: Attack rolls automatically modified via hooks
  *
+ * @author L5R4 System Team
+ * @since 1.0.0
+ * @version 2.1.0
  * @see {@link https://foundryvtt.com/api/classes/foundry.documents.ActiveEffect.html|ActiveEffect API}
  * @see {@link https://foundryvtt.com/api/classes/foundry.documents.Actor.html#prepareData|Actor.prepareData}
  * @see {@link https://foundryvtt.com/api/namespaces/Hooks.html|Foundry Hooks System}
@@ -246,13 +249,11 @@ async function triggerFullDefenseRoll(actor, sys) {
     // Check if roll already exists to prevent duplicates
     const existingRoll = actor.getFlag(SYS_ID, "fullDefenseRoll");
     if (existingRoll) {
-      console.log("L5R4 | Full Defense roll already exists, skipping duplicate");
       return;
     }
     
     // Check if a roll is already pending for this actor
     if (pendingFullDefenseRolls.has(actorId)) {
-      console.log("L5R4 | Full Defense roll already pending for this actor, skipping duplicate");
       return;
     }
     

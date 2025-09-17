@@ -1,11 +1,11 @@
 /**
- * L5R4 Template Preloader - Handlebars Template Caching for Foundry VTT v13+.
+ * @fileoverview L5R4 Template Preloader - Handlebars Template Caching for Foundry VTT v13+
  * 
  * This module preloads and caches all Handlebars templates used by the L5R4 system
  * to improve performance by eliminating template loading delays during runtime.
  * Templates are loaded during system initialization and cached in Foundry's template registry.
  *
- * ## Template Categories:
+ * **Template Categories:**
  * - **Item Templates**: Individual item type templates (advantage, weapon, spell, etc.)
  * - **Item Partials**: Shared components for item sheets (_rules-summary, _scaffold)
  * - **Actor Templates**: Main actor sheet templates (pc, npc)
@@ -13,22 +13,22 @@
  * - **Card Templates**: Chat card templates for items and rolls
  * - **Card Partials**: Shared chat card components (_expand)
  *
- * ## Performance Benefits:
+ * **Performance Benefits:**
  * - **Eliminates Loading Delays**: Templates are cached at startup
  * - **Reduces Network Requests**: No runtime template fetching
  * - **Improves User Experience**: Faster sheet rendering and chat cards
  * - **Error Prevention**: Template loading errors caught during initialization
  *
- * ## Template Organization:
+ * **Template Organization:**
  * Templates follow a hierarchical structure:
  * - `templates/item/`: Item sheet templates
  * - `templates/actor/`: Actor sheet templates  
  * - `templates/cards/`: Chat card templates
  * - `templates/*\/partials/`: Reusable template components
  *
- * @returns {Promise<void>} Resolves when all templates are preloaded and cached
- * @throws {Error} Logs warning if template preloading fails
- * 
+ * @author L5R4 System Team
+ * @since 1.0.0
+ * @version 2.1.0
  * @see {@link https://foundryvtt.com/api/functions/foundry.applications.handlebars.loadTemplates.html|loadTemplates}
  */
 export async function preloadTemplates() {

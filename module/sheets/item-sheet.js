@@ -1,10 +1,87 @@
 /**
- * L5R4 Item Sheet - Foundry VTT v13
+ * L5R4 Item Sheet - Universal Item Configuration Interface for Foundry VTT v13+.
+ * 
+ * This class provides a unified item sheet interface for all L5R4 item types including
+ * weapons, armor, skills, spells, advantages, techniques, and equipment. Built on
+ * Foundry's modern ApplicationV2 architecture with HandlebarsApplicationMixin integration.
  *
- * See Foundry VTT API:
- * - ItemSheetV2: https://foundryvtt.com/api/foundry.applications.sheets.ItemSheetV2.html
- * - HandlebarsApplicationMixin: https://foundryvtt.com/api/foundry.applications.api.html
- * - TextEditor: https://foundryvtt.com/api/TextEditor.html
+ * ## Core Responsibilities:
+ * - **Universal Item Interface**: Single sheet class handling all L5R4 item types
+ * - **Dynamic Template Loading**: Type-specific templates with shared scaffolding
+ * - **Rich Text Editing**: ProseMirror integration for description and rules fields
+ * - **Active Effects Management**: Embedded effect creation, editing, and deletion
+ * - **Responsive Layout**: Dynamic window sizing based on item type complexity
+ * - **Skill Integration**: Weapon-skill association for character-owned items
+ *
+ * ## ApplicationV2 Architecture:
+ * - **HandlebarsApplicationMixin**: Modern template rendering with async enrichment
+ * - **ItemSheetV2**: Foundry's v13+ item sheet base with improved lifecycle
+ * - **Form Handling**: Native AppV2 form submission with submitOnChange
+ * - **Part System**: Single root part with dynamic template resolution
+ * - **Scrollable Regions**: Optimized scrolling for content and editor areas
+ *
+ * ## Template System:
+ * Uses a scaffolding approach where all item types share a common structure:
+ * - `_scaffold.hbs`: Universal container with dynamic content injection
+ * - Type-specific templates loaded based on `item.type`
+ * - Shared partials for common elements like rules summaries
+ * - Rich text fields support both edit and view modes
+ *
+ * ## Rich Text Integration:
+ * Provides seamless editing experience for narrative fields:
+ * - **Edit Mode**: ProseMirror editors for description, rules, effects
+ * - **View Mode**: Enriched HTML with document links and secrets
+ * - **Field Normalization**: Ensures string types for editor compatibility
+ * - **Async Enrichment**: Non-blocking HTML enrichment during render
+ *
+ * ## Active Effects System:
+ * Comprehensive effect management with transfer support:
+ * - **Creation**: New effects with transfer=true for actor application
+ * - **Editing**: Direct integration with ActiveEffectConfig sheets
+ * - **Toggle**: Enable/disable effects with immediate feedback
+ * - **Deletion**: Safe removal with duplicate-click protection
+ * - **Transfer Logic**: Effects automatically apply to owning actors
+ *
+ * ## Weapon-Skill Integration:
+ * For character-owned weapons and bows:
+ * - **Skill Discovery**: Automatic detection of character's available skills
+ * - **Association Interface**: Dropdown selection for weapon-skill pairing
+ * - **Attack Resolution**: Skill+trait vs trait-only attack calculations
+ * - **Dynamic Options**: Skill list updates when character gains new skills
+ *
+ * ## Window Management:
+ * Intelligent sizing and identification:
+ * - **Type-Based Sizing**: Different widths for simple vs complex item types
+ * - **Unique IDs**: UUID-based element IDs prevent DOM conflicts
+ * - **Position Persistence**: Foundry's native window position memory
+ * - **Responsive Design**: Adapts to content complexity
+ *
+ * ## Usage Examples:
+ * ```javascript
+ * // Open item sheet
+ * const item = actor.items.get(itemId);
+ * item.sheet.render(true);
+ * 
+ * // Create new effect on item
+ * await item.createEmbeddedDocuments("ActiveEffect", [{
+ *   name: "Custom Effect",
+ *   transfer: true,
+ *   changes: [{ key: "system.bonuses.attack", mode: 2, value: "2" }]
+ * }]);
+ * ```
+ *
+ * ## API References:
+ * @see {@link https://foundryvtt.com/api/classes/foundry.applications.sheets.ItemSheetV2.html|ItemSheetV2}
+ * @see {@link https://foundryvtt.com/api/classes/foundry.applications.api.HandlebarsApplicationMixin.html|HandlebarsApplicationMixin}
+ * @see {@link https://foundryvtt.com/api/classes/foundry.applications.ux.TextEditor.html|TextEditor}
+ * @see {@link https://foundryvtt.com/api/classes/foundry.applications.sheets.ActiveEffectConfig.html|ActiveEffectConfig}
+ *
+ * ## Code Navigation Guide:
+ * 1. `_initializeApplicationOptions()` - Window sizing and unique ID assignment
+ * 2. `_prepareContext()` - Template data preparation with enrichment
+ * 3. `_onRender()` - Active Effects event binding and DOM setup
+ * 4. `widthFor()` - Type-based window width calculation
+ * 5. `typeLabel()` - Localized item type display names
  */
 
 import CONFIG_L5R4, { SYS_ID } from "../config.js";
@@ -15,10 +92,18 @@ const { ItemSheetV2 }                = foundry.applications.sheets;
 const { TextEditor }                 = foundry.applications.ux;
 
 /* ------------------------------------------ */
-/* Layout                                     */
+/* Layout Configuration and Helpers           */
 /* ------------------------------------------ */
 
-const WIDTH_BY_TYPE = {
+/**
+ * Window width configuration by item type.
+ * Determines initial window size based on content complexity.
+ * All types currently use 640px for consistency, but can be adjusted
+ * individually if certain item types require more space.
+ * 
+ * @type {Readonly<Record<string, number>>}
+ */
+const WIDTH_BY_TYPE = Object.freeze({
   advantage: 640,
   disadvantage: 640,
   skill: 640,
@@ -30,16 +115,36 @@ const WIDTH_BY_TYPE = {
   technique: 640,
   tattoo: 640,
   item: 640
-};
+});
 
-/** Resolve a width for an arbitrary item type. */
-const widthFor = (t) => WIDTH_BY_TYPE[t] ?? 640;
-/** Title case helper for fallback labels. */
-const titleCase = (s) => String(s ?? "").toLowerCase().replace(/\b[a-z]/g, m => m.toUpperCase());
-/** Localize an Item type key to a human label. */
-const typeLabel = (t) => {
-  const key = `TYPES.Item.${t}`;
-  return game.i18n.has?.(key) ? game.i18n.localize(key) : titleCase(t);
+/**
+ * Resolve window width for an arbitrary item type.
+ * Falls back to 640px for unknown types to maintain consistency.
+ * 
+ * @param {string} type - Item type identifier
+ * @returns {number} Window width in pixels
+ */
+const widthFor = (type) => WIDTH_BY_TYPE[type] ?? 640;
+
+/**
+ * Convert string to title case for fallback labels.
+ * Used when localization keys are missing for item types.
+ * 
+ * @param {string|null|undefined} str - String to convert
+ * @returns {string} Title-cased string
+ */
+const titleCase = (str) => String(str ?? "").toLowerCase().replace(/\b[a-z]/g, m => m.toUpperCase());
+
+/**
+ * Get localized display label for an item type.
+ * Attempts localization first, falls back to title-cased type name.
+ * 
+ * @param {string} type - Item type identifier
+ * @returns {string} Human-readable item type label
+ */
+const typeLabel = (type) => {
+  const key = `TYPES.Item.${type}`;
+  return game.i18n.has?.(key) ? game.i18n.localize(key) : titleCase(type);
 };
 
 /* ------------------------------------------ */
@@ -91,8 +196,21 @@ export default class L5R4ItemSheet extends HandlebarsApplicationMixin(ItemSheetV
 
   /**
    * @override
-   * Give each window a unique element id and set an initial width per item type.
-   * Do not override the id getter in v13. Configure here instead.
+   * Initialize application options with unique identification and type-based sizing.
+   * Prevents DOM conflicts between multiple item sheets and sets appropriate window dimensions.
+   * 
+   * **Unique ID Generation:**
+   * - Uses document UUID or ID to create unique element IDs
+   * - Prevents multiple sheets from conflicting in the DOM
+   * - Maintains sheet identity across renders
+   * 
+   * **Dynamic Sizing:**
+   * - Sets initial window width based on item type complexity
+   * - Preserves user-adjusted positions via Foundry's position system
+   * - Allows for future per-type size customization
+   * 
+   * @param {object} options - Application initialization options
+   * @returns {object} Modified options with unique ID and sizing
    */
   _initializeApplicationOptions(options) {
     options = super._initializeApplicationOptions(options);
@@ -112,8 +230,32 @@ export default class L5R4ItemSheet extends HandlebarsApplicationMixin(ItemSheetV
 
   /**
    * @override
-   * Prepare template context. Adds enriched HTML strings for read-only blocks so
-   * templates can render a <prose-mirror> in edit mode and enriched HTML in view mode.
+   * Prepare template context with enriched content and dynamic data.
+   * Transforms raw item data into a comprehensive context object for template rendering,
+   * including enriched HTML for rich text fields and dynamic skill associations.
+   * 
+   * **Context Preparation Process:**
+   * 1. **Data Cloning**: Deep clone system data to prevent mutation during rendering
+   * 2. **Field Normalization**: Ensure text fields are strings for editor compatibility
+   * 3. **HTML Enrichment**: Convert raw text to enriched HTML with links and secrets
+   * 4. **Skill Integration**: Build skill options for weapon-skill associations
+   * 5. **Effect Exposure**: Make embedded Active Effects available to templates
+   * 
+   * **Rich Text Processing:**
+   * - Processes description, rules, effects, and other narrative fields
+   * - Supports document links, secrets, and inline rolls
+   * - Provides both raw and enriched versions for edit/view modes
+   * - Uses async enrichment for non-blocking rendering
+   * 
+   * **Weapon-Skill Integration:**
+   * - Detects character-owned weapons and bows
+   * - Builds dropdown options from character's available skills
+   * - Enables weapon-skill association for attack roll calculations
+   * - Updates dynamically when character gains new skills
+   * 
+   * @param {object} context - Base template context from parent class
+   * @param {object} options - Rendering options (unused)
+   * @returns {Promise<object>} Enhanced context object for template rendering
    */
   async _prepareContext(context, options) {
     context = await super._prepareContext(context, options);
@@ -190,11 +332,36 @@ export default class L5R4ItemSheet extends HandlebarsApplicationMixin(ItemSheetV
   }
 
   /**
-   * Wire Active Effect controls using Foundry’s built-in editor.
-   * Docs:
-   * - ActiveEffect:       https://foundryvtt.com/api/classes/documents.ActiveEffect.html
-   * - ActiveEffectConfig: https://foundryvtt.com/api/classes/foundry.applications.sheets.ActiveEffectConfig.html
-   * - DocumentSheetV2:    https://foundryvtt.com/api/classes/foundry.applications.api.DocumentSheetV2.html
+   * @override
+   * Post-render setup for Active Effects management and event binding.
+   * Establishes event handlers for embedded Active Effects CRUD operations
+   * with proper duplicate-click protection and error handling.
+   * 
+   * **Event Binding Strategy:**
+   * - Uses element-level binding flags to prevent duplicate handlers
+   * - Handles DOM replacement scenarios in Foundry v13+
+   * - Provides immediate feedback for all effect operations
+   * - Integrates with Foundry's native ActiveEffectConfig sheets
+   * 
+   * **Active Effects Operations:**
+   * - **Creation**: New effects with transfer=true for actor application
+   * - **Editing**: Opens ActiveEffectConfig for comprehensive effect editing
+   * - **Toggle**: Enable/disable with immediate visual feedback
+   * - **Deletion**: Safe removal with busy-state protection
+   * 
+   * **Error Handling:**
+   * - Graceful handling of missing effects (race conditions)
+   * - Duplicate operation protection via busy flags
+   * - User notifications for operation failures
+   * - Cleanup of temporary state flags
+   * 
+   * @param {object} context - Template context (unused)
+   * @param {object} options - Render options (unused)
+   * @returns {Promise<void>}
+   * 
+   * @see {@link https://foundryvtt.com/api/classes/documents.ActiveEffect.html|ActiveEffect}
+   * @see {@link https://foundryvtt.com/api/classes/foundry.applications.sheets.ActiveEffectConfig.html|ActiveEffectConfig}
+   * @see {@link https://foundryvtt.com/api/classes/foundry.applications.api.DocumentSheetV2.html|DocumentSheetV2}
    */
   async _onRender(context, options) {
     await super._onRender?.(context, options);

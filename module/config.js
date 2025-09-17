@@ -1,17 +1,29 @@
 /**
- * L5R4 System Configuration Module for Foundry VTT v13+
+ * @fileoverview L5R4 System Configuration Module for Foundry VTT v13+
  * 
- * Provides centralized configuration data and utilities including:
- * - System constants (SYS_ID, paths, templates)
- * - Icon path resolution and aliasing system
- * - Localization key mappings for rings, traits, skills, emphases
- * - Chat template definitions
- * - Game rules constants (arrows, sizes, status effects)
- * - Legacy config object for template compatibility
+ * Provides centralized configuration data and utilities for the L5R4 system,
+ * serving as the single source of truth for system constants, icon management,
+ * localization mappings, and template definitions used throughout the codebase.
  * 
- * Pure data and helpers only - safe to import anywhere without side effects.
+ * **Core Responsibilities:**
+ * - **System Constants**: SYS_ID, path constants, and template definitions
+ * - **Icon Management**: Path resolution and aliasing system for asset organization
+ * - **Localization Mappings**: Key mappings for rings, traits, skills, and emphases
+ * - **Chat Templates**: Template definitions for chat cards and dialogs
+ * - **Game Rules Constants**: Arrow modifiers, sizes, status effects, and mechanical data
+ * - **Legacy Compatibility**: Config object structure for template backward compatibility
  * 
- * @see https://foundryvtt.com/api/
+ * **Design Principles:**
+ * - **Pure Data Module**: No side effects on import, safe to use anywhere
+ * - **Centralized Configuration**: Single source of truth for system constants
+ * - **Future-Proof Structure**: Icon aliasing system enables asset reorganization
+ * - **Template Integration**: Seamless integration with Handlebars template system
+ * - **Performance Optimized**: Frozen objects prevent accidental mutations
+ * 
+ * @author L5R4 System Team
+ * @since 1.0.0
+ * @version 2.1.0
+ * @see {@link https://foundryvtt.com/api/|Foundry VTT v13 API Documentation}
  */
 
 const freeze = Object.freeze;
