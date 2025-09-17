@@ -13,10 +13,15 @@
  * - **Chat Integration**: Render type-specific chat cards with proper templates
  * - **Cost Validation**: Enforce advantage/disadvantage cost constraints
  *
- * **Item Type Support:**
- * - **Skills**: Roll formula calculation, XP tracking, school skill benefits
- * - **Weapons/Bows**: Damage calculation with arrow modifiers and strength requirements
- * - **Armor**: Special properties and equipped state tracking
+ * **Item Types Supported:**
+ * - **Equipment**: Weapons, armor, bows with mechanical properties
+ * - **Character Elements**: Skills, advantages, disadvantages, spells
+ * - **Background Items**: Clans, families, schools with Active Effects
+ * - **Techniques**: Kata, kiho, tattoos with special abilities
+ * - **General Items**: commonItem type for miscellaneous equipment and gear
+ *
+ * **Key Features:**
+ * - **Equipment Management**: Weapons, armor, bows with damage calculations
  * - **Spells**: Effect descriptions and raise effect documentation
  * - **Advantages/Disadvantages**: Cost validation and XP integration
  * - **Techniques/Kata/Kiho**: Effect descriptions and mechanical benefits
@@ -47,17 +52,17 @@ export default class L5R4Item extends Item {
    * Maps each item type to its corresponding Handlebars template.
    * @type {Record<string, string>}
    */
-  chatTemplate = {
+  static CHAT_CARD_TEMPLATES = {
     advantage:    TEMPLATE("cards/advantage-disadvantage.hbs"),
     armor:        TEMPLATE("cards/armor.hbs"),
     bow:          TEMPLATE("cards/weapon.hbs"),
-    clan:         TEMPLATE("cards/item.hbs"),
+    clan:         TEMPLATE("cards/commonItem.hbs"),
     disadvantage: TEMPLATE("cards/advantage-disadvantage.hbs"),
-    family:       TEMPLATE("cards/item.hbs"),
-    item:         TEMPLATE("cards/item.hbs"),
+    family:       TEMPLATE("cards/commonItem.hbs"),
+    commonItem:   TEMPLATE("cards/commonItem.hbs"),
     kata:         TEMPLATE("cards/kata.hbs"),
     kiho:         TEMPLATE("cards/kiho.hbs"),
-    school:       TEMPLATE("cards/item.hbs"),
+    school:       TEMPLATE("cards/commonItem.hbs"),
     skill:        TEMPLATE("cards/skill.hbs"),
     spell:        TEMPLATE("cards/spell.hbs"),
     tattoo:       TEMPLATE("cards/tattoo.hbs"),
@@ -78,7 +83,7 @@ export default class L5R4Item extends Item {
     clan:         iconPath("bamboo.png"),
     disadvantage: iconPath("yin-yang.png"),
     family:       iconPath("tori.png"),
-    item:         iconPath("coins.png"),
+    commonItem:   iconPath("coins.png"),
     kata:         iconPath("scroll.png"),
     kiho:         iconPath("tori.png"),
     school:       iconPath("scroll.png"),
@@ -353,7 +358,7 @@ export default class L5R4Item extends Item {
    * @returns {Promise<ChatMessage|void>} The created chat message, or void if no template
    */
   async roll() {
-    const templatePath = this.chatTemplate[this.type];
+    const templatePath = L5R4Item.CHAT_CARD_TEMPLATES[this.type];
     if (!templatePath) return;
 
     // Render template with full item context (templates can access this.system)

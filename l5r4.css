@@ -270,7 +270,9 @@ body > * {
   padding: 0 0.1rem;
 }
 .l5r4.pc .grid > div > input,
-.l5r4.npc .grid > div > input {
+.l5r4.npc .grid > div > input,
+.l5r4.pc .grid > div > select,
+.l5r4.npc .grid > div > select {
   height: auto;
   line-height: 1;
 }
@@ -340,7 +342,6 @@ body > * {
   display: grid;
   grid-template-rows: min-content min-content;
   padding: 0 0.5rem;
-  text-transform: capitalize;
 }
 .l5r4.pc .item.-bio,
 .l5r4.npc .item.-bio {
@@ -469,9 +470,26 @@ body > * {
   width: 32px;
   z-index: 10;
 }
+.l5r4.pc .traits-rings .ring-roll,
+.l5r4.npc .traits-rings .ring-roll {
+  position: relative;
+}
+.l5r4.pc .traits-rings .ring-roll::after,
+.l5r4.npc .traits-rings .ring-roll::after {
+  border-radius: 50%;
+  box-shadow: white 0 0 5px 2px inset;
+  content: "";
+  height: 100%;
+  left: 0;
+  position: absolute;
+  top: 0;
+  width: 100%;
+}
 .l5r4.pc .traits-rings .ring-roll img,
 .l5r4.npc .traits-rings .ring-roll img {
+  border-radius: 50%;
   height: 96px;
+  position: relative;
   width: 96px;
 }
 .l5r4.pc .traits-rings .trait,

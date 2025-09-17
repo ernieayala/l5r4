@@ -8,6 +8,12 @@
     {{#if (eq actor.type "npc")}}
       <span>{{localize "l5r4.mechanics.wounds.maxWounds"}}</span>
       <div class="flexrow"><input type="number" name="system.wounds.max" placeholder="" value="{{#if (gt system.wounds.max 0)}}{{system.wounds.max}}{{/if}}" data-type="Number" /></div>
+      <span>{{localize "l5r4.ui.sheets.nrWoundLvls"}}</span>
+      <div class="flexrow">
+        <select name="system.nrWoundLvls" data-type="Number">
+          {{selectOptions config.npcNumberWoundLvls selected=system.nrWoundLvls}}
+        </select>
+      </div>
     {{/if}}
     <span>{{localize "l5r4.mechanics.wounds.wounds"}} {{localize "l5r4.ui.common.mod"}}</span>
     <div class="flexrow"><input type="number" name="system.woundsMod" value="{{system.woundsMod}}" data-type="Number" /></div>

@@ -18,7 +18,7 @@
       <label>{{localize "l5r4.magic.spells.affinity"}}</label>
       <div class="form-fields">
         <select name="system.affinity">
-          {{selectOptions config.rings selected=system.affinity localize=true}}
+          {{selectOptions config.ringsWithNone selected=system.affinity localize=true}}
         </select>
         {{log system.affinity}}
       </div>
@@ -27,7 +27,7 @@
       <label>{{localize "l5r4.magic.spells.deficiency"}}</label>
       <div class="form-fields">
         <select name="system.deficiency">
-          {{selectOptions config.rings selected=system.deficiency localize=true}}
+          {{selectOptions config.ringsWithNone selected=system.deficiency localize=true}}
         </select>
       </div>
     </div>

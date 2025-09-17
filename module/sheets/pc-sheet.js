@@ -1,5 +1,5 @@
 /**
- * L5R4 PC Sheet implementation for Foundry VTT v13+.
+ * @fileoverview L5R4 PC Sheet implementation for Foundry VTT v13+
  * 
  * This class extends BaseActorSheet to provide PC-specific functionality including
  * complex trait management with family bonuses, experience tracking, item sorting,
@@ -51,6 +51,14 @@
  * 8. `_paintVoidPointsDots()` - Visual void points dot rendering
  * 9. `_onSortClick()` - Item list sorting preference management
  * 10. `familyBonusFor()` - Family bonus calculation from Active Effects
+ *
+ * @author L5R4 System Team
+ * @since 1.0.0
+ * @version 1.0.0
+ * @extends {BaseActorSheet}
+ * @see {@link https://foundryvtt.com/api/classes/foundry.applications.sheets.ActorSheetV2.html|ActorSheetV2}
+ * @see {@link https://foundryvtt.com/api/classes/foundry.applications.api.HandlebarsApplicationMixin.html|HandlebarsApplicationMixin}
+ * @see {@link https://foundryvtt.com/api/classes/foundry.abstract.Document.html#update|Document.update}
  */
 
 import { SYS_ID, TEMPLATE } from "../config.js";

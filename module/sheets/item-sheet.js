@@ -114,7 +114,7 @@ const WIDTH_BY_TYPE = Object.freeze({
   spell: 640,
   technique: 640,
   tattoo: 640,
-  item: 640
+  commonItem: 640
 });
 
 /**
@@ -445,7 +445,7 @@ export default class L5R4ItemSheet extends HandlebarsApplicationMixin(ItemSheetV
       spell:        t("TYPES.Item.spell"),
       technique:    t("TYPES.Item.technique"),
       tattoo:       t("TYPES.Item.tattoo"),
-      item:         t("TYPES.Item.item")
+      commonItem:   t("TYPES.Item.commonItem")
     };
   }
 }

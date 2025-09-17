@@ -6,7 +6,7 @@
  * Templates are loaded during system initialization and cached in Foundry's template registry.
  *
  * **Template Categories:**
- * - **Item Templates**: Individual item type templates (advantage, weapon, spell, etc.)
+ * - **Item Templates**: Individual item type templates (advantage, weapon, spell, commonItem, etc.)
  * - **Item Partials**: Shared components for item sheets (_rules-summary, _scaffold)
  * - **Actor Templates**: Main actor sheet templates (pc, npc)
  * - **Actor Partials**: Reusable actor sheet components (_stats, _skills, _equipment, etc.)
@@ -41,7 +41,7 @@ export async function preloadTemplates() {
     "systems/l5r4/templates/item/clan.hbs",
     "systems/l5r4/templates/item/disadvantage.hbs",
     "systems/l5r4/templates/item/family.hbs",
-    "systems/l5r4/templates/item/item.hbs",
+    "systems/l5r4/templates/item/commonItem.hbs",
     "systems/l5r4/templates/item/kata.hbs",
     "systems/l5r4/templates/item/kiho.hbs",
     "systems/l5r4/templates/item/school.hbs",
@@ -77,7 +77,7 @@ export async function preloadTemplates() {
     "systems/l5r4/templates/cards/armor.hbs",
     "systems/l5r4/templates/cards/clan.hbs",
     "systems/l5r4/templates/cards/family.hbs",
-    "systems/l5r4/templates/cards/item.hbs",
+    "systems/l5r4/templates/cards/commonItem.hbs",
     "systems/l5r4/templates/cards/kata.hbs",
     "systems/l5r4/templates/cards/kiho.hbs",
     "systems/l5r4/templates/cards/school.hbs",

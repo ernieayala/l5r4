@@ -1,5 +1,5 @@
 /**
- * Base Actor Sheet for L5R4 - Foundry VTT v13+.
+ * @fileoverview Base Actor Sheet for L5R4 - Foundry VTT v13+
  * 
  * This class provides shared functionality for all L5R4 actor sheets including
  * event delegation, void point management, item CRUD operations, and common
@@ -70,6 +70,14 @@
  * 8. `_setupItemContextMenu()` - Right-click context menu setup
  * 9. `_onSkillRoll()`, `_onAttackRoll()`, `_onDamageRoll()` - Shared roll methods
  * 10. `_getStanceAttackBonuses()` - Stance bonus calculation for attacks
+ *
+ * @author L5R4 System Team
+ * @since 1.0.0
+ * @version 1.0.0
+ * @extends {foundry.applications.sheets.ActorSheetV2}
+ * @mixes {foundry.applications.api.HandlebarsApplicationMixin}
+ * @see {@link https://foundryvtt.com/api/classes/foundry.applications.sheets.ActorSheetV2.html|ActorSheetV2}
+ * @see {@link https://foundryvtt.com/api/classes/foundry.applications.api.HandlebarsApplicationMixin.html|HandlebarsApplicationMixin}
  */
 import { on, toInt, readWoundPenalty, normalizeTraitKey, getEffectiveTrait, extractRollParams, resolveWeaponSkillTrait } from "../utils.js";
 import * as Chat from "../services/chat.js";

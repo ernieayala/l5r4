@@ -201,6 +201,53 @@ async function normalizeItems(docs, label) {
 }
 
 /**
+ * Clean up duplicate legacy fields that may persist after partial migrations.
+ * Removes old snake_case fields when corresponding camelCase fields exist.
+ *
+ * @param {Array<Actor>} docs - Actors to clean up
+ * @param {string} label - Descriptive label for logging
+ */
+async function cleanupLegacyFields(docs, label) {
+  for (const doc of docs) {
+    try {
+      if (doc.documentName !== "Actor") continue;
+      
+      const updates = {};
+      let needsUpdate = false;
+
+      // Clean up duplicate fields if new camelCase version exists
+      const cleanupRules = [
+        { old: "system.wounds.heal_rate", new: "system.wounds.healRate" },
+        { old: "system.wound_lvl", new: "system.woundLevels" },
+        { old: "system.armor.armor_tn", new: "system.armor.armorTn" },
+        { old: "system.shadow_taint", new: "system.shadowTaint" },
+        { old: "system.armor_tn", new: "system.armorTn" },
+        { old: "system.initiative.roll_mod", new: "system.initiative.rollMod" },
+        { old: "system.initiative.keep_mod", new: "system.initiative.keepMod" },
+        { old: "system.initiative.total_mod", new: "system.initiative.totalMod" }
+      ];
+
+      for (const rule of cleanupRules) {
+        const oldVal = getByPath(doc, rule.old);
+        const newVal = getByPath(doc, rule.new);
+        
+        // If old field exists and new field also exists, remove old field
+        if (oldVal !== undefined && newVal !== undefined) {
+          setByPath(updates, rule.old, null);
+          needsUpdate = true;
+        }
+      }
+
+      if (needsUpdate) {
+        await doc.update(updates, { diff: true, render: false });
+      }
+    } catch (e) {
+      console.warn("L5R4", "Legacy cleanup failed", { label, id: doc.id, type: doc.type, error: e });
+    }
+  }
+}
+
+/**
  * Icon file relocation mapping for migration from flat to organized structure.
  * Maps original filenames to their new subfolder locations under PATHS.icons.
  * This maintains the migration logic independently of config aliases to avoid
@@ -412,6 +459,8 @@ export async function runMigrations(fromVersion, toVersion) {
   await applySchemaMapToDocs(game.items.contents, "world-items");
   // Normalize world items after schema changes
   await normalizeItems(game.items.contents, "world-items-norm");
+  // Clean up duplicate legacy fields after migration
+  await cleanupLegacyFields(game.actors.contents, "world-actors-cleanup");
 
   // CRITICAL: Phase 1.5 - Migrate embedded items on actors
   for (const actor of game.actors) {
@@ -425,6 +474,13 @@ export async function runMigrations(fromVersion, toVersion) {
   for (const pack of game.packs) {
     const docType = pack.metadata?.type ?? pack.documentName;
     if (docType !== "Actor" && docType !== "Item") continue;
+
+    // Skip locked compendiums to prevent permission errors
+    const isLocked = pack.metadata?.locked ?? pack.locked ?? false;
+    if (isLocked) {
+      console.log("L5R4", "Skipping locked compendium", { collection: pack.collection });
+      continue;
+    }
 
     try {
       const docs = await pack.getDocuments();

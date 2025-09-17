@@ -366,6 +366,16 @@ const _l5r4 = {
     void: "l5r4.mechanics.rings.void"
   }),
 
+  /** Ring options with None option for technique affinity/deficiency */
+  ringsWithNone: freeze({
+    "": "l5r4.ui.common.none",
+    fire: "l5r4.mechanics.rings.fire",
+    water: "l5r4.mechanics.rings.water",
+    air: "l5r4.mechanics.rings.air",
+    earth: "l5r4.mechanics.rings.earth",
+    void: "l5r4.mechanics.rings.void"
+  }),
+
   /** Ring options available for spell casting */
   spellRings: freeze({
     fire: "l5r4.mechanics.rings.fire",

@@ -767,15 +767,28 @@ export default class L5R4Actor extends Actor {
 
     sys.woundLevels = sys.woundLevels || {};
     const order = ["healthy", "nicked", "grazed", "hurt", "injured", "crippled", "down", "out"];
+    
+    // Handle customizable wound levels for nonhuman NPCs
+    const nrWoundLvls = toInt(sys.nrWoundLvls) || 1;
+    const activeOrder = nrWoundLvls === 1 ? ["healthy", "out"] : order.slice(0, Math.min(nrWoundLvls + 1, order.length));
+    
     let prev = 0;
-    for (const key of order) {
+    for (let i = 0; i < order.length; i++) {
+      const key = order[i];
       const lvl = sys.woundLevels[key] ?? (sys.woundLevels[key] = { value: 0, penalty: 0, current: false });
-      if (key === "healthy") {
-        lvl.value = 5 * earth + add;
+      
+      if (i < activeOrder.length) {
+        // Active wound level
+        if (key === "healthy") {
+          lvl.value = 5 * earth + add;
+        } else {
+          lvl.value = earth * mult + prev + add;
+        }
+        prev = lvl.value;
       } else {
-        lvl.value = earth * mult + prev + add;
+        // Inactive wound level - set to max value to effectively disable
+        lvl.value = prev;
       }
-      prev = lvl.value;
     }
 
     // Scale wound thresholds if NPC has manual max wounds override

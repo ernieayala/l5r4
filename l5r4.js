@@ -181,34 +181,6 @@ Hooks.once("init", async () => {
 // SYSTEM READY - POST-INITIALIZATION TASKS
 // =============================================================================
 
-Hooks.once("ready", async () => {
-  console.log(`${SYS_ID} | Ready`);
-
-  // Finalize setup migration flag (GM-only operation)
-  if (CONFIG[SYS_ID]?.__needsMigrateFlag && game.user?.isGM) {
-    try { await game.settings.set(SYS_ID, "migratedCommonItemTypes", true); }
-    catch (e) { console.error(`${SYS_ID} | failed to set migration flag`, e); }
-    finally { CONFIG[SYS_ID].__needsMigrateFlag = false; }
-  }
-
-  // Execute data migrations if system version has changed
-  if (game.user?.isGM) {
-    const currentVersion = game.system?.version ?? "0.0.0";
-    const last = game.settings.get(SYS_ID, "lastMigratedVersion") ?? "0.0.0";
-    const runFlag = game.settings.get(SYS_ID, "runMigration") ?? false;
-    const newer = (foundry?.utils?.isNewerVersion?.(currentVersion, last)) ?? (currentVersion !== last);
-    if (runFlag && newer) {
-      try {
-        await runMigrations(last, currentVersion);
-      } catch (e) {
-        console.warn(`${SYS_ID}`, "runMigrations failed", e);
-      } finally {
-        try { await game.settings.set(SYS_ID, "lastMigratedVersion", currentVersion); } catch (_e) {}
-        try { await game.settings.set(SYS_ID, "runMigration", false); } catch (_e) {}
-      }
-    }
-  }
-});
 
 // =============================================================================
 // CHAT INTEGRATION - INLINE ROLL PARSING
@@ -440,65 +412,36 @@ function registerHandlebarsHelpers() {
 // LEGACY MIGRATION - FOUNDRY v12 → v13 COMPATIBILITY
 // =============================================================================
 
-/**
- * One-time migration for Foundry v12 → v13 item type compatibility.
- * Converts legacy "commonItem" type to the standard "item" type to maintain
- * compatibility with Foundry v13's stricter type validation.
- * 
- * **Migration Scope:**
- * - Embedded items on all world actors
- * - Standalone world-level items
- * - Preserves all item data except type field
- * 
- * **Technical Details:**
- * - Uses {recursive: false} option required for document type changes
- * - Updates raw source data to avoid validation conflicts
- * - GM-only operation with proper error handling
- * - One-time execution controlled by world setting flag
- * 
- * **Safety Features:**
- * - Idempotent operation (safe to run multiple times)
- * - Comprehensive error handling and user feedback
- * - Deferred flag setting to avoid race conditions
- * 
- * @see {@link https://foundryvtt.com/api/classes/foundry.abstract.Document.html#update|Document.update}
- */
-Hooks.once("setup", async () => {
-  try {
-    if (!game.user?.isGM) return;
-    const already = game.settings.get(SYS_ID, "migratedCommonItemTypes");
-    if (already) return;
 
-    let changed = 0;
+Hooks.once("ready", async () => {
+  console.log(`${SYS_ID} | Ready`);
 
-    // Phase 1: Update embedded items on actors (requires source patching)
-    for (const actor of game.actors) {
-      const srcItems = actor?._source?.items ?? [];
-      const updates = srcItems
-        .filter(si => si.type === "commonItem")
-        .map(si => ({ _id: si._id, type: "item" })); // only flip the type
-
-      if (updates.length) {
-        // Critical: recursive:false required for document type changes
-        await actor.update({ items: updates }, { recursive: false });
-        changed += updates.length;
+  // Execute data migrations if system version has changed or forced
+  if (game.user?.isGM) {
+    const currentVersion = game.system?.version ?? "0.0.0";
+    const last = game.settings.get(SYS_ID, "lastMigratedVersion") ?? "0.0.0";
+    const runFlag = game.settings.get(SYS_ID, "runMigration") ?? false;
+    const forceFlag = game.settings.get(SYS_ID, "forceMigration") ?? false;
+    const newer = (foundry?.utils?.isNewerVersion?.(currentVersion, last)) ?? (currentVersion !== last);
+    
+    if (runFlag && (newer || forceFlag)) {
+      try {
+        console.log("L5R4", "Running migrations", { 
+          from: last, 
+          to: currentVersion, 
+          forced: forceFlag,
+          versionChanged: newer 
+        });
+        await runMigrations(last, currentVersion);
+      } catch (e) {
+        console.warn(`${SYS_ID}`, "runMigrations failed", e);
+      } finally {
+        try { await game.settings.set(SYS_ID, "lastMigratedVersion", currentVersion); } catch (_e) {}
+        try { await game.settings.set(SYS_ID, "runMigration", false); } catch (_e) {}
+        if (forceFlag) {
+          try { await game.settings.set(SYS_ID, "forceMigration", false); } catch (_e) {}
+        }
       }
     }
-
-    // Phase 2: Update standalone world items
-    for (const it of game.items) {
-      if (it.type === "commonItem") {
-        await it.update({ type: "item" }, { recursive: false });
-        changed += 1;
-      }
-    }
-
-    if (changed > 0) ui.notifications?.info(F("l5r4.system.migration.itemTypeChangeInfo", { count: changed }));
-    // Defer setting flag until ready hook to avoid timing issues
-    CONFIG[SYS_ID] ??= {};
-    CONFIG[SYS_ID].__needsMigrateFlag = true;
-  } catch (err) {
-    console.error(`${SYS_ID} | migration error`, err);
-    ui.notifications?.error(T("l5r4.system.migration.itemTypeChangeError"));
   }
 });

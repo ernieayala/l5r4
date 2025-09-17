@@ -221,6 +221,22 @@ export function registerSettings() {
   });
 
   /**
+   * Manual migration trigger: forces migrations to run regardless of version.
+   * Useful for debugging migration issues or re-running migrations after fixes.
+   * Automatically resets to false after migration completes.
+   * 
+   * @type {boolean} true = force migration on next startup, false = normal behavior
+   */
+  game.settings.register(SYS_ID, "forceMigration", {
+    scope: "world",
+    config: true,
+    name: "SETTINGS.forceMigration.name",
+    hint: "SETTINGS.forceMigration.label",
+    type: Boolean,
+    default: false
+  });
+
+  /**
    * Migration tracking: stores the last system version that had migrations applied.
    * Used internally to determine if migrations need to run when the system
    * version changes. Hidden from UI as it's purely for system bookkeeping.
