@@ -36,14 +36,21 @@
         "unskilledRoll": "Tirada sin Habilidad",
         "emphasis": "Énfasis",
         "raise": "Aumento",
-        "raises": "Aumentos"
+        "raises": "Aumentos",
+        "formula": "Fórmula",
+        "result": "Resultado"
       },
       "combat": {
         "attack": "Ataque",
         "melee": "Cuerpo a Cuerpo",
         "ranged": "A Distancia",
         "multiplier": "Multiplicador",
-        "woundPenalty": "Penalización por Heridas"
+        "woundPenalty": "Penalización por Heridas",
+        "armorTnBonus": "Bono de ND de Armadura",
+        "targeting": {
+          "vs": "vs",
+          "multipleTargets": "objetivos - ND no se establece automáticamente"
+        }
       },
       "wounds": {
         "wounds": "Heridas",
@@ -61,7 +68,14 @@
         "injured": "Herido",
         "crippled": "Incapacitado",
         "down": "Caído",
-        "out": "Fuera de Combate"
+        "out": "Fuera de Combate",
+        "maxWounds": "Heridas Máximas"
+      },
+      "stances": {
+        "fullDefense": "Defensa Total",
+        "fullDefenseDescription": "Realiza una tirada de Defensa/Reflejos. Añade la mitad del resultado (redondeado hacia arriba) a tu ND de Armadura durante esta postura.",
+        "cannotAttackDefense": "No puedes atacar mientras estés en Postura de Defensa",
+        "fullAttackBonus": "Postura de Ataque Total: +2k1"
       }
     },
     "character": {
@@ -287,9 +301,7 @@
         "tattoo": "Tatuaje",
         "tattoos": "Tatuajes",
         "traits": "Atributos",
-        "itemSheetTitle": "Hoja de Objeto",
-        "lock": "Bloquear Hoja",
-        "unlock": "Desbloquear Hoja"
+        "itemSheetTitle": "Hoja de Objeto"
       },
       "hints": {
         "leftRightToAdjust": "Izquierda y Derecha para Ajustar",

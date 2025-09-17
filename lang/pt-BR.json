@@ -36,14 +36,21 @@
         "unskilledRoll": "Rolagem Não Treinada",
         "emphasis": "Ênfase",
         "raise": "Aumento",
-        "raises": "Aumentos"
+        "raises": "Aumentos",
+        "formula": "Fórmula",
+        "result": "Resultado"
       },
       "combat": {
         "attack": "Ataque",
         "melee": "Corpo a Corpo",
         "ranged": "À Distância",
         "multiplier": "Multiplicador",
-        "woundPenalty": "Penalidade de Ferimento"
+        "woundPenalty": "Penalidade de Ferimento",
+        "armorTnBonus": "Bônus de ND da Armadura",
+        "targeting": {
+          "vs": "vs",
+          "multipleTargets": "alvos - ND não definido automaticamente"
+        }
       },
       "wounds": {
         "wounds": "Ferimentos",
@@ -61,7 +68,14 @@
         "injured": "Machucado",
         "crippled": "Aleijado",
         "down": "Caído",
-        "out": "Inconsciente"
+        "out": "Inconsciente",
+        "maxWounds": "Ferimentos Máximos"
+      },
+      "stances": {
+        "fullDefense": "Defesa Total",
+        "fullDefenseDescription": "Faça uma rolagem de Defesa/Reflexos. Adicione metade do resultado (arredondado para cima) ao seu ND de Armadura pela duração desta postura.",
+        "cannotAttackDefense": "Não é possível atacar enquanto estiver em Postura de Defesa",
+        "fullAttackBonus": "Postura de Ataque Total: +2k1"
       }
     },
     "character": {
@@ -287,9 +301,7 @@
         "tattoo": "Tatuagem",
         "tattoos": "Tatuagens",
         "traits": "Traços",
-        "itemSheetTitle": "Ficha de Item",
-        "lock": "Bloquear Ficha",
-        "unlock": "Desbloquear Ficha"
+        "itemSheetTitle": "Ficha de Item"
       },
       "hints": {
         "leftRightToAdjust": "Esquerda e Direita para Ajustar",

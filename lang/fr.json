@@ -36,14 +36,21 @@
         "unskilledRoll": "Jet Inexpérimenté",
         "emphasis": "Emphase",
         "raise": "Augmentation",
-        "raises": "Augmentations"
+        "raises": "Augmentations",
+        "formula": "Formule",
+        "result": "Résultat"
       },
       "combat": {
         "attack": "Attaque",
         "melee": "Mêlée",
         "ranged": "À distance",
         "multiplier": "Multiplicateur",
-        "woundPenalty": "Malus de Blessure"
+        "woundPenalty": "Malus de Blessure",
+        "armorTnBonus": "Bonus ND d'Armure",
+        "targeting": {
+          "vs": "vs",
+          "multipleTargets": "cibles - ND non défini automatiquement"
+        }
       },
       "wounds": {
         "wounds": "Blessures",
@@ -61,7 +68,14 @@
         "injured": "Blessé",
         "crippled": "Estropié",
         "down": "À terre",
-        "out": "Hors de combat"
+        "out": "Hors de combat",
+        "maxWounds": "Blessures Maximales"
+      },
+      "stances": {
+        "fullDefense": "Défense Totale",
+        "fullDefenseDescription": "Effectuez un jet de Défense/Réflexes. Ajoutez la moitié du résultat (arrondi au supérieur) à votre ND d'Armure pour la durée de cette posture.",
+        "cannotAttackDefense": "Impossible d'attaquer en Posture de Défense",
+        "fullAttackBonus": "Posture d'Attaque Totale : +2k1"
       }
     },
     "character": {
@@ -287,9 +301,7 @@
         "tattoo": "Tatouage",
         "tattoos": "Tatouages",
         "traits": "Traits",
-        "itemSheetTitle": "Fiche d'Objet",
-        "lock": "Verrouiller la Fiche",
-        "unlock": "Déverrouiller la Fiche"
+        "itemSheetTitle": "Fiche d'Objet"
       },
       "hints": {
         "leftRightToAdjust": "Gauche et Droite pour Ajuster",
