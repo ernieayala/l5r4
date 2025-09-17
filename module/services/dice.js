@@ -16,7 +16,7 @@
  *
  * **Roll Types Supported:**
  * - **Skill Rolls**: (Trait + Skill + mods)k(Trait + mods) with emphasis and wound penalties
- * - **Ring Rolls**: Ring-based tests and spell casting with affinity/deficiency
+ * - **Ring Rolls**: Ring-based tests (with optional spell slot spending when using Spell dialog)
  * - **Trait Rolls**: Pure trait tests with unskilled and void point options
  * - **Weapon Rolls**: Damage rolls with weapon-specific modifiers
  * - **NPC Rolls**: Simplified rolls for NPCs with optional void point restrictions
@@ -42,12 +42,13 @@
  *
  * **Code Navigation Guide:**
  * 1. `SkillRoll()` - Main skill roll function with targeting and void point support
- * 2. `RingRoll()` - Ring-based rolls for elemental tests and spell casting
+ * 2. `RingRoll()` - Ring-based rolls for elemental tests.
+ *    When invoked from the Spell dialog, it can optionally deduct elemental/void spell slots.
  * 3. `TraitRoll()` - Pure trait tests with unskilled option
  * 4. `NpcRoll()` - Simplified NPC roll function
  * 5. `TenDiceRule()` - Core Ten Dice Rule implementation
  * 6. `GetSkillOptions()` - Skill roll modifier dialog
- * 7. `GetSpellOptions()` - Ring/spell roll modifier dialog
+ * 7. `GetSpellOptions()` - Ring/spell roll modifier dialog (renders spell slot checkboxes)
  * 8. `GetTraitRollOptions()` - Trait roll modifier dialog
  * 9. `roll_parser()` - Inline roll notation parser for chat
  *
@@ -272,13 +273,18 @@ export async function SkillRoll({
 // ---------------------------------------------------------------------------
 
 /**
- * Execute a ring roll for elemental tests or spell casting.
- * Supports both normal ring tests and spell casting with affinity/deficiency modifiers.
- * Dialog allows choosing between ring test and spell casting paths.
+ * Execute a ring roll for elemental tests, with optional spell-slot spending when
+ * launched via the Spell dialog. The same dialog component is used for both the
+ * plain ring roll and the spell roll buttons; when rendered with `{ spell: true }`
+ * it includes `Use Spell Slot <Ring>` and `Use Void Spell Slot` checkboxes. If those
+ * are checked, this function deducts from `system.spellSlots.<ring>` or
+ * `system.spellSlots.void` before resolving the roll.
  * 
  * **Roll Types:**
  * - Normal Ring Roll: Standard ring-based test
- * - Spell Casting: Ring roll with spell-specific modifiers
+ * - Spell Casting: Not custom-modeled beyond resource spending yet; the dice math is
+ *   identical to a normal ring roll. Affinity/deficiency and school rank can be layered
+ *   in the future if desired.
  * 
  * **Spell Modifiers:**
  * - Affinity: Bonus for favorable elemental alignment
@@ -293,6 +299,10 @@ export async function SkillRoll({
  * @param {number} [opts.schoolRank] - Shugenja school rank for spell bonuses
  * @param {boolean} [opts.askForOptions=true] - Whether to show modifier dialog
  * @param {boolean} [opts.unskilled=false] - Apply unskilled penalties
+ *
+ * Dialog-derived options (when using the Spell dialog):
+ * - `choice.spellSlot` (boolean) - spend elemental spell slot for `systemRing`
+ * - `choice.voidSlot` (boolean)   - spend from `system.spellSlots.void`
  * @param {Actor} [opts.actor=null] - Actor for effects and void point spending
  * @returns {Promise<ChatMessage|false>} Created chat message or false if cancelled
  */
@@ -319,6 +329,8 @@ export async function RingRoll({
   let totalMod = 0;
   let voidRoll = false;
   let applyWoundPenalty = true;
+  let spellSlot = false;
+  let voidSlot = false;
   let __tnInput = 0, __raisesInput = 0;
 
   if (askForOptions !== optionsSetting) {
@@ -333,6 +345,9 @@ export async function RingRoll({
     keepMod = toInt(choice.keepMod);
     totalMod = toInt(choice.totalMod);
     voidRoll = !!choice.void;
+    // capture spell slot options when present on the form (spell dialog renders these fields)
+    spellSlot = !!choice.spellSlot;
+    voidSlot = !!choice.voidSlot;
 
     /** @added: Record TN/Raises and annotate the label. */
     __tnInput = toInt(choice.tn);
@@ -382,6 +397,54 @@ export async function RingRoll({
     label += ` ${game.i18n.localize("l5r4.mechanics.rings.void")}!`;
   }
 
+  // Deduct spell slots when requested (works with either Ring Roll or Spell Casting Roll button)
+  // Requires systemRing to identify which elemental slot to consume.
+  if ((spellSlot || voidSlot) && systemRing) {
+    const spendActor = actor
+      ?? canvas?.tokens?.controlled?.[0]?.actor
+      ?? game.user?.character
+      ?? (ChatMessage.getSpeaker()?.actor ? game.actors?.get(ChatMessage.getSpeaker().actor) : null);
+
+    if (!spendActor) {
+      ui.notifications?.warn(T("l5r4.ui.notifications.noActorForVoid"));
+      return false;
+    }
+
+    // Normalize ring key and validate
+    const ringKey = String(systemRing).toLowerCase();
+    const validRings = ["water", "air", "fire", "earth", "void"];
+    if (!validRings.includes(ringKey)) {
+      ui.notifications?.warn(`Invalid ring for spell slot: ${ringKey}`);
+      return false;
+    }
+
+    // Elemental spell slot spend
+    if (spellSlot) {
+      const path = `system.spellSlots.${ringKey}`;
+      const current = Number(foundry.utils.getProperty(spendActor, path) ?? 0) || 0;
+      if (current <= 0) {
+        const ringLabel = game.i18n.localize(`l5r4.mechanics.rings.${ringKey}`) || ringKey;
+        ui.notifications?.warn(`${ringLabel}: 0`);
+        return false;
+      }
+      await spendActor.update({ [path]: current - 1 }, { diff: true });
+      const ringDisplay = game.i18n.localize(`l5r4.mechanics.rings.${ringKey}`) || ringKey;
+      label += ` [${ringDisplay} Slot]`;
+    }
+
+    // Void spell slot spend
+    if (voidSlot) {
+      const vPath = "system.spellSlots.void";
+      const vCurrent = Number(foundry.utils.getProperty(spendActor, vPath) ?? 0) || 0;
+      if (vCurrent <= 0) {
+        ui.notifications?.warn(`${game.i18n.localize("l5r4.mechanics.rings.void")} ${game.i18n.localize("l5r4.magic.spells.voidSlot")} : 0`);
+        return false;
+      }
+      await spendActor.update({ [vPath]: vCurrent - 1 }, { diff: true });
+      label += ` [${game.i18n.localize("l5r4.mechanics.rings.void")} Slot]`;
+    }
+  }
+
   if (normalRoll) {
     const diceToRoll = toInt(ringRank) + rollMod;
     const diceToKeep = toInt(ringRank) + keepMod;
@@ -402,8 +465,9 @@ export async function RingRoll({
     return roll.toMessage({ speaker: ChatMessage.getSpeaker(), content });
   }
 
-  // Spell casting path would be implemented here if extended beyond normal ring rolls
-  // Current implementation uses standard ring roll with spell-specific modifiers
+  // Note: A dedicated spell-casting dice path is not implemented yet beyond the
+  // resource spending above. The current behavior always executes a standard
+  // ring roll with any applicable modifiers.
   return false;
 }
 
@@ -819,6 +883,18 @@ function _processTraitRollOptions(form) {
   };
 }
 
+/**
+ * Display the Ring/Spell roll options dialog.
+ * When rendered with `{ spell: true }`, the template includes spell-only options:
+ * - `spellSlot` (checkbox) to spend an elemental spell slot for the current `systemRing`
+ * - `voidSlot` (checkbox) to spend a Void spell slot (`system.spellSlots.void`)
+ *
+ * Returns a plain object with the same shape as `_processRingRollOptions` plus
+ * `spellSlot` and `voidSlot` when present.
+ *
+ * @param {string} ringName - Localized ring name for dialog title
+ * @returns {Promise<object>} Parsed form values
+ */
 async function GetSpellOptions(ringName) {
   const content = await R(CHAT_TEMPLATES.rollModifiers, { spell: true, ring: ringName });
   return await new Promise((resolve) => {
@@ -863,6 +939,25 @@ function _processSpellRollOptions(form) {
   };
 }
 
+/**
+ * Parse Ring/Spell dialog form values into a normalized options object.
+ * Always returns the base ring fields; when the dialog was rendered with
+ * `{ spell: true }` the returned object also includes `spellSlot` and `voidSlot`.
+ *
+ * @param {HTMLFormElement} form - Dialog form element
+ * @returns {{
+ *  applyWoundPenalty: boolean,
+ *  rollMod: number|string,
+ *  keepMod: number|string,
+ *  totalMod: number|string,
+ *  void: boolean,
+ *  tn: number|string,
+ *  raises: number|string,
+ *  spellSlot?: boolean,
+ *  voidSlot?: boolean,
+ *  normalRoll: boolean
+ * }}
+ */
 function _processRingRollOptions(form) {
   return {
     applyWoundPenalty: form.woundPenalty.checked,
@@ -872,6 +967,9 @@ function _processRingRollOptions(form) {
     void: form.void.checked,
     tn: form.tn?.value,
     raises: form.raises?.value,
+    // These fields exist when the dialog is rendered with { spell: true }
+    spellSlot: form.spellSlot?.checked ?? false,
+    voidSlot: form.voidSlot?.checked ?? false,
     normalRoll: true
   };
 }
