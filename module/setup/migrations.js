@@ -141,8 +141,10 @@ function buildSchemaUpdate(doc) {
     const fromVal = getByPath(patch, rule.from);
     const toVal = getByPath(patch, rule.to);
 
-    // Skip if source missing or already migrated (destination exists)
-    if (fromVal === undefined || toVal !== undefined) continue;
+    // Skip if source missing or already migrated (destination exists and has meaningful content)
+    // For string fields, empty string means not migrated yet
+    const hasValidTarget = toVal !== undefined && toVal !== "";
+    if (fromVal === undefined || hasValidTarget) continue;
 
     setByPath(patch, rule.to, fromVal);
     deleteByPath(patch, rule.from);
