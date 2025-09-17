@@ -506,6 +506,10 @@
     "lastMigratedVersion": {
       "name": "Last migrated version",
       "label": "Internal. Do not change."
+    },
+    "forceMigration": {
+      "name": "Force migration on startup",
+      "label": "Forces all migrations to run on next world load, regardless of version. Automatically resets after migration completes."
     }
   },
   "EFFECT": {
@@ -537,7 +541,7 @@
       "clan": "Clan",
       "disadvantage": "Disadvantage",
       "family": "Family",
-      "commonItem": "Item",
+      "item": "Item",
       "kata": "Kata",
       "kiho": "Kiho",
       "school": "School",

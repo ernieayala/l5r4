@@ -1,6 +1,10 @@
 .l5r4.pc,
 .l5r4.npc {
   .item-list {
+    display: flex;
+    flex-direction: column;
+    gap: 0.25rem;
+
     &.-header {
       background: var(--table-header-bg-color);
       border: 1px solid var(--table-header-border-color);
@@ -28,7 +32,7 @@
 
     &.-skill {
       .item {
-        grid-template-columns: 1fr 1fr 1fr 1fr 1fr 24px;
+        grid-template-columns: 1fr 60px 1fr 60px 1fr 24px;
       }
     }
 
@@ -51,6 +55,10 @@
     display: grid;
     grid-template-rows: min-content min-content;
     padding: 0 0.5rem;
+
+    &:nth-last-of-type(even) {
+      background-color: var(--table-row-color-even);
+    }
 
     &.-bio {
       background: var(--table-header-bg-color);
@@ -78,6 +86,10 @@
       border: 1px solid var(--input-border-color);
       height: 2em;
       min-height: 2em;
+    }
+
+    .title {
+      text-wrap: revert
     }
 
     .inline-control {

@@ -3,7 +3,7 @@
   data-document-id="{{coalesce docId this.id _id}}">
   <h4 class="flexrow -gap-sm title">
     {{#if inSheet}}
-      <a class="flex0" data-action="item-chat" title="{{localize "l5r4.ui.common.toChat"}}">{{name}}</a>
+      <a data-action="item-chat" title="{{name}}">{{name}}</a>
       {{#if system.school}}
         <img class="flex0" width="16px" height="16px" src="{{img}}" />
       {{/if}}
@@ -21,9 +21,14 @@
     <div><a class="button" data-action="roll-skill" title="{{localize "l5r4.ui.rolls.skillRoll"}}">{{system.rollDice}}k{{system.rollKeep}}</a></div>
     <div>{{system.emphasis}}</div>
     {{> "systems/l5r4/templates/cards/_partials/_expand.hbs"}}
-    {{#if system.description}}
+    {{#if (or system.description system.specialRules)}}
       <div class="expanded-text">
-        <p>{{{system.description}}}</p>
+        {{#if system.specialRules}}
+          <p>{{{system.specialRules}}}</p>
+        {{/if}}
+        {{#if system.description}}
+          <p>{{{system.description}}}</p>
+        {{/if}}
       </div>
     {{/if}}
   {{/if}}

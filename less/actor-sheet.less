@@ -81,8 +81,21 @@
 
     .slots {
       position: relative;
+      
+      &::after {
+        border-radius: 50%;
+        box-shadow: white 0 0 5px 2px inset;
+        content: "";
+        height: 32px;
+        left: 0;
+        pointer-events: none;
+        position: absolute;
+        top: 0;
+        width: 32px;
+      }
 
       img {
+        border-radius: 50%;
         height: 32px;
         width: 32px;
       }

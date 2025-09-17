@@ -3,7 +3,7 @@
   data-document-id="{{coalesce docId this.id _id}}">
   <h4 class="flexrow -gap-sm title">
     {{#if inSheet}}
-      <a data-action="item-chat" title="{{localize "l5r4.ui.common.toChat"}}">{{name}}</a>
+      <a data-action="item-chat" title="{{name}}">{{name}}</a>
     {{else}}
       {{name}}
     {{/if}}
@@ -13,9 +13,14 @@
     <div>{{system.mastery}}</div>
     <div>{{localize (concat "l5r4.magic.kiho." system.type)}}</div>
     {{> "systems/l5r4/templates/cards/_partials/_expand.hbs"}}
-    {{#if system.description}}
+    {{#if (or system.description system.specialRules)}}
       <div class="expanded-text">
-        <p>{{{system.description}}}</p>
+        {{#if system.specialRules}}
+          <p>{{{system.specialRules}}}</p>
+        {{/if}}
+        {{#if system.description}}
+          <p>{{{system.description}}}</p>
+        {{/if}}
       </div>
     {{/if}}
   {{/if}}

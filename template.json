@@ -190,7 +190,7 @@
       "disadvantage",
       "family",
       "school",
-      "commonItem",
+      "item",
       "kata",
       "kiho",
       "skill",
@@ -272,7 +272,7 @@
         "itemDescription"
       ]
     },
-    "commonItem": {
+    "item": {
       "templates": [
         "itemDescription"
       ]

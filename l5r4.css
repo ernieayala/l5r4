@@ -168,8 +168,21 @@ body > * {
 .l5r4.npc .section-title .slots {
   position: relative;
 }
+.l5r4.pc .section-title .slots::after,
+.l5r4.npc .section-title .slots::after {
+  border-radius: 50%;
+  box-shadow: white 0 0 5px 2px inset;
+  content: "";
+  height: 32px;
+  left: 0;
+  pointer-events: none;
+  position: absolute;
+  top: 0;
+  width: 32px;
+}
 .l5r4.pc .section-title .slots img,
 .l5r4.npc .section-title .slots img {
+  border-radius: 50%;
   height: 32px;
   width: 32px;
 }
@@ -294,6 +307,12 @@ body > * {
   min-width: 210px;
   width: 210px;
 }
+.l5r4.pc .item-list,
+.l5r4.npc .item-list {
+  display: flex;
+  flex-direction: column;
+  gap: 0.25rem;
+}
 .l5r4.pc .item-list.-header,
 .l5r4.npc .item-list.-header {
   background: var(--table-header-bg-color);
@@ -325,7 +344,7 @@ body > * {
 }
 .l5r4.pc .item-list.-skill .item,
 .l5r4.npc .item-list.-skill .item {
-  grid-template-columns: 1fr 1fr 1fr 1fr 1fr 24px;
+  grid-template-columns: 1fr 60px 1fr 60px 1fr 24px;
 }
 .l5r4.pc .item-list.-spell .item,
 .l5r4.npc .item-list.-spell .item {
@@ -342,6 +361,10 @@ body > * {
   display: grid;
   grid-template-rows: min-content min-content;
   padding: 0 0.5rem;
+}
+.l5r4.pc .item:nth-last-of-type(even),
+.l5r4.npc .item:nth-last-of-type(even) {
+  background-color: var(--table-row-color-even);
 }
 .l5r4.pc .item.-bio,
 .l5r4.npc .item.-bio {
@@ -367,6 +390,10 @@ body > * {
   border: 1px solid var(--input-border-color);
   height: 2em;
   min-height: 2em;
+}
+.l5r4.pc .item .title,
+.l5r4.npc .item .title {
+  text-wrap: revert;
 }
 .l5r4.pc .item .inline-control,
 .l5r4.npc .item .inline-control {
