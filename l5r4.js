@@ -139,6 +139,7 @@ Hooks.once("init", async () => {
       "armor",
       "bow",
       "clan",
+      "commonItem",
       "disadvantage",
       "family",
       "school",

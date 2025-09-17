@@ -187,6 +187,7 @@
       "armor",
       "bow",
       "clan",
+      "commonItem",
       "disadvantage",
       "family",
       "school",
@@ -272,7 +273,7 @@
         "itemDescription"
       ]
     },
-    "item": {
+    "commonItem": {
       "templates": [
         "itemDescription"
       ]
