@@ -51,6 +51,7 @@ export default class L5R4NpcSheet extends BaseActorSheet {
       case "roll-trait": return this._onTraitRoll(event, element);
       case "roll-attack": return this._onAttackRoll(event, element);
       case "roll-damage": return this._onDamageRoll(event, element);
+      case "roll-weapon-attack": return this._onWeaponAttackRoll(event, element);
       case "trait-rank": return this._onTraitAdjust(event, element, +1);
       case "void-points-dots": return this._onVoidPointsAdjust(event, element, +1);
     }

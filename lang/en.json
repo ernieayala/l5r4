@@ -69,7 +69,9 @@
       },
       "stances": {
         "fullDefense": "Full Defense",
-        "fullDefenseDescription": "Make a Defense/Reflexes roll. Add half the result (rounded up) to your Armor TN for the duration of this stance."
+        "fullDefenseDescription": "Make a Defense/Reflexes roll. Add half the result (rounded up) to your Armor TN for the duration of this stance.",
+        "cannotAttackDefense": "Cannot attack while in Defense Stance",
+        "fullAttackBonus": "Full Attack Stance: +2k1"
       }
     },
     "character": {

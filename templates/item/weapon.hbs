@@ -7,6 +7,41 @@
       </select>
     </div>
   </div>
+  {{#if isOwnedByCharacter}}
+    {{#if hasCharacterSkills}}
+      <div class="form-group">
+        <label>Associated Skill</label>
+        <div class="form-fields">
+          <select name="system.associatedSkill">
+            {{selectOptions skillOptions selected=system.associatedSkill}}
+          </select>
+        </div>
+      </div>
+    {{/if}}
+    <div class="form-group">
+      <label>{{#if hasCharacterSkills}}Fallback {{/if}}Trait</label>
+      <div class="form-fields">
+        <select name="system.fallbackTrait">
+          {{selectOptions config.traits selected=system.fallbackTrait localize=true}}
+        </select>
+      </div>
+    </div>
+  {{else}}
+    <div class="form-group">
+      <label>Associated Skill</label>
+      <div class="form-fields">
+        <input name="system.associatedSkill" type="text" value="{{system.associatedSkill}}" placeholder="e.g., Kenjutsu, Kyujutsu" disabled />
+      </div>
+    </div>
+    <div class="form-group">
+      <label>Fallback Trait</label>
+      <div class="form-fields">
+        <select name="system.fallbackTrait">
+          {{selectOptions config.traits selected=system.fallbackTrait localize=true}}
+        </select>
+      </div>
+    </div>
+  {{/if}}
   <div class="form-group">
     <label>{{localize "l5r4.mechanics.rolls.damageRoll"}}</label>
     <div class="form-fields">

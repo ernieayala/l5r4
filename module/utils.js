@@ -363,3 +363,53 @@ export function extractRollParams(el, actor) {
     description
   };
 }
+
+/**
+ * Resolve weapon skill/trait association for attack rolls.
+ * Checks if the weapon has an associated skill that the character possesses,
+ * otherwise falls back to the weapon's fallback trait.
+ * @param {Actor} actor - The actor making the attack
+ * @param {Item} weapon - The weapon item (weapon or bow type)
+ * @returns {{skillRank: number, traitValue: number, rollBonus: number, keepBonus: number, description: string}} Roll parameters
+ */
+export function resolveWeaponSkillTrait(actor, weapon) {
+  if (!weapon || !actor) {
+    return { skillRank: 0, traitValue: 0, rollBonus: 0, keepBonus: 0, description: "No weapon/actor" };
+  }
+
+  const weaponSystem = weapon.system || {};
+  const associatedSkill = weaponSystem.associatedSkill;
+  const fallbackTrait = weaponSystem.fallbackTrait || "agi";
+
+  // Try to find the associated skill on the character
+  let skill = null;
+  if (associatedSkill && associatedSkill.trim()) {
+    skill = actor.items.find(i => i.type === "skill" && i.name === associatedSkill);
+  }
+
+  if (skill) {
+    // Use the skill + its associated trait
+    const skillRank = toInt(skill.system?.rank || 0);
+    const skillTrait = skill.system?.trait || fallbackTrait;
+    const traitValue = getEffectiveTrait(actor, skillTrait);
+    
+    return {
+      skillRank,
+      traitValue,
+      rollBonus: skillRank + traitValue,
+      keepBonus: traitValue,
+      description: `${skill.name} (${skillRank}) + ${skillTrait.toUpperCase()} (${traitValue})`
+    };
+  } else {
+    // Fall back to trait only
+    const traitValue = getEffectiveTrait(actor, fallbackTrait);
+    
+    return {
+      skillRank: 0,
+      traitValue,
+      rollBonus: traitValue,
+      keepBonus: traitValue,
+      description: `${fallbackTrait.toUpperCase()} (${traitValue}) - No skill`
+    };
+  }
+}

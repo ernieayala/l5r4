@@ -14,7 +14,7 @@
  * @see https://foundryvtt.com/api/classes/foundry.applications.sheets.ActorSheetV2.html
  * @see https://foundryvtt.com/api/classes/foundry.applications.api.HandlebarsApplicationMixin.html
  */
-import { on, toInt, readWoundPenalty, normalizeTraitKey, getEffectiveTrait, extractRollParams } from "../utils.js";
+import { on, toInt, readWoundPenalty, normalizeTraitKey, getEffectiveTrait, extractRollParams, resolveWeaponSkillTrait } from "../utils.js";
 import * as Chat from "../services/chat.js";
 import * as Dice from "../services/dice.js";
 const { HandlebarsApplicationMixin } = foundry.applications.api;
@@ -421,6 +421,44 @@ export class BaseActorSheet extends HandlebarsApplicationMixin(foundry.applicati
     }
 
     return { roll: rollBonus, keep: keepBonus };
+  }
+
+  /**
+   * Handle weapon attack rolls using weapon skill/trait associations.
+   * Uses the weapon's associated skill if the character has it, otherwise falls back to the weapon's trait.
+   * @param {Event} event - The triggering event (shift-click for options)
+   * @param {HTMLElement} element - The element with weapon dataset attributes
+   * @returns {Promise<any>} Roll result from Dice.NpcRoll
+   */
+  _onWeaponAttackRoll(event, element) {
+    event.preventDefault();
+    const row = element.closest(".item");
+    const id = row?.dataset?.itemId || row?.dataset?.documentId || row?.dataset?.id;
+    const weapon = id ? this.actor.items.get(id) : null;
+    
+    if (!weapon || (weapon.type !== "weapon" && weapon.type !== "bow")) {
+      ui.notifications?.warn("No valid weapon found for attack roll");
+      return;
+    }
+
+    // Resolve weapon skill/trait association
+    const weaponSkill = resolveWeaponSkillTrait(this.actor, weapon);
+    
+    // Apply stance bonuses to attack rolls
+    const stanceBonuses = this._getStanceAttackBonuses();
+    
+    const rollName = `${this.actor.name}: ${weapon.name} Attack`;
+    const description = `${weaponSkill.description}${stanceBonuses.roll > 0 || stanceBonuses.keep > 0 ? ` (Full Attack: +${stanceBonuses.roll}k${stanceBonuses.keep})` : ''}`;
+
+    return Dice.NpcRoll({
+      woundPenalty: readWoundPenalty(this.actor),
+      diceRoll: weaponSkill.rollBonus + stanceBonuses.roll,
+      diceKeep: weaponSkill.keepBonus + stanceBonuses.keep,
+      rollName,
+      description,
+      toggleOptions: event.shiftKey,
+      rollType: "attack"
+    });
   }
 
   /**

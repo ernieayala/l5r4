@@ -231,7 +231,9 @@
       "arrow": "willow",
       "damageRoll": 0,
       "damageKeep": 0,
-      "explodesOn": 10
+      "explodesOn": 10,
+      "associatedSkill": "",
+      "fallbackTrait": "ref"
     },
     "clan": {
       "templates": [
@@ -327,7 +329,9 @@
       "damageKeep": 0,
       "size": "medium",
       "damageFormula": "",
-      "explodesOn": 10
+      "explodesOn": 10,
+      "associatedSkill": "",
+      "fallbackTrait": "agi"
     }
   }
 }

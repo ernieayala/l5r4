@@ -559,7 +559,9 @@ export async function NpcRoll({
   traitName = null,
   traitRank = null,
   ringName = null,
-  ringRank = null
+  ringRank = null,
+  woundPenalty = 0,
+  rollType = null
 } = {}) {
   const messageTemplate = CHAT_TEMPLATES.simpleRoll;
   const noVoid = !game.settings.get(SYS_ID, "allowNpcVoidPoints");
@@ -583,6 +585,8 @@ export async function NpcRoll({
   let keepMod = toInt(check.keepMod);
   let totalMod = toInt(check.totalMod);
   const unskilled = !!check.unskilled && !!traitName;
+
+  // Wound penalties affect TN for attack rolls (applied later), not dice pool
 
   if (check.void && !noVoid) {
     // NPCs don’t track resource spending here — just mirror +1k1 like PCs and annotate.
@@ -608,7 +612,11 @@ export async function NpcRoll({
   const rollHtml = await roll.render();
 
   // Calculate target number result matching PC roll format
-  const effTN = toInt(check.tn) + (toInt(check.raises) * 5);
+  let effTN = toInt(check.tn) + (toInt(check.raises) * 5);
+  // Apply wound penalties to TN if this is an attack roll and a TN was provided
+  if (rollType === "attack" && effTN > 0) {
+    effTN += toInt(woundPenalty);
+  }
   const tnResult = (effTN > 0)
     ? { effective: effTN, raises: toInt(check.raises) || 0, outcome: ((roll.total ?? 0) >= effTN) ? T("l5r4.mechanics.rolls.success") : T("l5r4.mechanics.rolls.failure") }
     : null;

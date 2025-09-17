@@ -165,6 +165,27 @@ export default class L5R4ItemSheet extends HandlebarsApplicationMixin(ItemSheetV
     /** Expose embedded Active Effects so the template can render them. */
     context.effects = this.item.effects?.contents ?? [];
 
+    // For weapons and bows, provide character skills if owned by an actor
+    if ((item.type === "weapon" || item.type === "bow") && item.parent?.type === "pc") {
+      const actor = item.parent;
+      const skills = actor.items.filter(i => i.type === "skill");
+      
+      // Create skill options for dropdown
+      context.skillOptions = {};
+      context.skillOptions[""] = "— No Skill —"; // Default empty option
+      
+      for (const skill of skills) {
+        context.skillOptions[skill.name] = skill.name;
+      }
+      
+      context.hasCharacterSkills = skills.length > 0;
+      context.isOwnedByCharacter = true;
+    } else {
+      context.hasCharacterSkills = false;
+      context.isOwnedByCharacter = false;
+      context.skillOptions = {};
+    }
+
     return context;
   }
 

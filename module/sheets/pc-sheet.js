@@ -17,7 +17,7 @@
  */
 
 import { SYS_ID, TEMPLATE } from "../config.js";
-import { T, getSortPref, on, setSortPref, sortWithPref, toInt, applyRankPointsDelta } from "../utils.js";
+import { T, getSortPref, on, setSortPref, sortWithPref, toInt, applyRankPointsDelta, resolveWeaponSkillTrait, readWoundPenalty } from "../utils.js";
 
 import * as Dice from "../services/dice.js";
 import * as Chat from "../services/chat.js";
@@ -139,6 +139,7 @@ export default class L5R4PcSheet extends BaseActorSheet {
       case "roll-skill": return this._onSkillRoll(event, element);
       case "roll-trait": return this._onTraitRoll(event, element);
       case "roll-weapon": return this._onWeaponRoll(event, element);
+      case "roll-weapon-attack": return this._onWeaponAttackRoll(event, element);
       case "rp-step": return this._onRankPointsStep(event, element, +0.1);
       case "school-link": return this._onSchoolLink(event);
       case "spell-slot": return this._onSpellSlotAdjust(event, element, +1);
@@ -427,7 +428,22 @@ export default class L5R4PcSheet extends BaseActorSheet {
       },
       // Item buckets used elsewhere
       armors: sortWithPref(byType("armor"), { name:(it)=>String(it?.name??""), bonus:(it)=>Number(it?.system?.bonus??0)||0, reduction:(it)=>Number(it?.system?.reduction??0)||0, equipped:(it)=>it?.system?.equipped?1:0 }, getSortPref(actorObj.id, "armors", ["name","bonus","reduction","equipped"], "name"), game.i18n?.lang),
-      bows:   sortWithPref(byType("bow"), {   name:(it)=>String(it?.name??""), damage:(it)=> (toInt(it?.system?.damageRoll)*10)+toInt(it?.system?.damageKeep), size:(it)=>String(it?.system?.size??"") }, getSortPref(actorObj.id, "weapons", ["name","damage","size"], "name"), game.i18n?.lang),
+      bows:   sortWithPref(byType("bow").map(bow => {
+        const weaponSkill = resolveWeaponSkillTrait(this.actor, bow);
+        // Preserve the original Item document so id/_id remain available to templates
+        bow.attackFormula = `${weaponSkill.rollBonus}k${weaponSkill.keepBonus}`;
+        
+        // Calculate attack formula with stance bonuses for Full Attack Stance
+        if (actorObj.system._stanceEffects?.fullAttack) {
+          const stanceRollBonus = weaponSkill.rollBonus + 2;
+          const stanceKeepBonus = weaponSkill.keepBonus + 1;
+          bow.attackFormulaWithStance = `${stanceRollBonus}k${stanceKeepBonus}`;
+        } else {
+          bow.attackFormulaWithStance = bow.attackFormula;
+        }
+        
+        return bow;
+      }), {   name:(it)=>String(it?.name??""), damage:(it)=> (toInt(it?.system?.damageRoll)*10)+toInt(it?.system?.damageKeep), size:(it)=>String(it?.system?.size??"") }, getSortPref(actorObj.id, "weapons", ["name","damage","size"], "name"), game.i18n?.lang),
       disadvantages: byType("disadvantage"),
       items: sortWithPref(all.filter((i) => i.type === "item" || i.type === "commonItem"), { name:(it)=>String(it?.name??"") }, getSortPref(actorObj.id, "items", ["name"], "name"), game.i18n?.lang),
       katas: byType("kata"),
@@ -436,7 +452,22 @@ export default class L5R4PcSheet extends BaseActorSheet {
       spells,
       tattoos: byType("tattoo"),
       techniques: byType("technique"),
-      weapons: sortWithPref(byType("weapon"), { name:(it)=>String(it?.name??""), damage:(it)=> (toInt(it?.system?.damageRoll)*10)+toInt(it?.system?.damageKeep), size:(it)=>String(it?.system?.size??"") }, getSortPref(actorObj.id, "weapons", ["name","damage","size"], "name"), game.i18n?.lang),
+      weapons: sortWithPref(byType("weapon").map(weapon => {
+        const weaponSkill = resolveWeaponSkillTrait(this.actor, weapon);
+        // Preserve the original Item document so id/_id remain available to templates
+        weapon.attackFormula = `${weaponSkill.rollBonus}k${weaponSkill.keepBonus}`;
+        
+        // Calculate attack formula with stance bonuses for Full Attack Stance
+        if (actorObj.system._stanceEffects?.fullAttack) {
+          const stanceRollBonus = weaponSkill.rollBonus + 2;
+          const stanceKeepBonus = weaponSkill.keepBonus + 1;
+          weapon.attackFormulaWithStance = `${stanceRollBonus}k${stanceKeepBonus}`;
+        } else {
+          weapon.attackFormulaWithStance = weapon.attackFormula;
+        }
+        
+        return weapon;
+      }), { name:(it)=>String(it?.name??""), damage:(it)=> (toInt(it?.system?.damageRoll)*10)+toInt(it?.system?.damageKeep), size:(it)=>String(it?.system?.size??"") }, getSortPref(actorObj.id, "weapons", ["name","damage","size"], "name"), game.i18n?.lang),
       masteries
     };
   }
@@ -864,7 +895,9 @@ export default class L5R4PcSheet extends BaseActorSheet {
       ringName,
       systemRing,
       askForOptions: event.shiftKey,
-      actor: this.actor
+      actor: this.actor,
+      // Ensure wound penalties apply to ring rolls like skills/traits
+      woundPenalty: readWoundPenalty(this.actor)
     });
   }
 

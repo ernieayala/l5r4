@@ -10,8 +10,20 @@
     {{/unless}}
   </h4>
   {{#if inSheet}}
-    <div><a class="button" data-action="roll-weapon" title="{{localize "l5r4.mechanics.rolls.damageRoll"}}">{{system.damageRoll}}k{{system.damageKeep}}</a></div>
-    <div>{{system.size}}</div>
+    {{!-- Check if actor is in defensive stance that prevents attacks --}}
+    {{#if (or @root.system._stanceEffects.defense @root.system._stanceEffects.fullDefense)}}
+      <div><span class="button disabled" title="{{localize "l5r4.mechanics.stances.cannotAttackDefense"}}">{{attackFormula}}</span></div>
+      <div><span class="button disabled" title="{{localize "l5r4.mechanics.stances.cannotAttackDefense"}}">{{system.damageRoll}}k{{system.damageKeep}}</span></div>
+    {{else}}
+      {{!-- Show attack bonus from Full Attack Stance if active --}}
+      {{#if @root.system._stanceEffects.fullAttack}}
+        {{!-- Calculate additive values by adding stance bonus to base formula --}}
+        <div><a class="button" data-action="roll-weapon-attack" title="{{localize "l5r4.mechanics.rolls.attackRoll"}} ({{localize "l5r4.mechanics.stances.fullAttackBonus"}})" data-stance-bonus="2,1">{{attackFormulaWithStance}}</a></div>
+      {{else}}
+        <div><a class="button" data-action="roll-weapon-attack" title="{{localize "l5r4.mechanics.rolls.attackRoll"}}">{{attackFormula}}</a></div>
+      {{/if}}
+      <div><a class="button" data-action="roll-weapon" title="{{localize "l5r4.mechanics.rolls.damageRoll"}}">{{system.damageRoll}}k{{system.damageKeep}}</a></div>
+    {{/if}}
     {{#if ranged}}
         <select data-action="inline-edit" data-field="system.arrow">{{selectOptions @root.config.arrows selected=system.arrow localize=true}}</select>
     {{/if}}
