@@ -55,8 +55,23 @@
     }
 
     .ring-roll {
+      position: relative;
+
+      &::after {
+        border-radius: 50%;
+        box-shadow: white 0 0 5px 2px inset;
+        content: "";
+        height: 100%;
+        left: 0;
+        position: absolute;
+        top: 0;
+        width: 100%;
+      }
+
       img {
+        border-radius: 50%;
         height: 96px;
+        position: relative;
         width: 96px;
       }
     }

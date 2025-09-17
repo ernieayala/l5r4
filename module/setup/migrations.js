@@ -178,6 +178,29 @@ async function applySchemaMapToDocs(docs, label) {
 }
 
 /**
+ * Normalize item values for compatibility (non-destructive minimal updates).
+ * Currently ensures size casing is normalized for weapon and bow items.
+ *
+ * @param {Array<Item>} docs - Items to normalize
+ * @param {string} label - Descriptive label for logging
+ */
+async function normalizeItems(docs, label) {
+  for (const doc of docs) {
+    try {
+      if (doc.documentName !== "Item") continue;
+      const t = doc.type;
+      if (t !== "weapon" && t !== "bow") continue;
+      const sz = doc.system?.size;
+      if (typeof sz === "string" && (sz !== sz.toLowerCase())) {
+        await doc.update({ "system.size": sz.toLowerCase() }, { diff: true, render: false });
+      }
+    } catch (e) {
+      console.warn("L5R4", "Normalization failed", { label, id: doc.id, type: doc.type, error: e });
+    }
+  }
+}
+
+/**
  * Icon file relocation mapping for migration from flat to organized structure.
  * Maps original filenames to their new subfolder locations under PATHS.icons.
  * This maintains the migration logic independently of config aliases to avoid
@@ -384,19 +407,39 @@ async function migrateCompendiumIconPaths() {
 export async function runMigrations(fromVersion, toVersion) {
   if (!game.user?.isGM) return;
 
-  // Phase 1: Schema migrations for world documents
+  // Phase 1: Schema migrations for world documents (Actors and Items)
   await applySchemaMapToDocs(game.actors.contents, "world-actors");
   await applySchemaMapToDocs(game.items.contents, "world-items");
+  // Normalize world items after schema changes
+  await normalizeItems(game.items.contents, "world-items-norm");
+
+  // CRITICAL: Phase 1.5 - Migrate embedded items on actors
+  for (const actor of game.actors) {
+    if (actor.items.size > 0) {
+      await applySchemaMapToDocs(actor.items.contents, `actor-items:${actor.id}`);
+      await normalizeItems(actor.items.contents, `actor-items-norm:${actor.id}`);
+    }
+  }
 
   // Phase 2: Schema migrations for compendium packs
   for (const pack of game.packs) {
-    const meta = pack.metadata || pack.documentName ? pack : null;
-    const docType = meta?.documentName ?? meta?.type; // v13 uses metadata.documentName
+    const docType = pack.metadata?.type ?? pack.documentName;
     if (docType !== "Actor" && docType !== "Item") continue;
 
     try {
       const docs = await pack.getDocuments();
       await applySchemaMapToDocs(docs, `pack:${pack.collection}`);
+      await normalizeItems(docs, `pack-norm:${pack.collection}`);
+
+      // Also migrate items embedded in compendium actors
+      if (docType === "Actor") {
+        for (const actor of docs) {
+          if (actor.items.size > 0) {
+            await applySchemaMapToDocs(actor.items.contents, `compendium-actor-items:${pack.collection}:${actor.id}`);
+            await normalizeItems(actor.items.contents, `compendium-actor-items-norm:${pack.collection}:${actor.id}`);
+          }
+        }
+      }
     } catch (e) {
       console.warn("L5R4", "Schema remap pack failed", { pack: pack.collection, error: e });
     }

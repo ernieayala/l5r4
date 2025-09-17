@@ -49,14 +49,18 @@ export const SCHEMA_MAP = [
   // Actor migrations: Universal rules applied to all actor types
   { docType: "Actor", type: "*",   from: "system.wounds.heal_rate",       to: "system.wounds.healRate" },
   { docType: "Actor", type: "*",   from: "system.wound_lvl",              to: "system.woundLevels" },
+  { docType: "Actor", type: "*",   from: "system.armor.armor_tn",         to: "system.armor.armorTn" },
+  
   // Actor migrations: Player Character specific field updates
   { docType: "Actor", type: "pc",  from: "system.armor_tn",               to: "system.armorTn" },
   { docType: "Actor", type: "pc",  from: "system.initiative.roll_mod",    to: "system.initiative.rollMod" },
   { docType: "Actor", type: "pc",  from: "system.initiative.keep_mod",    to: "system.initiative.keepMod" },
   { docType: "Actor", type: "pc",  from: "system.initiative.total_mod",   to: "system.initiative.totalMod" },
   { docType: "Actor", type: "pc",  from: "system.shadow_taint",           to: "system.shadowTaint" },
-  // Actor migrations: Non-Player Character specific field updates
+  
+  // Actor migrations: Non-Player Character specific field updates  
   { docType: "Actor", type: "npc", from: "system.armor.armor_tn",         to: "system.armor.armorTn" },
+  
   // Item migrations: Skill-specific field naming convention updates
   { docType: "Item", type: "skill", from: "system.mastery_3",             to: "system.mastery3" },
   { docType: "Item", type: "skill", from: "system.mastery_5",             to: "system.mastery5" },
@@ -64,5 +68,9 @@ export const SCHEMA_MAP = [
   { docType: "Item", type: "skill", from: "system.insight_bonus",         to: "system.insightBonus" },
   { docType: "Item", type: "skill", from: "system.roll_bonus",            to: "system.rollBonus" },
   { docType: "Item", type: "skill", from: "system.keep_bonus",            to: "system.keepBonus" },
-  { docType: "Item", type: "skill", from: "system.total_bonus",           to: "system.totalBonus" }
+  { docType: "Item", type: "skill", from: "system.total_bonus",           to: "system.totalBonus" },
+  
+  // Item migrations: Armor field typo fixes and naming updates
+  { docType: "Item", type: "armor", from: "system.equiped",               to: "system.equipped" },
+  { docType: "Item", type: "armor", from: "system.specialRues",           to: "system.specialRules" }
 ];
