@@ -436,6 +436,7 @@ const _l5r4 = {
     // Generic conditions
     { id: "blinded",   name: "EFFECT.blinded",   img: "icons/svg/blind.svg" },
     { id: "dazed",     name: "EFFECT.dazed",     img: "icons/svg/stoned.svg" },
+    { id: "dead",      name: "EFFECT.dead",      img: "icons/svg/skull.svg" },
     { id: "entangled", name: "EFFECT.entangled", img: "icons/svg/net.svg" },
     { id: "fasting",   name: "EFFECT.fasting",   img: "icons/svg/silenced.svg" },
     { id: "fatigued",  name: "EFFECT.fatigued",  img: "icons/svg/sleep.svg" },

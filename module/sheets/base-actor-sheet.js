@@ -1,18 +1,75 @@
 /**
- * Base Actor Sheet for L5R4 - Foundry VTT v13+
+ * Base Actor Sheet for L5R4 - Foundry VTT v13+.
  * 
- * Provides shared functionality for all L5R4 actor sheets including:
- * - Event delegation and data-action handling
- * - Void points management with visual dots
- * - Common item CRUD operations (create, edit, delete, expand)
- * - Shared roll methods (skill, attack, damage, trait rolls)
- * - Context menu setup for item management
- * - Base trait adjustment logic
- * 
- * Extended by PC and NPC sheets for specific actor type behaviors.
- * 
- * @see https://foundryvtt.com/api/classes/foundry.applications.sheets.ActorSheetV2.html
- * @see https://foundryvtt.com/api/classes/foundry.applications.api.HandlebarsApplicationMixin.html
+ * This class provides shared functionality for all L5R4 actor sheets including
+ * event delegation, void point management, item CRUD operations, and common
+ * roll methods. Extended by PC and NPC sheets for specific actor behaviors.
+ *
+ * ## Core Responsibilities:
+ * - **Event Delegation**: Centralized data-action attribute handling system
+ * - **Void Point Management**: Visual dot interface with click adjustment
+ * - **Item CRUD Operations**: Create, edit, delete, and expand item functionality
+ * - **Roll Integration**: Shared roll methods for skills, attacks, damage, and traits
+ * - **Context Menus**: Right-click item management with edit/delete options
+ * - **Stance Integration**: Automatic stance bonus application to attack rolls
+ *
+ * ## ApplicationV2 Architecture:
+ * - **HandlebarsApplicationMixin**: Template rendering with Handlebars integration
+ * - **ActorSheetV2**: Modern Foundry sheet base class with improved lifecycle
+ * - **Action Delegation**: Uses data-action attributes for clean event handling
+ * - **Lifecycle Hooks**: _onRender() for post-render setup and event binding
+ * - **Context Preparation**: Subclasses override _prepareContext() for template data
+ *
+ * ## Event System:
+ * The base sheet implements a sophisticated event delegation system:
+ * - `data-action` attributes trigger corresponding `_onAction()` methods
+ * - Right-click events trigger `_onActionContext()` methods
+ * - Change events trigger `_onActionChange()` methods
+ * - Prevents duplicate event binding on re-renders
+ * - Supports both click and contextmenu interactions
+ *
+ * ## Void Points System:
+ * Implements L5R4's void point mechanics with visual feedback:
+ * - 9-dot visual interface with filled/empty states
+ * - Left-click to spend, right-click to regain
+ * - Range validation [0..9] with immediate persistence
+ * - Visual state synchronization after actor updates
+ * - Safe DOM manipulation with null checks
+ *
+ * ## Item Management:
+ * Provides comprehensive item management functionality:
+ * - **Creation**: Type-specific item creation with subtype dialogs
+ * - **Editing**: Direct sheet opening for item modification
+ * - **Deletion**: Safe embedded document removal
+ * - **Expansion**: Toggle item detail visibility with chevron icons
+ * - **Inline Editing**: Direct field editing with dtype coercion
+ * - **Context Menus**: Right-click edit/delete options
+ *
+ * ## Roll Integration:
+ * Centralizes roll logic shared between PC and NPC sheets:
+ * - **Skill Rolls**: Trait + skill rank with emphasis and wound penalties
+ * - **Attack Rolls**: Weapon attacks with stance bonuses and targeting
+ * - **Damage Rolls**: Weapon damage with trait bonuses
+ * - **Trait Rolls**: Pure trait tests with unskilled options
+ * - **Stance Bonuses**: Automatic Full Attack stance bonus application
+ *
+ * ## API References:
+ * @see {@link https://foundryvtt.com/api/classes/foundry.applications.sheets.ActorSheetV2.html|ActorSheetV2}
+ * @see {@link https://foundryvtt.com/api/classes/foundry.applications.api.HandlebarsApplicationMixin.html|HandlebarsApplicationMixin}
+ * @see {@link https://foundryvtt.com/api/classes/foundry.abstract.Document.html#update|Document.update}
+ * @see {@link https://foundryvtt.com/api/classes/foundry.applications.ux.ContextMenu.html|ContextMenu}
+ *
+ * ## Code Navigation Guide:
+ * 1. `_onRender()` - Event delegation setup and DOM binding
+ * 2. `_onAction()`, `_onActionContext()`, `_onActionChange()` - Action handler stubs
+ * 3. `_onVoidPointsAdjust()` - Void point click handling
+ * 4. `_paintVoidPointsDots()` - Visual void point dot rendering
+ * 5. `_onItemCreate()`, `_onItemEdit()`, `_onItemDelete()` - Item CRUD operations
+ * 6. `_onItemExpand()` - Item detail expansion toggle
+ * 7. `_onInlineItemEdit()` - Direct field editing with type coercion
+ * 8. `_setupItemContextMenu()` - Right-click context menu setup
+ * 9. `_onSkillRoll()`, `_onAttackRoll()`, `_onDamageRoll()` - Shared roll methods
+ * 10. `_getStanceAttackBonuses()` - Stance bonus calculation for attacks
  */
 import { on, toInt, readWoundPenalty, normalizeTraitKey, getEffectiveTrait, extractRollParams, resolveWeaponSkillTrait } from "../utils.js";
 import * as Chat from "../services/chat.js";
@@ -360,7 +417,8 @@ export class BaseActorSheet extends HandlebarsApplicationMixin(foundry.applicati
       skillName: item.name,
       askForOptions: event.shiftKey,
       npc: isNpc,
-      skillTrait: traitKey
+      skillTrait: traitKey,
+      rollType: item.type === "weapon" || item.type === "bow" ? "attack" : null
     });
   }
 
@@ -394,7 +452,8 @@ export class BaseActorSheet extends HandlebarsApplicationMixin(foundry.applicati
       rollName,
       description,
       toggleOptions: event.shiftKey,
-      rollType: "attack"
+      rollType: "attack",
+      actor: this.actor
     });
   }
 
@@ -447,8 +506,11 @@ export class BaseActorSheet extends HandlebarsApplicationMixin(foundry.applicati
     // Apply stance bonuses to attack rolls
     const stanceBonuses = this._getStanceAttackBonuses();
     
+    // Check if weapon attack is untrained (no skill rank)
+    const isUntrained = weaponSkill.skillRank === 0;
+    
     const rollName = `${this.actor.name}: ${weapon.name} Attack`;
-    const description = `${weaponSkill.description}${stanceBonuses.roll > 0 || stanceBonuses.keep > 0 ? ` (Full Attack: +${stanceBonuses.roll}k${stanceBonuses.keep})` : ''}`;
+    const description = `${weaponSkill.description}${stanceBonuses.roll > 0 || stanceBonuses.keep > 0 ? ` (Full Attack: +${stanceBonuses.roll}k${stanceBonuses.keep})` : ''}${isUntrained ? ' (Untrained)' : ''}`;
 
     return Dice.NpcRoll({
       woundPenalty: readWoundPenalty(this.actor),
@@ -457,7 +519,9 @@ export class BaseActorSheet extends HandlebarsApplicationMixin(foundry.applicati
       rollName,
       description,
       toggleOptions: event.shiftKey,
-      rollType: "attack"
+      rollType: "attack",
+      actor: this.actor,
+      untrained: isUntrained
     });
   }
 
@@ -480,7 +544,8 @@ export class BaseActorSheet extends HandlebarsApplicationMixin(foundry.applicati
       rollName,
       description: params.description,
       toggleOptions: event.shiftKey,
-      rollType: "damage"
+      rollType: "damage",
+      actor: this.actor
     });
   }
 

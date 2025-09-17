@@ -1,18 +1,62 @@
 /**
- * L5R4 Utilities Module for Foundry VTT v13+
+ * L5R4 Utilities Module for Foundry VTT v13+.
  * 
- * Provides shared utility functions used across the L5R4 system including:
- * - Localization helpers (T, F, R)
- * - Type coercion and math utilities (toInt, clamp, sum)
- * - DOM manipulation helpers (on, qs, qsa)
- * - Sorting and preference management
- * - Rank/points conversion utilities
- * - Actor trait and wound penalty calculations
- * 
- * Import order: external → shared internal (config, utils) → feature modules → file-local helpers
- * No side effects on import.
+ * This module provides shared utility functions used across the L5R4 system including
+ * localization helpers, type coercion, DOM manipulation, sorting preferences, and
+ * actor-specific calculations. Designed as a pure utility module with no side effects.
  *
- * @see https://foundryvtt.com/api/
+ * ## Core Responsibilities:
+ * - **Localization**: Translation key resolution and template rendering (T, F, R)
+ * - **Type Safety**: Safe type coercion with fallbacks (toInt, clamp, sum)
+ * - **DOM Utilities**: Event delegation and element selection helpers (on, qs, qsa)
+ * - **Sorting System**: Per-user, per-actor item sorting preferences with persistence
+ * - **Data Conversion**: Rank/points decimal conversion for skill advancement
+ * - **Actor Utilities**: Trait normalization, wound penalty calculation, weapon skill resolution
+ *
+ * ## Sorting Preference System:
+ * The module implements a sophisticated sorting system that:
+ * - Stores preferences per-user, per-actor, per-scope (e.g., "skills", "weapons")
+ * - Supports multiple sort keys with primary/secondary ordering
+ * - Uses locale-aware string comparison for internationalization
+ * - Provides backward compatibility with legacy preference storage
+ * - Allows toggling between ascending/descending on repeated clicks
+ *
+ * ## Rank/Points System:
+ * L5R4 uses a decimal rank system (e.g., 3.7 = Rank 3, 7 points toward Rank 4):
+ * - `rankPointsToValue()`: Converts {rank: 3, points: 7} → 3.7
+ * - `valueToRankPoints()`: Converts 3.7 → {rank: 3, points: 7, value: 3.7}
+ * - `applyRankPointsDelta()`: Applies +/-0.1 increments with normalization
+ * - Handles edge cases like 10.0 (max rank) and point overflow
+ *
+ * ## Actor Trait System:
+ * Provides utilities for L5R4's complex trait system:
+ * - `normalizeTraitKey()`: Converts various trait formats to system keys
+ * - `getEffectiveTrait()`: Gets post-Active Effects trait values
+ * - `resolveWeaponSkillTrait()`: Determines weapon attack dice pools
+ * - Supports both PC (derived traits) and NPC (base traits) actors
+ *
+ * ## Design Principles:
+ * - **Pure Functions**: No side effects on import or function calls
+ * - **Defensive Programming**: Safe fallbacks for all type coercion
+ * - **Internationalization**: Locale-aware string operations throughout
+ * - **Performance**: Efficient algorithms for sorting and data conversion
+ * - **Compatibility**: Backward compatibility with legacy data structures
+ *
+ * ## API References:
+ * @see {@link https://foundryvtt.com/api/classes/foundry.abstract.Document.html#update|Document.update}
+ * @see {@link https://foundryvtt.com/api/classes/foundry.documents.BaseUser.html#getFlag|User.getFlag}
+ * @see {@link https://foundryvtt.com/api/classes/foundry.documents.BaseUser.html#setFlag|User.setFlag}
+ * @see {@link https://foundryvtt.com/api/functions/foundry.applications.handlebars.renderTemplate.html|renderTemplate}
+ *
+ * ## Code Navigation Guide:
+ * 1. `T()`, `F()`, `R()` - Localization and template rendering helpers
+ * 2. `toInt()`, `clamp()`, `sum()` - Type coercion and math utilities
+ * 3. `on()`, `qs()`, `qsa()` - DOM manipulation helpers
+ * 4. `getSortPref()`, `setSortPref()`, `sortWithPref()` - Sorting preference system
+ * 5. `rankPointsToValue()`, `valueToRankPoints()`, `applyRankPointsDelta()` - Rank/points conversion
+ * 6. `readWoundPenalty()` - Actor wound penalty calculation
+ * 7. `normalizeTraitKey()`, `getEffectiveTrait()` - Trait system utilities
+ * 8. `resolveWeaponSkillTrait()` - Weapon attack dice pool resolution
  */
 
 import { SYS_ID } from "./config.js";

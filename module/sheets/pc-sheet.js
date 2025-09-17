@@ -1,19 +1,57 @@
 /**
- * L5R4 PC Sheet — ApplicationV2 conversion (Foundry VTT v13+)
- * Extends BaseActorSheet for shared functionality with NPC sheet.
+ * L5R4 PC Sheet implementation for Foundry VTT v13+.
  * 
- * Features:
- * - Migrated from Application V1 (FormApplication/ActorSheet) to ActorSheetV2
- * - Uses HandlebarsApplicationMixin for template rendering
- * - Replaces getData -> _prepareContext, activateListeners -> _onRender
- * - Keeps drag/drop (clan/family) with TextEditor.getDragEventData
- * - Complex trait adjustment with family bonuses and XP logic
- * - Advanced sorting and filtering for skills, spells, advantages
+ * This class extends BaseActorSheet to provide PC-specific functionality including
+ * complex trait management with family bonuses, experience tracking, item sorting,
+ * and advanced character sheet interactions.
  *
- * API refs: https://foundryvtt.com/api/
- * - ActorSheetV2: https://foundryvtt.com/api/classes/foundry.applications.sheets.ActorSheetV2.html
- * - BaseActorSheet: ./base-actor-sheet.js (provides shared roll methods and CRUD operations)
- * - TextEditor.getDragEventData: https://foundryvtt.com/api/classes/foundry.applications.ux.TextEditor.html#static-getDragEventData
+ * ## Core Responsibilities:
+ * - **Trait Management**: Complex trait adjustment with family bonuses and XP calculation
+ * - **Item Organization**: Advanced sorting and filtering for skills, spells, advantages
+ * - **Experience Tracking**: Automatic XP calculation and logging for character advancement
+ * - **Bio Item Handling**: Drag/drop support for clan, family, and school items
+ * - **Sheet Locking**: Toggle edit mode to prevent accidental changes
+ * - **Void Point Management**: Visual dot interface for void point tracking
+ *
+ * ## ApplicationV2 Migration:
+ * - **Template System**: Uses HandlebarsApplicationMixin for template rendering
+ * - **Context Preparation**: Replaces getData() with _prepareContext()
+ * - **Event Handling**: Replaces activateListeners() with _onRender()
+ * - **Action Delegation**: Uses data-action attributes for event handling
+ * - **Header Controls**: Custom header controls for sheet locking and edit mode
+ *
+ * ## Advanced Features:
+ * - **Family Bonus Integration**: Live family item references with Active Effects
+ * - **Sorting Preferences**: Per-user, per-actor sorting preferences for all item lists
+ * - **Inline Editing**: Direct field editing with proper data type coercion
+ * - **Context Menus**: Right-click menus for item management
+ * - **Mastery Tracking**: Automatic skill mastery display based on ranks
+ *
+ * ## Trait System:
+ * PC traits use a complex system where:
+ * - Base traits are stored in system.traits.*
+ * - Family bonuses are applied via Active Effects
+ * - Effective traits are calculated in prepareDerivedData()
+ * - Sheet displays effective values but edits base values
+ * - XP costs are calculated based on effective rank increases
+ *
+ * ## API References:
+ * @see {@link https://foundryvtt.com/api/classes/foundry.applications.sheets.ActorSheetV2.html|ActorSheetV2}
+ * @see {@link https://foundryvtt.com/api/classes/foundry.applications.api.HandlebarsApplicationMixin.html|HandlebarsApplicationMixin}
+ * @see {@link https://foundryvtt.com/api/classes/foundry.applications.ux.TextEditor.html#getDragEventData|TextEditor.getDragEventData}
+ * @see {@link https://foundryvtt.com/api/classes/foundry.abstract.Document.html#update|Document.update}
+ *
+ * ## Code Navigation Guide:
+ * 1. `_prepareContext()` - Template data preparation with item sorting and family bonuses
+ * 2. `_onRender()` - Event binding and post-render setup
+ * 3. `_onTraitAdjust()` - Complex trait adjustment with family bonus handling
+ * 4. `_onDrop()` - Bio item (clan/family/school) drag/drop handling
+ * 5. `_onToggleSheetLock()` - Sheet lock/unlock functionality
+ * 6. `_onVoidAdjust()` - Void ring rank adjustment
+ * 7. `_onSpellSlotAdjust()` - Spell slot management
+ * 8. `_paintVoidPointsDots()` - Visual void points dot rendering
+ * 9. `_onSortClick()` - Item list sorting preference management
+ * 10. `familyBonusFor()` - Family bonus calculation from Active Effects
  */
 
 import { SYS_ID, TEMPLATE } from "../config.js";
@@ -923,6 +961,36 @@ export default class L5R4PcSheet extends BaseActorSheet {
       weaponName: item.name,
       description: item.system?.description,
       askForOptions: event.shiftKey
+    });
+  }
+
+  /**
+   * Handle weapon attack rolls using weapon skill/trait associations.
+   * Uses the weapon's associated skill if the character has it, otherwise falls back to the weapon's trait.
+   * @param {Event} event - The triggering event (shift-click for options)
+   * @param {HTMLElement} element - The clicked element in the weapon row
+   */
+  _onWeaponAttackRoll(event, element) {
+    event.preventDefault();
+    const row = element.closest(".item");
+    const id = row?.dataset?.itemId || row?.dataset?.documentId || row?.dataset?.id;
+    const item = id ? this.actor.items.get(id) : null;
+    if (!item) return;
+
+    const weaponSkill = resolveWeaponSkillTrait(this.actor, item);
+    const untrained = weaponSkill.skillRank === 0;
+    const rollName = untrained 
+      ? `${item.name} (${T("l5r4.mechanics.rolls.unskilled")})`
+      : `${item.name} ${T("l5r4.mechanics.rolls.attackRoll")}`;
+
+    return Dice.NpcRoll({
+      rollName,
+      diceRoll: weaponSkill.rollBonus,
+      diceKeep: weaponSkill.keepBonus,
+      rollType: "attack",
+      actor: this.actor,
+      untrained,
+      woundPenalty: readWoundPenalty(this.actor)
     });
   }
   /* ---------------------------------- */

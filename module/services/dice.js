@@ -12,6 +12,7 @@
  * - **Chat Integration**: Render roll results with custom templates and TN evaluation
  * - **Void Point Management**: Automatic void point spending and validation
  * - **Active Effects Integration**: Apply bonuses from actor effects to rolls
+ * - **Targeting System**: Auto-populate target numbers from selected tokens
  *
  * ## Roll Types Supported:
  * - **Skill Rolls**: (Trait + Skill + mods)k(Trait + mods) with emphasis and wound penalties
@@ -26,12 +27,35 @@
  * - **Void Points**: +1k1 bonus with automatic point deduction
  * - **Wound Penalties**: Applied to target numbers when enabled
  * - **Ten Dice Rule**: Excess dice converted to bonuses and kept dice
+ * - **Auto-Targeting**: Automatically sets TN from targeted token's Armor TN
+ *
+ * ## Dialog System:
+ * The service provides interactive dialogs for roll customization using Foundry's DialogV2 API.
+ * Dialogs support modifier input, void point spending, emphasis selection, and target number setting.
+ * All dialogs respect user preferences for automatic display vs. shift-click activation.
+ *
+ * ## Ten Dice Rule Implementation:
+ * L5R4's Ten Dice Rule is automatically applied to all rolls:
+ * - Dice pools > 10: Excess dice become flat bonuses
+ * - Keep values > 10: Excess keep becomes flat bonuses (2 per excess keep)
+ * - Special case: 10k10 + extras becomes 10k10 + (extras × 2)
  *
  * ## API References:
  * @see {@link https://foundryvtt.com/api/classes/foundry.dice.Roll.html|Roll}
  * @see {@link https://foundryvtt.com/api/classes/foundry.applications.api.DialogV2.html|DialogV2}
  * @see {@link https://foundryvtt.com/api/classes/documents.ChatMessage.html|ChatMessage}
  * @see {@link https://foundryvtt.com/api/functions/foundry.applications.handlebars.renderTemplate.html|renderTemplate}
+ *
+ * ## Code Navigation Guide:
+ * 1. `SkillRoll()` - Main skill roll function with targeting and void point support
+ * 2. `RingRoll()` - Ring-based rolls for elemental tests and spell casting
+ * 3. `TraitRoll()` - Pure trait tests with unskilled option
+ * 4. `NpcRoll()` - Simplified NPC roll function
+ * 5. `TenDiceRule()` - Core Ten Dice Rule implementation
+ * 6. `GetSkillOptions()` - Skill roll modifier dialog
+ * 7. `GetSpellOptions()` - Ring/spell roll modifier dialog
+ * 8. `GetTraitRollOptions()` - Trait roll modifier dialog
+ * 9. `roll_parser()` - Inline roll notation parser for chat
  */
 
 import { CHAT_TEMPLATES, SYS_ID } from "../config.js";
@@ -83,7 +107,8 @@ export async function SkillRoll({
   rollBonus = 0,
   keepBonus = 0,
   totalBonus = 0,
-  actor = null
+  actor = null,
+  rollType = null
 } = {}) {
   const messageTemplate = CHAT_TEMPLATES.simpleRoll;
   const traitI18nKey = skillTrait === "void" ? "l5r4.mechanics.rings.void" : `l5r4.mechanics.traits.${skillTrait}`;
@@ -99,6 +124,34 @@ export async function SkillRoll({
   let totalMod = 0;
   let applyWoundPenalty = true;
   let __tnInput = 0, __raisesInput = 0;
+  let autoTN = 0;
+  let targetInfo = "";
+
+  // Check for targeting and auto-populate TN for attack rolls
+  if (rollType === "attack" && actor) {
+    console.log("L5R4 Targeting: SkillRoll attack detected, checking targets...");
+    const targetedTokens = Array.from(game.user.targets || []);
+    console.log("L5R4 Targeting: Found", targetedTokens.length, "targets");
+    if (targetedTokens.length === 1) {
+      const targetActor = targetedTokens[0].actor;
+      console.log("L5R4 Targeting: Target actor:", targetActor?.name, "Armor TN:", targetActor?.system?.armorTn?.current);
+      if (targetActor?.system?.armorTn?.current) {
+        autoTN = toInt(targetActor.system.armorTn.current);
+        targetInfo = ` vs ${targetActor.name} (Armor TN ${autoTN})`;
+        console.log("L5R4 Targeting: Set autoTN to", autoTN);
+      }
+    } else if (targetedTokens.length > 1) {
+      targetInfo = ` (Multiple targets - TN not auto-set)`;
+      console.log("L5R4 Targeting: Multiple targets, TN not set");
+    } else {
+      console.log("L5R4 Targeting: No target selected for attack roll");
+    }
+  } else {
+    console.log("L5R4 Targeting: SkillRoll - Not an attack roll or no actor provided. rollType:", rollType, "actor:", !!actor);
+  }
+
+  // Declare check variable at function scope
+  let check;
 
   if (askForOptions !== optionsSetting) {
     // Apply Active Effects bonuses before showing dialog
@@ -114,7 +167,7 @@ export async function SkillRoll({
     }
 
     const noVoid = npc && !game.settings.get(SYS_ID, "allowNpcVoidPoints");
-    const check = await GetSkillOptions(skillName, noVoid, rollBonus, keepBonus, totalBonus);
+    check = await GetSkillOptions(skillName, noVoid, rollBonus, keepBonus, totalBonus);
     if (check?.cancelled) return;
     ({ emphasis, applyWoundPenalty } = check);
     rollMod = toInt(check.rollMod);
@@ -137,6 +190,17 @@ export async function SkillRoll({
         ?? (ChatMessage.getSpeaker()?.actor ? game.actors?.get(ChatMessage.getSpeaker().actor) : null);
 
       if (!spendActor) {
+        const messageData = {
+          user: game.user.id,
+          speaker: ChatMessage.getSpeaker({ actor }),
+          content: await renderTemplate(messageTemplate, {
+            rollHtml: "",
+            label,
+            tnResult: null,
+            rollType,
+            targetData: null
+          })
+        };
         ui.notifications?.warn(T("l5r4.ui.notifications.noActorForVoid"));
         return;
       }
@@ -159,6 +223,14 @@ export async function SkillRoll({
     rollMod = toInt(rollBonus);
     keepMod = toInt(keepBonus);
     totalMod = toInt(totalBonus);
+    // Create default check object when dialog is skipped
+    check = {
+      tn: 0,
+      raises: 0,
+      emphasis: false,
+      applyWoundPenalty: true
+    };
+    ({ emphasis, applyWoundPenalty } = check);
   }
 
   const diceToRoll = toInt(actorTrait) + toInt(skillRank) + rollMod;
@@ -170,6 +242,10 @@ export async function SkillRoll({
     label += ` (${game.i18n.localize("l5r4.mechanics.rolls.emphasis")})`;
     rollFormula = `${diceRoll}d10r1k${diceKeep}x10+${bonus}`;
   }
+  if (targetInfo) {
+    label += targetInfo;
+  }
+
   if (rollMod || keepMod || totalMod) {
     label += ` ${game.i18n.localize("l5r4.mechanics.rolls.mod")} (${rollMod}k${keepMod}${totalMod < 0 ? totalMod : "+" + totalMod})`;
   }
@@ -179,15 +255,21 @@ export async function SkillRoll({
   const rollHtml = await roll.render(); // Foundry's core dice visualization
   
   // Calculate effective target number and success/failure
-  let __effTN = toInt(__tnInput) + (toInt(__raisesInput) * 5);
-  if (applyWoundPenalty && __effTN > 0) {
-    __effTN += toInt(woundPenalty);
+  let baseTN = toInt(check.tn);
+  
+  // For attack rolls, use target's Armor TN if no TN was specified in dialog
+  if (rollType === "attack" && baseTN === 0 && autoTN > 0) {
+    baseTN = autoTN;
   }
-  const tnResult = (__effTN > 0) ? {
-    effective: __effTN,
-    raises: toInt(__raisesInput) || 0,
-    outcome: ((roll.total ?? 0) >= __effTN) ? T("l5r4.mechanics.rolls.success") : T("l5r4.mechanics.rolls.failure")
-  } : null;
+  
+  let effTN = baseTN + (toInt(check.raises) * 5);
+  if (applyWoundPenalty && woundPenalty > 0) {
+    effTN += woundPenalty;
+  }
+
+  const tnResult = (effTN > 0)
+    ? { effective: effTN, raises: toInt(check.raises) || 0, outcome: ((roll.total ?? 0) >= effTN) ? T("l5r4.mechanics.rolls.success") : T("l5r4.mechanics.rolls.failure") }
+    : null;
   const content = await R(messageTemplate, { flavor: label, roll: rollHtml, tnResult });
   return roll.toMessage({ speaker: ChatMessage.getSpeaker(), content });
 }
@@ -539,6 +621,7 @@ export async function WeaponRoll({
  * - Simplified Mechanics: No resource tracking for void points
  * - Unified Template: Uses same chat template as PC rolls
  * - Target Numbers: Full TN evaluation like PC rolls
+ * - Targeting Support: Automatically uses target's Armor TN for attack rolls
  * 
  * @param {object} opts - Roll configuration options
  * @param {boolean} [opts.npc=true] - NPC flag for void point restrictions
@@ -549,6 +632,7 @@ export async function WeaponRoll({
  * @param {number} [opts.traitRank=null] - Trait rank for trait-based rolls
  * @param {string} [opts.ringName=null] - Ring name for ring-based rolls
  * @param {number} [opts.ringRank=null] - Ring rank for ring-based rolls
+ * @param {Actor} [opts.actor=null] - Actor performing the roll (for targeting)
  * @returns {Promise<ChatMessage|void>} Created chat message or void if cancelled
  */
 export async function NpcRoll({
@@ -561,10 +645,46 @@ export async function NpcRoll({
   ringName = null,
   ringRank = null,
   woundPenalty = 0,
-  rollType = null
+  rollType = null,
+  actor = null,
+  untrained = false
 } = {}) {
   const messageTemplate = CHAT_TEMPLATES.simpleRoll;
   const noVoid = !game.settings.get(SYS_ID, "allowNpcVoidPoints");
+
+  // Check for targeting and auto-populate TN for attack rolls
+  let autoTN = 0;
+  let targetData = null;
+  if (rollType === "attack" && actor) {
+    const targetedTokens = Array.from(game.user.targets || []);
+    if (targetedTokens.length === 1) {
+      const targetActor = targetedTokens[0].actor;
+      
+      // Try multiple possible paths for Armor TN - check for actual numeric values
+      const armorTN = targetActor?.system?.armorTn?.current 
+        || (typeof targetActor?.system?.armorTn === 'number' ? targetActor?.system?.armorTn : null)
+        || targetActor?.system?.wounds?.armorTn?.current
+        || (typeof targetActor?.system?.wounds?.armorTn === 'number' ? targetActor?.system?.wounds?.armorTn : null)
+        || targetActor?.system?._derived?.armorTn?.current
+        || (typeof targetActor?.system?._derived?.armorTn === 'number' ? targetActor?.system?._derived?.armorTn : null)
+        || targetActor?.system?.armor?.tn
+        || targetActor?.system?.armor?.armorTn;
+        
+      if (armorTN) {
+        autoTN = toInt(armorTN);
+        targetData = {
+          name: targetActor.name,
+          armorTN: autoTN,
+          single: true
+        };
+      }
+    } else if (targetedTokens.length > 1) {
+      targetData = {
+        multiple: true,
+        count: targetedTokens.length
+      };
+    }
+  }
 
   // Use shared modifier dialog with trait flag for unskilled option
   const check = await getNpcRollOptions(String(rollName ?? ringName ?? traitName ?? ""), noVoid, Boolean(traitName));
@@ -581,10 +701,11 @@ export async function NpcRoll({
     label = game.i18n.format("l5r4.system.chat.rollName", { roll: String(rollName ?? "") });
   }
 
+
   let rollMod = toInt(check.rollMod);
   let keepMod = toInt(check.keepMod);
   let totalMod = toInt(check.totalMod);
-  const unskilled = !!check.unskilled && !!traitName;
+  const unskilled = !!check.unskilled && !!traitName || untrained;
 
   // Wound penalties affect TN for attack rolls (applied later), not dice pool
 
@@ -612,7 +733,14 @@ export async function NpcRoll({
   const rollHtml = await roll.render();
 
   // Calculate target number result matching PC roll format
-  let effTN = toInt(check.tn) + (toInt(check.raises) * 5);
+  let baseTN = toInt(check.tn);
+  
+  // For attack rolls, use target's Armor TN if no TN was specified in dialog
+  if (rollType === "attack" && baseTN === 0 && autoTN > 0) {
+    baseTN = autoTN;
+  }
+  
+  let effTN = baseTN + (toInt(check.raises) * 5);
   // Apply wound penalties to TN if this is an attack roll and a TN was provided
   if (rollType === "attack" && effTN > 0) {
     effTN += toInt(woundPenalty);
@@ -621,7 +749,17 @@ export async function NpcRoll({
     ? { effective: effTN, raises: toInt(check.raises) || 0, outcome: ((roll.total ?? 0) >= effTN) ? T("l5r4.mechanics.rolls.success") : T("l5r4.mechanics.rolls.failure") }
     : null;
 
-  const content = await R(messageTemplate, { flavor: label, roll: rollHtml, tnResult });
+  // Pre-localize target data strings for template
+  if (targetData) {
+    if (targetData.single) {
+      targetData.vsText = T("l5r4.mechanics.combat.targeting.vs");
+      targetData.armorTnText = T("l5r4.mechanics.wounds.armorTn");
+    } else if (targetData.multiple) {
+      targetData.multipleText = T("l5r4.mechanics.combat.targeting.multipleTargets");
+    }
+  }
+
+  const content = await R(messageTemplate, { flavor: label, roll: rollHtml, tnResult, targetData });
   return roll.toMessage({ speaker: ChatMessage.getSpeaker(), content });
 }
 
@@ -633,7 +771,7 @@ async function GetSkillOptions(skillName, noVoid, rollBonus = 0, keepBonus = 0, 
   const content = await R(CHAT_TEMPLATES.rollModifiers, { skill: true, noVoid, rollBonus, keepBonus, totalBonus });
   try {
     const result = await DIALOG.prompt({
-      window: { title: game.i18n.format("l5r4.system.chat.skillRoll", { skill: skillName }) },
+      window: { title: game.i18n.format("l5r4.system.chat.rollName", { roll: skillName }) },
       content,
       ok: { label: game.i18n.localize("l5r4.ui.common.roll"), callback: (_e, b, d) => _processSkillRollOptions(b.form ?? d.form) },
       cancel: { label: game.i18n.localize("l5r4.ui.common.cancel") },

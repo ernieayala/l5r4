@@ -1,6 +1,15 @@
 <div class="chat-card l5r4-roll">
   {{#if flavor}}
-    <div class="dice-flavor">{{flavor}}</div>
+    <div class="dice-flavor">
+      {{flavor}}
+      {{#if targetData}}
+        {{#if targetData.single}}
+          {{targetData.vsText}} {{targetData.name}} ({{targetData.armorTnText}} {{targetData.armorTN}})
+        {{else if targetData.multiple}}
+          ({{targetData.count}} {{targetData.multipleText}})
+        {{/if}}
+      {{/if}}
+    </div>
   {{/if}}
   {{{roll}}}
   {{#if tnResult}}

@@ -229,6 +229,9 @@ function applyFullDefenseStance(actor, sys) {
   }
 }
 
+// Track pending Full Defense rolls to prevent race conditions
+const pendingFullDefenseRolls = new Set();
+
 /**
  * Trigger a Defense/Reflexes roll for Full Defense Stance.
  * Creates a roll dialog and stores the result for the stance duration.
@@ -237,6 +240,8 @@ function applyFullDefenseStance(actor, sys) {
  * @param {object} sys - The actor's system data object
  */
 async function triggerFullDefenseRoll(actor, sys) {
+  const actorId = actor.id;
+  
   try {
     // Check if roll already exists to prevent duplicates
     const existingRoll = actor.getFlag(SYS_ID, "fullDefenseRoll");
@@ -244,6 +249,15 @@ async function triggerFullDefenseRoll(actor, sys) {
       console.log("L5R4 | Full Defense roll already exists, skipping duplicate");
       return;
     }
+    
+    // Check if a roll is already pending for this actor
+    if (pendingFullDefenseRolls.has(actorId)) {
+      console.log("L5R4 | Full Defense roll already pending for this actor, skipping duplicate");
+      return;
+    }
+    
+    // Mark this actor as having a pending roll
+    pendingFullDefenseRolls.add(actorId);
     
     // Find Defense skill rank
     let defenseSkillRank = 0;
@@ -297,6 +311,9 @@ async function triggerFullDefenseRoll(actor, sys) {
   } catch (error) {
     console.error("L5R4 | Failed to trigger Full Defense roll:", error);
     ui.notifications?.error("Failed to make Full Defense roll. Please roll manually.");
+  } finally {
+    // Always remove the pending flag, even if the roll failed
+    pendingFullDefenseRolls.delete(actorId);
   }
 }
 
@@ -667,6 +684,4 @@ export function initializeStanceService() {
   Hooks.on("createActiveEffect", onCreateActiveEffect);
   Hooks.on("updateActiveEffect", onUpdateActiveEffect);
   Hooks.on("deleteActiveEffect", onDeleteActiveEffect);
-  
-  console.log("L5R4 | Stance service initialized");
 }

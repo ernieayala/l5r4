@@ -104,11 +104,8 @@ Hooks.once("init", async () => {
 
         // Foundry core syntax: keep highest = kh, exploding d10s = !10
         const formulaStr = `${diceRoll}d10kh${diceKeep}!10${flatStr}`;
-        // Log once to help diagnose
-        console.log("L5R4 Initiative Formula:", { name: a.name, type: a.type, formula: formulaStr });
         return new Roll(formulaStr);
       } catch (e) {
-        console.warn("L5R4 | getInitiativeRoll override failed, using default", e);
         return __origGetInit.call(this, formula);
       }
     };

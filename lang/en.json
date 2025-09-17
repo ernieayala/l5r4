@@ -46,7 +46,11 @@
         "ranged": "Ranged",
         "multiplier": "Multiplier",
         "woundPenalty": "Wound Penalty",
-        "armorTnBonus": "Armor TN Bonus"
+        "armorTnBonus": "Armor TN Bonus",
+        "targeting": {
+          "vs": "vs",
+          "multipleTargets": "targets - TN not auto-set"
+        }
       },
       "wounds": {
         "wounds": "Wounds",
@@ -513,6 +517,7 @@
     "centerStance": "Center Stance",
     "blinded": "Blinded",
     "dazed": "Dazed",
+    "dead": "Dead",
     "entangled": "Entangled",
     "fasting": "Fasting",
     "fatigued": "Fatigued",
