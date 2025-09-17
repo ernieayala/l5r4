@@ -218,7 +218,7 @@ export default class L5R4NpcSheet extends BaseActorSheet {
   async _onVoidAdjust(event, element, delta) {
     event?.preventDefault?.();
     const cur = Number(this.actor.system?.rings?.void?.rank ?? 0) || 0;
-    const min = 1;
+    const min = 0;
     const max = 9;
     const next = Math.min(max, Math.max(min, cur + (delta > 0 ? 1 : -1)));
     if (next === cur) return;
@@ -299,6 +299,9 @@ export default class L5R4NpcSheet extends BaseActorSheet {
 
     // Simple rolls (not handled by base class action delegation)
     on(root, ".simple-roll", "click", (ev) => this._onSimpleRoll(ev));
+
+    // Image editing
+    on(root, "[data-edit='img']", "click", (ev) => this._onEditImage(ev, ev.currentTarget));
 
     // Setup shared context menu for item rows
     await this._setupItemContextMenu(root);

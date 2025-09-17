@@ -134,6 +134,29 @@ export class BaseActorSheet extends HandlebarsApplicationMixin(foundry.applicati
       if (typeof this._onActionChange === "function") this._onActionChange(action, ev, el);
       else if (typeof this._onAction === "function") this._onAction(action, ev, el);
     });
+
+    // Setup image error handling for broken actor images
+    this._setupImageErrorHandling(root);
+  }
+
+  /**
+   * Setup error handling for actor images to show default fallback when image fails to load.
+   * @param {HTMLElement} root - The sheet root element
+   */
+  _setupImageErrorHandling(root) {
+    const actorImages = root.querySelectorAll('.actor-img');
+    actorImages.forEach(img => {
+      if (!img.dataset.errorHandled) {
+        img.dataset.errorHandled = 'true';
+        img.addEventListener('error', () => {
+          // Use Foundry's default actor image based on actor type
+          const defaultImage = this.actor.type === 'npc' 
+            ? 'icons/svg/mystery-man.svg' 
+            : 'icons/svg/mystery-man.svg';
+          img.src = defaultImage;
+        });
+      }
+    });
   }
 
   /**
@@ -190,6 +213,38 @@ export class BaseActorSheet extends HandlebarsApplicationMixin(foundry.applicati
       d.classList.toggle("-filled", idx <= cur);
     });
     node.setAttribute("data-value", String(cur));
+  }
+
+  /* ---------------------------------- */
+  /* Shared Image Editing                */
+  /* ---------------------------------- */
+
+  /**
+   * Handle image editing via file picker.
+   * Opens Foundry's file picker to allow users to select a new actor image.
+   * @param {Event} event - The click event
+   * @param {HTMLElement} element - The clicked image element
+   * @returns {Promise<void>}
+   */
+  async _onEditImage(event, element) {
+    event?.preventDefault?.();
+    
+    const current = this.actor.img;
+    const fp = new foundry.applications.apps.FilePicker.implementation({
+      type: "image",
+      current: current,
+      callback: async (path) => {
+        try {
+          await this.actor.update({ img: path });
+        } catch (err) {
+          console.warn("L5R4", "Failed to update actor image", { err });
+        }
+      },
+      top: this.position.top + 40,
+      left: this.position.left + 10
+    });
+    
+    return fp.browse();
   }
 
   /* ---------------------------------- */
@@ -602,7 +657,7 @@ export class BaseActorSheet extends HandlebarsApplicationMixin(foundry.applicati
     if (!key) return;
     
     const cur = Number(this.actor.system?.traits?.[key] ?? 0) || 0;
-    const next = Math.min(10, Math.max(1, cur + (delta > 0 ? 1 : -1)));
+    const next = Math.min(10, Math.max(0, cur + (delta > 0 ? 1 : -1)));
     if (next === cur) return;
     
     try {

@@ -26,7 +26,6 @@ This major release features a complete system overhaul with:
 - **Wound System**: Dynamic wound level tracking with penalties applied automatically
 - **Experience Tracking**: Comprehensive XP system with automatic cost calculation for trait/skill advancement
 - **Family/School Integration**: Active Effects system for creation bonuses and trait modifications
-- **Sheet Locking**: Toggle edit mode to prevent accidental changes during gameplay
 - **Sorting Preferences**: Per-user, per-actor item sorting with persistent preferences
 
 ### 🎲 Authentic L5R Dice System
@@ -156,6 +155,159 @@ Full internationalization support with complete translations:
 - 💾 **Backup Recommended**: Always backup your world before major updates  
 - 🛑 **Safety Controls**: Migration can be disabled in system settings if needed
 - 🔒 **Data Preservation**: Existing characters and items remain fully functional
+
+## 🎯 Active Effects Reference
+
+Active Effects allow you to modify actor and item attributes dynamically. Use these attribute keys when creating Active Effects on items like Family, School, Advantages, Disadvantages, or other sources of bonuses/penalties.
+
+### Actor Attribute Keys
+
+#### Core Traits
+| Attribute Key | Description | Example Value |
+|---------------|-------------|---------------|
+| `system.traits.sta` | Stamina | `3` |
+| `system.traits.wil` | Willpower | `2` |
+| `system.traits.str` | Strength | `4` |
+| `system.traits.per` | Perception | `3` |
+| `system.traits.ref` | Reflexes | `3` |
+| `system.traits.awa` | Awareness | `2` |
+| `system.traits.agi` | Agility | `4` |
+| `system.traits.int` | Intelligence | `3` |
+
+#### Rings
+| Attribute Key | Description | Example Value |
+|---------------|-------------|---------------|
+| `system.rings.void.rank` | Void Ring Rank | `2` |
+| `system.rings.void.value` | Current Void Points | `1` |
+
+#### Character Attributes
+| Attribute Key | Description | Example Value |
+|---------------|-------------|---------------|
+| `system.honor.rank` | Honor Rank | `3` |
+| `system.honor.points` | Honor Points | `15` |
+| `system.glory.rank` | Glory Rank | `2` |
+| `system.glory.points` | Glory Points | `8` |
+| `system.status.rank` | Status Rank | `1` |
+| `system.status.points` | Status Points | `3` |
+| `system.shadowTaint.rank` | Shadow Taint Rank | `0` |
+| `system.shadowTaint.points` | Shadow Taint Points | `0` |
+
+#### Combat & Defense
+| Attribute Key | Description | Example Value |
+|---------------|-------------|---------------|
+| `system.initiative.rollMod` | Initiative Roll Modifier | `+2` |
+| `system.initiative.keepMod` | Initiative Keep Modifier | `+1` |
+| `system.initiative.totalMod` | Initiative Total Modifier | `+3` |
+| `system.armorTn.mod` | Armor TN Modifier | `+5` |
+| `system.armor.armorTn` | Base Armor TN | `20` |
+| `system.armor.reduction` | Damage Reduction | `3` |
+
+#### Wounds & Health
+| Attribute Key | Description | Example Value |
+|---------------|-------------|---------------|
+| `system.wounds.mod` | Wound Threshold Modifier | `+10` |
+| `system.woundsMultiplier` | Wound Level Multiplier | `2` |
+| `system.woundsMod` | Wound Threshold Additive Modifier | `+5` |
+| `system.woundsPenaltyMod` | Wound Penalty Modifier | `-2` |
+| `system.suffered` | Damage Suffered | `15` |
+
+#### Experience & Advancement
+| Attribute Key | Description | Example Value |
+|---------------|-------------|---------------|
+| `system.xp` | Experience Points | `45` |
+| `system.insight.points` | Insight Points | `150` |
+| `system.insight.rank` | Insight Rank | `2` |
+
+#### Spell Casting
+| Attribute Key | Description | Example Value |
+|---------------|-------------|---------------|
+| `system.spellSlots.water` | Water Spell Slots | `3` |
+| `system.spellSlots.fire` | Fire Spell Slots | `2` |
+| `system.spellSlots.earth` | Earth Spell Slots | `4` |
+| `system.spellSlots.air` | Air Spell Slots | `3` |
+| `system.spellSlots.void` | Void Spell Slots | `1` |
+
+#### Wealth
+| Attribute Key | Description | Example Value |
+|---------------|-------------|---------------|
+| `system.wealth.koku` | Koku | `10` |
+| `system.wealth.bu` | Bu | `5` |
+| `system.wealth.zeni` | Zeni | `25` |
+
+### Item Attribute Keys
+
+#### Skills
+| Attribute Key | Description | Example Value |
+|---------------|-------------|---------------|
+| `system.rank` | Skill Rank | `3` |
+| `system.rollBonus` | Roll Dice Bonus | `+1` |
+| `system.keepBonus` | Keep Dice Bonus | `+1` |
+| `system.totalBonus` | Total Bonus | `+2` |
+| `system.insightBonus` | Insight Bonus | `+5` |
+
+#### Weapons
+| Attribute Key | Description | Example Value |
+|---------------|-------------|---------------|
+| `system.damageRoll` | Damage Roll Dice | `3` |
+| `system.damageKeep` | Damage Keep Dice | `2` |
+| `system.explodesOn` | Explosion Threshold | `9` |
+
+#### Bows
+| Attribute Key | Description | Example Value |
+|---------------|-------------|---------------|
+| `system.str` | Bow Strength Rating | `3` |
+| `system.range` | Range in feet | `250` |
+| `system.damageRoll` | Damage Roll Dice | `2` |
+| `system.damageKeep` | Damage Keep Dice | `2` |
+
+#### Armor
+| Attribute Key | Description | Example Value |
+|---------------|-------------|---------------|
+| `system.bonus` | Armor TN Bonus | `+3` |
+| `system.reduction` | Damage Reduction | `2` |
+
+#### Spells
+| Attribute Key | Description | Example Value |
+|---------------|-------------|---------------|
+| `system.mastery` | Mastery Level | `3` |
+
+#### Advantages/Disadvantages
+| Attribute Key | Description | Example Value |
+|---------------|-------------|---------------|
+| `system.cost` | Point Cost | `5` (Advantages: ≥0, Disadvantages: ≤0) |
+
+### Usage Examples
+
+#### Family Trait Bonus
+Create an Active Effect on a Family item:
+- **Attribute Key**: `system.traits.str`
+- **Change Mode**: Add
+- **Effect Value**: `1`
+
+#### School Skill Bonus
+Create an Active Effect on a School item:
+- **Attribute Key**: `system.rollBonus` (on embedded skill items)
+- **Change Mode**: Add  
+- **Effect Value**: `1`
+
+#### Armor TN Modifier
+Create an Active Effect on an Advantage item:
+- **Attribute Key**: `system.armorTn.mod`
+- **Change Mode**: Add
+- **Effect Value**: `5`
+
+#### Void Point Bonus
+Create an Active Effect on a Technique item:
+- **Attribute Key**: `system.rings.void.value`
+- **Change Mode**: Add
+- **Effect Value**: `1`
+
+### Notes
+- Use dot notation for nested properties (e.g., `system.traits.str`)
+- Trait bonuses from Family items should use the trait keys above
+- School bonuses typically affect skills or provide special abilities
+- Some derived values (like elemental rings) are calculated automatically and cannot be directly modified
+- Always test Active Effects to ensure they work as intended with your specific use case
 
 ## ⚠️ Known Issues & Limitations
 

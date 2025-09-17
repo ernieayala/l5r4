@@ -301,9 +301,7 @@
         "tattoo": "Tattoo",
         "tattoos": "Tattoos",
         "traits": "Traits",
-        "itemSheetTitle": "Item Sheet",
-        "lock": "Lock Sheet",
-        "unlock": "Unlock Sheet"
+        "itemSheetTitle": "Item Sheet"
       },
       "hints": {
         "leftRightToAdjust": "Left and Right to Adjust",

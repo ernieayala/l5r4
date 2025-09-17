@@ -3,25 +3,6 @@
   display: flex;
   flex-direction: column;
 
-  &.is-locked {
-    .trait-rank,
-    .ring-rank,
-    .ranks {
-      pointer-events: none;
-    }
-
-    .-bio-section {
-      display: none;
-    }
-
-    .window-header {
-      .header-control[data-action="toggle-is-editable"] {
-        background: var(--button-hover-background-color);
-        color: var(--button-hover-text-color);
-      }
-    }
-  }
-
   .window-content {
     flex-flow: row;
     gap: 1rem;

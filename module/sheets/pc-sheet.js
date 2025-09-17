@@ -46,7 +46,6 @@
  * 2. `_onRender()` - Event binding and post-render setup
  * 3. `_onTraitAdjust()` - Complex trait adjustment with family bonus handling
  * 4. `_onDrop()` - Bio item (clan/family/school) drag/drop handling
- * 5. `_onToggleSheetLock()` - Sheet lock/unlock functionality
  * 6. `_onVoidAdjust()` - Void ring rank adjustment
  * 7. `_onSpellSlotAdjust()` - Spell slot management
  * 8. `_paintVoidPointsDots()` - Visual void points dot rendering
@@ -135,29 +134,6 @@ export default class L5R4PcSheet extends BaseActorSheet {
     }
   };
 
-  /**
-   * Provide a minimal header menu: Configure + our toggle.
-   * @returns {import("types/foundry/common/applications/api").ApplicationHeaderControlsEntry[]}
-   */
-  _getHeaderControls() {
-    const isLocked = this.actor.getFlag(SYS_ID, "sheetLocked") ?? false;
-
-    // This definitive array *replaces* the default Foundry controls.
-    return [
-      {
-        action: "toggle-sheet-lock",
-        icon: isLocked ? "fas fa-lock" : "fas fa-unlock-alt",
-        label: game.i18n.localize(isLocked ? "l5r4.ui.sheets.unlock" : "l5r4.ui.sheets.lock"),
-        toggle: true,
-        active: isLocked
-      },
-      {
-        action: "configureSheet",
-        icon: "fas fa-cog",
-        label: game.i18n.localize("SHEET.ConfigureSheet")
-      }
-    ];
-  }
 
   /** @inheritdoc */
   _onAction(action, event, element) {
@@ -260,37 +236,6 @@ export default class L5R4PcSheet extends BaseActorSheet {
   }
 
 
-  /**
-   * Toggle the sheet's locked state.
-   * Updates both the actor flag and provides immediate visual feedback.
-   * @returns {Promise<void>}
-   */
-  async _onToggleSheetLock() {
-    const currentLockState = this.actor.getFlag(SYS_ID, "sheetLocked") ?? false;
-    const newLockState = !currentLockState;
-    await this.actor.setFlag(SYS_ID, "sheetLocked", newLockState);
-
-    // Manually toggle the class on the sheet element for instant feedback.
-    this.element.classList.toggle("is-locked", newLockState);
-
-    // Manually update the button's appearance.
-    const button = this.element.closest(".app.window-app")?.querySelector('[data-action="toggle-sheet-lock"]');
-    if (button) {
-      const icon = button.querySelector("i");
-      if (icon) {
-        icon.className = newLockState ? "fas fa-lock" : "fas fa-unlock-alt";
-      }
-      // The label is a text node, not an element. We need to find and update it.
-      const textNode = Array.from(button.childNodes).find(node => node.nodeType === Node.TEXT_NODE);
-      if (textNode) {
-        textNode.nodeValue = ` ${game.i18n.localize(newLockState ? "l5r4.ui.sheets.unlock" : "l5r4.ui.sheets.lock")}`;
-      }
-    }
-
-    // A full render is still good practice to ensure all state is consistent,
-    // but the manual updates provide the immediate visual change.
-    this.render();
-  }
 
   /**
    * @override
@@ -521,19 +466,6 @@ export default class L5R4PcSheet extends BaseActorSheet {
     await super._onRender(context, options);
     const root = this.element;
 
-    // Find all buttons with the lock action and bind directly
-    setTimeout(() => {
-      const lockButtons = document.querySelectorAll('[data-action="toggle-sheet-lock"]');
-      lockButtons.forEach((btn) => {
-        if (!btn.dataset.l5r4Listener) {
-          btn.dataset.l5r4Listener = "true";
-          btn.addEventListener("click", (ev) => {
-            ev.preventDefault();
-            this._onToggleSheetLock();
-          });
-        }
-      });
-    }, 200);
 
     // Inline header control: Toggle Edit Mode (inject into window header controls).
     // v13 exposes header *menu* via _getHeaderControls()/hook; there is no public API for inline icons.
@@ -582,12 +514,6 @@ export default class L5R4PcSheet extends BaseActorSheet {
     // Keep only non-[data-action] bindings here:
     on(root, ".item-list.-header .item-sort-by", "click", (ev, el) => this._onSortClick(ev, (el)));
 
-    on(root, "[data-action='rp-step']", "wheel", (ev, el) => {
-      ev.preventDefault();
-      const dir = (ev.deltaY || 0) > 0 ? -0.1 : +0.1;
-      this._onRankPointsStep(ev, el, dir);
-    });
-
     // After render, paint the dot faces to match current value
     this._paintVoidPointsDots(root);
 
@@ -610,6 +536,9 @@ export default class L5R4PcSheet extends BaseActorSheet {
     on(root, "[data-action='clan-link']", "click", (ev) => this._onClanLink(ev));
     on(root, "[data-action='school-link']", "click", (ev) => this._onSchoolLink(ev));
     on(root, "[data-action='family-open']","click", (ev) => this._onFamilyOpen(ev));
+
+    // Image editing
+    on(root, "[data-edit='img']", "click", (ev) => this._onEditImage(ev, ev.currentTarget));
 
     // Experience actions
     on(root, "[data-action='xp-add']", "click", (ev) => this._onXpAdd(ev));
@@ -692,7 +621,7 @@ export default class L5R4PcSheet extends BaseActorSheet {
     // Work in *effective* space, then convert back to base
     const effNow = base + fam;
     // Effective caps
-    const effMin = 2 + Math.max(0, fam); // if Family gives +1 to Strength, min displayed is 3
+    const effMin = 0 + Math.max(0, fam); // if Family gives +1 to Strength, min displayed is 1
     const effMax = 9;                    // global cap
 
     const wantEff = effNow + (delta > 0 ? 1 : -1);
@@ -725,7 +654,7 @@ export default class L5R4PcSheet extends BaseActorSheet {
       event?.preventDefault?.();
 
       const cur = Number(this.actor.system?.rings?.void?.rank ?? 0) || 0;
-      const min = 2;
+      const min = 0;
       const max = 9;
 
       const next = Math.min(max, Math.max(min, cur + (delta > 0 ? 1 : -1)));
