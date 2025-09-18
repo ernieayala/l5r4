@@ -1,0 +1,202 @@
+.xp-breakdown-list {
+    list-style: none;
+    padding: 0;
+    margin: 0;
+
+    li {
+        border-block-end: 1px solid var(--color-border-dark);
+        display: flex;
+        gap: 0.5rem;
+        justify-content: space-between;
+        padding: 0.25rem;
+
+        &:last-child {
+            border-block-end: none;
+        }
+    }
+}
+
+.item-list {
+    &.-header {
+        border-inline-start-width: 1px;
+    }
+
+    .title {
+        align-items: center;
+        display: inline-flex;
+        font-size: var(--font-size-18);
+        margin: 0;
+        min-height: var(--input-height);
+        text-wrap: nowrap;
+    }
+}
+
+.xp-modal {
+    .xp-summary {
+      margin-bottom: 1rem;
+      
+      .xp-overview {
+        background: rgba(0, 0, 0, 0.1);
+        padding: 0.5rem;
+        border-radius: 4px;
+        margin-bottom: 1rem;
+        
+        p {
+          margin: 0;
+          font-size: var(--font-size-14);
+        }
+      }
+      
+      .xp-breakdown {
+        .xp-breakdown-list {
+          list-style: none;
+          padding: 0;
+          margin: 0;
+          
+          li {
+            display: flex;
+            justify-content: space-between;
+            padding: 0.25rem 0;
+            border-bottom: 1px solid rgba(0, 0, 0, 0.1);
+            
+            &:last-child {
+              border-bottom: none;
+            }
+            
+            .breakdown-label {
+              font-weight: normal;
+            }
+            
+            .breakdown-value {
+              font-weight: bold;
+            }
+          }
+        }
+      }
+    }
+    
+    .xp-actions {
+      background: rgba(0, 0, 0, 0.05);
+      padding: 1rem;
+      border-radius: 4px;
+      margin-bottom: 1rem;
+      
+      .xp-add-section {
+        .form-group {
+          margin-bottom: 0.75rem;
+          
+          label {
+            display: block;
+            font-weight: bold;
+            margin-bottom: 0.25rem;
+          }
+          
+          input {
+            width: 100%;
+            padding: 0.5rem;
+            border: 1px solid #ccc;
+            border-radius: 4px;
+            
+            &:focus {
+              outline: none;
+              border-color: var(--color-border-highlight);
+              box-shadow: 0 0 0 2px rgba(0, 123, 255, 0.25);
+            }
+          }
+        }
+        
+        .xp-add-btn {
+          background: var(--color-button-primary);
+          color: white;
+          border: none;
+          padding: 0.5rem 1rem;
+          border-radius: 4px;
+          cursor: pointer;
+          font-weight: bold;
+          
+          &:hover {
+            background: var(--color-button-primary-hover, #0056b3);
+          }
+          
+          i {
+            margin-right: 0.5rem;
+          }
+        }
+      }
+    }
+    
+    .xp-history {
+      .xp-pool-changes,
+      .xp-purchases {
+        margin-bottom: 1.5rem;
+        
+        h4 {
+          margin-bottom: 0.5rem;
+          border-bottom: 2px solid var(--color-border-dark);
+          padding-bottom: 0.25rem;
+        }
+        
+        .xp-table-container {
+          max-height: 300px;
+          overflow-y: auto;
+          border: 1px solid #ddd;
+          border-radius: 4px;
+          
+          .xp-table {
+            width: 100%;
+            border-collapse: collapse;
+            
+            th,
+            td {
+              padding: 0.5rem;
+              text-align: left;
+              border-bottom: 1px solid #eee;
+            }
+            
+            th {
+              background: rgba(0, 0, 0, 0.1);
+              font-weight: bold;
+              position: sticky;
+              top: 0;
+              z-index: 1;
+            }
+            
+            .text-right {
+              text-align: right;
+            }
+            
+            .actions-col {
+              width: 60px;
+              text-align: center;
+            }
+            
+            .delete-entry {
+              background: #dc3545;
+              color: white;
+              border: none;
+              padding: 0.25rem 0.5rem;
+              border-radius: 3px;
+              cursor: pointer;
+              font-size: 0.75rem;
+              
+              &:hover {
+                background: #c82333;
+              }
+            }
+            
+            .no-entries {
+              text-align: center;
+              font-style: italic;
+              color: #666;
+            }
+            
+            .total-row {
+              background: rgba(0, 0, 0, 0.05);
+              font-weight: bold;
+              border-top: 2px solid #ddd;
+            }
+          }
+        }
+      }
+    }
+  }

@@ -170,7 +170,13 @@ export default class L5R4Actor extends Actor {
       const oldSys = this.system ?? {};
 
       let spent = Array.isArray(ns.xpSpent) ? foundry.utils.duplicate(ns.xpSpent) : [];
-      const pushNote = (delta, note) => spent.push({ id: foundry.utils.randomID(), delta, note, ts: Date.now() });
+      const pushNote = (delta, note, extraData = {}) => spent.push({ 
+        id: foundry.utils.randomID(), 
+        delta, 
+        note, 
+        ts: Date.now(),
+        ...extraData
+      });
 
       // Traits delta → XP
       if (changed?.system?.traits) {
@@ -207,7 +213,13 @@ export default class L5R4Actor extends Actor {
           if (deltaXP > 0) {
             // Create localized log entry for experience tracking
             const label = game.i18n?.localize?.(`l5r4.mechanics.traits.${k}`) || k.toUpperCase();
-            pushNote(deltaXP, game.i18n.format("l5r4.character.experience.log.traitChange", { label, from: oldBase, to: newBase }));
+            pushNote(deltaXP, game.i18n.format("l5r4.character.experience.log.traitChange", { label, from: oldBase, to: newBase }), {
+              type: "trait",
+              traitKey: k,
+              traitLabel: label,
+              fromValue: oldBase,
+              toValue: newBase
+            });
           }
         }
       }
@@ -225,7 +237,11 @@ export default class L5R4Actor extends Actor {
             deltaXP += Math.max(0, step);
           }
           if (deltaXP > 0) {
-            pushNote(deltaXP, game.i18n.format("l5r4.character.experience.log.voidChange", { from: oldVoid, to: next }));
+            pushNote(deltaXP, game.i18n.format("l5r4.character.experience.log.voidChange", { from: oldVoid, to: next }), {
+              type: "void",
+              fromValue: oldVoid,
+              toValue: next
+            });
           }
         }
       }
@@ -651,7 +667,9 @@ export default class L5R4Actor extends Actor {
       if (it.type !== "disadvantage") {
         continue;
       }
-      disadvGranted += Math.max(0, -toInt(it.system?.cost));
+      // Disadvantage costs are displayed as positive but contribute negative XP
+      // Convert positive cost to negative XP contribution (up to 10 total)
+      disadvGranted += Math.max(0, toInt(it.system?.cost));
     }
     const disadvCap = Math.min(10, disadvGranted);
 

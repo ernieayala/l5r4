@@ -1,5 +1,6 @@
 .l5r4.pc,
-.l5r4.npc {
+.l5r4.npc,
+.xp-modal-dialog {
   .item-list {
     display: flex;
     flex-direction: column;
@@ -47,6 +48,22 @@
         grid-template-columns: 1fr 24px;
       }
     }
+
+    &.-xp {
+      .item {
+        grid-template-columns: 150px 1fr 24px;
+      }
+    }
+
+    &.-xp-spent {
+      .item {
+        grid-template-columns: 1fr 1fr 1fr;
+      }
+    }
+
+    > .item:nth-of-type(even) {
+      background-color: var(--table-row-color-even);
+    }
   }
 
   .item {
@@ -55,10 +72,6 @@
     display: grid;
     grid-template-rows: min-content min-content;
     padding: 0 0.5rem;
-
-    &:nth-last-of-type(even) {
-      background-color: var(--table-row-color-even);
-    }
 
     &.-bio {
       background: var(--table-header-bg-color);

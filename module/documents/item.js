@@ -120,17 +120,10 @@ export default class L5R4Item extends Item {
       this.updateSource({ img: icon });
     }
 
-    // Enforce advantage cost constraints (must be non-negative)
-    if (this.type === "advantage") {
-      const raw     = data?.system?.cost ?? this.system?.cost;
+    // Enforce advantage or disadvantage cost constraints (must be non-negative)
+    if (this.type === "advantage" || this.type === "disadvantage") {
+      const raw = data?.system?.cost ?? this.system?.cost;
       const clamped = Math.max(0, toInt(raw, 0));
-      this.updateSource({ "system.cost": clamped });
-    }
-
-    // Enforce disadvantage cost constraints (must be non-positive)
-    if (this.type === "disadvantage") {
-      const raw     = data?.system?.cost ?? this.system?.cost;
-      const clamped = Math.min(0, toInt(raw, 0));
       this.updateSource({ "system.cost": clamped });
     }
   }
@@ -151,25 +144,50 @@ export default class L5R4Item extends Item {
    * @override
    * @see {@link https://foundryvtt.com/api/classes/documents.Item.html#_onCreate|Item._onCreate}
    */
-  _onCreate(data, options, userId) {
+  async _onCreate(data, options, userId) {
     super._onCreate(data, options, userId);
-    // Only when embedded on an Actor and for Skill type
-    if (!this.actor || this.type !== "skill") return;
+    // Only when embedded on an Actor and for Skill, Advantage, or Disadvantage types
+    if (!this.actor || !["skill", "advantage", "disadvantage"].includes(this.type)) return;
     try {
       const sys = this.system ?? {};
-      const r = toInt(sys.rank);
-      const baseline = sys.school ? 1 : 0;
-      const tri = (n) => (n * (n + 1)) / 2;
-      const newCost = r > baseline ? tri(r) - tri(baseline) : 0;
-      if (newCost > 0) {
-        const ns = this.actor.flags?.[SYS_ID] ?? {};
-        const spent = Array.isArray(ns.xpSpent) ? ns.xpSpent.slice() : [];
-        spent.push({
-          id: foundry.utils.randomID(),
-          delta: newCost,
-          note: game.i18n.format("l5r4.character.experience.log.skillCreate", { name: this.name ?? "Skill", rank: r }),
-          ts: Date.now()
-        });
+      const ns = this.actor.flags?.[SYS_ID] ?? {};
+      const spent = Array.isArray(ns.xpSpent) ? ns.xpSpent.slice() : [];
+      
+      if (this.type === "skill") {
+        const r = toInt(sys.rank);
+        const baseline = sys.school ? 1 : 0;
+        const tri = (n) => (n * (n + 1)) / 2;
+        const newCost = r > baseline ? tri(r) - tri(baseline) : 0;
+        if (newCost > 0) {
+          spent.push({
+            id: foundry.utils.randomID(),
+            delta: newCost,
+            note: game.i18n.format("l5r4.character.experience.log.skillCreate", { name: this.name ?? "Skill", rank: r }),
+            ts: Date.now(),
+            type: "skill",
+            skillName: this.name ?? "Skill",
+            fromValue: 0,
+            toValue: r
+          });
+        }
+      } else if (this.type === "advantage" || this.type === "disadvantage") {
+        const cost = toInt(sys.cost, 0);
+        if (cost > 0) {
+          const itemType = this.type === "advantage" ? "advantage" : "disadvantage";
+          spent.push({
+            id: foundry.utils.randomID(),
+            delta: cost,
+            note: this.name ?? (this.type === "advantage" ? "Advantage" : "Disadvantage"),
+            ts: Date.now(),
+            type: itemType,
+            itemName: this.name ?? (this.type === "advantage" ? "Advantage" : "Disadvantage"),
+            fromValue: 0,
+            toValue: cost
+          });
+        }
+      }
+      
+      if (spent.length > (ns.xpSpent?.length ?? 0)) {
         // Async flag update - don't block creation if XP logging fails
         this.actor.setFlag(SYS_ID, "xpSpent", spent);
       }
@@ -203,33 +221,61 @@ export default class L5R4Item extends Item {
       changes.system.cost = Math.max(0, toInt(changes.system.cost, 0));
     }
 
-    // Validate disadvantage costs (must be non-positive)
-    if (this.type === "disadvantage" && changes?.system?.cost !== undefined) {
-      changes.system.cost = Math.min(0, toInt(changes.system.cost, 0));
-    }
+    // Allow disadvantages to have any cost value for flexibility
+    // XP calculation will handle the conversion appropriately
 
     await super._preUpdate(changes, options, userId);
-    if (!this.actor || this.type !== "skill") return;
+    if (!this.actor || !["skill", "advantage", "disadvantage"].includes(this.type)) return;
     try {
-      const oldRank   = toInt(this.system?.rank);
-      const newRank   = toInt(changes?.system?.rank ?? oldRank);
-      if (!(Number.isFinite(newRank) && newRank > oldRank)) return; // Only track XP on rank increases
+      const ns = this.actor.flags?.[SYS_ID] ?? {};
+      const spent = Array.isArray(ns.xpSpent) ? ns.xpSpent.slice() : [];
+      let shouldUpdate = false;
 
-      const newSchool = (changes?.system?.school ?? this.system?.school) ? true : false;
-      const baseline  = newSchool ? 1 : 0;
-      const tri = (n) => (n * (n + 1)) / 2;
-      const oldCost = oldRank > baseline ? tri(oldRank) - tri(baseline) : 0;
-      const newCost = newRank > baseline ? tri(newRank) - tri(baseline) : 0;
-      const delta = Math.max(0, newCost - oldCost);
-      if (delta > 0) {
-        const ns = this.actor.flags?.[SYS_ID] ?? {};
-        const spent = Array.isArray(ns.xpSpent) ? ns.xpSpent.slice() : [];
-        spent.push({
-          id: foundry.utils.randomID(),
-          delta,
-          note: game.i18n.format("l5r4.character.experience.log.skillChange", { name: this.name ?? "Skill", from: oldRank, to: newRank }),
-          ts: Date.now()
-        });
+      if (this.type === "skill") {
+        const oldRank   = toInt(this.system?.rank);
+        const newRank   = toInt(changes?.system?.rank ?? oldRank);
+        if (!(Number.isFinite(newRank) && newRank > oldRank)) return; // Only track XP on rank increases
+
+        const newSchool = (changes?.system?.school ?? this.system?.school) ? true : false;
+        const baseline  = newSchool ? 1 : 0;
+        const tri = (n) => (n * (n + 1)) / 2;
+        const oldCost = oldRank > baseline ? tri(oldRank) - tri(baseline) : 0;
+        const newCost = newRank > baseline ? tri(newRank) - tri(baseline) : 0;
+        const delta = Math.max(0, newCost - oldCost);
+        if (delta > 0) {
+          spent.push({
+            id: foundry.utils.randomID(),
+            delta,
+            note: game.i18n.format("l5r4.character.experience.log.skillChange", { name: this.name ?? "Skill", from: oldRank, to: newRank }),
+            ts: Date.now(),
+            type: "skill",
+            skillName: this.name ?? "Skill",
+            fromValue: oldRank,
+            toValue: newRank
+          });
+          shouldUpdate = true;
+        }
+      } else if (this.type === "advantage" || this.type === "disadvantage") {
+        const oldCost = toInt(this.system?.cost, 0);
+        const newCost = toInt(changes?.system?.cost ?? oldCost, 0);
+        const delta = Math.max(0, newCost - oldCost);
+        if (delta > 0) {
+          const itemType = this.type === "advantage" ? "advantage" : "disadvantage";
+          spent.push({
+            id: foundry.utils.randomID(),
+            delta,
+            note: `${this.name ?? (this.type === "advantage" ? "Advantage" : "Disadvantage")} (${newCost})`,
+            ts: Date.now(),
+            type: itemType,
+            itemName: this.name ?? (this.type === "advantage" ? "Advantage" : "Disadvantage"),
+            fromValue: oldCost,
+            toValue: newCost
+          });
+          shouldUpdate = true;
+        }
+      }
+
+      if (shouldUpdate) {
         await this.actor.setFlag(SYS_ID, "xpSpent", spent);
       }
     } catch (_) { /* no-op */ }

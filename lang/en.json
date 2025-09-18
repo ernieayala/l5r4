@@ -163,21 +163,32 @@
         "insightPoints": "Insight Points"
       },
       "experience": {
-        "xpAmount": "Amount (+/-)",
+        "xpAmount": "Amount",
         "note": "Note",
-        "reason": "Reason or source",
+        "reason": "Reason",
         "adjustExperience": "Adjust Experience",
         "experienceSummary": "Experience Summary",
         "usedTotal": "Used / Total",
-        "poolChanges": "Pool Changes (affect TOTAL)",
+        "poolChanges": "Pool Changes",
         "when": "When",
         "none": "No entries",
-        "purchases": "Purchases (do NOT change TOTAL)",
+        "purchases": "Purchases",
         "xpLog": "XP Log",
         "traitChange": "Trait: {label} {from}→{to}",
         "voidChange": "Void: {from}→{to}",
         "skillCreate": "Skill: {name} 0→{rank}",
-        "skillChange": "Skill: {name} {from}→{to}"
+        "skillChange": "Skill: {name} {from}→{to}",
+        "type": "Type",
+        "breakdown": {
+          "base": "Base",
+          "disadvantagesGrant": "Disadvantages grant",
+          "cap10": "(cap 10)",
+          "manualAdjustments": "Manual adjustments",
+          "traits": "Traits",
+          "void": "Void",
+          "skills": "Skills",
+          "advantages": "Advantages"
+        }
       }
     },
     "equipment": {
@@ -302,7 +313,8 @@
         "tattoo": "Tattoo",
         "tattoos": "Tattoos",
         "traits": "Traits",
-        "itemSheetTitle": "Item Sheet"
+        "itemSheetTitle": "Item Sheet",
+        "xpModal": "Experience"
       },
       "hints": {
         "leftRightToAdjust": "Left and Right to Adjust",
@@ -539,9 +551,9 @@
       "armor": "Armor",
       "bow": "Bow",
       "clan": "Clan",
+      "commonItem": "Item",
       "disadvantage": "Disadvantage",
       "family": "Family",
-      "item": "Item",
       "kata": "Kata",
       "kiho": "Kiho",
       "school": "School",

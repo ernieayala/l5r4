@@ -25,15 +25,10 @@
         <h4 class="flex0 title">{{localize "l5r4.ui.common.xp"}}</h4>
         <div class="flexrow flex1 -gap-xs input-placeholder">
           {{#if system._xp}}
-            <span>{{system._xp.spent}}/{{system._xp.total}}</span>
-            <!--
-            <div class="flexrow">
-              <a class="button" data-action="xp-add"><i class="fas fa-plus"></i> {{localize "l5r4.sheet.adjust"}}</a>
-              <a class="button" data-action="xp-log"><i class="fas fa-list"></i> {{localize "l5r4.sheet.log"}}</a>
+            <div class="flexrow -gap-md">
+              <span class="flex0">{{system._xp.spent}}/{{system._xp.total}}</span>
+              <a class="button inline-control icon" data-action="xp-modal"><i class="fas fa-chart-line"></i></a>
             </div>
-            -->
-          {{else}}
-            <span>{{system.xp}}/40</span>
           {{/if}}
         </div>
       </div>

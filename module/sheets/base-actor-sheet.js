@@ -584,7 +584,8 @@ export class BaseActorSheet extends HandlebarsApplicationMixin(foundry.applicati
       toggleOptions: event.shiftKey,
       rollType: "attack",
       actor: this.actor,
-      untrained: isUntrained
+      untrained: isUntrained,
+      weaponId: id
     });
   }
 

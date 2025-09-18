@@ -236,12 +236,10 @@ export async function SkillRoll({
     label += ` (${game.i18n.localize("l5r4.mechanics.rolls.emphasis")})`;
     rollFormula = `${diceRoll}d10r1k${diceKeep}x10+${bonus}`;
   }
-  if (targetInfo) {
-    label += targetInfo;
-  }
-
+  // Build base label without target info first
+  let baseLabel = label;
   if (rollMod || keepMod || totalMod) {
-    label += ` ${game.i18n.localize("l5r4.mechanics.rolls.mod")} (${rollMod}k${keepMod}${totalMod < 0 ? totalMod : "+" + totalMod})`;
+    baseLabel += ` ${game.i18n.localize("l5r4.mechanics.rolls.mod")} (${rollMod}k${keepMod}${totalMod < 0 ? totalMod : "+" + totalMod})`;
   }
 
   // Execute roll and render with custom template wrapper
@@ -264,7 +262,23 @@ export async function SkillRoll({
   const tnResult = (effTN > 0)
     ? { effective: effTN, raises: toInt(check.raises) || 0, outcome: ((roll.total ?? 0) >= effTN) ? T("l5r4.mechanics.rolls.success") : T("l5r4.mechanics.rolls.failure") }
     : null;
-  const content = await R(messageTemplate, { flavor: label, roll: rollHtml, tnResult });
+
+  // Determine final label and TN result based on GM status and attack success
+  let finalLabel = baseLabel;
+  let finalTnResult = tnResult;
+  
+  if (rollType === "attack" && !game.user.isGM && tnResult && tnResult.outcome === T("l5r4.mechanics.rolls.failure")) {
+    // Hide target information and TN result on missed attacks for non-GM players
+    finalTnResult = null;
+    // Don't add target info to label for failed attacks
+  } else {
+    // Add target info for successful attacks or GM users
+    if (targetInfo) {
+      finalLabel += targetInfo;
+    }
+  }
+
+  const content = await R(messageTemplate, { flavor: finalLabel, roll: rollHtml, tnResult: finalTnResult });
   return roll.toMessage({ speaker: ChatMessage.getSpeaker(), content });
 }
 
@@ -461,7 +475,16 @@ export async function RingRoll({
       raises: toInt(__raisesInput) || 0,
       outcome: ((roll.total ?? 0) >= __effTN) ? T("l5r4.mechanics.rolls.success") : T("l5r4.mechanics.rolls.failure")
     } : null;
-    const content = await R(messageTemplate, { flavor: label, roll: rollHtml, tnResult });
+
+    // Hide TN information for non-GM players on missed attack rolls (if this is used for attacks)
+    let finalTnResult = tnResult;
+    if (!game.user.isGM && tnResult && tnResult.outcome === T("l5r4.mechanics.rolls.failure")) {
+      // Note: RingRoll doesn't currently support rollType parameter, but we include this for consistency
+      // and future-proofing in case attack rolls use ring rolls
+      finalTnResult = null;
+    }
+
+    const content = await R(messageTemplate, { flavor: label, roll: rollHtml, tnResult: finalTnResult });
     return roll.toMessage({ speaker: ChatMessage.getSpeaker(), content });
   }
 
@@ -600,7 +623,16 @@ export async function TraitRoll({
     raises: toInt(__raisesInput) || 0,
     outcome: ((roll.total ?? 0) >= __effTN) ? T("l5r4.mechanics.rolls.success") : T("l5r4.mechanics.rolls.failure")
   } : null;
-  const content = await R(messageTemplate, { flavor, roll: rollHtml, tnResult });
+
+  // Hide TN information for non-GM players on missed attack rolls (if this is used for attacks)
+  let finalTnResult = tnResult;
+  if (!game.user.isGM && tnResult && tnResult.outcome === T("l5r4.mechanics.rolls.failure")) {
+    // Note: TraitRoll doesn't currently support rollType parameter, but we include this for consistency
+    // and future-proofing in case attack rolls use trait rolls
+    finalTnResult = null;
+  }
+
+  const content = await R(messageTemplate, { flavor, roll: rollHtml, tnResult: finalTnResult });
   return roll.toMessage({ speaker: ChatMessage.getSpeaker(), content });
 }
 
@@ -704,7 +736,8 @@ export async function NpcRoll({
   woundPenalty = 0,
   rollType = null,
   actor = null,
-  untrained = false
+  untrained = false,
+  weaponId = null
 } = {}) {
   const messageTemplate = CHAT_TEMPLATES.simpleRoll;
   const noVoid = !game.settings.get(SYS_ID, "allowNpcVoidPoints");
@@ -816,7 +849,32 @@ export async function NpcRoll({
     }
   }
 
-  const content = await R(messageTemplate, { flavor: label, roll: rollHtml, tnResult, targetData });
+  // Hide TN and enemy information for non-GM players on missed attack rolls
+  let finalTargetData = targetData;
+  let finalTnResult = tnResult;
+  
+  if (rollType === "attack" && !game.user.isGM && tnResult && tnResult.outcome === T("l5r4.mechanics.rolls.failure")) {
+    // Hide target information on missed attacks for non-GM players
+    finalTargetData = null;
+    finalTnResult = null;
+  }
+
+  // Prepare weapon data for damage button on successful attack rolls
+  let weaponData = null;
+  if (rollType === "attack" && weaponId && actor && tnResult && tnResult.outcome === T("l5r4.mechanics.rolls.success")) {
+    const weapon = actor.items.get(weaponId);
+    if (weapon && (weapon.type === "weapon" || weapon.type === "bow")) {
+      weaponData = {
+        id: weaponId,
+        name: weapon.name,
+        damageRoll: weapon.system?.damageRoll || 0,
+        damageKeep: weapon.system?.damageKeep || 0,
+        actorId: actor.id
+      };
+    }
+  }
+
+  const content = await R(messageTemplate, { flavor: label, roll: rollHtml, tnResult: finalTnResult, targetData: finalTargetData, weaponData });
   return roll.toMessage({ speaker: ChatMessage.getSpeaker(), content });
 }
 

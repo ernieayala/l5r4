@@ -13,9 +13,19 @@
   {{/if}}
   {{{roll}}}
   {{#if tnResult}}
-    <p class="l5r4-tn-result">
+    <div class="l5r4-tn-result">
       {{tnResult.outcome}} vs TN {{tnResult.effective}}
       {{#if tnResult.raises}} ({{localize "l5r4.magic.spells.raises"}}: {{tnResult.raises}}){{/if}}
-    </p>
+    </div>
+  {{/if}}
+  {{#if weaponData}}
+    <button class="l5r4-damage-button" 
+            data-weapon-id="{{weaponData.id}}" 
+            data-actor-id="{{weaponData.actorId}}"
+            data-weapon-name="{{weaponData.name}}"
+            data-damage-roll="{{weaponData.damageRoll}}"
+            data-damage-keep="{{weaponData.damageKeep}}">
+      {{localize "l5r4.mechanics.rolls.damageRoll"}} ({{weaponData.name}})
+    </button>
   {{/if}}
 </div>

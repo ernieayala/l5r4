@@ -169,15 +169,26 @@
         "adjustExperience": "Ajustar Experiência",
         "experienceSummary": "Resumo da Experiência",
         "usedTotal": "Usado / Total",
-        "poolChanges": "Mudanças na Reserva (afeta o TOTAL)",
+        "poolChanges": "Mudanças na Reserva",
         "when": "Quando",
         "none": "Nenhuma entrada",
-        "purchases": "Compras (NÃO alteram o TOTAL)",
+        "purchases": "Compras",
         "xpLog": "Registro de XP",
         "traitChange": "Traço: {label} {from}→{to}",
         "voidChange": "Vazio: {from}→{to}",
         "skillCreate": "Perícia: {name} 0→{rank}",
-        "skillChange": "Perícia: {name} {from}→{to}"
+        "skillChange": "Perícia: {name} {from}→{to}",
+        "type": "Tipo",
+        "breakdown": {
+          "base": "Base",
+          "disadvantagesGrant": "Desvantagens concedem",
+          "cap10": "(máx 10)",
+          "manualAdjustments": "Ajustes manuais",
+          "traits": "Traços",
+          "void": "Vazio",
+          "skills": "Perícias",
+          "advantages": "Vantagens"
+        }
       }
     },
     "equipment": {
@@ -534,9 +545,9 @@
       "armor": "Armadura",
       "bow": "Arco",
       "clan": "Clã",
+      "commonItem": "Item",
       "disadvantage": "Desvantagem",
       "family": "Família",
-      "item": "Item",
       "kata": "Kata",
       "kiho": "Kiho",
       "school": "Escola",

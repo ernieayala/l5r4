@@ -1,0 +1,100 @@
+<section class="standard-form">
+  <div>
+    <h3>{{localize "l5r4.character.experience.experienceSummary"}}</h3>
+    <div class="form-group">
+      <label>{{localize "l5r4.character.experience.usedTotal"}}</label>
+      <div class="form-fields">
+        <input type="text" disabled value="{{xp.spent}} / {{xp.total}}" />
+      </div>
+    </div>
+  </div>
+  <div>
+    <h3>{{localize "l5r4.character.experience.breakdown"}}</h3>
+    <ul class="xp-breakdown-list">
+      <li><span><strong>{{localize "l5r4.character.experience.breakdown.base"}}</strong>:</span> <span>{{xp.breakdown.base}}</span></li>
+      <li><span><strong>{{localize "l5r4.character.experience.breakdown.disadvantagesGrant"}}</strong>:</span> <span>{{xp.breakdown.disadvantagesGranted}} {{localize "l5r4.character.experience.breakdown.cap10"}}</span></li>
+      <li><span><strong>{{localize "l5r4.character.experience.breakdown.manualAdjustments"}}</strong>:</span> <span>{{xp.breakdown.manual}}</span></li>
+      <li><span><strong>{{localize "l5r4.character.experience.breakdown.traits"}}</strong>:</span> <span>{{xp.breakdown.traits}}</span></li>
+      <li><span><strong>{{localize "l5r4.character.experience.breakdown.void"}}</strong>:</span> <span>{{xp.breakdown.void}}</span></li>
+      <li><span><strong>{{localize "l5r4.character.experience.breakdown.skills"}}</strong>:</span> <span>{{xp.breakdown.skills}}</span></li>
+      <li><span><strong>{{localize "l5r4.character.experience.breakdown.advantages"}}</strong>:</span> <span>{{xp.breakdown.advantages}}</span></li>
+    </ul>
+  </div>
+  <div>
+    <h3>{{localize "l5r4.character.experience.adjustExperience"}}</h3>
+    <div class="form-group">
+      <label for="xp-amount">{{localize "l5r4.character.experience.xpAmount"}}</label>
+      <div class="form-fields">
+        <input type="number" id="xp-amount" name="xp-amount" step="1" value="1" />
+      </div>
+    </div>
+    <div class="form-group">
+      <label for="xp-note">{{localize "l5r4.character.experience.note"}}</label>
+      <div class="form-fields">
+        <input type="text" id="xp-note" name="xp-note" placeholder="{{localize 'l5r4.character.experience.reason'}}" />
+      </div>
+    </div>
+    <div class="form-group">
+      <div class="form-fields">
+        <button type="button" data-action="xp-add-confirm">
+          <i class="fas fa-plus"></i> {{localize "l5r4.ui.common.apply"}}
+        </button>
+      </div>
+    </div>
+  </div>
+  <div>
+    <section class="item-list -xp -header">
+      <div class="item">
+        <span>{{localize "l5r4.ui.common.xp"}}</span>
+        <span>{{localize "l5r4.character.experience.note"}}</span>
+        <span></span>
+      </div>
+    </section>
+    <section class="item-list -xp">
+      {{#if manualEntries}}
+        {{#each manualEntries}}
+          <div class="item -xp -expandable" data-entry-id="{{this.id}}">
+            <h4 class="flexrow -gap-sm title">
+              <span>{{this.deltaFormatted}}</span>
+            </h4>
+            <div>{{this.note}}</div>
+            <div>
+              <a class="button inline-control icon" data-action="xp-delete-manual" data-entry-id="{{this.id}}" title="{{localize 'l5r4.ui.common.delete'}}">
+                <i class="fas fa-trash"></i>
+              </a>
+            </div>
+          </div>
+        {{/each}}
+      {{/if}}
+    </section>
+  </div>
+  <div>
+    <h3>{{localize "l5r4.character.experience.purchases"}}</h3>
+    <section class="item-list -xp-spent -header">
+      <div class="item">
+        <span>{{localize "l5r4.character.experience.reason"}}</span>
+        <span>{{localize "l5r4.character.experience.xpAmount"}}</span>
+        <span>{{localize "l5r4.character.experience.type"}}</span>
+      </div>
+    </section>
+    <section class="item-list -xp-spent">
+      {{#if spentEntries}}
+        {{#each spentEntries}}
+          <div class="item -xp-spent -expandable">
+            <h4 class="flexrow -gap-sm title">
+              <span>{{this.note}}</span>
+            </h4>
+            <div>{{this.deltaFormatted}}</div>
+            <div>{{this.type}}</div>
+          </div>
+        {{/each}}
+      {{/if}}
+    </section>
+  </div>
+  <div class="form-group">
+    <label>{{localize "l5r4.ui.common.total"}}</label>
+    <div class="form-fields">
+      <input type="text" disabled value="{{spentTotal}}" />
+    </div>
+  </div>
+</section>

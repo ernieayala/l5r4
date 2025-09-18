@@ -184,8 +184,47 @@ Hooks.once("init", async () => {
 
 
 // =============================================================================
-// CHAT INTEGRATION - INLINE ROLL PARSING
+// CHAT INTEGRATION - INLINE ROLL PARSING & DAMAGE BUTTONS
 // =============================================================================
+
+// Handle damage button clicks in chat messages
+Hooks.on("renderChatMessageHTML", (app, html, data) => {
+  html.querySelectorAll(".l5r4-damage-button").forEach(button => {
+    button.addEventListener("click", async (event) => {
+      event.preventDefault();
+      const button = event.currentTarget;
+      const weaponId = button.dataset.weaponId;
+      const actorId = button.dataset.actorId;
+      const weaponName = button.dataset.weaponName;
+      const damageRoll = parseInt(button.dataset.damageRoll) || 0;
+      const damageKeep = parseInt(button.dataset.damageKeep) || 0;
+
+      // Find the actor
+      const actor = game.actors.get(actorId);
+      if (!actor) {
+        ui.notifications?.warn("Actor not found for damage roll");
+        return;
+      }
+
+      // Check permissions - only allow if user owns the actor or is GM
+      if (!actor.isOwner && !game.user.isGM) {
+        ui.notifications?.warn("You don't have permission to roll damage for this actor");
+        return;
+      }
+
+      // Import WeaponRoll from dice service
+      const { WeaponRoll } = await import("./module/services/dice.js");
+      
+      // Roll weapon damage
+      return WeaponRoll({
+        diceRoll: damageRoll,
+        diceKeep: damageKeep,
+        weaponName: weaponName,
+        askForOptions: event.shiftKey
+      });
+    });
+  });
+});
 
 Hooks.on("chatMessage", (chatlog, message, _chatData) => {
   const rollCmd = /^\/(r(oll)?|gmr(oll)?|br(oll)?|sr(oll)?)\s/i;
