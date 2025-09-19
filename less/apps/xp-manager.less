@@ -1,21 +1,26 @@
 .xp-modal-dialog {
+    .window-content {
+        overflow-y: auto;
+    }
+    
     .xp-breakdown-list {
         list-style: none;
         padding: 0;
         margin: 0;
 
-    li {
-        border-block-end: 1px solid var(--color-border-dark);
-        display: flex;
-        gap: 0.5rem;
-        justify-content: space-between;
-        padding: 0.25rem;
+        li {
+            border-block-end: 1px solid var(--color-border);
+            display: flex;
+            gap: 0.5rem;
+            justify-content: space-between;
+            padding: 0.25rem;
 
-        &:last-child {
-            border-block-end: none;
+            &:last-child {
+                border-block-end: none;
+            }
         }
     }
-    
+        
     .item-list {
         &.-header {
             border-inline-start-width: 1px;
