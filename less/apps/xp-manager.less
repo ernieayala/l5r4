@@ -1,38 +1,43 @@
 .xp-modal-dialog {
-    .window-content {
-        overflow-y: auto;
-    }
-    
-    .xp-breakdown-list {
-        list-style: none;
-        padding: 0;
-        margin: 0;
+  .window-content {
+    overflow-y: auto;
 
-        li {
-            border-block-end: 1px solid var(--color-border);
-            display: flex;
-            gap: 0.5rem;
-            justify-content: space-between;
-            padding: 0.25rem;
-
-            &:last-child {
-                border-block-end: none;
-            }
-        }
+    h3 {
+    border-block-end: 1px solid var(--color-border);
+      margin: 0;
     }
-        
-    .item-list {
-        &.-header {
-            border-inline-start-width: 1px;
-        }
+  }
 
-        .title {
-            align-items: center;
-            display: inline-flex;
-            font-size: var(--font-size-18);
-            margin: 0;
-            min-height: var(--input-height);
-            text-wrap: nowrap;
-        }
+  .xp-breakdown-list {
+    list-style: none;
+    padding: 0;
+    margin: 0;
+
+    li {
+      border-block-end: 1px solid var(--color-border);
+      display: flex;
+      gap: 0.5rem;
+      justify-content: space-between;
+      padding: 0.25rem;
+
+      &:last-child {
+        border-block-end: none;
+      }
     }
+  }
+
+  .item-list {
+    &.-header {
+      border-inline-start: 1px solid var(--table-header-border-color);
+    }
+
+    .title {
+      align-items: center;
+      display: inline-flex;
+      font-size: var(--font-size-18);
+      margin: 0;
+      min-height: var(--input-height);
+      text-wrap: nowrap;
+    }
+  }
 }

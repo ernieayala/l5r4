@@ -383,7 +383,7 @@ body > * {
 .l5r4.pc .item-list.-xp-spent .item,
 .l5r4.npc .item-list.-xp-spent .item,
 .xp-modal-dialog .item-list.-xp-spent .item {
-  grid-template-columns: 1fr 1fr 1fr;
+  grid-template-columns: 1fr 80px 120px;
 }
 .l5r4.pc .item-list > .item:nth-of-type(even),
 .l5r4.npc .item-list > .item:nth-of-type(even),
@@ -936,6 +936,10 @@ body > * {
 .xp-modal-dialog .window-content {
   overflow-y: auto;
 }
+.xp-modal-dialog .window-content h3 {
+  border-block-end: 1px solid var(--color-border);
+  margin: 0;
+}
 .xp-modal-dialog .xp-breakdown-list {
   list-style: none;
   padding: 0;
@@ -952,7 +956,7 @@ body > * {
   border-block-end: none;
 }
 .xp-modal-dialog .item-list.-header {
-  border-inline-start-width: 1px;
+  border-inline-start: 1px solid var(--table-header-border-color);
 }
 .xp-modal-dialog .item-list .title {
   align-items: center;

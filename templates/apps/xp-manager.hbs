@@ -1,5 +1,5 @@
 <section class="standard-form">
-  <div>
+  <div class="flexcol -gap-sm">
     <h3>{{localize "l5r4.character.experience.experienceSummary"}}</h3>
     <div class="form-group">
       <label>{{localize "l5r4.character.experience.usedTotal"}}</label>
@@ -8,19 +8,16 @@
       </div>
     </div>
   </div>
-  <div>
-    <h3>{{localize "l5r4.character.experience.breakdown"}}</h3>
-    <ul class="xp-breakdown-list">
-      <li><span><strong>{{localize "l5r4.character.experience.breakdown.base"}}</strong>:</span> <span>{{xp.breakdown.base}}</span></li>
-      <li><span><strong>{{localize "l5r4.character.experience.breakdown.disadvantagesGrant"}}</strong>:</span> <span>{{xp.breakdown.disadvantagesGranted}} {{localize "l5r4.character.experience.breakdown.cap10"}}</span></li>
-      <li><span><strong>{{localize "l5r4.character.experience.breakdown.manualAdjustments"}}</strong>:</span> <span>{{xp.breakdown.manual}}</span></li>
-      <li><span><strong>{{localize "l5r4.character.experience.breakdown.traits"}}</strong>:</span> <span>{{xp.breakdown.traits}}</span></li>
-      <li><span><strong>{{localize "l5r4.character.experience.breakdown.void"}}</strong>:</span> <span>{{xp.breakdown.void}}</span></li>
-      <li><span><strong>{{localize "l5r4.character.experience.breakdown.skills"}}</strong>:</span> <span>{{xp.breakdown.skills}}</span></li>
-      <li><span><strong>{{localize "l5r4.character.experience.breakdown.advantages"}}</strong>:</span> <span>{{xp.breakdown.advantages}}</span></li>
-    </ul>
-  </div>
-  <div>
+  <ul class="xp-breakdown-list">
+    <li><span><strong>{{localize "l5r4.character.experience.breakdown.base"}}</strong>:</span> <span>{{xp.breakdown.base}}</span></li>
+    <li><span><strong>{{localize "l5r4.character.experience.breakdown.disadvantagesGrant"}}</strong>:</span> <span>{{xp.breakdown.disadvantagesGranted}} {{localize "l5r4.character.experience.breakdown.cap10"}}</span></li>
+    <li><span><strong>{{localize "l5r4.character.experience.breakdown.manualAdjustments"}}</strong>:</span> <span>{{xp.breakdown.manual}}</span></li>
+    <li><span><strong>{{localize "l5r4.character.experience.breakdown.traits"}}</strong>:</span> <span>{{xp.breakdown.traits}}</span></li>
+    <li><span><strong>{{localize "l5r4.character.experience.breakdown.void"}}</strong>:</span> <span>{{xp.breakdown.void}}</span></li>
+    <li><span><strong>{{localize "l5r4.character.experience.breakdown.skills"}}</strong>:</span> <span>{{xp.breakdown.skills}}</span></li>
+    <li><span><strong>{{localize "l5r4.character.experience.breakdown.advantages"}}</strong>:</span> <span>{{xp.breakdown.advantages}}</span></li>
+  </ul>
+  <div class="flexcol -gap-sm">
     <h3>{{localize "l5r4.character.experience.adjustExperience"}}</h3>
     <div class="form-group">
       <label for="xp-amount">{{localize "l5r4.character.experience.xpAmount"}}</label>
@@ -42,7 +39,7 @@
       </div>
     </div>
   </div>
-  <div>
+  <div class="flexcol -gap-sm">
     <section class="item-list -xp -header">
       <div class="item">
         <span>{{localize "l5r4.ui.common.xp"}}</span>
@@ -68,7 +65,7 @@
       {{/if}}
     </section>
   </div>
-  <div>
+  <div class="flexcol -gap-sm">
     <h3>{{localize "l5r4.character.experience.purchases"}}</h3>
     <section class="item-list -xp-spent -header">
       <div class="item">
