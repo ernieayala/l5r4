@@ -4,6 +4,7 @@
  * This class extends the base Foundry Actor document to provide L5R4-specific
  * functionality including derived data computation, experience tracking, and
  * token configuration for both Player Characters and Non-Player Characters.
+ * Implements the complete L5R4 character mechanics with automatic calculations.
  *
  * **Core Responsibilities:**
  * - **Token Configuration**: Set appropriate defaults for PC/NPC tokens on creation
@@ -11,44 +12,103 @@
  * - **Experience Tracking**: Automatic XP cost calculation and logging for character advancement
  * - **Wound System**: Complex wound level tracking with penalties and healing rates
  * - **Family/School Integration**: Handle creation bonuses and trait modifications
+ * - **Active Effects Integration**: Full support for trait/ring/skill modifications
+ * - **Stance Automation**: Combat stance effects and mutual exclusion
+ *
+ * **System Architecture:**
+ * The actor document follows L5R4's hierarchical data model:
+ * - **Base Traits**: Eight primary attributes (Stamina, Willpower, etc.)
+ * - **Rings**: Derived from trait pairs with minimum values
+ * - **Skills**: Individual skill ranks with emphasis specializations
+ * - **Derived Stats**: Initiative, Armor TN, Wounds, Insight automatically calculated
+ * - **Experience**: Comprehensive XP tracking with automatic cost computation
  *
  * **Derived Data Features:**
  * 
  * **Player Characters (PC):**
- * - **Rings**: Computed from trait pairs (Air=Ref+Awa, Earth=Sta+Wil, etc.)
+ * - **Rings**: Computed from trait pairs (Air=min(Ref,Awa), Earth=min(Sta,Wil), etc.)
  * - **Initiative**: Roll=InsightRank+Reflexes+mods, Keep=Reflexes+mods
  * - **Armor TN**: Base=5×Reflexes+5, plus armor bonuses (stackable via setting)
  * - **Wounds**: Earth-based thresholds, current level tracking, penalties, heal rate
  * - **Insight**: Points from rings×10 + skills×1, optional auto-rank calculation
  * - **Experience**: Comprehensive XP tracking with automatic cost calculation
+ * - **Void Points**: Maximum equals Void Ring, current tracking with recovery
  *
  * **Non-Player Characters (NPC):**
  * - **Simplified Wounds**: Earth-based with optional manual max override
  * - **Initiative**: Effective values with fallbacks to Reflexes
  * - **Shared Logic**: Uses same trait/ring calculations as PCs
+ * - **Streamlined Interface**: Reduced complexity for GM ease of use
+ *
+ * **Experience Point System:**
+ * Advanced XP tracking with automatic cost calculation:
+ * - **Trait Advancement**: Progressive costs (4×new_rank XP per step)
+ * - **Void Advancement**: Fixed costs with family/school bonuses
+ * - **Free Bonuses**: Family traits and school skills reduce costs
+ * - **Discount System**: Flexible cost reduction for special circumstances
+ * - **Audit Trail**: Complete log of all XP expenditures with timestamps
+ *
+ * **Active Effects Integration:**
+ * Full support for Foundry's Active Effects system:
+ * - **Trait Modifications**: Direct trait value adjustments
+ * - **Ring Bonuses**: Computed ring values include effect modifications
+ * - **Skill Bonuses**: Roll/keep/total bonuses for individual skills
+ * - **Combat Bonuses**: Initiative, Armor TN, damage modifications
+ * - **Wound Penalties**: Automatic wound penalty application
  *
  * **Code Navigation Guide:**
- * 1. `_preCreate()` - Token defaults and initial actor image setup
- * 2. `_preUpdate()` - XP delta tracking for trait/void/skill changes
- * 3. `prepareDerivedData()` - Main entry point, branches to PC/NPC preparation
- * 4. `_preparePc()` - PC-specific derived data (traits, rings, initiative, armor, wounds, insight)
- * 5. `_preparePcExperience()` - XP totals and breakdown calculation
- * 6. `_prepareNpc()` - NPC-specific derived data (simplified wound system)
- * 7. `_prepareTraitsAndRings()` - Shared trait normalization and ring calculation
- * 8. `_calculateInsightRank()` - Insight points to rank conversion
- * 9. `_creationFreeBonus()` - Family/School bonus detection and summation
- * 10. `_xpStepCostForTrait()` - XP cost calculation for trait advancement
+ * 1. **Creation/Update Hooks** (`_preCreate()`, `_preUpdate()`) - Token setup and XP tracking
+ * 2. **Main Preparation** (`prepareDerivedData()`) - Entry point, branches to PC/NPC
+ * 3. **PC Preparation** (`_preparePc()`) - Complete PC stat calculation
+ * 4. **NPC Preparation** (`_prepareNpc()`) - Simplified NPC stat calculation
+ * 5. **Shared Logic** (`_prepareTraitsAndRings()`) - Common trait/ring computation
+ * 6. **Experience System** (`_preparePcExperience()`, `_xpStepCostForTrait()`) - XP calculations
+ * 7. **Utility Methods** (`_calculateInsightRank()`, `_creationFreeBonus()`) - Helper functions
+ *
+ * **Performance Optimizations:**
+ * - **Computed Properties**: Derived data cached during preparation phase
+ * - **Efficient Loops**: Optimized iteration over traits, rings, and skills
+ * - **Conditional Calculation**: PC/NPC branching avoids unnecessary computation
+ * - **Active Effects**: Leverages Foundry's built-in AE system for modifications
+ *
+ * **Integration Points:**
+ * - **Dice Service**: Provides trait/ring values for roll calculations
+ * - **Sheet Classes**: Supplies prepared data for template rendering
+ * - **Chat System**: Roll results include actor-specific bonuses and penalties
+ * - **Combat System**: Initiative and wound tracking integration
+ * - **XP Manager**: Experience point data and cost calculations
+ *
+ * **Error Handling:**
+ * - **Graceful Degradation**: Functions with missing or invalid data
+ * - **Type Safety**: Robust type checking and conversion
+ * - **Console Warnings**: Detailed logging for troubleshooting
+ * - **Fallback Values**: Safe defaults for all calculations
  *
  * **Trait Key Glossary:**
  * - `sta`: Stamina, `wil`: Willpower, `str`: Strength, `per`: Perception
  * - `ref`: Reflexes, `awa`: Awareness, `agi`: Agility, `int`: Intelligence
  *
+ * **Usage Examples:**
+ * ```javascript
+ * // Access derived data
+ * const actor = game.actors.get(actorId);
+ * const earthRing = actor.system.rings.earth; // Computed from Sta+Wil
+ * const armorTN = actor.system.armorTn.current; // Includes all bonuses
+ * 
+ * // Experience tracking
+ * const xpBreakdown = actor.system._xp; // Detailed XP analysis
+ * const totalSpent = xpBreakdown.spent; // Total XP expenditure
+ * ```
+ *
  * @author L5R4 System Team
  * @since 1.0.0
  * @version 2.1.0
+ * @extends {Actor}
  * @see {@link https://foundryvtt.com/api/classes/documents.Actor.html|Actor Document}
  * @see {@link https://foundryvtt.com/api/classes/documents.Actor.html#prototypeToken|Prototype Token}
  * @see {@link https://foundryvtt.com/api/classes/documents.Actor.html#applyActiveEffects|Active Effects}
+ * @see {@link ../services/stance.js|Stance Service} - Combat stance automation
+ * @see {@link ../apps/xp-manager.js|XP Manager} - Experience point management interface
  */
 
 import { SYS_ID, iconPath } from "../config.js";
@@ -712,15 +772,19 @@ export default class L5R4Actor extends Actor {
         continue;
       }
       const r = toInt(it.system?.rank);
-      const baseline = it.system?.school ? 1 : 0;
-      if (r > baseline) {
-        skillsXP += (r * (r + 1)) / 2 - (baseline * (baseline + 1)) / 2;
+      const freeRanks = it.system?.school ? 
+        (it.system?.freeRanks != null ? parseInt(it.system.freeRanks) : 1) : 0;
+      if (r > freeRanks) {
+        skillsXP += (r * (r + 1)) / 2 - (freeRanks * (freeRanks + 1)) / 2;
       }
-      // Emphases: 2 XP each, split on comma/semicolon
+      // Emphases: 2 XP each, split on comma/semicolon, minus free emphasis
       const emph = String(it.system?.emphasis ?? "").trim();
       if (emph) {
-        const count = emph.split(/[,;]+/).map(s => s.trim()).filter(Boolean).length;
-        skillsXP += 2 * count;
+        const emphases = emph.split(/[,;]+/).map(s => s.trim()).filter(Boolean);
+        const freeEmphasis = it.system?.school ? 
+          (it.system?.freeEmphasis != null ? parseInt(it.system.freeEmphasis) : 0) : 0;
+        const paidEmphases = Math.max(0, emphases.length - freeEmphasis);
+        skillsXP += 2 * paidEmphases;
       }
     }
 

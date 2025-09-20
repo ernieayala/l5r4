@@ -1,8 +1,73 @@
 /**
- * @fileoverview XP Manager Application for L5R4 system
+ * @fileoverview L5R4 XP Manager Application for Foundry VTT v13+
  * 
- * Modern ApplicationV2-based XP management interface that replaces the old Dialog-based modal.
- * Maintains the same visual structure and CSS classes while providing better architecture.
+ * This module provides a comprehensive experience point management interface for L5R4 characters,
+ * built on Foundry's modern ApplicationV2 architecture. It replaces the legacy Dialog-based modal
+ * with a more robust and maintainable solution while preserving the familiar user interface.
+ *
+ * **Core Responsibilities:**
+ * - **XP Tracking**: Comprehensive experience point breakdown and history management
+ * - **Manual Adjustments**: GM and player tools for XP modifications with audit trails
+ * - **Purchase History**: Automatic reconstruction of XP expenditures from character data
+ * - **Legacy Migration**: Retroactive data format updates for existing characters
+ * - **Real-time Updates**: Live synchronization with character sheet changes
+ *
+ * **Key Features:**
+ * - **Automatic XP Calculation**: Rebuilds XP history from traits, skills, void, and advantages
+ * - **Manual Entry System**: Add/remove XP with notes and timestamps for record keeping
+ * - **Type Categorization**: Organized display by expenditure type (traits, skills, advantages, etc.)
+ * - **Legacy Data Support**: Handles migration from old XP tracking formats
+ * - **Audit Trail**: Complete history of all XP changes with timestamps and descriptions
+ *
+ * **ApplicationV2 Architecture:**
+ * - **HandlebarsApplicationMixin**: Modern template rendering with async context preparation
+ * - **Form Integration**: Native form handling with action delegation system
+ * - **Unique Identification**: Actor-specific window IDs prevent conflicts
+ * - **Responsive Layout**: Resizable window with optimized dimensions
+ * - **Event Delegation**: Clean action-based event handling system
+ *
+ * **XP Calculation System:**
+ * The manager automatically reconstructs XP expenditures by analyzing:
+ * - **Traits**: Cost calculated using L5R4 progression (4×rank) with family bonuses
+ * - **Void Ring**: Separate progression (6×rank) with discount support
+ * - **Skills**: Rank-based costs with school skill free rank handling
+ * - **Emphases**: Fixed 2 XP cost with free emphasis support for school skills
+ * - **Advantages**: Direct cost from item system data
+ *
+ * **Data Migration Features:**
+ * - **Retroactive Updates**: Rebuilds XP history from current character state
+ * - **Legacy Format Support**: Handles old XP tracking data structures
+ * - **Type Standardization**: Ensures consistent entry formatting and categorization
+ * - **Timestamp Generation**: Creates logical timestamps for historical entries
+ * - **Error Recovery**: Graceful handling of corrupted or missing XP data
+ *
+ * **Usage Examples:**
+ * ```javascript
+ * // Open XP manager for an actor
+ * const xpManager = new XpManagerApplication(actor);
+ * await xpManager.render(true);
+ * 
+ * // Add manual XP adjustment
+ * await actor.setFlag('l5r4', 'xpManual', [...existing, {
+ *   id: foundry.utils.randomID(),
+ *   delta: 10,
+ *   note: 'Session reward',
+ *   ts: Date.now()
+ * }]);
+ * ```
+ *
+ * **Performance Considerations:**
+ * - **Lazy Calculation**: XP history rebuilt only when manager opens
+ * - **Efficient Updates**: Uses Foundry's flag system for minimal data changes
+ * - **Template Caching**: Handlebars templates cached for fast rendering
+ * - **Event Optimization**: Action delegation reduces event listener overhead
+ *
+ * @author L5R4 System Team
+ * @since 2.0.0
+ * @version 2.1.0
+ * @see {@link https://foundryvtt.com/api/classes/foundry.applications.api.ApplicationV2.html|ApplicationV2}
+ * @see {@link https://foundryvtt.com/api/classes/foundry.applications.api.HandlebarsApplicationMixin.html|HandlebarsApplicationMixin}
+ * @see {@link https://foundryvtt.com/api/classes/foundry.abstract.Document.html#setFlag|Document.setFlag}
  */
 
 import { SYS_ID } from "../config.js";
@@ -76,13 +141,24 @@ export default class XpManagerApplication extends foundry.applications.api.Handl
           // Use stored type and format note based on type, with fallback parsing for legacy entries
           if (e.type === "trait" && e.traitLabel && e.toValue !== undefined) {
             type = game.i18n.localize("l5r4.character.experience.breakdown.traits");
-            formattedNote = `${e.traitLabel} ${e.toValue}`;
+            formattedNote = e.fromValue !== undefined ? 
+              `${e.traitLabel} ${e.fromValue}→${e.toValue}` : 
+              `${e.traitLabel} ${e.toValue}`;
           } else if (e.type === "void" && e.toValue !== undefined) {
             type = game.i18n.localize("l5r4.character.experience.breakdown.void");
-            formattedNote = `${game.i18n.localize("l5r4.mechanics.rings.void")} ${e.toValue}`;
+            formattedNote = e.fromValue !== undefined ? 
+              `${game.i18n.localize("l5r4.mechanics.rings.void")} ${e.fromValue}→${e.toValue}` : 
+              `${game.i18n.localize("l5r4.mechanics.rings.void")} ${e.toValue}`;
           } else if (e.type === "skill" && e.skillName && e.toValue !== undefined) {
             type = game.i18n.localize("l5r4.character.experience.breakdown.skills");
-            formattedNote = `${e.skillName} ${e.toValue}`;
+            // Check if this is an emphasis entry (has emphasis field) or use the pre-formatted note
+            if (e.emphasis || e.note?.includes("Emphasis:")) {
+              formattedNote = e.note; // Use the pre-formatted note for emphasis
+            } else {
+              formattedNote = e.fromValue !== undefined ? 
+                `${e.skillName} ${e.fromValue}→${e.toValue}` : 
+                `${e.skillName} ${e.toValue}`;
+            }
           } else if (e.type === "advantage") {
             type = game.i18n.localize("l5r4.character.experience.breakdown.advantages");
             formattedNote = e.itemName || e.note || "Advantage";
@@ -274,11 +350,12 @@ export default class XpManagerApplication extends foundry.applications.api.Handl
         if (item.type !== "skill") continue;
         
         const rank = parseInt(item.system?.rank) || 0;
-        const baseline = item.system?.school ? 1 : 0;
+        const freeRanks = item.system?.school ? 
+          (item.system?.freeRanks != null ? parseInt(item.system.freeRanks) : 1) : 0;
         
-        if (rank > baseline) {
-          // Create individual entries for each rank increase above baseline
-          for (let r = baseline + 1; r <= rank; r++) {
+        if (rank > freeRanks) {
+          // Create individual entries for each rank increase above free ranks
+          for (let r = freeRanks + 1; r <= rank; r++) {
             spent.push({
               id: foundry.utils.randomID(),
               delta: r,
@@ -292,17 +369,22 @@ export default class XpManagerApplication extends foundry.applications.api.Handl
           }
         }
 
-        // Add emphasis costs
+        // Add emphasis costs (excluding free emphasis)
         const emph = String(item.system?.emphasis ?? "").trim();
         if (emph) {
           const emphases = emph.split(/[,;]+/).map(s => s.trim()).filter(Boolean);
-          emphases.forEach((emphasis, index) => {
+          const freeEmphasis = item.system?.school ? 
+            (item.system?.freeEmphasis != null ? parseInt(item.system.freeEmphasis) : 0) : 0;
+          const paidEmphases = emphases.slice(freeEmphasis); // Skip free emphasis count
+          
+          paidEmphases.forEach((emphasis, index) => {
             spent.push({
               id: foundry.utils.randomID(),
               delta: 2,
-              note: `${item.name} (${emphasis})`,
+              note: `${item.name} - Emphasis: ${emphasis}`,
               type: "skill",
               skillName: item.name,
+              emphasis: emphasis,
               fromValue: 0,
               toValue: 1,
               ts: Date.now() - (50 - index) * 1000

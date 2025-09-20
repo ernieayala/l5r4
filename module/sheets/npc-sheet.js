@@ -1,50 +1,67 @@
 /**
- * @fileoverview L5R4 NPC Sheet Implementation for Foundry VTT v13+
+ * @fileoverview L5R4 NPC Sheet - Non-Player Character Sheet Implementation for Foundry VTT v13+
  * 
  * This class provides a specialized actor sheet for Non-Player Characters in the L5R4 system,
  * extending BaseActorSheet to inherit shared functionality while implementing NPC-specific
  * features such as simplified trait management, limited view templates, and streamlined
- * roll interfaces optimized for GM use during gameplay.
+ * roll interfaces optimized for GM use during gameplay sessions.
  * 
  * **Core Responsibilities:**
- * - **Simplified Trait Management**: Direct rank adjustment without XP calculations
- * - **Limited View Support**: Restricted templates for player-visible NPCs
- * - **Streamlined Rolling**: Quick roll interfaces for common NPC actions
- * - **Void Point Integration**: Optional void point tracking for important NPCs
- * - **Item Organization**: Categorized item display matching PC sheet structure
- * - **Context Menu Support**: Right-click operations for efficient item management
+ * - **Simplified Trait Management**: Direct rank adjustment without XP calculations or family bonuses
+ * - **Limited View Support**: Restricted templates for player-visible NPCs with permission control
+ * - **Streamlined Rolling**: Quick roll interfaces for common NPC actions and combat
+ * - **Void Point Integration**: Optional void point tracking for important NPCs and villains
+ * - **Item Organization**: Categorized item display matching PC sheet structure for consistency
+ * - **Context Menu Support**: Right-click operations for efficient item management during play
+ * - **Permission Handling**: Dynamic template selection based on user ownership and permissions
  * 
  * **NPC vs PC Differences:**
- * - **No XP System**: Traits adjust directly without experience point costs
+ * Key distinctions from the PC sheet implementation:
+ * - **No XP System**: Traits adjust directly without experience point costs or tracking
  * - **Simplified Void**: Basic void rank adjustment without complex point management
- * - **Limited Templates**: Separate templates for GM and player views
- * - **Quick Rolls**: Dataset-driven simple rolls for rapid gameplay
+ * - **Limited Templates**: Separate templates for GM view vs player-visible information
+ * - **Quick Rolls**: Dataset-driven simple rolls for rapid gameplay without modifier dialogs
  * - **No Family Bonuses**: Direct trait values without Active Effects complexity
- * - **Streamlined UI**: Focused interface for essential NPC information
+ * - **Streamlined UI**: Focused interface showing only essential NPC information
+ * - **Direct Editing**: Immediate trait changes without validation or cost calculation
  * 
  * **ApplicationV2 Architecture:**
- * - **Template System**: Uses HandlebarsApplicationMixin for rendering
- * - **Action Delegation**: Event handling via data-action attributes
+ * Modern Foundry v13+ implementation with NPC-specific optimizations:
+ * - **Template System**: Uses HandlebarsApplicationMixin for efficient rendering
+ * - **Action Delegation**: Clean event handling via data-action attributes
  * - **Context Preparation**: Modern _prepareContext() replaces legacy getData()
  * - **Render Pipeline**: _onRender() handles post-render setup and event binding
  * - **Form Integration**: Seamless form handling with submitOnChange support
+ * - **Permission Integration**: Dynamic behavior based on user permissions
  * 
- * **Template Integration:**
- * - **Full Template**: `templates/actor/npc.hbs` for GM view
+ * **Template Integration System:**
+ * Dual template system for different user contexts:
+ * - **Full Template**: `templates/actor/npc.hbs` for GM view with full editing
  * - **Limited Template**: `templates/actor/limited-npc-sheet.hbs` for player view
  * - **Shared Partials**: Reuses PC sheet partials for consistent item display
  * - **Dynamic Selection**: Template chosen based on user permissions and ownership
+ * - **Permission Checks**: Automatic fallback to limited view for non-owners
+ * - **Responsive Layout**: Adapts to content complexity and user permissions
  * 
  * **Roll System Integration:**
- * - **NPC Rolls**: Specialized roll handling via Dice.NpcRoll()
- * - **Simple Rolls**: Dataset-driven rolls for basic actions
- * - **Trait Rolls**: Ring and trait rolling with wound penalty integration
+ * Streamlined rolling system optimized for NPC use:
+ * - **NPC Rolls**: Specialized roll handling via Dice.NpcRoll() for quick resolution
+ * - **Simple Rolls**: Dataset-driven rolls for basic actions without complex dialogs
+ * - **Trait Rolls**: Ring and trait rolling with automatic wound penalty integration
  * - **Weapon Rolls**: Attack and damage rolls using shared base class methods
  * - **Skill Rolls**: Skill-based rolls with emphasis and modifier support
+ * - **Quick Combat**: Rapid roll resolution for efficient combat management
  * 
- * **Event Handling:**
+ * **Performance Optimizations:**
+ * - **Simplified Context**: Reduced template data preparation for faster rendering
+ * - **Efficient Rolls**: Streamlined roll processing without complex modifier calculations
+ * - **Minimal Validation**: Direct trait updates without extensive validation overhead
+ * - **Template Caching**: Reuse of template data between renders
+ * - **Event Optimization**: Focused event handling for essential NPC interactions
+ * 
+ * **Event Handling Examples:**
  * ```javascript
- * // Action delegation examples
+ * // Action delegation examples for NPC interactions
  * <button data-action="roll-ring" data-ring-name="Fire" data-system-ring="fire" data-ring-rank="3">
  * <div data-action="trait-rank" data-trait="stamina">
  * <span data-action="void-points-dots" class="dot">
@@ -61,12 +78,35 @@
  * // Quick trait adjustment
  * await npcSheet._onTraitAdjust(event, element, +1);
  * ```
+ *
+ * **Integration Points:**
+ * - **Dice Service**: NPC-optimized roll processing with Dice.NpcRoll()
+ * - **Chat Service**: Item creation dialogs and message formatting
+ * - **Config Module**: System constants and localization keys
+ * - **Utils Module**: Helper functions for data processing and validation
+ * - **Base Sheet**: Inherited functionality from BaseActorSheet
+ *
+ * **Error Handling:**
+ * - **Graceful Degradation**: Sheet functions with missing or invalid data
+ * - **Console Warnings**: Detailed error logging for troubleshooting
+ * - **Fallback Templates**: Limited template used when full template fails
+ * - **Safe Updates**: Validation prevents invalid trait values
+ *
+ * **Code Navigation Guide:**
+ * 1. **Class Definition** (`L5R4NpcSheet`) - Main class with static configurations
+ * 2. **Action Handlers** (`_onAction()`, `_onActionContext()`) - Event routing
+ * 3. **Roll Methods** (`_onRingRoll()`, `_onSimpleRoll()`) - NPC-specific rolling
+ * 4. **Trait Management** (`_onVoidAdjust()`) - Direct trait modification
+ * 5. **Template System** (`_renderHTML()`, `_prepareContext()`) - Template handling
+ * 6. **Event Binding** (`_onRender()`) - Post-render setup
+ * 7. **Form Processing** (`_prepareSubmitData()`) - Form submission handling
  * 
  * **Performance Considerations:**
  * - **Template Caching**: Templates are preloaded and cached for fast rendering
  * - **Event Delegation**: Single event listener per action type reduces memory usage
  * - **Conditional Rendering**: Limited templates reduce DOM complexity for players
  * - **Lazy Loading**: Item context menus created only when needed
+ * - **Efficient Updates**: Targeted DOM updates for trait changes
  * 
  * @author L5R4 System Team
  * @since 2.0.0
@@ -74,6 +114,7 @@
  * @extends {BaseActorSheet}
  * @see {@link https://foundryvtt.com/api/classes/foundry.applications.sheets.ActorSheetV2.html|ActorSheetV2}
  * @see {@link ./base-actor-sheet.js|BaseActorSheet} - Shared functionality and roll methods
+ * @see {@link ../services/dice.js|Dice.NpcRoll} - NPC roll processing
  */
 
 import * as Dice from "../services/dice.js";

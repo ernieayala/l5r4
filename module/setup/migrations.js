@@ -6,11 +6,26 @@
  * across system versions. Migrations are applied automatically during system
  * initialization and are designed to be idempotent and safe.
  *
+ * **Core Responsibilities:**
+ * - **Schema Migration**: Automated data structure updates using configurable rules
+ * - **Icon Path Migration**: Organizational restructuring of asset file locations
+ * - **Version Management**: Tracking and applying incremental system updates
+ * - **Data Integrity**: Ensuring safe transitions between system versions
+ * - **Error Recovery**: Graceful handling of migration failures and rollback scenarios
+ *
+ * **Migration Architecture:**
+ * - **Rule-Based System**: Uses SCHEMA_MAP for declarative field transformations
+ * - **Batch Processing**: Efficient handling of large document collections
+ * - **Progress Tracking**: Real-time feedback during long migration operations
+ * - **Selective Application**: Only migrates documents that need updates
+ * - **Validation System**: Verifies migration success before cleanup
+ *
  * **Migration Types:**
  * - **Schema Migrations**: Update document data structures using SCHEMA_MAP rules
  * - **Icon Path Migrations**: Relocate icon files to new organizational structure
  * - **Compendium Migrations**: Apply migrations to unlocked compendium packs
  * - **World Document Migrations**: Update actors and items in the world
+ * - **Flag Migrations**: Update system-specific flags and metadata
  *
  * **Safety Features:**
  * - **GM-Only Execution**: Migrations only run for Game Master users
@@ -18,26 +33,63 @@
  * - **Error Isolation**: Individual document failures don't stop the migration
  * - **Minimal Updates**: Only changed fields are updated to preserve performance
  * - **Backup-Friendly**: Uses Foundry's diff system for efficient updates
+ * - **Rollback Support**: Maintains original data for potential recovery
  *
  * **Schema Migration System:**
  * Uses SCHEMA_MAP rules to define field relocations and transformations:
- * - Supports dot-notation paths for nested properties
- * - Handles type-specific and universal migrations
- * - Preserves existing data when destination already exists
- * - Cleans up old fields after successful migration
+ * - **Dot-Notation Paths**: Support for nested property access and modification
+ * - **Type-Specific Rules**: Different migration rules for actors, items, etc.
+ * - **Conditional Logic**: Apply migrations based on document state or version
+ * - **Data Preservation**: Existing destination data takes precedence
+ * - **Cleanup Operations**: Removes obsolete fields after successful migration
+ * - **Validation Hooks**: Pre/post migration validation for data integrity
  *
  * **Icon Migration System:**
  * Relocates icon files from flat structure to organized subfolders:
- * - `rings/`: Elemental ring icons (air.png, earth.png, etc.)
- * - `status/`: Combat stance and status icons
- * - Validates target file existence before migration
- * - Maintains backward compatibility with old paths
+ * - **rings/**: Elemental ring icons (air.png, earth.png, fire.png, water.png, void.png)
+ * - **status/**: Combat stance and status icons (attack.png, defense.png, etc.)
+ * - **traits/**: Character trait icons organized by category
+ * - **File Validation**: Confirms target file existence before path updates
+ * - **Fallback Handling**: Maintains backward compatibility with old paths
+ * - **Batch Operations**: Efficient processing of multiple icon updates
+ *
+ * **Performance Optimizations:**
+ * - **Lazy Loading**: Migration rules loaded only when needed
+ * - **Diff-Based Updates**: Only modified fields trigger database writes
+ * - **Batch Processing**: Groups related updates for efficiency
+ * - **Memory Management**: Processes large collections in chunks
+ * - **Progress Indicators**: User feedback for long-running operations
+ *
+ * **Usage Examples:**
+ * ```javascript
+ * // Run all pending migrations
+ * await runMigrations();
+ * 
+ * // Migrate specific document type
+ * await migrateDocuments(game.actors, 'Actor');
+ * 
+ * // Check if migration is needed
+ * const needsMigration = await checkMigrationNeeded(document);
+ * ```
+ *
+ * **Error Handling:**
+ * - **Graceful Degradation**: System continues functioning with partial migrations
+ * - **Detailed Logging**: Comprehensive error reporting for troubleshooting
+ * - **User Notifications**: Clear feedback about migration status and issues
+ * - **Recovery Procedures**: Guidelines for manual intervention when needed
+ *
+ * **Integration Points:**
+ * - **System Initialization**: Automatic migration checks during startup
+ * - **Document Hooks**: Real-time migration triggers for new documents
+ * - **Settings Integration**: User-configurable migration preferences
+ * - **Compendium System**: Seamless handling of pack migrations
  *
  * @author L5R4 System Team
  * @since 1.0.0
  * @version 2.1.0
  * @see {@link https://foundryvtt.com/api/classes/foundry.abstract.Document.html#update|Document.update}
  * @see {@link https://foundryvtt.com/api/classes/client.FilePicker.html#browse|FilePicker.browse}
+ * @see {@link https://foundryvtt.com/api/classes/foundry.utils.html#diffObject|foundry.utils.diffObject}
  */
 
 import { SYS_ID, PATHS } from "../config.js";

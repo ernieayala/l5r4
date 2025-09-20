@@ -3,7 +3,8 @@
  * 
  * This service module provides comprehensive dice rolling functionality for the L5R4 system,
  * including roll formula construction, Ten Dice Rule enforcement, modifier dialogs, and
- * chat card rendering with target number evaluation.
+ * chat card rendering with target number evaluation. Serves as the core mechanical engine
+ * for all dice-based interactions in the Legend of the Five Rings 4th Edition system.
  *
  * **Core Responsibilities:**
  * - **Roll Formula Construction**: Build L5R4 dice formulas (XkY) with modifiers and special rules
@@ -13,44 +14,112 @@
  * - **Void Point Management**: Automatic void point spending and validation
  * - **Active Effects Integration**: Apply bonuses from actor effects to rolls
  * - **Targeting System**: Auto-populate target numbers from selected tokens
+ * - **Spell Slot Management**: Track and deduct elemental/void spell slots for shugenja
+ *
+ * **System Architecture:**
+ * The dice service follows L5R4's hierarchical roll mechanics:
+ * - **Base Mechanics**: Trait + Skill combinations with keep/roll dice separation
+ * - **Modifier System**: Comprehensive bonus/penalty application from multiple sources
+ * - **Special Rules**: Emphasis, unskilled, void points, wound penalties
+ * - **Ten Dice Rule**: Automatic conversion of excess dice to flat bonuses
+ * - **Chat Integration**: Rich result presentation with success/failure evaluation
  *
  * **Roll Types Supported:**
  * - **Skill Rolls**: (Trait + Skill + mods)k(Trait + mods) with emphasis and wound penalties
- * - **Ring Rolls**: Ring-based tests (with optional spell slot spending when using Spell dialog)
+ * - **Ring Rolls**: Ring-based tests with optional spell slot spending for shugenja magic
  * - **Trait Rolls**: Pure trait tests with unskilled and void point options
- * - **Weapon Rolls**: Damage rolls with weapon-specific modifiers
+ * - **Weapon Rolls**: Damage rolls with weapon-specific modifiers and special properties
  * - **NPC Rolls**: Simplified rolls for NPCs with optional void point restrictions
+ * - **Initiative Rolls**: Combat initiative with insight rank and reflexes integration
  *
  * **Special Mechanics:**
- * - **Emphasis**: Reroll 1s on skill rolls (r1 modifier)
- * - **Unskilled**: No exploding dice on trait rolls
- * - **Void Points**: +1k1 bonus with automatic point deduction
- * - **Wound Penalties**: Applied to target numbers when enabled
- * - **Ten Dice Rule**: Excess dice converted to bonuses and kept dice
+ * - **Emphasis**: Reroll 1s on skill rolls (r1 modifier) for specialization bonuses
+ * - **Unskilled**: No exploding dice on trait rolls for untrained attempts
+ * - **Void Points**: +1k1 bonus with automatic point deduction and validation
+ * - **Wound Penalties**: Applied to target numbers when enabled in settings
+ * - **Ten Dice Rule**: Excess dice converted to bonuses and kept dice per L5R4 rules
  * - **Auto-Targeting**: Automatically sets TN from targeted token's Armor TN
+ * - **Raise Calculation**: Automatic raise counting for success margin evaluation
  *
  * **Dialog System:**
  * The service provides interactive dialogs for roll customization using Foundry's DialogV2 API.
- * Dialogs support modifier input, void point spending, emphasis selection, and target number setting.
- * All dialogs respect user preferences for automatic display vs. shift-click activation.
+ * Dialogs support modifier input, void point spending, emphasis selection, target number setting,
+ * and spell slot management. All dialogs respect user preferences for automatic display vs. 
+ * shift-click activation and provide comprehensive roll customization options.
  *
  * **Ten Dice Rule Implementation:**
  * L5R4's Ten Dice Rule is automatically applied to all rolls:
- * - Dice pools > 10: Excess dice become flat bonuses
- * - Keep values > 10: Excess keep becomes flat bonuses (2 per excess keep)
- * - Special case: 10k10 + extras becomes 10k10 + (extras × 2)
+ * - **Dice pools > 10**: Excess dice become flat bonuses (+1 per excess die)
+ * - **Keep values > 10**: Excess keep becomes flat bonuses (+2 per excess keep)
+ * - **Special case**: 10k10 + extras becomes 10k10 + (extras × 2) for maximum efficiency
+ * - **Transparency**: Rule application is logged and displayed in chat results
+ *
+ * **Active Effects Integration:**
+ * Full integration with Foundry's Active Effects system:
+ * - **Skill Bonuses**: Automatic application of skill-specific roll/keep/total bonuses
+ * - **Trait Bonuses**: Integration of trait-specific modifiers from items and effects
+ * - **Ring Bonuses**: Support for ring-based magical and elemental bonuses
+ * - **Combat Bonuses**: Weapon-specific and stance-based combat modifiers
+ * - **Conditional Effects**: Context-aware bonus application based on roll type
+ *
+ * **Spell System Integration:**
+ * Advanced spell casting mechanics for shugenja characters:
+ * - **Spell Slot Tracking**: Automatic deduction of elemental and void spell slots
+ * - **Ring-Based Casting**: Ring rolls with spell slot validation and management
+ * - **Mastery Integration**: Spell mastery effects and bonus applications
+ * - **Raise Effects**: Automatic raise calculation for spell effect enhancement
+ * - **Spell Failure**: Handling of failed casting attempts and consequences
+ *
+ * **Performance Optimizations:**
+ * - **Template Caching**: Chat templates cached for fast roll result rendering
+ * - **Formula Optimization**: Efficient roll formula construction and parsing
+ * - **Batch Processing**: Multiple modifier applications in single operations
+ * - **Lazy Evaluation**: Dialog rendering only when needed for user interaction
+ * - **Memory Management**: Proper cleanup of roll objects and dialog instances
+ *
+ * **Integration Points:**
+ * - **Actor System**: Deep integration with actor traits, skills, and derived statistics
+ * - **Item System**: Weapon properties, skill bonuses, and equipment effects
+ * - **Sheet Classes**: Roll button handlers and result display integration
+ * - **Chat System**: Rich message formatting and interactive roll results
+ * - **Combat System**: Initiative rolls, damage calculation, and targeting
+ * - **Stance Service**: Combat stance effects and mutual exclusion handling
+ *
+ * **Error Handling:**
+ * - **Graceful Degradation**: Rolls proceed with fallback values for missing data
+ * - **Validation**: Comprehensive input validation for all roll parameters
+ * - **User Feedback**: Clear error messages and recovery suggestions
+ * - **Console Logging**: Detailed error reporting for troubleshooting
+ * - **Exception Safety**: Robust handling of edge cases and invalid inputs
  *
  * **Code Navigation Guide:**
- * 1. `SkillRoll()` - Main skill roll function with targeting and void point support
- * 2. `RingRoll()` - Ring-based rolls for elemental tests.
- *    When invoked from the Spell dialog, it can optionally deduct elemental/void spell slots.
- * 3. `TraitRoll()` - Pure trait tests with unskilled option
- * 4. `NpcRoll()` - Simplified NPC roll function
- * 5. `TenDiceRule()` - Core Ten Dice Rule implementation
- * 6. `GetSkillOptions()` - Skill roll modifier dialog
- * 7. `GetSpellOptions()` - Ring/spell roll modifier dialog (renders spell slot checkboxes)
- * 8. `GetTraitRollOptions()` - Trait roll modifier dialog
- * 9. `roll_parser()` - Inline roll notation parser for chat
+ * 1. **Core Roll Functions** (`SkillRoll()`, `RingRoll()`, `TraitRoll()`) - Main roll implementations
+ * 2. **NPC System** (`NpcRoll()`) - Simplified NPC roll mechanics
+ * 3. **Weapon System** (`WeaponRoll()`) - Damage rolls and weapon properties
+ * 4. **Ten Dice Rule** (`TenDiceRule()`) - Core rule implementation and application
+ * 5. **Dialog System** (`GetSkillOptions()`, `GetSpellOptions()`) - User interaction dialogs
+ * 6. **Utility Functions** (`roll_parser()`) - Roll notation parsing and chat integration
+ * 7. **Helper Functions** - Supporting utilities for roll construction and validation
+ *
+ * **Usage Examples:**
+ * ```javascript
+ * // Execute a skill roll with dialog
+ * await SkillRoll({
+ *   actor: actor,
+ *   actorTrait: 4,
+ *   skillRank: 3,
+ *   skillName: "Kenjutsu",
+ *   skillTrait: "agi"
+ * });
+ * 
+ * // Ring roll for spell casting
+ * await RingRoll({
+ *   actor: actor,
+ *   ring: "fire",
+ *   ringRank: 3,
+ *   askForOptions: true
+ * });
+ * ```
  *
  * @author L5R4 System Team
  * @since 1.0.0
@@ -59,9 +128,11 @@
  * @see {@link https://foundryvtt.com/api/classes/foundry.applications.api.DialogV2.html|DialogV2}
  * @see {@link https://foundryvtt.com/api/classes/documents.ChatMessage.html|ChatMessage}
  * @see {@link https://foundryvtt.com/api/functions/foundry.applications.handlebars.renderTemplate.html|renderTemplate}
+ * @see {@link ../documents/actor.js|Actor Document} - Actor integration and derived statistics
+ * @see {@link ./stance.js|Stance Service} - Combat stance effects and automation
  */
 
-import { CHAT_TEMPLATES, SYS_ID } from "../config.js";
+import { CHAT_TEMPLATES, DIALOG_TEMPLATES, SYS_ID } from "../config.js";
 import { R, toInt, T } from "../utils.js";
 
 /** Foundry's DialogV2 API for creating modal roll option dialogs. */
@@ -883,7 +954,7 @@ export async function NpcRoll({
 // ---------------------------------------------------------------------------
 
 async function GetSkillOptions(skillName, noVoid, rollBonus = 0, keepBonus = 0, totalBonus = 0) {
-  const content = await R(CHAT_TEMPLATES.rollModifiers, { skill: true, noVoid, rollBonus, keepBonus, totalBonus });
+  const content = await R(DIALOG_TEMPLATES.rollModifiers, { skill: true, noVoid, rollBonus, keepBonus, totalBonus });
   try {
     const result = await DIALOG.prompt({
       window: { title: game.i18n.format("l5r4.system.chat.rollName", { roll: skillName }) },
@@ -911,7 +982,7 @@ function _processSkillRollOptions(form) {
 }
 
 async function GetTraitRollOptions(traitName) {
-  const content = await R(CHAT_TEMPLATES.rollModifiers, { trait: true });
+  const content = await R(DIALOG_TEMPLATES.rollModifiers, { trait: true });
   try {
     // Localize trait label for dialog title
     const traitKey = String(traitName).toLowerCase() === "void" ? "l5r4.mechanics.rings.void" : `l5r4.mechanics.traits.${String(traitName).toLowerCase()}`;
@@ -954,7 +1025,7 @@ function _processTraitRollOptions(form) {
  * @returns {Promise<object>} Parsed form values
  */
 async function GetSpellOptions(ringName) {
-  const content = await R(CHAT_TEMPLATES.rollModifiers, { spell: true, ring: ringName });
+  const content = await R(DIALOG_TEMPLATES.rollModifiers, { spell: true, ring: ringName });
   return await new Promise((resolve) => {
     new DIALOG({
       window: { title: game.i18n.format("l5r4.system.chat.ringRoll", { ring: ringName }) },
@@ -1033,7 +1104,7 @@ function _processRingRollOptions(form) {
 }
 
 async function GetWeaponOptions(weaponName) {
-  const content = await R(CHAT_TEMPLATES.rollModifiers, { weapon: true });
+  const content = await R(DIALOG_TEMPLATES.rollModifiers, { weapon: true });
   try {
     const result = await DIALOG.prompt({
       window: { title: game.i18n.format("l5r4.system.chat.damageRoll", { weapon: weaponName }) },
@@ -1052,7 +1123,7 @@ function _processWeaponRollOptions(form) {
 }
 
 async function getNpcRollOptions(rollName, noVoid, trait = false) {
-  const content = await R(CHAT_TEMPLATES.rollModifiers, { npcRoll: true, noVoid, trait });
+  const content = await R(DIALOG_TEMPLATES.rollModifiers, { npcRoll: true, noVoid, trait });
   try {
     const result = await DIALOG.prompt({
       window: { title: game.i18n.format("l5r4.system.chat.rollName", { roll: rollName }) },

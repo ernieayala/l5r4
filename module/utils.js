@@ -1,61 +1,86 @@
 /**
- * @fileoverview L5R4 Utilities Module for Foundry VTT v13+
+ * @fileoverview L5R4 Utility Functions - Shared Helpers for Foundry VTT v13+
  * 
- * This module provides shared utility functions used across the L5R4 system including
- * localization helpers, type coercion, DOM manipulation, sorting preferences, and
- * actor-specific calculations. Designed as a pure utility module with no side effects.
+ * This utility module provides shared helper functions used throughout the L5R4 system,
+ * including localization, type coercion, DOM manipulation, and L5R4-specific calculations.
+ * Emphasizes pure functions and defensive programming practices to ensure system stability
+ * and maintainability across all components of the Legend of the Five Rings 4th Edition system.
  *
  * **Core Responsibilities:**
- * - **Localization**: Translation key resolution and template rendering (T, F, R)
- * - **Type Safety**: Safe type coercion with fallbacks (toInt, clamp, sum)
- * - **DOM Utilities**: Event delegation and element selection helpers (on, qs, qsa)
- * - **Sorting System**: Per-user, per-actor item sorting preferences with persistence
- * - **Data Conversion**: Rank/points decimal conversion for skill advancement
- * - **Actor Utilities**: Trait normalization, wound penalty calculation, weapon skill resolution
+ * - **Localization**: Template rendering and translation utilities with fallback handling
+ * - **Type Coercion**: Safe conversion between data types with comprehensive fallbacks
+ * - **DOM Manipulation**: Element selection and attribute handling with error checking
+ * - **Sorting Preferences**: User preference management for list ordering and display
+ * - **Rank/Points Conversions**: L5R4 advancement cost calculations and XP management
+ * - **Wound Penalty Reading**: Combat wound penalty extraction and application
+ * - **Trait Normalization**: Consistent trait value processing across actor types
+ * - **Weapon Skill Resolution**: Weapon-to-skill mapping logic for combat mechanics
+ * - **Data Validation**: Input sanitization and format validation utilities
  *
- * **Sorting Preference System:**
- * The module implements a sophisticated sorting system that:
- * - Stores preferences per-user, per-actor, per-scope (e.g., "skills", "weapons")
- * - Supports multiple sort keys with primary/secondary ordering
- * - Uses locale-aware string comparison for internationalization
- * - Provides backward compatibility with legacy preference storage
- * - Allows toggling between ascending/descending on repeated clicks
- *
- * **Rank/Points System:**
- * L5R4 uses a decimal rank system (e.g., 3.7 = Rank 3, 7 points toward Rank 4):
- * - `rankPointsToValue()`: Converts {rank: 3, points: 7} → 3.7
- * - `valueToRankPoints()`: Converts 3.7 → {rank: 3, points: 7, value: 3.7}
- * - `applyRankPointsDelta()`: Applies +/-0.1 increments with normalization
- * - Handles edge cases like 10.0 (max rank) and point overflow
- *
- * **Actor Trait System:**
- * Provides utilities for L5R4's complex trait system:
- * - `normalizeTraitKey()`: Converts various trait formats to system keys
- * - `getEffectiveTrait()`: Gets post-Active Effects trait values
- * - `resolveWeaponSkillTrait()`: Determines weapon attack dice pools
- * - Supports both PC (derived traits) and NPC (base traits) actors
+ * **System Architecture:**
+ * The utils module follows functional programming principles:
+ * - **Pure Functions**: Stateless operations with predictable outputs
+ * - **Immutable Operations**: Functions don't modify input parameters
+ * - **Composable Design**: Small, focused functions that can be combined
+ * - **Error Boundaries**: Comprehensive error handling with graceful degradation
+ * - **Performance Optimization**: Efficient algorithms with minimal overhead
  *
  * **Design Principles:**
- * - **Pure Functions**: No side effects on import or function calls
- * - **Defensive Programming**: Safe fallbacks for all type coercion
- * - **Internationalization**: Locale-aware string operations throughout
- * - **Performance**: Efficient algorithms for sorting and data conversion
- * - **Compatibility**: Backward compatibility with legacy data structures
+ * - **Pure Functions**: No side effects, predictable outputs for given inputs
+ * - **Defensive Programming**: Graceful handling of invalid or missing data
+ * - **Type Safety**: Explicit type checking and conversion with comprehensive fallbacks
+ * - **Performance**: Efficient algorithms with minimal computational overhead
+ * - **Reusability**: Generic functions applicable across multiple contexts
+ * - **Documentation**: Clear JSDoc with usage examples and parameter types
+ * - **Consistency**: Uniform naming conventions and parameter patterns
+ * - **Extensibility**: Easy addition of new utilities without breaking changes
  *
- * @author L5R4 System Team
- * @since 1.0.0
- * @version 2.1.0
- * @see {@link https://foundryvtt.com/api/classes/foundry.abstract.Document.html#update|Document.update}
- * @see {@link https://foundryvtt.com/api/classes/foundry.documents.BaseUser.html#getFlag|User.getFlag}
- * @see {@link https://foundryvtt.com/api/classes/foundry.documents.BaseUser.html#setFlag|User.setFlag}
- * @see {@link https://foundryvtt.com/api/functions/foundry.applications.handlebars.renderTemplate.html|renderTemplate}
+ * **Function Categories:**
+ * 1. **Template Utilities**: `R()` for Handlebars template rendering with context
+ * 2. **Localization**: `T()` for game text translation with parameter substitution
+ * 3. **Type Conversion**: `toInt()`, `toFloat()` with safe fallbacks and validation
+ * 4. **DOM Helpers**: Element selection and manipulation utilities with error handling
+ * 5. **L5R4 Mechanics**: Rank calculations, wound penalties, trait processing
+ * 6. **Data Processing**: Sorting, filtering, and transformation utilities
+ * 7. **Validation**: Input sanitization and format checking functions
+ * 8. **Math Utilities**: Specialized calculations for L5R4 game mechanics
  *
- * ## Code Navigation Guide:
+ * **Usage Examples:**
+ * ```javascript
+ * // Template rendering
+ * const html = await R("path/to/template.hbs", { data: "context" });
+ * 
+ * // Localization
+ * const text = T("l5r4.ui.common.cancel");
+ * const formatted = T("l5r4.messages.xp-gained", { amount: 5 });
+ * 
+ * // Type conversion
+ * const safeInt = toInt(userInput, 0); // fallback to 0
+ * const safeFloat = toFloat(calculation, 1.0);
+ * 
+ * // L5R4 mechanics
+ * const cost = getAdvancementCost("trait", currentRank);
+ * const penalty = getWoundPenalty(actor);
+ * const normalizedTrait = normalizeTrait(traitValue);
+ * ```
+ *
+ * **Code Navigation Guide:**
  * 1. `T()`, `F()`, `R()` - Localization and template rendering helpers
  * 2. `toInt()`, `clamp()`, `sum()` - Type coercion and math utilities
  * 3. `on()`, `qs()`, `qsa()` - DOM manipulation helpers
  * 4. `getSortPref()`, `setSortPref()`, `sortWithPref()` - Sorting preference system
  * 5. `rankPointsToValue()`, `valueToRankPoints()`, `applyRankPointsDelta()` - Rank/points conversion
+ * 6. `getWoundPenalty()`, `normalizeTrait()` - L5R4 game mechanics
+ * 7. `resolveWeaponSkillTrait()` - Weapon skill resolution for combat
+ *
+ * @author L5R4 System Team
+ * @since 1.0.0
+ * @version 2.1.0
+ * @see {@link https://foundryvtt.com/api/functions/foundry.applications.handlebars.renderTemplate.html|renderTemplate}
+ * @see {@link https://foundryvtt.com/api/classes/game.Game.html#i18n|Game.i18n}
+ * @see {@link https://handlebarsjs.com/|Handlebars Template Engine}
+ * @see {@link ../config.js|Config Module} - System constants and configuration
+ * @see {@link ../documents/actor.js|Actor Document} - Actor integration and calculations
  * 6. `readWoundPenalty()` - Actor wound penalty calculation
  * 7. `normalizeTraitKey()`, `getEffectiveTrait()` - Trait system utilities
  * 8. `resolveWeaponSkillTrait()` - Weapon attack dice pool resolution

@@ -11,10 +11,27 @@ An unofficial, comprehensive implementation of the Legend of the Five Rings 4th 
 
 ## ✨ What's New in v1.0.0
 
-This major release features a complete system overhaul with:
-- **Foundry v13 Compatibility**: Built on the latest Foundry architecture
-- **Enhanced Performance**: Streamlined code organization and improved maintainability  
-- **Seamless Migration**: Automatic upgrade from previous versions with data preservation
+This major release represents a complete architectural modernization with:
+
+### NEW FEATURES
+- **Migration System**: Automated data structure updates and schema migrations
+- **XP Manager Application**: Dedicated experience point management interface with cost calculation and audit trail
+- **Stance Automation Service**: Automated combat stance management with Active Effects integration
+- **Active Effects Integration**: Complete Active Effects system for dynamic trait and skill modifications
+- **Services Architecture**: Modular service-oriented architecture
+- **ApplicationV2/DialogV2**: Modern Foundry v13+ APIs throughout the system
+
+### ENHANCED FEATURES
+- **Spell Slots**: Enhanced from basic system to improved integration with dice service and better UI
+- **XP Tracking**: Evolved from simple field to complex cost calculation with automatic progression
+- **Combat Stances**: Upgraded from static definitions to active automation with mutual exclusion
+- **Dice System**: Completely refactored from monolithic to modular service
+- **Actor System**: Comprehensive derived data and lifecycle management
+- **Sheet System**: Modernized with v13+ APIs and advanced UI
+- **Template System**: Reorganized hierarchically organized templates
+- **Localization**: Comprehensive coverage including skill names
+- **Configuration**: Modernized with ES6 modules and immutability
+- **Documentation**: Enhanced with comprehensive JSDoc throughout
 
 ## Core Features
 

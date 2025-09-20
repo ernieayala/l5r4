@@ -3,7 +3,8 @@
  * 
  * This class extends the base Foundry Item document to provide L5R4-specific
  * functionality including derived data computation, experience tracking, and
- * chat card rendering for all item types in the system.
+ * chat card rendering for all item types in the Legend of the Five Rings 4th Edition system.
+ * Handles the complete lifecycle of items from creation to chat integration.
  *
  * **Core Responsibilities:**
  * - **Default Icons**: Assign appropriate type-specific icons on item creation
@@ -12,29 +13,108 @@
  * - **Experience Tracking**: Automatic XP logging for skill creation and advancement
  * - **Chat Integration**: Render type-specific chat cards with proper templates
  * - **Cost Validation**: Enforce advantage/disadvantage cost constraints
+ * - **Active Effects**: Support for transferable effects on background items
+ *
+ * **System Architecture:**
+ * The item system follows L5R4's comprehensive item categorization:
+ * - **Combat Items**: Weapons, armor, bows with full mechanical integration
+ * - **Character Development**: Skills with emphasis, advantages/disadvantages with costs
+ * - **Background Elements**: Clans, families, schools with trait bonuses via Active Effects
+ * - **Magical Elements**: Spells with effect descriptions and raise mechanics
+ * - **Techniques**: Kata, kiho, tattoos with special abilities and prerequisites
+ * - **General Equipment**: Common items for inventory management
  *
  * **Item Types Supported:**
- * - **Equipment**: Weapons, armor, bows with mechanical properties
- * - **Character Elements**: Skills, advantages, disadvantages, spells
- * - **Background Items**: Clans, families, schools with Active Effects
- * - **Techniques**: Kata, kiho, tattoos with special abilities
+ * - **Equipment**: Weapons, armor, bows with mechanical properties and damage calculations
+ * - **Character Elements**: Skills with XP tracking, advantages/disadvantages with cost validation
+ * - **Background Items**: Clans, families, schools with Active Effects for trait bonuses
+ * - **Techniques**: Kata, kiho, tattoos with special abilities and mechanical effects
+ * - **Spells**: Magic with effect descriptions, raise effects, and casting requirements
  * - **General Items**: commonItem type for miscellaneous equipment and gear
  *
  * **Key Features:**
- * - **Equipment Management**: Weapons, armor, bows with damage calculations
- * - **Spells**: Effect descriptions and raise effect documentation
- * - **Advantages/Disadvantages**: Cost validation and XP integration
- * - **Techniques/Kata/Kiho**: Effect descriptions and mechanical benefits
- * - **Family/Clan/School**: Background items with trait bonuses
+ * - **Equipment Management**: Full weapon/armor system with damage, TN, and special properties
+ * - **Skill System**: Rank tracking, emphasis specializations, school skill integration
+ * - **Spell System**: Effect descriptions, raise mechanics, and casting requirements
+ * - **Advantage/Disadvantage**: Cost validation, XP integration, and mechanical effects
+ * - **Technique System**: Kata, kiho, tattoos with prerequisites and special abilities
+ * - **Background Integration**: Family/clan/school items with trait bonuses via Active Effects
+ * - **Chat Cards**: Rich chat integration with type-specific templates and roll buttons
+ *
+ * **Active Effects Integration:**
+ * Full support for Foundry's Active Effects system:
+ * - **Transferable Effects**: Background items can modify actor traits and skills
+ * - **Equipment Effects**: Weapons and armor can provide bonuses when equipped
+ * - **Conditional Effects**: Effects can be enabled/disabled based on item state
+ * - **Stacking Rules**: Proper handling of multiple effect sources
+ *
+ * **Experience Point Integration:**
+ * Automatic XP tracking for character development:
+ * - **Skill Creation**: Logs XP costs when skills are added to characters
+ * - **Advancement Tracking**: Monitors skill rank increases and emphasis additions
+ * - **Cost Calculation**: Proper XP cost formulas for all advancement types
+ * - **Audit Trail**: Complete logging of all XP expenditures with timestamps
+ *
+ * **Chat System Integration:**
+ * Rich chat card system with type-specific templates:
+ * - **Weapon Cards**: Damage rolls, special properties, and attack options
+ * - **Spell Cards**: Effect descriptions, raise options, and casting information
+ * - **Skill Cards**: Roll buttons with trait+skill combinations
+ * - **Technique Cards**: Effect descriptions and mechanical benefits
+ * - **Equipment Cards**: Properties, costs, and mechanical effects
+ *
+ * **Data Validation and Safety:**
+ * - **Rich Text Safety**: Ensures all rich text fields have safe default values
+ * - **Type Validation**: Robust type checking for all item properties
+ * - **Cost Constraints**: Enforces valid cost ranges for advantages/disadvantages
+ * - **Icon Management**: Automatic assignment of appropriate default icons
+ *
+ * **Performance Optimizations:**
+ * - **Template Caching**: Chat card templates are cached for fast rendering
+ * - **Computed Properties**: Derived data calculated during preparation phase
+ * - **Efficient Lookups**: Optimized icon and template resolution
+ * - **Lazy Loading**: Chat cards rendered only when needed
+ *
+ * **Integration Points:**
+ * - **Actor System**: Items integrate with actor preparation and XP tracking
+ * - **Sheet Classes**: Provides data for item sheet rendering and editing
+ * - **Dice Service**: Supplies roll formulas and mechanical properties
+ * - **Chat Service**: Renders rich chat cards with interactive elements
+ * - **Config Module**: Uses system constants and template paths
+ *
+ * **Error Handling:**
+ * - **Graceful Degradation**: Functions with missing or invalid data
+ * - **Template Fallbacks**: Safe defaults when templates are missing
+ * - **Console Logging**: Detailed error reporting for troubleshooting
+ * - **Type Safety**: Robust handling of unexpected data types
+ *
+ * **Usage Examples:**
+ * ```javascript
+ * // Create a weapon with automatic icon assignment
+ * const weapon = await Item.create({
+ *   name: "Katana",
+ *   type: "weapon",
+ *   system: { damageRoll: 3, damageKeep: 3 }
+ * });
+ * 
+ * // Render a chat card
+ * await weapon.displayCard();
+ * 
+ * // Access derived data
+ * const rollFormula = weapon.system.rollFormula; // "3k3"
+ * ```
  *
  * @author L5R4 System Team
  * @since 1.0.0
  * @version 2.1.0
+ * @extends {Item}
  * @see {@link https://foundryvtt.com/api/classes/documents.Item.html|Item Document}
  * @see {@link https://foundryvtt.com/api/classes/foundry.abstract.Document.html#_preCreate|Document._preCreate}
  * @see {@link https://foundryvtt.com/api/classes/foundry.abstract.Document.html#prepareData|Document.prepareData}
  * @see {@link https://foundryvtt.com/api/classes/documents.ChatMessage.html|ChatMessage}
  * @see {@link https://foundryvtt.com/api/functions/foundry.applications.handlebars.renderTemplate.html|renderTemplate}
+ * @see {@link ../services/dice.js|Dice Service} - Roll processing and Ten Dice Rule
+ * @see {@link ./actor.js|Actor Document} - Actor integration and XP tracking
  */
 
 import { TEMPLATE, ARROW_MODS, SYS_ID, iconPath } from "../config.js";
@@ -225,6 +305,33 @@ export default class L5R4Item extends Item {
     // XP calculation will handle the conversion appropriately
 
     await super._preUpdate(changes, options, userId);
+    
+    // Trigger XP recalculation if freeRanks or freeEmphasis actually changed on skills
+    if (this.actor && this.type === "skill") {
+      const oldFreeRanks = this.system?.freeRanks;
+      const newFreeRanks = changes?.system?.freeRanks;
+      const oldFreeEmphasis = this.system?.freeEmphasis;
+      const newFreeEmphasis = changes?.system?.freeEmphasis;
+      
+      const freeRanksActuallyChanged = newFreeRanks !== undefined && newFreeRanks !== oldFreeRanks;
+      const freeEmphasisActuallyChanged = newFreeEmphasis !== undefined && newFreeEmphasis !== oldFreeEmphasis;
+      
+      if (freeRanksActuallyChanged || freeEmphasisActuallyChanged) {
+        // Force complete XP reset
+        try {
+          await this.actor.setFlag(SYS_ID, "xpSpent", []);
+          await this.actor.setFlag(SYS_ID, "xpManual", []);
+          // Force actor sheet to recalculate XP on next render
+          if (this.actor.sheet?.rendered) {
+            this.actor.sheet.render();
+          }
+        } catch (err) {
+          console.warn("L5R4", "Failed to reset XP data", err);
+        }
+        return; // Skip the normal XP tracking logic below
+      }
+    }
+    
     if (!this.actor || !["skill", "advantage", "disadvantage"].includes(this.type)) return;
     try {
       const ns = this.actor.flags?.[SYS_ID] ?? {};
@@ -232,28 +339,69 @@ export default class L5R4Item extends Item {
       let shouldUpdate = false;
 
       if (this.type === "skill") {
+        // Track skill rank increases
         const oldRank   = toInt(this.system?.rank);
         const newRank   = toInt(changes?.system?.rank ?? oldRank);
-        if (!(Number.isFinite(newRank) && newRank > oldRank)) return; // Only track XP on rank increases
+        const rankIncreased = Number.isFinite(newRank) && newRank > oldRank;
 
-        const newSchool = (changes?.system?.school ?? this.system?.school) ? true : false;
-        const baseline  = newSchool ? 1 : 0;
-        const tri = (n) => (n * (n + 1)) / 2;
-        const oldCost = oldRank > baseline ? tri(oldRank) - tri(baseline) : 0;
-        const newCost = newRank > baseline ? tri(newRank) - tri(baseline) : 0;
-        const delta = Math.max(0, newCost - oldCost);
-        if (delta > 0) {
-          spent.push({
-            id: foundry.utils.randomID(),
-            delta,
-            note: game.i18n.format("l5r4.character.experience.log.skillChange", { name: this.name ?? "Skill", from: oldRank, to: newRank }),
-            ts: Date.now(),
-            type: "skill",
-            skillName: this.name ?? "Skill",
-            fromValue: oldRank,
-            toValue: newRank
-          });
-          shouldUpdate = true;
+        if (rankIncreased) {
+          const newSchool = (changes?.system?.school ?? this.system?.school) ? true : false;
+          const newFreeRanksForCalc = changes?.system?.freeRanks ?? this.system?.freeRanks;
+          const baseline = newSchool ? (parseInt(newFreeRanksForCalc) || 1) : 0;
+          const tri = (n) => (n * (n + 1)) / 2;
+          const oldCost = oldRank > baseline ? tri(oldRank) - tri(baseline) : 0;
+          const newCost = newRank > baseline ? tri(newRank) - tri(baseline) : 0;
+          const delta = Math.max(0, newCost - oldCost);
+          if (delta > 0) {
+            spent.push({
+              id: foundry.utils.randomID(),
+              delta,
+              note: game.i18n.format("l5r4.character.experience.log.skillChange", { name: this.name ?? "Skill", from: oldRank, to: newRank }),
+              ts: Date.now(),
+              type: "skill",
+              skillName: this.name ?? "Skill",
+              fromValue: oldRank,
+              toValue: newRank
+            });
+            shouldUpdate = true;
+          }
+        }
+
+        // Track emphasis additions
+        const oldEmphasis = String(this.system?.emphasis ?? "").trim();
+        const newEmphasis = String(changes?.system?.emphasis ?? oldEmphasis).trim();
+        
+        if (oldEmphasis !== newEmphasis) {
+          const oldEmphases = oldEmphasis ? oldEmphasis.split(/[,;]+/).map(s => s.trim()).filter(Boolean) : [];
+          const newEmphases = newEmphasis ? newEmphasis.split(/[,;]+/).map(s => s.trim()).filter(Boolean) : [];
+          
+          if (newEmphases.length > oldEmphases.length) {
+            const newSchool = (changes?.system?.school ?? this.system?.school) ? true : false;
+            const freeEmphasis = newSchool ? 
+              (parseInt(changes?.system?.freeEmphasis ?? this.system?.freeEmphasis) || 0) : 0;
+            
+            const oldPaidCount = Math.max(0, oldEmphases.length - freeEmphasis);
+            const newPaidCount = Math.max(0, newEmphases.length - freeEmphasis);
+            const emphasisDelta = Math.max(0, newPaidCount - oldPaidCount);
+            
+            if (emphasisDelta > 0) {
+              const emphasisCost = emphasisDelta * 2; // 2 XP per emphasis
+              const addedEmphases = newEmphases.slice(oldEmphases.length);
+              
+              spent.push({
+                id: foundry.utils.randomID(),
+                delta: emphasisCost,
+                note: `${this.name ?? "Skill"} - Emphasis: ${addedEmphases.join(", ")}`,
+                ts: Date.now(),
+                type: "emphasis",
+                skillName: this.name ?? "Skill",
+                fromValue: oldEmphases.length,
+                toValue: newEmphases.length,
+                addedEmphases: addedEmphases
+              });
+              shouldUpdate = true;
+            }
+          }
         }
       } else if (this.type === "advantage" || this.type === "disadvantage") {
         const oldCost = toInt(this.system?.cost, 0);
@@ -332,6 +480,10 @@ export default class L5R4Item extends Item {
       case "kiho":        ensureString(sys, ["effect"]); break;
       case "technique":   ensureString(sys, ["effect", "benefit", "drawback"]); break;
       case "tattoo":      ensureString(sys, ["effect"]); break;
+      case "skill":
+        // Set default values for existing skills that don't have these properties
+        // Only set defaults if the properties don't exist in the actual data
+        break;
     }
   }
 

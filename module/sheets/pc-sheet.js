@@ -1,63 +1,101 @@
 /**
- * @fileoverview L5R4 PC Sheet implementation for Foundry VTT v13+
+ * @fileoverview L5R4 PC Sheet - Player Character Sheet Implementation for Foundry VTT v13+
  * 
- * This class extends BaseActorSheet to provide PC-specific functionality including
- * complex trait management with family bonuses, experience tracking, item sorting,
- * and advanced character sheet interactions.
+ * This class extends BaseActorSheet to provide comprehensive PC-specific functionality including
+ * complex trait management with family bonuses, experience tracking, advanced item sorting,
+ * bio item integration, and sophisticated character sheet interactions. Built for the Legend
+ * of the Five Rings 4th Edition system with full L5R4 mechanics support.
  *
- * ## Core Responsibilities:
- * - **Trait Management**: Complex trait adjustment with family bonuses and XP calculation
- * - **Item Organization**: Advanced sorting and filtering for skills, spells, advantages
+ * **Core Responsibilities:**
+ * - **Complex Trait Management**: Advanced trait adjustment with family bonuses and XP calculation
+ * - **Item Organization**: Sophisticated sorting and filtering for skills, spells, advantages
  * - **Experience Tracking**: Automatic XP calculation and logging for character advancement
- * - **Bio Item Handling**: Drag/drop support for clan, family, and school items
- * - **Sheet Locking**: Toggle edit mode to prevent accidental changes
- * - **Void Point Management**: Visual dot interface for void point tracking
+ * - **Bio Item Integration**: Seamless drag/drop support for clan, family, and school items
+ * - **Sheet Locking**: Toggle edit mode to prevent accidental changes during play
+ * - **Void Point Management**: Interactive visual dot interface for void point tracking
+ * - **Advanced UI Controls**: Custom header controls and context-sensitive interfaces
  *
- * ## ApplicationV2 Migration:
- * - **Template System**: Uses HandlebarsApplicationMixin for template rendering
- * - **Context Preparation**: Replaces getData() with _prepareContext()
- * - **Event Handling**: Replaces activateListeners() with _onRender()
- * - **Action Delegation**: Uses data-action attributes for event handling
+ * **ApplicationV2 Architecture:**
+ * Modern Foundry v13+ implementation with enhanced capabilities:
+ * - **Template System**: Uses HandlebarsApplicationMixin for efficient template rendering
+ * - **Context Preparation**: Replaces legacy getData() with modern _prepareContext()
+ * - **Event Handling**: Replaces activateListeners() with _onRender() lifecycle
+ * - **Action Delegation**: Clean event handling using data-action attributes
  * - **Header Controls**: Custom header controls for sheet locking and edit mode
+ * - **Lifecycle Management**: Proper setup/teardown with memory management
  *
- * ## Advanced Features:
- * - **Family Bonus Integration**: Live family item references with Active Effects
+ * **Advanced Features:**
+ * - **Family Bonus Integration**: Live family item references with Active Effects system
  * - **Sorting Preferences**: Per-user, per-actor sorting preferences for all item lists
  * - **Inline Editing**: Direct field editing with proper data type coercion
- * - **Context Menus**: Right-click menus for item management
- * - **Mastery Tracking**: Automatic skill mastery display based on ranks
+ * - **Context Menus**: Comprehensive right-click menus for item management
+ * - **Mastery Tracking**: Automatic skill mastery display based on current ranks
+ * - **XP Manager Integration**: Seamless integration with XP tracking application
+ * - **Drag & Drop**: Full support for bio items and equipment organization
  *
- * ## Trait System:
- * PC traits use a complex system where:
- * - Base traits are stored in system.traits.*
- * - Family bonuses are applied via Active Effects
- * - Effective traits are calculated in prepareDerivedData()
- * - Sheet displays effective values but edits base values
- * - XP costs are calculated based on effective rank increases
+ * **Trait System Architecture:**
+ * PC traits use a sophisticated multi-layer system:
+ * - **Base Traits**: Core values stored in system.traits.* (editable)
+ * - **Family Bonuses**: Applied via Active Effects from family items
+ * - **Effective Traits**: Final calculated values in prepareDerivedData()
+ * - **Display Logic**: Sheet shows effective values but edits base values
+ * - **XP Calculation**: Costs calculated based on effective rank increases
+ * - **Validation**: Range checking and family bonus integration
  *
- * ## API References:
- * @see {@link https://foundryvtt.com/api/classes/foundry.applications.sheets.ActorSheetV2.html|ActorSheetV2}
- * @see {@link https://foundryvtt.com/api/classes/foundry.applications.api.HandlebarsApplicationMixin.html|HandlebarsApplicationMixin}
- * @see {@link https://foundryvtt.com/api/classes/foundry.applications.ux.TextEditor.html#getDragEventData|TextEditor.getDragEventData}
- * @see {@link https://foundryvtt.com/api/classes/foundry.abstract.Document.html#update|Document.update}
+ * **Item Management System:**
+ * - **Bio Items**: Clan, family, school items with special handling
+ * - **Skills**: Complex skill system with emphases, masteries, and school bonuses
+ * - **Spells**: Spell slot management with school and ring restrictions
+ * - **Advantages/Disadvantages**: Cost tracking and XP integration
+ * - **Equipment**: Weapons, armor, and gear with encumbrance tracking
+ * - **Sorting**: User-customizable sorting for all item categories
  *
- * ## Code Navigation Guide:
- * 1. `_prepareContext()` - Template data preparation with item sorting and family bonuses
- * 2. `_onRender()` - Event binding and post-render setup
- * 3. `_onTraitAdjust()` - Complex trait adjustment with family bonus handling
- * 4. `_onDrop()` - Bio item (clan/family/school) drag/drop handling
- * 6. `_onVoidAdjust()` - Void ring rank adjustment
- * 7. `_onSpellSlotAdjust()` - Spell slot management
- * 8. `_paintVoidPointsDots()` - Visual void points dot rendering
- * 9. `_onSortClick()` - Item list sorting preference management
- * 10. `familyBonusFor()` - Family bonus calculation from Active Effects
+ * **Experience Point Integration:**
+ * - **Automatic Tracking**: XP costs calculated for all character changes
+ * - **Manual Adjustments**: GM tools for XP modifications
+ * - **History Logging**: Complete audit trail of XP expenditures
+ * - **Validation**: Prevents invalid XP expenditures
+ * - **Manager Integration**: Seamless XP Manager application integration
+ *
+ * **Performance Optimizations:**
+ * - **Lazy Loading**: Item lists rendered only when visible
+ * - **Efficient Sorting**: Cached sort preferences with minimal recalculation
+ * - **DOM Optimization**: Targeted updates for trait and void point changes
+ * - **Template Caching**: Reuse of template data where possible
+ * - **Event Delegation**: Minimal event listeners with efficient routing
+ *
+ * **Usage Examples:**
+ * ```javascript
+ * // Open PC sheet
+ * const pc = game.actors.getName("Samurai Character");
+ * pc.sheet.render(true);
+ * 
+ * // Adjust trait with family bonus handling
+ * await pcSheet._onTraitAdjust(event, target);
+ * 
+ * // Toggle sheet lock
+ * await pcSheet._onToggleLock();
+ * ```
+ *
+ * **Code Navigation Guide:**
+ * 1. **Context Preparation** (`_prepareContext()`) - Template data with sorting and bonuses
+ * 2. **Event Binding** (`_onRender()`) - Post-render setup and event delegation
+ * 3. **Trait Management** (`_onTraitAdjust()`) - Complex trait adjustment with family bonuses
+ * 4. **Bio Items** (`_onDrop()`) - Clan/family/school drag/drop handling
+ * 5. **Void Management** (`_onVoidAdjust()`) - Void ring rank adjustment
+ * 6. **Spell Slots** (`_onSpellSlotAdjust()`) - Spell slot management
+ * 7. **Visual Updates** (`_paintVoidPointsDots()`) - Void points dot rendering
+ * 8. **Sorting** (`_onSortClick()`) - Item list sorting preference management
+ * 9. **Family Bonuses** (`familyBonusFor()`) - Family bonus calculation from Active Effects
+ * 10. **XP Integration** (various methods) - Experience point tracking and validation
  *
  * @author L5R4 System Team
  * @since 1.0.0
- * @version 1.0.0
+ * @version 2.1.0
  * @extends {BaseActorSheet}
  * @see {@link https://foundryvtt.com/api/classes/foundry.applications.sheets.ActorSheetV2.html|ActorSheetV2}
  * @see {@link https://foundryvtt.com/api/classes/foundry.applications.api.HandlebarsApplicationMixin.html|HandlebarsApplicationMixin}
+ * @see {@link https://foundryvtt.com/api/classes/foundry.applications.ux.TextEditor.html#getDragEventData|TextEditor.getDragEventData}
  * @see {@link https://foundryvtt.com/api/classes/foundry.abstract.Document.html#update|Document.update}
  */
 
@@ -1163,11 +1201,12 @@ export default class L5R4PcSheet extends BaseActorSheet {
         if (item.type !== "skill") continue;
         
         const rank = parseInt(item.system?.rank) || 0;
-        const baseline = item.system?.school ? 1 : 0;
+        const freeRanks = item.system?.school ? 
+          (item.system?.freeRanks != null ? parseInt(item.system.freeRanks) : 1) : 0;
         
-        if (rank > baseline) {
-          // Create individual entries for each rank increase above baseline
-          for (let r = baseline + 1; r <= rank; r++) {
+        if (rank > freeRanks) {
+          // Create individual entries for each rank increase above free ranks
+          for (let r = freeRanks + 1; r <= rank; r++) {
             spent.push({
               id: foundry.utils.randomID(),
               delta: r,
@@ -1181,11 +1220,15 @@ export default class L5R4PcSheet extends BaseActorSheet {
           }
         }
 
-        // Add emphasis costs
+        // Add emphasis costs (excluding free emphasis)
         const emph = String(item.system?.emphasis ?? "").trim();
         if (emph) {
           const emphases = emph.split(/[,;]+/).map(s => s.trim()).filter(Boolean);
-          emphases.forEach((emphasis, index) => {
+          const freeEmphasis = item.system?.school ? 
+            (item.system?.freeEmphasis != null ? parseInt(item.system.freeEmphasis) : 0) : 0;
+          const paidEmphases = emphases.slice(freeEmphasis); // Skip free emphasis count
+          
+          paidEmphases.forEach((emphasis, index) => {
             spent.push({
               id: foundry.utils.randomID(),
               delta: 2,

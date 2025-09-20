@@ -3,38 +3,88 @@
  * 
  * This is the primary system initialization module that coordinates all L5R4 system
  * components during Foundry VTT startup. It handles configuration, registration,
- * and integration with Foundry's core systems to provide a complete L5R4 gaming experience.
+ * and integration with Foundry's core systems to provide a complete Legend of the
+ * Five Rings 4th Edition gaming experience with full mechanics support.
  *
  * **Core Responsibilities:**
  * - **System Configuration**: Wire CONFIG objects, document classes, and sheet registrations
  * - **Template Management**: Preload Handlebars templates and register custom helpers
- * - **Initiative System**: Fallback formula with L5R4-specific rolls handled by Combatant.getInitiativeRoll() override
+ * - **Initiative System**: Custom initiative formula with L5R4-specific rolls and Ten Dice Rule
  * - **Chat Integration**: Parse inline roll notation (KxY format) in chat messages
  * - **Migration Management**: Handle data structure updates and legacy compatibility
- * - **Status Effect Logic**: Enforce mutually exclusive stance mechanics
+ * - **Status Effect Logic**: Enforce mutually exclusive stance mechanics and combat states
+ * - **Hook Management**: Coordinate system lifecycle with Foundry's hook system
+ *
+ * **System Architecture:**
+ * The L5R4 system follows a modular architecture with clear separation of concerns:
+ * - **Documents**: Actor and Item classes with L5R4-specific data models
+ * - **Sheets**: ApplicationV2-based user interfaces for all document types
+ * - **Services**: Dice rolling, chat integration, and stance management
+ * - **Utils**: Shared helper functions and data processing utilities
+ * - **Config**: Centralized configuration and constants
  *
  * **Initialization Sequence:**
  * 1. **Init Hook**: Register settings, configure documents, preload templates
  * 2. **Setup Hook**: Handle one-time legacy item type migrations
  * 3. **Ready Hook**: Execute data migrations and finalize system state
+ * 4. **Combat Hooks**: Initialize stance tracking and combat integration
+ * 5. **Chat Hooks**: Enable inline roll parsing and message processing
  *
  * **Key Features:**
- * - **L5R4 Initiative**: Actor-specific initiative rolls with Ten Dice Rule (via Combatant.getInitiativeRoll override)
- * - **Inline Roll Parsing**: Converts "3k2+1" notation to proper Foundry rolls
+ * - **L5R4 Initiative**: Actor-specific initiative rolls with Ten Dice Rule integration
+ * - **Inline Roll Parsing**: Converts "3k2+1" notation to proper Foundry rolls automatically
  * - **Stance Enforcement**: Automatically removes conflicting combat stances
  * - **Sheet Registration**: Configures custom actor and item sheets for all types
- * - **Migration Safety**: Handles version updates with data structure changes
+ * - **Migration Safety**: Handles version updates with comprehensive data structure changes
+ * - **Active Effects**: Full integration with Foundry's Active Effects system
+ * - **Compendium Support**: Seamless integration with system compendium packs
  *
- * **Performance Considerations:**
- * - Templates are preloaded during initialization for faster rendering
- * - Settings are registered early to ensure availability during data preparation
- * - Migrations are batched and run efficiently during system startup
- * - Hook registration is optimized to minimize performance impact
+ * **Chat Integration System:**
+ * Advanced chat message processing with L5R4-specific features:
+ * - **Roll Notation**: Automatic parsing of KxY+Z roll expressions
+ * - **Inline Rolls**: Seamless integration with Foundry's roll system
+ * - **Message Enhancement**: Rich formatting for L5R4 roll results
+ * - **Error Handling**: Graceful fallback for malformed roll expressions
+ *
+ * **Performance Optimizations:**
+ * - **Template Preloading**: All templates cached during initialization for faster rendering
+ * - **Settings Registration**: Early registration ensures availability during data preparation
+ * - **Migration Batching**: Efficient batch processing of data structure updates
+ * - **Hook Optimization**: Minimal performance impact from system hook registration
+ * - **Lazy Loading**: Non-critical components loaded only when needed
+ *
+ * **Integration Points:**
+ * - **Foundry Core**: Deep integration with document system, sheets, and hooks
+ * - **Combat System**: Custom initiative and stance management
+ * - **Chat System**: Inline roll parsing and message enhancement
+ * - **Settings System**: Comprehensive configuration options
+ * - **Migration System**: Automatic data structure updates
+ *
+ * **Error Handling:**
+ * - **Graceful Degradation**: System continues functioning with partial failures
+ * - **Console Logging**: Detailed error reporting for troubleshooting
+ * - **User Feedback**: Clear notifications for configuration issues
+ * - **Recovery Procedures**: Automatic fallbacks for common failure scenarios
+ *
+ * **Usage Examples:**
+ * ```javascript
+ * // System is automatically initialized by Foundry
+ * // Access system configuration
+ * console.log(CONFIG.l5r4);
+ * 
+ * // Use inline rolls in chat
+ * // Type: "I roll [[3k2+1]] for my attack"
+ * 
+ * // Access system utilities
+ * import { T, F } from "systems/l5r4/module/utils.js";
+ * ```
  *
  * @author L5R4 System Team
  * @since 1.0.0
  * @version 2.1.0
  * @see {@link https://foundryvtt.com/api/|Foundry VTT v13 API Documentation}
+ * @see {@link https://foundryvtt.com/api/classes/foundry.abstract.Document.html|Document}
+ * @see {@link https://foundryvtt.com/api/classes/foundry.applications.api.ApplicationV2.html|ApplicationV2}
  */
 
 import { l5r4, SYS_ID, iconPath } from "./module/config.js";

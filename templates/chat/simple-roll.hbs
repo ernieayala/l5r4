@@ -14,7 +14,7 @@
   {{{roll}}}
   {{#if tnResult}}
     <div class="l5r4-tn-result">
-      {{tnResult.outcome}} vs TN {{tnResult.effective}}
+      {{tnResult.outcome}} {{localize "l5r4.mechanics.combat.targeting.vs"}} {{localize "l5r4.ui.common.tn"}} {{tnResult.effective}}
       {{#if tnResult.raises}} ({{localize "l5r4.magic.spells.raises"}}: {{tnResult.raises}}){{/if}}
     </div>
   {{/if}}

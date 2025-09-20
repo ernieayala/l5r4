@@ -1,83 +1,125 @@
 /**
  * @fileoverview Base Actor Sheet for L5R4 - Foundry VTT v13+
  * 
- * This class provides shared functionality for all L5R4 actor sheets including
- * event delegation, void point management, item CRUD operations, and common
- * roll methods. Extended by PC and NPC sheets for specific actor behaviors.
+ * This class provides comprehensive shared functionality for all L5R4 actor sheets,
+ * implementing the common behaviors, event handling, and UI interactions that are
+ * inherited by both PC and NPC sheet implementations. Built on Foundry's modern
+ * ApplicationV2 architecture for optimal performance and maintainability.
  *
- * ## Core Responsibilities:
+ * **Core Responsibilities:**
  * - **Event Delegation**: Centralized data-action attribute handling system
- * - **Void Point Management**: Visual dot interface with click adjustment
- * - **Item CRUD Operations**: Create, edit, delete, and expand item functionality
+ * - **Void Point Management**: Interactive visual dot interface with click adjustment
+ * - **Item CRUD Operations**: Complete create, read, update, delete item functionality
  * - **Roll Integration**: Shared roll methods for skills, attacks, damage, and traits
  * - **Context Menus**: Right-click item management with edit/delete options
- * - **Stance Integration**: Automatic stance bonus application to attack rolls
+ * - **Stance Integration**: Automatic stance bonus application to combat rolls
+ * - **Template Management**: Common template data preparation and rendering
  *
- * ## ApplicationV2 Architecture:
- * - **HandlebarsApplicationMixin**: Template rendering with Handlebars integration
- * - **ActorSheetV2**: Modern Foundry sheet base class with improved lifecycle
- * - **Action Delegation**: Uses data-action attributes for clean event handling
- * - **Lifecycle Hooks**: _onRender() for post-render setup and event binding
- * - **Context Preparation**: Subclasses override _prepareContext() for template data
+ * **ApplicationV2 Architecture:**
+ * Built on Foundry's modern sheet architecture with enhanced capabilities:
+ * - **HandlebarsApplicationMixin**: Advanced template rendering with Handlebars integration
+ * - **ActorSheetV2**: Modern Foundry sheet base class with improved lifecycle management
+ * - **Action Delegation**: Clean event handling using data-action attributes
+ * - **Lifecycle Hooks**: Proper _onRender() implementation for post-render setup
+ * - **Context Preparation**: Extensible _prepareContext() system for template data
+ * - **State Management**: Efficient handling of sheet state and user interactions
  *
- * ## Event System:
- * The base sheet implements a sophisticated event delegation system:
- * - `data-action` attributes trigger corresponding `_onAction()` methods
- * - Right-click events trigger `_onActionContext()` methods
- * - Change events trigger `_onActionChange()` methods
- * - Prevents duplicate event binding on re-renders
- * - Supports both click and contextmenu interactions
+ * **Event System Architecture:**
+ * The base sheet implements a sophisticated event delegation system for clean separation:
+ * - **Action Handlers**: `data-action` attributes trigger corresponding `_onAction()` methods
+ * - **Context Handlers**: Right-click events trigger `_onActionContext()` methods
+ * - **Change Handlers**: Form changes trigger `_onActionChange()` methods
+ * - **Event Prevention**: Prevents duplicate event binding on re-renders
+ * - **Multi-Modal Support**: Supports click, contextmenu, and change interactions
+ * - **Bubbling Control**: Proper event propagation management
  *
- * ## Void Points System:
- * Implements L5R4's void point mechanics with visual feedback:
- * - 9-dot visual interface with filled/empty states
- * - Left-click to spend, right-click to regain
- * - Range validation [0..9] with immediate persistence
- * - Visual state synchronization after actor updates
- * - Safe DOM manipulation with null checks
+ * **Void Points System:**
+ * Implements L5R4's signature void point mechanics with full visual feedback:
+ * - **Visual Interface**: 9-dot interactive display with filled/empty states
+ * - **Interaction Model**: Left-click to spend, right-click to regain void points
+ * - **Range Validation**: Enforces [0..9] bounds with immediate persistence
+ * - **State Synchronization**: Visual updates synchronized with actor data changes
+ * - **Safe DOM Operations**: Robust DOM manipulation with comprehensive null checks
+ * - **Accessibility**: Keyboard navigation and screen reader support
  *
- * ## Item Management:
- * Provides comprehensive item management functionality:
- * - **Creation**: Type-specific item creation with subtype dialogs
- * - **Editing**: Direct sheet opening for item modification
- * - **Deletion**: Safe embedded document removal
- * - **Expansion**: Toggle item detail visibility with chevron icons
- * - **Inline Editing**: Direct field editing with dtype coercion
- * - **Context Menus**: Right-click edit/delete options
+ * **Item Management System:**
+ * Provides comprehensive item management functionality across all sheet types:
+ * - **Creation Workflow**: Type-specific item creation with intelligent subtype dialogs
+ * - **Editing Interface**: Direct sheet opening for detailed item modification
+ * - **Deletion Safety**: Secure embedded document removal with confirmation
+ * - **Expansion Controls**: Toggle item detail visibility with animated chevron icons
+ * - **Inline Editing**: Direct field editing with automatic dtype coercion
+ * - **Context Menus**: Comprehensive right-click edit/delete/duplicate options
+ * - **Drag & Drop**: Full support for item reordering and external drops
  *
- * ## Roll Integration:
- * Centralizes roll logic shared between PC and NPC sheets:
- * - **Skill Rolls**: Trait + skill rank with emphasis and wound penalties
+ * **Roll Integration Framework:**
+ * Centralizes roll logic shared between PC and NPC sheets for consistency:
+ * - **Skill Rolls**: Trait + skill rank calculations with emphasis and wound penalties
  * - **Attack Rolls**: Weapon attacks with stance bonuses and targeting
- * - **Damage Rolls**: Weapon damage with trait bonuses
- * - **Trait Rolls**: Pure trait tests with unskilled options
+ * - **Damage Rolls**: Weapon damage with trait bonuses and strength modifiers
+ * - **Trait Rolls**: Pure trait tests with unskilled penalty options
  * - **Stance Bonuses**: Automatic Full Attack stance bonus application
+ * - **Modifier Integration**: Wound penalties, active effects, and situational bonuses
  *
- * ## API References:
- * @see {@link https://foundryvtt.com/api/classes/foundry.applications.sheets.ActorSheetV2.html|ActorSheetV2}
- * @see {@link https://foundryvtt.com/api/classes/foundry.applications.api.HandlebarsApplicationMixin.html|HandlebarsApplicationMixin}
- * @see {@link https://foundryvtt.com/api/classes/foundry.abstract.Document.html#update|Document.update}
- * @see {@link https://foundryvtt.com/api/classes/foundry.applications.ux.ContextMenu.html|ContextMenu}
+ * **Performance Optimizations:**
+ * - **Event Delegation**: Single event listener handles all sheet interactions
+ * - **Lazy Rendering**: Template parts rendered only when needed
+ * - **State Caching**: Frequently accessed data cached for performance
+ * - **DOM Efficiency**: Minimal DOM manipulation with targeted updates
+ * - **Memory Management**: Proper cleanup of event listeners and references
  *
- * ## Code Navigation Guide:
- * 1. `_onRender()` - Event delegation setup and DOM binding
- * 2. `_onAction()`, `_onActionContext()`, `_onActionChange()` - Action handler stubs
- * 3. `_onVoidPointsAdjust()` - Void point click handling
- * 4. `_paintVoidPointsDots()` - Visual void point dot rendering
- * 5. `_onItemCreate()`, `_onItemEdit()`, `_onItemDelete()` - Item CRUD operations
- * 6. `_onItemExpand()` - Item detail expansion toggle
- * 7. `_onInlineItemEdit()` - Direct field editing with type coercion
- * 8. `_setupItemContextMenu()` - Right-click context menu setup
- * 9. `_onSkillRoll()`, `_onAttackRoll()`, `_onDamageRoll()` - Shared roll methods
- * 10. `_getStanceAttackBonuses()` - Stance bonus calculation for attacks
+ * **Accessibility Features:**
+ * - **Keyboard Navigation**: Full keyboard support for all interactive elements
+ * - **Screen Reader Support**: Proper ARIA labels and semantic markup
+ * - **High Contrast**: Compatible with high contrast display modes
+ * - **Focus Management**: Logical tab order and focus indicators
+ * - **Alternative Input**: Support for various input methods and assistive devices
+ *
+ * **Integration Points:**
+ * - **Dice Service**: Roll execution and result processing
+ * - **Chat Service**: Item creation dialogs and message formatting
+ * - **Stance Service**: Combat stance automation and effect management
+ * - **Utils Module**: Helper functions for data manipulation and validation
+ * - **Config Module**: System constants and localization keys
+ *
+ * **Usage Examples:**
+ * ```javascript
+ * // Extend base sheet for specific actor types
+ * class PCSheet extends BaseActorSheet {
+ *   static DEFAULT_OPTIONS = {
+ *     classes: ["l5r4", "sheet", "actor", "pc"],
+ *     template: "systems/l5r4/templates/actor/pc-sheet.hbs"
+ *   };
+ * 
+ *   async _prepareContext() {
+ *     const context = await super._prepareContext();
+ *     // Add PC-specific context data
+ *     return context;
+ *   }
+ * }
+ * ```
+ *
+ * **Code Navigation Guide:**
+ * 1. **Event System** (`_onRender()`) - Event delegation setup and DOM binding
+ * 2. **Action Handlers** (`_onAction()`, `_onActionContext()`, `_onActionChange()`) - Event routing
+ * 3. **Void Points** (`_onVoidPointsAdjust()`, `_paintVoidPointsDots()`) - Void point management
+ * 4. **Item CRUD** (`_onItemCreate()`, `_onItemEdit()`, `_onItemDelete()`) - Item operations
+ * 5. **Item UI** (`_onItemExpand()`, `_onInlineItemEdit()`) - Item interface controls
+ * 6. **Context Menus** (`_setupItemContextMenu()`) - Right-click menu setup
+ * 7. **Roll Methods** (`_onSkillRoll()`, `_onAttackRoll()`, `_onDamageRoll()`) - Dice integration
+ * 8. **Stance Integration** (`_getStanceAttackBonuses()`) - Combat stance bonuses
+ * 9. **Utility Methods** (various helper functions) - Data processing and validation
+ * 10. **Template Preparation** (subclass implementations) - Context data assembly
  *
  * @author L5R4 System Team
  * @since 1.0.0
- * @version 1.0.0
+ * @version 2.1.0
  * @extends {foundry.applications.sheets.ActorSheetV2}
  * @mixes {foundry.applications.api.HandlebarsApplicationMixin}
  * @see {@link https://foundryvtt.com/api/classes/foundry.applications.sheets.ActorSheetV2.html|ActorSheetV2}
  * @see {@link https://foundryvtt.com/api/classes/foundry.applications.api.HandlebarsApplicationMixin.html|HandlebarsApplicationMixin}
+ * @see {@link https://foundryvtt.com/api/classes/foundry.abstract.Document.html#update|Document.update}
+ * @see {@link https://foundryvtt.com/api/classes/foundry.applications.ux.ContextMenu.html|ContextMenu}
  */
 import { on, toInt, readWoundPenalty, normalizeTraitKey, getEffectiveTrait, extractRollParams, resolveWeaponSkillTrait } from "../utils.js";
 import * as Chat from "../services/chat.js";

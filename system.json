@@ -1,8 +1,17 @@
 {
   "id": "l5r4",
   "title": "Legend of the Five Rings 4th Edition",
-  "description": "System to play L5R 4th edition",
+  "description": "An unofficial, comprehensive implementation of Legend of the Five Rings 4th Edition for Foundry VTT with complete character management, authentic dice mechanics, and full L5R4e rule support.",
   "version": "1.0.0",
+  "authors": [
+    {
+      "name": "Ernie Ayala",
+      "url": "https://github.com/ernieayala/l5r4"
+    }
+  ],
+  "url": "https://github.com/ernieayala/l5r4",
+  "manifest": "https://github.com/ernieayala/l5r4/releases/latest/download/system.json",
+  "download": "https://github.com/ernieayala/l5r4/archive/refs/heads/main.zip",
   "compatibility": {
     "minimum": 13,
     "verified": 13,

@@ -1,32 +1,45 @@
 # Changelog
 
-## Version 1.0.0
+## Version 1.0.0 - Complete System Overhaul
 
-### Major System Refactor
+### NEW FEATURES
+- **Migration System**: Automated data structure updates and schema migrations (setup/migrations.js)
+- **XP Manager Application**: Dedicated experience point management interface with cost calculation and audit trail (apps/xp-manager.js)
+- **Stance Automation Service**: Automated combat stance management with Active Effects integration (services/stance.js)
+- **Active Effects Integration**: Complete Active Effects system for dynamic trait and skill modifications
+- **Services Architecture**: Modular service-oriented architecture (services/ directory)
+- **Setup System**: Organized system initialization (setup/ directory with preload-templates.js, register-settings.js)
+- **Base Actor Sheet**: Shared functionality between PC and NPC sheets (sheets/base-actor-sheet.js)
+- **Icon Path Resolver**: Flexible icon management system with alias support for future reorganization
+- **Family Bonuses System**: Automated character creation bonuses and trait modifications
+- **ApplicationV2/DialogV2**: Modern Foundry v13+ APIs throughout the system
 
-- **Removed PC Tabs Feature**: Completely removed the alternative PC sheet layout with tabs functionality and all related code, settings, and translations
+### ENHANCED FEATURES (Existed but significantly improved)
+- **Spell Slots**: Enhanced from basic system to improved integration with dice service and better UI
+- **XP Tracking**: Evolved from simple field to complex cost calculation with automatic progression
+- **Combat Stances**: Upgraded from static definitions to active automation with mutual exclusion
+- **Dice System**: Completely refactored from 21k+ line monolith to 1.3k line modular service
+- **Actor System**: Comprehensive derived data and lifecycle management
+- **Sheet System**: Modernized from basic ActorSheet to BaseActorSheet with v13+ APIs and advanced UI
+- **Template System**: Reorganized hierarchically organized templates
+- **Localization**: Comprehensive coverage including skill names
+- **Configuration**: Modernized from basic objects to ES6 modules with immutability and future-proofing
+- **Documentation**: Enhanced from minimal comments to JSDoc throughout
 
-- **Code Structure Reorganization**: Restructured the module directory to improve separation of concerns:
-  - `module/documents/` - Actor and Item document classes with pure rule logic
-  - `module/sheets/` - UI rendering classes extending ActorSheetV2/ItemSheetV2
-  - `module/services/` - Dice rolling, chat rendering, and game mechanics
-  - `module/setup/` - Settings registration, template preloading, and migrations
+### MAJOR REFACTORING
+- **File Organization**: Transformed from flat structure to modular directory hierarchy
+- **Code Architecture**: Shifted from monolithic to service-oriented design patterns
+- **Foundry Compatibility**: Updated from v12 to v13+ APIs with modern patterns
+- **Template Structure**: Reorganized from mixed partials to categorized functional hierarchy
 
-- **Naming Convention Standardization**: 
-  - File names now use kebab-case (e.g., `pc-sheet.js`, `base-actor-sheet.js`)
-  - Class names remain PascalCase (e.g., `L5R4Actor`, `L5R4PcSheet`)
-  - Constants use UPPER_SNAKE_CASE
-  - Flags consistently use `flags[SYS_ID].camelCaseKey` pattern
+### REMOVED FEATURES
+- **PC Tabs System**: Simplified complex conditional tab logic for better maintainability
 
-- **Base Actor Sheet**: Created shared base class to reduce code duplication between PC and NPC sheets
-
-- **Template Organization**: Consolidated and organized Handlebars templates with unified partial structure
-
-- **Migration System**: Added robust migration utilities to safely update existing world data
-
-- **Foundry v13 Compatibility**: Full migration to ActorSheetV2/ItemSheetV2 with proper lifecycle methods
-
-- **Developer Experience**: Improved JSDoc documentation, consistent error handling, and defensive coding practices
+### Technical Improvements
+- **Performance Optimization**: Template caching, formula optimization, and memory management
+- **Error Handling**: Comprehensive validation and graceful degradation
+- **Cross-browser Compatibility**: Improved compatibility across different browsers and Foundry versions
+- **Code Quality**: Modern JavaScript patterns with extensive JSDoc documentation
 
 ## Version 0.9.5
 

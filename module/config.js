@@ -29,11 +29,22 @@
 const freeze = Object.freeze;
 
 /**
- * System identifier and common path constants.
- * Used throughout the system for consistent path resolution.
+ * System identifier constant for L5R4 system.
+ * @constant {string}
  */
 export const SYS_ID = "l5r4";
+
+/**
+ * Root path for the L5R4 system directory.
+ * @constant {string}
+ */
 export const ROOT = `systems/${SYS_ID}`;
+
+/**
+ * Common path constants for system directories.
+ * Used throughout the system for consistent path resolution.
+ * @constant {Readonly<{templates: string, assets: string, icons: string}>}
+ */
 export const PATHS = freeze({
   templates: `${ROOT}/templates`,
   assets: `${ROOT}/assets`,
@@ -289,25 +300,41 @@ export const EMPHASIS_LABELS = freeze({
 
 /**
  * Build a template path consistently from a relative path.
+ * Provides centralized template path resolution for consistent file access
+ * across the system. Automatically prepends the system templates directory.
+ * 
  * @param {string} relPath - Relative path within the templates directory
- * @returns {string} Full template path
+ * @returns {string} Full template path ready for Foundry template loading
+ * @example
+ * // Get path for actor sheet template
+ * const actorTemplate = TEMPLATE("actor/pc-sheet.hbs");
+ * // Returns: "systems/l5r4/templates/actor/pc-sheet.hbs"
  */
 export const TEMPLATE = (relPath) => `${PATHS.templates}/${relPath}`;
 
 /**
- * Centralized chat template paths used by dialogs and chat cards.
- * Provides consistent template resolution for chat functionality.
+ * Chat template paths for messages displayed in the chat log.
+ * Provides consistent template resolution for chat cards and roll results.
+ * Each template is optimized for specific chat message types.
+ * @constant {Readonly<{simpleRoll: string, weaponCard: string, fullDefenseRoll: string}>}
  */
 export const CHAT_TEMPLATES = freeze({
   simpleRoll:     TEMPLATE("chat/simple-roll.hbs"),
-  rollModifiers:  TEMPLATE("chat/roll-modifiers-dialog.hbs"),
   weaponCard:     TEMPLATE("chat/weapon-chat.hbs"),
-  fullDefenseRoll: TEMPLATE("chat/full-defense-roll.hbs"),
+  fullDefenseRoll: TEMPLATE("chat/full-defense-roll.hbs")
+});
 
-  // item creation dialogs
-  createSpell:    TEMPLATE("chat/create-spell-dialog.hbs"),
-  createAdv:      TEMPLATE("chat/create-advantage-dialog.hbs"),
-  createEquip:    TEMPLATE("chat/create-equipment-dialog.hbs")
+/**
+ * Dialog template paths for modal forms and popups.
+ * Provides consistent template resolution for user interaction dialogs.
+ * Each template handles specific user input scenarios with proper validation.
+ * @constant {Readonly<{rollModifiers: string, createSpell: string, createAdv: string, createEquip: string}>}
+ */
+export const DIALOG_TEMPLATES = freeze({
+  rollModifiers:  TEMPLATE("dialogs/roll-modifiers-dialog.hbs"),
+  createSpell:    TEMPLATE("dialogs/create-spell-dialog.hbs"),
+  createAdv:      TEMPLATE("dialogs/create-advantage-dialog.hbs"),
+  createEquip:    TEMPLATE("dialogs/create-equipment-dialog.hbs")
 });
 
 /* ---------------------------------- */
@@ -316,7 +343,9 @@ export const CHAT_TEMPLATES = freeze({
 
 /**
  * Arrow type localization keys for UI select elements.
- * Maps arrow type identifiers to their display labels.
+ * Maps arrow type identifiers to their display labels for consistent
+ * presentation across weapon sheets and combat dialogs.
+ * @constant {Readonly<Record<string, string>>}
  */
 const ARROWS = freeze({
   armor:   "l5r4.equipment.weapons.arrows.armor",
@@ -328,7 +357,9 @@ const ARROWS = freeze({
 
 /**
  * Weapon size localization keys for UI select elements.
- * Maps size identifiers to their display labels.
+ * Maps size identifiers to their display labels for weapon categorization
+ * and mechanical effects in combat calculations.
+ * @constant {Readonly<Record<string, string>>}
  */
 const SIZES = freeze({
   small:  "l5r4.equipment.weapons.sizes.small",
@@ -353,6 +384,8 @@ export const ARROW_MODS = freeze({
  * Legacy-shaped config object for backward compatibility.
  * Used throughout the system and templates. Maintains the structure
  * expected by existing code while providing centralized configuration.
+ * Contains all localization keys and constants needed by templates.
+ * @type {object}
  */
 const _l5r4 = {
   arrows: ARROWS,
@@ -471,14 +504,30 @@ const _l5r4 = {
 
 /**
  * Frozen legacy config object for system-wide use.
+ * Primary configuration export used throughout the L5R4 system.
+ * Provides immutable access to all system constants and localization keys.
  * @type {Readonly<typeof _l5r4>}
+ * @example
+ * // Access ring labels in templates
+ * const airLabel = l5r4.rings.air; // "l5r4.mechanics.rings.air"
+ * 
+ * // Use in Handlebars templates
+ * // {{localize @root.config.rings.fire}}
  */
 export const l5r4 = freeze(_l5r4);
 
 /**
  * Structured config alias providing named helpers alongside the legacy object.
  * Combines system constants with the legacy config for comprehensive access.
+ * Provides both modern structured access and backward compatibility.
  * @type {Readonly<{SYS_ID: string, ROOT: string, PATHS: object, TEMPLATE: function, CHAT_TEMPLATES: object}>}
+ * @example
+ * // Modern structured access
+ * const templatePath = L5R4.TEMPLATE("actor/pc-sheet.hbs");
+ * const chatTemplate = L5R4.CHAT_TEMPLATES.simpleRoll;
+ * 
+ * // Legacy compatibility access
+ * const ringLabel = L5R4.rings.fire;
  */
 export const L5R4 = freeze({
   SYS_ID,
@@ -491,5 +540,8 @@ export const L5R4 = freeze({
 
 /**
  * Default export of the legacy config object for backward compatibility.
+ * Maintains compatibility with existing imports that expect the config object
+ * as the default export. New code should prefer named imports.
+ * @default
  */
 export default l5r4;

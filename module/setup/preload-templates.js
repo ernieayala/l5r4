@@ -1,35 +1,94 @@
 /**
  * @fileoverview L5R4 Template Preloader - Handlebars Template Caching for Foundry VTT v13+
  * 
- * This module preloads and caches all Handlebars templates used by the L5R4 system
- * to improve performance by eliminating template loading delays during runtime.
- * Templates are loaded during system initialization and cached in Foundry's template registry.
+ * This module provides comprehensive template preloading functionality for the L5R4 system,
+ * ensuring all Handlebars templates are cached during system initialization to optimize
+ * runtime performance and eliminate template loading delays.
+ *
+ * **Core Responsibilities:**
+ * - **Template Caching**: Preload all system templates into Foundry's template registry
+ * - **Performance Optimization**: Eliminate runtime template loading delays
+ * - **Error Prevention**: Catch template loading issues during system initialization
+ * - **Dependency Management**: Ensure all required templates are available before use
+ * - **Memory Efficiency**: Optimize template storage and access patterns
+ *
+ * **Template Architecture:**
+ * The L5R4 system uses a hierarchical template structure with clear separation of concerns:
+ * - **Main Templates**: Complete sheet layouts for actors, items, and applications
+ * - **Partial Templates**: Reusable components shared across multiple sheets
+ * - **Card Templates**: Specialized templates for chat message rendering
+ * - **Dialog Templates**: Modal and popup interface templates
  *
  * **Template Categories:**
  * - **Item Templates**: Individual item type templates (advantage, weapon, spell, commonItem, etc.)
- * - **Item Partials**: Shared components for item sheets (_rules-summary, _scaffold)
- * - **Actor Templates**: Main actor sheet templates (pc, npc)
- * - **Actor Partials**: Reusable actor sheet components (_stats, _skills, _equipment, etc.)
- * - **Card Templates**: Chat card templates for items and rolls
- * - **Card Partials**: Shared chat card components (_expand)
+ * - **Item Partials**: Shared components for item sheets (_rules-summary, _scaffold, _header)
+ * - **Actor Templates**: Main actor sheet templates (pc-sheet, npc-sheet, limited views)
+ * - **Actor Partials**: Reusable actor sheet components (_stats, _skills, _equipment, _traits)
+ * - **Card Templates**: Chat card templates for items and rolls (weapon-chat, spell-chat)
+ * - **Card Partials**: Shared chat card components (_expand, _header, _footer)
+ * - **Dialog Templates**: Application interfaces (xp-manager, stance-selector)
  *
  * **Performance Benefits:**
- * - **Eliminates Loading Delays**: Templates are cached at startup
- * - **Reduces Network Requests**: No runtime template fetching
- * - **Improves User Experience**: Faster sheet rendering and chat cards
+ * - **Eliminates Loading Delays**: Templates cached at startup prevent runtime fetching
+ * - **Reduces Network Requests**: No HTTP requests during sheet rendering
+ * - **Improves User Experience**: Instantaneous sheet opening and chat card display
  * - **Error Prevention**: Template loading errors caught during initialization
+ * - **Memory Optimization**: Efficient template storage in Foundry's registry
+ * - **Concurrent Loading**: Parallel template loading for faster startup
  *
  * **Template Organization:**
- * Templates follow a hierarchical structure:
- * - `templates/item/`: Item sheet templates
- * - `templates/actor/`: Actor sheet templates  
- * - `templates/cards/`: Chat card templates
- * - `templates/*\/partials/`: Reusable template components
+ * Templates follow a structured hierarchy for maintainability:
+ * ```
+ * templates/
+ * ├── item/               # Item sheet templates
+ * │   ├── _partials/      # Shared item components
+ * │   ├── advantage.hbs   # Advantage/disadvantage sheets
+ * │   ├── weapon.hbs      # Weapon configuration
+ * │   └── ...
+ * ├── actor/              # Actor sheet templates
+ * │   ├── _partials/      # Shared actor components
+ * │   ├── pc-sheet.hbs    # Player character sheet
+ * │   └── npc-sheet.hbs   # Non-player character sheet
+ * ├── cards/              # Chat card templates
+ * │   ├── _partials/      # Shared card components
+ * │   └── weapon-chat.hbs # Weapon roll cards
+ * └── apps/               # Application templates
+ *     └── xp-manager.hbs  # XP management interface
+ * ```
+ *
+ * **Loading Strategy:**
+ * - **Batch Loading**: All templates loaded in single operation for efficiency
+ * - **Error Handling**: Individual template failures logged but don't stop initialization
+ * - **Validation**: Template paths validated before loading attempts
+ * - **Caching**: Templates stored in Foundry's optimized template registry
+ * - **Lazy Evaluation**: Template compilation deferred until first use
+ *
+ * **Integration Points:**
+ * - **System Initialization**: Called during main system setup sequence
+ * - **Sheet Rendering**: Templates available for immediate use by all sheets
+ * - **Chat System**: Card templates ready for roll result display
+ * - **Application Framework**: Dialog templates available for popup interfaces
+ *
+ * **Usage Examples:**
+ * ```javascript
+ * // Preload all templates during system init
+ * await preloadTemplates();
+ * 
+ * // Templates are then available via Foundry's template system
+ * const html = await renderTemplate('systems/l5r4/templates/item/weapon.hbs', context);
+ * ```
+ *
+ * **Maintenance Guidelines:**
+ * - **Add New Templates**: Update templatePaths array when adding new templates
+ * - **Organize by Category**: Group related templates for clarity
+ * - **Use Descriptive Names**: Template names should clearly indicate their purpose
+ * - **Document Dependencies**: Note any template interdependencies
  *
  * @author L5R4 System Team
  * @since 1.0.0
  * @version 2.1.0
  * @see {@link https://foundryvtt.com/api/functions/foundry.applications.handlebars.loadTemplates.html|loadTemplates}
+ * @see {@link https://foundryvtt.com/api/functions/renderTemplate.html|renderTemplate}
  */
 export async function preloadTemplates() {
   // Comprehensive list of all Handlebars templates used by the L5R4 system
@@ -52,8 +111,8 @@ export async function preloadTemplates() {
     "systems/l5r4/templates/item/weapon.hbs",
     
     // Item partial templates - shared components
-    "systems/l5r4/templates/item/partials/_rules-summary.hbs",
-    "systems/l5r4/templates/item/partials/_scaffold.hbs",
+    "systems/l5r4/templates/item/_partials/_rules-summary.hbs",
+    "systems/l5r4/templates/item/_partials/_scaffold.hbs",
     
     // Actor sheet templates - main character sheets
     "systems/l5r4/templates/actor/pc.hbs",
@@ -89,6 +148,12 @@ export async function preloadTemplates() {
     
     // Chat card partial templates - shared chat components
     "systems/l5r4/templates/cards/_partials/_expand.hbs",
+    
+    // Dialog templates - modal forms and popups
+    "systems/l5r4/templates/dialogs/create-advantage-dialog.hbs",
+    "systems/l5r4/templates/dialogs/create-equipment-dialog.hbs",
+    "systems/l5r4/templates/dialogs/create-spell-dialog.hbs",
+    "systems/l5r4/templates/dialogs/roll-modifiers-dialog.hbs",
   ];
 
   // Preload all templates using Foundry's template caching system

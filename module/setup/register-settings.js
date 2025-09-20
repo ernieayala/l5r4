@@ -1,5 +1,5 @@
 /**
- * @fileoverview L5R4 System Settings Registration and Configuration Management
+ * @fileoverview L5R4 System Settings Registration and Configuration Management for Foundry VTT v13+
  * 
  * This module serves as the centralized configuration hub for the L5R4 Foundry VTT system,
  * registering all system settings with Foundry's settings API and establishing the
@@ -12,18 +12,22 @@
  * - **Validation and Constraints**: Define acceptable value ranges and validation rules
  * - **Localization Integration**: Provide translatable setting names and descriptions
  * - **Migration Support**: Handle setting schema changes across system versions
+ * - **Access Control**: Manage GM vs. player setting permissions and visibility
  * 
  * **Setting Architecture:**
+ * The L5R4 system uses a hierarchical settings structure with clear scope separation:
  * ```
  * Settings Hierarchy:
  * ├── World Settings (GM-controlled, affect all users)
  * │   ├── Automation (stance automation, roll behaviors)
  * │   ├── House Rules (optional rules, variant mechanics)
- * │   └── System Behavior (core mechanics, integration options)
+ * │   ├── System Behavior (core mechanics, integration options)
+ * │   └── Chat Integration (message formatting, visibility rules)
  * └── Client Settings (per-user preferences)
- *     ├── Display (UI themes, visibility options)
+ *     ├── Display (UI themes, visibility options, sheet layouts)
  *     ├── Accessibility (contrast, font sizes, animations)
- *     └── Performance (rendering options, cache settings)
+ *     ├── Performance (rendering options, cache settings)
+ *     └── Audio (sound effects, notification preferences)
  * ```
  * 
  * **Setting Categories:**
@@ -33,21 +37,66 @@
  * - **House Rules**: Optional L5R4 mechanics, variant rules, custom interpretations
  * - **Debug**: Development tools, logging levels, diagnostic information
  * - **Performance**: Rendering optimizations, caching strategies, memory management
+ * - **Accessibility**: Screen reader support, high contrast modes, reduced animations
+ * - **Integration**: Third-party module compatibility, API extensions
  * 
  * **Design Principles:**
  * - **Scope Separation**: World settings for game mechanics, client settings for UI preferences
  * - **Sensible Defaults**: All settings work out-of-the-box without configuration
  * - **Progressive Enhancement**: Advanced features are opt-in, basic functionality always available
- * - **Consistent Naming**: Settings follow `l5r4.category.setting` convention
+ * - **Consistent Naming**: Settings follow `l5r4.category.setting` convention for clarity
  * - **User-Friendly Descriptions**: Clear, jargon-free explanations of setting effects
- * - **Validation**: Type checking and range validation prevent invalid configurations
+ * - **Type Safety**: Proper validation and type checking prevent invalid configurations
  * - **Backwards Compatibility**: Setting changes maintain compatibility with existing worlds
+ * - **Performance Aware**: Settings that impact performance clearly documented
+ * 
+ * **Setting Types and Validation:**
+ * - **Boolean**: Simple on/off toggles with clear default states
+ * - **String**: Text inputs with length limits and pattern validation
+ * - **Number**: Numeric values with min/max ranges and step validation
+ * - **Choice**: Dropdown selections with predefined valid options
+ * - **Range**: Slider inputs with visual feedback and boundary enforcement
+ * - **Object**: Complex structured data with schema validation
  * 
  * **Integration Points:**
- * - **Dice Service**: Roll behavior, modifier handling, result formatting
- * - **Stance Service**: Automation triggers, effect management, UI updates
+ * - **Dice Service**: Roll behavior, modifier handling, result formatting preferences
+ * - **Stance Service**: Automation triggers, effect management, UI update preferences
  * - **Sheet Classes**: Display preferences, layout options, interaction modes
  * - **Chat Service**: Message formatting, template selection, visibility rules
+ * - **Migration System**: Version tracking, setting schema updates
+ * - **Template System**: UI customization, theme selection, layout preferences
+ * 
+ * **Performance Considerations:**
+ * - **Lazy Loading**: Settings loaded only when needed to reduce startup time
+ * - **Caching**: Frequently accessed settings cached for performance
+ * - **Change Detection**: Efficient updates when settings change
+ * - **Batch Operations**: Multiple setting changes processed efficiently
+ * - **Memory Management**: Settings cleanup when no longer needed
+ * 
+ * **Usage Examples:**
+ * ```javascript
+ * // Register a world setting
+ * game.settings.register('l5r4', 'automation.stances', {
+ *   name: 'l5r4.settings.automation.stances.name',
+ *   hint: 'l5r4.settings.automation.stances.hint',
+ *   scope: 'world',
+ *   config: true,
+ *   type: Boolean,
+ *   default: true
+ * });
+ * 
+ * // Access setting value
+ * const stanceAutomation = game.settings.get('l5r4', 'automation.stances');
+ * 
+ * // Update setting value
+ * await game.settings.set('l5r4', 'automation.stances', false);
+ * ```
+ * 
+ * **Error Handling:**
+ * - **Graceful Degradation**: Invalid settings fall back to safe defaults
+ * - **Validation Feedback**: Clear error messages for invalid setting values
+ * - **Recovery Procedures**: Automatic reset options for corrupted settings
+ * - **Diagnostic Tools**: Debug settings to help troubleshoot configuration issues
  * - **Migration System**: Setting schema updates, value transformations
  * 
  * **Usage Example:**

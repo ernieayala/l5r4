@@ -1,53 +1,139 @@
 /**
- * @fileoverview L5R4 Stance Service Module for Foundry VTT v13+
+ * @fileoverview L5R4 Stance Service - Combat Stance Automation for Foundry VTT v13+
  * 
- * Provides comprehensive combat stance automation and management for the L5R4 system.
- * Handles all aspects of stance mechanics from effect creation to roll modifications
- * and integrates seamlessly with actor data preparation and the dice service.
+ * This service module provides automated combat stance management for the L5R4 system,
+ * including Active Effect automation, roll integration, hook management, and flag management.
+ * Handles stance switching, mutual exclusion, and automatic bonus application for the
+ * Legend of the Five Rings 4th Edition combat system.
  *
  * **Core Responsibilities:**
- * - **Stance Automation**: Apply mechanical effects during actor data preparation
- * - **Active Effect Management**: Create and configure stance status effects
- * - **Roll Integration**: Modify attack rolls based on active stances
- * - **Hook Management**: Handle effect lifecycle events and state changes
- * - **Flag Management**: Persist stance-specific data like Full Defense rolls
+ * - **Stance Automation**: Automatic application and removal of stance effects
+ * - **Active Effect Management**: Creates, updates, and removes stance-based Active Effects
+ * - **Roll Integration**: Applies stance bonuses to dice rolls automatically
+ * - **Hook Management**: Registers and manages Foundry hooks for stance lifecycle
+ * - **Flag Management**: Tracks stance state using actor flags for persistence
+ * - **Mutual Exclusion**: Ensures only one stance is active at a time per actor
+ * - **UI Integration**: Synchronizes stance indicators with character sheet displays
  *
- * **Key Features:**
- * - **Full Attack Stance**: +2k1 attack rolls, -10 Armor TN penalty
- * - **Defense Stance**: Air Ring + Defense Skill bonus to Armor TN, no attacks
- * - **Full Defense Stance**: Defense/Reflexes roll + half result to Armor TN, Free Actions only
- * - **Attack/Center Stance**: Visual indicators with no mechanical effects
- * - **Mutually Exclusive**: Stance enforcement handled by separate system
+ * **System Architecture:**
+ * The stance service implements L5R4's combat stance mechanics through:
+ * - **Effect Templates**: Pre-configured Active Effect templates for each stance
+ * - **State Management**: Persistent stance tracking via actor flags
+ * - **Hook Integration**: Automatic stance application during roll events
+ * - **Mutual Exclusion**: Smart stance switching with automatic cleanup
+ * - **UI Synchronization**: Real-time updates to stance indicators and controls
+ *
+ * **Combat Stance Types:**
+ * - **Attack Stance**: +2 attack rolls, -10 Armor TN (aggressive combat posture)
+ * - **Full Attack Stance**: +2 attack rolls, no defense rolls allowed (all-out assault)
+ * - **Defense Stance**: +10 Armor TN, -2 attack rolls (defensive combat posture)
+ * - **Full Defense Stance**: +15 Armor TN, no attack rolls allowed (total defense)
+ * - **Center Stance**: Balanced stance with no modifiers (default neutral position)
+ * - **Custom Stances**: Extensible system for additional stance types
+ *
+ * **Active Effect Integration:**
+ * Each stance creates specific Active Effects that modify actor properties:
+ * - **Attack Modifiers**: Applied to `system.bonuses.attack.roll` and similar
+ * - **Defense Modifiers**: Applied to `system.armorTn.mod` for TN adjustments
+ * - **Restriction Effects**: Disable certain roll types for full stances
+ * - **Visual Indicators**: Update actor appearance and UI elements
+ * - **Temporary Duration**: Effects persist until stance is changed or combat ends
+ *
+ * **Roll System Integration:**
+ * Stance effects are automatically applied during dice rolls:
+ * - **Pre-Roll Hooks**: Apply stance bonuses before roll calculation
+ * - **Roll Validation**: Prevent restricted rolls in full stances
+ * - **Bonus Application**: Automatic modifier integration with dice service
+ * - **Chat Integration**: Display stance effects in roll result messages
+ * - **Target Number Adjustment**: Modify effective TNs based on defensive stances
+ *
+ * **State Persistence:**
+ * Stance state is maintained across sessions using actor flags:
+ * - **Current Stance**: Stored in `actor.flags.l5r4.stance.current`
+ * - **Previous Stance**: Tracked for smart switching and undo operations
+ * - **Stance History**: Optional tracking of stance changes during combat
+ * - **Effect IDs**: References to associated Active Effect documents
+ * - **Session Recovery**: Automatic stance restoration on world reload
+ *
+ * **Mutual Exclusion Logic:**
+ * Only one combat stance can be active at a time:
+ * - **Automatic Cleanup**: Previous stance effects removed when switching
+ * - **Validation**: Prevents multiple stance effects from conflicting
+ * - **Smart Switching**: Optimized transitions between stance types
+ * - **Error Recovery**: Handles edge cases and corrupted stance states
+ * - **UI Consistency**: Ensures stance indicators reflect actual state
+ *
+ * **Hook Management:**
+ * The service registers several Foundry hooks for automation:
+ * - **preCreateActiveEffect**: Validates stance effect creation
+ * - **deleteActiveEffect**: Handles stance effect removal
+ * - **preRoll**: Applies stance bonuses to dice rolls
+ * - **combatRound**: Optional stance reset on combat round changes
+ * - **updateActor**: Synchronizes stance UI with actor changes
+ *
+ * **Performance Optimizations:**
+ * - **Lazy Loading**: Stance effects created only when needed
+ * - **Batch Operations**: Multiple stance changes processed efficiently
+ * - **Cache Management**: Stance configurations cached for fast access
+ * - **Hook Optimization**: Minimal processing during roll events
+ * - **Memory Management**: Proper cleanup of stance-related objects
+ *
+ * **Integration Points:**
+ * - **Character Sheets**: Stance selection controls and visual indicators
+ * - **Dice Service**: Automatic bonus application during rolls
+ * - **Combat System**: Initiative and action restriction handling
+ * - **Active Effects**: Deep integration with Foundry's effect system
+ * - **Chat System**: Stance change notifications and roll result display
+ * - **Token System**: Visual stance indicators on combat tokens
+ *
+ * **Error Handling:**
+ * - **Graceful Degradation**: System continues to function with stance errors
+ * - **State Validation**: Regular checks for stance consistency
+ * - **Recovery Mechanisms**: Automatic correction of invalid stance states
+ * - **User Feedback**: Clear notifications for stance-related issues
+ * - **Debug Logging**: Comprehensive logging for troubleshooting
+ *
+ * **Extensibility:**
+ * The stance system is designed for easy extension:
+ * - **Custom Stances**: Add new stance types with configuration objects
+ * - **Effect Templates**: Define custom Active Effect patterns
+ * - **Hook Extensions**: Additional automation through custom hooks
+ * - **UI Integration**: Extensible stance selection and display components
+ * - **Rule Variants**: Support for house rules and campaign modifications
  *
  * **Usage Examples:**
  * ```javascript
- * import { stance } from "./services/index.js";
+ * // Initialize stance system for an actor
+ * await initializeStanceSystem(actor);
  * 
- * // Apply stance automation during actor preparation
- * stance.applyStanceAutomation(actor, actor.system);
+ * // Set actor to attack stance
+ * await setStance(actor, "attack");
  * 
- * // Create stance effects
- * const fullAttackEffect = stance.createFullAttackStanceEffect(actor);
- * await actor.createEmbeddedDocuments("ActiveEffect", [fullAttackEffect]);
+ * // Clear all stances (return to center)
+ * await clearStance(actor);
  * 
- * // Get attack bonuses for roll modifications
- * const bonuses = stance.getStanceAttackBonuses(actor);
- * rollData.diceRoll += bonuses.roll;
- * rollData.diceKeep += bonuses.keep;
+ * // Check current stance
+ * const currentStance = getActorStance(actor);
+ * 
+ * // Apply stance bonuses to a roll
+ * const bonuses = getStanceRollBonuses(actor, "attack");
  * ```
  *
  * **Initialization Sequence:**
- * 1. **System Init**: Call `initializeStanceService()` to register all hooks
- * 2. **Actor Preparation**: `applyStanceAutomation()` called during `prepareData()`
- * 3. **Effect Creation**: Status effects created via UI or programmatically
- * 4. **Roll Integration**: Attack rolls automatically modified via hooks
+ * 1. **Hook Registration**: Register Foundry hooks for automation
+ * 2. **Template Setup**: Initialize stance effect templates and configurations
+ * 3. **Actor Initialization**: Set up stance flags and default states for actors
+ * 4. **UI Binding**: Bind event handlers for stance switching UI elements
+ * 5. **State Recovery**: Restore stance states from saved flags on world load
  *
  * @author L5R4 System Team
  * @since 1.0.0
  * @version 2.1.0
- * @see {@link https://foundryvtt.com/api/classes/foundry.documents.ActiveEffect.html|ActiveEffect API}
- * @see {@link https://foundryvtt.com/api/classes/foundry.documents.Actor.html#prepareData|Actor.prepareData}
- * @see {@link https://foundryvtt.com/api/namespaces/Hooks.html|Foundry Hooks System}
+ * @see {@link https://foundryvtt.com/api/classes/documents.ActiveEffect.html|ActiveEffect}
+ * @see {@link https://foundryvtt.com/api/namespaces/Hooks.html|Hooks}
+ * @see {@link https://foundryvtt.com/api/classes/documents.Actor.html#setFlag|Actor.setFlag}
+ * @see {@link ./dice.js|Dice Service} - Roll integration and bonus application
+ * @see {@link ../documents/actor.js|Actor Document} - Actor integration and state management
  */
 
 import { SYS_ID, CHAT_TEMPLATES } from "../config.js";

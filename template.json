@@ -290,6 +290,8 @@
       "mastery7": "",
       "insightBonus": 0,
       "school": false,
+      "freeRanks": 1,
+      "freeEmphasis": 0,
       "rollBonus": 0,
       "keepBonus": 0,
       "totalBonus": 0

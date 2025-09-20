@@ -1,62 +1,87 @@
 /**
- * L5R4 Item Sheet - Universal Item Configuration Interface for Foundry VTT v13+.
+ * @fileoverview L5R4 Item Sheet - Universal Item Configuration Interface for Foundry VTT v13+
  * 
- * This class provides a unified item sheet interface for all L5R4 item types including
- * weapons, armor, skills, spells, advantages, techniques, and equipment. Built on
- * Foundry's modern ApplicationV2 architecture with HandlebarsApplicationMixin integration.
+ * This class provides a comprehensive unified item sheet interface for all L5R4 item types
+ * including weapons, armor, skills, spells, advantages, techniques, and equipment. Built on
+ * Foundry's modern ApplicationV2 architecture with HandlebarsApplicationMixin integration
+ * for optimal performance and maintainability.
  *
- * ## Core Responsibilities:
- * - **Universal Item Interface**: Single sheet class handling all L5R4 item types
- * - **Dynamic Template Loading**: Type-specific templates with shared scaffolding
- * - **Rich Text Editing**: ProseMirror integration for description and rules fields
- * - **Active Effects Management**: Embedded effect creation, editing, and deletion
- * - **Responsive Layout**: Dynamic window sizing based on item type complexity
- * - **Skill Integration**: Weapon-skill association for character-owned items
+ * **Core Responsibilities:**
+ * - **Universal Item Interface**: Single sheet class handling all L5R4 item types seamlessly
+ * - **Dynamic Template Loading**: Type-specific templates with shared scaffolding architecture
+ * - **Rich Text Editing**: Full ProseMirror integration for description and rules fields
+ * - **Active Effects Management**: Complete embedded effect creation, editing, and deletion
+ * - **Responsive Layout**: Dynamic window sizing based on item type complexity and content
+ * - **Skill Integration**: Weapon-skill association system for character-owned items
+ * - **Form Validation**: Real-time validation and error feedback for all item fields
  *
- * ## ApplicationV2 Architecture:
- * - **HandlebarsApplicationMixin**: Modern template rendering with async enrichment
- * - **ItemSheetV2**: Foundry's v13+ item sheet base with improved lifecycle
- * - **Form Handling**: Native AppV2 form submission with submitOnChange
- * - **Part System**: Single root part with dynamic template resolution
- * - **Scrollable Regions**: Optimized scrolling for content and editor areas
+ * **ApplicationV2 Architecture:**
+ * Built on Foundry's cutting-edge application framework with enhanced capabilities:
+ * - **HandlebarsApplicationMixin**: Modern template rendering with async HTML enrichment
+ * - **ItemSheetV2**: Foundry's v13+ item sheet base with improved lifecycle management
+ * - **Form Handling**: Native AppV2 form submission with submitOnChange functionality
+ * - **Part System**: Single root part with dynamic template resolution and caching
+ * - **Scrollable Regions**: Optimized scrolling for content areas and editor interfaces
+ * - **Event Delegation**: Efficient event handling using data-action attributes
  *
- * ## Template System:
- * Uses a scaffolding approach where all item types share a common structure:
- * - `_scaffold.hbs`: Universal container with dynamic content injection
- * - Type-specific templates loaded based on `item.type`
- * - Shared partials for common elements like rules summaries
- * - Rich text fields support both edit and view modes
+ * **Template System Architecture:**
+ * Uses an innovative scaffolding approach where all item types share common structure:
+ * - **_scaffold.hbs**: Universal container with dynamic content injection points
+ * - **Type-Specific Templates**: Loaded dynamically based on `item.type` property
+ * - **Shared Partials**: Common elements like rules summaries and headers
+ * - **Rich Text Fields**: Support both edit and view modes with seamless transitions
+ * - **Conditional Rendering**: Template sections shown/hidden based on item properties
+ * - **Localization Support**: Full i18n integration for all text content
  *
- * ## Rich Text Integration:
- * Provides seamless editing experience for narrative fields:
- * - **Edit Mode**: ProseMirror editors for description, rules, effects
- * - **View Mode**: Enriched HTML with document links and secrets
- * - **Field Normalization**: Ensures string types for editor compatibility
- * - **Async Enrichment**: Non-blocking HTML enrichment during render
+ * **Rich Text Integration System:**
+ * Provides seamless editing experience for narrative and rules content:
+ * - **Edit Mode**: Full ProseMirror editors for description, rules, and effect fields
+ * - **View Mode**: Enriched HTML with document links, secrets, and roll expressions
+ * - **Field Normalization**: Ensures proper string types for editor compatibility
+ * - **Async Enrichment**: Non-blocking HTML enrichment during render cycles
+ * - **Content Validation**: Prevents malformed HTML and ensures data integrity
+ * - **Auto-Save**: Automatic saving of editor content with debounced updates
  *
- * ## Active Effects System:
- * Comprehensive effect management with transfer support:
- * - **Creation**: New effects with transfer=true for actor application
- * - **Editing**: Direct integration with ActiveEffectConfig sheets
- * - **Toggle**: Enable/disable effects with immediate feedback
- * - **Deletion**: Safe removal with duplicate-click protection
- * - **Transfer Logic**: Effects automatically apply to owning actors
+ * **Active Effects Management:**
+ * Comprehensive effect system with full lifecycle management:
+ * - **Creation Workflow**: New effects with transfer=true for automatic actor application
+ * - **Editing Interface**: Direct integration with ActiveEffectConfig sheets
+ * - **Toggle Controls**: Enable/disable effects with immediate visual feedback
+ * - **Deletion Safety**: Safe removal with duplicate-click protection and confirmation
+ * - **Transfer Logic**: Effects automatically apply to owning actors when enabled
+ * - **Effect Validation**: Ensures proper effect structure and prevents conflicts
  *
- * ## Weapon-Skill Integration:
- * For character-owned weapons and bows:
+ * **Weapon-Skill Integration:**
+ * Advanced weapon-skill association system for character-owned items:
  * - **Skill Discovery**: Automatic detection of character's available skills
- * - **Association Interface**: Dropdown selection for weapon-skill pairing
- * - **Attack Resolution**: Skill+trait vs trait-only attack calculations
- * - **Dynamic Options**: Skill list updates when character gains new skills
+ * - **Association Interface**: Intuitive dropdown selection for weapon-skill pairing
+ * - **Attack Resolution**: Smart skill+trait vs trait-only attack calculations
+ * - **Dynamic Options**: Skill list updates automatically when character gains new skills
+ * - **Validation Logic**: Ensures weapon-skill compatibility and prevents invalid associations
  *
- * ## Window Management:
- * Intelligent sizing and identification:
- * - **Type-Based Sizing**: Different widths for simple vs complex item types
- * - **Unique IDs**: UUID-based element IDs prevent DOM conflicts
- * - **Position Persistence**: Foundry's native window position memory
- * - **Responsive Design**: Adapts to content complexity
+ * **Window Management System:**
+ * Intelligent sizing and identification for optimal user experience:
+ * - **Type-Based Sizing**: Different widths for simple vs complex item types (400-600px)
+ * - **Unique IDs**: UUID-based element IDs prevent DOM conflicts in multi-window scenarios
+ * - **Position Persistence**: Foundry's native window position memory for user convenience
+ * - **Responsive Design**: Adapts layout and sizing to content complexity automatically
+ * - **Modal Behavior**: Proper modal handling for embedded effect configuration
  *
- * ## Usage Examples:
+ * **Performance Optimizations:**
+ * - **Template Caching**: Type-specific templates cached for fast rendering
+ * - **Lazy Loading**: Rich text editors initialized only when needed
+ * - **Event Delegation**: Efficient event handling with minimal DOM listeners
+ * - **Async Operations**: Non-blocking HTML enrichment and content processing
+ * - **Memory Management**: Proper cleanup of editors and event listeners
+ *
+ * **Integration Points:**
+ * - **Config Module**: Item type definitions and localization keys
+ * - **Utils Module**: Helper functions for data processing and validation
+ * - **Active Effects**: Full integration with Foundry's effect system
+ * - **Text Editor**: ProseMirror integration for rich content editing
+ * - **Actor System**: Skill discovery and weapon-skill associations
+ *
+ * **Usage Examples:**
  * ```javascript
  * // Open item sheet
  * const item = actor.items.get(itemId);
@@ -68,20 +93,36 @@
  *   transfer: true,
  *   changes: [{ key: "system.bonuses.attack", mode: 2, value: "2" }]
  * }]);
+ * 
+ * // Get appropriate window width for item type
+ * const width = ItemSheet.widthFor("weapon"); // Returns 600
  * ```
  *
- * ## API References:
+ * **Error Handling:**
+ * - **Graceful Degradation**: Sheet functions even with missing templates or data
+ * - **Validation Feedback**: Clear error messages for invalid configurations
+ * - **Recovery Procedures**: Automatic fallbacks for corrupted item data
+ * - **User Notifications**: Informative messages for successful operations
+ *
+ * **Code Navigation Guide:**
+ * 1. **Initialization** (`_initializeApplicationOptions()`) - Window sizing and unique ID assignment
+ * 2. **Context Preparation** (`_prepareContext()`) - Template data preparation with enrichment
+ * 3. **Rendering** (`_onRender()`) - Active Effects event binding and DOM setup
+ * 4. **Utility Methods** (`widthFor()`, `typeLabel()`) - Helper functions for UI management
+ * 5. **Event Handlers** (various `_on*()` methods) - User interaction processing
+ * 6. **Active Effects** (effect management methods) - Effect lifecycle handling
+ * 7. **Rich Text** (editor integration) - ProseMirror editor management
+ * 8. **Validation** (data validation methods) - Input validation and error handling
+ *
+ * @author L5R4 System Team
+ * @since 1.0.0
+ * @version 2.1.0
+ * @extends {foundry.applications.sheets.ItemSheetV2}
+ * @mixes {foundry.applications.api.HandlebarsApplicationMixin}
  * @see {@link https://foundryvtt.com/api/classes/foundry.applications.sheets.ItemSheetV2.html|ItemSheetV2}
  * @see {@link https://foundryvtt.com/api/classes/foundry.applications.api.HandlebarsApplicationMixin.html|HandlebarsApplicationMixin}
  * @see {@link https://foundryvtt.com/api/classes/foundry.applications.ux.TextEditor.html|TextEditor}
  * @see {@link https://foundryvtt.com/api/classes/foundry.applications.sheets.ActiveEffectConfig.html|ActiveEffectConfig}
- *
- * ## Code Navigation Guide:
- * 1. `_initializeApplicationOptions()` - Window sizing and unique ID assignment
- * 2. `_prepareContext()` - Template data preparation with enrichment
- * 3. `_onRender()` - Active Effects event binding and DOM setup
- * 4. `widthFor()` - Type-based window width calculation
- * 5. `typeLabel()` - Localized item type display names
  */
 
 import CONFIG_L5R4, { SYS_ID } from "../config.js";
@@ -179,7 +220,7 @@ export default class L5R4ItemSheet extends HandlebarsApplicationMixin(ItemSheetV
     form: {
       root: true,
       classes: ["flexcol"],
-      template: `systems/${SYS_ID}/templates/item/partials/_scaffold.hbs`
+      template: `systems/${SYS_ID}/templates/item/_partials/_scaffold.hbs`
     }
   };
 
