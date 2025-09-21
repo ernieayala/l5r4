@@ -119,6 +119,7 @@ export async function preloadTemplates() {
     "systems/l5r4/templates/actor/npc.hbs",
     
     // Actor partial templates - reusable sheet components
+    "systems/l5r4/templates/actor/_partials/_expand.hbs",
     "systems/l5r4/templates/actor/_partials/_stats.hbs",
     "systems/l5r4/templates/actor/_partials/_stats-npc.hbs",
     "systems/l5r4/templates/actor/_partials/_ranks.hbs",

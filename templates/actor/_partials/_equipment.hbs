@@ -13,9 +13,10 @@
       <span>{{localize "l5r4.world.wealth.zeni"}}:</span>
       <input type="text" name="system.wealth.zeni" value="{{system.wealth.zeni}}" placeholder="0" />
     </div>
-    <a class="button icon" data-action="item-create" data-type="equipment" title="{{localize "l5r4.ui.sheets.addEquipment"}}">
+    <a class="button inline-control icon" data-action="item-create" data-type="equipment" title="{{localize "l5r4.ui.sheets.addEquipment"}}">
       <i class="fas fa-plus"></i>
     </a>
+    {{> "systems/l5r4/templates/actor/_partials/_expand.hbs"}}
   </div>
   {{#if armors.length}}
     <section class="item-list -equipment -header" data-scope="armors">

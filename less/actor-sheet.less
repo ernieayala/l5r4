@@ -58,6 +58,12 @@
     margin: 0;
     padding: 0.5rem;
 
+    &.is-collapsed {
+      ~ .item-list {
+        display: none;
+      }
+    }
+
     .title,
     .button,
     input,

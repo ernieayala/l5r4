@@ -51,9 +51,10 @@
           </div>
       </div>
     {{/if}}
-    <a class="button icon" data-action="item-create" data-type="spell" title="{{localize "l5r4.ui.sheets.addTechSpell"}}">
+    <a class="button inline-control icon" data-action="item-create" data-type="spell" title="{{localize "l5r4.ui.sheets.addTechSpell"}}">
       <i class="fas fa-plus"></i>
     </a>
+    {{> "systems/l5r4/templates/actor/_partials/_expand.hbs"}}
   </div>
   {{#if spells.length}}
     <section class="item-list -spell -header" data-scope="spells">

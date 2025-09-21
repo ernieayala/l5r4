@@ -147,6 +147,10 @@ body > * {
   margin: 0;
   padding: 0.5rem;
 }
+.l5r4.pc .section-title.is-collapsed ~ .item-list,
+.l5r4.npc .section-title.is-collapsed ~ .item-list {
+  display: none;
+}
 .l5r4.pc .section-title .title,
 .l5r4.npc .section-title .title,
 .l5r4.pc .section-title .button,

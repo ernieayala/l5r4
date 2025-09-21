@@ -203,6 +203,7 @@ export default class L5R4PcSheet extends BaseActorSheet {
       case "roll-weapon-attack": return this._onWeaponAttackRoll(event, element);
       case "rp-step": return this._onRankPointsStep(event, element, +0.1);
       case "school-link": return this._onSchoolLink(event);
+      case "section-expand": return this._onSectionExpand(event, element);
       case "spell-slot": return this._onSpellSlotAdjust(event, element, +1);
       case "trait-rank": return this._onTraitAdjust(event, element, +1);
       case "void-points-dots": return this._onVoidPointsAdjust(event, element, +1);
@@ -1547,6 +1548,28 @@ export default class L5R4PcSheet extends BaseActorSheet {
       await this.actor.update(update);
     } catch (err) {
       console.warn("L5R4 PC Sheet: failed to update rank/points", { err, event, el });
+    }
+  }
+
+  /**
+   * Toggle section collapse/expand by toggling is-collapsed class on section-title.
+   * @param {MouseEvent} event - The originating click event
+   * @param {HTMLElement} element - The clicked expand button
+   * @returns {void}
+   */
+  _onSectionExpand(event, element) {
+    event?.preventDefault?.();
+    
+    const sectionTitle = element.closest('.section-title');
+    if (!sectionTitle) return;
+    
+    sectionTitle.classList.toggle('is-collapsed');
+    
+    // Toggle the chevron icon direction
+    const icon = element.querySelector("i");
+    if (icon) {
+      icon.classList.toggle("fa-chevron-down");
+      icon.classList.toggle("fa-chevron-up");
     }
   }
 }
