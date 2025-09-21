@@ -232,6 +232,7 @@ export default class L5R4PcSheet extends BaseActorSheet {
   /**
    * @override
    * Handle clan/family/school drops as owned items so they render/edit/delete in Bio.
+   * For all other items, delegate to the base class implementation.
    * Foundry v13 API: Actor.createEmbeddedDocuments → https://foundryvtt.com/api/classes/documents.BaseDocument.html#createEmbeddedDocuments
    * Drag data: TextEditor.getDragEventData → https://foundryvtt.com/api/classes/foundry.applications.ux.TextEditor.html#static-getDragEventData
    */
@@ -247,7 +248,10 @@ export default class L5R4PcSheet extends BaseActorSheet {
 
     const type = String(itemDoc.type);
     const BIO_TYPES = new Set(["clan", "family", "school"]);
-    if (!BIO_TYPES.has(type)) return super._onDrop(event);
+    if (!BIO_TYPES.has(type)) {
+      // For non-bio items, use the base class implementation
+      return super._onDropItem(event, data);
+    }
 
     // Enforce singleton: remove prior of same type
     try {

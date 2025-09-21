@@ -266,6 +266,74 @@ export class BaseActorSheet extends HandlebarsApplicationMixin(foundry.applicati
   }
 
   /* ---------------------------------- */
+  /* Shared Drag & Drop Handling        */
+  /* ---------------------------------- */
+
+  /**
+   * Handle drop events on the actor sheet.
+   * Processes item drops from compendiums and other sources.
+   * Subclasses can override this method for specialized drop handling.
+   * @param {DragEvent} event - The drop event
+   * @returns {Promise<Document[]|false>} Created documents or false if not handled
+   * @see https://foundryvtt.com/api/classes/foundry.applications.ux.TextEditor.html#getDragEventData
+   * @see https://foundryvtt.com/api/classes/foundry.abstract.Document.html#createEmbeddedDocuments
+   */
+  async _onDrop(event) {
+    const data = foundry.applications.ux.TextEditor.getDragEventData(event);
+    if (!data) return false;
+
+    // Handle Item drops
+    if (data.type === "Item") {
+      return this._onDropItem(event, data);
+    }
+
+    // Handle Actor drops (for reference, not embedding)
+    if (data.type === "Actor") {
+      return this._onDropActor(event, data);
+    }
+
+    return false;
+  }
+
+  /**
+   * Handle dropping an Item onto the actor sheet.
+   * Creates an embedded copy of the item on this actor.
+   * @param {DragEvent} event - The drop event
+   * @param {object} data - The drag data containing item information
+   * @returns {Promise<Document[]|false>} Created item documents or false if failed
+   */
+  async _onDropItem(event, data) {
+    if (!this.actor.isOwner) return false;
+
+    try {
+      const item = await fromUuid(data.uuid);
+      if (!item) {
+        console.warn("L5R4 Base Sheet: Could not resolve item UUID", data.uuid);
+        return false;
+      }
+
+      // Create embedded item on this actor
+      const itemData = item.toObject();
+      return await this.actor.createEmbeddedDocuments("Item", [itemData]);
+    } catch (err) {
+      console.warn("L5R4 Base Sheet: Failed to drop item", { err, data });
+      return false;
+    }
+  }
+
+  /**
+   * Handle dropping an Actor onto the actor sheet.
+   * Base implementation does nothing - subclasses can override for specific behavior.
+   * @param {DragEvent} event - The drop event
+   * @param {object} data - The drag data containing actor information
+   * @returns {Promise<boolean>} Always returns false in base implementation
+   */
+  async _onDropActor(event, data) {
+    // Base implementation - subclasses can override
+    return false;
+  }
+
+  /* ---------------------------------- */
   /* Shared Image Editing                */
   /* ---------------------------------- */
 
