@@ -2,6 +2,10 @@
 
 ![Banner](banner.webp)
 
+## 🙏 Acknowledgments
+
+This system builds upon the foundational work of the original L5R 4th Edition contributors. While significantly refactored and modernized for Foundry v13+, we acknowledge and appreciate their pioneering efforts in bringing Legend of the Five Rings to Foundry VTT. Their original work for Foundry v12 and below can be found at: **https://gitlab.com/team-l5r4/l5r4**
+
 [![FoundryVTT version](https://img.shields.io/badge/FVTT-v13.x-informational)](https://foundryvtt.com/)
 [![Version](https://img.shields.io/badge/Version-1.0.0-blue)](https://github.com/ernieayala/l5r4/releases)
 [![License](https://img.shields.io/badge/License-GPL%20v3-green)](https://github.com/ernieayala/l5r4/blob/main/COPYING)
@@ -368,8 +372,6 @@ All visual assets are used with proper attribution:
 - **Samurai Icons**: [Freepik, shmai, photo3idea_studio, juicy_fish, Flaticon, Handicon, berkahicon, cube29](https://www.flaticon.com/free-icons/samurai)
 - **Additional Icons**: [Hey Rabbit from Noun Project (CC BY 3.0)](https://thenounproject.com/browse/icons/term/samurai/)
 
-### Acknowledgments
-This system builds upon the foundational work of the original L5R 4th Edition contributors. While significantly refactored and modernized, we acknowledge and appreciate their pioneering efforts in bringing Legend of the Five Rings to Foundry VTT.
 
 ### Legal Disclaimer
 This is an **unofficial fan-made system**. Legend of the Five Rings is a trademark of Fantasy Flight Games. This system is not affiliated with, endorsed by, or sponsored by Fantasy Flight Games.
