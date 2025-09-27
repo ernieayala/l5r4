@@ -326,10 +326,6 @@ Create an Active Effect on a Technique item:
 - Some derived values (like elemental rings) are calculated automatically and cannot be directly modified
 - Always test Active Effects to ensure they work as intended with your specific use case
 
-## ⚠️ Known Issues & Limitations
-
-- **PC Weapon/Bow Chat Cards**: On some PC sheets, clicking weapon and bow items may not generate a chat card, while other item types work correctly. This appears related to event propagation or CSS preventing clicks from registering. Tracking and fixes are ongoing. If you encounter this, please report details on the [issue tracker](https://github.com/ernieayala/l5r4/issues).
-
 ## 🛠️ Development & Contributing
 
 ### Project Architecture
