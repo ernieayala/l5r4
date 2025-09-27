@@ -1,0 +1,89 @@
+name: Release L5R4 System
+
+on:
+  release:
+    types: [published]
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    
+    steps:
+    - name: Checkout repository
+      uses: actions/checkout@v4
+
+    - name: Set up Node.js
+      uses: actions/setup-node@v4
+      with:
+        node-version: '18'
+        cache: 'npm'
+
+    - name: Install dependencies
+      run: npm ci
+
+    - name: Build CSS
+      run: npm run build:css
+
+    - name: Extract version from tag
+      id: get_version
+      run: |
+        VERSION=${GITHUB_REF#refs/tags/v}
+        echo "VERSION=$VERSION" >> $GITHUB_OUTPUT
+        echo "Extracted version: $VERSION"
+
+    - name: Update system.json with release info
+      run: |
+        # Update version in system.json
+        sed -i 's/"version": ".*"/"version": "${{ steps.get_version.outputs.VERSION }}"/' system.json
+        
+        # Update download URL to point to this specific release
+        sed -i 's|"download": ".*"|"download": "https://github.com/ernieayala/l5r4/releases/download/v${{ steps.get_version.outputs.VERSION }}/l5r4.zip"|' system.json
+        
+        # Verify the changes
+        echo "Updated system.json:"
+        cat system.json
+
+    - name: Create system ZIP
+      run: |
+        # Create a clean ZIP excluding development files
+        zip -r l5r4.zip . \
+          -x "*.git*" \
+          -x "node_modules/*" \
+          -x "scss/*" \
+          -x "gulpfile.js" \
+          -x "package*.json" \
+          -x ".github/*" \
+          -x "*.md" \
+          -x "COPYING"
+        
+        echo "Created l5r4.zip with contents:"
+        unzip -l l5r4.zip
+
+    - name: Upload system.json to release
+      uses: actions/upload-release-asset@v1
+      env:
+        GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+      with:
+        upload_url: ${{ github.event.release.upload_url }}
+        asset_path: ./system.json
+        asset_name: system.json
+        asset_content_type: application/json
+
+    - name: Upload system ZIP to release
+      uses: actions/upload-release-asset@v1
+      env:
+        GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+      with:
+        upload_url: ${{ github.event.release.upload_url }}
+        asset_path: ./l5r4.zip
+        asset_name: l5r4.zip
+        asset_content_type: application/zip
+
+    - name: Notify completion
+      run: |
+        echo "✅ Release v${{ steps.get_version.outputs.VERSION }} completed successfully!"
+        echo "📦 Assets uploaded:"
+        echo "  - system.json (manifest file)"
+        echo "  - l5r4.zip (system package)"
+        echo "🔗 Download URL: https://github.com/ernieayala/l5r4/releases/download/v${{ steps.get_version.outputs.VERSION }}/l5r4.zip"
+        echo "🔗 Manifest URL: https://github.com/ernieayala/l5r4/releases/download/v${{ steps.get_version.outputs.VERSION }}/system.json"
