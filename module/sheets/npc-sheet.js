@@ -230,6 +230,7 @@ export default class L5R4NpcSheet extends BaseActorSheet {
    * Provides direct trait manipulation for NPCs, bypassing the complex
    * experience point system used by player characters. Values are clamped
    * to the standard L5R4 trait range of 1-9.
+   * Requires Shift+Click to prevent accidental changes.
    * 
    * **NPC vs PC Differences:**
    * - No XP cost calculations or tracking
@@ -249,14 +250,18 @@ export default class L5R4NpcSheet extends BaseActorSheet {
    * @returns {Promise<void>} Resolves when update completes or fails
    * 
    * @example
-   * // Increment void rank on left-click
+   * // Increment void rank on Shift+left-click
    * await npcSheet._onVoidAdjust(event, element, +1);
    * 
-   * // Decrement void rank on right-click
+   * // Decrement void rank on Shift+right-click
    * await npcSheet._onVoidAdjust(event, element, -1);
    */
   async _onVoidAdjust(event, element, delta) {
     event?.preventDefault?.();
+    
+    // Require Shift+Click to prevent accidental void rank changes
+    if (!event?.shiftKey) return;
+    
     const cur = Number(this.actor.system?.rings?.void?.rank ?? 0) || 0;
     const min = 0;
     const max = 9;

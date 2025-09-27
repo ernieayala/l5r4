@@ -129,12 +129,15 @@
       },
       "sheets": {
         "bio": "Background",
+        "skill": "Skill",
         "skills": "Skills",
         "addSkill": "Add Skill",
+        "weapon": "Weapon",
         "weapons": "Weapons",
         "addWeapon": "Add Weapon",
         "armor": "Armor",
         "addArmor": "Add Armor",
+        "item": "Item",
         "items": "Items",
         "addItem": "Add Item",
         "notes": "Notes",
@@ -164,6 +167,8 @@
         "addAdvDis": "Add Advantage/Disadvantage",
         "addEquipment": "Add Equipment",
         "equipment": "Equipment",
+        "abilities": "Abilities",
+        "character": "Character",
         "rulesSummary": "Rules Summary",
         "description": "Description",
         "woundLevels": "Wound Levels",
@@ -193,7 +198,8 @@
       },
       "hints": {
         "leftRightToAdjust": "Left and Right to Adjust",
-        "leftClickPlusRightClickMinus": "Left click: +1, Right click: -1"
+        "leftClickPlusRightClickMinus": "Shift+Left click: +1, Shift+Right click: -1",
+        "shiftClickRankPoints": "Shift+Click: ±0.1, Shift+Ctrl+Click: ±1.0"
       }
     },
     "character": {

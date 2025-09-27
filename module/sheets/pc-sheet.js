@@ -193,7 +193,7 @@ export default class L5R4PcSheet extends BaseActorSheet {
       case "item-edit": return this._onItemEdit(event, element);
       case "item-expand": return this._onItemExpand(event, element);
       case "item-roll": return this._onItemRoll(event, element);
-      case "item-sort-by": return this._onSkillHeaderSort(event, element);
+      case "item-sort-by": return this._onUnifiedSortClick(event, element);
       case "ring-rank-void": return this._onVoidAdjust(event, element, +1);
       case "roll-ring": return this._onRingRoll(event, element);
       case "roll-skill": return this._onSkillRoll(event, element);
@@ -351,11 +351,11 @@ export default class L5R4PcSheet extends BaseActorSheet {
       documents: true,
       links: true
     });
-
+  
     /** Bucket items by type for the template (keep the order stable) */
     const all = actorObj.items.contents ?? actorObj.items;
     const byType = (t) => all.filter((i) => i.type === t);
-
+  
     // Skills sorted by user preference (name, rank, trait, type, emphasis)
     const skills = (() => {
       const cols = {
@@ -373,7 +373,7 @@ export default class L5R4PcSheet extends BaseActorSheet {
       const pref = getSortPref(actorObj.id, "skills", Object.keys(cols), "name");
       return sortWithPref(byType("skill"), cols, pref, game.i18n?.lang);
     })();
-
+  
     // Spells sorted by user preference (name, ring, mastery, range, aoe, duration)
     const spells = (() => {
       const cols = {
@@ -387,7 +387,135 @@ export default class L5R4PcSheet extends BaseActorSheet {
       const pref = getSortPref(actorObj.id, "spells", Object.keys(cols), "name");
       return sortWithPref(byType("spell"), cols, pref, game.i18n?.lang);
     })();
-
+  
+    // Advantages sorted by user preference (name, type, cost)
+    const advantages = (() => {
+      const cols = {
+        name: it => String(it?.name ?? ""),
+        type: it => String(game.i18n?.localize?.(`l5r4.character.advantages.${it?.system?.type ?? ""}`) ?? ""),
+        cost: it => Number(it?.system?.cost ?? 0) || 0
+      };
+      const pref = getSortPref(actorObj.id, "advantages", Object.keys(cols), "name");
+      return sortWithPref(byType("advantage"), cols, pref, game.i18n?.lang);
+    })();
+  
+    // Disadvantages sorted by user preference (name, type, cost)
+    const disadvantages = (() => {
+      const cols = {
+        name: it => String(it?.name ?? ""),
+        type: it => String(game.i18n?.localize?.(`l5r4.character.advantages.${it?.system?.type ?? ""}`) ?? ""),
+        cost: it => Number(it?.system?.cost ?? 0) || 0
+      };
+      const pref = getSortPref(actorObj.id, "disadvantages", Object.keys(cols), "name");
+      return sortWithPref(byType("disadvantage"), cols, pref, game.i18n?.lang);
+    })();
+  
+    // Items sorted by user preference (name)
+    const items = (() => {
+      const cols = {
+        name: it => String(it?.name ?? "")
+      };
+      const pref = getSortPref(actorObj.id, "items", Object.keys(cols), "name");
+      return sortWithPref(all.filter((i) => i.type === "item" || i.type === "commonItem"), cols, pref, game.i18n?.lang);
+    })();
+  
+    // Katas sorted by user preference (name, ring, mastery)
+    const katas = (() => {
+      const cols = {
+        name: it => String(it?.name ?? ""),
+        ring: it => String(it?.system?.ring ?? ""),
+        mastery: it => Number(it?.system?.mastery ?? 0) || 0
+      };
+      const pref = getSortPref(actorObj.id, "katas", Object.keys(cols), "name");
+      return sortWithPref(byType("kata"), cols, pref, game.i18n?.lang);
+    })();
+  
+    // Kihos sorted by user preference (name, ring, mastery, type)
+    const kihos = (() => {
+      const cols = {
+        name: it => String(it?.name ?? ""),
+        ring: it => String(it?.system?.ring ?? ""),
+        mastery: it => Number(it?.system?.mastery ?? 0) || 0,
+        type: it => String(it?.system?.type ?? "")
+      };
+      const pref = getSortPref(actorObj.id, "kihos", Object.keys(cols), "name");
+      return sortWithPref(byType("kiho"), cols, pref, game.i18n?.lang);
+    })();
+  
+    // Tattoos sorted by user preference (name)
+    const tattoos = (() => {
+      const cols = {
+        name: it => String(it?.name ?? "")
+      };
+      const pref = getSortPref(actorObj.id, "tattoos", Object.keys(cols), "name");
+      return sortWithPref(byType("tattoo"), cols, pref, game.i18n?.lang);
+    })();
+  
+    // Techniques sorted by user preference (name)
+    const techniques = (() => {
+      const cols = {
+        name: it => String(it?.name ?? "")
+      };
+      const pref = getSortPref(actorObj.id, "techniques", Object.keys(cols), "name");
+      return sortWithPref(byType("technique"), cols, pref, game.i18n?.lang);
+    })();
+  
+    // Armors sorted by user preference (name, bonus, reduction, equipped)
+    const armors = (() => {
+      const cols = {
+        name: it => String(it?.name ?? ""),
+        bonus: it => Number(it?.system?.bonus ?? 0) || 0,
+        reduction: it => Number(it?.system?.reduction ?? 0) || 0,
+        equipped: it => it?.system?.equipped ? 1 : 0
+      };
+      const pref = getSortPref(actorObj.id, "armors", Object.keys(cols), "name");
+      return sortWithPref(byType("armor"), cols, pref, game.i18n?.lang);
+    })();
+  
+    // Weapons sorted by user preference (name, damage, size)
+    const weapons = (() => {
+      const cols = {
+        name: it => String(it?.name ?? ""),
+        damage: it => (toInt(it?.system?.damageRoll) * 10) + toInt(it?.system?.damageKeep),
+        size: it => String(it?.system?.size ?? "")
+      };
+      const pref = getSortPref(actorObj.id, "weapons", Object.keys(cols), "name");
+      return sortWithPref(byType("weapon").map(weapon => {
+        const weaponSkill = resolveWeaponSkillTrait(this.actor, weapon);
+        weapon.attackFormula = `${weaponSkill.rollBonus}k${weaponSkill.keepBonus}`;
+        if (actorObj.system._stanceEffects?.fullAttack) {
+          const stanceRollBonus = weaponSkill.rollBonus + 2;
+          const stanceKeepBonus = weaponSkill.keepBonus + 1;
+          weapon.attackFormulaWithStance = `${stanceRollBonus}k${stanceKeepBonus}`;
+        } else {
+          weapon.attackFormulaWithStance = weapon.attackFormula;
+        }
+        return weapon;
+      }), cols, pref, game.i18n?.lang);
+    })();
+  
+    // Bows sorted by user preference (name, damage, size)
+    const bows = (() => {
+      const cols = {
+        name: it => String(it?.name ?? ""),
+        damage: it => (toInt(it?.system?.damageRoll) * 10) + toInt(it?.system?.damageKeep),
+        size: it => String(it?.system?.size ?? "")
+      };
+      const pref = getSortPref(actorObj.id, "weapons", Object.keys(cols), "name");
+      return sortWithPref(byType("bow").map(bow => {
+        const weaponSkill = resolveWeaponSkillTrait(this.actor, bow);
+        bow.attackFormula = `${weaponSkill.rollBonus}k${weaponSkill.keepBonus}`;
+        if (actorObj.system._stanceEffects?.fullAttack) {
+          const stanceRollBonus = weaponSkill.rollBonus + 2;
+          const stanceKeepBonus = weaponSkill.keepBonus + 1;
+          bow.attackFormulaWithStance = `${stanceRollBonus}k${stanceKeepBonus}`;
+        } else {
+          bow.attackFormulaWithStance = bow.attackFormula;
+        }
+        return bow;
+      }), cols, pref, game.i18n?.lang);
+    })();
+  
     /** Build mastery list from skill ranks */
     const masteries = [];
     for (const s of skills) {
@@ -396,13 +524,8 @@ export default class L5R4PcSheet extends BaseActorSheet {
       if (s.system?.mastery5 && r >= 5) masteries.push({ _id: s.id, name: `${s.name} 5`, mastery: s.system.mastery5 });
       if (s.system?.mastery7 && r >= 7) masteries.push({ _id: s.id, name: `${s.name} 7`, mastery: s.system.mastery7 });
     }
-
-    /**
-     * Effective traits for display: base + Family.
-     * Prefer the live Family item via uuid; fall back to stored flag.
-     * Mirrors Actor logic so UI and rolls stay consistent.
-     * @see https://foundryvtt.com/api/functions/global.html#fromUuidSync
-     */
+  
+    // Effective traits logic (unchanged)
     let fam = {};
     try {
       const uuid = this.actor.getFlag(SYS_ID, "familyItemUuid");
@@ -416,13 +539,11 @@ export default class L5R4PcSheet extends BaseActorSheet {
       }
     } catch (_e) {}
     if (!fam || Object.keys(fam).length === 0) fam = this.actor.flags?.[SYS_ID]?.familyBonus ?? {};
-
-    // Prefer document-owned _derived; fallback to legacy derived
+  
     let traitsEff = foundry.utils.duplicate(
       this.actor.system?._derived?.traitsEff ?? this.actor.system?.derived?.traitsEff ?? {}
     );
     if (!Object.keys(traitsEff).length) {
-      // Reassign the same variable (no shadowing)
       traitsEff = foundry.utils.duplicate(
         this.actor.system?._derived?.traitsEff ?? this.actor.system?.derived?.traitsEff ?? {}
       );
@@ -430,11 +551,15 @@ export default class L5R4PcSheet extends BaseActorSheet {
         console.warn("L5R4", "traitsEff missing in actor.system._derived; check prepareDerivedData()");
       }
     }
-
+  
     const bioClan   = byType("clan")[0]   ?? null;
     const bioFamily = byType("family")[0] ?? null;
     const bioSchool = byType("school")[0] ?? null;
-
+  
+    /**
+     * Template context with consistently pre-computed sorted item collections.
+     * All item types now use the same pre-computed pattern for maintainability.
+     */
     return {
       ...base,
       actor: this.actor,
@@ -451,7 +576,7 @@ export default class L5R4PcSheet extends BaseActorSheet {
        * Primary honors direction; tie-breakers ascend.
        */
       get advDisList() {
-        const list = [...byType("advantage"), ...byType("disadvantage")];
+        const list = [...advantages, ...disadvantages];
         const cols = {
           name:  (it) => String(it?.name ?? ""),
           type:  (it) => String(game.i18n?.localize?.(`l5r4.character.advantages.${it?.system?.type ?? ""}`) ?? ""),
@@ -461,49 +586,19 @@ export default class L5R4PcSheet extends BaseActorSheet {
         const pref = getSortPref(actorObj.id, "advDis", Object.keys(cols), "name");
         return sortWithPref(list, cols, pref, game.i18n?.lang);
       },
-      // Item buckets used elsewhere
-      armors: sortWithPref(byType("armor"), { name:(it)=>String(it?.name??""), bonus:(it)=>Number(it?.system?.bonus??0)||0, reduction:(it)=>Number(it?.system?.reduction??0)||0, equipped:(it)=>it?.system?.equipped?1:0 }, getSortPref(actorObj.id, "armors", ["name","bonus","reduction","equipped"], "name"), game.i18n?.lang),
-      bows:   sortWithPref(byType("bow").map(bow => {
-        const weaponSkill = resolveWeaponSkillTrait(this.actor, bow);
-        // Preserve the original Item document so id/_id remain available to templates
-        bow.attackFormula = `${weaponSkill.rollBonus}k${weaponSkill.keepBonus}`;
-        
-        // Calculate attack formula with stance bonuses for Full Attack Stance
-        if (actorObj.system._stanceEffects?.fullAttack) {
-          const stanceRollBonus = weaponSkill.rollBonus + 2;
-          const stanceKeepBonus = weaponSkill.keepBonus + 1;
-          bow.attackFormulaWithStance = `${stanceRollBonus}k${stanceKeepBonus}`;
-        } else {
-          bow.attackFormulaWithStance = bow.attackFormula;
-        }
-        
-        return bow;
-      }), {   name:(it)=>String(it?.name??""), damage:(it)=> (toInt(it?.system?.damageRoll)*10)+toInt(it?.system?.damageKeep), size:(it)=>String(it?.system?.size??"") }, getSortPref(actorObj.id, "weapons", ["name","damage","size"], "name"), game.i18n?.lang),
-      advantages: byType("advantage"),
-      disadvantages: byType("disadvantage"),
-      items: sortWithPref(all.filter((i) => i.type === "item" || i.type === "commonItem"), { name:(it)=>String(it?.name??"") }, getSortPref(actorObj.id, "items", ["name"], "name"), game.i18n?.lang),
-      katas: byType("kata"),
-      kihos: byType("kiho"),
+      // Clean, consistent variable references - much more maintainable!
+      armors,
+      bows,
+      advantages,
+      disadvantages,
+      items,
+      katas,
+      kihos,
       skills,
       spells,
-      tattoos: byType("tattoo"),
-      techniques: byType("technique"),
-      weapons: sortWithPref(byType("weapon").map(weapon => {
-        const weaponSkill = resolveWeaponSkillTrait(this.actor, weapon);
-        // Preserve the original Item document so id/_id remain available to templates
-        weapon.attackFormula = `${weaponSkill.rollBonus}k${weaponSkill.keepBonus}`;
-        
-        // Calculate attack formula with stance bonuses for Full Attack Stance
-        if (actorObj.system._stanceEffects?.fullAttack) {
-          const stanceRollBonus = weaponSkill.rollBonus + 2;
-          const stanceKeepBonus = weaponSkill.keepBonus + 1;
-          weapon.attackFormulaWithStance = `${stanceRollBonus}k${stanceKeepBonus}`;
-        } else {
-          weapon.attackFormulaWithStance = weapon.attackFormula;
-        }
-        
-        return weapon;
-      }), { name:(it)=>String(it?.name??""), damage:(it)=> (toInt(it?.system?.damageRoll)*10)+toInt(it?.system?.damageKeep), size:(it)=>String(it?.system?.size??"") }, getSortPref(actorObj.id, "weapons", ["name","damage","size"], "name"), game.i18n?.lang),
+      tattoos,
+      techniques,
+      weapons,
       masteries
     };
   }
@@ -565,7 +660,7 @@ export default class L5R4PcSheet extends BaseActorSheet {
 
     // All [data-action] handlers are now delegated via BaseActorSheet.
     // Keep only non-[data-action] bindings here:
-    on(root, ".item-list.-header .item-sort-by", "click", (ev, el) => this._onSortClick(ev, (el)));
+    // Sorting is now handled via data-action delegation - no direct binding needed
 
     // After render, paint the dot faces to match current value
     this._paintVoidPointsDots(root);
@@ -611,9 +706,10 @@ export default class L5R4PcSheet extends BaseActorSheet {
    * @see https://foundryvtt.com/api/classes/foundry.documents.BaseUser.html#getFlag
    * @see https://foundryvtt.com/api/classes/foundry.documents.BaseUser.html#setFlag
    */
-  async _onSortClick(event, el) {
+  async _onUnifiedSortClick(event, element) {
     event.preventDefault();
-    el = /** @type {HTMLElement} */ (el || event.currentTarget);
+    event.stopPropagation();
+    const el = /** @type {HTMLElement} */ (element || event.currentTarget);
     const header = /** @type {HTMLElement|null} */ (el.closest('.item-list.-header'));
     const scope = header?.dataset?.scope || "items";
     const key = el.dataset.sortby || "name";
@@ -639,13 +735,14 @@ export default class L5R4PcSheet extends BaseActorSheet {
 
   /**
    * Adjust a Trait rank by clicking its displayed value.
-   * Left click: +1. Right click: -1.
+   * Shift+Left click: +1. Shift+Right click: -1.
    * Caps:
    *  - Max effective Trait = 9
    *  - Min effective Trait = 2, or 2 + Family bonus when that Trait is boosted by Family
    *
    * The sheet stores base ranks under system.traits.*, and applies Family in derived data.
    * We clamp the *effective* rank, then convert back to base before update.
+   * Requires Shift+Click to prevent accidental changes.
    *
    * Foundry APIs:
    * - Document.update: https://foundryvtt.com/api/classes/foundry.abstract.Document.html#update
@@ -657,6 +754,9 @@ export default class L5R4PcSheet extends BaseActorSheet {
   async _onTraitAdjust(event, element, delta) {
     event?.preventDefault?.();
     event?.stopPropagation?.();
+
+    // Require Shift+Click to prevent accidental trait changes
+    if (!event?.shiftKey) return;
 
     const key = String(element?.dataset?.trait || "").toLowerCase();
     if (!TRAIT_KEYS.includes(key)) return;
@@ -696,8 +796,9 @@ export default class L5R4PcSheet extends BaseActorSheet {
 
     /**
      * Adjust the Void Ring via click.
-     * Left click adds 1. Right click subtracts 1.
+     * Shift+Left click adds 1. Shift+Right click subtracts 1.
      * Min 2. Max 9.
+     * Requires Shift+Click to prevent accidental changes.
      *
      * Uses standard Foundry document updates.
      * @see https://foundryvtt.com/api/classes/foundry.abstract.Document.html#update
@@ -708,6 +809,9 @@ export default class L5R4PcSheet extends BaseActorSheet {
      */
     async _onVoidAdjust(event, element, delta) {
       event?.preventDefault?.();
+
+      // Require Shift+Click to prevent accidental void rank changes
+      if (!event?.shiftKey) return;
 
       const cur = Number(this.actor.system?.rings?.void?.rank ?? 0) || 0;
       const min = 0;
@@ -1465,70 +1569,127 @@ export default class L5R4PcSheet extends BaseActorSheet {
   /* ---------------------------------- */
 
   /**
-   * Sort skills by the clicked header and persist using each Item's integer `sort`.
-   * Keeps the existing "sort bins" so non-skill items don't get interleaved.
-   *
-   * @param {MouseEvent} event
-   * @param {HTMLElement} el  <a class="item-sort-by" data-sortby="name|rank|trait|type|school|emphasis">
+   * Handle preference-based sorting for most item types.
+   * Uses user flags to store sort preferences and triggers a render.
+   * @param {string} scope - The item list scope (weapons, spells, etc.)
+   * @param {string} key - The sort key (name, rank, etc.)
+   * @param {HTMLElement} el - The clicked sort element
+   * @returns {Promise<void>}
    */
-  async _onSkillHeaderSort(event, el) {
-    event.preventDefault();
-
-    const key = el.dataset.sortby ?? "name";
-    // Toggle direction per-header: asc ⇄ desc
-    const dir = (el.dataset.dir = el.dataset.dir === "asc" ? "desc" : "asc");
-    const asc = dir === "asc" ? 1 : -1;
-
-    // Current skills on the Actor
-    const skills = this.actor.items.filter(i => i.type === "skill");
-
-    // Preserve existing numeric "sort bins" so other item types stay in place.
-    const bins = skills.map(i => i.sort).sort((a, b) => a - b);
-
-    // Value selector per column
-    const val = (it) => {
-      switch (key) {
-        case "name":     return String(it.name ?? "");
-        case "rank":     return Number(it.system?.rank ?? 0);
-        case "trait":    return String(it.system?.trait ?? "");
-        case "type":     return String(it.system?.type ?? "");
-        case "school":   return it.system?.school ? 1 : 0; // true/false → 1/0
-        case "emphasis": return String(it.system?.emphasis ?? "");
-        default:         return String(it.name ?? "");
+  async _onPreferenceBasedSort(scope, key, el) {
+    try {
+      const allowed = {
+        armors:       ["name","bonus","reduction","equipped"],
+        weapons:      ["name","damage","size"],
+        items:        ["name"],
+        spells:       ["name","ring","mastery","range","aoe","duration"],
+        techniques:   ["name"],
+        technique:    ["name"],
+        katas:        ["name","ring","mastery"],
+        kihos:        ["name","ring","mastery","type"],
+        tattoos:      ["name"],
+        advantages:   ["name","type","cost"],
+        disadvantages:["name","type","cost"],
+        advDis:       ["name","type","cost","item"]
+      }[scope] ?? ["name"];
+      
+      if (!allowed.includes(key)) {
+        console.warn("L5R4", "Invalid sort key for scope", { scope, key, allowed });
+        return;
       }
-    };
+      
+      const cur = getSortPref(this.actor.id, scope, allowed, allowed[0]);
+      await setSortPref(this.actor.id, scope, key, { toggleFrom: cur });
+      
+      // Update visual indicator
+      const header = el.closest('.item-list.-header');
+      if (header) {
+        header.querySelectorAll('.item-sort-by').forEach(a => {
+          a.classList.toggle('is-active', a === el);
+          if (a !== el) a.removeAttribute('data-dir');
+        });
+        
+        const newPref = getSortPref(this.actor.id, scope, allowed, allowed[0]);
+        el.setAttribute('data-dir', newPref.dir);
+      }
+      
+      // Trigger re-render to apply new sort
+      this.render();
+      
+    } catch (err) {
+      console.warn("L5R4", "Preference-based sort failed", { err, scope, key });
+    }
+  }
+  
+  /**
+   * Handle document-based sorting for skills to preserve sort bins.
+   * Updates the item.sort property directly to maintain item ordering.
+   * @param {MouseEvent} event - The original click event
+   * @param {HTMLElement} el - The clicked sort element
+   * @param {string} key - The sort key (name, rank, trait, etc.)
+   * @returns {Promise<void>}
+   */
+  async _onSkillsDocumentSort(event, el, key) {
+    try {
+      // Toggle direction per-header: asc ⇄ desc
+      const dir = (el.dataset.dir = el.dataset.dir === "asc" ? "desc" : "asc");
+      const asc = dir === "asc" ? 1 : -1;
 
-    // Comparator that handles both numbers and strings (with locale)
-    const cmp = (a, b) => {
-      const va = val(a), vb = val(b);
-      if (typeof va === "number" && typeof vb === "number") return asc * (va - vb);
-      return asc * String(va).localeCompare(String(vb), game.i18n.lang);
-    };
+      // Current skills on the Actor
+      const skills = this.actor.items.filter(i => i.type === "skill");
+      if (!skills.length) return;
 
-    const sorted = skills.slice().sort(cmp);
+      // Preserve existing numeric "sort bins" so other item types stay in place
+      const bins = skills.map(i => i.sort).sort((a, b) => a - b);
 
-    // Reassign the existing bins to the new order; fall back to spaced ints if needed.
-    const updates = sorted.map((it, i) => ({ _id: it.id, sort: bins[i] ?? ((i + 1) * 10) }));
+      // Value selector per column
+      const val = (it) => {
+        switch (key) {
+          case "name":     return String(it.name ?? "");
+          case "rank":     return Number(it.system?.rank ?? 0);
+          case "trait":    return String(it.system?.trait ?? "");
+          case "type":     return String(it.system?.type ?? "");
+          case "school":   return it.system?.school ? 1 : 0; // true/false → 1/0
+          case "emphasis": return String(it.system?.emphasis ?? "");
+          default:         return String(it.name ?? "");
+        }
+      };
 
-    if (updates.length) {
-      try {
+      // Comparator that handles both numbers and strings (with locale)
+      const cmp = (a, b) => {
+        const va = val(a), vb = val(b);
+        if (typeof va === "number" && typeof vb === "number") return asc * (va - vb);
+        return asc * String(va).localeCompare(String(vb), game.i18n.lang);
+      };
+
+      const sorted = skills.slice().sort(cmp);
+
+      // Reassign the existing bins to the new order; fall back to spaced ints if needed
+      const updates = sorted.map((it, i) => ({ _id: it.id, sort: bins[i] ?? ((i + 1) * 10) }));
+
+      if (updates.length) {
         await this.actor.updateEmbeddedDocuments("Item", updates);
-      } catch (err) {
-        console.warn("L5R4", "actor.updateEmbeddedDocuments failed in PcSheet", { err });
+        
+        // Update visual indicators
+        const skillsHeader = this.element.querySelector('.item-list.-header[data-scope="skills"]');
+        if (skillsHeader) {
+          skillsHeader.querySelectorAll('.item-sort-by').forEach(a => {
+            a.classList.toggle('is-active', a === el);
+            if (a !== el) a.removeAttribute('data-dir');
+          });
+        }
       }
-      // Optional: tiny visual cue for the active header
-      for (const a of this.element.querySelectorAll(".skills-sort .item-sort-by")) {
-        a.classList.toggle("is-active", a === el);
-        if (a !== el) a.removeAttribute("data-dir");
-      }
+      
+    } catch (err) {
+      console.warn("L5R4", "Skills document sort failed", { err, key });
     }
   }
 
-
   /**
-   * Adjust a Rank/Points pair via a single chip control.
-   * Left-click increments by +0.1, right-click decrements by -0.1.
-   * Holding Shift changes step to +/-1.0. Mouse wheel adjusts by 0.1.
+   * Adjust Honor/Glory/Status/Shadow rank.points by ±0.1 (or ±1.0 with Ctrl).
+   * Shift+Left-click increments by +0.1, Shift+Right-click decrements by -0.1.
+   * Holding Ctrl changes step to +/-1.0. Mouse wheel adjusts by 0.1.
+   * Requires Shift+Click to prevent accidental changes.
    * @param {MouseEvent|WheelEvent} event
    * @param {HTMLElement} el - the clicked chip element with data-key
    * @param {number} baseDelta - default delta in decimal units (0.1 or -0.1)
@@ -1537,6 +1698,9 @@ export default class L5R4PcSheet extends BaseActorSheet {
    */
   async _onRankPointsStep(event, el, baseDelta) {
     try {
+      // Require Shift+Click to prevent accidental rank/points changes
+      if (!event?.shiftKey) return;
+      
       const key = String(el?.dataset?.key || "");
       if (!key) return;
 
@@ -1546,7 +1710,7 @@ export default class L5R4PcSheet extends BaseActorSheet {
         points: Number(sys?.[key]?.points ?? 0) || 0
       };
 
-      const step = event?.shiftKey ? (baseDelta > 0 ? +1 : -1) : baseDelta;
+      const step = event?.ctrlKey ? (baseDelta > 0 ? +1 : -1) : baseDelta;
       const next = applyRankPointsDelta(cur, step, 0, 10);
 
       const update = {};

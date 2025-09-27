@@ -14,12 +14,10 @@
     {{#unless system.shugenja}}
       <div><strong>{{localize "l5r4.ui.common.rank"}}:</strong> {{system.rank}}</div>
       <span></span>
-      <span></span>
     {{/unless}}
     {{#if system.shugenja}}
       <div><strong>{{localize "l5r4.magic.spells.affinity"}}:</strong> {{localize (concat "l5r4.ui.mechanics.rings." system.affinity)}}</div>
       <div><strong>{{localize "l5r4.magic.spells.deficiency"}}:</strong> {{localize (concat "l5r4.ui.mechanics.rings." system.deficiency)}}</div>
-      <span></span>
     {{/if}}
     {{> "systems/l5r4/templates/cards/_partials/_expand.hbs"}}
     {{#if (or system.description system.specialRules)}}

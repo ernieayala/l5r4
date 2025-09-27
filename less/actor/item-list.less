@@ -20,14 +20,51 @@
     }
 
     &.-advantages,
-    &.-equipment,
-    &.-technique,
-    &.-kata,
-    &.-kiho,
-    &.-tattoo,
     &.-attacks {
       .item {
         grid-template-columns: 1fr 1fr 1fr 1fr 24px;
+      }
+    }
+
+    &.-advantage {
+      .item {
+        grid-template-columns: 1fr 80px 80px 24px;
+      }
+    }
+
+    &.-armor {
+      .item {
+        grid-template-columns: 1fr 80px 100px 100px 24px;
+      }
+    }
+
+    &.-bio {
+      .item {
+        grid-template-columns: 1fr 24px;
+      }
+    }
+
+    &.-commonItem {
+      .item {
+        grid-template-columns: 1fr 24px;
+      }
+    }
+
+    &.-disadvantage {
+      .item {
+        grid-template-columns: 1fr 80px 80px 24px;
+      }
+    }
+
+    &.-kata {
+      .item {
+        grid-template-columns: 1fr 80px 80px 24px;
+      }
+    }
+
+    &.-kiho {
+      .item {
+        grid-template-columns: 1fr 80px 80px 80px 24px;
       }
     }
 
@@ -39,13 +76,25 @@
 
     &.-spell {
       .item {
-        grid-template-columns: 1fr 1fr 1fr 1fr 1fr 1fr 24px;
+        grid-template-columns: 1fr 80px 80px 80px 1fr 1fr 24px;
       }
     }
 
-    &.-bio {
+    &.-tattoo {
       .item {
-        grid-template-columns: 1fr 24px;
+        grid-template-columns: 1fr 1fr 24px;
+      }
+    }
+
+    &.-technique {
+      .item {
+        grid-template-columns: 1fr 1fr 1fr 24px;
+      }
+    }
+
+    &.-weapon {
+      .item {
+        grid-template-columns: 1fr 80px 80px 150px 24px;
       }
     }
 

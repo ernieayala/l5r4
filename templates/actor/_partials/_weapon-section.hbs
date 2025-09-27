@@ -1,35 +1,24 @@
 <section class="flexcol -gap-sm">
   <div class="flexrow -gap-sm section-title">
     <h4 class="title">{{localize "l5r4.ui.sheets.weapons"}}</h4>
-    <a class="button inline-control icon" data-action="item-create" data-type="weapon" title="{{localize "l5r4.ui.sheets.addWeapon"}}">
-      <i class="fas fa-plus"></i>
-    </a>
+    {{> "systems/l5r4/templates/actor/_partials/_unified-item-create.hbs"}}
     {{> "systems/l5r4/templates/actor/_partials/_expand.hbs"}}
   </div>
-  {{#if (or weapons.length bows.length)}}
-    <section class="item-list -equipment -header" data-scope="weapons">
-      <div class="item">
-        <a class="item-sort-by" data-sortby="name">{{localize "l5r4.ui.common.name"}}</a>
-        <a class="item-sort-by" data-sortby="damage">{{localize "l5r4.ui.mechanics.combat.attack"}}</a>
-        <a class="item-sort-by" data-sortby="damage">{{localize "l5r4.ui.common.damage"}}</a>
-        <span></span>
-      </div>
-    </section>
-    <section class="item-list -equipment" data-scope="weapons">
-      {{#each weapons as |weapon id|}}
-        {{> "systems/l5r4/templates/cards/weapon.hbs"
-            system=weapon.system
-            inSheet=true
-            ranged=false
-            docId=weapon.id}}
-      {{/each}}
-      {{#each bows as |weapon id|}}
-        {{> "systems/l5r4/templates/cards/weapon.hbs"
-            system=weapon.system
-            inSheet=true
-            ranged=true
-            docId=weapon.id}}
-      {{/each}}
-    </section>
-  {{/if}}
+  <section class="item-list -weapon -header" data-scope="weapons">
+    <div class="item">
+      <a class="item-sort-by" data-action="item-sort-by" data-sortby="name">{{localize "l5r4.ui.common.name"}}</a>
+      <a class="item-sort-by" data-action="item-sort-by" data-sortby="damage">{{localize "l5r4.ui.mechanics.combat.attack"}}</a>
+      <a class="item-sort-by" data-action="item-sort-by" data-sortby="damage">{{localize "l5r4.ui.common.damage"}}</a>
+      <span></span>
+    </div>
+  </section>
+  <section class="item-list -weapon" data-scope="weapons">
+    {{#each weapons as |weapon id|}}
+      {{> "systems/l5r4/templates/cards/weapon.hbs"
+          system=weapon.system
+          inSheet=true
+          ranged=weapon.system.isBow
+          docId=weapon.id}}
+    {{/each}}
+  </section>
 </section>

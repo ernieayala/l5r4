@@ -123,6 +123,7 @@
  */
 import { on, toInt, readWoundPenalty, normalizeTraitKey, getEffectiveTrait, extractRollParams, resolveWeaponSkillTrait } from "../utils.js";
 import * as Dice from "../services/dice.js";
+import * as Chat from "../services/chat.js";
 const { HandlebarsApplicationMixin } = foundry.applications.api;
 
 /**
@@ -229,13 +230,18 @@ export class BaseActorSheet extends HandlebarsApplicationMixin(foundry.applicati
   /**
    * Adjust Void Points by ±1 within the range [0..9].
    * Uses Document.update to persist the value and repaints the dots.
+   * Requires Shift+Click to prevent accidental changes.
    * @param {MouseEvent} event - The triggering mouse event
    * @param {HTMLElement} element - The void points dots container element
-   * @param {number} delta - +1 (left click) or -1 (right-click)
+   * @param {number} delta - +1 (Shift+left click) or -1 (Shift+right-click)
    * @see https://foundryvtt.com/api/classes/foundry.abstract.Document.html#update
    */
   async _onVoidPointsAdjust(event, element, delta) {
     event?.preventDefault?.();
+    
+    // Require Shift+Click to prevent accidental void points changes
+    if (!event?.shiftKey) return;
+    
     const cur = Number(this.actor.system?.rings?.void?.value ?? 0) || 0;
     const next = Math.min(9, Math.max(0, cur + (delta > 0 ? 1 : -1)));
     if (next === cur) return;
@@ -369,22 +375,27 @@ export class BaseActorSheet extends HandlebarsApplicationMixin(foundry.applicati
   /* ---------------------------------- */
 
   /**
-   * Create a new embedded Item from a "+" button on the sheet.
-   * Creates items directly without dialogs since each section handles specific types.
+   * Create a new embedded Item using the unified item creation dialog.
+   * Shows a dialog with all relevant item types for the current actor type.
    * @param {Event} event - The originating click event
-   * @param {HTMLElement} element - The clicked element with data-type attribute
+   * @param {HTMLElement} element - The clicked element (may have data-type for fallback)
    * @returns {Promise<Document[]>} Array of created item documents
    */
   async _onItemCreate(event, element) {
     event.preventDefault();
-    const el = /** @type {HTMLElement} */ (element || event.currentTarget);
-    const type = el?.dataset?.type;
-    let itemData = {};
-
-    itemData = { 
-      name: game.i18n.localize("l5r4.ui.common.new") || "New", 
-      type 
+    
+    // Use unified dialog for item creation
+    const result = await Chat.getUnifiedItemOptions(this.actor.type);
+    
+    // Handle cancellation
+    if (result.cancelled) return [];
+    
+    // Create the item with user-specified name and type
+    const itemData = {
+      name: result.name,
+      type: result.type
     };
+    
     return this.actor.createEmbeddedDocuments("Item", [itemData]);
   }
 
@@ -755,6 +766,7 @@ export class BaseActorSheet extends HandlebarsApplicationMixin(foundry.applicati
    * Base trait adjustment method with simple NPC-style logic.
    * Adjusts trait values by ±1 within [1,10] range.
    * PC sheet overrides this for complex family bonus logic.
+   * Requires Shift+Click to prevent accidental changes.
    * @param {Event} event - The triggering event
    * @param {HTMLElement} element - The element with data-trait attribute
    * @param {number} delta - +1 or -1 adjustment value
@@ -762,6 +774,10 @@ export class BaseActorSheet extends HandlebarsApplicationMixin(foundry.applicati
    */
   async _onTraitAdjust(event, element, delta) {
     event?.preventDefault?.();
+    
+    // Require Shift+Click to prevent accidental trait changes
+    if (!event?.shiftKey) return;
+    
     const key = String(element?.dataset?.trait || "").toLowerCase();
     if (!key) return;
     

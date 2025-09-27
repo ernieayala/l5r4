@@ -1,21 +1,17 @@
 <section class="flexcol -gap-sm">
   <div class="flexrow -gap-sm section-title">
     <h4 class="title">{{localize "l5r4.ui.sheets.tattoos"}}</h4>
-    <a class="button inline-control icon" data-action="item-create" data-type="tattoo" title="{{localize "l5r4.ui.sheets.addTattoo"}}">
-      <i class="fas fa-plus"></i>
-    </a>
+    {{> "systems/l5r4/templates/actor/_partials/_unified-item-create.hbs"}}
     {{> "systems/l5r4/templates/actor/_partials/_expand.hbs"}}
   </div>
-  {{#if tattoos.length}}
-    <section class="item-list -kata -header" data-scope="tattoos">
-      <div class="item">
-        <a class="item-sort-by" data-sortby="name">{{localize "l5r4.ui.common.name"}}</a>
-      </div>
-    </section>
-    <section class="item-list -tattoo">
-      {{#each tattoos as |tattoo id|}}
-        {{> "systems/l5r4/templates/cards/tattoo.hbs" system=tattoo.system inSheet=true docId=tattoo.id}}
-      {{/each}}
-    </section>
-  {{/if}}
+  <section class="item-list -tattoo -header" data-scope="tattoos">
+    <div class="item">
+      <a class="item-sort-by" data-action="item-sort-by" data-sortby="name">{{localize "l5r4.ui.common.name"}}</a>
+    </div>
+  </section>
+  <section class="item-list -tattoo">
+    {{#each tattoos as |tattoo id|}}
+      {{> "systems/l5r4/templates/cards/tattoo.hbs" system=tattoo.system inSheet=true docId=tattoo.id}}
+    {{/each}}
+  </section>
 </section>

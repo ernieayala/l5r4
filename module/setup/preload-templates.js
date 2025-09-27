@@ -158,8 +158,12 @@ export async function preloadTemplates() {
     // Chat card partial templates - shared chat components
     "systems/l5r4/templates/cards/_partials/_expand.hbs",
     
+    // Actor partial templates - shared actor components
+    "systems/l5r4/templates/actor/_partials/_unified-item-create.hbs",
+    
     // Dialog templates - modal forms and popups
     "systems/l5r4/templates/dialogs/roll-modifiers-dialog.hbs",
+    "systems/l5r4/templates/dialogs/unified-item-create-dialog.hbs",
   ];
 
   // Preload all templates using Foundry's template caching system

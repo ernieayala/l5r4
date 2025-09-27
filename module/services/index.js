@@ -2,9 +2,9 @@
  * @fileoverview L5R4 Services Barrel Module - Service Exports for Foundry VTT v13+
  * 
  * This barrel module provides centralized access to all L5R4 system services,
- * including dice rolling and stance automation. Serves as the main entry point 
- * for service functionality across the system, implementing the barrel pattern 
- * for clean module organization and dependency management.
+ * including dice rolling, chat utilities, and stance automation. Serves as the 
+ * main entry point for service functionality across the system, implementing 
+ * the barrel pattern for clean module organization and dependency management.
  *
  * **Core Responsibilities:**
  * - **Service Aggregation**: Centralized re-export of all system services
@@ -16,17 +16,20 @@
  * **System Architecture:**
  * The services module implements a clean separation of concerns:
  * - **Dice Service**: Core mechanical engine for all roll-based interactions
+ * - **Chat Service**: User interface layer for unified item creation dialogs
  * - **Stance Service**: Combat automation layer for stance effects and state management
  * - **Barrel Pattern**: Simplified imports and reduced module coupling
  * - **Named Exports**: Clear function identification and IDE support
  *
  * **Exported Services:**
  * - **Dice Service**: Comprehensive dice rolling with L5R4 mechanics and Ten Dice Rule
+ * - **Chat Service**: Unified item creation dialog with context-aware filtering
  * - **Stance Service**: Combat stance automation and Active Effect management
  *
  * **Service Integration:**
  * Services are designed to work together seamlessly:
  * - **Dice ↔ Stance**: Automatic stance bonus application during rolls
+ * - **Chat ↔ Sheets**: Dialog-driven item creation workflows
  * - **Cross-Service**: Shared utilities and configuration from utils and config modules
  *
  * **Import Patterns:**
@@ -34,6 +37,7 @@
  * ```javascript
  * // Named imports (recommended)
  * import { SkillRoll, RingRoll, TraitRoll } from "./services/index.js";
+ * import { getUnifiedItemOptions } from "./services/index.js";
  * import { setStance, clearStance } from "./services/index.js";
  * 
  * // Namespace import
@@ -48,6 +52,13 @@
  * await SkillRoll({ actor, skillName: "Kenjutsu", actorTrait: 4, skillRank: 3 });
  * await RingRoll({ actor, ring: "fire", ringRank: 3 });
  * 
+ * // Chat service usage
+ * import { getUnifiedItemOptions } from "./services/index.js";
+ * const result = await getUnifiedItemOptions("pc");
+ * if (!result.cancelled) {
+ *   await Item.create({ name: result.name, type: result.type });
+ * }
+ * 
  * // Stance service usage
  * import { setStance, clearStance } from "./services/index.js";
  * await setStance(actor, "attack");
@@ -58,6 +69,7 @@
  * @since 1.0.0
  * @version 2.1.0
  * @see {@link ./dice.js|Dice Service} - Roll mechanics and dialog system
+ * @see {@link ./chat.js|Chat Service} - Unified item creation dialogs
  * @see {@link ./stance.js|Stance Service} - Combat stance automation
  * @see {@link ../config.js|Config Module} - System configuration and constants
  * @see {@link ../utils.js|Utils Module} - Shared utility functions
@@ -66,6 +78,9 @@
 
 /** Dice rolling mechanics and dialog systems. */
 export * as dice from "./dice.js";
+
+/** Chat utilities and unified item creation dialogs. */
+export * as chat from "./chat.js";
 
 /** Combat stance automation, effects, and roll modifications. */
 export * as stance from "./stance.js";

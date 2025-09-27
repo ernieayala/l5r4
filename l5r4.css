@@ -107,9 +107,20 @@ body > * {
 .l5r4.pc .main-sheet,
 .l5r4.npc .main-sheet {
   column-gap: 1rem;
-  display: grid;
-  grid-template-columns: 1fr min-content;
+  display: flex;
+  height: 100%;
   width: 100%;
+}
+.l5r4.pc .main-sheet > .stats,
+.l5r4.npc .main-sheet > .stats {
+  flex: 1;
+  min-width: 0;
+  overflow-x: auto;
+}
+.l5r4.pc .main-sheet > .sidebar,
+.l5r4.npc .main-sheet > .sidebar {
+  flex-shrink: 0;
+  width: 240px;
 }
 .l5r4.pc input,
 .l5r4.npc input,
@@ -306,11 +317,18 @@ body > * {
   padding: 0 0.5rem;
 }
 .l5r4.pc .actor-img {
+  align-items: center;
   cursor: pointer;
+  display: flex;
   height: 240px;
+  justify-content: center;
   max-width: 240px;
   min-width: 240px;
   width: 240px;
+}
+.l5r4.pc .actor-img img {
+  max-width: 100%;
+  max-height: 100%;
 }
 .l5r4.npc .actor-img {
   cursor: pointer;
@@ -344,25 +362,45 @@ body > * {
 .l5r4.pc .item-list.-advantages .item,
 .l5r4.npc .item-list.-advantages .item,
 .xp-modal-dialog .item-list.-advantages .item,
-.l5r4.pc .item-list.-equipment .item,
-.l5r4.npc .item-list.-equipment .item,
-.xp-modal-dialog .item-list.-equipment .item,
-.l5r4.pc .item-list.-technique .item,
-.l5r4.npc .item-list.-technique .item,
-.xp-modal-dialog .item-list.-technique .item,
-.l5r4.pc .item-list.-kata .item,
-.l5r4.npc .item-list.-kata .item,
-.xp-modal-dialog .item-list.-kata .item,
-.l5r4.pc .item-list.-kiho .item,
-.l5r4.npc .item-list.-kiho .item,
-.xp-modal-dialog .item-list.-kiho .item,
-.l5r4.pc .item-list.-tattoo .item,
-.l5r4.npc .item-list.-tattoo .item,
-.xp-modal-dialog .item-list.-tattoo .item,
 .l5r4.pc .item-list.-attacks .item,
 .l5r4.npc .item-list.-attacks .item,
 .xp-modal-dialog .item-list.-attacks .item {
   grid-template-columns: 1fr 1fr 1fr 1fr 24px;
+}
+.l5r4.pc .item-list.-advantage .item,
+.l5r4.npc .item-list.-advantage .item,
+.xp-modal-dialog .item-list.-advantage .item {
+  grid-template-columns: 1fr 80px 80px 24px;
+}
+.l5r4.pc .item-list.-armor .item,
+.l5r4.npc .item-list.-armor .item,
+.xp-modal-dialog .item-list.-armor .item {
+  grid-template-columns: 1fr 80px 100px 100px 24px;
+}
+.l5r4.pc .item-list.-bio .item,
+.l5r4.npc .item-list.-bio .item,
+.xp-modal-dialog .item-list.-bio .item {
+  grid-template-columns: 1fr 24px;
+}
+.l5r4.pc .item-list.-commonItem .item,
+.l5r4.npc .item-list.-commonItem .item,
+.xp-modal-dialog .item-list.-commonItem .item {
+  grid-template-columns: 1fr 24px;
+}
+.l5r4.pc .item-list.-disadvantage .item,
+.l5r4.npc .item-list.-disadvantage .item,
+.xp-modal-dialog .item-list.-disadvantage .item {
+  grid-template-columns: 1fr 80px 80px 24px;
+}
+.l5r4.pc .item-list.-kata .item,
+.l5r4.npc .item-list.-kata .item,
+.xp-modal-dialog .item-list.-kata .item {
+  grid-template-columns: 1fr 80px 80px 24px;
+}
+.l5r4.pc .item-list.-kiho .item,
+.l5r4.npc .item-list.-kiho .item,
+.xp-modal-dialog .item-list.-kiho .item {
+  grid-template-columns: 1fr 80px 80px 80px 24px;
 }
 .l5r4.pc .item-list.-skill .item,
 .l5r4.npc .item-list.-skill .item,
@@ -372,12 +410,22 @@ body > * {
 .l5r4.pc .item-list.-spell .item,
 .l5r4.npc .item-list.-spell .item,
 .xp-modal-dialog .item-list.-spell .item {
-  grid-template-columns: 1fr 1fr 1fr 1fr 1fr 1fr 24px;
+  grid-template-columns: 1fr 80px 80px 80px 1fr 1fr 24px;
 }
-.l5r4.pc .item-list.-bio .item,
-.l5r4.npc .item-list.-bio .item,
-.xp-modal-dialog .item-list.-bio .item {
-  grid-template-columns: 1fr 24px;
+.l5r4.pc .item-list.-tattoo .item,
+.l5r4.npc .item-list.-tattoo .item,
+.xp-modal-dialog .item-list.-tattoo .item {
+  grid-template-columns: 1fr 1fr 24px;
+}
+.l5r4.pc .item-list.-technique .item,
+.l5r4.npc .item-list.-technique .item,
+.xp-modal-dialog .item-list.-technique .item {
+  grid-template-columns: 1fr 1fr 1fr 24px;
+}
+.l5r4.pc .item-list.-weapon .item,
+.l5r4.npc .item-list.-weapon .item,
+.xp-modal-dialog .item-list.-weapon .item {
+  grid-template-columns: 1fr 80px 80px 150px 24px;
 }
 .l5r4.pc .item-list.-xp .item,
 .l5r4.npc .item-list.-xp .item,

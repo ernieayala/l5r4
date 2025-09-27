@@ -20,9 +20,23 @@
 
   .main-sheet {
     column-gap: 1rem;
-    display: grid;
-    grid-template-columns: 1fr min-content;
+    display: flex;
+    height: 100%;
     width: 100%;
+    // min-height: 0;
+
+    > .stats {
+      // flex: 1 1 1px;
+      flex: 1;
+      min-width: 0;
+      overflow-x: auto;
+    }
+
+    > .sidebar {
+      // overflow: hidden;
+      flex-shrink: 0;
+      width: 240px;
+    }
   }
 
   input,
@@ -216,11 +230,19 @@
 
 .l5r4.pc {
   .actor-img {
+    align-items: center;
     cursor: pointer;
+    display: flex;
     height: 240px;
+    justify-content: center;
     max-width: 240px;
     min-width: 240px;
     width: 240px;
+
+    img {
+      max-width: 100%;
+      max-height: 100%;
+    }
   }
 }
 
