@@ -27,9 +27,15 @@ jobs:
     - name: Extract version from tag
       id: get_version
       run: |
-        VERSION=${GITHUB_REF#refs/tags/v}
+        # Extract version from tag, handling both v1.0.0 and 1.0.0 formats
+        if [[ $GITHUB_REF == refs/tags/v* ]]; then
+          VERSION=${GITHUB_REF#refs/tags/v}
+        else
+          VERSION=${GITHUB_REF#refs/tags/}
+        fi
         echo "VERSION=$VERSION" >> $GITHUB_OUTPUT
         echo "Extracted version: $VERSION"
+        echo "Full ref: $GITHUB_REF"
 
     - name: Update system.json with release info
       run: |
@@ -59,25 +65,13 @@ jobs:
         echo "Created l5r4.zip with contents:"
         unzip -l l5r4.zip
 
-    - name: Upload system.json to release
-      uses: actions/upload-release-asset@v1
-      env:
-        GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+    - name: Upload release assets
+      uses: softprops/action-gh-release@v1
       with:
-        upload_url: ${{ github.event.release.upload_url }}
-        asset_path: ./system.json
-        asset_name: system.json
-        asset_content_type: application/json
-
-    - name: Upload system ZIP to release
-      uses: actions/upload-release-asset@v1
-      env:
-        GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-      with:
-        upload_url: ${{ github.event.release.upload_url }}
-        asset_path: ./l5r4.zip
-        asset_name: l5r4.zip
-        asset_content_type: application/zip
+        files: |
+          system.json
+          l5r4.zip
+        token: ${{ secrets.GITHUB_TOKEN }}
 
     - name: Notify completion
       run: |
