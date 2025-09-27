@@ -106,21 +106,30 @@ Works seamlessly with all Foundry roll commands:
 
 ## 🚀 Installation
 
-### Method 1: Foundry System Browser (Recommended)
-1. Launch Foundry VTT
-2. Navigate to **Game Systems** tab
-3. Click **Install System**
-4. Search for **"Legend of the Five Rings 4th Edition"**
-5. Click **Install**
+### Manual Installation (Current Method)
+Currently, the system must be installed manually by downloading the repository:
 
-### Method 2: Manual Installation
-Use this manifest URL in Foundry's system installer:
-```
-https://github.com/ernieayala/l5r4/releases/latest/download/system.json
-```
+1. **Download** the repository as a ZIP file:
+   - Go to [https://github.com/ernieayala/l5r4](https://github.com/ernieayala/l5r4)
+   - Click the green **"Code"** button
+   - Select **"Download ZIP"**
+2. **Extract** the ZIP file contents
+3. **Rename** the extracted folder from `l5r4-main` to `l5r4`
+4. **Copy** the `l5r4` folder to your Foundry systems directory:
+   - **Windows**: `%localappdata%\FoundryVTT\Data\systems\`
+   - **macOS**: `~/Library/Application Support/FoundryVTT/Data/systems/`
+   - **Linux**: `~/.local/share/FoundryVTT/Data/systems/`
+5. **Restart** Foundry VTT
+6. **Create** a new world and select "Legend of the Five Rings 4th Edition" as the game system
 
-### Method 3: Development Installation
-Clone the repository directly to your Foundry systems directory:
+> **⚠️ Important Notes:**
+> - The system **cannot** be installed through the Foundry VTT System Browser because the name is claimed by the previous version
+> - Manifest URL installation is **not yet available** but is being worked on for future releases
+> - Make sure to rename the folder from `l5r4-main` to `l5r4` or Foundry won't recognize it
+> - Always backup your worlds before installing or updating systems
+
+### Development Installation
+For developers who want to contribute or test the latest changes:
 ```bash
 cd [foundry-data-path]/systems/
 git clone https://github.com/ernieayala/l5r4.git
