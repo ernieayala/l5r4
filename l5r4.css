@@ -112,6 +112,16 @@ body > * {
   height: 100%;
   width: calc(100% - 2px);
 }
+.l5r4.pc .limited-sheet,
+.l5r4.npc .limited-sheet {
+  padding: 1rem;
+}
+.l5r4.pc .limited-sheet > *,
+.l5r4.npc .limited-sheet > * {
+  align-items: center;
+  margin: 0;
+  text-align: center;
+}
 .l5r4.pc input,
 .l5r4.npc input,
 .l5r4.pc select,

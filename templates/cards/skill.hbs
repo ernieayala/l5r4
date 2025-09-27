@@ -1,4 +1,4 @@
-<div class="item -{{type}}{{#if system.description}} -expandable{{/if}}"
+<div class="item -{{type}}{{#if (or system.description system.specialRules)}} -expandable{{/if}}"
   data-item-id="{{coalesce docId this.id _id}}"
   data-document-id="{{coalesce docId this.id _id}}">
   <h4 class="flexrow -gap-sm title">

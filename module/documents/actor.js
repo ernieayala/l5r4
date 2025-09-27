@@ -701,8 +701,8 @@ export default class L5R4Actor extends Actor {
    * **XP Expenditure Categories:**
    * - Traits: 4 × new effective rank per step, with Family/School bonuses
    * - Void: 6 × new rank per step
-   * - Skills: Triangular progression (1+2+3+...+rank), School skills get rank 1 free
-   * - Emphases: 2 XP each (comma/semicolon separated)
+   * - Skills: Triangular progression (1+2+3+...+rank), free ranks reduce cost regardless of School status
+   * - Emphases: 2 XP each (comma/semicolon separated), free emphasis reduces cost independently
    * - Advantages: Direct cost from item
    * - Disadvantages: Grant XP (capped at +10 total)
    * - Kata: Direct cost from item
@@ -768,15 +768,14 @@ export default class L5R4Actor extends Actor {
       }
     }
 
-    // Skills: sum of next-rank costs above baseline; School skill gets first rank free
+    // Skills: sum of next-rank costs above baseline; free ranks reduce XP cost regardless of School status
     let skillsXP = 0;
     for (const it of this.items) {
       if (it.type !== "skill") {
         continue;
       }
       const r = toInt(it.system?.rank);
-      const freeRanks = it.system?.school ? 
-        (it.system?.freeRanks != null ? parseInt(it.system.freeRanks) : 1) : 0;
+      const freeRanks = Math.max(0, toInt(it.system?.freeRanks ?? 0));
       if (r > freeRanks) {
         skillsXP += (r * (r + 1)) / 2 - (freeRanks * (freeRanks + 1)) / 2;
       }
@@ -784,8 +783,7 @@ export default class L5R4Actor extends Actor {
       const emph = String(it.system?.emphasis ?? "").trim();
       if (emph) {
         const emphases = emph.split(/[,;]+/).map(s => s.trim()).filter(Boolean);
-        const freeEmphasis = it.system?.school ? 
-          (it.system?.freeEmphasis != null ? parseInt(it.system.freeEmphasis) : 0) : 0;
+        const freeEmphasis = Math.max(0, toInt(it.system?.freeEmphasis ?? 0));
         const paidEmphases = Math.max(0, emphases.length - freeEmphasis);
         skillsXP += 2 * paidEmphases;
       }

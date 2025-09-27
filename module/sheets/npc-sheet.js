@@ -282,14 +282,14 @@ export default class L5R4NpcSheet extends BaseActorSheet {
    * @param {object} options - Render options
    * @returns {Promise<{form: HTMLElement}>}
    */
-  async _renderHTML(context, options) {
+  async _renderHTML(context, _options) {
     const isLimited = (!game.user.isGM && this.actor.limited);
-    const path = isLimited ? TEMPLATE("actor/limited-npc-sheet.hbs") : TEMPLATE("actor/npc.hbs");
-    let html = await foundry.applications.handlebars.renderTemplate(path, context);
-    html = html.replace(/^\s*<form[^>]*>/i, "").replace(/<\/form>\s*$/i, "");
-    const root = document.createElement("div");
-    root.innerHTML = html;
-    return { form: (root.firstElementChild ?? root) };
+    const path = isLimited ? TEMPLATE("actor/npc-limited.hbs") : TEMPLATE("actor/npc.hbs");
+    const html = await foundry.applications.handlebars.renderTemplate(path, context);
+    const host = document.createElement("div");
+    host.innerHTML = html;
+    const form = host.querySelector("form") || host.firstElementChild || host;
+    return { form };
   }
 
   /**

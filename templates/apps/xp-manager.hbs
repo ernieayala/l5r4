@@ -69,11 +69,11 @@
   </div>
   <div class="flexcol -gap-sm">
     <h3>{{localize "l5r4.character.experience.purchases"}}</h3>
-    <section class="item-list -xp-spent -header">
+    <section class="item-list -xp-spent -header" data-scope="xp-purchases">
       <div class="item">
-        <span>{{localize "l5r4.character.experience.reason"}}</span>
-        <span>{{localize "l5r4.character.experience.xpAmount"}}</span>
-        <span>{{localize "l5r4.ui.common.type"}}</span>
+        <a class="item-sort-by" data-action="item-sort-by" data-sortby="note">{{localize "l5r4.character.experience.reason"}}</a>
+        <a class="item-sort-by" data-action="item-sort-by" data-sortby="cost">{{localize "l5r4.character.experience.xpAmount"}}</a>
+        <a class="item-sort-by" data-action="item-sort-by" data-sortby="type">{{localize "l5r4.ui.common.type"}}</a>
       </div>
     </section>
     <section class="item-list -xp-spent">

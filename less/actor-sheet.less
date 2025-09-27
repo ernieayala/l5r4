@@ -15,7 +15,7 @@
       &.sidebar {
         flex: 0;
       }
-    }
+    } 
   }
 
   .main-sheet {
@@ -24,6 +24,16 @@
     grid-template-columns: 1fr min-content;
     height: 100%;
     width: calc(100% - 2px);
+  }
+
+  .limited-sheet {
+    padding: 1rem;
+    
+    > * {
+      align-items: center;
+      margin: 0;
+      text-align: center;
+    }
   }
 
   input,

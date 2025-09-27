@@ -291,13 +291,14 @@ export default class L5R4PcSheet extends BaseActorSheet {
 
   /**
    * @override
-   * Render HTML for PC sheet using the pc.hbs template.
+   * Render HTML for PC sheet, choosing between limited and full templates.
    * @param {object} context - Template context
    * @param {object} _options - Render options (unused)
    * @returns {Promise<{form: HTMLElement}>}
    */
   async _renderHTML(context, _options) {
-    const path = TEMPLATE("actor/pc.hbs");
+    const isLimited = (!game.user.isGM && this.actor.limited);
+    const path = isLimited ? TEMPLATE("actor/pc-limited.hbs") : TEMPLATE("actor/pc.hbs");
     const html = await foundry.applications.handlebars.renderTemplate(path, context);
     const host = document.createElement("div");
     host.innerHTML = html;
@@ -1314,8 +1315,7 @@ export default class L5R4PcSheet extends BaseActorSheet {
         if (item.type !== "skill") continue;
         
         const rank = parseInt(item.system?.rank) || 0;
-        const freeRanks = item.system?.school ? 
-          (item.system?.freeRanks != null ? parseInt(item.system.freeRanks) : 1) : 0;
+        const freeRanks = Math.max(0, parseInt(item.system?.freeRanks) || 0);
         
         if (rank > freeRanks) {
           // Create individual entries for each rank increase above free ranks
@@ -1337,8 +1337,7 @@ export default class L5R4PcSheet extends BaseActorSheet {
         const emph = String(item.system?.emphasis ?? "").trim();
         if (emph) {
           const emphases = emph.split(/[,;]+/).map(s => s.trim()).filter(Boolean);
-          const freeEmphasis = item.system?.school ? 
-            (item.system?.freeEmphasis != null ? parseInt(item.system.freeEmphasis) : 0) : 0;
+          const freeEmphasis = Math.max(0, parseInt(item.system?.freeEmphasis) || 0);
           const paidEmphases = emphases.slice(freeEmphasis); // Skip free emphasis count
           
           paidEmphases.forEach((emphasis, index) => {

@@ -74,6 +74,7 @@
  */
 
 import { SYS_ID } from "../config.js";
+import { getSortPref, setSortPref, sortWithPref } from "../utils.js";
 
 /**
  * XP Manager Application using ApplicationV2 architecture
@@ -96,7 +97,8 @@ export default class XpManagerApplication extends foundry.applications.api.Handl
     },
     actions: {
       "xp-add-confirm": XpManagerApplication.prototype._onAddXp,
-      "xp-delete-manual": XpManagerApplication.prototype._onDeleteEntry
+      "xp-delete-manual": XpManagerApplication.prototype._onDeleteEntry,
+      "item-sort-by": XpManagerApplication.prototype._onSortClick
     }
   };
 
@@ -133,11 +135,8 @@ export default class XpManagerApplication extends foundry.applications.api.Handl
     const spent = Array.isArray(ns.xpSpent) ? ns.xpSpent : [];
 
     // Format entries for display
-    const formatEntries = (arr) =>
-      arr
-        .slice()
-        .sort((a, b) => (a.ts || 0) - (b.ts || 0))
-        .map(e => {
+    const formatEntries = (arr, applySort = false) => {
+      let entries = arr.slice().map(e => {
           let formattedNote = e.note || "";
           let type = "";
           
@@ -200,12 +199,30 @@ export default class XpManagerApplication extends foundry.applications.api.Handl
             deltaFormatted: (Number.isFinite(+e.delta) ? (e.delta >= 0 ? "+" : "") : "") + (e.delta ?? 0),
             note: formattedNote,
             type: type,
-            delta: e.delta
+            delta: e.delta,
+            ts: e.ts
           };
         });
 
+      // Apply sorting if requested
+      if (applySort) {
+        const sortPref = getSortPref(this.actor.id, "xp-purchases", ["note", "cost", "type"], "note");
+        const columns = {
+          note: (e) => e.note || "",
+          cost: (e) => Math.abs(Number.isFinite(+e.delta) ? +e.delta : 0),
+          type: (e) => e.type || ""
+        };
+        entries = sortWithPref(entries, columns, sortPref);
+      } else {
+        // Default sort by timestamp
+        entries.sort((a, b) => (a.ts || 0) - (b.ts || 0));
+      }
+
+      return entries;
+    };
+
     const manualEntries = formatEntries(manual);
-    const spentEntries = formatEntries(spent);
+    const spentEntries = formatEntries(spent, true);
     const manualTotal = manual.reduce((s, e) => s + (Number.isFinite(+e.delta) ? +e.delta : 0), 0);
     const spentTotal = spent.reduce((s, e) => s + (Number.isFinite(+e.delta) ? +e.delta : 0), 0);
 
@@ -295,6 +312,40 @@ export default class XpManagerApplication extends foundry.applications.api.Handl
   }
 
   /**
+   * Handle sorting XP purchases by column
+   * @param {Event} event - The click event
+   * @param {HTMLElement} target - The clicked element
+   */
+  async _onSortClick(event, target) {
+    event.preventDefault();
+    event.stopPropagation();
+    
+    const header = target.closest('.item-list.-header');
+    const scope = header?.dataset?.scope || "xp-purchases";
+    const key = target.dataset.sortby || "note";
+    const allowed = ["note", "cost", "type"];
+    
+    if (!allowed.includes(key)) return;
+    
+    const cur = getSortPref(this.actor.id, scope, allowed, "note");
+    await setSortPref(this.actor.id, scope, key, { toggleFrom: cur });
+    
+    // Update visual indicators
+    if (header) {
+      header.querySelectorAll('.item-sort-by').forEach(a => {
+        a.classList.toggle('is-active', a === target);
+        if (a !== target) a.removeAttribute('data-dir');
+      });
+      
+      // Set direction indicator on active element
+      const newPref = getSortPref(this.actor.id, scope, allowed, "note");
+      target.setAttribute('data-dir', newPref.dir);
+    }
+    
+    this.render();
+  }
+
+  /**
    * Retroactively update XP entries to fix legacy data format issues.
    * Rebuilds XP tracking data with proper types and formatted notes.
    */
@@ -361,8 +412,7 @@ export default class XpManagerApplication extends foundry.applications.api.Handl
         if (item.type !== "skill") continue;
         
         const rank = parseInt(item.system?.rank) || 0;
-        const freeRanks = item.system?.school ? 
-          (item.system?.freeRanks != null ? parseInt(item.system.freeRanks) : 1) : 0;
+        const freeRanks = Math.max(0, parseInt(item.system?.freeRanks) || 0);
         
         if (rank > freeRanks) {
           // Create individual entries for each rank increase above free ranks
@@ -384,8 +434,7 @@ export default class XpManagerApplication extends foundry.applications.api.Handl
         const emph = String(item.system?.emphasis ?? "").trim();
         if (emph) {
           const emphases = emph.split(/[,;]+/).map(s => s.trim()).filter(Boolean);
-          const freeEmphasis = item.system?.school ? 
-            (item.system?.freeEmphasis != null ? parseInt(item.system.freeEmphasis) : 0) : 0;
+          const freeEmphasis = Math.max(0, parseInt(item.system?.freeEmphasis) || 0);
           const paidEmphases = emphases.slice(freeEmphasis); // Skip free emphasis count
           
           paidEmphases.forEach((emphasis, index) => {

@@ -117,6 +117,10 @@ export async function preloadTemplates() {
     "systems/l5r4/templates/actor/pc.hbs",
     "systems/l5r4/templates/actor/npc.hbs",
     
+    // Limited actor sheet templates - restricted views for non-owners
+    "systems/l5r4/templates/actor/pc-limited.hbs",
+    "systems/l5r4/templates/actor/npc-limited.hbs",
+    
     // Actor partial templates - reusable sheet components
     "systems/l5r4/templates/actor/_partials/_expand.hbs",
     "systems/l5r4/templates/actor/_partials/_stats.hbs",
