@@ -283,6 +283,7 @@ export default class L5R4Item extends Item {
    * - Only logs XP when skill ranks increase
    * - Uses updated school flag to determine if rank 1 is free
    * - Calculates delta cost between old and new total costs
+   * - Resets calculated XP when free ranks/emphasis change (preserves manual adjustments)
    * 
    * **Cost Validation:**
    * - Advantages: Clamps cost to non-negative values
@@ -317,16 +318,18 @@ export default class L5R4Item extends Item {
       const freeEmphasisActuallyChanged = newFreeEmphasis !== undefined && newFreeEmphasis !== oldFreeEmphasis;
       
       if (freeRanksActuallyChanged || freeEmphasisActuallyChanged) {
-        // Force complete XP reset
+        // Reset only calculated XP entries, preserve manual adjustments
         try {
+          // Preserve manual XP adjustments - only reset calculated XP
           await this.actor.setFlag(SYS_ID, "xpSpent", []);
-          await this.actor.setFlag(SYS_ID, "xpManual", []);
+          // DO NOT reset xpManual - preserve manual XP boosts
+          
           // Force actor sheet to recalculate XP on next render
           if (this.actor.sheet?.rendered) {
             this.actor.sheet.render();
           }
         } catch (err) {
-          console.warn("L5R4", "Failed to reset XP data", err);
+          console.warn("L5R4", "Failed to reset calculated XP data", err);
         }
         return; // Skip the normal XP tracking logic below
       }
@@ -347,7 +350,7 @@ export default class L5R4Item extends Item {
         if (rankIncreased) {
           const newSchool = (changes?.system?.school ?? this.system?.school) ? true : false;
           const newFreeRanksForCalc = changes?.system?.freeRanks ?? this.system?.freeRanks;
-          const baseline = newSchool ? (parseInt(newFreeRanksForCalc) || 1) : 0;
+          const baseline = newSchool ? Math.max(0, parseInt(newFreeRanksForCalc) || 0) : 0;
           const tri = (n) => (n * (n + 1)) / 2;
           const oldCost = oldRank > baseline ? tri(oldRank) - tri(baseline) : 0;
           const newCost = newRank > baseline ? tri(newRank) - tri(baseline) : 0;

@@ -1,0 +1,488 @@
+{
+  "l5r4": {
+    "ui": {
+      "mechanics": {
+        "rings": {
+          "ring": "Anel",
+          "fire": "Fogo",
+          "water": "Água",
+          "air": "Ar",
+          "earth": "Terra",
+          "void": "Vazio",
+          "voidPoints": "Pontos de Vazio",
+          "all": "Todos"
+        },
+        "traits": {
+          "sta": "Vigor",
+          "wil": "Força de Vontade",
+          "str": "Força",
+          "per": "Percepção",
+          "ref": "Reflexos",
+          "awa": "Consciência",
+          "agi": "Agilidade",
+          "int": "Inteligência"
+        },
+        "rolls": {
+          "success": "Sucesso",
+          "failure": "Falha",
+          "missed": "Errou",
+          "explodesOn": "Explode em",
+          "withEmphasis": "com Ênfase",
+          "unskilled": "Sem Treinamento",
+          "traitRoll": "Rolagem de Atributo",
+          "ringRoll": "Rolagem de Anel",
+          "skillRoll": "Rolagem de Perícia",
+          "damageRoll": "Rolagem de Dano",
+          "attackRoll": "Rolagem de Ataque",
+          "spellCasting": "Rolagem de Conjuração",
+          "unskilledRoll": "Rolagem sem Treinamento",
+          "emphasis": "Ênfase",
+          "raise": "Aumento",
+          "raises": "Aumentos",
+          "formula": "Fórmula",
+          "result": "Resultado"
+        },
+        "combat": {
+          "attack": "Ataque",
+          "melee": "Corpo a Corpo",
+          "ranged": "À Distância",
+          "multiplier": "Multiplicador",
+          "woundPenalty": "Penalidade por Ferimentos",
+          "armorTnBonus": "Bônus de TN da Armadura",
+          "targeting": {
+            "vs": "vs",
+            "multipleTargets": "alvos - TN não ajustado automaticamente"
+          }
+        },
+        "wounds": {
+          "wounds": "Ferimentos",
+          "armorTn": "TN da Armadura",
+          "armorTnBase": "TN Base da Armadura",
+          "armorReduction": "Redução",
+          "woundLevel": "Nível de Ferimentos",
+          "woundsSuffered": "Ferimentos Sofridos",
+          "maxWounds": "Ferimentos Máximos",
+          "penalty": "Penalidade",
+          "woundHealRate": "Taxa de Cura de Ferimentos",
+          "healRateFormula": "x 2 +",
+          "healthy": "Saudável",
+          "nicked": "Cortado",
+          "grazed": "Arranhado",
+          "hurt": "Machucado",
+          "injured": "Ferido",
+          "crippled": "Aleijado",
+          "down": "Derrubado",
+          "out": "Fora de combate"
+        },
+        "stances": {
+          "pending": "Pendente",
+          "attack": "Postura de Ataque",
+          "fullAttack": "Postura de Ataque Total",
+          "defense": "Postura de Defesa",
+          "fullDefense": "Postura de Defesa Total",
+          "center": "Postura de Centro",
+          "fullDefenseDescription": "Faça uma rolagem de Defesa/Reflexos. Some metade do resultado (arredondando para cima) ao seu TN de Armadura pela duração desta postura.",
+          "cannotAttackDefense": "Não é possível atacar em Postura de Defesa",
+          "fullAttackBonus": "Postura de Ataque Total: +2k1"
+        }
+      },
+      "common": {
+        "roll": "Rolar",
+        "cancel": "Cancelar",
+        "ok": "OK",
+        "none": "Nenhum",
+        "keep": "Manter",
+        "raise": "Aumento",
+        "init": "Iniciativa",
+        "bonus": "Bônus",
+        "mod": "Modificador",
+        "rate": "Taxa",
+        "current": "Atual",
+        "total": "Total",
+        "left": "restante",
+        "close": "Fechar",
+        "toChat": "Para o Chat",
+        "effect": "Efeito",
+        "simple": "Simples",
+        "complex": "Complexa",
+        "free": "Livre",
+        "action": "Ação",
+        "edit": "Editar",
+        "delete": "Excluir",
+        "name": "Nome",
+        "description": "Descrição",
+        "notes": "Notas",
+        "activeEffects": "Efeitos Ativos",
+        "new": "Novo",
+        "disabled": "desativado",
+        "rank": "Posto",
+        "clan": "Clã",
+        "school": "Escola",
+        "xp": "Pontos de Experiência",
+        "insight": "Discernimento",
+        "skill": "Perícia",
+        "damage": "Dano",
+        "type": "Tipo",
+        "ring": "Anel",
+        "mastery": "Maestria",
+        "tn": "TN",
+        "cost": "Custo"
+      },
+      "sheets": {
+        "bio": "Antecedentes",
+        "skill": "Perícia",
+        "skills": "Perícias",
+        "addSkill": "Adicionar Perícia",
+        "weapon": "Arma",
+        "weapons": "Armas",
+        "addWeapon": "Adicionar Arma",
+        "armor": "Armadura",
+        "addArmor": "Adicionar Armadura",
+        "item": "Item",
+        "items": "Itens",
+        "addItem": "Adicionar Item",
+        "notes": "Notas",
+        "spell": "Feitiço",
+        "spells": "Feitiços",
+        "addSpell": "Adicionar Feitiço",
+        "technique": "Técnica",
+        "techniques": "Técnicas",
+        "addTechnique": "Adicionar Técnica",
+        "armors": "Armaduras",
+        "advantage": "Vantagem",
+        "advantages": "Vantagens",
+        "addAdvantage": "Adicionar Vantagem",
+        "disadvantage": "Desvantagem",
+        "disadvantages": "Desvantagens",
+        "addDisadvantage": "Adicionar Desvantagem",
+        "kata": "Kata",
+        "katas": "Katas",
+        "addKata": "Adicionar Kata",
+        "kiho": "Kiho",
+        "kihos": "Kihos",
+        "addKiho": "Adicionar Kiho",
+        "tattoo": "Tatuagem",
+        "tattoos": "Tatuagens",
+        "addTattoo": "Adicionar Tatuagem",
+        "addTechSpell": "Adicionar Técnica/Feitiço",
+        "addAdvDis": "Adicionar Vantagem/Desvantagem",
+        "addEquipment": "Adicionar Equipamento",
+        "equipment": "Equipamento",
+        "abilities": "Aptidões",
+        "character": "Personagem",
+        "rulesSummary": "Resumo das Regras",
+        "description": "Descrição",
+        "woundLevels": "Níveis de Ferimentos",
+        "spellSlots": "Espaços de Feitiço",
+        "demands": "Exigências",
+        "traits": "Atributos",
+        "itemSheetTitle": "Ficha de Item",
+        "xpModal": "Experiência"
+      },
+      "notifications": {
+        "actorNotFound": "Ator não encontrado para rolagem de dano",
+        "noPermissionDamage": "Você não tem permissão para rolar dano para este ator",
+        "noValidWeapon": "Nenhuma arma válida encontrada para a rolagem de ataque",
+        "fullDefenseRollFailed": "Falha na rolagem de Defesa Total. Por favor, role manualmente.",
+        "invalidRingForSpell": "Anel inválido para espaço de feitiço: {ring}",
+        "noActorForVoid": "Nenhum ator disponível para gastar pontos de Vazio",
+        "deleteEffect": "Falha ao excluir efeito.",
+        "schoolRankZero": "Você não pode lançar um feitiço com Posto de Escola reduzido a zero",
+        "noSpellSlots": "Você ficou sem espaços de feitiço para este anel"
+      },
+      "chat": {
+        "traitRoll": "Rolagem de Atributo {trait}",
+        "ringRoll": "Rolagem de Anel {ring}",
+        "skillRoll": "Rolagem de Perícia {skill}",
+        "damageRoll": "Rolagem de Dano {weapon}",
+        "rollName": "Rolagem {roll}"
+      },
+      "hints": {
+        "leftRightToAdjust": "Esquerda e Direita para ajustar",
+        "leftClickPlusRightClickMinus": "Shift+Clique Esq: +1, Shift+Clique Dir: -1",
+        "shiftClickRankPoints": "Shift+Clique: ±0,1, Shift+Ctrl+Clique: ±1,0"
+      }
+    },
+    "character": {
+      "skills": {
+        "properties": {
+          "type": "Tipo",
+          "trait": "Atributo",
+          "emphasis": "Ênfases",
+          "school": "Perícia de Escola",
+          "mastery3": "Maestria Posto 3",
+          "mastery5": "Maestria Posto 5",
+          "mastery7": "Maestria Posto 7",
+          "insightbonus": "Bônus de Discernimento"
+        },
+        "names": {
+          "acting": "Atuação",
+          "animalHandling": "Manejo de Animais",
+          "artisan": "Artesão",
+          "athletics": "Atletismo",
+          "battle": "Batalha",
+          "calligraphy": "Caligrafia",
+          "chainWeapons": "Armas de Corrente",
+          "commerce": "Comércio",
+          "craft": "Ofício",
+          "courtier": "Cortesão",
+          "defense": "Defesa",
+          "divination": "Adivinhação",
+          "engineering": "Engenharia",
+          "etiquette": "Etiqueta",
+          "forgery": "Falsificação",
+          "games": "Jogos",
+          "heavyWeapons": "Armas Pesadas",
+          "horsemanship": "Equitação",
+          "hunting": "Caça",
+          "iaijutsu": "Iaijutsu",
+          "investigation": "Investigação",
+          "jiujutsu": "Jiujutsu",
+          "kenjutsu": "Kenjutsu",
+          "knives": "Facas",
+          "kyujutsu": "Kyujutsu",
+          "lore": "Erudição",
+          "medicine": "Medicina",
+          "meditation": "Meditação",
+          "ninjutsu": "Ninjutsu",
+          "perform": "Representar",
+          "polearms": "Armas de Haste",
+          "sailing": "Navegação",
+          "sincerity": "Sinceridade",
+          "sleightOfHand": "Prestidigitação",
+          "spears": "Lanças",
+          "spellcraft": "Feitiçaria",
+          "staves": "Bastões",
+          "stealth": "Furtividade",
+          "teaCeremony": "Cerimônia do Chá",
+          "temptation": "Tentação",
+          "warFan": "Leque de Guerra",
+          "weapons": "Armas"
+        }
+      },
+      "skillTypes": {
+        "high": "Alta",
+        "bugei": "Bugei",
+        "merch": "Mercantil",
+        "low": "Baixa"
+      },
+      "advantages": {
+        "physical": "Físico",
+        "mental": "Mental",
+        "social": "Social",
+        "material": "Material",
+        "spiritual": "Espiritual",
+        "ancestor": "Ancestral"
+      },
+      "ranks": {
+        "honorRank": "Honra",
+        "honorPoints": "Pontos de Honra",
+        "gloryRank": "Glória",
+        "gloryPoints": "Pontos de Glória",
+        "statusRank": "Posto de Status",
+        "statusPoints": "Pontos de Status",
+        "shadowRank": "Corrupção das Terras Sombrias",
+        "shadowPoints": "Pontos de Sombra",
+        "insightRank": "Posto de Discernimento",
+        "insightPoints": "Pontos de Discernimento"
+      },
+      "experience": {
+        "xpAmount": "Quantidade",
+        "note": "Nota",
+        "reason": "Motivo",
+        "adjustExperience": "Ajustar Experiência",
+        "experienceSummary": "Resumo da Experiência",
+        "usedTotal": "Usados / Total",
+        "poolChanges": "Mudanças na Reserva",
+        "when": "Quando",
+        "none": "Sem entradas",
+        "purchases": "Aquisições",
+        "xpLog": "Registro de XP",
+        "traitChange": "{label} {from}→{to}",
+        "voidChange": "Vazio {from}→{to}",
+        "skillCreate": "{name} 0→{rank}",
+        "skillChange": "{name} {from}→{to}",
+        "breakdown": {
+          "base": "Base",
+          "disadvantagesGrant": "Desvantagens",
+          "cap10": "(teto 10)",
+          "manualAdjustments": "Ajustes manuais",
+          "traits": "Atributos",
+          "void": "Vazio",
+          "skills": "Perícias",
+          "advantages": "Vantagens",
+          "kata": "Kata",
+          "kiho": "Kiho"
+        },
+        "fallbackLabels": {
+          "advantage": "Vantagem",
+          "disadvantage": "Desvantagem",
+          "traitIncrease": "Aumento de Atributo",
+          "voidIncrease": "Aumento de Vazio",
+          "skillCreated": "Perícia Criada",
+          "skillIncreased": "Perícia Aumentada"
+        }
+      }
+    },
+    "equipment": {
+      "weapons": {
+        "attackType": "Tipo de Ataque",
+        "size": "Tamanho",
+        "damageKeep": "Dano/Manter",
+        "range": "Alcance",
+        "arrow": "Flecha",
+        "typeWeapon": "Arma",
+        "typeBow": "Arco",
+        "associatedSkill": "Perícia Associada",
+        "fallback": "Padrão",
+        "skillExample": {
+          "bow": "Kyujutsu",
+          "weapon": "Kenjutsu"
+        },
+        "arrows": {
+          "armor": "Perfurante",
+          "flesh": "Corta-Carne",
+          "humming": "Zumbidora",
+          "rope": "Corta-Corda",
+          "willow": "Folha de Salgueiro"
+        },
+        "sizes": {
+          "small": "Pequeno",
+          "medium": "Médio",
+          "large": "Grande"
+        }
+      },
+      "armor": {
+        "reduction": "Redução",
+        "equipped": "Equipado"
+      },
+      "general": {}
+    },
+    "magic": {
+      "spells": {
+        "range": "Alcance",
+        "aoe": "Área de Efeito",
+        "duration": "Duração",
+        "raises": "Aumentos",
+        "affinity": "Afinidade",
+        "deficiency": "Deficiência",
+        "maho": "Mahō",
+        "useSpellSlot": "Usar espaço de feitiço",
+        "voidSlot": "Usar espaço de feitiço de Vazio"
+      },
+      "kiho": {
+        "internal": "Interno",
+        "karmic": "Kármico",
+        "martial": "Marcial",
+        "mystic": "Místico"
+      },
+      "techniques": {
+        "single": "Técnica",
+        "plural": "Técnicas"
+      }
+    },
+    "system": {
+      "migration": {
+        "itemTypeChangeInfo": "L5R4: migrado(s) {count} Item(ns) de \"commonItem\" para \"item\".",
+        "itemTypeChangeError": "L5R4: Falha na migração do tipo de item. Veja o console para detalhes.",
+        "iconsUpdated": "Migração L5R4: Atualizado(s) {count} caminho(s) de imagem do mundo.",
+        "compendiumIconsUpdated": "Migração L5R4 (Compêndios): Atualizado(s) {count} caminho(s) de imagem."
+      },
+      "errors": {
+        "deleteEffect": "Falha ao excluir efeito."
+      }
+    },
+    "world": {
+      "wealth": {
+        "koku": "Koku",
+        "bu": "Bu",
+        "zeni": "Zeni"
+      }
+    }
+  },
+  "SETTINGS": {
+    "showTraitRollOptions": {
+      "name": "Perguntar por padrão as opções de Rolagens de Atributo.",
+      "label": "Segure Shift para alternar."
+    },
+    "showSpellRollOptions": {
+      "name": "Perguntar por padrão se a Rolagem de Anel é um feitiço.",
+      "label": "Segure Shift para alternar."
+    },
+    "showSkillRollOptions": {
+      "name": "Perguntar por padrão as opções de Rolagens de Perícia e de Dano.",
+      "label": "Segure Shift para alternar."
+    },
+    "allowNpcVoidPoints": {
+      "name": "Exibir caixa de Pontos de Vazio para rolagens de PNJ.",
+      "label": "PNJs normalmente não possuem Vazio."
+    },
+    "useLtTenDiceRule": {
+      "name": "Usar a Regra dos Dez Dados modificada de Little Truths.",
+      "label": "Se houver um número ímpar de dados lançados em excesso e menos de 10 dados mantidos, some 2 ao total para que o dado \"extra\" traga benefício."
+    },
+    "calculateRank": {
+      "name": "Calcular automaticamente o Posto de Discernimento",
+      "label": "O Posto de Discernimento é atualizado automaticamente com base no total de Pontos de Discernimento"
+    },
+    "allowArmorStacking": {
+      "name": "Permitir empilhamento de armaduras",
+      "label": "Múltiplas peças de \"armadura\" podem ser empilhadas (para representar bônus, etc.)"
+    },
+    "showWeaponRollOptions": {
+      "name": "Perguntar por padrão as opções de Rolagem de Arma.",
+      "label": "Segure Shift para alternar."
+    },
+    "LtException": {
+      "name": "Aplicar exceção de Little Truths",
+      "label": "Quando os dados mantidos forem reduzidos abaixo de 10 por conversão, some 2."
+    },
+    "runMigration": {
+      "name": "Executar migrações na inicialização",
+      "label": "Se ativado, migrações pendentes serão executadas no próximo carregamento do mundo. Desative para ignorar ao solucionar problemas."
+    },
+    "lastMigratedVersion": {
+      "name": "Última versão migrada",
+      "label": "Interno. Não alterar."
+    },
+    "forceMigration": {
+      "name": "Forçar migração na inicialização",
+      "label": "Força todas as migrações a serem executadas no próximo carregamento do mundo, independentemente da versão. Reinicia automaticamente após concluir."
+    }
+  },
+  "EFFECT": {
+    "blinded": "Cego",
+    "dazed": "Atordoado",
+    "dead": "Morto",
+    "entangled": "Enredado",
+    "fasting": "Jejum",
+    "fatigued": "Fatigado",
+    "grappled": "Agarrado",
+    "mounted": "Montado/Altura",
+    "prone": "Caído",
+    "stunned": "Atônito"
+  },
+  "TYPES": {
+    "Actor": {
+      "pc": "PJ",
+      "npc": "PNJ"
+    },
+    "Item": {
+      "advantage": "Vantagem",
+      "armor": "Armadura",
+      "bow": "Arco",
+      "clan": "Clã",
+      "commonItem": "Item",
+      "disadvantage": "Desvantagem",
+      "family": "Família",
+      "kata": "Kata",
+      "kiho": "Kiho",
+      "school": "Escola",
+      "skill": "Perícia",
+      "spell": "Feitiço",
+      "tattoo": "Tatuagem",
+      "technique": "Técnica",
+      "weapon": "Arma"
+    }
+  }
+}

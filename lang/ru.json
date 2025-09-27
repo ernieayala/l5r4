@@ -1,0 +1,488 @@
+{
+  "l5r4": {
+    "ui": {
+      "mechanics": {
+        "rings": {
+          "ring": "Кольцо",
+          "fire": "Огонь",
+          "water": "Вода",
+          "air": "Воздух",
+          "earth": "Земля",
+          "void": "Пустота",
+          "voidPoints": "Очки Пустоты",
+          "all": "Все"
+        },
+        "traits": {
+          "sta": "Выносливость",
+          "wil": "Сила Воли",
+          "str": "Сила",
+          "per": "Восприятие",
+          "ref": "Рефлексы",
+          "awa": "Осознанность",
+          "agi": "Ловкость",
+          "int": "Интеллект"
+        },
+        "rolls": {
+          "success": "Успех",
+          "failure": "Провал",
+          "missed": "Промах",
+          "explodesOn": "Взрывается на",
+          "withEmphasis": "с Акцентом",
+          "unskilled": "Без Навыка",
+          "traitRoll": "Бросок Характристики",
+          "ringRoll": "Бросок Кольца",
+          "skillRoll": "Бросок Навыка",
+          "damageRoll": "Бросок Урона",
+          "attackRoll": "Бросок Атаки",
+          "spellCasting": "Бросок Заклинания",
+          "unskilledRoll": "Бросок без навыка",
+          "emphasis": "Акцент",
+          "raise": "Повышение",
+          "raises": "Повышения",
+          "formula": "Формула",
+          "result": "Результат"
+        },
+        "combat": {
+          "attack": "Атака",
+          "melee": "Рукопашный",
+          "ranged": "Дальний",
+          "multiplier": "Множитель",
+          "woundPenalty": "Штраф от Ран",
+          "armorTnBonus": "Бонус TN Брони",
+          "targeting": {
+            "vs": "против",
+            "multipleTargets": "цели — TN не устанавливается автоматически"
+          }
+        },
+        "wounds": {
+          "wounds": "Раны",
+          "armorTn": "TN Брони",
+          "armorTnBase": "Базовый TN Брони",
+          "armorReduction": "Поглощение",
+          "woundLevel": "Уровень Ран",
+          "woundsSuffered": "Полученные Раны",
+          "maxWounds": "Макс. Ран",
+          "penalty": "Штраф",
+          "woundHealRate": "Скорость Исцеления Ран",
+          "healRateFormula": "x 2 +",
+          "healthy": "Здоров",
+          "nicked": "Царапина",
+          "grazed": "Едва Задет",
+          "hurt": "Ранен",
+          "injured": "Тяжело Ранен",
+          "crippled": "Инвалид",
+          "down": "Сбит с Ног",
+          "out": "Выведен из боя"
+        },
+        "stances": {
+          "pending": "В ожидании",
+          "attack": "Стойка Атаки",
+          "fullAttack": "Стойка Полной Атаки",
+          "defense": "Стойка Обороны",
+          "fullDefense": "Стойка Полной Обороны",
+          "center": "Стойка Центра",
+          "fullDefenseDescription": "Сделайте бросок Защиты/Рефлексов. Добавьте половину результата (округляя вверх) к вашему TN Брони на время этой стойки.",
+          "cannotAttackDefense": "Нельзя атаковать в Стойке Обороны",
+          "fullAttackBonus": "Стойка Полной Атаки: +2k1"
+        }
+      },
+      "common": {
+        "roll": "Бросок",
+        "cancel": "Отмена",
+        "ok": "OK",
+        "none": "Нет",
+        "keep": "Оставить",
+        "raise": "Повышение",
+        "init": "Инициатива",
+        "bonus": "Бонус",
+        "mod": "Модификатор",
+        "rate": "Скорость",
+        "current": "Текущий",
+        "total": "Всего",
+        "left": "осталось",
+        "close": "Закрыть",
+        "toChat": "В Чат",
+        "effect": "Эффект",
+        "simple": "Простое",
+        "complex": "Сложное",
+        "free": "Свободное",
+        "action": "Действие",
+        "edit": "Править",
+        "delete": "Удалить",
+        "name": "Имя",
+        "description": "Описание",
+        "notes": "Заметки",
+        "activeEffects": "Активные Эффекты",
+        "new": "Новый",
+        "disabled": "отключено",
+        "rank": "Ранг",
+        "clan": "Клан",
+        "school": "Школа",
+        "xp": "Очки Опытa",
+        "insight": "Понимание",
+        "skill": "Навык",
+        "damage": "Урон",
+        "type": "Тип",
+        "ring": "Кольцо",
+        "mastery": "Мастерство",
+        "tn": "TN",
+        "cost": "Стоимость"
+      },
+      "sheets": {
+        "bio": "Предыстория",
+        "skill": "Навык",
+        "skills": "Навыки",
+        "addSkill": "Добавить Навык",
+        "weapon": "Оружие",
+        "weapons": "Оружие",
+        "addWeapon": "Добавить Оружие",
+        "armor": "Броня",
+        "addArmor": "Добавить Броню",
+        "item": "Предмет",
+        "items": "Предметы",
+        "addItem": "Добавить Предмет",
+        "notes": "Заметки",
+        "spell": "Заклинание",
+        "spells": "Заклинания",
+        "addSpell": "Добавить Заклинание",
+        "technique": "Техника",
+        "techniques": "Техники",
+        "addTechnique": "Добавить Технику",
+        "armors": "Брони",
+        "advantage": "Преимущество",
+        "advantages": "Преимущества",
+        "addAdvantage": "Добавить Преимущество",
+        "disadvantage": "Недостаток",
+        "disadvantages": "Недостатки",
+        "addDisadvantage": "Добавить Недостаток",
+        "kata": "Ката",
+        "katas": "Каты",
+        "addKata": "Добавить Ката",
+        "kiho": "Кихо",
+        "kihos": "Кихо",
+        "addKiho": "Добавить Кихо",
+        "tattoo": "Татуировка",
+        "tattoos": "Татуировки",
+        "addTattoo": "Добавить Татуировку",
+        "addTechSpell": "Добавить Технику/Заклинание",
+        "addAdvDis": "Добавить Преимущество/Недостаток",
+        "addEquipment": "Добавить Снаряжение",
+        "equipment": "Снаряжение",
+        "abilities": "Способности",
+        "character": "Персонаж",
+        "rulesSummary": "Краткие Правила",
+        "description": "Описание",
+        "woundLevels": "Уровни Ран",
+        "spellSlots": "Ячейки Заклинаний",
+        "demands": "Требования",
+        "traits": "Характеристики",
+        "itemSheetTitle": "Лист Предмета",
+        "xpModal": "Опыт"
+      },
+      "notifications": {
+        "actorNotFound": "Актер не найден для броска урона",
+        "noPermissionDamage": "У вас нет прав бросать урон для этого актера",
+        "noValidWeapon": "Не найдено подходящее оружие для броска атаки",
+        "fullDefenseRollFailed": "Не удалось выполнить бросок Полной Обороны. Пожалуйста, бросьте вручную.",
+        "invalidRingForSpell": "Неверное кольцо для ячейки заклинаний: {ring}",
+        "noActorForVoid": "Нет доступного актера для траты очков Пустоты",
+        "deleteEffect": "Не удалось удалить эффект.",
+        "schoolRankZero": "Нельзя колдовать при Ранге Школы, сниженном до нуля",
+        "noSpellSlots": "У вас закончились ячейки заклинаний для этого кольца"
+      },
+      "chat": {
+        "traitRoll": "Бросок Характеристики {trait}",
+        "ringRoll": "Бросок Кольца {ring}",
+        "skillRoll": "Бросок Навыка {skill}",
+        "damageRoll": "Бросок Урона {weapon}",
+        "rollName": "Бросок {roll}"
+      },
+      "hints": {
+        "leftRightToAdjust": "Влево и вправо для настройки",
+        "leftClickPlusRightClickMinus": "Shift+ЛКМ: +1, Shift+ПКМ: -1",
+        "shiftClickRankPoints": "Shift+Клик: ±0.1, Shift+Ctrl+Клик: ±1.0"
+      }
+    },
+    "character": {
+      "skills": {
+        "properties": {
+          "type": "Тип",
+          "trait": "Характеристика",
+          "emphasis": "Акценты",
+          "school": "Школьный Навык",
+          "mastery3": "Мастерство Ранг 3",
+          "mastery5": "Мастерство Ранг 5",
+          "mastery7": "Мастерство Ранг 7",
+          "insightbonus": "Бонус Понимания"
+        },
+        "names": {
+          "acting": "Актерское Мастерство",
+          "animalHandling": "Обращение с Животными",
+          "artisan": "Ремесленник",
+          "athletics": "Атлетика",
+          "battle": "Битва",
+          "calligraphy": "Каллиграфия",
+          "chainWeapons": "Цепное Оружие",
+          "commerce": "Коммерция",
+          "craft": "Рукоделие",
+          "courtier": "Придворный",
+          "defense": "Оборона",
+          "divination": "Гадание",
+          "engineering": "Инженерия",
+          "etiquette": "Этикет",
+          "forgery": "Подделка",
+          "games": "Игры",
+          "heavyWeapons": "Тяжелое Оружие",
+          "horsemanship": "Верховая Езда",
+          "hunting": "Охота",
+          "iaijutsu": "Иайдзюцу",
+          "investigation": "Расследование",
+          "jiujutsu": "Дзюдзюцу",
+          "kenjutsu": "Кэндзюцу",
+          "knives": "Ножи",
+          "kyujutsu": "Кюдзюцу",
+          "lore": "Знания",
+          "medicine": "Медицина",
+          "meditation": "Медитация",
+          "ninjutsu": "Ниндзюцу",
+          "perform": "Исполнение",
+          "polearms": "Древковое Оружие",
+          "sailing": "Навигация",
+          "sincerity": "Искренность",
+          "sleightOfHand": "Ловкость Рук",
+          "spears": "Копья",
+          "spellcraft": "Магия",
+          "staves": "Посохи",
+          "stealth": "Скрытность",
+          "teaCeremony": "Чайная Церемония",
+          "temptation": "Искушение",
+          "warFan": "Боевой Веер",
+          "weapons": "Оружие"
+        }
+      },
+      "skillTypes": {
+        "high": "Высокий",
+        "bugei": "Будзэй",
+        "merch": "Торговый",
+        "low": "Низкий"
+      },
+      "advantages": {
+        "physical": "Физический",
+        "mental": "Ментальный",
+        "social": "Социальный",
+        "material": "Материальный",
+        "spiritual": "Духовный",
+        "ancestor": "Предок"
+      },
+      "ranks": {
+        "honorRank": "Честь",
+        "honorPoints": "Очки Чести",
+        "gloryRank": "Слава",
+        "gloryPoints": "Очки Славы",
+        "statusRank": "Статус",
+        "statusPoints": "Очки Статуса",
+        "shadowRank": "Порча Земель Тени",
+        "shadowPoints": "Очки Тени",
+        "insightRank": "Ранг Понимания",
+        "insightPoints": "Очки Понимания"
+      },
+      "experience": {
+        "xpAmount": "Сумма",
+        "note": "Примечание",
+        "reason": "Причина",
+        "adjustExperience": "Изменить Опыт",
+        "experienceSummary": "Сводка Опытa",
+        "usedTotal": "Использовано / Всего",
+        "poolChanges": "Изменения Резерва",
+        "when": "Когда",
+        "none": "Нет записей",
+        "purchases": "Покупки",
+        "xpLog": "Журнал XP",
+        "traitChange": "{label} {from}→{to}",
+        "voidChange": "Пустота {from}→{to}",
+        "skillCreate": "{name} 0→{rank}",
+        "skillChange": "{name} {from}→{to}",
+        "breakdown": {
+          "base": "База",
+          "disadvantagesGrant": "Недостатки",
+          "cap10": "(предел 10)",
+          "manualAdjustments": "Ручные корректировки",
+          "traits": "Характеристики",
+          "void": "Пустота",
+          "skills": "Навыки",
+          "advantages": "Преимущества",
+          "kata": "Ката",
+          "kiho": "Кихо"
+        },
+        "fallbackLabels": {
+          "advantage": "Преимущество",
+          "disadvantage": "Недостаток",
+          "traitIncrease": "Повышение Характеристики",
+          "voidIncrease": "Повышение Пустоты",
+          "skillCreated": "Навык Создан",
+          "skillIncreased": "Навык Повышен"
+        }
+      }
+    },
+    "equipment": {
+      "weapons": {
+        "attackType": "Тип Атаки",
+        "size": "Размер",
+        "damageKeep": "Урон/Оставить",
+        "range": "Дистанция",
+        "arrow": "Стрела",
+        "typeWeapon": "Оружие",
+        "typeBow": "Лук",
+        "associatedSkill": "Связанный Навык",
+        "fallback": "По умолчанию",
+        "skillExample": {
+          "bow": "Кюдзюцу",
+          "weapon": "Кэндзюцу"
+        },
+        "arrows": {
+          "armor": "Бронебойная",
+          "flesh": "Мясорубка",
+          "humming": "Жужжащая",
+          "rope": "Резак веревок",
+          "willow": "Ивовый Лист"
+        },
+        "sizes": {
+          "small": "Маленький",
+          "medium": "Средний",
+          "large": "Большой"
+        }
+      },
+      "armor": {
+        "reduction": "Поглощение",
+        "equipped": "Надето"
+      },
+      "general": {}
+    },
+    "magic": {
+      "spells": {
+        "range": "Дистанция",
+        "aoe": "Область Эффекта",
+        "duration": "Длительность",
+        "raises": "Повышения",
+        "affinity": "Аффинитет",
+        "deficiency": "Дефицит",
+        "maho": "Махо",
+        "useSpellSlot": "Использовать ячейку заклинания",
+        "voidSlot": "Использовать ячейку Пустоты"
+      },
+      "kiho": {
+        "internal": "Внутреннее",
+        "karmic": "Кармическое",
+        "martial": "Боевые",
+        "mystic": "Мистическое"
+      },
+      "techniques": {
+        "single": "Техника",
+        "plural": "Техники"
+      }
+    },
+    "system": {
+      "migration": {
+        "itemTypeChangeInfo": "L5R4: мигрировано {count} Предмет(ов) из \"commonItem\" в \"item\".",
+        "itemTypeChangeError": "L5R4: Не удалось мигрировать тип предмета. См. консоль для подробностей.",
+        "iconsUpdated": "Миграция L5R4: обновлено {count} путей изображений мира.",
+        "compendiumIconsUpdated": "Миграция L5R4 (Компендиумы): обновлено {count} путей изображений."
+      },
+      "errors": {
+        "deleteEffect": "Не удалось удалить эффект."
+      }
+    },
+    "world": {
+      "wealth": {
+        "koku": "Коку",
+        "bu": "Бу",
+        "zeni": "Дзэни"
+      }
+    }
+  },
+  "SETTINGS": {
+    "showTraitRollOptions": {
+      "name": "По умолчанию спрашивать параметры Бросков Характеристик.",
+      "label": "Удерживайте Shift для переключения."
+    },
+    "showSpellRollOptions": {
+      "name": "По умолчанию спрашивать, является ли Бросок Кольца заклинанием.",
+      "label": "Удерживайте Shift для переключения."
+    },
+    "showSkillRollOptions": {
+      "name": "По умолчанию спрашивать параметры Бросков Навыков и Урона.",
+      "label": "Удерживайте Shift для переключения."
+    },
+    "allowNpcVoidPoints": {
+      "name": "Показывать чекбокс Очков Пустоты для бросков НИП.",
+      "label": "НИП обычно не имеют Пустоты."
+    },
+    "useLtTenDiceRule": {
+      "name": "Использовать модифицированное Правило Десяти Костей из Little Truths.",
+      "label": "Если количество избыточно брошенных костей нечетно и удерживается меньше 10, добавьте 2 к результату, чтобы \"лишняя\" кость дала пользу."
+    },
+    "calculateRank": {
+      "name": "Автоматически рассчитывать Ранг Понимания",
+      "label": "Ранг Понимания обновляется автоматически на основе общего числа Очков Понимания"
+    },
+    "allowArmorStacking": {
+      "name": "Разрешить суммирование брони",
+      "label": "Несколько предметов \"брони\" могут суммироваться (для представления баффов и т. п.)"
+    },
+    "showWeaponRollOptions": {
+      "name": "По умолчанию спрашивать параметры Бросков Оружия.",
+      "label": "Удерживайте Shift для переключения."
+    },
+    "LtException": {
+      "name": "Применить исключение Little Truths",
+      "label": "Когда удерживаемые кости уменьшены ниже 10 преобразованием, добавьте 2."
+    },
+    "runMigration": {
+      "name": "Запускать миграции при старте",
+      "label": "Если включено, ожидающие миграции данных будут выполнены при следующей загрузке мира. Отключите, чтобы пропустить при отладке."
+    },
+    "lastMigratedVersion": {
+      "name": "Последняя мигрированная версия",
+      "label": "Внутреннее. Не изменять."
+    },
+    "forceMigration": {
+      "name": "Принудительно мигрировать при старте",
+      "label": "Принуждает все миграции выполниться при следующей загрузке мира вне зависимости от версии. Автоматически сбрасывается после завершения."
+    }
+  },
+  "EFFECT": {
+    "blinded": "Ослеплен",
+    "dazed": "Оцепенел",
+    "dead": "Мертв",
+    "entangled": "Опутан",
+    "fasting": "Пост",
+    "fatigued": "Утомлен",
+    "grappled": "Схвачен",
+    "mounted": "Верхом/Выше",
+    "prone": "Лежит",
+    "stunned": "Оглушен"
+  },
+  "TYPES": {
+    "Actor": {
+      "pc": "ИП",
+      "npc": "НИП"
+    },
+    "Item": {
+      "advantage": "Преимущество",
+      "armor": "Броня",
+      "bow": "Лук",
+      "clan": "Клан",
+      "commonItem": "Предмет",
+      "disadvantage": "Недостаток",
+      "family": "Семья",
+      "kata": "Ката",
+      "kiho": "Кихо",
+      "school": "Школа",
+      "skill": "Навык",
+      "spell": "Заклинание",
+      "tattoo": "Татуировка",
+      "technique": "Техника",
+      "weapon": "Оружие"
+    }
+  }
+}

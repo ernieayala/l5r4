@@ -1,0 +1,488 @@
+{
+  "l5r4": {
+    "ui": {
+      "mechanics": {
+        "rings": {
+          "ring": "Ring",
+          "fire": "Feuer",
+          "water": "Wasser",
+          "air": "Luft",
+          "earth": "Erde",
+          "void": "Leere",
+          "voidPoints": "Leere-Punkte",
+          "all": "Alle"
+        },
+        "traits": {
+          "sta": "Konstitution",
+          "wil": "Willenskraft",
+          "str": "Stärke",
+          "per": "Wahrnehmung",
+          "ref": "Reflexe",
+          "awa": "Bewusstsein",
+          "agi": "Gewandtheit",
+          "int": "Intelligenz"
+        },
+        "rolls": {
+          "success": "Erfolg",
+          "failure": "Fehlschlag",
+          "missed": "Verfehlt",
+          "explodesOn": "Explodiert bei",
+          "withEmphasis": "mit Schwerpunkt",
+          "unskilled": "Ungelernt",
+          "traitRoll": "Eigenschaftswurf",
+          "ringRoll": "Ringwurf",
+          "skillRoll": "Fertigkeitswurf",
+          "damageRoll": "Schadenswurf",
+          "attackRoll": "Angriffswurf",
+          "spellCasting": "Zauberwurf",
+          "unskilledRoll": "Ungelernter Wurf",
+          "emphasis": "Schwerpunkt",
+          "raise": "Erhöhung",
+          "raises": "Erhöhungen",
+          "formula": "Formel",
+          "result": "Ergebnis"
+        },
+        "combat": {
+          "attack": "Angriff",
+          "melee": "Nahkampf",
+          "ranged": "Fernkampf",
+          "multiplier": "Multiplikator",
+          "woundPenalty": "Wundabzug",
+          "armorTnBonus": "Rüstungs-TN-Bonus",
+          "targeting": {
+            "vs": "gg.",
+            "multipleTargets": "Ziele - TN nicht automatisch gesetzt"
+          }
+        },
+        "wounds": {
+          "wounds": "Wunden",
+          "armorTn": "Rüstungs-TN",
+          "armorTnBase": "Rüstungs-TN Basis",
+          "armorReduction": "Reduktion",
+          "woundLevel": "Wundstufe",
+          "woundsSuffered": "Erlittene Wunden",
+          "maxWounds": "Maximale Wunden",
+          "penalty": "Abzug",
+          "woundHealRate": "Heilrate der Wunden",
+          "healRateFormula": "x 2 +",
+          "healthy": "Gesund",
+          "nicked": "Angeritzt",
+          "grazed": "Gekratzt",
+          "hurt": "Verletzt",
+          "injured": "Verwundet",
+          "crippled": "Verstümmelt",
+          "down": "Niedergeschlagen",
+          "out": "Kampfunfähig"
+        },
+        "stances": {
+          "pending": "Ausstehend",
+          "attack": "Angriffshaltung",
+          "fullAttack": "Volle Angriffshaltung",
+          "defense": "Verteidigungshaltung",
+          "fullDefense": "Volle Verteidigungshaltung",
+          "center": "Zentrierhaltung",
+          "fullDefenseDescription": "Führe einen Verteidigungs-/Reflexe-Wurf aus. Addiere die Hälfte des Ergebnisses (aufgerundet) zu deinem Rüstungs-TN für die Dauer dieser Haltung.",
+          "cannotAttackDefense": "Angreifen in Verteidigungshaltung nicht möglich",
+          "fullAttackBonus": "Volle Angriffshaltung: +2k1"
+        }
+      },
+      "common": {
+        "roll": "Würfeln",
+        "cancel": "Abbrechen",
+        "ok": "OK",
+        "none": "Keiner",
+        "keep": "Behalten",
+        "raise": "Erhöhung",
+        "init": "Initiative",
+        "bonus": "Bonus",
+        "mod": "Modifikator",
+        "rate": "Rate",
+        "current": "Aktuell",
+        "total": "Gesamt",
+        "left": "verbleibend",
+        "close": "Schließen",
+        "toChat": "In den Chat",
+        "effect": "Effekt",
+        "simple": "Einfach",
+        "complex": "Komplex",
+        "free": "Frei",
+        "action": "Aktion",
+        "edit": "Bearbeiten",
+        "delete": "Löschen",
+        "name": "Name",
+        "description": "Beschreibung",
+        "notes": "Notizen",
+        "activeEffects": "Aktive Effekte",
+        "new": "Neu",
+        "disabled": "deaktiviert",
+        "rank": "Rang",
+        "clan": "Clan",
+        "school": "Schule",
+        "xp": "Erfahrungspunkte",
+        "insight": "Einsicht",
+        "skill": "Fertigkeit",
+        "damage": "Schaden",
+        "type": "Typ",
+        "ring": "Ring",
+        "mastery": "Meisterschaft",
+        "tn": "TN",
+        "cost": "Kosten"
+      },
+      "sheets": {
+        "bio": "Hintergrund",
+        "skill": "Fertigkeit",
+        "skills": "Fertigkeiten",
+        "addSkill": "Fertigkeit hinzufügen",
+        "weapon": "Waffe",
+        "weapons": "Waffen",
+        "addWeapon": "Waffe hinzufügen",
+        "armor": "Rüstung",
+        "addArmor": "Rüstung hinzufügen",
+        "item": "Gegenstand",
+        "items": "Gegenstände",
+        "addItem": "Gegenstand hinzufügen",
+        "notes": "Notizen",
+        "spell": "Zauber",
+        "spells": "Zauber",
+        "addSpell": "Zauber hinzufügen",
+        "technique": "Technik",
+        "techniques": "Techniken",
+        "addTechnique": "Technik hinzufügen",
+        "armors": "Rüstungen",
+        "advantage": "Vorteil",
+        "advantages": "Vorteile",
+        "addAdvantage": "Vorteil hinzufügen",
+        "disadvantage": "Nachteil",
+        "disadvantages": "Nachteile",
+        "addDisadvantage": "Nachteil hinzufügen",
+        "kata": "Kata",
+        "katas": "Katas",
+        "addKata": "Kata hinzufügen",
+        "kiho": "Kiho",
+        "kihos": "Kihos",
+        "addKiho": "Kiho hinzufügen",
+        "tattoo": "Tätowierung",
+        "tattoos": "Tätowierungen",
+        "addTattoo": "Tätowierung hinzufügen",
+        "addTechSpell": "Technik/Zauber hinzufügen",
+        "addAdvDis": "Vorteil/Nachteil hinzufügen",
+        "addEquipment": "Ausrüstung hinzufügen",
+        "equipment": "Ausrüstung",
+        "abilities": "Fähigkeiten",
+        "character": "Charakter",
+        "rulesSummary": "Regelzusammenfassung",
+        "description": "Beschreibung",
+        "woundLevels": "Wundstufen",
+        "spellSlots": "Zauberplätze",
+        "demands": "Anforderungen",
+        "traits": "Eigenschaften",
+        "itemSheetTitle": "Gegenstandsblatt",
+        "xpModal": "Erfahrung"
+      },
+      "notifications": {
+        "actorNotFound": "Akteur für Schadenswurf nicht gefunden",
+        "noPermissionDamage": "Sie haben keine Berechtigung, den Schaden für diesen Akteur zu würfeln",
+        "noValidWeapon": "Keine gültige Waffe für den Angriffswurf gefunden",
+        "fullDefenseRollFailed": "Wurf für Volle Verteidigung fehlgeschlagen. Bitte manuell würfeln.",
+        "invalidRingForSpell": "Ungültiger Ring für Zauberplatz: {ring}",
+        "noActorForVoid": "Kein Akteur verfügbar für Leere-Punkte",
+        "deleteEffect": "Effekt konnte nicht gelöscht werden.",
+        "schoolRankZero": "Du kannst keinen Zauber wirken, wenn der Schulrang auf null reduziert ist",
+        "noSpellSlots": "Keine Zauberplätze mehr für diesen Ring"
+      },
+      "chat": {
+        "traitRoll": "Eigenschaftswurf {trait}",
+        "ringRoll": "Ringwurf {ring}",
+        "skillRoll": "Fertigkeitswurf {skill}",
+        "damageRoll": "Schadenswurf {weapon}",
+        "rollName": "Wurf {roll}"
+      },
+      "hints": {
+        "leftRightToAdjust": "Links und Rechts zum Anpassen",
+        "leftClickPlusRightClickMinus": "Umschalt+Linksklick: +1, Umschalt+Rechtsklick: -1",
+        "shiftClickRankPoints": "Umschalt+Klick: ±0,1, Umschalt+Strg+Klick: ±1,0"
+      }
+    },
+    "character": {
+      "skills": {
+        "properties": {
+          "type": "Typ",
+          "trait": "Eigenschaft",
+          "emphasis": "Schwerpunkte",
+          "school": "Schul-Fertigkeit",
+          "mastery3": "Meisterschaft Rang 3",
+          "mastery5": "Meisterschaft Rang 5",
+          "mastery7": "Meisterschaft Rang 7",
+          "insightbonus": "Einsichtsbonus"
+        },
+        "names": {
+          "acting": "Schauspiel",
+          "animalHandling": "Tierführung",
+          "artisan": "Handwerker",
+          "athletics": "Athletik",
+          "battle": "Schlacht",
+          "calligraphy": "Kalligraphie",
+          "chainWeapons": "Kettenwaffen",
+          "commerce": "Handel",
+          "craft": "Handwerk",
+          "courtier": "Höfling",
+          "defense": "Verteidigung",
+          "divination": "Wahrsagerei",
+          "engineering": "Ingenieurskunst",
+          "etiquette": "Etikette",
+          "forgery": "Fälschung",
+          "games": "Spiele",
+          "heavyWeapons": "Schwere Waffen",
+          "horsemanship": "Reiten",
+          "hunting": "Jagd",
+          "iaijutsu": "Iaijutsu",
+          "investigation": "Ermittlung",
+          "jiujutsu": "Jiujutsu",
+          "kenjutsu": "Kenjutsu",
+          "knives": "Messer",
+          "kyujutsu": "Kyujutsu",
+          "lore": "Wissen",
+          "medicine": "Medizin",
+          "meditation": "Meditation",
+          "ninjutsu": "Ninjutsu",
+          "perform": "Vortragen",
+          "polearms": "Stangenwaffen",
+          "sailing": "Seefahrt",
+          "sincerity": "Aufrichtigkeit",
+          "sleightOfHand": "Fingerfertigkeit",
+          "spears": "Speere",
+          "spellcraft": "Zauberkunde",
+          "staves": "Stäbe",
+          "stealth": "Heimlichkeit",
+          "teaCeremony": "Teezeremonie",
+          "temptation": "Versuchung",
+          "warFan": "Kampf-Fächer",
+          "weapons": "Waffen"
+        }
+      },
+      "skillTypes": {
+        "high": "Hoch",
+        "bugei": "Bugei",
+        "merch": "Händler",
+        "low": "Niedrig"
+      },
+      "advantages": {
+        "physical": "Physisch",
+        "mental": "Mental",
+        "social": "Sozial",
+        "material": "Materiell",
+        "spiritual": "Spirituell",
+        "ancestor": "Ahn"
+      },
+      "ranks": {
+        "honorRank": "Ehre",
+        "honorPoints": "Ehre-Punkte",
+        "gloryRank": "Ruhm",
+        "gloryPoints": "Ruhm-Punkte",
+        "statusRank": "Statusrang",
+        "statusPoints": "Status-Punkte",
+        "shadowRank": "Schattenlande-Makel",
+        "shadowPoints": "Schatten-Punkte",
+        "insightRank": "Einsichts-Rang",
+        "insightPoints": "Einsichts-Punkte"
+      },
+      "experience": {
+        "xpAmount": "Betrag",
+        "note": "Notiz",
+        "reason": "Grund",
+        "adjustExperience": "Erfahrung anpassen",
+        "experienceSummary": "Erfahrungsübersicht",
+        "usedTotal": "Verbraucht / Gesamt",
+        "poolChanges": "Änderungen im Pool",
+        "when": "Wann",
+        "none": "Keine Einträge",
+        "purchases": "Käufe",
+        "xpLog": "EP-Protokoll",
+        "traitChange": "{label} {from}→{to}",
+        "voidChange": "Leere {from}→{to}",
+        "skillCreate": "{name} 0→{rank}",
+        "skillChange": "{name} {from}→{to}",
+        "breakdown": {
+          "base": "Basis",
+          "disadvantagesGrant": "Nachteile",
+          "cap10": "(Deckel 10)",
+          "manualAdjustments": "Manuelle Anpassungen",
+          "traits": "Eigenschaften",
+          "void": "Leere",
+          "skills": "Fertigkeiten",
+          "advantages": "Vorteile",
+          "kata": "Kata",
+          "kiho": "Kiho"
+        },
+        "fallbackLabels": {
+          "advantage": "Vorteil",
+          "disadvantage": "Nachteil",
+          "traitIncrease": "Eigenschaftssteigerung",
+          "voidIncrease": "Leere-Steigerung",
+          "skillCreated": "Fertigkeit erstellt",
+          "skillIncreased": "Fertigkeit gesteigert"
+        }
+      }
+    },
+    "equipment": {
+      "weapons": {
+        "attackType": "Angriffsart",
+        "size": "Größe",
+        "damageKeep": "Schaden/Behalten",
+        "range": "Reichweite",
+        "arrow": "Pfeil",
+        "typeWeapon": "Waffe",
+        "typeBow": "Bogen",
+        "associatedSkill": "Zugehörige Fertigkeit",
+        "fallback": "Fallback",
+        "skillExample": {
+          "bow": "Kyujutsu",
+          "weapon": "Kenjutsu"
+        },
+        "arrows": {
+          "armor": "Rüstungsbrecher",
+          "flesh": "Fleischschneider",
+          "humming": "Summpfeil",
+          "rope": "Seilschneider",
+          "willow": "Weidenblatt"
+        },
+        "sizes": {
+          "small": "Klein",
+          "medium": "Mittel",
+          "large": "Groß"
+        }
+      },
+      "armor": {
+        "reduction": "Reduktion",
+        "equipped": "Ausgerüstet"
+      },
+      "general": {}
+    },
+    "magic": {
+      "spells": {
+        "range": "Reichweite",
+        "aoe": "Effektbereich",
+        "duration": "Dauer",
+        "raises": "Erhöhungen",
+        "affinity": "Affinität",
+        "deficiency": "Schwäche",
+        "maho": "Mahō",
+        "useSpellSlot": "Zauberplatz verwenden",
+        "voidSlot": "Leere-Zauberplatz verwenden"
+      },
+      "kiho": {
+        "internal": "Intern",
+        "karmic": "Karmisch",
+        "martial": "Kämpferisch",
+        "mystic": "Mystisch"
+      },
+      "techniques": {
+        "single": "Technik",
+        "plural": "Techniken"
+      }
+    },
+    "system": {
+      "migration": {
+        "itemTypeChangeInfo": "L5R4: {count} Gegenstand/Gegenstände von \"commonItem\" zu \"item\" migriert.",
+        "itemTypeChangeError": "L5R4: Gegenstandstyp-Migration fehlgeschlagen. Siehe Konsole für Details.",
+        "iconsUpdated": "L5R4 Migration: {count} Welt-Bildpfad/Pfade aktualisiert.",
+        "compendiumIconsUpdated": "L5R4 Migration (Kompendien): {count} Bildpfad/Pfade aktualisiert."
+      },
+      "errors": {
+        "deleteEffect": "Effekt konnte nicht gelöscht werden."
+      }
+    },
+    "world": {
+      "wealth": {
+        "koku": "Koku",
+        "bu": "Bu",
+        "zeni": "Zeni"
+      }
+    }
+  },
+  "SETTINGS": {
+    "showTraitRollOptions": {
+      "name": "Standardmäßig nach Optionen für Eigenschaftswürfe fragen.",
+      "label": "Umschalttaste halten zum Umschalten."
+    },
+    "showSpellRollOptions": {
+      "name": "Standardmäßig fragen, ob der Ringwurf ein Zauber ist.",
+      "label": "Umschalttaste halten zum Umschalten."
+    },
+    "showSkillRollOptions": {
+      "name": "Standardmäßig nach Optionen für Fertigkeits- und Schadenswürfe fragen.",
+      "label": "Umschalttaste halten zum Umschalten."
+    },
+    "allowNpcVoidPoints": {
+      "name": "Leere-Punkte-Kontrollkästchen für NSC-Würfe anzeigen.",
+      "label": "NSC haben normalerweise keine Leere."
+    },
+    "useLtTenDiceRule": {
+      "name": "Die modifizierte Zehn-Würfel-Regel von Little Truths verwenden.",
+      "label": "Wenn es eine ungerade Anzahl an überschüssig geworfenen Würfeln gibt und weniger als 10 behaltene Würfel, addiere 2 zum Gesamtergebnis, damit der \"extra\" Würfel einen Nutzen bringt."
+    },
+    "calculateRank": {
+      "name": "Einsichts-Rang automatisch berechnen",
+      "label": "Der Einsichts-Rang wird automatisch basierend auf den gesamten Einsichtspunkten aktualisiert"
+    },
+    "allowArmorStacking": {
+      "name": "Rüstungsstapelung erlauben",
+      "label": "Mehrere Stücke \"Rüstung\" können gestapelt werden (um Buffs etc. darzustellen)"
+    },
+    "showWeaponRollOptions": {
+      "name": "Standardmäßig nach Optionen für Waffenwürfe fragen.",
+      "label": "Umschalttaste halten zum Umschalten."
+    },
+    "LtException": {
+      "name": "Little Truths-Ausnahme anwenden",
+      "label": "Wenn die behaltenen Würfel durch Umwandlung unter 10 fallen, addiere 2."
+    },
+    "runMigration": {
+      "name": "Migrationen beim Start ausführen",
+      "label": "Wenn aktiviert, werden ausstehende Datenmigrationen beim nächsten Laden der Welt ausgeführt. Deaktivieren, um sie zur Fehlerbehebung zu überspringen."
+    },
+    "lastMigratedVersion": {
+      "name": "Zuletzt migrierte Version",
+      "label": "Intern. Nicht ändern."
+    },
+    "forceMigration": {
+      "name": "Migration beim Start erzwingen",
+      "label": "Erzwingt, dass alle Migrationen beim nächsten Laden der Welt ausgeführt werden, unabhängig von der Version. Setzt sich nach Abschluss automatisch zurück."
+    }
+  },
+  "EFFECT": {
+    "blinded": "Geblendet",
+    "dazed": "Benommen",
+    "dead": "Tot",
+    "entangled": "Verheddert",
+    "fasting": "Fasten",
+    "fatigued": "Erschöpft",
+    "grappled": "Gehalten",
+    "mounted": "Beritten/Erhöht",
+    "prone": "Liegend",
+    "stunned": "Betäubt"
+  },
+  "TYPES": {
+    "Actor": {
+      "pc": "SC",
+      "npc": "NSC"
+    },
+    "Item": {
+      "advantage": "Vorteil",
+      "armor": "Rüstung",
+      "bow": "Bogen",
+      "clan": "Clan",
+      "commonItem": "Gegenstand",
+      "disadvantage": "Nachteil",
+      "family": "Familie",
+      "kata": "Kata",
+      "kiho": "Kiho",
+      "school": "Schule",
+      "skill": "Fertigkeit",
+      "spell": "Zauber",
+      "tattoo": "Tätowierung",
+      "technique": "Technik",
+      "weapon": "Waffe"
+    }
+  }
+}

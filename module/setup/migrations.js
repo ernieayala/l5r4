@@ -310,6 +310,59 @@ async function normalizeItems(docs, label) {
 }
 
 /**
+ * Migrate skill items to ensure proper default values for freeRanks and freeEmphasis.
+ * Sets freeRanks and freeEmphasis to 0 for skills that don't have these fields set,
+ * fixing legacy skills that may have incorrect default values.
+ * 
+ * This migration addresses the issue where skills created before the School checkbox
+ * refactor might have incorrect default values or missing fields entirely.
+ * 
+ * @param {Array<Item>} docs - Items to migrate (will filter for skills)
+ * @param {string} label - Descriptive label for logging
+ * @returns {Promise<void>}
+ */
+async function migrateSkillDefaults(docs, label) {
+  const skillItems = docs.filter(doc => doc.type === "skill");
+  if (skillItems.length === 0) return;
+
+  console.log(`L5R4 | Migrating ${skillItems.length} skill items to ensure proper defaults (${label})`);
+  
+  let migratedCount = 0;
+  
+  for (const item of skillItems) {
+    try {
+      const updates = {};
+      let needsUpdate = false;
+      
+      // Check freeRanks - should default to 0
+      const currentFreeRanks = item.system?.freeRanks;
+      if (currentFreeRanks === undefined || currentFreeRanks === null) {
+        updates["system.freeRanks"] = 0;
+        needsUpdate = true;
+      }
+      
+      // Check freeEmphasis - should default to 0  
+      const currentFreeEmphasis = item.system?.freeEmphasis;
+      if (currentFreeEmphasis === undefined || currentFreeEmphasis === null) {
+        updates["system.freeEmphasis"] = 0;
+        needsUpdate = true;
+      }
+      
+      if (needsUpdate) {
+        await item.update(updates, { diff: true, render: false });
+        migratedCount++;
+      }
+    } catch (err) {
+      console.warn("L5R4", "Failed to migrate skill defaults", { id: item.id, name: item.name, err });
+    }
+  }
+  
+  if (migratedCount > 0) {
+    console.log(`L5R4 | Successfully migrated ${migratedCount} skill items with default values (${label})`);
+  }
+}
+
+/**
  * Clean up duplicate legacy fields that may persist after partial migrations.
  * Removes old snake_case fields when corresponding camelCase fields exist.
  *
@@ -568,6 +621,8 @@ export async function runMigrations(fromVersion, toVersion) {
   await applySchemaMapToDocs(game.items.contents, "world-items");
   // Convert bow items to weapons with isBow flag
   await migrateBowsToWeapons(game.items.contents, "world-bow-migration");
+  // Migrate skill items to ensure proper default values
+  await migrateSkillDefaults(game.items.contents, "world-skill-defaults");
   // Normalize world items after schema changes
   await normalizeItems(game.items.contents, "world-items-norm");
   // Clean up duplicate legacy fields after migration
@@ -578,6 +633,7 @@ export async function runMigrations(fromVersion, toVersion) {
     if (actor.items.size > 0) {
       await applySchemaMapToDocs(actor.items.contents, `actor-items:${actor.id}`);
       await migrateBowsToWeapons(actor.items.contents, `actor-bow-migration:${actor.id}`);
+      await migrateSkillDefaults(actor.items.contents, `actor-skill-defaults:${actor.id}`);
       await normalizeItems(actor.items.contents, `actor-items-norm:${actor.id}`);
     }
   }
@@ -598,6 +654,7 @@ export async function runMigrations(fromVersion, toVersion) {
       const docs = await pack.getDocuments();
       await applySchemaMapToDocs(docs, `pack:${pack.collection}`);
       await migrateBowsToWeapons(docs, `pack-bow-migration:${pack.collection}`);
+      await migrateSkillDefaults(docs, `pack-skill-defaults:${pack.collection}`);
       await normalizeItems(docs, `pack-norm:${pack.collection}`);
 
       // Also migrate items embedded in compendium actors
@@ -606,6 +663,7 @@ export async function runMigrations(fromVersion, toVersion) {
           if (actor.items.size > 0) {
             await applySchemaMapToDocs(actor.items.contents, `compendium-actor-items:${pack.collection}:${actor.id}`);
             await migrateBowsToWeapons(actor.items.contents, `compendium-actor-bow-migration:${pack.collection}:${actor.id}`);
+            await migrateSkillDefaults(actor.items.contents, `compendium-actor-skill-defaults:${pack.collection}:${actor.id}`);
             await normalizeItems(actor.items.contents, `compendium-actor-items-norm:${pack.collection}:${actor.id}`);
           }
         }

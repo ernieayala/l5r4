@@ -4,7 +4,7 @@
       {{flavor}}
       {{#if targetData}}
         {{#if targetData.single}}
-          {{targetData.vsText}} {{targetData.name}} ({{targetData.armorTnText}} {{targetData.armorTN}})
+          {{targetData.vsText}} {{targetData.name}}
         {{else if targetData.multiple}}
           ({{targetData.count}} {{targetData.multipleText}})
         {{/if}}
@@ -14,8 +14,12 @@
   {{{roll}}}
   {{#if tnResult}}
     <div class="l5r4-tn-result">
-      {{tnResult.outcome}} {{localize "l5r4.ui.mechanics.combat.targeting.vs"}} {{localize "l5r4.ui.common.tn"}} {{tnResult.effective}}
-      {{#if tnResult.raises}} ({{localize "l5r4.magic.spells.raises"}}: {{tnResult.raises}}){{/if}}
+      {{#if (eq tnResult.outcome (localize "l5r4.ui.mechanics.rolls.missed"))}}
+        {{tnResult.outcome}}
+      {{else}}
+        {{tnResult.outcome}} {{localize "l5r4.ui.mechanics.combat.targeting.vs"}} {{localize "l5r4.ui.common.tn"}} {{tnResult.effective}}
+        {{#if tnResult.raises}} ({{localize "l5r4.magic.spells.raises"}}: {{tnResult.raises}}){{/if}}
+      {{/if}}
     </div>
   {{/if}}
   {{#if weaponData}}

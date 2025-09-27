@@ -25,6 +25,7 @@
         "rolls": {
           "success": "Success",
           "failure": "Failure",
+          "missed": "Missed",
           "explodesOn": "Explodes On",
           "withEmphasis": "with Emphasis",
           "unskilled": "Unskilled",

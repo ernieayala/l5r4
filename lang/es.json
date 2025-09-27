@@ -1,0 +1,488 @@
+{
+  "l5r4": {
+    "ui": {
+      "mechanics": {
+        "rings": {
+          "ring": "Anillo",
+          "fire": "Fuego",
+          "water": "Agua",
+          "air": "Aire",
+          "earth": "Tierra",
+          "void": "Vacío",
+          "voidPoints": "Puntos de Vacío",
+          "all": "Todos"
+        },
+        "traits": {
+          "sta": "Resistencia",
+          "wil": "Voluntad",
+          "str": "Fuerza",
+          "per": "Percepción",
+          "ref": "Reflejos",
+          "awa": "Conciencia",
+          "agi": "Agilidad",
+          "int": "Inteligencia"
+        },
+        "rolls": {
+          "success": "Éxito",
+          "failure": "Fracaso",
+          "missed": "Fallado",
+          "explodesOn": "Explota en",
+          "withEmphasis": "con Énfasis",
+          "unskilled": "Sin Entrenamiento",
+          "traitRoll": "Tirada de Rasgo",
+          "ringRoll": "Tirada de Anillo",
+          "skillRoll": "Tirada de Habilidad",
+          "damageRoll": "Tirada de Daño",
+          "attackRoll": "Tirada de Ataque",
+          "spellCasting": "Tirada de Conjuro",
+          "unskilledRoll": "Tirada sin Entrenamiento",
+          "emphasis": "Énfasis",
+          "raise": "Aumento",
+          "raises": "Aumentos",
+          "formula": "Fórmula",
+          "result": "Resultado"
+        },
+        "combat": {
+          "attack": "Ataque",
+          "melee": "Cuerpo a Cuerpo",
+          "ranged": "A Distancia",
+          "multiplier": "Multiplicador",
+          "woundPenalty": "Penalizador de Heridas",
+          "armorTnBonus": "Bonificación TN de Armadura",
+          "targeting": {
+            "vs": "vs",
+            "multipleTargets": "objetivos - TN no ajustado automáticamente"
+          }
+        },
+        "wounds": {
+          "wounds": "Heridas",
+          "armorTn": "TN de Armadura",
+          "armorTnBase": "TN Base de Armadura",
+          "armorReduction": "Reducción",
+          "woundLevel": "Nivel de Heridas",
+          "woundsSuffered": "Heridas Sufridas",
+          "maxWounds": "Heridas Máximas",
+          "penalty": "Penalización",
+          "woundHealRate": "Ritmo de Curación de Heridas",
+          "healRateFormula": "x 2 +",
+          "healthy": "Sano",
+          "nicked": "Cortado",
+          "grazed": "Rozado",
+          "hurt": "Herido",
+          "injured": "Lesionado",
+          "crippled": "Lisiado",
+          "down": "Derribado",
+          "out": "Fuera de combate"
+        },
+        "stances": {
+          "pending": "Pendiente",
+          "attack": "Actitud de Ataque",
+          "fullAttack": "Actitud de Ataque Total",
+          "defense": "Actitud de Defensa",
+          "fullDefense": "Actitud de Defensa Total",
+          "center": "Actitud de Centro",
+          "fullDefenseDescription": "Haz una tirada de Defensa/Reflejos. Suma la mitad del resultado (redondeando hacia arriba) a tu TN de Armadura durante la duración de esta actitud.",
+          "cannotAttackDefense": "No puedes atacar mientras estás en Actitud de Defensa",
+          "fullAttackBonus": "Actitud de Ataque Total: +2k1"
+        }
+      },
+      "common": {
+        "roll": "Tirar",
+        "cancel": "Cancelar",
+        "ok": "OK",
+        "none": "Ninguno",
+        "keep": "Guardar",
+        "raise": "Aumento",
+        "init": "Iniciativa",
+        "bonus": "Bonificación",
+        "mod": "Modificador",
+        "rate": "Ritmo",
+        "current": "Actual",
+        "total": "Total",
+        "left": "restante",
+        "close": "Cerrar",
+        "toChat": "Al Chat",
+        "effect": "Efecto",
+        "simple": "Simple",
+        "complex": "Compleja",
+        "free": "Libre",
+        "action": "Acción",
+        "edit": "Editar",
+        "delete": "Eliminar",
+        "name": "Nombre",
+        "description": "Descripción",
+        "notes": "Notas",
+        "activeEffects": "Efectos Activos",
+        "new": "Nuevo",
+        "disabled": "deshabilitado",
+        "rank": "Rango",
+        "clan": "Clan",
+        "school": "Escuela",
+        "xp": "Puntos de Experiencia",
+        "insight": "Perspicacia",
+        "skill": "Habilidad",
+        "damage": "Daño",
+        "type": "Tipo",
+        "ring": "Anillo",
+        "mastery": "Maestría",
+        "tn": "TN",
+        "cost": "Coste"
+      },
+      "sheets": {
+        "bio": "Trasfondo",
+        "skill": "Habilidad",
+        "skills": "Habilidades",
+        "addSkill": "Añadir Habilidad",
+        "weapon": "Arma",
+        "weapons": "Armas",
+        "addWeapon": "Añadir Arma",
+        "armor": "Armadura",
+        "addArmor": "Añadir Armadura",
+        "item": "Objeto",
+        "items": "Objetos",
+        "addItem": "Añadir Objeto",
+        "notes": "Notas",
+        "spell": "Hechizo",
+        "spells": "Hechizos",
+        "addSpell": "Añadir Hechizo",
+        "technique": "Técnica",
+        "techniques": "Técnicas",
+        "addTechnique": "Añadir Técnica",
+        "armors": "Armaduras",
+        "advantage": "Ventaja",
+        "advantages": "Ventajas",
+        "addAdvantage": "Añadir Ventaja",
+        "disadvantage": "Desventaja",
+        "disadvantages": "Desventajas",
+        "addDisadvantage": "Añadir Desventaja",
+        "kata": "Kata",
+        "katas": "Katas",
+        "addKata": "Añadir Kata",
+        "kiho": "Kiho",
+        "kihos": "Kihos",
+        "addKiho": "Añadir Kiho",
+        "tattoo": "Tatuaje",
+        "tattoos": "Tatuajes",
+        "addTattoo": "Añadir Tatuaje",
+        "addTechSpell": "Añadir Técnica/Hechizo",
+        "addAdvDis": "Añadir Ventaja/Desventaja",
+        "addEquipment": "Añadir Equipo",
+        "equipment": "Equipo",
+        "abilities": "Habilidades",
+        "character": "Personaje",
+        "rulesSummary": "Resumen de Reglas",
+        "description": "Descripción",
+        "woundLevels": "Niveles de Heridas",
+        "spellSlots": "Espacios de Hechizo",
+        "demands": "Exigencias",
+        "traits": "Rasgos",
+        "itemSheetTitle": "Hoja de Objeto",
+        "xpModal": "Experiencia"
+      },
+      "notifications": {
+        "actorNotFound": "Actor no encontrado para tirada de daño",
+        "noPermissionDamage": "No tienes permiso para tirar daño para este actor",
+        "noValidWeapon": "No se encontró un arma válida para la tirada de ataque",
+        "fullDefenseRollFailed": "Falló la tirada de Defensa Total. Por favor, tira manualmente.",
+        "invalidRingForSpell": "Anillo inválido para el espacio de hechizo: {ring}",
+        "noActorForVoid": "No hay actor disponible para gastar puntos de Vacío",
+        "deleteEffect": "No se pudo eliminar el efecto.",
+        "schoolRankZero": "No puedes lanzar un hechizo con Rango de Escuela reducido a cero",
+        "noSpellSlots": "Te has quedado sin espacios de hechizo para este anillo"
+      },
+      "chat": {
+        "traitRoll": "Tirada de Rasgo {trait}",
+        "ringRoll": "Tirada de Anillo {ring}",
+        "skillRoll": "Tirada de Habilidad {skill}",
+        "damageRoll": "Tirada de Daño {weapon}",
+        "rollName": "Tirada {roll}"
+      },
+      "hints": {
+        "leftRightToAdjust": "Izquierda y Derecha para ajustar",
+        "leftClickPlusRightClickMinus": "Mayús+Clic Izq: +1, Mayús+Clic Der: -1",
+        "shiftClickRankPoints": "Mayús+Clic: ±0.1, Mayús+Ctrl+Clic: ±1.0"
+      }
+    },
+    "character": {
+      "skills": {
+        "properties": {
+          "type": "Tipo",
+          "trait": "Rasgo",
+          "emphasis": "Énfasis",
+          "school": "Habilidad de Escuela",
+          "mastery3": "Maestría de Rango 3",
+          "mastery5": "Maestría de Rango 5",
+          "mastery7": "Maestría de Rango 7",
+          "insightbonus": "Bonificación de Perspicacia"
+        },
+        "names": {
+          "acting": "Interpretación",
+          "animalHandling": "Manejo de Animales",
+          "artisan": "Artesano",
+          "athletics": "Atletismo",
+          "battle": "Batalla",
+          "calligraphy": "Caligrafía",
+          "chainWeapons": "Armas de Cadena",
+          "commerce": "Comercio",
+          "craft": "Artesanía",
+          "courtier": "Cortesano",
+          "defense": "Defensa",
+          "divination": "Adivinación",
+          "engineering": "Ingeniería",
+          "etiquette": "Etiqueta",
+          "forgery": "Falsificación",
+          "games": "Juegos",
+          "heavyWeapons": "Armas Pesadas",
+          "horsemanship": "Equitación",
+          "hunting": "Caza",
+          "iaijutsu": "Iaijutsu",
+          "investigation": "Investigación",
+          "jiujutsu": "Jiujutsu",
+          "kenjutsu": "Kenjutsu",
+          "knives": "Cuchillos",
+          "kyujutsu": "Kyujutsu",
+          "lore": "Saber",
+          "medicine": "Medicina",
+          "meditation": "Meditación",
+          "ninjutsu": "Ninjutsu",
+          "perform": "Interpretar",
+          "polearms": "Armas de Asta",
+          "sailing": "Navegación",
+          "sincerity": "Sinceridad",
+          "sleightOfHand": "Juego de Manos",
+          "spears": "Lanzas",
+          "spellcraft": "Hechicería",
+          "staves": "Bastones",
+          "stealth": "Sigilo",
+          "teaCeremony": "Ceremonia del Té",
+          "temptation": "Tentación",
+          "warFan": "Abanico de Guerra",
+          "weapons": "Armas"
+        }
+      },
+      "skillTypes": {
+        "high": "Alta",
+        "bugei": "Bugei",
+        "merch": "Mercantil",
+        "low": "Baja"
+      },
+      "advantages": {
+        "physical": "Físico",
+        "mental": "Mental",
+        "social": "Social",
+        "material": "Material",
+        "spiritual": "Espiritual",
+        "ancestor": "Ancestro"
+      },
+      "ranks": {
+        "honorRank": "Honor",
+        "honorPoints": "Puntos de Honor",
+        "gloryRank": "Gloria",
+        "gloryPoints": "Puntos de Gloria",
+        "statusRank": "Rango de Estatus",
+        "statusPoints": "Puntos de Estatus",
+        "shadowRank": "Corrupción de las Tierras Sombrías",
+        "shadowPoints": "Puntos de Sombra",
+        "insightRank": "Rango de Perspicacia",
+        "insightPoints": "Puntos de Perspicacia"
+      },
+      "experience": {
+        "xpAmount": "Cantidad",
+        "note": "Nota",
+        "reason": "Motivo",
+        "adjustExperience": "Ajustar Experiencia",
+        "experienceSummary": "Resumen de Experiencia",
+        "usedTotal": "Usados / Total",
+        "poolChanges": "Cambios en la Reserva",
+        "when": "Cuándo",
+        "none": "Sin entradas",
+        "purchases": "Compras",
+        "xpLog": "Registro de PX",
+        "traitChange": "{label} {from}→{to}",
+        "voidChange": "Vacío {from}→{to}",
+        "skillCreate": "{name} 0→{rank}",
+        "skillChange": "{name} {from}→{to}",
+        "breakdown": {
+          "base": "Base",
+          "disadvantagesGrant": "Desventajas",
+          "cap10": "(tope 10)",
+          "manualAdjustments": "Ajustes manuales",
+          "traits": "Rasgos",
+          "void": "Vacío",
+          "skills": "Habilidades",
+          "advantages": "Ventajas",
+          "kata": "Kata",
+          "kiho": "Kiho"
+        },
+        "fallbackLabels": {
+          "advantage": "Ventaja",
+          "disadvantage": "Desventaja",
+          "traitIncrease": "Aumento de Rasgo",
+          "voidIncrease": "Aumento de Vacío",
+          "skillCreated": "Habilidad Creada",
+          "skillIncreased": "Habilidad Aumentada"
+        }
+      }
+    },
+    "equipment": {
+      "weapons": {
+        "attackType": "Tipo de Ataque",
+        "size": "Tamaño",
+        "damageKeep": "Daño/Guardar",
+        "range": "Alcance",
+        "arrow": "Flecha",
+        "typeWeapon": "Arma",
+        "typeBow": "Arco",
+        "associatedSkill": "Habilidad Asociada",
+        "fallback": "Alternativa",
+        "skillExample": {
+          "bow": "Kyujutsu",
+          "weapon": "Kenjutsu"
+        },
+        "arrows": {
+          "armor": "Perforante",
+          "flesh": "Corta-Carne",
+          "humming": "Zumbadora",
+          "rope": "Corta-Cuerda",
+          "willow": "Hoja de Sauce"
+        },
+        "sizes": {
+          "small": "Pequeño",
+          "medium": "Mediano",
+          "large": "Grande"
+        }
+      },
+      "armor": {
+        "reduction": "Reducción",
+        "equipped": "Equipado"
+      },
+      "general": {}
+    },
+    "magic": {
+      "spells": {
+        "range": "Alcance",
+        "aoe": "Área de Efecto",
+        "duration": "Duración",
+        "raises": "Aumentos",
+        "affinity": "Afinidad",
+        "deficiency": "Deficiencia",
+        "maho": "Mahō",
+        "useSpellSlot": "Usar espacio de hechizo",
+        "voidSlot": "Usar espacio de hechizo de Vacío"
+      },
+      "kiho": {
+        "internal": "Interno",
+        "karmic": "Kármico",
+        "martial": "Marcial",
+        "mystic": "Místico"
+      },
+      "techniques": {
+        "single": "Técnica",
+        "plural": "Técnicas"
+      }
+    },
+    "system": {
+      "migration": {
+        "itemTypeChangeInfo": "L5R4: migrados {count} objeto(s) de \"commonItem\" a \"item\".",
+        "itemTypeChangeError": "L5R4: Falló la migración de tipo de objeto. Ver consola para más detalles.",
+        "iconsUpdated": "Migración L5R4: Actualizadas {count} rutas de imagen del mundo.",
+        "compendiumIconsUpdated": "Migración L5R4 (Compendios): Actualizadas {count} rutas de imagen."
+      },
+      "errors": {
+        "deleteEffect": "No se pudo eliminar el efecto."
+      }
+    },
+    "world": {
+      "wealth": {
+        "koku": "Koku",
+        "bu": "Bu",
+        "zeni": "Zeni"
+      }
+    }
+  },
+  "SETTINGS": {
+    "showTraitRollOptions": {
+      "name": "Preguntar por opciones de Tiradas de Rasgo por defecto.",
+      "label": "Mantén Mayús para alternar."
+    },
+    "showSpellRollOptions": {
+      "name": "Preguntar si la Tirada de Anillo es un hechizo por defecto.",
+      "label": "Mantén Mayús para alternar."
+    },
+    "showSkillRollOptions": {
+      "name": "Preguntar por opciones de Tiradas de Habilidad y de Daño por defecto.",
+      "label": "Mantén Mayús para alternar."
+    },
+    "allowNpcVoidPoints": {
+      "name": "Mostrar casilla de Puntos de Vacío para tiradas de PNJ.",
+      "label": "Los PNJ normalmente carecen de Vacío."
+    },
+    "useLtTenDiceRule": {
+      "name": "Usar la Regla de Diez Dados modificada de Little Truths.",
+      "label": "Si hay un número impar de dados lanzados en exceso y menos de 10 dados guardados, suma 2 al total para que el dado \"extra\" dé beneficio."
+    },
+    "calculateRank": {
+      "name": "Calcular automáticamente el Rango de Perspicacia",
+      "label": "El Rango de Perspicacia se actualiza automáticamente según el total de Puntos de Perspicacia"
+    },
+    "allowArmorStacking": {
+      "name": "Permitir acumulación de armadura",
+      "label": "Se pueden acumular múltiples piezas de \"armadura\" (para representar bonificaciones, etc.)"
+    },
+    "showWeaponRollOptions": {
+      "name": "Preguntar por opciones de Tirada de Arma por defecto.",
+      "label": "Mantén Mayús para alternar."
+    },
+    "LtException": {
+      "name": "Aplicar excepción de Little Truths",
+      "label": "Cuando la reserva guardada se reduzca por debajo de 10 por conversión, suma 2."
+    },
+    "runMigration": {
+      "name": "Ejecutar migraciones al iniciar",
+      "label": "Si está habilitado, las migraciones pendientes de datos se ejecutarán la próxima vez que cargue el mundo. Deshabilita para omitirlas en la resolución de problemas."
+    },
+    "lastMigratedVersion": {
+      "name": "Última versión migrada",
+      "label": "Interno. No cambiar."
+    },
+    "forceMigration": {
+      "name": "Forzar migración al iniciar",
+      "label": "Fuerza todas las migraciones a ejecutarse en la próxima carga del mundo, independientemente de la versión. Se restablece automáticamente tras completar."
+    }
+  },
+  "EFFECT": {
+    "blinded": "Cegado",
+    "dazed": "Aturdido",
+    "dead": "Muerto",
+    "entangled": "Enredado",
+    "fasting": "Ayuno",
+    "fatigued": "Fatigado",
+    "grappled": "Agarrado",
+    "mounted": "Montado/Altura",
+    "prone": "Tumbado",
+    "stunned": "Atontado"
+  },
+  "TYPES": {
+    "Actor": {
+      "pc": "PJ",
+      "npc": "PNJ"
+    },
+    "Item": {
+      "advantage": "Ventaja",
+      "armor": "Armadura",
+      "bow": "Arco",
+      "clan": "Clan",
+      "commonItem": "Objeto",
+      "disadvantage": "Desventaja",
+      "family": "Familia",
+      "kata": "Kata",
+      "kiho": "Kiho",
+      "school": "Escuela",
+      "skill": "Habilidad",
+      "spell": "Hechizo",
+      "tattoo": "Tatuaje",
+      "technique": "Técnica",
+      "weapon": "Arma"
+    }
+  }
+}

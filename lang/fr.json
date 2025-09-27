@@ -1,0 +1,488 @@
+{
+  "l5r4": {
+    "ui": {
+      "mechanics": {
+        "rings": {
+          "ring": "Anneau",
+          "fire": "Feu",
+          "water": "Eau",
+          "air": "Air",
+          "earth": "Terre",
+          "void": "Vide",
+          "voidPoints": "Points de Vide",
+          "all": "Tous"
+        },
+        "traits": {
+          "sta": "Endurance",
+          "wil": "Volonté",
+          "str": "Force",
+          "per": "Perception",
+          "ref": "Réflexes",
+          "awa": "Conscience",
+          "agi": "Agilité",
+          "int": "Intelligence"
+        },
+        "rolls": {
+          "success": "Réussite",
+          "failure": "Échec",
+          "missed": "Raté",
+          "explodesOn": "Explose sur",
+          "withEmphasis": "avec Accent",
+          "unskilled": "Non formé",
+          "traitRoll": "Jet de Caractéristique",
+          "ringRoll": "Jet d'Anneau",
+          "skillRoll": "Jet de Compétence",
+          "damageRoll": "Jet de Dégâts",
+          "attackRoll": "Jet d'Attaque",
+          "spellCasting": "Jet d'Incantation",
+          "unskilledRoll": "Jet non formé",
+          "emphasis": "Accent",
+          "raise": "Relance",
+          "raises": "Relances",
+          "formula": "Formule",
+          "result": "Résultat"
+        },
+        "combat": {
+          "attack": "Attaque",
+          "melee": "Corps à corps",
+          "ranged": "À distance",
+          "multiplier": "Multiplicateur",
+          "woundPenalty": "Pénalité de Blessures",
+          "armorTnBonus": "Bonus TN d'Armure",
+          "targeting": {
+            "vs": "vs",
+            "multipleTargets": "cibles - TN non réglé automatiquement"
+          }
+        },
+        "wounds": {
+          "wounds": "Blessures",
+          "armorTn": "TN d'Armure",
+          "armorTnBase": "TN d'Armure de Base",
+          "armorReduction": "Réduction",
+          "woundLevel": "Niveau de Blessures",
+          "woundsSuffered": "Blessures subies",
+          "maxWounds": "Blessures max",
+          "penalty": "Pénalité",
+          "woundHealRate": "Taux de guérison des blessures",
+          "healRateFormula": "x 2 +",
+          "healthy": "Sain",
+          "nicked": "Éraflé",
+          "grazed": "Egratigné",
+          "hurt": "Touché",
+          "injured": "Blessé",
+          "crippled": "Estropié",
+          "down": "À terre",
+          "out": "Hors de combat"
+        },
+        "stances": {
+          "pending": "En attente",
+          "attack": "Posture d'Attaque",
+          "fullAttack": "Posture d'Attaque Totale",
+          "defense": "Posture de Défense",
+          "fullDefense": "Posture de Défense Totale",
+          "center": "Posture du Centre",
+          "fullDefenseDescription": "Faites un jet de Défense/Réflexes. Ajoutez la moitié du résultat (arrondi à l'entier supérieur) à votre TN d'Armure pendant la durée de cette posture.",
+          "cannotAttackDefense": "Impossible d'attaquer en Posture de Défense",
+          "fullAttackBonus": "Posture d'Attaque Totale : +2g1"
+        }
+      },
+      "common": {
+        "roll": "Lancer",
+        "cancel": "Annuler",
+        "ok": "OK",
+        "none": "Aucun",
+        "keep": "Garder",
+        "raise": "Relance",
+        "init": "Initiative",
+        "bonus": "Bonus",
+        "mod": "Modificateur",
+        "rate": "Taux",
+        "current": "Actuel",
+        "total": "Total",
+        "left": "restant",
+        "close": "Fermer",
+        "toChat": "Au chat",
+        "effect": "Effet",
+        "simple": "Simple",
+        "complex": "Complexe",
+        "free": "Libre",
+        "action": "Action",
+        "edit": "Éditer",
+        "delete": "Supprimer",
+        "name": "Nom",
+        "description": "Description",
+        "notes": "Notes",
+        "activeEffects": "Effets actifs",
+        "new": "Nouveau",
+        "disabled": "désactivé",
+        "rank": "Rang",
+        "clan": "Clan",
+        "school": "École",
+        "xp": "Points d'Expérience",
+        "insight": "Perspicacité",
+        "skill": "Compétence",
+        "damage": "Dégâts",
+        "type": "Type",
+        "ring": "Anneau",
+        "mastery": "Maîtrise",
+        "tn": "TN",
+        "cost": "Coût"
+      },
+      "sheets": {
+        "bio": "Historique",
+        "skill": "Compétence",
+        "skills": "Compétences",
+        "addSkill": "Ajouter Compétence",
+        "weapon": "Arme",
+        "weapons": "Armes",
+        "addWeapon": "Ajouter Arme",
+        "armor": "Armure",
+        "addArmor": "Ajouter Armure",
+        "item": "Objet",
+        "items": "Objets",
+        "addItem": "Ajouter Objet",
+        "notes": "Notes",
+        "spell": "Sort",
+        "spells": "Sorts",
+        "addSpell": "Ajouter Sort",
+        "technique": "Technique",
+        "techniques": "Techniques",
+        "addTechnique": "Ajouter Technique",
+        "armors": "Armures",
+        "advantage": "Atout",
+        "advantages": "Atouts",
+        "addAdvantage": "Ajouter Atout",
+        "disadvantage": "Désavantage",
+        "disadvantages": "Désavantages",
+        "addDisadvantage": "Ajouter Désavantage",
+        "kata": "Kata",
+        "katas": "Katas",
+        "addKata": "Ajouter Kata",
+        "kiho": "Kiho",
+        "kihos": "Kihos",
+        "addKiho": "Ajouter Kiho",
+        "tattoo": "Tatouage",
+        "tattoos": "Tatouages",
+        "addTattoo": "Ajouter Tatouage",
+        "addTechSpell": "Ajouter Technique/Sort",
+        "addAdvDis": "Ajouter Atout/Désavantage",
+        "addEquipment": "Ajouter Équipement",
+        "equipment": "Équipement",
+        "abilities": "Aptitudes",
+        "character": "Personnage",
+        "rulesSummary": "Résumé des Règles",
+        "description": "Description",
+        "woundLevels": "Niveaux de Blessures",
+        "spellSlots": "Emplacements de Sort",
+        "demands": "Exigences",
+        "traits": "Caractéristiques",
+        "itemSheetTitle": "Feuille d'Objet",
+        "xpModal": "Expérience"
+      },
+      "notifications": {
+        "actorNotFound": "Acteur introuvable pour le jet de dégâts",
+        "noPermissionDamage": "Vous n'avez pas la permission de lancer les dégâts pour cet acteur",
+        "noValidWeapon": "Aucune arme valide trouvée pour le jet d'attaque",
+        "fullDefenseRollFailed": "Échec du jet de Défense Totale. Veuillez lancer manuellement.",
+        "invalidRingForSpell": "Anneau invalide pour l'emplacement de sort : {ring}",
+        "noActorForVoid": "Aucun acteur disponible pour dépenser des points de Vide",
+        "deleteEffect": "Échec de la suppression de l'effet.",
+        "schoolRankZero": "Vous ne pouvez pas lancer un sort avec un Rang d'École réduit à zéro",
+        "noSpellSlots": "Vous n'avez plus d'emplacements de sort pour cet anneau"
+      },
+      "chat": {
+        "traitRoll": "Jet de Caractéristique {trait}",
+        "ringRoll": "Jet d'Anneau {ring}",
+        "skillRoll": "Jet de Compétence {skill}",
+        "damageRoll": "Jet de Dégâts {weapon}",
+        "rollName": "Jet {roll}"
+      },
+      "hints": {
+        "leftRightToAdjust": "Gauche et Droite pour ajuster",
+        "leftClickPlusRightClickMinus": "Maj+Clic gauche : +1, Maj+Clic droit : -1",
+        "shiftClickRankPoints": "Maj+Clic : ±0,1, Maj+Ctrl+Clic : ±1,0"
+      }
+    },
+    "character": {
+      "skills": {
+        "properties": {
+          "type": "Type",
+          "trait": "Caractéristique",
+          "emphasis": "Accents",
+          "school": "Compétence d'École",
+          "mastery3": "Maîtrise Rang 3",
+          "mastery5": "Maîtrise Rang 5",
+          "mastery7": "Maîtrise Rang 7",
+          "insightbonus": "Bonus de Perspicacité"
+        },
+        "names": {
+          "acting": "Comédie",
+          "animalHandling": "Dressage",
+          "artisan": "Artisan",
+          "athletics": "Athlétisme",
+          "battle": "Bataille",
+          "calligraphy": "Calligraphie",
+          "chainWeapons": "Armes à chaîne",
+          "commerce": "Commerce",
+          "craft": "Artisanat",
+          "courtier": "Courtisan",
+          "defense": "Défense",
+          "divination": "Divination",
+          "engineering": "Ingénierie",
+          "etiquette": "Étiquette",
+          "forgery": "Faux",
+          "games": "Jeux",
+          "heavyWeapons": "Armes lourdes",
+          "horsemanship": "Équitation",
+          "hunting": "Chasse",
+          "iaijutsu": "Iaijutsu",
+          "investigation": "Investigation",
+          "jiujutsu": "Jiujutsu",
+          "kenjutsu": "Kenjutsu",
+          "knives": "Couteaux",
+          "kyujutsu": "Kyujutsu",
+          "lore": "Savoirs",
+          "medicine": "Médecine",
+          "meditation": "Méditation",
+          "ninjutsu": "Ninjutsu",
+          "perform": "Représentation",
+          "polearms": "Armes d'hast",
+          "sailing": "Navigation",
+          "sincerity": "Sincérité",
+          "sleightOfHand": "Escamotage",
+          "spears": "Lances",
+          "spellcraft": "Magie",
+          "staves": "Bâtons",
+          "stealth": "Discrétion",
+          "teaCeremony": "Cérémonie du Thé",
+          "temptation": "Tentation",
+          "warFan": "Éventail de guerre",
+          "weapons": "Armes"
+        }
+      },
+      "skillTypes": {
+        "high": "Haut",
+        "bugei": "Bugei",
+        "merch": "Marchand",
+        "low": "Bas"
+      },
+      "advantages": {
+        "physical": "Physique",
+        "mental": "Mental",
+        "social": "Social",
+        "material": "Matériel",
+        "spiritual": "Spirituel",
+        "ancestor": "Ancêtre"
+      },
+      "ranks": {
+        "honorRank": "Honneur",
+        "honorPoints": "Points d'Honneur",
+        "gloryRank": "Gloire",
+        "gloryPoints": "Points de Gloire",
+        "statusRank": "Rang de Statut",
+        "statusPoints": "Points de Statut",
+        "shadowRank": "Souillure des Terres de l'Ombre",
+        "shadowPoints": "Points d'Ombre",
+        "insightRank": "Rang de Perspicacité",
+        "insightPoints": "Points de Perspicacité"
+      },
+      "experience": {
+        "xpAmount": "Montant",
+        "note": "Note",
+        "reason": "Raison",
+        "adjustExperience": "Ajuster l'Expérience",
+        "experienceSummary": "Résumé de l'Expérience",
+        "usedTotal": "Utilisés / Total",
+        "poolChanges": "Changements de Réserve",
+        "when": "Quand",
+        "none": "Aucune entrée",
+        "purchases": "Achats",
+        "xpLog": "Journal d'XP",
+        "traitChange": "{label} {from}→{to}",
+        "voidChange": "Vide {from}→{to}",
+        "skillCreate": "{name} 0→{rank}",
+        "skillChange": "{name} {from}→{to}",
+        "breakdown": {
+          "base": "Base",
+          "disadvantagesGrant": "Désavantages",
+          "cap10": "(limite 10)",
+          "manualAdjustments": "Ajustements manuels",
+          "traits": "Caractéristiques",
+          "void": "Vide",
+          "skills": "Compétences",
+          "advantages": "Atouts",
+          "kata": "Kata",
+          "kiho": "Kiho"
+        },
+        "fallbackLabels": {
+          "advantage": "Atout",
+          "disadvantage": "Désavantage",
+          "traitIncrease": "Augmentation de Caractéristique",
+          "voidIncrease": "Augmentation de Vide",
+          "skillCreated": "Compétence créée",
+          "skillIncreased": "Compétence augmentée"
+        }
+      }
+    },
+    "equipment": {
+      "weapons": {
+        "attackType": "Type d'Attaque",
+        "size": "Taille",
+        "damageKeep": "Dégâts/Garder",
+        "range": "Portée",
+        "arrow": "Flèche",
+        "typeWeapon": "Arme",
+        "typeBow": "Arc",
+        "associatedSkill": "Compétence Associée",
+        "fallback": "Par défaut",
+        "skillExample": {
+          "bow": "Kyujutsu",
+          "weapon": "Kenjutsu"
+        },
+        "arrows": {
+          "armor": "Perce-armure",
+          "flesh": "Coupe-chair",
+          "humming": "Bourdonnante",
+          "rope": "Coupe-corde",
+          "willow": "Feuille de saule"
+        },
+        "sizes": {
+          "small": "Petit",
+          "medium": "Moyen",
+          "large": "Grand"
+        }
+      },
+      "armor": {
+        "reduction": "Réduction",
+        "equipped": "Équipé"
+      },
+      "general": {}
+    },
+    "magic": {
+      "spells": {
+        "range": "Portée",
+        "aoe": "Zone d'Effet",
+        "duration": "Durée",
+        "raises": "Relances",
+        "affinity": "Affinité",
+        "deficiency": "Déficience",
+        "maho": "Mahō",
+        "useSpellSlot": "Utiliser un emplacement de sort",
+        "voidSlot": "Utiliser un emplacement de sort de Vide"
+      },
+      "kiho": {
+        "internal": "Interne",
+        "karmic": "Karmique",
+        "martial": "Martial",
+        "mystic": "Mystique"
+      },
+      "techniques": {
+        "single": "Technique",
+        "plural": "Techniques"
+      }
+    },
+    "system": {
+      "migration": {
+        "itemTypeChangeInfo": "L5R4 : {count} Objet(s) migré(s) de \"commonItem\" vers \"item\".",
+        "itemTypeChangeError": "L5R4 : Échec de la migration du type d'objet. Voir la console pour plus de détails.",
+        "iconsUpdated": "Migration L5R4 : {count} chemin(s) d'image du monde mis à jour.",
+        "compendiumIconsUpdated": "Migration L5R4 (Compendiums) : {count} chemin(s) d'image mis à jour."
+      },
+      "errors": {
+        "deleteEffect": "Échec de la suppression de l'effet."
+      }
+    },
+    "world": {
+      "wealth": {
+        "koku": "Koku",
+        "bu": "Bu",
+        "zeni": "Zeni"
+      }
+    }
+  },
+  "SETTINGS": {
+    "showTraitRollOptions": {
+      "name": "Demander par défaut les options des Jets de Caractéristique.",
+      "label": "Maintenir Maj pour basculer."
+    },
+    "showSpellRollOptions": {
+      "name": "Demander par défaut si le Jet d'Anneau est un sort.",
+      "label": "Maintenir Maj pour basculer."
+    },
+    "showSkillRollOptions": {
+      "name": "Demander par défaut les options des Jets de Compétence et de Dégâts.",
+      "label": "Maintenir Maj pour basculer."
+    },
+    "allowNpcVoidPoints": {
+      "name": "Afficher la case Points de Vide pour les jets des PNJ.",
+      "label": "Les PNJ n'ont normalement pas de Vide."
+    },
+    "useLtTenDiceRule": {
+      "name": "Utiliser la règle des Dix Dés modifiée de Little Truths.",
+      "label": "S'il y a un nombre impair de dés lancés en excès et moins de 10 dés gardés, ajoutez 2 au total pour que le dé \"supplémentaire\" apporte un bénéfice."
+    },
+    "calculateRank": {
+      "name": "Calculer automatiquement le Rang de Perspicacité",
+      "label": "Le Rang de Perspicacité est mis à jour automatiquement en fonction du total des Points de Perspicacité"
+    },
+    "allowArmorStacking": {
+      "name": "Autoriser l'empilement d'armures",
+      "label": "Plusieurs pièces d'\"armure\" peuvent être empilées (pour représenter des bonus, etc.)"
+    },
+    "showWeaponRollOptions": {
+      "name": "Demander par défaut les options des Jets d'Arme.",
+      "label": "Maintenir Maj pour basculer."
+    },
+    "LtException": {
+      "name": "Appliquer l'exception Little Truths",
+      "label": "Lorsque les dés gardés sont réduits en dessous de 10 par conversion, ajoutez 2."
+    },
+    "runMigration": {
+      "name": "Exécuter les migrations au démarrage",
+      "label": "Si activé, les migrations de données en attente s'exécuteront au prochain chargement du monde. Désactivez pour ignorer en cas de dépannage."
+    },
+    "lastMigratedVersion": {
+      "name": "Dernière version migrée",
+      "label": "Interne. Ne pas modifier."
+    },
+    "forceMigration": {
+      "name": "Forcer la migration au démarrage",
+      "label": "Force toutes les migrations à s'exécuter au prochain chargement du monde, quelle que soit la version. Se réinitialise automatiquement après la migration."
+    }
+  },
+  "EFFECT": {
+    "blinded": "Aveuglé",
+    "dazed": "Hagard",
+    "dead": "Mort",
+    "entangled": "Empêtré",
+    "fasting": "Jeûne",
+    "fatigued": "Fatigué",
+    "grappled": "Agrippé",
+    "mounted": "Monté/En hauteur",
+    "prone": "À terre",
+    "stunned": "Étourdi"
+  },
+  "TYPES": {
+    "Actor": {
+      "pc": "PJ",
+      "npc": "PNJ"
+    },
+    "Item": {
+      "advantage": "Atout",
+      "armor": "Armure",
+      "bow": "Arc",
+      "clan": "Clan",
+      "commonItem": "Objet",
+      "disadvantage": "Désavantage",
+      "family": "Famille",
+      "kata": "Kata",
+      "kiho": "Kiho",
+      "school": "École",
+      "skill": "Compétence",
+      "spell": "Sort",
+      "tattoo": "Tatouage",
+      "technique": "Technique",
+      "weapon": "Arme"
+    }
+  }
+}
