@@ -96,7 +96,6 @@ export async function preloadTemplates() {
     // Item sheet templates - individual item type forms
     "systems/l5r4/templates/item/advantage.hbs",
     "systems/l5r4/templates/item/armor.hbs",
-    "systems/l5r4/templates/item/bow.hbs",
     "systems/l5r4/templates/item/clan.hbs",
     "systems/l5r4/templates/item/disadvantage.hbs",
     "systems/l5r4/templates/item/family.hbs",
@@ -126,11 +125,20 @@ export async function preloadTemplates() {
     "systems/l5r4/templates/actor/_partials/_initiative.hbs",
     "systems/l5r4/templates/actor/_partials/_armor.hbs",
     "systems/l5r4/templates/actor/_partials/_wounds.hbs",
-    "systems/l5r4/templates/actor/_partials/_advantages.hbs",
-    "systems/l5r4/templates/actor/_partials/_skills.hbs",
-    "systems/l5r4/templates/actor/_partials/_equipment.hbs",
     "systems/l5r4/templates/actor/_partials/_bio.hbs",
-    "systems/l5r4/templates/actor/_partials/_techniques.hbs",
+    
+    // Individual item section templates
+    "systems/l5r4/templates/actor/_partials/_skills-section.hbs",
+    "systems/l5r4/templates/actor/_partials/_weapon-section.hbs",
+    "systems/l5r4/templates/actor/_partials/_armor-section.hbs",
+    "systems/l5r4/templates/actor/_partials/_item-section.hbs",
+    "systems/l5r4/templates/actor/_partials/_spell-section.hbs",
+    "systems/l5r4/templates/actor/_partials/_technique-section.hbs",
+    "systems/l5r4/templates/actor/_partials/_kiho-section.hbs",
+    "systems/l5r4/templates/actor/_partials/_kata-section.hbs",
+    "systems/l5r4/templates/actor/_partials/_tattoo-section.hbs",
+    "systems/l5r4/templates/actor/_partials/_advantage-section.hbs",
+    "systems/l5r4/templates/actor/_partials/_disadvantage-section.hbs",
     
     // Chat card templates - item display in chat
     "systems/l5r4/templates/cards/advantage-disadvantage.hbs",

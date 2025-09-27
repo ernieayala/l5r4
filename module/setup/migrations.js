@@ -99,6 +99,61 @@ import { SYS_ID, PATHS } from "../config.js";
 import { SCHEMA_MAP } from "./schema-map.js";
 
 /**
+ * Migrate bow items to weapons with isBow flag.
+ * Converts all bow-type items to weapon-type items with the isBow flag set to true.
+ * This consolidates the weapon system to use a single item type with conditional fields.
+ * 
+ * **Foundry v13 Compatibility:**
+ * Uses {recursive: false} option when changing document types to comply with
+ * Foundry v13's stricter type change requirements. This prevents the error:
+ * "The type of a Document can be changed only if the system field is force-replaced (==) or updated with {recursive: false}"
+ * 
+ * @param {Array<Document>} docs - Array of documents to migrate
+ * @param {string} label - Label for progress tracking
+ * @returns {Promise<void>}
+ */
+async function migrateBowsToWeapons(docs, label) {
+  const bowItems = docs.filter(doc => doc.type === "bow");
+  if (bowItems.length === 0) return;
+
+  console.log(`L5R4 | Migrating ${bowItems.length} bow items to weapons (${label})`);
+  
+  for (const item of bowItems) {
+    try {
+      // Foundry v13 requires special handling when changing document types
+      // We need to update the type and system data in separate operations
+      // or use {recursive: false} to prevent deep merging issues
+      
+      // First, prepare the complete system data for the weapon
+      const currentSystem = foundry.utils.deepClone(item.system || {});
+      const weaponSystem = {
+        ...currentSystem,
+        isBow: true,
+        damageKeep: 0, // Bows don't use damageKeep, set to 0
+        // Ensure bow-specific fields are preserved
+        str: currentSystem.str || 1,
+        range: currentSystem.range || 100,
+        arrow: currentSystem.arrow || "willow",
+        // Ensure weapon-specific fields have defaults
+        explodesOn: currentSystem.explodesOn || 10,
+        associatedSkill: currentSystem.associatedSkill || "",
+        fallbackTrait: currentSystem.fallbackTrait || "ref"
+      };
+
+      // Update with type change using recursive: false for Foundry v13 compatibility
+      const updateData = {
+        type: "weapon",
+        system: weaponSystem
+      };
+      
+      await item.update(updateData, { diff: false, recursive: false, render: false });
+    } catch (err) {
+      console.warn("L5R4", "Failed to migrate bow item", { id: item.id, name: item.name, err });
+    }
+  }
+}
+
+/**
  * Safely retrieve a nested property value using dot-notation path.
  * Handles missing intermediate objects gracefully without throwing errors.
  * 
@@ -511,6 +566,8 @@ export async function runMigrations(fromVersion, toVersion) {
   // Phase 1: Schema migrations for world documents (Actors and Items)
   await applySchemaMapToDocs(game.actors.contents, "world-actors");
   await applySchemaMapToDocs(game.items.contents, "world-items");
+  // Convert bow items to weapons with isBow flag
+  await migrateBowsToWeapons(game.items.contents, "world-bow-migration");
   // Normalize world items after schema changes
   await normalizeItems(game.items.contents, "world-items-norm");
   // Clean up duplicate legacy fields after migration
@@ -520,6 +577,7 @@ export async function runMigrations(fromVersion, toVersion) {
   for (const actor of game.actors) {
     if (actor.items.size > 0) {
       await applySchemaMapToDocs(actor.items.contents, `actor-items:${actor.id}`);
+      await migrateBowsToWeapons(actor.items.contents, `actor-bow-migration:${actor.id}`);
       await normalizeItems(actor.items.contents, `actor-items-norm:${actor.id}`);
     }
   }
@@ -539,6 +597,7 @@ export async function runMigrations(fromVersion, toVersion) {
     try {
       const docs = await pack.getDocuments();
       await applySchemaMapToDocs(docs, `pack:${pack.collection}`);
+      await migrateBowsToWeapons(docs, `pack-bow-migration:${pack.collection}`);
       await normalizeItems(docs, `pack-norm:${pack.collection}`);
 
       // Also migrate items embedded in compendium actors
@@ -546,6 +605,7 @@ export async function runMigrations(fromVersion, toVersion) {
         for (const actor of docs) {
           if (actor.items.size > 0) {
             await applySchemaMapToDocs(actor.items.contents, `compendium-actor-items:${pack.collection}:${actor.id}`);
+            await migrateBowsToWeapons(actor.items.contents, `compendium-actor-bow-migration:${pack.collection}:${actor.id}`);
             await normalizeItems(actor.items.contents, `compendium-actor-items-norm:${pack.collection}:${actor.id}`);
           }
         }

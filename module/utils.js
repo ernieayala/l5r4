@@ -347,7 +347,7 @@ export function readWoundPenalty(actor) {
  * Accepts multiple input formats:
  * - Short keys ("ref")
  * - English labels ("Reflexes")
- * - i18n keys ("l5r4.mechanics.traits.ref")
+ * - i18n keys ("l5r4.ui.mechanics.traits.ref")
  * - Localized labels in any language (via game.i18n.localize)
  * @param {string|null|undefined} raw - Raw trait identifier to normalize
  * @returns {string} Normalized trait key or empty string if not found
@@ -357,8 +357,8 @@ export function normalizeTraitKey(raw) {
   if (raw == null) return "";
   let k = String(raw).trim();
 
-  // If given an i18n key like "l5r4.mechanics.traits.ref"
-  const m = /^l5r4\.mechanics\.traits\.(\w+)$/i.exec(k);
+  // If given an i18n key like "l5r4.ui.mechanics.traits.ref"
+  const m = /^l5r4\.ui\.mechanics\.traits\.(\w+)$/i.exec(k);
   if (m && known.includes(m[1].toLowerCase())) return m[1].toLowerCase();
 
   // Plain short key?
@@ -380,7 +380,7 @@ export function normalizeTraitKey(raw) {
   // Localized labels (any language): compare against localized names
   try {
     for (const key of known) {
-      const label = game.i18n?.localize?.(`l5r4.mechanics.traits.${key}`) ?? "";
+      const label = game.i18n?.localize?.(`l5r4.ui.mechanics.traits.${key}`) ?? "";
       if (label && label.toLowerCase() === k.toLowerCase()) return key;
     }
   } catch (_) { /* ignore if i18n not ready here */ }

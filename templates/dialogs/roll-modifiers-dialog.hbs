@@ -1,25 +1,25 @@
 <form class="standard-form">
   {{#unless weapon}}
     <div class="form-group">
-      <label>{{localize "l5r4.mechanics.combat.woundPenalty"}}</label>
+      <label>{{localize "l5r4.ui.mechanics.combat.woundPenalty"}}</label>
       <input type="checkbox" name="woundPenalty" checked="checked" />
     </div>
   {{/unless}}
   {{#unless noVoid}}
     <div class="form-group">
-      <label>{{localize "l5r4.mechanics.rings.void"}}</label>
+      <label>{{localize "l5r4.ui.mechanics.rings.void"}}</label>
       <input type="checkbox" name="void" />
     </div>
   {{/unless}}
   {{#if trait}}
     <div class="form-group">
-      <label>{{localize "l5r4.mechanics.rolls.unskilledRoll"}}</label>
+      <label>{{localize "l5r4.ui.mechanics.rolls.unskilledRoll"}}</label>
       <input type="checkbox" name="unskilled" />
     </div>
   {{/if}}
   {{#if skill}}
     <div class="form-group">
-      <label>{{localize "l5r4.mechanics.rolls.emphasis"}}</label>
+      <label>{{localize "l5r4.ui.mechanics.rolls.emphasis"}}</label>
       <input type="checkbox" name="emphasis" />
     </div>
     <div class="form-group">

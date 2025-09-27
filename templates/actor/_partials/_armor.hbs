@@ -1,12 +1,12 @@
 {{#if (eq actor.type "pc")}}
   <section class="armor">
     <div class="flexrow -gap-sm section-title">
-      <h4 class="title -compact">{{localize "l5r4.mechanics.wounds.armorTn"}}</h4>
+      <h4 class="title -compact">{{localize "l5r4.ui.mechanics.wounds.armorTn"}}</h4>
     </div>
     <div class="grid">
-      <span>{{localize "l5r4.mechanics.wounds.armorTn"}}</span>
+      <span>{{localize "l5r4.ui.mechanics.wounds.armorTn"}}</span>
       <div class="flexrow"><span>{{system.armorTn.current}}</span></div>
-      <span>{{localize "l5r4.mechanics.wounds.armorReduction"}}</span>
+      <span>{{localize "l5r4.ui.mechanics.wounds.armorReduction"}}</span>
       <div class="flexrow"><span>{{system.armorTn.reduction}}</span></div>
       <span>{{localize "l5r4.ui.common.mod"}}</span>
       <div class="flexrow"><input type="number" name="system.armorTn.mod" value="{{system.armorTn.mod}}" data-type="Number" /></div>
@@ -15,12 +15,12 @@
 {{else}}
   <section class="armor">
     <div class="flexrow -gap-sm section-title">
-      <h4 class="title -compact">{{localize "l5r4.mechanics.wounds.armorTn"}}</h4>
+      <h4 class="title -compact">{{localize "l5r4.ui.mechanics.wounds.armorTn"}}</h4>
     </div>
     <div class="grid">
-      <span>{{localize "l5r4.mechanics.wounds.armorTn"}}</span>
+      <span>{{localize "l5r4.ui.mechanics.wounds.armorTn"}}</span>
       <div class="flexrow"><input type="number" name="system.armor.armorTn" value="{{system.armor.armorTn}}" data-type="Number" /></div>
-      <span>{{localize "l5r4.mechanics.wounds.armorReduction"}}</span>
+      <span>{{localize "l5r4.ui.mechanics.wounds.armorReduction"}}</span>
       <div class="flexrow"><input type="number" name="system.armor.reduction" value="{{system.armor.reduction}}" data-type="Number" /></div>
     </div>
   </section>

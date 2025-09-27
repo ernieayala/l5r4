@@ -1,5 +1,11 @@
 <section class="standard-form">
   <div class="form-group">
+    <label>{{localize "l5r4.equipment.weapons.typeBow"}}</label>
+    <div class="form-fields">
+      <input name="system.isBow" type="checkbox" {{checked system.isBow}} />
+    </div>
+  </div>
+  <div class="form-group">
     <label>{{localize "l5r4.equipment.weapons.size"}}</label>
     <div class="form-fields">
       <select name="system.size">
@@ -10,7 +16,7 @@
   {{#if isOwnedByCharacter}}
     {{#if hasCharacterSkills}}
       <div class="form-group">
-        <label>Associated Skill</label>
+        <label>{{localize "l5r4.equipment.weapons.associatedSkill"}}</label>
         <div class="form-fields">
           <select name="system.associatedSkill">
             {{selectOptions skillOptions selected=system.associatedSkill}}
@@ -19,7 +25,7 @@
       </div>
     {{/if}}
     <div class="form-group">
-      <label>{{#if hasCharacterSkills}}Fallback {{/if}}Trait</label>
+      <label>{{#if hasCharacterSkills}}{{localize "l5r4.equipment.weapons.fallback"}} {{/if}}{{localize "l5r4.character.skills.properties.trait"}}</label>
       <div class="form-fields">
         <select name="system.fallbackTrait">
           {{selectOptions config.traits selected=system.fallbackTrait localize=true}}
@@ -28,13 +34,13 @@
     </div>
   {{else}}
     <div class="form-group">
-      <label>Associated Skill</label>
+      <label>{{localize "l5r4.equipment.weapons.associatedSkill"}}</label>
       <div class="form-fields">
-        <input name="system.associatedSkill" type="text" value="{{system.associatedSkill}}" placeholder="e.g., Kenjutsu, Kyujutsu" disabled />
+        <input name="system.associatedSkill" type="text" value="{{system.associatedSkill}}" placeholder="{{#if system.isBow}}{{localize 'l5r4.equipment.weapons.skillExample.bow'}}{{else}}{{localize 'l5r4.equipment.weapons.skillExample.weapon'}}{{/if}}" disabled />
       </div>
     </div>
     <div class="form-group">
-      <label>Fallback Trait</label>
+      <label>{{localize "l5r4.equipment.weapons.fallback"}} {{localize "l5r4.character.skills.properties.trait"}}</label>
       <div class="form-fields">
         <select name="system.fallbackTrait">
           {{selectOptions config.traits selected=system.fallbackTrait localize=true}}
@@ -42,20 +48,44 @@
       </div>
     </div>
   {{/if}}
+  {{#if system.isBow}}
+    <div class="form-group">
+      <label>{{localize "l5r4.ui.mechanics.traits.str"}}</label>
+      <div class="form-fields">
+        <input name="system.str" type="number" value="{{system.str}}" data-type="Number" />
+      </div>
+    </div>
+    <div class="form-group">
+      <label>{{localize "l5r4.equipment.weapons.range"}}</label>
+      <div class="form-fields">
+        <input name="system.range" type="number" value="{{system.range}}" data-type="Number" />
+      </div>
+    </div>
+    <div class="form-group">
+      <label>{{localize "l5r4.equipment.weapons.arrow"}}</label>
+      <div class="form-fields">
+        <select name="system.arrow">
+          {{selectOptions config.arrows selected=system.arrow localize=true}}
+        </select>
+      </div>
+    </div>
+  {{/if}}
   <div class="form-group">
-    <label>{{localize "l5r4.mechanics.rolls.damageRoll"}}</label>
+    <label>{{localize "l5r4.ui.mechanics.rolls.damageRoll"}}</label>
     <div class="form-fields">
       <input name="system.damageRoll" type="number" data-type="Number" value="{{system.damageRoll}}" />
     </div>
   </div>
-  <div class="form-group">
-    <label>{{localize "l5r4.equipment.weapons.damageKeep"}}</label>
-    <div class="form-fields">
-      <input name="system.damageKeep" type="number" data-type="Number" value="{{system.damageKeep}}" />
+  {{#unless system.isBow}}
+    <div class="form-group">
+      <label>{{localize "l5r4.equipment.weapons.damageKeep"}}</label>
+      <div class="form-fields">
+        <input name="system.damageKeep" type="number" data-type="Number" value="{{system.damageKeep}}" />
+      </div>
     </div>
-  </div>
+  {{/unless}}
   <div class="form-group">
-    <label>{{localize "l5r4.mechanics.rolls.explodesOn"}}</label>
+    <label>{{localize "l5r4.ui.mechanics.rolls.explodesOn"}}</label>
     <div class="form-fields">
       <input name="system.explodesOn" type="number" data-type="Number" value="{{system.explodesOn}}" />
     </div>

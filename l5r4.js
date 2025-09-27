@@ -187,7 +187,6 @@ Hooks.once("init", async () => {
     types: [
       "advantage",
       "armor",
-      "bow",
       "clan",
       "commonItem",
       "disadvantage",
@@ -252,13 +251,13 @@ Hooks.on("renderChatMessageHTML", (app, html, data) => {
       // Find the actor
       const actor = game.actors.get(actorId);
       if (!actor) {
-        ui.notifications?.warn("Actor not found for damage roll");
+        ui.notifications?.warn(game.i18n.localize("l5r4.ui.notifications.actorNotFound"));
         return;
       }
 
       // Check permissions - only allow if user owns the actor or is GM
       if (!actor.isOwner && !game.user.isGM) {
-        ui.notifications?.warn("You don't have permission to roll damage for this actor");
+        ui.notifications?.warn(game.i18n.localize("l5r4.ui.notifications.noPermissionDamage"));
         return;
       }
 

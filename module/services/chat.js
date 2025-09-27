@@ -128,7 +128,7 @@ export async function getItemOptions(elementType) {
   // Map element types to their corresponding templates and localized titles
   const mapping = {
     spell:    { template: DIALOG_TEMPLATES.createSpell, title: T("l5r4.ui.sheets.addTechSpell") },
-    advantage:{ template: DIALOG_TEMPLATES.createAdv,   title: T("l5r4.ui.sheets.addAdv/Dis") },
+    advantage:{ template: DIALOG_TEMPLATES.createAdv,   title: T("l5r4.ui.sheets.addAdvDis") },
     default:  { template: DIALOG_TEMPLATES.createEquip, title: T("l5r4.ui.sheets.addEquipment") }
   };
 

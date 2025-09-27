@@ -371,7 +371,7 @@ export class BaseActorSheet extends HandlebarsApplicationMixin(foundry.applicati
 
   /**
    * Create a new embedded Item from a "+" button on the sheet.
-   * For equipment, spell, and advantage types, prompts for subtype selection.
+   * Creates items directly without dialogs since each section handles specific types.
    * @param {Event} event - The originating click event
    * @param {HTMLElement} element - The clicked element with data-type attribute
    * @returns {Promise<Document[]>} Array of created item documents
@@ -382,21 +382,10 @@ export class BaseActorSheet extends HandlebarsApplicationMixin(foundry.applicati
     const type = el?.dataset?.type;
     let itemData = {};
 
-    if (type === "equipment" || type === "spell") {
-      const opts = await Chat.getItemOptions(type);
-      if (opts?.cancelled) return;
-      itemData = { name: opts.name, type: opts.type };
-    } else if (type === "advantage") {
-      const result = await Chat.getItemOptions("advantage");
-      if (!result || result.cancelled) return;
-      const { name, type: chosenType } = result;
-      itemData = { name, type: chosenType };
-    } else {
-      itemData = { 
-        name: game.i18n.localize("l5r4.ui.common.new") || "New", 
-        type 
-      };
-    }
+    itemData = { 
+      name: game.i18n.localize("l5r4.ui.common.new") || "New", 
+      type 
+    };
     return this.actor.createEmbeddedDocuments("Item", [itemData]);
   }
 
@@ -669,7 +658,7 @@ export class BaseActorSheet extends HandlebarsApplicationMixin(foundry.applicati
     const weapon = id ? this.actor.items.get(id) : null;
     
     if (!weapon || (weapon.type !== "weapon" && weapon.type !== "bow")) {
-      ui.notifications?.warn("No valid weapon found for attack roll");
+      ui.notifications?.warn(game.i18n.localize("l5r4.ui.notifications.noValidWeapon"));
       return;
     }
 
@@ -682,8 +671,10 @@ export class BaseActorSheet extends HandlebarsApplicationMixin(foundry.applicati
     // Check if weapon attack is untrained (no skill rank)
     const isUntrained = weaponSkill.skillRank === 0;
     
-    const rollName = `${this.actor.name}: ${weapon.name} Attack`;
-    const description = `${weaponSkill.description}${stanceBonuses.roll > 0 || stanceBonuses.keep > 0 ? ` (Full Attack: +${stanceBonuses.roll}k${stanceBonuses.keep})` : ''}${isUntrained ? ' (Untrained)' : ''}`;
+    const rollName = `${this.actor.name}: ${weapon.name} ${game.i18n.localize("l5r4.ui.mechanics.rolls.attackRoll")}`;
+    const description = `${weaponSkill.description}`
+      + `${(stanceBonuses.roll > 0 || stanceBonuses.keep > 0) ? ` (${game.i18n.localize("l5r4.ui.mechanics.stances.fullAttack")}: +${stanceBonuses.roll}k${stanceBonuses.keep})` : ''}`
+      + `${isUntrained ? ` (${game.i18n.localize("l5r4.ui.mechanics.rolls.unskilled")})` : ''}`;
 
     return Dice.NpcRoll({
       woundPenalty: readWoundPenalty(this.actor),

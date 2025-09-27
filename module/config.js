@@ -8,7 +8,7 @@
  * **Core Responsibilities:**
  * - **System Constants**: SYS_ID, path constants, and template definitions
  * - **Icon Management**: Path resolution and aliasing system for asset organization
- * - **Localization Mappings**: Key mappings for rings, traits, skills, and emphases
+ * - **Localization Mappings**: Key mappings for rings, traits, and skills
  * - **Chat Templates**: Template definitions for chat cards and dialogs
  * - **Game Rules Constants**: Arrow modifiers, sizes, status effects, and mechanical data
  * - **Legacy Compatibility**: Config object structure for template backward compatibility
@@ -110,11 +110,11 @@ export function iconPath(nameOrPath) {
 
 /** @type {RingLabelMap} */
 export const RING_LABELS = freeze({
-  air: "l5r4.mechanics.rings.air",
-  earth: "l5r4.mechanics.rings.earth",
-  fire: "l5r4.mechanics.rings.fire",
-  water: "l5r4.mechanics.rings.water",
-  void: "l5r4.mechanics.rings.void"
+  air: "l5r4.ui.mechanics.rings.air",
+  earth: "l5r4.ui.mechanics.rings.earth",
+  fire: "l5r4.ui.mechanics.rings.fire",
+  water: "l5r4.ui.mechanics.rings.water",
+  void: "l5r4.ui.mechanics.rings.void"
 });
 
 /**
@@ -167,135 +167,6 @@ export const SKILL_LABELS = freeze({
   temptation: "l5r4.character.skills.names.temptation",
   warFan: "l5r4.character.skills.names.warFan",
   weapons: "l5r4.character.skills.names.weapons"
-});
-
-/**
- * Emphasis label keys for skill specializations.
- * Maps emphasis identifiers to localization keys for consistent presentation
- * across sheets and chat. Maintained in alphabetical order.
- * @type {Readonly<Record<string, string>>}
- */
-export const EMPHASIS_LABELS = freeze({
-  ambush: "l5r4.world.emphases.ambush",
-  anatomy: "l5r4.world.emphases.anatomy",
-  antidotes: "l5r4.world.emphases.antidotes",
-  architecture: "l5r4.world.emphases.architecture",
-  armorsmithing: "l5r4.world.emphases.armorsmithing",
-  artwork: "l5r4.world.emphases.artwork",
-  assessment: "l5r4.world.emphases.assessment",
-  astrology: "l5r4.world.emphases.astrology",
-  biwa: "l5r4.world.emphases.biwa",
-  blacksmithing: "l5r4.world.emphases.blacksmithing",
-  bonsai: "l5r4.world.emphases.bonsai",
-  bowyer: "l5r4.world.emphases.bowyer",
-  brewing: "l5r4.world.emphases.brewing",
-  bureaucracy: "l5r4.world.emphases.bureaucracy",
-  bushido: "l5r4.world.emphases.bushido",
-  carpentry: "l5r4.world.emphases.carpentry",
-  cartography: "l5r4.world.emphases.cartography",
-  cipher: "l5r4.world.emphases.cipher",
-  clan: "l5r4.world.emphases.clan",
-  climbing: "l5r4.world.emphases.climbing",
-  conceal: "l5r4.world.emphases.conceal",
-  construction: "l5r4.world.emphases.construction",
-  conversation: "l5r4.world.emphases.conversation",
-  cooking: "l5r4.world.emphases.cooking",
-  courtesy: "l5r4.world.emphases.courtesy",
-  dance: "l5r4.world.emphases.dance",
-  daiTsuchi: "l5r4.world.emphases.daiTsuchi",
-  deceit: "l5r4.world.emphases.deceit",
-  disease: "l5r4.world.emphases.disease",
-  documents: "l5r4.world.emphases.documents",
-  dogs: "l5r4.world.emphases.dogs",
-  elements: "l5r4.world.emphases.elements",
-  escape: "l5r4.world.emphases.escape",
-  falcons: "l5r4.world.emphases.falcons",
-  farming: "l5r4.world.emphases.farming",
-  fasting: "l5r4.world.emphases.fasting",
-  fishing: "l5r4.world.emphases.fishing",
-  flute: "l5r4.world.emphases.flute",
-  fortunesAndWinds: "l5r4.world.emphases.fortunesAndWinds",
-  gaijinCulture: "l5r4.world.emphases.gaijinCulture",
-  gaijinRidingHorse: "l5r4.world.emphases.gaijinRidingHorse",
-  gardening: "l5r4.world.emphases.gardening",
-  ghosts: "l5r4.world.emphases.ghosts",
-  go: "l5r4.world.emphases.go",
-  grappling: "l5r4.world.emphases.grappling",
-  greatClan: "l5r4.world.emphases.greatClan",
-  herbalism: "l5r4.world.emphases.herbalism",
-  heraldry: "l5r4.world.emphases.heraldry",
-  highRokugani: "l5r4.world.emphases.highRokugani",
-  history: "l5r4.world.emphases.history",
-  honesty: "l5r4.world.emphases.honesty",
-  horses: "l5r4.world.emphases.horses",
-  ikebana: "l5r4.world.emphases.ikebana",
-  improvisedWeapons: "l5r4.world.emphases.improvisedWeapons",
-  importune: "l5r4.world.emphases.importune",
-  interrogation: "l5r4.world.emphases.interrogation",
-  katana: "l5r4.world.emphases.katana",
-  kawaru: "l5r4.world.emphases.kawaru",
-  kemari: "l5r4.world.emphases.kemari",
-  knotWork: "l5r4.world.emphases.knotWork",
-  kusarigama: "l5r4.world.emphases.kusarigama",
-  kyoketsuShogi: "l5r4.world.emphases.kyoketsuShogi",
-  letters: "l5r4.world.emphases.letters",
-  manipulation: "l5r4.world.emphases.manipulation",
-  manrikigusari: "l5r4.world.emphases.manrikigusari",
-  martialArts: "l5r4.world.emphases.martialArts",
-  masonry: "l5r4.world.emphases.masonry",
-  masakari: "l5r4.world.emphases.masakari",
-  mining: "l5r4.world.emphases.mining",
-  navigation: "l5r4.world.emphases.navigation",
-  nature: "l5r4.world.emphases.nature",
-  ninjaTo: "l5r4.world.emphases.ninjaTo",
-  noDachi: "l5r4.world.emphases.noDachi",
-  nonHumans: "l5r4.world.emphases.nonHumans",
-  nonhumanCulture: "l5r4.world.emphases.nonhumanCulture",
-  omens: "l5r4.world.emphases.omens",
-  ono: "l5r4.world.emphases.ono",
-  oratory: "l5r4.world.emphases.oratory",
-  painting: "l5r4.world.emphases.painting",
-  parangu: "l5r4.world.emphases.parangu",
-  personalSeals: "l5r4.world.emphases.personalSeals",
-  pickPocket: "l5r4.world.emphases.pickPocket",
-  poetry: "l5r4.world.emphases.poetry",
-  poison: "l5r4.world.emphases.poison",
-  pottery: "l5r4.world.emphases.pottery",
-  prestidigitation: "l5r4.world.emphases.prestidigitation",
-  puppeteer: "l5r4.world.emphases.puppeteer",
-  rhetoric: "l5r4.world.emphases.rhetoric",
-  rokuganiPony: "l5r4.world.emphases.rokuganiPony",
-  running: "l5r4.world.emphases.running",
-  sadane: "l5r4.world.emphases.sadane",
-  samisen: "l5r4.world.emphases.samisen",
-  scimitar: "l5r4.world.emphases.scimitar",
-  search: "l5r4.world.emphases.search",
-  shadowing: "l5r4.world.emphases.shadowing",
-  shadowlands: "l5r4.world.emphases.shadowlands",
-  shipbuilding: "l5r4.world.emphases.shipbuilding",
-  shogi: "l5r4.world.emphases.shogi",
-  shugenja: "l5r4.world.emphases.shugenja",
-  siege: "l5r4.world.emphases.siege",
-  song: "l5r4.world.emphases.song",
-  spiritRealms: "l5r4.world.emphases.spiritRealms",
-  spellCasting: "l5r4.world.emphases.spellCasting",
-  spellResearch: "l5r4.world.emphases.spellResearch",
-  storytelling: "l5r4.world.emphases.storytelling",
-  survival: "l5r4.world.emphases.survival",
-  swimming: "l5r4.world.emphases.swimming",
-  tailoring: "l5r4.world.emphases.tailoring",
-  tattooing: "l5r4.world.emphases.tattooing",
-  tetsubo: "l5r4.world.emphases.tetsubo",
-  theology: "l5r4.world.emphases.theology",
-  throwing: "l5r4.world.emphases.throwing",
-  tracking: "l5r4.world.emphases.tracking",
-  trailblazing: "l5r4.world.emphases.trailblazing",
-  utakuSteed: "l5r4.world.emphases.utakuSteed",
-  voidRecovery: "l5r4.world.emphases.voidRecovery",
-  wakizashi: "l5r4.world.emphases.wakizashi",
-  war: "l5r4.world.emphases.war",
-  weaponsmithing: "l5r4.world.emphases.weaponsmithing",
-  weaving: "l5r4.world.emphases.weaving"
 });
 
 /**
@@ -392,55 +263,55 @@ const _l5r4 = {
   sizes: SIZES,
 
   rings: freeze({
-    fire: "l5r4.mechanics.rings.fire",
-    water: "l5r4.mechanics.rings.water",
-    air: "l5r4.mechanics.rings.air",
-    earth: "l5r4.mechanics.rings.earth",
-    void: "l5r4.mechanics.rings.void"
+    fire: "l5r4.ui.mechanics.rings.fire",
+    water: "l5r4.ui.mechanics.rings.water",
+    air: "l5r4.ui.mechanics.rings.air",
+    earth: "l5r4.ui.mechanics.rings.earth",
+    void: "l5r4.ui.mechanics.rings.void"
   }),
 
   /** Ring options with None option for technique affinity/deficiency */
   ringsWithNone: freeze({
     "": "l5r4.ui.common.none",
-    fire: "l5r4.mechanics.rings.fire",
-    water: "l5r4.mechanics.rings.water",
-    air: "l5r4.mechanics.rings.air",
-    earth: "l5r4.mechanics.rings.earth",
-    void: "l5r4.mechanics.rings.void"
+    fire: "l5r4.ui.mechanics.rings.fire",
+    water: "l5r4.ui.mechanics.rings.water",
+    air: "l5r4.ui.mechanics.rings.air",
+    earth: "l5r4.ui.mechanics.rings.earth",
+    void: "l5r4.ui.mechanics.rings.void"
   }),
 
   /** Ring options available for spell casting */
   spellRings: freeze({
-    fire: "l5r4.mechanics.rings.fire",
-    water: "l5r4.mechanics.rings.water",
-    air: "l5r4.mechanics.rings.air",
-    earth: "l5r4.mechanics.rings.earth",
-    void: "l5r4.mechanics.rings.void",
-    all: "l5r4.mechanics.rings.all"
+    fire: "l5r4.ui.mechanics.rings.fire",
+    water: "l5r4.ui.mechanics.rings.water",
+    air: "l5r4.ui.mechanics.rings.air",
+    earth: "l5r4.ui.mechanics.rings.earth",
+    void: "l5r4.ui.mechanics.rings.void",
+    all: "l5r4.ui.mechanics.rings.all"
   }),
 
   /** PC trait localization keys */
   traits: freeze({
-    sta: "l5r4.mechanics.traits.sta",
-    wil: "l5r4.mechanics.traits.wil",
-    str: "l5r4.mechanics.traits.str",
-    per: "l5r4.mechanics.traits.per",
-    ref: "l5r4.mechanics.traits.ref",
-    awa: "l5r4.mechanics.traits.awa",
-    agi: "l5r4.mechanics.traits.agi",
-    int: "l5r4.mechanics.traits.int"
+    sta: "l5r4.ui.mechanics.traits.sta",
+    wil: "l5r4.ui.mechanics.traits.wil",
+    str: "l5r4.ui.mechanics.traits.str",
+    per: "l5r4.ui.mechanics.traits.per",
+    ref: "l5r4.ui.mechanics.traits.ref",
+    awa: "l5r4.ui.mechanics.traits.awa",
+    agi: "l5r4.ui.mechanics.traits.agi",
+    int: "l5r4.ui.mechanics.traits.int"
   }),
 
   /** NPC trait localization keys (same as PC for consistency) */
   npcTraits: freeze({
-    sta: "l5r4.mechanics.traits.sta",
-    wil: "l5r4.mechanics.traits.wil",
-    str: "l5r4.mechanics.traits.str",
-    per: "l5r4.mechanics.traits.per",
-    ref: "l5r4.mechanics.traits.ref",
-    awa: "l5r4.mechanics.traits.awa",
-    agi: "l5r4.mechanics.traits.agi",
-    int: "l5r4.mechanics.traits.int"
+    sta: "l5r4.ui.mechanics.traits.sta",
+    wil: "l5r4.ui.mechanics.traits.wil",
+    str: "l5r4.ui.mechanics.traits.str",
+    per: "l5r4.ui.mechanics.traits.per",
+    ref: "l5r4.ui.mechanics.traits.ref",
+    awa: "l5r4.ui.mechanics.traits.awa",
+    agi: "l5r4.ui.mechanics.traits.agi",
+    int: "l5r4.ui.mechanics.traits.int"
   }),
 
   /** Skill category/family localization keys */
@@ -482,11 +353,11 @@ const _l5r4 = {
   /** Registered status effects for the system */
   statusEffects: freeze([
     // Stances
-    { id: "attackStance",      name: "EFFECT.attackStance",      img: iconPath("attackstance.png") },
-    { id: "fullAttackStance",  name: "EFFECT.fullAttackStance",  img: iconPath("fullattackstance.png") },
-    { id: "defenseStance",     name: "EFFECT.defenseStance",     img: iconPath("defensestance.png") },
-    { id: "fullDefenseStance", name: "EFFECT.fullDefenseStance", img: iconPath("fulldefensestance.png") },
-    { id: "centerStance",      name: "EFFECT.centerStance",      img: iconPath("centerstance.png") },
+    { id: "attackStance",      name: "l5r4.ui.mechanics.stances.attack",       img: iconPath("attackstance.png") },
+    { id: "fullAttackStance",  name: "l5r4.ui.mechanics.stances.fullAttack",   img: iconPath("fullattackstance.png") },
+    { id: "defenseStance",     name: "l5r4.ui.mechanics.stances.defense",      img: iconPath("defensestance.png") },
+    { id: "fullDefenseStance", name: "l5r4.ui.mechanics.stances.fullDefense",  img: iconPath("fulldefensestance.png") },
+    { id: "centerStance",      name: "l5r4.ui.mechanics.stances.center",       img: iconPath("centerstance.png") },
 
     // Generic conditions
     { id: "blinded",   name: "EFFECT.blinded",   img: "icons/svg/blind.svg" },
@@ -509,7 +380,7 @@ const _l5r4 = {
  * @type {Readonly<typeof _l5r4>}
  * @example
  * // Access ring labels in templates
- * const airLabel = l5r4.rings.air; // "l5r4.mechanics.rings.air"
+ * const airLabel = l5r4.rings.air; // "l5r4.ui.mechanics.rings.air"
  * 
  * // Use in Handlebars templates
  * // {{localize @root.config.rings.fire}}

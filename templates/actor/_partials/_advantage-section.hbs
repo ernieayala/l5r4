@@ -1,23 +1,22 @@
 <section class="flexcol -gap-sm">
   <div class="flexrow -gap-sm section-title">
-    <h4 class="title">{{localize "l5r4.ui.sheets.advantages"}}/{{localize "l5r4.ui.sheets.disadvantages"}}</h4>
-    <a class="button inline-control icon" data-action="item-create" data-type="advantage" title="{{localize "l5r4.ui.sheets.addAdv/Dis"}}">
+    <h4 class="title">{{localize "l5r4.ui.sheets.advantages"}}</h4>
+    <a class="button inline-control icon" data-action="item-create" data-type="advantage" title="{{localize "l5r4.ui.sheets.addAdvantage"}}">
       <i class="fas fa-plus"></i>
     </a>
     {{> "systems/l5r4/templates/actor/_partials/_expand.hbs"}}
   </div>
-  {{#if advDisList.length}}
-    <section class="item-list -advantages -header" data-scope="advDis">
+  {{#if advantages.length}}
+    <section class="item-list -advantages -header" data-scope="advantages">
       <div class="item">
         <a class="item-sort-by" data-sortby="name">{{localize "l5r4.ui.common.name"}}</a>
         <a class="item-sort-by" data-sortby="type">{{localize "l5r4.ui.common.type"}}</a>
-        <a class="item-sort-by" data-sortby="cost">{{localize "l5r4.equipment.general.cost"}}</a>
-        <a class="item-sort-by" data-sortby="item">{{localize "l5r4.ui.common.type"}}</a>
+        <a class="item-sort-by" data-sortby="cost">{{localize "l5r4.ui.common.cost"}}</a>
         <span></span>
       </div>
     </section>
     <section class="item-list -advantages">
-      {{#each advDisList as |item id|}}
+      {{#each advantages as |item id|}}
         {{> "systems/l5r4/templates/cards/advantage-disadvantage.hbs"
             system=item.system
             inSheet=true

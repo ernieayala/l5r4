@@ -147,8 +147,8 @@ export default class XpManagerApplication extends foundry.applications.api.Handl
           } else if (e.type === "void" && e.toValue !== undefined) {
             type = game.i18n.localize("l5r4.character.experience.breakdown.void");
             formattedNote = e.fromValue !== undefined ? 
-              `${game.i18n.localize("l5r4.mechanics.rings.void")} ${e.fromValue}→${e.toValue}` : 
-              `${game.i18n.localize("l5r4.mechanics.rings.void")} ${e.toValue}`;
+              `${game.i18n.localize("l5r4.ui.mechanics.rings.void")} ${e.fromValue}→${e.toValue}` : 
+              `${game.i18n.localize("l5r4.ui.mechanics.rings.void")} ${e.toValue}`;
           } else if (e.type === "skill" && e.skillName && e.toValue !== undefined) {
             type = game.i18n.localize("l5r4.character.experience.breakdown.skills");
             // Check if this is an emphasis entry (has emphasis field) or use the pre-formatted note
@@ -167,18 +167,18 @@ export default class XpManagerApplication extends foundry.applications.api.Handl
             formattedNote = e.itemName || e.note || "Disadvantage";
           } else {
             // Parse legacy entries based on localization keys in notes
-            if (formattedNote.includes("l5r4.character.experience.log.traitChange")) {
+            if (formattedNote.includes("l5r4.character.experience.traitChange")) {
               type = game.i18n.localize("l5r4.character.experience.breakdown.traits");
-              formattedNote = "Trait Increase";
-            } else if (formattedNote.includes("l5r4.character.experience.log.voidChange")) {
+              formattedNote = game.i18n.localize("l5r4.character.experience.fallbackLabels.traitIncrease");
+            } else if (formattedNote.includes("l5r4.character.experience.voidChange")) {
               type = game.i18n.localize("l5r4.character.experience.breakdown.void");
-              formattedNote = "Void Increase";
-            } else if (formattedNote.includes("l5r4.character.experience.log.skillCreate")) {
+              formattedNote = game.i18n.localize("l5r4.character.experience.fallbackLabels.voidIncrease");
+            } else if (formattedNote.includes("l5r4.character.experience.skillCreate")) {
               type = game.i18n.localize("l5r4.character.experience.breakdown.skills");
-              formattedNote = "Skill Created";
-            } else if (formattedNote.includes("l5r4.character.experience.log.skillChange")) {
+              formattedNote = game.i18n.localize("l5r4.character.experience.fallbackLabels.skillCreated");
+            } else if (formattedNote.includes("l5r4.character.experience.skillChange")) {
               type = game.i18n.localize("l5r4.character.experience.breakdown.skills");
-              formattedNote = "Skill Increased";
+              formattedNote = game.i18n.localize("l5r4.character.experience.fallbackLabels.skillIncreased");
             } else if (e.type) {
               type = e.type;
             } else {
@@ -310,7 +310,7 @@ export default class XpManagerApplication extends foundry.applications.api.Handl
         // Create entries for each rank increase
         for (let r = baseline + 1; r <= baseCur; r++) {
           const cost = this.actor._xpStepCostForTrait?.(r, freeEff, disc) || (4 * r);
-          const traitLabel = game.i18n.localize(`l5r4.mechanics.traits.${traitKey}`) || traitKey.toUpperCase();
+          const traitLabel = game.i18n.localize(`l5r4.ui.mechanics.traits.${traitKey}`) || traitKey.toUpperCase();
           
           spent.push({
             id: foundry.utils.randomID(),
@@ -336,7 +336,7 @@ export default class XpManagerApplication extends foundry.applications.api.Handl
           spent.push({
             id: foundry.utils.randomID(),
             delta: Math.max(0, cost),
-            note: `${game.i18n.localize("l5r4.mechanics.rings.void")} ${r}`,
+            note: `${game.i18n.localize("l5r4.ui.mechanics.rings.void")} ${r}`,
             type: "void",
             fromValue: r - 1,
             toValue: r,

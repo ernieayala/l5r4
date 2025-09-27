@@ -1,0 +1,27 @@
+<section class="flexcol -gap-sm">
+  <div class="flexrow -gap-sm section-title">
+    <h4 class="title">{{localize "l5r4.ui.sheets.disadvantages"}}</h4>
+    <a class="button inline-control icon" data-action="item-create" data-type="disadvantage" title="{{localize "l5r4.ui.sheets.addDisadvantage"}}">
+      <i class="fas fa-plus"></i>
+    </a>
+    {{> "systems/l5r4/templates/actor/_partials/_expand.hbs"}}
+  </div>
+  {{#if disadvantages.length}}
+    <section class="item-list -advantages -header" data-scope="disadvantages">
+      <div class="item">
+        <a class="item-sort-by" data-sortby="name">{{localize "l5r4.ui.common.name"}}</a>
+        <a class="item-sort-by" data-sortby="type">{{localize "l5r4.ui.common.type"}}</a>
+        <a class="item-sort-by" data-sortby="cost">{{localize "l5r4.ui.common.cost"}}</a>
+        <span></span>
+      </div>
+    </section>
+    <section class="item-list -advantages">
+      {{#each disadvantages as |item id|}}
+        {{> "systems/l5r4/templates/cards/advantage-disadvantage.hbs"
+            system=item.system
+            inSheet=true
+            docId=item.id}}
+      {{/each}}
+    </section>
+  {{/if}}
+</section>

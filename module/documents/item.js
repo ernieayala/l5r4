@@ -242,7 +242,7 @@ export default class L5R4Item extends Item {
           spent.push({
             id: foundry.utils.randomID(),
             delta: newCost,
-            note: game.i18n.format("l5r4.character.experience.log.skillCreate", { name: this.name ?? "Skill", rank: r }),
+            note: game.i18n.format("l5r4.character.experience.skillCreate", { name: this.name ?? "Skill", rank: r }),
             ts: Date.now(),
             type: "skill",
             skillName: this.name ?? "Skill",
@@ -356,7 +356,7 @@ export default class L5R4Item extends Item {
             spent.push({
               id: foundry.utils.randomID(),
               delta,
-              note: game.i18n.format("l5r4.character.experience.log.skillChange", { name: this.name ?? "Skill", from: oldRank, to: newRank }),
+              note: game.i18n.format("l5r4.character.experience.skillChange", { name: this.name ?? "Skill", from: oldRank, to: newRank }),
               ts: Date.now(),
               type: "skill",
               skillName: this.name ?? "Skill",
@@ -450,7 +450,7 @@ export default class L5R4Item extends Item {
     const sys = (this.system ??= {});
 
     // Set bow-specific defaults for damage calculation compatibility
-    if (this.type === "bow") {
+    if (this.type === "weapon" && sys.isBow) {
       if (sys.str == null) sys.str = 0;            // Bow strength rating for damage calculation
       if (sys.arrow == null) sys.arrow = "willow"; // Default arrow type (must match ARROW_MODS keys)
     }
@@ -530,7 +530,7 @@ export default class L5R4Item extends Item {
     }
 
     // Calculate bow damage formula based on strength and arrow type
-    if (this.type === "bow") {
+    if (this.type === "weapon" && sys.isBow) {
       const actorStr = this.actor ? toInt(this.actor.system?.traits?.str) : toInt(sys.str);
       const bowStr   = toInt(sys.str);
 

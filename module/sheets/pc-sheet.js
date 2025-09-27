@@ -364,7 +364,7 @@ export default class L5R4PcSheet extends BaseActorSheet {
         rank:     it => Number(it?.system?.rank ?? 0) || 0,
         trait:    it => {
           const raw = String(it?.system?.trait ?? "").toLowerCase();
-          const key = raw && /^l5r4\.mechanics\.traits\./.test(raw) ? raw : (raw ? `l5r4.mechanics.traits.${raw}` : "");
+          const key = raw && /^l5r4\.mechanics\.traits\./.test(raw) ? raw : (raw ? `l5r4.ui.mechanics.traits.${raw}` : "");
           const loc = key ? game.i18n?.localize?.(key) : "";
           return String((loc && loc !== key) ? loc : (it?.system?.trait ?? ""));
         },
@@ -480,6 +480,7 @@ export default class L5R4PcSheet extends BaseActorSheet {
         
         return bow;
       }), {   name:(it)=>String(it?.name??""), damage:(it)=> (toInt(it?.system?.damageRoll)*10)+toInt(it?.system?.damageKeep), size:(it)=>String(it?.system?.size??"") }, getSortPref(actorObj.id, "weapons", ["name","damage","size"], "name"), game.i18n?.lang),
+      advantages: byType("advantage"),
       disadvantages: byType("disadvantage"),
       items: sortWithPref(all.filter((i) => i.type === "item" || i.type === "commonItem"), { name:(it)=>String(it?.name??"") }, getSortPref(actorObj.id, "items", ["name"], "name"), game.i18n?.lang),
       katas: byType("kata"),
@@ -615,19 +616,22 @@ export default class L5R4PcSheet extends BaseActorSheet {
     event.preventDefault();
     el = /** @type {HTMLElement} */ (el || event.currentTarget);
     const header = /** @type {HTMLElement|null} */ (el.closest('.item-list.-header'));
-    const scope = String(header?.dataset?.scope || "advDis");
-    const key = String(el?.dataset?.sortby || "name");
+    const scope = header?.dataset?.scope || "items";
+    const key = el.dataset.sortby || "name";
     const allowed = {
-      advDis:     ["name","type","cost","item"],
-      armors:     ["name","bonus","reduction","equipped"],
-      weapons:    ["name","damage","size"],
-      items:      ["name"],
-      skills:     ["name","rank","trait","emphasis"],
-      spells:     ["name","ring","mastery","range","aoe","duration"],
-      techniques: ["name"],
-      katas:      ["name","ring","mastery"],
-      kihos:      ["name","ring","mastery","type"],
-      tattoos:    ["name"]
+      armors:       ["name","bonus","reduction","equipped"],
+      weapons:      ["name","damage","size"],
+      items:        ["name"],
+      skills:       ["name","rank","trait","emphasis"],
+      spells:       ["name","ring","mastery","range","aoe","duration"],
+      techniques:   ["name"],
+      technique:    ["name"],
+      katas:        ["name","ring","mastery"],
+      kihos:        ["name","ring","mastery","type"],
+      tattoos:      ["name"],
+      advantages:   ["name","type","cost"],
+      disadvantages:["name","type","cost"],
+      advDis:       ["name","type","cost","item"]
     }[scope] ?? ["name"];
     const cur = getSortPref(this.actor.id, scope, allowed, allowed[0]);
     await setSortPref(this.actor.id, scope, key, { toggleFrom: cur });
@@ -903,7 +907,7 @@ export default class L5R4PcSheet extends BaseActorSheet {
   _onRingRoll(event, el) {
     event.preventDefault();
     /** Localized ring name for chat flavor. */
-    const ringName = el.dataset?.ringName || T(`l5r4.mechanics.rings.${el.dataset?.systemRing || "void"}`);
+    const ringName = el.dataset?.ringName || T(`l5r4.ui.mechanics.rings.${el.dataset?.systemRing || "void"}`);
     /** System ring key: "earth" | "air" | "water" | "fire" | "void". */
     const systemRing = String(el.dataset?.systemRing || "void").toLowerCase();
     /** Numeric ring rank from dataset, already formatted by the template. */
@@ -962,8 +966,8 @@ export default class L5R4PcSheet extends BaseActorSheet {
     const weaponSkill = resolveWeaponSkillTrait(this.actor, item);
     const untrained = weaponSkill.skillRank === 0;
     const rollName = untrained 
-      ? `${item.name} (${T("l5r4.mechanics.rolls.unskilled")})`
-      : `${item.name} ${T("l5r4.mechanics.rolls.attackRoll")}`;
+      ? `${item.name} (${T("l5r4.ui.mechanics.rolls.unskilled")})`
+      : `${item.name} ${T("l5r4.ui.mechanics.rolls.attackRoll")}`;
 
     return Dice.NpcRoll({
       rollName,
@@ -1095,7 +1099,7 @@ export default class L5R4PcSheet extends BaseActorSheet {
 
     const content = `
       <h3>${game.i18n.localize("l5r4.character.experience.experienceSummary")}</h3>
-      <p><b>${game.i18n.localize("l5r4.character.experience.usedTotal")}:</b> ${xp.spent ?? 0} / ${xp.total ?? 40} <i>(${(xp.available ?? (xp.total ?? 40) - (xp.spent ?? 0))} ${game.i18n.localize("l5r4.ui.common.left") ?? "left"})</i></p>
+      <p><b>${game.i18n.localize("l5r4.character.experience.usedTotal")}:</b> ${xp.spent ?? 0} / ${xp.total ?? 40} <i>(${(xp.available ?? (xp.total ?? 40) - (xp.spent ?? 0))} ${game.i18n.localize("l5r4.ui.common.left")})</i></p>
       <ul>
         <li>Base: ${xp?.breakdown?.base ?? 40}</li>
         <li>Disadvantages grant: ${xp?.breakdown?.disadvantagesGranted ?? 0} (cap 10)</li>
@@ -1134,7 +1138,7 @@ export default class L5R4PcSheet extends BaseActorSheet {
     await Dialog.prompt({
       title: game.i18n.localize("l5r4.character.experience.xpLog"),
       content,
-      label: game.i18n.localize("Close"),
+      label: game.i18n.localize("l5r4.ui.common.close"),
       callback: () => true
     });
   }
@@ -1166,7 +1170,7 @@ export default class L5R4PcSheet extends BaseActorSheet {
         // Create entries for each rank increase
         for (let r = baseline + 1; r <= baseCur; r++) {
           const cost = this.actor._xpStepCostForTrait?.(r, freeEff, disc) || (4 * r);
-          const traitLabel = game.i18n.localize(`l5r4.mechanics.traits.${traitKey}`) || traitKey.toUpperCase();
+          const traitLabel = game.i18n.localize(`l5r4.ui.mechanics.traits.${traitKey}`) || traitKey.toUpperCase();
           
           spent.push({
             id: foundry.utils.randomID(),
@@ -1192,7 +1196,7 @@ export default class L5R4PcSheet extends BaseActorSheet {
           spent.push({
             id: foundry.utils.randomID(),
             delta: Math.max(0, cost),
-            note: `${game.i18n.localize("l5r4.mechanics.rings.void")} ${r}`,
+            note: `${game.i18n.localize("l5r4.ui.mechanics.rings.void")} ${r}`,
             type: "void",
             fromValue: r - 1,
             toValue: r,

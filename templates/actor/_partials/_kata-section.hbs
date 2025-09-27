@@ -1,0 +1,24 @@
+<section class="flexcol -gap-sm">
+  <div class="flexrow -gap-sm section-title">
+    <h4 class="title">{{localize "l5r4.ui.sheets.kata"}}</h4>
+    <a class="button inline-control icon" data-action="item-create" data-type="kata" title="{{localize "l5r4.ui.sheets.addKata"}}">
+      <i class="fas fa-plus"></i>
+    </a>
+    {{> "systems/l5r4/templates/actor/_partials/_expand.hbs"}}
+  </div>
+  {{#if katas.length}}
+    <section class="item-list -kata -header" data-scope="katas">
+      <div class="item">
+        <a class="item-sort-by" data-sortby="name">{{localize "l5r4.ui.common.name"}}</a>
+        <a class="item-sort-by" data-sortby="ring">{{localize "l5r4.ui.common.ring"}}</a>
+        <a class="item-sort-by" data-sortby="mastery">{{localize "l5r4.ui.common.mastery"}}</a>
+        <span></span>
+      </div>
+    </section>
+    <section class="item-list -kata">
+      {{#each katas as |kata id|}}
+        {{> "systems/l5r4/templates/cards/kata.hbs" system=kata.system inSheet=true docId=kata.id}}
+      {{/each}}
+    </section>
+  {{/if}}
+</section>

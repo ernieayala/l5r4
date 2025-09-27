@@ -272,8 +272,8 @@ export default class L5R4Actor extends Actor {
 
           if (deltaXP > 0) {
             // Create localized log entry for experience tracking
-            const label = game.i18n?.localize?.(`l5r4.mechanics.traits.${k}`) || k.toUpperCase();
-            pushNote(deltaXP, game.i18n.format("l5r4.character.experience.log.traitChange", { label, from: oldBase, to: newBase }), {
+            const label = game.i18n?.localize?.(`l5r4.ui.mechanics.traits.${k}`) || k.toUpperCase();
+            pushNote(deltaXP, game.i18n.format("l5r4.character.experience.traitChange", { label, from: oldBase, to: newBase }), {
               type: "trait",
               traitKey: k,
               traitLabel: label,
@@ -297,7 +297,7 @@ export default class L5R4Actor extends Actor {
             deltaXP += Math.max(0, step);
           }
           if (deltaXP > 0) {
-            pushNote(deltaXP, game.i18n.format("l5r4.character.experience.log.voidChange", { from: oldVoid, to: next }), {
+            pushNote(deltaXP, game.i18n.format("l5r4.character.experience.voidChange", { from: oldVoid, to: next }), {
               type: "void",
               fromValue: oldVoid,
               toValue: next
@@ -428,7 +428,7 @@ export default class L5R4Actor extends Actor {
      * **Supported Input Formats:**
      * - Short keys: "ref", "awa", "sta", etc.
      * - English labels: "Reflexes", "Awareness", "Stamina", etc.
-     * - Localization keys: "l5r4.mechanics.traits.ref", etc.
+     * - Localization keys: "l5r4.ui.mechanics.traits.ref", etc.
      * - Localized labels: Any language via game.i18n.localize
      * 
      * @param {string} raw - The trait identifier to normalize
@@ -468,7 +468,7 @@ export default class L5R4Actor extends Actor {
       // Localized labels (any language): compare against localized names
       try {
         for (const key of known) {
-          const label = game.i18n?.localize?.(`l5r4.mechanics.traits.${key}`) ?? "";
+          const label = game.i18n?.localize?.(`l5r4.ui.mechanics.traits.${key}`) ?? "";
           if (label && label.toLowerCase() === k.toLowerCase()) {
             return key;
           }

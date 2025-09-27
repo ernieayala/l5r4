@@ -185,12 +185,12 @@ export async function SkillRoll({
   rollType = null
 } = {}) {
   const messageTemplate = CHAT_TEMPLATES.simpleRoll;
-  const traitI18nKey = skillTrait === "void" ? "l5r4.mechanics.rings.void" : `l5r4.mechanics.traits.${skillTrait}`;
+  const traitI18nKey = skillTrait === "void" ? "l5r4.ui.mechanics.rings.void" : `l5r4.ui.mechanics.traits.${skillTrait}`;
   const optionsSetting = game.settings.get(SYS_ID, "showSkillRollOptions");
-  // Prefer an i18n key if it exists; otherwise use the item’s display name
-  const tryKey = typeof skillName === "string" ? `l5r4.skills.${skillName.toLowerCase()}` : "";
+  // Prefer an i18n key if it exists; otherwise use the item's display name
+  const tryKey = typeof skillName === "string" ? `l5r4.character.skills.names.${skillName.toLowerCase()}` : "";
   const skillLabel = (tryKey && game.i18n?.has?.(tryKey)) ? game.i18n.localize(tryKey) : String(skillName ?? game.i18n.localize("l5r4.ui.common.skill"));
-  let label = `${game.i18n.localize("l5r4.mechanics.rolls.skillRoll")}: ${skillLabel} / ${game.i18n.localize(traitI18nKey)}`;
+  let label = `${game.i18n.localize("l5r4.ui.mechanics.rolls.skillRoll")}: ${skillLabel} / ${game.i18n.localize(traitI18nKey)}`;
 
   let emphasis = false;
   let rollMod = 0;
@@ -208,10 +208,10 @@ export async function SkillRoll({
       const targetActor = targetedTokens[0].actor;
       if (targetActor?.system?.armorTn?.current) {
         autoTN = toInt(targetActor.system.armorTn.current);
-        targetInfo = ` vs ${targetActor.name} (Armor TN ${autoTN})`;
+        targetInfo = ` ${game.i18n.localize("l5r4.ui.mechanics.combat.targeting.vs")} ${targetActor.name} (${game.i18n.localize("l5r4.ui.mechanics.wounds.armorTn")} ${autoTN})`;
       }
     } else if (targetedTokens.length > 1) {
-      targetInfo = ` (Multiple targets - TN not auto-set)`;
+      targetInfo = ` (${game.i18n.localize("l5r4.ui.mechanics.combat.targeting.multipleTargets")})`;
     }
   }
 
@@ -244,7 +244,7 @@ export async function SkillRoll({
     __raisesInput = toInt(check.raises);
     if (__tnInput || __raisesInput) {
       const __effTN = __tnInput + (__raisesInput * 5);
-      label += ` [TN ${__effTN}${__raisesInput ? ` (${game.i18n.localize("l5r4.mechanics.rolls.raises")}: ${__raisesInput})` : ""}]`;
+      label += ` [TN ${__effTN}${__raisesInput ? ` (${game.i18n.localize("l5r4.ui.mechanics.rolls.raises")}: ${__raisesInput})` : ""}]`;
     }
 
     if (check.void) {
@@ -272,7 +272,7 @@ export async function SkillRoll({
 
       const curVoid = Number(spendActor.system?.rings?.void?.value ?? 0) || 0;
       if (curVoid <= 0) {
-        const labelVP = game.i18n?.localize?.("l5r4.mechanics.rings.voidPoints") || "Void Points";
+        const labelVP = game.i18n?.localize?.("l5r4.ui.mechanics.rings.voidPoints") || "Void Points";
         ui.notifications?.warn(`${labelVP}: 0`);
         return;
       }
@@ -282,7 +282,7 @@ export async function SkillRoll({
 
       // Apply void point bonus (+1k1) and update label
       rollMod += 1; keepMod += 1;
-      label += ` ${game.i18n.localize("l5r4.mechanics.rings.void")}!`;
+      label += ` ${game.i18n.localize("l5r4.ui.mechanics.rings.void")}!`;
     }
   } else {
     rollMod = toInt(rollBonus);
@@ -304,13 +304,13 @@ export async function SkillRoll({
 
   let rollFormula = `${diceRoll}d10k${diceKeep}x10+${bonus}`;
   if (emphasis) {
-    label += ` (${game.i18n.localize("l5r4.mechanics.rolls.emphasis")})`;
+    label += ` (${game.i18n.localize("l5r4.ui.mechanics.rolls.emphasis")})`;
     rollFormula = `${diceRoll}d10r1k${diceKeep}x10+${bonus}`;
   }
   // Build base label without target info first
   let baseLabel = label;
   if (rollMod || keepMod || totalMod) {
-    baseLabel += ` ${game.i18n.localize("l5r4.mechanics.rolls.mod")} (${rollMod}k${keepMod}${totalMod < 0 ? totalMod : "+" + totalMod})`;
+    baseLabel += ` ${game.i18n.localize("l5r4.ui.common.mod")} (${rollMod}k${keepMod}${totalMod < 0 ? totalMod : "+" + totalMod})`;
   }
 
   // Execute roll and render with custom template wrapper
@@ -331,14 +331,14 @@ export async function SkillRoll({
   }
 
   const tnResult = (effTN > 0)
-    ? { effective: effTN, raises: toInt(check.raises) || 0, outcome: ((roll.total ?? 0) >= effTN) ? T("l5r4.mechanics.rolls.success") : T("l5r4.mechanics.rolls.failure") }
+    ? { effective: effTN, raises: toInt(check.raises) || 0, outcome: ((roll.total ?? 0) >= effTN) ? T("l5r4.ui.mechanics.rolls.success") : T("l5r4.ui.mechanics.rolls.failure") }
     : null;
 
   // Determine final label and TN result based on GM status and attack success
   let finalLabel = baseLabel;
   let finalTnResult = tnResult;
   
-  if (rollType === "attack" && !game.user.isGM && tnResult && tnResult.outcome === T("l5r4.mechanics.rolls.failure")) {
+  if (rollType === "attack" && !game.user.isGM && tnResult && tnResult.outcome === T("l5r4.ui.mechanics.rolls.failure")) {
     // Hide target information and TN result on missed attacks for non-GM players
     finalTnResult = null;
     // Don't add target info to label for failed attacks
@@ -402,7 +402,7 @@ export async function RingRoll({
   actor = null
 } = {}) {
   const messageTemplate = CHAT_TEMPLATES.simpleRoll;
-  let label = `${game.i18n.localize("l5r4.mechanics.rolls.ringRoll")}: ${ringName}`;
+  let label = `${game.i18n.localize("l5r4.ui.mechanics.rolls.ringRoll")}: ${ringName}`;
 
   const optionsSetting = game.settings.get(SYS_ID, "showSpellRollOptions");
 
@@ -439,7 +439,7 @@ export async function RingRoll({
     __raisesInput = toInt(choice.raises);
     if (__tnInput || __raisesInput) {
       const __effTN = __tnInput + (__raisesInput * 5);
-      label += ` [TN ${__effTN}${__raisesInput ? ` (${game.i18n.localize("l5r4.mechanics.rolls.raises")}: ${__raisesInput})` : ""}]`;
+      label += ` [TN ${__effTN}${__raisesInput ? ` (${game.i18n.localize("l5r4.ui.mechanics.rolls.raises")}: ${__raisesInput})` : ""}]`;
     }
   }
 
@@ -469,7 +469,7 @@ export async function RingRoll({
 
     const curVoid = Number(spendActor.system?.rings?.void?.value ?? 0) || 0;
     if (curVoid <= 0) {
-      const labelVP = game.i18n?.localize?.("l5r4.mechanics.rings.voidPoints") || "Void Points";
+      const labelVP = game.i18n?.localize?.("l5r4.ui.mechanics.rings.voidPoints") || "Void Points";
       ui.notifications?.warn(`${labelVP}: 0`);
       return false;
     }
@@ -479,7 +479,7 @@ export async function RingRoll({
 
     // Apply void point bonus (+1k1) and update label
     rollMod += 1; keepMod += 1;
-    label += ` ${game.i18n.localize("l5r4.mechanics.rings.void")}!`;
+    label += ` ${game.i18n.localize("l5r4.ui.mechanics.rings.void")}!`;
   }
 
   // Deduct spell slots when requested (works with either Ring Roll or Spell Casting Roll button)
@@ -499,7 +499,7 @@ export async function RingRoll({
     const ringKey = String(systemRing).toLowerCase();
     const validRings = ["water", "air", "fire", "earth", "void"];
     if (!validRings.includes(ringKey)) {
-      ui.notifications?.warn(`Invalid ring for spell slot: ${ringKey}`);
+      ui.notifications?.warn(game.i18n.format("l5r4.ui.notifications.invalidRingForSpell", {ring: ringKey}));
       return false;
     }
 
@@ -508,12 +508,12 @@ export async function RingRoll({
       const path = `system.spellSlots.${ringKey}`;
       const current = Number(foundry.utils.getProperty(spendActor, path) ?? 0) || 0;
       if (current <= 0) {
-        const ringLabel = game.i18n.localize(`l5r4.mechanics.rings.${ringKey}`) || ringKey;
+        const ringLabel = game.i18n.localize(`l5r4.ui.mechanics.rings.${ringKey}`) || ringKey;
         ui.notifications?.warn(`${ringLabel}: 0`);
         return false;
       }
       await spendActor.update({ [path]: current - 1 }, { diff: true });
-      const ringDisplay = game.i18n.localize(`l5r4.mechanics.rings.${ringKey}`) || ringKey;
+      const ringDisplay = game.i18n.localize(`l5r4.ui.mechanics.rings.${ringKey}`) || ringKey;
       label += ` [${ringDisplay} Slot]`;
     }
 
@@ -522,11 +522,11 @@ export async function RingRoll({
       const vPath = "system.spellSlots.void";
       const vCurrent = Number(foundry.utils.getProperty(spendActor, vPath) ?? 0) || 0;
       if (vCurrent <= 0) {
-        ui.notifications?.warn(`${game.i18n.localize("l5r4.mechanics.rings.void")} ${game.i18n.localize("l5r4.magic.spells.voidSlot")} : 0`);
+        ui.notifications?.warn(`${game.i18n.localize("l5r4.ui.mechanics.rings.void")} ${game.i18n.localize("l5r4.magic.spells.voidSlot")} : 0`);
         return false;
       }
       await spendActor.update({ [vPath]: vCurrent - 1 }, { diff: true });
-      label += ` [${game.i18n.localize("l5r4.mechanics.rings.void")} Slot]`;
+      label += ` [${game.i18n.localize("l5r4.ui.mechanics.rings.void")} Slot]`;
     }
   }
 
@@ -544,12 +544,12 @@ export async function RingRoll({
     const tnResult = (__effTN > 0) ? {
       effective: __effTN,
       raises: toInt(__raisesInput) || 0,
-      outcome: ((roll.total ?? 0) >= __effTN) ? T("l5r4.mechanics.rolls.success") : T("l5r4.mechanics.rolls.failure")
+      outcome: ((roll.total ?? 0) >= __effTN) ? T("l5r4.ui.mechanics.rolls.success") : T("l5r4.ui.mechanics.rolls.failure")
     } : null;
 
     // Hide TN information for non-GM players on missed attack rolls (if this is used for attacks)
     let finalTnResult = tnResult;
-    if (!game.user.isGM && tnResult && tnResult.outcome === T("l5r4.mechanics.rolls.failure")) {
+    if (!game.user.isGM && tnResult && tnResult.outcome === T("l5r4.ui.mechanics.rolls.failure")) {
       // Note: RingRoll doesn't currently support rollType parameter, but we include this for consistency
       // and future-proofing in case attack rolls use ring rolls
       finalTnResult = null;
@@ -601,7 +601,7 @@ export async function TraitRoll({
 } = {}) {
   const messageTemplate = CHAT_TEMPLATES.simpleRoll;
   const labelTrait = String(traitName).toLowerCase();
-  const traitKey = labelTrait === "void" ? "l5r4.mechanics.rings.void" : `l5r4.mechanics.traits.${labelTrait}`;
+  const traitKey = labelTrait === "void" ? "l5r4.ui.mechanics.rings.void" : `l5r4.ui.mechanics.traits.${labelTrait}`;
 
   const optionsSetting = game.settings.get(SYS_ID, "showTraitRollOptions");
   let rollMod = 0, keepMod = 0, totalMod = 0, applyWoundPenalty = true;
@@ -631,7 +631,7 @@ export async function TraitRoll({
     __raisesInput = toInt(check.raises);
     if (__tnInput || __raisesInput) {
       const __effTN = __tnInput + (__raisesInput * 5);
-      label += ` [TN ${__effTN}${__raisesInput ? ` (${game.i18n.localize("l5r4.mechanics.rolls.raises")}: ${__raisesInput})` : ""}]`;
+      label += ` [TN ${__effTN}${__raisesInput ? ` (${game.i18n.localize("l5r4.ui.mechanics.rolls.raises")}: ${__raisesInput})` : ""}]`;
     }
 
     // Apply Active Effects bonuses for this trait
@@ -655,7 +655,7 @@ export async function TraitRoll({
 
       const curVoid = Number(targetActor.system?.rings?.void?.value ?? 0) || 0;
       if (curVoid <= 0) {
-        const labelVP = game.i18n?.localize?.("l5r4.mechanics.rings.voidPoints") || "Void Points";
+        const labelVP = game.i18n?.localize?.("l5r4.ui.mechanics.rings.voidPoints") || "Void Points";
         ui.notifications?.warn(`${labelVP}: 0`);
         return;
       }
@@ -666,7 +666,7 @@ export async function TraitRoll({
       // Apply void point bonus (+1k1) and update label
       rollMod += 1;
       keepMod += 1;
-      label += ` ${game.i18n.localize("l5r4.mechanics.rings.void")}!`;
+      label += ` ${game.i18n.localize("l5r4.ui.mechanics.rings.void")}!`;
     }
   }
 
@@ -679,7 +679,7 @@ export async function TraitRoll({
 
   if (unskilled) {
     rollFormula = `${diceRoll}d10k${diceKeep}+${bonus}`;
-    flavor += ` (${game.i18n.localize("l5r4.mechanics.rolls.unskilledRoll")})`;
+    flavor += ` (${game.i18n.localize("l5r4.ui.mechanics.rolls.unskilledRoll")})`;
   }
 
   // Execute roll and render with target number evaluation
@@ -692,12 +692,12 @@ export async function TraitRoll({
   const tnResult = (__effTN > 0) ? {
     effective: __effTN,
     raises: toInt(__raisesInput) || 0,
-    outcome: ((roll.total ?? 0) >= __effTN) ? T("l5r4.mechanics.rolls.success") : T("l5r4.mechanics.rolls.failure")
+    outcome: ((roll.total ?? 0) >= __effTN) ? T("l5r4.ui.mechanics.rolls.success") : T("l5r4.ui.mechanics.rolls.failure")
   } : null;
 
   // Hide TN information for non-GM players on missed attack rolls (if this is used for attacks)
   let finalTnResult = tnResult;
-  if (!game.user.isGM && tnResult && tnResult.outcome === T("l5r4.mechanics.rolls.failure")) {
+  if (!game.user.isGM && tnResult && tnResult.outcome === T("l5r4.ui.mechanics.rolls.failure")) {
     // Note: TraitRoll doesn't currently support rollType parameter, but we include this for consistency
     // and future-proofing in case attack rolls use trait rolls
     finalTnResult = null;
@@ -744,7 +744,7 @@ export async function WeaponRoll({
   const messageTemplate = CHAT_TEMPLATES.weaponCard;
 
   let rollMod = 0, keepMod = 0, bonus = 0;
-  let label = `${game.i18n.localize("l5r4.mechanics.rolls.damageRoll")} ${weaponName}`;
+  let label = `${game.i18n.localize("l5r4.ui.mechanics.rolls.damageRoll")} ${weaponName}`;
   const optionsSetting = game.settings.get(SYS_ID, "showWeaponRollOptions");
 
   if (askForOptions !== optionsSetting) {
@@ -854,12 +854,12 @@ export async function NpcRoll({
   // Build display label matching PC roll format
   let label = "";
   if (traitName) {
-    const traitKey = (String(traitName).toLowerCase() === "void") ? "l5r4.mechanics.rings.void" : `l5r4.mechanics.traits.${String(traitName).toLowerCase()}`;
+    const traitKey = (String(traitName).toLowerCase() === "void") ? "l5r4.ui.mechanics.rings.void" : `l5r4.ui.mechanics.traits.${String(traitName).toLowerCase()}`;
     label = `${game.i18n.localize(traitKey)} ${game.i18n.localize("l5r4.ui.common.roll")}`;
   } else if (ringName) {
-    label = `${game.i18n.localize("l5r4.mechanics.rolls.ringRoll")}: ${ringName}`;
+    label = `${game.i18n.localize("l5r4.ui.mechanics.rolls.ringRoll")}: ${ringName}`;
   } else {
-    label = game.i18n.format("l5r4.system.chat.rollName", { roll: String(rollName ?? "") });
+    label = game.i18n.format("l5r4.ui.chat.rollName", { roll: String(rollName ?? "") });
   }
 
 
@@ -874,7 +874,7 @@ export async function NpcRoll({
     // NPCs don’t track resource spending here — just mirror +1k1 like PCs and annotate.
     rollMod += 1; 
     keepMod += 1;
-    label += ` ${game.i18n.localize("l5r4.mechanics.rings.void")}!`;
+    label += ` ${game.i18n.localize("l5r4.ui.mechanics.rings.void")}!`;
   }
 
   // Determine dice pool: numeric values take precedence over trait/ring
@@ -907,16 +907,16 @@ export async function NpcRoll({
     effTN += toInt(woundPenalty);
   }
   const tnResult = (effTN > 0)
-    ? { effective: effTN, raises: toInt(check.raises) || 0, outcome: ((roll.total ?? 0) >= effTN) ? T("l5r4.mechanics.rolls.success") : T("l5r4.mechanics.rolls.failure") }
+    ? { effective: effTN, raises: toInt(check.raises) || 0, outcome: ((roll.total ?? 0) >= effTN) ? T("l5r4.ui.mechanics.rolls.success") : T("l5r4.ui.mechanics.rolls.failure") }
     : null;
 
   // Pre-localize target data strings for template
   if (targetData) {
     if (targetData.single) {
-      targetData.vsText = T("l5r4.mechanics.combat.targeting.vs");
-      targetData.armorTnText = T("l5r4.mechanics.wounds.armorTn");
+      targetData.vsText = T("l5r4.ui.mechanics.combat.targeting.vs");
+      targetData.armorTnText = T("l5r4.ui.mechanics.wounds.armorTn");
     } else if (targetData.multiple) {
-      targetData.multipleText = T("l5r4.mechanics.combat.targeting.multipleTargets");
+      targetData.multipleText = T("l5r4.ui.mechanics.combat.targeting.multipleTargets");
     }
   }
 
@@ -924,7 +924,7 @@ export async function NpcRoll({
   let finalTargetData = targetData;
   let finalTnResult = tnResult;
   
-  if (rollType === "attack" && !game.user.isGM && tnResult && tnResult.outcome === T("l5r4.mechanics.rolls.failure")) {
+  if (rollType === "attack" && !game.user.isGM && tnResult && tnResult.outcome === T("l5r4.ui.mechanics.rolls.failure")) {
     // Hide target information on missed attacks for non-GM players
     finalTargetData = null;
     finalTnResult = null;
@@ -932,9 +932,9 @@ export async function NpcRoll({
 
   // Prepare weapon data for damage button on successful attack rolls
   let weaponData = null;
-  if (rollType === "attack" && weaponId && actor && tnResult && tnResult.outcome === T("l5r4.mechanics.rolls.success")) {
+  if (rollType === "attack" && weaponId && actor && tnResult && tnResult.outcome === T("l5r4.ui.mechanics.rolls.success")) {
     const weapon = actor.items.get(weaponId);
-    if (weapon && (weapon.type === "weapon" || weapon.type === "bow")) {
+    if (weapon && (weapon.type === "weapon")) {
       weaponData = {
         id: weaponId,
         name: weapon.name,
@@ -957,7 +957,7 @@ async function GetSkillOptions(skillName, noVoid, rollBonus = 0, keepBonus = 0, 
   const content = await R(DIALOG_TEMPLATES.rollModifiers, { skill: true, noVoid, rollBonus, keepBonus, totalBonus });
   try {
     const result = await DIALOG.prompt({
-      window: { title: game.i18n.format("l5r4.system.chat.rollName", { roll: skillName }) },
+      window: { title: game.i18n.format("l5r4.ui.chat.rollName", { roll: skillName }) },
       content,
       ok: { label: game.i18n.localize("l5r4.ui.common.roll"), callback: (_e, b, d) => _processSkillRollOptions(b.form ?? d.form) },
       cancel: { label: game.i18n.localize("l5r4.ui.common.cancel") },
@@ -985,10 +985,10 @@ async function GetTraitRollOptions(traitName) {
   const content = await R(DIALOG_TEMPLATES.rollModifiers, { trait: true });
   try {
     // Localize trait label for dialog title
-    const traitKey = String(traitName).toLowerCase() === "void" ? "l5r4.mechanics.rings.void" : `l5r4.mechanics.traits.${String(traitName).toLowerCase()}`;
+    const traitKey = String(traitName).toLowerCase() === "void" ? "l5r4.ui.mechanics.rings.void" : `l5r4.ui.mechanics.traits.${String(traitName).toLowerCase()}`;
     const traitLabel = game.i18n.localize(traitKey);
     const result = await DIALOG.prompt({
-      window: { title: game.i18n.format("l5r4.system.chat.traitRoll", { trait: traitLabel }) },
+      window: { title: game.i18n.format("l5r4.ui.chat.traitRoll", { trait: traitLabel }) },
       content,
       ok: { label: game.i18n.localize("l5r4.ui.common.roll"), callback: (_e, b, d) => _processTraitRollOptions(b.form ?? d.form) },
       cancel: { label: game.i18n.localize("l5r4.ui.common.cancel") },
@@ -1028,17 +1028,17 @@ async function GetSpellOptions(ringName) {
   const content = await R(DIALOG_TEMPLATES.rollModifiers, { spell: true, ring: ringName });
   return await new Promise((resolve) => {
     new DIALOG({
-      window: { title: game.i18n.format("l5r4.system.chat.ringRoll", { ring: ringName }) },
+      window: { title: game.i18n.format("l5r4.ui.chat.ringRoll", { ring: ringName }) },
       position: { width: 460 },
       content,
       buttons: [
         {
           action: "normal",
-          label: game.i18n.localize("l5r4.mechanics.rolls.ringRoll"),
+          label: game.i18n.localize("l5r4.ui.mechanics.rolls.ringRoll"),
           callback: (_e, b, d) => resolve(_processRingRollOptions(b.form ?? d.form, false))
         },
         {
-          label: game.i18n.localize("l5r4.mechanics.rolls.spellCasting"),
+          label: game.i18n.localize("l5r4.ui.mechanics.rolls.spellCasting"),
           callback: (_e, b, d) => resolve(_processRingRollOptions(b.form ?? d.form, true))
         },
         { action: "cancel", label: game.i18n.localize("l5r4.ui.common.cancel") }
@@ -1107,7 +1107,7 @@ async function GetWeaponOptions(weaponName) {
   const content = await R(DIALOG_TEMPLATES.rollModifiers, { weapon: true });
   try {
     const result = await DIALOG.prompt({
-      window: { title: game.i18n.format("l5r4.system.chat.damageRoll", { weapon: weaponName }) },
+      window: { title: game.i18n.format("l5r4.ui.chat.damageRoll", { weapon: weaponName }) },
       content,
       ok: { label: game.i18n.localize("l5r4.ui.common.roll"), callback: (_e, b, d) => _processWeaponRollOptions(b.form ?? d.form) },
       cancel: { label: game.i18n.localize("l5r4.ui.common.cancel") },
@@ -1126,7 +1126,7 @@ async function getNpcRollOptions(rollName, noVoid, trait = false) {
   const content = await R(DIALOG_TEMPLATES.rollModifiers, { npcRoll: true, noVoid, trait });
   try {
     const result = await DIALOG.prompt({
-      window: { title: game.i18n.format("l5r4.system.chat.rollName", { roll: rollName }) },
+      window: { title: game.i18n.format("l5r4.ui.chat.rollName", { roll: rollName }) },
       content,
       ok: { label: game.i18n.localize("l5r4.ui.common.roll"), callback: (_e, b, d) => _processNpcRollOptions(b.form ?? d.form) },
       cancel: { label: game.i18n.localize("l5r4.ui.common.cancel") },

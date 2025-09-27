@@ -215,7 +215,7 @@ export default class L5R4NpcSheet extends BaseActorSheet {
    */
   _onRingRoll(event, el) {
     event?.preventDefault?.();
-    const ringName = el?.dataset?.ringName || T(`l5r4.mechanics.rings.${el?.dataset?.systemRing || "void"}`);
+    const ringName = el?.dataset?.ringName || T(`l5r4.ui.mechanics.rings.${el?.dataset?.systemRing || "void"}`);
     const systemRing = String(el?.dataset?.systemRing || "void").toLowerCase();
     const ringRank = toInt(el?.dataset?.ringRank);
     return Dice.NpcRoll({

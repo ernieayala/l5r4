@@ -297,7 +297,7 @@ function applyFullDefenseStance(actor, sys) {
     // Store stance info for UI display
     sys._stanceEffects = sys._stanceEffects || {};
     sys._stanceEffects.fullDefense = {
-      rollResult: "Pending",
+      rollResult: game.i18n.localize("l5r4.ui.mechanics.stances.pending"),
       armorTnBonus: defaultBonus,
       needsRoll: true
     };
@@ -397,7 +397,7 @@ async function triggerFullDefenseRoll(actor, sys) {
     
   } catch (error) {
     console.error("L5R4 | Failed to trigger Full Defense roll:", error);
-    ui.notifications?.error("Failed to make Full Defense roll. Please roll manually.");
+    ui.notifications?.error(game.i18n.localize("l5r4.ui.notifications.fullDefenseRollFailed"));
   } finally {
     // Always remove the pending flag, even if the roll failed
     pendingFullDefenseRolls.delete(actorId);
@@ -441,7 +441,7 @@ export async function clearStanceFlags(actor, removedStanceId) {
  */
 export function createFullAttackStanceEffect(actor) {
   return {
-    name: "Full Attack Stance",
+    name: game.i18n.localize("l5r4.ui.mechanics.stances.fullAttack"),
     icon: `systems/${SYS_ID}/assets/icons/fullattackstance.png`,
     statuses: ["fullAttackStance"],
     changes: [
@@ -466,7 +466,7 @@ export function createFullAttackStanceEffect(actor) {
  */
 export function createDefenseStanceEffect(actor) {
   return {
-    name: "Defense Stance",
+    name: game.i18n.localize("l5r4.ui.mechanics.stances.defense"),
     icon: `systems/${SYS_ID}/assets/icons/defensestance.png`,
     statuses: ["defenseStance"],
     changes: [
@@ -490,7 +490,7 @@ export function createDefenseStanceEffect(actor) {
  */
 export function createFullDefenseStanceEffect(actor) {
   return {
-    name: "Full Defense Stance",
+    name: game.i18n.localize("l5r4.ui.mechanics.stances.fullDefense"),
     icon: `systems/${SYS_ID}/assets/icons/fulldefensestance.png`,
     statuses: ["fullDefenseStance"],
     changes: [
@@ -513,7 +513,7 @@ export function createFullDefenseStanceEffect(actor) {
  */
 export function createAttackStanceEffect(actor) {
   return {
-    name: "Attack Stance",
+    name: game.i18n.localize("l5r4.ui.mechanics.stances.attack"),
     icon: `systems/${SYS_ID}/assets/icons/attackstance.png`,
     statuses: ["attackStance"],
     changes: [],
@@ -534,7 +534,7 @@ export function createAttackStanceEffect(actor) {
  */
 export function createCenterStanceEffect(actor) {
   return {
-    name: "Center Stance",
+    name: game.i18n.localize("l5r4.ui.mechanics.stances.center"),
     icon: `systems/${SYS_ID}/assets/icons/centerstance.png`,
     statuses: ["centerStance"],
     changes: [],

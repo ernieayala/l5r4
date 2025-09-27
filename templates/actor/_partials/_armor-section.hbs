@@ -1,0 +1,28 @@
+<section class="flexcol -gap-sm">
+  <div class="flexrow -gap-sm section-title">
+    <h4 class="title">{{localize "l5r4.ui.sheets.armor"}}</h4>
+    <a class="button inline-control icon" data-action="item-create" data-type="armor" title="{{localize "l5r4.ui.sheets.addArmor"}}">
+      <i class="fas fa-plus"></i>
+    </a>
+    {{> "systems/l5r4/templates/actor/_partials/_expand.hbs"}}
+  </div>
+  {{#if armors.length}}
+    <section class="item-list -equipment -header" data-scope="armors">
+      <div class="item">
+        <a class="item-sort-by" data-sortby="name">{{localize "l5r4.ui.common.name"}}</a>
+        <a class="item-sort-by" data-sortby="bonus">{{localize "l5r4.ui.common.bonus"}}</a>
+        <a class="item-sort-by" data-sortby="reduction">{{localize "l5r4.equipment.armor.reduction"}}</a>
+        <a class="item-sort-by" data-sortby="equipped">{{localize "l5r4.equipment.armor.equipped"}}</a>
+        <span></span>
+      </div>
+    </section>
+    <section class="item-list -equipment">
+      {{#each armors as |armor id|}}
+        {{> "systems/l5r4/templates/cards/armor.hbs"
+            system=armor.system
+            inSheet=true
+            docId=armor.id}}
+      {{/each}}
+    </section>
+  {{/if}}
+</section>

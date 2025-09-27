@@ -1,14 +1,14 @@
 <section class="standard-form">
   {{#unless item.system.shugenja}}
   <div class="form-group">
-    <label>{{localize "l5r4.character.skills.properties.rank"}}</label>
+    <label>{{localize "l5r4.ui.common.rank"}}</label>
     <div class="form-fields">
       <input name="system.rank" type="number" value="{{system.rank}}" data-type="Number" />
     </div>
   </div>
   {{/unless}}
   <div class="form-group">
-    <label>{{localize "l5r4.world.emphases.shugenja"}}</label>
+    <label>Shugenja</label>
     <div class="form-fields">
       <input type="checkbox" name="system.shugenja" {{checked system.shugenja}} data-type="Boolean" />
     </div>

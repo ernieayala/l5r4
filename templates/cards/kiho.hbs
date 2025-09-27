@@ -9,7 +9,7 @@
     {{/if}}
   </h4>
   {{#if inSheet}}
-    <div>{{localize (concat "l5r4.mechanics.rings." system.ring)}}</div>
+    <div>{{localize (concat "l5r4.ui.mechanics.rings." system.ring)}}</div>
     <div>{{system.mastery}}</div>
     <div>{{localize (concat "l5r4.magic.kiho." system.type)}}</div>
     {{> "systems/l5r4/templates/cards/_partials/_expand.hbs"}}
@@ -25,7 +25,7 @@
     {{/if}}
   {{/if}}
   {{#unless inSheet}}
-    <p><strong>{{localize "l5r4.ui.common.ring"}}:</strong> {{localize (concat "l5r4.mechanics.rings." system.ring)}}</p>
+    <p><strong>{{localize "l5r4.ui.common.ring"}}:</strong> {{localize (concat "l5r4.ui.mechanics.rings." system.ring)}}</p>
     <p><strong>{{localize "l5r4.ui.common.mastery"}}:</strong> {{system.mastery}}</p>
     <p><strong>{{localize "l5r4.ui.common.type"}}:</strong> {{localize (concat "l5r4.magic.kiho." system.type)}}</p>
     {{#if system.specialRules}}

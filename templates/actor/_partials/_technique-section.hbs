@@ -1,0 +1,21 @@
+<section class="flexcol -gap-sm">
+  <div class="flexrow -gap-sm section-title">
+    <h4 class="title">{{localize "l5r4.ui.sheets.techniques"}}</h4>
+    <a class="button inline-control icon" data-action="item-create" data-type="technique" title="{{localize "l5r4.ui.sheets.addTechnique"}}">
+      <i class="fas fa-plus"></i>
+    </a>
+    {{> "systems/l5r4/templates/actor/_partials/_expand.hbs"}}
+  </div>
+  {{#if techniques.length}}
+    <section class="item-list -technique -header" data-scope="technique">
+      <div class="item">
+        <a class="item-sort-by" data-sortby="name">{{localize "l5r4.ui.common.name"}}</a>
+      </div>
+    </section>
+    <section class="item-list -technique">
+      {{#each techniques as |technique id|}}
+        {{> "systems/l5r4/templates/cards/technique.hbs" system=technique.system inSheet=true docId=technique.id}}
+      {{/each}}
+    </section>
+  {{/if}}
+</section>

@@ -355,7 +355,7 @@ export default class L5R4ItemSheet extends HandlebarsApplicationMixin(ItemSheetV
       
       // Create skill options for dropdown
       context.skillOptions = {};
-      context.skillOptions[""] = "— No Skill —"; // Default empty option
+      context.skillOptions[""] = game.i18n.localize("l5r4.ui.common.none"); // Default empty option
       
       for (const skill of skills) {
         context.skillOptions[skill.name] = skill.name;
@@ -421,7 +421,7 @@ export default class L5R4ItemSheet extends HandlebarsApplicationMixin(ItemSheetV
     on(root, ".effect-create", "click", async (ev) => {
       ev.preventDefault();
       const [eff] = await this.item.createEmbeddedDocuments("ActiveEffect", [{
-        name: game.i18n.localize("EFFECT.New"),
+        name: game.i18n.localize("l5r4.ui.common.new"),
         icon: "icons/svg/aura.svg",
         disabled: false,
         transfer: true,

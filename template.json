@@ -221,20 +221,6 @@
       "reduction": 0,
       "specialRules": ""
     },
-    "bow": {
-      "templates": [
-        "itemDescription"
-      ],
-      "str": 1,
-      "size": "large",
-      "range": 100,
-      "arrow": "willow",
-      "damageRoll": 0,
-      "damageKeep": 0,
-      "explodesOn": 10,
-      "associatedSkill": "",
-      "fallbackTrait": "ref"
-    },
     "clan": {
       "templates": [
         "itemDescription"
@@ -333,7 +319,11 @@
       "damageFormula": "",
       "explodesOn": 10,
       "associatedSkill": "",
-      "fallbackTrait": "agi"
+      "fallbackTrait": "agi",
+      "isBow": false,
+      "str": 1,
+      "range": 100,
+      "arrow": "willow"
     }
   }
 }

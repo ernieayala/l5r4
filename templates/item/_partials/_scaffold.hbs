@@ -2,7 +2,7 @@
   <img class="flex0 profile" src="{{item.img}}" data-edit="img" title="{{item.name}}" height="64" width="64"/>
   <div class="header-fields">
     <h1 class="document-name">
-      <input type="text" name="name" value="{{item.name}}" placeholder="{{localize 'Name'}}"/>
+      <input type="text" name="name" value="{{item.name}}" placeholder="{{localize 'l5r4.ui.common.name'}}"/>
     </h1>
   </div>
 </header>
@@ -24,11 +24,11 @@
   {{/if}}
 
   {{!-- Active Effects --}}
-  <h4>Active Effects</h4>
+  <h4>{{localize "l5r4.ui.common.activeEffects"}}</h4>
   <div class="effects">
     {{#if editable}}
       <button type="button" class="effect-create">
-        <i class="fas fa-plus"></i> New
+        <i class="fas fa-plus"></i> {{localize "l5r4.ui.common.new"}}
       </button>
     {{/if}}
 
@@ -37,11 +37,11 @@
         <li class="flexrow -gap-sm effect" data-effect-id="{{e.id}}">
           <div class="flex1 effect-name">
             {{#if e.label}}{{e.label}}{{else}}{{e.name}}{{/if}}
-            {{#if e.disabled}}<em>(disabled)</em>{{/if}}
+            {{#if e.disabled}}<em>({{localize "l5r4.ui.common.disabled"}})</em>{{/if}}
           </div>
           <div class="flexrow -gap-md flex0 effect-controls">
             <a class="effect-edit" title="{{localize "l5r4.ui.common.edit"}}"><i class="fas fa-edit"></i></a>
-            <a class="effect-toggle" title="{{localize "l5r4.ui.common.enableDisable"}}">
+            <a class="effect-toggle">
               <i class="fas {{#if e.disabled}}fa-toggle-off{{else}}fa-toggle-on{{/if}}"></i>
             </a>
             <a class="effect-delete" title="{{localize "l5r4.ui.common.delete"}}"><i class="fas fa-trash"></i></a>

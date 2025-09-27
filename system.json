@@ -47,7 +47,31 @@
       "path": "lang/pt-BR.json"
     }
   ],
-  "gridDistance": 5,
-  "gridUnits": "ft",
+  "documentTypes": {
+    "Actor": {
+      "pc": {},
+      "npc": {}
+    },
+    "Item": {
+      "advantage": {},
+      "armor": {},
+      "clan": {},
+      "commonItem": {},
+      "disadvantage": {},
+      "family": {},
+      "school": {},
+      "kata": {},
+      "kiho": {},
+      "skill": {},
+      "spell": {},
+      "tattoo": {},
+      "technique": {},
+      "weapon": {}
+    }
+  },
+  "grid": {
+    "distance": 5,
+    "units": "ft"
+  },
   "license": "GPL v3"
 }
