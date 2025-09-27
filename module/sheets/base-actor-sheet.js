@@ -187,6 +187,9 @@ export class BaseActorSheet extends HandlebarsApplicationMixin(foundry.applicati
 
     // Setup image error handling for broken actor images
     this._setupImageErrorHandling(root);
+
+    // Setup conditional cursor behavior for increment/decrement controls
+    this._setupConditionalCursor(root);
   }
 
   /**
@@ -210,6 +213,82 @@ export class BaseActorSheet extends HandlebarsApplicationMixin(foundry.applicati
   }
 
   /**
+   * Setup conditional cursor behavior for increment/decrement controls.
+   * Shows pointer cursor only when Shift key is held, default cursor otherwise.
+   * Applies to trait ranks, void points, honor/glory/status ranks, and other interactive elements.
+   * @param {HTMLElement} root - The sheet root element
+   */
+  _setupConditionalCursor(root) {
+    // Store bound event handlers for cleanup
+    if (!this._keyboardHandlers) {
+      this._keyboardHandlers = {
+        keydown: this._onKeyDown.bind(this),
+        keyup: this._onKeyUp.bind(this)
+      };
+    }
+
+    // Remove existing listeners to prevent duplicates
+    document.removeEventListener('keydown', this._keyboardHandlers.keydown);
+    document.removeEventListener('keyup', this._keyboardHandlers.keyup);
+
+    // Add global keyboard listeners
+    document.addEventListener('keydown', this._keyboardHandlers.keydown);
+    document.addEventListener('keyup', this._keyboardHandlers.keyup);
+
+    // Initialize cursor state
+    this._updateConditionalCursor(root, false);
+  }
+
+  /**
+   * Handle keydown events to detect Shift key press.
+   * Updates cursor to pointer when Shift is pressed.
+   * @param {KeyboardEvent} event - The keyboard event
+   */
+  _onKeyDown(event) {
+    if (event.key === 'Shift' && !event.repeat) {
+      this._updateConditionalCursor(this.element, true);
+    }
+  }
+
+  /**
+   * Handle keyup events to detect Shift key release.
+   * Updates cursor back to default when Shift is released.
+   * @param {KeyboardEvent} event - The keyboard event
+   */
+  _onKeyUp(event) {
+    if (event.key === 'Shift') {
+      this._updateConditionalCursor(this.element, false);
+    }
+  }
+
+  /**
+   * Update the conditional cursor CSS custom property.
+   * @param {HTMLElement} root - The sheet root element
+   * @param {boolean} showPointer - Whether to show pointer cursor
+   */
+  _updateConditionalCursor(root, showPointer) {
+    if (!root) return;
+    
+    const cursorValue = showPointer ? 'pointer' : 'default';
+    root.style.setProperty('--conditional-cursor', cursorValue);
+  }
+
+  /**
+   * Cleanup keyboard event listeners when sheet is closed.
+   * @override
+   */
+  async close(options = {}) {
+    // Remove global keyboard listeners
+    if (this._keyboardHandlers) {
+      document.removeEventListener('keydown', this._keyboardHandlers.keydown);
+      document.removeEventListener('keyup', this._keyboardHandlers.keyup);
+      this._keyboardHandlers = null;
+    }
+    
+    return super.close(options);
+  }
+
+  /**
    * Optional generic data-action handlers for subclasses to override.
    * Called by the event delegation system when data-action elements are interacted with.
    * @param {string|null} _action - The data-action attribute value
@@ -230,17 +309,13 @@ export class BaseActorSheet extends HandlebarsApplicationMixin(foundry.applicati
   /**
    * Adjust Void Points by ±1 within the range [0..9].
    * Uses Document.update to persist the value and repaints the dots.
-   * Requires Shift+Click to prevent accidental changes.
    * @param {MouseEvent} event - The triggering mouse event
    * @param {HTMLElement} element - The void points dots container element
-   * @param {number} delta - +1 (Shift+left click) or -1 (Shift+right-click)
+   * @param {number} delta - +1 (left click) or -1 (right-click)
    * @see https://foundryvtt.com/api/classes/foundry.abstract.Document.html#update
    */
   async _onVoidPointsAdjust(event, element, delta) {
     event?.preventDefault?.();
-    
-    // Require Shift+Click to prevent accidental void points changes
-    if (!event?.shiftKey) return;
     
     const cur = Number(this.actor.system?.rings?.void?.value ?? 0) || 0;
     const next = Math.min(9, Math.max(0, cur + (delta > 0 ? 1 : -1)));

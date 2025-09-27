@@ -1,6 +1,11 @@
 {
-  "dependencies": {
-    "gulp": "4.0.2",
-    "gulp-less": "5.0.0"
+  "scripts": {
+    "build:css": "sass --no-source-map scss/l5r4.scss l5r4.css",
+    "watch:css": "sass --no-source-map --watch scss/l5r4.scss:l5r4.css",
+    "build": "npm run build:css",
+    "dev": "npm run watch:css"
+  },
+  "devDependencies": {
+    "sass": "1.69.5"
   }
 }

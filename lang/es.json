@@ -200,6 +200,7 @@
       "hints": {
         "leftRightToAdjust": "Izquierda y Derecha para ajustar",
         "leftClickPlusRightClickMinus": "Mayús+Clic Izq: +1, Mayús+Clic Der: -1",
+        "voidPointsClickAdjust": "Clic Izq: +1, Clic Der: -1",
         "shiftClickRankPoints": "Mayús+Clic: ±0.1, Mayús+Ctrl+Clic: ±1.0"
       }
     },

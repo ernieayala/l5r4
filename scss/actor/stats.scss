@@ -1,7 +1,9 @@
+@use "../config.scss" as config;
+
 .l5r4.pc,
 .l5r4.npc {
   .pc-info {
-    background: @brush-background;
+    background: config.$brush-background;
     background-size: 100% 100%;
     flex-wrap: nowrap;
     padding: 1rem;
@@ -44,6 +46,7 @@
       border-radius: 50%;
       border: 1px solid var(--table-header-border-color);
       color: var(--color-text-primary);
+      cursor: var(--conditional-cursor);
       display: grid;
       font-family: var(--font-h1);
       font-size: 32px;
@@ -103,6 +106,7 @@
         background-color: var(--table-header-bg-color);
         border-radius: 50%;
         color: var(--color-text-primary);
+        cursor: var(--conditional-cursor);
         display: inline-flex;
         font-family: var(--font-h3);
         font-size: 22px;
@@ -166,160 +170,160 @@
     // Earth
     .ring-name-earth {
       align-self: end;
-      grid-column: ~"5/8";
-      grid-row: ~"1/2";
+      grid-column: 5/8;
+      grid-row: 1/2;
     }
 
     .earth-ring {
-      grid-column: ~"5/8";
-      grid-row: ~"2/4";
+      grid-column: 5/8;
+      grid-row: 2/4;
 
       .earth-ring-img {
         border: none;
-        content: @earth-ring-img;
+        content: config.$earth-ring-img;
       }
     }
 
     .ring-rank-earth {
       align-self: end;
-      grid-column: ~"6/8";
-      grid-row: ~"3/4";
+      grid-column: 6/8;
+      grid-row: 3/4;
       justify-self: end;
     }
 
     .trait-stamina {
-      grid-column: ~"1/5";
-      grid-row: ~"2/3";
+      grid-column: 1/5;
+      grid-row: 2/3;
     }
 
     .trait-willpower {
-      grid-column: ~"1/4";
-      grid-row: ~"3/4";
+      grid-column: 1/4;
+      grid-row: 3/4;
     }
 
     // Air
     .ring-name-air {
       align-self: end;
-      grid-column: ~"10/13";
-      grid-row: ~"1/2";
+      grid-column: 10/13;
+      grid-row: 1/2;
     }
 
     .air-ring {
-      grid-column: ~"10/13";
-      grid-row: ~"2/4";
+      grid-column: 10/13;
+      grid-row: 2/4;
 
       .air-ring-img {
         border: none;
-        content: @air-ring-img;
+        content: config.$air-ring-img;
       }
     }
 
     .ring-rank-air {
       align-self: end;
-      grid-column: ~"10/11";
-      grid-row: ~"3/4";
+      grid-column: 10/11;
+      grid-row: 3/4;
       justify-self: start;
     }
 
     .trait-reflex {
-      grid-column: ~"13/18";
-      grid-row: ~"2/3";
+      grid-column: 13/18;
+      grid-row: 2/3;
     }
 
     .trait-awarness {
       align-self: start;
-      grid-column: ~"13/18";
-      grid-row: ~"3/4";
+      grid-column: 13/18;
+      grid-row: 3/4;
     }
 
     // Water
     .ring-name-water {
-      grid-column: ~"4/7";
-      grid-row: ~"7/8";
+      grid-column: 4/7;
+      grid-row: 7/8;
     }
 
     .water-ring {
-      grid-column: ~"4/7";
-      grid-row: ~"5/7";
+      grid-column: 4/7;
+      grid-row: 5/7;
 
       .water-ring-img{
         border: none;
-        content: @water-ring-img;
+        content: config.$water-ring-img;
       }
     }
 
     .ring-rank-water {
-      grid-column: ~"6/7";
-      grid-row: ~"5/6";
+      grid-column: 6/7;
+      grid-row: 5/6;
       justify-self: end;
       margin-inline-end: -12px;
     }
 
     .trait-strength {
-      grid-column: ~"1/3";
-      grid-row: ~"5/6";
+      grid-column: 1/3;
+      grid-row: 5/6;
     }
 
     .trait-perception {
-      grid-column: ~"1/1";
-      grid-row: ~"6/7";
+      grid-column: 1/1;
+      grid-row: 6/7;
     }
 
     // Fire
     .ring-name-fire {
-      grid-column: ~"11/14";
-      grid-row: ~"7/8";
+      grid-column: 11/14;
+      grid-row: 7/8;
     }
 
     .fire-ring {
-      grid-column: ~"11/14";
-      grid-row: ~"5/7";
+      grid-column: 11/14;
+      grid-row: 5/7;
 
       .fire-ring-img{
         border: none;
-        content: @fire-ring-img;
+        content: config.$fire-ring-img;
       }
     }
 
     .ring-rank-fire {
-      grid-column: ~"11/12";
-      grid-row: ~"5/6";
+      grid-column: 11/12;
+      grid-row: 5/6;
       justify-self: start;
       margin-inline-start: -12px;
     }
 
     .trait-agility {
-      grid-column: ~"13/16";
-      grid-row: ~"5/6";
+      grid-column: 13/16;
+      grid-row: 5/6;
     }
 
     .trait-intelligence {
       align-self: start;
-      grid-column: ~"13/16";
-      grid-row: ~"6/7";
+      grid-column: 13/16;
+      grid-row: 6/7;
     }
 
     // Void
     .ring-name-void {
-      grid-column: ~"7/11";
-      grid-row: ~"8/9";
+      grid-column: 7/11;
+      grid-row: 8/9;
     }
 
     .ring-rank-void {
       align-self: start;
-      grid-column: ~"8/10";
-      grid-row: ~"6/7";
+      grid-column: 8/10;
+      grid-row: 6/7;
       margin-block-start: -12px;
       text-align: center;
     }
 
     .void-ring {
-      grid-column: ~"6/12";
-      grid-row: ~"6/8";
+      grid-column: 6/12;
+      grid-row: 6/8;
 
       .void-ring-img{
         border: none;
-        content: @void-ring-img;
+        content: config.$void-ring-img;
       }
     }
 
@@ -328,8 +332,8 @@
       display: flex;
       flex-direction: column;
       gap: 2px;
-      grid-column: ~"1/18";
-      grid-row: ~"10/11";
+      grid-column: 1/18;
+      grid-row: 10/11;
       margin-block-start: 4px;
       width: max-content;
     }
@@ -340,7 +344,7 @@
 
     .void-points-dots {
       align-items: center;
-      cursor: pointer;
+      cursor: var(--conditional-cursor);
       display: flex;
       gap: 2px;
     }

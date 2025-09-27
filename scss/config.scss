@@ -58,33 +58,33 @@
   src: url("assets/fonts/HiroshigeStd-Bold.otf");
 }
 
-.hiroshigueBook() {
+@mixin hiroshigueBook() {
   font-family: "Hiroshigue book";
   text-transform: none;
 }
 
-.rotisSerif() {
+@mixin rotisSerif() {
   font-family: "Rotis Serif";
   text-transform: none;
 }
 
-.oldStyle() {
+@mixin oldStyle() {
   font-family: "Old Style";
   text-transform: none;
   font-weight: bold;
 }
 
 // textures
-@main-background: rgb(255, 250, 230) url("assets/textures/scroll2.webp") no-repeat;
-@brush-background: url("assets/textures/brush.webp") no-repeat 0 0;
-@water-background: url("assets/textures/watercolor.webp") no-repeat 0 0;
+$main-background: rgb(255, 250, 230) url("assets/textures/scroll2.webp") no-repeat;
+$brush-background: url("assets/textures/brush.webp") no-repeat 0 0;
+$water-background: url("assets/textures/watercolor.webp") no-repeat 0 0;
 
 // images
-@air-ring-img: url("assets/icons/air.png");
-@water-ring-img: url("assets/icons/water.png");
-@earth-ring-img: url("assets/icons/earth.png");
-@fire-ring-img: url("assets/icons/fire.png");
-@void-ring-img: url("assets/icons/void.png");
+$air-ring-img: url("assets/icons/air.png");
+$water-ring-img: url("assets/icons/water.png");
+$earth-ring-img: url("assets/icons/earth.png");
+$fire-ring-img: url("assets/icons/fire.png");
+$void-ring-img: url("assets/icons/void.png");
 
 // colors
-@accent-color: #d6cd9fa3;
+$accent-color: #d6cd9fa3;
