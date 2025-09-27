@@ -657,35 +657,18 @@ body > * {
   margin: 0;
 }
 .l5r4.pc .traits-rings .trait .trait-rank,
-.l5r4.pc .traits-rings .void-points .trait-rank,
-.l5r4.npc .traits-rings .trait .trait-rank,
-.l5r4.npc .traits-rings .void-points .trait-rank {
-  align-items: center;
-  background-color: var(--table-header-bg-color);
-  border-radius: 50%;
-  color: var(--color-text-primary);
-  cursor: var(--conditional-cursor);
-  display: inline-flex;
-  font-family: var(--font-h3);
-  font-size: 22px;
-  font-weight: 600;
-  grid-area: rank;
-  height: 24px;
-  justify-content: center;
-  padding: 0;
-  text-align: center;
-  width: 24px;
-  z-index: 10;
-}
 .l5r4.pc .traits-rings .trait .void-points-amount,
+.l5r4.pc .traits-rings .void-points .trait-rank,
 .l5r4.pc .traits-rings .void-points .void-points-amount,
+.l5r4.npc .traits-rings .trait .trait-rank,
 .l5r4.npc .traits-rings .trait .void-points-amount,
+.l5r4.npc .traits-rings .void-points .trait-rank,
 .l5r4.npc .traits-rings .void-points .void-points-amount {
   align-items: center;
   background-color: var(--table-header-bg-color);
   border-radius: 50%;
   color: var(--color-text-primary);
-  cursor: pointer;
+  cursor: var(--conditional-cursor);
   display: inline-flex;
   font-family: var(--font-h3);
   font-size: 22px;
@@ -924,7 +907,7 @@ body > * {
 .l5r4.pc .traits-rings .void-points-dots,
 .l5r4.npc .traits-rings .void-points-dots {
   align-items: center;
-  cursor: pointer;
+  cursor: var(--conditional-cursor);
   display: flex;
   gap: 2px;
 }

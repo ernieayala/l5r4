@@ -1,9 +1,27 @@
 {
+  "name": "l5r4",
+  "version": "1.0.1",
+  "description": "Legend of the Five Rings 4th Edition system for Foundry VTT",
+  "author": "Ernie Ayala",
+  "license": "GPL-3.0",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/ernieayala/l5r4.git"
+  },
+  "bugs": {
+    "url": "https://github.com/ernieayala/l5r4/issues"
+  },
+  "homepage": "https://github.com/ernieayala/l5r4#readme",
   "scripts": {
     "build:css": "sass --no-source-map scss/l5r4.scss l5r4.css",
     "watch:css": "sass --no-source-map --watch scss/l5r4.scss:l5r4.css",
     "build": "npm run build:css",
-    "dev": "npm run watch:css"
+    "dev": "npm run watch:css",
+    "version:patch": "npm version patch --no-git-tag-version",
+    "version:minor": "npm version minor --no-git-tag-version",
+    "version:major": "npm version major --no-git-tag-version",
+    "prepare-release": "node scripts/prepare-release.js",
+    "validate": "node scripts/prepare-release.js --validate-only"
   },
   "devDependencies": {
     "sass": "1.69.5"
