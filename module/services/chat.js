@@ -40,20 +40,26 @@ const DIALOG = foundry.applications.api.DialogV2;
  * - **NPC Actors**: Shows only equipment items (weapons, armor, common items)
  * - **Validation**: Requires non-empty item name before allowing creation
  * - **Cancellation**: Returns cancelled status if user cancels or validation fails
+ * - **Auto-Selection**: Pre-selects item type based on sheet section context
  * 
  * **Template Context:**
  * The dialog template receives context data to determine which item types to show:
  * - `showCharacterItems`: Boolean indicating if PC-specific items should be displayed
+ * - `preferredType`: String indicating which item type should be pre-selected
  * 
  * @param {string} actorType - The actor type ("pc" or "npc") to determine available items
+ * @param {string} [preferredType] - Optional item type to pre-select in dropdown
  * @returns {Promise<UnifiedItemResult>} User selections or cancellation status
  */
-export async function getUnifiedItemOptions(actorType) {
+export async function getUnifiedItemOptions(actorType, preferredType = null) {
   // Determine which item types to show based on actor type
   const showCharacterItems = actorType === "pc";
   
   // Render dialog content with appropriate context
-  const content = await R(DIALOG_TEMPLATES.unifiedItemCreate, { showCharacterItems });
+  const content = await R(DIALOG_TEMPLATES.unifiedItemCreate, { 
+    showCharacterItems,
+    preferredType 
+  });
 
   try {
     // Display modal dialog with form validation

@@ -377,6 +377,7 @@ export class BaseActorSheet extends HandlebarsApplicationMixin(foundry.applicati
   /**
    * Create a new embedded Item using the unified item creation dialog.
    * Shows a dialog with all relevant item types for the current actor type.
+   * Auto-selects item type based on the sheet section context when available.
    * @param {Event} event - The originating click event
    * @param {HTMLElement} element - The clicked element (may have data-type for fallback)
    * @returns {Promise<Document[]>} Array of created item documents
@@ -384,8 +385,11 @@ export class BaseActorSheet extends HandlebarsApplicationMixin(foundry.applicati
   async _onItemCreate(event, element) {
     event.preventDefault();
     
-    // Use unified dialog for item creation
-    const result = await Chat.getUnifiedItemOptions(this.actor.type);
+    // Detect section context to auto-select appropriate item type
+    const preferredType = this._detectSectionItemType(element);
+    
+    // Use unified dialog for item creation with preferred type
+    const result = await Chat.getUnifiedItemOptions(this.actor.type, preferredType);
     
     // Handle cancellation
     if (result.cancelled) return [];
@@ -397,6 +401,37 @@ export class BaseActorSheet extends HandlebarsApplicationMixin(foundry.applicati
     };
     
     return this.actor.createEmbeddedDocuments("Item", [itemData]);
+  }
+
+  /**
+   * Detect the appropriate item type based on the sheet section context.
+   * Maps section data-scope attributes to their corresponding item types.
+   * @param {HTMLElement} element - The clicked Add Item button element
+   * @returns {string|null} The preferred item type or null if not detectable
+   */
+  _detectSectionItemType(element) {
+    // Find the closest parent with a data-scope attribute
+    const section = element?.closest?.('[data-scope]');
+    const scope = section?.dataset?.scope;
+    
+    if (!scope) return null;
+    
+    // Map section scopes to item types
+    const sectionToItemType = {
+      'skills': 'skill',
+      'weapons': 'weapon',
+      'armors': 'armor',
+      'techniques': 'technique',
+      'items': 'commonItem',
+      'spells': 'spell',
+      'katas': 'kata',
+      'kihos': 'kiho',
+      'tattoos': 'tattoo',
+      'advantages': 'advantage',
+      'disadvantages': 'disadvantage'
+    };
+    
+    return sectionToItemType[scope] || null;
   }
 
   /**
