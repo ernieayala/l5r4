@@ -21,8 +21,17 @@
     <div><a class="button" data-action="roll-skill" title="{{localize "l5r4.ui.mechanics.rolls.skillRoll"}}">{{system.rollDice}}k{{system.rollKeep}}</a></div>
     <div>{{system.emphasis}}</div>
     {{> "systems/l5r4/templates/cards/_partials/_expand.hbs"}}
-    {{#if (or system.description system.specialRules)}}
+    {{#if (or system.description system.specialRules (and (gte system.rank 3) system.mastery3) (and (gte system.rank 5) system.mastery5) (and (gte system.rank 7) system.mastery7))}}
       <div class="expanded-text">
+        {{#if (and (gte system.rank 3) system.mastery3)}}
+          <p><strong>{{localize "l5r4.character.skills.properties.mastery3"}}:</strong> {{system.mastery3}}</p>
+        {{/if}}
+        {{#if (and (gte system.rank 5) system.mastery5)}}
+          <p><strong>{{localize "l5r4.character.skills.properties.mastery5"}}:</strong> {{system.mastery5}}</p>
+        {{/if}}
+        {{#if (and (gte system.rank 7) system.mastery7)}}
+          <p><strong>{{localize "l5r4.character.skills.properties.mastery7"}}:</strong> {{system.mastery7}}</p>
+        {{/if}}
         {{#if system.specialRules}}
           <p>{{{system.specialRules}}}</p>
         {{/if}}
@@ -41,7 +50,7 @@
         {{{system.specialRules}}}
       </p>
     {{/if}}
-    {{#if system.mastery3}}
+    {{#if (and (gte system.rank 3) system.mastery3)}}
       <h5>{{localize "l5r4.character.skills.properties.mastery3"}}</h5>
       <p>
         {{{system.mastery3}}}
