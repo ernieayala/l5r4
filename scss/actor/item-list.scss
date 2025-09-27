@@ -162,7 +162,7 @@
     .expanded-text {
       display: none;
       font-size: var(--font-size-14);
-      grid-column: ~"1 / -1";
+      grid-column: 1 / -1;
       grid-row: 2;
 
       &.-npc {

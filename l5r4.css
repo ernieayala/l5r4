@@ -49,21 +49,27 @@
 body > * {
   scrollbar-width: thin;
 }
+
 .-gap-xs {
   gap: 0.125rem;
 }
+
 .-gap-sm {
   gap: 0.25rem;
 }
+
 .-gap-md {
   gap: 0.5rem;
 }
+
 .-gap-lg {
   gap: 0.75rem;
 }
+
 .-gap-xl {
   gap: 1rem;
 }
+
 .message-content .item h4,
 .message-content .item h5 {
   margin: 0;
@@ -84,8 +90,11 @@ body > * {
 .message-content .l5r4-damage-button {
   width: 100%;
 }
+
 .l5r4.pc,
 .l5r4.npc {
+  /* CSS custom property for conditional cursor behavior */
+  --conditional-cursor: default;
   display: flex;
   flex-direction: column;
 }
@@ -123,10 +132,10 @@ body > * {
   text-align: center;
 }
 .l5r4.pc input,
-.l5r4.npc input,
 .l5r4.pc select,
-.l5r4.npc select,
 .l5r4.pc textarea,
+.l5r4.npc input,
+.l5r4.npc select,
 .l5r4.npc textarea {
   border: none;
   box-shadow: none;
@@ -163,12 +172,12 @@ body > * {
   display: none;
 }
 .l5r4.pc .section-title .title,
-.l5r4.npc .section-title .title,
 .l5r4.pc .section-title .button,
-.l5r4.npc .section-title .button,
 .l5r4.pc .section-title input,
-.l5r4.npc .section-title input,
 .l5r4.pc .section-title input::placeholder,
+.l5r4.npc .section-title .title,
+.l5r4.npc .section-title .button,
+.l5r4.npc .section-title input,
 .l5r4.npc .section-title input::placeholder {
   color: inherit;
 }
@@ -182,8 +191,8 @@ body > * {
   text-wrap: nowrap;
 }
 .l5r4.pc .section-title .flexrow.wealth,
-.l5r4.npc .section-title .flexrow.wealth,
 .l5r4.pc .section-title .flexrow.spells,
+.l5r4.npc .section-title .flexrow.wealth,
 .l5r4.npc .section-title .flexrow.spells {
   flex-wrap: nowrap;
 }
@@ -214,7 +223,7 @@ body > * {
   align-items: center;
   background: rgba(0, 0, 0, 0.4);
   border-radius: 50%;
-  cursor: pointer;
+  cursor: var(--conditional-cursor);
   display: inline-flex;
   height: 32px;
   justify-content: center;
@@ -283,8 +292,8 @@ body > * {
   grid-template-columns: 1fr 1fr;
 }
 .l5r4.pc .grid > span,
-.l5r4.npc .grid > span,
 .l5r4.pc .grid > div,
+.l5r4.npc .grid > span,
 .l5r4.npc .grid > div {
   border-block-end: 1px solid var(--table-header-border-color);
 }
@@ -306,8 +315,8 @@ body > * {
   padding: 0 0.1rem;
 }
 .l5r4.pc .grid > div > input,
-.l5r4.npc .grid > div > input,
 .l5r4.pc .grid > div > select,
+.l5r4.npc .grid > div > input,
 .l5r4.npc .grid > div > select {
   height: auto;
   line-height: 1;
@@ -316,9 +325,10 @@ body > * {
 .l5r4.npc .grid > div > span {
   padding: 0 0.5rem;
 }
+
 .l5r4.pc .actor-img {
   align-items: center;
-  cursor: pointer;
+  cursor: var(--conditional-cursor);
   display: flex;
   height: 240px;
   justify-content: center;
@@ -330,13 +340,15 @@ body > * {
   max-width: 100%;
   max-height: 100%;
 }
+
 .l5r4.npc .actor-img {
-  cursor: pointer;
+  cursor: var(--conditional-cursor);
   height: 210px;
   max-width: 210px;
   min-width: 210px;
   width: 210px;
 }
+
 .l5r4.pc .item-list,
 .l5r4.npc .item-list,
 .xp-modal-dialog .item-list {
@@ -359,11 +371,10 @@ body > * {
 .xp-modal-dialog .item-list.-header .item {
   padding: 0;
 }
-.l5r4.pc .item-list.-advantages .item,
+.l5r4.pc .item-list.-advantages .item, .l5r4.pc .item-list.-attacks .item,
 .l5r4.npc .item-list.-advantages .item,
-.xp-modal-dialog .item-list.-advantages .item,
-.l5r4.pc .item-list.-attacks .item,
 .l5r4.npc .item-list.-attacks .item,
+.xp-modal-dialog .item-list.-advantages .item,
 .xp-modal-dialog .item-list.-attacks .item {
   grid-template-columns: 1fr 1fr 1fr 1fr 24px;
 }
@@ -473,11 +484,11 @@ body > * {
   display: flex;
 }
 .l5r4.pc .item select,
+.l5r4.pc .item input[type=number],
 .l5r4.npc .item select,
+.l5r4.npc .item input[type=number],
 .xp-modal-dialog .item select,
-.l5r4.pc .item input[type="number"],
-.l5r4.npc .item input[type="number"],
-.xp-modal-dialog .item input[type="number"] {
+.xp-modal-dialog .item input[type=number] {
   border: 1px solid var(--input-border-color);
   height: 2em;
   min-height: 2em;
@@ -498,7 +509,7 @@ body > * {
 .xp-modal-dialog .item .expanded-text {
   display: none;
   font-size: var(--font-size-14);
-  grid-column: 1 / -1;
+  grid-column: 1/-1;
   grid-row: 2;
 }
 .l5r4.pc .item .expanded-text.-npc,
@@ -513,6 +524,7 @@ body > * {
 .xp-modal-dialog .item .expanded-text.-npc h5 {
   margin: 0;
 }
+
 .l5r4.pc .ranks,
 .l5r4.npc .ranks {
   display: grid;
@@ -525,7 +537,7 @@ body > * {
   background: var(--table-header-bg-color);
   border: 1px solid var(--table-header-border-color);
   color: var(--table-header-text-color);
-  cursor: pointer;
+  cursor: var(--conditional-cursor);
   display: flex;
   font-size: var(--font-size-16);
   padding: 0.25rem 0;
@@ -537,6 +549,7 @@ body > * {
   font-size: var(--font-size-18);
   font-weight: 600;
 }
+
 .l5r4.pc .pc-info,
 .l5r4.npc .pc-info {
   background: url("assets/textures/brush.webp") no-repeat 0 0;
@@ -545,8 +558,8 @@ body > * {
   padding: 1rem;
 }
 .l5r4.pc .pc-info input,
-.l5r4.npc .pc-info input,
 .l5r4.pc .pc-info .input-placeholder,
+.l5r4.npc .pc-info input,
 .l5r4.npc .pc-info .input-placeholder {
   background: none;
   font-size: var(--font-size-16);
@@ -584,6 +597,7 @@ body > * {
   border-radius: 50%;
   border: 1px solid var(--table-header-border-color);
   color: var(--color-text-primary);
+  cursor: var(--conditional-cursor);
   display: grid;
   font-family: var(--font-h1);
   font-size: 32px;
@@ -617,8 +631,8 @@ body > * {
   width: 96px;
 }
 .l5r4.pc .traits-rings .trait,
-.l5r4.npc .traits-rings .trait,
 .l5r4.pc .traits-rings .void-points,
+.l5r4.npc .traits-rings .trait,
 .l5r4.npc .traits-rings .void-points {
   align-items: center;
   align-self: center;
@@ -631,29 +645,47 @@ body > * {
   width: 100%;
 }
 .l5r4.pc .traits-rings .trait .trait-roll,
-.l5r4.npc .traits-rings .trait .trait-roll,
 .l5r4.pc .traits-rings .void-points .trait-roll,
+.l5r4.npc .traits-rings .trait .trait-roll,
 .l5r4.npc .traits-rings .void-points .trait-roll {
   grid-area: roll;
 }
 .l5r4.pc .traits-rings .trait .trait-roll p,
-.l5r4.npc .traits-rings .trait .trait-roll p,
 .l5r4.pc .traits-rings .void-points .trait-roll p,
+.l5r4.npc .traits-rings .trait .trait-roll p,
 .l5r4.npc .traits-rings .void-points .trait-roll p {
   margin: 0;
 }
 .l5r4.pc .traits-rings .trait .trait-rank,
-.l5r4.npc .traits-rings .trait .trait-rank,
 .l5r4.pc .traits-rings .void-points .trait-rank,
-.l5r4.npc .traits-rings .void-points .trait-rank,
+.l5r4.npc .traits-rings .trait .trait-rank,
+.l5r4.npc .traits-rings .void-points .trait-rank {
+  align-items: center;
+  background-color: var(--table-header-bg-color);
+  border-radius: 50%;
+  color: var(--color-text-primary);
+  cursor: var(--conditional-cursor);
+  display: inline-flex;
+  font-family: var(--font-h3);
+  font-size: 22px;
+  font-weight: 600;
+  grid-area: rank;
+  height: 24px;
+  justify-content: center;
+  padding: 0;
+  text-align: center;
+  width: 24px;
+  z-index: 10;
+}
 .l5r4.pc .traits-rings .trait .void-points-amount,
-.l5r4.npc .traits-rings .trait .void-points-amount,
 .l5r4.pc .traits-rings .void-points .void-points-amount,
+.l5r4.npc .traits-rings .trait .void-points-amount,
 .l5r4.npc .traits-rings .void-points .void-points-amount {
   align-items: center;
   background-color: var(--table-header-bg-color);
   border-radius: 50%;
   color: var(--color-text-primary);
+  cursor: pointer;
   display: inline-flex;
   font-family: var(--font-h3);
   font-size: 22px;
@@ -667,12 +699,12 @@ body > * {
   z-index: 10;
 }
 .l5r4.pc .traits-rings .trait-reflex,
-.l5r4.npc .traits-rings .trait-reflex,
 .l5r4.pc .traits-rings .trait-awarness,
-.l5r4.npc .traits-rings .trait-awarness,
 .l5r4.pc .traits-rings .trait-agility,
-.l5r4.npc .traits-rings .trait-agility,
 .l5r4.pc .traits-rings .trait-intelligence,
+.l5r4.npc .traits-rings .trait-reflex,
+.l5r4.npc .traits-rings .trait-awarness,
+.l5r4.npc .traits-rings .trait-agility,
 .l5r4.npc .traits-rings .trait-intelligence {
   grid-template-areas: "rank roll";
   grid-template-columns: 24px 1fr;
@@ -680,12 +712,12 @@ body > * {
   padding-inline-start: 8px;
 }
 .l5r4.pc .traits-rings .trait-stamina,
-.l5r4.npc .traits-rings .trait-stamina,
 .l5r4.pc .traits-rings .trait-willpower,
-.l5r4.npc .traits-rings .trait-willpower,
 .l5r4.pc .traits-rings .trait-strength,
-.l5r4.npc .traits-rings .trait-strength,
 .l5r4.pc .traits-rings .trait-perception,
+.l5r4.npc .traits-rings .trait-stamina,
+.l5r4.npc .traits-rings .trait-willpower,
+.l5r4.npc .traits-rings .trait-strength,
 .l5r4.npc .traits-rings .trait-perception {
   padding-inline-end: 8px;
 }
@@ -714,8 +746,8 @@ body > * {
   margin-inline-start: 96px;
 }
 .l5r4.pc .traits-rings .trait-willpower,
-.l5r4.npc .traits-rings .trait-willpower,
 .l5r4.pc .traits-rings .trait-perception,
+.l5r4.npc .traits-rings .trait-willpower,
 .l5r4.npc .traits-rings .trait-perception {
   align-self: start;
 }
@@ -907,6 +939,7 @@ body > * {
 .l5r4.npc .traits-rings .void-dot.-filled {
   background-color: #666;
 }
+
 .l5r4.pc .wounds .wound-grid,
 .l5r4.npc .wounds .wound-grid {
   border-block-end: none;
@@ -941,8 +974,8 @@ body > * {
   min-height: 25px;
   padding: 0.1rem 0.25rem;
 }
-.l5r4.pc .wounds .wound-grid > div:nth-child(4n + 1),
-.l5r4.npc .wounds .wound-grid > div:nth-child(4n + 1) {
+.l5r4.pc .wounds .wound-grid > div:nth-child(4n+1),
+.l5r4.npc .wounds .wound-grid > div:nth-child(4n+1) {
   justify-content: start;
 }
 .l5r4.pc .wounds .wound-grid > div input,
@@ -951,6 +984,7 @@ body > * {
   line-height: 1;
   text-align: center;
 }
+
 .l5r4.item .window-content {
   gap: 0.5rem;
   overflow: auto;
@@ -986,6 +1020,7 @@ body > * {
 .l5r4.item .effect-controls {
   flex-wrap: nowrap;
 }
+
 .xp-modal-dialog .window-content {
   overflow-y: auto;
 }

@@ -200,6 +200,7 @@
       "hints": {
         "leftRightToAdjust": "Links und Rechts zum Anpassen",
         "leftClickPlusRightClickMinus": "Umschalt+Linksklick: +1, Umschalt+Rechtsklick: -1",
+        "voidPointsClickAdjust": "Linksklick: +1, Rechtsklick: -1",
         "shiftClickRankPoints": "Umschalt+Klick: ±0,1, Umschalt+Strg+Klick: ±1,0"
       }
     },

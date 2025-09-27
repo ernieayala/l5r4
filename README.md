@@ -1,10 +1,8 @@
-# Legend of the Five Rings 4th Edition for Foundry VTT
-
-![Banner](banner.webp)
-
 ## 🙏 Acknowledgments
 
 This system builds upon the foundational work of the original L5R 4th Edition contributors. While significantly refactored and modernized for Foundry v13+, we acknowledge and appreciate their pioneering efforts in bringing Legend of the Five Rings to Foundry VTT. Their original work for Foundry v12 and below can be found at: **https://gitlab.com/team-l5r4/l5r4**
+
+# Legend of the Five Rings 4th Edition for Foundry VTT
 
 [![FoundryVTT version](https://img.shields.io/badge/FVTT-v13.x-informational)](https://foundryvtt.com/)
 [![Version](https://img.shields.io/badge/Version-1.0.0-blue)](https://github.com/ernieayala/l5r4/releases)

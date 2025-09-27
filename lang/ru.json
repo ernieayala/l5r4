@@ -200,6 +200,7 @@
       "hints": {
         "leftRightToAdjust": "Влево и вправо для настройки",
         "leftClickPlusRightClickMinus": "Shift+ЛКМ: +1, Shift+ПКМ: -1",
+        "voidPointsClickAdjust": "ЛКМ: +1, ПКМ: -1",
         "shiftClickRankPoints": "Shift+Клик: ±0.1, Shift+Ctrl+Клик: ±1.0"
       }
     },
