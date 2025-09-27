@@ -103,7 +103,6 @@ import { SYS_ID, TEMPLATE } from "../config.js";
 import { T, getSortPref, on, setSortPref, sortWithPref, toInt, applyRankPointsDelta, resolveWeaponSkillTrait, readWoundPenalty } from "../utils.js";
 
 import * as Dice from "../services/dice.js";
-import * as Chat from "../services/chat.js";
 import { BaseActorSheet } from "./base-actor-sheet.js";
 import XpManagerApplication from "../apps/xp-manager.js";
 
@@ -896,7 +895,8 @@ export default class L5R4PcSheet extends BaseActorSheet {
     const item = rid ? this.actor.items.get(rid) : null;
     if (!item) return;
 
-    return Chat.SimpleItemChat(this.actor, item);
+    // Send item to chat
+    return item.toMessage();
   }
 
   /**

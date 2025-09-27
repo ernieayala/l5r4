@@ -704,6 +704,9 @@ export default class L5R4Actor extends Actor {
    * - Skills: Triangular progression (1+2+3+...+rank), School skills get rank 1 free
    * - Emphases: 2 XP each (comma/semicolon separated)
    * - Advantages: Direct cost from item
+   * - Disadvantages: Grant XP (capped at +10 total)
+   * - Kata: Direct cost from item
+   * - Kiho: Direct cost from item
    * 
    * Results stored in `sys._xp` for sheet display (not persisted to database).
    * 
@@ -788,17 +791,22 @@ export default class L5R4Actor extends Actor {
       }
     }
 
-    // Advantages: their cost counts as spent
+    // Advantages, Kata, and Kiho: calculate separately for proper categorization
     let advantagesXP = 0;
+    let kataXP = 0;
+    let kihoXP = 0;
     for (const it of this.items) {
-      if (it.type !== "advantage") {
-        continue;
+      if (it.type === "advantage") {
+        advantagesXP += toInt(it.system?.cost);
+      } else if (it.type === "kata") {
+        kataXP += toInt(it.system?.cost);
+      } else if (it.type === "kiho") {
+        kihoXP += toInt(it.system?.cost);
       }
-      advantagesXP += toInt(it.system?.cost);
     }
 
     const total = xpBase + disadvCap + manualSum;
-    const spent = traitsXP + voidXP + skillsXP + advantagesXP;
+    const spent = traitsXP + voidXP + skillsXP + advantagesXP + kataXP + kihoXP;
     const available = total - spent;
 
     sys._xp = {
@@ -812,7 +820,9 @@ export default class L5R4Actor extends Actor {
         traits: traitsXP,
         void: voidXP,
         skills: skillsXP,
-        advantages: advantagesXP
+        advantages: advantagesXP,
+        kata: kataXP,
+        kiho: kihoXP
       }
     };
   }

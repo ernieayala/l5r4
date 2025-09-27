@@ -122,7 +122,6 @@
  * @see {@link https://foundryvtt.com/api/classes/foundry.applications.ux.ContextMenu.html|ContextMenu}
  */
 import { on, toInt, readWoundPenalty, normalizeTraitKey, getEffectiveTrait, extractRollParams, resolveWeaponSkillTrait } from "../utils.js";
-import * as Chat from "../services/chat.js";
 import * as Dice from "../services/dice.js";
 const { HandlebarsApplicationMixin } = foundry.applications.api;
 

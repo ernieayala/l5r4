@@ -199,13 +199,10 @@ export const CHAT_TEMPLATES = freeze({
  * Dialog template paths for modal forms and popups.
  * Provides consistent template resolution for user interaction dialogs.
  * Each template handles specific user input scenarios with proper validation.
- * @constant {Readonly<{rollModifiers: string, createSpell: string, createAdv: string, createEquip: string}>}
+ * @constant {Readonly<{rollModifiers: string}>}
  */
 export const DIALOG_TEMPLATES = freeze({
-  rollModifiers:  TEMPLATE("dialogs/roll-modifiers-dialog.hbs"),
-  createSpell:    TEMPLATE("dialogs/create-spell-dialog.hbs"),
-  createAdv:      TEMPLATE("dialogs/create-advantage-dialog.hbs"),
-  createEquip:    TEMPLATE("dialogs/create-equipment-dialog.hbs")
+  rollModifiers:  TEMPLATE("dialogs/roll-modifiers-dialog.hbs")
 });
 
 /* ---------------------------------- */

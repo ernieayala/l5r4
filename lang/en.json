@@ -141,8 +141,8 @@
         "spell": "Spell",
         "spells": "Spells",
         "addSpell": "Add Spell",
-        "single": "Technique",
-        "plural": "Techniques",
+        "technique": "Technique",
+        "techniques": "Techniques",
         "addTechnique": "Add Technique",
         "armors": "Armors",
         "advantage": "Advantage",
@@ -297,13 +297,15 @@
         "skillChange": "{name} {from}→{to}",
         "breakdown": {
           "base": "Base",
-          "disadvantagesGrant": "Disadvantages grant",
+          "disadvantagesGrant": "Disadvantages",
           "cap10": "(cap 10)",
           "manualAdjustments": "Manual adjustments",
           "traits": "Traits",
           "void": "Void",
           "skills": "Skills",
-          "advantages": "Advantages"
+          "advantages": "Advantages",
+          "kata": "Kata",
+          "kiho": "Kiho"
         },
         "fallbackLabels": {
           "advantage": "Advantage",

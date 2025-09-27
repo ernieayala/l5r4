@@ -118,7 +118,6 @@
  */
 
 import * as Dice from "../services/dice.js";
-import * as Chat from "../services/chat.js";
 import { SYS_ID, TEMPLATE } from "../config.js";
 import { on, toInt, T, readWoundPenalty } from "../utils.js";
 import { BaseActorSheet } from "./base-actor-sheet.js";

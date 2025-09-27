@@ -159,9 +159,6 @@ export async function preloadTemplates() {
     "systems/l5r4/templates/cards/_partials/_expand.hbs",
     
     // Dialog templates - modal forms and popups
-    "systems/l5r4/templates/dialogs/create-advantage-dialog.hbs",
-    "systems/l5r4/templates/dialogs/create-equipment-dialog.hbs",
-    "systems/l5r4/templates/dialogs/create-spell-dialog.hbs",
     "systems/l5r4/templates/dialogs/roll-modifiers-dialog.hbs",
   ];
 

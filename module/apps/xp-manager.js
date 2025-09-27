@@ -33,6 +33,9 @@
  * - **Skills**: Rank-based costs with school skill free rank handling
  * - **Emphases**: Fixed 2 XP cost with free emphasis support for school skills
  * - **Advantages**: Direct cost from item system data
+ * - **Disadvantages**: Direct cost from item system data (displayed as negative XP)
+ * - **Kata**: Direct cost from item system data
+ * - **Kiho**: Direct cost from item system data
  *
  * **Data Migration Features:**
  * - **Retroactive Updates**: Rebuilds XP history from current character state
@@ -160,11 +163,17 @@ export default class XpManagerApplication extends foundry.applications.api.Handl
                 `${e.skillName} ${e.toValue}`;
             }
           } else if (e.type === "advantage") {
-            type = game.i18n.localize("l5r4.character.experience.breakdown.advantages");
+            type = game.i18n.localize("l5r4.ui.sheets.advantage");
             formattedNote = e.itemName || e.note || "Advantage";
           } else if (e.type === "disadvantage") {
-            type = game.i18n.localize("l5r4.character.experience.breakdown.advantages");
+            type = game.i18n.localize("l5r4.ui.sheets.disadvantage");
             formattedNote = e.itemName || e.note || "Disadvantage";
+          } else if (e.type === "kata") {
+            type = game.i18n.localize("l5r4.ui.sheets.kata");
+            formattedNote = e.itemName || e.note || "Kata";
+          } else if (e.type === "kiho") {
+            type = game.i18n.localize("l5r4.ui.sheets.kiho");
+            formattedNote = e.itemName || e.note || "Kiho";
           } else {
             // Parse legacy entries based on localization keys in notes
             if (formattedNote.includes("l5r4.character.experience.traitChange")) {
@@ -212,7 +221,9 @@ export default class XpManagerApplication extends foundry.applications.api.Handl
           traits: xp?.breakdown?.traits ?? 0,
           void: xp?.breakdown?.void ?? 0,
           skills: xp?.breakdown?.skills ?? 0,
-          advantages: xp?.breakdown?.advantages ?? 0
+          advantages: xp?.breakdown?.advantages ?? 0,
+          kata: xp?.breakdown?.kata ?? 0,
+          kiho: xp?.breakdown?.kiho ?? 0
         }
       },
       manualEntries,
@@ -393,17 +404,19 @@ export default class XpManagerApplication extends foundry.applications.api.Handl
         }
       }
 
-      // Rebuild advantage purchases
+      // Rebuild advantage, disadvantage, kata, and kiho purchases
       for (const item of this.actor.items) {
-        if (item.type !== "advantage") continue;
+        if (item.type !== "advantage" && item.type !== "disadvantage" && item.type !== "kata" && item.type !== "kiho") continue;
         
         const cost = parseInt(item.system?.cost) || 0;
         if (cost > 0) {
+          // Disadvantages should show as negative XP (they grant XP to the character)
+          const delta = item.type === "disadvantage" ? -cost : cost;
           spent.push({
             id: foundry.utils.randomID(),
-            delta: cost,
+            delta: delta,
             note: item.name,
-            type: "advantage",
+            type: item.type,
             itemName: item.name,
             ts: Date.now() - Math.random() * 10000
           });

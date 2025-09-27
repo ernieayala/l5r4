@@ -238,7 +238,8 @@
         "itemDescription"
       ],
       "ring": "earth",
-      "mastery": 1
+      "mastery": 1,
+      "cost": 0
     },
     "kiho": {
       "templates": [
@@ -246,7 +247,8 @@
       ],
       "ring": "earth",
       "mastery": 1,
-      "type": "internal"
+      "type": "internal",
+      "cost": 0
     },
     "family": {
       "templates": [
