@@ -42,17 +42,15 @@ jobs:
         echo "Extracted version: $VERSION"
         echo "Full ref: $GITHUB_REF"
 
-    - name: Update system.json with release info
+    - name: Update system.json version
       run: |
-        # Update version in system.json
+        # Update only the version field in system.json
+        # Leave manifest and download URLs pointing to /latest/download/ for Foundry auto-update
         sed -i 's/"version": ".*"/"version": "${{ steps.get_version.outputs.VERSION }}"/' system.json
         
-        # Update download URL to point to this specific release
-        sed -i 's|"download": ".*"|"download": "https://github.com/ernieayala/l5r4/releases/download/v${{ steps.get_version.outputs.VERSION }}/l5r4.zip"|' system.json
-        
         # Verify the changes
-        echo "Updated system.json:"
-        cat system.json
+        echo "Updated system.json version to ${{ steps.get_version.outputs.VERSION }}:"
+        grep -A 2 '"version"' system.json
 
     - name: Create system ZIP
       run: |
