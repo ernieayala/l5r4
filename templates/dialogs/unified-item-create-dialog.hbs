@@ -6,25 +6,31 @@
   <div class="form-group">
     <label>{{localize "l5r4.ui.common.type"}}</label>
     <select name="itemType">
-      {{#if showCharacterItems}}
-        <optgroup label="{{localize 'l5r4.ui.sheets.character'}}">
-          <option value="advantage" {{#if (eq preferredType "advantage")}}selected{{/if}}>{{localize "l5r4.ui.sheets.advantage"}}</option>
-          <option value="disadvantage" {{#if (eq preferredType "disadvantage")}}selected{{/if}}>{{localize "l5r4.ui.sheets.disadvantage"}}</option>
-        </optgroup>
-        <optgroup label="{{localize 'l5r4.ui.sheets.abilities'}}">
-          <option value="skill" {{#if (eq preferredType "skill")}}selected{{/if}}>{{localize "l5r4.ui.sheets.skill"}}</option>
-          <option value="spell" {{#if (eq preferredType "spell")}}selected{{/if}}>{{localize "l5r4.ui.sheets.spell"}}</option>
-          <option value="technique" {{#if (eq preferredType "technique")}}selected{{/if}}>{{localize "l5r4.ui.sheets.technique"}}</option>
-          <option value="kata" {{#if (eq preferredType "kata")}}selected{{/if}}>{{localize "l5r4.ui.sheets.kata"}}</option>
-          <option value="kiho" {{#if (eq preferredType "kiho")}}selected{{/if}}>{{localize "l5r4.ui.sheets.kiho"}}</option>
-          <option value="tattoo" {{#if (eq preferredType "tattoo")}}selected{{/if}}>{{localize "l5r4.ui.sheets.tattoo"}}</option>
+      {{#if npcSkillsOnly}}
+        {{!-- NPC: Skills only --}}
+        <option value="skill" selected>{{localize "l5r4.ui.sheets.skill"}}</option>
+      {{else}}
+        {{!-- PC: All item types --}}
+        {{#if showCharacterItems}}
+          <optgroup label="{{localize 'l5r4.ui.sheets.character'}}">
+            <option value="advantage" {{#if (eq preferredType "advantage")}}selected{{/if}}>{{localize "l5r4.ui.sheets.advantage"}}</option>
+            <option value="disadvantage" {{#if (eq preferredType "disadvantage")}}selected{{/if}}>{{localize "l5r4.ui.sheets.disadvantage"}}</option>
+          </optgroup>
+          <optgroup label="{{localize 'l5r4.ui.sheets.abilities'}}">
+            <option value="skill" {{#if (eq preferredType "skill")}}selected{{/if}}>{{localize "l5r4.ui.sheets.skill"}}</option>
+            <option value="spell" {{#if (eq preferredType "spell")}}selected{{/if}}>{{localize "l5r4.ui.sheets.spell"}}</option>
+            <option value="technique" {{#if (eq preferredType "technique")}}selected{{/if}}>{{localize "l5r4.ui.sheets.technique"}}</option>
+            <option value="kata" {{#if (eq preferredType "kata")}}selected{{/if}}>{{localize "l5r4.ui.sheets.kata"}}</option>
+            <option value="kiho" {{#if (eq preferredType "kiho")}}selected{{/if}}>{{localize "l5r4.ui.sheets.kiho"}}</option>
+            <option value="tattoo" {{#if (eq preferredType "tattoo")}}selected{{/if}}>{{localize "l5r4.ui.sheets.tattoo"}}</option>
+          </optgroup>
+        {{/if}}
+        <optgroup label="{{localize 'l5r4.ui.sheets.equipment'}}">
+          <option value="weapon" {{#if (or (eq preferredType "weapon") (and (not preferredType) (not showCharacterItems)))}}selected{{/if}}>{{localize "l5r4.ui.sheets.weapon"}}</option>
+          <option value="armor" {{#if (eq preferredType "armor")}}selected{{/if}}>{{localize "l5r4.ui.sheets.armor"}}</option>
+          <option value="commonItem" {{#if (eq preferredType "commonItem")}}selected{{/if}}>{{localize "l5r4.ui.sheets.item"}}</option>
         </optgroup>
       {{/if}}
-      <optgroup label="{{localize 'l5r4.ui.sheets.equipment'}}">
-        <option value="weapon" {{#if (or (eq preferredType "weapon") (and (not preferredType) (not showCharacterItems)))}}selected{{/if}}>{{localize "l5r4.ui.sheets.weapon"}}</option>
-        <option value="armor" {{#if (eq preferredType "armor")}}selected{{/if}}>{{localize "l5r4.ui.sheets.armor"}}</option>
-        <option value="commonItem" {{#if (eq preferredType "commonItem")}}selected{{/if}}>{{localize "l5r4.ui.sheets.item"}}</option>
-      </optgroup>
     </select>
   </div>
 </form>

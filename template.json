@@ -116,7 +116,18 @@
         "keep": 2,
         "type": ""
       },
-      "nrWoundLvls": 1
+      "nrWoundLvls": 1,
+      "woundMode": "manual",
+      "manualWoundLevels": {
+        "healthy": {"value": 15, "penalty": 0, "active": true},
+        "nicked": {"value": 20, "penalty": 3, "active": true},
+        "grazed": {"value": 25, "penalty": 5, "active": false},
+        "hurt": {"value": 30, "penalty": 10, "active": false},
+        "injured": {"value": 35, "penalty": 15, "active": false},
+        "crippled": {"value": 40, "penalty": 20, "active": false},
+        "down": {"value": 43, "penalty": 40, "active": false},
+        "out": {"value": 45, "penalty": 99, "active": true}
+      }
     },
     "pc": {
       "templates": [

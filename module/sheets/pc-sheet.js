@@ -105,6 +105,7 @@ import { T, getSortPref, on, setSortPref, sortWithPref, toInt, applyRankPointsDe
 import * as Dice from "../services/dice.js";
 import { BaseActorSheet } from "./base-actor-sheet.js";
 import XpManagerApplication from "../apps/xp-manager.js";
+import WoundConfigApplication from "../apps/wound-config.js";
 
 /** Foundry UX TextEditor (for enrichHTML) — https://foundryvtt.com/api/classes/foundry.applications.ux.TextEditor.html */
 const { TextEditor } = foundry.applications.ux;
@@ -206,6 +207,7 @@ export default class L5R4PcSheet extends BaseActorSheet {
       case "spell-slot": return this._onSpellSlotAdjust(event, element, +1);
       case "trait-rank": return this._onTraitAdjust(event, element, +1);
       case "void-points-dots": return this._onVoidPointsAdjust(event, element, +1);
+      case "wound-config": return this._onWoundConfig(event);
       case "xp-add": return this._onXpAdd(event);
       case "xp-log": return this._onXpLog(event);
       case "xp-modal": return this._onXpModal(event);
@@ -357,7 +359,7 @@ export default class L5R4PcSheet extends BaseActorSheet {
     const all = actorObj.items.contents ?? actorObj.items;
     const byType = (t) => all.filter((i) => i.type === t);
   
-    // Skills sorted by user preference (name, rank, trait, type, emphasis)
+    // Skills sorted by user preference (name, rank, trait, roll, emphasis)
     const skills = (() => {
       const cols = {
         name:     it => String(it?.name ?? ""),
@@ -368,7 +370,7 @@ export default class L5R4PcSheet extends BaseActorSheet {
           const loc = key ? game.i18n?.localize?.(key) : "";
           return String((loc && loc !== key) ? loc : (it?.system?.trait ?? ""));
         },
-        type:     it => String(it?.system?.type ?? ""),
+        roll:     it => Number(it?.system?.rank ?? 0) || 0,
         emphasis: it => String(it?.system?.emphasis ?? "")
       };
       const pref = getSortPref(actorObj.id, "skills", Object.keys(cols), "name");
@@ -700,25 +702,19 @@ export default class L5R4PcSheet extends BaseActorSheet {
 
 
   /**
-   * Generic sorter for any header with data-scope and <a class="item-sort-by" data-sortby="...">
-   * Stores per-user, per-actor preferences.
-   * @param {MouseEvent} event
-   * @param {HTMLElement} [el]
-   * @see https://foundryvtt.com/api/classes/foundry.documents.BaseUser.html#getFlag
-   * @see https://foundryvtt.com/api/classes/foundry.documents.BaseUser.html#setFlag
+   * @override
+   * Define allowed sort keys for PC lists.
+   * Specifies which columns are sortable for each list scope.
+   * 
+   * @param {string} scope - Sort scope identifier (e.g., "skills", "spells", "advantages")
+   * @returns {string[]} Array of allowed sort keys for this scope
    */
-  async _onUnifiedSortClick(event, element) {
-    event.preventDefault();
-    event.stopPropagation();
-    const el = /** @type {HTMLElement} */ (element || event.currentTarget);
-    const header = /** @type {HTMLElement|null} */ (el.closest('.item-list.-header'));
-    const scope = header?.dataset?.scope || "items";
-    const key = el.dataset.sortby || "name";
-    const allowed = {
+  _getAllowedSortKeys(scope) {
+    const keys = {
       armors:       ["name","bonus","reduction","equipped"],
       weapons:      ["name","damage","size"],
       items:        ["name"],
-      skills:       ["name","rank","trait","emphasis"],
+      skills:       ["name","rank","trait","roll","emphasis"],
       spells:       ["name","ring","mastery","range","aoe","duration"],
       techniques:   ["name"],
       technique:    ["name"],
@@ -728,10 +724,8 @@ export default class L5R4PcSheet extends BaseActorSheet {
       advantages:   ["name","type","cost"],
       disadvantages:["name","type","cost"],
       advDis:       ["name","type","cost","item"]
-    }[scope] ?? ["name"];
-    const cur = getSortPref(this.actor.id, scope, allowed, allowed[0]);
-    await setSortPref(this.actor.id, scope, key, { toggleFrom: cur });
-    this.render();
+    };
+    return keys[scope] ?? ["name"];
   }
 
   /**
@@ -1249,139 +1243,14 @@ export default class L5R4PcSheet extends BaseActorSheet {
   }
 
   /**
-   * Retroactively update XP entries to fix legacy data format issues.
-   * Rebuilds XP tracking data with proper types and formatted notes.
+   * Legacy _retroactivelyUpdateXP method removed to prevent XP log duplication.
+   * XP Manager now handles all XP calculations and retroactive updates.
+   * This method was creating duplicate entries when both PC sheet and XP Manager
+   * attempted to rebuild XP tracking data simultaneously.
+   * 
+   * @deprecated Removed in favor of XP Manager's _retroactivelyUpdateXP method
+   * @see module/apps/xp-manager.js XpManagerApplication._retroactivelyUpdateXP()
    */
-  async _retroactivelyUpdateXP() {
-    try {
-      const sys = this.actor.system ?? {};
-      const flags = this.actor.flags?.[SYS_ID] ?? {};
-      const spent = [];
-
-      // Rebuild trait purchases
-      const TRAITS = ["sta","wil","str","per","ref","awa","agi","int"];
-      const traitDiscounts = flags?.traitDiscounts ?? {};
-      const freeTraitBase = flags?.xpFreeTraitBase ?? {};
-
-      for (const traitKey of TRAITS) {
-        const effCur = parseInt(sys?.traits?.[traitKey]) || 2;
-        const freeBase = parseInt(freeTraitBase?.[traitKey] ?? 0);
-        const freeEff = freeBase > 0 ? 0 : parseInt(this.actor._creationFreeBonus?.(traitKey)) || 0;
-        const disc = parseInt(traitDiscounts?.[traitKey] ?? 0);
-        
-        const baseline = 2 + freeBase;
-        const baseCur = Math.max(baseline, effCur - freeEff);
-        
-        // Create entries for each rank increase
-        for (let r = baseline + 1; r <= baseCur; r++) {
-          const cost = this.actor._xpStepCostForTrait?.(r, freeEff, disc) || (4 * r);
-          const traitLabel = game.i18n.localize(`l5r4.ui.mechanics.traits.${traitKey}`) || traitKey.toUpperCase();
-          
-          spent.push({
-            id: foundry.utils.randomID(),
-            delta: cost,
-            note: `${traitLabel} ${r}`,
-            type: "trait",
-            traitLabel: traitLabel,
-            fromValue: r - 1,
-            toValue: r,
-            ts: Date.now() - (baseCur - r) * 1000 // Fake timestamps in reverse order
-          });
-        }
-      }
-
-      // Rebuild void purchases
-      const voidCur = parseInt(sys?.rings?.void?.rank ?? sys?.rings?.void?.value ?? sys?.rings?.void ?? 0);
-      const voidBaseline = 2 + parseInt(freeTraitBase?.void ?? 0);
-      
-      if (voidCur > voidBaseline) {
-        for (let r = voidBaseline + 1; r <= voidCur; r++) {
-          const cost = 6 * r + parseInt(traitDiscounts?.void ?? 0);
-          
-          spent.push({
-            id: foundry.utils.randomID(),
-            delta: Math.max(0, cost),
-            note: `${game.i18n.localize("l5r4.ui.mechanics.rings.void")} ${r}`,
-            type: "void",
-            fromValue: r - 1,
-            toValue: r,
-            ts: Date.now() - (voidCur - r) * 1000
-          });
-        }
-      }
-
-      // Rebuild skill purchases
-      for (const item of this.actor.items) {
-        if (item.type !== "skill") continue;
-        
-        const rank = parseInt(item.system?.rank) || 0;
-        const freeRanks = Math.max(0, parseInt(item.system?.freeRanks) || 0);
-        
-        if (rank > freeRanks) {
-          // Create individual entries for each rank increase above free ranks
-          for (let r = freeRanks + 1; r <= rank; r++) {
-            spent.push({
-              id: foundry.utils.randomID(),
-              delta: r,
-              note: `${item.name} ${r}`,
-              type: "skill",
-              skillName: item.name,
-              fromValue: r - 1,
-              toValue: r,
-              ts: Date.now() - (100 - r) * 1000
-            });
-          }
-        }
-
-        // Add emphasis costs (excluding free emphasis)
-        const emph = String(item.system?.emphasis ?? "").trim();
-        if (emph) {
-          const emphases = emph.split(/[,;]+/).map(s => s.trim()).filter(Boolean);
-          const freeEmphasis = Math.max(0, parseInt(item.system?.freeEmphasis) || 0);
-          const paidEmphases = emphases.slice(freeEmphasis); // Skip free emphasis count
-          
-          paidEmphases.forEach((emphasis, index) => {
-            spent.push({
-              id: foundry.utils.randomID(),
-              delta: 2,
-              note: `${item.name} (${emphasis})`,
-              type: "skill",
-              skillName: item.name,
-              fromValue: 0,
-              toValue: 1,
-              ts: Date.now() - (50 - index) * 1000
-            });
-          });
-        }
-      }
-
-      // Rebuild advantage purchases
-      for (const item of this.actor.items) {
-        if (item.type !== "advantage") continue;
-        
-        const cost = parseInt(item.system?.cost) || 0;
-        if (cost > 0) {
-          spent.push({
-            id: foundry.utils.randomID(),
-            delta: cost,
-            note: item.name,
-            type: "advantage",
-            itemName: item.name,
-            ts: Date.now() - Math.random() * 10000
-          });
-        }
-      }
-
-      // Sort by timestamp
-      spent.sort((a, b) => (a.ts || 0) - (b.ts || 0));
-
-      // Update the actor's XP spent tracking
-      await this.actor.setFlag(SYS_ID, "xpSpent", spent);
-      
-    } catch (err) {
-      console.warn("L5R4", "Failed to rebuild XP purchase history", err);
-    }
-  }
 
   /**
    * Display the XP modal with comprehensive experience tracking.
@@ -1394,6 +1263,33 @@ export default class L5R4PcSheet extends BaseActorSheet {
     // Create and show the new XP Manager Application
     const xpManager = new XpManagerApplication(this.actor);
     xpManager.render(true);
+  }
+
+  /**
+   * Open the Wound Configuration Application for this PC.
+   * Provides real-time wound system configuration with Formula/Manual modes.
+   * @param {Event} event - The click event
+   */
+  async _onWoundConfig(event) {
+    event?.preventDefault?.();
+    
+    try {
+      // Check for existing wound config window and focus it
+      const existingApp = Object.values(ui.windows).find(app => 
+        app instanceof WoundConfigApplication && app.actor.id === this.actor.id
+      );
+
+      if (existingApp) {
+        existingApp.bringToTop();
+      } else {
+        // Create and show new Wound Configuration Application
+        const woundConfig = new WoundConfigApplication(this.actor);
+        await woundConfig.render(true);
+      }
+    } catch (err) {
+      console.warn("L5R4", "Failed to open wound configuration", { err, actorId: this.actor.id });
+      ui.notifications?.error(game.i18n.localize("l5r4.ui.notifications.woundConfigFailed"));
+    }
   }
 
 

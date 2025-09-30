@@ -93,7 +93,6 @@ body > * {
 
 .l5r4.pc,
 .l5r4.npc {
-  /* CSS custom property for conditional cursor behavior */
   --conditional-cursor: default;
   display: flex;
   flex-direction: column;
@@ -130,6 +129,22 @@ body > * {
   align-items: center;
   margin: 0;
   text-align: center;
+}
+.l5r4.pc .actor-img,
+.l5r4.npc .actor-img {
+  align-items: center;
+  cursor: var(--conditional-cursor);
+  display: flex;
+  height: 240px;
+  justify-content: center;
+  max-width: 240px;
+  min-width: 240px;
+  width: 240px;
+}
+.l5r4.pc .actor-img img,
+.l5r4.npc .actor-img img {
+  max-width: 100%;
+  max-height: 100%;
 }
 .l5r4.pc input,
 .l5r4.pc select,
@@ -324,29 +339,6 @@ body > * {
 .l5r4.pc .grid > div > span,
 .l5r4.npc .grid > div > span {
   padding: 0 0.5rem;
-}
-
-.l5r4.pc .actor-img {
-  align-items: center;
-  cursor: var(--conditional-cursor);
-  display: flex;
-  height: 240px;
-  justify-content: center;
-  max-width: 240px;
-  min-width: 240px;
-  width: 240px;
-}
-.l5r4.pc .actor-img img {
-  max-width: 100%;
-  max-height: 100%;
-}
-
-.l5r4.npc .actor-img {
-  cursor: var(--conditional-cursor);
-  height: 210px;
-  max-width: 210px;
-  min-width: 210px;
-  width: 210px;
 }
 
 .l5r4.pc .item-list,
@@ -923,8 +915,9 @@ body > * {
   background-color: #666;
 }
 
-.l5r4.pc .wounds .wound-grid,
-.l5r4.npc .wounds .wound-grid {
+.l5r4.pc .grid .wound-grid,
+.l5r4.npc .grid .wound-grid,
+.wound-config-app .grid .wound-grid {
   border-block-end: none;
   display: grid;
   grid-column-end: 3;
@@ -932,8 +925,9 @@ body > * {
   grid-template-columns: 1fr min-content min-content min-content;
   padding: 0;
 }
-.l5r4.pc .wounds .wound-grid > span,
-.l5r4.npc .wounds .wound-grid > span {
+.l5r4.pc .grid .wound-grid > span,
+.l5r4.npc .grid .wound-grid > span,
+.wound-config-app .grid .wound-grid > span {
   align-items: center;
   background: var(--table-header-bg-color);
   border-inline-end: none;
@@ -945,24 +939,29 @@ body > * {
   justify-content: center;
   padding: 0.25rem;
 }
-.l5r4.pc .wounds .wound-grid > span:first-child,
-.l5r4.npc .wounds .wound-grid > span:first-child {
+.l5r4.pc .grid .wound-grid > span:first-child,
+.l5r4.npc .grid .wound-grid > span:first-child,
+.wound-config-app .grid .wound-grid > span:first-child {
   justify-content: start;
 }
-.l5r4.pc .wounds .wound-grid > div,
-.l5r4.npc .wounds .wound-grid > div {
+.l5r4.pc .grid .wound-grid > div,
+.l5r4.npc .grid .wound-grid > div,
+.wound-config-app .grid .wound-grid > div {
+  align-items: center;
   border-block-end: 1px solid var(--table-header-border-color);
   display: inline-flex;
   justify-content: center;
   min-height: 25px;
   padding: 0.1rem 0.25rem;
 }
-.l5r4.pc .wounds .wound-grid > div:nth-child(4n+1),
-.l5r4.npc .wounds .wound-grid > div:nth-child(4n+1) {
+.l5r4.pc .grid .wound-grid > div:nth-child(4n+1),
+.l5r4.npc .grid .wound-grid > div:nth-child(4n+1),
+.wound-config-app .grid .wound-grid > div:nth-child(4n+1) {
   justify-content: start;
 }
-.l5r4.pc .wounds .wound-grid > div input,
-.l5r4.npc .wounds .wound-grid > div input {
+.l5r4.pc .grid .wound-grid > div input,
+.l5r4.npc .grid .wound-grid > div input,
+.wound-config-app .grid .wound-grid > div input {
   height: auto;
   line-height: 1;
   text-align: center;
@@ -1002,6 +1001,10 @@ body > * {
 }
 .l5r4.item .effect-controls {
   flex-wrap: nowrap;
+}
+
+.wound-config-app .window-content {
+  overflow-y: auto;
 }
 
 .xp-modal-dialog .window-content {

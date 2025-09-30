@@ -121,9 +121,11 @@
  * @see {@link https://foundryvtt.com/api/classes/foundry.abstract.Document.html#update|Document.update}
  * @see {@link https://foundryvtt.com/api/classes/foundry.applications.ux.ContextMenu.html|ContextMenu}
  */
-import { on, toInt, readWoundPenalty, normalizeTraitKey, getEffectiveTrait, extractRollParams, resolveWeaponSkillTrait } from "../utils.js";
+import { on, toInt, readWoundPenalty, normalizeTraitKey, getEffectiveTrait, extractRollParams, resolveWeaponSkillTrait, getSortPref, setSortPref } from "../utils.js";
 import * as Dice from "../services/dice.js";
 import * as Chat from "../services/chat.js";
+import { SYS_ID } from "../config.js";
+
 const { HandlebarsApplicationMixin } = foundry.applications.api;
 
 /**
@@ -900,5 +902,168 @@ export class BaseActorSheet extends HandlebarsApplicationMixin(foundry.applicati
     } catch (err) {
       console.warn("L5R4 Base Sheet: failed to update trait", { err, key, cur, next });
     }
+  }
+
+  /* Sorting System -------------------------------------------------------- */
+
+  /**
+   * Initialize sort visual indicators based on current sort preferences.
+   * Sets the active column and sort direction indicators for list headers.
+   * Should be called from child sheet's _onRender() method.
+   * 
+   * **Usage:**
+   * ```javascript
+   * // In child sheet's _onRender method:
+   * this._initializeSortIndicators(root, "skills", ["name", "rank", "trait", "emphasis"]);
+   * ```
+   * 
+   * **Visual Indicators:**
+   * - Active column receives `.is-active` CSS class
+   * - Sort direction set via `data-dir="asc"` or `data-dir="desc"` attribute
+   * - Inactive columns have neither class nor attribute
+   * 
+   * @param {HTMLElement} root - Sheet root element
+   * @param {string} scope - Sort scope identifier (e.g., "skills", "spells", "advantages")
+   * @param {string[]} allowedKeys - Array of allowed sort keys for this scope
+   * @returns {void}
+   * 
+   * @see {@link #_onUnifiedSortClick} - Click handler that updates sort preferences
+   * @see {@link ../utils.js|getSortPref} - Retrieves stored sort preference
+   * @protected
+   */
+  _initializeSortIndicators(root, scope, allowedKeys) {
+    try {
+      const header = root.querySelector(`.item-list.-header[data-scope="${scope}"]`);
+      if (!header) return;
+
+      const pref = getSortPref(this.actor.id, scope, allowedKeys, allowedKeys[0]);
+
+      // Update visual indicators for all sort headers in this scope
+      header.querySelectorAll('.item-sort-by').forEach(a => {
+        const sortKey = a.dataset.sortby;
+        const isActive = sortKey === pref.key;
+        a.classList.toggle('is-active', isActive);
+        
+        if (isActive) {
+          a.setAttribute('data-dir', pref.dir);
+        } else {
+          a.removeAttribute('data-dir');
+        }
+      });
+    } catch (err) {
+      console.warn("L5R4", "Failed to initialize sort indicators", { err, scope });
+    }
+  }
+
+  /**
+   * Generic unified sort click handler for list column headers.
+   * Handles user clicks on sortable column headers, toggling sort direction
+   * and updating visual indicators. Stores preferences per-user, per-actor.
+   * 
+   * **Event Delegation:**
+   * This method should be registered in child sheet's `_onAction()` switch:
+   * ```javascript
+   * case "item-sort-by": return this._onUnifiedSortClick(event, element);
+   * ```
+   * 
+   * **Template Requirements:**
+   * - Headers need `<a class="item-sort-by" data-action="item-sort-by" data-sortby="{key}">`
+   * - Parent header section needs `data-scope="{scope}"` attribute
+   * 
+   * **Sort Behavior:**
+   * - First click on a column: Sort ascending by that column
+   * - Second click on same column: Toggle to descending
+   * - Click on different column: Sort ascending by new column
+   * 
+   * **Visual Feedback:**
+   * - Updates `.is-active` class on clicked header
+   * - Sets `data-dir` attribute to "asc" or "desc"
+   * - Removes indicators from inactive columns
+   * - Re-renders sheet to apply new sort
+   * 
+   * **Configuration:**
+   * Child sheets must define allowed sort keys via `_getAllowedSortKeys()` method.
+   * Override this method to specify which columns are sortable for each scope.
+   * 
+   * @param {MouseEvent} event - Click event from sort header
+   * @param {HTMLElement} element - The clicked element with data-sortby attribute
+   * @returns {Promise<void>}
+   * 
+   * @example
+   * // Define allowed sort keys in child sheet
+   * _getAllowedSortKeys(scope) {
+   *   const keys = {
+   *     skills: ["name", "rank", "trait", "emphasis"],
+   *     spells: ["name", "ring", "mastery"],
+   *     weapons: ["name", "damage", "size"]
+   *   };
+   *   return keys[scope] ?? ["name"];
+   * }
+   * 
+   * @see {@link https://foundryvtt.com/api/classes/foundry.documents.BaseUser.html#getFlag|BaseUser.getFlag}
+   * @see {@link https://foundryvtt.com/api/classes/foundry.documents.BaseUser.html#setFlag|BaseUser.setFlag}
+   * @see {@link ../utils.js|getSortPref} - Read sort preference from user flags
+   * @see {@link ../utils.js|setSortPref} - Save sort preference to user flags
+   * @see {@link #_initializeSortIndicators} - Initialize visual indicators on render
+   * @protected
+   */
+  async _onUnifiedSortClick(event, element) {
+    event.preventDefault();
+    event.stopPropagation();
+    
+    try {
+      const el = /** @type {HTMLElement} */ (element || event.currentTarget);
+      const header = /** @type {HTMLElement|null} */ (el.closest('.item-list.-header'));
+      const scope = header?.dataset?.scope || "items";
+      const key = el.dataset.sortby || "name";
+      
+      // Get allowed keys from child sheet implementation
+      const allowed = this._getAllowedSortKeys?.(scope) ?? ["name"];
+      
+      // Validate sort key
+      if (!allowed.includes(key)) {
+        console.warn("L5R4", "Invalid sort key for scope", { scope, key, allowed });
+        return;
+      }
+      
+      // Get current preference and toggle direction if same key
+      const cur = getSortPref(this.actor.id, scope, allowed, allowed[0]);
+      await setSortPref(this.actor.id, scope, key, { toggleFrom: cur });
+      
+      // Update visual indicators before re-render
+      if (header) {
+        header.querySelectorAll('.item-sort-by').forEach(a => {
+          a.classList.toggle('is-active', a === el);
+          if (a !== el) a.removeAttribute('data-dir');
+        });
+        
+        // Set direction indicator on the clicked element
+        const newPref = getSortPref(this.actor.id, scope, allowed, allowed[0]);
+        el.setAttribute('data-dir', newPref.dir);
+      }
+      
+      // Re-render sheet to apply new sort
+      this.render();
+    } catch (err) {
+      console.warn("L5R4", "Unified sort click failed", {
+        err,
+        actorId: this.actor?.id,
+        scope: element?.closest('.item-list.-header')?.dataset?.scope
+      });
+    }
+  }
+
+  /**
+   * Get allowed sort keys for a given scope.
+   * Child sheets should override this method to define sortable columns.
+   * Default implementation returns only "name" for all scopes.
+   * 
+   * @param {string} scope - Sort scope identifier (e.g., "skills", "spells")
+   * @returns {string[]} Array of allowed sort keys for this scope
+   * @protected
+   * @virtual
+   */
+  _getAllowedSortKeys(scope) {
+    return ["name"];
   }
 }

@@ -1,0 +1,73 @@
+<section class="standard-form">
+  <div class="flexcol -gap-sm">
+    {{#if (eq actor.type "npc")}}
+      <div class="form-group">
+        <label>{{localize "l5r4.ui.mechanics.wounds.woundMode"}}</label>
+        <div class="form-fields">
+          <select name="woundMode" data-action="wound-mode-change" data-type="String">
+            <option value="manual" {{#if (eq woundMode "manual")}}selected{{/if}}>{{localize "l5r4.ui.mechanics.wounds.manual"}}</option>
+            <option value="formula" {{#if (eq woundMode "formula")}}selected{{/if}}>{{localize "l5r4.ui.mechanics.wounds.formula"}}</option>
+          </select>
+        </div>
+      </div>
+
+      {{#if (eq woundMode "manual")}}
+        <div class="form-group">
+          <label>{{localize "l5r4.ui.mechanics.wounds.maxWounds"}}</label>
+          <div class="form-fields">
+            <input type="number" name="wounds.max" placeholder="" value="{{#if (gt wounds.max 0)}}{{wounds.max}}{{/if}}" data-action="field-change" data-type="Number" min="0" />
+          </div>
+        </div>
+      {{/if}}
+
+      {{#if (eq woundMode "formula")}}
+        <div class="form-group">
+          <label>{{localize "l5r4.ui.sheets.woundLevels"}}</label>
+          <div class="form-fields">
+            <select name="nrWoundLvls" data-action="field-change" data-type="Number">
+              {{selectOptions config.npcNumberWoundLvls selected=nrWoundLvls}}
+            </select>
+          </div>
+        </div>
+      {{/if}}
+    {{/if}}
+
+    {{#if (or (eq actor.type "pc") (eq woundMode "formula"))}}
+      <div class="form-group">
+        <label>{{localize "l5r4.ui.mechanics.wounds.earthMultiplier"}}</label>
+        <div class="form-fields">
+          <input type="number" name="woundsMultiplier" value="{{woundsMultiplier}}" data-action="field-change" data-type="Number" />
+        </div>
+      </div>
+      <div class="form-group">
+        <label>{{localize "l5r4.ui.mechanics.wounds.woundBonus"}}</label>
+        <div class="form-fields">
+          <input type="number" name="woundsMod" value="{{woundsMod}}" data-action="field-change" data-type="Number" />
+        </div>
+      </div>
+      <div class="form-group">
+        <label>{{localize "l5r4.ui.mechanics.wounds.penalty"}} {{localize "l5r4.ui.common.mod"}}</label>
+        <div class="form-fields">
+          <input type="number" name="woundsPenaltyMod" value="{{woundsPenaltyMod}}" data-action="field-change" data-type="Number" />
+        </div>
+      </div>
+    {{/if}}
+
+    {{#if (and (eq actor.type "npc") (eq woundMode "manual"))}}
+      <div class="grid">
+        <div class="wound-grid">
+          <span>{{localize "l5r4.ui.mechanics.wounds.woundLevel"}}</span>
+          <span>{{localize "l5r4.ui.mechanics.wounds.penalty"}}</span>
+          <span>{{localize "l5r4.ui.mechanics.wounds.threshold"}}</span>
+          <span>{{localize "l5r4.ui.common.active"}}</span>
+          {{#each visibleManualWoundLevels as |lvl name|}}
+            <div>{{localize (concat "l5r4.ui.mechanics.wounds." name)}}</div>
+            <div><input type="number" name="manualWoundLevels.{{name}}.penalty" value="{{penalty}}" data-action="field-change" data-type="Number" min="0" /></div>
+            <div><input type="number" name="manualWoundLevels.{{name}}.value" value="{{value}}" data-action="field-change" data-type="Number" min="0" /></div>
+            <div><input type="checkbox" name="manualWoundLevels.{{name}}.active" {{checked active}} data-action="field-change" data-type="Boolean" /></div>
+          {{/each}}
+        </div>
+      </div>
+    {{/if}}
+  </div>
+</section>

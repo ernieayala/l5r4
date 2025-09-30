@@ -1,6 +1,5 @@
 .l5r4.pc,
 .l5r4.npc {
-  /* CSS custom property for conditional cursor behavior */
   --conditional-cursor: default;
   
   display: flex;
@@ -36,6 +35,22 @@
       align-items: center;
       margin: 0;
       text-align: center;
+    }
+  }
+
+  .actor-img {
+    align-items: center;
+    cursor: var(--conditional-cursor);
+    display: flex;
+    height: 240px;
+    justify-content: center;
+    max-width: 240px;
+    min-width: 240px;
+    width: 240px;
+
+    img {
+      max-width: 100%;
+      max-height: 100%;
     }
   }
 
@@ -225,33 +240,5 @@
         padding: 0 0.5rem;
       }
     }
-  }
-}
-
-.l5r4.pc {
-  .actor-img {
-    align-items: center;
-    cursor: var(--conditional-cursor);
-    display: flex;
-    height: 240px;
-    justify-content: center;
-    max-width: 240px;
-    min-width: 240px;
-    width: 240px;
-
-    img {
-      max-width: 100%;
-      max-height: 100%;
-    }
-  }
-}
-
-.l5r4.npc {
-  .actor-img {
-    cursor: var(--conditional-cursor);
-    height: 210px;
-    max-width: 210px;
-    min-width: 210px;
-    width: 210px;
   }
 }
