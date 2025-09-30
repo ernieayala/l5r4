@@ -16,11 +16,13 @@ jobs:
       uses: actions/setup-node@v4
       with:
         node-version: '18'
+        # Disable cache to avoid version conflicts
+        # cache: 'npm'
 
-    - name: Clean install dependencies
+    - name: Install dependencies (force fresh install)
       run: |
-        rm -rf node_modules package-lock.json
-        npm install
+        rm -rf node_modules
+        npm install --force
 
     - name: Build CSS
       run: npm run build:css
