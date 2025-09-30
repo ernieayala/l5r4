@@ -1,6 +1,7 @@
 .l5r4.pc,
-.l5r4.npc {
-  .wounds .wound-grid {
+.l5r4.npc,
+.wound-config-app {
+  .grid .wound-grid {
     border-block-end: none;
     display: grid;
     grid-column-end: 3;
@@ -26,6 +27,7 @@
     }
 
     > div {
+      align-items: center;
       border-block-end: 1px solid var(--table-header-border-color);
       display: inline-flex;
       justify-content: center;

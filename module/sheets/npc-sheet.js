@@ -119,7 +119,8 @@
 
 import * as Dice from "../services/dice.js";
 import { SYS_ID, TEMPLATE } from "../config.js";
-import { on, toInt, T, readWoundPenalty } from "../utils.js";
+import { on, toInt, T, readWoundPenalty, getSortPref, sortWithPref } from "../utils.js";
+import WoundConfigApplication from "../apps/wound-config.js";
 import { BaseActorSheet } from "./base-actor-sheet.js";
 
 
@@ -153,6 +154,7 @@ export default class L5R4NpcSheet extends BaseActorSheet {
       case "item-edit": return this._onItemEdit(event, element);
       case "item-expand": return this._onItemExpand(event, element);
       case "item-chat": return this._onItemHeaderToChat(event, element);
+      case "item-sort-by": return this._onUnifiedSortClick(event, element);
       case "ring-rank-void": return this._onVoidAdjust(event, element, +1);
       case "roll-ring": return this._onRingRoll(event, element);
       case "roll-skill": return this._onSkillRoll(event, element);
@@ -162,6 +164,7 @@ export default class L5R4NpcSheet extends BaseActorSheet {
       case "roll-weapon-attack": return this._onWeaponAttackRoll(event, element);
       case "trait-rank": return this._onTraitAdjust(event, element, +1);
       case "void-points-dots": return this._onVoidPointsAdjust(event, element, +1);
+      case "wound-config": return this._onWoundConfig(event, element);
     }
   }
 
@@ -296,16 +299,35 @@ export default class L5R4NpcSheet extends BaseActorSheet {
    * @override
    * Prepare template context for NPC sheet.
    * Categorizes items by type and adds NPC-specific settings.
+   * Applies user sorting preferences for skills list.
    * @param {object} options - Context preparation options
    * @returns {Promise<object>} Template context
    */
   async _prepareContext(options) {
     const base = await super._prepareContext(options);
-    const actorObj = this.actor.toObject(false);
+    const actorObj = this.actor;
 
     // Categorize items - mirrors the PC sheet so templates can rely on the same buckets
     const all = this.actor.items.contents;
     const byType = (t) => all.filter((i) => i.type === t);
+
+    // Skills sorted by user preference (name, rank, trait, roll, emphasis)
+    const skills = (() => {
+      const cols = {
+        name:     it => String(it?.name ?? ""),
+        rank:     it => Number(it?.system?.rank ?? 0) || 0,
+        trait:    it => {
+          const raw = String(it?.system?.trait ?? "").toLowerCase();
+          const key = raw && /^l5r4\.mechanics\.traits\./.test(raw) ? raw : (raw ? `l5r4.ui.mechanics.traits.${raw}` : "");
+          const loc = key ? game.i18n?.localize?.(key) : "";
+          return String((loc && loc !== key) ? loc : (it?.system?.trait ?? ""));
+        },
+        roll:     it => Number(it?.system?.rank ?? 0) || 0,
+        emphasis: it => String(it?.system?.emphasis ?? "")
+      };
+      const pref = getSortPref(actorObj.id, "skills", Object.keys(cols), "name");
+      return sortWithPref(byType("skill"), cols, pref, game.i18n?.lang);
+    })();
 
     return {
       ...base,
@@ -320,7 +342,7 @@ export default class L5R4NpcSheet extends BaseActorSheet {
       traitsEff: foundry.utils.duplicate(this.actor.system?._derived?.traitsEff ?? {}),
 
       // Buckets commonly used by your stock templates
-      skills: byType("skill"),
+      skills,
       weapons: byType("weapon"),
       bows: byType("bow"),
       armors: byType("armor"),
@@ -332,7 +354,7 @@ export default class L5R4NpcSheet extends BaseActorSheet {
   /**
    * @override
    * Post-render setup for NPC sheet.
-   * Paints void dots and sets up event listeners for NPC-specific functionality.
+   * Paints void dots, initializes sort indicators, and sets up event listeners for NPC-specific functionality.
    * @param {object} context - Template context
    * @param {object} options - Render options
    */
@@ -341,6 +363,9 @@ export default class L5R4NpcSheet extends BaseActorSheet {
     const root = this.element;
     this._paintVoidPointsDots(root);
     if (!this.actor.isOwner) return;
+
+    // Initialize sort indicators for skills section using base class method
+    this._initializeSortIndicators(root, "skills", ["name", "rank", "trait", "roll", "emphasis"]);
 
     // Simple rolls (not handled by base class action delegation)
     on(root, ".simple-roll", "click", (ev) => this._onSimpleRoll(ev));
@@ -415,6 +440,53 @@ export default class L5R4NpcSheet extends BaseActorSheet {
       toggleOptions: event.shiftKey,
       rollType
     });
+  }
+
+  /**
+   * @override
+   * Define allowed sort keys for NPC lists.
+   * Specifies which columns are sortable for each list scope.
+   * 
+   * @param {string} scope - Sort scope identifier (e.g., "skills")
+   * @returns {string[]} Array of allowed sort keys for this scope
+   */
+  _getAllowedSortKeys(scope) {
+    const keys = {
+      skills: ["name", "rank", "trait", "roll", "emphasis"]
+    };
+    return keys[scope] ?? ["name"];
+  }
+
+  /**
+   * Handle wound configuration application for NPCs.
+   * Opens a dedicated Application window with wound system configuration options.
+   * 
+   * @param {Event} event - Click event on cog button
+   * @param {HTMLElement} element - The clicked element
+   * @returns {Promise<void>}
+   */
+  async _onWoundConfig(event, element) {
+    event.preventDefault();
+    
+    try {
+      // Create or bring to front existing wound config application
+      const existingApp = Object.values(ui.windows).find(app => 
+        app instanceof WoundConfigApplication && app.actor.id === this.actor.id
+      );
+      
+      if (existingApp) {
+        existingApp.bringToTop();
+      } else {
+        const woundConfig = new WoundConfigApplication(this.actor);
+        await woundConfig.render(true);
+      }
+    } catch (err) {
+      console.warn("L5R4", "Failed to open wound configuration application", { 
+        err, 
+        actorId: this.actor.id 
+      });
+      ui.notifications?.error(game.i18n.localize("l5r4.ui.notifications.woundConfigFailed"));
+    }
   }
 
   /* Submit-time guard ------------------------------------------------------ */

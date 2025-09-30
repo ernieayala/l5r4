@@ -42,6 +42,13 @@
           "formula": "Formula",
           "result": "Result"
         },
+        "notifications": {
+          "itemCreated": "Created {type}: {name}",
+          "itemDeleted": "Deleted {type}: {name}",
+          "itemUpdated": "Updated {type}: {name}",
+          "woundConfigFailed": "Failed to open wound configuration",
+          "woundConfigUpdateFailed": "Failed to update wound configuration"
+        },
         "combat": {
           "attack": "Attack",
           "melee": "Melee",
@@ -59,12 +66,19 @@
           "armorTn": "Armor TN",
           "armorTnBase": "Armor TN Base",
           "armorReduction": "Reduction",
-          "woundLevel": "Wounds Level",
+          "woundLevel": "Level",
           "woundsSuffered": "Wounds Suffered",
           "maxWounds": "Max Wounds",
           "penalty": "Penalty",
           "woundHealRate": "Rate of Wound Heal",
           "healRateFormula": "x 2 +",
+          "woundMode": "Wound Mode",
+          "manual": "Manual",
+          "formula": "Formula",
+          "woundConfiguration": "Wound Configuration",
+          "earthMultiplier": "Earth Multiplier",
+          "woundBonus": "Wound Bonus",
+          "threshold": "Threshold",
           "healthy": "Healthy",
           "nicked": "Nicked",
           "grazed": "Grazed",
@@ -113,6 +127,7 @@
         "description": "Description",
         "notes": "Notes",
         "activeEffects": "Active Effects",
+        "active": "Active",
         "new": "New",
         "disabled": "disabled",
         "rank": "Rank",
@@ -449,6 +464,18 @@
     "forceMigration": {
       "name": "Force migration on startup",
       "label": "Forces all migrations to run on next world load, regardless of version. Automatically resets after migration completes."
+    },
+    "defaultNpcWoundMode": {
+      "name": "Default NPC Wound Mode",
+      "label": "Controls whether new NPCs use formula-based (Earth Ring) or manual threshold entry for wound calculations. Existing NPCs retain their individual settings.",
+      "choices": {
+        "manual": "Manual (Direct Entry)",
+        "formula": "Formula (Earth-based)"
+      }
+    },
+    "debugWoundConfig": {
+      "name": "Debug Wound Configuration",
+      "label": "Enable detailed console logging for Wound Configuration Application interactions, event handling, and actor updates. Useful for troubleshooting form response issues."
     }
   },
   "EFFECT": {

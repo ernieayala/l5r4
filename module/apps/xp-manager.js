@@ -429,28 +429,34 @@ export default class XpManagerApplication extends foundry.applications.api.Handl
   }
 
   /**
-   * Retroactively update XP entries to fix legacy data format issues.
+   * Retroactively rebuild XP tracking entries from current character state.
    * Preserves existing XP entries and adds missing calculated entries.
    * This ensures manual XP adjustments and historical data are not lost.
+   * 
+   * **Duplicate Prevention:**
+   * - Uses same note formats as real-time XP logging to prevent duplicates
+   * - Trait entries: "Awareness 3→4" (matches actor document format)
+   * - Void entries: "Void 2→3" (matches actor document format)
+   * - Skill entries: "Skill Name 3" (retroactive only, no real-time equivalent)
+   * 
+   * **Integration with Real-time XP:**
+   * - Real-time entries created by actor document when traits/void change
+   * - Retroactive entries only added if not already present
+   * - Manual XP adjustments always preserved
    */
   async _retroactivelyUpdateXP() {
     try {
       const sys = this.actor.system ?? {};
       const flags = this.actor.flags?.[SYS_ID] ?? {};
       
-      // Preserve existing xpSpent entries to avoid losing manual adjustments
+      // Build a fresh xpSpent list from the current actor state.
+      // Manual adjustments live under flags.xpManual and are not part of xpSpent,
+      // so it is safe to fully rebuild xpSpent here.
       const existingSpent = Array.isArray(flags.xpSpent) ? foundry.utils.duplicate(flags.xpSpent) : [];
-      const spent = [...existingSpent]; // Start with existing entries
+      const spent = [];
       
-      // Track what we've already accounted for to avoid duplicates
+      // Track entries we add during this rebuild to avoid internal duplicates
       const existingEntries = new Set();
-      existingSpent.forEach(entry => {
-        if (entry.type && entry.note) {
-          // Create a unique key for this entry type and description
-          const key = `${entry.type}:${entry.note}`;
-          existingEntries.add(key);
-        }
-      });
 
       // Rebuild trait purchases
       const TRAITS = ["sta","wil","str","per","ref","awa","agi","int"];
@@ -470,7 +476,13 @@ export default class XpManagerApplication extends foundry.applications.api.Handl
         for (let r = baseline + 1; r <= baseCur; r++) {
           const cost = this.actor._xpStepCostForTrait?.(r, freeEff, disc) || (4 * r);
           const traitLabel = game.i18n.localize(`l5r4.ui.mechanics.traits.${traitKey}`) || traitKey.toUpperCase();
-          const note = `${traitLabel} ${r}`;
+          
+          // Use same format as real-time trait changes to prevent duplicates
+          const note = game.i18n.format("l5r4.character.experience.traitChange", { 
+            label: traitLabel, 
+            from: r - 1, 
+            to: r 
+          });
           const entryKey = `trait:${note}`;
           
           // Only add if this entry doesn't already exist
@@ -497,7 +509,12 @@ export default class XpManagerApplication extends foundry.applications.api.Handl
       if (voidCur > voidBaseline) {
         for (let r = voidBaseline + 1; r <= voidCur; r++) {
           const cost = 6 * r + parseInt(traitDiscounts?.void ?? 0);
-          const note = `${game.i18n.localize("l5r4.ui.mechanics.rings.void")} ${r}`;
+          
+          // Use same format as real-time void changes to prevent duplicates
+          const note = game.i18n.format("l5r4.character.experience.voidChange", { 
+            from: r - 1, 
+            to: r 
+          });
           const entryKey = `void:${note}`;
           
           // Only add if this entry doesn't already exist
@@ -605,10 +622,9 @@ export default class XpManagerApplication extends foundry.applications.api.Handl
       // Sort by timestamp
       spent.sort((a, b) => (a.ts || 0) - (b.ts || 0));
 
-      // Only update if we actually added new entries to avoid unnecessary writes
-      if (spent.length > existingSpent.length) {
-        await this.actor.setFlag(SYS_ID, "xpSpent", spent);
-      }
+      // Update if data changed (additions, removals, or order)
+      const changed = JSON.stringify(existingSpent) !== JSON.stringify(spent);
+      if (changed) await this.actor.setFlag(SYS_ID, "xpSpent", spent);
       
     } catch (err) {
       console.warn("L5R4", "Failed to rebuild XP purchase history", err);

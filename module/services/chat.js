@@ -36,16 +36,22 @@ const DIALOG = foundry.applications.api.DialogV2;
  * Shows all item types relevant to the actor type with proper categorization.
  * 
  * **Dialog Behavior:**
- * - **PC Actors**: Shows character items (advantages, skills, spells, etc.) + equipment
- * - **NPC Actors**: Shows only equipment items (weapons, armor, common items)
+ * - **PC Actors**: Shows all character items (advantages, skills, spells, etc.) + equipment
+ * - **NPC Actors**: Shows only skills (restricted for simplified NPC management)
  * - **Validation**: Requires non-empty item name before allowing creation
  * - **Cancellation**: Returns cancelled status if user cancels or validation fails
  * - **Auto-Selection**: Pre-selects item type based on sheet section context
  * 
  * **Template Context:**
  * The dialog template receives context data to determine which item types to show:
- * - `showCharacterItems`: Boolean indicating if PC-specific items should be displayed
+ * - `showCharacterItems`: Boolean indicating if PC items should be displayed (true for PCs)
+ * - `npcSkillsOnly`: Boolean indicating if only skills should be shown for NPCs
  * - `preferredType`: String indicating which item type should be pre-selected
+ * 
+ * **NPC Restriction Rationale:**
+ * NPCs are currently restricted to skills only for simplified management. This ensures
+ * the Skills section "Add item" button works correctly while preventing clutter from
+ * unnecessary item types that NPCs typically don't use.
  * 
  * @param {string} actorType - The actor type ("pc" or "npc") to determine available items
  * @param {string} [preferredType] - Optional item type to pre-select in dropdown
@@ -53,11 +59,14 @@ const DIALOG = foundry.applications.api.DialogV2;
  */
 export async function getUnifiedItemOptions(actorType, preferredType = null) {
   // Determine which item types to show based on actor type
+  const isNpc = actorType === "npc";
   const showCharacterItems = actorType === "pc";
+  const npcSkillsOnly = isNpc; // NPCs restricted to skills only
   
   // Render dialog content with appropriate context
   const content = await R(DIALOG_TEMPLATES.unifiedItemCreate, { 
     showCharacterItems,
+    npcSkillsOnly,
     preferredType 
   });
 

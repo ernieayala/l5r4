@@ -86,13 +86,13 @@
  *
  * @author L5R4 System Team
  * @since 1.0.0
- * @version 2.1.0
  * @see {@link https://foundryvtt.com/api/classes/foundry.abstract.Document.html#update|Document.update}
  * @see {@link https://foundryvtt.com/api/classes/client.FilePicker.html#browse|FilePicker.browse}
  * @see {@link https://foundryvtt.com/api/classes/foundry.utils.html#diffObject|foundry.utils.diffObject}
  */
 
 import { SYS_ID, PATHS } from "../config.js";
+import L5R4Actor from "../documents/actor.js";
 
 // Schema migration utilities for safe data structure updates
 
@@ -101,6 +101,7 @@ import { SCHEMA_MAP } from "./schema-map.js";
 /**
  * Migrate bow items to weapons with isBow flag.
  * Converts all bow-type items to weapon-type items with the isBow flag set to true.
+{{ ... }}
  * This consolidates the weapon system to use a single item type with conditional fields.
  * 
  * **Foundry v13 Compatibility:**
@@ -363,6 +364,234 @@ async function migrateSkillDefaults(docs, label) {
 }
 
 /**
+ * Migrate legacy NPC wound data to current positive penalty system.
+ * 
+ * **CRITICAL: PRESERVES ORIGINAL STAT BLOCK VALUES**
+ * This migration uses `actor._source` to access raw database data BEFORE Actor._prepareData()
+ * runs. This ensures original values are preserved and not overwritten by computed defaults.
+ * 
+ * **Handles Migration From:**
+ * - **Old snake_case structure**: `wound_lvl` → `woundLevels` (handled by SCHEMA_MAP)
+ * - **String penalties**: "5", "10" → 5, 10 (converted to numbers, PRESERVED)
+ * - **Negative penalties**: -3, -10 → 3, 10 (converted to positive, VALUES PRESERVED)
+ * - **Missing wound mode**: Adds `woundMode: "manual"` default
+ * - **Missing manual levels**: Creates `manualWoundLevels` from legacy data (PRESERVES VALUES)
+ * - **Missing multipliers**: Sets default `woundsMultiplier: 2` and `woundsPenaltyMod: 0`
+ * - **String nrWoundLvls**: "3" → 3 (converted to number)
+ * - **Armor TN**: Preserves original armor TN values using both legacy and migrated field names
+ * 
+ * **Data Structure Transformation:**
+ * ```javascript
+ * // INPUT (Legacy NPC - Ape example):
+ * {
+ *   armor: { armor_tn: 20, reduction: 4 },  // armor_tn (snake_case)
+ *   wound_lvl: {  // snake_case (fixed by SCHEMA_MAP)
+ *     healthy: { value: 10, penalty: "5", current: true },   // Original: 10, "5"
+ *     nicked: { value: 20, penalty: "10", current: false },  // Original: 20, "10"
+ *     grazed: { value: 30, penalty: "15", current: false },  // Original: 30, "15"
+ *     hurt: { value: 0, penalty: 10, current: false }        // Original: 0 (inactive)
+ *   },
+ *   nrWoundLvls: "3"  // String
+ * }
+ * 
+ * // OUTPUT (Migrated NPC - VALUES PRESERVED):
+ * {
+ *   armor: { armorTn: 20, reduction: 4 },  // PRESERVED: 20 (not changed to 10!)
+ *   woundMode: "manual",
+ *   woundsMultiplier: 2,
+ *   woundsPenaltyMod: 0,
+ *   nrWoundLvls: 3,  // Number
+ *   woundLevels: {
+ *     healthy: { value: 10, penalty: 5, current: true },   // PRESERVED: 10, 5
+ *     nicked: { value: 20, penalty: 10, current: false },  // PRESERVED: 20, 10
+ *     grazed: { value: 30, penalty: 15, current: false },  // PRESERVED: 30, 15
+ *     hurt: { value: 0, penalty: 10, current: false }      // PRESERVED: 0 (inactive)
+ *   },
+ *   manualWoundLevels: {
+ *     healthy: { value: 10, penalty: 5, active: true },    // PRESERVED: 10, 5
+ *     nicked: { value: 20, penalty: 10, active: true },    // PRESERVED: 20, 10
+ *     grazed: { value: 30, penalty: 15, active: true },    // PRESERVED: 30, 15 (active because value > 0)
+ *     hurt: { value: 0, penalty: 10, active: false },      // PRESERVED: 0, 10 (inactive because value = 0)
+ *     injured: { value: 0, penalty: 15, active: false },   // inactive
+ *     crippled: { value: 0, penalty: 20, active: false },  // inactive
+ *     down: { value: 0, penalty: 40, active: false },      // inactive
+ *     out: { value: 0, penalty: 40, active: false }        // inactive (value = 0 in original)
+ *   }
+ * }
+ * ```
+ * 
+ * **Migration Safety:**
+ * - **Idempotent**: Safe to run multiple times without side effects
+ * - **Non-Destructive**: Uses `_source` to preserve all original stat block values
+ * - **Error Isolation**: Individual actor failures logged but don't stop migration
+ * - **Data Validation**: Converts strings to numbers with fallbacks
+ * - **Active Detection**: Based on original value > 0 (NOT arbitrary defaults)
+ * - **Source Access**: Reads raw database data before computed values overwrite originals
+ * 
+ * @param {Array<Actor>} docs - Actors to migrate (will filter for NPCs)
+ * @param {string} label - Descriptive label for logging
+ * @returns {Promise<void>}
+ */
+async function migrateLegacyNpcWounds(docs, label) {
+  const npcActors = docs.filter(doc => doc.type === "npc");
+  if (npcActors.length === 0) return;
+
+  console.log(`L5R4 | Migrating ${npcActors.length} legacy NPC wound systems (${label})`);
+  
+  let migratedCount = 0;
+  
+  for (const actor of npcActors) {
+    try {
+      const updates = {};
+      let needsUpdate = false;
+      
+      // Set default wound mode if missing
+      if (!actor.system.woundMode) {
+        updates["system.woundMode"] = "manual";
+        needsUpdate = true;
+      }
+      
+      // Set default wound multiplier if missing  
+      if (actor.system.woundsMultiplier === undefined) {
+        updates["system.woundsMultiplier"] = 2;
+        needsUpdate = true;
+      }
+      
+      // Set default wound penalty modifier if missing
+      if (actor.system.woundsPenaltyMod === undefined) {
+        updates["system.woundsPenaltyMod"] = 0;
+        needsUpdate = true;
+      }
+      
+      // CRITICAL: Preserve armor TN from legacy NPCs
+      // Check BOTH armor_tn (legacy) and armorTn (migrated) to get original value before template default overwrites it
+      const legacyArmorTn = actor.system.armor?.armor_tn;
+      const currentArmorTn = actor.system.armor?.armorTn;
+      
+      // Prefer legacy value if it exists, otherwise use current
+      const armorTnValue = legacyArmorTn !== undefined && legacyArmorTn !== null 
+        ? legacyArmorTn 
+        : currentArmorTn;
+      
+      if (armorTnValue !== undefined && armorTnValue !== null) {
+        updates["system.armor.armorTn"] = armorTnValue;
+        needsUpdate = true;
+      }
+      
+      // Convert string nrWoundLvls to number (legacy NPCs stored as "3")
+      if (typeof actor.system.nrWoundLvls === "string") {
+        updates["system.nrWoundLvls"] = parseInt(actor.system.nrWoundLvls) || 1;
+        needsUpdate = true;
+      }
+      
+      // Convert string penalties to numbers in woundLevels
+      if (actor.system.woundLevels) {
+        const woundLevels = foundry.utils.deepClone(actor.system.woundLevels);
+        let woundLevelsChanged = false;
+        
+        for (const [key, level] of Object.entries(woundLevels)) {
+          // Convert string penalties to positive numbers
+          if (typeof level.penalty === "string") {
+            level.penalty = Math.abs(parseInt(level.penalty) || 0);
+            woundLevelsChanged = true;
+          } 
+          // Convert negative penalties to positive
+          else if (typeof level.penalty === "number" && level.penalty < 0) {
+            level.penalty = Math.abs(level.penalty);
+            woundLevelsChanged = true;
+          }
+          
+          // Convert string values to numbers
+          if (typeof level.value === "string") {
+            level.value = parseInt(level.value) || 0;
+            woundLevelsChanged = true;
+          }
+        }
+        
+        if (woundLevelsChanged) {
+          updates["system.woundLevels"] = woundLevels;
+          needsUpdate = true;
+        }
+      }
+      
+      // Create/fix manualWoundLevels from legacy wound data
+      // CRITICAL: Must use _source to get raw DB data before Actor._prepareData() wipes it
+      const rawSource = actor._source?.system || actor.system;
+      const legacyWoundData = rawSource.wound_lvl;
+      const rawWoundLevels = rawSource.woundLevels;
+      
+      // Only migrate if legacy data exists OR if manualWoundLevels is missing from SOURCE
+      // Use rawSource to check if manualWoundLevels was actually saved to DB (not just computed)
+      if (legacyWoundData || !rawSource.manualWoundLevels) {
+        const sourceData = legacyWoundData || rawWoundLevels;
+        
+        if (sourceData) {
+          const manualWoundLevels = {};
+          const order = L5R4Actor.WOUND_LEVEL_ORDER;
+          
+          // CRITICAL: Must create ALL 8 entries to prevent actor prep from filling missing ones with defaults
+          for (const key of order) {
+            const woundLevel = sourceData[key];
+            const value = woundLevel ? (parseInt(woundLevel.value) || 0) : 0;
+            const penalty = woundLevel ? (Math.abs(parseInt(woundLevel.penalty) || 0)) : 0;
+            
+            manualWoundLevels[key] = {
+              value: value,
+              penalty: penalty,
+              active: value > 0
+            };
+          }
+          
+          updates["system.manualWoundLevels"] = manualWoundLevels;
+          needsUpdate = true;
+        }
+      }
+      
+      // Convert any remaining string or negative penalties in manualWoundLevels
+      if (actor.system.manualWoundLevels) {
+        const manualWoundLevels = foundry.utils.deepClone(actor.system.manualWoundLevels);
+        let manualChanged = false;
+        
+        for (const [key, level] of Object.entries(manualWoundLevels)) {
+          // Convert string penalties to positive numbers
+          if (typeof level.penalty === "string") {
+            level.penalty = Math.abs(parseInt(level.penalty) || 0);
+            manualChanged = true;
+          }
+          // Convert negative penalties to positive
+          else if (typeof level.penalty === "number" && level.penalty < 0) {
+            level.penalty = Math.abs(level.penalty);
+            manualChanged = true;
+          }
+          
+          // Convert string values to numbers
+          if (typeof level.value === "string") {
+            level.value = parseInt(level.value) || 0;
+            manualChanged = true;
+          }
+        }
+        
+        if (manualChanged) {
+          updates["system.manualWoundLevels"] = manualWoundLevels;
+          needsUpdate = true;
+        }
+      }
+      
+      if (needsUpdate) {
+        await actor.update(updates, { diff: true, render: false });
+        migratedCount++;
+      }
+    } catch (err) {
+      console.warn("L5R4", "Failed to migrate legacy NPC wounds", { id: actor.id, name: actor.name, err });
+    }
+  }
+  
+  if (migratedCount > 0) {
+    console.log(`L5R4 | Successfully migrated ${migratedCount} legacy NPC wound systems (${label})`);
+  }
+}
+
+/**
  * Clean up duplicate legacy fields that may persist after partial migrations.
  * Removes old snake_case fields when corresponding camelCase fields exist.
  *
@@ -619,6 +848,8 @@ export async function runMigrations(fromVersion, toVersion) {
   // Phase 1: Schema migrations for world documents (Actors and Items)
   await applySchemaMapToDocs(game.actors.contents, "world-actors");
   await applySchemaMapToDocs(game.items.contents, "world-items");
+  // Migrate legacy NPC wound systems to positive penalty format
+  await migrateLegacyNpcWounds(game.actors.contents, "world-legacy-npc-wounds");
   // Convert bow items to weapons with isBow flag
   await migrateBowsToWeapons(game.items.contents, "world-bow-migration");
   // Migrate skill items to ensure proper default values
@@ -653,6 +884,10 @@ export async function runMigrations(fromVersion, toVersion) {
     try {
       const docs = await pack.getDocuments();
       await applySchemaMapToDocs(docs, `pack:${pack.collection}`);
+      // Migrate legacy NPC wounds in compendium packs
+      if (docType === "Actor") {
+        await migrateLegacyNpcWounds(docs, `pack-legacy-npc-wounds:${pack.collection}`);
+      }
       await migrateBowsToWeapons(docs, `pack-bow-migration:${pack.collection}`);
       await migrateSkillDefaults(docs, `pack-skill-defaults:${pack.collection}`);
       await normalizeItems(docs, `pack-norm:${pack.collection}`);

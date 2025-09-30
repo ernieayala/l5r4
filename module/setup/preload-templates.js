@@ -168,6 +168,10 @@ export async function preloadTemplates() {
     // Dialog templates - modal forms and popups
     "systems/l5r4/templates/dialogs/roll-modifiers-dialog.hbs",
     "systems/l5r4/templates/dialogs/unified-item-create-dialog.hbs",
+    
+    // Application templates - dedicated app windows
+    "systems/l5r4/templates/apps/xp-manager.hbs",
+    "systems/l5r4/templates/apps/wound-config.hbs",
   ];
 
   // Preload all templates using Foundry's template caching system

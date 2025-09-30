@@ -369,4 +369,53 @@ export function registerSettings() {
     hint: "SETTINGS.allowArmorStacking.label",
     type: Boolean, default: false
   });
+
+  /**
+   * NPC wound system: controls the default wound calculation mode for NPCs.
+   * Determines whether new NPCs use formula-based (Earth Ring) calculations
+   * or manual threshold entry for wound levels.
+   * 
+   * **Mechanical Effect:**
+   * - "manual" (default): NPCs use direct threshold/penalty entry
+   * - "formula": NPCs use Earth Ring-based wound calculations like PCs
+   * 
+   * **Impact:**
+   * - Affects new NPC creation defaults
+   * - Existing NPCs retain their individual wound mode settings
+   * - Can be overridden per-NPC via Wound Configuration dialog
+   * 
+   * @type {string} "manual" = direct entry, "formula" = Earth-based calculations
+   */
+  game.settings.register(SYS_ID, "defaultNpcWoundMode", {
+    config: true, scope: "world",
+    name: "SETTINGS.defaultNpcWoundMode.name",
+    hint: "SETTINGS.defaultNpcWoundMode.label",
+    type: String, 
+    default: "manual",
+    choices: {
+      "manual": "SETTINGS.defaultNpcWoundMode.choices.manual",
+      "formula": "SETTINGS.defaultNpcWoundMode.choices.formula"
+    }
+  });
+
+  /**
+   * Debug setting: enables detailed logging for Wound Configuration Application.
+   * Provides comprehensive debugging information for troubleshooting form
+   * interactions, event handling, and actor updates in the wound config system.
+   * 
+   * **Debug Information Includes:**
+   * - Form element detection and event listener attachment
+   * - User interaction events (change, input, click)
+   * - Actor update operations and success/failure status
+   * - Application lifecycle events (render, close)
+   * 
+   * @type {boolean} true = enable debug logging, false = normal operation
+   */
+  game.settings.register(SYS_ID, "debugWoundConfig", {
+    config: true, scope: "client",
+    name: "SETTINGS.debugWoundConfig.name",
+    hint: "SETTINGS.debugWoundConfig.label",
+    type: Boolean,
+    default: false
+  });
 }
