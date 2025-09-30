@@ -106,7 +106,7 @@
  *
  * @author L5R4 System Team
  * @since 1.0.0
- * @version 2.1.0
+ * @version 1.0.2
  * @extends {Item}
  * @see {@link https://foundryvtt.com/api/classes/documents.Item.html|Item Document}
  * @see {@link https://foundryvtt.com/api/classes/foundry.abstract.Document.html#_preCreate|Document._preCreate}
@@ -130,12 +130,16 @@ export default class L5R4Item extends Item {
   /**
    * Chat template paths for rendering item-specific chat cards.
    * Maps each item type to its corresponding Handlebars template.
+   * 
+   * NOTE: 'bow' entry is LEGACY support for pre-v1.0.0 items during migration.
+   * New bows use type='weapon' with system.isBow=true flag.
+   * 
    * @type {Record<string, string>}
    */
   static CHAT_CARD_TEMPLATES = {
     advantage:    TEMPLATE("cards/advantage-disadvantage.hbs"),
     armor:        TEMPLATE("cards/armor.hbs"),
-    bow:          TEMPLATE("cards/weapon.hbs"),
+    bow:          TEMPLATE("cards/weapon.hbs"),  // LEGACY: For unmigrated bow items
     clan:         TEMPLATE("cards/commonItem.hbs"),
     disadvantage: TEMPLATE("cards/advantage-disadvantage.hbs"),
     family:       TEMPLATE("cards/commonItem.hbs"),
@@ -153,13 +157,17 @@ export default class L5R4Item extends Item {
   /**
    * Default icon paths by item type for automatic assignment.
    * Used when items are created without explicit icons or with the generic bag icon.
+   * 
+   * NOTE: 'bow' entry is LEGACY support for pre-v1.0.0 items during migration.
+   * New bows use type='weapon' with system.isBow=true flag.
+   * 
    * @type {Record<string, string>}
    * @static
    */
   static DEFAULT_ICONS = {
     advantage:    iconPath("yin-yang.png"),
     armor:        iconPath("hat.png"),
-    bow:          iconPath("bow.png"),
+    bow:          iconPath("bow.png"),  // LEGACY: For unmigrated bow items
     clan:         iconPath("bamboo.png"),
     disadvantage: iconPath("yin-yang.png"),
     family:       iconPath("tori.png"),
@@ -181,7 +189,7 @@ export default class L5R4Item extends Item {
   /**
    * Configure item defaults and validate data on creation.
    * Assigns type-appropriate icons and enforces cost constraints for
-   * advantages (≥0) and disadvantages (≤0).
+   * advantages and disadvantages (both ≥0, disadvantages grant XP in calculations).
    * 
    * @param {object} data - The initial data object provided to the document creation
    * @param {object} options - Additional options which modify the creation request
@@ -200,7 +208,8 @@ export default class L5R4Item extends Item {
       this.updateSource({ img: icon });
     }
 
-    // Enforce advantage or disadvantage cost constraints (must be non-negative)
+    // Enforce cost constraints (must be non-negative for both types)
+    // Disadvantages store positive costs but grant XP in calculations (see actor.js _preparePcExperience)
     if (this.type === "advantage" || this.type === "disadvantage") {
       const raw = data?.system?.cost ?? this.system?.cost;
       const clamped = Math.max(0, toInt(raw, 0));
@@ -302,8 +311,9 @@ export default class L5R4Item extends Item {
       changes.system.cost = Math.max(0, toInt(changes.system.cost, 0));
     }
 
-    // Allow disadvantages to have any cost value for flexibility
-    // XP calculation will handle the conversion appropriately
+    // Allow disadvantages to have any cost value for flexibility during updates
+    // (creation enforces ≥0). XP calculations in actor.js interpret positive
+    // costs as granted XP (see _preparePcExperience).
 
     await super._preUpdate(changes, options, userId);
     
@@ -329,7 +339,7 @@ export default class L5R4Item extends Item {
             this.actor.sheet.render();
           }
         } catch (err) {
-          console.warn("L5R4", "Failed to reset calculated XP data", err);
+          console.warn(`${SYS_ID}`, "Failed to reset calculated XP data", err);
         }
         return; // Skip the normal XP tracking logic below
       }
@@ -528,7 +538,7 @@ export default class L5R4Item extends Item {
         sys.rollDice = Math.max(0, toInt(sys.rank));
         sys.rollKeep = 0;
         sys.rollFormula = `${sys.rollDice}k${sys.rollKeep}`;
-        console.warn("L5R4", "Failed to compute skill roll formula", { err, item: this });
+        console.warn(`${SYS_ID}`, "Failed to compute skill roll formula", { err, item: this });
       }
     }
 

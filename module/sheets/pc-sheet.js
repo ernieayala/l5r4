@@ -91,7 +91,7 @@
  *
  * @author L5R4 System Team
  * @since 1.0.0
- * @version 2.1.0
+ * @version 1.0.2
  * @extends {BaseActorSheet}
  * @see {@link https://foundryvtt.com/api/classes/foundry.applications.sheets.ActorSheetV2.html|ActorSheetV2}
  * @see {@link https://foundryvtt.com/api/classes/foundry.applications.api.HandlebarsApplicationMixin.html|HandlebarsApplicationMixin}
@@ -259,7 +259,7 @@ export default class L5R4PcSheet extends BaseActorSheet {
       const prior = (this.actor.items?.contents ?? this.actor.items).filter(i => i.type === type);
       if (prior.length) await this.actor.deleteEmbeddedDocuments("Item", prior.map(i => i.id));
     } catch (err) {
-      console.warn("L5R4", "Failed to delete prior bio item(s)", { type, err });
+      console.warn(`${SYS_ID}`, "Failed to delete prior bio item(s)", { type, err });
     }
 
     let newest = null;
@@ -267,7 +267,7 @@ export default class L5R4PcSheet extends BaseActorSheet {
       const [created] = await this.actor.createEmbeddedDocuments("Item", [itemDoc.toObject()]);
       newest = created ?? null;
     } catch (err) {
-      console.warn("L5R4", "Failed to embed bio item on drop", { type, err });
+      console.warn(`${SYS_ID}`, "Failed to embed bio item on drop", { type, err });
     }
 
     // Update labels/flags (no renaming on Family)
@@ -285,7 +285,7 @@ export default class L5R4PcSheet extends BaseActorSheet {
 
     if (Object.keys(updates).length) {
       try { await this.actor.update(updates); }
-      catch (err) { console.warn("L5R4", "actor.update failed after bio drop", { type, updates, err }); }
+      catch (err) { console.warn(`${SYS_ID}`, "actor.update failed after bio drop", { type, updates, err }); }
     }
   }
 
@@ -551,7 +551,7 @@ export default class L5R4PcSheet extends BaseActorSheet {
         this.actor.system?._derived?.traitsEff ?? this.actor.system?.derived?.traitsEff ?? {}
       );
       if (!Object.keys(traitsEff).length) {
-        console.warn("L5R4", "traitsEff missing in actor.system._derived; check prepareDerivedData()");
+        console.warn(`${SYS_ID}`, "traitsEff missing in actor.system._derived; check prepareDerivedData()");
       }
     }
   
@@ -640,7 +640,7 @@ export default class L5R4PcSheet extends BaseActorSheet {
           try {
             this.element?.classList.toggle("is-editable");
           } catch (err) {
-            console.warn("L5R4", "PC Sheet: toggle-is-editable failed", { err });
+            console.warn(`${SYS_ID}`, "PC Sheet: toggle-is-editable failed", { err });
           }
         });
 
@@ -648,7 +648,7 @@ export default class L5R4PcSheet extends BaseActorSheet {
         controls.insertBefore(btn, controls.firstElementChild);
       }
     } catch (err) {
-      console.warn("L5R4", "PC Sheet: header control injection failed", { err });
+      console.warn(`${SYS_ID}`, "PC Sheet: header control injection failed", { err });
     }
 
     // Always repaint Void dots after any render, even if the root element is reused.
@@ -785,7 +785,7 @@ export default class L5R4PcSheet extends BaseActorSheet {
     try {
       await this.actor.update({ [`system.traits.${key}`]: nextBase }, { diff: true });
     } catch (err) {
-      console.warn("L5R4", "actor.update failed in PcSheet", { err });
+      console.warn(`${SYS_ID}`, "actor.update failed in PcSheet", { err });
     }
   }
 
@@ -818,7 +818,7 @@ export default class L5R4PcSheet extends BaseActorSheet {
       try {
         await this.actor.update({ "system.rings.void.rank": next }, { diff: true });
       } catch (err) {
-        console.warn("L5R4", "actor.update failed in PcSheet", { err });
+        console.warn(`${SYS_ID}`, "actor.update failed in PcSheet", { err });
       }
     }
 
@@ -855,7 +855,7 @@ export default class L5R4PcSheet extends BaseActorSheet {
       // Optional immediate visual feedback (sheet will re-render anyway)
       element.textContent = String(next);
     } catch (err) {
-      console.warn("L5R4", "Spell slot adjust failed", { err, element, delta });
+      console.warn(`${SYS_ID}`, "Spell slot adjust failed", { err, element, delta });
     }
   }
 
@@ -892,7 +892,7 @@ export default class L5R4PcSheet extends BaseActorSheet {
     try {
       await this.actor.update({ [path]: value });
     } catch (err) {
-      console.warn("L5R4", "actor.update failed in PcSheet", { err });
+      console.warn(`${SYS_ID}`, "actor.update failed in PcSheet", { err });
     }
   }
 
@@ -911,7 +911,7 @@ export default class L5R4PcSheet extends BaseActorSheet {
     try {
       await this.actor.update(data);
     } catch (err) {
-      console.warn("L5R4", "actor.update failed in PcSheet", { err });
+      console.warn(`${SYS_ID}`, "actor.update failed in PcSheet", { err });
     }
   }
 
@@ -927,7 +927,7 @@ export default class L5R4PcSheet extends BaseActorSheet {
     try {
       await this.actor.update(data);
     } catch (err) {
-      console.warn("L5R4", "actor.update failed in PcSheet _handleSchoolDrop", { err });
+      console.warn(`${SYS_ID}`, "actor.update failed in PcSheet _handleSchoolDrop", { err });
     }
   }
 
@@ -941,7 +941,7 @@ export default class L5R4PcSheet extends BaseActorSheet {
       const prior = (this.actor.items?.contents ?? this.actor.items).filter(i => i.type === "family");
       if (prior.length) await this.actor.deleteEmbeddedDocuments("Item", prior.map(i => i.id));
     } catch (err) {
-      console.warn("L5R4", "Failed to delete stale Family items on drop", { err });
+      console.warn(`${SYS_ID}`, "Failed to delete stale Family items on drop", { err });
     }
 
     try {
@@ -951,7 +951,7 @@ export default class L5R4PcSheet extends BaseActorSheet {
         // No name mutations here anymore.
       });
     } catch (err) {
-      console.warn("L5R4", "actor.update failed in _handleFamilyDrop", { err });
+      console.warn(`${SYS_ID}`, "actor.update failed in _handleFamilyDrop", { err });
     }
   }
 
@@ -974,7 +974,7 @@ export default class L5R4PcSheet extends BaseActorSheet {
         [`flags.${SYS_ID}.familyBaseName`]: null
       });
     } catch (err) {
-      console.warn("L5R4", "actor.update failed in _onFamilyClear", { err });
+      console.warn(`${SYS_ID}`, "actor.update failed in _onFamilyClear", { err });
     }
   }
 
@@ -1162,7 +1162,7 @@ export default class L5R4PcSheet extends BaseActorSheet {
     try {
       await this.actor.setFlag(SYS_ID, "xpManual", manual);
     } catch (err) {
-      console.warn("L5R4", "actor.setFlag failed in PcSheet", { err });
+      console.warn(`${SYS_ID}`, "actor.setFlag failed in PcSheet", { err });
     }
   }
 
@@ -1287,7 +1287,7 @@ export default class L5R4PcSheet extends BaseActorSheet {
         await woundConfig.render(true);
       }
     } catch (err) {
-      console.warn("L5R4", "Failed to open wound configuration", { err, actorId: this.actor.id });
+      console.warn(`${SYS_ID}`, "Failed to open wound configuration", { err, actorId: this.actor.id });
       ui.notifications?.error(game.i18n.localize("l5r4.ui.notifications.woundConfigFailed"));
     }
   }
@@ -1321,7 +1321,7 @@ export default class L5R4PcSheet extends BaseActorSheet {
         [`flags.${SYS_ID}.clanItemUuid`]: null
       });
     } catch (err) {
-      console.warn("L5R4", "actor.update failed in PcSheet", { err });
+      console.warn(`${SYS_ID}`, "actor.update failed in PcSheet", { err });
     }
   }
 
@@ -1350,7 +1350,7 @@ export default class L5R4PcSheet extends BaseActorSheet {
         [`flags.${SYS_ID}.schoolItemUuid`]: null
       });
     } catch (err) {
-      console.warn("L5R4", "actor.update failed in PcSheet _onSchoolClear", { err });
+      console.warn(`${SYS_ID}`, "actor.update failed in PcSheet _onSchoolClear", { err });
     }
   }
 
@@ -1385,7 +1385,7 @@ export default class L5R4PcSheet extends BaseActorSheet {
         [`flags.${SYS_ID}.familyBaseName`]: null
       });
     } catch (err) {
-      console.warn("L5R4", "actor.update failed in PcSheet", { err });
+      console.warn(`${SYS_ID}`, "actor.update failed in PcSheet", { err });
     }
   }
 
@@ -1489,7 +1489,7 @@ export default class L5R4PcSheet extends BaseActorSheet {
       }[scope] ?? ["name"];
       
       if (!allowed.includes(key)) {
-        console.warn("L5R4", "Invalid sort key for scope", { scope, key, allowed });
+        console.warn(`${SYS_ID}`, "Invalid sort key for scope", { scope, key, allowed });
         return;
       }
       
@@ -1512,7 +1512,7 @@ export default class L5R4PcSheet extends BaseActorSheet {
       this.render();
       
     } catch (err) {
-      console.warn("L5R4", "Preference-based sort failed", { err, scope, key });
+      console.warn(`${SYS_ID}`, "Preference-based sort failed", { err, scope, key });
     }
   }
   
@@ -1576,7 +1576,7 @@ export default class L5R4PcSheet extends BaseActorSheet {
       }
       
     } catch (err) {
-      console.warn("L5R4", "Skills document sort failed", { err, key });
+      console.warn(`${SYS_ID}`, "Skills document sort failed", { err, key });
     }
   }
 
@@ -1614,7 +1614,7 @@ export default class L5R4PcSheet extends BaseActorSheet {
 
       await this.actor.update(update);
     } catch (err) {
-      console.warn("L5R4 PC Sheet: failed to update rank/points", { err, event, el });
+      console.warn(`${SYS_ID} PC Sheet: failed to update rank/points`, { err, event, el });
     }
   }
 

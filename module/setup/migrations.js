@@ -104,6 +104,12 @@ import { SCHEMA_MAP } from "./schema-map.js";
 {{ ... }}
  * This consolidates the weapon system to use a single item type with conditional fields.
  * 
+ * **IMPORTANT - Do Not Remove Yet:**
+ * The "bow" type must remain registered in template.json for this migration to work.
+ * Removal is safe only after confirming all user worlds have zero bow-type items.
+ * Check criteria: No bug reports about bow items, multiple releases since v1.0.0,
+ * and confirmation that legacy worlds have completed migration.
+ * 
  * **Foundry v13 Compatibility:**
  * Uses {recursive: false} option when changing document types to comply with
  * Foundry v13's stricter type change requirements. This prevents the error:
@@ -117,7 +123,7 @@ async function migrateBowsToWeapons(docs, label) {
   const bowItems = docs.filter(doc => doc.type === "bow");
   if (bowItems.length === 0) return;
 
-  console.log(`L5R4 | Migrating ${bowItems.length} bow items to weapons (${label})`);
+  console.log(`${SYS_ID} | Migrating ${bowItems.length} bow items to weapons (${label})`);
   
   for (const item of bowItems) {
     try {
@@ -149,7 +155,7 @@ async function migrateBowsToWeapons(docs, label) {
       
       await item.update(updateData, { diff: false, recursive: false, render: false });
     } catch (err) {
-      console.warn("L5R4", "Failed to migrate bow item", { id: item.id, name: item.name, err });
+      console.warn(`${SYS_ID}`, "Failed to migrate bow item", { id: item.id, name: item.name, err });
     }
   }
 }
@@ -282,7 +288,7 @@ async function applySchemaMapToDocs(docs, label) {
         await doc.update(update);
       }
     } catch (e) {
-      console.warn("L5R4", "Schema remap failed", { label, id: doc.id, type: doc.type, error: e });
+      console.warn(`${SYS_ID}`, "Schema remap failed", { label, id: doc.id, type: doc.type, error: e });
     }
   }
 }
@@ -305,7 +311,7 @@ async function normalizeItems(docs, label) {
         await doc.update({ "system.size": sz.toLowerCase() }, { diff: true, render: false });
       }
     } catch (e) {
-      console.warn("L5R4", "Normalization failed", { label, id: doc.id, type: doc.type, error: e });
+      console.warn(`${SYS_ID}`, "Normalization failed", { label, id: doc.id, type: doc.type, error: e });
     }
   }
 }
@@ -326,7 +332,7 @@ async function migrateSkillDefaults(docs, label) {
   const skillItems = docs.filter(doc => doc.type === "skill");
   if (skillItems.length === 0) return;
 
-  console.log(`L5R4 | Migrating ${skillItems.length} skill items to ensure proper defaults (${label})`);
+  console.log(`${SYS_ID} | Migrating ${skillItems.length} skill items to ensure proper defaults (${label})`);
   
   let migratedCount = 0;
   
@@ -354,12 +360,12 @@ async function migrateSkillDefaults(docs, label) {
         migratedCount++;
       }
     } catch (err) {
-      console.warn("L5R4", "Failed to migrate skill defaults", { id: item.id, name: item.name, err });
+      console.warn(`${SYS_ID}`, "Failed to migrate skill defaults", { id: item.id, name: item.name, err });
     }
   }
   
   if (migratedCount > 0) {
-    console.log(`L5R4 | Successfully migrated ${migratedCount} skill items with default values (${label})`);
+    console.log(`${SYS_ID} | Successfully migrated ${migratedCount} skill items with default values (${label})`);
   }
 }
 
@@ -436,7 +442,7 @@ async function migrateLegacyNpcWounds(docs, label) {
   const npcActors = docs.filter(doc => doc.type === "npc");
   if (npcActors.length === 0) return;
 
-  console.log(`L5R4 | Migrating ${npcActors.length} legacy NPC wound systems (${label})`);
+  console.log(`${SYS_ID} | Migrating ${npcActors.length} legacy NPC wound systems (${label})`);
   
   let migratedCount = 0;
   
@@ -582,12 +588,12 @@ async function migrateLegacyNpcWounds(docs, label) {
         migratedCount++;
       }
     } catch (err) {
-      console.warn("L5R4", "Failed to migrate legacy NPC wounds", { id: actor.id, name: actor.name, err });
+      console.warn(`${SYS_ID}`, "Failed to migrate legacy NPC wounds", { id: actor.id, name: actor.name, err });
     }
   }
   
   if (migratedCount > 0) {
-    console.log(`L5R4 | Successfully migrated ${migratedCount} legacy NPC wound systems (${label})`);
+    console.log(`${SYS_ID} | Successfully migrated ${migratedCount} legacy NPC wound systems (${label})`);
   }
 }
 
@@ -633,7 +639,7 @@ async function cleanupLegacyFields(docs, label) {
         await doc.update(updates, { diff: true, render: false });
       }
     } catch (e) {
-      console.warn("L5R4", "Legacy cleanup failed", { label, id: doc.id, type: doc.type, error: e });
+      console.warn(`${SYS_ID}`, "Legacy cleanup failed", { label, id: doc.id, type: doc.type, error: e });
     }
   }
 }
@@ -689,7 +695,7 @@ async function listDir(dirPath) {
     dirCache.set(dirPath, files);
     return files;
   } catch (err) {
-    console.warn("L5R4", "Failed to browse directory", { dirPath, err });
+    console.warn(`${SYS_ID}`, "Failed to browse directory", { dirPath, err });
     const empty = new Set();
     dirCache.set(dirPath, empty);
     return empty;
@@ -746,7 +752,7 @@ export async function runIconPathMigration() {
     const next = await computeNewIconPath(a.img);
     if (next && next !== a.img) {
       try { await a.update({ img: next }, { diff: true, render: false }); changed++; }
-      catch (err) { console.warn("L5R4", "Failed to update actor img", { id: a.id, err }); }
+      catch (err) { console.warn(`${SYS_ID}`, "Failed to update actor img", { id: a.id, err }); }
     }
   }
 
@@ -755,7 +761,7 @@ export async function runIconPathMigration() {
     const next = await computeNewIconPath(i.img);
     if (next && next !== i.img) {
       try { await i.update({ img: next }, { diff: true, render: false }); changed++; }
-      catch (err) { console.warn("L5R4", "Failed to update item img", { id: i.id, err }); }
+      catch (err) { console.warn(`${SYS_ID}`, "Failed to update item img", { id: i.id, err }); }
     }
   }
 
@@ -763,7 +769,7 @@ export async function runIconPathMigration() {
   try {
     if (changed > 0) { await game.settings.set(SYS_ID, "runMigration", false); }
   } catch (err) {
-    console.warn("L5R4", "Failed to disable runMigration setting", err);
+    console.warn(`${SYS_ID}`, "Failed to disable runMigration setting", err);
   }
 }
 
@@ -793,7 +799,7 @@ async function migrateCompendiumIconPaths() {
     try {
       docs = await pack.getDocuments();
     } catch (err) {
-      console.warn("L5R4", "Failed to load compendium documents", { collection: pack.collection, err });
+      console.warn(`${SYS_ID}`, "Failed to load compendium documents", { collection: pack.collection, err });
       continue;
     }
 
@@ -804,7 +810,7 @@ async function migrateCompendiumIconPaths() {
           await doc.update({ img: next }, { diff: true, render: false });
           changed++;
         } catch (err) {
-          console.warn("L5R4", "Failed to update compendium doc img", { id: doc.id, collection: pack.collection, err });
+          console.warn(`${SYS_ID}`, "Failed to update compendium doc img", { id: doc.id, collection: pack.collection, err });
         }
       }
     }
@@ -877,7 +883,7 @@ export async function runMigrations(fromVersion, toVersion) {
     // Skip locked compendiums to prevent permission errors
     const isLocked = pack.metadata?.locked ?? pack.locked ?? false;
     if (isLocked) {
-      console.log("L5R4", "Skipping locked compendium", { collection: pack.collection });
+      console.log(`${SYS_ID}`, "Skipping locked compendium", { collection: pack.collection });
       continue;
     }
 
@@ -904,7 +910,7 @@ export async function runMigrations(fromVersion, toVersion) {
         }
       }
     } catch (e) {
-      console.warn("L5R4", "Schema remap pack failed", { pack: pack.collection, error: e });
+      console.warn(`${SYS_ID}`, "Schema remap pack failed", { pack: pack.collection, error: e });
     }
   }
 
@@ -913,6 +919,6 @@ export async function runMigrations(fromVersion, toVersion) {
     await runIconPathMigration();
     await migrateCompendiumIconPaths();
   } catch (err) {
-    console.warn("L5R4 | Migration failed", { fromVersion, toVersion, error: err });
+    console.warn(`${SYS_ID} | Migration failed`, { fromVersion, toVersion, error: err });
   }
 }

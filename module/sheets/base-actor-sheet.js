@@ -113,7 +113,7 @@
  *
  * @author L5R4 System Team
  * @since 1.0.0
- * @version 2.1.0
+ * @version 1.0.2
  * @extends {foundry.applications.sheets.ActorSheetV2}
  * @mixes {foundry.applications.api.HandlebarsApplicationMixin}
  * @see {@link https://foundryvtt.com/api/classes/foundry.applications.sheets.ActorSheetV2.html|ActorSheetV2}
@@ -325,7 +325,7 @@ export class BaseActorSheet extends HandlebarsApplicationMixin(foundry.applicati
     try {
       await this.actor.update({ "system.rings.void.value": next }, { diff: true });
     } catch (err) {
-      console.warn("L5R4 Base Sheet: failed to update void points", { err });
+      console.warn(`${SYS_ID} Base Sheet: failed to update void points`, { err });
     }
     // Repaint from authoritative actor state to avoid stale DOM edge-cases
     this._paintVoidPointsDots(this.element);
@@ -390,7 +390,7 @@ export class BaseActorSheet extends HandlebarsApplicationMixin(foundry.applicati
     try {
       const item = await fromUuid(data.uuid);
       if (!item) {
-        console.warn("L5R4 Base Sheet: Could not resolve item UUID", data.uuid);
+        console.warn(`${SYS_ID} Base Sheet: Could not resolve item UUID`, data.uuid);
         return false;
       }
 
@@ -398,7 +398,7 @@ export class BaseActorSheet extends HandlebarsApplicationMixin(foundry.applicati
       const itemData = item.toObject();
       return await this.actor.createEmbeddedDocuments("Item", [itemData]);
     } catch (err) {
-      console.warn("L5R4 Base Sheet: Failed to drop item", { err, data });
+      console.warn(`${SYS_ID} Base Sheet: Failed to drop item`, { err, data });
       return false;
     }
   }
@@ -437,7 +437,7 @@ export class BaseActorSheet extends HandlebarsApplicationMixin(foundry.applicati
         try {
           await this.actor.update({ img: path });
         } catch (err) {
-          console.warn("L5R4", "Failed to update actor image", { err });
+          console.warn(`${SYS_ID}`, "Failed to update actor image", { err });
         }
       },
       top: this.position.top + 40,
@@ -539,7 +539,7 @@ export class BaseActorSheet extends HandlebarsApplicationMixin(foundry.applicati
       try {
         await this.actor.deleteEmbeddedDocuments("Item", [id]);
       } catch (err) {
-        console.warn("L5R4 Base Sheet: deleteEmbeddedDocuments failed", { err });
+        console.warn(`${SYS_ID} Base Sheet: deleteEmbeddedDocuments failed`, { err });
       }
     }
   }
@@ -610,7 +610,7 @@ export class BaseActorSheet extends HandlebarsApplicationMixin(foundry.applicati
     try { 
       await item.roll(); 
     } catch (err) { 
-      console.warn("L5R4 Base Sheet: item.roll() failed", { err, id }); 
+      console.warn(`${SYS_ID} Base Sheet: item.roll() failed`, { err, id }); 
     }
   }
 
@@ -656,13 +656,13 @@ export class BaseActorSheet extends HandlebarsApplicationMixin(foundry.applicati
             try { 
               await this.actor.deleteEmbeddedDocuments("Item", [id]); 
             } catch (err) { 
-              console.warn("L5R4 Base Sheet: deleteEmbeddedDocuments failed", { err }); 
+              console.warn(`${SYS_ID} Base Sheet: deleteEmbeddedDocuments failed`, { err }); 
             }
           }
         }
       ], { jQuery: false });
     } catch (e) {
-      console.warn("L5R4 Base Sheet: context menu init failed", e);
+      console.warn(`${SYS_ID} Base Sheet: context menu init failed`, e);
     }
   }
 
@@ -900,7 +900,7 @@ export class BaseActorSheet extends HandlebarsApplicationMixin(foundry.applicati
     try {
       await this.actor.update({ [`system.traits.${key}`]: next }, { diff: true });
     } catch (err) {
-      console.warn("L5R4 Base Sheet: failed to update trait", { err, key, cur, next });
+      console.warn(`${SYS_ID} Base Sheet: failed to update trait`, { err, key, cur, next });
     }
   }
 
@@ -951,7 +951,7 @@ export class BaseActorSheet extends HandlebarsApplicationMixin(foundry.applicati
         }
       });
     } catch (err) {
-      console.warn("L5R4", "Failed to initialize sort indicators", { err, scope });
+      console.warn(`${SYS_ID}`, "Failed to initialize sort indicators", { err, scope });
     }
   }
 
@@ -1022,7 +1022,7 @@ export class BaseActorSheet extends HandlebarsApplicationMixin(foundry.applicati
       
       // Validate sort key
       if (!allowed.includes(key)) {
-        console.warn("L5R4", "Invalid sort key for scope", { scope, key, allowed });
+        console.warn(`${SYS_ID}`, "Invalid sort key for scope", { scope, key, allowed });
         return;
       }
       
@@ -1045,7 +1045,7 @@ export class BaseActorSheet extends HandlebarsApplicationMixin(foundry.applicati
       // Re-render sheet to apply new sort
       this.render();
     } catch (err) {
-      console.warn("L5R4", "Unified sort click failed", {
+      console.warn(`${SYS_ID}`, "Unified sort click failed", {
         err,
         actorId: this.actor?.id,
         scope: element?.closest('.item-list.-header')?.dataset?.scope

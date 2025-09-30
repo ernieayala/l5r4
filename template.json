@@ -126,7 +126,7 @@
         "injured": {"value": 35, "penalty": 15, "active": false},
         "crippled": {"value": 40, "penalty": 20, "active": false},
         "down": {"value": 43, "penalty": 40, "active": false},
-        "out": {"value": 45, "penalty": 99, "active": true}
+        "out": {"value": 45, "penalty": 40, "active": true}
       }
     },
     "pc": {
@@ -193,6 +193,7 @@
     }
   },
   "Item": {
+    "_comment_types": "NOTE: 'bow' type is LEGACY - kept for backward compatibility with pre-v1.0.0 worlds during migration. New bows use type='weapon' with system.isBow=true. Required for migrateBowsToWeapons() in migrations.js. Safe to remove after all user worlds complete migration.",
     "types": [
       "advantage",
       "armor",
@@ -229,8 +230,7 @@
       ],
       "bonus": 0,
       "equipped": false,
-      "reduction": 0,
-      "specialRules": ""
+      "reduction": 0
     },
     "clan": {
       "templates": [

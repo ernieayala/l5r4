@@ -7,7 +7,7 @@
  *
  * @author L5R4 System Team
  * @since 2.1.0
- * @version 2.1.0
+ * @version 1.0.2
  */
 
 import { SYS_ID } from "../config.js";
@@ -61,6 +61,13 @@ export default class WoundConfigApplication extends foundry.applications.api.Han
     this.actor = actor;
     this.#updateDebounced = foundry.utils.debounce(this.#updateActor.bind(this), 300);
     
+    // Store bound event handlers for proper cleanup
+    // This ensures the same function references are used for both addEventListener and removeEventListener
+    this._eventHandlers = {
+      change: this._onDirectChange.bind(this),
+      input: this._onDirectInput.bind(this)
+    };
+    
     this._debug("Constructor", { actorId: this.actor.id, appId: this.id });
   }
 
@@ -80,7 +87,7 @@ export default class WoundConfigApplication extends foundry.applications.api.Han
   _debug(message, data = {}) {
     // Debug logging can be enabled via browser console: game.settings.set("l5r4", "debugWoundConfig", true)
     if (game.settings?.get(SYS_ID, "debugWoundConfig")) {
-      console.log(`L5R4 | WoundConfig | ${message}:`, data);
+      console.log(`${SYS_ID} | WoundConfig | ${message}:`, data);
     }
   }
 
@@ -94,7 +101,7 @@ export default class WoundConfigApplication extends foundry.applications.api.Han
     
     try {
       // Ensure we have the wound levels config with fallback
-      const npcNumberWoundLvls = CONFIG.L5R4?.npcNumberWoundLvls || { 1:1, 2:2, 3:3, 4:4, 5:5, 6:6, 7:7, 8:8 };
+      const npcNumberWoundLvls = CONFIG.l5r4?.npcNumberWoundLvls || { 1:1, 2:2, 3:3, 4:4, 5:5, 6:6, 7:7, 8:8 };
       
       const context = {
         actor: this.actor,
@@ -107,7 +114,7 @@ export default class WoundConfigApplication extends foundry.applications.api.Han
         wounds: sys.wounds || {},
         visibleManualWoundLevels: sys.visibleManualWoundLevels || {},
         config: {
-          ...CONFIG.L5R4,
+          ...CONFIG.l5r4,
           npcNumberWoundLvls
         }
       };
@@ -122,7 +129,7 @@ export default class WoundConfigApplication extends foundry.applications.api.Han
       
       return context;
     } catch (err) {
-      console.warn("L5R4", "Failed to prepare wound config context", { err, actorId: this.actor?.id });
+      console.warn(`${SYS_ID}`, "Failed to prepare wound config context", { err, actorId: this.actor?.id });
       // Comprehensive error handling with fallback context
       return {
         actor: this.actor,
@@ -156,7 +163,7 @@ export default class WoundConfigApplication extends foundry.applications.api.Han
     });
     
     if (!this.element) {
-      console.warn("L5R4", "WoundConfig _onRender: No element reference available");
+      console.warn(`${SYS_ID}`, "WoundConfig _onRender: No element reference available");
       return;
     }
     
@@ -189,12 +196,13 @@ export default class WoundConfigApplication extends foundry.applications.api.Han
     
     formElements.forEach(element => {
       // Remove any existing listeners to prevent duplicates
-      element.removeEventListener('change', this._onDirectChange);
-      element.removeEventListener('input', this._onDirectInput);
+      // Using stored bound references ensures proper cleanup
+      element.removeEventListener('change', this._eventHandlers.change);
+      element.removeEventListener('input', this._eventHandlers.input);
       
-      // Add new listeners
-      element.addEventListener('change', this._onDirectChange.bind(this));
-      element.addEventListener('input', this._onDirectInput.bind(this));
+      // Add new listeners using stored bound references
+      element.addEventListener('change', this._eventHandlers.change);
+      element.addEventListener('input', this._eventHandlers.input);
     });
     
     this._debug("Direct event listeners attached", { count: formElements.length });
@@ -281,7 +289,7 @@ export default class WoundConfigApplication extends foundry.applications.api.Han
       this._debug("Mode Update Success, re-rendering");
       this.render();
     } catch (err) {
-      console.warn("L5R4", "Failed to update wound mode", { err, newMode, actorId: this.actor.id });
+      console.warn(`${SYS_ID}`, "Failed to update wound mode", { err, newMode, actorId: this.actor.id });
       ui.notifications?.error(game.i18n.localize("l5r4.ui.notifications.woundConfigUpdateFailed"));
     }
   }
@@ -311,7 +319,7 @@ export default class WoundConfigApplication extends foundry.applications.api.Han
     });
     
     if (!field) {
-      console.warn("L5R4", "Field change event with no field name", { element: element.outerHTML });
+      console.warn(`${SYS_ID}`, "Field change event with no field name", { element: element.outerHTML });
       return;
     }
     
@@ -332,12 +340,12 @@ export default class WoundConfigApplication extends foundry.applications.api.Han
   async #updateActor(field, value) {
     try {
       if (!this.actor) {
-        console.warn("L5R4", "WoundConfig: No actor reference available for update");
+        console.warn(`${SYS_ID}`, "WoundConfig: No actor reference available for update");
         return;
       }
       
       if (this.rendered === false) {
-        console.warn("L5R4", "WoundConfig: Attempted update after application closed");
+        console.warn(`${SYS_ID}`, "WoundConfig: Attempted update after application closed");
         return;
       }
       
@@ -364,7 +372,7 @@ export default class WoundConfigApplication extends foundry.applications.api.Han
       // Foundry automatically re-renders sheets after actor updates
       
     } catch (err) {
-      console.warn("L5R4", "Failed to update wound configuration", { 
+      console.warn(`${SYS_ID}`, "Failed to update wound configuration", { 
         err, 
         field, 
         value, 
@@ -416,8 +424,9 @@ export default class WoundConfigApplication extends foundry.applications.api.Han
     if (this.element) {
       const formElements = this.element.querySelectorAll('input, select, textarea');
       formElements.forEach(element => {
-        element.removeEventListener('change', this._onDirectChange);
-        element.removeEventListener('input', this._onDirectInput);
+        // Use stored bound references for proper cleanup
+        element.removeEventListener('change', this._eventHandlers.change);
+        element.removeEventListener('input', this._eventHandlers.input);
       });
     }
     

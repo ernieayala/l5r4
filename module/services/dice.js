@@ -123,7 +123,7 @@
  *
  * @author L5R4 System Team
  * @since 1.0.0
- * @version 2.1.0
+ * @version 1.0.2
  * @see {@link https://foundryvtt.com/api/classes/foundry.dice.Roll.html|Roll}
  * @see {@link https://foundryvtt.com/api/classes/foundry.applications.api.DialogV2.html|DialogV2}
  * @see {@link https://foundryvtt.com/api/classes/documents.ChatMessage.html|ChatMessage}
@@ -251,17 +251,6 @@ export async function SkillRoll({
         ?? (ChatMessage.getSpeaker()?.actor ? game.actors?.get(ChatMessage.getSpeaker().actor) : null);
 
       if (!spendActor) {
-        const messageData = {
-          user: game.user.id,
-          speaker: ChatMessage.getSpeaker({ actor }),
-          content: await renderTemplate(messageTemplate, {
-            rollHtml: "",
-            label,
-            tnResult: null,
-            rollType,
-            targetData: null
-          })
-        };
         ui.notifications?.warn(T("l5r4.ui.notifications.noActorForVoid"));
         return;
       }
@@ -273,7 +262,15 @@ export async function SkillRoll({
         return;
       }
 
-      // Deduct void point immediately for UI synchronization
+      /**
+       * DESIGN DECISION: Void points are deducted BEFORE rolling per L5R4 tabletop rules.
+       * Players must declare void point usage before knowing the roll outcome, matching
+       * the tabletop experience. This provides immediate visual feedback and prevents
+       * "ghost void points" in the UI. Modal dialogs prevent multiple simultaneous
+       * invocations in normal gameplay.
+       * 
+       * No rollback is implemented to maintain rules accuracy and UX responsiveness.
+       */
       await spendActor.update({ "system.rings.void.value": curVoid - 1 }, { diff: true });
 
       // Apply void point bonus (+1k1) and update label
@@ -350,7 +347,15 @@ export async function SkillRoll({
   }
 
   const content = await R(messageTemplate, { flavor: finalLabel, roll: rollHtml, tnResult: finalTnResult });
-  return roll.toMessage({ speaker: ChatMessage.getSpeaker(), content });
+  
+  // Post roll to chat with error handling for edge cases (network failures, module conflicts)
+  try {
+    return await roll.toMessage({ speaker: ChatMessage.getSpeaker(), content });
+  } catch (err) {
+    console.error(`${SYS_ID}`, "SkillRoll: Failed to post chat message after roll", { err, skillName });
+    ui.notifications?.error(game.i18n.localize("l5r4.ui.notifications.chatMessageFailed"));
+    return false;
+  }
 }
 
 // ---------------------------------------------------------------------------
@@ -474,7 +479,15 @@ export async function RingRoll({
       return false;
     }
 
-    // Deduct void point immediately for UI synchronization
+    /**
+     * DESIGN DECISION: Void points are deducted BEFORE rolling per L5R4 tabletop rules.
+     * Players must declare void point usage before knowing the roll outcome, matching
+     * the tabletop experience. This provides immediate visual feedback and prevents
+     * "ghost void points" in the UI. Modal dialogs prevent multiple simultaneous
+     * invocations in normal gameplay.
+     * 
+     * No rollback is implemented to maintain rules accuracy and UX responsiveness.
+     */
     await spendActor.update({ "system.rings.void.value": curVoid - 1 }, { diff: true });
 
     // Apply void point bonus (+1k1) and update label
@@ -556,7 +569,15 @@ export async function RingRoll({
     }
 
     const content = await R(messageTemplate, { flavor: label, roll: rollHtml, tnResult: finalTnResult });
-    return roll.toMessage({ speaker: ChatMessage.getSpeaker(), content });
+    
+    // Post roll to chat with error handling for edge cases (network failures, module conflicts)
+    try {
+      return await roll.toMessage({ speaker: ChatMessage.getSpeaker(), content });
+    } catch (err) {
+      console.error(`${SYS_ID}`, "RingRoll: Failed to post chat message after roll", { err, ringName });
+      ui.notifications?.error(game.i18n.localize("l5r4.ui.notifications.chatMessageFailed"));
+      return false;
+    }
   }
 
   // Note: A dedicated spell-casting dice path is not implemented yet beyond the
@@ -660,7 +681,15 @@ export async function TraitRoll({
         return;
       }
 
-      // Deduct void point immediately for UI synchronization
+      /**
+       * DESIGN DECISION: Void points are deducted BEFORE rolling per L5R4 tabletop rules.
+       * Players must declare void point usage before knowing the roll outcome, matching
+       * the tabletop experience. This provides immediate visual feedback and prevents
+       * "ghost void points" in the UI. Modal dialogs prevent multiple simultaneous
+       * invocations in normal gameplay.
+       * 
+       * No rollback is implemented to maintain rules accuracy and UX responsiveness.
+       */
       await targetActor.update({ "system.rings.void.value": curVoid - 1 }, { diff: true });
 
       // Apply void point bonus (+1k1) and update label
@@ -704,7 +733,15 @@ export async function TraitRoll({
   }
 
   const content = await R(messageTemplate, { flavor, roll: rollHtml, tnResult: finalTnResult });
-  return roll.toMessage({ speaker: ChatMessage.getSpeaker(), content });
+  
+  // Post roll to chat with error handling for edge cases (network failures, module conflicts)
+  try {
+    return await roll.toMessage({ speaker: ChatMessage.getSpeaker(), content });
+  } catch (err) {
+    console.error(`${SYS_ID}`, "TraitRoll: Failed to post chat message after roll", { err, traitName });
+    ui.notifications?.error(game.i18n.localize("l5r4.ui.notifications.chatMessageFailed"));
+    return false;
+  }
 }
 
 // ---------------------------------------------------------------------------

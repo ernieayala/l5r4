@@ -302,7 +302,7 @@ Active Effects allow you to modify actor and item attributes dynamically. Use th
 #### Advantages/Disadvantages
 | Attribute Key | Description | Example Value |
 |---------------|-------------|---------------|
-| `system.cost` | Point Cost | `5` (Advantages: ≥0, Disadvantages: ≤0) |
+| `system.cost` | Point Cost | `5` (Both types stored as positive; disadvantages grant XP) |
 
 ### Usage Examples
 

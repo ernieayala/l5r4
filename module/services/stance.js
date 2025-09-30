@@ -128,7 +128,7 @@
  *
  * @author L5R4 System Team
  * @since 1.0.0
- * @version 2.1.0
+ * @version 1.0.2
  * @see {@link https://foundryvtt.com/api/classes/documents.ActiveEffect.html|ActiveEffect}
  * @see {@link https://foundryvtt.com/api/namespaces/Hooks.html|Hooks}
  * @see {@link https://foundryvtt.com/api/classes/documents.Actor.html#setFlag|Actor.setFlag}
@@ -224,6 +224,22 @@ function getActiveStances(actor) {
 }
 
 /**
+ * Find the Defense skill rank for an actor.
+ * Handles case-insensitive partial matching to support localized skill names.
+ * 
+ * @param {Actor} actor - The actor to search
+ * @returns {number} Defense skill rank (0 if not found)
+ */
+function getDefenseSkillRank(actor) {
+  for (const item of actor.items) {
+    if (item.type === "skill" && item.name?.toLowerCase().includes("defense")) {
+      return toInt(item.system?.rank || 0);
+    }
+  }
+  return 0;
+}
+
+/**
  * Apply Full Attack Stance automation:
  * - +2k1 to all attack rolls (handled via Active Effects)
  * - -10 to Armor TN
@@ -252,16 +268,7 @@ function applyFullAttackStance(actor, sys) {
  */
 function applyDefenseStance(actor, sys) {
   const airRing = toInt(sys.rings?.air || 0);
-  
-  // Find Defense skill rank
-  let defenseSkillRank = 0;
-  for (const item of actor.items) {
-    if (item.type === "skill" && item.name?.toLowerCase().includes("defense")) {
-      defenseSkillRank = toInt(item.system?.rank || 0);
-      break;
-    }
-  }
-  
+  const defenseSkillRank = getDefenseSkillRank(actor);
   const defenseBonus = airRing + defenseSkillRank;
   
   // Apply bonus to Armor TN via stance modifier
@@ -346,15 +353,7 @@ async function triggerFullDefenseRoll(actor, sys) {
     // Mark this actor as having a pending roll
     pendingFullDefenseRolls.add(actorId);
     
-    // Find Defense skill rank
-    let defenseSkillRank = 0;
-    for (const item of actor.items) {
-      if (item.type === "skill" && item.name?.toLowerCase().includes("defense")) {
-        defenseSkillRank = toInt(item.system?.rank || 0);
-        break;
-      }
-    }
-    
+    const defenseSkillRank = getDefenseSkillRank(actor);
     const reflexes = toInt(sys.traits?.ref || sys._derived?.traitsEff?.ref || 0);
     const rollDice = reflexes + defenseSkillRank;
     const keepDice = reflexes;
@@ -671,8 +670,8 @@ export function onCreateActiveEffect(effect, options, userId) {
   if (hasStance) {
     // Handle Full Defense stance roll trigger
     if (effectStances.includes("fullDefenseStance")) {
-      // Trigger the Defense/Reflexes roll immediately
-      setTimeout(() => triggerFullDefenseRoll(actor, actor.system), 100);
+      // Trigger the Defense/Reflexes roll after current execution context completes
+      queueMicrotask(() => triggerFullDefenseRoll(actor, actor.system));
     }
     
     // Re-prepare actor data to apply stance effects
@@ -705,8 +704,8 @@ export function onUpdateActiveEffect(effect, changes, options, userId) {
     } else if (changes.disabled === false) {
       // Stance was re-enabled
       if (effectStances.includes("fullDefenseStance")) {
-        // Trigger the Defense/Reflexes roll immediately
-        setTimeout(() => triggerFullDefenseRoll(actor, actor.system), 100);
+        // Trigger the Defense/Reflexes roll after current execution context completes
+        queueMicrotask(() => triggerFullDefenseRoll(actor, actor.system));
       }
     }
     
