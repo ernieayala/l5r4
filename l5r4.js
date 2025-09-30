@@ -81,7 +81,7 @@
  *
  * @author L5R4 System Team
  * @since 1.0.0
- * @version 2.1.0
+ * @version 1.0.2
  * @see {@link https://foundryvtt.com/api/|Foundry VTT v13 API Documentation}
  * @see {@link https://foundryvtt.com/api/classes/foundry.abstract.Document.html|Document}
  * @see {@link https://foundryvtt.com/api/classes/foundry.applications.api.ApplicationV2.html|ApplicationV2}
@@ -169,7 +169,7 @@ Hooks.once("init", async () => {
       }
     };
   } catch (e) {
-    console.warn("L5R4 | Unable to patch Combatant.getInitiativeRoll", e);
+    console.warn(`${SYS_ID} | Unable to patch Combatant.getInitiativeRoll`, e);
   }
 
   // Phase 5: Register custom document sheets (Foundry v13 ApplicationV2 system)
@@ -182,6 +182,8 @@ Hooks.once("init", async () => {
   } catch (_e) { /* already unregistered is fine */ }
 
   // Register L5R4 item sheet for all supported item types
+  // Note: "item" included as defensive fallback for edge cases (imports, legacy data)
+  // while "commonItem" is the official registered type per system.json
   DocumentSheetConfig.registerSheet(Item, SYS_ID, L5R4ItemSheet, {
     makeDefault: true,
     types: [
@@ -192,7 +194,7 @@ Hooks.once("init", async () => {
       "disadvantage",
       "family",
       "school",
-      "item",
+      "item",        // Generic fallback (not in system.json but covers edge cases)
       "kata",
       "kiho",
       "skill",
@@ -515,7 +517,7 @@ Hooks.once("ready", async () => {
     
     if (runFlag && (newer || forceFlag)) {
       try {
-        console.log("L5R4", "Running migrations", { 
+        console.log(`${SYS_ID}`, "Running migrations", { 
           from: last, 
           to: currentVersion, 
           forced: forceFlag,

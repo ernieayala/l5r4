@@ -116,7 +116,7 @@
  *
  * @author L5R4 System Team
  * @since 1.0.0
- * @version 2.1.0
+ * @version 1.0.2
  * @extends {foundry.applications.sheets.ItemSheetV2}
  * @mixes {foundry.applications.api.HandlebarsApplicationMixin}
  * @see {@link https://foundryvtt.com/api/classes/foundry.applications.sheets.ItemSheetV2.html|ItemSheetV2}

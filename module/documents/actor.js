@@ -102,7 +102,7 @@
  *
  * @author L5R4 System Team
  * @since 1.0.0
- * @version 2.1.0
+ * @version 1.0.2
  * @extends {Actor}
  * @see {@link https://foundryvtt.com/api/classes/documents.Actor.html|Actor Document}
  * @see {@link https://foundryvtt.com/api/classes/documents.Actor.html#prototypeToken|Prototype Token}
@@ -112,7 +112,7 @@
  */
 
 import { SYS_ID, iconPath } from "../config.js";
-import { toInt } from "../utils.js";
+import { toInt, normalizeTraitKey } from "../utils.js";
 import { applyStanceAutomation } from "../services/stance.js";
 
 /**
@@ -186,7 +186,7 @@ export default class L5R4Actor extends Actor {
    */
   static DEFAULT_WOUND_PENALTIES = { 
     healthy: 0, nicked: 3, grazed: 5, hurt: 10, 
-    injured: 15, crippled: 20, down: 40, out: 99 
+    injured: 15, crippled: 20, down: 40, out: 40 
   };
 
   /**
@@ -333,7 +333,7 @@ export default class L5R4Actor extends Actor {
       try {
         defaultWoundMode = game.settings.get(SYS_ID, "defaultNpcWoundMode") || "manual";
       } catch (err) {
-        console.warn("L5R4", "Failed to read defaultNpcWoundMode setting during NPC creation, using manual mode", { 
+        console.warn(`${SYS_ID}`, "Failed to read defaultNpcWoundMode setting during NPC creation, using manual mode", { 
           err, 
           actorId: this.id, 
           actorName: this.name 
@@ -357,14 +357,14 @@ export default class L5R4Actor extends Actor {
         
         // Debug logging for NPC creation
         if (CONFIG.debug?.l5r4?.wounds) {
-          console.log("L5R4 | NPC Created with wound mode:", {
+          console.log(`${SYS_ID} | NPC Created with wound mode:`, {
             actorId: this.id,
             actorName: this.name,
             woundMode: defaultWoundMode
           });
         }
       } catch (err) {
-        console.warn("L5R4", "Failed to set default wound mode during NPC creation", { 
+        console.warn(`${SYS_ID}`, "Failed to set default wound mode during NPC creation", { 
           err, 
           actorId: this.id, 
           actorName: this.name,
@@ -403,7 +403,7 @@ export default class L5R4Actor extends Actor {
           if (e && e.type && e.note) existingEntries.add(`${e.type}:${e.note}`);
         }
       } catch (err) {
-        console.warn("L5R4", "Failed to build existing XP entry index", { err });
+        console.warn(`${SYS_ID}`, "Failed to build existing XP entry index", { err });
       }
       /**
        * Push an XP note if not already present.
@@ -498,7 +498,7 @@ export default class L5R4Actor extends Actor {
         foundry.utils.setProperty(changed, `flags.${SYS_ID}.xpSpent`, spent);
       }
     } catch (err) {
-      console.warn("L5R4", "Actor._preUpdate xp delta failed", { err });
+      console.warn(`${SYS_ID}`, "Actor._preUpdate xp delta failed", { err });
     }
   }
 
@@ -603,124 +603,27 @@ export default class L5R4Actor extends Actor {
       const schoolItem = (this.items?.contents ?? this.items).find(i => i.type === "school");
       sys.school = schoolItem?.name ?? "";
     } catch (err) {
-      console.warn("L5R4", "Failed to derive school name in _preparePc", { err });
+      console.warn(`${SYS_ID}`, "Failed to derive school name in _preparePc", { err });
       sys.school = sys.school ?? "";
     }
 
     const TRAIT_KEYS = ["sta","wil","str","per","ref","awa","agi","int"];
-    /**
-     * Normalize various trait identifier formats to standard system keys.
-     * Handles multiple input formats for maximum compatibility with different
-     * data sources and user input methods.
-     * 
-     * **Supported Input Formats:**
-     * - Short keys: "ref", "awa", "sta", etc.
-     * - English labels: "Reflexes", "Awareness", "Stamina", etc.
-     * - Localization keys: "l5r4.ui.mechanics.traits.ref", etc.
-     * - Localized labels: Any language via game.i18n.localize
-     * 
-     * @param {string} raw - The trait identifier to normalize
-     * @returns {string} Standard trait key ("sta"|"wil"|"str"|"per"|"ref"|"awa"|"agi"|"int") or "" if unknown
-     */
-    const normalizeTraitKey = (raw) => {
-      const known = ["sta","wil","str","per","ref","awa","agi","int"];
-      if (raw === null || raw === undefined) { return ""; }
-      let k = String(raw).trim();
-
-      // If given an i18n key like "l5r4.traits.ref"
-      const m = /^l5r4\.mechanics\.traits\.(\w+)$/i.exec(k);
-      if (m && known.includes(m[1].toLowerCase())) {
-        return m[1].toLowerCase();
-      }
-
-      // Plain short key
-      if (known.includes(k.toLowerCase())) {
-        return k.toLowerCase();
-      }
-
-      // English labels -> keys
-      const english = {
-        stamina: "sta",
-        willpower: "wil",
-        strength: "str",
-        perception: "per",
-        reflexes: "ref",
-        awareness: "awa",
-        agility: "agi",
-        intelligence: "int"
-      };
-      if (english[k.toLowerCase()]) {
-        return english[k.toLowerCase()];
-      }
-
-      // Localized labels (any language): compare against localized names
-      try {
-        for (const key of known) {
-          const label = game.i18n?.localize?.(`l5r4.ui.mechanics.traits.${key}`) ?? "";
-          if (label && label.toLowerCase() === k.toLowerCase()) {
-            return key;
-          }
-        }
-      } catch (_) { /* i18n not ready: ignore */ }
-
-      return "";
-    };
+    // Use normalizeTraitKey from utils.js (imported above) for trait normalization
 
     /**
-     * Resolve Family trait bonuses from multiple sources with fallback chain.
-     * Prioritizes live Family item references to ensure real-time updates when
-     * Family items are modified. Falls back to cached flags for compatibility.
+     * Family Bonus Integration:
+     * Family trait bonuses are applied via Active Effects that transfer from Family items.
+     * Foundry applies Active Effects before calling prepareDerivedData, so system.traits
+     * already contains final effective values including family bonuses.
      * 
-     * **Resolution Priority:**
-     * 1. Live Family item via UUID (preferred - reflects real-time changes)
-     * 2. Cached family bonus flags (compatibility with older actors)
-     * 3. First embedded family item (legacy fallback)
+     * For XP cost calculations that need to know creation bonuses, use the
+     * _creationFreeBonus() method which properly resolves family/school bonuses.
      * 
-     * **Family Bonus Integration:**
-     * Family bonuses should be implemented as Active Effects on the Family item
-     * that transfer to the actor, rather than being handled here directly.
-     * 
-     * @see {@link https://foundryvtt.com/api/classes/foundry.abstract.Document.html#getFlag|Document.getFlag}
-     * @see {@link https://foundryvtt.com/api/functions/global.html#fromUuidSync|fromUuidSync}
+     * @see {@link _creationFreeBonus} For querying family/school creation bonuses
+     * @see {@link https://foundryvtt.com/api/classes/documents.Actor.html#applyActiveEffects|Actor.applyActiveEffects}
      */
-    let fam = {};
-    try {
-      const uuid = /** @type {string|undefined} */ (this.getFlag(SYS_ID, "familyItemUuid"));
-      if (uuid && globalThis.fromUuidSync) {
-        const doc = /** @type {any} */ (fromUuidSync(uuid));
-        const key = normalizeTraitKey(doc?.system?.trait);
-        const amt = Number(doc?.system?.bonus ?? 1);
-        if (key && sys.traits && (key in sys.traits) && Number.isFinite(amt) && amt !== 0) {
-          fam = { [key]: amt };
-        }
-      }
-    } catch { /* unresolved family reference: continue to flag-based fallback */ }
-    if (!fam || Object.keys(fam).length === 0) {
-      const fb = this.flags?.[SYS_ID]?.familyBonus;
-      if (fb && typeof fb === "object" && Object.keys(fb).length) {
-        // Sanitize old flags that may be keyed by full trait names
-        const norm = {};
-        for (const [k, v] of Object.entries(fb)) {
-          const nk = normalizeTraitKey(k);
-          if (nk) { norm[nk] = toInt(v); }
-        }
-        if (Object.keys(norm).length) {
-          fam = norm;
-        }
-      }
-    }
-    if (!fam || Object.keys(fam).length === 0) {
-      // Final fallback for older actors: use the first embedded Family item
-      const it = this.items.find(i => i.type === "family");
-      const key = normalizeTraitKey(it?.system?.trait);
-      const amt = Number(it?.system?.bonus ?? 0);
-      if (key && sys.traits && (key in sys.traits) && Number.isFinite(amt) && amt !== 0) {
-        fam = { [key]: amt };
-      }
-    }
 
     // Expose effective traits = post-AE system values
-    // (Family bonuses must be modeled as transferred Active Effects on the Family Item)
     sys._derived = sys._derived || {};
     const traitsEff = {};
     for (const k of TRAIT_KEYS) {
@@ -1037,7 +940,7 @@ export default class L5R4Actor extends Actor {
     try {
       globalDefault = game.settings.get(SYS_ID, "defaultNpcWoundMode") || "manual";
     } catch (err) {
-      console.warn("L5R4", "Failed to read defaultNpcWoundMode setting, using manual mode", { 
+      console.warn(`${SYS_ID}`, "Failed to read defaultNpcWoundMode setting, using manual mode", { 
         err, 
         actorId: this.id, 
         actorName: this.name 
@@ -1048,7 +951,7 @@ export default class L5R4Actor extends Actor {
     
     // Debug logging for wound mode selection
     if (CONFIG.debug?.l5r4?.wounds) {
-      console.log("L5R4 | NPC Wound Mode Selection:", {
+      console.log(`${SYS_ID} | NPC Wound Mode Selection:`, {
         actorId: this.id,
         actorName: this.name,
         individualMode: sys.woundMode,
@@ -1066,7 +969,7 @@ export default class L5R4Actor extends Actor {
       
       // Debug: Check values immediately after formula calculation
       if (CONFIG.debug?.l5r4?.wounds) {
-        console.log("L5R4 | RIGHT AFTER _prepareNpcFormulaWounds:", {
+        console.log(`${SYS_ID} | RIGHT AFTER _prepareNpcFormulaWounds:`, {
           healthy: sys.woundLevels.healthy?.value,
           nicked: sys.woundLevels.nicked?.value,
           out: sys.woundLevels.out?.value,
@@ -1078,7 +981,7 @@ export default class L5R4Actor extends Actor {
         // Try accessing the same object twice
         const firstAccess = sys.woundLevels.healthy?.value;
         const secondAccess = sys.woundLevels.healthy?.value;
-        console.log("L5R4 | Double-check access:", { firstAccess, secondAccess, same: firstAccess === secondAccess });
+        console.log(`${SYS_ID} | Double-check access:`, { firstAccess, secondAccess, same: firstAccess === secondAccess });
       }
     }
 
@@ -1087,7 +990,7 @@ export default class L5R4Actor extends Actor {
     
     // Debug: Check after initializeWoundState
     if (CONFIG.debug?.l5r4?.wounds && woundMode === "formula") {
-      console.log("L5R4 | AFTER initializeWoundState:", {
+      console.log(`${SYS_ID} | AFTER initializeWoundState:`, {
         healthy: sys.woundLevels.healthy?.value,
         nicked: sys.woundLevels.nicked?.value,
         out: sys.woundLevels.out?.value
@@ -1113,7 +1016,7 @@ export default class L5R4Actor extends Actor {
 
     // Debug: Check wound levels right before _prepareVisibleWoundLevels
     if (CONFIG.debug?.l5r4?.wounds && woundMode === "formula") {
-      console.log("L5R4 | sys.woundLevels RIGHT BEFORE _prepareVisibleWoundLevels:", {
+      console.log(`${SYS_ID} | sys.woundLevels RIGHT BEFORE _prepareVisibleWoundLevels:`, {
         healthy: sys.woundLevels.healthy?.value,
         nicked: sys.woundLevels.nicked?.value,
         out: sys.woundLevels.out?.value
@@ -1220,7 +1123,7 @@ export default class L5R4Actor extends Actor {
 
     // Debug logging
     if (CONFIG.debug?.l5r4?.wounds) {
-      console.log("L5R4 | Formula Wounds Calculation:", {
+      console.log(`${SYS_ID} | Formula Wounds Calculation:`, {
         actorId: this.id,
         earth,
         mult,
@@ -1253,11 +1156,11 @@ export default class L5R4Actor extends Actor {
         if (key === "healthy") {
           const newValue = 5 * earth + add;
           if (CONFIG.debug?.l5r4?.wounds) {
-            console.log(`L5R4 | ${key}: BEFORE assign = ${lvl.value}, AFTER assign = ${newValue}, setting now...`);
+            console.log(`${SYS_ID} | ${key}: BEFORE assign = ${lvl.value}, AFTER assign = ${newValue}, setting now...`);
           }
           lvl.value = newValue;
           if (CONFIG.debug?.l5r4?.wounds) {
-            console.log(`L5R4 | ${key}: CONFIRMED lvl.value = ${lvl.value}`);
+            console.log(`${SYS_ID} | ${key}: CONFIRMED lvl.value = ${lvl.value}`);
           }
         } else {
           lvl.value = earth * mult + prev + add;
@@ -1268,7 +1171,7 @@ export default class L5R4Actor extends Actor {
         
         // Debug logging
         if (CONFIG.debug?.l5r4?.wounds) {
-          console.log(`L5R4 | ${key}: value = ${lvl.value}`);
+          console.log(`${SYS_ID} | ${key}: value = ${lvl.value}`);
         }
       } else {
         // Inactive wound level - set to previous value to effectively disable
@@ -1280,7 +1183,7 @@ export default class L5R4Actor extends Actor {
 
     // Final debug log
     if (CONFIG.debug?.l5r4?.wounds) {
-      console.log("L5R4 | Formula Wounds Complete:", {
+      console.log(`${SYS_ID} | Formula Wounds Complete:`, {
         healthy: sys.woundLevels.healthy?.value,
         nicked: sys.woundLevels.nicked?.value,
         out: sys.woundLevels.out?.value,
@@ -1355,7 +1258,7 @@ export default class L5R4Actor extends Actor {
       return current;
       
     } catch (err) {
-      console.warn("L5R4", "Failed to determine current wound level", { 
+      console.warn(`${SYS_ID}`, "Failed to determine current wound level", { 
         err, 
         woundMode, 
         suffered: sys.suffered 
@@ -1461,7 +1364,7 @@ export default class L5R4Actor extends Actor {
         }
 
         if (CONFIG.debug?.l5r4?.wounds) {
-          console.log("L5R4 | _prepareVisibleWoundLevels (formula) computed:", {
+          console.log(`${SYS_ID} | _prepareVisibleWoundLevels (formula) computed:`, {
             healthy: sys.visibleWoundLevels.healthy?.value,
             nicked: sys.visibleWoundLevels.nicked?.value,
             out: sys.visibleWoundLevels.out?.value
@@ -1471,7 +1374,7 @@ export default class L5R4Actor extends Actor {
       
       // Final debug log for visible wounds
       if (CONFIG.debug?.l5r4?.wounds) {
-        console.log("L5R4 | visibleWoundLevels prepared:", {
+        console.log(`${SYS_ID} | visibleWoundLevels prepared:`, {
           keys: Object.keys(sys.visibleWoundLevels),
           healthy: sys.visibleWoundLevels.healthy?.value,
           nicked: sys.visibleWoundLevels.nicked?.value,
@@ -1480,7 +1383,7 @@ export default class L5R4Actor extends Actor {
       }
       
     } catch (err) {
-      console.warn("L5R4", "Failed to prepare visible wound levels", { 
+      console.warn(`${SYS_ID}`, "Failed to prepare visible wound levels", { 
         err, 
         woundMode: sys.woundMode, 
         nrWoundLvls: sys.nrWoundLvls 

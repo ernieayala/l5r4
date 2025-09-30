@@ -115,6 +115,7 @@
         "total": "Total",
         "left": "left",
         "close": "Close",
+        "apply": "Apply",
         "toChat": "To Chat",
         "effect": "Effect",
         "simple": "Simple",
@@ -201,6 +202,7 @@
         "fullDefenseRollFailed": "Failed to make Full Defense roll. Please roll manually.",
         "invalidRingForSpell": "Invalid ring for spell slot: {ring}",
         "noActorForVoid": "No actor available for void point spending",
+        "chatMessageFailed": "Failed to post roll to chat - see console for details",
         "deleteEffect": "Failed to delete effect.",
         "schoolRankZero": "You can't cast a spell with School Rank reduced to zero",
         "noSpellSlots": "You ran out of spell slots for this ring"

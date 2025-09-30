@@ -101,6 +101,7 @@
         "total": "Total",
         "left": "restant",
         "close": "Fermer",
+        "apply": "Appliquer",
         "toChat": "Au chat",
         "effect": "Effet",
         "simple": "Simple",
@@ -186,9 +187,12 @@
         "fullDefenseRollFailed": "Échec du jet de Défense Totale. Veuillez lancer manuellement.",
         "invalidRingForSpell": "Anneau invalide pour l'emplacement de sort : {ring}",
         "noActorForVoid": "Aucun acteur disponible pour dépenser des points de Vide",
+        "chatMessageFailed": "Échec de la publication du jet dans le chat - voir la console pour les détails",
         "deleteEffect": "Échec de la suppression de l'effet.",
         "schoolRankZero": "Vous ne pouvez pas lancer un sort avec un Rang d'École réduit à zéro",
-        "noSpellSlots": "Vous n'avez plus d'emplacements de sort pour cet anneau"
+        "noSpellSlots": "Vous n'avez plus d'emplacements de sort pour cet anneau",
+        "woundConfigFailed": "Échec de l'ouverture de la configuration des blessures",
+        "woundConfigUpdateFailed": "Échec de la mise à jour de la configuration des blessures"
       },
       "chat": {
         "traitRoll": "Jet de Caractéristique {trait}",
@@ -449,6 +453,18 @@
     "forceMigration": {
       "name": "Forcer la migration au démarrage",
       "label": "Force toutes les migrations à s'exécuter au prochain chargement du monde, quelle que soit la version. Se réinitialise automatiquement après la migration."
+    },
+    "defaultNpcWoundMode": {
+      "name": "Mode de Blessures par Défaut pour PNJ",
+      "label": "Détermine si les nouveaux PNJ utilisent des calculs basés sur une formule (Anneau de Terre) ou une saisie manuelle de seuils pour les calculs de blessures. Les PNJ existants conservent leurs paramètres individuels.",
+      "choices": {
+        "manual": "Manuel (Saisie Directe)",
+        "formula": "Formule (Basée sur Terre)"
+      }
+    },
+    "debugWoundConfig": {
+      "name": "Déboguer la Configuration des Blessures",
+      "label": "Active la journalisation détaillée de la console pour les interactions de l'Application de Configuration des Blessures, la gestion des événements et les mises à jour des acteurs. Utile pour dépanner les problèmes de réponse de formulaire."
     }
   },
   "EFFECT": {

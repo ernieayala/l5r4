@@ -50,6 +50,54 @@ function updateVersionInFile(filePath, version) {
 }
 
 /**
+ * Update @version tags in JavaScript files
+ * @param {string} version - New version number
+ */
+function updateJSDocVersionTags(version) {
+  console.log('\n📝 Updating JSDoc @version tags...');
+  
+  const jsFiles = [];
+  
+  // Find all .js files recursively
+  function findJSFiles(dir) {
+    const items = fs.readdirSync(dir, { withFileTypes: true });
+    for (const item of items) {
+      const fullPath = path.join(dir, item.name);
+      if (item.isDirectory() && item.name !== 'node_modules' && item.name !== '.git') {
+        findJSFiles(fullPath);
+      } else if (item.isFile() && item.name.endsWith('.js')) {
+        jsFiles.push(fullPath);
+      }
+    }
+  }
+  
+  findJSFiles(PROJECT_ROOT);
+  
+  let updatedCount = 0;
+  const versionRegex = /^(\s*\*\s*@version\s+)[\d.]+(.*)$/gm;
+  
+  for (const filePath of jsFiles) {
+    try {
+      let content = fs.readFileSync(filePath, 'utf8');
+      const originalContent = content;
+      
+      // Replace @version X.Y.Z with @version {newVersion}
+      content = content.replace(versionRegex, `$1${version}$2`);
+      
+      if (content !== originalContent) {
+        fs.writeFileSync(filePath, content, 'utf8');
+        updatedCount++;
+        console.log(`  ✅ Updated: ${path.relative(PROJECT_ROOT, filePath)}`);
+      }
+    } catch (error) {
+      console.warn(`  ⚠️  Could not update ${filePath}:`, error.message);
+    }
+  }
+  
+  console.log(`✅ Updated @version in ${updatedCount} file(s)`);
+}
+
+/**
  * Validate project structure
  * @returns {boolean} True if all required files exist
  */
@@ -219,7 +267,7 @@ function main() {
   }
 
   console.log(`🚀 Preparing L5R4 System release v${version}`);
-  console.log('=' .repeat(50));
+  console.log('='.repeat(50));
 
   // Validate project structure
   if (!validateProjectStructure()) {
@@ -240,6 +288,7 @@ function main() {
   console.log('\n📝 Updating version numbers...');
   updateVersionInFile(PACKAGE_JSON_PATH, version);
   updateVersionInFile(SYSTEM_JSON_PATH, version);
+  updateJSDocVersionTags(version);
 
   // Generate release checklist
   generateReleaseChecklist(version);
@@ -260,6 +309,7 @@ if (require.main === module) {
 module.exports = {
   isValidVersion,
   updateVersionInFile,
+  updateJSDocVersionTags,
   validateProjectStructure,
   buildCSS,
   validateLanguageFiles,

@@ -101,6 +101,7 @@
         "total": "Gesamt",
         "left": "verbleibend",
         "close": "Schließen",
+        "apply": "Anwenden",
         "toChat": "In den Chat",
         "effect": "Effekt",
         "simple": "Einfach",
@@ -186,9 +187,12 @@
         "fullDefenseRollFailed": "Wurf für Volle Verteidigung fehlgeschlagen. Bitte manuell würfeln.",
         "invalidRingForSpell": "Ungültiger Ring für Zauberplatz: {ring}",
         "noActorForVoid": "Kein Akteur verfügbar für Leere-Punkte",
+        "chatMessageFailed": "Wurf konnte nicht im Chat gepostet werden - siehe Konsole für Details",
         "deleteEffect": "Effekt konnte nicht gelöscht werden.",
         "schoolRankZero": "Du kannst keinen Zauber wirken, wenn der Schulrang auf null reduziert ist",
-        "noSpellSlots": "Keine Zauberplätze mehr für diesen Ring"
+        "noSpellSlots": "Keine Zauberplätze mehr für diesen Ring",
+        "woundConfigFailed": "Fehler beim Öffnen der Wundenkonfiguration",
+        "woundConfigUpdateFailed": "Fehler beim Aktualisieren der Wundenkonfiguration"
       },
       "chat": {
         "traitRoll": "Eigenschaftswurf {trait}",
@@ -449,6 +453,18 @@
     "forceMigration": {
       "name": "Migration beim Start erzwingen",
       "label": "Erzwingt, dass alle Migrationen beim nächsten Laden der Welt ausgeführt werden, unabhängig von der Version. Setzt sich nach Abschluss automatisch zurück."
+    },
+    "defaultNpcWoundMode": {
+      "name": "Standard-NSC-Wundenmodus",
+      "label": "Legt fest, ob neue NSCs formelbasierte (Erde-Ring) oder manuelle Schwellenwert-Eingabe für Wundenberechnungen verwenden. Bestehende NSCs behalten ihre individuellen Einstellungen.",
+      "choices": {
+        "manual": "Manuell (Direkte Eingabe)",
+        "formula": "Formel (Erde-basiert)"
+      }
+    },
+    "debugWoundConfig": {
+      "name": "Wundenkonfiguration debuggen",
+      "label": "Aktiviert detaillierte Konsolenprotokollierung für Wundenkonfigurations-Anwendungsinteraktionen, Ereignisbehandlung und Akteur-Updates. Nützlich zur Fehlerbehebung bei Formularantwortproblemen."
     }
   },
   "EFFECT": {

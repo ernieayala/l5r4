@@ -5,6 +5,10 @@
  * to the current actor. Uses Foundry's DialogV2 API with a single template that
  * adapts based on actor type (PC vs NPC).
  *
+ * **Note:** "Chat" refers to the user interaction service layer, not Foundry's ChatMessage API.
+ * This module provides dialog utilities for collecting user input, not posting to the chat log.
+ * For chat message posting functionality, see dice.js which uses roll.toMessage().
+ *
  * **Core Functionality:**
  * - **Unified Dialog**: Single dialog for all item creation needs
  * - **Context Awareness**: Shows appropriate item types based on actor type
@@ -13,7 +17,7 @@
  *
  * @author L5R4 System Team
  * @since 2.1.0
- * @version 2.1.0
+ * @version 1.0.2
  * @see {@link https://foundryvtt.com/api/classes/foundry.applications.api.DialogV2.html|DialogV2}
  */
 

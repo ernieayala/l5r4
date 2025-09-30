@@ -67,7 +67,7 @@
  *
  * @author L5R4 System Team
  * @since 2.0.0
- * @version 2.1.0
+ * @version 1.0.2
  * @see {@link https://foundryvtt.com/api/classes/foundry.applications.api.ApplicationV2.html|ApplicationV2}
  * @see {@link https://foundryvtt.com/api/classes/foundry.applications.api.HandlebarsApplicationMixin.html|HandlebarsApplicationMixin}
  * @see {@link https://foundryvtt.com/api/classes/foundry.abstract.Document.html#setFlag|Document.setFlag}
@@ -283,7 +283,7 @@ export default class XpManagerApplication extends foundry.applications.api.Handl
       // Re-render to show changes
       this.render();
     } catch (err) {
-      console.warn("L5R4", "actor.setFlag failed in XpManagerApplication", { err });
+      console.warn(`${SYS_ID}`, "actor.setFlag failed in XpManagerApplication", { err });
     }
   }
 
@@ -307,7 +307,7 @@ export default class XpManagerApplication extends foundry.applications.api.Handl
       // Re-render to show changes
       this.render();
     } catch (err) {
-      console.warn("L5R4", "actor.setFlag failed in XpManagerApplication", { err });
+      console.warn(`${SYS_ID}`, "actor.setFlag failed in XpManagerApplication", { err });
     }
   }
 
@@ -368,7 +368,7 @@ export default class XpManagerApplication extends foundry.applications.api.Handl
                          flags.xpSpent.length === 0;
       
       if (needsUpdate) {
-        console.log("L5R4 | Running retroactive XP update", { 
+        console.log(`${SYS_ID} | Running retroactive XP update`, { 
           actorId: this.actor.id, 
           lastVersion: lastUpdateVersion, 
           currentVersion: currentVersion 
@@ -379,7 +379,7 @@ export default class XpManagerApplication extends foundry.applications.api.Handl
         await this.actor.setFlag(SYS_ID, "xpRetroactiveVersion", currentVersion);
       }
     } catch (err) {
-      console.warn("L5R4", "Failed to check retroactive XP update need", err);
+      console.warn(`${SYS_ID}`, "Failed to check retroactive XP update need", err);
       // Fallback to always running the update if check fails
       await this._retroactivelyUpdateXP();
     }
@@ -423,7 +423,7 @@ export default class XpManagerApplication extends foundry.applications.api.Handl
       }
       return Math.abs(hash);
     } catch (err) {
-      console.warn("L5R4", "Failed to calculate XP data version", err);
+      console.warn(`${SYS_ID}`, "Failed to calculate XP data version", err);
       return Date.now(); // Fallback to timestamp
     }
   }
@@ -627,7 +627,7 @@ export default class XpManagerApplication extends foundry.applications.api.Handl
       if (changed) await this.actor.setFlag(SYS_ID, "xpSpent", spent);
       
     } catch (err) {
-      console.warn("L5R4", "Failed to rebuild XP purchase history", err);
+      console.warn(`${SYS_ID}`, "Failed to rebuild XP purchase history", err);
     }
   }
 }

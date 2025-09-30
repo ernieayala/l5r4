@@ -101,6 +101,7 @@
         "total": "Total",
         "left": "restante",
         "close": "Cerrar",
+        "apply": "Aplicar",
         "toChat": "Al Chat",
         "effect": "Efecto",
         "simple": "Simple",
@@ -186,9 +187,12 @@
         "fullDefenseRollFailed": "Falló la tirada de Defensa Total. Por favor, tira manualmente.",
         "invalidRingForSpell": "Anillo inválido para el espacio de hechizo: {ring}",
         "noActorForVoid": "No hay actor disponible para gastar puntos de Vacío",
+        "chatMessageFailed": "No se pudo publicar la tirada en el chat - ver consola para detalles",
         "deleteEffect": "No se pudo eliminar el efecto.",
         "schoolRankZero": "No puedes lanzar un hechizo con Rango de Escuela reducido a cero",
-        "noSpellSlots": "Te has quedado sin espacios de hechizo para este anillo"
+        "noSpellSlots": "Te has quedado sin espacios de hechizo para este anillo",
+        "woundConfigFailed": "Error al abrir la configuración de heridas",
+        "woundConfigUpdateFailed": "Error al actualizar la configuración de heridas"
       },
       "chat": {
         "traitRoll": "Tirada de Rasgo {trait}",
@@ -449,6 +453,18 @@
     "forceMigration": {
       "name": "Forzar migración al iniciar",
       "label": "Fuerza todas las migraciones a ejecutarse en la próxima carga del mundo, independientemente de la versión. Se restablece automáticamente tras completar."
+    },
+    "defaultNpcWoundMode": {
+      "name": "Modo de Heridas Predeterminado para PNJ",
+      "label": "Controla si los nuevos PNJ usan cálculos basados en fórmula (Anillo de Tierra) o entrada manual de umbrales para cálculos de heridas. Los PNJ existentes conservan su configuración individual.",
+      "choices": {
+        "manual": "Manual (Entrada Directa)",
+        "formula": "Fórmula (Basada en Tierra)"
+      }
+    },
+    "debugWoundConfig": {
+      "name": "Depurar Configuración de Heridas",
+      "label": "Habilita el registro detallado en consola para las interacciones de la Aplicación de Configuración de Heridas, manejo de eventos y actualizaciones de actores. Útil para solucionar problemas de respuesta de formularios."
     }
   },
   "EFFECT": {

@@ -101,6 +101,7 @@
         "total": "Total",
         "left": "restante",
         "close": "Fechar",
+        "apply": "Aplicar",
         "toChat": "Para o Chat",
         "effect": "Efeito",
         "simple": "Simples",
@@ -186,9 +187,12 @@
         "fullDefenseRollFailed": "Falha na rolagem de Defesa Total. Por favor, role manualmente.",
         "invalidRingForSpell": "Anel inválido para espaço de feitiço: {ring}",
         "noActorForVoid": "Nenhum ator disponível para gastar pontos de Vazio",
+        "chatMessageFailed": "Falha ao publicar a rolagem no chat - veja o console para detalhes",
         "deleteEffect": "Falha ao excluir efeito.",
         "schoolRankZero": "Você não pode lançar um feitiço com Posto de Escola reduzido a zero",
-        "noSpellSlots": "Você ficou sem espaços de feitiço para este anel"
+        "noSpellSlots": "Você ficou sem espaços de feitiço para este anel",
+        "woundConfigFailed": "Falha ao abrir configuração de ferimentos",
+        "woundConfigUpdateFailed": "Falha ao atualizar configuração de ferimentos"
       },
       "chat": {
         "traitRoll": "Rolagem de Atributo {trait}",
@@ -449,6 +453,18 @@
     "forceMigration": {
       "name": "Forçar migração na inicialização",
       "label": "Força todas as migrações a serem executadas no próximo carregamento do mundo, independentemente da versão. Reinicia automaticamente após concluir."
+    },
+    "defaultNpcWoundMode": {
+      "name": "Modo de Ferimentos Padrão para PNJ",
+      "label": "Controla se novos PNJs usam cálculos baseados em fórmula (Anel de Terra) ou entrada manual de limites para cálculos de ferimentos. PNJs existentes mantêm suas configurações individuais.",
+      "choices": {
+        "manual": "Manual (Entrada Direta)",
+        "formula": "Fórmula (Baseada em Terra)"
+      }
+    },
+    "debugWoundConfig": {
+      "name": "Depurar Configuração de Ferimentos",
+      "label": "Ativa o registro detalhado no console para interações da Aplicação de Configuração de Ferimentos, manipulação de eventos e atualizações de atores. Útil para solucionar problemas de resposta de formulário."
     }
   },
   "EFFECT": {

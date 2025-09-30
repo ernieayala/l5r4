@@ -70,20 +70,18 @@
  * 3. `on()`, `qs()`, `qsa()` - DOM manipulation helpers
  * 4. `getSortPref()`, `setSortPref()`, `sortWithPref()` - Sorting preference system
  * 5. `rankPointsToValue()`, `valueToRankPoints()`, `applyRankPointsDelta()` - Rank/points conversion
- * 6. `getWoundPenalty()`, `normalizeTrait()` - L5R4 game mechanics
- * 7. `resolveWeaponSkillTrait()` - Weapon skill resolution for combat
+ * 6. `readWoundPenalty()` - Actor wound penalty calculation
+ * 7. `normalizeTraitKey()`, `getEffectiveTrait()` - Trait system utilities
+ * 8. `resolveWeaponSkillTrait()` - Weapon attack dice pool resolution
  *
  * @author L5R4 System Team
  * @since 1.0.0
- * @version 2.1.0
+ * @version 1.0.2
  * @see {@link https://foundryvtt.com/api/functions/foundry.applications.handlebars.renderTemplate.html|renderTemplate}
  * @see {@link https://foundryvtt.com/api/classes/game.Game.html#i18n|Game.i18n}
  * @see {@link https://handlebarsjs.com/|Handlebars Template Engine}
  * @see {@link ../config.js|Config Module} - System constants and configuration
  * @see {@link ../documents/actor.js|Actor Document} - Actor integration and calculations
- * 6. `readWoundPenalty()` - Actor wound penalty calculation
- * 7. `normalizeTraitKey()`, `getEffectiveTrait()` - Trait system utilities
- * 8. `resolveWeaponSkillTrait()` - Weapon attack dice pool resolution
  */
 
 import { SYS_ID } from "./config.js";

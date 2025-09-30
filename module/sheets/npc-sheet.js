@@ -110,7 +110,7 @@
  * 
  * @author L5R4 System Team
  * @since 2.0.0
- * @version 2.1.0
+ * @version 1.0.2
  * @extends {BaseActorSheet}
  * @see {@link https://foundryvtt.com/api/classes/foundry.applications.sheets.ActorSheetV2.html|ActorSheetV2}
  * @see {@link ./base-actor-sheet.js|BaseActorSheet} - Shared functionality and roll methods
@@ -273,7 +273,7 @@ export default class L5R4NpcSheet extends BaseActorSheet {
     try {
       await this.actor.update({ "system.rings.void.rank": next }, { diff: true });
     } catch (err) {
-      console.warn("L5R4 NPC Sheet: failed to update void rank", { err });
+      console.warn(`${SYS_ID} NPC Sheet: failed to update void rank`, { err });
     }
   }
 
@@ -481,7 +481,7 @@ export default class L5R4NpcSheet extends BaseActorSheet {
         await woundConfig.render(true);
       }
     } catch (err) {
-      console.warn("L5R4", "Failed to open wound configuration application", { 
+      console.warn(`${SYS_ID}`, "Failed to open wound configuration application", { 
         err, 
         actorId: this.actor.id 
       });
