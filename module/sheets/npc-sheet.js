@@ -265,7 +265,9 @@ export default class L5R4NpcSheet extends BaseActorSheet {
     // Require Shift+Click to prevent accidental void rank changes
     if (!event?.shiftKey) return;
     
-    const cur = Number(this.actor.system?.rings?.void?.rank ?? 0) || 0;
+    // Use _source to get base value before Active Effects are applied
+    const cur = Number(this.actor._source?.system?.rings?.void?.rank
+                ?? this.actor.system?.rings?.void?.rank ?? 0) || 0;
     const min = 0;
     const max = 9;
     const next = Math.min(max, Math.max(min, cur + (delta > 0 ? 1 : -1)));

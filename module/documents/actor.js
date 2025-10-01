@@ -677,7 +677,8 @@ export default class L5R4Actor extends Actor {
     let reduction = 0;
 
     for (const it of this.items) {
-      if (it.type !== "armor") continue;
+      // Defensive check: ensure this is an actual Item document, not an Active Effect
+      if (!it || typeof it.type !== "string" || it.type !== "armor") continue;
       const a = it.system ?? {};
       if (!a?.equipped) continue;
       const b = toInt(a.bonus);
@@ -747,7 +748,8 @@ export default class L5R4Actor extends Actor {
     // Skill points = sum of skill ranks
     let skillTotal = 0;
     for (const it of this.items) {
-      if (it.type !== "skill") {
+      // Defensive check: ensure this is an actual Item document, not an Active Effect
+      if (!it || typeof it.type !== "string" || it.type !== "skill") {
         continue;
       }
       skillTotal += toInt(it.system?.rank);
@@ -800,7 +802,8 @@ export default class L5R4Actor extends Actor {
     // Disadvantage granted XP, capped at +10
     let disadvGranted = 0;
     for (const it of this.items) {
-      if (it.type !== "disadvantage") {
+      // Defensive check: ensure this is an actual Item document, not an Active Effect
+      if (!it || typeof it.type !== "string" || it.type !== "disadvantage") {
         continue;
       }
       // Disadvantage costs are displayed as positive but contribute negative XP
@@ -831,11 +834,15 @@ export default class L5R4Actor extends Actor {
     }
 
     // Void: cost per purchased step = 6 × new rank, after baseline
-    const voidCur = toInt(sys?.rings?.void?.rank ?? sys?.rings?.void?.value ?? sys?.rings?.void ?? 0);
-    const voidBaseline = 2 + toInt(freeTraitBase?.void ?? 0);
+    // Like traits, subtract Active Effect bonuses to get base purchased value
+    const voidEffCur = toInt(sys?.rings?.void?.rank ?? sys?.rings?.void?.value ?? sys?.rings?.void ?? 0);
+    const voidFreeBase = toInt(freeTraitBase?.void ?? 0);
+    const voidFreeEff = voidFreeBase > 0 ? 0 : toInt(this._creationFreeBonusVoid());
+    const voidBaseline = 2 + voidFreeBase;
+    const voidBaseCur = Math.max(voidBaseline, voidEffCur - voidFreeEff);
     let voidXP = 0;
-    if (voidCur > voidBaseline) {
-      for (let r = voidBaseline + 1; r <= voidCur; r++) {
+    if (voidBaseCur > voidBaseline) {
+      for (let r = voidBaseline + 1; r <= voidBaseCur; r++) {
         const step = 6 * r + toInt(traitDiscounts?.void ?? 0);
         voidXP += Math.max(0, step);
       }
@@ -844,7 +851,8 @@ export default class L5R4Actor extends Actor {
     // Skills: sum of next-rank costs above baseline; free ranks reduce XP cost regardless of School status
     let skillsXP = 0;
     for (const it of this.items) {
-      if (it.type !== "skill") {
+      // Defensive check: ensure this is an actual Item document, not an Active Effect
+      if (!it || typeof it.type !== "string" || it.type !== "skill") {
         continue;
       }
       const r = toInt(it.system?.rank);
@@ -867,6 +875,10 @@ export default class L5R4Actor extends Actor {
     let kataXP = 0;
     let kihoXP = 0;
     for (const it of this.items) {
+      // Defensive check: ensure this is an actual Item document with a valid type
+      if (!it || typeof it.type !== "string") {
+        continue;
+      }
       if (it.type === "advantage") {
         advantagesXP += toInt(it.system?.cost);
       } else if (it.type === "kata") {
@@ -1480,6 +1492,76 @@ export default class L5R4Actor extends Actor {
 
       // Embedded docs (older actors)
       for (const it of this.items ?? []) {
+        // Defensive check: ensure this is an actual Item document, not an Active Effect
+        if (!it || typeof it.type !== "string") continue;
+        if (it.type === "family" || it.type === "school") addFromDoc(it);
+      }
+
+      return sum || 0;
+    } catch {
+      return 0;
+    }
+  }
+
+  /**
+   * Calculate total creation bonuses for Void ring from Family/School items.
+   * Similar to _creationFreeBonus but checks for system.rings.void.rank Active Effects.
+   * 
+   * **Resolution Priority:**
+   * 1. Active Effects that transfer and ADD to system.rings.void.rank
+   * 2. Legacy direct bonuses from item.system.trait + item.system.bonus (if trait === "void")
+   * 
+   * **Sources Checked:**
+   * - Flagged Family/School items via UUID (preferred)
+   * - Embedded Family/School items (fallback for older actors)
+   * 
+   * @returns {number} Total void bonus amount from all creation sources
+   * @see {@link https://foundryvtt.com/api/classes/documents.ActiveEffect.html|ActiveEffect}
+   * @see {@link https://foundryvtt.com/api/functions/client.fromUuidSync.html|fromUuidSync}
+   */
+  _creationFreeBonusVoid() {
+    try {
+      let sum = 0;
+      const seen = new Set();
+
+      const addFromDoc = doc => {
+        if (!doc) return;
+        const did = doc.uuid ?? doc.id ?? null;
+        if (did && seen.has(did)) return;
+        if (did) seen.add(did);
+
+        // Check for transferred AEs that ADD to void rank
+        let ae = 0;
+        for (const eff of (doc.effects ?? [])) {
+          if (eff?.transfer !== true) continue;
+          for (const ch of (eff?.changes ?? [])) {
+            // Check both possible void paths: system.rings.void.rank and system.rings.void.value
+            if ((ch?.key === "system.rings.void.rank" || ch?.key === "system.rings.void.value") 
+                && ch?.mode === CONST.ACTIVE_EFFECT_MODES.ADD) {
+              const v = Number(ch?.value ?? 0);
+              if (Number.isFinite(v)) ae += v;
+            }
+          }
+        }
+        if (ae !== 0) { sum += ae; return; }
+
+        // Legacy fallback: check if item grants void bonus
+        const tKey = String(doc?.system?.trait ?? "").toLowerCase();
+        const amt  = Number(doc?.system?.bonus ?? NaN);
+        if (tKey === "void" && Number.isFinite(amt)) sum += amt;
+      };
+
+      // Flagged docs
+      for (const flagKey of ["familyItemUuid", "schoolItemUuid"]) {
+        const uuid = this.getFlag(SYS_ID, flagKey);
+        if (!uuid || !globalThis.fromUuidSync) continue;
+        addFromDoc(fromUuidSync(uuid));
+      }
+
+      // Embedded docs (older actors)
+      for (const it of this.items ?? []) {
+        // Defensive check: ensure this is an actual Item document, not an Active Effect
+        if (!it || typeof it.type !== "string") continue;
         if (it.type === "family" || it.type === "school") addFromDoc(it);
       }
 

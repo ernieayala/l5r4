@@ -68,7 +68,10 @@
     </section>
   </div>
   <div class="flexcol -gap-sm">
-    <h3>{{localize "l5r4.character.experience.purchases"}}</h3>
+    <div class="flexrow">
+      <h3>{{localize "l5r4.character.experience.purchases"}}</h3>
+      <a class="button inline-control icon" data-action="recalculate-xp-purchase" data-tooltip="{{localize 'l5r4.character.experience.recalculateTooltip'}}"><i class="fas fa-calculator"></i></a>
+    </div>
     <section class="item-list -xp-spent -header" data-scope="xp-purchases">
       <div class="item">
         <a class="item-sort-by" data-action="item-sort-by" data-sortby="note">{{localize "l5r4.character.experience.reason"}}</a>

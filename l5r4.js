@@ -238,43 +238,81 @@ Hooks.once("init", async () => {
 // CHAT INTEGRATION - INLINE ROLL PARSING & DAMAGE BUTTONS
 // =============================================================================
 
-// Handle damage button clicks in chat messages
+/**
+ * Chat Message Rendering Hook - Damage Button Integration
+ * 
+ * Attaches click event listeners to weapon damage buttons in chat messages,
+ * enabling players to roll damage directly from attack roll results.
+ * 
+ * **Migration Note (Foundry v13+):**
+ * This hook uses `renderChatMessageHTML` (introduced in v13) instead of the
+ * deprecated `renderChatMessage` hook. Key differences:
+ * - Hook name: `renderChatMessage` → `renderChatMessageHTML`
+ * - HTML parameter: jQuery object → Native HTMLElement
+ * - DOM methods: `.find()` → `.querySelector()` / `.querySelectorAll()`
+ * 
+ * **Hook Signature:**
+ * @param {ChatMessage} app - The ChatMessage document being rendered
+ * @param {HTMLElement} html - Native DOM element (NOT jQuery) containing the message HTML
+ * @param {object} data - Template data used to render the message
+ * 
+ * **Button Data Attributes:**
+ * - `data-weapon-id`: Item UUID for the weapon
+ * - `data-actor-id`: Actor ID who owns the weapon
+ * - `data-weapon-name`: Display name of the weapon
+ * - `data-damage-roll`: Number of dice to roll (e.g., 3 for 3k2)
+ * - `data-damage-keep`: Number of dice to keep (e.g., 2 for 3k2)
+ * 
+ * **Security:**
+ * - Validates actor ownership before allowing damage rolls
+ * - GM users can roll damage for any actor
+ * - Non-owners receive localized permission warning
+ * 
+ * @since 1.0.0
+ * @version 1.0.2 - Migrated to renderChatMessageHTML for Foundry v13 compatibility
+ * @see {@link https://foundryvtt.com/api/classes/foundry.documents.ChatMessage.html|ChatMessage}
+ * @see {@link ./module/services/dice.js|Dice Service} - WeaponRoll implementation
+ */
 Hooks.on("renderChatMessageHTML", (app, html, data) => {
-  html.querySelectorAll(".l5r4-damage-button").forEach(button => {
-    button.addEventListener("click", async (event) => {
-      event.preventDefault();
-      const button = event.currentTarget;
-      const weaponId = button.dataset.weaponId;
-      const actorId = button.dataset.actorId;
-      const weaponName = button.dataset.weaponName;
-      const damageRoll = parseInt(button.dataset.damageRoll) || 0;
-      const damageKeep = parseInt(button.dataset.damageKeep) || 0;
+  try {
+    html.querySelectorAll(".l5r4-damage-button").forEach(button => {
+      button.addEventListener("click", async (event) => {
+        event.preventDefault();
+        const button = event.currentTarget;
+        const weaponId = button.dataset.weaponId;
+        const actorId = button.dataset.actorId;
+        const weaponName = button.dataset.weaponName;
+        const damageRoll = parseInt(button.dataset.damageRoll) || 0;
+        const damageKeep = parseInt(button.dataset.damageKeep) || 0;
 
-      // Find the actor
-      const actor = game.actors.get(actorId);
-      if (!actor) {
-        ui.notifications?.warn(game.i18n.localize("l5r4.ui.notifications.actorNotFound"));
-        return;
-      }
+        // Find the actor
+        const actor = game.actors.get(actorId);
+        if (!actor) {
+          ui.notifications?.warn(game.i18n.localize("l5r4.ui.notifications.actorNotFound"));
+          return;
+        }
 
-      // Check permissions - only allow if user owns the actor or is GM
-      if (!actor.isOwner && !game.user.isGM) {
-        ui.notifications?.warn(game.i18n.localize("l5r4.ui.notifications.noPermissionDamage"));
-        return;
-      }
+        // Check permissions - only allow if user owns the actor or is GM
+        if (!actor.isOwner && !game.user.isGM) {
+          ui.notifications?.warn(game.i18n.localize("l5r4.ui.notifications.noPermissionDamage"));
+          return;
+        }
 
-      // Import WeaponRoll from dice service
-      const { WeaponRoll } = await import("./module/services/dice.js");
-      
-      // Roll weapon damage
-      return WeaponRoll({
-        diceRoll: damageRoll,
-        diceKeep: damageKeep,
-        weaponName: weaponName,
-        askForOptions: event.shiftKey
+        // Import WeaponRoll from dice service
+        const { WeaponRoll } = await import("./module/services/dice.js");
+        
+        // Roll weapon damage
+        return WeaponRoll({
+          diceRoll: damageRoll,
+          diceKeep: damageKeep,
+          weaponName: weaponName,
+          askForOptions: event.shiftKey
+        });
       });
     });
-  });
+  } catch (error) {
+    console.warn("L5R4", "Error attaching damage button listeners:", error);
+  }
 });
 
 Hooks.on("chatMessage", (chatlog, message, _chatData) => {
