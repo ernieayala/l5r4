@@ -15,7 +15,7 @@ This system builds upon the foundational work of the original L5R 4th Edition co
 
 ## Table of Contents
 
-- [What's New in v1.0.2](#-whats-new-in-v102)
+- [What's New in v1.0.x - Complete System Overhaul](#-whats-new-in-v10x---complete-system-overhaul)
 - [Installation](#-installation)
 - [Quick Start Guide](#-quick-start-guide)
 - [Core Features](#-core-features)
