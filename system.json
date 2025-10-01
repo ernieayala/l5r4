@@ -2,7 +2,7 @@
   "id": "l5r4",
   "title": "Legend of the Five Rings 4th Edition",
   "description": "An unofficial, comprehensive implementation of Legend of the Five Rings 4th Edition for Foundry VTT with complete character management, authentic dice mechanics, and full L5R4e rule support.",
-  "version": "1.0.1",
+  "version": "1.0.2",
   "authors": [
     {
       "name": "Ernie Ayala",
