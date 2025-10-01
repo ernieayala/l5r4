@@ -523,16 +523,16 @@ export default class L5R4Item extends Item {
     const sys = this.system ?? {};
 
     // Calculate skill roll formula: (Skill Rank + Trait)k(Trait)
-    // Uses effective trait values from actor if available
+    // NOTE: This runs BEFORE actor.prepareDerivedData(), so Active Effects aren't applied yet.
+    // We store basic values here and recalculate in getData() for accurate display.
     if (this.type === "skill") {
       try {
         const traitKey = String(sys.trait ?? "").toLowerCase();
-        const traitEff =
-          toInt(this.actor?.system?._derived?.traitsEff?.[traitKey]) ||
-          toInt(this.actor?.system?.traits?.[traitKey]);
         const rank = toInt(sys.rank);
-        sys.rollDice    = Math.max(0, traitEff + rank);
-        sys.rollKeep    = Math.max(0, traitEff);
+        
+        // Store basic formula without bonuses - will be recalculated in getData()
+        sys.rollDice    = Math.max(0, rank);
+        sys.rollKeep    = 0;
         sys.rollFormula = `${sys.rollDice}k${sys.rollKeep}`;
       } catch (err) {
         sys.rollDice = Math.max(0, toInt(sys.rank));
