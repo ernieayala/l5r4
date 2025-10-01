@@ -34,20 +34,133 @@ This system builds upon the foundational work of the original L5R 4th Edition co
 
 ---
 
-## ✨ What's New in v1.0.2
+## ✨ What's New in v1.0.x - Complete System Overhaul
 
-### Features
-- **Recalculate Purchase XP Button**: Added calculator icon button to XP Manager Purchases section
-  - Allows manual recalculation of XP purchases from current character state
-  - Useful when XP tracking becomes outdated or needs to be refreshed
-  - Provides user feedback via notifications (success/failure messages)
+This major release represents a complete architectural modernization for Foundry VTT v13+, transforming the L5R4 system from the ground up.
 
-### Technical Details
-- Leverages existing retroactive XP update logic for recalculation
-- Forces version flag reset to trigger full XP purchase rebuild
-- Recalculates all XP expenditures: traits, void, skills, advantages, disadvantages, kata, kiho
-- Updates `flags.l5r4.xpSpent` array on actor document
-- Includes proper error handling and console logging
+### NEW FEATURES
+
+#### Modern Architecture
+- **ApplicationV2/DialogV2**: Complete rewrite using Foundry v13+ modern APIs
+- **Migration System**: Automated data structure updates and schema migrations
+- **Services Architecture**: Modular service-oriented design (dice, chat, stance services)
+- **Setup System**: Organized initialization with preload templates and centralized settings
+
+#### XP Manager Application
+- **Dedicated Interface**: Full-featured XP management window with ApplicationV2
+- **Automatic Tracking**: Comprehensive XP breakdown by category (traits, void, skills, advantages, disadvantages, kata, kiho)
+- **Cost Calculation**: Automatic L5R4 progression formulas with family/school bonuses
+- **Audit Trail**: Complete purchase history with timestamps and descriptions
+- **Retroactive Calculation**: Rebuild XP history from current character state
+- **v1.0.2**: Added "Recalculate Purchase XP" button for manual refresh
+
+#### Stance Automation Service
+- **Active Effects Integration**: Automated combat stance management with real-time bonus application
+- **Mutual Exclusion**: Only one stance active at a time per actor
+- **Full Attack Stance**: +2k1 to attack rolls, -10 to Armor TN (automated)
+- **Defense Stance**: Air Ring + Defense Skill to Armor TN (automated)
+- **Full Defense Stance**: Defense/Reflexes roll, half (rounded up) to Armor TN (automated)
+- **Status Effect System**: Visual indicators with mechanical automation
+
+#### Active Effects Integration
+- **Complete System**: Dynamic trait and skill modifications via Foundry's Active Effects
+- **Transferable Effects**: Family, School, Advantage, and Disadvantage bonuses apply automatically
+- **Skill Bonuses**: Roll/keep/total bonuses for individual skills
+- **Combat Bonuses**: Initiative, Armor TN, damage modifications
+- **Wound Penalties**: Automatic wound penalty modifiers
+
+#### Enhanced Systems
+- **Base Actor Sheet**: Shared functionality between PC and NPC sheets with consistent UI
+- **Icon Path Resolver**: Future-proof asset management with alias support
+- **Family Bonuses**: Automated character creation bonuses via Active Effects
+- **Wound Configuration**: Dedicated application for NPC wound customization
+
+### ENHANCED FEATURES
+
+#### Dice System Refactor
+- **Before**: 21k+ line monolithic file
+- **After**: 1.3k line modular service with focused functions
+- Improved Ten Dice Rule implementation with Little Truths variant
+- Better modifier dialog system with DialogV2
+- Enhanced chat card rendering with success/failure evaluation
+- Auto-targeting from selected tokens
+
+#### XP Tracking Evolution
+- **Before**: Simple XP field with manual calculation
+- **After**: Complex cost calculation with automatic progression
+- Triangular costs for skills (1+2+3+...+rank)
+- Progressive costs for traits (4×new_rank)
+- Fixed costs for void (6×new_rank)
+- School skill free rank handling
+- Emphasis cost tracking (2 XP each)
+
+#### Combat Stances Upgrade
+- **Before**: Static status effect definitions
+- **After**: Active automation with mutual exclusion
+- Automatic bonus application during rolls
+- Armor TN modifications during data preparation
+- Defense/Reflexes roll for Full Defense stance
+- Chat integration for stance notifications
+
+#### Spell Slots Enhancement
+- **Before**: Basic checkbox system
+- **After**: Integrated with dice service for automatic deduction
+- Elemental spell slots (Air, Earth, Fire, Water, Void)
+- Validation prevents casting when slots depleted
+- Chat message integration shows slot usage
+
+#### Sheet System Modernization
+- **Before**: Basic ActorSheet implementation
+- **After**: BaseActorSheet with v13+ APIs and advanced UI
+- ApplicationV2 architecture throughout
+- Improved event handling with action delegation
+- Better drag-drop functionality
+- Sorting preferences with persistence
+
+#### Template Organization
+- **Before**: Mixed partials in flat structure
+- **After**: Hierarchically organized by function
+- Categorized templates (actor, cards, chat, apps, dialogs)
+- Partial templates for reusability
+- Consistent naming conventions
+
+#### Comprehensive Localization
+- **Before**: Basic UI text coverage
+- **After**: Complete coverage including skill names
+- Six languages supported (en, es, fr, pt-BR, de, ru)
+- All UI elements, settings, and error messages localized
+
+#### Configuration Modernization
+- **Before**: Basic objects with mutable state
+- **After**: ES6 modules with immutability
+- Frozen configuration objects
+- Centralized constants (SYS_ID, paths, templates)
+- Icon path resolver for future asset reorganization
+
+#### Documentation Enhancement
+- **Before**: Minimal comments
+- **After**: Comprehensive JSDoc throughout codebase
+- Function documentation with parameter types
+- Usage examples and integration notes
+- Performance considerations documented
+
+### BREAKING CHANGES
+
+- **Foundry v13+ Required**: System no longer compatible with Foundry v12 and below
+- **PC Tabs Removed**: Simplified to single-page layout for better maintainability
+- **Bow Type Migration**: Legacy "bow" items automatically migrated to weapon type with `isBow` flag
+
+### MIGRATION NOTES
+
+When upgrading from v0.9.x:
+1. **Backup your world** before updating
+2. Ensure you're running Foundry VTT v13 or later
+3. Automatic migrations will run on first world load
+4. Review character sheets for any data inconsistencies
+5. Use XP Manager's "Recalculate Purchase XP" button if needed
+6. Re-apply combat stances using new status effect system
+
+All character data, XP totals, wound configurations, and compendium content are preserved during migration.
 
 ---
 
