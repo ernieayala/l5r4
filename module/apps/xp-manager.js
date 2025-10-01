@@ -98,7 +98,8 @@ export default class XpManagerApplication extends foundry.applications.api.Handl
     actions: {
       "xp-add-confirm": XpManagerApplication.prototype._onAddXp,
       "xp-delete-manual": XpManagerApplication.prototype._onDeleteEntry,
-      "item-sort-by": XpManagerApplication.prototype._onSortClick
+      "item-sort-by": XpManagerApplication.prototype._onSortClick,
+      "recalculate-xp-purchase": XpManagerApplication.prototype._onRecalculateXpPurchase
     }
   };
 
@@ -346,6 +347,37 @@ export default class XpManagerApplication extends foundry.applications.api.Handl
   }
 
   /**
+   * Handle recalculating XP purchases from current character state.
+   * Forces a retroactive XP update and re-renders the manager to show changes.
+   * @param {Event} event - The click event
+   * @param {HTMLElement} target - The clicked element
+   */
+  async _onRecalculateXpPurchase(event, target) {
+    event.preventDefault();
+    
+    try {
+      // Force retroactive update by clearing the version flag
+      await this.actor.setFlag(SYS_ID, "xpRetroactiveVersion", 0);
+      
+      // Run the retroactive update
+      await this._retroactivelyUpdateXP();
+      
+      // Update the version flag to current state
+      const currentVersion = this._calculateXPDataVersion();
+      await this.actor.setFlag(SYS_ID, "xpRetroactiveVersion", currentVersion);
+      
+      // Notify user
+      ui.notifications?.info(game.i18n.localize("l5r4.character.experience.recalculateSuccess"));
+      
+      // Re-render to show changes
+      this.render();
+    } catch (err) {
+      console.warn(`${SYS_ID}`, "Failed to recalculate XP purchases", err);
+      ui.notifications?.error(game.i18n.localize("l5r4.character.experience.recalculateFailed"));
+    }
+  }
+
+  /**
    * Check if retroactive XP update is needed and run it if so.
    * This prevents unnecessary updates that can cause timing issues with character sheet XP display.
    * Only runs retroactive update on first open or when actor data has changed significantly.
@@ -503,11 +535,15 @@ export default class XpManagerApplication extends foundry.applications.api.Handl
       }
 
       // Rebuild void purchases
-      const voidCur = parseInt(sys?.rings?.void?.rank ?? sys?.rings?.void?.value ?? sys?.rings?.void ?? 0);
-      const voidBaseline = 2 + parseInt(freeTraitBase?.void ?? 0);
+      // Like traits, subtract Active Effect bonuses to get base purchased value
+      const voidEffCur = parseInt(sys?.rings?.void?.rank ?? sys?.rings?.void?.value ?? sys?.rings?.void ?? 0);
+      const voidFreeBase = parseInt(freeTraitBase?.void ?? 0);
+      const voidFreeEff = voidFreeBase > 0 ? 0 : parseInt(this.actor._creationFreeBonusVoid?.() ?? 0);
+      const voidBaseline = 2 + voidFreeBase;
+      const voidBaseCur = Math.max(voidBaseline, voidEffCur - voidFreeEff);
       
-      if (voidCur > voidBaseline) {
-        for (let r = voidBaseline + 1; r <= voidCur; r++) {
+      if (voidBaseCur > voidBaseline) {
+        for (let r = voidBaseline + 1; r <= voidBaseCur; r++) {
           const cost = 6 * r + parseInt(traitDiscounts?.void ?? 0);
           
           // Use same format as real-time void changes to prevent duplicates
@@ -526,7 +562,7 @@ export default class XpManagerApplication extends foundry.applications.api.Handl
               type: "void",
               fromValue: r - 1,
               toValue: r,
-              ts: Date.now() - (voidCur - r) * 1000
+              ts: Date.now() - (voidBaseCur - r) * 1000
             });
             existingEntries.add(entryKey);
           }
@@ -535,7 +571,8 @@ export default class XpManagerApplication extends foundry.applications.api.Handl
 
       // Rebuild skill purchases
       for (const item of this.actor.items) {
-        if (item.type !== "skill") continue;
+        // Defensive check: ensure this is an actual Item document, not an Active Effect
+        if (!item || typeof item.type !== "string" || item.type !== "skill") continue;
         
         const rank = parseInt(item.system?.rank) || 0;
         const freeRanks = Math.max(0, parseInt(item.system?.freeRanks) || 0);
@@ -595,6 +632,8 @@ export default class XpManagerApplication extends foundry.applications.api.Handl
 
       // Rebuild advantage, disadvantage, kata, and kiho purchases
       for (const item of this.actor.items) {
+        // Defensive check: ensure this is an actual Item document with a valid type
+        if (!item || typeof item.type !== "string") continue;
         if (item.type !== "advantage" && item.type !== "disadvantage" && item.type !== "kata" && item.type !== "kiho") continue;
         
         const cost = parseInt(item.system?.cost) || 0;

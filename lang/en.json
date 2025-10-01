@@ -320,6 +320,9 @@
         "voidChange": "Void {from}→{to}",
         "skillCreate": "{name} 0→{rank}",
         "skillChange": "{name} {from}→{to}",
+        "recalculateTooltip": "Recalculate XP purchases from current character state",
+        "recalculateSuccess": "XP purchases recalculated successfully",
+        "recalculateFailed": "Failed to recalculate XP purchases",
         "breakdown": {
           "base": "Base",
           "disadvantagesGrant": "Disadvantages",

@@ -899,7 +899,7 @@ body > * {
 .l5r4.pc .traits-rings .void-points-dots,
 .l5r4.npc .traits-rings .void-points-dots {
   align-items: center;
-  cursor: var(--conditional-cursor);
+  cursor: pointer;
   display: flex;
   gap: 2px;
 }
