@@ -374,7 +374,30 @@ export default class L5R4PcSheet extends BaseActorSheet {
         emphasis: it => String(it?.system?.emphasis ?? "")
       };
       const pref = getSortPref(actorObj.id, "skills", Object.keys(cols), "name");
-      return sortWithPref(byType("skill"), cols, pref, game.i18n?.lang);
+      const sorted = sortWithPref(byType("skill"), cols, pref, game.i18n?.lang);
+      
+      // Recalculate skill formulas with correct trait values (after Active Effects)
+      for (const skill of sorted) {
+        const traitKey = String(skill.system?.trait ?? "").toLowerCase();
+        const traitEff =
+          toInt(actorObj.system?._derived?.traitsEff?.[traitKey]) ||
+          toInt(actorObj.system?.traits?.[traitKey]);
+        const rank = toInt(skill.system?.rank);
+        
+        // Include Active Effects bonuses (matches dice.js SkillRoll logic)
+        const bb = actorObj.system?.bonuses;
+        const kSkill = String(skill.name).toLowerCase?.();
+        const bSkill = (bb?.skill && bb.skill[kSkill]) || {};
+        const bTrait = (bb?.trait && bb.trait[traitKey]) || {};
+        const rollBonus = toInt(bSkill.roll) + toInt(bTrait.roll);
+        const keepBonus = toInt(bSkill.keep) + toInt(bTrait.keep);
+        
+        skill.system.rollDice = Math.max(0, traitEff + rank + rollBonus);
+        skill.system.rollKeep = Math.max(0, traitEff + keepBonus);
+        skill.system.rollFormula = `${skill.system.rollDice}k${skill.system.rollKeep}`;
+      }
+      
+      return sorted;
     })();
   
     // Spells sorted by user preference (name, ring, mastery, range, aoe, duration)
