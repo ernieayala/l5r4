@@ -1,5 +1,21 @@
 # Changelog
 
+## Version 1.0.2 - XP Management Enhancement
+
+### Features
+- **Recalculate Purchase XP Button**: Added calculator icon button to XP Manager Purchases section
+  - Allows manual recalculation of XP purchases from current character state
+  - Useful when XP tracking becomes outdated or needs to be refreshed
+  - Provides user feedback via notifications (success/failure messages)
+  - Follows L5R4 system patterns with data-action delegation and defensive coding
+
+### Technical Details
+- Leverages existing `_retroactivelyUpdateXP()` method for recalculation logic
+- Forces version flag reset to trigger full XP purchase rebuild
+- Recalculates all XP expenditures: traits, void, skills, advantages, disadvantages, kata, kiho
+- Updates `flags.l5r4.xpSpent` array on actor document
+- Includes proper error handling and console logging
+
 ## Version 1.0.0 - Complete System Overhaul
 
 ### NEW FEATURES
