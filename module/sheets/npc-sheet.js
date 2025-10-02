@@ -485,7 +485,7 @@ export default class L5R4NpcSheet extends BaseActorSheet {
     }
     
     // Delegate to Fear service
-    await Fear.handleFearClick(this.actor);
+    await Fear.handleFearClick({ npc: this.actor });
   }
 
   /**

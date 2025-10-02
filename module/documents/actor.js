@@ -1601,16 +1601,22 @@ export default class L5R4Actor extends Actor {
    * ======================================================================== */
 
   /**
-   * Prepare Fear-related derived data for NPCs.
-   * Computes Fear TN, localized labels, and active state for efficient sheet rendering.
+   * Prepare Fear derived data for NPCs.
+   * Computes Fear TN and active state for efficient sheet rendering.
    * Called from prepareDerivedData() to ensure Fear values are always current.
+   * 
+   * **L5R4 Rules as Written (RAW):**
+   * - **Fear X**: TN = 5 + (5 × Fear Rank)
+   *   - Example: Fear 3 = TN 20 (5 + 15)
+   * - **Resistance Roll**: Raw Willpower, then add Honor Rank to total
+   * - **Failure**: Character suffers -XkO penalty to all rolls (X = Fear Rank)
+   *   - Penalty lasts until end of encounter or source removed
+   * - **Catastrophic Failure**: Failing by 15+ causes flee/cower
    * 
    * **Computed Properties:**
    * - `system.fear.rank` - Normalized Fear rank (0-10)
-   * - `system.fear.type` - Normalized type ("fear" or "terrifying")
    * - `system.fear.active` - Boolean indicating if Fear is enabled
-   * - `system.fear.tn` - Pre-calculated Target Number (5 × rank)
-   * - `system.fear.label` - Localized Fear type label for display
+   * - `system.fear.tn` - Pre-calculated Target Number (5 + 5×rank)
    * 
    * **Performance:**
    * Pre-computing these values eliminates redundant calculations in:
@@ -1621,48 +1627,26 @@ export default class L5R4Actor extends Actor {
    * @param {L5R4ActorSystem} sys - The actor's system data object
    * @returns {void}
    * @private
+   * @see L5R4 Core Rulebook, 4th Edition, p. 91-92 - Fear mechanics
+   * @see {@link ../services/fear.js|Fear Service} - Roll execution and penalty tracking
    */
   _prepareFear(sys) {
     try {
       sys.fear = sys.fear || {};
       const rank = toInt(sys.fear.rank ?? 0);
-      const type = (sys.fear.type === "terrifying") ? "terrifying" : "fear";
       
       sys.fear.rank = rank;
-      sys.fear.type = type;
       sys.fear.active = rank > 0;
-      sys.fear.tn = rank > 0 ? 5 * rank : 0;
-      sys.fear.label = rank > 0 ? game.i18n?.localize?.(`l5r4.ui.mechanics.fear.${type}`) ?? type : "";
+      // RAW: TN = 5 + (5 × Fear Rank)
+      sys.fear.tn = rank > 0 ? 5 + (5 * rank) : 0;
     } catch (err) {
       console.warn(`${SYS_ID}`, "Failed to prepare Fear derived data", { err, actorId: this.id });
       // Ensure safe defaults on error
       sys.fear = sys.fear || {};
       sys.fear.rank = 0;
-      sys.fear.type = "fear";
       sys.fear.active = false;
       sys.fear.tn = 0;
-      sys.fear.label = "";
     }
-  }
-
-  /**
-   * Get the Fear rank for this NPC.
-   * Returns pre-computed value from prepareDerivedData().
-   * 
-   * @returns {number} Fear rank (0-10)
-   */
-  getFearRank() {
-    return toInt(this.system?.fear?.rank ?? 0);
-  }
-
-  /**
-   * Get the Fear type for this NPC.
-   * Returns pre-computed value from prepareDerivedData().
-   * 
-   * @returns {string} Fear type ("fear" or "terrifying")
-   */
-  getFearType() {
-    return this.system?.fear?.type ?? "fear";
   }
 
   /**
@@ -1670,6 +1654,11 @@ export default class L5R4Actor extends Actor {
    * Returns pre-computed value from prepareDerivedData().
    * 
    * @returns {boolean} True if Fear is active
+   * @example
+   * // Check if NPC has Fear before testing
+   * if (npc.hasFear()) {
+   *   await Fear.testFear({ npc, character });
+   * }
    */
   hasFear() {
     return this.system?.fear?.active ?? false;
