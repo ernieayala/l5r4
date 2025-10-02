@@ -1,7 +1,7 @@
 # Legend of the Five Rings 4th Edition for Foundry VTT
 
 [![FoundryVTT version](https://img.shields.io/badge/FVTT-v13.x-informational)](https://foundryvtt.com/)
-[![Version](https://img.shields.io/badge/Version-1.0.2-blue)](https://github.com/ernieayala/l5r4/releases)
+[![Version](https://img.shields.io/badge/Version-1.1.0-blue)](https://github.com/ernieayala/l5r4/releases)
 [![License](https://img.shields.io/badge/License-GPL%20v3-green)](https://github.com/ernieayala/l5r4/blob/main/COPYING)
 [![GitHub Issues](https://img.shields.io/github/issues/ernieayala/l5r4)](https://github.com/ernieayala/l5r4/issues)
 
