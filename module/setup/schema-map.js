@@ -78,7 +78,7 @@
  *
  * @author L5R4 System Team
  * @since 1.0.0
- * @version 1.0.2
+ * @version 1.1.0
  * @see {@link ./migrations.js} Migration system that processes these rules
  * @see {@link https://foundryvtt.com/api/classes/foundry.utils.html#getProperty|foundry.utils.getProperty}
  * @see {@link https://foundryvtt.com/api/classes/foundry.utils.html#setProperty|foundry.utils.setProperty}

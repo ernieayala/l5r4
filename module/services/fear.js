@@ -28,7 +28,7 @@
  * 
  * @author L5R4 System Team
  * @since 1.0.2
- * @version 2.0.0
+ * @version 1.1.0
  * @see {@link https://foundryvtt.com/api/classes/documents.Actor.html|Actor Document}
  * @see {@link https://foundryvtt.com/api/classes/documents.ChatMessage.html|ChatMessage}
  * @see L5R4 Core Rulebook, 4th Edition, p. 91-92 - Fear rules

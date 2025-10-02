@@ -7,6 +7,30 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ---
 
+## [1.1.0] - 2025-10-01
+
+### Added
+- **Fear System**: Comprehensive Fear mechanics implementation for NPCs
+  - Fear rating support on NPC sheets
+  - Automatic Fear checks when NPCs are encountered
+  - Fear effects applied to characters based on check results
+  - Configurable Fear thresholds and durations
+
+### Fixed
+- **Skill Roll Display**: Fixed formula display to properly show Active Effects bonuses in chat cards
+  - Roll and keep bonuses from effects now correctly displayed in roll breakdown
+
+### Changed
+- **Fear Mechanics**: Simplified Fear system implementation
+  - Removed complex Active Effects for Fear in favor of direct application
+  - Improved clarity and reliability of Fear mechanic processing
+
+### Technical
+- Code documentation cleanup across multiple modules
+- Enhanced JSDoc comments for better maintainability
+
+---
+
 ## [1.0.2] - 2025-09-30
 
 ### Added
