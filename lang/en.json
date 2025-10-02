@@ -98,6 +98,20 @@
           "fullDefenseDescription": "Make a Defense/Reflexes roll. Add half the result (rounded up) to your Armor TN for the duration of this stance.",
           "cannotAttackDefense": "Cannot attack while in Defense Stance",
           "fullAttackBonus": "Full Attack Stance: +2k1"
+        },
+        "fear": {
+          "fear": "Fear",
+          "terrifying": "Terrifying",
+          "fearRank": "Fear Rank",
+          "fearLabel": "Fear {rank}",
+          "terrifyingLabel": "Terrifying {rank}",
+          "clickToTest": "Click to test Fear against selected characters",
+          "testResult": "{type} {rank} Test",
+          "testSuccess": "Resisted {type} {rank}",
+          "testFailure": "Failed {type} {rank} Test",
+          "noTargets": "No tokens selected for Fear test",
+          "noWillpower": "{character} has no Willpower trait",
+          "testAgainst": "vs {creature}"
         }
       },
       "common": {

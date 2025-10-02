@@ -129,6 +129,7 @@ export async function preloadTemplates() {
     "systems/l5r4/templates/actor/_partials/_initiative.hbs",
     "systems/l5r4/templates/actor/_partials/_armor.hbs",
     "systems/l5r4/templates/actor/_partials/_wounds.hbs",
+    "systems/l5r4/templates/actor/_partials/_fear.hbs",
     "systems/l5r4/templates/actor/_partials/_bio.hbs",
     
     // Individual item section templates

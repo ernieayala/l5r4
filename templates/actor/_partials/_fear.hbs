@@ -1,0 +1,33 @@
+<section class="fear">
+  <div class="flexrow -gap-sm section-title">
+    <h4 class="title -compact">{{localize "l5r4.ui.mechanics.fear.fearRank"}}</h4>
+  </div>
+  <div class="flexcol -gap-sm">
+    <div class="grid">
+      <span>{{localize "l5r4.ui.common.rank"}}</span>
+      <div class="flexrow">
+        <input name="system.fear.rank" type="number" value="{{system.fear.rank}}" min="0" max="10" data-type="Number" />
+      </div>
+      <span>{{localize "l5r4.ui.common.type"}}</span>
+      <div class="flexrow">
+        <select name="system.fear.type">
+          <option value="fear" {{#if (eq system.fear.type "fear")}}selected{{/if}}>{{localize "l5r4.ui.mechanics.fear.fear"}}</option>
+          <option value="terrifying" {{#if (eq system.fear.type "terrifying")}}selected{{/if}}>{{localize "l5r4.ui.mechanics.fear.terrifying"}}</option>
+        </select>
+      </div>
+    </div>
+    {{#if system.fear.rank}}
+      <a class="button fear-test" 
+          data-action="test-fear" 
+          data-fear-rank="{{system.fear.rank}}" 
+          data-fear-type="{{system.fear.type}}"
+          title="{{localize "l5r4.ui.mechanics.fear.clickToTest"}}">
+          {{#if (eq system.fear.type "terrifying")}}
+            {{localize "l5r4.ui.mechanics.fear.terrifyingLabel" rank=system.fear.rank}}
+          {{else}}
+            {{localize "l5r4.ui.mechanics.fear.fearLabel" rank=system.fear.rank}}
+          {{/if}}
+      </a>
+    {{/if}}
+  </div>
+</section>

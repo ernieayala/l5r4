@@ -715,7 +715,7 @@ export async function TraitRoll({
   const roll = new Roll(rollFormula);
   const rollHtml = await roll.render();
   let __effTN = toInt(__tnInput) + (toInt(__raisesInput) * 5);
-    if (applyWoundPenalty && __effTN > 0) {
+  if (applyWoundPenalty && __effTN > 0) {
     __effTN += toInt(currentWoundPenalty);
   }
   const tnResult = (__effTN > 0) ? {
@@ -724,15 +724,7 @@ export async function TraitRoll({
     outcome: ((roll.total ?? 0) >= __effTN) ? T("l5r4.ui.mechanics.rolls.success") : T("l5r4.ui.mechanics.rolls.failure")
   } : null;
 
-  // Hide TN information for non-GM players on missed attack rolls (if this is used for attacks)
-  let finalTnResult = tnResult;
-  if (!game.user.isGM && tnResult && tnResult.outcome === T("l5r4.ui.mechanics.rolls.failure")) {
-    // Note: TraitRoll doesn't currently support rollType parameter, but we include this for consistency
-    // and future-proofing in case attack rolls use trait rolls
-    finalTnResult = null;
-  }
-
-  const content = await R(messageTemplate, { flavor, roll: rollHtml, tnResult: finalTnResult });
+  const content = await R(messageTemplate, { flavor, roll: rollHtml, tnResult });
   
   // Post roll to chat with error handling for edge cases (network failures, module conflicts)
   try {

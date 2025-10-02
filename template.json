@@ -127,6 +127,10 @@
         "crippled": {"value": 40, "penalty": 20, "active": false},
         "down": {"value": 43, "penalty": 40, "active": false},
         "out": {"value": 45, "penalty": 40, "active": true}
+      },
+      "fear": {
+        "rank": 0,
+        "type": "fear"
       }
     },
     "pc": {
