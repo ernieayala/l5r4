@@ -1317,7 +1317,6 @@ export default class L5R4PcSheet extends BaseActorSheet {
     }
   }
 
-
   /* ---------------------------------- */
   /* Clan / Family helpers               */
   /* ---------------------------------- */

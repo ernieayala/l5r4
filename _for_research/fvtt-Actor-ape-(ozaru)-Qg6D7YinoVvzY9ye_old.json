@@ -1,0 +1,253 @@
+{
+  "folder": "11Wh0U8x6V3pxBZm",
+  "name": "Ape (Ozaru)",
+  "type": "npc",
+  "img": "systems/l5r4/assets/icons/lonely-orangutan-14248110.webp",
+  "system": {
+    "traits": {
+      "sta": 4,
+      "wil": 2,
+      "str": 5,
+      "per": 1,
+      "ref": 3,
+      "awa": 2,
+      "agi": 4,
+      "int": 2
+    },
+    "rings": {
+      "fire": 2,
+      "air": 1,
+      "water": 1,
+      "earth": 2,
+      "void": {
+        "rank": 0
+      }
+    },
+    "wounds": {
+      "value": 0,
+      "max": 40,
+      "mod": 0,
+      "heal_rate": 0
+    },
+    "suffered": 0,
+    "wound_lvl": {
+      "healthy": {
+        "value": 10,
+        "penalty": "5",
+        "current": true
+      },
+      "nicked": {
+        "value": 20,
+        "penalty": "10",
+        "current": false
+      },
+      "grazed": {
+        "value": 30,
+        "penalty": "15",
+        "current": false
+      },
+      "hurt": {
+        "value": 0,
+        "penalty": 10,
+        "current": false
+      },
+      "injured": {
+        "value": 0,
+        "penalty": 15,
+        "current": false
+      },
+      "crippled": {
+        "value": 0,
+        "penalty": 20,
+        "current": false
+      },
+      "down": {
+        "value": 0,
+        "penalty": 40,
+        "current": false
+      },
+      "out": {
+        "value": 0,
+        "penalty": 40,
+        "current": false
+      }
+    },
+    "armor": {
+      "armor_tn": 20,
+      "reduction": 4
+    },
+    "notes": "<p><span class=\"fontstyle0\">Apes are large manlike animals, covered in fur, with high intelligence; some breeds are known to be able to utilize crude stone or wood tools. They are common in the jungles of the Isles of Silk and Spice, and sometimes appear on the mainland as well, albeit much more rarely. Apes are not overtly aggressive, but they will defend any intrusion into their territory, and a perceived threat to their dominance will be met with brutal retaliation. Any warrior would consider it foolish to face an enraged ape without weapons.</span></p>\n<p>&nbsp;</p>\n<p><span class=\"fontstyle0\">The stats below represent a typical medium-sized ape. GMs may depict larger specimens by increasing the Earth Ring, Strength Trait, and Wounds.</span></p>\n<p>&nbsp;</p>\n<h3><span class=\"fontstyle0\">Special Abilities</span></h3>\n<ul>\n<li><span class=\"fontstyle0\">Fear 1.<br></span></li>\n</ul>",
+    "initiative": {
+      "roll": 4,
+      "keep": 3
+    },
+    "attack1": {
+      "roll": 5,
+      "keep": 4,
+      "type": "simple"
+    },
+    "attack2": {
+      "roll": 4,
+      "keep": 4,
+      "type": "complex"
+    },
+    "damage1": {
+      "roll": 5,
+      "keep": 2,
+      "type": "Smash"
+    },
+    "damage2": {
+      "roll": 3,
+      "keep": 3,
+      "type": "Bite"
+    },
+    "nrWoundLvls": "3"
+  },
+  "prototypeToken": {
+    "name": "Ape (Ozaru)",
+    "displayName": 40,
+    "actorLink": false,
+    "appendNumber": false,
+    "prependAdjective": false,
+    "width": 1,
+    "height": 1,
+    "texture": {
+      "src": "systems/l5r4/assets/icons/ninja.png",
+      "anchorX": 0.5,
+      "anchorY": 0.5,
+      "offsetX": 0,
+      "offsetY": 0,
+      "fit": "contain",
+      "scaleX": 1,
+      "scaleY": 1,
+      "rotation": 0,
+      "tint": "#ffffff",
+      "alphaThreshold": 0.75
+    },
+    "hexagonalShape": 0,
+    "lockRotation": false,
+    "rotation": 0,
+    "alpha": 1,
+    "disposition": -1,
+    "displayBars": 40,
+    "bar1": {
+      "attribute": "wounds"
+    },
+    "bar2": {
+      "attribute": "suffered"
+    },
+    "light": {
+      "negative": false,
+      "priority": 0,
+      "alpha": 0.5,
+      "angle": 360,
+      "bright": 0,
+      "color": null,
+      "coloration": 1,
+      "dim": 0,
+      "attenuation": 0.5,
+      "luminosity": 0.5,
+      "saturation": 0,
+      "contrast": 0,
+      "shadows": 0,
+      "animation": {
+        "type": null,
+        "speed": 5,
+        "intensity": 5,
+        "reverse": false
+      },
+      "darkness": {
+        "min": 0,
+        "max": 1
+      }
+    },
+    "sight": {
+      "enabled": false,
+      "range": 0,
+      "angle": 360,
+      "visionMode": "basic",
+      "color": null,
+      "attenuation": 0.1,
+      "brightness": 0,
+      "saturation": 0,
+      "contrast": 0
+    },
+    "detectionModes": [],
+    "occludable": {
+      "radius": 0
+    },
+    "ring": {
+      "enabled": false,
+      "colors": {
+        "ring": null,
+        "background": null
+      },
+      "effects": 1,
+      "subject": {
+        "scale": 1,
+        "texture": null
+      }
+    },
+    "flags": {},
+    "randomImg": false
+  },
+  "items": [
+    {
+      "folder": "KPNzcQlw945Icb8J",
+      "name": "Athletics (Climbing)",
+      "type": "skill",
+      "_id": "jrour5mzEhV5LBA1",
+      "img": "systems/l5r4/assets/icons/flower.png",
+      "system": {
+        "description": "",
+        "specialRules": "<p><strong>Emphases:</strong>&nbsp;Climbing, Running, Swimming, Throwing</p>\n<p><strong>Description:</strong> The training that every bushi student receives includes vigorous physical conditioning. For some, this results in a lifelong enjoyment of athletics. Like many who pursue a martial lifestyle, some bushi spend their off duty hours engaging in competitions with one another, or simply pitting themselves against challenges designed to test the limits of their physical abilities. Athletics covers many areas normally governed by Trait rolls. If you have a background in Athletics, however, you can perform these activities, principally climbing, running, and swimming, with considerably more ease than most. Athletics can also increase your capacity for movement, even when restricted by heavy armor and the like. The Throwing Emphasis allows you to throw items with greater accuracy, including certain weapons such as knives or even the wakizashi. Using Athletics to throw a weapon offensively is considered an attack roll. Athletics Skill Rolls to climb, run, or swim use Strength, whereas the Throwing Emphasis requires Agility.</p>",
+        "rank": "3",
+        "type": "bugei",
+        "trait": "str",
+        "emphasis": "",
+        "mastery_3": "Moderate Terrain no longer impedes movement, and movement across Difficult Terrain reduces the character’s Water Ring by 1 instead of 2.",
+        "mastery_5": "The character no longer suffers movement penalties regardless of terrain.",
+        "mastery_7": "The character may add 5 feet to the total of one Move Action per Round (this does not increase his maximum possible movement per round).",
+        "insight_bonus": 0,
+        "school": false,
+        "roll_bonus": 0,
+        "keep_bonus": 0,
+        "total_bonus": 0
+      },
+      "effects": [],
+      "sort": 0,
+      "ownership": {
+        "default": 0,
+        "5KjFq6Ol4nwgvDKL": 3
+      },
+      "flags": {},
+      "_stats": {
+        "compendiumSource": "Compendium.world.skills.Item.NByb5RwxIl5oUJ2X",
+        "duplicateSource": null,
+        "coreVersion": "12.343",
+        "systemId": "l5r4",
+        "systemVersion": "0.9.5",
+        "createdTime": 1753070997679,
+        "modifiedTime": 1753071014176,
+        "lastModifiedBy": "5KjFq6Ol4nwgvDKL"
+      }
+    }
+  ],
+  "effects": [],
+  "flags": {
+    "exportSource": {
+      "world": "heroes-and-villains-of-rokugan",
+      "system": "l5r4",
+      "coreVersion": "12.331",
+      "systemVersion": "0.9.5"
+    }
+  },
+  "_stats": {
+    "coreVersion": "12.343",
+    "systemId": "l5r4",
+    "systemVersion": "0.9.5",
+    "createdTime": 1753070801793,
+    "modifiedTime": 1753071124548,
+    "lastModifiedBy": "5KjFq6Ol4nwgvDKL"
+  }
+}

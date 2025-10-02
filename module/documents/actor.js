@@ -521,6 +521,7 @@ export default class L5R4Actor extends Actor {
       this._preparePcExperience(sys);
     } else if (this.type === "npc") {
       this._prepareNpc(sys);
+      this._prepareFear(sys);
     }
   }
 
@@ -1593,6 +1594,85 @@ export default class L5R4Actor extends Actor {
   _xpStepCostForTrait(r, freeEff, discount) {
     const d = Number.isFinite(+discount) ? Number(discount) : 0;
     return Math.max(0, 4 * (r + freeEff) + d);
+  }
+
+  /* ========================================================================
+   * FEAR SYSTEM METHODS
+   * ======================================================================== */
+
+  /**
+   * Prepare Fear-related derived data for NPCs.
+   * Computes Fear TN, localized labels, and active state for efficient sheet rendering.
+   * Called from prepareDerivedData() to ensure Fear values are always current.
+   * 
+   * **Computed Properties:**
+   * - `system.fear.rank` - Normalized Fear rank (0-10)
+   * - `system.fear.type` - Normalized type ("fear" or "terrifying")
+   * - `system.fear.active` - Boolean indicating if Fear is enabled
+   * - `system.fear.tn` - Pre-calculated Target Number (5 × rank)
+   * - `system.fear.label` - Localized Fear type label for display
+   * 
+   * **Performance:**
+   * Pre-computing these values eliminates redundant calculations in:
+   * - Fear service functions (testFear, handleFearClick)
+   * - Sheet rendering (NPC sheet Fear display)
+   * - Chat message generation
+   * 
+   * @param {L5R4ActorSystem} sys - The actor's system data object
+   * @returns {void}
+   * @private
+   */
+  _prepareFear(sys) {
+    try {
+      sys.fear = sys.fear || {};
+      const rank = toInt(sys.fear.rank ?? 0);
+      const type = (sys.fear.type === "terrifying") ? "terrifying" : "fear";
+      
+      sys.fear.rank = rank;
+      sys.fear.type = type;
+      sys.fear.active = rank > 0;
+      sys.fear.tn = rank > 0 ? 5 * rank : 0;
+      sys.fear.label = rank > 0 ? game.i18n?.localize?.(`l5r4.ui.mechanics.fear.${type}`) ?? type : "";
+    } catch (err) {
+      console.warn(`${SYS_ID}`, "Failed to prepare Fear derived data", { err, actorId: this.id });
+      // Ensure safe defaults on error
+      sys.fear = sys.fear || {};
+      sys.fear.rank = 0;
+      sys.fear.type = "fear";
+      sys.fear.active = false;
+      sys.fear.tn = 0;
+      sys.fear.label = "";
+    }
+  }
+
+  /**
+   * Get the Fear rank for this NPC.
+   * Returns pre-computed value from prepareDerivedData().
+   * 
+   * @returns {number} Fear rank (0-10)
+   */
+  getFearRank() {
+    return toInt(this.system?.fear?.rank ?? 0);
+  }
+
+  /**
+   * Get the Fear type for this NPC.
+   * Returns pre-computed value from prepareDerivedData().
+   * 
+   * @returns {string} Fear type ("fear" or "terrifying")
+   */
+  getFearType() {
+    return this.system?.fear?.type ?? "fear";
+  }
+
+  /**
+   * Check if this NPC has Fear enabled.
+   * Returns pre-computed value from prepareDerivedData().
+   * 
+   * @returns {boolean} True if Fear is active
+   */
+  hasFear() {
+    return this.system?.fear?.active ?? false;
   }
 
 }

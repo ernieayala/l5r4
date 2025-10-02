@@ -118,6 +118,7 @@
  */
 
 import * as Dice from "../services/dice.js";
+import * as Fear from "../services/fear.js";
 import { SYS_ID, TEMPLATE } from "../config.js";
 import { on, toInt, T, readWoundPenalty, getSortPref, sortWithPref } from "../utils.js";
 import WoundConfigApplication from "../apps/wound-config.js";
@@ -162,6 +163,7 @@ export default class L5R4NpcSheet extends BaseActorSheet {
       case "roll-attack": return this._onAttackRoll(event, element);
       case "roll-damage": return this._onDamageRoll(event, element);
       case "roll-weapon-attack": return this._onWeaponAttackRoll(event, element);
+      case "test-fear": return this._onFearTest(event, element);
       case "trait-rank": return this._onTraitAdjust(event, element, +1);
       case "void-points-dots": return this._onVoidPointsAdjust(event, element, +1);
       case "wound-config": return this._onWoundConfig(event, element);
@@ -457,6 +459,33 @@ export default class L5R4NpcSheet extends BaseActorSheet {
       skills: ["name", "rank", "trait", "roll", "emphasis"]
     };
     return keys[scope] ?? ["name"];
+  }
+
+  /**
+   * Handle Fear test click from NPC sheet.
+   * Tests selected tokens against this NPC's Fear effect.
+   * 
+   * **Process:**
+   * 1. Validates NPC has Fear configured
+   * 2. Gets selected tokens from canvas
+   * 3. Filters to valid character actors
+   * 4. Calls Fear service to process tests
+   * 
+   * @param {Event} event - Click event on Fear display
+   * @param {HTMLElement} element - The clicked element
+   * @returns {Promise<void>}
+   */
+  async _onFearTest(event, element) {
+    event?.preventDefault?.();
+    
+    // Validate NPC has Fear
+    if (!this.actor.hasFear?.()) {
+      ui.notifications?.warn(game.i18n.localize("l5r4.ui.mechanics.fear.noFear"));
+      return;
+    }
+    
+    // Delegate to Fear service
+    await Fear.handleFearClick(this.actor);
   }
 
   /**
