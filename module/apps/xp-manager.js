@@ -67,7 +67,7 @@
  *
  * @author L5R4 System Team
  * @since 2.0.0
- * @version 1.0.2
+ * @version 1.1.0
  * @see {@link https://foundryvtt.com/api/classes/foundry.applications.api.ApplicationV2.html|ApplicationV2}
  * @see {@link https://foundryvtt.com/api/classes/foundry.applications.api.HandlebarsApplicationMixin.html|HandlebarsApplicationMixin}
  * @see {@link https://foundryvtt.com/api/classes/foundry.abstract.Document.html#setFlag|Document.setFlag}

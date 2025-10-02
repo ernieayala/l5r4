@@ -106,7 +106,7 @@
  *
  * @author L5R4 System Team
  * @since 1.0.0
- * @version 1.0.2
+ * @version 1.1.0
  * @extends {Item}
  * @see {@link https://foundryvtt.com/api/classes/documents.Item.html|Item Document}
  * @see {@link https://foundryvtt.com/api/classes/foundry.abstract.Document.html#_preCreate|Document._preCreate}

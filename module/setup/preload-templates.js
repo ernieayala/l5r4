@@ -86,7 +86,7 @@
  *
  * @author L5R4 System Team
  * @since 1.0.0
- * @version 1.0.2
+ * @version 1.1.0
  * @see {@link https://foundryvtt.com/api/functions/foundry.applications.handlebars.loadTemplates.html|loadTemplates}
  * @see {@link https://foundryvtt.com/api/functions/renderTemplate.html|renderTemplate}
  */

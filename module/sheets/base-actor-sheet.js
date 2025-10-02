@@ -113,7 +113,7 @@
  *
  * @author L5R4 System Team
  * @since 1.0.0
- * @version 1.0.2
+ * @version 1.1.0
  * @extends {foundry.applications.sheets.ActorSheetV2}
  * @mixes {foundry.applications.api.HandlebarsApplicationMixin}
  * @see {@link https://foundryvtt.com/api/classes/foundry.applications.sheets.ActorSheetV2.html|ActorSheetV2}

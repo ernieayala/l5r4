@@ -128,7 +128,7 @@
  *
  * @author L5R4 System Team
  * @since 1.0.0
- * @version 1.0.2
+ * @version 1.1.0
  * @see {@link https://foundryvtt.com/api/classes/documents.ActiveEffect.html|ActiveEffect}
  * @see {@link https://foundryvtt.com/api/namespaces/Hooks.html|Hooks}
  * @see {@link https://foundryvtt.com/api/classes/documents.Actor.html#setFlag|Actor.setFlag}

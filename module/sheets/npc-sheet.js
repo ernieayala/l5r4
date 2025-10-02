@@ -110,7 +110,7 @@
  * 
  * @author L5R4 System Team
  * @since 2.0.0
- * @version 1.0.2
+ * @version 1.1.0
  * @extends {BaseActorSheet}
  * @see {@link https://foundryvtt.com/api/classes/foundry.applications.sheets.ActorSheetV2.html|ActorSheetV2}
  * @see {@link ./base-actor-sheet.js|BaseActorSheet} - Shared functionality and roll methods

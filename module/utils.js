@@ -76,7 +76,7 @@
  *
  * @author L5R4 System Team
  * @since 1.0.0
- * @version 1.0.2
+ * @version 1.1.0
  * @see {@link https://foundryvtt.com/api/functions/foundry.applications.handlebars.renderTemplate.html|renderTemplate}
  * @see {@link https://foundryvtt.com/api/classes/game.Game.html#i18n|Game.i18n}
  * @see {@link https://handlebarsjs.com/|Handlebars Template Engine}
