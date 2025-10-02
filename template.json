@@ -129,8 +129,7 @@
         "out": {"value": 45, "penalty": 40, "active": true}
       },
       "fear": {
-        "rank": 0,
-        "type": "fear"
+        "rank": 0
       }
     },
     "pc": {

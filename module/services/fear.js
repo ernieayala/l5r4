@@ -1,66 +1,75 @@
 /**
- * @fileoverview L5R4 Fear Service - Fear and Terrifying Mechanics for Foundry VTT v13+
+ * @fileoverview L5R4 Fear Service - Fear Mechanics for Foundry VTT v13+
  * 
  * This service module implements the complete L5R4 Fear mechanic for NPCs, matching
- * the published rules for Fear X and Terrifying X exactly. Uses pre-computed Fear data
- * from Actor.prepareDerivedData() for optimal performance and maintainability.
+ * the published rules for Fear X exactly. Uses pre-computed Fear data from
+ * Actor.prepareDerivedData() for optimal performance and maintainability.
  * 
  * **Core Responsibilities:**
- * - **Fear Tests**: Willpower vs pre-computed TN with success/failure evaluation
- * - **Effect Application**: Dazed (Fear) or Stunned (Terrifying) with correct duration
- * - **Chat Integration**: Clear result messages with all relevant information
+ * - **Fear Tests**: Raw Willpower roll vs TN, with Honor Rank added to total
+ * - **Penalty Application**: -XkO penalty to all rolls on failure (where X = Fear Rank)
+ * - **Chat Integration**: Clear result messages with penalty and catastrophic failure warnings
  * - **Edge Case Handling**: Graceful handling of missing data and invalid states
  * 
- * **L5R4 Fear Rules:**
- * - **Fear X**: TN = 5 × Rank, Failure = Dazed (10 - Willpower) rounds, min 1
- * - **Terrifying X**: TN = 5 × Rank, Failure = Stunned (10 - Willpower) rounds, min 1
- * - **Dazed**: May only take Simple Actions until duration expires
- * - **Stunned**: May take no actions until duration expires
+ * **L5R4 Fear Rules (RAW):**
+ * - **Fear X**: TN = 5 + (5 × Fear Rank)
+ *   - Example: Fear 3 = TN 20 (5 + 15)
+ * - **Resistance Roll**: Raw Willpower at TN, then add Honor Rank to total
+ * - **Failure**: Character suffers -XkO penalty to all rolls (X = Fear Rank)
+ *   - Penalty lasts until end of encounter or source removed
+ * - **Catastrophic Failure**: Failing by 15+ causes character to flee or cower
+ * - **Honor Bonus**: Add Honor Rank to roll total (not dice pool)
  * 
  * **Architecture:**
- * - Fear TN and labels computed in Actor.prepareDerivedData() (system.fear.*)
- * - Service layer handles roll logic and effect application only
+ * - Fear TN computed in Actor.prepareDerivedData() (system.fear.*)
+ * - Service layer handles roll logic and penalty tracking
+ * - No Active Effects - penalties tracked via flags for manual application
  * - Consolidated executeFearTest() eliminates code duplication
- * - Proper duration calculation: max(1, 10 - Willpower)
  * 
  * @author L5R4 System Team
  * @since 1.0.2
- * @version 1.1.0
+ * @version 2.0.0
  * @see {@link https://foundryvtt.com/api/classes/documents.Actor.html|Actor Document}
  * @see {@link https://foundryvtt.com/api/classes/documents.ChatMessage.html|ChatMessage}
+ * @see L5R4 Core Rulebook, 4th Edition, p. 91-92 - Fear rules
  */
 
 import { SYS_ID, CHAT_TEMPLATES } from "../config.js";
-import { toInt, T } from "../utils.js";
+import { toInt } from "../utils.js";
 
 /**
  * Core Fear test execution logic.
- * Consolidated function that handles all Fear test scenarios with proper duration calculation.
+ * Consolidated function that handles all Fear test scenarios per RAW.
  * 
- * **Test Process:**
+ * **Test Process (RAW):**
  * 1. Validate character has Willpower
- * 2. Build roll formula with modifiers
- * 3. Execute Willpower roll
- * 4. Evaluate success/failure against TN
- * 5. Calculate effect duration (10 - Willpower, min 1)
- * 6. Apply effect if failed (Dazed or Stunned)
- * 7. Post result to chat
+ * 2. Roll Raw Willpower (no modifiers to dice pool)
+ * 3. Add Honor Rank to roll total
+ * 4. Compare total vs TN
+ * 5. On failure: Apply -XkO penalty flag (X = Fear Rank)
+ * 6. Check for catastrophic failure (failed by 15+)
+ * 7. Post result to chat with penalty info
  * 
- * **Effect Duration Formula:**
- * Duration = max(1, 10 - Character's Willpower Rank)
+ * **Penalty Application:**
+ * - Failure causes -XkO penalty to all rolls (X = Fear Rank)
+ * - Penalty tracked via actor flag for manual application by GM
+ * - Lasts until end of encounter or source removed
+ * 
+ * **Catastrophic Failure:**
+ * - Failing by 15+ triggers flee/cower message
+ * - GM decides whether character flees or cowers
  * 
  * @param {object} opts - Test configuration
  * @param {Actor} opts.character - Character being tested
- * @param {number} opts.tn - Target Number for the test
- * @param {number} [opts.modifier=0] - Roll modifier (affects roll and keep)
- * @param {string} opts.fearType - "fear" or "terrifying"
- * @param {number} opts.fearRank - Fear rank for display
+ * @param {number} opts.tn - Target Number for the test (5 + 5×rank)
+ * @param {number} [opts.modifier=0] - Situational modifier to roll total (not dice pool)
+ * @param {number} opts.fearRank - Fear rank for penalty calculation
  * @param {string} opts.sourceName - Name of Fear source (NPC name)
  * @param {string} [opts.targetInfo=""] - Additional targeting info for flavor
  * @returns {Promise<ChatMessage|null>} Chat message or null if failed
  * @private
  */
-async function executeFearTest({ character, tn, modifier = 0, fearType, fearRank, sourceName, targetInfo = "" } = {}) {
+async function executeFearTest({ character, tn, modifier = 0, fearRank, sourceName, targetInfo = "" } = {}) {
   // Validate character has Willpower
   const willpower = toInt(character.system?.traits?.wil ?? 0);
   if (willpower <= 0) {
@@ -70,44 +79,68 @@ async function executeFearTest({ character, tn, modifier = 0, fearType, fearRank
     return null;
   }
 
-  // Build roll formula with modifier
-  const effectiveWillpower = willpower + modifier;
-  const rollFormula = `${effectiveWillpower}d10k${effectiveWillpower}x10`;
+  // Build roll formula with Honor bonus (RAW: added to roll total, not dice pool)
+  const honorRank = toInt(character.system?.honor?.rank ?? 0);
+  const totalBonus = honorRank + modifier;
+  const rollFormula = totalBonus !== 0 
+    ? `${willpower}d10k${willpower}x10+${totalBonus}`
+    : `${willpower}d10k${willpower}x10`;
+  
   const roll = new Roll(rollFormula);
   await roll.evaluate();
 
-  // Evaluate success/failure
-  const total = roll.total ?? 0;
-  const success = tn > 0 ? total >= tn : null;
+  // Roll total now includes Honor and modifiers
+  const rollTotal = roll.total ?? 0;
+  const success = tn > 0 ? rollTotal >= tn : null;
+  const margin = rollTotal - tn;
 
-  // Apply effect if failed
-  let effectDescription = "";
+  // Track penalty and catastrophic failure
+  let penaltyInfo = "";
+  let catastrophicFailure = false;
   
   if (success === false && fearRank > 0) {
-    const effectType = fearType === "terrifying" ? "stunned" : "dazed";
-    effectDescription = effectType === "stunned" ? "Stunned" : "Dazed";
-    const duration = Math.max(1, 10 - willpower);
-    await applyFearEffect(character, effectType, duration, sourceName);
+    // RAW: Failure causes -XkO penalty (X = Fear Rank)
+    penaltyInfo = game.i18n.format("l5r4.ui.mechanics.fear.penaltyApplied", { penalty: fearRank });
+    
+    // RAW: Catastrophic failure if failed by 15+
+    if (margin <= -15) {
+      catastrophicFailure = true;
+    }
+    
+    // Store penalty flag for manual application
+    // TODO: Implement penalty tracking system
+    // await character.setFlag(SYS_ID, "fearPenalty", { rank: fearRank, source: sourceName });
   }
 
-  // Build chat message flavor and outcome
-  const typeLabel = game.i18n.localize(`l5r4.ui.mechanics.fear.${fearType}`);
+  // Build chat message flavor
+  const bonusText = [];
+  if (honorRank > 0) bonusText.push(`Honor +${honorRank}`);
+  if (modifier !== 0) bonusText.push(`${game.i18n.localize("l5r4.ui.common.mod")} ${modifier > 0 ? '+' : ''}${modifier}`);
+  const bonusDisplay = bonusText.length > 0 ? ` (${bonusText.join(", ")})` : "";
+  
   const flavor = [
     fearRank > 0 
-      ? game.i18n.format("l5r4.ui.mechanics.fear.testResult", { type: typeLabel, rank: fearRank })
+      ? game.i18n.format("l5r4.ui.mechanics.fear.testResult", { rank: fearRank })
       : game.i18n.localize("l5r4.ui.mechanics.fear.fearRank"),
     targetInfo,
-    modifier !== 0 ? ` ${game.i18n.localize("l5r4.ui.common.mod")} (${modifier > 0 ? '+' : ''}${modifier})` : ""
+    bonusDisplay
   ].filter(Boolean).join("");
 
   const rollHtml = await roll.render();
   
+  // Build outcome message
   const outcomeLabel = success === null ? "" :
     fearRank > 0
-      ? game.i18n.format(success ? "l5r4.ui.mechanics.fear.testSuccess" : "l5r4.ui.mechanics.fear.testFailure", { type: typeLabel, rank: fearRank })
+      ? game.i18n.format(success ? "l5r4.ui.mechanics.fear.testSuccess" : "l5r4.ui.mechanics.fear.testFailure", { rank: fearRank })
       : game.i18n.localize(success ? "l5r4.ui.mechanics.rolls.success" : "l5r4.ui.mechanics.rolls.failure");
 
   const tnResult = tn > 0 ? { effective: tn, raises: 0, outcome: outcomeLabel } : null;
+
+  // Build effect info for chat display
+  let effectInfo = penaltyInfo;
+  if (catastrophicFailure) {
+    effectInfo += (effectInfo ? " " : "") + game.i18n.localize("l5r4.ui.mechanics.fear.catastrophicFailure");
+  }
 
   // Render chat content
   const content = await foundry.applications.handlebars.renderTemplate(
@@ -116,7 +149,7 @@ async function executeFearTest({ character, tn, modifier = 0, fearType, fearRank
       flavor,
       roll: rollHtml,
       tnResult,
-      effectInfo: effectDescription || undefined
+      effectInfo: effectInfo || undefined
     }
   );
 
@@ -142,6 +175,11 @@ async function executeFearTest({ character, tn, modifier = 0, fearType, fearRank
  * @param {Actor} opts.npc - NPC actor with Fear
  * @param {Actor} opts.character - Character being tested
  * @returns {Promise<ChatMessage|null>} Chat message or null if test skipped
+ * @example
+ * // Test a PC against an NPC's Fear
+ * const npc = game.actors.getName("Oni");
+ * const pc = game.actors.getName("Samurai");
+ * await Fear.testFear({ npc, character: pc });
  */
 export async function testFear({ npc, character } = {}) {
   // Validate inputs
@@ -152,7 +190,6 @@ export async function testFear({ npc, character } = {}) {
 
   // Use pre-computed Fear data from prepareDerivedData()
   const fearRank = npc.system?.fear?.rank ?? 0;
-  const fearType = npc.system?.fear?.type ?? "fear";
   const tn = npc.system?.fear?.tn ?? 0;
   
   if (fearRank <= 0 || tn <= 0) {
@@ -166,7 +203,6 @@ export async function testFear({ npc, character } = {}) {
     character,
     tn,
     modifier: 0,
-    fearType,
     fearRank,
     sourceName: npc.name,
     targetInfo
@@ -181,6 +217,11 @@ export async function testFear({ npc, character } = {}) {
  * @param {Actor} opts.npc - NPC actor with Fear
  * @param {Actor[]} opts.characters - Array of characters to test
  * @returns {Promise<void>}
+ * @example
+ * // Test multiple party members against Fear
+ * const npc = game.actors.getName("Oni");
+ * const party = game.actors.filter(a => a.type === "pc");
+ * await Fear.testFearMultiple({ npc, characters: party });
  */
 export async function testFearMultiple({ npc, characters } = {}) {
   if (!npc || !characters || characters.length === 0) {
@@ -194,68 +235,34 @@ export async function testFearMultiple({ npc, characters } = {}) {
   }
 }
 
-/**
- * Apply a Fear effect (Dazed or Stunned) to a character.
- * Uses Foundry's Active Effects system to track the condition with proper duration.
- * 
- * **Effect Properties:**
- * - **Dazed**: "May only take Simple Actions"
- * - **Stunned**: "Cannot take any actions"
- * - **Duration**: Calculated as max(1, 10 - Willpower) rounds
- * - **Source**: References the NPC that caused the effect
- * 
- * **Duration Calculation:**
- * Per L5R4 rules, Fear effects last for (10 - Willpower) rounds, minimum 1 round.
- * This ensures even high-Willpower characters are affected for at least 1 round.
- * 
- * @param {Actor} character - Character to apply effect to
- * @param {string} effectType - "dazed" or "stunned"
- * @param {number} duration - Duration in rounds (pre-calculated)
- * @param {string} sourceName - Name of NPC that caused the effect
- * @returns {Promise<void>}
- */
-async function applyFearEffect(character, effectType, duration, sourceName) {
-  if (!character) return;
-
-  try {
-    // Remove existing fear effects to prevent duplicates
-    const existingIds = character.effects
-      .filter(e => e.flags?.[SYS_ID]?.fearEffect)
-      .map(e => e.id);
-    
-    if (existingIds.length) {
-      await character.deleteEmbeddedDocuments("ActiveEffect", existingIds);
-    }
-
-    // Create new fear effect
-    await character.createEmbeddedDocuments("ActiveEffect", [{
-      name: effectType === "stunned" ? "Stunned" : "Dazed",
-      icon: effectType === "stunned" ? "icons/svg/daze.svg" : "icons/svg/stoned.svg",
-      origin: character.uuid,
-      statuses: [effectType],
-      duration: { rounds: Math.max(1, duration) },
-      flags: {
-        [SYS_ID]: {
-          fearEffect: true,
-          effectType,
-          sourceName,
-          duration
-        }
-      }
-    }]);
-  } catch (err) {
-    console.warn(`${SYS_ID}`, `Fear: Failed to apply ${effectType} effect to ${character.name}`, { err, duration });
-  }
-}
+// TODO: Implement Fear penalty tracking system
+// Future implementation should:
+// 1. Store penalty in actor flag: { rank: X, source: "NPC Name", timestamp }
+// 2. Provide UI for GMs to view/clear penalties  
+// 3. Optionally integrate with dice roller to auto-apply penalty
+// 4. Track multiple Fear sources (penalties stack per RAW)
+// 
+// Placeholder function signature:
+// async function applyFearPenalty(character, fearRank, sourceName) {
+//   await character.setFlag(SYS_ID, "fearPenalty", {
+//     rank: fearRank,
+//     source: sourceName,
+//     timestamp: Date.now()
+//   });
+// }
 
 /**
  * Handle Fear test click from NPC sheet.
  * Gets selected tokens and tests each character against the NPC's Fear.
  * 
- * @param {Actor} npc - NPC actor with Fear
+ * @param {object} opts - Configuration options
+ * @param {Actor} opts.npc - NPC actor with Fear
  * @returns {Promise<void>}
+ * @example
+ * // Called from NPC sheet button click
+ * await Fear.handleFearClick({ npc: this.actor });
  */
-export async function handleFearClick(npc) {
+export async function handleFearClick({ npc } = {}) {
   if (!npc) return;
 
   // Get selected tokens

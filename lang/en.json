@@ -100,17 +100,17 @@
           "fullAttackBonus": "Full Attack Stance: +2k1"
         },
         "fear": {
-          "fear": "Fear",
-          "terrifying": "Terrifying",
           "fearRank": "Fear Rank",
           "fearLabel": "Fear {rank}",
-          "terrifyingLabel": "Terrifying {rank}",
           "clickToTest": "Click to test Fear against selected characters",
-          "testResult": "{type} {rank} Test",
-          "testSuccess": "Resisted {type} {rank}",
-          "testFailure": "Failed {type} {rank} Test",
+          "testResult": "Fear {rank} Test",
+          "testSuccess": "Resisted Fear {rank}",
+          "testFailure": "Failed Fear {rank} Test",
+          "penaltyApplied": "Penalty: -{penalty}kO to all rolls",
+          "catastrophicFailure": "CATASTROPHIC FAILURE! Character flees or cowers helplessly.",
           "noTargets": "No tokens selected for Fear test",
           "noWillpower": "{character} has no Willpower trait",
+          "noFear": "This NPC has no Fear effect configured",
           "testAgainst": "vs {creature}"
         }
       },

@@ -22,6 +22,11 @@
       {{/if}}
     </div>
   {{/if}}
+  {{#if effectInfo}}
+    <div class="effect-applied">
+      <strong>{{localize "l5r4.ui.common.effect"}}:</strong> {{effectInfo}}
+    </div>
+  {{/if}}
   {{#if weaponData}}
     <button class="l5r4-damage-button" 
             data-weapon-id="{{weaponData.id}}" 
