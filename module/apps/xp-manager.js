@@ -73,15 +73,35 @@
  * @see {@link https://foundryvtt.com/api/classes/foundry.abstract.Document.html#setFlag|Document.setFlag}
  */
 
-import { SYS_ID } from "../config.js";
-import { getSortPref, setSortPref, sortWithPref } from "../utils.js";
+import { SYS_ID } from "../config/constants.js";
+import { getSortPref, setSortPref } from "../utils/sorting.js";
+import { buildXpHistory } from "../services/xp/xp-calculator.js";
+import { formatXpEntries } from "../services/xp/xp-formatter.js";
+import { needsRetroactiveUpdate, calculateXpDataVersion } from "../services/xp/xp-versioning.js";
 
 /**
- * XP Manager Application using ApplicationV2 architecture
- * Provides experience point management with breakdown, manual adjustments, and purchase history
+ * XP Manager Application using ApplicationV2 architecture.
+ * Provides experience point management with breakdown, manual adjustments, and purchase history.
+ * 
+ * @class XpManagerApplication
+ * @extends {HandlebarsApplicationMixin(ApplicationV2)}
+ * @memberof module:apps
  */
 export default class XpManagerApplication extends foundry.applications.api.HandlebarsApplicationMixin(foundry.applications.api.ApplicationV2) {
   
+  /**
+   * Default ApplicationV2 configuration options.
+   * Defines window behavior, styling, dimensions, and action handlers.
+   * 
+   * @static
+   * @type {object}
+   * @property {string} id - Unique window identifier pattern using actor ID
+   * @property {string[]} classes - CSS classes applied to application element
+   * @property {string} tag - HTML tag for root element (form for native submission)
+   * @property {object} window - Window behavior configuration
+   * @property {object} position - Default window dimensions
+   * @property {object} actions - Map of action names to handler methods
+   */
   static DEFAULT_OPTIONS = {
     id: "xp-manager-{id}",
     classes: ["l5r4", "xp-modal-dialog"],
@@ -103,6 +123,15 @@ export default class XpManagerApplication extends foundry.applications.api.Handl
     }
   };
 
+  /**
+   * ApplicationV2 template parts configuration.
+   * Defines Handlebars templates used for rendering the application.
+   * 
+   * @static
+   * @type {object}
+   * @property {object} form - Main form template configuration
+   * @property {string} form.template - Path to Handlebars template file
+   */
   static PARTS = {
     form: {
       template: "systems/l5r4/templates/apps/xp-manager.hbs"
@@ -110,122 +139,59 @@ export default class XpManagerApplication extends foundry.applications.api.Handl
   };
 
   /**
+   * Creates a new XP Manager instance for the specified actor.
+   * Initializes ApplicationV2 with actor-specific window ID to prevent conflicts.
+   * 
    * @param {Actor} actor - The actor whose XP to manage
-   * @param {object} options - Application options
+   * @param {object} [options={}] - ApplicationV2 configuration overrides
    */
   constructor(actor, options = {}) {
-    // Set unique ID based on actor before calling super
     super(options);
     this.actor = actor;
   }
 
   /**
    * Prepare context data for the XP Manager template.
-   * Retroactively updates XP data and formats entries for display.
-   * @returns {Promise<object>} Template context data
+   * Updates XP data if needed and formats entries for display using services.
+   * 
+   * @private
+   * @async
+   * @param {object} [options] - Render options passed by ApplicationV2
+   * @returns {Promise<object>} Template context object
+   * @returns {Promise<object>} context.xp - XP summary with spent, total, available, and breakdown
+   * @returns {Promise<Array<object>>} context.manualEntries - Formatted manual XP entries
+   * @returns {Promise<Array<object>>} context.spentEntries - Formatted purchase history entries
+   * @returns {Promise<number>} context.manualTotal - Sum of manual adjustments
+   * @returns {Promise<number>} context.spentTotal - Sum of XP purchases
    */
   async _prepareContext() {
     // Only run retroactive update if needed to avoid timing issues with character sheet
-    await this._retroactivelyUpdateXPIfNeeded();
-    
-    // Prepare XP data
+    if (await needsRetroactiveUpdate(this.actor)) {
+      await this._performRetroactiveUpdate();
+    }
     const sys = this.actor.system ?? {};
     const xp = sys?._xp ?? {};
     const ns = this.actor.flags?.[SYS_ID] ?? {};
     const manual = Array.isArray(ns.xpManual) ? ns.xpManual : [];
     const spent = Array.isArray(ns.xpSpent) ? ns.xpSpent : [];
 
-    // Format entries for display
-    const formatEntries = (arr, applySort = false) => {
-      let entries = arr.slice().map(e => {
-          let formattedNote = e.note || "";
-          let type = "";
-          
-          // Use stored type and format note based on type, with fallback parsing for legacy entries
-          if (e.type === "trait" && e.traitLabel && e.toValue !== undefined) {
-            type = game.i18n.localize("l5r4.character.experience.breakdown.traits");
-            formattedNote = e.fromValue !== undefined ? 
-              `${e.traitLabel} ${e.fromValue}→${e.toValue}` : 
-              `${e.traitLabel} ${e.toValue}`;
-          } else if (e.type === "void" && e.toValue !== undefined) {
-            type = game.i18n.localize("l5r4.character.experience.breakdown.void");
-            formattedNote = e.fromValue !== undefined ? 
-              `${game.i18n.localize("l5r4.ui.mechanics.rings.void")} ${e.fromValue}→${e.toValue}` : 
-              `${game.i18n.localize("l5r4.ui.mechanics.rings.void")} ${e.toValue}`;
-          } else if (e.type === "skill" && e.skillName && e.toValue !== undefined) {
-            type = game.i18n.localize("l5r4.character.experience.breakdown.skills");
-            // Check if this is an emphasis entry (has emphasis field) or use the pre-formatted note
-            if (e.emphasis || e.note?.includes("Emphasis:")) {
-              formattedNote = e.note; // Use the pre-formatted note for emphasis
-            } else {
-              formattedNote = e.fromValue !== undefined ? 
-                `${e.skillName} ${e.fromValue}→${e.toValue}` : 
-                `${e.skillName} ${e.toValue}`;
-            }
-          } else if (e.type === "advantage") {
-            type = game.i18n.localize("l5r4.ui.sheets.advantage");
-            formattedNote = e.itemName || e.note || "Advantage";
-          } else if (e.type === "disadvantage") {
-            type = game.i18n.localize("l5r4.ui.sheets.disadvantage");
-            formattedNote = e.itemName || e.note || "Disadvantage";
-          } else if (e.type === "kata") {
-            type = game.i18n.localize("l5r4.ui.sheets.kata");
-            formattedNote = e.itemName || e.note || "Kata";
-          } else if (e.type === "kiho") {
-            type = game.i18n.localize("l5r4.ui.sheets.kiho");
-            formattedNote = e.itemName || e.note || "Kiho";
-          } else {
-            // Parse legacy entries based on localization keys in notes
-            if (formattedNote.includes("l5r4.character.experience.traitChange")) {
-              type = game.i18n.localize("l5r4.character.experience.breakdown.traits");
-              formattedNote = game.i18n.localize("l5r4.character.experience.fallbackLabels.traitIncrease");
-            } else if (formattedNote.includes("l5r4.character.experience.voidChange")) {
-              type = game.i18n.localize("l5r4.character.experience.breakdown.void");
-              formattedNote = game.i18n.localize("l5r4.character.experience.fallbackLabels.voidIncrease");
-            } else if (formattedNote.includes("l5r4.character.experience.skillCreate")) {
-              type = game.i18n.localize("l5r4.character.experience.breakdown.skills");
-              formattedNote = game.i18n.localize("l5r4.character.experience.fallbackLabels.skillCreated");
-            } else if (formattedNote.includes("l5r4.character.experience.skillChange")) {
-              type = game.i18n.localize("l5r4.character.experience.breakdown.skills");
-              formattedNote = game.i18n.localize("l5r4.character.experience.fallbackLabels.skillIncreased");
-            } else if (e.type) {
-              type = e.type;
-            } else {
-              type = game.i18n.localize("l5r4.character.experience.breakdown.manualAdjustments");
-            }
-          }
-          
-          return {
-            id: e.id,
-            deltaFormatted: (Number.isFinite(+e.delta) ? (e.delta >= 0 ? "+" : "") : "") + (e.delta ?? 0),
-            note: formattedNote,
-            type: type,
-            delta: e.delta,
-            ts: e.ts
-          };
-        });
-
-      // Apply sorting if requested
-      if (applySort) {
-        const sortPref = getSortPref(this.actor.id, "xp-purchases", ["note", "cost", "type"], "note");
-        const columns = {
-          note: (e) => e.note || "",
-          cost: (e) => Math.abs(Number.isFinite(+e.delta) ? +e.delta : 0),
-          type: (e) => e.type || ""
-        };
-        entries = sortWithPref(entries, columns, sortPref);
-      } else {
-        // Default sort by timestamp
-        entries.sort((a, b) => (a.ts || 0) - (b.ts || 0));
-      }
-
-      return entries;
-    };
-
-    const manualEntries = formatEntries(manual);
-    const spentEntries = formatEntries(spent, true);
-    const manualTotal = manual.reduce((s, e) => s + (Number.isFinite(+e.delta) ? +e.delta : 0), 0);
-    const spentTotal = spent.reduce((s, e) => s + (Number.isFinite(+e.delta) ? +e.delta : 0), 0);
+    // Format entries using service
+    const manualEntries = formatXpEntries(manual, { sort: false });
+    const spentEntries = formatXpEntries(spent, { 
+      sort: true, 
+      actorId: this.actor.id,
+      scope: "xp-purchases"
+    });
+    
+    // Safely sum deltas, handling null/invalid entries
+    const manualTotal = manual.reduce((s, e) => {
+      if (!e || typeof e !== 'object') return s;
+      return s + (Number.isFinite(+e.delta) ? +e.delta : 0);
+    }, 0);
+    const spentTotal = spent.reduce((s, e) => {
+      if (!e || typeof e !== 'object') return s;
+      return s + (Number.isFinite(+e.delta) ? +e.delta : 0);
+    }, 0);
 
     return {
       xp: {
@@ -252,9 +218,20 @@ export default class XpManagerApplication extends foundry.applications.api.Handl
   }
 
   /**
-   * Handle adding XP
-   * @param {Event} event - The click event
-   * @param {HTMLElement} target - The clicked element
+   * Handle adding XP from form submission.
+   * Reads amount and note from form fields, validates, and adds to xpManual flag.
+   * 
+   * @private
+   * @async
+   * @param {PointerEvent} event - The click event from action delegation
+   * @param {HTMLElement} target - The clicked button element
+   * @returns {Promise<void>} Resolves after flag update and re-render
+   * 
+   * @remarks
+   * - Silently ignores zero-value entries
+   * - Creates entry with random ID and current timestamp
+   * - Clears form on success and triggers re-render
+   * - Logs warning and preserves form state on setFlag failure
    */
   async _onAddXp(event, target) {
     event.preventDefault();
@@ -277,11 +254,12 @@ export default class XpManagerApplication extends foundry.applications.api.Handl
     try {
       await this.actor.setFlag(SYS_ID, "xpManual", manual);
       
-      // Clear the form
-      form.querySelector('#xp-amount').value = "1";
-      form.querySelector('#xp-note').value = "";
+      // Reset to default values for next entry (defensive - form may be destroyed)
+      const amountField = form.querySelector('#xp-amount');
+      const noteField = form.querySelector('#xp-note');
+      if (amountField) amountField.value = "1";
+      if (noteField) noteField.value = "";
       
-      // Re-render to show changes
       this.render();
     } catch (err) {
       console.warn(`${SYS_ID}`, "actor.setFlag failed in XpManagerApplication", { err });
@@ -289,9 +267,14 @@ export default class XpManagerApplication extends foundry.applications.api.Handl
   }
 
   /**
-   * Handle deleting a manual XP entry
-   * @param {Event} event - The click event
-   * @param {HTMLElement} target - The clicked element
+   * Handle deleting a manual XP entry.
+   * Removes the specified entry from xpManual flag and re-renders.
+   * 
+   * @private
+   * @async
+   * @param {PointerEvent} event - The click event from action delegation
+   * @param {HTMLElement} target - The clicked delete button element with data-entry-id
+   * @returns {Promise<void>} Resolves after flag update and re-render
    */
   async _onDeleteEntry(event, target) {
     event.preventDefault();
@@ -305,7 +288,6 @@ export default class XpManagerApplication extends foundry.applications.api.Handl
 
     try {
       await this.actor.setFlag(SYS_ID, "xpManual", filtered);
-      // Re-render to show changes
       this.render();
     } catch (err) {
       console.warn(`${SYS_ID}`, "actor.setFlag failed in XpManagerApplication", { err });
@@ -313,9 +295,14 @@ export default class XpManagerApplication extends foundry.applications.api.Handl
   }
 
   /**
-   * Handle sorting XP purchases by column
-   * @param {Event} event - The click event
-   * @param {HTMLElement} target - The clicked element
+   * Handle sorting XP purchases by column.
+   * Updates sort preference and visual indicators, then re-renders.
+   * 
+   * @private
+   * @async
+   * @param {PointerEvent} event - The click event from action delegation
+   * @param {HTMLElement} target - The clicked sort header element with data-sortby
+   * @returns {Promise<void>} Resolves after sort preference update
    */
   async _onSortClick(event, target) {
     event.preventDefault();
@@ -349,8 +336,12 @@ export default class XpManagerApplication extends foundry.applications.api.Handl
   /**
    * Handle recalculating XP purchases from current character state.
    * Forces a retroactive XP update and re-renders the manager to show changes.
-   * @param {Event} event - The click event
-   * @param {HTMLElement} target - The clicked element
+   * 
+   * @private
+   * @async
+   * @param {PointerEvent} event - The click event from action delegation
+   * @param {HTMLElement} target - The clicked recalculate button element
+   * @returns {Promise<void>} Resolves after recalculation and notification
    */
   async _onRecalculateXpPurchase(event, target) {
     event.preventDefault();
@@ -360,16 +351,9 @@ export default class XpManagerApplication extends foundry.applications.api.Handl
       await this.actor.setFlag(SYS_ID, "xpRetroactiveVersion", 0);
       
       // Run the retroactive update
-      await this._retroactivelyUpdateXP();
+      await this._performRetroactiveUpdate();
       
-      // Update the version flag to current state
-      const currentVersion = this._calculateXPDataVersion();
-      await this.actor.setFlag(SYS_ID, "xpRetroactiveVersion", currentVersion);
-      
-      // Notify user
       ui.notifications?.info(game.i18n.localize("l5r4.character.experience.recalculateSuccess"));
-      
-      // Re-render to show changes
       this.render();
     } catch (err) {
       console.warn(`${SYS_ID}`, "Failed to recalculate XP purchases", err);
@@ -378,295 +362,38 @@ export default class XpManagerApplication extends foundry.applications.api.Handl
   }
 
   /**
-   * Check if retroactive XP update is needed and run it if so.
-   * This prevents unnecessary updates that can cause timing issues with character sheet XP display.
-   * Only runs retroactive update on first open or when actor data has changed significantly.
+   * Perform retroactive XP update using the calculator service.
+   * Rebuilds XP history from current character state and updates flags.
    * 
-   * @returns {Promise<void>}
+   * @private
+   * @async
+   * @returns {Promise<void>} Resolves when XP history is rebuilt and flags updated
+   * 
+   * @remarks
+   * - Compares new history to existing to avoid unnecessary updates
+   * - Marks current data version as processed to prevent re-runs
+   * - Logs warning but does not throw on failure
    */
-  async _retroactivelyUpdateXPIfNeeded() {
+  async _performRetroactiveUpdate() {
     try {
+      // Build XP history using service
+      const spent = await buildXpHistory(this.actor);
+      
+      // Get existing spent data for comparison
       const flags = this.actor.flags?.[SYS_ID] ?? {};
-      const lastUpdateVersion = flags.xpRetroactiveVersion || 0;
-      const currentVersion = this._calculateXPDataVersion();
+      const existingSpent = Array.isArray(flags.xpSpent) ? flags.xpSpent : [];
       
-      // Only run retroactive update if:
-      // 1. Never run before (lastUpdateVersion === 0), OR
-      // 2. Actor data has changed (version mismatch), OR  
-      // 3. No xpSpent data exists (legacy actor)
-      const needsUpdate = lastUpdateVersion === 0 || 
-                         lastUpdateVersion !== currentVersion ||
-                         !Array.isArray(flags.xpSpent) ||
-                         flags.xpSpent.length === 0;
-      
-      if (needsUpdate) {
-        console.log(`${SYS_ID} | Running retroactive XP update`, { 
-          actorId: this.actor.id, 
-          lastVersion: lastUpdateVersion, 
-          currentVersion: currentVersion 
-        });
-        await this._retroactivelyUpdateXP();
-        
-        // Mark this version as processed
-        await this.actor.setFlag(SYS_ID, "xpRetroactiveVersion", currentVersion);
-      }
-    } catch (err) {
-      console.warn(`${SYS_ID}`, "Failed to check retroactive XP update need", err);
-      // Fallback to always running the update if check fails
-      await this._retroactivelyUpdateXP();
-    }
-  }
-
-  /**
-   * Calculate a version hash of the actor's XP-relevant data.
-   * This is used to detect when retroactive XP updates are needed.
-   * 
-   * @returns {number} Version hash of XP-relevant data
-   */
-  _calculateXPDataVersion() {
-    try {
-      const sys = this.actor.system ?? {};
-      
-      // Create a hash of XP-relevant data
-      const xpData = {
-        traits: sys.traits || {},
-        voidRank: sys.rings?.void?.rank || 0,
-        skills: this.actor.items.filter(i => i.type === "skill").map(i => ({
-          id: i.id,
-          rank: i.system?.rank || 0,
-          freeRanks: i.system?.freeRanks || 0,
-          emphasis: i.system?.emphasis || "",
-          freeEmphasis: i.system?.freeEmphasis || 0
-        })),
-        items: this.actor.items.filter(i => ["advantage", "disadvantage", "kata", "kiho"].includes(i.type)).map(i => ({
-          id: i.id,
-          type: i.type,
-          cost: i.system?.cost || 0
-        }))
-      };
-      
-      // Simple hash function - convert to string and get hash code
-      const str = JSON.stringify(xpData);
-      let hash = 0;
-      for (let i = 0; i < str.length; i++) {
-        const char = str.charCodeAt(i);
-        hash = ((hash << 5) - hash) + char;
-        hash = hash & hash; // Convert to 32-bit integer
-      }
-      return Math.abs(hash);
-    } catch (err) {
-      console.warn(`${SYS_ID}`, "Failed to calculate XP data version", err);
-      return Date.now(); // Fallback to timestamp
-    }
-  }
-
-  /**
-   * Retroactively rebuild XP tracking entries from current character state.
-   * Preserves existing XP entries and adds missing calculated entries.
-   * This ensures manual XP adjustments and historical data are not lost.
-   * 
-   * **Duplicate Prevention:**
-   * - Uses same note formats as real-time XP logging to prevent duplicates
-   * - Trait entries: "Awareness 3→4" (matches actor document format)
-   * - Void entries: "Void 2→3" (matches actor document format)
-   * - Skill entries: "Skill Name 3" (retroactive only, no real-time equivalent)
-   * 
-   * **Integration with Real-time XP:**
-   * - Real-time entries created by actor document when traits/void change
-   * - Retroactive entries only added if not already present
-   * - Manual XP adjustments always preserved
-   */
-  async _retroactivelyUpdateXP() {
-    try {
-      const sys = this.actor.system ?? {};
-      const flags = this.actor.flags?.[SYS_ID] ?? {};
-      
-      // Build a fresh xpSpent list from the current actor state.
-      // Manual adjustments live under flags.xpManual and are not part of xpSpent,
-      // so it is safe to fully rebuild xpSpent here.
-      const existingSpent = Array.isArray(flags.xpSpent) ? foundry.utils.duplicate(flags.xpSpent) : [];
-      const spent = [];
-      
-      // Track entries we add during this rebuild to avoid internal duplicates
-      const existingEntries = new Set();
-
-      // Rebuild trait purchases
-      const TRAITS = ["sta","wil","str","per","ref","awa","agi","int"];
-      const traitDiscounts = flags?.traitDiscounts ?? {};
-      const freeTraitBase = flags?.xpFreeTraitBase ?? {};
-
-      for (const traitKey of TRAITS) {
-        const effCur = parseInt(sys?.traits?.[traitKey]) || 2;
-        const freeBase = parseInt(freeTraitBase?.[traitKey] ?? 0);
-        const freeEff = freeBase > 0 ? 0 : parseInt(this.actor._creationFreeBonus?.(traitKey)) || 0;
-        const disc = parseInt(traitDiscounts?.[traitKey] ?? 0);
-        
-        const baseline = 2 + freeBase;
-        const baseCur = Math.max(baseline, effCur - freeEff);
-        
-        // Create entries for each rank increase
-        for (let r = baseline + 1; r <= baseCur; r++) {
-          const cost = this.actor._xpStepCostForTrait?.(r, freeEff, disc) || (4 * r);
-          const traitLabel = game.i18n.localize(`l5r4.ui.mechanics.traits.${traitKey}`) || traitKey.toUpperCase();
-          
-          // Use same format as real-time trait changes to prevent duplicates
-          const note = game.i18n.format("l5r4.character.experience.traitChange", { 
-            label: traitLabel, 
-            from: r - 1, 
-            to: r 
-          });
-          const entryKey = `trait:${note}`;
-          
-          // Only add if this entry doesn't already exist
-          if (!existingEntries.has(entryKey)) {
-            spent.push({
-              id: foundry.utils.randomID(),
-              delta: cost,
-              note: note,
-              type: "trait",
-              traitLabel: traitLabel,
-              fromValue: r - 1,
-              toValue: r,
-              ts: Date.now() - (baseCur - r) * 1000 // Fake timestamps in reverse order
-            });
-            existingEntries.add(entryKey);
-          }
-        }
-      }
-
-      // Rebuild void purchases
-      // Like traits, subtract Active Effect bonuses to get base purchased value
-      const voidEffCur = parseInt(sys?.rings?.void?.rank ?? sys?.rings?.void?.value ?? sys?.rings?.void ?? 0);
-      const voidFreeBase = parseInt(freeTraitBase?.void ?? 0);
-      const voidFreeEff = voidFreeBase > 0 ? 0 : parseInt(this.actor._creationFreeBonusVoid?.() ?? 0);
-      const voidBaseline = 2 + voidFreeBase;
-      const voidBaseCur = Math.max(voidBaseline, voidEffCur - voidFreeEff);
-      
-      if (voidBaseCur > voidBaseline) {
-        for (let r = voidBaseline + 1; r <= voidBaseCur; r++) {
-          const cost = 6 * r + parseInt(traitDiscounts?.void ?? 0);
-          
-          // Use same format as real-time void changes to prevent duplicates
-          const note = game.i18n.format("l5r4.character.experience.voidChange", { 
-            from: r - 1, 
-            to: r 
-          });
-          const entryKey = `void:${note}`;
-          
-          // Only add if this entry doesn't already exist
-          if (!existingEntries.has(entryKey)) {
-            spent.push({
-              id: foundry.utils.randomID(),
-              delta: Math.max(0, cost),
-              note: note,
-              type: "void",
-              fromValue: r - 1,
-              toValue: r,
-              ts: Date.now() - (voidBaseCur - r) * 1000
-            });
-            existingEntries.add(entryKey);
-          }
-        }
-      }
-
-      // Rebuild skill purchases
-      for (const item of this.actor.items) {
-        // Defensive check: ensure this is an actual Item document, not an Active Effect
-        if (!item || typeof item.type !== "string" || item.type !== "skill") continue;
-        
-        const rank = parseInt(item.system?.rank) || 0;
-        const freeRanks = Math.max(0, parseInt(item.system?.freeRanks) || 0);
-        
-        if (rank > freeRanks) {
-          // Create individual entries for each rank increase above free ranks
-          for (let r = freeRanks + 1; r <= rank; r++) {
-            const note = `${item.name} ${r}`;
-            const entryKey = `skill:${note}`;
-            
-            // Only add if this entry doesn't already exist
-            if (!existingEntries.has(entryKey)) {
-              spent.push({
-                id: foundry.utils.randomID(),
-                delta: r,
-                note: note,
-                type: "skill",
-                skillName: item.name,
-                fromValue: r - 1,
-                toValue: r,
-                ts: Date.now() - (100 - r) * 1000
-              });
-              existingEntries.add(entryKey);
-            }
-          }
-        }
-
-        // Add emphasis costs (excluding free emphasis)
-        const emph = String(item.system?.emphasis ?? "").trim();
-        if (emph) {
-          const emphases = emph.split(/[,;]+/).map(s => s.trim()).filter(Boolean);
-          const freeEmphasis = Math.max(0, parseInt(item.system?.freeEmphasis) || 0);
-          const paidEmphases = emphases.slice(freeEmphasis); // Skip free emphasis count
-          
-          paidEmphases.forEach((emphasis, index) => {
-            const note = `${item.name} - Emphasis: ${emphasis}`;
-            const entryKey = `skill:${note}`;
-            
-            // Only add if this entry doesn't already exist
-            if (!existingEntries.has(entryKey)) {
-              spent.push({
-                id: foundry.utils.randomID(),
-                delta: 2,
-                note: note,
-                type: "skill",
-                skillName: item.name,
-                emphasis: emphasis,
-                fromValue: 0,
-                toValue: 1,
-                ts: Date.now() - (50 - index) * 1000
-              });
-              existingEntries.add(entryKey);
-            }
-          });
-        }
-      }
-
-      // Rebuild advantage, disadvantage, kata, and kiho purchases
-      for (const item of this.actor.items) {
-        // Defensive check: ensure this is an actual Item document with a valid type
-        if (!item || typeof item.type !== "string") continue;
-        if (item.type !== "advantage" && item.type !== "disadvantage" && item.type !== "kata" && item.type !== "kiho") continue;
-        
-        const cost = parseInt(item.system?.cost) || 0;
-        if (cost > 0) {
-          // Disadvantages should show as negative XP (they grant XP to the character)
-          const delta = item.type === "disadvantage" ? -cost : cost;
-          const note = item.name;
-          const entryKey = `${item.type}:${note}`;
-          
-          // Only add if this entry doesn't already exist
-          if (!existingEntries.has(entryKey)) {
-            spent.push({
-              id: foundry.utils.randomID(),
-              delta: delta,
-              note: note,
-              type: item.type,
-              itemName: item.name,
-              ts: Date.now() - Math.random() * 10000
-            });
-            existingEntries.add(entryKey);
-          }
-        }
-      }
-
-      // Sort by timestamp
-      spent.sort((a, b) => (a.ts || 0) - (b.ts || 0));
-
       // Update if data changed (additions, removals, or order)
       const changed = JSON.stringify(existingSpent) !== JSON.stringify(spent);
-      if (changed) await this.actor.setFlag(SYS_ID, "xpSpent", spent);
+      if (changed) {
+        await this.actor.setFlag(SYS_ID, "xpSpent", spent);
+      }
       
+      // Mark this version as processed
+      const currentVersion = calculateXpDataVersion(this.actor);
+      await this.actor.setFlag(SYS_ID, "xpRetroactiveVersion", currentVersion);
     } catch (err) {
-      console.warn(`${SYS_ID}`, "Failed to rebuild XP purchase history", err);
+      console.warn(`${SYS_ID}`, "Failed to perform retroactive XP update", err);
     }
   }
 }
