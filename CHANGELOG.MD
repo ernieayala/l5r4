@@ -7,6 +7,226 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ---
 
+## [2.0.0] - 2025-10-10
+
+### 🚀 MAJOR ARCHITECTURAL REFACTORING
+
+Version 2.0.0 represents a complete restructuring of the L5R4 system codebase into a modern, maintainable, and scalable architecture. While this is a major version bump due to the extensive internal changes, **all user data and functionality remain fully backward compatible**.
+
+### Breaking Changes
+
+**BREAKING CHANGE: Internal API Structure**
+- Monolithic modules split into 60+ focused files
+- File paths and import statements completely reorganized
+- Third-party modules depending on internal APIs may need updates
+
+**License Change**
+- Previous: GPL v2
+- New: MIT License (more permissive for community contributions)
+
+### Refactoring Overview
+
+#### Module Organization
+**Before**: 4 monolithic files (3,016 lines)
+- `module/config.js` (416 lines)
+- `module/services/dice.js` (1,343 lines)
+- `module/services/stance.js` (773 lines)
+- `module/utils.js` (484 lines)
+
+**After**: 60+ focused modules organized by domain
+- `module/config/` - 5 configuration modules
+- `module/documents/actor/` - 8 actor calculation modules
+- `module/documents/item/` - 11 item lifecycle modules
+- `module/services/dice/` - 18 dice service modules
+- `module/services/stance/` - 8 stance automation modules
+- `module/services/xp/` - 3 XP management modules
+- `module/sheets/handlers/` - 11 sheet event handlers
+- `module/setup/settings/` - 4 settings modules
+- `module/utils/` - 7 utility modules
+
+#### Architecture Improvements
+
+**Configuration System**
+- Split monolithic config into domain-specific modules
+- Added constants.js for system-wide constants (SYS_ID, paths)
+- Added game-data.js for L5R4 game data definitions
+- Added icons.js for icon path resolution
+- Added localization.js for i18n helpers
+- Added templates.js for template path management
+
+**Actor Document System**
+- Extracted calculations into specialized modules:
+  * `fear-system.js` - NPC fear mechanics
+  * `shared-traits-rings.js` - Ring calculation logic
+  * `stance-effects.js` - Stance bonus application
+  * `wound-system.js` - Wound threshold calculation
+  * `xp-system.js` - XP tracking and costs
+- Added actor constants for wound thresholds
+- Added creation bonuses module for family/school bonuses
+
+**Item Document System**
+- Organized into functional subdirectories:
+  * `constants/` - Item types and XP costs
+  * `integration/` - Chat cards and sheet data
+  * `lifecycle/` - Creation, updates, XP tracking
+  * `preparation/` - Base data, derived data, formulas
+- Improved skill formula handling
+- Added bow damage calculation module
+
+**Dice Service Decomposition**
+- Deleted 1,343-line monolithic file
+- Created 18 focused modules:
+  * `core/` - Formula builder, roll parser, TN calculator, Ten Dice Rule
+  * `dialogs/` - Separate dialog for each roll type (5 modules)
+  * `effects/` - Bonus applicator for Active Effects
+  * `resources/` - Spell slots, void points, target resolution
+  * `rolls/` - Roll execution by type (5 modules)
+
+**Stance System Modularization**
+- Deleted 773-line monolithic file
+- Created 8 focused modules:
+  * `core/` - Automation, effect templates, helpers
+  * `hooks/` - Effect lifecycle, roll integration
+  * `rolls/` - Attack bonuses, full defense rolls
+  * `initialize.js` - System initialization
+
+**Sheet System Transformation**
+- Extracted sheet logic into 11 specialized handlers:
+  * `app-launcher-handler.js` - Application windows
+  * `bio-item-handler.js` - Biography & items
+  * `drag-drop-handler.js` - Drag/drop operations
+  * `item-crud-handler.js` - Item CRUD operations
+  * `item-effects-handler.js` - Active Effects UI
+  * `pc-adjustment-handler.js` - PC stat adjustments
+  * `pc-context-builder.js` - Context menu construction
+  * `pc-trait-handler.js` - Trait manipulation
+  * `roll-handler.js` - Roll triggering
+  * `sort-handler.js` - Item sorting
+  * `void-points-handler.js` - Void point management
+- Added UI components: context-menu-builder, image-editor
+- Added keyboard-behavior mixin
+- Reduced pc-sheet.js from 811 lines to focused orchestration
+- Reduced base-actor-sheet.js from 688 lines to core functionality
+
+**Utilities Reorganization**
+- Split 484-line monolithic utils.js into 7 focused modules:
+  * `advancement.js` - Character advancement logic
+  * `dom.js` - DOM manipulation helpers
+  * `localization.js` - i18n utilities
+  * `mechanics.js` - Game mechanics calculations
+  * `sorting.js` - Sorting algorithms
+  * `type-coercion.js` - Type conversion utilities
+  * `xp-calculations.js` - XP cost formulas
+
+**Setup & Configuration**
+- Modularized settings into client/world/migration modules
+- Added register-handlebars.js for Handlebars helper registration
+- Improved preload-templates.js organization
+- Enhanced migrations.js structure
+
+**Main Entry Point**
+- Simplified l5r4.js from 433 lines of inline logic to clean orchestration
+- Removed inline stance enforcement (moved to modules)
+- Removed inline Handlebars helpers (moved to modules)
+- Added Quench test integration
+- Improved initialization flow and error handling
+
+### Added Features
+
+**Service Modules**
+- `family-bonus-service.js` - Character creation family bonuses
+- `initiative.js` - Initiative computation service
+- XP service modules (calculator, formatter, versioning)
+
+**Development Infrastructure**
+- `DEVELOPER.md` - Comprehensive contribution guidelines
+- `game-rules/` - 38 markdown files with L5R4 rule references
+- `tests/` - Integration test suite with Quench framework
+- `ARCHITECTURE.md` - System architecture documentation (555 lines)
+
+**Template Enhancements**
+- Attack raises tracking in weapon chat cards
+- Stance bonus display in roll modifiers dialog
+- Improved data flow for weapon attack sequences
+
+### Technical Improvements
+
+**Code Quality**
+- Single Responsibility Principle enforced across all modules
+- Clear separation of concerns with domain-driven organization
+- Improved testability with isolated functions
+- Enhanced maintainability with focused module boundaries
+- Better code splitting for performance
+
+**Documentation**
+- Comprehensive JSDoc across all modules
+- Module-level documentation explaining purpose and responsibilities
+- Clear API contracts for inter-module communication
+- Architecture documentation for developers
+
+**Performance**
+- Better code splitting reduces initial load
+- Isolated modules enable tree-shaking
+- Clearer import paths improve bundling efficiency
+
+### Migration Impact
+
+**For Users**: ✅ Seamless upgrade
+- No action required
+- All data fully compatible
+- No breaking changes to functionality
+- Existing characters, items, and worlds work without modification
+
+**For Developers**: ⚠️ Requires attention
+- All file paths changed
+- Import statements need updating
+- Internal APIs reorganized
+- Module structure completely different
+- Review DEVELOPER.md for new architecture
+
+**For Data**: ✅ Fully backward compatible
+- No data migrations required
+- All flags and settings preserved
+- Existing Active Effects continue working
+- No compendium updates needed
+
+### Files Changed
+
+**Statistics**
+- 113 files changed
+- +18,192 insertions
+- -9,400 deletions
+- Net: +8,792 lines (includes new documentation and tests)
+
+**Deleted Files**
+- `COPYING` (GPL v2 license)
+- `module/config.js`
+- `module/services/dice.js`
+- `module/services/stance.js`
+- `module/utils.js`
+- `_for_research/` (development artifacts)
+
+**Added Directories**
+- `module/config/` (5 modules)
+- `module/documents/actor/` (8 modules)
+- `module/documents/item/` (11 modules)
+- `module/services/dice/` (18 modules)
+- `module/services/stance/` (8 modules)
+- `module/services/xp/` (3 modules)
+- `module/sheets/handlers/` (11 modules)
+- `module/sheets/ui/` (2 modules)
+- `module/sheets/mixins/` (1 module)
+- `module/setup/settings/` (4 modules)
+- `module/utils/` (7 modules)
+- `game-rules/` (38 markdown files)
+- `tests/` (integration test suite)
+
+### Acknowledgments
+
+This refactoring maintains all functionality while providing a solid foundation for future development. Special thanks to the community for feedback and support during this major architectural improvement.
+
+---
+
 ## [1.1.0] - 2025-10-01
 
 ### Added

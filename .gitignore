@@ -52,7 +52,7 @@ npc-images
 
 # Project-specific directories
 _for_research/
-# game-rules/
+game-rules/
 .windsurf/
 
 # Test coverage reports
