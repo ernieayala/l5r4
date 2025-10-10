@@ -82,5 +82,14 @@
     "distance": 5,
     "units": "ft"
   },
-  "license": "GPL v3"
+  "relationships": {
+    "recommends": [
+      {
+        "id": "quench",
+        "type": "module",
+        "reason": "Required for running integration tests in Foundry VTT"
+      }
+    ]
+  },
+  "license": "MIT"
 }

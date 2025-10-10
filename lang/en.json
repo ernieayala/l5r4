@@ -39,6 +39,7 @@
           "emphasis": "Emphasis",
           "raise": "Raise",
           "raises": "Raises",
+          "automatic": "Automatic",
           "formula": "Formula",
           "result": "Result"
         },
@@ -47,7 +48,8 @@
           "itemDeleted": "Deleted {type}: {name}",
           "itemUpdated": "Updated {type}: {name}",
           "woundConfigFailed": "Failed to open wound configuration",
-          "woundConfigUpdateFailed": "Failed to update wound configuration"
+          "woundConfigUpdateFailed": "Failed to update wound configuration",
+          "invalidWoundConfigValue": "Invalid wound configuration value"
         },
         "combat": {
           "attack": "Attack",
@@ -111,7 +113,9 @@
           "noTargets": "No tokens selected for Fear test",
           "noWillpower": "{character} has no Willpower trait",
           "noFear": "This NPC has no Fear effect configured",
-          "testAgainst": "vs {creature}"
+          "testAgainst": "vs {creature}",
+          "rollFailed": "Fear test roll failed - invalid formula or corrupted data",
+          "templateFailed": "Fear test chat template failed to render"
         }
       },
       "common": {

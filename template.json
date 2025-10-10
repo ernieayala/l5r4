@@ -116,7 +116,7 @@
         "keep": 2,
         "type": ""
       },
-      "nrWoundLvls": 1,
+      "nrWoundLvls": 3,
       "woundMode": "manual",
       "manualWoundLevels": {
         "healthy": {"value": 15, "penalty": 0, "active": true},
