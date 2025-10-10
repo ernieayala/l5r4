@@ -91,7 +91,7 @@
  * @see {@link https://foundryvtt.com/api/classes/foundry.utils.html#diffObject|foundry.utils.diffObject}
  */
 
-import { SYS_ID, PATHS } from "../config.js";
+import { SYS_ID, PATHS } from "../config/constants.js";
 import L5R4Actor from "../documents/actor.js";
 
 // Schema migration utilities for safe data structure updates
