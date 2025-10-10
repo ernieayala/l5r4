@@ -22,8 +22,8 @@
  * 
  * **Architecture:**
  * - Fear TN computed in Actor.prepareDerivedData() (system.fear.*)
- * - Service layer handles roll logic and penalty tracking
- * - No Active Effects - penalties tracked via flags for manual application
+ * - Service layer handles roll logic and chat display
+ * - Penalties shown in chat for manual GM application (not automated)
  * - Consolidated executeFearTest() eliminates code duplication
  * 
  * @author L5R4 System Team
@@ -34,8 +34,9 @@
  * @see L5R4 Core Rulebook, 4th Edition, p. 91-92 - Fear rules
  */
 
-import { SYS_ID, CHAT_TEMPLATES } from "../config.js";
-import { toInt } from "../utils.js";
+import { SYS_ID } from "../config/constants.js";
+import { CHAT_TEMPLATES } from "../config/templates.js";
+import { toInt } from "../utils/type-coercion.js";
 
 /**
  * Core Fear test execution logic.
@@ -52,8 +53,8 @@ import { toInt } from "../utils.js";
  * 
  * **Penalty Application:**
  * - Failure causes -XkO penalty to all rolls (X = Fear Rank)
- * - Penalty tracked via actor flag for manual application by GM
- * - Lasts until end of encounter or source removed
+ * - Penalty displayed in chat for manual GM application (not automated)
+ * - Lasts until end of encounter or source removed per RAW
  * 
  * **Catastrophic Failure:**
  * - Failing by 15+ triggers flee/cower message
@@ -74,7 +75,7 @@ async function executeFearTest({ character, tn, modifier = 0, fearRank, sourceNa
   const willpower = toInt(character.system?.traits?.wil ?? 0);
   if (willpower <= 0) {
     ui.notifications?.warn(game.i18n.format("l5r4.ui.mechanics.fear.noWillpower", {
-      character: character.name
+      character: character?.name ?? "Character"
     }));
     return null;
   }
@@ -86,8 +87,16 @@ async function executeFearTest({ character, tn, modifier = 0, fearRank, sourceNa
     ? `${willpower}d10k${willpower}x10+${totalBonus}`
     : `${willpower}d10k${willpower}x10`;
   
-  const roll = new Roll(rollFormula);
-  await roll.evaluate();
+  // Evaluate roll with error handling
+  let roll;
+  try {
+    roll = new Roll(rollFormula);
+    await roll.evaluate();
+  } catch (err) {
+    console.error(`${SYS_ID}`, "Fear test: Roll evaluation failed", { rollFormula, err });
+    ui.notifications?.error(game.i18n.localize("l5r4.ui.mechanics.fear.rollFailed"));
+    return null;
+  }
 
   // Roll total now includes Honor and modifiers
   const rollTotal = roll.total ?? 0;
@@ -107,17 +116,26 @@ async function executeFearTest({ character, tn, modifier = 0, fearRank, sourceNa
       catastrophicFailure = true;
     }
     
-    // Store penalty flag for manual application
-    // TODO: Implement penalty tracking system
-    // await character.setFlag(SYS_ID, "fearPenalty", { rank: fearRank, source: sourceName });
+    // Note: Penalty tracking not yet implemented - displayed in chat for manual GM application
   }
 
   // Build chat message flavor
   const bonusText = [];
   if (honorRank > 0) bonusText.push(`Honor +${honorRank}`);
+  /**
+   * @integration-test Scenario: Manual modifier UI allows adding situational bonuses/penalties to Fear tests
+   * @integration-test Reason: testFear() always passes modifier=0, unreachable via current public API
+   * @integration-test Validates: Modifier display in chat flavor text (e.g., "Mod +2" or "Mod -3")
+   */
   if (modifier !== 0) bonusText.push(`${game.i18n.localize("l5r4.ui.common.mod")} ${modifier > 0 ? '+' : ''}${modifier}`);
   const bonusDisplay = bonusText.length > 0 ? ` (${bonusText.join(", ")})` : "";
   
+  /**
+   * @integration-test Scenario: executeFearTest() called directly (not via testFear) with fearRank <= 0
+   * @integration-test Reason: testFear() validates fearRank > 0 before calling executeFearTest(), unreachable via public API
+   * @integration-test Validates: Defensive code handling - generic "Fear Test" label when rank missing
+   * @integration-test Note: executeFearTest() is private; would need export to trigger this branch
+   */
   const flavor = [
     fearRank > 0 
       ? game.i18n.format("l5r4.ui.mechanics.fear.testResult", { rank: fearRank })
@@ -126,8 +144,22 @@ async function executeFearTest({ character, tn, modifier = 0, fearRank, sourceNa
     bonusDisplay
   ].filter(Boolean).join("");
 
-  const rollHtml = await roll.render();
+  // Render roll HTML with error handling
+  let rollHtml;
+  try {
+    rollHtml = await roll.render();
+  } catch (err) {
+    console.error(`${SYS_ID}`, "Fear test: Roll render failed", { err });
+    ui.notifications?.error(game.i18n.localize("l5r4.ui.mechanics.fear.rollFailed"));
+    return null;
+  }
   
+  /**
+   * @integration-test Scenario: executeFearTest() called with fearRank <= 0 to test generic success/failure labels
+   * @integration-test Reason: testFear() validates fearRank > 0, unreachable via public API
+   * @integration-test Validates: Fallback to generic "Success"/"Failure" when Fear rank missing
+   * @integration-test Note: Defensive code for private function
+   */
   // Build outcome message
   const outcomeLabel = success === null ? "" :
     fearRank > 0
@@ -138,20 +170,33 @@ async function executeFearTest({ character, tn, modifier = 0, fearRank, sourceNa
 
   // Build effect info for chat display
   let effectInfo = penaltyInfo;
+  /**
+   * @integration-test Scenario: Catastrophic failure with empty penaltyInfo (logically impossible)
+   * @integration-test Reason: catastrophicFailure only occurs when success === false && fearRank > 0, which always sets penaltyInfo first
+   * @integration-test Validates: Defensive ternary handling when effectInfo is empty (unreachable branch: "")
+   * @integration-test Note: This is logically impossible - penaltyInfo is always set before catastrophicFailure can be true
+   */
   if (catastrophicFailure) {
     effectInfo += (effectInfo ? " " : "") + game.i18n.localize("l5r4.ui.mechanics.fear.catastrophicFailure");
   }
 
-  // Render chat content
-  const content = await foundry.applications.handlebars.renderTemplate(
-    CHAT_TEMPLATES.simpleRoll,
-    {
-      flavor,
-      roll: rollHtml,
-      tnResult,
-      effectInfo: effectInfo || undefined
-    }
-  );
+  // Render chat content with error handling
+  let content;
+  try {
+    content = await foundry.applications.handlebars.renderTemplate(
+      CHAT_TEMPLATES.simpleRoll,
+      {
+        flavor,
+        roll: rollHtml,
+        tnResult,
+        effectInfo: effectInfo || undefined
+      }
+    );
+  } catch (err) {
+    console.error(`${SYS_ID}`, "Fear test: Template render failed", { err });
+    ui.notifications?.error(game.i18n.localize("l5r4.ui.mechanics.fear.templateFailed"));
+    return null;
+  }
 
   // Post to chat
   try {
@@ -235,27 +280,17 @@ export async function testFearMultiple({ npc, characters } = {}) {
   }
 }
 
-// TODO: Implement Fear penalty tracking system
-// Future implementation should:
-// 1. Store penalty in actor flag: { rank: X, source: "NPC Name", timestamp }
-// 2. Provide UI for GMs to view/clear penalties  
-// 3. Optionally integrate with dice roller to auto-apply penalty
-// 4. Track multiple Fear sources (penalties stack per RAW)
-// 
-// Placeholder function signature:
-// async function applyFearPenalty(character, fearRank, sourceName) {
-//   await character.setFlag(SYS_ID, "fearPenalty", {
-//     rank: fearRank,
-//     source: sourceName,
-//     timestamp: Date.now()
-//   });
-// }
+/**
+ * Debounce flag to prevent concurrent Fear tests.
+ * @private
+ */
+let fearTestInProgress = false;
 
 /**
  * Handle Fear test click from NPC sheet.
  * Gets selected tokens and tests each character against the NPC's Fear.
+ * Includes debounce protection to prevent concurrent executions.
  * 
- * @param {object} opts - Configuration options
  * @param {Actor} opts.npc - NPC actor with Fear
  * @returns {Promise<void>}
  * @example
@@ -263,27 +298,32 @@ export async function testFearMultiple({ npc, characters } = {}) {
  * await Fear.handleFearClick({ npc: this.actor });
  */
 export async function handleFearClick({ npc } = {}) {
-  if (!npc) return;
+  if (!npc || fearTestInProgress) return;
 
-  // Get selected tokens
-  const selectedTokens = Array.from(canvas?.tokens?.controlled ?? []);
-  
-  if (selectedTokens.length === 0) {
-    ui.notifications?.warn(game.i18n.localize("l5r4.ui.mechanics.fear.noTargets"));
-    return;
+  fearTestInProgress = true;
+  try {
+    // Get selected tokens
+    const selectedTokens = Array.from(canvas?.tokens?.controlled ?? []);
+    
+    if (selectedTokens.length === 0) {
+      ui.notifications?.warn(game.i18n.localize("l5r4.ui.mechanics.fear.noTargets"));
+      return;
+    }
+
+    // Extract actors from tokens
+    const characters = selectedTokens
+      .map(token => token.actor)
+      .filter(actor => actor && actor.id !== npc.id); // Don't test the NPC against itself
+
+    if (characters.length === 0) {
+      ui.notifications?.warn(game.i18n.localize("l5r4.ui.mechanics.fear.noTargets"));
+      return;
+    }
+
+    // Test each character
+    await testFearMultiple({ npc, characters });
+  } finally {
+    fearTestInProgress = false;
   }
-
-  // Extract actors from tokens
-  const characters = selectedTokens
-    .map(token => token.actor)
-    .filter(actor => actor && actor.id !== npc.id); // Don't test the NPC against itself
-
-  if (characters.length === 0) {
-    ui.notifications?.warn(game.i18n.localize("l5r4.ui.mechanics.fear.noTargets"));
-    return;
-  }
-
-  // Test each character
-  await testFearMultiple({ npc, characters });
 }
 
