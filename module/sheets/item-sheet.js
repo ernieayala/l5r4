@@ -125,8 +125,22 @@
  * @see {@link https://foundryvtt.com/api/classes/foundry.applications.sheets.ActiveEffectConfig.html|ActiveEffectConfig}
  */
 
-import CONFIG_L5R4, { SYS_ID } from "../config.js";
-import { on } from "../utils.js";
+import { SYS_ID } from "../config/constants.js";
+import { 
+  ARROWS, 
+  SIZES, 
+  RINGS, 
+  RINGS_WITH_NONE, 
+  SPELL_RINGS, 
+  SKILL_TRAITS, 
+  NPC_TRAITS, 
+  SKILL_TYPES, 
+  ACTION_TYPES, 
+  KIHO_TYPES, 
+  ADVANTAGE_TYPES 
+} from "../config/localization.js";
+import { NPC_NUMBER_WOUND_LVLS } from "../config/game-data.js";
+import { ItemEffectsHandler } from "./handlers/item-effects-handler.js";
 
 const { HandlebarsApplicationMixin } = foundry.applications.api;
 const { ItemSheetV2 }                = foundry.applications.sheets;
@@ -342,7 +356,20 @@ export default class L5R4ItemSheet extends HandlebarsApplicationMixin(ItemSheetV
     context.system   = system;
     context.SYS_ID   = SYS_ID;
     context.editable = this.isEditable;
-    context.config   = CONFIG.l5r4;
+    context.config   = {
+      arrows: ARROWS,
+      sizes: SIZES,
+      rings: RINGS,
+      ringsWithNone: RINGS_WITH_NONE,
+      spellRings: SPELL_RINGS,
+      traits: SKILL_TRAITS,
+      npcTraits: NPC_TRAITS,
+      skillTypes: SKILL_TYPES,
+      actionTypes: ACTION_TYPES,
+      kihoTypes: KIHO_TYPES,
+      advantageTypes: ADVANTAGE_TYPES,
+      npcNumberWoundLvls: NPC_NUMBER_WOUND_LVLS
+    };
     context.enriched = enriched;
 
     /** Expose embedded Active Effects so the template can render them. */
@@ -374,102 +401,22 @@ export default class L5R4ItemSheet extends HandlebarsApplicationMixin(ItemSheetV
 
   /**
    * @override
-   * Post-render setup for Active Effects management and event binding.
-   * Establishes event handlers for embedded Active Effects CRUD operations
-   * with proper duplicate-click protection and error handling.
-   * 
-   * **Event Binding Strategy:**
-   * - Uses element-level binding flags to prevent duplicate handlers
-   * - Handles DOM replacement scenarios in Foundry v13+
-   * - Provides immediate feedback for all effect operations
-   * - Integrates with Foundry's native ActiveEffectConfig sheets
-   * 
-   * **Active Effects Operations:**
-   * - **Creation**: New effects with transfer=true for actor application
-   * - **Editing**: Opens ActiveEffectConfig for comprehensive effect editing
-   * - **Toggle**: Enable/disable with immediate visual feedback
-   * - **Deletion**: Safe removal with busy-state protection
-   * 
-   * **Error Handling:**
-   * - Graceful handling of missing effects (race conditions)
-   * - Duplicate operation protection via busy flags
-   * - User notifications for operation failures
-   * - Cleanup of temporary state flags
+   * Post-render setup for Active Effects management.
+   * Delegates all Active Effects event handling to ItemEffectsHandler for clean separation.
    * 
    * @param {object} context - Template context (unused)
    * @param {object} options - Render options (unused)
    * @returns {Promise<void>}
    * 
-   * @see {@link https://foundryvtt.com/api/classes/documents.ActiveEffect.html|ActiveEffect}
-   * @see {@link https://foundryvtt.com/api/classes/foundry.applications.sheets.ActiveEffectConfig.html|ActiveEffectConfig}
-   * @see {@link https://foundryvtt.com/api/classes/foundry.applications.api.DocumentSheetV2.html|DocumentSheetV2}
+   * @see {@link ItemEffectsHandler}
    */
   async _onRender(context, options) {
     await super._onRender?.(context, options);
     const root = this.element;
     if (!root) return;
 
-    /**
-     * Bind once per DOM element.
-     * Some v13 renders replace the root element; if we only track a sheet-level
-     * boolean, we can miss (and fail to bind) new roots. Mark the element itself.
-     */
-    if (root.dataset.effectsBound === "1") return;
-    root.dataset.effectsBound = "1";
-
-    // Create (transfer=true so it applies to the owning Actor)
-    on(root, ".effect-create", "click", async (ev) => {
-      ev.preventDefault();
-      const [eff] = await this.item.createEmbeddedDocuments("ActiveEffect", [{
-        name: game.i18n.localize("l5r4.ui.common.new"),
-        icon: "icons/svg/aura.svg",
-        disabled: false,
-        transfer: true,
-        changes: []
-      }]);
-      if (eff) new foundry.applications.sheets.ActiveEffectConfig({ document: eff }).render(true);
-    });
-
-    // Edit
-    on(root, ".effect-edit", "click", (ev, el) => {
-      ev.preventDefault();
-      const id  = el.closest("[data-effect-id]")?.dataset?.effectId;
-      const eff = id ? this.item.effects.get(id) : null;
-      if (eff) new foundry.applications.sheets.ActiveEffectConfig({ document: eff }).render(true);
-    });
-
-    // Enable/Disable
-    on(root, ".effect-toggle", "click", async (ev, el) => {
-      ev.preventDefault();
-      const id  = el.closest("[data-effect-id]")?.dataset?.effectId;
-      const eff = id ? this.item.effects.get(id) : null;
-      if (!eff) return;
-      await eff.update({ disabled: !eff.disabled });
-    });
-
-    // Delete (safe against double-fire)
-    on(root, ".effect-delete", "click", async (ev, el) => {
-      ev.preventDefault();
-      const wrap = el.closest("[data-effect-id]");
-      const id   = wrap?.dataset?.effectId;
-      if (!id) return;
-      // avoid double-click spam
-      if (wrap.dataset.busy) return;
-      wrap.dataset.busy = "1";
-
-      try {
-        const eff = this.item.effects.get(id);
-        if (!eff) return; // already gone
-        await eff.delete();
-      } catch (err) {
-        // Swallow the “does not exist” repeat from a duplicate listener
-        if (String(err?.message || err).includes("does not exist")) return;
-        console.error(err);
-        ui.notifications?.error(err.message ?? game.i18n.localize("l5r4.system.errors.deleteEffect"));
-      } finally {
-        delete wrap.dataset.busy;
-      }
-    });
+    // Delegate Active Effects management to handler
+    ItemEffectsHandler.bind({ item: this.item, element: root });
   }
 
   /** Optional: label map handy for titles. */
