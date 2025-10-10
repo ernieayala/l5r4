@@ -87,18 +87,34 @@
  * @see {@link https://foundryvtt.com/api/classes/foundry.applications.api.ApplicationV2.html|ApplicationV2}
  */
 
-import { l5r4, SYS_ID, iconPath } from "./module/config.js";
-import { T, F } from "./module/utils.js";
+import { SYS_ID } from "./module/config/constants.js";
+import { 
+  ARROWS, 
+  SIZES, 
+  RINGS, 
+  RINGS_WITH_NONE, 
+  SPELL_RINGS, 
+  TRAITS, 
+  NPC_TRAITS, 
+  SKILL_TYPES, 
+  ACTION_TYPES, 
+  KIHO_TYPES, 
+  ADVANTAGE_TYPES 
+} from "./module/config/localization.js";
+import { NPC_NUMBER_WOUND_LVLS, STATUS_EFFECTS } from "./module/config/game-data.js";
 import L5R4Actor from "./module/documents/actor.js";
 import L5R4Item from "./module/documents/item.js";
 import L5R4ItemSheet from "./module/sheets/item-sheet.js";
 import L5R4PcSheet from "./module/sheets/pc-sheet.js";
 import L5R4NpcSheet from "./module/sheets/npc-sheet.js";
-import { TenDiceRule, roll_parser } from "./module/services/dice.js";
 import { preloadTemplates } from "./module/setup/preload-templates.js";
 import { runMigrations } from "./module/setup/migrations.js";
 import { registerSettings } from "./module/setup/register-settings.js";
-import { onCreateActiveEffect, onUpdateActiveEffect, onDeleteActiveEffect, initializeStanceService } from "./module/services/stance.js";
+import { registerHandlebarsHelpers } from "./module/setup/register-handlebars.js";
+import { initializeStanceService } from "./module/services/stance/initialize.js";
+import { initializeChatService } from "./module/services/chat.js";
+import { initializeInitiativeSystem } from "./module/services/initiative.js";
+import { registerQuenchTests } from "./tests/integration/quench-integration.js";
 
 // =============================================================================
 // SYSTEM INITIALIZATION
@@ -115,62 +131,31 @@ Hooks.once("init", async () => {
   CONFIG.Actor.documentClass = L5R4Actor;
 
   // Phase 3: Setup system configuration objects
-  // Clone frozen config to allow runtime extensions and template aliases
-  CONFIG.l5r4 = foundry.utils.duplicate(l5r4);
+  // Build config object from direct imports for template compatibility
+  CONFIG.l5r4 = {
+    arrows: ARROWS,
+    sizes: SIZES,
+    rings: RINGS,
+    ringsWithNone: RINGS_WITH_NONE,
+    spellRings: SPELL_RINGS,
+    traits: TRAITS,
+    npcTraits: NPC_TRAITS,
+    skillTypes: SKILL_TYPES,
+    actionTypes: ACTION_TYPES,
+    kihoTypes: KIHO_TYPES,
+    advantageTypes: ADVANTAGE_TYPES,
+    npcNumberWoundLvls: NPC_NUMBER_WOUND_LVLS,
+    statusEffects: STATUS_EFFECTS
+  };
 
   // Configure status effects for token HUD integration
-  CONFIG.statusEffects = l5r4.statusEffects;
+  CONFIG.statusEffects = STATUS_EFFECTS;
 
   // Create template compatibility aliases for legacy references
   CONFIG.l5r4.TRAIT_CHOICES = CONFIG.l5r4.traits;
 
   // Phase 4: Configure L5R4 initiative system with Ten Dice Rule integration
-  // Important: Foundry v13 expects a STRING here, not a function. We'll override
-  // Combatant.prototype.getInitiativeRoll to build a dynamic formula.
-  CONFIG.Combat.initiative = { formula: "1d10", decimals: 0 };
-
-  // Override Combatant.getInitiativeRoll to compute L5R4 initiative safely
-  try {
-    const { Combatant } = foundry.documents;
-    const __origGetInit = Combatant.prototype.getInitiativeRoll;
-    Combatant.prototype.getInitiativeRoll = function(formula) {
-      try {
-        const a = this.actor;
-        if (!a) return new Roll(CONFIG.Combat.initiative.formula);
-        const toInt = (v) => Number.isFinite(+v) ? Math.trunc(Number(v)) : 0;
-        // Start with PC values
-        let roll  = toInt(a.system?.initiative?.roll);
-        let keep  = toInt(a.system?.initiative?.keep);
-        if (a.type === "npc") {
-          const effR = toInt(a.system?.initiative?.effRoll);
-          const effK = toInt(a.system?.initiative?.effKeep);
-          if (effR > 0) roll = effR;
-          if (effK > 0) keep = effK;
-        }
-        let bonus = toInt(a.system?.initiative?.totalMod);
-
-        // Ten Dice Rule inline
-        let extras = 0;
-        if (roll > 10) { extras = roll - 10; roll = 10; }
-        while (extras >= 3) { keep += 2; extras -= 3; }
-        while (keep > 10) { keep -= 2; bonus += 2; }
-        if (keep === 10 && extras >= 0) { bonus += extras * 2; }
-
-        const diceRoll = (Number.isFinite(roll) && roll > 0) ? roll : 1;
-        const diceKeep = (Number.isFinite(keep) && keep > 0) ? keep : 1;
-        const flat     = Number.isFinite(bonus) ? bonus : 0;
-        const flatStr  = flat === 0 ? "" : (flat > 0 ? `+${flat}` : `${flat}`);
-
-        // Foundry core syntax: keep highest = kh, exploding d10s = !10
-        const formulaStr = `${diceRoll}d10kh${diceKeep}!10${flatStr}`;
-        return new Roll(formulaStr);
-      } catch (e) {
-        return __origGetInit.call(this, formula);
-      }
-    };
-  } catch (e) {
-    console.warn(`${SYS_ID} | Unable to patch Combatant.getInitiativeRoll`, e);
-  }
+  initializeInitiativeSystem();
 
   // Phase 5: Register custom document sheets (Foundry v13 ApplicationV2 system)
   const { DocumentSheetConfig } = foundry.applications.apps;
@@ -225,325 +210,63 @@ Hooks.once("init", async () => {
   preloadTemplates();
   registerHandlebarsHelpers();
 
-  // Phase 7: Initialize stance service (hooks and automation)
+  // Phase 7: Initialize services (hooks and automation)
   initializeStanceService();
+  initializeChatService();
 });
 
 // =============================================================================
-// SYSTEM READY - POST-INITIALIZATION TASKS
+// QUENCH INTEGRATION - INTEGRATION TEST REGISTRATION
 // =============================================================================
 
-
-// =============================================================================
-// CHAT INTEGRATION - INLINE ROLL PARSING & DAMAGE BUTTONS
-// =============================================================================
-
-/**
- * Chat Message Rendering Hook - Damage Button Integration
- * 
- * Attaches click event listeners to weapon damage buttons in chat messages,
- * enabling players to roll damage directly from attack roll results.
- * 
- * **Migration Note (Foundry v13+):**
- * This hook uses `renderChatMessageHTML` (introduced in v13) instead of the
- * deprecated `renderChatMessage` hook. Key differences:
- * - Hook name: `renderChatMessage` → `renderChatMessageHTML`
- * - HTML parameter: jQuery object → Native HTMLElement
- * - DOM methods: `.find()` → `.querySelector()` / `.querySelectorAll()`
- * 
- * **Hook Signature:**
- * @param {ChatMessage} app - The ChatMessage document being rendered
- * @param {HTMLElement} html - Native DOM element (NOT jQuery) containing the message HTML
- * @param {object} data - Template data used to render the message
- * 
- * **Button Data Attributes:**
- * - `data-weapon-id`: Item UUID for the weapon
- * - `data-actor-id`: Actor ID who owns the weapon
- * - `data-weapon-name`: Display name of the weapon
- * - `data-damage-roll`: Number of dice to roll (e.g., 3 for 3k2)
- * - `data-damage-keep`: Number of dice to keep (e.g., 2 for 3k2)
- * 
- * **Security:**
- * - Validates actor ownership before allowing damage rolls
- * - GM users can roll damage for any actor
- * - Non-owners receive localized permission warning
- * 
- * @since 1.0.0
- * @version 1.1.0 - Migrated to renderChatMessageHTML for Foundry v13 compatibility
- * @see {@link https://foundryvtt.com/api/classes/foundry.documents.ChatMessage.html|ChatMessage}
- * @see {@link ./module/services/dice.js|Dice Service} - WeaponRoll implementation
- */
-Hooks.on("renderChatMessageHTML", (app, html, data) => {
+Hooks.once("quenchReady", async () => {
+  console.log(`${SYS_ID} | quenchReady hook fired`);
+  
   try {
-    html.querySelectorAll(".l5r4-damage-button").forEach(button => {
-      button.addEventListener("click", async (event) => {
-        event.preventDefault();
-        const button = event.currentTarget;
-        const weaponId = button.dataset.weaponId;
-        const actorId = button.dataset.actorId;
-        const weaponName = button.dataset.weaponName;
-        const damageRoll = parseInt(button.dataset.damageRoll) || 0;
-        const damageKeep = parseInt(button.dataset.damageKeep) || 0;
-
-        // Find the actor
-        const actor = game.actors.get(actorId);
-        if (!actor) {
-          ui.notifications?.warn(game.i18n.localize("l5r4.ui.notifications.actorNotFound"));
-          return;
-        }
-
-        // Check permissions - only allow if user owns the actor or is GM
-        if (!actor.isOwner && !game.user.isGM) {
-          ui.notifications?.warn(game.i18n.localize("l5r4.ui.notifications.noPermissionDamage"));
-          return;
-        }
-
-        // Import WeaponRoll from dice service
-        const { WeaponRoll } = await import("./module/services/dice.js");
-        
-        // Roll weapon damage
-        return WeaponRoll({
-          diceRoll: damageRoll,
-          diceKeep: damageKeep,
-          weaponName: weaponName,
-          askForOptions: event.shiftKey
-        });
-      });
-    });
-  } catch (error) {
-    console.warn("L5R4", "Error attaching damage button listeners:", error);
+    // Quench exposes its API via globalThis.quench
+    const quench = globalThis.quench;
+    if (!quench) {
+      console.error(`${SYS_ID} | globalThis.quench not found`);
+      return;
+    }
+    
+    console.log(`${SYS_ID} | Registering Quench integration tests...`);
+    await registerQuenchTests(quench);
+    
+    // Mark as registered to prevent duplicate registration
+    const quenchModule = game.modules.get("quench");
+    if (quenchModule) quenchModule._l5r4Registered = true;
+    
+    console.log(`${SYS_ID} | ✓ Successfully registered Quench tests`);
+  } catch (err) {
+    console.error(`${SYS_ID} | ✗ Failed to register Quench tests:`, err);
+    console.error(`${SYS_ID} | Error details:`, err.message);
+    console.error(`${SYS_ID} | Stack trace:`, err.stack);
   }
 });
 
-Hooks.on("chatMessage", (chatlog, message, _chatData) => {
-  const rollCmd = /^\/(r(oll)?|gmr(oll)?|br(oll)?|sr(oll)?)\s/i;
-  if (rollCmd.test(message)) return true;
-
-  // Handle complete inline roll messages: [[3k2+1]]
-  const whole = /^\[\[(.*)\]\]$/;
-  if (whole.test(message)) {
-    const token = message.substring(2, message.length - 2);
-    const kxy   = /(u|e)?\d+k\d+(x\d+)?([+]\d+)?/;
-    const result = token.replace(kxy, roll_parser(token));
-    chatlog.processMessage(result);
-    return false;
-  }
-
-  // Handle mixed text with embedded inline rolls: "I roll [[3k2+1]] for damage"
-  const inline = /\[\[(.*?)\]\]/g;
-  const kxy = /(u|e)?\d+k\d+(x\d+)?([+]\d+)?/;
-  if (inline.test(message)) {
-    const result = message.replace(inline, (match, token) => {
-      if (!kxy.test(token)) return match;
-      return match.replace(kxy, roll_parser(token));
-    });
-    chatlog.processMessage(result);
-    return false;
-  }
-
-  return true;
-});
-
 // =============================================================================
-// HANDLEBARS TEMPLATE SYSTEM
+// SYSTEM READY - POST-INITIALIZATION AND MIGRATION
 // =============================================================================
-
-/**
- * Register custom Handlebars helpers for L5R4 templates.
- * Provides utility functions for mathematical operations, comparisons,
- * and L5R4-specific formatting used throughout the template system.
- * 
- * **Available Helpers:**
- * - **Comparison**: eq, ne, and, or (logical operations)
- * - **Math**: math (arithmetic and comparison operations)
- * - **Utility**: coalesce (null coalescing), concat (string joining)
- * - **L5R4 Specific**: iconPath (asset path resolution)
- * 
- * @returns {void}
- * 
- * @see {@link https://foundryvtt.com/api/classes/foundry.applications.api.HandlebarsApplicationMixin.html|HandlebarsApplicationMixin}
- */
-function registerHandlebarsHelpers() {
-  Handlebars.registerHelper("eq", (a, b) => a === b);
-  Handlebars.registerHelper("ne", (a, b) => a !== b);
-  Handlebars.registerHelper("and", (a, b) => a && b);
-  Handlebars.registerHelper("or", (a, b) => a || b);
-  Handlebars.registerHelper("coalesce", (...args) => {
-    const A = args.slice(0, -1);
-    for (const v of A) if (v != null) return v;
-    return null;
-  });
-  Handlebars.registerHelper("iconPath", (n) => iconPath(n));
-  Handlebars.registerHelper("math", function (L, op, R) {
-    const n = (v) => (v === true || v === false) ? (v ? 1 : 0) : Number(v ?? 0);
-    const a = n(L), b = n(R);
-    switch (op) {
-      case "+": return a + b;
-      case "-": return a - b;
-      case "*": return a * b;
-      case "/": return b !== 0 ? a / b : 0;
-      case "%": return b !== 0 ? a % b : 0;
-      case ">": return a > b;
-      case "<": return a < b;
-      case ">=": return a >= b;
-      case "<=": return a <= b;
-      case "==": return a == b;
-      case "===": return a === b;
-      case "!=": return a != b;
-      case "!==": return a !== b;
-      case "floor": return Math.floor(a);
-      case "ceil": return Math.ceil(a);
-      case "round": return Math.round(a);
-      default: return 0;
-    }
-  });
-  Handlebars.registerHelper("concat", function (...args) {
-    return args.slice(0, -1).filter(a => typeof a !== "object").join("");
-  });
-}
-
-// =============================================================================
-// COMBAT STANCE ENFORCEMENT
-// =============================================================================
-
-/**
- * L5R4 Combat Stance Management System.
- * Enforces mutually exclusive stance mechanics where only one combat stance
- * can be active on an actor at any time. Automatically removes conflicting
- * stances when a new stance is applied.
- * 
- * **Supported Stances:**
- * - Attack Stance: Bonus to attack rolls, penalty to defense
- * - Full Attack Stance: Greater attack bonus, greater defense penalty
- * - Defense Stance: Bonus to defense, penalty to attacks
- * - Full Defense Stance: Greater defense bonus, cannot attack
- * - Center Stance: Balanced stance with no bonuses or penalties
- * 
- * **Integration Points:**
- * - Token HUD status effect toggles
- * - ActiveEffect document creation/updates
- * - Item-granted stance effects
- * - Macro-applied status effects
- * 
- * **Safety Features:**
- * - Handles both v11+ statuses Set and legacy statusId flags
- * - Preserves newly created effects during cleanup
- * - Error isolation prevents stance conflicts from breaking other systems
- * 
- * @see {@link https://foundryvtt.com/api/functions/hookEvents.applyTokenStatusEffect.html|applyTokenStatusEffect}
- * @see {@link https://foundryvtt.com/api/classes/foundry.documents.Actor.html#deleteEmbeddedDocuments|Actor.deleteEmbeddedDocuments}
- */
-(function enforceExclusiveStances() {
-  // Define all L5R4 combat stances that are mutually exclusive
-  const STANCE_IDS = new Set([
-    "attackStance",
-    "fullAttackStance",
-    "defenseStance",
-    "fullDefenseStance",
-    "centerStance"
-  ]);
-
-  /**
-   * Extract status IDs from an ActiveEffect document.
-   * Handles both modern statuses Set (v11+) and legacy statusId flag
-   * for maximum compatibility with different Foundry versions and modules.
-   * 
-   * @param {ActiveEffect} eff - ActiveEffect document to analyze
-   * @returns {string[]} Array of status IDs associated with the effect
-   */
-  function getEffectStatusIds(eff) {
-    const ids = [];
-    // Modern approach: statuses Set (Foundry v11+)
-    if (eff?.statuses?.size) ids.push(...eff.statuses);
-    // Legacy approach: core.statusId flag (pre-v11 compatibility)
-    const legacy = eff?.getFlag?.("core", "statusId");
-    if (legacy) ids.push(legacy);
-    return ids.filter(Boolean);
-  }
-
-  /**
-   * Remove conflicting stance effects from an actor.
-   * Finds and deletes all active stance effects except the newly chosen one,
-   * ensuring only one stance remains active at a time.
-   * 
-   * @param {Actor|null} actor - Actor to clean up stance effects on
-   * @param {string} chosenId - Status ID of the stance being activated
-   * @param {string} [keepEffectId] - Effect ID to preserve (newly created effect)
-   * @returns {Promise<void>}
-   */
-  async function removeOtherStances(actor, chosenId, keepEffectId) {
-    if (!actor || !chosenId) return;
-    const toDelete = actor.effects
-      .filter(e => !e.disabled && e.id !== keepEffectId)
-      .filter(e => {
-        const ids = getEffectStatusIds(e);
-        return ids.some(id => STANCE_IDS.has(id)) && !ids.includes(chosenId);
-      })
-      .map(e => e.id)
-      .filter(Boolean);
-
-    if (toDelete.length) {
-      await actor.deleteEmbeddedDocuments("ActiveEffect", toDelete);
-    }
-  }
-
-  // Hook: Token HUD status effect application
-  // Handles direct status toggles from token HUD or similar interfaces
-  Hooks.on("applyTokenStatusEffect", (token, statusId, active) => {
-    if (!active || !STANCE_IDS.has(statusId)) return;
-    const actor = token?.actor ?? null;
-    // Fire-and-forget cleanup (hook listeners are not awaited)
-    removeOtherStances(actor, statusId).catch(console.error);
-  });
-
-  // Hook: ActiveEffect creation with stance status
-  // Handles effects created by items, macros, or other systems
-  Hooks.on("createActiveEffect", (effect, _opts, _userId) => {
-    const actor = effect?.parent;
-    const ids = getEffectStatusIds(effect);
-    const chosen = ids.find(id => STANCE_IDS.has(id));
-    if (!chosen) return;
-    removeOtherStances(actor, chosen, effect.id).catch(console.error);
-    
-    // Apply stance automation
-    onCreateActiveEffect(effect, _opts, _userId);
-  });
-
-  // Hook: ActiveEffect re-enablement
-  // Handles existing effects being re-enabled after being disabled
-  Hooks.on("updateActiveEffect", (effect, changes, _opts, _userId) => {
-    // Only process when disabled flag changes from true to false
-    if (changes?.disabled !== false) return;
-    const actor = effect?.parent;
-    const ids = getEffectStatusIds(effect);
-    const chosen = ids.find(id => STANCE_IDS.has(id));
-    if (!chosen) return;
-    removeOtherStances(actor, chosen, effect.id).catch(console.error);
-    
-    // Apply stance automation
-    onUpdateActiveEffect(effect, changes, _opts, _userId);
-  });
-
-  // Hook: ActiveEffect deletion
-  // Handles stance effects being removed
-  Hooks.on("deleteActiveEffect", (effect, _opts, _userId) => {
-    const actor = effect?.parent;
-    const ids = getEffectStatusIds(effect);
-    const hasStance = ids.some(id => STANCE_IDS.has(id));
-    if (!hasStance) return;
-    
-    // Apply stance automation cleanup
-    onDeleteActiveEffect(effect, _opts, _userId);
-  });
-})();
-
-// =============================================================================
-// LEGACY MIGRATION - FOUNDRY v12 → v13 COMPATIBILITY
-// =============================================================================
-
 
 Hooks.once("ready", async () => {
   console.log(`${SYS_ID} | Ready`);
+  
+  // Alternative: Register tests if Quench already loaded (fallback if quenchReady already fired)
+  const quenchModule = game.modules.get("quench");
+  const quench = globalThis.quench;
+  
+  if (quenchModule?.active && quench && !quenchModule._l5r4Registered) {
+    console.log(`${SYS_ID} | Quench detected, attempting late registration...`);
+    try {
+      await registerQuenchTests(quench);
+      quenchModule._l5r4Registered = true;
+      console.log(`${SYS_ID} | ✓ Successfully registered Quench tests (late registration)`);
+    } catch (err) {
+      console.error(`${SYS_ID} | ✗ Failed to register Quench tests (late registration):`, err);
+      console.error(`${SYS_ID} | Error details:`, err.message);
+    }
+  }
 
   // Execute data migrations if system version has changed or forced
   if (game.user?.isGM) {
