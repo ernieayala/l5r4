@@ -109,7 +109,7 @@ function validateProjectStructure() {
     'template.json',
     'README.md',
     'CHANGELOG.MD',
-    'COPYING'
+    'LICENSE'
   ];
 
   const requiredDirs = [

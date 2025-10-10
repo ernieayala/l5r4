@@ -12,7 +12,7 @@
  *
  * @author L5R4 System Team
  * @since 2.1.0
- * @version 1.2.0
+ * @version 2.0.0
  */
 
 import { SYS_ID } from "../config/constants.js";

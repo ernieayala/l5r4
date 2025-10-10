@@ -44,7 +44,7 @@
  * 
  * @author L5R4 System Team
  * @since 2.0.0
- * @version 1.0.0
+ * @version 2.0.0
  * @see {@link ./xp-calculator.js|XP Calculator} - Rebuilds history when update needed
  * @see {@link ../../apps/xp-manager.js|XP Manager} - Uses this to minimize updates
  */
