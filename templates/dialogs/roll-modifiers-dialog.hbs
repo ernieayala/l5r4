@@ -17,6 +17,12 @@
       <input type="checkbox" name="unskilled" />
     </div>
   {{/if}}
+  {{#if attackRaises}}
+    <div class="form-group">
+      <label>{{localize "l5r4.ui.mechanics.rolls.raises"}} ({{localize "l5r4.ui.mechanics.rolls.automatic"}})</label>
+      <input type="text" value="+{{attackRaises}}k0" disabled="disabled" style="background-color: #e0e0e0;" />
+    </div>
+  {{/if}}
   {{#if skill}}
     <div class="form-group">
       <label>{{localize "l5r4.ui.mechanics.rolls.emphasis"}}</label>
