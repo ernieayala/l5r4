@@ -117,12 +117,28 @@
  * @see {@link ../services/dice.js|Dice.NpcRoll} - NPC roll processing
  */
 
-import * as Dice from "../services/dice.js";
 import * as Fear from "../services/fear.js";
-import { SYS_ID, TEMPLATE } from "../config.js";
-import { on, toInt, T, readWoundPenalty, getSortPref, sortWithPref } from "../utils.js";
-import WoundConfigApplication from "../apps/wound-config.js";
+import { SYS_ID } from "../config/constants.js";
+import { TEMPLATE } from "../config/templates.js";
+import { 
+  ARROWS, 
+  SIZES, 
+  RINGS, 
+  RINGS_WITH_NONE, 
+  SPELL_RINGS, 
+  SKILL_TRAITS, 
+  NPC_TRAITS, 
+  SKILL_TYPES, 
+  ACTION_TYPES, 
+  KIHO_TYPES, 
+  ADVANTAGE_TYPES 
+} from "../config/localization.js";
+import { NPC_NUMBER_WOUND_LVLS } from "../config/game-data.js";
+import { on } from "../utils/dom.js";
+import { getSortPref, sortWithPref } from "../utils/sorting.js";
 import { BaseActorSheet } from "./base-actor-sheet.js";
+import { RollHandler } from "./handlers/roll-handler.js";
+import { AppLauncherHandler } from "./handlers/app-launcher-handler.js";
 
 
 export default class L5R4NpcSheet extends BaseActorSheet {
@@ -157,7 +173,7 @@ export default class L5R4NpcSheet extends BaseActorSheet {
       case "item-chat": return this._onItemHeaderToChat(event, element);
       case "item-sort-by": return this._onUnifiedSortClick(event, element);
       case "ring-rank-void": return this._onVoidAdjust(event, element, +1);
-      case "roll-ring": return this._onRingRoll(event, element);
+      case "roll-ring": return RollHandler.npcRingRoll(this._getHandlerContext(), event, element);
       case "roll-skill": return this._onSkillRoll(event, element);
       case "roll-trait": return this._onTraitRoll(event, element);
       case "roll-attack": return this._onAttackRoll(event, element);
@@ -166,7 +182,7 @@ export default class L5R4NpcSheet extends BaseActorSheet {
       case "test-fear": return this._onFearTest(event, element);
       case "trait-rank": return this._onTraitAdjust(event, element, +1);
       case "void-points-dots": return this._onVoidPointsAdjust(event, element, +1);
-      case "wound-config": return this._onWoundConfig(event, element);
+      case "wound-config": return AppLauncherHandler.openWoundConfig(this._getHandlerContext(), event, element);
     }
   }
 
@@ -185,50 +201,6 @@ export default class L5R4NpcSheet extends BaseActorSheet {
     if (action === "inline-edit") return this._onInlineItemEdit(event, element);
   }
 
-  /**
-   * Ring roll handler for NPCs.
-   * Processes ring-based rolls using dataset attributes for roll parameters.
-   * Provides a streamlined interface for GM ring rolls without complex trait resolution.
-   * 
-   * **Dataset Attributes:**
-   * - `data-ring-name`: Display name for the ring (e.g., "Fire", "Water")
-   * - `data-system-ring`: System ring identifier for localization lookup
-   * - `data-ring-rank`: Numeric rank value for the ring (1-9)
-   * 
-   * **Roll Processing:**
-   * - Uses Dice.NpcRoll() for specialized NPC roll handling
-   * - Applies localized ring names from translation keys
-   * - Defaults to "void" ring if no system ring specified
-   * - Bypasses complex PC trait calculation systems
-   * 
-   * @param {Event} event - Click event from ring roll element
-   * @param {HTMLElement} el - Element containing dataset attributes
-   * @returns {Promise<void>} Roll result processed by dice service
-   * 
-   * @example
-   * // Template usage
-   * <button data-action="roll-ring" 
-   *         data-ring-name="Fire" 
-   *         data-system-ring="fire" 
-   *         data-ring-rank="3">
-   *   Roll Fire Ring
-   * </button>
-   * 
-   * @see {@link https://foundryvtt.com/api/classes/foundry.applications.sheets.ActorSheetV2.html|ActorSheetV2}
-   * @see {@link ../services/dice.js|Dice.NpcRoll} - NPC-specific roll processing
-   */
-  _onRingRoll(event, el) {
-    event?.preventDefault?.();
-    const ringName = el?.dataset?.ringName || T(`l5r4.ui.mechanics.rings.${el?.dataset?.systemRing || "void"}`);
-    const systemRing = String(el?.dataset?.systemRing || "void").toLowerCase();
-    const ringRank = toInt(el?.dataset?.ringRank);
-    return Dice.NpcRoll({
-      npc: true,
-      rollName: ringName,
-      ringName: systemRing,
-      ringRank
-    });
-  }
 
   /**
    * Adjust NPC Void Ring rank by ±1 without XP calculations.
@@ -337,7 +309,20 @@ export default class L5R4NpcSheet extends BaseActorSheet {
       ...base,
       actor: this.actor,
       system: actorObj.system,
-      config: CONFIG.l5r4,
+      config: {
+        arrows: ARROWS,
+        sizes: SIZES,
+        rings: RINGS,
+        ringsWithNone: RINGS_WITH_NONE,
+        spellRings: SPELL_RINGS,
+        traits: SKILL_TRAITS,
+        npcTraits: NPC_TRAITS,
+        skillTypes: SKILL_TYPES,
+        actionTypes: ACTION_TYPES,
+        kihoTypes: KIHO_TYPES,
+        advantageTypes: ADVANTAGE_TYPES,
+        npcNumberWoundLvls: NPC_NUMBER_WOUND_LVLS
+      },
 
       // Add the setting to the context
       showNpcVoidPoints: game.settings.get(SYS_ID, "allowNpcVoidPoints"),
@@ -372,7 +357,7 @@ export default class L5R4NpcSheet extends BaseActorSheet {
     this._initializeSortIndicators(root, "skills", ["name", "rank", "trait", "roll", "emphasis"]);
 
     // Simple rolls (not handled by base class action delegation)
-    on(root, ".simple-roll", "click", (ev) => this._onSimpleRoll(ev));
+    on(root, ".simple-roll", "click", (ev) => RollHandler.npcSimpleRoll(this._getHandlerContext(), ev));
 
     // Image editing
     on(root, "[data-edit='img']", "click", (ev) => this._onEditImage(ev, ev.currentTarget));
@@ -383,68 +368,6 @@ export default class L5R4NpcSheet extends BaseActorSheet {
 
   /* Rolls ----------------------------------------------------------------- */
 
-  /**
-   * Handle simple dice rolls from dataset attributes.
-   * Processes basic NPC rolls using data attributes for roll parameters,
-   * providing a streamlined interface for common NPC actions that don't
-   * require the complex trait resolution used by player characters.
-   * 
-   * **Dataset Attributes:**
-   * - `data-roll`: Number of dice to roll (e.g., "5" for 5d10)
-   * - `data-keep`: Number of dice to keep (e.g., "3" for keep 3)
-   * - `data-rolllabel`: Display label for the roll type
-   * - `data-trait`: Trait name being rolled (for display)
-   * - `data-rolltype`: Roll category ("simple", "attack", "damage", etc.)
-   * 
-   * **Roll Processing:**
-   * - Extracts roll parameters from element dataset
-   * - Constructs descriptive roll name from actor and action
-   * - Applies wound penalties automatically
-   * - Supports shift-click for roll options dialog
-   * - Uses NpcRoll() for specialized NPC roll handling
-   * 
-   * **Usage Examples:**
-   * ```html
-   * <!-- Basic trait roll -->
-   * <div class="simple-roll" 
-   *      data-roll="4" 
-   *      data-keep="2" 
-   *      data-rolllabel="Agility" 
-   *      data-trait="agility">
-   * 
-   * <!-- Attack roll -->
-   * <div class="simple-roll" 
-   *      data-roll="6" 
-   *      data-keep="3" 
-   *      data-rolllabel="Katana Attack" 
-   *      data-rolltype="attack">
-   * ```
-   * 
-   * @param {Event} event - Click event from simple roll element
-   * @returns {Promise<void>} Roll result processed by dice service
-   * 
-   * @see {@link ../services/dice.js|Dice.NpcRoll} - NPC roll processing
-   * @see {@link ../utils.js|readWoundPenalty} - Wound penalty calculation
-   */
-  async _onSimpleRoll(event) {
-    event.preventDefault();
-    const ds = event.currentTarget?.dataset || {};
-    const diceRoll = toInt(ds.roll);
-    const diceKeep = toInt(ds.keep);
-    const rollTypeLabel = ds.rolllabel || "";
-    const trait = ds.trait || "";
-    const rollType = ds.rolltype || "simple";
-    const rollName = `${this.actor.name}: ${rollTypeLabel} ${trait}`.trim();
-
-    return Dice.NpcRoll({
-      woundPenalty: readWoundPenalty(this.actor),
-      diceRoll,
-      diceKeep,
-      rollName,
-      toggleOptions: event.shiftKey,
-      rollType
-    });
-  }
 
   /**
    * @override
@@ -488,37 +411,6 @@ export default class L5R4NpcSheet extends BaseActorSheet {
     await Fear.handleFearClick({ npc: this.actor });
   }
 
-  /**
-   * Handle wound configuration application for NPCs.
-   * Opens a dedicated Application window with wound system configuration options.
-   * 
-   * @param {Event} event - Click event on cog button
-   * @param {HTMLElement} element - The clicked element
-   * @returns {Promise<void>}
-   */
-  async _onWoundConfig(event, element) {
-    event.preventDefault();
-    
-    try {
-      // Create or bring to front existing wound config application
-      const existingApp = Object.values(ui.windows).find(app => 
-        app instanceof WoundConfigApplication && app.actor.id === this.actor.id
-      );
-      
-      if (existingApp) {
-        existingApp.bringToTop();
-      } else {
-        const woundConfig = new WoundConfigApplication(this.actor);
-        await woundConfig.render(true);
-      }
-    } catch (err) {
-      console.warn(`${SYS_ID}`, "Failed to open wound configuration application", { 
-        err, 
-        actorId: this.actor.id 
-      });
-      ui.notifications?.error(game.i18n.localize("l5r4.ui.notifications.woundConfigFailed"));
-    }
-  }
 
   /* Submit-time guard ------------------------------------------------------ */
 

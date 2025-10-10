@@ -86,7 +86,7 @@
  * 6. **Spell Slots** (`_onSpellSlotAdjust()`) - Spell slot management
  * 7. **Visual Updates** (`_paintVoidPointsDots()`) - Void points dot rendering
  * 8. **Sorting** (`_onSortClick()`) - Item list sorting preference management
- * 9. **Family Bonuses** (`familyBonusFor()`) - Family bonus calculation from Active Effects
+ * 9. **Family Bonuses** (FamilyBonusService) - Family bonus calculation from Active Effects
  * 10. **XP Integration** (various methods) - Experience point tracking and validation
  *
  * @author L5R4 System Team
@@ -99,13 +99,40 @@
  * @see {@link https://foundryvtt.com/api/classes/foundry.abstract.Document.html#update|Document.update}
  */
 
-import { SYS_ID, TEMPLATE } from "../config.js";
-import { T, getSortPref, on, setSortPref, sortWithPref, toInt, applyRankPointsDelta, resolveWeaponSkillTrait, readWoundPenalty } from "../utils.js";
-
-import * as Dice from "../services/dice.js";
+import { SYS_ID } from "../config/constants.js";
+import { TEMPLATE } from "../config/templates.js";
+import { 
+  ARROWS, 
+  SIZES, 
+  RINGS, 
+  RINGS_WITH_NONE, 
+  SPELL_RINGS, 
+  SKILL_TRAITS, 
+  NPC_TRAITS, 
+  SKILL_TYPES, 
+  ACTION_TYPES, 
+  KIHO_TYPES, 
+  ADVANTAGE_TYPES 
+} from "../config/localization.js";
+import { NPC_NUMBER_WOUND_LVLS } from "../config/game-data.js";
+import { T } from "../utils/localization.js";
+import { getSortPref, setSortPref, sortWithPref } from "../utils/sorting.js";
+import { on } from "../utils/dom.js";
+import { toInt } from "../utils/type-coercion.js";
+import { applyRankPointsDelta } from "../utils/advancement.js";
+import { resolveWeaponSkillTrait, readWoundPenalty } from "../utils/mechanics.js";
+import { RingRoll } from "../services/dice/rolls/ring-roll.js";
+import { WeaponRoll } from "../services/dice/rolls/weapon-roll.js";
+import { NpcRoll } from "../services/dice/rolls/npc-roll.js";
+import { FamilyBonusService } from "../services/family-bonus-service.js";
+import { getStanceAttackBonuses, getStanceDamageBonuses } from "../services/stance/rolls/attack-bonuses.js";
 import { BaseActorSheet } from "./base-actor-sheet.js";
 import XpManagerApplication from "../apps/xp-manager.js";
-import WoundConfigApplication from "../apps/wound-config.js";
+import { AppLauncherHandler } from "./handlers/app-launcher-handler.js";
+import { PcAdjustmentHandler } from "./handlers/pc-adjustment-handler.js";
+import { BioItemHandler } from "./handlers/bio-item-handler.js";
+import { PcTraitHandler } from "./handlers/pc-trait-handler.js";
+import { PcContextBuilder } from "./handlers/pc-context-builder.js";
 
 /** Foundry UX TextEditor (for enrichHTML) — https://foundryvtt.com/api/classes/foundry.applications.ux.TextEditor.html */
 const { TextEditor } = foundry.applications.ux;
@@ -113,54 +140,8 @@ const { TextEditor } = foundry.applications.ux;
 /** Stable trait keys used by templates and derived math */
 const TRAIT_KEYS = /** @type {const} */ (["sta","wil","str","per","ref","awa","agi","int"]);
 
-/** @typedef {"name"|"type"|"cost"} AdvSortKey */
-/**
- * Build comparable fields for sorting Advantages/Disadvantages.
- * - Name/Type use locale-aware string compare
- * - Type uses the localized label so alpha matches the UI
- * - Cost is numeric
- * @param {any} item
- * @returns {{name:string,type:string,cost:number}}
- * @see https://foundryvtt.com/api/classes/foundry.documents.BaseUser.html#getFlag
- * @see https://foundryvtt.com/api/classes/foundry.documents.BaseUser.html#setFlag
- */
-function _advComparable(item) {
-  const name = String(item?.name ?? "").toLocaleLowerCase(game.i18n.lang || undefined);
-  const typeKey = String(item?.system?.type ?? "");
-  const type = game.i18n.localize(`l5r4.character.advantages.${typeKey}`).toLocaleLowerCase(game.i18n.lang || undefined);
-  const cost = Number(item?.system?.cost ?? 0) || 0;
-  return { name, type, cost };
-}
-
-
-/**
- * Return the Family AE bonus for a trait if (and only if) it comes from the
- * embedded Family Item’s **transferred** Active Effects. Otherwise 0.
- * @param {Actor} actor
- * @param {string} traitKey - "sta","wil","str","per","ref","awa","agi","int"
- * @returns {number}
- * @see https://foundryvtt.com/api/classes/documents.ActiveEffect.html
- */
-const familyBonusFor = function(actor, traitKey) {
-  try {
-    const uuid = actor.getFlag(SYS_ID, "familyItemUuid");
-    if (!uuid || !globalThis.fromUuidSync) return 0;
-    const familyItem = /** @type {any} */ (fromUuidSync(uuid));
-    if (!familyItem || familyItem.type !== "family") return 0;
-    const key = `system.traits.${traitKey}`;
-    let total = 0;
-    for (const eff of familyItem.effects ?? []) {
-      if (eff?.transfer !== true) continue; // only transferred effects count
-      for (const ch of eff.changes ?? []) {
-        if (ch?.key === key && ch?.mode === CONST.ACTIVE_EFFECT_MODES.ADD) {
-          const v = Number(ch?.value ?? 0);
-          if (Number.isFinite(v)) total += v;
-        }
-      }
-    }
-    return total;
-  } catch (_e) { return 0; }
-};
+// Sorting logic now handled by PcContextBuilder
+// Family bonus calculations handled by FamilyBonusService
 
 export default class L5R4PcSheet extends BaseActorSheet {
   /**
@@ -185,8 +166,8 @@ export default class L5R4PcSheet extends BaseActorSheet {
   /** @inheritdoc */
   _onAction(action, event, element) {
     switch (action) {
-      case "clan-link": return this._onClanLink(event);
-      case "family-open": return this._onFamilyOpen(event);
+      case "clan-link": return BioItemHandler.openLinked(this.actor, "clan");
+      case "family-open": return BioItemHandler.openLinked(this.actor, "family");
       case "inline-edit": return this._onInlineItemEdit(event, element);
       case "item-chat": return this._onItemHeaderToChat(event, element);
       case "item-create": return this._onItemCreate(event, element);
@@ -195,19 +176,19 @@ export default class L5R4PcSheet extends BaseActorSheet {
       case "item-expand": return this._onItemExpand(event, element);
       case "item-roll": return this._onItemRoll(event, element);
       case "item-sort-by": return this._onUnifiedSortClick(event, element);
-      case "ring-rank-void": return this._onVoidAdjust(event, element, +1);
+      case "ring-rank-void": return PcAdjustmentHandler.adjustVoidRing(this._getHandlerContext(), event, element, +1);
       case "roll-ring": return this._onRingRoll(event, element);
       case "roll-skill": return this._onSkillRoll(event, element);
       case "roll-trait": return this._onTraitRoll(event, element);
       case "roll-weapon": return this._onWeaponRoll(event, element);
       case "roll-weapon-attack": return this._onWeaponAttackRoll(event, element);
-      case "rp-step": return this._onRankPointsStep(event, element, +0.1);
-      case "school-link": return this._onSchoolLink(event);
-      case "section-expand": return this._onSectionExpand(event, element);
-      case "spell-slot": return this._onSpellSlotAdjust(event, element, +1);
-      case "trait-rank": return this._onTraitAdjust(event, element, +1);
+      case "rp-step": return PcAdjustmentHandler.adjustRankPoints(this._getHandlerContext(), event, element, +0.1);
+      case "school-link": return BioItemHandler.openLinked(this.actor, "school");
+      case "section-expand": return PcAdjustmentHandler.toggleSection(this._getHandlerContext(), event, element);
+      case "spell-slot": return PcAdjustmentHandler.adjustSpellSlot(this._getHandlerContext(), event, element, +1);
+      case "trait-rank": return PcTraitHandler.adjust(this._getHandlerContext(), event, element, +1);
       case "void-points-dots": return this._onVoidPointsAdjust(event, element, +1);
-      case "wound-config": return this._onWoundConfig(event);
+      case "wound-config": return AppLauncherHandler.openWoundConfig(this._getHandlerContext(), event, element);
       case "xp-add": return this._onXpAdd(event);
       case "xp-log": return this._onXpLog(event);
       case "xp-modal": return this._onXpModal(event);
@@ -217,10 +198,10 @@ export default class L5R4PcSheet extends BaseActorSheet {
   /** @inheritdoc */
   _onActionContext(action, event, element) {
     switch (action) {
-      case "ring-rank-void": return this._onVoidAdjust(event, element, -1);
-      case "rp-step": return this._onRankPointsStep(event, element, -0.1);
-      case "spell-slot": return this._onSpellSlotAdjust(event, element, -1);
-      case "trait-rank": return this._onTraitAdjust(event, element, -1);
+      case "ring-rank-void": return PcAdjustmentHandler.adjustVoidRing(this._getHandlerContext(), event, element, -1);
+      case "rp-step": return PcAdjustmentHandler.adjustRankPoints(this._getHandlerContext(), event, element, -0.1);
+      case "spell-slot": return PcAdjustmentHandler.adjustSpellSlot(this._getHandlerContext(), event, element, -1);
+      case "trait-rank": return PcTraitHandler.adjust(this._getHandlerContext(), event, element, -1);
       case "void-points-dots": return this._onVoidPointsAdjust(event, element, -1);
     }
   }
@@ -232,10 +213,8 @@ export default class L5R4PcSheet extends BaseActorSheet {
 
   /**
    * @override
-   * Handle clan/family/school drops as owned items so they render/edit/delete in Bio.
+   * Handle clan/family/school drops using BioItemHandler.
    * For all other items, delegate to the base class implementation.
-   * Foundry v13 API: Actor.createEmbeddedDocuments → https://foundryvtt.com/api/classes/documents.BaseDocument.html#createEmbeddedDocuments
-   * Drag data: TextEditor.getDragEventData → https://foundryvtt.com/api/classes/foundry.applications.ux.TextEditor.html#static-getDragEventData
    */
   async _onDrop(event) {
     const ev = /** @type {{originalEvent?: DragEvent}} */(event)?.originalEvent ?? event;
@@ -254,39 +233,8 @@ export default class L5R4PcSheet extends BaseActorSheet {
       return super._onDropItem(event, data);
     }
 
-    // Enforce singleton: remove prior of same type
-    try {
-      const prior = (this.actor.items?.contents ?? this.actor.items).filter(i => i.type === type);
-      if (prior.length) await this.actor.deleteEmbeddedDocuments("Item", prior.map(i => i.id));
-    } catch (err) {
-      console.warn(`${SYS_ID}`, "Failed to delete prior bio item(s)", { type, err });
-    }
-
-    let newest = null;
-    try {
-      const [created] = await this.actor.createEmbeddedDocuments("Item", [itemDoc.toObject()]);
-      newest = created ?? null;
-    } catch (err) {
-      console.warn(`${SYS_ID}`, "Failed to embed bio item on drop", { type, err });
-    }
-
-    // Update labels/flags (no renaming on Family)
-    const updates = {};
-    if (type === "clan") {
-      updates["system.clan"] = newest?.name ?? "";
-      updates[`flags.${SYS_ID}.clanItemUuid`] = newest?.uuid ?? null;
-    } else if (type === "school") {
-      updates["system.school"] = newest?.name ?? "";
-      updates[`flags.${SYS_ID}.schoolItemUuid`] = newest?.uuid ?? null;
-    } else if (type === "family") {
-      updates[`flags.${SYS_ID}.familyItemUuid`] = newest?.uuid ?? null;
-      updates[`flags.${SYS_ID}.familyName`] = newest?.name ?? null;
-    }
-
-    if (Object.keys(updates).length) {
-      try { await this.actor.update(updates); }
-      catch (err) { console.warn(`${SYS_ID}`, "actor.update failed after bio drop", { type, updates, err }); }
-    }
+    // Delegate bio item handling to BioItemHandler
+    return BioItemHandler.handleDrop(this._getHandlerContext(), itemDoc);
   }
 
 
@@ -313,20 +261,16 @@ export default class L5R4PcSheet extends BaseActorSheet {
   /* ---------------------------------- */
 
   /** @override */
-  static get DEFAULT_OPTIONS() {
-    const options = super.DEFAULT_OPTIONS;
-    return {
-      ...options,
-      styles: ["window", "forms", "prosemirror"],
-      classes: [
-        ...(options.classes ?? []).filter(c => c !== "pc" && c !== "npc" && c !== "l5r4"),
-        "l5r4",
-        "pc"
-      ],
-      position: { ...(super.DEFAULT_OPTIONS.position ?? {}), width: 870 },
-      form: { ...(super.DEFAULT_OPTIONS.form ?? {}), submitOnChange: true, submitOnClose: true }
-    };
-  }
+  static DEFAULT_OPTIONS = {
+    ...BaseActorSheet.DEFAULT_OPTIONS,
+    classes: [
+      ...(BaseActorSheet.DEFAULT_OPTIONS.classes ?? []).filter(c => c !== "pc" && c !== "npc" && c !== "l5r4"),
+      "l5r4",
+      "pc"
+    ],
+    position: { ...(BaseActorSheet.DEFAULT_OPTIONS.position ?? {}), width: 870 },
+    form: { ...(BaseActorSheet.DEFAULT_OPTIONS.form ?? {}), submitOnChange: true, submitOnClose: true }
+  };
 
 
   /* ---------------------------------- */
@@ -355,201 +299,17 @@ export default class L5R4PcSheet extends BaseActorSheet {
       links: true
     });
   
-    /** Bucket items by type for the template (keep the order stable) */
+    // Use PcContextBuilder to sort all item types (eliminates ~200 lines of duplication)
     const all = actorObj.items.contents ?? actorObj.items;
     const byType = (t) => all.filter((i) => i.type === t);
-  
-    // Skills sorted by user preference (name, rank, trait, roll, emphasis)
-    const skills = (() => {
-      const cols = {
-        name:     it => String(it?.name ?? ""),
-        rank:     it => Number(it?.system?.rank ?? 0) || 0,
-        trait:    it => {
-          const raw = String(it?.system?.trait ?? "").toLowerCase();
-          const key = raw && /^l5r4\.mechanics\.traits\./.test(raw) ? raw : (raw ? `l5r4.ui.mechanics.traits.${raw}` : "");
-          const loc = key ? game.i18n?.localize?.(key) : "";
-          return String((loc && loc !== key) ? loc : (it?.system?.trait ?? ""));
-        },
-        roll:     it => Number(it?.system?.rank ?? 0) || 0,
-        emphasis: it => String(it?.system?.emphasis ?? "")
-      };
-      const pref = getSortPref(actorObj.id, "skills", Object.keys(cols), "name");
-      const sorted = sortWithPref(byType("skill"), cols, pref, game.i18n?.lang);
-      
-      // Recalculate skill formulas with correct trait values (after Active Effects)
-      for (const skill of sorted) {
-        const traitKey = String(skill.system?.trait ?? "").toLowerCase();
-        const traitEff =
-          toInt(actorObj.system?._derived?.traitsEff?.[traitKey]) ||
-          toInt(actorObj.system?.traits?.[traitKey]);
-        const rank = toInt(skill.system?.rank);
-        
-        // Include Active Effects bonuses (matches dice.js SkillRoll logic)
-        const bb = actorObj.system?.bonuses;
-        const kSkill = String(skill.name).toLowerCase?.();
-        const bSkill = (bb?.skill && bb.skill[kSkill]) || {};
-        const bTrait = (bb?.trait && bb.trait[traitKey]) || {};
-        const rollBonus = toInt(bSkill.roll) + toInt(bTrait.roll);
-        const keepBonus = toInt(bSkill.keep) + toInt(bTrait.keep);
-        
-        skill.system.rollDice = Math.max(0, traitEff + rank + rollBonus);
-        skill.system.rollKeep = Math.max(0, traitEff + keepBonus);
-        skill.system.rollFormula = `${skill.system.rollDice}k${skill.system.rollKeep}`;
-      }
-      
-      return sorted;
-    })();
-  
-    // Spells sorted by user preference (name, ring, mastery, range, aoe, duration)
-    const spells = (() => {
-      const cols = {
-        name:     it => String(it?.name ?? ""),
-        ring:     it => String(it?.system?.ring ?? ""),
-        mastery:  it => Number(it?.system?.mastery ?? 0) || 0,
-        range:    it => String(it?.system?.range ?? ""),
-        aoe:      it => String(it?.system?.aoe ?? ""),
-        duration: it => String(it?.system?.duration ?? "")
-      };
-      const pref = getSortPref(actorObj.id, "spells", Object.keys(cols), "name");
-      return sortWithPref(byType("spell"), cols, pref, game.i18n?.lang);
-    })();
-  
-    // Advantages sorted by user preference (name, type, cost)
-    const advantages = (() => {
-      const cols = {
-        name: it => String(it?.name ?? ""),
-        type: it => String(game.i18n?.localize?.(`l5r4.character.advantages.${it?.system?.type ?? ""}`) ?? ""),
-        cost: it => Number(it?.system?.cost ?? 0) || 0
-      };
-      const pref = getSortPref(actorObj.id, "advantages", Object.keys(cols), "name");
-      return sortWithPref(byType("advantage"), cols, pref, game.i18n?.lang);
-    })();
-  
-    // Disadvantages sorted by user preference (name, type, cost)
-    const disadvantages = (() => {
-      const cols = {
-        name: it => String(it?.name ?? ""),
-        type: it => String(game.i18n?.localize?.(`l5r4.character.advantages.${it?.system?.type ?? ""}`) ?? ""),
-        cost: it => Number(it?.system?.cost ?? 0) || 0
-      };
-      const pref = getSortPref(actorObj.id, "disadvantages", Object.keys(cols), "name");
-      return sortWithPref(byType("disadvantage"), cols, pref, game.i18n?.lang);
-    })();
-  
-    // Items sorted by user preference (name)
-    const items = (() => {
-      const cols = {
-        name: it => String(it?.name ?? "")
-      };
-      const pref = getSortPref(actorObj.id, "items", Object.keys(cols), "name");
-      return sortWithPref(all.filter((i) => i.type === "item" || i.type === "commonItem"), cols, pref, game.i18n?.lang);
-    })();
-  
-    // Katas sorted by user preference (name, ring, mastery)
-    const katas = (() => {
-      const cols = {
-        name: it => String(it?.name ?? ""),
-        ring: it => String(it?.system?.ring ?? ""),
-        mastery: it => Number(it?.system?.mastery ?? 0) || 0
-      };
-      const pref = getSortPref(actorObj.id, "katas", Object.keys(cols), "name");
-      return sortWithPref(byType("kata"), cols, pref, game.i18n?.lang);
-    })();
-  
-    // Kihos sorted by user preference (name, ring, mastery, type)
-    const kihos = (() => {
-      const cols = {
-        name: it => String(it?.name ?? ""),
-        ring: it => String(it?.system?.ring ?? ""),
-        mastery: it => Number(it?.system?.mastery ?? 0) || 0,
-        type: it => String(it?.system?.type ?? "")
-      };
-      const pref = getSortPref(actorObj.id, "kihos", Object.keys(cols), "name");
-      return sortWithPref(byType("kiho"), cols, pref, game.i18n?.lang);
-    })();
-  
-    // Tattoos sorted by user preference (name)
-    const tattoos = (() => {
-      const cols = {
-        name: it => String(it?.name ?? "")
-      };
-      const pref = getSortPref(actorObj.id, "tattoos", Object.keys(cols), "name");
-      return sortWithPref(byType("tattoo"), cols, pref, game.i18n?.lang);
-    })();
-  
-    // Techniques sorted by user preference (name)
-    const techniques = (() => {
-      const cols = {
-        name: it => String(it?.name ?? "")
-      };
-      const pref = getSortPref(actorObj.id, "techniques", Object.keys(cols), "name");
-      return sortWithPref(byType("technique"), cols, pref, game.i18n?.lang);
-    })();
-  
-    // Armors sorted by user preference (name, bonus, reduction, equipped)
-    const armors = (() => {
-      const cols = {
-        name: it => String(it?.name ?? ""),
-        bonus: it => Number(it?.system?.bonus ?? 0) || 0,
-        reduction: it => Number(it?.system?.reduction ?? 0) || 0,
-        equipped: it => it?.system?.equipped ? 1 : 0
-      };
-      const pref = getSortPref(actorObj.id, "armors", Object.keys(cols), "name");
-      return sortWithPref(byType("armor"), cols, pref, game.i18n?.lang);
-    })();
-  
-    // Weapons sorted by user preference (name, damage, size)
-    const weapons = (() => {
-      const cols = {
-        name: it => String(it?.name ?? ""),
-        damage: it => (toInt(it?.system?.damageRoll) * 10) + toInt(it?.system?.damageKeep),
-        size: it => String(it?.system?.size ?? "")
-      };
-      const pref = getSortPref(actorObj.id, "weapons", Object.keys(cols), "name");
-      return sortWithPref(byType("weapon").map(weapon => {
-        const weaponSkill = resolveWeaponSkillTrait(this.actor, weapon);
-        weapon.attackFormula = `${weaponSkill.rollBonus}k${weaponSkill.keepBonus}`;
-        if (actorObj.system._stanceEffects?.fullAttack) {
-          const stanceRollBonus = weaponSkill.rollBonus + 2;
-          const stanceKeepBonus = weaponSkill.keepBonus + 1;
-          weapon.attackFormulaWithStance = `${stanceRollBonus}k${stanceKeepBonus}`;
-        } else {
-          weapon.attackFormulaWithStance = weapon.attackFormula;
-        }
-        return weapon;
-      }), cols, pref, game.i18n?.lang);
-    })();
-  
-    // Bows sorted by user preference (name, damage, size)
-    const bows = (() => {
-      const cols = {
-        name: it => String(it?.name ?? ""),
-        damage: it => (toInt(it?.system?.damageRoll) * 10) + toInt(it?.system?.damageKeep),
-        size: it => String(it?.system?.size ?? "")
-      };
-      const pref = getSortPref(actorObj.id, "weapons", Object.keys(cols), "name");
-      return sortWithPref(byType("bow").map(bow => {
-        const weaponSkill = resolveWeaponSkillTrait(this.actor, bow);
-        bow.attackFormula = `${weaponSkill.rollBonus}k${weaponSkill.keepBonus}`;
-        if (actorObj.system._stanceEffects?.fullAttack) {
-          const stanceRollBonus = weaponSkill.rollBonus + 2;
-          const stanceKeepBonus = weaponSkill.keepBonus + 1;
-          bow.attackFormulaWithStance = `${stanceRollBonus}k${stanceKeepBonus}`;
-        } else {
-          bow.attackFormulaWithStance = bow.attackFormula;
-        }
-        return bow;
-      }), cols, pref, game.i18n?.lang);
-    })();
-  
-    /** Build mastery list from skill ranks */
-    const masteries = [];
-    for (const s of skills) {
-      const r = toInt(s.system?.rank);
-      if (s.system?.mastery3 && r >= 3) masteries.push({ _id: s.id, name: `${s.name} 3`, mastery: s.system.mastery3 });
-      if (s.system?.mastery5 && r >= 5) masteries.push({ _id: s.id, name: `${s.name} 5`, mastery: s.system.mastery5 });
-      if (s.system?.mastery7 && r >= 7) masteries.push({ _id: s.id, name: `${s.name} 7`, mastery: s.system.mastery7 });
-    }
+    const sortedItems = PcContextBuilder.buildSortedItems(actorObj, all);
+    const {
+      skills, spells, advantages, disadvantages, items,
+      katas, kihos, tattoos, techniques, armors, weapons, bows
+    } = sortedItems;
+    
+    // Build mastery list from sorted skills
+    const masteries = PcContextBuilder.buildMasteryList(skills);
   
     // Effective traits logic (unchanged)
     let fam = {};
@@ -596,21 +356,23 @@ export default class L5R4PcSheet extends BaseActorSheet {
       editable: this.isEditable,
       enriched: { notes: enrichedNotes },
       traitsEff,
-      config: CONFIG[SYS_ID] || CONFIG.l5r4 || {},
-      /**
-       * One combined, sorted list for the Advantages/Disadvantages panel.
-       * Primary honors direction; tie-breakers ascend.
-       */
+      config: {
+        arrows: ARROWS,
+        sizes: SIZES,
+        rings: RINGS,
+        ringsWithNone: RINGS_WITH_NONE,
+        spellRings: SPELL_RINGS,
+        traits: SKILL_TRAITS,
+        npcTraits: NPC_TRAITS,
+        skillTypes: SKILL_TYPES,
+        actionTypes: ACTION_TYPES,
+        kihoTypes: KIHO_TYPES,
+        advantageTypes: ADVANTAGE_TYPES,
+        npcNumberWoundLvls: NPC_NUMBER_WOUND_LVLS
+      },
+      // Combined advantage/disadvantage list (uses PcContextBuilder)
       get advDisList() {
-        const list = [...advantages, ...disadvantages];
-        const cols = {
-          name:  (it) => String(it?.name ?? ""),
-          type:  (it) => String(game.i18n?.localize?.(`l5r4.character.advantages.${it?.system?.type ?? ""}`) ?? ""),
-          cost:  (it) => Number(it?.system?.cost ?? 0) || 0,
-          item:  (it) => String(it.type ?? "")
-        };
-        const pref = getSortPref(actorObj.id, "advDis", Object.keys(cols), "name");
-        return sortWithPref(list, cols, pref, game.i18n?.lang);
+        return PcContextBuilder.buildAdvDisList(actorObj, advantages, disadvantages);
       },
       // Clean, consistent variable references - much more maintainable!
       armors,
@@ -706,11 +468,7 @@ export default class L5R4PcSheet extends BaseActorSheet {
     on(root, "input[name='system.rings.void.value']", "input",  (ev, el) => saveTrait(el));
     on(root, "input[name='system.rings.void.value']", "change", (ev, el) => this._onInlineActorEdit(ev, el));
 
-    // Clan/family/school helpers
-    on(root, "[data-action='clan-link']", "click", (ev) => this._onClanLink(ev));
-    on(root, "[data-action='school-link']", "click", (ev) => this._onSchoolLink(ev));
-    on(root, "[data-action='family-open']","click", (ev) => this._onFamilyOpen(ev));
-
+    // Clan/family/school now handled by action delegation (BioItemHandler)
     // Image editing
     on(root, "[data-edit='img']", "click", (ev) => this._onEditImage(ev, ev.currentTarget));
 
@@ -751,138 +509,7 @@ export default class L5R4PcSheet extends BaseActorSheet {
     return keys[scope] ?? ["name"];
   }
 
-  /**
-   * Adjust a Trait rank by clicking its displayed value.
-   * Shift+Left click: +1. Shift+Right click: -1.
-   * Caps:
-   *  - Max effective Trait = 9
-   *  - Min effective Trait = 2, or 2 + Family bonus when that Trait is boosted by Family
-   *
-   * The sheet stores base ranks under system.traits.*, and applies Family in derived data.
-   * We clamp the *effective* rank, then convert back to base before update.
-   * Requires Shift+Click to prevent accidental changes.
-   *
-   * Foundry APIs:
-   * - Document.update: https://foundryvtt.com/api/classes/foundry.abstract.Document.html#update
-   *
-   * @param {MouseEvent} event  The originating mouse event
-   * @param {HTMLElement} element  The clicked `.trait-rank` element
-   * @param {number} delta  +1 or -1
-   */
-  async _onTraitAdjust(event, element, delta) {
-    event?.preventDefault?.();
-    event?.stopPropagation?.();
-
-    // Require Shift+Click to prevent accidental trait changes
-    if (!event?.shiftKey) return;
-
-    const key = String(element?.dataset?.trait || "").toLowerCase();
-    if (!TRAIT_KEYS.includes(key)) return;
-
-    /**
-     * Current base (pre-AE) and Family bonus.
-     * Foundry applies Active Effects before prepareDerivedData, so actor.system is post-AE.
-     * Use the document source for the true base rank.
-     * @see https://foundryvtt.com/api/classes/foundry.abstract.Document.html#_source
-     */
-    const base = Number(this.actor._source?.system?.traits?.[key]
-                 ?? this.actor.system?.traits?.[key] ?? 0) || 0;
-    const fam  = Number((() => {
-      // familyBonusFor is defined above in this file
-      try { return familyBonusFor(this.actor, key) || 0; } catch { return 0; }
-    })());
-
-    // Work in *effective* space, then convert back to base
-    const effNow = base + fam;
-    // Effective caps
-    const effMin = 0 + Math.max(0, fam); // if Family gives +1 to Strength, min displayed is 1
-    const effMax = 9;                    // global cap
-
-    const wantEff = effNow + (delta > 0 ? 1 : -1);
-    const nextEff = Math.min(effMax, Math.max(effMin, wantEff));
-    if (nextEff === effNow) return; // no change
-
-    const nextBase = nextEff - fam;
-
-    // Update the Actor’s base Trait
-    try {
-      await this.actor.update({ [`system.traits.${key}`]: nextBase }, { diff: true });
-    } catch (err) {
-      console.warn(`${SYS_ID}`, "actor.update failed in PcSheet", { err });
-    }
-  }
-
-    /**
-     * Adjust the Void Ring via click.
-     * Shift+Left click adds 1. Shift+Right click subtracts 1.
-     * Min 2. Max 9.
-     * Requires Shift+Click to prevent accidental changes.
-     *
-     * Uses standard Foundry document updates.
-     * @see https://foundryvtt.com/api/classes/foundry.abstract.Document.html#update
-     *
-     * @param {MouseEvent} event - originating event
-     * @param {HTMLElement} element - clicked .ring-rank-void element
-     * @param {number} delta - +1 or -1
-     */
-    async _onVoidAdjust(event, element, delta) {
-      event?.preventDefault?.();
-
-      // Require Shift+Click to prevent accidental void rank changes
-      if (!event?.shiftKey) return;
-
-      // Use _source to get base value before Active Effects are applied
-      const cur = Number(this.actor._source?.system?.rings?.void?.rank
-                  ?? this.actor.system?.rings?.void?.rank ?? 0) || 0;
-      const min = 0;
-      const max = 9;
-
-      const next = Math.min(max, Math.max(min, cur + (delta > 0 ? 1 : -1)));
-      if (next === cur) return;
-
-      try {
-        await this.actor.update({ "system.rings.void.rank": next }, { diff: true });
-      } catch (err) {
-        console.warn(`${SYS_ID}`, "actor.update failed in PcSheet", { err });
-      }
-    }
-
-  /**
-   * Adjust a spell slot value by +1/-1 within [0..9].
-   *
-   * - Reads the target path from the clicked element's data-path (e.g. "system.spellSlots.water")
-   * - Uses Actor.update to persist immediately.
-   *
-   * Foundry APIs:
-   * - Document.update: https://foundryvtt.com/api/classes/foundry.abstract.Document.html#update
-   * - foundry.utils.getProperty: https://foundryvtt.com/api/functions/utilities.html#getProperty
-   *
-   * @param {MouseEvent} event
-   * @param {HTMLElement} element - The clicked button with data-path
-   * @param {number} delta - +1 or -1
-   * @returns {Promise<void>}
-   */
-  async _onSpellSlotAdjust(event, element, delta) {
-    try {
-      const path = element?.dataset?.path || "";
-      // Defensive guard: only allow system.spellSlots.*
-      if (!/^system\.spellSlots\.(water|air|fire|earth|void)$/.test(path)) return;
-
-      // Read current value safely, default 0
-      const current = Number(foundry.utils.getProperty(this.actor, path) ?? 0) || 0;
-
-      // Clamp to 0..9
-      const next = Math.min(9, Math.max(0, current + (delta || 0)));
-      if (next === current) return;
-
-      await this.actor.update({ [path]: next });
-
-      // Optional immediate visual feedback (sheet will re-render anyway)
-      element.textContent = String(next);
-    } catch (err) {
-      console.warn(`${SYS_ID}`, "Spell slot adjust failed", { err, element, delta });
-    }
-  }
+  /* Trait adjustment now handled by PcTraitHandler */
 
   /**
    * Minimal inline actor edit for "system.*" fields.
@@ -922,88 +549,6 @@ export default class L5R4PcSheet extends BaseActorSheet {
   }
 
   /* ---------------------------------- */
-  /* Drag & Drop                         */
-  /* ---------------------------------- */
-
-  /**
-   * Handle drop of a Clan item: set actor.system.clan and remember the source item UUID.
-   * @param {Item} itemDoc - The dropped clan item
-   */
-  async _handleClanDrop(itemDoc) {
-    const clanName = String(itemDoc.name ?? "").trim();
-    const data = { "system.clan": clanName };
-    data[`flags.${SYS_ID}.clanItemUuid`] = itemDoc.uuid;
-    try {
-      await this.actor.update(data);
-    } catch (err) {
-      console.warn(`${SYS_ID}`, "actor.update failed in PcSheet", { err });
-    }
-  }
-
-  /**
-   * Handle drop of a School item: set actor.system.school and remember the source item UUID.
-   * Uses standard Actor.update to persist data. (Actor API: https://foundryvtt.com/api/Actor.html#update)
-   * @param {Item} itemDoc
-   */
-  async _handleSchoolDrop(itemDoc) {
-    const schoolName = String(itemDoc.name ?? "").trim();
-    const data = { "system.school": schoolName };
-    data[`flags.${SYS_ID}.schoolItemUuid`] = itemDoc.uuid;
-    try {
-      await this.actor.update(data);
-    } catch (err) {
-      console.warn(`${SYS_ID}`, "actor.update failed in PcSheet _handleSchoolDrop", { err });
-    }
-  }
-
-  /**
-   * Handle drop of a Family item: set flags and embed the item.
-   * Kept for backwards compatibility; primary flow embeds via _onDrop above.
-   * @param {Item} itemDoc - The dropped family item
-   */
-  async _handleFamilyDrop(itemDoc) {
-    try {
-      const prior = (this.actor.items?.contents ?? this.actor.items).filter(i => i.type === "family");
-      if (prior.length) await this.actor.deleteEmbeddedDocuments("Item", prior.map(i => i.id));
-    } catch (err) {
-      console.warn(`${SYS_ID}`, "Failed to delete stale Family items on drop", { err });
-    }
-
-    try {
-      await this.actor.update({
-        [`flags.${SYS_ID}.familyItemUuid`]: itemDoc.uuid,
-        [`flags.${SYS_ID}.familyName`]: String(itemDoc.name ?? "")
-        // No name mutations here anymore.
-      });
-    } catch (err) {
-      console.warn(`${SYS_ID}`, "actor.update failed in _handleFamilyDrop", { err });
-    }
-  }
-
-  /**
-   * Clear the family assignment and remove embedded Family items.
-   * Removes family bonuses and active effects immediately.
-   * @param {Event} event - The click event
-   */
-  async _onFamilyClear(event) {
-    event?.preventDefault?.();
-    const fam = this.actor.getFlag(SYS_ID, "familyName");
-    const name = fam ? this._extractBaseName(this.actor.name || "", fam) : (this.actor.name || "");
-    try {
-      const prior = (this.actor.items?.contents ?? this.actor.items).filter(i => i.type === "family");
-      if (prior.length) await this.actor.deleteEmbeddedDocuments("Item", prior.map(i => i.id));
-      await this.actor.update({
-        name,
-        [`flags.${SYS_ID}.familyItemUuid`]: null,
-        [`flags.${SYS_ID}.familyName`]: null,
-        [`flags.${SYS_ID}.familyBaseName`]: null
-      });
-    } catch (err) {
-      console.warn(`${SYS_ID}`, "actor.update failed in _onFamilyClear", { err });
-    }
-  }
-
-  /* ---------------------------------- */
   /* Rolls                               */
   /* ---------------------------------- */
 
@@ -1038,7 +583,7 @@ export default class L5R4PcSheet extends BaseActorSheet {
     const ringRank = toInt(el.dataset?.ringRank);
 
     // Pass the exact option names RingRoll expects.
-    Dice.RingRoll({
+    RingRoll({
       ringRank,
       ringName,
       systemRing,
@@ -1051,6 +596,7 @@ export default class L5R4PcSheet extends BaseActorSheet {
 
   /**
    * Handle weapon damage rolls using stored damage dice.
+   * Applies Full Attack stance bonuses (+1k1) when active.
    * Shift-click to open roll options dialog.
    * @param {MouseEvent} event - The click event
    * @param {HTMLElement} element - The clicked element in the weapon row
@@ -1062,14 +608,29 @@ export default class L5R4PcSheet extends BaseActorSheet {
     const item = id ? this.actor.items.get(id) : null;
     if (!item) return;
 
-    const diceRoll = Number(item.system?.damageRoll ?? 0) || 0;
-    const diceKeep = Number(item.system?.damageKeep ?? 0) || 0;
+    const baseDiceRoll = Number(item.system?.damageRoll ?? 0) || 0;
+    const baseDiceKeep = Number(item.system?.damageKeep ?? 0) || 0;
+    
+    // Apply stance damage bonuses
+    const stanceBonuses = getStanceDamageBonuses(this.actor);
+    const diceRoll = baseDiceRoll + stanceBonuses.roll;
+    const diceKeep = baseDiceKeep + stanceBonuses.keep;
+    
+    // Add stance bonus information to description
+    let description = item.system?.description || "";
+    if (stanceBonuses.roll > 0 || stanceBonuses.keep > 0) {
+      const bonusText = `+${stanceBonuses.roll}k${stanceBonuses.keep}`;
+      const stanceLabel = T("l5r4.ui.mechanics.stances.fullAttack");
+      description = description 
+        ? `${description} (${stanceLabel}: ${bonusText})` 
+        : `${stanceLabel}: ${bonusText}`;
+    }
 
-    return Dice.WeaponRoll({
+    return WeaponRoll({
       diceRoll,
       diceKeep,
       weaponName: item.name,
-      description: item.system?.description,
+      description,
       askForOptions: event.shiftKey
     });
   }
@@ -1089,14 +650,18 @@ export default class L5R4PcSheet extends BaseActorSheet {
 
     const weaponSkill = resolveWeaponSkillTrait(this.actor, item);
     const untrained = weaponSkill.skillRank === 0;
+    
+    // Apply stance bonuses to attack rolls
+    const stanceBonuses = getStanceAttackBonuses(this.actor);
+    
     const rollName = untrained 
       ? `${item.name} (${T("l5r4.ui.mechanics.rolls.unskilled")})`
       : `${item.name} ${T("l5r4.ui.mechanics.rolls.attackRoll")}`;
 
-    return Dice.NpcRoll({
+    return NpcRoll({
       rollName,
-      diceRoll: weaponSkill.rollBonus,
-      diceKeep: weaponSkill.keepBonus,
+      diceRoll: weaponSkill.rollBonus + stanceBonuses.roll,
+      diceKeep: weaponSkill.keepBonus + stanceBonuses.keep,
       rollType: "attack",
       actor: this.actor,
       untrained,
@@ -1290,142 +855,9 @@ export default class L5R4PcSheet extends BaseActorSheet {
     xpManager.render(true);
   }
 
-  /**
-   * Open the Wound Configuration Application for this PC.
-   * Provides real-time wound system configuration with Formula/Manual modes.
-   * @param {Event} event - The click event
-   */
-  async _onWoundConfig(event) {
-    event?.preventDefault?.();
-    
-    try {
-      // Check for existing wound config window and focus it
-      const existingApp = Object.values(ui.windows).find(app => 
-        app instanceof WoundConfigApplication && app.actor.id === this.actor.id
-      );
-
-      if (existingApp) {
-        existingApp.bringToTop();
-      } else {
-        // Create and show new Wound Configuration Application
-        const woundConfig = new WoundConfigApplication(this.actor);
-        await woundConfig.render(true);
-      }
-    } catch (err) {
-      console.warn(`${SYS_ID}`, "Failed to open wound configuration", { err, actorId: this.actor.id });
-      ui.notifications?.error(game.i18n.localize("l5r4.ui.notifications.woundConfigFailed"));
-    }
-  }
-
   /* ---------------------------------- */
-  /* Clan / Family helpers               */
+  /* Clan/Family/School now handled by BioItemHandler */
   /* ---------------------------------- */
-
-  /**
-   * Open the linked Clan item sheet by UUID.
-   * @param {Event} event - The click event
-   */
-  async _onClanLink(event) {
-    event.preventDefault();
-    const uuid = event.currentTarget?.dataset?.uuid || this.actor.getFlag(SYS_ID, "clanItemUuid");
-    if (!uuid) return;
-    const doc = await fromUuid(uuid);
-    doc?.sheet?.render(true);
-  }
-
-  /**
-   * Clear the Clan selection and remove the stored UUID flag.
-   * @param {Event} event - The click event
-   */
-  async _onClanClear(event) {
-    event.preventDefault();
-    try {
-      await this.actor.update({
-        "system.clan": "",
-        [`flags.${SYS_ID}.clanItemUuid`]: null
-      });
-    } catch (err) {
-      console.warn(`${SYS_ID}`, "actor.update failed in PcSheet", { err });
-    }
-  }
-
-  /**
-   * Open the linked School item sheet by UUID.
-   * @param {Event} event - The click event
-   * @see https://foundryvtt.com/api/global.html#fromUuid
-   */
-  async _onSchoolLink(event) {
-    event.preventDefault();
-    const uuid = event.currentTarget?.dataset?.uuid || this.actor.getFlag(SYS_ID, "schoolItemUuid");
-    if (!uuid) return;
-    const doc = await fromUuid(uuid);
-    doc?.sheet?.render(true);
-  }
-
-  /**
-   * Clear the School selection and remove the stored UUID flag.
-   * @param {Event} event - The click event
-   */
-  async _onSchoolClear(event) {
-    event.preventDefault();
-    try {
-      await this.actor.update({
-        "system.school": "",
-        [`flags.${SYS_ID}.schoolItemUuid`]: null
-      });
-    } catch (err) {
-      console.warn(`${SYS_ID}`, "actor.update failed in PcSheet _onSchoolClear", { err });
-    }
-  }
-
-  /**
-   * Open the linked Family item sheet by UUID.
-   * @param {Event} event - The click event
-   */
-  async _onFamilyOpen(event) {
-    event.preventDefault();
-    const uuid = event.currentTarget?.dataset?.uuid || this.actor.getFlag(SYS_ID, "familyItemUuid");
-    if (!uuid) return;
-    const doc = await fromUuid(uuid);
-    doc?.sheet?.render(true);
-  }
-
-  /**
-   * Clear the Family selection and remove name prefix.
-   * Removes the family name from the actor's display name.
-   * @param {Event} event - The click event
-   */
-  async _onFamilyClear(event) {
-    event.preventDefault();
-    // Remove prefix from name when clearing the family
-    const fam = this.actor.getFlag(SYS_ID, "familyName");
-    let name = this.actor.name || "";
-    if (fam) name = this._extractBaseName(name, fam);
-    try {
-      await this.actor.update({
-        name,
-        [`flags.${SYS_ID}.familyItemUuid`]: null,
-        [`flags.${SYS_ID}.familyName`]: null,
-        [`flags.${SYS_ID}.familyBaseName`]: null
-      });
-    } catch (err) {
-      console.warn(`${SYS_ID}`, "actor.update failed in PcSheet", { err });
-    }
-  }
-
-  /**
-   * Extract base name by removing family prefix from the current name.
-   * Handles case-insensitive family name removal.
-   * @param {string} current - The current actor name
-   * @param {string} fam - The family name to remove
-   * @returns {string} The base name without family prefix
-   */
-  _extractBaseName(current, fam) {
-    const famPrefix = (String(fam) + " ").toLowerCase();
-    const s = String(current ?? "");
-    if (s.toLowerCase().startsWith(famPrefix)) return s.slice(famPrefix.length).trim();
-    return s;
-  }
 
   /* ---------------------------------- */
   /* Submit pipeline                     */
@@ -1446,13 +878,13 @@ export default class L5R4PcSheet extends BaseActorSheet {
     // Call parent to build the update object first
     const data = super._prepareSubmitData(event, form, formData, updateData);
 
-    // If traits are part of the update, convert eff -> base by subtracting the family bonus
+    // Convert effective traits to base (uses FamilyBonusService, same logic as PcTraitHandler.convertSubmitData)
     const t = data?.system?.traits;
     if (t && typeof t === "object") {
       for (const [k, v] of Object.entries(t)) {
         if (v === undefined || v === null) continue;
         const eff = Number(v) || 0;
-        const bonus = toInt(familyBonusFor(this.actor, k)); // resolves flags → uuid → embedded
+        const bonus = FamilyBonusService.getBonus(this.actor, k);
         const base  = eff - bonus;
         // Clamp to >= 0 (L5R traits can’t be negative)
         t[k] = Math.max(0, base);
@@ -1601,66 +1033,6 @@ export default class L5R4PcSheet extends BaseActorSheet {
       
     } catch (err) {
       console.warn(`${SYS_ID}`, "Skills document sort failed", { err, key });
-    }
-  }
-
-  /**
-   * Adjust Honor/Glory/Status/Shadow rank.points by ±0.1 (or ±1.0 with Ctrl).
-   * Shift+Left-click increments by +0.1, Shift+Right-click decrements by -0.1.
-   * Holding Ctrl changes step to +/-1.0. Mouse wheel adjusts by 0.1.
-   * Requires Shift+Click to prevent accidental changes.
-   * @param {MouseEvent|WheelEvent} event
-   * @param {HTMLElement} el - the clicked chip element with data-key
-   * @param {number} baseDelta - default delta in decimal units (0.1 or -0.1)
-   * @returns {Promise<void>}
-   * @see https://foundryvtt.com/api/classes/foundry.documents.BaseActor.html#update
-   */
-  async _onRankPointsStep(event, el, baseDelta) {
-    try {
-      // Require Shift+Click to prevent accidental rank/points changes
-      if (!event?.shiftKey) return;
-      
-      const key = String(el?.dataset?.key || "");
-      if (!key) return;
-
-      const sys = this.actor.system ?? {};
-      const cur = {
-        rank: Number(sys?.[key]?.rank ?? 0) || 0,
-        points: Number(sys?.[key]?.points ?? 0) || 0
-      };
-
-      const step = event?.ctrlKey ? (baseDelta > 0 ? +1 : -1) : baseDelta;
-      const next = applyRankPointsDelta(cur, step, 0, 10);
-
-      const update = {};
-      update[`system.${key}.rank`] = next.rank;
-      update[`system.${key}.points`] = next.points;
-
-      await this.actor.update(update);
-    } catch (err) {
-      console.warn(`${SYS_ID} PC Sheet: failed to update rank/points`, { err, event, el });
-    }
-  }
-
-  /**
-   * Toggle section collapse/expand by toggling is-collapsed class on section-title.
-   * @param {MouseEvent} event - The originating click event
-   * @param {HTMLElement} element - The clicked expand button
-   * @returns {void}
-   */
-  _onSectionExpand(event, element) {
-    event?.preventDefault?.();
-    
-    const sectionTitle = element.closest('.section-title');
-    if (!sectionTitle) return;
-    
-    sectionTitle.classList.toggle('is-collapsed');
-    
-    // Toggle the chevron icon direction
-    const icon = element.querySelector("i");
-    if (icon) {
-      icon.classList.toggle("fa-chevron-down");
-      icon.classList.toggle("fa-chevron-up");
     }
   }
 }
