@@ -46,12 +46,22 @@ Thumbs.db
 # Large media files
 *.mp4
 *.tiff
-*.avi
-*.flv
-*.mov
-*.wmv
 
-.windsurf
-_for_research
 pc-images
 npc-images
+
+# Project-specific directories
+_for_research/
+# game-rules/
+.windsurf/
+
+# Test coverage reports
+tests/coverage/
+coverage/
+test_priority/
+
+# Vitest cache
+.vitest/
+
+# Madge dependency analysis
+madge-analysis.json
