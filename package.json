@@ -3,7 +3,7 @@
   "version": "1.1.0",
   "description": "Legend of the Five Rings 4th Edition system for Foundry VTT",
   "author": "Ernie Ayala",
-  "license": "GPL-3.0",
+  "license": "MIT",
   "repository": {
     "type": "git",
     "url": "https://github.com/ernieayala/l5r4.git"
@@ -21,9 +21,22 @@
     "version:minor": "npm version minor --no-git-tag-version",
     "version:major": "npm version major --no-git-tag-version",
     "prepare-release": "node scripts/prepare-release.js",
-    "validate": "node scripts/prepare-release.js --validate-only"
+    "validate": "node scripts/prepare-release.js --validate-only",
+    "madge:check": "madge --circular module/",
+    "madge:summary": "madge --summary module/",
+    "madge:json": "madge --json module/ > madge-analysis.json",
+    "pretest": "npm run madge:check",
+    "test": "vitest run",
+    "test:watch": "vitest",
+    "test:ui": "vitest --ui",
+    "test:coverage": "vitest run --coverage"
   },
   "devDependencies": {
-    "sass": "1.69.5"
+    "@vitest/coverage-v8": "^1.0.0",
+    "@vitest/ui": "^1.0.0",
+    "happy-dom": "^12.10.3",
+    "madge": "^8.0.0",
+    "sass": "1.69.5",
+    "vitest": "^1.0.0"
   }
 }
