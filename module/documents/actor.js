@@ -111,9 +111,11 @@
  * @see {@link ../apps/xp-manager.js|XP Manager} - Experience point management interface
  */
 
-import { SYS_ID, iconPath } from "../config.js";
-import { toInt, normalizeTraitKey } from "../utils.js";
-import { applyStanceAutomation } from "../services/stance.js";
+import { SYS_ID } from "../config/constants.js";
+import { iconPath } from "../config/icons.js";
+import { toInt } from "../utils/type-coercion.js";
+import { normalizeTraitKey } from "../utils/mechanics.js";
+import { applyStanceAutomation } from "../services/stance/core/automation.js";
 
 /**
  * Type definition for the L5R4 actor system data structure.
@@ -349,18 +351,25 @@ export default class L5R4Actor extends Actor {
       });
       
       // Set default wound mode and image for new NPCs
+      // Only apply default wound mode if not explicitly provided in creation data
       try {
-        this.updateSource({ 
-          img: iconPath("ninja.png"),
-          "system.woundMode": defaultWoundMode
-        });
+        const updates = { img: iconPath("ninja.png") };
+        
+        // Check if woundMode was explicitly provided during creation
+        if (!data.system?.woundMode) {
+          updates["system.woundMode"] = defaultWoundMode;
+        }
+        
+        this.updateSource(updates);
         
         // Debug logging for NPC creation
         if (CONFIG.debug?.l5r4?.wounds) {
           console.log(`${SYS_ID} | NPC Created with wound mode:`, {
             actorId: this.id,
             actorName: this.name,
-            woundMode: defaultWoundMode
+            providedWoundMode: data.system?.woundMode,
+            defaultWoundMode: defaultWoundMode,
+            finalWoundMode: data.system?.woundMode || defaultWoundMode
           });
         }
       } catch (err) {
@@ -388,6 +397,10 @@ export default class L5R4Actor extends Actor {
    */
   async _preUpdate(changed, options, user) {
     await super._preUpdate(changed, options, user);
+    
+    // Only track XP expenditure for PC actors
+    if (this.type !== "pc") return;
+    
     try {
       const ns = this.flags?.[SYS_ID] ?? {};
       const freeTraitBase  = ns.xpFreeTraitBase ?? {};
@@ -429,7 +442,9 @@ export default class L5R4Actor extends Actor {
       // Traits delta → XP
       if (changed?.system?.traits) {
         const toInt = n => Number.isFinite(+n) ? Number(n) : 0;
-        const oldSys = /** @type {any} */ (this.system);
+        // Use _source to get base values before Active Effects
+        // this.system contains effective values after AEs are applied
+        const oldSys = /** @type {any} */ (this._source?.system ?? this.system);
         const traitDiscounts = this.flags?.[SYS_ID]?.traitDiscounts ?? {};
         const freeTraitBase = this.flags?.[SYS_ID]?.xpFreeTraitBase ?? {};
 
@@ -475,7 +490,9 @@ export default class L5R4Actor extends Actor {
       // Void
       const newVoid = changed?.system?.rings?.void?.rank ?? changed?.system?.rings?.void?.value;
       if (newVoid !== undefined) {
-        const oldVoid = toInt(oldSys?.rings?.void?.rank ?? oldSys?.rings?.void?.value ?? oldSys?.rings?.void);
+        // Use _source to get base void value before Active Effects
+        const oldSysVoid = this._source?.system ?? this.system;
+        const oldVoid = toInt(oldSysVoid?.rings?.void?.rank ?? oldSysVoid?.rings?.void?.value ?? oldSysVoid?.rings?.void);
         const next = toInt(newVoid);
         if (Number.isFinite(next) && next > oldVoid) {
           const baselineVoid = 2 + toInt(freeTraitBase?.void ?? 0);
@@ -943,6 +960,13 @@ export default class L5R4Actor extends Actor {
     sys.initiative.effKeep = toInt(sys.initiative.keep) > 0 ? toInt(sys.initiative.keep) : ref;
     sys.initiative.totalMod = toInt(sys.initiative.totalMod);
 
+    // Armor TN for NPCs
+    sys.armorTn = sys.armorTn || {};
+    sys.armorTn.base = 0;
+    sys.armorTn.bonus = 0;
+    sys.armorTn.reduction = toInt(sys.armor?.reduction ?? 0);
+    sys.armorTn.current = toInt(sys.armor?.armorTn ?? 0);
+
     // Initialize wound system based on mode
     sys.woundLevels = sys.woundLevels || {};
     sys.manualWoundLevels = sys.manualWoundLevels || {};
@@ -1146,7 +1170,7 @@ export default class L5R4Actor extends Actor {
     }
 
     // Handle customizable wound levels for nonhuman NPCs
-    const nrWoundLvls = toInt(sys.nrWoundLvls) || 1;
+    const nrWoundLvls = toInt(sys.nrWoundLvls) || 3;
     const activeOrder = L5R4Actor.getWoundLevelsForCount(nrWoundLvls);
     
     let prev = 0;
@@ -1161,7 +1185,6 @@ export default class L5R4Actor extends Actor {
       lvl.current = false;
       lvl.isActive = false;
       lvl.isVisible = false;
-      lvl.penalty = 0;
       
       // Check if this wound level key is in the active order (not based on index)
       if (activeOrder.includes(key)) {
@@ -1182,6 +1205,9 @@ export default class L5R4Actor extends Actor {
         lvl.isActive = true;
         lvl.isVisible = true;
         
+        // Always set penalty from defaults for active levels in formula mode
+        lvl.penalty = L5R4Actor.DEFAULT_WOUND_PENALTIES[key] || 0;
+        
         // Debug logging
         if (CONFIG.debug?.l5r4?.wounds) {
           console.log(`${SYS_ID} | ${key}: value = ${lvl.value}`);
@@ -1189,6 +1215,7 @@ export default class L5R4Actor extends Actor {
       } else {
         // Inactive wound level - set to previous value to effectively disable
         lvl.value = prev;
+        lvl.penalty = 0;
         lvl.isActive = false;
         lvl.isVisible = false;
       }
