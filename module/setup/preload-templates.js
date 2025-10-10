@@ -12,6 +12,19 @@
  * - **Dependency Management**: Ensure all required templates are available before use
  * - **Memory Efficiency**: Optimize template storage and access patterns
  *
+ * **Integration Testing Requirements:**
+ * @integration-test Scenario: Real template files exist and are valid Handlebars
+ * @integration-test Reason: Unit tests mock loadTemplates completely
+ * @integration-test Validates: Actual template paths resolve, files parse without errors
+ * 
+ * @integration-test Scenario: Foundry's loadTemplates API caches templates correctly
+ * @integration-test Reason: Unit tests stub API behavior with vi.fn()
+ * @integration-test Validates: Templates available via renderTemplate after preload
+ * 
+ * @integration-test Scenario: Missing template file throws descriptive error
+ * @integration-test Reason: Unit tests mock error conditions, not real file I/O
+ * @integration-test Validates: Actual 404 errors caught during system initialization
+ *
  * **Template Architecture:**
  * The L5R4 system uses a hierarchical template structure with clear separation of concerns:
  * - **Main Templates**: Complete sheet layouts for actors, items, and applications
@@ -24,9 +37,11 @@
  * - **Item Partials**: Shared components for item sheets (_rules-summary, _scaffold, _header)
  * - **Actor Templates**: Main actor sheet templates (pc-sheet, npc-sheet, limited views)
  * - **Actor Partials**: Reusable actor sheet components (_stats, _skills, _equipment, _traits)
- * - **Card Templates**: Chat card templates for items and rolls (weapon-chat, spell-chat)
+ * - **Card Templates**: Chat card templates for items (weapon-card, spell-card, etc.)
  * - **Card Partials**: Shared chat card components (_expand, _header, _footer)
- * - **Dialog Templates**: Application interfaces (xp-manager, stance-selector)
+ * - **Chat Templates**: Roll result displays (simple-roll, full-defense-roll, weapon-chat)
+ * - **Dialog Templates**: Application interfaces (roll-modifiers, unified-item-create)
+ * - **App Templates**: Dedicated application windows (xp-manager, wound-config)
  *
  * **Performance Benefits:**
  * - **Eliminates Loading Delays**: Templates cached at startup prevent runtime fetching
@@ -47,11 +62,16 @@
  * │   └── ...
  * ├── actor/              # Actor sheet templates
  * │   ├── _partials/      # Shared actor components
- * │   ├── pc-sheet.hbs    # Player character sheet
- * │   └── npc-sheet.hbs   # Non-player character sheet
- * ├── cards/              # Chat card templates
+ * │   ├── pc.hbs          # Player character sheet
+ * │   └── npc.hbs         # Non-player character sheet
+ * ├── cards/              # Chat card templates (item displays)
  * │   ├── _partials/      # Shared card components
- * │   └── weapon-chat.hbs # Weapon roll cards
+ * │   └── weapon.hbs      # Weapon info card
+ * ├── chat/               # Chat message templates (roll results)
+ * │   ├── simple-roll.hbs # Generic roll results
+ * │   └── weapon-chat.hbs # Weapon attack results
+ * ├── dialogs/            # Modal dialog templates
+ * │   └── roll-modifiers-dialog.hbs
  * └── apps/               # Application templates
  *     └── xp-manager.hbs  # XP management interface
  * ```
@@ -163,6 +183,11 @@ export async function preloadTemplates() {
     // Chat card partial templates - shared chat components
     "systems/l5r4/templates/cards/_partials/_expand.hbs",
     
+    // Chat message templates - roll result displays
+    "systems/l5r4/templates/chat/full-defense-roll.hbs",
+    "systems/l5r4/templates/chat/simple-roll.hbs",
+    "systems/l5r4/templates/chat/weapon-chat.hbs",
+    
     // Actor partial templates - shared actor components
     "systems/l5r4/templates/actor/_partials/_unified-item-create.hbs",
     
@@ -175,12 +200,24 @@ export async function preloadTemplates() {
     "systems/l5r4/templates/apps/wound-config.hbs",
   ];
 
+  // Validate Foundry API availability before attempting to load templates
+  if (!globalThis.foundry?.applications?.handlebars?.loadTemplates) {
+    const error = new Error(
+      "Foundry VTT template system not available. " +
+      "Ensure preloadTemplates() is called after Foundry initialization."
+    );
+    console.warn("L5R4 | Template preloading failed", { error, templatePaths });
+    throw error;
+  }
+
   // Preload all templates using Foundry's template caching system
   try {
     await foundry.applications.handlebars.loadTemplates(templatePaths);
-    console.log("L5R4 | Preloaded " + templatePaths.length + " Handlebars templates");
+    console.log(`L5R4 | Preloaded ${templatePaths.length} Handlebars templates`);
   } catch (err) {
+    // Safe error message extraction - handles any error type
+    const errorMessage = err?.message ?? err?.toString?.() ?? String(err);
     console.warn("L5R4 | Template preloading failed", { error: err, templatePaths });
-    throw new Error("Failed to preload L5R4 templates: " + err.message);
+    throw new Error(`Failed to preload L5R4 templates: ${errorMessage}`);
   }
 }
