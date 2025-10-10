@@ -16,7 +16,7 @@
  * 
  * @author L5R4 System Team
  * @since 1.1.0
- * @version 1.1.0
+ * @version 2.0.0
  */
 
 import { CHAT_CARD_TEMPLATES } from "../constants/item-types.js";

@@ -35,7 +35,7 @@
  * 
  * @author L5R4 System Team
  * @since 1.1.0
- * @version 1.1.0
+ * @version 2.0.0
  * @see {@link ../../services/fear.js|Fear Service} - Uses these computed values
  * @see L5R4 Core Rulebook, 4th Edition, p. 91-92 - Fear rules
  */

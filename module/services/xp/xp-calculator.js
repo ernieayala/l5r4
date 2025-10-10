@@ -44,7 +44,7 @@
  * 
  * @author L5R4 System Team
  * @since 2.0.0
- * @version 1.0.0
+ * @version 2.0.0
  * @see {@link ../../documents/actor/calculations/xp-system.js|XP System} - Shared calculation functions
  * @see {@link ../../apps/xp-manager.js|XP Manager} - UI that uses this service
  */

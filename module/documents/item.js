@@ -20,7 +20,7 @@
  *
  * @author L5R4 System Team
  * @since 1.0.0
- * @version 1.1.0
+ * @version 2.0.0
  * @extends {Item}
  * @see {@link ./item/constants/item-types.js|Item Type Constants}
  * @see {@link ./item/lifecycle/item-creation.js|Item Creation Logic}

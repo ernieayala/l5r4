@@ -53,7 +53,7 @@
  * 
  * @author L5R4 System Team
  * @since 1.1.0
- * @version 1.1.0
+ * @version 2.0.0
  * @see {@link https://foundryvtt.com/api/classes/documents.Combatant.html#getInitiativeRoll|Combatant.getInitiativeRoll}
  * @see {@link https://foundryvtt.com/api/classes/foundry.dice.Roll.html|Roll}
  * @see {@link ./dice.js|Dice Service} - TenDiceRule implementation
