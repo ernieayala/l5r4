@@ -48,8 +48,8 @@ Thumbs.db
 
 # Project-specific directories
 _for_research/
-# game-rules/
-# .windsurf/
+game-rules/
+.windsurf/
 pc-images
 npc-images
 
