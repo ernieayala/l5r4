@@ -711,8 +711,8 @@ async function listDir(dirPath) {
  * @returns {Promise<string|null>} New path if migration available and target exists, null otherwise
  * 
  * @example
- * const newPath = await computeNewIconPath("systems/l5r4/assets/icons/air.png");
- * // Returns "systems/l5r4/assets/icons/rings/air.png" if target exists
+ * const newPath = await computeNewIconPath("systems/l5r4-enhanced/assets/icons/air.png");
+ * // Returns "systems/l5r4-enhanced/assets/icons/rings/air.png" if target exists
  */
 async function computeNewIconPath(img) {
   if (typeof img !== "string" || !img.startsWith(PATHS.icons + "/")) return null;

@@ -107,7 +107,7 @@ export const F = (key, data) => {
  * 
  * **Path Resolution:**
  * - Path should be relative to the Foundry root directory
- * - System templates typically start with "systems/l5r4/templates/"
+ * - System templates typically start with "systems/l5r4-enhanced/templates/"
  * - Use full extension (.hbs) in path
  * 
  * **Error Handling:**

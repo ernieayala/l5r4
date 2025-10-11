@@ -1,7 +1,7 @@
 {
   "name": "l5r4",
   "version": "2.0.0",
-  "description": "Legend of the Five Rings 4th Edition system for Foundry VTT",
+  "description": "Legend of the Five Rings 4e Enhanced system for Foundry VTT",
   "author": "Ernie Ayala",
   "license": "MIT",
   "repository": {
@@ -13,8 +13,8 @@
   },
   "homepage": "https://github.com/ernieayala/l5r4#readme",
   "scripts": {
-    "build:css": "sass --no-source-map scss/l5r4.scss l5r4.css",
-    "watch:css": "sass --no-source-map --watch scss/l5r4.scss:l5r4.css",
+    "build:css": "sass --no-source-map scss/l5r4-enhanced.scss dist/l5r4-enhanced.css",
+    "watch:css": "sass --no-source-map --watch scss/l5r4-enhanced.scss:dist/l5r4-enhanced.css",
     "build": "npm run build:css",
     "dev": "npm run watch:css",
     "version:patch": "npm version patch --no-git-tag-version",
@@ -32,11 +32,11 @@
     "test:coverage": "vitest run --coverage"
   },
   "devDependencies": {
-    "@vitest/coverage-v8": "^1.0.0",
-    "@vitest/ui": "^1.0.0",
-    "happy-dom": "^12.10.3",
-    "madge": "^8.0.0",
+    "@vitest/coverage-v8": "1.0.0",
+    "@vitest/ui": "1.0.0",
+    "happy-dom": "12.10.3",
+    "madge": "8.0.0",
     "sass": "1.69.5",
-    "vitest": "^1.0.0"
+    "vitest": "1.0.0"
   }
 }

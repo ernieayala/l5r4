@@ -49,8 +49,8 @@
             </span>
         </div>
     </div>
-    {{> "systems/l5r4/templates/actor/_partials/_unified-item-create.hbs"}}
-    {{> "systems/l5r4/templates/actor/_partials/_expand.hbs"}}
+    {{> "systems/l5r4-enhanced/templates/actor/_partials/_unified-item-create.hbs"}}
+    {{> "systems/l5r4-enhanced/templates/actor/_partials/_expand.hbs"}}
   </div>
   <section class="item-list -spell -header" data-scope="spells">
     <div class="item">
@@ -65,7 +65,7 @@
   </section>
   <section class="item-list -spell">
     {{#each spells as |spell id|}}
-      {{> "systems/l5r4/templates/cards/spell.hbs" system=spell.system inSheet=true docId=spell.id}}
+      {{> "systems/l5r4-enhanced/templates/cards/spell.hbs" system=spell.system inSheet=true docId=spell.id}}
     {{/each}}
   </section>
 </section>

@@ -134,7 +134,7 @@ export default class XpManagerApplication extends foundry.applications.api.Handl
    */
   static PARTS = {
     form: {
-      template: "systems/l5r4/templates/apps/xp-manager.hbs"
+      template: `systems/${SYS_ID}/templates/apps/xp-manager.hbs`
     }
   };
 
