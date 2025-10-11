@@ -133,6 +133,15 @@ Version 2.0.0 represents a complete restructuring of the L5R4 system codebase in
 
 ### Added Features
 
+**User-Facing Features**
+- **Combat Stance Controls**: Dropdown stance selector on character sheets (PC and NPC)
+  - Located below Initiative section for easy access during combat
+  - Five stance options: Attack, Full Attack, Defense, Full Defense, Center
+  - Uses existing stance system with Active Effects
+  - Zero new CSS required - reuses existing grid pattern from Initiative section
+  - Automatic mutual exclusion via existing stance lifecycle hooks
+  - Stances persist through combat rounds and affect roll calculations
+
 **Service Modules**
 - `family-bonus-service.js` - Character creation family bonuses
 - `initiative.js` - Initiative computation service
@@ -220,6 +229,9 @@ Version 2.0.0 represents a complete restructuring of the L5R4 system codebase in
 - `module/utils/` (7 modules)
 - `game-rules/` (38 markdown files)
 - `tests/` (integration test suite)
+
+### Fixed
+- Fixed stance effect template lookup for Full Attack stance (function name mismatch)
 
 ### Acknowledgments
 

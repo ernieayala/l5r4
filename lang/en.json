@@ -322,6 +322,10 @@
         "insightRank": "Insight Rank",
         "insightPoints": "Insight Points"
       },
+      "stance": {
+        "title": "Combat Stance",
+        "current": "Current Stance"
+      },
       "experience": {
         "xpAmount": "Amount",
         "note": "Note",

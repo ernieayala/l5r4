@@ -112,7 +112,8 @@ import {
   SKILL_TYPES, 
   ACTION_TYPES, 
   KIHO_TYPES, 
-  ADVANTAGE_TYPES 
+  ADVANTAGE_TYPES,
+  STANCES 
 } from "../config/localization.js";
 import { NPC_NUMBER_WOUND_LVLS } from "../config/game-data.js";
 import { T } from "../utils/localization.js";
@@ -126,6 +127,7 @@ import { WeaponRoll } from "../services/dice/rolls/weapon-roll.js";
 import { NpcRoll } from "../services/dice/rolls/npc-roll.js";
 import { FamilyBonusService } from "../services/family-bonus-service.js";
 import { getStanceAttackBonuses, getStanceDamageBonuses } from "../services/stance/rolls/attack-bonuses.js";
+import { getActiveStances } from "../services/stance/core/helpers.js";
 import { BaseActorSheet } from "./base-actor-sheet.js";
 import XpManagerApplication from "../apps/xp-manager.js";
 import { AppLauncherHandler } from "./handlers/app-launcher-handler.js";
@@ -133,6 +135,7 @@ import { PcAdjustmentHandler } from "./handlers/pc-adjustment-handler.js";
 import { BioItemHandler } from "./handlers/bio-item-handler.js";
 import { PcTraitHandler } from "./handlers/pc-trait-handler.js";
 import { PcContextBuilder } from "./handlers/pc-context-builder.js";
+import { StanceHandler } from "./handlers/stance-handler.js";
 
 /** Foundry UX TextEditor (for enrichHTML) — https://foundryvtt.com/api/classes/foundry.applications.ux.TextEditor.html */
 const { TextEditor } = foundry.applications.ux;
@@ -209,6 +212,7 @@ export default class L5R4PcSheet extends BaseActorSheet {
   /** @inheritdoc */
   _onActionChange(action, event, element) {
     if (action === "inline-edit") return this._onInlineItemEdit(event, element);
+    if (action === "change-stance") return StanceHandler.changeStance(this._getHandlerContext(), event, element);
   }
 
   /**
@@ -342,6 +346,10 @@ export default class L5R4PcSheet extends BaseActorSheet {
     const bioFamily = byType("family")[0] ?? null;
     const bioSchool = byType("school")[0] ?? null;
   
+    // Get current active stance for dropdown
+    const activeStances = getActiveStances(actorObj);
+    const currentStance = activeStances[0] || "";
+  
     /**
      * Template context with consistently pre-computed sorted item collections.
      * All item types now use the same pre-computed pattern for maintainability.
@@ -356,6 +364,7 @@ export default class L5R4PcSheet extends BaseActorSheet {
       editable: this.isEditable,
       enriched: { notes: enrichedNotes },
       traitsEff,
+      currentStance,
       config: {
         arrows: ARROWS,
         sizes: SIZES,
@@ -368,6 +377,7 @@ export default class L5R4PcSheet extends BaseActorSheet {
         actionTypes: ACTION_TYPES,
         kihoTypes: KIHO_TYPES,
         advantageTypes: ADVANTAGE_TYPES,
+        stances: STANCES,
         npcNumberWoundLvls: NPC_NUMBER_WOUND_LVLS
       },
       // Combined advantage/disadvantage list (uses PcContextBuilder)
