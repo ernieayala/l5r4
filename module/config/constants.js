@@ -33,7 +33,7 @@ const freeze = Object.freeze;
  * // Store actor flag
  * actor.setFlag(SYS_ID, "customData", value);
  */
-export const SYS_ID = "l5r4";
+export const SYS_ID = "l5r4-enhanced";
 
 /**
  * Root path for the L5R4 system directory.

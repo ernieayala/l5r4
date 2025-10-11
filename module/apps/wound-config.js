@@ -93,7 +93,7 @@ export default class WoundConfigApplication extends foundry.applications.api.Han
    */
   static PARTS = {
     form: {
-      template: "systems/l5r4/templates/apps/wound-config.hbs"
+      template: `systems/${SYS_ID}/templates/apps/wound-config.hbs`
     }
   };
 
@@ -134,7 +134,7 @@ export default class WoundConfigApplication extends foundry.applications.api.Han
    * @private
    */
   _debug(message, data = {}) {
-    // Debug logging can be enabled via browser console: game.settings.set("l5r4", "debugWoundConfig", true)
+    // Debug logging can be enabled via browser console: game.settings.set("l5r4-enhanced", "debugWoundConfig", true)
     if (game.settings?.get(SYS_ID, "debugWoundConfig")) {
       console.log(`${SYS_ID} | WoundConfig | ${message}:`, data);
     }

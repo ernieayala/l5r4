@@ -19,7 +19,7 @@
  * 
  * **Storage Structure:**
  * ```javascript
- * game.user.flags.l5r4.sortByActor = {
+ * game.user.flags["l5r4-enhanced"].sortByActor = {
  *   [actorId]: {
  *     [scope]: { key: "name", dir: "asc" },
  *     "weapons": { key: "damage", dir: "desc" },

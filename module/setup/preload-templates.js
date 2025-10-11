@@ -1,3 +1,5 @@
+import { SYS_ID } from "../config/constants.js";
+
 /**
  * @fileoverview L5R4 Template Preloader - Handlebars Template Caching for Foundry VTT v13+
  * 
@@ -95,7 +97,8 @@
  * await preloadTemplates();
  * 
  * // Templates are then available via Foundry's template system
- * const html = await renderTemplate('systems/l5r4/templates/item/weapon.hbs', context);
+ * // Path is built using SYS_ID constant
+ * const html = await renderTemplate(`systems/${SYS_ID}/templates/item/weapon.hbs`, context);
  * ```
  *
  * **Maintenance Guidelines:**
@@ -114,90 +117,90 @@ export async function preloadTemplates() {
   // Comprehensive list of all Handlebars templates used by the L5R4 system
   const templatePaths = [
     // Item sheet templates - individual item type forms
-    "systems/l5r4/templates/item/advantage.hbs",
-    "systems/l5r4/templates/item/armor.hbs",
-    "systems/l5r4/templates/item/clan.hbs",
-    "systems/l5r4/templates/item/disadvantage.hbs",
-    "systems/l5r4/templates/item/family.hbs",
-    "systems/l5r4/templates/item/commonItem.hbs",
-    "systems/l5r4/templates/item/kata.hbs",
-    "systems/l5r4/templates/item/kiho.hbs",
-    "systems/l5r4/templates/item/school.hbs",
-    "systems/l5r4/templates/item/skill.hbs",
-    "systems/l5r4/templates/item/spell.hbs",
-    "systems/l5r4/templates/item/tattoo.hbs",
-    "systems/l5r4/templates/item/technique.hbs",
-    "systems/l5r4/templates/item/weapon.hbs",
+    `systems/${SYS_ID}/templates/item/advantage.hbs`,
+    `systems/${SYS_ID}/templates/item/armor.hbs`,
+    `systems/${SYS_ID}/templates/item/clan.hbs`,
+    `systems/${SYS_ID}/templates/item/disadvantage.hbs`,
+    `systems/${SYS_ID}/templates/item/family.hbs`,
+    `systems/${SYS_ID}/templates/item/commonItem.hbs`,
+    `systems/${SYS_ID}/templates/item/kata.hbs`,
+    `systems/${SYS_ID}/templates/item/kiho.hbs`,
+    `systems/${SYS_ID}/templates/item/school.hbs`,
+    `systems/${SYS_ID}/templates/item/skill.hbs`,
+    `systems/${SYS_ID}/templates/item/spell.hbs`,
+    `systems/${SYS_ID}/templates/item/tattoo.hbs`,
+    `systems/${SYS_ID}/templates/item/technique.hbs`,
+    `systems/${SYS_ID}/templates/item/weapon.hbs`,
     
     // Item partial templates - shared components
-    "systems/l5r4/templates/item/_partials/_rules-summary.hbs",
-    "systems/l5r4/templates/item/_partials/_scaffold.hbs",
+    `systems/${SYS_ID}/templates/item/_partials/_rules-summary.hbs`,
+    `systems/${SYS_ID}/templates/item/_partials/_scaffold.hbs`,
     
     // Actor sheet templates - main character sheets
-    "systems/l5r4/templates/actor/pc.hbs",
-    "systems/l5r4/templates/actor/npc.hbs",
+    `systems/${SYS_ID}/templates/actor/pc.hbs`,
+    `systems/${SYS_ID}/templates/actor/npc.hbs`,
     
     // Limited actor sheet templates - restricted views for non-owners
-    "systems/l5r4/templates/actor/pc-limited.hbs",
-    "systems/l5r4/templates/actor/npc-limited.hbs",
+    `systems/${SYS_ID}/templates/actor/pc-limited.hbs`,
+    `systems/${SYS_ID}/templates/actor/npc-limited.hbs`,
     
     // Actor partial templates - reusable sheet components
-    "systems/l5r4/templates/actor/_partials/_expand.hbs",
-    "systems/l5r4/templates/actor/_partials/_stats.hbs",
-    "systems/l5r4/templates/actor/_partials/_stats-npc.hbs",
-    "systems/l5r4/templates/actor/_partials/_ranks.hbs",
-    "systems/l5r4/templates/actor/_partials/_initiative.hbs",
-    "systems/l5r4/templates/actor/_partials/_armor.hbs",
-    "systems/l5r4/templates/actor/_partials/_wounds.hbs",
-    "systems/l5r4/templates/actor/_partials/_fear.hbs",
-    "systems/l5r4/templates/actor/_partials/_bio.hbs",
+    `systems/${SYS_ID}/templates/actor/_partials/_expand.hbs`,
+    `systems/${SYS_ID}/templates/actor/_partials/_stats.hbs`,
+    `systems/${SYS_ID}/templates/actor/_partials/_stats-npc.hbs`,
+    `systems/${SYS_ID}/templates/actor/_partials/_ranks.hbs`,
+    `systems/${SYS_ID}/templates/actor/_partials/_initiative.hbs`,
+    `systems/${SYS_ID}/templates/actor/_partials/_armor.hbs`,
+    `systems/${SYS_ID}/templates/actor/_partials/_wounds.hbs`,
+    `systems/${SYS_ID}/templates/actor/_partials/_fear.hbs`,
+    `systems/${SYS_ID}/templates/actor/_partials/_bio.hbs`,
     
     // Individual item section templates
-    "systems/l5r4/templates/actor/_partials/_skills-section.hbs",
-    "systems/l5r4/templates/actor/_partials/_weapon-section.hbs",
-    "systems/l5r4/templates/actor/_partials/_armor-section.hbs",
-    "systems/l5r4/templates/actor/_partials/_item-section.hbs",
-    "systems/l5r4/templates/actor/_partials/_spell-section.hbs",
-    "systems/l5r4/templates/actor/_partials/_technique-section.hbs",
-    "systems/l5r4/templates/actor/_partials/_kiho-section.hbs",
-    "systems/l5r4/templates/actor/_partials/_kata-section.hbs",
-    "systems/l5r4/templates/actor/_partials/_tattoo-section.hbs",
-    "systems/l5r4/templates/actor/_partials/_advantage-section.hbs",
-    "systems/l5r4/templates/actor/_partials/_disadvantage-section.hbs",
+    `systems/${SYS_ID}/templates/actor/_partials/_skills-section.hbs`,
+    `systems/${SYS_ID}/templates/actor/_partials/_weapon-section.hbs`,
+    `systems/${SYS_ID}/templates/actor/_partials/_armor-section.hbs`,
+    `systems/${SYS_ID}/templates/actor/_partials/_item-section.hbs`,
+    `systems/${SYS_ID}/templates/actor/_partials/_spell-section.hbs`,
+    `systems/${SYS_ID}/templates/actor/_partials/_technique-section.hbs`,
+    `systems/${SYS_ID}/templates/actor/_partials/_kiho-section.hbs`,
+    `systems/${SYS_ID}/templates/actor/_partials/_kata-section.hbs`,
+    `systems/${SYS_ID}/templates/actor/_partials/_tattoo-section.hbs`,
+    `systems/${SYS_ID}/templates/actor/_partials/_advantage-section.hbs`,
+    `systems/${SYS_ID}/templates/actor/_partials/_disadvantage-section.hbs`,
     
     // Chat card templates - item display in chat
-    "systems/l5r4/templates/cards/advantage-disadvantage.hbs",
-    "systems/l5r4/templates/cards/armor.hbs",
-    "systems/l5r4/templates/cards/clan.hbs",
-    "systems/l5r4/templates/cards/family.hbs",
-    "systems/l5r4/templates/cards/commonItem.hbs",
-    "systems/l5r4/templates/cards/kata.hbs",
-    "systems/l5r4/templates/cards/kiho.hbs",
-    "systems/l5r4/templates/cards/school.hbs",
-    "systems/l5r4/templates/cards/skill.hbs",
-    "systems/l5r4/templates/cards/spell.hbs",
-    "systems/l5r4/templates/cards/tattoo.hbs",
-    "systems/l5r4/templates/cards/technique.hbs",
-    "systems/l5r4/templates/cards/weapon.hbs",
+    `systems/${SYS_ID}/templates/cards/advantage-disadvantage.hbs`,
+    `systems/${SYS_ID}/templates/cards/armor.hbs`,
+    `systems/${SYS_ID}/templates/cards/clan.hbs`,
+    `systems/${SYS_ID}/templates/cards/family.hbs`,
+    `systems/${SYS_ID}/templates/cards/commonItem.hbs`,
+    `systems/${SYS_ID}/templates/cards/kata.hbs`,
+    `systems/${SYS_ID}/templates/cards/kiho.hbs`,
+    `systems/${SYS_ID}/templates/cards/school.hbs`,
+    `systems/${SYS_ID}/templates/cards/skill.hbs`,
+    `systems/${SYS_ID}/templates/cards/spell.hbs`,
+    `systems/${SYS_ID}/templates/cards/tattoo.hbs`,
+    `systems/${SYS_ID}/templates/cards/technique.hbs`,
+    `systems/${SYS_ID}/templates/cards/weapon.hbs`,
     
     // Chat card partial templates - shared chat components
-    "systems/l5r4/templates/cards/_partials/_expand.hbs",
+    `systems/${SYS_ID}/templates/cards/_partials/_expand.hbs`,
     
     // Chat message templates - roll result displays
-    "systems/l5r4/templates/chat/full-defense-roll.hbs",
-    "systems/l5r4/templates/chat/simple-roll.hbs",
-    "systems/l5r4/templates/chat/weapon-chat.hbs",
+    `systems/${SYS_ID}/templates/chat/full-defense-roll.hbs`,
+    `systems/${SYS_ID}/templates/chat/simple-roll.hbs`,
+    `systems/${SYS_ID}/templates/chat/weapon-chat.hbs`,
     
     // Actor partial templates - shared actor components
-    "systems/l5r4/templates/actor/_partials/_unified-item-create.hbs",
+    `systems/${SYS_ID}/templates/actor/_partials/_unified-item-create.hbs`,
     
     // Dialog templates - modal forms and popups
-    "systems/l5r4/templates/dialogs/roll-modifiers-dialog.hbs",
-    "systems/l5r4/templates/dialogs/unified-item-create-dialog.hbs",
+    `systems/${SYS_ID}/templates/dialogs/roll-modifiers-dialog.hbs`,
+    `systems/${SYS_ID}/templates/dialogs/unified-item-create-dialog.hbs`,
     
     // Application templates - dedicated app windows
-    "systems/l5r4/templates/apps/xp-manager.hbs",
-    "systems/l5r4/templates/apps/wound-config.hbs",
+    `systems/${SYS_ID}/templates/apps/xp-manager.hbs`,
+    `systems/${SYS_ID}/templates/apps/wound-config.hbs`,
   ];
 
   // Validate Foundry API availability before attempting to load templates

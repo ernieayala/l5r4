@@ -1,51 +1,3 @@
-@font-face {
-  font-family: "Brushtip";
-  src: url("assets/fonts/BrushtipTexe.ttf");
-}
-@font-face {
-  font-family: "Old Style";
-  src: url("assets/fonts/OLDSH___.TTF");
-}
-@font-face {
-  font-family: "Old Style";
-  src: url("assets/fonts/OLDSIH__.TTF");
-  font-style: italic;
-}
-@font-face {
-  font-family: "Old Style";
-  src: url("assets/fonts/OLDSSCH_.TTF");
-  font-weight: bold;
-}
-@font-face {
-  font-family: "Rotis Serif";
-  src: url("assets/fonts/RotisSerif.otf");
-}
-@font-face {
-  font-family: "Rotis Serif";
-  src: url("assets/fonts/RotisSerifStd-Bold.otf");
-  font-weight: bold;
-}
-@font-face {
-  font-family: "Rotis Semi Serif";
-  src: url("assets/fonts/RotisSemiSerifStd.otf");
-}
-@font-face {
-  font-family: "Rotis Semi Sans";
-  src: url("assets/fonts/RotisSemiSansStd.otf");
-}
-@font-face {
-  font-family: "Hiroshige book";
-  src: url("assets/fonts/HiroshigeStd-Book.otf");
-}
-@font-face {
-  font-family: "Hiroshige book";
-  src: url("assets/fonts/HiroshigeStd-BookItalic.otf");
-  font-style: italic;
-}
-@font-face {
-  font-family: "Hiroshige book";
-  src: url("assets/fonts/HiroshigeStd-Bold.otf");
-}
 body > * {
   scrollbar-width: thin;
 }
@@ -544,7 +496,7 @@ body > * {
 
 .l5r4.pc .pc-info,
 .l5r4.npc .pc-info {
-  background: url("assets/textures/brush.webp") no-repeat 0 0;
+  background: url("../assets/textures/brush.webp") no-repeat 0 0;
   background-size: 100% 100%;
   flex-wrap: nowrap;
   padding: 1rem;
@@ -740,7 +692,7 @@ body > * {
 .l5r4.pc .traits-rings .earth-ring .earth-ring-img,
 .l5r4.npc .traits-rings .earth-ring .earth-ring-img {
   border: none;
-  content: url("assets/icons/earth.png");
+  content: url("../assets/icons/earth.png");
 }
 .l5r4.pc .traits-rings .ring-rank-earth,
 .l5r4.npc .traits-rings .ring-rank-earth {
@@ -773,7 +725,7 @@ body > * {
 .l5r4.pc .traits-rings .air-ring .air-ring-img,
 .l5r4.npc .traits-rings .air-ring .air-ring-img {
   border: none;
-  content: url("assets/icons/air.png");
+  content: url("../assets/icons/air.png");
 }
 .l5r4.pc .traits-rings .ring-rank-air,
 .l5r4.npc .traits-rings .ring-rank-air {
@@ -806,7 +758,7 @@ body > * {
 .l5r4.pc .traits-rings .water-ring .water-ring-img,
 .l5r4.npc .traits-rings .water-ring .water-ring-img {
   border: none;
-  content: url("assets/icons/water.png");
+  content: url("../assets/icons/water.png");
 }
 .l5r4.pc .traits-rings .ring-rank-water,
 .l5r4.npc .traits-rings .ring-rank-water {
@@ -838,7 +790,7 @@ body > * {
 .l5r4.pc .traits-rings .fire-ring .fire-ring-img,
 .l5r4.npc .traits-rings .fire-ring .fire-ring-img {
   border: none;
-  content: url("assets/icons/fire.png");
+  content: url("../assets/icons/fire.png");
 }
 .l5r4.pc .traits-rings .ring-rank-fire,
 .l5r4.npc .traits-rings .ring-rank-fire {
@@ -879,7 +831,7 @@ body > * {
 .l5r4.pc .traits-rings .void-ring .void-ring-img,
 .l5r4.npc .traits-rings .void-ring .void-ring-img {
   border: none;
-  content: url("assets/icons/void.png");
+  content: url("../assets/icons/void.png");
 }
 .l5r4.pc .traits-rings .void-points,
 .l5r4.npc .traits-rings .void-points {

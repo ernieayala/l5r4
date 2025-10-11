@@ -88,7 +88,7 @@
  * class PCSheet extends BaseActorSheet {
  *   static DEFAULT_OPTIONS = {
  *     classes: ["l5r4", "sheet", "actor", "pc"],
- *     template: "systems/l5r4/templates/actor/pc-sheet.hbs"
+ *     template: `systems/${SYS_ID}/templates/actor/pc-sheet.hbs`
  *   };
  * 
  *   async _prepareContext() {

@@ -40,11 +40,11 @@ export const ICON_FILENAME_ALIASES = freeze({
  * 
  * @example
  * // Bare filename
- * iconPath("air.png")  // => "systems/l5r4/assets/icons/air.png"
+ * iconPath("air.png")  // => "systems/l5r4-enhanced/assets/icons/air.png"
  * 
  * @example
  * // Full system path (unchanged)
- * iconPath("systems/l5r4/assets/icons/air.png")  // => "systems/l5r4/assets/icons/air.png"
+ * iconPath("systems/l5r4-enhanced/assets/icons/air.png")  // => "systems/l5r4-enhanced/assets/icons/air.png"
  * 
  * @example
  * // Core Foundry icons (unchanged)
@@ -62,7 +62,7 @@ export function iconPath(nameOrPath) {
     return n;
   }
 
-  // PATHS.icons = "systems/l5r4/assets/icons"
+  // PATHS.icons = "systems/l5r4-enhanced/assets/icons"
   const prefix = `${PATHS.icons}/`;
   // Normalize to filename within the icons directory
   const file = n.startsWith(prefix) ? n.slice(prefix.length) : n;

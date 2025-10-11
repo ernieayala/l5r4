@@ -76,7 +76,7 @@
  * // Type: "I roll [[3k2+1]] for my attack"
  * 
  * // Access system utilities
- * import { T, F } from "systems/l5r4/module/utils.js";
+ * import { T, F } from "systems/l5r4-enhanced/module/utils.js";
  * ```
  *
  * @author L5R4 System Team
@@ -87,7 +87,7 @@
  * @see {@link https://foundryvtt.com/api/classes/foundry.applications.api.ApplicationV2.html|ApplicationV2}
  */
 
-import { SYS_ID } from "./module/config/constants.js";
+import { SYS_ID } from "../module/config/constants.js";
 import { 
   ARROWS, 
   SIZES, 
@@ -100,21 +100,21 @@ import {
   ACTION_TYPES, 
   KIHO_TYPES, 
   ADVANTAGE_TYPES 
-} from "./module/config/localization.js";
-import { NPC_NUMBER_WOUND_LVLS, STATUS_EFFECTS } from "./module/config/game-data.js";
-import L5R4Actor from "./module/documents/actor.js";
-import L5R4Item from "./module/documents/item.js";
-import L5R4ItemSheet from "./module/sheets/item-sheet.js";
-import L5R4PcSheet from "./module/sheets/pc-sheet.js";
-import L5R4NpcSheet from "./module/sheets/npc-sheet.js";
-import { preloadTemplates } from "./module/setup/preload-templates.js";
-import { runMigrations } from "./module/setup/migrations.js";
-import { registerSettings } from "./module/setup/register-settings.js";
-import { registerHandlebarsHelpers } from "./module/setup/register-handlebars.js";
-import { initializeStanceService } from "./module/services/stance/initialize.js";
-import { initializeChatService } from "./module/services/chat.js";
-import { initializeInitiativeSystem } from "./module/services/initiative.js";
-import { registerQuenchTests } from "./tests/integration/quench-integration.js";
+} from "../module/config/localization.js";
+import { NPC_NUMBER_WOUND_LVLS, STATUS_EFFECTS } from "../module/config/game-data.js";
+import L5R4Actor from "../module/documents/actor.js";
+import L5R4Item from "../module/documents/item.js";
+import L5R4ItemSheet from "../module/sheets/item-sheet.js";
+import L5R4PcSheet from "../module/sheets/pc-sheet.js";
+import L5R4NpcSheet from "../module/sheets/npc-sheet.js";
+import { preloadTemplates } from "../module/setup/preload-templates.js";
+import { runMigrations } from "../module/setup/migrations.js";
+import { registerSettings } from "../module/setup/register-settings.js";
+import { registerHandlebarsHelpers } from "../module/setup/register-handlebars.js";
+import { initializeStanceService } from "../module/services/stance/initialize.js";
+import { initializeChatService } from "../module/services/chat.js";
+import { initializeInitiativeSystem } from "../module/services/initiative.js";
+import { registerQuenchTests } from "../tests/integration/quench-integration.js";
 
 // =============================================================================
 // SYSTEM INITIALIZATION

@@ -35,7 +35,7 @@ const freeze = Object.freeze;
  * @example
  * // Get path for actor sheet template
  * const actorTemplate = TEMPLATE("actor/pc-sheet.hbs");
- * // Returns: "systems/l5r4/templates/actor/pc-sheet.hbs"
+ * // Returns: "systems/l5r4-enhanced/templates/actor/pc-sheet.hbs"
  */
 export const TEMPLATE = (relPath) => {
   if (typeof relPath !== "string") {

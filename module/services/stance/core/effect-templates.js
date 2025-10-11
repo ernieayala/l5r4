@@ -34,7 +34,7 @@ import { T } from "../../../utils/localization.js";
 export function createFullAttackEffect(actor) {
   return {
     name: T("l5r4.ui.mechanics.stances.fullAttack"),
-    icon: "systems/l5r4/assets/icons/attackstance.png",
+    icon: `systems/${SYS_ID}/assets/icons/attackstance.png`,
     statuses: ["fullAttackStance"],
     flags: {
       [SYS_ID]: {

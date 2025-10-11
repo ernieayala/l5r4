@@ -104,7 +104,7 @@ export function registerHandlebarsHelpers() {
    * @returns {string} Full icon path
    * 
    * @example
-   * {{iconPath "air"}} // Returns "systems/l5r4/assets/icons/rings/air.png"
+   * {{iconPath "air"}} // Returns "systems/l5r4-enhanced/assets/icons/rings/air.png"
    */
   Handlebars.registerHelper("iconPath", (n) => iconPath(n));
 
