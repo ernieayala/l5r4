@@ -131,7 +131,8 @@ import {
   SKILL_TYPES, 
   ACTION_TYPES, 
   KIHO_TYPES, 
-  ADVANTAGE_TYPES 
+  ADVANTAGE_TYPES,
+  STANCES 
 } from "../config/localization.js";
 import { NPC_NUMBER_WOUND_LVLS } from "../config/game-data.js";
 import { on } from "../utils/dom.js";
@@ -139,6 +140,8 @@ import { getSortPref, sortWithPref } from "../utils/sorting.js";
 import { BaseActorSheet } from "./base-actor-sheet.js";
 import { RollHandler } from "./handlers/roll-handler.js";
 import { AppLauncherHandler } from "./handlers/app-launcher-handler.js";
+import { StanceHandler } from "./handlers/stance-handler.js";
+import { getActiveStances } from "../services/stance/core/helpers.js";
 
 
 export default class L5R4NpcSheet extends BaseActorSheet {
@@ -199,6 +202,7 @@ export default class L5R4NpcSheet extends BaseActorSheet {
   /** @inheritdoc (change events for inline-edit passthrough) */
   _onActionChange(action, event, element) {
     if (action === "inline-edit") return this._onInlineItemEdit(event, element);
+    if (action === "change-stance") return StanceHandler.changeStance(this._getHandlerContext(), event, element);
   }
 
 
@@ -288,6 +292,10 @@ export default class L5R4NpcSheet extends BaseActorSheet {
     const byType = (t) => all.filter((i) => i.type === t);
 
     // Skills sorted by user preference (name, rank, trait, roll, emphasis)
+    // Get current active stance for dropdown
+    const activeStances = getActiveStances(actorObj);
+    const currentStance = activeStances[0] || "";
+
     const skills = (() => {
       const cols = {
         name:     it => String(it?.name ?? ""),
@@ -309,6 +317,7 @@ export default class L5R4NpcSheet extends BaseActorSheet {
       ...base,
       actor: this.actor,
       system: actorObj.system,
+      currentStance,
       config: {
         arrows: ARROWS,
         sizes: SIZES,
@@ -321,6 +330,7 @@ export default class L5R4NpcSheet extends BaseActorSheet {
         actionTypes: ACTION_TYPES,
         kihoTypes: KIHO_TYPES,
         advantageTypes: ADVANTAGE_TYPES,
+        stances: STANCES,
         npcNumberWoundLvls: NPC_NUMBER_WOUND_LVLS
       },
 

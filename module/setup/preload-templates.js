@@ -150,6 +150,7 @@ export async function preloadTemplates() {
     `systems/${SYS_ID}/templates/actor/_partials/_stats-npc.hbs`,
     `systems/${SYS_ID}/templates/actor/_partials/_ranks.hbs`,
     `systems/${SYS_ID}/templates/actor/_partials/_initiative.hbs`,
+    `systems/${SYS_ID}/templates/actor/_partials/_stances.hbs`,
     `systems/${SYS_ID}/templates/actor/_partials/_armor.hbs`,
     `systems/${SYS_ID}/templates/actor/_partials/_wounds.hbs`,
     `systems/${SYS_ID}/templates/actor/_partials/_fear.hbs`,

@@ -145,7 +145,7 @@ export function createCenterStanceEffect(actor) {
 export function getStanceEffectCreator(stanceId) {
   const creators = {
     "attackStance": createAttackStanceEffect,
-    "fullAttackStance": createFullAttackStanceEffect,
+    "fullAttackStance": createFullAttackEffect,
     "defenseStance": createDefenseStanceEffect,
     "fullDefenseStance": createFullDefenseStanceEffect,
     "centerStance": createCenterStanceEffect

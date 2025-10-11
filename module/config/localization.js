@@ -144,6 +144,21 @@ export const RINGS_WITH_NONE = freeze({
 });
 
 /**
+ * Combat stance options for character sheets.
+ * Maps stance status IDs to their localization keys for dropdown display.
+ * Includes empty string for "no stance" state.
+ * @type {Readonly<Record<string, string>>}
+ */
+export const STANCES = freeze({
+  "": "l5r4.ui.common.none",
+  attackStance: "l5r4.ui.mechanics.stances.attack",
+  fullAttackStance: "l5r4.ui.mechanics.stances.fullAttack",
+  defenseStance: "l5r4.ui.mechanics.stances.defense",
+  fullDefenseStance: "l5r4.ui.mechanics.stances.fullDefense",
+  centerStance: "l5r4.ui.mechanics.stances.center"
+});
+
+/**
  * Ring options available for spell casting.
  * Includes standard five rings plus "all" for universal spells that can be cast with any ring.
  * Used in spell item sheets and casting dialogs.

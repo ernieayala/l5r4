@@ -1,0 +1,13 @@
+<section class="stances">
+  <div class="flexrow -gap-sm section-title">
+    <h4 class="title -compact">{{localize "l5r4.character.stance.title"}}</h4>
+  </div>
+  <div class="grid">
+    <span>{{localize "l5r4.character.stance.current"}}</span>
+    <div class="flexrow">
+      <select data-action="change-stance">
+        {{selectOptions config.stances selected=currentStance localize=true}}
+      </select>
+    </div>
+  </div>
+</section>
