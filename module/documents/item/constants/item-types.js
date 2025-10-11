@@ -58,19 +58,19 @@ export const CHAT_CARD_TEMPLATES = {
  * @type {Record<string, string>}
  */
 export const DEFAULT_ICONS = {
-  advantage:    iconPath("yin-yang.png"),
-  armor:        iconPath("hat.png"),
-  bow:          iconPath("bow.png"),  // LEGACY: For unmigrated bow items
-  clan:         iconPath("bamboo.png"),
-  disadvantage: iconPath("yin-yang.png"),
-  family:       iconPath("tori.png"),
-  commonItem:   iconPath("coins.png"),
-  kata:         iconPath("scroll.png"),
-  kiho:         iconPath("tori.png"),
-  school:       iconPath("scroll.png"),
-  skill:        iconPath("flower.png"),
-  spell:        iconPath("scroll2.png"),
-  tattoo:       iconPath("tattoo.png"),
-  technique:    iconPath("kanji.png"),
-  weapon:       iconPath("sword.png")
+  advantage:    iconPath("advantage.webp"),
+  armor:        iconPath("armor.webp"),
+  bow:          iconPath("bow.webp"),  // LEGACY: For unmigrated bow items
+  clan:         iconPath("clan.webp"),
+  disadvantage: iconPath("disadvantage.webp"),
+  family:       iconPath("family.webp"),
+  commonItem:   iconPath("item.webp"),
+  kata:         iconPath("kata.webp"),
+  kiho:         iconPath("kiho.webp"),
+  school:       iconPath("school.webp"),
+  skill:        iconPath("skill.webp"),
+  spell:        iconPath("spell.webp"),
+  tattoo:       iconPath("tattoo.webp"),
+  technique:    iconPath("technique.webp"),
+  weapon:       iconPath("weapon.webp")
 };

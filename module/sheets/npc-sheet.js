@@ -142,6 +142,7 @@ import { RollHandler } from "./handlers/roll-handler.js";
 import { AppLauncherHandler } from "./handlers/app-launcher-handler.js";
 import { StanceHandler } from "./handlers/stance-handler.js";
 import { getActiveStances } from "../services/stance/core/helpers.js";
+import { getMountedStatus } from "../services/mounted-combat.js";
 
 
 export default class L5R4NpcSheet extends BaseActorSheet {
@@ -295,6 +296,9 @@ export default class L5R4NpcSheet extends BaseActorSheet {
     // Get current active stance for dropdown
     const activeStances = getActiveStances(actorObj);
     const currentStance = activeStances[0] || "";
+    
+    // Get mounted combat status
+    const mountedStatus = getMountedStatus(actorObj);
 
     const skills = (() => {
       const cols = {
@@ -318,6 +322,7 @@ export default class L5R4NpcSheet extends BaseActorSheet {
       actor: this.actor,
       system: actorObj.system,
       currentStance,
+      mountedStatus,
       config: {
         arrows: ARROWS,
         sizes: SIZES,

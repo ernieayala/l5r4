@@ -55,7 +55,10 @@ export function handleItemPreCreate(item, data) {
   // Assign default icon if none provided or using generic bag icon
   const isUnsetOrBag = !item.img || item.img === "icons/svg/item-bag.svg";
   if (isUnsetOrBag) {
-    const icon = DEFAULT_ICONS[item.type] ?? "icons/svg/item-bag.svg";
+    // Special case: bows are weapon type but need bow icon
+    const isBow = item.type === "weapon" && (item.system?.isBow || data?.system?.isBow);
+    const iconType = isBow ? "bow" : item.type;
+    const icon = DEFAULT_ICONS[iconType] ?? "icons/svg/item-bag.svg";
     item.updateSource({ img: icon });
   }
 

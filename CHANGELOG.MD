@@ -7,6 +7,60 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ---
 
+## [2.0.0] - 2025-10-11
+
+### Added
+
+**Mounted Combat System**
+- New mounted combat service (`module/services/mounted-combat.js`)
+- Mounted/higher ground attack bonuses: +1k0 to attack rolls
+- Full Attack stance restriction when mounted (requires Horsemanship 3+)
+- Visual feedback in stance dropdown for restricted options
+- Automatic bonus application for both PC and NPC attack rolls
+
+### Enhanced
+
+**Combat System**
+- Attack bonus consolidation: Combined stance and mounted bonuses via `getAllAttackBonuses()`
+- NPC attack rolls now include stance and mounted combat bonuses
+- Full Defense roll chat cards now display actual dice roll with 3D dice integration
+- Improved roll HTML rendering in chat for better visual feedback
+
+**Icon System Migration**
+- Migrated all system icons from PNG to WebP format for better performance
+- Updated 25 PNG icons to modern WebP equivalents
+- Reduced file sizes by ~60% while maintaining visual quality
+- Updated icon migration mapping in `module/setup/migrations.js`:
+  * Stance icons: `attackstance.png` → `attack-stance.webp`, etc.
+  * Item type icons: `bow.png` → `bow.webp`, `sword.png` → `weapon.webp`, etc.
+  * Actor icons: `helm.png` → `pc.webp`, `ninja.png` → `npc.webp`
+  * Status icons: `grapple.png` → `grappled.webp`, `mounted.png` → `mounted.webp`
+
+**Migration System**
+- Token image migration: Automatically updates actor prototype token images during icon migration
+- Bow weapon icon fix: Special migration logic to correct bow weapons with incorrect sword icons
+- Enhanced FilePicker compatibility for Foundry v13+
+- Improved error handling and logging for migration failures
+
+### Fixed
+- Bow weapons now correctly display bow icon instead of generic weapon/sword icons
+- Actor token images now properly migrate alongside portrait images
+- Full Defense roll chat card formatting improved with proper HTML structure
+
+### Technical
+
+**Code Quality**
+- Refactored attack bonus calculation into centralized `getAllAttackBonuses()` function
+- Removed duplicate stance bonus logic from PC sheet weapon rolls
+- Improved separation of concerns between stance and mounted combat systems
+- Enhanced localization with mounted combat UI strings
+
+**Localization**
+- Added `l5r4.ui.mechanics.mounted.fullAttackRestriction` key
+- Added `l5r4.ui.mechanics.mounted.attackBonus` key
+
+---
+
 ## [2.0.0] - 2025-10-10
 
 ### 🚀 MAJOR ARCHITECTURAL REFACTORING

@@ -64,21 +64,21 @@ export const NPC_NUMBER_WOUND_LVLS = freeze({ 1:1, 2:2, 3:3, 4:4, 5:5, 6:6, 7:7,
  */
 export const STATUS_EFFECTS = freeze([
   // Stances
-  { id: "attackStance",      name: "l5r4.ui.mechanics.stances.attack",       img: iconPath("attackstance.png") },
-  { id: "fullAttackStance",  name: "l5r4.ui.mechanics.stances.fullAttack",   img: iconPath("fullattackstance.png") },
-  { id: "defenseStance",     name: "l5r4.ui.mechanics.stances.defense",      img: iconPath("defensestance.png") },
-  { id: "fullDefenseStance", name: "l5r4.ui.mechanics.stances.fullDefense",  img: iconPath("fulldefensestance.png") },
-  { id: "centerStance",      name: "l5r4.ui.mechanics.stances.center",       img: iconPath("centerstance.png") },
+  { id: "attackStance",      name: "l5r4.ui.mechanics.stances.attack",       img: iconPath("attack-stance.webp") },
+  { id: "fullAttackStance",  name: "l5r4.ui.mechanics.stances.fullAttack",   img: iconPath("full-attack-stance.webp") },
+  { id: "defenseStance",     name: "l5r4.ui.mechanics.stances.defense",      img: iconPath("defence-stance.webp") },
+  { id: "fullDefenseStance", name: "l5r4.ui.mechanics.stances.fullDefense",  img: iconPath("full-defense-stance.webp") },
+  { id: "centerStance",      name: "l5r4.ui.mechanics.stances.center",       img: iconPath("centered-stance.webp") },
 
   // Generic conditions
-  { id: "blinded",   name: "EFFECT.blinded",   img: "icons/svg/blind.svg" },
-  { id: "dazed",     name: "EFFECT.dazed",     img: "icons/svg/stoned.svg" },
-  { id: "dead",      name: "EFFECT.dead",      img: "icons/svg/skull.svg" },
-  { id: "entangled", name: "EFFECT.entangled", img: "icons/svg/net.svg" },
-  { id: "fasting",   name: "EFFECT.fasting",   img: "icons/svg/silenced.svg" },
-  { id: "fatigued",  name: "EFFECT.fatigued",  img: "icons/svg/sleep.svg" },
-  { id: "grappled",  name: "EFFECT.grappled",  img: iconPath("grapple.png") },
-  { id: "mounted",   name: "EFFECT.mounted",   img: iconPath("mounted.png") },
-  { id: "prone",     name: "EFFECT.prone",     img: "icons/svg/falling.svg" },
-  { id: "stunned",   name: "EFFECT.stunned",   img: "icons/svg/daze.svg" }
+  { id: "blinded",   name: "EFFECT.blinded",   img: iconPath("blinded.webp") },
+  { id: "dazed",     name: "EFFECT.dazed",     img: iconPath("dazed.webp") },
+  { id: "dead",      name: "EFFECT.dead",      img: iconPath("dead.webp") },
+  { id: "entangled", name: "EFFECT.entangled", img: iconPath("entangled.webp") },
+  { id: "fasting",   name: "EFFECT.fasting",   img: iconPath("fasting.webp") },
+  { id: "fatigued",  name: "EFFECT.fatigued",  img: iconPath("fatigue.webp") },
+  { id: "grappled",  name: "EFFECT.grappled",  img: iconPath("grappled.webp") },
+  { id: "mounted",   name: "EFFECT.mounted",   img: iconPath("mounted.webp") },
+  { id: "prone",     name: "EFFECT.prone",     img: iconPath("prone.webp") },
+  { id: "stunned",   name: "EFFECT.stunned",   img: iconPath("stunned.webp") }
 ]);

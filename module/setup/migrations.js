@@ -645,32 +645,45 @@ async function cleanupLegacyFields(docs, label) {
 }
 
 /**
- * Icon file relocation mapping for migration from flat to organized structure.
- * Maps original filenames to their new subfolder locations under PATHS.icons.
+ * Icon file migration mapping from old .png filenames to new .webp filenames.
+ * Maps original filenames to their new names under PATHS.icons.
  * This maintains the migration logic independently of config aliases to avoid
  * circular dependencies during system initialization.
  * 
- * @type {Readonly<Record<string, string>>} filename -> subfolder/filename
+ * @type {Readonly<Record<string, string>>} old filename -> new filename
  * 
  * @example
- * ICON_MIGRATION_MAP["air.png"] // Returns "rings/air.png"
+ * ICON_MIGRATION_MAP["attackstance.png"] // Returns "attack-stance.webp"
  */
 const ICON_MIGRATION_MAP = Object.freeze({
-  // Rings
-  "air.png": "rings/air.png",
-  "earth.png": "rings/earth.png",
-  "fire.png": "rings/fire.png",
-  "water.png": "rings/water.png",
-  "void.png": "rings/void.png",
-
-  // Stances / status
-  "attackstance.png": "status/attackstance.png",
-  "fullattackstance.png": "status/fullattackstance.png",
-  "defensestance.png": "status/defensestance.png",
-  "fulldefensestance.png": "status/fulldefensestance.png",
-  "centerstance.png": "status/centerstance.png",
-  "grapple.png": "status/grapple.png",
-  "mounted.png": "status/mounted.png"
+  // Stances
+  "attackstance.png": "attack-stance.webp",
+  "fullattackstance.png": "full-attack-stance.webp",
+  "defensestance.png": "defence-stance.webp",
+  "fulldefensestance.png": "full-defense-stance.webp",
+  "centerstance.png": "centered-stance.webp",
+  
+  // Status effects
+  "grapple.png": "grappled.webp",
+  "mounted.png": "mounted.webp",
+  
+  // Item type icons
+  "bamboo.png": "clan.webp",
+  "bow.png": "bow.webp",
+  "coins.png": "item.webp",
+  "flower.png": "skill.webp",
+  "hat.png": "armor.webp",
+  "kanji.png": "technique.webp",
+  "scroll.png": "kata.webp",
+  "scroll2.png": "spell.webp",
+  "sword.png": "weapon.webp",
+  "tattoo.png": "tattoo.webp",
+  "tori.png": "family.webp",
+  "yin-yang.png": "advantage.webp",
+  
+  // Actor icons
+  "helm.png": "pc.webp",
+  "ninja.png": "npc.webp"
 });
 
 /** @type {Map<string, Set<string>>} dir -> filenames */
@@ -687,7 +700,8 @@ const dirCache = new Map();
 async function listDir(dirPath) {
   if (dirCache.has(dirPath)) return dirCache.get(dirPath);
   try {
-    const res = await FilePicker.browse("data", dirPath);
+    const FP = foundry.applications?.apps?.FilePicker?.implementation ?? FilePicker;
+    const res = await FP.browse("data", dirPath);
     const files = new Set((res.files ?? []).map(f => {
       const i = f.lastIndexOf("/");
       return i >= 0 ? f.slice(i + 1) : f;
@@ -749,18 +763,47 @@ export async function runIconPathMigration() {
 
   // Actors
   for (const a of game.actors.contents) {
-    const next = await computeNewIconPath(a.img);
-    if (next && next !== a.img) {
-      try { await a.update({ img: next }, { diff: true, render: false }); changed++; }
+    const updates = {};
+    
+    // Update actor portrait
+    const nextImg = await computeNewIconPath(a.img);
+    if (nextImg && nextImg !== a.img) {
+      updates.img = nextImg;
+    }
+    
+    // Update token image
+    const tokenImg = a.prototypeToken?.texture?.src;
+    if (tokenImg) {
+      const nextToken = await computeNewIconPath(tokenImg);
+      if (nextToken && nextToken !== tokenImg) {
+        updates["prototypeToken.texture.src"] = nextToken;
+      }
+    }
+    
+    // Apply updates if any
+    if (Object.keys(updates).length > 0) {
+      try { 
+        await a.update(updates, { diff: true, render: false }); 
+        changed++; 
+      }
       catch (err) { console.warn(`${SYS_ID}`, "Failed to update actor img", { id: a.id, err }); }
     }
   }
 
   // Items
   for (const i of game.items.contents) {
-    const next = await computeNewIconPath(i.img);
-    if (next && next !== i.img) {
-      try { await i.update({ img: next }, { diff: true, render: false }); changed++; }
+    let nextImg = await computeNewIconPath(i.img);
+    
+    // Special case: Fix bow weapons that have weapon/sword icons
+    if (i.type === "weapon" && i.system?.isBow) {
+      const bowIcon = await computeNewIconPath("bow.png"); // Get the current bow.webp path
+      if (bowIcon && i.img !== bowIcon) {
+        nextImg = bowIcon;
+      }
+    }
+    
+    if (nextImg && nextImg !== i.img) {
+      try { await i.update({ img: nextImg }, { diff: true, render: false }); changed++; }
       catch (err) { console.warn(`${SYS_ID}`, "Failed to update item img", { id: i.id, err }); }
     }
   }
@@ -804,10 +847,38 @@ async function migrateCompendiumIconPaths() {
     }
 
     for (const doc of docs) {
-      const next = await computeNewIconPath(doc.img);
-      if (next && next !== doc.img) {
+      const updates = {};
+      
+      // Update document image
+      let nextImg = await computeNewIconPath(doc.img);
+      
+      // Special case: Fix bow weapons that have weapon/sword icons
+      if (docName === "Item" && doc.type === "weapon" && doc.system?.isBow) {
+        const bowIcon = await computeNewIconPath("bow.png"); // Get the current bow.webp path
+        if (bowIcon && doc.img !== bowIcon) {
+          nextImg = bowIcon;
+        }
+      }
+      
+      if (nextImg && nextImg !== doc.img) {
+        updates.img = nextImg;
+      }
+      
+      // Update token image for actors
+      if (docName === "Actor") {
+        const tokenImg = doc.prototypeToken?.texture?.src;
+        if (tokenImg) {
+          const nextToken = await computeNewIconPath(tokenImg);
+          if (nextToken && nextToken !== tokenImg) {
+            updates["prototypeToken.texture.src"] = nextToken;
+          }
+        }
+      }
+      
+      // Apply updates if any
+      if (Object.keys(updates).length > 0) {
         try {
-          await doc.update({ img: next }, { diff: true, render: false });
+          await doc.update(updates, { diff: true, render: false });
           changed++;
         } catch (err) {
           console.warn(`${SYS_ID}`, "Failed to update compendium doc img", { id: doc.id, collection: pack.collection, err });

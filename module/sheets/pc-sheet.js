@@ -126,8 +126,9 @@ import { RingRoll } from "../services/dice/rolls/ring-roll.js";
 import { WeaponRoll } from "../services/dice/rolls/weapon-roll.js";
 import { NpcRoll } from "../services/dice/rolls/npc-roll.js";
 import { FamilyBonusService } from "../services/family-bonus-service.js";
-import { getStanceAttackBonuses, getStanceDamageBonuses } from "../services/stance/rolls/attack-bonuses.js";
+import { getAllAttackBonuses, getStanceDamageBonuses } from "../services/stance/rolls/attack-bonuses.js";
 import { getActiveStances } from "../services/stance/core/helpers.js";
+import { getMountedStatus } from "../services/mounted-combat.js";
 import { BaseActorSheet } from "./base-actor-sheet.js";
 import XpManagerApplication from "../apps/xp-manager.js";
 import { AppLauncherHandler } from "./handlers/app-launcher-handler.js";
@@ -349,6 +350,9 @@ export default class L5R4PcSheet extends BaseActorSheet {
     // Get current active stance for dropdown
     const activeStances = getActiveStances(actorObj);
     const currentStance = activeStances[0] || "";
+    
+    // Get mounted combat status
+    const mountedStatus = getMountedStatus(actorObj);
   
     /**
      * Template context with consistently pre-computed sorted item collections.
@@ -365,6 +369,7 @@ export default class L5R4PcSheet extends BaseActorSheet {
       enriched: { notes: enrichedNotes },
       traitsEff,
       currentStance,
+      mountedStatus,
       config: {
         arrows: ARROWS,
         sizes: SIZES,
@@ -661,17 +666,15 @@ export default class L5R4PcSheet extends BaseActorSheet {
     const weaponSkill = resolveWeaponSkillTrait(this.actor, item);
     const untrained = weaponSkill.skillRank === 0;
     
-    // Apply stance bonuses to attack rolls
-    const stanceBonuses = getStanceAttackBonuses(this.actor);
-    
     const rollName = untrained 
       ? `${item.name} (${T("l5r4.ui.mechanics.rolls.unskilled")})`
       : `${item.name} ${T("l5r4.ui.mechanics.rolls.attackRoll")}`;
 
+    // NpcRoll now applies all attack bonuses (stance + mounted) internally
     return NpcRoll({
       rollName,
-      diceRoll: weaponSkill.rollBonus + stanceBonuses.roll,
-      diceKeep: weaponSkill.keepBonus + stanceBonuses.keep,
+      diceRoll: weaponSkill.rollBonus,
+      diceKeep: weaponSkill.keepBonus,
       rollType: "attack",
       actor: this.actor,
       untrained,
@@ -679,6 +682,7 @@ export default class L5R4PcSheet extends BaseActorSheet {
       weaponId: id
     });
   }
+
   /* ---------------------------------- */
   /* Item CRUD                           */
   /* ---------------------------------- */

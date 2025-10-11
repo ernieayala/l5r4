@@ -34,7 +34,7 @@ import { T } from "../../../utils/localization.js";
 export function createFullAttackEffect(actor) {
   return {
     name: T("l5r4.ui.mechanics.stances.fullAttack"),
-    icon: `systems/${SYS_ID}/assets/icons/attackstance.png`,
+    icon: `systems/${SYS_ID}/assets/icons/full-attack-stance.webp`,
     statuses: ["fullAttackStance"],
     flags: {
       [SYS_ID]: {
@@ -56,7 +56,7 @@ export function createFullAttackEffect(actor) {
 export function createDefenseStanceEffect(actor) {
   return {
     name: game.i18n.localize("l5r4.ui.mechanics.stances.defense"),
-    icon: `systems/${SYS_ID}/assets/icons/defensestance.png`,
+    icon: `systems/${SYS_ID}/assets/icons/defence-stance.webp`,
     statuses: ["defenseStance"],
     changes: [
       // Disable attack actions (handled by UI restrictions)
@@ -80,7 +80,7 @@ export function createDefenseStanceEffect(actor) {
 export function createFullDefenseStanceEffect(actor) {
   return {
     name: game.i18n.localize("l5r4.ui.mechanics.stances.fullDefense"),
-    icon: `systems/${SYS_ID}/assets/icons/fulldefensestance.png`,
+    icon: `systems/${SYS_ID}/assets/icons/full-defense-stance.webp`,
     statuses: ["fullDefenseStance"],
     changes: [
       // All restrictions handled by stance automation
@@ -103,7 +103,7 @@ export function createFullDefenseStanceEffect(actor) {
 export function createAttackStanceEffect(actor) {
   return {
     name: game.i18n.localize("l5r4.ui.mechanics.stances.attack"),
-    icon: `systems/${SYS_ID}/assets/icons/attackstance.png`,
+    icon: `systems/${SYS_ID}/assets/icons/attack-stance.webp`,
     statuses: ["attackStance"],
     changes: [],
     flags: {
@@ -124,7 +124,7 @@ export function createAttackStanceEffect(actor) {
 export function createCenterStanceEffect(actor) {
   return {
     name: game.i18n.localize("l5r4.ui.mechanics.stances.center"),
-    icon: `systems/${SYS_ID}/assets/icons/centerstance.png`,
+    icon: `systems/${SYS_ID}/assets/icons/centered-stance.webp`,
     statuses: ["centerStance"],
     changes: [],
     flags: {
