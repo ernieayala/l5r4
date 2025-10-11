@@ -29,7 +29,7 @@ import { TenDiceRule } from "../core/ten-dice-rule.js";
 import { buildFormula } from "../core/formula-builder.js";
 import { evaluateTN, calculateEffectiveTN, buildTNLabel, replaceFailureWithMissed } from "../core/tn-calculator.js";
 import { getNpcRollOptions } from "../dialogs/npc-dialog.js";
-import { getStanceDamageBonuses } from "../../stance/rolls/attack-bonuses.js";
+import { getStanceDamageBonuses, getAllAttackBonuses } from "../../stance/rolls/attack-bonuses.js";
 import { resolveTargets } from "../resources/target-resolver.js";
 
 /**
@@ -91,6 +91,17 @@ export async function NpcRoll({
   let keepMod = toInt(check.keepMod);
   let totalMod = toInt(check.totalMod);
   const unskilled = !!check.unskilled && !!traitName || untrained;
+
+  // Apply attack bonuses (stance + mounted/higher ground) for attack rolls
+  if (rollType === "attack" && actor) {
+    const targetActor = targetData?.actor || null;
+    const attackBonuses = getAllAttackBonuses(actor, targetActor);
+    
+    if (attackBonuses.roll > 0 || attackBonuses.keep > 0) {
+      rollMod += attackBonuses.roll;
+      keepMod += attackBonuses.keep;
+    }
+  }
 
   // Wound penalties affect TN for attack rolls (applied later), not dice pool
 

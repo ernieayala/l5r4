@@ -60,7 +60,8 @@ export function resolveTargets(actor, rollType) {
           name: targetActor.name,
           armorTN: armorTN,
           single: true,
-          vsText: T("l5r4.ui.mechanics.combat.targeting.vs")
+          vsText: T("l5r4.ui.mechanics.combat.targeting.vs"),
+          actor: targetActor // Include target actor for mounted bonus calculation
         }
       };
     }

@@ -6,7 +6,11 @@
     <span>{{localize "l5r4.character.stance.current"}}</span>
     <div class="flexrow">
       <select data-action="change-stance">
-        {{selectOptions config.stances selected=currentStance localize=true}}
+        {{#each config.stances as |label id|}}
+          <option value="{{id}}" {{#if (eq ../currentStance id)}}selected{{/if}} {{#if (and (eq id "fullAttackStance") ../mountedStatus.isMounted (not ../mountedStatus.canFullAttack))}}disabled{{/if}}>
+            {{localize label}}{{#if (and (eq id "fullAttackStance") ../mountedStatus.isMounted (not ../mountedStatus.canFullAttack))}} ({{localize "l5r4.ui.mechanics.mounted.fullAttackRestriction"}}){{/if}}
+          </option>
+        {{/each}}
       </select>
     </div>
   </div>

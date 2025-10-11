@@ -24,6 +24,7 @@
  */
 
 import { SYS_ID } from "../../../config/constants.js";
+import { getMountedAttackBonus } from "../../mounted-combat.js";
 
 /* -------------------------------------------- */
 /* Roll Hooks and Bonuses                      */
@@ -63,6 +64,24 @@ export function getStanceAttackBonuses(actor) {
   }
 
   return { roll: rollBonus, keep: keepBonus };
+}
+
+/**
+ * Get all attack bonuses for an attacker against a target.
+ * Combines stance bonuses and mounted/higher ground bonuses.
+ * 
+ * @param {Actor} attacker - The actor making the attack roll
+ * @param {Actor} [target] - The target of the attack (optional, for mounted bonus)
+ * @returns {{roll: number, keep: number}} Combined attack roll bonuses
+ */
+export function getAllAttackBonuses(attacker, target = null) {
+  const stanceBonuses = getStanceAttackBonuses(attacker);
+  const mountedBonuses = getMountedAttackBonus(attacker, target);
+  
+  return {
+    roll: stanceBonuses.roll + mountedBonuses.roll,
+    keep: stanceBonuses.keep + mountedBonuses.keep
+  };
 }
 
 /**

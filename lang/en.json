@@ -101,6 +101,10 @@
           "cannotAttackDefense": "Cannot attack while in Defense Stance",
           "fullAttackBonus": "Full Attack Stance: +2k1"
         },
+        "mounted": {
+          "fullAttackRestriction": "Full Attack stance requires Horsemanship 3+ when mounted",
+          "attackBonus": "Mounted/Higher: +1k0"
+        },
         "fear": {
           "fearRank": "Fear Rank",
           "fearLabel": "Fear {rank}",

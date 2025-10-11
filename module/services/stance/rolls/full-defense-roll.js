@@ -80,6 +80,7 @@ export async function triggerFullDefenseRoll(actor, sys) {
     
     // Execute the roll
     await roll.evaluate();
+    const rollHtml = await roll.render();
     
     // Store the roll result
     await actor.setFlag(SYS_ID, "fullDefenseRoll", {
@@ -93,7 +94,8 @@ export async function triggerFullDefenseRoll(actor, sys) {
     const templateData = {
       formula: formula,
       rollTotal: roll.total,
-      armorBonus: armorBonus
+      armorBonus: armorBonus,
+      rollHtml: rollHtml
     };
     
     const content = await R(CHAT_TEMPLATES.fullDefenseRoll, templateData);

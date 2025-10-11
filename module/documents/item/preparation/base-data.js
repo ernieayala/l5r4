@@ -42,7 +42,10 @@ export function prepareItemBaseData(item) {
 
   // Ensure valid image path, preferring type-specific defaults over generic bag icon
   if (!item.img || typeof item.img !== "string" || item.img === "icons/svg/item-bag.svg") {
-    item.img = DEFAULT_ICONS[type] ?? "icons/svg/item-bag.svg";
+    // Special case: bows are weapon type but need bow icon
+    const isBow = type === "weapon" && sys.isBow;
+    const iconType = isBow ? "bow" : type;
+    item.img = DEFAULT_ICONS[iconType] ?? "icons/svg/item-bag.svg";
   }
 
   // Normalize rich-text fields to strings for template safety
