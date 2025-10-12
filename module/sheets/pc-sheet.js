@@ -924,8 +924,6 @@ export default class L5R4PcSheet extends BaseActorSheet {
       delete submitData.__familyBaseName;
     }
 
-    console.debug("[L5R4] submit traits", submitData?.system?.traits);
-
     return super._processSubmitData(event, form, submitData, options);
   }
 
