@@ -422,10 +422,6 @@
       "name": "Leere-Punkte-Kontrollkästchen für NSC-Würfe anzeigen.",
       "label": "NSC haben normalerweise keine Leere."
     },
-    "useLtTenDiceRule": {
-      "name": "Die modifizierte Zehn-Würfel-Regel von Little Truths verwenden.",
-      "label": "Wenn es eine ungerade Anzahl an überschüssig geworfenen Würfeln gibt und weniger als 10 behaltene Würfel, addiere 2 zum Gesamtergebnis, damit der \"extra\" Würfel einen Nutzen bringt."
-    },
     "calculateRank": {
       "name": "Einsichts-Rang automatisch berechnen",
       "label": "Der Einsichts-Rang wird automatisch basierend auf den gesamten Einsichtspunkten aktualisiert"

@@ -422,10 +422,6 @@
       "name": "Afficher la case Points de Vide pour les jets des PNJ.",
       "label": "Les PNJ n'ont normalement pas de Vide."
     },
-    "useLtTenDiceRule": {
-      "name": "Utiliser la règle des Dix Dés modifiée de Little Truths.",
-      "label": "S'il y a un nombre impair de dés lancés en excès et moins de 10 dés gardés, ajoutez 2 au total pour que le dé \"supplémentaire\" apporte un bénéfice."
-    },
     "calculateRank": {
       "name": "Calculer automatiquement le Rang de Perspicacité",
       "label": "Le Rang de Perspicacité est mis à jour automatiquement en fonction du total des Points de Perspicacité"

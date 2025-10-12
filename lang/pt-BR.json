@@ -422,10 +422,6 @@
       "name": "Exibir caixa de Pontos de Vazio para rolagens de PNJ.",
       "label": "PNJs normalmente não possuem Vazio."
     },
-    "useLtTenDiceRule": {
-      "name": "Usar a Regra dos Dez Dados modificada de Little Truths.",
-      "label": "Se houver um número ímpar de dados lançados em excesso e menos de 10 dados mantidos, some 2 ao total para que o dado \"extra\" traga benefício."
-    },
     "calculateRank": {
       "name": "Calcular automaticamente o Posto de Discernimento",
       "label": "O Posto de Discernimento é atualizado automaticamente com base no total de Pontos de Discernimento"

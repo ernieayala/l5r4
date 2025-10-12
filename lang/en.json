@@ -464,10 +464,6 @@
       "name": "Display Void Point checkbox for NPC rolls.",
       "label": "NPCs normally lack Void."
     },
-    "useLtTenDiceRule": {
-      "name": "Use the modified Ten Dice Rule from Little Truths.",
-      "label": "If there are an odd number of excess rolled dice and fewer than 10 kept dice, add 2 to the roll total so the \"extra\" die gives a benefit."
-    },
     "calculateRank": {
       "name": "Calculate Insight Rank automatically",
       "label": "Insight Rank is updated automatically based on total Insight Points"

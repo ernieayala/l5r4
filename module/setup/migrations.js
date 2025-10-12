@@ -809,11 +809,7 @@ export async function runIconPathMigration() {
   }
 
   ui.notifications?.info(game.i18n.format("l5r4.system.migration.iconsUpdated", { count: changed }));
-  try {
-    if (changed > 0) { await game.settings.set(SYS_ID, "runMigration", false); }
-  } catch (err) {
-    console.warn(`${SYS_ID}`, "Failed to disable runMigration setting", err);
-  }
+  // Note: runMigration setting is no longer auto-disabled, it remains as a persistent preference
 }
 
 /**
