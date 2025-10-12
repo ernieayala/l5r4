@@ -22,6 +22,11 @@ body > * {
   gap: 1rem;
 }
 
+:root {
+  --l5r4-transition-fast: 150ms ease-out;
+  --l5r4-transition-normal: 250ms ease-out;
+}
+
 .message-content .item h4,
 .message-content .item h5 {
   margin: 0;
@@ -85,7 +90,6 @@ body > * {
 .l5r4.pc .actor-img,
 .l5r4.npc .actor-img {
   align-items: center;
-  cursor: var(--conditional-cursor);
   display: flex;
   height: 240px;
   justify-content: center;
@@ -95,8 +99,19 @@ body > * {
 }
 .l5r4.pc .actor-img img,
 .l5r4.npc .actor-img img {
+  transition: transform var(--l5r4-transition-fast), filter var(--l5r4-transition-fast);
+  cursor: pointer;
   max-width: 100%;
   max-height: 100%;
+}
+.l5r4.pc .actor-img img:hover,
+.l5r4.npc .actor-img img:hover {
+  transform: scale(1.05);
+  filter: brightness(1.1) drop-shadow(0 0 8px rgba(0, 0, 0, 0.3));
+}
+.l5r4.pc .actor-img img:active,
+.l5r4.npc .actor-img img:active {
+  transform: scale(0.98);
 }
 .l5r4.pc input,
 .l5r4.pc select,
@@ -213,31 +228,47 @@ body > * {
 .l5r4.pc .info-group,
 .l5r4.npc .info-group {
   flex-wrap: nowrap;
-  transition-delay: 2000ms;
 }
-.l5r4.pc .info-group:hover,
-.l5r4.npc .info-group:hover {
-  transition-delay: 0;
-}
-.l5r4.pc .info-group:hover .clear-btn,
+.l5r4.pc .info-group:hover .inline-control, .l5r4.pc .info-group:hover .clear-btn,
+.l5r4.npc .info-group:hover .inline-control,
 .l5r4.npc .info-group:hover .clear-btn {
   opacity: 1;
-}
-.l5r4.pc .info-group .clear-btn,
-.l5r4.npc .info-group .clear-btn {
-  opacity: 0;
+  pointer-events: all;
 }
 .l5r4.pc .clear-btn,
 .l5r4.npc .clear-btn {
+  opacity: 0;
+  transition: opacity var(--l5r4-transition-normal);
+  pointer-events: none;
   align-items: center;
   display: inline-flex;
   height: var(--form-field-height);
   justify-content: center;
   min-width: 20px;
 }
+.l5r4.pc .clear-btn:hover,
+.l5r4.npc .clear-btn:hover {
+  filter: brightness(1.2);
+}
 .l5r4.pc .button,
 .l5r4.npc .button {
+  transition: all var(--l5r4-transition-fast);
+  cursor: pointer;
   display: inline-flex;
+}
+.l5r4.pc .button:hover,
+.l5r4.npc .button:hover {
+  filter: brightness(1.1);
+}
+.l5r4.pc .button:active,
+.l5r4.npc .button:active {
+  transform: scale(0.98);
+  filter: brightness(0.95);
+}
+.l5r4.pc .button:hover,
+.l5r4.npc .button:hover {
+  opacity: 1;
+  filter: brightness(1.15);
 }
 .l5r4.pc .grid,
 .l5r4.npc .grid {
@@ -394,6 +425,14 @@ body > * {
   grid-template-rows: min-content min-content;
   padding: 0 0.5rem;
 }
+.l5r4.pc .item:hover .inline-control, .l5r4.pc .item:hover .clear-btn,
+.l5r4.npc .item:hover .inline-control,
+.l5r4.npc .item:hover .clear-btn,
+.xp-modal-dialog .item:hover .inline-control,
+.xp-modal-dialog .item:hover .clear-btn {
+  opacity: 1;
+  pointer-events: all;
+}
 .l5r4.pc .item.-bio,
 .l5r4.npc .item.-bio,
 .xp-modal-dialog .item.-bio {
@@ -430,11 +469,25 @@ body > * {
 .xp-modal-dialog .item .title {
   text-wrap: revert;
 }
+.l5r4.pc .item .title a[data-action=item-chat],
+.l5r4.npc .item .title a[data-action=item-chat],
+.xp-modal-dialog .item .title a[data-action=item-chat] {
+  color: inherit;
+  text-decoration: none;
+  cursor: var(--conditional-cursor);
+  text-shadow: none;
+}
 .l5r4.pc .item .inline-control,
 .l5r4.npc .item .inline-control,
 .xp-modal-dialog .item .inline-control {
   opacity: 0;
+  transition: opacity var(--l5r4-transition-normal);
   pointer-events: none;
+}
+.l5r4.pc .item .inline-control:hover,
+.l5r4.npc .item .inline-control:hover,
+.xp-modal-dialog .item .inline-control:hover {
+  filter: brightness(1.2);
 }
 .l5r4.pc .item .expanded-text,
 .l5r4.npc .item .expanded-text,
@@ -466,14 +519,24 @@ body > * {
 }
 .l5r4.pc .rank-name,
 .l5r4.npc .rank-name {
+  transition: all var(--l5r4-transition-fast);
+  cursor: pointer;
   background: var(--table-header-bg-color);
   border: 1px solid var(--table-header-border-color);
   color: var(--table-header-text-color);
-  cursor: var(--conditional-cursor);
   display: flex;
   font-size: var(--font-size-16);
   padding: 0.25rem 0;
   text-align: center;
+}
+.l5r4.pc .rank-name:hover,
+.l5r4.npc .rank-name:hover {
+  filter: brightness(1.1);
+}
+.l5r4.pc .rank-name:active,
+.l5r4.npc .rank-name:active {
+  transform: scale(0.98);
+  filter: brightness(0.95);
 }
 .l5r4.pc .rank-name span:first-child,
 .l5r4.npc .rank-name span:first-child {
@@ -522,12 +585,13 @@ body > * {
 }
 .l5r4.pc .traits-rings .ring-rank,
 .l5r4.npc .traits-rings .ring-rank {
+  transition: all var(--l5r4-transition-fast);
+  cursor: pointer;
   align-content: center;
   background-color: var(--content-link-background);
   border-radius: 50%;
   border: 1px solid var(--table-header-border-color);
   color: var(--color-text-primary);
-  cursor: var(--conditional-cursor);
   display: grid;
   font-family: var(--font-h1);
   font-size: 32px;
@@ -538,16 +602,36 @@ body > * {
   width: 32px;
   z-index: 10;
 }
+.l5r4.pc .traits-rings .ring-rank:hover,
+.l5r4.npc .traits-rings .ring-rank:hover {
+  filter: brightness(1.1);
+}
+.l5r4.pc .traits-rings .ring-rank:active,
+.l5r4.npc .traits-rings .ring-rank:active {
+  transform: scale(0.98);
+  filter: brightness(0.95);
+}
 .l5r4.pc .traits-rings .ring-roll,
 .l5r4.npc .traits-rings .ring-roll {
   position: relative;
 }
 .l5r4.pc .traits-rings .ring-roll img,
 .l5r4.npc .traits-rings .ring-roll img {
+  transition: transform var(--l5r4-transition-fast), filter var(--l5r4-transition-fast);
+  cursor: pointer;
   border-radius: 50%;
   height: 96px;
   position: relative;
   width: 96px;
+}
+.l5r4.pc .traits-rings .ring-roll img:hover,
+.l5r4.npc .traits-rings .ring-roll img:hover {
+  transform: scale(1.05);
+  filter: brightness(1.1) drop-shadow(0 0 8px rgba(0, 0, 0, 0.3));
+}
+.l5r4.pc .traits-rings .ring-roll img:active,
+.l5r4.npc .traits-rings .ring-roll img:active {
+  transform: scale(0.98);
 }
 .l5r4.pc .traits-rings .trait,
 .l5r4.pc .traits-rings .void-points,
@@ -583,11 +667,12 @@ body > * {
 .l5r4.npc .traits-rings .trait .void-points-amount,
 .l5r4.npc .traits-rings .void-points .trait-rank,
 .l5r4.npc .traits-rings .void-points .void-points-amount {
+  transition: all var(--l5r4-transition-fast);
+  cursor: pointer;
   align-items: center;
   background-color: var(--table-header-bg-color);
   border-radius: 50%;
   color: var(--color-text-primary);
-  cursor: var(--conditional-cursor);
   display: inline-flex;
   font-family: var(--font-h3);
   font-size: 22px;
@@ -599,6 +684,27 @@ body > * {
   text-align: center;
   width: 24px;
   z-index: 10;
+}
+.l5r4.pc .traits-rings .trait .trait-rank:hover,
+.l5r4.pc .traits-rings .trait .void-points-amount:hover,
+.l5r4.pc .traits-rings .void-points .trait-rank:hover,
+.l5r4.pc .traits-rings .void-points .void-points-amount:hover,
+.l5r4.npc .traits-rings .trait .trait-rank:hover,
+.l5r4.npc .traits-rings .trait .void-points-amount:hover,
+.l5r4.npc .traits-rings .void-points .trait-rank:hover,
+.l5r4.npc .traits-rings .void-points .void-points-amount:hover {
+  filter: brightness(1.1);
+}
+.l5r4.pc .traits-rings .trait .trait-rank:active,
+.l5r4.pc .traits-rings .trait .void-points-amount:active,
+.l5r4.pc .traits-rings .void-points .trait-rank:active,
+.l5r4.pc .traits-rings .void-points .void-points-amount:active,
+.l5r4.npc .traits-rings .trait .trait-rank:active,
+.l5r4.npc .traits-rings .trait .void-points-amount:active,
+.l5r4.npc .traits-rings .void-points .trait-rank:active,
+.l5r4.npc .traits-rings .void-points .void-points-amount:active {
+  transform: scale(0.98);
+  filter: brightness(0.95);
 }
 .l5r4.pc .traits-rings .trait-reflex,
 .l5r4.pc .traits-rings .trait-awarness,
@@ -835,11 +941,21 @@ body > * {
   border: 2px solid #666;
   border-radius: 50%;
   height: 12px;
+  transition: all var(--l5r4-transition-fast);
   width: 12px;
+}
+.l5r4.pc .traits-rings .void-dot:hover,
+.l5r4.npc .traits-rings .void-dot:hover {
+  transform: scale(1.2);
+  border-color: #888;
 }
 .l5r4.pc .traits-rings .void-dot.-filled,
 .l5r4.npc .traits-rings .void-dot.-filled {
   background-color: #666;
+}
+.l5r4.pc .traits-rings .void-dot.-filled:hover,
+.l5r4.npc .traits-rings .void-dot.-filled:hover {
+  background-color: #888;
 }
 
 .l5r4.pc .grid .wound-grid,
@@ -911,7 +1027,20 @@ body > * {
   margin-block-end: 0;
 }
 .l5r4.item .button {
+  transition: all var(--l5r4-transition-fast);
+  cursor: pointer;
   display: inline-flex;
+}
+.l5r4.item .button:hover {
+  filter: brightness(1.1);
+}
+.l5r4.item .button:active {
+  transform: scale(0.98);
+  filter: brightness(0.95);
+}
+.l5r4.item .button:hover {
+  opacity: 1;
+  filter: brightness(1.15);
 }
 .l5r4.item .editor {
   min-height: 200px;

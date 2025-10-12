@@ -1,3 +1,5 @@
+@use "./interactions.scss" as *;
+
 .l5r4.item {
   .window-content {
     gap: 0.5rem;
@@ -21,6 +23,7 @@
   }
 
   .button {
+    @include interactive-control;
     display: inline-flex;
   }
 

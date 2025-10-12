@@ -1,5 +1,6 @@
 @use "./config.scss";
 @use "./global.scss";
+@use "./interactions.scss" as *;
 
 // Chat
 @use "./chat.scss";

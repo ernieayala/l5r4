@@ -192,7 +192,7 @@ export class ItemCRUDHandler {
   }
 
   /**
-   * Post an item's card to chat when its title is clicked.
+   * Post an item's card to chat when its title is shift+clicked.
    * Calls the item's roll() method to display in chat.
    * 
    * @param {object} context - Handler context
@@ -203,6 +203,10 @@ export class ItemCRUDHandler {
    */
   static async toChat(context, event, element) {
     event.preventDefault();
+    
+    // Only proceed if shift key is held
+    if (!event.shiftKey) return;
+    
     const row = element?.closest?.(".item");
     const id = row?.dataset?.documentId || row?.dataset?.itemId || row?.dataset?.id;
     if (!id) return;
