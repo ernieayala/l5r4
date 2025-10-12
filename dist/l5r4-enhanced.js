@@ -289,7 +289,7 @@ Hooks.once("ready", async () => {
         console.warn(`${SYS_ID}`, "runMigrations failed", e);
       } finally {
         try { await game.settings.set(SYS_ID, "lastMigratedVersion", currentVersion); } catch (_e) {}
-        try { await game.settings.set(SYS_ID, "runMigration", false); } catch (_e) {}
+        // Note: runMigration remains enabled as a persistent preference
         if (forceFlag) {
           try { await game.settings.set(SYS_ID, "forceMigration", false); } catch (_e) {}
         }

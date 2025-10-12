@@ -8,10 +8,8 @@
  * **Responsibilities:**
  * - Register migration control flags (enable/disable, force run)
  * - Track system version and migration completion status
- * - Provide internal flags for one-time migration tracking
  * 
  * **Settings Registered:**
- * - `migratedCommonItemTypes`: One-time v12→v13 item type migration completion flag
  * - `runMigration`: Master switch to enable/disable automatic migrations
  * - `forceMigration`: Manual trigger to force migrations regardless of version
  * - `lastMigratedVersion`: Tracks last system version that had migrations applied
@@ -32,7 +30,7 @@ import { SYS_ID } from "../../config/constants.js";
  * These settings control migration behavior and track version history.
  * 
  * **Registration Order:**
- * Settings registered in logical order: flag tracking → control switches → version tracking
+ * Settings registered in logical order: control switches → version tracking
  * 
  * @returns {void}
  * 
@@ -47,24 +45,10 @@ import { SYS_ID } from "../../config/constants.js";
  */
 export function registerMigrationSettings() {
   /**
-   * Migration tracking: one-time v12→v13 item-type migration status.
-   * Internal flag to track completion of the item type migration that occurred
-   * during the Foundry v12 to v13 transition. Hidden from UI as it's purely
-   * for system bookkeeping and should not be modified by users.
-   * 
-   * @type {boolean} true = migration completed, false = migration pending
-   */
-  game.settings.register(SYS_ID, "migratedCommonItemTypes", {
-    scope: "world", 
-    config: false, 
-    type: Boolean, 
-    default: false
-  });
-
-  /**
    * Migration control: enables/disables automatic data migrations.
-   * Provides a safety mechanism to prevent migrations from running
-   * if issues are discovered. Should normally remain enabled.
+   * When enabled, migrations run automatically when system version changes.
+   * When disabled, migrations are skipped (useful for troubleshooting).
+   * Unlike forceMigration, this setting does not auto-reset.
    * 
    * @type {boolean} true = migrations run automatically, false = skip migrations
    */

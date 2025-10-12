@@ -422,10 +422,6 @@
       "name": "Mostrar casilla de Puntos de Vacío para tiradas de PNJ.",
       "label": "Los PNJ normalmente carecen de Vacío."
     },
-    "useLtTenDiceRule": {
-      "name": "Usar la Regla de Diez Dados modificada de Little Truths.",
-      "label": "Si hay un número impar de dados lanzados en exceso y menos de 10 dados guardados, suma 2 al total para que el dado \"extra\" dé beneficio."
-    },
     "calculateRank": {
       "name": "Calcular automáticamente el Rango de Perspicacia",
       "label": "El Rango de Perspicacia se actualiza automáticamente según el total de Puntos de Perspicacia"
