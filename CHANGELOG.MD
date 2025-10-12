@@ -18,7 +18,21 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - Visual feedback in stance dropdown for restricted options
 - Automatic bonus application for both PC and NPC attack rolls
 
+**Interaction System**
+- New interaction animations SCSS module (`scss/interactions.scss`)
+- Reusable animation mixins for interactive elements
+- Shift+Click requirement for posting items to chat (prevents accidental posting)
+- Hover tooltips with keyboard hints for interactive elements
+- Fade-in controls for inline item actions
+
 ### Enhanced
+
+**User Experience**
+- Item titles now require Shift+Click to post to chat, reducing accidental posts
+- Improved actor header spacing and visual definition with background color
+- Interactive controls now fade in on hover for cleaner interface
+- Added visual feedback for ring ranks, trait ranks, and void points with hover effects
+- Enhanced void dots with hover animations and scaling
 
 **Combat System**
 - Attack bonus consolidation: Combined stance and mounted bonuses via `getAllAttackBonuses()`
@@ -58,6 +72,8 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 **Localization**
 - Added `l5r4.ui.mechanics.mounted.fullAttackRestriction` key
 - Added `l5r4.ui.mechanics.mounted.attackBonus` key
+- Added `l5r4.ui.hints.shiftClickToChat` key for all languages (en, de, es, fr)
+- Fixed missing translation keys across all language files
 
 ---
 
