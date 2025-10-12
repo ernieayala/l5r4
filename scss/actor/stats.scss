@@ -3,8 +3,6 @@
 .l5r4.pc,
 .l5r4.npc {
   .pc-info {
-    background: config.$brush-background;
-    background-size: 100% 100%;
     flex-wrap: nowrap;
     padding: 1rem;
 
@@ -60,17 +58,6 @@
 
     .ring-roll {
       position: relative;
-
-      &::after {
-        border-radius: 50%;
-        box-shadow: white 0 0 5px 2px inset;
-        content: "";
-        height: 100%;
-        left: 0;
-        position: absolute;
-        top: 0;
-        width: 100%;
-      }
 
       img {
         border-radius: 50%;

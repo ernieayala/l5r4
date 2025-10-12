@@ -167,18 +167,6 @@ body > * {
 .l5r4.npc .section-title .slots {
   position: relative;
 }
-.l5r4.pc .section-title .slots::after,
-.l5r4.npc .section-title .slots::after {
-  border-radius: 50%;
-  box-shadow: white 0 0 5px 2px inset;
-  content: "";
-  height: 32px;
-  left: 0;
-  pointer-events: none;
-  position: absolute;
-  top: 0;
-  width: 32px;
-}
 .l5r4.pc .section-title .slots img,
 .l5r4.npc .section-title .slots img {
   border-radius: 50%;
@@ -496,8 +484,6 @@ body > * {
 
 .l5r4.pc .pc-info,
 .l5r4.npc .pc-info {
-  background: url("../assets/textures/brush.webp") no-repeat 0 0;
-  background-size: 100% 100%;
   flex-wrap: nowrap;
   padding: 1rem;
 }
@@ -555,17 +541,6 @@ body > * {
 .l5r4.pc .traits-rings .ring-roll,
 .l5r4.npc .traits-rings .ring-roll {
   position: relative;
-}
-.l5r4.pc .traits-rings .ring-roll::after,
-.l5r4.npc .traits-rings .ring-roll::after {
-  border-radius: 50%;
-  box-shadow: white 0 0 5px 2px inset;
-  content: "";
-  height: 100%;
-  left: 0;
-  position: absolute;
-  top: 0;
-  width: 100%;
 }
 .l5r4.pc .traits-rings .ring-roll img,
 .l5r4.npc .traits-rings .ring-roll img {
@@ -692,7 +667,7 @@ body > * {
 .l5r4.pc .traits-rings .earth-ring .earth-ring-img,
 .l5r4.npc .traits-rings .earth-ring .earth-ring-img {
   border: none;
-  content: url("../assets/icons/earth.png");
+  content: url("../assets/icons/earth.webp");
 }
 .l5r4.pc .traits-rings .ring-rank-earth,
 .l5r4.npc .traits-rings .ring-rank-earth {
@@ -725,7 +700,7 @@ body > * {
 .l5r4.pc .traits-rings .air-ring .air-ring-img,
 .l5r4.npc .traits-rings .air-ring .air-ring-img {
   border: none;
-  content: url("../assets/icons/air.png");
+  content: url("../assets/icons/air.webp");
 }
 .l5r4.pc .traits-rings .ring-rank-air,
 .l5r4.npc .traits-rings .ring-rank-air {
@@ -758,7 +733,7 @@ body > * {
 .l5r4.pc .traits-rings .water-ring .water-ring-img,
 .l5r4.npc .traits-rings .water-ring .water-ring-img {
   border: none;
-  content: url("../assets/icons/water.png");
+  content: url("../assets/icons/water.webp");
 }
 .l5r4.pc .traits-rings .ring-rank-water,
 .l5r4.npc .traits-rings .ring-rank-water {
@@ -790,7 +765,7 @@ body > * {
 .l5r4.pc .traits-rings .fire-ring .fire-ring-img,
 .l5r4.npc .traits-rings .fire-ring .fire-ring-img {
   border: none;
-  content: url("../assets/icons/fire.png");
+  content: url("../assets/icons/fire.webp");
 }
 .l5r4.pc .traits-rings .ring-rank-fire,
 .l5r4.npc .traits-rings .ring-rank-fire {
@@ -831,7 +806,7 @@ body > * {
 .l5r4.pc .traits-rings .void-ring .void-ring-img,
 .l5r4.npc .traits-rings .void-ring .void-ring-img {
   border: none;
-  content: url("../assets/icons/void.png");
+  content: url("../assets/icons/void.webp");
 }
 .l5r4.pc .traits-rings .void-points,
 .l5r4.npc .traits-rings .void-points {
