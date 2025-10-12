@@ -13,17 +13,31 @@ Built exclusively for Foundry VTT v13+ with ApplicationV2 architecture, comprehe
 
 ---
 
-## 🔄 Migrating from the Old L5R4 System?
+## ⚠️ BREAKING: New System ID - Migration Required
 
-If you're currently using the legacy `l5r4` system, we've made switching easy! Check out our **[Migration Guide](#-migration-guide)** below for step-by-step instructions or use our automated migration tool.
+**This is NOT the same system as `l5r4`**. This system uses the ID `l5r4-enhanced` and requires migration from existing `l5r4` worlds.
 
-**Why Switch?**
-- ✅ Built for Foundry v13+ (not just compatible)
-- ✅ Automatic XP tracking with cost calculation
+### Critical Information
+
+❌ **You CANNOT switch an existing world to this system** - Foundry does not allow changing system IDs
+
+✅ **You MUST migrate your data** - Use our migration tool to transfer your world data
+
+✅ **Your data is safe** - The migration tool creates a new world without touching your original
+
+**Why the Name Change?**
+- System ID change enables clean architectural modernization
+- Separates actively maintained version from legacy implementations
+- Allows independent versioning and release cycles
+- Provides clear distinction for module compatibility
+
+**Why Migrate?**
+- ✅ Built for Foundry v13+ with ApplicationV2 architecture
+- ✅ Automatic XP tracking with progression formulas
 - ✅ Combat stance automation with Active Effects
-- ✅ Strict architecture compliance
-- ✅ Modern architecture with ongoing development
-- ✅ Six languages supported
+- ✅ Modern 60+ module architecture for maintainability
+- ✅ Active development and community support
+- ✅ Six languages with complete localization
 
 ---
 
@@ -47,54 +61,107 @@ If you're currently using the legacy `l5r4` system, we've made switching easy! C
 
 ## 🔄 Migration Guide
 
-### Switching from the Legacy L5R4 System
+### Understanding the System ID Change
 
-We understand you may have invested significant time in characters and campaigns using the previous L5R4 implementation. We've created tools to make your transition seamless.
+**Why Can't I Just Switch Systems?**
 
-#### Option 1: Automated Migration (Recommended)
+Foundry VTT treats `l5r4` and `l5r4-enhanced` as completely different game systems due to their different system IDs. The engine **does not allow** changing a world's system ID - this is a core Foundry limitation, not a module restriction.
 
-1. **Install the Migration Module:**
-   ```
-   https://github.com/ernieayala/l5r4-migrator/releases/latest/download/module.json
-   ```
+**What This Means:**
+- ✅ Your existing `l5r4` world will continue to work (unchanged)
+- ❌ You cannot "switch" your world to `l5r4-enhanced`
+- ✅ You must **create a NEW world** and migrate your data
+- ✅ The migration tool handles the export → new world → import process safely
 
-2. **Open your existing L5R4 world** (don't worry, your data is safe)
+### Automated Migration Tool (Recommended)
 
-3. **Enable the "L5R4 to Enhanced Migrator" module** in Module Management
+We've built a comprehensive migration tool that handles all the complexity:
 
-4. **Click the "Migrate to L5R4-Enhanced" button** that appears in the setup screen
+**Installation:**
+```
+https://github.com/ernieayala/l5r4-migrator/releases/latest/download/module.json
+```
 
-5. **Follow the prompts** - the tool will:
-   - Create a backup of your world
-   - Export all actors, items, and scenes
-   - Create a new world with L5R4-Enhanced
-   - Import and convert your data
-   - Preserve all character progress, XP, and items
+**Key Features:**
+- ✅ Automatic schema detection (detects Original v12/v13 vs New v13)
+- ✅ Intelligent import routing (transformation vs as-is)
+- ✅ Complete backup system
+- ✅ Step-by-step UI with visual feedback
+- ✅ Validation with detailed readiness reports
+- ✅ Preserves all data: actors, items, scenes, journals, folders
 
-#### Option 2: Manual Migration (Advanced Users)
+**Complete Migration Instructions:**
 
-If you prefer manual control or want to understand the process:
+📖 **[Full Migration Guide](https://github.com/ernieayala/l5r4-migrator/blob/main/MIGRATION_GUIDE.md)**
 
-1. **Backup your world** using Foundry's built-in backup tool
+The migration guide includes:
+- Step-by-step instructions (5 phases)
+- Schema detection explained
+- Troubleshooting for common issues
+- FAQ section
+- Emergency recovery procedures
 
-2. **Install L5R4-Enhanced** following the [Installation](#-installation) instructions below
+**Quick Overview:**
+1. Install migration module in both worlds
+2. Export data from your `l5r4` world
+3. Create NEW `l5r4-enhanced` world
+4. Import data (tool auto-detects schema and transforms)
+5. Verify your data
 
-3. **Close Foundry VTT**
+### What Gets Migrated
 
-4. **Edit your world's configuration:**
-   - Navigate to: `[UserData]/Data/worlds/[your-world]/world.json`
-   - Change: `"system": "l5r4"` to `"system": "l5r4-enhanced"`
-   - Save the file
+✅ **Fully Migrated:**
+- All actors (PCs and NPCs) with complete system data
+- All items with embedded items and Active Effects
+- Scenes with tokens, walls, lights, and other scene data
+- Journal entries with full content
+- Folders and organization structure
+- Document permissions and ownership
 
-5. **Restart Foundry VTT** and load your world
+⚠️ **Requires Manual Migration:**
+- Compendium packs (export/import manually)
+- Module-specific settings
+- Macros (may need API updates)
 
-6. **Run the data repair macro** (provided in our documentation) if needed
+❌ **Not Migrated:**
+- Chat history
+- World-level settings (reconfigure in new world)
 
-> **Note:** Because L5R4-Enhanced shares the same data structure roots, most data should convert cleanly. However, we recommend testing with a backup first.
+### How Migration Works
 
-#### Option 3: Fresh Start
+The migration tool uses **intelligent schema detection** to automatically determine the correct import strategy:
 
-Start a new campaign with L5R4-Enhanced and enjoy the modern experience from the ground up. You can reference your old characters while building new ones with the enhanced features.
+**Schema Detection:**
+- Automatically detects **Original v12/v13** (snake_case) vs **New v13** (camelCase)
+- Confidence scoring ensures accurate detection
+- Routes to appropriate import path:
+  - **With Transform**: Converts snake_case → camelCase, adds new fields
+  - **As-Is**: Preserves New v13 data exactly, no transformation
+
+**What Gets Transformed:**
+- 18+ field renames (e.g., `heal_rate` → `healRate`, `mastery_3` → `mastery3`)
+- Bow items converted to weapons with `isBow` flag
+- New fields added for v2.0.0 features (mounted combat, fear system, etc.)
+
+For complete technical details, see the [Migration Tool README](https://github.com/ernieayala/l5r4-migrator#readme).
+
+### Migration Support
+
+**Having Issues?**
+- 📖 [Troubleshooting Guide](https://github.com/ernieayala/l5r4-migrator/blob/main/MIGRATION_GUIDE.md#troubleshooting) - 20+ common scenarios with solutions
+- 📖 [FAQ](https://github.com/ernieayala/l5r4-migrator/blob/main/MIGRATION_GUIDE.md#faq) - Answers to frequently asked questions
+- 🐛 [Report Issues](https://github.com/ernieayala/l5r4-migrator/issues)
+- 💬 [Discussions](https://github.com/ernieayala/l5r4-migrator/discussions)
+
+### Option: Fresh Start
+
+If you prefer to start fresh or have a small world:
+
+1. Create a new world with **l5r4-enhanced**
+2. Manually recreate characters using the enhanced features
+3. Use your old world as reference
+
+This approach lets you experience the new architecture from scratch.
 
 ---
 
@@ -112,13 +179,40 @@ Unlike compatibility patches for older systems, L5R4-Enhanced is built exclusive
 - 📱 **Actively Maintained:** Regular updates and community support
 - 🌍 **Global Ready:** Six languages with complete localization
 
-### NEW FEATURES
+### v2.0.0 - Latest Features
 
-#### Modern Foundation
+#### Mounted Combat System
+- **Mounted/Higher Ground Bonuses**: +1k0 to attack rolls when mounted or on higher ground
+- **Stance Restrictions**: Full Attack stance requires Horsemanship 3+ when mounted
+- **Visual Feedback**: Clear indicators for restricted stances in dropdown
+- **Automatic Application**: Bonuses apply to both PC and NPC attack rolls
+- **Combat Integration**: Works seamlessly with existing stance system
+
+#### Enhanced Interaction System
+- **Shift+Click for Chat**: Item titles require Shift+Click to post, preventing accidental posting
+- **Hover Tooltips**: Keyboard hints show on interactive elements
+- **Fade-In Controls**: Inline item actions appear on hover for cleaner interface
+- **Visual Feedback**: Interactive elements have clear hover animations and scaling
+
+#### Icon System Migration
+- **WebP Format**: All system icons migrated from PNG to WebP (60% file size reduction)
+- **Automatic Token Migration**: Actor prototype token images update with icon migration
+- **Bow Icon Fix**: Special migration logic corrects bow weapons with incorrect icons
+- **Enhanced FilePicker**: Improved compatibility for Foundry v13+
+
+#### Full Defense Improvements
+- **3D Dice Integration**: Full Defense roll chat cards now show actual dice roll
+- **Improved Rendering**: Better HTML structure for roll displays
+- **Visual Consistency**: Matches other roll types in chat
+
+### Core System Features
+
+#### Modern Foundation (v1.0.0+)
 - **ApplicationV2/DialogV2**: Complete rewrite using Foundry v13+ modern APIs
 - **Migration System**: Automated data structure updates and schema migrations
-- **Services Architecture**: Modular service-oriented design (dice, chat, stance services)
+- **Services Architecture**: Modular service-oriented design (dice, chat, stance, mounted combat)
 - **Setup System**: Organized initialization with preload templates and centralized settings
+- **60+ Module Architecture**: Complete refactoring from 4 monolithic files into focused modules
 
 #### XP Manager Application
 - **Dedicated Interface**: Full-featured XP management window with ApplicationV2
@@ -149,74 +243,23 @@ Unlike compatibility patches for older systems, L5R4-Enhanced is built exclusive
 - **Family Bonuses**: Automated character creation bonuses via Active Effects
 - **Wound Configuration**: Dedicated application for NPC wound customization
 
-### ENHANCED FEATURES
+### System Evolution Highlights
 
-#### Dice System Refactor
-- **Before**: 21k+ line monolithic file
-- **After**: 1.3k line modular service with focused functions
-- Improved Ten Dice Rule implementation with Little Truths variant
-- Better modifier dialog system with DialogV2
-- Enhanced chat card rendering with success/failure evaluation
-- Auto-targeting from selected tokens
+Key improvements from previous implementations:
 
-#### XP Tracking Evolution
-- **Before**: Simple XP field with manual calculation
-- **After**: Complex cost calculation with automatic progression
-- Triangular costs for skills (1+2+3+...+rank)
-- Progressive costs for traits (4×new_rank)
-- Fixed costs for void (6×new_rank)
-- School skill free rank handling
-- Emphasis cost tracking (2 XP each)
+**Dice System**: 1,343-line monolithic file → 18 focused modules with improved Ten Dice Rule and DialogV2 integration
 
-#### Combat Stances Upgrade
-- **Before**: Static status effect definitions
-- **After**: Active automation with mutual exclusion
-- Automatic bonus application during rolls
-- Armor TN modifications during data preparation
-- Defense/Reflexes roll for Full Defense stance
-- Chat integration for stance notifications
+**XP Tracking**: Manual calculation → Automatic progression with triangular costs, family bonuses, and complete audit trail
 
-#### Spell Slots Enhancement
-- **Before**: Basic checkbox system
-- **After**: Integrated with dice service for automatic deduction
-- Elemental spell slots (Air, Earth, Fire, Water, Void)
-- Validation prevents casting when slots depleted
-- Chat message integration shows slot usage
+**Combat Stances**: Static definitions → Active automation with mutual exclusion and real-time bonus application
 
-#### Sheet System Modernization
-- **Before**: Basic ActorSheet implementation
-- **After**: BaseActorSheet with v13+ APIs and advanced UI
-- ApplicationV2 architecture throughout
-- Improved event handling with action delegation
-- Better drag-drop functionality
-- Sorting preferences with persistence
+**Spell Slots**: Basic checkboxes → Integrated resource management with validation and automatic deduction
 
-#### Template Organization
-- **Before**: Mixed partials in flat structure
-- **After**: Hierarchically organized by function
-- Categorized templates (actor, cards, chat, apps, dialogs)
-- Partial templates for reusability
-- Consistent naming conventions
+**Sheet System**: Basic ActorSheet → Modern BaseActorSheet with ApplicationV2, event delegation, and persistent sorting
 
-#### Comprehensive Localization
-- **Before**: Basic UI text coverage
-- **After**: Complete coverage including skill names
-- Six languages supported (en, es, fr, pt-BR, de, ru)
-- All UI elements, settings, and error messages localized
+**Localization**: Basic UI text → Complete coverage in 6 languages including skill names and error messages
 
-#### Configuration Modernization
-- **Before**: Basic objects with mutable state
-- **After**: ES6 modules with immutability
-- Frozen configuration objects
-- Centralized constants (SYS_ID, paths, templates)
-- Icon path resolver for future asset reorganization
-
-#### Documentation Enhancement
-- **Before**: Minimal comments
-- **After**: Comprehensive JSDoc throughout codebase
-- Function documentation with parameter types
-- Usage examples and integration notes
-- Performance considerations documented
+**Architecture**: 4 monolithic files (3,016 lines) → 60+ focused modules organized by domain
 
 ---
 
@@ -386,6 +429,23 @@ Advanced XP tracking with automatic cost calculation:
 - **Shift-Click Override**: Hold Shift to bypass dialog and roll immediately
 - **Preset Modifiers**: Dialog pre-populates with bonuses from Active Effects
 
+#### Chat Dice Roller
+
+Built-in L5R4e dice parser for chat commands:
+
+**Quick Syntax:**
+- `XkY` - Standard roll (e.g., `5k3` = roll 5 dice, keep 3 highest)
+- `XkYxZ` - Custom explosion (e.g., `5k3x9` = explode on 9+)
+- `uXkY` - Unskilled (e.g., `u4k2` = no exploding dice)
+- `eXkY` - Emphasis (e.g., `e5k3` = reroll 1s once)
+- `XkY±A` - With modifier (e.g., `5k3+2` = add bonus)
+
+**Foundry Commands:**
+- `/roll 6k4` - Public roll
+- `/gmroll 6k4` - GM-only roll
+- `/selfroll 6k4` - Private roll
+- `[[6k4]]` - Inline rolls in chat or journals
+
 ---
 
 ### ⚔️ Combat & Equipment
@@ -465,43 +525,13 @@ Full stance system with automation and mutual exclusion:
 - **Area of Effect**: Note AoE dimensions and shapes
 - **Duration**: Track spell duration (Instantaneous, Concentration, etc.)
 - **Raises**: Document raise effects for spell enhancement
-
----
-
-## 🎯 Integrated Dice Roller
-
-Built-in L5R4e dice parser that seamlessly converts chat messages into authentic Foundry rolls with beautiful L5R styling.
-
-### Quick Syntax Guide
-
-| Roll Type | Syntax | Example | Description |
-|-----------|--------|---------|-------------|
-| Standard | `XkY` | `5k3` | Roll 5 dice, keep 3 highest |
-| Custom Explosion | `XkYxZ` | `5k3x9` | Explode on 9+ instead of 10 |
-| Unskilled | `uXkY` | `u4k2` | No exploding dice |
-| Emphasis | `eXkY` | `e5k3` | Reroll 1s once |
-| With Modifier | `XkY±A` | `5k3+2` | Add/subtract bonus |
-
-### Foundry Integration
-
-Works seamlessly with all Foundry roll commands:
-- `/roll 6k4` - Public roll
-- `/gmroll 6k4` - GM-only roll  
-- `/selfroll 6k4` - Private roll
-- `/blindroll 6k4` - Hidden roll
-- `[[6k4]]` - Inline rolls in chat or journals
-
-### Visual Experience
-
-- 📊 Clear success/failure indicators
-- 🎯 Automatic raise tracking and TN display
+- **Casting Time**: Track spell casting time (Instantaneous, 1 Action, 1 Minute, etc.)
 
 ---
 
 ## ⚙️ System Settings & Configuration
 
 ### Automation Settings
-
 #### Insight Rank Calculation
 - **Default**: Enabled
 - **Description**: Automatically calculates character insight rank based on total insight points

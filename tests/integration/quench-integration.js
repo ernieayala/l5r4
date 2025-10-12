@@ -14,8 +14,6 @@
  */
 export async function registerQuenchTests(quench) {
   // Stub implementation - tests to be implemented
-  console.log("L5R4 | Quench test registration called (stub implementation)");
-  
   // Future: Register test batches here
   // quench.registerBatch("l5r4.core", tests, { displayName: "L5R4 Core Tests" });
 }

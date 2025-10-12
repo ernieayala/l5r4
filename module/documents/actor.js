@@ -328,7 +328,10 @@ export default class L5R4Actor extends Actor {
         vision: true,
         actorLink: true
       });
-      this.updateSource({ img: iconPath("pc.webp") });
+      // Only set default image if not provided
+      if (!data.img) {
+        this.updateSource({ img: iconPath("pc.webp") });
+      }
     } else {
       // NPC creation: set default wound mode from global setting
       let defaultWoundMode = "manual"; // Fallback default
@@ -353,14 +356,22 @@ export default class L5R4Actor extends Actor {
       // Set default wound mode and image for new NPCs
       // Only apply default wound mode if not explicitly provided in creation data
       try {
-        const updates = { img: iconPath("npc.webp") };
+        const updates = {};
+        
+        // Only set default image if not provided
+        if (!data.img) {
+          updates.img = iconPath("npc.webp");
+        }
         
         // Check if woundMode was explicitly provided during creation
         if (!data.system?.woundMode) {
           updates["system.woundMode"] = defaultWoundMode;
         }
         
-        this.updateSource(updates);
+        // Only update if there are changes
+        if (Object.keys(updates).length > 0) {
+          this.updateSource(updates);
+        }
         
         // Debug logging for NPC creation
         if (CONFIG.debug?.l5r4?.wounds) {
