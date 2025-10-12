@@ -1,3 +1,5 @@
+@use "./interactions.scss" as *;
+
 .l5r4.pc,
 .l5r4.npc {
   --conditional-cursor: default;
@@ -40,7 +42,6 @@
 
   .actor-img {
     align-items: center;
-    cursor: var(--conditional-cursor);
     display: flex;
     height: 240px;
     justify-content: center;
@@ -49,6 +50,7 @@
     width: 240px;
 
     img {
+      @include interactive-image;
       max-width: 100%;
       max-height: 100%;
     }
@@ -163,23 +165,12 @@
   }
 
   .info-group {
+    @include fade-control-parent;
     flex-wrap: nowrap;
-    transition-delay: 2000ms;
-
-    &:hover {
-      transition-delay: 0;
-
-      .clear-btn {
-        opacity: 1;
-      }
-    }
-
-    .clear-btn {
-      opacity: 0;
-    }
   }
 
   .clear-btn {
+    @include fade-control;
     align-items: center;
     display: inline-flex;
     height: var(--form-field-height);
@@ -188,6 +179,7 @@
   }
 
   .button {
+    @include interactive-control;
     display: inline-flex;
   }
 

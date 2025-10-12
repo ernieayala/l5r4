@@ -1,3 +1,5 @@
+@use "../interactions.scss" as *;
+
 .l5r4.pc,
 .l5r4.npc,
 .xp-modal-dialog {
@@ -116,6 +118,7 @@
   }
 
   .item {
+    @include fade-control-parent;
     align-items: center;
     column-gap: 0.25rem;
     display: grid;
@@ -151,12 +154,18 @@
     }
 
     .title {
-      text-wrap: revert
+      text-wrap: revert;
+
+      a[data-action="item-chat"] {
+        color: inherit;
+        text-decoration: none;
+        cursor: var(--conditional-cursor);
+        text-shadow: none;
+      }
     }
 
     .inline-control {
-      opacity: 0;
-      pointer-events: none;
+      @include fade-control;
     }
 
     .expanded-text {

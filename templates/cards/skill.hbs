@@ -3,7 +3,7 @@
   data-document-id="{{coalesce docId this.id _id}}">
   <h4 class="flexrow -gap-sm title">
     {{#if inSheet}}
-      <a data-action="item-chat" title="{{name}}">{{name}}</a>
+      <a data-action="item-chat" title="{{localize "l5r4.ui.hints.shiftClickToChat"}}">{{name}}</a>
       {{#if system.school}}
         <img class="flex0" width="16px" height="16px" src="{{iconPath 'school.webp'}}" />
       {{/if}}
