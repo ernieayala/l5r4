@@ -547,6 +547,7 @@ body > * {
 
 .l5r4.pc .pc-info,
 .l5r4.npc .pc-info {
+  background-color: var(--table-header-bg-color);
   flex-wrap: nowrap;
   padding: 1rem;
 }
