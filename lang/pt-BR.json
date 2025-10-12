@@ -39,8 +39,17 @@
           "emphasis": "Ênfase",
           "raise": "Aumento",
           "raises": "Aumentos",
+          "automatic": "Automatic",
           "formula": "Fórmula",
           "result": "Resultado"
+        },
+        "notifications": {
+          "itemCreated": "Created {type}: {name}",
+          "itemDeleted": "Deleted {type}: {name}",
+          "itemUpdated": "Updated {type}: {name}",
+          "woundConfigFailed": "Failed to open wound configuration",
+          "woundConfigUpdateFailed": "Failed to update wound configuration",
+          "invalidWoundConfigValue": "Invalid wound configuration value"
         },
         "combat": {
           "attack": "Ataque",
@@ -65,6 +74,13 @@
           "penalty": "Penalidade",
           "woundHealRate": "Taxa de Cura de Ferimentos",
           "healRateFormula": "x 2 +",
+          "woundMode": "Wound Mode",
+          "manual": "Manual",
+          "formula": "Formula",
+          "woundConfiguration": "Wound Configuration",
+          "earthMultiplier": "Earth Multiplier",
+          "woundBonus": "Wound Bonus",
+          "threshold": "Threshold",
           "healthy": "Saudável",
           "nicked": "Cortado",
           "grazed": "Arranhado",
@@ -84,6 +100,26 @@
           "fullDefenseDescription": "Faça uma rolagem de Defesa/Reflexos. Some metade do resultado (arredondando para cima) ao seu TN de Armadura pela duração desta postura.",
           "cannotAttackDefense": "Não é possível atacar em Postura de Defesa",
           "fullAttackBonus": "Postura de Ataque Total: +2k1"
+        },
+        "mounted": {
+          "fullAttackRestriction": "Full Attack stance requires Horsemanship 3+ when mounted",
+          "attackBonus": "Mounted/Higher: +1k0"
+        },
+        "fear": {
+          "fearRank": "Fear Rank",
+          "fearLabel": "Fear {rank}",
+          "clickToTest": "Click to test Fear against selected characters",
+          "testResult": "Fear {rank} Test",
+          "testSuccess": "Resisted Fear {rank}",
+          "testFailure": "Failed Fear {rank} Test",
+          "penaltyApplied": "Penalty: -{penalty}kO to all rolls",
+          "catastrophicFailure": "CATASTROPHIC FAILURE! Character flees or cowers helplessly.",
+          "noTargets": "No tokens selected for Fear test",
+          "noWillpower": "{character} has no Willpower trait",
+          "noFear": "This NPC has no Fear effect configured",
+          "testAgainst": "vs {creature}",
+          "rollFailed": "Fear test roll failed - invalid formula or corrupted data",
+          "templateFailed": "Fear test chat template failed to render"
         }
       },
       "common": {
@@ -114,6 +150,7 @@
         "description": "Descrição",
         "notes": "Notas",
         "activeEffects": "Efeitos Ativos",
+        "active": "Active",
         "new": "Novo",
         "disabled": "desativado",
         "rank": "Posto",
@@ -190,9 +227,7 @@
         "chatMessageFailed": "Falha ao publicar a rolagem no chat - veja o console para detalhes",
         "deleteEffect": "Falha ao excluir efeito.",
         "schoolRankZero": "Você não pode lançar um feitiço com Posto de Escola reduzido a zero",
-        "noSpellSlots": "Você ficou sem espaços de feitiço para este anel",
-        "woundConfigFailed": "Falha ao abrir configuração de ferimentos",
-        "woundConfigUpdateFailed": "Falha ao atualizar configuração de ferimentos"
+        "noSpellSlots": "Você ficou sem espaços de feitiço para este anel"
       },
       "chat": {
         "traitRoll": "Rolagem de Atributo {trait}",
@@ -291,6 +326,10 @@
         "insightRank": "Posto de Discernimento",
         "insightPoints": "Pontos de Discernimento"
       },
+      "stance": {
+        "title": "Combat Stance",
+        "current": "Current Stance"
+      },
       "experience": {
         "xpAmount": "Quantidade",
         "note": "Nota",
@@ -307,6 +346,9 @@
         "voidChange": "Vazio {from}→{to}",
         "skillCreate": "{name} 0→{rank}",
         "skillChange": "{name} {from}→{to}",
+        "recalculateTooltip": "Recalculate XP purchases from current character state",
+        "recalculateSuccess": "XP purchases recalculated successfully",
+        "recalculateFailed": "Failed to recalculate XP purchases",
         "breakdown": {
           "base": "Base",
           "disadvantagesGrant": "Desvantagens",
