@@ -39,8 +39,17 @@
           "emphasis": "Schwerpunkt",
           "raise": "Erhöhung",
           "raises": "Erhöhungen",
+          "automatic": "Automatic",
           "formula": "Formel",
           "result": "Ergebnis"
+        },
+        "notifications": {
+          "itemCreated": "Created {type}: {name}",
+          "itemDeleted": "Deleted {type}: {name}",
+          "itemUpdated": "Updated {type}: {name}",
+          "woundConfigFailed": "Failed to open wound configuration",
+          "woundConfigUpdateFailed": "Failed to update wound configuration",
+          "invalidWoundConfigValue": "Invalid wound configuration value"
         },
         "combat": {
           "attack": "Angriff",
@@ -65,6 +74,13 @@
           "penalty": "Abzug",
           "woundHealRate": "Heilrate der Wunden",
           "healRateFormula": "x 2 +",
+          "woundMode": "Wound Mode",
+          "manual": "Manual",
+          "formula": "Formula",
+          "woundConfiguration": "Wound Configuration",
+          "earthMultiplier": "Earth Multiplier",
+          "woundBonus": "Wound Bonus",
+          "threshold": "Threshold",
           "healthy": "Gesund",
           "nicked": "Angeritzt",
           "grazed": "Gekratzt",
@@ -84,6 +100,26 @@
           "fullDefenseDescription": "Führe einen Verteidigungs-/Reflexe-Wurf aus. Addiere die Hälfte des Ergebnisses (aufgerundet) zu deinem Rüstungs-TN für die Dauer dieser Haltung.",
           "cannotAttackDefense": "Angreifen in Verteidigungshaltung nicht möglich",
           "fullAttackBonus": "Volle Angriffshaltung: +2k1"
+        },
+        "mounted": {
+          "fullAttackRestriction": "Full Attack stance requires Horsemanship 3+ when mounted",
+          "attackBonus": "Mounted/Higher: +1k0"
+        },
+        "fear": {
+          "fearRank": "Fear Rank",
+          "fearLabel": "Fear {rank}",
+          "clickToTest": "Click to test Fear against selected characters",
+          "testResult": "Fear {rank} Test",
+          "testSuccess": "Resisted Fear {rank}",
+          "testFailure": "Failed Fear {rank} Test",
+          "penaltyApplied": "Penalty: -{penalty}kO to all rolls",
+          "catastrophicFailure": "CATASTROPHIC FAILURE! Character flees or cowers helplessly.",
+          "noTargets": "No tokens selected for Fear test",
+          "noWillpower": "{character} has no Willpower trait",
+          "noFear": "This NPC has no Fear effect configured",
+          "testAgainst": "vs {creature}",
+          "rollFailed": "Fear test roll failed - invalid formula or corrupted data",
+          "templateFailed": "Fear test chat template failed to render"
         }
       },
       "common": {
@@ -114,6 +150,7 @@
         "description": "Beschreibung",
         "notes": "Notizen",
         "activeEffects": "Aktive Effekte",
+        "active": "Active",
         "new": "Neu",
         "disabled": "deaktiviert",
         "rank": "Rang",
@@ -190,9 +227,7 @@
         "chatMessageFailed": "Wurf konnte nicht im Chat gepostet werden - siehe Konsole für Details",
         "deleteEffect": "Effekt konnte nicht gelöscht werden.",
         "schoolRankZero": "Du kannst keinen Zauber wirken, wenn der Schulrang auf null reduziert ist",
-        "noSpellSlots": "Keine Zauberplätze mehr für diesen Ring",
-        "woundConfigFailed": "Fehler beim Öffnen der Wundenkonfiguration",
-        "woundConfigUpdateFailed": "Fehler beim Aktualisieren der Wundenkonfiguration"
+        "noSpellSlots": "Keine Zauberplätze mehr für diesen Ring"
       },
       "chat": {
         "traitRoll": "Eigenschaftswurf {trait}",
@@ -291,6 +326,10 @@
         "insightRank": "Einsichts-Rang",
         "insightPoints": "Einsichts-Punkte"
       },
+      "stance": {
+        "title": "Combat Stance",
+        "current": "Current Stance"
+      },
       "experience": {
         "xpAmount": "Betrag",
         "note": "Notiz",
@@ -307,6 +346,9 @@
         "voidChange": "Leere {from}→{to}",
         "skillCreate": "{name} 0→{rank}",
         "skillChange": "{name} {from}→{to}",
+        "recalculateTooltip": "Recalculate XP purchases from current character state",
+        "recalculateSuccess": "XP purchases recalculated successfully",
+        "recalculateFailed": "Failed to recalculate XP purchases",
         "breakdown": {
           "base": "Basis",
           "disadvantagesGrant": "Nachteile",

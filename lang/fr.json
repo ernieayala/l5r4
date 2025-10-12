@@ -39,8 +39,17 @@
           "emphasis": "Accent",
           "raise": "Relance",
           "raises": "Relances",
+          "automatic": "Automatic",
           "formula": "Formule",
           "result": "Résultat"
+        },
+        "notifications": {
+          "itemCreated": "Created {type}: {name}",
+          "itemDeleted": "Deleted {type}: {name}",
+          "itemUpdated": "Updated {type}: {name}",
+          "woundConfigFailed": "Failed to open wound configuration",
+          "woundConfigUpdateFailed": "Failed to update wound configuration",
+          "invalidWoundConfigValue": "Invalid wound configuration value"
         },
         "combat": {
           "attack": "Attaque",
@@ -65,6 +74,13 @@
           "penalty": "Pénalité",
           "woundHealRate": "Taux de guérison des blessures",
           "healRateFormula": "x 2 +",
+          "woundMode": "Wound Mode",
+          "manual": "Manual",
+          "formula": "Formula",
+          "woundConfiguration": "Wound Configuration",
+          "earthMultiplier": "Earth Multiplier",
+          "woundBonus": "Wound Bonus",
+          "threshold": "Threshold",
           "healthy": "Sain",
           "nicked": "Éraflé",
           "grazed": "Egratigné",
@@ -84,6 +100,26 @@
           "fullDefenseDescription": "Faites un jet de Défense/Réflexes. Ajoutez la moitié du résultat (arrondi à l'entier supérieur) à votre TN d'Armure pendant la durée de cette posture.",
           "cannotAttackDefense": "Impossible d'attaquer en Posture de Défense",
           "fullAttackBonus": "Posture d'Attaque Totale : +2g1"
+        },
+        "mounted": {
+          "fullAttackRestriction": "Full Attack stance requires Horsemanship 3+ when mounted",
+          "attackBonus": "Mounted/Higher: +1k0"
+        },
+        "fear": {
+          "fearRank": "Fear Rank",
+          "fearLabel": "Fear {rank}",
+          "clickToTest": "Click to test Fear against selected characters",
+          "testResult": "Fear {rank} Test",
+          "testSuccess": "Resisted Fear {rank}",
+          "testFailure": "Failed Fear {rank} Test",
+          "penaltyApplied": "Penalty: -{penalty}kO to all rolls",
+          "catastrophicFailure": "CATASTROPHIC FAILURE! Character flees or cowers helplessly.",
+          "noTargets": "No tokens selected for Fear test",
+          "noWillpower": "{character} has no Willpower trait",
+          "noFear": "This NPC has no Fear effect configured",
+          "testAgainst": "vs {creature}",
+          "rollFailed": "Fear test roll failed - invalid formula or corrupted data",
+          "templateFailed": "Fear test chat template failed to render"
         }
       },
       "common": {
@@ -114,6 +150,7 @@
         "description": "Description",
         "notes": "Notes",
         "activeEffects": "Effets actifs",
+        "active": "Active",
         "new": "Nouveau",
         "disabled": "désactivé",
         "rank": "Rang",
@@ -190,9 +227,7 @@
         "chatMessageFailed": "Échec de la publication du jet dans le chat - voir la console pour les détails",
         "deleteEffect": "Échec de la suppression de l'effet.",
         "schoolRankZero": "Vous ne pouvez pas lancer un sort avec un Rang d'École réduit à zéro",
-        "noSpellSlots": "Vous n'avez plus d'emplacements de sort pour cet anneau",
-        "woundConfigFailed": "Échec de l'ouverture de la configuration des blessures",
-        "woundConfigUpdateFailed": "Échec de la mise à jour de la configuration des blessures"
+        "noSpellSlots": "Vous n'avez plus d'emplacements de sort pour cet anneau"
       },
       "chat": {
         "traitRoll": "Jet de Caractéristique {trait}",
@@ -291,6 +326,10 @@
         "insightRank": "Rang de Perspicacité",
         "insightPoints": "Points de Perspicacité"
       },
+      "stance": {
+        "title": "Combat Stance",
+        "current": "Current Stance"
+      },
       "experience": {
         "xpAmount": "Montant",
         "note": "Note",
@@ -307,6 +346,9 @@
         "voidChange": "Vide {from}→{to}",
         "skillCreate": "{name} 0→{rank}",
         "skillChange": "{name} {from}→{to}",
+        "recalculateTooltip": "Recalculate XP purchases from current character state",
+        "recalculateSuccess": "XP purchases recalculated successfully",
+        "recalculateFailed": "Failed to recalculate XP purchases",
         "breakdown": {
           "base": "Base",
           "disadvantagesGrant": "Désavantages",
