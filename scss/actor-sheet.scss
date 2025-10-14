@@ -1,7 +1,7 @@
 .l5r4.pc,
 .l5r4.npc {
   --conditional-cursor: default;
-  
+
   display: flex;
   flex-direction: column;
 
@@ -17,7 +17,7 @@
       &.sidebar {
         flex: 0;
       }
-    } 
+    }
   }
 
   .main-sheet {
@@ -30,7 +30,7 @@
 
   .limited-sheet {
     padding: 1rem;
-    
+
     > * {
       align-items: center;
       margin: 0;
@@ -99,7 +99,7 @@
       color: inherit;
     }
 
-    input[type=text] {
+    input[type="text"] {
       max-width: 46px;
       width: auto;
     }
@@ -133,7 +133,9 @@
         left: 0;
         padding: 0;
         position: absolute;
-        text-shadow: 1px 1px 1px #000, -1px -1px 1px #000;
+        text-shadow:
+          1px 1px 1px #000,
+          -1px -1px 1px #000;
         top: 0;
         width: 32px;
       }

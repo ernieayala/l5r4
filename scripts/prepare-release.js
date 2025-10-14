@@ -2,25 +2,25 @@
 
 /**
  * Release Preparation Script for L5R4 System
- * 
+ *
  * This script helps prepare releases by:
  * 1. Updating version numbers in package.json and system.json
  * 2. Validating file structure and dependencies
  * 3. Building CSS from SCSS
  * 4. Creating release checklist
- * 
+ *
  * Usage: node scripts/prepare-release.js [version]
  * Example: node scripts/prepare-release.js 1.0.1
  */
 
-const fs = require('fs');
-const path = require('path');
-const { execSync } = require('child_process');
+const fs = require("fs");
+const path = require("path");
+const { execSync } = require("child_process");
 
 // Configuration
-const PROJECT_ROOT = path.resolve(__dirname, '..');
-const PACKAGE_JSON_PATH = path.join(PROJECT_ROOT, 'package.json');
-const SYSTEM_JSON_PATH = path.join(PROJECT_ROOT, 'system.json');
+const PROJECT_ROOT = path.resolve(__dirname, "..");
+const PACKAGE_JSON_PATH = path.join(PROJECT_ROOT, "package.json");
+const SYSTEM_JSON_PATH = path.join(PROJECT_ROOT, "system.json");
 
 /**
  * Validate semantic version format
@@ -28,7 +28,8 @@ const SYSTEM_JSON_PATH = path.join(PROJECT_ROOT, 'system.json');
  * @returns {boolean} True if valid semantic version
  */
 function isValidVersion(version) {
-  const semverRegex = /^(\d+)\.(\d+)\.(\d+)(?:-([0-9A-Za-z-]+(?:\.[0-9A-Za-z-]+)*))?(?:\+([0-9A-Za-z-]+(?:\.[0-9A-Za-z-]+)*))?$/;
+  const semverRegex =
+    /^(\d+)\.(\d+)\.(\d+)(?:-([0-9A-Za-z-]+(?:\.[0-9A-Za-z-]+)*))?(?:\+([0-9A-Za-z-]+(?:\.[0-9A-Za-z-]+)*))?$/;
   return semverRegex.test(version);
 }
 
@@ -39,9 +40,9 @@ function isValidVersion(version) {
  */
 function updateVersionInFile(filePath, version) {
   try {
-    const content = JSON.parse(fs.readFileSync(filePath, 'utf8'));
+    const content = JSON.parse(fs.readFileSync(filePath, "utf8"));
     content.version = version;
-    fs.writeFileSync(filePath, JSON.stringify(content, null, 2) + '\n');
+    fs.writeFileSync(filePath, JSON.stringify(content, null, 2) + "\n");
     console.log(`✅ Updated version to ${version} in ${path.basename(filePath)}`);
   } catch (error) {
     console.error(`❌ Failed to update ${filePath}:`, error.message);
@@ -54,38 +55,38 @@ function updateVersionInFile(filePath, version) {
  * @param {string} version - New version number
  */
 function updateJSDocVersionTags(version) {
-  console.log('\n📝 Updating JSDoc @version tags...');
-  
+  console.log("\n📝 Updating JSDoc @version tags...");
+
   const jsFiles = [];
-  
+
   // Find all .js files recursively
   function findJSFiles(dir) {
     const items = fs.readdirSync(dir, { withFileTypes: true });
     for (const item of items) {
       const fullPath = path.join(dir, item.name);
-      if (item.isDirectory() && item.name !== 'node_modules' && item.name !== '.git') {
+      if (item.isDirectory() && item.name !== "node_modules" && item.name !== ".git") {
         findJSFiles(fullPath);
-      } else if (item.isFile() && item.name.endsWith('.js')) {
+      } else if (item.isFile() && item.name.endsWith(".js")) {
         jsFiles.push(fullPath);
       }
     }
   }
-  
+
   findJSFiles(PROJECT_ROOT);
-  
+
   let updatedCount = 0;
   const versionRegex = /^(\s*\*\s*@version\s+)[\d.]+(.*)$/gm;
-  
+
   for (const filePath of jsFiles) {
     try {
-      let content = fs.readFileSync(filePath, 'utf8');
+      let content = fs.readFileSync(filePath, "utf8");
       const originalContent = content;
-      
+
       // Replace @version X.Y.Z with @version {newVersion}
       content = content.replace(versionRegex, `$1${version}$2`);
-      
+
       if (content !== originalContent) {
-        fs.writeFileSync(filePath, content, 'utf8');
+        fs.writeFileSync(filePath, content, "utf8");
         updatedCount++;
         console.log(`  ✅ Updated: ${path.relative(PROJECT_ROOT, filePath)}`);
       }
@@ -93,7 +94,7 @@ function updateJSDocVersionTags(version) {
       console.warn(`  ⚠️  Could not update ${filePath}:`, error.message);
     }
   }
-  
+
   console.log(`✅ Updated @version in ${updatedCount} file(s)`);
 }
 
@@ -103,26 +104,21 @@ function updateJSDocVersionTags(version) {
  */
 function validateProjectStructure() {
   const requiredFiles = [
-    'l5r4.js',
-    'l5r4.css',
-    'system.json',
-    'template.json',
-    'README.md',
-    'CHANGELOG.MD',
-    'LICENSE'
+    "l5r4.js",
+    "l5r4.css",
+    "system.json",
+    "template.json",
+    "README.md",
+    "CHANGELOG.MD",
+    "LICENSE"
   ];
 
-  const requiredDirs = [
-    'lang',
-    'module',
-    'templates',
-    'assets'
-  ];
+  const requiredDirs = ["lang", "module", "templates", "assets"];
 
-  console.log('\n📁 Validating project structure...');
-  
+  console.log("\n📁 Validating project structure...");
+
   let valid = true;
-  
+
   // Check required files
   for (const file of requiredFiles) {
     const filePath = path.join(PROJECT_ROOT, file);
@@ -152,12 +148,12 @@ function validateProjectStructure() {
  * Build CSS from SCSS
  */
 function buildCSS() {
-  console.log('\n🎨 Building CSS from SCSS...');
+  console.log("\n🎨 Building CSS from SCSS...");
   try {
-    execSync('npm run build:css', { cwd: PROJECT_ROOT, stdio: 'inherit' });
-    console.log('✅ CSS build completed successfully');
+    execSync("npm run build:css", { cwd: PROJECT_ROOT, stdio: "inherit" });
+    console.log("✅ CSS build completed successfully");
   } catch (error) {
-    console.error('❌ CSS build failed:', error.message);
+    console.error("❌ CSS build failed:", error.message);
     process.exit(1);
   }
 }
@@ -166,11 +162,11 @@ function buildCSS() {
  * Validate language files
  */
 function validateLanguageFiles() {
-  console.log('\n🌍 Validating language files...');
-  
-  const langDir = path.join(PROJECT_ROOT, 'lang');
-  const systemJson = JSON.parse(fs.readFileSync(SYSTEM_JSON_PATH, 'utf8'));
-  
+  console.log("\n🌍 Validating language files...");
+
+  const langDir = path.join(PROJECT_ROOT, "lang");
+  const systemJson = JSON.parse(fs.readFileSync(SYSTEM_JSON_PATH, "utf8"));
+
   // Check that all languages in system.json have corresponding files
   for (const lang of systemJson.languages) {
     const langFile = path.join(PROJECT_ROOT, lang.path);
@@ -178,16 +174,16 @@ function validateLanguageFiles() {
       console.error(`❌ Missing language file: ${lang.path} for ${lang.name}`);
       return false;
     }
-    
+
     try {
-      JSON.parse(fs.readFileSync(langFile, 'utf8'));
+      JSON.parse(fs.readFileSync(langFile, "utf8"));
       console.log(`✅ Valid JSON: ${lang.path} (${lang.name})`);
     } catch (error) {
       console.error(`❌ Invalid JSON in ${lang.path}:`, error.message);
       return false;
     }
   }
-  
+
   return true;
 }
 
@@ -242,7 +238,7 @@ function generateReleaseChecklist(version) {
 `;
 
   const checklistPath = path.join(PROJECT_ROOT, `RELEASE_CHECKLIST_v${version}.md`);
-  fs.writeFileSync(checklistPath, checklist.trim() + '\n');
+  fs.writeFileSync(checklistPath, checklist.trim() + "\n");
   console.log(`\n📋 Release checklist created: RELEASE_CHECKLIST_v${version}.md`);
 }
 
@@ -251,27 +247,27 @@ function generateReleaseChecklist(version) {
  */
 function main() {
   const args = process.argv.slice(2);
-  
+
   if (args.length === 0) {
-    console.error('❌ Please provide a version number');
-    console.log('Usage: node scripts/prepare-release.js [version]');
-    console.log('Example: node scripts/prepare-release.js 1.0.1');
+    console.error("❌ Please provide a version number");
+    console.log("Usage: node scripts/prepare-release.js [version]");
+    console.log("Example: node scripts/prepare-release.js 1.0.1");
     process.exit(1);
   }
 
   const version = args[0];
-  
+
   if (!isValidVersion(version)) {
-    console.error('❌ Invalid version format. Please use semantic versioning (e.g., 1.0.1)');
+    console.error("❌ Invalid version format. Please use semantic versioning (e.g., 1.0.1)");
     process.exit(1);
   }
 
   console.log(`🚀 Preparing L5R4 System release v${version}`);
-  console.log('='.repeat(50));
+  console.log("=".repeat(50));
 
   // Validate project structure
   if (!validateProjectStructure()) {
-    console.error('\n❌ Project structure validation failed');
+    console.error("\n❌ Project structure validation failed");
     process.exit(1);
   }
 
@@ -280,12 +276,12 @@ function main() {
 
   // Validate language files
   if (!validateLanguageFiles()) {
-    console.error('\n❌ Language file validation failed');
+    console.error("\n❌ Language file validation failed");
     process.exit(1);
   }
 
   // Update version numbers
-  console.log('\n📝 Updating version numbers...');
+  console.log("\n📝 Updating version numbers...");
   updateVersionInFile(PACKAGE_JSON_PATH, version);
   updateVersionInFile(SYSTEM_JSON_PATH, version);
   updateJSDocVersionTags(version);
@@ -293,7 +289,7 @@ function main() {
   // Generate release checklist
   generateReleaseChecklist(version);
 
-  console.log('\n🎉 Release preparation completed successfully!');
+  console.log("\n🎉 Release preparation completed successfully!");
   console.log(`\nNext steps:`);
   console.log(`1. Review RELEASE_CHECKLIST_v${version}.md`);
   console.log(`2. Commit changes: git add . && git commit -m "Prepare release v${version}"`);

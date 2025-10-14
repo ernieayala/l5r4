@@ -1,34 +1,34 @@
 /**
  * Item Update Lifecycle Handler
- * 
+ *
  * Foundry VTT preUpdate hook handler for L5R4 item documents. Intercepts
  * item updates to validate data, track XP expenditures, and handle free
  * rank changes that require XP recalculation.
- * 
+ *
  * Key Responsibilities:
  * - **Cost Validation**: Clamp advantage/disadvantage costs to non-negative
  * - **XP Tracking**: Log XP spent on skill ranks, emphases, and advantages
  * - **Free Rank Management**: Reset XP when school-granted ranks change
  * - **Conditional Updates**: Only track XP for actor-owned items
- * 
+ *
  * Foundry VTT Integration:
  * - Called from Document.preUpdate hook (Foundry v13+ Document lifecycle)
  * - Receives item reference and changes delta (only modified fields)
  * - Must be async to support await actor.setFlag() calls
  * - Changes parameter follows Foundry's delta update pattern
- * 
+ *
  * L5R4 Rules Context:
  * - Skills cost XP equal to next rank (rank 3 = 3 XP)
  * - Emphases cost 2 XP each
  * - School skills grant free rank 1 (some grant free emphasis)
  * - Advantages/disadvantages have point costs during creation/advancement
  * - Free ranks are immutable after creation, changes invalidate XP history
- * 
+ *
  * Usage:
  * - Registered in system init via Hooks.on("preUpdateItem", handleItemPreUpdate)
  * - Only processes items embedded in actors (not compendium items)
  * - Filters by item type (skill, advantage, disadvantage)
- * 
+ *
  * @module documents/item/lifecycle/item-updates
  * @see module:documents/item/lifecycle/xp-tracking - XP logging functions
  * @see module:documents/item/constants/xp-costs - XP calculation formulas
@@ -44,13 +44,13 @@ import {
 
 /**
  * Handle item preUpdate hook to validate data and track XP expenditures.
- * 
+ *
  * Foundry VTT preUpdate hook handler called before any item document updates.
  * Performs three key functions:
  * 1. Validates advantage/disadvantage costs (enforce ≥0)
  * 2. Detects free rank changes and triggers XP reset
  * 3. Tracks XP spending for skill/advantage/disadvantage updates
- * 
+ *
  * **Critical Free Rank Logic:**
  * When a skill's freeRanks or freeEmphasis changes, the entire XP history
  * becomes invalid and must be recalculated. This happens because:
@@ -58,25 +58,25 @@ import {
  *   but rank 3 with 1 free = 5 XP)
  * - Character creation can grant free ranks that weren't set initially
  * - Technique or advantage changes can add/remove free emphases
- * 
+ *
  * The system resets all XP tracking and relies on the character's current
  * item state to recalculate spent XP on next sheet render.
- * 
+ *
  * **Item Type Filtering:**
  * Only processes skills, advantages, and disadvantages because:
  * - Skills: Track rank and emphasis XP
  * - Advantages/Disadvantages: Track point cost changes
  * - Other types (weapons, armor, etc.): No XP mechanics
- * 
+ *
  * **Actor Ownership Check:**
  * Only tracks XP for items embedded in actors (item.actor !== null).
  * Compendium items and unowned items skip XP tracking.
- * 
+ *
  * Foundry VTT Context:
  * - Hook: preUpdate (called before document.update() applies changes)
  * - Changes parameter: Delta object with only modified fields
  * - Async required: XP logging calls await actor.setFlag()
- * 
+ *
  * @param {Item} item - The item document being updated
  * @param {object} changes - Delta object containing only changed fields (Foundry format)
  * @param {object} [changes.system] - System data changes (undefined if no system changes)
@@ -87,11 +87,10 @@ import {
  * @param {number} [changes.system.freeEmphasis] - New free emphasis count
  * @param {boolean} [changes.system.school] - Whether skill is a school skill
  * @returns {Promise<void>} Resolves when validation and XP tracking complete
- * 
+ *
  * @async
  */
 export async function handleItemPreUpdate(item, changes) {
-
   if (item.type === "advantage" && changes?.system?.cost !== undefined) {
     changes.system.cost = Math.max(0, toInt(changes.system.cost, 0));
   }
@@ -102,12 +101,14 @@ export async function handleItemPreUpdate(item, changes) {
   // - Character creation adjustments (adding school skills post-creation)
   // - Technique changes that grant/remove free ranks or emphases
   // - GM corrections to free rank values
-if (item.actor && item.type === "skill") {
-    const freeRanksChanged = changes?.system?.freeRanks !== undefined && 
-                              changes.system.freeRanks !== item.system?.freeRanks;
-    const freeEmphasisChanged = changes?.system?.freeEmphasis !== undefined && 
-                                 changes.system.freeEmphasis !== item.system?.freeEmphasis;
-    
+  if (item.actor && item.type === "skill") {
+    const freeRanksChanged =
+      changes?.system?.freeRanks !== undefined &&
+      changes.system.freeRanks !== item.system?.freeRanks;
+    const freeEmphasisChanged =
+      changes?.system?.freeEmphasis !== undefined &&
+      changes.system.freeEmphasis !== item.system?.freeEmphasis;
+
     if (freeRanksChanged || freeEmphasisChanged) {
       await resetCalculatedXp(item.actor);
       return;
@@ -121,26 +122,24 @@ if (item.actor && item.type === "skill") {
   if (item.type === "skill") {
     await trackSkillRankIncrease(item, changes);
     await trackEmphasisAdditions(item, changes);
-  }
-
-  else if (item.type === "advantage" || item.type === "disadvantage") {
+  } else if (item.type === "advantage" || item.type === "disadvantage") {
     await trackCostChange(item, changes);
   }
 }
 
 /**
  * Determine if a skill is a school skill based on current or pending changes.
- * 
+ *
  * School skills receive benefits like free rank 1 and potentially free emphasis.
  * This check looks at both the current state and pending changes because during
  * an update, we need to know if the skill IS or WILL BE a school skill.
- * 
+ *
  * Logic: Returns true if either:
  * - changes.system.school is being set to truthy (changing to school skill)
  * - item.system.school is already truthy (currently a school skill)
- * 
+ *
  * Used to determine free rank calculations when tracking skill XP.
- * 
+ *
  * @param {Item} item - The skill item being checked
  * @param {object} changes - Delta changes object from preUpdate hook
  * @param {boolean} [changes.system.school] - New school skill flag (if being changed)
@@ -152,58 +151,63 @@ function isSchoolSkill(item, changes) {
 
 /**
  * Parse emphasis string into array of individual emphasis names.
- * 
+ *
  * Emphases can be entered by users as comma-separated or semicolon-separated
  * strings. This parser handles both delimiters for user flexibility and trims
  * whitespace to allow "Fire, Water" or "Fire , Water" formats.
- * 
+ *
  * Parsing strategy:
  * - Split on comma OR semicolon (regex: /[,;]+/)
  * - Trim each element (remove leading/trailing whitespace)
  * - Filter out empty strings (handles trailing delimiters like "Fire, Water,")
- * 
+ *
  * Examples:
  * - "Fire" → ["Fire"]
  * - "Fire, Water" → ["Fire", "Water"]
  * - "Fire; Water; Earth" → ["Fire", "Water", "Earth"]
  * - "" → []
  * - "Fire,," → ["Fire"] (filters empty)
- * 
+ *
  * @param {string|*} emphasisString - Emphasis string from item.system.emphasis
  * @returns {string[]} Array of trimmed, non-empty emphasis names
  */
 function parseEmphases(emphasisString) {
   const trimmed = String(emphasisString ?? "").trim();
-  return trimmed ? trimmed.split(/[,;]+/).map(s => s.trim()).filter(Boolean) : [];
+  return trimmed
+    ? trimmed
+        .split(/[,;]+/)
+        .map(s => s.trim())
+        .filter(Boolean)
+    : [];
 }
 
 /**
  * Track XP expenditure when a skill rank increases.
- * 
+ *
  * Detects skill rank increases and logs the XP cost according to L5R4
  * advancement rules. Only logs XP when:
  * - Rank actually increases (new > old)
  * - New rank is a valid finite number
- * 
+ *
  * **Free Ranks Handling:**
  * School skills grant free rank 1, which affects XP cost calculations.
  * The cost is calculated by xp-costs.js which subtracts free rank costs
  * from the total. This ensures characters only pay for ranks they purchased.
- * 
+ *
  * Example: Advancing school skill from 2→3:
  * - No free rank: Pay 3 XP (cost of rank 3)
  * - 1 free rank: Pay 3 XP (cost of rank 3, rank 1 was free)
- * 
+ *
  * L5R4 Rules:
  * - Skills cost XP equal to the next rank (rank 3 = 3 XP)
  * - Total cost from 0→3 is triangular sum: 1+2+3 = 6 XP
  * - School skills receive free rank 1, so 0→3 costs 2+3 = 5 XP
- * 
+ *
  * @param {Item} item - The skill item being updated
  * @param {object} changes - Delta changes object from preUpdate hook
  * @param {number} [changes.system.rank] - New skill rank (if being changed)
  * @returns {Promise<void>} Resolves when XP logging completes
- * 
+ *
  * @async
  * @see {@link module:documents/item/lifecycle/xp-tracking.logSkillRankXp}
  */
@@ -215,91 +219,92 @@ async function trackSkillRankIncrease(item, changes) {
   if (rankIncreased) {
     const newFreeRanks = changes?.system?.freeRanks ?? item.system?.freeRanks;
     const freeRanks = isSchoolSkill(item, changes) ? Math.max(0, parseInt(newFreeRanks) || 0) : 0;
-    
+
     await logSkillRankXp(item, oldRank, newRank, freeRanks);
   }
 }
 
 /**
  * Track XP expenditure when emphases are added to a skill.
- * 
+ *
  * Detects when new emphases are added (count increases) and logs the XP cost
  * according to L5R4 advancement rules (2 XP per emphasis).
- * 
+ *
  * **Emphasis Mechanics:**
  * Emphases allow re-rolling 1s on skill rolls when the task matches the
  * emphasis. For example, a character with Kenjutsu (Katana) can re-roll 1s
  * when using a katana specifically.
- * 
+ *
  * **Free Emphasis Handling:**
  * Some school skills grant a free emphasis (typically at School Rank 3+).
  * Similar to free ranks, the first emphasis may be free, and only additional
  * emphases cost XP.
- * 
+ *
  * Only logs XP when:
  * - Emphasis string changes
  * - New emphasis count > old emphasis count (additions only, not removals)
- * 
+ *
  * L5R4 Rules:
  * - Emphases cost 2 XP each
  * - Each emphasis must be distinct (no duplicates)
  * - Emphases can be added at any time during advancement
- * 
+ *
  * @param {Item} item - The skill item being updated
  * @param {object} changes - Delta changes object from preUpdate hook
  * @param {string} [changes.system.emphasis] - New emphasis string (if being changed)
  * @returns {Promise<void>} Resolves when XP logging completes
- * 
+ *
  * @async
  * @see {@link module:documents/item/lifecycle/xp-tracking.logEmphasisXp}
  */
 async function trackEmphasisAdditions(item, changes) {
   const oldEmphasis = item.system?.emphasis ?? "";
   const newEmphasis = changes?.system?.emphasis ?? oldEmphasis;
-  
+
   if (oldEmphasis === newEmphasis) return;
 
   const oldEmphases = parseEmphases(oldEmphasis);
   const newEmphases = parseEmphases(newEmphasis);
-  
+
   if (newEmphases.length > oldEmphases.length) {
-    const freeEmphasis = isSchoolSkill(item, changes) ? 
-      (parseInt(changes?.system?.freeEmphasis ?? item.system?.freeEmphasis) || 0) : 0;
-    
+    const freeEmphasis = isSchoolSkill(item, changes)
+      ? parseInt(changes?.system?.freeEmphasis ?? item.system?.freeEmphasis) || 0
+      : 0;
+
     await logEmphasisXp(item, oldEmphases, newEmphases, freeEmphasis);
   }
 }
 
 /**
  * Track XP expenditure when advantage/disadvantage cost changes.
- * 
+ *
  * Logs XP spending when the point cost of an advantage or disadvantage
  * increases. This typically happens when:
  * - Advantage rank increases (e.g., Luck 2 → Luck 3)
  * - Variable cost advantages adjust (e.g., gaining additional Languages)
- * 
+ *
  * **Cost Change Rules:**
  * - Only cost increases are logged (cost decreases don't refund XP)
  * - Disadvantages use cost as negative XP (gaining XP, not spending)
  * - Cost is clamped to ≥0 by preUpdate validation (line 96)
- * 
+ *
  * L5R4 Rules:
  * - Advantages cost their listed XP value
  * - Some advantages can be purchased multiple times (ranks)
  * - Disadvantages grant XP during creation (max 10 XP total)
  * - Advantage/disadvantage changes during play are rare but possible
- * 
+ *
  * @param {Item} item - The advantage or disadvantage item being updated
  * @param {object} changes - Delta changes object from preUpdate hook
  * @param {number} [changes.system.cost] - New cost value (if being changed)
  * @returns {Promise<void>} Resolves when XP logging completes
- * 
+ *
  * @async
  * @see {@link module:documents/item/lifecycle/xp-tracking.logCostChangeXp}
  */
 async function trackCostChange(item, changes) {
   const oldCost = toInt(item.system?.cost, 0);
   const newCost = toInt(changes?.system?.cost ?? oldCost, 0);
-  
+
   await logCostChangeXp(item, oldCost, newCost);
 }

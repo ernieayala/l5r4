@@ -80,7 +80,7 @@ The system uses strict layers for clean, maintainable code:
 ```
 module/
 ├── documents/     # Actor/Item classes with game rule logic
-├── sheets/        # UI rendering with ActorSheetV2/ItemSheetV2  
+├── sheets/        # UI rendering with ActorSheetV2/ItemSheetV2
 ├── services/      # Dice mechanics, chat rendering, utilities
 ├── apps/          # XP Manager, Wound Config applications
 ├── utils/         # Shared pure functions
@@ -93,7 +93,6 @@ module/
 - Automatic verification ensures code quality
 - Layer separation strictly enforced
 
-
 ---
 
 ## Development Guidelines
@@ -103,6 +102,7 @@ module/
 Follow the layer flow (top to bottom):
 
 **✅ Allowed**
+
 ```javascript
 // Sheets → Services
 import { rollSkill } from "../services/dice/index.js";
@@ -115,6 +115,7 @@ import { calculateXpStepCostForTrait } from "../../utils/xp-calculations.js";
 ```
 
 **❌ Forbidden**
+
 ```javascript
 // Documents → Services (WRONG!)
 import { rollSkill } from "../services/dice/index.js";
@@ -146,66 +147,81 @@ import { calculateXpStepCostForTrait } from "../../utils/xp-calculations.js";
 ## Layer Responsibilities
 
 ### Documents (`module/documents/`)
+
 **Purpose**: Calculate derived data
 
 **Do**:
+
 - Calculate stats (Armor TN, wounds, insight)
 - Prepare data for display
 - Apply Active Effects
 
 **Don't**:
+
 - Roll dice (use Services)
 - Show UI (use Sheets)
 - Use async in `prepareDerivedData()`
 
 ### Services (`module/services/`)
+
 **Purpose**: Business logic with side effects
 
 **Do**:
+
 - Roll dice
 - Create chat messages
 - Show dialogs
 - Manipulate documents
 
 **Don't**:
+
 - Calculate derived data (use Documents)
 - Render sheets (use Sheets)
 
 ### Sheets (`module/sheets/`)
+
 **Purpose**: UI rendering and interaction
 
 **Do**:
+
 - Render HTML
 - Handle events
 - Coordinate Documents and Services
 
 **Don't**:
+
 - Calculate data (read from Documents)
 - Implement logic (call Services)
 
 ### Utils (`module/utils/`)
+
 **Purpose**: Pure helper functions
 
 **Do**:
+
 - Type coercion
 - Localization helpers
 - Math functions
 - Game mechanics calculations
 
 **Don't**:
+
 - Import from Documents or Services
 - Use async operations
 - Mutate global state
 
 ### Config (`module/config/`)
+
 **Purpose**: Constants only
 
 **Do**:
+
 - System IDs and paths
 - Game data constants
 - Localization keys
 
 **Don't**:
+
 - Import from other modules
 - Have side effects
 
@@ -221,7 +237,7 @@ import { calculateXpStepCostForTrait } from "../../utils/xp-calculations.js";
 // ❌ BAD: Document handles presentation
 class L5R4Actor extends Actor {
   prepareDerivedData() {
-    this.rollSkill("kenjutsu");  // WRONG!
+    this.rollSkill("kenjutsu"); // WRONG!
   }
 }
 
@@ -235,7 +251,9 @@ class L5R4Actor extends Actor {
 export async function rollSkill(actor, skillId) {
   const roll = new Roll(formula);
   await roll.evaluate();
-  await ChatMessage.create({ /* ... */ });
+  await ChatMessage.create({
+    /* ... */
+  });
 }
 ```
 
@@ -262,17 +280,21 @@ import { calculateXpStepCostForTrait } from "../../utils/xp-calculations.js";
 **Problem**: Modules import from each other
 
 **Solution**:
+
 1. Run `npm run madge:check` to see the cycle
 2. Extract shared logic to Utils
 3. Use events/hooks instead of direct imports
 
 **Example Fix**:
+
 ```javascript
 // ❌ Circular
 import { applyStanceAutomation } from "../services/stance/index.js";
 
 // ✅ Fixed: Extract to documents layer
-export function applyStanceEffects(actor, sys) { /* ... */ }
+export function applyStanceEffects(actor, sys) {
+  /* ... */
+}
 ```
 
 ### Wrong Layer Import
@@ -315,6 +337,7 @@ export function applyStanceEffects(actor, sys) { /* ... */ }
 [GitHub Issues](https://github.com/ernieayala/l5r4/issues)
 
 Include:
+
 - Foundry VTT version
 - System version
 - Steps to reproduce
@@ -327,10 +350,10 @@ Include:
 
 ### Import Cheat Sheet
 
-| Layer | Can Import | Cannot Import |
-|-------|-----------|---------------|
-| **Sheets** | documents, services, utils, config | - |
-| **Services** | utils, config | documents, sheets |
-| **Documents** | utils, config | services, sheets |
-| **Utils** | config only | documents, services, sheets |
-| **Config** | nothing | anything |
+| Layer         | Can Import                         | Cannot Import               |
+| ------------- | ---------------------------------- | --------------------------- |
+| **Sheets**    | documents, services, utils, config | -                           |
+| **Services**  | utils, config                      | documents, sheets           |
+| **Documents** | utils, config                      | services, sheets            |
+| **Utils**     | config only                        | documents, services, sheets |
+| **Config**    | nothing                            | anything                    |

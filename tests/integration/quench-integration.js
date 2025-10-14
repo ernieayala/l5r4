@@ -1,9 +1,9 @@
 /**
  * @fileoverview L5R4 Quench Integration Tests Registration
- * 
+ *
  * Stub implementation for Quench test framework integration.
  * Registers integration tests for the L5R4 system when Quench module is active.
- * 
+ *
  * @see https://github.com/Ethaks/FVTT-Quench
  */
 

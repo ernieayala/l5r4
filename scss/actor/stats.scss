@@ -266,7 +266,7 @@
       grid-column: 4/7;
       grid-row: 5/7;
 
-      .water-ring-img{
+      .water-ring-img {
         border: none;
         content: config.$water-ring-img;
       }
@@ -299,7 +299,7 @@
       grid-column: 11/14;
       grid-row: 5/7;
 
-      .fire-ring-img{
+      .fire-ring-img {
         border: none;
         content: config.$fire-ring-img;
       }
@@ -341,7 +341,7 @@
       grid-column: 6/12;
       grid-row: 6/8;
 
-      .void-ring-img{
+      .void-ring-img {
         border: none;
         content: config.$void-ring-img;
       }
@@ -383,7 +383,7 @@
 
       &.-filled {
         background-color: #666;
-        
+
         &:hover {
           background-color: #888;
         }

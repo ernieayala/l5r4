@@ -1,39 +1,39 @@
 /**
  * Base Actor Sheet
- * 
+ *
  * Abstract base class for all L5R4 actor sheets (PC and NPC). Provides shared
  * functionality including event delegation, handler orchestration, Void Points
  * management, drag-and-drop, item CRUD operations, and roll handling.
- * 
+ *
  * **Architecture:**
  * Uses a handler delegation pattern where UI interactions are routed to specialized
  * handler classes (VoidPointsHandler, ItemCRUDHandler, RollHandler, etc.). This
  * separation keeps the sheet focused on rendering and event routing while handlers
  * encapsulate business logic.
- * 
+ *
  * **Foundry Integration:**
  * - Extends ActorSheetV2 (Foundry v13+ Application v2 architecture)
  * - Uses HandlebarsApplicationMixin for template rendering
  * - Implements event delegation pattern via data-action attributes
  * - Leverages _onRender and _prepareContext lifecycle hooks
- * 
+ *
  * **Event Delegation:**
  * All user interactions are handled through delegated events on [data-action] elements.
  * Actions are routed to _onAction (click), _onActionContext (right-click), or
  * _onActionChange (change) methods, which subclasses override to implement behavior.
- * 
+ *
  * **Handler Pattern:**
  * Handlers receive a context object from _getHandlerContext() containing the actor,
  * sheet element, and sheet class name. This allows handlers to operate independently
  * while maintaining access to necessary sheet state.
- * 
+ *
  * **Game Mechanics:**
  * Implements trait adjustment (Shift+Click) with bounds checking (ranks 1-10),
  * Void Points management, and delegates skill/attack/damage rolls to RollHandler.
- * 
+ *
  * **Foundry APIs:** ActorSheetV2, HandlebarsApplicationMixin, Actor#update
  * **Requires:** Foundry v13+
- * 
+ *
  * @abstract
  * @extends {foundry.applications.sheets.ActorSheetV2}
  * @mixes HandlebarsApplicationMixin
@@ -55,18 +55,19 @@ import { setupItemContextMenu } from "./ui/context-menu-builder.js";
 
 const { HandlebarsApplicationMixin } = foundry.applications.api;
 
-export class BaseActorSheet extends KeyboardBehaviorMixin(HandlebarsApplicationMixin(foundry.applications.sheets.ActorSheetV2)) {
-  
+export class BaseActorSheet extends KeyboardBehaviorMixin(
+  HandlebarsApplicationMixin(foundry.applications.sheets.ActorSheetV2)
+) {
   /**
    * Default configuration options for the actor sheet.
-   * 
+   *
    * Merges with ActorSheetV2 defaults to configure sheet behavior:
    * - Filters out Foundry's default "pc"/"npc" classes, adds "l5r4" system class
    * - Enables automatic form submission on change and close
-   * 
+   *
    * **Foundry v13 Pattern:**
    * Uses static DEFAULT_OPTIONS instead of defaultOptions() getter.
-   * 
+   *
    * @static
    * @type {Object}
    */
@@ -85,24 +86,24 @@ export class BaseActorSheet extends KeyboardBehaviorMixin(HandlebarsApplicationM
 
   /**
    * Lifecycle hook called when the sheet is rendered into the DOM.
-   * 
+   *
    * Sets up event delegation for all user interactions via [data-action] attributes,
    * implementing the Foundry v13 Application v2 event delegation pattern. Ensures
    * event handlers are only bound once per root element to prevent duplicate listeners.
-   * 
+   *
    * **Event Delegation:**
    * - click: Routes to _onAction(action, event, element)
    * - contextmenu: Routes to _onActionContext(action, event, element)
    * - change: Routes to _onActionChange(action, event, element)
-   * 
+   *
    * **Guard Logic:**
    * Tracks bound root element to prevent duplicate event listener registration
    * when sheet re-renders. Only binds events if actor is owned by current user.
-   * 
+   *
    * **Foundry Lifecycle:**
    * Called automatically by Foundry after template rendering. Always call
    * super._onRender first to ensure parent class setup completes.
-   * 
+   *
    * @param {Object} context - Template context data prepared by _prepareContext
    * @param {Object} options - Rendering options passed to the sheet
    * @returns {Promise<void>}
@@ -123,11 +124,17 @@ export class BaseActorSheet extends KeyboardBehaviorMixin(HandlebarsApplicationM
       this._onAction(action, ev, el);
     });
 
-on(root, "[data-action]", "contextmenu", (ev, el) => {
-      ev.preventDefault();
-      const action = el.getAttribute("data-action");
-      this._onActionContext(action, ev, el);
-    }, { capture: true });
+    on(
+      root,
+      "[data-action]",
+      "contextmenu",
+      (ev, el) => {
+        ev.preventDefault();
+        const action = el.getAttribute("data-action");
+        this._onActionContext(action, ev, el);
+      },
+      { capture: true }
+    );
 
     on(root, "[data-action]", "change", (ev, el) => {
       const action = el.getAttribute("data-action");
@@ -141,28 +148,26 @@ on(root, "[data-action]", "contextmenu", (ev, el) => {
 
   /**
    * Sets up fallback handling for broken actor images.
-   * 
+   *
    * Attaches error event listeners to all .actor-img elements that replace
    * broken images with type-appropriate default icons (pc.webp or npc.webp).
    * Uses data-errorHandled flag to ensure handlers are only attached once.
-   * 
+   *
    * **Implementation:**
    * Prevents multiple error handlers from being attached during re-renders by
    * marking each image with dataset.errorHandled after first attachment.
-   * 
+   *
    * @param {HTMLElement} root - Sheet root element to query for actor images
    * @private
    */
   _setupImageErrorHandling(root) {
-    const actorImages = root.querySelectorAll('.actor-img');
+    const actorImages = root.querySelectorAll(".actor-img");
     actorImages.forEach(img => {
       if (!img.dataset.errorHandled) {
-        img.dataset.errorHandled = 'true';
-        img.addEventListener('error', () => {
-
-          const defaultImage = this.actor.type === 'npc' 
-            ? iconPath('npc.webp') 
-            : iconPath('pc.webp');
+        img.dataset.errorHandled = "true";
+        img.addEventListener("error", () => {
+          const defaultImage =
+            this.actor.type === "npc" ? iconPath("npc.webp") : iconPath("pc.webp");
           img.src = defaultImage;
         });
       }
@@ -171,14 +176,14 @@ on(root, "[data-action]", "contextmenu", (ev, el) => {
 
   /**
    * Extension point for handling click events on [data-action] elements.
-   * 
+   *
    * Subclasses override this method to implement action routing via switch
    * statements. Called by the delegated click handler in _onRender.
-   * 
+   *
    * **Foundry v13 Pattern:**
    * Part of Application v2 event delegation architecture. Actions are
    * identified by data-action attribute values on interactive elements.
-   * 
+   *
    * @param {string} _action - The data-action attribute value
    * @param {Event} _ev - The click event
    * @param {HTMLElement} _el - The element that was clicked
@@ -188,10 +193,10 @@ on(root, "[data-action]", "contextmenu", (ev, el) => {
 
   /**
    * Extension point for handling right-click (contextmenu) events on [data-action] elements.
-   * 
+   *
    * Subclasses override this method to implement context menu behaviors.
    * Called by the delegated contextmenu handler in _onRender.
-   * 
+   *
    * @param {string} _action - The data-action attribute value
    * @param {Event} _ev - The contextmenu event
    * @param {HTMLElement} _el - The element that was right-clicked
@@ -201,10 +206,10 @@ on(root, "[data-action]", "contextmenu", (ev, el) => {
 
   /**
    * Extension point for handling change events on [data-action] form elements.
-   * 
+   *
    * Subclasses override this method to implement form field change behaviors.
    * Called by the delegated change handler in _onRender.
-   * 
+   *
    * @param {string} _action - The data-action attribute value
    * @param {Event} _ev - The change event
    * @param {HTMLElement} _el - The form element that changed
@@ -214,15 +219,15 @@ on(root, "[data-action]", "contextmenu", (ev, el) => {
 
   /**
    * Closes the sheet and performs cleanup.
-   * 
+   *
    * Clears the bound root element reference to allow fresh event binding
    * if the sheet is reopened. Delegates to parent class for standard
    * Foundry close behavior (save position, remove from DOM, etc.).
-   * 
+   *
    * **Foundry Lifecycle:**
    * Called when user closes sheet or by Application API. Always call
    * super.close to ensure proper cleanup chain execution.
-   * 
+   *
    * @param {Object} [options={}] - Options passed to Application.close
    * @returns {Promise<void>}
    * @async
@@ -240,16 +245,16 @@ on(root, "[data-action]", "contextmenu", (ev, el) => {
 
   /**
    * Adjusts character Void Points by the specified delta.
-   * 
+   *
    * Delegates to VoidPointsHandler for the actual adjustment logic.
    * Void Points represent moments of enlightened insight and are equal
    * to the character's Void Ring (max 10, clamped to 9 in implementation).
-   * 
+   *
    * **Game Rules:**
    * Characters have Void Points equal to their Void Ring rank. These refresh
    * daily after rest and can be spent to enhance rolls (+1k1), reduce damage,
    * or increase Initiative/Armor TN.
-   * 
+   *
    * @param {Event} event - DOM event triggering the adjustment
    * @param {HTMLElement} element - Element that was interacted with
    * @param {number} delta - Amount to adjust (+1 to spend, -1 to regain)
@@ -263,10 +268,10 @@ on(root, "[data-action]", "contextmenu", (ev, el) => {
 
   /**
    * Updates the visual representation of Void Points dots in the UI.
-   * 
+   *
    * Delegates to VoidPointsHandler to synchronize the dot display with
    * the actor's current Void Point value.
-   * 
+   *
    * @param {HTMLElement} root - Sheet root element containing void-points-dots
    * @protected
    */
@@ -280,14 +285,14 @@ on(root, "[data-action]", "contextmenu", (ev, el) => {
 
   /**
    * Handles drop events on the sheet (items or actors).
-   * 
+   *
    * Delegates to DragDropHandler to route to appropriate handler based
    * on the type of data being dropped. Supports dropping items onto
    * characters and NPCs.
-   * 
+   *
    * **Foundry Pattern:**
    * Overrides ActorSheetV2._onDrop to implement custom drag-drop behavior.
-   * 
+   *
    * @param {DragEvent} event - The drop event from Foundry's drag-drop system
    * @returns {Promise<void>}
    * @protected
@@ -300,10 +305,10 @@ on(root, "[data-action]", "contextmenu", (ev, el) => {
 
   /**
    * Handles dropping an item onto the sheet.
-   * 
+   *
    * Delegates to DragDropHandler for item-specific drop logic (adding
    * items to inventory, equipment slots, etc.).
-   * 
+   *
    * @param {DragEvent} event - The drop event
    * @param {Object} data - Dropped item data from Foundry drag-drop system
    * @returns {Promise<void>}
@@ -316,9 +321,9 @@ on(root, "[data-action]", "contextmenu", (ev, el) => {
 
   /**
    * Handles dropping an actor onto the sheet.
-   * 
+   *
    * Delegates to DragDropHandler for actor-specific drop logic.
-   * 
+   *
    * @param {DragEvent} event - The drop event
    * @param {Object} data - Dropped actor data from Foundry drag-drop system
    * @returns {Promise<void>}
@@ -335,10 +340,10 @@ on(root, "[data-action]", "contextmenu", (ev, el) => {
 
   /**
    * Opens the image editor for the actor's portrait.
-   * 
+   *
    * Delegates to openImageEditor utility to show Foundry's FilePicker
    * configured for actor image selection.
-   * 
+   *
    * @param {Event} event - DOM event triggering the image edit
    * @returns {Promise<void>}
    * @protected
@@ -355,10 +360,10 @@ on(root, "[data-action]", "contextmenu", (ev, el) => {
 
   /**
    * Creates a new item on the actor.
-   * 
+   *
    * Delegates to ItemCRUDHandler to handle item creation from templates
    * or defaults. Item type is determined from element's data attributes.
-   * 
+   *
    * @param {Event} event - DOM event triggering item creation
    * @param {HTMLElement} element - Element containing item type in data attributes
    * @returns {Promise<void>}
@@ -371,10 +376,10 @@ on(root, "[data-action]", "contextmenu", (ev, el) => {
 
   /**
    * Opens the item sheet for editing an embedded item.
-   * 
+   *
    * Delegates to ItemCRUDHandler to show the item's configuration sheet.
    * Item ID is extracted from element's data attributes.
-   * 
+   *
    * @param {Event} event - DOM event triggering item edit
    * @param {HTMLElement} element - Element containing item ID in data attributes
    * @protected
@@ -385,10 +390,10 @@ on(root, "[data-action]", "contextmenu", (ev, el) => {
 
   /**
    * Deletes an embedded item from the actor.
-   * 
+   *
    * Delegates to ItemCRUDHandler to handle deletion with confirmation.
    * Item ID is extracted from element's data attributes.
-   * 
+   *
    * @param {Event} event - DOM event triggering item deletion
    * @param {HTMLElement} element - Element containing item ID in data attributes
    * @returns {Promise<void>}
@@ -401,10 +406,10 @@ on(root, "[data-action]", "contextmenu", (ev, el) => {
 
   /**
    * Toggles expansion state of an item in the sheet's item list.
-   * 
+   *
    * Delegates to ItemCRUDHandler to show/hide extended item details.
    * Uses data attributes or local state to track expansion.
-   * 
+   *
    * @param {Event} event - DOM event triggering item expansion toggle
    * @param {HTMLElement} element - Element containing item ID in data attributes
    * @protected
@@ -415,10 +420,10 @@ on(root, "[data-action]", "contextmenu", (ev, el) => {
 
   /**
    * Handles inline editing of item properties in the sheet.
-   * 
+   *
    * Delegates to ItemCRUDHandler for updating item properties directly
    * from form fields in the sheet without opening the full item sheet.
-   * 
+   *
    * @param {Event} event - DOM change event from inline edit field
    * @param {HTMLElement} element - Form element containing new value
    * @returns {Promise<void>}
@@ -431,11 +436,11 @@ on(root, "[data-action]", "contextmenu", (ev, el) => {
 
   /**
    * Posts an item's header information to chat.
-   * 
+   *
    * Delegates to ItemCRUDHandler to create a chat message displaying
    * the item's name, type, and basic information. Useful for showing
    * weapons, spells, or equipment to other players.
-   * 
+   *
    * @param {Event} ev - DOM event triggering chat post
    * @param {HTMLElement} el - Element containing item ID in data attributes
    * @returns {Promise<void>}
@@ -452,14 +457,14 @@ on(root, "[data-action]", "contextmenu", (ev, el) => {
 
   /**
    * Initializes right-click context menu for item list entries.
-   * 
+   *
    * Sets up ContextMenu instance for item operations (edit, delete,
    * duplicate, send to chat). Preserves existing menu instance to
    * prevent memory leaks from duplicate menu creation.
-   * 
+   *
    * **Foundry Pattern:**
    * Uses ContextMenu API to attach right-click menus to item entries.
-   * 
+   *
    * @param {HTMLElement} root - Sheet root element to attach context menu to
    * @returns {Promise<void>}
    * @protected
@@ -475,14 +480,14 @@ on(root, "[data-action]", "contextmenu", (ev, el) => {
 
   /**
    * Initiates a skill roll.
-   * 
+   *
    * Delegates to RollHandler to construct and evaluate a skill roll using
    * the (Skill + Trait)k(Trait) formula from L5R4 rules.
-   * 
+   *
    * **Game Rules:**
    * Skill rolls use XkY notation where X = Skill rank + Trait rank and
    * Y = Trait rank. Dice explode on 10s.
-   * 
+   *
    * @param {Event} event - DOM event triggering the roll
    * @param {HTMLElement} element - Element containing skill/trait info in data attributes
    * @protected
@@ -493,14 +498,14 @@ on(root, "[data-action]", "contextmenu", (ev, el) => {
 
   /**
    * Initiates an attack roll.
-   * 
+   *
    * Delegates to RollHandler to construct an attack roll (typically a weapon
    * skill roll against opponent's Armor TN).
-   * 
+   *
    * **Game Rules:**
    * Attack rolls use weapon skills paired with Agility or other traits.
    * Success determined by meeting/exceeding target's Armor TN (Reflexes × 5 + 5 + armor).
-   * 
+   *
    * @param {Event} event - DOM event triggering the roll
    * @param {HTMLElement} element - Element containing attack info in data attributes
    * @protected
@@ -511,10 +516,10 @@ on(root, "[data-action]", "contextmenu", (ev, el) => {
 
   /**
    * Initiates a weapon-specific attack roll.
-   * 
+   *
    * Delegates to RollHandler for weapon attack with item-specific modifiers
    * and properties (weapon skill, damage, special abilities).
-   * 
+   *
    * @param {Event} event - DOM event triggering the roll
    * @param {HTMLElement} element - Element containing weapon item ID in data attributes
    * @protected
@@ -525,13 +530,13 @@ on(root, "[data-action]", "contextmenu", (ev, el) => {
 
   /**
    * Initiates a damage roll.
-   * 
+   *
    * Delegates to RollHandler to roll weapon damage (DR + Strength for melee).
-   * 
+   *
    * **Game Rules:**
    * Melee damage = (Weapon DR + Strength)kKeep. For example, a katana
    * (3k2) wielded with Strength 3 rolls 6k2 damage.
-   * 
+   *
    * @param {Event} event - DOM event triggering the roll
    * @param {HTMLElement} element - Element containing weapon/damage info in data attributes
    * @protected
@@ -542,14 +547,14 @@ on(root, "[data-action]", "contextmenu", (ev, el) => {
 
   /**
    * Initiates a raw trait roll.
-   * 
+   *
    * Delegates to RollHandler to roll XkX where X = trait rank. Trait rolls
    * are used for tests of raw ability without skill training.
-   * 
+   *
    * **Game Rules:**
    * Trait rolls use XkX notation where both rolled and kept dice equal
    * the trait rank. Used for raw ability checks (resisting, holding breath, etc.).
-   * 
+   *
    * @param {Event} event - DOM event triggering the roll
    * @param {HTMLElement} element - Element containing trait info in data attributes
    * @protected
@@ -560,20 +565,20 @@ on(root, "[data-action]", "contextmenu", (ev, el) => {
 
   /**
    * Adjusts a trait rank by the specified delta (requires Shift+Click).
-   * 
+   *
    * Increments or decrements the specified trait rank, clamping to valid
    * range (0-10). Requires Shift key to be held during click as a safety
    * mechanism against accidental adjustments.
-   * 
+   *
    * **Game Rules:**
    * Traits (Stamina, Willpower, Strength, Perception, Agility, Intelligence,
    * Reflexes, Awareness) have ranks from 1-10. Normal humans start at rank 2.
    * Advancement cost = 4 × new rank XP (e.g., 2→3 costs 12 XP).
-   * 
+   *
    * **Safety Mechanism:**
    * Only executes if Shift key is held. Works in conjunction with
    * KeyboardBehaviorMixin which provides visual cursor feedback.
-   * 
+   *
    * @param {Event} event - DOM event (must have shiftKey = true)
    * @param {HTMLElement} element - Element with data-trait attribute
    * @param {number} delta - Direction to adjust (+1 to increase, -1 to decrease)
@@ -586,15 +591,15 @@ on(root, "[data-action]", "contextmenu", (ev, el) => {
 
     // Safety check: require Shift key to prevent accidental adjustments
     if (!event?.shiftKey) return;
-    
+
     const key = String(element?.dataset?.trait || "").toLowerCase();
     if (!key) return;
-    
+
     const cur = Number(this.actor.system?.traits?.[key] ?? 0) || 0;
     // Clamp to 0-10 per L5R4 rules (traits ranked 1-10, but 0 allowed for flexibility)
     const next = clamp(cur + (delta > 0 ? 1 : -1), 0, 10);
     if (next === cur) return;
-    
+
     try {
       await this.actor.update({ [`system.traits.${key}`]: next }, { diff: true });
     } catch (err) {
@@ -606,10 +611,10 @@ on(root, "[data-action]", "contextmenu", (ev, el) => {
 
   /**
    * Initializes sort direction indicators in the UI.
-   * 
+   *
    * Delegates to SortHandler to set up visual indicators (arrows) showing
    * current sort field and direction for item lists.
-   * 
+   *
    * @param {HTMLElement} root - Sheet root element
    * @param {string} scope - Sort scope identifier (e.g., "skills", "items")
    * @param {string[]} allowedKeys - Array of sortable field names
@@ -621,10 +626,10 @@ on(root, "[data-action]", "contextmenu", (ev, el) => {
 
   /**
    * Handles click on a sort header to change sort field/direction.
-   * 
+   *
    * Delegates to SortHandler to toggle sort field or reverse direction,
    * then triggers sheet re-render to display sorted list.
-   * 
+   *
    * @param {Event} event - DOM click event on sort header
    * @param {HTMLElement} element - Sort header element with data attributes
    * @returns {Promise<void>}
@@ -636,17 +641,17 @@ on(root, "[data-action]", "contextmenu", (ev, el) => {
       this.actor.id,
       event,
       element,
-      (scope) => this._getAllowedSortKeys(scope),
+      scope => this._getAllowedSortKeys(scope),
       () => this.render()
     );
   }
 
   /**
    * Returns allowed sort keys for a given scope.
-   * 
+   *
    * Extension point for subclasses to define sortable fields per list type.
    * Base implementation only allows sorting by "name".
-   * 
+   *
    * @param {string} _scope - Sort scope identifier (e.g., "skills", "items")
    * @returns {string[]} Array of allowed sort field names
    * @protected
@@ -659,16 +664,16 @@ on(root, "[data-action]", "contextmenu", (ev, el) => {
 
   /**
    * Constructs a context object for handler delegation.
-   * 
+   *
    * Creates a standardized context passed to all handler classes, providing
    * them with access to the actor, sheet element, and sheet class name without
    * coupling handlers to sheet implementation details.
-   * 
+   *
    * **Handler Pattern:**
    * This context object is the primary interface between sheets and handlers.
    * Handlers should only access sheet state through this context, not by
    * storing sheet references.
-   * 
+   *
    * @returns {Object} Handler context
    * @returns {L5R4Actor} returns.actor - The actor document
    * @returns {HTMLElement} returns.element - The sheet's root element

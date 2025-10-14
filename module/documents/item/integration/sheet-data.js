@@ -1,40 +1,40 @@
 /**
  * Item Sheet Data Enhancement
- * 
+ *
  * Provides a utility function to augment Foundry VTT sheet context objects with
  * L5R4-specific configuration data needed by Handlebars templates for rendering
  * item sheets and embedded item lists in actor sheets.
- * 
+ *
  * This module follows the Application v2 data preparation pattern where sheet classes
  * call this function within their `_prepareContext()` methods to inject localized
  * dropdown options, form selectors, and other UI configuration data.
- * 
+ *
  * Usage Pattern:
  * - ItemSheetV2: Called in `_prepareContext()` to prepare item editing forms
  * - ActorSheetV2: Called in `_prepareContext()` for embedded item rendering
  * - Legacy Item.getData(): Called for backwards compatibility (deprecated pattern)
- * 
+ *
  * Foundry VTT Integration:
  * - Follows Application v2 context preparation lifecycle (Foundry v13+)
  * - Mutates context object in-place following Foundry's data preparation convention
  * - Config objects reference frozen localization constants from config/localization.js
- * 
+ *
  * @module documents/item/integration/sheet-data
  * @requires Foundry VTT v13+
  */
 
-import { 
-  ARROWS, 
-  SIZES, 
-  RINGS, 
-  RINGS_WITH_NONE, 
-  SPELL_RINGS, 
-  SKILL_TRAITS, 
-  NPC_TRAITS, 
-  SKILL_TYPES, 
-  ACTION_TYPES, 
-  KIHO_TYPES, 
-  ADVANTAGE_TYPES 
+import {
+  ARROWS,
+  SIZES,
+  RINGS,
+  RINGS_WITH_NONE,
+  SPELL_RINGS,
+  SKILL_TRAITS,
+  NPC_TRAITS,
+  SKILL_TYPES,
+  ACTION_TYPES,
+  KIHO_TYPES,
+  ADVANTAGE_TYPES
 } from "../../../config/localization.js";
 import { NPC_NUMBER_WOUND_LVLS } from "../../../config/game-data.js";
 
@@ -57,12 +57,12 @@ import { NPC_NUMBER_WOUND_LVLS } from "../../../config/game-data.js";
 
 /**
  * Augments sheet context with L5R4 configuration data for template rendering.
- * 
+ *
  * Injects a `config` property containing localized dropdown options and form selector
  * data used by item sheet templates and embedded item lists. Each config property maps
  * to frozen localization constants that reference i18n keys for Handlebars {{selectOptions}}
  * and similar helpers.
- * 
+ *
  * This function mutates the provided data object in-place following Foundry's convention
  * for sheet context preparation. The config data enables templates to render:
  * - Arrow type selectors (weapon sheets)
@@ -73,12 +73,12 @@ import { NPC_NUMBER_WOUND_LVLS } from "../../../config/game-data.js";
  * - Action type selectors (technique/kata sheets)
  * - Advantage/disadvantage type filters (advantage/disadvantage sheets)
  * - NPC wound level configuration (NPC sheets)
- * 
+ *
  * Foundry Integration:
  * - Called within `_prepareContext()` methods of ItemSheetV2 and ActorSheetV2 classes
  * - Mutates context object per Application v2 data preparation pattern
  * - All config values reference frozen constants for immutability and performance
- * 
+ *
  * @param {SheetContext} data - Mutable sheet context object from Foundry's data preparation
  * @returns {SheetContext} The same data object with injected config property (for chaining)
  */

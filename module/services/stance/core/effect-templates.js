@@ -3,22 +3,22 @@ import { T } from "../../../utils/localization.js";
 
 /**
  * Stance Effect Templates
- * 
+ *
  * Creates Active Effect data structures for L5R4 combat stances. These templates
  * define the visual presentation (name, icon) and mechanical data (bonuses, penalties,
  * descriptions) that are applied when a character adopts a stance.
- * 
+ *
  * The effect templates follow the Foundry VTT v13+ Active Effects data model:
  * - `name`: Localized display name
  * - `icon`: Path to stance icon asset
  * - `statuses`: Array of status ID strings for identification
  * - `flags[SYS_ID]`: System-specific data including stanceType and mechanical effects
- * 
+ *
  * These templates are consumed by the stance automation system which applies
  * the mechanical effects to actor stats during `prepareDerivedData()`.
- * 
+ *
  * Game rules implemented per Stances_Actions_Maneuvers chapter.
- * 
+ *
  * @module services/stance/core/effect-templates
  * @requires module:config/constants~SYS_ID
  * @requires module:utils/localization~T
@@ -41,16 +41,16 @@ import { T } from "../../../utils/localization.js";
 
 /**
  * Creates Full Attack stance effect template.
- * 
+ *
  * Full Attack is the Ring of Fire stance - aggressive and all-consuming. Characters
  * in Full Attack gain +2k1 to attack rolls but suffer -10 to Armor TN. Movement is
  * restricted to closing with enemies only, and no ranged attacks are permitted.
- * 
+ *
  * Game rules: Characters in Full Attack may only take actions to make attacks and
  * Move Actions to get closer to enemies. Cannot be used while mounted (unless
  * Horsemanship rank 3+). If a Move Action is taken, character moves +5 feet beyond
  * normal (once per round, cannot exceed maximum movement).
- * 
+ *
  * @returns {StanceEffectTemplate} Full Attack stance effect data
  */
 export function createFullAttackEffect() {
@@ -70,15 +70,15 @@ export function createFullAttackEffect() {
 
 /**
  * Creates Defense stance effect template.
- * 
+ *
  * Defense is the Ring of Air stance - adaptable and reactive. Characters in Defense
  * add their Air Ring plus Defense Skill rank to Armor TN, but cannot make attacks.
  * All other actions are permitted.
- * 
+ *
  * Game rules: Defense stance allows freedom of action (Skill Rolls, Spell Casting,
  * movement) while providing defensive bonuses. Useful for performing complex actions
  * while under threat without being completely vulnerable.
- * 
+ *
  * @returns {StanceEffectTemplate} Defense stance effect data
  */
 export function createDefenseStanceEffect() {
@@ -97,16 +97,16 @@ export function createDefenseStanceEffect() {
 
 /**
  * Creates Full Defense stance effect template.
- * 
+ *
  * Full Defense is the Ring of Earth stance - reserved, unmoving, and unassailable.
  * Upon declaring Full Defense, character makes a Defense/Reflexes roll (Complex Action)
  * and adds half the result (rounded up) to Armor TN until their next turn. Only Free
  * Actions are permitted while in Full Defense.
- * 
+ *
  * Game rules: The Defense/Reflexes roll is a Complex Action, consuming the character's
  * turn. The bonus persists until the character's next turn. The roll is stored in actor
  * flags and must be made before the defensive bonus is applied.
- * 
+ *
  * @returns {StanceEffectTemplate} Full Defense stance effect data
  */
 export function createFullDefenseStanceEffect() {
@@ -117,7 +117,8 @@ export function createFullDefenseStanceEffect() {
     flags: {
       [SYS_ID]: {
         stanceType: "fullDefense",
-        description: "Full Defense Stance: Defense/Reflexes roll + half to Armor TN, only Free Actions"
+        description:
+          "Full Defense Stance: Defense/Reflexes roll + half to Armor TN, only Free Actions"
       }
     }
   };
@@ -125,14 +126,14 @@ export function createFullDefenseStanceEffect() {
 
 /**
  * Creates Attack stance effect template.
- * 
+ *
  * Attack is the Ring of Water stance - fluid and versatile. This is the standard
  * combat stance with no restrictions on actions or movement. Characters in Attack
  * stance may freely take any combination of actions available to them.
- * 
+ *
  * Game rules: Attack stance is the default stance most bushi adopt. No mechanical
  * bonuses or penalties, complete freedom of action.
- * 
+ *
  * @returns {StanceEffectTemplate} Attack stance effect data
  */
 export function createAttackStanceEffect() {
@@ -151,20 +152,20 @@ export function createAttackStanceEffect() {
 
 /**
  * Creates Center stance effect template.
- * 
+ *
  * Center is the Ring of Void stance - focused preparation and inner balance. Characters
  * in Center stance forfeit all actions to focus energy for the following round. The
  * mechanical benefits (bonus roll dice and initiative) are applied by the automation
  * system, not stored in this effect template.
- * 
+ *
  * Game rules: Character takes no actions while in Center stance. On the following round,
  * gains +1k1 + Void Ring bonus to any one roll during their turn, and adds +10 to
  * Initiative Score for that round only. Particularly valuable in iaijutsu dueling.
- * 
+ *
  * Note: The description in this template is intentionally simplified for UI display.
  * The actual mechanical bonuses are handled by the stance automation system based on
  * the character's Void Ring value.
- * 
+ *
  * @returns {StanceEffectTemplate} Center stance effect data
  */
 export function createCenterStanceEffect() {
@@ -183,22 +184,22 @@ export function createCenterStanceEffect() {
 
 /**
  * Retrieves the appropriate effect creator function for a given stance ID.
- * 
+ *
  * This lookup utility maps stance identifiers to their corresponding creator functions,
  * allowing the stance service to generate effect templates dynamically based on user
  * input or actor state changes.
- * 
+ *
  * @param {string} stanceId - The stance identifier (e.g., "attackStance", "fullAttackStance")
  * @returns {Function|null} The effect creator function, or null if stance ID is invalid
  */
 export function getStanceEffectCreator(stanceId) {
   const creators = {
-    "attackStance": createAttackStanceEffect,
-    "fullAttackStance": createFullAttackEffect,
-    "defenseStance": createDefenseStanceEffect,
-    "fullDefenseStance": createFullDefenseStanceEffect,
-    "centerStance": createCenterStanceEffect
+    attackStance: createAttackStanceEffect,
+    fullAttackStance: createFullAttackEffect,
+    defenseStance: createDefenseStanceEffect,
+    fullDefenseStance: createFullDefenseStanceEffect,
+    centerStance: createCenterStanceEffect
   };
-  
+
   return creators[stanceId] || null;
 }

@@ -1,10 +1,10 @@
 /**
  * L5R4 System Data Migrations
- * 
+ *
  * Handles schema transformations and data migrations across system versions. Migrates both
  * world documents (actors, items) and compendium packs when the system is updated, ensuring
  * backward compatibility with legacy data structures from earlier system versions.
- * 
+ *
  * Key Responsibilities:
  * - **Schema Migrations**: Transform legacy field names (snake_case → camelCase)
  * - **Type Migrations**: Convert deprecated item types (bow → weapon with isBow flag)
@@ -12,32 +12,32 @@
  * - **Icon Paths**: Update old .png icon paths to new .webp asset structure
  * - **Default Values**: Backfill missing fields with proper defaults
  * - **Data Normalization**: Ensure type consistency (strings → numbers, case normalization)
- * 
+ *
  * Migration Lifecycle:
  * - Triggered by system version change via game.settings
  * - Runs once per version bump during Foundry ready hook
  * - Processes world actors/items first, then unlocked compendiums
  * - Includes embedded items within actors (equipment, skills, etc.)
- * 
+ *
  * L5R4 Game Mechanics Migrated:
  * - **Wound Levels**: 8-rank system (Healthy → Out) with progressive TN penalties
  * - **Earth Multipliers**: Configurable lethality (×2 default, ×3/×4/×5 heroic)
  * - **Armor TN**: Legacy armor_tn → armorTn per (Reflexes × 5 + 5 + bonus) formula
  * - **Skill Defaults**: freeRanks and freeEmphasis for advancement tracking
- * 
+ *
  * Foundry VTT Integration:
  * - Uses Document.update() with render: false for bulk performance (requires v13+)
  * - Accesses _source for pre-derived raw data when needed
  * - Handles FilePicker API differences between Foundry versions
  * - Respects compendium locked state (skips locked packs)
  * - Uses diff: false for type changes (full replacement required)
- * 
+ *
  * Safety Notes:
  * - All migrations wrapped in try/catch to prevent cascade failures
  * - Logs failures to console with document context for manual review
  * - Non-destructive: preserves data when target fields already populated
  * - Idempotent: safe to run multiple times on same data
- * 
+ *
  * @module setup/migrations
  * @see {@link https://foundryvtt.com/api/v13/classes/foundry.documents.BaseActor.html#update|Document.update API}
  */
@@ -49,21 +49,21 @@ import { SCHEMA_MAP } from "./schema-map.js";
 
 /**
  * Migrates legacy "bow" item type to unified "weapon" type with isBow flag.
- * 
+ *
  * Transforms deprecated standalone bow items into weapon items marked with isBow: true,
  * preserving bow-specific properties (str requirement, range, arrow type) while unifying
  * the item type structure. This migration enables shared weapon systems while maintaining
  * bow-specific mechanics like ranged attacks and arrow compatibility.
- * 
+ *
  * Migration Details:
  * - Sets damageKeep: 0 (bows calculate damage differently than melee weapons)
  * - Preserves bow mechanics: str (tension rating), range, arrow type
  * - Carries forward explodesOn (typically 10 for standard dice)
  * - Maintains skill/trait associations for attack rolls
- * 
+ *
  * Uses diff: false because changing document type requires full replacement, not incremental
  * patching. Foundry VTT doesn't support partial updates when document type changes.
- * 
+ *
  * @param {Document[]} docs - Array of Item documents to scan for bow types
  * @param {string} label - Migration context label for console logging (e.g., "world-items")
  * @returns {Promise<void>}
@@ -73,11 +73,10 @@ async function migrateBowsToWeapons(docs, label) {
   if (bowItems.length === 0) return;
 
   console.log(`${SYS_ID} | Migrating ${bowItems.length} bow items to weapons (${label})`);
-  
+
   for (const item of bowItems) {
     try {
-
-const currentSystem = foundry.utils.deepClone(item.system || {});
+      const currentSystem = foundry.utils.deepClone(item.system || {});
       const weaponSystem = {
         ...currentSystem,
         isBow: true,
@@ -96,28 +95,34 @@ const currentSystem = foundry.utils.deepClone(item.system || {});
         type: "weapon",
         system: weaponSystem
       };
-      
+
       await item.update(updateData, { diff: false, recursive: false, render: false });
     } catch (err) {
-      console.warn(`${SYS_ID}`, "Failed to migrate bow item", { id: item.id, name: item.name, err });
+      console.warn(`${SYS_ID}`, "Failed to migrate bow item", {
+        id: item.id,
+        name: item.name,
+        err
+      });
     }
   }
 }
 
 /**
  * Retrieves a nested property value from an object using dot notation path.
- * 
+ *
  * Safely traverses nested object structure to retrieve deeply nested values without
  * throwing errors if intermediate properties are missing. Used by schema migration
  * functions to read legacy field locations before transformation.
- * 
+ *
  * @param {Object} obj - Source object to traverse
  * @param {string} path - Dot-delimited property path (e.g., "system.armor.armor_tn")
  * @returns {*} The value at the specified path, or undefined if path doesn't exist
  */
 function getByPath(obj, path) {
   try {
-    return path.split(".").reduce((acc, key) => (acc !== undefined && acc !== null ? acc[key] : undefined), obj);
+    return path
+      .split(".")
+      .reduce((acc, key) => (acc !== undefined && acc !== null ? acc[key] : undefined), obj);
   } catch (_e) {
     return undefined;
   }
@@ -125,11 +130,11 @@ function getByPath(obj, path) {
 
 /**
  * Sets a nested property value on an object using dot notation path.
- * 
+ *
  * Creates intermediate objects as needed when traversing the path. Mutates the original
  * object directly. Used by schema migrations to write transformed values to new field
  * locations while building update payloads.
- * 
+ *
  * @param {Object} obj - Target object to modify (mutated in place)
  * @param {string} path - Dot-delimited property path (e.g., "system.armor.armorTn")
  * @param {*} value - Value to assign at the target path
@@ -148,11 +153,11 @@ function setByPath(obj, path, value) {
 
 /**
  * Deletes a nested property from an object using dot notation path.
- * 
+ *
  * Safely removes a property at any nesting level. Handles missing intermediate paths
  * gracefully without throwing errors. Used by schema migrations to clean up legacy
  * field names after copying their values to new locations.
- * 
+ *
  * @param {Object} obj - Target object to modify (mutated in place)
  * @param {string} path - Dot-delimited property path (e.g., "system.armor.armor_tn")
  * @returns {void}
@@ -172,55 +177,54 @@ function deleteByPath(obj, path) {
 
 /**
  * Normalizes wound level data types and ensures penalties are positive values.
- * 
+ *
  * Converts legacy string types to numbers and ensures wound penalties are stored as
  * positive absolute values (L5R4 represents penalties as positive TN increases, not
  * negative modifiers). Mutates the wound data object in place.
- * 
+ *
  * L5R4 Wound Penalties:
  * - Nicked: +3 TN, Grazed: +5 TN, Hurt: +10 TN, Injured: +15 TN
  * - Crippled: +20 TN, Down: +40 TN
  * - Penalties increase the TN of all rolls, making actions harder
- * 
+ *
  * @param {Object} woundData - Wound level data object with penalty/value properties (mutated)
  * @returns {boolean} True if any normalization changes were made, false otherwise
  */
 function normalizeWoundLevelData(woundData) {
   let changed = false;
-  
+
   for (const [key, level] of Object.entries(woundData)) {
     if (typeof level.penalty === "string") {
       level.penalty = Math.abs(parseInt(level.penalty) || 0);
       changed = true;
-    } 
-    else if (typeof level.penalty === "number" && level.penalty < 0) {
+    } else if (typeof level.penalty === "number" && level.penalty < 0) {
       level.penalty = Math.abs(level.penalty);
       changed = true;
     }
-    
+
     if (typeof level.value === "string") {
       level.value = parseInt(level.value) || 0;
       changed = true;
     }
   }
-  
+
   return changed;
 }
 
 /**
  * Migrates all embedded items within an actor document.
- * 
+ *
  * Applies all item-type migrations to embedded items (skills, equipment, weapons, etc.)
  * owned by an actor. Processes schema remapping, bow→weapon conversions, skill defaults,
  * and data normalization in sequence.
- * 
+ *
  * @param {Actor} actor - Actor document containing embedded items to migrate
  * @param {string} labelPrefix - Context prefix for logging (e.g., "actor", "compendium-actor")
  * @returns {Promise<void>}
  */
 async function migrateActorEmbeddedItems(actor, labelPrefix) {
   if (actor.items.size === 0) return;
-  
+
   await applySchemaMapToDocs(actor.items.contents, `${labelPrefix}-items:${actor.id}`);
   await migrateBowsToWeapons(actor.items.contents, `${labelPrefix}-bow-migration:${actor.id}`);
   await migrateSkillDefaults(actor.items.contents, `${labelPrefix}-skill-defaults:${actor.id}`);
@@ -229,14 +233,14 @@ async function migrateActorEmbeddedItems(actor, labelPrefix) {
 
 /**
  * Builds an update object for document schema field remapping.
- * 
+ *
  * Scans the document against SCHEMA_MAP rules to identify legacy field names that need
  * transformation. Only creates updates if legacy fields exist AND target fields are empty.
  * Preserves existing data at target locations (non-destructive).
- * 
+ *
  * Schema Map Example:
  * - { docType: "Actor", type: "npc", from: "system.armor.armor_tn", to: "system.armor.armorTn" }
- * 
+ *
  * @param {Document} doc - Actor or Item document to evaluate
  * @returns {Object|null} Update object with transformed fields, or null if no changes needed
  */
@@ -244,7 +248,9 @@ function buildSchemaUpdate(doc) {
   const { documentName: docType } = doc; // "Actor" | "Item"
   const type = doc.type;
 
-  const rules = SCHEMA_MAP.filter(r => r.docType === docType && (r.type === type || r.type === "*"));
+  const rules = SCHEMA_MAP.filter(
+    r => r.docType === docType && (r.type === type || r.type === "*")
+  );
   if (!rules.length) return null;
 
   const patch = { system: foundry.utils.deepClone(doc.system ?? {}) };
@@ -254,7 +260,7 @@ function buildSchemaUpdate(doc) {
     const fromVal = getByPath(patch, rule.from);
     const toVal = getByPath(patch, rule.to);
 
-const hasValidTarget = toVal !== undefined && toVal !== "";
+    const hasValidTarget = toVal !== undefined && toVal !== "";
     if (fromVal === undefined || hasValidTarget) continue;
 
     setByPath(patch, rule.to, fromVal);
@@ -269,11 +275,11 @@ const hasValidTarget = toVal !== undefined && toVal !== "";
 
 /**
  * Applies schema field remapping to a collection of documents.
- * 
+ *
  * Iterates through documents and applies SCHEMA_MAP transformations (e.g., snake_case →
  * camelCase field names). Each document is evaluated independently and updated only if
  * changes are needed. Errors are logged but don't halt the batch process.
- * 
+ *
  * @param {Document[]} docs - Array of Actor or Item documents to process
  * @param {string} label - Migration context label for console logging
  * @returns {Promise<void>}
@@ -286,18 +292,23 @@ async function applySchemaMapToDocs(docs, label) {
         await doc.update(update);
       }
     } catch (e) {
-      console.warn(`${SYS_ID}`, "Schema remap failed", { label, id: doc.id, type: doc.type, error: e });
+      console.warn(`${SYS_ID}`, "Schema remap failed", {
+        label,
+        id: doc.id,
+        type: doc.type,
+        error: e
+      });
     }
   }
 }
 
 /**
  * Normalizes weapon/bow item data for consistency.
- * 
+ *
  * Ensures weapon size properties use lowercase values. Early system versions may have
  * stored size values with mixed case ("Medium" vs "medium"). This migration enforces
  * lowercase for consistent filtering and comparison.
- * 
+ *
  * @param {Document[]} docs - Array of Item documents to normalize
  * @param {string} label - Migration context label for console logging
  * @returns {Promise<void>}
@@ -309,22 +320,27 @@ async function normalizeItems(docs, label) {
       const t = doc.type;
       if (t !== "weapon" && t !== "bow") continue;
       const sz = doc.system?.size;
-      if (typeof sz === "string" && (sz !== sz.toLowerCase())) {
+      if (typeof sz === "string" && sz !== sz.toLowerCase()) {
         await doc.update({ "system.size": sz.toLowerCase() }, { diff: true, render: false });
       }
     } catch (e) {
-      console.warn(`${SYS_ID}`, "Normalization failed", { label, id: doc.id, type: doc.type, error: e });
+      console.warn(`${SYS_ID}`, "Normalization failed", {
+        label,
+        id: doc.id,
+        type: doc.type,
+        error: e
+      });
     }
   }
 }
 
 /**
  * Ensures skill items have required default values for advancement tracking.
- * 
+ *
  * Backfills freeRanks and freeEmphasis fields which may be missing in skills created
  * before these properties were added. These fields track ranks/emphasis granted by
  * advantages, disadvantages, or school bonuses that don't cost XP.
- * 
+ *
  * @param {Document[]} docs - Array of Item documents to scan for skills
  * @param {string} label - Migration context label for console logging
  * @returns {Promise<void>}
@@ -333,10 +349,12 @@ async function migrateSkillDefaults(docs, label) {
   const skillItems = docs.filter(doc => doc.type === "skill");
   if (skillItems.length === 0) return;
 
-  console.log(`${SYS_ID} | Migrating ${skillItems.length} skill items to ensure proper defaults (${label})`);
-  
+  console.log(
+    `${SYS_ID} | Migrating ${skillItems.length} skill items to ensure proper defaults (${label})`
+  );
+
   let migratedCount = 0;
-  
+
   for (const item of skillItems) {
     try {
       const updates = {};
@@ -353,34 +371,40 @@ async function migrateSkillDefaults(docs, label) {
         updates["system.freeEmphasis"] = 0;
         needsUpdate = true;
       }
-      
+
       if (needsUpdate) {
         await item.update(updates, { diff: true, render: false });
         migratedCount++;
       }
     } catch (err) {
-      console.warn(`${SYS_ID}`, "Failed to migrate skill defaults", { id: item.id, name: item.name, err });
+      console.warn(`${SYS_ID}`, "Failed to migrate skill defaults", {
+        id: item.id,
+        name: item.name,
+        err
+      });
     }
   }
-  
+
   if (migratedCount > 0) {
-    console.log(`${SYS_ID} | Successfully migrated ${migratedCount} skill items with default values (${label})`);
+    console.log(
+      `${SYS_ID} | Successfully migrated ${migratedCount} skill items with default values (${label})`
+    );
   }
 }
 
 /**
  * Migrates legacy NPC wound system to current schema with manual/formula modes.
- * 
+ *
  * Transforms older NPC wound data structures into the current system which supports two
  * wound calculation modes: manual (GM-defined levels) and formula (Earth Ring-based).
  * Handles multiple legacy field structures including wound_lvl, woundLevels, and various
  * armor TN field names.
- * 
+ *
  * L5R4 Wound System (8 progressive ranks):
  * - Healthy: Earth × 5 (buffer for all campaigns regardless of multiplier)
  * - Nicked through Out: Size determined by woundsMultiplier (default ×2 for lethal play)
  * - Each rank imposes cumulative TN penalties: +3, +5, +10, +15, +20, +40, unconscious
- * 
+ *
  * Migration Actions:
  * - Sets woundMode: "manual" if missing (GM-controlled wounds for NPCs)
  * - Sets woundsMultiplier: 2 (default Earth ×2 lethality per core rules)
@@ -389,11 +413,11 @@ async function migrateSkillDefaults(docs, label) {
  * - Converts string nrWoundLvls → number
  * - Normalizes wound penalties to positive absolute values (TN increases)
  * - Transforms wound_lvl/woundLevels → manualWoundLevels structure
- * 
+ *
  * Uses actor._source to access raw pre-derived data, necessary because wound calculations
  * in prepareDerivedData may have already transformed the values. This ensures migration
  * reads the actual stored data, not computed values.
- * 
+ *
  * @param {Document[]} docs - Array of Actor documents to scan for NPCs
  * @param {string} label - Migration context label for console logging
  * @returns {Promise<void>}
@@ -403,9 +427,9 @@ async function migrateLegacyNpcWounds(docs, label) {
   if (npcActors.length === 0) return;
 
   console.log(`${SYS_ID} | Migrating ${npcActors.length} legacy NPC wound systems (${label})`);
-  
+
   let migratedCount = 0;
-  
+
   for (const actor of npcActors) {
     try {
       const updates = {};
@@ -426,13 +450,12 @@ async function migrateLegacyNpcWounds(docs, label) {
         needsUpdate = true;
       }
 
-const legacyArmorTn = actor.system.armor?.armor_tn;
+      const legacyArmorTn = actor.system.armor?.armor_tn;
       const currentArmorTn = actor.system.armor?.armorTn;
 
-      const armorTnValue = legacyArmorTn !== undefined && legacyArmorTn !== null 
-        ? legacyArmorTn 
-        : currentArmorTn;
-      
+      const armorTnValue =
+        legacyArmorTn !== undefined && legacyArmorTn !== null ? legacyArmorTn : currentArmorTn;
+
       if (armorTnValue !== undefined && armorTnValue !== null) {
         updates["system.armor.armorTn"] = armorTnValue;
         needsUpdate = true;
@@ -445,7 +468,7 @@ const legacyArmorTn = actor.system.armor?.armor_tn;
 
       if (actor.system.woundLevels) {
         const woundLevels = foundry.utils.deepClone(actor.system.woundLevels);
-        
+
         if (normalizeWoundLevelData(woundLevels)) {
           updates["system.woundLevels"] = woundLevels;
           needsUpdate = true;
@@ -460,23 +483,23 @@ const legacyArmorTn = actor.system.armor?.armor_tn;
       // Transform legacy wound_lvl or woundLevels into current manualWoundLevels structure
       if (legacyWoundData || !rawSource.manualWoundLevels) {
         const sourceData = legacyWoundData || rawWoundLevels;
-        
+
         if (sourceData) {
           const manualWoundLevels = {};
           const order = L5R4Actor.WOUND_LEVEL_ORDER;
 
           for (const key of order) {
             const woundLevel = sourceData[key];
-            const value = woundLevel ? (parseInt(woundLevel.value) || 0) : 0;
-            const penalty = woundLevel ? (Math.abs(parseInt(woundLevel.penalty) || 0)) : 0;
-            
+            const value = woundLevel ? parseInt(woundLevel.value) || 0 : 0;
+            const penalty = woundLevel ? Math.abs(parseInt(woundLevel.penalty) || 0) : 0;
+
             manualWoundLevels[key] = {
               value: value,
               penalty: penalty,
               active: value > 0
             };
           }
-          
+
           updates["system.manualWoundLevels"] = manualWoundLevels;
           needsUpdate = true;
         }
@@ -484,35 +507,41 @@ const legacyArmorTn = actor.system.armor?.armor_tn;
 
       if (actor.system.manualWoundLevels) {
         const manualWoundLevels = foundry.utils.deepClone(actor.system.manualWoundLevels);
-        
+
         if (normalizeWoundLevelData(manualWoundLevels)) {
           updates["system.manualWoundLevels"] = manualWoundLevels;
           needsUpdate = true;
         }
       }
-      
+
       if (needsUpdate) {
         await actor.update(updates, { diff: true, render: false });
         migratedCount++;
       }
     } catch (err) {
-      console.warn(`${SYS_ID}`, "Failed to migrate legacy NPC wounds", { id: actor.id, name: actor.name, err });
+      console.warn(`${SYS_ID}`, "Failed to migrate legacy NPC wounds", {
+        id: actor.id,
+        name: actor.name,
+        err
+      });
     }
   }
-  
+
   if (migratedCount > 0) {
-    console.log(`${SYS_ID} | Successfully migrated ${migratedCount} legacy NPC wound systems (${label})`);
+    console.log(
+      `${SYS_ID} | Successfully migrated ${migratedCount} legacy NPC wound systems (${label})`
+    );
   }
 }
 
 /**
  * Removes legacy field names after successful migration to new schema.
- * 
+ *
  * Deletes old snake_case field names when corresponding camelCase fields exist and are
  * populated. This cleanup prevents data duplication and ensures documents only contain
  * current-schema fields. Only removes fields when BOTH old and new versions exist,
  * preserving data safety.
- * 
+ *
  * @param {Document[]} docs - Array of Actor documents to clean up
  * @param {string} label - Migration context label for console logging
  * @returns {Promise<void>}
@@ -521,7 +550,7 @@ async function cleanupLegacyFields(docs, label) {
   for (const doc of docs) {
     try {
       if (doc.documentName !== "Actor") continue;
-      
+
       const updates = {};
       let needsUpdate = false;
 
@@ -550,23 +579,27 @@ async function cleanupLegacyFields(docs, label) {
         await doc.update(updates, { diff: true, render: false });
       }
     } catch (e) {
-      console.warn(`${SYS_ID}`, "Legacy cleanup failed", { label, id: doc.id, type: doc.type, error: e });
+      console.warn(`${SYS_ID}`, "Legacy cleanup failed", {
+        label,
+        id: doc.id,
+        type: doc.type,
+        error: e
+      });
     }
   }
 }
 
 /**
  * Legacy icon filename mapping for .png → .webp migration.
- * 
+ *
  * Maps old PNG icon filenames to new WebP format with updated naming conventions.
  * Used during system asset migration to update document icons without breaking existing
  * actor/item references. Frozen to prevent runtime modification.
- * 
+ *
  * @type {Object<string, string>}
  * @constant
  */
 const ICON_MIGRATION_MAP = Object.freeze({
-
   "attackstance.png": "attack-stance.webp",
   "fullattackstance.png": "full-attack-stance.webp",
   "defensestance.png": "defence-stance.webp",
@@ -595,26 +628,26 @@ const ICON_MIGRATION_MAP = Object.freeze({
 
 /**
  * Directory listing cache to avoid repeated FilePicker API calls.
- * 
+ *
  * Caches directory contents during icon migration to improve performance when checking
  * for file existence. Populated lazily as directories are accessed.
- * 
+ *
  * @type {Map<string, Set<string>>}
  */
 const dirCache = new Map();
 
 /**
  * Lists files in a directory with caching for performance.
- * 
+ *
  * Uses Foundry's FilePicker API to browse directory contents, extracting just the
  * filenames. Results are cached to avoid redundant API calls during bulk migrations.
  * Handles API differences between Foundry versions via optional chaining.
- * 
+ *
  * Foundry VTT Integration:
  * - foundry.applications?.apps?.FilePicker?.implementation handles v13+ structure
  * - Falls back to global FilePicker for earlier versions
  * - browse("data", path) reads from Foundry's Data directory
- * 
+ *
  * @param {string} dirPath - Directory path to list (relative to Foundry Data)
  * @returns {Promise<Set<string>>} Set of filenames in the directory
  */
@@ -623,10 +656,12 @@ async function listDir(dirPath) {
   try {
     const FP = foundry.applications?.apps?.FilePicker?.implementation ?? FilePicker;
     const res = await FP.browse("data", dirPath);
-    const files = new Set((res.files ?? []).map(f => {
-      const i = f.lastIndexOf("/");
-      return i >= 0 ? f.slice(i + 1) : f;
-    }));
+    const files = new Set(
+      (res.files ?? []).map(f => {
+        const i = f.lastIndexOf("/");
+        return i >= 0 ? f.slice(i + 1) : f;
+      })
+    );
     dirCache.set(dirPath, files);
     return files;
   } catch (err) {
@@ -639,11 +674,11 @@ async function listDir(dirPath) {
 
 /**
  * Computes new icon path from legacy path using migration map.
- * 
+ *
  * Checks if an image path references a legacy icon and returns the new path if the
  * target file exists. Only returns a path if the new icon file actually exists on disk,
  * preventing broken image references.
- * 
+ *
  * @param {string} img - Current image path to evaluate
  * @returns {Promise<string|null>} New icon path if migration needed and file exists, null otherwise
  */
@@ -663,10 +698,10 @@ async function computeNewIconPath(img) {
 
 /**
  * Determines updated icon path for a document, with special bow handling.
- * 
+ *
  * Checks standard icon migration map and applies special logic for weapon items with
  * isBow flag to ensure they use the bow icon. Returns null if no migration needed.
- * 
+ *
  * @param {Document} doc - Document to evaluate for icon update
  * @param {string} docType - Document type ("Actor" or "Item")
  * @returns {Promise<string|null>} New icon path if update needed, null otherwise
@@ -680,19 +715,19 @@ async function getUpdatedIconPath(doc, docType) {
       nextImg = bowIcon;
     }
   }
-  
+
   return nextImg;
 }
 
 /**
  * Migrates legacy PNG icon paths to new WebP assets for world documents.
- * 
+ *
  * Updates actor and item icons from old .png format to new .webp assets. Also updates
  * prototype token images for actors. Only runs if GM and migration setting enabled.
  * Displays notification with count of updated documents when complete.
- * 
+ *
  * This is a world-only migration (compendiums handled separately by migrateCompendiumIconPaths).
- * 
+ *
  * @returns {Promise<void>}
  * @async
  * @export
@@ -721,39 +756,45 @@ export async function runIconPathMigration() {
     }
 
     if (Object.keys(updates).length > 0) {
-      try { 
-        await a.update(updates, { diff: true, render: false }); 
-        changed++; 
+      try {
+        await a.update(updates, { diff: true, render: false });
+        changed++;
+      } catch (err) {
+        console.warn(`${SYS_ID}`, "Failed to update actor img", { id: a.id, err });
       }
-      catch (err) { console.warn(`${SYS_ID}`, "Failed to update actor img", { id: a.id, err }); }
     }
   }
 
   for (const i of game.items.contents) {
     const nextImg = await getUpdatedIconPath(i, "Item");
-    
+
     if (nextImg && nextImg !== i.img) {
-      try { await i.update({ img: nextImg }, { diff: true, render: false }); changed++; }
-      catch (err) { console.warn(`${SYS_ID}`, "Failed to update item img", { id: i.id, err }); }
+      try {
+        await i.update({ img: nextImg }, { diff: true, render: false });
+        changed++;
+      } catch (err) {
+        console.warn(`${SYS_ID}`, "Failed to update item img", { id: i.id, err });
+      }
     }
   }
 
-  ui.notifications?.info(game.i18n.format("l5r4.system.migration.iconsUpdated", { count: changed }));
-
+  ui.notifications?.info(
+    game.i18n.format("l5r4.system.migration.iconsUpdated", { count: changed })
+  );
 }
 
 /**
  * Migrates legacy PNG icon paths to new WebP assets in compendium packs.
- * 
+ *
  * Updates actor and item icons within unlocked compendium packs. Skips locked packs to
  * avoid permission errors. Displays notification with count of updated documents when
  * complete. Runs separately from world migration to handle compendium-specific loading.
- * 
+ *
  * Foundry VTT Integration:
  * - Respects pack.metadata.locked status (skips locked compendia)
  * - Loads compendium documents via pack.getDocuments()
  * - Updates both document icons and actor prototype token images
- * 
+ *
  * @returns {Promise<void>}
  * @async
  */
@@ -771,14 +812,17 @@ async function migrateCompendiumIconPaths() {
     try {
       docs = await pack.getDocuments();
     } catch (err) {
-      console.warn(`${SYS_ID}`, "Failed to load compendium documents", { collection: pack.collection, err });
+      console.warn(`${SYS_ID}`, "Failed to load compendium documents", {
+        collection: pack.collection,
+        err
+      });
       continue;
     }
 
     for (const doc of docs) {
       const nextImg = await getUpdatedIconPath(doc, docName);
       const updates = {};
-      
+
       if (nextImg && nextImg !== doc.img) {
         updates.img = nextImg;
       }
@@ -798,25 +842,31 @@ async function migrateCompendiumIconPaths() {
           await doc.update(updates, { diff: true, render: false });
           changed++;
         } catch (err) {
-          console.warn(`${SYS_ID}`, "Failed to update compendium doc img", { id: doc.id, collection: pack.collection, err });
+          console.warn(`${SYS_ID}`, "Failed to update compendium doc img", {
+            id: doc.id,
+            collection: pack.collection,
+            err
+          });
         }
       }
     }
   }
 
   if (changed > 0) {
-    ui.notifications?.info(game.i18n.format("l5r4.system.migration.compendiumIconsUpdated", { count: changed }));
+    ui.notifications?.info(
+      game.i18n.format("l5r4.system.migration.compendiumIconsUpdated", { count: changed })
+    );
   }
 }
 
 /**
  * Main migration orchestration function for system version updates.
- * 
+ *
  * Executes all migration steps in sequence when system version changes. Processes world
  * documents first, then unlocked compendiums. Only runs for GM users. Handles both schema
  * transformations (field renames, type changes) and content migrations (wound systems,
  * icon paths, defaults).
- * 
+ *
  * Migration Execution Order:
  * 1. Schema field remapping (world actors/items)
  * 2. NPC wound system migration (world actors)
@@ -827,13 +877,13 @@ async function migrateCompendiumIconPaths() {
  * 7. Embedded item migrations (all world actors)
  * 8. Compendium migrations (unlocked packs only)
  * 9. Icon path migrations (world + compendiums)
- * 
+ *
  * Foundry VTT Integration:
  * - Called from system ready hook when version mismatch detected
  * - Uses game.actors.contents and game.items.contents for world documents
  * - Uses game.packs to iterate compendium packs
  * - Checks pack.metadata.locked to respect pack permissions
- * 
+ *
  * @param {string} fromVersion - Previous system version (unused but kept for API compatibility)
  * @param {string} toVersion - New system version (unused but kept for API compatibility)
  * @returns {Promise<void>}

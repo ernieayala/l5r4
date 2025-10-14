@@ -746,39 +746,6 @@ body > * {
   flex-wrap: nowrap;
   padding: 1rem;
   position: relative;
-  border: 2px solid rgba(250, 178, 11, 0.3);
-}
-.l5r4.pc .pc-info::before, .l5r4.pc .pc-info::after,
-.l5r4.npc .pc-info::before,
-.l5r4.npc .pc-info::after {
-  content: "";
-  position: absolute;
-  width: 80px;
-  height: 80px;
-  background-image: url("../assets/borders/brush-stroke.svg");
-  background-size: contain;
-  background-repeat: no-repeat;
-  pointer-events: none;
-  opacity: 1;
-  z-index: 0;
-  filter: brightness(0) saturate(100%);
-}
-.l5r4.pc .pc-info::before,
-.l5r4.npc .pc-info::before {
-  top: -8px;
-  left: -8px;
-  transform: rotate(0deg);
-}
-.l5r4.pc .pc-info::after,
-.l5r4.npc .pc-info::after {
-  bottom: -8px;
-  right: -8px;
-  transform: rotate(180deg);
-}
-.l5r4.pc .pc-info > *,
-.l5r4.npc .pc-info > * {
-  position: relative;
-  z-index: 1;
 }
 .l5r4.pc .pc-info input,
 .l5r4.pc .pc-info .input-placeholder,
