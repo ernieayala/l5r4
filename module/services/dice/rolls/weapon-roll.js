@@ -149,7 +149,9 @@ export async function WeaponRoll({
   // Build chat label with optional annotations for description, raises, and stance bonuses
   if (description) label += ` (${description})`;
   if (raiseBonus > 0) {
-    label += ` [${game.i18n.localize("l5r4.ui.mechanics.rolls.raises")}: ${raiseBonus} (+${raiseBonus}k0)]`;
+    label += ` [${game.i18n.localize(
+      "l5r4.ui.mechanics.rolls.raises"
+    )}: ${raiseBonus} (+${raiseBonus}k0)]`;
   }
   if (stanceRoll > 0 || stanceKeep > 0) {
     label += ` [Full Attack: +${stanceRoll}k${stanceKeep}]`;

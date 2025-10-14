@@ -1,0 +1,46 @@
+/**
+ * Grids
+ * Reusable grid component patterns
+ */
+
+.l5r4.pc,
+.l5r4.npc {
+  .grid {
+    border: 1px solid var(--table-header-border-color);
+    border-block-end: none;
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+
+    > span,
+    > div {
+      border-block-end: 1px solid var(--table-header-border-color);
+    }
+
+    > span {
+      align-items: center;
+      background: var(--table-header-bg-color);
+      border-inline-end: 1px solid var(--table-header-border-color);
+      display: inline-flex;
+      font-family: var(--font-h4);
+      font-size: var(--font-size-16);
+      height: 100%;
+      padding: 0.25rem;
+    }
+
+    > div {
+      align-items: center;
+      font-size: var(--font-size-16);
+      padding: 0 0.1rem;
+
+      > input,
+      > select {
+        height: auto;
+        line-height: 1;
+      }
+
+      > span {
+        padding: 0 0.5rem;
+      }
+    }
+  }
+}

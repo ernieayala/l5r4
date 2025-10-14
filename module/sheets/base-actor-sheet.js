@@ -564,11 +564,15 @@ export class BaseActorSheet extends KeyboardBehaviorMixin(
   }
 
   /**
-   * Adjusts a trait rank by the specified delta (requires Shift+Click).
+   * Handles trait rank click - rolls trait or adjusts rank based on Shift key.
    *
+   * **Without Shift Key:**
+   * Performs a trait roll (XkX where X = trait rank) via RollHandler.traitRoll().
+   * This allows quick trait rolls by clicking directly on the trait rank.
+   *
+   * **With Shift Key:**
    * Increments or decrements the specified trait rank, clamping to valid
-   * range (0-10). Requires Shift key to be held during click as a safety
-   * mechanism against accidental adjustments.
+   * range (0-10). Shift key acts as a safety mechanism against accidental adjustments.
    *
    * **Game Rules:**
    * Traits (Stamina, Willpower, Strength, Perception, Agility, Intelligence,
@@ -576,10 +580,10 @@ export class BaseActorSheet extends KeyboardBehaviorMixin(
    * Advancement cost = 4 × new rank XP (e.g., 2→3 costs 12 XP).
    *
    * **Safety Mechanism:**
-   * Only executes if Shift key is held. Works in conjunction with
+   * Rank adjustment only executes if Shift key is held. Works in conjunction with
    * KeyboardBehaviorMixin which provides visual cursor feedback.
    *
-   * @param {Event} event - DOM event (must have shiftKey = true)
+   * @param {Event} event - DOM event (shiftKey determines roll vs adjust behavior)
    * @param {HTMLElement} element - Element with data-trait attribute
    * @param {number} delta - Direction to adjust (+1 to increase, -1 to decrease)
    * @returns {Promise<void>}
@@ -589,11 +593,13 @@ export class BaseActorSheet extends KeyboardBehaviorMixin(
   async _onTraitAdjust(event, element, delta) {
     event?.preventDefault?.();
 
-    // Safety check: require Shift key to prevent accidental adjustments
-    if (!event?.shiftKey) return;
-
     const key = String(element?.dataset?.trait || "").toLowerCase();
     if (!key) return;
+
+    // If shift key NOT pressed, perform trait roll instead of adjustment
+    if (!event?.shiftKey) {
+      return RollHandler.traitRoll(this._getHandlerContext(), event, element);
+    }
 
     const cur = Number(this.actor.system?.traits?.[key] ?? 0) || 0;
     // Clamp to 0-10 per L5R4 rules (traits ranked 1-10, but 0 allowed for flexibility)

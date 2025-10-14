@@ -98,7 +98,9 @@ export function validateSpellSlot(actor, ringKey, isVoidSlot = false) {
 
   if (current <= 0) {
     const ringLabel = isVoidSlot
-      ? `${game.i18n.localize("l5r4.ui.mechanics.rings.void")} ${game.i18n.localize("l5r4.magic.spells.voidSlot")}`
+      ? `${game.i18n.localize("l5r4.ui.mechanics.rings.void")} ${game.i18n.localize(
+          "l5r4.magic.spells.voidSlot"
+        )}`
       : game.i18n.localize(`l5r4.ui.mechanics.rings.${normalizedRing}`) || normalizedRing;
 
     return {
