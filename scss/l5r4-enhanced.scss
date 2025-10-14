@@ -1,0 +1,52 @@
+/**
+ * L5R4 Enhanced System - Main SCSS Entry Point
+ * Modular CSS architecture organized by concern:
+ * - base/        → Variables, resets, and foundational styles
+ * - utilities/   → Single-purpose utility classes
+ * - layout/      → Grid and flexbox layout patterns
+ * - components/  → Reusable UI components
+ * - features/    → Domain-specific feature modules
+ * - apps/        → Modal dialogs and applications
+ * - sheets/      → Sheet-specific overrides
+ * - chat/        → Chat message styling
+ */
+
+// Base Styles
+@use "./base/variables";
+@use "./base/reset";
+
+// Utilities
+@use "./utilities";
+
+// Chat
+@use "./chat";
+
+// Layout
+@use "./layout/actor-layout";
+@use "./layout/sidebar";
+@use "./layout/item-layout";
+
+// Components
+@use "./components/forms";
+@use "./components/buttons";
+@use "./components/grids";
+@use "./components/sections";
+@use "./components/item-lists";
+@use "./components/animations";
+
+// Features
+@use "./features/pc-info";
+@use "./features/traits-rings";
+@use "./features/ranks";
+@use "./features/wounds";
+@use "./features/initiative";
+@use "./features/stances";
+@use "./features/armor";
+
+// Apps
+@use "./apps/wound-config";
+@use "./apps/xp-manager";
+
+// Sheets (minimal overrides)
+@use "./sheets/actor-sheet";
+@use "./sheets/item-sheet";

@@ -1,0 +1,38 @@
+/**
+ * PC Info Section
+ * Header section with character name, clan, school, rank, XP, and insight
+ */
+
+.l5r4.pc,
+.l5r4.npc {
+  .pc-info {
+    flex-wrap: nowrap;
+    padding: 1rem;
+    position: relative;
+
+    &::before {
+      border-image-repeat: stretch;
+      border-image-slice: 15 fill;
+      border-image-source: url("../assets/borders/brush-08-gray.svg");
+      border-image-width: 15px;
+      content: "";
+      inset: -5px;
+      opacity: 0.25;
+      pointer-events: none;
+      position: absolute;
+      z-index: -1;
+    }
+
+    input,
+    .input-placeholder {
+      background: none;
+      font-size: var(--font-size-16);
+      height: calc(var(--input-height) - 0.5rem);
+      line-height: 1;
+    }
+
+    .title {
+      min-height: calc(var(--input-height) - 0.5rem);
+    }
+  }
+}

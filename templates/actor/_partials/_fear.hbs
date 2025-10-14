@@ -6,14 +6,23 @@
     <div class="grid">
       <span>{{localize "l5r4.ui.common.rank"}}</span>
       <div class="flexrow">
-        <input name="system.fear.rank" type="number" value="{{system.fear.rank}}" min="0" max="10" data-type="Number" />
+        <input
+          name="system.fear.rank"
+          type="number"
+          value="{{system.fear.rank}}"
+          min="0"
+          max="10"
+          data-type="Number"
+        />
       </div>
     </div>
     {{#if system.fear.rank}}
-      <a class="button fear-test" 
-          data-action="test-fear" 
-          data-fear-rank="{{system.fear.rank}}"
-          title="{{localize "l5r4.ui.mechanics.fear.clickToTest"}}">
+      <a
+        class="button fear-test"
+        data-action="test-fear"
+        data-fear-rank="{{system.fear.rank}}"
+        title="{{localize 'l5r4.ui.mechanics.fear.clickToTest'}}"
+      >
         {{localize "l5r4.ui.mechanics.fear.fearLabel" rank=system.fear.rank}}
       </a>
     {{/if}}

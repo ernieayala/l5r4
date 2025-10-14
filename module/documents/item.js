@@ -1,560 +1,303 @@
 /**
- * @fileoverview L5R4 Item Document Implementation for Foundry VTT v13+
- * 
- * This class extends the base Foundry Item document to provide L5R4-specific
- * functionality including derived data computation, experience tracking, and
- * chat card rendering for all item types in the Legend of the Five Rings 4th Edition system.
- * Handles the complete lifecycle of items from creation to chat integration.
+ * L5R4 Item Document
  *
- * **Core Responsibilities:**
- * - **Default Icons**: Assign appropriate type-specific icons on item creation
- * - **Data Normalization**: Ensure rich-text fields are never null for template safety
- * - **Derived Data**: Calculate roll formulas, bow damage, and other computed values
- * - **Experience Tracking**: Automatic XP logging for skill creation and advancement
- * - **Chat Integration**: Render type-specific chat cards with proper templates
- * - **Cost Validation**: Enforce advantage/disadvantage cost constraints
- * - **Active Effects**: Support for transferable effects on background items
+ * Core document class for Legend of the Five Rings 4th Edition items in Foundry VTT.
+ * Extends Foundry's base Item class to implement L5R4-specific lifecycle hooks,
+ * data preparation, and integration with the system's XP tracking and chat rendering.
  *
- * **System Architecture:**
- * The item system follows L5R4's comprehensive item categorization:
- * - **Combat Items**: Weapons, armor, bows with full mechanical integration
- * - **Character Development**: Skills with emphasis, advantages/disadvantages with costs
- * - **Background Elements**: Clans, families, schools with trait bonuses via Active Effects
- * - **Magical Elements**: Spells with effect descriptions and raise mechanics
- * - **Techniques**: Kata, kiho, tattoos with special abilities and prerequisites
- * - **General Equipment**: Common items for inventory management
+ * Architecture:
+ * This class follows the Separation of Concerns principle by delegating most logic
+ * to specialized modules:
+ * - **Lifecycle**: item-creation.js, item-updates.js (handle preCreate, onCreate, preUpdate hooks)
+ * - **Preparation**: base-data.js, derived-data.js (implement prepareBaseData, prepareDerivedData)
+ * - **Integration**: chat-cards.js, sheet-data.js (render chat cards, enhance sheet context)
  *
- * **Item Types Supported:**
- * - **Equipment**: Weapons, armor, bows with mechanical properties and damage calculations
- * - **Character Elements**: Skills with XP tracking, advantages/disadvantages with cost validation
- * - **Background Items**: Clans, families, schools with Active Effects for trait bonuses
- * - **Techniques**: Kata, kiho, tattoos with special abilities and mechanical effects
- * - **Spells**: Magic with effect descriptions, raise effects, and casting requirements
- * - **General Items**: commonItem type for miscellaneous equipment and gear
+ * The document class serves as a thin orchestration layer, calling imported functions
+ * to perform actual work. This keeps the document class focused on Foundry lifecycle
+ * coordination while business logic lives in testable, focused modules.
  *
- * **Key Features:**
- * - **Equipment Management**: Full weapon/armor system with damage, TN, and special properties
- * - **Skill System**: Rank tracking, emphasis specializations, school skill integration
- * - **Spell System**: Effect descriptions, raise mechanics, and casting requirements
- * - **Advantage/Disadvantage**: Cost validation, XP integration, and mechanical effects
- * - **Technique System**: Kata, kiho, tattoos with prerequisites and special abilities
- * - **Background Integration**: Family/clan/school items with trait bonuses via Active Effects
- * - **Chat Cards**: Rich chat integration with type-specific templates and roll buttons
+ * L5R4 Item Types:
+ * - **skill**: Character abilities tied to traits (Bugei, High, Low, Merchant)
+ * - **weapon**: Melee and ranged weapons with damage rolls and skill associations
+ * - **armor**: Protective equipment providing Armor TN bonus and damage reduction
+ * - **spell**: Shugenja magic with ring, mastery level, range, and duration
+ * - **advantage/disadvantage**: Character creation traits with XP costs/benefits
+ * - **technique**: School techniques unlocking at specific insight ranks
+ * - **kata**: Martial techniques requiring ring mastery levels
+ * - **kiho**: Monk mystical abilities tied to elemental rings
+ * - **tattoo**: Ise Zumi mystical tattoos with supernatural effects
+ * - **clan/family**: Character lineage and social structure
+ * - **school**: Training dojo teaching techniques
+ * - **commonItem**: Generic equipment and possessions
  *
- * **Active Effects Integration:**
- * Full support for Foundry's Active Effects system:
- * - **Transferable Effects**: Background items can modify actor traits and skills
- * - **Equipment Effects**: Weapons and armor can provide bonuses when equipped
- * - **Conditional Effects**: Effects can be enabled/disabled based on item state
- * - **Stacking Rules**: Proper handling of multiple effect sources
+ * Key Integrations:
+ * - **XP Tracking**: onCreate and preUpdate hooks log skill ranks, emphases, and advantage costs
+ * - **Default Icons**: preCreate hook assigns type-specific icons from DEFAULT_ICONS
+ * - **Chat Cards**: roll() method renders items as formatted chat messages using Handlebars templates
+ * - **Sheet Data**: getData() enhances context with localized configuration for templates
  *
- * **Experience Point Integration:**
- * Automatic XP tracking for character development:
- * - **Skill Creation**: Logs XP costs when skills are added to characters
- * - **Advancement Tracking**: Monitors skill rank increases and emphasis additions
- * - **Cost Calculation**: Proper XP cost formulas for all advancement types
- * - **Audit Trail**: Complete logging of all XP expenditures with timestamps
+ * Foundry VTT Integration:
+ * - Requires Foundry v13+ for Item Document and DataModel lifecycle
+ * - Implements Document lifecycle hooks: _preCreate, _onCreate, _preUpdate
+ * - Implements DataModel preparation: prepareBaseData, prepareDerivedData
+ * - Uses Application v2 pattern: getData() for sheet context preparation
+ * - Registered in CONFIG.Item.documentClass during system initialization
  *
- * **Chat System Integration:**
- * Rich chat card system with type-specific templates:
- * - **Weapon Cards**: Damage rolls, special properties, and attack options
- * - **Spell Cards**: Effect descriptions, raise options, and casting information
- * - **Skill Cards**: Roll buttons with trait+skill combinations
- * - **Technique Cards**: Effect descriptions and mechanical benefits
- * - **Equipment Cards**: Properties, costs, and mechanical effects
+ * Data Preparation Flow:
+ * 1. **_preCreate**: Assign default icons, validate advantage/disadvantage costs
+ * 2. **prepareBaseData**: Initialize bow properties, normalize icons, ensure rich text strings
+ * 3. **prepareDerivedData**: Compute skill formulas, calculate bow damage
+ * 4. **getData**: Inject configuration data for sheet templates
  *
- * **Data Validation and Safety:**
- * - **Rich Text Safety**: Ensures all rich text fields have safe default values
- * - **Type Validation**: Robust type checking for all item properties
- * - **Cost Constraints**: Enforces valid cost ranges for advantages/disadvantages
- * - **Icon Management**: Automatic assignment of appropriate default icons
+ * Consumers:
+ * - System initialization: Registered as CONFIG.Item.documentClass
+ * - Item sheets: ItemSheetV2 classes render and edit items
+ * - Actor documents: Items embedded in actors for character sheets
+ * - Chat integration: roll() called from item sheets and quick-roll buttons
+ * - XP Manager: Reads XP journal flags written by lifecycle hooks
  *
- * **Performance Optimizations:**
- * - **Template Caching**: Chat card templates are cached for fast rendering
- * - **Computed Properties**: Derived data calculated during preparation phase
- * - **Efficient Lookups**: Optimized icon and template resolution
- * - **Lazy Loading**: Chat cards rendered only when needed
- *
- * **Integration Points:**
- * - **Actor System**: Items integrate with actor preparation and XP tracking
- * - **Sheet Classes**: Provides data for item sheet rendering and editing
- * - **Dice Service**: Supplies roll formulas and mechanical properties
- * - **Chat Service**: Renders rich chat cards with interactive elements
- * - **Config Module**: Uses system constants and template paths
- *
- * **Error Handling:**
- * - **Graceful Degradation**: Functions with missing or invalid data
- * - **Template Fallbacks**: Safe defaults when templates are missing
- * - **Console Logging**: Detailed error reporting for troubleshooting
- * - **Type Safety**: Robust handling of unexpected data types
- *
- * **Usage Examples:**
- * ```javascript
- * // Create a weapon with automatic icon assignment
- * const weapon = await Item.create({
- *   name: "Katana",
- *   type: "weapon",
- *   system: { damageRoll: 3, damageKeep: 3 }
- * });
- * 
- * // Render a chat card
- * await weapon.displayCard();
- * 
- * // Access derived data
- * const rollFormula = weapon.system.rollFormula; // "3k3"
- * ```
- *
- * @author L5R4 System Team
- * @since 1.0.0
- * @version 1.1.0
- * @extends {Item}
- * @see {@link https://foundryvtt.com/api/classes/documents.Item.html|Item Document}
- * @see {@link https://foundryvtt.com/api/classes/foundry.abstract.Document.html#_preCreate|Document._preCreate}
- * @see {@link https://foundryvtt.com/api/classes/foundry.abstract.Document.html#prepareData|Document.prepareData}
- * @see {@link https://foundryvtt.com/api/classes/documents.ChatMessage.html|ChatMessage}
- * @see {@link https://foundryvtt.com/api/functions/foundry.applications.handlebars.renderTemplate.html|renderTemplate}
- * @see {@link ../services/dice.js|Dice Service} - Roll processing and Ten Dice Rule
- * @see {@link ./actor.js|Actor Document} - Actor integration and XP tracking
+ * @module documents/item
+ * @requires Foundry VTT v13+
+ * @see {@link https://foundryvtt.com/api/v13/classes/client.Item.html|Foundry Item API}
+ * @see {@link https://foundryvtt.com/api/v13/classes/foundry.abstract.DataModel.html|DataModel API}
  */
 
-import { TEMPLATE, ARROW_MODS, SYS_ID, iconPath } from "../config.js";
-import { on, toInt } from "../utils.js";
-import { TenDiceRule } from "../services/dice.js";
+import { CHAT_CARD_TEMPLATES, DEFAULT_ICONS } from "./item/constants/item-types.js";
+import { handleItemPreCreate, handleItemOnCreate } from "./item/lifecycle/item-creation.js";
+import { handleItemPreUpdate } from "./item/lifecycle/item-updates.js";
+import { prepareItemBaseData } from "./item/preparation/base-data.js";
+import { prepareItemDerivedData } from "./item/preparation/derived-data.js";
+import { renderItemChatCard } from "./item/integration/chat-cards.js";
+import { enhanceItemSheetData } from "./item/integration/sheet-data.js";
 
 /**
- * L5R4 Item document class extending Foundry's base Item.
- * Handles all item types in the L5R4 system with type-specific logic.
+ * L5R4 Item Document class.
+ *
+ * Extends Foundry's base Item class to provide L5R4-specific lifecycle handling,
+ * data preparation, and system integration. Delegates most logic to imported modules
+ * following the Separation of Concerns architecture pattern.
+ *
+ * Static Properties:
+ * - `CHAT_CARD_TEMPLATES`: Maps item types to Handlebars template paths for chat rendering
+ * - `DEFAULT_ICONS`: Maps item types to default icon paths for automatic assignment
+ *
+ * Lifecycle Hooks (Foundry v13 Document API):
+ * - `_preCreate`: Pre-creation validation and default value assignment
+ * - `_onCreate`: Post-creation XP tracking and journal logging
+ * - `_preUpdate`: Pre-update validation and XP expenditure tracking
+ *
+ * Data Preparation (Foundry v13 DataModel API):
+ * - `prepareBaseData`: Initialize default values and normalize data
+ * - `prepareDerivedData`: Compute roll formulas and derived statistics
+ *
+ * Integration Methods:
+ * - `roll`: Render item as chat card in chat log
+ * - `getData`: Enhance sheet context with configuration data for templates
+ *
  * @extends {Item}
  */
 export default class L5R4Item extends Item {
   /**
-   * Chat template paths for rendering item-specific chat cards.
-   * Maps each item type to its corresponding Handlebars template.
-   * 
-   * NOTE: 'bow' entry is LEGACY support for pre-v1.0.0 items during migration.
-   * New bows use type='weapon' with system.isBow=true flag.
-   * 
-   * @type {Record<string, string>}
+   * Chat card template paths mapped by item type.
+   *
+   * Static reference to CHAT_CARD_TEMPLATES constant from item-types.js.
+   * Used by renderItemChatCard() to look up the appropriate Handlebars template
+   * when rendering items to chat. Each L5R4 item type has a corresponding template
+   * that formats its properties for display in chat messages.
+   *
+   * @type {Object.<string, string>}
+   * @static
+   * @readonly
    */
-  static CHAT_CARD_TEMPLATES = {
-    advantage:    TEMPLATE("cards/advantage-disadvantage.hbs"),
-    armor:        TEMPLATE("cards/armor.hbs"),
-    bow:          TEMPLATE("cards/weapon.hbs"),  // LEGACY: For unmigrated bow items
-    clan:         TEMPLATE("cards/commonItem.hbs"),
-    disadvantage: TEMPLATE("cards/advantage-disadvantage.hbs"),
-    family:       TEMPLATE("cards/commonItem.hbs"),
-    commonItem:   TEMPLATE("cards/commonItem.hbs"),
-    kata:         TEMPLATE("cards/kata.hbs"),
-    kiho:         TEMPLATE("cards/kiho.hbs"),
-    school:       TEMPLATE("cards/commonItem.hbs"),
-    skill:        TEMPLATE("cards/skill.hbs"),
-    spell:        TEMPLATE("cards/spell.hbs"),
-    tattoo:       TEMPLATE("cards/tattoo.hbs"),
-    technique:    TEMPLATE("cards/technique.hbs"),
-    weapon:       TEMPLATE("cards/weapon.hbs")
-  };
+  static CHAT_CARD_TEMPLATES = CHAT_CARD_TEMPLATES;
 
   /**
-   * Default icon paths by item type for automatic assignment.
-   * Used when items are created without explicit icons or with the generic bag icon.
-   * 
-   * NOTE: 'bow' entry is LEGACY support for pre-v1.0.0 items during migration.
-   * New bows use type='weapon' with system.isBow=true flag.
-   * 
-   * @type {Record<string, string>}
+   * Default icon paths mapped by item type.
+   *
+   * Static reference to DEFAULT_ICONS constant from item-types.js.
+   * Used during item creation and base data preparation to assign type-specific
+   * default icons when items are created without custom images. Ensures consistent
+   * visual representation across the system.
+   *
+   * @type {Object.<string, string>}
    * @static
+   * @readonly
    */
-  static DEFAULT_ICONS = {
-    advantage:    iconPath("yin-yang.png"),
-    armor:        iconPath("hat.png"),
-    bow:          iconPath("bow.png"),  // LEGACY: For unmigrated bow items
-    clan:         iconPath("bamboo.png"),
-    disadvantage: iconPath("yin-yang.png"),
-    family:       iconPath("tori.png"),
-    commonItem:   iconPath("coins.png"),
-    kata:         iconPath("scroll.png"),
-    kiho:         iconPath("tori.png"),
-    school:       iconPath("scroll.png"),
-    skill:        iconPath("flower.png"),
-    spell:        iconPath("scroll2.png"),
-    tattoo:       iconPath("tattoo.png"),
-    technique:    iconPath("kanji.png"),
-    weapon:       iconPath("sword.png")
-  };
+  static DEFAULT_ICONS = DEFAULT_ICONS;
 
   /* -------------------------------------------- */
   /* Lifecycle                                    */
   /* -------------------------------------------- */
 
   /**
-   * Configure item defaults and validate data on creation.
-   * Assigns type-appropriate icons and enforces cost constraints for
-   * advantages and disadvantages (both ≥0, disadvantages grant XP in calculations).
-   * 
-   * @param {object} data - The initial data object provided to the document creation
-   * @param {object} options - Additional options which modify the creation request
-   * @param {string} userId - The ID of the User requesting the document creation
-   * @returns {Promise<void>}
+   * Pre-creation lifecycle hook for L5R4 items.
+   *
+   * Foundry Document lifecycle hook called before item validation and database insertion.
+   * Delegates to handleItemPreCreate() for:
+   * - Assigning default icons based on item type
+   * - Validating advantage/disadvantage costs (clamp to ≥0)
+   * - Special handling for bow weapons (isBow flag → bow icon)
+   *
+   * This hook executes before Foundry's data validation, allowing us to normalize
+   * data and set defaults that will be validated against the schema. Changes are
+   * applied via updateSource() which mutates the document during creation.
+   *
+   * L5R4 Rules Context:
+   * - Advantages cost XP as listed (always positive)
+   * - Disadvantages grant XP during creation (max 10 total)
+   * - Cost validation prevents XP exploits from negative values
+   *
+   * Foundry Integration:
+   * - Hook: _preCreate (Foundry v13 Document lifecycle)
+   * - Timing: Before validation, before database persistence
+   * - Mutation: Uses updateSource() to modify document data
+   * - Async: Required by Foundry's hook contract
+   *
+   * @param {object} data - Raw creation data passed to Item.create()
+   * @param {object} options - Creation options (parent, pack, etc.)
+   * @param {string} userId - ID of user creating the item
+   * @returns {Promise<void>} Resolves when pre-creation processing completes
+   *
+   * @async
    * @override
-   * @see {@link https://foundryvtt.com/api/classes/foundry.abstract.Document.html#_preCreate|Document._preCreate}
    */
   async _preCreate(data, options, userId) {
     await super._preCreate(data, options, userId);
-
-    // Assign default icon if none provided or using generic bag icon
-    const isUnsetOrBag = !this.img || this.img === "icons/svg/item-bag.svg";
-    if (isUnsetOrBag) {
-      const icon = L5R4Item.DEFAULT_ICONS[this.type] ?? "icons/svg/item-bag.svg";
-      this.updateSource({ img: icon });
-    }
-
-    // Enforce cost constraints (must be non-negative for both types)
-    // Disadvantages store positive costs but grant XP in calculations (see actor.js _preparePcExperience)
-    if (this.type === "advantage" || this.type === "disadvantage") {
-      const raw = data?.system?.cost ?? this.system?.cost;
-      const clamped = Math.max(0, toInt(raw, 0));
-      this.updateSource({ "system.cost": clamped });
-    }
+    handleItemPreCreate(this, data);
   }
 
   /**
-   * Track experience expenditure when skills are created on actors.
-   * Automatically calculates and logs XP costs using L5R4 skill progression:
-   * triangular costs (1+2+3+...+rank) with school skills getting rank 1 free.
-   * 
-   * **Cost Formula:**
-   * - Regular skills: 1+2+3+...+rank XP
-   * - School skills: 2+3+4+...+rank XP (rank 1 free)
-   * 
-   * @param {object} data - The data object of the created document
-   * @param {object} options - Additional options which modify the creation request
-   * @param {string} userId - The ID of the User who triggered the creation
-   * @returns {void}
+   * Post-creation lifecycle hook for L5R4 items.
+   *
+   * Foundry Document lifecycle hook called after item is persisted to database.
+   * Delegates to handleItemOnCreate() for XP tracking:
+   * - Skills: Log XP cost for initial rank purchase
+   * - Advantages: Log XP expenditure (positive cost)
+   * - Disadvantages: Log XP gain (negative cost)
+   *
+   * XP tracking only applies to items owned by actors (orphan items ignored).
+   * Journal entries are written to actor flags for display in XP Manager application.
+   *
+   * L5R4 Rules Context:
+   * - Skills cost XP equal to rank (1 XP for rank 1, cumulative for higher ranks)
+   * - Advantages deduct XP from available pool
+   * - Disadvantages grant XP up to 10 point maximum during character creation
+   *
+   * Foundry Integration:
+   * - Hook: _onCreate (Foundry v13 Document lifecycle)
+   * - Timing: After database persistence, safe to read item.id
+   * - Mutation: Calls actor.setFlag() to persist XP journal
+   * - Async: Required for await on actor flag updates
+   *
+   * @param {object} data - Creation data passed to Item.create()
+   * @param {object} options - Creation options (parent, pack, etc.)
+   * @param {string} userId - ID of user who created the item
+   * @returns {Promise<void>} Resolves when XP tracking completes
+   *
+   * @async
    * @override
-   * @see {@link https://foundryvtt.com/api/classes/documents.Item.html#_onCreate|Item._onCreate}
    */
   async _onCreate(data, options, userId) {
     super._onCreate(data, options, userId);
-    // Only when embedded on an Actor and for Skill, Advantage, or Disadvantage types
-    if (!this.actor || !["skill", "advantage", "disadvantage"].includes(this.type)) return;
-    try {
-      const sys = this.system ?? {};
-      const ns = this.actor.flags?.[SYS_ID] ?? {};
-      const spent = Array.isArray(ns.xpSpent) ? ns.xpSpent.slice() : [];
-      
-      if (this.type === "skill") {
-        const r = toInt(sys.rank);
-        const baseline = sys.school ? 1 : 0;
-        const tri = (n) => (n * (n + 1)) / 2;
-        const newCost = r > baseline ? tri(r) - tri(baseline) : 0;
-        if (newCost > 0) {
-          spent.push({
-            id: foundry.utils.randomID(),
-            delta: newCost,
-            note: game.i18n.format("l5r4.character.experience.skillCreate", { name: this.name ?? "Skill", rank: r }),
-            ts: Date.now(),
-            type: "skill",
-            skillName: this.name ?? "Skill",
-            fromValue: 0,
-            toValue: r
-          });
-        }
-      } else if (this.type === "advantage" || this.type === "disadvantage") {
-        const cost = toInt(sys.cost, 0);
-        if (cost > 0) {
-          const itemType = this.type === "advantage" ? "advantage" : "disadvantage";
-          spent.push({
-            id: foundry.utils.randomID(),
-            delta: cost,
-            note: this.name ?? (this.type === "advantage" ? "Advantage" : "Disadvantage"),
-            ts: Date.now(),
-            type: itemType,
-            itemName: this.name ?? (this.type === "advantage" ? "Advantage" : "Disadvantage"),
-            fromValue: 0,
-            toValue: cost
-          });
-        }
-      }
-      
-      if (spent.length > (ns.xpSpent?.length ?? 0)) {
-        // Async flag update - don't block creation if XP logging fails
-        this.actor.setFlag(SYS_ID, "xpSpent", spent);
-      }
-    } catch (_) { /* no-op */ }
+    await handleItemOnCreate(this, data);
   }
 
   /**
-   * Track experience expenditure and validate costs on item updates.
-   * Handles skill rank advancement XP logging and enforces advantage/disadvantage
-   * cost constraints during updates.
-   * 
-   * **Skill XP Tracking:**
-   * - Only logs XP when skill ranks increase
-   * - Uses updated school flag to determine if rank 1 is free
-   * - Calculates delta cost between old and new total costs
-   * - Resets calculated XP when free ranks/emphasis change (preserves manual adjustments)
-   * 
-   * **Cost Validation:**
-   * - Advantages: Clamps cost to non-negative values
-   * - Disadvantages: Clamps cost to non-positive values
-   * 
-   * @param {object} changes - The differential data that is being updated
-   * @param {object} options - Additional options which modify the update request
-   * @param {string} userId - The ID of the User requesting the document update
-   * @returns {Promise<void>}
+   * Pre-update lifecycle hook for L5R4 items.
+   *
+   * Foundry Document lifecycle hook called before item updates are applied.
+   * Delegates to handleItemPreUpdate() for:
+   * - Validating advantage/disadvantage cost changes (clamp to ≥0)
+   * - Detecting free rank changes that invalidate XP history
+   * - Tracking XP expenditures for skill ranks, emphases, and advantage costs
+   *
+   * Critical Free Rank Logic:
+   * When freeRanks or freeEmphasis changes, all XP history becomes invalid because
+   * free ranks affect retroactive XP calculations. The system resets all XP tracking
+   * and relies on current item state to recalculate spent XP.
+   *
+   * L5R4 Rules Context:
+   * - Skill ranks cost XP equal to next rank (rank 3 = 3 XP)
+   * - Emphases cost 2 XP each
+   * - School skills grant free rank 1 (some grant free emphasis)
+   * - Advantages/disadvantages have point costs that can change
+   *
+   * Foundry Integration:
+   * - Hook: _preUpdate (Foundry v13 Document lifecycle)
+   * - Timing: Before update applies, receives delta changes only
+   * - Mutation: Calls actor.setFlag() to persist XP journal
+   * - Async: Required for await on actor flag updates
+   *
+   * @param {object} changes - Delta object containing only changed fields (Foundry format)
+   * @param {object} options - Update options (diff, render, etc.)
+   * @param {string} userId - ID of user making the update
+   * @returns {Promise<void>} Resolves when validation and XP tracking complete
+   *
+   * @async
    * @override
-   * @see {@link https://foundryvtt.com/api/classes/documents.Item.html#_preUpdate|Item._preUpdate}
    */
   async _preUpdate(changes, options, userId) {
-    // Validate advantage costs (must be non-negative)
-    if (this.type === "advantage" && changes?.system?.cost !== undefined) {
-      changes.system.cost = Math.max(0, toInt(changes.system.cost, 0));
-    }
-
-    // Allow disadvantages to have any cost value for flexibility during updates
-    // (creation enforces ≥0). XP calculations in actor.js interpret positive
-    // costs as granted XP (see _preparePcExperience).
-
     await super._preUpdate(changes, options, userId);
-    
-    // Trigger XP recalculation if freeRanks or freeEmphasis actually changed on skills
-    if (this.actor && this.type === "skill") {
-      const oldFreeRanks = this.system?.freeRanks;
-      const newFreeRanks = changes?.system?.freeRanks;
-      const oldFreeEmphasis = this.system?.freeEmphasis;
-      const newFreeEmphasis = changes?.system?.freeEmphasis;
-      
-      const freeRanksActuallyChanged = newFreeRanks !== undefined && newFreeRanks !== oldFreeRanks;
-      const freeEmphasisActuallyChanged = newFreeEmphasis !== undefined && newFreeEmphasis !== oldFreeEmphasis;
-      
-      if (freeRanksActuallyChanged || freeEmphasisActuallyChanged) {
-        // Reset only calculated XP entries, preserve manual adjustments
-        try {
-          // Preserve manual XP adjustments - only reset calculated XP
-          await this.actor.setFlag(SYS_ID, "xpSpent", []);
-          // DO NOT reset xpManual - preserve manual XP boosts
-          
-          // Force actor sheet to recalculate XP on next render
-          if (this.actor.sheet?.rendered) {
-            this.actor.sheet.render();
-          }
-        } catch (err) {
-          console.warn(`${SYS_ID}`, "Failed to reset calculated XP data", err);
-        }
-        return; // Skip the normal XP tracking logic below
-      }
-    }
-    
-    if (!this.actor || !["skill", "advantage", "disadvantage"].includes(this.type)) return;
-    try {
-      const ns = this.actor.flags?.[SYS_ID] ?? {};
-      const spent = Array.isArray(ns.xpSpent) ? ns.xpSpent.slice() : [];
-      let shouldUpdate = false;
-
-      if (this.type === "skill") {
-        // Track skill rank increases
-        const oldRank   = toInt(this.system?.rank);
-        const newRank   = toInt(changes?.system?.rank ?? oldRank);
-        const rankIncreased = Number.isFinite(newRank) && newRank > oldRank;
-
-        if (rankIncreased) {
-          const newSchool = (changes?.system?.school ?? this.system?.school) ? true : false;
-          const newFreeRanksForCalc = changes?.system?.freeRanks ?? this.system?.freeRanks;
-          const baseline = newSchool ? Math.max(0, parseInt(newFreeRanksForCalc) || 0) : 0;
-          const tri = (n) => (n * (n + 1)) / 2;
-          const oldCost = oldRank > baseline ? tri(oldRank) - tri(baseline) : 0;
-          const newCost = newRank > baseline ? tri(newRank) - tri(baseline) : 0;
-          const delta = Math.max(0, newCost - oldCost);
-          if (delta > 0) {
-            spent.push({
-              id: foundry.utils.randomID(),
-              delta,
-              note: game.i18n.format("l5r4.character.experience.skillChange", { name: this.name ?? "Skill", from: oldRank, to: newRank }),
-              ts: Date.now(),
-              type: "skill",
-              skillName: this.name ?? "Skill",
-              fromValue: oldRank,
-              toValue: newRank
-            });
-            shouldUpdate = true;
-          }
-        }
-
-        // Track emphasis additions
-        const oldEmphasis = String(this.system?.emphasis ?? "").trim();
-        const newEmphasis = String(changes?.system?.emphasis ?? oldEmphasis).trim();
-        
-        if (oldEmphasis !== newEmphasis) {
-          const oldEmphases = oldEmphasis ? oldEmphasis.split(/[,;]+/).map(s => s.trim()).filter(Boolean) : [];
-          const newEmphases = newEmphasis ? newEmphasis.split(/[,;]+/).map(s => s.trim()).filter(Boolean) : [];
-          
-          if (newEmphases.length > oldEmphases.length) {
-            const newSchool = (changes?.system?.school ?? this.system?.school) ? true : false;
-            const freeEmphasis = newSchool ? 
-              (parseInt(changes?.system?.freeEmphasis ?? this.system?.freeEmphasis) || 0) : 0;
-            
-            const oldPaidCount = Math.max(0, oldEmphases.length - freeEmphasis);
-            const newPaidCount = Math.max(0, newEmphases.length - freeEmphasis);
-            const emphasisDelta = Math.max(0, newPaidCount - oldPaidCount);
-            
-            if (emphasisDelta > 0) {
-              const emphasisCost = emphasisDelta * 2; // 2 XP per emphasis
-              const addedEmphases = newEmphases.slice(oldEmphases.length);
-              
-              spent.push({
-                id: foundry.utils.randomID(),
-                delta: emphasisCost,
-                note: `${this.name ?? "Skill"} - Emphasis: ${addedEmphases.join(", ")}`,
-                ts: Date.now(),
-                type: "emphasis",
-                skillName: this.name ?? "Skill",
-                fromValue: oldEmphases.length,
-                toValue: newEmphases.length,
-                addedEmphases: addedEmphases
-              });
-              shouldUpdate = true;
-            }
-          }
-        }
-      } else if (this.type === "advantage" || this.type === "disadvantage") {
-        const oldCost = toInt(this.system?.cost, 0);
-        const newCost = toInt(changes?.system?.cost ?? oldCost, 0);
-        const delta = Math.max(0, newCost - oldCost);
-        if (delta > 0) {
-          const itemType = this.type === "advantage" ? "advantage" : "disadvantage";
-          spent.push({
-            id: foundry.utils.randomID(),
-            delta,
-            note: `${this.name ?? (this.type === "advantage" ? "Advantage" : "Disadvantage")} (${newCost})`,
-            ts: Date.now(),
-            type: itemType,
-            itemName: this.name ?? (this.type === "advantage" ? "Advantage" : "Disadvantage"),
-            fromValue: oldCost,
-            toValue: newCost
-          });
-          shouldUpdate = true;
-        }
-      }
-
-      if (shouldUpdate) {
-        await this.actor.setFlag(SYS_ID, "xpSpent", spent);
-      }
-    } catch (_) { /* no-op */ }
+    await handleItemPreUpdate(this, changes);
   }
 
   /**
-   * Initialize and normalize base item data for template safety.
-   * Ensures all rich-text fields are strings (never null/undefined) and sets
-   * appropriate defaults for type-specific fields like bow properties.
-   * 
-   * **Normalization Tasks:**
-   * - Convert null/undefined rich-text fields to empty strings
-   * - Set bow defaults (strength rating, arrow type)
-   * - Assign default icons for items without custom images
-   * - Ensure system object exists and is mutable
-   * 
-   * @returns {void}
+   * Base data preparation hook for L5R4 items.
+   *
+   * Foundry DataModel lifecycle hook called during data preparation phase.
+   * First preparation phase after item creation, before prepareDerivedData.
+   * Delegates to prepareItemBaseData() for:
+   * - Initializing bow weapon properties (strength, arrow type)
+   * - Normalizing item icons (assign type-specific defaults)
+   * - Ensuring rich text fields are strings for template rendering
+   *
+   * Bow Mechanics:
+   * Initializes bow strength (0-4) and arrow type (default "willow") per core
+   * Weapons rules. Bow damage = min(bow Str, actor Str) + arrow modifiers.
+   *
+   * Foundry Integration:
+   * - Hook: prepareBaseData (Foundry v13 DataModel lifecycle)
+   * - Timing: After _preCreate, before prepareDerivedData
+   * - Frequency: Every time item data is accessed (cached by Foundry)
+   * - Mutation: Modifies item.system and item.img directly
+   *
+   * @returns {void} Mutates the item in-place
+   *
    * @override
    */
   prepareBaseData() {
     super.prepareBaseData();
-
-    // Ensure system data object exists and is mutable for further processing
-    const sys = (this.system ??= {});
-
-    // Set bow-specific defaults for damage calculation compatibility
-    if (this.type === "weapon" && sys.isBow) {
-      if (sys.str == null) sys.str = 0;            // Bow strength rating for damage calculation
-      if (sys.arrow == null) sys.arrow = "willow"; // Default arrow type (must match ARROW_MODS keys)
-    }
-
-    // Ensure valid image path, preferring type-specific defaults over generic bag icon
-    if (!this.img || typeof this.img !== "string" || this.img === "icons/svg/item-bag.svg") {
-      this.img = L5R4Item.DEFAULT_ICONS[this.type] ?? "icons/svg/item-bag.svg";
-    }
-
-    // Helper function to normalize rich-text fields to strings
-    const ensureString = (obj, keys) => {
-      for (const k of keys) {
-        if (obj[k] == null) obj[k] = "";
-        else if (typeof obj[k] !== "string") obj[k] = String(obj[k]);
-      }
-    };
-
-    // Normalize common rich-text fields used across multiple item types
-    ensureString(sys, ["description", "specialRules", "demands", "notes", "text"]);
-
-    // Normalize type-specific rich-text fields for template editors
-    switch (this.type) {
-      case "spell":       ensureString(sys, ["effect", "raiseEffects"]); break;
-      case "weapon":      ensureString(sys, ["special"]); break;
-      case "armor":       ensureString(sys, ["special"]); break;
-      case "kata":        ensureString(sys, ["effect"]); break;
-      case "kiho":        ensureString(sys, ["effect"]); break;
-      case "technique":   ensureString(sys, ["effect", "benefit", "drawback"]); break;
-      case "tattoo":      ensureString(sys, ["effect"]); break;
-      case "skill":
-        // Set default values for existing skills that don't have these properties
-        // Only set defaults if the properties don't exist in the actual data
-        break;
-    }
+    prepareItemBaseData(this);
   }
 
   /**
-   * Compute derived data for items based on type and context.
-   * Calculates roll formulas for skills and damage formulas for bows using
-   * actor traits and item properties.
-   * 
-   * **Skill Calculations:**
-   * - Roll dice: Skill rank + effective trait value
-   * - Keep dice: Effective trait value
-   * - Formula: "XkY" format for display
-   * 
-   * **Bow Calculations:**
-   * - Damage roll: min(bow strength, actor strength) + arrow modifier
-   * - Damage keep: Arrow modifier keep value
-   * - Formula: "XkY" format for damage rolls
-   * 
-   * @returns {void}
+   * Derived data preparation hook for L5R4 items.
+   *
+   * Foundry DataModel lifecycle hook called during data preparation phase.
+   * Second preparation phase after prepareBaseData, computes roll formulas
+   * and derived statistics. Delegates to prepareItemDerivedData() for:
+   * - Computing skill roll formulas: (Skill Rank)k0
+   * - Calculating bow damage formulas: min(bow Str, actor Str) + arrow DR
+   *
+   * L5R4 Rules Context:
+   * - Skill rolls become (Skill + Trait)k(Trait) when paired with traits at roll time
+   * - Bow damage follows Equipment rules: bow Strength added to arrow damage,
+   *   limited by actor's Strength (weaker archers can't fully draw strong bows)
+   * - Arrow types modify damage: Willow Leaf 2k2, Armor Piercing 1k1, Flesh Cutter 2k3
+   *
+   * Foundry Integration:
+   * - Hook: prepareDerivedData (Foundry v13 DataModel lifecycle)
+   * - Timing: After prepareBaseData, before sheets render
+   * - Frequency: Every time item data is accessed (cached by Foundry)
+   * - Mutation: Modifies item.system properties (rollFormula, damageFormula, etc.)
+   *
+   * @returns {void} Mutates the item in-place
+   *
    * @override
    */
   prepareDerivedData() {
     super.prepareDerivedData();
-    const sys = this.system ?? {};
-
-    // Calculate skill roll formula: (Skill Rank + Trait)k(Trait)
-    // NOTE: This runs BEFORE actor.prepareDerivedData(), so Active Effects aren't applied yet.
-    // We store basic values here and recalculate in getData() for accurate display.
-    if (this.type === "skill") {
-      try {
-        const traitKey = String(sys.trait ?? "").toLowerCase();
-        const rank = toInt(sys.rank);
-        
-        // Store basic formula without bonuses - will be recalculated in getData()
-        sys.rollDice    = Math.max(0, rank);
-        sys.rollKeep    = 0;
-        sys.rollFormula = `${sys.rollDice}k${sys.rollKeep}`;
-      } catch (err) {
-        sys.rollDice = Math.max(0, toInt(sys.rank));
-        sys.rollKeep = 0;
-        sys.rollFormula = `${sys.rollDice}k${sys.rollKeep}`;
-        console.warn(`${SYS_ID}`, "Failed to compute skill roll formula", { err, item: this });
-      }
-    }
-
-    // Calculate bow damage formula based on strength and arrow type
-    if (this.type === "weapon" && sys.isBow) {
-      const actorStr = this.actor ? toInt(this.actor.system?.traits?.str) : toInt(sys.str);
-      const bowStr   = toInt(sys.str);
-
-      // Apply arrow type modifiers (stored as system keys, not localized labels)
-      const key = String(sys.arrow || "willow");
-      const mod = ARROW_MODS[key] ?? { r: 0, k: 0 };
-
-      sys.damageRoll    = Math.min(bowStr, actorStr) + mod.r;
-      sys.damageKeep    = mod.k;
-      sys.damageFormula = `${sys.damageRoll}k${sys.damageKeep}`;
-    }
+    prepareItemDerivedData(this);
   }
 
   /* -------------------------------------------- */
@@ -562,44 +305,72 @@ export default class L5R4Item extends Item {
   /* -------------------------------------------- */
 
   /**
-   * Create and send a chat message with an item-specific card.
-   * Renders the appropriate template for the item type and posts it to chat
-   * with proper speaker attribution and roll mode settings.
-   * 
-   * @returns {Promise<ChatMessage|void>} The created chat message, or void if no template
+   * Render this item as a chat card in the Foundry VTT chat log.
+   *
+   * Creates a ChatMessage displaying the item's details using a type-specific
+   * Handlebars template from CHAT_CARD_TEMPLATES. The message includes speaker
+   * context (from item's owning actor if available), respects the current roll
+   * mode setting, and displays a localized item type label as flavor text.
+   *
+   * Delegates to renderItemChatCard() which handles:
+   * - Template lookup based on item.type
+   * - Handlebars rendering with item data context
+   * - ChatMessage creation with speaker and roll mode
+   * - Localized type label generation
+   *
+   * This method is typically called from:
+   * - Item sheet "Post to Chat" button clicks
+   * - Quick-roll buttons in actor sheets
+   * - Macro commands and API calls
+   *
+   * Foundry Integration:
+   * - Uses ChatMessage.create() to post to chat log
+   * - Uses ChatMessage.getSpeaker() for actor context
+   * - Respects game.settings roll mode (public, private, blind, self)
+   *
+   * @returns {Promise<ChatMessage|undefined>} Created ChatMessage document,
+   *   or undefined if no template exists for item type
+   *
+   * @async
    */
   async roll() {
-    const templatePath = L5R4Item.CHAT_CARD_TEMPLATES[this.type];
-    if (!templatePath) return;
-
-    // Render template with full item context (templates can access this.system)
-    // @see https://foundryvtt.com/api/functions/foundry.applications.handlebars.renderTemplate.html
-    const html = await foundry.applications.handlebars.renderTemplate(templatePath, this);
-
-    // Get localized item type label for chat flavor text
-    const typeKey   = `TYPES.Item.${this.type}`;
-    const typeLabel = game.i18n.has?.(typeKey) ? game.i18n.localize(typeKey) : this.type;
-
-    return ChatMessage.create({
-      speaker: ChatMessage.getSpeaker({ actor: this.actor }),
-      rollMode: game.settings.get("core", "rollMode"),
-      flavor: `[${typeLabel}]`,
-      content: html ?? ""
-    });
+    return renderItemChatCard(this);
   }
 
   /**
-   * Enhance template data with system configuration for item sheets.
-   * Provides access to CONFIG.l5r4 constants and lookups in item sheet templates.
-   * 
-   * @param {object} options - Sheet rendering options
-   * @returns {Promise<object>} Enhanced data object with config access
-   * @override
+   * Prepare sheet context data for rendering item sheets.
+   *
+   * Called by Foundry's sheet rendering pipeline (both Application v2 and legacy patterns).
+   * Enhances the base context object with L5R4-specific configuration data needed by
+   * Handlebars templates for rendering item sheets and embedded item lists.
+   *
+   * Delegates to enhanceItemSheetData() which injects a `config` property containing:
+   * - Arrow type options (weapon sheets)
+   * - Weapon size options (weapon sheets)
+   * - Ring selectors (spell/kiho sheets)
+   * - Trait dropdowns (skill sheets)
+   * - Skill type categories (skill sheets)
+   * - Action type selectors (technique/kata sheets)
+   * - Advantage/disadvantage type filters
+   * - NPC wound level configuration
+   *
+   * This method is called by:
+   * - ItemSheetV2._prepareContext() for Application v2 sheets
+   * - Legacy Item.getData() for backwards compatibility
+   * - ActorSheetV2._prepareContext() for embedded item rendering
+   *
+   * Foundry Integration:
+   * - Follows Application v2 context preparation pattern (Foundry v13+)
+   * - Mutates context object in-place per Foundry's data preparation convention
+   * - All config values reference frozen localization constants
+   *
+   * @param {object} [options] - Sheet rendering options passed by Foundry
+   * @returns {Promise<object>} Enhanced context object with injected config property
+   *
+   * @async
    */
   async getData(options) {
     const data = await super.getData(options);
-    // Provide system config to templates for dropdown options and constants
-    data.config = CONFIG.l5r4 ?? CONFIG;
-    return data;
+    return enhanceItemSheetData(data);
   }
 }

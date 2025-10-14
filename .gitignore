@@ -5,7 +5,6 @@
 
 # Node artifact files
 node_modules/
-dist/
 
 # Compiled Java class files
 *.class
@@ -21,7 +20,6 @@ dist/
 
 # Maven
 target/
-dist/
 
 # JetBrains IDE
 .idea/
@@ -46,12 +44,22 @@ Thumbs.db
 # Large media files
 *.mp4
 *.tiff
-*.avi
-*.flv
-*.mov
-*.wmv
+*.psd
 
-.windsurf
-_for_research
+# Project-specific directories
+_for_research/
+game-rules/
+.windsurf/
 pc-images
 npc-images
+
+# Test coverage reports
+tests/coverage/
+coverage/
+test_priority/
+
+# Vitest cache
+.vitest/
+
+# Madge dependency analysis
+madge-analysis.json

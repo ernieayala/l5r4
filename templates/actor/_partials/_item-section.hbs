@@ -13,8 +13,8 @@
       <span>{{localize "l5r4.world.wealth.zeni"}}:</span>
       <input type="text" name="system.wealth.zeni" value="{{system.wealth.zeni}}" placeholder="0" />
     </div>
-    {{> "systems/l5r4/templates/actor/_partials/_unified-item-create.hbs"}}
-    {{> "systems/l5r4/templates/actor/_partials/_expand.hbs"}}
+    {{> "systems/l5r4-enhanced/templates/actor/_partials/_unified-item-create.hbs"}}
+    {{> "systems/l5r4-enhanced/templates/actor/_partials/_expand.hbs"}}
   </div>
   {{#if items.length}}
     <section class="item-list -commonItem -header" data-scope="items">
@@ -24,7 +24,7 @@
     </section>
     <section class="item-list -commonItem">
       {{#each items as |item id|}}
-        {{> "systems/l5r4/templates/cards/commonItem.hbs"
+        {{> "systems/l5r4-enhanced/templates/cards/commonItem.hbs"
             system=item.system
             inSheet=true
             docId=item.id}}

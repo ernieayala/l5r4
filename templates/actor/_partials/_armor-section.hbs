@@ -1,8 +1,8 @@
 <section class="flexcol -gap-sm">
   <div class="flexrow -gap-sm section-title" data-scope="armors">
     <h4 class="title">{{localize "l5r4.ui.sheets.armor"}}</h4>
-    {{> "systems/l5r4/templates/actor/_partials/_unified-item-create.hbs"}}
-    {{> "systems/l5r4/templates/actor/_partials/_expand.hbs"}}
+    {{> "systems/l5r4-enhanced/templates/actor/_partials/_unified-item-create.hbs"}}
+    {{> "systems/l5r4-enhanced/templates/actor/_partials/_expand.hbs"}}
   </div>
   <section class="item-list -armor -header" data-scope="armors">
     <div class="item">
@@ -15,7 +15,7 @@
   </section>
   <section class="item-list -armor">
     {{#each armors as |armor id|}}
-      {{> "systems/l5r4/templates/cards/armor.hbs"
+      {{> "systems/l5r4-enhanced/templates/cards/armor.hbs"
           system=armor.system
           inSheet=true
           docId=armor.id}}

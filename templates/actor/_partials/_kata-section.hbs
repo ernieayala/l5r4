@@ -1,8 +1,8 @@
 <section class="flexcol -gap-sm">
   <div class="flexrow -gap-sm section-title" data-scope="katas">
     <h4 class="title">{{localize "l5r4.ui.sheets.kata"}}</h4>
-    {{> "systems/l5r4/templates/actor/_partials/_unified-item-create.hbs"}}
-    {{> "systems/l5r4/templates/actor/_partials/_expand.hbs"}}
+    {{> "systems/l5r4-enhanced/templates/actor/_partials/_unified-item-create.hbs"}}
+    {{> "systems/l5r4-enhanced/templates/actor/_partials/_expand.hbs"}}
   </div>
   <section class="item-list -kata -header" data-scope="katas">
     <div class="item">
@@ -14,7 +14,7 @@
   </section>
   <section class="item-list -kata">
     {{#each katas as |kata id|}}
-      {{> "systems/l5r4/templates/cards/kata.hbs" system=kata.system inSheet=true docId=kata.id}}
+      {{> "systems/l5r4-enhanced/templates/cards/kata.hbs" system=kata.system inSheet=true docId=kata.id}}
     {{/each}}
   </section>
 </section>

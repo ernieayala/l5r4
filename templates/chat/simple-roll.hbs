@@ -4,9 +4,11 @@
       {{flavor}}
       {{#if targetData}}
         {{#if targetData.single}}
-          {{targetData.vsText}} {{targetData.name}}
+          {{targetData.vsText}}
+          {{targetData.name}}
         {{else if targetData.multiple}}
-          ({{targetData.count}} {{targetData.multipleText}})
+          ({{targetData.count}}
+          {{targetData.multipleText}})
         {{/if}}
       {{/if}}
     </div>
@@ -17,24 +19,36 @@
       {{#if (eq tnResult.outcome (localize "l5r4.ui.mechanics.rolls.missed"))}}
         {{tnResult.outcome}}
       {{else}}
-        {{tnResult.outcome}} {{localize "l5r4.ui.mechanics.combat.targeting.vs"}} {{localize "l5r4.ui.common.tn"}} {{tnResult.effective}}
-        {{#if tnResult.raises}} ({{localize "l5r4.magic.spells.raises"}}: {{tnResult.raises}}){{/if}}
+        {{tnResult.outcome}}
+        {{localize "l5r4.ui.mechanics.combat.targeting.vs"}}
+        {{localize "l5r4.ui.common.tn"}}
+        {{tnResult.effective}}
+        {{#if tnResult.raises}}
+          ({{localize "l5r4.magic.spells.raises"}}:
+          {{tnResult.raises}}){{/if}}
       {{/if}}
     </div>
   {{/if}}
   {{#if effectInfo}}
     <div class="effect-applied">
-      <strong>{{localize "l5r4.ui.common.effect"}}:</strong> {{effectInfo}}
+      <strong>{{localize "l5r4.ui.common.effect"}}:</strong>
+      {{effectInfo}}
     </div>
   {{/if}}
   {{#if weaponData}}
-    <button class="l5r4-damage-button" 
-            data-weapon-id="{{weaponData.id}}" 
-            data-actor-id="{{weaponData.actorId}}"
-            data-weapon-name="{{weaponData.name}}"
-            data-damage-roll="{{weaponData.damageRoll}}"
-            data-damage-keep="{{weaponData.damageKeep}}">
-      {{localize "l5r4.ui.mechanics.rolls.damageRoll"}} ({{weaponData.name}})
+    <button
+      class="l5r4-damage-button"
+      data-weapon-id="{{weaponData.id}}"
+      data-actor-id="{{weaponData.actorId}}"
+      data-weapon-name="{{weaponData.name}}"
+      data-damage-roll="{{weaponData.damageRoll}}"
+      data-damage-keep="{{weaponData.damageKeep}}"
+      data-attack-raises="{{weaponData.raises}}"
+      data-stance-roll="{{weaponData.stanceRoll}}"
+      data-stance-keep="{{weaponData.stanceKeep}}"
+    >
+      {{localize "l5r4.ui.mechanics.rolls.damageRoll"}}
+      ({{weaponData.name}})
     </button>
   {{/if}}
 </div>

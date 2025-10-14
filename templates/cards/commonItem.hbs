@@ -3,13 +3,13 @@
   data-document-id="{{coalesce docId this.id _id}}">
   <h4 class="flexrow -gap-sm title">
     {{#if inSheet}}
-      <a data-action="item-chat" title="{{name}}">{{name}}</a>
+      <a data-action="item-chat" title="{{localize "l5r4.ui.hints.shiftClickToChat"}}">{{name}}</a>
     {{else}}
       {{name}}
     {{/if}}
   </h4>
   {{#if inSheet}}
-    {{> "systems/l5r4/templates/cards/_partials/_expand.hbs"}}
+    {{> "systems/l5r4-enhanced/templates/cards/_partials/_expand.hbs"}}
     {{#if system.description}}
       <div class="expanded-text">
         <p>{{{system.description}}}</p>
