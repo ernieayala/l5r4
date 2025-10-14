@@ -178,7 +178,9 @@ export async function testFear({ npc, character } = {}) {
     return null;
   }
 
-  const targetInfo = ` ${game.i18n.format("l5r4.ui.mechanics.fear.testAgainst", { creature: npc.name })}`;
+  const targetInfo = ` ${game.i18n.format("l5r4.ui.mechanics.fear.testAgainst", {
+    creature: npc.name
+  })}`;
 
   return executeFearTest({
     character,

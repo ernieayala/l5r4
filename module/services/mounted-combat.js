@@ -3,11 +3,9 @@
  *
  * Handles mounted combat mechanics per L5R4 core rules.
  * Determines mounted status via Active Effects and Horsemanship skill rank.
- * Implements Rank 3 Horsemanship Mastery: Full Attack Stance while mounted.
  *
  * Key mechanics:
  * - Mounted status tracked via "mounted" status effect
- * - Horsemanship Rank 3+ allows Full Attack Stance on horseback
  * - Mounted attackers receive +1k0 bonus vs unmounted targets
  *
  * Foundry APIs: Active Effects (v10+ statuses and legacy statusId flags)
@@ -76,20 +74,11 @@ export function getHorsemanshipRank(actor) {
 /**
  * Determines if an actor can use Full Attack Stance while mounted.
  *
- * Implements Horsemanship Mastery Ability (Rank 3):
- * "The character may utilize the Full Attack Stance when on horseback."
- *
- * Unmounted characters can always use Full Attack Stance.
- * Mounted characters require Horsemanship Rank 3 or higher.
- *
  * @param {Actor|null} actor - The actor to check
- * @returns {boolean} True if actor can use Full Attack Stance (either unmounted or has Horsemanship 3+)
+ * @returns {boolean} True if actor can use Full Attack Stance
  */
 export function canUseFullAttackMounted(actor) {
-  if (!isMounted(actor)) return true;
-
-  const horsemanshipRank = getHorsemanshipRank(actor);
-  return horsemanshipRank >= 3;
+  return true;
 }
 
 /**
@@ -108,7 +97,7 @@ export function canUseFullAttackMounted(actor) {
 export function getMountedStatus(actor) {
   const mounted = isMounted(actor);
   const horsemanshipRank = getHorsemanshipRank(actor);
-  const canFullAttack = !mounted || horsemanshipRank >= 3;
+  const canFullAttack = true;
 
   return {
     isMounted: mounted,

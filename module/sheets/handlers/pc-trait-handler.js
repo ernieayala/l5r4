@@ -46,6 +46,7 @@
 import { SYS_ID } from "../../config/constants.js";
 import { FamilyBonusService } from "../../services/family-bonus-service.js";
 import { clamp } from "../../utils/type-coercion.js";
+import { RollHandler } from "./roll-handler.js";
 
 /**
  * Handler class for PC-specific trait adjustments.
@@ -79,6 +80,13 @@ export class PcTraitHandler {
   static TRAIT_KEYS = Object.freeze(["sta", "wil", "str", "per", "ref", "awa", "agi", "int"]);
 
   /**
+   * Handles trait rank click - rolls trait or adjusts rank based on Shift key.
+   *
+   * **Without Shift Key:**
+   * Performs a trait roll (XkX where X = trait rank) via RollHandler.traitRoll().
+   * This allows quick trait rolls by clicking directly on the trait rank.
+   *
+   * **With Shift Key:**
    * Adjusts a PC's trait value, accounting for family bonuses.
    *
    * **Game Rules Context:**
@@ -88,7 +96,7 @@ export class PcTraitHandler {
    * - Effective Trait = Base Trait + Family Bonus (displayed to user)
    * - System stores only Base Trait; family bonus applied via Active Effects
    *
-   * **Calculation Flow:**
+   * **Calculation Flow (when Shift+Click):**
    * 1. Read current base trait value from actor data
    * 2. Get family bonus for this trait from FamilyBonusService
    * 3. Calculate current effective trait (base + family)
@@ -100,12 +108,13 @@ export class PcTraitHandler {
    * **Example:**
    * - Character has Hida family (+1 Strength)
    * - Current: base STR = 2, family bonus = 1, effective STR = 3
-   * - User clicks + button (delta = +1)
+   * - User Shift+Clicks + button (delta = +1)
    * - New: effective STR = 4, base STR = 3
    * - System stores base STR = 3, sheet displays effective STR = 4
    *
    * **User Interaction:**
-   * Requires Shift+Click to prevent accidental adjustments (safety mechanism).
+   * - Normal Click: Rolls the trait
+   * - Shift+Click: Adjusts trait rank (safety mechanism)
    * This matches the pattern used in PcAdjustmentHandler for other sheet adjustments.
    *
    * **Bounds Enforcement:**
@@ -119,7 +128,7 @@ export class PcTraitHandler {
    * - Non-blocking error handling (logs warning, doesn't throw)
    *
    * @param {Object} context - Sheet render context with actor reference
-   * @param {Event} event - DOM event (must have shiftKey = true to execute)
+   * @param {Event} event - DOM event (shiftKey determines roll vs adjust behavior)
    * @param {HTMLElement} element - Target element with data-trait attribute
    * @param {number} delta - Direction of adjustment: positive = increase, negative = decrease
    * @returns {Promise<void>}
@@ -128,14 +137,16 @@ export class PcTraitHandler {
     event?.preventDefault?.();
     event?.stopPropagation?.();
 
-    // Safety mechanism: require Shift key to prevent accidental trait changes
-    if (!event?.shiftKey) return;
-
     // Validate trait key from element dataset
     const key = String(element?.dataset?.trait || "").toLowerCase();
     if (!this.TRAIT_KEYS.includes(key)) {
       console.warn(`${SYS_ID} PcTraitHandler: Invalid trait key`, { key });
       return;
+    }
+
+    // If shift key NOT pressed, perform trait roll instead of adjustment
+    if (!event?.shiftKey) {
+      return RollHandler.traitRoll(context, event, element);
     }
 
     // Read current base trait value (pending changes in _source take precedence)

@@ -114,7 +114,9 @@ export async function SkillRoll({
     tryKey && game.i18n?.has?.(tryKey)
       ? game.i18n.localize(tryKey)
       : String(skillName ?? game.i18n.localize("l5r4.ui.common.skill"));
-  let label = `${game.i18n.localize("l5r4.ui.mechanics.rolls.skillRoll")}: ${skillLabel} / ${game.i18n.localize(traitI18nKey)}`;
+  let label = `${game.i18n.localize(
+    "l5r4.ui.mechanics.rolls.skillRoll"
+  )}: ${skillLabel} / ${game.i18n.localize(traitI18nKey)}`;
 
   let emphasis = false;
   let rollMod = 0;
@@ -187,7 +189,9 @@ export async function SkillRoll({
     baseLabel += ` (${game.i18n.localize("l5r4.ui.mechanics.rolls.emphasis")})`;
   }
   if (rollMod || keepMod || totalMod) {
-    baseLabel += ` ${game.i18n.localize("l5r4.ui.common.mod")} (${rollMod}k${keepMod}${totalMod < 0 ? totalMod : "+" + totalMod})`;
+    baseLabel += ` ${game.i18n.localize("l5r4.ui.common.mod")} (${rollMod}k${keepMod}${
+      totalMod < 0 ? totalMod : "+" + totalMod
+    })`;
   }
 
   const roll = new Roll(rollFormula);

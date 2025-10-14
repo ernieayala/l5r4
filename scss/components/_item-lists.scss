@@ -1,3 +1,8 @@
+/**
+ * Item Lists
+ * Grid layouts and styling for item lists in actor sheets
+ */
+
 .l5r4.pc,
 .l5r4.npc,
 .xp-modal-dialog {
@@ -44,6 +49,7 @@
       }
     }
 
+    /* stylelint-disable-next-line selector-class-pattern -- Legacy class name */
     &.-commonItem {
       .item {
         grid-template-columns: 1fr 24px;
@@ -122,20 +128,18 @@
     grid-template-rows: min-content min-content;
     padding: 0 0.5rem;
 
-    &:hover .inline-control,
-    &:hover .clear-btn {
-      opacity: 1;
-      pointer-events: all;
-    }
-
     &.-bio {
       background: var(--table-header-bg-color);
     }
 
     &.-expandable {
-      .inline-control {
+      &:hover .inline-control {
         opacity: 1;
         pointer-events: all;
+      }
+
+      .inline-control {
+        opacity: 0;
       }
     }
 
@@ -161,16 +165,16 @@
 
       a[data-action="item-chat"] {
         color: inherit;
-        text-decoration: none;
         cursor: var(--conditional-cursor);
+        text-decoration: none;
         text-shadow: none;
       }
     }
 
     .inline-control {
       opacity: 0;
-      transition: opacity 250ms ease-out;
       pointer-events: none;
+      transition: opacity 250ms ease-out;
 
       &:hover {
         filter: brightness(1.2);

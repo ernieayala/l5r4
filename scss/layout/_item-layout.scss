@@ -1,3 +1,8 @@
+/**
+ * Item Layout
+ * Layouts for item sheets
+ */
+
 .l5r4.item {
   .window-content {
     gap: 0.5rem;
@@ -17,22 +22,6 @@
 
     &.prose-title {
       margin-block-end: 0;
-    }
-  }
-
-  .button {
-    transition: all 150ms ease-out;
-    cursor: pointer;
-    display: inline-flex;
-
-    &:hover {
-      opacity: 1;
-      filter: brightness(1.15);
-    }
-
-    &:active {
-      transform: scale(0.98);
-      filter: brightness(0.95);
     }
   }
 

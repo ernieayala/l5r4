@@ -1,5 +1,5 @@
 {
-  "name": "l5r4",
+  "name": "l5r4-enhanced",
   "version": "2.0.0",
   "description": "Legend of the Five Rings 4e Enhanced system for Foundry VTT",
   "author": "Ernie Ayala",
@@ -19,6 +19,8 @@
     "dev": "npm run watch:css",
     "format": "prettier --write \"**/*.{js,css,scss,json,md}\"",
     "format:check": "prettier --check \"**/*.{js,css,scss,json,md}\"",
+    "lint:css": "stylelint \"scss/**/*.scss\"",
+    "lint:css:fix": "stylelint \"scss/**/*.scss\" --fix",
     "version:patch": "npm version patch --no-git-tag-version",
     "version:minor": "npm version minor --no-git-tag-version",
     "version:major": "npm version major --no-git-tag-version",
@@ -40,6 +42,9 @@
     "madge": "8.0.0",
     "prettier": "3.1.0",
     "sass": "1.69.5",
+    "stylelint": "^16.25.0",
+    "stylelint-config-standard-scss": "^16.0.0",
+    "stylelint-order": "^6.0.4",
     "vitest": "1.0.0"
   }
 }

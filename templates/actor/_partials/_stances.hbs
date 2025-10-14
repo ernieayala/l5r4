@@ -7,8 +7,8 @@
     <div class="flexrow">
       <select data-action="change-stance">
         {{#each config.stances as |label id|}}
-          <option value="{{id}}" {{#if (eq ../currentStance id)}}selected{{/if}} {{#if (and (eq id "fullAttackStance") ../mountedStatus.isMounted (not ../mountedStatus.canFullAttack))}}disabled{{/if}}>
-            {{localize label}}{{#if (and (eq id "fullAttackStance") ../mountedStatus.isMounted (not ../mountedStatus.canFullAttack))}} ({{localize "l5r4.ui.mechanics.mounted.fullAttackRestriction"}}){{/if}}
+          <option value="{{id}}" {{#if (eq ../currentStance id)}}selected{{/if}}>
+            {{localize label}}
           </option>
         {{/each}}
       </select>

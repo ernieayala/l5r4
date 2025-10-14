@@ -146,7 +146,7 @@ export async function handleItemPreUpdate(item, changes) {
  * @returns {boolean} True if skill is or will be a school skill, false otherwise
  */
 function isSchoolSkill(item, changes) {
-  return (changes?.system?.school ?? item.system?.school) ? true : false;
+  return changes?.system?.school ?? item.system?.school ? true : false;
 }
 
 /**

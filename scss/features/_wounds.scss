@@ -1,19 +1,23 @@
+/**
+ * Wounds
+ * Wound tracking grid for character sheets and wound config modal
+ */
+
 .l5r4.pc,
 .l5r4.npc,
 .wound-config-app {
   .grid .wound-grid {
     border-block-end: none;
     display: grid;
-    grid-column-end: 3;
-    grid-column-start: 1;
+    grid-column: 1 / 3;
     grid-template-columns: 1fr min-content min-content min-content;
     padding: 0;
 
     > span {
       align-items: center;
       background: var(--table-header-bg-color);
-      border-inline-end: none;
       border-block-end: 1px solid var(--table-header-border-color);
+      border-inline-end: none;
       display: inline-flex;
       font-family: var(--font-h4);
       font-size: var(--font-size-16);

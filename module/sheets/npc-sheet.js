@@ -374,7 +374,7 @@ export default class L5R4NpcSheet extends BaseActorSheet {
                 ? `l5r4.ui.mechanics.traits.${raw}`
                 : "";
           const loc = key ? game.i18n?.localize?.(key) : "";
-          return String(loc && loc !== key ? loc : (it?.system?.trait ?? ""));
+          return String(loc && loc !== key ? loc : it?.system?.trait ?? "");
         },
         roll: it => Number(it?.system?.rollDice ?? it?.system?.rank ?? 0) || 0,
         emphasis: it => String(it?.system?.emphasis ?? "")

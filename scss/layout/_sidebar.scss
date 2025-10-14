@@ -1,0 +1,22 @@
+/**
+ * Sidebar Layout
+ * Actor sheet sidebar component (actor image and compact sections)
+ */
+
+.l5r4.pc,
+.l5r4.npc {
+  .actor-img {
+    align-items: center;
+    display: flex;
+    height: 240px;
+    justify-content: center;
+    max-width: 240px;
+    min-width: 240px;
+    width: 240px;
+
+    img {
+      max-height: 100%;
+      max-width: 100%;
+    }
+  }
+}

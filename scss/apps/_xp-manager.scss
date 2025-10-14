@@ -1,3 +1,8 @@
+/**
+ * XP Manager Modal
+ * Modal dialog for managing character experience points
+ */
+
 .xp-modal-dialog {
   .window-content {
     overflow-y: auto;
@@ -10,8 +15,8 @@
 
   .xp-breakdown-list {
     list-style: none;
-    padding: 0;
     margin: 0;
+    padding: 0;
 
     li {
       border-block-end: 1px solid var(--color-border);

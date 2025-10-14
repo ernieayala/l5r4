@@ -286,10 +286,18 @@ export class RollHandler {
 
     const isUntrained = weaponSkill.skillRank === 0;
 
-    const rollName = `${context.actor.name}: ${weapon.name} ${game.i18n.localize("l5r4.ui.mechanics.rolls.attackRoll")}`;
+    const rollName = `${context.actor.name}: ${weapon.name} ${game.i18n.localize(
+      "l5r4.ui.mechanics.rolls.attackRoll"
+    )}`;
     const description =
       `${weaponSkill.description}` +
-      `${stanceBonuses.roll > 0 || stanceBonuses.keep > 0 ? ` (${game.i18n.localize("l5r4.ui.mechanics.stances.fullAttack")}: +${stanceBonuses.roll}k${stanceBonuses.keep})` : ""}` +
+      `${
+        stanceBonuses.roll > 0 || stanceBonuses.keep > 0
+          ? ` (${game.i18n.localize("l5r4.ui.mechanics.stances.fullAttack")}: +${
+              stanceBonuses.roll
+            }k${stanceBonuses.keep})`
+          : ""
+      }` +
       `${isUntrained ? ` (${game.i18n.localize("l5r4.ui.mechanics.rolls.unskilled")})` : ""}`;
 
     return SimpleRoll({

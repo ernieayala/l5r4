@@ -1,8 +1,7 @@
-body {
-  > * {
-    scrollbar-width: thin;
-  }
-}
+/**
+ * Utility Classes
+ * Reusable single-purpose utility classes for spacing and layout
+ */
 
 .-gap-xs {
   gap: 0.125rem;
