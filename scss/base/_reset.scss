@@ -1,0 +1,10 @@
+/**
+ * Base Reset
+ * System-specific browser resets and base element styling
+ */
+
+body {
+  > * {
+    scrollbar-width: thin;
+  }
+}

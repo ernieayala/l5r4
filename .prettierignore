@@ -1,0 +1,22 @@
+# Build outputs
+dist/
+node_modules/
+
+# Dependencies
+package-lock.json
+
+# System files
+*.log
+.DS_Store
+
+# Foundry specific
+packs/
+
+# Test coverage
+coverage/
+
+# Handlebars templates
+# Prettier's Glimmer parser doesn't support:
+# - Dynamic partials with concat helper
+# - Handlebars blocks inside HTML attributes
+*.hbs

@@ -1,0 +1,50 @@
+/**
+ * Item Layout
+ * Layouts for item sheets
+ */
+
+.l5r4.item {
+  .window-content {
+    gap: 0.5rem;
+    overflow: auto;
+  }
+
+  .header-fields > h1 {
+    margin: 0;
+
+    input {
+      height: auto;
+    }
+  }
+
+  .sheet-content > h4 {
+    margin: 1rem 0 0.5rem;
+
+    &.prose-title {
+      margin-block-end: 0;
+    }
+  }
+
+  // Prose Editor
+  .editor {
+    min-height: 200px;
+  }
+
+  prose-mirror {
+    border-block-end: var(--sidebar-separator);
+  }
+
+  // Active Effects
+  .effects-list {
+    margin: 0;
+    padding: 0;
+
+    .effect {
+      margin-block-start: 0.5rem;
+    }
+  }
+
+  .effect-controls {
+    flex-wrap: nowrap;
+  }
+}

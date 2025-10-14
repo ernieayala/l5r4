@@ -39,6 +39,7 @@
           "emphasis": "Emphasis",
           "raise": "Raise",
           "raises": "Raises",
+          "automatic": "Automatic",
           "formula": "Formula",
           "result": "Result"
         },
@@ -47,7 +48,8 @@
           "itemDeleted": "Deleted {type}: {name}",
           "itemUpdated": "Updated {type}: {name}",
           "woundConfigFailed": "Failed to open wound configuration",
-          "woundConfigUpdateFailed": "Failed to update wound configuration"
+          "woundConfigUpdateFailed": "Failed to update wound configuration",
+          "invalidWoundConfigValue": "Invalid wound configuration value"
         },
         "combat": {
           "attack": "Attack",
@@ -99,6 +101,10 @@
           "cannotAttackDefense": "Cannot attack while in Defense Stance",
           "fullAttackBonus": "Full Attack Stance: +2k1"
         },
+        "mounted": {
+          "fullAttackRestriction": "Full Attack stance requires Horsemanship 3+ when mounted",
+          "attackBonus": "Mounted/Higher: +1k0"
+        },
         "fear": {
           "fearRank": "Fear Rank",
           "fearLabel": "Fear {rank}",
@@ -111,7 +117,9 @@
           "noTargets": "No tokens selected for Fear test",
           "noWillpower": "{character} has no Willpower trait",
           "noFear": "This NPC has no Fear effect configured",
-          "testAgainst": "vs {creature}"
+          "testAgainst": "vs {creature}",
+          "rollFailed": "Fear test roll failed - invalid formula or corrupted data",
+          "templateFailed": "Fear test chat template failed to render"
         }
       },
       "common": {
@@ -232,7 +240,8 @@
         "leftRightToAdjust": "Left and Right to Adjust",
         "leftClickPlusRightClickMinus": "Shift+Left click: +1, Shift+Right click: -1",
         "voidPointsClickAdjust": "Left click: +1, Right click: -1",
-        "shiftClickRankPoints": "Shift+Click: ±0.1, Shift+Ctrl+Click: ±1.0"
+        "shiftClickRankPoints": "Shift+Click: ±0.1, Shift+Ctrl+Click: ±1.0",
+        "shiftClickToChat": "Shift+Click to post to chat"
       }
     },
     "character": {
@@ -317,6 +326,10 @@
         "shadowPoints": "Shadow Points",
         "insightRank": "Insight Rank",
         "insightPoints": "Insight Points"
+      },
+      "stance": {
+        "title": "Combat Stance",
+        "current": "Current Stance"
       },
       "experience": {
         "xpAmount": "Amount",
@@ -451,10 +464,6 @@
     "allowNpcVoidPoints": {
       "name": "Display Void Point checkbox for NPC rolls.",
       "label": "NPCs normally lack Void."
-    },
-    "useLtTenDiceRule": {
-      "name": "Use the modified Ten Dice Rule from Little Truths.",
-      "label": "If there are an odd number of excess rolled dice and fewer than 10 kept dice, add 2 to the roll total so the \"extra\" die gives a benefit."
     },
     "calculateRank": {
       "name": "Calculate Insight Rank automatically",

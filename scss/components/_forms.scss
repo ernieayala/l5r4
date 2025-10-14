@@ -1,0 +1,53 @@
+/**
+ * Form Controls
+ * Styling for input, select, and textarea elements
+ */
+
+.l5r4.pc,
+.l5r4.npc {
+  input,
+  select,
+  textarea {
+    border: none;
+    box-shadow: none;
+    margin: 0;
+    resize: none;
+  }
+
+  .input-placeholder {
+    align-items: center;
+    color: var(--color-text-dark-primary);
+    display: inline-flex;
+    font-family: inherit;
+    font-size: inherit;
+    height: var(--input-height);
+    line-height: var(--input-height);
+    margin: 0;
+    min-width: 20px;
+    padding: 0 0.5rem;
+    text-align: inherit;
+    user-select: text;
+    width: calc(100% - 2px);
+  }
+
+  .info-group {
+    flex-wrap: nowrap;
+
+    &:hover .inline-control,
+    &:hover .clear-btn {
+      opacity: 1;
+      pointer-events: all;
+    }
+  }
+
+  .clear-btn {
+    align-items: center;
+    display: inline-flex;
+    height: var(--form-field-height);
+    justify-content: center;
+    min-width: 20px;
+    opacity: 0;
+    pointer-events: none;
+    transition: opacity 250ms ease-out;
+  }
+}

@@ -1,0 +1,43 @@
+/**
+ * Ranks
+ * Honor, Glory, Status, and Shadow/Taint rank displays
+ * Note: Animation styles are in components/_animations.scss
+ */
+
+.l5r4.pc,
+.l5r4.npc {
+  .ranks {
+    display: grid;
+    gap: 0.2rem;
+    grid-template-columns: 1fr 1fr;
+    grid-template-rows: 1fr 1fr;
+  }
+
+  .rank-name {
+    background: var(--table-header-bg-color);
+    border: 1px solid var(--table-header-border-color);
+    color: var(--table-header-text-color);
+    cursor: pointer;
+    display: flex;
+    font-size: var(--font-size-16);
+    line-height: 1;
+    padding: 0.25rem 0;
+    text-align: center;
+    transition: all 150ms ease-out;
+
+    &:hover {
+      filter: brightness(1.1);
+    }
+
+    &:active {
+      filter: brightness(0.95);
+      transform: scale(0.98);
+    }
+
+    span:first-child {
+      font-family: var(--font-h4);
+      font-size: var(--font-size-18);
+      font-weight: 600;
+    }
+  }
+}

@@ -1,0 +1,23 @@
+/**
+ * Base Variables
+ * CSS custom properties and SCSS variables used throughout the system
+ */
+
+// CSS Custom Properties (Ring Colors)
+:root {
+  --air-ring-color: 136, 158, 179; // #889EB3
+  --water-ring-color: 64, 89, 132; // #405984
+  --earth-ring-color: 89, 72, 57; // #594839
+  --fire-ring-color: 171, 73, 19; // #AB4913
+  --void-ring-color: 125, 104, 98; // #7D6862
+}
+
+// SCSS Variables (Asset Paths)
+$air-ring-img: url("../assets/icons/air.webp");
+$water-ring-img: url("../assets/icons/water.webp");
+$earth-ring-img: url("../assets/icons/earth.webp");
+$fire-ring-img: url("../assets/icons/fire.webp");
+$void-ring-img: url("../assets/icons/void.webp");
+
+// Animation Timing
+$mask-animation-duration: 0.5s;

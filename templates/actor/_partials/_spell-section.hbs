@@ -4,7 +4,7 @@
     <div class="flexrow -gap-sm spells">
         <span>{{localize "l5r4.ui.sheets.spellSlots"}}:</span>
         <div class="slots">
-          <img src="{{iconPath 'water.png'}}" title="{{localize "l5r4.ui.mechanics.rings.water"}}" />
+          <img src="{{iconPath 'water.webp'}}" title="{{localize "l5r4.ui.mechanics.rings.water"}}" />
           <span
             data-action="spell-slot"
             data-path="system.spellSlots.water"
@@ -13,7 +13,7 @@
           </span>
         </div>
         <div class="slots">
-            <img src="{{iconPath 'air.png'}}" title="{{localize "l5r4.ui.mechanics.rings.air"}}" />
+            <img src="{{iconPath 'air.webp'}}" title="{{localize "l5r4.ui.mechanics.rings.air"}}" />
             <span
               data-action="spell-slot"
               data-path="system.spellSlots.air"
@@ -22,7 +22,7 @@
             </span>
         </div>
         <div class="slots">
-            <img src="{{iconPath 'fire.png'}}" title="{{localize "l5r4.ui.mechanics.rings.fire"}}" />
+            <img src="{{iconPath 'fire.webp'}}" title="{{localize "l5r4.ui.mechanics.rings.fire"}}" />
             <span
               data-action="spell-slot"
               data-path="system.spellSlots.fire"
@@ -31,7 +31,7 @@
             </span>
         </div>
         <div class="slots">
-            <img src="{{iconPath 'earth.png'}}" title="{{localize "l5r4.ui.mechanics.rings.earth"}}" />
+            <img src="{{iconPath 'earth.webp'}}" title="{{localize "l5r4.ui.mechanics.rings.earth"}}" />
             <span
               data-action="spell-slot"
               data-path="system.spellSlots.earth"
@@ -40,7 +40,7 @@
             </span>
         </div>
         <div class="slots">
-            <img src="{{iconPath 'void.png'}}" title="{{localize "l5r4.ui.mechanics.rings.void"}}" />
+            <img src="{{iconPath 'void.webp'}}" title="{{localize "l5r4.ui.mechanics.rings.void"}}" />
             <span
               data-action="spell-slot"
               data-path="system.spellSlots.void"
@@ -49,8 +49,8 @@
             </span>
         </div>
     </div>
-    {{> "systems/l5r4/templates/actor/_partials/_unified-item-create.hbs"}}
-    {{> "systems/l5r4/templates/actor/_partials/_expand.hbs"}}
+    {{> "systems/l5r4-enhanced/templates/actor/_partials/_unified-item-create.hbs"}}
+    {{> "systems/l5r4-enhanced/templates/actor/_partials/_expand.hbs"}}
   </div>
   <section class="item-list -spell -header" data-scope="spells">
     <div class="item">
@@ -65,7 +65,7 @@
   </section>
   <section class="item-list -spell">
     {{#each spells as |spell id|}}
-      {{> "systems/l5r4/templates/cards/spell.hbs" system=spell.system inSheet=true docId=spell.id}}
+      {{> "systems/l5r4-enhanced/templates/cards/spell.hbs" system=spell.system inSheet=true docId=spell.id}}
     {{/each}}
   </section>
 </section>

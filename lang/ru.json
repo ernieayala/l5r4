@@ -39,8 +39,17 @@
           "emphasis": "Акцент",
           "raise": "Повышение",
           "raises": "Повышения",
+          "automatic": "Automatic",
           "formula": "Формула",
           "result": "Результат"
+        },
+        "notifications": {
+          "itemCreated": "Created {type}: {name}",
+          "itemDeleted": "Deleted {type}: {name}",
+          "itemUpdated": "Updated {type}: {name}",
+          "woundConfigFailed": "Failed to open wound configuration",
+          "woundConfigUpdateFailed": "Failed to update wound configuration",
+          "invalidWoundConfigValue": "Invalid wound configuration value"
         },
         "combat": {
           "attack": "Атака",
@@ -65,6 +74,13 @@
           "penalty": "Штраф",
           "woundHealRate": "Скорость Исцеления Ран",
           "healRateFormula": "x 2 +",
+          "woundMode": "Wound Mode",
+          "manual": "Manual",
+          "formula": "Formula",
+          "woundConfiguration": "Wound Configuration",
+          "earthMultiplier": "Earth Multiplier",
+          "woundBonus": "Wound Bonus",
+          "threshold": "Threshold",
           "healthy": "Здоров",
           "nicked": "Царапина",
           "grazed": "Едва Задет",
@@ -84,6 +100,26 @@
           "fullDefenseDescription": "Сделайте бросок Защиты/Рефлексов. Добавьте половину результата (округляя вверх) к вашему TN Брони на время этой стойки.",
           "cannotAttackDefense": "Нельзя атаковать в Стойке Обороны",
           "fullAttackBonus": "Стойка Полной Атаки: +2k1"
+        },
+        "mounted": {
+          "fullAttackRestriction": "Full Attack stance requires Horsemanship 3+ when mounted",
+          "attackBonus": "Mounted/Higher: +1k0"
+        },
+        "fear": {
+          "fearRank": "Fear Rank",
+          "fearLabel": "Fear {rank}",
+          "clickToTest": "Click to test Fear against selected characters",
+          "testResult": "Fear {rank} Test",
+          "testSuccess": "Resisted Fear {rank}",
+          "testFailure": "Failed Fear {rank} Test",
+          "penaltyApplied": "Penalty: -{penalty}kO to all rolls",
+          "catastrophicFailure": "CATASTROPHIC FAILURE! Character flees or cowers helplessly.",
+          "noTargets": "No tokens selected for Fear test",
+          "noWillpower": "{character} has no Willpower trait",
+          "noFear": "This NPC has no Fear effect configured",
+          "testAgainst": "vs {creature}",
+          "rollFailed": "Fear test roll failed - invalid formula or corrupted data",
+          "templateFailed": "Fear test chat template failed to render"
         }
       },
       "common": {
@@ -114,6 +150,7 @@
         "description": "Описание",
         "notes": "Заметки",
         "activeEffects": "Активные Эффекты",
+        "active": "Active",
         "new": "Новый",
         "disabled": "отключено",
         "rank": "Ранг",
@@ -190,9 +227,7 @@
         "chatMessageFailed": "Не удалось опубликовать бросок в чате - см. консоль для подробностей",
         "deleteEffect": "Не удалось удалить эффект.",
         "schoolRankZero": "Нельзя колдовать при Ранге Школы, сниженном до нуля",
-        "noSpellSlots": "У вас закончились ячейки заклинаний для этого кольца",
-        "woundConfigFailed": "Не удалось открыть конфигурацию ран",
-        "woundConfigUpdateFailed": "Не удалось обновить конфигурацию ран"
+        "noSpellSlots": "У вас закончились ячейки заклинаний для этого кольца"
       },
       "chat": {
         "traitRoll": "Бросок Характеристики {trait}",
@@ -291,6 +326,10 @@
         "insightRank": "Ранг Понимания",
         "insightPoints": "Очки Понимания"
       },
+      "stance": {
+        "title": "Combat Stance",
+        "current": "Current Stance"
+      },
       "experience": {
         "xpAmount": "Сумма",
         "note": "Примечание",
@@ -307,6 +346,9 @@
         "voidChange": "Пустота {from}→{to}",
         "skillCreate": "{name} 0→{rank}",
         "skillChange": "{name} {from}→{to}",
+        "recalculateTooltip": "Recalculate XP purchases from current character state",
+        "recalculateSuccess": "XP purchases recalculated successfully",
+        "recalculateFailed": "Failed to recalculate XP purchases",
         "breakdown": {
           "base": "База",
           "disadvantagesGrant": "Недостатки",
@@ -421,10 +463,6 @@
     "allowNpcVoidPoints": {
       "name": "Показывать чекбокс Очков Пустоты для бросков НИП.",
       "label": "НИП обычно не имеют Пустоты."
-    },
-    "useLtTenDiceRule": {
-      "name": "Использовать модифицированное Правило Десяти Костей из Little Truths.",
-      "label": "Если количество избыточно брошенных костей нечетно и удерживается меньше 10, добавьте 2 к результату, чтобы \"лишняя\" кость дала пользу."
     },
     "calculateRank": {
       "name": "Автоматически рассчитывать Ранг Понимания",
