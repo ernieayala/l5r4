@@ -1,211 +1,164 @@
 /**
- * @fileoverview L5R4 Roll Parser - Roll Notation Parsing Utilities
+ * L5R4 Roll Notation Parser
  * 
- * Pure utility functions for parsing L5R4 roll notation strings into
- * normalized dice pool components. Supports compact roll notation with
- * special flags and applies Ten Dice Rule automatically.
+ * Parses Legend of the Five Rings 4th Edition dice notation strings into structured
+ * roll configuration objects. Supports the Roll & Keep system with modifiers for
+ * unskilled rolls, emphasis, exploding bonuses, and flat bonuses.
  * 
- * **Supported Formats:**
- * - Basic: "6k3" (6 dice, keep 3)
- * - With exploding: "6k3x10" (explode on 10s)
- * - With bonus: "6k3x10+4" (flat +4 bonus)
- * - With flags: "6k3x10+4u" (unskilled), "6k3x10+4e" (emphasis)
+ * Supported Notation Formats:
+ * - Basic: "XkY" (roll X dice, keep Y highest)
+ * - With bonus: "XkY+Z" (roll X dice, keep Y, add flat bonus Z)
+ * - With explode bonus: "XkYxZ" (keep Y, then add Z dice that auto-explode)
+ * - Unskilled: "uXkY" (prefix u - dice don't explode per Unskilled Roll rules)
+ * - Emphasis: "eXkY" (prefix e - re-roll 1s per Skill Emphasis rules)
+ * - Combined: "e7k3x2+5" (emphasis, 7 roll 3 keep, 2 explode bonus, +5 flat)
  * 
- * **Special Flags:**
- * - "u": Unskilled roll (no exploding dice)
- * - "e": Emphasis (reroll 1s)
+ * Game Mechanics Integration:
+ * - Enforces Ten Dice Rule via TenDiceRule when bonuses are non-negative
+ * - Preserves unskilled/emphasis flags for formula-builder consumption
+ * - Supports explode bonus notation for custom roll modifiers
  * 
- * **L5R4 Dice Mechanics:**
- * - Rises: When dice pool exceeds 10, excess dice convert to rises
- * - Each 2 rises can convert back to 1 kept die (Ten Dice Rule)
- * - Unskilled: Rises are consumed without benefit
- * - Emphasis: More efficient rise-to-kept conversion
+ * Usage:
+ * This parser is invoked by the chat service when users type roll commands like
+ * [[7k3+5]] in chat. The parsed result is passed to buildFormula for conversion
+ * to Foundry Roll API syntax.
  * 
- * @author L5R4 System Team
- * @since 1.0.0
- * @see {@link https://foundryvtt.com/api/} Foundry VTT API
+ * Responsibilities:
+ * - Parse dice notation strings into structured data
+ * - Extract roll/keep values, bonuses, and modifiers
+ * - Apply Ten Dice Rule for valid positive bonus scenarios
+ * - Preserve game mechanic flags (unskilled, emphasis)
+ * 
+ * Related Files:
+ * - ten-dice-rule.js: Enforces max 10 dice rolled/kept per L5R4 rules
+ * - formula-builder.js: Converts parsed data to Foundry Roll formulas
+ * - chat.js: Invokes parser when detecting inline roll notation
  */
 
 import { TenDiceRule } from "./ten-dice-rule.js";
 
 /**
- * @typedef {Object} ParsedRoll
- * @property {number} dice_count - Total dice to roll
- * @property {number} kept - Number of dice to keep
- * @property {number} explode_bonus - Exploding dice threshold
- * @property {number} bonus - Flat bonus to add
- * @property {boolean} unskilled - Whether this is an unskilled roll
- * @property {boolean} emphasis - Whether emphasis applies (reroll 1s)
+ * Parsed roll configuration containing all components of an L5R4 dice roll
+ * @typedef {Object} RollConfig
+ * @property {number|string} dice_count - Number of d10 dice to roll (1-10 after TenDiceRule)
+ * @property {number|string} kept - Number of dice to keep (1-10 after TenDiceRule)
+ * @property {number|string|undefined} explode_bonus - Additional dice that auto-explode (optional)
+ * @property {number} bonus - Flat bonus to add to roll total (can be negative)
+ * @property {boolean} unskilled - If true, dice don't explode (Unskilled Roll penalty)
+ * @property {boolean} emphasis - If true, re-roll 1s (Skill Emphasis mechanic)
  */
 
 /**
- * Parse L5R4 roll notation strings into normalized dice pool components.
- * Supports compact roll notation with special flags and applies Ten Dice Rule.
+ * Parses L5R4 roll notation string into structured roll configuration
  * 
- * **Supported Formats:**
- * - Basic: "6k3" (6 dice, keep 3)
- * - With exploding: "6k3x10" (explode on 10s)
- * - With bonus: "6k3x10+4" (flat +4 bonus)
- * - With flags: "6k3x10+4u" (unskilled), "6k3x10+4e" (emphasis)
+ * Accepts various formats of Roll & Keep notation and extracts all components:
+ * dice to roll, dice to keep, modifiers (unskilled/emphasis), exploding bonus
+ * dice, and flat bonuses. Applies the Ten Dice Rule when appropriate.
  * 
- * **Special Flags:**
- * - "u": Unskilled roll (no exploding dice)
- * - "e": Emphasis (reroll 1s)
+ * Valid Input Formats:
+ * - "7k3" → Roll 7 dice, keep 3 highest
+ * - "7k3+5" → Roll 7, keep 3, add +5 bonus
+ * - "7k3x2" → Roll 7, keep 3, add 2 auto-exploding dice
+ * - "7k3x2+5" → Combined explode bonus and flat bonus
+ * - "u3k3" → Unskilled roll (no exploding per game rules)
+ * - "e7k3+2" → Emphasis (re-roll 1s per Skill Emphasis)
  * 
- * @param {string} roll - Roll notation string to parse
- * @returns {ParsedRoll} Parsed roll components
+ * Ten Dice Rule Application:
+ * For non-negative bonuses, automatically applies Ten Dice Rule which caps rolled
+ * and kept dice at 10, converting excess into flat bonuses. For negative bonuses,
+ * skips Ten Dice Rule to preserve the penalty effect.
  * 
- * @example
- * roll_parser("6k3x10+4"); // { dice_count: 6, kept: 3, explode_bonus: 10, bonus: 4, unskilled: false, emphasis: false }
- * 
- * @example
- * roll_parser("15k12x10+0"); // Applies TenDiceRule automatically
- * 
- * @throws {TypeError} If roll parameter is not a string
- * @note Negative bonuses bypass Ten Dice Rule application
- * @note Flags 'u' and 'e' are mutually exclusive; 'u' takes precedence
+ * @param {string} roll - Dice notation string to parse (e.g., "7k3+5", "e7k3x2")
+ * @returns {RollConfig} Parsed roll configuration object
  */
 export function roll_parser(roll) {
   let unskilled = false;
   let emphasis = false;
 
-  // Extract flags first (u=unskilled, e=emphasis) - they're mutually exclusive
+  // Extract modifier prefix - only one allowed (unskilled OR emphasis, not both)
   if (roll.includes("u")) { roll = roll.replace("u", ""); unskilled = true; }
   else if (roll.includes("e")) { roll = roll.replace("e", ""); emphasis = true; }
 
-  // Split on 'k' to get dice count and the keep/bonus portion
+  // Split on 'k' to separate rolled dice from kept dice and any modifiers
+  // Format: "XkY..." where X=rolled, Y...=kept plus optional modifiers
   const parts = roll.split('k');
   const dice_count = parseIntIfPossible(parts[0]);
-  const keptPortion = parts[1] || '';
+  const keptPortion = parts[1] || ''; // Everything after 'k': kept, explode bonus, flat bonus
 
-  // Parse the keep/explode/bonus portion: format is "K[xE][+B]" where K=kept, E=explode, B=bonus
   let kept, explode_bonus, bonus;
-  
-  // Split on 'x' to separate kept from explode+bonus
+
+  // Parse keptPortion which can contain 'x' notation and '+' bonuses
+  // Possible formats: "3", "3+5", "3x2", "3x2+5"
   const xParts = keptPortion.split('x');
   kept = parseIntIfPossible(xParts[0]);
-  
+
   if (xParts.length > 1) {
-    // Has explode modifier: parse "10+4" or "10" or "10+-4"
+    // Format: "3x2+5" → xParts = ["3", "2+5"]
     const explodePortion = xParts[1];
     const plusParts = explodePortion.split('+');
     explode_bonus = parseIntIfPossible(plusParts[0]);
-    
-    if (plusParts.length > 1) {
-      // Has bonus after explode - sum multiple bonus parts
-      bonus = plusParts.slice(1)
-        .map(part => parseIntIfPossible(part))
-        .reduce((sum, val) => sum + (val || 0), 0);
-    } else {
-      bonus = 0;
-    }
+    bonus = sumBonusParts(plusParts);
   } else {
-    // No explode modifier, check for bonus only: "3+4" or "3"
+    // Format: "3+5" → xParts = ["3+5"]
     const plusParts = xParts[0].split('+');
     if (plusParts.length > 1) {
       kept = parseIntIfPossible(plusParts[0]);
-      // Sum multiple bonus parts
-      bonus = plusParts.slice(1)
-        .map(part => parseIntIfPossible(part))
-        .reduce((sum, val) => sum + (val || 0), 0);
-    } else {
-      bonus = 0;
     }
+    bonus = sumBonusParts(plusParts);
   }
 
-  if (!bonus) bonus = 0;
-
-  const u_modifiers = { kept, rises: 0, bonus };
-  const e_modifiers = { kept, rises: 0, bonus };
-  const { kept: new_kept, rises } = unskilled ? unskilledModifiers(u_modifiers) : emphasisModifiers(e_modifiers);
-
   let result;
+  // Negative bonuses skip Ten Dice Rule to preserve penalty effect
+  // Positive bonuses apply Ten Dice Rule which may convert excess dice to bonuses
   if (bonus < 0) {
-    result = { dice_count, kept: new_kept, explode_bonus, bonus, unskilled };
+    result = { dice_count, kept, explode_bonus, bonus, unskilled, emphasis };
   } else {
-    const tenDiceResult = TenDiceRule(dice_count, new_kept, calculate_bonus({ rises, bonus }));
+    const tenDiceResult = TenDiceRule(dice_count, kept, bonus);
     result = {
       dice_count: tenDiceResult.diceRoll,
       kept: tenDiceResult.diceKeep,
       explode_bonus,
       bonus: tenDiceResult.bonus,
-      unskilled
+      unskilled,
+      emphasis
     };
   }
 
-  result.explode_bonus = explode_bonus;
-  result.emphasis = emphasis;
   return result;
 }
 
 /**
- * Parse string to integer if possible, preserving non-numeric values.
+ * Sums all bonus parts from a split array, skipping the first element
  * 
- * @param {*} x - Value to parse
- * @returns {number|*} Parsed integer or original value
- * @internal Exported for testing purposes only
+ * Used internally to calculate total flat bonuses when parsing notation like
+ * "7k3+5+2" which splits into ["7k3", "5", "2"]. Sums indices 1 onward.
+ * Handles non-numeric values gracefully by treating them as 0.
+ * 
+ * @param {string[]} parts - Array of string parts from split operation
+ * @returns {number} Sum of all parts after index 0, or 0 if only one part exists
  */
-export function parseIntIfPossible(x) {
+function sumBonusParts(parts) {
+  if (parts.length <= 1) return 0;
+  return parts.slice(1)
+    .map(part => parseIntIfPossible(part))
+    .reduce((sum, val) => sum + (val || 0), 0);
+}
+
+/**
+ * Safely parses a value to integer if it contains only digits
+ * 
+ * Returns the original value unchanged if it's not a valid numeric string.
+ * Handles negative numbers by checking for leading '-' sign. This prevents
+ * accidentally converting non-numeric strings to NaN or unexpected values.
+ * 
+ * @param {*} x - Value to parse (typically string or number)
+ * @returns {number|*} Parsed integer if valid numeric string, otherwise original value
+ */
+function parseIntIfPossible(x) {
   const s = x?.toString();
   if (!s) return x;
   const neg = s.startsWith('-');
   const digits = neg ? s.slice(1) : s;
   if (digits && [...digits].every(ch => ch >= '0' && ch <= '9')) return parseInt(s, 10);
   return x;
-}
-
-/**
- * Apply unskilled modifiers to roll (consumes rises without benefit).
- * For unskilled rolls, rises are consumed but provide no bonus to kept dice.
- * 
- * @param {object} roll - Roll modifiers object
- * @param {number} roll.kept - Kept dice count (passed through unchanged)
- * @param {number} roll.rises - Rise count (consumed without benefit)
- * @returns {{kept: number, rises: number}} Modified roll with rises consumed
- * @internal Exported for testing purposes only
- * @note Currently rises is always 0 in roll_parser, but function supports future use
- */
-export function unskilledModifiers(roll) {
-  const { kept } = roll;
-  let { rises } = roll;
-  while (rises) {
-    if (rises > 2) rises -= 3;
-    else if (rises > 1) rises -= 2;
-    else rises--;
-  }
-  return { kept, rises };
-}
-
-/**
- * Apply emphasis modifiers to roll (increases kept dice based on rises).
- * 
- * @param {object} roll - Roll modifiers object
- * @param {number} roll.kept - Kept dice count
- * @param {number} roll.rises - Rise count
- * @returns {{kept: number, rises: number}} Modified roll
- * @internal Exported for testing purposes only
- * @note Currently rises is always 0 in roll_parser, but function supports future use
- */
-export function emphasisModifiers(roll) {
-  let { kept } = roll; let { rises } = roll;
-  while (rises) {
-    if (rises > 2) { kept += 2; rises -= 3; }
-    else if (rises > 1) { kept++; rises -= 2; }
-    else break;
-  }
-  return { kept, rises };
-}
-
-/**
- * Calculate flat bonus from rises and base bonus.
- * Each rise adds +2 to the total bonus.
- * 
- * @param {object} params - Bonus calculation parameters
- * @param {number} params.rises - Rise count (each worth +2)
- * @param {number} params.bonus - Base bonus
- * @returns {number} Total bonus (base + rises * 2)
- * @internal Exported for testing purposes only
- */
-export function calculate_bonus({ rises, bonus } = {}) {
-  return bonus + rises * 2;
 }

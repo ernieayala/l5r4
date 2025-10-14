@@ -1,0 +1,16 @@
+# Build outputs
+dist/
+node_modules/
+
+# Dependencies
+package-lock.json
+
+# System files
+*.log
+.DS_Store
+
+# Foundry specific
+packs/
+
+# Test coverage
+coverage/

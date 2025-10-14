@@ -1,76 +1,44 @@
 /**
- * @fileoverview L5R4 XP Manager Application for Foundry VTT v13+
+ * XP Manager Application
  * 
- * This module provides a comprehensive experience point management interface for L5R4 characters,
- * built on Foundry's modern ApplicationV2 architecture. It replaces the legacy Dialog-based modal
- * with a more robust and maintainable solution while preserving the familiar user interface.
- *
- * **Core Responsibilities:**
- * - **XP Tracking**: Comprehensive experience point breakdown and history management
- * - **Manual Adjustments**: GM and player tools for XP modifications with audit trails
- * - **Purchase History**: Automatic reconstruction of XP expenditures from character data
- * - **Legacy Migration**: Retroactive data format updates for existing characters
- * - **Real-time Updates**: Live synchronization with character sheet changes
- *
- * **Key Features:**
- * - **Automatic XP Calculation**: Rebuilds XP history from traits, skills, void, and advantages
- * - **Manual Entry System**: Add/remove XP with notes and timestamps for record keeping
- * - **Type Categorization**: Organized display by expenditure type (traits, skills, advantages, etc.)
- * - **Legacy Data Support**: Handles migration from old XP tracking formats
- * - **Audit Trail**: Complete history of all XP changes with timestamps and descriptions
- *
- * **ApplicationV2 Architecture:**
- * - **HandlebarsApplicationMixin**: Modern template rendering with async context preparation
- * - **Form Integration**: Native form handling with action delegation system
- * - **Unique Identification**: Actor-specific window IDs prevent conflicts
- * - **Responsive Layout**: Resizable window with optimized dimensions
- * - **Event Delegation**: Clean action-based event handling system
- *
- * **XP Calculation System:**
- * The manager automatically reconstructs XP expenditures by analyzing:
- * - **Traits**: Cost calculated using L5R4 progression (4×rank) with family bonuses
- * - **Void Ring**: Separate progression (6×rank) with discount support
- * - **Skills**: Rank-based costs with school skill free rank handling
- * - **Emphases**: Fixed 2 XP cost with free emphasis support for school skills
- * - **Advantages**: Direct cost from item system data
- * - **Disadvantages**: Direct cost from item system data (displayed as negative XP)
- * - **Kata**: Direct cost from item system data
- * - **Kiho**: Direct cost from item system data
- *
- * **Data Migration Features:**
- * - **Retroactive Updates**: Rebuilds XP history from current character state
- * - **Legacy Format Support**: Handles old XP tracking data structures
- * - **Type Standardization**: Ensures consistent entry formatting and categorization
- * - **Timestamp Generation**: Creates logical timestamps for historical entries
- * - **Error Recovery**: Graceful handling of corrupted or missing XP data
- *
- * **Usage Examples:**
- * ```javascript
- * // Open XP manager for an actor
- * const xpManager = new XpManagerApplication(actor);
- * await xpManager.render(true);
+ * UI application for viewing and managing a character's Experience Points (XP) in the L5R4 system.
+ * Displays both manually-awarded XP entries and automatically-calculated XP expenditures from
+ * character advancement (traits, skills, advantages, disadvantages, kata, kiho).
  * 
- * // Add manual XP adjustment
- * await actor.setFlag('l5r4', 'xpManual', [...existing, {
- *   id: foundry.utils.randomID(),
- *   delta: 10,
- *   note: 'Session reward',
- *   ts: Date.now()
- * }]);
- * ```
- *
- * **Performance Considerations:**
- * - **Lazy Calculation**: XP history rebuilt only when manager opens
- * - **Efficient Updates**: Uses Foundry's flag system for minimal data changes
- * - **Template Caching**: Handlebars templates cached for fast rendering
- * - **Event Optimization**: Action delegation reduces event listener overhead
- *
- * @author L5R4 System Team
- * @since 2.0.0
- * @version 2.0.0
- * @see {@link https://foundryvtt.com/api/classes/foundry.applications.api.ApplicationV2.html|ApplicationV2}
- * @see {@link https://foundryvtt.com/api/classes/foundry.applications.api.HandlebarsApplicationMixin.html|HandlebarsApplicationMixin}
- * @see {@link https://foundryvtt.com/api/classes/foundry.abstract.Document.html#setFlag|Document.setFlag}
+ * L5R4 Game Rules Context:
+ * - Starting characters receive 40 XP for customization
+ * - Trait advancement costs 4 × new rank (e.g., Reflexes 2→3 = 12 XP)
+ * - Void advancement costs 6 × new rank (e.g., Void 2→3 = 18 XP)
+ * - Skill advancement costs next rank (e.g., Kenjutsu 2→3 = 3 XP)
+ * - New skills cost 1 XP to acquire at rank 1
+ * - Emphases cost 2 XP each
+ * - Advantages/Disadvantages have variable XP costs (disadvantages grant XP, max 10)
+ * - Kata and Kiho have variable XP costs based on their mastery level
+ * 
+ * XP Tracking System:
+ * - **Manual XP** (flags[SYS_ID].xpManual): GM-awarded XP gains (session rewards, story awards)
+ * - **Spent XP** (flags[SYS_ID].xpSpent): Auto-calculated from character's purchased abilities
+ * - **Versioning** (flags[SYS_ID].xpRetroactiveVersion): Content hash to detect when recalculation needed
+ * 
+ * Retroactive Recalculation:
+ * When traits, skills, or purchased items change, the system detects this via version hash
+ * comparison and rebuilds the entire XP expenditure history by reverse-engineering the
+ * character's current state. This ensures XP costs always reflect actual character progression.
+ * 
+ * Foundry VTT Integration:
+ * - Extends Application v2 (requires Foundry v13+)
+ * - Uses HandlebarsApplicationMixin for template rendering
+ * - Implements event delegation pattern (data-action attributes, _onAction handler registration)
+ * - Stores XP data in actor.flags[SYS_ID] for persistence
+ * - Integrates with xp-calculator service for spent XP computation
+ * - Integrates with xp-formatter service for display formatting and sorting
+ * - Integrates with xp-versioning service for change detection
+ * 
+ * @module apps/xp-manager
+ * @see {@link https://foundryvtt.com/api/v13/classes/foundry.applications.api.ApplicationV2.html|Application v2 Documentation}
+ * @see module:services/xp/xp-calculator for XP history reconstruction logic
+ * @see module:services/xp/xp-versioning for change detection mechanism
+ * @see module:services/xp/xp-formatter for entry formatting and sorting
  */
 
 import { SYS_ID } from "../config/constants.js";
@@ -80,28 +48,27 @@ import { formatXpEntries } from "../services/xp/xp-formatter.js";
 import { needsRetroactiveUpdate, calculateXpDataVersion } from "../services/xp/xp-versioning.js";
 
 /**
- * XP Manager Application using ApplicationV2 architecture.
- * Provides experience point management with breakdown, manual adjustments, and purchase history.
+ * XP Manager Application for L5R4 character XP tracking and management.
  * 
- * @class XpManagerApplication
- * @extends {HandlebarsApplicationMixin(ApplicationV2)}
- * @memberof module:apps
+ * Provides a modal dialog interface for viewing XP gains (manual entries), XP expenditures
+ * (automatically calculated from character advancement), and managing manual XP awards.
+ * Uses Foundry v13's Application v2 architecture with Handlebars template rendering.
+ * 
+ * The application displays two separate XP entry lists:
+ * 1. Manual entries - GM-awarded XP that can be added/deleted through this UI
+ * 2. Spent entries - Read-only list of XP costs from trait/skill/item purchases (auto-calculated)
+ * 
+ * User Actions:
+ * - Add manual XP entry (positive or negative amounts)
+ * - Delete manual XP entry
+ * - Sort spent entries by note, cost, or type
+ * - Trigger manual recalculation of spent XP history
+ * 
+ * @extends foundry.applications.api.ApplicationV2
+ * @mixes foundry.applications.api.HandlebarsApplicationMixin
  */
 export default class XpManagerApplication extends foundry.applications.api.HandlebarsApplicationMixin(foundry.applications.api.ApplicationV2) {
-  
-  /**
-   * Default ApplicationV2 configuration options.
-   * Defines window behavior, styling, dimensions, and action handlers.
-   * 
-   * @static
-   * @type {object}
-   * @property {string} id - Unique window identifier pattern using actor ID
-   * @property {string[]} classes - CSS classes applied to application element
-   * @property {string} tag - HTML tag for root element (form for native submission)
-   * @property {object} window - Window behavior configuration
-   * @property {object} position - Default window dimensions
-   * @property {object} actions - Map of action names to handler methods
-   */
+
   static DEFAULT_OPTIONS = {
     id: "xp-manager-{id}",
     classes: ["l5r4", "xp-modal-dialog"],
@@ -123,15 +90,6 @@ export default class XpManagerApplication extends foundry.applications.api.Handl
     }
   };
 
-  /**
-   * ApplicationV2 template parts configuration.
-   * Defines Handlebars templates used for rendering the application.
-   * 
-   * @static
-   * @type {object}
-   * @property {object} form - Main form template configuration
-   * @property {string} form.template - Path to Handlebars template file
-   */
   static PARTS = {
     form: {
       template: `systems/${SYS_ID}/templates/apps/xp-manager.hbs`
@@ -139,11 +97,10 @@ export default class XpManagerApplication extends foundry.applications.api.Handl
   };
 
   /**
-   * Creates a new XP Manager instance for the specified actor.
-   * Initializes ApplicationV2 with actor-specific window ID to prevent conflicts.
+   * Constructs the XP Manager application instance.
    * 
-   * @param {Actor} actor - The actor whose XP to manage
-   * @param {object} [options={}] - ApplicationV2 configuration overrides
+   * @param {Actor} actor - The L5R4 actor document whose XP will be managed
+   * @param {object} [options={}] - Additional application options (merged with DEFAULT_OPTIONS)
    */
   constructor(actor, options = {}) {
     super(options);
@@ -151,47 +108,115 @@ export default class XpManagerApplication extends foundry.applications.api.Handl
   }
 
   /**
-   * Prepare context data for the XP Manager template.
-   * Updates XP data if needed and formats entries for display using services.
+   * Retrieves the actor's L5R4 system flags object.
    * 
+   * Safely accesses actor.flags[SYS_ID] with fallback to empty object if undefined.
+   * The flags object contains xpManual, xpSpent, and xpRetroactiveVersion data.
+   * 
+   * @returns {object} The actor's L5R4 flags object, or empty object if not set
    * @private
+   */
+  _getFlags() {
+    return this.actor.flags?.[SYS_ID] ?? {};
+  }
+
+  /**
+   * Retrieves the actor's manual XP entry history.
+   * 
+   * Manual XP entries represent GM-awarded experience (session rewards, story milestones).
+   * Each entry contains: { id, delta, note, ts }
+   * - id: unique entry identifier (randomID)
+   * - delta: XP amount (positive for gains, negative for penalties)
+   * - note: description of award/penalty
+   * - ts: timestamp in milliseconds
+   * 
+   * @param {boolean} [duplicate=false] - If true, returns deep copy for safe mutation
+   * @returns {Array<{id: string, delta: number, note: string, ts: number}>} Array of manual XP entries
+   * @private
+   */
+  _getXpManual(duplicate = false) {
+    const flags = this._getFlags();
+    const manual = Array.isArray(flags.xpManual) ? flags.xpManual : [];
+    return duplicate ? foundry.utils.duplicate(manual) : manual;
+  }
+
+  /**
+   * Retrieves the actor's calculated XP expenditure history.
+   * 
+   * Spent XP entries are auto-generated by reverse-engineering the character's current
+   * abilities (traits, skills, advantages, etc.) per L5R4 advancement costs. This array
+   * is rebuilt whenever character data changes (detected via version hash).
+   * 
+   * Each entry contains: { id, delta, note, ts, type, key }
+   * 
+   * @returns {Array<object>} Array of spent XP entries (read-only, computed by xp-calculator)
+   * @private
+   * @see buildXpHistory in module:services/xp/xp-calculator
+   */
+  _getXpSpent() {
+    const flags = this._getFlags();
+    return Array.isArray(flags.xpSpent) ? flags.xpSpent : [];
+  }
+
+  /**
+   * Calculates total XP from an array of XP entries.
+   * 
+   * Sums the delta values from all entries, safely handling malformed entries by
+   * skipping non-objects or non-numeric deltas. Negative deltas (penalties or spent XP)
+   * are summed as-is.
+   * 
+   * @param {Array<{delta: number}>} entries - Array of XP entries with delta properties
+   * @returns {number} Sum of all delta values, or 0 if entries array is empty
+   * @private
+   */
+  _calculateTotal(entries) {
+    return entries.reduce((s, e) => {
+      if (!e || typeof e !== 'object') return s;
+      return s + (Number.isFinite(+e.delta) ? +e.delta : 0);
+    }, 0);
+  }
+
+  /**
+   * Prepares template context data for rendering the XP manager UI.
+   * 
+   * Checks if retroactive XP recalculation is needed (via version hash comparison),
+   * triggers recalculation if necessary, then assembles all XP data for display:
+   * - Current XP totals (spent, total, available)
+   * - XP breakdown by category (traits, void, skills, advantages, kata, kiho)
+   * - Formatted manual entry list
+   * - Formatted spent entry list (with applied sort preferences)
+   * 
+   * Manual entries are unsorted by default; spent entries respect user sort preferences
+   * persisted via the sorting utility service.
+   * 
+   * @override
    * @async
-   * @param {object} [options] - Render options passed by ApplicationV2
-   * @returns {Promise<object>} Template context object
-   * @returns {Promise<object>} context.xp - XP summary with spent, total, available, and breakdown
-   * @returns {Promise<Array<object>>} context.manualEntries - Formatted manual XP entries
-   * @returns {Promise<Array<object>>} context.spentEntries - Formatted purchase history entries
-   * @returns {Promise<number>} context.manualTotal - Sum of manual adjustments
-   * @returns {Promise<number>} context.spentTotal - Sum of XP purchases
+   * @returns {Promise<object>} Context object for xp-manager.hbs template
+   * @property {object} xp - Current XP values and breakdown
+   * @property {Array} manualEntries - Formatted manual XP entries
+   * @property {Array} spentEntries - Formatted spent XP entries
+   * @property {number} manualTotal - Sum of manual entry deltas
+   * @property {number} spentTotal - Sum of spent entry deltas (typically negative)
    */
   async _prepareContext() {
-    // Only run retroactive update if needed to avoid timing issues with character sheet
+    // Check if character data changed since last XP calculation via version hash comparison
     if (await needsRetroactiveUpdate(this.actor)) {
       await this._performRetroactiveUpdate();
     }
     const sys = this.actor.system ?? {};
     const xp = sys?._xp ?? {};
-    const ns = this.actor.flags?.[SYS_ID] ?? {};
-    const manual = Array.isArray(ns.xpManual) ? ns.xpManual : [];
-    const spent = Array.isArray(ns.xpSpent) ? ns.xpSpent : [];
+    const manual = this._getXpManual();
+    const spent = this._getXpSpent();
 
-    // Format entries using service
     const manualEntries = formatXpEntries(manual, { sort: false });
     const spentEntries = formatXpEntries(spent, { 
       sort: true, 
       actorId: this.actor.id,
       scope: "xp-purchases"
     });
-    
-    // Safely sum deltas, handling null/invalid entries
-    const manualTotal = manual.reduce((s, e) => {
-      if (!e || typeof e !== 'object') return s;
-      return s + (Number.isFinite(+e.delta) ? +e.delta : 0);
-    }, 0);
-    const spentTotal = spent.reduce((s, e) => {
-      if (!e || typeof e !== 'object') return s;
-      return s + (Number.isFinite(+e.delta) ? +e.delta : 0);
-    }, 0);
+
+    const manualTotal = this._calculateTotal(manual);
+    const spentTotal = this._calculateTotal(spent);
 
     return {
       xp: {
@@ -218,32 +243,31 @@ export default class XpManagerApplication extends foundry.applications.api.Handl
   }
 
   /**
-   * Handle adding XP from form submission.
-   * Reads amount and note from form fields, validates, and adds to xpManual flag.
+   * Event handler for adding a manual XP entry.
    * 
-   * @private
+   * Reads amount and note from form inputs, validates amount is non-zero, then appends
+   * a new entry to the xpManual flag array with a unique ID and current timestamp.
+   * After successful save, resets form inputs and re-renders the application.
+   * 
+   * L5R4 Usage: GMs use this to award XP at end of session or for story accomplishments.
+   * Negative amounts can be entered to represent XP penalties if needed.
+   * 
    * @async
-   * @param {PointerEvent} event - The click event from action delegation
-   * @param {HTMLElement} target - The clicked button element
-   * @returns {Promise<void>} Resolves after flag update and re-render
-   * 
-   * @remarks
-   * - Silently ignores zero-value entries
-   * - Creates entry with random ID and current timestamp
-   * - Clears form on success and triggers re-render
-   * - Logs warning and preserves form state on setFlag failure
+   * @param {Event} event - Form submission event
+   * @param {HTMLElement} target - Event target element (form or submit button)
+   * @private
    */
   async _onAddXp(event, target) {
     event.preventDefault();
-    
+
     const form = this.element;
     const amount = Number(form.querySelector('#xp-amount')?.value) || 0;
     const note = form.querySelector('#xp-note')?.value?.trim() || "";
-    
+
     if (amount === 0) return;
 
-    const ns = this.actor.flags?.[SYS_ID] ?? {};
-    const manual = Array.isArray(ns.xpManual) ? foundry.utils.duplicate(ns.xpManual) : [];
+    const manual = this._getXpManual(true);
+    // Manual XP entry structure: { id, delta, note, ts }
     manual.push({
       id: foundry.utils.randomID(),
       delta: amount,
@@ -253,13 +277,12 @@ export default class XpManagerApplication extends foundry.applications.api.Handl
 
     try {
       await this.actor.setFlag(SYS_ID, "xpManual", manual);
-      
-      // Reset to default values for next entry (defensive - form may be destroyed)
+
       const amountField = form.querySelector('#xp-amount');
       const noteField = form.querySelector('#xp-note');
       if (amountField) amountField.value = "1";
       if (noteField) noteField.value = "";
-      
+
       this.render();
     } catch (err) {
       console.warn(`${SYS_ID}`, "actor.setFlag failed in XpManagerApplication", { err });
@@ -267,23 +290,24 @@ export default class XpManagerApplication extends foundry.applications.api.Handl
   }
 
   /**
-   * Handle deleting a manual XP entry.
-   * Removes the specified entry from xpManual flag and re-renders.
+   * Event handler for deleting a manual XP entry.
    * 
-   * @private
+   * Reads entry ID from data-entry-id attribute, filters it from xpManual array,
+   * saves the updated array, and re-renders. Only manual entries can be deleted;
+   * spent entries are read-only as they reflect character purchases.
+   * 
    * @async
-   * @param {PointerEvent} event - The click event from action delegation
-   * @param {HTMLElement} target - The clicked delete button element with data-entry-id
-   * @returns {Promise<void>} Resolves after flag update and re-render
+   * @param {Event} event - Click event from delete button
+   * @param {HTMLElement} target - Delete button element (must have data-entry-id attribute)
+   * @private
    */
   async _onDeleteEntry(event, target) {
     event.preventDefault();
-    
+
     const entryId = target.dataset.entryId;
     if (!entryId) return;
 
-    const ns = this.actor.flags?.[SYS_ID] ?? {};
-    const manual = Array.isArray(ns.xpManual) ? foundry.utils.duplicate(ns.xpManual) : [];
+    const manual = this._getXpManual(true);
     const filtered = manual.filter(e => e.id !== entryId);
 
     try {
@@ -295,64 +319,73 @@ export default class XpManagerApplication extends foundry.applications.api.Handl
   }
 
   /**
-   * Handle sorting XP purchases by column.
-   * Updates sort preference and visual indicators, then re-renders.
+   * Event handler for changing spent XP entry sort order.
    * 
-   * @private
+   * Implements column header click sorting with ascending/descending toggle.
+   * Sort preference is persisted per actor and per scope ("xp-purchases") using
+   * the sorting utility service, so sort order survives sheet closure.
+   * 
+   * Allowed sort keys: "note", "cost", "type"
+   * Sort direction toggles between "asc" and "desc" on repeated clicks.
+   * 
+   * Updates UI to show active sort column with direction indicator, then re-renders
+   * the application with new sort order applied to spent entries list.
+   * 
    * @async
-   * @param {PointerEvent} event - The click event from action delegation
-   * @param {HTMLElement} target - The clicked sort header element with data-sortby
-   * @returns {Promise<void>} Resolves after sort preference update
+   * @param {Event} event - Click event from sort header
+   * @param {HTMLElement} target - Sort button element (must have data-sortby attribute)
+   * @private
    */
   async _onSortClick(event, target) {
     event.preventDefault();
     event.stopPropagation();
-    
+
     const header = target.closest('.item-list.-header');
     const scope = header?.dataset?.scope || "xp-purchases";
     const key = target.dataset.sortby || "note";
     const allowed = ["note", "cost", "type"];
-    
+
     if (!allowed.includes(key)) return;
-    
+
     const cur = getSortPref(this.actor.id, scope, allowed, "note");
     await setSortPref(this.actor.id, scope, key, { toggleFrom: cur });
-    
-    // Update visual indicators
+
     if (header) {
       header.querySelectorAll('.item-sort-by').forEach(a => {
         a.classList.toggle('is-active', a === target);
         if (a !== target) a.removeAttribute('data-dir');
       });
-      
-      // Set direction indicator on active element
+
       const newPref = getSortPref(this.actor.id, scope, allowed, "note");
       target.setAttribute('data-dir', newPref.dir);
     }
-    
+
     this.render();
   }
 
   /**
-   * Handle recalculating XP purchases from current character state.
-   * Forces a retroactive XP update and re-renders the manager to show changes.
+   * Event handler for manually triggering XP expenditure recalculation.
    * 
-   * @private
+   * Forces a complete rebuild of the xpSpent array by resetting the version hash to 0,
+   * which causes _prepareContext to detect version mismatch and call _performRetroactiveUpdate.
+   * 
+   * This is a maintenance action for players/GMs who want to ensure XP history is
+   * up-to-date even if the automatic version detection missed a change. Shows success/
+   * failure notification toast after operation completes.
+   * 
    * @async
-   * @param {PointerEvent} event - The click event from action delegation
-   * @param {HTMLElement} target - The clicked recalculate button element
-   * @returns {Promise<void>} Resolves after recalculation and notification
+   * @param {Event} event - Click event from recalculate button
+   * @param {HTMLElement} target - Recalculate button element
+   * @private
    */
   async _onRecalculateXpPurchase(event, target) {
     event.preventDefault();
-    
+
     try {
-      // Force retroactive update by clearing the version flag
       await this.actor.setFlag(SYS_ID, "xpRetroactiveVersion", 0);
-      
-      // Run the retroactive update
+
       await this._performRetroactiveUpdate();
-      
+
       ui.notifications?.info(game.i18n.localize("l5r4.character.experience.recalculateSuccess"));
       this.render();
     } catch (err) {
@@ -362,34 +395,34 @@ export default class XpManagerApplication extends foundry.applications.api.Handl
   }
 
   /**
-   * Perform retroactive XP update using the calculator service.
-   * Rebuilds XP history from current character state and updates flags.
+   * Performs retroactive XP expenditure recalculation and version update.
    * 
-   * @private
+   * Rebuilds the complete XP spent history by calling buildXpHistory, which reverse-engineers
+   * the character's current state (traits, skills, advantages, etc.) to generate XP cost
+   * entries per L5R4 advancement rules.
+   * 
+   * Only saves the new xpSpent array if it differs from existing (JSON comparison to avoid
+   * unnecessary flag updates). Always updates xpRetroactiveVersion to the current data hash
+   * to mark this version as processed.
+   * 
+   * Called automatically when version mismatch is detected, or manually via recalculate button.
+   * 
    * @async
-   * @returns {Promise<void>} Resolves when XP history is rebuilt and flags updated
-   * 
-   * @remarks
-   * - Compares new history to existing to avoid unnecessary updates
-   * - Marks current data version as processed to prevent re-runs
-   * - Logs warning but does not throw on failure
+   * @private
+   * @see buildXpHistory in module:services/xp/xp-calculator
+   * @see calculateXpDataVersion in module:services/xp/xp-versioning
    */
   async _performRetroactiveUpdate() {
     try {
-      // Build XP history using service
       const spent = await buildXpHistory(this.actor);
-      
-      // Get existing spent data for comparison
-      const flags = this.actor.flags?.[SYS_ID] ?? {};
-      const existingSpent = Array.isArray(flags.xpSpent) ? flags.xpSpent : [];
-      
-      // Update if data changed (additions, removals, or order)
+
+      const existingSpent = this._getXpSpent();
+
       const changed = JSON.stringify(existingSpent) !== JSON.stringify(spent);
       if (changed) {
         await this.actor.setFlag(SYS_ID, "xpSpent", spent);
       }
-      
-      // Mark this version as processed
+
       const currentVersion = calculateXpDataVersion(this.actor);
       await this.actor.setFlag(SYS_ID, "xpRetroactiveVersion", currentVersion);
     } catch (err) {

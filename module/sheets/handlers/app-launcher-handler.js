@@ -1,78 +1,73 @@
 /**
- * @fileoverview Application Launcher Handler - Configuration Application Management
+ * Application Launcher Handler
  * 
- * Provides reusable utilities for opening and managing configuration applications
- * from actor sheets. Implements bring-to-front pattern for singleton applications
- * that should only have one instance per actor.
+ * Delegates actor sheet actions to launch specialized applications (Wound Config, XP Manager).
+ * Implements singleton window management to prevent duplicate application instances per actor.
  * 
- * **Responsibilities:**
- * - Open configuration applications (wound config, XP manager, etc.)
- * - Ensure only one instance per actor (bring existing to front)
- * - Handle application lifecycle errors gracefully
- * - Provide consistent pattern across PC and NPC sheets
+ * Foundry VTT Integration:
+ * - Uses Foundry v13+ Application v2 singleton pattern via ui.windows registry
+ * - Integrates with event delegation system (receives context, event, element from sheets)
+ * - Leverages bringToTop() for window focus management
+ * - Uses foundry.utils.mergeObject pattern in target applications
  * 
- * **Usage:**
- * ```javascript
- * import { AppLauncherHandler } from "./handlers/app-launcher-handler.js";
+ * Responsibilities:
+ * - Check for existing application instances before creating new ones
+ * - Create and render new application instances when none exist
+ * - Focus existing instances if already open (prevent duplicates)
+ * - Handle errors gracefully with console warnings and user notifications
  * 
- * // In sheet _onAction handler:
- * case "wound-config": 
- *   return AppLauncherHandler.openWoundConfig(this._getHandlerContext(), event, element);
- * ```
- * 
- * @author L5R4 System Team
- * @since 1.1.0
- * @see {@link https://foundryvtt.com/api/classes/foundry.applications.api.ApplicationV2.html|ApplicationV2}
+ * @module sheets/handlers/app-launcher-handler
+ * @requires Foundry VTT v13+
+ * @see {@link https://foundryvtt.com/api/v13/classes/foundry.applications.api.ApplicationV2.html|Application v2 Documentation}
+ * @see module:apps/wound-config for wound mechanics configuration UI
+ * @see module:apps/xp-manager for XP tracking and advancement UI
  */
 
 import { SYS_ID } from "../../config/constants.js";
 import WoundConfigApplication from "../../apps/wound-config.js";
+import XpManagerApplication from "../../apps/xp-manager.js";
 
 /**
- * Application Launcher Handler Class
- * Manages configuration application lifecycle for actor sheets.
+ * Handler for launching specialized actor applications from sheet actions.
+ * Implements singleton pattern to prevent duplicate windows per actor.
+ * 
+ * Usage Pattern:
+ * Called via event delegation from actor sheets with standardized handler signature:
+ * - context: Sheet rendering context with actor reference
+ * - event: DOM event (preventDefault called if present)
+ * - element: Target DOM element (unused in these handlers)
+ * 
+ * All methods perform singleton checks against ui.windows registry before instantiation.
  */
 export class AppLauncherHandler {
+    
   /**
-   * Open wound configuration application for an actor.
-   * Implements singleton pattern - brings existing app to front if already open,
-   * otherwise creates new instance.
+   * Opens the Wound Configuration application for the actor.
+   * Implements singleton pattern: if an instance exists for this actor, focuses it instead of creating a new one.
    * 
-   * **Wound Configuration:**
-   * - Allows switching between Formula and Manual wound track modes
-   * - Provides real-time wound system configuration
-   * - Updates actor's wound system settings
-   * 
-   * **Singleton Behavior:**
-   * - Only one wound config per actor at a time
-   * - If already open, brings window to front instead of creating duplicate
-   * - Prevents multiple config windows causing state conflicts
-   * 
-   * @param {object} context - Handler context
-   * @param {Actor} context.actor - The actor document
-   * @param {Event} event - The click event on config button
-   * @param {HTMLElement} element - The clicked element (unused)
+   * @param {Object} context - Sheet rendering context
+   * @param {L5R4Actor} context.actor - The actor whose wound configuration to open
+   * @param {Event} [event] - DOM event to prevent default behavior on
+   * @param {HTMLElement} [element] - Target element (unused)
    * @returns {Promise<void>}
+   * @throws {Error} Logs warning and shows user notification on failure
    * 
-   * @example
-   * // In sheet action handler:
-   * case "wound-config":
-   *   return AppLauncherHandler.openWoundConfig(this._getHandlerContext(), event, element);
+   * @see WoundConfigApplication for wound mechanics implementation
    */
   static async openWoundConfig(context, event, element) {
     event?.preventDefault?.();
     
     try {
-      // Check if wound config already open for this actor
+      // Check ui.windows registry for existing WoundConfigApplication instance for this actor
       const existingApp = Object.values(ui.windows).find(app => 
         app instanceof WoundConfigApplication && app.actor.id === context.actor.id
       );
       
       if (existingApp) {
-        // Bring existing window to front
+        // Focus existing window instead of creating duplicate
         existingApp.bringToTop();
       } else {
-        // Create new wound config application
+        // No existing instance - create and render new application
         const woundConfig = new WoundConfigApplication(context.actor);
         await woundConfig.render(true);
       }
@@ -82,6 +77,45 @@ export class AppLauncherHandler {
         actorId: context.actor.id 
       });
       ui.notifications?.error(game.i18n.localize("l5r4.ui.notifications.woundConfigFailed"));
+    }
+  }
+
+  /**
+   * Opens the XP Manager application for the actor.
+   * Implements singleton pattern: if an instance exists for this actor, focuses it instead of creating a new one.
+   * 
+   * @param {Object} context - Sheet rendering context
+   * @param {L5R4Actor} context.actor - The actor whose XP to manage
+   * @param {Event} [event] - DOM event to prevent default behavior on
+   * @param {HTMLElement} [element] - Target element (unused)
+   * @returns {Promise<void>}
+   * @throws {Error} Logs warning and shows user notification on failure
+   * 
+   * @see XpManagerApplication for XP calculation and tracking implementation
+   */
+  static async openXpManager(context, event, element) {
+    event?.preventDefault?.();
+    
+    try {
+      // Check ui.windows registry for existing XpManagerApplication instance for this actor
+      const existingApp = Object.values(ui.windows).find(app => 
+        app instanceof XpManagerApplication && app.actor.id === context.actor.id
+      );
+      
+      if (existingApp) {
+        // Focus existing window instead of creating duplicate
+        existingApp.bringToTop();
+      } else {
+        // No existing instance - create and render new application
+        const xpManager = new XpManagerApplication(context.actor);
+        await xpManager.render(true);
+      }
+    } catch (err) {
+      console.warn(`${SYS_ID} AppLauncherHandler: Failed to open XP manager application`, { 
+        err, 
+        actorId: context.actor.id 
+      });
+      ui.notifications?.error(game.i18n.localize("l5r4.ui.notifications.xpManagerFailed"));
     }
   }
 }

@@ -1,26 +1,21 @@
 /**
- * @fileoverview Item CRUD Handler - Actor Sheet Item Operations
+ * Item CRUD Handler
  * 
- * Manages all Create, Read, Update, Delete operations for embedded items on actor sheets.
- * Provides unified item creation dialogs, inline editing, expansion controls, and chat integration.
+ * Handles Create, Read, Update, and Delete operations for embedded Item documents
+ * on Actor sheets. Uses Foundry v13 Application v2 event delegation pattern.
  * 
- * **Responsibilities:**
- * - Create new items with type-specific dialogs
- * - Edit items by opening their sheets
- * - Delete items with confirmation
- * - Toggle item detail expansion
- * - Handle inline field editing with dtype coercion
- * - Post item cards to chat
- * - Auto-detect item types from sheet section context
+ * All methods are static and designed to be called from actor sheet event handlers
+ * with a context object containing { actor, element, sheetClassName }.
  * 
- * **Integration:**
- * Used by BaseActorSheet via composition. All methods receive explicit context
- * for accessing actor document and performing operations.
+ * Relevant Foundry APIs:
+ * - Actor.createEmbeddedDocuments() - Creates embedded Items
+ * - Actor.deleteEmbeddedDocuments() - Deletes embedded Items
+ * - Actor.items.get() - Retrieves Item by ID
+ * - Item.sheet.render() - Opens Item sheet
+ * - Item.roll() - Posts Item to chat
  * 
- * @author L5R4 System Team
- * @since 1.1.0
- * @see {@link https://foundryvtt.com/api/classes/foundry.abstract.Document.html#createEmbeddedDocuments|Document.createEmbeddedDocuments}
- * @see {@link https://foundryvtt.com/api/classes/foundry.abstract.Document.html#deleteEmbeddedDocuments|Document.deleteEmbeddedDocuments}
+ * @see {@link https://foundryvtt.com/api/v13/classes/client.Actor.html}
+ * @see {@link https://foundryvtt.com/api/v13/classes/client.Item.html}
  */
 
 import { SYS_ID } from "../../config/constants.js";
@@ -28,34 +23,71 @@ import { toInt } from "../../utils/type-coercion.js";
 import * as Chat from "../../services/chat.js";
 
 /**
- * Item CRUD Handler Class
- * Provides comprehensive item management for actor sheets.
+ * Static utility class for handling item CRUD operations on actor sheets.
+ * Provides methods for creating, editing, deleting, expanding, and posting items to chat.
+ * Integrates with Foundry's embedded document system and sheet rendering.
  */
 export class ItemCRUDHandler {
+
   /**
-   * Create a new embedded Item using the unified item creation dialog.
-   * Shows a dialog with all relevant item types for the current actor type.
-   * Auto-selects item type based on the sheet section context when available.
+   * Resolves the target element from either an explicit element or event target.
+   * Defensive helper for handlers that may receive element or event.
    * 
-   * @param {object} context - Handler context
+   * @param {HTMLElement} element - Explicitly passed element
+   * @param {Event} event - Event containing currentTarget
+   * @returns {HTMLElement} The resolved element
+   * @private
+   */
+  static _getElement(element, event) {
+    return  (element || event.currentTarget);
+  }
+
+  /**
+   * Finds the closest ancestor item row element.
+   * Item rows are expected to have the CSS class "item".
+   * 
+   * @param {HTMLElement} element - Starting element for traversal
+   * @returns {HTMLElement|null} The item row element or null if not found
+   * @private
+   */
+  static _getItemRow(element) {
+    return element?.closest?.(".item");
+  }
+
+  /**
+   * Extracts the item ID from a row element's dataset.
+   * Checks multiple dataset properties for compatibility: itemId, documentId, id.
+   * 
+   * @param {HTMLElement} row - Item row element
+   * @returns {string|undefined} The item ID or undefined if not found
+   * @private
+   */
+  static _getItemId(row) {
+    return row?.dataset?.itemId || row?.dataset?.documentId || row?.dataset?.id;
+  }
+
+  /**
+   * Creates a new embedded Item on the actor.
+   * Prompts user for item type and name via unified dialog.
+   * Auto-detects preferred item type based on the clicked section's data-scope attribute.
+   * 
+   * @param {Object} context - Handler context from actor sheet
    * @param {Actor} context.actor - The actor document
-   * @param {Event} event - The originating click event
-   * @param {HTMLElement} element - The clicked element (may have data-type for fallback)
-   * @returns {Promise<Document[]>} Array of created item documents
+   * @param {Event} event - Click event (prevented)
+   * @param {HTMLElement} element - Clicked element (used to detect section)
+   * @returns {Promise<Item[]>} Created item documents (empty if cancelled)
+   * 
+   * @see detectSectionItemType
    */
   static async create(context, event, element) {
     event.preventDefault();
-    
-    // Detect section context to auto-select appropriate item type
+
     const preferredType = this.detectSectionItemType(element);
-    
-    // Use unified dialog for item creation with preferred type
+
     const result = await Chat.getUnifiedItemOptions(context.actor.type, preferredType);
-    
-    // Handle cancellation
+
     if (result.cancelled) return [];
-    
-    // Create the item with user-specified name and type
+
     const itemData = {
       name: result.name,
       type: result.type
@@ -65,20 +97,31 @@ export class ItemCRUDHandler {
   }
 
   /**
-   * Detect the appropriate item type based on the sheet section context.
-   * Maps section data-scope attributes to their corresponding item types.
+   * Detects the preferred item type based on the section's data-scope attribute.
+   * Maps sheet section names to L5R4 item types for context-aware item creation.
    * 
-   * @param {HTMLElement} element - The clicked Add Item button element
-   * @returns {string|null} The preferred item type or null if not detectable
+   * Section mappings:
+   * - skills → skill (Bugei, High, Low, Merchant skills)
+   * - weapons → weapon (Melee and ranged weapons)
+   * - armors → armor (Protective equipment)
+   * - techniques → technique (School techniques)
+   * - items → commonItem (General equipment)
+   * - spells → spell (Shugenja magic)
+   * - katas → kata (Combat techniques)
+   * - kihos → kiho (Monk abilities)
+   * - tattoos → tattoo (Togashi tattoos)
+   * - advantages → advantage (Character creation benefits)
+   * - disadvantages → disadvantage (Character creation drawbacks)
+   * 
+   * @param {HTMLElement} element - Element within a sheet section
+   * @returns {string|null} Item type string or null if section not recognized
    */
   static detectSectionItemType(element) {
-    // Find the closest parent with a data-scope attribute
     const section = element?.closest?.('[data-scope]');
     const scope = section?.dataset?.scope;
     
     if (!scope) return null;
-    
-    // Map section scopes to item types
+
     const sectionToItemType = {
       'skills': 'skill',
       'weapons': 'weapon',
@@ -97,36 +140,37 @@ export class ItemCRUDHandler {
   }
 
   /**
-   * Open an item's sheet for editing by finding the item ID from the row.
+   * Opens the item sheet for editing.
+   * Locates the item by traversing DOM to find item row and extract ID.
    * 
-   * @param {object} context - Handler context
+   * @param {Object} context - Handler context from actor sheet
    * @param {Actor} context.actor - The actor document
-   * @param {Event} event - The triggering event
-   * @param {HTMLElement} element - The clicked element within an item row
-   * @returns {void}
+   * @param {Event} event - Click event (prevented)
+   * @param {HTMLElement} element - Clicked element or event target
    */
   static edit(context, event, element) {
     event.preventDefault();
-    const el = /** @type {HTMLElement} */ (element || event.currentTarget);
-    const row = el?.closest?.(".item");
-    const id = row?.dataset?.itemId || row?.dataset?.documentId || row?.dataset?.id;
+    const el = this._getElement(element, event);
+    const row = this._getItemRow(el);
+    const id = this._getItemId(row);
     context.actor.items.get(id)?.sheet?.render(true);
   }
 
   /**
-   * Delete an embedded item by finding the item ID from the row.
+   * Deletes an embedded Item from the actor.
+   * Silently catches and logs errors to prevent sheet breakage on failed deletion.
    * 
-   * @param {object} context - Handler context
+   * @param {Object} context - Handler context from actor sheet
    * @param {Actor} context.actor - The actor document
-   * @param {Event} event - The triggering event
-   * @param {HTMLElement} element - The clicked element within an item row
+   * @param {Event} event - Click event (prevented)
+   * @param {HTMLElement} element - Clicked element or event target
    * @returns {Promise<void>}
    */
   static async deleteItem(context, event, element) {
     event.preventDefault();
-    const el = /** @type {HTMLElement} */ (element || event.currentTarget);
-    const row = el?.closest?.(".item");
-    const id = row?.dataset?.itemId || row?.dataset?.documentId || row?.dataset?.id;
+    const el = this._getElement(element, event);
+    const row = this._getItemRow(el);
+    const id = this._getItemId(row);
     if (id) {
       try {
         await context.actor.deleteEmbeddedDocuments("Item", [id]);
@@ -137,20 +181,19 @@ export class ItemCRUDHandler {
   }
 
   /**
-   * Toggle inline expansion of an item row to reveal/hide its details.
-   * Updates the chevron icon and applies the "is-expanded" class.
+   * Toggles the expanded/collapsed state of an item row.
+   * Adds/removes "is-expanded" CSS class and rotates chevron icon between down/up.
    * 
-   * @param {object} context - Handler context (unused, for consistency)
-   * @param {MouseEvent} event - The triggering mouse event
-   * @param {HTMLElement} element - The expand/collapse button element
-   * @returns {void}
+   * @param {Object} context - Handler context from actor sheet (unused)
+   * @param {Event} event - Click event (prevented)
+   * @param {HTMLElement} element - Clicked element containing the chevron icon
    */
   static expand(context, event, element) {
     event?.preventDefault?.();
-    const row = /** @type {HTMLElement|null} */ (element.closest(".item"));
+    const row = this._getItemRow(element);
     if (!row) return;
     row.classList.toggle("is-expanded");
-    const icon = /** @type {HTMLElement|null} */ (element.querySelector("i"));
+    const icon =  (element.querySelector("i"));
     if (icon) {
       icon.classList.toggle("fa-chevron-down");
       icon.classList.toggle("fa-chevron-up");
@@ -158,25 +201,35 @@ export class ItemCRUDHandler {
   }
 
   /**
-   * Handle inline editing of item fields with proper dtype coercion.
-   * Supports Integer, Number, Boolean, and String data types.
+   * Handles inline editing of item fields directly on the actor sheet.
+   * Reads the field path and data type from element dataset attributes,
+   * coerces the input value to the appropriate type, and updates the item.
    * 
-   * @param {object} context - Handler context
+   * HTML elements should include data-action="inline-edit", data-field="path.to.field",
+   * and data-dtype="TypeName" attributes. For example, to edit a skill rank:
+   * <input data-action="inline-edit" data-field="system.rank" data-dtype="Integer" value="3">
+   * 
+   * Supported data types (via data-dtype attribute):
+   * - "Integer" → Converts to integer (default 0)
+   * - "Number" → Converts to float (default 0)
+   * - "Boolean" → Converts to boolean (accepts "true", "1", "on", "yes")
+   * - Default → Converts to string
+   * 
+   * @param {Object} context - Handler context from actor sheet
    * @param {Actor} context.actor - The actor document
-   * @param {Event} event - The input change event
-   * @param {HTMLElement} element - The input element with data-field and data-dtype
-   * @returns {Promise<Document|undefined>} Updated item document or undefined
+   * @param {Event} event - Change event (prevented)
+   * @param {HTMLElement} element - Input element with data-field and data-dtype attributes
+   * @returns {Promise<Item|undefined>} Updated item document or undefined if validation fails
    */
   static async inlineEdit(context, event, element) {
     event.preventDefault();
-    const el = /** @type {HTMLElement} */ (element || event.currentTarget);
-    const row = el?.closest?.(".item");
-    const id = row?.dataset?.itemId || row?.dataset?.documentId || row?.dataset?.id;
+    const el = this._getElement(element, event);
+    const row = this._getItemRow(el);
+    const id = this._getItemId(row);
     const field = el.dataset.field;
     if (!id || !field) return;
 
-    // dtype coercion if provided
-    let value = /** @type {HTMLInputElement|HTMLSelectElement} */ (el).value;
+    let value =  (el).value;
     switch (el.dataset.dtype) {
       case "Integer": value = toInt(value, 0); break;
       case "Number":  value = Number.isFinite(+value) ? +value : 0; break;
@@ -192,23 +245,23 @@ export class ItemCRUDHandler {
   }
 
   /**
-   * Post an item's card to chat when its title is shift+clicked.
-   * Calls the item's roll() method to display in chat.
+   * Posts an item to chat by calling its roll() method.
+   * **Requires Shift+Click** - ignored if shift key not held to prevent accidental posts.
+   * Silently catches and logs errors to prevent sheet breakage on failed rolls.
    * 
-   * @param {object} context - Handler context
+   * @param {Object} context - Handler context from actor sheet
    * @param {Actor} context.actor - The actor document
-   * @param {MouseEvent} event - The click event
-   * @param {HTMLElement} element - The clicked element within an item row
+   * @param {Event} event - Click event (prevented, must have shiftKey=true)
+   * @param {HTMLElement} element - Clicked element or event target
    * @returns {Promise<void>}
    */
   static async toChat(context, event, element) {
     event.preventDefault();
-    
-    // Only proceed if shift key is held
+
     if (!event.shiftKey) return;
     
-    const row = element?.closest?.(".item");
-    const id = row?.dataset?.documentId || row?.dataset?.itemId || row?.dataset?.id;
+    const row = this._getItemRow(element);
+    const id = this._getItemId(row);
     if (!id) return;
     const item = context.actor?.items?.get(id);
     if (!item) return;

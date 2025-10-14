@@ -1,143 +1,113 @@
 /**
- * @fileoverview L5R4 Localization & Template Utilities
+ * Localization Utility Module
  * 
- * Provides wrapper functions for Foundry VTT's internationalization (i18n) and
- * Handlebars template rendering systems. These utilities simplify common operations
- * and provide consistent patterns across the L5R4 system.
+ * Provides defensive wrappers around Foundry VTT's i18n system for safe
+ * localization key lookups, string formatting, and template rendering.
  * 
- * **Core Responsibilities:**
- * - **Translation**: Simple and formatted string localization
- * - **Template Rendering**: Handlebars template compilation and rendering
+ * Implements defensive type checking and validation to prevent runtime errors
+ * from invalid keys or data. All functions handle edge cases gracefully with
+ * console warnings and fallback behavior.
  * 
- * **Design Principles:**
- * - **Minimal Wrappers**: Thin abstraction over Foundry APIs
- * - **Consistency**: Uniform naming (T/F/R) across the system
- * - **Type Safety**: Clear JSDoc parameter and return types
+ * The terse function names (T, F, R) follow common i18n patterns:
+ * - T = Translate: Simple key lookup
+ * - F = Format: Variable substitution in translations
+ * - R = Render: Handlebars template rendering
  * 
- * **Usage Examples:**
- * ```javascript
- * // Simple translation
- * const cancelText = T("l5r4.ui.common.cancel");
+ * Requires Foundry VTT v10+ for:
+ * - game.i18n.localize() - Translation key resolution
+ * - game.i18n.format() - String interpolation with data objects
+ * - foundry.applications.handlebars.renderTemplate() - Template rendering
  * 
- * // Formatted translation with parameters
- * const message = F("l5r4.messages.xp-gained", { amount: 5 });
- * 
- * // Render a template
- * const html = await R("templates/chat/simple-roll.hbs", { roll: rollData });
- * ```
- * 
- * **When to Use Each Function:**
- * - **T()**: Static translations without variables (labels, buttons, headers)
- * - **F()**: Dynamic translations with variables (messages, formatted text)
- * - **R()**: Complex HTML rendering with logic (sheets, chat cards, dialogs)
- * 
- * @author L5R4 System Team
- * @since 1.0.0
- * @see {@link https://foundryvtt.com/api/classes/game.Game.html#i18n|Foundry i18n}
- * @see {@link https://foundryvtt.com/api/functions/foundry.applications.handlebars.renderTemplate.html|renderTemplate}
- * @see {@link https://handlebarsjs.com/|Handlebars Template Engine}
+ * @module utils/localization
+ * @see {@link https://foundryvtt.com/api/v13/classes/client.Localization.html|Foundry Localization API}
  */
 
 /**
- * Localize a translation key.
- * Wrapper around game.i18n.localize for consistent system-wide usage.
+ * Validate and coerce a localization key to string.
  * 
- * **Behavior Notes:**
- * - Returns the key itself if translation is not found
- * - Never throws errors; safe for all contexts
- * - Coerces non-string keys to empty string with warning
+ * Implements defensive type checking to prevent Foundry API errors from
+ * non-string keys. Handles edge cases:
+ * - null/undefined: Coerced to empty string
+ * - Symbols: Logged as warning, coerced to empty string
+ * - Numbers/booleans: Coerced to string representation
  * 
- * @param {string} key - The i18n key to localize (e.g., "l5r4.ui.common.cancel")
- * @returns {string} The localized string
- * @example
- * const label = T("l5r4.ui.mechanics.traits.sta"); // "Stamina"
+ * @param {*} key - Value to validate as localization key
+ * @param {string} fnName - Calling function name for warning messages
+ * @returns {string} Validated string key (may be empty string if invalid)
+ * @private
+ */
+const validateKey = (key, fnName) => {
+  if (typeof key !== 'string') {
+    console.warn(`L5R4 | ${fnName}() requires string key, got:`, typeof key, key);
+    return String(key ?? '');
+  }
+  return key;
+};
+
+/**
+ * Translate a localization key to its string value.
  * 
- * @integration-test Scenario: Verify Foundry i18n.localize behavior
- * @integration-test Reason: Unit tests mock game.i18n.localize completely
- * @integration-test Validates: Key fallback behavior, special character handling, actual translation lookup
+ * Wrapper around game.i18n.localize() with defensive key validation.
+ * Handles invalid keys gracefully by coercing to string and logging warnings.
+ * 
+ * Use this for simple translation lookups without variable substitution.
+ * For translations with placeholders, use F() instead.
+ * 
+ * @param {string} key - Localization key (e.g., "L5R4.traits.stamina")
+ * @returns {string} Translated string, or the key itself if translation not found
+ * 
+ * @see {@link https://foundryvtt.com/api/v13/classes/client.Localization.html#localize|game.i18n.localize}
  */
 export const T = (key) => {
-  if (typeof key !== 'string') {
-    console.warn('L5R4 | T() requires string key, got:', typeof key, key);
-    return String(key ?? '');
-  }
-  return game.i18n.localize(key);
+  const validKey = validateKey(key, 'T');
+  return game.i18n.localize(validKey);
 };
 
 /**
- * Localize a translation key with formatting data.
- * Wrapper around game.i18n.format for parameterized translations.
+ * Format a localization string with variable substitution.
  * 
- * **Behavior Notes:**
- * - Returns the key itself if translation is not found
- * - Data properties are interpolated into {placeholders} in the translation string
- * - Never throws errors; safe for all contexts
- * - Falls back to unformatted localization if data is invalid
+ * Wrapper around game.i18n.format() with defensive validation of both
+ * key and data parameters. If data is invalid, falls back to T() for
+ * simple translation without substitution.
  * 
- * @param {string} key - The i18n key to localize
- * @param {Record<string, any>} data - Data object for string interpolation (key-value pairs)
- * @returns {string} The formatted localized string
- * @example
- * const msg = F("l5r4.messages.xp-gained", { amount: 5 });
- * // "You gained 5 XP"
- * @example
- * // Translation string: "Roll {skill} + {trait}"
- * const text = F("l5r4.roll.formula", { skill: "Kenjutsu", trait: "Agility" });
- * // "Roll Kenjutsu + Agility"
+ * Use this for translations containing placeholders like {name}, {count}, etc.
+ * For simple lookups without variables, use T() instead.
  * 
- * @integration-test Scenario: Verify Foundry i18n.format placeholder interpolation
- * @integration-test Reason: Unit tests mock game.i18n.format completely
- * @integration-test Validates: Actual {placeholder} substitution, nested data handling, type coercion
+ * Foundry's format() replaces {key} placeholders with values from data object.
+ * 
+ * @param {string} key - Localization key with placeholders (e.g., "L5R4.messages.xpGained")
+ * @param {Object} data - Object containing substitution values (e.g., {amount: 5, reason: "quest"})
+ * @returns {string} Formatted string with substitutions, or fallback translation if data invalid
+ * 
+ * @see {@link https://foundryvtt.com/api/v13/classes/client.Localization.html#format|game.i18n.format}
  */
 export const F = (key, data) => {
-  if (typeof key !== 'string') {
-    console.warn('L5R4 | F() requires string key, got:', typeof key, key);
-    return String(key ?? '');
-  }
+  const validKey = validateKey(key, 'F');
+  // Data must be non-null object for format() variable substitution
+  // Fall back to simple translation if invalid to prevent Foundry errors
   if (typeof data !== 'object' || data === null) {
     console.warn('L5R4 | F() requires object data, got:', typeof data, data);
-    return game.i18n.localize(key);
+    return T(validKey);
   }
-  return game.i18n.format(key, data);
+  return game.i18n.format(validKey, data);
 };
 
 /**
- * Render a Handlebars template using Foundry's v13+ namespaced API.
- * Asynchronous wrapper around Foundry's template rendering system.
+ * Render a Handlebars template with provided data.
  * 
- * **Path Resolution:**
- * - Path should be relative to the Foundry root directory
- * - System templates typically start with "systems/l5r4-enhanced/templates/"
- * - Use full extension (.hbs) in path
+ * Wrapper around foundry.applications.handlebars.renderTemplate() with
+ * strict path validation. Unlike T() and F(), this throws TypeError for
+ * invalid paths since template rendering errors should fail fast.
  * 
- * **Error Handling:**
- * - Throws error if template file is not found
- * - Throws error if template compilation fails
- * - Throws error if path is not a string
- * - Always await and handle potential rejections
+ * Use this for rendering complex UI fragments from .hbs template files.
+ * For simple text translations, use T() or F() instead.
  * 
- * @param {string} path - Template path relative to the system
- * @param {Record<string, any>} data - Template context data (variables accessible in template)
+ * @param {string} path - Template file path relative to system root (e.g., "systems/l5r4-enhanced/templates/chat/roll.hbs")
+ * @param {Object} [data={}] - Context data object passed to template
  * @returns {Promise<string>} Rendered HTML string
- * @throws {Error} If template not found or compilation fails
  * @throws {TypeError} If path is not a string
- * @see https://foundryvtt.com/api/functions/foundry.applications.handlebars.renderTemplate.html
- * @example
- * const html = await R("templates/chat/weapon-chat.hbs", {
- *   weapon: weaponData,
- *   roll: rollResult
- * });
- * @example
- * // With error handling
- * try {
- *   const html = await R("templates/actor/_partials/skills.hbs", { skills });
- * } catch (err) {
- *   console.error("L5R4 | Template render failed:", err);
- * }
  * 
- * @integration-test Scenario: Verify Foundry template rendering with real .hbs files
- * @integration-test Reason: Unit tests mock renderTemplate completely
- * @integration-test Validates: Path resolution, Handlebars compilation, helper registration, error types
+ * @see {@link https://foundryvtt.com/api/v13/namespaces/foundry.applications.handlebars.html#renderTemplate|renderTemplate}
  */
 export const R = (path, data) => {
   if (typeof path !== 'string') {

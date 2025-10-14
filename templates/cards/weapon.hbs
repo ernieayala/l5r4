@@ -11,11 +11,20 @@
   </h4>
   {{#if inSheet}}
     {{#if @root.system._stanceEffects.fullAttack}}
-      <div><a class="button" data-action="roll-weapon-attack" title="{{localize "l5r4.ui.mechanics.rolls.attackRoll"}} ({{localize "l5r4.ui.mechanics.stances.fullAttackBonus"}})" data-stance-bonus="2,1">{{attackFormulaWithStance}}</a></div>
+      <div class="button-mask-container">
+        <span class="mas">{{attackFormulaWithStance}}</span>
+        <a class="button" data-action="roll-weapon-attack" title="{{localize "l5r4.ui.mechanics.rolls.attackRoll"}} ({{localize "l5r4.ui.mechanics.stances.fullAttackBonus"}})" data-stance-bonus="2,1">{{attackFormulaWithStance}}</a>
+      </div>
     {{else}}
-      <div><a class="button" data-action="roll-weapon-attack" title="{{localize "l5r4.ui.mechanics.rolls.attackRoll"}}">{{attackFormula}}</a></div>
+      <div class="button-mask-container">
+        <span class="mas">{{attackFormula}}</span>
+        <a class="button" data-action="roll-weapon-attack" title="{{localize "l5r4.ui.mechanics.rolls.attackRoll"}}">{{attackFormula}}</a>
+      </div>
     {{/if}}
-    <div><a class="button" data-action="roll-weapon" title="{{localize "l5r4.ui.mechanics.rolls.damageRoll"}}">{{system.damageRoll}}k{{system.damageKeep}}</a></div>
+    <div class="button-mask-container">
+      <span class="mas">{{system.damageRoll}}k{{system.damageKeep}}</span>
+      <a class="button" data-action="roll-weapon" title="{{localize "l5r4.ui.mechanics.rolls.damageRoll"}}">{{system.damageRoll}}k{{system.damageKeep}}</a>
+    </div>
     {{#if ranged}}
         <select data-action="inline-edit" data-field="system.arrow">{{selectOptions @root.config.arrows selected=system.arrow localize=true}}</select>
     {{/if}}

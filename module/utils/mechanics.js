@@ -1,71 +1,104 @@
 /**
- * @fileoverview L5R4 Game Mechanics Utilities
+ * Game Mechanics Utility Module
  * 
- * Provides L5R4-specific game mechanics calculations and data processing.
- * Handles wound penalties, trait normalization, roll parameter extraction,
- * and weapon skill resolution following L5R4 4th Edition rules.
+ * Implements core L5R4 TTRPG mechanics for character traits, wound penalties,
+ * and skill roll calculations. Provides utilities for trait key normalization,
+ * effective trait resolution (with wound penalties), and weapon skill lookups.
  * 
- * **Core Responsibilities:**
- * - **Wound Penalties**: Extract current wound penalty from actors
- * - **Trait Normalization**: Convert various trait identifiers to system keys
- * - **Effective Traits**: Get trait values accounting for PC/NPC differences
- * - **Roll Parameters**: Extract roll data from DOM elements
- * - **Weapon Skills**: Resolve skill+trait for weapon attacks
+ * L5R4 Game Rules Implemented:
+ * - **Wound Penalty System**: Characters suffer TN increases based on wound rank
+ *   (Nicked +3, Grazed +5, Hurt +10, Injured +15, Crippled +20, Down +40)
+ * - **Skill Roll Formula**: (Skill Rank + Trait Value)k(Trait Value) for attack rolls
+ * - **Trait System**: Eight traits (STA, WIL, STR, PER, REF, AWA, AGI, INT) plus Void Ring
+ * - **Roll & Keep Dice**: XkY notation where X=rolled dice, Y=kept dice
  * 
- * **Design Principles:**
- * - **Rules Accuracy**: Faithful implementation of L5R4 mechanics
- * - **PC/NPC Compatibility**: Handle both character types gracefully
- * - **Legacy Support**: Work with older data shapes
- * - **Defensive Programming**: Safe fallbacks for missing data
+ * Foundry VTT Integration:
+ * - Reads actor.system for trait values and wound data (Actor DataModel)
+ * - Searches actor.items collection for skill lookups (EmbeddedCollection)
+ * - Supports _derived data pattern for pre-calculated effective traits
+ * - Parses DOM dataset attributes for roll parameter extraction
  * 
- * **L5R4 Rules Context:**
- * - **Traits**: sta, wil, str, per, ref, awa, agi, int (+ void)
- * - **Wound Penalties**: Applied to all rolls when wounded
- * - **Attack Rolls**: (Skill + Trait)k(Trait) or (Trait)k(Trait) if unskilled
- * - **Effective Traits**: May differ from base traits due to wounds, spells, etc.
+ * Requires Foundry VTT v10+ for:
+ * - Actor and Item DataModel APIs
+ * - game.i18n localization for trait label resolution
  * 
- * **Usage Examples:**
- * ```javascript
- * // Get wound penalty
- * const penalty = readWoundPenalty(actor); // -10, -5, 0, etc.
- * 
- * // Normalize trait identifiers
- * const trait = normalizeTraitKey("Reflexes");        // "ref"
- * const trait2 = normalizeTraitKey("l5r4.ui.mechanics.traits.agi"); // "agi"
- * 
- * // Get effective trait value
- * const reflex = getEffectiveTrait(actor, "ref"); // 4
- * 
- * // Extract roll parameters from DOM
- * const params = extractRollParams(buttonElement, actor);
- * 
- * // Resolve weapon attack
- * const attack = resolveWeaponSkillTrait(actor, weapon);
- * // { skillRank: 5, traitValue: 4, rollBonus: 9, keepBonus: 4, description: "..." }
- * ```
- * 
- * @author L5R4 System Team
- * @since 1.0.0
- * @version 2.0.0
- * @see {@link https://foundryvtt.com/api/classes/foundry.documents.BaseActor.html|Actor}
- * @see {@link https://foundryvtt.com/api/classes/foundry.documents.BaseItem.html|Item}
+ * @module utils/mechanics
+ * @see {@link https://foundryvtt.com/api/v13/classes/foundry.abstract.DataModel.html|Foundry DataModel}
  */
 
 import { toInt } from "./type-coercion.js";
 
 /**
- * Compute the current wound penalty from an actor, handling legacy data shapes.
- * Works for both PC and NPC actors with different wound tracking systems.
- * @param {Actor} actor - The actor to read wound penalty from
- * @returns {number} Current wound penalty (0 or negative number)
- * @example
- * const penalty = readWoundPenalty(actor); // -10 (Crippled)
- * const bonus = readWoundPenalty(actor);   // 0 (Healthy)
+ * Safely coerce a value to string with fallback.
+ * 
+ * Defensive utility that handles null, undefined, and symbol types which
+ * cannot be safely converted to strings. Used throughout this module to
+ * safely access weapon.system and skill.system properties.
+ * 
+ * @param {*} value - Value to coerce to string
+ * @param {string} [fallback=""] - Fallback string if value is null/undefined/symbol
+ * @returns {string} String representation or fallback
+ * @private
+ */
+function safeString(value, fallback = "") {
+  if (value == null || typeof value === "symbol") return fallback;
+  return String(value);
+}
+
+/**
+ * List of all valid trait abbreviations in L5R4.
+ * Eight traits (sta, wil, str, per, ref, awa, agi, int) plus void ring.
+ * Used for validation and normalization throughout the system.
+ * @constant {string[]}
+ * @private
+ */
+const KNOWN_TRAITS = ["sta","wil","str","per","ref","awa","agi","int","void"];
+
+/**
+ * Mapping of English trait names to their three-letter abbreviations.
+ * Supports trait key normalization from full names (e.g., "stamina" → "sta").
+ * @constant {Object.<string, string>}
+ * @private
+ */
+const ENGLISH_TRAIT_LABELS = {
+  stamina: "sta",
+  willpower: "wil",
+  strength: "str",
+  perception: "per",
+  reflexes: "ref",
+  awareness: "awa",
+  agility: "agi",
+  intelligence: "int",
+  void: "void"
+};
+
+/**
+ * Read the current wound penalty for an actor.
+ * 
+ * Implements the L5R4 Wound Penalty system where characters suffer TN increases
+ * based on their wound rank:
+ * - Healthy: No penalty
+ * - Nicked: +3 TN
+ * - Grazed: +5 TN
+ * - Hurt: +10 TN
+ * - Injured: +15 TN
+ * - Crippled: +20 TN
+ * - Down: +40 TN
+ * 
+ * The function checks two possible data structures:
+ * 1. Direct penalty at actor.system.wounds.penalty (preferred)
+ * 2. Legacy woundLvlsUsed structure (fallback)
+ * 
+ * For legacy structure, finds the worst (highest) penalty among current wound levels.
+ * 
+ * @param {Actor} actor - Foundry Actor document with wound data
+ * @returns {number} Current wound penalty (0 if healthy or no wound data)
  */
 export function readWoundPenalty(actor) {
-  // Newer shape
   if (actor.system?.wounds?.penalty != null) return toInt(actor.system.wounds.penalty, 0);
-  // Fallback to woundLvlsUsed shape if present
+
+  // Legacy wound system: Find worst penalty among current wound levels
+  // Sentinel value -999 ensures highest penalty wins comparison
   const levels = Object.values(actor.system?.woundLvlsUsed || {});
   const current = levels
     .filter((w) => w?.current)
@@ -74,112 +107,126 @@ export function readWoundPenalty(actor) {
 }
 
 /**
- * Normalize a trait label/key into a system trait key ("ref", "awa", etc.).
- * Accepts multiple input formats:
- * - Short keys ("ref")
- * - English labels ("Reflexes")
- * - i18n keys ("l5r4.ui.mechanics.traits.ref")
- * - Localized labels in any language (via game.i18n.localize)
- * @param {string|null|undefined} raw - Raw trait identifier to normalize
- * @returns {string} Normalized trait key or empty string if not found
- * @example
- * normalizeTraitKey("ref");                           // "ref"
- * normalizeTraitKey("Reflexes");                      // "ref"
- * normalizeTraitKey("l5r4.ui.mechanics.traits.ref");  // "ref"
- * normalizeTraitKey("Réflexes");                      // "ref" (French)
- * normalizeTraitKey("invalid");                       // ""
+ * Normalize a trait key to its standard three-letter abbreviation.
+ * 
+ * Converts various trait key formats to standard abbreviations (sta, wil, str, etc.).
+ * Handles multiple input formats through a fallback chain:
+ * 1. i18n keys (e.g., "l5r4.ui.mechanics.traits.sta")
+ * 2. Void ring special case ("l5r4.ui.mechanics.rings.void")
+ * 3. Direct abbreviations (e.g., "sta", "ref")
+ * 4. English full names (e.g., "stamina", "reflexes")
+ * 5. Reverse i18n lookup (localized trait names)
+ * 
+ * Returns empty string for unrecognized inputs rather than throwing errors.
+ * 
+ * @param {*} raw - Raw trait key in any supported format
+ * @returns {string} Normalized three-letter abbreviation, or "" if unrecognized
  */
 export function normalizeTraitKey(raw) {
-  const known = ["sta","wil","str","per","ref","awa","agi","int","void"];
   if (raw == null) return "";
-  // Guard against Symbol values which throw when coerced to string
   if (typeof raw === "symbol") return "";
   let k = String(raw).trim();
 
-  // If given an i18n key like "l5r4.ui.mechanics.traits.ref"
+  // Strategy 1: Parse i18n key format (e.g., "l5r4.ui.mechanics.traits.sta")
   const m = /^l5r4\.ui\.mechanics\.traits\.(\w+)$/i.exec(k);
-  if (m && known.includes(m[1].toLowerCase())) return m[1].toLowerCase();
+  if (m && KNOWN_TRAITS.includes(m[1].toLowerCase())) return m[1].toLowerCase();
 
-  // If given the rings.void i18n key
+  // Strategy 2: Handle void ring i18n key specially
   if (/^l5r4\.ui\.mechanics\.rings\.void$/i.test(k)) return "void";
 
-  // Plain short key?
-  if (known.includes(k.toLowerCase())) return k.toLowerCase();
+  // Strategy 3: Direct abbreviation match (case-insensitive)
+  if (KNOWN_TRAITS.includes(k.toLowerCase())) return k.toLowerCase();
 
-  // English labels -> keys
-  const english = {
-    stamina: "sta",
-    willpower: "wil",
-    strength: "str",
-    perception: "per",
-    reflexes: "ref",
-    awareness: "awa",
-    agility: "agi",
-    intelligence: "int",
-    void: "void"
-  };
-  if (english[k.toLowerCase()]) return english[k.toLowerCase()];
+  // Strategy 4: Lookup English full name (e.g., "stamina" → "sta")
+  if (ENGLISH_TRAIT_LABELS[k.toLowerCase()]) return ENGLISH_TRAIT_LABELS[k.toLowerCase()];
 
-  // Localized labels (any language): compare against localized names
+  // Strategy 5: Reverse i18n lookup - match localized trait names
+  // Handles user input in non-English languages
   try {
-    for (const key of known) {
-      // Void is a ring, not a trait, so use different i18n key
+    for (const key of KNOWN_TRAITS) {
       const labelKey = key === "void" 
         ? "l5r4.ui.mechanics.rings.void" 
         : `l5r4.ui.mechanics.traits.${key}`;
       const label = game.i18n?.localize?.(labelKey) ?? "";
       if (label && label.toLowerCase() === k.toLowerCase()) return key;
     }
-  } catch (_) { /* ignore if i18n not ready here */ }
+  } catch (_) { }
 
   return "";
 }
 
 /**
- * Get the effective trait value for an actor, handling both PC and NPC cases.
- * For PCs: uses derived effective traits if available, falls back to base traits.
- * For NPCs: uses base traits directly.
- * @param {Actor} actor - The actor to read traits from
- * @param {string} traitKey - Trait identifier ("sta","wil","str","per","ref","awa","agi","int","void")
- * @returns {number} Effective trait value
- * @example
- * const reflexes = getEffectiveTrait(actor, "ref");  // 4
- * const voidRing = getEffectiveTrait(actor, "void"); // 3
+ * Get the effective trait value for an actor, including wound penalties.
+ * 
+ * Resolves trait values in priority order:
+ * 1. Void ring: Read from actor.system.rings.void.rank
+ * 2. Derived effective traits: Pre-calculated values in actor.system._derived.traitsEff
+ * 3. Base traits: Raw values from actor.system.traits
+ * 
+ * The _derived.traitsEff pattern is populated by Actor.prepareDerivedData() and
+ * includes wound penalties, advantages, and other modifiers. Always prefer this
+ * over raw trait values when calculating rolls.
+ * 
+ * @param {Actor} actor - Foundry Actor document
+ * @param {string} traitKey - Normalized trait abbreviation (sta, wil, str, per, ref, awa, agi, int, void)
+ * @returns {number} Effective trait value (0 if trait not found)
  */
 export function getEffectiveTrait(actor, traitKey) {
+  // Void is stored separately as a Ring, not a Trait
   if (traitKey === "void") {
     return toInt(actor.system?.rings?.void?.rank, 0);
   }
-  
-  // Try derived effective traits first (PC sheets)
+
+  // Prefer pre-calculated effective traits (includes wound penalties)
   const derived = actor.system?._derived?.traitsEff?.[traitKey];
   if (derived != null) return toInt(derived, 0);
-  
-  // Fall back to base traits (both PC and NPC)
+
   return toInt(actor.system?.traits?.[traitKey], 0);
 }
 
 /**
- * Extract roll parameters from a dataset element, handling trait bonuses.
- * Common pattern used in both PC and NPC attack/damage rolls.
- * @param {HTMLElement} el - Element with dataset properties (roll, keep, trait, label, description)
- * @param {Actor} actor - Actor for trait lookups and bonus calculations
- * @returns {{diceRoll: number, diceKeep: number, traitBonus: number, label: string, description: string}} Roll parameters object
- * @example
- * // Button with data-roll="3" data-keep="2" data-trait="str" data-label="Damage"
- * const params = extractRollParams(button, actor);
- * // { diceRoll: 3, diceKeep: 2, traitBonus: 4, label: "Damage", description: "" }
+ * Roll parameters extracted from DOM element dataset attributes.
+ * 
+ * @typedef {Object} RollParams
+ * @property {number} diceRoll - Number of dice to roll (kept + unkept)
+ * @property {number} diceKeep - Number of dice to keep from roll
+ * @property {number} traitBonus - Bonus from trait value (if trait specified)
+ * @property {string} label - Display label for the roll
+ * @property {string} description - Detailed description of the roll
+ */
+
+/**
+ * Extract roll parameters from DOM element dataset attributes.
+ * 
+ * Parses data-* attributes on HTML elements to construct roll parameters
+ * for L5R4 Roll & Keep dice system. Common in ActorSheetV2 event handlers.
+ * 
+ * Expected dataset attributes:
+ * - data-roll: Number of dice to roll (required)
+ * - data-keep: Number of dice to keep (required)
+ * - data-label: Display name for roll (optional)
+ * - data-description: Roll description (optional)
+ * - data-trait: Trait key for bonus (optional, triggers effective trait lookup)
+ * 
+ * If data-trait is present, looks up effective trait value (including wound
+ * penalties) and includes it as traitBonus.
+ * 
+ * @param {HTMLElement} el - DOM element with dataset attributes
+ * @param {Actor} actor - Foundry Actor for trait lookups
+ * @returns {RollParams} Extracted roll parameters
  */
 export function extractRollParams(el, actor) {
   const diceRoll = toInt(el.dataset.roll, 0);
   const diceKeep = toInt(el.dataset.keep, 0);
   const label = String(el.dataset.label ?? "");
   const description = String(el.dataset.description ?? "");
-  
+
+  // Use hasOwnProperty to distinguish between missing attribute and empty string
+  // el.dataset.trait === undefined is true for both cases, but we need the distinction
   const hasTrait = Object.prototype.hasOwnProperty.call(el.dataset, "trait");
   const traitKey = hasTrait ? String(el.dataset.trait || "").toLowerCase() : "";
   const traitBonus = hasTrait ? getEffectiveTrait(actor, traitKey) : 0;
-  
+
   return {
     diceRoll,
     diceKeep,
@@ -190,26 +237,33 @@ export function extractRollParams(el, actor) {
 }
 
 /**
- * Resolve weapon skill/trait association for attack rolls.
- * Checks if the weapon has an associated skill that the character possesses,
- * otherwise falls back to the weapon's fallback trait.
+ * Weapon skill and trait resolution result for attack rolls.
  * 
- * **L5R4 Rule (Skills_and_Rolls.md):**
- * - Skilled roll: (Skill + Trait)k(Trait)
- * - Unskilled roll: (Trait)k(Trait)
+ * @typedef {Object} WeaponSkillResult
+ * @property {number} skillRank - Skill rank value (0 if no skill)
+ * @property {number} traitValue - Effective trait value (includes wound penalties)
+ * @property {number} rollBonus - Total rolled dice (Skill + Trait)
+ * @property {number} keepBonus - Total kept dice (Trait only)
+ * @property {string} description - Human-readable roll formula description
+ */
+
+/**
+ * Resolve weapon skill and trait for attack roll calculation.
  * 
- * @param {Actor} actor - The actor making the attack
- * @param {Item} weapon - The weapon item (weapon or bow type)
- * @returns {{skillRank: number, traitValue: number, rollBonus: number, keepBonus: number, description: string}} Roll parameters
- * @example
- * const attack = resolveWeaponSkillTrait(actor, katana);
- * // {
- * //   skillRank: 5,
- * //   traitValue: 4,
- * //   rollBonus: 9,  // (Skill + Trait) = 5 + 4
- * //   keepBonus: 4,  // (Trait) = 4
- * //   description: "Kenjutsu (5) + AGI (4)"
- * // }
+ * Implements L5R4 Skill Roll formula: (Skill Rank + Trait Value)k(Trait Value)
+ * 
+ * Resolution process:
+ * 1. Extract weapon.system.associatedSkill name (e.g., "Kenjutsu")
+ * 2. Search actor.items for matching skill by name (case-insensitive)
+ * 3. If skill found: Use skill's trait, calculate (Skill + Trait)k(Trait)
+ * 4. If no skill: Fall back to weapon.system.fallbackTrait, calculate (Trait)k(Trait)
+ * 
+ * Default fallback trait is "agi" (Agility) for weapons without skills.
+ * All trait values include wound penalties via getEffectiveTrait().
+ * 
+ * @param {Actor} actor - Foundry Actor making the attack
+ * @param {Item} weapon - Foundry Item of type "weapon"
+ * @returns {WeaponSkillResult} Resolved skill/trait values and roll formula
  */
 export function resolveWeaponSkillTrait(actor, weapon) {
   if (!weapon || !actor) {
@@ -217,56 +271,44 @@ export function resolveWeaponSkillTrait(actor, weapon) {
   }
 
   const weaponSystem = weapon.system || {};
-  const associatedSkill = String(weaponSystem.associatedSkill ?? "");
-  
-  // Defensive: Guard against Symbol or non-string fallbackTrait
-  let fallbackTrait = weaponSystem.fallbackTrait ?? "agi";
-  if (typeof fallbackTrait === "symbol") fallbackTrait = "agi";
-  fallbackTrait = String(fallbackTrait || "agi");
+  const associatedSkill = safeString(weaponSystem.associatedSkill);
+  const fallbackTrait = safeString(weaponSystem.fallbackTrait, "agi") || "agi";
 
-  // Try to find the associated skill on the character
-  // Case-insensitive matching to handle data import/export inconsistencies
+  // Search actor's skill items for matching skill by name (case-insensitive)
   let skill = null;
   if (associatedSkill && associatedSkill.trim() && actor.items?.find) {
     const skillNameLower = associatedSkill.toLowerCase();
     skill = actor.items.find(i => {
-      // Defensive: Guard against Symbol or non-string skill names
-      if (i.type !== "skill" || typeof i.name === "symbol") return false;
-      const itemName = String(i.name ?? "");
+      if (i.type !== "skill") return false;
+      const itemName = safeString(i.name);
       return itemName.toLowerCase() === skillNameLower;
     });
   }
 
   if (skill) {
-    // Use the skill + its associated trait
     const skillRank = toInt(skill.system?.rank || 0);
-    
-    // Defensive: Guard against Symbol or non-string trait
-    let skillTrait = skill.system?.trait ?? fallbackTrait;
-    if (typeof skillTrait === "symbol") skillTrait = fallbackTrait;
-    skillTrait = String(skillTrait || fallbackTrait);
-    
+    const skillTrait = safeString(skill.system?.trait, fallbackTrait) || fallbackTrait;
     const traitValue = getEffectiveTrait(actor, skillTrait);
-    
-    // Defensive: Guard against Symbol skill.name
-    const skillName = typeof skill.name === "symbol" ? "Unknown Skill" : String(skill.name ?? "Unknown");
-    
+    const skillName = safeString(skill.name, "Unknown Skill") || "Unknown";
+
+    // Skill Roll formula: (Skill + Trait)k(Trait)
+    // rollBonus = rolled dice, keepBonus = kept dice
     return {
       skillRank,
       traitValue,
-      rollBonus: skillRank + traitValue,  // Roll: Skill + Trait
-      keepBonus: traitValue,               // Keep: Trait
+      rollBonus: skillRank + traitValue,  // Total rolled dice
+      keepBonus: traitValue,               // Total kept dice
       description: `${skillName} (${skillRank}) + ${skillTrait.toUpperCase()} (${traitValue})`
     };
   } else {
-    // L5R4 Rule: Unskilled attack is (Trait)k(Trait)
+    // No skill found: Fall back to pure Trait Roll (Trait)k(Trait)
     const traitValue = getEffectiveTrait(actor, fallbackTrait);
-    
+
     return {
       skillRank: 0,
       traitValue,
-      rollBonus: traitValue,  // Roll: Trait only
-      keepBonus: traitValue,  // Keep: Trait
+      rollBonus: traitValue,
+      keepBonus: traitValue,
       description: `${fallbackTrait.toUpperCase()} (${traitValue}) - No skill`
     };
   }

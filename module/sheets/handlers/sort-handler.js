@@ -1,58 +1,86 @@
 /**
- * @fileoverview Sort Handler - Item List Sorting System
+ * Sort Handler for Item Lists
  * 
- * Manages sortable item lists in actor sheets with per-user, per-actor preferences.
- * Handles sort column clicks, visual indicators, and preference persistence.
+ * Manages user-initiated column sorting for actor item lists (skills, weapons, techniques, etc.).
+ * Handles click events on sortable column headers, updates visual indicators (active column, direction),
+ * persists preferences via user flags, and triggers sheet re-renders.
  * 
- * **Responsibilities:**
- * - Initialize sort visual indicators on render
- * - Handle sort column header clicks
- * - Toggle sort direction for repeated clicks
- * - Persist sort preferences to user flags
- * - Update visual indicators (active class, direction)
+ * Integration with Foundry VTT v13+:
+ * - Uses Application v2 event delegation pattern (event handlers receive event + target element)
+ * - Manipulates DOM directly for visual indicator updates (classList, data attributes)
+ * - Integrates with user flag system via sorting.js utilities (getSortPref, setSortPref)
  * 
- * **Integration:**
- * Used by BaseActorSheet and child sheets for consistent sorting behavior
- * across all item lists (skills, spells, advantages, etc.).
+ * Visual Indicator Convention:
+ * - `.item-sort-by` elements receive `.is-active` class when they're the active sort column
+ * - `data-dir="asc"|"desc"` attribute shows current sort direction on active column
+ * - Relies on CSS to render direction arrows based on these attributes
  * 
- * @author L5R4 System Team
- * @since 1.1.0
- * @see {@link https://foundryvtt.com/api/classes/foundry.documents.BaseUser.html#getFlag|BaseUser.getFlag}
- * @see {@link https://foundryvtt.com/api/classes/foundry.documents.BaseUser.html#setFlag|BaseUser.setFlag}
+ * @module sheets/handlers/sort-handler
+ * @requires Foundry VTT v13+ (Application v2 event patterns, User.flags API)
  */
 
 import { SYS_ID } from "../../config/constants.js";
 import { getSortPref, setSortPref } from "../../utils/sorting.js";
 
 /**
- * Sort Handler Class
- * Manages item list sorting preferences and visual indicators.
+ * Static utility class for handling sortable column header interactions.
+ * 
+ * Designed for use with Foundry v13's Application v2 event delegation system.
+ * All methods are static - no instance creation required. Handlers are meant
+ * to be called from sheet event delegation callbacks with appropriate parameters.
+ * 
+ * Typical workflow:
+ * 1. User clicks a `.item-sort-by` element in an `.item-list.-header`
+ * 2. Sheet's delegated event handler calls `SortHandler.handleClick(...)`
+ * 3. Handler updates user preferences, visual indicators, and triggers re-render
+ * 4. Sheet re-renders with newly sorted item list
+ * 
+ * @class SortHandler
+ * @static
  */
 export class SortHandler {
+  
   /**
-   * Initialize sort visual indicators based on current sort preferences.
-   * Sets the active column and sort direction indicators for list headers.
-   * Should be called from child sheet's _onRender() method.
+   * Updates visual indicators for sortable column headers.
    * 
-   * **Usage:**
-   * ```javascript
-   * // In child sheet's _onRender method:
-   * SortHandler.initializeIndicators(root, actor.id, "skills", ["name", "rank", "trait", "emphasis"]);
-   * ```
+   * Applies `.is-active` class to the currently active sort column and sets
+   * its `data-dir` attribute to show sort direction. Removes indicators from
+   * all other columns. CSS uses these attributes to render direction arrows.
    * 
-   * **Visual Indicators:**
-   * - Active column receives `.is-active` CSS class
-   * - Sort direction set via `data-dir="asc"` or `data-dir="desc"` attribute
-   * - Inactive columns have neither class nor attribute
+   * @param {HTMLElement} header - The `.item-list.-header` container element
+   * @param {string} activeKey - The data-sortby value of the active column
+   * @param {"asc"|"desc"} direction - Current sort direction for the active column
+   * @private
+   */
+  static _updateVisualIndicators(header, activeKey, direction) {
+    header.querySelectorAll('.item-sort-by').forEach(a => {
+      const sortKey = a.dataset.sortby;
+      const isActive = sortKey === activeKey;
+      a.classList.toggle('is-active', isActive);
+      
+      if (isActive) {
+        a.setAttribute('data-dir', direction);
+      } else {
+        a.removeAttribute('data-dir');
+      }
+    });
+  }
+
+  /**
+   * Initializes visual sort indicators on sheet render based on stored preferences.
    * 
-   * @param {HTMLElement} root - Sheet root element
-   * @param {string} actorId - Actor ID for preference storage
-   * @param {string} scope - Sort scope identifier (e.g., "skills", "spells", "advantages")
-   * @param {string[]} allowedKeys - Array of allowed sort keys for this scope
-   * @returns {void}
+   * Called during sheet render to restore the user's last sort state for a given
+   * scope (skills, weapons, etc.). Reads preferences from user flags via getSortPref
+   * and updates the DOM accordingly.
    * 
-   * @see {@link #handleClick} - Click handler that updates sort preferences
-   * @see {@link ../../utils/sorting.js|getSortPref} - Retrieves stored sort preference
+   * Safe to call even if the header element doesn't exist - fails gracefully with
+   * a console warning.
+   * 
+   * @param {HTMLElement} root - The sheet's root element (Application v2 pattern)
+   * @param {string} actorId - The actor's UUID or ID for preference lookup
+   * @param {string} scope - Sort scope identifier (e.g., "skills", "weapons", "techniques")
+   * @param {string[]} allowedKeys - Valid sort keys for this scope (security whitelist)
+   * @static
    */
   static initializeIndicators(root, actorId, scope, allowedKeys) {
     try {
@@ -60,101 +88,64 @@ export class SortHandler {
       if (!header) return;
 
       const pref = getSortPref(actorId, scope, allowedKeys, allowedKeys[0]);
-
-      // Update visual indicators for all sort headers in this scope
-      header.querySelectorAll('.item-sort-by').forEach(a => {
-        const sortKey = a.dataset.sortby;
-        const isActive = sortKey === pref.key;
-        a.classList.toggle('is-active', isActive);
-        
-        if (isActive) {
-          a.setAttribute('data-dir', pref.dir);
-        } else {
-          a.removeAttribute('data-dir');
-        }
-      });
+      this._updateVisualIndicators(header, pref.key, pref.dir);
     } catch (err) {
       console.warn(`${SYS_ID}`, "Failed to initialize sort indicators", { err, scope });
     }
   }
 
   /**
-   * Generic unified sort click handler for list column headers.
-   * Handles user clicks on sortable column headers, toggling sort direction
-   * and updating visual indicators. Stores preferences per-user, per-actor.
+   * Handles click events on sortable column headers with toggle logic.
    * 
-   * **Event Delegation:**
-   * This method should be called from sheet's `_onAction()` handler:
-   * ```javascript
-   * case "item-sort-by": 
-   *   return SortHandler.handleClick(this.actor.id, event, element, 
-   *     (scope) => this._getAllowedSortKeys(scope), () => this.render());
-   * ```
+   * Implements Application v2 event delegation pattern - receives both the event
+   * and the target element. Validates the sort key against allowed keys, persists
+   * the new preference to user flags, updates visual indicators, and triggers a
+   * sheet re-render with the new sort order.
    * 
-   * **Template Requirements:**
-   * - Headers need `<a class="item-sort-by" data-action="item-sort-by" data-sortby="{key}">`
-   * - Parent header section needs `data-scope="{scope}"` attribute
-   * 
-   * **Sort Behavior:**
-   * - First click on a column: Sort ascending by that column
+   * Toggle behavior:
+   * - First click on a column: Sort by that column ascending
    * - Second click on same column: Toggle to descending
-   * - Click on different column: Sort ascending by new column
+   * - Click on different column: Switch to new column ascending
    * 
-   * **Visual Feedback:**
-   * - Updates `.is-active` class on clicked header
-   * - Sets `data-dir` attribute to "asc" or "desc"
-   * - Removes indicators from inactive columns
-   * - Triggers sheet re-render to apply new sort
+   * Error handling:
+   * - Invalid sort keys are rejected with a warning (doesn't crash the sheet)
+   * - Missing DOM elements handled gracefully with fallbacks
+   * - Errors are logged but don't prevent re-render
    * 
-   * @param {string} actorId - Actor ID for preference storage
-   * @param {MouseEvent} event - Click event from sort header
-   * @param {HTMLElement} element - The clicked element with data-sortby attribute
-   * @param {Function} getAllowedKeys - Function that returns allowed keys for a scope
-   * @param {Function} renderSheet - Function to re-render the sheet
+   * @param {string} actorId - The actor's UUID or ID for preference storage
+   * @param {Event} event - The DOM click event (preventDefault called automatically)
+   * @param {HTMLElement} element - The clicked `.item-sort-by` element (Application v2 pattern)
+   * @param {Function} getAllowedKeys - Callback to get valid keys for a scope: (scope) => string[]
+   * @param {Function} renderSheet - Callback to trigger sheet re-render after sort change
    * @returns {Promise<void>}
-   * 
-   * @see {@link https://foundryvtt.com/api/classes/foundry.documents.BaseUser.html#getFlag|BaseUser.getFlag}
-   * @see {@link https://foundryvtt.com/api/classes/foundry.documents.BaseUser.html#setFlag|BaseUser.setFlag}
-   * @see {@link ../../utils/sorting.js|getSortPref} - Read sort preference from user flags
-   * @see {@link ../../utils/sorting.js|setSortPref} - Save sort preference to user flags
-   * @see {@link #initializeIndicators} - Initialize visual indicators on render
+   * @async
+   * @static
    */
   static async handleClick(actorId, event, element, getAllowedKeys, renderSheet) {
     event.preventDefault();
     event.stopPropagation();
     
     try {
-      const el = /** @type {HTMLElement} */ (element || event.currentTarget);
-      const header = /** @type {HTMLElement|null} */ (el.closest('.item-list.-header'));
+      const el = (element || event.currentTarget);
+      const header = (el.closest('.item-list.-header'));
       const scope = header?.dataset?.scope || "items";
       const key = el.dataset.sortby || "name";
-      
-      // Get allowed keys from provided function
+
       const allowed = getAllowedKeys?.(scope) ?? ["name"];
-      
-      // Validate sort key
+
       if (!allowed.includes(key)) {
         console.warn(`${SYS_ID}`, "Invalid sort key for scope", { scope, key, allowed });
         return;
       }
-      
-      // Get current preference and toggle direction if same key
+
       const cur = getSortPref(actorId, scope, allowed, allowed[0]);
       await setSortPref(actorId, scope, key, { toggleFrom: cur });
-      
-      // Update visual indicators before re-render
+
       if (header) {
-        header.querySelectorAll('.item-sort-by').forEach(a => {
-          a.classList.toggle('is-active', a === el);
-          if (a !== el) a.removeAttribute('data-dir');
-        });
-        
-        // Set direction indicator on the clicked element
         const newPref = getSortPref(actorId, scope, allowed, allowed[0]);
-        el.setAttribute('data-dir', newPref.dir);
+        this._updateVisualIndicators(header, newPref.key, newPref.dir);
       }
-      
-      // Re-render sheet to apply new sort
+
       renderSheet();
     } catch (err) {
       console.warn(`${SYS_ID}`, "Unified sort click failed", {

@@ -1,78 +1,108 @@
 /**
- * @fileoverview Void Points Handler - L5R4 Void Point Management
+ * Void Points Handler
  * 
- * Encapsulates void point adjustment and visual rendering logic for actor sheets.
- * Provides interactive dot interface for tracking void point expenditure and recovery.
+ * Manages adjustment and UI updates for character Void Points in the L5R4 system.
+ * Void Points represent moments of enlightened insight that characters can spend to
+ * enhance rolls or activate abilities. Each character has Void Points equal to their
+ * Void Ring rank, which refresh daily after rest.
  * 
- * **Responsibilities:**
- * - Adjust void points by ±1 within [0..9] range
- * - Persist changes to actor document
- * - Render visual dot interface with filled/empty states
- * - Handle click interactions (left=spend, right=regain)
+ * Foundry APIs: Actor#update, querySelector, classList
+ * Requires: Foundry v13+
  * 
- * **Integration:**
- * Used by BaseActorSheet via composition pattern. Methods are called with
- * explicit `this` context binding to access actor and element.
- * 
- * @author L5R4 System Team
- * @since 1.1.0
- * @see {@link https://foundryvtt.com/api/classes/foundry.abstract.Document.html#update|Document.update}
+ * @module VoidPointsHandler
  */
 
 import { SYS_ID } from "../../config/constants.js";
+import { clamp } from "../../utils/type-coercion.js";
 
 /**
- * Void Points Handler Class
- * Manages void point state and UI for actor sheets.
+ * Handles Void Point adjustments and visual representation updates.
+ * 
+ * Provides methods to increment/decrement a character's current Void Points
+ * and synchronize the UI dot display. Void Points are stored in the actor's
+ * system data at `system.rings.void.value` and are clamped between 0 and 9.
+ * 
+ * Usage pattern:
+ * - Called from sheet event handlers when void dot is clicked
+ * - Provides both state management (adjust) and rendering (paint)
+ * 
+ * @class VoidPointsHandler
  */
 export class VoidPointsHandler {
+  
   /**
-   * Adjust Void Points by ±1 within the range [0..9].
-   * Uses Document.update to persist the value and triggers UI repaint.
+   * Adjusts an actor's Void Points by the specified delta amount.
    * 
-   * @param {object} context - Handler context
-   * @param {Actor} context.actor - The actor document
-   * @param {HTMLElement} context.element - The sheet root element
-   * @param {MouseEvent} event - The triggering mouse event
-   * @param {HTMLElement} targetElement - The void points dots container element
-   * @param {number} delta - +1 (left click) or -1 (right-click)
+   * Increments or decrements the actor's current Void Points, clamping the result
+   * between 0 (spent all points) and 9 (maximum). Updates the actor document via
+   * Foundry's Actor#update API and triggers a UI repaint.
+   * 
+   * Game Rules: Characters have Void Points equal to their Void Ring (max 10 in rules,
+   * but clamped to 9 here). Void Points refresh daily after rest.
+   * 
+   * @param {Object} context - Sheet context containing actor and element references
+   * @param {L5R4Actor} context.actor - The actor document to update
+   * @param {HTMLElement} context.element - Root sheet element for UI updates
+   * @param {Event} [event] - Optional DOM event to prevent default behavior
+   * @param {number} delta - Amount to adjust (+1 to spend, -1 to regain)
    * @returns {Promise<void>}
-   * @see https://foundryvtt.com/api/classes/foundry.abstract.Document.html#update
+   * @async
    */
-  static async adjust(context, event, targetElement, delta) {
+  static async adjust(context, event, delta) {
     event?.preventDefault?.();
     
-    const cur = Number(context.actor.system?.rings?.void?.value ?? 0) || 0;
-    const next = Math.min(9, Math.max(0, cur + (delta > 0 ? 1 : -1)));
+    const cur = this._getVoidValue(context.actor);
+    const next = clamp(cur + delta, 0, 9); // Max 9 Void Points (system constraint)
     if (next === cur) return;
     
     try {
+      // diff:true minimizes update payload for performance
       await context.actor.update({ "system.rings.void.value": next }, { diff: true });
     } catch (err) {
       console.warn(`${SYS_ID} VoidPointsHandler: failed to update void points`, { err });
     }
-    
-    // Repaint from authoritative actor state to avoid stale DOM edge-cases
+
     this.paint(context.element, context.actor);
   }
 
   /**
-   * Render the 9-dot Void Points control by toggling "-filled" class on dots.
-   * Updates visual state to match current void points value. Safe to call after every render.
+   * Updates the visual representation of Void Points in the character sheet.
    * 
-   * @param {HTMLElement} root - The sheet root element containing .void-points-dots
-   * @param {Actor} actor - The actor document with void point data
+   * Finds all void dot elements and toggles their filled state based on the actor's
+   * current Void Point value. Dots with index <= current value are marked as filled.
+   * 
+   * Foundry Pattern: Uses standard DOM querySelector and classList manipulation.
+   * Compatible with Foundry v13 Application v2 architecture.
+   * 
+   * @param {HTMLElement} root - Root element to query for void point dots
+   * @param {L5R4Actor} actor - Actor document containing current Void Point data
    * @returns {void}
+   * @static
    */
   static paint(root, actor) {
     const node = root?.querySelector?.(".void-points-dots");
     if (!node) return;
     
-    const cur = Number(actor.system?.rings?.void?.value ?? 0) || 0;
+    const cur = this._getVoidValue(actor);
     node.querySelectorAll(".void-dot").forEach(d => {
       const idx = Number(d.getAttribute("data-idx") || "0") || 0;
       d.classList.toggle("-filled", idx <= cur);
     });
     node.setAttribute("data-value", String(cur));
+  }
+
+  /**
+   * Safely retrieves the current Void Point value from an actor.
+   * 
+   * Defensive accessor that handles missing or malformed data by returning 0.
+   * Uses optional chaining to safely traverse the actor's system data structure.
+   * 
+   * @param {L5R4Actor} actor - Actor document to read Void Points from
+   * @returns {number} Current Void Point value (0 if data is missing/invalid)
+   * @private
+   * @static
+   */
+  static _getVoidValue(actor) {
+    return Number(actor.system?.rings?.void?.value ?? 0) || 0;
   }
 }

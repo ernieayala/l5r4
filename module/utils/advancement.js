@@ -1,63 +1,43 @@
 /**
- * @fileoverview L5R4 Character Advancement Utilities
+ * Advancement Utilities
  * 
- * Provides mathematical utilities for L5R4's rank/points XP advancement system.
- * Handles conversion between decimal values and rank/points pairs, supporting
- * the XP Manager and character progression mechanics.
+ * Handles conversion between rank/points representation and decimal values for 
+ * character advancement in L5R4. The system tracks character progression (skills,
+ * traits, honor, glory, status, etc.) using a rank/points structure where:
+ * - **Rank:** The whole number level (0-10) 
+ * - **Points:** Fractional progress toward next rank (0-9)
+ * - **Value:** Decimal representation (rank + points/10)
  * 
- * **Core Responsibilities:**
- * - **Rank/Points Conversion**: Bidirectional conversion (decimal ↔ rank/points)
- * - **Delta Application**: Add/subtract XP while maintaining valid ranges
- * - **Normalization**: Ensure rank/points stay within L5R4 rules (0-10 ranks, 0-9 points)
+ * Per L5R4 core rules:
+ * - Skills cost XP = next rank (rank 2→3 costs 3 XP)
+ * - Traits cost XP = 4 × next rank (Reflexes 2→3 costs 12 XP)
+ * - Void Ring costs XP = 6 × next rank (Void 2→3 costs 18 XP)
+ * - Maximum starting rank is 4; absolute maximum is 10
  * 
- * **Design Principles:**
- * - **Pure Functions**: No side effects, deterministic outputs
- * - **Range Safety**: Automatic clamping to valid L5R4 ranges
- * - **Point Normalization**: Ensures points ∈ [0,9] with proper carry
- * - **Edge Case Handling**: Properly handles 10.0 (max rank, zero points)
+ * Used by Foundry DataModel properties: honor, glory, status, insight, shadowTaint.
  * 
- * **L5R4 Advancement System:**
- * - Ranks range from 0 to 10
- * - Points range from 0 to 9 within each rank
- * - Decimal representation: rank.points (e.g., 5.6 = rank 5, 6 points)
- * - 10 points roll over to next rank (e.g., 5.10 → 6.0)
- * - Maximum advancement is 10.0 (rank 10, no further points)
+ * @module utils/advancement
+ */
+
+import { clamp } from "./type-coercion.js";
+
+/**
+ * Rank/Points object structure used for character advancement tracking.
  * 
- * **Usage Examples:**
- * ```javascript
- * // Convert rank/points to decimal
- * const value = rankPointsToValue({ rank: 5, points: 6 }); // 5.6
- * 
- * // Convert decimal to rank/points
- * const rp = valueToRankPoints(5.6); // { rank: 5, points: 6, value: 5.6 }
- * 
- * // Apply XP delta
- * const current = { rank: 5, points: 6 };
- * const updated = applyRankPointsDelta(current, 0.5); // { rank: 6, points: 1, value: 6.1 }
- * ```
- * 
- * @author L5R4 System Team
- * @since 1.0.0
- * @version 2.0.0
+ * @typedef {Object} RankPoints
+ * @property {number} rank - Whole number rank (0-10)
+ * @property {number} points - Fractional progress toward next rank (0-9)
+ * @property {number} value - Decimal representation (rank + points/10)
  */
 
 /**
- * Convert a rank/points pair to a single decimal value (e.g., rank 5, points 6 = 5.6).
- * Used for XP calculations and advancement tracking.
+ * Converts a rank/points object to its decimal value representation.
  * 
- * Safely handles null/undefined inputs by defaulting to 0.
+ * Performs defensive coercion: treats nullish, undefined, or non-numeric values as 0.
+ * Commonly used when reading character progression from Foundry DataModel properties.
  * 
- * @param {{rank:number, points:number}|null|undefined} rp - Rank/points object (nullable)
- * @param {number} rp.rank - The rank value (0-10)
- * @param {number} rp.points - The points value (0-9)
- * @returns {number} Combined decimal value
- * @example
- * rankPointsToValue({ rank: 5, points: 6 }); // 5.6
- * rankPointsToValue({ rank: 0, points: 3 }); // 0.3
- * rankPointsToValue({ rank: 10, points: 0 }); // 10.0
- * rankPointsToValue(null); // 0.0 (safe default)
- * @pure
- * @see valueToRankPoints
+ * @param {RankPoints|null|undefined} rp - Rank/points object with optional rank and points properties
+ * @returns {number} Decimal value (e.g., rank 3 + 5 points = 3.5)
  */
 export function rankPointsToValue(rp) {
   const r = Number(rp?.rank ?? 0) || 0;
@@ -66,31 +46,26 @@ export function rankPointsToValue(rp) {
 }
 
 /**
- * Convert a decimal value (0.0..10.0) to normalized rank/points.
- * Ensures points ∈ [0,9], and 10.0 => { rank:10, points:0 }.
- * Automatically handles edge cases and clamping to valid ranges.
+ * Converts a decimal value to a rank/points object with optional bounds enforcement.
  * 
- * Safely handles null/undefined/NaN by treating as 0.
+ * Automatically handles:
+ * - Value clamping within [minRank, maxRank] range
+ * - Points overflow (≥10 points increments rank by 1, resets points to 0)
+ * - Max rank ceiling (at maxRank, points locked at 0)
  * 
- * @param {number|null|undefined} value - Decimal value to convert (coerced to number)
- * @param {number} [minRank=0] - Minimum allowed rank
- * @param {number} [maxRank=10] - Maximum allowed rank
- * @returns {{rank:number, points:number, value:number}} Normalized rank/points object
- * @example
- * valueToRankPoints(5.6);    // { rank: 5, points: 6, value: 5.6 }
- * valueToRankPoints(5.12);   // { rank: 6, points: 2, value: 6.2 } (normalized)
- * valueToRankPoints(10.0);   // { rank: 10, points: 0, value: 10.0 } (max)
- * valueToRankPoints(-1);     // { rank: 0, points: 0, value: 0.0 } (clamped)
- * valueToRankPoints(null);   // { rank: 0, points: 0, value: 0.0 } (safe default)
- * @pure
- * @see rankPointsToValue
- * @see applyRankPointsDelta
+ * Commonly used when setting character progression values from user input or calculations.
+ * Per L5R4 rules, most character attributes cap at rank 10.
+ * 
+ * @param {number} value - Decimal value to convert (e.g., 3.5)
+ * @param {number} [minRank=0] - Minimum allowed rank (default 0)
+ * @param {number} [maxRank=10] - Maximum allowed rank per L5R4 rules (default 10)
+ * @returns {RankPoints} Object with rank, points, and value properties
  */
 export function valueToRankPoints(value, minRank = 0, maxRank = 10) {
   const min = Number(minRank) || 0;
   const max = Number(maxRank) || 10;
-  let v = Math.max(min, Math.min(max, Number(value) || 0));
-  if (v === max) return { rank: max, points: 0, value: max }; // exact 10.0
+  let v = clamp(Number(value) || 0, min, max);
+  if (v === max) return { rank: max, points: 0, value: max };
   const rank = Math.floor(v);
   let points = Math.round((v - rank) * 10);
   if (points >= 10) return { rank: Math.min(rank + 1, max), points: 0, value: Math.min(rank + 1, max) };
@@ -98,36 +73,19 @@ export function valueToRankPoints(value, minRank = 0, maxRank = 10) {
 }
 
 /**
- * Apply a decimal delta (e.g., +0.1, -1.0) to a rank/points pair and normalize.
- * Used when spending or gaining XP, with automatic normalization and clamping.
+ * Applies a delta (positive or negative) to a rank/points value and returns the result.
  * 
- * Safely handles null/undefined inputs by treating as 0.
- * Internally calls rankPointsToValue and valueToRankPoints for conversion.
+ * Useful for increment/decrement operations in character sheets (e.g., +1 or -1 clicks).
+ * The delta can be fractional (e.g., +0.5 adds 5 points) or whole numbers.
+ * Result is automatically clamped within [minRank, maxRank] bounds.
  * 
- * @param {{rank:number, points:number}|null|undefined} rp - Current rank/points object (nullable)
- * @param {number|null|undefined} delta - Delta to apply (positive or negative, coerced to number)
- * @param {number} [minRank=0] - Minimum allowed rank
- * @param {number} [maxRank=10] - Maximum allowed rank
- * @returns {{rank:number, points:number, value:number}} Updated and normalized rank/points object
- * @example
- * // Add 0.5 (5 points)
- * applyRankPointsDelta({ rank: 5, points: 6 }, 0.5);
- * // { rank: 6, points: 1, value: 6.1 }
+ * Used by: PcAdjustmentHandler for trait/skill/honor/glory/status adjustments.
  * 
- * // Subtract 1.2
- * applyRankPointsDelta({ rank: 5, points: 6 }, -1.2);
- * // { rank: 4, points: 4, value: 4.4 }
- * 
- * // At maximum (clamped)
- * applyRankPointsDelta({ rank: 10, points: 0 }, 0.5);
- * // { rank: 10, points: 0, value: 10.0 }
- * 
- * // Safe null handling
- * applyRankPointsDelta(null, 0.5);
- * // { rank: 0, points: 5, value: 0.5 }
- * @pure
- * @see rankPointsToValue
- * @see valueToRankPoints
+ * @param {RankPoints|null|undefined} rp - Current rank/points object
+ * @param {number} delta - Amount to add (positive) or subtract (negative)
+ * @param {number} [minRank=0] - Minimum allowed rank (default 0)
+ * @param {number} [maxRank=10] - Maximum allowed rank per L5R4 rules (default 10)
+ * @returns {RankPoints} New rank/points object after applying delta
  */
 export function applyRankPointsDelta(rp, delta, minRank = 0, maxRank = 10) {
   const now = rankPointsToValue(rp);

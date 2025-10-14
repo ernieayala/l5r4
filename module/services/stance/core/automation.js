@@ -1,63 +1,61 @@
 /**
- * @fileoverview L5R4 Stance Automation - Backward Compatibility and Flag Management
+ * Stance Automation Service
  * 
- * **ARCHITECTURAL NOTE**: The pure stance calculation logic has been moved to
- * `documents/actor/calculations/stance-effects.js` to maintain proper layer separation.
- * This file now provides backward compatibility and handles async flag management
- * (which belongs in the services layer).
+ * Manages automated effects and cleanup for L5R4 combat stances.
+ * Handles persisted stance data (e.g., Full Defense roll results) and
+ * ensures flags are properly cleared when stances are removed.
  * 
- * **Core Responsibilities:**
- * - **Backward Compatibility**: Re-export stance calculation functions
- * - **Flag Management**: Clean up stance-specific flags when stances change (async)
- * - **Effect Lifecycle**: Handle ActiveEffect-related operations
+ * Related modules:
+ * - stance-effects.js: Applies stance bonuses/penalties to character stats
+ * - effect-templates.js: Defines Active Effect configurations for each stance
  * 
- * **Migration Path:**
- * ```javascript
- * // Old (still works via this file)
- * import { applyStanceAutomation } from "./services/stance/core/automation.js";
+ * Game Mechanics:
+ * Full Defense Stance requires a Defense/Reflexes roll at declaration.
+ * Half the roll total (rounded up) is added to Armor TN until next turn.
+ * This result must be stored in actor flags and cleared when stance ends.
  * 
- * // New (for documents layer)
- * import { applyStanceEffects } from "./documents/actor/calculations/stance-effects.js";
- * ```
- * 
- * @author L5R4 System Team
- * @since 1.1.0
- * @version 2.0.0
- * @deprecated Use applyStanceEffects from documents/actor/calculations/stance-effects.js
- * @see {@link ../../../documents/actor/calculations/stance-effects.js|Stance Effects}
+ * API: Foundry Actor document, Actor.getFlag/unsetFlag
+ * Requires: Foundry VTT v13+
  */
 
 import { SYS_ID } from "../../../config/constants.js";
 import { applyStanceEffects } from "../../../documents/actor/calculations/stance-effects.js";
 
-/* -------------------------------------------- */
-/* Backward Compatibility Exports              */
-/* -------------------------------------------- */
-
 /**
- * Stance automation handler (backward compatibility wrapper).
+ * Alias for applyStanceEffects function.
+ * Maintains backward compatibility and provides a descriptive name
+ * for external modules that apply automated stance effects.
  * 
- * @deprecated Import applyStanceEffects from documents/actor/calculations/stance-effects.js instead
- * @param {Actor} actor - The actor to apply stance effects to
- * @param {object} sys - The actor's system data object
+ * @see {applyStanceEffects} in stance-effects.js for implementation
  */
 export const applyStanceAutomation = applyStanceEffects;
 
 /**
- * Clear stance-related flags when a stance is removed.
+ * Removes persisted flag data when a stance is removed from an actor.
+ * 
+ * Some stances (e.g., Full Defense) store roll results or state in actor flags.
+ * When these stances are removed, the associated flags must be cleared to
+ * prevent stale data from affecting future calculations.
+ * 
+ * Full Defense Stance: Stores the Defense/Reflexes roll result in the
+ * "fullDefenseRoll" flag. This value determines the Armor TN bonus per
+ * core rules (half of roll total, rounded up). The flag must be cleared
+ * when the stance ends to ensure accurate calculations on re-activation.
  * 
  * @param {Actor} actor - The actor whose stance flags should be cleared
- * @param {string} removedStanceId - The stance ID that was removed
+ * @param {string} removedStanceId - The ID of the removed stance (e.g., "fullDefenseStance")
+ * @returns {Promise<void>} Resolves when flags are cleared, or immediately if actor lacks permissions
+ * 
+ * @async
  */
 export async function clearStanceFlags(actor, removedStanceId) {
   if (!actor?.isOwner) return;
-  
+
   try {
     switch (removedStanceId) {
       case "fullDefenseStance":
         await actor.unsetFlag(SYS_ID, "fullDefenseRoll");
         break;
-      // Other stances don't currently use flags
       default:
         break;
     }

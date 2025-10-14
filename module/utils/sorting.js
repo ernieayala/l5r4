@@ -1,73 +1,62 @@
 /**
- * @fileoverview L5R4 Sorting Preference System
+ * Sort Preference Management Utility
  * 
- * Manages user-specific sorting preferences for actor item lists.
- * Stores preferences in user flags and provides locale-aware comparison
- * for consistent sorting across different languages and data types.
+ * Provides user-scoped, actor-scoped sort preference storage and retrieval
+ * using Foundry VTT's user flag system. Each actor can have different sort
+ * preferences for different scopes (e.g., "skills", "weapons", "items").
  * 
- * **Core Responsibilities:**
- * - **Preference Storage**: Read/write sort preferences to user flags
- * - **Locale-Aware Sorting**: Multi-column sorting with proper collation
- * - **Legacy Compatibility**: Migrate old advantage-only preferences
- * 
- * **Design Principles:**
- * - **Per-User Preferences**: Stored in user flags, not actor data
- * - **Per-Actor Scopes**: Different sorting for different actors
- * - **Per-Scope Settings**: Different sorting for weapons, skills, etc.
- * - **Toggle Behavior**: Clicking same column toggles asc/desc
- * - **Fallback Columns**: Primary sort with secondary tie-breakers
- * 
- * **Storage Structure:**
- * ```javascript
- * game.user.flags["l5r4-enhanced"].sortByActor = {
+ * Sort preferences are stored in `game.user.flags[SYS_ID].sortByActor` as:
+ * ```
+ * {
  *   [actorId]: {
- *     [scope]: { key: "name", dir: "asc" },
- *     "weapons": { key: "damage", dir: "desc" },
- *     "advDis": { key: "type", dir: "asc" }
+ *     [scope]: { key: string, dir: "asc"|"desc" }
  *   }
  * }
  * ```
  * 
- * **Usage Examples:**
- * ```javascript
- * // Read preferences
- * const pref = getSortPref(actorId, "weapons", ["name", "damage", "skill"], "name");
- * 
- * // Update preferences (with toggle behavior)
- * await setSortPref(actorId, "weapons", "damage", { toggleFrom: pref });
- * 
- * // Sort array with preferences
- * const sorted = sortWithPref(weapons, {
- *   name: w => w.name,
- *   damage: w => w.system.damage,
- *   skill: w => w.system.associatedSkill
- * }, pref);
- * ```
- * 
- * @author L5R4 System Team
- * @since 1.0.0
- * @version 2.0.0
- * @see {@link https://foundryvtt.com/api/classes/foundry.documents.BaseUser.html#getFlag|User.getFlag}
- * @see {@link https://foundryvtt.com/api/classes/foundry.documents.BaseUser.html#setFlag|User.setFlag}
+ * @module utils/sorting
+ * @requires Foundry VTT v13+ (uses User.flags API)
  */
 
 import { SYS_ID } from "../config/constants.js";
 
 /**
- * Read a sort preference for an actor's items, validating against allowed keys.
- * @param {string} actorId - Actor ID for preference storage
- * @param {string} scope - Scope identifier (e.g., "advDis", "weapons", "items")
- * @param {string[]} allowedKeys - Valid sort keys for this scope
- * @param {string} [defaultKey="name"] - Default sort key if none found
- * @returns {{key: string, dir: "asc"|"desc"}} Sort preference object
- * @see https://foundryvtt.com/api/classes/foundry.documents.BaseUser.html#getFlag
+ * @typedef {Object} SortPreference
+ * @property {string} key - The property key to sort by
+ * @property {"asc"|"desc"} dir - Sort direction (ascending or descending)
+ */
+
+/**
+ * @typedef {Object.<string, Function>} ColumnExtractors
+ * @description Map of column keys to extractor functions that pull sortable values from items.
+ * Each function receives an item and returns a sortable value (string or number).
  * @example
- * const pref = getSortPref(actor.id, "weapons", ["name", "damage"], "name");
- * // Returns: { key: "name", dir: "asc" } (or saved preference)
+ * {
+ *   name: (item) => item.name,
+ *   rank: (item) => item.system.rank
+ * }
+ */
+
+/**
+ * Retrieves the current sort preference for a specific actor and scope.
+ * 
+ * Reads from Foundry user flags at `game.user.flags[SYS_ID].sortByActor[actorId][scope]`.
+ * If no preference exists or the stored key is not in allowedKeys, returns the defaultKey.
+ * Direction defaults to "asc" if not explicitly set to "desc".
+ * 
+ * @param {string} actorId - The actor's UUID or ID
+ * @param {string} scope - The sort scope (e.g., "skills", "weapons", "items")
+ * @param {string[]} allowedKeys - Valid sort keys for this scope (security whitelist)
+ * @param {string} [defaultKey="name"] - Fallback key if no preference stored
+ * @returns {SortPreference} The validated sort preference with key and direction
+ * @example
+ * // Get skill sorting preference
+ * const pref = getSortPref(actor.id, "skills", ["name", "rank", "trait"], "name");
+ * // Returns: { key: "rank", dir: "desc" }
  */
 export function getSortPref(actorId, scope, allowedKeys, defaultKey="name") {
   const safeKey = (k) => allowedKeys.includes(k) ? k : defaultKey;
-  const sortByActor = /** @type {{[id:string]: {[scope:string]: {key?: string, dir?: "asc"|"desc"}}}} */ (game.user?.flags?.[SYS_ID]?.sortByActor ?? {});
+  const sortByActor = (game.user?.flags?.[SYS_ID]?.sortByActor ?? {});
   const rec = sortByActor?.[actorId]?.[scope];
   const key = safeKey(String(rec?.key ?? defaultKey));
   const dir = rec?.dir === "desc" ? "desc" : "asc";
@@ -75,22 +64,32 @@ export function getSortPref(actorId, scope, allowedKeys, defaultKey="name") {
 }
 
 /**
- * Write a sort preference for an actor's items. If switching to a new key, reset dir to asc.
- * If clicking the same key, toggle between asc and desc.
- * @param {string} actorId - Actor ID for preference storage
- * @param {string} scope - Scope identifier for the sort preference
- * @param {string} key - Sort key to set
- * @param {{toggleFrom?: {key:string, dir:"asc"|"desc"}}} [opts] - Options for toggling behavior
+ * Sets the sort preference for a specific actor and scope with toggle logic.
+ * 
+ * If the user clicks the same column twice, the direction toggles (asc ↔ desc).
+ * If the user clicks a different column, direction resets to "asc".
+ * 
+ * Persists to Foundry user flags via `game.user.setFlag(SYS_ID, "sortByActor", ...)`.
+ * 
+ * @param {string} actorId - The actor's UUID or ID
+ * @param {string} scope - The sort scope (e.g., "skills", "weapons")
+ * @param {string} key - The new sort key
+ * @param {Object} [opts={}] - Additional options
+ * @param {SortPreference} [opts.toggleFrom] - Previous preference for toggle calculation (overrides stored value)
  * @returns {Promise<void>}
- * @see https://foundryvtt.com/api/classes/foundry.documents.BaseUser.html#setFlag
+ * @async
  * @example
- * // Toggle behavior: clicking same column toggles direction
- * const current = getSortPref(actorId, "weapons", ["name", "damage"]);
- * await setSortPref(actorId, "weapons", "damage", { toggleFrom: current });
+ * // Toggle skill sorting by rank
+ * await setSortPref(actor.id, "skills", "rank");
+ * // First click: sorts by rank ascending
+ * // Second click: sorts by rank descending
+ * // Click "name": sorts by name ascending
  */
 export async function setSortPref(actorId, scope, key, opts={}) {
-  const map = /** @type {{[id:string]: {[scope:string]: {key:string,dir:"asc"|"desc"}}}} */ (await game.user.getFlag(SYS_ID, "sortByActor")) ?? {};
+  const map = (await game.user.getFlag(SYS_ID, "sortByActor")) ?? {};
+  // Determine previous preference for toggle logic
   const prev = map?.[actorId]?.[scope] ?? opts.toggleFrom ?? { key: "name", dir: "asc" };
+  // Toggle direction if same key, otherwise reset to ascending
   const next = { key, dir: prev.key === key ? (prev.dir === "asc" ? "desc" : "asc") : "asc" };
   const out = { ...map };
   out[actorId] = { ...(out[actorId] ?? {}), [scope]: next };
@@ -98,34 +97,46 @@ export async function setSortPref(actorId, scope, key, opts={}) {
 }
 
 /**
- * Sort a list by a column map and preference with locale-aware comparison.
- * Each column accessor returns either a string or a number.
- * Primary column honors direction; tie-breakers always ascend.
- * @template T
- * @param {T[]} list - Array of items to sort
- * @param {{[key:string]: (it:T)=>string|number}} columns - Column accessor functions
- * @param {{key:string, dir:"asc"|"desc"}} pref - Sort preference (key and direction)
- * @param {string} [locale] - Locale for string comparison (defaults to game.i18n.lang)
- * @returns {T[]} Sorted array
+ * Performs multi-column sorting with user preference and locale-aware comparison.
+ * 
+ * Sorts the list by the primary key (from pref) first, then uses remaining columns
+ * as tiebreakers in the order they appear in the columns object. Direction multiplier
+ * only applies to the primary column; tiebreakers always sort ascending.
+ * 
+ * Automatically selects numeric comparison for number types, string comparison for others.
+ * String comparison uses `String.localeCompare()` for proper locale-aware sorting
+ * (handles accents, case, etc.).
+ * 
+ * @param {Array<any>} list - Array of items to sort (mutates in place)
+ * @param {ColumnExtractors} columns - Map of column keys to extractor functions
+ * @param {SortPreference} pref - User's sort preference (key and direction)
+ * @param {string} [locale=game.i18n?.lang] - Locale code for string comparison
+ * @returns {Array<any>} The sorted array (same reference as input)
  * @example
- * const sortedWeapons = sortWithPref(weapons, {
- *   name: w => w.name,
- *   damage: w => w.system.damage,
- *   skill: w => w.system.associatedSkill
- * }, { key: "damage", dir: "desc" });
+ * // Sort skills by rank descending, name ascending (tiebreaker)
+ * const sorted = sortWithPref(
+ *   skills,
+ *   { name: s => s.name, rank: s => s.system.rank },
+ *   { key: "rank", dir: "desc" },
+ *   "en"
+ * );
  */
 export function sortWithPref(list, columns, pref, locale=game.i18n?.lang) {
   const primary = pref.key;
   const dirMul = pref.dir === "desc" ? -1 : 1;
+  // Build precedence: primary first, then all other columns (deduplicated)
   const precedence = [primary, ...Object.keys(columns)].filter((v,i,a)=>a.indexOf(v)===i);
+  // String comparator: locale-aware
   const sc = (a,b) => String(a ?? "").localeCompare(String(b ?? ""), locale);
+  // Numeric comparator: handles null/undefined as 0
   const nc = (a,b) => Math.sign((Number(a)||0) - (Number(b)||0));
   return list.sort((a,b)=>{
     for (const k of precedence) {
       const Av = columns[k]?.(a);
       const Bv = columns[k]?.(b);
+      // Select comparator based on type of extracted values
       const r = typeof Av === "number" || typeof Bv === "number" ? nc(Av,Bv) : sc(Av,Bv);
-      if (r !== 0) return k === primary ? r * dirMul : r;
+      if (r !== 0) return k === primary ? r * dirMul : r; // Apply direction only to primary
     }
     return 0;
   });

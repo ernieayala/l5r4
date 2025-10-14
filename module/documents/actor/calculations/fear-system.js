@@ -1,118 +1,65 @@
 /**
- * @fileoverview L5R4 Fear System - Fear Derived Data Calculation
+ * Fear System Calculations
  * 
- * Provides Fear TN calculation for NPC actors according to L5R4 RAW rules.
- * Pre-computes Fear data during prepareDerivedData for efficient sheet rendering
- * and Fear test execution by the Fear service module.
+ * Calculates Fear-related derived data for L5R4 actors. Fear represents the
+ * psychological terror inflicted by supernatural creatures, horrifying enemies,
+ * or traumatic situations. This module computes the Target Number required to
+ * resist Fear effects based on the Fear Rank.
  * 
- * **Core Responsibilities:**
- * - **Fear TN Calculation**: TN = 5 + (5 × Fear Rank) per RAW
- * - **Active State**: Determine if Fear is enabled (rank > 0)
- * - **Error Handling**: Graceful fallback to safe defaults on calculation errors
+ * Game Mechanics:
+ * - Fear has a Rank from 1 to 10 representing severity
+ * - Resistance TN = 5 + (5 × Fear Rank)
+ * - Characters roll Raw Willpower + Honor Rank to resist
+ * - Failure inflicts -Xk0 penalty to all rolls (X = Fear Rank)
+ * - Catastrophic failure (by 15+) causes fleeing or cowering
  * 
- * **L5R4 Rules as Written (RAW):**
- * - Fear X: TN = 5 + (5 × Fear Rank)
- *   - Example: Fear 3 = TN 20 (5 + 15)
- * - Resistance Roll: Raw Willpower at TN, then add Honor Rank to total
- * - Failure: Character suffers -XkO penalty to all rolls (X = Fear Rank)
+ * This module is called during Actor prepareDerivedData lifecycle.
  * 
- * **Architecture:**
- * This module computes Fear derived data (TN, active state) which is then
- * consumed by the Fear service module for executing Fear tests and applying
- * penalties. Separation of concerns: calculation logic here, test logic in service.
- * 
- * **Usage:**
- * ```javascript
- * import { prepareFear } from "./fear-system.js";
- * 
- * // During NPC prepareDerivedData
- * prepareFear(sys);
- * 
- * // Access computed values
- * console.log(sys.fear.tn); // 20 (Fear 3)
- * console.log(sys.fear.active); // true
- * ```
- * 
- * @author L5R4 System Team
- * @since 1.1.0
- * @version 2.0.0
- * @see {@link ../../services/fear.js|Fear Service} - Uses these computed values
- * @see L5R4 Core Rulebook, 4th Edition, p. 91-92 - Fear rules
+ * API: None (pure calculation helpers)
  */
-
 import { SYS_ID } from "../../../config/constants.js";
 import { toInt } from "../../../utils/type-coercion.js";
 
 /**
- * Prepare Fear derived data for NPCs.
- * Computes Fear TN and active state for efficient sheet rendering.
- * Called from Actor.prepareDerivedData() to ensure Fear values are always current.
- * @public
+ * Prepares Fear-related derived data for an actor's system object.
  * 
- * **L5R4 Rules as Written (RAW):**
- * - **Fear X**: TN = 5 + (5 × Fear Rank)
- *   - Fear 1: TN 10
- *   - Fear 2: TN 15
- *   - Fear 3: TN 20
- *   - Fear 4: TN 25
- *   - Fear 5: TN 30
+ * Calculates the Target Number required to resist the Fear effect based on
+ * the Fear Rank. The TN follows the core rule: 5 + (5 × Fear Rank). This
+ * function also sets an `active` flag to indicate whether Fear is currently
+ * affecting the actor.
  * 
- * **Calculation:**
- * 1. Extract Fear rank from sys.fear.rank (default 0)
- * 2. Calculate TN = 5 + (5 × rank) if rank > 0, otherwise 0
- * 3. Set active = true if rank > 0, otherwise false
- * 4. Store results in sys.fear for sheet and service access
+ * Note: This calculates the TN that must be beaten, not the resistance roll
+ * itself. The actual resistance roll is Raw Willpower + Honor Rank vs this TN.
  * 
- * **Error Handling:**
- * If calculation fails, falls back to safe defaults:
- * - rank: 0
- * - active: false
- * - tn: 0
- * 
- * This ensures sheets and services never encounter undefined Fear data.
- * 
- * @param {object} sys - The actor's system data object
- * @param {object} [sys.fear] - Fear data storage
- * @param {number} [sys.fear.rank] - Fear rank (0-10+)
- * @returns {void} - Modifies sys.fear in place
- * @throws {never} - Never throws; errors are caught and logged with safe defaults applied
- * 
- * @example
- * // Set up NPC with Fear 3
- * sys.fear = { rank: 3 };
- * prepareFear(sys);
- * console.log(sys.fear.tn); // 20
- * console.log(sys.fear.active); // true
- * 
- * @example
- * // NPC with no Fear
- * sys.fear = { rank: 0 };
- * prepareFear(sys);
- * console.log(sys.fear.tn); // 0
- * console.log(sys.fear.active); // false
+ * @param {Object} sys - The actor's system data object
+ * @param {Object} [sys.fear] - The fear data object
+ * @param {number} [sys.fear.rank] - The Fear Rank (1-10), defaults to 0
+ * @throws {TypeError} If sys is not a valid object
+ * @returns {void} Modifies sys.fear in place with calculated values:
+ *   - rank: The coerced Fear Rank (integer)
+ *   - active: Boolean indicating if Fear is active (rank > 0)
+ *   - tn: The Target Number to resist (5 + 5×rank, or 0 if inactive)
  */
 export function prepareFear(sys) {
-  // Defensive: validate sys is a plain object (not null, not array)
   if (!sys || typeof sys !== "object" || Array.isArray(sys)) {
     throw new TypeError("prepareFear requires a valid system object");
   }
-  
+
+  sys.fear = sys.fear || {};
+  let rank = 0;
+
+  // Safely coerce fear rank to integer with fallback to 0
+  // Errors are logged but don't halt actor preparation
   try {
-    sys.fear = sys.fear || {};
-    // toInt safely coerces to integer, handles non-numeric values
-    const rank = toInt(sys.fear.rank ?? 0);
-    
-    sys.fear.rank = rank;
-    sys.fear.active = rank > 0;
-    // RAW: TN = 5 + (5 × Fear Rank)
-    sys.fear.tn = rank > 0 ? 5 + (5 * rank) : 0;
+    rank = toInt(sys.fear.rank ?? 0);
   } catch (err) {
-    // Log error for debugging (tests can mock console.warn to suppress)
     console.warn(`${SYS_ID}`, "Failed to prepare Fear derived data", { err });
-    // Ensure safe defaults on error
-    sys.fear = sys.fear || {};
-    sys.fear.rank = 0;
-    sys.fear.active = false;
-    sys.fear.tn = 0;
   }
+
+  sys.fear.rank = rank;
+  // Mark Fear as active if rank > 0 (any Fear effect present)
+  sys.fear.active = rank > 0;
+  // Calculate resistance TN per core rules: 5 + (5 × Fear Rank)
+  // Characters roll Raw Willpower + Honor Rank against this TN
+  sys.fear.tn = rank > 0 ? 5 + (5 * rank) : 0;
 }

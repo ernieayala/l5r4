@@ -1,27 +1,43 @@
 /**
- * @fileoverview XP Tracking Shared Utilities
+ * XP Tracking System - Item Lifecycle Integration
  * 
- * Shared functions for logging experience point expenditures to actor flags.
- * Used by both item creation and update lifecycle hooks to maintain XP audit trail.
+ * Logs Experience Point expenditures when items are created or updated on actor documents.
+ * Creates detailed audit trail entries stored in actor flags for display in the XP Manager UI.
  * 
- * **Responsibilities:**
- * - Log XP expenditures to actor.flags[SYS_ID].xpSpent array
- * - Generate XP log entries with proper metadata
- * - Handle skill, advantage, and disadvantage XP logging
- * - Provide safe async flag updates without blocking
+ * Key Responsibilities:
+ * - **Skill Creation Tracking**: Log XP spent when new skills are added to character
+ * - **Skill Advancement Tracking**: Log XP spent when skill ranks increase
+ * - **Emphasis Tracking**: Log XP spent when skill emphases are added
+ * - **Advantage/Disadvantage Tracking**: Log XP spent or gained from character options
+ * - **Cost Change Tracking**: Log additional XP when item costs are adjusted post-creation
+ * - **XP Reset**: Clear all calculated XP tracking data
  * 
- * **Architecture:**
- * Shared utility functions called by:
- * - {@link module/documents/item/lifecycle/item-creation.js}
- * - {@link module/documents/item/lifecycle/item-updates.js}
+ * **L5R4 Rules Context:**
+ * This module implements the Experience Point tracking system from Character Creation and Advancement:
+ * - Skills cost XP equal to next rank (rank 1→2 costs 2 XP, rank 2→3 costs 3 XP, etc.)
+ * - Emphases cost 2 XP each
+ * - Advantages cost variable XP as listed in their descriptions
+ * - Disadvantages grant XP (up to max 10 points total)
+ * - School skills receive rank 1 for free (tracked via freeRanks parameter)
  * 
- * XP costs calculated via {@link module/documents/item/constants/xp-costs.js}
+ * **Foundry Integration:**
+ * - Stores XP log as array in `actor.flags[SYS_ID].xpSpent`
+ * - Each entry has unique ID (via `foundry.utils.randomID()`)
+ * - Uses `game.i18n.format()` for localized log messages
+ * - Integrates with XP Manager UI for detailed XP breakdown display
+ * - Called automatically by item lifecycle hooks (pre-create, pre-update)
  * 
- * Operates on actor flags to maintain persistent XP audit trail.
- * All functions handle errors gracefully without throwing.
+ * **Data Structure:**
+ * XP entries stored with different schemas per type:
+ * - Skill entries: { id, delta, note, ts, type: "skill", skillName, fromValue, toValue }
+ * - Emphasis entries: { id, delta, note, ts, type: "emphasis", skillName, fromValue, toValue, addedEmphases }
+ * - Advantage entries: { id, delta, note, ts, type: "advantage", itemName, fromValue, toValue }
+ * - Disadvantage entries: { id, delta, note, ts, type: "disadvantage", itemName, fromValue, toValue }
  * 
- * @author L5R4 System Team
- * @since 1.1.0
+ * @module documents/item/lifecycle/xp-tracking
+ * @requires Foundry v13+ (uses foundry.utils, flag system, optional chaining)
+ * @see module:documents/item/constants/xp-costs - XP cost calculation utilities
+ * @see module:apps/xp-manager - XP Manager UI that displays these log entries
  */
 
 import { SYS_ID } from "../../../config/constants.js";
@@ -29,49 +45,89 @@ import { toInt } from "../../../utils/type-coercion.js";
 import {
   calculateSkillCost,
   calculateSkillRankDelta,
-  calculateEmphasisCost,
-  EMPHASIS_COST
+  calculateEmphasisCost
 } from "../constants/xp-costs.js";
 
 /**
- * @typedef {Object} XpLogEntry
- * @property {string} id - Unique identifier for this log entry (generated via randomID)
- * @property {number} delta - XP cost (positive number)
- * @property {string} note - Human-readable description of expenditure
- * @property {number} ts - Timestamp (Date.now())
- * @property {string} type - Entry type: "skill", "emphasis", "advantage", or "disadvantage"
- * @property {string} [skillName] - Skill name (for skill and emphasis types)
- * @property {string} [itemName] - Item name (for advantage and disadvantage types)
- * @property {number} fromValue - Previous value
- * @property {number} toValue - New value
- * @property {string[]} [addedEmphases] - Array of emphasis names added (emphasis type only)
+ * Retrieve the XP spent log array from an actor's flags.
+ * 
+ * Safely extracts the XP tracking array from actor flags with defensive null checks.
+ * Returns a shallow copy to prevent accidental mutations of the flag data.
+ * 
+ * Uses Foundry's flag system for persistent data storage:
+ * - Flags are stored under `actor.flags[SYS_ID].xpSpent`
+ * - Returns empty array if flag doesn't exist or isn't an array
+ * - Shallow copy prevents direct flag mutation (use setFlag to update)
+ * 
+ * @param {L5R4Actor} actor - The actor document to retrieve XP log from
+ * @returns {Array<Object>} Shallow copy of XP entries array, or empty array if not found
+ * @private
  */
+function getXpSpentArray(actor) {
+  const ns = actor.flags?.[SYS_ID] ?? {};
+  return Array.isArray(ns.xpSpent) ? ns.xpSpent.slice() : [];
+}
 
 /**
- * Log skill creation XP expenditure to actor flags.
+ * Add a new XP entry to an actor's XP tracking log.
  * 
- * Calculates XP cost for initial skill rank using triangular progression
- * with school skill bonuses (rank 1 free for school skills). Creates an
- * {@link XpLogEntry} and appends to actor.flags[SYS_ID].xpSpent array.
+ * Appends a new entry to the actor's XP spent array and persists it via Foundry's flag system.
+ * This is the core mutation operation for all XP tracking. Uses `actor.setFlag()` to ensure
+ * proper Foundry document updates and database persistence.
+ * 
+ * **Foundry API Note:**
+ * - Uses `actor.setFlag(SYS_ID, "xpSpent", array)` for atomic updates
+ * - Triggers document update hooks and database write
+ * - Returns a promise that resolves when database write completes
+ * 
+ * @param {L5R4Actor} actor - The actor document to add the entry to
+ * @param {Object} entry - The XP entry object to append (must include id, delta, note, ts, type)
+ * @returns {Promise<void>} Resolves when flag is successfully persisted to database
+ * @private
+ */
+async function addXpEntry(actor, entry) {
+  const spent = getXpSpentArray(actor);
+  spent.push(entry);
+  await actor.setFlag(SYS_ID, "xpSpent", spent);
+}
+
+/**
+ * Log XP spent when a new skill is created on a character.
+ * 
+ * Called during skill item creation to track the XP cost of acquiring the skill at its starting rank.
+ * Handles free ranks from school skills (school skills start at rank 1 for free per L5R4 rules).
+ * If the calculated cost is 0 (e.g., school skill at rank 1), no entry is logged.
+ * 
+ * **L5R4 Rules:**
+ * - New skills cost 1 XP for rank 1
+ * - School skills receive rank 1 for free (cost = 0 for rank 1, normal cost for higher ranks)
+ * - Higher starting ranks cost cumulative XP: rank 3 = 1+2+3 = 6 XP (or 5 XP if school skill)
+ * 
+ * **Usage:**
+ * - Called by item-creation.js in handleItemPreCreate hook
+ * - Only logs if skill has an owning actor (unlinked skills are ignored)
+ * - Generates localized log message via i18n key "l5r4.character.experience.skillCreate"
+ * 
+ * **Error Handling:**
+ * - Wraps in try/catch to prevent creation failures from XP logging issues
+ * - Logs warning to console if XP tracking fails, but doesn't block skill creation
  * 
  * @param {L5R4Item} item - The skill item being created
- * @param {{rank: number, school: boolean}} sys - Item system data with rank and school flag
- * @returns {Promise<void>} Async flag update (non-blocking, failures logged but not thrown)
- * @throws {Error} Never throws - errors are caught and logged to console
+ * @param {Object} sys - The item's system data object containing rank and school properties
+ * @param {number} sys.rank - The starting skill rank (typically 1-4)
+ * @param {boolean} [sys.school] - True if this is a school skill (grants free rank 1)
+ * @returns {Promise<void>} Resolves when XP entry is logged or operation completes
  */
 export async function logSkillCreationXp(item, sys) {
   if (!item.actor) return;
   
   try {
-    const ns = item.actor.flags?.[SYS_ID] ?? {};
-    const spent = Array.isArray(ns.xpSpent) ? ns.xpSpent.slice() : [];
-    
     const rank = toInt(sys.rank);
     const freeRanks = sys.school ? 1 : 0;
     const cost = calculateSkillCost(rank, freeRanks);
     
     if (cost > 0) {
-      spent.push({
+      await addXpEntry(item.actor, {
         id: foundry.utils.randomID(),
         delta: cost,
         note: game.i18n.format("l5r4.character.experience.skillCreate", { 
@@ -84,9 +140,6 @@ export async function logSkillCreationXp(item, sys) {
         fromValue: 0,
         toValue: rank
       });
-      
-      // Async flag update - don't block creation if XP logging fails
-      await item.actor.setFlag(SYS_ID, "xpSpent", spent);
     }
   } catch (err) {
     console.warn(`${SYS_ID}`, "Failed to log skill creation XP", { err, item: item.name });
@@ -94,17 +147,32 @@ export async function logSkillCreationXp(item, sys) {
 }
 
 /**
- * Log skill rank increase XP expenditure to actor flags.
+ * Log XP spent when a skill's rank is increased.
  * 
- * Calculates XP delta between old and new ranks, accounting for school
- * bonuses and free ranks. Creates an {@link XpLogEntry} when delta > 0.
+ * Called during skill item updates to track incremental XP cost when rank changes.
+ * Calculates only the additional XP needed for the rank increase, not the total cost.
+ * Returns true if XP was logged, false otherwise (for caller to know if cost was incurred).
+ * 
+ * **L5R4 Rules:**
+ * - Advancing a skill costs XP equal to the new rank
+ * - Rank 2→3 costs 3 XP, rank 3→4 costs 4 XP, etc.
+ * - School skills have rank 1 free, so advancing from 1→2 still costs 2 XP
+ * - Decreasing rank logs no XP (no refunds in L5R4)
+ * 
+ * **Usage:**
+ * - Called by item lifecycle hooks when sys.rank changes
+ * - Only logs if skill has an owning actor
+ * - Generates localized log message via i18n key "l5r4.character.experience.skillChange"
+ * 
+ * **Error Handling:**
+ * - Returns false on error to indicate no XP was logged
+ * - Logs warning to console but doesn't throw to prevent update failures
  * 
  * @param {L5R4Item} item - The skill item being updated
- * @param {number} oldRank - Previous skill rank
- * @param {number} newRank - New skill rank
- * @param {number} freeRanks - Number of free ranks from school bonuses
- * @returns {Promise<boolean>} True if XP was logged (delta > 0), false otherwise
- * @throws {Error} Never throws - errors are caught and logged to console
+ * @param {number} oldRank - The skill rank before the update
+ * @param {number} newRank - The skill rank after the update
+ * @param {number} [freeRanks=0] - Number of free ranks (0 for non-school skills, 1 for school skills)
+ * @returns {Promise<boolean>} True if XP entry was logged, false otherwise
  */
 export async function logSkillRankXp(item, oldRank, newRank, freeRanks) {
   if (!item.actor) return false;
@@ -113,10 +181,7 @@ export async function logSkillRankXp(item, oldRank, newRank, freeRanks) {
     const delta = calculateSkillRankDelta(oldRank, newRank, freeRanks);
     
     if (delta > 0) {
-      const ns = item.actor.flags?.[SYS_ID] ?? {};
-      const spent = Array.isArray(ns.xpSpent) ? ns.xpSpent.slice() : [];
-      
-      spent.push({
+      await addXpEntry(item.actor, {
         id: foundry.utils.randomID(),
         delta,
         note: game.i18n.format("l5r4.character.experience.skillChange", { 
@@ -130,8 +195,6 @@ export async function logSkillRankXp(item, oldRank, newRank, freeRanks) {
         fromValue: oldRank,
         toValue: newRank
       });
-      
-      await item.actor.setFlag(SYS_ID, "xpSpent", spent);
       return true;
     }
   } catch (err) {
@@ -142,17 +205,36 @@ export async function logSkillRankXp(item, oldRank, newRank, freeRanks) {
 }
 
 /**
- * Log emphasis addition XP expenditure to actor flags.
+ * Log XP spent when emphases are added to a skill.
  * 
- * Calculates XP cost for new emphases (2 XP each) accounting for free
- * emphases from school bonuses. Only logs when new emphases are added.
+ * Called during skill item updates to track XP cost when emphasis string changes.
+ * Calculates cost for newly added emphases only (2 XP each per L5R4 rules).
+ * Returns true if XP was logged, false otherwise.
+ * 
+ * **L5R4 Rules:**
+ * - Each emphasis costs 2 XP per Character Creation and Advancement rules
+ * - Emphases allow re-rolling 1s when the emphasis applies to the task
+ * - Some Techniques or Advantages grant free emphases in specific skills
+ * - Multiple emphases can exist on a single skill (each costs 2 XP)
+ * 
+ * **Implementation Note:**
+ * Assumes emphases are stored as an array. The function slices the new array at the old length
+ * to get only the added emphases for the log note. Calculates cost based on count difference.
+ * 
+ * **Usage:**
+ * - Called by item lifecycle hooks when emphasis array changes
+ * - Only logs if skill has an owning actor and cost > 0
+ * - Creates manual note format: "SkillName - Emphasis: emphasis1, emphasis2"
+ * 
+ * **Error Handling:**
+ * - Returns false on error to indicate no XP was logged
+ * - Logs warning to console but doesn't throw
  * 
  * @param {L5R4Item} item - The skill item being updated
- * @param {string[]} oldEmphases - Previous emphasis array
- * @param {string[]} newEmphases - New emphasis array
- * @param {number} freeEmphasis - Number of free emphases from school bonuses
- * @returns {Promise<boolean>} True if XP was logged (cost > 0), false otherwise
- * @throws {Error} Never throws - errors are caught and logged to console
+ * @param {string[]} oldEmphases - Array of emphasis strings before update
+ * @param {string[]} newEmphases - Array of emphasis strings after update
+ * @param {number} [freeEmphasis=0] - Number of free emphases granted (usually 0 or 1)
+ * @returns {Promise<boolean>} True if XP entry was logged, false otherwise
  */
 export async function logEmphasisXp(item, oldEmphases, newEmphases, freeEmphasis) {
   if (!item.actor) return false;
@@ -160,12 +242,9 @@ export async function logEmphasisXp(item, oldEmphases, newEmphases, freeEmphasis
     const cost = calculateEmphasisCost(oldEmphases.length, newEmphases.length, freeEmphasis);
     
     if (cost > 0) {
-      const ns = item.actor.flags?.[SYS_ID] ?? {};
-      const spent = Array.isArray(ns.xpSpent) ? ns.xpSpent.slice() : [];
-      // Extract only the newly added emphases (assumes newEmphases contains all old + new)
       const addedEmphases = newEmphases.slice(oldEmphases.length);
       
-      spent.push({
+      await addXpEntry(item.actor, {
         id: foundry.utils.randomID(),
         delta: cost,
         note: `${item.name ?? "Skill"} - Emphasis: ${addedEmphases.join(", ")}`,
@@ -176,8 +255,6 @@ export async function logEmphasisXp(item, oldEmphases, newEmphases, freeEmphasis
         toValue: newEmphases.length,
         addedEmphases
       });
-      
-      await item.actor.setFlag(SYS_ID, "xpSpent", spent);
       return true;
     }
   } catch (err) {
@@ -188,23 +265,38 @@ export async function logEmphasisXp(item, oldEmphases, newEmphases, freeEmphasis
 }
 
 /**
- * Log advantage creation XP expenditure to actor flags.
+ * Log XP spent when an advantage is purchased.
  * 
- * Records advantage purchase to XP audit trail. No-op if cost <= 0 or no actor.
+ * Called during advantage item creation to track the XP cost. Advantages cost variable
+ * amounts of XP as listed in their individual descriptions. Some advantages have reduced
+ * costs for specific clans or professions (handled by caller, this function just logs the cost).
+ * 
+ * **L5R4 Rules:**
+ * - Advantages cost XP as listed in their descriptions (typically 1-10 XP)
+ * - Some advantages have reduced costs for certain clans/schools
+ * - Maximum 15 points of advantages recommended for starting characters
+ * - Can be purchased after character creation with GM approval (for Social/Material types)
+ * - Physical/Mental advantages typically cannot be purchased after creation
+ * 
+ * **Usage:**
+ * - Called by item-creation.js when advantage item is created
+ * - Cost parameter should be pre-calculated with any discounts applied
+ * - Only logs if item has owning actor and cost > 0
+ * - Uses item name directly as the log note
+ * 
+ * **Error Handling:**
+ * - Wraps in try/catch to prevent creation failures from XP logging issues
+ * - Logs warning to console if XP tracking fails
  * 
  * @param {L5R4Item} item - The advantage item being created
- * @param {number} cost - XP cost of the advantage (must be positive)
- * @returns {Promise<void>} Async flag update (non-blocking, failures logged but not thrown)
- * @throws {Error} Never throws - errors are caught and logged to console
+ * @param {number} cost - The XP cost of the advantage (after any discounts)
+ * @returns {Promise<void>} Resolves when XP entry is logged or operation completes
  */
 export async function logAdvantageXp(item, cost) {
   if (!item.actor || cost <= 0) return;
   
   try {
-    const ns = item.actor.flags?.[SYS_ID] ?? {};
-    const spent = Array.isArray(ns.xpSpent) ? ns.xpSpent.slice() : [];
-    
-    spent.push({
+    await addXpEntry(item.actor, {
       id: foundry.utils.randomID(),
       delta: cost,
       note: item.name ?? "Advantage",
@@ -214,31 +306,49 @@ export async function logAdvantageXp(item, cost) {
       fromValue: 0,
       toValue: cost
     });
-    
-    await item.actor.setFlag(SYS_ID, "xpSpent", spent);
   } catch (err) {
     console.warn(`${SYS_ID}`, "Failed to log advantage XP", { err, item: item.name });
   }
 }
 
 /**
- * Log disadvantage creation XP expenditure to actor flags.
+ * Log XP gained when a disadvantage is taken.
  * 
- * Records disadvantage purchase to XP audit trail. No-op if cost <= 0 or no actor.
+ * Called during disadvantage item creation to track the XP gained. Disadvantages grant
+ * bonus XP that can be spent on other character improvements. The cost parameter represents
+ * the XP gained (not spent), but is stored as a positive delta in the log for consistency.
+ * 
+ * **L5R4 Rules:**
+ * - Disadvantages grant bonus XP as listed in their descriptions
+ * - Maximum 10 XP can be gained from disadvantages per Character Creation and Advancement rules
+ * - Some disadvantages cost more (grant more XP) for certain clans/schools
+ * - Physical/Mental disadvantages typically cannot be removed after character creation
+ * - Social disadvantages may change during play with GM approval
+ * 
+ * **Implementation Note:**
+ * Although disadvantages grant XP rather than cost XP, the delta is stored as positive
+ * for consistency with the XP Manager UI's expectation. The UI interprets disadvantage
+ * type entries as XP gained rather than spent.
+ * 
+ * **Usage:**
+ * - Called by item-creation.js when disadvantage item is created
+ * - Cost parameter should be pre-calculated with any modifiers applied
+ * - Only logs if item has owning actor and cost > 0
+ * - Uses item name directly as the log note
+ * 
+ * **Error Handling:**
+ * - Wraps in try/catch to prevent creation failures from XP logging issues
+ * - Logs warning to console if XP tracking fails
  * 
  * @param {L5R4Item} item - The disadvantage item being created
- * @param {number} cost - XP cost of the disadvantage (must be positive)
- * @returns {Promise<void>} Async flag update (non-blocking, failures logged but not thrown)
- * @throws {Error} Never throws - errors are caught and logged to console
+ * @param {number} cost - The XP value of the disadvantage (amount of XP gained)
+ * @returns {Promise<void>} Resolves when XP entry is logged or operation completes
  */
 export async function logDisadvantageXp(item, cost) {
   if (!item.actor || cost <= 0) return;
   
   try {
-    const ns = item.actor.flags?.[SYS_ID] ?? {};
-    const spent = Array.isArray(ns.xpSpent) ? ns.xpSpent.slice() : [];
-    
-    spent.push({
+    await addXpEntry(item.actor, {
       id: foundry.utils.randomID(),
       delta: cost,
       note: item.name ?? "Disadvantage",
@@ -248,24 +358,44 @@ export async function logDisadvantageXp(item, cost) {
       fromValue: 0,
       toValue: cost
     });
-    
-    await item.actor.setFlag(SYS_ID, "xpSpent", spent);
   } catch (err) {
     console.warn(`${SYS_ID}`, "Failed to log disadvantage XP", { err, item: item.name });
   }
 }
 
 /**
- * Log advantage/disadvantage cost change XP expenditure to actor flags.
+ * Log additional XP spent when an advantage/disadvantage cost changes after creation.
  * 
- * Records XP delta when advantage/disadvantage cost increases. Only logs
- * positive deltas (cost increases). Cost decreases are ignored.
+ * Called during advantage/disadvantage item updates to track XP cost adjustments.
+ * Only logs if the cost increases (no XP refunds for cost decreases per L5R4 rules).
+ * Returns true if XP was logged, false otherwise.
+ * 
+ * **L5R4 Rules:**
+ * - Advantages and disadvantages can have variable costs based on circumstances
+ * - Some advantages/disadvantages have tiered costs (e.g., Allies 1-5 points)
+ * - If cost increases post-creation, additional XP must be spent
+ * - If cost decreases, no XP is refunded (character keeps the benefit)
+ * 
+ * **Use Cases:**
+ * - Player realizes advantage should cost more due to clan/school restrictions
+ * - GM adjusts cost to reflect campaign-specific balance
+ * - Tiered advantage increases in value (e.g., Allies rank increases)
+ * - Cost correction after initial creation
+ * 
+ * **Usage:**
+ * - Called by item lifecycle hooks when cost field changes
+ * - Only logs positive deltas (cost increases only)
+ * - Creates note format: "ItemName (newCost)"
+ * - Type determined from item.type (advantage or disadvantage)
+ * 
+ * **Error Handling:**
+ * - Returns false on error to indicate no XP was logged
+ * - Logs warning to console but doesn't throw
  * 
  * @param {L5R4Item} item - The advantage/disadvantage item being updated
- * @param {number} oldCost - Previous cost value
- * @param {number} newCost - New cost value
- * @returns {Promise<boolean>} True if XP was logged (positive delta), false otherwise
- * @throws {Error} Never throws - errors are caught and logged to console
+ * @param {number} oldCost - The XP cost before the update
+ * @param {number} newCost - The XP cost after the update
+ * @returns {Promise<boolean>} True if XP entry was logged, false otherwise
  */
 export async function logCostChangeXp(item, oldCost, newCost) {
   if (!item.actor) return false;
@@ -274,12 +404,10 @@ export async function logCostChangeXp(item, oldCost, newCost) {
   if (delta <= 0) return false;
   
   try {
-    const ns = item.actor.flags?.[SYS_ID] ?? {};
-    const spent = Array.isArray(ns.xpSpent) ? ns.xpSpent.slice() : [];
     const itemType = item.type === "advantage" ? "advantage" : "disadvantage";
     const itemLabel = item.type === "advantage" ? "Advantage" : "Disadvantage";
     
-    spent.push({
+    await addXpEntry(item.actor, {
       id: foundry.utils.randomID(),
       delta,
       note: `${item.name ?? itemLabel} (${newCost})`,
@@ -289,8 +417,6 @@ export async function logCostChangeXp(item, oldCost, newCost) {
       fromValue: oldCost,
       toValue: newCost
     });
-    
-    await item.actor.setFlag(SYS_ID, "xpSpent", spent);
     return true;
   } catch (err) {
     console.warn(`${SYS_ID}`, "Failed to log cost change XP", { err, item: item.name });
@@ -300,26 +426,46 @@ export async function logCostChangeXp(item, oldCost, newCost) {
 }
 
 /**
- * Reset calculated XP data when freeRanks or freeEmphasis change.
+ * Clear all calculated XP tracking data from an actor.
  * 
- * Clears the xpSpent array to allow recalculation with new free rank/emphasis
- * values. Forces actor sheet re-render if currently displayed.
+ * Resets the XP spent log to an empty array, effectively clearing all XP tracking history.
+ * This is a destructive operation typically used when rebuilding a character or fixing
+ * corrupted XP data. After clearing, triggers a sheet re-render to update the UI.
  * 
- * **Note:** This only clears calculated XP entries. Manual XP adjustments
- * (stored elsewhere) are preserved.
+ * **Use Cases:**
+ * - GM resets character XP tracking to rebuild from scratch
+ * - Player wants to recalculate XP after character modifications
+ * - XP log becomes corrupted or inaccurate
+ * - Character is being rebuilt with different advancement choices
  * 
- * @param {Actor} actor - The actor whose XP data should be reset
- * @returns {Promise<void>} Async flag update
- * @throws {Error} Never throws - errors are caught and logged to console
+ * **Foundry Integration:**
+ * - Uses `actor.setFlag()` to clear the xpSpent array atomically
+ * - Triggers `actor.sheet.render()` if sheet is currently rendered
+ * - Optional chaining (`?.`) prevents errors if sheet doesn't exist or isn't rendered
+ * 
+ * **Warning:**
+ * This is a destructive operation with no built-in undo. All XP tracking history
+ * is permanently deleted. Consider warning users before calling this function.
+ * 
+ * **Usage:**
+ * - Called by XP Manager UI's reset button
+ * - Can be called programmatically for bulk character updates
+ * - Only operates if actor exists (defensive null check)
+ * 
+ * **Error Handling:**
+ * - Wraps in try/catch to prevent failures from breaking other operations
+ * - Logs warning to console if reset fails
+ * 
+ * @param {L5R4Actor} actor - The actor document to reset XP tracking for
+ * @returns {Promise<void>} Resolves when flag is cleared and sheet is re-rendered (if applicable)
  */
 export async function resetCalculatedXp(actor) {
   if (!actor) return;
   
   try {
-    // Clear all calculated XP entries to allow fresh recalculation
+
     await actor.setFlag(SYS_ID, "xpSpent", []);
-    
-    // Force actor sheet to recalculate XP on next render
+
     if (actor.sheet?.rendered) {
       actor.sheet.render();
     }

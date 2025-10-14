@@ -1,12 +1,12 @@
 @use "./config.scss";
 @use "./global.scss";
-@use "./interactions.scss" as *;
 
 // Chat
 @use "./chat.scss";
 
 // Sheets PC
 @use "./actor-sheet.scss";
+@use "./actor/button-mask.scss";
 @use "./actor/item-list.scss";
 @use "./actor/ranks.scss";
 @use "./actor/stats.scss";

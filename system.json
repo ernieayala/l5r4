@@ -82,14 +82,16 @@
     "distance": 5,
     "units": "ft"
   },
-  "relationships": {
-    "recommends": [
-      {
-        "id": "quench",
-        "type": "module",
-        "reason": "Required for running integration tests in Foundry VTT"
-      }
-    ]
-  },
+  "background": "systems/l5r4-enhanced/assets/background.webp",
+  "media": [
+    {
+      "type": "icon",
+      "url": "systems/l5r4-enhanced/assets/icon.webp"
+    },
+    {
+      "type": "cover",
+      "url": "systems/l5r4-enhanced/assets/banner.webp"
+    }
+  ],
   "license": "MIT"
 }

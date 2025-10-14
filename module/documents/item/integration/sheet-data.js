@@ -1,21 +1,26 @@
 /**
- * @fileoverview Item Sheet Data Enhancement
+ * Item Sheet Data Enhancement
  * 
- * Enhances item sheet template data with system configuration access.
- * Provides config object for dropdown options and constants.
+ * Provides a utility function to augment Foundry VTT sheet context objects with
+ * L5R4-specific configuration data needed by Handlebars templates for rendering
+ * item sheets and embedded item lists in actor sheets.
  * 
- * **Responsibilities:**
- * - Build config object from imported constants for template context
- * - Provide access to system constants for templates
- * - Enable dropdown options and lookups in item sheets
+ * This module follows the Application v2 data preparation pattern where sheet classes
+ * call this function within their `_prepareContext()` methods to inject localized
+ * dropdown options, form selectors, and other UI configuration data.
  * 
- * **Architecture:**
- * Integration logic called from item.getData() to enhance template context.
- * Provides read-only access to system configuration for sheet rendering.
+ * Usage Pattern:
+ * - ItemSheetV2: Called in `_prepareContext()` to prepare item editing forms
+ * - ActorSheetV2: Called in `_prepareContext()` for embedded item rendering
+ * - Legacy Item.getData(): Called for backwards compatibility (deprecated pattern)
  * 
- * @author L5R4 System Team
- * @since 1.1.0
- * @version 2.0.0
+ * Foundry VTT Integration:
+ * - Follows Application v2 context preparation lifecycle (Foundry v13+)
+ * - Mutates context object in-place following Foundry's data preparation convention
+ * - Config objects reference frozen localization constants from config/localization.js
+ * 
+ * @module documents/item/integration/sheet-data
+ * @requires Foundry VTT v13+
  */
 
 import { 
@@ -34,38 +39,50 @@ import {
 import { NPC_NUMBER_WOUND_LVLS } from "../../../config/game-data.js";
 
 /**
- * @typedef {object} ItemSheetData
- * @property {L5R4Item} item - The item document
- * @property {object} system - The item's system data
- * @property {object} config - System configuration (injected by enhanceItemSheetData)
+ * @typedef {Object} SheetContext
+ * @property {Object} config - Configuration data for template rendering
+ * @property {Object} config.arrows - Arrow type localization keys (armor, flesh, humming, rope, willow)
+ * @property {Object} config.sizes - Weapon size localization keys (small, medium, large)
+ * @property {Object} config.rings - Five Rings localization keys (fire, water, air, earth, void)
+ * @property {Object} config.ringsWithNone - Five Rings with empty option for dropdowns
+ * @property {Object} config.spellRings - Spell Ring keys including "all" for universal spells
+ * @property {Object} config.traits - Skill trait keys with Void Ring option (sta, wil, str, per, ref, awa, agi, int, void)
+ * @property {Object} config.npcTraits - NPC trait keys (same as traits, semantic alias)
+ * @property {Object} config.skillTypes - Skill category keys (high, bugei, merch, low)
+ * @property {Object} config.actionTypes - Action timing keys (simple, complex, free)
+ * @property {Object} config.kihoTypes - Kiho category keys (internal, karmic, martial, mystic)
+ * @property {Object} config.advantageTypes - Advantage/disadvantage type keys (physical, mental, social, material, spiritual, ancestor)
+ * @property {Object} config.npcNumberWoundLvls - NPC rank to wound level count mapping (1-8)
  */
 
 /**
- * Enhance item sheet data with system configuration.
+ * Augments sheet context with L5R4 configuration data for template rendering.
  * 
- * Builds config object from imported constants and injects into the data object
- * passed to item sheet templates. This provides access to:
- * - Trait choices and labels
- * - Ring choices and labels
- * - Weapon types and properties
- * - Arrow types and modifiers
- * - Spell ring options
- * - Other system constants needed for dropdowns
+ * Injects a `config` property containing localized dropdown options and form selector
+ * data used by item sheet templates and embedded item lists. Each config property maps
+ * to frozen localization constants that reference i18n keys for Handlebars {{selectOptions}}
+ * and similar helpers.
  * 
- * **Side Effects:**
- * Mutates the input data object by adding a `config` property.
+ * This function mutates the provided data object in-place following Foundry's convention
+ * for sheet context preparation. The config data enables templates to render:
+ * - Arrow type selectors (weapon sheets)
+ * - Weapon size dropdowns (weapon sheets)
+ * - Ring selectors (spell/kiho sheets)
+ * - Trait dropdowns (skill roll dialogs)
+ * - Skill type categories (skill sheets)
+ * - Action type selectors (technique/kata sheets)
+ * - Advantage/disadvantage type filters (advantage/disadvantage sheets)
+ * - NPC wound level configuration (NPC sheets)
  * 
- * @param {ItemSheetData} data - Base data object from super.getData()
- * @returns {ItemSheetData} Same object with config property injected
+ * Foundry Integration:
+ * - Called within `_prepareContext()` methods of ItemSheetV2 and ActorSheetV2 classes
+ * - Mutates context object per Application v2 data preparation pattern
+ * - All config values reference frozen constants for immutability and performance
  * 
- * @example
- * // Called from item sheet's getData()
- * const context = await super.getData();
- * return enhanceItemSheetData(context);
- * // Now templates can access {{config.traits}} etc.
+ * @param {SheetContext} data - Mutable sheet context object from Foundry's data preparation
+ * @returns {SheetContext} The same data object with injected config property (for chaining)
  */
 export function enhanceItemSheetData(data) {
-  // Provide system config to templates for dropdown options and constants
   data.config = {
     arrows: ARROWS,
     sizes: SIZES,

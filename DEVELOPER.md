@@ -1,27 +1,23 @@
 # Developer Guide
 
-**Status**: ✅ **100% Compliant** (Verified with Madge)  
+**Status**: ✅ 100% Architecture Compliant  
 **Last Updated**: 2025-10-04
 
-This guide covers the architecture, development guidelines, and contribution process for the L5R4-Enhanced system.
-
----
+This guide explains the system architecture and how to contribute.
 
 ## Table of Contents
 
 - [Getting Started](#getting-started)
-- [Project Architecture](#project-architecture)
-- [Development Guidelines](#development-guidelines)
-- [How to Contribute](#how-to-contribute)
+- [Architecture](#project-architecture)
+- [Guidelines](#development-guidelines)
+- [Contributing](#how-to-contribute)
 - [Troubleshooting](#troubleshooting)
 
 ---
 
 ## Getting Started
 
-### Development Installation
-
-For developers who want to contribute:
+### Setup
 
 ```bash
 cd [foundry-data-path]/systems/
@@ -31,60 +27,52 @@ npm install
 npm run build:css
 ```
 
-### Architecture Verification
+### Verify Architecture
 
 ```bash
 npm run madge:check    # Check for circular dependencies
-npm run madge:summary  # View dependency statistics
-npm run madge:json     # Export dependency graph to JSON
+npm run madge:summary  # View statistics
+npm run madge:json     # Export graph
 ```
 
 ---
 
 ## Project Architecture
 
-### Layer Architecture
+### Layer System
 
-The L5R4 system follows strict layer separation to maintain clean, maintainable code:
+The system uses strict layers for clean, maintainable code:
 
 ```
-┌─────────────────────────────────────┐
-│  SHEETS (UI Layer)                  │
-│  Location: module/sheets/           │
-│  ✓ Can import: documents, services  │
-│  Purpose: Render UI, handle events  │
-└──────────────┬──────────────────────┘
-               │
-┌──────────────▼──────────────────────┐
-│  SERVICES (Business Logic)          │
-│  Location: module/services/         │
-│  ✓ Can import: utils, config        │
-│  ❌ Cannot: documents, sheets        │
-│  Purpose: Dice, chat, utilities     │
-└──────────────┬──────────────────────┘
-               │
-┌──────────────▼──────────────────────┐
-│  DOCUMENTS (Data/Computation)       │
-│  Location: module/documents/        │
-│  ✓ Can import: utils, config        │
-│  ❌ Cannot: services, sheets         │
-│  Purpose: Data prep, calculations   │
-└──────────────┬──────────────────────┘
-               │
-┌──────────────▼──────────────────────┐
-│  UTILS (Shared Pure Functions)      │
-│  Location: module/utils/            │
-│  ✓ Can import: config               │
-│  ❌ Cannot: anything else            │
-│  Purpose: Pure helper functions     │
-└──────────────┬──────────────────────┘
-               │
-┌──────────────▼──────────────────────┐
-│  CONFIG (Constants)                 │
-│  Location: module/config/           │
-│  ✓ Can import: nothing              │
-│  Purpose: System constants          │
-└─────────────────────────────────────┘
+┌───────────────────────────────────┐
+│  SHEETS (UI)                      │
+│  → Render UI, handle events       │
+│  ✓ Can import: documents, services│
+└─────────────┬─────────────────────┘
+              │
+┌─────────────▼─────────────────────┐
+│  SERVICES (Logic)                 │
+│  → Dice, chat, utilities          │
+│  ✓ Can import: utils, config      │
+└─────────────┬─────────────────────┘
+              │
+┌─────────────▼─────────────────────┐
+│  DOCUMENTS (Data)                 │
+│  → Data prep, calculations        │
+│  ✓ Can import: utils, config      │
+└─────────────┬─────────────────────┘
+              │
+┌─────────────▼─────────────────────┐
+│  UTILS (Helpers)                  │
+│  → Pure functions                 │
+│  ✓ Can import: config only        │
+└─────────────┬─────────────────────┘
+              │
+┌─────────────▼─────────────────────┐
+│  CONFIG (Constants)               │
+│  → System constants               │
+│  ✓ No imports                     │
+└───────────────────────────────────┘
 ```
 
 ### Directory Structure
@@ -100,99 +88,56 @@ module/
 └── setup/         # Settings, templates, migrations
 ```
 
-**Architecture Status**: ✅ **100% Compliant** (Zero circular dependencies, zero boundary violations)
+**Status**: ✅ 100% Compliant (Zero circular dependencies)
 
-- **Automatic Verification**: Architecture checks ensure code quality
-- **Layer Separation**: Documents → Services → Sheets hierarchy strictly enforced
+- Automatic verification ensures code quality
+- Layer separation strictly enforced
 
----
-
-## Architecture Verification
-
-### Running Checks
-
-Verify the architecture with these commands:
-
-### Manual Checks
-
-```bash
-# Check for circular dependencies
-npm run madge:check
-
-# View dependency statistics
-npm run madge:summary
-
-# Export dependency graph to JSON
-npm run madge:json
-```
-
-### What Gets Checked
-
-- ✅ **No circular dependencies** across all modules
-- ✅ **Documents don't import from Services**
-- ✅ **Documents don't import from Sheets**
-- ✅ **Services don't import from Documents**
-- ✅ **Services don't import from Sheets**
-- ✅ **Proper layer separation maintained**
 
 ---
 
 ## Development Guidelines
 
-### Adding New Code
+### Import Rules
 
-**Rule of Thumb**: Follow the import flow (top to bottom in diagram above)
+Follow the layer flow (top to bottom):
 
-#### ✅ Good Examples
-
+**✅ Allowed**
 ```javascript
-// Sheets can import from Services
-// module/sheets/pc-sheet.js
+// Sheets → Services
 import { rollSkill } from "../services/dice/index.js";
 
-// Services can import from Utils
-// module/services/dice/rolls/skill-roll.js
+// Services → Utils
 import { toInt } from "../../../utils/index.js";
 
-// Documents can import from Utils
-// module/documents/actor.js
+// Documents → Utils
 import { calculateXpStepCostForTrait } from "../../utils/xp-calculations.js";
 ```
 
-#### ❌ Bad Examples (Will Fail Madge Check)
-
+**❌ Forbidden**
 ```javascript
-// ❌ Documents importing from Services
-// module/documents/actor.js
-import { rollSkill } from "../services/dice/index.js"; // FORBIDDEN!
+// Documents → Services (WRONG!)
+import { rollSkill } from "../services/dice/index.js";
 
-// ❌ Services importing from Documents
-// module/services/xp/xp-calculator.js
-import { preparePcExperience } from "../../documents/actor/calculations/xp-system.js"; // FORBIDDEN!
+// Services → Documents (WRONG!)
+import { preparePcExperience } from "../../documents/actor/calculations/xp-system.js";
 
-// ❌ Utils importing from anything except config
-// module/utils/mechanics.js
-import { L5R4Actor } from "../documents/actor.js"; // FORBIDDEN!
+// Utils → Anything except Config (WRONG!)
+import { L5R4Actor } from "../documents/actor.js";
 ```
 
-### Shared Logic Between Layers
+### Shared Logic
 
-**Question**: What if both Documents and Services need the same calculation function?
-
-**Answer**: Extract it to the Utils layer!
-
-**Example**: XP calculations needed by both actor documents and XP calculator service:
+**Need the same function in multiple layers?**  
+Extract it to Utils!
 
 ```javascript
-// ✅ Extract to utils/xp-calculations.js
+// utils/xp-calculations.js
 export function calculateXpStepCostForTrait(rank, freeBonus, discount) {
   return Math.max(0, 4 * (rank + freeBonus) + discount);
 }
 
-// ✅ Documents import from utils
-import { calculateXpStepCostForTrait } from "../../utils/xp-calculations.js";
-
-// ✅ Services import from utils
+// Both documents and services can import from utils
 import { calculateXpStepCostForTrait } from "../../utils/xp-calculations.js";
 ```
 
@@ -200,430 +145,192 @@ import { calculateXpStepCostForTrait } from "../../utils/xp-calculations.js";
 
 ## Layer Responsibilities
 
-### Documents Layer (`module/documents/`)
+### Documents (`module/documents/`)
+**Purpose**: Calculate derived data
 
-**Purpose**: Compute all derived data for actors and items
+**Do**:
+- Calculate stats (Armor TN, wounds, insight)
+- Prepare data for display
+- Apply Active Effects
 
-**Responsibilities**:
-- Calculate derived statistics (Armor TN, wounds, insight, etc.)
-- Prepare data for display (wound levels, XP totals, etc.)
-- Track data changes (XP expenditure logging, etc.)
-- Apply Active Effects to base values
+**Don't**:
+- Roll dice (use Services)
+- Show UI (use Sheets)
+- Use async in `prepareDerivedData()`
 
-**Rules**:
-- ✅ Pure data computation only
-- ✅ No UI rendering logic
-- ✅ No async operations in `prepareDerivedData()`
-- ❌ No dice rolling (that's Services)
-- ❌ No chat messages (that's Services)
-- ❌ No sheet rendering (that's Sheets)
+### Services (`module/services/`)
+**Purpose**: Business logic with side effects
 
-**Example Structure**:
-```
-documents/
-├── actor.js                    # Main actor document
-├── item.js                     # Main item document
-├── actor/
-│   ├── calculations/           # Derived data calculations
-│   │   ├── wound-system.js
-│   │   ├── xp-system.js
-│   │   └── stance-effects.js
-│   ├── constants/              # Actor-specific constants
-│   └── creation/               # Character creation logic
-└── item/
-    ├── preparation/            # Item derived data
-    └── lifecycle/              # Item CRUD hooks
-```
+**Do**:
+- Roll dice
+- Create chat messages
+- Show dialogs
+- Manipulate documents
 
----
+**Don't**:
+- Calculate derived data (use Documents)
+- Render sheets (use Sheets)
 
-### Services Layer (`module/services/`)
+### Sheets (`module/sheets/`)
+**Purpose**: UI rendering and interaction
 
-**Purpose**: Business logic and operations with side effects
+**Do**:
+- Render HTML
+- Handle events
+- Coordinate Documents and Services
 
-**Responsibilities**:
-- Dice rolling and roll parsing
-- Chat message creation
-- Active Effect lifecycle (async operations)
-- External integrations
+**Don't**:
+- Calculate data (read from Documents)
+- Implement logic (call Services)
 
-**Rules**:
-- ✅ Can be async
-- ✅ Can show dialogs
-- ✅ Can create chat messages
-- ✅ Can manipulate documents
-- ❌ Don't compute derived data (that's Documents)
-- ❌ Don't render sheets (that's Sheets)
+### Utils (`module/utils/`)
+**Purpose**: Pure helper functions
 
-**Example Structure**:
-```
-services/
-├── dice/
-│   ├── rolls/                  # Roll implementations
-│   ├── dialogs/                # Roll dialogs
-│   └── core/                   # Roll utilities
-├── stance/
-│   ├── core/                   # Effect templates
-│   └── hooks/                  # Effect lifecycle
-├── chat.js
-└── initiative.js
-```
-
----
-
-### Sheets Layer (`module/sheets/`)
-
-**Purpose**: User interface rendering and interaction
-
-**Responsibilities**:
-- Render HTML templates
-- Handle user events (clicks, drags, etc.)
-- Coordinate between documents and services
-- Manage sheet state
-
-**Rules**:
-- ✅ Can import from Documents (read data)
-- ✅ Can import from Services (trigger actions)
-- ✅ Event delegation on sheet root
-- ❌ Don't compute derived data (read from Documents)
-- ❌ Don't implement business logic (call Services)
-
-**Example Structure**:
-```
-sheets/
-├── pc-sheet.js                 # Player character sheet
-├── npc-sheet.js                # NPC sheet
-├── base-actor-sheet.js         # Shared actor logic
-├── handlers/                   # Event handlers (delegated)
-├── mixins/                     # Reusable behaviors
-└── ui/                         # UI components
-```
-
----
-
-### Utils Layer (`module/utils/`)
-
-**Purpose**: Pure helper functions shared across all layers
-
-**Responsibilities**:
-- Type coercion and validation
+**Do**:
+- Type coercion
 - Localization helpers
-- DOM manipulation utilities
-- Pure math functions
-- Shared game mechanics calculations
+- Math functions
+- Game mechanics calculations
 
-**Rules**:
-- ✅ Must be pure functions (no side effects)
-- ✅ Must be framework-agnostic where possible
-- ✅ Can import from Config only
-- ❌ No Foundry document dependencies
-- ❌ No async operations
-- ❌ No global state mutation
+**Don't**:
+- Import from Documents or Services
+- Use async operations
+- Mutate global state
 
-**Example Structure**:
-```
-utils/
-├── index.js                    # Barrel export
-├── localization.js             # i18n helpers
-├── type-coercion.js            # Safe type conversion
-├── dom.js                      # DOM utilities
-├── mechanics.js                # L5R4 game mechanics
-├── xp-calculations.js          # XP cost formulas
-└── sorting.js                  # Sorting helpers
-```
+### Config (`module/config/`)
+**Purpose**: Constants only
 
----
-
-### Config Layer (`module/config/`)
-
-**Purpose**: System constants and configuration
-
-**Responsibilities**:
+**Do**:
 - System IDs and paths
-- Game data constants (traits, skills, etc.)
-- Icon paths
-- Localization key mappings
-- Template paths
+- Game data constants
+- Localization keys
 
-**Rules**:
-- ✅ Only exports constants
-- ✅ No functions (except pure getters)
-- ❌ No dependencies on other modules
-- ❌ No side effects at import time
-
-**Example Structure**:
-```
-config/
-├── index.js                    # Barrel export
-├── constants.js                # System IDs, paths
-├── game-data.js                # L5R4 game constants
-├── icons.js                    # Icon path resolution
-└── localization.js             # i18n key mappings
-```
+**Don't**:
+- Import from other modules
+- Have side effects
 
 ---
 
 ## Common Patterns
 
-### Pattern 1: Documents Compute, Services Present
+### Pattern 1: Separation of Concerns
 
-**Scenario**: Rolling a skill check
+**Rolling a skill check:**
 
 ```javascript
-// ❌ BAD: Document doing presentation
+// ❌ BAD: Document handles presentation
 class L5R4Actor extends Actor {
   prepareDerivedData() {
-    // ... calculations ...
-    
-    // ❌ Don't do this in documents!
-    this.rollSkill("kenjutsu");
-    ChatMessage.create({ content: "Rolling..." });
+    this.rollSkill("kenjutsu");  // WRONG!
   }
 }
 
-// ✅ GOOD: Document computes, service presents
-// documents/actor.js
+// ✅ GOOD: Document computes, Service presents
 class L5R4Actor extends Actor {
   prepareDerivedData() {
-    // ✅ Just compute derived data
     sys.skills = this.items.filter(i => i.type === "skill");
   }
 }
 
-// services/dice/rolls/skill-roll.js
 export async function rollSkill(actor, skillId) {
-  // ✅ Service handles rolling and chat
   const roll = new Roll(formula);
   await roll.evaluate();
   await ChatMessage.create({ /* ... */ });
 }
 ```
 
-### Pattern 2: Shared Calculations in Utils
+### Pattern 2: Shared Functions
 
-**Scenario**: XP cost calculation needed by both documents and services
+**When multiple layers need the same function:**
 
 ```javascript
-// ✅ GOOD: Extract to utils
-// utils/xp-calculations.js
+// ✅ Extract to utils
 export function calculateXpStepCostForTrait(rank, freeBonus, discount) {
   return Math.max(0, 4 * (rank + freeBonus) + discount);
 }
 
-// documents/actor/calculations/xp-system.js
-import { calculateXpStepCostForTrait } from "../../../utils/xp-calculations.js";
-
-export function preparePcExperience(actor, sys) {
-  // Use shared function
-  const cost = calculateXpStepCostForTrait(newRank, bonus, discount);
-}
-
-// services/xp/xp-calculator.js
+// Both Documents and Services import from utils
 import { calculateXpStepCostForTrait } from "../../utils/xp-calculations.js";
-
-export function buildXpHistory(actor) {
-  // Use same shared function
-  const cost = calculateXpStepCostForTrait(rank, bonus, discount);
-}
-```
-
-### Pattern 3: Backward Compatibility via Re-exports
-
-**Scenario**: Moved function to new location, need backward compatibility
-
-```javascript
-// ✅ GOOD: Re-export from old location
-// documents/actor/creation/creation-bonuses.js (old location)
-/**
- * @deprecated Import from utils/xp-calculations.js instead
- */
-export { getCreationFreeBonus, getCreationFreeBonusVoid } from "../../../utils/xp-calculations.js";
-
-// Old code still works
-import { getCreationFreeBonus } from "./documents/actor/creation/creation-bonuses.js";
-
-// New code uses correct location
-import { getCreationFreeBonus } from "./utils/xp-calculations.js";
 ```
 
 ---
 
 ## Troubleshooting
 
-### "Madge check failed: Circular dependency found"
+### Circular Dependency Error
 
-**Cause**: Two or more modules import from each other, creating a cycle.
+**Problem**: Modules import from each other
 
-**Fix**:
-1. Run `npm run madge:check` to see the circular chain
-2. Extract shared logic to a common module (usually Utils)
-3. Use events/hooks instead of direct imports where appropriate
+**Solution**:
+1. Run `npm run madge:check` to see the cycle
+2. Extract shared logic to Utils
+3. Use events/hooks instead of direct imports
 
-**Example**:
+**Example Fix**:
 ```javascript
-// ❌ Circular dependency
-// actor.js
+// ❌ Circular
 import { applyStanceAutomation } from "../services/stance/index.js";
 
-// services/stance/index.js
-import { L5R4Actor } from "../documents/actor.js";
-
-// ✅ Break the cycle: Extract to documents layer
-// documents/actor/calculations/stance-effects.js
+// ✅ Fixed: Extract to documents layer
 export function applyStanceEffects(actor, sys) { /* ... */ }
-
-// actor.js
-import { applyStanceEffects } from "./actor/calculations/stance-effects.js";
-
-// services/stance/index.js (re-export for backward compat)
-export { applyStanceEffects as applyStanceAutomation } from "../../documents/actor/calculations/stance-effects.js";
 ```
 
-### "Documents layer importing from Services"
+### Wrong Layer Import
 
-**Cause**: Actor or Item document is importing from services layer.
+**Problem**: Documents importing from Services (or vice versa)
 
-**Fix**: Move pure calculation logic to documents layer, keep async/presentation logic in services.
+**Solution**: Extract shared logic to Utils layer
 
-### "Services layer importing from Documents"
+### Architecture Benefits
 
-**Cause**: Service is importing calculation functions from documents.
-
-**Fix**: Extract shared calculations to Utils layer, have both import from there.
-
----
-
-## Migration Guide
-
-### From Monolithic to Layered
-
-If you have a large function that violates layer separation:
-
-**Before**:
-```javascript
-// documents/actor.js
-import { rollDice } from "../services/dice.js"; // ❌ Violation!
-
-class L5R4Actor extends Actor {
-  prepareDerivedData() {
-    // Calculate AND present (❌ bad!)
-    const bonus = this.calculateBonus();
-    rollDice(bonus); // ❌ Don't do this here!
-  }
-}
-```
-
-**After**:
-```javascript
-// documents/actor.js
-class L5R4Actor extends Actor {
-  prepareDerivedData() {
-    // ✅ Only calculate
-    sys._rollBonus = this.calculateBonus();
-  }
-}
-
-// sheets/pc-sheet.js
-import { rollWithBonus } from "../services/dice.js";
-
-class L5R4PCSheet extends ActorSheetV2 {
-  _onRollSkill(event) {
-    // ✅ Sheet coordinates between document and service
-    const bonus = this.actor.system._rollBonus;
-    rollWithBonus(this.actor, bonus);
-  }
-}
-```
-
----
-
-## Benefits of This Architecture
-
-### 1. **Maintainability**
-- Each layer has clear responsibilities
-- Pure functions in Utils are framework-agnostic
-- Documents have no UI or service dependencies
-
-### 2. **Code Organization**
-- Clear separation of concerns
-- Easy to find where logic lives
-- No unexpected side effects
-
-### 3. **Reusability**
-- Utils functions can be used anywhere
-- Services can be called from any UI context
-- Documents compute data once, use everywhere
-
-### 4. **Debugging**
-- No circular dependencies to navigate
-- Clear data flow (top to bottom)
-- Easier to trace bugs to their source
-
-### 5. **Performance**
-- Documents compute derived data efficiently
-- No redundant calculations across layers
-- Services can be async without blocking data prep
+- **Maintainability** - Clear responsibilities per layer
+- **Organization** - Easy to find where logic lives
+- **Reusability** - Utils work anywhere, Documents compute once
+- **Debugging** - No circular dependencies, clear data flow
+- **Performance** - Efficient calculations, no redundancy
 
 ---
 
 ## How to Contribute
 
-We welcome contributions! Here's how to get started:
-
-1. **Fork** the repository on [GitHub](https://github.com/ernieayala/l5r4)
-2. **Clone** your fork locally
-3. **Create** a feature branch (`git checkout -b feature/amazing-feature`)
-4. **Follow** our code style:
+1. **Fork** the repo on [GitHub](https://github.com/ernieayala/l5r4)
+2. **Clone** your fork
+3. **Create** a feature branch (`git checkout -b feature/name`)
+4. **Follow** code style:
    - JSDoc comments for functions
-   - kebab-case for file names
-   - PascalCase for class names
-5. **Verify** thoroughly with existing worlds
-6. **Submit** a pull request with a clear description
+   - kebab-case for files
+   - PascalCase for classes
+   - Run `npm run madge:check` before committing
+5. **Test** thoroughly
+6. **Submit** a pull request
 
-### Code Style Guidelines
+### Code Style
 
-- Use JSDoc comments for all functions
-- Use kebab-case for file names
-- Use PascalCase for class names
-- Follow the layer architecture strictly
-- Run `npm run madge:check` before committing
+- JSDoc for all functions
+- Follow layer architecture
+- Verify with `npm run madge:check`
 
-### 🐛 Bug Reports
+### Report Bugs
 
-Found an issue? Report it on [GitHub Issues](https://github.com/ernieayala/l5r4/issues) with:
+[GitHub Issues](https://github.com/ernieayala/l5r4/issues)
+
+Include:
 - Foundry VTT version
 - System version
 - Steps to reproduce
-- Console errors (press F12 → Console tab)
-- Screenshots if applicable
+- Console errors (F12)
+- Screenshots
 
 ---
 
-## Reference
-
-### Quick Architecture Check
-
-```bash
-# Before committing
-npm run madge:check    # Verify architecture compliance
-
-# Detailed analysis
-npm run madge:summary  # View dependency statistics
-```
+## Quick Reference
 
 ### Import Cheat Sheet
 
-| From Layer | Can Import | Cannot Import |
-|------------|------------|---------------|
+| Layer | Can Import | Cannot Import |
+|-------|-----------|---------------|
 | **Sheets** | documents, services, utils, config | - |
 | **Services** | utils, config | documents, sheets |
 | **Documents** | utils, config | services, sheets |
-| **Utils** | config | documents, services, sheets |
-| **Config** | - | anything |
-
----
-
-**Last Architecture Audit**: 2025-10-04  
-**Architecture Grade**: A+ (100%)  
-**Circular Dependencies**: 0  
-**Boundary Violations**: 0
+| **Utils** | config only | documents, services, sheets |
+| **Config** | nothing | anything |

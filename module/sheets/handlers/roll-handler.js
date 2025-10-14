@@ -1,30 +1,44 @@
 /**
- * @fileoverview Roll Handler - Actor Sheet Roll Operations
+ * Roll Handler Module
  * 
- * Centralizes all roll-related functionality for actor sheets, providing consistent
- * roll interfaces for skills, attacks, damage, traits, and weapons. Integrates with
- * the dice service and applies game mechanics like wound penalties and stance bonuses.
+ * Event handler collection for ActorSheetV2 roll actions in the L5R4 system.
+ * Bridges UI events from character sheets to the dice service layer, handling
+ * skill rolls, trait rolls, attack rolls, and damage rolls for both PCs and NPCs.
  * 
- * **Responsibilities:**
- * - Process skill rolls with trait resolution
- * - Handle attack rolls with stance bonuses
- * - Execute damage rolls with trait bonuses
- * - Perform trait rolls (pure ability checks)
- * - Manage weapon attack rolls with skill/trait associations
- * - Apply wound penalties and modifiers
- * - Detect actor type (PC vs NPC) for appropriate roll handling
+ * Architecture:
+ * - **Handler Responsibilities**: Parse DOM events, extract roll parameters, dispatch to dice services
+ * - **NO Business Logic**: All game mechanics delegated to dice services and utils
+ * - **Stateless**: Pure handler methods, no instance state beyond static methods
+ * - **Event Delegation**: Designed for Application v2 event delegation pattern
  * 
- * **Integration:**
- * Used by BaseActorSheet and child sheets via composition. All methods receive
- * explicit context for accessing actor data and performing dice service calls.
+ * L5R4 Roll Types Handled:
+ * - **Skill Rolls**: (Skill + Trait)k(Trait) for trained abilities
+ * - **Trait Rolls**: XkX for raw ability checks without training
+ * - **Attack Rolls**: Weapon attacks with stance bonuses and wound penalties
+ * - **Damage Rolls**: Weapon damage with stance bonuses
+ * - **NPC Rolls**: Simplified rolls for NPC stat blocks
  * 
- * @author L5R4 System Team
- * @since 1.1.0
- * @see {@link ../../services/dice/index.js|Dice Service}
+ * Foundry VTT Integration (v13+):
+ * - Uses Application v2 event delegation (element parameter pattern)
+ * - Reads data-* attributes from DOM for roll parameters
+ * - Integrates with Actor.items collection for skill/weapon lookups
+ * - Respects event.shiftKey for optional roll dialog display
+ * - Posts results via ChatMessage through dice service layer
+ * 
+ * Related Services:
+ * - SkillRoll: Handles PC skill roll execution with emphasis and raises
+ * - TraitRoll: Handles PC trait roll execution with void spending
+ * - SimpleRoll: General-purpose roll handler for pre-calculated dice pools (PCs and NPCs)
+ * - attack-bonuses: Stance bonus extraction (Full Attack +2k1, etc.)
+ * - mechanics utils: Trait resolution, weapon skill lookups, wound penalties
+ * 
+ * @module sheets/handlers/roll-handler
+ * @requires Foundry VTT v13+ (Application v2 event delegation)
+ * @see {@link https://foundryvtt.com/api/v13/classes/foundry.applications.api.ApplicationV2.html|Application v2}
  */
 
 import { SkillRoll } from "../../services/dice/rolls/skill-roll.js";
-import { NpcRoll } from "../../services/dice/rolls/npc-roll.js";
+import { SimpleRoll } from "../../services/dice/rolls/simple-roll.js";
 import { TraitRoll } from "../../services/dice/rolls/trait-roll.js";
 import { getStanceAttackBonuses, getStanceDamageBonuses } from "../../services/stance/rolls/attack-bonuses.js";
 import { normalizeTraitKey, getEffectiveTrait, extractRollParams, resolveWeaponSkillTrait, readWoundPenalty } from "../../utils/mechanics.js";
@@ -32,24 +46,108 @@ import { toInt } from "../../utils/type-coercion.js";
 import { T } from "../../utils/localization.js";
 
 /**
- * Roll Handler Class
- * Provides comprehensive roll functionality for actor sheets.
+ * Static handler collection for L5R4 roll events from character sheets.
+ * 
+ * Provides event handlers for Application v2 sheets that parse DOM events,
+ * extract roll parameters from data-* attributes, and dispatch to appropriate
+ * dice service functions. All methods are static since no instance state needed.
+ * 
+ * Usage Pattern (in ActorSheetV2._onAction):
+ * ```javascript
+ * switch (action) {
+ *   case "roll-skill":
+ *     return RollHandler.skillRoll(context, event, target);
+ *   case "roll-trait":
+ *     return RollHandler.traitRoll(context, event, target);
+ * }
+ * ```
  */
 export class RollHandler {
+  
   /**
-   * Shared skill roll handler for both PC and NPC sheets.
-   * Automatically detects actor type and applies appropriate roll logic.
+   * Determine if the actor is an NPC based on sheet class name or actor type.
    * 
-   * @param {object} context - Handler context
+   * Checks two indicators: sheet class name contains "Npc" or actor.type === "npc".
+   * Used to route rolls to appropriate service (SkillRoll vs SimpleRoll).
+   * 
+   * @param {Object} context - Sheet context object from _prepareContext()
+   * @param {string} [context.sheetClassName] - Sheet class name (may include "Npc")
    * @param {Actor} context.actor - The actor document
-   * @param {string} [context.sheetClassName] - Optional sheet class name for NPC detection
-   * @param {Event} event - The triggering event (shift-click for options)
-   * @param {HTMLElement} element - The clicked element within a skill item row
-   * @returns {void}
+   * @returns {boolean} True if actor is an NPC
+   * @private
+   */
+  static _isNpc(context) {
+    return context.sheetClassName?.includes("Npc") || context.actor.type === "npc";
+  }
+
+/**
+   * Append stance bonus notation to roll description text.
+   * 
+   * If stance bonuses are present (e.g., Full Attack +2k1), appends bonus notation
+   * to description string for display in chat messages. Enhances roll transparency
+   * by showing where attack/damage bonuses originate.
+   * 
+   * @param {string} description - Base roll description text
+   * @param {Object} stanceBonuses - Stance bonuses from getStanceAttackBonuses/getStanceDamageBonuses
+   * @param {number} stanceBonuses.roll - Rolled dice bonus
+   * @param {number} stanceBonuses.keep - Kept dice bonus
+   * @returns {string} Description with stance bonus appended if applicable
+   * @private
+   */
+  static _addStanceBonusText(description, stanceBonuses) {
+    if (stanceBonuses.roll > 0 || stanceBonuses.keep > 0) {
+      const bonusText = `+${stanceBonuses.roll}k${stanceBonuses.keep}`;
+      return description ? `${description} (Full Attack: ${bonusText})` : `Full Attack: ${bonusText}`;
+    }
+    return description;
+  }
+
+/**
+   * Resolve target element from Application v2 event delegation pattern.
+   * 
+   * Application v2 passes element as a parameter, but falls back to event.currentTarget
+   * for compatibility. This ensures handlers work with both delegation patterns.
+   * 
+   * @param {HTMLElement|null} element - Element from delegation (preferred)
+   * @param {Event} event - DOM event with currentTarget fallback
+   * @returns {HTMLElement} The target element to extract data from
+   * @private
+   */
+  static _getElement(element, event) {
+    return  (element || event.currentTarget);
+  }
+  
+  /**
+   * Handle skill roll event from character sheet.
+   * 
+   * Executes L5R4 skill rolls using formula (Skill Rank + Trait)k(Trait). Extracts
+   * skill data from closest .item row, resolves trait key, applies stance bonuses
+   * for weapon/bow attacks, and dispatches to SkillRoll service. Supports both
+   * PC rolls (with emphasis, raises, void) and NPC simplified rolls.
+   * 
+   * L5R4 Mechanics:
+   * - Skill Roll Formula: (Skill + Trait)k(Trait) where rolled = Skill + Trait, kept = Trait
+   * - Weapon/Bow Attacks: Applies Full Attack stance bonuses (+2k1) if applicable
+   * - Wound Penalties: Applied to attack roll TN via SkillRoll service
+   * 
+   * Data Sources:
+   * - Skill Item: Extracts from actor.items via data-item-id on closest .item row
+   * - Trait: Normalized from item.system.trait, resolved to effective value
+   * - Bonuses: item.system.rollBonus, keepBonus, totalBonus plus stance bonuses
+   * 
+   * Event Handling:
+   * - event.shiftKey: Toggles roll dialog display (XOR with system setting)
+   * - Prevents default to stop form submission or link navigation
+   * 
+   * @param {Object} context - Sheet context from _prepareContext()
+   * @param {Actor} context.actor - The actor making the roll
+   * @param {Event} event - DOM click event on skill roll trigger
+   * @param {HTMLElement} element - Target element from Application v2 delegation
+   * @returns {void} Delegates to SkillRoll service which posts to chat
    */
   static skillRoll(context, event, element) {
     event.preventDefault();
-    const el = /** @type {HTMLElement} */ (element || event.currentTarget);
+    const el = RollHandler._getElement(element, event);
     const row = el?.closest?.(".item");
     const item = row ? context.actor.items.get(row.dataset.itemId) : null;
     if (!item) return;
@@ -61,13 +159,10 @@ export class RollHandler {
     }
     const actorTrait = getEffectiveTrait(context.actor, traitKey);
 
-    // Determine if this is an NPC sheet
-    const isNpc = context.sheetClassName?.includes("Npc") || context.actor.type === "npc";
-    
-    // Determine if this is an attack roll (weapon/bow skill)
+    const isNpc = RollHandler._isNpc(context);
+
     const rollType = item.type === "weapon" || item.type === "bow" ? "attack" : null;
-    
-    // Apply stance bonuses for attack rolls
+
     let rollBonus = toInt(item.system?.rollBonus);
     let keepBonus = toInt(item.system?.keepBonus);
     if (rollType === "attack") {
@@ -93,32 +188,38 @@ export class RollHandler {
   }
 
   /**
-   * Shared attack roll handler using extractRollParams utility.
-   * Extracts roll parameters from dataset and applies trait bonuses and stance bonuses.
+   * Handle generic NPC attack roll from data-* attributes.
    * 
-   * @param {object} context - Handler context
-   * @param {Actor} context.actor - The actor document
-   * @param {Event} event - The triggering event (shift-click for options)
-   * @param {HTMLElement} element - The element with roll dataset attributes
-   * @returns {Promise<any>} Roll result from Dice.NpcRoll
+   * Executes attack rolls for NPC stat blocks using pre-calculated dice pools
+   * stored in data-roll/data-keep attributes. Applies trait bonuses, stance bonuses
+   * (Full Attack +2k1), and wound penalties. Used for NPC sheet quick rolls.
+   * 
+   * L5R4 Mechanics:
+   * - Base dice from data-roll/data-keep attributes on element
+   * - Adds trait bonus if data-trait present (effective trait value)
+   * - Full Attack stance: +2k1 to attack, -10 Armor TN (TN reduction in SimpleRoll)
+   * - Wound Penalties: Applied to TN via SimpleRoll service
+   * 
+   * Data Extraction:
+   * Uses extractRollParams() to read data-roll, data-keep, data-label, data-description,
+   * and optional data-trait from target element. Trait bonus resolved via getEffectiveTrait().
+   * 
+   * @param {Object} context - Sheet context from _prepareContext()
+   * @param {Actor} context.actor - The NPC actor making the roll
+   * @param {Event} event - DOM click event on attack roll trigger
+   * @param {HTMLElement} element - Target element from Application v2 delegation
+   * @returns {Promise<ChatMessage|undefined>} Chat message from SimpleRoll service
    */
   static attackRoll(context, event, element) {
     event.preventDefault();
-    const el = /** @type {HTMLElement} */ (element || event.currentTarget);
+    const el = RollHandler._getElement(element, event);
     const params = extractRollParams(el, context.actor);
-    
-    // Apply stance bonuses to attack rolls
-    const stanceBonuses = getStanceAttackBonuses(context.actor);
-    let rollName = `${context.actor.name}: ${params.label}`.trim();
-    let description = params.description;
-    
-    // Add stance bonus information to description
-    if (stanceBonuses.roll > 0 || stanceBonuses.keep > 0) {
-      const bonusText = `+${stanceBonuses.roll}k${stanceBonuses.keep}`;
-      description = description ? `${description} (Full Attack: ${bonusText})` : `Full Attack: ${bonusText}`;
-    }
 
-    return NpcRoll({
+    const stanceBonuses = getStanceAttackBonuses(context.actor);
+    const rollName = `${context.actor.name}: ${params.label}`.trim();
+    const description = RollHandler._addStanceBonusText(params.description, stanceBonuses);
+
+    return SimpleRoll({
       woundPenalty: readWoundPenalty(context.actor),
       diceRoll: params.diceRoll + params.traitBonus + stanceBonuses.roll,
       diceKeep: params.diceKeep + params.traitBonus + stanceBonuses.keep,
@@ -131,14 +232,32 @@ export class RollHandler {
   }
 
   /**
-   * Handle weapon attack rolls using weapon skill/trait associations.
-   * Uses the weapon's associated skill if the character has it, otherwise falls back to the weapon's trait.
+   * Handle weapon attack roll from weapon/bow item row.
    * 
-   * @param {object} context - Handler context
-   * @param {Actor} context.actor - The actor document
-   * @param {Event} event - The triggering event (shift-click for options)
-   * @param {HTMLElement} element - The element with weapon dataset attributes
-   * @returns {Promise<any>} Roll result from Dice.NpcRoll
+   * Executes weapon attack rolls with full skill/trait resolution. Searches actor's
+   * skills for weapon's associatedSkill, calculates (Skill + Trait)k(Trait), applies
+   * stance bonuses (Full Attack +2k1), and handles unskilled attacks (no skill = trait-only).
+   * Posts chat message with weapon damage button on successful attacks.
+   * 
+   * L5R4 Mechanics:
+   * - Skilled Attack: (Skill Rank + Trait)k(Trait) using weapon's associated skill
+   * - Unskilled Attack: (Trait)k(Trait) if no skill found, dice never explode
+   * - Full Attack Stance: +2k1 attack bonus, -10 Armor TN (in SimpleRoll)
+   * - Wound Penalties: Applied to attack TN via SimpleRoll service
+   * - Successful Hit: Generates weapon damage button in chat with stance damage bonuses
+   * 
+   * Resolution Process:
+   * 1. Extract weapon item from closest .item row via data-item-id/data-document-id/data-id
+   * 2. Validate weapon type (must be "weapon" or "bow")
+   * 3. Resolve weapon skill and trait via resolveWeaponSkillTrait()
+   * 4. Apply stance attack bonuses (Full Attack +2k1)
+   * 5. Execute SimpleRoll with rollType="attack" and weaponId for damage integration
+   * 
+   * @param {Object} context - Sheet context from _prepareContext()
+   * @param {Actor} context.actor - The actor making the weapon attack
+   * @param {Event} event - DOM click event on weapon attack trigger
+   * @param {HTMLElement} element - Target element from Application v2 delegation
+   * @returns {Promise<ChatMessage|undefined>} Chat message from SimpleRoll service
    */
   static weaponAttackRoll(context, event, element) {
     event.preventDefault();
@@ -151,13 +270,10 @@ export class RollHandler {
       return;
     }
 
-    // Resolve weapon skill/trait association
     const weaponSkill = resolveWeaponSkillTrait(context.actor, weapon);
-    
-    // Apply stance bonuses to attack rolls
+
     const stanceBonuses = getStanceAttackBonuses(context.actor);
-    
-    // Check if weapon attack is untrained (no skill rank)
+
     const isUntrained = weaponSkill.skillRank === 0;
     
     const rollName = `${context.actor.name}: ${weapon.name} ${game.i18n.localize("l5r4.ui.mechanics.rolls.attackRoll")}`;
@@ -165,7 +281,7 @@ export class RollHandler {
       + `${(stanceBonuses.roll > 0 || stanceBonuses.keep > 0) ? ` (${game.i18n.localize("l5r4.ui.mechanics.stances.fullAttack")}: +${stanceBonuses.roll}k${stanceBonuses.keep})` : ''}`
       + `${isUntrained ? ` (${game.i18n.localize("l5r4.ui.mechanics.rolls.unskilled")})` : ''}`;
 
-    return NpcRoll({
+    return SimpleRoll({
       woundPenalty: readWoundPenalty(context.actor),
       diceRoll: weaponSkill.rollBonus + stanceBonuses.roll,
       diceKeep: weaponSkill.keepBonus + stanceBonuses.keep,
@@ -180,32 +296,39 @@ export class RollHandler {
   }
 
   /**
-   * Shared damage roll handler using extractRollParams utility.
-   * Extracts roll parameters from dataset and applies trait bonuses and stance bonuses.
+   * Handle damage roll from data-* attributes.
    * 
-   * @param {object} context - Handler context
-   * @param {Actor} context.actor - The actor document
-   * @param {Event} event - The triggering event (shift-click for options)
-   * @param {HTMLElement} element - The element with roll dataset attributes
-   * @returns {Promise<any>} Roll result from Dice.NpcRoll
+   * Executes damage rolls for weapons using pre-calculated dice pools from data-*
+   * attributes. Applies stance damage bonuses (from Full Attack stance if applicable)
+   * and trait bonuses (typically Strength for melee, bow Strength for ranged).
+   * 
+   * L5R4 Mechanics:
+   * - Base dice from data-roll/data-keep on element
+   * - Melee: Usually includes Strength trait bonus (data-trait="str")
+   * - Ranged: Bow Strength or weapon-specific attribute
+   * - Stance Bonuses: Extracted from active effects (varies by technique/stance)
+   * - No Wound Penalties: Damage rolls not affected by attacker's wounds
+   * 
+   * Data Extraction:
+   * Uses extractRollParams() to read roll parameters and optional trait bonus.
+   * Stance damage bonuses retrieved via getStanceDamageBonuses().
+   * 
+   * @param {Object} context - Sheet context from _prepareContext()
+   * @param {Actor} context.actor - The actor making the damage roll
+   * @param {Event} event - DOM click event on damage roll trigger
+   * @param {HTMLElement} element - Target element from Application v2 delegation
+   * @returns {Promise<ChatMessage|undefined>} Chat message from SimpleRoll service
    */
   static damageRoll(context, event, element) {
     event.preventDefault();
-    const el = /** @type {HTMLElement} */ (element || event.currentTarget);
+    const el = RollHandler._getElement(element, event);
     const params = extractRollParams(el, context.actor);
-    
-    // Apply stance bonuses to damage rolls
+
     const stanceBonuses = getStanceDamageBonuses(context.actor);
     const rollName = `${context.actor.name}: ${params.label}`.trim();
-    let description = params.description;
-    
-    // Add stance bonus information to description
-    if (stanceBonuses.roll > 0 || stanceBonuses.keep > 0) {
-      const bonusText = `+${stanceBonuses.roll}k${stanceBonuses.keep}`;
-      description = description ? `${description} (Full Attack: ${bonusText})` : `Full Attack: ${bonusText}`;
-    }
+    const description = RollHandler._addStanceBonusText(params.description, stanceBonuses);
 
-    return NpcRoll({
+    return SimpleRoll({
       diceRoll: params.diceRoll + params.traitBonus + stanceBonuses.roll,
       diceKeep: params.diceKeep + params.traitBonus + stanceBonuses.keep,
       rollName,
@@ -217,15 +340,30 @@ export class RollHandler {
   }
 
   /**
-   * Shared trait roll handler for both PC and NPC sheets.
-   * Automatically detects actor type and uses appropriate roll method.
+   * Handle trait roll for raw ability checks.
    * 
-   * @param {object} context - Handler context
-   * @param {Actor} context.actor - The actor document
-   * @param {string} [context.sheetClassName] - Optional sheet class name for NPC detection
-   * @param {Event} event - The triggering event (shift-click for PC options)
-   * @param {HTMLElement} element - The trait element with dataset attributes
-   * @returns {Promise<any>} Roll result from appropriate Dice method
+   * Executes trait rolls using formula XkX where X = trait rank. Trait rolls represent
+   * innate abilities without skill training (resisting effects, lifting, endurance).
+   * Routes to SimpleRoll for NPCs or TraitRoll for PCs (which supports void spending,
+   * raises, and wound penalties).
+   * 
+   * L5R4 Mechanics:
+   * - Trait Roll Formula: XkX where X = trait rank (roll and keep same number)
+   * - Usage: Raw ability checks (Stamina for poison resistance, Willpower for mental focus)
+   * - PC Rolls: Support void points (+1k1), raises, wound penalties, unskilled flag
+   * - NPC Rolls: Simplified XkX without advanced options
+   * 
+   * Trait Resolution:
+   * Attempts to extract trait key from multiple sources with fallback chain:
+   * 1. Closest .trait block's .trait-rank data-trait attribute
+   * 2. element.dataset.traitName
+   * 3. Default fallback: "ref" (Reflexes)
+   * 
+   * @param {Object} context - Sheet context from _prepareContext()
+   * @param {Actor} context.actor - The actor making the trait roll
+   * @param {Event} event - DOM click event on trait roll trigger
+   * @param {HTMLElement} element - Target element from Application v2 delegation
+   * @returns {Promise<ChatMessage|false|undefined>} Chat message from service, false if cancelled
    */
   static traitRoll(context, event, element) {
     event.preventDefault();
@@ -238,11 +376,10 @@ export class RollHandler {
 
     const traitValue = getEffectiveTrait(context.actor, traitKey);
 
-    // Determine if this is an NPC sheet
-    const isNpc = context.sheetClassName?.includes("Npc") || context.actor.type === "npc";
+    const isNpc = RollHandler._isNpc(context);
 
     if (isNpc) {
-      return NpcRoll({
+      return SimpleRoll({
         npc: true,
         rollName: element?.dataset?.traitName || traitKey,
         traitName: traitKey,
@@ -259,42 +396,35 @@ export class RollHandler {
   }
 
   /**
-   * NPC ring roll handler for streamlined ring-based rolls.
-   * Processes ring-based rolls using dataset attributes for roll parameters.
-   * Provides a simplified interface optimized for GM use during gameplay.
+   * Handle NPC ring roll for magical/supernatural effects.
    * 
-   * **Dataset Attributes:**
-   * - `data-ring-name`: Display name for the ring (e.g., "Fire", "Water")
-   * - `data-system-ring`: System ring identifier for localization lookup
-   * - `data-ring-rank`: Numeric rank value for the ring (1-9)
+   * Executes ring rolls using formula XkX where X = ring rank. Ring rolls are uncommon
+   * and typically involve magical/supernatural effects (spell resistance, Taint resistance).
+   * Used exclusively for NPCs; PCs use trait rolls or spell casting rolls instead.
    * 
-   * **Roll Processing:**
-   * - Uses Dice.NpcRoll() for specialized NPC roll handling
-   * - Applies localized ring names from translation keys
-   * - Defaults to "void" ring if no system ring specified
-   * - Bypasses complex PC trait calculation systems
+   * L5R4 Mechanics:
+   * - Ring Roll Formula: XkX where X = ring rank (Earth, Air, Fire, Water, Void)
+   * - Usage: Resisting spells, supernatural effects, Shadowlands Taint
+   * - No Wound Penalties: Ring rolls represent spiritual/magical resilience
+   * - No Skill Training: Pure ring value without modifiers
    * 
-   * @param {object} context - Handler context
-   * @param {Actor} context.actor - The actor document
-   * @param {Event} event - Click event from ring roll element
-   * @param {HTMLElement} element - Element containing dataset attributes
-   * @returns {Promise<any>} Roll result processed by dice service
+   * Data Sources:
+   * - Ring Name: element.dataset.ringName or localized from dataset.systemRing
+   * - Ring Rank: element.dataset.ringRank (pre-calculated from NPC stat block)
+   * - System Ring: element.dataset.systemRing (ring identifier: "earth", "air", etc.)
    * 
-   * @example
-   * // Template usage
-   * <button data-action="roll-ring" 
-   *         data-ring-name="Fire" 
-   *         data-system-ring="fire" 
-   *         data-ring-rank="3">
-   *   Roll Fire Ring
-   * </button>
+   * @param {Object} context - Sheet context from _prepareContext()
+   * @param {Actor} context.actor - The NPC actor making the ring roll
+   * @param {Event} event - DOM click event on ring roll trigger
+   * @param {HTMLElement} element - Target element with data-ring-name/data-ring-rank/data-system-ring
+   * @returns {Promise<ChatMessage|undefined>} Chat message from SimpleRoll service
    */
   static npcRingRoll(context, event, element) {
     event?.preventDefault?.();
     const ringName = element?.dataset?.ringName || T(`l5r4.ui.mechanics.rings.${element?.dataset?.systemRing || "void"}`);
     const systemRing = String(element?.dataset?.systemRing || "void").toLowerCase();
     const ringRank = toInt(element?.dataset?.ringRank);
-    return NpcRoll({
+    return SimpleRoll({
       npc: true,
       rollName: ringName,
       ringName: systemRing,
@@ -303,48 +433,32 @@ export class RollHandler {
   }
 
   /**
-   * NPC simple roll handler for dataset-driven rolls.
-   * Processes basic NPC rolls using data attributes for roll parameters,
-   * providing a streamlined interface for common NPC actions without
-   * complex trait resolution or skill lookup.
+   * Handle generic NPC simple roll from event.currentTarget dataset.
    * 
-   * **Dataset Attributes:**
-   * - `data-roll`: Number of dice to roll (e.g., "5" for 5d10)
-   * - `data-keep`: Number of dice to keep (e.g., "3" for keep 3)
-   * - `data-rolllabel`: Display label for the roll type
-   * - `data-trait`: Trait name being rolled (for display)
-   * - `data-rolltype`: Roll category ("simple", "attack", "damage", etc.)
+   * Executes custom rolls for NPCs using XkY notation from data-* attributes.
+   * Flexible handler for any roll type (attack, damage, skill, initiative, etc.)
+   * defined directly on NPC sheets without requiring item lookups.
    * 
-   * **Roll Processing:**
-   * - Extracts roll parameters from element dataset
-   * - Constructs descriptive roll name from actor and action
-   * - Applies wound penalties automatically
-   * - Supports shift-click for roll options dialog
-   * - Uses NpcRoll() for specialized NPC roll handling
+   * L5R4 Mechanics:
+   * - Base dice from data-roll and data-keep on event.currentTarget
+   * - Roll type determined by data-rolltype ("attack", "damage", "simple")
+   * - Attack rolls: Apply wound penalties to TN
+   * - Other rolls: No wound penalties applied
+   * - Supports event.shiftKey for optional roll dialog
    * 
-   * **Usage Examples:**
-   * ```html
-   * <!-- Basic trait roll -->
-   * <div class="simple-roll" 
-   *      data-roll="4" 
-   *      data-keep="2" 
-   *      data-rolllabel="Agility" 
-   *      data-trait="agility">
+   * Data Sources (from event.currentTarget.dataset):
+   * - roll: Number of dice to roll (required)
+   * - keep: Number of dice to keep (required)
+   * - rolllabel: Display label for the roll (e.g., "Claw Attack")
+   * - trait: Trait name for display purposes (e.g., "Agility")
+   * - rolltype: Roll type identifier ("attack", "damage", "simple", etc.)
    * 
-   * <!-- Attack roll -->
-   * <div class="simple-roll" 
-   *      data-roll="6" 
-   *      data-keep="3" 
-   *      data-rolllabel="Katana Attack" 
-   *      data-rolltype="attack">
-   * ```
-   * 
-   * @param {object} context - Handler context
-   * @param {Actor} context.actor - The actor document
-   * @param {Event} event - Click event from simple roll element
-   * @returns {Promise<any>} Roll result processed by dice service
+   * @param {Object} context - Sheet context from _prepareContext()
+   * @param {Actor} context.actor - The NPC actor making the roll
+   * @param {Event} event - DOM click event with dataset on currentTarget
+   * @returns {Promise<ChatMessage|undefined>} Chat message from SimpleRoll service
    */
-  static async npcSimpleRoll(context, event) {
+  static npcSimpleRoll(context, event) {
     event?.preventDefault?.();
     const ds = event.currentTarget?.dataset || {};
     const diceRoll = toInt(ds.roll);
@@ -354,7 +468,7 @@ export class RollHandler {
     const rollType = ds.rolltype || "simple";
     const rollName = `${context.actor.name}: ${rollTypeLabel} ${trait}`.trim();
 
-    return NpcRoll({
+    return SimpleRoll({
       woundPenalty: readWoundPenalty(context.actor),
       diceRoll,
       diceKeep,

@@ -22,11 +22,6 @@ body > * {
   gap: 1rem;
 }
 
-:root {
-  --l5r4-transition-fast: 150ms ease-out;
-  --l5r4-transition-normal: 250ms ease-out;
-}
-
 .message-content .item h4,
 .message-content .item h5 {
   margin: 0;
@@ -99,19 +94,8 @@ body > * {
 }
 .l5r4.pc .actor-img img,
 .l5r4.npc .actor-img img {
-  transition: transform var(--l5r4-transition-fast), filter var(--l5r4-transition-fast);
-  cursor: pointer;
   max-width: 100%;
   max-height: 100%;
-}
-.l5r4.pc .actor-img img:hover,
-.l5r4.npc .actor-img img:hover {
-  transform: scale(1.05);
-  filter: brightness(1.1) drop-shadow(0 0 8px rgba(0, 0, 0, 0.3));
-}
-.l5r4.pc .actor-img img:active,
-.l5r4.npc .actor-img img:active {
-  transform: scale(0.98);
 }
 .l5r4.pc input,
 .l5r4.pc select,
@@ -238,7 +222,7 @@ body > * {
 .l5r4.pc .clear-btn,
 .l5r4.npc .clear-btn {
   opacity: 0;
-  transition: opacity var(--l5r4-transition-normal);
+  transition: opacity 250ms ease-out;
   pointer-events: none;
   align-items: center;
   display: inline-flex;
@@ -252,23 +236,19 @@ body > * {
 }
 .l5r4.pc .button,
 .l5r4.npc .button {
-  transition: all var(--l5r4-transition-fast);
+  transition: all 150ms ease-out;
   cursor: pointer;
   display: inline-flex;
 }
 .l5r4.pc .button:hover,
 .l5r4.npc .button:hover {
-  filter: brightness(1.1);
+  opacity: 1;
+  filter: brightness(1.15);
 }
 .l5r4.pc .button:active,
 .l5r4.npc .button:active {
   transform: scale(0.98);
   filter: brightness(0.95);
-}
-.l5r4.pc .button:hover,
-.l5r4.npc .button:hover {
-  opacity: 1;
-  filter: brightness(1.15);
 }
 .l5r4.pc .grid,
 .l5r4.npc .grid {
@@ -312,6 +292,221 @@ body > * {
   padding: 0 0.5rem;
 }
 
+.l5r4.pc .button-mask-container,
+.l5r4.npc .button-mask-container {
+  border-radius: 4px;
+  position: relative;
+  overflow: hidden;
+  border: 1px solid #000;
+  transition: all 150ms ease-out;
+}
+.l5r4.pc .button-mask-container .mas,
+.l5r4.npc .button-mask-container .mas {
+  position: absolute;
+  color: #000;
+  text-align: center;
+  width: 100%;
+  height: 100%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-weight: bold;
+  pointer-events: none;
+}
+.l5r4.pc .button-mask-container .button,
+.l5r4.npc .button-mask-container .button {
+  width: 100%;
+  height: 100%;
+  background: #000;
+  border-radius: 4px;
+  border: none;
+  color: #fff;
+  cursor: pointer;
+  font-weight: bold;
+  mask: url("../assets/animation/urban-sprite.webp");
+  mask-size: 3000% 100%;
+  -webkit-mask: url("../assets/animation/urban-sprite.webp");
+  -webkit-mask-size: 3000% 100%;
+  animation: mask-reverse-urban 0.5s steps(29) forwards;
+  -webkit-animation: mask-reverse-urban 0.5s steps(29) forwards;
+}
+.l5r4.pc .button-mask-container .button:hover,
+.l5r4.npc .button-mask-container .button:hover {
+  animation: mask-forward-urban 0.5s steps(29) forwards;
+  -webkit-animation: mask-forward-urban 0.5s steps(29) forwards;
+}
+.l5r4.pc .trait-rank-container,
+.l5r4.npc .trait-rank-container {
+  position: relative;
+  overflow: hidden;
+  border: 1px solid #000;
+  border-radius: 50%;
+  transition: all 150ms ease-out;
+}
+.l5r4.pc .trait-rank-container .mas,
+.l5r4.npc .trait-rank-container .mas {
+  position: absolute;
+  color: #000;
+  text-align: center;
+  width: 100%;
+  height: 100%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-weight: bold;
+  pointer-events: none;
+}
+.l5r4.pc .trait-rank-container .trait-rank,
+.l5r4.npc .trait-rank-container .trait-rank {
+  width: 100%;
+  height: 100%;
+  background: #000;
+  border: none;
+  border-radius: 50%;
+  color: #fff;
+  cursor: pointer;
+  font-weight: bold;
+  mask: url("../assets/animation/nature-sprite.webp");
+  mask-size: 2300% 100%;
+  -webkit-mask: url("../assets/animation/nature-sprite.webp");
+  -webkit-mask-size: 2300% 100%;
+  animation: mask-reverse-nature 0.5s steps(22) forwards;
+  -webkit-animation: mask-reverse-nature 0.5s steps(22) forwards;
+}
+.l5r4.pc .trait-rank-container .trait-rank:hover,
+.l5r4.npc .trait-rank-container .trait-rank:hover {
+  animation: mask-forward-nature 0.5s steps(22) forwards;
+  -webkit-animation: mask-forward-nature 0.5s steps(22) forwards;
+}
+.l5r4.pc .rank-name-container,
+.l5r4.npc .rank-name-container {
+  position: relative;
+  overflow: hidden;
+  border: 1px solid #000;
+  transition: all 150ms ease-out;
+}
+.l5r4.pc .rank-name-container .mas,
+.l5r4.npc .rank-name-container .mas {
+  position: absolute;
+  color: #000;
+  text-align: center;
+  width: 100%;
+  height: 100%;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  font-weight: bold;
+  gap: 0.25rem;
+  pointer-events: none;
+}
+.l5r4.pc .rank-name-container .rank-name,
+.l5r4.npc .rank-name-container .rank-name {
+  width: 100%;
+  height: 100%;
+  background: #000;
+  border: none;
+  color: #fff;
+  cursor: pointer;
+  font-weight: bold;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 0.25rem;
+  mask: url("../assets/animation/nature-sprite.webp");
+  mask-size: 2300% 100%;
+  -webkit-mask: url("../assets/animation/nature-sprite.webp");
+  -webkit-mask-size: 2300% 100%;
+  animation: mask-reverse-nature 0.5s steps(22) forwards;
+  -webkit-animation: mask-reverse-nature 0.5s steps(22) forwards;
+}
+.l5r4.pc .rank-name-container .rank-name:hover,
+.l5r4.npc .rank-name-container .rank-name:hover {
+  animation: mask-forward-nature 0.5s steps(22) forwards;
+  -webkit-animation: mask-forward-nature 0.5s steps(22) forwards;
+}
+
+@keyframes mask-forward-urban {
+  from {
+    mask-position: 0 0;
+    -webkit-mask-position: 0 0;
+  }
+  to {
+    mask-position: 100% 0;
+    -webkit-mask-position: 100% 0;
+  }
+}
+@-webkit-keyframes mask-forward-urban {
+  from {
+    mask-position: 0 0;
+    -webkit-mask-position: 0 0;
+  }
+  to {
+    mask-position: 100% 0;
+    -webkit-mask-position: 100% 0;
+  }
+}
+@keyframes mask-reverse-urban {
+  from {
+    mask-position: 100% 0;
+    -webkit-mask-position: 100% 0;
+  }
+  to {
+    mask-position: 0 0;
+    -webkit-mask-position: 0 0;
+  }
+}
+@-webkit-keyframes mask-reverse-urban {
+  from {
+    mask-position: 100% 0;
+    -webkit-mask-position: 100% 0;
+  }
+  to {
+    mask-position: 0 0;
+    -webkit-mask-position: 0 0;
+  }
+}
+@keyframes mask-forward-nature {
+  from {
+    mask-position: 0 0;
+    -webkit-mask-position: 0 0;
+  }
+  to {
+    mask-position: 100% 0;
+    -webkit-mask-position: 100% 0;
+  }
+}
+@-webkit-keyframes mask-forward-nature {
+  from {
+    mask-position: 0 0;
+    -webkit-mask-position: 0 0;
+  }
+  to {
+    mask-position: 100% 0;
+    -webkit-mask-position: 100% 0;
+  }
+}
+@keyframes mask-reverse-nature {
+  from {
+    mask-position: 100% 0;
+    -webkit-mask-position: 100% 0;
+  }
+  to {
+    mask-position: 0 0;
+    -webkit-mask-position: 0 0;
+  }
+}
+@-webkit-keyframes mask-reverse-nature {
+  from {
+    mask-position: 100% 0;
+    -webkit-mask-position: 100% 0;
+  }
+  to {
+    mask-position: 0 0;
+    -webkit-mask-position: 0 0;
+  }
+}
 .l5r4.pc .item-list,
 .l5r4.npc .item-list,
 .xp-modal-dialog .item-list {
@@ -481,7 +676,7 @@ body > * {
 .l5r4.npc .item .inline-control,
 .xp-modal-dialog .item .inline-control {
   opacity: 0;
-  transition: opacity var(--l5r4-transition-normal);
+  transition: opacity 250ms ease-out;
   pointer-events: none;
 }
 .l5r4.pc .item .inline-control:hover,
@@ -519,7 +714,7 @@ body > * {
 }
 .l5r4.pc .rank-name,
 .l5r4.npc .rank-name {
-  transition: all var(--l5r4-transition-fast);
+  transition: all 150ms ease-out;
   cursor: pointer;
   background: var(--table-header-bg-color);
   border: 1px solid var(--table-header-border-color);
@@ -550,6 +745,40 @@ body > * {
   background-color: var(--table-header-bg-color);
   flex-wrap: nowrap;
   padding: 1rem;
+  position: relative;
+  border: 2px solid rgba(250, 178, 11, 0.3);
+}
+.l5r4.pc .pc-info::before, .l5r4.pc .pc-info::after,
+.l5r4.npc .pc-info::before,
+.l5r4.npc .pc-info::after {
+  content: "";
+  position: absolute;
+  width: 80px;
+  height: 80px;
+  background-image: url("../assets/borders/brush-stroke.svg");
+  background-size: contain;
+  background-repeat: no-repeat;
+  pointer-events: none;
+  opacity: 1;
+  z-index: 0;
+  filter: brightness(0) saturate(100%);
+}
+.l5r4.pc .pc-info::before,
+.l5r4.npc .pc-info::before {
+  top: -8px;
+  left: -8px;
+  transform: rotate(0deg);
+}
+.l5r4.pc .pc-info::after,
+.l5r4.npc .pc-info::after {
+  bottom: -8px;
+  right: -8px;
+  transform: rotate(180deg);
+}
+.l5r4.pc .pc-info > *,
+.l5r4.npc .pc-info > * {
+  position: relative;
+  z-index: 1;
 }
 .l5r4.pc .pc-info input,
 .l5r4.pc .pc-info .input-placeholder,
@@ -586,8 +815,6 @@ body > * {
 }
 .l5r4.pc .traits-rings .ring-rank,
 .l5r4.npc .traits-rings .ring-rank {
-  transition: all var(--l5r4-transition-fast);
-  cursor: pointer;
   align-content: center;
   background-color: var(--content-link-background);
   border-radius: 50%;
@@ -603,36 +830,22 @@ body > * {
   width: 32px;
   z-index: 10;
 }
-.l5r4.pc .traits-rings .ring-rank:hover,
-.l5r4.npc .traits-rings .ring-rank:hover {
-  filter: brightness(1.1);
-}
-.l5r4.pc .traits-rings .ring-rank:active,
-.l5r4.npc .traits-rings .ring-rank:active {
-  transform: scale(0.98);
-  filter: brightness(0.95);
-}
 .l5r4.pc .traits-rings .ring-roll,
 .l5r4.npc .traits-rings .ring-roll {
   position: relative;
 }
+.l5r4.pc .traits-rings .ring-roll:hover img,
+.l5r4.npc .traits-rings .ring-roll:hover img {
+  filter: brightness(1.1);
+  transform: scale(1.1);
+}
 .l5r4.pc .traits-rings .ring-roll img,
 .l5r4.npc .traits-rings .ring-roll img {
-  transition: transform var(--l5r4-transition-fast), filter var(--l5r4-transition-fast);
-  cursor: pointer;
   border-radius: 50%;
   height: 96px;
   position: relative;
+  transition: all 150ms ease-out;
   width: 96px;
-}
-.l5r4.pc .traits-rings .ring-roll img:hover,
-.l5r4.npc .traits-rings .ring-roll img:hover {
-  transform: scale(1.05);
-  filter: brightness(1.1) drop-shadow(0 0 8px rgba(0, 0, 0, 0.3));
-}
-.l5r4.pc .traits-rings .ring-roll img:active,
-.l5r4.npc .traits-rings .ring-roll img:active {
-  transform: scale(0.98);
 }
 .l5r4.pc .traits-rings .trait,
 .l5r4.pc .traits-rings .void-points,
@@ -660,15 +873,32 @@ body > * {
 .l5r4.npc .traits-rings .void-points .trait-roll p {
   margin: 0;
 }
-.l5r4.pc .traits-rings .trait .trait-rank,
+.l5r4.pc .traits-rings .trait .trait-rank-container,
+.l5r4.pc .traits-rings .void-points .trait-rank-container,
+.l5r4.npc .traits-rings .trait .trait-rank-container,
+.l5r4.npc .traits-rings .void-points .trait-rank-container {
+  grid-area: rank;
+  height: 24px;
+  width: 24px;
+}
+.l5r4.pc .traits-rings .trait .trait-rank-container .trait-rank,
+.l5r4.pc .traits-rings .void-points .trait-rank-container .trait-rank,
+.l5r4.npc .traits-rings .trait .trait-rank-container .trait-rank,
+.l5r4.npc .traits-rings .void-points .trait-rank-container .trait-rank {
+  align-items: center;
+  display: inline-flex;
+  font-family: var(--font-h3);
+  font-size: 22px;
+  font-weight: 600;
+  justify-content: center;
+  padding: 0;
+  text-align: center;
+}
 .l5r4.pc .traits-rings .trait .void-points-amount,
-.l5r4.pc .traits-rings .void-points .trait-rank,
 .l5r4.pc .traits-rings .void-points .void-points-amount,
-.l5r4.npc .traits-rings .trait .trait-rank,
 .l5r4.npc .traits-rings .trait .void-points-amount,
-.l5r4.npc .traits-rings .void-points .trait-rank,
 .l5r4.npc .traits-rings .void-points .void-points-amount {
-  transition: all var(--l5r4-transition-fast);
+  transition: all 150ms ease-out;
   cursor: pointer;
   align-items: center;
   background-color: var(--table-header-bg-color);
@@ -686,23 +916,15 @@ body > * {
   width: 24px;
   z-index: 10;
 }
-.l5r4.pc .traits-rings .trait .trait-rank:hover,
 .l5r4.pc .traits-rings .trait .void-points-amount:hover,
-.l5r4.pc .traits-rings .void-points .trait-rank:hover,
 .l5r4.pc .traits-rings .void-points .void-points-amount:hover,
-.l5r4.npc .traits-rings .trait .trait-rank:hover,
 .l5r4.npc .traits-rings .trait .void-points-amount:hover,
-.l5r4.npc .traits-rings .void-points .trait-rank:hover,
 .l5r4.npc .traits-rings .void-points .void-points-amount:hover {
   filter: brightness(1.1);
 }
-.l5r4.pc .traits-rings .trait .trait-rank:active,
 .l5r4.pc .traits-rings .trait .void-points-amount:active,
-.l5r4.pc .traits-rings .void-points .trait-rank:active,
 .l5r4.pc .traits-rings .void-points .void-points-amount:active,
-.l5r4.npc .traits-rings .trait .trait-rank:active,
 .l5r4.npc .traits-rings .trait .void-points-amount:active,
-.l5r4.npc .traits-rings .void-points .trait-rank:active,
 .l5r4.npc .traits-rings .void-points .void-points-amount:active {
   transform: scale(0.98);
   filter: brightness(0.95);
@@ -942,7 +1164,7 @@ body > * {
   border: 2px solid #666;
   border-radius: 50%;
   height: 12px;
-  transition: all var(--l5r4-transition-fast);
+  transition: all 150ms ease-out;
   width: 12px;
 }
 .l5r4.pc .traits-rings .void-dot:hover,
@@ -1028,20 +1250,17 @@ body > * {
   margin-block-end: 0;
 }
 .l5r4.item .button {
-  transition: all var(--l5r4-transition-fast);
+  transition: all 150ms ease-out;
   cursor: pointer;
   display: inline-flex;
 }
 .l5r4.item .button:hover {
-  filter: brightness(1.1);
+  opacity: 1;
+  filter: brightness(1.15);
 }
 .l5r4.item .button:active {
   transform: scale(0.98);
   filter: brightness(0.95);
-}
-.l5r4.item .button:hover {
-  opacity: 1;
-  filter: brightness(1.15);
 }
 .l5r4.item .editor {
   min-height: 200px;

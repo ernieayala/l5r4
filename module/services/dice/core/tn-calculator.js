@@ -1,64 +1,43 @@
 /**
- * @fileoverview L5R4 Target Number Calculator - Success/Failure Evaluation
+ * Target Number Calculator
  * 
- * Pure utility functions for calculating effective target numbers and
- * evaluating roll success/failure. Handles raises, wound penalties, and
- * outcome determination with localized result strings.
+ * Core utilities for calculating effective Target Numbers (TN) in L5R4 rolls.
+ * Implements the Raises mechanic (+5 TN per Raise), wound penalty application,
+ * and success/failure evaluation per game rules.
  * 
- * **Defensive Coding:** All numeric inputs use type coercion to prevent
- * string concatenation bugs from dialog inputs or malformed data. Invalid
- * values (NaN, undefined, null) default to 0 or appropriate fallbacks.
+ * Used by: skill-roll.js, trait-roll.js, ring-roll.js, simple-roll.js
  * 
- * **Wound Penalty Implementation Note:**
- * Per L5R4 rules (Combat_and_Wounds.md), wound penalties should "increase the
- * TN of ALL rolls made." However, this calculator is agnostic - it applies
- * wound penalties only if the caller passes applyWoundPenalty=true. Different
- * roll types may have different policies:
- * - Skill/Trait rolls: Apply to all rolls with TN > 0
- * - NPC rolls: Apply only to attack rolls
- * - Spell rolls: May not apply wound penalties
+ * Game Mechanics:
+ * - Base TN: Set by GM or automatic (e.g., Armor TN for attacks)
+ * - Raises: +5 TN per Raise declared before rolling
+ * - Wound Penalties: Added to TN when character is injured (typically for attacks)
+ * - Success: Roll total >= effective TN
  * 
- * @author L5R4 System Team
- * @since 1.1.0
+ * API: Roll
+ * Requires: Foundry v13+
+ * 
+ * @module services/dice/core/tn-calculator
  */
 
 import { T } from "../../../utils/localization.js";
 
 /**
- * @typedef {Object} TNResult
- * @property {number} effective - The effective target number after all modifiers
- * @property {number} raises - Number of raises declared for this roll
- * @property {string} outcome - Localized outcome string ("Success", "Failure", or "Missed")
- */
-
-/**
- * Calculate effective target number with raises and wound penalties.
+ * Calculates the effective Target Number for a roll including Raises and wound penalties.
  * 
- * **Formula:** effectiveTN = baseTN + (raises × 5) + woundPenalty
+ * Implements L5R4 core rule: each Raise adds +5 to the TN. Wound penalties are conditionally
+ * applied based on roll type (typically only for attack rolls and some physical actions).
  * 
- * **Type Safety:** All numeric inputs are coerced to numbers. Invalid values
- * (NaN, undefined, null) default to 0. This prevents string concatenation bugs
- * from dialog inputs or malformed actor data.
- * 
- * @param {number} baseTN - Base target number
- * @param {number} raises - Number of raises declared
- * @param {number} woundPenalty - Wound penalty to add
- * @param {boolean} applyWoundPenalty - Whether to apply wound penalty
- * @returns {number} Effective target number
- * @see evaluateTN - Use this TN to evaluate roll success/failure
- * 
- * @example
- * calculateEffectiveTN(15, 2, 10, true); // 15 + 10 + 10 = 35
- * calculateEffectiveTN(15, 0, 10, false); // 15 (wound penalty not applied)
- * calculateEffectiveTN("15", "2", "10", true); // 35 (strings coerced)
+ * @param {number} baseTN - The base Target Number set by GM or game mechanics
+ * @param {number} raises - Number of Raises declared (each adds +5 to TN)
+ * @param {number} woundPenalty - Current wound penalty value from character's wound rank
+ * @param {boolean} applyWoundPenalty - Whether to apply wound penalty to this roll
+ * @returns {number} The final effective TN (baseTN + raises*5 + conditionalWoundPenalty)
  */
 export function calculateEffectiveTN(baseTN, raises, woundPenalty, applyWoundPenalty) {
-  // Defensive type coercion: Prevent string concatenation bugs
-  // Number("5") = 5, Number(undefined) = NaN, Number(NaN) || 0 = 0
   const _baseTN = Number(baseTN) || 0;
   const _raises = Number(raises) || 0;
   const _woundPenalty = Number(woundPenalty) || 0;
-  
+
   let effectiveTN = _baseTN + (_raises * 5);
   if (applyWoundPenalty && _woundPenalty > 0) {
     effectiveTN += _woundPenalty;
@@ -67,31 +46,23 @@ export function calculateEffectiveTN(baseTN, raises, woundPenalty, applyWoundPen
 }
 
 /**
- * Evaluate roll result against target number and return outcome object.
+ * Evaluates a roll result against the effective TN and determines success/failure.
  * 
- * **Note:** Returns null if effectiveTN is zero, negative, or NaN (invalid TN).
+ * Returns structured result for display in chat messages. Success requires the roll
+ * total to meet or exceed the effective TN (including all Raises declared).
  * 
- * **Type Safety:** Numeric inputs are coerced to numbers. Invalid effectiveTN
- * returns null. Invalid rollTotal is treated as 0 (failure).
- * 
- * @param {number} rollTotal - Total roll result
- * @param {number} effectiveTN - Effective target number
- * @param {number} raises - Number of raises declared
- * @returns {TNResult|null} TN result object or null if no TN
- * @see calculateEffectiveTN - Calculate effectiveTN from base TN and modifiers
- * @see replaceFailureWithMissed - Post-process result for attack rolls
- * 
- * @example
- * evaluateTN(25, 20, 1); // { effective: 20, raises: 1, outcome: "Success" }
- * evaluateTN(15, 20, 0); // { effective: 20, raises: 0, outcome: "Failure" }
- * evaluateTN(25, NaN, 1); // null (invalid TN)
+ * @param {number} rollTotal - The total value of the completed roll
+ * @param {number} effectiveTN - The effective TN (from calculateEffectiveTN)
+ * @param {number} raises - Number of Raises declared (for display purposes)
+ * @returns {Object|null} Result object with {effective, raises, outcome} or null if TN invalid
+ * @returns {number} returns.effective - The effective TN used
+ * @returns {number} returns.raises - Number of Raises declared
+ * @returns {string} returns.outcome - Localized "Success" or "Failure" string
  */
 export function evaluateTN(rollTotal, effectiveTN, raises) {
-  // Defensive type coercion
   const _effectiveTN = Number(effectiveTN);
   const _rollTotal = Number(rollTotal) || 0;
-  
-  // Return null for invalid or zero TN (including NaN)
+
   if (!_effectiveTN || _effectiveTN <= 0) return null;
 
   const outcome = (_rollTotal >= _effectiveTN)
@@ -100,49 +71,44 @@ export function evaluateTN(rollTotal, effectiveTN, raises) {
 
   return {
     effective: _effectiveTN,
-    raises: raises || 0,  // Ensure raises is always a number
+    raises: raises || 0,
     outcome
   };
 }
 
 /**
- * Build TN label suffix for roll flavor text.
+ * Constructs a formatted TN label string for display in chat messages.
  * 
- * Returns empty string if effectiveTN is zero or negative.
+ * Format: " [TN {effective}]" or " [TN {effective} ({raisesLabel}: {raises})]"
+ * Returns empty string if TN is 0 or negative (no TN applies to roll).
  * 
- * @param {number} effectiveTN - Effective target number
- * @param {number} raises - Number of raises
- * @param {string} raisesLabel - Localized "Raises" label
- * @returns {string} Formatted TN label suffix
- * @see evaluateTN - Provides the effective TN and raises values
- * 
- * @example
- * buildTNLabel(25, 2, "Raises"); // " [TN 25 (Raises: 2)]"
- * buildTNLabel(15, 0, "Raises"); // " [TN 15]"
+ * @param {number} effectiveTN - The effective TN to display
+ * @param {number} raises - Number of Raises declared
+ * @param {string} raisesLabel - Localized label for "Raises" text
+ * @returns {string} Formatted TN label with optional Raises, or empty string if no TN
  */
 export function buildTNLabel(effectiveTN, raises, raisesLabel) {
   if (effectiveTN <= 0) return "";
-  
+
   const raisePart = raises ? ` (${raisesLabel}: ${raises})` : "";
   return ` [TN ${effectiveTN}${raisePart}]`;
 }
 
 /**
- * Replace failure outcome with "Missed" for attack rolls.
- * Used to provide more contextual feedback for combat.
+ * Replaces "Failure" outcome with "Missed" for attack rolls.
  * 
- * @param {TNResult|null} tnResult - TN result object from evaluateTN
- * @param {string} rollType - Type of roll ("attack" for combat)
- * @returns {TNResult|null} Modified TN result or original
+ * L5R4 thematic convention: attack rolls that fail to hit display "Missed" rather
+ * than "Failure" for more natural combat narration. Non-attack rolls use standard
+ * "Success"/"Failure" terminology.
  * 
- * @example
- * const result = { effective: 20, raises: 0, outcome: "Failure" };
- * replaceFailureWithMissed(result, "attack"); // outcome becomes "Missed"
+ * @param {Object|null} tnResult - Result object from evaluateTN()
+ * @param {string} rollType - Type of roll (e.g., "attack", "skill", "trait")
+ * @returns {Object|null} Modified result with "Missed" outcome for failed attacks, or original result
  */
 export function replaceFailureWithMissed(tnResult, rollType) {
   if (!tnResult) return null;
   if (rollType !== "attack") return tnResult;
-  
+
   const failureLabel = T("l5r4.ui.mechanics.rolls.failure");
   if (tnResult.outcome === failureLabel) {
     return {
@@ -150,6 +116,6 @@ export function replaceFailureWithMissed(tnResult, rollType) {
       outcome: T("l5r4.ui.mechanics.rolls.missed")
     };
   }
-  
+
   return tnResult;
 }

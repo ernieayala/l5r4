@@ -1,101 +1,133 @@
 /**
- * @fileoverview L5R4 Shared Traits and Rings Calculation
+ * Shared Traits and Rings Calculations
  * 
- * Provides shared logic for computing effective traits and elemental rings
- * from base trait values. Used by both PC and NPC preparation to ensure
- * consistent calculation across actor types.
+ * Core trait and ring computation module for L5R4 character sheets. Calculates
+ * effective trait values and derives ring ranks per Legend of the Five Rings 4th
+ * Edition core rules. Used during Actor Document data preparation lifecycle.
  * 
- * **Core Responsibilities:**
- * - **Trait Extraction**: Convert trait data to normalized effective values
- * - **Ring Calculation**: Compute elemental rings from trait pairs
- * - **Void Handling**: Initialize void ring structure with current/max tracking
+ * Key Responsibilities:
+ * - **Effective Trait Calculation**: Extract and coerce trait rank values to integers
+ * - **Ring Derivation**: Compute ring ranks as minimum of component traits per L5R4 rules
+ * - **Void Ring Handling**: Preserve void ring structure (rank/value/max)
+ * - **Defensive Parsing**: Handle missing/malformed trait data gracefully
  * 
- * **L5R4 Ring Rules:**
- * - **Air Ring**: min(Reflexes, Awareness)
- * - **Earth Ring**: min(Stamina, Willpower)
- * - **Fire Ring**: min(Agility, Intelligence)
- * - **Water Ring**: min(Strength, Perception)
- * - **Void Ring**: User-controlled, not derived from traits
+ * L5R4 Game Rules Context:
+ * Each of the four elemental rings (Air, Earth, Fire, Water) is composed of two traits:
+ * - **Air**: Reflexes (Physical) + Awareness (Mental)
+ * - **Earth**: Stamina (Physical) + Willpower (Mental)
+ * - **Fire**: Agility (Physical) + Intelligence (Mental)
+ * - **Water**: Strength (Physical) + Perception (Mental)
  * 
- * **Active Effects Integration:**
- * Foundry applies Active Effects before calling prepareDerivedData, so
- * system.traits already contains final effective values including all bonuses
- * from Family, School, items, and temporary effects.
+ * Ring rank always equals the LOWER of its two component traits. For example, if a
+ * character has Agility 4 and Intelligence 2, their Fire ring is 2. This encourages
+ * balanced character development across physical and mental attributes.
  * 
- * @author L5R4 System Team
- * @since 1.1.0
- * @version 2.0.0
- * @see {@link https://foundryvtt.com/api/classes/documents.Actor.html#applyActiveEffects|Actor.applyActiveEffects}
+ * Void is special - it has no component traits and instead provides Void Points equal
+ * to its rank. Characters spend Void Points for powerful effects like +1k1 to rolls.
+ * 
+ * Foundry VTT Integration:
+ * - Called from Actor.prepareDerivedData() lifecycle hook (Foundry v13+)
+ * - Mutates actor.system object in place per Foundry data preparation pattern
+ * - Stores intermediate values in sys._derived for use by other calculation modules
+ * - Safe to call multiple times (idempotent) during data preparation
+ * 
+ * @module documents/actor/calculations/shared-traits-rings
+ * @see {@link https://foundryvtt.com/api/v13/classes/foundry.abstract.Document.html#prepareDerivedData|Foundry prepareDerivedData}
  */
 
 import { toInt } from "../../../utils/type-coercion.js";
 
 /**
- * Compute effective traits and elemental rings from base trait values.
- * Shared logic between PC and NPC preparation to ensure consistency.
+ * Prepare effective traits and derive ring ranks per L5R4 core rules.
  * 
- * **Trait Processing:**
- * - Extracts effective trait values after Active Effects are applied
- * - Stores normalized values in `sys._derived.traitsEff` for sheet access
- * - Handles both simple numeric values and `{rank: number}` objects
+ * Calculates effective trait values from actor.system.traits and derives elemental ring
+ * ranks using the core L5R4 mechanic: Ring = min(trait1, trait2). Mutates the provided
+ * system object in place, populating sys._derived.traitsEff and sys.rings.
  * 
- * **Ring Calculation:**
- * - Air = min(Reflexes, Awareness)
- * - Earth = min(Stamina, Willpower) 
- * - Fire = min(Agility, Intelligence)
- * - Water = min(Strength, Perception)
- * - Void remains user-controlled (not derived)
+ * **L5R4 Ring Calculation Rules:**
+ * - Air Ring = min(Reflexes, Awareness)
+ * - Earth Ring = min(Stamina, Willpower)
+ * - Fire Ring = min(Agility, Intelligence)
+ * - Water Ring = min(Strength, Perception)
+ * - Void Ring = special structure with rank/value/max properties
  * 
- * @param {object} sys - The actor's system data object
- * @param {Record<string, number|{rank?: number}>} sys.traits - Character traits
- * @param {object} [sys.rings] - Existing rings data
- * @param {object} [sys._derived] - Derived data storage
- * @returns {void} - Modifies sys.rings and sys._derived.traitsEff in place
+ * **Trait Data Handling:**
+ * Supports two trait data formats for backward compatibility:
+ * - Object format: `sys.traits.ref = { rank: 3 }` (preferred)
+ * - Direct format: `sys.traits.ref = 3` (legacy)
  * 
- * @example
- * // Called during PC/NPC preparation
- * prepareTraitsAndRings(sys);
+ * Both formats are coerced to integers defensively using toInt(), so missing traits
+ * default to 0 and malformed values are handled gracefully.
  * 
- * // Access computed values
- * const earthRing = sys.rings.earth; // min(Stamina, Willpower)
- * const effectiveStamina = sys._derived.traitsEff.sta; // Post-AE value
+ * **Void Ring Structure:**
+ * Unlike elemental rings (which are simple integers), void ring maintains:
+ * - `rank`: Character's void ring rank (determines max void points)
+ * - `value`: Current void points available (spent/recovered during play)
+ * - `max`: Maximum void points (typically equals rank)
+ * 
+ * This function preserves the existing void ring structure from sys.rings.void,
+ * coercing each property to ensure numeric safety.
+ * 
+ * **Mutation Pattern:**
+ * This function directly mutates the `sys` parameter per Foundry's data preparation
+ * pattern. It creates/updates:
+ * - `sys._derived.traitsEff` - Effective trait values (used by other calculations)
+ * - `sys.rings.air/earth/fire/water` - Derived elemental ring ranks
+ * - `sys.rings.void` - Normalized void ring structure
+ * 
+ * **Usage Context:**
+ * Called during Actor.prepareDerivedData() for both PC and NPC actor types.
+ * Must execute before other calculations that depend on ring values (wounds,
+ * initiative, armor TN, insight rank, etc.).
+ * 
+ * Requires Foundry v13+ Actor Document data preparation lifecycle.
+ * 
+ * @param {Object} sys - Actor system data object (actor.system) to mutate
+ * @param {Object} [sys.traits] - Character traits object with 8 trait properties
+ * @param {number|Object} [sys.traits.sta] - Stamina (Earth/Physical)
+ * @param {number|Object} [sys.traits.wil] - Willpower (Earth/Mental)
+ * @param {number|Object} [sys.traits.str] - Strength (Water/Physical)
+ * @param {number|Object} [sys.traits.per] - Perception (Water/Mental)
+ * @param {number|Object} [sys.traits.ref] - Reflexes (Air/Physical)
+ * @param {number|Object} [sys.traits.awa] - Awareness (Air/Mental)
+ * @param {number|Object} [sys.traits.agi] - Agility (Fire/Physical)
+ * @param {number|Object} [sys.traits.int] - Intelligence (Fire/Mental)
+ * @param {Object} [sys.rings] - Existing rings object (void ring structure preserved)
+ * @param {Object} [sys.rings.void] - Void ring with rank/value/max properties
+ * @param {Object} [sys._derived] - Derived data container (created if missing)
+ * @returns {void} Mutates sys in place, does not return a value
  */
 export function prepareTraitsAndRings(sys) {
-  // L5R4's 8 core traits: 4 Physical (sta, str, ref, agi) and 4 Mental (wil, per, awa, int)
+
+  // L5R4 trait abbreviations: sta=Stamina, wil=Willpower, str=Strength, per=Perception,
+  // ref=Reflexes, awa=Awareness, agi=Agility, int=Intelligence (8 traits total)
   const TRAIT_KEYS = ["sta","wil","str","per","ref","awa","agi","int"];
-  
-  /**
-   * Extract effective trait value after Active Effects.
-   * Handles both simple numbers and {rank: number} objects from template.json
-   * @param {string} k - Trait key (e.g., "sta", "ref")
-   * @returns {number} Normalized trait value
-   */
-  const TR = k => {
-    const v = sys.traits?.[k];
-    return toInt(v?.rank ?? v);
-  };
 
-  // Store normalized effective trait values in _derived for sheet access
-  // This provides a clean numeric interface for templates after AE application
+  // Initialize derived data container and effective traits object
   sys._derived = sys._derived || {};
-  const traitsEff = {};
+  sys._derived.traitsEff = {};
+  
+  // Extract effective trait values, supporting both object format (v.rank) and direct format (v)
+  // for backward compatibility. Missing traits default to 0 via toInt() defensive coercion.
   for (const k of TRAIT_KEYS) {
-    const base = sys.traits?.[k];
-    traitsEff[k] = toInt(base?.rank ?? base);
+    const v = sys.traits?.[k];
+    sys._derived.traitsEff[k] = toInt(v?.rank ?? v);
   }
-  sys._derived.traitsEff = traitsEff;
 
-  // Rings from traits
+  // Calculate elemental ring ranks per L5R4 core rules: Ring = min(physical_trait, mental_trait)
+  // This encourages balanced development - improving a ring requires raising BOTH component traits
+  const t = sys._derived.traitsEff;
   sys.rings = {
     ...sys.rings,
-    air:   Math.min(TR("ref"), TR("awa")),
-    earth: Math.min(TR("sta"), TR("wil")),
-    fire:  Math.min(TR("agi"), TR("int")),
-    water: Math.min(TR("str"), TR("per"))
+    air:   Math.min(t.ref, t.awa),
+    earth: Math.min(t.sta, t.wil),
+    fire:  Math.min(t.agi, t.int),
+    water: Math.min(t.str, t.per)
   };
-  
-  // Void ring requires special handling: tracks current/max/rank unlike other rings
-  // Initialize structure if missing and normalize values to integers
+
+  // Void ring is special: unlike elemental rings, it maintains a structure with rank (permanent),
+  // value (current points), and max (typically equals rank). Preserve existing structure while
+  // ensuring numeric safety for all properties.
   sys.rings.void = {
     rank: toInt(sys.rings?.void?.rank ?? 0),
     value: toInt(sys.rings?.void?.value ?? 0),

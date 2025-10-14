@@ -1,94 +1,82 @@
 /**
- * @fileoverview L5R4 Handlebars Helper Registration
+ * Handlebars Helper Registration
+ * Registers custom Handlebars helpers for template rendering in the L5R4 Enhanced system.
+ * These helpers provide utility functions for templates including logic operations,
+ * mathematical calculations, string manipulation, and icon path resolution.
  * 
- * Registers custom Handlebars helpers for L5R4 templates.
- * Provides utility functions for mathematical operations, comparisons,
- * and L5R4-specific formatting used throughout the template system.
+ * Foundry VTT Requirements:
+ * - Requires Foundry v13+ (uses global Handlebars object)
+ * - Must be called during system initialization (setup hook)
+ * - Helpers are globally available in all Handlebars templates (.hbs files)
  * 
- * **Available Helpers:**
- * - **Comparison**: eq, ne, and, or (logical operations)
- * - **Math**: math (arithmetic and comparison operations)
- * - **Utility**: coalesce (null coalescing), concat (string joining)
- * - **L5R4 Specific**: iconPath (asset path resolution)
+ * Registered Helpers:
+ * - eq, and, or: Logical comparison operators for template conditionals
+ * - coalesce: Returns first non-null value from arguments
+ * - iconPath: Resolves icon paths using system icon configuration
+ * - math: Performs arithmetic and comparison operations in templates
+ * - concat: Concatenates string arguments
  * 
- * @author L5R4 System Team
- * @since 1.1.0
- * @version 2.0.0
- * @see {@link https://foundryvtt.com/api/classes/foundry.applications.api.HandlebarsApplicationMixin.html|HandlebarsApplicationMixin}
+ * @module setup/register-handlebars
+ * @requires Foundry VTT v13+
  */
 
 import { iconPath } from "../config/icons.js";
 
 /**
- * Register all custom Handlebars helpers for the L5R4 system.
- * This function should be called once during system initialization.
+ * Registers all custom Handlebars helpers for the L5R4 Enhanced system.
+ * This function should be called once during system initialization to make
+ * all custom helpers available to Handlebars templates throughout the system.
  * 
- * **Helper Categories:**
- * - **Logical Comparisons**: eq, ne, and, or for conditional rendering
- * - **Mathematical Operations**: math helper for calculations and comparisons
- * - **Utility Functions**: coalesce for null handling, concat for string building
- * - **Asset Resolution**: iconPath for icon file path generation
+ * The registered helpers extend Handlebars' built-in functionality with:
+ * - Logical operators for template conditionals (eq, and, or)
+ * - Null-safe value selection (coalesce)
+ * - Mathematical operations and comparisons (math)
+ * - String concatenation (concat)
+ * - Icon path resolution (iconPath)
  * 
+ * Usage: Call this function once in the system's init or setup hook.
+ * After registration, helpers are available in templates like:
+ * {{#if (eq value "expected")}}...{{/if}}
+ * {{math attribute "+" bonus}}
+ * 
+ * @function registerHandlebarsHelpers
  * @returns {void}
- * 
- * @example
- * // Called from system initialization
- * Hooks.once("init", () => {
- *   registerHandlebarsHelpers();
- * });
- * 
- * @example
- * // Template usage - Comparison
- * {{#if (eq actor.type "pc")}}Player Character{{/if}}
- * 
- * @example
- * // Template usage - Math
- * {{math trait.rank "+" skill.rank}}
- * 
- * @example
- * // Template usage - Coalesce
- * {{coalesce item.system.customValue item.system.defaultValue 0}}
  */
 export function registerHandlebarsHelpers() {
+
   /**
    * Equality comparison helper.
-   * @param {any} a - First value to compare
-   * @param {any} b - Second value to compare
-   * @returns {boolean} True if values are strictly equal (===)
+   * Tests if two values are strictly equal (===).
+   * @param {*} a - First value to compare
+   * @param {*} b - Second value to compare
+   * @returns {boolean} True if a === b, false otherwise
    */
   Handlebars.registerHelper("eq", (a, b) => a === b);
 
   /**
-   * Inequality comparison helper.
-   * @param {any} a - First value to compare
-   * @param {any} b - Second value to compare
-   * @returns {boolean} True if values are not strictly equal (!==)
-   */
-  Handlebars.registerHelper("ne", (a, b) => a !== b);
-
-  /**
    * Logical AND helper.
-   * @param {any} a - First value
-   * @param {any} b - Second value
-   * @returns {any} Result of logical AND operation
+   * Returns true only if both values are truthy.
+   * @param {*} a - First value to test
+   * @param {*} b - Second value to test
+   * @returns {boolean} Result of a && b
    */
   Handlebars.registerHelper("and", (a, b) => a && b);
 
   /**
    * Logical OR helper.
-   * @param {any} a - First value
-   * @param {any} b - Second value
-   * @returns {any} Result of logical OR operation
+   * Returns true if at least one value is truthy.
+   * @param {*} a - First value to test
+   * @param {*} b - Second value to test
+   * @returns {boolean} Result of a || b
    */
   Handlebars.registerHelper("or", (a, b) => a || b);
 
   /**
-   * Null coalescing helper - returns first non-null value.
-   * @param {...any} args - Values to check (last arg is Handlebars options object)
-   * @returns {any} First non-null/undefined value, or null if all are null
-   * 
-   * @example
-   * {{coalesce value1 value2 fallback}} // Returns first non-null value
+   * Coalesce helper - returns first non-null, non-undefined value.
+   * Useful for providing fallback values in templates.
+   * Example template usage: {{coalesce customValue defaultValue "hardcoded"}}
+   * @param {...*} args - Values to check, followed by Handlebars options object (auto-removed)
+   * @returns {*} First non-null/undefined value, or null if all are null/undefined
    */
   Handlebars.registerHelper("coalesce", (...args) => {
     const A = args.slice(0, -1); // Remove Handlebars options object
@@ -98,51 +86,49 @@ export function registerHandlebarsHelpers() {
 
   /**
    * Icon path resolution helper.
-   * Generates full icon paths for L5R4 system assets.
-   * 
-   * @param {string} n - Icon name or path
-   * @returns {string} Full icon path
-   * 
-   * @example
-   * {{iconPath "air"}} // Returns "systems/l5r4-enhanced/assets/icons/rings/air.png"
+   * Normalizes icon references to full Foundry-compatible paths.
+   * Delegates to the iconPath utility function from config/icons module.
+   * @param {string} n - Icon filename, path, URL, or data URI
+   * @returns {string} Normalized icon path for Foundry resource loading
+   * @see {@link module:config/icons~iconPath}
    */
   Handlebars.registerHelper("iconPath", (n) => iconPath(n));
 
   /**
-   * Mathematical operations helper.
-   * Supports arithmetic operations and comparisons on numeric values.
-   * Converts boolean values to 1 (true) or 0 (false) for calculations.
+   * Mathematical operations and comparisons helper.
+   * Performs arithmetic, comparison, and rounding operations in templates.
+   * Automatically converts boolean values to numbers (true=1, false=0) and
+   * treats null/undefined as 0 for safe numeric operations.
    * 
-   * **Supported Operations:**
-   * - Arithmetic: +, -, *, /, %
-   * - Comparison: >, <, >=, <=, ==, ===, !=, !==
-   * - Rounding: floor, ceil, round
+   * Supported operations:
+   * - Arithmetic: +, -, *, / (division by zero returns 0)
+   * - Modulo: % (modulo by zero returns 0)
+   * - Comparisons: >, <, >=, <=, ==, ===, !=, !==
+   * - Rounding: floor, ceil, round (uses only first operand)
    * 
-   * @param {any} L - Left operand (number, boolean, or numeric string)
-   * @param {string} op - Operation to perform
-   * @param {any} R - Right operand (number, boolean, or numeric string)
-   * @returns {number|boolean} Result of the operation
+   * Template usage examples:
+   * - {{math stamina "+" bonus}} → Addition
+   * - {{#if (math value ">" 5)}} → Comparison
+   * - {{math wounds "floor"}} → Rounding (second param ignored)
    * 
-   * @example
-   * {{math 5 "+" 3}} // Returns 8
-   * {{math total "/" count}} // Division
-   * {{math value ">" 10}} // Returns true/false
-   * {{math 3.7 "floor"}} // Returns 3
+   * @param {*} L - Left operand (converted to number, booleans become 0/1)
+   * @param {string} op - Operator (+, -, *, /, %, >, <, >=, <=, ==, ===, !=, !==, floor, ceil, round)
+   * @param {*} R - Right operand (converted to number, booleans become 0/1)
+   * @returns {number|boolean} Numeric result for arithmetic/rounding, boolean for comparisons
    */
   Handlebars.registerHelper("math", function (L, op, R) {
-    // Convert values to numbers (booleans become 1/0)
+    // Convert values to numbers: booleans become 0 (false) or 1 (true), null/undefined become 0
     const n = (v) => (v === true || v === false) ? (v ? 1 : 0) : Number(v ?? 0);
     const a = n(L), b = n(R);
 
     switch (op) {
-      // Arithmetic operations
+
       case "+": return a + b;
       case "-": return a - b;
       case "*": return a * b;
       case "/": return b !== 0 ? a / b : 0;
       case "%": return b !== 0 ? a % b : 0;
 
-      // Comparison operations
       case ">": return a > b;
       case "<": return a < b;
       case ">=": return a >= b;
@@ -152,12 +138,10 @@ export function registerHandlebarsHelpers() {
       case "!=": return a != b;
       case "!==": return a !== b;
 
-      // Rounding operations (R is ignored for these)
       case "floor": return Math.floor(a);
       case "ceil": return Math.ceil(a);
       case "round": return Math.round(a);
 
-      // Unknown operation - log warning for debugging
       default:
         if (op != null) {
           console.warn(`L5R4 | Unknown math operator "${op}" in template - returning 0`);
@@ -168,16 +152,17 @@ export function registerHandlebarsHelpers() {
 
   /**
    * String concatenation helper.
-   * Joins multiple values into a single string, filtering out objects.
+   * Joins multiple string arguments into a single string.
+   * Automatically filters out Handlebars options object and any other objects.
+   * Only string, number, boolean, null, and undefined values are concatenated.
    * 
-   * @param {...any} args - Values to concatenate (last arg is Handlebars options object)
-   * @returns {string} Concatenated string
+   * Template usage: {{concat "prefix-" itemId "-suffix"}}
    * 
-   * @example
-   * {{concat "systems/" sysId "/templates/actor.hbs"}}
-   * {{concat firstName " " lastName}}
+   * @param {...*} args - Values to concatenate, followed by Handlebars options object (auto-removed)
+   * @returns {string} Concatenated string of all non-object arguments
    */
   Handlebars.registerHelper("concat", function (...args) {
+    // Remove Handlebars options object and filter out any objects, keeping only primitives
     return args.slice(0, -1).filter(a => typeof a !== "object").join("");
   });
 }
