@@ -14,3 +14,9 @@ packs/
 
 # Test coverage
 coverage/
+
+# Handlebars templates
+# Prettier's Glimmer parser doesn't support:
+# - Dynamic partials with concat helper
+# - Handlebars blocks inside HTML attributes
+*.hbs
