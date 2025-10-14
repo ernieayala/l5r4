@@ -3,8 +3,6 @@
 [![FoundryVTT version](https://img.shields.io/badge/FVTT-v13.x-informational)](https://foundryvtt.com/)
 [![Version](https://img.shields.io/badge/Version-2.0.0-blue)](https://github.com/ernieayala/l5r4/releases)
 [![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](LICENSE)
-[![GitHub Downloads](https://img.shields.io/github/downloads/ernieayala/l5r4/total?label=Downloads&color=brightgreen)](https://github.com/ernieayala/l5r4/releases)
-[![GitHub Stars](https://img.shields.io/github/stars/ernieayala/l5r4?style=flat&label=Stars)](https://github.com/ernieayala/l5r4)
 [![GitHub Issues](https://img.shields.io/github/issues/ernieayala/l5r4)](https://github.com/ernieayala/l5r4/issues)
 
 **Play Legend of the Five Rings 4th Edition in Foundry VTT with automatic character management, authentic dice mechanics, and full rule support.**
