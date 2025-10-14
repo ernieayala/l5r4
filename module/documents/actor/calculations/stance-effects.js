@@ -1,143 +1,87 @@
 /**
- * @fileoverview L5R4 Stance Effects - Pure Stance Calculation Logic
+ * Stance Effects Calculator
  * 
- * Pure calculation functions for applying stance mechanical effects during actor
- * data preparation. Extracted from services layer to maintain proper architectural
- * separation - documents should compute derived data independently.
+ * Applies L5R4 combat stance mechanical effects to actor derived data during preparation phase.
+ * Modifies Armor TN and stores detailed stance effect data for UI display and rules enforcement.
  * 
- * **Core Responsibilities:**
- * - **Stat Calculation**: Apply stance bonuses/penalties to derived statistics
- * - **Armor TN Modification**: Calculate Armor TN adjustments from active stances
- * - **UI Data Preparation**: Prepare stance effect data for template display
+ * Key Responsibilities:
+ * - **Full Attack Stance**: Apply -10 Armor TN penalty and track attack/damage bonuses
+ * - **Defense Stance**: Add Air Ring + Defense Skill to Armor TN
+ * - **Full Defense Stance**: Apply Defense/Reflexes roll result (÷2 rounded up) to Armor TN
+ * - **Effect Tracking**: Store stance details in sys._stanceEffects for sheet rendering
  * 
- * **L5R4 Stance Mechanics:**
- * - **Full Attack**: -10 to Armor TN (attack bonus handled separately)
- * - **Defense**: +Air Ring +Defense Skill to Armor TN
- * - **Full Defense**: +half of Defense/Reflexes roll to Armor TN
+ * L5R4 Game Rules Context:
+ * Implements the three aggressive/defensive stances from core combat rules:
+ * - Full Attack (Fire Ring): +2k1 attack, +1k1 damage, -10 Armor TN penalty
+ * - Defense (Air Ring): +Air Ring + Defense Skill to Armor TN, cannot attack
+ * - Full Defense (Earth Ring): Defense/Reflexes roll ÷ 2 (rounded up) to Armor TN, only Free Actions
  * 
- * **Design Principles:**
- * - Pure functions with no side effects
- * - No Active Effect lifecycle management (that stays in services)
- * - No async operations (flag clearing handled by services)
- * - All logic operates on actor document and system data only
+ * Foundry VTT Integration:
+ * - Called during Actor.prepareDerivedData() lifecycle hook
+ * - Reads stance state from ActiveEffect status IDs via getActiveStances()
+ * - Uses flag storage for Full Defense roll persistence (flags[SYS_ID].fullDefenseRoll)
+ * - Populates sys._stanceEffects for template consumption
  * 
- * @author L5R4 System Team
- * @since 1.1.0
- * @version 2.0.0
- * @see {@link ../actor.js|Actor Document} - Calls applyStanceEffects during prepareDerivedData
+ * Data Flow:
+ * 1. Read active stances from actor.effects collection
+ * 2. Apply each stance's Armor TN modifier and track effects
+ * 3. Aggregate all stance modifiers into sys.armorTn.stanceMod
+ * 4. Update sys.armorTn.current with final modifier
+ * 
+ * @module documents/actor/calculations/stance-effects
+ * @requires Foundry VTT v13+
+ * @see {@link module:services/stance/core/helpers} for stance detection logic
+ * @see {@link https://foundryvtt.com/api/v13/classes/foundry.documents.BaseActor.html#prepareDerivedData|Actor.prepareDerivedData}
  */
 
 import { SYS_ID } from "../../../config/constants.js";
 import { toInt } from "../../../utils/type-coercion.js";
-
-/* -------------------------------------------- */
-/* Helper Functions                             */
-/* -------------------------------------------- */
+import { getActiveStances, getDefenseSkillRank } from "../../../services/stance/core/helpers.js";
 
 /**
- * Set of all recognized stance status IDs in the L5R4 system.
- * Used for filtering and validation of stance effects.
+ * Applies all active stance mechanical effects to actor system data.
  * 
- * @type {Set<string>}
- * @constant
- */
-const STANCE_IDS = new Set([
-  "attackStance",
-  "fullAttackStance", 
-  "defenseStance",
-  "fullDefenseStance",
-  "centerStance"
-]);
-
-/**
- * Get all active stance status effects on an actor.
- * Checks both modern statuses Set (v11+) and legacy statusId flag for compatibility.
+ * Primary entry point for stance effect calculation during actor data preparation.
+ * Iterates through all active stances and delegates to specific handler functions
+ * that apply Armor TN modifiers and populate effect tracking data.
  * 
- * @param {Actor} actor - The actor to check for active stances
- * @returns {string[]} Array of active stance IDs
- */
-function getActiveStances(actor) {
-  const activeStances = [];
-  
-  for (const effect of actor.effects) {
-    if (effect.disabled) continue;
-    
-    // Check modern statuses Set (v11+)
-    if (effect.statuses?.size) {
-      for (const statusId of effect.statuses) {
-        if (STANCE_IDS.has(statusId)) {
-          activeStances.push(statusId);
-        }
-      }
-    }
-    
-    // Check legacy statusId flag (pre-v11 compatibility)
-    const legacyId = effect.getFlag?.("core", "statusId");
-    if (legacyId && STANCE_IDS.has(legacyId)) {
-      activeStances.push(legacyId);
-    }
-  }
-  
-  return activeStances;
-}
-
-/**
- * Find the Defense skill rank for an actor.
- * Handles case-insensitive partial matching to support localized skill names.
+ * L5R4 Rules Implementation:
+ * - Characters can have only one stance active at a time per core rules
+ * - Each stance provides different combat bonuses/penalties
+ * - Armor TN is the primary mechanical effect (base = Reflexes × 5 + 5 + armor bonus)
  * 
- * @param {Actor} actor - The actor to search
- * @returns {number} Defense skill rank (0 if not found)
- */
-function getDefenseSkillRank(actor) {
-  for (const item of actor.items) {
-    if (item.type === "skill" && item.name?.toLowerCase().includes("defense")) {
-      return toInt(item.system?.rank || 0);
-    }
-  }
-  return 0;
-}
-
-/* -------------------------------------------- */
-/* Stance Effect Calculation Functions         */
-/* -------------------------------------------- */
-
-/**
- * Apply stance mechanical effects to actor derived statistics.
- * Called during actor data preparation to modify stats based on active stances.
+ * Armor TN Calculation:
+ * - Initializes sys.armorTn.stanceMod to 0
+ * - Each stance adds/subtracts from stanceMod
+ * - Final modifier applied to sys.armorTn.current if non-zero
  * 
- * **Pure Calculation Function:**
- * - No side effects (only modifies passed sys object)
- * - No async operations
- * - No Active Effect lifecycle management
- * - Idempotent (can be called multiple times safely)
+ * Effect Tracking:
+ * - sys._stanceEffects object populated with stance-specific data
+ * - Used by character sheet to display current bonuses/penalties
+ * - Structure varies by stance type (see individual handler functions)
  * 
- * **Stance Effects Applied:**
- * - Full Attack: -10 Armor TN
- * - Defense: +Air Ring +Defense Skill to Armor TN
- * - Full Defense: +half of Defense roll to Armor TN
- * 
- * @param {Actor} actor - The actor to apply stance effects to
- * @param {object} sys - The actor's system data object (modified in place)
- * @returns {void} Modifies sys object in place
- * 
- * @example
- * // Called from Actor.prepareDerivedData()
- * applyStanceEffects(this, sys);
+ * @param {Actor} actor - The L5R4 actor document being prepared
+ * @param {Object} sys - The actor.system data object being modified
+ * @param {Object} sys.armorTn - Armor TN calculation object
+ * @param {number} sys.armorTn.current - Current Armor TN value to be modified
+ * @param {Object} sys.rings - Actor Ring values (for Defense stance)
+ * @see applyFullAttackStance for Full Attack stance effects
+ * @see applyDefenseStance for Defense stance effects
+ * @see applyFullDefenseStance for Full Defense stance effects
  */
 export function applyStanceEffects(actor, sys) {
   if (!actor || !sys) return;
 
   const activeStances = getActiveStances(actor);
-  
-  // Initialize stance modifier tracking
+
   sys.armorTn = sys.armorTn || {};
-  sys.armorTn.stanceMod = 0; // Reset stance modifier each time
-  
-  // Apply stance-specific automations
+  sys.armorTn.stanceMod = 0;
+  sys._stanceEffects = {};
+
   for (const stanceId of activeStances) {
     switch (stanceId) {
       case "fullAttackStance":
-        applyFullAttackStance(actor, sys);
+        applyFullAttackStance(sys);
         break;
       case "defenseStance":
         applyDefenseStance(actor, sys);
@@ -145,34 +89,39 @@ export function applyStanceEffects(actor, sys) {
       case "fullDefenseStance":
         applyFullDefenseStance(actor, sys);
         break;
-      case "centerStance":
-      default:
-        break;
     }
   }
-  
-  // Apply final stance modifier to current Armor TN
+
   if (sys.armorTn.stanceMod !== 0) {
     sys.armorTn.current = (sys.armorTn.current || 0) + sys.armorTn.stanceMod;
   }
 }
 
 /**
- * Apply Full Attack Stance effects:
- * - +2k1 to all attack rolls (handled via Active Effects)
- * - +1k1 to all damage rolls (handled via Active Effects)
- * - -10 to Armor TN
+ * Applies Full Attack stance mechanical effects.
  * 
- * @param {Actor} actor - The actor in Full Attack Stance
- * @param {object} sys - The actor's system data object
+ * L5R4 Full Attack Stance (Fire Ring):
+ * "A character in Full Attack Stance gains a bonus of +2k1 to attack rolls made that round,
+ * but his Armor TN is reduced by 10 to reflect the all-or-nothing nature of the attack."
+ * 
+ * Mechanical Effects:
+ * - **Attack Bonus**: +2k1 to all attack rolls (applied during roll construction)
+ * - **Damage Bonus**: +1k1 to damage rolls per core rules
+ * - **Armor TN Penalty**: -10 to Armor TN (applied here)
+ * 
+ * Effect Tracking:
+ * Stores bonuses in sys._stanceEffects.fullAttack for UI display and roll integration.
+ * Attack/damage bonuses are read by dice service during roll construction.
+ * 
+ * @param {Object} sys - The actor.system data object being modified
+ * @param {Object} sys.armorTn - Armor TN calculation object
+ * @param {number} sys.armorTn.stanceMod - Stance modifier accumulator
+ * @param {Object} sys._stanceEffects - Effect tracking object for UI display
  * @private
  */
-function applyFullAttackStance(actor, sys) {
-  // Apply -10 to Armor TN via stance modifier
+function applyFullAttackStance(sys) {
   sys.armorTn.stanceMod += -10;
-  
-  // Store stance info for UI display
-  sys._stanceEffects = sys._stanceEffects || {};
+
   sys._stanceEffects.fullAttack = {
     armorTnPenalty: -10,
     attackBonus: "+2k1",
@@ -181,23 +130,40 @@ function applyFullAttackStance(actor, sys) {
 }
 
 /**
- * Apply Defense Stance effects:
- * - Add Air Ring + Defense Skill Rank to Armor TN
+ * Applies Defense stance mechanical effects.
  * 
- * @param {Actor} actor - The actor in Defense Stance
- * @param {object} sys - The actor's system data object
+ * L5R4 Defense Stance (Air Ring):
+ * "Characters in Defense Stance add their Air Ring plus their Defense Skill Rank to their Armor TN.
+ * There are no restrictions on what kind of Actions a character may take, other than that they may not attack."
+ * 
+ * Mechanical Effects:
+ * - **Armor TN Bonus**: +Air Ring + Defense Skill Rank
+ * - **Attack Restriction**: Cannot make attacks (enforced by stance service, not here)
+ * 
+ * Defense Skill Lookup:
+ * Uses getDefenseSkillRank() to search actor.items for Defense skill.
+ * Returns 0 if untrained (L5R4 allows untrained Defense skill usage).
+ * 
+ * Effect Tracking:
+ * Stores bonus breakdown in sys._stanceEffects.defense for UI transparency.
+ * Shows Air Ring and Defense Skill contributions separately.
+ * 
+ * @param {Actor} actor - The L5R4 actor document (needed for Defense skill lookup)
+ * @param {Object} sys - The actor.system data object being modified
+ * @param {Object} sys.rings - Actor Ring values
+ * @param {number} sys.rings.air - Air Ring rank (used for Defense bonus)
+ * @param {Object} sys.armorTn - Armor TN calculation object
+ * @param {number} sys.armorTn.stanceMod - Stance modifier accumulator
+ * @param {Object} sys._stanceEffects - Effect tracking object for UI display
  * @private
  */
 function applyDefenseStance(actor, sys) {
   const airRing = toInt(sys.rings?.air || 0);
   const defenseSkillRank = getDefenseSkillRank(actor);
   const defenseBonus = airRing + defenseSkillRank;
-  
-  // Apply bonus to Armor TN via stance modifier
+
   sys.armorTn.stanceMod += defenseBonus;
-  
-  // Store stance info for UI display
-  sys._stanceEffects = sys._stanceEffects || {};
+
   sys._stanceEffects.defense = {
     armorTnBonus: defenseBonus,
     airRing: airRing,
@@ -206,41 +172,58 @@ function applyDefenseStance(actor, sys) {
 }
 
 /**
- * Apply Full Defense Stance effects:
- * - Trigger Defense/Reflexes roll when stance is selected
- * - Add half the Defense roll (rounded up) to Armor TN
+ * Applies Full Defense stance mechanical effects.
  * 
- * @param {Actor} actor - The actor in Full Defense Stance
- * @param {object} sys - The actor's system data object
+ * L5R4 Full Defense Stance (Earth Ring):
+ * "Upon declaring his Stance, a character in Full Defense Stance makes a Defense/Reflexes roll
+ * and adds half of the total (rounding up) to his Armor TN until his following Turn.
+ * This Skill Roll is considered a Complex Action, so a character in this Stance may only take Free Actions."
+ * 
+ * Implementation Strategy:
+ * - **Roll Required**: Full Defense requires a Defense/Reflexes roll before bonus is calculated
+ * - **Default Bonus**: Uses +5 as temporary bonus while awaiting roll (reasonable defensive value)
+ * - **Roll Storage**: Stores roll result in actor flag (flags[SYS_ID].fullDefenseRoll)
+ * - **Bonus Calculation**: Math.ceil(rollResult / 2) implements "half, rounding up" per rules
+ * 
+ * Two-Phase Application:
+ * 1. **Before Roll**: Apply default +5 bonus, set needsRoll flag for UI prompt
+ * 2. **After Roll**: Read stored roll result, calculate actual bonus (roll ÷ 2, rounded up)
+ * 
+ * Roll result is set by stance service roll handler and persists until stance changes
+ * or combat round ends (flag cleared on stance deactivation).
+ * 
+ * Effect Tracking:
+ * Stores roll state and bonus in sys._stanceEffects.fullDefense:
+ * - rollResult: Current roll total or localized "pending" message
+ * - armorTnBonus: Actual bonus being applied to Armor TN
+ * - needsRoll: Boolean flag indicating roll prompt needed (only before roll)
+ * 
+ * @param {Actor} actor - The L5R4 actor document (needed for flag storage)
+ * @param {Object} sys - The actor.system data object being modified
+ * @param {Object} sys.armorTn - Armor TN calculation object
+ * @param {number} sys.armorTn.stanceMod - Stance modifier accumulator
+ * @param {Object} sys._stanceEffects - Effect tracking object for UI display
  * @private
  */
 function applyFullDefenseStance(actor, sys) {
-  // Check if we need to make the Defense/Reflexes roll
   const existingRoll = actor.getFlag(SYS_ID, "fullDefenseRoll");
-  
+
+  // Before roll: Apply conservative default bonus and prompt for roll
   if (!existingRoll) {
-    // Don't trigger roll during data preparation - defer to stance activation
-    // Just apply a default bonus for now
-    const defaultBonus = 5; // Reasonable default until roll is made
+    const defaultBonus = 5; // Temporary bonus until Defense/Reflexes roll completed
     sys.armorTn.stanceMod += defaultBonus;
-    
-    // Store stance info for UI display
-    sys._stanceEffects = sys._stanceEffects || {};
+
     sys._stanceEffects.fullDefense = {
       rollResult: game.i18n.localize("l5r4.ui.mechanics.stances.pending"),
       armorTnBonus: defaultBonus,
       needsRoll: true
     };
   } else {
-    // Apply existing roll result
     const rollResult = toInt(existingRoll.total || 0);
-    const armorBonus = Math.ceil(rollResult / 2); // Half rounded up
-    
-    // Apply bonus to Armor TN via stance modifier
+    const armorBonus = Math.ceil(rollResult / 2);
+
     sys.armorTn.stanceMod += armorBonus;
-    
-    // Store stance info for UI display
-    sys._stanceEffects = sys._stanceEffects || {};
+
     sys._stanceEffects.fullDefense = {
       rollResult: rollResult,
       armorTnBonus: armorBonus

@@ -1,108 +1,116 @@
 /**
- * @fileoverview L5R4 Mounted Combat Helper Functions
+ * Mounted Combat Service
  * 
- * Provides utility functions for mounted combat mechanics per L5R4 rules.
- * Handles Horsemanship skill checks, stance restrictions, and attack bonuses.
+ * Handles mounted combat mechanics per L5R4 core rules.
+ * Determines mounted status via Active Effects and Horsemanship skill rank.
+ * Implements Rank 3 Horsemanship Mastery: Full Attack Stance while mounted.
  * 
- * **L5R4 Mounted Combat Rules (from game-rules/Dueling_Grappling_Conditions.md):**
- * - **Attack Bonus**: Mounted/higher ground characters gain +1k0 on attack rolls
- *   against unmounted/lower characters
- * - **Full Attack Restriction**: Mounted characters cannot adopt Full Attack stance
- *   unless the rider has Horsemanship 3 (Mastery Ability)
- * - Mount control requires Animal Handling rolls (left to GM discretion)
- * - Certain kata provide mounted bonuses (not implemented here)
+ * Key mechanics:
+ * - Mounted status tracked via "mounted" status effect
+ * - Horsemanship Rank 3+ allows Full Attack Stance on horseback
+ * - Mounted attackers receive +1k0 bonus vs unmounted targets
  * 
- * **Responsibilities:**
- * - Check if actor is mounted/higher (via Active Effect status)
- * - Find Horsemanship skill rank
- * - Determine if Full Attack stance is available when mounted
- * - Calculate attack bonus when fighting from higher position
+ * Foundry APIs: Active Effects (v10+ statuses and legacy statusId flags)
+ * Game Rules: Bugei Skills - Horsemanship (Agility)
  * 
- * **Integration:**
- * Uses Foundry's built-in status effect system. The "mounted" status can be
- * toggled from the Token HUD alongside other status effects like dazed, prone, etc.
- * 
- * @author L5R4 System Team
- * @since 2.1.0
- * @see {@link https://l5r.fandom.com/wiki/Horsemanship|Horsemanship Skill}
- * @see {@link game-rules/Dueling_Grappling_Conditions.md|L5R4 Mounted/Higher Rules}
+ * @module services/mounted-combat
  */
 
 import { toInt } from "../utils/type-coercion.js";
 
 /**
- * Check if an actor has the "mounted" status effect active.
- * Checks both modern statuses Set (v11+) and legacy statusId flag.
+ * Determines if an actor is currently mounted.
  * 
- * @param {Actor} actor - The actor to check
- * @returns {boolean} True if actor has mounted status
+ * Checks for "mounted" status effect using both modern (v10+) status effects
+ * via effect.statuses Set and legacy core.statusId flags for backwards compatibility.
+ * 
+ * @param {Actor|null} actor - The actor to check for mounted status
+ * @returns {boolean} True if actor has active "mounted" status effect
  */
 export function isMounted(actor) {
   if (!actor?.effects) return false;
-  
+
   for (const effect of actor.effects) {
     if (effect.disabled) continue;
-    
-    // Check modern statuses Set (v11+)
+
     if (effect.statuses?.has?.("mounted")) return true;
-    
-    // Check legacy statusId flag (pre-v11 compatibility)
+
+    // Defensive: effect.getFlag may not exist on all effect types
     const legacyId = effect.getFlag?.("core", "statusId");
     if (legacyId === "mounted") return true;
   }
-  
+
   return false;
 }
 
 /**
- * Get the Horsemanship skill rank for an actor.
- * Performs case-insensitive name matching to support localized skill names.
+ * Retrieves an actor's Horsemanship skill rank.
  * 
- * @param {Actor} actor - The actor to check
- * @returns {number} Horsemanship skill rank (0 if not found)
+ * Searches actor's skill items for Horsemanship using internationalized skill names:
+ * - English: "horsemanship"
+ * - French: "équitation"  
+ * - German: "reiten"
+ * 
+ * This multi-language support matches the system's localization strategy without
+ * requiring localized lookups, enabling skill detection regardless of compendium language.
+ * 
+ * @param {Actor|null} actor - The actor to check for Horsemanship skill
+ * @returns {number} Horsemanship skill rank (0 if not found or actor invalid)
  */
 export function getHorsemanshipRank(actor) {
   if (!actor?.items) return 0;
-  
+
   for (const item of actor.items) {
     if (item.type === "skill") {
       const name = item.name?.toLowerCase() || "";
-      // Match "horsemanship" in any language
+
       if (name.includes("horsemanship") || name.includes("équitation") || name.includes("reiten")) {
         return toInt(item.system?.rank ?? 0);
       }
     }
   }
-  
+
   return 0;
 }
 
 /**
- * Check if Full Attack stance is available for a mounted character.
- * Per L5R4 rules, mounted characters need Horsemanship 3+ to use Full Attack.
+ * Determines if an actor can use Full Attack Stance while mounted.
  * 
- * @param {Actor} actor - The actor to check
- * @returns {boolean} True if Full Attack is available (not mounted OR has Horsemanship 3+)
+ * Implements Horsemanship Mastery Ability (Rank 3):
+ * "The character may utilize the Full Attack Stance when on horseback."
+ * 
+ * Unmounted characters can always use Full Attack Stance.
+ * Mounted characters require Horsemanship Rank 3 or higher.
+ * 
+ * @param {Actor|null} actor - The actor to check
+ * @returns {boolean} True if actor can use Full Attack Stance (either unmounted or has Horsemanship 3+)
  */
 export function canUseFullAttackMounted(actor) {
-  if (!isMounted(actor)) return true; // Not mounted = no restriction
-  
+
+  if (!isMounted(actor)) return true;
+
   const horsemanshipRank = getHorsemanshipRank(actor);
-  return horsemanshipRank >= 3; // Horsemanship 3 Mastery Ability
+  return horsemanshipRank >= 3;
 }
 
 /**
- * Get mounted status information for an actor.
- * Provides complete mounted state for UI display and logic checks.
+ * Retrieves complete mounted combat status for an actor.
  * 
- * @param {Actor} actor - The actor to check
- * @returns {{isMounted: boolean, horsemanshipRank: number, canFullAttack: boolean}}
+ * Aggregates mounted status, Horsemanship rank, and Full Attack eligibility
+ * into a single data structure for UI rendering and rules evaluation.
+ * 
+ * @param {Actor|null} actor - The actor to evaluate
+ * @returns {{isMounted: boolean, horsemanshipRank: number, canFullAttack: boolean}} 
+ *   Mounted combat status object containing:
+ *   - isMounted: Whether actor has "mounted" status effect
+ *   - horsemanshipRank: Current Horsemanship skill rank (0 if none)
+ *   - canFullAttack: Whether Full Attack Stance is available
  */
 export function getMountedStatus(actor) {
   const mounted = isMounted(actor);
   const horsemanshipRank = getHorsemanshipRank(actor);
   const canFullAttack = !mounted || horsemanshipRank >= 3;
-  
+
   return {
     isMounted: mounted,
     horsemanshipRank,
@@ -111,35 +119,35 @@ export function getMountedStatus(actor) {
 }
 
 /**
- * Calculate mounted/higher ground attack bonus against a target.
- * Per L5R4 rules, a character who is mounted or on higher ground gains +1k0
- * on attack rolls against unmounted/lower characters.
+ * Calculates attack roll bonus for mounted combat.
  * 
- * @param {Actor} attacker - The actor making the attack
- * @param {Actor} [target] - The target of the attack (optional)
- * @returns {{roll: number, keep: number}} Attack roll bonus from mounted/higher status
+ * Mounted attacker vs unmounted target: +1k0 (roll one extra die, keep same)
+ * All other scenarios: No bonus
  * 
- * @example
- * const bonus = getMountedAttackBonus(samurai, opponent);
- * // If samurai is mounted and opponent is not: { roll: 1, keep: 0 }
- * // Otherwise: { roll: 0, keep: 0 }
+ * Bonus structure uses L5R4 roll/keep notation:
+ * - roll: Additional dice to roll (explode on 10)
+ * - keep: Additional dice to keep in final total
+ * 
+ * Note: This implements a mounted combat advantage rule. The specific
+ * +1k0 bonus vs unmounted targets represents tactical positioning superiority.
+ * 
+ * @param {Actor|null} attacker - The attacking actor
+ * @param {Actor|null} target - The target being attacked (optional)
+ * @returns {{roll: number, keep: number}} Dice bonus to add to attack roll
  */
 export function getMountedAttackBonus(attacker, target = null) {
-  // No bonus if attacker is not mounted/higher
+
   if (!isMounted(attacker)) {
     return { roll: 0, keep: 0 };
   }
-  
-  // If no target specified, cannot determine bonus (assume no bonus)
+
   if (!target) {
     return { roll: 0, keep: 0 };
   }
-  
-  // If target is also mounted/higher, no advantage
+
   if (isMounted(target)) {
     return { roll: 0, keep: 0 };
   }
-  
-  // Attacker is mounted/higher, target is not → +1k0 bonus
+
   return { roll: 1, keep: 0 };
 }

@@ -1,136 +1,57 @@
 /**
- * @fileoverview L5R4 PC Sheet - Player Character Sheet Implementation for Foundry VTT v13+
+ * L5R4 PC Character Sheet (Application v2)
  * 
- * This class extends BaseActorSheet to provide comprehensive PC-specific functionality including
- * complex trait management with family bonuses, experience tracking, advanced item sorting,
- * bio item integration, and sophisticated character sheet interactions. Built for the Legend
- * of the Five Rings 4th Edition system with full L5R4 mechanics support.
- *
- * **Core Responsibilities:**
- * - **Complex Trait Management**: Advanced trait adjustment with family bonuses and XP calculation
- * - **Item Organization**: Sophisticated sorting and filtering for skills, spells, advantages
- * - **Experience Tracking**: Automatic XP calculation and logging for character advancement
- * - **Bio Item Integration**: Seamless drag/drop support for clan, family, and school items
- * - **Sheet Locking**: Toggle edit mode to prevent accidental changes during play
- * - **Void Point Management**: Interactive visual dot interface for void point tracking
- * - **Advanced UI Controls**: Custom header controls and context-sensitive interfaces
- *
- * **ApplicationV2 Architecture:**
- * Modern Foundry v13+ implementation with enhanced capabilities:
- * - **Template System**: Uses HandlebarsApplicationMixin for efficient template rendering
- * - **Context Preparation**: Replaces legacy getData() with modern _prepareContext()
- * - **Event Handling**: Replaces activateListeners() with _onRender() lifecycle
- * - **Action Delegation**: Clean event handling using data-action attributes
- * - **Header Controls**: Custom header controls for sheet locking and edit mode
- * - **Lifecycle Management**: Proper setup/teardown with memory management
- *
- * **Advanced Features:**
- * - **Family Bonus Integration**: Live family item references with Active Effects system
- * - **Sorting Preferences**: Per-user, per-actor sorting preferences for all item lists
- * - **Inline Editing**: Direct field editing with proper data type coercion
- * - **Context Menus**: Comprehensive right-click menus for item management
- * - **Mastery Tracking**: Automatic skill mastery display based on current ranks
- * - **XP Manager Integration**: Seamless integration with XP tracking application
- * - **Drag & Drop**: Full support for bio items and equipment organization
- *
- * **Trait System Architecture:**
- * PC traits use a sophisticated multi-layer system:
- * - **Base Traits**: Core values stored in system.traits.* (editable)
- * - **Family Bonuses**: Applied via Active Effects from family items
- * - **Effective Traits**: Final calculated values in prepareDerivedData()
- * - **Display Logic**: Sheet shows effective values but edits base values
- * - **XP Calculation**: Costs calculated based on effective rank increases
- * - **Validation**: Range checking and family bonus integration
- *
- * **Item Management System:**
- * - **Bio Items**: Clan, family, school items with special handling
- * - **Skills**: Complex skill system with emphases, masteries, and school bonuses
- * - **Spells**: Spell slot management with school and ring restrictions
- * - **Advantages/Disadvantages**: Cost tracking and XP integration
- * - **Equipment**: Weapons, armor, and gear with encumbrance tracking
- * - **Sorting**: User-customizable sorting for all item categories
- *
- * **Experience Point Integration:**
- * - **Automatic Tracking**: XP costs calculated for all character changes
- * - **Manual Adjustments**: GM tools for XP modifications
- * - **History Logging**: Complete audit trail of XP expenditures
- * - **Validation**: Prevents invalid XP expenditures
- * - **Manager Integration**: Seamless XP Manager application integration
- *
- * **Performance Optimizations:**
- * - **Lazy Loading**: Item lists rendered only when visible
- * - **Efficient Sorting**: Cached sort preferences with minimal recalculation
- * - **DOM Optimization**: Targeted updates for trait and void point changes
- * - **Template Caching**: Reuse of template data where possible
- * - **Event Delegation**: Minimal event listeners with efficient routing
- *
- * **Usage Examples:**
- * ```javascript
- * // Open PC sheet
- * const pc = game.actors.getName("Samurai Character");
- * pc.sheet.render(true);
+ * Primary character sheet for player characters in the Legend of the Five Rings 4th Edition
+ * system. Extends BaseActorSheet to provide PC-specific UI, event handling, and context
+ * preparation for character management.
  * 
- * // Adjust trait with family bonus handling
- * await pcSheet._onTraitAdjust(event, target);
+ * **Architecture:**
+ * Uses handler delegation pattern where UI interactions route to specialized handler classes:
+ * - PcAdjustmentHandler: Void Ring, spell slots, rank/points adjustments
+ * - PcTraitHandler: Trait rank adjustments with Shift+Click safety
+ * - BioItemHandler: Clan/family/school item drag-drop and linking
+ * - AppLauncherHandler: XP Manager and Wound Configuration dialogs
+ * - StanceHandler: Stance changes (Attack, Defense, Full Attack, Full Defense, Center)
+ * - PcContextBuilder: Sorted item lists with roll formulas and mastery abilities
  * 
- * // Toggle sheet lock
- * await pcSheet._onToggleLock();
- * ```
- *
- * **Code Navigation Guide:**
- * 1. **Context Preparation** (`_prepareContext()`) - Template data with sorting and bonuses
- * 2. **Event Binding** (`_onRender()`) - Post-render setup and event delegation
- * 3. **Trait Management** (`_onTraitAdjust()`) - Complex trait adjustment with family bonuses
- * 4. **Bio Items** (`_onDrop()`) - Clan/family/school drag/drop handling
- * 5. **Void Management** (`_onVoidAdjust()`) - Void ring rank adjustment
- * 6. **Spell Slots** (`_onSpellSlotAdjust()`) - Spell slot management
- * 7. **Visual Updates** (`_paintVoidPointsDots()`) - Void points dot rendering
- * 8. **Sorting** (`_onSortClick()`) - Item list sorting preference management
- * 9. **Family Bonuses** (FamilyBonusService) - Family bonus calculation from Active Effects
- * 10. **XP Integration** (various methods) - Experience point tracking and validation
- *
- * @author L5R4 System Team
- * @since 1.0.0
- * @version 2.0.0
+ * **Game Mechanics Implemented:**
+ * - Ring Rolls: XkX formula where X = Ring rank (raw ability checks)
+ * - Skill Rolls: (Skill + Trait)k(Trait) via RollHandler in base class
+ * - Weapon Attacks: (Skill + Agility)k(Agility) vs Armor TN (Reflexes × 5 + 5 + armor)
+ * - Weapon Damage: (Weapon DR + Strength)k(Keep) with exploding d10s
+ * - Full Attack Stance: +2k1 attack bonus, -10 Armor TN (Fire Ring stance)
+ * - Void Points: Equal to Void Ring, spent for +1k1 roll bonus or damage reduction
+ * - Void Ring Advancement: Unique ring with no traits, costs 6×next rank XP
+ * - Mastery Abilities: Displayed at skill ranks 3, 5, 7 per core rules
+ * 
+ * **Foundry Integration:**
+ * - Extends ActorSheetV2 (Foundry v13+ Application v2 architecture)
+ * - Uses HandlebarsApplicationMixin for template rendering
+ * - Implements event delegation via data-action attributes
+ * - Custom window header button for edit mode toggle (is-editable class)
+ * - Limited view rendering for non-owner players (pc-limited.hbs template)
+ * - Integrates with enhanceItemSheetData for unified item context
+ * 
+ * **Foundry APIs:** ActorSheetV2, HandlebarsApplicationMixin, TextEditor.enrichHTML
+ * **Requires:** Foundry v13+
+ * 
  * @extends {BaseActorSheet}
- * @see {@link https://foundryvtt.com/api/classes/foundry.applications.sheets.ActorSheetV2.html|ActorSheetV2}
- * @see {@link https://foundryvtt.com/api/classes/foundry.applications.api.HandlebarsApplicationMixin.html|HandlebarsApplicationMixin}
- * @see {@link https://foundryvtt.com/api/classes/foundry.applications.ux.TextEditor.html#getDragEventData|TextEditor.getDragEventData}
- * @see {@link https://foundryvtt.com/api/classes/foundry.abstract.Document.html#update|Document.update}
  */
 
 import { SYS_ID } from "../config/constants.js";
 import { TEMPLATE } from "../config/templates.js";
-import { 
-  ARROWS, 
-  SIZES, 
-  RINGS, 
-  RINGS_WITH_NONE, 
-  SPELL_RINGS, 
-  SKILL_TRAITS, 
-  NPC_TRAITS, 
-  SKILL_TYPES, 
-  ACTION_TYPES, 
-  KIHO_TYPES, 
-  ADVANTAGE_TYPES,
-  STANCES 
-} from "../config/localization.js";
-import { NPC_NUMBER_WOUND_LVLS } from "../config/game-data.js";
+import { STANCES } from "../config/localization.js";
+import { enhanceItemSheetData } from "../documents/item/integration/sheet-data.js";
 import { T } from "../utils/localization.js";
-import { getSortPref, setSortPref, sortWithPref } from "../utils/sorting.js";
 import { on } from "../utils/dom.js";
 import { toInt } from "../utils/type-coercion.js";
-import { applyRankPointsDelta } from "../utils/advancement.js";
-import { resolveWeaponSkillTrait, readWoundPenalty } from "../utils/mechanics.js";
+import { readWoundPenalty } from "../utils/mechanics.js";
 import { RingRoll } from "../services/dice/rolls/ring-roll.js";
 import { WeaponRoll } from "../services/dice/rolls/weapon-roll.js";
-import { NpcRoll } from "../services/dice/rolls/npc-roll.js";
-import { FamilyBonusService } from "../services/family-bonus-service.js";
-import { getAllAttackBonuses, getStanceDamageBonuses } from "../services/stance/rolls/attack-bonuses.js";
+import { getStanceDamageBonuses } from "../services/stance/rolls/attack-bonuses.js";
 import { getActiveStances } from "../services/stance/core/helpers.js";
 import { getMountedStatus } from "../services/mounted-combat.js";
 import { BaseActorSheet } from "./base-actor-sheet.js";
-import XpManagerApplication from "../apps/xp-manager.js";
 import { AppLauncherHandler } from "./handlers/app-launcher-handler.js";
 import { PcAdjustmentHandler } from "./handlers/pc-adjustment-handler.js";
 import { BioItemHandler } from "./handlers/bio-item-handler.js";
@@ -138,23 +59,56 @@ import { PcTraitHandler } from "./handlers/pc-trait-handler.js";
 import { PcContextBuilder } from "./handlers/pc-context-builder.js";
 import { StanceHandler } from "./handlers/stance-handler.js";
 
-/** Foundry UX TextEditor (for enrichHTML) — https://foundryvtt.com/api/classes/foundry.applications.ux.TextEditor.html */
 const { TextEditor } = foundry.applications.ux;
 
-/** Stable trait keys used by templates and derived math */
-const TRAIT_KEYS = /** @type {const} */ (["sta","wil","str","per","ref","awa","agi","int"]);
-
-// Sorting logic now handled by PcContextBuilder
-// Family bonus calculations handled by FamilyBonusService
-
+/**
+ * L5R4 Player Character Sheet
+ * 
+ * Primary character sheet for PC actors. Provides comprehensive character management UI
+ * including traits, skills, rings, items, spells, advantages/disadvantages, and advancement.
+ * 
+ * **Key Features:**
+ * - Sorted item lists with user-scoped sort preferences
+ * - Calculated roll formulas (skills, weapons, rings) displayed in UI
+ * - Full Attack stance integration with +2k1 attack bonuses
+ * - Bio item (clan/family/school) drag-drop with linking
+ * - XP Manager and Wound Configuration app launchers
+ * - Void Points and spell slot adjustments
+ * - Mastery ability tracking at ranks 3, 5, 7
+ * - Edit mode toggle via custom window header button
+ * - Limited view for non-owner players
+ * 
+ * **Template Structure:**
+ * Main template: `templates/actor/pc.hbs`
+ * Limited template: `templates/actor/pc-limited.hbs`
+ * 
+ * @class
+ */
 export default class L5R4PcSheet extends BaseActorSheet {
+  
   /**
-   * Track the DOM root we last bound listeners to.
-   * Foundry v13 replaces the root on every render, so we must re-bind for each new root.
-   * @private @type {HTMLElement|null}
+   * Tracks bound root element for extra event listeners.
+   * 
+   * Used to prevent duplicate binding of non-delegated event listeners
+   * (image edit click, context menus) during re-renders.
+   * 
+   * @type {HTMLElement|null}
+   * @private
    */
   _boundExtraRoot = null;
 
+  /**
+   * Application v2 part configuration.
+   * 
+   * Defines sheet structure for Foundry v13 Application v2 architecture.
+   * Single-part sheet with scrollable content area and auto-submit forms.
+   * 
+   * **Foundry v13 Pattern:**
+   * Static PARTS object replaces deprecated _getPartTemplates().
+   * 
+   * @static
+   * @type {Object}
+   */
   static PARTS = {
     form: {
       root: true,
@@ -166,8 +120,30 @@ export default class L5R4PcSheet extends BaseActorSheet {
     }
   };
 
-
-  /** @inheritdoc */
+  /**
+   * Routes click events to appropriate action handlers.
+   * 
+   * Implements Application v2 event delegation pattern by dispatching data-action
+   * values to specialized handler methods or handler classes. Supports all PC-specific
+   * interactions including:
+   * - Bio item linking (clan, family, school)
+   * - Item CRUD operations (create, edit, delete, expand)
+   * - Roll actions (ring, skill, trait, weapon, weapon attack)
+   * - Adjustments (Void Ring, spell slots, rank points, traits, Void Points)
+   * - App launchers (XP Manager, Wound Config)
+   * - UI toggles (section expand/collapse, inline editing, sorting)
+   * - Stance changes
+   * 
+   * **Implementation Note:**
+   * Some actions delegate to base class methods (inherited from BaseActorSheet),
+   * others to specialized PC handler classes (PcAdjustmentHandler, BioItemHandler, etc.).
+   * 
+   * @param {string} action - The data-action attribute value from clicked element
+   * @param {Event} event - The click event
+   * @param {HTMLElement} element - The clicked element with data-action attribute
+   * @protected
+   * @override
+   */
   _onAction(action, event, element) {
     switch (action) {
       case "clan-link": return BioItemHandler.openLinked(this.actor, "clan");
@@ -178,7 +154,6 @@ export default class L5R4PcSheet extends BaseActorSheet {
       case "item-delete": return this._onItemDelete(event, element);
       case "item-edit": return this._onItemEdit(event, element);
       case "item-expand": return this._onItemExpand(event, element);
-      case "item-roll": return this._onItemRoll(event, element);
       case "item-sort-by": return this._onUnifiedSortClick(event, element);
       case "ring-rank-void": return PcAdjustmentHandler.adjustVoidRing(this._getHandlerContext(), event, element, +1);
       case "roll-ring": return this._onRingRoll(event, element);
@@ -193,13 +168,31 @@ export default class L5R4PcSheet extends BaseActorSheet {
       case "trait-rank": return PcTraitHandler.adjust(this._getHandlerContext(), event, element, +1);
       case "void-points-dots": return this._onVoidPointsAdjust(event, element, +1);
       case "wound-config": return AppLauncherHandler.openWoundConfig(this._getHandlerContext(), event, element);
-      case "xp-add": return this._onXpAdd(event);
-      case "xp-log": return this._onXpLog(event);
-      case "xp-modal": return this._onXpModal(event);
+      case "xp-modal": return AppLauncherHandler.openXpManager(this._getHandlerContext(), event, element);
     }
   }
 
-  /** @inheritdoc */
+  /**
+   * Routes right-click events to appropriate action handlers.
+   * 
+   * Implements Application v2 contextmenu event delegation for modifier-based actions.
+   * Right-click (or context menu) triggers decrement operations for adjustable values:
+   * - Void Ring rank (-1)
+   * - Spell slots (-1)
+   * - Rank/points (-0.1)
+   * - Trait ranks (-1)
+   * - Void Points (-1)
+   * 
+   * **User Interaction Pattern:**
+   * Right-click typically decrements values, while left-click increments.
+   * All context actions still respect safety mechanisms (Shift+Click requirements).
+   * 
+   * @param {string} action - The data-action attribute value from right-clicked element
+   * @param {Event} event - The contextmenu event
+   * @param {HTMLElement} element - The right-clicked element
+   * @protected
+   * @override
+   */
   _onActionContext(action, event, element) {
     switch (action) {
       case "ring-rank-void": return PcAdjustmentHandler.adjustVoidRing(this._getHandlerContext(), event, element, -1);
@@ -210,19 +203,54 @@ export default class L5R4PcSheet extends BaseActorSheet {
     }
   }
 
-  /** @inheritdoc */
+  /**
+   * Routes change events to appropriate action handlers.
+   * 
+   * Implements Application v2 change event delegation for form field updates.
+   * Handles:
+   * - Inline item editing (skills, weapons, armor, etc.)
+   * - Stance changes (dropdown selection)
+   * 
+   * **Auto-Submit Behavior:**
+   * Sheet has submitOnChange:true, so most form changes trigger actor updates
+   * automatically via _prepareSubmitData. These handlers provide additional
+   * processing or validation before submission.
+   * 
+   * @param {string} action - The data-action attribute value from changed element
+   * @param {Event} event - The change event
+   * @param {HTMLElement} element - The form element that changed
+   * @protected
+   * @override
+   */
   _onActionChange(action, event, element) {
     if (action === "inline-edit") return this._onInlineItemEdit(event, element);
     if (action === "change-stance") return StanceHandler.changeStance(this._getHandlerContext(), event, element);
   }
 
   /**
+   * Handles drop events with special bio item (clan/family/school) routing.
+   * 
+   * **Game Rules Context:**
+   * Bio items are special Item types that define character identity:
+   * - **Clan**: Determines starting family options and clan-specific abilities
+   * - **Family**: Grants +1 to a specific trait (e.g., Mirumoto → Agility +1)
+   * - **School**: Defines techniques, starting skills, honor rank, and +1 trait
+   * 
+   * Characters can only have one of each bio item type at a time. Dropping a new
+   * bio item replaces the existing one (e.g., dropping Crane Clan removes Dragon Clan).
+   * 
+   * **Implementation:**
+   * Bio items route to BioItemHandler for replacement logic and trait recalculation.
+   * All other item types delegate to base class for standard item creation.
+   * 
+   * @param {DragEvent} event - Drop event from Foundry drag-drop system
+   * @returns {Promise<void>}
+   * @protected
+   * @async
    * @override
-   * Handle clan/family/school drops using BioItemHandler.
-   * For all other items, delegate to the base class implementation.
    */
   async _onDrop(event) {
-    const ev = /** @type {{originalEvent?: DragEvent}} */(event)?.originalEvent ?? event;
+    const ev = (event)?.originalEvent ?? event;
     if (!ev?.dataTransfer) return super._onDrop(event);
 
     const data = foundry.applications.ux.TextEditor.getDragEventData(ev);
@@ -234,22 +262,29 @@ export default class L5R4PcSheet extends BaseActorSheet {
     const type = String(itemDoc.type);
     const BIO_TYPES = new Set(["clan", "family", "school"]);
     if (!BIO_TYPES.has(type)) {
-      // For non-bio items, use the base class implementation
       return super._onDropItem(event, data);
     }
 
-    // Delegate bio item handling to BioItemHandler
     return BioItemHandler.handleDrop(this._getHandlerContext(), itemDoc);
   }
 
-
-
   /**
+   * Renders the sheet's HTML with limited/full view logic.
+   * 
+   * Selects between full character sheet (pc.hbs) and limited view (pc-limited.hbs)
+   * based on ownership and GM status. Limited view shows only basic info for
+   * non-owner players (respects Foundry's limited permission level).
+   * 
+   * **Foundry Pattern:**
+   * Custom _renderHTML implementation for Application v2 to support conditional
+   * template selection. Returns object with named part keys matching PARTS config.
+   * 
+   * @param {Object} context - Template context from _prepareContext
+   * @param {Object} _options - Render options (unused)
+   * @returns {Promise<Object>} Object with 'form' property containing rendered HTML element
+   * @protected
+   * @async
    * @override
-   * Render HTML for PC sheet, choosing between limited and full templates.
-   * @param {object} context - Template context
-   * @param {object} _options - Render options (unused)
-   * @returns {Promise<{form: HTMLElement}>}
    */
   async _renderHTML(context, _options) {
     const isLimited = (!game.user.isGM && this.actor.limited);
@@ -265,7 +300,20 @@ export default class L5R4PcSheet extends BaseActorSheet {
   /* Options / Tabs                      */
   /* ---------------------------------- */
 
-  /** @override */
+  /**
+   * Default configuration options for PC sheet.
+   * 
+   * Extends BaseActorSheet options with PC-specific settings:
+   * - Width: 870px (wider than base to accommodate PC-specific columns)
+   * - Classes: Adds "pc" class for styling specificity
+   * - Form: Auto-submit on change and close for seamless editing
+   * 
+   * **Foundry v13 Pattern:**
+   * Static DEFAULT_OPTIONS replaces deprecated defaultOptions() getter.
+   * 
+   * @static
+   * @type {Object}
+   */
   static DEFAULT_OPTIONS = {
     ...BaseActorSheet.DEFAULT_OPTIONS,
     classes: [
@@ -277,26 +325,43 @@ export default class L5R4PcSheet extends BaseActorSheet {
     form: { ...(BaseActorSheet.DEFAULT_OPTIONS.form ?? {}), submitOnChange: true, submitOnClose: true }
   };
 
-
   /* ---------------------------------- */
   /* Data Prep                           */
   /* ---------------------------------- */
 
   /**
+   * Prepares template context data for PC sheet rendering.
+   * 
+   * Builds comprehensive context object with:
+   * - Enriched HTML (notes with @UUID, inline rolls)
+   * - Sorted item collections (skills, spells, weapons, etc.) with roll formulas
+   * - Bio items (clan, family, school)
+   * - Effective traits (includes wound penalties)
+   * - Stance and mounted status
+   * - Mastery abilities list
+   * - Lazy-loaded advantage/disadvantage combined list
+   * 
+   * **Performance Optimization:**
+   * Uses lazy getter for advDisList to defer expensive sorting until template
+   * actually accesses the property. This avoids unnecessary computation when
+   * rendering non-default tabs.
+   * 
+   * **Game Mechanics:**
+   * Effective traits from _derived include wound penalties per the Wound Penalty
+   * system (Nicked: +3 TN, Grazed: +5 TN, Hurt: +10 TN, etc.). These feed into
+   * skill and weapon roll formulas calculated by PcContextBuilder.
+   * 
+   * @param {Object} _options - Render options from Application v2 (unused)
+   * @returns {Promise<Object>} Template context with all sheet data
+   * @protected
+   * @async
    * @override
-   * Prepare the context passed to the Handlebars template.
-   * Handles complex PC-specific data like sorted items, effective traits, and family bonuses.
-   * @param {object} _options - Context preparation options (unused)
-   * @returns {Promise<object>} Template context
-   * @see https://foundryvtt.com/api/classes/foundry.applications.api.HandlebarsApplicationMixin.html#_prepareContext
    */
   async _prepareContext(_options) {
     const base = await super._prepareContext(_options);
     const actorObj = this.document;
     const system = foundry.utils.deepClone(actorObj.system ?? {});
-    // Normalize notes to a string for the editor.
     if (typeof system.notes !== "string") system.notes = String(system.notes ?? "");
-    // Pre-enrich for read-only rendering.
     const enrichedNotes = await TextEditor.enrichHTML(system.notes ?? "", {
       async: true,
       secrets: this.isEditable,
@@ -304,7 +369,6 @@ export default class L5R4PcSheet extends BaseActorSheet {
       links: true
     });
   
-    // Use PcContextBuilder to sort all item types (eliminates ~200 lines of duplication)
     const all = actorObj.items.contents ?? actorObj.items;
     const byType = (t) => all.filter((i) => i.type === t);
     const sortedItems = PcContextBuilder.buildSortedItems(actorObj, all);
@@ -313,52 +377,24 @@ export default class L5R4PcSheet extends BaseActorSheet {
       katas, kihos, tattoos, techniques, armors, weapons, bows
     } = sortedItems;
     
-    // Build mastery list from sorted skills
     const masteries = PcContextBuilder.buildMasteryList(skills);
   
-    // Effective traits logic (unchanged)
-    let fam = {};
-    try {
-      const uuid = this.actor.getFlag(SYS_ID, "familyItemUuid");
-      if (uuid && globalThis.fromUuidSync) {
-        const doc = /** @type {any} */ (fromUuidSync(uuid));
-        const key = String(doc?.system?.trait ?? "").toLowerCase();
-        const amt = Number(doc?.system?.bonus ?? 1);
-        if (key && actorObj.system?.traits && (key in actorObj.system.traits) && Number.isFinite(amt) && amt !== 0) {
-          fam = { [key]: amt };
-        }
-      }
-    } catch (_e) {}
-    if (!fam || Object.keys(fam).length === 0) fam = this.actor.flags?.[SYS_ID]?.familyBonus ?? {};
-  
-    let traitsEff = foundry.utils.duplicate(
+    const traitsEff = foundry.utils.duplicate(
       this.actor.system?._derived?.traitsEff ?? this.actor.system?.derived?.traitsEff ?? {}
     );
     if (!Object.keys(traitsEff).length) {
-      traitsEff = foundry.utils.duplicate(
-        this.actor.system?._derived?.traitsEff ?? this.actor.system?.derived?.traitsEff ?? {}
-      );
-      if (!Object.keys(traitsEff).length) {
-        console.warn(`${SYS_ID}`, "traitsEff missing in actor.system._derived; check prepareDerivedData()");
-      }
+      console.warn(`${SYS_ID}`, "traitsEff missing in actor.system._derived; check prepareDerivedData()");
     }
   
     const bioClan   = byType("clan")[0]   ?? null;
     const bioFamily = byType("family")[0] ?? null;
     const bioSchool = byType("school")[0] ?? null;
   
-    // Get current active stance for dropdown
     const activeStances = getActiveStances(actorObj);
     const currentStance = activeStances[0] || "";
-    
-    // Get mounted combat status
     const mountedStatus = getMountedStatus(actorObj);
   
-    /**
-     * Template context with consistently pre-computed sorted item collections.
-     * All item types now use the same pre-computed pattern for maintainability.
-     */
-    return {
+    const context = {
       ...base,
       actor: this.actor,
       system,
@@ -370,26 +406,10 @@ export default class L5R4PcSheet extends BaseActorSheet {
       traitsEff,
       currentStance,
       mountedStatus,
-      config: {
-        arrows: ARROWS,
-        sizes: SIZES,
-        rings: RINGS,
-        ringsWithNone: RINGS_WITH_NONE,
-        spellRings: SPELL_RINGS,
-        traits: SKILL_TRAITS,
-        npcTraits: NPC_TRAITS,
-        skillTypes: SKILL_TYPES,
-        actionTypes: ACTION_TYPES,
-        kihoTypes: KIHO_TYPES,
-        advantageTypes: ADVANTAGE_TYPES,
-        stances: STANCES,
-        npcNumberWoundLvls: NPC_NUMBER_WOUND_LVLS
-      },
-      // Combined advantage/disadvantage list (uses PcContextBuilder)
+      // Lazy getter: Defers expensive sorting until template accesses property
       get advDisList() {
         return PcContextBuilder.buildAdvDisList(actorObj, advantages, disadvantages);
       },
-      // Clean, consistent variable references - much more maintainable!
       armors,
       bows,
       advantages,
@@ -404,28 +424,47 @@ export default class L5R4PcSheet extends BaseActorSheet {
       weapons,
       masteries
     };
+
+    enhanceItemSheetData(context);
+    context.config.stances = STANCES;
+    return context;
   }
 
   /**
+   * Post-render lifecycle hook for DOM manipulation and event binding.
+   * 
+   * Performs PC-specific rendering tasks:
+   * 1. Injects custom edit mode toggle button into window header
+   * 2. Paints Void Points dots based on current/max values
+   * 3. Binds image edit click handler (non-delegated)
+   * 4. Sets up item context menus
+   * 
+   * **Custom Header Button:**
+   * Adds pen-to-square icon button to window controls that toggles "is-editable"
+   * class on sheet element. This enables/disables editing mode without changing
+   * Foundry permissions, useful for preventing accidental edits during play.
+   * 
+   * **Guard Logic:**
+   * Tracks _boundExtraRoot to prevent duplicate event binding on re-renders.
+   * Only binds events if actor is owned by current user.
+   * 
+   * @param {Object} context - Template context from _prepareContext
+   * @param {Object} options - Render options from Application v2
+   * @returns {Promise<void>}
+   * @protected
+   * @async
    * @override
-   * Bind UI events and setup post-render functionality.
-   * Replaces the old activateListeners pattern from ApplicationV1.
-   * @param {object} context - Template context
-   * @param {object} options - Render options
    */
   async _onRender(context, options) {
     await super._onRender(context, options);
     const root = this.element;
 
-
-    // Inline header control: Toggle Edit Mode (inject into window header controls).
-    // v13 exposes header *menu* via _getHeaderControls()/hook; there is no public API for inline icons.
-    // We scope to this sheet and make it idempotent on every render.
+    // Inject custom edit mode toggle button into window header
     try {
       const appEl = root?.closest(".app.window-app");
       const controls = appEl?.querySelector(":scope > header.window-header .window-controls");
       if (controls) {
-        // Remove any prior copies to prevent the "button parade" on re-renders.
+
         controls.querySelectorAll(".l5r4-toggle-edit").forEach(n => n.remove());
 
         const btn = document.createElement("button");
@@ -444,66 +483,48 @@ export default class L5R4PcSheet extends BaseActorSheet {
           }
         });
 
-        // Put it first, before the kebab.
         controls.insertBefore(btn, controls.firstElementChild);
       }
     } catch (err) {
       console.warn(`${SYS_ID}`, "PC Sheet: header control injection failed", { err });
     }
 
-    // Always repaint Void dots after any render, even if the root element is reused.
-    // Foundry v13 often re-renders by replacing innerHTML without swapping the root.
-    // @see https://foundryvtt.com/api/classes/foundry.applications.api.ApplicationV2.html#render
+    // Paint Void Points dots based on current/max values
     this._paintVoidPointsDots(root);
 
-    // Bind once per *current* DOM root; rebind only if the root element actually changed.
+    // Guard: Only bind non-delegated events once per root element
     if (this._boundExtraRoot === root) return;
     this._boundExtraRoot = root;
     if (!this.actor.isOwner) return;
 
-    // All [data-action] handlers are now delegated via BaseActorSheet.
-    // Keep only non-[data-action] bindings here:
-    // Sorting is now handled via data-action delegation - no direct binding needed
-
-    // After render, paint the dot faces to match current value
-    this._paintVoidPointsDots(root);
-
-    /**
-     * Persist trait edits immediately (debounced) using the matched element,
-     * not the event, since our "on(...)" helper is delegated.
-     * @see https://foundryvtt.com/api/classes/foundry.utils.html#debounce
-     */
-    const saveTrait = foundry.utils.debounce((el) => this._onInlineActorEdit(null, el), 200);
-    // Traits (Earth, Air, Fire, Water pairs)
-    on(root, "input[name^='system.traits.']", "input",  (ev, el) => saveTrait(el));
-    on(root, "input[name^='system.traits.']", "change", (ev, el) => this._onInlineActorEdit(ev, el));
-    /** Void ring fields live under system.rings.void.*, not system.traits.* */
-    on(root, "input[name='system.rings.void.rank']",  "input",  (ev, el) => saveTrait(el));
-    on(root, "input[name='system.rings.void.rank']",  "change", (ev, el) => this._onInlineActorEdit(ev, el));
-    on(root, "input[name='system.rings.void.value']", "input",  (ev, el) => saveTrait(el));
-    on(root, "input[name='system.rings.void.value']", "change", (ev, el) => this._onInlineActorEdit(ev, el));
-
-    // Clan/family/school now handled by action delegation (BioItemHandler)
-    // Image editing
     on(root, "[data-edit='img']", "click", (ev) => this._onEditImage(ev, ev.currentTarget));
-
-    // Experience actions
-    on(root, "[data-action='xp-add']", "click", (ev) => this._onXpAdd(ev));
-    on(root, "[data-action='xp-log']", "click", (ev) => this._onXpLog(ev));
-
-    // Setup shared context menu for item rows
     await this._setupItemContextMenu(root);
   }
 
-
-
   /**
-   * @override
-   * Define allowed sort keys for PC lists.
-   * Specifies which columns are sortable for each list scope.
+   * Returns allowed sort column keys for a given item list scope.
    * 
-   * @param {string} scope - Sort scope identifier (e.g., "skills", "spells", "advantages")
-   * @returns {string[]} Array of allowed sort keys for this scope
+   * Defines sortable columns for each item type displayed in PC sheet.
+   * Used by SortHandler to validate user sort preferences and provide
+   * column options in sort UI.
+   * 
+   * **Sort Columns by Type:**
+   * - **armors**: name, bonus, reduction, equipped
+   * - **weapons**: name, damage, size
+   * - **items**: name only
+   * - **skills**: name, rank, trait, roll, emphasis
+   * - **spells**: name, ring, mastery, range, aoe, duration
+   * - **techniques**: name only
+   * - **katas**: name, ring, mastery
+   * - **kihos**: name, ring, mastery, type
+   * - **tattoos**: name only
+   * - **advantages/disadvantages**: name, type, cost
+   * - **advDis** (combined): name, type, cost, item
+   * 
+   * @param {string} scope - Sort scope identifier matching item type or list name
+   * @returns {string[]} Array of allowed sort column keys
+   * @protected
+   * @override
    */
   _getAllowedSortKeys(scope) {
     const keys = {
@@ -524,97 +545,67 @@ export default class L5R4PcSheet extends BaseActorSheet {
     return keys[scope] ?? ["name"];
   }
 
-  /* Trait adjustment now handled by PcTraitHandler */
-
-  /**
-   * Minimal inline actor edit for "system.*" fields.
-   * Works with delegated handlers by accepting an explicit element.
-   * @param {Event|null} ev
-   * @param {HTMLElement} [element]
-   */
-  async _onInlineActorEdit(ev, element) {
-    const el = /** @type {HTMLInputElement|null} */ (
-      element instanceof HTMLElement ? element
-      : (ev?.target instanceof HTMLElement ? ev.target
-      : (ev?.currentTarget instanceof HTMLElement ? ev.currentTarget : null))
-    );
-    if (!el) return; // nothing to do
-    const path = el.name || el.getAttribute("name");
-    if (!path) return;
-    let value = el.value;
-
-    /** Respect Foundry's dtype casting.
-     *  @see https://foundryvtt.com/api/classes/foundry.utils.FormDataExtended.html
-     */
-    const dtype = el.dataset.dtype || el.getAttribute("data-dtype");
-    if (dtype === "Boolean") {
-      value = !!el.checked;
-    } else if (dtype === "Number" || el.type === "number") {
-      const n = Number(value);
-      if (!Number.isFinite(n)) return; // ignore incomplete input like "-" or ""
-      value = n;
-    }
-
-    // Update only the changed path
-    try {
-      await this.actor.update({ [path]: value });
-    } catch (err) {
-      console.warn(`${SYS_ID}`, "actor.update failed in PcSheet", { err });
-    }
-  }
-
   /* ---------------------------------- */
   /* Rolls                               */
   /* ---------------------------------- */
 
   /**
-   * Handle item roll for simple item chat display.
-   * @param {Event} event - The click event
-   * @param {HTMLElement} element - The clicked element
-   */
-  _onItemRoll(event, element) {
-    event.preventDefault();
-    const row = element.closest(".item");
-    const rid = row?.dataset?.itemId || row?.dataset?.documentId || row?.dataset?.id;
-    const item = rid ? this.actor.items.get(rid) : null;
-    if (!item) return;
-
-    // Send item to chat
-    return item.toMessage();
-  }
-
-  /**
-   * Handle Ring rolls from the rings wheel.
-   * @param {MouseEvent} event - The click event
-   * @param {HTMLElement} el - The ring roll element with dataset attributes
+   * Initiates a Ring roll (XkX where X = Ring rank).
+   * 
+   * **Game Rules Context:**
+   * Ring rolls represent raw supernatural or elemental power checks:
+   * - Spell resistance rolls (e.g., "Roll Earth to resist Shadowlands Taint")
+   * - Void-based enlightenment checks
+   * - Elemental attunement tests
+   * 
+   * Formula: XkX where both rolled and kept dice equal Ring rank.
+   * Includes wound penalties per the Wound Penalty system.
+   * 
+   * **User Interaction:**
+   * Shift+Click opens options dialog for raises, bonuses, and TN entry.
+   * Normal click uses default ring value without modifications.
+   * 
+   * @param {Event} event - Click event (shift key triggers options dialog)
+   * @param {HTMLElement} el - Element with dataset.ringRank and dataset.systemRing
+   * @protected
    */
   _onRingRoll(event, el) {
     event.preventDefault();
-    /** Localized ring name for chat flavor. */
     const ringName = el.dataset?.ringName || T(`l5r4.ui.mechanics.rings.${el.dataset?.systemRing || "void"}`);
-    /** System ring key: "earth" | "air" | "water" | "fire" | "void". */
     const systemRing = String(el.dataset?.systemRing || "void").toLowerCase();
-    /** Numeric ring rank from dataset, already formatted by the template. */
     const ringRank = toInt(el.dataset?.ringRank);
 
-    // Pass the exact option names RingRoll expects.
     RingRoll({
       ringRank,
       ringName,
       systemRing,
       askForOptions: event.shiftKey,
       actor: this.actor,
-      // Ensure wound penalties apply to ring rolls like skills/traits
       woundPenalty: readWoundPenalty(this.actor)
     });
   }
 
   /**
-   * Handle weapon damage rolls using stored damage dice.
-   * Applies Full Attack stance bonuses (+1k1) when active.
-   * Shift-click to open roll options dialog.
-   * @param {MouseEvent} event - The click event
-   * @param {HTMLElement} element - The clicked element in the weapon row
+   * Initiates a weapon damage roll.
+   * 
+   * **Game Rules Context:**
+   * Weapon damage rolls determine wounds inflicted on successful hits:
+   * - Formula: (Weapon DR + Strength)k(Keep) for melee weapons
+   * - Dice explode on 10s (roll again and add, per core rules)
+   * - Full Attack stance: +2k1 damage bonus (Fire Ring stance)
+   * 
+   * Full Attack Stance Bonus:
+   * Characters in Full Attack stance gain +2k1 to damage rolls in addition to
+   * the +2k1 attack bonus and -10 Armor TN penalty. This makes Full Attack a
+   * high-risk, high-reward offensive posture.
+   * 
+   * **Implementation:**
+   * Reads stance bonuses from actor.system via getStanceDamageBonuses service.
+   * Appends stance bonus to description for chat display.
+   * 
+   * @param {Event} event - Click event (shift key triggers damage modifier dialog)
+   * @param {HTMLElement} element - Element with data-item-id for weapon lookup
+   * @protected
    */
   _onWeaponRoll(event, element) {
     event.preventDefault();
@@ -625,13 +616,9 @@ export default class L5R4PcSheet extends BaseActorSheet {
 
     const baseDiceRoll = Number(item.system?.damageRoll ?? 0) || 0;
     const baseDiceKeep = Number(item.system?.damageKeep ?? 0) || 0;
-    
-    // Apply stance damage bonuses
     const stanceBonuses = getStanceDamageBonuses(this.actor);
     const diceRoll = baseDiceRoll + stanceBonuses.roll;
     const diceKeep = baseDiceKeep + stanceBonuses.keep;
-    
-    // Add stance bonus information to description
     let description = item.system?.description || "";
     if (stanceBonuses.roll > 0 || stanceBonuses.keep > 0) {
       const bonusText = `+${stanceBonuses.roll}k${stanceBonuses.keep}`;
@@ -646,40 +633,8 @@ export default class L5R4PcSheet extends BaseActorSheet {
       diceKeep,
       weaponName: item.name,
       description,
-      askForOptions: event.shiftKey
-    });
-  }
-
-  /**
-   * Handle weapon attack rolls using weapon skill/trait associations.
-   * Uses the weapon's associated skill if the character has it, otherwise falls back to the weapon's trait.
-   * @param {Event} event - The triggering event (shift-click for options)
-   * @param {HTMLElement} element - The clicked element in the weapon row
-   */
-  _onWeaponAttackRoll(event, element) {
-    event.preventDefault();
-    const row = element.closest(".item");
-    const id = row?.dataset?.itemId || row?.dataset?.documentId || row?.dataset?.id;
-    const item = id ? this.actor.items.get(id) : null;
-    if (!item) return;
-
-    const weaponSkill = resolveWeaponSkillTrait(this.actor, item);
-    const untrained = weaponSkill.skillRank === 0;
-    
-    const rollName = untrained 
-      ? `${item.name} (${T("l5r4.ui.mechanics.rolls.unskilled")})`
-      : `${item.name} ${T("l5r4.ui.mechanics.rolls.attackRoll")}`;
-
-    // NpcRoll now applies all attack bonuses (stance + mounted) internally
-    return NpcRoll({
-      rollName,
-      diceRoll: weaponSkill.rollBonus,
-      diceKeep: weaponSkill.keepBonus,
-      rollType: "attack",
-      actor: this.actor,
-      untrained,
-      woundPenalty: readWoundPenalty(this.actor),
-      weaponId: id
+      askForOptions: event.shiftKey,
+      actor: this.actor
     });
   }
 
@@ -688,21 +643,33 @@ export default class L5R4PcSheet extends BaseActorSheet {
   /* ---------------------------------- */
 
   /**
-   * @override
-   * Handle inline item editing with enhanced dtype support for PC sheet.
-   * Supports checkboxes, numbers, booleans, and string values.
-   * @param {Event} event - The input event
-   * @param {HTMLElement} element - The input element
+   * Handles inline editing of item properties directly in the sheet.
+   * 
+   * Allows quick edits of item fields (name, rank, cost, etc.) without opening
+   * the full item sheet. Performs type coercion based on data-dtype attribute:
+   * - **Integer**: Coerces to integer via toInt()
+   * - **Number**: Coerces to float, defaults to 0 if invalid
+   * - **Boolean**: Supports checkbox inputs and string boolean values
+   * - **Default**: Coerces to string
+   * 
+   * **Form Integration:**
+   * Works in conjunction with submitOnChange for seamless editing experience.
+   * Type coercion ensures proper data types in Actor/Item system data.
+   * 
+   * @param {Event} event - Change event from form field
+   * @param {HTMLElement} element - Form element with data-field and data-dtype
+   * @returns {Promise<void>}
+   * @protected
+   * @async
    */
   async _onInlineItemEdit(event, element) {
     event.preventDefault();
-    const el = /** @type {HTMLInputElement} */ (element || event.currentTarget);
+    const el =  (element || event.currentTarget);
     const row = el?.closest?.(".item");
     const id = row?.dataset?.itemId || row?.dataset?.documentId || row?.dataset?.id;
     const field = el.dataset.field;
     if (!id || !field) return;
 
-    // Handle checkbox values and extended dtype support
     let value = el.type === "checkbox" ? el.checked : el.value;
     const dtype = el.dataset.dtype ?? el.dataset.type;
     switch (dtype) {
@@ -717,334 +684,32 @@ export default class L5R4PcSheet extends BaseActorSheet {
     return this.actor.items.get(id)?.update({ [field]: value });
   }
 
-
-  /* ---------------------------------- */
-  /* Experience: manual adjustments and log */
-  /* ---------------------------------- */
-
-  /**
-   * Prompt to add or remove XP manually with a reason note.
-   * Stores entries in the actor's manual XP log under flags.
-   * @param {Event} event - The click event
-   * @see https://foundryvtt.com/api/classes/foundry.abstract.Document.html#setFlag
-   * @see https://foundryvtt.com/api/classes/client.Dialog.html#static-prompt
-   */
-  async _onXpAdd(event) {
-    event?.preventDefault?.();
-    const html = document.createElement("div");
-    html.innerHTML = `
-      <div class="form-group">
-        <label>${game.i18n.localize("l5r4.character.experience.xpAmount")}</label>
-        <input type="number" step="1" value="1" class="xp-amount" />
-      </div>
-      <div class="form-group">
-        <label>${game.i18n.localize("l5r4.character.experience.note")}</label>
-        <input type="text" class="xp-note" placeholder="${game.i18n.localize("l5r4.character.experience.reason")}" />
-      </div>
-    `;
-
-    const value = await Dialog.prompt({
-      title: game.i18n.localize("l5r4.character.experience.adjustExperience"),
-      content: html,
-      label: game.i18n.localize("l5r4.ui.common.apply"),
-      callback: (dlg) => {
-        const amount = Number.isFinite(+dlg.querySelector(".xp-amount")?.value) ? +dlg.querySelector(".xp-amount").value : 0;
-        const note = String(dlg.querySelector(".xp-note")?.value ?? "").trim();
-        return { amount, note };
-      }
-    });
-    if (!value) return;
-
-    const ns = this.actor.flags?.[SYS_ID] ?? {};
-    const manual = Array.isArray(ns.xpManual) ? foundry.utils.duplicate(ns.xpManual) : [];
-    manual.push({
-      id: foundry.utils.randomID(),
-      delta: Number.isFinite(+value.amount) ? +value.amount : 0,
-      note: value.note,
-      ts: Date.now()
-    });
-    try {
-      await this.actor.setFlag(SYS_ID, "xpManual", manual);
-    } catch (err) {
-      console.warn(`${SYS_ID}`, "actor.setFlag failed in PcSheet", { err });
-    }
-  }
-
-  /**
-   * Display a detailed XP breakdown dialog showing spent, earned, and available XP.
-   * Includes manual XP adjustments from the log.
-   * @param {Event} event - The click event
-   * @see https://foundryvtt.com/api/classes/client.Dialog.html#static-prompt
-   */
-  async _onXpLog(event) {
-    event?.preventDefault?.();
-    const sys = this.actor.system ?? {};
-    const xp = sys?._xp ?? {};
-    const ns = this.actor.flags?.[SYS_ID] ?? {};
-    const manual = Array.isArray(ns.xpManual) ? ns.xpManual : [];  // pool changes
-    const spent  = Array.isArray(ns.xpSpent)  ? ns.xpSpent  : [];  // purchases
-
-    const rows = (arr) =>
-      arr
-        .slice()
-        .sort((a, b) => (a.ts || 0) - (b.ts || 0))
-        .map(e => {
-          const when = new Date(e.ts || Date.now()).toLocaleString();
-          const sign = (Number.isFinite(+e.delta) ? (e.delta >= 0 ? "+" : "") : "");
-          return `<tr><td>${when}</td><td style="text-align:right">${sign}${e.delta ?? 0}</td><td>${foundry.utils.escapeHTML(e.note || "")}</td></tr>`;
-        })
-        .join("");
-
-    const manualRows  = rows(manual);
-    const spentRows   = rows(spent);
-    const manualTotal = manual.reduce((s, e) => s + (Number.isFinite(+e.delta) ? +e.delta : 0), 0);
-    const spentTotal  = spent.reduce((s, e) => s + (Number.isFinite(+e.delta) ? +e.delta : 0), 0);
-
-    const content = `
-      <h3>${game.i18n.localize("l5r4.character.experience.experienceSummary")}</h3>
-      <p><b>${game.i18n.localize("l5r4.character.experience.usedTotal")}:</b> ${xp.spent ?? 0} / ${xp.total ?? 40} <i>(${(xp.available ?? (xp.total ?? 40) - (xp.spent ?? 0))} ${game.i18n.localize("l5r4.ui.common.left")})</i></p>
-      <ul>
-        <li>Base: ${xp?.breakdown?.base ?? 40}</li>
-        <li>Disadvantages grant: ${xp?.breakdown?.disadvantagesGranted ?? 0} (cap 10)</li>
-        <li>Manual adjustments: ${xp?.breakdown?.manual ?? 0}</li>
-        <li>Traits: ${xp?.breakdown?.traits ?? 0}</li>
-        <li>Void: ${xp?.breakdown?.void ?? 0}</li>
-        <li>Skills: ${xp?.breakdown?.skills ?? 0}</li>
-        <li>Advantages: ${xp?.breakdown?.advantages ?? 0}</li>
-      </ul>
-
-      <h4>${game.i18n.localize("l5r4.character.experience.poolChanges")}:</h4>
-      <table class="table">
-        <thead><tr>
-          <th>${game.i18n.localize("l5r4.character.experience.when")}</th>
-          <th style="text-align:right">${game.i18n.localize("l5r4.ui.common.xp")}</th>
-          <th>${game.i18n.localize("l5r4.character.experience.note")}</th>
-        </tr></thead>
-        <tbody>${manualRows || `<tr><td colspan="3"><i>${game.i18n.localize("l5r4.ui.common.none")}</i></td></tr>`}</tbody>
-        <tfoot><tr><td style="text-align:right" colspan="1"><b>${game.i18n.localize("l5r4.ui.common.total")}</b></td>
-        <td style="text-align:right"><b>${manualTotal}</b></td><td></td></tr></tfoot>
-      </table>
-
-      <h4>${game.i18n.localize("l5r4.character.experience.purchases")}:</h4>
-      <table class="table">
-        <thead><tr>
-          <th>${game.i18n.localize("l5r4.character.experience.when")}</th>
-          <th style="text-align:right">${game.i18n.localize("l5r4.ui.common.xp")}</th>
-          <th>${game.i18n.localize("l5r4.character.experience.note")}</th>
-        </tr></thead>
-        <tbody>${spentRows || `<tr><td colspan="3"><i>${game.i18n.localize("l5r4.ui.common.none")}</i></td></tr>`}</tbody>
-        <tfoot><tr><td style="text-align:right" colspan="1"><b>${game.i18n.localize("l5r4.ui.common.total")}</b></td>
-        <td style="text-align:right"><b>${spentTotal}</b></td><td></td></tr></tfoot>
-      </table>
-    `;
-
-    await Dialog.prompt({
-      title: game.i18n.localize("l5r4.character.experience.xpLog"),
-      content,
-      label: game.i18n.localize("l5r4.ui.common.close"),
-      callback: () => true
-    });
-  }
-
-  /**
-   * Legacy _retroactivelyUpdateXP method removed to prevent XP log duplication.
-   * XP Manager now handles all XP calculations and retroactive updates.
-   * This method was creating duplicate entries when both PC sheet and XP Manager
-   * attempted to rebuild XP tracking data simultaneously.
-   * 
-   * @deprecated Removed in favor of XP Manager's _retroactivelyUpdateXP method
-   * @see module/apps/xp-manager.js XpManagerApplication._retroactivelyUpdateXP()
-   */
-
-  /**
-   * Display the XP modal with comprehensive experience tracking.
-   * Shows XP breakdown, manual adjustments, and purchase history in a dialog.
-   * @param {Event} event - The click event
-   */
-  async _onXpModal(event) {
-    event?.preventDefault?.();
-    
-    // Create and show the new XP Manager Application
-    const xpManager = new XpManagerApplication(this.actor);
-    xpManager.render(true);
-  }
-
-  /* ---------------------------------- */
-  /* Clan/Family/School now handled by BioItemHandler */
-  /* ---------------------------------- */
-
   /* ---------------------------------- */
   /* Submit pipeline                     */
   /* ---------------------------------- */
 
   /**
+   * Processes form data before submission to actor document.
+   * 
+   * Intercepts form submission to apply PC-specific data transformations:
+   * - Trait value coercion and bounds checking via PcTraitHandler
+   * - Conversion of string inputs to proper numeric types
+   * - Validation of rank/points values
+   * 
+   * **Foundry Pattern:**
+   * Part of Application v2 form handling pipeline. Called automatically when
+   * submitOnChange triggers or user explicitly submits the form.
+   * 
+   * @param {Event} event - Form submit event
+   * @param {HTMLFormElement} form - The form element being submitted
+   * @param {FormDataExtended} formData - Foundry's extended FormData object
+   * @param {Object} [updateData={}] - Pre-processed update data object
+   * @returns {Object} Processed update data ready for Actor.update()
+   * @protected
    * @override
-   * Convert trait inputs that display "effective" (base + family) back to base before submit.
-   * Handles family bonus calculations to maintain proper trait values.
-   * @param {Event} event - The submit event
-   * @param {HTMLFormElement} form - The form element
-   * @param {FormData} formData - The form data
-   * @param {object} updateData - Additional update data
-   * @returns {object} Processed submit data
-   * @see https://foundryvtt.com/api/classes/foundry.applications.sheets.ActorSheetV2.html#_prepareSubmitData
    */
   _prepareSubmitData(event, form, formData, updateData = {}) {
-    // Call parent to build the update object first
     const data = super._prepareSubmitData(event, form, formData, updateData);
-
-    // Convert effective traits to base (uses FamilyBonusService, same logic as PcTraitHandler.convertSubmitData)
-    const t = data?.system?.traits;
-    if (t && typeof t === "object") {
-      for (const [k, v] of Object.entries(t)) {
-        if (v === undefined || v === null) continue;
-        const eff = Number(v) || 0;
-        const bonus = FamilyBonusService.getBonus(this.actor, k);
-        const base  = eff - bonus;
-        // Clamp to >= 0 (L5R traits can’t be negative)
-        t[k] = Math.max(0, base);
-      }
-    }
-    return data;
-  }
-
-  /**
-   * @override
-   * Process submit data with family-specific side effects.
-   * Handles family base name persistence and delegates to parent.
-   * @param {Event} event - The submit event
-   * @param {HTMLFormElement} form - The form element
-   * @param {object} submitData - The processed submit data
-   * @param {object} options - Submit options
-   * @returns {Promise<void>}
-   */
-  async _processSubmitData(event, form, submitData, options) {
-    // Persist base name if we prefixed during _prepareSubmitData
-    if (submitData.__familyBaseName) {
-      submitData[`flags.${SYS_ID}.familyBaseName`] = submitData.__familyBaseName;
-      delete submitData.__familyBaseName;
-    }
-
-    return super._processSubmitData(event, form, submitData, options);
-  }
-
-  /* ---------------------------------- */
-  /* Family bonus from item              */
-  /* ---------------------------------- */
-
-  /**
-   * Handle preference-based sorting for most item types.
-   * Uses user flags to store sort preferences and triggers a render.
-   * @param {string} scope - The item list scope (weapons, spells, etc.)
-   * @param {string} key - The sort key (name, rank, etc.)
-   * @param {HTMLElement} el - The clicked sort element
-   * @returns {Promise<void>}
-   */
-  async _onPreferenceBasedSort(scope, key, el) {
-    try {
-      const allowed = {
-        armors:       ["name","bonus","reduction","equipped"],
-        weapons:      ["name","damage","size"],
-        items:        ["name"],
-        spells:       ["name","ring","mastery","range","aoe","duration"],
-        techniques:   ["name"],
-        technique:    ["name"],
-        katas:        ["name","ring","mastery"],
-        kihos:        ["name","ring","mastery","type"],
-        tattoos:      ["name"],
-        advantages:   ["name","type","cost"],
-        disadvantages:["name","type","cost"],
-        advDis:       ["name","type","cost","item"]
-      }[scope] ?? ["name"];
-      
-      if (!allowed.includes(key)) {
-        console.warn(`${SYS_ID}`, "Invalid sort key for scope", { scope, key, allowed });
-        return;
-      }
-      
-      const cur = getSortPref(this.actor.id, scope, allowed, allowed[0]);
-      await setSortPref(this.actor.id, scope, key, { toggleFrom: cur });
-      
-      // Update visual indicator
-      const header = el.closest('.item-list.-header');
-      if (header) {
-        header.querySelectorAll('.item-sort-by').forEach(a => {
-          a.classList.toggle('is-active', a === el);
-          if (a !== el) a.removeAttribute('data-dir');
-        });
-        
-        const newPref = getSortPref(this.actor.id, scope, allowed, allowed[0]);
-        el.setAttribute('data-dir', newPref.dir);
-      }
-      
-      // Trigger re-render to apply new sort
-      this.render();
-      
-    } catch (err) {
-      console.warn(`${SYS_ID}`, "Preference-based sort failed", { err, scope, key });
-    }
-  }
-  
-  /**
-   * Handle document-based sorting for skills to preserve sort bins.
-   * Updates the item.sort property directly to maintain item ordering.
-   * @param {MouseEvent} event - The original click event
-   * @param {HTMLElement} el - The clicked sort element
-   * @param {string} key - The sort key (name, rank, trait, etc.)
-   * @returns {Promise<void>}
-   */
-  async _onSkillsDocumentSort(event, el, key) {
-    try {
-      // Toggle direction per-header: asc ⇄ desc
-      const dir = (el.dataset.dir = el.dataset.dir === "asc" ? "desc" : "asc");
-      const asc = dir === "asc" ? 1 : -1;
-
-      // Current skills on the Actor
-      const skills = this.actor.items.filter(i => i.type === "skill");
-      if (!skills.length) return;
-
-      // Preserve existing numeric "sort bins" so other item types stay in place
-      const bins = skills.map(i => i.sort).sort((a, b) => a - b);
-
-      // Value selector per column
-      const val = (it) => {
-        switch (key) {
-          case "name":     return String(it.name ?? "");
-          case "rank":     return Number(it.system?.rank ?? 0);
-          case "trait":    return String(it.system?.trait ?? "");
-          case "type":     return String(it.system?.type ?? "");
-          case "school":   return it.system?.school ? 1 : 0; // true/false → 1/0
-          case "emphasis": return String(it.system?.emphasis ?? "");
-          default:         return String(it.name ?? "");
-        }
-      };
-
-      // Comparator that handles both numbers and strings (with locale)
-      const cmp = (a, b) => {
-        const va = val(a), vb = val(b);
-        if (typeof va === "number" && typeof vb === "number") return asc * (va - vb);
-        return asc * String(va).localeCompare(String(vb), game.i18n.lang);
-      };
-
-      const sorted = skills.slice().sort(cmp);
-
-      // Reassign the existing bins to the new order; fall back to spaced ints if needed
-      const updates = sorted.map((it, i) => ({ _id: it.id, sort: bins[i] ?? ((i + 1) * 10) }));
-
-      if (updates.length) {
-        await this.actor.updateEmbeddedDocuments("Item", updates);
-        
-        // Update visual indicators
-        const skillsHeader = this.element.querySelector('.item-list.-header[data-scope="skills"]');
-        if (skillsHeader) {
-          skillsHeader.querySelectorAll('.item-sort-by').forEach(a => {
-            a.classList.toggle('is-active', a === el);
-            if (a !== el) a.removeAttribute('data-dir');
-          });
-        }
-      }
-      
-    } catch (err) {
-      console.warn(`${SYS_ID}`, "Skills document sort failed", { err, key });
-    }
+    return PcTraitHandler.convertSubmitData(this.actor, data);
   }
 }

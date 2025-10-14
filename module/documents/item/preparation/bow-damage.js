@@ -1,74 +1,69 @@
 /**
- * @fileoverview Bow Damage Formula Calculation
+ * Bow Damage Calculator
  * 
- * Calculates bow damage formulas based on bow strength, actor strength, and arrow type.
- * Implements L5R4 bow damage mechanics with arrow modifier integration.
+ * Calculates archery damage formulas for L5R4 bow weapons based on Equipment rules
+ * from Weapons.md. Implements the core bow damage mechanic: bow Strength adds to
+ * arrow rolled dice, but character uses their own Strength if lower than bow rating.
  * 
- * **Responsibilities:**
- * - Calculate bow damage roll and keep values
- * - Apply arrow type modifiers from ARROW_MODS
- * - Generate damage formula strings (XkY notation)
+ * Core L5R4 Archery Rules:
+ * - Bow adds its Strength to arrow's rolled dice (e.g., Yumi STR 3 + Willow 2k2 = 5k2)
+ * - If character Strength < bow Strength, use character Strength instead
+ * - Arrow type determines both rolled and kept dice modifiers (see ARROW_MODS)
+ * - Final formula: Math.min(bowStr, actorStr) + arrow.r, k = arrow.k
  * 
- * **Architecture:**
- * Pure calculation functions that operate on item and actor data without side effects.
- * Called during item.prepareDerivedData() to compute weapon damage formulas.
+ * Foundry VTT Integration:
+ * - Called during Item.prepareDerivedData for bow weapons
+ * - Optional actor parameter enables character-specific damage calculation
+ * - Returns structured data for roll formula construction
  * 
- * **L5R4 Bow Damage Rules:**
- * - Damage Roll: min(Bow Strength, Actor Strength) + Arrow Roll Modifier
- * - Damage Keep: Arrow Keep Modifier
- * - Formula: (min(BowStr, ActorStr) + ArrowR)k(ArrowK)
- * 
- * @author L5R4 System Team
- * @since 1.1.0
- * @version 2.0.0
+ * @module documents/item/preparation/bow-damage
+ * @see ARROW_MODS in config/game-data.js for arrow type modifiers
  */
 
 import { ARROW_MODS } from "../../../config/game-data.js";
 import { toInt } from "../../../utils/type-coercion.js";
 
 /**
- * Bow damage calculation result.
  * @typedef {Object} BowDamageResult
- * @property {number} damageRoll - Total number of dice to roll (XkY notation X value)
- * @property {number} damageKeep - Number of dice to keep (XkY notation Y value)
- * @property {string} damageFormula - Complete damage formula string in XkY format
+ * @property {number} damageRoll - Total rolled dice (XkY formula X value)
+ * @property {number} damageKeep - Total kept dice (XkY formula Y value)
+ * @property {string} damageFormula - Complete damage formula string (e.g., "5k2")
  */
 
 /**
- * Calculate bow damage formula based on strength and arrow type.
+ * Calculate bow damage formula based on L5R4 archery rules.
  * 
- * Applies L5R4 bow damage rules with arrow modifiers. Uses the lower of
- * bow strength and actor strength, then applies arrow type bonuses.
+ * Implements the Equipment rules from Weapons.md: "A bow adds its strength rating
+ * to the first number of the DR of the arrow being fired. However, a character whose
+ * Strength is less than that of the bow he is wielding uses his Strength instead."
  * 
- * **Arrow Types:**
- * - willow: Standard hunting arrows (default)
- * - armor: Armor-piercing with reduced damage
- * - flesh: High damage against unarmored targets
- * - humming: Signaling arrows with reduced damage
- * - rope: Utility arrows with reduced damage
+ * Calculation Steps:
+ * 1. Determine effective Strength: min(character Strength, bow Strength)
+ * 2. Look up arrow type modifiers from ARROW_MODS (default: willow)
+ * 3. Calculate damage: (effective Strength + arrow.r)k(arrow.k)
  * 
- * @example
- * // Calculate damage for a strength 3 bow with willow arrows
- * const result = calculateBowDamage({ str: 3, arrow: "willow" }, actor);
- * // Returns: { damageRoll: 5, damageKeep: 2, damageFormula: "5k2" }
+ * Arrow Type System:
+ * - armor (1k1): Armor-Piercing arrows
+ * - flesh (2k3): Flesh Cutter arrows (devastating, ½ range)
+ * - humming (0k1): Humming Bulb signaling arrows (minimal damage)
+ * - rope (1k1): Rope Cutter arrows (vs objects, ½ range)
+ * - willow (2k2): Willow Leaf (Ya) standard arrows (DEFAULT)
  * 
- * @param {object} sys - Item system data
- * @param {number} sys.str - Bow strength rating
- * @param {string} sys.arrow - Arrow type key (matches ARROW_MODS keys)
- * @param {object|null} actor - Actor document if item is embedded
- * @returns {BowDamageResult} Calculated damage formula components
- * @since 1.1.0
+ * @param {Object} sys - Item system data for the bow weapon
+ * @param {number} sys.str - Bow Strength rating (1-5 typical)
+ * @param {string} [sys.arrow="willow"] - Arrow type key from ARROW_MODS
+ * @param {L5R4Actor|null} [actor=null] - Optional actor wielding the bow (for character Strength)
+ * @returns {BowDamageResult} Damage roll components for formula construction
  */
 export function calculateBowDamage(sys, actor = null) {
-  // Get actor strength if item is embedded on an actor
+
   const actorStr = actor ? toInt(actor.system?.traits?.str) : toInt(sys.str);
   const bowStr = toInt(sys.str);
 
-  // Apply arrow type modifiers (stored as system keys, not localized labels)
   const arrowKey = String(sys.arrow || "willow");
   const arrowMod = ARROW_MODS[arrowKey] ?? { r: 0, k: 0 };
 
-  // Calculate damage: min(bow strength, actor strength) + arrow modifiers
+  // Use lower of character Strength or bow Strength per Weapons.md rules
   const damageRoll = Math.min(bowStr, actorStr) + arrowMod.r;
   const damageKeep = arrowMod.k;
   const damageFormula = `${damageRoll}k${damageKeep}`;

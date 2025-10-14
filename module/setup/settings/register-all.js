@@ -1,54 +1,46 @@
 /**
- * @fileoverview Settings Registration - Orchestrator
+ * Settings Registration Coordinator
  * 
- * Coordinates registration of all system settings by calling individual
- * registration functions from category-specific modules.
+ * Coordinates the registration of all game system settings with the Foundry VTT settings API.
+ * This module delegates to specialized registration modules for different setting scopes:
+ * - Migration settings: Control automatic data migrations between system versions
+ * - Client settings: Per-user preferences for UI behavior and roll display
+ * - World settings: Game master controls for rule variants and house rules
  * 
- * @author L5R4 System Team
- * @since 1.1.0
+ * Must be called during the 'init' hook before document classes are configured
+ * or data preparation occurs, as settings may be accessed during those processes.
+ * 
+ * Foundry API: Uses game.settings.register() - see Foundry VTT Settings API documentation
+ * @module setup/settings/register-all
  */
-
 import { registerMigrationSettings } from "./migration.js";
 import { registerClientSettings } from "./client.js";
 import { registerWorldSettings } from "./world.js";
 
 /**
- * Register all L5R4 system settings.
- * Should be called once during system initialization (init hook).
+ * Registers all game system settings with Foundry VTT
  * 
- * **Registration Order:**
- * 1. Migration settings - Version tracking and migration control
- * 2. Client settings - Per-user UI preferences
- * 3. World settings - GM-controlled game mechanics
+ * Coordinates the registration of migration, client, and world settings by delegating
+ * to specialized registration modules. Each module handles a specific scope:
+ * - Migration settings control automatic data migrations and version tracking
+ * - Client settings configure per-user UI preferences and roll display options
+ * - World settings enable GM control of rule variants (e.g., armor stacking, Void usage)
  * 
- * **Safety:**
- * This function relies on Foundry's guarantee that game.settings exists
- * during the init hook. No defensive checks are implemented as this is
- * an internal system function with controlled invocation context.
+ * This function must be called during the 'init' hook before any data preparation or
+ * document configuration occurs, as settings may be accessed during those processes.
+ * Typically invoked via Hooks.once('init', registerSettings) in the system entry point.
  * 
+ * @function registerSettings
  * @returns {void}
- * 
- * @integration-test Scenario: All 14 settings persist across Foundry restarts
- * @integration-test Reason: Unit tests mock game.settings.register completely
- * @integration-test Validates: Settings save to world/client storage and are retrievable
- * 
- * @integration-test Scenario: Duplicate registration is properly rejected by Foundry
- * @integration-test Reason: Unit tests cannot simulate Foundry's internal registration state
- * @integration-test Validates: Calling twice produces clear error (dev hot-reload scenario)
- * 
- * @integration-test Scenario: Settings appear in Foundry's settings UI correctly
- * @integration-test Reason: Unit tests mock UI rendering completely
- * @integration-test Validates: config:true settings visible, config:false hidden
- * 
- * @example
- * ```javascript
- * Hooks.once("init", () => {
- *   registerSettings();
- * });
- * ```
+ * @throws {Error} If called before game.settings is available
  */
 export function registerSettings() {
+  // Register migration control and version tracking settings (world scope)
   registerMigrationSettings();
+  
+  // Register per-user UI preferences and roll display options (client scope)
   registerClientSettings();
+  
+  // Register GM controls for rule variants and house rules (world scope)
   registerWorldSettings();
 }

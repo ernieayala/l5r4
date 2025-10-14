@@ -1,90 +1,34 @@
 /**
- * @fileoverview L5R4 System Bootstrap - Main Entry Point for Foundry VTT v13+
+ * L5R4 Enhanced System Bootstrap
+ * Main entry point for Legend of the Five Rings 4th Edition system initialization.
+ * Coordinates system registration with Foundry VTT v13+ using Application v2 architecture.
  * 
- * This is the primary system initialization module that coordinates all L5R4 system
- * components during Foundry VTT startup. It handles configuration, registration,
- * and integration with Foundry's core systems to provide a complete Legend of the
- * Five Rings 4th Edition gaming experience with full mechanics support.
- *
- * **Core Responsibilities:**
- * - **System Configuration**: Wire CONFIG objects, document classes, and sheet registrations
- * - **Template Management**: Preload Handlebars templates and register custom helpers
- * - **Initiative System**: Custom initiative formula with L5R4-specific rolls and Ten Dice Rule
- * - **Chat Integration**: Parse inline roll notation (KxY format) in chat messages
- * - **Migration Management**: Handle data structure updates and legacy compatibility
- * - **Status Effect Logic**: Enforce mutually exclusive stance mechanics and combat states
- * - **Hook Management**: Coordinate system lifecycle with Foundry's hook system
- *
- * **System Architecture:**
- * The L5R4 system follows a modular architecture with clear separation of concerns:
- * - **Documents**: Actor and Item classes with L5R4-specific data models
- * - **Sheets**: ApplicationV2-based user interfaces for all document types
- * - **Services**: Dice rolling, chat integration, and stance management
- * - **Utils**: Shared helper functions and data processing utilities
- * - **Config**: Centralized configuration and constants
- *
  * **Initialization Sequence:**
- * 1. **Init Hook**: Register settings, configure documents, preload templates
- * 2. **Setup Hook**: Handle one-time legacy item type migrations
- * 3. **Ready Hook**: Execute data migrations and finalize system state
- * 4. **Combat Hooks**: Initialize stance tracking and combat integration
- * 5. **Chat Hooks**: Enable inline roll parsing and message processing
- *
- * **Key Features:**
- * - **L5R4 Initiative**: Actor-specific initiative rolls with Ten Dice Rule integration
- * - **Inline Roll Parsing**: Converts "3k2+1" notation to proper Foundry rolls automatically
- * - **Stance Enforcement**: Automatically removes conflicting combat stances
- * - **Sheet Registration**: Configures custom actor and item sheets for all types
- * - **Migration Safety**: Handles version updates with comprehensive data structure changes
- * - **Active Effects**: Full integration with Foundry's Active Effects system
- * - **Compendium Support**: Seamless integration with system compendium packs
- *
- * **Chat Integration System:**
- * Advanced chat message processing with L5R4-specific features:
- * - **Roll Notation**: Automatic parsing of KxY+Z roll expressions
- * - **Inline Rolls**: Seamless integration with Foundry's roll system
- * - **Message Enhancement**: Rich formatting for L5R4 roll results
- * - **Error Handling**: Graceful fallback for malformed roll expressions
- *
- * **Performance Optimizations:**
- * - **Template Preloading**: All templates cached during initialization for faster rendering
- * - **Settings Registration**: Early registration ensures availability during data preparation
- * - **Migration Batching**: Efficient batch processing of data structure updates
- * - **Hook Optimization**: Minimal performance impact from system hook registration
- * - **Lazy Loading**: Non-critical components loaded only when needed
- *
- * **Integration Points:**
- * - **Foundry Core**: Deep integration with document system, sheets, and hooks
- * - **Combat System**: Custom initiative and stance management
- * - **Chat System**: Inline roll parsing and message enhancement
- * - **Settings System**: Comprehensive configuration options
- * - **Migration System**: Automatic data structure updates
- *
- * **Error Handling:**
- * - **Graceful Degradation**: System continues functioning with partial failures
- * - **Console Logging**: Detailed error reporting for troubleshooting
- * - **User Feedback**: Clear notifications for configuration issues
- * - **Recovery Procedures**: Automatic fallbacks for common failure scenarios
- *
- * **Usage Examples:**
- * ```javascript
- * // System is automatically initialized by Foundry
- * // Access system configuration
- * console.log(CONFIG.l5r4);
+ * 1. Register system settings for data preparation
+ * 2. Configure document classes (Actor/Item) with L5R4 implementations
+ * 3. Build CONFIG.l5r4 namespace with game data (rings, traits, stances, status effects)
+ * 4. Initialize L5R4 initiative system with Insight/Reflexes rolls
+ * 5. Register Application v2 sheets for all actor and item types
+ * 6. Preload Handlebars templates and register custom helpers
+ * 7. Initialize services (stance management, chat integration)
+ * 8. Register Quench integration tests if module active
+ * 9. Execute data migrations on version changes
  * 
- * // Use inline rolls in chat
- * // Type: "I roll [[3k2+1]] for my attack"
+ * **L5R4 Game Mechanics Integration:**
+ * - Initiative rolls use Insight Rank and Reflexes (Insight/Reflexes keep Reflexes)
+ * - Status effects implement mutually exclusive stance system (Attack, Full Attack, Defense, Full Defense, Center)
+ * - Wound penalties apply TN increases per wound rank (Nicked +3, Grazed +5, Hurt +10, etc.)
+ * - Combat stances affect Armor TN calculations and available actions per turn
  * 
- * // Access system utilities
- * import { T, F } from "systems/l5r4-enhanced/module/utils.js";
- * ```
- *
- * @author L5R4 System Team
- * @since 1.0.0
- * @version 2.0.0
+ * **Foundry VTT Integration:**
+ * - Requires Foundry VTT v13+ for Application v2 sheet system
+ * - Uses DocumentSheetConfig for sheet registration (replaces deprecated ActorSheet.register)
+ * - Leverages Foundry's hook system for lifecycle management
+ * - Integrates with CONFIG.statusEffects for token HUD display
+ * 
+ * @module l5r4-enhanced
+ * @requires Foundry VTT v13+
  * @see {@link https://foundryvtt.com/api/|Foundry VTT v13 API Documentation}
- * @see {@link https://foundryvtt.com/api/classes/foundry.abstract.Document.html|Document}
- * @see {@link https://foundryvtt.com/api/classes/foundry.applications.api.ApplicationV2.html|ApplicationV2}
  */
 
 import { SYS_ID } from "../module/config/constants.js";
@@ -116,22 +60,23 @@ import { initializeChatService } from "../module/services/chat.js";
 import { initializeInitiativeSystem } from "../module/services/initiative.js";
 import { registerQuenchTests } from "../tests/integration/quench-integration.js";
 
-// =============================================================================
-// SYSTEM INITIALIZATION
-// =============================================================================
-
+/**
+ * Foundry VTT Init Hook
+ * Executes during Foundry's initialization phase before world data loads.
+ * Registers all system configuration, document classes, sheets, and services.
+ * This hook fires once per session when Foundry starts.
+ * 
+ * @async
+ * @listens Hooks#init
+ */
 Hooks.once("init", async () => {
   console.log(`${SYS_ID} | Initializing Legend of the Five Rings 4e`);
 
-  // Phase 1: Register system settings (must be first for data preparation)
   registerSettings();
 
-  // Phase 2: Configure Foundry document classes
   CONFIG.Item.documentClass  = L5R4Item;
   CONFIG.Actor.documentClass = L5R4Actor;
 
-  // Phase 3: Setup system configuration objects
-  // Build config object from direct imports for template compatibility
   CONFIG.l5r4 = {
     arrows: ARROWS,
     sizes: SIZES,
@@ -148,27 +93,17 @@ Hooks.once("init", async () => {
     statusEffects: STATUS_EFFECTS
   };
 
-  // Configure status effects for token HUD integration
   CONFIG.statusEffects = STATUS_EFFECTS;
 
-  // Create template compatibility aliases for legacy references
   CONFIG.l5r4.TRAIT_CHOICES = CONFIG.l5r4.traits;
 
-  // Phase 4: Configure L5R4 initiative system with Ten Dice Rule integration
   initializeInitiativeSystem();
 
-  // Phase 5: Register custom document sheets (Foundry v13 ApplicationV2 system)
   const { DocumentSheetConfig } = foundry.applications.apps;
   const { Item, Actor } = foundry.documents;
 
-  // Unregister default item sheet and register L5R4 custom sheet
-  try {
-    DocumentSheetConfig.unregisterSheet(Item, "core", foundry.applications.sheets.ItemSheetV2);
-  } catch (_e) { /* already unregistered is fine */ }
+  try { DocumentSheetConfig.unregisterSheet(Item, "core", foundry.applications.sheets.ItemSheetV2); } catch (_e) { }
 
-  // Register L5R4 item sheet for all supported item types
-  // Note: "item" included as defensive fallback for edge cases (imports, legacy data)
-  // while "commonItem" is the official registered type per system.json
   DocumentSheetConfig.registerSheet(Item, SYS_ID, L5R4ItemSheet, {
     makeDefault: true,
     types: [
@@ -179,7 +114,7 @@ Hooks.once("init", async () => {
       "disadvantage",
       "family",
       "school",
-      "item",        // Generic fallback (not in system.json but covers edge cases)
+      "item",
       "kata",
       "kiho",
       "skill",
@@ -190,12 +125,7 @@ Hooks.once("init", async () => {
     ]
   });
 
-  // Unregister default actor sheets and register L5R4 custom sheets
-  try {
-    DocumentSheetConfig.unregisterSheet(Actor, "core", foundry.applications.sheets.ActorSheetV2, {
-      types: ["pc", "npc"]
-    });
-  } catch (_e) { /* ignore */ }
+  try { DocumentSheetConfig.unregisterSheet(Actor, "core", foundry.applications.sheets.ActorSheetV2, { types: ["pc", "npc"] }); } catch (_e) { }
 
   DocumentSheetConfig.registerSheet(Actor, SYS_ID, L5R4PcSheet, {
     types: ["pc"],
@@ -206,76 +136,86 @@ Hooks.once("init", async () => {
     makeDefault: true
   });
 
-  // Phase 6: Initialize template system and Handlebars helpers
   preloadTemplates();
   registerHandlebarsHelpers();
 
-  // Phase 7: Initialize services (hooks and automation)
   initializeStanceService();
   initializeChatService();
 });
 
-// =============================================================================
-// QUENCH INTEGRATION - INTEGRATION TEST REGISTRATION
-// =============================================================================
-
-Hooks.once("quenchReady", async () => {
-  console.log(`${SYS_ID} | quenchReady hook fired`);
+/**
+ * Register Quench Integration Tests
+ * Registers system integration tests with the Quench testing module if available.
+ * Uses defensive registration with flag to prevent duplicate registration across hooks.
+ * Called from both quenchReady and ready hooks to handle unpredictable hook timing.
+ * 
+ * **Registration Strategy:**
+ * - Checks for globalThis.quench API availability
+ * - Verifies Quench module is active in game.modules
+ * - Uses _l5r4Registered flag to prevent duplicate registration
+ * - Silently returns if already registered or Quench unavailable
+ * 
+ * **Hook Timing:**
+ * Primary registration occurs in quenchReady hook when Quench signals readiness.
+ * Fallback registration occurs in ready hook if quenchReady already fired.
+ * This dual-hook pattern ensures reliable registration regardless of module load order.
+ * 
+ * @async
+ * @returns {Promise<void>}
+ */
+async function registerQuenchIfAvailable() {
+  const quench = globalThis.quench;
+  const quenchModule = game.modules.get("quench");
   
-  try {
-    // Quench exposes its API via globalThis.quench
-    const quench = globalThis.quench;
-    if (!quench) {
-      console.error(`${SYS_ID} | globalThis.quench not found`);
-      return;
-    }
-    
-    console.log(`${SYS_ID} | Registering Quench integration tests...`);
-    await registerQuenchTests(quench);
-    
-    // Mark as registered to prevent duplicate registration
-    const quenchModule = game.modules.get("quench");
-    if (quenchModule) quenchModule._l5r4Registered = true;
-    
-    console.log(`${SYS_ID} | ✓ Successfully registered Quench tests`);
-  } catch (err) {
-    console.error(`${SYS_ID} | ✗ Failed to register Quench tests:`, err);
-    console.error(`${SYS_ID} | Error details:`, err.message);
-    console.error(`${SYS_ID} | Stack trace:`, err.stack);
+  if (!quench || !quenchModule?.active || quenchModule._l5r4Registered) {
+    return;
   }
-});
 
-// =============================================================================
-// SYSTEM READY - POST-INITIALIZATION AND MIGRATION
-// =============================================================================
+  try {
+    await registerQuenchTests(quench);
+    quenchModule._l5r4Registered = true;
+    console.log(`${SYS_ID} | ✓ Quench tests registered`);
+  } catch (err) {
+    console.error(`${SYS_ID} | ✗ Quench registration failed:`, err);
+  }
+}
 
+/**
+ * Quench Ready Hook
+ * Fires when Quench testing module signals it's ready to accept test registrations.
+ * Primary hook for registering L5R4 integration tests.
+ * 
+ * @listens Hooks#quenchReady
+ */
+Hooks.once("quenchReady", registerQuenchIfAvailable);
+
+/**
+ * Foundry VTT Ready Hook
+ * Executes after Foundry completes initialization and world data is loaded.
+ * Handles fallback Quench registration and executes data migrations for GMs.
+ * This hook fires once per session after all modules and systems are ready.
+ * 
+ * **Migration System:**
+ * Only executes for GM users to prevent concurrent migration conflicts.
+ * Compares system.version against lastMigratedVersion setting to detect updates.
+ * Respects runMigration and forceMigration settings for migration control.
+ * Updates lastMigratedVersion on completion and clears forceMigration flag.
+ * 
+ * @async
+ * @listens Hooks#ready
+ */
 Hooks.once("ready", async () => {
   console.log(`${SYS_ID} | Ready`);
-  
-  // Alternative: Register tests if Quench already loaded (fallback if quenchReady already fired)
-  const quenchModule = game.modules.get("quench");
-  const quench = globalThis.quench;
-  
-  if (quenchModule?.active && quench && !quenchModule._l5r4Registered) {
-    console.log(`${SYS_ID} | Quench detected, attempting late registration...`);
-    try {
-      await registerQuenchTests(quench);
-      quenchModule._l5r4Registered = true;
-      console.log(`${SYS_ID} | ✓ Successfully registered Quench tests (late registration)`);
-    } catch (err) {
-      console.error(`${SYS_ID} | ✗ Failed to register Quench tests (late registration):`, err);
-      console.error(`${SYS_ID} | Error details:`, err.message);
-    }
-  }
 
-  // Execute data migrations if system version has changed or forced
+  await registerQuenchIfAvailable();
+
   if (game.user?.isGM) {
     const currentVersion = game.system?.version ?? "0.0.0";
     const last = game.settings.get(SYS_ID, "lastMigratedVersion") ?? "0.0.0";
     const runFlag = game.settings.get(SYS_ID, "runMigration") ?? false;
     const forceFlag = game.settings.get(SYS_ID, "forceMigration") ?? false;
     const newer = (foundry?.utils?.isNewerVersion?.(currentVersion, last)) ?? (currentVersion !== last);
-    
+
     if (runFlag && (newer || forceFlag)) {
       try {
         console.log(`${SYS_ID}`, "Running migrations", { 
@@ -288,11 +228,12 @@ Hooks.once("ready", async () => {
       } catch (e) {
         console.warn(`${SYS_ID}`, "runMigrations failed", e);
       } finally {
-        try { await game.settings.set(SYS_ID, "lastMigratedVersion", currentVersion); } catch (_e) {}
-        // Note: runMigration remains enabled as a persistent preference
-        if (forceFlag) {
-          try { await game.settings.set(SYS_ID, "forceMigration", false); } catch (_e) {}
-        }
+        try {
+          await game.settings.set(SYS_ID, "lastMigratedVersion", currentVersion);
+          if (forceFlag) {
+            await game.settings.set(SYS_ID, "forceMigration", false);
+          }
+        } catch (_e) {}
       }
     }
   }

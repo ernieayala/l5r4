@@ -1,0 +1,227 @@
+// Animation duration variables
+$mask-animation-duration: 0.5s;
+
+.l5r4.pc,
+.l5r4.npc {
+  .button-mask-container {
+    border-radius: 4px;
+    position: relative;
+    overflow: hidden;
+    border: 1px solid #000;
+    transition: all 150ms ease-out;
+
+    .mas {
+      position: absolute;
+      color: #000;
+      text-align: center;
+      width: 100%;
+      height: 100%;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-weight: bold;
+      pointer-events: none;
+    }
+
+    .button {
+      width: 100%;
+      height: 100%;
+      background: #000;
+      border-radius: 4px;
+      border: none;
+      color: #fff;
+      cursor: pointer;
+      font-weight: bold;
+      mask: url("../assets/animation/urban-sprite.webp");
+      mask-size: 3000% 100%;
+      -webkit-mask: url("../assets/animation/urban-sprite.webp");
+      -webkit-mask-size: 3000% 100%;
+      animation: mask-reverse-urban $mask-animation-duration steps(29) forwards;
+      -webkit-animation: mask-reverse-urban $mask-animation-duration steps(29) forwards;
+
+      &:hover {
+        animation: mask-forward-urban $mask-animation-duration steps(29) forwards;
+        -webkit-animation: mask-forward-urban $mask-animation-duration steps(29) forwards;
+      }
+    }
+  }
+
+  .trait-rank-container {
+    position: relative;
+    overflow: hidden;
+    border: 1px solid #000;
+    border-radius: 50%;
+    transition: all 150ms ease-out;
+
+    .mas {
+      position: absolute;
+      color: #000;
+      text-align: center;
+      width: 100%;
+      height: 100%;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-weight: bold;
+      pointer-events: none;
+    }
+
+    .trait-rank {
+      width: 100%;
+      height: 100%;
+      background: #000;
+      border: none;
+      border-radius: 50%;
+      color: #fff;
+      cursor: pointer;
+      font-weight: bold;
+      mask: url("../assets/animation/nature-sprite.webp");
+      mask-size: 2300% 100%;
+      -webkit-mask: url("../assets/animation/nature-sprite.webp");
+      -webkit-mask-size: 2300% 100%;
+      animation: mask-reverse-nature $mask-animation-duration steps(22) forwards;
+      -webkit-animation: mask-reverse-nature $mask-animation-duration steps(22) forwards;
+
+      &:hover {
+        animation: mask-forward-nature $mask-animation-duration steps(22) forwards;
+        -webkit-animation: mask-forward-nature $mask-animation-duration steps(22) forwards;
+      }
+    }
+  }
+
+  .rank-name-container {
+    position: relative;
+    overflow: hidden;
+    border: 1px solid #000;
+    transition: all 150ms ease-out;
+
+    .mas {
+      position: absolute;
+      color: #000;
+      text-align: center;
+      width: 100%;
+      height: 100%;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      font-weight: bold;
+      gap: 0.25rem;
+      pointer-events: none;
+    }
+
+    .rank-name {
+      width: 100%;
+      height: 100%;
+      background: #000;
+      border: none;
+      color: #fff;
+      cursor: pointer;
+      font-weight: bold;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      gap: 0.25rem;
+      mask: url("../assets/animation/nature-sprite.webp");
+      mask-size: 2300% 100%;
+      -webkit-mask: url("../assets/animation/nature-sprite.webp");
+      -webkit-mask-size: 2300% 100%;
+      animation: mask-reverse-nature $mask-animation-duration steps(22) forwards;
+      -webkit-animation: mask-reverse-nature $mask-animation-duration steps(22) forwards;
+
+      &:hover {
+        animation: mask-forward-nature $mask-animation-duration steps(22) forwards;
+        -webkit-animation: mask-forward-nature $mask-animation-duration steps(22) forwards;
+      }
+    }
+  }
+}
+
+@keyframes mask-forward-urban {
+  from {
+    mask-position: 0 0;
+    -webkit-mask-position: 0 0;
+  }
+  to {
+    mask-position: 100% 0;
+    -webkit-mask-position: 100% 0;
+  }
+}
+
+@-webkit-keyframes mask-forward-urban {
+  from {
+    mask-position: 0 0;
+    -webkit-mask-position: 0 0;
+  }
+  to {
+    mask-position: 100% 0;
+    -webkit-mask-position: 100% 0;
+  }
+}
+
+@keyframes mask-reverse-urban {
+  from {
+    mask-position: 100% 0;
+    -webkit-mask-position: 100% 0;
+  }
+  to {
+    mask-position: 0 0;
+    -webkit-mask-position: 0 0;
+  }
+}
+
+@-webkit-keyframes mask-reverse-urban {
+  from {
+    mask-position: 100% 0;
+    -webkit-mask-position: 100% 0;
+  }
+  to {
+    mask-position: 0 0;
+    -webkit-mask-position: 0 0;
+  }
+}
+
+@keyframes mask-forward-nature {
+  from {
+    mask-position: 0 0;
+    -webkit-mask-position: 0 0;
+  }
+  to {
+    mask-position: 100% 0;
+    -webkit-mask-position: 100% 0;
+  }
+}
+
+@-webkit-keyframes mask-forward-nature {
+  from {
+    mask-position: 0 0;
+    -webkit-mask-position: 0 0;
+  }
+  to {
+    mask-position: 100% 0;
+    -webkit-mask-position: 100% 0;
+  }
+}
+
+@keyframes mask-reverse-nature {
+  from {
+    mask-position: 100% 0;
+    -webkit-mask-position: 100% 0;
+  }
+  to {
+    mask-position: 0 0;
+    -webkit-mask-position: 0 0;
+  }
+}
+
+@-webkit-keyframes mask-reverse-nature {
+  from {
+    mask-position: 100% 0;
+    -webkit-mask-position: 100% 0;
+  }
+  to {
+    mask-position: 0 0;
+    -webkit-mask-position: 0 0;
+  }
+}

@@ -1,5 +1,3 @@
-@use "../interactions.scss" as *;
-
 .l5r4.pc,
 .l5r4.npc,
 .xp-modal-dialog {
@@ -118,12 +116,17 @@
   }
 
   .item {
-    @include fade-control-parent;
     align-items: center;
     column-gap: 0.25rem;
     display: grid;
     grid-template-rows: min-content min-content;
     padding: 0 0.5rem;
+
+    &:hover .inline-control,
+    &:hover .clear-btn {
+      opacity: 1;
+      pointer-events: all;
+    }
 
     &.-bio {
       background: var(--table-header-bg-color);
@@ -165,7 +168,13 @@
     }
 
     .inline-control {
-      @include fade-control;
+      opacity: 0;
+      transition: opacity 250ms ease-out;
+      pointer-events: none;
+
+      &:hover {
+        filter: brightness(1.2);
+      }
     }
 
     .expanded-text {

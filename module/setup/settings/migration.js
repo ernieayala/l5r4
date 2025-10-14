@@ -1,92 +1,72 @@
 /**
- * @fileoverview L5R4 Migration Settings
+ * Migration Settings Registration
  * 
- * Registers migration-related system settings that control automatic data structure
- * updates when the system version changes. These settings manage migration behavior,
- * version tracking, and provide manual override controls for troubleshooting.
+ * Registers Foundry VTT world settings that control the system's data migration behavior.
+ * These settings work in conjunction with migrations.js to handle schema updates, legacy
+ * data conversions, and icon path migrations when the system version changes.
  * 
- * **Responsibilities:**
- * - Register migration control flags (enable/disable, force run)
- * - Track system version and migration completion status
+ * Settings registered:
+ * - runMigration: User-controlled flag to enable/disable automatic migrations
+ * - forceMigration: Developer/troubleshooting flag to force re-run all migrations
+ * - lastMigratedVersion: Internal version tracking for incremental migrations
  * 
- * **Settings Registered:**
- * - `runMigration`: Master switch to enable/disable automatic migrations
- * - `forceMigration`: Manual trigger to force migrations regardless of version
- * - `lastMigratedVersion`: Tracks last system version that had migrations applied
+ * API: game.settings (Foundry VTT Settings API)
+ * Scope: world (all settings persist in world database, shared across users)
  * 
- * **Scope:** All settings are `world` scope (stored with world data, GM-controlled)
- * **Visibility:** Most are hidden from UI (`config: false`) as they're for internal tracking
- * 
- * @author L5R4 System Team
- * @since 1.1.0
- * @version 2.0.0
- * @see {@link https://foundryvtt.com/api/classes/client.ClientSettings.html|Foundry Settings API}
+ * @module setup/settings/migration
  */
 
 import { SYS_ID } from "../../config/constants.js";
 
 /**
- * Register all migration-related system settings.
- * These settings control migration behavior and track version history.
+ * Registers migration-related world settings.
  * 
- * **Registration Order:**
- * Settings registered in logical order: control switches → version tracking
+ * Called during system initialization (see register-all.js) to configure settings
+ * that control when and how data migrations execute. The migration system handles:
+ * - Schema field renames and restructuring
+ * - Legacy data format conversions (e.g., bow → weapon type)
+ * - Icon path updates
+ * - NPC wound system normalization
+ * - Skill default value enforcement
  * 
- * @returns {void}
+ * Foundry API: Uses game.settings.register() to create world-scoped persistent settings.
+ * Each setting uses i18n keys from SETTINGS namespace for localized names and hints.
  * 
- * @example
- * // Called from main settings registration
- * registerMigrationSettings();
- * 
- * @example
- * // Accessing migration settings
- * const shouldMigrate = game.settings.get('l5r4', 'runMigration');
- * const lastVersion = game.settings.get('l5r4', 'lastMigratedVersion');
+ * @see module:setup/migrations for migration execution logic
  */
 export function registerMigrationSettings() {
-  /**
-   * Migration control: enables/disables automatic data migrations.
-   * When enabled, migrations run automatically when system version changes.
-   * When disabled, migrations are skipped (useful for troubleshooting).
-   * Unlike forceMigration, this setting does not auto-reset.
-   * 
-   * @type {boolean} true = migrations run automatically, false = skip migrations
-   */
+  // User-visible toggle: Enable/disable automatic migrations on world load
+  // Default: true (migrations run automatically when version changes)
+  // Use case: Disable for troubleshooting migration issues
   game.settings.register(SYS_ID, "runMigration", {
-    scope: "world",
-    config: true,
+    scope: "world",        // Shared setting across all users in this world
+    config: true,          // Visible in Foundry settings menu
     name: "SETTINGS.runMigration.name",
     hint: "SETTINGS.runMigration.label",
     type: Boolean,
     default: true
   });
 
-  /**
-   * Manual migration trigger: forces migrations to run regardless of version.
-   * Useful for debugging migration issues or re-running migrations after fixes.
-   * Automatically resets to false after migration completes.
-   * 
-   * @type {boolean} true = force migration on next startup, false = normal behavior
-   */
+  // Developer/troubleshooting toggle: Force re-run all migrations regardless of version
+  // Default: false (only run migrations when version advances)
+  // Use case: Re-apply migrations after data corruption or testing
+  // Note: Automatically resets to false after migration completes
   game.settings.register(SYS_ID, "forceMigration", {
-    scope: "world",
-    config: true,
+    scope: "world",        // Shared setting across all users in this world
+    config: true,          // Visible in Foundry settings menu
     name: "SETTINGS.forceMigration.name",
     hint: "SETTINGS.forceMigration.label",
     type: Boolean,
     default: false
   });
 
-  /**
-   * Migration tracking: stores the last system version that had migrations applied.
-   * Used internally to determine if migrations need to run when the system
-   * version changes. Hidden from UI as it's purely for system bookkeeping.
-   * 
-   * @type {string} Semantic version string (e.g., "1.2.3")
-   */
+  // Internal version tracker: Records last successfully migrated system version
+  // Default: "0.0.0" (triggers migrations on first world load)
+  // Hidden from settings menu (config: false) - managed automatically by migration system
+  // Used to determine which migrations need to run (only runs for version changes)
   game.settings.register(SYS_ID, "lastMigratedVersion", {
-    scope: "world",
-    config: false,
+    scope: "world",        // Shared setting across all users in this world
+    config: false,         // Hidden - internal system setting
     type: String,
     default: "0.0.0"
   });

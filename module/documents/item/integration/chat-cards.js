@@ -1,74 +1,66 @@
 /**
- * @fileoverview Chat Card Rendering Integration
+ * Chat Card Rendering Module
  * 
- * Handles rendering of item-specific chat cards with proper templates and
- * speaker attribution. Provides roll() method logic for chat integration.
+ * Handles rendering L5R4 item documents as chat cards in the Foundry VTT
+ * chat log. Maps item types to Handlebars templates and creates ChatMessage
+ * documents with appropriate speaker context and formatting.
  * 
- * **Responsibilities:**
- * - Render item-specific chat card templates
- * - Create chat messages with proper speaker and roll mode
- * - Provide localized flavor text for item types
- * - Handle missing templates gracefully
+ * Integrates with Foundry's ChatMessage API to display item information
+ * in a formatted card layout, respecting the user's configured roll mode
+ * and generating localized type labels.
  * 
- * **Architecture:**
- * Integration logic called from item.roll() method to display items in chat.
- * Uses type-specific Handlebars templates for rich card formatting.
+ * Requires Foundry VTT v10+ for:
+ * - ChatMessage.create() - Chat message document creation
+ * - ChatMessage.getSpeaker() - Speaker context from actor
+ * - game.settings.get() - Roll mode setting retrieval
+ * - game.i18n.has() / localize() - Type label localization
  * 
- * @author L5R4 System Team
- * @since 1.1.0
- * @version 2.0.0
+ * @module documents/item/integration/chat-cards
+ * @see {@link https://foundryvtt.com/api/v13/classes/client.ChatMessage.html|Foundry ChatMessage API}
  */
 
 import { CHAT_CARD_TEMPLATES } from "../constants/item-types.js";
+import { R } from "../../../utils/localization.js";
 
 /**
- * Render and send item chat card to chat log.
+ * Render an item as a chat card in the Foundry VTT chat log.
  * 
- * Renders the appropriate template for the item type and posts it to chat
- * with proper speaker attribution and roll mode settings. Returns the created
- * chat message for further processing if needed.
+ * Creates a ChatMessage displaying the item's details using a type-specific
+ * Handlebars template. The message includes speaker context (from item's
+ * owning actor if available), respects the current roll mode setting, and
+ * displays a localized item type label as flavor text.
  * 
- * **Template Selection:**
- * - Uses CHAT_CARD_TEMPLATES mapping to find type-specific template
- * - Returns early if no template exists for item type
- * - Passes full item context to template (item.system available)
+ * Template selection is based on item.type using CHAT_CARD_TEMPLATES lookup.
+ * If no template exists for the item type, the function returns early without
+ * creating a message.
  * 
- * **Chat Message Settings:**
- * - Speaker: Derived from item.actor if embedded, otherwise generic
- * - Roll Mode: Uses current user's roll mode setting
- * - Flavor: Localized item type label in brackets [Type]
+ * The type label is localized from TYPES.Item.{itemType} translation keys,
+ * with a fallback to title-casing the item type string if no translation exists.
+ * This provides graceful degradation for custom or unrecognized item types.
  * 
- * **Error Handling:**
- * - Template rendering failures are not caught; will propagate to caller
- * - Missing templates result in early return (void)
- * - Missing i18n keys fall back to raw item.type string
+ * @param {L5R4Item} item - The item document to render as a chat card
+ * @returns {Promise<ChatMessage|undefined>} Created ChatMessage document, or undefined if no template exists for item type
  * 
- * @async
- * @param {L5R4Item} item - The item to display in chat
- * @returns {Promise<ChatMessage|void>} Created chat message or void if no template
- * @throws {Error} If template rendering fails or ChatMessage.create fails
- * 
- * @example
- * // Display a weapon in chat when clicked
- * const weapon = actor.items.getName("Katana");
- * const message = await renderItemChatCard(weapon);
- * if (message) console.log(`Posted message ${message.id}`);
+ * @see {@link https://foundryvtt.com/api/v13/classes/client.ChatMessage.html#create|ChatMessage.create}
+ * @see {@link https://foundryvtt.com/api/v13/classes/client.ChatMessage.html#getSpeaker|ChatMessage.getSpeaker}
  */
 export async function renderItemChatCard(item) {
   const templatePath = CHAT_CARD_TEMPLATES[item.type];
   if (!templatePath) return;
 
-  // Render template with full item context (templates can access item.system)
-  const html = await foundry.applications.handlebars.renderTemplate(templatePath, item);
+  const html = await R(templatePath, item);
 
-  // Get localized item type label for chat flavor text
+  // Localize item type label from TYPES.Item.{type} key, with title-case fallback
+  // Uses optional chaining for has() as defensive check for older Foundry versions
   const typeKey = `TYPES.Item.${item.type}`;
-  const typeLabel = game.i18n.has?.(typeKey) ? game.i18n.localize(typeKey) : item.type;
+  const typeLabel = game.i18n.has?.(typeKey) 
+    ? game.i18n.localize(typeKey) 
+    : item.type.toLowerCase().replace(/\b[a-z]/g, m => m.toUpperCase());
 
   return ChatMessage.create({
     speaker: ChatMessage.getSpeaker({ actor: item.actor }),
     rollMode: game.settings.get("core", "rollMode"),
     flavor: `[${typeLabel}]`,
-    content: html ?? "" // Fallback to empty string if template returns null/undefined
+    content: html ?? ""
   });
 }

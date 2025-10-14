@@ -1,118 +1,74 @@
 /**
- * @fileoverview Family Bonus Service - L5R4 Family Trait Bonus Management
+ * Family Bonus Service
  * 
- * Centralized service for calculating family trait bonuses from embedded family items.
- * Handles Active Effects integration, UUID resolution, and bonus aggregation for the
- * L5R4 family system where families grant +1 bonuses to specific traits.
+ * Manages the application of family trait bonuses to L5R4 characters.
+ * In L5R4, each family grants a +1 bonus to one specific Trait (e.g., Hida: +1 Strength, 
+ * Yasuki: +1 Awareness), allowing that Trait to start at 3 instead of the default 2.
  * 
- * **Responsibilities:**
- * - Calculate family bonus for individual traits from Active Effects
- * - Retrieve complete bonus map for all traits
- * - Resolve family item from stored UUID
- * - Validate family item existence and type
- * - Safe error handling for missing/invalid family data
+ * This service uses Foundry VTT's Active Effects system to apply these bonuses, reading
+ * from the family Item's effects that target trait properties (e.g., "system.traits.str").
  * 
- * **Family Bonus System:**
- * In L5R4, when a character has a family, that family grants a +1 bonus to one
- * specific trait (e.g., Crab family might grant +1 Stamina). This is implemented
- * via Active Effects on the family item that are transferred to the actor.
+ * Responsibilities:
+ * - Retrieve family Item from actor flags
+ * - Calculate trait bonuses from family Active Effects
+ * - Provide individual trait bonuses or complete bonus maps
+ * - Validate trait keys and family items
  * 
- * The PC sheet displays "effective" trait values (base + family bonus) but stores
- * only the base value. This service provides the bridge between the two by reading
- * the Active Effects from the embedded family item.
- * 
- * **Active Effects Integration:**
- * - Family items have Active Effects with `transfer: true`
- * - Effects modify `system.traits.{traitKey}` with ADD mode
- * - Only transferred effects are counted
- * - Multiple effects on same trait are summed
- * - Effects are validated and sanitized
- * 
- * **Usage Examples:**
- * ```javascript
- * // Get bonus for a single trait
- * const staBonus = FamilyBonusService.getBonus(actor, "sta");
- * 
- * // Get all trait bonuses at once
- * const bonusMap = FamilyBonusService.getBonusMap(actor);
- * // bonusMap = { sta: 1, wil: 0, str: 0, ... }
- * 
- * // Get the family item document
- * const familyItem = FamilyBonusService.getFamilyItem(actor);
- * 
- * // Check if family is valid
- * const hasFamily = FamilyBonusService.hasValidFamily(actor);
- * ```
- * 
- * **Error Handling:**
- * All methods fail gracefully:
- * - Missing family UUID → returns 0 / empty map
- * - Invalid UUID → returns 0 / empty map
- * - Wrong item type → returns 0 / empty map
- * - Missing Active Effects → returns 0 / empty map
- * - Malformed effect data → skips that effect
- * - Never throws errors, always returns safe defaults
- * 
- * @author L5R4 System Team
- * @since 1.1.0
- * @see {@link https://foundryvtt.com/api/classes/documents.ActiveEffect.html|ActiveEffect}
- * @see {@link https://foundryvtt.com/api/global.html#fromUuidSync|fromUuidSync}
+ * Related Foundry APIs: Actor flags, fromUuidSync, Active Effects (v13+)
+ * Related Game Rules: Character Creation Step 2 (Family Selection)
  */
 
 import { SYS_ID } from "../config/constants.js";
 
 /**
- * Family Bonus Service
- * Stateless service for calculating family trait bonuses from Active Effects.
+ * Service for managing family trait bonuses applied to L5R4 actors.
+ * 
+ * Families in L5R4 grant a +1 bonus to a single Trait during character creation.
+ * This service calculates these bonuses by reading Active Effects from the actor's
+ * assigned family Item, filtering for effects that modify trait properties.
  */
 export class FamilyBonusService {
+  
   /**
    * Valid L5R4 trait keys.
-   * Per Character Creation rules, families grant bonuses to these eight traits only.
-   * @private
+   * Maps to the eight Traits organized into four Rings (Earth, Air, Fire, Water):
+   * - Earth: sta (Stamina), wil (Willpower)
+   * - Air: ref (Reflexes), awa (Awareness)
+   * - Fire: agi (Agility), int (Intelligence)
+   * - Water: str (Strength), per (Perception)
+   * @type {string[]}
    */
   static VALID_TRAIT_KEYS = ["sta", "wil", "str", "per", "ref", "awa", "agi", "int"];
-  /**
-   * Get the family bonus for a specific trait from the actor's embedded family item.
-   * Returns the sum of all transferred Active Effects that modify the specified trait.
+
+/**
+   * Creates a zero-initialized map for all trait bonuses.
+   * Used as the default/fallback when no family item exists.
+   * @returns {Object.<string, number>} Map of trait keys to zero values
+   * @private
+   */
+  static _createZeroMap() {
+    const map = {};
+    for (const key of this.VALID_TRAIT_KEYS) {
+      map[key] = 0;
+    }
+    return map;
+  }
+
+/**
+   * Gets the family bonus for a specific trait.
    * 
-   * **How It Works:**
-   * 1. Retrieves family item UUID from actor flags
-   * 2. Resolves UUID to get family item document
-   * 3. Iterates through family item's Active Effects
-   * 4. Filters for transferred effects that modify the trait
-   * 5. Sums all matching effect values
+   * Calculates the total family bonus applied to a single trait by summing all
+   * Active Effect changes from the actor's family Item that target the trait property.
+   * Only considers effects with transfer=true and ADD mode, and only positive values.
    * 
-   * **Effect Filtering:**
-   * - Only effects with `transfer: true` are counted
-   * - Only effects targeting `system.traits.{traitKey}` are counted
-   * - Only effects with ADD mode (CONST.ACTIVE_EFFECT_MODES.ADD) are counted
-   * - Effect values must be finite numbers
-   * 
-   * @integration-test Scenario: Family item with transfer:true effects modifies actor traits
-   * @integration-test Reason: Unit tests mock fromUuidSync and Active Effects structure
-   * @integration-test Validates: fromUuidSync resolves embedded item UUIDs correctly
-   * @integration-test Validates: Active Effects with transfer:true actually apply to actor
-   * @integration-test Validates: Effect changes target correct system data paths
-   * 
-   * @param {Actor} actor - The actor document to check
-   * @param {string} traitKey - Trait key: "sta", "wil", "str", "per", "ref", "awa", "agi", "int"
-   * @returns {number} The family bonus for this trait (usually 0 or 1, but could be higher)
-   * 
-   * @example
-   * // Get Stamina family bonus
-   * const staBonus = FamilyBonusService.getBonus(actor, "sta");
-   * // If Hida family (Crab), returns 1, otherwise returns 0
-   * 
-   * @see {@link https://foundryvtt.com/api/classes/documents.ActiveEffect.html|ActiveEffect}
-   * @see {@link #getFamilyItem} - Gets the family item document
+   * @param {L5R4Actor} actor - The actor to check for family bonuses
+   * @param {string} traitKey - The trait key (e.g., "str", "agi", "int")
+   * @returns {number} Total family bonus for the trait (0 if none or error)
    */
   static getBonus(actor, traitKey) {
     try {
-      // Validate inputs
       if (!actor || !traitKey) return 0;
-      
-      // Validate trait key against known L5R4 traits
+
       if (!this.VALID_TRAIT_KEYS.includes(traitKey)) {
         console.warn(`${SYS_ID} FamilyBonusService: Invalid trait key`, { 
           actorId: actor?.id, 
@@ -121,33 +77,28 @@ export class FamilyBonusService {
         });
         return 0;
       }
-      
-      // Get the family item document
+
       const familyItem = this.getFamilyItem(actor);
       if (!familyItem) return 0;
-      
-      // Build the Active Effect key for this trait
+
       const effectKey = `system.traits.${traitKey}`;
       let total = 0;
-      
-      // Iterate through all effects on the family item
+
       for (const effect of familyItem.effects ?? []) {
-        // Only count transferred effects (these apply to the actor)
+        // Only process effects that transfer to the actor (not temporary/suppressed effects)
         if (effect?.transfer !== true) continue;
-        
-        // Check each change in the effect
+
         for (const change of effect.changes ?? []) {
-          // Must target the correct trait and use ADD mode
           if (change?.key === effectKey && change?.mode === CONST.ACTIVE_EFFECT_MODES.ADD) {
             const value = Number(change?.value ?? 0);
-            // Per Character_Creation_and_Advancement.md: families grant +1 bonuses only (positive)
+            // Only accept positive bonuses - negative values would be penalties, not family bonuses
             if (Number.isFinite(value) && value > 0) {
               total += value;
             }
           }
         }
       }
-      
+
       return total;
     } catch (err) {
       console.warn(`${SYS_ID} FamilyBonusService: Failed to get bonus for trait`, { 
@@ -159,124 +110,88 @@ export class FamilyBonusService {
     }
   }
 
-  /**
-   * Get a complete map of family bonuses for all traits.
-   * Returns an object with all trait keys mapped to their family bonus values.
-   * This is more efficient than calling getBonus() multiple times.
+/**
+   * Gets a complete map of all trait bonuses from the actor's family.
    * 
-   * @integration-test Scenario: Family item effects populate complete trait bonus map
-   * @integration-test Reason: Unit tests mock Active Effects and fromUuidSync
-   * @integration-test Validates: All 8 traits receive correct bonuses from real effects
+   * Returns an object with all eight trait keys mapped to their family bonuses.
+   * Uses Active Effects from the family Item, filtering for effects that modify
+   * trait properties (system.traits.*) with transfer=true and ADD mode.
    * 
-   * @param {Actor} actor - The actor document to check
-   * @returns {Object<string, number>} Map of trait keys to bonus values
+   * This is more efficient than calling getBonus() multiple times when you need
+   * bonuses for multiple traits.
    * 
-   * @example
-   * const bonuses = FamilyBonusService.getBonusMap(actor);
-   * // Returns: { sta: 1, wil: 0, str: 0, per: 0, ref: 0, awa: 0, agi: 0, int: 0 }
-   * 
-   * // Use in context preparation
-   * const traitsEff = {};
-   * for (const [key, base] of Object.entries(actor.system.traits)) {
-   *   traitsEff[key] = base + (bonuses[key] || 0);
-   * }
+   * @param {L5R4Actor} actor - The actor to retrieve family bonuses for
+   * @returns {Object.<string, number>} Map of trait keys to their bonus values (0 if none)
    */
   static getBonusMap(actor) {
-    const TRAIT_KEYS = ["sta", "wil", "str", "per", "ref", "awa", "agi", "int"];
-    const bonusMap = {};
-    
     try {
       const familyItem = this.getFamilyItem(actor);
       if (!familyItem) {
-        // Return map of zeros
-        for (const key of TRAIT_KEYS) {
-          bonusMap[key] = 0;
-        }
-        return bonusMap;
+        return this._createZeroMap();
       }
-      
-      // Initialize all traits to 0
-      for (const key of TRAIT_KEYS) {
-        bonusMap[key] = 0;
-      }
-      
-      // Iterate through effects once and populate the map
+
+      const bonusMap = this._createZeroMap();
+
       for (const effect of familyItem.effects ?? []) {
+        // Only process effects that transfer to the actor (not temporary/suppressed effects)
         if (effect?.transfer !== true) continue;
-        
+
         for (const change of effect.changes ?? []) {
           if (change?.mode !== CONST.ACTIVE_EFFECT_MODES.ADD) continue;
-          
-          // Extract trait key from "system.traits.sta" → "sta"
+
+          // Extract trait key from effect property path (e.g., "system.traits.str" -> "str")
           const match = change?.key?.match(/^system\.traits\.(\w+)$/);
-          if (match && TRAIT_KEYS.includes(match[1])) {
+          if (match && this.VALID_TRAIT_KEYS.includes(match[1])) {
             const traitKey = match[1];
             const value = Number(change?.value ?? 0);
-            // Per Character_Creation_and_Advancement.md: families grant +1 bonuses only (positive)
+            // Only accept positive bonuses - negative values would be penalties, not family bonuses
             if (Number.isFinite(value) && value > 0) {
               bonusMap[traitKey] += value;
             }
           }
         }
       }
-      
+
       return bonusMap;
     } catch (err) {
       console.warn(`${SYS_ID} FamilyBonusService: Failed to get bonus map`, { 
         actorId: actor?.id, 
         err 
       });
-      // Return map of zeros on error
-      for (const key of TRAIT_KEYS) {
-        bonusMap[key] = 0;
-      }
-      return bonusMap;
+      return this._createZeroMap();
     }
   }
 
-  /**
-   * Get the family item document from the actor's stored UUID.
-   * Returns null if no family item is assigned or if the UUID is invalid.
+/**
+   * Retrieves the family Item associated with an actor.
    * 
-   * @integration-test Scenario: Resolve family item from embedded and compendium UUIDs
-   * @integration-test Reason: Unit tests mock fromUuidSync return values
-   * @integration-test Validates: fromUuidSync handles Actor.id.Item.id format correctly
-   * @integration-test Validates: fromUuidSync handles Compendium.pack.Item.id format correctly
-   * @integration-test Validates: Resolved item has correct type validation
+   * Reads the family Item UUID from actor flags (flags.l5r4.familyItemUuid) and
+   * resolves it using Foundry's fromUuidSync. Validates that the item exists and
+   * has type "family".
    * 
-   * @param {Actor} actor - The actor document
-   * @returns {Item|null} The family item document, or null if not found/invalid
+   * Requires Foundry v13+ (uses fromUuidSync).
    * 
-   * @example
-   * const familyItem = FamilyBonusService.getFamilyItem(actor);
-   * if (familyItem) {
-   *   console.log(`Family: ${familyItem.name}`);
-   *   console.log(`Trait: ${familyItem.system.trait}`);
-   *   console.log(`Bonus: +${familyItem.system.bonus}`);
-   * }
-   * 
-   * @see {@link https://foundryvtt.com/api/global.html#fromUuidSync|fromUuidSync}
+   * @param {L5R4Actor} actor - The actor to retrieve the family item for
+   * @returns {Item|null} The family Item, or null if not found/invalid
    */
   static getFamilyItem(actor) {
     try {
       if (!actor) return null;
-      
+
       const uuid = actor.getFlag?.(SYS_ID, "familyItemUuid");
       if (!uuid) return null;
-      
-      // Check if fromUuidSync is available (should always be in v13+)
+
       if (typeof globalThis.fromUuidSync !== "function") {
         console.warn(`${SYS_ID} FamilyBonusService: fromUuidSync not available`);
         return null;
       }
-      
+
       const item = fromUuidSync(uuid);
-      
-      // Validate that it's actually a family item
+
       if (!item || item.type !== "family") {
         return null;
       }
-      
+
       return item;
     } catch (err) {
       console.warn(`${SYS_ID} FamilyBonusService: Failed to get family item`, { 
@@ -287,32 +202,24 @@ export class FamilyBonusService {
     }
   }
 
-  /**
-   * Check if the actor has a valid family item assigned.
-   * This is a convenience method for UI conditionals.
+/**
+   * Checks whether an actor has a valid family assigned.
    * 
-   * @param {Actor} actor - The actor document
-   * @returns {boolean} True if actor has a valid family item, false otherwise
-   * 
-   * @example
-   * if (FamilyBonusService.hasValidFamily(actor)) {
-   *   // Show family bonus indicators in UI
-   * }
+   * @param {L5R4Actor} actor - The actor to check
+   * @returns {boolean} True if actor has a valid family Item
    */
   static hasValidFamily(actor) {
     return this.getFamilyItem(actor) !== null;
   }
 
-  /**
-   * Get the family name from the actor's stored flag.
-   * This is faster than resolving the full item document when you only need the name.
+/**
+   * Gets the display name of the actor's family.
    * 
-   * @param {Actor} actor - The actor document
-   * @returns {string|null} The family name, or null if not set
+   * Reads from actor flags (flags.l5r4.familyName) for display purposes.
+   * This is stored separately from the family Item for performance.
    * 
-   * @example
-   * const familyName = FamilyBonusService.getFamilyName(actor);
-   * // Returns "Hida" or null
+   * @param {L5R4Actor} actor - The actor to retrieve the family name for
+   * @returns {string|null} The family name, or null if not set or error
    */
   static getFamilyName(actor) {
     try {

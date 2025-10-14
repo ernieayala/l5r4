@@ -1,66 +1,46 @@
 /**
- * @fileoverview L5R4 System Constants
+ * System Constants
+ * Defines core system identifiers and resource paths for L5R4 Enhanced system.
+ * Used throughout the codebase for consistent resource references and Foundry integration.
  * 
- * Core system identifiers and path constants used throughout the L5R4 system.
- * These values form the foundation of the system's file structure and naming.
+ * Foundry VTT Requirements:
+ * - SYS_ID must match the ID in system.json manifest
+ * - Paths follow Foundry's standard systems directory structure
  * 
- * **Responsibilities:**
- * - Define system identifier (SYS_ID)
- * - Provide root path constants
- * - Define common directory paths
- * 
- * @author L5R4 System Team
- * @since 1.0.0
- * @version 2.0.0
+ * @module config/constants
+ * @requires Foundry VTT v13+
  */
 
 /**
- * Helper alias for Object.freeze to improve readability.
- * @type {typeof Object.freeze}
- * @private
- */
-const freeze = Object.freeze;
-
-/**
- * System identifier constant for L5R4 system.
- * Used for settings registration, flag namespacing, and module identification.
+ * System identifier matching the ID in system.json manifest.
+ * Used for settings registration (game.settings.register), flags storage (actor.flags[SYS_ID]),
+ * and all Foundry API calls requiring system identification.
+ * 
  * @constant {string}
- * @example
- * // Register a system setting
- * game.settings.register(SYS_ID, "myKey", { ... });
- * 
- * @example
- * // Store actor flag
- * actor.setFlag(SYS_ID, "customData", value);
  */
 export const SYS_ID = "l5r4-enhanced";
 
 /**
- * Root path for the L5R4 system directory.
- * Used for constructing absolute paths to system resources.
+ * Root path for all system resources.
+ * Constructed from Foundry's standard systems directory structure.
+ * Used as base for building template, asset, and icon paths.
+ * 
  * @constant {string}
- * @example
- * import { ROOT } from './config/constants.js';
- * const langPath = `${ROOT}/lang/en.json`;
  */
 export const ROOT = `systems/${SYS_ID}`;
 
 /**
- * @typedef {Object} SystemPaths
- * @property {string} templates - Path to Handlebars templates directory
- * @property {string} assets - Path to system assets directory
- * @property {string} icons - Path to icon assets directory
+ * Frozen object containing standard resource paths for templates, assets, and icons.
+ * All paths are relative to Foundry's data directory and used for resource loading.
+ * Frozen to prevent runtime modification and ensure path consistency across the system.
+ * 
+ * @constant {Object}
+ * @property {string} templates - Path to Handlebars templates directory for sheet rendering
+ * @property {string} assets - Path to general assets directory for images and media
+ * @property {string} icons - Path to status effect and UI icons directory
+ * @readonly
  */
-
-/**
- * Common path constants for system directories.
- * Used throughout the system for consistent path resolution.
- * @constant {Readonly<SystemPaths>}
- * @example
- * import { PATHS } from './config/constants.js';
- * const templatePath = `${PATHS.templates}/actor/character.hbs`;
- */
-export const PATHS = freeze({
+export const PATHS = Object.freeze({
   templates: `${ROOT}/templates`,
   assets: `${ROOT}/assets`,
   icons: `${ROOT}/assets/icons`

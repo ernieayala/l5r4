@@ -1,85 +1,87 @@
 /**
- * @fileoverview PC Adjustment Handler - PC-Specific UI Controls
+ * PC Character Sheet Adjustment Handler
  * 
- * Handles PC-specific adjustment controls for void ring rank, spell slots,
- * rank points, and section expand/collapse. These are features unique to the
- * PC sheet that don't apply to NPCs.
+ * Handles user-driven adjustments to PC character attributes via sheet UI interactions.
+ * Implements Application v2 event delegation pattern for Foundry VTT v13+.
  * 
  * **Responsibilities:**
- * - Void Ring rank adjustment (shift+click, separate from void points)
- * - Spell slot adjustments by element (water, air, fire, earth, void)
- * - Rank points stepping for Honor/Glory/Status/Shadow (±0.1 or ±1.0)
- * - Section expand/collapse toggle for UI organization
+ * - Void Ring rank adjustments (0-9 per core rules)
+ * - Spell slot adjustments per element (0-9, equal to Ring rank)
+ * - Rank/points advancement system (skills, traits, honor, glory, status)
+ * - Section collapse/expand UI toggles
  * 
- * **PC vs NPC Differences:**
- * These controls are PC-specific because:
- * - Void Ring: PCs track ring rank separately for XP calculations
- * - Spell Slots: PCs have spell slot management, NPCs cast freely
- * - Rank Points: PCs track Honor/Glory/Status with decimal precision
- * - Sections: PC sheets are complex enough to need collapsible sections
+ * **User Interaction Patterns:**
+ * - **Shift+Click**: Required for Void Ring and rank/points adjustments (safety mechanism)
+ * - **Ctrl+Shift+Click**: Single point adjustment for rank/points (±1 point vs ±1 rank)
+ * - **Click**: Direct adjustment for spell slots and UI toggles
  * 
- * **Integration:**
- * Used by PC sheet via composition pattern. All methods receive handler context
- * with actor, element, and sheet class name.
+ * **Game Rules Integration:**
+ * - Void Ring produces Void Points equal to rank (Rings_and_Traits.md)
+ * - Spell slots per element equal Ring rank (Spells.md, line 11)
+ * - Rank/points system per advancement rules (Character_Creation_and_Advancement.md)
  * 
- * @author L5R4 System Team
- * @since 1.1.0
- * @see {@link https://foundryvtt.com/api/classes/foundry.abstract.Document.html#update|Document.update}
+ * **Foundry API:**
+ * - Actor.update() with diff option for efficient updates
+ * - foundry.utils.getProperty() for safe nested property access
+ * - Application v2 event delegation via dataset attributes
+ * 
+ * @module sheets/handlers/pc-adjustment-handler
  */
 
 import { SYS_ID } from "../../config/constants.js";
 import { applyRankPointsDelta } from "../../utils/advancement.js";
+import { clamp } from "../../utils/type-coercion.js";
 
 /**
- * PC Adjustment Handler Class
- * Manages PC-specific adjustment controls and UI interactions.
+ * Handler class for PC character sheet adjustments.
+ * 
+ * All methods follow Application v2 event delegation pattern:
+ * - Receive (context, event, element) parameters from sheet event dispatcher
+ * - Extract data from element.dataset attributes
+ * - Perform defensive validation and bounds checking
+ * - Update actor document via async Actor.update()
+ * - Log warnings on failure (non-blocking)
  */
 export class PcAdjustmentHandler {
   /**
-   * Adjust the Void Ring rank via click.
-   * Shift+Left click adds 1. Shift+Right click subtracts 1.
-   * Min 0. Max 9.
-   * Requires Shift+Click to prevent accidental changes.
+   * Adjusts the Void Ring rank for a PC character.
    * 
-   * **Void Ring vs Void Points:**
-   * - Void Ring RANK: Maximum void points, increases with XP (this method)
-   * - Void Points VALUE: Current spent/available points (VoidPointsHandler)
+   * **Game Rules Context:**
+   * Per core rules (Rings_and_Traits.md), Void Ring is unique:
+   * - No associated Traits (unlike other Rings)
+   * - Produces Void Points equal to rank (used to enhance rolls +1k1)
+   * - Valid range: 0-9 (matches all Ring/Trait maximum)
+   * - Cannot exceed 10 per L5R4 rules
    * 
-   * **Active Effects:**
-   * Uses _source to get base value before Active Effects are applied.
-   * This ensures family bonuses or other effects don't interfere with the
-   * stored base rank value.
-   *
-   * @param {object} context - Handler context
-   * @param {Actor} context.actor - The actor document
-   * @param {HTMLElement} context.element - The sheet root element
-   * @param {MouseEvent} event - originating event
-   * @param {HTMLElement} element - clicked .ring-rank-void element
-   * @param {number} delta - +1 or -1
+   * **User Interaction:**
+   * Requires Shift+Click to prevent accidental adjustments (safety mechanism).
+   * Delta parameter determines direction: positive = increase, negative = decrease.
+   * 
+   * **Implementation Notes:**
+   * Reads from _source first (pending changes) before falling back to system data.
+   * Uses diff:true option for efficient Foundry update.
+   * 
+   * @param {Object} context - Sheet render context with actor reference
+   * @param {Event} event - DOM event (must have shiftKey = true)
+   * @param {HTMLElement} element - Target element from event delegation
+   * @param {number} delta - Direction of adjustment (+1 or -1)
    * @returns {Promise<void>}
-   * 
-   * @example
-   * // In pc-sheet.js _onAction():
-   * case "ring-rank-void": 
-   *   return PcAdjustmentHandler.adjustVoidRing(this._getHandlerContext(), event, element, +1);
-   * 
-   * @see {@link https://foundryvtt.com/api/classes/foundry.abstract.Document.html#update|Document.update}
-   * @see {@link https://foundryvtt.com/api/classes/foundry.abstract.Document.html#_source|Document._source}
    */
   static async adjustVoidRing(context, event, element, delta) {
     event?.preventDefault?.();
 
-    // Require Shift+Click to prevent accidental void rank changes
+    // Safety: require Shift key to prevent accidental adjustment
     if (!event?.shiftKey) return;
 
-    // Use _source to get base value before Active Effects are applied
+    // Read current value from _source (pending changes) or system data
     const cur = Number(context.actor._source?.system?.rings?.void?.rank
                 ?? context.actor.system?.rings?.void?.rank ?? 0) || 0;
     const min = 0;
-    const max = 9;
+    const max = 9; // L5R4 maximum for all Rings/Traits
 
-    const next = Math.min(max, Math.max(min, cur + (delta > 0 ? 1 : -1)));
-    if (next === cur) return;
+    // Calculate next value: delta sign determines direction
+    const next = clamp(cur + (delta > 0 ? 1 : -1), min, max);
+    if (next === cur) return; // No-op if already at boundary
 
     try {
       await context.actor.update({ "system.rings.void.rank": next }, { diff: true });
@@ -89,117 +91,105 @@ export class PcAdjustmentHandler {
   }
 
   /**
-   * Adjust a spell slot value by +1/-1 within [0..9].
+   * Adjusts spell slots for a specific element (Air, Earth, Fire, Water, Void).
    * 
-   * **L5R4 Spell Slots:**
-   * Shugenja can prepare spells into spell slots. The number of slots per ring
-   * is determined by the character's school and rank. This method adjusts the
-   * current slot values stored in system.spellSlots.{element}.
+   * **Game Rules Context:**
+   * Per Spells.md (line 11):
+   * - Shugenja have spell slots equal to their Ring rank in each element
+   * - Bonus spell slots equal to Void Ring (can cast any element)
+   * - Valid range: 0-9 (matches Ring rank maximum)
+   * - Failed spells consume slots; interrupted spells do not
    * 
-   * **Security:**
-   * - Path validation: Only allows system.spellSlots.* paths
-   * - Element validation: Only water, air, fire, earth, void
-   * - Range clamping: Values constrained to [0..9]
-   *
-   * @param {object} context - Handler context
-   * @param {Actor} context.actor - The actor document
-   * @param {MouseEvent} event - The triggering event
-   * @param {HTMLElement} element - The clicked button with data-path
-   * @param {number} delta - +1 or -1
+   * **Data Model:**
+   * Expects element.dataset.path in format: "system.spellSlots.{element}"
+   * Valid elements: water, air, fire, earth, void
+   * 
+   * **Implementation Notes:**
+   * Uses foundry.utils.getProperty for safe nested property access.
+   * Path validation via regex to prevent invalid property updates.
+   * No shift key required (direct adjustment pattern).
+   * 
+   * @param {Object} context - Sheet render context with actor reference
+   * @param {Event} event - DOM event (not required for this adjustment)
+   * @param {HTMLElement} element - Target element with dataset.path attribute
+   * @param {number} delta - Amount to adjust (+1 or -1 typically)
    * @returns {Promise<void>}
-   * 
-   * @example
-   * // Template markup:
-   * <button data-action="spell-slot" data-path="system.spellSlots.fire">+</button>
-   * 
-   * // In pc-sheet.js _onAction():
-   * case "spell-slot": 
-   *   return PcAdjustmentHandler.adjustSpellSlot(this._getHandlerContext(), event, element, +1);
-   * 
-   * @see {@link https://foundryvtt.com/api/classes/foundry.abstract.Document.html#update|Document.update}
-   * @see {@link https://foundryvtt.com/api/functions/utilities.html#getProperty|foundry.utils.getProperty}
    */
   static async adjustSpellSlot(context, event, element, delta) {
     try {
       const path = element?.dataset?.path || "";
-      
-      // Defensive guard: only allow system.spellSlots.* for valid elements
+
+      // Validate path format to prevent invalid property updates
       if (!/^system\.spellSlots\.(water|air|fire|earth|void)$/.test(path)) {
         console.warn(`${SYS_ID} PcAdjustmentHandler: Invalid spell slot path`, { path });
         return;
       }
 
-      // Read current value safely, default 0
+      // Safe property access via Foundry utility
       const current = Number(foundry.utils.getProperty(context.actor, path) ?? 0) || 0;
 
-      // Clamp to 0..9
-      const next = Math.min(9, Math.max(0, current + (delta || 0)));
-      if (next === current) return;
+      // Apply delta with bounds [0, 9] matching Ring rank maximum
+      const next = clamp(current + (delta || 0), 0, 9);
+      if (next === current) return; // No-op if already at boundary
 
       await context.actor.update({ [path]: next });
-
-      // Optional immediate visual feedback (sheet will re-render anyway)
-      element.textContent = String(next);
     } catch (err) {
       console.warn(`${SYS_ID} PcAdjustmentHandler: Spell slot adjust failed`, { err, element, delta });
     }
   }
 
   /**
-   * Adjust Honor/Glory/Status/Shadow rank.points by ±0.1 (or ±1.0 with Ctrl).
+   * Adjusts rank/points values for character advancement attributes.
    * 
-   * **L5R4 Rank System:**
-   * Honor, Glory, Status, and Shadow use a decimal system where:
-   * - Rank: The whole number (1, 2, 3, etc.)
-   * - Points: Decimal progress toward next rank (0.0 to 0.9)
-   * - Full representation: "2.7" means Rank 2, 0.7 points
+   * **Game Rules Context:**
+   * Per Character_Creation_and_Advancement.md:
+   * - Rank/points system tracks progression (rank 0-10, points 0-9)
+   * - 10 points = 1 rank increase
+   * - Used for: skills, traits, honor, glory, status, insight, shadowTaint
+   * - XP costs scale with rank (skills = next rank, traits = 4×next rank, Void = 6×next rank)
    * 
-   * **Interaction:**
-   * - Shift+Left-click: +0.1 (or +1.0 with Ctrl held)
-   * - Shift+Right-click: -0.1 (or -1.0 with Ctrl held)
-   * - Rolls over at 1.0 → next rank with 0.0 points
-   * - Rolls under at 0.0 → previous rank with 0.9 points
+   * **Modifier Keys:**
+   * - **Shift+Click**: Required to activate adjustment (safety)
+   * - **Ctrl+Shift+Click**: Single point adjustment (±1 point)
+   * - **Shift+Click alone**: Full rank adjustment (±1.0 = ±10 points)
    * 
-   * **Requires Shift+Click** to prevent accidental changes during normal interaction.
+   * **Data Model:**
+   * Expects element.dataset.key with property name (e.g., "honor", "glory").
+   * Reads/writes system[key].rank and system[key].points.
    * 
-   * @param {object} context - Handler context
-   * @param {Actor} context.actor - The actor document
-   * @param {MouseEvent|WheelEvent} event - The triggering event
-   * @param {HTMLElement} element - the clicked chip element with data-key
-   * @param {number} baseDelta - default delta in decimal units (0.1 or -0.1)
+   * **Implementation Notes:**
+   * Uses applyRankPointsDelta utility for overflow/underflow handling.
+   * Supports fractional deltas: baseDelta=1.0 → ±10 points, baseDelta=0.1 → ±1 point.
+   * 
+   * @param {Object} context - Sheet render context with actor reference
+   * @param {Event} event - DOM event (requires shiftKey; ctrlKey changes step size)
+   * @param {HTMLElement} element - Target element with dataset.key attribute
+   * @param {number} baseDelta - Base adjustment amount (typically ±1.0 or ±0.1)
    * @returns {Promise<void>}
-   * 
-   * @example
-   * // Template markup:
-   * <div data-action="rp-step" data-key="honor">Honor: 3.5</div>
-   * 
-   * // In pc-sheet.js _onAction():
-   * case "rp-step": 
-   *   return PcAdjustmentHandler.adjustRankPoints(this._getHandlerContext(), event, element, +0.1);
-   * 
-   * @see {@link https://foundryvtt.com/api/classes/foundry.documents.BaseActor.html#update|Actor.update}
-   * @see {@link ../../utils.js#applyRankPointsDelta|applyRankPointsDelta}
    */
   static async adjustRankPoints(context, event, element, baseDelta) {
     try {
-      // Require Shift+Click to prevent accidental rank/points changes
+      // Safety: require Shift key to prevent accidental adjustment
       if (!event?.shiftKey) return;
       
+      // Extract property key from element dataset
       const key = String(element?.dataset?.key || "");
       if (!key) return;
 
+      // Read current rank/points from actor system data
       const sys = context.actor.system ?? {};
       const cur = {
         rank: Number(sys?.[key]?.rank ?? 0) || 0,
         points: Number(sys?.[key]?.points ?? 0) || 0
       };
 
-      // Ctrl/Cmd increases step size to whole ranks (±1.0)
+      // Ctrl key switches between point adjustment (±1) and rank adjustment (±10)
       const step = event?.ctrlKey ? (baseDelta > 0 ? +1 : -1) : baseDelta;
-      
-      // Apply delta with rollover logic (provided by utils)
+
+      // Apply delta with automatic overflow/underflow handling [0, 10]
       const next = applyRankPointsDelta(cur, step, 0, 10);
 
+      // Build update object with computed property keys
       const update = {};
       update[`system.${key}.rank`] = next.rank;
       update[`system.${key}.points`] = next.points;
@@ -211,46 +201,35 @@ export class PcAdjustmentHandler {
   }
 
   /**
-   * Toggle section collapse/expand by toggling is-collapsed class on section-title.
+   * Toggles collapse/expand state of a sheet section.
    * 
-   * **PC Sheet Organization:**
-   * The PC sheet has many sections (Skills, Spells, Techniques, Equipment, etc.).
-   * Users can collapse sections they're not currently using to reduce visual clutter.
-   * State is purely visual (CSS class) and doesn't persist across renders.
+   * **UI Pattern:**
+   * Pure DOM manipulation for section visibility toggle.
+   * No actor data updates (client-side display state only).
    * 
-   * **Visual Feedback:**
-   * - Toggles `.is-collapsed` class on the section-title element
-   * - Rotates chevron icon from down (▼) to up (▲)
-   * - CSS handles actual show/hide of content
+   * **Implementation:**
+   * - Finds parent .section-title element
+   * - Toggles "is-collapsed" class for CSS-driven visibility
+   * - Swaps chevron icon direction (fa-chevron-down ↔ fa-chevron-up)
    * 
-   * @param {object} context - Handler context (unused for this method)
-   * @param {MouseEvent} event - The originating click event
-   * @param {HTMLElement} element - The clicked expand button
+   * **No Game Rules:** This is purely a UI convenience feature.
+   * 
+   * @param {Object} context - Sheet render context (unused for this method)
+   * @param {Event} event - DOM click event
+   * @param {HTMLElement} element - Clicked element (searches up for .section-title)
    * @returns {void}
-   * 
-   * @example
-   * // Template markup:
-   * <div class="section-title">
-   *   <button data-action="section-expand">
-   *     <i class="fas fa-chevron-down"></i>
-   *   </button>
-   *   <h3>Skills</h3>
-   * </div>
-   * <div class="section-content">...</div>
-   * 
-   * // In pc-sheet.js _onAction():
-   * case "section-expand": 
-   *   return PcAdjustmentHandler.toggleSection(this._getHandlerContext(), event, element);
    */
   static toggleSection(context, event, element) {
     event?.preventDefault?.();
     
+    // Find parent section title container
     const sectionTitle = element.closest(".section-title");
     if (!sectionTitle) return;
     
+    // Toggle collapsed state (CSS-driven visibility)
     sectionTitle.classList.toggle("is-collapsed");
-    
-    // Toggle the chevron icon direction for visual feedback
+
+    // Swap chevron icon direction for visual feedback
     const icon = element.querySelector("i");
     if (icon) {
       icon.classList.toggle("fa-chevron-down");

@@ -1,65 +1,50 @@
 /**
- * @fileoverview L5R4 World Settings
+ * World Settings Registration
+ * Registers world-scoped (GM-controlled) game settings for the L5R4 Enhanced system.
+ * These settings affect game mechanics, automation, and rule interpretations.
  * 
- * Registers GM-controlled game mechanics settings that affect gameplay rules,
- * automation behavior, and default configurations. These settings are stored
- * with world data and apply to all users in the game session.
+ * Foundry VTT Integration:
+ * - Uses game.settings.register() API with "world" scope
+ * - Settings are GM-only and persist with the world data
+ * - config:true exposes settings in Configure Game Settings dialog
  * 
- * **Responsibilities:**
- * - Register automation settings (rank calculation)
- * - Register house rule variants (Ten Dice Rule, NPC behavior)
- * - Register default configurations (NPC wound mode, armor stacking)
- * - Provide GM control over game mechanics interpretation
+ * Game Mechanics Affected:
+ * - Insight Rank calculation automation
+ * - Little Truths spell conversion exception
+ * - NPC Void Point usage
+ * - Armor stacking rules
+ * - NPC wound threshold calculation method
  * 
- * **Settings Registered:**
- * - `calculateRank`: Automatic insight rank calculation based on traits/skills
- * - `LtException`: Little Truths Ten Dice Rule variant (+2 compensation bonus)
- * - `allowNpcVoidPoints`: Enable void point usage for NPCs in rolls
- * - `allowArmorStacking`: Allow multiple armor pieces to stack TN bonuses
- * - `defaultNpcWoundMode`: Default wound calculation method for new NPCs
- * 
- * **Scope:** All settings are `world` scope (stored with world data, GM-controlled)
- * **Visibility:** All are visible in Settings UI (`config: true`)
- * 
- * **Design Notes:**
- * These settings follow L5R4 core rules by default, with house rule variants
- * available as opt-in. GMs can customize gameplay mechanics without modifying code.
- * 
- * @author L5R4 System Team
- * @since 1.1.0
- * @version 2.0.0
- * @see {@link https://foundryvtt.com/api/classes/client.ClientSettings.html|Foundry Settings API}
+ * @module setup/settings/world
+ * @requires Foundry VTT v13+
  */
 
 import { SYS_ID } from "../../config/constants.js";
 
 /**
- * Register all world-scope game mechanics settings.
- * These settings are controlled by the GM and affect all players.
+ * Registers all world-scoped (GM-controlled) game settings.
+ * Called during system initialization to set up configurable game rules and automation options.
  * 
- * **Registration Order:**
- * Automation settings first, then house rules, then default configurations
+ * Settings Registered:
+ * - calculateRank: Automatic Insight Rank calculation
+ * - LtException: Little Truths spell conversion rule
+ * - allowNpcVoidPoints: Enable Void Points for NPCs
+ * - allowArmorStacking: Multiple armor pieces stack bonuses
+ * - defaultNpcWoundMode: Formula vs manual wound thresholds for new NPCs
  * 
+ * Foundry API:
+ * All settings use game.settings.register() with:
+ * - scope: "world" (GM-only, affects all players)
+ * - config: true (appears in Configure Game Settings)
+ * - Localized name/hint from lang files
+ * 
+ * @function registerWorldSettings
  * @returns {void}
- * 
- * @example
- * // Called from main settings registration
- * registerWorldSettings();
- * 
- * @example
- * // Accessing world settings
- * const autoRank = game.settings.get('l5r4', 'calculateRank');
- * const ltException = game.settings.get('l5r4', 'LtException');
  */
 export function registerWorldSettings() {
-  /**
-   * World game logic: automatic rank calculation.
-   * Controls whether the system automatically calculates character insight rank
-   * based on ring and skill values. When enabled, rank updates dynamically as
-   * traits change. When disabled, GMs must manually set character ranks.
-   * 
-   * @type {boolean} true = auto-calculate ranks, false = manual rank management
-   */
+  // Insight Rank automation
+  // Automatically calculates character Insight Rank based on total Insight Points per L5R4 advancement rules.
+  // When enabled, system updates character rank; when disabled, GMs manually set rank.
   game.settings.register(SYS_ID, "calculateRank", {
     config: true, 
     scope: "world",
@@ -69,19 +54,10 @@ export function registerWorldSettings() {
     default: true
   });
 
-  /**
-   * Ten Dice Rule variant: Little Truths exception.
-   * When the Ten Dice Rule reduces kept dice below 10, adds a +2 bonus
-   * to compensate. This is a house rule variant not in the core L5R4 rules.
-   * Provides balance for characters with very high dice pools who would
-   * otherwise be penalized by the Ten Dice Rule's kept dice reduction.
-   * 
-   * **Mechanical Effect:**
-   * - Normal: 12k8 becomes 10k8 + 4 bonus
-   * - With LT Exception: 12k8 becomes 10k8 + 6 bonus (extra +2)
-   * 
-   * @type {boolean} true = apply Little Truths exception, false = standard Ten Dice Rule
-   */
+  // Little Truths Exception (Air Spell)
+  // Little Truths converts kept dice to rolled dice. Per core rules, if the conversion
+  // reduces kept dice below 10, add 2 to the kept dice pool to compensate.
+  // This setting enables that compensation mechanic.
   game.settings.register(SYS_ID, "LtException", {
     config: true, 
     scope: "world",
@@ -91,13 +67,10 @@ export function registerWorldSettings() {
     default: false
   });
 
-  /**
-   * NPC void point usage: controls whether NPCs can spend void points on rolls.
-   * By default, NPCs don't track void points as a resource, but this setting
-   * allows them to gain the mechanical benefits (+1k1) without resource deduction.
-   * 
-   * @type {boolean} true = NPCs can use void points, false = NPCs cannot use void points
-   */
+  // NPC Void Point Usage
+  // By default, most NPCs and non-human creatures in L5R4 do not have a Void Ring or Void Points (core rules).
+  // Player Character NPCs and certain special creatures may have Void.
+  // This setting displays Void Point options in NPC roll dialogs for such exceptions or house rules.
   game.settings.register(SYS_ID, "allowNpcVoidPoints", {
     config: true, 
     scope: "world",
@@ -107,17 +80,9 @@ export function registerWorldSettings() {
     default: false
   });
 
-  /**
-   * Armor mechanics: controls whether multiple armor pieces stack their TN bonuses.
-   * Standard L5R4 rules typically don't allow armor stacking, but this provides
-   * flexibility for house rules or specific campaign needs.
-   * 
-   * **Mechanical Effect:**
-   * - false (default): Only highest armor TN bonus applies
-   * - true: All equipped armor TN bonuses stack together
-   * 
-   * @type {boolean} true = armor bonuses stack, false = only highest applies
-   */
+  // Armor Stacking
+  // Core L5R4 rules: only one armor piece applies to Armor TN calculation (Reflexes × 5 + 5 + armor bonus).
+  // This setting allows multiple armor items to stack bonuses (useful for magical buffs or house rules).
   game.settings.register(SYS_ID, "allowArmorStacking", {
     config: true, 
     scope: "world",
@@ -127,22 +92,11 @@ export function registerWorldSettings() {
     default: false
   });
 
-  /**
-   * NPC wound system: controls the default wound calculation mode for NPCs.
-   * Determines whether new NPCs use formula-based (Earth Ring) calculations
-   * or manual threshold entry for wound levels.
-   * 
-   * **Mechanical Effect:**
-   * - "manual" (default): NPCs use direct threshold/penalty entry
-   * - "formula": NPCs use Earth Ring-based wound calculations like PCs
-   * 
-   * **Impact:**
-   * - Affects new NPC creation defaults
-   * - Existing NPCs retain their individual wound mode settings
-   * - Can be overridden per-NPC via Wound Configuration dialog
-   * 
-   * @type {string} "manual" = direct entry, "formula" = Earth-based calculations
-   */
+  // Default NPC Wound Mode
+  // Controls how new NPCs calculate wound thresholds:
+  // - "formula": Earth Ring × multiplier per wound rank (standard multiplier is 2 for most ranks, 5 for Healthy)
+  // - "manual": GM directly enters threshold values for each wound rank
+  // Existing NPCs retain their individual wound mode setting.
   game.settings.register(SYS_ID, "defaultNpcWoundMode", {
     config: true, 
     scope: "world",

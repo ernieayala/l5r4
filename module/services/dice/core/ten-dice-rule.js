@@ -1,101 +1,108 @@
 /**
- * @fileoverview L5R4 Ten Dice Rule - Core Mechanic Implementation
+ * L5R4 Ten Dice Rule Implementation
  * 
- * Implements the L5R4 Ten Dice Rule which caps dice pools at 10k10 with
- * excess dice converted to kept dice and flat bonuses.
+ * Enforces the Ten Dice Rule from Legend of the Five Rings 4th Edition core rules.
+ * This rule caps all rolls at maximum 10 rolled dice and 10 kept dice, converting
+ * excess dice into flat bonuses using specific conversion ratios.
  * 
- * **Note:** Reads the "LtException" game setting to apply Lieutenant Exception bonus.
+ * Conversion Mechanics:
+ * - Rolled dice exceeding 10 convert to kept dice at 2:1 ratio
+ * - Kept dice exceeding 10 convert to +2 flat bonus per die
+ * - When both at 10, additional rolled/kept each become +2 bonus
  * 
- * **Rule Logic (per Book of Earth - Rings and Traits):**
- * 1. Cap rolled dice at 10, convert excess to "extras"
- * 2. Every 2 extras become 1 kept die (ratio: 2 rolled → 1 kept)
- * 3. Cap kept dice at 10, convert excess to bonus (1 kept die → +2)
- * 4. Apply Lieutenant Exception (+2 bonus) if setting enabled AND kept < 10
- * 5. Convert remaining odd extras to bonus (1 extra rolled → +2) when at 10k10
+ * Optional House Rule:
+ * Supports "Little Truths exception" setting which grants +2 bonus when kept dice
+ * fall below 10 due to conversion. This is not part of official L5R4 rules.
  * 
- * @author L5R4 System Team
- * @since 1.1.0
- * @see {@link https://foundryvtt.com/api/|Foundry VTT API}
+ * Game Rules Reference:
+ * Ten Dice Rule mechanic from core rulebook prevents unwieldy dice pools and
+ * maintains balanced high-level play (Rings and Traits chapter).
+ * - 12k4 becomes 10k5 (2 excess rolled → 1 kept)
+ * - 13k9 becomes 10k10+2 (2 excess rolled → 1 kept, 1 leftover → +2)
+ * - 10k12 becomes 10k10+4 (2 excess kept → +4)
+ * - 14k12 becomes 10k10+12 (4 excess rolled → +8, 2 excess kept → +4)
+ * 
+ * Foundry Integration:
+ * Uses `game.settings.get()` to check optional "LtException" world setting.
+ * Requires Foundry runtime context (game global) to function properly.
+ * 
+ * Related Files:
+ * - roll-parser.js: Invokes this rule during dice notation parsing
+ * - formula-builder.js: Uses output to construct Foundry Roll formulas
  */
 
 import { SYS_ID } from "../../../config/constants.js";
 
 /**
- * Apply the L5R4 Ten Dice Rule to convert excess dice to bonuses.
+ * Return value structure from TenDiceRule function
+ * @typedef {Object} TenDiceRuleResult
+ * @property {number} diceRoll - Number of dice to roll (capped at 10)
+ * @property {number} diceKeep - Number of dice to keep (capped at 10)
+ * @property {number} bonus - Total flat bonus including conversions and input bonus
+ */
+
+/**
+ * Applies the Ten Dice Rule to cap rolled and kept dice at 10, converting excess
  * 
- * See fileoverview for complete algorithm details.
+ * Implements the official L5R4 Ten Dice Rule which prevents any roll from using
+ * more than 10 rolled dice (XkY where X≤10) or 10 kept dice (Y≤10). Excess dice
+ * are converted using the following rules:
  * 
- * @param {number} diceRoll - Initial rolled dice count
- * @param {number} diceKeep - Initial kept dice count
- * @param {number} [bonus=0] - Base flat modifier
- * @returns {{diceRoll: number, diceKeep: number, bonus: number}} Normalized dice pool
- *   with diceRoll and diceKeep capped at 10, and excess converted to flat bonus
+ * Conversion Rules:
+ * 1. If both rolled≥10 AND kept≥10: Convert all excess to +2 bonus per die
+ * 2. If only rolled>10: Convert excess rolled to kept at 2:1 ratio
+ * 3. If kept>10 after conversion: Convert excess kept to +2 bonus per die
+ * 4. Odd leftover rolled dice when kept=10: Become +2 bonus each
  * 
- * @sideeffect Reads game.settings.get(SYS_ID, "LtException") setting
- * @requires Foundry game.settings API must be available
+ * Little Truths Exception (Optional House Rule):
+ * If enabled via world setting "LtException", grants +2 bonus when kept dice
+ * remain below 10 after conversion. This is NOT part of official L5R4 rules.
  * 
- * @example
- * // 15k12 becomes 10k10+10
- * TenDiceRule(15, 12, 0); // { diceRoll: 10, diceKeep: 10, bonus: 10 }
- * 
- * @example
- * // 8k4+5 stays as is
- * TenDiceRule(8, 4, 5); // { diceRoll: 8, diceKeep: 4, bonus: 5 }
- * 
- * @example
- * // Lieutenant Exception adds +2 when kept dice < 10
- * // (Assuming LtException setting is enabled)
- * TenDiceRule(10, 8, 0); // { diceRoll: 10, diceKeep: 8, bonus: 2 }
- * 
- * @example
- * // Remaining extras at 10k10: 1 extra = +2 bonus
- * TenDiceRule(11, 10, 0); // { diceRoll: 10, diceKeep: 10, bonus: 2 }
+ * @param {number} diceRoll - Number of dice to roll (before Ten Dice Rule applied)
+ * @param {number} diceKeep - Number of dice to keep (before Ten Dice Rule applied)
+ * @param {number} [bonus=0] - Starting flat bonus to add to conversion bonuses
+ * @returns {TenDiceRuleResult} Capped values with conversion bonuses applied
  */
 export function TenDiceRule(diceRoll, diceKeep, bonus = 0) {
-  // Special case: If both rolled and kept already exceed 10
-  // Book of Earth: "If both rolled and kept dice already equal ten, then
-  // each additional die of both types converts to a bonus of +2"
-  if (diceRoll > 10 && diceKeep > 10) {
+
+  // Fast path: Both dice already at or above cap - convert all excess directly to +2 bonuses
+  if (diceRoll >= 10 && diceKeep >= 10) {
     const excessRolled = diceRoll - 10;
     const excessKept = diceKeep - 10;
     bonus += (excessRolled * 2) + (excessKept * 2);
-    diceRoll = 10;
-    diceKeep = 10;
-    
-    // Apply Lieutenant Exception if enabled (kept now = 10, so no bonus)
-    return { diceRoll, diceKeep, bonus };
+    return { diceRoll: 10, diceKeep: 10, bonus };
   }
 
-  // Step 1: Cap rolled dice at 10, convert excess to extras
+  // Cap rolled dice at 10, tracking excess for conversion to kept dice
   let extras = 0;
   if (diceRoll > 10) {
     extras = diceRoll - 10;
     diceRoll = 10;
   }
 
-  // Step 2: Every 2 extra rolled dice become 1 kept die
-  // Book of Earth: "one kept die per two additional rolled dice"
+  // Convert excess rolled dice to kept dice at 2:1 ratio per Ten Dice Rule
+  // Example: 12k3 → 10k4 (2 excess rolled become 1 kept, 0 leftover)
+  // Example: 13k3 → 10k4 (3 excess rolled become 1 kept, 1 leftover)
   while (extras >= 2) {
     diceKeep += 1;
     extras -= 2;
   }
 
-  // Step 3: Cap kept dice at 10, convert excess to bonus
-  // Book of Earth: "each additional die...converts to a bonus of +2"
+  // If kept dice now exceed 10, convert excess to +2 flat bonus per die
   if (diceKeep > 10) {
     const excessKept = diceKeep - 10;
     bonus += excessKept * 2;
     diceKeep = 10;
   }
 
-  // Step 4: Apply Lieutenant Exception if enabled and kept < 10
-  const addLtBonus = !!game.settings.get(SYS_ID, "LtException");
-  if (addLtBonus && diceKeep < 10) {
+  // Optional house rule: "Little Truths exception" grants +2 when kept < 10
+  // This is NOT part of official L5R4 rules - controlled by world setting
+  if (game.settings.get(SYS_ID, "LtException") && diceKeep < 10) {
     bonus += 2;
   }
 
-  // Step 5: Convert remaining odd extras to bonus when at 10k10
-  // Book of Earth: remaining odd rolled die becomes +2 bonus
+  // Edge case: Odd leftover rolled dice when kept dice already at cap become +2 bonus
+  // Example: 11k10 → 10k10+2 (1 leftover rolled die can't convert to kept, becomes bonus)
   if (diceKeep === 10 && extras > 0) {
     bonus += extras * 2;
   }

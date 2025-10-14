@@ -1,58 +1,52 @@
 /**
- * @fileoverview L5R4 Type Coercion & Math Utilities
+ * Type Coercion Utilities
  * 
- * Provides safe type conversion functions and basic mathematical utilities
- * used throughout the L5R4 system. All functions employ defensive programming
- * with fallback values to prevent runtime errors from invalid input.
+ * Defensive type coercion functions for safely converting user input and DOM data
+ * to numeric types. Core utilities for Foundry VTT v13+ ActorSheetV2 pattern,
+ * particularly for parsing dataset attributes and sanitizing form inputs.
  * 
- * **Core Responsibilities:**
- * - **Type Conversion**: Safe string-to-number coercion with fallbacks
- * - **Math Utilities**: Clamping, summing, and other numeric operations
- * - **Document Updates**: Optimized Foundry document update wrapper
+ * Key Responsibilities:
+ * - **Defensive Coercion**: Handle null, undefined, empty strings, symbols gracefully
+ * - **DOM Dataset Parsing**: Convert string dataset attributes (data-roll="3") to integers
+ * - **Form Data Sanitization**: Coerce user input with safe fallbacks
+ * - **Bounds Enforcement**: Constrain numeric values to valid game ranges
  * 
- * **Design Principles:**
- * - **Pure Functions**: No side effects, predictable outputs
- * - **Defensive Programming**: Graceful handling of invalid input
- * - **Fallback Values**: Always provide safe defaults
- * - **Performance**: Efficient algorithms with minimal overhead
+ * Foundry VTT Integration:
+ * - Used extensively in ActorSheetV2._prepareContext for data preparation
+ * - Powers DOM event delegation pattern (parsing data-action attributes)
+ * - Handles _prepareSubmitData type coercion (case "Integer": toInt(value))
+ * - Safe for reading actor.system and item.system properties with optional chaining
  * 
- * **Usage Examples:**
- * ```javascript
- * // Safe integer parsing
- * const rank = toInt(userInput, 0); // fallback to 0
- * const damage = toInt(rollResult, 1); // fallback to 1
- * 
- * // Clamping values
- * const health = clamp(currentHealth, 0, maxHealth);
- * 
- * // Summing values
- * const total = sum(base, bonus1, bonus2, penalty);
- * 
- * // Optimized document updates
- * await safeUpdate(actor, { "system.health.value": newHealth });
- * ```
- * 
- * @author L5R4 System Team
- * @since 1.0.0
- * @version 2.0.0
- * @see {@link https://foundryvtt.com/api/classes/foundry.abstract.Document.html#update|Document.update}
+ * @module utils/type-coercion
+ * @see {@link https://foundryvtt.com/api/v13/classes/foundry.applications.api.ApplicationV2.html|Foundry ApplicationV2}
  */
 
 /**
- * Safe integer coercion with fallback.
- * Accepts string or number; trims strings; returns fallback on NaN.
- * Commonly used for parsing user input, dataset attributes, and system data.
- * @param {unknown} v - Value to convert to integer
- * @param {number} [fallback=0] - Fallback value if conversion fails
- * @returns {number} Parsed integer or fallback
- * @example
- * toInt("42", 0);        // 42
- * toInt("  42  ", 0);    // 42 (trimmed)
- * toInt("invalid", 5);   // 5 (fallback)
- * toInt(null, 10);       // 10 (fallback)
+ * Safely coerce any value to an integer with fallback.
+ * 
+ * Defensive utility that handles edge cases common in Foundry VTT sheets:
+ * - Null/undefined from missing actor.system properties → fallback
+ * - Empty/whitespace strings from DOM inputs → fallback
+ * - Symbols (cannot be coerced) → fallback
+ * - Invalid numeric strings ("abc") → fallback
+ * - Valid numeric strings ("42", " 3 ") → integer
+ * 
+ * Commonly used for:
+ * - Parsing DOM dataset attributes: toInt(element.dataset.roll)
+ * - Reading system properties: toInt(item.system?.rank)
+ * - Form data coercion: toInt(formData.get("rank"), 0)
+ * 
+ * **Why not Number() or Number.parseInt() directly?**
+ * - Number() treats empty string as 0, not fallback
+ * - Number.parseInt() doesn't trim whitespace automatically
+ * - Neither handles symbols safely (would throw or return NaN)
+ * - This utility provides consistent fallback behavior
+ * 
+ * @param {*} v - Value to coerce (any type accepted)
+ * @param {number} [fallback=0] - Value to return if coercion fails
+ * @returns {number} Integer value or fallback
  */
 export function toInt(v, fallback = 0) {
-  // Guard against Symbol values which throw when coerced to string
   if (typeof v === "symbol") {
     return fallback;
   }
@@ -62,68 +56,37 @@ export function toInt(v, fallback = 0) {
 }
 
 /**
- * Clamp a number within the specified range [min, max].
- * Ensures the returned value is never less than min or greater than max.
- * Defensively handles NaN inputs by returning min as fallback.
- * @param {number} n - Number to clamp
- * @param {number} min - Minimum allowed value
- * @param {number} max - Maximum allowed value
- * @returns {number} Clamped number (or min if any input is NaN)
- * @example
- * clamp(5, 0, 10);   // 5
- * clamp(-5, 0, 10);  // 0 (clamped to min)
- * clamp(15, 0, 10);  // 10 (clamped to max)
- * clamp(NaN, 0, 10); // 0 (fallback to min)
- */
-export const clamp = (n, min, max) => {
-  // Defensive: return min if any input is NaN (prevents NaN propagation)
-  if (Number.isNaN(n) || Number.isNaN(min) || Number.isNaN(max)) {
-    return min;
-  }
-  return Math.min(max, Math.max(min, n));
-};
-
-/**
- * Sum multiple numbers efficiently. Non-numeric values are ignored.
- * Filters out NaN, Infinity, and Symbol values for safe arithmetic operations.
- * @param {...unknown} nums - Numbers to sum
- * @returns {number} Sum of all finite numbers
- * @example
- * sum(1, 2, 3);           // 6
- * sum(1, "2", 3);         // 6 (string coerced)
- * sum(1, NaN, 3);         // 4 (NaN ignored)
- * sum(1, null, 3, "bad"); // 4 (null→0, "bad"→NaN ignored)
- * sum(5, Symbol("x"), 3); // 8 (Symbol ignored)
- */
-export function sum(...nums) {
-  let t = 0;
-  for (const x of nums) {
-    // Guard against Symbol (throws when coerced to Number)
-    if (typeof x === "symbol") continue;
-    
-    const n = Number(x);
-    if (Number.isFinite(n)) t += n;
-  }
-  return t;
-}
-
-/**
- * Update a Foundry document safely with optimized options for derived-data flows.
- * Provides sensible defaults for common update patterns while allowing customization.
- * @param {Document} doc - The document to update
- * @param {object} data - Update data object
- * @param {{render?: boolean, diff?: boolean}} [opts] - Update options
- * @param {boolean} [opts.render=false] - Whether to trigger a render
- * @param {boolean} [opts.diff=true] - Whether to use differential updates
- * @returns {Promise<Document>} The updated document
- * @see https://foundryvtt.com/api/classes/foundry.abstract.Document.html#update
- * @example
- * // Update without re-rendering (efficient for batch updates)
- * await safeUpdate(actor, { "system.health.value": 25 });
+ * Clamp a numeric value within an inclusive [min, max] range.
  * 
- * // Update with re-render
- * await safeUpdate(actor, { name: "New Name" }, { render: true });
+ * Defensive utility that constrains values to valid bounds, handling all edge cases:
+ * - Invalid inputs (null, undefined, "", NaN) → 0
+ * - Value below min → min
+ * - Value above max → max
+ * - Value within range → value
+ * 
+ * All three parameters (value, min, max) are coerced to numbers. If any parameter
+ * cannot be coerced (results in NaN), the function returns 0 as a safe default.
+ * 
+ * Commonly used for:
+ * - Void points constraints: clamp(current + delta, 0, 9)
+ * - Trait rank bounds: clamp(newValue, minRank, maxRank)
+ * - User input sanitization in ActorSheetV2 forms
+ * 
+ * **L5R4 Game Rules:**
+ * Most character attributes have bounds (traits 1-10, void points 0-9, etc.).
+ * This utility enforces those constraints automatically.
+ * 
+ * @param {*} value - Value to clamp (will be coerced to number)
+ * @param {*} min - Minimum allowed value (will be coerced to number)
+ * @param {*} max - Maximum allowed value (will be coerced to number)
+ * @returns {number} Clamped value within [min, max], or 0 if any parameter is NaN
  */
-export function safeUpdate(doc, data, { render = false, diff = true } = {}) {
-  return doc.update(data, { render, diff });
+export function clamp(value, min, max) {
+  const n = Number(value);
+  const minVal = Number(min);
+  const maxVal = Number(max);
+  if (Number.isNaN(n) || Number.isNaN(minVal) || Number.isNaN(maxVal)) {
+    return 0;
+  }
+  return Math.max(minVal, Math.min(maxVal, n));
 }

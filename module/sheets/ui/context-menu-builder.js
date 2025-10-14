@@ -1,41 +1,61 @@
 /**
- * @fileoverview Context Menu Builder - Item Context Menu Factory
+ * Context Menu Builder
  * 
- * Provides a factory function for creating standardized context menus for item rows
- * in actor sheets. Generates edit and delete menu options with proper callbacks.
+ * Constructs and manages right-click context menus for actor item lists.
+ * Provides standard Edit and Delete operations for embedded items.
  * 
- * **Responsibilities:**
- * - Build Foundry ContextMenu instances for item rows
- * - Provide standard edit and delete options
- * - Handle menu lifecycle (creation, cleanup)
- * - Localize menu labels
+ * Foundry Requirements:
+ * - Requires Foundry VTT v13+ (uses foundry.applications.ux.ContextMenu)
+ * - Uses Application v2 event delegation patterns
+ * - jQuery-free implementation (jQuery: false option)
  * 
- * **Usage:**
- * ```javascript
- * import { setupItemContextMenu } from "./ui/context-menu-builder.js";
- * await setupItemContextMenu(root, actor, existingMenu);
- * ```
- * 
- * @author L5R4 System Team
- * @since 1.1.0
- * @see {@link https://foundryvtt.com/api/classes/foundry.applications.ux.ContextMenu.html|ContextMenu}
+ * API: ContextMenu, Actor.deleteEmbeddedDocuments
  */
 
 import { SYS_ID } from "../../config/constants.js";
 
 /**
- * Setup right-click context menu for item rows with edit and delete options.
- * Should be called during _onRender after DOM is ready.
- * Replaces any existing context menu to avoid duplicates.
+ * Extracts item ID from a DOM element or jQuery-like array.
  * 
- * @param {HTMLElement} root - The sheet root element
- * @param {Actor} actor - The actor document
- * @param {ContextMenu} [existingMenu] - Existing menu instance to cleanup
- * @returns {Promise<ContextMenu|null>} Created context menu instance or null if failed
+ * Checks multiple dataset properties in order:
+ * 1. itemId - Primary item identifier
+ * 2. documentId - Alternative document identifier
+ * 3. id - Generic fallback identifier
+ * 
+ * @param {HTMLElement|Array<HTMLElement>} target - Element or element array
+ * @returns {string|undefined} Item UUID or undefined if not found
+ * @private
+ */
+function getItemId(target) {
+  const el = target instanceof HTMLElement ? target : target?.[0];
+  return el?.dataset?.itemId || el?.dataset?.documentId || el?.dataset?.id;
+}
+
+/**
+ * Sets up a context menu for actor item operations.
+ * 
+ * Creates a Foundry v13 ContextMenu instance with Edit and Delete operations.
+ * Handles menu lifecycle by closing any existing menu before creating a new one
+ * to prevent multiple menus from rendering simultaneously.
+ * 
+ * Menu Operations:
+ * - **Edit**: Opens the item sheet for modification
+ * - **Delete**: Removes the item from the actor with confirmation
+ * 
+ * Error Handling:
+ * - Gracefully handles menu close failures (menu may already be destroyed)
+ * - Logs deleteEmbeddedDocuments failures without throwing
+ * - Returns null if menu initialization fails
+ * 
+ * @param {HTMLElement} root - Root element to attach context menu to
+ * @param {L5R4Actor} actor - Actor document containing the items
+ * @param {ContextMenu|null} [existingMenu=null] - Previous menu instance to clean up
+ * @returns {Promise<ContextMenu|null>} New context menu instance or null on failure
  */
 export async function setupItemContextMenu(root, actor, existingMenu = null) {
   try {
-    // Avoid duplicate menus on re-render
+    // Close any existing menu to prevent multiple menus rendering simultaneously.
+    // Animation disabled for instant cleanup. Ignore errors if menu already destroyed.
     if (existingMenu?.element) {
       try { 
         await existingMenu.close({ animate: false }); 
@@ -48,8 +68,7 @@ export async function setupItemContextMenu(root, actor, existingMenu = null) {
         name: game.i18n.localize("l5r4.ui.common.edit"),
         icon: '<i class="fas fa-edit"></i>',
         callback: (target) => {
-          const el = target instanceof HTMLElement ? target : target?.[0];
-          const id = el?.dataset?.itemId || el?.dataset?.documentId || el?.dataset?.id;
+          const id = getItemId(target);
           actor.items.get(id)?.sheet?.render(true);
         }
       },
@@ -57,12 +76,12 @@ export async function setupItemContextMenu(root, actor, existingMenu = null) {
         name: game.i18n.localize("l5r4.ui.common.delete"),
         icon: '<i class="fas fa-trash"></i>',
         callback: async (target) => {
-          const el = target instanceof HTMLElement ? target : target?.[0];
-          const id = el?.dataset?.itemId || el?.dataset?.documentId || el?.dataset?.id;
+          const id = getItemId(target);
           if (!id) return;
           try { 
             await actor.deleteEmbeddedDocuments("Item", [id]); 
-          } catch (err) { 
+          } catch (err) {
+            // Log but don't throw - allows sheet to remain functional after delete failures
             console.warn(`${SYS_ID} ContextMenuBuilder: deleteEmbeddedDocuments failed`, { err }); 
           }
         }

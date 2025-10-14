@@ -1,27 +1,33 @@
 /**
- * @fileoverview L5R4 Skill Roll - Skill Roll Execution
+ * Skill Roll Service
  * 
- * Execute skill rolls with L5R4 mechanics, optional modifier dialog, and
- * comprehensive integration with void points, Active Effects, targeting,
- * and chat rendering. Combines trait and skill ranks with modifiers, applies
- * Ten Dice Rule, and renders results to chat with target number evaluation.
+ * Handles skill roll execution following L5R4 core mechanics:
+ * - Skill rolls use (Skill + Trait)k(Trait) formula
+ * - Emphasis allows re-rolling 1s once per roll
+ * - Raises increase TN by +5 each (max Void Ring)
+ * - Void spending grants +1k1 bonus
+ * - Ten Dice Rule enforced (max 10 rolled/kept dice)
+ * - Wound penalties apply to effective TN
  * 
- * **Roll Formula:** (Trait + Skill + rollMod)k(Trait + keepMod) x10 + totalMod
+ * Foundry VTT Integration:
+ * - Uses Foundry Roll API for dice mechanics
+ * - Posts results via ChatMessage API
+ * - Respects system settings for roll dialog display
+ * - Handles localization via game.i18n
  * 
- * **Special Features:**
- * - Emphasis: Rerolls 1s when enabled (adds r1 to formula)
- * - Void Points: +1k1 bonus with automatic point deduction
- * - Wound Penalties: Applied to effective target numbers
- * - Active Effects: Automatic bonus integration from actor effects
- * - Target Numbers: Success/failure evaluation with raise calculation
+ * Side Effects:
+ * - May deduct void points from actor if spent
+ * - Creates chat message with roll results
+ * - Shows notifications on errors or void spending failure
  * 
- * @author L5R4 System Team
- * @since 1.1.0
+ * @module services/dice/rolls/skill-roll
+ * @requires foundry.api.Roll Foundry VTT Roll API (v13+)
+ * @requires foundry.api.ChatMessage Foundry VTT Chat API (v13+)
  */
 
 import { SYS_ID } from "../../../config/constants.js";
 import { CHAT_TEMPLATES } from "../../../config/templates.js";
-import { R, T } from "../../../utils/localization.js";
+import { R } from "../../../utils/localization.js";
 import { toInt } from "../../../utils/type-coercion.js";
 import { TenDiceRule } from "../core/ten-dice-rule.js";
 import { buildFormula } from "../core/formula-builder.js";
@@ -32,28 +38,50 @@ import { applySkillAndTraitBonuses } from "../effects/bonus-applicator.js";
 import { GetSkillOptions } from "../dialogs/skill-dialog.js";
 
 /**
- * Execute a skill roll with L5R4 mechanics and optional modifier dialog.
- * Combines trait and skill ranks with modifiers, applies Ten Dice Rule, and
- * renders results to chat with target number evaluation.
+ * Executes a skill roll following L5R4 mechanics.
  * 
- * @integration-test Scenario: Complete skill roll with real Actor, Roll, and ChatMessage
- * @integration-test Reason: Unit tests mock all Foundry APIs (Roll, ChatMessage, Active Effects)
- * @integration-test Validates: Roll formula generation, dice explosion, chat rendering, Active Effects application
+ * Implements the core L5R4 skill roll system where rolls are calculated as
+ * (Skill Rank + Trait)k(Trait). The function handles all roll modifiers including
+ * bonuses from effects, void point spending, emphasis, raises, and wound penalties.
  * 
- * @param {object} opts - Roll configuration options
- * @param {number} [opts.woundPenalty=0] - Wound penalty applied to target numbers
- * @param {number} opts.actorTrait - Base trait value for dice pool and keep
- * @param {number} opts.skillRank - Skill ranks added to rolled dice
- * @param {string} opts.skillName - Skill name for localization and display
- * @param {string} opts.skillTrait - Trait key ("str"|"ref"|"agi"|"awa"|"int"|"per"|"sta"|"wil"|"void")
- * @param {boolean} [opts.askForOptions=true] - Whether to show modifier dialog
- * @param {boolean} [opts.npc=false] - Apply NPC void point restrictions
- * @param {number} [opts.rollBonus=0] - Bonus dice to roll
- * @param {number} [opts.keepBonus=0] - Bonus dice to keep
- * @param {number} [opts.totalBonus=0] - Flat bonus to total
- * @param {Actor} [opts.actor=null] - Actor for void point spending and effects
- * @param {string} [opts.rollType=null] - Roll type ("attack" for targeting)
- * @returns {Promise<ChatMessage|void>} Created chat message or void if cancelled
+ * Skill Roll Mechanics (per core rules):
+ * - Base formula: Roll (Skill + Trait + rollMod) dice, keep (Trait + keepMod) dice
+ * - Emphasis: When applicable, re-roll any dice showing 1 (once per die)
+ * - Raises: Each raise increases effective TN by +5 (declared before roll)
+ * - Void Points: Spending void grants +1k1 bonus to the roll
+ * - Ten Dice Rule: Enforced automatically (excess dice convert to kept or bonuses)
+ * - Wound Penalties: Applied to effective TN if enabled
+ * 
+ * Dialog Behavior:
+ * The function conditionally shows a roll options dialog based on the askForOptions
+ * parameter and the "showSkillRollOptions" system setting. If these values differ
+ * (XOR logic), the dialog is displayed. Otherwise, uses provided bonuses directly.
+ * 
+ * Attack Rolls:
+ * When rollType is "attack" and no manual TN is set, automatically resolves the
+ * target's Armor TN from selected tokens.
+ * 
+ * @async
+ * @param {Object} options - Skill roll configuration options
+ * @param {number} [options.woundPenalty=0] - Current wound penalty value (applied to TN)
+ * @param {number|null} [options.actorTrait=null] - Actor's trait value (kept dice)
+ * @param {number|null} [options.skillRank=null] - Skill rank value (rolled dice)
+ * @param {string|null} [options.skillName=null] - Skill identifier for i18n and bonuses
+ * @param {string|null} [options.skillTrait=null] - Trait identifier ("void" or trait name)
+ * @param {boolean} [options.askForOptions=true] - Request dialog display (XOR with setting)
+ * @param {boolean} [options.npc=false] - Whether roller is an NPC (affects void availability)
+ * @param {number} [options.rollBonus=0] - Additional rolled dice from effects
+ * @param {number} [options.keepBonus=0] - Additional kept dice from effects
+ * @param {number} [options.totalBonus=0] - Flat bonus added to roll total
+ * @param {L5R4Actor|null} [options.actor=null] - Actor performing the roll (for bonuses/void)
+ * @param {string|null} [options.rollType=null] - Roll type identifier (e.g., "attack")
+ * 
+ * @returns {Promise<ChatMessage|false>} The created chat message, or false on error
+ * 
+ * @throws {Error} Logs to console if chat message creation fails, shows UI notification
+ * 
+ * @see {@link https://foundryvtt.com/api/classes/client.Roll.html|Foundry Roll API}
+ * @see {@link https://foundryvtt.com/api/classes/client.ChatMessage.html|Foundry ChatMessage API}
  */
 export async function SkillRoll({
   woundPenalty = 0,
@@ -72,8 +100,7 @@ export async function SkillRoll({
   const messageTemplate = CHAT_TEMPLATES.simpleRoll;
   const traitI18nKey = skillTrait === "void" ? "l5r4.ui.mechanics.rings.void" : `l5r4.ui.mechanics.traits.${skillTrait}`;
   const optionsSetting = game.settings.get(SYS_ID, "showSkillRollOptions");
-  
-  // Prefer an i18n key if it exists; otherwise use the item's display name
+
   const tryKey = typeof skillName === "string" ? `l5r4.character.skills.names.${skillName.toLowerCase()}` : "";
   const skillLabel = (tryKey && game.i18n?.has?.(tryKey)) ? game.i18n.localize(tryKey) : String(skillName ?? game.i18n.localize("l5r4.ui.common.skill"));
   let label = `${game.i18n.localize("l5r4.ui.mechanics.rolls.skillRoll")}: ${skillLabel} / ${game.i18n.localize(traitI18nKey)}`;
@@ -83,35 +110,23 @@ export async function SkillRoll({
   let keepMod = 0;
   let totalMod = 0;
   let applyWoundPenalty = true;
-  let __tnInput = 0, __raisesInput = 0;
 
-  // Check for targeting and auto-populate TN for attack rolls
+  // Resolve target TN and info string from selected tokens (attack rolls only)
   const { autoTN, targetInfo } = resolveTargets(actor, rollType);
 
-  // Declare check variable at function scope
-  let check;
-
-  // ALWAYS apply Active Effects bonuses regardless of dialog visibility
-  // This ensures advantages/disadvantages apply correctly to the dice pool
-  // before Ten Dice Rule conversion
+  // Apply active effects and abilities that modify skill/trait rolls
   const bonuses = applySkillAndTraitBonuses(actor, skillName, skillTrait) ?? { roll: 0, keep: 0, total: 0 };
   rollBonus = toInt(rollBonus) + bonuses.roll;
   keepBonus = toInt(keepBonus) + bonuses.keep;
   totalBonus = toInt(totalBonus) + bonuses.total;
 
+  // XOR logic: Show dialog if askForOptions differs from system setting
+  // This allows callers to override the global setting on a per-roll basis
+  let check;
   if (askForOptions !== optionsSetting) {
     const noVoid = npc && !game.settings.get(SYS_ID, "allowNpcVoidPoints");
     check = await GetSkillOptions(skillName, noVoid, rollBonus, keepBonus, totalBonus);
     if (!check || check.cancelled) return;
-    
-    ({ emphasis, applyWoundPenalty } = check);
-    rollMod = toInt(check.rollMod);
-    keepMod = toInt(check.keepMod);
-    totalMod = toInt(check.totalMod);
-
-    /** Record TN/Raises for later use. */
-    __tnInput = toInt(check.tn);
-    __raisesInput = toInt(check.raises);
 
     if (check.void) {
       const voidResult = await spendVoidPoint(actor);
@@ -120,32 +135,38 @@ export async function SkillRoll({
         return;
       }
 
-      // Apply void point bonus (+1k1) and update label
       rollMod += voidResult.rollBonus ?? 0;
       keepMod += voidResult.keepBonus ?? 0;
       label += ` ${game.i18n.localize("l5r4.ui.mechanics.rings.void")}!`;
     }
   } else {
-    rollMod = toInt(rollBonus);
-    keepMod = toInt(keepBonus);
-    totalMod = toInt(totalBonus);
-    // Create default check object when dialog is skipped
+    // Dialog skipped - use default values with provided bonuses
     check = {
       tn: 0,
       raises: 0,
+      rollMod: rollBonus,
+      keepMod: keepBonus,
+      totalMod: totalBonus,
       emphasis: false,
       applyWoundPenalty: true
     };
-    ({ emphasis, applyWoundPenalty } = check);
   }
 
+  // Extract emphasis and wound penalty flags from dialog/default check object
+  ({ emphasis, applyWoundPenalty } = check);
+  rollMod += toInt(check.rollMod);
+  keepMod += toInt(check.keepMod);
+  totalMod += toInt(check.totalMod);
+
+  // Calculate base roll: (Skill + Trait + modifiers)k(Trait + modifiers)
   const diceToRoll = toInt(actorTrait) + toInt(skillRank) + rollMod;
   const diceToKeep = toInt(actorTrait) + keepMod;
+  // Enforce Ten Dice Rule: max 10 rolled/kept, excess converts to bonuses
   const { diceRoll, diceKeep, bonus } = TenDiceRule(diceToRoll, diceToKeep, totalMod);
 
   const rollFormula = buildFormula(diceRoll, diceKeep, bonus, { emphasis });
-  
-  // Build base label without target info first
+
+  // Build chat message label with modifiers and emphasis notation
   let baseLabel = label;
   if (emphasis) {
     baseLabel += ` (${game.i18n.localize("l5r4.ui.mechanics.rolls.emphasis")})`;
@@ -154,37 +175,37 @@ export async function SkillRoll({
     baseLabel += ` ${game.i18n.localize("l5r4.ui.common.mod")} (${rollMod}k${keepMod}${totalMod < 0 ? totalMod : "+" + totalMod})`;
   }
 
-  // Execute roll and render with custom template wrapper
   const roll = new Roll(rollFormula);
-  const rollHtml = await roll.render(); // Foundry's core dice visualization
-  
-  // Calculate effective target number and success/failure
+  const rollHtml = await roll.render();
+
   let baseTN = toInt(check.tn);
-  
-  // For attack rolls, use target's Armor TN if no TN was specified in dialog
+  const raises = toInt(check.raises);
+
+  // Special case: Attack rolls with no manual TN use auto-resolved target Armor TN
   if (rollType === "attack" && baseTN === 0 && autoTN > 0) {
     baseTN = autoTN;
   }
-  
-  const effTN = calculateEffectiveTN(baseTN, toInt(check.raises), woundPenalty, applyWoundPenalty);
-  let tnResult = evaluateTN(roll.total ?? 0, effTN, toInt(check.raises));
 
-  // Add target info and TN to label
+  // Calculate effective TN: baseTN + (raises × 5) + wound penalty (if applicable)
+  const effTN = calculateEffectiveTN(baseTN, raises, woundPenalty, applyWoundPenalty);
+  let tnResult = evaluateTN(roll.total ?? 0, effTN, raises);
+
+  // Append target info and TN/raises display to final chat message label
   let finalLabel = baseLabel;
   if (targetInfo) {
     finalLabel += targetInfo;
   }
-  if (__tnInput || __raisesInput) {
+  if (baseTN || raises) {
     const raisesLabel = game.i18n.localize("l5r4.ui.mechanics.rolls.raises");
-    finalLabel += ` [TN ${effTN}${__raisesInput ? ` (${raisesLabel}: ${__raisesInput})` : ""}]`;
+    finalLabel += ` [TN ${effTN}${raises ? ` (${raisesLabel}: ${raises})` : ""}]`;
   }
 
-  // For failed attacks, show "Missed" instead of "Failure"
+  // Convert "failure" to "missed" for attack rolls (better UX messaging)
   tnResult = replaceFailureWithMissed(tnResult, rollType);
 
   const content = await R(messageTemplate, { flavor: finalLabel, roll: rollHtml, tnResult });
-  
-  // Post roll to chat with error handling for edge cases (network failures, module conflicts)
+
+  // Post roll to chat, handle errors gracefully
   try {
     return await roll.toMessage({ speaker: ChatMessage.getSpeaker(), content });
   } catch (err) {

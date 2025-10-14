@@ -1,46 +1,50 @@
 /**
- * @fileoverview L5R4 Template Path Management
+ * Template Path Configuration
+ * Provides utilities and constants for building Handlebars template paths
+ * used throughout the L5R4 Enhanced system for rendering sheets, chat cards, and dialogs.
  * 
- * Provides centralized template path resolution for consistent file access
- * across the system. Handles chat templates and dialog templates.
+ * Architecture:
+ * - TEMPLATE() function: Validated path builder for dynamic template references
+ * - CHAT_TEMPLATES: Pre-built paths for roll results and combat chat cards
+ * - DIALOG_TEMPLATES: Pre-built paths for user input dialogs
  * 
- * **Responsibilities:**
- * - Define template path helper function
- * - Map chat template paths
- * - Map dialog template paths
+ * All paths are validated at runtime and frozen to prevent accidental modification.
+ * Templates are rendered using Foundry's Handlebars engine via renderTemplate() API.
  * 
- * **Foundry APIs:**
- * - Template rendering via Handlebars
- * - renderTemplate() global helper
+ * Foundry VTT Requirements:
+ * - Requires Foundry v13+ for Handlebars template rendering
+ * - Paths follow Foundry's systems directory structure (systems/[sysId]/templates/)
+ * - Templates consumed by foundry.utils.renderTemplate() and Application rendering
  * 
- * @author L5R4 System Team
- * @since 1.0.0
- * @version 2.0.0
+ * @module config/templates
+ * @requires Foundry VTT v13+
  */
 
 import { PATHS } from "./constants.js";
 
-// Optimize repeated Object.freeze calls throughout this module
+// Alias for Object.freeze - used to make template path objects immutable
+// Prevents accidental runtime modification of template references
 const freeze = Object.freeze;
 
 /**
- * Build a template path consistently from a relative path.
- * Automatically prepends the system templates directory for consistent
- * file access across the system.
+ * Constructs a validated absolute template path for Foundry's renderTemplate() API.
+ * Builds paths relative to the system's templates directory with runtime validation.
  * 
- * @param {string} relPath - Relative path within the templates directory
- * @returns {string} Full template path ready for Foundry template loading
+ * Validation:
+ * - Ensures relPath is a string (prevents accidental object/array passing)
+ * - Rejects empty strings (prevents malformed paths)
+ * 
+ * @param {string} relPath - Template path relative to templates directory (e.g., "chat/simple-roll.hbs")
+ * @returns {string} Absolute path in format "systems/l5r4-enhanced/templates/{relPath}"
  * @throws {TypeError} If relPath is not a string
- * @throws {Error} If relPath is empty
- * @example
- * // Get path for actor sheet template
- * const actorTemplate = TEMPLATE("actor/pc-sheet.hbs");
- * // Returns: "systems/l5r4-enhanced/templates/actor/pc-sheet.hbs"
+ * @throws {Error} If relPath is empty string
  */
 export const TEMPLATE = (relPath) => {
+  // Type guard: Prevent accidental object/array passing from callers
   if (typeof relPath !== "string") {
     throw new TypeError(`TEMPLATE expects string, got ${typeof relPath}`);
   }
+  // Validation: Prevent empty paths that would create malformed template references
   if (!relPath) {
     throw new Error("TEMPLATE requires non-empty path");
   }
@@ -48,14 +52,22 @@ export const TEMPLATE = (relPath) => {
 };
 
 /**
- * Chat template paths for messages displayed in the chat log.
+ * Frozen object containing pre-built paths for chat card templates.
+ * Used by roll services and combat systems to render chat messages with formatted results.
  * 
- * Templates available:
- * - `simpleRoll`: Basic skill/trait roll results with TN comparison
- * - `weaponCard`: Weapon attack cards with damage and special properties
- * - `fullDefenseRoll`: Full Defense stance roll results
+ * Templates implement L5R4 game mechanics display:
+ * - simpleRoll: Standard trait/skill/ring roll results with keep/roll dice display
+ * - weaponCard: Weapon attack results with damage, raises, and modifiers
+ * - fullDefenseRoll: Full Defense stance roll results per combat rules
  * 
- * @constant {Readonly<{simpleRoll: string, weaponCard: string, fullDefenseRoll: string}>}
+ * Frozen to prevent runtime modification and ensure consistent chat rendering.
+ * Consumed by foundry.utils.renderTemplate() in chat message creation.
+ * 
+ * @constant {Object}
+ * @property {string} simpleRoll - Template path for standard roll results
+ * @property {string} weaponCard - Template path for weapon attack chat cards
+ * @property {string} fullDefenseRoll - Template path for Full Defense stance rolls
+ * @readonly
  */
 export const CHAT_TEMPLATES = freeze({
   simpleRoll:     TEMPLATE("chat/simple-roll.hbs"),
@@ -64,13 +76,20 @@ export const CHAT_TEMPLATES = freeze({
 });
 
 /**
- * Dialog template paths for modal forms and popups.
+ * Frozen object containing pre-built paths for dialog templates.
+ * Used by dice services to render user input dialogs for roll modifiers and item creation.
  * 
- * Templates available:
- * - `rollModifiers`: Dialog for entering raises, TNs, and other roll modifiers
- * - `unifiedItemCreate`: Universal item creation dialog for all item types
+ * Dialogs implement user interaction patterns:
+ * - rollModifiers: Raises, Void points, and situational modifiers input for rolls
+ * - unifiedItemCreate: Single dialog for creating any item type (advantages, skills, equipment, etc.)
  * 
- * @constant {Readonly<{rollModifiers: string, unifiedItemCreate: string}>}
+ * Frozen to prevent runtime modification and ensure consistent dialog rendering.
+ * Consumed by DialogV2.prompt() with rendered HTML content.
+ * 
+ * @constant {Object}
+ * @property {string} rollModifiers - Template path for roll modifier input dialog
+ * @property {string} unifiedItemCreate - Template path for unified item creation dialog
+ * @readonly
  */
 export const DIALOG_TEMPLATES = freeze({
   rollModifiers:     TEMPLATE("dialogs/roll-modifiers-dialog.hbs"),
