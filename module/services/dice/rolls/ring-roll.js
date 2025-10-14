@@ -1,10 +1,10 @@
 /**
  * Ring Roll and Spell Casting Service
- * 
+ *
  * Handles L5R4 Ring-based rolls including raw Ring ability checks and shugenja
  * Spell Casting rolls. Ring rolls use a Ring value directly (XkX formula), while
  * Spell Casting rolls add School Rank to dice pool ((Ring + School Rank)kRing).
- * 
+ *
  * Key Responsibilities:
  * - **Ring Rolls**: Raw ability checks using Ring value (resisting, raw attribute tests)
  * - **Spell Casting**: Shugenja invocations against spell TN (5 + Mastery Level × 5)
@@ -12,7 +12,7 @@
  * - **Modifier Application**: Roll/keep/total bonuses from effects and user input
  * - **TN Evaluation**: Calculate effective TN with raises and wound penalties
  * - **Chat Integration**: Construct and post roll messages with formatted results
- * 
+ *
  * L5R4 Game Mechanics:
  * - **Ring Rolls**: XkX where X = Ring rank (used for trait-based ability checks)
  * - **Spell Casting**: (Ring + School Rank)k(Ring) vs TN 5 + (Mastery Level × 5)
@@ -22,14 +22,14 @@
  * - **Spell Slots**: Elemental slots (equal to Ring rank) + Void bonus slots
  * - **Exploding Dice**: Tens explode (reroll and add result) per core rules
  * - **Ten Dice Rule**: Cap at 10 rolled/kept dice with overflow bonuses
- * 
+ *
  * Foundry VTT Integration:
  * - Uses Roll API for dice formula evaluation and rendering (Foundry v13)
  * - Leverages ChatMessage.getSpeaker() for chat message creation
  * - Uses game.settings for user preference toggles (showSpellRollOptions)
  * - Uses game.i18n for localized labels and error messages
  * - Async operations: Dialog display, resource spending, actor updates, message posting
- * 
+ *
  * Usage Pattern:
  * ```javascript
  * // Spell casting from actor sheet
@@ -42,7 +42,7 @@
  *   woundPenalty: 5
  * });
  * ```
- * 
+ *
  * @module services/dice/rolls/ring-roll
  * @requires Foundry VTT v13+
  * @see {@link https://foundryvtt.com/api/v13/classes/client.Roll.html|Roll API}
@@ -63,14 +63,14 @@ import { GetSpellOptions } from "../dialogs/ring-dialog.js";
 
 /**
  * Generic resource spending wrapper with user notification.
- * 
+ *
  * Abstracts the common pattern of spending a resource (spell slot, Void Point),
  * checking for success, displaying error notifications, and extracting values.
  * Centralizes error handling and provides consistent user feedback.
- * 
+ *
  * Used for spell slot consumption where successful spends return a chat label
  * to append to the roll message (e.g., " [Fire Slot]").
- * 
+ *
  * @param {Function} spendFn - Async function that returns {success, message, [successProp]}
  * @param {string} [successProp="label"] - Property name to extract from successful result
  * @returns {Promise<{success: boolean, value: *}>} Normalized result with extracted value
@@ -79,23 +79,23 @@ import { GetSpellOptions } from "../dialogs/ring-dialog.js";
  */
 async function spendResource(spendFn, successProp = "label") {
   const result = await spendFn();
-  
+
   // Display user-facing error notification if spending failed
   if (!result.success) {
     ui.notifications?.warn(result.message);
     return { success: false, value: null };
   }
-  
+
   return { success: true, value: result[successProp] };
 }
 
 /**
  * Execute a Ring roll or Spell Casting roll with full L5R4 mechanics.
- * 
+ *
  * Handles two distinct roll types based on user selection in dialog:
  * 1. **Ring Roll**: Raw ability check (XkX formula) for resisting effects, lifting, etc.
  * 2. **Spell Casting**: Shugenja invocation ((Ring + School Rank)kRing) against spell TN
- * 
+ *
  * Process Flow:
  * 1. Display modifier dialog (if enabled by settings or askForOptions parameter)
  * 2. Collect user input: modifiers, Void expenditure, spell slot selection, TN, raises
@@ -106,7 +106,7 @@ async function spendResource(spendFn, successProp = "label") {
  * 7. Build roll formula with emphasis support (if applicable)
  * 8. Execute roll and calculate TN result (success/failure with margin)
  * 9. Post chat message with formatted roll results and flavor text
- * 
+ *
  * L5R4 Mechanics Implemented:
  * - **Ring Rolls**: Direct Ring value used for both rolled and kept dice
  * - **Spell Casting**: Ring + School Rank for rolled dice, Ring for kept dice
@@ -116,23 +116,23 @@ async function spendResource(spendFn, successProp = "label") {
  * - **Spell Slots**: Consumed on cast attempt (elemental slots or Void bonus slots)
  * - **Exploding Dice**: Tens reroll and add result (handled by Roll formula)
  * - **Ten Dice Rule**: Maximum 10 rolled/kept dice, overflow becomes bonuses
- * 
+ *
  * User Settings:
  * - `showSpellRollOptions`: Controls whether modifier dialog appears by default
  * - `askForOptions`: Inverts settings behavior (true = show if setting false)
- * 
+ *
  * Side Effects:
  * - May decrement actor.system.rings.void.value (Void Point spending)
  * - May decrement actor.system.spellSlots[ring] (elemental slot spending)
  * - May decrement actor.system.spellSlots.void (Void bonus slot spending)
  * - Posts ChatMessage to game chat log
- * 
+ *
  * Error Handling:
  * - Returns false if dialog cancelled by user
  * - Returns false if resource spending fails (insufficient resources)
  * - Returns false if chat message posting fails (logs error to console)
  * - Displays ui.notifications warnings for resource failures
- * 
+ *
  * @param {Object} options - Roll configuration options
  * @param {number} [options.woundPenalty=0] - Current wound penalty to add to TN (based on wound rank)
  * @param {number} [options.ringRank=null] - Ring value for dice pool (e.g., Fire 3 = ringRank 3)
@@ -140,10 +140,10 @@ async function spendResource(spendFn, successProp = "label") {
  * @param {string} [options.systemRing=null] - System key for Ring (lowercase, e.g., "fire") for slot tracking
  * @param {boolean} [options.askForOptions=true] - Invert showSpellRollOptions setting (controls dialog display)
  * @param {L5R4Actor} [options.actor=null] - Actor performing the roll (for resource spending and bonuses)
- * 
+ *
  * @returns {Promise<ChatMessage|false>} Posted ChatMessage if successful, false if cancelled/failed
  * @async
- * 
+ *
  * @see {@link GetSpellOptions} for dialog UI and user input collection
  * @see {@link spendVoidPoint} for Void Point mechanics and +1k1 bonus
  * @see {@link spendElementalSlot} for elemental spell slot consumption
@@ -164,27 +164,28 @@ export async function RingRoll({
   const optionsSetting = game.settings.get(SYS_ID, "showSpellRollOptions");
 
   // Roll configuration variables (populated from dialog or defaults)
-  let normalRoll = true;           // true = Ring Roll (XkX), false = Spell Casting ((Ring+School)kRing)
-  let rollMod = 0;                 // Additional rolled dice (situational bonuses, techniques)
-  let keepMod = 0;                 // Additional kept dice (rare, usually from techniques)
-  let totalMod = 0;                // Flat bonus to roll total (situational modifiers)
-  let voidRoll = false;            // Void Point spent for +1k1 bonus
-  let applyWoundPenalty = true;    // Apply wound rank TN penalty
-  let spellSlot = false;           // Elemental spell slot consumed
-  let voidSlot = false;            // Void bonus spell slot consumed
-  let __tnInput = 0, __raisesInput = 0; // User-specified TN and raises
+  let normalRoll = true; // true = Ring Roll (XkX), false = Spell Casting ((Ring+School)kRing)
+  let rollMod = 0; // Additional rolled dice (situational bonuses, techniques)
+  let keepMod = 0; // Additional kept dice (rare, usually from techniques)
+  let totalMod = 0; // Flat bonus to roll total (situational modifiers)
+  let voidRoll = false; // Void Point spent for +1k1 bonus
+  let applyWoundPenalty = true; // Apply wound rank TN penalty
+  let spellSlot = false; // Elemental spell slot consumed
+  let voidSlot = false; // Void bonus spell slot consumed
+  let __tnInput = 0,
+    __raisesInput = 0; // User-specified TN and raises
 
   // Show dialog if askForOptions inverts the setting (XOR logic)
   // Setting ON + askForOptions false = show dialog | Setting OFF + askForOptions true = show dialog
   if (askForOptions !== optionsSetting) {
     const choice = await GetSpellOptions(ringName);
-    
+
     // User cancelled dialog - abort roll
     if (choice?.cancelled) return false;
 
     // Extract dialog choices
     applyWoundPenalty = !!choice.applyWoundPenalty;
-    normalRoll = !!choice.normalRoll;  // Dialog button determines Ring Roll vs Spell Casting
+    normalRoll = !!choice.normalRoll; // Dialog button determines Ring Roll vs Spell Casting
     rollMod = toInt(choice.rollMod);
     keepMod = toInt(choice.keepMod);
     totalMod = toInt(choice.totalMod);
@@ -194,11 +195,11 @@ export async function RingRoll({
 
     __tnInput = toInt(choice.tn);
     __raisesInput = toInt(choice.raises);
-    
+
     // Append TN and raises to chat label if specified
     // Each raise adds +5 to effective TN per L5R4 Skills_and_Rolls.md
     if (__tnInput || __raisesInput) {
-      const __effTN = __tnInput + (__raisesInput * 5); // Raises formula: base TN + (raises × 5)
+      const __effTN = __tnInput + __raisesInput * 5; // Raises formula: base TN + (raises × 5)
       const raisesLabel = game.i18n.localize("l5r4.ui.mechanics.rolls.raises");
       label += ` [TN ${__effTN}${__raisesInput ? ` (${raisesLabel}: ${__raisesInput})` : ""}]`;
     }
@@ -218,8 +219,8 @@ export async function RingRoll({
       ui.notifications?.warn(voidResult.message);
       return false; // Abort roll if Void Point unavailable
     }
-    rollMod += voidResult.rollBonus;  // +1 rolled die
-    keepMod += voidResult.keepBonus;  // +1 kept die
+    rollMod += voidResult.rollBonus; // +1 rolled die
+    keepMod += voidResult.keepBonus; // +1 kept die
     label += ` ${game.i18n.localize("l5r4.ui.mechanics.rings.void")}!`;
   }
 
@@ -230,7 +231,7 @@ export async function RingRoll({
     if (!result.success) return false; // Abort if slot unavailable
     label += result.value; // Append slot label (e.g., " [Fire Slot]")
   }
-  
+
   // Void bonus spell slot consumption (flexible slot for any element)
   // Side effect: Decrements actor.system.spellSlots.void by 1
   if (voidSlot) {
@@ -245,22 +246,27 @@ export async function RingRoll({
     // Calculate dice pool: Ring rank + accumulated modifiers
     const diceToRoll = toInt(ringRank) + rollMod;
     const diceToKeep = toInt(ringRank) + keepMod;
-    
+
     // Apply Ten Dice Rule: Cap at 10 rolled/kept dice, overflow becomes bonuses
     // Example: 12k4 → 10k5, 14k12 → 10k10+12
     const { diceRoll, diceKeep, bonus } = TenDiceRule(diceToRoll, diceToKeep, totalMod);
 
     // Build roll formula (e.g., "4d10x10kh3+2" for 4k3+2 with exploding tens)
     const rollFormula = buildFormula(diceRoll, diceKeep, bonus);
-    
+
     // Execute roll using Foundry Roll API
     const roll = new Roll(rollFormula);
     const rollHtml = await roll.render();
 
     // Calculate effective TN: base TN + (raises × 5) + wound penalty
     // Wound penalty only applied if enabled AND a TN was specified
-    const effTN = calculateEffectiveTN(__tnInput, __raisesInput, woundPenalty, applyWoundPenalty && __tnInput > 0);
-    
+    const effTN = calculateEffectiveTN(
+      __tnInput,
+      __raisesInput,
+      woundPenalty,
+      applyWoundPenalty && __tnInput > 0
+    );
+
     // Evaluate success/failure with margin calculation
     const tnResult = evaluateTN(roll.total ?? 0, effTN, __raisesInput);
 
@@ -271,7 +277,10 @@ export async function RingRoll({
     try {
       return await roll.toMessage({ speaker: ChatMessage.getSpeaker(), content });
     } catch (err) {
-      console.error(`${SYS_ID}`, "RingRoll: Failed to post chat message after roll", { err, ringName });
+      console.error(`${SYS_ID}`, "RingRoll: Failed to post chat message after roll", {
+        err,
+        ringName
+      });
       ui.notifications?.error(game.i18n.localize("l5r4.ui.notifications.chatMessageFailed"));
       return false; // Roll succeeded but chat post failed
     }

@@ -1,36 +1,36 @@
 /**
  * L5R4 NPC Actor Sheet
- * 
+ *
  * Provides character sheet interface for NPC actors in the Legend of the Five Rings
  * 4th Edition system. Handles display and interaction for non-player characters including
  * creatures, adversaries, and supporting cast.
- * 
+ *
  * **Architecture:**
  * Extends BaseActorSheet to inherit common actor sheet functionality (Void Points,
  * item CRUD, roll handling, drag-drop). Adds NPC-specific features including Fear tests,
  * simplified skill display, and limited view for non-GM players.
- * 
+ *
  * **NPC-Specific Features:**
  * - Fear Test button for creatures with Fear ability (see game rules)
  * - Optional Void Points display controlled by system setting
  * - Simplified trait adjustment (Shift+Click on ranks)
  * - Limited view for players without ownership
  * - Direct Void Ring rank editing (bypasses trait calculation used for PCs)
- * 
+ *
  * **Foundry Integration:**
  * - Extends BaseActorSheet (which extends ActorSheetV2)
  * - Uses Application v2 event delegation pattern (Foundry v13+)
  * - Implements PARTS-based template rendering
  * - Supports both full (GM/owner) and limited (observer) views
- * 
+ *
  * **Game Mechanics:**
  * Implements L5R4 NPC rules including Fear tests (Raw Willpower vs TN 5 + 5×Fear Rank),
  * Void Ring adjustment, skill rolls, and combat actions. NPCs may have simplified
  * stat blocks compared to PCs and don't require trait-to-ring calculations.
- * 
+ *
  * **Foundry APIs:** ActorSheetV2, HandlebarsApplicationMixin, Actor#update
  * **Requires:** Foundry v13+
- * 
+ *
  * @extends {BaseActorSheet}
  * @mixes HandlebarsApplicationMixin
  */
@@ -52,32 +52,31 @@ import { getMountedStatus } from "../services/mounted-combat.js";
 
 /**
  * NPC Actor Sheet for L5R4 System
- * 
+ *
  * Renders and manages the character sheet UI for NPC actors. Provides simplified
  * interface compared to PC sheets, with direct stat editing, Fear test integration,
  * and optional limited view for non-owners.
- * 
+ *
  * **Key Differences from PC Sheet:**
  * - Direct Void Ring rank editing (not derived from Void trait)
  * - Fear test button for creatures with Fear ability
  * - No XP/advancement tracking
  * - Optional Void Points display (controlled by system setting)
  * - Simplified item lists (no advancement hints)
- * 
+ *
  * @extends {BaseActorSheet}
  */
 export default class L5R4NpcSheet extends BaseActorSheet {
-  
   /**
    * Template part configuration for the NPC sheet.
-   * 
+   *
    * Defines the Handlebars template structure using Foundry v13 PARTS pattern.
    * Supports switching between full and limited views based on ownership.
-   * 
+   *
    * **Template Variants:**
    * - Full view (npc.hbs): Complete stat block for GM/owners
    * - Limited view (npc-limited.hbs): Restricted info for observers
-   * 
+   *
    * @static
    * @type {Object}
    */
@@ -92,18 +91,18 @@ export default class L5R4NpcSheet extends BaseActorSheet {
 
   /**
    * Default configuration options for the NPC sheet.
-   * 
+   *
    * Extends BaseActorSheet options to:
    * - Add "npc" class for styling specificity
    * - Set wider default width (840px) for NPC stat blocks
    * - Enable form auto-submission on field changes
-   * 
+   *
    * Filters out Foundry's default "pc"/"npc" classes before adding system-specific
    * "l5r4" and "npc" classes for proper CSS targeting.
-   * 
+   *
    * **Foundry v13 Pattern:**
    * Uses static DEFAULT_OPTIONS instead of defaultOptions() getter method.
-   * 
+   *
    * @static
    * @type {Object}
    * @override
@@ -111,7 +110,9 @@ export default class L5R4NpcSheet extends BaseActorSheet {
   static DEFAULT_OPTIONS = {
     ...super.DEFAULT_OPTIONS,
     classes: [
-      ...(super.DEFAULT_OPTIONS.classes ?? []).filter(c => c !== "pc" && c !== "npc" && c !== "l5r4"),
+      ...(super.DEFAULT_OPTIONS.classes ?? []).filter(
+        c => c !== "pc" && c !== "npc" && c !== "l5r4"
+      ),
       "l5r4",
       "npc"
     ],
@@ -121,10 +122,10 @@ export default class L5R4NpcSheet extends BaseActorSheet {
 
   /**
    * Routes click events on [data-action] elements to appropriate handlers.
-   * 
+   *
    * Implements event delegation pattern for all user interactions on the sheet.
    * Actions are identified by data-action attribute values on interactive elements.
-   * 
+   *
    * **Supported Actions:**
    * - inline-edit: Update item properties directly in the sheet
    * - item-create/delete/edit/expand/chat: Item CRUD operations
@@ -135,11 +136,11 @@ export default class L5R4NpcSheet extends BaseActorSheet {
    * - trait-rank: Adjust trait ranks (Shift+Click)
    * - void-points-dots: Spend/regain Void Points
    * - wound-config: Open wound threshold configuration dialog
-   * 
+   *
    * **Implementation Note:**
    * Most actions delegate to BaseActorSheet or specialized handlers. NPC-specific
    * actions include ring-rank-void (direct Void Ring editing) and test-fear.
-   * 
+   *
    * @param {string} action - The data-action attribute value from the clicked element
    * @param {Event} event - The click event
    * @param {HTMLElement} element - The element that was clicked
@@ -148,38 +149,56 @@ export default class L5R4NpcSheet extends BaseActorSheet {
    */
   _onAction(action, event, element) {
     switch (action) {
-      case "inline-edit": return this._onInlineItemEdit(event, element);
-      case "item-create": return this._onItemCreate(event, element);
-      case "item-delete": return this._onItemDelete(event, element);
-      case "item-edit": return this._onItemEdit(event, element);
-      case "item-expand": return this._onItemExpand(event, element);
-      case "item-chat": return this._onItemHeaderToChat(event, element);
-      case "item-sort-by": return this._onUnifiedSortClick(event, element);
-      case "ring-rank-void": return this._onVoidAdjust(event, element, +1);
-      case "roll-ring": return RollHandler.npcRingRoll(this._getHandlerContext(), event, element);
-      case "roll-skill": return this._onSkillRoll(event, element);
-      case "roll-trait": return this._onTraitRoll(event, element);
-      case "roll-attack": return this._onAttackRoll(event, element);
-      case "roll-damage": return this._onDamageRoll(event, element);
-      case "roll-weapon-attack": return this._onWeaponAttackRoll(event, element);
-      case "test-fear": return this._onFearTest(event, element);
-      case "trait-rank": return this._onTraitAdjust(event, element, +1);
-      case "void-points-dots": return this._onVoidPointsAdjust(event, element, +1);
-      case "wound-config": return AppLauncherHandler.openWoundConfig(this._getHandlerContext(), event, element);
+      case "inline-edit":
+        return this._onInlineItemEdit(event, element);
+      case "item-create":
+        return this._onItemCreate(event, element);
+      case "item-delete":
+        return this._onItemDelete(event, element);
+      case "item-edit":
+        return this._onItemEdit(event, element);
+      case "item-expand":
+        return this._onItemExpand(event, element);
+      case "item-chat":
+        return this._onItemHeaderToChat(event, element);
+      case "item-sort-by":
+        return this._onUnifiedSortClick(event, element);
+      case "ring-rank-void":
+        return this._onVoidAdjust(event, element, +1);
+      case "roll-ring":
+        return RollHandler.npcRingRoll(this._getHandlerContext(), event, element);
+      case "roll-skill":
+        return this._onSkillRoll(event, element);
+      case "roll-trait":
+        return this._onTraitRoll(event, element);
+      case "roll-attack":
+        return this._onAttackRoll(event, element);
+      case "roll-damage":
+        return this._onDamageRoll(event, element);
+      case "roll-weapon-attack":
+        return this._onWeaponAttackRoll(event, element);
+      case "test-fear":
+        return this._onFearTest(event, element);
+      case "trait-rank":
+        return this._onTraitAdjust(event, element, +1);
+      case "void-points-dots":
+        return this._onVoidPointsAdjust(event, element, +1);
+      case "wound-config":
+        return AppLauncherHandler.openWoundConfig(this._getHandlerContext(), event, element);
     }
   }
 
   /**
    * Routes right-click (contextmenu) events on [data-action] elements.
-   * 
+   *
    * Handles reverse operations for rank adjustment actions (decrement instead of
    * increment). Falls back to _onAction for actions that don't have context variants.
-   * 
+   *
    * **Context-Specific Actions:**
    * - trait-rank: Decrement trait (Shift+Right-Click)
    * - ring-rank-void: Decrement Void Ring (Shift+Right-Click, NPC-specific)
    * - void-points-dots: Regain Void Point (Right-Click)
-   * 
+   *
    * @param {string} action - The data-action attribute value
    * @param {Event} event - The contextmenu event
    * @param {HTMLElement} element - The element that was right-clicked
@@ -188,23 +207,27 @@ export default class L5R4NpcSheet extends BaseActorSheet {
    */
   _onActionContext(action, event, element) {
     switch (action) {
-      case "trait-rank": return this._onTraitAdjust(event, element, -1);
-      case "ring-rank-void": return this._onVoidAdjust(event, element, -1);
-      case "void-points-dots": return this._onVoidPointsAdjust(event, element, -1);
-      default: return this._onAction(action, event, element);
+      case "trait-rank":
+        return this._onTraitAdjust(event, element, -1);
+      case "ring-rank-void":
+        return this._onVoidAdjust(event, element, -1);
+      case "void-points-dots":
+        return this._onVoidPointsAdjust(event, element, -1);
+      default:
+        return this._onAction(action, event, element);
     }
   }
 
   /**
    * Routes change events on [data-action] form elements.
-   * 
+   *
    * Handles form field changes for inline editing and stance changes.
    * Only processes actions that require change event handling.
-   * 
+   *
    * **Supported Actions:**
    * - inline-edit: Update item properties from form fields
    * - change-stance: Update character's combat stance
-   * 
+   *
    * @param {string} action - The data-action attribute value
    * @param {Event} event - The change event
    * @param {HTMLElement} element - The form element that changed
@@ -213,28 +236,29 @@ export default class L5R4NpcSheet extends BaseActorSheet {
    */
   _onActionChange(action, event, element) {
     if (action === "inline-edit") return this._onInlineItemEdit(event, element);
-    if (action === "change-stance") return StanceHandler.changeStance(this._getHandlerContext(), event, element);
+    if (action === "change-stance")
+      return StanceHandler.changeStance(this._getHandlerContext(), event, element);
   }
 
   /**
    * Adjusts NPC's Void Ring rank by the specified delta.
-   * 
+   *
    * NPCs have direct Void Ring editing unlike PCs where Rings are derived from traits.
    * This allows GMs to quickly adjust NPC power levels and Void Point pools.
-   * 
+   *
    * **Safety Mechanism:**
    * Requires Shift key to prevent accidental adjustments. Works with KeyboardBehaviorMixin
    * to show visual cursor feedback when Shift is held.
-   * 
+   *
    * **Game Rules:**
    * Void Ring determines Void Points available (equal to Void Ring rank). Most creatures
    * don't have Void Rings, but some intelligent NPCs and supernatural beings do.
-   * 
+   *
    * **Implementation Note:**
    * Clamps to 0-9 range. Standard character range is 1-10 per core rules, but 0 is
    * allowed for flexibility (creatures without Void). Max of 9 instead of 10 may be
    * implementation choice for UI consistency.
-   * 
+   *
    * @param {Event} event - DOM event (must have shiftKey = true to execute)
    * @param {HTMLElement} element - Element containing Void Ring data
    * @param {number} delta - Direction to adjust (+1 to increase, -1 to decrease)
@@ -248,8 +272,10 @@ export default class L5R4NpcSheet extends BaseActorSheet {
     // Safety check: require Shift key to prevent accidental adjustments
     if (!event?.shiftKey) return;
 
-    const cur = Number(this.actor._source?.system?.rings?.void?.rank
-                ?? this.actor.system?.rings?.void?.rank ?? 0) || 0;
+    const cur =
+      Number(
+        this.actor._source?.system?.rings?.void?.rank ?? this.actor.system?.rings?.void?.rank ?? 0
+      ) || 0;
     const min = 0;
     const max = 9;
     const next = clamp(cur + (delta > 0 ? 1 : -1), min, max);
@@ -263,18 +289,18 @@ export default class L5R4NpcSheet extends BaseActorSheet {
 
   /**
    * Renders the sheet's HTML based on ownership level.
-   * 
+   *
    * Non-GM users without ownership see a limited view showing only basic information
    * (name, image, basic stats). GMs and owners see the full NPC stat block.
-   * 
+   *
    * **View Selection:**
    * - Limited view (npc-limited.hbs): Non-GM observers
    * - Full view (npc.hbs): GM or actor owners
-   * 
+   *
    * **Foundry Pattern:**
    * Overrides ActorSheetV2._renderHTML to implement custom template selection.
    * Returns object with 'form' property containing the rendered element.
-   * 
+   *
    * @param {Object} context - Template context data from _prepareContext
    * @param {Object} _options - Rendering options (unused)
    * @returns {Promise<{form: HTMLElement}>} Object containing rendered form element
@@ -283,7 +309,7 @@ export default class L5R4NpcSheet extends BaseActorSheet {
    * @override
    */
   async _renderHTML(context, _options) {
-    const isLimited = (!game.user.isGM && this.actor.limited);
+    const isLimited = !game.user.isGM && this.actor.limited;
     const path = isLimited ? TEMPLATE("actor/npc-limited.hbs") : TEMPLATE("actor/npc.hbs");
     const html = await foundry.applications.handlebars.renderTemplate(path, context);
     const host = document.createElement("div");
@@ -294,26 +320,26 @@ export default class L5R4NpcSheet extends BaseActorSheet {
 
   /**
    * Prepares template context data for rendering the NPC sheet.
-   * 
+   *
    * Gathers and organizes all data needed by the Handlebars template:
    * - Actor system data (traits, rings, stats)
    * - Embedded items sorted by type (skills, weapons, armor, spells)
    * - Derived values (effective traits with modifiers)
    * - UI state (current stance, mounted status, sort preferences)
    * - System settings (Void Points display toggle)
-   * 
+   *
    * **Skills Sorting:**
    * Skills are sorted using user preference (stored per-actor) with sortable columns:
    * name, rank, trait, roll (skill+trait), emphasis. Default sort is alphabetical by name.
-   * 
+   *
    * **Item Type Filtering:**
    * Separates items into categories for distinct display sections. "item" and "commonItem"
    * types are combined into generic items list.
-   * 
+   *
    * **Foundry Lifecycle:**
    * Called automatically before rendering. Always call super._prepareContext first to
    * inherit base context (editable, limited, owner flags, config data).
-   * 
+   *
    * @param {Object} options - Rendering options
    * @returns {Promise<Object>} Complete context object for template rendering
    * @protected
@@ -325,7 +351,7 @@ export default class L5R4NpcSheet extends BaseActorSheet {
     const actorObj = this.actor;
 
     const all = this.actor.items.contents;
-    const byType = (t) => all.filter((i) => i.type === t);
+    const byType = t => all.filter(i => i.type === t);
 
     const activeStances = getActiveStances(actorObj);
     const currentStance = activeStances[0] || "";
@@ -336,16 +362,21 @@ export default class L5R4NpcSheet extends BaseActorSheet {
     const skills = (() => {
       // Define column extractors for sorting
       const cols = {
-        name:     it => String(it?.name ?? ""),
-        rank:     it => Number(it?.system?.rank ?? 0) || 0,
-        trait:    it => {
+        name: it => String(it?.name ?? ""),
+        rank: it => Number(it?.system?.rank ?? 0) || 0,
+        trait: it => {
           // Localize trait key if it matches known pattern
           const raw = String(it?.system?.trait ?? "").toLowerCase();
-          const key = raw && /^l5r4\.mechanics\.traits\./.test(raw) ? raw : (raw ? `l5r4.ui.mechanics.traits.${raw}` : "");
+          const key =
+            raw && /^l5r4\.mechanics\.traits\./.test(raw)
+              ? raw
+              : raw
+                ? `l5r4.ui.mechanics.traits.${raw}`
+                : "";
           const loc = key ? game.i18n?.localize?.(key) : "";
-          return String((loc && loc !== key) ? loc : (it?.system?.trait ?? ""));
+          return String(loc && loc !== key ? loc : (it?.system?.trait ?? ""));
         },
-        roll:     it => Number(it?.system?.rollDice ?? it?.system?.rank ?? 0) || 0,
+        roll: it => Number(it?.system?.rollDice ?? it?.system?.rank ?? 0) || 0,
         emphasis: it => String(it?.system?.emphasis ?? "")
       };
       const pref = getSortPref(actorObj.id, "skills", Object.keys(cols), "name");
@@ -369,7 +400,7 @@ export default class L5R4NpcSheet extends BaseActorSheet {
       bows: byType("bow"),
       armors: byType("armor"),
       spells: byType("spell"),
-      items: all.filter((i) => i.type === "item" || i.type === "commonItem")
+      items: all.filter(i => i.type === "item" || i.type === "commonItem")
     };
 
     enhanceItemSheetData(context);
@@ -379,22 +410,22 @@ export default class L5R4NpcSheet extends BaseActorSheet {
 
   /**
    * Post-render lifecycle hook for setting up interactive UI elements.
-   * 
+   *
    * Initializes UI components that require DOM access:
    * - Paints Void Points dots to match actor's current Void Points
    * - Sets up sort indicators for skills list headers
    * - Binds simple roll handlers (non-delegated clicks)
    * - Binds image editor click handler
    * - Initializes right-click context menu for items
-   * 
+   *
    * **Ownership Check:**
    * Only sets up interactive elements (sort indicators, context menus) if current
    * user owns the actor. Void Points painting happens regardless for visual consistency.
-   * 
+   *
    * **Foundry Lifecycle:**
    * Called automatically after template rendering. Always call super._onRender first
    * to ensure parent class setup (event delegation, image error handling) completes.
-   * 
+   *
    * @param {Object} context - Template context data used for rendering
    * @param {Object} options - Rendering options
    * @returns {Promise<void>}
@@ -410,26 +441,28 @@ export default class L5R4NpcSheet extends BaseActorSheet {
 
     this._initializeSortIndicators(root, "skills", ["name", "rank", "trait", "roll", "emphasis"]);
 
-    on(root, ".simple-roll", "click", (ev) => RollHandler.npcSimpleRoll(this._getHandlerContext(), ev));
+    on(root, ".simple-roll", "click", ev =>
+      RollHandler.npcSimpleRoll(this._getHandlerContext(), ev)
+    );
 
-    on(root, "[data-edit='img']", "click", (ev) => this._onEditImage(ev, ev.currentTarget));
+    on(root, "[data-edit='img']", "click", ev => this._onEditImage(ev, ev.currentTarget));
 
     await this._setupItemContextMenu(root);
   }
 
   /**
    * Returns allowed sort field names for a given scope.
-   * 
+   *
    * Defines which columns can be used for sorting in each item list.
    * Currently only skills list supports sorting by multiple fields.
-   * 
+   *
    * **Skills Sort Fields:**
    * - name: Alphabetical by skill name
    * - rank: Skill rank (0-10)
    * - trait: Associated trait (localized)
    * - roll: Total rolled dice (skill + trait)
    * - emphasis: Skill emphasis (if any)
-   * 
+   *
    * @param {string} scope - Sort scope identifier ("skills", etc.)
    * @returns {string[]} Array of allowed sort field names for the scope
    * @protected
@@ -444,24 +477,24 @@ export default class L5R4NpcSheet extends BaseActorSheet {
 
   /**
    * Initiates a Fear resistance test against this NPC.
-   * 
+   *
    * Triggers Fear tests for all currently selected tokens (excluding the NPC itself).
    * Selected characters make Raw Willpower rolls vs TN (5 + 5×Fear Rank), adding their
    * Honor Rank to the roll.
-   * 
+   *
    * **Game Rules:**
    * Creatures with Fear ability automatically inflict Fear at encounter start. Characters
    * who fail the test suffer -Xk0 penalty to all rolls (X = Fear Rank) for the encounter.
    * Catastrophic failure (fail by 15+) causes character to flee or cower.
-   * 
+   *
    * **Requirements:**
    * - NPC must have Fear ability (fear.rank > 0)
    * - At least one token must be selected on the canvas
    * - Selected tokens must be different from the NPC
-   * 
+   *
    * **Implementation:**
    * Delegates to Fear service which handles roll mechanics and chat output.
-   * 
+   *
    * @param {Event} event - DOM event triggering the Fear test
    * @param {HTMLElement} element - Element that was clicked
    * @returns {Promise<void>}
@@ -481,14 +514,14 @@ export default class L5R4NpcSheet extends BaseActorSheet {
 
   /**
    * Validates and coerces form data before submitting to actor update.
-   * 
+   *
    * Ensures actor always has a valid name. If name field is empty or whitespace-only,
    * falls back to current actor name or "Unnamed" placeholder.
-   * 
+   *
    * **Foundry Pattern:**
    * Part of ActorSheetV2 form submission lifecycle. Called before actor.update() to
    * allow field validation and type coercion.
-   * 
+   *
    * @param {Event} event - Form submission event
    * @param {HTMLFormElement} form - The form element being submitted
    * @param {FormData} formData - Raw form data from the browser
@@ -497,7 +530,7 @@ export default class L5R4NpcSheet extends BaseActorSheet {
    * @protected
    * @override
    */
-  _prepareSubmitData(event, form, formData, updateData={}) {
+  _prepareSubmitData(event, form, formData, updateData = {}) {
     const submit = super._prepareSubmitData(event, form, formData, updateData);
     if (!String(submit.name ?? "").trim()) submit.name = this.actor.name || "Unnamed";
     return submit;

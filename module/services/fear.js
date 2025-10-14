@@ -1,17 +1,17 @@
 /**
  * Fear Test Service
- * 
+ *
  * Handles Fear mechanic for L5R4 system per core rules:
  * - Characters face Fear effects (Rank 1-10) from supernatural creatures
  * - Test: Roll Raw Willpower vs TN (5 + 5×Fear Rank), add Honor Rank
  * - Failure: -Xk0 penalty to all rolls (X = Fear Rank) for encounter
  * - Catastrophic Failure (fail by 15+): Character flees or cowers
- * 
+ *
  * Integrates with:
  * - Foundry Roll API for dice mechanics
  * - ChatMessage API for result posting
  * - Canvas tokens for target selection
- * 
+ *
  * @module services/fear
  * @requires Foundry v13+
  */
@@ -31,14 +31,14 @@ import { toInt } from "../utils/type-coercion.js";
 
 /**
  * Executes a Fear resistance test for a character
- * 
+ *
  * Implements core Fear mechanic:
  * - Roll: Willpower d10k Willpower x10 + Honor Rank + modifier
  * - Target: TN (typically 5 + 5×Fear Rank)
  * - Success: No effect
  * - Failure: -Fear Rank k0 penalty to all rolls
  * - Catastrophic (fail by 15+): Character overwhelmed by terror
- * 
+ *
  * @async
  * @param {FearTestOptions} options - Fear test configuration
  * @returns {Promise<ChatMessage|null>} Created chat message, or null if failed
@@ -47,17 +47,20 @@ import { toInt } from "../utils/type-coercion.js";
 async function executeFearTest({ character, tn, modifier = 0, fearRank, targetInfo = "" } = {}) {
   const willpower = toInt(character.system?.traits?.wil ?? 0);
   if (willpower <= 0) {
-    ui.notifications?.warn(game.i18n.format("l5r4.ui.mechanics.fear.noWillpower", {
-      character: character?.name ?? "Character"
-    }));
+    ui.notifications?.warn(
+      game.i18n.format("l5r4.ui.mechanics.fear.noWillpower", {
+        character: character?.name ?? "Character"
+      })
+    );
     return null;
   }
 
   const honorRank = toInt(character.system?.honor?.rank ?? 0);
   const totalBonus = honorRank + modifier;
-  const rollFormula = totalBonus !== 0 
-    ? `${willpower}d10k${willpower}x10+${totalBonus}`
-    : `${willpower}d10k${willpower}x10`;
+  const rollFormula =
+    totalBonus !== 0
+      ? `${willpower}d10k${willpower}x10+${totalBonus}`
+      : `${willpower}d10k${willpower}x10`;
 
   let roll;
   try {
@@ -87,14 +90,19 @@ async function executeFearTest({ character, tn, modifier = 0, fearRank, targetIn
 
   const bonusText = [];
   if (honorRank > 0) bonusText.push(`Honor +${honorRank}`);
-  if (modifier !== 0) bonusText.push(`${game.i18n.localize("l5r4.ui.common.mod")} ${modifier > 0 ? '+' : ''}${modifier}`);
+  if (modifier !== 0)
+    bonusText.push(
+      `${game.i18n.localize("l5r4.ui.common.mod")} ${modifier > 0 ? "+" : ""}${modifier}`
+    );
   const bonusDisplay = bonusText.length > 0 ? ` (${bonusText.join(", ")})` : "";
 
   const flavor = [
     game.i18n.format("l5r4.ui.mechanics.fear.testResult", { rank: fearRank }),
     targetInfo,
     bonusDisplay
-  ].filter(Boolean).join("");
+  ]
+    .filter(Boolean)
+    .join("");
 
   let rollHtml;
   try {
@@ -119,15 +127,12 @@ async function executeFearTest({ character, tn, modifier = 0, fearRank, targetIn
 
   let content;
   try {
-    content = await foundry.applications.handlebars.renderTemplate(
-      CHAT_TEMPLATES.simpleRoll,
-      {
-        flavor,
-        roll: rollHtml,
-        tnResult,
-        effectInfo: effectInfo || undefined
-      }
-    );
+    content = await foundry.applications.handlebars.renderTemplate(CHAT_TEMPLATES.simpleRoll, {
+      flavor,
+      roll: rollHtml,
+      tnResult,
+      effectInfo: effectInfo || undefined
+    });
   } catch (err) {
     console.error(`${SYS_ID}`, "Fear test: Template render failed", { err });
     ui.notifications?.error(game.i18n.localize("l5r4.ui.mechanics.fear.templateFailed"));
@@ -149,10 +154,10 @@ async function executeFearTest({ character, tn, modifier = 0, fearRank, targetIn
 
 /**
  * Triggers a Fear test for a single character against an NPC's Fear effect
- * 
+ *
  * Extracts Fear Rank and TN from NPC, then executes the resistance roll.
  * NPCs without Fear ability (rank ≤ 0) are skipped with a warning.
- * 
+ *
  * @async
  * @param {Object} options - Test parameters
  * @param {L5R4Actor} options.npc - The creature with the Fear ability
@@ -186,10 +191,10 @@ export async function testFear({ npc, character } = {}) {
 
 /**
  * Executes Fear tests for multiple characters against a single NPC
- * 
+ *
  * Sequentially processes each character to maintain proper roll order
  * in the chat log. Displays warning if no valid characters provided.
- * 
+ *
  * @async
  * @param {Object} options - Test parameters
  * @param {L5R4Actor} options.npc - The creature with the Fear ability
@@ -212,13 +217,13 @@ let fearTestInProgress = false;
 
 /**
  * Handles Fear button clicks on NPC sheets
- * 
+ *
  * Collects all controlled tokens (excluding the NPC itself) and triggers
  * Fear tests against them. Uses a lock to prevent concurrent executions
  * that could result in duplicate rolls or race conditions.
- * 
+ *
  * Requires Foundry canvas with selected tokens.
- * 
+ *
  * @async
  * @param {Object} options - Handler parameters
  * @param {L5R4Actor} options.npc - The creature triggering Fear

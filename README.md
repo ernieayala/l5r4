@@ -56,7 +56,6 @@ Built for Foundry VTT v13+ with modern features like automatic XP tracking, comb
 3. Restart Foundry VTT
 4. Create a new world with the system
 
-
 ---
 
 ## 🎯 Quick Start
@@ -84,6 +83,7 @@ Built for Foundry VTT v13+ with modern features like automatic XP tracking, comb
 ### Character Management
 
 **Player Characters**
+
 - All L5R4e stats (traits, rings, void, insight rank)
 - Automatic calculations (rings, initiative, armor TN, wounds, insight)
 - Dynamic wound tracking with automatic penalties
@@ -91,11 +91,13 @@ Built for Foundry VTT v13+ with modern features like automatic XP tracking, comb
 - Family and School bonuses apply automatically
 
 **NPCs**
+
 - Streamlined interface with essential stats
 - Flexible wound system (manual or formula-based)
 - Quick combat stats for fast resolution
 
 **XP System**
+
 - Automatic cost tracking for all advancement types
 - Family and school bonuses reduce costs automatically
 - Complete audit trail with timestamps
@@ -106,6 +108,7 @@ Built for Foundry VTT v13+ with modern features like automatic XP tracking, comb
 ### 🎲 Dice System
 
 ### Roll & Keep Mechanics
+
 - **XkY System** - Roll X dice, keep Y highest
 - **Ten Dice Rule** - Automatic enforcement (excess dice become flat bonuses)
 - **Exploding Dice** - Dice explode on 10 (configurable)
@@ -113,6 +116,7 @@ Built for Foundry VTT v13+ with modern features like automatic XP tracking, comb
 - **Unskilled Rolls** - Ctrl+click rings (no exploding dice)
 
 ### Roll Modifiers
+
 - **Raises** - Declare before rolling (+5 TN each)
 - **Void Points** - Spend for +1k1 bonus (deducted automatically)
 - **Wound Penalties** - Applied automatically to target numbers
@@ -120,6 +124,7 @@ Built for Foundry VTT v13+ with modern features like automatic XP tracking, comb
 - **Custom Modifiers** - Add via roll dialog
 
 ### Combat Integration
+
 - **Auto-Targeting** - Uses selected token's Armor TN
 - **Success Evaluation** - Automatic comparison vs. TN
 - **Raise Display** - Shows raises achieved on success
@@ -139,22 +144,26 @@ Use L5R4e dice in chat:
 ## ⚔️ Combat & Equipment
 
 ### Weapons
+
 - **Rollable Attacks** - Click weapon name for attack and damage rolls
 - **Damage Formulas** - Proper XkY damage calculations
 - **Special Properties** - Custom explosion thresholds and rules
 - **Skill Detection** - Automatic skill association (Kenjutsu, Kyujutsu, etc.)
 
 ### Bows
+
 - **Strength Rating** - Bow strength limits damage based on character Strength
 - **Arrow Types** - Support for specialized arrows with damage modifiers
 - **Range Tracking** - Range values stored for reference
 
 ### Armor
+
 - **Auto TN Calculation** - Armor TN = 5×Reflexes + 5 + armor bonus + modifiers
 - **Damage Reduction** - Reduction values tracked and applied
 - **Stacking Rules** - Configure whether multiple armors stack (default: highest only)
 
 ### Combat Stances
+
 - **Attack** - Visual indicator only
 - **Full Attack** - +2k1 to attacks, -10 to Armor TN
 - **Defense** - Add Air Ring + Defense Skill to Armor TN
@@ -164,6 +173,7 @@ Use L5R4e dice in chat:
 - **Mutual Exclusion** - Only one stance active at a time
 
 ### Initiative
+
 - **Auto Calculation** - Insight Rank + Reflexes + modifiers
 - **Combat Tracker** - Integrates with Foundry's combat tracker
 
@@ -172,12 +182,14 @@ Use L5R4e dice in chat:
 ## 🔮 Spellcasting
 
 ### Ring-Based Magic
+
 - **Spell System** - Full spell support with automatic TN calculations
 - **Ring Selection** - Spells use elemental rings (Air, Earth, Fire, Water, Void)
 - **Multi-Ring Spells** - Spells can use multiple rings
 - **Mastery Levels** - Track prerequisites and effects
 
 ### Casting
+
 - **Ring Rolls** - Cast using ring-based rolls
 - **Spell Slots** - Optional resource management (Air, Earth, Fire, Water, Void)
 - **Auto Deduction** - Slots deducted automatically when used
@@ -185,10 +197,12 @@ Use L5R4e dice in chat:
 - **Raises** - Spell-specific raise options
 
 ### Maho Support
+
 - **Maho Toggle** - Mark spells as Maho with warnings
 - **Visual Indicators** - Clearly marked in UI
 
 ### Spell Properties
+
 Track keywords, range, area of effect, duration, raises, and casting time
 
 ---
@@ -196,21 +210,25 @@ Track keywords, range, area of effect, duration, raises, and casting time
 ## ⚙️ Settings
 
 ### Automation
+
 - **Insight Rank Calculation** - Auto-calculate insight rank (default: enabled)
 
 ### Roll Dialogs (Per-User)
+
 - **Show Trait Roll Options** - Display dialog for trait rolls (default: enabled)
 - **Show Skill Roll Options** - Display dialog for skill rolls (default: enabled)
 - **Show Spell Roll Options** - Display dialog for spell rolls (default: enabled)
 - **Show Weapon Roll Options** - Display dialog for weapon rolls (default: enabled)
 
 ### House Rules
+
 - **Little Truths Ten Dice Rule** - Alternate Ten Dice Rule with +2 compensation (default: disabled)
 - **Allow NPC Void Points** - NPCs can spend void without resource deduction (default: disabled)
 - **Allow Armor Stacking** - Multiple armors stack bonuses (default: disabled, highest only)
 - **Default NPC Wound Mode** - Manual or formula-based for new NPCs (default: manual)
 
 ### Migration & Debug
+
 - **Run Migration** - Enable automatic data migrations (default: enabled)
 - **Force Migration** - Force migrations to run (default: disabled)
 - **Debug Wound Config** - Enable detailed logging (default: disabled)
@@ -225,158 +243,166 @@ Active Effects let you modify character stats dynamically. Use these keys when c
 
 #### Core Traits
 
-| Attribute Key | Description | Example Value |
-|---------------|-------------|---------------|
-| `system.traits.sta` | Stamina | `3` |
-| `system.traits.wil` | Willpower | `2` |
-| `system.traits.str` | Strength | `4` |
-| `system.traits.per` | Perception | `3` |
-| `system.traits.ref` | Reflexes | `3` |
-| `system.traits.awa` | Awareness | `2` |
-| `system.traits.agi` | Agility | `4` |
-| `system.traits.int` | Intelligence | `3` |
+| Attribute Key       | Description  | Example Value |
+| ------------------- | ------------ | ------------- |
+| `system.traits.sta` | Stamina      | `3`           |
+| `system.traits.wil` | Willpower    | `2`           |
+| `system.traits.str` | Strength     | `4`           |
+| `system.traits.per` | Perception   | `3`           |
+| `system.traits.ref` | Reflexes     | `3`           |
+| `system.traits.awa` | Awareness    | `2`           |
+| `system.traits.agi` | Agility      | `4`           |
+| `system.traits.int` | Intelligence | `3`           |
 
 #### Rings
 
-| Attribute Key | Description | Example Value |
-|---------------|-------------|---------------|
-| `system.rings.void.rank` | Void Ring Rank | `2` |
-| `system.rings.void.value` | Current Void Points | `1` |
+| Attribute Key             | Description         | Example Value |
+| ------------------------- | ------------------- | ------------- |
+| `system.rings.void.rank`  | Void Ring Rank      | `2`           |
+| `system.rings.void.value` | Current Void Points | `1`           |
 
 **Note**: Elemental rings (Air, Earth, Fire, Water) are calculated automatically from trait pairs and cannot be directly modified.
 
 #### Character Attributes
 
-| Attribute Key | Description | Example Value |
-|---------------|-------------|---------------|
-| `system.honor.rank` | Honor Rank | `3` |
-| `system.honor.points` | Honor Points | `15` |
-| `system.glory.rank` | Glory Rank | `2` |
-| `system.glory.points` | Glory Points | `8` |
-| `system.status.rank` | Status Rank | `1` |
-| `system.status.points` | Status Points | `3` |
-| `system.shadowTaint.rank` | Shadow Taint Rank | `0` |
-| `system.shadowTaint.points` | Shadow Taint Points | `0` |
+| Attribute Key               | Description         | Example Value |
+| --------------------------- | ------------------- | ------------- |
+| `system.honor.rank`         | Honor Rank          | `3`           |
+| `system.honor.points`       | Honor Points        | `15`          |
+| `system.glory.rank`         | Glory Rank          | `2`           |
+| `system.glory.points`       | Glory Points        | `8`           |
+| `system.status.rank`        | Status Rank         | `1`           |
+| `system.status.points`      | Status Points       | `3`           |
+| `system.shadowTaint.rank`   | Shadow Taint Rank   | `0`           |
+| `system.shadowTaint.points` | Shadow Taint Points | `0`           |
 
 #### Combat & Defense
 
-| Attribute Key | Description | Example Value |
-|---------------|-------------|---------------|
-| `system.initiative.rollMod` | Initiative Roll Modifier | `+2` |
-| `system.initiative.keepMod` | Initiative Keep Modifier | `+1` |
-| `system.initiative.totalMod` | Initiative Total Modifier | `+3` |
-| `system.armorTn.mod` | Armor TN Modifier | `+5` |
-| `system.armor.armorTn` | Base Armor TN | `20` |
-| `system.armor.reduction` | Damage Reduction | `3` |
+| Attribute Key                | Description               | Example Value |
+| ---------------------------- | ------------------------- | ------------- |
+| `system.initiative.rollMod`  | Initiative Roll Modifier  | `+2`          |
+| `system.initiative.keepMod`  | Initiative Keep Modifier  | `+1`          |
+| `system.initiative.totalMod` | Initiative Total Modifier | `+3`          |
+| `system.armorTn.mod`         | Armor TN Modifier         | `+5`          |
+| `system.armor.armorTn`       | Base Armor TN             | `20`          |
+| `system.armor.reduction`     | Damage Reduction          | `3`           |
 
 #### Wounds & Health
 
-| Attribute Key | Description | Example Value |
-|---------------|-------------|---------------|
-| `system.wounds.mod` | Wound Threshold Modifier | `+10` |
-| `system.woundsMultiplier` | Wound Level Multiplier | `2` |
-| `system.woundsMod` | Wound Threshold Additive Modifier | `+5` |
-| `system.woundsPenaltyMod` | Wound Penalty Modifier | `-2` |
-| `system.suffered` | Damage Suffered | `15` |
+| Attribute Key             | Description                       | Example Value |
+| ------------------------- | --------------------------------- | ------------- |
+| `system.wounds.mod`       | Wound Threshold Modifier          | `+10`         |
+| `system.woundsMultiplier` | Wound Level Multiplier            | `2`           |
+| `system.woundsMod`        | Wound Threshold Additive Modifier | `+5`          |
+| `system.woundsPenaltyMod` | Wound Penalty Modifier            | `-2`          |
+| `system.suffered`         | Damage Suffered                   | `15`          |
 
 #### Experience & Advancement
 
-| Attribute Key | Description | Example Value |
-|---------------|-------------|---------------|
-| `system.xp` | Experience Points | `45` |
-| `system.insight.points` | Insight Points | `150` |
-| `system.insight.rank` | Insight Rank | `2` |
+| Attribute Key           | Description       | Example Value |
+| ----------------------- | ----------------- | ------------- |
+| `system.xp`             | Experience Points | `45`          |
+| `system.insight.points` | Insight Points    | `150`         |
+| `system.insight.rank`   | Insight Rank      | `2`           |
 
 #### Spell Casting
 
-| Attribute Key | Description | Example Value |
-|---------------|-------------|---------------|
-| `system.spellSlots.water` | Water Spell Slots | `3` |
-| `system.spellSlots.fire` | Fire Spell Slots | `2` |
-| `system.spellSlots.earth` | Earth Spell Slots | `4` |
-| `system.spellSlots.air` | Air Spell Slots | `3` |
-| `system.spellSlots.void` | Void Spell Slots | `1` |
+| Attribute Key             | Description       | Example Value |
+| ------------------------- | ----------------- | ------------- |
+| `system.spellSlots.water` | Water Spell Slots | `3`           |
+| `system.spellSlots.fire`  | Fire Spell Slots  | `2`           |
+| `system.spellSlots.earth` | Earth Spell Slots | `4`           |
+| `system.spellSlots.air`   | Air Spell Slots   | `3`           |
+| `system.spellSlots.void`  | Void Spell Slots  | `1`           |
 
 #### Wealth
 
-| Attribute Key | Description | Example Value |
-|---------------|-------------|---------------|
-| `system.wealth.koku` | Koku | `10` |
-| `system.wealth.bu` | Bu | `5` |
-| `system.wealth.zeni` | Zeni | `25` |
+| Attribute Key        | Description | Example Value |
+| -------------------- | ----------- | ------------- |
+| `system.wealth.koku` | Koku        | `10`          |
+| `system.wealth.bu`   | Bu          | `5`           |
+| `system.wealth.zeni` | Zeni        | `25`          |
 
 ### Item Attribute Keys
 
 #### Skills
 
-| Attribute Key | Description | Example Value |
-|---------------|-------------|---------------|
-| `system.rank` | Skill Rank | `3` |
-| `system.rollBonus` | Roll Dice Bonus | `+1` |
-| `system.keepBonus` | Keep Dice Bonus | `+1` |
-| `system.totalBonus` | Total Bonus | `+2` |
-| `system.insightBonus` | Insight Bonus | `+5` |
+| Attribute Key         | Description     | Example Value |
+| --------------------- | --------------- | ------------- |
+| `system.rank`         | Skill Rank      | `3`           |
+| `system.rollBonus`    | Roll Dice Bonus | `+1`          |
+| `system.keepBonus`    | Keep Dice Bonus | `+1`          |
+| `system.totalBonus`   | Total Bonus     | `+2`          |
+| `system.insightBonus` | Insight Bonus   | `+5`          |
 
 #### Weapons
 
-| Attribute Key | Description | Example Value |
-|---------------|-------------|---------------|
-| `system.damageRoll` | Damage Roll Dice | `3` |
-| `system.damageKeep` | Damage Keep Dice | `2` |
-| `system.explodesOn` | Explosion Threshold | `9` |
+| Attribute Key       | Description         | Example Value |
+| ------------------- | ------------------- | ------------- |
+| `system.damageRoll` | Damage Roll Dice    | `3`           |
+| `system.damageKeep` | Damage Keep Dice    | `2`           |
+| `system.explodesOn` | Explosion Threshold | `9`           |
 
 #### Bows
 
-| Attribute Key | Description | Example Value |
-|---------------|-------------|---------------|
-| `system.str` | Bow Strength Rating | `3` |
-| `system.range` | Range in feet | `250` |
-| `system.damageRoll` | Damage Roll Dice | `2` |
-| `system.damageKeep` | Damage Keep Dice | `2` |
+| Attribute Key       | Description         | Example Value |
+| ------------------- | ------------------- | ------------- |
+| `system.str`        | Bow Strength Rating | `3`           |
+| `system.range`      | Range in feet       | `250`         |
+| `system.damageRoll` | Damage Roll Dice    | `2`           |
+| `system.damageKeep` | Damage Keep Dice    | `2`           |
 
 #### Armor
 
-| Attribute Key | Description | Example Value |
-|---------------|-------------|---------------|
-| `system.bonus` | Armor TN Bonus | `+3` |
-| `system.reduction` | Damage Reduction | `2` |
+| Attribute Key      | Description      | Example Value |
+| ------------------ | ---------------- | ------------- |
+| `system.bonus`     | Armor TN Bonus   | `+3`          |
+| `system.reduction` | Damage Reduction | `2`           |
 
 #### Spells
 
-| Attribute Key | Description | Example Value |
-|---------------|-------------|---------------|
-| `system.mastery` | Mastery Level | `3` |
+| Attribute Key    | Description   | Example Value |
+| ---------------- | ------------- | ------------- |
+| `system.mastery` | Mastery Level | `3`           |
 
 #### Advantages/Disadvantages
 
 | Attribute Key | Description | Example Value |
-|---------------|-------------|---------------|
-| `system.cost` | Point Cost | `5` |
+| ------------- | ----------- | ------------- |
+| `system.cost` | Point Cost  | `5`           |
 
 **Note**: Both advantages and disadvantages store positive costs. Disadvantages grant XP in calculations (handled automatically by the system).
 
 ### Usage Examples
 
 #### Family Trait Bonus
+
 Create an Active Effect on a Family item:
+
 - **Attribute Key**: `system.traits.str`
 - **Change Mode**: Add
 - **Effect Value**: `1`
 
 #### School Skill Bonus
+
 Create an Active Effect on a School item:
+
 - **Attribute Key**: `system.rollBonus` (on embedded skill items)
-- **Change Mode**: Add  
+- **Change Mode**: Add
 - **Effect Value**: `1`
 
 #### Armor TN Modifier
+
 Create an Active Effect on an Advantage item:
+
 - **Attribute Key**: `system.armorTn.mod`
 - **Change Mode**: Add
 - **Effect Value**: `5`
 
 #### Void Point Bonus
+
 Create an Active Effect on a Technique item:
+
 - **Attribute Key**: `system.rings.void.value`
 - **Change Mode**: Add
 - **Effect Value**: `1`
@@ -402,17 +428,19 @@ Complete translations available:
 - 🇩🇪 Deutsch
 - 🇷🇺 Русский
 
-*Want to help translate? Submit pull requests on [GitHub](https://github.com/ernieayala/l5r4)!*
+_Want to help translate? Submit pull requests on [GitHub](https://github.com/ernieayala/l5r4)!_
 
 ---
 
 ## 🔧 Recommended Modules
 
 **Essential**
+
 - **[Dice So Nice!](https://foundryvtt.com/packages/dice-so-nice)** - 3D dice animations for L5R rolls
 - **[Token Action HUD](https://foundryvtt.com/packages/token-action-hud)** - Quick access to actions
 
 **Quality of Life**
+
 - **[Drag Ruler](https://foundryvtt.com/packages/drag-ruler)** - Enhanced movement
 - **[Combat Utility Belt](https://foundryvtt.com/packages/combat-utility-belt)** - Combat management
 - **[Monk's Enhanced Journal](https://foundryvtt.com/packages/monks-enhanced-journal)** - Better journals
@@ -426,17 +454,20 @@ Complete translations available:
 ### Why Migration is Needed
 
 Foundry doesn't allow changing system IDs. Since this system uses `l5r4-enhanced` instead of `l5r4`, you need to:
+
 1. Create a new world with `l5r4-enhanced`
 2. Transfer your data using our migration tool
 
 ### Migration Tool
 
 Install the automated migration tool:
+
 ```
 https://github.com/ernieayala/l5r4-migrator/releases/latest/download/module.json
 ```
 
 **Features:**
+
 - Automatic schema detection
 - Complete backup system
 - Step-by-step UI
@@ -445,6 +476,7 @@ https://github.com/ernieayala/l5r4-migrator/releases/latest/download/module.json
 **Full Guide:** [Migration Documentation](https://github.com/ernieayala/l5r4-migrator/blob/main/MIGRATION_GUIDE.md)
 
 **Quick Steps:**
+
 1. Install migration module in both worlds
 2. Export data from old world
 3. Create new `l5r4-enhanced` world
@@ -452,6 +484,7 @@ https://github.com/ernieayala/l5r4-migrator/releases/latest/download/module.json
 5. Verify your data
 
 **Need Help?**
+
 - [Troubleshooting](https://github.com/ernieayala/l5r4-migrator/blob/main/MIGRATION_GUIDE.md#troubleshooting)
 - [FAQ](https://github.com/ernieayala/l5r4-migrator/blob/main/MIGRATION_GUIDE.md#faq)
 - [Report Issues](https://github.com/ernieayala/l5r4-migrator/issues)
@@ -463,26 +496,32 @@ https://github.com/ernieayala/l5r4-migrator/releases/latest/download/module.json
 ### Common Issues
 
 **System Won't Install**
+
 - Use the manifest URL installation method
 - Verify you're using the correct URL for L5R4-Enhanced
 
 **Rolls Not Working**
+
 - Check browser console (F12) for errors
 - Check for module conflicts
 
 **XP Not Tracking**
+
 - Click "Recalculate Purchase XP" button in XP Manager
 
 **Wound Penalties Not Applying**
+
 - Check "Apply Wound Penalty" in roll dialog
 - Note: Penalties apply to target numbers, not roll results
 
 **Active Effects Not Working**
+
 - Verify attribute keys match documentation
 - Ensure effects are not disabled
 - Check transfer settings on items
 
 **Migration Issues**
+
 - Use the automated migration tool
 - See [Migration Guide](#-migration-guide)
 
@@ -510,6 +549,7 @@ Want to help improve L5R4-Enhanced?
 **Report Bugs:** [GitHub Issues](https://github.com/ernieayala/l5r4/issues)
 
 Include:
+
 - Foundry VTT version
 - System version
 - Steps to reproduce
@@ -521,9 +561,11 @@ Include:
 ## 📄 License
 
 ### Code
+
 MIT License. See [LICENSE](LICENSE) for details.
 
 ### L5R Content
+
 **Unofficial fan-made system.** Not affiliated with or endorsed by Fantasy Flight Games, Edge Studio, or Asmodee.
 
 **Legend of the Five Rings** and **L5R** are trademarks of Fantasy Flight Games. All rights reserved.
@@ -531,14 +573,16 @@ MIT License. See [LICENSE](LICENSE) for details.
 **You must own the L5R 4th Edition rulebooks** to use this system. This package does not include copyrighted rulebook content.
 
 ### Foundry VTT
+
 Created under [Foundry VTT Limited License Agreement](https://foundryvtt.com/article/license/). Foundry VTT © Foundry Gaming LLC.
 
 ### Disclaimer
+
 Software provided "as is" without warranty. Always backup worlds before updates.
 
 ---
 
-*"In a land where honor is stronger than steel, your story awaits..."*
+_"In a land where honor is stronger than steel, your story awaits..."_
 
 Ready to experience Rokugan? Install and let the kami guide your dice!
 

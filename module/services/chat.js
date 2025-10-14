@@ -1,32 +1,32 @@
 /**
  * Chat Service
- * 
+ *
  * Centralized service for chat-related functionality including item creation dialogs,
  * inline roll parsing, and damage button event handling. Integrates L5R4 Roll & Keep
  * dice notation with Foundry's chat system and provides UI dialogs for item creation.
- * 
+ *
  * Core Responsibilities:
  * - **Item Creation Dialog**: Unified dialog for creating actor items (skills, advantages, equipment, etc.)
  * - **Inline Roll Parsing**: Intercepts chat messages to parse L5R4 Roll & Keep notation (XkY format)
  * - **Damage Button Handling**: Attaches click handlers to weapon damage buttons in chat cards
- * 
+ *
  * L5R4 Mechanics Integration:
  * - Roll & Keep Notation: Parses [[XkY]] inline rolls per Skills & Rolls rules
  * - Exploding Dice: All 10s explode (re-roll and add) per core dice mechanics
  * - Unskilled Rolls: Recognizes 'u' prefix (uXkY) - dice don't explode per Unskilled Roll rules
  * - Emphasis: Recognizes 'e' prefix (eXkY) - re-roll 1s per Skill Emphasis rules
  * - Damage Rolls: Handles weapon damage with attack raises and stance bonuses per Combat rules
- * 
+ *
  * Foundry VTT Integration:
  * - Requires: Foundry VTT v13+ (DialogV2 API, Hook system)
  * - Hooks: renderChatMessageHTML (damage buttons), chatMessage (inline roll parsing)
  * - Permissions: Respects actor ownership and GM privileges for damage rolls
  * - Chat System: Integrates with ChatMessage and chatlog.processMessage() for roll output
- * 
+ *
  * Service Initialization:
  * Call initializeChatService() from system init hook to register all chat hooks.
  * This attaches event listeners for damage buttons and inline roll interceptors.
- * 
+ *
  * @module services/chat
  * @requires Foundry VTT v13+
  * @see {@link https://foundryvtt.com/api/v13/classes/foundry.applications.api.DialogV2.html|DialogV2 API}
@@ -50,35 +50,35 @@ const DIALOG = foundry.applications.api.DialogV2;
 
 /**
  * Display unified item creation dialog and return user selections.
- * 
+ *
  * Prompts the user with a dialog to create a new item for an actor. The dialog
  * adjusts available item types based on actor type:
  * - PC actors: All item types (skills, advantages, disadvantages, equipment, spells, etc.)
  * - NPC actors: Skills only (simplified NPC sheet)
- * 
+ *
  * Dialog uses Foundry v13+ DialogV2.prompt() with rejectClose behavior, meaning
  * clicking outside the dialog or pressing Escape is treated as cancellation rather
  * than rejection, returning {cancelled: true} instead of throwing.
- * 
+ *
  * Validation:
  * - Item name is required (empty names return {cancelled: true})
  * - Item type defaults to "commonItem" if not provided
  * - Form element access uses fallback pattern: button.form ?? dialog.form
- * 
+ *
  * @param {string} actorType - Actor type ("pc" or "npc") to determine available item types
  * @param {string|null} [preferredType=null] - Item type to pre-select in dialog (e.g., "skill", "advantage")
  * @returns {Promise<ItemCreateResult>} Object with {name, type} on success, {cancelled: true} on cancellation
- * 
+ *
  * @async
  */
 export async function getUnifiedItemOptions(actorType, preferredType = null) {
   const showCharacterItems = actorType === "pc";
   const npcSkillsOnly = actorType === "npc";
 
-  const content = await R(DIALOG_TEMPLATES.unifiedItemCreate, { 
+  const content = await R(DIALOG_TEMPLATES.unifiedItemCreate, {
     showCharacterItems,
     npcSkillsOnly,
-    preferredType 
+    preferredType
   });
 
   try {
@@ -97,7 +97,7 @@ export async function getUnifiedItemOptions(actorType, preferredType = null) {
           const type = String(form.elements.itemType?.value ?? "").trim() || "commonItem";
 
           if (!name) return { cancelled: true };
-          
+
           return { name, type };
         }
       },
@@ -114,18 +114,18 @@ export async function getUnifiedItemOptions(actorType, preferredType = null) {
 
 /**
  * Initialize chat service by registering all required Foundry VTT hooks.
- * 
+ *
  * Registers two critical hooks for L5R4 chat integration:
  * 1. renderChatMessageHTML: Attaches click handlers to damage buttons in weapon chat cards
  * 2. chatMessage: Intercepts outgoing chat messages to parse L5R4 inline roll notation
- * 
+ *
  * This function should be called once during system initialization (typically in the
  * 'init' hook). Hooks remain active for the entire Foundry session.
- * 
+ *
  * Registered Hooks:
  * - **renderChatMessageHTML**: Runs after chat HTML is rendered, before display
  * - **chatMessage**: Runs before message is sent to chat, can intercept/modify
- * 
+ *
  * @see registerDamageButtonHook
  * @see registerInlineRollParsingHook
  */
@@ -136,33 +136,33 @@ export function initializeChatService() {
 
 /**
  * Register hook to attach damage roll click handlers to weapon chat cards.
- * 
+ *
  * Hooks into renderChatMessageHTML to find all damage buttons (.l5r4-damage-button)
  * and attach click event listeners. When clicked, extracts weapon data from button
  * dataset attributes and invokes WeaponRoll service to execute damage roll.
- * 
+ *
  * L5R4 Damage Mechanics:
  * - Base Damage: Weapon DR (roll/keep) from dataset.damageRoll/damageKeep
  * - Attack Raises: Converted to damage (+1k0 per raise) per Increased Damage maneuver
  * - Stance Bonuses: Full Attack stance grants +2k1 to damage rolls
  * - Clamping: Enforces game bounds (roll/keep 0-99, raises 0-20, stance 0-10)
- * 
+ *
  * Permission Checks:
  * - Requires actor ownership (actor.isOwner) OR GM privileges (game.user.isGM)
  * - Shows warning notification if permission denied
- * 
+ *
  * Debouncing:
  * - Uses isProcessing flag to prevent double-click damage rolls
  * - Flag scoped per button instance, resets after roll completes
- * 
+ *
  * Shift-Key Modifier:
  * - Holding Shift when clicking bypasses damage modifier dialog
  * - Passed to WeaponRoll as askForOptions parameter
- * 
+ *
  * Foundry VTT Hook:
  * - **renderChatMessageHTML**: Fired after chat HTML rendered, before inserted into DOM
  * - Params: (_app, html, _data) - html is jQuery-wrapped chat content
- * 
+ *
  * @private
  */
 function registerDamageButtonHook() {
@@ -171,12 +171,12 @@ function registerDamageButtonHook() {
       html.querySelectorAll(".l5r4-damage-button").forEach(button => {
         let isProcessing = false;
 
-        button.addEventListener("click", async (event) => {
+        button.addEventListener("click", async event => {
           event.preventDefault();
 
           if (isProcessing) return;
           isProcessing = true;
-          
+
           try {
             const actorId = event.currentTarget.dataset.actorId;
             const weaponName = event.currentTarget.dataset.weaponName;
@@ -201,15 +201,16 @@ function registerDamageButtonHook() {
 
             const actor = game?.actors?.get(actorId);
             if (!actor) {
-              const message = game?.i18n?.localize?.("l5r4.ui.notifications.actorNotFound") 
-                ?? "Actor not found";
+              const message =
+                game?.i18n?.localize?.("l5r4.ui.notifications.actorNotFound") ?? "Actor not found";
               ui?.notifications?.warn(message);
               return;
             }
 
             if (!actor.isOwner && !game?.user?.isGM) {
-              const message = game?.i18n?.localize?.("l5r4.ui.notifications.noPermissionDamage") 
-                ?? "No permission to roll damage";
+              const message =
+                game?.i18n?.localize?.("l5r4.ui.notifications.noPermissionDamage") ??
+                "No permission to roll damage";
               ui?.notifications?.warn(message);
               return;
             }
@@ -239,55 +240,56 @@ function registerDamageButtonHook() {
 
 /**
  * Register hook to intercept and parse L5R4 Roll & Keep notation in chat messages.
- * 
+ *
  * Hooks into chatMessage to detect and parse inline L5R4 dice notation before the
  * message is sent to Foundry's standard chat system. Supports both whole-message
  * rolls [[XkY]] and inline rolls within text "I attack [[7k3+5]] and defend [[5k3]]".
- * 
+ *
  * L5R4 Roll & Keep Notation:
  * - Basic Format: [[XkY]] = Roll X dice, keep Y highest (e.g., [[7k3]])
  * - With Bonus: [[XkY+Z]] = Roll X, keep Y, add flat bonus Z (e.g., [[7k3+5]])
  * - Unskilled: [[uXkY]] = Unskilled roll (dice don't explode per Unskilled Roll rules)
  * - Emphasis: [[eXkY]] = Emphasis (re-roll 1s per Skill Emphasis rules)
  * - Exploding Dice: All 10s explode automatically (re-roll and add to total)
- * 
+ *
  * Regex Patterns:
  * - Foundry Roll Commands: /^\/(r(oll)?|gmr(oll)?|br(oll)?|sr(oll)?)\s/i
  *   → Detects /roll, /r, /gmroll, /gmr, /broll, /br, /sroll, /sr commands
  *   → Passes through to Foundry's native roll handler without interception
- * 
+ *
  * - L5R4 Notation: /(u|e)?\d+k\d+(x\d+)?([+]\d+)?/
  *   → Matches: [optional u/e prefix][digits]k[digits][optional xN][optional +N]
  *   → Examples: "7k3", "u3k3", "e7k3+5", "7k3x2+5"
- * 
+ *
  * - Whole Message Roll: /^\[\[(.*)\]\]$/
  *   → Matches: [[content]] when it's the entire message (no surrounding text)
  *   → Extracts content and checks if it matches L5R4 notation
- * 
+ *
  * - Inline Rolls: /\[\[(.*?)\]\]/g
  *   → Matches: [[content]] anywhere in message (supports multiple per message)
  *   → Global flag (/g) requires manual lastIndex reset to prevent state issues
- * 
+ *
  * Hook Behavior:
  * - Returns true: Message passes through to Foundry's standard chat processing
  * - Returns false: Message intercepted, custom processing applied (prevents default)
- * 
+ *
  * Character Limit:
  * - Maximum 10,000 characters enforced to prevent excessive chat message sizes
  * - Shows warning notification and prevents message submission if exceeded
- * 
+ *
  * Foundry VTT Hook:
  * - **chatMessage**: Fired before message sent to chat, can intercept/modify
  * - Params: (chatlog, message, _chatData) - message is raw string input
- * 
+ *
  * @private
  */
 function registerInlineRollParsingHook() {
   Hooks.on("chatMessage", (chatlog, message, _chatData) => {
     // Enforce character limit to prevent performance issues with massive chat messages
     if (message.length > 10000) {
-      const warning = game?.i18n?.localize?.("l5r4.ui.notifications.messageTooLong") 
-        ?? "Message too long (max 10,000 characters)";
+      const warning =
+        game?.i18n?.localize?.("l5r4.ui.notifications.messageTooLong") ??
+        "Message too long (max 10,000 characters)";
       ui?.notifications?.warn(warning);
       return false;
     }

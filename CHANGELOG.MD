@@ -12,18 +12,21 @@ Versioning: [Semantic Versioning](https://semver.org/spec/v2.0.0.html)
 ### Added
 
 **Mounted Combat**
+
 - Mounted/higher ground bonuses (+1k0 to attacks)
 - Full Attack stance restriction when mounted (needs Horsemanship 3+)
 - Visual feedback for restricted stances
 - Works for both PCs and NPCs
 
 **User Interface**
+
 - Shift+Click required to post items to chat (prevents accidents)
 - Hover tooltips with keyboard hints
 - Fade-in controls for cleaner look
 - Improved hover animations
 
 **Icon System**
+
 - Migrated all icons from PNG to WebP (60% smaller files)
 - Automatic token image migration
 - Fixed bow weapon icons
@@ -52,19 +55,23 @@ Complete restructuring into modern, maintainable architecture. **All user data r
 ### Breaking Changes
 
 **For Third-Party Module Developers**
+
 - 4 monolithic files split into 60+ focused modules
 - File paths and imports completely reorganized
 - Internal APIs changed
 
 **License**
+
 - Changed from GPL v2 to MIT License
 
 ### Refactoring
 
 **Before**: 4 large files (3,016 lines total)
+
 - config.js, dice.js, stance.js, utils.js
 
 **After**: 60+ focused modules
+
 - 5 config modules
 - 8 actor calculation modules
 - 11 item lifecycle modules
@@ -77,12 +84,14 @@ Complete restructuring into modern, maintainable architecture. **All user data r
 ### Added
 
 **User Features**
+
 - Combat stance dropdown on character sheets
 - Five stance options: Attack, Full Attack, Defense, Full Defense, Center
 - Automatic mutual exclusion
 - Stances persist through combat
 
 **Development**
+
 - DEVELOPER.md with contribution guidelines
 - game-rules/ with 38 L5R4 rule reference files
 - Integration test suite with Quench
@@ -106,6 +115,7 @@ Complete restructuring into modern, maintainable architecture. **All user data r
 ## [1.1.0] - 2025-10-01
 
 ### Added
+
 - Fear System for NPCs
   - Fear rating support
   - Automatic Fear checks
@@ -113,6 +123,7 @@ Complete restructuring into modern, maintainable architecture. **All user data r
   - Configurable thresholds and durations
 
 ### Fixed
+
 - Skill roll formulas now properly display Active Effects bonuses in chat
 
 ---
@@ -120,6 +131,7 @@ Complete restructuring into modern, maintainable architecture. **All user data r
 ## [1.0.2] - 2025-09-30
 
 ### Added
+
 - XP Manager recalculation button (calculator icon)
 - User feedback for recalculation success/failure
 - Recalculates all XP expenditures from current character state
@@ -131,12 +143,14 @@ Complete restructuring into modern, maintainable architecture. **All user data r
 ### New Features
 
 **Migration System**
+
 - Automated data structure updates
 - Version tracking
 - Schema field normalization
 - Icon path management
 
 **XP Manager**
+
 - Dedicated XP management interface
 - Comprehensive XP breakdown by category
 - Automatic L5R4 cost calculation
@@ -144,6 +158,7 @@ Complete restructuring into modern, maintainable architecture. **All user data r
 - ApplicationV2 architecture
 
 **Stance Automation**
+
 - Automated combat stance management
 - Active Effects integration
 - Mutual exclusion (one stance at a time)
@@ -151,22 +166,26 @@ Complete restructuring into modern, maintainable architecture. **All user data r
 - Automatic bonus application
 
 **Active Effects**
+
 - Complete trait and skill modification system
 - Transferable effects from Family, School, Advantages, Disadvantages
 - Automatic bonus application
 
 **Services Architecture**
+
 - Modular service-oriented design
 - Dice, Chat, and Stance services
 - Clear separation of concerns
 
 **Base Actor Sheet**
+
 - Shared functionality between PC and NPC sheets
 - Consistent UI patterns
 - Drag-drop support
 - Persistent sorting preferences
 
 **ApplicationV2/DialogV2**
+
 - Modern Foundry v13+ APIs throughout
 - XP Manager with ApplicationV2
 - Wound Config with ApplicationV2
@@ -175,43 +194,51 @@ Complete restructuring into modern, maintainable architecture. **All user data r
 ### Enhanced
 
 **Spell Slots**
+
 - Integrated with dice service
 - Automatic deduction
 - Validation when slots depleted
 
 **XP Tracking**
+
 - Automatic cost calculation
 - Triangular costs for skills
 - Progressive costs for traits
 - Complete audit trail
 
 **Combat Stances**
+
 - Active automation
 - Automatic bonus application
 - Status effect integration
 
 **Dice System**
+
 - Modular service (reduced from 21k+ lines)
 - Improved Ten Dice Rule
 - Better modifier dialogs
 - Enhanced chat cards
 
 **Localization**
+
 - Six languages (en, es, fr, pt-BR, de, ru)
 - Comprehensive coverage including skill names
 
 ### Major Refactoring
 
 **File Organization**
+
 - From flat structure to modular hierarchy
 - Separated documents/, sheets/, services/, apps/, setup/
 
 **Code Architecture**
+
 - Service-oriented design
 - Clear separation of concerns
 - Single responsibility principle
 
 **Foundry Compatibility**
+
 - Foundry v13+ APIs
 - ApplicationV2 and DialogV2 throughout
 - Modern event handling
@@ -219,9 +246,10 @@ Complete restructuring into modern, maintainable architecture. **All user data r
 ### Removed
 
 **PC Tabs System**
+
 - Simplified to single-page with scrolling
 - Reduced complexity, improved performance
 
 ---
 
-*Legend of the Five Rings is a trademark of Fantasy Flight Games. This is an unofficial fan-made system.*
+_Legend of the Five Rings is a trademark of Fantasy Flight Games. This is an unofficial fan-made system._

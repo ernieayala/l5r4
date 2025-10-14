@@ -1,10 +1,10 @@
 /**
  * Experience Point System
- * 
+ *
  * Implements Legend of the Five Rings 4th Edition experience point calculations for
  * character advancement. Handles XP tracking, cost calculations, and free bonus
  * management for both character creation and post-creation advancement.
- * 
+ *
  * Key Responsibilities:
  * - **XP Cost Calculation**: Compute XP costs for trait, Void, skill, emphasis,
  *   advantage, disadvantage, kata, and kiho purchases per L5R4 rules
@@ -13,7 +13,7 @@
  *   that don't cost XP (e.g., family grants +1 trait, school grants +1 trait)
  * - **XP Expenditure Tracking**: Log all XP spending for character sheet history
  * - **Disadvantage Cap**: Enforce 10 XP maximum from disadvantages per game rules
- * 
+ *
  * L5R4 Game Rules Implemented:
  * - **Trait Advancement**: Cost = 4 × new rank (e.g., Reflexes 2→3 = 12 XP)
  * - **Void Advancement**: Cost = 6 × new rank (e.g., Void 2→3 = 18 XP)
@@ -25,18 +25,18 @@
  * - **Insight Rank**: (Sum of all 5 Rings × 10) + (Sum of all Skill Ranks)
  *   - Rank 1: 0-149, Rank 2: 150-174, Rank 3: 175-199, Rank 4: 200-224,
  *     Rank 5: 225-249, then +25 insight per rank thereafter
- * 
+ *
  * Free Bonus System:
  * During character creation, family selection grants +1 to one trait and school
  * selection grants +1 to another trait. These "creation bonuses" let characters
  * start with traits at rank 3 instead of 2 without spending XP. The system tracks
  * these bonuses to ensure only the first rank-3 purchase is free; subsequent
  * advancement costs full XP.
- * 
+ *
  * This module uses `xpFreeTraitBase` flags to convert free "effective" bonuses to
  * permanent "base" bonuses when a trait is first advanced to rank 3, preventing
  * double-counting and ensuring proper XP tracking.
- * 
+ *
  * Foundry VTT Integration:
  * - Reads actor.flags[SYS_ID] for XP tracking data (xpBase, xpManual, xpSpent, etc.)
  * - Uses actor.items collection to sum costs from skills, advantages, disadvantages
@@ -44,7 +44,7 @@
  * - Uses foundry.utils.setProperty() for deep flag updates during _preUpdate hooks
  * - Leverages game.i18n for localized XP log entries
  * - Requires Foundry v10+ for foundry.utils.randomID()
- * 
+ *
  * @module documents/actor/calculations/xp-system
  * @see {@link https://foundryvtt.com/api/v13/classes/foundry.abstract.Document.html#flags|Foundry Flags API}
  */
@@ -59,16 +59,16 @@ import {
 
 /**
  * Calculate total XP cost to advance a trait from oldRank to newRank.
- * 
+ *
  * Sums the XP cost for each individual rank step using the L5R4 formula (4 × rank).
  * Accounts for free effective ranks from family/school bonuses and optional discounts.
- * 
+ *
  * If a character has a free effective bonus (freeEff), the cost is reduced. For example,
  * if advancing Stamina from rank 2 to 4 with freeEff=1 and no discount:
  * - Step 2→3: 4 × (3 - 1) = 8 XP (free bonus offsets one rank)
  * - Step 3→4: 4 × (4 - 1) = 12 XP (free bonus still applies)
  * - Total: 20 XP instead of the normal 28 XP (12 + 16)
- * 
+ *
  * @param {number} oldRank - Current trait rank (typically 2-9)
  * @param {number} newRank - Target trait rank (typically 3-10)
  * @param {number} freeEff - Free effective ranks from creation bonuses (usually 0 or 1)
@@ -86,18 +86,18 @@ function calculateTraitXpCost(oldRank, newRank, freeEff, disc) {
 
 /**
  * Calculate total XP cost to advance Void Ring from oldRank to newRank.
- * 
+ *
  * Implements the L5R4 Void advancement formula: Cost = 6 × new rank.
  * Sums the cost for each rank step and applies optional discounts.
- * 
+ *
  * Void costs more than regular traits because it directly contributes to Insight Rank
  * calculation and grants Void Points (powerful meta-currency for boosting rolls).
- * 
+ *
  * If advancing Void from 2 to 4 with no discount:
  * - Step 2→3: 6 × 3 = 18 XP
  * - Step 3→4: 6 × 4 = 24 XP
  * - Total: 42 XP
- * 
+ *
  * @param {number} oldRank - Current Void Ring rank (typically 2-9)
  * @param {number} newRank - Target Void Ring rank (typically 3-10)
  * @param {number} disc - XP cost discount modifier (negative = cheaper, positive = more expensive)
@@ -116,11 +116,11 @@ function calculateVoidXpCost(oldRank, newRank, disc) {
 
 /**
  * Type guard to safely check if an item matches an expected type.
- * 
+ *
  * Defensive helper that validates both the item exists and has a string type
  * property matching the expected value. Prevents errors when iterating actor.items
  * with potentially malformed or null entries.
- * 
+ *
  * @param {Object|null} item - Foundry Item document (or null)
  * @param {string} expectedType - Expected item.type value (e.g., "skill", "advantage")
  * @returns {boolean} True if item exists and item.type === expectedType
@@ -132,7 +132,7 @@ function isItemOfType(item, expectedType) {
 
 /**
  * Calculate Insight Rank from total insight value.
- * 
+ *
  * Implements L5R4 Insight Rank thresholds:
  * - Rank 1: 0-149 insight
  * - Rank 2: 150-174 insight
@@ -140,11 +140,11 @@ function isItemOfType(item, expectedType) {
  * - Rank 4: 200-224 insight
  * - Rank 5: 225-249 insight
  * - Rank 6+: +25 insight per rank
- * 
+ *
  * Insight Rank determines when characters learn new school Techniques and is a
  * measure of overall character power. Total insight = (sum of 5 Ring ranks × 10)
  * + (sum of all skill ranks).
- * 
+ *
  * @param {number} insight - Total insight value (Rings × 10 + Skills)
  * @returns {number} Insight Rank (1-50+)
  */
@@ -166,16 +166,16 @@ export function calculateInsightRank(insight) {
 
 /**
  * Calculate and store complete XP breakdown for a PC actor.
- * 
+ *
  * Computes total XP available, total XP spent, and XP remaining from all sources.
  * Stores the complete breakdown in sys._xp for sheet display. This function is
  * called during actor.prepareDerivedData() to ensure XP totals are always current.
- * 
+ *
  * XP Sources (Total):
  * - Base XP (default 40 for starting characters)
  * - Disadvantages (up to 10 XP cap per game rules)
  * - Manual adjustments (GM-awarded XP from flags.xpManual array)
- * 
+ *
  * XP Expenditures (Spent):
  * - Traits: Sum of all trait advancements beyond baseline (2 + free bonuses)
  * - Void Ring: Advancements beyond baseline (2 + free bonuses)
@@ -184,13 +184,13 @@ export function calculateInsightRank(insight) {
  * - Advantages: Sum of all advantage costs
  * - Kata: Sum of all kata costs
  * - Kiho: Sum of all kiho costs
- * 
+ *
  * Free Bonus Handling:
  * The system tracks two types of free bonuses to prevent double-counting:
  * - **freeEff** (effective): Ongoing bonus from family/school, reduces XP cost
  * - **freeBase** (base): Permanent bonus stored in xpFreeTraitBase flag after
  *   first advancement to rank 3, ensures bonus only applies once
- * 
+ *
  * @param {Actor} actor - Foundry Actor document (must be type "pc")
  * @param {Object} sys - Actor's system data object (actor.system)
  */
@@ -214,7 +214,7 @@ export function preparePcExperience(actor, sys) {
   const disadvCap = Math.min(10, disadvGranted);
 
   const traitDiscounts = actor.flags?.[SYS_ID]?.traitDiscounts ?? {};
-  const freeTraitBase  = actor.flags?.[SYS_ID]?.xpFreeTraitBase ?? {};
+  const freeTraitBase = actor.flags?.[SYS_ID]?.xpFreeTraitBase ?? {};
 
   let traitsXP = 0;
   for (const k of Object.keys(sys.traits ?? {})) {
@@ -226,22 +226,23 @@ export function preparePcExperience(actor, sys) {
 
     const baseline = 2 + freeBase;
     const baseCur = Math.max(baseline, effCur - freeEff);
-    
+
     if (baseCur > baseline) {
       traitsXP += calculateTraitXpCost(baseline, baseCur, freeEff, disc);
     }
   }
 
-  const voidEffCur = toInt(sys?.rings?.void?.rank ?? sys?.rings?.void?.value ?? sys?.rings?.void ?? 0);
+  const voidEffCur = toInt(
+    sys?.rings?.void?.rank ?? sys?.rings?.void?.value ?? sys?.rings?.void ?? 0
+  );
   const voidFreeBase = toInt(freeTraitBase?.void ?? 0);
   const voidFreeEff = voidFreeBase > 0 ? 0 : toInt(getCreationFreeBonusVoid(actor));
   const voidBaseline = 2 + voidFreeBase;
   const voidBaseCur = Math.max(voidBaseline, voidEffCur - voidFreeEff);
   const voidDisc = toInt(traitDiscounts?.void ?? 0);
-  
-  const voidXP = voidBaseCur > voidBaseline
-    ? calculateVoidXpCost(voidBaseline, voidBaseCur, voidDisc)
-    : 0;
+
+  const voidXP =
+    voidBaseCur > voidBaseline ? calculateVoidXpCost(voidBaseline, voidBaseCur, voidDisc) : 0;
 
   let skillsXP = 0;
   for (const it of actor.items) {
@@ -255,7 +256,10 @@ export function preparePcExperience(actor, sys) {
     }
     const emph = String(it.system?.emphasis ?? "").trim();
     if (emph) {
-      const emphases = emph.split(/[,;]+/).map(s => s.trim()).filter(Boolean);
+      const emphases = emph
+        .split(/[,;]+/)
+        .map(s => s.trim())
+        .filter(Boolean);
       const freeEmphasis = Math.max(0, toInt(it.system?.freeEmphasis ?? 0));
       const paidEmphases = Math.max(0, emphases.length - freeEmphasis);
 
@@ -301,24 +305,24 @@ export function preparePcExperience(actor, sys) {
 
 /**
  * Track XP expenditures when traits or Void Ring increase.
- * 
+ *
  * Called during actor._preUpdate hook to log XP spending whenever traits or Void
  * Ring change. Creates timestamped log entries in flags.xpSpent array for display
  * in the XP Manager application.
- * 
+ *
  * Handles free bonus consumption: When a trait with a free effective bonus is
  * advanced to rank 3 for the first time, the system converts the effective bonus
  * to a permanent base bonus (stored in xpFreeTraitBase flag). This ensures:
  * - The rank 3 purchase doesn't cost XP (uses free creation bonus)
  * - Future advancements correctly calculate costs using the updated baseline
  * - No double-counting of free bonuses
- * 
+ *
  * This function mutates the `changed` object by adding entries to flags.xpSpent
  * and potentially updating flags.xpFreeTraitBase when free bonuses are consumed.
- * 
+ *
  * **Important**: Only tracks trait and Void changes. Skill/advantage/disadvantage
  * purchases are tracked through item creation/deletion in separate hooks.
- * 
+ *
  * @param {Actor} actor - Foundry Actor document being updated
  * @param {Object} changed - Update delta object passed to _preUpdate hook. This
  *   object will be mutated to add flag updates if XP tracking entries are created.
@@ -327,7 +331,7 @@ export function trackXpExpenditure(actor, changed) {
   try {
     if (actor.type !== "pc") return;
 
-    const oldSys =  (actor._source?.system ?? actor.system);
+    const oldSys = actor._source?.system ?? actor.system;
     const ns = actor.flags?.[SYS_ID] ?? {};
     const spent = Array.isArray(ns.xpSpent) ? [...ns.xpSpent] : [];
 
@@ -343,11 +347,11 @@ export function trackXpExpenditure(actor, changed) {
 
     /**
      * Add an XP expenditure log entry to the spent array.
-     * 
+     *
      * Creates a timestamped log entry with XP delta, human-readable note, and
      * optional metadata for filtering/display. Deduplicates entries by checking
      * if an entry with the same type:note key already exists.
-     * 
+     *
      * @param {number} delta - XP cost (positive value)
      * @param {string} note - Localized description of the expenditure
      * @param {Object} [extraData={}] - Additional metadata (type, traitKey, fromValue, toValue, etc.)
@@ -385,7 +389,11 @@ export function trackXpExpenditure(actor, changed) {
           // (e.g., family/school grant), convert the effective bonus to a permanent base
           // bonus so it only applies once. This rank costs no XP.
           if (!consumedFreeBase && freeBase === 0 && stepFreeEff > 0 && r === 3) {
-            foundry.utils.setProperty(changed, `flags.${SYS_ID}.xpFreeTraitBase.${k}`, (freeTraitBase?.[k] ?? 0) + 1);
+            foundry.utils.setProperty(
+              changed,
+              `flags.${SYS_ID}.xpFreeTraitBase.${k}`,
+              (freeTraitBase?.[k] ?? 0) + 1
+            );
             consumedFreeBase = true;
             stepFreeEff = 0;
             continue;
@@ -396,20 +404,30 @@ export function trackXpExpenditure(actor, changed) {
 
         if (deltaXP > 0) {
           const label = game.i18n?.localize?.(`l5r4.ui.mechanics.traits.${k}`) || k.toUpperCase();
-          pushNote(deltaXP, game.i18n.format("l5r4.character.experience.traitChange", { label, from: oldBase, to: newBase }), {
-            type: "trait",
-            traitKey: k,
-            traitLabel: label,
-            fromValue: oldBase,
-            toValue: newBase
-          });
+          pushNote(
+            deltaXP,
+            game.i18n.format("l5r4.character.experience.traitChange", {
+              label,
+              from: oldBase,
+              to: newBase
+            }),
+            {
+              type: "trait",
+              traitKey: k,
+              traitLabel: label,
+              fromValue: oldBase,
+              toValue: newBase
+            }
+          );
         }
       }
     }
 
     const newVoid = changed?.system?.rings?.void?.rank ?? changed?.system?.rings?.void?.value;
     if (newVoid !== undefined) {
-      const oldVoid = toInt(oldSys?.rings?.void?.rank ?? oldSys?.rings?.void?.value ?? oldSys?.rings?.void);
+      const oldVoid = toInt(
+        oldSys?.rings?.void?.rank ?? oldSys?.rings?.void?.value ?? oldSys?.rings?.void
+      );
       const next = toInt(newVoid);
 
       if (Number.isFinite(next) && next > oldVoid) {
@@ -419,11 +437,15 @@ export function trackXpExpenditure(actor, changed) {
         const deltaXP = calculateVoidXpCost(startRank, next, voidDisc);
 
         if (deltaXP > 0) {
-          pushNote(deltaXP, game.i18n.format("l5r4.character.experience.voidChange", { from: oldVoid, to: next }), {
-            type: "void",
-            fromValue: oldVoid,
-            toValue: next
-          });
+          pushNote(
+            deltaXP,
+            game.i18n.format("l5r4.character.experience.voidChange", { from: oldVoid, to: next }),
+            {
+              type: "void",
+              fromValue: oldVoid,
+              toValue: next
+            }
+          );
         }
       }
     }
