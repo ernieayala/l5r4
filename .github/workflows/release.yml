@@ -57,13 +57,26 @@ jobs:
         # Create a clean ZIP excluding development files
         zip -r l5r4.zip . \
           -x "*.git*" \
+          -x ".gitignore" \
           -x "node_modules/*" \
           -x "scss/*" \
           -x "gulpfile.js" \
           -x "package*.json" \
           -x ".github/*" \
-          -x "*.md" \
-          -x "scripts/*"
+          -x ".windsurf/*" \
+          -x "scripts/*" \
+          -x "tests/*" \
+          -x "_for_research/*" \
+          -x "game-rules/*" \
+          -x "pc-images/*" \
+          -x "npc-images/*" \
+          -x ".prettierignore" \
+          -x ".prettierrc" \
+          -x ".stylelintignore" \
+          -x ".stylelintrc.json" \
+          -x "madge-analysis.json" \
+          -x "DEVELOPER.md" \
+          -x "RELEASE_CHECKLIST*.md"
         
         echo "Created l5r4.zip with contents:"
         unzip -l l5r4.zip
