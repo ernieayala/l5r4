@@ -435,13 +435,6 @@ _Want to help translate? Submit pull requests on [GitHub](https://github.com/ern
 **Essential**
 
 - **[Dice So Nice!](https://foundryvtt.com/packages/dice-so-nice)** - 3D dice animations for L5R rolls
-- **[Token Action HUD](https://foundryvtt.com/packages/token-action-hud)** - Quick access to actions
-
-**Quality of Life**
-
-- **[Drag Ruler](https://foundryvtt.com/packages/drag-ruler)** - Enhanced movement
-- **[Combat Utility Belt](https://foundryvtt.com/packages/combat-utility-belt)** - Combat management
-- **[Monk's Enhanced Journal](https://foundryvtt.com/packages/monks-enhanced-journal)** - Better journals
 
 ---
 
