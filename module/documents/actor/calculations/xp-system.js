@@ -210,8 +210,9 @@ export function preparePcExperience(actor, sys) {
     disadvGranted += Math.max(0, toInt(it.system?.cost));
   }
 
-  // Disadvantage cap: Maximum 10 XP from disadvantages per L5R4 rules
-  const disadvCap = Math.min(10, disadvGranted);
+  // Disadvantage cap: Maximum XP from disadvantages (default 10 per L5R4 rules, configurable by GM)
+  const configuredCap = Number.isFinite(+flags.disadvantageCap) ? Number(flags.disadvantageCap) : 10;
+  const disadvCap = Math.min(configuredCap, disadvGranted);
 
   const traitDiscounts = actor.flags?.[SYS_ID]?.traitDiscounts ?? {};
   const freeTraitBase = actor.flags?.[SYS_ID]?.xpFreeTraitBase ?? {};

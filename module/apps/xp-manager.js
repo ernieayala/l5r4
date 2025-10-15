@@ -87,7 +87,8 @@ export default class XpManagerApplication extends foundry.applications.api.Handl
       "xp-add-confirm": XpManagerApplication.prototype._onAddXp,
       "xp-delete-manual": XpManagerApplication.prototype._onDeleteEntry,
       "item-sort-by": XpManagerApplication.prototype._onSortClick,
-      "recalculate-xp-purchase": XpManagerApplication.prototype._onRecalculateXpPurchase
+      "recalculate-xp-purchase": XpManagerApplication.prototype._onRecalculateXpPurchase,
+      "change-disadvantage-cap": XpManagerApplication.prototype._onChangeDisadvantageCap
     }
   };
 
@@ -219,6 +220,9 @@ export default class XpManagerApplication extends foundry.applications.api.Handl
     const manualTotal = this._calculateTotal(manual);
     const spentTotal = this._calculateTotal(spent);
 
+    const flags = this._getFlags();
+    const disadvantageCap = Number.isFinite(+flags.disadvantageCap) ? Number(flags.disadvantageCap) : 10;
+
     return {
       xp: {
         spent: xp.spent ?? 0,
@@ -236,6 +240,7 @@ export default class XpManagerApplication extends foundry.applications.api.Handl
           kiho: xp?.breakdown?.kiho ?? 0
         }
       },
+      disadvantageCap,
       manualEntries,
       spentEntries,
       manualTotal,
@@ -392,6 +397,55 @@ export default class XpManagerApplication extends foundry.applications.api.Handl
     } catch (err) {
       console.warn(`${SYS_ID}`, "Failed to recalculate XP purchases", err);
       ui.notifications?.error(game.i18n.localize("l5r4.character.experience.recalculateFailed"));
+    }
+  }
+
+  /**
+   * Event handler for changing the disadvantage XP cap.
+   *
+   * Opens a dialog prompting the user to enter a new maximum XP value from disadvantages.
+   * Default is 10 per L5R4 rules, but GMs can adjust this for house rules or campaign needs.
+   *
+   * @async
+   * @param {Event} event - Click event from the cap value element
+   * @param {HTMLElement} target - Clicked element
+   * @private
+   */
+  async _onChangeDisadvantageCap(event, target) {
+    event.preventDefault();
+
+    const flags = this._getFlags();
+    const currentCap = Number.isFinite(+flags.disadvantageCap) ? Number(flags.disadvantageCap) : 10;
+
+    const content = await foundry.applications.handlebars.renderTemplate(
+      `systems/${SYS_ID}/templates/dialogs/disadvantage-cap-dialog.hbs`,
+      { currentCap }
+    );
+
+    try {
+      const newCap = await foundry.applications.api.DialogV2.prompt({
+        window: { title: game.i18n.localize("l5r4.character.experience.disadvantageCapTitle") },
+        content,
+        ok: {
+          label: game.i18n.localize("l5r4.ui.common.ok"),
+          callback: (_e, b, d) => {
+            const form = b.form ?? d.form;
+            const input = form?.querySelector("#disadvantage-cap");
+            return input ? Number(input.value) : null;
+          }
+        },
+        cancel: { label: game.i18n.localize("l5r4.ui.common.cancel") },
+        rejectClose: false,
+        modal: true
+      });
+
+      if (newCap !== null && Number.isFinite(newCap) && newCap >= 0) {
+        await this.actor.setFlag(SYS_ID, "disadvantageCap", newCap);
+        this.render();
+      }
+    } catch (err) {
+      // Dialog cancelled or error occurred
+      if (err) console.warn(`${SYS_ID}`, "Failed to set disadvantage cap", { err });
     }
   }
 

@@ -119,6 +119,7 @@ export async function preloadTemplates() {
     `systems/${SYS_ID}/templates/chat/weapon-chat.hbs`,
 
     // Dialog Templates
+    `systems/${SYS_ID}/templates/dialogs/disadvantage-cap-dialog.hbs`,
     `systems/${SYS_ID}/templates/dialogs/roll-modifiers-dialog.hbs`,
     `systems/${SYS_ID}/templates/dialogs/unified-item-create-dialog.hbs`,
 
