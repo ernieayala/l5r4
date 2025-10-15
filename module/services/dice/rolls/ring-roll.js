@@ -159,7 +159,7 @@ export async function RingRoll({
   actor = null
 } = {}) {
   const messageTemplate = CHAT_TEMPLATES.simpleRoll;
-  let label = `${game.i18n.localize("l5r4.ui.mechanics.rolls.ringRoll")}: ${ringName}`;
+  let label = ""; // Will be set after dialog processing based on roll type
 
   const optionsSetting = game.settings.get(SYS_ID, "showSpellRollOptions");
 
@@ -195,14 +195,13 @@ export async function RingRoll({
 
     __tnInput = toInt(choice.tn);
     __raisesInput = toInt(choice.raises);
+  }
 
-    // Append TN and raises to chat label if specified
-    // Each raise adds +5 to effective TN per L5R4 Skills_and_Rolls.md
-    if (__tnInput || __raisesInput) {
-      const __effTN = __tnInput + __raisesInput * 5; // Raises formula: base TN + (raises × 5)
-      const raisesLabel = game.i18n.localize("l5r4.ui.mechanics.rolls.raises");
-      label += ` [TN ${__effTN}${__raisesInput ? ` (${raisesLabel}: ${__raisesInput})` : ""}]`;
-    }
+  // Set base label based on roll type (before appending modifiers)
+  if (normalRoll) {
+    label = `${game.i18n.localize("l5r4.ui.mechanics.rolls.ringRoll")}: ${ringName}`;
+  } else {
+    label = `${game.i18n.localize("l5r4.ui.mechanics.rolls.spellCasting")}: ${ringName}`;
   }
 
   // Apply actor-specific Ring bonuses from effects, techniques, advantages
@@ -240,52 +239,69 @@ export async function RingRoll({
     label += result.value; // Append slot label (e.g., " [Void Slot]")
   }
 
-  // Only execute roll if normalRoll is true (dialog not cancelled, valid roll type)
-  // normalRoll = false indicates Spell Casting was selected but not yet implemented here
+  // Determine dice pool based on roll type
+  let diceToRoll, diceToKeep;
+
   if (normalRoll) {
-    // Calculate dice pool: Ring rank + accumulated modifiers
-    const diceToRoll = toInt(ringRank) + rollMod;
-    const diceToKeep = toInt(ringRank) + keepMod;
+    // Ring Roll: XkX where X = Ring rank
+    diceToRoll = toInt(ringRank) + rollMod;
+    diceToKeep = toInt(ringRank) + keepMod;
+  } else {
+    // Spell Casting: (Ring + School Rank)k(Ring)
+    const schoolRank = toInt(actor?.system?.insight?.rank);
 
-    // Apply Ten Dice Rule: Cap at 10 rolled/kept dice, overflow becomes bonuses
-    // Example: 12k4 → 10k5, 14k12 → 10k10+12
-    const { diceRoll, diceKeep, bonus } = TenDiceRule(diceToRoll, diceToKeep, totalMod);
-
-    // Build roll formula (e.g., "4d10x10kh3+2" for 4k3+2 with exploding tens)
-    const rollFormula = buildFormula(diceRoll, diceKeep, bonus);
-
-    // Execute roll using Foundry Roll API
-    const roll = new Roll(rollFormula);
-    const rollHtml = await roll.render();
-
-    // Calculate effective TN: base TN + (raises × 5) + wound penalty
-    // Wound penalty only applied if enabled AND a TN was specified
-    const effTN = calculateEffectiveTN(
-      __tnInput,
-      __raisesInput,
-      woundPenalty,
-      applyWoundPenalty && __tnInput > 0
-    );
-
-    // Evaluate success/failure with margin calculation
-    const tnResult = evaluateTN(roll.total ?? 0, effTN, __raisesInput);
-
-    // Render chat message content from template
-    const content = await R(messageTemplate, { flavor: label, roll: rollHtml, tnResult });
-
-    // Post to chat with error recovery
-    try {
-      return await roll.toMessage({ speaker: ChatMessage.getSpeaker(), content });
-    } catch (err) {
-      console.error(`${SYS_ID}`, "RingRoll: Failed to post chat message after roll", {
-        err,
-        ringName
-      });
-      ui.notifications?.error(game.i18n.localize("l5r4.ui.notifications.chatMessageFailed"));
-      return false; // Roll succeeded but chat post failed
+    // Validate school rank - cannot cast with rank 0
+    if (schoolRank <= 0) {
+      ui.notifications?.warn(game.i18n.localize("l5r4.ui.notifications.schoolRankZero"));
+      return false;
     }
+
+    diceToRoll = toInt(ringRank) + schoolRank + rollMod;
+    diceToKeep = toInt(ringRank) + keepMod;
   }
 
-  // Dialog was cancelled or spell casting selected (not yet implemented)
-  return false;
+  // Append TN and raises to label if specified
+  if (__tnInput || __raisesInput) {
+    const __effTN = __tnInput + __raisesInput * 5;
+    const raisesLabel = game.i18n.localize("l5r4.ui.mechanics.rolls.raises");
+    label += ` [TN ${__effTN}${__raisesInput ? ` (${raisesLabel}: ${__raisesInput})` : ""}]`;
+  }
+
+  // Apply Ten Dice Rule: Cap at 10 rolled/kept dice, overflow becomes bonuses
+  // Example: 12k4 → 10k5, 14k12 → 10k10+12
+  const { diceRoll, diceKeep, bonus } = TenDiceRule(diceToRoll, diceToKeep, totalMod);
+
+  // Build roll formula (e.g., "4d10x10kh3+2" for 4k3+2 with exploding tens)
+  const rollFormula = buildFormula(diceRoll, diceKeep, bonus);
+
+  // Execute roll using Foundry Roll API
+  const roll = new Roll(rollFormula);
+  const rollHtml = await roll.render();
+
+  // Calculate effective TN: base TN + (raises × 5) + wound penalty
+  // Wound penalty only applied if enabled AND a TN was specified
+  const effTN = calculateEffectiveTN(
+    __tnInput,
+    __raisesInput,
+    woundPenalty,
+    applyWoundPenalty && __tnInput > 0
+  );
+
+  // Evaluate success/failure with margin calculation
+  const tnResult = evaluateTN(roll.total ?? 0, effTN, __raisesInput);
+
+  // Render chat message content from template
+  const content = await R(messageTemplate, { flavor: label, roll: rollHtml, tnResult });
+
+  // Post to chat with error recovery
+  try {
+    return await roll.toMessage({ speaker: ChatMessage.getSpeaker(), content });
+  } catch (err) {
+    console.error(`${SYS_ID}`, "RingRoll: Failed to post chat message after roll", {
+      err,
+      ringName
+    });
+    ui.notifications?.error(game.i18n.localize("l5r4.ui.notifications.chatMessageFailed"));
+    return false; // Roll succeeded but chat post failed
+  }
 }

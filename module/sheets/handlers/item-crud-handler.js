@@ -245,7 +245,7 @@ export class ItemCRUDHandler {
         value = String(value ?? "");
     }
 
-    return context.actor.items.get(id)?.update({ [field]: value });
+    return context.actor.items.get(id)?.update({ [field]: value }, { render: false });
   }
 
   /**

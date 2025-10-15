@@ -15,7 +15,7 @@
               "l5r4.character.experience.breakdown.disadvantagesGrant"
             }}</strong>:</span>
         <span>{{xp.breakdown.disadvantagesGranted}}
-          {{localize "l5r4.character.experience.breakdown.cap10"}}</span></li>{{/if}}
+          (<span class="clickable" data-action="change-disadvantage-cap" title="{{localize 'l5r4.character.experience.disadvantageCapTooltip'}}">{{localize "l5r4.character.experience.breakdown.cap"}} {{disadvantageCap}}</span>)</span></li>{{/if}}
     {{#if xp.breakdown.manual}}<li><span><strong>{{localize
               "l5r4.character.experience.breakdown.manualAdjustments"
             }}</strong>:</span>
