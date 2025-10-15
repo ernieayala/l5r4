@@ -57,7 +57,10 @@ import { getNpcRollOptions } from "../dialogs/npc-dialog.js";
 import { getStanceDamageBonuses, getAllAttackBonuses } from "../../stance/rolls/attack-bonuses.js";
 import { resolveTargets } from "../resources/target-resolver.js";
 import { spendVoidPoint } from "../resources/void-manager.js";
-import { getConditionRollPenalties, getConditionTNPenalty } from "../../../utils/condition-penalties.js";
+import {
+  getConditionRollPenalties,
+  getConditionTNPenalty
+} from "../../../utils/condition-penalties.js";
 
 /**
  * Parameters for constructing a simple roll
@@ -221,7 +224,7 @@ export async function SimpleRoll({
       rollMod += attackBonuses.roll;
       keepMod += attackBonuses.keep;
     }
-    
+
     // Apply condition penalties (blinded, dazed, prone, etc.)
     // Use isRanged from dialog checkbox (user decides ranged vs melee per attack)
     const attackType = check.isRanged ? "ranged" : "melee";

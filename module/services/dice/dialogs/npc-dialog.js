@@ -80,8 +80,20 @@ const DIALOG = foundry.applications.api.DialogV2;
  * @param {boolean} [isBow=false] - If true, pre-checks Ranged Attack checkbox (bows are always ranged)
  * @returns {Promise<NpcRollOptions|CancelledResult>} Processed roll options or cancellation indicator
  */
-export async function getNpcRollOptions(rollName, noVoid, trait = false, isAttack = false, isBow = false) {
-  const content = await R(DIALOG_TEMPLATES.rollModifiers, { npcRoll: true, noVoid, trait, isAttack, isBow });
+export async function getNpcRollOptions(
+  rollName,
+  noVoid,
+  trait = false,
+  isAttack = false,
+  isBow = false
+) {
+  const content = await R(DIALOG_TEMPLATES.rollModifiers, {
+    npcRoll: true,
+    noVoid,
+    trait,
+    isAttack,
+    isBow
+  });
   try {
     const result = await DIALOG.prompt({
       window: { title: game.i18n.format("l5r4.ui.chat.rollName", { roll: rollName }) },

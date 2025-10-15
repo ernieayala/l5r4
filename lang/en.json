@@ -88,7 +88,17 @@
           "injured": "Injured",
           "crippled": "Crippled",
           "down": "Down",
-          "out": "Out"
+          "out": "Out",
+          "applyHealing": "Apply Healing",
+          "applyHealingTitle": "Apply natural healing from rest",
+          "naturalHealing": "Natural Healing",
+          "restedAndRecovered": "rested and recovered wounds",
+          "healingApplied": "Healed {amount} wounds (heal rate: {rate})",
+          "woundStatus": "Wounds: {current}/{max} (suffered: {suffered})",
+          "fullyHealed": "Fully healed!",
+          "alreadyFullHealth": "{name} is already at full health",
+          "noHealRate": "{name} has no healing rate configured",
+          "healingFailed": "Failed to apply healing to {name}"
         },
         "stances": {
           "pending": "Pending",

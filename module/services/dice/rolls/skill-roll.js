@@ -40,7 +40,10 @@ import { spendVoidPoint } from "../resources/void-manager.js";
 import { resolveTargets } from "../resources/target-resolver.js";
 import { applySkillAndTraitBonuses } from "../effects/bonus-applicator.js";
 import { GetSkillOptions } from "../dialogs/skill-dialog.js";
-import { getConditionRollPenalties, getConditionTNPenalty } from "../../../utils/condition-penalties.js";
+import {
+  getConditionRollPenalties,
+  getConditionTNPenalty
+} from "../../../utils/condition-penalties.js";
 
 /**
  * Executes a skill roll following L5R4 mechanics.
@@ -138,7 +141,7 @@ export async function SkillRoll({
   rollBonus = toInt(rollBonus) + bonuses.roll;
   keepBonus = toInt(keepBonus) + bonuses.keep;
   totalBonus = toInt(totalBonus) + bonuses.total;
-  
+
   // Apply condition penalties (blinded, dazed, fatigued, prone, etc.)
   const conditionPenalties = getConditionRollPenalties(actor, rollType, "melee");
   rollBonus += conditionPenalties.roll; // Will be negative if conditions active
@@ -229,7 +232,8 @@ export async function SkillRoll({
 
   // Calculate effective TN: baseTN + (raises × 5) + wound penalty + condition penalty (if applicable)
   const conditionTNPenalty = getConditionTNPenalty(actor);
-  let effTN = calculateEffectiveTN(baseTN, raises, woundPenalty, applyWoundPenalty) + conditionTNPenalty;
+  let effTN =
+    calculateEffectiveTN(baseTN, raises, woundPenalty, applyWoundPenalty) + conditionTNPenalty;
   effTN = Math.max(0, effTN); // TN cannot be negative
   let tnResult = evaluateTN(roll.total ?? 0, effTN, raises);
 

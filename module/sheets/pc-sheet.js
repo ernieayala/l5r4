@@ -51,6 +51,7 @@ import { WeaponRoll } from "../services/dice/rolls/weapon-roll.js";
 import { getStanceDamageBonuses } from "../services/stance/rolls/attack-bonuses.js";
 import { getActiveStances } from "../services/stance/core/helpers.js";
 import { getMountedStatus } from "../services/mounted-combat.js";
+import { applyNaturalHealing } from "../services/healing.js";
 import { BaseActorSheet } from "./base-actor-sheet.js";
 import { AppLauncherHandler } from "./handlers/app-launcher-handler.js";
 import { PcAdjustmentHandler } from "./handlers/pc-adjustment-handler.js";
@@ -144,6 +145,8 @@ export default class L5R4PcSheet extends BaseActorSheet {
    */
   _onAction(action, event, element) {
     switch (action) {
+      case "apply-healing":
+        return this._onApplyHealing(event, element);
       case "clan-link":
         return BioItemHandler.openLinked(this.actor, "clan");
       case "family-open":
@@ -568,6 +571,31 @@ export default class L5R4PcSheet extends BaseActorSheet {
   /* ---------------------------------- */
   /* Rolls                               */
   /* ---------------------------------- */
+
+  /**
+   * Applies natural healing to the character.
+   *
+   * **Game Rules Context:**
+   * Characters heal (Stamina × 2) + Insight Rank wounds per night of rest.
+   * Healing cannot reduce suffered wounds below 0 (no over-healing).
+   *
+   * **Implementation:**
+   * Delegates to healing service which:
+   * - Calculates healing amount from actor.system.wounds.healRate
+   * - Reduces suffered wounds by healing amount
+   * - Posts chat message with healing summary
+   * - Handles edge cases (already at full health, invalid heal rate)
+   *
+   * @param {Event} event - Click event on healing button
+   * @param {HTMLElement} element - Button element (unused)
+   * @returns {Promise<void>}
+   * @protected
+   * @async
+   */
+  async _onApplyHealing(event, element) {
+    event?.preventDefault?.();
+    await applyNaturalHealing(this.actor);
+  }
 
   /**
    * Initiates a Ring roll (XkX where X = Ring rank).

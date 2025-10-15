@@ -67,12 +67,12 @@ const CONDITION_IDS = new Set([
  */
 function getActiveConditions(actor) {
   const conditions = new Set();
-  
+
   if (!actor?.effects) return conditions;
-  
+
   for (const effect of actor.effects) {
     if (effect.disabled) continue;
-    
+
     const statuses = effect.statuses || new Set();
     for (const statusId of statuses) {
       if (CONDITION_IDS.has(statusId)) {
@@ -80,7 +80,7 @@ function getActiveConditions(actor) {
       }
     }
   }
-  
+
   return conditions;
 }
 
@@ -118,20 +118,28 @@ function getActiveConditions(actor) {
  */
 export function applyConditionEffects(actor, sys) {
   if (!actor || !sys) return;
-  
+
   const activeConditions = getActiveConditions(actor);
-  
+
   // Initialize condition effects tracking
   sys._conditionEffects = {
     active: Array.from(activeConditions),
-    rollPenalties: { melee: { roll: 0, keep: 0 }, ranged: { roll: 0, keep: 0 }, defense: { roll: 0, keep: 0 } },
-    keepPenalties: { melee: { roll: 0, keep: 0 }, ranged: { roll: 0, keep: 0 }, defense: { roll: 0, keep: 0 } },
+    rollPenalties: {
+      melee: { roll: 0, keep: 0 },
+      ranged: { roll: 0, keep: 0 },
+      defense: { roll: 0, keep: 0 }
+    },
+    keepPenalties: {
+      melee: { roll: 0, keep: 0 },
+      ranged: { roll: 0, keep: 0 },
+      defense: { roll: 0, keep: 0 }
+    },
     tnPenalty: 0,
     restrictions: [],
     armorTnOverride: null,
     armorTnModifier: 0 // Additive modifier applied after override (e.g., Prone -10)
   };
-  
+
   for (const conditionId of activeConditions) {
     switch (conditionId) {
       case "blinded":
@@ -157,7 +165,7 @@ export function applyConditionEffects(actor, sys) {
         break;
     }
   }
-  
+
   // Apply Armor TN override if any condition sets one
   // Preserve stance modifiers (e.g., Full Attack -10) when applying override
   if (sys._conditionEffects.armorTnOverride !== null) {
@@ -165,12 +173,12 @@ export function applyConditionEffects(actor, sys) {
     sys.armorTn.current = sys._conditionEffects.armorTnOverride + stanceMod;
     sys.armorTn.conditionOverride = true;
   }
-  
+
   // Apply additive Armor TN modifiers after override (e.g., Prone -10)
   if (sys._conditionEffects.armorTnModifier !== 0) {
     sys.armorTn.current += sys._conditionEffects.armorTnModifier;
   }
-  
+
   // Enforce Armor TN floor of 5 per L5R4 rules (minimum from Grappled/Stunned base)
   if (sys.armorTn.current < 5) {
     sys.armorTn.current = 5;
@@ -207,25 +215,28 @@ function applyBlindedCondition(sys) {
   // Ranged attack penalty: -3k3
   sys._conditionEffects.rollPenalties.ranged.roll += -3;
   sys._conditionEffects.rollPenalties.ranged.keep += -3;
-  
+
   // Melee attack penalty: -1k1
   sys._conditionEffects.rollPenalties.melee.roll += -1;
   sys._conditionEffects.rollPenalties.melee.keep += -1;
-  
+
   // Defense penalty: -1k1
   sys._conditionEffects.rollPenalties.defense.roll += -1;
   sys._conditionEffects.rollPenalties.defense.keep += -1;
-  
+
   // Armor TN override: Reflexes + 5 + armor bonus (no other modifiers)
   // When multiple conditions set overrides, use the lowest value (most vulnerable)
   const ref = toInt(sys.traits?.ref || 0);
   const armorBonus = toInt(sys.armorTn?.bonus || 0);
   const blindedTN = ref + 5 + armorBonus;
-  
-  if (sys._conditionEffects.armorTnOverride === null || blindedTN < sys._conditionEffects.armorTnOverride) {
+
+  if (
+    sys._conditionEffects.armorTnOverride === null ||
+    blindedTN < sys._conditionEffects.armorTnOverride
+  ) {
     sys._conditionEffects.armorTnOverride = blindedTN;
   }
-  
+
   sys._conditionEffects.restrictions.push("l5r4.conditions.blinded.restrictions");
 }
 
@@ -260,7 +271,7 @@ function applyDazedCondition(sys) {
   sys._conditionEffects.rollPenalties.melee.roll += -3;
   sys._conditionEffects.rollPenalties.ranged.roll += -3;
   sys._conditionEffects.rollPenalties.defense.roll += -3;
-  
+
   sys._conditionEffects.restrictions.push("l5r4.conditions.dazed.restrictions");
 }
 
@@ -320,7 +331,7 @@ function applyEntangledCondition(sys) {
 function applyFatiguedCondition(sys) {
   // TN penalty: +5 (stacking per day without rest)
   sys._conditionEffects.tnPenalty += 5;
-  
+
   sys._conditionEffects.restrictions.push("l5r4.conditions.fatigued.restrictions");
 }
 
@@ -349,11 +360,14 @@ function applyGrappledCondition(sys) {
   // When multiple conditions set overrides, use the lowest value (most vulnerable)
   const armorBonus = toInt(sys.armorTn?.bonus || 0);
   const grappledTN = 5 + armorBonus;
-  
-  if (sys._conditionEffects.armorTnOverride === null || grappledTN < sys._conditionEffects.armorTnOverride) {
+
+  if (
+    sys._conditionEffects.armorTnOverride === null ||
+    grappledTN < sys._conditionEffects.armorTnOverride
+  ) {
     sys._conditionEffects.armorTnOverride = grappledTN;
   }
-  
+
   sys._conditionEffects.restrictions.push("l5r4.conditions.grappled.restrictions");
 }
 
@@ -391,11 +405,11 @@ function applyProneCondition(sys) {
   // Applied via armorTnModifier to work correctly with condition overrides
   sys._conditionEffects.armorTnModifier += -10;
   sys.armorTn.pronePenalty = -10;
-  
+
   // Attack penalty: -2k0 for medium/small weapons
   sys._conditionEffects.rollPenalties.melee.roll += -2;
   sys._conditionEffects.rollPenalties.ranged.roll += -2;
-  
+
   sys._conditionEffects.restrictions.push("l5r4.conditions.prone.restrictions");
 }
 
@@ -426,10 +440,13 @@ function applyStunnedCondition(sys) {
   // When multiple conditions set overrides, use the lowest value (most vulnerable)
   const armorBonus = toInt(sys.armorTn?.bonus || 0);
   const stunnedTN = 5 + armorBonus;
-  
-  if (sys._conditionEffects.armorTnOverride === null || stunnedTN < sys._conditionEffects.armorTnOverride) {
+
+  if (
+    sys._conditionEffects.armorTnOverride === null ||
+    stunnedTN < sys._conditionEffects.armorTnOverride
+  ) {
     sys._conditionEffects.armorTnOverride = stunnedTN;
   }
-  
+
   sys._conditionEffects.restrictions.push("l5r4.conditions.stunned.restrictions");
 }

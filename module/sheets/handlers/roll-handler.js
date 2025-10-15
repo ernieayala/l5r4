@@ -303,7 +303,7 @@ export class RollHandler {
 
     // Pass isBow flag to pre-check ranged checkbox in dialog
     const isBow = weapon.type === "bow";
-    
+
     return SimpleRoll({
       woundPenalty: readWoundPenalty(context.actor),
       diceRoll: weaponSkill.rollBonus + stanceBonuses.roll,
