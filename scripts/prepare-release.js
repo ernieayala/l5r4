@@ -104,8 +104,8 @@ function updateJSDocVersionTags(version) {
  */
 function validateProjectStructure() {
   const requiredFiles = [
-    "l5r4.js",
-    "l5r4.css",
+    "dist/l5r4-enhanced.js",
+    "dist/l5r4-enhanced.css",
     "system.json",
     "template.json",
     "README.md",

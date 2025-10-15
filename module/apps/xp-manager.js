@@ -221,7 +221,9 @@ export default class XpManagerApplication extends foundry.applications.api.Handl
     const spentTotal = this._calculateTotal(spent);
 
     const flags = this._getFlags();
-    const disadvantageCap = Number.isFinite(+flags.disadvantageCap) ? Number(flags.disadvantageCap) : 10;
+    const disadvantageCap = Number.isFinite(+flags.disadvantageCap)
+      ? Number(flags.disadvantageCap)
+      : 10;
 
     return {
       xp: {

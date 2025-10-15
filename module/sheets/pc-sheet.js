@@ -26,9 +26,9 @@
  *
  * **Foundry Integration:**
  * - Extends ActorSheetV2 (Foundry v13+ Application v2 architecture)
- * - Uses HandlebarsApplicationMixin for template rendering
+ * - Uses HandlebarsApplicationMixin with PARTS configuration
+ * - Overrides _renderHTML for limited/full template selection
  * - Implements event delegation via data-action attributes
- * - Custom window header button for edit mode toggle (is-editable class)
  * - Limited view rendering for non-owner players (pc-limited.hbs template)
  * - Integrates with enhanceItemSheetData for unified item context
  *
@@ -75,7 +75,6 @@ const { TextEditor } = foundry.applications.ux;
  * - XP Manager and Wound Configuration app launchers
  * - Void Points and spell slot adjustments
  * - Mastery ability tracking at ranks 3, 5, 7
- * - Edit mode toggle via custom window header button
  * - Limited view for non-owner players
  *
  * **Template Structure:**
@@ -491,15 +490,9 @@ export default class L5R4PcSheet extends BaseActorSheet {
    * Post-render lifecycle hook for DOM manipulation and event binding.
    *
    * Performs PC-specific rendering tasks:
-   * 1. Injects custom edit mode toggle button into window header
-   * 2. Paints Void Points dots based on current/max values
-   * 3. Binds image edit click handler (non-delegated)
-   * 4. Sets up item context menus
-   *
-   * **Custom Header Button:**
-   * Adds pen-to-square icon button to window controls that toggles "is-editable"
-   * class on sheet element. This enables/disables editing mode without changing
-   * Foundry permissions, useful for preventing accidental edits during play.
+   * 1. Paints Void Points dots based on current/max values
+   * 2. Binds image edit click handler (non-delegated)
+   * 3. Sets up item context menus
    *
    * **Guard Logic:**
    * Tracks _boundExtraRoot to prevent duplicate event binding on re-renders.
@@ -515,35 +508,6 @@ export default class L5R4PcSheet extends BaseActorSheet {
   async _onRender(context, options) {
     await super._onRender(context, options);
     const root = this.element;
-
-    // Inject custom edit mode toggle button into window header
-    try {
-      const appEl = root?.closest(".app.window-app");
-      const controls = appEl?.querySelector(":scope > header.window-header .window-controls");
-      if (controls) {
-        controls.querySelectorAll(".l5r4-toggle-edit").forEach(n => n.remove());
-
-        const btn = document.createElement("button");
-        btn.type = "button";
-        btn.classList.add("window-control", "l5r4-toggle-edit");
-        btn.dataset.action = "toggle-is-editable";
-        btn.dataset.tooltip = "Toggle Edit Mode";
-        btn.setAttribute("aria-label", "Toggle Edit Mode");
-        btn.innerHTML = `<i class="fas fa-pen-to-square"></i>`;
-        btn.addEventListener("click", ev => {
-          ev.preventDefault();
-          try {
-            this.element?.classList.toggle("is-editable");
-          } catch (err) {
-            console.warn(`${SYS_ID}`, "PC Sheet: toggle-is-editable failed", { err });
-          }
-        });
-
-        controls.insertBefore(btn, controls.firstElementChild);
-      }
-    } catch (err) {
-      console.warn(`${SYS_ID}`, "PC Sheet: header control injection failed", { err });
-    }
 
     // Paint Void Points dots based on current/max values
     this._paintVoidPointsDots(root);
