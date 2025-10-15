@@ -49,21 +49,22 @@ export function getConditionRollPenalties(actor, rollType = null, attackType = "
   if (!actor?.system?._conditionEffects) {
     return { roll: 0, keep: 0 };
   }
-  
+
   const conditionEffects = actor.system._conditionEffects;
-  
+
   // For attack rolls, use melee or ranged penalties
   if (rollType === "attack") {
-    const penalties = attackType === "ranged" 
-      ? conditionEffects.rollPenalties?.ranged 
-      : conditionEffects.rollPenalties?.melee;
-    
+    const penalties =
+      attackType === "ranged"
+        ? conditionEffects.rollPenalties?.ranged
+        : conditionEffects.rollPenalties?.melee;
+
     return {
       roll: toInt(penalties?.roll || 0),
       keep: toInt(penalties?.keep || 0)
     };
   }
-  
+
   // For defense rolls, use defense penalties
   if (rollType === "defense") {
     const penalties = conditionEffects.rollPenalties?.defense;
@@ -72,28 +73,18 @@ export function getConditionRollPenalties(actor, rollType = null, attackType = "
       keep: toInt(penalties?.keep || 0)
     };
   }
-  
+
   // For general skill rolls, apply the most severe penalty (typically from Dazed)
   // Dazed applies -3k0 to ALL actions
   const melee = conditionEffects.rollPenalties?.melee || { roll: 0, keep: 0 };
   const ranged = conditionEffects.rollPenalties?.ranged || { roll: 0, keep: 0 };
   const defense = conditionEffects.rollPenalties?.defense || { roll: 0, keep: 0 };
-  
+
   // Take the most negative penalty from all categories
-  const rollPenalty = Math.min(
-    toInt(melee.roll),
-    toInt(ranged.roll),
-    toInt(defense.roll),
-    0
-  );
-  
-  const keepPenalty = Math.min(
-    toInt(melee.keep),
-    toInt(ranged.keep),
-    toInt(defense.keep),
-    0
-  );
-  
+  const rollPenalty = Math.min(toInt(melee.roll), toInt(ranged.roll), toInt(defense.roll), 0);
+
+  const keepPenalty = Math.min(toInt(melee.keep), toInt(ranged.keep), toInt(defense.keep), 0);
+
   return { roll: rollPenalty, keep: keepPenalty };
 }
 
@@ -121,7 +112,7 @@ export function getConditionTNPenalty(actor) {
   if (!actor?.system?._conditionEffects) {
     return 0;
   }
-  
+
   return toInt(actor.system._conditionEffects.tnPenalty || 0);
 }
 
@@ -153,7 +144,7 @@ export function getConditionRestrictions(actor) {
   if (!actor?.system?._conditionEffects) {
     return [];
   }
-  
+
   return actor.system._conditionEffects.restrictions || [];
 }
 
@@ -176,7 +167,7 @@ export function hasActiveConditions(actor) {
   if (!actor?.system?._conditionEffects) {
     return false;
   }
-  
+
   const active = actor.system._conditionEffects.active || [];
   return active.length > 0;
 }
