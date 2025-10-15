@@ -249,13 +249,16 @@ export function extractRollParams(el, actor) {
 /**
  * Resolve weapon skill and trait for attack roll calculation.
  *
- * Implements L5R4 Skill Roll formula: (Skill Rank + Trait Value)k(Trait Value)
+ * Implements L5R4 Skill Roll formulas per Skills_and_Rolls.md:
+ * - Skilled (Rank > 0): (Skill Rank + Trait Value)k(Trait Value)
+ * - Unskilled (Rank = 0): (Trait Value)k(Trait Value) with no exploding dice
  *
  * Resolution process:
  * 1. Extract weapon.system.associatedSkill name (e.g., "Kenjutsu")
  * 2. Search actor.items for matching skill by name (case-insensitive)
- * 3. If skill found: Use skill's trait, calculate (Skill + Trait)k(Trait)
- * 4. If no skill: Fall back to weapon.system.fallbackTrait, calculate (Trait)k(Trait)
+ * 3. If skill found with rank > 0: Calculate (Skill + Trait)k(Trait)
+ * 4. If skill found with rank = 0: Calculate (Trait)k(Trait) [Unskilled]
+ * 5. If no skill: Fall back to weapon.system.fallbackTrait, calculate (Trait)k(Trait) [Unskilled]
  *
  * Default fallback trait is "agi" (Agility) for weapons without skills.
  * All trait values include wound penalties via getEffectiveTrait().
@@ -296,7 +299,20 @@ export function resolveWeaponSkillTrait(actor, weapon) {
     const traitValue = getEffectiveTrait(actor, skillTrait);
     const skillName = safeString(skill.name, "Unknown Skill") || "Unknown";
 
-    // Skill Roll formula: (Skill + Trait)k(Trait)
+    // L5R4 Unskilled Roll Rule (Skills_and_Rolls.md):
+    // When skill rank = 0, "effectively making a Trait Roll" = (Trait)k(Trait) with no exploding dice
+    // When skill rank > 0, roll (Skill + Trait)k(Trait) normally
+    if (skillRank === 0) {
+      return {
+        skillRank: 0,
+        traitValue,
+        rollBonus: traitValue, // Trait Roll: (Trait)k(Trait)
+        keepBonus: traitValue,
+        description: `${skillName} (${skillRank}) + ${skillTrait.toUpperCase()} (${traitValue}) [Unskilled]`
+      };
+    }
+
+    // Skilled Roll formula: (Skill + Trait)k(Trait)
     // rollBonus = rolled dice, keepBonus = kept dice
     return {
       skillRank,
@@ -306,15 +322,16 @@ export function resolveWeaponSkillTrait(actor, weapon) {
       description: `${skillName} (${skillRank}) + ${skillTrait.toUpperCase()} (${traitValue})`
     };
   } else {
-    // No skill found: Fall back to pure Trait Roll (Trait)k(Trait)
+    // No skill found: Unskilled roll with fallback trait
+    // L5R4 Rule: "effectively making a Trait Roll" = (Trait)k(Trait) with no exploding dice
     const traitValue = getEffectiveTrait(actor, fallbackTrait);
 
     return {
       skillRank: 0,
       traitValue,
-      rollBonus: traitValue,
+      rollBonus: traitValue, // Trait Roll: (Trait)k(Trait)
       keepBonus: traitValue,
-      description: `${fallbackTrait.toUpperCase()} (${traitValue}) - No skill`
+      description: `${fallbackTrait.toUpperCase()} (${traitValue}) [Unskilled]`
     };
   }
 }

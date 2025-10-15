@@ -17,6 +17,12 @@
       <input type="checkbox" name="unskilled" />
     </div>
   {{/if}}
+  {{#if isAttack}}
+    <div class="form-group">
+      <label>{{localize "l5r4.equipment.weapons.rangedAttack"}}</label>
+      <input type="checkbox" name="isRanged" {{checked isBow}} />
+    </div>
+  {{/if}}
   {{#if attackRaises}}
     <div class="form-group">
       <label>{{localize "l5r4.ui.mechanics.rolls.raises"}}
