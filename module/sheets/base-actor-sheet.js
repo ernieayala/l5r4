@@ -16,6 +16,7 @@
  * - Uses HandlebarsApplicationMixin for template rendering
  * - Implements event delegation pattern via data-action attributes
  * - Leverages _onRender and _prepareContext lifecycle hooks
+ * - Overrides _getHeaderControls to prevent mixin-chain duplicates
  *
  * **Event Delegation:**
  * All user interactions are handled through delegated events on [data-action] elements.
@@ -171,6 +172,27 @@ export class BaseActorSheet extends KeyboardBehaviorMixin(
           img.src = defaultImage;
         });
       }
+    });
+  }
+
+  /**
+   * Deduplicates header controls from mixin chain.
+   *
+   * The nested mixin chain causes super._getHeaderControls() to return duplicate
+   * entries. Filters by action to ensure each control appears only once in the
+   * header dropdown menu.
+   *
+   * @returns {ApplicationHeaderControlsEntry[]} Deduplicated header controls
+   * @protected
+   * @override
+   */
+  _getHeaderControls() {
+    const controls = super._getHeaderControls();
+    const seen = new Set();
+    return controls.filter(control => {
+      if (seen.has(control.action)) return false;
+      seen.add(control.action);
+      return true;
     });
   }
 

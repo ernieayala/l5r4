@@ -20,11 +20,12 @@
  * **Foundry Integration:**
  * - Extends BaseActorSheet (which extends ActorSheetV2)
  * - Uses Application v2 event delegation pattern (Foundry v13+)
- * - Implements PARTS-based template rendering
+ * - Uses HandlebarsApplicationMixin with PARTS configuration
+ * - Overrides _renderHTML for limited/full template selection
  * - Supports both full (GM/owner) and limited (observer) views
  *
  * **Game Mechanics:**
- * Implements L5R4 NPC rules including Fear tests (Raw Willpower vs TN 5 + 5×Fear Rank),
+ * Implements L5R4 rules for NPC combat stats, skill checks, fear tests, and
  * Void Ring adjustment, skill rolls, and combat actions. NPCs may have simplified
  * stat blocks compared to PCs and don't require trait-to-ring calculations.
  *
@@ -436,6 +437,7 @@ export default class L5R4NpcSheet extends BaseActorSheet {
   async _onRender(context, options) {
     await super._onRender(context, options);
     const root = this.element;
+
     this._paintVoidPointsDots(root);
     if (!this.actor.isOwner) return;
 

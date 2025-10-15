@@ -233,10 +233,6 @@ body > * {
   pointer-events: none;
   transition: opacity 250ms ease-out;
 }
-.l5r4.pc .clear-btn:hover,
-.l5r4.npc .clear-btn:hover {
-  filter: brightness(1.2);
-}
 
 /**
  * Buttons

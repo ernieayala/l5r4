@@ -7,6 +7,22 @@ Versioning: [Semantic Versioning](https://semver.org/spec/v2.0.0.html)
 
 ---
 
+## [2.1.0] - 2025-10-15
+
+### Fixed
+
+- Header control duplication in actor sheets (mixin chain now properly deduplicated)
+- Removed deprecated custom edit mode toggle button from PC sheet
+
+### Enhanced
+
+- Code readability with improved ternary operator formatting
+- Build script now includes linting and formatting in single command
+- Updated JSDoc documentation for sheet architecture
+- Simplified package.json scripts for cleaner workflow
+
+---
+
 ## [2.0.0] - 2025-10-11
 
 ### Added

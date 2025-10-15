@@ -1,6 +1,6 @@
 {
   "name": "l5r4-enhanced",
-  "version": "2.0.0",
+  "version": "2.1.0",
   "description": "Legend of the Five Rings 4e Enhanced system for Foundry VTT",
   "author": "Ernie Ayala",
   "license": "MIT",
@@ -15,8 +15,7 @@
   "scripts": {
     "build:css": "sass --no-source-map scss/l5r4-enhanced.scss dist/l5r4-enhanced.css",
     "watch:css": "sass --no-source-map --watch scss/l5r4-enhanced.scss:dist/l5r4-enhanced.css",
-    "build": "npm run build:css",
-    "dev": "npm run watch:css",
+    "build": "npm run build:css && npm run lint:css:fix && npm run format && npm run pretest",
     "format": "prettier --write \"**/*.{js,css,scss,json,md}\"",
     "format:check": "prettier --check \"**/*.{js,css,scss,json,md}\"",
     "lint:css": "stylelint \"scss/**/*.scss\"",
@@ -29,11 +28,7 @@
     "madge:check": "madge --circular module/",
     "madge:summary": "madge --summary module/",
     "madge:json": "madge --json module/ > madge-analysis.json",
-    "pretest": "npm run madge:check",
-    "test": "vitest run",
-    "test:watch": "vitest",
-    "test:ui": "vitest --ui",
-    "test:coverage": "vitest run --coverage"
+    "pretest": "npm run madge:check"
   },
   "devDependencies": {
     "@vitest/coverage-v8": "1.0.0",
