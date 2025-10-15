@@ -64,6 +64,14 @@ import { SYS_ID } from "../../../config/constants.js";
  * @returns {TenDiceRuleResult} Capped values with conversion bonuses applied
  */
 export function TenDiceRule(diceRoll, diceKeep, bonus = 0) {
+  // Enforce minimum 1k1 - you cannot make a roll with 0 dice
+  // Penalties can reduce dice pools below 1k1, but L5R4 requires at least 1k1 to attempt any action
+  if (diceRoll < 1) diceRoll = 1;
+  if (diceKeep < 1) diceKeep = 1;
+  
+  // Enforce L5R4 rule: Cannot keep more dice than rolled
+  if (diceKeep > diceRoll) diceKeep = diceRoll;
+  
   // Fast path: Both dice already at or above cap - convert all excess directly to +2 bonuses
   if (diceRoll >= 10 && diceKeep >= 10) {
     const excessRolled = diceRoll - 10;

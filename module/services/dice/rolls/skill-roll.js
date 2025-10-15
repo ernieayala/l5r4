@@ -40,6 +40,7 @@ import { spendVoidPoint } from "../resources/void-manager.js";
 import { resolveTargets } from "../resources/target-resolver.js";
 import { applySkillAndTraitBonuses } from "../effects/bonus-applicator.js";
 import { GetSkillOptions } from "../dialogs/skill-dialog.js";
+import { getConditionRollPenalties, getConditionTNPenalty } from "../../../utils/condition-penalties.js";
 
 /**
  * Executes a skill roll following L5R4 mechanics.
@@ -48,8 +49,9 @@ import { GetSkillOptions } from "../dialogs/skill-dialog.js";
  * (Skill Rank + Trait)k(Trait). The function handles all roll modifiers including
  * bonuses from effects, void point spending, emphasis, raises, and wound penalties.
  *
- * Skill Roll Mechanics (per core rules):
- * - Base formula: Roll (Skill + Trait + rollMod) dice, keep (Trait + keepMod) dice
+ * Skill Roll Mechanics (per Skills_and_Rolls.md):
+ * - Skilled formula (Rank > 0): Roll (Skill + Trait + rollMod) dice, keep (Trait + keepMod) dice
+ * - Unskilled formula (Rank = 0): Roll (Trait + rollMod)k(Trait + keepMod) - no exploding dice, no raises
  * - Emphasis: When applicable, re-roll any dice showing 1 (once per die)
  * - Raises: Each raise increases effective TN by +5 (declared before roll)
  * - Void Points: Spending void grants +1k1 bonus to the roll
@@ -136,6 +138,11 @@ export async function SkillRoll({
   rollBonus = toInt(rollBonus) + bonuses.roll;
   keepBonus = toInt(keepBonus) + bonuses.keep;
   totalBonus = toInt(totalBonus) + bonuses.total;
+  
+  // Apply condition penalties (blinded, dazed, fatigued, prone, etc.)
+  const conditionPenalties = getConditionRollPenalties(actor, rollType, "melee");
+  rollBonus += conditionPenalties.roll; // Will be negative if conditions active
+  keepBonus += conditionPenalties.keep;
 
   // XOR logic: Show dialog if askForOptions differs from system setting
   // This allows callers to override the global setting on a per-roll basis
@@ -175,16 +182,31 @@ export async function SkillRoll({
   keepMod += toInt(check.keepMod);
   totalMod += toInt(check.totalMod);
 
-  // Calculate base roll: (Skill + Trait + modifiers)k(Trait + modifiers)
-  const diceToRoll = toInt(actorTrait) + toInt(skillRank) + rollMod;
-  const diceToKeep = toInt(actorTrait) + keepMod;
+  // L5R4 Unskilled Roll Rule (Skills_and_Rolls.md):
+  // When skill rank = 0, "effectively making a Trait Roll" = (Trait)k(Trait) with no exploding dice
+  const isUnskilled = toInt(skillRank) === 0;
+  let diceToRoll, diceToKeep;
+
+  if (isUnskilled) {
+    // Unskilled formula: (Trait)k(Trait) - no exploding dice
+    diceToRoll = toInt(actorTrait) + rollMod;
+    diceToKeep = toInt(actorTrait) + keepMod;
+  } else {
+    // Skilled formula: (Skill + Trait)k(Trait)
+    diceToRoll = toInt(actorTrait) + toInt(skillRank) + rollMod;
+    diceToKeep = toInt(actorTrait) + keepMod;
+  }
+
   // Enforce Ten Dice Rule: max 10 rolled/kept, excess converts to bonuses
   const { diceRoll, diceKeep, bonus } = TenDiceRule(diceToRoll, diceToKeep, totalMod);
 
-  const rollFormula = buildFormula(diceRoll, diceKeep, bonus, { emphasis });
+  const rollFormula = buildFormula(diceRoll, diceKeep, bonus, { emphasis, unskilled: isUnskilled });
 
   // Build chat message label with modifiers and emphasis notation
   let baseLabel = label;
+  if (isUnskilled) {
+    baseLabel += ` [${game.i18n.localize("l5r4.ui.mechanics.rolls.unskilled")}]`;
+  }
   if (emphasis) {
     baseLabel += ` (${game.i18n.localize("l5r4.ui.mechanics.rolls.emphasis")})`;
   }
@@ -205,8 +227,10 @@ export async function SkillRoll({
     baseTN = autoTN;
   }
 
-  // Calculate effective TN: baseTN + (raises × 5) + wound penalty (if applicable)
-  const effTN = calculateEffectiveTN(baseTN, raises, woundPenalty, applyWoundPenalty);
+  // Calculate effective TN: baseTN + (raises × 5) + wound penalty + condition penalty (if applicable)
+  const conditionTNPenalty = getConditionTNPenalty(actor);
+  let effTN = calculateEffectiveTN(baseTN, raises, woundPenalty, applyWoundPenalty) + conditionTNPenalty;
+  effTN = Math.max(0, effTN); // TN cannot be negative
   let tnResult = evaluateTN(roll.total ?? 0, effTN, raises);
 
   // Append target info and TN/raises display to final chat message label

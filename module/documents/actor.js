@@ -64,6 +64,8 @@ import { prepareTraitsAndRings } from "./actor/calculations/shared-traits-rings.
 
 import { prepareFear } from "./actor/calculations/fear-system.js";
 
+import { applyConditionEffects } from "./actor/calculations/condition-effects.js";
+
 /**
  * L5R4 Actor Document class.
  *
@@ -414,6 +416,7 @@ export default class L5R4Actor extends Actor {
     sys.armorTn.current = baseTN + modTN + bonusTN;
 
     applyStanceAutomation(this, sys);
+    applyConditionEffects(this, sys);
 
     // Wound threshold calculation per L5R4 rules with lethality variants:
     // Healthy rank: Earth × 5 + modifier (buffer for normal activity)
@@ -562,6 +565,7 @@ export default class L5R4Actor extends Actor {
     this._finalizeWoundPenalties(sys, order, woundMode);
 
     applyStanceAutomation(this, sys);
+    applyConditionEffects(this, sys);
 
     prepareVisibleWoundLevels(sys, order);
   }
