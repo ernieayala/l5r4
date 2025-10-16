@@ -41,7 +41,9 @@
           "raises": "Raises",
           "automatic": "Automatic",
           "formula": "Formula",
-          "result": "Result"
+          "result": "Result",
+          "socialResistance": "Social Resistance",
+          "socialResistanceDescription": "Resisting Intimidation or Temptation"
         },
         "notifications": {
           "itemCreated": "Created {type}: {name}",

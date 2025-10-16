@@ -104,6 +104,7 @@ export async function GetSkillOptions(
  * Form Field Mapping:
  * - woundPenalty: Checkbox for applying wound rank TN penalties
  * - emphasis: Checkbox for skill emphasis (re-roll 1s mechanic)
+ * - socialResistance: Checkbox for adding Honor Rank (resisting Intimidation/Temptation)
  * - rollMod: Number input for additional rolled dice
  * - keepMod: Number input for additional kept dice
  * - totalMod: Number input for flat total bonus
@@ -115,6 +116,7 @@ export async function GetSkillOptions(
  * @returns {Object} Structured roll options object for consumption by SkillRoll()
  * @returns {boolean} return.applyWoundPenalty - Whether to apply wound penalties
  * @returns {boolean} return.emphasis - Whether emphasis applies (re-roll 1s)
+ * @returns {boolean} return.socialResistance - Whether to add Honor Rank (social resistance)
  * @returns {string} return.rollMod - Additional rolled dice modifier (string from input.value)
  * @returns {string} return.keepMod - Additional kept dice modifier (string from input.value)
  * @returns {string} return.totalMod - Additional flat total modifier (string from input.value)
@@ -128,6 +130,7 @@ function _processSkillRollOptions(form) {
   return {
     applyWoundPenalty: form.woundPenalty.checked,
     emphasis: form.emphasis.checked,
+    socialResistance: form.socialResistance?.checked ?? false,
     rollMod: form.rollMod.value,
     keepMod: form.keepMod.value,
     totalMod: form.totalMod.value,
