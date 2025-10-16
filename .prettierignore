@@ -20,3 +20,6 @@ coverage/
 # - Dynamic partials with concat helper
 # - Handlebars blocks inside HTML attributes
 *.hbs
+
+# Documentation files - ignore to avoid line ending conflicts
+*.md
