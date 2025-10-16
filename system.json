@@ -2,7 +2,7 @@
   "id": "l5r4-enhanced",
   "title": "Legend of the Five Rings 4e Enhanced",
   "description": "Enhanced implementation of Legend of the Five Rings 4th Edition for Foundry VTT v13+. Built with modern architecture featuring complete character management, authentic L5R4 mechanics, automated stance system, and comprehensive XP tracking.",
-  "version": "2.2.0",
+  "version": "2.2.0-rc.1",
   "authors": [
     {
       "name": "Ernie Ayala",
@@ -17,8 +17,12 @@
     "verified": 13,
     "maximum": 13
   },
-  "esmodules": ["dist/l5r4-enhanced.js"],
-  "styles": ["dist/l5r4-enhanced.css"],
+  "esmodules": [
+    "dist/l5r4-enhanced.js"
+  ],
+  "styles": [
+    "dist/l5r4-enhanced.css"
+  ],
   "packs": [],
   "languages": [
     {
