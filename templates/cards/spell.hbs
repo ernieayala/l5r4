@@ -14,11 +14,21 @@
     <div class="spell-ring">{{localize (concat "l5r4.ui.mechanics.rings." system.ring)}}</div>
     <div class="spell-mastery">{{system.mastery}}</div>
     <div class="spell-range">{{system.range}}</div>
-    <div class="spell-aoe">{{system.aoe}}</div>
-    <div class="spell-duration">{{system.duration}}</div>
+    <div class="spell-cast">
+      <div class="button-mask-container">
+        <span class="mas">{{system.castFormula}}</span>
+        <a class="button" data-action="cast-spell" title="{{localize "l5r4.ui.mechanics.rolls.spellCasting"}}">{{system.castFormula}}</a>
+      </div>
+    </div>
     {{> "systems/l5r4-enhanced/templates/cards/_partials/_expand.hbs"}}
-    {{#if (or system.description system.specialRules)}}
+    {{#if (or system.description system.specialRules system.aoe system.duration)}}
       <div class="expanded-text">
+        {{#if system.aoe}}
+          <p><strong>{{localize "l5r4.magic.spells.aoe"}}:</strong> {{system.aoe}}</p>
+        {{/if}}
+        {{#if system.duration}}
+          <p><strong>{{localize "l5r4.magic.spells.duration"}}:</strong> {{system.duration}}</p>
+        {{/if}}
         {{#if system.specialRules}}
           <p>{{{system.specialRules}}}</p>
         {{/if}}

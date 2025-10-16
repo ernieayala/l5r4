@@ -97,14 +97,7 @@ export class PcContextBuilder {
 
     const skills = this._sortSkills(actor, byType("skill"));
 
-    const spells = this._sortGeneric(actor, byType("spell"), "spells", {
-      name: it => String(it?.name ?? ""),
-      ring: it => String(it?.system?.ring ?? ""),
-      mastery: it => Number(it?.system?.mastery ?? 0) || 0,
-      range: it => String(it?.system?.range ?? ""),
-      aoe: it => String(it?.system?.aoe ?? ""),
-      duration: it => String(it?.system?.duration ?? "")
-    });
+    const spells = this._sortSpells(actor, byType("spell"));
 
     const advantages = this._sortGeneric(
       actor,
@@ -252,6 +245,86 @@ export class PcContextBuilder {
 
     const pref = getSortPref(actor.id, "skills", Object.keys(cols), "name");
     return sortWithPref(skillItems, cols, pref, game.i18n?.lang);
+  }
+
+  /**
+   * Sort spells and calculate casting formulas.
+   *
+   * Enriches each spell with calculated casting formulas following L5R4 Spell Casting rules:
+   * **Formula**: (Ring + School Rank ± Affinity/Deficiency)k(Ring)
+   * **TN**: 5 + (Mastery Level × 5)
+   *
+   * Calculation process:
+   * 1. Get Ring value from actor.system.rings[spell.system.ring]
+   * 2. Get School Rank from actor.system.insight.rank
+   * 3. Detect affinity/deficiency from actor's shugenja school
+   * 4. Apply school rank modifier: +1 for affinity, -1 for deficiency
+   * 5. Calculate rollDice = Ring + (School Rank ± modifier)
+   * 6. Calculate rollKeep = Ring
+   * 7. Calculate TN = 5 + (Mastery Level × 5)
+   *
+   * Affinity/Deficiency Detection:
+   * - Searches for shugenja school technique in actor's items
+   * - Compares spell's ring against school's affinity/deficiency
+   * - Automatically applies +1 or -1 School Rank modifier to displayed formula
+   *
+   * Sorting columns:
+   * - **name**: Spell name
+   * - **ring**: Element (air, earth, fire, water, void)
+   * - **mastery**: Mastery Level (1-6)
+   * - **range**: Range text
+   * - **aoe**: Area of Effect text
+   * - **duration**: Duration text
+   *
+   * @param {Actor} actor - L5R4 Actor document
+   * @param {Item[]} spellItems - Array of spell items
+   * @returns {Item[]} Sorted spells with castRoll, castKeep, castFormula, castTN properties added
+   * @private
+   */
+  static _sortSpells(actor, spellItems) {
+    // Find shugenja school for affinity/deficiency detection
+    const school = actor.items.find(i => i.type === "technique" && i.system?.shugenja);
+    const schoolAffinity = school ? String(school.system?.affinity ?? "").toLowerCase() : "";
+    const schoolDeficiency = school ? String(school.system?.deficiency ?? "").toLowerCase() : "";
+
+    // Enrich each spell with calculated casting formulas
+    for (const spell of spellItems) {
+      const ringKey = String(spell.system?.ring ?? "earth").toLowerCase();
+      const ringValue = toInt(actor.system?.rings?.[ringKey]) || 2;
+      const baseSchoolRank = toInt(actor.system?.insight?.rank) || 1;
+      const masteryLevel = toInt(spell.system?.mastery) || 1;
+
+      // Apply affinity/deficiency to school rank
+      let schoolRankMod = 0;
+      if (schoolAffinity === ringKey) {
+        schoolRankMod = 1; // Affinity: +1 School Rank
+      } else if (schoolDeficiency === ringKey) {
+        schoolRankMod = -1; // Deficiency: -1 School Rank
+      }
+      const effectiveSchoolRank = baseSchoolRank + schoolRankMod;
+
+      // L5R4 Spell Casting: (Ring + School Rank)k(Ring)
+      // Affinity/Deficiency now applied to displayed formula
+      spell.system.castRoll = Math.max(0, ringValue + effectiveSchoolRank);
+      spell.system.castKeep = Math.max(0, ringValue);
+      spell.system.castFormula = `${spell.system.castRoll}k${spell.system.castKeep}`;
+
+      // Calculate Target Number: 5 + (Mastery Level × 5)
+      spell.system.castTN = 5 + masteryLevel * 5;
+    }
+
+    // Define sortable columns with extractor functions
+    const cols = {
+      name: it => String(it?.name ?? ""),
+      ring: it => String(it?.system?.ring ?? ""),
+      mastery: it => Number(it?.system?.mastery ?? 0) || 0,
+      range: it => String(it?.system?.range ?? ""),
+      aoe: it => String(it?.system?.aoe ?? ""),
+      duration: it => String(it?.system?.duration ?? "")
+    };
+
+    const pref = getSortPref(actor.id, "spells", Object.keys(cols), "name");
+    return sortWithPref(spellItems, cols, pref, game.i18n?.lang);
   }
 
   /**

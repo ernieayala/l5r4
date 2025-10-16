@@ -421,6 +421,7 @@
         "range": "Alcance",
         "aoe": "Área de Efecto",
         "duration": "Duración",
+        "cast": "Lanzar",
         "raises": "Aumentos",
         "affinity": "Afinidad",
         "deficiency": "Deficiencia",

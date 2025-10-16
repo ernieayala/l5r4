@@ -42,10 +42,11 @@ import { TEMPLATE } from "../config/templates.js";
 import { STANCES } from "../config/localization.js";
 
 // Utils
-import { clamp } from "../utils/type-coercion.js";
+import { clamp, toInt } from "../utils/type-coercion.js";
 import { on } from "../utils/dom.js";
 import { getSortPref, sortWithPref } from "../utils/sorting.js";
 import { getSectionCollapsedMap } from "../utils/section-state.js";
+import { readWoundPenalty } from "../utils/mechanics.js";
 
 // Documents
 import { enhanceItemSheetData } from "../documents/item/integration/sheet-data.js";
@@ -55,6 +56,8 @@ import * as Fear from "../services/fear.js";
 import { applyLongRest } from "../services/rest.js";
 import { getActiveStances } from "../services/stance/core/helpers.js";
 import { getMountedStatus } from "../services/mounted-combat.js";
+import { RingRoll } from "../services/dice/rolls/ring-roll.js";
+import { SpellCastRoll } from "../services/dice/rolls/spell-cast-roll.js";
 
 // Local
 import { BaseActorSheet } from "./base-actor-sheet.js";
@@ -191,6 +194,8 @@ export default class L5R4NpcSheet extends BaseActorSheet {
         return this._onDamageRoll(event, element);
       case "roll-weapon-attack":
         return this._onWeaponAttackRoll(event, element);
+      case "cast-spell":
+        return this._onCastSpell(event, element);
       case "test-fear":
         return this._onFearTest(event, element);
       case "trait-rank":
@@ -566,6 +571,49 @@ export default class L5R4NpcSheet extends BaseActorSheet {
     }
 
     await Fear.handleFearClick({ npc: this.actor });
+  }
+
+  /**
+   * Initiates a spell casting roll for an NPC shugenja.
+   *
+   * **Game Rules Context:**
+   * Spell Casting rolls determine if a shugenja successfully invokes the kami:
+   * - Formula: (Ring + School Rank)k(Ring)
+   * - TN: 5 + (Mastery Level × 5)
+   * - Affinity: +1 effective School Rank (auto-detected)
+   * - Deficiency: -1 effective School Rank (auto-detected)
+   * - Spell slots consumed automatically (elemental or Void bonus slots)
+   *
+   * **Automatic Detection:**
+   * - Affinity/Deficiency: Detected from actor's school and applied automatically
+   * - Target Number: Calculated from spell's Mastery Level automatically
+   * - Spell Slots: Consumed automatically (elemental preferred, void fallback)
+   *
+   * **Implementation:**
+   * Extracts spell data from .item row, shows simplified dialog (wound penalty,
+   * void, modifiers, raises only), then executes spell casting with all automatic
+   * detection and slot management handled by SpellCastRoll service. Dialog always
+   * appears to give user control over modifiers and raises before casting.
+   *
+   * @param {Event} event - Click event
+   * @param {HTMLElement} element - Element with data-item-id for spell lookup
+   * @protected
+   */
+  _onCastSpell(event, element) {
+    event.preventDefault();
+    const row = element.closest(".item");
+    const id = row?.dataset?.itemId || row?.dataset?.documentId || row?.dataset?.id;
+    const spell = id ? this.actor.items.get(id) : null;
+    if (!spell || spell.type !== "spell") {
+      return;
+    }
+
+    return SpellCastRoll({
+      actor: this.actor,
+      spell,
+      woundPenalty: readWoundPenalty(this.actor),
+      showDialog: true // Always show dialog for user control
+    });
   }
 
   /**

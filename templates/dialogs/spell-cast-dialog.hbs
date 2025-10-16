@@ -1,0 +1,32 @@
+<form class="standard-form">
+  <div class="form-group">
+    <label>{{localize "l5r4.ui.mechanics.combat.woundPenalty"}}</label>
+    <input type="checkbox" name="woundPenalty" checked="checked" />
+  </div>
+  {{#unless noVoid}}
+    <div class="form-group">
+      <label>{{localize "l5r4.ui.mechanics.rings.void"}}</label>
+      <input type="checkbox" name="void" />
+    </div>
+  {{/unless}}
+  <div class="form-group">
+    <label>{{localize "l5r4.ui.common.roll"}} {{localize "l5r4.ui.common.mod"}}</label>
+    <input type="number" name="rollMod" value="0" />
+  </div>
+  <div class="form-group">
+    <label>{{localize "l5r4.ui.common.keep"}} {{localize "l5r4.ui.common.mod"}}</label>
+    <input type="number" name="keepMod" value="0" />
+  </div>
+  <div class="form-group">
+    <label>{{localize "l5r4.ui.common.total"}} {{localize "l5r4.ui.common.mod"}}</label>
+    <input type="number" name="totalMod" value="0" />
+  </div>
+  <div class="form-group">
+    <label>{{localize "l5r4.magic.spells.voidSlot"}}</label>
+    <input type="checkbox" name="useVoidSlot" />
+  </div>
+  <div class="form-group">
+    <label>{{localize "l5r4.magic.spells.raises"}}</label>
+    <input type="number" name="raises" min="0" value="0" />
+  </div>
+</form>
