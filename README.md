@@ -9,7 +9,12 @@
 
 Built for Foundry VTT v13+ with modern features like automatic XP tracking, combat stance automation, and six language options.
 
-> **⚠️ Migrating from an older version?** This system uses a new ID (`l5r4-enhanced`). See the [Migration Guide](#-migration-guide) for help transferring your data.
+**⚠️ Migrating from a previous version?** You'll need to migrate your data if you're coming from:
+
+- Any version from the GitLab repository (`https://gitlab.com/team-l5r4/l5r4`)
+- Version 1.x of this GitHub repository (`l5r4`)
+
+> ** This system uses a new ID (`l5r4-enhanced`). See the [Migration Guide](#-migration-guide) for help transferring your data.
 
 ---
 
@@ -440,7 +445,10 @@ _Want to help translate? Submit pull requests on [GitHub](https://github.com/ern
 
 ## 🔄 Migration Guide
 
-**Using an older `l5r4` version?** You'll need to migrate your data.
+**Migrating from a previous version?** You'll need to migrate your data if you're coming from:
+
+- Any version from the GitLab repository (`https://gitlab.com/team-l5r4/l5r4`)
+- Version 1.x of this GitHub repository (`l5r4`)
 
 ### Why Migration is Needed
 
