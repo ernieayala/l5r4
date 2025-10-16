@@ -49,6 +49,7 @@ import { calculateEffectiveTN, evaluateTN } from "../core/tn-calculator.js";
 import { spendVoidPoint, resolveActor } from "../resources/void-manager.js";
 import { applyTraitBonuses } from "../effects/bonus-applicator.js";
 import { GetTraitRollOptions } from "../dialogs/trait-dialog.js";
+import { getArmorTNPenalty } from "../../../utils/armor-penalties.js";
 
 /**
  * Execute a trait roll for innate ability checks in the L5R4 system.
@@ -198,14 +199,17 @@ export async function TraitRoll({
   const roll = new Roll(rollFormula);
   const rollHtml = await roll.render();
 
-  // Calculate final effective TN: base + (raises × 5) + optional wound penalty
+  // Calculate final effective TN: base + (raises × 5) + optional wound penalty + armor penalty
   // Wound penalty only applies if user selected AND TN > 0 (must be a targeted roll)
-  const effTN = calculateEffectiveTN(
+  // Armor penalty only applies to Agility/Reflexes trait rolls with Riding Armor (per Equipment rules)
+  const armorTNPenalty = getArmorTNPenalty(actorObj, null, traitName);
+  let baseTN = calculateEffectiveTN(
     userTN,
     userRaises,
     currentWoundPenalty,
     applyWoundPenalty && userTN > 0
   );
+  const effTN = baseTN + armorTNPenalty;
   const tnResult = evaluateTN(roll.total ?? 0, effTN, userRaises);
 
   const content = await R(messageTemplate, { flavor, roll: rollHtml, tnResult });

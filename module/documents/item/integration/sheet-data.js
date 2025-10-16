@@ -25,6 +25,7 @@
 
 import {
   ARROWS,
+  ARMOR_TYPES,
   SIZES,
   RINGS,
   RINGS_WITH_NONE,
@@ -42,6 +43,7 @@ import { NPC_NUMBER_WOUND_LVLS } from "../../../config/game-data.js";
  * @typedef {Object} SheetContext
  * @property {Object} config - Configuration data for template rendering
  * @property {Object} config.arrows - Arrow type localization keys (armor, flesh, humming, rope, willow)
+ * @property {Object} config.armorTypes - Armor type localization keys (ashigaru, light, heavy, riding)
  * @property {Object} config.sizes - Weapon size localization keys (small, medium, large)
  * @property {Object} config.rings - Five Rings localization keys (fire, water, air, earth, void)
  * @property {Object} config.ringsWithNone - Five Rings with empty option for dropdowns
@@ -85,6 +87,7 @@ import { NPC_NUMBER_WOUND_LVLS } from "../../../config/game-data.js";
 export function enhanceItemSheetData(data) {
   data.config = {
     arrows: ARROWS,
+    armorTypes: ARMOR_TYPES,
     sizes: SIZES,
     rings: RINGS,
     ringsWithNone: RINGS_WITH_NONE,

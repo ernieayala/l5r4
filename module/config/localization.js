@@ -117,6 +117,27 @@ export const ARROWS = freeze({
 });
 
 /**
+ * Armor type localization keys.
+ *
+ * Maps armor categories to i18n keys for the armor penalty system. Different armor types
+ * impose different TN penalties on skills and rolls based on their weight and restrictiveness.
+ *
+ * Armor Types and Penalties:
+ * - ashigaru: Ashigaru Armor - No penalties (light peasant armor)
+ * - light: Light Armor - +5 TN to Athletics and Stealth skills only
+ * - heavy: Heavy Armor - +5 TN to all Agility and Reflexes-based skills
+ * - riding: Riding Armor - +5 TN to all Agility and Reflexes rolls (waived when mounted)
+ *
+ * @type {Readonly<{ashigaru: string, light: string, heavy: string, riding: string}>}
+ */
+export const ARMOR_TYPES = freeze({
+  ashigaru: "l5r4.equipment.armor.types.ashigaru",
+  light: "l5r4.equipment.armor.types.light",
+  heavy: "l5r4.equipment.armor.types.heavy",
+  riding: "l5r4.equipment.armor.types.riding"
+});
+
+/**
  * Weapon size localization keys.
  *
  * Maps weapon size categories to i18n keys. Weapons are classified as small (knives, tanto),

@@ -405,7 +405,14 @@
       },
       "armor": {
         "reduction": "Réduction",
-        "equipped": "Équipé"
+        "equipped": "Équipé",
+        "armorType": "Type d'Armure",
+        "types": {
+          "ashigaru": "Armure Ashigaru",
+          "light": "Armure Légère",
+          "heavy": "Armure Lourde",
+          "riding": "Armure de Cavalerie"
+        }
       },
       "general": {}
     },

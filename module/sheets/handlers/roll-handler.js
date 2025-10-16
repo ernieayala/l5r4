@@ -304,6 +304,21 @@ export class RollHandler {
     // Pass isBow flag to pre-check ranged checkbox in dialog
     const isBow = weapon.type === "bow";
 
+    // Extract skill name and trait for armor penalty calculation
+    const weaponSystem = weapon.system || {};
+    const associatedSkill = weaponSystem.associatedSkill || null;
+
+    // Find the actual skill item to get its trait (if it exists)
+    let skillTrait = weaponSystem.fallbackTrait || "agi";
+    if (associatedSkill && context.actor.items) {
+      const skillItem = context.actor.items.find(
+        i => i.type === "skill" && i.name.toLowerCase() === associatedSkill.toLowerCase()
+      );
+      if (skillItem && skillItem.system?.trait) {
+        skillTrait = skillItem.system.trait;
+      }
+    }
+
     return SimpleRoll({
       woundPenalty: readWoundPenalty(context.actor),
       diceRoll: weaponSkill.rollBonus + stanceBonuses.roll,
@@ -315,7 +330,9 @@ export class RollHandler {
       actor: context.actor,
       untrained: isUntrained,
       weaponId: id,
-      isBow
+      isBow,
+      skillName: associatedSkill,
+      skillTrait: skillTrait
     });
   }
 
