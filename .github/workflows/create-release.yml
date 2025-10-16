@@ -1,0 +1,200 @@
+name: Create Release
+
+on:
+  workflow_dispatch:
+    inputs:
+      version:
+        description: 'Release version (e.g., 2.2.0 or 2.2.0-beta.1)'
+        required: true
+        type: string
+      release_type:
+        description: 'Release type'
+        required: true
+        type: choice
+        options:
+          - release
+          - prerelease
+      changelog:
+        description: 'Changelog content (optional - will extract from CHANGELOG.MD if empty)'
+        required: false
+        type: string
+
+jobs:
+  create-release:
+    runs-on: ubuntu-latest
+    permissions:
+      contents: write
+    
+    steps:
+    - name: Checkout repository
+      uses: actions/checkout@v4
+      with:
+        fetch-depth: 0
+
+    - name: Set up Node.js
+      uses: actions/setup-node@v4
+      with:
+        node-version: '18'
+        cache: 'npm'
+
+    - name: Validate version format
+      run: |
+        VERSION="${{ github.event.inputs.version }}"
+        if ! [[ "$VERSION" =~ ^[0-9]+\.[0-9]+\.[0-9]+(-[0-9A-Za-z-]+(\.[0-9A-Za-z-]+)*)?$ ]]; then
+          echo "❌ Invalid version format: $VERSION"
+          echo "Expected format: X.Y.Z or X.Y.Z-prerelease"
+          exit 1
+        fi
+        echo "✅ Version format is valid: $VERSION"
+
+    - name: Check if version already exists
+      run: |
+        VERSION="v${{ github.event.inputs.version }}"
+        if git rev-parse "$VERSION" >/dev/null 2>&1; then
+          echo "❌ Version tag $VERSION already exists"
+          exit 1
+        fi
+        echo "✅ Version tag is available: $VERSION"
+
+    - name: Install dependencies
+      run: npm ci
+
+    - name: Run validations
+      run: |
+        echo "Running format check..."
+        npm run format:check
+        
+        echo "Running CSS lint..."
+        npm run lint:css
+        
+        echo "Building CSS..."
+        npm run build:css
+        
+        echo "Checking circular dependencies..."
+        npm run madge:check
+        
+        echo "✅ All validations passed"
+
+    - name: Update version in files
+      run: |
+        VERSION="${{ github.event.inputs.version }}"
+        
+        # Update package.json
+        npm version "$VERSION" --no-git-tag-version
+        echo "✅ Updated package.json to $VERSION"
+        
+        # Update system.json
+        node -e "
+          const fs = require('fs');
+          const systemJson = JSON.parse(fs.readFileSync('system.json', 'utf8'));
+          systemJson.version = '$VERSION';
+          fs.writeFileSync('system.json', JSON.stringify(systemJson, null, 2) + '\n');
+        "
+        echo "✅ Updated system.json to $VERSION"
+
+    - name: Extract changelog
+      id: changelog
+      run: |
+        VERSION="${{ github.event.inputs.version }}"
+        CUSTOM_CHANGELOG="${{ github.event.inputs.changelog }}"
+        
+        if [ -n "$CUSTOM_CHANGELOG" ]; then
+          # Use custom changelog if provided
+          echo "Using custom changelog"
+          echo "$CUSTOM_CHANGELOG" > /tmp/changelog.md
+        else
+          # Extract from CHANGELOG.MD
+          echo "Extracting changelog from CHANGELOG.MD"
+          
+          # Try to extract section for this version
+          if grep -q "\[$VERSION\]" CHANGELOG.MD; then
+            sed -n "/\[$VERSION\]/,/^## \[/p" CHANGELOG.MD | sed '$d' > /tmp/changelog.md
+            echo "✅ Found changelog for version $VERSION"
+          else
+            echo "⚠️ No changelog found for version $VERSION in CHANGELOG.MD"
+            echo "Release notes will need to be added manually" > /tmp/changelog.md
+          fi
+        fi
+        
+        # Make changelog available to next steps
+        echo "CHANGELOG_PATH=/tmp/changelog.md" >> $GITHUB_OUTPUT
+
+    - name: Build CSS
+      run: npm run build:css
+
+    - name: Commit version changes
+      run: |
+        VERSION="${{ github.event.inputs.version }}"
+        git config user.name "github-actions[bot]"
+        git config user.email "github-actions[bot]@users.noreply.github.com"
+        
+        git add package.json package-lock.json system.json dist/l5r4-enhanced.css
+        git commit -m "chore: bump version to $VERSION"
+        
+        echo "✅ Committed version changes"
+
+    - name: Create and push tag
+      run: |
+        VERSION="v${{ github.event.inputs.version }}"
+        git tag -a "$VERSION" -m "Release $VERSION"
+        git push origin "$VERSION"
+        echo "✅ Created and pushed tag: $VERSION"
+
+    - name: Push version commit
+      run: |
+        git push origin HEAD:${{ github.ref_name }}
+        echo "✅ Pushed version commit"
+
+    - name: Create system ZIP
+      run: |
+        zip -r l5r4.zip . \
+          -x "*.git*" \
+          -x ".gitignore" \
+          -x "node_modules/*" \
+          -x "scss/*" \
+          -x "gulpfile.js" \
+          -x "package*.json" \
+          -x ".github/*" \
+          -x ".windsurf/*" \
+          -x "scripts/*" \
+          -x "tests/*" \
+          -x "_for_research/*" \
+          -x "game-rules/*" \
+          -x "pc-images/*" \
+          -x "npc-images/*" \
+          -x ".prettierignore" \
+          -x ".prettierrc" \
+          -x ".stylelintignore" \
+          -x ".stylelintrc.json" \
+          -x "madge-analysis.json" \
+          -x "DEVELOPER.md" \
+          -x "RELEASE_CHECKLIST*.md"
+        
+        echo "✅ Created l5r4.zip"
+
+    - name: Create GitHub Release
+      uses: softprops/action-gh-release@v1
+      with:
+        tag_name: v${{ github.event.inputs.version }}
+        name: Release v${{ github.event.inputs.version }}
+        body_path: ${{ steps.changelog.outputs.CHANGELOG_PATH }}
+        prerelease: ${{ github.event.inputs.release_type == 'prerelease' }}
+        files: |
+          system.json
+          l5r4.zip
+        token: ${{ secrets.GITHUB_TOKEN }}
+
+    - name: Release summary
+      run: |
+        VERSION="v${{ github.event.inputs.version }}"
+        RELEASE_TYPE="${{ github.event.inputs.release_type }}"
+        
+        echo "🎉 Release created successfully!"
+        echo ""
+        echo "📦 Release: $VERSION"
+        echo "🏷️  Type: $RELEASE_TYPE"
+        echo "🔗 URL: https://github.com/ernieayala/l5r4/releases/tag/$VERSION"
+        echo ""
+        echo "📥 Download URLs:"
+        echo "  - Manifest: https://github.com/ernieayala/l5r4/releases/download/$VERSION/system.json"
+        echo "  - Package: https://github.com/ernieayala/l5r4/releases/download/$VERSION/l5r4.zip"
