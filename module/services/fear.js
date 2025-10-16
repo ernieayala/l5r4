@@ -89,7 +89,7 @@ async function executeFearTest({ character, tn, modifier = 0, fearRank, targetIn
         {
           name: game.i18n.format("l5r4.ui.mechanics.fear.effectName", { rank: fearRank }),
           statuses: ["feared"],
-          icon: "systems/l5r4-enhanced/assets/icons/disadvantage.webp",
+          icon: "systems/l5r4-enhanced/assets/icons/fear.webp",
           flags: {
             [SYS_ID]: {
               fearRank: fearRank

@@ -147,7 +147,7 @@ export const STATUS_EFFECTS = freeze([
   { id: "entangled", name: "EFFECT.entangled", img: iconPath("entangled.webp") },
   { id: "fasting", name: "EFFECT.fasting", img: iconPath("fasting.webp") },
   { id: "fatigued", name: "EFFECT.fatigued", img: iconPath("fatigue.webp") },
-  { id: "feared", name: "EFFECT.feared", img: iconPath("disadvantage.webp") },
+  { id: "feared", name: "EFFECT.feared", img: iconPath("fear.webp") },
   { id: "grappled", name: "EFFECT.grappled", img: iconPath("grappled.webp") },
   { id: "mounted", name: "EFFECT.mounted", img: iconPath("mounted.webp") },
   { id: "prone", name: "EFFECT.prone", img: iconPath("prone.webp") },

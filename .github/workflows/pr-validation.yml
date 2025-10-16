@@ -1,0 +1,82 @@
+name: PR Validation
+
+on:
+  pull_request:
+    branches: [main, master, develop]
+  push:
+    branches: [main, master, develop]
+
+jobs:
+  validate:
+    runs-on: ubuntu-latest
+    
+    steps:
+    - name: Checkout repository
+      uses: actions/checkout@v4
+
+    - name: Set up Node.js
+      uses: actions/setup-node@v4
+      with:
+        node-version: '18'
+        cache: 'npm'
+
+    - name: Install dependencies
+      run: npm ci
+
+    - name: Check code formatting
+      run: npm run format:check
+
+    - name: Lint CSS/SCSS
+      run: npm run lint:css
+
+    - name: Build CSS
+      run: npm run build:css
+
+    - name: Check for circular dependencies
+      run: npm run madge:check
+
+    - name: Validate JSON files
+      run: |
+        echo "Validating system.json..."
+        node -e "JSON.parse(require('fs').readFileSync('system.json', 'utf8'))"
+        echo "✅ system.json is valid"
+        
+        echo "Validating template.json..."
+        node -e "JSON.parse(require('fs').readFileSync('template.json', 'utf8'))"
+        echo "✅ template.json is valid"
+        
+        echo "Validating package.json..."
+        node -e "JSON.parse(require('fs').readFileSync('package.json', 'utf8'))"
+        echo "✅ package.json is valid"
+
+    - name: Validate language files
+      run: |
+        for file in lang/*.json; do
+          echo "Validating $file..."
+          node -e "JSON.parse(require('fs').readFileSync('$file', 'utf8'))"
+          echo "✅ $file is valid"
+        done
+
+    - name: Check for required files
+      run: |
+        required_files=(
+          "system.json"
+          "template.json"
+          "README.md"
+          "CHANGELOG.MD"
+          "LICENSE"
+        )
+        
+        for file in "${required_files[@]}"; do
+          if [ ! -f "$file" ]; then
+            echo "❌ Missing required file: $file"
+            exit 1
+          fi
+          echo "✅ Found: $file"
+        done
+
+    - name: Validation summary
+      if: success()
+      run: |
+        echo "✅ All validations passed!"
+        echo "📦 PR is ready for review"
