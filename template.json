@@ -223,7 +223,14 @@
       "bonus": 0,
       "equipped": false,
       "reduction": 0,
-      "armorType": "ashigaru"
+      "armorType": "ashigaru",
+      "keywords": [],
+      "nemuranai": false,
+      "price": {
+        "koku": 0,
+        "bu": 0,
+        "zeni": 0
+      }
     },
     "clan": {
       "templates": ["itemDescription"]
@@ -253,7 +260,14 @@
       "templates": ["itemDescription"]
     },
     "commonItem": {
-      "templates": ["itemDescription"]
+      "templates": ["itemDescription"],
+      "keywords": [],
+      "nemuranai": false,
+      "price": {
+        "koku": 0,
+        "bu": 0,
+        "zeni": 0
+      }
     },
     "skill": {
       "templates": ["itemDescription"],
@@ -305,7 +319,14 @@
       "isBow": false,
       "str": 1,
       "range": 100,
-      "arrow": "willow"
+      "arrow": "willow",
+      "keywords": [],
+      "nemuranai": false,
+      "price": {
+        "koku": 0,
+        "bu": 0,
+        "zeni": 0
+      }
     }
   }
 }

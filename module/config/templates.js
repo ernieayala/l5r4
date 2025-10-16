@@ -84,6 +84,7 @@ export const CHAT_TEMPLATES = freeze({
  *
  * Dialogs implement user interaction patterns:
  * - rollModifiers: Raises, Void points, and situational modifiers input for rolls
+ * - spellCast: Simplified spell casting dialog with auto affinity/deficiency/TN/slots
  * - unifiedItemCreate: Single dialog for creating any item type (advantages, skills, equipment, etc.)
  *
  * Frozen to prevent runtime modification and ensure consistent dialog rendering.
@@ -91,10 +92,12 @@ export const CHAT_TEMPLATES = freeze({
  *
  * @constant {Object}
  * @property {string} rollModifiers - Template path for roll modifier input dialog
+ * @property {string} spellCast - Template path for simplified spell casting dialog
  * @property {string} unifiedItemCreate - Template path for unified item creation dialog
  * @readonly
  */
 export const DIALOG_TEMPLATES = freeze({
   rollModifiers: TEMPLATE("dialogs/roll-modifiers-dialog.hbs"),
+  spellCast: TEMPLATE("dialogs/spell-cast-dialog.hbs"),
   unifiedItemCreate: TEMPLATE("dialogs/unified-item-create-dialog.hbs")
 });

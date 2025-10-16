@@ -421,6 +421,7 @@
         "range": "Portée",
         "aoe": "Zone d'Effet",
         "duration": "Durée",
+        "cast": "Lancer",
         "raises": "Relances",
         "affinity": "Affinité",
         "deficiency": "Déficience",

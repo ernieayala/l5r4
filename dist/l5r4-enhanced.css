@@ -180,6 +180,34 @@ body > * {
 .l5r4.item .effect-controls {
   flex-wrap: nowrap;
 }
+.l5r4.item .price-section {
+  border: 1px solid var(--color-border-dark-tertiary);
+  border-radius: 4px;
+  margin: 0;
+  padding: 0.5rem;
+}
+.l5r4.item .price-section legend {
+  font-weight: bold;
+  padding: 0 0.25rem;
+}
+.l5r4.item .price-section .form-fields {
+  display: flex;
+  gap: 1rem;
+  flex-wrap: nowrap;
+}
+.l5r4.item .price-section .price-field {
+  display: flex;
+  flex-direction: column;
+  gap: 0.25rem;
+  flex: 1;
+}
+.l5r4.item .price-section .price-field label {
+  font-size: 0.85rem;
+  font-weight: normal;
+}
+.l5r4.item .price-section .price-field input {
+  width: 100%;
+}
 
 /**
  * Form Controls
@@ -458,7 +486,7 @@ body > * {
 .l5r4.pc .item-list.-spell .item,
 .l5r4.npc .item-list.-spell .item,
 .xp-modal-dialog .item-list.-spell .item {
-  grid-template-columns: 1fr 80px 80px 80px 1fr 1fr 24px;
+  grid-template-columns: 1fr 80px 80px 80px 60px 24px;
 }
 .l5r4.pc .item-list.-tattoo .item,
 .l5r4.npc .item-list.-tattoo .item,

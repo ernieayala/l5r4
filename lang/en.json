@@ -35,6 +35,7 @@
           "damageRoll": "Damage Roll",
           "attackRoll": "Attack Roll",
           "spellCasting": "Spell Casting Roll",
+          "castSpell": "Cast {spell} ({ring})",
           "unskilledRoll": "Unskilled Roll",
           "emphasis": "Emphasis",
           "raise": "Raise",
@@ -429,6 +430,10 @@
           "riding": "Riding Armor"
         }
       },
+      "keywords": "Keywords",
+      "keywordsPlaceholder": "e.g., Samurai, Peasant",
+      "nemuranai": "Nemuranai",
+      "price": "Price",
       "general": {}
     },
     "magic": {
@@ -436,6 +441,7 @@
         "range": "Range",
         "aoe": "Area of Effect",
         "duration": "Duration",
+        "cast": "Cast",
         "raises": "Raises",
         "affinity": "Affinity",
         "deficiency": "Deficiency",

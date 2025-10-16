@@ -421,6 +421,7 @@
         "range": "Reichweite",
         "aoe": "Effektbereich",
         "duration": "Dauer",
+        "cast": "Wirken",
         "raises": "Erhöhungen",
         "affinity": "Affinität",
         "deficiency": "Schwäche",
