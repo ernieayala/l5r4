@@ -8,6 +8,7 @@
  * - Void spending grants +1k1 bonus
  * - Ten Dice Rule enforced (max 10 rolled/kept dice)
  * - Wound penalties apply to effective TN
+ * - Honor Rank adds to social resistance rolls (resisting Intimidation/Temptation)
  *
  * Foundry VTT Integration:
  * - Uses Foundry Roll API for dice mechanics
@@ -40,26 +41,36 @@ import { spendVoidPoint } from "../resources/void-manager.js";
 import { resolveTargets } from "../resources/target-resolver.js";
 import { applySkillAndTraitBonuses } from "../effects/bonus-applicator.js";
 import { GetSkillOptions } from "../dialogs/skill-dialog.js";
+import {
+  getConditionRollPenalties,
+  getConditionTNPenalty
+} from "../../../utils/condition-penalties.js";
+import { getArmorTNPenalty } from "../../../utils/armor-penalties.js";
 
 /**
  * Executes a skill roll following L5R4 mechanics.
  *
  * Implements the core L5R4 skill roll system where rolls are calculated as
  * (Skill Rank + Trait)k(Trait). The function handles all roll modifiers including
- * bonuses from effects, void point spending, emphasis, raises, and wound penalties.
+ * bonuses from effects, void point spending, emphasis, raises, wound penalties,
+ * and Honor bonuses for social resistance.
  *
- * Skill Roll Mechanics (per core rules):
- * - Base formula: Roll (Skill + Trait + rollMod) dice, keep (Trait + keepMod) dice
+ * Skill Roll Mechanics (per Skills_and_Rolls.md):
+ * - Skilled formula (Rank > 0): Roll (Skill + Trait + rollMod) dice, keep (Trait + keepMod) dice
+ * - Unskilled formula (Rank = 0): Roll (Trait + rollMod)k(Trait + keepMod) - no exploding dice, no raises
  * - Emphasis: When applicable, re-roll any dice showing 1 (once per die)
  * - Raises: Each raise increases effective TN by +5 (declared before roll)
  * - Void Points: Spending void grants +1k1 bonus to the roll
  * - Ten Dice Rule: Enforced automatically (excess dice convert to kept or bonuses)
  * - Wound Penalties: Applied to effective TN if enabled
+ * - Social Resistance: Honor Rank added to total when resisting Intimidation/Temptation (Honor_Glory_Status.md)
  *
  * Dialog Behavior:
  * The function conditionally shows a roll options dialog based on the askForOptions
  * parameter and the "showSkillRollOptions" system setting. If these values differ
- * (XOR logic), the dialog is displayed. Otherwise, uses provided bonuses directly.
+ * (XOR logic), the dialog is displayed. The dialog includes a checkbox for social
+ * resistance which adds the character's Honor Rank as a flat bonus to the roll.
+ * Otherwise, uses provided bonuses directly.
  *
  * Attack Rolls:
  * When rollType is "attack" and no manual TN is set, automatically resolves the
@@ -77,7 +88,7 @@ import { GetSkillOptions } from "../dialogs/skill-dialog.js";
  * @param {number} [options.rollBonus=0] - Additional rolled dice from effects
  * @param {number} [options.keepBonus=0] - Additional kept dice from effects
  * @param {number} [options.totalBonus=0] - Flat bonus added to roll total
- * @param {L5R4Actor|null} [options.actor=null] - Actor performing the roll (for bonuses/void)
+ * @param {L5R4Actor|null} [options.actor=null] - Actor performing the roll (for bonuses/void/honor)
  * @param {string|null} [options.rollType=null] - Roll type identifier (e.g., "attack")
  *
  * @returns {Promise<ChatMessage|false>} The created chat message, or false on error
@@ -123,6 +134,7 @@ export async function SkillRoll({
   let keepMod = 0;
   let totalMod = 0;
   let applyWoundPenalty = true;
+  let socialResistance = false;
 
   // Resolve target TN and info string from selected tokens (attack rolls only)
   const { autoTN, targetInfo } = resolveTargets(actor, rollType);
@@ -136,6 +148,11 @@ export async function SkillRoll({
   rollBonus = toInt(rollBonus) + bonuses.roll;
   keepBonus = toInt(keepBonus) + bonuses.keep;
   totalBonus = toInt(totalBonus) + bonuses.total;
+
+  // Apply condition penalties (blinded, dazed, fatigued, prone, etc.)
+  const conditionPenalties = getConditionRollPenalties(actor, rollType, "melee");
+  rollBonus += conditionPenalties.roll; // Will be negative if conditions active
+  keepBonus += conditionPenalties.keep;
 
   // XOR logic: Show dialog if askForOptions differs from system setting
   // This allows callers to override the global setting on a per-roll basis
@@ -165,28 +182,54 @@ export async function SkillRoll({
       keepMod: keepBonus,
       totalMod: totalBonus,
       emphasis: false,
-      applyWoundPenalty: true
+      applyWoundPenalty: true,
+      socialResistance: false
     };
   }
 
-  // Extract emphasis and wound penalty flags from dialog/default check object
-  ({ emphasis, applyWoundPenalty } = check);
+  // Extract emphasis, wound penalty, and social resistance flags from dialog/default check object
+  ({ emphasis, applyWoundPenalty, socialResistance } = check);
   rollMod += toInt(check.rollMod);
   keepMod += toInt(check.keepMod);
   totalMod += toInt(check.totalMod);
 
-  // Calculate base roll: (Skill + Trait + modifiers)k(Trait + modifiers)
-  const diceToRoll = toInt(actorTrait) + toInt(skillRank) + rollMod;
-  const diceToKeep = toInt(actorTrait) + keepMod;
+  // Apply Honor Rank bonus for social resistance (L5R4 rule: resisting Intimidation/Temptation)
+  let honorRank = 0;
+  if (socialResistance && actor) {
+    honorRank = toInt(actor.system?.honor?.rank ?? 0);
+    totalMod += honorRank;
+  }
+
+  // L5R4 Unskilled Roll Rule (Skills_and_Rolls.md):
+  // When skill rank = 0, "effectively making a Trait Roll" = (Trait)k(Trait) with no exploding dice
+  const isUnskilled = toInt(skillRank) === 0;
+  let diceToRoll, diceToKeep;
+
+  if (isUnskilled) {
+    // Unskilled formula: (Trait)k(Trait) - no exploding dice
+    diceToRoll = toInt(actorTrait) + rollMod;
+    diceToKeep = toInt(actorTrait) + keepMod;
+  } else {
+    // Skilled formula: (Skill + Trait)k(Trait)
+    diceToRoll = toInt(actorTrait) + toInt(skillRank) + rollMod;
+    diceToKeep = toInt(actorTrait) + keepMod;
+  }
+
   // Enforce Ten Dice Rule: max 10 rolled/kept, excess converts to bonuses
   const { diceRoll, diceKeep, bonus } = TenDiceRule(diceToRoll, diceToKeep, totalMod);
 
-  const rollFormula = buildFormula(diceRoll, diceKeep, bonus, { emphasis });
+  const rollFormula = buildFormula(diceRoll, diceKeep, bonus, { emphasis, unskilled: isUnskilled });
 
   // Build chat message label with modifiers and emphasis notation
   let baseLabel = label;
+  if (isUnskilled) {
+    baseLabel += ` [${game.i18n.localize("l5r4.ui.mechanics.rolls.unskilled")}]`;
+  }
   if (emphasis) {
     baseLabel += ` (${game.i18n.localize("l5r4.ui.mechanics.rolls.emphasis")})`;
+  }
+  if (socialResistance && honorRank > 0) {
+    baseLabel += ` [${game.i18n.localize("l5r4.character.ranks.honorRank")} +${honorRank}]`;
   }
   if (rollMod || keepMod || totalMod) {
     baseLabel += ` ${game.i18n.localize("l5r4.ui.common.mod")} (${rollMod}k${keepMod}${
@@ -205,8 +248,14 @@ export async function SkillRoll({
     baseTN = autoTN;
   }
 
-  // Calculate effective TN: baseTN + (raises × 5) + wound penalty (if applicable)
-  const effTN = calculateEffectiveTN(baseTN, raises, woundPenalty, applyWoundPenalty);
+  // Calculate effective TN: baseTN + (raises × 5) + wound penalty + condition penalty + armor penalty (if applicable)
+  const conditionTNPenalty = getConditionTNPenalty(actor);
+  const armorTNPenalty = getArmorTNPenalty(actor, skillName, skillTrait);
+  let effTN =
+    calculateEffectiveTN(baseTN, raises, woundPenalty, applyWoundPenalty) +
+    conditionTNPenalty +
+    armorTNPenalty;
+  effTN = Math.max(0, effTN); // TN cannot be negative
   let tnResult = evaluateTN(roll.total ?? 0, effTN, raises);
 
   // Append target info and TN/raises display to final chat message label

@@ -57,6 +57,11 @@ import { getNpcRollOptions } from "../dialogs/npc-dialog.js";
 import { getStanceDamageBonuses, getAllAttackBonuses } from "../../stance/rolls/attack-bonuses.js";
 import { resolveTargets } from "../resources/target-resolver.js";
 import { spendVoidPoint } from "../resources/void-manager.js";
+import {
+  getConditionRollPenalties,
+  getConditionTNPenalty
+} from "../../../utils/condition-penalties.js";
+import { getArmorTNPenalty } from "../../../utils/armor-penalties.js";
 
 /**
  * Parameters for constructing a simple roll
@@ -74,6 +79,7 @@ import { spendVoidPoint } from "../resources/void-manager.js";
  * @property {L5R4Actor|null} [actor=null] - Actor making the roll (required for attack bonuses/weapons)
  * @property {boolean} [untrained=false] - Force unskilled roll (no explosions, no raises)
  * @property {string|null} [weaponId=null] - Item ID of weapon for attack roll damage integration
+ * @property {boolean} [isBow=false] - True if weapon is a bow (pre-checks ranged attack in dialog)
  */
 
 /**
@@ -166,7 +172,10 @@ export async function SimpleRoll({
   rollType = null,
   actor = null,
   untrained = false,
-  weaponId = null
+  weaponId = null,
+  isBow = false,
+  skillName = null,
+  skillTrait = null
 } = {}) {
   const messageTemplate = CHAT_TEMPLATES.simpleRoll;
 
@@ -183,7 +192,9 @@ export async function SimpleRoll({
   const check = await getNpcRollOptions(
     String(rollName ?? ringName ?? traitName ?? ""),
     noVoid,
-    Boolean(traitName)
+    Boolean(traitName),
+    rollType === "attack", // isAttack - show ranged checkbox for attacks
+    isBow // isBow - pre-check ranged if weapon is a bow
   );
   if (check?.cancelled) return;
 
@@ -216,6 +227,13 @@ export async function SimpleRoll({
       rollMod += attackBonuses.roll;
       keepMod += attackBonuses.keep;
     }
+
+    // Apply condition penalties (blinded, dazed, prone, etc.)
+    // Use isRanged from dialog checkbox (user decides ranged vs melee per attack)
+    const attackType = check.isRanged ? "ranged" : "melee";
+    const conditionPenalties = getConditionRollPenalties(actor, "attack", attackType);
+    rollMod += conditionPenalties.roll; // Will be negative if conditions active
+    keepMod += conditionPenalties.keep;
   }
 
   // Handle Void point spending if user checked the Void checkbox
@@ -270,12 +288,17 @@ export async function SimpleRoll({
 
   // Apply wound penalties to attack roll TN only (not damage rolls or general skill checks)
   // Wound penalties increase TN to hit (+3 Nicked, +5 Grazed, +10 Hurt, +15 Injured, etc.)
-  const effTN = calculateEffectiveTN(
+  const conditionTNPenalty = actor ? getConditionTNPenalty(actor) : 0;
+  const armorTNPenalty = actor ? getArmorTNPenalty(actor, skillName, skillTrait) : 0;
+  let effTN = calculateEffectiveTN(
     baseTN,
     toInt(check.raises),
     rollType === "attack" ? woundPenalty : 0,
     rollType === "attack" && baseTN > 0
   );
+  effTN += conditionTNPenalty; // Add condition TN penalties (Fatigued, etc.)
+  effTN += armorTNPenalty; // Add armor TN penalties (Light/Heavy/Riding armor)
+  effTN = Math.max(0, effTN); // TN cannot be negative
   let tnResult = evaluateTN(roll.total ?? 0, effTN, toInt(check.raises));
 
   tnResult = replaceFailureWithMissed(tnResult, rollType);

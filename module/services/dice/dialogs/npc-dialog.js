@@ -39,6 +39,7 @@ const DIALOG = foundry.applications.api.DialogV2;
  * @property {string} totalMod - Total modifier (flat bonus/penalty to roll result)
  * @property {boolean} void - True if Void point spent for +1k1 bonus
  * @property {boolean} unskilled - True if unskilled roll (no explosions, no raises)
+ * @property {boolean} isRanged - True if ranged attack (affects condition penalties like Blinded)
  * @property {number} tn - Target number for success (0 if not specified)
  * @property {number} raises - Number of raises declared (+5 TN each)
  */
@@ -75,10 +76,24 @@ const DIALOG = foundry.applications.api.DialogV2;
  * @param {string} rollName - Display name for the roll (e.g., "Reflexes", "Agility", "Investigation")
  * @param {boolean} noVoid - If true, hides Void point checkbox (used when Void already spent or unavailable)
  * @param {boolean} [trait=false] - If true, shows Unskilled checkbox for trait-only rolls
+ * @param {boolean} [isAttack=false] - If true, shows Ranged Attack checkbox for weapon attacks
+ * @param {boolean} [isBow=false] - If true, pre-checks Ranged Attack checkbox (bows are always ranged)
  * @returns {Promise<NpcRollOptions|CancelledResult>} Processed roll options or cancellation indicator
  */
-export async function getNpcRollOptions(rollName, noVoid, trait = false) {
-  const content = await R(DIALOG_TEMPLATES.rollModifiers, { npcRoll: true, noVoid, trait });
+export async function getNpcRollOptions(
+  rollName,
+  noVoid,
+  trait = false,
+  isAttack = false,
+  isBow = false
+) {
+  const content = await R(DIALOG_TEMPLATES.rollModifiers, {
+    npcRoll: true,
+    noVoid,
+    trait,
+    isAttack,
+    isBow
+  });
   try {
     const result = await DIALOG.prompt({
       window: { title: game.i18n.format("l5r4.ui.chat.rollName", { roll: rollName }) },
@@ -125,6 +140,7 @@ function _processNpcRollOptions(form) {
     totalMod: form.totalMod.value,
     void: form.void?.checked ?? false,
     unskilled: form.unskilled?.checked ?? false,
+    isRanged: form.isRanged?.checked ?? false,
     tn: form.tn?.value ?? 0,
     raises: form.raises?.value ?? 0
   };

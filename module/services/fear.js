@@ -6,11 +6,13 @@
  * - Test: Roll Raw Willpower vs TN (5 + 5×Fear Rank), add Honor Rank
  * - Failure: -Xk0 penalty to all rolls (X = Fear Rank) for encounter
  * - Catastrophic Failure (fail by 15+): Character flees or cowers
+ * - Duration: Effect persists until encounter end (ActiveEffect with no expiry)
  *
  * Integrates with:
  * - Foundry Roll API for dice mechanics
  * - ChatMessage API for result posting
  * - Canvas tokens for target selection
+ * - ActiveEffect API for persistent penalty tracking
  *
  * @module services/fear
  * @requires Foundry v13+
@@ -36,8 +38,9 @@ import { toInt } from "../utils/type-coercion.js";
  * - Roll: Willpower d10k Willpower x10 + Honor Rank + modifier
  * - Target: TN (typically 5 + 5×Fear Rank)
  * - Success: No effect
- * - Failure: -Fear Rank k0 penalty to all rolls
+ * - Failure: -Fear Rank k0 penalty to all rolls (ActiveEffect created)
  * - Catastrophic (fail by 15+): Character overwhelmed by terror
+ * - Duration: Effect persists until manually removed (encounter end)
  *
  * @async
  * @param {FearTestOptions} options - Fear test configuration
@@ -80,6 +83,24 @@ async function executeFearTest({ character, tn, modifier = 0, fearRank, targetIn
   let catastrophicFailure = false;
 
   if (!success) {
+    // Create ActiveEffect for Fear penalty that persists until encounter end
+    try {
+      await character.createEmbeddedDocuments("ActiveEffect", [
+        {
+          name: game.i18n.format("l5r4.ui.mechanics.fear.effectName", { rank: fearRank }),
+          statuses: ["feared"],
+          icon: "systems/l5r4-enhanced/assets/icons/fear.webp",
+          flags: {
+            [SYS_ID]: {
+              fearRank: fearRank
+            }
+          }
+        }
+      ]);
+    } catch (err) {
+      console.error(`${SYS_ID}`, "Fear test: Failed to create Fear effect", { err });
+    }
+
     penaltyInfo = game.i18n.format("l5r4.ui.mechanics.fear.penaltyApplied", { penalty: fearRank });
 
     // Catastrophic failure occurs when failing by 15+, causing the character to flee or cower

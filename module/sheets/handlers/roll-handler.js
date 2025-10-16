@@ -137,6 +137,7 @@ export class RollHandler {
    *
    * L5R4 Mechanics:
    * - Skill Roll Formula: (Skill + Trait)k(Trait) where rolled = Skill + Trait, kept = Trait
+   * - Emphasis: Player selects via dialog if their emphasis applies to this specific situation
    * - Weapon/Bow Attacks: Applies Full Attack stance bonuses (+2k1) if applicable
    * - Wound Penalties: Applied to attack roll TN via SkillRoll service
    *
@@ -300,6 +301,24 @@ export class RollHandler {
       }` +
       `${isUntrained ? ` (${game.i18n.localize("l5r4.ui.mechanics.rolls.unskilled")})` : ""}`;
 
+    // Pass isBow flag to pre-check ranged checkbox in dialog
+    const isBow = weapon.type === "bow";
+
+    // Extract skill name and trait for armor penalty calculation
+    const weaponSystem = weapon.system || {};
+    const associatedSkill = weaponSystem.associatedSkill || null;
+
+    // Find the actual skill item to get its trait (if it exists)
+    let skillTrait = weaponSystem.fallbackTrait || "agi";
+    if (associatedSkill && context.actor.items) {
+      const skillItem = context.actor.items.find(
+        i => i.type === "skill" && i.name.toLowerCase() === associatedSkill.toLowerCase()
+      );
+      if (skillItem && skillItem.system?.trait) {
+        skillTrait = skillItem.system.trait;
+      }
+    }
+
     return SimpleRoll({
       woundPenalty: readWoundPenalty(context.actor),
       diceRoll: weaponSkill.rollBonus + stanceBonuses.roll,
@@ -310,7 +329,10 @@ export class RollHandler {
       rollType: "attack",
       actor: context.actor,
       untrained: isUntrained,
-      weaponId: id
+      weaponId: id,
+      isBow,
+      skillName: associatedSkill,
+      skillTrait: skillTrait
     });
   }
 
