@@ -39,17 +39,17 @@
           "emphasis": "Accent",
           "raise": "Relance",
           "raises": "Relances",
-          "automatic": "Automatic",
+          "automatic": "Automatique",
           "formula": "Formule",
           "result": "Résultat"
         },
         "notifications": {
-          "itemCreated": "Created {type}: {name}",
-          "itemDeleted": "Deleted {type}: {name}",
-          "itemUpdated": "Updated {type}: {name}",
-          "woundConfigFailed": "Failed to open wound configuration",
-          "woundConfigUpdateFailed": "Failed to update wound configuration",
-          "invalidWoundConfigValue": "Invalid wound configuration value"
+          "itemCreated": "Créé {type} : {name}",
+          "itemDeleted": "Supprimé {type} : {name}",
+          "itemUpdated": "Mis à jour {type} : {name}",
+          "woundConfigFailed": "Échec de l'ouverture de la configuration des blessures",
+          "woundConfigUpdateFailed": "Échec de la mise à jour de la configuration des blessures",
+          "invalidWoundConfigValue": "Valeur de configuration de blessure invalide"
         },
         "combat": {
           "attack": "Attaque",
@@ -74,13 +74,13 @@
           "penalty": "Pénalité",
           "woundHealRate": "Taux de guérison des blessures",
           "healRateFormula": "x 2 +",
-          "woundMode": "Wound Mode",
-          "manual": "Manual",
-          "formula": "Formula",
-          "woundConfiguration": "Wound Configuration",
-          "earthMultiplier": "Earth Multiplier",
-          "woundBonus": "Wound Bonus",
-          "threshold": "Threshold",
+          "woundMode": "Mode de Blessures",
+          "manual": "Manuel",
+          "formula": "Formule",
+          "woundConfiguration": "Configuration des Blessures",
+          "earthMultiplier": "Multiplicateur de Terre",
+          "woundBonus": "Bonus de Blessures",
+          "threshold": "Seuil",
           "healthy": "Sain",
           "nicked": "Éraflé",
           "grazed": "Egratigné",
@@ -89,16 +89,16 @@
           "crippled": "Estropié",
           "down": "À terre",
           "out": "Hors de combat",
-          "applyHealing": "Apply Healing",
-          "applyHealingTitle": "Apply natural healing from rest",
-          "naturalHealing": "Natural Healing",
-          "restedAndRecovered": "rested and recovered wounds",
-          "healingApplied": "Healed {amount} wounds (heal rate: {rate})",
-          "woundStatus": "Wounds: {current}/{max} (suffered: {suffered})",
-          "fullyHealed": "Fully healed!",
-          "alreadyFullHealth": "{name} is already at full health",
-          "noHealRate": "{name} has no healing rate configured",
-          "healingFailed": "Failed to apply healing to {name}"
+          "applyHealing": "Appliquer la Guérison",
+          "applyHealingTitle": "Appliquer la guérison naturelle du repos",
+          "naturalHealing": "Guérison Naturelle",
+          "restedAndRecovered": "reposé et blessures récupérées",
+          "healingApplied": "{amount} blessures soignées (taux de guérison : {rate})",
+          "woundStatus": "Blessures : {current}/{max} (subies : {suffered})",
+          "fullyHealed": "Complètement guéri !",
+          "alreadyFullHealth": "{name} est déjà en pleine santé",
+          "noHealRate": "{name} n'a pas de taux de guérison configuré",
+          "healingFailed": "Échec de l'application de la guérison à {name}"
         },
         "stances": {
           "pending": "En attente",
@@ -112,25 +112,25 @@
           "fullAttackBonus": "Posture d'Attaque Totale : +2g1"
         },
         "mounted": {
-          "fullAttackRestriction": "Full Attack stance requires Horsemanship 3+ when mounted",
-          "attackBonus": "Mounted/Higher: +1k0"
+          "fullAttackRestriction": "La Posture d'Attaque Totale nécessite Équitation 3+ à cheval",
+          "attackBonus": "Monté/En hauteur : +1k0"
         },
         "fear": {
-          "fearRank": "Fear Rank",
-          "fearLabel": "Fear {rank}",
-          "effectName": "Fear {rank}",
-          "clickToTest": "Click to test Fear against selected characters",
-          "testResult": "Fear {rank} Test",
-          "testSuccess": "Resisted Fear {rank}",
-          "testFailure": "Failed Fear {rank} Test",
-          "penaltyApplied": "Penalty: -{penalty}kO to all rolls",
-          "catastrophicFailure": "CATASTROPHIC FAILURE! Character flees or cowers helplessly.",
-          "noTargets": "No tokens selected for Fear test",
-          "noWillpower": "{character} has no Willpower trait",
-          "noFear": "This NPC has no Fear effect configured",
+          "fearRank": "Rang de Peur",
+          "fearLabel": "Peur {rank}",
+          "effectName": "Peur {rank}",
+          "clickToTest": "Cliquez pour tester la Peur contre les personnages sélectionnés",
+          "testResult": "Test de Peur {rank}",
+          "testSuccess": "Résisté à la Peur {rank}",
+          "testFailure": "Échec du Test de Peur {rank}",
+          "penaltyApplied": "Pénalité : -{penalty}k0 à tous les jets",
+          "catastrophicFailure": "ÉCHEC CATASTROPHIQUE ! Le personnage fuit ou se recroqueville sans défense.",
+          "noTargets": "Aucun jeton sélectionné pour le test de Peur",
+          "noWillpower": "{character} n'a pas de caractéristique Volonté",
+          "noFear": "Ce PNJ n'a pas d'effet de Peur configuré",
           "testAgainst": "vs {creature}",
-          "rollFailed": "Fear test roll failed - invalid formula or corrupted data",
-          "templateFailed": "Fear test chat template failed to render"
+          "rollFailed": "Le jet du test de Peur a échoué - formule invalide ou données corrompues",
+          "templateFailed": "Le modèle de chat du test de Peur n'a pas pu être affiché"
         }
       },
       "common": {
@@ -161,7 +161,7 @@
         "description": "Description",
         "notes": "Notes",
         "activeEffects": "Effets actifs",
-        "active": "Active",
+        "active": "Actif",
         "new": "Nouveau",
         "disabled": "désactivé",
         "rank": "Rang",
@@ -238,7 +238,7 @@
         "chatMessageFailed": "Échec de la publication du jet dans le chat - voir la console pour les détails",
         "deleteEffect": "Échec de la suppression de l'effet.",
         "schoolRankZero": "Vous ne pouvez pas lancer un sort avec un Rang d'École réduit à zéro",
-        "deficiencyBlocksCasting": "Deficiency in {ring} reduces your School Rank to zero - cannot cast",
+        "deficiencyBlocksCasting": "La Déficience en {ring} réduit votre Rang d'École à zéro - impossible de lancer",
         "noSpellSlots": "Vous n'avez plus d'emplacements de sort pour cet anneau"
       },
       "chat": {
@@ -340,8 +340,8 @@
         "insightPoints": "Points de Perspicacité"
       },
       "stance": {
-        "title": "Combat Stance",
-        "current": "Current Stance"
+        "title": "Posture de Combat",
+        "current": "Posture Actuelle"
       },
       "experience": {
         "xpAmount": "Montant",
@@ -359,9 +359,9 @@
         "voidChange": "Vide {from}→{to}",
         "skillCreate": "{name} 0→{rank}",
         "skillChange": "{name} {from}→{to}",
-        "recalculateTooltip": "Recalculate XP purchases from current character state",
-        "recalculateSuccess": "XP purchases recalculated successfully",
-        "recalculateFailed": "Failed to recalculate XP purchases",
+        "recalculateTooltip": "Recalculer les achats d'XP depuis l'état actuel du personnage",
+        "recalculateSuccess": "Achats d'XP recalculés avec succès",
+        "recalculateFailed": "Échec du recalcul des achats d'XP",
         "disadvantageCapLabel": "Max XP",
         "disadvantageCapTitle": "Définir la Limite des Désavantages",
         "disadvantageCapTooltip": "Cliquez pour modifier le maximum d'XP gagnés par les désavantages",
@@ -440,25 +440,25 @@
         "maho": "Mahō",
         "useSpellSlot": "Utiliser un emplacement de sort",
         "voidSlot": "Utiliser un emplacement de sort de Vide",
-        "slotsRestored": "All spell slots restored to maximum",
-        "restored": "restored"
+        "slotsRestored": "Tous les emplacements de sort restaurés au maximum",
+        "restored": "restauré"
       },
       "maho": {
-        "warningTitle": "Blood Magic - Forbidden Maho",
-        "bloodRequired": "Blood Cost Required",
-        "additionalBloodBonus": "Each additional blood cost amount grants +1 Free Raise",
+        "warningTitle": "Magie de Sang - Mahō Interdit",
+        "bloodRequired": "Coût de Sang Requis",
+        "additionalBloodBonus": "Chaque coût de sang supplémentaire accorde +1 Relance Gratuite",
         "bloodSource": {
-          "label": "Blood Source",
-          "self": "Self",
-          "other": "Other"
+          "label": "Source de Sang",
+          "self": "Soi-même",
+          "other": "Autre"
         },
-        "additionalBlood": "Additional Blood",
-        "castMaho": "Cast Maho Spell",
-        "mahoCasting": "Maho Casting",
-        "bloodCost": "Blood",
-        "freeRaises": "Free Raises",
-        "taintGained": "Taint Gained",
-        "taintGainedNotification": "Gained {taint} points of Shadowlands Taint from maho casting"
+        "additionalBlood": "Sang Supplémentaire",
+        "castMaho": "Lancer un Sort Mahō",
+        "mahoCasting": "Incantation Mahō",
+        "bloodCost": "Sang",
+        "freeRaises": "Relances Gratuites",
+        "taintGained": "Souillure Gagnée",
+        "taintGainedNotification": "Gagné {taint} points de Souillure des Terres de l'Ombre par incantation mahō"
       },
       "kiho": {
         "internal": "Interne",
@@ -582,28 +582,28 @@
   },
   "conditions": {
     "blinded": {
-      "restrictions": "Blinded: -3k3 ranged attacks, -1k1 melee attacks, -1k1 Defense rolls, Armor TN = Ref+5+Armor, Water Ring -2 for movement"
+      "restrictions": "Aveuglé : -3k3 attaques à distance, -1k1 attaques au corps à corps, -1k1 jets de Défense, TN d'Armure = Réf+5+Armure, Anneau d'Eau -2 pour le mouvement"
     },
     "dazed": {
-      "restrictions": "Dazed: -3k0 to all actions, only Defense/Full Defense stances, cannot duel"
+      "restrictions": "Étourdi : -3k0 à toutes les actions, seulement Postures de Défense/Défense Totale, ne peut pas dueller"
     },
     "entangled": {
-      "restrictions": "Entangled: Cannot Move or take Complex Actions except Strength roll to break free"
+      "restrictions": "Empêtré : Ne peut pas Bouger ou effectuer d'Actions Complexes sauf jet de Force pour se libérer"
     },
     "fatigued": {
-      "restrictions": "Fatigued: +5 TN to physical rolls, skills, and spellcasting (stacks per day), cannot use Full Attack stance"
+      "restrictions": "Fatigué : +5 TN aux jets physiques, compétences et incantation (s'accumule par jour), ne peut pas utiliser la Posture d'Attaque Totale"
     },
     "feared": {
-      "restrictions": "Feared: -Xk0 to all rolls (X = Fear Rank), lasts until encounter end"
+      "restrictions": "Effrayé : -Xk0 à tous les jets (X = Rang de Peur), dure jusqu'à la fin de la rencontre"
     },
     "grappled": {
-      "restrictions": "Grappled: Armor TN = 5 + armor bonus only"
+      "restrictions": "Agrippé : TN d'Armure = 5 + bonus d'armure uniquement"
     },
     "prone": {
-      "restrictions": "Prone: -10 Armor TN vs melee, -2k0 attacks, cannot Move, only Attack/Defense stances"
+      "restrictions": "À terre : -10 TN d'Armure vs corps à corps, -2k0 attaques, ne peut pas Bouger, seulement Postures d'Attaque/Défense"
     },
     "stunned": {
-      "restrictions": "Stunned: Cannot take any actions, Armor TN = 5 + armor bonus"
+      "restrictions": "Étourdi : Ne peut effectuer aucune action, TN d'Armure = 5 + bonus d'armure"
     }
   }
 }

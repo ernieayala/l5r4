@@ -39,17 +39,17 @@
           "emphasis": "Schwerpunkt",
           "raise": "Erhöhung",
           "raises": "Erhöhungen",
-          "automatic": "Automatic",
+          "automatic": "Automatisch",
           "formula": "Formel",
           "result": "Ergebnis"
         },
         "notifications": {
-          "itemCreated": "Created {type}: {name}",
-          "itemDeleted": "Deleted {type}: {name}",
-          "itemUpdated": "Updated {type}: {name}",
-          "woundConfigFailed": "Failed to open wound configuration",
-          "woundConfigUpdateFailed": "Failed to update wound configuration",
-          "invalidWoundConfigValue": "Invalid wound configuration value"
+          "itemCreated": "Erstellt {type}: {name}",
+          "itemDeleted": "Gelöscht {type}: {name}",
+          "itemUpdated": "Aktualisiert {type}: {name}",
+          "woundConfigFailed": "Wundenkonfiguration konnte nicht geöffnet werden",
+          "woundConfigUpdateFailed": "Wundenkonfiguration konnte nicht aktualisiert werden",
+          "invalidWoundConfigValue": "Ungültiger Wundenkonfigurationswert"
         },
         "combat": {
           "attack": "Angriff",
@@ -74,13 +74,13 @@
           "penalty": "Abzug",
           "woundHealRate": "Heilrate der Wunden",
           "healRateFormula": "x 2 +",
-          "woundMode": "Wound Mode",
-          "manual": "Manual",
-          "formula": "Formula",
-          "woundConfiguration": "Wound Configuration",
-          "earthMultiplier": "Earth Multiplier",
-          "woundBonus": "Wound Bonus",
-          "threshold": "Threshold",
+          "woundMode": "Wundenmodus",
+          "manual": "Manuell",
+          "formula": "Formel",
+          "woundConfiguration": "Wundenkonfiguration",
+          "earthMultiplier": "Erde-Multiplikator",
+          "woundBonus": "Wundenbonus",
+          "threshold": "Schwelle",
           "healthy": "Gesund",
           "nicked": "Angeritzt",
           "grazed": "Gekratzt",
@@ -89,16 +89,16 @@
           "crippled": "Verstümmelt",
           "down": "Niedergeschlagen",
           "out": "Kampfunfähig",
-          "applyHealing": "Apply Healing",
-          "applyHealingTitle": "Apply natural healing from rest",
-          "naturalHealing": "Natural Healing",
-          "restedAndRecovered": "rested and recovered wounds",
-          "healingApplied": "Healed {amount} wounds (heal rate: {rate})",
-          "woundStatus": "Wounds: {current}/{max} (suffered: {suffered})",
-          "fullyHealed": "Fully healed!",
-          "alreadyFullHealth": "{name} is already at full health",
-          "noHealRate": "{name} has no healing rate configured",
-          "healingFailed": "Failed to apply healing to {name}"
+          "applyHealing": "Heilung anwenden",
+          "applyHealingTitle": "Natürliche Heilung durch Ruhe anwenden",
+          "naturalHealing": "Natürliche Heilung",
+          "restedAndRecovered": "ausgeruht und Wunden erholt",
+          "healingApplied": "{amount} Wunden geheilt (Heilrate: {rate})",
+          "woundStatus": "Wunden: {current}/{max} (erlitten: {suffered})",
+          "fullyHealed": "Vollständig geheilt!",
+          "alreadyFullHealth": "{name} ist bereits vollständig gesund",
+          "noHealRate": "{name} hat keine Heilrate konfiguriert",
+          "healingFailed": "Heilung konnte nicht auf {name} angewendet werden"
         },
         "stances": {
           "pending": "Ausstehend",
@@ -112,25 +112,25 @@
           "fullAttackBonus": "Volle Angriffshaltung: +2k1"
         },
         "mounted": {
-          "fullAttackRestriction": "Full Attack stance requires Horsemanship 3+ when mounted",
-          "attackBonus": "Mounted/Higher: +1k0"
+          "fullAttackRestriction": "Volle Angriffshaltung erfordert Reiten 3+ beim Beritten sein",
+          "attackBonus": "Beritten/Erhöht: +1k0"
         },
         "fear": {
-          "fearRank": "Fear Rank",
-          "fearLabel": "Fear {rank}",
-          "effectName": "Fear {rank}",
-          "clickToTest": "Click to test Fear against selected characters",
-          "testResult": "Fear {rank} Test",
-          "testSuccess": "Resisted Fear {rank}",
-          "testFailure": "Failed Fear {rank} Test",
-          "penaltyApplied": "Penalty: -{penalty}kO to all rolls",
-          "catastrophicFailure": "CATASTROPHIC FAILURE! Character flees or cowers helplessly.",
-          "noTargets": "No tokens selected for Fear test",
-          "noWillpower": "{character} has no Willpower trait",
-          "noFear": "This NPC has no Fear effect configured",
+          "fearRank": "Furcht-Rang",
+          "fearLabel": "Furcht {rank}",
+          "effectName": "Furcht {rank}",
+          "clickToTest": "Klicken Sie, um Furcht gegen ausgewählte Charaktere zu testen",
+          "testResult": "Furcht {rank} Test",
+          "testSuccess": "Furcht {rank} widerstanden",
+          "testFailure": "Furcht {rank} Test fehlgeschlagen",
+          "penaltyApplied": "Strafe: -{penalty}k0 auf alle Würfe",
+          "catastrophicFailure": "KATASTROPHALER FEHLSCHLAG! Charakter flieht oder kauert hilflos.",
+          "noTargets": "Keine Token für Furcht-Test ausgewählt",
+          "noWillpower": "{character} hat keine Willenskraft-Eigenschaft",
+          "noFear": "Dieser NSC hat keinen Furcht-Effekt konfiguriert",
           "testAgainst": "vs {creature}",
-          "rollFailed": "Fear test roll failed - invalid formula or corrupted data",
-          "templateFailed": "Fear test chat template failed to render"
+          "rollFailed": "Furcht-Testwurf fehlgeschlagen - ungültige Formel oder beschädigte Daten",
+          "templateFailed": "Furcht-Test-Chat-Vorlage konnte nicht gerendert werden"
         }
       },
       "common": {
@@ -161,7 +161,7 @@
         "description": "Beschreibung",
         "notes": "Notizen",
         "activeEffects": "Aktive Effekte",
-        "active": "Active",
+        "active": "Aktiv",
         "new": "Neu",
         "disabled": "deaktiviert",
         "rank": "Rang",
@@ -238,7 +238,7 @@
         "chatMessageFailed": "Wurf konnte nicht im Chat gepostet werden - siehe Konsole für Details",
         "deleteEffect": "Effekt konnte nicht gelöscht werden.",
         "schoolRankZero": "Du kannst keinen Zauber wirken, wenn der Schulrang auf null reduziert ist",
-        "deficiencyBlocksCasting": "Deficiency in {ring} reduces your School Rank to zero - cannot cast",
+        "deficiencyBlocksCasting": "Schwäche in {ring} reduziert deinen Schulrang auf null - kann nicht zaubern",
         "noSpellSlots": "Keine Zauberplätze mehr für diesen Ring"
       },
       "chat": {
@@ -340,8 +340,8 @@
         "insightPoints": "Einsichts-Punkte"
       },
       "stance": {
-        "title": "Combat Stance",
-        "current": "Current Stance"
+        "title": "Kampfhaltung",
+        "current": "Aktuelle Haltung"
       },
       "experience": {
         "xpAmount": "Betrag",
@@ -359,9 +359,9 @@
         "voidChange": "Leere {from}→{to}",
         "skillCreate": "{name} 0→{rank}",
         "skillChange": "{name} {from}→{to}",
-        "recalculateTooltip": "Recalculate XP purchases from current character state",
-        "recalculateSuccess": "XP purchases recalculated successfully",
-        "recalculateFailed": "Failed to recalculate XP purchases",
+        "recalculateTooltip": "EP-Käufe vom aktuellen Charakterzustand neu berechnen",
+        "recalculateSuccess": "EP-Käufe erfolgreich neu berechnet",
+        "recalculateFailed": "EP-Käufe konnten nicht neu berechnet werden",
         "disadvantageCapLabel": "Max EP",
         "disadvantageCapTitle": "Nachteil-Grenze festlegen",
         "disadvantageCapTooltip": "Klicken Sie, um die maximalen EP aus Nachteilen zu ändern",
@@ -440,25 +440,25 @@
         "maho": "Mahō",
         "useSpellSlot": "Zauberplatz verwenden",
         "voidSlot": "Leere-Zauberplatz verwenden",
-        "slotsRestored": "All spell slots restored to maximum",
-        "restored": "restored"
+        "slotsRestored": "Alle Zauberplätze auf Maximum wiederhergestellt",
+        "restored": "wiederhergestellt"
       },
       "maho": {
-        "warningTitle": "Blood Magic - Forbidden Maho",
-        "bloodRequired": "Blood Cost Required",
-        "additionalBloodBonus": "Each additional blood cost amount grants +1 Free Raise",
+        "warningTitle": "Blutmagie - Verbotenes Mahō",
+        "bloodRequired": "Blutkosten erforderlich",
+        "additionalBloodBonus": "Jede zusätzliche Blutkostenmenge gewährt +1 Freie Erhöhung",
         "bloodSource": {
-          "label": "Blood Source",
-          "self": "Self",
-          "other": "Other"
+          "label": "Blutquelle",
+          "self": "Selbst",
+          "other": "Anderer"
         },
-        "additionalBlood": "Additional Blood",
-        "castMaho": "Cast Maho Spell",
-        "mahoCasting": "Maho Casting",
-        "bloodCost": "Blood",
-        "freeRaises": "Free Raises",
-        "taintGained": "Taint Gained",
-        "taintGainedNotification": "Gained {taint} points of Shadowlands Taint from maho casting"
+        "additionalBlood": "Zusätzliches Blut",
+        "castMaho": "Mahō-Zauber wirken",
+        "mahoCasting": "Mahō-Zaubern",
+        "bloodCost": "Blut",
+        "freeRaises": "Freie Erhöhungen",
+        "taintGained": "Makel erhalten",
+        "taintGainedNotification": "{taint} Punkte Schattenlande-Makel durch Mahō-Zaubern erhalten"
       },
       "kiho": {
         "internal": "Intern",
@@ -582,28 +582,28 @@
   },
   "conditions": {
     "blinded": {
-      "restrictions": "Blinded: -3k3 ranged attacks, -1k1 melee attacks, -1k1 Defense rolls, Armor TN = Ref+5+Armor, Water Ring -2 for movement"
+      "restrictions": "Geblendet: -3k3 Fernkampfangriffe, -1k1 Nahkampfangriffe, -1k1 Verteidigungs-Würfe, Rüstungs-TN = Ref+5+Rüstung, Wasser-Ring -2 für Bewegung"
     },
     "dazed": {
-      "restrictions": "Dazed: -3k0 to all actions, only Defense/Full Defense stances, cannot duel"
+      "restrictions": "Benommen: -3k0 auf alle Aktionen, nur Verteidigungs-/Volle Verteidigungs-Haltungen, kann nicht duellieren"
     },
     "entangled": {
-      "restrictions": "Entangled: Cannot Move or take Complex Actions except Strength roll to break free"
+      "restrictions": "Verheddert: Kann sich nicht bewegen oder komplexe Aktionen ausführen, außer Stärke-Wurf zum Befreien"
     },
     "fatigued": {
-      "restrictions": "Fatigued: +5 TN to physical rolls, skills, and spellcasting (stacks per day), cannot use Full Attack stance"
+      "restrictions": "Erschöpft: +5 TN auf körperliche Würfe, Fertigkeiten und Zaubern (stapelt sich pro Tag), kann Volle Angriffshaltung nicht verwenden"
     },
     "feared": {
-      "restrictions": "Feared: -Xk0 to all rolls (X = Fear Rank), lasts until encounter end"
+      "restrictions": "Gefürchtet: -Xk0 auf alle Würfe (X = Furcht-Rang), dauert bis zum Ende der Begegnung"
     },
     "grappled": {
-      "restrictions": "Grappled: Armor TN = 5 + armor bonus only"
+      "restrictions": "Gehalten: Rüstungs-TN = 5 + nur Rüstungsbonus"
     },
     "prone": {
-      "restrictions": "Prone: -10 Armor TN vs melee, -2k0 attacks, cannot Move, only Attack/Defense stances"
+      "restrictions": "Liegend: -10 Rüstungs-TN vs Nahkampf, -2k0 Angriffe, kann sich nicht bewegen, nur Angriffs-/Verteidigungs-Haltungen"
     },
     "stunned": {
-      "restrictions": "Stunned: Cannot take any actions, Armor TN = 5 + armor bonus"
+      "restrictions": "Betäubt: Kann keine Aktionen ausführen, Rüstungs-TN = 5 + Rüstungsbonus"
     }
   }
 }
