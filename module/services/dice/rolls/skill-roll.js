@@ -8,6 +8,7 @@
  * - Void spending grants +1k1 bonus
  * - Ten Dice Rule enforced (max 10 rolled/kept dice)
  * - Wound penalties apply to effective TN
+ * - Honor Rank adds to social resistance rolls (resisting Intimidation/Temptation)
  *
  * Foundry VTT Integration:
  * - Uses Foundry Roll API for dice mechanics
@@ -51,7 +52,8 @@ import { getArmorTNPenalty } from "../../../utils/armor-penalties.js";
  *
  * Implements the core L5R4 skill roll system where rolls are calculated as
  * (Skill Rank + Trait)k(Trait). The function handles all roll modifiers including
- * bonuses from effects, void point spending, emphasis, raises, and wound penalties.
+ * bonuses from effects, void point spending, emphasis, raises, wound penalties,
+ * and Honor bonuses for social resistance.
  *
  * Skill Roll Mechanics (per Skills_and_Rolls.md):
  * - Skilled formula (Rank > 0): Roll (Skill + Trait + rollMod) dice, keep (Trait + keepMod) dice
@@ -61,11 +63,14 @@ import { getArmorTNPenalty } from "../../../utils/armor-penalties.js";
  * - Void Points: Spending void grants +1k1 bonus to the roll
  * - Ten Dice Rule: Enforced automatically (excess dice convert to kept or bonuses)
  * - Wound Penalties: Applied to effective TN if enabled
+ * - Social Resistance: Honor Rank added to total when resisting Intimidation/Temptation (Honor_Glory_Status.md)
  *
  * Dialog Behavior:
  * The function conditionally shows a roll options dialog based on the askForOptions
  * parameter and the "showSkillRollOptions" system setting. If these values differ
- * (XOR logic), the dialog is displayed. Otherwise, uses provided bonuses directly.
+ * (XOR logic), the dialog is displayed. The dialog includes a checkbox for social
+ * resistance which adds the character's Honor Rank as a flat bonus to the roll.
+ * Otherwise, uses provided bonuses directly.
  *
  * Attack Rolls:
  * When rollType is "attack" and no manual TN is set, automatically resolves the
@@ -83,7 +88,7 @@ import { getArmorTNPenalty } from "../../../utils/armor-penalties.js";
  * @param {number} [options.rollBonus=0] - Additional rolled dice from effects
  * @param {number} [options.keepBonus=0] - Additional kept dice from effects
  * @param {number} [options.totalBonus=0] - Flat bonus added to roll total
- * @param {L5R4Actor|null} [options.actor=null] - Actor performing the roll (for bonuses/void)
+ * @param {L5R4Actor|null} [options.actor=null] - Actor performing the roll (for bonuses/void/honor)
  * @param {string|null} [options.rollType=null] - Roll type identifier (e.g., "attack")
  *
  * @returns {Promise<ChatMessage|false>} The created chat message, or false on error
@@ -129,6 +134,7 @@ export async function SkillRoll({
   let keepMod = 0;
   let totalMod = 0;
   let applyWoundPenalty = true;
+  let socialResistance = false;
 
   // Resolve target TN and info string from selected tokens (attack rolls only)
   const { autoTN, targetInfo } = resolveTargets(actor, rollType);
@@ -176,15 +182,23 @@ export async function SkillRoll({
       keepMod: keepBonus,
       totalMod: totalBonus,
       emphasis: false,
-      applyWoundPenalty: true
+      applyWoundPenalty: true,
+      socialResistance: false
     };
   }
 
-  // Extract emphasis and wound penalty flags from dialog/default check object
-  ({ emphasis, applyWoundPenalty } = check);
+  // Extract emphasis, wound penalty, and social resistance flags from dialog/default check object
+  ({ emphasis, applyWoundPenalty, socialResistance } = check);
   rollMod += toInt(check.rollMod);
   keepMod += toInt(check.keepMod);
   totalMod += toInt(check.totalMod);
+
+  // Apply Honor Rank bonus for social resistance (L5R4 rule: resisting Intimidation/Temptation)
+  let honorRank = 0;
+  if (socialResistance && actor) {
+    honorRank = toInt(actor.system?.honor?.rank ?? 0);
+    totalMod += honorRank;
+  }
 
   // L5R4 Unskilled Roll Rule (Skills_and_Rolls.md):
   // When skill rank = 0, "effectively making a Trait Roll" = (Trait)k(Trait) with no exploding dice
@@ -213,6 +227,9 @@ export async function SkillRoll({
   }
   if (emphasis) {
     baseLabel += ` (${game.i18n.localize("l5r4.ui.mechanics.rolls.emphasis")})`;
+  }
+  if (socialResistance && honorRank > 0) {
+    baseLabel += ` [${game.i18n.localize("l5r4.character.ranks.honorRank")} +${honorRank}]`;
   }
   if (rollMod || keepMod || totalMod) {
     baseLabel += ` ${game.i18n.localize("l5r4.ui.common.mod")} (${rollMod}k${keepMod}${
