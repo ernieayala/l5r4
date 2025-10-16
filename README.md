@@ -11,7 +11,7 @@ Complete Legend of the Five Rings 4th Edition implementation for Foundry VTT v13
 
 ## ⚠️ Migration Required for Existing Users
 
-**Moving from GitLab or version 1.x?** You must migrate your data.
+**Moving from [https://gitlab.com/team-l5r4/l5r4](https://gitlab.com/team-l5r4/l5r4) or version 1.x?** You must migrate your data.
 
 This system uses ID `l5r4-enhanced` instead of `l5r4`. Foundry doesn't allow system ID changes, so worlds using the old system cannot directly upgrade.
 
