@@ -39,17 +39,17 @@
           "emphasis": "Акцент",
           "raise": "Повышение",
           "raises": "Повышения",
-          "automatic": "Automatic",
+          "automatic": "Автоматический",
           "formula": "Формула",
           "result": "Результат"
         },
         "notifications": {
-          "itemCreated": "Created {type}: {name}",
-          "itemDeleted": "Deleted {type}: {name}",
-          "itemUpdated": "Updated {type}: {name}",
-          "woundConfigFailed": "Failed to open wound configuration",
-          "woundConfigUpdateFailed": "Failed to update wound configuration",
-          "invalidWoundConfigValue": "Invalid wound configuration value"
+          "itemCreated": "Создано {type}: {name}",
+          "itemDeleted": "Удалено {type}: {name}",
+          "itemUpdated": "Обновлено {type}: {name}",
+          "woundConfigFailed": "Не удалось открыть конфигурацию ран",
+          "woundConfigUpdateFailed": "Не удалось обновить конфигурацию ран",
+          "invalidWoundConfigValue": "Неверное значение конфигурации ран"
         },
         "combat": {
           "attack": "Атака",
@@ -74,13 +74,13 @@
           "penalty": "Штраф",
           "woundHealRate": "Скорость Исцеления Ран",
           "healRateFormula": "x 2 +",
-          "woundMode": "Wound Mode",
-          "manual": "Manual",
-          "formula": "Formula",
-          "woundConfiguration": "Wound Configuration",
-          "earthMultiplier": "Earth Multiplier",
-          "woundBonus": "Wound Bonus",
-          "threshold": "Threshold",
+          "woundMode": "Режим Ран",
+          "manual": "Ручной",
+          "formula": "Формула",
+          "woundConfiguration": "Конфигурация Ран",
+          "earthMultiplier": "Множитель Земли",
+          "woundBonus": "Бонус Ран",
+          "threshold": "Порог",
           "healthy": "Здоров",
           "nicked": "Царапина",
           "grazed": "Едва Задет",
@@ -89,16 +89,16 @@
           "crippled": "Инвалид",
           "down": "Сбит с Ног",
           "out": "Выведен из боя",
-          "applyHealing": "Apply Healing",
-          "applyHealingTitle": "Apply natural healing from rest",
-          "naturalHealing": "Natural Healing",
-          "restedAndRecovered": "rested and recovered wounds",
-          "healingApplied": "Healed {amount} wounds (heal rate: {rate})",
-          "woundStatus": "Wounds: {current}/{max} (suffered: {suffered})",
-          "fullyHealed": "Fully healed!",
-          "alreadyFullHealth": "{name} is already at full health",
-          "noHealRate": "{name} has no healing rate configured",
-          "healingFailed": "Failed to apply healing to {name}"
+          "applyHealing": "Применить Исцеление",
+          "applyHealingTitle": "Применить естественное исцеление от отдыха",
+          "naturalHealing": "Естественное Исцеление",
+          "restedAndRecovered": "отдохнул и восстановил раны",
+          "healingApplied": "Исцелено {amount} ран (скорость исцеления: {rate})",
+          "woundStatus": "Раны: {current}/{max} (получено: {suffered})",
+          "fullyHealed": "Полностью исцелен!",
+          "alreadyFullHealth": "{name} уже полностью здоров",
+          "noHealRate": "У {name} не настроена скорость исцеления",
+          "healingFailed": "Не удалось применить исцеление к {name}"
         },
         "stances": {
           "pending": "В ожидании",
@@ -112,25 +112,25 @@
           "fullAttackBonus": "Стойка Полной Атаки: +2k1"
         },
         "mounted": {
-          "fullAttackRestriction": "Full Attack stance requires Horsemanship 3+ when mounted",
-          "attackBonus": "Mounted/Higher: +1k0"
+          "fullAttackRestriction": "Стойка Полной Атаки требует Верховою Езду 3+ верхом",
+          "attackBonus": "Верхом/Выше: +1k0"
         },
         "fear": {
-          "fearRank": "Fear Rank",
-          "fearLabel": "Fear {rank}",
-          "effectName": "Fear {rank}",
-          "clickToTest": "Click to test Fear against selected characters",
-          "testResult": "Fear {rank} Test",
-          "testSuccess": "Resisted Fear {rank}",
-          "testFailure": "Failed Fear {rank} Test",
-          "penaltyApplied": "Penalty: -{penalty}kO to all rolls",
-          "catastrophicFailure": "CATASTROPHIC FAILURE! Character flees or cowers helplessly.",
-          "noTargets": "No tokens selected for Fear test",
-          "noWillpower": "{character} has no Willpower trait",
-          "noFear": "This NPC has no Fear effect configured",
-          "testAgainst": "vs {creature}",
-          "rollFailed": "Fear test roll failed - invalid formula or corrupted data",
-          "templateFailed": "Fear test chat template failed to render"
+          "fearRank": "Ранг Страха",
+          "fearLabel": "Страх {rank}",
+          "effectName": "Страх {rank}",
+          "clickToTest": "Нажмите, чтобы проверить Страх против выбранных персонажей",
+          "testResult": "Тест Страха {rank}",
+          "testSuccess": "Сопротивление Страху {rank}",
+          "testFailure": "Провал Теста Страха {rank}",
+          "penaltyApplied": "Штраф: -{penalty}k0 ко всем броскам",
+          "catastrophicFailure": "КАТАСТРОФИЧЕСКИЙ ПРОВАЛ! Персонаж бежит или жмется беспомощно.",
+          "noTargets": "Не выбраны токены для теста Страха",
+          "noWillpower": "У {character} нет характеристики Силы Воли",
+          "noFear": "У этого НИП не настроен эффект Страха",
+          "testAgainst": "против {creature}",
+          "rollFailed": "Бросок теста Страха не удался - неверная формула или поврежденные данные",
+          "templateFailed": "Не удалось отобразить шаблон чата теста Страха"
         }
       },
       "common": {
@@ -161,7 +161,7 @@
         "description": "Описание",
         "notes": "Заметки",
         "activeEffects": "Активные Эффекты",
-        "active": "Active",
+        "active": "Активный",
         "new": "Новый",
         "disabled": "отключено",
         "rank": "Ранг",
@@ -238,7 +238,7 @@
         "chatMessageFailed": "Не удалось опубликовать бросок в чате - см. консоль для подробностей",
         "deleteEffect": "Не удалось удалить эффект.",
         "schoolRankZero": "Нельзя колдовать при Ранге Школы, сниженном до нуля",
-        "deficiencyBlocksCasting": "Deficiency in {ring} reduces your School Rank to zero - cannot cast",
+        "deficiencyBlocksCasting": "Дефицит в {ring} снижает ваш Ранг Школы до нуля - невозможно сотворить",
         "noSpellSlots": "У вас закончились ячейки заклинаний для этого кольца"
       },
       "chat": {
@@ -340,8 +340,8 @@
         "insightPoints": "Очки Понимания"
       },
       "stance": {
-        "title": "Combat Stance",
-        "current": "Current Stance"
+        "title": "Боевая Стойка",
+        "current": "Текущая Стойка"
       },
       "experience": {
         "xpAmount": "Сумма",
@@ -359,9 +359,9 @@
         "voidChange": "Пустота {from}→{to}",
         "skillCreate": "{name} 0→{rank}",
         "skillChange": "{name} {from}→{to}",
-        "recalculateTooltip": "Recalculate XP purchases from current character state",
-        "recalculateSuccess": "XP purchases recalculated successfully",
-        "recalculateFailed": "Failed to recalculate XP purchases",
+        "recalculateTooltip": "Пересчитать покупки Опыта из текущего состояния персонажа",
+        "recalculateSuccess": "Покупки Опыта успешно пересчитаны",
+        "recalculateFailed": "Не удалось пересчитать покупки Опыта",
         "disadvantageCapLabel": "Макс XP",
         "disadvantageCapTitle": "Установить предел недостатков",
         "disadvantageCapTooltip": "Нажмите, чтобы изменить максимальное количество опыта, полученного от недостатков",
@@ -440,25 +440,25 @@
         "maho": "Махо",
         "useSpellSlot": "Использовать ячейку заклинания",
         "voidSlot": "Использовать ячейку Пустоты",
-        "slotsRestored": "All spell slots restored to maximum",
-        "restored": "restored"
+        "slotsRestored": "Все ячейки заклинаний восстановлены до максимума",
+        "restored": "восстановлено"
       },
       "maho": {
-        "warningTitle": "Blood Magic - Forbidden Maho",
-        "bloodRequired": "Blood Cost Required",
-        "additionalBloodBonus": "Each additional blood cost amount grants +1 Free Raise",
+        "warningTitle": "Кровавая Магия - Запретное Махо",
+        "bloodRequired": "Требуется Кровавая Цена",
+        "additionalBloodBonus": "Каждая дополнительная кровавая цена дает +1 Бесплатное Повышение",
         "bloodSource": {
-          "label": "Blood Source",
-          "self": "Self",
-          "other": "Other"
+          "label": "Источник Крови",
+          "self": "Себя",
+          "other": "Другой"
         },
-        "additionalBlood": "Additional Blood",
-        "castMaho": "Cast Maho Spell",
-        "mahoCasting": "Maho Casting",
-        "bloodCost": "Blood",
-        "freeRaises": "Free Raises",
-        "taintGained": "Taint Gained",
-        "taintGainedNotification": "Gained {taint} points of Shadowlands Taint from maho casting"
+        "additionalBlood": "Дополнительная Кровь",
+        "castMaho": "Сотворить Заклинание Махо",
+        "mahoCasting": "Колдовство Махо",
+        "bloodCost": "Кровь",
+        "freeRaises": "Бесплатные Повышения",
+        "taintGained": "Получена Порча",
+        "taintGainedNotification": "Получено {taint} очков Порчи Земель Тени от колдовства махо"
       },
       "kiho": {
         "internal": "Внутреннее",
@@ -582,28 +582,28 @@
   },
   "conditions": {
     "blinded": {
-      "restrictions": "Blinded: -3k3 ranged attacks, -1k1 melee attacks, -1k1 Defense rolls, Armor TN = Ref+5+Armor, Water Ring -2 for movement"
+      "restrictions": "Ослеплен: -3k3 для дальних атак, -1k1 для рукопашных атак, -1k1 для бросков Защиты, TN Брони = Рефлексы+5+Броня, Кольцо Воды -2 для передвижения"
     },
     "dazed": {
-      "restrictions": "Dazed: -3k0 to all actions, only Defense/Full Defense stances, cannot duel"
+      "restrictions": "Оцепенение: -3k0 ко всем действиям, только Стойки Обороны/Полной Обороны, нельзя участвовать в дуэлях"
     },
     "entangled": {
-      "restrictions": "Entangled: Cannot Move or take Complex Actions except Strength roll to break free"
+      "restrictions": "Опутан: Нельзя двигаться или совершать Сложные Действия, кроме броска Силы для освобождения"
     },
     "fatigued": {
-      "restrictions": "Fatigued: +5 TN to physical rolls, skills, and spellcasting (stacks per day), cannot use Full Attack stance"
+      "restrictions": "Утомлен: +5 TN к физическим броскам, навыкам и заклинаниям (складывается по дням), нельзя использовать Стойку Полной Атаки"
     },
     "feared": {
-      "restrictions": "Feared: -Xk0 to all rolls (X = Fear Rank), lasts until encounter end"
+      "restrictions": "Испуган: -Xk0 ко всем броскам (X = Ранг Страха), длится до конца столкновения"
     },
     "grappled": {
-      "restrictions": "Grappled: Armor TN = 5 + armor bonus only"
+      "restrictions": "Схвачен: TN Брони = 5 + только бонус брони"
     },
     "prone": {
-      "restrictions": "Prone: -10 Armor TN vs melee, -2k0 attacks, cannot Move, only Attack/Defense stances"
+      "restrictions": "Лежит: -10 TN Брони против рукопашных атак, -2k0 к атакам, нельзя Движение, только Стойки Атаки/Обороны"
     },
     "stunned": {
-      "restrictions": "Stunned: Cannot take any actions, Armor TN = 5 + armor bonus"
+      "restrictions": "Оглушен: Нельзя совершать какие-либо действия, TN Брони = 5 + бонус брони"
     }
   }
 }

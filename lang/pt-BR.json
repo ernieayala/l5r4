@@ -39,17 +39,17 @@
           "emphasis": "Ênfase",
           "raise": "Aumento",
           "raises": "Aumentos",
-          "automatic": "Automatic",
+          "automatic": "Automático",
           "formula": "Fórmula",
           "result": "Resultado"
         },
         "notifications": {
-          "itemCreated": "Created {type}: {name}",
-          "itemDeleted": "Deleted {type}: {name}",
-          "itemUpdated": "Updated {type}: {name}",
-          "woundConfigFailed": "Failed to open wound configuration",
-          "woundConfigUpdateFailed": "Failed to update wound configuration",
-          "invalidWoundConfigValue": "Invalid wound configuration value"
+          "itemCreated": "Criado {type}: {name}",
+          "itemDeleted": "Excluído {type}: {name}",
+          "itemUpdated": "Atualizado {type}: {name}",
+          "woundConfigFailed": "Falha ao abrir configuração de ferimentos",
+          "woundConfigUpdateFailed": "Falha ao atualizar configuração de ferimentos",
+          "invalidWoundConfigValue": "Valor de configuração de ferimento inválido"
         },
         "combat": {
           "attack": "Ataque",
@@ -74,13 +74,13 @@
           "penalty": "Penalidade",
           "woundHealRate": "Taxa de Cura de Ferimentos",
           "healRateFormula": "x 2 +",
-          "woundMode": "Wound Mode",
+          "woundMode": "Modo de Ferimentos",
           "manual": "Manual",
-          "formula": "Formula",
-          "woundConfiguration": "Wound Configuration",
-          "earthMultiplier": "Earth Multiplier",
-          "woundBonus": "Wound Bonus",
-          "threshold": "Threshold",
+          "formula": "Fórmula",
+          "woundConfiguration": "Configuração de Ferimentos",
+          "earthMultiplier": "Multiplicador de Terra",
+          "woundBonus": "Bônus de Ferimentos",
+          "threshold": "Limiar",
           "healthy": "Saudável",
           "nicked": "Cortado",
           "grazed": "Arranhado",
@@ -89,16 +89,16 @@
           "crippled": "Aleijado",
           "down": "Derrubado",
           "out": "Fora de combate",
-          "applyHealing": "Apply Healing",
-          "applyHealingTitle": "Apply natural healing from rest",
-          "naturalHealing": "Natural Healing",
-          "restedAndRecovered": "rested and recovered wounds",
-          "healingApplied": "Healed {amount} wounds (heal rate: {rate})",
-          "woundStatus": "Wounds: {current}/{max} (suffered: {suffered})",
-          "fullyHealed": "Fully healed!",
-          "alreadyFullHealth": "{name} is already at full health",
-          "noHealRate": "{name} has no healing rate configured",
-          "healingFailed": "Failed to apply healing to {name}"
+          "applyHealing": "Aplicar Cura",
+          "applyHealingTitle": "Aplicar cura natural do descanso",
+          "naturalHealing": "Cura Natural",
+          "restedAndRecovered": "descansou e recuperou ferimentos",
+          "healingApplied": "Curados {amount} ferimentos (taxa de cura: {rate})",
+          "woundStatus": "Ferimentos: {current}/{max} (sofridos: {suffered})",
+          "fullyHealed": "Completamente curado!",
+          "alreadyFullHealth": "{name} já está com saúde completa",
+          "noHealRate": "{name} não tem taxa de cura configurada",
+          "healingFailed": "Falha ao aplicar cura em {name}"
         },
         "stances": {
           "pending": "Pendente",
@@ -112,25 +112,25 @@
           "fullAttackBonus": "Postura de Ataque Total: +2k1"
         },
         "mounted": {
-          "fullAttackRestriction": "Full Attack stance requires Horsemanship 3+ when mounted",
-          "attackBonus": "Mounted/Higher: +1k0"
+          "fullAttackRestriction": "Postura de Ataque Total requer Equitação 3+ quando montado",
+          "attackBonus": "Montado/Mais Alto: +1k0"
         },
         "fear": {
-          "fearRank": "Fear Rank",
-          "fearLabel": "Fear {rank}",
-          "effectName": "Fear {rank}",
-          "clickToTest": "Click to test Fear against selected characters",
-          "testResult": "Fear {rank} Test",
-          "testSuccess": "Resisted Fear {rank}",
-          "testFailure": "Failed Fear {rank} Test",
-          "penaltyApplied": "Penalty: -{penalty}kO to all rolls",
-          "catastrophicFailure": "CATASTROPHIC FAILURE! Character flees or cowers helplessly.",
-          "noTargets": "No tokens selected for Fear test",
-          "noWillpower": "{character} has no Willpower trait",
-          "noFear": "This NPC has no Fear effect configured",
+          "fearRank": "Posto de Medo",
+          "fearLabel": "Medo {rank}",
+          "effectName": "Medo {rank}",
+          "clickToTest": "Clique para testar Medo contra personagens selecionados",
+          "testResult": "Teste de Medo {rank}",
+          "testSuccess": "Resistiu ao Medo {rank}",
+          "testFailure": "Falhou no Teste de Medo {rank}",
+          "penaltyApplied": "Penalidade: -{penalty}k0 para todas as rolagens",
+          "catastrophicFailure": "FALHA CATASTRÓFICA! Personagem foge ou se encolhe desamparado.",
+          "noTargets": "Nenhum token selecionado para teste de Medo",
+          "noWillpower": "{character} não tem atributo de Força de Vontade",
+          "noFear": "Este NPC não tem efeito de Medo configurado",
           "testAgainst": "vs {creature}",
-          "rollFailed": "Fear test roll failed - invalid formula or corrupted data",
-          "templateFailed": "Fear test chat template failed to render"
+          "rollFailed": "Rolagem de teste de Medo falhou - fórmula inválida ou dados corrompidos",
+          "templateFailed": "Template de chat do teste de Medo falhou ao renderizar"
         }
       },
       "common": {
@@ -161,7 +161,7 @@
         "description": "Descrição",
         "notes": "Notas",
         "activeEffects": "Efeitos Ativos",
-        "active": "Active",
+        "active": "Ativo",
         "new": "Novo",
         "disabled": "desativado",
         "rank": "Posto",
@@ -238,7 +238,7 @@
         "chatMessageFailed": "Falha ao publicar a rolagem no chat - veja o console para detalhes",
         "deleteEffect": "Falha ao excluir efeito.",
         "schoolRankZero": "Você não pode lançar um feitiço com Posto de Escola reduzido a zero",
-        "deficiencyBlocksCasting": "Deficiency in {ring} reduces your School Rank to zero - cannot cast",
+        "deficiencyBlocksCasting": "Deficiência em {ring} reduz seu Posto de Escola a zero - não pode lançar",
         "noSpellSlots": "Você ficou sem espaços de feitiço para este anel"
       },
       "chat": {
@@ -340,8 +340,8 @@
         "insightPoints": "Pontos de Discernimento"
       },
       "stance": {
-        "title": "Combat Stance",
-        "current": "Current Stance"
+        "title": "Postura de Combate",
+        "current": "Postura Atual"
       },
       "experience": {
         "xpAmount": "Quantidade",
@@ -359,9 +359,9 @@
         "voidChange": "Vazio {from}→{to}",
         "skillCreate": "{name} 0→{rank}",
         "skillChange": "{name} {from}→{to}",
-        "recalculateTooltip": "Recalculate XP purchases from current character state",
-        "recalculateSuccess": "XP purchases recalculated successfully",
-        "recalculateFailed": "Failed to recalculate XP purchases",
+        "recalculateTooltip": "Recalcular compras de XP do estado atual do personagem",
+        "recalculateSuccess": "Compras de XP recalculadas com sucesso",
+        "recalculateFailed": "Falha ao recalcular compras de XP",
         "disadvantageCapLabel": "Máx XP",
         "disadvantageCapTitle": "Definir Teto de Desvantagens",
         "disadvantageCapTooltip": "Clique para alterar o máximo de XP obtidos de desvantagens",
@@ -440,25 +440,25 @@
         "maho": "Mahō",
         "useSpellSlot": "Usar espaço de feitiço",
         "voidSlot": "Usar espaço de feitiço de Vazio",
-        "slotsRestored": "All spell slots restored to maximum",
-        "restored": "restored"
+        "slotsRestored": "Todos os espaços de feitiço restaurados ao máximo",
+        "restored": "restaurado"
       },
       "maho": {
-        "warningTitle": "Blood Magic - Forbidden Maho",
-        "bloodRequired": "Blood Cost Required",
-        "additionalBloodBonus": "Each additional blood cost amount grants +1 Free Raise",
+        "warningTitle": "Magia de Sangue - Mahō Proibido",
+        "bloodRequired": "Custo de Sangue Necessário",
+        "additionalBloodBonus": "Cada custo de sangue adicional concede +1 Aumento Grátis",
         "bloodSource": {
-          "label": "Blood Source",
-          "self": "Self",
-          "other": "Other"
+          "label": "Fonte de Sangue",
+          "self": "Próprio",
+          "other": "Outro"
         },
-        "additionalBlood": "Additional Blood",
-        "castMaho": "Cast Maho Spell",
-        "mahoCasting": "Maho Casting",
-        "bloodCost": "Blood",
-        "freeRaises": "Free Raises",
-        "taintGained": "Taint Gained",
-        "taintGainedNotification": "Gained {taint} points of Shadowlands Taint from maho casting"
+        "additionalBlood": "Sangue Adicional",
+        "castMaho": "Lançar Feitiço Mahō",
+        "mahoCasting": "Conjuração Mahō",
+        "bloodCost": "Sangue",
+        "freeRaises": "Aumentos Grátis",
+        "taintGained": "Corrupção Ganha",
+        "taintGainedNotification": "Ganhou {taint} pontos de Corrupção das Terras Sombrias da conjuração mahō"
       },
       "kiho": {
         "internal": "Interno",
@@ -582,28 +582,28 @@
   },
   "conditions": {
     "blinded": {
-      "restrictions": "Blinded: -3k3 ranged attacks, -1k1 melee attacks, -1k1 Defense rolls, Armor TN = Ref+5+Armor, Water Ring -2 for movement"
+      "restrictions": "Cego: -3k3 ataques à distância, -1k1 ataques corpo a corpo, -1k1 rolagens de Defesa, TN de Armadura = Ref+5+Armadura, Anel de Água -2 para movimento"
     },
     "dazed": {
-      "restrictions": "Dazed: -3k0 to all actions, only Defense/Full Defense stances, cannot duel"
+      "restrictions": "Atordoado: -3k0 para todas as ações, apenas Posturas de Defesa/Defesa Total, não pode duelar"
     },
     "entangled": {
-      "restrictions": "Entangled: Cannot Move or take Complex Actions except Strength roll to break free"
+      "restrictions": "Enredado: Não pode Mover ou realizar Ações Complexas exceto rolagem de Força para se libertar"
     },
     "fatigued": {
-      "restrictions": "Fatigued: +5 TN to physical rolls, skills, and spellcasting (stacks per day), cannot use Full Attack stance"
+      "restrictions": "Fatigado: +5 TN para rolagens físicas, perícias e conjuração (acumula por dia), não pode usar Postura de Ataque Total"
     },
     "feared": {
-      "restrictions": "Feared: -Xk0 to all rolls (X = Fear Rank), lasts until encounter end"
+      "restrictions": "Amedrontado: -Xk0 para todas as rolagens (X = Posto de Medo), dura até o fim do encontro"
     },
     "grappled": {
-      "restrictions": "Grappled: Armor TN = 5 + armor bonus only"
+      "restrictions": "Agarrado: TN de Armadura = 5 + apenas bônus de armadura"
     },
     "prone": {
-      "restrictions": "Prone: -10 Armor TN vs melee, -2k0 attacks, cannot Move, only Attack/Defense stances"
+      "restrictions": "Caído: -10 TN de Armadura vs corpo a corpo, -2k0 ataques, não pode Mover, apenas Posturas de Ataque/Defesa"
     },
     "stunned": {
-      "restrictions": "Stunned: Cannot take any actions, Armor TN = 5 + armor bonus"
+      "restrictions": "Atordoado: Não pode realizar nenhuma ação, TN de Armadura = 5 + bônus de armadura"
     }
   }
 }
