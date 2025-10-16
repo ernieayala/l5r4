@@ -1,0 +1,54 @@
+<form class="standard-form maho-dialog">
+  <div class="form-group blood-cost-info">
+    <p class="warning-text">
+      <strong>{{localize "l5r4.magic.maho.warningTitle"}}</strong><br/>
+      {{localize "l5r4.magic.maho.bloodRequired"}}: <strong>{{bloodCost}}</strong> {{localize "l5r4.ui.mechanics.wounds.wounds"}}<br/>
+      {{localize "l5r4.magic.maho.additionalBloodBonus"}}
+    </p>
+  </div>
+
+  <div class="form-group">
+    <label>{{localize "l5r4.magic.maho.bloodSource.label"}}</label>
+    <select name="bloodSource">
+      <option value="self">{{localize "l5r4.magic.maho.bloodSource.self"}}</option>
+      <option value="other">{{localize "l5r4.magic.maho.bloodSource.other"}}</option>
+    </select>
+  </div>
+
+  <div class="form-group">
+    <label>{{localize "l5r4.magic.maho.additionalBlood"}}</label>
+    <input type="number" name="additionalBlood" min="0" value="0" step="{{bloodCost}}" />
+  </div>
+
+  <div class="form-group">
+    <label>{{localize "l5r4.ui.mechanics.combat.woundPenalty"}}</label>
+    <input type="checkbox" name="woundPenalty" checked="checked" />
+  </div>
+
+  {{#unless noVoid}}
+    <div class="form-group">
+      <label>{{localize "l5r4.ui.mechanics.rings.void"}}</label>
+      <input type="checkbox" name="void" />
+    </div>
+  {{/unless}}
+
+  <div class="form-group">
+    <label>{{localize "l5r4.ui.common.roll"}} {{localize "l5r4.ui.common.mod"}}</label>
+    <input type="number" name="rollMod" value="0" />
+  </div>
+
+  <div class="form-group">
+    <label>{{localize "l5r4.ui.common.keep"}} {{localize "l5r4.ui.common.mod"}}</label>
+    <input type="number" name="keepMod" value="0" />
+  </div>
+
+  <div class="form-group">
+    <label>{{localize "l5r4.ui.common.total"}} {{localize "l5r4.ui.common.mod"}}</label>
+    <input type="number" name="totalMod" value="0" />
+  </div>
+
+  <div class="form-group">
+    <label>{{localize "l5r4.magic.spells.raises"}}</label>
+    <input type="number" name="raises" min="0" value="0" />
+  </div>
+</form>

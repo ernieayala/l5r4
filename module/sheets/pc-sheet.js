@@ -57,6 +57,7 @@ import { enhanceItemSheetData } from "../documents/item/integration/sheet-data.j
 import { RingRoll } from "../services/dice/rolls/ring-roll.js";
 import { WeaponRoll } from "../services/dice/rolls/weapon-roll.js";
 import { SpellCastRoll } from "../services/dice/rolls/spell-cast-roll.js";
+import { MahoCastRoll } from "../services/dice/rolls/maho-cast-roll.js";
 import { getStanceDamageBonuses } from "../services/stance/rolls/attack-bonuses.js";
 import { getActiveStances } from "../services/stance/core/helpers.js";
 import { getMountedStatus } from "../services/mounted-combat.js";
@@ -718,6 +719,16 @@ export default class L5R4PcSheet extends BaseActorSheet {
     const spell = id ? this.actor.items.get(id) : null;
     if (!spell || spell.type !== "spell") {
       return;
+    }
+
+    // Route to maho casting if spell is blood magic
+    if (spell.system?.maho) {
+      return MahoCastRoll({
+        actor: this.actor,
+        spell,
+        woundPenalty: readWoundPenalty(this.actor),
+        showDialog: true
+      });
     }
 
     return SpellCastRoll({
