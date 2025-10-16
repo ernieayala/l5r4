@@ -172,7 +172,9 @@ export class PcTraitHandler {
     const nextEff = clamp(wantEff, effMin, effMax);
 
     // No-op if already at boundary
-    if (nextEff === effNow) return;
+    if (nextEff === effNow) {
+      return;
+    }
 
     // Convert effective trait back to base trait for storage
     const nextBase = nextEff - fam;
@@ -232,19 +234,21 @@ export class PcTraitHandler {
    * @returns {Object} Modified submitData with base trait values for storage
    */
   static convertSubmitData(actor, submitData) {
-    // Extract traits object from submission data
     const t = submitData?.system?.traits;
-    if (!t || typeof t !== "object") return submitData;
+    if (!t || typeof t !== "object") {
+      return submitData;
+    }
 
     // Convert each effective trait to base trait
     for (const [k, v] of Object.entries(t)) {
       // Skip null/undefined (partial submissions or unchanged fields)
-      if (v === undefined || v === null) continue;
+      if (v === undefined || v === null) {
+        continue;
+      }
 
       // Treat submitted value as effective trait
       const eff = Number(v) || 0;
 
-      // Get family bonus for this trait
       const bonus = FamilyBonusService.getBonus(actor, k);
 
       // Calculate base trait (effective - family bonus)

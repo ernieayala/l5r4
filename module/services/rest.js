@@ -154,7 +154,7 @@ async function _postRestMessage({
   actor,
   healingApplied,
   healRate,
-  previousSuffered,
+  _previousSuffered,
   newSuffered,
   newCurrentWounds,
   maxWounds,

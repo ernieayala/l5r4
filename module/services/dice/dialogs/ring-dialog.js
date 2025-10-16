@@ -137,8 +137,11 @@ export async function GetSpellOptions(ringName, actor = null, systemRing = null)
       ],
       submit: result => {
         // Handle dialog close/cancel events
-        if (result === "cancel" || result == null) resolve({ cancelled: true });
-        else resolve(result);
+        if (result === "cancel" || result == null) {
+          resolve({ cancelled: true });
+        } else {
+          resolve(result);
+        }
       }
     }).render({ force: true });
   });

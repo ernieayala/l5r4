@@ -143,7 +143,9 @@ export function roll_parser(roll) {
  * @returns {number} Sum of all parts after index 0, or 0 if only one part exists
  */
 function sumBonusParts(parts) {
-  if (parts.length <= 1) return 0;
+  if (parts.length <= 1) {
+    return 0;
+  }
   return parts
     .slice(1)
     .map(part => parseIntIfPossible(part))
@@ -162,9 +164,13 @@ function sumBonusParts(parts) {
  */
 function parseIntIfPossible(x) {
   const s = x?.toString();
-  if (!s) return x;
+  if (!s) {
+    return x;
+  }
   const neg = s.startsWith("-");
   const digits = neg ? s.slice(1) : s;
-  if (digits && [...digits].every(ch => ch >= "0" && ch <= "9")) return parseInt(s, 10);
+  if (digits && [...digits].every(ch => ch >= "0" && ch <= "9")) {
+    return parseInt(s, 10);
+  }
   return x;
 }

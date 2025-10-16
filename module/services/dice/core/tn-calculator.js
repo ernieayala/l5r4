@@ -63,7 +63,9 @@ export function evaluateTN(rollTotal, effectiveTN, raises) {
   const _effectiveTN = Number(effectiveTN);
   const _rollTotal = Number(rollTotal) || 0;
 
-  if (!_effectiveTN || _effectiveTN <= 0) return null;
+  if (!_effectiveTN || _effectiveTN <= 0) {
+    return null;
+  }
 
   const outcome =
     _rollTotal >= _effectiveTN
@@ -89,7 +91,9 @@ export function evaluateTN(rollTotal, effectiveTN, raises) {
  * @returns {string} Formatted TN label with optional Raises, or empty string if no TN
  */
 export function buildTNLabel(effectiveTN, raises, raisesLabel) {
-  if (effectiveTN <= 0) return "";
+  if (effectiveTN <= 0) {
+    return "";
+  }
 
   const raisePart = raises ? ` (${raisesLabel}: ${raises})` : "";
   return ` [TN ${effectiveTN}${raisePart}]`;
@@ -107,8 +111,12 @@ export function buildTNLabel(effectiveTN, raises, raisesLabel) {
  * @returns {Object|null} Modified result with "Missed" outcome for failed attacks, or original result
  */
 export function replaceFailureWithMissed(tnResult, rollType) {
-  if (!tnResult) return null;
-  if (rollType !== "attack") return tnResult;
+  if (!tnResult) {
+    return null;
+  }
+  if (rollType !== "attack") {
+    return tnResult;
+  }
 
   const failureLabel = T("l5r4.ui.mechanics.rolls.failure");
   if (tnResult.outcome === failureLabel) {

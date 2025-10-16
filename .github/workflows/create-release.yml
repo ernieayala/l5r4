@@ -167,7 +167,6 @@ jobs:
           -x ".stylelintignore" \
           -x ".stylelintrc.json" \
           -x "madge-analysis.json" \
-          -x "DEVELOPER.md" \
           -x "RELEASE_CHECKLIST*.md"
         
         echo "✅ Created l5r4.zip"

@@ -38,21 +38,30 @@
  * @extends {BaseActorSheet}
  */
 
+// Config
 import { SYS_ID } from "../config/constants.js";
 import { TEMPLATE } from "../config/templates.js";
 import { STANCES } from "../config/localization.js";
-import { enhanceItemSheetData } from "../documents/item/integration/sheet-data.js";
+
+// Utils
 import { T } from "../utils/localization.js";
 import { on } from "../utils/dom.js";
 import { toInt } from "../utils/type-coercion.js";
 import { readWoundPenalty } from "../utils/mechanics.js";
 import { getSectionCollapsedMap } from "../utils/section-state.js";
+
+// Documents
+import { enhanceItemSheetData } from "../documents/item/integration/sheet-data.js";
+
+// Services
 import { RingRoll } from "../services/dice/rolls/ring-roll.js";
 import { WeaponRoll } from "../services/dice/rolls/weapon-roll.js";
 import { getStanceDamageBonuses } from "../services/stance/rolls/attack-bonuses.js";
 import { getActiveStances } from "../services/stance/core/helpers.js";
 import { getMountedStatus } from "../services/mounted-combat.js";
 import { applyLongRest } from "../services/rest.js";
+
+// Local
 import { BaseActorSheet } from "./base-actor-sheet.js";
 import { AppLauncherHandler } from "./handlers/app-launcher-handler.js";
 import { PcAdjustmentHandler } from "./handlers/pc-adjustment-handler.js";
@@ -263,9 +272,12 @@ export default class L5R4PcSheet extends BaseActorSheet {
    * @override
    */
   _onActionChange(action, event, element) {
-    if (action === "inline-edit") return this._onInlineItemEdit(event, element);
-    if (action === "change-stance")
+    if (action === "inline-edit") {
+      return this._onInlineItemEdit(event, element);
+    }
+    if (action === "change-stance") {
       return StanceHandler.changeStance(this._getHandlerContext(), event, element);
+    }
   }
 
   /**
@@ -292,13 +304,19 @@ export default class L5R4PcSheet extends BaseActorSheet {
    */
   async _onDrop(event) {
     const ev = event?.originalEvent ?? event;
-    if (!ev?.dataTransfer) return super._onDrop(event);
+    if (!ev?.dataTransfer) {
+      return super._onDrop(event);
+    }
 
     const data = foundry.applications.ux.TextEditor.getDragEventData(ev);
-    if (!data || data.type !== "Item") return super._onDrop(event);
+    if (!data || data.type !== "Item") {
+      return super._onDrop(event);
+    }
 
     const itemDoc = await fromUuid(data.uuid ?? "");
-    if (!itemDoc) return super._onDrop(event);
+    if (!itemDoc) {
+      return super._onDrop(event);
+    }
 
     const type = String(itemDoc.type);
     const BIO_TYPES = new Set(["clan", "family", "school"]);
@@ -333,6 +351,8 @@ export default class L5R4PcSheet extends BaseActorSheet {
     const html = await foundry.applications.handlebars.renderTemplate(path, context);
     const host = document.createElement("div");
     host.innerHTML = html;
+    // querySelector used here for template host parsing (temporary DOM, not live application)
+    // This is a Foundry v13 pattern for extracting form element from rendered template string
     const form = host.querySelector("form") || host.firstElementChild || host;
     return { form };
   }
@@ -408,7 +428,9 @@ export default class L5R4PcSheet extends BaseActorSheet {
     const base = await super._prepareContext(_options);
     const actorObj = this.document;
     const system = foundry.utils.deepClone(actorObj.system ?? {});
-    if (typeof system.notes !== "string") system.notes = String(system.notes ?? "");
+    if (typeof system.notes !== "string") {
+      system.notes = String(system.notes ?? "");
+    }
     const enrichedNotes = await TextEditor.enrichHTML(system.notes ?? "", {
       async: true,
       secrets: this.isEditable,
@@ -454,7 +476,6 @@ export default class L5R4PcSheet extends BaseActorSheet {
     const currentStance = activeStances[0] || "";
     const mountedStatus = getMountedStatus(actorObj);
 
-    // Get collapsed section states for all collapsible sections
     const collapsedSections = getSectionCollapsedMap(actorObj.id, [
       "skills",
       "weapons",
@@ -534,9 +555,13 @@ export default class L5R4PcSheet extends BaseActorSheet {
     this._paintVoidPointsDots(root);
 
     // Guard: Only bind non-delegated events once per root element
-    if (this._boundExtraRoot === root) return;
+    if (this._boundExtraRoot === root) {
+      return;
+    }
     this._boundExtraRoot = root;
-    if (!this.actor.isOwner) return;
+    if (!this.actor.isOwner) {
+      return;
+    }
 
     on(root, "[data-edit='img']", "click", ev => this._onEditImage(ev, ev.currentTarget));
     await this._setupItemContextMenu(root);
@@ -610,7 +635,7 @@ export default class L5R4PcSheet extends BaseActorSheet {
    * @protected
    * @async
    */
-  async _onApplyHealing(event, element) {
+  async _onApplyHealing(event, _element) {
     event?.preventDefault?.();
     await applyLongRest(this.actor);
   }
@@ -679,7 +704,9 @@ export default class L5R4PcSheet extends BaseActorSheet {
     const row = element.closest(".item");
     const id = row?.dataset?.itemId || row?.dataset?.documentId || row?.dataset?.id;
     const item = id ? this.actor.items.get(id) : null;
-    if (!item) return;
+    if (!item) {
+      return;
+    }
 
     const baseDiceRoll = Number(item.system?.damageRoll ?? 0) || 0;
     const baseDiceKeep = Number(item.system?.damageKeep ?? 0) || 0;
@@ -735,7 +762,9 @@ export default class L5R4PcSheet extends BaseActorSheet {
     const row = el?.closest?.(".item");
     const id = row?.dataset?.itemId || row?.dataset?.documentId || row?.dataset?.id;
     const field = el.dataset.field;
-    if (!id || !field) return;
+    if (!id || !field) {
+      return;
+    }
 
     let value = el.type === "checkbox" ? el.checked : el.value;
     const dtype = el.dataset.dtype ?? el.dataset.type;

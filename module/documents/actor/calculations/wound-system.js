@@ -153,7 +153,9 @@ export function findCurrentWoundLevel(sys, levelsToCheck, sCapped) {
 
   for (const key of levelsToCheck) {
     const lvl = sys.woundLevels[key];
-    if (!lvl) continue;
+    if (!lvl) {
+      continue;
+    }
 
     const upper = toInt(lvl.value);
     const within = sCapped <= upper && sCapped > lastVal;

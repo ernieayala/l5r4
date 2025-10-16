@@ -138,7 +138,9 @@ export async function TraitRoll({
   // Show dialog if askForOptions doesn't match the setting (XOR logic - show when override differs from default)
   if (askForOptions !== optionsSetting) {
     const check = await GetTraitRollOptions(traitName);
-    if (check?.cancelled) return;
+    if (check?.cancelled) {
+      return;
+    }
 
     unskilled = !!check.unskilled;
     applyWoundPenalty = !!check.applyWoundPenalty;
@@ -202,8 +204,8 @@ export async function TraitRoll({
   // Calculate final effective TN: base + (raises × 5) + optional wound penalty + armor penalty
   // Wound penalty only applies if user selected AND TN > 0 (must be a targeted roll)
   // Armor penalty only applies to Agility/Reflexes trait rolls with Riding Armor (per Equipment rules)
-  const armorTNPenalty = getArmorTNPenalty(actorObj, null, traitName);
-  let baseTN = calculateEffectiveTN(
+  const armorTNPenalty = getArmorTNPenalty(targetActor, null, traitName);
+  const baseTN = calculateEffectiveTN(
     userTN,
     userRaises,
     currentWoundPenalty,

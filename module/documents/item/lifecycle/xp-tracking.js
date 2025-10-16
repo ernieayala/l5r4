@@ -119,7 +119,9 @@ async function addXpEntry(actor, entry) {
  * @returns {Promise<void>} Resolves when XP entry is logged or operation completes
  */
 export async function logSkillCreationXp(item, sys) {
-  if (!item.actor) return;
+  if (!item.actor) {
+    return;
+  }
 
   try {
     const rank = toInt(sys.rank);
@@ -175,7 +177,9 @@ export async function logSkillCreationXp(item, sys) {
  * @returns {Promise<boolean>} True if XP entry was logged, false otherwise
  */
 export async function logSkillRankXp(item, oldRank, newRank, freeRanks) {
-  if (!item.actor) return false;
+  if (!item.actor) {
+    return false;
+  }
 
   try {
     const delta = calculateSkillRankDelta(oldRank, newRank, freeRanks);
@@ -237,7 +241,9 @@ export async function logSkillRankXp(item, oldRank, newRank, freeRanks) {
  * @returns {Promise<boolean>} True if XP entry was logged, false otherwise
  */
 export async function logEmphasisXp(item, oldEmphases, newEmphases, freeEmphasis) {
-  if (!item.actor) return false;
+  if (!item.actor) {
+    return false;
+  }
   try {
     const cost = calculateEmphasisCost(oldEmphases.length, newEmphases.length, freeEmphasis);
 
@@ -293,7 +299,9 @@ export async function logEmphasisXp(item, oldEmphases, newEmphases, freeEmphasis
  * @returns {Promise<void>} Resolves when XP entry is logged or operation completes
  */
 export async function logAdvantageXp(item, cost) {
-  if (!item.actor || cost <= 0) return;
+  if (!item.actor || cost <= 0) {
+    return;
+  }
 
   try {
     await addXpEntry(item.actor, {
@@ -345,7 +353,9 @@ export async function logAdvantageXp(item, cost) {
  * @returns {Promise<void>} Resolves when XP entry is logged or operation completes
  */
 export async function logDisadvantageXp(item, cost) {
-  if (!item.actor || cost <= 0) return;
+  if (!item.actor || cost <= 0) {
+    return;
+  }
 
   try {
     await addXpEntry(item.actor, {
@@ -398,10 +408,14 @@ export async function logDisadvantageXp(item, cost) {
  * @returns {Promise<boolean>} True if XP entry was logged, false otherwise
  */
 export async function logCostChangeXp(item, oldCost, newCost) {
-  if (!item.actor) return false;
+  if (!item.actor) {
+    return false;
+  }
 
   const delta = Math.max(0, newCost - oldCost);
-  if (delta <= 0) return false;
+  if (delta <= 0) {
+    return false;
+  }
 
   try {
     const itemType = item.type === "advantage" ? "advantage" : "disadvantage";
@@ -460,7 +474,9 @@ export async function logCostChangeXp(item, oldCost, newCost) {
  * @returns {Promise<void>} Resolves when flag is cleared and sheet is re-rendered (if applicable)
  */
 export async function resetCalculatedXp(actor) {
-  if (!actor) return;
+  if (!actor) {
+    return;
+  }
 
   try {
     await actor.setFlag(SYS_ID, "xpSpent", []);

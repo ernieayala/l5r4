@@ -26,16 +26,24 @@ import { toInt } from "../utils/type-coercion.js";
  * @returns {boolean} True if actor has active "mounted" status effect
  */
 export function isMounted(actor) {
-  if (!actor?.effects) return false;
+  if (!actor?.effects) {
+    return false;
+  }
 
   for (const effect of actor.effects) {
-    if (effect.disabled) continue;
+    if (effect.disabled) {
+      continue;
+    }
 
-    if (effect.statuses?.has?.("mounted")) return true;
+    if (effect.statuses?.has?.("mounted")) {
+      return true;
+    }
 
     // Defensive: effect.getFlag may not exist on all effect types
     const legacyId = effect.getFlag?.("core", "statusId");
-    if (legacyId === "mounted") return true;
+    if (legacyId === "mounted") {
+      return true;
+    }
   }
 
   return false;
@@ -56,7 +64,9 @@ export function isMounted(actor) {
  * @returns {number} Horsemanship skill rank (0 if not found or actor invalid)
  */
 export function getHorsemanshipRank(actor) {
-  if (!actor?.items) return 0;
+  if (!actor?.items) {
+    return 0;
+  }
 
   for (const item of actor.items) {
     if (item.type === "skill") {
@@ -77,7 +87,7 @@ export function getHorsemanshipRank(actor) {
  * @param {Actor|null} actor - The actor to check
  * @returns {boolean} True if actor can use Full Attack Stance
  */
-export function canUseFullAttackMounted(actor) {
+export function canUseFullAttackMounted(_actor) {
   return true;
 }
 

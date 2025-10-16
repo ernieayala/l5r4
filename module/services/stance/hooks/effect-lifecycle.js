@@ -64,7 +64,9 @@ function removeConflictingStances(actor, currentStanceId, excludeEffectId) {
 
   for (const existingEffect of actor.effects) {
     // Skip the newly created effect and any disabled effects
-    if (existingEffect.id === excludeEffectId || existingEffect.disabled) continue;
+    if (existingEffect.id === excludeEffectId || existingEffect.disabled) {
+      continue;
+    }
 
     const existingStances = getEffectStatusIds(existingEffect);
     const hasOtherStance = existingStances.some(id => STANCE_IDS.has(id) && id !== currentStanceId);
@@ -180,9 +182,11 @@ function clearStanceFlagsFromEffect(actor, effectStances) {
  *
  * @see {@link https://foundryvtt.com/api/v13/classes/foundry.abstract.Document.html#_preCreate|Foundry preCreate Hook}
  */
-export function onPreCreateActiveEffect(effect, data, options, userId) {
+export function onPreCreateActiveEffect(effect, _data, _options, _userId) {
   const actor = effect?.parent;
-  if (!actor || actor.documentName !== "Actor") return;
+  if (!actor || actor.documentName !== "Actor") {
+    return;
+  }
 
   const effectStances = getEffectStatusIds(effect);
   const stanceId = effectStances.find(id => STANCE_IDS.has(id));
@@ -238,9 +242,11 @@ export function onPreCreateActiveEffect(effect, data, options, userId) {
  *
  * @see {@link https://foundryvtt.com/api/v13/classes/foundry.abstract.Document.html#_onCreate|Foundry onCreate Hook}
  */
-export function onCreateActiveEffect(effect, options, userId) {
+export function onCreateActiveEffect(effect, _options, _userId) {
   const actor = effect?.parent;
-  if (!actor || actor.documentName !== "Actor") return;
+  if (!actor || actor.documentName !== "Actor") {
+    return;
+  }
 
   const effectStances = getEffectStatusIds(effect);
   const hasStance = effectStances.some(id => STANCE_IDS.has(id));
@@ -280,12 +286,16 @@ export function onCreateActiveEffect(effect, options, userId) {
  *
  * @see {@link https://foundryvtt.com/api/v13/classes/foundry.abstract.Document.html#_onUpdate|Foundry onUpdate Hook}
  */
-export function onUpdateActiveEffect(effect, changes, options, userId) {
+export function onUpdateActiveEffect(effect, changes, _options, _userId) {
   // Early return: Only handle disabled state changes
-  if (changes?.disabled === undefined) return;
+  if (changes?.disabled === undefined) {
+    return;
+  }
 
   const actor = effect?.parent;
-  if (!actor || actor.documentName !== "Actor") return;
+  if (!actor || actor.documentName !== "Actor") {
+    return;
+  }
 
   const effectStances = getEffectStatusIds(effect);
   const hasStance = effectStances.some(id => STANCE_IDS.has(id));
@@ -294,9 +304,8 @@ export function onUpdateActiveEffect(effect, changes, options, userId) {
     // Handle disabling: Clear persisted stance data
     if (changes.disabled === true) {
       clearStanceFlagsFromEffect(actor, effectStances);
-    }
-    // Handle enabling: Re-apply stance activation logic
-    else if (changes.disabled === false) {
+    } else if (changes.disabled === false) {
+      // Handle enabling: Re-apply stance activation logic
       const stanceId = effectStances.find(id => STANCE_IDS.has(id));
       removeConflictingStances(actor, stanceId, effect.id);
       triggerFullDefenseIfNeeded(effectStances, actor);
@@ -335,9 +344,11 @@ export function onUpdateActiveEffect(effect, changes, options, userId) {
  *
  * @see {@link https://foundryvtt.com/api/v13/classes/foundry.abstract.Document.html#_onDelete|Foundry onDelete Hook}
  */
-export function onDeleteActiveEffect(effect, options, userId) {
+export function onDeleteActiveEffect(effect, _options, _userId) {
   const actor = effect?.parent;
-  if (!actor || actor.documentName !== "Actor") return;
+  if (!actor || actor.documentName !== "Actor") {
+    return;
+  }
 
   const effectStances = getEffectStatusIds(effect);
   // Always clear flags for any effect with stance status IDs

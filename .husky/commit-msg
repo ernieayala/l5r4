@@ -1,0 +1,11 @@
+#!/usr/bin/env sh
+# Validate commit message format (optional - can be customized)
+# For now, just ensure commit message is not empty
+
+commit_msg_file="$1"
+commit_msg=$(cat "$commit_msg_file")
+
+if [ -z "$commit_msg" ]; then
+  echo "Error: Commit message cannot be empty"
+  exit 1
+fi

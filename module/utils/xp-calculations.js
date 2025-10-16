@@ -86,20 +86,30 @@ function getCreationBonusInternal(actor, effectMatcher, legacyMatcher) {
     const seen = new Set();
 
     const addFromDoc = doc => {
-      if (!doc) return;
+      if (!doc) {
+        return;
+      }
       // Deduplicate: Skip if we've already processed this document
       const did = doc.uuid ?? doc.id ?? null;
-      if (did && seen.has(did)) return;
-      if (did) seen.add(did);
+      if (did && seen.has(did)) {
+        return;
+      }
+      if (did) {
+        seen.add(did);
+      }
 
       // Modern approach: Check Active Effects for trait bonuses
       let ae = 0;
       for (const eff of doc.effects ?? []) {
-        if (eff?.transfer !== true) continue; // Only transfer=true effects apply to actor
+        if (eff?.transfer !== true) {
+          continue;
+        } // Only transfer=true effects apply to actor
         for (const ch of eff?.changes ?? []) {
           if (effectMatcher(ch)) {
             const v = Number(ch?.value ?? 0);
-            if (Number.isFinite(v)) ae += v;
+            if (Number.isFinite(v)) {
+              ae += v;
+            }
           }
         }
       }
@@ -112,20 +122,28 @@ function getCreationBonusInternal(actor, effectMatcher, legacyMatcher) {
       // Legacy approach: Check old system.trait and system.bonus properties
       const tKey = String(doc?.system?.trait ?? "").toLowerCase();
       const amt = Number(doc?.system?.bonus ?? NaN);
-      if (legacyMatcher(tKey, amt)) sum += amt;
+      if (legacyMatcher(tKey, amt)) {
+        sum += amt;
+      }
     };
 
     // Check flagged family/school items (stored as UUIDs in actor flags)
     for (const flagKey of ["familyItemUuid", "schoolItemUuid"]) {
       const uuid = actor.getFlag(SYS_ID, flagKey);
-      if (!uuid || !globalThis.fromUuidSync) continue;
-      addFromDoc(fromUuidSync(uuid));
+      if (!uuid || !globalThis.fromUuidSync) {
+        continue;
+      }
+      addFromDoc(globalThis.fromUuidSync(uuid));
     }
 
     // Check family/school items in actor's items collection
     for (const it of actor.items ?? []) {
-      if (!it || typeof it.type !== "string") continue;
-      if (it.type === "family" || it.type === "school") addFromDoc(it);
+      if (!it || typeof it.type !== "string") {
+        continue;
+      }
+      if (it.type === "family" || it.type === "school") {
+        addFromDoc(it);
+      }
     }
 
     return sum || 0;

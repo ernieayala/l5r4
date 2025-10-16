@@ -148,7 +148,6 @@ export default class WoundConfigApplication extends foundry.applications.api.Han
     this.actor = actor;
     // Debounce prevents update spam during rapid typing (300ms cooldown)
     this._updateDebounced = foundry.utils.debounce(this._updateActor.bind(this), 300);
-    this._debug("Constructor", { actorId: this.actor.id, appId: this.id });
   }
 
   /**
@@ -158,20 +157,6 @@ export default class WoundConfigApplication extends foundry.applications.api.Han
    * @private
    */
   _updateDebounced;
-
-  /**
-   * Conditional debug logger for wound configuration operations.
-   * Only logs when debugWoundConfig setting is enabled.
-   *
-   * @param {string} message - Debug message identifier
-   * @param {object} [data={}] - Contextual data to log
-   * @private
-   */
-  _debug(message, data = {}) {
-    if (game.settings?.get(SYS_ID, "debugWoundConfig")) {
-      console.log(`${SYS_ID} | WoundConfig | ${message}:`, data);
-    }
-  }
 
   /**
    * Prepares context data for wound configuration template rendering.
@@ -187,7 +172,7 @@ export default class WoundConfigApplication extends foundry.applications.api.Han
    * @override
    * @async
    */
-  async _prepareContext(options) {
+  async _prepareContext(_options) {
     if (!this.actor) {
       console.warn(`${SYS_ID}`, "WoundConfig: No actor reference in _prepareContext");
       return this._getFallbackContext();
@@ -210,14 +195,6 @@ export default class WoundConfigApplication extends foundry.applications.api.Han
           npcNumberWoundLvls: NPC_NUMBER_WOUND_LVLS
         }
       };
-
-      this._debug("Context Prepared", {
-        actorId: this.actor.id,
-        woundMode: context.woundMode,
-        nrWoundLvls: context.nrWoundLvls,
-        hasVisibleManualWoundLevels: Object.keys(context.visibleManualWoundLevels || {}).length > 0,
-        configKeys: Object.keys(context.config || {}).length
-      });
 
       return context;
     } catch (err) {
@@ -262,37 +239,17 @@ export default class WoundConfigApplication extends foundry.applications.api.Han
   /**
    * Post-render hook for ApplicationV2 lifecycle.
    *
-   * Logs form element discovery for debugging delegated event handlers.
    * All input events are handled via data-action delegation at form root.
    *
    * @param {WoundConfigContext} context - Rendered template context
    * @param {object} options - Render options
    * @override
    */
-  _onRender(context, options) {
-    this._debug("_onRender called", {
-      actorId: this.actor.id,
-      element: this.element,
-      hasElement: !!this.element,
-      elementTagName: this.element?.tagName,
-      elementClasses: this.element?.className
-    });
-
+  _onRender(_context, _options) {
     if (!this.element) {
       console.warn(`${SYS_ID}`, "WoundConfig _onRender: No element reference available");
       return;
     }
-
-    const formElements = this.element.querySelectorAll("input, select, textarea");
-    this._debug("Form Elements Found", {
-      count: formElements.length,
-      elements: Array.from(formElements).map(el => ({
-        name: el.name,
-        type: el.type,
-        dataAction: el.dataset.action,
-        value: el.value
-      }))
-    });
   }
 
   /**
@@ -311,21 +268,12 @@ export default class WoundConfigApplication extends foundry.applications.api.Han
   async _onWoundModeChange(event, element) {
     const newMode = element.value;
 
-    this._debug("Mode Change", {
-      newMode,
-      oldMode: this.actor.system.woundMode,
-      actorId: this.actor.id,
-      elementName: element.name
-    });
-
     if (newMode === this.actor.system.woundMode) {
-      this._debug("Mode unchanged, skipping update");
       return;
     }
 
     try {
       await this.actor.update({ "system.woundMode": newMode });
-      this._debug("Mode Update Success, re-rendering");
       this.render();
     } catch (err) {
       console.warn(`${SYS_ID}`, "Failed to update wound mode", {
@@ -362,15 +310,6 @@ export default class WoundConfigApplication extends foundry.applications.api.Han
           ? parseInt(element.value) || 0
           : element.value;
 
-    this._debug("Field Change", {
-      field,
-      value,
-      type: element.type,
-      dataType: element.dataset.type,
-      actorId: this.actor.id,
-      elementName: element.name
-    });
-
     if (!field) {
       console.warn(`${SYS_ID}`, "Field change event with no field name", {
         element: element.outerHTML
@@ -404,7 +343,7 @@ export default class WoundConfigApplication extends foundry.applications.api.Han
         }
         return value;
 
-      case "woundsMultiplier":
+      case "woundsMultiplier": {
         const mult = Number(value);
         if (!Number.isInteger(mult) || mult < MIN_WOUND_MULTIPLIER || mult > MAX_WOUND_MULTIPLIER) {
           console.warn(
@@ -414,8 +353,9 @@ export default class WoundConfigApplication extends foundry.applications.api.Han
           return null;
         }
         return mult;
+      }
 
-      case "nrWoundLvls":
+      case "nrWoundLvls": {
         const lvl = Number(value);
         if (!Number.isInteger(lvl) || lvl < MIN_NPC_WOUND_LEVELS || lvl > MAX_NPC_WOUND_LEVELS) {
           console.warn(
@@ -425,15 +365,17 @@ export default class WoundConfigApplication extends foundry.applications.api.Han
           return null;
         }
         return lvl;
+      }
 
       case "woundsMod":
-      case "woundsPenaltyMod":
+      case "woundsPenaltyMod": {
         const mod = Number(value);
         if (!Number.isFinite(mod)) {
           console.warn(`${SYS_ID}`, `Invalid ${field}: ${value}. Must be a number.`);
           return null;
         }
         return Math.floor(mod);
+      }
 
       default:
         return value;
@@ -477,24 +419,7 @@ export default class WoundConfigApplication extends foundry.applications.api.Han
 
       const updateData = { [`system.${field}`]: validatedValue };
 
-      this._debug("Actor Update", {
-        field,
-        value,
-        validatedValue,
-        updateData,
-        updatePath: `system.${field}`,
-        actorId: this.actor.id,
-        actorType: this.actor.type
-      });
-
       await this.actor.update(updateData);
-
-      this._debug("Update Success", {
-        field,
-        value,
-        actorId: this.actor.id,
-        updatedValue: foundry.utils.getProperty(this.actor.system, field)
-      });
     } catch (err) {
       console.warn(`${SYS_ID}`, "Failed to update wound configuration", {
         err,
@@ -521,9 +446,10 @@ export default class WoundConfigApplication extends foundry.applications.api.Han
    * @override
    * @async
    */
-  async _onSubmitForm(event, form, formData) {
-    if (event) event.preventDefault();
-    this._debug("Form Submit Prevented", { actorId: this.actor.id });
+  async _onSubmitForm(event, _form, _formData) {
+    if (event) {
+      event.preventDefault();
+    }
   }
 
   /**
@@ -538,8 +464,6 @@ export default class WoundConfigApplication extends foundry.applications.api.Han
    * @async
    */
   async close(options = {}) {
-    this._debug("Application Closing", { actorId: this.actor.id });
-
     if (this._updateDebounced && typeof this._updateDebounced.cancel === "function") {
       this._updateDebounced.cancel();
     }

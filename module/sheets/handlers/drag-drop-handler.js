@@ -57,7 +57,9 @@ export class DragDropHandler {
    */
   static async handleDrop(context, event) {
     const data = foundry.applications.ux.TextEditor.getDragEventData(event);
-    if (!data) return false;
+    if (!data) {
+      return false;
+    }
 
     if (data.type === "Item") {
       return this.handleItemDrop(context, event, data);
@@ -89,7 +91,9 @@ export class DragDropHandler {
    * @see https://foundryvtt.com/api/classes/client.Actor.html#createEmbeddedDocuments
    */
   static async handleItemDrop(context, event, data) {
-    if (!context.actor.isOwner) return false;
+    if (!context.actor.isOwner) {
+      return false;
+    }
 
     try {
       // Resolve source item by UUID
@@ -119,7 +123,7 @@ export class DragDropHandler {
    * @param {Object} data - Parsed drag data (unused)
    * @returns {Promise<false>} Always returns false (not implemented)
    */
-  static async handleActorDrop(context, event, data) {
+  static async handleActorDrop(_context, _event, _data) {
     // Stub: Actor drops not currently supported
     return false;
   }

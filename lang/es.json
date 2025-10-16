@@ -501,19 +501,15 @@
     },
     "forceMigration": {
       "name": "Forzar migración al iniciar",
-      "label": "Fuerza todas las migraciones a ejecutarse en la próxima carga del mundo, independientemente de la versión. Se restablece automáticamente tras completar."
+      "label": "Fuerza que todas las migraciones se ejecuten en la próxima carga del mundo, independientemente de la versión. Se restablece automáticamente después de completar la migración."
     },
     "defaultNpcWoundMode": {
-      "name": "Modo de Heridas Predeterminado para PNJ",
-      "label": "Controla si los nuevos PNJ usan cálculos basados en fórmula (Anillo de Tierra) o entrada manual de umbrales para cálculos de heridas. Los PNJ existentes conservan su configuración individual.",
+      "name": "Modo de Heridas de PNJ Predeterminado",
+      "label": "Controla si los nuevos PNJs usan entrada basada en fórmula (Anillo de Tierra) o umbral manual para cálculos de heridas. Los PNJs existentes mantienen sus configuraciones individuales.",
       "choices": {
         "manual": "Manual (Entrada Directa)",
         "formula": "Fórmula (Basada en Tierra)"
       }
-    },
-    "debugWoundConfig": {
-      "name": "Depurar Configuración de Heridas",
-      "label": "Habilita el registro detallado en consola para las interacciones de la Aplicación de Configuración de Heridas, manejo de eventos y actualizaciones de actores. Útil para solucionar problemas de respuesta de formularios."
     }
   },
   "EFFECT": {

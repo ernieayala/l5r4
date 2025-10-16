@@ -173,7 +173,9 @@ export default class XpManagerApplication extends foundry.applications.api.Handl
    */
   _calculateTotal(entries) {
     return entries.reduce((s, e) => {
-      if (!e || typeof e !== "object") return s;
+      if (!e || typeof e !== "object") {
+        return s;
+      }
       return s + (Number.isFinite(+e.delta) ? +e.delta : 0);
     }, 0);
   }
@@ -265,14 +267,18 @@ export default class XpManagerApplication extends foundry.applications.api.Handl
    * @param {HTMLElement} target - Event target element (form or submit button)
    * @private
    */
-  async _onAddXp(event, target) {
+  async _onAddXp(event, _target) {
     event.preventDefault();
 
     const form = this.element;
+    // querySelector used here to access form inputs by ID (standard form pattern)
+    // IDs are unique within the form scope, making this a reliable selector
     const amount = Number(form.querySelector("#xp-amount")?.value) || 0;
     const note = form.querySelector("#xp-note")?.value?.trim() || "";
 
-    if (amount === 0) return;
+    if (amount === 0) {
+      return;
+    }
 
     const manual = this._getXpManual(true);
     // Manual XP entry structure: { id, delta, note, ts }
@@ -286,10 +292,15 @@ export default class XpManagerApplication extends foundry.applications.api.Handl
     try {
       await this.actor.setFlag(SYS_ID, "xpManual", manual);
 
+      // querySelector used to reset form inputs after successful submission
       const amountField = form.querySelector("#xp-amount");
       const noteField = form.querySelector("#xp-note");
-      if (amountField) amountField.value = "1";
-      if (noteField) noteField.value = "";
+      if (amountField) {
+        amountField.value = "1";
+      }
+      if (noteField) {
+        noteField.value = "";
+      }
 
       this.render();
     } catch (err) {
@@ -313,7 +324,9 @@ export default class XpManagerApplication extends foundry.applications.api.Handl
     event.preventDefault();
 
     const entryId = target.dataset.entryId;
-    if (!entryId) return;
+    if (!entryId) {
+      return;
+    }
 
     const manual = this._getXpManual(true);
     const filtered = manual.filter(e => e.id !== entryId);
@@ -353,7 +366,9 @@ export default class XpManagerApplication extends foundry.applications.api.Handl
     const key = target.dataset.sortby || "note";
     const allowed = ["note", "cost", "type"];
 
-    if (!allowed.includes(key)) return;
+    if (!allowed.includes(key)) {
+      return;
+    }
 
     const cur = getSortPref(this.actor.id, scope, allowed, "note");
     await setSortPref(this.actor.id, scope, key, { toggleFrom: cur });
@@ -361,7 +376,9 @@ export default class XpManagerApplication extends foundry.applications.api.Handl
     if (header) {
       header.querySelectorAll(".item-sort-by").forEach(a => {
         a.classList.toggle("is-active", a === target);
-        if (a !== target) a.removeAttribute("data-dir");
+        if (a !== target) {
+          a.removeAttribute("data-dir");
+        }
       });
 
       const newPref = getSortPref(this.actor.id, scope, allowed, "note");
@@ -386,7 +403,7 @@ export default class XpManagerApplication extends foundry.applications.api.Handl
    * @param {HTMLElement} target - Recalculate button element
    * @private
    */
-  async _onRecalculateXpPurchase(event, target) {
+  async _onRecalculateXpPurchase(event, _target) {
     event.preventDefault();
 
     try {
@@ -413,7 +430,7 @@ export default class XpManagerApplication extends foundry.applications.api.Handl
    * @param {HTMLElement} target - Clicked element
    * @private
    */
-  async _onChangeDisadvantageCap(event, target) {
+  async _onChangeDisadvantageCap(event, _target) {
     event.preventDefault();
 
     const flags = this._getFlags();
@@ -432,6 +449,7 @@ export default class XpManagerApplication extends foundry.applications.api.Handl
           label: game.i18n.localize("l5r4.ui.common.ok"),
           callback: (_e, b, d) => {
             const form = b.form ?? d.form;
+            // querySelector used to retrieve dialog input value by ID (Foundry dialog pattern)
             const input = form?.querySelector("#disadvantage-cap");
             return input ? Number(input.value) : null;
           }
@@ -447,7 +465,9 @@ export default class XpManagerApplication extends foundry.applications.api.Handl
       }
     } catch (err) {
       // Dialog cancelled or error occurred
-      if (err) console.warn(`${SYS_ID}`, "Failed to set disadvantage cap", { err });
+      if (err) {
+        console.warn(`${SYS_ID}`, "Failed to set disadvantage cap", { err });
+      }
     }
   }
 

@@ -83,8 +83,12 @@ export class SortHandler {
    */
   static initializeIndicators(root, actorId, scope, allowedKeys) {
     try {
+      // querySelector used here to find header element by data-scope attribute
+      // This is proper use of data attributes for behavior targeting
       const header = root.querySelector(`.item-list.-header[data-scope="${scope}"]`);
-      if (!header) return;
+      if (!header) {
+        return;
+      }
 
       const pref = getSortPref(actorId, scope, allowedKeys, allowedKeys[0]);
       this._updateVisualIndicators(header, pref.key, pref.dir);

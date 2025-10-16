@@ -160,7 +160,9 @@ export async function SkillRoll({
   if (askForOptions !== optionsSetting) {
     const noVoid = npc && !game.settings.get(SYS_ID, "allowNpcVoidPoints");
     check = await GetSkillOptions(skillName, noVoid, rollBonus, keepBonus, totalBonus);
-    if (!check || check.cancelled) return;
+    if (!check || check.cancelled) {
+      return;
+    }
 
     if (check.void) {
       const voidResult = await spendVoidPoint(actor);

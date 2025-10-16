@@ -140,7 +140,6 @@ export async function preloadTemplates() {
 
   try {
     await foundry.applications.handlebars.loadTemplates(templatePaths);
-    console.log(`L5R4 | Preloaded ${templatePaths.length} Handlebars templates`);
   } catch (err) {
     const errorMessage = err?.message ?? err?.toString?.() ?? String(err);
     console.warn("L5R4 | Template preloading failed", { error: err, templatePaths });

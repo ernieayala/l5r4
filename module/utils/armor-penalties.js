@@ -23,8 +23,6 @@
  * @requires module:utils/type-coercion~toInt
  */
 
-import { toInt } from "./type-coercion.js";
-
 /**
  * Armor type identifiers matching L5R4 Equipment rules.
  * @constant {Object.<string, string>}
@@ -96,12 +94,15 @@ export function getArmorTNPenalty(actor, skillName = null, traitName = null) {
 
   let maxPenalty = 0;
 
-  // Iterate through all equipped armor items
   for (const item of actor.items) {
-    if (!item || item.type !== "armor") continue;
+    if (!item || item.type !== "armor") {
+      continue;
+    }
 
     const armorData = item.system ?? {};
-    if (!armorData.equipped) continue;
+    if (!armorData.equipped) {
+      continue;
+    }
 
     const armorType = String(armorData.armorType ?? "light").toLowerCase();
     const penalty = _calculateSingleArmorPenalty(armorType, skill, trait, isMounted);
@@ -153,7 +154,6 @@ function _calculateSingleArmorPenalty(armorType, skillName, traitName, isMounted
       if (isMounted) {
         return 0;
       }
-      // When not mounted, apply heavy armor penalty
       if (traitName === "agi" || traitName === "ref") {
         return PENALTY_VALUE;
       }
@@ -179,12 +179,15 @@ function _calculateSingleArmorPenalty(armorType, skillName, traitName, isMounted
  * @returns {boolean} True if character is mounted, false otherwise
  */
 function _isCharacterMounted(actor) {
-  if (!actor) return false;
+  if (!actor) {
+    return false;
+  }
 
-  // Check Active Effects for mounted status
   if (actor.effects) {
     for (const effect of actor.effects) {
-      if (!effect || effect.disabled) continue;
+      if (!effect || effect.disabled) {
+        continue;
+      }
       const statusId = effect.statuses?.values?.()?.next?.()?.value ?? effect.flags?.core?.statusId;
       if (statusId === "mounted") {
         return true;
@@ -218,18 +221,23 @@ function _isCharacterMounted(actor) {
  */
 export function getArmorPenaltyDescription(actor, skillName = null, traitName = null) {
   const penalty = getArmorTNPenalty(actor, skillName, traitName);
-  if (penalty === 0) return null;
+  if (penalty === 0) {
+    return null;
+  }
 
-  // Find which armor is causing the penalty
   const isMounted = _isCharacterMounted(actor);
   const skill = skillName ? String(skillName).toLowerCase() : null;
   const trait = traitName ? String(traitName).toLowerCase() : null;
 
   for (const item of actor.items) {
-    if (!item || item.type !== "armor") continue;
+    if (!item || item.type !== "armor") {
+      continue;
+    }
 
     const armorData = item.system ?? {};
-    if (!armorData.equipped) continue;
+    if (!armorData.equipped) {
+      continue;
+    }
 
     const armorType = String(armorData.armorType ?? "light").toLowerCase();
     const itemPenalty = _calculateSingleArmorPenalty(armorType, skill, trait, isMounted);

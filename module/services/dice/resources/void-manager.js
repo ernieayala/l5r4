@@ -95,13 +95,19 @@ import { T } from "../../../utils/localization.js";
  */
 export function resolveActor(providedActor) {
   // Priority 1: Explicit actor from caller (GM override, direct item roll)
-  if (providedActor) return providedActor;
+  if (providedActor) {
+    return providedActor;
+  }
 
   // Priority 2: Controlled token on canvas (player selected token)
-  if (canvas?.tokens?.controlled?.[0]?.actor) return canvas.tokens.controlled[0].actor;
+  if (canvas?.tokens?.controlled?.[0]?.actor) {
+    return canvas.tokens.controlled[0].actor;
+  }
 
   // Priority 3: Assigned character (player's default character)
-  if (game.user?.character) return game.user.character;
+  if (game.user?.character) {
+    return game.user.character;
+  }
 
   // Priority 4: Chat speaker fallback (message-driven rolls)
   const speaker = ChatMessage.getSpeaker();

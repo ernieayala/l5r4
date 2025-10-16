@@ -161,7 +161,9 @@ export class RollHandler {
     const el = RollHandler._getElement(element, event);
     const row = el?.closest?.(".item");
     const item = row ? context.actor.items.get(row.dataset.itemId) : null;
-    if (!item) return;
+    if (!item) {
+      return;
+    }
 
     const traitKey = normalizeTraitKey(item.system?.trait);
     if (!traitKey) {
@@ -409,6 +411,8 @@ export class RollHandler {
   static traitRoll(context, event, element) {
     event.preventDefault();
     const block = element.closest(".trait");
+    // querySelector used here to find trait-rank element within the trait block context
+    // Scoped query prevents selecting unrelated trait elements elsewhere in the sheet
     const traitKey = normalizeTraitKey(
       block?.querySelector(".trait-rank")?.dataset.trait || element.dataset.traitName || "ref"
     );

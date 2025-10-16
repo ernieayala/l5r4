@@ -74,7 +74,9 @@ const pendingFullDefenseRolls = new Set();
  * @throws {Error} If roll evaluation fails - error is logged and user notification shown
  */
 export async function triggerFullDefenseRoll(actor, sys) {
-  if (!actor?.isOwner) return;
+  if (!actor?.isOwner) {
+    return;
+  }
 
   const actorId = actor.id;
 

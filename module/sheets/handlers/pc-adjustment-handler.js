@@ -71,7 +71,9 @@ export class PcAdjustmentHandler {
     event?.preventDefault?.();
 
     // Safety: require Shift key to prevent accidental adjustment
-    if (!event?.shiftKey) return;
+    if (!event?.shiftKey) {
+      return;
+    }
 
     // Read current value from _source (pending changes) or system data
     const cur =
@@ -85,7 +87,9 @@ export class PcAdjustmentHandler {
 
     // Calculate next value: delta sign determines direction
     const next = clamp(cur + (delta > 0 ? 1 : -1), min, max);
-    if (next === cur) return; // No-op if already at boundary
+    if (next === cur) {
+      return;
+    } // No-op if already at boundary
 
     try {
       await context.actor.update({ "system.rings.void.rank": next }, { diff: true });
@@ -134,7 +138,9 @@ export class PcAdjustmentHandler {
 
       // Apply delta with bounds [0, 9] matching Ring rank maximum
       const next = clamp(current + (delta || 0), 0, 9);
-      if (next === current) return; // No-op if already at boundary
+      if (next === current) {
+        return;
+      } // No-op if already at boundary
 
       await context.actor.update({ [path]: next });
     } catch (err) {
@@ -178,11 +184,14 @@ export class PcAdjustmentHandler {
   static async adjustRankPoints(context, event, element, baseDelta) {
     try {
       // Safety: require Shift key to prevent accidental adjustment
-      if (!event?.shiftKey) return;
+      if (!event?.shiftKey) {
+        return;
+      }
 
-      // Extract property key from element dataset
       const key = String(element?.dataset?.key || "");
-      if (!key) return;
+      if (!key) {
+        return;
+      }
 
       // Read current rank/points from actor system data
       const sys = context.actor.system ?? {};
@@ -197,7 +206,6 @@ export class PcAdjustmentHandler {
       // Apply delta with automatic overflow/underflow handling [0, 10]
       const next = applyRankPointsDelta(cur, step, 0, 10);
 
-      // Build update object with computed property keys
       const update = {};
       update[`system.${key}.rank`] = next.rank;
       update[`system.${key}.points`] = next.points;
@@ -244,7 +252,9 @@ export class PcAdjustmentHandler {
 
     // Find parent section title container
     const sectionTitle = element.closest(".section-title");
-    if (!sectionTitle) return;
+    if (!sectionTitle) {
+      return;
+    }
 
     // Get section scope from data attribute (e.g., "skills", "weapons", "spells")
     const scope =
@@ -254,6 +264,7 @@ export class PcAdjustmentHandler {
     const isNowCollapsed = sectionTitle.classList.toggle("is-collapsed");
 
     // Swap chevron icon direction for visual feedback
+    // querySelector used here to find icon element within the clicked button (scoped query)
     const icon = element.querySelector("i");
     if (icon) {
       icon.classList.toggle("fa-chevron-down");

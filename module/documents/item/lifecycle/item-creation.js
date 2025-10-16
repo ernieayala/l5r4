@@ -36,8 +36,13 @@
  * @requires Foundry VTT v13+
  */
 
-import { DEFAULT_ICONS } from "../constants/item-types.js";
+// Utils
 import { toInt } from "../../../utils/type-coercion.js";
+
+// Feature modules
+import { DEFAULT_ICONS } from "../constants/item-types.js";
+
+// Local helpers
 import { logSkillCreationXp, logAdvantageXp, logDisadvantageXp } from "./xp-tracking.js";
 
 /**
@@ -132,7 +137,7 @@ export function handleItemPreCreate(item, data) {
  *
  * @returns {Promise<void>} Resolves when XP tracking is complete
  */
-export async function handleItemOnCreate(item, data) {
+export async function handleItemOnCreate(item, _data) {
   // Only track XP for actor-owned skills, advantages, and disadvantages
   // Orphan items (no actor) and non-XP item types are ignored
   if (!item.actor || !["skill", "advantage", "disadvantage"].includes(item.type)) {
@@ -143,10 +148,7 @@ export async function handleItemOnCreate(item, data) {
 
   if (item.type === "skill") {
     await logSkillCreationXp(item, sys);
-  }
-
-  // Track advantage/disadvantage XP expenditures
-  else {
+  } else {
     const cost = toInt(sys.cost, 0);
     if (item.type === "advantage") {
       await logAdvantageXp(item, cost);

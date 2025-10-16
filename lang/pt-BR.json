@@ -509,10 +509,6 @@
         "manual": "Manual (Entrada Direta)",
         "formula": "Fórmula (Baseada em Terra)"
       }
-    },
-    "debugWoundConfig": {
-      "name": "Depurar Configuração de Ferimentos",
-      "label": "Ativa o registro detalhado no console para interações da Aplicação de Configuração de Ferimentos, manipulação de eventos e atualizações de atores. Útil para solucionar problemas de resposta de formulário."
     }
   },
   "EFFECT": {

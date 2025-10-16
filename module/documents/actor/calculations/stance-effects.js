@@ -70,7 +70,9 @@ import { getActiveStances, getDefenseSkillRank } from "../../../services/stance/
  * @see applyFullDefenseStance for Full Defense stance effects
  */
 export function applyStanceEffects(actor, sys) {
-  if (!actor || !sys) return;
+  if (!actor || !sys) {
+    return;
+  }
 
   const activeStances = getActiveStances(actor);
 

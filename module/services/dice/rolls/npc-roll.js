@@ -172,7 +172,9 @@ export async function NpcRoll({
     noVoid,
     Boolean(traitName)
   );
-  if (check?.cancelled) return;
+  if (check?.cancelled) {
+    return;
+  }
 
   let label = "";
   if (traitName) {
@@ -189,7 +191,7 @@ export async function NpcRoll({
 
   let rollMod = toInt(check.rollMod);
   let keepMod = toInt(check.keepMod);
-  let totalMod = toInt(check.totalMod);
+  const totalMod = toInt(check.totalMod);
 
   // Unskilled roll triggered by: (1) user dialog checkbox AND trait roll, OR (2) explicit untrained param
   // Trait rolls can be unskilled if character lacks training; ring/custom rolls cannot be unskilled

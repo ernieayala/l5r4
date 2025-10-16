@@ -50,8 +50,6 @@ Thumbs.db
 _for_research/
 game-rules/
 .windsurf/
-pc-images
-npc-images
 
 # Test coverage reports
 tests/coverage/

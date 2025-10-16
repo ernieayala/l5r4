@@ -5,6 +5,13 @@
  * using Foundry VTT's user flag system. Each actor can have different sort
  * preferences for different scopes (e.g., "skills", "weapons", "items").
  *
+ * **Storage Method:**
+ * Uses Foundry's **database-backed User Flags system** (NOT browser localStorage).
+ * Preferences persist in Foundry's server database and sync automatically across
+ * sessions and devices. This is superior to localStorage as it survives browser
+ * cache clears and works when accessing Foundry from different browsers/devices.
+ *
+ * **Storage Pattern:**
  * Sort preferences are stored in `game.user.flags[SYS_ID].sortByActor` as:
  * ```
  * {
@@ -13,6 +20,11 @@
  *   }
  * }
  * ```
+ *
+ * **Privacy:**
+ * - Only stores sort column and direction (no sensitive data)
+ * - Scoped per-user (each user's preferences are independent)
+ * - Stored in Foundry's database (not exposed to browsers)
  *
  * @module utils/sorting
  * @requires Foundry VTT v13+ (uses User.flags API)
@@ -136,7 +148,9 @@ export function sortWithPref(list, columns, pref, locale = game.i18n?.lang) {
       const Bv = columns[k]?.(b);
       // Select comparator based on type of extracted values
       const r = typeof Av === "number" || typeof Bv === "number" ? nc(Av, Bv) : sc(Av, Bv);
-      if (r !== 0) return k === primary ? r * dirMul : r; // Apply direction only to primary
+      if (r !== 0) {
+        return k === primary ? r * dirMul : r;
+      } // Apply direction only to primary
     }
     return 0;
   });

@@ -501,24 +501,20 @@
     },
     "forceMigration": {
       "name": "Forcer la migration au démarrage",
-      "label": "Force toutes les migrations à s'exécuter au prochain chargement du monde, quelle que soit la version. Se réinitialise automatiquement après la migration."
+      "label": "Force toutes les migrations à s'exécuter au prochain chargement du monde, quelle que soit la version. Se réinitialise automatiquement après la fin de la migration."
     },
     "defaultNpcWoundMode": {
-      "name": "Mode de Blessures par Défaut pour PNJ",
-      "label": "Détermine si les nouveaux PNJ utilisent des calculs basés sur une formule (Anneau de Terre) ou une saisie manuelle de seuils pour les calculs de blessures. Les PNJ existants conservent leurs paramètres individuels.",
+      "name": "Mode de Blessures PNJ par Défaut",
+      "label": "Contrôle si les nouveaux PNJ utilisent l'entrée basée sur la formule (Anneau de Terre) ou manuelle pour les calculs de blessures. Les PNJ existants conservent leurs paramètres individuels.",
       "choices": {
-        "manual": "Manuel (Saisie Directe)",
+        "manual": "Manuel (Entrée Directe)",
         "formula": "Formule (Basée sur Terre)"
       }
-    },
-    "debugWoundConfig": {
-      "name": "Déboguer la Configuration des Blessures",
-      "label": "Active la journalisation détaillée de la console pour les interactions de l'Application de Configuration des Blessures, la gestion des événements et les mises à jour des acteurs. Utile pour dépanner les problèmes de réponse de formulaire."
     }
   },
   "EFFECT": {
     "blinded": "Aveuglé",
-    "dazed": "Hagard",
+    "dazed": "Étourdi",
     "dead": "Mort",
     "entangled": "Empêtré",
     "fasting": "Jeûne",

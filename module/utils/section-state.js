@@ -5,10 +5,21 @@
  * sheet re-renders and browser sessions. Uses Foundry's user flag system to store
  * per-actor, per-section UI preferences.
  *
+ * **Storage Method:**
+ * Uses Foundry's **database-backed User Flags system** (NOT browser localStorage).
+ * Data persists in Foundry's server database and syncs automatically across sessions.
+ * This is preferable to localStorage as it survives browser cache clears and works
+ * across different browsers/devices when accessing the same Foundry server.
+ *
  * **Storage Pattern:**
  * Flags are stored at: `game.user.flags.l5r4-enhanced.collapsedSections`
  * Structure: `{ [actorId]: { [scope]: boolean } }`
  * Example: `{ "Actor.abc123": { "skills": true, "weapons": false } }`
+ *
+ * **Privacy:**
+ * - Only stores UI state (no sensitive data)
+ * - Scoped per-user (each user has their own preferences)
+ * - Stored in Foundry's database (not exposed to browsers)
  *
  * **Integration Points:**
  * - Sheet _prepareContext: Read state to inject into template context

@@ -196,7 +196,9 @@ export async function SimpleRoll({
     rollType === "attack", // isAttack - show ranged checkbox for attacks
     isBow // isBow - pre-check ranged if weapon is a bow
   );
-  if (check?.cancelled) return;
+  if (check?.cancelled) {
+    return;
+  }
 
   let label = "";
   if (traitName) {
@@ -213,7 +215,7 @@ export async function SimpleRoll({
 
   let rollMod = toInt(check.rollMod);
   let keepMod = toInt(check.keepMod);
-  let totalMod = toInt(check.totalMod);
+  const totalMod = toInt(check.totalMod);
 
   // Unskilled roll triggered by: (1) user dialog checkbox AND trait roll, OR (2) explicit untrained param
   // Trait rolls can be unskilled if character lacks training; ring/custom rolls cannot be unskilled

@@ -208,7 +208,9 @@ export async function buildXpHistory(actor) {
 
     // Process actor items: skills, emphases, advantages, disadvantages, kata, kiho
     for (const item of actor.items) {
-      if (!item || typeof item.type !== "string") continue;
+      if (!item || typeof item.type !== "string") {
+        continue;
+      }
 
       // Skills: Track rank advancements (cost = next rank, e.g., 2→3 costs 3 XP)
       if (item.type === "skill") {
