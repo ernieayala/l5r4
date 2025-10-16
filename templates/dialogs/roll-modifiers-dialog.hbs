@@ -73,11 +73,11 @@
   {{#if spell}}
     <div class="form-group">
       <label>{{localize "l5r4.magic.spells.affinity"}}</label>
-      <input type="checkbox" name="affinity" />
+      <input type="checkbox" name="affinity" {{checked hasAffinity}} />
     </div>
     <div class="form-group">
       <label>{{localize "l5r4.magic.spells.deficiency"}}</label>
-      <input type="checkbox" name="deficiency" />
+      <input type="checkbox" name="deficiency" {{checked hasDeficiency}} />
     </div>
     <div class="form-group">
       <label>{{localize "l5r4.magic.spells.useSpellSlot"}} {{ring}}</label>

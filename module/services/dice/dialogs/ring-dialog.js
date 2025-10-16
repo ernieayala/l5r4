@@ -27,6 +27,7 @@
 
 import { DIALOG_TEMPLATES } from "../../../config/templates.js";
 import { R } from "../../../utils/localization.js";
+import { getAffinityDeficiencyModifier } from "../../../utils/mechanics.js";
 
 const DIALOG = foundry.applications.api.DialogV2;
 
@@ -34,14 +35,16 @@ const DIALOG = foundry.applications.api.DialogV2;
  * Ring roll or spell casting options selected by user.
  *
  * @typedef {Object} RingRollOptions
- * @property {boolean} applyWoundPenalty - Apply wound rank TN penalty per Combat_and_Wounds.md
+ * @property {boolean} applyWoundPenalty - Apply wound rank TN penalty
  * @property {number} rollMod - Additional rolled dice modifier (situational bonuses)
  * @property {number} keepMod - Additional kept dice modifier (rare, usually from techniques)
  * @property {number} totalMod - Flat bonus to roll total (situational adjustments)
- * @property {boolean} void - Void Point spent for +1k1 bonus per Rings_and_Traits.md
+ * @property {boolean} void - Void Point spent for +1k1 bonus
  * @property {number} [tn] - Target Number for contested/specific checks
- * @property {number} [raises] - Number of Raises declared (+5 TN each per Skills_and_Rolls.md)
- * @property {boolean} spellSlot - Spell slot consumed (elemental slot per Spells.md)
+ * @property {number} [raises] - Number of Raises declared (+5 TN each)
+ * @property {boolean} affinity - Affinity active (+1 to School Rank)
+ * @property {boolean} deficiency - Deficiency active (-1 to School Rank)
+ * @property {boolean} spellSlot - Spell slot consumed (elemental slot)
  * @property {boolean} voidSlot - Void slot consumed (bonus slot for any element)
  * @property {boolean} normalRoll - true for Ring roll, false for Spell Casting roll
  * @property {boolean} [cancelled] - true if dialog was cancelled/closed
@@ -59,14 +62,14 @@ const DIALOG = foundry.applications.api.DialogV2;
  * - Void Point expenditure (+1k1 to roll per core rules)
  * - Wound Penalty application (TN increase per wound rank)
  * - Target Number (for contested or specific TN checks)
- * - Raises (declared before rolling, +5 TN each per Skills_and_Rolls.md)
+ * - Raises (declared before rolling, +5 TN each)
  * - Spell Slot consumption (elemental slot vs void slot)
- * - Void Slot usage (flexible bonus slots for any element per Spells.md)
+ * - Void Slot usage (flexible bonus slots for any element)
  *
- * L5R4 Spell Slot Mechanics:
+ * Spell Slot Mechanics:
  * - Shugenja have slots equal to Ring value in each element
  * - Void Ring provides bonus slots usable for any element
- * - Failed spell casts still consume slots (kami anger per Spells.md)
+ * - Failed spell casts still consume slots
  * - Interrupted casts (before completion) do not consume slots
  *
  * Foundry Implementation:
@@ -76,18 +79,35 @@ const DIALOG = foundry.applications.api.DialogV2;
  * - Fallback pattern (`b.form ?? d.form`) handles different callback signatures
  *
  * @param {string} ringName - Name of the Ring being rolled (e.g., "Fire", "Earth", "Void")
+ * @param {L5R4Actor} [actor=null] - Actor casting spell (for affinity/deficiency detection)
+ * @param {string} [systemRing=null] - System ring key ("air", "fire", etc.) for affinity/deficiency
  * @returns {Promise<RingRollOptions>} Resolves with user-selected modifiers, or {cancelled: true} if dialog closed
  *
  * @example
- * const options = await GetSpellOptions("Fire");
+ * const options = await GetSpellOptions("Fire", actor, "fire");
  * if (!options.cancelled) {
  *   // options.normalRoll = false for spellcasting, true for ring roll
  *   // options.void = true if Void Point spent
+ *   // options.affinity/deficiency pre-checked based on school
  *   // options.spellSlot/voidSlot indicate slot consumption
  * }
  */
-export async function GetSpellOptions(ringName) {
-  const content = await R(DIALOG_TEMPLATES.rollModifiers, { spell: true, ring: ringName });
+export async function GetSpellOptions(ringName, actor = null, systemRing = null) {
+  // Detect affinity/deficiency from school to pre-check appropriate checkbox
+  let hasAffinity = false;
+  let hasDeficiency = false;
+  if (actor && systemRing) {
+    const modifier = getAffinityDeficiencyModifier(actor, systemRing);
+    hasAffinity = modifier > 0;
+    hasDeficiency = modifier < 0;
+  }
+
+  const content = await R(DIALOG_TEMPLATES.rollModifiers, {
+    spell: true,
+    ring: ringName,
+    hasAffinity,
+    hasDeficiency
+  });
   return await new Promise(resolve => {
     new DIALOG({
       window: { title: game.i18n.format("l5r4.ui.chat.ringRoll", { ring: ringName }) },
@@ -136,6 +156,7 @@ export async function GetSpellOptions(ringName) {
  * - Void Point expenditure (checkbox for +1k1)
  * - Target Number (optional numeric input)
  * - Raises (optional, +5 TN per raise)
+ * - Affinity/Deficiency checkboxes (School Rank ±1)
  * - Spell slot type (elemental vs void slot consumption)
  *
  * @param {HTMLFormElement} form - Dialog form element containing user inputs
@@ -152,6 +173,8 @@ export function _processRingRollOptions(form, isSpellCasting = false) {
     void: form.void.checked,
     tn: form.tn?.value,
     raises: form.raises?.value,
+    affinity: form.affinity?.checked ?? false,
+    deficiency: form.deficiency?.checked ?? false,
     spellSlot: form.spellSlot?.checked ?? false,
     voidSlot: form.voidSlot?.checked ?? false,
     normalRoll: !isSpellCasting

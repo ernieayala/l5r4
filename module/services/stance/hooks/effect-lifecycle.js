@@ -106,25 +106,24 @@ function triggerFullDefenseIfNeeded(effectStances, actor) {
 }
 
 /**
- * Refreshes the actor's derived data and sheet display.
+ * Refreshes the actor's derived data.
  *
  * Calls Actor.prepareData() to recalculate all derived stats (including stance-based
- * Armor TN modifiers, attack bonuses, etc.) and then re-renders the actor sheet to
- * reflect the changes in the UI without resetting scroll position or input focus.
+ * Armor TN modifiers, attack bonuses, etc.). Foundry's reactive rendering system
+ * automatically updates the UI when actor properties change.
  *
  * Foundry Pattern:
  * prepareData() triggers the full data preparation pipeline (prepareBaseData,
- * prepareDerivedData, prepareEmbeddedDocuments). The optional sheet render ensures
- * UI synchronization without disrupting user interaction.
+ * prepareDerivedData, prepareEmbeddedDocuments) which recalculates all derived
+ * actor statistics.
  *
- * @param {Actor} actor - The actor whose display should be refreshed
+ * @param {Actor} actor - The actor whose data should be refreshed
  * @returns {void}
  *
  * @private
  */
 function refreshActorDisplay(actor) {
   actor.prepareData();
-  actor.sheet?.render(false);
 }
 
 /**

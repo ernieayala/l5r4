@@ -247,9 +247,72 @@ export function extractRollParams(el, actor) {
  */
 
 /**
+ * Get affinity/deficiency school rank modifier for spell casting.
+ *
+ * Affinity/deficiency mechanics:
+ * - **Affinity**: Shugenja casts spells of that element as if School Rank +1
+ * - **Deficiency**: Shugenja casts spells of that element as if School Rank -1
+ * - If deficiency reduces effective School Rank to 0, cannot cast spells of that element
+ *
+ * Searches actor's items for shugenja technique items and checks their affinity/deficiency
+ * properties against the provided ring key. If multiple techniques have conflicting modifiers
+ * for the same element, returns 0 (no auto-select, user must choose).
+ *
+ * Ring keys must be lowercase element names: "air", "earth", "fire", "water", "void"
+ *
+ * @param {Actor} actor - Foundry Actor casting the spell
+ * @param {string} ringKey - Lowercase ring identifier ("air", "earth", "fire", "water", "void")
+ * @returns {number} School rank modifier: +1 (affinity), -1 (deficiency), or 0 (no modifier/conflict)
+ */
+export function getAffinityDeficiencyModifier(actor, ringKey) {
+  if (!actor || !ringKey) return 0;
+
+  const normalizedRing = String(ringKey).toLowerCase().trim();
+  if (!normalizedRing) return 0;
+
+  // Find all shugenja technique items
+  let shugenjaItems = [];
+  try {
+    const items = actor.items?.contents ?? actor.items ?? [];
+    shugenjaItems = Array.from(items).filter(
+      i => i.type === "technique" && i.system?.shugenja === true
+    );
+  } catch (err) {
+    console.warn("l5r4-enhanced", "Failed to find technique items in getAffinityDeficiencyModifier", {
+      err
+    });
+    return 0;
+  }
+
+  // Collect all modifiers for this ring from all shugenja techniques
+  const modifiers = new Set();
+  for (const item of shugenjaItems) {
+    if (!item?.system) continue;
+
+    // Check affinity (case-insensitive comparison)
+    const affinity = String(item.system.affinity || "").toLowerCase().trim();
+    if (affinity === normalizedRing) {
+      modifiers.add(1);
+    }
+
+    // Check deficiency (case-insensitive comparison)
+    const deficiency = String(item.system.deficiency || "").toLowerCase().trim();
+    if (deficiency === normalizedRing) {
+      modifiers.add(-1);
+    }
+  }
+
+  // Handle conflicts: if both affinity and deficiency exist, return 0 (no auto-select)
+  if (modifiers.size > 1) return 0;
+
+  // Return single modifier if found, otherwise 0
+  return modifiers.size === 1 ? modifiers.values().next().value : 0;
+}
+
+/**
  * Resolve weapon skill and trait for attack roll calculation.
  *
- * Implements L5R4 Skill Roll formulas per Skills_and_Rolls.md:
+ * L5R4 Skill Roll formulas:
  * - Skilled (Rank > 0): (Skill Rank + Trait Value)k(Trait Value)
  * - Unskilled (Rank = 0): (Trait Value)k(Trait Value) with no exploding dice
  *

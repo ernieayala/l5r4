@@ -44,7 +44,8 @@ import { STANCES } from "../config/localization.js";
 import { enhanceItemSheetData } from "../documents/item/integration/sheet-data.js";
 import { on } from "../utils/dom.js";
 import { getSortPref, sortWithPref } from "../utils/sorting.js";
-import { applyNaturalHealing } from "../services/healing.js";
+import { getSectionCollapsedMap } from "../utils/section-state.js";
+import { applyLongRest } from "../services/rest.js";
 import { BaseActorSheet } from "./base-actor-sheet.js";
 import { RollHandler } from "./handlers/roll-handler.js";
 import { AppLauncherHandler } from "./handlers/app-launcher-handler.js";
@@ -387,12 +388,22 @@ export default class L5R4NpcSheet extends BaseActorSheet {
       return sortWithPref(byType("skill"), cols, pref, game.i18n?.lang);
     })();
 
+    // Get collapsed section states for all collapsible sections
+    const collapsedSections = getSectionCollapsedMap(actorObj.id, [
+      "skills",
+      "weapons",
+      "armors",
+      "spells",
+      "items"
+    ]);
+
     const context = {
       ...base,
       actor: this.actor,
       system: actorObj.system,
       currentStance,
       mountedStatus,
+      collapsedSections,
 
       // Show Void Points section only if system setting enabled
       showNpcVoidPoints: game.settings.get(SYS_ID, "allowNpcVoidPoints"),
@@ -498,7 +509,7 @@ export default class L5R4NpcSheet extends BaseActorSheet {
    */
   async _onApplyHealing(event, element) {
     event?.preventDefault?.();
-    await applyNaturalHealing(this.actor);
+    await applyLongRest(this.actor);
   }
 
   /**

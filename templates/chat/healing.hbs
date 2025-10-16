@@ -6,5 +6,11 @@
     {{#if wasFullyHealed}}
       <p><strong>{{localize "l5r4.ui.mechanics.wounds.fullyHealed"}}</strong></p>
     {{/if}}
+    {{#if spellSlotsRestored}}
+      <p><em>{{localize "l5r4.magic.spells.slotsRestored"}}</em></p>
+    {{/if}}
+    {{#if voidRestored}}
+      <p><em>{{localize "l5r4.ui.mechanics.rings.void"}}: {{voidRestored}}/{{voidRestored}} {{localize "l5r4.magic.spells.restored"}}</em></p>
+    {{/if}}
   </div>
 </div>
