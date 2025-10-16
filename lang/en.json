@@ -120,6 +120,7 @@
         "fear": {
           "fearRank": "Fear Rank",
           "fearLabel": "Fear {rank}",
+          "effectName": "Fear {rank}",
           "clickToTest": "Click to test Fear against selected characters",
           "testResult": "Fear {rank} Test",
           "testSuccess": "Resisted Fear {rank}",
@@ -545,6 +546,9 @@
     "fatigued": {
       "restrictions": "Fatigued: +5 TN to physical rolls, skills, and spellcasting (stacks per day), cannot use Full Attack stance"
     },
+    "feared": {
+      "restrictions": "Feared: -Xk0 to all rolls (X = Fear Rank), lasts until encounter end"
+    },
     "grappled": {
       "restrictions": "Grappled: Armor TN = 5 + armor bonus only"
     },
@@ -562,6 +566,7 @@
     "entangled": "Entangled",
     "fasting": "Fasting",
     "fatigued": "Fatigued",
+    "feared": "Feared",
     "grappled": "Grappled",
     "mounted": "Mounted/Higher",
     "prone": "Prone",

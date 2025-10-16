@@ -36,6 +36,7 @@
  * @see {@link https://foundryvtt.com/api/v13/classes/foundry.documents.BaseActor.html#prepareDerivedData|Actor.prepareDerivedData}
  */
 
+import { SYS_ID } from "../../../config/constants.js";
 import { toInt } from "../../../utils/type-coercion.js";
 
 /**
@@ -49,6 +50,7 @@ const CONDITION_IDS = new Set([
   "dazed",
   "entangled",
   "fatigued",
+  "feared",
   "grappled",
   "prone",
   "stunned"
@@ -111,7 +113,9 @@ function getActiveConditions(actor) {
  * @param {Object} sys.traits - Actor Trait values
  * @see applyBlindedCondition for Blinded condition effects
  * @see applyDazedCondition for Dazed condition effects
+ * @see applyEntangledCondition for Entangled condition effects
  * @see applyFatiguedCondition for Fatigued condition effects
+ * @see applyFearedCondition for Feared condition effects
  * @see applyGrappledCondition for Grappled condition effects
  * @see applyProneCondition for Prone condition effects
  * @see applyStunnedCondition for Stunned condition effects
@@ -153,6 +157,9 @@ export function applyConditionEffects(actor, sys) {
         break;
       case "fatigued":
         applyFatiguedCondition(sys);
+        break;
+      case "feared":
+        applyFearedCondition(actor, sys);
         break;
       case "grappled":
         applyGrappledCondition(sys);
@@ -317,6 +324,56 @@ function applyFatiguedCondition(sys) {
   sys._conditionEffects.tnPenalty += 5;
 
   sys._conditionEffects.restrictions.push("l5r4.conditions.fatigued.restrictions");
+}
+
+/**
+ * Applies Feared condition mechanical effects.
+ *
+ * L5R4 Fear Condition:
+ * "[book text removed; Core Rulebook p.90]."
+ *
+ * Mechanical Effects:
+ * - **Universal Penalty**: -Xk0 to all actions (attacks, skills, spells, etc.) where X = Fear Rank
+ * - **Duration**: Until encounter end or Fear source removed
+ * - **Multiple Fear Sources**: If multiple Fear effects apply, use the highest Fear Rank
+ *
+ * Note: The -Xk0 penalty reduces rolled dice. If rolled dice become less than kept dice,
+ * kept dice are reduced to match (per L5R4 dice penalty rules).
+ *
+ * Effect Tracking:
+ * Stores penalty in sys._conditionEffects for UI display and roll integration.
+ * Fear Rank is retrieved from the ActiveEffect's flags.l5r4.fearRank value.
+ *
+ * @param {Actor} actor - The actor document (needed to access effects)
+ * @param {Object} sys - The actor.system data object being modified
+ * @param {Object} sys._conditionEffects - Effect tracking object for UI display and rolls
+ * @private
+ */
+function applyFearedCondition(actor, sys) {
+  // Find the feared effect to extract Fear Rank
+  // If multiple fear effects exist, use the highest Fear Rank
+  let maxFearRank = 0;
+
+  for (const effect of actor.effects) {
+    if (effect.disabled) continue;
+
+    const statuses = effect.statuses || new Set();
+    if (statuses.has("feared")) {
+      const fearRank = toInt(effect.getFlag(SYS_ID, "fearRank") || 0);
+      if (fearRank > maxFearRank) {
+        maxFearRank = fearRank;
+      }
+    }
+  }
+
+  // Apply -Xk0 penalty to all roll types
+  if (maxFearRank > 0) {
+    sys._conditionEffects.rollPenalties.melee.roll += -maxFearRank;
+    sys._conditionEffects.rollPenalties.ranged.roll += -maxFearRank;
+    sys._conditionEffects.rollPenalties.defense.roll += -maxFearRank;
+
+    sys._conditionEffects.restrictions.push("l5r4.conditions.feared.restrictions");
+  }
 }
 
 /**

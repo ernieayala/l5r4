@@ -247,8 +247,9 @@ export class PcAdjustmentHandler {
     if (!sectionTitle) return;
 
     // Get section scope from data attribute (e.g., "skills", "weapons", "spells")
-    const scope = sectionTitle.dataset.scope || sectionTitle.closest("[data-scope]")?.dataset?.scope;
-    
+    const scope =
+      sectionTitle.dataset.scope || sectionTitle.closest("[data-scope]")?.dataset?.scope;
+
     // Toggle collapsed state (CSS-driven visibility)
     const isNowCollapsed = sectionTitle.classList.toggle("is-collapsed");
 
