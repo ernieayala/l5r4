@@ -107,7 +107,7 @@ export async function setSectionCollapsed(actorId, scope, isCollapsed) {
  * @returns {Object.<string, boolean>} Map of scope to collapsed state
  *
  * @example
- * const collapsed = getSectionCollapsedMap("Actor.abc123", 
+ * const collapsed = getSectionCollapsedMap("Actor.abc123",
  *   ["skills", "weapons", "spells", "advantages"]
  * );
  * // Returns: { skills: true, weapons: false, spells: false, advantages: true }

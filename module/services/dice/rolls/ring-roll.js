@@ -336,9 +336,10 @@ export async function RingRoll({
 
     // Validate effective school rank - cannot cast if deficiency reduces rank to 0 or below
     if (effectiveSchoolRank <= 0) {
-      const msg = schoolRankMod < 0
-        ? game.i18n.format("l5r4.ui.notifications.deficiencyBlocksCasting", { ring: ringName })
-        : game.i18n.localize("l5r4.ui.notifications.schoolRankZero");
+      const msg =
+        schoolRankMod < 0
+          ? game.i18n.format("l5r4.ui.notifications.deficiencyBlocksCasting", { ring: ringName })
+          : game.i18n.localize("l5r4.ui.notifications.schoolRankZero");
       ui.notifications?.warn(msg);
       return false;
     }

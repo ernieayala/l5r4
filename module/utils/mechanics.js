@@ -278,9 +278,13 @@ export function getAffinityDeficiencyModifier(actor, ringKey) {
       i => i.type === "technique" && i.system?.shugenja === true
     );
   } catch (err) {
-    console.warn("l5r4-enhanced", "Failed to find technique items in getAffinityDeficiencyModifier", {
-      err
-    });
+    console.warn(
+      "l5r4-enhanced",
+      "Failed to find technique items in getAffinityDeficiencyModifier",
+      {
+        err
+      }
+    );
     return 0;
   }
 
@@ -290,13 +294,17 @@ export function getAffinityDeficiencyModifier(actor, ringKey) {
     if (!item?.system) continue;
 
     // Check affinity (case-insensitive comparison)
-    const affinity = String(item.system.affinity || "").toLowerCase().trim();
+    const affinity = String(item.system.affinity || "")
+      .toLowerCase()
+      .trim();
     if (affinity === normalizedRing) {
       modifiers.add(1);
     }
 
     // Check deficiency (case-insensitive comparison)
-    const deficiency = String(item.system.deficiency || "").toLowerCase().trim();
+    const deficiency = String(item.system.deficiency || "")
+      .toLowerCase()
+      .trim();
     if (deficiency === normalizedRing) {
       modifiers.add(-1);
     }
