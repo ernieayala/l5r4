@@ -88,7 +88,17 @@
           "injured": "Blessé",
           "crippled": "Estropié",
           "down": "À terre",
-          "out": "Hors de combat"
+          "out": "Hors de combat",
+          "applyHealing": "Apply Healing",
+          "applyHealingTitle": "Apply natural healing from rest",
+          "naturalHealing": "Natural Healing",
+          "restedAndRecovered": "rested and recovered wounds",
+          "healingApplied": "Healed {amount} wounds (heal rate: {rate})",
+          "woundStatus": "Wounds: {current}/{max} (suffered: {suffered})",
+          "fullyHealed": "Fully healed!",
+          "alreadyFullHealth": "{name} is already at full health",
+          "noHealRate": "{name} has no healing rate configured",
+          "healingFailed": "Failed to apply healing to {name}"
         },
         "stances": {
           "pending": "En attente",
@@ -108,6 +118,7 @@
         "fear": {
           "fearRank": "Fear Rank",
           "fearLabel": "Fear {rank}",
+          "effectName": "Fear {rank}",
           "clickToTest": "Click to test Fear against selected characters",
           "testResult": "Fear {rank} Test",
           "testSuccess": "Resisted Fear {rank}",
@@ -227,6 +238,7 @@
         "chatMessageFailed": "Échec de la publication du jet dans le chat - voir la console pour les détails",
         "deleteEffect": "Échec de la suppression de l'effet.",
         "schoolRankZero": "Vous ne pouvez pas lancer un sort avec un Rang d'École réduit à zéro",
+        "deficiencyBlocksCasting": "Deficiency in {ring} reduces your School Rank to zero - cannot cast",
         "noSpellSlots": "Vous n'avez plus d'emplacements de sort pour cet anneau"
       },
       "chat": {
@@ -427,7 +439,26 @@
         "deficiency": "Déficience",
         "maho": "Mahō",
         "useSpellSlot": "Utiliser un emplacement de sort",
-        "voidSlot": "Utiliser un emplacement de sort de Vide"
+        "voidSlot": "Utiliser un emplacement de sort de Vide",
+        "slotsRestored": "All spell slots restored to maximum",
+        "restored": "restored"
+      },
+      "maho": {
+        "warningTitle": "Blood Magic - Forbidden Maho",
+        "bloodRequired": "Blood Cost Required",
+        "additionalBloodBonus": "Each additional blood cost amount grants +1 Free Raise",
+        "bloodSource": {
+          "label": "Blood Source",
+          "self": "Self",
+          "other": "Other"
+        },
+        "additionalBlood": "Additional Blood",
+        "castMaho": "Cast Maho Spell",
+        "mahoCasting": "Maho Casting",
+        "bloodCost": "Blood",
+        "freeRaises": "Free Raises",
+        "taintGained": "Taint Gained",
+        "taintGainedNotification": "Gained {taint} points of Shadowlands Taint from maho casting"
       },
       "kiho": {
         "internal": "Interne",
@@ -547,6 +578,32 @@
       "tattoo": "Tatouage",
       "technique": "Technique",
       "weapon": "Arme"
+    }
+  },
+  "conditions": {
+    "blinded": {
+      "restrictions": "Blinded: -3k3 ranged attacks, -1k1 melee attacks, -1k1 Defense rolls, Armor TN = Ref+5+Armor, Water Ring -2 for movement"
+    },
+    "dazed": {
+      "restrictions": "Dazed: -3k0 to all actions, only Defense/Full Defense stances, cannot duel"
+    },
+    "entangled": {
+      "restrictions": "Entangled: Cannot Move or take Complex Actions except Strength roll to break free"
+    },
+    "fatigued": {
+      "restrictions": "Fatigued: +5 TN to physical rolls, skills, and spellcasting (stacks per day), cannot use Full Attack stance"
+    },
+    "feared": {
+      "restrictions": "Feared: -Xk0 to all rolls (X = Fear Rank), lasts until encounter end"
+    },
+    "grappled": {
+      "restrictions": "Grappled: Armor TN = 5 + armor bonus only"
+    },
+    "prone": {
+      "restrictions": "Prone: -10 Armor TN vs melee, -2k0 attacks, cannot Move, only Attack/Defense stances"
+    },
+    "stunned": {
+      "restrictions": "Stunned: Cannot take any actions, Armor TN = 5 + armor bonus"
     }
   }
 }
