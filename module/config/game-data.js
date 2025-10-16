@@ -94,6 +94,7 @@ export const NPC_NUMBER_WOUND_LVLS = freeze({ 1: 1, 2: 2, 3: 3, 4: 4, 5: 5, 6: 6
  * - entangled: Cannot act except Strength roll to break free
  * - fasting: Void recovery disabled, escalating TN penalties, eventual death
  * - fatigued: +5 TN penalties (stacking), Willpower rolls to avoid sleep
+ * - feared: -XkO all rolls (X = Fear Rank), lasts until encounter end
  * - grappled: Armor TN reduced to 5 + armor bonus
  * - mounted: +1k0 attack vs unmounted/lower targets
  * - prone: -10 Armor TN vs melee, movement/attack restrictions
@@ -146,6 +147,7 @@ export const STATUS_EFFECTS = freeze([
   { id: "entangled", name: "EFFECT.entangled", img: iconPath("entangled.webp") },
   { id: "fasting", name: "EFFECT.fasting", img: iconPath("fasting.webp") },
   { id: "fatigued", name: "EFFECT.fatigued", img: iconPath("fatigue.webp") },
+  { id: "feared", name: "EFFECT.feared", img: iconPath("fear.webp") },
   { id: "grappled", name: "EFFECT.grappled", img: iconPath("grappled.webp") },
   { id: "mounted", name: "EFFECT.mounted", img: iconPath("mounted.webp") },
   { id: "prone", name: "EFFECT.prone", img: iconPath("prone.webp") },

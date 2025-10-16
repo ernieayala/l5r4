@@ -7,6 +7,156 @@ Versioning: [Semantic Versioning](https://semver.org/spec/v2.0.0.html)
 
 ---
 
+## [2.2.0] - 2025-10-16
+
+### Added
+
+**Fear System**
+
+- Complete Fear mechanic implementation for supernatural horror encounters
+- Fear Rank system (1-10) for NPCs representing terror intensity
+- Automatic Fear TN calculation: 5 + (5 × Fear Rank)
+- Willpower + Honor Rank resistance rolls with proper L5R4 mechanics
+- Failed tests apply persistent -XkY penalties to all rolls via Active Effects
+- Catastrophic failure detection (failure by 15+) for fleeing/cowering outcomes
+- Click-to-test Fear button on NPC sheets
+- Multi-target Fear testing (test all controlled tokens simultaneously)
+- Fear status effect with custom icon and automatic tracking
+- Comprehensive chat cards showing test results and effects
+- Localized Fear UI text across all six supported languages
+- Proper lock mechanism to prevent concurrent test execution
+
+**Mounted Combat System**
+
+- Full mounted combat mechanics per L5R4 core rules
+- Mounted status tracking via Active Effects system
+- +1k0 attack bonus for mounted attackers vs unmounted targets
+- Automatic mounted status detection and application
+- Horsemanship skill detection with multi-language support (English, French, German)
+- Visual mounted status indicators on tokens
+- Seamless integration with existing attack roll system
+- Proper bonus application in both PC and NPC attack rolls
+- Works with all weapon types and attack scenarios
+
+**Long Rest & Healing**
+
+- Natural healing system: (Stamina × 2) + Insight Rank wounds healed per night
+- Complete resource restoration on long rest
+  - All spell slots (Air, Earth, Fire, Water, Void) restore to maximum
+  - Void Points restore to full (Void Ring value)
+- Automatic Fatigued condition removal
+- Comprehensive healing chat cards with before/after status
+- One-click rest button on character sheets
+- Wound state tracking and validation
+- Visual feedback for full recovery
+- Proper error handling with localized notifications
+
+**User Interface**
+
+- Rest button added to PC and NPC sheets for quick long rest application
+- Fear test button on NPC sheets with proper hover states
+- Mounted status toggle in combat effects section
+- Visual indicators for all new status effects (Fear, Mounted, Fatigued)
+- Improved chat card formatting for healing and Fear tests
+- Icon system expanded with Fear and healing assets
+
+### Enhanced
+
+**Combat System**
+
+- Attack roll bonuses now include mounted combat calculations
+- NPC attack rolls properly integrate stance, mounted, and circumstance bonuses
+- Target selection improved for mounted vs unmounted detection
+- Consolidated attack bonus system for cleaner code architecture
+
+**Actor Data Model**
+
+- Added `fear` data structure to NPC actors (rank, tn, active state)
+- Wound healing rate calculation integrated into character data
+- Proper derived data preparation for Fear mechanics
+- Improved type coercion throughout healing and Fear systems
+
+**Services Architecture**
+
+- New `fear.js` service module with comprehensive Fear mechanics
+- New `mounted-combat.js` service for mounted status and bonuses
+- New `rest.js` service handling long rest and natural healing
+- Fear service includes single and multi-target test execution
+- Proper separation of concerns with focused service responsibilities
+- Click handler lock mechanisms to prevent race conditions
+
+**Chat System**
+
+- New healing chat template with rich formatting
+- Fear test results with detailed outcome descriptions
+- Improved chat card styling for new mechanics
+- Proper speaker attribution for all new chat messages
+- Error handling with graceful degradation for chat failures
+
+**Calculations & Formulas**
+
+- New `fear-system.js` calculation module for derived Fear data
+- Heal rate formula: (Stamina × 2) + Insight Rank + modifiers
+- Fear resistance TN formula: 5 + (5 × Fear Rank)
+- Mounted attack bonus calculation with proper target awareness
+- Catastrophic failure detection (margin ≤ -15)
+
+**Documentation**
+
+- Comprehensive JSDoc for all new service modules
+- Inline code documentation for Fear mechanics
+- Detailed game rule citations for mounted combat
+- Architecture notes for service layer integration
+- README updated with Fear, Mounted Combat, and Healing sections
+
+**Localization**
+
+- Complete Fear system text in all six languages (en, es, fr, pt-BR, de, ru)
+- Healing notification text localized
+- Mounted combat UI labels translated
+- Fear status effect names internationalized
+- Proper formatting strings for dynamic text
+
+### Fixed
+
+- Actor updates now use single transaction for rest operations (prevents partial updates)
+- Proper void point restoration calculation using Void Ring rank
+- Fear effect creation with correct status flag structure
+- Spell slot restoration correctly references ring values
+- Horsemanship skill detection works across localized skill names
+- Error handling improved for edge cases in healing and Fear tests
+- Chat message posting failures now show user-friendly notifications
+
+### Technical Improvements
+
+**Code Quality**
+
+- Consistent error handling patterns across new services
+- Proper null/undefined guards throughout new modules
+- Type coercion with fallbacks for all numeric calculations
+- Defensive programming for effect queries (statuses vs legacy flags)
+- Lock mechanisms prevent concurrent execution issues
+- Clean separation between calculation and side effect logic
+
+**Architecture**
+
+- New services follow established modular architecture
+- Clear API boundaries with proper import restrictions
+- Calculation modules remain pure (no side effects)
+- Service modules handle Foundry API integration
+- Proper async/await patterns throughout
+- Template rendering with comprehensive error handling
+
+**Performance**
+
+- Single actor update transaction for rest (reduces Foundry API calls)
+- Efficient Active Effect queries with early returns
+- Localized string caching where appropriate
+- Minimal template rendering overhead
+- Debounced click handlers prevent duplicate processing
+
+---
+
 ## [2.1.0] - 2025-10-15
 
 ### Fixed

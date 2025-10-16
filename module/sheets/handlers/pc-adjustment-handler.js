@@ -213,39 +213,56 @@ export class PcAdjustmentHandler {
   }
 
   /**
-   * Toggles collapse/expand state of a sheet section.
+   * Toggles collapse/expand state of a sheet section with persistence.
    *
    * **UI Pattern:**
-   * Pure DOM manipulation for section visibility toggle.
-   * No actor data updates (client-side display state only).
+   * Toggles section visibility and persists state to user flags so collapsed
+   * sections remain collapsed across sheet re-renders and browser sessions.
    *
    * **Implementation:**
    * - Finds parent .section-title element
-   * - Toggles "is-collapsed" class for CSS-driven visibility
+   * - Toggles "is-collapsed" class for immediate CSS-driven visibility
    * - Swaps chevron icon direction (fa-chevron-down ↔ fa-chevron-up)
+   * - Persists state to user flags via setSectionCollapsed()
+   *
+   * **Persistence:**
+   * State is stored per-user, per-actor, per-section in user flags. This allows
+   * each user to have their own preferred collapsed/expanded sections for each actor.
    *
    * **No Game Rules:** This is purely a UI convenience feature.
    *
-   * @param {Object} context - Sheet render context (unused for this method)
+   * @param {Object} context - Sheet render context with actor reference
    * @param {Event} event - DOM click event
    * @param {HTMLElement} element - Clicked element (searches up for .section-title)
-   * @returns {void}
+   * @returns {Promise<void>}
+   * @async
    */
-  static toggleSection(context, event, element) {
+  static async toggleSection(context, event, element) {
     event?.preventDefault?.();
+
+    const { setSectionCollapsed } = await import("../../utils/section-state.js");
 
     // Find parent section title container
     const sectionTitle = element.closest(".section-title");
     if (!sectionTitle) return;
 
+    // Get section scope from data attribute (e.g., "skills", "weapons", "spells")
+    const scope =
+      sectionTitle.dataset.scope || sectionTitle.closest("[data-scope]")?.dataset?.scope;
+
     // Toggle collapsed state (CSS-driven visibility)
-    sectionTitle.classList.toggle("is-collapsed");
+    const isNowCollapsed = sectionTitle.classList.toggle("is-collapsed");
 
     // Swap chevron icon direction for visual feedback
     const icon = element.querySelector("i");
     if (icon) {
       icon.classList.toggle("fa-chevron-down");
       icon.classList.toggle("fa-chevron-up");
+    }
+
+    // Persist state to user flags if we have a valid scope
+    if (scope && context.actor) {
+      await setSectionCollapsed(context.actor.id, scope, isNowCollapsed);
     }
   }
 }

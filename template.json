@@ -222,7 +222,8 @@
       "templates": ["itemDescription"],
       "bonus": 0,
       "equipped": false,
-      "reduction": 0
+      "reduction": 0,
+      "armorType": "ashigaru"
     },
     "clan": {
       "templates": ["itemDescription"]

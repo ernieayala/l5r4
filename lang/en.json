@@ -41,7 +41,9 @@
           "raises": "Raises",
           "automatic": "Automatic",
           "formula": "Formula",
-          "result": "Result"
+          "result": "Result",
+          "socialResistance": "Social Resistance",
+          "socialResistanceDescription": "Resisting Intimidation or Temptation"
         },
         "notifications": {
           "itemCreated": "Created {type}: {name}",
@@ -88,7 +90,17 @@
           "injured": "Injured",
           "crippled": "Crippled",
           "down": "Down",
-          "out": "Out"
+          "out": "Out",
+          "applyHealing": "Apply Healing",
+          "applyHealingTitle": "Apply natural healing from rest",
+          "naturalHealing": "Natural Healing",
+          "restedAndRecovered": "rested and recovered wounds",
+          "healingApplied": "Healed {amount} wounds (heal rate: {rate})",
+          "woundStatus": "Wounds: {current}/{max} (suffered: {suffered})",
+          "fullyHealed": "Fully healed!",
+          "alreadyFullHealth": "{name} is already at full health",
+          "noHealRate": "{name} has no healing rate configured",
+          "healingFailed": "Failed to apply healing to {name}"
         },
         "stances": {
           "pending": "Pending",
@@ -108,6 +120,7 @@
         "fear": {
           "fearRank": "Fear Rank",
           "fearLabel": "Fear {rank}",
+          "effectName": "Fear {rank}",
           "clickToTest": "Click to test Fear against selected characters",
           "testResult": "Fear {rank} Test",
           "testSuccess": "Resisted Fear {rank}",
@@ -227,6 +240,7 @@
         "chatMessageFailed": "Failed to post roll to chat - see console for details",
         "deleteEffect": "Failed to delete effect.",
         "schoolRankZero": "You can't cast a spell with School Rank reduced to zero",
+        "deficiencyBlocksCasting": "Deficiency in {ring} reduces your School Rank to zero - cannot cast",
         "noSpellSlots": "You ran out of spell slots for this ring"
       },
       "chat": {
@@ -384,6 +398,7 @@
         "arrow": "Arrow",
         "typeWeapon": "Weapon",
         "typeBow": "Bow",
+        "rangedAttack": "Ranged Attack",
         "associatedSkill": "Associated Skill",
         "fallback": "Fallback",
         "skillExample": {
@@ -405,7 +420,14 @@
       },
       "armor": {
         "reduction": "Reduction",
-        "equipped": "Equipped"
+        "equipped": "Equipped",
+        "armorType": "Armor Type",
+        "types": {
+          "ashigaru": "Ashigaru Armor",
+          "light": "Light Armor",
+          "heavy": "Heavy Armor",
+          "riding": "Riding Armor"
+        }
       },
       "general": {}
     },
@@ -419,7 +441,9 @@
         "deficiency": "Deficiency",
         "maho": "Maho",
         "useSpellSlot": "Use Spell Slot",
-        "voidSlot": "Use Void Spell Slot"
+        "voidSlot": "Use Void Spell Slot",
+        "slotsRestored": "All spell slots restored to maximum",
+        "restored": "restored"
       },
       "kiho": {
         "internal": "Internal",
@@ -509,6 +533,32 @@
       "label": "Enable detailed console logging for Wound Configuration Application interactions, event handling, and actor updates. Useful for troubleshooting form response issues."
     }
   },
+  "conditions": {
+    "blinded": {
+      "restrictions": "Blinded: -3k3 ranged attacks, -1k1 melee attacks, -1k1 Defense rolls, Armor TN = Ref+5+Armor, Water Ring -2 for movement"
+    },
+    "dazed": {
+      "restrictions": "Dazed: -3k0 to all actions, only Defense/Full Defense stances, cannot duel"
+    },
+    "entangled": {
+      "restrictions": "Entangled: Cannot Move or take Complex Actions except Strength roll to break free"
+    },
+    "fatigued": {
+      "restrictions": "Fatigued: +5 TN to physical rolls, skills, and spellcasting (stacks per day), cannot use Full Attack stance"
+    },
+    "feared": {
+      "restrictions": "Feared: -Xk0 to all rolls (X = Fear Rank), lasts until encounter end"
+    },
+    "grappled": {
+      "restrictions": "Grappled: Armor TN = 5 + armor bonus only"
+    },
+    "prone": {
+      "restrictions": "Prone: -10 Armor TN vs melee, -2k0 attacks, cannot Move, only Attack/Defense stances"
+    },
+    "stunned": {
+      "restrictions": "Stunned: Cannot take any actions, Armor TN = 5 + armor bonus"
+    }
+  },
   "EFFECT": {
     "blinded": "Blinded",
     "dazed": "Dazed",
@@ -516,6 +566,7 @@
     "entangled": "Entangled",
     "fasting": "Fasting",
     "fatigued": "Fatigued",
+    "feared": "Feared",
     "grappled": "Grappled",
     "mounted": "Mounted/Higher",
     "prone": "Prone",

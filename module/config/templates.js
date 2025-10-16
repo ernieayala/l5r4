@@ -59,6 +59,7 @@ export const TEMPLATE = relPath => {
  * - simpleRoll: Standard trait/skill/ring roll results with keep/roll dice display
  * - weaponCard: Weapon attack results with damage, raises, and modifiers
  * - fullDefenseRoll: Full Defense stance roll results per combat rules
+ * - healing: Natural healing results with wounds healed and status
  *
  * Frozen to prevent runtime modification and ensure consistent chat rendering.
  * Consumed by foundry.utils.renderTemplate() in chat message creation.
@@ -67,12 +68,14 @@ export const TEMPLATE = relPath => {
  * @property {string} simpleRoll - Template path for standard roll results
  * @property {string} weaponCard - Template path for weapon attack chat cards
  * @property {string} fullDefenseRoll - Template path for Full Defense stance rolls
+ * @property {string} healing - Template path for natural healing chat cards
  * @readonly
  */
 export const CHAT_TEMPLATES = freeze({
   simpleRoll: TEMPLATE("chat/simple-roll.hbs"),
   weaponCard: TEMPLATE("chat/weapon-chat.hbs"),
-  fullDefenseRoll: TEMPLATE("chat/full-defense-roll.hbs")
+  fullDefenseRoll: TEMPLATE("chat/full-defense-roll.hbs"),
+  healing: TEMPLATE("chat/healing.hbs")
 });
 
 /**

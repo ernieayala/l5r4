@@ -1,7 +1,7 @@
 # Legend of the Five Rings 4th Edition - Enhanced
 
 [![FoundryVTT version](https://img.shields.io/badge/FVTT-v13.x-informational)](https://foundryvtt.com/)
-[![Version](https://img.shields.io/badge/Version-2.1.0-blue)](https://github.com/ernieayala/l5r4/releases)
+[![Version](https://img.shields.io/badge/Version-2.2.0-blue)](https://github.com/ernieayala/l5r4/releases)
 [![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](LICENSE)
 [![GitHub Issues](https://img.shields.io/github/issues/ernieayala/l5r4)](https://github.com/ernieayala/l5r4/issues)
 
@@ -179,6 +179,29 @@ Use L5R4e dice in chat:
 
 - **Auto Calculation** - Insight Rank + Reflexes + modifiers
 - **Combat Tracker** - Integrates with Foundry's combat tracker
+
+### Mounted Combat
+
+- **Mounted Status** - Track mounted status via Active Effects
+- **Attack Bonuses** - +1k0 attack bonus for mounted vs unmounted targets
+- **Visual Indicators** - Clear status effect display on tokens
+- **Horsemanship Integration** - Automatic detection of Horsemanship skill
+
+### Fear System (NPCs)
+
+- **Fear Rating** - NPCs can have Fear ratings from 1-10
+- **Automatic TN Calculation** - Fear TN = 5 + (5 × Fear Rank)
+- **Willpower Tests** - Characters roll Willpower + Honor Rank to resist
+- **Fear Effects** - Failed tests apply -XkY penalty to all rolls
+- **Catastrophic Failure** - Failure by 15+ causes fleeing or cowering
+- **Chat Integration** - Fear test results posted to chat automatically
+
+### Long Rest & Healing
+
+- **Natural Healing** - Characters heal (Stamina × 2) + Insight Rank wounds per night
+- **Resource Restoration** - Spell slots and Void Points restore to maximum
+- **Condition Removal** - Automatically removes Fatigued status effect
+- **Chat Feedback** - Displays healing summary in chat
 
 ---
 

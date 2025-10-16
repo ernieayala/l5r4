@@ -404,7 +404,14 @@
       },
       "armor": {
         "reduction": "Поглощение",
-        "equipped": "Надето"
+        "equipped": "Надето",
+        "armorType": "Тип доспехов",
+        "types": {
+          "ashigaru": "Доспехи Асигару",
+          "light": "Лёгкие доспехи",
+          "heavy": "Тяжёлые доспехи",
+          "riding": "Верховые доспехи"
+        }
       },
       "general": {}
     },
@@ -515,6 +522,7 @@
     "entangled": "Опутан",
     "fasting": "Пост",
     "fatigued": "Утомлен",
+    "feared": "Испуган",
     "grappled": "Схвачен",
     "mounted": "Верхом/Выше",
     "prone": "Лежит",

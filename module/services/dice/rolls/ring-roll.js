@@ -16,6 +16,7 @@
  * L5R4 Game Mechanics:
  * - **Ring Rolls**: XkX where X = Ring rank (used for trait-based ability checks)
  * - **Spell Casting**: (Ring + School Rank)k(Ring) vs TN 5 + (Mastery Level × 5)
+ * - **Affinity/Deficiency**: School Rank ±1 based on element
  * - **Void Spending**: +1k1 bonus to any roll (one per round limit enforced by caller)
  * - **Raises**: Declared before rolling, +5 TN each for enhanced effects
  * - **Wound Penalties**: Incremental TN increases per wound rank (applied if enabled)
@@ -57,9 +58,75 @@ import { TenDiceRule } from "../core/ten-dice-rule.js";
 import { buildFormula } from "../core/formula-builder.js";
 import { calculateEffectiveTN, evaluateTN } from "../core/tn-calculator.js";
 import { spendVoidPoint } from "../resources/void-manager.js";
-import { spendElementalSlot, spendVoidSlot } from "../resources/spell-slot-manager.js";
+import {
+  spendElementalSlot,
+  spendVoidSlot,
+  validateSpellSlot
+} from "../resources/spell-slot-manager.js";
 import { applyRingBonuses } from "../effects/bonus-applicator.js";
 import { GetSpellOptions } from "../dialogs/ring-dialog.js";
+
+/**
+ * Confirms spell slot usage for spell casting when no slot checkbox selected.
+ *
+ * Per L5R4 core rules, spell casting consumes a slot when the Spell Casting Roll
+ * is made. This confirmation dialog ensures compliance with spell slot mechanics
+ * by prompting the user when casting without a pre-selected slot checkbox.
+ *
+ * Slot Selection Priority:
+ * 1. Elemental slot (preferred, conserves flexible void slots)
+ * 2. Void slot (fallback if elemental unavailable)
+ * 3. None available → Display warning, allow casting without consumption
+ *
+ * The dialog displays current slot count and prompts: "Use Spell Slot Fire (3)?"
+ * User selects Yes to consume slot and proceed, or No to cast without consuming slot.
+ *
+ * @param {L5R4Actor} actor - Actor casting the spell
+ * @param {string} systemRing - Ring key ("fire", "water", "earth", "air", "void")
+ * @param {string} ringName - Display name of ring for dialog title
+ * @returns {Promise<{useElemental: boolean, useVoid: boolean}>} Slot selection (false/false if No clicked)
+ * @private
+ * @async
+ */
+async function _confirmSpellSlotUsage(actor, systemRing, ringName) {
+  const elementalValidation = validateSpellSlot(actor, systemRing, false);
+  const voidValidation = validateSpellSlot(actor, "void", true);
+
+  // Check if any slots available
+  if (!elementalValidation.valid && !voidValidation.valid) {
+    ui.notifications?.warn(
+      game.i18n.format("l5r4.ui.notifications.noSpellSlots", { ring: ringName })
+    );
+    // No slots available - return null to abort roll entirely
+    return null;
+  }
+
+  // Determine which slot type to use (prefer elemental)
+  const useElemental = elementalValidation.valid;
+  const useVoid = !useElemental && voidValidation.valid;
+
+  // Build confirmation message showing available slots
+  const elementalLabel = game.i18n.localize("l5r4.magic.spells.useSpellSlot");
+  const voidLabel = game.i18n.localize("l5r4.magic.spells.voidSlot");
+  const slotType = useElemental
+    ? `${elementalLabel} ${ringName} (${elementalValidation.current})`
+    : `${voidLabel} (${voidValidation.current})`;
+
+  // Show confirmation dialog using DialogV2
+  const confirmed = await foundry.applications.api.DialogV2.confirm({
+    window: { title: game.i18n.localize("l5r4.magic.spells.useSpellSlot") },
+    content: `<p>${slotType}?</p>`,
+    rejectClose: false,
+    modal: true
+  });
+
+  // Yes: Consume the selected slot | No: Cast without consuming slot
+  if (confirmed) {
+    return { useElemental, useVoid };
+  } else {
+    return { useElemental: false, useVoid: false };
+  }
+}
 
 /**
  * Generic resource spending wrapper with user notification.
@@ -110,6 +177,8 @@ async function spendResource(spendFn, successProp = "label") {
  * L5R4 Mechanics Implemented:
  * - **Ring Rolls**: Direct Ring value used for both rolled and kept dice
  * - **Spell Casting**: Ring + School Rank for rolled dice, Ring for kept dice
+ * - **Affinity**: +1 to effective School Rank for spells of affinity element
+ * - **Deficiency**: -1 to effective School Rank for spells of deficiency element (blocks if rank ≤0)
  * - **Raises**: Each raise adds +5 to effective TN (declared before rolling)
  * - **Void Points**: Grant +1k1 to roll (one die added to both roll and keep)
  * - **Wound Penalties**: Add to TN if enabled (based on wound rank severity)
@@ -170,6 +239,8 @@ export async function RingRoll({
   let totalMod = 0; // Flat bonus to roll total (situational modifiers)
   let voidRoll = false; // Void Point spent for +1k1 bonus
   let applyWoundPenalty = true; // Apply wound rank TN penalty
+  let affinity = false; // Affinity checkbox active (+1 School Rank)
+  let deficiency = false; // Deficiency checkbox active (-1 School Rank)
   let spellSlot = false; // Elemental spell slot consumed
   let voidSlot = false; // Void bonus spell slot consumed
   let __tnInput = 0,
@@ -178,7 +249,7 @@ export async function RingRoll({
   // Show dialog if askForOptions inverts the setting (XOR logic)
   // Setting ON + askForOptions false = show dialog | Setting OFF + askForOptions true = show dialog
   if (askForOptions !== optionsSetting) {
-    const choice = await GetSpellOptions(ringName);
+    const choice = await GetSpellOptions(ringName, actor, systemRing);
 
     // User cancelled dialog - abort roll
     if (choice?.cancelled) return false;
@@ -190,11 +261,26 @@ export async function RingRoll({
     keepMod = toInt(choice.keepMod);
     totalMod = toInt(choice.totalMod);
     voidRoll = !!choice.void;
+    affinity = !!choice.affinity;
+    deficiency = !!choice.deficiency;
     spellSlot = !!choice.spellSlot;
     voidSlot = !!choice.voidSlot;
 
     __tnInput = toInt(choice.tn);
     __raisesInput = toInt(choice.raises);
+
+    // Spell Casting without slot checkbox: Prompt for slot usage per L5R4 core rules
+    if (!normalRoll && !spellSlot && !voidSlot) {
+      const slotChoice = await _confirmSpellSlotUsage(actor, systemRing, ringName);
+      if (slotChoice === null) {
+        // User said Yes but no slots available - abort roll
+        return false;
+      }
+      if (slotChoice) {
+        spellSlot = slotChoice.useElemental;
+        voidSlot = slotChoice.useVoid;
+      }
+    }
   }
 
   // Set base label based on roll type (before appending modifiers)
@@ -210,7 +296,7 @@ export async function RingRoll({
   keepMod += bonuses.keep;
   totalMod += bonuses.total;
 
-  // Void Point spending: +1k1 bonus per L5R4 Rings_and_Traits.md
+  // Void Point spending: +1k1 bonus
   // Side effect: Decrements actor.system.rings.void.value by 1
   if (voidRoll) {
     const voidResult = await spendVoidPoint(actor);
@@ -223,22 +309,6 @@ export async function RingRoll({
     label += ` ${game.i18n.localize("l5r4.ui.mechanics.rings.void")}!`;
   }
 
-  // Elemental spell slot consumption per L5R4 Spells.md
-  // Side effect: Decrements actor.system.spellSlots[systemRing] by 1
-  if (spellSlot && systemRing) {
-    const result = await spendResource(() => spendElementalSlot(actor, systemRing));
-    if (!result.success) return false; // Abort if slot unavailable
-    label += result.value; // Append slot label (e.g., " [Fire Slot]")
-  }
-
-  // Void bonus spell slot consumption (flexible slot for any element)
-  // Side effect: Decrements actor.system.spellSlots.void by 1
-  if (voidSlot) {
-    const result = await spendResource(() => spendVoidSlot(actor));
-    if (!result.success) return false; // Abort if slot unavailable
-    label += result.value; // Append slot label (e.g., " [Void Slot]")
-  }
-
   // Determine dice pool based on roll type
   let diceToRoll, diceToKeep;
 
@@ -248,16 +318,48 @@ export async function RingRoll({
     diceToKeep = toInt(ringRank) + keepMod;
   } else {
     // Spell Casting: (Ring + School Rank)k(Ring)
-    const schoolRank = toInt(actor?.system?.insight?.rank);
+    const baseSchoolRank = toInt(actor?.system?.insight?.rank);
 
-    // Validate school rank - cannot cast with rank 0
-    if (schoolRank <= 0) {
-      ui.notifications?.warn(game.i18n.localize("l5r4.ui.notifications.schoolRankZero"));
+    // Apply affinity/deficiency from dialog checkboxes
+    // Affinity: +1 School Rank | Deficiency: -1 School Rank
+    // Both cannot be active simultaneously (mutually exclusive)
+    let schoolRankMod = 0;
+    if (affinity && !deficiency) {
+      schoolRankMod = 1;
+      label += ` [${game.i18n.localize("l5r4.magic.spells.affinity")}]`;
+    } else if (deficiency && !affinity) {
+      schoolRankMod = -1;
+      label += ` [${game.i18n.localize("l5r4.magic.spells.deficiency")}]`;
+    }
+
+    const effectiveSchoolRank = baseSchoolRank + schoolRankMod;
+
+    // Validate effective school rank - cannot cast if deficiency reduces rank to 0 or below
+    if (effectiveSchoolRank <= 0) {
+      const msg =
+        schoolRankMod < 0
+          ? game.i18n.format("l5r4.ui.notifications.deficiencyBlocksCasting", { ring: ringName })
+          : game.i18n.localize("l5r4.ui.notifications.schoolRankZero");
+      ui.notifications?.warn(msg);
       return false;
     }
 
-    diceToRoll = toInt(ringRank) + schoolRank + rollMod;
+    diceToRoll = toInt(ringRank) + effectiveSchoolRank + rollMod;
     diceToKeep = toInt(ringRank) + keepMod;
+  }
+
+  // Spell slot consumption happens AFTER validation passes
+  // This ensures slots are only consumed when spell actually casts
+  if (spellSlot && systemRing) {
+    const result = await spendResource(() => spendElementalSlot(actor, systemRing));
+    if (!result.success) return false; // Abort if slot unavailable
+    label += result.value; // Append slot label (e.g., " [Fire Slot]")
+  }
+
+  if (voidSlot) {
+    const result = await spendResource(() => spendVoidSlot(actor));
+    if (!result.success) return false; // Abort if slot unavailable
+    label += result.value; // Append slot label (e.g., " [Void Slot]")
   }
 
   // Append TN and raises to label if specified
