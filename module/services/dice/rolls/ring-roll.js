@@ -57,9 +57,75 @@ import { TenDiceRule } from "../core/ten-dice-rule.js";
 import { buildFormula } from "../core/formula-builder.js";
 import { calculateEffectiveTN, evaluateTN } from "../core/tn-calculator.js";
 import { spendVoidPoint } from "../resources/void-manager.js";
-import { spendElementalSlot, spendVoidSlot } from "../resources/spell-slot-manager.js";
+import {
+  spendElementalSlot,
+  spendVoidSlot,
+  validateSpellSlot
+} from "../resources/spell-slot-manager.js";
 import { applyRingBonuses } from "../effects/bonus-applicator.js";
 import { GetSpellOptions } from "../dialogs/ring-dialog.js";
+
+/**
+ * Confirms spell slot usage for spell casting when no slot checkbox selected.
+ *
+ * Per L5R4 core rules, spell casting consumes a slot when the Spell Casting Roll
+ * is made. This confirmation dialog ensures compliance with spell slot mechanics
+ * by prompting the user when casting without a pre-selected slot checkbox.
+ *
+ * Slot Selection Priority:
+ * 1. Elemental slot (preferred, conserves flexible void slots)
+ * 2. Void slot (fallback if elemental unavailable)
+ * 3. None available → Display warning, allow casting without consumption
+ *
+ * The dialog displays current slot count and prompts: "Use Spell Slot Fire (3)?"
+ * User selects Yes to consume slot and proceed, or No to cast without consuming slot.
+ *
+ * @param {L5R4Actor} actor - Actor casting the spell
+ * @param {string} systemRing - Ring key ("fire", "water", "earth", "air", "void")
+ * @param {string} ringName - Display name of ring for dialog title
+ * @returns {Promise<{useElemental: boolean, useVoid: boolean}>} Slot selection (false/false if No clicked)
+ * @private
+ * @async
+ */
+async function _confirmSpellSlotUsage(actor, systemRing, ringName) {
+  const elementalValidation = validateSpellSlot(actor, systemRing, false);
+  const voidValidation = validateSpellSlot(actor, "void", true);
+
+  // Check if any slots available
+  if (!elementalValidation.valid && !voidValidation.valid) {
+    ui.notifications?.warn(
+      game.i18n.format("l5r4.ui.notifications.noSpellSlots", { ring: ringName })
+    );
+    // No slots available, but allow casting without consuming
+    return { useElemental: false, useVoid: false };
+  }
+
+  // Determine which slot type to use (prefer elemental)
+  const useElemental = elementalValidation.valid;
+  const useVoid = !useElemental && voidValidation.valid;
+
+  // Build confirmation message showing available slots
+  const elementalLabel = game.i18n.localize("l5r4.magic.spells.useSpellSlot");
+  const voidLabel = game.i18n.localize("l5r4.magic.spells.voidSlot");
+  const slotType = useElemental
+    ? `${elementalLabel} ${ringName} (${elementalValidation.current})`
+    : `${voidLabel} (${voidValidation.current})`;
+
+  // Show confirmation dialog using DialogV2
+  const confirmed = await foundry.applications.api.DialogV2.confirm({
+    window: { title: game.i18n.localize("l5r4.magic.spells.useSpellSlot") },
+    content: `<p>${slotType}?</p>`,
+    rejectClose: false,
+    modal: true
+  });
+
+  // Yes: Consume the selected slot | No: Cast without consuming slot
+  if (confirmed) {
+    return { useElemental, useVoid };
+  } else {
+    return { useElemental: false, useVoid: false };
+  }
+}
 
 /**
  * Generic resource spending wrapper with user notification.
@@ -195,6 +261,15 @@ export async function RingRoll({
 
     __tnInput = toInt(choice.tn);
     __raisesInput = toInt(choice.raises);
+
+    // Spell Casting without slot checkbox: Prompt for slot usage per L5R4 core rules
+    if (!normalRoll && !spellSlot && !voidSlot) {
+      const slotChoice = await _confirmSpellSlotUsage(actor, systemRing, ringName);
+      if (slotChoice) {
+        spellSlot = slotChoice.useElemental;
+        voidSlot = slotChoice.useVoid;
+      }
+    }
   }
 
   // Set base label based on roll type (before appending modifiers)
