@@ -36,6 +36,7 @@
           "attackRoll": "Attack Roll",
           "spellCasting": "Spell Casting Roll",
           "castSpell": "Cast {spell} ({ring})",
+          "castMaho": "Cast Maho: {spell} ({ring})",
           "unskilledRoll": "Unskilled Roll",
           "emphasis": "Emphasis",
           "raise": "Raise",
@@ -450,6 +451,23 @@
         "voidSlot": "Use Void Spell Slot",
         "slotsRestored": "All spell slots restored to maximum",
         "restored": "restored"
+      },
+      "maho": {
+        "warningTitle": "Blood Magic - Forbidden Maho",
+        "bloodRequired": "Blood Cost Required",
+        "additionalBloodBonus": "Each additional blood cost amount grants +1 Free Raise",
+        "bloodSource": {
+          "label": "Blood Source",
+          "self": "Self",
+          "other": "Other"
+        },
+        "additionalBlood": "Additional Blood",
+        "castMaho": "Cast Maho Spell",
+        "mahoCasting": "Maho Casting",
+        "bloodCost": "Blood",
+        "freeRaises": "Free Raises",
+        "taintGained": "Taint Gained",
+        "taintGainedNotification": "Gained {taint} points of Shadowlands Taint from maho casting"
       },
       "kiho": {
         "internal": "Internal",
