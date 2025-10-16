@@ -33,7 +33,7 @@ jobs:
       run: npm run build:css
 
     - name: Check for circular dependencies
-      run: npm run madge:check
+      run: npm run deps:circular
 
     - name: Validate JSON files
       run: |
