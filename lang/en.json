@@ -416,7 +416,14 @@
       },
       "armor": {
         "reduction": "Reduction",
-        "equipped": "Equipped"
+        "equipped": "Equipped",
+        "armorType": "Armor Type",
+        "types": {
+          "ashigaru": "Ashigaru Armor",
+          "light": "Light Armor",
+          "heavy": "Heavy Armor",
+          "riding": "Riding Armor"
+        }
       },
       "general": {}
     },

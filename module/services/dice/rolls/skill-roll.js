@@ -44,6 +44,7 @@ import {
   getConditionRollPenalties,
   getConditionTNPenalty
 } from "../../../utils/condition-penalties.js";
+import { getArmorTNPenalty } from "../../../utils/armor-penalties.js";
 
 /**
  * Executes a skill roll following L5R4 mechanics.
@@ -230,10 +231,13 @@ export async function SkillRoll({
     baseTN = autoTN;
   }
 
-  // Calculate effective TN: baseTN + (raises × 5) + wound penalty + condition penalty (if applicable)
+  // Calculate effective TN: baseTN + (raises × 5) + wound penalty + condition penalty + armor penalty (if applicable)
   const conditionTNPenalty = getConditionTNPenalty(actor);
+  const armorTNPenalty = getArmorTNPenalty(actor, skillName, skillTrait);
   let effTN =
-    calculateEffectiveTN(baseTN, raises, woundPenalty, applyWoundPenalty) + conditionTNPenalty;
+    calculateEffectiveTN(baseTN, raises, woundPenalty, applyWoundPenalty) +
+    conditionTNPenalty +
+    armorTNPenalty;
   effTN = Math.max(0, effTN); // TN cannot be negative
   let tnResult = evaluateTN(roll.total ?? 0, effTN, raises);
 

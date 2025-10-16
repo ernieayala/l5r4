@@ -405,7 +405,14 @@
       },
       "armor": {
         "reduction": "Reduktion",
-        "equipped": "Ausgerüstet"
+        "equipped": "Ausgerüstet",
+        "armorType": "Rüstungstyp",
+        "types": {
+          "ashigaru": "Ashigaru-Rüstung",
+          "light": "Leichte Rüstung",
+          "heavy": "Schwere Rüstung",
+          "riding": "Reitrüstung"
+        }
       },
       "general": {}
     },

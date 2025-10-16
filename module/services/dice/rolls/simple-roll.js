@@ -61,6 +61,7 @@ import {
   getConditionRollPenalties,
   getConditionTNPenalty
 } from "../../../utils/condition-penalties.js";
+import { getArmorTNPenalty } from "../../../utils/armor-penalties.js";
 
 /**
  * Parameters for constructing a simple roll
@@ -172,7 +173,9 @@ export async function SimpleRoll({
   actor = null,
   untrained = false,
   weaponId = null,
-  isBow = false
+  isBow = false,
+  skillName = null,
+  skillTrait = null
 } = {}) {
   const messageTemplate = CHAT_TEMPLATES.simpleRoll;
 
@@ -286,6 +289,7 @@ export async function SimpleRoll({
   // Apply wound penalties to attack roll TN only (not damage rolls or general skill checks)
   // Wound penalties increase TN to hit (+3 Nicked, +5 Grazed, +10 Hurt, +15 Injured, etc.)
   const conditionTNPenalty = actor ? getConditionTNPenalty(actor) : 0;
+  const armorTNPenalty = actor ? getArmorTNPenalty(actor, skillName, skillTrait) : 0;
   let effTN = calculateEffectiveTN(
     baseTN,
     toInt(check.raises),
@@ -293,6 +297,7 @@ export async function SimpleRoll({
     rollType === "attack" && baseTN > 0
   );
   effTN += conditionTNPenalty; // Add condition TN penalties (Fatigued, etc.)
+  effTN += armorTNPenalty; // Add armor TN penalties (Light/Heavy/Riding armor)
   effTN = Math.max(0, effTN); // TN cannot be negative
   let tnResult = evaluateTN(roll.total ?? 0, effTN, toInt(check.raises));
 
