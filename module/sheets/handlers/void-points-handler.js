@@ -55,8 +55,9 @@ export class VoidPointsHandler {
     if (next === cur) return;
 
     try {
-      // diff:true minimizes update payload for performance
-      await context.actor.update({ "system.rings.void.value": next }, { diff: true });
+      // diff:true minimizes update payload, render:false prevents automatic sheet redraw
+      // since we manually update the UI via paint() below
+      await context.actor.update({ "system.rings.void.value": next }, { diff: true, render: false });
     } catch (err) {
       console.warn(`${SYS_ID} VoidPointsHandler: failed to update void points`, { err });
     }

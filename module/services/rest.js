@@ -1,27 +1,19 @@
 /**
- * Natural Healing Service
+ * Long Rest Service
  *
- * Handles natural healing mechanics for L5R4 system per core rules:
+ * Handles long rest recovery mechanics for L5R4 system:
  * - Characters heal (Stamina × 2) + Insight Rank wounds per night of rest
- * - Healing cannot reduce suffered wounds below 0 (no over-healing)
- * - Provides chat feedback on healing applied
- *
- * L5R4 Rules Reference:
- * Core Rulebook, Stances_Actions_Maneuvers.md:
- * "For every night's rest a character gets, he recovers a number of Wounds
- * equal to twice his Stamina Trait, plus his Insight Rank."
+ * - Spell slots restore to maximum
+ * - Void Points restore to maximum
+ * - Removes Fatigued condition
+ * - Provides chat feedback on recovery
  *
  * Architecture Notes:
  * - Services layer: Handles side effects (actor updates, chat messages)
  * - Can import: utils, config (NOT documents per architecture rules)
  * - Pure business logic with Foundry API integration
  *
- * Integrates with:
- * - Actor document for wound updates
- * - ChatMessage API for healing feedback
- * - Localization system for user messages
- *
- * @module services/healing
+ * @module services/rest
  * @requires Foundry v13+
  */
 
@@ -29,41 +21,27 @@ import { SYS_ID } from "../config/constants.js";
 import { toInt } from "../utils/type-coercion.js";
 
 /**
- * Applies natural healing to a character after rest.
+ * Applies long rest recovery to a character.
  *
- * Implements L5R4 natural healing rules:
- * - Healing amount = (Stamina × 2) + Insight Rank + modifiers
- * - Reduces suffered wounds by healing amount
- * - Cannot reduce suffered wounds below 0 (clamped)
- * - Posts chat message with healing details
+ * Recovery includes:
+ * - **Wounds**: (Stamina × 2) + Insight Rank + modifiers
+ * - **Spell Slots**: All elemental and Void slots restore to maximum
+ * - **Void Points**: Restore to maximum (Void Ring value)
+ * - **Conditions**: Removes Fatigued status effect
  *
- * **Game Rules Context:**
- * This represents one night's rest. Multiple applications could represent
- * multiple nights of recovery. Medicine skill can increase healing rate
- * through the wounds.mod field (managed separately).
- *
- * **Edge Cases:**
- * - Already at full health: Shows message, no update
- * - Partial healing: Heals available amount, clamps to 0
- * - Missing heal rate: Defaults to 0, shows warning
- *
- * **Side Effects:**
- * - Updates actor.system.suffered (reduces by healing amount)
- * - Creates ChatMessage with healing summary
- * - Shows UI notification if actor already at full health
+ * This represents one night's rest (8 hours).
  *
  * @async
- * @param {L5R4Actor} actor - The actor receiving healing
+ * @param {L5R4Actor} actor - The actor taking a long rest
  * @returns {Promise<void>}
  *
  * @example
- * // Apply healing to selected character
- * import { applyNaturalHealing } from "./services/healing.js";
- * await applyNaturalHealing(actor);
+ * import { applyLongRest } from "./services/rest.js";
+ * await applyLongRest(actor);
  */
-export async function applyNaturalHealing(actor) {
+export async function applyLongRest(actor) {
   if (!actor) {
-    console.warn(`${SYS_ID} | healing.js: No actor provided to applyNaturalHealing`);
+    console.warn(`${SYS_ID} | rest.js: No actor provided to applyLongRest`);
     return;
   }
 
@@ -72,36 +50,51 @@ export async function applyNaturalHealing(actor) {
   const maxWounds = toInt(actor.system?.wounds?.max ?? 0);
   const healRate = toInt(actor.system?.wounds?.healRate ?? 0);
 
-  // Check if already at full health (suffered = 0)
-  if (currentSuffered <= 0) {
-    ui.notifications?.info(
-      game.i18n.format("l5r4.ui.mechanics.wounds.alreadyFullHealth", {
-        name: actor.name
-      })
-    );
-    return;
-  }
-
-  // Validate heal rate exists
+  // Log if heal rate is invalid
   if (healRate <= 0) {
-    console.warn(`${SYS_ID} | healing.js: Actor ${actor.name} has invalid heal rate: ${healRate}`);
-    ui.notifications?.warn(
-      game.i18n.format("l5r4.ui.mechanics.wounds.noHealRate", {
-        name: actor.name
-      })
-    );
-    return;
+    console.warn(`${SYS_ID} | rest.js: Actor ${actor.name} has heal rate of ${healRate}`);
   }
 
   // Calculate healing: reduce suffered wounds by heal rate, minimum 0
-  const healingApplied = Math.min(currentSuffered, healRate);
-  const newSuffered = Math.max(0, currentSuffered - healRate);
+  const healingApplied = healRate > 0 ? Math.min(currentSuffered, healRate) : 0;
+  const newSuffered = healRate > 0 ? Math.max(0, currentSuffered - healRate) : currentSuffered;
 
-  // Update actor with new suffered wounds value
+  // Restore spell slots to maximum
+  const rings = actor.system?.rings || {};
+  const spellSlotUpdates = {
+    "system.spellSlots.air": toInt(rings.air ?? 0),
+    "system.spellSlots.earth": toInt(rings.earth ?? 0),
+    "system.spellSlots.fire": toInt(rings.fire ?? 0),
+    "system.spellSlots.water": toInt(rings.water ?? 0),
+    "system.spellSlots.void": toInt(rings.void?.rank ?? 0)
+  };
+
+  // Restore Void Points to maximum
+  const voidMax = toInt(rings.void?.rank ?? 0);
+  const voidUpdate = { "system.rings.void.value": voidMax };
+
+  // Remove Fatigued condition
+  const fatigued = actor.effects?.find(e => e.statuses?.has("fatigued"));
+  if (fatigued) {
+    try {
+      await fatigued.delete();
+    } catch (err) {
+      console.warn(`${SYS_ID} | rest.js: Failed to remove Fatigued condition`, { err });
+    }
+  }
+
+  // Build complete update object
+  const updates = {
+    "system.suffered": newSuffered,
+    ...spellSlotUpdates,
+    ...voidUpdate
+  };
+
+  // Apply all updates in single transaction
   try {
-    await actor.update({ "system.suffered": newSuffered }, { diff: true });
+    await actor.update(updates, { diff: true });
   } catch (err) {
-    console.error(`${SYS_ID} | healing.js: Failed to update actor wounds`, { actor, err });
+    console.error(`${SYS_ID} | rest.js: Failed to update actor after rest`, { actor, err });
     ui.notifications?.error(
       game.i18n.format("l5r4.ui.mechanics.wounds.healingFailed", {
         name: actor.name
@@ -114,8 +107,8 @@ export async function applyNaturalHealing(actor) {
   const newCurrentWounds = maxWounds - newSuffered;
   const wasFullyHealed = newSuffered === 0;
 
-  // Post chat message with healing summary
-  await _postHealingMessage({
+  // Post chat message with rest summary
+  await _postRestMessage({
     actor,
     healingApplied,
     healRate,
@@ -123,12 +116,14 @@ export async function applyNaturalHealing(actor) {
     newSuffered,
     newCurrentWounds,
     maxWounds,
-    wasFullyHealed
+    wasFullyHealed,
+    voidRestored: voidMax,
+    spellSlotsRestored: true
   });
 }
 
 /**
- * Creates a chat message announcing healing results.
+ * Creates a chat message announcing rest recovery results.
  *
  * Posts a formatted chat card showing:
  * - Character name and portrait
@@ -142,8 +137,8 @@ export async function applyNaturalHealing(actor) {
  *
  * @async
  * @private
- * @param {Object} data - Healing message data
- * @param {L5R4Actor} data.actor - The actor who was healed
+ * @param {Object} data - Rest message data
+ * @param {L5R4Actor} data.actor - The actor who rested
  * @param {number} data.healingApplied - Amount of wounds healed
  * @param {number} data.healRate - Character's heal rate per rest
  * @param {number} data.previousSuffered - Suffered wounds before healing
@@ -151,9 +146,11 @@ export async function applyNaturalHealing(actor) {
  * @param {number} data.newCurrentWounds - Current wounds after healing (max - suffered)
  * @param {number} data.maxWounds - Maximum wounds (total HP)
  * @param {boolean} data.wasFullyHealed - Whether character reached full health
+ * @param {number} data.voidRestored - Void Points restored to maximum
+ * @param {boolean} data.spellSlotsRestored - Whether spell slots were restored
  * @returns {Promise<ChatMessage|null>} Created chat message, or null if failed
  */
-async function _postHealingMessage({
+async function _postRestMessage({
   actor,
   healingApplied,
   healRate,
@@ -161,7 +158,9 @@ async function _postHealingMessage({
   newSuffered,
   newCurrentWounds,
   maxWounds,
-  wasFullyHealed
+  wasFullyHealed,
+  voidRestored,
+  spellSlotsRestored
 }) {
   const speaker = ChatMessage.getSpeaker({ actor });
   const actorImg = actor.img || actor.prototypeToken?.texture?.src || "icons/svg/mystery-man.svg";
@@ -184,7 +183,9 @@ async function _postHealingMessage({
     actorName: actor.name,
     healingText,
     woundsText,
-    wasFullyHealed
+    wasFullyHealed,
+    voidRestored,
+    spellSlotsRestored
   };
 
   // Render chat card from template
@@ -196,7 +197,7 @@ async function _postHealingMessage({
       templateData
     );
   } catch (err) {
-    console.error(`${SYS_ID} | healing.js: Failed to render healing template`, { err });
+    console.error(`${SYS_ID} | rest.js: Failed to render rest template`, { err });
     return null;
   }
 
@@ -210,7 +211,7 @@ async function _postHealingMessage({
   try {
     return await ChatMessage.create(messageData);
   } catch (err) {
-    console.error(`${SYS_ID} | healing.js: Failed to create healing chat message`, { err });
+    console.error(`${SYS_ID} | rest.js: Failed to create rest chat message`, { err });
     return null;
   }
 }

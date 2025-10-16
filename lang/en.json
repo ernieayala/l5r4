@@ -239,6 +239,7 @@
         "chatMessageFailed": "Failed to post roll to chat - see console for details",
         "deleteEffect": "Failed to delete effect.",
         "schoolRankZero": "You can't cast a spell with School Rank reduced to zero",
+        "deficiencyBlocksCasting": "Deficiency in {ring} reduces your School Rank to zero - cannot cast",
         "noSpellSlots": "You ran out of spell slots for this ring"
       },
       "chat": {
@@ -439,7 +440,9 @@
         "deficiency": "Deficiency",
         "maho": "Maho",
         "useSpellSlot": "Use Spell Slot",
-        "voidSlot": "Use Void Spell Slot"
+        "voidSlot": "Use Void Spell Slot",
+        "slotsRestored": "All spell slots restored to maximum",
+        "restored": "restored"
       },
       "kiho": {
         "internal": "Internal",
