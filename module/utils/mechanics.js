@@ -41,7 +41,9 @@ import { toInt } from "./type-coercion.js";
  * @private
  */
 function safeString(value, fallback = "") {
-  if (value == null || typeof value === "symbol") return fallback;
+  if (value == null || typeof value === "symbol") {
+    return fallback;
+  }
   return String(value);
 }
 
@@ -95,7 +97,9 @@ const ENGLISH_TRAIT_LABELS = {
  * @returns {number} Current wound penalty (0 if healthy or no wound data)
  */
 export function readWoundPenalty(actor) {
-  if (actor.system?.wounds?.penalty != null) return toInt(actor.system.wounds.penalty, 0);
+  if (actor.system?.wounds?.penalty != null) {
+    return toInt(actor.system.wounds.penalty, 0);
+  }
 
   // Legacy wound system: Find worst penalty among current wound levels
   // Sentinel value -999 ensures highest penalty wins comparison
@@ -123,22 +127,34 @@ export function readWoundPenalty(actor) {
  * @returns {string} Normalized three-letter abbreviation, or "" if unrecognized
  */
 export function normalizeTraitKey(raw) {
-  if (raw == null) return "";
-  if (typeof raw === "symbol") return "";
-  let k = String(raw).trim();
+  if (raw == null) {
+    return "";
+  }
+  if (typeof raw === "symbol") {
+    return "";
+  }
+  const k = String(raw).trim();
 
   // Strategy 1: Parse i18n key format (e.g., "l5r4.ui.mechanics.traits.sta")
   const m = /^l5r4\.ui\.mechanics\.traits\.(\w+)$/i.exec(k);
-  if (m && KNOWN_TRAITS.includes(m[1].toLowerCase())) return m[1].toLowerCase();
+  if (m && KNOWN_TRAITS.includes(m[1].toLowerCase())) {
+    return m[1].toLowerCase();
+  }
 
   // Strategy 2: Handle void ring i18n key specially
-  if (/^l5r4\.ui\.mechanics\.rings\.void$/i.test(k)) return "void";
+  if (/^l5r4\.ui\.mechanics\.rings\.void$/i.test(k)) {
+    return "void";
+  }
 
   // Strategy 3: Direct abbreviation match (case-insensitive)
-  if (KNOWN_TRAITS.includes(k.toLowerCase())) return k.toLowerCase();
+  if (KNOWN_TRAITS.includes(k.toLowerCase())) {
+    return k.toLowerCase();
+  }
 
   // Strategy 4: Lookup English full name (e.g., "stamina" → "sta")
-  if (ENGLISH_TRAIT_LABELS[k.toLowerCase()]) return ENGLISH_TRAIT_LABELS[k.toLowerCase()];
+  if (ENGLISH_TRAIT_LABELS[k.toLowerCase()]) {
+    return ENGLISH_TRAIT_LABELS[k.toLowerCase()];
+  }
 
   // Strategy 5: Reverse i18n lookup - match localized trait names
   // Handles user input in non-English languages
@@ -147,9 +163,13 @@ export function normalizeTraitKey(raw) {
       const labelKey =
         key === "void" ? "l5r4.ui.mechanics.rings.void" : `l5r4.ui.mechanics.traits.${key}`;
       const label = game.i18n?.localize?.(labelKey) ?? "";
-      if (label && label.toLowerCase() === k.toLowerCase()) return key;
+      if (label && label.toLowerCase() === k.toLowerCase()) {
+        return key;
+      }
     }
-  } catch (_) {}
+  } catch (_) {
+    // Ignore localization errors
+  }
 
   return "";
 }
@@ -178,7 +198,9 @@ export function getEffectiveTrait(actor, traitKey) {
 
   // Prefer pre-calculated effective traits (includes wound penalties)
   const derived = actor.system?._derived?.traitsEff?.[traitKey];
-  if (derived != null) return toInt(derived, 0);
+  if (derived != null) {
+    return toInt(derived, 0);
+  }
 
   return toInt(actor.system?.traits?.[traitKey], 0);
 }
@@ -265,10 +287,14 @@ export function extractRollParams(el, actor) {
  * @returns {number} School rank modifier: +1 (affinity), -1 (deficiency), or 0 (no modifier/conflict)
  */
 export function getAffinityDeficiencyModifier(actor, ringKey) {
-  if (!actor || !ringKey) return 0;
+  if (!actor || !ringKey) {
+    return 0;
+  }
 
   const normalizedRing = String(ringKey).toLowerCase().trim();
-  if (!normalizedRing) return 0;
+  if (!normalizedRing) {
+    return 0;
+  }
 
   // Find all shugenja technique items
   let shugenjaItems = [];
@@ -291,7 +317,9 @@ export function getAffinityDeficiencyModifier(actor, ringKey) {
   // Collect all modifiers for this ring from all shugenja techniques
   const modifiers = new Set();
   for (const item of shugenjaItems) {
-    if (!item?.system) continue;
+    if (!item?.system) {
+      continue;
+    }
 
     // Check affinity (case-insensitive comparison)
     const affinity = String(item.system.affinity || "")
@@ -311,7 +339,9 @@ export function getAffinityDeficiencyModifier(actor, ringKey) {
   }
 
   // Handle conflicts: if both affinity and deficiency exist, return 0 (no auto-select)
-  if (modifiers.size > 1) return 0;
+  if (modifiers.size > 1) {
+    return 0;
+  }
 
   // Return single modifier if found, otherwise 0
   return modifiers.size === 1 ? modifiers.values().next().value : 0;
@@ -358,7 +388,9 @@ export function resolveWeaponSkillTrait(actor, weapon) {
   if (associatedSkill && associatedSkill.trim() && actor.items?.find) {
     const skillNameLower = associatedSkill.toLowerCase();
     skill = actor.items.find(i => {
-      if (i.type !== "skill") return false;
+      if (i.type !== "skill") {
+        return false;
+      }
       const itemName = safeString(i.name);
       return itemName.toLowerCase() === skillNameLower;
     });

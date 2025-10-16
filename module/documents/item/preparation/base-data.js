@@ -68,8 +68,12 @@ export function prepareItemBaseData(item) {
 
   // Initialize bow weapon properties per core Weapons rules (bow strength + arrow damage)
   if (type === "weapon" && sys.isBow) {
-    if (sys.str == null) sys.str = 0; // Bow strength rating (0-4, added to arrow damage roll)
-    if (sys.arrow == null) sys.arrow = "willow"; // Arrow type key (see ARROW_MODS in config/game-data.js)
+    if (sys.str == null) {
+      sys.str = 0;
+    } // Bow strength rating (0-4, added to arrow damage roll)
+    if (sys.arrow == null) {
+      sys.arrow = "willow";
+    } // Arrow type key (see ARROW_MODS in config/game-data.js)
   }
 
   // Normalize item icon: assign type-specific default if using Foundry's generic bag icon.
@@ -112,8 +116,11 @@ export function prepareItemBaseData(item) {
 function normalizeRichTextFields(sys, type) {
   const ensureString = (obj, keys) => {
     for (const k of keys) {
-      if (obj[k] == null) obj[k] = "";
-      else if (typeof obj[k] !== "string") obj[k] = String(obj[k]);
+      if (obj[k] == null) {
+        obj[k] = "";
+      } else if (typeof obj[k] !== "string") {
+        obj[k] = String(obj[k]);
+      }
     }
   };
 

@@ -110,7 +110,9 @@ export async function WeaponRoll({
   // or skip dialog (askForOptions=true) when setting is false
   if (askForOptions !== optionsSetting) {
     const check = await GetWeaponOptions(weaponName, toInt(attackRaises), actor);
-    if (check?.cancelled) return;
+    if (check?.cancelled) {
+      return;
+    }
     rollMod = toInt(check.rollMod);
     keepMod = toInt(check.keepMod);
     bonus = toInt(check.totalMod);
@@ -147,7 +149,9 @@ export async function WeaponRoll({
   const roll = new Roll(rollFormula);
 
   // Build chat label with optional annotations for description, raises, and stance bonuses
-  if (description) label += ` (${description})`;
+  if (description) {
+    label += ` (${description})`;
+  }
   if (raiseBonus > 0) {
     label += ` [${game.i18n.localize(
       "l5r4.ui.mechanics.rolls.raises"

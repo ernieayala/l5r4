@@ -54,10 +54,14 @@ function extractBonusesFromEffects(actor, flagName, fallback = null) {
   let rollBonus = 0;
   let keepBonus = 0;
 
-  if (!actor) return { roll: rollBonus, keep: keepBonus };
+  if (!actor) {
+    return { roll: rollBonus, keep: keepBonus };
+  }
 
   for (const effect of actor.effects) {
-    if (effect.disabled) continue;
+    if (effect.disabled) {
+      continue;
+    }
 
     const bonus = effect.getFlag?.(SYS_ID, flagName);
     if (bonus && typeof bonus === "object") {

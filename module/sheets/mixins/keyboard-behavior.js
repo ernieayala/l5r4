@@ -145,7 +145,9 @@ export function KeyboardBehaviorMixin(Base) {
      */
     _updateConditionalCursor(root, showPointer) {
       // Guard: element may not be available during initialization or cleanup
-      if (!root) return;
+      if (!root) {
+        return;
+      }
 
       const cursorValue = showPointer ? "pointer" : "default";
       root.style.setProperty("--conditional-cursor", cursorValue);

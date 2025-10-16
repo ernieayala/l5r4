@@ -117,17 +117,6 @@ export async function needsRetroactiveUpdate(actor) {
 
     const needsUpdate = isFirstRun || hasDataChanged || hasMissingData;
 
-    if (needsUpdate) {
-      // Log diagnostic info for debugging XP calculation issues
-      console.log(`${SYS_ID} | XP retroactive update needed`, {
-        actorId: actor.id,
-        actorName: actor.name,
-        reason: isFirstRun ? "first-run" : hasMissingData ? "missing-data" : "data-changed",
-        lastVersion: lastUpdateVersion,
-        currentVersion: currentVersion
-      });
-    }
-
     return needsUpdate;
   } catch (err) {
     console.warn(`${SYS_ID}`, "Failed to check retroactive XP update need", err);

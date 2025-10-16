@@ -79,7 +79,11 @@ export function registerHandlebarsHelpers() {
    */
   Handlebars.registerHelper("coalesce", (...args) => {
     const A = args.slice(0, -1); // Remove Handlebars options object
-    for (const v of A) if (v != null) return v;
+    for (const v of A) {
+      if (v != null) {
+        return v;
+      }
+    }
     return null;
   });
 
@@ -142,11 +146,11 @@ export function registerHandlebarsHelpers() {
       case "<=":
         return a <= b;
       case "==":
-        return a == b;
+        return a === b;
       case "===":
         return a === b;
       case "!=":
-        return a != b;
+        return a !== b;
       case "!==":
         return a !== b;
 

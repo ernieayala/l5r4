@@ -13,33 +13,53 @@
   },
   "homepage": "https://github.com/ernieayala/l5r4#readme",
   "scripts": {
+    "build": "npm run build:css",
     "build:css": "sass --no-source-map scss/l5r4-enhanced.scss dist/l5r4-enhanced.css",
-    "watch:css": "sass --no-source-map --watch scss/l5r4-enhanced.scss:dist/l5r4-enhanced.css",
-    "build": "npm run build:css && npm run lint:css:fix && npm run format && npm run pretest",
+    "watch": "sass --no-source-map --watch scss/l5r4-enhanced.scss:dist/l5r4-enhanced.css",
+    "lint": "npm run lint:js && npm run lint:css",
+    "lint:js": "eslint module/**/*.js",
+    "lint:css": "stylelint \"scss/**/*.scss\"",
+    "lint:fix": "npm run lint:js -- --fix && npm run lint:css -- --fix",
     "format": "prettier --write \"**/*.{js,css,scss,json,md}\"",
     "format:check": "prettier --check \"**/*.{js,css,scss,json,md}\"",
-    "lint:css": "stylelint \"scss/**/*.scss\"",
-    "lint:css:fix": "stylelint \"scss/**/*.scss\" --fix",
+    "check": "npm run lint && npm run format:check && npm run deps:circular",
+    "deps:circular": "madge --circular module/",
+    "deps:analyze": "madge --summary module/ && madge --json module/ > madge-analysis.json",
+    "release:prepare": "node scripts/prepare-release.js",
+    "release:validate": "node scripts/prepare-release.js --validate-only",
     "version:patch": "npm version patch --no-git-tag-version",
     "version:minor": "npm version minor --no-git-tag-version",
     "version:major": "npm version major --no-git-tag-version",
-    "prepare-release": "node scripts/prepare-release.js",
-    "validate": "node scripts/prepare-release.js --validate-only",
-    "madge:check": "madge --circular module/",
-    "madge:summary": "madge --summary module/",
-    "madge:json": "madge --json module/ > madge-analysis.json",
-    "pretest": "npm run madge:check"
+    "pretest": "npm run deps:circular",
+    "prepare": "husky"
   },
   "devDependencies": {
     "@vitest/coverage-v8": "1.0.0",
     "@vitest/ui": "1.0.0",
+    "eslint": "8.56.0",
+    "eslint-config-prettier": "9.1.0",
     "happy-dom": "12.10.3",
+    "husky": "9.0.11",
+    "lint-staged": "15.2.0",
     "madge": "8.0.0",
     "prettier": "3.1.0",
     "sass": "1.69.5",
-    "stylelint": "^16.25.0",
-    "stylelint-config-standard-scss": "^16.0.0",
-    "stylelint-order": "^6.0.4",
+    "stylelint": "16.25.0",
+    "stylelint-config-standard-scss": "16.0.0",
+    "stylelint-order": "6.0.4",
     "vitest": "1.0.0"
+  },
+  "lint-staged": {
+    "*.js": [
+      "eslint --fix",
+      "prettier --write"
+    ],
+    "*.{scss,css}": [
+      "stylelint --fix",
+      "prettier --write"
+    ],
+    "*.{json,md}": [
+      "prettier --write"
+    ]
   }
 }

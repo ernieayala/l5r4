@@ -261,7 +261,9 @@ async function trackEmphasisAdditions(item, changes) {
   const oldEmphasis = item.system?.emphasis ?? "";
   const newEmphasis = changes?.system?.emphasis ?? oldEmphasis;
 
-  if (oldEmphasis === newEmphasis) return;
+  if (oldEmphasis === newEmphasis) {
+    return;
+  }
 
   const oldEmphases = parseEmphases(oldEmphasis);
   const newEmphases = parseEmphases(newEmphasis);

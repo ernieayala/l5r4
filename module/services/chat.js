@@ -91,12 +91,16 @@ export async function getUnifiedItemOptions(actorType, preferredType = null) {
           // Fallback pattern: button.form exists in most cases, dialog.form as backup
           // This handles edge cases where button might not have direct form reference
           const form = button.form ?? dialog.form;
-          if (!form) return { cancelled: true };
+          if (!form) {
+            return { cancelled: true };
+          }
 
           const name = String(form.elements.itemName?.value ?? "").trim();
           const type = String(form.elements.itemType?.value ?? "").trim() || "commonItem";
 
-          if (!name) return { cancelled: true };
+          if (!name) {
+            return { cancelled: true };
+          }
 
           return { name, type };
         }
@@ -174,7 +178,9 @@ function registerDamageButtonHook() {
         button.addEventListener("click", async event => {
           event.preventDefault();
 
-          if (isProcessing) return;
+          if (isProcessing) {
+            return;
+          }
           isProcessing = true;
 
           try {
@@ -297,7 +303,9 @@ function registerInlineRollParsingHook() {
     // Foundry native roll commands: /roll, /r, /gmroll, /gmr, /broll, /br, /sroll, /sr
     // Pass through to Foundry's standard roll handler (don't intercept)
     const rollCmd = /^\/(r(oll)?|gmr(oll)?|br(oll)?|sr(oll)?)\s/i;
-    if (rollCmd.test(message)) return true;
+    if (rollCmd.test(message)) {
+      return true;
+    }
 
     // L5R4 Roll & Keep notation pattern: (u|e)?XkY(xZ)?(+N)?
     // Matches: 7k3, u3k3, e7k3+5, 7k3x2+5, etc.
@@ -331,7 +339,9 @@ function registerInlineRollParsingHook() {
       let hasL5R4Rolls = false;
       // Replace each [[...]] with parsed roll formula, but only if it matches L5R4 notation
       const result = message.replace(inline, (match, token) => {
-        if (!kxy.test(token)) return match; // Not L5R4 notation, leave unchanged
+        if (!kxy.test(token)) {
+          return match;
+        } // Not L5R4 notation, leave unchanged
         hasL5R4Rolls = true;
         return roll_parser(token); // Parse and convert to Foundry roll formula
       });

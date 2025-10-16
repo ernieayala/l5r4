@@ -1,0 +1,71 @@
+{
+  "env": {
+    "browser": true,
+    "es2022": true
+  },
+  "extends": ["eslint:recommended", "prettier"],
+  "parserOptions": {
+    "ecmaVersion": "latest",
+    "sourceType": "module"
+  },
+  "globals": {
+    "game": "readonly",
+    "CONFIG": "readonly",
+    "CONST": "readonly",
+    "foundry": "readonly",
+    "Hooks": "readonly",
+    "Actors": "readonly",
+    "Items": "readonly",
+    "Roll": "readonly",
+    "ChatMessage": "readonly",
+    "Actor": "readonly",
+    "Item": "readonly",
+    "Token": "readonly",
+    "Combat": "readonly",
+    "Combatant": "readonly",
+    "Dialog": "readonly",
+    "FormApplication": "readonly",
+    "Application": "readonly",
+    "renderTemplate": "readonly",
+    "getTemplate": "readonly",
+    "loadTemplates": "readonly",
+    "mergeObject": "readonly",
+    "duplicate": "readonly",
+    "randomID": "readonly",
+    "isObjectEmpty": "readonly",
+    "hasProperty": "readonly",
+    "getProperty": "readonly",
+    "setProperty": "readonly",
+    "ui": "readonly",
+    "canvas": "readonly",
+    "Handlebars": "readonly",
+    "TextEditor": "readonly",
+    "fromUuidSync": "readonly",
+    "fromUuid": "readonly",
+    "FilePicker": "readonly"
+  },
+  "rules": {
+    "no-unused-vars": [
+      "warn",
+      {
+        "argsIgnorePattern": "^_",
+        "varsIgnorePattern": "^_"
+      }
+    ],
+    "no-console": [
+      "warn",
+      {
+        "allow": ["warn", "error"]
+      }
+    ],
+    "prefer-const": "warn",
+    "no-var": "error",
+    "eqeqeq": ["warn", "always", { "null": "ignore" }],
+    "curly": ["warn", "all"],
+    "brace-style": ["warn", "1tbs", { "allowSingleLine": true }],
+    "no-empty": ["error", { "allowEmptyCatch": true }],
+    "no-throw-literal": "error",
+    "no-unreachable": "error",
+    "no-duplicate-imports": "warn"
+  }
+}

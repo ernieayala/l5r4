@@ -59,7 +59,9 @@ export async function setupItemContextMenu(root, actor, existingMenu = null) {
     if (existingMenu?.element) {
       try {
         await existingMenu.close({ animate: false });
-      } catch (_) {}
+      } catch (_) {
+        // Ignore errors if menu already destroyed
+      }
     }
 
     const Menu = foundry.applications.ux.ContextMenu;
@@ -80,7 +82,9 @@ export async function setupItemContextMenu(root, actor, existingMenu = null) {
           icon: '<i class="fas fa-trash"></i>',
           callback: async target => {
             const id = getItemId(target);
-            if (!id) return;
+            if (!id) {
+              return;
+            }
             try {
               await actor.deleteEmbeddedDocuments("Item", [id]);
             } catch (err) {

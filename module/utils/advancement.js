@@ -64,12 +64,15 @@ export function rankPointsToValue(rp) {
 export function valueToRankPoints(value, minRank = 0, maxRank = 10) {
   const min = Number(minRank) || 0;
   const max = Number(maxRank) || 10;
-  let v = clamp(Number(value) || 0, min, max);
-  if (v === max) return { rank: max, points: 0, value: max };
+  const v = clamp(Number(value) || 0, min, max);
+  if (v === max) {
+    return { rank: max, points: 0, value: max };
+  }
   const rank = Math.floor(v);
-  let points = Math.round((v - rank) * 10);
-  if (points >= 10)
+  const points = Math.round((v - rank) * 10);
+  if (points >= 10) {
     return { rank: Math.min(rank + 1, max), points: 0, value: Math.min(rank + 1, max) };
+  }
   return { rank, points, value: rank + points / 10 };
 }
 

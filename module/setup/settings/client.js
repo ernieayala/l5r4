@@ -23,7 +23,6 @@ import { SYS_ID } from "../../config/constants.js";
  * - showSkillRollOptions: Display skill/damage roll dialog by default (holding Shift inverts this setting)
  * - showSpellRollOptions: Display spell ring roll dialog by default (holding Shift inverts this setting)
  * - showWeaponRollOptions: Display weapon roll dialog by default (holding Shift inverts this setting)
- * - debugWoundConfig: Enable console logging for Wound Configuration troubleshooting
  *
  * All settings use the Foundry client scope, storing values in browser localStorage per user.
  * Setting names and hints use i18n keys formatted as SETTINGS.{key}.name and SETTINGS.{key}.label.
@@ -38,8 +37,7 @@ export function registerClientSettings() {
     { key: "showTraitRollOptions", default: true }, // Display trait roll dialog by default
     { key: "showSkillRollOptions", default: true }, // Display skill/damage roll dialog by default
     { key: "showSpellRollOptions", default: true }, // Display spell ring roll dialog by default
-    { key: "showWeaponRollOptions", default: true }, // Display weapon roll dialog by default
-    { key: "debugWoundConfig", default: false } // Enable wound config debug logging
+    { key: "showWeaponRollOptions", default: true } // Display weapon roll dialog by default
   ];
 
   settings.forEach(({ key, default: defaultValue }) => {

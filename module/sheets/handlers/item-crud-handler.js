@@ -85,7 +85,9 @@ export class ItemCRUDHandler {
 
     const result = await Chat.getUnifiedItemOptions(context.actor.type, preferredType);
 
-    if (result.cancelled) return [];
+    if (result.cancelled) {
+      return [];
+    }
 
     const itemData = {
       name: result.name,
@@ -119,7 +121,9 @@ export class ItemCRUDHandler {
     const section = element?.closest?.("[data-scope]");
     const scope = section?.dataset?.scope;
 
-    if (!scope) return null;
+    if (!scope) {
+      return null;
+    }
 
     const sectionToItemType = {
       skills: "skill",
@@ -190,8 +194,11 @@ export class ItemCRUDHandler {
   static expand(context, event, element) {
     event?.preventDefault?.();
     const row = this._getItemRow(element);
-    if (!row) return;
+    if (!row) {
+      return;
+    }
     row.classList.toggle("is-expanded");
+    // querySelector used here to find icon element within the clicked button (scoped query)
     const icon = element.querySelector("i");
     if (icon) {
       icon.classList.toggle("fa-chevron-down");
@@ -226,7 +233,9 @@ export class ItemCRUDHandler {
     const row = this._getItemRow(el);
     const id = this._getItemId(row);
     const field = el.dataset.field;
-    if (!id || !field) return;
+    if (!id || !field) {
+      return;
+    }
 
     let value = el.value;
     switch (el.dataset.dtype) {
@@ -262,13 +271,19 @@ export class ItemCRUDHandler {
   static async toChat(context, event, element) {
     event.preventDefault();
 
-    if (!event.shiftKey) return;
+    if (!event.shiftKey) {
+      return;
+    }
 
     const row = this._getItemRow(element);
     const id = this._getItemId(row);
-    if (!id) return;
+    if (!id) {
+      return;
+    }
     const item = context.actor?.items?.get(id);
-    if (!item) return;
+    if (!item) {
+      return;
+    }
     try {
       await item.roll();
     } catch (err) {

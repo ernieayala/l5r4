@@ -77,7 +77,9 @@ export function initializeInitiativeSystem() {
     Combatant.prototype.getInitiativeRoll = function (formula) {
       try {
         const a = this.actor;
-        if (!a) return new Roll(CONFIG.Combat.initiative.formula);
+        if (!a) {
+          return new Roll(CONFIG.Combat.initiative.formula);
+        }
 
         // Defensive type coercion - ensures numeric values from actor data
         // Returns 0 for undefined, null, NaN, or non-numeric values
@@ -91,8 +93,12 @@ export function initializeInitiativeSystem() {
         if (a.type === "npc") {
           const effR = toInt(a.system?.initiative?.effRoll);
           const effK = toInt(a.system?.initiative?.effKeep);
-          if (effR > 0) roll = effR;
-          if (effK > 0) keep = effK;
+          if (effR > 0) {
+            roll = effR;
+          }
+          if (effK > 0) {
+            keep = effK;
+          }
         }
 
         let bonus = toInt(a.system?.initiative?.totalMod);
@@ -142,8 +148,6 @@ export function initializeInitiativeSystem() {
         return __origGetInit.call(this, formula);
       }
     };
-
-    console.log(`${SYS_ID} | Initiative system initialized`);
   } catch (e) {
     // Critical failure - system cannot override initiative
     // Log warning but allow Foundry to continue with default initiative system

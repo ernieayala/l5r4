@@ -166,8 +166,12 @@ export function resolveTargets(actor, rollType) {
  * @private
  */
 function extractNumericValue(value) {
-  if (value?.current !== undefined) return value.current;
-  if (typeof value === "number") return value;
+  if (value?.current !== undefined) {
+    return value.current;
+  }
+  if (typeof value === "number") {
+    return value;
+  }
   return null;
 }
 
@@ -205,7 +209,9 @@ function extractNumericValue(value) {
  * @private
  */
 function resolveArmorTN(targetActor) {
-  if (!targetActor) return 0;
+  if (!targetActor) {
+    return 0;
+  }
 
   const armorTN =
     extractNumericValue(targetActor?.system?.armorTn) ||

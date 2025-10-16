@@ -102,7 +102,6 @@ export function prepareTraitsAndRings(sys) {
   // ref=Reflexes, awa=Awareness, agi=Agility, int=Intelligence (8 traits total)
   const TRAIT_KEYS = ["sta", "wil", "str", "per", "ref", "awa", "agi", "int"];
 
-  // Initialize derived data container and effective traits object
   sys._derived = sys._derived || {};
   sys._derived.traitsEff = {};
 

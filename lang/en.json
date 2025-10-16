@@ -527,10 +527,6 @@
         "manual": "Manual (Direct Entry)",
         "formula": "Formula (Earth-based)"
       }
-    },
-    "debugWoundConfig": {
-      "name": "Debug Wound Configuration",
-      "label": "Enable detailed console logging for Wound Configuration Application interactions, event handling, and actor updates. Useful for troubleshooting form response issues."
     }
   },
   "conditions": {

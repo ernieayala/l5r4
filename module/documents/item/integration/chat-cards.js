@@ -46,7 +46,9 @@ import { R } from "../../../utils/localization.js";
  */
 export async function renderItemChatCard(item) {
   const templatePath = CHAT_CARD_TEMPLATES[item.type];
-  if (!templatePath) return;
+  if (!templatePath) {
+    return;
+  }
 
   const html = await R(templatePath, item);
 

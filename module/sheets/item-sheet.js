@@ -231,7 +231,9 @@ export default class L5R4ItemSheet extends HandlebarsApplicationMixin(ItemSheetV
     options.uniqueId = `item-${uid}`;
 
     options.position ??= {};
-    if (!options.position.width) options.position.width = widthFor(doc?.type ?? "item");
+    if (!options.position.width) {
+      options.position.width = widthFor(doc?.type ?? "item");
+    }
 
     return options;
   }
@@ -273,11 +275,16 @@ export default class L5R4ItemSheet extends HandlebarsApplicationMixin(ItemSheetV
     const system = foundry.utils.deepClone(item.system ?? {});
 
     const ensureStr = k => {
-      if (system[k] == null) system[k] = "";
-      else if (typeof system[k] !== "string") system[k] = String(system[k]);
+      if (system[k] == null) {
+        system[k] = "";
+      } else if (typeof system[k] !== "string") {
+        system[k] = String(system[k]);
+      }
     };
 
-    for (const k of ["description", "specialRules", "demands", "effect"]) ensureStr(k);
+    for (const k of ["description", "specialRules", "demands", "effect"]) {
+      ensureStr(k);
+    }
 
     const enrich = html =>
       TextEditor.enrichHTML(html ?? "", {
@@ -345,7 +352,9 @@ export default class L5R4ItemSheet extends HandlebarsApplicationMixin(ItemSheetV
   async _onRender(context, options) {
     await super._onRender?.(context, options);
     const root = this.element;
-    if (!root) return;
+    if (!root) {
+      return;
+    }
 
     ItemEffectsHandler.bind({ item: this.item, element: root });
   }

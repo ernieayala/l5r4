@@ -179,7 +179,9 @@ export class StanceHandler {
 
       // Identify stance effects using dual-path status ID detection for v13 compatibility
       for (const effect of actor.effects) {
-        if (effect.disabled) continue;
+        if (effect.disabled) {
+          continue;
+        }
 
         let isStance = false;
 

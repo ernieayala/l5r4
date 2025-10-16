@@ -49,7 +49,9 @@ export const applyStanceAutomation = applyStanceEffects;
  * @async
  */
 export async function clearStanceFlags(actor, removedStanceId) {
-  if (!actor?.isOwner) return;
+  if (!actor?.isOwner) {
+    return;
+  }
 
   try {
     switch (removedStanceId) {

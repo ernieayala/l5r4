@@ -70,9 +70,11 @@ import { SCHEMA_MAP } from "./schema-map.js";
  */
 async function migrateBowsToWeapons(docs, label) {
   const bowItems = docs.filter(doc => doc.type === "bow");
-  if (bowItems.length === 0) return;
+  if (bowItems.length === 0) {
+    return;
+  }
 
-  console.log(`${SYS_ID} | Migrating ${bowItems.length} bow items to weapons (${label})`);
+  console.warn(`${SYS_ID} | Migrating ${bowItems.length} bow items to weapons (${label})`);
 
   for (const item of bowItems) {
     try {
@@ -145,7 +147,9 @@ function setByPath(obj, path, value) {
   const last = parts.pop();
   let cur = obj;
   for (const k of parts) {
-    if (cur[k] === undefined || cur[k] === null || typeof cur[k] !== "object") cur[k] = {};
+    if (cur[k] === undefined || cur[k] === null || typeof cur[k] !== "object") {
+      cur[k] = {};
+    }
     cur = cur[k];
   }
   cur[last] = value;
@@ -167,7 +171,9 @@ function deleteByPath(obj, path) {
   const last = parts.pop();
   let cur = obj;
   for (const k of parts) {
-    if (cur?.[k] === undefined) return;
+    if (cur?.[k] === undefined) {
+      return;
+    }
     cur = cur[k];
   }
   if (cur && Object.prototype.hasOwnProperty.call(cur, last)) {
@@ -193,7 +199,7 @@ function deleteByPath(obj, path) {
 function normalizeWoundLevelData(woundData) {
   let changed = false;
 
-  for (const [key, level] of Object.entries(woundData)) {
+  for (const [_key, level] of Object.entries(woundData)) {
     if (typeof level.penalty === "string") {
       level.penalty = Math.abs(parseInt(level.penalty) || 0);
       changed = true;
@@ -223,7 +229,9 @@ function normalizeWoundLevelData(woundData) {
  * @returns {Promise<void>}
  */
 async function migrateActorEmbeddedItems(actor, labelPrefix) {
-  if (actor.items.size === 0) return;
+  if (actor.items.size === 0) {
+    return;
+  }
 
   await applySchemaMapToDocs(actor.items.contents, `${labelPrefix}-items:${actor.id}`);
   await migrateBowsToWeapons(actor.items.contents, `${labelPrefix}-bow-migration:${actor.id}`);
@@ -252,7 +260,9 @@ function buildSchemaUpdate(doc) {
   const rules = SCHEMA_MAP.filter(
     r => r.docType === docType && (r.type === type || r.type === "*")
   );
-  if (!rules.length) return null;
+  if (!rules.length) {
+    return null;
+  }
 
   const patch = { system: foundry.utils.deepClone(doc.system ?? {}) };
   let touched = false;
@@ -262,14 +272,18 @@ function buildSchemaUpdate(doc) {
     const toVal = getByPath(patch, rule.to);
 
     const hasValidTarget = toVal !== undefined && toVal !== "";
-    if (fromVal === undefined || hasValidTarget) continue;
+    if (fromVal === undefined || hasValidTarget) {
+      continue;
+    }
 
     setByPath(patch, rule.to, fromVal);
     deleteByPath(patch, rule.from);
     touched = true;
   }
 
-  if (!touched) return null;
+  if (!touched) {
+    return null;
+  }
 
   return { system: patch.system };
 }
@@ -317,9 +331,13 @@ async function applySchemaMapToDocs(docs, label) {
 async function normalizeItems(docs, label) {
   for (const doc of docs) {
     try {
-      if (doc.documentName !== "Item") continue;
+      if (doc.documentName !== "Item") {
+        continue;
+      }
       const t = doc.type;
-      if (t !== "weapon" && t !== "bow") continue;
+      if (t !== "weapon" && t !== "bow") {
+        continue;
+      }
       const sz = doc.system?.size;
       if (typeof sz === "string" && sz !== sz.toLowerCase()) {
         await doc.update({ "system.size": sz.toLowerCase() }, { diff: true, render: false });
@@ -348,9 +366,11 @@ async function normalizeItems(docs, label) {
  */
 async function migrateSkillDefaults(docs, label) {
   const skillItems = docs.filter(doc => doc.type === "skill");
-  if (skillItems.length === 0) return;
+  if (skillItems.length === 0) {
+    return;
+  }
 
-  console.log(
+  console.warn(
     `${SYS_ID} | Migrating ${skillItems.length} skill items to ensure proper defaults (${label})`
   );
 
@@ -387,7 +407,7 @@ async function migrateSkillDefaults(docs, label) {
   }
 
   if (migratedCount > 0) {
-    console.log(
+    console.warn(
       `${SYS_ID} | Successfully migrated ${migratedCount} skill items with default values (${label})`
     );
   }
@@ -412,9 +432,11 @@ async function migrateSkillDefaults(docs, label) {
  */
 async function migrateArmorTypes(docs, label) {
   const armorItems = docs.filter(doc => doc.type === "armor");
-  if (armorItems.length === 0) return;
+  if (armorItems.length === 0) {
+    return;
+  }
 
-  console.log(
+  console.warn(
     `${SYS_ID} | Migrating ${armorItems.length} armor items to add armorType field (${label})`
   );
 
@@ -437,7 +459,7 @@ async function migrateArmorTypes(docs, label) {
   }
 
   if (migratedCount > 0) {
-    console.log(
+    console.warn(
       `${SYS_ID} | Successfully migrated ${migratedCount} armor items with armorType field (${label})`
     );
   }
@@ -475,9 +497,11 @@ async function migrateArmorTypes(docs, label) {
  */
 async function migrateLegacyNpcWounds(docs, label) {
   const npcActors = docs.filter(doc => doc.type === "npc");
-  if (npcActors.length === 0) return;
+  if (npcActors.length === 0) {
+    return;
+  }
 
-  console.log(`${SYS_ID} | Migrating ${npcActors.length} legacy NPC wound systems (${label})`);
+  console.warn(`${SYS_ID} | Migrating ${npcActors.length} legacy NPC wound systems (${label})`);
 
   let migratedCount = 0;
 
@@ -579,7 +603,7 @@ async function migrateLegacyNpcWounds(docs, label) {
   }
 
   if (migratedCount > 0) {
-    console.log(
+    console.warn(
       `${SYS_ID} | Successfully migrated ${migratedCount} legacy NPC wound systems (${label})`
     );
   }
@@ -600,7 +624,9 @@ async function migrateLegacyNpcWounds(docs, label) {
 async function cleanupLegacyFields(docs, label) {
   for (const doc of docs) {
     try {
-      if (doc.documentName !== "Actor") continue;
+      if (doc.documentName !== "Actor") {
+        continue;
+      }
 
       const updates = {};
       let needsUpdate = false;
@@ -703,7 +729,9 @@ const dirCache = new Map();
  * @returns {Promise<Set<string>>} Set of filenames in the directory
  */
 async function listDir(dirPath) {
-  if (dirCache.has(dirPath)) return dirCache.get(dirPath);
+  if (dirCache.has(dirPath)) {
+    return dirCache.get(dirPath);
+  }
   try {
     const FP = foundry.applications?.apps?.FilePicker?.implementation ?? FilePicker;
     const res = await FP.browse("data", dirPath);
@@ -734,11 +762,15 @@ async function listDir(dirPath) {
  * @returns {Promise<string|null>} New icon path if migration needed and file exists, null otherwise
  */
 async function computeNewIconPath(img) {
-  if (typeof img !== "string" || !img.startsWith(PATHS.icons + "/")) return null;
+  if (typeof img !== "string" || !img.startsWith(PATHS.icons + "/")) {
+    return null;
+  }
   const prefix = PATHS.icons + "/";
   const file = img.slice(prefix.length);
   const rel = ICON_MIGRATION_MAP[file];
-  if (!rel) return null;
+  if (!rel) {
+    return null;
+  }
   const targetPath = prefix + rel;
   const lastSlash = targetPath.lastIndexOf("/");
   const dir = targetPath.slice(0, lastSlash);
@@ -784,9 +816,13 @@ async function getUpdatedIconPath(doc, docType) {
  * @export
  */
 export async function runIconPathMigration() {
-  if (!game.user?.isGM) return;
+  if (!game.user?.isGM) {
+    return;
+  }
   const shouldRun = game.settings.get(SYS_ID, "runMigration");
-  if (!shouldRun) return;
+  if (!shouldRun) {
+    return;
+  }
 
   let changed = 0;
 
@@ -854,10 +890,14 @@ async function migrateCompendiumIconPaths() {
   const packs = game.packs?.contents ?? [];
   for (const pack of packs) {
     const docName = pack.documentName ?? pack.metadata?.type ?? pack.metadata?.documentName;
-    if (docName !== "Actor" && docName !== "Item") continue;
+    if (docName !== "Actor" && docName !== "Item") {
+      continue;
+    }
 
     const isLocked = pack.metadata?.locked ?? pack.locked ?? false;
-    if (isLocked) continue;
+    if (isLocked) {
+      continue;
+    }
 
     let docs = [];
     try {
@@ -942,7 +982,9 @@ async function migrateCompendiumIconPaths() {
  * @export
  */
 export async function runMigrations(fromVersion, toVersion) {
-  if (!game.user?.isGM) return;
+  if (!game.user?.isGM) {
+    return;
+  }
 
   await applySchemaMapToDocs(game.actors.contents, "world-actors");
   await applySchemaMapToDocs(game.items.contents, "world-items");
@@ -965,11 +1007,13 @@ export async function runMigrations(fromVersion, toVersion) {
 
   for (const pack of game.packs) {
     const docType = pack.metadata?.type ?? pack.documentName;
-    if (docType !== "Actor" && docType !== "Item") continue;
+    if (docType !== "Actor" && docType !== "Item") {
+      continue;
+    }
 
     const isLocked = pack.metadata?.locked ?? pack.locked ?? false;
     if (isLocked) {
-      console.log(`${SYS_ID}`, "Skipping locked compendium", { collection: pack.collection });
+      console.warn(`${SYS_ID}`, "Skipping locked compendium", { collection: pack.collection });
       continue;
     }
 

@@ -70,10 +70,14 @@ const CONDITION_IDS = new Set([
 function getActiveConditions(actor) {
   const conditions = new Set();
 
-  if (!actor?.effects) return conditions;
+  if (!actor?.effects) {
+    return conditions;
+  }
 
   for (const effect of actor.effects) {
-    if (effect.disabled) continue;
+    if (effect.disabled) {
+      continue;
+    }
 
     const statuses = effect.statuses || new Set();
     for (const statusId of statuses) {
@@ -121,11 +125,12 @@ function getActiveConditions(actor) {
  * @see applyStunnedCondition for Stunned condition effects
  */
 export function applyConditionEffects(actor, sys) {
-  if (!actor || !sys) return;
+  if (!actor || !sys) {
+    return;
+  }
 
   const activeConditions = getActiveConditions(actor);
 
-  // Initialize condition effects tracking
   sys._conditionEffects = {
     active: Array.from(activeConditions),
     rollPenalties: {
@@ -374,7 +379,9 @@ function applyFearedCondition(actor, sys) {
   let maxFearRank = 0;
 
   for (const effect of actor.effects) {
-    if (effect.disabled) continue;
+    if (effect.disabled) {
+      continue;
+    }
 
     const statuses = effect.statuses || new Set();
     if (statuses.has("feared")) {

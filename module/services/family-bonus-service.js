@@ -66,7 +66,9 @@ export class FamilyBonusService {
    */
   static getBonus(actor, traitKey) {
     try {
-      if (!actor || !traitKey) return 0;
+      if (!actor || !traitKey) {
+        return 0;
+      }
 
       if (!this.VALID_TRAIT_KEYS.includes(traitKey)) {
         console.warn(`${SYS_ID} FamilyBonusService: Invalid trait key`, {
@@ -78,14 +80,18 @@ export class FamilyBonusService {
       }
 
       const familyItem = this.getFamilyItem(actor);
-      if (!familyItem) return 0;
+      if (!familyItem) {
+        return 0;
+      }
 
       const effectKey = `system.traits.${traitKey}`;
       let total = 0;
 
       for (const effect of familyItem.effects ?? []) {
         // Only process effects that transfer to the actor (not temporary/suppressed effects)
-        if (effect?.transfer !== true) continue;
+        if (effect?.transfer !== true) {
+          continue;
+        }
 
         for (const change of effect.changes ?? []) {
           if (change?.key === effectKey && change?.mode === CONST.ACTIVE_EFFECT_MODES.ADD) {
@@ -133,10 +139,14 @@ export class FamilyBonusService {
 
       for (const effect of familyItem.effects ?? []) {
         // Only process effects that transfer to the actor (not temporary/suppressed effects)
-        if (effect?.transfer !== true) continue;
+        if (effect?.transfer !== true) {
+          continue;
+        }
 
         for (const change of effect.changes ?? []) {
-          if (change?.mode !== CONST.ACTIVE_EFFECT_MODES.ADD) continue;
+          if (change?.mode !== CONST.ACTIVE_EFFECT_MODES.ADD) {
+            continue;
+          }
 
           // Extract trait key from effect property path (e.g., "system.traits.str" -> "str")
           const match = change?.key?.match(/^system\.traits\.(\w+)$/);
@@ -175,17 +185,21 @@ export class FamilyBonusService {
    */
   static getFamilyItem(actor) {
     try {
-      if (!actor) return null;
+      if (!actor) {
+        return null;
+      }
 
       const uuid = actor.getFlag?.(SYS_ID, "familyItemUuid");
-      if (!uuid) return null;
+      if (!uuid) {
+        return null;
+      }
 
       if (typeof globalThis.fromUuidSync !== "function") {
         console.warn(`${SYS_ID} FamilyBonusService: fromUuidSync not available`);
         return null;
       }
 
-      const item = fromUuidSync(uuid);
+      const item = globalThis.fromUuidSync(uuid);
 
       if (!item || item.type !== "family") {
         return null;

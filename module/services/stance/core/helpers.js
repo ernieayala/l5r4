@@ -75,7 +75,9 @@ export function getActiveStances(actor) {
   const activeStances = [];
 
   for (const effect of actor.effects) {
-    if (effect.disabled) continue;
+    if (effect.disabled) {
+      continue;
+    }
 
     const statusIds = getEffectStatusIds(effect);
     for (const statusId of statusIds) {
@@ -141,9 +143,13 @@ export function getDefenseSkillRank(actor) {
 export function getEffectStatusIds(eff) {
   const ids = [];
   // v13+ uses .statuses Set for multiple simultaneous status effects
-  if (eff?.statuses?.size) ids.push(...eff.statuses);
+  if (eff?.statuses?.size) {
+    ids.push(...eff.statuses);
+  }
   // Legacy support for pre-v13 effects using core.statusId flag
   const legacy = eff?.getFlag?.("core", "statusId");
-  if (legacy) ids.push(legacy);
+  if (legacy) {
+    ids.push(legacy);
+  }
   return ids.filter(Boolean);
 }

@@ -510,10 +510,6 @@
         "manual": "Manuell (Direkte Eingabe)",
         "formula": "Formel (Erde-basiert)"
       }
-    },
-    "debugWoundConfig": {
-      "name": "Wundenkonfiguration debuggen",
-      "label": "Aktiviert detaillierte Konsolenprotokollierung für Wundenkonfigurations-Anwendungsinteraktionen, Ereignisbehandlung und Akteur-Updates. Nützlich zur Fehlerbehebung bei Formularantwortproblemen."
     }
   },
   "EFFECT": {

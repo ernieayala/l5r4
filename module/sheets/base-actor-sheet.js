@@ -41,10 +41,15 @@
  * @mixes KeyboardBehaviorMixin
  */
 
-import { on } from "../utils/dom.js";
+// Config
 import { SYS_ID } from "../config/constants.js";
-import { clamp } from "../utils/type-coercion.js";
 import { iconPath } from "../config/icons.js";
+
+// Utils
+import { on } from "../utils/dom.js";
+import { clamp } from "../utils/type-coercion.js";
+
+// Local
 import { KeyboardBehaviorMixin } from "./mixins/keyboard-behavior.js";
 import { VoidPointsHandler } from "./handlers/void-points-handler.js";
 import { DragDropHandler } from "./handlers/drag-drop-handler.js";
@@ -116,9 +121,13 @@ export class BaseActorSheet extends KeyboardBehaviorMixin(
     await super._onRender(context, options);
     const root = this.element;
 
-    if (this._boundRoot === root) return;
+    if (this._boundRoot === root) {
+      return;
+    }
     this._boundRoot = root;
-    if (!this.actor?.isOwner) return;
+    if (!this.actor?.isOwner) {
+      return;
+    }
 
     on(root, "[data-action]", "click", (ev, el) => {
       const action = el.getAttribute("data-action");
@@ -190,7 +199,9 @@ export class BaseActorSheet extends KeyboardBehaviorMixin(
     const controls = super._getHeaderControls();
     const seen = new Set();
     return controls.filter(control => {
-      if (seen.has(control.action)) return false;
+      if (seen.has(control.action)) {
+        return false;
+      }
       seen.add(control.action);
       return true;
     });
@@ -211,7 +222,9 @@ export class BaseActorSheet extends KeyboardBehaviorMixin(
    * @param {HTMLElement} _el - The element that was clicked
    * @protected
    */
-  _onAction(_action, _ev, _el) {}
+  _onAction(_action, _ev, _el) {
+    // Extension point for subclasses
+  }
 
   /**
    * Extension point for handling right-click (contextmenu) events on [data-action] elements.
@@ -224,7 +237,9 @@ export class BaseActorSheet extends KeyboardBehaviorMixin(
    * @param {HTMLElement} _el - The element that was right-clicked
    * @protected
    */
-  _onActionContext(_action, _ev, _el) {}
+  _onActionContext(_action, _ev, _el) {
+    // Extension point for subclasses
+  }
 
   /**
    * Extension point for handling change events on [data-action] form elements.
@@ -237,7 +252,9 @@ export class BaseActorSheet extends KeyboardBehaviorMixin(
    * @param {HTMLElement} _el - The form element that changed
    * @protected
    */
-  _onActionChange(_action, _ev, _el) {}
+  _onActionChange(_action, _ev, _el) {
+    // Extension point for subclasses
+  }
 
   /**
    * Closes the sheet and performs cleanup.
@@ -616,7 +633,9 @@ export class BaseActorSheet extends KeyboardBehaviorMixin(
     event?.preventDefault?.();
 
     const key = String(element?.dataset?.trait || "").toLowerCase();
-    if (!key) return;
+    if (!key) {
+      return;
+    }
 
     // If shift key NOT pressed, perform trait roll instead of adjustment
     if (!event?.shiftKey) {
@@ -626,7 +645,9 @@ export class BaseActorSheet extends KeyboardBehaviorMixin(
     const cur = Number(this.actor.system?.traits?.[key] ?? 0) || 0;
     // Clamp to 0-10 per L5R4 rules (traits ranked 1-10, but 0 allowed for flexibility)
     const next = clamp(cur + (delta > 0 ? 1 : -1), 0, 10);
-    if (next === cur) return;
+    if (next === cur) {
+      return;
+    }
 
     try {
       await this.actor.update({ [`system.traits.${key}`]: next }, { diff: true });

@@ -110,11 +110,14 @@ async function executeFearTest({ character, tn, modifier = 0, fearRank, targetIn
   }
 
   const bonusText = [];
-  if (honorRank > 0) bonusText.push(`Honor +${honorRank}`);
-  if (modifier !== 0)
+  if (honorRank > 0) {
+    bonusText.push(`Honor +${honorRank}`);
+  }
+  if (modifier !== 0) {
     bonusText.push(
       `${game.i18n.localize("l5r4.ui.common.mod")} ${modifier > 0 ? "+" : ""}${modifier}`
     );
+  }
   const bonusDisplay = bonusText.length > 0 ? ` (${bonusText.join(", ")})` : "";
 
   const flavor = [
@@ -253,7 +256,9 @@ let fearTestInProgress = false;
  * @returns {Promise<void>}
  */
 export async function handleFearClick({ npc } = {}) {
-  if (!npc || fearTestInProgress) return;
+  if (!npc || fearTestInProgress) {
+    return;
+  }
 
   fearTestInProgress = true;
   try {

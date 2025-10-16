@@ -36,22 +36,31 @@
  * @mixes HandlebarsApplicationMixin
  */
 
-import * as Fear from "../services/fear.js";
+// Config
 import { SYS_ID } from "../config/constants.js";
-import { clamp } from "../utils/type-coercion.js";
 import { TEMPLATE } from "../config/templates.js";
 import { STANCES } from "../config/localization.js";
-import { enhanceItemSheetData } from "../documents/item/integration/sheet-data.js";
+
+// Utils
+import { clamp } from "../utils/type-coercion.js";
 import { on } from "../utils/dom.js";
 import { getSortPref, sortWithPref } from "../utils/sorting.js";
 import { getSectionCollapsedMap } from "../utils/section-state.js";
+
+// Documents
+import { enhanceItemSheetData } from "../documents/item/integration/sheet-data.js";
+
+// Services
+import * as Fear from "../services/fear.js";
 import { applyLongRest } from "../services/rest.js";
+import { getActiveStances } from "../services/stance/core/helpers.js";
+import { getMountedStatus } from "../services/mounted-combat.js";
+
+// Local
 import { BaseActorSheet } from "./base-actor-sheet.js";
 import { RollHandler } from "./handlers/roll-handler.js";
 import { AppLauncherHandler } from "./handlers/app-launcher-handler.js";
 import { StanceHandler } from "./handlers/stance-handler.js";
-import { getActiveStances } from "../services/stance/core/helpers.js";
-import { getMountedStatus } from "../services/mounted-combat.js";
 
 /**
  * NPC Actor Sheet for L5R4 System
@@ -240,9 +249,12 @@ export default class L5R4NpcSheet extends BaseActorSheet {
    * @override
    */
   _onActionChange(action, event, element) {
-    if (action === "inline-edit") return this._onInlineItemEdit(event, element);
-    if (action === "change-stance")
+    if (action === "inline-edit") {
+      return this._onInlineItemEdit(event, element);
+    }
+    if (action === "change-stance") {
       return StanceHandler.changeStance(this._getHandlerContext(), event, element);
+    }
   }
 
   /**
@@ -275,7 +287,9 @@ export default class L5R4NpcSheet extends BaseActorSheet {
     event?.preventDefault?.();
 
     // Safety check: require Shift key to prevent accidental adjustments
-    if (!event?.shiftKey) return;
+    if (!event?.shiftKey) {
+      return;
+    }
 
     const cur =
       Number(
@@ -284,7 +298,9 @@ export default class L5R4NpcSheet extends BaseActorSheet {
     const min = 0;
     const max = 9;
     const next = clamp(cur + (delta > 0 ? 1 : -1), min, max);
-    if (next === cur) return;
+    if (next === cur) {
+      return;
+    }
     try {
       await this.actor.update({ "system.rings.void.rank": next }, { diff: true });
     } catch (err) {
@@ -319,6 +335,8 @@ export default class L5R4NpcSheet extends BaseActorSheet {
     const html = await foundry.applications.handlebars.renderTemplate(path, context);
     const host = document.createElement("div");
     host.innerHTML = html;
+    // querySelector used here for template host parsing (temporary DOM, not live application)
+    // This is a Foundry v13 pattern for extracting form element from rendered template string
     const form = host.querySelector("form") || host.firstElementChild || host;
     return { form };
   }
@@ -388,7 +406,6 @@ export default class L5R4NpcSheet extends BaseActorSheet {
       return sortWithPref(byType("skill"), cols, pref, game.i18n?.lang);
     })();
 
-    // Get collapsed section states for all collapsible sections
     const collapsedSections = getSectionCollapsedMap(actorObj.id, [
       "skills",
       "weapons",
@@ -453,7 +470,9 @@ export default class L5R4NpcSheet extends BaseActorSheet {
     const root = this.element;
 
     this._paintVoidPointsDots(root);
-    if (!this.actor.isOwner) return;
+    if (!this.actor.isOwner) {
+      return;
+    }
 
     this._initializeSortIndicators(root, "skills", ["name", "rank", "trait", "roll", "emphasis"]);
 
@@ -507,7 +526,7 @@ export default class L5R4NpcSheet extends BaseActorSheet {
    * @protected
    * @async
    */
-  async _onApplyHealing(event, element) {
+  async _onApplyHealing(event, _element) {
     event?.preventDefault?.();
     await applyLongRest(this.actor);
   }
@@ -538,7 +557,7 @@ export default class L5R4NpcSheet extends BaseActorSheet {
    * @protected
    * @async
    */
-  async _onFearTest(event, element) {
+  async _onFearTest(event, _element) {
     event?.preventDefault?.();
 
     if (!this.actor.hasFear?.()) {
@@ -569,7 +588,9 @@ export default class L5R4NpcSheet extends BaseActorSheet {
    */
   _prepareSubmitData(event, form, formData, updateData = {}) {
     const submit = super._prepareSubmitData(event, form, formData, updateData);
-    if (!String(submit.name ?? "").trim()) submit.name = this.actor.name || "Unnamed";
+    if (!String(submit.name ?? "").trim()) {
+      submit.name = this.actor.name || "Unnamed";
+    }
     return submit;
   }
 }

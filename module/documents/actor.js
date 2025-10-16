@@ -38,11 +38,17 @@
  * @see {@link https://foundryvtt.com/api/v13/classes/foundry.documents.BaseActor.html|Foundry Actor API}
  */
 
+// Config
 import { SYS_ID } from "../config/constants.js";
 import { iconPath } from "../config/icons.js";
+
+// Utils
 import { toInt } from "../utils/type-coercion.js";
+
+// Services
 import { applyStanceAutomation } from "../services/stance/core/automation.js";
 
+// Local
 import { WOUND_LEVEL_ORDER } from "./actor/constants/wound-constants.js";
 import {
   calculateWoundPenalties,
@@ -218,7 +224,7 @@ export default class L5R4Actor extends Actor {
         }
 
         if (CONFIG.debug?.l5r4?.wounds) {
-          console.log(`${SYS_ID} | NPC Created with wound mode:`, {
+          console.warn(`${SYS_ID} | NPC Created with wound mode:`, {
             actorId: this.id,
             actorName: this.name,
             providedWoundMode: data.system?.woundMode,
@@ -394,9 +400,13 @@ export default class L5R4Actor extends Actor {
     let reduction = 0;
 
     for (const it of this.items) {
-      if (!it || typeof it.type !== "string" || it.type !== "armor") continue;
+      if (!it || typeof it.type !== "string" || it.type !== "armor") {
+        continue;
+      }
       const a = it.system ?? {};
-      if (!a?.equipped) continue;
+      if (!a?.equipped) {
+        continue;
+      }
       const b = toInt(a.bonus);
       const r = toInt(a.reduction);
       if (allowStack) {

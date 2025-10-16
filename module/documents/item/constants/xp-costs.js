@@ -81,7 +81,9 @@ export function triangular(n) {
  */
 export function calculateSkillCost(rank, freeRanks = 0) {
   const baseline = Math.max(0, freeRanks);
-  if (rank <= baseline) return 0;
+  if (rank <= baseline) {
+    return 0;
+  }
   return triangular(rank) - triangular(baseline);
 }
 

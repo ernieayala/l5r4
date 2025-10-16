@@ -53,7 +53,7 @@ export class AppLauncherHandler {
    *
    * @see WoundConfigApplication for wound mechanics implementation
    */
-  static async openWoundConfig(context, event, element) {
+  static async openWoundConfig(context, event, _element) {
     event?.preventDefault?.();
 
     try {
@@ -92,7 +92,7 @@ export class AppLauncherHandler {
    *
    * @see XpManagerApplication for XP calculation and tracking implementation
    */
-  static async openXpManager(context, event, element) {
+  static async openXpManager(context, event, _element) {
     event?.preventDefault?.();
 
     try {

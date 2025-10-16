@@ -17,12 +17,8 @@
     "verified": 13,
     "maximum": 13
   },
-  "esmodules": [
-    "dist/l5r4-enhanced.js"
-  ],
-  "styles": [
-    "dist/l5r4-enhanced.css"
-  ],
+  "esmodules": ["dist/l5r4-enhanced.js"],
+  "styles": ["dist/l5r4-enhanced.css"],
   "packs": [],
   "languages": [
     {

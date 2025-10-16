@@ -52,7 +52,9 @@ export class VoidPointsHandler {
 
     const cur = this._getVoidValue(context.actor);
     const next = clamp(cur + delta, 0, 9); // Max 9 Void Points (system constraint)
-    if (next === cur) return;
+    if (next === cur) {
+      return;
+    }
 
     try {
       // diff:true minimizes update payload, render:false prevents automatic sheet redraw
@@ -83,10 +85,19 @@ export class VoidPointsHandler {
    * @static
    */
   static paint(root, actor) {
+    // querySelector used here to find specific UI component container by class
+    // Alternative would require data-attribute on container, but class selector is
+    // semantically correct for styling-related component queries
+    // Additionally, using querySelector for void dots UI allows for easy styling
+    // and layout changes without modifying the underlying JavaScript code.
     const node = root?.querySelector?.(".void-points-dots");
-    if (!node) return;
+    if (!node) {
+      return;
+    }
 
     const cur = this._getVoidValue(actor);
+    // querySelectorAll used to find all dot elements within the container
+    // Data attributes used for dot index values (data-idx)
     node.querySelectorAll(".void-dot").forEach(d => {
       const idx = Number(d.getAttribute("data-idx") || "0") || 0;
       d.classList.toggle("-filled", idx <= cur);

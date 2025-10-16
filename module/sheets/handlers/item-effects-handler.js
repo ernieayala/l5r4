@@ -54,9 +54,13 @@ export class ItemEffectsHandler {
    */
   static bind(context) {
     const { item, element: root } = context;
-    if (!root || !item) return;
+    if (!root || !item) {
+      return;
+    }
 
-    if (root.dataset.effectsBound === "1") return;
+    if (root.dataset.effectsBound === "1") {
+      return;
+    }
     root.dataset.effectsBound = "1";
 
     on(root, ".effect-create", "click", async ev => {
@@ -95,11 +99,13 @@ export class ItemEffectsHandler {
    * @param {HTMLElement} targetElement - Button that triggered the event
    * @returns {Promise<void>}
    */
-  static async create(context, event, targetElement) {
+  static async create(context, event, _targetElement) {
     event?.preventDefault?.();
 
     const { item } = context;
-    if (!item) return;
+    if (!item) {
+      return;
+    }
 
     try {
       const [eff] = await item.createEmbeddedDocuments("ActiveEffect", [
@@ -140,7 +146,9 @@ export class ItemEffectsHandler {
     event?.preventDefault?.();
 
     const { item } = context;
-    if (!item) return;
+    if (!item) {
+      return;
+    }
 
     const id = targetElement.closest("[data-effect-id]")?.dataset?.effectId;
     const eff = id ? item.effects.get(id) : null;
@@ -170,12 +178,16 @@ export class ItemEffectsHandler {
     event?.preventDefault?.();
 
     const { item } = context;
-    if (!item) return;
+    if (!item) {
+      return;
+    }
 
     const id = targetElement.closest("[data-effect-id]")?.dataset?.effectId;
     const eff = id ? item.effects.get(id) : null;
 
-    if (!eff) return;
+    if (!eff) {
+      return;
+    }
 
     try {
       await eff.update({ disabled: !eff.disabled });
@@ -207,24 +219,34 @@ export class ItemEffectsHandler {
     event?.preventDefault?.();
 
     const { item } = context;
-    if (!item) return;
+    if (!item) {
+      return;
+    }
 
     const wrap = targetElement.closest("[data-effect-id]");
     const id = wrap?.dataset?.effectId;
-    if (!id) return;
+    if (!id) {
+      return;
+    }
 
     // Prevent race condition: Skip if already processing a delete operation
-    if (wrap.dataset.busy) return;
+    if (wrap.dataset.busy) {
+      return;
+    }
     wrap.dataset.busy = "1";
 
     try {
       const eff = item.effects.get(id);
-      if (!eff) return; // Effect already deleted by another operation
+      if (!eff) {
+        return;
+      } // Effect already deleted by another operation
 
       await eff.delete();
     } catch (err) {
       // Silently ignore "does not exist" errors - effect was deleted elsewhere (e.g., by another user in same session)
-      if (String(err?.message || err).includes("does not exist")) return;
+      if (String(err?.message || err).includes("does not exist")) {
+        return;
+      }
 
       console.error("L5R4 ItemEffectsHandler: Failed to delete effect", err);
       ui.notifications?.error(err.message ?? game.i18n.localize("l5r4.system.errors.deleteEffect"));

@@ -91,7 +91,9 @@ export function on(root, selector, type, handler, options = {}) {
       }
       // Only invoke handler if match found and element is still in root's tree
       // (prevents handling events from detached/moved elements)
-      if (el && root.contains(el)) handler(ev, el);
+      if (el && root.contains(el)) {
+        handler(ev, el);
+      }
     },
     useCapture
   );

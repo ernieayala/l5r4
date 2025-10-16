@@ -206,7 +206,9 @@ export function preparePcExperience(actor, sys) {
   // Sum XP granted by disadvantages
   let disadvGranted = 0;
   for (const it of actor.items) {
-    if (!isItemOfType(it, "disadvantage")) continue;
+    if (!isItemOfType(it, "disadvantage")) {
+      continue;
+    }
     disadvGranted += Math.max(0, toInt(it.system?.cost));
   }
 
@@ -249,7 +251,9 @@ export function preparePcExperience(actor, sys) {
 
   let skillsXP = 0;
   for (const it of actor.items) {
-    if (!isItemOfType(it, "skill")) continue;
+    if (!isItemOfType(it, "skill")) {
+      continue;
+    }
     const r = toInt(it.system?.rank);
     const freeRanks = Math.max(0, toInt(it.system?.freeRanks ?? 0));
     if (r > freeRanks) {
@@ -332,7 +336,9 @@ export function preparePcExperience(actor, sys) {
  */
 export function trackXpExpenditure(actor, changed) {
   try {
-    if (actor.type !== "pc") return;
+    if (actor.type !== "pc") {
+      return;
+    }
 
     const oldSys = actor._source?.system ?? actor.system;
     const ns = actor.flags?.[SYS_ID] ?? {};
@@ -363,7 +369,9 @@ export function trackXpExpenditure(actor, changed) {
     const pushNote = (delta, note, extraData = {}) => {
       const t = String(extraData?.type || "");
       const key = `${t}:${note}`;
-      if (existingEntries.has(key)) return;
+      if (existingEntries.has(key)) {
+        return;
+      }
       spent.push({
         id: foundry.utils.randomID(),
         delta,
@@ -378,7 +386,9 @@ export function trackXpExpenditure(actor, changed) {
       for (const [k, v] of Object.entries(changed.system.traits)) {
         const newBase = toInt(v);
         const oldBase = toInt(oldSys?.traits?.[k]);
-        if (!Number.isFinite(newBase) || newBase <= oldBase) continue;
+        if (!Number.isFinite(newBase) || newBase <= oldBase) {
+          continue;
+        }
 
         const freeBase = toInt(freeTraitBase?.[k] ?? 0);
         const freeEff = freeBase > 0 ? 0 : toInt(getCreationFreeBonus(actor, k));

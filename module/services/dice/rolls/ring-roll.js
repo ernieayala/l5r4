@@ -92,7 +92,6 @@ async function _confirmSpellSlotUsage(actor, systemRing, ringName) {
   const elementalValidation = validateSpellSlot(actor, systemRing, false);
   const voidValidation = validateSpellSlot(actor, "void", true);
 
-  // Check if any slots available
   if (!elementalValidation.valid && !voidValidation.valid) {
     ui.notifications?.warn(
       game.i18n.format("l5r4.ui.notifications.noSpellSlots", { ring: ringName })
@@ -105,14 +104,12 @@ async function _confirmSpellSlotUsage(actor, systemRing, ringName) {
   const useElemental = elementalValidation.valid;
   const useVoid = !useElemental && voidValidation.valid;
 
-  // Build confirmation message showing available slots
   const elementalLabel = game.i18n.localize("l5r4.magic.spells.useSpellSlot");
   const voidLabel = game.i18n.localize("l5r4.magic.spells.voidSlot");
   const slotType = useElemental
     ? `${elementalLabel} ${ringName} (${elementalValidation.current})`
     : `${voidLabel} (${voidValidation.current})`;
 
-  // Show confirmation dialog using DialogV2
   const confirmed = await foundry.applications.api.DialogV2.confirm({
     window: { title: game.i18n.localize("l5r4.magic.spells.useSpellSlot") },
     content: `<p>${slotType}?</p>`,
@@ -252,7 +249,9 @@ export async function RingRoll({
     const choice = await GetSpellOptions(ringName, actor, systemRing);
 
     // User cancelled dialog - abort roll
-    if (choice?.cancelled) return false;
+    if (choice?.cancelled) {
+      return false;
+    }
 
     // Extract dialog choices
     applyWoundPenalty = !!choice.applyWoundPenalty;
@@ -352,13 +351,17 @@ export async function RingRoll({
   // This ensures slots are only consumed when spell actually casts
   if (spellSlot && systemRing) {
     const result = await spendResource(() => spendElementalSlot(actor, systemRing));
-    if (!result.success) return false; // Abort if slot unavailable
+    if (!result.success) {
+      return false;
+    } // Abort if slot unavailable
     label += result.value; // Append slot label (e.g., " [Fire Slot]")
   }
 
   if (voidSlot) {
     const result = await spendResource(() => spendVoidSlot(actor));
-    if (!result.success) return false; // Abort if slot unavailable
+    if (!result.success) {
+      return false;
+    } // Abort if slot unavailable
     label += result.value; // Append slot label (e.g., " [Void Slot]")
   }
 
