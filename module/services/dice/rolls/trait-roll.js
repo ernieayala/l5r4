@@ -180,6 +180,14 @@ export async function TraitRoll({
       keepMod += voidResult.keepBonus;
       label += ` ${game.i18n.localize("l5r4.ui.mechanics.rings.void")}`;
     }
+
+    // Apply wound penalty to roll total when rolling without a TN
+    // When no TN is specified, subtract wound penalty from roll result
+    // This ensures wounds affect rolls even when there's no target number to compare against
+    // Otherwise, wound penalty will be applied to TN later
+    if (userTN === 0 && applyWoundPenalty && currentWoundPenalty > 0) {
+      totalMod -= currentWoundPenalty;
+    }
   }
 
   // Calculate final dice pool: trait rank + all modifiers
