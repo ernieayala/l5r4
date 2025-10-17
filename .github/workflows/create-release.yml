@@ -101,9 +101,12 @@ jobs:
           // Update version
           systemJson.version = version;
           
+          // Auto-detect pre-release from version format (contains hyphen)
+          const isPrerelease = version.includes('-') || releaseType === 'prerelease';
+          
           // Update URLs for pre-releases
-          if (releaseType === 'prerelease') {
-            console.log('📦 Pre-release: Updating URLs to point to specific version');
+          if (isPrerelease) {
+            console.log('📦 Pre-release detected: Updating URLs to point to specific version');
             systemJson.manifest = \`https://github.com/ernieayala/l5r4/releases/download/v\${version}/system.json\`;
             systemJson.download = \`https://github.com/ernieayala/l5r4/releases/download/v\${version}/l5r4.zip\`;
           } else {
@@ -205,7 +208,7 @@ jobs:
         tag_name: v${{ steps.normalize_version.outputs.VERSION }}
         name: Release v${{ steps.normalize_version.outputs.VERSION }}
         body_path: ${{ steps.changelog.outputs.CHANGELOG_PATH }}
-        prerelease: ${{ github.event.inputs.release_type == 'prerelease' }}
+        prerelease: ${{ contains(steps.normalize_version.outputs.VERSION, '-') || github.event.inputs.release_type == 'prerelease' }}
         files: |
           system.json
           l5r4.zip
@@ -214,19 +217,27 @@ jobs:
     - name: Release summary
       run: |
         VERSION="v${{ steps.normalize_version.outputs.VERSION }}"
+        PLAIN_VERSION="${{ steps.normalize_version.outputs.VERSION }}"
         RELEASE_TYPE="${{ github.event.inputs.release_type }}"
+        
+        # Auto-detect if this is a pre-release based on version format
+        if [[ "$PLAIN_VERSION" == *"-"* ]] || [[ "$RELEASE_TYPE" == "prerelease" ]]; then
+          IS_PRERELEASE=true
+        else
+          IS_PRERELEASE=false
+        fi
         
         echo "🎉 Release created successfully!"
         echo ""
         echo "📦 Release: $VERSION"
-        echo "🏷️  Type: $RELEASE_TYPE"
+        echo "🏷️  Type: $([ "$IS_PRERELEASE" = true ] && echo "Pre-release" || echo "Stable")"
         echo "🔗 URL: https://github.com/ernieayala/l5r4/releases/tag/$VERSION"
         echo ""
         echo "📥 Release-specific URLs:"
         echo "  - Manifest: https://github.com/ernieayala/l5r4/releases/download/$VERSION/system.json"
         echo "  - Package: https://github.com/ernieayala/l5r4/releases/download/$VERSION/l5r4.zip"
         echo ""
-        if [[ "$RELEASE_TYPE" == "prerelease" ]]; then
+        if [ "$IS_PRERELEASE" = true ]; then
           echo "⚠️  Pre-release: system.json URLs point to this specific version"
         else
           echo "✅ Stable release: system.json URLs point to /latest/ for auto-updates"
