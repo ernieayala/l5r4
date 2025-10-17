@@ -263,12 +263,14 @@ export async function SkillRoll({
 
   // Calculate effective TN: baseTN + (raises × 5) + wound penalty + condition penalty + armor penalty (if applicable)
   // Note: If baseTN is 0, wound penalty was already subtracted from totalMod
-  const conditionTNPenalty = getConditionTNPenalty(actor);
-  const armorTNPenalty = getArmorTNPenalty(actor, skillName, skillTrait);
-  let effTN =
-    calculateEffectiveTN(baseTN, raises, woundPenalty, applyWoundPenalty && baseTN > 0) +
-    conditionTNPenalty +
-    armorTNPenalty;
+  // Only apply condition and armor TN penalties when there's an actual target (baseTN > 0)
+  let effTN = calculateEffectiveTN(baseTN, raises, woundPenalty, applyWoundPenalty && baseTN > 0);
+  if (baseTN > 0) {
+    const conditionTNPenalty = getConditionTNPenalty(actor);
+    const armorTNPenalty = getArmorTNPenalty(actor, skillName, skillTrait);
+    effTN += conditionTNPenalty;
+    effTN += armorTNPenalty;
+  }
   effTN = Math.max(0, effTN); // TN cannot be negative
   let tnResult = evaluateTN(roll.total ?? 0, effTN, raises);
 

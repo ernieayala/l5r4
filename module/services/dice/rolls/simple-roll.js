@@ -306,16 +306,19 @@ export async function SimpleRoll({
   // For attack rolls, wounds make it harder to hit (increased TN)
   // For skill checks, wounds make it harder to succeed (increased TN)
   // Note: If baseTN is 0, wound penalty was already subtracted from totalMod
-  const conditionTNPenalty = actor ? getConditionTNPenalty(actor) : 0;
-  const armorTNPenalty = actor ? getArmorTNPenalty(actor, skillName, skillTrait) : 0;
+  // Only apply condition and armor TN penalties when there's an actual target (baseTN > 0)
   let effTN = calculateEffectiveTN(
     baseTN,
     toInt(check.raises),
     applyWoundPenalty && baseTN > 0 ? woundPenalty : 0,
     applyWoundPenalty && baseTN > 0
   );
-  effTN += conditionTNPenalty; // Add condition TN penalties (Fatigued, etc.)
-  effTN += armorTNPenalty; // Add armor TN penalties (Light/Heavy/Riding armor)
+  if (baseTN > 0) {
+    const conditionTNPenalty = actor ? getConditionTNPenalty(actor) : 0;
+    const armorTNPenalty = actor ? getArmorTNPenalty(actor, skillName, skillTrait) : 0;
+    effTN += conditionTNPenalty; // Add condition TN penalties (Fatigued, etc.)
+    effTN += armorTNPenalty; // Add armor TN penalties (Light/Heavy/Riding armor)
+  }
   effTN = Math.max(0, effTN); // TN cannot be negative
   let tnResult = evaluateTN(roll.total ?? 0, effTN, toInt(check.raises));
 
