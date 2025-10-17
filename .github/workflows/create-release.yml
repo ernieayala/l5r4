@@ -87,9 +87,14 @@ jobs:
         VERSION="${{ steps.normalize_version.outputs.VERSION }}"
         RELEASE_TYPE="${{ github.event.inputs.release_type }}"
         
-        # Update package.json
-        npm version "$VERSION" --no-git-tag-version
-        echo "✅ Updated package.json to $VERSION"
+        # Update package.json (only if version changed)
+        CURRENT_VERSION=$(node -p "require('./package.json').version")
+        if [ "$CURRENT_VERSION" != "$VERSION" ]; then
+          npm version "$VERSION" --no-git-tag-version
+          echo "✅ Updated package.json from $CURRENT_VERSION to $VERSION"
+        else
+          echo "ℹ️  package.json already at version $VERSION, skipping npm version"
+        fi
         
         # Update system.json version and URLs
         node -e "
