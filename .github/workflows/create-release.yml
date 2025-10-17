@@ -97,6 +97,8 @@ jobs:
         fi
         
         # Update system.json version and URLs
+        export VERSION
+        export RELEASE_TYPE
         node -e "
           const fs = require('fs');
           const systemJson = JSON.parse(fs.readFileSync('system.json', 'utf8'));
@@ -121,7 +123,7 @@ jobs:
           }
           
           fs.writeFileSync('system.json', JSON.stringify(systemJson, null, 2) + '\n');
-        " VERSION="$VERSION" RELEASE_TYPE="$RELEASE_TYPE"
+        "
         
         echo "✅ Updated system.json to $VERSION"
         echo ""
