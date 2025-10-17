@@ -25,9 +25,9 @@ import { toInt } from "../../../utils/type-coercion.js";
 
 /**
  * @typedef {Object} BowDamageResult
- * @property {number} damageRoll - Total rolled dice (XkY formula X value)
- * @property {number} damageKeep - Total kept dice (XkY formula Y value)
- * @property {string} damageFormula - Complete damage formula string (e.g., "5k2")
+ * @property {number} derivedDamageRoll - Total rolled dice including bow/actor Strength (XkY formula X value)
+ * @property {number} derivedDamageKeep - Total kept dice from arrow type (XkY formula Y value)
+ * @property {string} derivedDamageFormula - Complete damage formula string (e.g., "5k2")
  */
 
 /**
@@ -63,9 +63,10 @@ export function calculateBowDamage(sys, actor = null) {
   const arrowMod = ARROW_MODS[arrowKey] ?? { r: 0, k: 0 };
 
   // Use lower of character Strength or bow Strength per Weapons.md rules
-  const damageRoll = Math.min(bowStr, actorStr) + arrowMod.r;
-  const damageKeep = arrowMod.k;
-  const damageFormula = `${damageRoll}k${damageKeep}`;
+  // Store in separate 'derived' properties to preserve original field values
+  const derivedDamageRoll = Math.min(bowStr, actorStr) + arrowMod.r;
+  const derivedDamageKeep = arrowMod.k;
+  const derivedDamageFormula = `${derivedDamageRoll}k${derivedDamageKeep}`;
 
-  return { damageRoll, damageKeep, damageFormula };
+  return { derivedDamageRoll, derivedDamageKeep, derivedDamageFormula };
 }

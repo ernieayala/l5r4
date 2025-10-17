@@ -163,6 +163,7 @@
         "activeEffects": "Efeitos Ativos",
         "active": "Ativo",
         "new": "Novo",
+        "auto": "Automático",
         "disabled": "desativado",
         "rank": "Posto",
         "clan": "Clã",
@@ -239,7 +240,8 @@
         "deleteEffect": "Falha ao excluir efeito.",
         "schoolRankZero": "Você não pode lançar um feitiço com Posto de Escola reduzido a zero",
         "deficiencyBlocksCasting": "Deficiência em {ring} reduz seu Posto de Escola a zero - não pode lançar",
-        "noSpellSlots": "Você ficou sem espaços de feitiço para este anel"
+        "noSpellSlots": "Você ficou sem espaços de feitiço para este anel",
+        "conditionApplyFailed": "Falha ao aplicar {condition} em {actor}"
       },
       "chat": {
         "traitRoll": "Rolagem de Atributo {trait}",

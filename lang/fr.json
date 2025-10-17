@@ -163,6 +163,7 @@
         "activeEffects": "Effets actifs",
         "active": "Actif",
         "new": "Nouveau",
+        "auto": "Automatique",
         "disabled": "désactivé",
         "rank": "Rang",
         "clan": "Clan",
@@ -239,7 +240,8 @@
         "deleteEffect": "Échec de la suppression de l'effet.",
         "schoolRankZero": "Vous ne pouvez pas lancer un sort avec un Rang d'École réduit à zéro",
         "deficiencyBlocksCasting": "La Déficience en {ring} réduit votre Rang d'École à zéro - impossible de lancer",
-        "noSpellSlots": "Vous n'avez plus d'emplacements de sort pour cet anneau"
+        "noSpellSlots": "Vous n'avez plus d'emplacements de sort pour cet anneau",
+        "conditionApplyFailed": "Échec de l'application de {condition} à {actor}"
       },
       "chat": {
         "traitRoll": "Jet de Caractéristique {trait}",

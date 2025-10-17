@@ -163,6 +163,7 @@
         "activeEffects": "Aktive Effekte",
         "active": "Aktiv",
         "new": "Neu",
+        "auto": "Automatisch",
         "disabled": "deaktiviert",
         "rank": "Rang",
         "clan": "Clan",
@@ -239,7 +240,8 @@
         "deleteEffect": "Effekt konnte nicht gelöscht werden.",
         "schoolRankZero": "Du kannst keinen Zauber wirken, wenn der Schulrang auf null reduziert ist",
         "deficiencyBlocksCasting": "Schwäche in {ring} reduziert deinen Schulrang auf null - kann nicht zaubern",
-        "noSpellSlots": "Keine Zauberplätze mehr für diesen Ring"
+        "noSpellSlots": "Keine Zauberplätze mehr für diesen Ring",
+        "conditionApplyFailed": "Fehler beim Anwenden von {condition} auf {actor}"
       },
       "chat": {
         "traitRoll": "Eigenschaftswurf {trait}",

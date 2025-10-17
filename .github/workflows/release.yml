@@ -42,15 +42,32 @@ jobs:
         echo "Extracted version: $VERSION"
         echo "Full ref: $GITHUB_REF"
 
-    - name: Update system.json version
+    - name: Update system.json version and URLs
       run: |
-        # Update only the version field in system.json
-        # Leave manifest and download URLs pointing to /latest/download/ for Foundry auto-update
-        sed -i 's/"version": ".*"/"version": "${{ steps.get_version.outputs.VERSION }}"/' system.json
+        VERSION="${{ steps.get_version.outputs.VERSION }}"
+        
+        # Update version field
+        sed -i 's/"version": ".*"/"version": "'"$VERSION"'"/' system.json
+        
+        # Check if this is a pre-release (contains hyphen)
+        if [[ "$VERSION" == *"-"* ]]; then
+          echo "📦 Pre-release detected: $VERSION"
+          echo "Updating URLs to point to specific version..."
+          
+          # Update manifest URL to specific version
+          sed -i 's|"manifest": "https://github.com/ernieayala/l5r4/releases/latest/download/system.json"|"manifest": "https://github.com/ernieayala/l5r4/releases/download/v'"$VERSION"'/system.json"|' system.json
+          
+          # Update download URL to specific version
+          sed -i 's|"download": "https://github.com/ernieayala/l5r4/releases/latest/download/l5r4.zip"|"download": "https://github.com/ernieayala/l5r4/releases/download/v'"$VERSION"'/l5r4.zip"|' system.json
+        else
+          echo "✅ Stable release detected: $VERSION"
+          echo "Keeping URLs pointing to /latest/ for Foundry auto-update"
+        fi
         
         # Verify the changes
-        echo "Updated system.json version to ${{ steps.get_version.outputs.VERSION }}:"
-        grep -A 2 '"version"' system.json
+        echo ""
+        echo "Updated system.json:"
+        grep -E '"version"|"manifest"|"download"' system.json
 
     - name: Create system ZIP
       run: |
@@ -90,9 +107,21 @@ jobs:
 
     - name: Notify completion
       run: |
-        echo "✅ Release v${{ steps.get_version.outputs.VERSION }} completed successfully!"
+        VERSION="${{ steps.get_version.outputs.VERSION }}"
+        
+        echo "✅ Release v$VERSION completed successfully!"
         echo "📦 Assets uploaded:"
         echo "  - system.json (manifest file)"
         echo "  - l5r4.zip (system package)"
-        echo "🔗 Download URL: https://github.com/ernieayala/l5r4/releases/download/v${{ steps.get_version.outputs.VERSION }}/l5r4.zip"
-        echo "🔗 Manifest URL: https://github.com/ernieayala/l5r4/releases/download/v${{ steps.get_version.outputs.VERSION }}/system.json"
+        echo ""
+        echo "🔗 Release-specific URLs:"
+        echo "  - Download: https://github.com/ernieayala/l5r4/releases/download/v$VERSION/l5r4.zip"
+        echo "  - Manifest: https://github.com/ernieayala/l5r4/releases/download/v$VERSION/system.json"
+        
+        if [[ "$VERSION" == *"-"* ]]; then
+          echo ""
+          echo "⚠️  Pre-release: system.json URLs point to this specific version"
+        else
+          echo ""
+          echo "✅ Stable release: system.json URLs point to /latest/ for auto-updates"
+        fi

@@ -104,7 +104,7 @@ export function prepareItemDerivedData(item) {
       // Actor reference needed to get actor's Strength for bow damage limit
       () => calculateBowDamage(sys, item.actor),
       // Fallback: Default 0k0 prevents undefined values in damage rolls
-      { damageRoll: 0, damageKeep: 0, damageFormula: "0k0" },
+      { derivedDamageRoll: 0, derivedDamageKeep: 0, derivedDamageFormula: "0k0" },
       "Failed to compute bow damage formula",
       item
     );
@@ -117,9 +117,9 @@ export function prepareItemDerivedData(item) {
       () => calculateMeleeDamage(sys, item.actor),
       // Fallback: Use base weapon DR without Strength if calculation fails
       {
-        damageRoll: toInt(sys.damageRoll),
-        damageKeep: toInt(sys.damageKeep),
-        damageFormula: `${toInt(sys.damageRoll)}k${toInt(sys.damageKeep)}`
+        derivedDamageRoll: toInt(sys.damageRoll),
+        derivedDamageKeep: toInt(sys.damageKeep),
+        derivedDamageFormula: `${toInt(sys.damageRoll)}k${toInt(sys.damageKeep)}`
       },
       "Failed to compute melee damage formula",
       item

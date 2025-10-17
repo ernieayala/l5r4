@@ -22,9 +22,9 @@ import { toInt } from "../../../utils/type-coercion.js";
 
 /**
  * @typedef {Object} MeleeDamageResult
- * @property {number} damageRoll - Total rolled dice (XkY formula X value)
- * @property {number} damageKeep - Total kept dice (XkY formula Y value)
- * @property {string} damageFormula - Complete damage formula string (e.g., "6k2")
+ * @property {number} derivedDamageRoll - Total rolled dice including Strength (XkY formula X value)
+ * @property {number} derivedDamageKeep - Total kept dice (XkY formula Y value)
+ * @property {string} derivedDamageFormula - Complete damage formula string (e.g., "6k2")
  */
 
 /**
@@ -56,9 +56,10 @@ export function calculateMeleeDamage(sys, actor = null) {
   const actorStr = actor ? toInt(actor.system?.traits?.str) : 0;
 
   // Add actor Strength to rolled dice per Combat_and_Wounds.md
-  const damageRoll = weaponRoll + actorStr;
-  const damageKeep = weaponKeep;
-  const damageFormula = `${damageRoll}k${damageKeep}`;
+  // Store in separate 'derived' properties to preserve original field values
+  const derivedDamageRoll = weaponRoll + actorStr;
+  const derivedDamageKeep = weaponKeep;
+  const derivedDamageFormula = `${derivedDamageRoll}k${derivedDamageKeep}`;
 
-  return { damageRoll, damageKeep, damageFormula };
+  return { derivedDamageRoll, derivedDamageKeep, derivedDamageFormula };
 }
