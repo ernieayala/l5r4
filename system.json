@@ -88,5 +88,6 @@
       "url": "systems/l5r4-enhanced/assets/banner.webp"
     }
   ],
-  "license": "MIT"
+  "license": "MIT",
+  "version": "2.2.0"
 }
