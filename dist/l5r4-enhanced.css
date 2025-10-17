@@ -192,14 +192,14 @@ body > * {
 }
 .l5r4.item .price-section .form-fields {
   display: flex;
-  gap: 1rem;
   flex-wrap: nowrap;
+  gap: 1rem;
 }
 .l5r4.item .price-section .price-field {
   display: flex;
+  flex: 1;
   flex-direction: column;
   gap: 0.25rem;
-  flex: 1;
 }
 .l5r4.item .price-section .price-field label {
   font-size: 0.85rem;
