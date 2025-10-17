@@ -202,6 +202,21 @@ export async function SkillRoll({
     totalMod += honorRank;
   }
 
+  // Determine final TN early to decide how to apply wound penalty
+  // For attack rolls, autoTN from target may override user's TN input
+  let finalTN = toInt(check.tn);
+  if (rollType === "attack" && finalTN === 0 && autoTN > 0) {
+    finalTN = autoTN;
+  }
+
+  // Apply wound penalty to roll total when rolling without a TN
+  // When no TN is specified (even after autoTN resolution), subtract wound penalty from roll result
+  // This ensures wounds affect rolls even when there's no target number to compare against
+  // Otherwise, wound penalty will be applied to TN later
+  if (finalTN === 0 && applyWoundPenalty && woundPenalty > 0) {
+    totalMod -= woundPenalty;
+  }
+
   // L5R4 Unskilled Roll Rule (Skills_and_Rolls.md):
   // When skill rank = 0, "effectively making a Trait Roll" = (Trait)k(Trait) with no exploding dice
   const isUnskilled = toInt(skillRank) === 0;
@@ -242,19 +257,16 @@ export async function SkillRoll({
   const roll = new Roll(rollFormula);
   const rollHtml = await roll.render();
 
-  let baseTN = toInt(check.tn);
+  // Use finalTN calculated earlier (already includes autoTN resolution for attack rolls)
+  const baseTN = finalTN;
   const raises = toInt(check.raises);
 
-  // Special case: Attack rolls with no manual TN use auto-resolved target Armor TN
-  if (rollType === "attack" && baseTN === 0 && autoTN > 0) {
-    baseTN = autoTN;
-  }
-
   // Calculate effective TN: baseTN + (raises × 5) + wound penalty + condition penalty + armor penalty (if applicable)
+  // Note: If baseTN is 0, wound penalty was already subtracted from totalMod
   const conditionTNPenalty = getConditionTNPenalty(actor);
   const armorTNPenalty = getArmorTNPenalty(actor, skillName, skillTrait);
   let effTN =
-    calculateEffectiveTN(baseTN, raises, woundPenalty, applyWoundPenalty) +
+    calculateEffectiveTN(baseTN, raises, woundPenalty, applyWoundPenalty && baseTN > 0) +
     conditionTNPenalty +
     armorTNPenalty;
   effTN = Math.max(0, effTN); // TN cannot be negative

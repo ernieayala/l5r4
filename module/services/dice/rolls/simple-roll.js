@@ -215,7 +215,7 @@ export async function SimpleRoll({
 
   let rollMod = toInt(check.rollMod);
   let keepMod = toInt(check.keepMod);
-  const totalMod = toInt(check.totalMod);
+  let totalMod = toInt(check.totalMod);
 
   // Unskilled roll triggered by: (1) user dialog checkbox AND trait roll, OR (2) explicit untrained param
   // Trait rolls can be unskilled if character lacks training; ring/custom rolls cannot be unskilled
@@ -252,6 +252,23 @@ export async function SimpleRoll({
     label += ` ${game.i18n.localize("l5r4.ui.mechanics.rings.void")}!`;
   }
 
+  // Determine final TN early to decide how to apply wound penalty
+  // For attack rolls, autoTN from target may override user's TN input
+  const userTN = toInt(check.tn);
+  let finalTN = userTN;
+  if (rollType === "attack" && finalTN === 0 && autoTN > 0) {
+    finalTN = autoTN;
+  }
+
+  // Apply wound penalty to roll total when rolling without a TN
+  // When no TN is specified (even after autoTN resolution), subtract wound penalty from roll result
+  // This ensures wounds affect rolls even when there's no target number to compare against
+  // Otherwise, wound penalty will be applied to TN later
+  const applyWoundPenalty = check.woundPenalty ?? true;
+  if (finalTN === 0 && applyWoundPenalty && woundPenalty > 0) {
+    totalMod -= woundPenalty;
+  }
+
   // Determine dice pool source: explicit diceRoll/diceKeep > traitRank > ringRank
   // Explicit values for custom rolls, trait for Trait Rolls, ring for Ring Rolls
   let Rn, Kn, bonus;
@@ -281,22 +298,21 @@ export async function SimpleRoll({
   const roll = new Roll(formula);
   const rollHtml = await roll.render();
 
-  let baseTN = toInt(check.tn);
+  // Use finalTN calculated earlier (already includes autoTN resolution for attack rolls)
+  const baseTN = finalTN;
 
-  // Auto-resolve target's Armor TN for attack rolls if single target selected
-  if (rollType === "attack" && baseTN === 0 && autoTN > 0) {
-    baseTN = autoTN;
-  }
-
-  // Apply wound penalties to attack roll TN only (not damage rolls or general skill checks)
-  // Wound penalties increase TN to hit (+3 Nicked, +5 Grazed, +10 Hurt, +15 Injured, etc.)
+  // Apply wound penalties to TN when rolling with a TN and wound penalty checkbox is checked
+  // Wound penalties increase TN (+3 Nicked, +5 Grazed, +10 Hurt, +15 Injured, etc.)
+  // For attack rolls, wounds make it harder to hit (increased TN)
+  // For skill checks, wounds make it harder to succeed (increased TN)
+  // Note: If baseTN is 0, wound penalty was already subtracted from totalMod
   const conditionTNPenalty = actor ? getConditionTNPenalty(actor) : 0;
   const armorTNPenalty = actor ? getArmorTNPenalty(actor, skillName, skillTrait) : 0;
   let effTN = calculateEffectiveTN(
     baseTN,
     toInt(check.raises),
-    rollType === "attack" ? woundPenalty : 0,
-    rollType === "attack" && baseTN > 0
+    applyWoundPenalty && baseTN > 0 ? woundPenalty : 0,
+    applyWoundPenalty && baseTN > 0
   );
   effTN += conditionTNPenalty; // Add condition TN penalties (Fatigued, etc.)
   effTN += armorTNPenalty; // Add armor TN penalties (Light/Heavy/Riding armor)

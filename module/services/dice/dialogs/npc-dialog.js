@@ -40,6 +40,7 @@ const DIALOG = foundry.applications.api.DialogV2;
  * @property {boolean} void - True if Void point spent for +1k1 bonus
  * @property {boolean} unskilled - True if unskilled roll (no explosions, no raises)
  * @property {boolean} isRanged - True if ranged attack (affects condition penalties like Blinded)
+ * @property {boolean} woundPenalty - True if wound penalty should be applied to roll
  * @property {number} tn - Target number for success (0 if not specified)
  * @property {number} raises - Number of raises declared (+5 TN each)
  */
@@ -122,11 +123,13 @@ export async function getNpcRollOptions(
  * - form.totalMod.value → totalMod (string): Flat bonus/penalty to final roll total
  * - form.void?.checked → void (boolean): Void point expenditure flag (+1k1 if true)
  * - form.unskilled?.checked → unskilled (boolean): Unskilled roll flag (no explosions if true)
+ * - form.isRanged?.checked → isRanged (boolean): Ranged attack flag (affects condition penalties)
+ * - form.woundPenalty?.checked → woundPenalty (boolean): Apply wound penalty (defaults to true)
  * - form.tn?.value → tn (number): Target number for success threshold (defaults to 0)
  * - form.raises?.value → raises (number): Number of raises declared (defaults to 0)
  *
  * Optional Chaining:
- * Uses ?. operator for optional fields (void, unskilled, tn, raises) to handle
+ * Uses ?. operator for optional fields (void, unskilled, woundPenalty, tn, raises) to handle
  * conditional template rendering based on npcRoll/trait/noVoid flags.
  *
  * @private
@@ -141,6 +144,7 @@ function _processNpcRollOptions(form) {
     void: form.void?.checked ?? false,
     unskilled: form.unskilled?.checked ?? false,
     isRanged: form.isRanged?.checked ?? false,
+    woundPenalty: form.woundPenalty?.checked ?? true,
     tn: form.tn?.value ?? 0,
     raises: form.raises?.value ?? 0
   };
