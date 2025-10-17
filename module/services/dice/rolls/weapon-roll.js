@@ -3,20 +3,21 @@
  *
  * Handles weapon damage rolls following successful weapon attacks in the L5R4 system.
  * Implements damage roll mechanics including Strength bonuses, attack raises converted
- * to damage, stance bonuses (Full Attack), and optional modifier dialogs.
+ * to damage, stance bonuses from effect flags, and optional modifier dialogs.
  *
  * L5R4 Weapon Damage Mechanics:
  * - Formula: (Weapon DR + Strength)kWeapon Keep (e.g., Katana 3k2 + Strength 3 = 6k2)
- * - Strength: Added to rolled dice for melee weapons (some ranged weapons)
+ * - Strength: Added to rolled dice for melee weapons during item preparation (some ranged weapons)
+ * - diceRoll/diceKeep parameters already include actor Strength for melee weapons
  * - Attack Raises: Can be converted to damage via Increased Damage maneuver (+1k0 per raise)
- * - Full Attack Stance: Grants +2k1 to damage rolls (applied via stanceRollBonus/stanceKeepBonus)
+ * - Stance Damage Bonuses: Applied via stanceRollBonus/stanceKeepBonus from effect flags (e.g., School Techniques)
  * - Exploding Dice: All damage dice explode on 10s (re-roll and add)
  * - Ten Dice Rule: Caps rolls at 10k10, excess converts to flat bonus
  *
  * Service Flow:
  * 1. Optionally prompt user for additional damage modifiers via dialog
  * 2. Apply attack raises as rolled dice bonus (Increased Damage maneuver)
- * 3. Apply stance bonuses (Full Attack +2k1)
+ * 3. Apply stance bonuses from effect flags (if present)
  * 4. Enforce Ten Dice Rule to cap at 10k10
  * 5. Build and execute damage roll formula
  * 6. Post damage result to chat with annotated label
@@ -52,14 +53,16 @@ import { spendVoidPoint } from "../resources/void-manager.js";
  * Executes a weapon damage roll with L5R4 mechanics and posts result to chat.
  *
  * Performs weapon damage rolls after successful weapon attacks, applying Strength
- * bonuses, attack raises (Increased Damage maneuver), stance modifiers (Full Attack),
+ * bonuses, attack raises (Increased Damage maneuver), stance modifiers from effect flags,
  * and optional user-specified bonuses via dialog prompt.
  *
  * Damage Calculation Process:
- * 1. Base damage: Weapon DR (diceRoll/diceKeep) provided by caller
+ * 1. Base damage: Weapon DR + Strength (diceRoll/diceKeep) provided by caller
+ *    - Melee weapons: Strength already added during item.prepareDerivedData
+ *    - Bows: Bow Strength (or actor Strength if lower) already added during item.prepareDerivedData
  * 2. User modifiers: Optional dialog for additional roll/keep/flat bonuses
  * 3. Attack raises: Converted to rolled dice (+1k0 per raise, Increased Damage maneuver)
- * 4. Stance bonuses: Full Attack stance grants +2k1 (via stanceRollBonus/stanceKeepBonus)
+ * 4. Stance bonuses: Applied if present in effect flags (via stanceRollBonus/stanceKeepBonus)
  * 5. Ten Dice Rule: Enforces 10k10 cap, excess converts to flat bonus
  * 6. Roll execution: Exploding d10s, post to chat with annotated label
  *
@@ -72,17 +75,17 @@ import { spendVoidPoint } from "../resources/void-manager.js";
  * - Base: "Damage Roll: [Weapon Name]"
  * - Description: Appended if provided (e.g., special attack notes)
  * - Raises: Shows attack raises and damage bonus (e.g., "[Raises: 2 (+2k0)]")
- * - Stance: Shows Full Attack bonus (e.g., "[Full Attack: +2k1]")
+ * - Stance: Shows stance bonus if present (e.g., "[Stance Bonus: +2k1]")
  *
  * @param {Object} options - Weapon damage roll parameters
- * @param {number} [options.diceRoll=null] - Base rolled dice from weapon DR (before Strength, usually 0-6)
- * @param {number} [options.diceKeep=null] - Base kept dice from weapon DR (usually 1-4)
+ * @param {number} [options.diceRoll=null] - Rolled dice including Strength (e.g., Katana 3k2 + Str 3 = 6k2, pass 6)
+ * @param {number} [options.diceKeep=null] - Kept dice from weapon DR (e.g., Katana 3k2, pass 2)
  * @param {string} [options.weaponName=null] - Name of weapon for chat label (e.g., "Katana", "Yumi")
  * @param {string} [options.description=null] - Optional description appended to label (e.g., "Called Shot: Head")
  * @param {boolean} [options.askForOptions=true] - If true, inverts "showWeaponRollOptions" setting (forces dialog when setting is false)
  * @param {number} [options.attackRaises=0] - Number of raises spent on attack roll, converted to damage via Increased Damage maneuver (+1k0 per raise)
- * @param {number} [options.stanceRollBonus=0] - Rolled dice bonus from stance (Full Attack grants +2)
- * @param {number} [options.stanceKeepBonus=0] - Kept dice bonus from stance (Full Attack grants +1)
+ * @param {number} [options.stanceRollBonus=0] - Rolled dice bonus from stance effect flags (e.g., School Techniques)
+ * @param {number} [options.stanceKeepBonus=0] - Kept dice bonus from stance effect flags (e.g., School Techniques)
  * @param {L5R4Actor} [options.actor=null] - Actor making the damage roll (for Void point spending)
  * @returns {Promise<ChatMessage|undefined>} ChatMessage if roll succeeds, undefined if dialog cancelled
  *
@@ -137,7 +140,8 @@ export async function WeaponRoll({
   const raiseBonus = toInt(attackRaises);
   rollMod += raiseBonus;
 
-  // Apply stance damage bonuses (Full Attack stance provides +2k1 to damage)
+  // Apply stance damage bonuses from effect flags (e.g., School Techniques)
+  // Note: Full Attack stance grants +2k1 to ATTACK rolls only, not damage
   const stanceRoll = toInt(stanceRollBonus);
   const stanceKeep = toInt(stanceKeepBonus);
   rollMod += stanceRoll;
@@ -158,7 +162,7 @@ export async function WeaponRoll({
     )}: ${raiseBonus} (+${raiseBonus}k0)]`;
   }
   if (stanceRoll > 0 || stanceKeep > 0) {
-    label += ` [Full Attack: +${stanceRoll}k${stanceKeep}]`;
+    label += ` [Stance Bonus: +${stanceRoll}k${stanceKeep}]`;
   }
 
   return roll.toMessage({ flavor: label, speaker: ChatMessage.getSpeaker() });

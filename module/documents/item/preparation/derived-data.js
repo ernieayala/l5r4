@@ -22,8 +22,10 @@
  */
 
 import { SYS_ID } from "../../../config/constants.js";
+import { toInt } from "../../../utils/type-coercion.js";
 import { calculateSkillFormula } from "./skill-formulas.js";
 import { calculateBowDamage } from "./bow-damage.js";
+import { calculateMeleeDamage } from "./melee-damage.js";
 
 /**
  * Safely applies a dice formula calculation to an item's system data.
@@ -59,6 +61,8 @@ function applyDiceFormula(sys, calculator, fallback, errorMsg, item) {
  *   during actual rolls, this becomes (Skill + Trait)k(Trait) per core rules.
  * - **Weapons (Bows):** Calculates damage as min(bow Str, actor Str) + arrow DR.
  *   Uses arrow modifiers from game data (e.g., Willow Leaf +2r/+2k).
+ * - **Weapons (Melee):** Calculates damage as (weapon DR + actor Str)k(Keep).
+ *   Adds actor's Strength to rolled dice per Combat rules.
  *
  * Game Rules:
  * - Skill rolls: Standalone skills show only their rank contribution until paired
@@ -66,6 +70,8 @@ function applyDiceFormula(sys, calculator, fallback, errorMsg, item) {
  * - Bow damage: Follows Equipment rules where bow Strength is added to arrow DR,
  *   limited by actor's Strength (weaker archers can't fully draw strong bows)
  * - Arrow types modify damage: Willow Leaf 2k2, Armor Piercing 1k1, Flesh Cutter 2k3
+ * - Melee damage: Follows Combat rules where actor Strength is added to weapon DR
+ *   (e.g., Katana 3k2 + Strength 3 = 6k2)
  *
  * Foundry Integration:
  * - Runs during prepareDerivedData phase of Foundry v13 DataModel lifecycle
@@ -100,6 +106,22 @@ export function prepareItemDerivedData(item) {
       // Fallback: Default 0k0 prevents undefined values in damage rolls
       { damageRoll: 0, damageKeep: 0, damageFormula: "0k0" },
       "Failed to compute bow damage formula",
+      item
+    );
+  }
+
+  if (type === "weapon" && !sys.isBow) {
+    applyDiceFormula(
+      sys,
+      // Actor reference needed to get actor's Strength for melee damage
+      () => calculateMeleeDamage(sys, item.actor),
+      // Fallback: Use base weapon DR without Strength if calculation fails
+      {
+        damageRoll: toInt(sys.damageRoll),
+        damageKeep: toInt(sys.damageKeep),
+        damageFormula: `${toInt(sys.damageRoll)}k${toInt(sys.damageKeep)}`
+      },
+      "Failed to compute melee damage formula",
       item
     );
   }
