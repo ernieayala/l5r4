@@ -770,8 +770,11 @@ export default class L5R4PcSheet extends BaseActorSheet {
       return;
     }
 
-    const baseDiceRoll = Number(item.system?.damageRoll ?? 0) || 0;
-    const baseDiceKeep = Number(item.system?.damageKeep ?? 0) || 0;
+    // Use derived damage values (includes Strength) if available, otherwise fall back to base values
+    const baseDiceRoll =
+      Number(item.system?.derivedDamageRoll ?? item.system?.damageRoll ?? 0) || 0;
+    const baseDiceKeep =
+      Number(item.system?.derivedDamageKeep ?? item.system?.damageKeep ?? 0) || 0;
     const stanceBonuses = getStanceDamageBonuses(this.actor);
     const diceRoll = baseDiceRoll + stanceBonuses.roll;
     const diceKeep = baseDiceKeep + stanceBonuses.keep;

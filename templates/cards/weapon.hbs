@@ -22,8 +22,8 @@
       </div>
     {{/if}}
     <div class="button-mask-container">
-      <span class="mas">{{system.damageRoll}}k{{system.damageKeep}}</span>
-      <a class="button" data-action="roll-weapon" title="{{localize "l5r4.ui.mechanics.rolls.damageRoll"}}">{{system.damageRoll}}k{{system.damageKeep}}</a>
+      <span class="mas">{{#if system.derivedDamageFormula}}{{system.derivedDamageFormula}}{{else}}{{system.damageRoll}}k{{system.damageKeep}}{{/if}}</span>
+      <a class="button" data-action="roll-weapon" title="{{localize "l5r4.ui.mechanics.rolls.damageRoll"}}">{{#if system.derivedDamageFormula}}{{system.derivedDamageFormula}}{{else}}{{system.damageRoll}}k{{system.damageKeep}}{{/if}}</a>
     </div>
     {{#if ranged}}
         <select data-action="inline-edit" data-field="system.arrow">{{selectOptions @root.config.arrows selected=system.arrow localize=true}}</select>

@@ -167,6 +167,7 @@
         "activeEffects": "Active Effects",
         "active": "Active",
         "new": "New",
+        "auto": "Auto",
         "disabled": "disabled",
         "rank": "Rank",
         "clan": "Clan",
@@ -243,7 +244,8 @@
         "deleteEffect": "Failed to delete effect.",
         "schoolRankZero": "You can't cast a spell with School Rank reduced to zero",
         "deficiencyBlocksCasting": "Deficiency in {ring} reduces your School Rank to zero - cannot cast",
-        "noSpellSlots": "You ran out of spell slots for this ring"
+        "noSpellSlots": "You ran out of spell slots for this ring",
+        "conditionApplyFailed": "Failed to apply {condition} to {actor}"
       },
       "chat": {
         "traitRoll": "Trait Roll {trait}",

@@ -163,6 +163,7 @@
         "activeEffects": "Efectos Activos",
         "active": "Activo",
         "new": "Nuevo",
+        "auto": "Automático",
         "disabled": "deshabilitado",
         "rank": "Rango",
         "clan": "Clan",
@@ -239,7 +240,8 @@
         "deleteEffect": "No se pudo eliminar el efecto.",
         "schoolRankZero": "No puedes lanzar un hechizo con Rango de Escuela reducido a cero",
         "deficiencyBlocksCasting": "La Deficiencia en {ring} reduce tu Rango de Escuela a cero - no puedes lanzar",
-        "noSpellSlots": "Te has quedado sin espacios de hechizo para este anillo"
+        "noSpellSlots": "Te has quedado sin espacios de hechizo para este anillo",
+        "conditionApplyFailed": "Error al aplicar {condition} a {actor}"
       },
       "chat": {
         "traitRoll": "Tirada de Rasgo {trait}",

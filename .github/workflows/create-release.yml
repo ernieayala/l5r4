@@ -78,19 +78,40 @@ jobs:
     - name: Update version in files
       run: |
         VERSION="${{ github.event.inputs.version }}"
+        RELEASE_TYPE="${{ github.event.inputs.release_type }}"
         
         # Update package.json
         npm version "$VERSION" --no-git-tag-version
         echo "✅ Updated package.json to $VERSION"
         
-        # Update system.json
+        # Update system.json version and URLs
         node -e "
           const fs = require('fs');
           const systemJson = JSON.parse(fs.readFileSync('system.json', 'utf8'));
-          systemJson.version = '$VERSION';
+          const version = process.env.VERSION;
+          const releaseType = process.env.RELEASE_TYPE;
+          
+          // Update version
+          systemJson.version = version;
+          
+          // Update URLs for pre-releases
+          if (releaseType === 'prerelease') {
+            console.log('📦 Pre-release: Updating URLs to point to specific version');
+            systemJson.manifest = \`https://github.com/ernieayala/l5r4/releases/download/v\${version}/system.json\`;
+            systemJson.download = \`https://github.com/ernieayala/l5r4/releases/download/v\${version}/l5r4.zip\`;
+          } else {
+            console.log('✅ Stable release: Keeping URLs pointing to /latest/');
+            systemJson.manifest = 'https://github.com/ernieayala/l5r4/releases/latest/download/system.json';
+            systemJson.download = 'https://github.com/ernieayala/l5r4/releases/latest/download/l5r4.zip';
+          }
+          
           fs.writeFileSync('system.json', JSON.stringify(systemJson, null, 2) + '\n');
-        "
+        " VERSION="$VERSION" RELEASE_TYPE="$RELEASE_TYPE"
+        
         echo "✅ Updated system.json to $VERSION"
+        echo ""
+        echo "URLs in system.json:"
+        grep -E '"version"|"manifest"|"download"' system.json
 
     - name: Extract changelog
       id: changelog
@@ -194,6 +215,12 @@ jobs:
         echo "🏷️  Type: $RELEASE_TYPE"
         echo "🔗 URL: https://github.com/ernieayala/l5r4/releases/tag/$VERSION"
         echo ""
-        echo "📥 Download URLs:"
+        echo "📥 Release-specific URLs:"
         echo "  - Manifest: https://github.com/ernieayala/l5r4/releases/download/$VERSION/system.json"
         echo "  - Package: https://github.com/ernieayala/l5r4/releases/download/$VERSION/l5r4.zip"
+        echo ""
+        if [[ "$RELEASE_TYPE" == "prerelease" ]]; then
+          echo "⚠️  Pre-release: system.json URLs point to this specific version"
+        else
+          echo "✅ Stable release: system.json URLs point to /latest/ for auto-updates"
+        fi
