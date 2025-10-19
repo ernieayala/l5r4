@@ -1,3 +1,4 @@
+/* global before, beforeEach, after, afterEach */
 /**
  * Stance System Mechanics Tests
  *
@@ -17,6 +18,7 @@
 
 import { SYS_ID } from "../../../module/config/constants.js";
 import { STANCE_IDS } from "../../../module/services/stance/core/helpers.js";
+import { createTestPC } from "../../fixtures/actor-fixtures.js";
 
 /**
  * Register Stance mechanics tests
@@ -25,7 +27,7 @@ import { STANCE_IDS } from "../../../module/services/stance/core/helpers.js";
 export function registerStanceTests(quench) {
   quench.registerBatch(
     `${SYS_ID}.services.stance`,
-    (context) => {
+    context => {
       const { describe, it, assert } = context;
 
       describe("Stance Identification", () => {
@@ -327,6 +329,148 @@ export function registerStanceTests(quench) {
 
           assert.equal(totalRoll, 4, "Center: +1+Void roll bonus");
           assert.equal(keepBonus, 1, "Center: +1 keep bonus");
+        });
+      });
+
+      describe("Stance Transitions (Regression Tests)", () => {
+        let actor;
+
+        before(async () => {
+          actor = await createTestPC({
+            name: "Stance Transition Test Character",
+            system: {
+              traits: { ref: 3, sta: 3, wil: 3, str: 3, agi: 3, int: 3, per: 3, awa: 3 }
+            }
+          });
+
+          // Clean up any lingering effects from other test suites
+          if (actor.effects.size > 0) {
+            await actor.deleteEmbeddedDocuments("ActiveEffect", Array.from(actor.effects.keys()));
+          }
+
+          // Force data preparation
+          actor.prepareData();
+        });
+
+        afterEach(async () => {
+          // Clean up ALL effects between tests to prevent accumulation and interference
+          if (actor && actor.effects.size > 0) {
+            await actor.deleteEmbeddedDocuments("ActiveEffect", Array.from(actor.effects.keys()));
+          }
+        });
+
+        after(async () => {
+          if (actor) {
+            await actor.delete();
+          }
+        });
+
+        it("should replace stance modifiers, not stack them (Issue #2)", async function () {
+          // Base TN: (Reflexes 3 × 5) + 5 = 20
+          const baseTN = 20;
+
+          // Initial state: No stance
+          actor.prepareData();
+          assert.equal(actor.system.armorTn.current, baseTN, "Base TN = 20");
+
+          // Apply Full Attack stance: -10 to TN
+          await actor.createEmbeddedDocuments("ActiveEffect", [
+            {
+              name: "Full Attack Stance",
+              icon: "icons/svg/sword.svg",
+              statuses: ["fullAttackStance"]
+            }
+          ]);
+
+          actor.prepareData();
+          assert.equal(actor.system.armorTn.current, 10, "Full Attack: TN reduced to 10 (20-10)");
+
+          // Switch to Defense stance: Should REPLACE, not stack
+          // Remove old stance FIRST (mimics what stance handler does)
+          const oldStances = actor.effects.filter(e =>
+            Array.from(e.statuses || []).some(id => STANCE_IDS.has(id))
+          );
+          if (oldStances.length > 0) {
+            await actor.deleteEmbeddedDocuments(
+              "ActiveEffect",
+              oldStances.map(e => e.id)
+            );
+          }
+
+          // Then create new stance
+          await actor.createEmbeddedDocuments("ActiveEffect", [
+            {
+              name: "Defense Stance",
+              icon: "icons/svg/shield.svg",
+              statuses: ["defenseStance"]
+            }
+          ]);
+
+          actor.prepareData();
+
+          // Verify only ONE stance effect exists
+          const activeStances = actor.effects.filter(
+            e =>
+              !e.disabled &&
+              (e.statuses?.has("fullAttackStance") || e.statuses?.has("defenseStance"))
+          );
+
+          assert.equal(activeStances.length, 1, "Only one stance should be active");
+          assert.isTrue(
+            activeStances[0].statuses.has("defenseStance"),
+            "Active stance should be Defense"
+          );
+
+          // Verify TN is replaced, not stacked
+          // Defense stance: +3 (Air) + 0 (no Defense skill) = +3
+          assert.equal(actor.system.armorTn.current, 23, "Defense: TN = 23 (20+3), NOT stacked");
+        });
+
+        it("should handle multiple stance transitions without accumulation", async function () {
+          // Transition sequence: Attack → Full Attack → Defense → Attack
+          const stances = [
+            { id: "attackStance", expectedTN: 20, name: "Attack" },
+            { id: "fullAttackStance", expectedTN: 10, name: "Full Attack" },
+            { id: "defenseStance", expectedTN: 23, name: "Defense" },
+            { id: "attackStance", expectedTN: 20, name: "Attack (return)" }
+          ];
+
+          for (const stance of stances) {
+            // Remove old stance first (mimics stance handler behavior)
+            const oldStances = actor.effects.filter(e =>
+              Array.from(e.statuses || []).some(id => STANCE_IDS.has(id))
+            );
+            if (oldStances.length > 0) {
+              await actor.deleteEmbeddedDocuments(
+                "ActiveEffect",
+                oldStances.map(e => e.id)
+              );
+            }
+
+            // Create new stance
+            await actor.createEmbeddedDocuments("ActiveEffect", [
+              {
+                name: `${stance.name} Stance`,
+                icon: "icons/svg/combat.svg",
+                statuses: [stance.id]
+              }
+            ]);
+
+            actor.prepareData();
+
+            const activeStances = actor.effects.filter(e => !e.disabled);
+            assert.isAtMost(
+              activeStances.length,
+              1,
+              `After ${stance.name}: At most 1 active stance`
+            );
+
+            assert.equal(
+              actor.system.armorTn.current,
+              stance.expectedTN,
+              `${stance.name}: TN = ${stance.expectedTN}`
+            );
+          }
         });
       });
     },
