@@ -30,6 +30,11 @@
     "version:patch": "npm version patch --no-git-tag-version",
     "version:minor": "npm version minor --no-git-tag-version",
     "version:major": "npm version major --no-git-tag-version",
+    "test": "vitest run",
+    "test:unit": "vitest run tests/unit",
+    "test:watch": "vitest watch tests/unit",
+    "test:ui": "vitest --ui tests/unit",
+    "test:coverage": "vitest run --coverage tests/unit",
     "pretest": "npm run deps:circular",
     "prepare": "husky"
   },
