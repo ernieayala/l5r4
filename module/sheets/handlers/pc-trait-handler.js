@@ -195,9 +195,25 @@ export class PcTraitHandler {
   /**
    * Converts form submission data from effective traits to base traits.
    *
-   * **Purpose:**
-   * Called by the sheet's form submission handler (ActorSheetV2 lifecycle) to
-   * convert user-entered effective trait values into base trait values for storage.
+   * **⚠️ CRITICAL WARNING - DO NOT USE UNLESS TRAITS HAVE FORM INPUTS:**
+   * This function should ONLY be called if traits are edited through form inputs
+   * (like `<input name="system.traits.sta" />`). As of this implementation, traits
+   * have NO form inputs and are only modified via Shift+Click handlers.
+   *
+   * **Known Bug if Used Incorrectly:**
+   * If this function processes submitData that contains base trait values (not
+   * effective values), it will corrupt data by subtracting family bonuses twice:
+   * - Base trait: 3
+   * - Family bonus: +1
+   * - If base 3 enters submitData, this function treats it as effective
+   * - Subtracts bonus: 3 - 1 = 2 (WRONG!)
+   * - Result: Character loses a trait point
+   *
+   * This bug occurred in Issue #1 when convertSubmitData was called on every form
+   * submission even though traits weren't in the form.
+   *
+   * **Purpose (if traits become form inputs):**
+   * Convert user-entered effective trait values into base trait values for storage.
    * This is necessary because:
    * - Sheet displays effective traits (base + family bonus)
    * - System stores only base traits
@@ -210,7 +226,7 @@ export class PcTraitHandler {
    * 4. Ensure base trait is non-negative (floor at 0)
    * 5. Update submission data with base trait values
    *
-   * **Example:**
+   * **Example (if traits had form inputs):**
    * - Character has Bayushi family (+1 Agility)
    * - User edits trait field to "5" (effective Agility)
    * - Form submission contains: { system: { traits: { agi: 5 } } }
@@ -224,13 +240,13 @@ export class PcTraitHandler {
    * - Non-blocking: processes all traits even if one fails
    * - Floor at 0: prevents negative base traits from family bonus subtraction
    *
-   * **Integration:**
-   * Called from ActorSheetV2's _prepareSubmitData() lifecycle hook.
-   * Works in conjunction with prepareDerivedData() which applies family bonuses.
+   * **Current Status:**
+   * NOT USED - Traits are edited via Shift+Click handlers, not form inputs.
+   * Handlers use actor._source to read base values directly, avoiding conversion issues.
    *
    * @param {L5R4Actor} actor - The actor being updated (needed for family bonus lookup)
    * @param {Object} submitData - Form data from ActorSheetV2 submission
-   * @param {Object} [submitData.system.traits] - Trait values from form (effective values)
+   * @param {Object} [submitData.system.traits] - Trait values from form (must be effective values!)
    * @returns {Object} Modified submitData with base trait values for storage
    */
   static convertSubmitData(actor, submitData) {

@@ -860,13 +860,19 @@ export default class L5R4PcSheet extends BaseActorSheet {
    * Processes form data before submission to actor document.
    *
    * Intercepts form submission to apply PC-specific data transformations:
-   * - Trait value coercion and bounds checking via PcTraitHandler
    * - Conversion of string inputs to proper numeric types
    * - Validation of rank/points values
    *
    * **Foundry Pattern:**
    * Part of Application v2 form handling pipeline. Called automatically when
    * submitOnChange triggers or user explicitly submits the form.
+   *
+   * **Note on Trait Handling:**
+   * Traits are NOT processed here because they have no form inputs. Traits are only
+   * modified via Shift+Click handlers (PcTraitHandler.adjust) which directly handle
+   * effective→base conversion using actor._source. Processing traits here would cause
+   * data corruption if current trait values (base) were mistakenly treated as effective
+   * values and had family bonuses subtracted again.
    *
    * @param {Event} event - Form submit event
    * @param {HTMLFormElement} form - The form element being submitted
@@ -877,7 +883,6 @@ export default class L5R4PcSheet extends BaseActorSheet {
    * @override
    */
   _prepareSubmitData(event, form, formData, updateData = {}) {
-    const data = super._prepareSubmitData(event, form, formData, updateData);
-    return PcTraitHandler.convertSubmitData(this.actor, data);
+    return super._prepareSubmitData(event, form, formData, updateData);
   }
 }
