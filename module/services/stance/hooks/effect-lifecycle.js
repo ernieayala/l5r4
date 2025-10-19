@@ -43,9 +43,9 @@ import { getStanceEffectCreator } from "../core/effect-templates.js";
  * any existing stance effects that conflict with the newly applied stance.
  * Disabled effects are ignored since they don't contribute to active stance state.
  *
- * The deletion is queued via queueMicrotask() to avoid hook reentrancy issues.
- * This ensures the current hook completes before triggering delete hooks on the
- * conflicting effects, preventing race conditions in Foundry's hook system.
+ * The deletion is awaited synchronously in the preCreate hook to ensure conflicting
+ * stances are fully removed before the new stance effect is created. This prevents
+ * both stances from being active during prepareDerivedData() calculation.
  *
  * Game Rules Context:
  * Per L5R4 core rules, characters may only adopt one stance at a time. When changing
@@ -55,11 +55,12 @@ import { getStanceEffectCreator } from "../core/effect-templates.js";
  * @param {Actor} actor - The actor whose conflicting stances should be removed
  * @param {string} currentStanceId - The stance ID that should remain (e.g., "fullAttackStance")
  * @param {string} excludeEffectId - The effect ID to exclude from removal (the newly created effect)
- * @returns {void}
+ * @returns {Promise<void>}
  *
  * @private
+ * @async
  */
-function removeConflictingStances(actor, currentStanceId, excludeEffectId) {
+async function removeConflictingStances(actor, currentStanceId, excludeEffectId) {
   const effectsToRemove = [];
 
   for (const existingEffect of actor.effects) {
@@ -77,10 +78,9 @@ function removeConflictingStances(actor, currentStanceId, excludeEffectId) {
   }
 
   if (effectsToRemove.length > 0) {
-    // Defer deletion to avoid hook reentrancy issues
-    queueMicrotask(async () => {
-      await actor.deleteEmbeddedDocuments("ActiveEffect", effectsToRemove);
-    });
+    // Delete and await in preCreate hook to ensure old stance is removed
+    // before new stance is fully created and prepareDerivedData() is called
+    await actor.deleteEmbeddedDocuments("ActiveEffect", effectsToRemove);
   }
 }
 
@@ -165,24 +165,25 @@ function clearStanceFlagsFromEffect(actor, effectStances) {
  * applies the appropriate stance template to ensure consistent effect data.
  *
  * Conflict Resolution:
- * Queues removal of conflicting stances before the new effect is fully created,
+ * Awaits removal of conflicting stances before the new effect is fully created,
  * ensuring L5R4's rule that only one stance can be active at a time.
  *
  * Foundry Lifecycle:
  * preCreate hooks fire before the document is saved to the database. Changes made
  * via effect.updateSource() modify the creation data directly, avoiding unnecessary
- * update operations. The hook runs synchronously, so conflict removal is deferred
- * via queueMicrotask() inside removeConflictingStances().
+ * update operations. The hook is async and awaits conflict removal to ensure
+ * old stances are deleted before the new stance becomes active.
  *
  * @param {ActiveEffect} effect - The Active Effect being created
  * @param {object} data - The initial data for the effect
  * @param {object} options - Additional options for the creation operation
  * @param {string} userId - ID of the user who initiated the creation
- * @returns {void}
+ * @returns {Promise<void>}
  *
+ * @async
  * @see {@link https://foundryvtt.com/api/v13/classes/foundry.abstract.Document.html#_preCreate|Foundry preCreate Hook}
  */
-export function onPreCreateActiveEffect(effect, _data, _options, _userId) {
+export async function onPreCreateActiveEffect(effect, _data, _options, _userId) {
   const actor = effect?.parent;
   if (!actor || actor.documentName !== "Actor") {
     return;
@@ -210,7 +211,10 @@ export function onPreCreateActiveEffect(effect, _data, _options, _userId) {
     }
 
     // Remove conflicting stances to enforce mutual exclusivity
-    removeConflictingStances(actor, stanceId, effect.id);
+    // CRITICAL: Must await synchronously in preCreate to ensure old stance is removed
+    // BEFORE onCreate hook fires and prepareDerivedData() is called
+    // Note: Stance handler also removes conflicts, but this handles programmatic creation
+    await removeConflictingStances(actor, stanceId, effect.id);
   }
 }
 
@@ -282,11 +286,12 @@ export function onCreateActiveEffect(effect, _options, _userId) {
  * @param {object} changes - Object containing only the changed fields
  * @param {object} options - Additional options passed to the update operation
  * @param {string} userId - ID of the user who initiated the update
- * @returns {void}
+ * @returns {Promise<void>}
  *
+ * @async
  * @see {@link https://foundryvtt.com/api/v13/classes/foundry.abstract.Document.html#_onUpdate|Foundry onUpdate Hook}
  */
-export function onUpdateActiveEffect(effect, changes, _options, _userId) {
+export async function onUpdateActiveEffect(effect, changes, _options, _userId) {
   // Early return: Only handle disabled state changes
   if (changes?.disabled === undefined) {
     return;
@@ -307,7 +312,7 @@ export function onUpdateActiveEffect(effect, changes, _options, _userId) {
     } else if (changes.disabled === false) {
       // Handle enabling: Re-apply stance activation logic
       const stanceId = effectStances.find(id => STANCE_IDS.has(id));
-      removeConflictingStances(actor, stanceId, effect.id);
+      await removeConflictingStances(actor, stanceId, effect.id);
       triggerFullDefenseIfNeeded(effectStances, actor);
     }
 
