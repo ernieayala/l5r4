@@ -97,6 +97,11 @@ const ENGLISH_TRAIT_LABELS = {
  * @returns {number} Current wound penalty (0 if healthy or no wound data)
  */
 export function readWoundPenalty(actor) {
+  // Defensive guard: handle null/undefined actor
+  if (!actor?.system) {
+    return 0;
+  }
+  
   if (actor.system?.wounds?.penalty != null) {
     return toInt(actor.system.wounds.penalty, 0);
   }
@@ -191,7 +196,12 @@ export function normalizeTraitKey(raw) {
  * @returns {number} Effective trait value (0 if trait not found)
  */
 export function getEffectiveTrait(actor, traitKey) {
-  // Void is stored separately as a Ring, not a Trait
+  // Defensive guard: handle null/undefined actor
+  if (!actor?.system) {
+    return 0;
+  }
+  
+  // Special case: void ring
   if (traitKey === "void") {
     return toInt(actor.system?.rings?.void?.rank, 0);
   }
