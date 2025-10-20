@@ -210,7 +210,8 @@
     "templates": {
       "itemDescription": {
         "description": "",
-        "specialRules": ""
+        "specialRules": "",
+        "freeRaises": 0
       }
     },
     "advantage": {

@@ -64,7 +64,7 @@ import {
   validateSpellSlot
 } from "../resources/spell-slot-manager.js";
 import { applyRingBonuses } from "../effects/bonus-applicator.js";
-import { GetSpellOptions } from "../dialogs/ring-dialog.js";
+import { GetRingOptions } from "../dialogs/ring-dialog.js";
 
 /**
  * Confirms spell slot usage for spell casting when no slot checkbox selected.
@@ -210,7 +210,7 @@ async function spendResource(spendFn, successProp = "label") {
  * @returns {Promise<ChatMessage|false>} Posted ChatMessage if successful, false if cancelled/failed
  * @async
  *
- * @see {@link GetSpellOptions} for dialog UI and user input collection
+ * @see {@link GetRingOptions} for dialog UI and user input collection
  * @see {@link spendVoidPoint} for Void Point mechanics and +1k1 bonus
  * @see {@link spendElementalSlot} for elemental spell slot consumption
  * @see {@link spendVoidSlot} for Void bonus slot consumption
@@ -241,12 +241,13 @@ export async function RingRoll({
   let spellSlot = false; // Elemental spell slot consumed
   let voidSlot = false; // Void bonus spell slot consumed
   let __tnInput = 0,
-    __raisesInput = 0; // User-specified TN and raises
+    __raisesInput = 0,
+    __freeRaisesInput = 0; // User-specified TN, raises, and free raises
 
   // Show dialog if askForOptions inverts the setting (XOR logic)
   // Setting ON + askForOptions false = show dialog | Setting OFF + askForOptions true = show dialog
   if (askForOptions !== optionsSetting) {
-    const choice = await GetSpellOptions(ringName, actor, systemRing);
+    const choice = await GetRingOptions(ringName, actor, systemRing);
 
     // User cancelled dialog - abort roll
     if (choice?.cancelled) {
@@ -267,6 +268,7 @@ export async function RingRoll({
 
     __tnInput = toInt(choice.tn);
     __raisesInput = toInt(choice.raises);
+    __freeRaisesInput = toInt(choice.freeRaises) || 0;
 
     // Spell Casting without slot checkbox: Prompt for slot usage per L5R4 core rules
     if (!normalRoll && !spellSlot && !voidSlot) {
@@ -374,10 +376,19 @@ export async function RingRoll({
   }
 
   // Append TN and raises to label if specified
-  if (__tnInput || __raisesInput) {
-    const __effTN = __tnInput + __raisesInput * 5;
+  if (__tnInput || __raisesInput || __freeRaisesInput) {
+    const __effTN = __tnInput + __raisesInput * 5 - __freeRaisesInput * 5;
     const raisesLabel = game.i18n.localize("l5r4.ui.mechanics.rolls.raises");
-    label += ` [TN ${__effTN}${__raisesInput ? ` (${raisesLabel}: ${__raisesInput})` : ""}]`;
+    const freeRaisesLabel = game.i18n.localize("l5r4.ui.mechanics.rolls.freeRaises");
+    label += ` [TN ${__effTN}`;
+    if (__raisesInput || __freeRaisesInput) {
+      label += ` (${raisesLabel}: ${__raisesInput}`;
+      if (__freeRaisesInput) {
+        label += ` + ${__freeRaisesInput} ${freeRaisesLabel}`;
+      }
+      label += ")";
+    }
+    label += "]";
   }
 
   // Apply Ten Dice Rule: Cap at 10 rolled/kept dice, overflow becomes bonuses
@@ -391,17 +402,18 @@ export async function RingRoll({
   const roll = new Roll(rollFormula);
   const rollHtml = await roll.render();
 
-  // Calculate effective TN: base TN + (raises × 5) + wound penalty
+  // Calculate effective TN: base TN + (raises × 5) - (freeRaises × 5) + wound penalty
   // Wound penalty only applied if enabled AND a TN was specified
   const effTN = calculateEffectiveTN(
     __tnInput,
     __raisesInput,
+    __freeRaisesInput,
     woundPenalty,
     applyWoundPenalty && __tnInput > 0
   );
 
   // Evaluate success/failure with margin calculation
-  const tnResult = evaluateTN(roll.total ?? 0, effTN, __raisesInput);
+  const tnResult = evaluateTN(roll.total ?? 0, effTN, __raisesInput, __freeRaisesInput);
 
   // Render chat message content from template
   const content = await R(messageTemplate, { flavor: label, roll: rollHtml, tnResult });

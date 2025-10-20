@@ -23,6 +23,8 @@
 
 import { DIALOG_TEMPLATES } from "../../../config/templates.js";
 import { R } from "../../../utils/localization.js";
+import { getMaxRaises } from "../../../utils/raises-validator.js";
+import { calculateFreeRaises } from "../resources/raise-manager.js";
 
 const DIALOG = foundry.applications.api.DialogV2;
 
@@ -41,6 +43,7 @@ const DIALOG = foundry.applications.api.DialogV2;
  * to inform the player's decisions before rolling.
  *
  * @param {string} skillName - Display name of skill being rolled (localized, e.g., "Kenjutsu")
+ * @param {Actor} actor - The actor making the roll (for Void Ring and Free Raises calculation)
  * @param {boolean} noVoid - If true, hides Void point option (e.g., for NPCs when setting disabled)
  * @param {number} [rollBonus=0] - Pre-calculated bonus to rolled dice from effects/advantages
  * @param {number} [keepBonus=0] - Pre-calculated bonus to kept dice from effects/advantages
@@ -60,18 +63,26 @@ const DIALOG = foundry.applications.api.DialogV2;
  */
 export async function GetSkillOptions(
   skillName,
+  actor,
   noVoid,
   rollBonus = 0,
   keepBonus = 0,
   totalBonus = 0
 ) {
+  // Calculate max Raises from Void Ring and Free Raises from items/effects
+  const voidRing = actor?.system?.rings?.void?.value ?? 0;
+  const maxRaises = getMaxRaises(voidRing);
+  const freeRaises = calculateFreeRaises(actor);
+
   // Render template with context: skill=true enables skill-specific UI (emphasis checkbox)
   const content = await R(DIALOG_TEMPLATES.rollModifiers, {
     skill: true,
     noVoid,
     rollBonus,
     keepBonus,
-    totalBonus
+    totalBonus,
+    maxRaises,
+    freeRaises: freeRaises ?? 0
   });
 
   try {
@@ -137,6 +148,7 @@ function _processSkillRollOptions(form) {
     // Optional chaining: void field absent when noVoid=true, default to false
     void: form.void?.checked ?? false,
     tn: form.tn?.value,
+    freeRaises: form.freeRaises?.value,
     raises: form.raises?.value
   };
 }

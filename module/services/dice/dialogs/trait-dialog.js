@@ -26,6 +26,8 @@
 
 import { DIALOG_TEMPLATES } from "../../../config/templates.js";
 import { R } from "../../../utils/localization.js";
+import { getMaxRaises } from "../../../utils/raises-validator.js";
+import { calculateFreeRaises } from "../resources/raise-manager.js";
 
 const DIALOG = foundry.applications.api.DialogV2;
 
@@ -45,6 +47,7 @@ const DIALOG = foundry.applications.api.DialogV2;
  * Called by TraitRoll service when user initiates a check using innate abilities.
  *
  * @param {string} traitName - Name of trait being rolled (e.g., "Stamina", "Willpower", "Void")
+ * @param {Actor} actor - The actor making the roll (for Void Ring and Free Raises calculation)
  * @returns {Promise<Object>} Roll options object with user selections, or {cancelled: true} if dialog closed
  * @returns {boolean} return.applyWoundPenalty - Whether to apply wound rank TN penalty
  * @returns {boolean} return.unskilled - If true, disables exploding dice and raises
@@ -58,9 +61,18 @@ const DIALOG = foundry.applications.api.DialogV2;
  *
  * @async
  */
-export async function GetTraitRollOptions(traitName) {
+export async function GetTraitRollOptions(traitName, actor) {
+  // Calculate max Raises from Void Ring and Free Raises from items/effects
+  const voidRing = actor?.system?.rings?.void?.value ?? 0;
+  const maxRaises = getMaxRaises(voidRing);
+  const freeRaises = calculateFreeRaises(actor);
+
   // Render template with context: trait=true enables trait-specific UI (unskilled checkbox)
-  const content = await R(DIALOG_TEMPLATES.rollModifiers, { trait: true });
+  const content = await R(DIALOG_TEMPLATES.rollModifiers, {
+    trait: true,
+    maxRaises,
+    freeRaises: freeRaises ?? 0
+  });
   try {
     const lowerTrait = String(traitName).toLowerCase();
     const traitKey =
@@ -113,18 +125,20 @@ export async function GetTraitRollOptions(traitName) {
  * @returns {boolean} return.void - Whether to spend Void point
  * @returns {string|undefined} return.tn - Target number if entered (undefined if empty)
  * @returns {string|undefined} return.raises - Number of raises if entered (undefined if empty)
+ * @returns {string|undefined} return.freeRaises - Number of free raises if entered (undefined if empty)
  *
  * @private
  */
 function _processTraitRollOptions(form) {
   return {
     applyWoundPenalty: form.woundPenalty.checked,
-    unskilled: form.unskilled.checked,
+    unskilled: form.unskilled?.checked ?? false,
     rollMod: form.rollMod.value,
     keepMod: form.keepMod.value,
     totalMod: form.totalMod.value,
-    void: form.void.checked,
+    void: form.void?.checked ?? false,
     tn: form.tn?.value,
+    freeRaises: form.freeRaises?.value,
     raises: form.raises?.value
   };
 }

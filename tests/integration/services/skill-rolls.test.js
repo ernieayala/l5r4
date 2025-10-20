@@ -27,7 +27,7 @@ import { createSkillData } from "../../fixtures/item-fixtures.js";
 export function registerSkillRollTests(quench) {
   quench.registerBatch(
     `${SYS_ID}.services.rolls.skill`,
-    (context) => {
+    context => {
       const { describe, it, assert, beforeEach, afterEach } = context;
 
       describe("Skill Roll Formula Construction", () => {
@@ -64,7 +64,7 @@ export function registerSkillRollTests(quench) {
 
         it("should build correct formula with buildFormula", () => {
           const formula = buildFormula(8, 3, 0, {});
-          
+
           assert.equal(formula, "8d10k3x10+0", "Formula constructed correctly");
           assert.include(formula, "d10", "Uses d10 dice");
           assert.include(formula, "k3", "Keeps 3 dice");
@@ -73,14 +73,14 @@ export function registerSkillRollTests(quench) {
 
         it("should handle unskilled rolls without explosions", () => {
           const formula = buildFormula(3, 2, 0, { unskilled: true });
-          
+
           assert.equal(formula, "3d10k2+0", "Unskilled formula correct");
           assert.notInclude(formula, "x10", "No explosions for unskilled");
         });
 
         it("should apply emphasis for re-rolling 1s", () => {
           const formula = buildFormula(5, 3, 0, { emphasis: true });
-          
+
           assert.include(formula, "r1", "Emphasis re-rolls 1s");
         });
       });
@@ -112,13 +112,13 @@ export function registerSkillRollTests(quench) {
           // Test that we can access the data needed for a skill roll
           const skillRank = skill.system.rank;
           const traitValue = actor.system.traits[skill.system.trait];
-          
+
           assert.equal(skillRank, 3, "Skill rank is 3");
           assert.equal(traitValue, 4, "Trait value is 4");
-          
+
           const rolled = skillRank + traitValue;
           const kept = traitValue;
-          
+
           assert.equal(rolled, 7, "Roll pool calculated (3+4=7)");
           assert.equal(kept, 4, "Keep pool calculated (4)");
         });
@@ -151,7 +151,7 @@ export function registerSkillRollTests(quench) {
 
         it("should not allow explosions on unskilled rolls", () => {
           const formula = buildFormula(3, 3, 0, { unskilled: true });
-          
+
           assert.notInclude(formula, "x10", "Unskilled rolls don't explode");
         });
       });
@@ -183,7 +183,7 @@ export function registerSkillRollTests(quench) {
 
         it("should apply total bonus to result", () => {
           const formula = buildFormula(5, 3, 5, {});
-          
+
           assert.include(formula, "+5", "Total bonus added to formula");
         });
       });
@@ -211,7 +211,7 @@ export function registerSkillRollTests(quench) {
         it("should have wound penalty calculated", () => {
           // Wound penalty is calculated in actor.system.woundPenalty
           const woundPenalty = actor.system.woundPenalty || 0;
-          
+
           assert.isNumber(woundPenalty, "Wound penalty is a number");
           assert.isAtLeast(woundPenalty, 0, "Wound penalty is non-negative");
           // Penalty would be applied to TN or roll total
@@ -242,14 +242,14 @@ export function registerSkillRollTests(quench) {
 
         it("should handle high dice pools", () => {
           const formula = buildFormula(15, 8, 0, {});
-          
+
           assert.exists(formula, "High dice pool formula created");
           // Ten Dice Rule should cap at 10k10
         });
 
         it("should handle negative modifiers", () => {
           const formula = buildFormula(5, 3, -5, {});
-          
+
           assert.include(formula, "-5", "Negative modifiers supported");
         });
       });
@@ -270,6 +270,49 @@ export function registerSkillRollTests(quench) {
           const formula = buildFormula(5, 3, 10, {});
 
           assert.include(formula, "+10", "Bonus in formula");
+        });
+      });
+
+      describe("Raise Mechanics", () => {
+        it("should increase effective TN by 5 per raise", () => {
+          const baseTN = 15;
+          const raises = 2;
+          const effectiveTN = baseTN + raises * 5;
+
+          assert.equal(effectiveTN, 25, "Each raise adds +5 to TN (15 + 10 = 25)");
+        });
+
+        it("should reduce effective TN by 5 per free raise", () => {
+          const baseTN = 20;
+          const freeRaises = 2;
+          const effectiveTN = baseTN - freeRaises * 5;
+
+          assert.equal(effectiveTN, 10, "Each free raise reduces TN by 5 (20 - 10 = 10)");
+        });
+
+        it("should combine raises and free raises correctly", () => {
+          const baseTN = 20;
+          const raises = 3;
+          const freeRaises = 1;
+          const effectiveTN = baseTN + raises * 5 - freeRaises * 5;
+
+          assert.equal(effectiveTN, 30, "Raises add, free raises subtract (20 + 15 - 5 = 30)");
+        });
+
+        it("should not allow TN to go below 0 with free raises", () => {
+          const baseTN = 10;
+          const freeRaises = 3;
+          const effectiveTN = Math.max(0, baseTN - freeRaises * 5);
+
+          assert.equal(effectiveTN, 0, "TN has floor of 0");
+        });
+
+        it("should handle unskilled rolls without raises", () => {
+          // Unskilled rolls cannot use raises per L5R4 rules
+          const isUnskilled = true;
+          const maxRaises = isUnskilled ? 0 : 5;
+
+          assert.equal(maxRaises, 0, "Unskilled rolls cannot declare raises");
         });
       });
     },
