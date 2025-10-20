@@ -35,12 +35,14 @@ import { buildFormula } from "../core/formula-builder.js";
 import {
   calculateEffectiveTN,
   evaluateTN,
-  replaceFailureWithMissed
+  replaceFailureWithMissed,
+  buildTNLabel
 } from "../core/tn-calculator.js";
 import { spendVoidPoint } from "../resources/void-manager.js";
 import { resolveTargets } from "../resources/target-resolver.js";
 import { applySkillAndTraitBonuses } from "../effects/bonus-applicator.js";
 import { GetSkillOptions } from "../dialogs/skill-dialog.js";
+import { clampRaises } from "../../../utils/raises-validator.js";
 import {
   getConditionRollPenalties,
   getConditionTNPenalty
@@ -159,7 +161,7 @@ export async function SkillRoll({
   let check;
   if (askForOptions !== optionsSetting) {
     const noVoid = npc && !game.settings.get(SYS_ID, "allowNpcVoidPoints");
-    check = await GetSkillOptions(skillName, noVoid, rollBonus, keepBonus, totalBonus);
+    check = await GetSkillOptions(skillName, actor, noVoid, rollBonus, keepBonus, totalBonus);
     if (!check || check.cancelled) {
       return;
     }
@@ -259,12 +261,22 @@ export async function SkillRoll({
 
   // Use finalTN calculated earlier (already includes autoTN resolution for attack rolls)
   const baseTN = finalTN;
-  const raises = toInt(check.raises);
 
-  // Calculate effective TN: baseTN + (raises × 5) + wound penalty + condition penalty + armor penalty (if applicable)
+  // Use Free Raises from dialog (user editable) and clamp declared Raises to Void Ring limit
+  const freeRaises = toInt(check.freeRaises) || 0;
+  const voidRing = actor?.system?.rings?.void?.value ?? 0;
+  const raises = clampRaises(toInt(check.raises), voidRing);
+
+  // Calculate effective TN: baseTN + (raises × 5) - (freeRaises × 5) + wound penalty + condition penalty + armor penalty (if applicable)
   // Note: If baseTN is 0, wound penalty was already subtracted from totalMod
   // Only apply condition and armor TN penalties when there's an actual target (baseTN > 0)
-  let effTN = calculateEffectiveTN(baseTN, raises, woundPenalty, applyWoundPenalty && baseTN > 0);
+  let effTN = calculateEffectiveTN(
+    baseTN,
+    raises,
+    freeRaises,
+    woundPenalty,
+    applyWoundPenalty && baseTN > 0
+  );
   if (baseTN > 0) {
     const conditionTNPenalty = getConditionTNPenalty(actor);
     const armorTNPenalty = getArmorTNPenalty(actor, skillName, skillTrait);
@@ -272,16 +284,17 @@ export async function SkillRoll({
     effTN += armorTNPenalty;
   }
   effTN = Math.max(0, effTN); // TN cannot be negative
-  let tnResult = evaluateTN(roll.total ?? 0, effTN, raises);
+  let tnResult = evaluateTN(roll.total ?? 0, effTN, raises, freeRaises);
 
   // Append target info and TN/raises display to final chat message label
   let finalLabel = baseLabel;
   if (targetInfo) {
     finalLabel += targetInfo;
   }
-  if (baseTN || raises) {
+  if (baseTN || raises || freeRaises) {
     const raisesLabel = game.i18n.localize("l5r4.ui.mechanics.rolls.raises");
-    finalLabel += ` [TN ${effTN}${raises ? ` (${raisesLabel}: ${raises})` : ""}]`;
+    const freeRaisesLabel = game.i18n.localize("l5r4.ui.mechanics.rolls.freeRaises");
+    finalLabel += buildTNLabel(effTN, raises, freeRaises, raisesLabel, freeRaisesLabel);
   }
 
   // Convert "failure" to "missed" for attack rolls (better UX messaging)

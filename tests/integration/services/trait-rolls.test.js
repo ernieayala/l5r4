@@ -22,7 +22,7 @@ import { SYS_ID } from "../../../module/config/constants.js";
 export function registerTraitRollTests(quench) {
   quench.registerBatch(
     `${SYS_ID}.services.rolls.trait`,
-    (context) => {
+    context => {
       const { describe, it, assert } = context;
 
       describe("Trait Roll Formula (XkX)", () => {
@@ -162,6 +162,57 @@ export function registerTraitRollTests(quench) {
           const highTrait = 8;
           assert.equal(highTrait, 8, "High trait = 8");
           // 8k8 formula
+        });
+      });
+
+      describe("Raise Mechanics for Trait Rolls", () => {
+        it("should increase effective TN by 5 per raise", () => {
+          const baseTN = 15;
+          const raises = 2;
+          const effectiveTN = baseTN + raises * 5;
+
+          assert.equal(effectiveTN, 25, "Each raise adds +5 to TN (15 + 10 = 25)");
+        });
+
+        it("should reduce effective TN by 5 per free raise", () => {
+          const baseTN = 20;
+          const freeRaises = 2;
+          const effectiveTN = baseTN - freeRaises * 5;
+
+          assert.equal(effectiveTN, 10, "Each free raise reduces TN by 5 (20 - 10 = 10)");
+        });
+
+        it("should limit declared raises to Void Ring value", () => {
+          const voidRing = 3;
+          const declaredRaises = 5;
+          const actualRaises = Math.min(declaredRaises, voidRing);
+
+          assert.equal(actualRaises, 3, "Raises capped at Void Ring (min(5, 3) = 3)");
+        });
+
+        it("should not limit free raises", () => {
+          const voidRing = 2;
+          const freeRaises = 4;
+          // Free raises are NOT limited by Void Ring
+
+          assert.equal(freeRaises, 4, "Free raises not capped by Void Ring");
+        });
+
+        it("should combine raises and free raises", () => {
+          const baseTN = 20;
+          const raises = 2;
+          const freeRaises = 1;
+          const effectiveTN = baseTN + raises * 5 - freeRaises * 5;
+
+          assert.equal(effectiveTN, 25, "Raises add, free raises subtract (20 + 10 - 5 = 25)");
+        });
+
+        it("should handle TN floor at 0", () => {
+          const baseTN = 10;
+          const freeRaises = 3;
+          const effectiveTN = Math.max(0, baseTN - freeRaises * 5);
+
+          assert.equal(effectiveTN, 0, "TN cannot go below 0");
         });
       });
     },

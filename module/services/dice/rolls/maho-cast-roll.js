@@ -88,7 +88,7 @@ export async function MahoCastRoll({ actor, spell, woundPenalty = 0, showDialog 
   };
 
   if (showDialog) {
-    options = await GetMahoCastOptions(spell.name, ringName, baseBloodCost);
+    options = await GetMahoCastOptions(spell.name, ringName, baseBloodCost, actor);
     if (options.cancelled) {
       return false;
     }

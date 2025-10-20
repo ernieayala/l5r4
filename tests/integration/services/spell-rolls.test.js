@@ -23,7 +23,7 @@ import { SYS_ID } from "../../../module/config/constants.js";
 export function registerSpellCastRollTests(quench) {
   quench.registerBatch(
     `${SYS_ID}.services.rolls.spell`,
-    (context) => {
+    context => {
       const { describe, it, assert } = context;
 
       describe("Spell Casting Formula", () => {
@@ -53,35 +53,35 @@ export function registerSpellCastRollTests(quench) {
       describe("Target Number (TN) Calculation", () => {
         it("should calculate TN for Mastery 1 spell", () => {
           const masteryLevel = 1;
-          const tn = 5 + (5 * masteryLevel);
+          const tn = 5 + 5 * masteryLevel;
 
           assert.equal(tn, 10, "Mastery 1 TN = 10 (5 + 5×1)");
         });
 
         it("should calculate TN for Mastery 2 spell", () => {
           const masteryLevel = 2;
-          const tn = 5 + (5 * masteryLevel);
+          const tn = 5 + 5 * masteryLevel;
 
           assert.equal(tn, 15, "Mastery 2 TN = 15 (5 + 5×2)");
         });
 
         it("should calculate TN for Mastery 3 spell", () => {
           const masteryLevel = 3;
-          const tn = 5 + (5 * masteryLevel);
+          const tn = 5 + 5 * masteryLevel;
 
           assert.equal(tn, 20, "Mastery 3 TN = 20 (5 + 5×3)");
         });
 
         it("should calculate TN for Mastery 4 spell", () => {
           const masteryLevel = 4;
-          const tn = 5 + (5 * masteryLevel);
+          const tn = 5 + 5 * masteryLevel;
 
           assert.equal(tn, 25, "Mastery 4 TN = 25 (5 + 5×4)");
         });
 
         it("should calculate TN for Mastery 5 spell", () => {
           const masteryLevel = 5;
-          const tn = 5 + (5 * masteryLevel);
+          const tn = 5 + 5 * masteryLevel;
 
           assert.equal(tn, 30, "Mastery 5 TN = 30 (5 + 5×5)");
         });
@@ -93,7 +93,14 @@ export function registerSpellCastRollTests(quench) {
           const freeRaises = hasAffinity ? 1 : 0;
 
           assert.equal(freeRaises, 1, "Affinity grants 1 Free Raise");
-          // Free Raise doesn't modify TN, it grants bonus effect
+        });
+
+        it("should reduce effective TN by 5 with affinity free raise", () => {
+          const baseTN = 15; // Mastery 2 spell
+          const freeRaises = 1; // From affinity
+          const effectiveTN = baseTN - freeRaises * 5;
+
+          assert.equal(effectiveTN, 10, "Free raise reduces TN by 5 (15-5=10)");
         });
 
         it("should increase TN by 5 with Deficiency", () => {
@@ -167,6 +174,43 @@ export function registerSpellCastRollTests(quench) {
 
           assert.equal(rolled, 6, "Void spell rolled (2+4=6)");
           assert.equal(kept, 2, "Void spell kept (2)");
+        });
+      });
+
+      describe("Raise Mechanics for Spell Casting", () => {
+        it("should increase spell TN by 5 per raise", () => {
+          const baseTN = 15; // Mastery 2
+          const raises = 2;
+          const effectiveTN = baseTN + raises * 5;
+
+          assert.equal(effectiveTN, 25, "Each raise adds +5 to spell TN (15 + 10 = 25)");
+        });
+
+        it("should combine raises and affinity free raise", () => {
+          const baseTN = 20; // Mastery 3
+          const raises = 2; // Declared raises
+          const freeRaises = 1; // From affinity
+          const effectiveTN = baseTN + raises * 5 - freeRaises * 5;
+
+          assert.equal(effectiveTN, 25, "Raises add, affinity subtracts (20 + 10 - 5 = 25)");
+        });
+
+        it("should handle deficiency and raises together", () => {
+          const masteryTN = 15; // Mastery 2
+          const deficiencyPenalty = 5;
+          const baseTN = masteryTN + deficiencyPenalty;
+          const raises = 1;
+          const effectiveTN = baseTN + raises * 5;
+
+          assert.equal(effectiveTN, 25, "Deficiency + raises (15 + 5 + 5 = 25)");
+        });
+
+        it("should handle free raises reducing TN to minimum", () => {
+          const baseTN = 10; // Mastery 1
+          const freeRaises = 3; // Multiple free raise sources
+          const effectiveTN = Math.max(0, baseTN - freeRaises * 5);
+
+          assert.equal(effectiveTN, 0, "TN cannot go below 0");
         });
       });
     },

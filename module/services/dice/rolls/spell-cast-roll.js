@@ -72,7 +72,7 @@ export async function SpellCastRoll({ actor, spell, woundPenalty = 0, showDialog
   };
 
   if (showDialog) {
-    options = await GetSpellCastOptions(spell.name, ringName);
+    options = await GetSpellCastOptions(spell.name, ringName, actor);
     if (options.cancelled) {
       return false;
     }
@@ -181,18 +181,31 @@ export async function SpellCastRoll({ actor, spell, woundPenalty = 0, showDialog
   const diceToRoll = ringValue + effectiveSchoolRank + rollMod;
   const diceToKeep = ringValue + keepMod;
 
+  // Use free raises from dialog
+  const freeRaises = options.freeRaises || 0;
+
   // Calculate effective TN
   const effTN = calculateEffectiveTN(
     baseTN,
     options.raises,
+    freeRaises,
     woundPenalty,
     options.applyWoundPenalty
   );
 
   // Append TN to label
-  if (baseTN || options.raises) {
+  if (baseTN || options.raises || freeRaises) {
     const raisesLabel = game.i18n.localize("l5r4.ui.mechanics.rolls.raises");
-    label += ` [TN ${effTN}${options.raises ? ` (${raisesLabel}: ${options.raises})` : ""}]`;
+    const freeRaisesLabel = game.i18n.localize("l5r4.ui.mechanics.rolls.freeRaises");
+    label += ` [TN ${effTN}`;
+    if (options.raises || freeRaises) {
+      label += ` (${raisesLabel}: ${options.raises}`;
+      if (freeRaises) {
+        label += ` + ${freeRaises} ${freeRaisesLabel}`;
+      }
+      label += ")";
+    }
+    label += "]";
   }
 
   // Apply Ten Dice Rule
@@ -204,7 +217,7 @@ export async function SpellCastRoll({ actor, spell, woundPenalty = 0, showDialog
   const rollHtml = await roll.render();
 
   // Evaluate TN result
-  const tnResult = evaluateTN(roll.total ?? 0, effTN, options.raises);
+  const tnResult = evaluateTN(roll.total ?? 0, effTN, options.raises, freeRaises);
 
   // Render and post chat message
   const content = await R(CHAT_TEMPLATES.simpleRoll, {
