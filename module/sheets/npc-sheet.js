@@ -42,7 +42,7 @@ import { TEMPLATE } from "../config/templates.js";
 import { STANCES } from "../config/localization.js";
 
 // Utils
-import { clamp, toInt } from "../utils/type-coercion.js";
+import { clamp } from "../utils/type-coercion.js";
 import { on } from "../utils/dom.js";
 import { getSortPref, sortWithPref } from "../utils/sorting.js";
 import { getSectionCollapsedMap } from "../utils/section-state.js";
@@ -56,7 +56,6 @@ import * as Fear from "../services/fear.js";
 import { applyLongRest } from "../services/rest.js";
 import { getActiveStances } from "../services/stance/core/helpers.js";
 import { getMountedStatus } from "../services/mounted-combat.js";
-import { RingRoll } from "../services/dice/rolls/ring-roll.js";
 import { SpellCastRoll } from "../services/dice/rolls/spell-cast-roll.js";
 import { MahoCastRoll } from "../services/dice/rolls/maho-cast-roll.js";
 
