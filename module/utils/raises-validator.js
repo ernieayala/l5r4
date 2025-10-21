@@ -4,10 +4,11 @@
  * Validates Raises declarations against L5R4 game rules.
  * Core rule: Maximum Raises per roll = Void Ring value
  *
- * Game Mechanics:
+ * Game Mechanics (game-rules/Skills_and_Rolls.md):
  * - Regular Raises: Limited to Void Ring (each adds +5 TN)
  * - Free Raises: No limit, don't count toward Void Ring maximum
  * - Free Raises can reduce TN instead of adding benefits
+ * - Per rules: "[book text removed; Core Rulebook p.79]."
  *
  * Used by: Dialog services to enforce Void Ring limit on Raises input
  *

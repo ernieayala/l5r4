@@ -7,10 +7,12 @@
  *
  * Used by: skill-roll.js, trait-roll.js, ring-roll.js, simple-roll.js
  *
- * Game Mechanics:
+ * Game Mechanics (game-rules/Skills_and_Rolls.md):
  * - Base TN: Set by GM or automatic (e.g., Armor TN for attacks)
  * - Raises: +5 TN per Raise declared before rolling (max = Void Ring)
+ *   Per rules: "[book text removed; Core Rulebook p.79]."
  * - Free Raises: -5 TN per Free Raise (no Void Ring limit)
+ *   Per rules: "[book text removed; Core Rulebook p.79]."
  * - Wound Penalties: Added to TN when character is injured (typically for attacks)
  * - Success: Roll total >= effective TN
  *
