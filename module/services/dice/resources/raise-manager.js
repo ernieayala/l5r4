@@ -5,11 +5,15 @@
  * Free Raises provide Raise benefits without increasing TN and don't count toward
  * the Void Ring limit.
  *
- * L5R4 Game Mechanics:
+ * L5R4 Game Mechanics (game-rules/Skills_and_Rolls.md):
  * - Free Raises: Grant Raise benefits without +5 TN increase
  * - Don't count toward Void Ring maximum
  * - Can be used to reduce TN by 5 instead of adding benefits
  * - Sources: Advantages, school techniques, items, temporary effects
+ * - Per rules: "Some mechanical effects grant a character Free Raises. These give
+ *   the benefit of having made a Raise without actually increasing the TN of the
+ *   roll in question, and do not count toward the maximum number of Raises that
+ *   may be made per roll."
  *
  * Used by: Roll services to calculate total Free Raises before rolling
  *

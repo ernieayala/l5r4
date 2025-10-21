@@ -237,6 +237,7 @@ async function migrateActorEmbeddedItems(actor, labelPrefix) {
   await migrateBowsToWeapons(actor.items.contents, `${labelPrefix}-bow-migration:${actor.id}`);
   await migrateSkillDefaults(actor.items.contents, `${labelPrefix}-skill-defaults:${actor.id}`);
   await migrateArmorTypes(actor.items.contents, `${labelPrefix}-armor-types:${actor.id}`);
+  await migrateFreeRaisesDefaults(actor.items.contents, `${labelPrefix}-free-raises:${actor.id}`);
   await normalizeItems(actor.items.contents, `${labelPrefix}-items-norm:${actor.id}`);
 }
 
@@ -466,6 +467,57 @@ async function migrateArmorTypes(docs, label) {
 }
 
 /**
+ * Ensures all items with itemDescription template have freeRaises field.
+ *
+ * Backfills freeRaises field for items created before the Raise/Free Raise system
+ * was implemented. All items using the itemDescription template (advantages, disadvantages,
+ * spells, techniques, skills, etc.) should have freeRaises: 0 as default.
+ *
+ * L5R4 Free Raises Mechanic (game-rules/Skills_and_Rolls.md):
+ * Free Raises grant Raise benefits without +5 TN increase and don't count toward
+ * Void Ring maximum. Items like advantages or school techniques can grant Free Raises.
+ *
+ * @param {Document[]} docs - Array of Item documents to scan
+ * @param {string} label - Migration context label for console logging
+ * @returns {Promise<void>}
+ */
+async function migrateFreeRaisesDefaults(docs, label) {
+  const itemDocs = docs.filter(doc => doc.documentName === "Item");
+  if (itemDocs.length === 0) {
+    return;
+  }
+
+  console.warn(
+    `${SYS_ID} | Migrating ${itemDocs.length} items to ensure freeRaises field exists (${label})`
+  );
+
+  let migratedCount = 0;
+
+  for (const item of itemDocs) {
+    try {
+      const currentFreeRaises = item.system?.freeRaises;
+      if (currentFreeRaises === undefined || currentFreeRaises === null) {
+        await item.update({ "system.freeRaises": 0 }, { diff: true, render: false });
+        migratedCount++;
+      }
+    } catch (err) {
+      console.warn(`${SYS_ID}`, "Failed to migrate freeRaises default", {
+        id: item.id,
+        name: item.name,
+        type: item.type,
+        err
+      });
+    }
+  }
+
+  if (migratedCount > 0) {
+    console.warn(
+      `${SYS_ID} | Successfully migrated ${migratedCount} items with freeRaises field (${label})`
+    );
+  }
+}
+
+/**
  * Migrates legacy NPC wound system to current schema with manual/formula modes.
  *
  * Transforms older NPC wound data structures into the current system which supports two
@@ -641,6 +693,15 @@ async function cleanupLegacyFields(docs, label) {
         { old: "system.initiative.keep_mod", new: "system.initiative.keepMod" },
         { old: "system.initiative.total_mod", new: "system.initiative.totalMod" }
       ];
+
+      // PC-specific cleanup: Remove system.armor (NPC-only property)
+      if (doc.type === "pc") {
+        const pcArmorProp = getByPath(doc, "system.armor");
+        if (pcArmorProp !== undefined) {
+          setByPath(updates, "system.armor", null);
+          needsUpdate = true;
+        }
+      }
 
       for (const rule of cleanupRules) {
         const oldVal = getByPath(doc, rule.old);
@@ -963,11 +1024,13 @@ async function migrateCompendiumIconPaths() {
  * 2. NPC wound system migration (world actors)
  * 3. Bow → weapon type conversion (world items)
  * 4. Skill default values backfill (world items)
- * 5. Data normalization (world items)
- * 6. Legacy field cleanup (world actors)
- * 7. Embedded item migrations (all world actors)
- * 8. Compendium migrations (unlocked packs only)
- * 9. Icon path migrations (world + compendiums)
+ * 5. Armor type backfill (world items)
+ * 6. Free Raises field backfill (world items)
+ * 7. Data normalization (world items)
+ * 8. Legacy field cleanup (world actors)
+ * 9. Embedded item migrations (all world actors)
+ * 10. Compendium migrations (unlocked packs only)
+ * 11. Icon path migrations (world + compendiums)
  *
  * Foundry VTT Integration:
  * - Called from system ready hook when version mismatch detected
@@ -996,6 +1059,8 @@ export async function runMigrations(fromVersion, toVersion) {
   await migrateSkillDefaults(game.items.contents, "world-skill-defaults");
 
   await migrateArmorTypes(game.items.contents, "world-armor-types");
+
+  await migrateFreeRaisesDefaults(game.items.contents, "world-free-raises");
 
   await normalizeItems(game.items.contents, "world-items-norm");
 
@@ -1027,6 +1092,7 @@ export async function runMigrations(fromVersion, toVersion) {
       await migrateBowsToWeapons(docs, `pack-bow-migration:${pack.collection}`);
       await migrateSkillDefaults(docs, `pack-skill-defaults:${pack.collection}`);
       await migrateArmorTypes(docs, `pack-armor-types:${pack.collection}`);
+      await migrateFreeRaisesDefaults(docs, `pack-free-raises:${pack.collection}`);
       await normalizeItems(docs, `pack-norm:${pack.collection}`);
 
       if (docType === "Actor") {
