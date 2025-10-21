@@ -45,6 +45,7 @@ import { registerCombatWorkflowTests } from "./workflows/combat-workflow.test.js
 import { registerAdvancementWorkflowTests } from "./workflows/advancement-workflow.test.js";
 import { registerSpellCastingWorkflowTests } from "./workflows/spell-casting-workflow.test.js";
 import { registerTraitFamilyBonusTests } from "./workflows/trait-family-bonus.test.js";
+import { registerArmorTNCalculationTests } from "./workflows/armor-tn-calculation.test.js";
 
 /**
  * Register Quench integration tests for the L5R4 system.
@@ -59,39 +60,40 @@ export async function registerQuenchTests(quench) {
   registerActorXpTests(quench);
   registerItemDocumentTests(quench);
   registerSkillRollTests(quench);
-  
+
   // Register service tests (Phase 1: Critical Rolls)
   registerSkillRollServiceTests(quench);
   registerWeaponRollTests(quench);
   registerInitiativeTests(quench);
-  
+
   // Register service tests (Phase 2: Extended Rolls)
   registerSpellCastRollTests(quench);
   registerRingRollTests(quench);
   registerTraitRollTests(quench);
   registerNpcRollTests(quench);
-  
+
   // Register service tests (Phase 3: Combat Systems)
   registerFearTests(quench);
   registerStanceTests(quench);
-  
+
   // Register service tests (Phase 4: Support Systems)
   registerRestTests(quench);
   registerFamilyBonusTests(quench);
   registerXpServiceTests(quench);
-  
+
   // Register sheet tests (Phase 5: User Interface)
   registerPCSheetTests(quench);
   registerNPCSheetTests(quench);
   registerItemSheetTests(quench);
   registerWoundConfigTests(quench);
   registerXpManagerTests(quench);
-  
+
   // Register workflow tests (Phase 6: Complete Workflows)
   registerCombatWorkflowTests(quench);
   registerAdvancementWorkflowTests(quench);
   registerSpellCastingWorkflowTests(quench);
   registerTraitFamilyBonusTests(quench);
+  registerArmorTNCalculationTests(quench);
 }
 
 /**
@@ -101,7 +103,7 @@ export async function registerQuenchTests(quench) {
 function registerSmokeTests(quench) {
   quench.registerBatch(
     `${SYS_ID}.smoke`,
-    (context) => {
+    context => {
       const { describe, it, assert } = context;
 
       describe("System Configuration", () => {
@@ -157,9 +159,7 @@ function registerSmokeTests(quench) {
         });
 
         it("should create skill item", async () => {
-          item = await Item.create(
-            createSkillData("Test Skill")
-          );
+          item = await Item.create(createSkillData("Test Skill"));
 
           assert.exists(item, "Item created");
           assert.equal(item.type, "skill", "Item is skill type");
@@ -178,7 +178,7 @@ function registerSmokeTests(quench) {
 function registerActorDocumentTests(quench) {
   quench.registerBatch(
     `${SYS_ID}.documents.actor`,
-    (context) => {
+    context => {
       const { describe, it, assert, beforeEach, afterEach } = context;
 
       describe("Actor Creation", () => {
@@ -206,10 +206,14 @@ function registerActorDocumentTests(quench) {
             system: {
               // Rings are DERIVED from traits: earth = min(sta, wil)
               traits: {
-                sta: 4, wil: 5,  // Earth = min(4, 5) = 4
-                ref: 3, awa: 4,  // Air = min(3, 4) = 3
-                agi: 5, int: 6,  // Fire = min(5, 6) = 5
-                str: 3, per: 4   // Water = min(3, 4) = 3
+                sta: 4,
+                wil: 5, // Earth = min(4, 5) = 4
+                ref: 3,
+                awa: 4, // Air = min(3, 4) = 3
+                agi: 5,
+                int: 6, // Fire = min(5, 6) = 5
+                str: 3,
+                per: 4 // Water = min(3, 4) = 3
               },
               rings: { void: { rank: 2 } }
             }
@@ -239,10 +243,14 @@ function registerActorDocumentTests(quench) {
             system: {
               rings: { earth: 3, air: 2, fire: 2, water: 2, void: { rank: 2 } },
               traits: {
-                sta: 3, wil: 3,
-                ref: 3, awa: 2,
-                agi: 2, int: 2,
-                str: 2, per: 2
+                sta: 3,
+                wil: 3,
+                ref: 3,
+                awa: 2,
+                agi: 2,
+                int: 2,
+                str: 2,
+                per: 2
               }
             }
           });
@@ -264,26 +272,34 @@ function registerActorDocumentTests(quench) {
         it("should calculate Armor TN", () => {
           assert.exists(actor.system.armorTn, "Armor TN object exists");
           assert.isNumber(actor.system.armorTn.current, "Armor TN current is number");
-          
+
           // Armor TN = (Reflexes × 5) + 5 + armor bonus
           // With Reflexes 3: (3 × 5) + 5 = 20
-          const expectedBaseTN = (3 * 5) + 5;
-          assert.equal(actor.system.armorTn.base, expectedBaseTN, "Base Armor TN calculated correctly");
+          const expectedBaseTN = 3 * 5 + 5;
+          assert.equal(
+            actor.system.armorTn.base,
+            expectedBaseTN,
+            "Base Armor TN calculated correctly"
+          );
         });
 
         it("should calculate wound levels from Earth Ring", () => {
           assert.exists(actor.system.woundLevels, "Wound levels exist");
           assert.exists(actor.system.woundLevels.healthy, "Healthy level exists");
           assert.exists(actor.system.woundLevels.out, "Out level exists");
-          
+
           // Healthy = Earth × 5 = 3 × 5 = 15
-          assert.equal(actor.system.woundLevels.healthy.value, 15, "Healthy wounds calculated correctly");
+          assert.equal(
+            actor.system.woundLevels.healthy.value,
+            15,
+            "Healthy wounds calculated correctly"
+          );
         });
 
         it("should calculate insight points", () => {
           assert.exists(actor.system.insight, "Insight object exists");
           assert.isNumber(actor.system.insight.points, "Insight points is number");
-          
+
           // Insight = (Rings × 10) + Skills
           // Rings: 3 + 2 + 2 + 2 + 2 = 11, Skills: 0
           // 11 × 10 = 110
@@ -299,7 +315,7 @@ function registerActorDocumentTests(quench) {
             name: "Update Test",
             system: {
               // Rings are DERIVED from traits
-              traits: { sta: 3, wil: 3 }  // Earth = min(3, 3) = 3
+              traits: { sta: 3, wil: 3 } // Earth = min(3, 3) = 3
             }
           });
         });
@@ -313,10 +329,10 @@ function registerActorDocumentTests(quench) {
 
         it("should recalculate derived data on update", async () => {
           const oldHealthy = actor.system.woundLevels.healthy.value;
-          
+
           // Update traits to change derived earth ring (earth = min(sta, wil))
           await actor.update({ "system.traits.sta": 5, "system.traits.wil": 5 });
-          
+
           const newHealthy = actor.system.woundLevels.healthy.value;
           assert.notEqual(newHealthy, oldHealthy, "Wound levels recalculated");
           assert.equal(newHealthy, 25, "New healthy level correct (5 × 5)");
@@ -324,7 +340,7 @@ function registerActorDocumentTests(quench) {
 
         it("should track wound damage", async () => {
           await actor.update({ "system.suffered": 10 });
-          
+
           assert.equal(actor.system.suffered, 10, "Suffered wounds recorded");
         });
       });
@@ -340,7 +356,7 @@ function registerActorDocumentTests(quench) {
 function registerActorWoundTests(quench) {
   quench.registerBatch(
     `${SYS_ID}.documents.actor.wounds`,
-    (context) => {
+    context => {
       const { describe, it, assert, beforeEach, afterEach } = context;
 
       describe("Wound Calculation Integration", () => {
@@ -350,7 +366,7 @@ function registerActorWoundTests(quench) {
           actor = await createTestPC({
             name: "Wound Test PC",
             system: {
-              traits: { sta: 3, wil: 3 },  // Earth = min(3, 3) = 3
+              traits: { sta: 3, wil: 3 }, // Earth = min(3, 3) = 3
               woundsMultiplier: 2
             }
           });
@@ -367,20 +383,20 @@ function registerActorWoundTests(quench) {
           assert.exists(actor.system.woundLevels, "Wound levels exist");
           assert.exists(actor.system.woundLevels.healthy, "Healthy level exists");
           assert.exists(actor.system.woundLevels.out, "Out level exists");
-          
+
           // Healthy = Earth × 5 = 3 × 5 = 15
           assert.equal(actor.system.woundLevels.healthy.value, 15, "Healthy threshold correct");
         });
 
         it("should recalculate wounds when Earth Ring changes", async () => {
           const oldHealthy = actor.system.woundLevels.healthy.value;
-          
+
           // Change Earth traits: sta 3→5, wil 3→5, so Earth 3→5
-          await actor.update({ 
+          await actor.update({
             "system.traits.sta": 5,
             "system.traits.wil": 5
           });
-          
+
           const newHealthy = actor.system.woundLevels.healthy.value;
           assert.notEqual(newHealthy, oldHealthy, "Healthy threshold recalculated");
           assert.equal(newHealthy, 25, "New healthy threshold correct (5 × 5)");
@@ -388,7 +404,7 @@ function registerActorWoundTests(quench) {
 
         it("should track suffered wounds", async () => {
           await actor.update({ "system.suffered": 10 });
-          
+
           assert.equal(actor.system.suffered, 10, "Suffered wounds tracked");
           assert.exists(actor.system.wounds, "Wounds object exists");
         });
@@ -396,10 +412,12 @@ function registerActorWoundTests(quench) {
         it("should determine current wound level from suffered damage", async () => {
           // Set suffered to be in "nicked" range (between healthy and grazed)
           await actor.update({ "system.suffered": 16 });
-          
+
           assert.exists(actor.system.woundLevels.nicked, "Nicked level exists");
           // Current wound level should be marked
-          const hasCurrentLevel = Object.values(actor.system.woundLevels).some(lvl => lvl.current === true);
+          const hasCurrentLevel = Object.values(actor.system.woundLevels).some(
+            lvl => lvl.current === true
+          );
           assert.isTrue(hasCurrentLevel, "A wound level is marked as current");
         });
 
@@ -412,8 +430,12 @@ function registerActorWoundTests(quench) {
         it("should calculate wounds.value as max minus suffered", async () => {
           const maxWounds = actor.system.wounds.max;
           await actor.update({ "system.suffered": 5 });
-          
-          assert.equal(actor.system.wounds.value, maxWounds - 5, "Current wounds calculated correctly");
+
+          assert.equal(
+            actor.system.wounds.value,
+            maxWounds - 5,
+            "Current wounds calculated correctly"
+          );
         });
       });
 
@@ -431,7 +453,7 @@ function registerActorWoundTests(quench) {
           npc = await createTestNPC({
             name: "Formula NPC",
             system: {
-              traits: { sta: 4, wil: 4 },  // Set traits so Earth = 4
+              traits: { sta: 4, wil: 4 }, // Set traits so Earth = 4
               woundMode: "formula",
               woundsMultiplier: 2
             }
@@ -485,9 +507,9 @@ function registerActorWoundTests(quench) {
 
         it("should apply wound penalty modifier", async () => {
           const basePenalty = actor.system.woundLevels.nicked.penaltyEff;
-          
+
           await actor.update({ "system.woundsPenaltyMod": 5 });
-          
+
           const newPenalty = actor.system.woundLevels.nicked.penaltyEff;
           assert.isTrue(newPenalty >= basePenalty, "Penalty increased by modifier");
         });
@@ -504,7 +526,7 @@ function registerActorWoundTests(quench) {
 function registerActorXpTests(quench) {
   quench.registerBatch(
     `${SYS_ID}.documents.actor.xp`,
-    (context) => {
+    context => {
       const { describe, it, assert, beforeEach, afterEach } = context;
 
       describe("PC XP Initialization", () => {
@@ -523,12 +545,12 @@ function registerActorXpTests(quench) {
 
         it("should initialize XP flags for PC", () => {
           const flags = actor.flags[SYS_ID];
-          
+
           assert.exists(flags, "System flags exist");
           assert.exists(flags.xpBase, "xpBase flag exists");
           assert.exists(flags.xpManual, "xpManual flag exists");
           assert.exists(flags.xpSpent, "xpSpent flag exists");
-          
+
           assert.equal(flags.xpBase, 40, "Default xpBase is 40");
           assert.isArray(flags.xpManual, "xpManual is array");
           assert.isArray(flags.xpSpent, "xpSpent is array");
@@ -537,17 +559,21 @@ function registerActorXpTests(quench) {
         it("should calculate insight points from rings", () => {
           assert.exists(actor.system.insight, "Insight object exists");
           assert.isNumber(actor.system.insight.points, "Insight points is number");
-          
+
           // Default rings: 2+2+2+2+2 = 10
           // Insight = (10 × 10) + skills = 100 + 0 = 100
           const expectedInsight = 100;
-          assert.equal(actor.system.insight.points, expectedInsight, "Insight calculated correctly");
+          assert.equal(
+            actor.system.insight.points,
+            expectedInsight,
+            "Insight calculated correctly"
+          );
         });
 
         it("should calculate insight rank from insight points", () => {
           assert.exists(actor.system.insight.rank, "Insight rank exists");
           assert.isNumber(actor.system.insight.rank, "Insight rank is number");
-          
+
           // With 100 insight points, should be rank 1 (0-149)
           assert.equal(actor.system.insight.rank, 1, "Insight rank is 1");
         });
@@ -561,10 +587,14 @@ function registerActorXpTests(quench) {
             name: "Rank Progression Test",
             system: {
               traits: {
-                sta: 3, wil: 3,  // Earth = 3
-                ref: 3, awa: 3,  // Air = 3
-                agi: 3, int: 3,  // Fire = 3
-                str: 3, per: 3   // Water = 3
+                sta: 3,
+                wil: 3, // Earth = 3
+                ref: 3,
+                awa: 3, // Air = 3
+                agi: 3,
+                int: 3, // Fire = 3
+                str: 3,
+                per: 3 // Water = 3
               },
               rings: { void: { rank: 3 } }
             }
@@ -588,10 +618,10 @@ function registerActorXpTests(quench) {
             { name: "Skill4", type: "skill", system: { rank: 10 } },
             { name: "Skill5", type: "skill", system: { rank: 10 } }
           ]);
-          
+
           // Force re-preparation
           actor.prepareData();
-          
+
           const insight = actor.system.insight.points;
           assert.isAtLeast(insight, 150, "Insight at least 150");
           assert.isAtLeast(actor.system.insight.rank, 2, "Insight rank at least 2");
@@ -622,7 +652,7 @@ function registerActorXpTests(quench) {
         it("should start with base XP available", () => {
           const total = actor.system._xp.total;
           const base = actor.flags[SYS_ID].xpBase;
-          
+
           assert.isAtLeast(total, base, "Total XP includes base");
         });
 
@@ -630,7 +660,7 @@ function registerActorXpTests(quench) {
           const total = actor.system._xp.total;
           const spent = actor.system._xp.spent;
           const available = actor.system._xp.available;
-          
+
           assert.equal(available, total - spent, "Available = Total - Spent");
         });
       });
@@ -649,7 +679,7 @@ function registerActorXpTests(quench) {
           npc = await createTestNPC({ name: "Test NPC" });
 
           const flags = npc.flags[SYS_ID];
-          
+
           // NPCs should not have xpBase, xpManual, xpSpent
           assert.isUndefined(flags?.xpBase, "NPC has no xpBase");
           assert.isUndefined(flags?.xpManual, "NPC has no xpManual");
@@ -673,7 +703,7 @@ function registerActorXpTests(quench) {
 function registerItemDocumentTests(quench) {
   quench.registerBatch(
     `${SYS_ID}.documents.item`,
-    (context) => {
+    context => {
       const { describe, it, assert, afterEach } = context;
 
       describe("Item Creation", () => {
@@ -687,9 +717,7 @@ function registerItemDocumentTests(quench) {
         });
 
         it("should create skill item", async () => {
-          item = await Item.create(
-            createSkillData("Kenjutsu", 3, "agi")
-          );
+          item = await Item.create(createSkillData("Kenjutsu", 3, "agi"));
 
           assert.exists(item, "Item created");
           assert.equal(item.type, "skill", "Item type is skill");
@@ -697,18 +725,14 @@ function registerItemDocumentTests(quench) {
         });
 
         it("should create weapon item", async () => {
-          item = await Item.create(
-            createWeaponData("Katana", 3, 2)
-          );
+          item = await Item.create(createWeaponData("Katana", 3, 2));
 
           assert.exists(item, "Item created");
           assert.equal(item.type, "weapon", "Item type is weapon");
         });
 
         it("should create armor item", async () => {
-          item = await Item.create(
-            createArmorData("Light Armor", 3, 1)
-          );
+          item = await Item.create(createArmorData("Light Armor", 3, 1));
 
           assert.exists(item, "Item created");
           assert.equal(item.system.bonus, 3, "Armor bonus set");
@@ -751,11 +775,11 @@ function registerItemDocumentTests(quench) {
           ]);
 
           assert.equal(actor.items.size, 3, "Three items on actor");
-          
+
           const skill = actor.items.find(i => i.type === "skill");
           const weapon = actor.items.find(i => i.type === "weapon");
           const armor = actor.items.find(i => i.type === "armor");
-          
+
           assert.exists(skill, "Skill exists");
           assert.exists(weapon, "Weapon exists");
           assert.exists(armor, "Armor exists");
@@ -787,7 +811,7 @@ function registerItemDocumentTests(quench) {
 function registerSkillRollTests(quench) {
   quench.registerBatch(
     `${SYS_ID}.rolls.skill`,
-    (context) => {
+    context => {
       const { describe, it, assert, beforeEach, afterEach } = context;
 
       describe("Basic Roll Creation", () => {
@@ -834,9 +858,7 @@ function registerSkillRollTests(quench) {
             }
           });
 
-          await actor.createEmbeddedDocuments("Item", [
-            createSkillData("Kenjutsu", 5, "agi")
-          ]);
+          await actor.createEmbeddedDocuments("Item", [createSkillData("Kenjutsu", 5, "agi")]);
         });
 
         afterEach(async () => {
@@ -848,7 +870,7 @@ function registerSkillRollTests(quench) {
 
         it("should access skill from actor", () => {
           const skill = actor.items.find(i => i.name === "Kenjutsu");
-          
+
           assert.exists(skill, "Skill exists on actor");
           assert.equal(skill.system.rank, 5, "Skill has correct rank");
           assert.equal(skill.system.trait, "agi", "Skill has correct trait");
@@ -857,10 +879,10 @@ function registerSkillRollTests(quench) {
         it("should calculate dice pool from skill and trait", () => {
           const skill = actor.items.find(i => i.name === "Kenjutsu");
           const trait = actor.system.traits[skill.system.trait];
-          
+
           const rolled = skill.system.rank + trait;
           const kept = trait;
-          
+
           assert.equal(rolled, 8, "Rolled dice calculated (5 + 3)");
           assert.equal(kept, 3, "Kept dice calculated (trait value)");
         });
@@ -868,15 +890,15 @@ function registerSkillRollTests(quench) {
         it("should create skill check roll", async () => {
           const skill = actor.items.find(i => i.name === "Kenjutsu");
           const trait = actor.system.traits[skill.system.trait];
-          
+
           const rolled = skill.system.rank + trait;
           const kept = trait;
-          
+
           // Use buildFormula to convert XkY to Foundry notation
           const formula = buildFormula(rolled, kept, 0, {});
           const roll = new Roll(formula);
           await roll.evaluate();
-          
+
           assert.exists(roll, "Roll created");
           assert.isNumber(roll.total, "Roll has result");
           assert.equal(formula, "8d10k3x10+0", "Formula built correctly for 8k3");

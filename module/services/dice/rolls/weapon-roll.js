@@ -165,5 +165,19 @@ export async function WeaponRoll({
     label += ` [Stance Bonus: +${stanceRoll}k${stanceKeep}]`;
   }
 
-  return roll.toMessage({ flavor: label, speaker: ChatMessage.getSpeaker() });
+  await roll.evaluate();
+
+  const rollHtml = await roll.render();
+  const html = await renderTemplate("systems/l5r4-enhanced/templates/chat/damage-roll.hbs", {
+    flavor: label,
+    roll: rollHtml,
+    damageTotal: roll.total,
+    actorId: actor?.id ?? null
+  });
+
+  return ChatMessage.create({
+    speaker: ChatMessage.getSpeaker({ actor }),
+    content: html,
+    type: CONST.CHAT_MESSAGE_TYPES.OTHER
+  });
 }

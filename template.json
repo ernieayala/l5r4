@@ -155,11 +155,12 @@
         "points": 0
       },
       "initiative": {
-        "roll": 2,
-        "keep": 2,
+        "roll": 0,
+        "keep": 0,
         "rollMod": 0,
         "keepMod": 0,
-        "totalMod": 0
+        "totalMod": 0,
+        "useVoid": false
       },
       "insight": {
         "rank": 1,
@@ -169,7 +170,9 @@
         "type": "",
         "reduction": 0,
         "current": 0,
-        "mod": 0
+        "mod": 0,
+        "useVoid": false,
+        "voidRound": null
       },
       "woundsMod": 0,
       "woundsMultiplier": 2,

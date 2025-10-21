@@ -15,6 +15,16 @@
           value="{{system.armorTn.mod}}"
           data-type="Number"
         /></div>
+      <span>{{localize "l5r4.ui.mechanics.rings.voidTnBoost"}}</span>
+      <div class="flexrow">
+        <input
+          type="checkbox"
+          name="system.armorTn.useVoid"
+          {{checked system.armorTn.useVoid}}
+          data-action="toggle-armor-void"
+        />
+        <span>+10 {{localize "l5r4.ui.common.tn"}}</span>
+      </div>
     </div>
   </section>
 {{else}}

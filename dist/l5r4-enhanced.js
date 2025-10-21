@@ -59,6 +59,8 @@ import { initializeStanceService } from "../module/services/stance/initialize.js
 import { initializeChatService } from "../module/services/chat.js";
 import { initializeInitiativeSystem } from "../module/services/initiative.js";
 import { initializeWoundProneAutomation } from "../module/services/wound-prone-automation.js";
+import { registerChatDamageButtons } from "../module/hooks/chat-damage-buttons.js";
+import { registerCombatVoidSpending } from "../module/hooks/combat-void-spending.js";
 import { registerQuenchTests } from "../tests/integration/quench-integration.js";
 
 /**
@@ -143,6 +145,8 @@ Hooks.once("init", async () => {
   initializeStanceService();
   initializeChatService();
   initializeWoundProneAutomation();
+  registerChatDamageButtons();
+  registerCombatVoidSpending();
 });
 
 /**
