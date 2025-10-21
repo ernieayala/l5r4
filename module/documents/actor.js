@@ -366,7 +366,8 @@ export default class L5R4Actor extends Actor {
     prepareTraitsAndRings(sys);
 
     // Helper: Get trait value safely as integer
-    const TR = k => toInt(sys.traits?.[k]);
+    const tEff = sys._derived?.traitsEff || {};
+    const TR = k => toInt(tEff[k]);
 
     // Initiative calculation per L5R4 combat rules:
     // Roll: Insight Rank + Reflexes + modifiers (determines action order)
@@ -375,6 +376,9 @@ export default class L5R4Actor extends Actor {
     sys.initiative = sys.initiative || {};
     sys.initiative.roll = toInt(sys.insight?.rank) + TR("ref") + toInt(sys.initiative.rollMod);
     sys.initiative.keep = TR("ref") + toInt(sys.initiative.keepMod);
+
+    // Note: Void Point initiative bonus (+10) is applied in initiative.js
+    // when dialog is confirmed, not in prepareDerivedData
 
     // Armor TN calculation per L5R4 combat rules:
     // Base TN = (Reflexes × 5) + 5 (default difficulty to hit character)
@@ -423,7 +427,10 @@ export default class L5R4Actor extends Actor {
     sys.armorTn.base = baseTN;
     sys.armorTn.bonus = bonusTN;
     sys.armorTn.reduction = reduction;
-    sys.armorTn.current = baseTN + modTN + bonusTN;
+
+    // Apply Void Point armor TN boost if active (+10)
+    const voidTnBonus = sys.armorTn.useVoid ? 10 : 0;
+    sys.armorTn.current = baseTN + modTN + bonusTN + voidTnBonus;
 
     applyStanceAutomation(this, sys);
     applyConditionEffects(this, sys);

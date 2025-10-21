@@ -48,6 +48,8 @@ import { T } from "../utils/localization.js";
 import { on } from "../utils/dom.js";
 import { toInt } from "../utils/type-coercion.js";
 import { readWoundPenalty } from "../utils/mechanics.js";
+
+// Services
 import { getSectionCollapsedMap } from "../utils/section-state.js";
 
 // Documents
@@ -208,6 +210,10 @@ export default class L5R4PcSheet extends BaseActorSheet {
         return PcTraitHandler.adjust(this._getHandlerContext(), event, element, +1);
       case "void-points-dots":
         return this._onVoidPointsAdjust(event, element, +1);
+      case "toggle-armor-void":
+        return this._onToggleArmorVoid(event, element);
+      case "toggle-initiative-void":
+        return this._onToggleInitiativeVoid(event, element);
       case "wound-config":
         return AppLauncherHandler.openWoundConfig(this._getHandlerContext(), event, element);
       case "xp-modal":
@@ -850,6 +856,114 @@ export default class L5R4PcSheet extends BaseActorSheet {
         value = String(value ?? "");
     }
     return this.actor.items.get(id)?.update({ [field]: value });
+  }
+
+  /**
+   * Toggles Void Point armor TN boost.
+   *
+   * **Game Rules:** Spend Void at beginning of round for +10 Armor TN for 1 round.
+   * Only works if in combat on the actor's turn.
+   *
+   * @param {Event} event - Checkbox change event
+   * @param {HTMLElement} element - Checkbox element
+   * @returns {Promise<void>}
+   * @protected
+   * @async
+   */
+  async _onToggleArmorVoid(event, element) {
+    event?.preventDefault?.();
+    const checked = element.checked;
+
+    if (!checked) {
+      // Just uncheck, no void spending
+      await this.actor.update({
+        "system.armorTn.useVoid": false,
+        "system.armorTn.voidRound": null
+      });
+      return;
+    }
+
+    // Check if in combat
+    const combat = game.combat;
+    if (!combat || !combat.started) {
+      ui.notifications?.warn("Must be in active combat to use Void for Armor TN");
+      element.checked = false;
+      await this.actor.update({
+        "system.armorTn.useVoid": false,
+        "system.armorTn.voidRound": null
+      });
+      return;
+    }
+
+    // Check if it's this actor's turn
+    const currentCombatant = combat.combatant;
+    if (!currentCombatant || currentCombatant.actorId !== this.actor.id) {
+      ui.notifications?.warn("Can only use Void for Armor TN on your turn");
+      element.checked = false;
+      await this.actor.update({
+        "system.armorTn.useVoid": false,
+        "system.armorTn.voidRound": null
+      });
+      return;
+    }
+
+    // Check void points available
+    const voidCurrent = this.actor.system?.rings?.void?.value ?? 0;
+    if (voidCurrent <= 0) {
+      ui.notifications?.warn(T("l5r4.ui.mechanics.wounds.noVoidPoints"));
+      element.checked = false;
+      await this.actor.update({
+        "system.armorTn.useVoid": false,
+        "system.armorTn.voidRound": null
+      });
+      return;
+    }
+
+    // Confirm with dialog
+    const confirmed = await Dialog.confirm({
+      title: "Spend Void Point",
+      content: "<p>Spend a Void Point to increase Armor TN by +10 for 1 round?</p>",
+      yes: () => true,
+      no: () => false
+    });
+
+    if (!confirmed) {
+      element.checked = false;
+      await this.actor.update({
+        "system.armorTn.useVoid": false,
+        "system.armorTn.voidRound": null
+      });
+      return;
+    }
+
+    // Spend void and activate (useVoid stays true until round end)
+    await this.actor.update({
+      "system.rings.void.value": voidCurrent - 1,
+      "system.armorTn.useVoid": true,
+      "system.armorTn.voidRound": combat.round
+    });
+
+    ui.notifications?.info(`${this.actor.name} spent Void Point - Armor TN +10 for 1 round`);
+  }
+
+  /**
+   * Toggles Void Point initiative boost flag.
+   *
+   * **Game Rules:** Flag indicates intent to spend Void for +10 initiative.
+   * Void is spent when initiative is rolled and flag clears after roll.
+   *
+   * @param {Event} event - Checkbox change event
+   * @param {HTMLElement} element - Checkbox element
+   * @returns {Promise<void>}
+   * @protected
+   * @async
+   */
+  async _onToggleInitiativeVoid(event, element) {
+    event?.preventDefault?.();
+    const checked = element.checked;
+
+    // Just toggle the flag - Void spending happens during initiative roll
+    await this.actor.update({ "system.initiative.useVoid": checked });
   }
 
   /* ---------------------------------- */
