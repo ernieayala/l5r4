@@ -10,8 +10,8 @@
  */
 export async function createTestPC(overrides = {}) {
   const defaultData = {
-    name: 'Test Character',
-    type: 'pc',
+    name: "Test Character",
+    type: "pc",
     system: {
       rings: {
         earth: 2,
@@ -37,7 +37,7 @@ export async function createTestPC(overrides = {}) {
       xp: 0
     }
   };
-  
+
   // Deep merge overrides
   const actorData = foundry.utils.mergeObject(defaultData, overrides);
   return await Actor.create(actorData);
@@ -50,8 +50,8 @@ export async function createTestPC(overrides = {}) {
  */
 export async function createHighRankPC(overrides = {}) {
   const baseData = {
-    name: 'Elite Samurai',
-    type: 'pc',
+    name: "Elite Samurai",
+    type: "pc",
     system: {
       rings: {
         earth: 5,
@@ -74,7 +74,7 @@ export async function createHighRankPC(overrides = {}) {
       xp: 200
     }
   };
-  
+
   return await createTestPC(foundry.utils.mergeObject(baseData, overrides));
 }
 
@@ -91,7 +91,7 @@ export async function createWoundedPC(wounds, overrides = {}) {
       wounds: { value: wounds }
     }
   };
-  
+
   return await createTestPC(foundry.utils.mergeObject(baseData, overrides));
 }
 
@@ -102,18 +102,18 @@ export async function createWoundedPC(wounds, overrides = {}) {
  */
 export async function createTestNPC(overrides = {}) {
   const defaultData = {
-    name: 'Test NPC',
-    type: 'npc',
+    name: "Test NPC",
+    type: "npc",
     system: {
       rings: { earth: 2, air: 2, fire: 2, water: 2, void: { rank: 0 } },
       traits: { sta: 2, wil: 2, str: 2, per: 2, ref: 2, awa: 2, agi: 2, int: 2 },
       nrWoundLvls: 3,
-      attack1: { roll: 3, keep: 2, type: '' },
-      damage1: { roll: 2, keep: 2, type: '' },
+      attack1: { roll: 3, keep: 2, type: "" },
+      damage1: { roll: 2, keep: 2, type: "" },
       fear: { rank: 0 }
     }
   };
-  
+
   const actorData = foundry.utils.mergeObject(defaultData, overrides);
   return await Actor.create(actorData);
 }
@@ -126,13 +126,13 @@ export async function createTestNPC(overrides = {}) {
  */
 export async function createFearsomeNPC(fearRank, overrides = {}) {
   const baseData = {
-    name: 'Fearsome Creature',
+    name: "Fearsome Creature",
     system: {
       fear: { rank: fearRank },
       rings: { earth: 4 }
     }
   };
-  
+
   return await createTestNPC(foundry.utils.mergeObject(baseData, overrides));
 }
 
@@ -144,11 +144,11 @@ export async function createFearsomeNPC(fearRank, overrides = {}) {
  */
 export async function createPCWithSkills(skills, overrides = {}) {
   const actor = await createTestPC(overrides);
-  
+
   if (skills && skills.length > 0) {
-    await actor.createEmbeddedDocuments('Item', skills);
+    await actor.createEmbeddedDocuments("Item", skills);
   }
-  
+
   return actor;
 }
 
@@ -159,16 +159,20 @@ export async function createPCWithSkills(skills, overrides = {}) {
  */
 export async function createShugenja(overrides = {}) {
   const baseData = {
-    name: 'Test Shugenja',
+    name: "Test Shugenja",
     system: {
       // Set traits to calculate rings (Ring = min(trait1, trait2))
       // Air Ring = min(ref, awa), Earth = min(sta, wil)
       // Fire Ring = min(agi, int), Water = min(str, per)
       traits: {
-        sta: 3, wil: 3,  // Earth = 3
-        ref: 4, awa: 4,  // Air = 4
-        agi: 4, int: 4,  // Fire = 4
-        str: 3, per: 3   // Water = 3
+        sta: 3,
+        wil: 3, // Earth = 3
+        ref: 4,
+        awa: 4, // Air = 4
+        agi: 4,
+        int: 4, // Fire = 4
+        str: 3,
+        per: 3 // Water = 3
       },
       rings: {
         void: { rank: 3, value: 3 }
@@ -182,6 +186,6 @@ export async function createShugenja(overrides = {}) {
       }
     }
   };
-  
+
   return await createTestPC(foundry.utils.mergeObject(baseData, overrides));
 }

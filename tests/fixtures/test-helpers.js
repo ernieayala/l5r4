@@ -1,6 +1,6 @@
 /**
  * @fileoverview Shared test helpers and utilities for unit tests
- * 
+ *
  * Provides common test utilities, fixtures, and helper functions
  * used across multiple test files.
  */
@@ -12,8 +12,8 @@
  */
 export function createMockActorData(overrides = {}) {
   return {
-    name: 'Test Character',
-    type: 'character',
+    name: "Test Character",
+    type: "character",
     system: {
       rings: {
         earth: { value: 2 },
@@ -61,22 +61,22 @@ export function createMockItemData(type, overrides = {}) {
     system: {}
   };
 
-  if (type === 'weapon') {
+  if (type === "weapon") {
     baseData.system = {
-      damage: { roll: '3k2', bonus: 0 },
-      skill: 'kenjutsu',
+      damage: { roll: "3k2", bonus: 0 },
+      skill: "kenjutsu",
       ...overrides.system
     };
-  } else if (type === 'armor') {
+  } else if (type === "armor") {
     baseData.system = {
       tnBonus: 5,
       reduction: 3,
       ...overrides.system
     };
-  } else if (type === 'skill') {
+  } else if (type === "skill") {
     baseData.system = {
       rank: 1,
-      trait: 'agility',
+      trait: "agility",
       ...overrides.system
     };
   }
@@ -111,21 +111,7 @@ export function getValidRingValues() {
  * @returns {Array} Array of invalid values (including edge cases)
  */
 export function getInvalidRingValues() {
-  return [
-    0,
-    -1,
-    11,
-    100,
-    null,
-    undefined,
-    NaN,
-    Infinity,
-    -Infinity,
-    '',
-    '5',
-    {},
-    []
-  ];
+  return [0, -1, 11, 100, null, undefined, NaN, Infinity, -Infinity, "", "5", {}, []];
 }
 
 /**
@@ -163,7 +149,7 @@ export function getNullishValues() {
  * @returns {Array} Array of falsy values
  */
 export function getFalsyValues() {
-  return [false, 0, -0, '', null, undefined, NaN];
+  return [false, 0, -0, "", null, undefined, NaN];
 }
 
 /**
@@ -182,7 +168,9 @@ export function wait(ms) {
  */
 export async function cleanupActors(actors) {
   for (const actor of actors) {
-    if (actor) await actor.delete();
+    if (actor) {
+      await actor.delete();
+    }
   }
 }
 
@@ -193,7 +181,9 @@ export async function cleanupActors(actors) {
  */
 export async function cleanupItems(items) {
   for (const item of items) {
-    if (item) await item.delete();
+    if (item) {
+      await item.delete();
+    }
   }
 }
 
@@ -225,7 +215,7 @@ export async function clearChatMessages() {
 export function assertRollFormula(roll, rolled, kept) {
   const formula = roll.formula.toLowerCase();
   // Basic check - formula should contain "Xk" pattern
-  const pattern = new RegExp(`${rolled}k${kept}`, 'i');
+  const pattern = new RegExp(`${rolled}k${kept}`, "i");
   if (!pattern.test(formula)) {
     throw new Error(`Expected formula to contain ${rolled}k${kept}, got: ${formula}`);
   }
@@ -241,13 +231,15 @@ export async function withTestActor(testFn, actorData = {}) {
   let actor;
   try {
     actor = await Actor.create({
-      name: 'Test Actor',
-      type: 'pc',
+      name: "Test Actor",
+      type: "pc",
       ...actorData
     });
     await testFn(actor);
   } finally {
-    if (actor) await actor.delete();
+    if (actor) {
+      await actor.delete();
+    }
   }
 }
 
@@ -258,17 +250,19 @@ export async function withTestActor(testFn, actorData = {}) {
  */
 export async function withCleanup(testFn) {
   const toCleanup = [];
-  
-  const cleanup = (doc) => {
+
+  const cleanup = doc => {
     toCleanup.push(doc);
     return doc;
   };
-  
+
   try {
     await testFn(cleanup);
   } finally {
     for (const doc of toCleanup.reverse()) {
-      if (doc && doc.delete) await doc.delete();
+      if (doc && doc.delete) {
+        await doc.delete();
+      }
     }
   }
 }

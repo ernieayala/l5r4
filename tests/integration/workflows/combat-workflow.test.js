@@ -1,9 +1,9 @@
 /**
  * Combat Workflow Integration Tests
- * 
+ *
  * Tests complete combat sequences from attack roll through damage application.
  * Validates multi-step combat processes work together correctly.
- * 
+ *
  * Test Priority: Tier 1 (Critical - Core combat mechanics)
  */
 
@@ -18,7 +18,7 @@ import { createWeaponData } from "../../fixtures/item-fixtures.js";
 export function registerCombatWorkflowTests(quench) {
   quench.registerBatch(
     `${SYS_ID}.workflows.combat`,
-    (context) => {
+    context => {
       const { describe, it, assert, beforeEach, afterEach } = context;
 
       describe("Combat Workflow: Attack Sequence", () => {
@@ -34,9 +34,7 @@ export function registerCombatWorkflowTests(quench) {
             }
           });
 
-          await attacker.createEmbeddedDocuments("Item", [
-            createWeaponData("Katana", 3, 2)
-          ]);
+          await attacker.createEmbeddedDocuments("Item", [createWeaponData("Katana", 3, 2)]);
 
           // Create defender
           defender = await createTestPC({
@@ -48,8 +46,12 @@ export function registerCombatWorkflowTests(quench) {
         });
 
         afterEach(async () => {
-          if (defender) await defender.delete();
-          if (attacker) await attacker.delete();
+          if (defender) {
+            await defender.delete();
+          }
+          if (attacker) {
+            await attacker.delete();
+          }
         });
 
         it("should execute complete attack sequence", async () => {
@@ -65,7 +67,7 @@ export function registerCombatWorkflowTests(quench) {
           // 1. Calculate attack dice pool
           const attackRoll = weapon.system.damageRoll || 3;
           const attackKeep = weapon.system.damageKeep || 2;
-          
+
           assert.isNumber(attackRoll, "Attack roll dice calculated");
           assert.isNumber(attackKeep, "Attack keep dice calculated");
 
@@ -147,9 +149,7 @@ export function registerCombatWorkflowTests(quench) {
             }
           });
 
-          await samurai.createEmbeddedDocuments("Item", [
-            createWeaponData("Katana", 3, 2)
-          ]);
+          await samurai.createEmbeddedDocuments("Item", [createWeaponData("Katana", 3, 2)]);
 
           // Create multiple enemies
           enemies = [];
@@ -161,9 +161,13 @@ export function registerCombatWorkflowTests(quench) {
 
         afterEach(async () => {
           for (const enemy of enemies) {
-            if (enemy) await enemy.delete();
+            if (enemy) {
+              await enemy.delete();
+            }
           }
-          if (samurai) await samurai.delete();
+          if (samurai) {
+            await samurai.delete();
+          }
         });
 
         it("should handle attacks against multiple targets", async () => {
@@ -176,9 +180,9 @@ export function registerCombatWorkflowTests(quench) {
           for (const enemy of enemies) {
             const initialWounds = enemy.system.wounds?.value || enemy.system.wounds?.max || 50;
             const damage = 10;
-            
+
             await enemy.update({ "system.suffered": damage });
-            
+
             results.push({
               enemy: enemy.name,
               damaged: true
@@ -187,7 +191,10 @@ export function registerCombatWorkflowTests(quench) {
 
           // ASSERT
           assert.equal(results.length, 3, "Attacked all three enemies");
-          assert.isTrue(results.every(r => r.damaged), "All enemies took damage");
+          assert.isTrue(
+            results.every(r => r.damaged),
+            "All enemies took damage"
+          );
         });
       });
     },

@@ -65,28 +65,28 @@ export function valueToRankPoints(value, minRank = 0, maxRank = 10) {
   const min = Number(minRank) || 0;
   const max = Number(maxRank) || 10;
   const v = clamp(Number(value) || 0, min, max);
-  
+
   if (v === max) {
     return { rank: max, points: 0, value: max };
   }
-  
+
   let rank = Math.floor(v);
   // Add small epsilon to handle floating point precision issues before rounding
   // e.g., 0.95 * 10 might be 9.499999... which would round to 9 instead of 10
   let points = Math.round((v - rank) * 10 + 0.0001);
-  
+
   // Handle points overflow (10 points = 1 rank)
   if (points >= 10) {
     rank++;
     points = 0;
   }
-  
+
   // Enforce max rank cap after overflow
   if (rank > max) {
     rank = max;
     points = 0;
   }
-  
+
   return { rank, points, value: rank + points / 10 };
 }
 

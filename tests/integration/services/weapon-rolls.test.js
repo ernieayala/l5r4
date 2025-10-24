@@ -24,7 +24,7 @@ import { SYS_ID } from "../../../module/config/constants.js";
 export function registerWeaponRollTests(quench) {
   quench.registerBatch(
     `${SYS_ID}.services.rolls.weapon`,
-    (context) => {
+    context => {
       const { describe, it, assert, beforeEach, afterEach } = context;
 
       describe("Basic Weapon Damage", () => {

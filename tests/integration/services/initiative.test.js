@@ -22,7 +22,7 @@ import { createTestPC, createTestNPC } from "../../fixtures/actor-fixtures.js";
 export function registerInitiativeTests(quench) {
   quench.registerBatch(
     `${SYS_ID}.services.initiative`,
-    (context) => {
+    context => {
       const { describe, it, assert, beforeEach, afterEach } = context;
 
       describe("PC Initiative Calculation", () => {
@@ -33,10 +33,14 @@ export function registerInitiativeTests(quench) {
             name: "Initiative Test PC",
             system: {
               traits: {
-                sta: 3, wil: 3,
-                ref: 4, awa: 3,
-                agi: 3, int: 3,
-                str: 3, per: 3
+                sta: 3,
+                wil: 3,
+                ref: 4,
+                awa: 3,
+                agi: 3,
+                int: 3,
+                str: 3,
+                per: 3
               },
               rings: { void: { rank: 2 } }
             }
@@ -140,10 +144,18 @@ export function registerInitiativeTests(quench) {
         it("should default to Reflexes for NPC initiative", () => {
           // First verify what reflexes value the NPC actually has
           const reflexes = npc.system.traits.ref;
-          
+
           // NPCs use effRoll/effKeep which default to Reflexes when roll/keep are 0
-          assert.equal(npc.system.initiative.effRoll, reflexes, `Effective roll defaults to Reflexes (${reflexes})`);
-          assert.equal(npc.system.initiative.effKeep, reflexes, `Effective keep defaults to Reflexes (${reflexes})`);
+          assert.equal(
+            npc.system.initiative.effRoll,
+            reflexes,
+            `Effective roll defaults to Reflexes (${reflexes})`
+          );
+          assert.equal(
+            npc.system.initiative.effKeep,
+            reflexes,
+            `Effective keep defaults to Reflexes (${reflexes})`
+          );
         });
 
         it("should use explicit roll value when > 0", async () => {
@@ -151,7 +163,11 @@ export function registerInitiativeTests(quench) {
           await npc.update({ "system.initiative.roll": 7 });
 
           // effRoll should use the roll value since it's > 0
-          assert.equal(npc.system.initiative.effRoll, 7, "Effective roll uses explicit roll value (7)");
+          assert.equal(
+            npc.system.initiative.effRoll,
+            7,
+            "Effective roll uses explicit roll value (7)"
+          );
         });
 
         it("should use explicit keep value when > 0", async () => {
@@ -159,7 +175,11 @@ export function registerInitiativeTests(quench) {
           await npc.update({ "system.initiative.keep": 5 });
 
           // effKeep should use the keep value since it's > 0
-          assert.equal(npc.system.initiative.effKeep, 5, "Effective keep uses explicit keep value (5)");
+          assert.equal(
+            npc.system.initiative.effKeep,
+            5,
+            "Effective keep uses explicit keep value (5)"
+          );
         });
       });
 
@@ -315,7 +335,7 @@ export function registerInitiativeTests(quench) {
           await actor.update({
             "system.traits.ref": 10
           });
-          
+
           // Add skills to increase insight rank to 10
           await actor.createEmbeddedDocuments("Item", [
             { name: "Skill1", type: "skill", system: { rank: 10 } },

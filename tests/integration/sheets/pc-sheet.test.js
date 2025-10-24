@@ -24,7 +24,7 @@ import { createSkillData } from "../../fixtures/item-fixtures.js";
 export function registerPCSheetTests(quench) {
   quench.registerBatch(
     `${SYS_ID}.sheets.pc`,
-    (context) => {
+    context => {
       const { describe, it, assert, beforeEach, afterEach } = context;
 
       describe("PC Sheet Rendering", () => {
@@ -35,10 +35,14 @@ export function registerPCSheetTests(quench) {
             name: "Test Character",
             system: {
               traits: {
-                sta: 4, wil: 5,  // Earth = 4
-                ref: 3, awa: 3,  // Air = 3
-                agi: 3, int: 3,  // Fire = 3
-                str: 4, per: 3   // Water = 3
+                sta: 4,
+                wil: 5, // Earth = 4
+                ref: 3,
+                awa: 3, // Air = 3
+                agi: 3,
+                int: 3, // Fire = 3
+                str: 4,
+                per: 3 // Water = 3
               },
               rings: { void: { rank: 2 } }
             }
@@ -47,8 +51,12 @@ export function registerPCSheetTests(quench) {
         });
 
         afterEach(async () => {
-          if (sheet?.rendered) await sheet.close();
-          if (actor) await actor.delete();
+          if (sheet?.rendered) {
+            await sheet.close();
+          }
+          if (actor) {
+            await actor.delete();
+          }
         });
 
         it("should render sheet without errors", async () => {
@@ -75,7 +83,7 @@ export function registerPCSheetTests(quench) {
 
           const element = sheet.element;
           // Rings use data-system-ring attribute
-          const ringElements = element.querySelectorAll('[data-system-ring]');
+          const ringElements = element.querySelectorAll("[data-system-ring]");
 
           assert.isAtLeast(ringElements.length, 1, "Ring elements found");
         });
@@ -86,7 +94,7 @@ export function registerPCSheetTests(quench) {
 
           const element = sheet.element;
           // Traits use data-trait attribute on rank spans
-          const traitElements = element.querySelectorAll('.trait-rank[data-trait]');
+          const traitElements = element.querySelectorAll(".trait-rank[data-trait]");
 
           assert.isAtLeast(traitElements.length, 1, "Trait elements found");
         });
@@ -97,7 +105,7 @@ export function registerPCSheetTests(quench) {
 
           const element = sheet.element;
           // Check for main sheet structure instead of tabs
-          const mainSheet = element.querySelector('.main-sheet');
+          const mainSheet = element.querySelector(".main-sheet");
 
           assert.exists(mainSheet, "Main sheet structure exists");
         });
@@ -110,7 +118,7 @@ export function registerPCSheetTests(quench) {
           actor = await createTestPC({
             name: "Update Test",
             system: {
-              traits: { sta: 3, wil: 3 }  // Earth = 3
+              traits: { sta: 3, wil: 3 } // Earth = 3
             }
           });
           sheet = actor.sheet;
@@ -118,8 +126,12 @@ export function registerPCSheetTests(quench) {
         });
 
         afterEach(async () => {
-          if (sheet?.rendered) await sheet.close();
-          if (actor) await actor.delete();
+          if (sheet?.rendered) {
+            await sheet.close();
+          }
+          if (actor) {
+            await actor.delete();
+          }
         });
 
         it("should update display when actor changes", async () => {
@@ -160,9 +172,7 @@ export function registerPCSheetTests(quench) {
             }
           });
 
-          await actor.createEmbeddedDocuments("Item", [
-            createSkillData("Kenjutsu", 4, "agi")
-          ]);
+          await actor.createEmbeddedDocuments("Item", [createSkillData("Kenjutsu", 4, "agi")]);
 
           sheet = actor.sheet;
           await sheet.render(true);
@@ -170,8 +180,12 @@ export function registerPCSheetTests(quench) {
         });
 
         afterEach(async () => {
-          if (sheet?.rendered) await sheet.close();
-          if (actor) await actor.delete();
+          if (sheet?.rendered) {
+            await sheet.close();
+          }
+          if (actor) {
+            await actor.delete();
+          }
         });
 
         it("should have roll action buttons", () => {
@@ -186,7 +200,9 @@ export function registerPCSheetTests(quench) {
         it("should have item management actions", () => {
           const element = sheet.element;
           // Look for edit or delete actions
-          const itemActions = element.querySelectorAll('[data-action*="edit"], [data-action*="delete"]');
+          const itemActions = element.querySelectorAll(
+            '[data-action*="edit"], [data-action*="delete"]'
+          );
 
           assert.exists(element, "Sheet element exists with potential item actions");
         });
@@ -213,8 +229,12 @@ export function registerPCSheetTests(quench) {
         });
 
         afterEach(async () => {
-          if (sheet?.rendered) await sheet.close();
-          if (actor) await actor.delete();
+          if (sheet?.rendered) {
+            await sheet.close();
+          }
+          if (actor) {
+            await actor.delete();
+          }
         });
 
         it("should reflect new items on sheet", async () => {
@@ -256,7 +276,7 @@ export function registerPCSheetTests(quench) {
           actor = await createTestPC({
             name: "Wound Display Test",
             system: {
-              traits: { sta: 3, wil: 3 }  // Earth = 3
+              traits: { sta: 3, wil: 3 } // Earth = 3
             }
           });
           sheet = actor.sheet;
@@ -264,8 +284,12 @@ export function registerPCSheetTests(quench) {
         });
 
         afterEach(async () => {
-          if (sheet?.rendered) await sheet.close();
-          if (actor) await actor.delete();
+          if (sheet?.rendered) {
+            await sheet.close();
+          }
+          if (actor) {
+            await actor.delete();
+          }
         });
 
         it("should display wound levels", async () => {
@@ -273,7 +297,7 @@ export function registerPCSheetTests(quench) {
 
           const element = sheet.element;
           // Look for wound level displays
-          const woundElements = element.querySelectorAll('[data-wound-level], [data-wound]');
+          const woundElements = element.querySelectorAll("[data-wound-level], [data-wound]");
 
           // Wound levels should be visible on sheet
           assert.exists(element, "Sheet displays wound tracking");

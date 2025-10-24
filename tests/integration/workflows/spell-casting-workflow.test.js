@@ -1,9 +1,9 @@
 /**
  * Spell Casting Workflow Integration Tests
- * 
+ *
  * Tests complete spell casting sequences from slot availability through
  * spell effect resolution. Validates multi-step spell casting processes.
- * 
+ *
  * Test Priority: Tier 1 (Critical - Spellcasting mechanics)
  */
 
@@ -18,7 +18,7 @@ import { createSpellData } from "../../fixtures/item-fixtures.js";
 export function registerSpellCastingWorkflowTests(quench) {
   quench.registerBatch(
     `${SYS_ID}.workflows.spellcasting`,
-    (context) => {
+    context => {
       const { describe, it, assert, beforeEach, afterEach } = context;
 
       describe("Spell Casting Workflow: Basic Casting", () => {
@@ -38,7 +38,9 @@ export function registerSpellCastingWorkflowTests(quench) {
         });
 
         afterEach(async () => {
-          if (shugenja) await shugenja.delete();
+          if (shugenja) {
+            await shugenja.delete();
+          }
         });
 
         it("should execute complete spell casting sequence", async () => {
@@ -61,7 +63,7 @@ export function registerSpellCastingWorkflowTests(quench) {
           // 2. Calculate spell roll (Ring kept dice)
           const rolled = ringValue;
           const kept = ringValue;
-          
+
           assert.equal(rolled, 4, "Roll 4 dice for Fire 4");
           assert.equal(kept, 4, "Keep 4 dice for Fire 4");
 
@@ -149,12 +151,16 @@ export function registerSpellCastingWorkflowTests(quench) {
         });
 
         afterEach(async () => {
-          if (shugenja) await shugenja.delete();
+          if (shugenja) {
+            await shugenja.delete();
+          }
         });
 
         it("should handle multiple spell casts from same ring", async () => {
           // ARRANGE
-          const fireSpells = shugenja.items.filter(i => i.type === "spell" && i.system.ring === "fire");
+          const fireSpells = shugenja.items.filter(
+            i => i.type === "spell" && i.system.ring === "fire"
+          );
           const initialFireSlots = shugenja.system.spellSlots.fire;
 
           assert.equal(fireSpells.length, 2, "Has 2 Fire spells");
@@ -230,7 +236,9 @@ export function registerSpellCastingWorkflowTests(quench) {
         });
 
         afterEach(async () => {
-          if (shugenja) await shugenja.delete();
+          if (shugenja) {
+            await shugenja.delete();
+          }
         });
 
         it("should track Void Points with spell casting", async () => {
@@ -288,7 +296,9 @@ export function registerSpellCastingWorkflowTests(quench) {
         });
 
         afterEach(async () => {
-          if (shugenja) await shugenja.delete();
+          if (shugenja) {
+            await shugenja.delete();
+          }
         });
 
         it("should handle spells of different mastery levels", async () => {
@@ -298,19 +308,19 @@ export function registerSpellCastingWorkflowTests(quench) {
 
           // ASSERT
           assert.includeMembers(masteryLevels, [1, 3, 5], "Has spells of various mastery");
-          
+
           // All spells use same ring, so same dice pool
           const fireRing = shugenja.system.rings.fire;
           assert.equal(fireRing, 5, "Fire Ring is 5");
-          
+
           // Mastery affects TN, not dice pool
           // TN = Mastery × 5
           const expectedTNs = {
-            1: 5,   // Mastery 1 = TN 5
-            3: 15,  // Mastery 3 = TN 15
-            5: 25   // Mastery 5 = TN 25
+            1: 5, // Mastery 1 = TN 5
+            3: 15, // Mastery 3 = TN 15
+            5: 25 // Mastery 5 = TN 25
           };
-          
+
           spells.forEach(spell => {
             const mastery = spell.system.mastery;
             const expectedTN = expectedTNs[mastery];

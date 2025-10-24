@@ -35,7 +35,7 @@ import { createTestPC } from "../../fixtures/actor-fixtures.js";
 export function registerTraitFamilyBonusTests(quench) {
   quench.registerBatch(
     `${SYS_ID}.workflows.traitFamilyBonus`,
-    (context) => {
+    context => {
       const { describe, it, assert, beforeEach, afterEach } = context;
 
       describe("Trait Stability with Family Bonus", () => {
@@ -94,8 +94,12 @@ export function registerTraitFamilyBonusTests(quench) {
         });
 
         afterEach(async () => {
-          if (sheet?.rendered) await sheet.close();
-          if (actor) await actor.delete();
+          if (sheet?.rendered) {
+            await sheet.close();
+          }
+          if (actor) {
+            await actor.delete();
+          }
           // familyItem is embedded, deleted with actor
         });
 
@@ -230,7 +234,9 @@ export function registerTraitFamilyBonusTests(quench) {
         });
 
         afterEach(async () => {
-          if (actor) await actor.delete();
+          if (actor) {
+            await actor.delete();
+          }
           // familyItem is embedded, deleted with actor
         });
 
@@ -315,7 +321,9 @@ export function registerTraitFamilyBonusTests(quench) {
         });
 
         afterEach(async () => {
-          if (actor) await actor.delete();
+          if (actor) {
+            await actor.delete();
+          }
           // familyItem is embedded, deleted with actor
         });
 
@@ -337,7 +345,11 @@ export function registerTraitFamilyBonusTests(quench) {
           await new Promise(resolve => setTimeout(resolve, 200));
 
           // Non-bonused trait should remain completely stable
-          assert.equal(actor._source.system.traits.per, initialPerBase, "Non-bonused base unchanged");
+          assert.equal(
+            actor._source.system.traits.per,
+            initialPerBase,
+            "Non-bonused base unchanged"
+          );
           assert.equal(actor.system.traits.per, initialPerEff, "Non-bonused effective unchanged");
         });
       });
@@ -364,7 +376,9 @@ export function registerTraitFamilyBonusTests(quench) {
         });
 
         afterEach(async () => {
-          if (actor) await actor.delete();
+          if (actor) {
+            await actor.delete();
+          }
         });
 
         it("should handle actors without family bonus", async () => {

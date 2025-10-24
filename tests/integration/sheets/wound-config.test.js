@@ -26,7 +26,7 @@ import { createTestPC, createTestNPC } from "../../fixtures/actor-fixtures.js";
 export function registerWoundConfigTests(quench) {
   quench.registerBatch(
     `${SYS_ID}.apps.wound-config`,
-    (context) => {
+    context => {
       const { describe, it, assert, beforeEach, afterEach } = context;
 
       describe("Wound Config Dialog Rendering", () => {
@@ -36,15 +36,19 @@ export function registerWoundConfigTests(quench) {
           actor = await createTestPC({
             name: "Wound Config Test",
             system: {
-              traits: { sta: 3, wil: 3 },  // Earth = 3
+              traits: { sta: 3, wil: 3 }, // Earth = 3
               woundsMultiplier: 2
             }
           });
         });
 
         afterEach(async () => {
-          if (dialog?.rendered) await dialog.close();
-          if (actor) await actor.delete();
+          if (dialog?.rendered) {
+            await dialog.close();
+          }
+          if (actor) {
+            await actor.delete();
+          }
         });
 
         it("should create wound config dialog", () => {
@@ -80,7 +84,7 @@ export function registerWoundConfigTests(quench) {
           await new Promise(resolve => setTimeout(resolve, 100));
 
           const element = dialog.element;
-          const formElements = element.querySelectorAll('input, select');
+          const formElements = element.querySelectorAll("input, select");
 
           assert.isAtLeast(formElements.length, 1, "Form elements exist");
         });
@@ -93,7 +97,7 @@ export function registerWoundConfigTests(quench) {
           actor = await createTestPC({
             name: "Config Display Test",
             system: {
-              traits: { sta: 4, wil: 4 },  // Earth = 4
+              traits: { sta: 4, wil: 4 }, // Earth = 4
               woundsMultiplier: 3,
               woundsPenaltyMod: 5
             }
@@ -104,13 +108,19 @@ export function registerWoundConfigTests(quench) {
         });
 
         afterEach(async () => {
-          if (dialog?.rendered) await dialog.close();
-          if (actor) await actor.delete();
+          if (dialog?.rendered) {
+            await dialog.close();
+          }
+          if (actor) {
+            await actor.delete();
+          }
         });
 
         it("should display wound multiplier", () => {
           const element = dialog.element;
-          const multiplierInput = element.querySelector('[name*="woundsMultiplier"], [name*="multiplier"]');
+          const multiplierInput = element.querySelector(
+            '[name*="woundsMultiplier"], [name*="multiplier"]'
+          );
 
           // Multiplier should be displayed
           assert.exists(element, "Dialog displays wound settings");
@@ -142,8 +152,12 @@ export function registerWoundConfigTests(quench) {
         });
 
         afterEach(async () => {
-          if (dialog?.rendered) await dialog.close();
-          if (npc) await npc.delete();
+          if (dialog?.rendered) {
+            await dialog.close();
+          }
+          if (npc) {
+            await npc.delete();
+          }
         });
 
         it("should open config for NPC", async () => {
@@ -182,7 +196,7 @@ export function registerWoundConfigTests(quench) {
           npc = await createTestNPC({
             name: "Formula NPC",
             system: {
-              traits: { sta: 4, wil: 4 },  // Earth = 4
+              traits: { sta: 4, wil: 4 }, // Earth = 4
               woundMode: "formula",
               woundsMultiplier: 2
             }
@@ -193,21 +207,25 @@ export function registerWoundConfigTests(quench) {
         });
 
         afterEach(async () => {
-          if (dialog?.rendered) await dialog.close();
-          if (npc) await npc.delete();
+          if (dialog?.rendered) {
+            await dialog.close();
+          }
+          if (npc) {
+            await npc.delete();
+          }
         });
 
         it("should calculate wounds from Earth Ring", () => {
           assert.equal(npc.system.woundMode, "formula", "Formula mode active");
           assert.equal(npc.system.rings.earth, 4, "Earth Ring is 4");
-          
+
           // Wound levels should be calculated
           assert.exists(npc.system.woundLevels, "Wound levels calculated");
         });
 
         it("should use multiplier in calculation", () => {
           assert.equal(npc.system.woundsMultiplier, 2, "Multiplier is 2");
-          
+
           // Healthy = Earth × 5 × multiplier = 4 × 5 × 2 = 40
           // Wait, that's not standard calculation. Let me check actual formula
           // Healthy = Earth × multiplier × 5
@@ -233,8 +251,12 @@ export function registerWoundConfigTests(quench) {
         });
 
         afterEach(async () => {
-          if (dialog?.rendered) await dialog.close();
-          if (actor) await actor.delete();
+          if (dialog?.rendered) {
+            await dialog.close();
+          }
+          if (actor) {
+            await actor.delete();
+          }
         });
 
         it("should have close button", () => {
@@ -282,8 +304,12 @@ export function registerWoundConfigTests(quench) {
         });
 
         afterEach(async () => {
-          if (dialog?.rendered) await dialog.close();
-          if (actor) await actor.delete();
+          if (dialog?.rendered) {
+            await dialog.close();
+          }
+          if (actor) {
+            await actor.delete();
+          }
         });
 
         it("should reflect actor wound settings", () => {
