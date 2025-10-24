@@ -23,7 +23,7 @@ import { SYS_ID } from "../../../module/config/constants.js";
 export function registerNpcRollTests(quench) {
   quench.registerBatch(
     `${SYS_ID}.services.rolls.npc`,
-    (context) => {
+    context => {
       const { describe, it, assert } = context;
 
       describe("NPC Trait Rolls", () => {

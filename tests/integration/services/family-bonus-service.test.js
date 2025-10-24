@@ -24,7 +24,7 @@ import { FamilyBonusService } from "../../../module/services/family-bonus-servic
 export function registerFamilyBonusTests(quench) {
   quench.registerBatch(
     `${SYS_ID}.services.familyBonus`,
-    (context) => {
+    context => {
       const { describe, it, assert } = context;
 
       describe("Valid Trait Keys", () => {

@@ -24,14 +24,14 @@ import { SYS_ID } from "../../../module/config/constants.js";
 export function registerRestTests(quench) {
   quench.registerBatch(
     `${SYS_ID}.services.rest`,
-    (context) => {
+    context => {
       const { describe, it, assert } = context;
 
       describe("Heal Rate Calculation", () => {
         it("should calculate heal rate as (Stamina × 2) + Insight Rank", () => {
           const stamina = 3;
           const insightRank = 2;
-          const healRate = (stamina * 2) + insightRank;
+          const healRate = stamina * 2 + insightRank;
 
           assert.equal(healRate, 8, "Heal rate = (3×2)+2 = 8");
         });
@@ -39,7 +39,7 @@ export function registerRestTests(quench) {
         it("should handle minimum values", () => {
           const stamina = 2; // Min trait
           const insightRank = 1; // Min rank
-          const healRate = (stamina * 2) + insightRank;
+          const healRate = stamina * 2 + insightRank;
 
           assert.equal(healRate, 5, "Min heal rate = (2×2)+1 = 5");
         });
@@ -47,7 +47,7 @@ export function registerRestTests(quench) {
         it("should handle high values", () => {
           const stamina = 5; // High Stamina
           const insightRank = 5; // Rank 5 character
-          const healRate = (stamina * 2) + insightRank;
+          const healRate = stamina * 2 + insightRank;
 
           assert.equal(healRate, 15, "High heal rate = (5×2)+5 = 15");
         });
@@ -55,7 +55,7 @@ export function registerRestTests(quench) {
         it("should double Stamina before adding Insight", () => {
           const stamina = 4;
           const insightRank = 3;
-          const healRate = (stamina * 2) + insightRank;
+          const healRate = stamina * 2 + insightRank;
 
           assert.equal(healRate, 11, "Heal rate = (4×2)+3 = 11");
           assert.notEqual(healRate, 10, "Not (Stamina + Insight)×2");
@@ -131,7 +131,7 @@ export function registerRestTests(quench) {
         it("should restore all spell slots regardless of current", () => {
           const currentSlots = { air: 1, earth: 0, fire: 2, water: 0, void: 0 };
           const rings = { air: 4, earth: 3, fire: 3, water: 3, void: { rank: 2 } };
-          
+
           const restored = {
             air: rings.air,
             earth: rings.earth,
@@ -218,7 +218,7 @@ export function registerRestTests(quench) {
         it("should handle lightly wounded character", () => {
           const stamina = 3;
           const insightRank = 2;
-          const healRate = (stamina * 2) + insightRank;
+          const healRate = stamina * 2 + insightRank;
           const suffered = 5;
           const newSuffered = Math.max(0, suffered - healRate);
 
@@ -229,7 +229,7 @@ export function registerRestTests(quench) {
         it("should handle moderately wounded character", () => {
           const stamina = 3;
           const insightRank = 2;
-          const healRate = (stamina * 2) + insightRank;
+          const healRate = stamina * 2 + insightRank;
           const suffered = 15;
           const newSuffered = Math.max(0, suffered - healRate);
 
@@ -240,7 +240,7 @@ export function registerRestTests(quench) {
         it("should handle critically wounded character", () => {
           const stamina = 4;
           const insightRank = 3;
-          const healRate = (stamina * 2) + insightRank;
+          const healRate = stamina * 2 + insightRank;
           const suffered = 30;
           const newSuffered = Math.max(0, suffered - healRate);
 

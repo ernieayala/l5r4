@@ -23,7 +23,7 @@ import { createTestNPC } from "../../fixtures/actor-fixtures.js";
 export function registerNPCSheetTests(quench) {
   quench.registerBatch(
     `${SYS_ID}.sheets.npc`,
-    (context) => {
+    context => {
       const { describe, it, assert, beforeEach, afterEach } = context;
 
       describe("NPC Sheet Rendering", () => {
@@ -42,8 +42,12 @@ export function registerNPCSheetTests(quench) {
         });
 
         afterEach(async () => {
-          if (sheet?.rendered) await sheet.close();
-          if (actor) await actor.delete();
+          if (sheet?.rendered) {
+            await sheet.close();
+          }
+          if (actor) {
+            await actor.delete();
+          }
         });
 
         it("should render NPC sheet", async () => {
@@ -105,13 +109,19 @@ export function registerNPCSheetTests(quench) {
         });
 
         afterEach(async () => {
-          if (sheet?.rendered) await sheet.close();
-          if (actor) await actor.delete();
+          if (sheet?.rendered) {
+            await sheet.close();
+          }
+          if (actor) {
+            await actor.delete();
+          }
         });
 
         it("should display multiple attacks", () => {
           const element = sheet.element;
-          const attackSections = element.querySelectorAll('[data-attack], [name*="attack1"], [name*="attack2"]');
+          const attackSections = element.querySelectorAll(
+            '[data-attack], [name*="attack1"], [name*="attack2"]'
+          );
 
           assert.isAtLeast(attackSections.length, 1, "Multiple attack fields exist");
         });
@@ -119,7 +129,9 @@ export function registerNPCSheetTests(quench) {
         it("should have roll buttons for attacks", () => {
           const element = sheet.element;
           // Look for attack, ring, and trait roll actions
-          const rollButtons = element.querySelectorAll('[data-action="roll-attack"], [data-action="roll-ring"], [data-action="roll-trait"]');
+          const rollButtons = element.querySelectorAll(
+            '[data-action="roll-attack"], [data-action="roll-ring"], [data-action="roll-trait"]'
+          );
 
           assert.isAtLeast(rollButtons.length, 1, "Roll buttons exist for NPC attacks");
         });
@@ -143,8 +155,12 @@ export function registerNPCSheetTests(quench) {
         });
 
         afterEach(async () => {
-          if (sheet?.rendered) await sheet.close();
-          if (actor) await actor.delete();
+          if (sheet?.rendered) {
+            await sheet.close();
+          }
+          if (actor) {
+            await actor.delete();
+          }
         });
 
         it("should display wound tracking fields", () => {
@@ -176,8 +192,12 @@ export function registerNPCSheetTests(quench) {
         });
 
         afterEach(async () => {
-          if (sheet?.rendered) await sheet.close();
-          if (actor) await actor.delete();
+          if (sheet?.rendered) {
+            await sheet.close();
+          }
+          if (actor) {
+            await actor.delete();
+          }
         });
 
         it("should update when attack values change", async () => {
@@ -213,7 +233,7 @@ export function registerNPCSheetTests(quench) {
           actor = await createTestNPC({
             name: "Ring NPC",
             system: {
-              traits: { sta: 4, wil: 3 }  // Earth = 3
+              traits: { sta: 4, wil: 3 } // Earth = 3
             }
           });
           sheet = actor.sheet;
@@ -221,8 +241,12 @@ export function registerNPCSheetTests(quench) {
         });
 
         afterEach(async () => {
-          if (sheet?.rendered) await sheet.close();
-          if (actor) await actor.delete();
+          if (sheet?.rendered) {
+            await sheet.close();
+          }
+          if (actor) {
+            await actor.delete();
+          }
         });
 
         it("should display NPC rings", () => {

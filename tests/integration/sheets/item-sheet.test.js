@@ -16,7 +16,12 @@
 
 import { SYS_ID } from "../../../module/config/constants.js";
 import { createTestPC } from "../../fixtures/actor-fixtures.js";
-import { createSkillData, createWeaponData, createArmorData, createSpellData } from "../../fixtures/item-fixtures.js";
+import {
+  createSkillData,
+  createWeaponData,
+  createArmorData,
+  createSpellData
+} from "../../fixtures/item-fixtures.js";
 
 /**
  * Register item sheet tests
@@ -25,7 +30,7 @@ import { createSkillData, createWeaponData, createArmorData, createSpellData } f
 export function registerItemSheetTests(quench) {
   quench.registerBatch(
     `${SYS_ID}.sheets.item`,
-    (context) => {
+    context => {
       const { describe, it, assert, beforeEach, afterEach } = context;
 
       describe("Skill Item Sheet", () => {
@@ -41,8 +46,12 @@ export function registerItemSheetTests(quench) {
         });
 
         afterEach(async () => {
-          if (sheet?.rendered) await sheet.close();
-          if (item) await item.delete();
+          if (sheet?.rendered) {
+            await sheet.close();
+          }
+          if (item) {
+            await item.delete();
+          }
         });
 
         it("should render skill sheet", async () => {
@@ -110,8 +119,12 @@ export function registerItemSheetTests(quench) {
         });
 
         afterEach(async () => {
-          if (sheet?.rendered) await sheet.close();
-          if (item) await item.delete();
+          if (sheet?.rendered) {
+            await sheet.close();
+          }
+          if (item) {
+            await item.delete();
+          }
         });
 
         it("should render weapon sheet", async () => {
@@ -167,15 +180,17 @@ export function registerItemSheetTests(quench) {
         let item, sheet;
 
         beforeEach(async () => {
-          item = await Item.create(
-            createArmorData("Light Armor", 3, 1)
-          );
+          item = await Item.create(createArmorData("Light Armor", 3, 1));
           sheet = item.sheet;
         });
 
         afterEach(async () => {
-          if (sheet?.rendered) await sheet.close();
-          if (item) await item.delete();
+          if (sheet?.rendered) {
+            await sheet.close();
+          }
+          if (item) {
+            await item.delete();
+          }
         });
 
         it("should render armor sheet", async () => {
@@ -212,15 +227,17 @@ export function registerItemSheetTests(quench) {
         let item, sheet;
 
         beforeEach(async () => {
-          item = await Item.create(
-            createSpellData("Clarity of Purpose", "air", 2)
-          );
+          item = await Item.create(createSpellData("Clarity of Purpose", "air", 2));
           sheet = item.sheet;
         });
 
         afterEach(async () => {
-          if (sheet?.rendered) await sheet.close();
-          if (item) await item.delete();
+          if (sheet?.rendered) {
+            await sheet.close();
+          }
+          if (item) {
+            await item.delete();
+          }
         });
 
         it("should render spell sheet", async () => {
@@ -256,15 +273,17 @@ export function registerItemSheetTests(quench) {
         let item, sheet;
 
         beforeEach(async () => {
-          item = await Item.create(
-            createSkillData("Test Item", 1)
-          );
+          item = await Item.create(createSkillData("Test Item", 1));
           sheet = item.sheet;
         });
 
         afterEach(async () => {
-          if (sheet?.rendered) await sheet.close();
-          if (item) await item.delete();
+          if (sheet?.rendered) {
+            await sheet.close();
+          }
+          if (item) {
+            await item.delete();
+          }
         });
 
         it("should have description field", async () => {
@@ -324,8 +343,12 @@ export function registerItemSheetTests(quench) {
         });
 
         afterEach(async () => {
-          if (sheet?.rendered) await sheet.close();
-          if (actor) await actor.delete();
+          if (sheet?.rendered) {
+            await sheet.close();
+          }
+          if (actor) {
+            await actor.delete();
+          }
         });
 
         it("should render embedded item sheet", async () => {

@@ -25,7 +25,7 @@ import { SYS_ID } from "../../../module/config/constants.js";
 export function registerXpServiceTests(quench) {
   quench.registerBatch(
     `${SYS_ID}.services.xp`,
-    (context) => {
+    context => {
       const { describe, it, assert } = context;
 
       describe("Trait Advancement Costs", () => {
@@ -203,7 +203,7 @@ export function registerXpServiceTests(quench) {
           const freeRanks = 3; // Baseline 2 + family bonus 1
           const currentRank = 5;
           const paidRanks = [4, 5]; // Ranks that cost XP
-          const totalCost = (4 * 4) + (4 * 5);
+          const totalCost = 4 * 4 + 4 * 5;
 
           assert.equal(paidRanks.length, 2, "2 ranks cost XP");
           assert.equal(totalCost, 36, "Ranks 4-5 cost 36 XP (16+20)");
@@ -256,7 +256,7 @@ export function registerXpServiceTests(quench) {
 
         it("should calculate rank 3 character advancement", () => {
           // Raise 1 trait from 3 to 5
-          const trait = (4 * 4) + (4 * 5); // 36 XP
+          const trait = 4 * 4 + 4 * 5; // 36 XP
           // Raise 1 skill from 5 to 7
           const skill = 6 + 7; // 13 XP
           // Raise Void from 2 to 3

@@ -24,41 +24,41 @@ import { SYS_ID } from "../../../module/config/constants.js";
 export function registerFearTests(quench) {
   quench.registerBatch(
     `${SYS_ID}.services.fear`,
-    (context) => {
+    context => {
       const { describe, it, assert } = context;
 
       describe("Fear Target Number Calculation", () => {
         it("should calculate TN for Fear Rank 1", () => {
           const fearRank = 1;
-          const tn = 5 + (5 * fearRank);
+          const tn = 5 + 5 * fearRank;
 
           assert.equal(tn, 10, "Fear Rank 1 TN = 10 (5 + 5×1)");
         });
 
         it("should calculate TN for Fear Rank 3", () => {
           const fearRank = 3;
-          const tn = 5 + (5 * fearRank);
+          const tn = 5 + 5 * fearRank;
 
           assert.equal(tn, 20, "Fear Rank 3 TN = 20 (5 + 5×3)");
         });
 
         it("should calculate TN for Fear Rank 5", () => {
           const fearRank = 5;
-          const tn = 5 + (5 * fearRank);
+          const tn = 5 + 5 * fearRank;
 
           assert.equal(tn, 30, "Fear Rank 5 TN = 30 (5 + 5×5)");
         });
 
         it("should calculate TN for Fear Rank 7", () => {
           const fearRank = 7;
-          const tn = 5 + (5 * fearRank);
+          const tn = 5 + 5 * fearRank;
 
           assert.equal(tn, 40, "Fear Rank 7 TN = 40 (5 + 5×7)");
         });
 
         it("should calculate TN for Fear Rank 10", () => {
           const fearRank = 10;
-          const tn = 5 + (5 * fearRank);
+          const tn = 5 + 5 * fearRank;
 
           assert.equal(tn, 55, "Fear Rank 10 TN = 55 (5 + 5×10)");
         });
@@ -216,7 +216,7 @@ export function registerFearTests(quench) {
       describe("Fear Rank Range", () => {
         it("should handle minimum Fear Rank (1)", () => {
           const fearRank = 1;
-          const tn = 5 + (5 * fearRank);
+          const tn = 5 + 5 * fearRank;
 
           assert.equal(fearRank, 1, "Minimum Fear Rank = 1");
           assert.equal(tn, 10, "Minimum TN = 10");
@@ -224,7 +224,7 @@ export function registerFearTests(quench) {
 
         it("should handle moderate Fear Rank (5)", () => {
           const fearRank = 5;
-          const tn = 5 + (5 * fearRank);
+          const tn = 5 + 5 * fearRank;
 
           assert.equal(fearRank, 5, "Moderate Fear Rank = 5");
           assert.equal(tn, 30, "Moderate TN = 30");
@@ -232,7 +232,7 @@ export function registerFearTests(quench) {
 
         it("should handle maximum Fear Rank (10)", () => {
           const fearRank = 10;
-          const tn = 5 + (5 * fearRank);
+          const tn = 5 + 5 * fearRank;
 
           assert.equal(fearRank, 10, "Maximum Fear Rank = 10");
           assert.equal(tn, 55, "Maximum TN = 55");
@@ -244,7 +244,7 @@ export function registerFearTests(quench) {
           const willpower = 2; // Low
           const honorRank = 1;
           const fearRank = 7; // High
-          const tn = 5 + (5 * fearRank); // 40
+          const tn = 5 + 5 * fearRank; // 40
 
           assert.equal(willpower, 2, "Low Willpower = 2");
           assert.equal(tn, 40, "High Fear TN = 40");
@@ -255,7 +255,7 @@ export function registerFearTests(quench) {
           const willpower = 5; // High
           const honorRank = 4; // High
           const fearRank = 2; // Low
-          const tn = 5 + (5 * fearRank); // 15
+          const tn = 5 + 5 * fearRank; // 15
 
           assert.equal(willpower, 5, "High Willpower = 5");
           assert.equal(honorRank, 4, "High Honor = 4");
@@ -267,7 +267,7 @@ export function registerFearTests(quench) {
           const willpower = 3;
           const honorRank = 2;
           const fearRank = 4;
-          const tn = 5 + (5 * fearRank); // 25
+          const tn = 5 + 5 * fearRank; // 25
 
           assert.equal(willpower, 3, "Willpower = 3");
           assert.equal(honorRank, 2, "Honor = 2");

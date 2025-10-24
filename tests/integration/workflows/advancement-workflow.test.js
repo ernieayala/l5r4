@@ -1,9 +1,9 @@
 /**
  * Advancement Workflow Integration Tests
- * 
+ *
  * Tests complete character advancement sequences from XP spending through
  * insight rank progression. Validates multi-step advancement processes.
- * 
+ *
  * Test Priority: Tier 1 (Critical - Character progression)
  */
 
@@ -18,7 +18,7 @@ import { createSkillData } from "../../fixtures/item-fixtures.js";
 export function registerAdvancementWorkflowTests(quench) {
   quench.registerBatch(
     `${SYS_ID}.workflows.advancement`,
-    (context) => {
+    context => {
       const { describe, it, assert, beforeEach, afterEach } = context;
 
       describe("Advancement Workflow: Skill Progression", () => {
@@ -33,13 +33,13 @@ export function registerAdvancementWorkflowTests(quench) {
             }
           });
 
-          await character.createEmbeddedDocuments("Item", [
-            createSkillData("Kenjutsu", 1, "agi")
-          ]);
+          await character.createEmbeddedDocuments("Item", [createSkillData("Kenjutsu", 1, "agi")]);
         });
 
         afterEach(async () => {
-          if (character) await character.delete();
+          if (character) {
+            await character.delete();
+          }
         });
 
         it("should advance skill rank and update insight", async () => {
@@ -61,7 +61,10 @@ export function registerAdvancementWorkflowTests(quench) {
           const updatedInsight = character.system.insight.points;
 
           assert.equal(updatedSkill.system.rank, 2, "Skill advanced to rank 2");
-          assert.isTrue(updatedInsight > initialInsight, "Insight increased after skill advancement");
+          assert.isTrue(
+            updatedInsight > initialInsight,
+            "Insight increased after skill advancement"
+          );
         });
 
         it("should handle multiple skill advancements", async () => {
@@ -83,10 +86,18 @@ export function registerAdvancementWorkflowTests(quench) {
 
           // ASSERT
           const finalInsight = character.system.insight.points;
-          const skillRanks = character.items.filter(i => i.type === "skill").map(s => s.system.rank);
+          const skillRanks = character.items
+            .filter(i => i.type === "skill")
+            .map(s => s.system.rank);
 
-          assert.isTrue(skillRanks.every(r => r >= 2), "All skills advanced");
-          assert.isTrue(finalInsight > initialInsight, "Insight increased from multiple advancements");
+          assert.isTrue(
+            skillRanks.every(r => r >= 2),
+            "All skills advanced"
+          );
+          assert.isTrue(
+            finalInsight > initialInsight,
+            "Insight increased from multiple advancements"
+          );
         });
       });
 
@@ -103,7 +114,9 @@ export function registerAdvancementWorkflowTests(quench) {
         });
 
         afterEach(async () => {
-          if (character) await character.delete();
+          if (character) {
+            await character.delete();
+          }
         });
 
         it("should advance traits and recalculate rings", async () => {
@@ -124,7 +137,7 @@ export function registerAdvancementWorkflowTests(quench) {
           assert.equal(insightAfterSta, initialInsight, "Insight unchanged (ring didn't increase)");
 
           // ACT - Advance BOTH Earth traits (increases Earth Ring)
-          await character.update({ 
+          await character.update({
             "system.traits.sta": 4,
             "system.traits.wil": 4
           });
@@ -134,7 +147,10 @@ export function registerAdvancementWorkflowTests(quench) {
 
           // ASSERT - Ring increased, so insight increased
           assert.equal(finalEarth, 4, "Earth Ring now 4 after both traits advanced");
-          assert.isTrue(finalInsight > initialInsight, "Insight increased (ring increased from 3 to 4)");
+          assert.isTrue(
+            finalInsight > initialInsight,
+            "Insight increased (ring increased from 3 to 4)"
+          );
         });
 
         it("should recalculate wound capacity when Earth Ring changes", async () => {
@@ -154,7 +170,7 @@ export function registerAdvancementWorkflowTests(quench) {
 
           assert.equal(newEarth, 5, "Earth Ring advanced to 5");
           assert.isTrue(newWoundCapacity > initialWoundCapacity, "Wound capacity increased");
-          
+
           // Wound capacity = Earth × 5
           const expectedHealthy = newEarth * 5;
           assert.equal(newWoundCapacity, expectedHealthy, "Wound capacity calculated correctly");
@@ -174,7 +190,9 @@ export function registerAdvancementWorkflowTests(quench) {
         });
 
         afterEach(async () => {
-          if (character) await character.delete();
+          if (character) {
+            await character.delete();
+          }
         });
 
         it("should progress through insight ranks", async () => {
@@ -183,7 +201,7 @@ export function registerAdvancementWorkflowTests(quench) {
           const initialPoints = character.system.insight.points;
 
           assert.equal(initialRank, 1, "Starting at Insight Rank 1");
-          
+
           // Rank 1: 0-149
           // Rank 2: 150-174
           // Need 150+ points for Rank 2
@@ -220,7 +238,9 @@ export function registerAdvancementWorkflowTests(quench) {
         });
 
         afterEach(async () => {
-          if (character) await character.delete();
+          if (character) {
+            await character.delete();
+          }
         });
 
         it("should handle complete advancement progression", async () => {
@@ -259,7 +279,7 @@ export function registerAdvancementWorkflowTests(quench) {
           assert.isTrue(final.insight > initial.insight, "Insight increased");
           assert.isTrue(final.earth >= initial.earth, "Earth Ring maintained or increased");
           assert.isTrue(final.wounds >= initial.wounds, "Wound capacity maintained or increased");
-          
+
           // Verify all systems updated consistently
           assert.exists(final.insightRank, "Insight rank calculated");
           assert.exists(final.wounds, "Wounds recalculated");

@@ -24,14 +24,14 @@ export const SAMPLE_RINGS = {
  * Wound level data
  */
 export const WOUND_LEVELS = [
-  'healthy',
-  'nicked',
-  'grazed',
-  'hurt',
-  'injured',
-  'crippled',
-  'down',
-  'out'
+  "healthy",
+  "nicked",
+  "grazed",
+  "hurt",
+  "injured",
+  "crippled",
+  "down",
+  "out"
 ];
 
 /**
@@ -52,25 +52,19 @@ export const INSIGHT_THRESHOLDS = {
  * Common skill names
  */
 export const COMMON_SKILL_NAMES = [
-  'Kenjutsu',
-  'Iaijutsu',
-  'Kyujutsu',
-  'Defense',
-  'Etiquette',
-  'Sincerity',
-  'Courtier',
-  'Investigation',
-  'Lore: History',
-  'Meditation'
+  "Kenjutsu",
+  "Iaijutsu",
+  "Kyujutsu",
+  "Defense",
+  "Etiquette",
+  "Sincerity",
+  "Courtier",
+  "Investigation",
+  "Lore: History",
+  "Meditation"
 ];
 
 /**
  * Stance types
  */
-export const STANCES = [
-  'attack',
-  'defense',
-  'fullAttack',
-  'fullDefense',
-  'center'
-];
+export const STANCES = ["attack", "defense", "fullAttack", "fullDefense", "center"];

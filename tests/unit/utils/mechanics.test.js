@@ -1,13 +1,13 @@
 /**
  * Unit Tests: mechanics.js
- * 
+ *
  * Tests core L5R4 game mechanics utilities including trait normalization,
  * wound penalties, effective trait resolution, and weapon skill lookups.
- * 
+ *
  * Test Priority: Tier 1 (Critical - Core game calculations)
  */
 
-import { describe, it, expect, beforeEach, vi } from 'vitest';
+import { describe, it, expect, beforeEach, vi } from "vitest";
 import {
   readWoundPenalty,
   normalizeTraitKey,
@@ -15,11 +15,11 @@ import {
   extractRollParams,
   getAffinityDeficiencyModifier,
   resolveWeaponSkillTrait
-} from '../../../module/utils/mechanics.js';
+} from "../../../module/utils/mechanics.js";
 
-describe('readWoundPenalty', () => {
-  describe('modern wound system', () => {
-    it('should read penalty from wounds.penalty', () => {
+describe("readWoundPenalty", () => {
+  describe("modern wound system", () => {
+    it("should read penalty from wounds.penalty", () => {
       // ARRANGE
       const actor = {
         system: {
@@ -36,7 +36,7 @@ describe('readWoundPenalty', () => {
       expect(result).toBe(15);
     });
 
-    it('should return 0 for healthy character', () => {
+    it("should return 0 for healthy character", () => {
       const actor = {
         system: {
           wounds: {
@@ -49,7 +49,7 @@ describe('readWoundPenalty', () => {
       expect(result).toBe(0);
     });
 
-    it('should coerce string penalty to number', () => {
+    it("should coerce string penalty to number", () => {
       const actor = {
         system: {
           wounds: {
@@ -63,8 +63,8 @@ describe('readWoundPenalty', () => {
     });
   });
 
-  describe('legacy wound system', () => {
-    it('should find worst penalty from multiple wound levels', () => {
+  describe("legacy wound system", () => {
+    it("should find worst penalty from multiple wound levels", () => {
       const actor = {
         system: {
           woundLvlsUsed: {
@@ -79,7 +79,7 @@ describe('readWoundPenalty', () => {
       expect(result).toBe(5); // Highest penalty
     });
 
-    it('should ignore non-current wound levels', () => {
+    it("should ignore non-current wound levels", () => {
       const actor = {
         system: {
           woundLvlsUsed: {
@@ -93,7 +93,7 @@ describe('readWoundPenalty', () => {
       expect(result).toBe(10);
     });
 
-    it('should return 0 if no current wound levels', () => {
+    it("should return 0 if no current wound levels", () => {
       const actor = {
         system: {
           woundLvlsUsed: {
@@ -107,24 +107,24 @@ describe('readWoundPenalty', () => {
     });
   });
 
-  describe('edge cases', () => {
-    it('should handle null actor', () => {
+  describe("edge cases", () => {
+    it("should handle null actor", () => {
       const result = readWoundPenalty(null);
       expect(result).toBe(0);
     });
 
-    it('should handle undefined actor', () => {
+    it("should handle undefined actor", () => {
       const result = readWoundPenalty(undefined);
       expect(result).toBe(0);
     });
 
-    it('should handle actor without system', () => {
+    it("should handle actor without system", () => {
       const actor = {};
       const result = readWoundPenalty(actor);
       expect(result).toBe(0);
     });
 
-    it('should handle actor without wounds data', () => {
+    it("should handle actor without wounds data", () => {
       const actor = {
         system: {}
       };
@@ -132,7 +132,7 @@ describe('readWoundPenalty', () => {
       expect(result).toBe(0);
     });
 
-    it('should handle empty woundLvlsUsed', () => {
+    it("should handle empty woundLvlsUsed", () => {
       const actor = {
         system: {
           woundLvlsUsed: {}
@@ -144,75 +144,75 @@ describe('readWoundPenalty', () => {
   });
 });
 
-describe('normalizeTraitKey', () => {
-  describe('direct abbreviations', () => {
-    it('should accept sta lowercase', () => {
-      expect(normalizeTraitKey('sta')).toBe('sta');
+describe("normalizeTraitKey", () => {
+  describe("direct abbreviations", () => {
+    it("should accept sta lowercase", () => {
+      expect(normalizeTraitKey("sta")).toBe("sta");
     });
 
-    it('should accept sta uppercase', () => {
-      expect(normalizeTraitKey('STA')).toBe('sta');
+    it("should accept sta uppercase", () => {
+      expect(normalizeTraitKey("STA")).toBe("sta");
     });
 
-    it('should accept sta mixed case', () => {
-      expect(normalizeTraitKey('StA')).toBe('sta');
+    it("should accept sta mixed case", () => {
+      expect(normalizeTraitKey("StA")).toBe("sta");
     });
 
-    it('should accept all valid trait abbreviations', () => {
-      const traits = ['sta', 'wil', 'str', 'per', 'ref', 'awa', 'agi', 'int', 'void'];
+    it("should accept all valid trait abbreviations", () => {
+      const traits = ["sta", "wil", "str", "per", "ref", "awa", "agi", "int", "void"];
       traits.forEach(trait => {
         expect(normalizeTraitKey(trait)).toBe(trait);
       });
     });
   });
 
-  describe('i18n key format', () => {
-    it('should parse l5r4.ui.mechanics.traits.sta', () => {
-      expect(normalizeTraitKey('l5r4.ui.mechanics.traits.sta')).toBe('sta');
+  describe("i18n key format", () => {
+    it("should parse l5r4.ui.mechanics.traits.sta", () => {
+      expect(normalizeTraitKey("l5r4.ui.mechanics.traits.sta")).toBe("sta");
     });
 
-    it('should parse l5r4.ui.mechanics.traits.REF', () => {
-      expect(normalizeTraitKey('l5r4.ui.mechanics.traits.REF')).toBe('ref');
+    it("should parse l5r4.ui.mechanics.traits.REF", () => {
+      expect(normalizeTraitKey("l5r4.ui.mechanics.traits.REF")).toBe("ref");
     });
 
-    it('should parse void ring i18n key', () => {
-      expect(normalizeTraitKey('l5r4.ui.mechanics.rings.void')).toBe('void');
+    it("should parse void ring i18n key", () => {
+      expect(normalizeTraitKey("l5r4.ui.mechanics.rings.void")).toBe("void");
     });
 
-    it('should parse void ring i18n key case insensitive', () => {
-      expect(normalizeTraitKey('L5R4.UI.MECHANICS.RINGS.VOID')).toBe('void');
+    it("should parse void ring i18n key case insensitive", () => {
+      expect(normalizeTraitKey("L5R4.UI.MECHANICS.RINGS.VOID")).toBe("void");
     });
   });
 
-  describe('English full names', () => {
-    it('should convert stamina to sta', () => {
-      expect(normalizeTraitKey('stamina')).toBe('sta');
+  describe("English full names", () => {
+    it("should convert stamina to sta", () => {
+      expect(normalizeTraitKey("stamina")).toBe("sta");
     });
 
-    it('should convert willpower to wil', () => {
-      expect(normalizeTraitKey('willpower')).toBe('wil');
+    it("should convert willpower to wil", () => {
+      expect(normalizeTraitKey("willpower")).toBe("wil");
     });
 
-    it('should convert reflexes to ref', () => {
-      expect(normalizeTraitKey('reflexes')).toBe('ref');
+    it("should convert reflexes to ref", () => {
+      expect(normalizeTraitKey("reflexes")).toBe("ref");
     });
 
-    it('should handle case insensitive English names', () => {
-      expect(normalizeTraitKey('STAMINA')).toBe('sta');
-      expect(normalizeTraitKey('Reflexes')).toBe('ref');
+    it("should handle case insensitive English names", () => {
+      expect(normalizeTraitKey("STAMINA")).toBe("sta");
+      expect(normalizeTraitKey("Reflexes")).toBe("ref");
     });
 
-    it('should convert all English trait names', () => {
+    it("should convert all English trait names", () => {
       const mapping = {
-        'stamina': 'sta',
-        'willpower': 'wil',
-        'strength': 'str',
-        'perception': 'per',
-        'reflexes': 'ref',
-        'awareness': 'awa',
-        'agility': 'agi',
-        'intelligence': 'int',
-        'void': 'void'
+        stamina: "sta",
+        willpower: "wil",
+        strength: "str",
+        perception: "per",
+        reflexes: "ref",
+        awareness: "awa",
+        agility: "agi",
+        intelligence: "int",
+        void: "void"
       };
 
       Object.entries(mapping).forEach(([english, abbr]) => {
@@ -221,47 +221,47 @@ describe('normalizeTraitKey', () => {
     });
   });
 
-  describe('edge cases', () => {
-    it('should return empty string for null', () => {
-      expect(normalizeTraitKey(null)).toBe('');
+  describe("edge cases", () => {
+    it("should return empty string for null", () => {
+      expect(normalizeTraitKey(null)).toBe("");
     });
 
-    it('should return empty string for undefined', () => {
-      expect(normalizeTraitKey(undefined)).toBe('');
+    it("should return empty string for undefined", () => {
+      expect(normalizeTraitKey(undefined)).toBe("");
     });
 
-    it('should return empty string for symbol', () => {
-      expect(normalizeTraitKey(Symbol('test'))).toBe('');
+    it("should return empty string for symbol", () => {
+      expect(normalizeTraitKey(Symbol("test"))).toBe("");
     });
 
-    it('should return empty string for invalid trait', () => {
-      expect(normalizeTraitKey('invalid')).toBe('');
+    it("should return empty string for invalid trait", () => {
+      expect(normalizeTraitKey("invalid")).toBe("");
     });
 
-    it('should return empty string for number', () => {
-      expect(normalizeTraitKey(123)).toBe('');
+    it("should return empty string for number", () => {
+      expect(normalizeTraitKey(123)).toBe("");
     });
 
-    it('should handle whitespace', () => {
-      expect(normalizeTraitKey('  sta  ')).toBe('sta');
+    it("should handle whitespace", () => {
+      expect(normalizeTraitKey("  sta  ")).toBe("sta");
     });
 
-    it('should return empty string for empty string', () => {
-      expect(normalizeTraitKey('')).toBe('');
+    it("should return empty string for empty string", () => {
+      expect(normalizeTraitKey("")).toBe("");
     });
   });
 
-  describe('i18n reverse lookup', () => {
-    it('should handle missing game.i18n gracefully', () => {
+  describe("i18n reverse lookup", () => {
+    it("should handle missing game.i18n gracefully", () => {
       // Should not throw when game.i18n is undefined
-      expect(() => normalizeTraitKey('test')).not.toThrow();
+      expect(() => normalizeTraitKey("test")).not.toThrow();
     });
   });
 });
 
-describe('getEffectiveTrait', () => {
-  describe('void ring special case', () => {
-    it('should read void from rings.void.rank', () => {
+describe("getEffectiveTrait", () => {
+  describe("void ring special case", () => {
+    it("should read void from rings.void.rank", () => {
       const actor = {
         system: {
           rings: {
@@ -272,24 +272,24 @@ describe('getEffectiveTrait', () => {
         }
       };
 
-      const result = getEffectiveTrait(actor, 'void');
+      const result = getEffectiveTrait(actor, "void");
       expect(result).toBe(3);
     });
 
-    it('should return 0 for missing void ring', () => {
+    it("should return 0 for missing void ring", () => {
       const actor = {
         system: {
           rings: {}
         }
       };
 
-      const result = getEffectiveTrait(actor, 'void');
+      const result = getEffectiveTrait(actor, "void");
       expect(result).toBe(0);
     });
   });
 
-  describe('derived effective traits', () => {
-    it('should prefer _derived.traitsEff over base traits', () => {
+  describe("derived effective traits", () => {
+    it("should prefer _derived.traitsEff over base traits", () => {
       const actor = {
         system: {
           traits: {
@@ -303,11 +303,11 @@ describe('getEffectiveTrait', () => {
         }
       };
 
-      const result = getEffectiveTrait(actor, 'sta');
+      const result = getEffectiveTrait(actor, "sta");
       expect(result).toBe(2); // Should use effective, not base
     });
 
-    it('should fall back to base trait if no derived', () => {
+    it("should fall back to base trait if no derived", () => {
       const actor = {
         system: {
           traits: {
@@ -316,40 +316,40 @@ describe('getEffectiveTrait', () => {
         }
       };
 
-      const result = getEffectiveTrait(actor, 'ref');
+      const result = getEffectiveTrait(actor, "ref");
       expect(result).toBe(5);
     });
 
-    it('should return 0 if trait not found', () => {
+    it("should return 0 if trait not found", () => {
       const actor = {
         system: {
           traits: {}
         }
       };
 
-      const result = getEffectiveTrait(actor, 'agi');
+      const result = getEffectiveTrait(actor, "agi");
       expect(result).toBe(0);
     });
   });
 
-  describe('edge cases', () => {
-    it('should handle null actor', () => {
-      const result = getEffectiveTrait(null, 'sta');
+  describe("edge cases", () => {
+    it("should handle null actor", () => {
+      const result = getEffectiveTrait(null, "sta");
       expect(result).toBe(0);
     });
 
-    it('should handle undefined actor', () => {
-      const result = getEffectiveTrait(undefined, 'sta');
+    it("should handle undefined actor", () => {
+      const result = getEffectiveTrait(undefined, "sta");
       expect(result).toBe(0);
     });
 
-    it('should handle actor without system', () => {
+    it("should handle actor without system", () => {
       const actor = {};
-      const result = getEffectiveTrait(actor, 'sta');
+      const result = getEffectiveTrait(actor, "sta");
       expect(result).toBe(0);
     });
 
-    it('should coerce string trait values', () => {
+    it("should coerce string trait values", () => {
       const actor = {
         system: {
           traits: {
@@ -358,19 +358,19 @@ describe('getEffectiveTrait', () => {
         }
       };
 
-      const result = getEffectiveTrait(actor, 'sta');
+      const result = getEffectiveTrait(actor, "sta");
       expect(result).toBe(5);
     });
   });
 });
 
-describe('extractRollParams', () => {
-  describe('basic extraction', () => {
-    it('should extract roll and keep values', () => {
+describe("extractRollParams", () => {
+  describe("basic extraction", () => {
+    it("should extract roll and keep values", () => {
       const el = {
         dataset: {
-          roll: '5',
-          keep: '3'
+          roll: "5",
+          keep: "3"
         }
       };
 
@@ -381,46 +381,46 @@ describe('extractRollParams', () => {
       expect(result.diceKeep).toBe(3);
     });
 
-    it('should extract label and description', () => {
+    it("should extract label and description", () => {
       const el = {
         dataset: {
-          roll: '5',
-          keep: '3',
-          label: 'Kenjutsu',
-          description: 'Katana attack'
+          roll: "5",
+          keep: "3",
+          label: "Kenjutsu",
+          description: "Katana attack"
         }
       };
 
       const actor = {};
       const result = extractRollParams(el, actor);
 
-      expect(result.label).toBe('Kenjutsu');
-      expect(result.description).toBe('Katana attack');
+      expect(result.label).toBe("Kenjutsu");
+      expect(result.description).toBe("Katana attack");
     });
 
-    it('should return empty strings for missing label/description', () => {
+    it("should return empty strings for missing label/description", () => {
       const el = {
         dataset: {
-          roll: '5',
-          keep: '3'
+          roll: "5",
+          keep: "3"
         }
       };
 
       const actor = {};
       const result = extractRollParams(el, actor);
 
-      expect(result.label).toBe('');
-      expect(result.description).toBe('');
+      expect(result.label).toBe("");
+      expect(result.description).toBe("");
     });
   });
 
-  describe('trait bonus extraction', () => {
-    it('should extract trait bonus when trait specified', () => {
+  describe("trait bonus extraction", () => {
+    it("should extract trait bonus when trait specified", () => {
       const el = {
         dataset: {
-          roll: '5',
-          keep: '3',
-          trait: 'agi'
+          roll: "5",
+          keep: "3",
+          trait: "agi"
         }
       };
 
@@ -436,11 +436,11 @@ describe('extractRollParams', () => {
       expect(result.traitBonus).toBe(4);
     });
 
-    it('should return 0 trait bonus when no trait attribute', () => {
+    it("should return 0 trait bonus when no trait attribute", () => {
       const el = {
         dataset: {
-          roll: '5',
-          keep: '3'
+          roll: "5",
+          keep: "3"
         }
       };
 
@@ -449,12 +449,12 @@ describe('extractRollParams', () => {
       expect(result.traitBonus).toBe(0);
     });
 
-    it('should handle empty trait string', () => {
+    it("should handle empty trait string", () => {
       const el = {
         dataset: {
-          roll: '5',
-          keep: '3',
-          trait: ''
+          roll: "5",
+          keep: "3",
+          trait: ""
         }
       };
 
@@ -464,8 +464,8 @@ describe('extractRollParams', () => {
     });
   });
 
-  describe('edge cases', () => {
-    it('should handle missing dataset values', () => {
+  describe("edge cases", () => {
+    it("should handle missing dataset values", () => {
       const el = {
         dataset: {}
       };
@@ -478,11 +478,11 @@ describe('extractRollParams', () => {
       expect(result.traitBonus).toBe(0);
     });
 
-    it('should coerce string numbers', () => {
+    it("should coerce string numbers", () => {
       const el = {
         dataset: {
-          roll: '7',
-          keep: '4'
+          roll: "7",
+          keep: "4"
         }
       };
 
@@ -493,11 +493,11 @@ describe('extractRollParams', () => {
       expect(result.diceKeep).toBe(4);
     });
 
-    it('should handle invalid numeric strings', () => {
+    it("should handle invalid numeric strings", () => {
       const el = {
         dataset: {
-          roll: 'abc',
-          keep: 'def'
+          roll: "abc",
+          keep: "def"
         }
       };
 
@@ -510,168 +510,168 @@ describe('extractRollParams', () => {
   });
 });
 
-describe('getAffinityDeficiencyModifier', () => {
-  describe('affinity bonuses', () => {
-    it('should return +1 for affinity match', () => {
+describe("getAffinityDeficiencyModifier", () => {
+  describe("affinity bonuses", () => {
+    it("should return +1 for affinity match", () => {
       const actor = {
         items: [
           {
-            type: 'technique',
+            type: "technique",
             system: {
               shugenja: true,
-              affinity: 'fire'
+              affinity: "fire"
             }
           }
         ]
       };
 
-      const result = getAffinityDeficiencyModifier(actor, 'fire');
+      const result = getAffinityDeficiencyModifier(actor, "fire");
       expect(result).toBe(1);
     });
 
-    it('should be case insensitive for affinity', () => {
+    it("should be case insensitive for affinity", () => {
       const actor = {
         items: [
           {
-            type: 'technique',
+            type: "technique",
             system: {
               shugenja: true,
-              affinity: 'FIRE'
+              affinity: "FIRE"
             }
           }
         ]
       };
 
-      const result = getAffinityDeficiencyModifier(actor, 'fire');
+      const result = getAffinityDeficiencyModifier(actor, "fire");
       expect(result).toBe(1);
     });
 
-    it('should return 0 for non-matching affinity', () => {
+    it("should return 0 for non-matching affinity", () => {
       const actor = {
         items: [
           {
-            type: 'technique',
+            type: "technique",
             system: {
               shugenja: true,
-              affinity: 'water'
+              affinity: "water"
             }
           }
         ]
       };
 
-      const result = getAffinityDeficiencyModifier(actor, 'fire');
+      const result = getAffinityDeficiencyModifier(actor, "fire");
       expect(result).toBe(0);
     });
   });
 
-  describe('deficiency penalties', () => {
-    it('should return -1 for deficiency match', () => {
+  describe("deficiency penalties", () => {
+    it("should return -1 for deficiency match", () => {
       const actor = {
         items: [
           {
-            type: 'technique',
+            type: "technique",
             system: {
               shugenja: true,
-              deficiency: 'air'
+              deficiency: "air"
             }
           }
         ]
       };
 
-      const result = getAffinityDeficiencyModifier(actor, 'air');
+      const result = getAffinityDeficiencyModifier(actor, "air");
       expect(result).toBe(-1);
     });
 
-    it('should be case insensitive for deficiency', () => {
+    it("should be case insensitive for deficiency", () => {
       const actor = {
         items: [
           {
-            type: 'technique',
+            type: "technique",
             system: {
               shugenja: true,
-              deficiency: 'AIR'
+              deficiency: "AIR"
             }
           }
         ]
       };
 
-      const result = getAffinityDeficiencyModifier(actor, 'air');
+      const result = getAffinityDeficiencyModifier(actor, "air");
       expect(result).toBe(-1);
     });
   });
 
-  describe('conflict handling', () => {
-    it('should return 0 for affinity/deficiency conflict', () => {
+  describe("conflict handling", () => {
+    it("should return 0 for affinity/deficiency conflict", () => {
       const actor = {
         items: [
           {
-            type: 'technique',
+            type: "technique",
             system: {
               shugenja: true,
-              affinity: 'earth',
-              deficiency: 'earth'
+              affinity: "earth",
+              deficiency: "earth"
             }
           }
         ]
       };
 
-      const result = getAffinityDeficiencyModifier(actor, 'earth');
+      const result = getAffinityDeficiencyModifier(actor, "earth");
       expect(result).toBe(0); // Conflict = no auto-select
     });
 
-    it('should return 0 for multiple techniques with conflicting modifiers', () => {
+    it("should return 0 for multiple techniques with conflicting modifiers", () => {
       const actor = {
         items: [
           {
-            type: 'technique',
+            type: "technique",
             system: {
               shugenja: true,
-              affinity: 'void'
+              affinity: "void"
             }
           },
           {
-            type: 'technique',
+            type: "technique",
             system: {
               shugenja: true,
-              deficiency: 'void'
+              deficiency: "void"
             }
           }
         ]
       };
 
-      const result = getAffinityDeficiencyModifier(actor, 'void');
+      const result = getAffinityDeficiencyModifier(actor, "void");
       expect(result).toBe(0); // Conflict across techniques
     });
   });
 
-  describe('edge cases', () => {
-    it('should return 0 for null actor', () => {
-      const result = getAffinityDeficiencyModifier(null, 'fire');
+  describe("edge cases", () => {
+    it("should return 0 for null actor", () => {
+      const result = getAffinityDeficiencyModifier(null, "fire");
       expect(result).toBe(0);
     });
 
-    it('should return 0 for undefined actor', () => {
-      const result = getAffinityDeficiencyModifier(undefined, 'fire');
+    it("should return 0 for undefined actor", () => {
+      const result = getAffinityDeficiencyModifier(undefined, "fire");
       expect(result).toBe(0);
     });
 
-    it('should return 0 for null ringKey', () => {
+    it("should return 0 for null ringKey", () => {
       const actor = { items: [] };
       const result = getAffinityDeficiencyModifier(actor, null);
       expect(result).toBe(0);
     });
 
-    it('should return 0 for empty ringKey', () => {
+    it("should return 0 for empty ringKey", () => {
       const actor = { items: [] };
-      const result = getAffinityDeficiencyModifier(actor, '');
+      const result = getAffinityDeficiencyModifier(actor, "");
       expect(result).toBe(0);
     });
 
-    it('should return 0 for no shugenja techniques', () => {
+    it("should return 0 for no shugenja techniques", () => {
       const actor = {
         items: [
           {
-            type: 'technique',
+            type: "technique",
             system: {
               shugenja: false
             }
@@ -679,40 +679,40 @@ describe('getAffinityDeficiencyModifier', () => {
         ]
       };
 
-      const result = getAffinityDeficiencyModifier(actor, 'fire');
+      const result = getAffinityDeficiencyModifier(actor, "fire");
       expect(result).toBe(0);
     });
 
-    it('should return 0 for actor without items', () => {
+    it("should return 0 for actor without items", () => {
       const actor = {};
-      const result = getAffinityDeficiencyModifier(actor, 'fire');
+      const result = getAffinityDeficiencyModifier(actor, "fire");
       expect(result).toBe(0);
     });
 
-    it('should handle items.contents array', () => {
+    it("should handle items.contents array", () => {
       const actor = {
         items: {
           contents: [
             {
-              type: 'technique',
+              type: "technique",
               system: {
                 shugenja: true,
-                affinity: 'water'
+                affinity: "water"
               }
             }
           ]
         }
       };
 
-      const result = getAffinityDeficiencyModifier(actor, 'water');
+      const result = getAffinityDeficiencyModifier(actor, "water");
       expect(result).toBe(1);
     });
   });
 });
 
-describe('resolveWeaponSkillTrait', () => {
-  describe('skilled weapon use', () => {
-    it('should resolve skill + trait for skilled attack', () => {
+describe("resolveWeaponSkillTrait", () => {
+  describe("skilled weapon use", () => {
+    it("should resolve skill + trait for skilled attack", () => {
       const actor = {
         system: {
           traits: {
@@ -720,13 +720,13 @@ describe('resolveWeaponSkillTrait', () => {
           }
         },
         items: {
-          find: vi.fn((cb) => {
+          find: vi.fn(cb => {
             const skill = {
-              type: 'skill',
-              name: 'Kenjutsu',
+              type: "skill",
+              name: "Kenjutsu",
               system: {
                 rank: 4,
-                trait: 'agi'
+                trait: "agi"
               }
             };
             return cb(skill) ? skill : undefined;
@@ -736,8 +736,8 @@ describe('resolveWeaponSkillTrait', () => {
 
       const weapon = {
         system: {
-          associatedSkill: 'Kenjutsu',
-          fallbackTrait: 'agi'
+          associatedSkill: "Kenjutsu",
+          fallbackTrait: "agi"
         }
       };
 
@@ -749,7 +749,7 @@ describe('resolveWeaponSkillTrait', () => {
       expect(result.keepBonus).toBe(3); // Trait only
     });
 
-    it('should be case insensitive for skill name match', () => {
+    it("should be case insensitive for skill name match", () => {
       const actor = {
         system: {
           traits: {
@@ -757,13 +757,13 @@ describe('resolveWeaponSkillTrait', () => {
           }
         },
         items: {
-          find: vi.fn((cb) => {
+          find: vi.fn(cb => {
             const skill = {
-              type: 'skill',
-              name: 'kenjutsu',
+              type: "skill",
+              name: "kenjutsu",
               system: {
                 rank: 2,
-                trait: 'agi'
+                trait: "agi"
               }
             };
             return cb(skill) ? skill : undefined;
@@ -773,7 +773,7 @@ describe('resolveWeaponSkillTrait', () => {
 
       const weapon = {
         system: {
-          associatedSkill: 'KENJUTSU'
+          associatedSkill: "KENJUTSU"
         }
       };
 
@@ -782,8 +782,8 @@ describe('resolveWeaponSkillTrait', () => {
     });
   });
 
-  describe('unskilled weapon use', () => {
-    it('should use trait roll for rank 0 skill', () => {
+  describe("unskilled weapon use", () => {
+    it("should use trait roll for rank 0 skill", () => {
       const actor = {
         system: {
           traits: {
@@ -791,13 +791,13 @@ describe('resolveWeaponSkillTrait', () => {
           }
         },
         items: {
-          find: vi.fn((cb) => {
+          find: vi.fn(cb => {
             const skill = {
-              type: 'skill',
-              name: 'Kenjutsu',
+              type: "skill",
+              name: "Kenjutsu",
               system: {
                 rank: 0,
-                trait: 'agi'
+                trait: "agi"
               }
             };
             return cb(skill) ? skill : undefined;
@@ -807,7 +807,7 @@ describe('resolveWeaponSkillTrait', () => {
 
       const weapon = {
         system: {
-          associatedSkill: 'Kenjutsu'
+          associatedSkill: "Kenjutsu"
         }
       };
 
@@ -817,10 +817,10 @@ describe('resolveWeaponSkillTrait', () => {
       expect(result.traitValue).toBe(3);
       expect(result.rollBonus).toBe(3); // Trait only (unskilled)
       expect(result.keepBonus).toBe(3); // Trait only
-      expect(result.description).toContain('[Unskilled]');
+      expect(result.description).toContain("[Unskilled]");
     });
 
-    it('should use fallback trait when no skill found', () => {
+    it("should use fallback trait when no skill found", () => {
       const actor = {
         system: {
           traits: {
@@ -834,8 +834,8 @@ describe('resolveWeaponSkillTrait', () => {
 
       const weapon = {
         system: {
-          associatedSkill: 'NonexistentSkill',
-          fallbackTrait: 'agi'
+          associatedSkill: "NonexistentSkill",
+          fallbackTrait: "agi"
         }
       };
 
@@ -845,10 +845,10 @@ describe('resolveWeaponSkillTrait', () => {
       expect(result.traitValue).toBe(3);
       expect(result.rollBonus).toBe(3); // Unskilled trait roll
       expect(result.keepBonus).toBe(3);
-      expect(result.description).toContain('[Unskilled]');
+      expect(result.description).toContain("[Unskilled]");
     });
 
-    it('should default to agi if no fallback specified', () => {
+    it("should default to agi if no fallback specified", () => {
       const actor = {
         system: {
           traits: {
@@ -862,19 +862,19 @@ describe('resolveWeaponSkillTrait', () => {
 
       const weapon = {
         system: {
-          associatedSkill: 'NonexistentSkill'
+          associatedSkill: "NonexistentSkill"
         }
       };
 
       const result = resolveWeaponSkillTrait(actor, weapon);
 
       expect(result.traitValue).toBe(4);
-      expect(result.description).toContain('AGI');
+      expect(result.description).toContain("AGI");
     });
   });
 
-  describe('edge cases', () => {
-    it('should handle null weapon', () => {
+  describe("edge cases", () => {
+    it("should handle null weapon", () => {
       const actor = {};
       const result = resolveWeaponSkillTrait(actor, null);
 
@@ -882,17 +882,17 @@ describe('resolveWeaponSkillTrait', () => {
       expect(result.traitValue).toBe(0);
       expect(result.rollBonus).toBe(0);
       expect(result.keepBonus).toBe(0);
-      expect(result.description).toBe('No weapon/actor');
+      expect(result.description).toBe("No weapon/actor");
     });
 
-    it('should handle null actor', () => {
+    it("should handle null actor", () => {
       const weapon = {};
       const result = resolveWeaponSkillTrait(null, weapon);
 
-      expect(result.description).toBe('No weapon/actor');
+      expect(result.description).toBe("No weapon/actor");
     });
 
-    it('should handle weapon without system', () => {
+    it("should handle weapon without system", () => {
       const actor = {
         system: {
           traits: {
@@ -911,7 +911,7 @@ describe('resolveWeaponSkillTrait', () => {
       expect(result.traitValue).toBe(3);
     });
 
-    it('should handle actor without items.find', () => {
+    it("should handle actor without items.find", () => {
       const actor = {
         system: {
           traits: {
@@ -922,8 +922,8 @@ describe('resolveWeaponSkillTrait', () => {
 
       const weapon = {
         system: {
-          associatedSkill: 'SomeSkill',
-          fallbackTrait: 'str'
+          associatedSkill: "SomeSkill",
+          fallbackTrait: "str"
         }
       };
 
@@ -931,10 +931,10 @@ describe('resolveWeaponSkillTrait', () => {
 
       // Should fall back to trait roll
       expect(result.traitValue).toBe(5);
-      expect(result.description).toContain('STR');
+      expect(result.description).toContain("STR");
     });
 
-    it('should handle empty associatedSkill', () => {
+    it("should handle empty associatedSkill", () => {
       const actor = {
         system: {
           traits: {
@@ -948,8 +948,8 @@ describe('resolveWeaponSkillTrait', () => {
 
       const weapon = {
         system: {
-          associatedSkill: '',
-          fallbackTrait: 'agi'
+          associatedSkill: "",
+          fallbackTrait: "agi"
         }
       };
 
@@ -957,7 +957,7 @@ describe('resolveWeaponSkillTrait', () => {
       expect(result.traitValue).toBe(3);
     });
 
-    it('should handle whitespace-only associatedSkill', () => {
+    it("should handle whitespace-only associatedSkill", () => {
       const actor = {
         system: {
           traits: {
@@ -971,8 +971,8 @@ describe('resolveWeaponSkillTrait', () => {
 
       const weapon = {
         system: {
-          associatedSkill: '   ',
-          fallbackTrait: 'agi'
+          associatedSkill: "   ",
+          fallbackTrait: "agi"
         }
       };
 

@@ -101,7 +101,7 @@ export function readWoundPenalty(actor) {
   if (!actor?.system) {
     return 0;
   }
-  
+
   if (actor.system?.wounds?.penalty != null) {
     return toInt(actor.system.wounds.penalty, 0);
   }
@@ -200,7 +200,7 @@ export function getEffectiveTrait(actor, traitKey) {
   if (!actor?.system) {
     return 0;
   }
-  
+
   // Special case: void ring
   if (traitKey === "void") {
     return toInt(actor.system?.rings?.void?.rank, 0);

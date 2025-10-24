@@ -11,22 +11,22 @@
  * @param {Object} overrides - Optional property overrides
  * @returns {Object} Item data (not created)
  */
-export function createSkillData(name, rank = 0, trait = 'agi', overrides = {}) {
+export function createSkillData(name, rank = 0, trait = "agi", overrides = {}) {
   const defaultData = {
     name,
-    type: 'skill',
+    type: "skill",
     system: {
       rank,
       trait,
-      type: 'high',
+      type: "high",
       school: false,
-      emphasis: '',
-      mastery3: '',
-      mastery5: '',
-      mastery7: ''
+      emphasis: "",
+      mastery3: "",
+      mastery5: "",
+      mastery7: ""
     }
   };
-  
+
   return foundry.utils.mergeObject(defaultData, overrides);
 }
 
@@ -41,20 +41,20 @@ export function createSkillData(name, rank = 0, trait = 'agi', overrides = {}) {
 export function createWeaponData(name, damageRoll = 3, damageKeep = 2, overrides = {}) {
   const defaultData = {
     name,
-    type: 'weapon',
+    type: "weapon",
     system: {
       damageRoll,
       damageKeep,
-      size: 'medium',
-      damageFormula: '',
+      size: "medium",
+      damageFormula: "",
       explodesOn: 10,
-      associatedSkill: '',
-      fallbackTrait: 'agi',
+      associatedSkill: "",
+      fallbackTrait: "agi",
       isBow: false,
       keywords: []
     }
   };
-  
+
   return foundry.utils.mergeObject(defaultData, overrides);
 }
 
@@ -64,9 +64,9 @@ export function createWeaponData(name, damageRoll = 3, damageKeep = 2, overrides
  * @returns {Object} Katana item data
  */
 export function createKatana(overrides = {}) {
-  return createWeaponData('Katana', 3, 2, {
+  return createWeaponData("Katana", 3, 2, {
     system: {
-      associatedSkill: 'kenjutsu',
+      associatedSkill: "kenjutsu",
       ...overrides.system
     }
   });
@@ -78,12 +78,12 @@ export function createKatana(overrides = {}) {
  * @returns {Object} Bow item data
  */
 export function createBow(overrides = {}) {
-  return createWeaponData('Yumi', 2, 2, {
+  return createWeaponData("Yumi", 2, 2, {
     system: {
       isBow: true,
       str: 3,
       range: 250,
-      associatedSkill: 'kyujutsu',
+      associatedSkill: "kyujutsu",
       ...overrides.system
     }
   });
@@ -100,16 +100,16 @@ export function createBow(overrides = {}) {
 export function createArmorData(name, bonus = 3, reduction = 2, overrides = {}) {
   const defaultData = {
     name,
-    type: 'armor',
+    type: "armor",
     system: {
       bonus,
       reduction,
       equipped: false,
-      armorType: 'light',
+      armorType: "light",
       keywords: []
     }
   };
-  
+
   return foundry.utils.mergeObject(defaultData, overrides);
 }
 
@@ -121,21 +121,21 @@ export function createArmorData(name, bonus = 3, reduction = 2, overrides = {}) 
  * @param {Object} overrides - Optional property overrides
  * @returns {Object} Spell item data
  */
-export function createSpellData(name, ring = 'fire', mastery = 1, overrides = {}) {
+export function createSpellData(name, ring = "fire", mastery = 1, overrides = {}) {
   const defaultData = {
     name,
-    type: 'spell',
+    type: "spell",
     system: {
       ring,
       mastery,
       keywords: [],
-      range: '',
-      aoe: '',
-      duration: '',
-      raises: ''
+      range: "",
+      aoe: "",
+      duration: "",
+      raises: ""
     }
   };
-  
+
   return foundry.utils.mergeObject(defaultData, overrides);
 }
 
@@ -148,13 +148,13 @@ export function createSpellData(name, ring = 'fire', mastery = 1, overrides = {}
 export function createSchoolData(name, overrides = {}) {
   const defaultData = {
     name,
-    type: 'school',
+    type: "school",
     system: {
-      description: '',
-      specialRules: ''
+      description: "",
+      specialRules: ""
     }
   };
-  
+
   return foundry.utils.mergeObject(defaultData, overrides);
 }
 
@@ -167,13 +167,13 @@ export function createSchoolData(name, overrides = {}) {
 export function createFamilyData(name, overrides = {}) {
   const defaultData = {
     name,
-    type: 'family',
+    type: "family",
     system: {
-      description: '',
-      specialRules: ''
+      description: "",
+      specialRules: ""
     }
   };
-  
+
   return foundry.utils.mergeObject(defaultData, overrides);
 }
 
@@ -182,23 +182,23 @@ export function createFamilyData(name, overrides = {}) {
  */
 export const COMMON_SKILLS = {
   bushi: [
-    createSkillData('Kenjutsu', 5, 'agi'),
-    createSkillData('Iaijutsu', 3, 'ref'),
-    createSkillData('Kyujutsu', 2, 'ref'),
-    createSkillData('Defense', 3, 'ref')
+    createSkillData("Kenjutsu", 5, "agi"),
+    createSkillData("Iaijutsu", 3, "ref"),
+    createSkillData("Kyujutsu", 2, "ref"),
+    createSkillData("Defense", 3, "ref")
   ],
-  
+
   courtier: [
-    createSkillData('Etiquette', 5, 'awa'),
-    createSkillData('Sincerity', 4, 'awa'),
-    createSkillData('Courtier', 3, 'awa'),
-    createSkillData('Lore: Heraldry', 2, 'int')
+    createSkillData("Etiquette", 5, "awa"),
+    createSkillData("Sincerity", 4, "awa"),
+    createSkillData("Courtier", 3, "awa"),
+    createSkillData("Lore: Heraldry", 2, "int")
   ],
-  
+
   shugenja: [
-    createSkillData('Spellcraft', 4, 'int'),
-    createSkillData('Calligraphy', 3, 'int'),
-    createSkillData('Meditation', 3, 'voidRing'),
-    createSkillData('Lore: Theology', 2, 'int')
+    createSkillData("Spellcraft", 4, "int"),
+    createSkillData("Calligraphy", 3, "int"),
+    createSkillData("Meditation", 3, "voidRing"),
+    createSkillData("Lore: Theology", 2, "int")
   ]
 };
