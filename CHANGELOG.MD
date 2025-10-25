@@ -7,6 +7,15 @@ Versioning: [Semantic Versioning](https://semver.org/spec/v2.0.0.html)
 
 ---
 
+## [2.2.1] - 2025-10-25
+
+### Fixed
+
+- Fixed 404 error for test file on fresh builds by converting static import to dynamic import
+- Test files now only load when Quench module is active, preventing errors in production
+
+---
+
 ## [2.2.0] - 2025-10-16
 
 ### Added
