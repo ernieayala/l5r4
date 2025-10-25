@@ -15,7 +15,7 @@ export function registerCombatVoidSpending() {
   /**
    * Check if armor TN Void should expire on turn start
    */
-  Hooks.on("combatTurn", async (combat, updateData, options) => {
+  Hooks.on("combatTurn", async (combat, _updateData, _options) => {
     const combatant = combat.combatant;
     if (!combatant) {
       return;

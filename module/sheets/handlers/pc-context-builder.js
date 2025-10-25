@@ -240,7 +240,10 @@ export class PcContextBuilder {
         return String(loc && loc !== key ? loc : it?.system?.trait ?? "");
       },
       roll: it => Number(it?.system?.rollDice ?? 0) || 0,
-      emphasis: it => String(it?.system?.emphasis ?? "")
+      emphasis: it => {
+        const trained = Array.isArray(it?.system?.trainedEmphases) ? it.system.trainedEmphases : [];
+        return trained.join(", ");
+      }
     };
 
     const pref = getSortPref(actor.id, "skills", Object.keys(cols), "name");

@@ -405,7 +405,12 @@ export default class L5R4NpcSheet extends BaseActorSheet {
           return String(loc && loc !== key ? loc : it?.system?.trait ?? "");
         },
         roll: it => Number(it?.system?.rollDice ?? it?.system?.rank ?? 0) || 0,
-        emphasis: it => String(it?.system?.emphasis ?? "")
+        emphasis: it => {
+          const trained = Array.isArray(it?.system?.trainedEmphases)
+            ? it.system.trainedEmphases
+            : [];
+          return trained.join(", ");
+        }
       };
       const pref = getSortPref(actorObj.id, "skills", Object.keys(cols), "name");
       return sortWithPref(byType("skill"), cols, pref, game.i18n?.lang);

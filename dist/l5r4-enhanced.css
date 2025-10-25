@@ -305,7 +305,7 @@ body > * {
 .l5r4.npc .grid > div {
   align-items: center;
   font-size: var(--font-size-16);
-  padding: 0 0.1rem;
+  padding: 0 0.25rem;
 }
 .l5r4.pc .grid > div > input,
 .l5r4.pc .grid > div > select,
@@ -1505,6 +1505,45 @@ body > * {
   margin: 0;
   min-height: var(--input-height);
   text-wrap: nowrap;
+}
+
+/**
+ * Emphasis Manager Application Styles
+ * Styles for the EmphasisManager ApplicationV2 dialog
+ */
+.emphasis-manager-container {
+  display: flex;
+  flex-direction: column;
+  gap: 1rem;
+  height: 100%;
+}
+.emphasis-manager-container .emphasis-list-container {
+  border: 1px solid var(--table-header-border-color);
+  flex: 1;
+  overflow-y: auto;
+}
+.emphasis-manager-container .emphasis-list-container ul {
+  display: flex;
+  flex-direction: column;
+  list-style: none;
+  margin: 0;
+  padding: 0;
+}
+.emphasis-manager-container .emphasis-list-container ul li {
+  align-items: center;
+  display: flex;
+  gap: 0.5rem;
+  justify-content: space-between;
+  margin: 0;
+}
+.emphasis-manager-container .emphasis-list-container ul li:nth-of-type(even) {
+  background-color: var(--table-row-color-even);
+}
+.emphasis-manager-container .emphasis-list-container ul li label {
+  align-items: center;
+  display: flex;
+  flex: 1;
+  gap: 0.25rem;
 }
 
 /**

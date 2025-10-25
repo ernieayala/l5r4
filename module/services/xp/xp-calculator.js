@@ -238,16 +238,13 @@ export async function buildXpHistory(actor) {
         }
 
         // Skill Emphases: Specialized aspects that allow re-rolling 1s (cost = 2 XP each)
-        const emph = String(item.system?.emphasis ?? "").trim();
-        if (emph) {
-          // Parse comma or semicolon-separated list: "Katana, Bokken" → ["Katana", "Bokken"]
-          const emphases = emph
-            .split(/[,;]+/)
-            .map(s => s.trim())
-            .filter(Boolean);
+        const trainedEmphases = Array.isArray(item.system?.trainedEmphases)
+          ? item.system.trainedEmphases
+          : [];
+        if (trainedEmphases.length > 0) {
           const freeEmphasis = Math.max(0, parseInt(item.system?.freeEmphasis) || 0);
           // Only count emphases beyond the free count
-          const paidEmphases = emphases.slice(freeEmphasis);
+          const paidEmphases = trainedEmphases.slice(freeEmphasis);
 
           paidEmphases.forEach((emphasis, index) => {
             const note = `${item.name} - Emphasis: ${emphasis}`;

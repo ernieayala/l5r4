@@ -68,7 +68,21 @@ export function registerHandlebarsHelpers() {
    * @param {*} b - Second value to test
    * @returns {boolean} Result of a || b
    */
-  Handlebars.registerHelper("or", (a, b) => a || b);
+  Handlebars.registerHelper("or", (a, b) => Boolean(a) || Boolean(b));
+
+  /**
+   * Array includes helper.
+   * Tests if an array includes a specific value.
+   * @param {Array} array - Array to search in
+   * @param {*} value - Value to search for
+   * @returns {boolean} True if array includes value, false otherwise
+   */
+  Handlebars.registerHelper("includes", (array, value) => {
+    if (!Array.isArray(array)) {
+      return false;
+    }
+    return array.includes(value);
+  });
 
   /**
    * Coalesce helper - returns first non-null, non-undefined value.
@@ -186,5 +200,22 @@ export function registerHandlebarsHelpers() {
       .slice(0, -1)
       .filter(a => typeof a !== "object")
       .join("");
+  });
+
+  /**
+   * Join array helper.
+   * Joins array elements with a separator, filtering out falsy values.
+   *
+   * Template usage: {{join array ", "}}
+   *
+   * @param {Array} array - Array to join
+   * @param {string} separator - Separator string (default: ", ")
+   * @returns {string} Joined string with falsy values filtered out
+   */
+  Handlebars.registerHelper("join", function (array, separator = ", ") {
+    if (!Array.isArray(array)) {
+      return "";
+    }
+    return array.filter(Boolean).join(separator);
   });
 }

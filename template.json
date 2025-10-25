@@ -192,7 +192,6 @@
     }
   },
   "Item": {
-    "_comment_types": "NOTE: 'bow' type is LEGACY - kept for backward compatibility with pre-v1.0.0 worlds during migration. New bows use type='weapon' with system.isBow=true. Required for migrateBowsToWeapons() in migrations.js. Safe to remove after all user worlds complete migration.",
     "types": [
       "advantage",
       "armor",
@@ -228,6 +227,26 @@
       "equipped": false,
       "reduction": 0,
       "armorType": "ashigaru",
+      "keywords": [],
+      "nemuranai": false,
+      "price": {
+        "koku": 0,
+        "bu": 0,
+        "zeni": 0
+      }
+    },
+    "bow": {
+      "templates": ["itemDescription"],
+      "damageRoll": 0,
+      "damageKeep": 0,
+      "size": "medium",
+      "damageFormula": "",
+      "explodesOn": 10,
+      "associatedSkill": "kyujutsu",
+      "fallbackTrait": "ref",
+      "str": 1,
+      "range": 100,
+      "arrow": "willow",
       "keywords": [],
       "nemuranai": false,
       "price": {
@@ -278,7 +297,8 @@
       "rank": 0,
       "type": "high",
       "trait": "sta",
-      "emphasis": "",
+      "availableEmphases": [],
+      "trainedEmphases": [],
       "mastery3": "",
       "mastery5": "",
       "mastery7": "",
