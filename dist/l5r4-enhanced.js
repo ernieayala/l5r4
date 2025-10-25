@@ -11,7 +11,7 @@
  * 5. Register Application v2 sheets for all actor and item types
  * 6. Preload Handlebars templates and register custom helpers
  * 7. Initialize services (stance management, chat integration)
- * 8. Register Quench integration tests if module active
+ * 8. Dynamically load Quench integration tests if module active
  * 9. Execute data migrations on version changes
  * 
  * **L5R4 Game Mechanics Integration:**
@@ -59,7 +59,6 @@ import { initializeStanceService } from "../module/services/stance/initialize.js
 import { initializeChatService } from "../module/services/chat.js";
 import { initializeInitiativeSystem } from "../module/services/initiative.js";
 import { initializeWoundProneAutomation } from "../module/services/wound-prone-automation.js";
-import { registerQuenchTests } from "../tests/integration/quench-integration.js";
 
 /**
  * Foundry VTT Init Hook
@@ -174,12 +173,11 @@ async function registerQuenchIfAvailable() {
   }
 
   try {
+    // Dynamic import - only load tests when Quench is available
+    const { registerQuenchTests } = await import("../tests/integration/quench-integration.js");
     await registerQuenchTests(quench);
     quenchModule._l5r4Registered = true;
-    console.log(`${SYS_ID} | ✓ Quench tests registered`);
-  } catch (err) {
-    console.error(`${SYS_ID} | ✗ Quench registration failed:`, err);
-  }
+  } catch (err) { }
 }
 
 /**
