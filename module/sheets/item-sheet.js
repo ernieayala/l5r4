@@ -144,24 +144,53 @@ export default class L5R4ItemSheet extends HandlebarsApplicationMixin(ItemSheetV
     id: "l5r4-item",
     classes: ["l5r4", "sheet", "item"],
     form: { ...super.DEFAULT_OPTIONS.form, submitOnChange: true },
-    window: { ...super.DEFAULT_OPTIONS.window }
+    window: {
+      ...super.DEFAULT_OPTIONS.window,
+      contentClasses: ["standard-form"]
+    },
+    actions: {
+      changeTab: L5R4ItemSheet.prototype._onChangeTab
+    }
   };
 
   /**
    * Application template parts configuration.
    *
-   * Defines the root form template with flexcol layout class.
-   * Type-specific item templates are loaded as partials via _scaffold.hbs.
+   * Defines multi-tab sheet structure with separate parts for each tab section.
+   * Tabs organize item properties into logical categories:
+   * - header: Item image, name, and type
+   * - tabs: Tab navigation bar
+   * - details: Type-specific properties (ring, cost, mastery, raises, demands, price)
+   * - modifiers: Bonuses, rolls, damage (only weapon/armor/skill)
+   * - description: Long-form text content and special rules (universal)
+   * - effects: Active Effects management (universal)
    *
    * @type {Object<string, ApplicationPart>}
    * @static
    */
   static PARTS = {
     ...(super.PARTS ?? {}),
-    form: {
-      root: true,
-      classes: ["flexcol"],
-      template: `systems/${SYS_ID}/templates/item/_partials/_scaffold.hbs`
+    header: {
+      template: `systems/${SYS_ID}/templates/item/_partials/_header.hbs`
+    },
+    tabs: {
+      template: `systems/${SYS_ID}/templates/item/_partials/_tabs.hbs`
+    },
+    details: {
+      template: `systems/${SYS_ID}/templates/item/_partials/_tab-details.hbs`,
+      scrollable: [".tab-content"]
+    },
+    modifiers: {
+      template: `systems/${SYS_ID}/templates/item/_partials/_tab-modifiers.hbs`,
+      scrollable: [".tab-content"]
+    },
+    description: {
+      template: `systems/${SYS_ID}/templates/item/_partials/_tab-description.hbs`,
+      scrollable: [".tab-content"]
+    },
+    effects: {
+      template: `systems/${SYS_ID}/templates/item/_partials/_tab-effects.hbs`,
+      scrollable: [".tab-content"]
     }
   };
 
@@ -174,6 +203,14 @@ export default class L5R4ItemSheet extends HandlebarsApplicationMixin(ItemSheetV
    * @static
    */
   static SCROLLABLE = [".sheet-content", ".editor"];
+
+  /**
+   * Current active tab ID.
+   * Defaults to first available tab (details or description).
+   *
+   * @type {string}
+   */
+  #currentTab = "";
 
   /**
    * Convenience getter for the Item document.
@@ -328,7 +365,80 @@ export default class L5R4ItemSheet extends HandlebarsApplicationMixin(ItemSheetV
       context.skillOptions = {};
     }
 
+    // Tab management: Build tab state for template rendering
+    // Determines which tabs are available for this item type and which is currently active
+    const availableTabs = this._getAvailableTabs(item.type);
+
+    // Set default tab to first available if not set
+    if (!this.#currentTab || !availableTabs.includes(this.#currentTab)) {
+      this.#currentTab = availableTabs[0];
+    }
+
+    context.tabs = availableTabs.map(tabId => ({
+      id: tabId,
+      label: game.i18n.localize(`l5r4.ui.tabs.${tabId}`),
+      active: tabId === this.#currentTab,
+      cssClass: tabId === this.#currentTab ? "active" : "" // Used by tab navigation
+    }));
+    context.currentTab = this.#currentTab;
+
     return context;
+  }
+
+  /**
+   * Determine which tabs are available for a given item type.
+   *
+   * Tab structure varies by item type:
+   * - Details: Always shown (unless item type has no detail fields like family/clan)
+   * - Modifiers: Only for items with mechanical bonuses (weapon, armor, skill)
+   * - Description: Always shown
+   * - Active Effects: Always shown
+   *
+   * @param {string} itemType - Item type (weapon, spell, advantage, etc.)
+   * @returns {string[]} Array of available tab IDs
+   * @private
+   */
+  _getAvailableTabs(itemType) {
+    // Items that have modifier/bonus fields
+    const hasModifiers = ["weapon", "armor", "skill"].includes(itemType);
+
+    // Items with no Details tab (only description)
+    const noDetails = ["family", "clan", "school"].includes(itemType);
+
+    const tabs = [];
+
+    if (!noDetails) {
+      tabs.push("details");
+    }
+
+    if (hasModifiers) {
+      tabs.push("modifiers");
+    }
+
+    tabs.push("description");
+    tabs.push("effects");
+
+    return tabs;
+  }
+
+  /**
+   * Handle tab change action.
+   *
+   * Updates the active tab and triggers a re-render to display the new tab content.
+   * Foundry Application v2 action handler bound via DEFAULT_OPTIONS.actions.
+   *
+   * @param {Event} event - Click event from tab navigation
+   * @param {HTMLElement} target - Clicked tab element with data-tab attribute
+   * @private
+   */
+  _onChangeTab(event, target) {
+    const tabId = target.dataset.tab;
+    if (!tabId) {
+      return;
+    }
+
+    this.#currentTab = tabId;
+    this.render();
   }
 
   /**

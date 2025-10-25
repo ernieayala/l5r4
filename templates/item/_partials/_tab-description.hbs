@@ -1,0 +1,27 @@
+<section class="tab {{#if (eq currentTab "description")}}active{{/if}}" data-tab="description" data-application-part="description">
+  {{!-- Main Description --}}
+  <h4 class="prose-title">{{localize "l5r4.ui.sheets.description"}}</h4>
+  {{#if editable}}
+    <prose-mirror name="system.description" value="{{ system.description }}" document-uuid="{{ item.uuid }}" class="sized" compact>
+      {{{ enriched.description }}}
+    </prose-mirror>
+  {{else}}
+    <div class="editor editor-content">
+      {{{ enriched.description }}}
+    </div>
+  {{/if}}
+
+  {{!-- Special Rules (show if editable OR if content exists) --}}
+  {{#if (or editable system.specialRules)}}
+    <h4 class="prose-title">{{localize "l5r4.ui.sheets.rulesSummary"}}</h4>
+    {{#if editable}}
+      <prose-mirror name="system.specialRules" value="{{system.specialRules}}" document-uuid="{{item.uuid}}" class="sized" compact>
+        {{{enriched.specialRules}}}
+      </prose-mirror>
+    {{else}}
+      <div class="editor editor-content">
+        {{{enriched.specialRules}}}
+      </div>
+    {{/if}}
+  {{/if}}
+</section>

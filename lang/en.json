@@ -1,6 +1,12 @@
 {
   "l5r4": {
     "ui": {
+      "tabs": {
+        "details": "Details",
+        "modifiers": "Modifiers",
+        "description": "Description",
+        "effects": "Active Effects"
+      },
       "mechanics": {
         "rings": {
           "ring": "Ring",
