@@ -109,4 +109,15 @@ export function registerWorldSettings() {
       formula: "SETTINGS.defaultNpcWoundMode.choices.formula"
     }
   });
+
+  // Custom Skill Emphases
+  // Stores world-level custom emphases added by GM/players that are not in the official L5R4 list.
+  // Custom emphases are available to all players in the world when managing skill emphases.
+  // Hidden from Configure Game Settings as it's managed through EmphasisManager dialog.
+  game.settings.register(SYS_ID, "customEmphases", {
+    config: false,
+    scope: "world",
+    type: Array,
+    default: []
+  });
 }

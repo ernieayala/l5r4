@@ -156,6 +156,7 @@
         "roll": "Roll",
         "cancel": "Cancel",
         "ok": "OK",
+        "add": "Add",
         "none": "None",
         "keep": "Keep",
         "raise": "Raise",
@@ -195,7 +196,19 @@
         "ring": "Ring",
         "mastery": "Mastery",
         "tn": "TN",
-        "cost": "Cost"
+        "cost": "Cost",
+        "save": "Save"
+      },
+      "emphasisManager": {
+        "title": "Manage Skill Emphases",
+        "manageFor": "Manage Available Emphases for",
+        "manage": "Manage Emphases",
+        "addCustom": "Add Custom Emphasis",
+        "custom": "Custom",
+        "none": "No emphases available",
+        "help": "Select which emphases are available for this skill. Train them on the character sheet.",
+        "noEmphases": "No emphases in list",
+        "limitReached": "Cannot train more than {max} emphases at this skill rank"
       },
       "sheets": {
         "bio": "Background",

@@ -37,7 +37,7 @@
  * @param {string} [options.rollType] - Type of roll (for type-specific Free Raises)
  * @returns {number} Total Free Raises available for this roll
  */
-export function calculateFreeRaises(actor, options = {}) {
+export function calculateFreeRaises(actor, _options = {}) {
   if (!actor?.items) {
     return 0;
   }

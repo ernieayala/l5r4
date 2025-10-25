@@ -35,6 +35,7 @@
 import { SYS_ID } from "../config/constants.js";
 import { enhanceItemSheetData } from "../documents/item/integration/sheet-data.js";
 import { ItemEffectsHandler } from "./handlers/item-effects-handler.js";
+import EmphasisManager from "../apps/emphasis-manager.js";
 
 const { HandlebarsApplicationMixin } = foundry.applications.api;
 const { ItemSheetV2 } = foundry.applications.sheets;
@@ -149,7 +150,8 @@ export default class L5R4ItemSheet extends HandlebarsApplicationMixin(ItemSheetV
       contentClasses: ["standard-form"]
     },
     actions: {
-      changeTab: L5R4ItemSheet.prototype._onChangeTab
+      changeTab: L5R4ItemSheet.prototype._onChangeTab,
+      manageEmphases: L5R4ItemSheet.prototype._onManageEmphases
     }
   };
 
@@ -439,6 +441,35 @@ export default class L5R4ItemSheet extends HandlebarsApplicationMixin(ItemSheetV
 
     this.#currentTab = tabId;
     this.render();
+  }
+
+  /**
+   * Handle manage emphases button click.
+   *
+   * Opens the EmphasisManager ApplicationV2 dialog for the skill item.
+   * Only applicable to skill-type items.
+   *
+   * Foundry Application v2 action handler bound via DEFAULT_OPTIONS.actions.
+   * EmphasisManager handles emphasis selection, custom emphasis addition,
+   * and XP tracking for trained emphases.
+   *
+   * @param {Event} event - Click event from button
+   * @param {HTMLElement} target - Button element with data-action="manageEmphases"
+   * @private
+   */
+  async _onManageEmphases(_event, _target) {
+    if (this.item.type !== "skill") {
+      console.warn("Emphasis manager only available for skill items");
+      return;
+    }
+
+    const manager = new EmphasisManager({ item: this.item });
+    await manager.render(true);
+
+    // Wait for dialog to close, then refresh this sheet
+    manager.addEventListener("close", () => {
+      this.render(false);
+    });
   }
 
   /**

@@ -145,10 +145,12 @@ export async function preloadTemplates() {
     `systems/${SYS_ID}/templates/dialogs/disadvantage-cap-dialog.hbs`,
     `systems/${SYS_ID}/templates/dialogs/roll-modifiers-dialog.hbs`,
     `systems/${SYS_ID}/templates/dialogs/unified-item-create-dialog.hbs`,
+    `systems/${SYS_ID}/templates/dialogs/custom-emphasis-dialog.hbs`,
 
     // Application Templates
     `systems/${SYS_ID}/templates/apps/xp-manager.hbs`,
-    `systems/${SYS_ID}/templates/apps/wound-config.hbs`
+    `systems/${SYS_ID}/templates/apps/wound-config.hbs`,
+    `systems/${SYS_ID}/templates/apps/emphasis-manager.hbs`
   ];
 
   if (!globalThis.foundry?.applications?.handlebars?.loadTemplates) {

@@ -59,7 +59,7 @@ async function applyWoundsToToken(damage) {
  * @returns {Promise<void>}
  * @async
  */
-async function reduceAndApplyWounds(damage, actorId) {
+async function reduceAndApplyWounds(damage, _actorId) {
   const tokens = canvas.tokens?.controlled ?? [];
 
   if (tokens.length === 0) {

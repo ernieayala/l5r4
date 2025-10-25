@@ -236,6 +236,10 @@ async function migrateActorEmbeddedItems(actor, labelPrefix) {
   await applySchemaMapToDocs(actor.items.contents, `${labelPrefix}-items:${actor.id}`);
   await migrateBowsToWeapons(actor.items.contents, `${labelPrefix}-bow-migration:${actor.id}`);
   await migrateSkillDefaults(actor.items.contents, `${labelPrefix}-skill-defaults:${actor.id}`);
+  await migrateEmphasisStringToArray(
+    actor.items.contents,
+    `${labelPrefix}-emphasis-migration:${actor.id}`
+  );
   await migrateArmorTypes(actor.items.contents, `${labelPrefix}-armor-types:${actor.id}`);
   await migrateFreeRaisesDefaults(actor.items.contents, `${labelPrefix}-free-raises:${actor.id}`);
   await normalizeItems(actor.items.contents, `${labelPrefix}-items-norm:${actor.id}`);
@@ -410,6 +414,80 @@ async function migrateSkillDefaults(docs, label) {
   if (migratedCount > 0) {
     console.warn(
       `${SYS_ID} | Successfully migrated ${migratedCount} skill items with default values (${label})`
+    );
+  }
+}
+
+/**
+ * Migrates legacy emphasis string format to new split structure.
+ *
+ * Converts old comma/semicolon-separated emphasis strings into two fields:
+ * - availableEmphases: Array of emphasis names available for skill
+ * - trainedEmphases: Empty array (training happens on character sheet)
+ *
+ * Migration Strategy:
+ * - Parse old emphasis string (comma/semicolon delimited)
+ * - Put all parsed names into availableEmphases array
+ * - Initialize trainedEmphases as empty (user will select on character sheet)
+ * - Skip if already migrated (has availableEmphases field)
+ *
+ * Example:
+ * Old: system.emphasis = "Katana, Wakizashi"
+ * New: system.availableEmphases = ["Katana", "Wakizashi"]
+ *      system.trainedEmphases = []
+ *
+ * @param {Document[]} docs - Array of Item documents to scan for skills
+ * @param {string} label - Migration context label for console logging
+ * @returns {Promise<void>}
+ */
+async function migrateEmphasisStringToArray(docs, label) {
+  const skillItems = docs.filter(doc => doc.type === "skill");
+  if (skillItems.length === 0) {
+    return;
+  }
+
+  let migratedCount = 0;
+
+  for (const item of skillItems) {
+    try {
+      const system = item.system || {};
+
+      // Skip if already migrated (has availableEmphases array)
+      if (Array.isArray(system.availableEmphases)) {
+        continue;
+      }
+
+      // Parse old emphasis string
+      const oldEmphasis = system.emphasis ?? "";
+      const trimmed = String(oldEmphasis).trim();
+
+      const emphasisNames = trimmed
+        ? trimmed
+            .split(/[,;]+/)
+            .map(s => s.trim())
+            .filter(Boolean)
+        : [];
+
+      await item.update(
+        {
+          "system.availableEmphases": emphasisNames,
+          "system.trainedEmphases": []
+        },
+        { diff: true, render: false }
+      );
+      migratedCount++;
+    } catch (err) {
+      console.warn(`${SYS_ID}`, "Failed to migrate skill emphasis", {
+        id: item.id,
+        name: item.name,
+        err
+      });
+    }
+  }
+
+  if (migratedCount > 0) {
+    console.warn(
+      `${SYS_ID} | Migrated ${migratedCount} skill items from emphasis string to split fields (${label})`
     );
   }
 }
@@ -1058,6 +1136,8 @@ export async function runMigrations(fromVersion, toVersion) {
 
   await migrateSkillDefaults(game.items.contents, "world-skill-defaults");
 
+  await migrateEmphasisStringToArray(game.items.contents, "world-emphasis-migration");
+
   await migrateArmorTypes(game.items.contents, "world-armor-types");
 
   await migrateFreeRaisesDefaults(game.items.contents, "world-free-raises");
@@ -1091,6 +1171,7 @@ export async function runMigrations(fromVersion, toVersion) {
       }
       await migrateBowsToWeapons(docs, `pack-bow-migration:${pack.collection}`);
       await migrateSkillDefaults(docs, `pack-skill-defaults:${pack.collection}`);
+      await migrateEmphasisStringToArray(docs, `pack-emphasis-migration:${pack.collection}`);
       await migrateArmorTypes(docs, `pack-armor-types:${pack.collection}`);
       await migrateFreeRaisesDefaults(docs, `pack-free-raises:${pack.collection}`);
       await normalizeItems(docs, `pack-norm:${pack.collection}`);

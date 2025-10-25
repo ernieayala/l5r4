@@ -36,11 +36,13 @@ import { registerStanceTests } from "./services/stance.test.js";
 import { registerRestTests } from "./services/rest.test.js";
 import { registerFamilyBonusTests } from "./services/family-bonus-service.test.js";
 import { registerXpServiceTests } from "./services/xp-service.test.js";
+import { registerEmphasisXpTrackingTests } from "./services/emphasis-xp-tracking.test.js";
 import { registerPCSheetTests } from "./sheets/pc-sheet.test.js";
 import { registerNPCSheetTests } from "./sheets/npc-sheet.test.js";
 import { registerItemSheetTests } from "./sheets/item-sheet.test.js";
 import { registerWoundConfigTests } from "./sheets/wound-config.test.js";
 import { registerXpManagerTests } from "./sheets/xp-manager.test.js";
+import { registerEmphasisManagerTests } from "./sheets/emphasis-manager.test.js";
 import { registerCombatWorkflowTests } from "./workflows/combat-workflow.test.js";
 import { registerAdvancementWorkflowTests } from "./workflows/advancement-workflow.test.js";
 import { registerSpellCastingWorkflowTests } from "./workflows/spell-casting-workflow.test.js";
@@ -80,6 +82,7 @@ export async function registerQuenchTests(quench) {
   registerRestTests(quench);
   registerFamilyBonusTests(quench);
   registerXpServiceTests(quench);
+  registerEmphasisXpTrackingTests(quench);
 
   // Register sheet tests (Phase 5: User Interface)
   registerPCSheetTests(quench);
@@ -87,6 +90,7 @@ export async function registerQuenchTests(quench) {
   registerItemSheetTests(quench);
   registerWoundConfigTests(quench);
   registerXpManagerTests(quench);
+  registerEmphasisManagerTests(quench);
 
   // Register workflow tests (Phase 6: Complete Workflows)
   registerCombatWorkflowTests(quench);

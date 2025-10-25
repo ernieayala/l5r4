@@ -261,14 +261,12 @@ export function preparePcExperience(actor, sys) {
       // Subtract free ranks using same formula
       skillsXP += (r * (r + 1)) / 2 - (freeRanks * (freeRanks + 1)) / 2;
     }
-    const emph = String(it.system?.emphasis ?? "").trim();
-    if (emph) {
-      const emphases = emph
-        .split(/[,;]+/)
-        .map(s => s.trim())
-        .filter(Boolean);
+    const trainedEmphases = Array.isArray(it.system?.trainedEmphases)
+      ? it.system.trainedEmphases
+      : [];
+    if (trainedEmphases.length > 0) {
       const freeEmphasis = Math.max(0, toInt(it.system?.freeEmphasis ?? 0));
-      const paidEmphases = Math.max(0, emphases.length - freeEmphasis);
+      const paidEmphases = Math.max(0, trainedEmphases.length - freeEmphasis);
 
       // Emphasis cost: 2 XP each per L5R4 rules
       skillsXP += 2 * paidEmphases;

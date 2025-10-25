@@ -22,7 +22,13 @@
       <span class="mas">{{system.rollDice}}k{{system.rollKeep}}</span>
       <a class="button" data-action="roll-skill" title="{{localize "l5r4.ui.mechanics.rolls.skillRoll"}}">{{system.rollDice}}k{{system.rollKeep}}</a>
     </div>
-    <div>{{system.emphasis}}</div>
+    <div class="emphasis-display">
+      {{#if system.trainedEmphases.length}}
+        {{join system.trainedEmphases ", "}}
+      {{else}}
+        —
+      {{/if}}
+    </div>
     {{> "systems/l5r4-enhanced/templates/cards/_partials/_expand.hbs"}}
     {{#if (or system.description system.specialRules (and (gte system.rank 3) system.mastery3) (and (gte system.rank 5) system.mastery5) (and (gte system.rank 7) system.mastery7))}}
       <div class="expanded-text">

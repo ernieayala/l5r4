@@ -1,0 +1,44 @@
+/**
+ * Emphasis Manager Application Styles
+ * Styles for the EmphasisManager ApplicationV2 dialog
+ */
+
+.emphasis-manager-container {
+  display: flex;
+  flex-direction: column;
+  gap: 1rem;
+  height: 100%;
+
+  .emphasis-list-container {
+    border: 1px solid var(--table-header-border-color);
+    flex: 1;
+    overflow-y: auto;
+
+    ul {
+      display: flex;
+      flex-direction: column;
+      list-style: none;
+      margin: 0;
+      padding: 0;
+
+      li {
+        align-items: center;
+        display: flex;
+        gap: 0.5rem;
+        justify-content: space-between;
+        margin: 0;
+
+        &:nth-of-type(even) {
+          background-color: var(--table-row-color-even);
+        }
+
+        label {
+          align-items: center;
+          display: flex;
+          flex: 1;
+          gap: 0.25rem;
+        }
+      }
+    }
+  }
+}

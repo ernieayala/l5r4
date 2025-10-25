@@ -1,0 +1,62 @@
+<div class="emphasis-manager-container">
+  <p>{{localize "l5r4.ui.emphasisManager.help"}}</p>
+  <button type="button" data-action="addCustom">
+    <i class="fa-solid fa-plus"></i>
+    {{localize "l5r4.ui.emphasisManager.addCustom"}}
+  </button>
+  <div class="emphasis-list-container">
+    {{#if emphasisList.length}}
+      <ul>
+        {{#each emphasisList}}
+          <li class="{{#if this.custom}}custom-emphasis{{/if}}">
+            <label>
+              <input 
+                type="checkbox" 
+                name="emphasis.{{this.name}}" 
+                {{checked this.available}}
+                data-type="Boolean"
+              />
+              <span>{{this.name}}</span>
+              {{#if this.custom}}
+                <span>({{localize "l5r4.ui.emphasisManager.custom"}})</span>
+              {{/if}}
+            </label>
+            {{#if this.custom}}
+              <div class="flexrow -gap-sm">
+                <button 
+                  type="button" 
+                  class="button inline-control icon" 
+                  data-action="editCustom" 
+                  data-emphasis-name="{{this.name}}"
+                  data-tooltip="{{localize 'l5r4.ui.common.edit'}}"
+                >
+                  <i class="fa-solid fa-edit"></i>
+                </button>
+                <button 
+                  type="button" 
+                  class="button inline-control icon" 
+                  data-action="deleteCustom" 
+                  data-emphasis-name="{{this.name}}"
+                  data-tooltip="{{localize 'l5r4.ui.common.delete'}}"
+                >
+                  <i class="fa-solid fa-trash"></i>
+                </button>
+              </div>
+            {{/if}}
+          </li>
+        {{/each}}
+      </ul>
+    {{else}}
+      <p>{{localize "l5r4.ui.emphasisManager.noEmphases"}}</p>
+    {{/if}}
+  </div>
+  <footer class="flexrow -gap-sm">
+    <button type="submit">
+      <i class="fa-solid fa-save"></i>
+      {{localize "l5r4.ui.common.save"}}
+    </button>
+    <button type="button" data-action="close">
+      {{localize "l5r4.ui.common.cancel"}}
+    </button>
+  </footer>
+</div>
