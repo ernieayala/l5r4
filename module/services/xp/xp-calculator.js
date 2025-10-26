@@ -238,16 +238,13 @@ export async function buildXpHistory(actor) {
         }
 
         // Skill Emphases: Specialized aspects that allow re-rolling 1s (cost = 2 XP each)
-        const emph = String(item.system?.emphasis ?? "").trim();
-        if (emph) {
-          // Parse comma or semicolon-separated list: "Katana, Bokken" → ["Katana", "Bokken"]
-          const emphases = emph
-            .split(/[,;]+/)
-            .map(s => s.trim())
-            .filter(Boolean);
+        const trainedEmphases = Array.isArray(item.system?.trainedEmphases)
+          ? item.system.trainedEmphases
+          : [];
+        if (trainedEmphases.length > 0) {
           const freeEmphasis = Math.max(0, parseInt(item.system?.freeEmphasis) || 0);
           // Only count emphases beyond the free count
-          const paidEmphases = emphases.slice(freeEmphasis);
+          const paidEmphases = trainedEmphases.slice(freeEmphasis);
 
           paidEmphases.forEach((emphasis, index) => {
             const note = `${item.name} - Emphasis: ${emphasis}`;
@@ -288,6 +285,28 @@ export async function buildXpHistory(actor) {
             type: item.type,
             itemName: item.name,
             // Random timestamp within 10-second window (these have no inherent order)
+            ts: Date.now() - Math.random() * 10000
+          });
+        }
+      }
+
+      // Spells: Memorization costs XP equal to mastery level (L5R4 Spells.md line 25)
+      if (item.type === "spell") {
+        const memorized = item.system?.memorized ?? false;
+        if (memorized) {
+          const mastery = parseInt(item.system?.mastery) || 1;
+          const note = game.i18n.format("l5r4.character.experience.spellMemorized", {
+            name: item.name
+          });
+          const entryKey = `spell:memorized:${item.name}`;
+
+          addXpEntry(spent, existingEntries, entryKey, {
+            delta: mastery,
+            note: note,
+            type: "spell",
+            itemName: item.name,
+            mastery: mastery,
+            // Random timestamp within 10-second window
             ts: Date.now() - Math.random() * 10000
           });
         }

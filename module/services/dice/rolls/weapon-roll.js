@@ -72,7 +72,7 @@ import { spendVoidPoint } from "../resources/void-manager.js";
  * specific calls to override the global setting (e.g., right-click to force dialog).
  *
  * Chat Label Annotations:
- * - Base: "Damage Roll: [Weapon Name]"
+ * - Base: "Damage for [Weapon Name]"
  * - Description: Appended if provided (e.g., special attack notes)
  * - Raises: Shows attack raises and damage bonus (e.g., "[Raises: 2 (+2k0)]")
  * - Stance: Shows stance bonus if present (e.g., "[Stance Bonus: +2k1]")
@@ -105,7 +105,7 @@ export async function WeaponRoll({
   let rollMod = 0,
     keepMod = 0,
     bonus = 0;
-  let label = `${game.i18n.localize("l5r4.ui.mechanics.rolls.damageRoll")} ${weaponName}`;
+  let label = `Damage for ${weaponName}`;
   const optionsSetting = game.settings.get(SYS_ID, "showWeaponRollOptions");
 
   // Inverted boolean logic: Dialog appears when askForOptions !== setting
@@ -165,5 +165,19 @@ export async function WeaponRoll({
     label += ` [Stance Bonus: +${stanceRoll}k${stanceKeep}]`;
   }
 
-  return roll.toMessage({ flavor: label, speaker: ChatMessage.getSpeaker() });
+  await roll.evaluate();
+
+  const rollHtml = await roll.render();
+  const html = await renderTemplate("systems/l5r4-enhanced/templates/chat/damage-roll.hbs", {
+    flavor: label,
+    roll: rollHtml,
+    damageTotal: roll.total,
+    actorId: actor?.id ?? null
+  });
+
+  return ChatMessage.create({
+    speaker: ChatMessage.getSpeaker({ actor }),
+    content: html,
+    type: CONST.CHAT_MESSAGE_TYPES.OTHER
+  });
 }

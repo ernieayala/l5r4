@@ -82,7 +82,7 @@ import {
  * @param {object} [changes.system] - System data changes (undefined if no system changes)
  * @param {number} [changes.system.cost] - New advantage/disadvantage cost
  * @param {number} [changes.system.rank] - New skill rank
- * @param {string} [changes.system.emphasis] - New emphasis string (comma/semicolon separated)
+ * @param {string[]} [changes.system.trainedEmphases] - New trained emphases array
  * @param {number} [changes.system.freeRanks] - New free ranks count
  * @param {number} [changes.system.freeEmphasis] - New free emphasis count
  * @param {boolean} [changes.system.school] - Whether skill is a school skill
@@ -150,38 +150,6 @@ function isSchoolSkill(item, changes) {
 }
 
 /**
- * Parse emphasis string into array of individual emphasis names.
- *
- * Emphases can be entered by users as comma-separated or semicolon-separated
- * strings. This parser handles both delimiters for user flexibility and trims
- * whitespace to allow "Fire, Water" or "Fire , Water" formats.
- *
- * Parsing strategy:
- * - Split on comma OR semicolon (regex: /[,;]+/)
- * - Trim each element (remove leading/trailing whitespace)
- * - Filter out empty strings (handles trailing delimiters like "Fire, Water,")
- *
- * Examples:
- * - "Fire" → ["Fire"]
- * - "Fire, Water" → ["Fire", "Water"]
- * - "Fire; Water; Earth" → ["Fire", "Water", "Earth"]
- * - "" → []
- * - "Fire,," → ["Fire"] (filters empty)
- *
- * @param {string|*} emphasisString - Emphasis string from item.system.emphasis
- * @returns {string[]} Array of trimmed, non-empty emphasis names
- */
-function parseEmphases(emphasisString) {
-  const trimmed = String(emphasisString ?? "").trim();
-  return trimmed
-    ? trimmed
-        .split(/[,;]+/)
-        .map(s => s.trim())
-        .filter(Boolean)
-    : [];
-}
-
-/**
  * Track XP expenditure when a skill rank increases.
  *
  * Detects skill rank increases and logs the XP cost according to L5R4
@@ -225,56 +193,35 @@ async function trackSkillRankIncrease(item, changes) {
 }
 
 /**
- * Track XP expenditure when emphases are added to a skill.
+ * Track XP expenditure when skill emphases are added.
  *
- * Detects when new emphases are added (count increases) and logs the XP cost
- * according to L5R4 advancement rules (2 XP per emphasis).
- *
- * **Emphasis Mechanics:**
- * Emphases allow re-rolling 1s on skill rolls when the task matches the
- * emphasis. For example, a character with Kenjutsu (Katana) can re-roll 1s
- * when using a katana specifically.
- *
- * **Free Emphasis Handling:**
- * Some school skills grant a free emphasis (typically at School Rank 3+).
- * Similar to free ranks, the first emphasis may be free, and only additional
- * emphases cost XP.
- *
- * Only logs XP when:
- * - Emphasis string changes
- * - New emphasis count > old emphasis count (additions only, not removals)
+ * Logs XP when trainedEmphases array changes on a skill item. Each emphasis
+ * costs 2 XP, minus any free emphasis granted by the skill (freeEmphasis field).
  *
  * L5R4 Rules:
  * - Emphases cost 2 XP each
- * - Each emphasis must be distinct (no duplicates)
- * - Emphases can be added at any time during advancement
+ * - School skills may grant 1 free emphasis
+ * - Only new emphases (increased count) trigger XP logging
  *
  * @param {Item} item - The skill item being updated
  * @param {object} changes - Delta changes object from preUpdate hook
- * @param {string} [changes.system.emphasis] - New emphasis string (if being changed)
- * @returns {Promise<void>} Resolves when XP logging completes
- *
- * @async
- * @see {@link module:documents/item/lifecycle/xp-tracking.logEmphasisXp}
+ * @returns {Promise<void>}
  */
 async function trackEmphasisAdditions(item, changes) {
-  const oldEmphasis = item.system?.emphasis ?? "";
-  const newEmphasis = changes?.system?.emphasis ?? oldEmphasis;
-
-  if (oldEmphasis === newEmphasis) {
+  if (!item.actor) {
     return;
   }
 
-  const oldEmphases = parseEmphases(oldEmphasis);
-  const newEmphases = parseEmphases(newEmphasis);
+  const oldEmphases = item.system?.trainedEmphases ?? [];
+  const newEmphases = changes?.system?.trainedEmphases;
 
-  if (newEmphases.length > oldEmphases.length) {
-    const freeEmphasis = isSchoolSkill(item, changes)
-      ? parseInt(changes?.system?.freeEmphasis ?? item.system?.freeEmphasis) || 0
-      : 0;
-
-    await logEmphasisXp(item, oldEmphases, newEmphases, freeEmphasis);
+  // Only track if trainedEmphases actually changed
+  if (!Array.isArray(newEmphases)) {
+    return;
   }
+
+  const freeEmphasis = toInt(item.system?.freeEmphasis, 0);
+  await logEmphasisXp(item, oldEmphases, newEmphases, freeEmphasis);
 }
 
 /**

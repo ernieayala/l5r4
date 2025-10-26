@@ -13,9 +13,9 @@
   },
   "homepage": "https://github.com/ernieayala/l5r4#readme",
   "scripts": {
-    "build": "npm run build:css",
+    "build": "npm run build:css && npm run lint:fix && npm run format && npm run check",
     "build:css": "sass --no-source-map scss/l5r4-enhanced.scss dist/l5r4-enhanced.css",
-    "watch": "sass --no-source-map --watch scss/l5r4-enhanced.scss:dist/l5r4-enhanced.css",
+    "watch:css": "sass --no-source-map --watch scss/l5r4-enhanced.scss:dist/l5r4-enhanced.css",
     "lint": "npm run lint:js && npm run lint:css",
     "lint:js": "eslint module/**/*.js",
     "lint:css": "stylelint \"scss/**/*.scss\"",
@@ -30,6 +30,11 @@
     "version:patch": "npm version patch --no-git-tag-version",
     "version:minor": "npm version minor --no-git-tag-version",
     "version:major": "npm version major --no-git-tag-version",
+    "test": "vitest run",
+    "test:unit": "vitest run tests/unit",
+    "test:watch": "vitest watch tests/unit",
+    "test:ui": "vitest --ui tests/unit",
+    "test:coverage": "vitest run --coverage tests/unit",
     "pretest": "npm run deps:circular",
     "prepare": "husky"
   },

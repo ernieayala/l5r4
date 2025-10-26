@@ -49,9 +49,9 @@ import { SYS_ID } from "../config/constants.js";
  * @returns {number} XP cost for this advancement step (minimum 0)
  */
 export function calculateXpStepCostForTrait(r, freeEff, discount) {
-  const rank = Number.isFinite(+r) ? Number(r) : 0;
-  const bonus = Number.isFinite(+freeEff) ? Number(freeEff) : 0;
-  const d = Number.isFinite(+discount) ? Number(discount) : 0;
+  const rank = Number(r) || 0;
+  const bonus = Number(freeEff) || 0;
+  const d = Number(discount) || 0;
   return Math.max(0, 4 * (rank + bonus) + d);
 }
 

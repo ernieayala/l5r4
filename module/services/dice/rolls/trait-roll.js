@@ -137,7 +137,7 @@ export async function TraitRoll({
 
   // Show dialog if askForOptions doesn't match the setting (XOR logic - show when override differs from default)
   if (askForOptions !== optionsSetting) {
-    const check = await GetTraitRollOptions(traitName);
+    const check = await GetTraitRollOptions(traitName, targetActor);
     if (check?.cancelled) {
       return;
     }
@@ -149,12 +149,22 @@ export async function TraitRoll({
     totalMod = toInt(check.totalMod);
 
     userTN = toInt(check.tn);
+    const userFreeRaises = toInt(check.freeRaises) || 0;
     userRaises = toInt(check.raises);
-    if (userTN || userRaises) {
-      // Calculate effective TN: base TN + (raises × 5) per L5R4 core rules
-      const displayTN = userTN + userRaises * 5;
+    if (userTN || userRaises || userFreeRaises) {
+      // Calculate effective TN: base TN + (raises × 5) - (freeRaises × 5) per L5R4 core rules
+      const displayTN = userTN + userRaises * 5 - userFreeRaises * 5;
       const raisesLabel = game.i18n.localize("l5r4.ui.mechanics.rolls.raises");
-      label += ` [TN ${displayTN}${userRaises ? ` (${raisesLabel}: ${userRaises})` : ""}]`;
+      const freeRaisesLabel = game.i18n.localize("l5r4.ui.mechanics.rolls.freeRaises");
+      label += ` [TN ${displayTN}`;
+      if (userRaises || userFreeRaises) {
+        label += ` (${raisesLabel}: ${userRaises}`;
+        if (userFreeRaises) {
+          label += ` + ${userFreeRaises} ${freeRaisesLabel}`;
+        }
+        label += ")";
+      }
+      label += "]";
     }
 
     // Apply passive bonuses from advantages, techniques, and effects

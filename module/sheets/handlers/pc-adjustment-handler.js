@@ -102,7 +102,6 @@ export class PcAdjustmentHandler {
    * Adjusts spell slots for a specific element (Air, Earth, Fire, Water, Void).
    *
    * **Game Rules Context:**
-   * Per Spells.md (line 11):
    * - Shugenja have spell slots equal to their Ring rank in each element
    * - Bonus spell slots equal to Void Ring (can cast any element)
    * - Valid range: 0-9 (matches Ring rank maximum)

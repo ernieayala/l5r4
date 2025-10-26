@@ -1,0 +1,71 @@
+<div class="form-group">
+  <label>{{localize "l5r4.equipment.weapons.typeBow"}}</label>
+  <div class="form-fields">
+    <input name="system.isBow" type="checkbox" {{checked system.isBow}} />
+  </div>
+</div>
+<div class="form-group">
+  <label>{{localize "l5r4.equipment.weapons.size"}}</label>
+  <div class="form-fields">
+    <select name="system.size">
+      {{selectOptions config.sizes selected=system.size localize=true}}
+    </select>
+  </div>
+</div>
+{{#if isOwnedByCharacter}}
+  {{#if hasCharacterSkills}}
+    <div class="form-group">
+      <label>{{localize "l5r4.equipment.weapons.associatedSkill"}}</label>
+      <div class="form-fields">
+        <select name="system.associatedSkill">
+          {{selectOptions skillOptions selected=system.associatedSkill}}
+        </select>
+      </div>
+    </div>
+  {{/if}}
+  <div class="form-group">
+    <label>{{#if hasCharacterSkills}}{{localize "l5r4.equipment.weapons.fallback"}} {{/if}}{{localize "l5r4.character.skills.properties.trait"}}</label>
+    <div class="form-fields">
+      <select name="system.fallbackTrait">
+        {{selectOptions config.traits selected=system.fallbackTrait localize=true}}
+      </select>
+    </div>
+  </div>
+{{else}}
+  <div class="form-group">
+    <label>{{localize "l5r4.equipment.weapons.associatedSkill"}}</label>
+    <div class="form-fields">
+      <input name="system.associatedSkill" type="text" value="{{system.associatedSkill}}" placeholder="{{#if system.isBow}}{{localize 'l5r4.equipment.weapons.skillExample.bow'}}{{else}}{{localize 'l5r4.equipment.weapons.skillExample.weapon'}}{{/if}}" disabled />
+    </div>
+  </div>
+  <div class="form-group">
+    <label>{{localize "l5r4.equipment.weapons.fallback"}} {{localize "l5r4.character.skills.properties.trait"}}</label>
+    <div class="form-fields">
+      <select name="system.fallbackTrait">
+        {{selectOptions config.traits selected=system.fallbackTrait localize=true}}
+      </select>
+    </div>
+  </div>
+{{/if}}
+{{#if system.isBow}}
+  <div class="form-group">
+    <label>{{localize "l5r4.ui.mechanics.traits.str"}}</label>
+    <div class="form-fields">
+      <input name="system.str" type="number" value="{{system.str}}" data-type="Number" />
+    </div>
+  </div>
+  <div class="form-group">
+    <label>{{localize "l5r4.equipment.weapons.range"}}</label>
+    <div class="form-fields">
+      <input name="system.range" type="number" value="{{system.range}}" data-type="Number" />
+    </div>
+  </div>
+  <div class="form-group">
+    <label>{{localize "l5r4.equipment.weapons.arrow"}}</label>
+    <div class="form-fields">
+      <select name="system.arrow">
+        {{selectOptions config.arrows selected=system.arrow localize=true}}
+      </select>
+    </div>
+  </div>
+{{/if}}

@@ -88,7 +88,7 @@ export async function MahoCastRoll({ actor, spell, woundPenalty = 0, showDialog 
   };
 
   if (showDialog) {
-    options = await GetMahoCastOptions(spell.name, ringName, baseBloodCost);
+    options = await GetMahoCastOptions(spell.name, ringName, baseBloodCost, actor);
     if (options.cancelled) {
       return false;
     }
@@ -104,9 +104,6 @@ export async function MahoCastRoll({ actor, spell, woundPenalty = 0, showDialog 
 
   if (options.bloodSource === "self") {
     const newWounds = Math.min(currentWounds + totalBloodCost, maxWounds);
-    console.log(
-      `${SYS_ID} | Maho Blood Cost: ${currentWounds} + ${totalBloodCost} = ${newWounds} wounds`
-    );
     await actor.update({ "system.suffered": newWounds });
   }
   // Note: If bloodSource is "other", wounds are inflicted on another actor

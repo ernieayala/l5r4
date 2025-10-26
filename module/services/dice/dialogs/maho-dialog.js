@@ -18,6 +18,8 @@
 
 import { DIALOG_TEMPLATES } from "../../../config/templates.js";
 import { R } from "../../../utils/localization.js";
+import { getMaxRaises } from "../../../utils/raises-validator.js";
+import { calculateFreeRaises } from "../resources/raise-manager.js";
 
 const DIALOG = foundry.applications.api.DialogV2;
 
@@ -53,6 +55,7 @@ const DIALOG = foundry.applications.api.DialogV2;
  * @param {string} spellName - Name of the maho spell being cast
  * @param {string} ringName - Display name of the Ring
  * @param {number} bloodCost - Base blood cost in Wounds (2×Mastery Rank)
+ * @param {Actor} actor - The actor casting the spell (for max raises and free raises calculation)
  * @returns {Promise<MahoCastOptions>} User-selected options or {cancelled: true}
  *
  * @example
@@ -62,8 +65,17 @@ const DIALOG = foundry.applications.api.DialogV2;
  *   // options.additionalBlood = extra wounds for free raises
  * }
  */
-export async function GetMahoCastOptions(spellName, ringName, bloodCost) {
-  const content = await R(DIALOG_TEMPLATES.mahoCast, { bloodCost });
+export async function GetMahoCastOptions(spellName, ringName, bloodCost, actor) {
+  // Calculate max Raises from Void Ring and Free Raises from items/effects
+  const voidRing = actor?.system?.rings?.void?.rank ?? 0;
+  const maxRaises = getMaxRaises(voidRing);
+  const freeRaises = calculateFreeRaises(actor);
+
+  const content = await R(DIALOG_TEMPLATES.mahoCast, {
+    bloodCost,
+    maxRaises,
+    freeRaises: freeRaises ?? 0
+  });
 
   return await new Promise(resolve => {
     new DIALOG({
@@ -122,6 +134,7 @@ function _processMahoCastOptions(form) {
     keepMod: parseInt(form.keepMod?.value) || 0,
     totalMod: parseInt(form.totalMod?.value) || 0,
     void: form.void?.checked ?? false,
+    freeRaises: parseInt(form.freeRaises?.value) || 0,
     raises: parseInt(form.raises?.value) || 0
   };
 }

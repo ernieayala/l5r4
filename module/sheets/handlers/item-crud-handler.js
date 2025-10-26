@@ -161,6 +161,7 @@ export class ItemCRUDHandler {
 
   /**
    * Deletes an embedded Item from the actor.
+   * Shows confirmation dialog unless Shift key is held.
    * Silently catches and logs errors to prevent sheet breakage on failed deletion.
    *
    * @param {Object} context - Handler context from actor sheet
@@ -174,12 +175,37 @@ export class ItemCRUDHandler {
     const el = this._getElement(element, event);
     const row = this._getItemRow(el);
     const id = this._getItemId(row);
-    if (id) {
-      try {
-        await context.actor.deleteEmbeddedDocuments("Item", [id]);
-      } catch (err) {
-        console.warn(`${SYS_ID} ItemCRUDHandler: deleteEmbeddedDocuments failed`, { err });
+
+    if (!id) {
+      return;
+    }
+
+    const item = context.actor?.items?.get(id);
+    if (!item) {
+      return;
+    }
+
+    // Skip confirmation if Shift key is held
+    if (!event.shiftKey) {
+      const confirmed = await Dialog.confirm({
+        title: game.i18n.localize("l5r4.ui.dialogs.deleteItem.title"),
+        content: `<p>${game.i18n.format("l5r4.ui.dialogs.deleteItem.content", {
+          name: item.name
+        })}</p>`,
+        yes: () => true,
+        no: () => false,
+        defaultYes: false
+      });
+
+      if (!confirmed) {
+        return;
       }
+    }
+
+    try {
+      await context.actor.deleteEmbeddedDocuments("Item", [id]);
+    } catch (err) {
+      console.warn(`${SYS_ID} ItemCRUDHandler: deleteEmbeddedDocuments failed`, { err });
     }
   }
 
@@ -259,21 +285,16 @@ export class ItemCRUDHandler {
 
   /**
    * Posts an item to chat by calling its roll() method.
-   * **Requires Shift+Click** - ignored if shift key not held to prevent accidental posts.
    * Silently catches and logs errors to prevent sheet breakage on failed rolls.
    *
    * @param {Object} context - Handler context from actor sheet
    * @param {Actor} context.actor - The actor document
-   * @param {Event} event - Click event (prevented, must have shiftKey=true)
+   * @param {Event} event - Click event (prevented)
    * @param {HTMLElement} element - Clicked element or event target
    * @returns {Promise<void>}
    */
   static async toChat(context, event, element) {
     event.preventDefault();
-
-    if (!event.shiftKey) {
-      return;
-    }
 
     const row = this._getItemRow(element);
     const id = this._getItemId(row);

@@ -42,12 +42,10 @@
  */
 
 // Config
-import { SYS_ID } from "../config/constants.js";
 import { iconPath } from "../config/icons.js";
 
 // Utils
 import { on } from "../utils/dom.js";
-import { clamp } from "../utils/type-coercion.js";
 
 // Local
 import { KeyboardBehaviorMixin } from "./mixins/keyboard-behavior.js";
@@ -56,8 +54,8 @@ import { DragDropHandler } from "./handlers/drag-drop-handler.js";
 import { ItemCRUDHandler } from "./handlers/item-crud-handler.js";
 import { RollHandler } from "./handlers/roll-handler.js";
 import { SortHandler } from "./handlers/sort-handler.js";
+import { TraitHandler } from "./handlers/trait-handler.js";
 import { openImageEditor } from "./ui/image-editor.js";
-import { setupItemContextMenu } from "./ui/context-menu-builder.js";
 
 const { HandlebarsApplicationMixin } = foundry.applications.api;
 
@@ -159,7 +157,7 @@ export class BaseActorSheet extends KeyboardBehaviorMixin(
   /**
    * Sets up fallback handling for broken actor images.
    *
-   * Attaches error event listeners to all .actor-img elements that replace
+   * Attaches error event listeners to all [data-actor-image] elements that replace
    * broken images with type-appropriate default icons (pc.webp or npc.webp).
    * Uses data-errorHandled flag to ensure handlers are only attached once.
    *
@@ -171,7 +169,7 @@ export class BaseActorSheet extends KeyboardBehaviorMixin(
    * @private
    */
   _setupImageErrorHandling(root) {
-    const actorImages = root.querySelectorAll(".actor-img");
+    const actorImages = root.querySelectorAll("[data-actor-image]");
     actorImages.forEach(img => {
       if (!img.dataset.errorHandled) {
         img.dataset.errorHandled = "true";
@@ -491,29 +489,6 @@ export class BaseActorSheet extends KeyboardBehaviorMixin(
   }
 
   /* ---------------------------------- */
-  /* Shared Context Menu Setup          */
-  /* ---------------------------------- */
-
-  /**
-   * Initializes right-click context menu for item list entries.
-   *
-   * Sets up ContextMenu instance for item operations (edit, delete,
-   * duplicate, send to chat). Preserves existing menu instance to
-   * prevent memory leaks from duplicate menu creation.
-   *
-   * **Foundry Pattern:**
-   * Uses ContextMenu API to attach right-click menus to item entries.
-   *
-   * @param {HTMLElement} root - Sheet root element to attach context menu to
-   * @returns {Promise<void>}
-   * @protected
-   * @async
-   */
-  async _setupItemContextMenu(root) {
-    this._itemContextMenu = await setupItemContextMenu(root, this.actor, this._itemContextMenu);
-  }
-
-  /* ---------------------------------- */
   /* Shared Roll Methods                 */
   /* ---------------------------------- */
 
@@ -605,8 +580,10 @@ export class BaseActorSheet extends KeyboardBehaviorMixin(
   /**
    * Handles trait rank click - rolls trait or adjusts rank based on Shift key.
    *
+   * Delegates to TraitHandler for trait roll or rank adjustment logic.
+   *
    * **Without Shift Key:**
-   * Performs a trait roll (XkX where X = trait rank) via RollHandler.traitRoll().
+   * Performs a trait roll (XkX where X = trait rank) via TraitHandler/RollHandler.
    * This allows quick trait rolls by clicking directly on the trait rank.
    *
    * **With Shift Key:**
@@ -618,10 +595,6 @@ export class BaseActorSheet extends KeyboardBehaviorMixin(
    * Reflexes, Awareness) have ranks from 1-10. Normal humans start at rank 2.
    * Advancement cost = 4 × new rank XP (e.g., 2→3 costs 12 XP).
    *
-   * **Safety Mechanism:**
-   * Rank adjustment only executes if Shift key is held. Works in conjunction with
-   * KeyboardBehaviorMixin which provides visual cursor feedback.
-   *
    * @param {Event} event - DOM event (shiftKey determines roll vs adjust behavior)
    * @param {HTMLElement} element - Element with data-trait attribute
    * @param {number} delta - Direction to adjust (+1 to increase, -1 to decrease)
@@ -630,30 +603,7 @@ export class BaseActorSheet extends KeyboardBehaviorMixin(
    * @async
    */
   async _onTraitAdjust(event, element, delta) {
-    event?.preventDefault?.();
-
-    const key = String(element?.dataset?.trait || "").toLowerCase();
-    if (!key) {
-      return;
-    }
-
-    // If shift key NOT pressed, perform trait roll instead of adjustment
-    if (!event?.shiftKey) {
-      return RollHandler.traitRoll(this._getHandlerContext(), event, element);
-    }
-
-    const cur = Number(this.actor.system?.traits?.[key] ?? 0) || 0;
-    // Clamp to 0-10 per L5R4 rules (traits ranked 1-10, but 0 allowed for flexibility)
-    const next = clamp(cur + (delta > 0 ? 1 : -1), 0, 10);
-    if (next === cur) {
-      return;
-    }
-
-    try {
-      await this.actor.update({ [`system.traits.${key}`]: next }, { diff: true });
-    } catch (err) {
-      console.warn(`${SYS_ID} BaseActorSheet: failed to update trait`, { err, key, cur, next });
-    }
+    return TraitHandler.adjust(this._getHandlerContext(), event, element, delta);
   }
 
   /* Sorting System -------------------------------------------------------- */

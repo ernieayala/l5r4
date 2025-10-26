@@ -229,7 +229,7 @@ export class RollHandler {
     const params = extractRollParams(el, context.actor);
 
     const stanceBonuses = getStanceAttackBonuses(context.actor);
-    const rollName = `${context.actor.name}: ${params.label}`.trim();
+    const rollName = params.label;
     const description = RollHandler._addStanceBonusText(params.description, stanceBonuses);
 
     return SimpleRoll({
@@ -289,9 +289,7 @@ export class RollHandler {
 
     const isUntrained = weaponSkill.skillRank === 0;
 
-    const rollName = `${context.actor.name}: ${weapon.name} ${game.i18n.localize(
-      "l5r4.ui.mechanics.rolls.attackRoll"
-    )}`;
+    const rollName = `${weapon.name} ${game.i18n.localize("l5r4.ui.mechanics.rolls.attackRoll")}`;
     const description =
       `${weaponSkill.description}` +
       `${
@@ -368,7 +366,7 @@ export class RollHandler {
     const params = extractRollParams(el, context.actor);
 
     const stanceBonuses = getStanceDamageBonuses(context.actor);
-    const rollName = `${context.actor.name}: ${params.label}`.trim();
+    const rollName = params.label;
     const description = RollHandler._addStanceBonusText(params.description, stanceBonuses);
 
     return SimpleRoll({
@@ -511,7 +509,7 @@ export class RollHandler {
     const rollTypeLabel = ds.rolllabel || "";
     const trait = ds.trait || "";
     const rollType = ds.rolltype || "simple";
-    const rollName = `${context.actor.name}: ${rollTypeLabel} ${trait}`.trim();
+    const rollName = `${rollTypeLabel} ${trait}`.trim();
 
     return SimpleRoll({
       woundPenalty: readWoundPenalty(context.actor),

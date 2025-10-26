@@ -91,7 +91,8 @@ export class StanceHandler {
     if (!stanceId) {
       await this._removeAllStances(actor);
     } else {
-      // Apply new stance (removes conflicting stances internally)
+      // Remove conflicting stances FIRST, then apply new stance
+      await this._removeAllStances(actor);
       await this._addStance(actor, stanceId);
     }
   }

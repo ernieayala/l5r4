@@ -27,6 +27,8 @@
 
 import { DIALOG_TEMPLATES } from "../../../config/templates.js";
 import { R } from "../../../utils/localization.js";
+import { getMaxRaises } from "../../../utils/raises-validator.js";
+import { calculateFreeRaises } from "../resources/raise-manager.js";
 import { getAffinityDeficiencyModifier } from "../../../utils/mechanics.js";
 
 const DIALOG = foundry.applications.api.DialogV2;
@@ -84,7 +86,7 @@ const DIALOG = foundry.applications.api.DialogV2;
  * @returns {Promise<RingRollOptions>} Resolves with user-selected modifiers, or {cancelled: true} if dialog closed
  *
  * @example
- * const options = await GetSpellOptions("Fire", actor, "fire");
+ * const options = await GetRingOptions("Fire", actor, "fire");
  * if (!options.cancelled) {
  *   // options.normalRoll = false for spellcasting, true for ring roll
  *   // options.void = true if Void Point spent
@@ -92,7 +94,11 @@ const DIALOG = foundry.applications.api.DialogV2;
  *   // options.spellSlot/voidSlot indicate slot consumption
  * }
  */
-export async function GetSpellOptions(ringName, actor = null, systemRing = null) {
+export async function GetRingOptions(ringName, actor, systemRing = null) {
+  const voidRing = actor?.system?.rings?.void?.rank ?? 0;
+  const maxRaises = getMaxRaises(voidRing);
+  const freeRaises = calculateFreeRaises(actor);
+
   // Detect affinity/deficiency from school to pre-check appropriate checkbox
   let hasAffinity = false;
   let hasDeficiency = false;
@@ -103,6 +109,8 @@ export async function GetSpellOptions(ringName, actor = null, systemRing = null)
   }
 
   const content = await R(DIALOG_TEMPLATES.rollModifiers, {
+    maxRaises,
+    freeRaises: freeRaises ?? 0,
     spell: true,
     ring: ringName,
     hasAffinity,
@@ -169,17 +177,18 @@ export async function GetSpellOptions(ringName, actor = null, systemRing = null)
  */
 export function _processRingRollOptions(form, isSpellCasting = false) {
   return {
-    applyWoundPenalty: form.woundPenalty.checked,
-    rollMod: form.rollMod.value,
-    keepMod: form.keepMod.value,
-    totalMod: form.totalMod.value,
-    void: form.void.checked,
-    tn: form.tn?.value,
-    raises: form.raises?.value,
+    applyWoundPenalty: form.woundPenalty?.checked ?? true,
+    void: form.void?.checked ?? false,
     affinity: form.affinity?.checked ?? false,
     deficiency: form.deficiency?.checked ?? false,
     spellSlot: form.spellSlot?.checked ?? false,
     voidSlot: form.voidSlot?.checked ?? false,
+    rollMod: parseInt(form.rollMod?.value) || 0,
+    keepMod: parseInt(form.keepMod?.value) || 0,
+    totalMod: parseInt(form.totalMod?.value) || 0,
+    tn: parseInt(form.tn?.value) || 0,
+    freeRaises: parseInt(form.freeRaises?.value) || 0,
+    raises: parseInt(form.raises?.value) || 0,
     normalRoll: !isSpellCasting
   };
 }

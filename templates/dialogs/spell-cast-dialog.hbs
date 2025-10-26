@@ -26,7 +26,11 @@
     <input type="checkbox" name="useVoidSlot" />
   </div>
   <div class="form-group">
-    <label>{{localize "l5r4.magic.spells.raises"}}</label>
-    <input type="number" name="raises" min="0" value="0" />
+    <label>{{localize "l5r4.ui.mechanics.rolls.freeRaises"}}</label>
+    <input type="number" name="freeRaises" min="0" value="{{freeRaises}}" />
+  </div>
+  <div class="form-group">
+    <label>{{localize "l5r4.magic.spells.raises"}}{{#if maxRaises}} (Max: {{maxRaises}}){{/if}}</label>
+    <input type="number" name="raises" min="0" value="0" {{#if maxRaises}}max="{{maxRaises}}"{{/if}} />
   </div>
 </form>

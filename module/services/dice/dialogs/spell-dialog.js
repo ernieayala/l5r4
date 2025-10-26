@@ -23,6 +23,8 @@
 
 import { DIALOG_TEMPLATES } from "../../../config/templates.js";
 import { R } from "../../../utils/localization.js";
+import { getMaxRaises } from "../../../utils/raises-validator.js";
+import { calculateFreeRaises } from "../resources/raise-manager.js";
 
 const DIALOG = foundry.applications.api.DialogV2;
 
@@ -67,6 +69,7 @@ const DIALOG = foundry.applications.api.DialogV2;
  *
  * @param {string} spellName - Name of the spell being cast
  * @param {string} ringName - Display name of the Ring (e.g., "Fire", "Earth")
+ * @param {Actor} actor - The actor casting the spell (for max raises and free raises calculation)
  * @returns {Promise<SpellCastOptions>} Resolves with user-selected modifiers, or {cancelled: true} if dialog closed
  *
  * @example
@@ -78,8 +81,16 @@ const DIALOG = foundry.applications.api.DialogV2;
  *   // options.applyWoundPenalty = true if wound penalties should apply
  * }
  */
-export async function GetSpellCastOptions(spellName, ringName) {
-  const content = await R(DIALOG_TEMPLATES.spellCast, {});
+export async function GetSpellCastOptions(spellName, ringName, actor) {
+  // Calculate max Raises from Void Ring and Free Raises from items/effects
+  const voidRing = actor?.system?.rings?.void?.rank ?? 0;
+  const maxRaises = getMaxRaises(voidRing);
+  const freeRaises = calculateFreeRaises(actor);
+
+  const content = await R(DIALOG_TEMPLATES.spellCast, {
+    maxRaises,
+    freeRaises: freeRaises ?? 0
+  });
 
   return await new Promise(resolve => {
     new DIALOG({
@@ -136,6 +147,7 @@ function _processSpellCastOptions(form) {
     keepMod: parseInt(form.keepMod?.value) || 0,
     totalMod: parseInt(form.totalMod?.value) || 0,
     void: form.void?.checked ?? false,
+    freeRaises: parseInt(form.freeRaises?.value) || 0,
     raises: parseInt(form.raises?.value) || 0,
     useVoidSlot: form.useVoidSlot?.checked ?? false
   };

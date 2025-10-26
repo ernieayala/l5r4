@@ -310,52 +310,292 @@ Only staged files checked. Bypass with `git commit --no-verify` (not recommended
 
 ## Testing
 
-### Status
+### Test Suite Status ✅
 
-Test coverage minimal. Contributing tests highly valuable.
+- **440 unit tests** passing
+- **~1.5 second** execution time
+- **78.55%** coverage of tested modules
+- **Zero** circular dependencies
 
-### When Adding Features
+### Testing Philosophy
 
-**Always write tests for:**
-- Utils (pure functions - easiest to test)
-- Services (business logic)
-- Document calculations (derived data)
+**Tests exist to find bugs, not achieve metrics.**
 
-**Test priority:**
-1. Utils layer (highest ROI)
-2. Services layer
-3. Document calculations
+✅ **Do:**
+- Test behavior, not implementation
+- Test edge cases and boundaries
+- Test error conditions
+- Write independent tests
+- Use descriptive test names
 
-### Framework
+❌ **Don't:**
+- Test only happy paths
+- Test framework code
+- Test trivial getters
+- Chase coverage metrics
+- Create flaky tests
 
-- Vitest - Unit tests
-- happy-dom - DOM testing
-- @vitest/ui - Visual runner
+### Frameworks
+
+**Unit Tests (Vitest):**
+- Pure functions in `utils/`
+- Calculation logic
+- Document derived data
+- Fast execution (< 5s total)
+
+**Integration Tests (Quench):**
+- Foundry-dependent code
+- Documents, Services, Sheets
+- Complete workflows
+- Run in Foundry VTT
+
+### Commands
+
+```bash
+# Unit Tests (Vitest)
+npm test                # Run all unit tests
+npm run test:unit       # Run unit tests
+npm run test:watch      # Watch mode
+npm run test:ui         # Visual runner
+npm run test:coverage   # Coverage report
+
+# Integration Tests (Quench)
+# Run in Foundry VTT via Quench module UI
+```
 
 ### Test Organization
 
 ```
 tests/
-├── integration/  # Foundry integration tests
-└── unit/         # Unit tests (create as needed)
+├── unit/                    # Vitest unit tests
+│   ├── utils/              # Pure function tests
+│   ├── documents/          # Calculation tests
+│   └── smoke.test.js       # Basic sanity checks
+├── integration/            # Quench integration tests
+│   ├── documents/          # Actor/Item lifecycle
+│   ├── services/           # Dice, combat, XP
+│   ├── sheets/             # UI rendering
+│   └── workflows/          # Complete sequences
+└── fixtures/               # Shared test data
+    ├── actor-fixtures.js
+    ├── item-fixtures.js
+    ├── test-helpers.js
+    └── mock-data.js
 ```
 
-### Example
+### Writing Unit Tests
 
+**AAA Pattern (Required):**
 ```javascript
 import { describe, it, expect } from 'vitest';
 import { toInt } from '../module/utils/type-coercion.js';
 
 describe('toInt', () => {
-  it('converts strings to integers', () => {
-    expect(toInt("42")).toBe(42);
+  it('should convert valid strings to integers', () => {
+    // ARRANGE
+    const input = "42";
+    
+    // ACT
+    const result = toInt(input);
+    
+    // ASSERT
+    expect(result).toBe(42);
   });
 
-  it('returns fallback for invalid values', () => {
-    expect(toInt("invalid", 10)).toBe(10);
+  it('should return default for invalid values', () => {
+    // ARRANGE
+    const invalid = "not-a-number";
+    const fallback = 10;
+    
+    // ACT
+    const result = toInt(invalid, fallback);
+    
+    // ASSERT
+    expect(result).toBe(10);
+  });
+
+  it('should handle null/undefined', () => {
+    expect(toInt(null, 5)).toBe(5);
+    expect(toInt(undefined, 5)).toBe(5);
   });
 });
 ```
+
+**Test Edge Cases:**
+```javascript
+describe('valueToRankPoints', () => {
+  describe('edge cases', () => {
+    it('should handle minimum value', () => {
+      expect(valueToRankPoints(0)).toEqual({ rank: 0, points: 0, value: 0 });
+    });
+
+    it('should handle maximum value', () => {
+      expect(valueToRankPoints(10)).toEqual({ rank: 10, points: 0, value: 10 });
+    });
+
+    it('should handle null/undefined', () => {
+      expect(valueToRankPoints(null)).toEqual({ rank: 0, points: 0, value: 0 });
+    });
+
+    it('should handle points overflow', () => {
+      // 9.95 should round to 10.0 (rank 10, points 0)
+      expect(valueToRankPoints(9.95)).toEqual({ rank: 10, points: 0, value: 10 });
+    });
+  });
+});
+```
+
+### Writing Integration Tests
+
+**Quench Tests (Foundry):**
+```javascript
+export function registerActorTests(quench) {
+  quench.registerBatch(
+    'l5r4-enhanced.actor-tests',
+    (context) => {
+      const { describe, it, assert, before, after } = context;
+
+      describe('Actor Creation', () => {
+        let actor;
+
+        before(async () => {
+          actor = await Actor.create({
+            name: 'Test Character',
+            type: 'pc'
+          });
+        });
+
+        after(async () => {
+          await actor.delete();
+        });
+
+        it('should calculate Armor TN', () => {
+          const armorTN = actor.system.armorTn.current;
+          assert.exists(armorTN, 'Armor TN calculated');
+          assert.isNumber(armorTN, 'Armor TN is number');
+        });
+      });
+    },
+    { displayName: 'L5R4: Actor Tests' }
+  );
+}
+```
+
+**CRITICAL:** Always clean up documents in `after`/`afterEach` hooks.
+
+### Test Priorities
+
+**Tier 1 (Test First):**
+- Core mechanics (XP costs, wound calculations)
+- Resource calculations (insight, armor TN)
+- Critical workflows (combat, advancement)
+
+**Tier 2 (Test When Stable):**
+- Secondary mechanics
+- Helper functions
+- Data transformations
+
+**Tier 3 (Low Priority):**
+- Trivial code
+- Simple data models
+- Configuration
+
+**Don't Test:**
+- Framework code
+- Foundry APIs
+- External libraries
+- Constants
+
+### When Adding Features
+
+1. **Identify layer** - Utils, Services, Documents, etc.
+2. **Choose test type:**
+   - **Utils:** Unit tests (Vitest)
+   - **Services:** Integration tests (Quench)
+   - **Documents:** Both (unit for calculations, integration for lifecycle)
+3. **Write tests** - During or immediately after implementation
+4. **Verify bugs caught** - Introduce deliberate bug, test should fail
+
+### Test Patterns
+
+**Pure Function (Utils):**
+```javascript
+describe('calculateXpCost', () => {
+  it('should calculate trait XP cost', () => {
+    // Trait XP = 4 × (next rank)
+    expect(calculateXpCost('trait', 2)).toBe(12);
+    expect(calculateXpCost('trait', 5)).toBe(24);
+  });
+});
+```
+
+**Document Calculation:**
+```javascript
+describe('Actor Derived Data', () => {
+  it('should calculate insight from rings and skills', () => {
+    const actor = createTestActor({
+      rings: { earth: 3, air: 3 },
+      skills: [{ rank: 2 }, { rank: 3 }]
+    });
+    
+    // Insight = sum of rings + sum of skill ranks
+    // (3+3) + (2+3) = 11
+    expect(actor.system.insight.points).toBe(11);
+  });
+});
+```
+
+**Workflow Test:**
+```javascript
+describe('Combat Workflow', () => {
+  it('should track wound progression', async () => {
+    // Create defender
+    const defender = await createTestPC();
+    const healthyMax = defender.system.woundLevels.healthy.value;
+
+    // Apply damage within healthy range
+    await defender.update({ 'system.suffered': 5 });
+    const updated = game.actors.get(defender.id);
+    
+    assert.isTrue(updated.system.woundLevels.healthy.current);
+
+    // Apply damage exceeding healthy
+    await defender.update({ 'system.suffered': healthyMax + 2 });
+    const wounded = game.actors.get(defender.id);
+    
+    assert.isTrue(wounded.system.woundLevels.nicked.current);
+  });
+});
+```
+
+### Troubleshooting Tests
+
+**Tests failing after update:**
+- Check for stale actor references
+- Refresh using `game.actors.get(actor.id)` after updates
+- Foundry doesn't auto-refresh local variables
+
+**Tests pass with broken code:**
+- Test is worthless, delete it
+- Or fix test to actually validate behavior
+
+**Flaky tests:**
+- Check for shared state between tests
+- Ensure proper cleanup in `afterEach`
+- Verify no timing dependencies
+
+**Slow tests:**
+- Unit tests should complete in < 5s total
+- Integration tests < 5s each
+- Minimize document creation
+- Use fixtures for test data
+
+### Resources
+
+- **Test README:** `tests/README.md`
+- **Fixtures:** `tests/fixtures/`
+- **Vitest Docs:** https://vitest.dev
+- **Quench Docs:** https://github.com/Ethaks/FVTT-Quench
 
 ## Submitting Changes
 

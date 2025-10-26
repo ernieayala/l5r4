@@ -1,0 +1,4 @@
+<section class="tab {{#if (eq currentTab "modifiers")}}active{{/if}}" data-tab="modifiers" data-application-part="modifiers">
+  {{!-- Type-specific modifier/bonus fields --}}
+  {{> (concat "systems/" SYS_ID "/templates/item/_type-modifiers/" item.type ".hbs") }}
+</section>
