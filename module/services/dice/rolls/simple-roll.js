@@ -210,7 +210,7 @@ export async function SimpleRoll({
   } else if (ringName) {
     label = `${game.i18n.localize("l5r4.ui.mechanics.rolls.ringRoll")}: ${ringName}`;
   } else {
-    label = game.i18n.format("l5r4.ui.chat.rollName", { roll: String(rollName ?? "") });
+    label = `${game.i18n.localize("l5r4.ui.common.roll")}: ${String(rollName ?? "")}`;
   }
 
   let rollMod = toInt(check.rollMod);

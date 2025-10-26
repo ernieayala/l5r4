@@ -92,24 +92,24 @@ export function roll_parser(roll) {
 
   let kept, explode_bonus, bonus;
 
-  // Parse keptPortion which can contain 'x' notation and '+' bonuses
-  // Possible formats: "3", "3+5", "3x2", "3x2+5"
+  // Parse keptPortion which can contain 'x' notation and '+/-' bonuses
+  // Possible formats: "3", "3+5", "3-10", "3x2", "3x2+5", "3x2-5"
   const xParts = keptPortion.split("x");
   kept = parseIntIfPossible(xParts[0]);
 
   if (xParts.length > 1) {
     // Format: "3x2+5" → xParts = ["3", "2+5"]
     const explodePortion = xParts[1];
-    const plusParts = explodePortion.split("+");
-    explode_bonus = parseIntIfPossible(plusParts[0]);
-    bonus = sumBonusParts(plusParts);
+    const bonusParts = splitPreservingSign(explodePortion);
+    explode_bonus = parseIntIfPossible(bonusParts[0]);
+    bonus = sumBonusParts(bonusParts);
   } else {
-    // Format: "3+5" → xParts = ["3+5"]
-    const plusParts = xParts[0].split("+");
-    if (plusParts.length > 1) {
-      kept = parseIntIfPossible(plusParts[0]);
+    // Format: "3+5" or "3-10" → xParts = ["3+5"] or ["3-10"]
+    const bonusParts = splitPreservingSign(xParts[0]);
+    if (bonusParts.length > 1) {
+      kept = parseIntIfPossible(bonusParts[0]);
     }
-    bonus = sumBonusParts(plusParts);
+    bonus = sumBonusParts(bonusParts);
   }
 
   let result;
@@ -133,11 +133,53 @@ export function roll_parser(roll) {
 }
 
 /**
+ * Splits a string on + or - while preserving the sign with each part
+ *
+ * Handles both positive and negative modifiers in notation like "3+5-2+10".
+ * Preserves the sign character with each subsequent part for correct parsing.
+ *
+ * Examples:
+ * - "3+5" → ["3", "+5"]
+ * - "3-10" → ["3", "-10"]
+ * - "3+5-2" → ["3", "+5", "-2"]
+ *
+ * @param {string} str - String containing numbers with + or - separators
+ * @returns {string[]} Array of parts with signs preserved
+ */
+function splitPreservingSign(str) {
+  if (!str) {
+    return [];
+  }
+
+  // Match: number, then capture +/- followed by number, repeating
+  // Regex: (\d+) captures first number, ([+-]\d+) captures signed numbers
+  const matches = str.match(/^(\d+)((?:[+-]\d+)*)$/);
+
+  if (!matches) {
+    return [str]; // Fallback if pattern doesn't match
+  }
+
+  const firstPart = matches[1]; // First number without sign
+  const remainingParts = matches[2]; // Everything else: "+5-10+2"
+
+  if (!remainingParts) {
+    return [firstPart];
+  }
+
+  // Split remaining on lookahead before +/-, keeping the sign with each number
+  // Regex: (?=[+-]) means "split before + or -" without consuming the character
+  const signedParts = remainingParts.match(/[+-]\d+/g) || [];
+
+  return [firstPart, ...signedParts];
+}
+
+/**
  * Sums all bonus parts from a split array, skipping the first element
  *
  * Used internally to calculate total flat bonuses when parsing notation like
  * "7k3+5+2" which splits into ["7k3", "5", "2"]. Sums indices 1 onward.
  * Handles non-numeric values gracefully by treating them as 0.
+ * Now supports negative values from splitPreservingSign (e.g., "-10").
  *
  * @param {string[]} parts - Array of string parts from split operation
  * @returns {number} Sum of all parts after index 0, or 0 if only one part exists
@@ -156,7 +198,7 @@ function sumBonusParts(parts) {
  * Safely parses a value to integer if it contains only digits
  *
  * Returns the original value unchanged if it's not a valid numeric string.
- * Handles negative numbers by checking for leading '-' sign. This prevents
+ * Handles both positive (+5) and negative (-10) signs. This prevents
  * accidentally converting non-numeric strings to NaN or unexpected values.
  *
  * @param {*} x - Value to parse (typically string or number)
@@ -167,8 +209,8 @@ function parseIntIfPossible(x) {
   if (!s) {
     return x;
   }
-  const neg = s.startsWith("-");
-  const digits = neg ? s.slice(1) : s;
+  const hasSign = s.startsWith("+") || s.startsWith("-");
+  const digits = hasSign ? s.slice(1) : s;
   if (digits && [...digits].every(ch => ch >= "0" && ch <= "9")) {
     return parseInt(s, 10);
   }

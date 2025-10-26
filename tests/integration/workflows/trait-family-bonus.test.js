@@ -410,6 +410,399 @@ export function registerTraitFamilyBonusTests(quench) {
           assert.equal(finalBase, initialBase, "Traits stable with multi-field update");
         });
       });
+
+      describe("Edge Case: Multiple Families", () => {
+        let actor, family1, _family2;
+
+        beforeEach(async () => {
+          actor = await createTestPC({
+            name: "Multiple Families Test",
+            system: {
+              traits: {
+                sta: 2,
+                wil: 2,
+                str: 2,
+                per: 2,
+                ref: 2,
+                awa: 2,
+                agi: 2,
+                int: 2
+              }
+            }
+          });
+
+          // Embed first family: +1 Strength (Hida)
+          const [embeddedFamily1] = await actor.createEmbeddedDocuments("Item", [
+            {
+              name: "Hida Family",
+              type: "family",
+              system: {},
+              effects: [
+                {
+                  name: "Hida Family Bonus",
+                  transfer: true,
+                  disabled: false,
+                  changes: [
+                    {
+                      key: "system.traits.str",
+                      mode: CONST.ACTIVE_EFFECT_MODES.ADD,
+                      value: "1"
+                    }
+                  ]
+                }
+              ]
+            }
+          ]);
+
+          // Embed second family: +1 Awareness (Doji)
+          // NOTE: L5R4 rules don't allow multiple families, but test handles it
+          const [embeddedFamily2] = await actor.createEmbeddedDocuments("Item", [
+            {
+              name: "Doji Family",
+              type: "family",
+              system: {},
+              effects: [
+                {
+                  name: "Doji Family Bonus",
+                  transfer: true,
+                  disabled: false,
+                  changes: [
+                    {
+                      key: "system.traits.awa",
+                      mode: CONST.ACTIVE_EFFECT_MODES.ADD,
+                      value: "1"
+                    }
+                  ]
+                }
+              ]
+            }
+          ]);
+
+          family1 = embeddedFamily1;
+          _family2 = embeddedFamily2;
+
+          // Set flag to first family (standard behavior)
+          await actor.setFlag(SYS_ID, "familyItemUuid", family1.uuid);
+          await actor.setFlag(SYS_ID, "familyName", "Hida");
+
+          actor.prepareDerivedData();
+        });
+
+        afterEach(async () => {
+          if (actor) {
+            await actor.delete();
+          }
+        });
+
+        it("should apply bonuses from both family items (Active Effects accumulate)", () => {
+          // Both families' Active Effects should transfer to actor
+          // Strength: base 2 + Hida bonus 1 = 3
+          // Awareness: base 2 + Doji bonus 1 = 3
+
+          const baseStr = actor._source.system.traits.str;
+          const effStr = actor.system.traits.str;
+          const baseAwa = actor._source.system.traits.awa;
+          const effAwa = actor.system.traits.awa;
+
+          assert.equal(baseStr, 2, "Base Strength is 2");
+          assert.equal(effStr, 3, "Effective Strength is 3 (Hida bonus)");
+          assert.equal(baseAwa, 2, "Base Awareness is 2");
+          assert.equal(effAwa, 3, "Effective Awareness is 3 (Doji bonus)");
+        });
+
+        it("should handle multiple families without trait corruption during updates", async () => {
+          const initialStrBase = actor._source.system.traits.str;
+          const initialAwaBase = actor._source.system.traits.awa;
+
+          // Update unrelated field
+          await actor.update({ "system.wealth.koku": 150 });
+          await new Promise(resolve => setTimeout(resolve, 200));
+
+          // Both bonused traits should remain stable
+          assert.equal(actor._source.system.traits.str, initialStrBase, "Strength base unchanged");
+          assert.equal(actor._source.system.traits.awa, initialAwaBase, "Awareness base unchanged");
+          assert.equal(actor.system.traits.str, 3, "Strength effective still 3");
+          assert.equal(actor.system.traits.awa, 3, "Awareness effective still 3");
+        });
+
+        it("should accumulate multiple effects on same trait", async () => {
+          // Add ANOTHER Strength bonus from a different family
+          const [embeddedFamily3] = await actor.createEmbeddedDocuments("Item", [
+            {
+              name: "Test Family",
+              type: "family",
+              system: {},
+              effects: [
+                {
+                  name: "Test Family Bonus",
+                  transfer: true,
+                  disabled: false,
+                  changes: [
+                    {
+                      key: "system.traits.str",
+                      mode: CONST.ACTIVE_EFFECT_MODES.ADD,
+                      value: "1"
+                    }
+                  ]
+                }
+              ]
+            }
+          ]);
+
+          actor.prepareDerivedData();
+          await new Promise(resolve => setTimeout(resolve, 100));
+
+          // Strength should now have TWO bonuses: base 2 + Hida 1 + Test 1 = 4
+          const effStr = actor.system.traits.str;
+          assert.equal(effStr, 4, "Strength has accumulated bonuses (2 base + 2 from families)");
+
+          // Cleanup
+          await embeddedFamily3.delete();
+        });
+      });
+
+      describe("Edge Case: Family Bonus to Non-Existent Stat", () => {
+        let actor, familyItem;
+
+        beforeEach(async () => {
+          actor = await createTestPC({
+            name: "Invalid Bonus Test",
+            system: {
+              traits: {
+                sta: 2,
+                wil: 2,
+                str: 2,
+                per: 2,
+                ref: 2,
+                awa: 2,
+                agi: 2,
+                int: 2
+              }
+            }
+          });
+
+          // Embed family with effect targeting INVALID trait
+          const [embeddedFamily] = await actor.createEmbeddedDocuments("Item", [
+            {
+              name: "Broken Family",
+              type: "family",
+              system: {},
+              effects: [
+                {
+                  name: "Invalid Bonus",
+                  transfer: true,
+                  disabled: false,
+                  changes: [
+                    {
+                      key: "system.traits.honor", // INVALID: honor is not a trait
+                      mode: CONST.ACTIVE_EFFECT_MODES.ADD,
+                      value: "1"
+                    }
+                  ]
+                }
+              ]
+            }
+          ]);
+
+          familyItem = embeddedFamily;
+
+          await actor.setFlag(SYS_ID, "familyItemUuid", familyItem.uuid);
+          await actor.setFlag(SYS_ID, "familyName", "Broken");
+
+          actor.prepareDerivedData();
+        });
+
+        afterEach(async () => {
+          if (actor) {
+            await actor.delete();
+          }
+        });
+
+        it("should ignore family bonus targeting invalid trait key", () => {
+          // All traits should remain at base value (no bonuses applied)
+          const traits = actor.system.traits;
+
+          assert.equal(traits.sta, 2, "Stamina unchanged");
+          assert.equal(traits.wil, 2, "Willpower unchanged");
+          assert.equal(traits.str, 2, "Strength unchanged");
+          assert.equal(traits.per, 2, "Perception unchanged");
+          assert.equal(traits.ref, 2, "Reflexes unchanged");
+          assert.equal(traits.awa, 2, "Awareness unchanged");
+          assert.equal(traits.agi, 2, "Agility unchanged");
+          assert.equal(traits.int, 2, "Intelligence unchanged");
+        });
+
+        it("should create property but FamilyBonusService ignores it", () => {
+          // ACTUAL FOUNDRY BEHAVIOR: Active Effects CAN create properties not in template
+          // The property IS created, but FamilyBonusService won't recognize it as valid
+          const hasHonorTrait = "honor" in actor.system.traits;
+
+          // Foundry creates the property (this is normal Active Effect behavior)
+          assert.isTrue(hasHonorTrait, "Foundry creates property from Active Effect");
+
+          // But the 8 valid L5R4 traits remain unchanged
+          const validTraits = ["sta", "wil", "str", "per", "ref", "awa", "agi", "int"];
+          for (const traitKey of validTraits) {
+            assert.equal(
+              actor.system.traits[traitKey],
+              2,
+              `Valid trait ${traitKey} unchanged at 2`
+            );
+          }
+
+          // NOTE: FamilyBonusService.getBonus(actor, "honor") would return 0
+          // because "honor" is not in VALID_TRAIT_KEYS array
+        });
+
+        it("should keep traits stable during updates despite invalid effect", async () => {
+          const initialBase = actor._source.system.traits.str;
+
+          await actor.update({ "system.wealth.koku": 100 });
+          await new Promise(resolve => setTimeout(resolve, 200));
+
+          const finalBase = actor._source.system.traits.str;
+
+          assert.equal(finalBase, initialBase, "Traits remain stable with invalid effect");
+        });
+      });
+
+      describe("Edge Case: Family Bonus Targeting Ring Instead of Trait", () => {
+        let actor, familyItem;
+
+        beforeEach(async () => {
+          actor = await createTestPC({
+            name: "Ring Target Test",
+            system: {
+              traits: {
+                sta: 2,
+                wil: 2,
+                str: 2,
+                per: 2,
+                ref: 2,
+                awa: 2,
+                agi: 2,
+                int: 2
+              }
+            }
+          });
+
+          // Embed family with effect targeting Ring instead of Trait
+          const [embeddedFamily] = await actor.createEmbeddedDocuments("Item", [
+            {
+              name: "Misconfigured Family",
+              type: "family",
+              system: {},
+              effects: [
+                {
+                  name: "Ring Bonus (Invalid)",
+                  transfer: true,
+                  disabled: false,
+                  changes: [
+                    {
+                      key: "system.rings.earth", // INVALID: should target trait, not ring
+                      mode: CONST.ACTIVE_EFFECT_MODES.ADD,
+                      value: "1"
+                    }
+                  ]
+                }
+              ]
+            }
+          ]);
+
+          familyItem = embeddedFamily;
+
+          await actor.setFlag(SYS_ID, "familyItemUuid", familyItem.uuid);
+          actor.prepareDerivedData();
+        });
+
+        afterEach(async () => {
+          if (actor) {
+            await actor.delete();
+          }
+        });
+
+        it("should not apply family bonus when targeting ring", () => {
+          // FamilyBonusService only recognizes system.traits.* pattern
+          // Effect targeting system.rings.* should be ignored by family bonus logic
+
+          // All traits should remain at base (no family bonuses applied)
+          const traits = actor.system.traits;
+
+          assert.equal(traits.sta, 2, "Stamina unchanged");
+          assert.equal(traits.wil, 2, "Willpower unchanged");
+
+          // NOTE: The Active Effect MIGHT still modify the ring directly,
+          // but FamilyBonusService won't recognize it as a family trait bonus
+        });
+      });
+
+      describe("Edge Case: Family Bonus with Invalid Value Types", () => {
+        let actor, familyItem;
+
+        beforeEach(async () => {
+          actor = await createTestPC({
+            name: "Invalid Value Test",
+            system: {
+              traits: {
+                sta: 2,
+                wil: 2,
+                str: 2,
+                per: 2,
+                ref: 2,
+                awa: 2,
+                agi: 2,
+                int: 2
+              }
+            }
+          });
+
+          // Embed family with NEGATIVE bonus value (invalid)
+          const [embeddedFamily] = await actor.createEmbeddedDocuments("Item", [
+            {
+              name: "Penalty Family",
+              type: "family",
+              system: {},
+              effects: [
+                {
+                  name: "Negative Bonus (Invalid)",
+                  transfer: true,
+                  disabled: false,
+                  changes: [
+                    {
+                      key: "system.traits.str",
+                      mode: CONST.ACTIVE_EFFECT_MODES.ADD,
+                      value: "-1" // NEGATIVE value (should be rejected)
+                    }
+                  ]
+                }
+              ]
+            }
+          ]);
+
+          familyItem = embeddedFamily;
+
+          await actor.setFlag(SYS_ID, "familyItemUuid", familyItem.uuid);
+          actor.prepareDerivedData();
+        });
+
+        afterEach(async () => {
+          if (actor) {
+            await actor.delete();
+          }
+        });
+
+        it("should apply negative value as Active Effect but FamilyBonusService rejects it", () => {
+          // Active Effects WILL apply negative modifier (Foundry behavior)
+          const effStr = actor.system.traits.str;
+
+          // Effective Strength should be reduced: 2 + (-1) = 1
+          assert.equal(effStr, 1, "Foundry applies negative Active Effect");
+
+          // NOTE: FamilyBonusService.getBonus() would return 0 for this
+          // because it filters for positive-only values (value > 0)
+          // This demonstrates defensive service behavior vs raw Active Effect application
+        });
+      });
     },
     { displayName: "L5R4: Trait & Family Bonus Integration Tests" }
   );

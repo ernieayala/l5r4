@@ -118,7 +118,7 @@ export async function GetRingOptions(ringName, actor, systemRing = null) {
   });
   return await new Promise(resolve => {
     new DIALOG({
-      window: { title: game.i18n.format("l5r4.ui.chat.ringRoll", { ring: ringName }) },
+      window: { title: `${game.i18n.localize("l5r4.ui.mechanics.rolls.ringRoll")} (${ringName})` },
       position: { width: 460 },
       content,
       buttons: [

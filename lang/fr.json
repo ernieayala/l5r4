@@ -1,6 +1,12 @@
 {
   "l5r4": {
     "ui": {
+      "tabs": {
+        "details": "Détails",
+        "modifiers": "Modificateurs",
+        "description": "Description",
+        "effects": "Effets Actifs"
+      },
       "mechanics": {
         "rings": {
           "ring": "Anneau",
@@ -10,7 +16,9 @@
           "earth": "Terre",
           "void": "Vide",
           "voidPoints": "Points de Vide",
-          "all": "Tous"
+          "all": "Tous",
+          "voidTnBoost": "Utiliser Vide",
+          "voidInitBoost": "Utiliser Vide"
         },
         "traits": {
           "sta": "Endurance",
@@ -23,25 +31,30 @@
           "int": "Intelligence"
         },
         "rolls": {
-          "success": "Réussite",
+          "success": "Succès",
           "failure": "Échec",
           "missed": "Raté",
-          "explodesOn": "Explose sur",
-          "withEmphasis": "avec Accent",
-          "unskilled": "Non formé",
-          "traitRoll": "Jet de Caractéristique",
+          "explodesOn": "Explose Sur",
+          "withEmphasis": "avec Emphase",
+          "unskilled": "Sans Compétence",
+          "traitRoll": "Jet de Trait",
           "ringRoll": "Jet d'Anneau",
           "skillRoll": "Jet de Compétence",
           "damageRoll": "Jet de Dégâts",
           "attackRoll": "Jet d'Attaque",
-          "spellCasting": "Jet d'Incantation",
-          "unskilledRoll": "Jet non formé",
-          "emphasis": "Accent",
+          "spellCasting": "Jet de Lancement de Sort",
+          "castSpell": "Lancer {spell} ({ring})",
+          "castMaho": "Lancer Maho : {spell} ({ring})",
+          "unskilledRoll": "Jet sans Compétence",
+          "emphasis": "Emphase",
           "raise": "Relance",
           "raises": "Relances",
+          "freeRaises": "Relances Gratuites",
           "automatic": "Automatique",
           "formula": "Formule",
-          "result": "Résultat"
+          "result": "Résultat",
+          "socialResistance": "Résistance Sociale",
+          "socialResistanceDescription": "Résister à l'Intimidation ou la Tentation"
         },
         "notifications": {
           "itemCreated": "Créé {type} : {name}",
@@ -53,26 +66,26 @@
         },
         "combat": {
           "attack": "Attaque",
-          "melee": "Corps à corps",
-          "ranged": "À distance",
+          "melee": "Corps à Corps",
+          "ranged": "À Distance",
           "multiplier": "Multiplicateur",
-          "woundPenalty": "Pénalité de Blessures",
-          "armorTnBonus": "Bonus TN d'Armure",
+          "woundPenalty": "Pénalité de Blessure",
+          "armorTnBonus": "Bonus de ND d'Armure",
           "targeting": {
             "vs": "vs",
-            "multipleTargets": "cibles - TN non réglé automatiquement"
+            "multipleTargets": "cibles - ND non défini automatiquement"
           }
         },
         "wounds": {
           "wounds": "Blessures",
-          "armorTn": "TN d'Armure",
-          "armorTnBase": "TN d'Armure de Base",
+          "armorTn": "ND d'Armure",
+          "armorTnBase": "ND d'Armure de Base",
           "armorReduction": "Réduction",
-          "woundLevel": "Niveau de Blessures",
-          "woundsSuffered": "Blessures subies",
-          "maxWounds": "Blessures max",
+          "woundLevel": "Niveau",
+          "woundsSuffered": "Blessures Subies",
+          "maxWounds": "Blessures Maximum",
           "penalty": "Pénalité",
-          "woundHealRate": "Taux de guérison des blessures",
+          "woundHealRate": "Taux de Guérison des Blessures",
           "healRateFormula": "x 2 +",
           "woundMode": "Mode de Blessures",
           "manual": "Manuel",
@@ -81,39 +94,47 @@
           "earthMultiplier": "Multiplicateur de Terre",
           "woundBonus": "Bonus de Blessures",
           "threshold": "Seuil",
-          "healthy": "Sain",
-          "nicked": "Éraflé",
-          "grazed": "Egratigné",
-          "hurt": "Touché",
-          "injured": "Blessé",
+          "healthy": "En Bonne Santé",
+          "nicked": "Égratigné",
+          "grazed": "Effleuré",
+          "hurt": "Blessé",
+          "injured": "Gravement Blessé",
           "crippled": "Estropié",
-          "down": "À terre",
-          "out": "Hors de combat",
-          "applyHealing": "Appliquer la Guérison",
-          "applyHealingTitle": "Appliquer la guérison naturelle du repos",
+          "down": "À Terre",
+          "out": "Hors Combat",
+          "applyHealing": "Appliquer Guérison",
+          "applyHealingTitle": "Appliquer la guérison naturelle par repos",
           "naturalHealing": "Guérison Naturelle",
-          "restedAndRecovered": "reposé et blessures récupérées",
-          "healingApplied": "{amount} blessures soignées (taux de guérison : {rate})",
+          "restedAndRecovered": "s'est reposé et a récupéré des blessures",
+          "healingApplied": "Guéri {amount} blessures (taux de guérison : {rate})",
           "woundStatus": "Blessures : {current}/{max} (subies : {suffered})",
           "fullyHealed": "Complètement guéri !",
           "alreadyFullHealth": "{name} est déjà en pleine santé",
           "noHealRate": "{name} n'a pas de taux de guérison configuré",
-          "healingFailed": "Échec de l'application de la guérison à {name}"
+          "healingFailed": "Échec de l'application de la guérison à {name}",
+          "applyWounds": "Appliquer Blessures",
+          "reduceWithVoid": "Réduire avec Vide",
+          "woundsApplied": "Appliqué {amount} blessures à {name}",
+          "woundsAppliedWithArmor": "{name} a reçu {original} dégâts. L'armure a réduit de {reduction}. Appliqué {final} blessures.",
+          "woundsReducedApplied": "Point de Vide dépensé : Dégâts réduits de 10. Appliqué {amount} blessures à {name}",
+          "woundsReducedWithArmor": "{name} a reçu {original} dégâts. Vide réduit à {afterVoid}, armure réduite de {reduction}. Appliqué {final} blessures.",
+          "noTokenSelected": "Aucun pion sélectionné. Sélectionnez un pion pour appliquer des blessures.",
+          "noVoidPoints": "Aucun Point de Vide disponible pour réduire les dégâts"
         },
         "stances": {
-          "pending": "En attente",
+          "pending": "En Attente",
           "attack": "Posture d'Attaque",
           "fullAttack": "Posture d'Attaque Totale",
           "defense": "Posture de Défense",
           "fullDefense": "Posture de Défense Totale",
-          "center": "Posture du Centre",
-          "fullDefenseDescription": "Faites un jet de Défense/Réflexes. Ajoutez la moitié du résultat (arrondi à l'entier supérieur) à votre TN d'Armure pendant la durée de cette posture.",
+          "center": "Posture Centrée",
+          "fullDefenseDescription": "Effectuez un jet de Défense/Réflexes. Ajoutez la moitié du résultat (arrondi au supérieur) à votre ND d'Armure pour la durée de cette posture.",
           "cannotAttackDefense": "Impossible d'attaquer en Posture de Défense",
-          "fullAttackBonus": "Posture d'Attaque Totale : +2g1"
+          "fullAttackBonus": "Posture d'Attaque Totale : +2k1"
         },
         "mounted": {
-          "fullAttackRestriction": "La Posture d'Attaque Totale nécessite Équitation 3+ à cheval",
-          "attackBonus": "Monté/En hauteur : +1k0"
+          "fullAttackRestriction": "La posture d'Attaque Totale nécessite Équitation 3+ lorsque monté",
+          "attackBonus": "Monté/Position Supérieure : +1k0"
         },
         "fear": {
           "fearRank": "Rang de Peur",
@@ -124,21 +145,22 @@
           "testSuccess": "Résisté à la Peur {rank}",
           "testFailure": "Échec du Test de Peur {rank}",
           "penaltyApplied": "Pénalité : -{penalty}k0 à tous les jets",
-          "catastrophicFailure": "ÉCHEC CATASTROPHIQUE ! Le personnage fuit ou se recroqueville sans défense.",
-          "noTargets": "Aucun jeton sélectionné pour le test de Peur",
-          "noWillpower": "{character} n'a pas de caractéristique Volonté",
+          "catastrophicFailure": "ÉCHEC CATASTROPHIQUE ! Le personnage fuit ou se recroqueville de terreur.",
+          "noTargets": "Aucun pion sélectionné pour le test de Peur",
+          "noWillpower": "{character} n'a pas de trait Volonté",
           "noFear": "Ce PNJ n'a pas d'effet de Peur configuré",
           "testAgainst": "vs {creature}",
-          "rollFailed": "Le jet du test de Peur a échoué - formule invalide ou données corrompues",
-          "templateFailed": "Le modèle de chat du test de Peur n'a pas pu être affiché"
+          "rollFailed": "Le jet de test de Peur a échoué - formule invalide ou données corrompues",
+          "templateFailed": "Le modèle de chat du test de Peur n'a pas pu être rendu"
         }
       },
       "common": {
         "roll": "Lancer",
         "cancel": "Annuler",
         "ok": "OK",
+        "add": "Ajouter",
         "none": "Aucun",
-        "keep": "Garder",
+        "keep": "Conserver",
         "raise": "Relance",
         "init": "Initiative",
         "bonus": "Bonus",
@@ -149,21 +171,21 @@
         "left": "restant",
         "close": "Fermer",
         "apply": "Appliquer",
-        "toChat": "Au chat",
+        "toChat": "Au Chat",
         "effect": "Effet",
         "simple": "Simple",
         "complex": "Complexe",
         "free": "Libre",
         "action": "Action",
-        "edit": "Éditer",
+        "edit": "Modifier",
         "delete": "Supprimer",
         "name": "Nom",
         "description": "Description",
         "notes": "Notes",
-        "activeEffects": "Effets actifs",
+        "activeEffects": "Effets Actifs",
         "active": "Actif",
         "new": "Nouveau",
-        "auto": "Automatique",
+        "auto": "Auto",
         "disabled": "désactivé",
         "rank": "Rang",
         "clan": "Clan",
@@ -175,96 +197,115 @@
         "type": "Type",
         "ring": "Anneau",
         "mastery": "Maîtrise",
-        "tn": "TN",
-        "cost": "Coût"
+        "tn": "ND",
+        "cost": "Coût",
+        "save": "Sauvegarder"
+      },
+      "emphasisManager": {
+        "title": "Gérer les Emphases de Compétence",
+        "manageFor": "Gérer les Emphases Disponibles pour",
+        "manage": "Gérer les Emphases",
+        "addCustom": "Ajouter une Emphase Personnalisée",
+        "custom": "Personnalisée",
+        "none": "Aucune emphase disponible",
+        "help": "Sélectionnez les emphases disponibles pour cette compétence. Entraînez-les sur la feuille de personnage.",
+        "noEmphases": "Aucune emphase dans la liste",
+        "limitReached": "Impossible d'entraîner plus de {max} emphases à ce rang de compétence"
       },
       "sheets": {
         "bio": "Historique",
         "skill": "Compétence",
         "skills": "Compétences",
-        "addSkill": "Ajouter Compétence",
         "weapon": "Arme",
         "weapons": "Armes",
-        "addWeapon": "Ajouter Arme",
         "armor": "Armure",
-        "addArmor": "Ajouter Armure",
         "item": "Objet",
         "items": "Objets",
-        "addItem": "Ajouter Objet",
+        "addItem": "Ajouter un Objet",
         "notes": "Notes",
         "spell": "Sort",
         "spells": "Sorts",
-        "addSpell": "Ajouter Sort",
         "technique": "Technique",
         "techniques": "Techniques",
-        "addTechnique": "Ajouter Technique",
         "armors": "Armures",
-        "advantage": "Atout",
-        "advantages": "Atouts",
-        "addAdvantage": "Ajouter Atout",
+        "advantage": "Avantage",
+        "advantages": "Avantages",
         "disadvantage": "Désavantage",
         "disadvantages": "Désavantages",
-        "addDisadvantage": "Ajouter Désavantage",
         "kata": "Kata",
         "katas": "Katas",
-        "addKata": "Ajouter Kata",
         "kiho": "Kiho",
         "kihos": "Kihos",
-        "addKiho": "Ajouter Kiho",
         "tattoo": "Tatouage",
         "tattoos": "Tatouages",
-        "addTattoo": "Ajouter Tatouage",
-        "addTechSpell": "Ajouter Technique/Sort",
-        "addAdvDis": "Ajouter Atout/Désavantage",
-        "addEquipment": "Ajouter Équipement",
         "equipment": "Équipement",
-        "abilities": "Aptitudes",
+        "abilities": "Capacités",
         "character": "Personnage",
         "rulesSummary": "Résumé des Règles",
         "description": "Description",
         "woundLevels": "Niveaux de Blessures",
         "spellSlots": "Emplacements de Sort",
         "demands": "Exigences",
-        "traits": "Caractéristiques",
-        "itemSheetTitle": "Feuille d'Objet",
+        "traits": "Traits",
+        "itemSheetTitle": "Fiche d'Objet",
         "xpModal": "Expérience"
       },
       "notifications": {
-        "actorNotFound": "Acteur introuvable pour le jet de dégâts",
+        "actorNotFound": "Acteur non trouvé pour le jet de dégâts",
         "noPermissionDamage": "Vous n'avez pas la permission de lancer les dégâts pour cet acteur",
         "noValidWeapon": "Aucune arme valide trouvée pour le jet d'attaque",
         "fullDefenseRollFailed": "Échec du jet de Défense Totale. Veuillez lancer manuellement.",
         "invalidRingForSpell": "Anneau invalide pour l'emplacement de sort : {ring}",
-        "noActorForVoid": "Aucun acteur disponible pour dépenser des points de Vide",
-        "chatMessageFailed": "Échec de la publication du jet dans le chat - voir la console pour les détails",
-        "deleteEffect": "Échec de la suppression de l'effet.",
+        "noActorForVoid": "Aucun acteur disponible pour dépenser des points de vide",
+        "chatMessageFailed": "Échec de la publication du jet dans le chat - voir la console pour plus de détails",
         "schoolRankZero": "Vous ne pouvez pas lancer un sort avec un Rang d'École réduit à zéro",
-        "deficiencyBlocksCasting": "La Déficience en {ring} réduit votre Rang d'École à zéro - impossible de lancer",
+        "deficiencyBlocksCasting": "Déficience en {ring} réduit votre Rang d'École à zéro - impossible de lancer",
         "noSpellSlots": "Vous n'avez plus d'emplacements de sort pour cet anneau",
-        "conditionApplyFailed": "Échec de l'application de {condition} à {actor}"
+        "conditionApplyFailed": "Échec de l'application de {condition} à {actor}",
+        "invalidSkillName": "Nom de compétence invalide fourni",
+        "invalidDamageValue": "Valeur de dégâts invalide fournie",
+        "noTargetForSwap": "Aucune cible sélectionnée pour l'échange d'initiative",
+        "noCombatActive": "Aucun combat actif pour modifier l'initiative",
+        "notInCombat": "Le personnage n'est pas dans un combat actif"
       },
-      "chat": {
-        "traitRoll": "Jet de Caractéristique {trait}",
-        "ringRoll": "Jet d'Anneau {ring}",
-        "skillRoll": "Jet de Compétence {skill}",
-        "damageRoll": "Jet de Dégâts {weapon}",
-        "rollName": "Jet {roll}"
+      "voidActions": {
+        "title": "Actions de Points de Vide",
+        "enhanceRoll": "Améliorer le Jet (+1k1)",
+        "tempSkill": "Obtenir une Compétence Temporaire",
+        "reduceDamage": "Réduire les Dégâts (-10)",
+        "increaseArmorTN": "Augmenter le ND d'Armure (+10)",
+        "swapInitiative": "Échanger l'Initiative",
+        "increaseInitiative": "Augmenter l'Initiative (+10)",
+        "tempSkillGranted": "Point de Vide dépensé : Rang temporaire obtenu dans {skill}",
+        "damageReduced": "Point de Vide dépensé : Dégâts réduits de {original} à {reduced} (-{amount})",
+        "armorTnBonus": "Vide : ND d'Armure +10",
+        "armorTnIncreased": "Point de Vide dépensé : ND d'Armure augmenté de 10 pour ce Round",
+        "armorTnAlreadyActive": "Le bonus de ND d'Armure du Point de Vide est déjà actif",
+        "initiativeSwapped": "Point de Vide dépensé : {source} a échangé l'initiative avec {target}",
+        "initiativeIncreased": "Point de Vide dépensé : Initiative augmentée de {oldValue} à {newValue}"
       },
       "hints": {
-        "leftRightToAdjust": "Gauche et Droite pour ajuster",
-        "leftClickPlusRightClickMinus": "Maj+Clic gauche : +1, Maj+Clic droit : -1",
+        "leftRightToAdjust": "Gauche et Droite pour Ajuster",
+        "leftClickPlusRightClickMinus": "Shift+Clic gauche : +1, Shift+Clic droit : -1",
         "voidPointsClickAdjust": "Clic gauche : +1, Clic droit : -1",
-        "shiftClickRankPoints": "Maj+Clic : ±0,1, Maj+Ctrl+Clic : ±1,0",
-        "shiftClickToChat": "Maj+Clic pour envoyer au chat"
+        "shiftClickRankPoints": "Shift+Clic : ±0.1, Shift+Ctrl+Clic : ±1.0",
+        "shiftClickToChat": "Shift+Clic pour publier dans le chat",
+        "postToChat": "Publier dans le chat"
+      },
+      "dialogs": {
+        "deleteItem": {
+          "title": "Supprimer l'Objet ?",
+          "content": "Êtes-vous sûr de vouloir supprimer {name} ?"
+        }
       }
     },
     "character": {
       "skills": {
         "properties": {
           "type": "Type",
-          "trait": "Caractéristique",
-          "emphasis": "Accents",
-          "school": "Compétence d'École",
+          "trait": "Trait",
+          "emphasis": "Emphase",
+          "school": "Compétence d'école",
           "mastery3": "Maîtrise Rang 3",
           "mastery5": "Maîtrise Rang 5",
           "mastery7": "Maîtrise Rang 7",
@@ -273,21 +314,21 @@
         "names": {
           "acting": "Comédie",
           "animalHandling": "Dressage",
-          "artisan": "Artisan",
+          "artisan": "Artisanat",
           "athletics": "Athlétisme",
           "battle": "Bataille",
           "calligraphy": "Calligraphie",
-          "chainWeapons": "Armes à chaîne",
+          "chainWeapons": "Armes à Chaîne",
           "commerce": "Commerce",
-          "craft": "Artisanat",
+          "craft": "Métier",
           "courtier": "Courtisan",
           "defense": "Défense",
           "divination": "Divination",
           "engineering": "Ingénierie",
           "etiquette": "Étiquette",
-          "forgery": "Faux",
+          "forgery": "Contrefaçon",
           "games": "Jeux",
-          "heavyWeapons": "Armes lourdes",
+          "heavyWeapons": "Armes Lourdes",
           "horsemanship": "Équitation",
           "hunting": "Chasse",
           "iaijutsu": "Iaijutsu",
@@ -296,30 +337,30 @@
           "kenjutsu": "Kenjutsu",
           "knives": "Couteaux",
           "kyujutsu": "Kyujutsu",
-          "lore": "Savoirs",
+          "lore": "Connaissance",
           "medicine": "Médecine",
           "meditation": "Méditation",
           "ninjutsu": "Ninjutsu",
-          "perform": "Représentation",
-          "polearms": "Armes d'hast",
+          "perform": "Spectacle",
+          "polearms": "Armes d'Hast",
           "sailing": "Navigation",
           "sincerity": "Sincérité",
-          "sleightOfHand": "Escamotage",
+          "sleightOfHand": "Prestidigitation",
           "spears": "Lances",
           "spellcraft": "Magie",
           "staves": "Bâtons",
           "stealth": "Discrétion",
           "teaCeremony": "Cérémonie du Thé",
           "temptation": "Tentation",
-          "warFan": "Éventail de guerre",
+          "warFan": "Éventail de Guerre",
           "weapons": "Armes"
         }
       },
       "skillTypes": {
-        "high": "Haut",
+        "high": "Haute",
         "bugei": "Bugei",
         "merch": "Marchand",
-        "low": "Bas"
+        "low": "Basse"
       },
       "advantages": {
         "physical": "Physique",
@@ -336,14 +377,19 @@
         "gloryPoints": "Points de Gloire",
         "statusRank": "Rang de Statut",
         "statusPoints": "Points de Statut",
-        "shadowRank": "Souillure des Terres de l'Ombre",
+        "shadowRank": "Corruption des Terres de l'Ombre",
         "shadowPoints": "Points d'Ombre",
         "insightRank": "Rang de Perspicacité",
         "insightPoints": "Points de Perspicacité"
       },
       "stance": {
-        "title": "Posture de Combat",
+        "title": "Combat",
         "current": "Posture Actuelle"
+      },
+      "movement": {
+        "title": "Mouvement",
+        "maximum": "Mouvement Maximum",
+        "feet": "pieds"
       },
       "experience": {
         "xpAmount": "Montant",
@@ -351,70 +397,73 @@
         "reason": "Raison",
         "adjustExperience": "Ajuster l'Expérience",
         "experienceSummary": "Résumé de l'Expérience",
-        "usedTotal": "Utilisés / Total",
+        "usedTotal": "Utilisé / Total",
         "poolChanges": "Changements de Réserve",
         "when": "Quand",
         "none": "Aucune entrée",
         "purchases": "Achats",
-        "xpLog": "Journal d'XP",
+        "xpLog": "Journal d'EXP",
         "traitChange": "{label} {from}→{to}",
         "voidChange": "Vide {from}→{to}",
         "skillCreate": "{name} 0→{rank}",
         "skillChange": "{name} {from}→{to}",
-        "recalculateTooltip": "Recalculer les achats d'XP depuis l'état actuel du personnage",
-        "recalculateSuccess": "Achats d'XP recalculés avec succès",
-        "recalculateFailed": "Échec du recalcul des achats d'XP",
-        "disadvantageCapLabel": "Max XP",
-        "disadvantageCapTitle": "Définir la Limite des Désavantages",
-        "disadvantageCapTooltip": "Cliquez pour modifier le maximum d'XP gagnés par les désavantages",
+        "recalculateTooltip": "Recalculer les achats d'EXP à partir de l'état actuel du personnage",
+        "recalculateSuccess": "Achats d'EXP recalculés avec succès",
+        "recalculateFailed": "Échec du recalcul des achats d'EXP",
+        "disadvantageCapLabel": "EXP Maximum",
+        "disadvantageCapTitle": "Définir la Limite de Désavantages",
+        "disadvantageCapTooltip": "Cliquez pour modifier l'EXP maximum gagnée des désavantages",
         "breakdown": {
           "base": "Base",
           "disadvantagesGrant": "Désavantages",
           "cap": "limite",
           "manualAdjustments": "Ajustements manuels",
-          "traits": "Caractéristiques",
+          "traits": "Traits",
           "void": "Vide",
           "skills": "Compétences",
-          "advantages": "Atouts",
+          "advantages": "Avantages",
           "kata": "Kata",
-          "kiho": "Kiho"
+          "kiho": "Kiho",
+          "spells": "Sorts"
         },
         "fallbackLabels": {
-          "advantage": "Atout",
+          "advantage": "Avantage",
           "disadvantage": "Désavantage",
-          "traitIncrease": "Augmentation de Caractéristique",
+          "traitIncrease": "Augmentation de Trait",
           "voidIncrease": "Augmentation de Vide",
-          "skillCreated": "Compétence créée",
-          "skillIncreased": "Compétence augmentée"
-        }
+          "skillCreated": "Compétence Créée",
+          "skillIncreased": "Compétence Augmentée"
+        },
+        "spellMemorized": "Mémorisé : {name}"
       }
     },
     "equipment": {
       "weapons": {
         "attackType": "Type d'Attaque",
         "size": "Taille",
-        "damageKeep": "Dégâts/Garder",
+        "damageKeep": "Dés de Dégâts Conservés",
         "range": "Portée",
         "arrow": "Flèche",
         "typeWeapon": "Arme",
         "typeBow": "Arc",
+        "rangedAttack": "Attaque à Distance",
         "associatedSkill": "Compétence Associée",
-        "fallback": "Par défaut",
+        "fallback": "Alternative",
         "skillExample": {
           "bow": "Kyujutsu",
           "weapon": "Kenjutsu"
         },
         "arrows": {
-          "armor": "Perce-armure",
-          "flesh": "Coupe-chair",
-          "humming": "Bourdonnante",
-          "rope": "Coupe-corde",
-          "willow": "Feuille de saule"
+          "armor": "Perforante",
+          "flesh": "Tranche-Chair",
+          "humming": "Bulbe Bourdonnant",
+          "rope": "Coupe-Corde",
+          "willow": "Feuille de Saule"
         },
         "sizes": {
-          "small": "Petit",
-          "medium": "Moyen",
-          "large": "Grand"
+          "small": "Petite",
+          "medium": "Moyenne",
+          "large": "Grande"
         }
       },
       "armor": {
@@ -425,9 +474,13 @@
           "ashigaru": "Armure Ashigaru",
           "light": "Armure Légère",
           "heavy": "Armure Lourde",
-          "riding": "Armure de Cavalerie"
+          "riding": "Armure de Monte"
         }
       },
+      "keywords": "Mots-clés",
+      "keywordsPlaceholder": "ex., Samouraï, Paysan",
+      "nemuranai": "Nemuranai",
+      "price": "Prix",
       "general": {}
     },
     "magic": {
@@ -439,28 +492,29 @@
         "raises": "Relances",
         "affinity": "Affinité",
         "deficiency": "Déficience",
-        "maho": "Mahō",
-        "useSpellSlot": "Utiliser un emplacement de sort",
-        "voidSlot": "Utiliser un emplacement de sort de Vide",
+        "maho": "Maho",
+        "useSpellSlot": "Utiliser Emplacement de Sort",
+        "voidSlot": "Utiliser Emplacement de Sort de Vide",
         "slotsRestored": "Tous les emplacements de sort restaurés au maximum",
-        "restored": "restauré"
+        "restored": "restaurés",
+        "memorized": "Mémorisé"
       },
       "maho": {
-        "warningTitle": "Magie de Sang - Mahō Interdit",
-        "bloodRequired": "Coût de Sang Requis",
-        "additionalBloodBonus": "Chaque coût de sang supplémentaire accorde +1 Relance Gratuite",
+        "warningTitle": "Magie de Sang - Maho Interdit",
+        "bloodRequired": "Coût en Sang Requis",
+        "additionalBloodBonus": "Chaque quantité supplémentaire de coût en sang accorde +1 Relance Gratuite",
         "bloodSource": {
           "label": "Source de Sang",
           "self": "Soi-même",
           "other": "Autre"
         },
         "additionalBlood": "Sang Supplémentaire",
-        "castMaho": "Lancer un Sort Mahō",
-        "mahoCasting": "Incantation Mahō",
+        "castMaho": "Lancer Sort Maho",
+        "mahoCasting": "Lancement de Maho",
         "bloodCost": "Sang",
         "freeRaises": "Relances Gratuites",
-        "taintGained": "Souillure Gagnée",
-        "taintGainedNotification": "Gagné {taint} points de Souillure des Terres de l'Ombre par incantation mahō"
+        "taintGained": "Corruption Gagnée",
+        "taintGainedNotification": "Gagné {taint} points de Corruption des Terres de l'Ombre en lançant du maho"
       },
       "kiho": {
         "internal": "Interne",
@@ -475,10 +529,10 @@
     },
     "system": {
       "migration": {
-        "itemTypeChangeInfo": "L5R4 : {count} Objet(s) migré(s) de \"commonItem\" vers \"item\".",
+        "itemTypeChangeInfo": "L5R4 : migré {count} Objet(s) de \"commonItem\" à \"item\".",
         "itemTypeChangeError": "L5R4 : Échec de la migration du type d'objet. Voir la console pour plus de détails.",
-        "iconsUpdated": "Migration L5R4 : {count} chemin(s) d'image du monde mis à jour.",
-        "compendiumIconsUpdated": "Migration L5R4 (Compendiums) : {count} chemin(s) d'image mis à jour."
+        "iconsUpdated": "Migration L5R4 : Mis à jour {count} chemin(s) d'image du monde.",
+        "compendiumIconsUpdated": "Migration L5R4 (Compendiums) : Mis à jour {count} chemin(s) d'image."
       },
       "errors": {
         "deleteEffect": "Échec de la suppression de l'effet."
@@ -494,40 +548,40 @@
   },
   "SETTINGS": {
     "showTraitRollOptions": {
-      "name": "Demander par défaut les options des Jets de Caractéristique.",
-      "label": "Maintenir Maj pour basculer."
+      "name": "Demander les options de Jets de Trait par défaut.",
+      "label": "Maintenez Shift pour Basculer."
     },
     "showSpellRollOptions": {
-      "name": "Demander par défaut si le Jet d'Anneau est un sort.",
-      "label": "Maintenir Maj pour basculer."
+      "name": "Demander si le Jet d'Anneau est un sort par défaut.",
+      "label": "Maintenez Shift pour Basculer."
     },
     "showSkillRollOptions": {
-      "name": "Demander par défaut les options des Jets de Compétence et de Dégâts.",
-      "label": "Maintenir Maj pour basculer."
+      "name": "Demander les options de Jets de Compétence et Jets de Dégâts par défaut.",
+      "label": "Maintenez Shift pour Basculer."
     },
     "allowNpcVoidPoints": {
-      "name": "Afficher la case Points de Vide pour les jets des PNJ.",
+      "name": "Afficher la case Point de Vide pour les jets de PNJ.",
       "label": "Les PNJ n'ont normalement pas de Vide."
     },
     "calculateRank": {
-      "name": "Calculer automatiquement le Rang de Perspicacité",
-      "label": "Le Rang de Perspicacité est mis à jour automatiquement en fonction du total des Points de Perspicacité"
+      "name": "Calculer le Rang de Perspicacité automatiquement",
+      "label": "Le Rang de Perspicacité est mis à jour automatiquement en fonction du total de Points de Perspicacité"
     },
     "allowArmorStacking": {
-      "name": "Autoriser l'empilement d'armures",
-      "label": "Plusieurs pièces d'\"armure\" peuvent être empilées (pour représenter des bonus, etc.)"
+      "name": "Autoriser le cumul d'armures",
+      "label": "Plusieurs pièces d'\"armure\" peuvent être cumulées (pour représenter des bonus, etc.)"
     },
     "showWeaponRollOptions": {
-      "name": "Demander par défaut les options des Jets d'Arme.",
-      "label": "Maintenir Maj pour basculer."
+      "name": "Demander les options de Jet d'Arme par défaut.",
+      "label": "Maintenez Shift pour Basculer."
     },
     "LtException": {
-      "name": "Appliquer l'exception Little Truths",
-      "label": "Lorsque les dés gardés sont réduits en dessous de 10 par conversion, ajoutez 2."
+      "name": "Appliquer l'exception des Petites Vérités",
+      "label": "Lorsque les dés conservés sont réduits en dessous de 10 par conversion, ajouter 2."
     },
     "runMigration": {
       "name": "Exécuter les migrations au démarrage",
-      "label": "Si activé, les migrations de données en attente s'exécuteront au prochain chargement du monde. Désactivez pour ignorer en cas de dépannage."
+      "label": "Si activé, les migrations de données en attente s'exécuteront la prochaine fois que le monde se chargera. Désactivez pour ignorer les migrations en cas de dépannage."
     },
     "lastMigratedVersion": {
       "name": "Dernière version migrée",
@@ -535,29 +589,64 @@
     },
     "forceMigration": {
       "name": "Forcer la migration au démarrage",
-      "label": "Force toutes les migrations à s'exécuter au prochain chargement du monde, quelle que soit la version. Se réinitialise automatiquement après la fin de la migration."
+      "label": "Force l'exécution de toutes les migrations au prochain chargement du monde, quelle que soit la version. Se réinitialise automatiquement une fois la migration terminée."
     },
     "defaultNpcWoundMode": {
-      "name": "Mode de Blessures PNJ par Défaut",
-      "label": "Contrôle si les nouveaux PNJ utilisent l'entrée basée sur la formule (Anneau de Terre) ou manuelle pour les calculs de blessures. Les PNJ existants conservent leurs paramètres individuels.",
+      "name": "Mode de Blessures par Défaut pour PNJ",
+      "label": "Contrôle si les nouveaux PNJ utilisent le mode basé sur une formule (Anneau de Terre) ou la saisie manuelle du seuil pour les calculs de blessures. Les PNJ existants conservent leurs paramètres individuels.",
       "choices": {
-        "manual": "Manuel (Entrée Directe)",
-        "formula": "Formule (Basée sur Terre)"
+        "manual": "Manuel (Saisie Directe)",
+        "formula": "Formule (Basé sur Terre)"
       }
+    }
+  },
+  "conditions": {
+    "blinded": {
+      "restrictions": "Aveuglé : -3k3 attaques à distance, -1k1 attaques au corps à corps, -1k1 jets de Défense, ND d'Armure = Réf+5+Armure, Anneau d'Eau -2 pour le mouvement"
+    },
+    "dazed": {
+      "restrictions": "Étourdi : -3k0 à toutes les actions, uniquement postures Défense/Défense Totale, impossible de dueler"
+    },
+    "entangled": {
+      "restrictions": "Entravé : Impossible de Se Déplacer ou de prendre des Actions Complexes sauf jet de Force pour se libérer"
+    },
+    "fatigued": {
+      "restrictions": "Fatigué : +5 ND aux jets physiques, compétences et lancement de sorts (cumulatif par jour), impossible d'utiliser la posture d'Attaque Totale"
+    },
+    "feared": {
+      "restrictions": "Apeuré : -Xk0 à tous les jets (X = Rang de Peur), dure jusqu'à la fin de la rencontre"
+    },
+    "grappled": {
+      "restrictions": "Agrippé : ND d'Armure = 5 + bonus d'armure uniquement"
+    },
+    "guarded": {
+      "restrictions": "Protégé : +10 ND d'Armure tant que protégé par un allié à 5 pieds (jusqu'au prochain tour du gardien)"
+    },
+    "guarding": {
+      "restrictions": "Protecteur : -5 ND d'Armure tant que protégeant un allié à 5 pieds (jusqu'à votre prochain tour)"
+    },
+    "prone": {
+      "restrictions": "À Terre : -10 ND d'Armure vs corps à corps, -2k0 attaques, impossible de Se Déplacer, uniquement postures Attaque/Défense"
+    },
+    "stunned": {
+      "restrictions": "Sonné : Impossible de prendre la moindre action, ND d'Armure = 5 + bonus d'armure"
     }
   },
   "EFFECT": {
     "blinded": "Aveuglé",
+    "concentration": "Concentration",
     "dazed": "Étourdi",
     "dead": "Mort",
-    "entangled": "Empêtré",
+    "entangled": "Entravé",
     "fasting": "Jeûne",
     "fatigued": "Fatigué",
-    "feared": "Effrayé",
+    "feared": "Apeuré",
     "grappled": "Agrippé",
-    "mounted": "Monté/En hauteur",
-    "prone": "À terre",
-    "stunned": "Étourdi"
+    "guarded": "Protégé",
+    "guarding": "Protecteur",
+    "mounted": "Monté/Position Supérieure",
+    "prone": "À Terre",
+    "stunned": "Sonné"
   },
   "TYPES": {
     "Actor": {
@@ -565,7 +654,7 @@
       "npc": "PNJ"
     },
     "Item": {
-      "advantage": "Atout",
+      "advantage": "Avantage",
       "armor": "Armure",
       "bow": "Arc",
       "clan": "Clan",
@@ -580,32 +669,6 @@
       "tattoo": "Tatouage",
       "technique": "Technique",
       "weapon": "Arme"
-    }
-  },
-  "conditions": {
-    "blinded": {
-      "restrictions": "Aveuglé : -3k3 attaques à distance, -1k1 attaques au corps à corps, -1k1 jets de Défense, TN d'Armure = Réf+5+Armure, Anneau d'Eau -2 pour le mouvement"
-    },
-    "dazed": {
-      "restrictions": "Étourdi : -3k0 à toutes les actions, seulement Postures de Défense/Défense Totale, ne peut pas dueller"
-    },
-    "entangled": {
-      "restrictions": "Empêtré : Ne peut pas Bouger ou effectuer d'Actions Complexes sauf jet de Force pour se libérer"
-    },
-    "fatigued": {
-      "restrictions": "Fatigué : +5 TN aux jets physiques, compétences et incantation (s'accumule par jour), ne peut pas utiliser la Posture d'Attaque Totale"
-    },
-    "feared": {
-      "restrictions": "Effrayé : -Xk0 à tous les jets (X = Rang de Peur), dure jusqu'à la fin de la rencontre"
-    },
-    "grappled": {
-      "restrictions": "Agrippé : TN d'Armure = 5 + bonus d'armure uniquement"
-    },
-    "prone": {
-      "restrictions": "À terre : -10 TN d'Armure vs corps à corps, -2k0 attaques, ne peut pas Bouger, seulement Postures d'Attaque/Défense"
-    },
-    "stunned": {
-      "restrictions": "Étourdi : Ne peut effectuer aucune action, TN d'Armure = 5 + bonus d'armure"
     }
   }
 }

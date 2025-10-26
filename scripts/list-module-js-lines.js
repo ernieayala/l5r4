@@ -1,3 +1,20 @@
+/**
+ * Module Line Counter Script
+ *
+ * Development utility that counts non-comment, non-blank lines of code
+ * in all JavaScript files within the module/ directory. Outputs a tab-separated
+ * list of file paths and their corresponding line counts.
+ *
+ * Usage: node scripts/list-module-js-lines.js
+ * Output: [relative-path]\t[line-count]
+ *
+ * Counting Rules:
+ * - Excludes blank lines
+ * - Excludes single-line comments (//)
+ * - Excludes block comments
+ * - Excludes JSDoc comments
+ */
+
 /* eslint-env node */
 /* eslint-disable no-console */
 const fs = require("fs");
@@ -6,6 +23,11 @@ const path = require("path");
 const moduleRoot = path.resolve(__dirname, "../module");
 const files = [];
 
+/**
+ * Recursively walks directory tree and collects all .js file paths
+ * @param {string} dir - Absolute path to directory to walk
+ * @returns {void} Mutates the files array by pushing discovered .js files
+ */
 function walk(dir) {
   for (const entry of fs.readdirSync(dir, { withFileTypes: true })) {
     const full = path.join(dir, entry.name);
@@ -31,14 +53,12 @@ for (const file of files) {
   for (const line of allLines) {
     const trimmed = line.trim();
 
-    // Check for block comment start/end
+    // Track block comment boundaries to exclude comment content from count
     if (trimmed.startsWith("/*") || trimmed.startsWith("/**")) {
       inBlockComment = true;
     }
 
-    // Skip if we're in a block comment or line is a comment/empty
     if (inBlockComment || trimmed.startsWith("//") || trimmed === "") {
-      // Check if block comment ends on this line
       if (trimmed.endsWith("*/")) {
         inBlockComment = false;
       }

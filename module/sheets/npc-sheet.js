@@ -40,6 +40,7 @@
 import { SYS_ID } from "../config/constants.js";
 import { TEMPLATE } from "../config/templates.js";
 import { STANCES } from "../config/localization.js";
+import { NPC_SORT_KEYS } from "../config/sort-keys.js";
 
 // Utils
 import { clamp } from "../utils/type-coercion.js";
@@ -414,7 +415,8 @@ export default class L5R4NpcSheet extends BaseActorSheet {
           return trained.join(", ");
         }
       };
-      const pref = getSortPref(actorObj.id, "skills", Object.keys(cols), "name");
+      const allowedKeys = this._getAllowedSortKeys("skills");
+      const pref = getSortPref(actorObj.id, "skills", allowedKeys, "name");
       return sortWithPref(byType("skill"), cols, pref, game.i18n?.lang);
     })();
 
@@ -486,7 +488,7 @@ export default class L5R4NpcSheet extends BaseActorSheet {
       return;
     }
 
-    this._initializeSortIndicators(root, "skills", ["name", "rank", "trait", "roll", "emphasis"]);
+    this._initializeSortIndicators(root, "skills", this._getAllowedSortKeys("skills"));
 
     on(root, ".simple-roll", "click", ev =>
       RollHandler.npcSimpleRoll(this._getHandlerContext(), ev)
@@ -501,23 +503,13 @@ export default class L5R4NpcSheet extends BaseActorSheet {
    * Defines which columns can be used for sorting in each item list.
    * Currently only skills list supports sorting by multiple fields.
    *
-   * **Skills Sort Fields:**
-   * - name: Alphabetical by skill name
-   * - rank: Skill rank (0-10)
-   * - trait: Associated trait (localized)
-   * - roll: Total rolled dice (skill + trait)
-   * - emphasis: Skill emphasis (if any)
-   *
-   * @param {string} scope - Sort scope identifier ("skills", etc.)
-   * @returns {string[]} Array of allowed sort field names for the scope
+   * @param {string} scope - Sort scope identifier (e.g., "skills", "weapons")
+   * @returns {string[]} Array of allowed column keys for sorting
    * @protected
    * @override
    */
   _getAllowedSortKeys(scope) {
-    const keys = {
-      skills: ["name", "rank", "trait", "roll", "emphasis"]
-    };
-    return keys[scope] ?? ["name"];
+    return NPC_SORT_KEYS[scope] ?? ["name"];
   }
 
   /**

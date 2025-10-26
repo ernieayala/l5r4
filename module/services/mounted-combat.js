@@ -82,37 +82,24 @@ export function getHorsemanshipRank(actor) {
 }
 
 /**
- * Determines if an actor can use Full Attack Stance while mounted.
- *
- * @param {Actor|null} actor - The actor to check
- * @returns {boolean} True if actor can use Full Attack Stance
- */
-export function canUseFullAttackMounted(_actor) {
-  return true;
-}
-
-/**
  * Retrieves complete mounted combat status for an actor.
  *
- * Aggregates mounted status, Horsemanship rank, and Full Attack eligibility
- * into a single data structure for UI rendering and rules evaluation.
+ * Aggregates mounted status and Horsemanship rank into a single data structure
+ * for UI rendering and rules evaluation.
  *
  * @param {Actor|null} actor - The actor to evaluate
- * @returns {{isMounted: boolean, horsemanshipRank: number, canFullAttack: boolean}}
+ * @returns {{isMounted: boolean, horsemanshipRank: number}}
  *   Mounted combat status object containing:
  *   - isMounted: Whether actor has "mounted" status effect
  *   - horsemanshipRank: Current Horsemanship skill rank (0 if none)
- *   - canFullAttack: Whether Full Attack Stance is available
  */
 export function getMountedStatus(actor) {
   const mounted = isMounted(actor);
   const horsemanshipRank = getHorsemanshipRank(actor);
-  const canFullAttack = true;
 
   return {
     isMounted: mounted,
-    horsemanshipRank,
-    canFullAttack
+    horsemanshipRank
   };
 }
 

@@ -1,6 +1,12 @@
 {
   "l5r4": {
     "ui": {
+      "tabs": {
+        "details": "Detalhes",
+        "modifiers": "Modificadores",
+        "description": "Descrição",
+        "effects": "Efeitos Ativos"
+      },
       "mechanics": {
         "rings": {
           "ring": "Anel",
@@ -10,11 +16,13 @@
           "earth": "Terra",
           "void": "Vazio",
           "voidPoints": "Pontos de Vazio",
-          "all": "Todos"
+          "all": "Todos",
+          "voidTnBoost": "Usar Vazio",
+          "voidInitBoost": "Usar Vazio"
         },
         "traits": {
           "sta": "Vigor",
-          "wil": "Força de Vontade",
+          "wil": "Vontade",
           "str": "Força",
           "per": "Percepção",
           "ref": "Reflexos",
@@ -26,22 +34,27 @@
           "success": "Sucesso",
           "failure": "Falha",
           "missed": "Errou",
-          "explodesOn": "Explode em",
+          "explodesOn": "Explode Em",
           "withEmphasis": "com Ênfase",
-          "unskilled": "Sem Treinamento",
+          "unskilled": "Sem Perícia",
           "traitRoll": "Rolagem de Atributo",
           "ringRoll": "Rolagem de Anel",
           "skillRoll": "Rolagem de Perícia",
           "damageRoll": "Rolagem de Dano",
           "attackRoll": "Rolagem de Ataque",
           "spellCasting": "Rolagem de Conjuração",
-          "unskilledRoll": "Rolagem sem Treinamento",
+          "castSpell": "Conjurar {spell} ({ring})",
+          "castMaho": "Conjurar Maho: {spell} ({ring})",
+          "unskilledRoll": "Rolagem sem Perícia",
           "emphasis": "Ênfase",
           "raise": "Aumento",
           "raises": "Aumentos",
+          "freeRaises": "Aumentos Grátis",
           "automatic": "Automático",
           "formula": "Fórmula",
-          "result": "Resultado"
+          "result": "Resultado",
+          "socialResistance": "Resistência Social",
+          "socialResistanceDescription": "Resistindo Intimidação ou Tentação"
         },
         "notifications": {
           "itemCreated": "Criado {type}: {name}",
@@ -56,19 +69,19 @@
           "melee": "Corpo a Corpo",
           "ranged": "À Distância",
           "multiplier": "Multiplicador",
-          "woundPenalty": "Penalidade por Ferimentos",
-          "armorTnBonus": "Bônus de TN da Armadura",
+          "woundPenalty": "Penalidade de Ferimento",
+          "armorTnBonus": "Bônus de ND de Armadura",
           "targeting": {
             "vs": "vs",
-            "multipleTargets": "alvos - TN não ajustado automaticamente"
+            "multipleTargets": "alvos - ND não definido automaticamente"
           }
         },
         "wounds": {
           "wounds": "Ferimentos",
-          "armorTn": "TN da Armadura",
-          "armorTnBase": "TN Base da Armadura",
+          "armorTn": "ND de Armadura",
+          "armorTnBase": "ND de Armadura Base",
           "armorReduction": "Redução",
-          "woundLevel": "Nível de Ferimentos",
+          "woundLevel": "Nível",
           "woundsSuffered": "Ferimentos Sofridos",
           "maxWounds": "Ferimentos Máximos",
           "penalty": "Penalidade",
@@ -80,53 +93,61 @@
           "woundConfiguration": "Configuração de Ferimentos",
           "earthMultiplier": "Multiplicador de Terra",
           "woundBonus": "Bônus de Ferimentos",
-          "threshold": "Limiar",
+          "threshold": "Limite",
           "healthy": "Saudável",
-          "nicked": "Cortado",
-          "grazed": "Arranhado",
-          "hurt": "Machucado",
-          "injured": "Ferido",
+          "nicked": "Arranhado",
+          "grazed": "Raspado",
+          "hurt": "Ferido",
+          "injured": "Machucado",
           "crippled": "Aleijado",
-          "down": "Derrubado",
-          "out": "Fora de combate",
+          "down": "Caído",
+          "out": "Fora de Combate",
           "applyHealing": "Aplicar Cura",
-          "applyHealingTitle": "Aplicar cura natural do descanso",
+          "applyHealingTitle": "Aplicar cura natural de descanso",
           "naturalHealing": "Cura Natural",
           "restedAndRecovered": "descansou e recuperou ferimentos",
-          "healingApplied": "Curados {amount} ferimentos (taxa de cura: {rate})",
+          "healingApplied": "Curou {amount} ferimentos (taxa de cura: {rate})",
           "woundStatus": "Ferimentos: {current}/{max} (sofridos: {suffered})",
           "fullyHealed": "Completamente curado!",
           "alreadyFullHealth": "{name} já está com saúde completa",
           "noHealRate": "{name} não tem taxa de cura configurada",
-          "healingFailed": "Falha ao aplicar cura em {name}"
+          "healingFailed": "Falha ao aplicar cura em {name}",
+          "applyWounds": "Aplicar Ferimentos",
+          "reduceWithVoid": "Reduzir com Vazio",
+          "woundsApplied": "Aplicados {amount} ferimentos a {name}",
+          "woundsAppliedWithArmor": "{name} recebeu {original} de dano. Armadura reduziu {reduction}. Aplicados {final} ferimentos.",
+          "woundsReducedApplied": "Ponto de Vazio gasto: Dano reduzido em 10. Aplicados {amount} ferimentos a {name}",
+          "woundsReducedWithArmor": "{name} recebeu {original} de dano. Vazio reduziu para {afterVoid}, armadura reduziu {reduction}. Aplicados {final} ferimentos.",
+          "noTokenSelected": "Nenhum token selecionado. Selecione um token para aplicar ferimentos.",
+          "noVoidPoints": "Nenhum Ponto de Vazio disponível para reduzir dano"
         },
         "stances": {
           "pending": "Pendente",
           "attack": "Postura de Ataque",
-          "fullAttack": "Postura de Ataque Total",
+          "fullAttack": "Ataque Total",
           "defense": "Postura de Defesa",
-          "fullDefense": "Postura de Defesa Total",
-          "center": "Postura de Centro",
-          "fullDefenseDescription": "Faça uma rolagem de Defesa/Reflexos. Some metade do resultado (arredondando para cima) ao seu TN de Armadura pela duração desta postura.",
-          "cannotAttackDefense": "Não é possível atacar em Postura de Defesa",
-          "fullAttackBonus": "Postura de Ataque Total: +2k1"
+          "fullDefense": "Defesa Total",
+          "center": "Postura Centrada",
+          "fullDefenseDescription": "Faça um teste de Defesa/Reflexos. Adicione metade do resultado (arredondado para cima) ao seu ND de Armadura pela duração desta postura.",
+          "cannotAttackDefense": "Não pode atacar em Postura de Defesa",
+          "fullAttackBonus": "Ataque Total: +2k1"
         },
         "mounted": {
-          "fullAttackRestriction": "Postura de Ataque Total requer Equitação 3+ quando montado",
-          "attackBonus": "Montado/Mais Alto: +1k0"
+          "fullAttackRestriction": "Ataque Total requer Cavalgar 3+ quando montado",
+          "attackBonus": "Montado/Posição Superior: +1k0"
         },
         "fear": {
-          "fearRank": "Posto de Medo",
+          "fearRank": "Grau de Medo",
           "fearLabel": "Medo {rank}",
           "effectName": "Medo {rank}",
           "clickToTest": "Clique para testar Medo contra personagens selecionados",
           "testResult": "Teste de Medo {rank}",
           "testSuccess": "Resistiu ao Medo {rank}",
           "testFailure": "Falhou no Teste de Medo {rank}",
-          "penaltyApplied": "Penalidade: -{penalty}k0 para todas as rolagens",
-          "catastrophicFailure": "FALHA CATASTRÓFICA! Personagem foge ou se encolhe desamparado.",
+          "penaltyApplied": "Penalidade: -{penalty}k0 em todas as rolagens",
+          "catastrophicFailure": "FALHA CATASTRÓFICA! O personagem foge ou se encolhe aterrorizado.",
           "noTargets": "Nenhum token selecionado para teste de Medo",
-          "noWillpower": "{character} não tem atributo de Força de Vontade",
+          "noWillpower": "{character} não tem atributo Vontade",
           "noFear": "Este NPC não tem efeito de Medo configurado",
           "testAgainst": "vs {creature}",
           "rollFailed": "Rolagem de teste de Medo falhou - fórmula inválida ou dados corrompidos",
@@ -137,6 +158,7 @@
         "roll": "Rolar",
         "cancel": "Cancelar",
         "ok": "OK",
+        "add": "Adicionar",
         "none": "Nenhum",
         "keep": "Manter",
         "raise": "Aumento",
@@ -152,7 +174,7 @@
         "toChat": "Para o Chat",
         "effect": "Efeito",
         "simple": "Simples",
-        "complex": "Complexa",
+        "complex": "Complexo",
         "free": "Livre",
         "action": "Ação",
         "edit": "Editar",
@@ -163,9 +185,9 @@
         "activeEffects": "Efeitos Ativos",
         "active": "Ativo",
         "new": "Novo",
-        "auto": "Automático",
-        "disabled": "desativado",
-        "rank": "Posto",
+        "auto": "Auto",
+        "disabled": "desabilitado",
+        "rank": "Grau",
         "clan": "Clã",
         "school": "Escola",
         "xp": "Pontos de Experiência",
@@ -175,56 +197,55 @@
         "type": "Tipo",
         "ring": "Anel",
         "mastery": "Maestria",
-        "tn": "TN",
-        "cost": "Custo"
+        "tn": "ND",
+        "cost": "Custo",
+        "save": "Salvar"
+      },
+      "emphasisManager": {
+        "title": "Gerenciar Ênfases de Perícias",
+        "manageFor": "Gerenciar Ênfases Disponíveis para",
+        "manage": "Gerenciar Ênfases",
+        "addCustom": "Adicionar Ênfase Personalizada",
+        "custom": "Personalizado",
+        "none": "Nenhuma ênfase disponível",
+        "help": "Selecione quais ênfases estão disponíveis para esta perícia. Treine-as na ficha de personagem.",
+        "noEmphases": "Nenhuma ênfase na lista",
+        "limitReached": "Não é possível treinar mais de {max} ênfases neste grau de perícia"
       },
       "sheets": {
-        "bio": "Antecedentes",
+        "bio": "Histórico",
         "skill": "Perícia",
         "skills": "Perícias",
-        "addSkill": "Adicionar Perícia",
         "weapon": "Arma",
         "weapons": "Armas",
-        "addWeapon": "Adicionar Arma",
         "armor": "Armadura",
-        "addArmor": "Adicionar Armadura",
         "item": "Item",
         "items": "Itens",
         "addItem": "Adicionar Item",
         "notes": "Notas",
-        "spell": "Feitiço",
-        "spells": "Feitiços",
-        "addSpell": "Adicionar Feitiço",
+        "spell": "Magia",
+        "spells": "Magias",
         "technique": "Técnica",
         "techniques": "Técnicas",
-        "addTechnique": "Adicionar Técnica",
         "armors": "Armaduras",
         "advantage": "Vantagem",
         "advantages": "Vantagens",
-        "addAdvantage": "Adicionar Vantagem",
         "disadvantage": "Desvantagem",
         "disadvantages": "Desvantagens",
-        "addDisadvantage": "Adicionar Desvantagem",
         "kata": "Kata",
         "katas": "Katas",
-        "addKata": "Adicionar Kata",
         "kiho": "Kiho",
         "kihos": "Kihos",
-        "addKiho": "Adicionar Kiho",
         "tattoo": "Tatuagem",
         "tattoos": "Tatuagens",
-        "addTattoo": "Adicionar Tatuagem",
-        "addTechSpell": "Adicionar Técnica/Feitiço",
-        "addAdvDis": "Adicionar Vantagem/Desvantagem",
-        "addEquipment": "Adicionar Equipamento",
         "equipment": "Equipamento",
-        "abilities": "Aptidões",
+        "abilities": "Habilidades",
         "character": "Personagem",
-        "rulesSummary": "Resumo das Regras",
+        "rulesSummary": "Resumo de Regras",
         "description": "Descrição",
-        "woundLevels": "Níveis de Ferimentos",
-        "spellSlots": "Espaços de Feitiço",
-        "demands": "Exigências",
+        "woundLevels": "Níveis de Ferimento",
+        "spellSlots": "Espaços de Magia",
+        "demands": "Demandas",
         "traits": "Atributos",
         "itemSheetTitle": "Ficha de Item",
         "xpModal": "Experiência"
@@ -232,30 +253,50 @@
       "notifications": {
         "actorNotFound": "Ator não encontrado para rolagem de dano",
         "noPermissionDamage": "Você não tem permissão para rolar dano para este ator",
-        "noValidWeapon": "Nenhuma arma válida encontrada para a rolagem de ataque",
-        "fullDefenseRollFailed": "Falha na rolagem de Defesa Total. Por favor, role manualmente.",
-        "invalidRingForSpell": "Anel inválido para espaço de feitiço: {ring}",
-        "noActorForVoid": "Nenhum ator disponível para gastar pontos de Vazio",
-        "chatMessageFailed": "Falha ao publicar a rolagem no chat - veja o console para detalhes",
-        "deleteEffect": "Falha ao excluir efeito.",
-        "schoolRankZero": "Você não pode lançar um feitiço com Posto de Escola reduzido a zero",
-        "deficiencyBlocksCasting": "Deficiência em {ring} reduz seu Posto de Escola a zero - não pode lançar",
-        "noSpellSlots": "Você ficou sem espaços de feitiço para este anel",
-        "conditionApplyFailed": "Falha ao aplicar {condition} em {actor}"
+        "noValidWeapon": "Nenhuma arma válida encontrada para rolagem de ataque",
+        "fullDefenseRollFailed": "Falha ao fazer rolagem de Defesa Total. Por favor, role manualmente.",
+        "invalidRingForSpell": "Anel inválido para espaço de magia: {ring}",
+        "noActorForVoid": "Nenhum ator disponível para gastar pontos de vazio",
+        "chatMessageFailed": "Falha ao postar rolagem no chat - veja o console para detalhes",
+        "schoolRankZero": "Você não pode conjurar uma magia com Grau de Escola reduzido a zero",
+        "deficiencyBlocksCasting": "Deficiência em {ring} reduz seu Grau de Escola a zero - não pode conjurar",
+        "noSpellSlots": "Você ficou sem espaços de magia para este anel",
+        "conditionApplyFailed": "Falha ao aplicar {condition} a {actor}",
+        "invalidSkillName": "Nome de perícia inválido fornecido",
+        "invalidDamageValue": "Valor de dano inválido fornecido",
+        "noTargetForSwap": "Nenhum alvo selecionado para troca de iniciativa",
+        "noCombatActive": "Nenhum combate ativo para modificar iniciativa",
+        "notInCombat": "Personagem não está em combate ativo"
       },
-      "chat": {
-        "traitRoll": "Rolagem de Atributo {trait}",
-        "ringRoll": "Rolagem de Anel {ring}",
-        "skillRoll": "Rolagem de Perícia {skill}",
-        "damageRoll": "Rolagem de Dano {weapon}",
-        "rollName": "Rolagem {roll}"
+      "voidActions": {
+        "title": "Ações de Pontos de Vazio",
+        "enhanceRoll": "Melhorar Rolagem (+1k1)",
+        "tempSkill": "Ganhar Perícia Temporária",
+        "reduceDamage": "Reduzir Dano (-10)",
+        "increaseArmorTN": "Aumentar ND de Armadura (+10)",
+        "swapInitiative": "Trocar Iniciativa",
+        "increaseInitiative": "Aumentar Iniciativa (+10)",
+        "tempSkillGranted": "Ponto de Vazio gasto: Ganhou grau temporário em {skill}",
+        "damageReduced": "Ponto de Vazio gasto: Dano reduzido de {original} para {reduced} (-{amount})",
+        "armorTnBonus": "Vazio: ND de Armadura +10",
+        "armorTnIncreased": "Ponto de Vazio gasto: ND de Armadura aumentado em 10 para este Turno",
+        "armorTnAlreadyActive": "Bônus de ND de Armadura do Ponto de Vazio já está ativo",
+        "initiativeSwapped": "Ponto de Vazio gasto: {source} trocou iniciativa com {target}",
+        "initiativeIncreased": "Ponto de Vazio gasto: Iniciativa aumentada de {oldValue} para {newValue}"
       },
       "hints": {
-        "leftRightToAdjust": "Esquerda e Direita para ajustar",
-        "leftClickPlusRightClickMinus": "Shift+Clique Esq: +1, Shift+Clique Dir: -1",
-        "voidPointsClickAdjust": "Clique Esq: +1, Clique Dir: -1",
-        "shiftClickRankPoints": "Shift+Clique: ±0,1, Shift+Ctrl+Clique: ±1,0",
-        "shiftClickToChat": "Shift+Clique para enviar ao chat"
+        "leftRightToAdjust": "Esquerda e Direita para Ajustar",
+        "leftClickPlusRightClickMinus": "Shift+Clique esquerdo: +1, Shift+Clique direito: -1",
+        "voidPointsClickAdjust": "Clique esquerdo: +1, Clique direito: -1",
+        "shiftClickRankPoints": "Shift+Clique: ±0.1, Shift+Ctrl+Clique: ±1.0",
+        "shiftClickToChat": "Shift+Clique para postar no chat",
+        "postToChat": "Postar no chat"
+      },
+      "dialogs": {
+        "deleteItem": {
+          "title": "Excluir Item?",
+          "content": "Tem certeza que deseja excluir {name}?"
+        }
       }
     },
     "character": {
@@ -263,17 +304,17 @@
         "properties": {
           "type": "Tipo",
           "trait": "Atributo",
-          "emphasis": "Ênfases",
-          "school": "Perícia de Escola",
-          "mastery3": "Maestria Posto 3",
-          "mastery5": "Maestria Posto 5",
-          "mastery7": "Maestria Posto 7",
+          "emphasis": "Ênfase",
+          "school": "Perícia de escola",
+          "mastery3": "Maestria Grau 3",
+          "mastery5": "Maestria Grau 5",
+          "mastery7": "Maestria Grau 7",
           "insightbonus": "Bônus de Discernimento"
         },
         "names": {
           "acting": "Atuação",
-          "animalHandling": "Manejo de Animais",
-          "artisan": "Artesão",
+          "animalHandling": "Trato com Animais",
+          "artisan": "Artesanato",
           "athletics": "Atletismo",
           "battle": "Batalha",
           "calligraphy": "Caligrafia",
@@ -288,7 +329,7 @@
           "forgery": "Falsificação",
           "games": "Jogos",
           "heavyWeapons": "Armas Pesadas",
-          "horsemanship": "Equitação",
+          "horsemanship": "Cavalgar",
           "hunting": "Caça",
           "iaijutsu": "Iaijutsu",
           "investigation": "Investigação",
@@ -296,17 +337,17 @@
           "kenjutsu": "Kenjutsu",
           "knives": "Facas",
           "kyujutsu": "Kyujutsu",
-          "lore": "Erudição",
+          "lore": "Conhecimento",
           "medicine": "Medicina",
           "meditation": "Meditação",
           "ninjutsu": "Ninjutsu",
-          "perform": "Representar",
+          "perform": "Performance",
           "polearms": "Armas de Haste",
           "sailing": "Navegação",
           "sincerity": "Sinceridade",
           "sleightOfHand": "Prestidigitação",
           "spears": "Lanças",
-          "spellcraft": "Feitiçaria",
+          "spellcraft": "Magia Arcana",
           "staves": "Bastões",
           "stealth": "Furtividade",
           "teaCeremony": "Cerimônia do Chá",
@@ -318,11 +359,11 @@
       "skillTypes": {
         "high": "Alta",
         "bugei": "Bugei",
-        "merch": "Mercantil",
+        "merch": "Mercante",
         "low": "Baixa"
       },
       "advantages": {
-        "physical": "Físico",
+        "physical": "Física",
         "mental": "Mental",
         "social": "Social",
         "material": "Material",
@@ -334,28 +375,33 @@
         "honorPoints": "Pontos de Honra",
         "gloryRank": "Glória",
         "gloryPoints": "Pontos de Glória",
-        "statusRank": "Posto de Status",
+        "statusRank": "Grau de Status",
         "statusPoints": "Pontos de Status",
         "shadowRank": "Corrupção das Terras Sombrias",
-        "shadowPoints": "Pontos de Sombra",
-        "insightRank": "Posto de Discernimento",
+        "shadowPoints": "Pontos das Sombras",
+        "insightRank": "Grau de Discernimento",
         "insightPoints": "Pontos de Discernimento"
       },
       "stance": {
-        "title": "Postura de Combate",
+        "title": "Combate",
         "current": "Postura Atual"
+      },
+      "movement": {
+        "title": "Movimento",
+        "maximum": "Movimento Máximo",
+        "feet": "pés"
       },
       "experience": {
         "xpAmount": "Quantidade",
         "note": "Nota",
         "reason": "Motivo",
         "adjustExperience": "Ajustar Experiência",
-        "experienceSummary": "Resumo da Experiência",
-        "usedTotal": "Usados / Total",
-        "poolChanges": "Mudanças na Reserva",
+        "experienceSummary": "Resumo de Experiência",
+        "usedTotal": "Usado / Total",
+        "poolChanges": "Mudanças de Reserva",
         "when": "Quando",
         "none": "Sem entradas",
-        "purchases": "Aquisições",
+        "purchases": "Compras",
         "xpLog": "Registro de XP",
         "traitChange": "{label} {from}→{to}",
         "voidChange": "Vazio {from}→{to}",
@@ -364,20 +410,21 @@
         "recalculateTooltip": "Recalcular compras de XP do estado atual do personagem",
         "recalculateSuccess": "Compras de XP recalculadas com sucesso",
         "recalculateFailed": "Falha ao recalcular compras de XP",
-        "disadvantageCapLabel": "Máx XP",
-        "disadvantageCapTitle": "Definir Teto de Desvantagens",
-        "disadvantageCapTooltip": "Clique para alterar o máximo de XP obtidos de desvantagens",
+        "disadvantageCapLabel": "XP Máximo",
+        "disadvantageCapTitle": "Definir Limite de Desvantagens",
+        "disadvantageCapTooltip": "Clique para alterar o XP máximo ganho de desvantagens",
         "breakdown": {
           "base": "Base",
           "disadvantagesGrant": "Desvantagens",
-          "cap": "teto",
+          "cap": "limite",
           "manualAdjustments": "Ajustes manuais",
           "traits": "Atributos",
           "void": "Vazio",
           "skills": "Perícias",
           "advantages": "Vantagens",
           "kata": "Kata",
-          "kiho": "Kiho"
+          "kiho": "Kiho",
+          "spells": "Magias"
         },
         "fallbackLabels": {
           "advantage": "Vantagem",
@@ -386,20 +433,22 @@
           "voidIncrease": "Aumento de Vazio",
           "skillCreated": "Perícia Criada",
           "skillIncreased": "Perícia Aumentada"
-        }
+        },
+        "spellMemorized": "Memorizada: {name}"
       }
     },
     "equipment": {
       "weapons": {
         "attackType": "Tipo de Ataque",
         "size": "Tamanho",
-        "damageKeep": "Dano/Manter",
+        "damageKeep": "Dados de Dano Mantidos",
         "range": "Alcance",
         "arrow": "Flecha",
         "typeWeapon": "Arma",
         "typeBow": "Arco",
+        "rangedAttack": "Ataque à Distância",
         "associatedSkill": "Perícia Associada",
-        "fallback": "Padrão",
+        "fallback": "Alternativa",
         "skillExample": {
           "bow": "Kyujutsu",
           "weapon": "Kenjutsu"
@@ -407,13 +456,13 @@
         "arrows": {
           "armor": "Perfurante",
           "flesh": "Corta-Carne",
-          "humming": "Zumbidora",
-          "rope": "Corta-Corda",
+          "humming": "Bulbo Zumbidor",
+          "rope": "Corta-Cordas",
           "willow": "Folha de Salgueiro"
         },
         "sizes": {
-          "small": "Pequeno",
-          "medium": "Médio",
+          "small": "Pequena",
+          "medium": "Média",
           "large": "Grande"
         }
       },
@@ -428,6 +477,10 @@
           "riding": "Armadura de Montaria"
         }
       },
+      "keywords": "Palavras-chave",
+      "keywordsPlaceholder": "ex., Samurai, Camponês",
+      "nemuranai": "Nemuranai",
+      "price": "Preço",
       "general": {}
     },
     "magic": {
@@ -435,18 +488,19 @@
         "range": "Alcance",
         "aoe": "Área de Efeito",
         "duration": "Duração",
-        "cast": "Lançar",
+        "cast": "Conjurar",
         "raises": "Aumentos",
         "affinity": "Afinidade",
         "deficiency": "Deficiência",
-        "maho": "Mahō",
-        "useSpellSlot": "Usar espaço de feitiço",
-        "voidSlot": "Usar espaço de feitiço de Vazio",
-        "slotsRestored": "Todos os espaços de feitiço restaurados ao máximo",
-        "restored": "restaurado"
+        "maho": "Maho",
+        "useSpellSlot": "Usar Espaço de Magia",
+        "voidSlot": "Usar Espaço de Magia de Vazio",
+        "slotsRestored": "Todos os espaços de magia restaurados ao máximo",
+        "restored": "restaurados",
+        "memorized": "Memorizada"
       },
       "maho": {
-        "warningTitle": "Magia de Sangue - Mahō Proibido",
+        "warningTitle": "Magia de Sangue - Maho Proibido",
         "bloodRequired": "Custo de Sangue Necessário",
         "additionalBloodBonus": "Cada custo de sangue adicional concede +1 Aumento Grátis",
         "bloodSource": {
@@ -455,12 +509,12 @@
           "other": "Outro"
         },
         "additionalBlood": "Sangue Adicional",
-        "castMaho": "Lançar Feitiço Mahō",
-        "mahoCasting": "Conjuração Mahō",
+        "castMaho": "Conjurar Magia Maho",
+        "mahoCasting": "Conjuração de Maho",
         "bloodCost": "Sangue",
         "freeRaises": "Aumentos Grátis",
         "taintGained": "Corrupção Ganha",
-        "taintGainedNotification": "Ganhou {taint} pontos de Corrupção das Terras Sombrias da conjuração mahō"
+        "taintGainedNotification": "Ganhou {taint} pontos de Corrupção das Terras Sombrias ao conjurar maho"
       },
       "kiho": {
         "internal": "Interno",
@@ -475,10 +529,10 @@
     },
     "system": {
       "migration": {
-        "itemTypeChangeInfo": "L5R4: migrado(s) {count} Item(ns) de \"commonItem\" para \"item\".",
-        "itemTypeChangeError": "L5R4: Falha na migração do tipo de item. Veja o console para detalhes.",
-        "iconsUpdated": "Migração L5R4: Atualizado(s) {count} caminho(s) de imagem do mundo.",
-        "compendiumIconsUpdated": "Migração L5R4 (Compêndios): Atualizado(s) {count} caminho(s) de imagem."
+        "itemTypeChangeInfo": "L5R4: migrou {count} Item(ns) de \"commonItem\" para \"item\".",
+        "itemTypeChangeError": "L5R4: Falha na migração de tipo de item. Veja o console para detalhes.",
+        "iconsUpdated": "Migração L5R4: Atualizou {count} caminho(s) de imagem do mundo.",
+        "compendiumIconsUpdated": "Migração L5R4 (Compêndios): Atualizou {count} caminho(s) de imagem."
       },
       "errors": {
         "deleteEffect": "Falha ao excluir efeito."
@@ -494,40 +548,40 @@
   },
   "SETTINGS": {
     "showTraitRollOptions": {
-      "name": "Perguntar por padrão as opções de Rolagens de Atributo.",
-      "label": "Segure Shift para alternar."
+      "name": "Perguntar por opções de Rolagens de Atributo por padrão.",
+      "label": "Segure Shift para Alternar."
     },
     "showSpellRollOptions": {
-      "name": "Perguntar por padrão se a Rolagem de Anel é um feitiço.",
-      "label": "Segure Shift para alternar."
+      "name": "Perguntar se a Rolagem de Anel é uma magia por padrão.",
+      "label": "Segure Shift para Alternar."
     },
     "showSkillRollOptions": {
-      "name": "Perguntar por padrão as opções de Rolagens de Perícia e de Dano.",
-      "label": "Segure Shift para alternar."
+      "name": "Perguntar por opções de Rolagens de Perícia e Rolagens de Dano por padrão.",
+      "label": "Segure Shift para Alternar."
     },
     "allowNpcVoidPoints": {
-      "name": "Exibir caixa de Pontos de Vazio para rolagens de PNJ.",
-      "label": "PNJs normalmente não possuem Vazio."
+      "name": "Exibir caixa de seleção de Ponto de Vazio para rolagens de NPC.",
+      "label": "NPCs normalmente não têm Vazio."
     },
     "calculateRank": {
-      "name": "Calcular automaticamente o Posto de Discernimento",
-      "label": "O Posto de Discernimento é atualizado automaticamente com base no total de Pontos de Discernimento"
+      "name": "Calcular Grau de Discernimento automaticamente",
+      "label": "O Grau de Discernimento é atualizado automaticamente com base no total de Pontos de Discernimento"
     },
     "allowArmorStacking": {
-      "name": "Permitir empilhamento de armaduras",
+      "name": "Permitir empilhamento de armadura",
       "label": "Múltiplas peças de \"armadura\" podem ser empilhadas (para representar bônus, etc.)"
     },
     "showWeaponRollOptions": {
-      "name": "Perguntar por padrão as opções de Rolagem de Arma.",
-      "label": "Segure Shift para alternar."
+      "name": "Perguntar por opções de Rolagem de Arma por padrão.",
+      "label": "Segure Shift para Alternar."
     },
     "LtException": {
-      "name": "Aplicar exceção de Little Truths",
-      "label": "Quando os dados mantidos forem reduzidos abaixo de 10 por conversão, some 2."
+      "name": "Aplicar exceção de Pequenas Verdades",
+      "label": "Quando dados mantidos são reduzidos abaixo de 10 por conversão, adicionar 2."
     },
     "runMigration": {
       "name": "Executar migrações na inicialização",
-      "label": "Se ativado, migrações pendentes serão executadas no próximo carregamento do mundo. Desative para ignorar ao solucionar problemas."
+      "label": "Se habilitado, migrações de dados pendentes serão executadas na próxima vez que o mundo carregar. Desabilite para pular migrações para solução de problemas."
     },
     "lastMigratedVersion": {
       "name": "Última versão migrada",
@@ -535,19 +589,52 @@
     },
     "forceMigration": {
       "name": "Forçar migração na inicialização",
-      "label": "Força todas as migrações a serem executadas no próximo carregamento do mundo, independentemente da versão. Reinicia automaticamente após concluir."
+      "label": "Força todas as migrações a serem executadas no próximo carregamento do mundo, independentemente da versão. Redefine automaticamente após a conclusão da migração."
     },
     "defaultNpcWoundMode": {
-      "name": "Modo de Ferimentos Padrão para PNJ",
-      "label": "Controla se novos PNJs usam cálculos baseados em fórmula (Anel de Terra) ou entrada manual de limites para cálculos de ferimentos. PNJs existentes mantêm suas configurações individuais.",
+      "name": "Modo de Ferimentos Padrão para NPC",
+      "label": "Controla se novos NPCs usam modo baseado em fórmula (Anel de Terra) ou entrada manual de limite para cálculos de ferimentos. NPCs existentes mantêm suas configurações individuais.",
       "choices": {
         "manual": "Manual (Entrada Direta)",
-        "formula": "Fórmula (Baseada em Terra)"
+        "formula": "Fórmula (Baseado em Terra)"
       }
+    }
+  },
+  "conditions": {
+    "blinded": {
+      "restrictions": "Cego: -3k3 ataques à distância, -1k1 ataques corpo a corpo, -1k1 rolagens de Defesa, ND de Armadura = Ref+5+Armadura, Anel de Água -2 para movimento"
+    },
+    "dazed": {
+      "restrictions": "Atordoado: -3k0 para todas as ações, apenas posturas Defesa/Defesa Total, não pode duelar"
+    },
+    "entangled": {
+      "restrictions": "Enredado: Não pode Mover ou realizar Ações Complexas exceto teste de Força para se libertar"
+    },
+    "fatigued": {
+      "restrictions": "Fatigado: +5 ND para rolagens físicas, perícias e conjuração de magias (cumulativo por dia), não pode usar postura de Ataque Total"
+    },
+    "feared": {
+      "restrictions": "Amedrontado: -Xk0 para todas as rolagens (X = Grau de Medo), dura até o fim do encontro"
+    },
+    "grappled": {
+      "restrictions": "Agarrado: ND de Armadura = 5 + apenas bônus de armadura"
+    },
+    "guarded": {
+      "restrictions": "Protegido: +10 ND de Armadura enquanto protegido por aliado a 5 pés (até o próximo turno do guardião)"
+    },
+    "guarding": {
+      "restrictions": "Guardião: -5 ND de Armadura enquanto protege aliado a 5 pés (até seu próximo turno)"
+    },
+    "prone": {
+      "restrictions": "Caído: -10 ND de Armadura vs corpo a corpo, -2k0 ataques, não pode Mover, apenas posturas Ataque/Defesa"
+    },
+    "stunned": {
+      "restrictions": "Atordoado: Não pode realizar nenhuma ação, ND de Armadura = 5 + bônus de armadura"
     }
   },
   "EFFECT": {
     "blinded": "Cego",
+    "concentration": "Concentração",
     "dazed": "Atordoado",
     "dead": "Morto",
     "entangled": "Enredado",
@@ -555,14 +642,16 @@
     "fatigued": "Fatigado",
     "feared": "Amedrontado",
     "grappled": "Agarrado",
-    "mounted": "Montado/Altura",
+    "guarded": "Protegido",
+    "guarding": "Guardião",
+    "mounted": "Montado/Posição Superior",
     "prone": "Caído",
-    "stunned": "Atônito"
+    "stunned": "Atordoado"
   },
   "TYPES": {
     "Actor": {
       "pc": "PJ",
-      "npc": "PNJ"
+      "npc": "NPC"
     },
     "Item": {
       "advantage": "Vantagem",
@@ -576,36 +665,10 @@
       "kiho": "Kiho",
       "school": "Escola",
       "skill": "Perícia",
-      "spell": "Feitiço",
+      "spell": "Magia",
       "tattoo": "Tatuagem",
       "technique": "Técnica",
       "weapon": "Arma"
-    }
-  },
-  "conditions": {
-    "blinded": {
-      "restrictions": "Cego: -3k3 ataques à distância, -1k1 ataques corpo a corpo, -1k1 rolagens de Defesa, TN de Armadura = Ref+5+Armadura, Anel de Água -2 para movimento"
-    },
-    "dazed": {
-      "restrictions": "Atordoado: -3k0 para todas as ações, apenas Posturas de Defesa/Defesa Total, não pode duelar"
-    },
-    "entangled": {
-      "restrictions": "Enredado: Não pode Mover ou realizar Ações Complexas exceto rolagem de Força para se libertar"
-    },
-    "fatigued": {
-      "restrictions": "Fatigado: +5 TN para rolagens físicas, perícias e conjuração (acumula por dia), não pode usar Postura de Ataque Total"
-    },
-    "feared": {
-      "restrictions": "Amedrontado: -Xk0 para todas as rolagens (X = Posto de Medo), dura até o fim do encontro"
-    },
-    "grappled": {
-      "restrictions": "Agarrado: TN de Armadura = 5 + apenas bônus de armadura"
-    },
-    "prone": {
-      "restrictions": "Caído: -10 TN de Armadura vs corpo a corpo, -2k0 ataques, não pode Mover, apenas Posturas de Ataque/Defesa"
-    },
-    "stunned": {
-      "restrictions": "Atordoado: Não pode realizar nenhuma ação, TN de Armadura = 5 + bônus de armadura"
     }
   }
 }

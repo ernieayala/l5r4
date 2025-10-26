@@ -48,6 +48,16 @@ import { registerAdvancementWorkflowTests } from "./workflows/advancement-workfl
 import { registerSpellCastingWorkflowTests } from "./workflows/spell-casting-workflow.test.js";
 import { registerTraitFamilyBonusTests } from "./workflows/trait-family-bonus.test.js";
 import { registerArmorTNCalculationTests } from "./workflows/armor-tn-calculation.test.js";
+import { registerDiceRollingWorkflowTests } from "./workflows/dice-rolling-workflow.test.js";
+import { registerStanceSwitchingWorkflowTests } from "./workflows/stance-switching-workflow.test.js";
+import { registerInitiativeWorkflowTests } from "./workflows/initiative-workflow.test.js";
+import { registerItemManagementWorkflowTests } from "./workflows/item-management-workflow.test.js";
+import { registerStatusEffectsWorkflowTests } from "./workflows/status-effects-workflow.test.js";
+import { registerFearWorkflowTests } from "./workflows/fear-workflow.test.js";
+import { registerRestRecoveryWorkflowTests } from "./workflows/rest-recovery-workflow.test.js";
+import { registerNPCWorkflowTests } from "./workflows/npc-workflows.test.js";
+import { registerChatSystemWorkflowTests } from "./workflows/chat-system-workflow.test.js";
+import { registerEmphasisWorkflowTests } from "./workflows/emphasis-workflow.test.js";
 
 /**
  * Register Quench integration tests for the L5R4 system.
@@ -98,6 +108,16 @@ export async function registerQuenchTests(quench) {
   registerSpellCastingWorkflowTests(quench);
   registerTraitFamilyBonusTests(quench);
   registerArmorTNCalculationTests(quench);
+  registerDiceRollingWorkflowTests(quench);
+  registerStanceSwitchingWorkflowTests(quench);
+  registerInitiativeWorkflowTests(quench);
+  registerItemManagementWorkflowTests(quench);
+  registerStatusEffectsWorkflowTests(quench);
+  registerFearWorkflowTests(quench);
+  registerRestRecoveryWorkflowTests(quench);
+  registerNPCWorkflowTests(quench);
+  registerChatSystemWorkflowTests(quench);
+  registerEmphasisWorkflowTests(quench);
 }
 
 /**

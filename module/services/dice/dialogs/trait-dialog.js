@@ -81,7 +81,9 @@ export async function GetTraitRollOptions(traitName, actor) {
         : `l5r4.ui.mechanics.traits.${lowerTrait}`;
     const traitLabel = game.i18n.localize(traitKey);
     const result = await DIALOG.prompt({
-      window: { title: game.i18n.format("l5r4.ui.chat.traitRoll", { trait: traitLabel }) },
+      window: {
+        title: `${game.i18n.localize("l5r4.ui.mechanics.rolls.traitRoll")} (${traitLabel})`
+      },
       content,
       // Callback extracts form data; b.form ?? d.form handles DialogV2 API variations
       ok: {
