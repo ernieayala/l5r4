@@ -66,7 +66,9 @@ export async function GetWeaponOptions(weaponName, attackRaises = 0, actor = nul
   const content = await R(DIALOG_TEMPLATES.rollModifiers, { weapon: true, attackRaises, noVoid });
   try {
     const result = await DIALOG.prompt({
-      window: { title: game.i18n.format("l5r4.ui.chat.damageRoll", { weapon: weaponName }) },
+      window: {
+        title: `${game.i18n.localize("l5r4.ui.mechanics.rolls.damageRoll")} (${weaponName})`
+      },
       content,
       // Callback extracts form data; b.form ?? d.form handles DialogV2 API variations
       ok: {

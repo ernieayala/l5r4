@@ -48,7 +48,9 @@ export function buildFormula(
   const emphasisMod = emphasis ? "r1" : ""; // Re-roll 1s when Emphasis applies
   const keepMod = `k${diceKeep}`;
   const explodeMod = unskilled ? "" : "x10"; // No exploding for Unskilled Rolls
-  const bonusMod = `+${bonus}`;
+
+  // Handle bonus: include sign for positive/zero, negative already has sign
+  const bonusMod = bonus >= 0 ? `+${bonus}` : `${bonus}`;
 
   return `${baseFormula}${emphasisMod}${keepMod}${explodeMod}${bonusMod}`;
 }

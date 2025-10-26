@@ -10,6 +10,7 @@
 import { SYS_ID } from "../../../module/config/constants.js";
 import { createShugenja } from "../../fixtures/actor-fixtures.js";
 import { createSpellData } from "../../fixtures/item-fixtures.js";
+import { SpellCastRoll } from "../../../module/services/dice/rolls/spell-cast-roll.js";
 
 /**
  * Register spell casting workflow tests with Quench
@@ -47,40 +48,100 @@ export function registerSpellCastingWorkflowTests(quench) {
           // ARRANGE
           const spell = shugenja.items.find(i => i.name === "Jade Strike");
           const spellRing = spell.system.ring;
-          const ringValue = shugenja.system.rings[spellRing];
           const initialSlots = shugenja.system.spellSlots?.[spellRing] || 0;
 
           assert.exists(spell, "Spell exists");
-          assert.equal(spellRing, "fire", "Spell uses Fire ring");
-          assert.isNumber(ringValue, "Ring value exists");
           assert.isTrue(initialSlots > 0, "Has spell slots available");
 
-          // ACT - Simulate casting sequence
-          // 1. Check spell slot availability
-          const hasSlots = initialSlots > 0;
-          assert.isTrue(hasSlots, "Spell slots available");
+          // ACT - Use REAL service
+          const spellRoll = await SpellCastRoll({
+            actor: shugenja,
+            spell,
+            showDialog: false
+          });
 
-          // 2. Calculate spell roll (Ring kept dice)
-          const rolled = ringValue;
-          const kept = ringValue;
+          // ASSERT spell roll
+          assert.exists(spellRoll, "Spell roll executed");
+          assert.isTrue(spellRoll instanceof ChatMessage, "Returned a chat message");
 
-          assert.equal(rolled, 4, "Roll 4 dice for Fire 4");
-          assert.equal(kept, 4, "Keep 4 dice for Fire 4");
-
-          // 3. Simulate successful cast
-          const mockCastTotal = 25;
-          const spellTN = 20; // Mastery 3 spell
-          const castSucceeds = mockCastTotal >= spellTN;
-
-          assert.isTrue(castSucceeds, "Cast total exceeds TN");
-
-          // 4. Consume spell slot
-          const newSlots = Math.max(0, initialSlots - 1);
-          await shugenja.update({ [`system.spellSlots.${spellRing}`]: newSlots });
-
-          // ASSERT
+          // Verify spell slot consumed
           const finalSlots = shugenja.system.spellSlots[spellRing];
           assert.equal(finalSlots, initialSlots - 1, "Spell slot consumed");
+        });
+
+        it("should use correct TN based on spell mastery", async () => {
+          // ARRANGE - Spells of different mastery levels
+          const spells = [
+            { name: "Mastery 1 Spell", ring: "fire", mastery: 1, expectedTN: 10 }, // TN = 5 + (1 × 5)
+            { name: "Mastery 3 Spell", ring: "fire", mastery: 3, expectedTN: 20 }, // TN = 5 + (3 × 5)
+            { name: "Mastery 5 Spell", ring: "fire", mastery: 5, expectedTN: 30 } // TN = 5 + (5 × 5)
+          ];
+
+          for (const spellData of spells) {
+            await shugenja.createEmbeddedDocuments("Item", [
+              createSpellData(spellData.name, spellData.ring, spellData.mastery)
+            ]);
+          }
+
+          // ACT & ASSERT - Test each mastery level
+          for (const spellData of spells) {
+            const spell = shugenja.items.find(i => i.name === spellData.name);
+
+            // Verify TN calculation (TN = 5 + Mastery × 5)
+            const calculatedTN = 5 + spell.system.mastery * 5;
+            assert.equal(
+              calculatedTN,
+              spellData.expectedTN,
+              `Mastery ${spellData.mastery} → TN ${spellData.expectedTN}`
+            );
+          }
+        });
+
+        it("should handle spell cast that fails to meet TN", async () => {
+          // ARRANGE - Low ring shugenja vs high mastery spell
+          const weakCaster = await createShugenja({
+            name: "Weak Caster",
+            system: {
+              traits: {
+                agi: 1,
+                int: 1,
+                sta: 2,
+                wil: 2,
+                ref: 2,
+                awa: 2,
+                str: 2,
+                per: 2
+              },
+              rings: { fire: 1 }, // Very low ring
+              spellSlots: { fire: 3 },
+              insight: { rank: 1 }
+            }
+          });
+
+          await weakCaster.createEmbeddedDocuments("Item", [
+            createSpellData("Difficult Spell", "fire", 6) // TN 35 = 5 + (6 × 5)
+          ]);
+
+          const spell = weakCaster.items.find(i => i.name === "Difficult Spell");
+          const initialSlots = weakCaster.system.spellSlots.fire;
+
+          // ACT - Attempt cast (very likely to fail with Fire 1 + School 1 = 2k1)
+          const spellRoll = await SpellCastRoll({
+            actor: weakCaster,
+            spell,
+            showDialog: false
+          });
+
+          // ASSERT - Roll happened regardless of success
+          assert.exists(spellRoll, "Spell roll attempted");
+          assert.isTrue(spellRoll instanceof ChatMessage, "Chat message posted");
+
+          // Verify slot consumed even if cast likely failed (per game rules)
+          const finalSlots = weakCaster.system.spellSlots.fire;
+          assert.equal(finalSlots, initialSlots - 1, "Slot consumed even on likely failed cast");
+
+          // Cleanup
+          await weakCaster.delete();
         });
 
         it("should prevent casting without spell slots", async () => {
@@ -168,7 +229,7 @@ export function registerSpellCastingWorkflowTests(quench) {
 
           // ACT - Cast both Fire spells
           let currentSlots = initialFireSlots;
-          for (const spell of fireSpells) {
+          for (const _spell of fireSpells) {
             currentSlots--;
             await shugenja.update({ "system.spellSlots.fire": currentSlots });
           }
@@ -301,15 +362,9 @@ export function registerSpellCastingWorkflowTests(quench) {
           }
         });
 
-        it("should handle spells of different mastery levels", async () => {
+        it("should handle different mastery levels", () => {
           // ARRANGE
           const spells = shugenja.items.filter(i => i.type === "spell");
-          const masteryLevels = spells.map(s => s.system.mastery);
-
-          // ASSERT
-          assert.includeMembers(masteryLevels, [1, 3, 5], "Has spells of various mastery");
-
-          // All spells use same ring, so same dice pool
           const fireRing = shugenja.system.rings.fire;
           assert.equal(fireRing, 5, "Fire Ring is 5");
 

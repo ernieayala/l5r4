@@ -26,8 +26,11 @@ import { toInt } from "../utils/type-coercion.js";
  * Recovery includes:
  * - **Wounds**: (Stamina × 2) + Insight Rank + modifiers
  * - **Spell Slots**: All elemental and Void slots restore to maximum
- * - **Void Points**: Restore to maximum (Void Ring value)
+ * - **Void Points**: Restore to maximum (Void Ring value) UNLESS fasting
  * - **Conditions**: Removes Fatigued status effect
+ *
+ * **Fasting Condition:** Per L5R4 rules, characters with the Fasting condition
+ * do NOT recover Void Points during rest. Wounds and spell slots still recover normally.
  *
  * This represents one night's rest (8 hours).
  *
@@ -69,9 +72,12 @@ export async function applyLongRest(actor) {
     "system.spellSlots.void": toInt(rings.void?.rank ?? 0)
   };
 
-  // Restore Void Points to maximum
+  // Check if character is fasting (blocks void recovery per L5R4 rules)
+  const isFasting = actor.effects?.some(e => e.statuses?.has("fasting")) ?? false;
+
+  // Restore Void Points to maximum (unless fasting)
   const voidMax = toInt(rings.void?.rank ?? 0);
-  const voidUpdate = { "system.rings.void.value": voidMax };
+  const voidUpdate = isFasting ? {} : { "system.rings.void.value": voidMax };
 
   // Remove Fatigued condition
   const fatigued = actor.effects?.find(e => e.statuses?.has("fatigued"));
@@ -117,7 +123,8 @@ export async function applyLongRest(actor) {
     newCurrentWounds,
     maxWounds,
     wasFullyHealed,
-    voidRestored: voidMax,
+    voidRestored: isFasting ? 0 : voidMax,
+    voidBlockedByFasting: isFasting,
     spellSlotsRestored: true
   });
 }
@@ -146,7 +153,8 @@ export async function applyLongRest(actor) {
  * @param {number} data.newCurrentWounds - Current wounds after healing (max - suffered)
  * @param {number} data.maxWounds - Maximum wounds (total HP)
  * @param {boolean} data.wasFullyHealed - Whether character reached full health
- * @param {number} data.voidRestored - Void Points restored to maximum
+ * @param {number} data.voidRestored - Void Points restored to maximum (0 if fasting)
+ * @param {boolean} data.voidBlockedByFasting - Whether void recovery was blocked by fasting
  * @param {boolean} data.spellSlotsRestored - Whether spell slots were restored
  * @returns {Promise<ChatMessage|null>} Created chat message, or null if failed
  */
@@ -160,6 +168,7 @@ async function _postRestMessage({
   maxWounds,
   wasFullyHealed,
   voidRestored,
+  voidBlockedByFasting,
   spellSlotsRestored
 }) {
   const speaker = ChatMessage.getSpeaker({ actor });
@@ -185,6 +194,7 @@ async function _postRestMessage({
     woundsText,
     wasFullyHealed,
     voidRestored,
+    voidBlockedByFasting,
     spellSlotsRestored
   };
 

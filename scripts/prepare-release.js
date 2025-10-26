@@ -1,42 +1,64 @@
 #!/usr/bin/env node
 
 /**
- * Release Preparation Script for L5R4 System
+ * Release preparation automation script for L5R4 Foundry VTT system.
  *
- * This script helps prepare releases by:
- * 1. Updating version numbers in package.json and system.json
- * 2. Validating file structure and dependencies
- * 3. Building CSS from SCSS
- * 4. Creating release checklist
+ * Orchestrates the pre-release workflow including manifest versioning,
+ * asset validation, stylesheet compilation, and release checklist generation.
+ * Ensures consistent release preparation across all versions.
  *
- * Usage: node scripts/prepare-release.js [version]
- * Example: node scripts/prepare-release.js 1.0.1
+ * Usage: node scripts/prepare-release.js <version>
+ * Example: node scripts/prepare-release.js 1.2.3
+ *
+ * The script performs these steps:
+ * 1. Validates semantic version format
+ * 2. Verifies project structure completeness
+ * 3. Builds CSS from SCSS sources
+ * 4. Validates language file JSON syntax
+ * 5. Updates version in package.json and system.json
+ * 6. Updates @version tags in all JavaScript files
+ * 7. Generates release checklist markdown file
+ *
+ * Exits with code 1 if any validation or build step fails.
+ *
+ * @module scripts/prepare-release
+ * @requires fs
+ * @requires path
+ * @requires child_process
  */
-
+/* eslint-env node */
+/* eslint-disable no-console */
 const fs = require("fs");
 const path = require("path");
 const { execSync } = require("child_process");
 
-// Configuration
 const PROJECT_ROOT = path.resolve(__dirname, "..");
 const PACKAGE_JSON_PATH = path.join(PROJECT_ROOT, "package.json");
 const SYSTEM_JSON_PATH = path.join(PROJECT_ROOT, "system.json");
 
 /**
- * Validate semantic version format
- * @param {string} version - Version string to validate
- * @returns {boolean} True if valid semantic version
+ * Validates semantic versioning format per semver.org specification.
+ * Accepts standard versions (1.2.3) and prerelease/build metadata.
+ *
+ * @param {string} version - Version string to validate (e.g., "1.2.3", "2.0.0-beta.1")
+ * @returns {boolean} True if version conforms to semantic versioning rules
  */
 function isValidVersion(version) {
+  // Semver regex: major.minor.patch with optional prerelease and build metadata
   const semverRegex =
     /^(\d+)\.(\d+)\.(\d+)(?:-([0-9A-Za-z-]+(?:\.[0-9A-Za-z-]+)*))?(?:\+([0-9A-Za-z-]+(?:\.[0-9A-Za-z-]+)*))?$/;
   return semverRegex.test(version);
 }
 
 /**
- * Update version in JSON file
- * @param {string} filePath - Path to JSON file
- * @param {string} version - New version number
+ * Updates version field in a JSON manifest file atomically.
+ * Reads JSON, updates version property, writes back with formatting.
+ * Terminates process with exit code 1 if file operations fail.
+ *
+ * @param {string} filePath - Absolute path to JSON manifest (package.json or system.json)
+ * @param {string} version - Semantic version string to write
+ * @returns {void}
+ * @throws {Error} JSON parse errors or file I/O errors terminate the process
  */
 function updateVersionInFile(filePath, version) {
   try {
@@ -51,15 +73,26 @@ function updateVersionInFile(filePath, version) {
 }
 
 /**
- * Update @version tags in JavaScript files
- * @param {string} version - New version number
+ * Recursively updates @version JSDoc tags across all project JavaScript files.
+ * Scans the project tree, finds .js files, and replaces numeric version tags
+ * using regex pattern matching. Skips node_modules and .git directories.
+ * Only updates tags with pure numeric versions (X.Y.Z format).
+ *
+ * @param {string} version - Semantic version to propagate into @version tags
+ * @returns {void}
  */
 function updateJSDocVersionTags(version) {
   console.log("\n📝 Updating JSDoc @version tags...");
 
   const jsFiles = [];
 
-  // Find all .js files recursively
+  /**
+   * Recursively collects JavaScript file paths while excluding dependencies.
+   * Skips node_modules and .git directories to avoid modifying external code.
+   *
+   * @param {string} dir - Directory path to scan recursively
+   * @returns {void}
+   */
   function findJSFiles(dir) {
     const items = fs.readdirSync(dir, { withFileTypes: true });
     for (const item of items) {
@@ -75,6 +108,7 @@ function updateJSDocVersionTags(version) {
   findJSFiles(PROJECT_ROOT);
 
   let updatedCount = 0;
+  // Matches @version tags with numeric versions: "* @version 1.2.3" -> captures version
   const versionRegex = /^(\s*\*\s*@version\s+)[\d.]+(.*)$/gm;
 
   for (const filePath of jsFiles) {
@@ -82,7 +116,6 @@ function updateJSDocVersionTags(version) {
       let content = fs.readFileSync(filePath, "utf8");
       const originalContent = content;
 
-      // Replace @version X.Y.Z with @version {newVersion}
       content = content.replace(versionRegex, `$1${version}$2`);
 
       if (content !== originalContent) {
@@ -99,8 +132,10 @@ function updateJSDocVersionTags(version) {
 }
 
 /**
- * Validate project structure
- * @returns {boolean} True if all required files exist
+ * Validates presence of all required files and directories for release.
+ * Checks for compiled assets (dist/), manifests, documentation, and source directories.
+ *
+ * @returns {boolean} True if all required files and directories exist
  */
 function validateProjectStructure() {
   const requiredFiles = [
@@ -119,7 +154,6 @@ function validateProjectStructure() {
 
   let valid = true;
 
-  // Check required files
   for (const file of requiredFiles) {
     const filePath = path.join(PROJECT_ROOT, file);
     if (!fs.existsSync(filePath)) {
@@ -130,7 +164,6 @@ function validateProjectStructure() {
     }
   }
 
-  // Check required directories
   for (const dir of requiredDirs) {
     const dirPath = path.join(PROJECT_ROOT, dir);
     if (!fs.existsSync(dirPath)) {
@@ -145,7 +178,12 @@ function validateProjectStructure() {
 }
 
 /**
- * Build CSS from SCSS
+ * Compiles SCSS sources to CSS using npm build script.
+ * Executes "npm run build:css" and inherits stdio for output visibility.
+ * Terminates process with exit code 1 if compilation fails.
+ *
+ * @returns {void}
+ * @throws {Error} Build failures terminate the process
  */
 function buildCSS() {
   console.log("\n🎨 Building CSS from SCSS...");
@@ -159,15 +197,17 @@ function buildCSS() {
 }
 
 /**
- * Validate language files
+ * Validates all language files declared in system.json manifest.
+ * Verifies each language file exists and contains valid JSON syntax.
+ * Foundry VTT requires language files to be valid JSON for i18n support.
+ *
+ * @returns {boolean} True if all language files exist and parse successfully
  */
 function validateLanguageFiles() {
   console.log("\n🌍 Validating language files...");
 
-  const langDir = path.join(PROJECT_ROOT, "lang");
   const systemJson = JSON.parse(fs.readFileSync(SYSTEM_JSON_PATH, "utf8"));
 
-  // Check that all languages in system.json have corresponding files
   for (const lang of systemJson.languages) {
     const langFile = path.join(PROJECT_ROOT, lang.path);
     if (!fs.existsSync(langFile)) {
@@ -188,8 +228,12 @@ function validateLanguageFiles() {
 }
 
 /**
- * Generate release checklist
- * @param {string} version - Release version
+ * Generates a Markdown checklist documenting manual release steps.
+ * Creates RELEASE_CHECKLIST_v{version}.md with validation, testing,
+ * release process, and post-release verification tasks.
+ *
+ * @param {string} version - Semantic version embedded in checklist filename and URLs
+ * @returns {void}
  */
 function generateReleaseChecklist(version) {
   const checklist = `
@@ -243,7 +287,12 @@ function generateReleaseChecklist(version) {
 }
 
 /**
- * Main execution function
+ * CLI entry point orchestrating the complete release preparation workflow.
+ * Validates arguments, executes preparation steps in sequence, and generates
+ * release checklist. Provides next-step instructions upon successful completion.
+ *
+ * @returns {void}
+ * @throws {Error} Validation or build failures terminate process with exit code 1
  */
 function main() {
   const args = process.argv.slice(2);
@@ -265,28 +314,23 @@ function main() {
   console.log(`🚀 Preparing L5R4 System release v${version}`);
   console.log("=".repeat(50));
 
-  // Validate project structure
   if (!validateProjectStructure()) {
     console.error("\n❌ Project structure validation failed");
     process.exit(1);
   }
 
-  // Build CSS
   buildCSS();
 
-  // Validate language files
   if (!validateLanguageFiles()) {
     console.error("\n❌ Language file validation failed");
     process.exit(1);
   }
 
-  // Update version numbers
   console.log("\n📝 Updating version numbers...");
   updateVersionInFile(PACKAGE_JSON_PATH, version);
   updateVersionInFile(SYSTEM_JSON_PATH, version);
   updateJSDocVersionTags(version);
 
-  // Generate release checklist
   generateReleaseChecklist(version);
 
   console.log("\n🎉 Release preparation completed successfully!");
@@ -297,11 +341,14 @@ function main() {
   console.log(`4. Create GitHub release with tag v${version}`);
 }
 
-// Run the script
 if (require.main === module) {
   main();
 }
 
+/**
+ * Exported functions for testing and programmatic usage.
+ * All functions can be imported individually for unit testing or CI/CD integration.
+ */
 module.exports = {
   isValidVersion,
   updateVersionInFile,

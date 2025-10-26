@@ -97,7 +97,7 @@ export async function getNpcRollOptions(
   });
   try {
     const result = await DIALOG.prompt({
-      window: { title: game.i18n.format("l5r4.ui.chat.rollName", { roll: rollName }) },
+      window: { title: rollName },
       content,
       ok: {
         label: game.i18n.localize("l5r4.ui.common.roll"),

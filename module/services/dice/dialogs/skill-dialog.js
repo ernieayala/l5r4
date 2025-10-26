@@ -87,7 +87,9 @@ export async function GetSkillOptions(
 
   try {
     const result = await DIALOG.prompt({
-      window: { title: game.i18n.format("l5r4.ui.chat.rollName", { roll: skillName }) },
+      window: {
+        title: `${game.i18n.localize("l5r4.ui.mechanics.rolls.skillRoll")} (${skillName})`
+      },
       content,
       // Callback extracts form data; b.form ?? d.form handles DialogV2 API variations
       ok: {

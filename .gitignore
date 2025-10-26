@@ -47,7 +47,7 @@ Thumbs.db
 *.psd
 
 # Project-specific directories
-_for_research/
+for-research/
 game-rules/
 .windsurf/
 
