@@ -186,7 +186,7 @@ export default class XpManagerApplication extends foundry.applications.api.Handl
    * Checks if retroactive XP recalculation is needed (via version hash comparison),
    * triggers recalculation if necessary, then assembles all XP data for display:
    * - Current XP totals (spent, total, available)
-   * - XP breakdown by category (traits, void, skills, advantages, kata, kiho)
+   * - XP breakdown by category (traits, void, skills, advantages, kata, kiho, spells)
    * - Formatted manual entry list
    * - Formatted spent entry list (with applied sort preferences)
    *
@@ -241,7 +241,8 @@ export default class XpManagerApplication extends foundry.applications.api.Handl
           skills: xp?.breakdown?.skills ?? 0,
           advantages: xp?.breakdown?.advantages ?? 0,
           kata: xp?.breakdown?.kata ?? 0,
-          kiho: xp?.breakdown?.kiho ?? 0
+          kiho: xp?.breakdown?.kiho ?? 0,
+          spells: xp?.breakdown?.spells ?? 0
         }
       },
       disadvantageCap,

@@ -23,7 +23,8 @@
           "value": 0,
           "max": 0,
           "mod": 0,
-          "healRate": 0
+          "healRate": 0,
+          "healingStaminaMod": 0
         },
         "suffered": 0,
         "woundLevels": {
@@ -318,7 +319,8 @@
       "range": "",
       "aoe": "",
       "duration": "",
-      "raises": ""
+      "raises": "",
+      "memorized": false
     },
     "tattoo": {
       "templates": ["itemDescription"],

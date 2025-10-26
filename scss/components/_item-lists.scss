@@ -24,95 +24,97 @@
       }
     }
 
+    --controls: 102px;
+
     &.-advantages,
     &.-attacks {
       .item {
-        grid-template-columns: 1fr 1fr 1fr 1fr 24px;
+        grid-template-columns: 1fr 1fr 1fr 1fr var(--controls);
       }
     }
 
     &.-advantage {
       .item {
-        grid-template-columns: 1fr 80px 80px 24px;
+        grid-template-columns: 1fr 80px 80px var(--controls);
       }
     }
 
     &.-armor {
       .item {
-        grid-template-columns: 1fr 80px 100px 100px 24px;
+        grid-template-columns: 1fr 80px 100px 100px var(--controls);
       }
     }
 
     &.-bio {
       .item {
-        grid-template-columns: 1fr 24px;
+        grid-template-columns: 1fr var(--controls);
       }
     }
 
     /* stylelint-disable-next-line selector-class-pattern -- Legacy class name */
     &.-commonItem {
       .item {
-        grid-template-columns: 1fr 24px;
+        grid-template-columns: 1fr var(--controls);
       }
     }
 
     &.-disadvantage {
       .item {
-        grid-template-columns: 1fr 80px 80px 24px;
+        grid-template-columns: 1fr 80px 80px var(--controls);
       }
     }
 
     &.-kata {
       .item {
-        grid-template-columns: 1fr 80px 80px 24px;
+        grid-template-columns: 1fr 80px 80px var(--controls);
       }
     }
 
     &.-kiho {
       .item {
-        grid-template-columns: 1fr 80px 80px 80px 24px;
+        grid-template-columns: 1fr 80px 80px 80px var(--controls);
       }
     }
 
     &.-skill {
       .item {
-        grid-template-columns: 1fr 60px 1fr 60px 1fr 24px;
+        grid-template-columns: 1fr 60px 120px 60px 1fr var(--controls);
       }
     }
 
     &.-spell {
       .item {
-        grid-template-columns: 1fr 80px 80px 80px 60px 24px;
+        grid-template-columns: 1fr 80px 60px 60px var(--controls);
       }
     }
 
     &.-tattoo {
       .item {
-        grid-template-columns: 1fr 1fr 24px;
+        grid-template-columns: 1fr 1fr var(--controls);
       }
     }
 
     &.-technique {
       .item {
-        grid-template-columns: 1fr 1fr 1fr 24px;
+        grid-template-columns: 1fr 1fr 1fr var(--controls);
       }
     }
 
     &.-weapon {
       .item {
-        grid-template-columns: 1fr 80px 80px 150px 24px;
+        grid-template-columns: 1fr 80px 80px 150px var(--controls);
       }
     }
 
     &.-xp {
       .item {
-        grid-template-columns: 150px 1fr 24px;
+        grid-template-columns: 150px 1fr var(--controls);
       }
     }
 
     &.-xp-spent {
       .item {
-        grid-template-columns: 1fr 80px 120px;
+        grid-template-columns: 1fr 80px 120px var(--controls);
       }
     }
 
@@ -128,18 +130,20 @@
     grid-template-rows: min-content min-content;
     padding: 0 0.5rem;
 
+    &:hover {
+      .inline-control {
+        opacity: 1;
+        pointer-events: all;
+      }
+    }
+
     &.-bio {
       background: var(--table-header-bg-color);
     }
 
     &.-expandable {
-      &:hover .inline-control {
-        opacity: 1;
-        pointer-events: all;
-      }
-
-      .inline-control {
-        opacity: 0;
+      .inline-control.expandable {
+        display: flex;
       }
     }
 
@@ -171,13 +175,16 @@
       }
     }
 
+    .controls {
+      justify-content: flex-end;
+    }
+
     .inline-control {
       opacity: 0;
       pointer-events: none;
-      transition: opacity 250ms ease-out;
 
-      &:hover {
-        filter: brightness(1.2);
+      &.expandable {
+        display: none;
       }
     }
 

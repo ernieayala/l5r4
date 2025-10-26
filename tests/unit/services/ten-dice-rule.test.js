@@ -13,7 +13,6 @@
  * - Both fast path (both >= 10) and slow path conversions
  * - Little Truths exception (optional house rule)
  *
- * Reference: game-rules/Rings_and_Traits.md lines 81-90
  */
 
 import { describe, it, expect, beforeEach, afterEach, vi } from "vitest";

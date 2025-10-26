@@ -83,7 +83,7 @@ const DIALOG = foundry.applications.api.DialogV2;
  */
 export async function GetSpellCastOptions(spellName, ringName, actor) {
   // Calculate max Raises from Void Ring and Free Raises from items/effects
-  const voidRing = actor?.system?.rings?.void?.value ?? 0;
+  const voidRing = actor?.system?.rings?.void?.rank ?? 0;
   const maxRaises = getMaxRaises(voidRing);
   const freeRaises = calculateFreeRaises(actor);
 

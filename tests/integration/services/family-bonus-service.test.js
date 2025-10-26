@@ -11,7 +11,6 @@
  * The service reads from family Items which requires complex Actor/Item setup.
  *
  * @see module/services/family-bonus-service.js
- * @see game-rules/Character_Creation.md (Step 2: Family Selection)
  */
 
 import { SYS_ID } from "../../../module/config/constants.js";

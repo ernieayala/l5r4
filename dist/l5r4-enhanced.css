@@ -419,6 +419,7 @@ body > * {
   display: flex;
   flex-direction: column;
   gap: 0.25rem;
+  --controls: 102px;
   /* stylelint-disable-next-line selector-class-pattern -- Legacy class name */
 }
 .l5r4.pc .item-list.-header,
@@ -441,77 +442,77 @@ body > * {
 .l5r4.npc .item-list.-attacks .item,
 .xp-modal-dialog .item-list.-advantages .item,
 .xp-modal-dialog .item-list.-attacks .item {
-  grid-template-columns: 1fr 1fr 1fr 1fr 24px;
+  grid-template-columns: 1fr 1fr 1fr 1fr var(--controls);
 }
 .l5r4.pc .item-list.-advantage .item,
 .l5r4.npc .item-list.-advantage .item,
 .xp-modal-dialog .item-list.-advantage .item {
-  grid-template-columns: 1fr 80px 80px 24px;
+  grid-template-columns: 1fr 80px 80px var(--controls);
 }
 .l5r4.pc .item-list.-armor .item,
 .l5r4.npc .item-list.-armor .item,
 .xp-modal-dialog .item-list.-armor .item {
-  grid-template-columns: 1fr 80px 100px 100px 24px;
+  grid-template-columns: 1fr 80px 100px 100px var(--controls);
 }
 .l5r4.pc .item-list.-bio .item,
 .l5r4.npc .item-list.-bio .item,
 .xp-modal-dialog .item-list.-bio .item {
-  grid-template-columns: 1fr 24px;
+  grid-template-columns: 1fr var(--controls);
 }
 .l5r4.pc .item-list.-commonItem .item,
 .l5r4.npc .item-list.-commonItem .item,
 .xp-modal-dialog .item-list.-commonItem .item {
-  grid-template-columns: 1fr 24px;
+  grid-template-columns: 1fr var(--controls);
 }
 .l5r4.pc .item-list.-disadvantage .item,
 .l5r4.npc .item-list.-disadvantage .item,
 .xp-modal-dialog .item-list.-disadvantage .item {
-  grid-template-columns: 1fr 80px 80px 24px;
+  grid-template-columns: 1fr 80px 80px var(--controls);
 }
 .l5r4.pc .item-list.-kata .item,
 .l5r4.npc .item-list.-kata .item,
 .xp-modal-dialog .item-list.-kata .item {
-  grid-template-columns: 1fr 80px 80px 24px;
+  grid-template-columns: 1fr 80px 80px var(--controls);
 }
 .l5r4.pc .item-list.-kiho .item,
 .l5r4.npc .item-list.-kiho .item,
 .xp-modal-dialog .item-list.-kiho .item {
-  grid-template-columns: 1fr 80px 80px 80px 24px;
+  grid-template-columns: 1fr 80px 80px 80px var(--controls);
 }
 .l5r4.pc .item-list.-skill .item,
 .l5r4.npc .item-list.-skill .item,
 .xp-modal-dialog .item-list.-skill .item {
-  grid-template-columns: 1fr 60px 1fr 60px 1fr 24px;
+  grid-template-columns: 1fr 60px 120px 60px 1fr var(--controls);
 }
 .l5r4.pc .item-list.-spell .item,
 .l5r4.npc .item-list.-spell .item,
 .xp-modal-dialog .item-list.-spell .item {
-  grid-template-columns: 1fr 80px 80px 80px 60px 24px;
+  grid-template-columns: 1fr 80px 60px 60px var(--controls);
 }
 .l5r4.pc .item-list.-tattoo .item,
 .l5r4.npc .item-list.-tattoo .item,
 .xp-modal-dialog .item-list.-tattoo .item {
-  grid-template-columns: 1fr 1fr 24px;
+  grid-template-columns: 1fr 1fr var(--controls);
 }
 .l5r4.pc .item-list.-technique .item,
 .l5r4.npc .item-list.-technique .item,
 .xp-modal-dialog .item-list.-technique .item {
-  grid-template-columns: 1fr 1fr 1fr 24px;
+  grid-template-columns: 1fr 1fr 1fr var(--controls);
 }
 .l5r4.pc .item-list.-weapon .item,
 .l5r4.npc .item-list.-weapon .item,
 .xp-modal-dialog .item-list.-weapon .item {
-  grid-template-columns: 1fr 80px 80px 150px 24px;
+  grid-template-columns: 1fr 80px 80px 150px var(--controls);
 }
 .l5r4.pc .item-list.-xp .item,
 .l5r4.npc .item-list.-xp .item,
 .xp-modal-dialog .item-list.-xp .item {
-  grid-template-columns: 150px 1fr 24px;
+  grid-template-columns: 150px 1fr var(--controls);
 }
 .l5r4.pc .item-list.-xp-spent .item,
 .l5r4.npc .item-list.-xp-spent .item,
 .xp-modal-dialog .item-list.-xp-spent .item {
-  grid-template-columns: 1fr 80px 120px;
+  grid-template-columns: 1fr 80px 120px var(--controls);
 }
 .l5r4.pc .item-list > .item:nth-of-type(even),
 .l5r4.npc .item-list > .item:nth-of-type(even),
@@ -527,21 +528,21 @@ body > * {
   grid-template-rows: min-content min-content;
   padding: 0 0.5rem;
 }
+.l5r4.pc .item:hover .inline-control,
+.l5r4.npc .item:hover .inline-control,
+.xp-modal-dialog .item:hover .inline-control {
+  opacity: 1;
+  pointer-events: all;
+}
 .l5r4.pc .item.-bio,
 .l5r4.npc .item.-bio,
 .xp-modal-dialog .item.-bio {
   background: var(--table-header-bg-color);
 }
-.l5r4.pc .item.-expandable:hover .inline-control,
-.l5r4.npc .item.-expandable:hover .inline-control,
-.xp-modal-dialog .item.-expandable:hover .inline-control {
-  opacity: 1;
-  pointer-events: all;
-}
-.l5r4.pc .item.-expandable .inline-control,
-.l5r4.npc .item.-expandable .inline-control,
-.xp-modal-dialog .item.-expandable .inline-control {
-  opacity: 0;
+.l5r4.pc .item.-expandable .inline-control.expandable,
+.l5r4.npc .item.-expandable .inline-control.expandable,
+.xp-modal-dialog .item.-expandable .inline-control.expandable {
+  display: flex;
 }
 .l5r4.pc .item.is-expanded .expanded-text,
 .l5r4.npc .item.is-expanded .expanded-text,
@@ -576,17 +577,21 @@ body > * {
   text-decoration: none;
   text-shadow: none;
 }
+.l5r4.pc .item .controls,
+.l5r4.npc .item .controls,
+.xp-modal-dialog .item .controls {
+  justify-content: flex-end;
+}
 .l5r4.pc .item .inline-control,
 .l5r4.npc .item .inline-control,
 .xp-modal-dialog .item .inline-control {
   opacity: 0;
   pointer-events: none;
-  transition: opacity 250ms ease-out;
 }
-.l5r4.pc .item .inline-control:hover,
-.l5r4.npc .item .inline-control:hover,
-.xp-modal-dialog .item .inline-control:hover {
-  filter: brightness(1.2);
+.l5r4.pc .item .inline-control.expandable,
+.l5r4.npc .item .inline-control.expandable,
+.xp-modal-dialog .item .inline-control.expandable {
+  display: none;
 }
 .l5r4.pc .item .expanded-text,
 .l5r4.npc .item .expanded-text,

@@ -491,8 +491,6 @@ export default class L5R4NpcSheet extends BaseActorSheet {
     );
 
     on(root, "[data-edit='img']", "click", ev => this._onEditImage(ev, ev.currentTarget));
-
-    await this._setupItemContextMenu(root);
   }
 
   /**
