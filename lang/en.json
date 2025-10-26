@@ -638,6 +638,12 @@
     "grappled": {
       "restrictions": "Grappled: Armor TN = 5 + armor bonus only"
     },
+    "guarded": {
+      "restrictions": "Guarded: +10 Armor TN while protected by ally within 5 feet (until guardian's next turn)"
+    },
+    "guarding": {
+      "restrictions": "Guarding: -5 Armor TN while protecting ally within 5 feet (until your next turn)"
+    },
     "prone": {
       "restrictions": "Prone: -10 Armor TN vs melee, -2k0 attacks, cannot Move, only Attack/Defense stances"
     },
@@ -654,6 +660,8 @@
     "fatigued": "Fatigued",
     "feared": "Feared",
     "grappled": "Grappled",
+    "guarded": "Guarded",
+    "guarding": "Guarding",
     "mounted": "Mounted/Higher",
     "prone": "Prone",
     "stunned": "Stunned"

@@ -12,6 +12,8 @@
  * - **Grappled**: Override Armor TN to 5 + armor
  * - **Prone**: Apply -10 Armor TN vs melee, -2k0 attack penalties
  * - **Stunned**: Override Armor TN, prevent all actions
+ * - **Guarding**: Apply -5 Armor TN penalty while protecting ally
+ * - **Guarded**: Apply +10 Armor TN bonus while being protected by ally
  * - **Effect Tracking**: Store condition details in sys._conditionEffects for sheet rendering and rolls
  *
  * L5R4 Game Rules Context:
@@ -52,6 +54,8 @@ const CONDITION_IDS = new Set([
   "fatigued",
   "feared",
   "grappled",
+  "guarded",
+  "guarding",
   "prone",
   "stunned"
 ]);
@@ -121,6 +125,8 @@ function getActiveConditions(actor) {
  * @see applyFatiguedCondition for Fatigued condition effects
  * @see applyFearedCondition for Feared condition effects
  * @see applyGrappledCondition for Grappled condition effects
+ * @see applyGuardedCondition for Guarded condition effects
+ * @see applyGuardingCondition for Guarding condition effects
  * @see applyProneCondition for Prone condition effects
  * @see applyStunnedCondition for Stunned condition effects
  */
@@ -169,6 +175,12 @@ export function applyConditionEffects(actor, sys) {
         break;
       case "grappled":
         applyGrappledCondition(sys);
+        break;
+      case "guarded":
+        applyGuardedCondition(sys);
+        break;
+      case "guarding":
+        applyGuardingCondition(sys);
         break;
       case "prone":
         applyProneCondition(sys);
@@ -440,6 +452,70 @@ function applyGrappledCondition(sys) {
   }
 
   sys._conditionEffects.restrictions.push("l5r4.conditions.grappled.restrictions");
+}
+
+/**
+ * Applies Guarded condition mechanical effects.
+ *
+ * L5R4 Guard Maneuver:
+ * "When you declare a Guard Action, you must designate one other person within 5 feet of you.
+ * Until your next Turn, any time that person is within 5 feet of you, their Armor TN is
+ * increased by 10 and your Armor TN is decreased by 5."
+ *
+ * Mechanical Effects (Guarded - the protected character):
+ * - **Armor TN Bonus**: +10 while within 5 feet of guardian
+ * - **Duration**: Until guardian's next turn
+ * - **Proximity Requirement**: Must remain within 5 feet of guardian
+ *
+ * Note: Players manually apply/remove this status when Guard action is declared.
+ * Proximity tracking is handled by players as per L5R4 tabletop rules.
+ *
+ * Effect Tracking:
+ * Stores Armor TN modifier in sys._conditionEffects.
+ *
+ * @param {Object} sys - The actor.system data object being modified
+ * @param {Object} sys._conditionEffects - Effect tracking object for UI display
+ * @param {Object} sys.armorTn - Armor TN calculation object
+ * @private
+ */
+function applyGuardedCondition(sys) {
+  // Armor TN bonus: +10 while being guarded
+  sys._conditionEffects.armorTnModifier += 10;
+
+  sys._conditionEffects.restrictions.push("l5r4.conditions.guarded.restrictions");
+}
+
+/**
+ * Applies Guarding condition mechanical effects.
+ *
+ * L5R4 Guard Maneuver:
+ * "When you declare a Guard Action, you must designate one other person within 5 feet of you.
+ * Until your next Turn, any time that person is within 5 feet of you, their Armor TN is
+ * increased by 10 and your Armor TN is decreased by 5."
+ *
+ * Mechanical Effects (Guarding - the guardian character):
+ * - **Armor TN Penalty**: -5 while protecting ally
+ * - **Duration**: Until guardian's next turn
+ * - **Proximity Requirement**: Protected ally must remain within 5 feet
+ * - **Action Cost**: Simple Action to declare Guard
+ * - **Stance Restriction**: Cannot Guard while in Full Attack stance
+ *
+ * Note: Players manually apply/remove this status when Guard action is declared.
+ * Proximity tracking is handled by players as per L5R4 tabletop rules.
+ *
+ * Effect Tracking:
+ * Stores Armor TN modifier in sys._conditionEffects.
+ *
+ * @param {Object} sys - The actor.system data object being modified
+ * @param {Object} sys._conditionEffects - Effect tracking object for UI display
+ * @param {Object} sys.armorTn - Armor TN calculation object
+ * @private
+ */
+function applyGuardingCondition(sys) {
+  // Armor TN penalty: -5 while guarding
+  sys._conditionEffects.armorTnModifier += -5;
+
+  sys._conditionEffects.restrictions.push("l5r4.conditions.guarding.restrictions");
 }
 
 /**
