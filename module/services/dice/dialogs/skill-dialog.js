@@ -70,7 +70,7 @@ export async function GetSkillOptions(
   totalBonus = 0
 ) {
   // Calculate max Raises from Void Ring and Free Raises from items/effects
-  const voidRing = actor?.system?.rings?.void?.value ?? 0;
+  const voidRing = actor?.system?.rings?.void?.rank ?? 0;
   const maxRaises = getMaxRaises(voidRing);
   const freeRaises = calculateFreeRaises(actor);
 

@@ -7,7 +7,7 @@
  *
  * Key Responsibilities:
  * - **XP Cost Calculation**: Compute XP costs for trait, Void, skill, emphasis,
- *   advantage, disadvantage, kata, and kiho purchases per L5R4 rules
+ *   advantage, disadvantage, kata, kiho, and spell memorization purchases per L5R4 rules
  * - **Insight Rank**: Calculate Insight Rank thresholds for school advancement
  * - **Free Bonuses**: Track and apply character creation bonuses from family/school
  *   that don't cost XP (e.g., family grants +1 trait, school grants +1 trait)
@@ -184,6 +184,7 @@ export function calculateInsightRank(insight) {
  * - Advantages: Sum of all advantage costs
  * - Kata: Sum of all kata costs
  * - Kiho: Sum of all kiho costs
+ * - Spells: Mastery level for each memorized spell
  *
  * Free Bonus Handling:
  * The system tracks two types of free bonuses to prevent double-counting:
@@ -276,6 +277,7 @@ export function preparePcExperience(actor, sys) {
   let advantagesXP = 0;
   let kataXP = 0;
   let kihoXP = 0;
+  let spellsXP = 0;
   for (const it of actor.items) {
     if (isItemOfType(it, "advantage")) {
       advantagesXP += toInt(it.system?.cost);
@@ -283,11 +285,15 @@ export function preparePcExperience(actor, sys) {
       kataXP += toInt(it.system?.cost);
     } else if (isItemOfType(it, "kiho")) {
       kihoXP += toInt(it.system?.cost);
+    } else if (isItemOfType(it, "spell")) {
+      if (it.system?.memorized === true) {
+        spellsXP += toInt(it.system?.mastery);
+      }
     }
   }
 
   const total = xpBase + disadvCap + manualSum;
-  const spent = traitsXP + voidXP + skillsXP + advantagesXP + kataXP + kihoXP;
+  const spent = traitsXP + voidXP + skillsXP + advantagesXP + kataXP + kihoXP + spellsXP;
   const available = total - spent;
 
   sys._xp = {
@@ -303,7 +309,8 @@ export function preparePcExperience(actor, sys) {
       skills: skillsXP,
       advantages: advantagesXP,
       kata: kataXP,
-      kiho: kihoXP
+      kiho: kihoXP,
+      spells: spellsXP
     }
   };
 }

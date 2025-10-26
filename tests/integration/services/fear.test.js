@@ -12,7 +12,6 @@
  * The fear service creates ActiveEffects and chat messages which are hard to test.
  *
  * @see module/services/fear.js
- * @see game-rules/Combat_and_Damage.md (Fear rules)
  */
 
 import { SYS_ID } from "../../../module/config/constants.js";
@@ -76,7 +75,7 @@ export function registerFearTests(quench) {
         });
 
         it("should add Honor Rank as bonus", () => {
-          const willpower = 3;
+          const _willpower = 3;
           const honorRank = 2;
           const bonus = honorRank;
 
@@ -85,7 +84,7 @@ export function registerFearTests(quench) {
         });
 
         it("should handle zero Honor Rank", () => {
-          const willpower = 4;
+          const _willpower = 4;
           const honorRank = 0;
           const bonus = honorRank;
 
@@ -94,7 +93,7 @@ export function registerFearTests(quench) {
         });
 
         it("should handle high Honor Rank", () => {
-          const willpower = 3;
+          const _willpower = 3;
           const honorRank = 5; // High honor character
           const bonus = honorRank;
 
@@ -242,7 +241,7 @@ export function registerFearTests(quench) {
       describe("Combined Fear Scenarios", () => {
         it("should handle low Willpower vs high Fear", () => {
           const willpower = 2; // Low
-          const honorRank = 1;
+          const _honorRank = 1;
           const fearRank = 7; // High
           const tn = 5 + 5 * fearRank; // 40
 

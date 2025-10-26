@@ -72,7 +72,7 @@ import { spendVoidPoint } from "../resources/void-manager.js";
  * specific calls to override the global setting (e.g., right-click to force dialog).
  *
  * Chat Label Annotations:
- * - Base: "Damage Roll: [Weapon Name]"
+ * - Base: "Damage for [Weapon Name]"
  * - Description: Appended if provided (e.g., special attack notes)
  * - Raises: Shows attack raises and damage bonus (e.g., "[Raises: 2 (+2k0)]")
  * - Stance: Shows stance bonus if present (e.g., "[Stance Bonus: +2k1]")
@@ -105,7 +105,7 @@ export async function WeaponRoll({
   let rollMod = 0,
     keepMod = 0,
     bonus = 0;
-  let label = `${game.i18n.localize("l5r4.ui.mechanics.rolls.damageRoll")} ${weaponName}`;
+  let label = `Damage for ${weaponName}`;
   const optionsSetting = game.settings.get(SYS_ID, "showWeaponRollOptions");
 
   // Inverted boolean logic: Dialog appears when askForOptions !== setting

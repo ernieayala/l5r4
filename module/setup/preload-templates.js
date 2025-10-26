@@ -133,7 +133,7 @@ export async function preloadTemplates() {
     `systems/${SYS_ID}/templates/cards/weapon.hbs`,
 
     // Card Partials
-    `systems/${SYS_ID}/templates/cards/_partials/_expand.hbs`,
+    `systems/${SYS_ID}/templates/cards/_partials/_controls.hbs`,
 
     // Chat Message Templates
     `systems/${SYS_ID}/templates/chat/full-defense-roll.hbs`,

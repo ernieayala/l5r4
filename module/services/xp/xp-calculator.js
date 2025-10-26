@@ -289,6 +289,28 @@ export async function buildXpHistory(actor) {
           });
         }
       }
+
+      // Spells: Memorization costs XP equal to mastery level (L5R4 Spells.md line 25)
+      if (item.type === "spell") {
+        const memorized = item.system?.memorized ?? false;
+        if (memorized) {
+          const mastery = parseInt(item.system?.mastery) || 1;
+          const note = game.i18n.format("l5r4.character.experience.spellMemorized", {
+            name: item.name
+          });
+          const entryKey = `spell:memorized:${item.name}`;
+
+          addXpEntry(spent, existingEntries, entryKey, {
+            delta: mastery,
+            note: note,
+            type: "spell",
+            itemName: item.name,
+            mastery: mastery,
+            // Random timestamp within 10-second window
+            ts: Date.now() - Math.random() * 10000
+          });
+        }
+      }
     }
 
     // Sort by synthetic timestamp to create chronological history for UI display

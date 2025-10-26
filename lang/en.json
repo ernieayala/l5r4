@@ -113,7 +113,7 @@
           "noHealRate": "{name} has no healing rate configured",
           "healingFailed": "Failed to apply healing to {name}",
           "applyWounds": "Apply Wounds",
-          "reduceWithVoid": "Reduce with Void (-10)",
+          "reduceWithVoid": "Reduce with Void",
           "woundsApplied": "Applied {amount} wounds to {name}",
           "woundsReducedApplied": "Void Point spent: Reduced damage by 10. Applied {amount} wounds to {name}",
           "noTokenSelected": "No token selected. Select a token to apply wounds.",
@@ -308,7 +308,14 @@
         "leftClickPlusRightClickMinus": "Shift+Left click: +1, Shift+Right click: -1",
         "voidPointsClickAdjust": "Left click: +1, Right click: -1",
         "shiftClickRankPoints": "Shift+Click: ±0.1, Shift+Ctrl+Click: ±1.0",
-        "shiftClickToChat": "Shift+Click to post to chat"
+        "shiftClickToChat": "Shift+Click to post to chat",
+        "postToChat": "Post to chat"
+      },
+      "dialogs": {
+        "deleteItem": {
+          "title": "Delete Item?",
+          "content": "Are you sure you want to delete {name}?"
+        }
       }
     },
     "character": {
@@ -430,7 +437,8 @@
           "skills": "Skills",
           "advantages": "Advantages",
           "kata": "Kata",
-          "kiho": "Kiho"
+          "kiho": "Kiho",
+          "spells": "Spells"
         },
         "fallbackLabels": {
           "advantage": "Advantage",
@@ -439,7 +447,8 @@
           "voidIncrease": "Void Increase",
           "skillCreated": "Skill Created",
           "skillIncreased": "Skill Increased"
-        }
+        },
+        "spellMemorized": "Memorized: {name}"
       }
     },
     "equipment": {
@@ -501,7 +510,8 @@
         "useSpellSlot": "Use Spell Slot",
         "voidSlot": "Use Void Spell Slot",
         "slotsRestored": "All spell slots restored to maximum",
-        "restored": "restored"
+        "restored": "restored",
+        "memorized": "Memorized"
       },
       "maho": {
         "warningTitle": "Blood Magic - Forbidden Maho",

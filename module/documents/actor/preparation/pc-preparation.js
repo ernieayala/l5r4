@@ -23,6 +23,7 @@ import { applyStanceAutomation } from "../../../services/stance/core/automation.
 import { WOUND_LEVEL_ORDER } from "../constants/wound-constants.js";
 import { prepareTraitsAndRings } from "../calculations/shared-traits-rings.js";
 import { applyConditionEffects } from "../calculations/condition-effects.js";
+import { enrichActorItems } from "../calculations/item-enrichment.js";
 
 /**
  * Prepare derived data for Player Character actors.
@@ -179,9 +180,19 @@ export function preparePcData(actor, sys, finalizeWoundPenaltiesFn, calculateIns
 
   finalizeWoundPenaltiesFn(sys, order);
 
+  // Calculate derived healing stamina for advantages that boost stamina for healing
+  // (e.g., "For the purposes of recovering Wounds, your Stamina is considered to be two ranks higher")
+  const baseStamina = TR("sta");
+  const healingStaminaMod = toInt(sys.wounds?.healingStaminaMod);
+  const healingStamina = baseStamina + healingStaminaMod;
+
+  // Store derived value for use in healing calculations
+  sys._derived = sys._derived || {};
+  sys._derived.healingStamina = healingStamina;
+
   // Healing rate per L5R4 rules: (Stamina × 2) + Insight Rank + modifiers
-  // This determines the number of wounds healed per day of rest
-  sys.wounds.healRate = TR("sta") * 2 + toInt(sys.insight?.rank) + toInt(sys.wounds?.mod);
+  // Uses healingStamina to account for advantages that boost healing
+  sys.wounds.healRate = healingStamina * 2 + toInt(sys.insight?.rank) + toInt(sys.wounds?.mod);
 
   // Insight calculation per L5R4 character advancement:
   // Insight Points = (Sum of 5 Ring ranks × 10) + (Sum of all Skill ranks)
@@ -209,4 +220,9 @@ export function preparePcData(actor, sys, finalizeWoundPenaltiesFn, calculateIns
   if (game.settings.get(SYS_ID, "calculateRank")) {
     sys.insight.rank = calculateInsightRankFn(sys.insight.points);
   }
+
+  // Enrich all actor items with calculated roll formulas
+  // This runs in Documents layer (prepareDerivedData) per architecture rules
+  // Sheets will only read these pre-calculated formulas, never recalculate them
+  enrichActorItems(actor);
 }

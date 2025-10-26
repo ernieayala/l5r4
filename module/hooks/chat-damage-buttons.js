@@ -108,9 +108,9 @@ async function reduceAndApplyWounds(damage, _actorId) {
  * Registers chat message hook to handle damage button clicks
  */
 export function registerChatDamageButtons() {
-  Hooks.on("renderChatMessage", (message, html) => {
-    // Foundry v13 passes array of HTMLElements
-    const element = html[0] || html;
+  Hooks.on("renderChatMessageHTML", (message, html) => {
+    // Foundry v13 renderChatMessageHTML passes HTMLElement directly
+    const element = html;
 
     // Apply wounds button
     const applyButton = element.querySelector("[data-action='apply-wounds']");

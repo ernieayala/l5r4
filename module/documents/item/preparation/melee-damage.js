@@ -5,7 +5,7 @@
  * from Combat_and_Wounds.md. Implements the core melee damage mechanic: character
  * Strength adds to weapon's rolled dice.
  *
- * Core L5R4 Melee Rules (Combat_and_Wounds.md line 27):
+ * Core L5R4 Melee Rules
  * - "For melee attacks, characters add their Strength to the first number of a weapon's DR."
  * - Example: Katana (3k2) + Strength 3 = 6k2 damage
  * - Final formula: weaponRoll + actorStrength, k = weaponKeep
