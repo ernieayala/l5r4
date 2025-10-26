@@ -5,7 +5,7 @@
   {{#if inSheet}}
     <div>{{system.bonus}}</div>
     <div>{{system.reduction}}</div>
-    <div><input data-action="inline-edit" data-field="system.equipped" type="checkbox" {{checked system.equipped}} data-type="Boolean" /></div>
+    <div><input data-action="inline-edit" data-field="system.equipped" type="checkbox" {{checked system.equipped}} data-dtype="Boolean" /></div>
     {{> "systems/l5r4-enhanced/templates/cards/_partials/_controls.hbs"}}
     {{#if system.description}}
       <div class="expanded-text">

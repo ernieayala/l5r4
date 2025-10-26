@@ -272,15 +272,40 @@ export class ItemCRUDHandler {
         value = Number.isFinite(+value) ? +value : 0;
         break;
       case "Boolean": {
-        const s = String(value).toLowerCase();
-        value = s === "true" || s === "1" || s === "on" || s === "yes";
+        // For checkboxes, use checked property instead of value
+        if (el.type === "checkbox") {
+          value = el.checked;
+        } else {
+          const s = String(value).toLowerCase();
+          value = s === "true" || s === "1" || s === "on" || s === "yes";
+        }
         break;
       }
       default:
         value = String(value ?? "");
     }
 
-    return context.actor.items.get(id)?.update({ [field]: value }, { render: false });
+    // Update the item
+    const item = context.actor.items.get(id);
+    if (!item) {
+      return;
+    }
+
+    // For equipped field: need to trigger actor re-render so Armor TN recalculates
+    // For other fields: render:false avoids flicker
+    const needsActorRefresh = field === "system.equipped";
+
+    await item.update({ [field]: value }, { render: false });
+
+    // For checkboxes, manually update the visual state
+    if (el.type === "checkbox" && el.dataset.dtype === "Boolean") {
+      el.checked = value;
+    }
+
+    // If equipped changed, trigger actor sheet refresh to recalculate Armor TN
+    if (needsActorRefresh && context.actor.sheet?.rendered) {
+      context.actor.sheet.render(false);
+    }
   }
 
   /**
