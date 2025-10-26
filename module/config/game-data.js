@@ -89,6 +89,7 @@ export const NPC_NUMBER_WOUND_LVLS = freeze({ 1: 1, 2: 2, 3: 3, 4: 4, 5: 5, 6: 6
  *
  * Conditional Effects (mechanical penalties/restrictions):
  * - blinded: -3k3 ranged, -1k1 melee, reduced Armor TN and movement
+ * - concentration: Manually toggled to track spells requiring concentration
  * - dazed: -3k0 all actions, limited stances, Earth roll to recover
  * - dead: Character is deceased
  * - entangled: Cannot act except Strength roll to break free
@@ -144,6 +145,7 @@ export const STATUS_EFFECTS = freeze([
   },
 
   { id: "blinded", name: "EFFECT.blinded", img: iconPath("blinded.webp") },
+  { id: "concentration", name: "EFFECT.concentration", img: iconPath("concentration.webp") },
   { id: "dazed", name: "EFFECT.dazed", img: iconPath("dazed.webp") },
   { id: "dead", name: "EFFECT.dead", img: iconPath("dead.webp") },
   { id: "entangled", name: "EFFECT.entangled", img: iconPath("entangled.webp") },

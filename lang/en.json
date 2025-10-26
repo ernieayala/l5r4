@@ -115,7 +115,9 @@
           "applyWounds": "Apply Wounds",
           "reduceWithVoid": "Reduce with Void",
           "woundsApplied": "Applied {amount} wounds to {name}",
+          "woundsAppliedWithArmor": "{name} took {original} damage. Armor reduced by {reduction}. Applied {final} wounds.",
           "woundsReducedApplied": "Void Point spent: Reduced damage by 10. Applied {amount} wounds to {name}",
+          "woundsReducedWithArmor": "{name} took {original} damage. Void reduced to {afterVoid}, armor reduced by {reduction}. Applied {final} wounds.",
           "noTokenSelected": "No token selected. Select a token to apply wounds.",
           "noVoidPoints": "No Void Points available to reduce damage"
         },
@@ -653,6 +655,7 @@
   },
   "EFFECT": {
     "blinded": "Blinded",
+    "concentration": "Concentration",
     "dazed": "Dazed",
     "dead": "Dead",
     "entangled": "Entangled",
