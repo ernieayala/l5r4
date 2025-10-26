@@ -160,8 +160,6 @@ async function applyProneCondition(actor) {
         }
       }
     ]);
-
-    console.log(`${SYS_ID} | Applied Prone condition to ${actor.name} due to critical wounds`);
   } catch (err) {
     console.error(`${SYS_ID} | Failed to apply Prone condition to ${actor.name}`, err);
     ui.notifications?.error(

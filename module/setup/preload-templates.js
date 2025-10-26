@@ -41,25 +41,47 @@ import { SYS_ID } from "../config/constants.js";
  */
 export async function preloadTemplates() {
   const templatePaths = [
-    // Item Sheet Templates
-    `systems/${SYS_ID}/templates/item/advantage.hbs`,
-    `systems/${SYS_ID}/templates/item/armor.hbs`,
-    `systems/${SYS_ID}/templates/item/clan.hbs`,
-    `systems/${SYS_ID}/templates/item/disadvantage.hbs`,
-    `systems/${SYS_ID}/templates/item/family.hbs`,
-    `systems/${SYS_ID}/templates/item/commonItem.hbs`,
-    `systems/${SYS_ID}/templates/item/kata.hbs`,
-    `systems/${SYS_ID}/templates/item/kiho.hbs`,
-    `systems/${SYS_ID}/templates/item/school.hbs`,
-    `systems/${SYS_ID}/templates/item/skill.hbs`,
-    `systems/${SYS_ID}/templates/item/spell.hbs`,
-    `systems/${SYS_ID}/templates/item/tattoo.hbs`,
-    `systems/${SYS_ID}/templates/item/technique.hbs`,
-    `systems/${SYS_ID}/templates/item/weapon.hbs`,
+    // Item Sheet - Main Tab Partials
+    `systems/${SYS_ID}/templates/item/_partials/_header.hbs`,
+    `systems/${SYS_ID}/templates/item/_partials/_tabs.hbs`,
+    `systems/${SYS_ID}/templates/item/_partials/_tab-details.hbs`,
+    `systems/${SYS_ID}/templates/item/_partials/_tab-modifiers.hbs`,
+    `systems/${SYS_ID}/templates/item/_partials/_tab-description.hbs`,
+    `systems/${SYS_ID}/templates/item/_partials/_tab-effects.hbs`,
 
-    // Item Partials
-    `systems/${SYS_ID}/templates/item/_partials/_rules-summary.hbs`,
-    `systems/${SYS_ID}/templates/item/_partials/_scaffold.hbs`,
+    // Item Sheet - Type-Specific Details Templates
+    `systems/${SYS_ID}/templates/item/_type-details/advantage.hbs`,
+    `systems/${SYS_ID}/templates/item/_type-details/armor.hbs`,
+    `systems/${SYS_ID}/templates/item/_type-details/bow.hbs`,
+    `systems/${SYS_ID}/templates/item/_type-details/clan.hbs`,
+    `systems/${SYS_ID}/templates/item/_type-details/commonItem.hbs`,
+    `systems/${SYS_ID}/templates/item/_type-details/disadvantage.hbs`,
+    `systems/${SYS_ID}/templates/item/_type-details/family.hbs`,
+    `systems/${SYS_ID}/templates/item/_type-details/kata.hbs`,
+    `systems/${SYS_ID}/templates/item/_type-details/kiho.hbs`,
+    `systems/${SYS_ID}/templates/item/_type-details/school.hbs`,
+    `systems/${SYS_ID}/templates/item/_type-details/skill.hbs`,
+    `systems/${SYS_ID}/templates/item/_type-details/spell.hbs`,
+    `systems/${SYS_ID}/templates/item/_type-details/tattoo.hbs`,
+    `systems/${SYS_ID}/templates/item/_type-details/technique.hbs`,
+    `systems/${SYS_ID}/templates/item/_type-details/weapon.hbs`,
+
+    // Item Sheet - Type-Specific Modifiers Templates
+    `systems/${SYS_ID}/templates/item/_type-modifiers/advantage.hbs`,
+    `systems/${SYS_ID}/templates/item/_type-modifiers/armor.hbs`,
+    `systems/${SYS_ID}/templates/item/_type-modifiers/bow.hbs`,
+    `systems/${SYS_ID}/templates/item/_type-modifiers/clan.hbs`,
+    `systems/${SYS_ID}/templates/item/_type-modifiers/commonItem.hbs`,
+    `systems/${SYS_ID}/templates/item/_type-modifiers/disadvantage.hbs`,
+    `systems/${SYS_ID}/templates/item/_type-modifiers/family.hbs`,
+    `systems/${SYS_ID}/templates/item/_type-modifiers/kata.hbs`,
+    `systems/${SYS_ID}/templates/item/_type-modifiers/kiho.hbs`,
+    `systems/${SYS_ID}/templates/item/_type-modifiers/school.hbs`,
+    `systems/${SYS_ID}/templates/item/_type-modifiers/skill.hbs`,
+    `systems/${SYS_ID}/templates/item/_type-modifiers/spell.hbs`,
+    `systems/${SYS_ID}/templates/item/_type-modifiers/tattoo.hbs`,
+    `systems/${SYS_ID}/templates/item/_type-modifiers/technique.hbs`,
+    `systems/${SYS_ID}/templates/item/_type-modifiers/weapon.hbs`,
 
     // Actor Sheet Templates
     `systems/${SYS_ID}/templates/actor/pc.hbs`,
@@ -111,7 +133,7 @@ export async function preloadTemplates() {
     `systems/${SYS_ID}/templates/cards/weapon.hbs`,
 
     // Card Partials
-    `systems/${SYS_ID}/templates/cards/_partials/_expand.hbs`,
+    `systems/${SYS_ID}/templates/cards/_partials/_controls.hbs`,
 
     // Chat Message Templates
     `systems/${SYS_ID}/templates/chat/full-defense-roll.hbs`,
@@ -123,10 +145,12 @@ export async function preloadTemplates() {
     `systems/${SYS_ID}/templates/dialogs/disadvantage-cap-dialog.hbs`,
     `systems/${SYS_ID}/templates/dialogs/roll-modifiers-dialog.hbs`,
     `systems/${SYS_ID}/templates/dialogs/unified-item-create-dialog.hbs`,
+    `systems/${SYS_ID}/templates/dialogs/custom-emphasis-dialog.hbs`,
 
     // Application Templates
     `systems/${SYS_ID}/templates/apps/xp-manager.hbs`,
-    `systems/${SYS_ID}/templates/apps/wound-config.hbs`
+    `systems/${SYS_ID}/templates/apps/wound-config.hbs`,
+    `systems/${SYS_ID}/templates/apps/emphasis-manager.hbs`
   ];
 
   if (!globalThis.foundry?.applications?.handlebars?.loadTemplates) {

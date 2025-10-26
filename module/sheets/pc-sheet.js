@@ -42,26 +42,13 @@
 import { SYS_ID } from "../config/constants.js";
 import { TEMPLATE } from "../config/templates.js";
 import { STANCES } from "../config/localization.js";
+import { PC_SORT_KEYS } from "../config/sort-keys.js";
 
 // Utils
-import { T } from "../utils/localization.js";
 import { on } from "../utils/dom.js";
-import { toInt } from "../utils/type-coercion.js";
-import { readWoundPenalty } from "../utils/mechanics.js";
-import { getSectionCollapsedMap } from "../utils/section-state.js";
 
 // Documents
 import { enhanceItemSheetData } from "../documents/item/integration/sheet-data.js";
-
-// Services
-import { RingRoll } from "../services/dice/rolls/ring-roll.js";
-import { WeaponRoll } from "../services/dice/rolls/weapon-roll.js";
-import { SpellCastRoll } from "../services/dice/rolls/spell-cast-roll.js";
-import { MahoCastRoll } from "../services/dice/rolls/maho-cast-roll.js";
-import { getStanceDamageBonuses } from "../services/stance/rolls/attack-bonuses.js";
-import { getActiveStances } from "../services/stance/core/helpers.js";
-import { getMountedStatus } from "../services/mounted-combat.js";
-import { applyLongRest } from "../services/rest.js";
 
 // Local
 import { BaseActorSheet } from "./base-actor-sheet.js";
@@ -70,6 +57,8 @@ import { PcAdjustmentHandler } from "./handlers/pc-adjustment-handler.js";
 import { BioItemHandler } from "./handlers/bio-item-handler.js";
 import { PcTraitHandler } from "./handlers/pc-trait-handler.js";
 import { PcContextBuilder } from "./handlers/pc-context-builder.js";
+import { PcRollHandler } from "./handlers/pc-roll-handler.js";
+import { PcActionsHandler } from "./handlers/pc-actions-handler.js";
 import { StanceHandler } from "./handlers/stance-handler.js";
 
 const { TextEditor } = foundry.applications.ux;
@@ -158,7 +147,7 @@ export default class L5R4PcSheet extends BaseActorSheet {
   _onAction(action, event, element) {
     switch (action) {
       case "apply-healing":
-        return this._onApplyHealing(event, element);
+        return PcActionsHandler.handleApplyHealing(this._getHandlerContext(), event, element);
       case "clan-link":
         return BioItemHandler.openLinked(this.actor, "clan");
       case "family-open":
@@ -180,17 +169,17 @@ export default class L5R4PcSheet extends BaseActorSheet {
       case "ring-rank-void":
         return PcAdjustmentHandler.adjustVoidRing(this._getHandlerContext(), event, element, +1);
       case "roll-ring":
-        return this._onRingRoll(event, element);
+        return PcRollHandler.handleRingRoll(this._getHandlerContext(), event, element);
       case "roll-skill":
         return this._onSkillRoll(event, element);
       case "roll-trait":
         return this._onTraitRoll(event, element);
       case "roll-weapon":
-        return this._onWeaponRoll(event, element);
+        return PcRollHandler.handleWeaponRoll(this._getHandlerContext(), event, element);
       case "roll-weapon-attack":
         return this._onWeaponAttackRoll(event, element);
       case "cast-spell":
-        return this._onCastSpell(event, element);
+        return PcRollHandler.handleCastSpell(this._getHandlerContext(), event, element);
       case "rp-step":
         return PcAdjustmentHandler.adjustRankPoints(
           this._getHandlerContext(),
@@ -208,6 +197,14 @@ export default class L5R4PcSheet extends BaseActorSheet {
         return PcTraitHandler.adjust(this._getHandlerContext(), event, element, +1);
       case "void-points-dots":
         return this._onVoidPointsAdjust(event, element, +1);
+      case "toggle-armor-void":
+        return PcActionsHandler.handleToggleArmorVoid(this._getHandlerContext(), event, element);
+      case "toggle-initiative-void":
+        return PcActionsHandler.handleToggleInitiativeVoid(
+          this._getHandlerContext(),
+          event,
+          element
+        );
       case "wound-config":
         return AppLauncherHandler.openWoundConfig(this._getHandlerContext(), event, element);
       case "xp-modal":
@@ -265,9 +262,8 @@ export default class L5R4PcSheet extends BaseActorSheet {
    * - Stance changes (dropdown selection)
    *
    * **Auto-Submit Behavior:**
-   * Sheet has submitOnChange:true, so most form changes trigger actor updates
-   * automatically via _prepareSubmitData. These handlers provide additional
-   * processing or validation before submission.
+   * Sheet has submitOnChange:true, so form changes trigger automatic actor updates.
+   * Handlers provide additional processing or validation before submission.
    *
    * @param {string} action - The data-action attribute value from changed element
    * @param {Event} event - The change event
@@ -414,8 +410,8 @@ export default class L5R4PcSheet extends BaseActorSheet {
    *
    * **Performance Optimization:**
    * Uses lazy getter for advDisList to defer expensive sorting until template
-   * actually accesses the property. This avoids unnecessary computation when
-   * rendering non-default tabs.
+   * accesses the property. Avoids unnecessary computation when rendering
+   * non-default tabs.
    *
    * **Game Mechanics:**
    * Effective traits from _derived include wound penalties per the Wound Penalty
@@ -443,7 +439,6 @@ export default class L5R4PcSheet extends BaseActorSheet {
     });
 
     const all = actorObj.items.contents ?? actorObj.items;
-    const byType = t => all.filter(i => i.type === t);
     const sortedItems = PcContextBuilder.buildSortedItems(actorObj, all);
     const {
       skills,
@@ -461,47 +456,18 @@ export default class L5R4PcSheet extends BaseActorSheet {
     } = sortedItems;
 
     const masteries = PcContextBuilder.buildMasteryList(skills);
-
-    const traitsEff = foundry.utils.duplicate(
-      this.actor.system?._derived?.traitsEff ?? this.actor.system?.derived?.traitsEff ?? {}
-    );
-    if (!Object.keys(traitsEff).length) {
-      console.warn(
-        `${SYS_ID}`,
-        "traitsEff missing in actor.system._derived; check prepareDerivedData()"
-      );
-    }
-
-    const bioClan = byType("clan")[0] ?? null;
-    const bioFamily = byType("family")[0] ?? null;
-    const bioSchool = byType("school")[0] ?? null;
-
-    const activeStances = getActiveStances(actorObj);
-    const currentStance = activeStances[0] || "";
-    const mountedStatus = getMountedStatus(actorObj);
-
-    const collapsedSections = getSectionCollapsedMap(actorObj.id, [
-      "skills",
-      "weapons",
-      "armors",
-      "spells",
-      "techniques",
-      "katas",
-      "kihos",
-      "tattoos",
-      "advantages",
-      "disadvantages",
-      "items",
-      "bio"
-    ]);
+    const traitsEff = PcContextBuilder.extractEffectiveTraits(actorObj);
+    const bioItems = PcContextBuilder.extractBioItems(all);
+    const { currentStance, mountedStatus } = PcContextBuilder.extractStanceAndMounted(actorObj);
+    const collapsedSections = PcContextBuilder.extractCollapsedSections(actorObj.id);
 
     const context = {
       ...base,
       actor: this.actor,
       system,
-      bioClan,
-      bioFamily,
-      bioSchool,
+      bioClan: bioItems.clan,
+      bioFamily: bioItems.family,
+      bioSchool: bioItems.school,
       editable: this.isEditable,
       enriched: { notes: enrichedNotes },
       traitsEff,
@@ -568,28 +534,13 @@ export default class L5R4PcSheet extends BaseActorSheet {
     }
 
     on(root, "[data-edit='img']", "click", ev => this._onEditImage(ev, ev.currentTarget));
-    await this._setupItemContextMenu(root);
   }
 
   /**
    * Returns allowed sort column keys for a given item list scope.
    *
-   * Defines sortable columns for each item type displayed in PC sheet.
-   * Used by SortHandler to validate user sort preferences and provide
-   * column options in sort UI.
-   *
-   * **Sort Columns by Type:**
-   * - **armors**: name, bonus, reduction, equipped
-   * - **weapons**: name, damage, size
-   * - **items**: name only
-   * - **skills**: name, rank, trait, roll, emphasis
-   * - **spells**: name, ring, mastery, range, aoe, duration
-   * - **techniques**: name only
-   * - **katas**: name, ring, mastery
-   * - **kihos**: name, ring, mastery, type
-   * - **tattoos**: name only
-   * - **advantages/disadvantages**: name, type, cost
-   * - **advDis** (combined): name, type, cost, item
+   * Delegates to PC_SORT_KEYS configuration for sortable columns.
+   * See config/sort-keys.js for complete list of supported columns by type.
    *
    * @param {string} scope - Sort scope identifier matching item type or list name
    * @returns {string[]} Array of allowed sort column keys
@@ -597,287 +548,6 @@ export default class L5R4PcSheet extends BaseActorSheet {
    * @override
    */
   _getAllowedSortKeys(scope) {
-    const keys = {
-      armors: ["name", "bonus", "reduction", "equipped"],
-      weapons: ["name", "damage", "size"],
-      items: ["name"],
-      skills: ["name", "rank", "trait", "roll", "emphasis"],
-      spells: ["name", "ring", "mastery", "range", "aoe", "duration"],
-      techniques: ["name"],
-      technique: ["name"],
-      katas: ["name", "ring", "mastery"],
-      kihos: ["name", "ring", "mastery", "type"],
-      tattoos: ["name"],
-      advantages: ["name", "type", "cost"],
-      disadvantages: ["name", "type", "cost"],
-      advDis: ["name", "type", "cost", "item"]
-    };
-    return keys[scope] ?? ["name"];
-  }
-
-  /* ---------------------------------- */
-  /* Rolls                               */
-  /* ---------------------------------- */
-
-  /**
-   * Applies natural healing to the character.
-   *
-   * **Game Rules Context:**
-   * Characters heal (Stamina × 2) + Insight Rank wounds per night of rest.
-   * Healing cannot reduce suffered wounds below 0 (no over-healing).
-   *
-   * **Implementation:**
-   * Delegates to healing service which:
-   * - Calculates healing amount from actor.system.wounds.healRate
-   * - Reduces suffered wounds by healing amount
-   * - Posts chat message with healing summary
-   * - Handles edge cases (already at full health, invalid heal rate)
-   *
-   * @param {Event} event - Click event on healing button
-   * @param {HTMLElement} element - Button element (unused)
-   * @returns {Promise<void>}
-   * @protected
-   * @async
-   */
-  async _onApplyHealing(event, _element) {
-    event?.preventDefault?.();
-    await applyLongRest(this.actor);
-  }
-
-  /**
-   * Initiates a Ring roll (XkX where X = Ring rank).
-   *
-   * **Game Rules Context:**
-   * Ring rolls represent raw supernatural or elemental power checks:
-   * - Spell resistance rolls (e.g., "Roll Earth to resist Shadowlands Taint")
-   * - Void-based enlightenment checks
-   * - Elemental attunement tests
-   *
-   * Formula: XkX where both rolled and kept dice equal Ring rank.
-   * Includes wound penalties per the Wound Penalty system.
-   *
-   * **User Interaction:**
-   * Shift+Click opens options dialog for raises, bonuses, and TN entry.
-   * Normal click uses default ring value without modifications.
-   *
-   * @param {Event} event - Click event (shift key triggers options dialog)
-   * @param {HTMLElement} el - Element with dataset.ringRank and dataset.systemRing
-   * @protected
-   */
-  _onRingRoll(event, el) {
-    event.preventDefault();
-    const ringName =
-      el.dataset?.ringName || T(`l5r4.ui.mechanics.rings.${el.dataset?.systemRing || "void"}`);
-    const systemRing = String(el.dataset?.systemRing || "void").toLowerCase();
-    const ringRank = toInt(el.dataset?.ringRank);
-
-    RingRoll({
-      ringRank,
-      ringName,
-      systemRing,
-      askForOptions: event.shiftKey,
-      actor: this.actor,
-      woundPenalty: readWoundPenalty(this.actor)
-    });
-  }
-
-  /**
-   * Initiates a spell casting roll with simplified dialog.
-   *
-   * **Game Rules Context:**
-   * Spell Casting rolls determine if a shugenja successfully invokes the kami:
-   * - Formula: (Ring + School Rank)k(Ring)
-   * - TN: 5 + (Mastery Level × 5)
-   * - Affinity: +1 effective School Rank (auto-detected)
-   * - Deficiency: -1 effective School Rank (auto-detected)
-   * - Spell slots consumed automatically (elemental or Void bonus slots)
-   *
-   * **L5R4 Spell Casting Mechanics:**
-   * Shugenja have spell slots equal to their Ring value in each element, plus
-   * Void Ring bonus slots usable for any element. Failed casts still consume
-   * slots. Interrupted casts (before completion) do not consume slots.
-   *
-   * **Automatic Detection:**
-   * - Affinity/Deficiency: Detected from actor's school and applied automatically
-   * - Target Number: Calculated from spell's Mastery Level automatically
-   * - Spell Slots: Consumed automatically (elemental preferred, void fallback)
-   *
-   * **Implementation:**
-   * Extracts spell data from .item row, shows simplified dialog (wound penalty,
-   * void, modifiers, raises only), then executes spell casting with all automatic
-   * detection and slot management handled by SpellCastRoll service. Dialog always
-   * appears to give user control over modifiers and raises before casting.
-   *
-   * @param {Event} event - Click event
-   * @param {HTMLElement} element - Element with data-item-id for spell lookup
-   * @protected
-   */
-  _onCastSpell(event, element) {
-    event.preventDefault();
-    const row = element.closest(".item");
-    const id = row?.dataset?.itemId || row?.dataset?.documentId || row?.dataset?.id;
-    const spell = id ? this.actor.items.get(id) : null;
-    if (!spell || spell.type !== "spell") {
-      return;
-    }
-
-    // Route to maho casting if spell is blood magic
-    if (spell.system?.maho) {
-      return MahoCastRoll({
-        actor: this.actor,
-        spell,
-        woundPenalty: readWoundPenalty(this.actor),
-        showDialog: true
-      });
-    }
-
-    return SpellCastRoll({
-      actor: this.actor,
-      spell,
-      woundPenalty: readWoundPenalty(this.actor),
-      showDialog: true // Always show dialog for user control
-    });
-  }
-
-  /**
-   * Initiates a weapon damage roll.
-   *
-   * **Game Rules Context:**
-   * Weapon damage rolls determine wounds inflicted on successful hits:
-   * - Formula: (Weapon DR + Strength)k(Keep) for melee weapons
-   * - Dice explode on 10s (roll again and add, per core rules)
-   * - Full Attack stance: +2k1 damage bonus (Fire Ring stance)
-   *
-   * Full Attack Stance Bonus:
-   * Characters in Full Attack stance gain +2k1 to damage rolls in addition to
-   * the +2k1 attack bonus and -10 Armor TN penalty. This makes Full Attack a
-   * high-risk, high-reward offensive posture.
-   *
-   * **Implementation:**
-   * Reads stance bonuses from actor.system via getStanceDamageBonuses service.
-   * Appends stance bonus to description for chat display.
-   *
-   * @param {Event} event - Click event (shift key triggers damage modifier dialog)
-   * @param {HTMLElement} element - Element with data-item-id for weapon lookup
-   * @protected
-   */
-  _onWeaponRoll(event, element) {
-    event.preventDefault();
-    const row = element.closest(".item");
-    const id = row?.dataset?.itemId || row?.dataset?.documentId || row?.dataset?.id;
-    const item = id ? this.actor.items.get(id) : null;
-    if (!item) {
-      return;
-    }
-
-    // Use derived damage values (includes Strength) if available, otherwise fall back to base values
-    const baseDiceRoll =
-      Number(item.system?.derivedDamageRoll ?? item.system?.damageRoll ?? 0) || 0;
-    const baseDiceKeep =
-      Number(item.system?.derivedDamageKeep ?? item.system?.damageKeep ?? 0) || 0;
-    const stanceBonuses = getStanceDamageBonuses(this.actor);
-    const diceRoll = baseDiceRoll + stanceBonuses.roll;
-    const diceKeep = baseDiceKeep + stanceBonuses.keep;
-    let description = item.system?.description || "";
-    if (stanceBonuses.roll > 0 || stanceBonuses.keep > 0) {
-      const bonusText = `+${stanceBonuses.roll}k${stanceBonuses.keep}`;
-      const stanceLabel = T("l5r4.ui.mechanics.stances.fullAttack");
-      description = description
-        ? `${description} (${stanceLabel}: ${bonusText})`
-        : `${stanceLabel}: ${bonusText}`;
-    }
-
-    return WeaponRoll({
-      diceRoll,
-      diceKeep,
-      weaponName: item.name,
-      description,
-      askForOptions: event.shiftKey,
-      actor: this.actor
-    });
-  }
-
-  /* ---------------------------------- */
-  /* Item CRUD                           */
-  /* ---------------------------------- */
-
-  /**
-   * Handles inline editing of item properties directly in the sheet.
-   *
-   * Allows quick edits of item fields (name, rank, cost, etc.) without opening
-   * the full item sheet. Performs type coercion based on data-dtype attribute:
-   * - **Integer**: Coerces to integer via toInt()
-   * - **Number**: Coerces to float, defaults to 0 if invalid
-   * - **Boolean**: Supports checkbox inputs and string boolean values
-   * - **Default**: Coerces to string
-   *
-   * **Form Integration:**
-   * Works in conjunction with submitOnChange for seamless editing experience.
-   * Type coercion ensures proper data types in Actor/Item system data.
-   *
-   * @param {Event} event - Change event from form field
-   * @param {HTMLElement} element - Form element with data-field and data-dtype
-   * @returns {Promise<void>}
-   * @protected
-   * @async
-   */
-  async _onInlineItemEdit(event, element) {
-    event.preventDefault();
-    const el = element || event.currentTarget;
-    const row = el?.closest?.(".item");
-    const id = row?.dataset?.itemId || row?.dataset?.documentId || row?.dataset?.id;
-    const field = el.dataset.field;
-    if (!id || !field) {
-      return;
-    }
-
-    let value = el.type === "checkbox" ? el.checked : el.value;
-    const dtype = el.dataset.dtype ?? el.dataset.type;
-    switch (dtype) {
-      case "Integer":
-        value = toInt(value, 0);
-        break;
-      case "Number":
-        value = Number.isFinite(+value) ? +value : 0;
-        break;
-      case "Boolean":
-        value =
-          el.type === "checkbox"
-            ? !!value
-            : ["true", "1", "on", "yes"].includes(String(value).toLowerCase());
-        break;
-      default:
-        value = String(value ?? "");
-    }
-    return this.actor.items.get(id)?.update({ [field]: value });
-  }
-
-  /* ---------------------------------- */
-  /* Submit pipeline                     */
-  /* ---------------------------------- */
-
-  /**
-   * Processes form data before submission to actor document.
-   *
-   * Intercepts form submission to apply PC-specific data transformations:
-   * - Trait value coercion and bounds checking via PcTraitHandler
-   * - Conversion of string inputs to proper numeric types
-   * - Validation of rank/points values
-   *
-   * **Foundry Pattern:**
-   * Part of Application v2 form handling pipeline. Called automatically when
-   * submitOnChange triggers or user explicitly submits the form.
-   *
-   * @param {Event} event - Form submit event
-   * @param {HTMLFormElement} form - The form element being submitted
-   * @param {FormDataExtended} formData - Foundry's extended FormData object
-   * @param {Object} [updateData={}] - Pre-processed update data object
-   * @returns {Object} Processed update data ready for Actor.update()
-   * @protected
-   * @override
-   */
-  _prepareSubmitData(event, form, formData, updateData = {}) {
-    const data = super._prepareSubmitData(event, form, formData, updateData);
-    return PcTraitHandler.convertSubmitData(this.actor, data);
+    return PC_SORT_KEYS[scope] ?? ["name"];
   }
 }

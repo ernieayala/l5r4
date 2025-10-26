@@ -3,7 +3,7 @@
   data-document-id="{{coalesce docId this.id _id}}">
   <h4 class="flexrow -gap-sm title">
     {{#if inSheet}}
-      <a data-action="item-chat" title="{{localize "l5r4.ui.hints.shiftClickToChat"}}">{{name}}</a>
+      {{name}}
       {{#if system.school}}
         <img class="flex0" width="16px" height="16px" src="{{iconPath 'school.webp'}}" />
       {{/if}}
@@ -22,8 +22,14 @@
       <span class="mas">{{system.rollDice}}k{{system.rollKeep}}</span>
       <a class="button" data-action="roll-skill" title="{{localize "l5r4.ui.mechanics.rolls.skillRoll"}}">{{system.rollDice}}k{{system.rollKeep}}</a>
     </div>
-    <div>{{system.emphasis}}</div>
-    {{> "systems/l5r4-enhanced/templates/cards/_partials/_expand.hbs"}}
+    <div class="emphasis-display">
+      {{#if system.trainedEmphases.length}}
+        {{join system.trainedEmphases ", "}}
+      {{else}}
+        —
+      {{/if}}
+    </div>
+    {{> "systems/l5r4-enhanced/templates/cards/_partials/_controls.hbs"}}
     {{#if (or system.description system.specialRules (and (gte system.rank 3) system.mastery3) (and (gte system.rank 5) system.mastery5) (and (gte system.rank 7) system.mastery7))}}
       <div class="expanded-text">
         {{#if (and (gte system.rank 3) system.mastery3)}}

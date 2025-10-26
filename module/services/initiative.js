@@ -47,6 +47,59 @@ export function initializeInitiativeSystem() {
     decimals: 0
   };
 
+  // Override Combat.rollInitiative to handle void spending prompts
+  try {
+    const { Combat } = foundry.documents;
+    const __origCombatRollInit = Combat.prototype.rollInitiative;
+
+    Combat.prototype.rollInitiative = async function (ids, options = {}) {
+      // Get combatants that will roll
+      const combatantIds = typeof ids === "string" ? [ids] : ids;
+      const combatants = combatantIds.map(id => this.combatants.get(id)).filter(c => c);
+
+      // Check each combatant for void initiative flags
+      for (const combatant of combatants) {
+        const actor = combatant.actor;
+        if (!actor || actor.type !== "pc") {
+          continue;
+        }
+        if (!actor.system?.initiative?.useVoid) {
+          continue;
+        }
+
+        const voidCurrent = actor.system?.rings?.void?.value ?? 0;
+
+        if (voidCurrent > 0) {
+          const confirmed = await Dialog.confirm({
+            title: `Spend Void Point for Initiative - ${actor.name}`,
+            content: `<p>Spend a Void Point to add +10 to ${actor.name}'s initiative roll?</p>`,
+            yes: () => true,
+            no: () => false
+          });
+
+          if (confirmed) {
+            await actor.update({
+              "system.rings.void.value": voidCurrent - 1,
+              "system.initiative.useVoid": false,
+              "system.initiative._voidThisRoll": true
+            });
+            ui.notifications?.info(`${actor.name} spent Void Point for initiative (+10)`);
+          } else {
+            await actor.update({ "system.initiative.useVoid": false });
+          }
+        } else {
+          await actor.update({ "system.initiative.useVoid": false });
+          ui.notifications?.warn(`${actor.name} has no Void Points available`);
+        }
+      }
+
+      // Call original method to actually roll
+      return __origCombatRollInit.call(this, ids, options);
+    };
+  } catch (e) {
+    console.warn(`${SYS_ID} | Unable to override Combat.rollInitiative`, e);
+  }
+
   try {
     const { Combatant } = foundry.documents;
     // Preserve original method for error fallback
@@ -102,6 +155,15 @@ export function initializeInitiativeSystem() {
         }
 
         let bonus = toInt(a.system?.initiative?.totalMod);
+
+        // Check if void was confirmed for this roll
+        if (a.system?.initiative?._voidThisRoll) {
+          bonus += 10;
+          // Clear temp flag after using it
+          a.update({ "system.initiative._voidThisRoll": false }).catch(err => {
+            console.warn(`${SYS_ID} | Failed to clear void temp flag`, err);
+          });
+        }
 
         // Apply L5R4 10-dice cap - Foundry Roll class cannot handle more than 10 dice effectively
         // Excess dice convert to flat bonuses to maintain game balance

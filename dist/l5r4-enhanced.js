@@ -59,6 +59,10 @@ import { initializeStanceService } from "../module/services/stance/initialize.js
 import { initializeChatService } from "../module/services/chat.js";
 import { initializeInitiativeSystem } from "../module/services/initiative.js";
 import { initializeWoundProneAutomation } from "../module/services/wound-prone-automation.js";
+import { registerChatDamageButtons } from "../module/hooks/chat-damage-buttons.js";
+import { registerCombatVoidSpending } from "../module/hooks/combat-void-spending.js";
+import { registerSpellMemorizationHooks } from "../module/hooks/spell-memorization.js";
+
 
 /**
  * Foundry VTT Init Hook
@@ -142,6 +146,9 @@ Hooks.once("init", async () => {
   initializeStanceService();
   initializeChatService();
   initializeWoundProneAutomation();
+  registerChatDamageButtons();
+  registerCombatVoidSpending();
+  registerSpellMemorizationHooks();
 });
 
 /**

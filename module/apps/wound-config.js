@@ -114,8 +114,7 @@ export default class WoundConfigApplication extends foundry.applications.api.Han
       height: 400
     },
     actions: {
-      "wound-mode-change": WoundConfigApplication.prototype._onWoundModeChange,
-      "field-change": WoundConfigApplication.prototype._onFieldChange
+      "wound-mode-change": WoundConfigApplication.prototype._onWoundModeChange
     },
     form: {
       handler: WoundConfigApplication.prototype._onSubmitForm,
@@ -239,7 +238,7 @@ export default class WoundConfigApplication extends foundry.applications.api.Han
   /**
    * Post-render hook for ApplicationV2 lifecycle.
    *
-   * All input events are handled via data-action delegation at form root.
+   * Attaches change event listeners to form fields for debounced updates.
    *
    * @param {WoundConfigContext} context - Rendered template context
    * @param {object} options - Render options
@@ -250,6 +249,14 @@ export default class WoundConfigApplication extends foundry.applications.api.Han
       console.warn(`${SYS_ID}`, "WoundConfig _onRender: No element reference available");
       return;
     }
+
+    // Attach change event listeners to all fields with data-action="field-change"
+    const fields = this.element.querySelectorAll('[data-action="field-change"]');
+    fields.forEach(field => {
+      field.addEventListener("change", event => {
+        this._onFieldChange(event, event.target);
+      });
+    });
   }
 
   /**

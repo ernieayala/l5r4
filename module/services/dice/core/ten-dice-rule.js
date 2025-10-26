@@ -74,7 +74,8 @@ export function TenDiceRule(diceRoll, diceKeep, bonus = 0) {
   }
 
   // Enforce L5R4 rule: Cannot keep more dice than rolled
-  if (diceKeep > diceRoll) {
+  // Only enforce when kept is under Ten Dice cap - conversions handle kept > 10
+  if (diceKeep > diceRoll && diceKeep <= 10) {
     diceKeep = diceRoll;
   }
 

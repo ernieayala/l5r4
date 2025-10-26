@@ -1,6 +1,12 @@
 {
   "l5r4": {
     "ui": {
+      "tabs": {
+        "details": "Details",
+        "modifiers": "Modifiers",
+        "description": "Description",
+        "effects": "Active Effects"
+      },
       "mechanics": {
         "rings": {
           "ring": "Ring",
@@ -10,7 +16,9 @@
           "earth": "Earth",
           "void": "Void",
           "voidPoints": "Void Points",
-          "all": "All"
+          "all": "All",
+          "voidTnBoost": "Use Void",
+          "voidInitBoost": "Use Void"
         },
         "traits": {
           "sta": "Stamina",
@@ -41,6 +49,7 @@
           "emphasis": "Emphasis",
           "raise": "Raise",
           "raises": "Raises",
+          "freeRaises": "Free Raises",
           "automatic": "Automatic",
           "formula": "Formula",
           "result": "Result",
@@ -102,7 +111,13 @@
           "fullyHealed": "Fully healed!",
           "alreadyFullHealth": "{name} is already at full health",
           "noHealRate": "{name} has no healing rate configured",
-          "healingFailed": "Failed to apply healing to {name}"
+          "healingFailed": "Failed to apply healing to {name}",
+          "applyWounds": "Apply Wounds",
+          "reduceWithVoid": "Reduce with Void",
+          "woundsApplied": "Applied {amount} wounds to {name}",
+          "woundsReducedApplied": "Void Point spent: Reduced damage by 10. Applied {amount} wounds to {name}",
+          "noTokenSelected": "No token selected. Select a token to apply wounds.",
+          "noVoidPoints": "No Void Points available to reduce damage"
         },
         "stances": {
           "pending": "Pending",
@@ -141,6 +156,7 @@
         "roll": "Roll",
         "cancel": "Cancel",
         "ok": "OK",
+        "add": "Add",
         "none": "None",
         "keep": "Keep",
         "raise": "Raise",
@@ -180,7 +196,19 @@
         "ring": "Ring",
         "mastery": "Mastery",
         "tn": "TN",
-        "cost": "Cost"
+        "cost": "Cost",
+        "save": "Save"
+      },
+      "emphasisManager": {
+        "title": "Manage Skill Emphases",
+        "manageFor": "Manage Available Emphases for",
+        "manage": "Manage Emphases",
+        "addCustom": "Add Custom Emphasis",
+        "custom": "Custom",
+        "none": "No emphases available",
+        "help": "Select which emphases are available for this skill. Train them on the character sheet.",
+        "noEmphases": "No emphases in list",
+        "limitReached": "Cannot train more than {max} emphases at this skill rank"
       },
       "sheets": {
         "bio": "Background",
@@ -245,7 +273,28 @@
         "schoolRankZero": "You can't cast a spell with School Rank reduced to zero",
         "deficiencyBlocksCasting": "Deficiency in {ring} reduces your School Rank to zero - cannot cast",
         "noSpellSlots": "You ran out of spell slots for this ring",
-        "conditionApplyFailed": "Failed to apply {condition} to {actor}"
+        "conditionApplyFailed": "Failed to apply {condition} to {actor}",
+        "invalidSkillName": "Invalid skill name provided",
+        "invalidDamageValue": "Invalid damage value provided",
+        "noTargetForSwap": "No target selected for initiative swap",
+        "noCombatActive": "No active combat to modify initiative",
+        "notInCombat": "Character not in active combat"
+      },
+      "voidActions": {
+        "title": "Void Point Actions",
+        "enhanceRoll": "Enhance Roll (+1k1)",
+        "tempSkill": "Gain Temporary Skill",
+        "reduceDamage": "Reduce Damage (-10)",
+        "increaseArmorTN": "Increase Armor TN (+10)",
+        "swapInitiative": "Swap Initiative",
+        "increaseInitiative": "Increase Initiative (+10)",
+        "tempSkillGranted": "Void Point spent: Gained temporary rank in {skill}",
+        "damageReduced": "Void Point spent: Damage reduced from {original} to {reduced} (-{amount})",
+        "armorTnBonus": "Void: Armor TN +10",
+        "armorTnIncreased": "Void Point spent: Armor TN increased by 10 for this Round",
+        "armorTnAlreadyActive": "Armor TN bonus from Void Point already active",
+        "initiativeSwapped": "Void Point spent: {source} swapped initiative with {target}",
+        "initiativeIncreased": "Void Point spent: Initiative increased from {oldValue} to {newValue}"
       },
       "chat": {
         "traitRoll": "Trait Roll {trait}",
@@ -259,7 +308,14 @@
         "leftClickPlusRightClickMinus": "Shift+Left click: +1, Shift+Right click: -1",
         "voidPointsClickAdjust": "Left click: +1, Right click: -1",
         "shiftClickRankPoints": "Shift+Click: ±0.1, Shift+Ctrl+Click: ±1.0",
-        "shiftClickToChat": "Shift+Click to post to chat"
+        "shiftClickToChat": "Shift+Click to post to chat",
+        "postToChat": "Post to chat"
+      },
+      "dialogs": {
+        "deleteItem": {
+          "title": "Delete Item?",
+          "content": "Are you sure you want to delete {name}?"
+        }
       }
     },
     "character": {
@@ -381,7 +437,8 @@
           "skills": "Skills",
           "advantages": "Advantages",
           "kata": "Kata",
-          "kiho": "Kiho"
+          "kiho": "Kiho",
+          "spells": "Spells"
         },
         "fallbackLabels": {
           "advantage": "Advantage",
@@ -390,7 +447,8 @@
           "voidIncrease": "Void Increase",
           "skillCreated": "Skill Created",
           "skillIncreased": "Skill Increased"
-        }
+        },
+        "spellMemorized": "Memorized: {name}"
       }
     },
     "equipment": {
@@ -452,7 +510,8 @@
         "useSpellSlot": "Use Spell Slot",
         "voidSlot": "Use Void Spell Slot",
         "slotsRestored": "All spell slots restored to maximum",
-        "restored": "restored"
+        "restored": "restored",
+        "memorized": "Memorized"
       },
       "maho": {
         "warningTitle": "Blood Magic - Forbidden Maho",

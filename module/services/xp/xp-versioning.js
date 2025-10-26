@@ -53,7 +53,9 @@ export function calculateXpDataVersion(actor) {
           id: i.id,
           rank: i.system?.rank || 0,
           freeRanks: i.system?.freeRanks || 0,
-          emphasis: i.system?.emphasis || "",
+          trainedEmphases: Array.isArray(i.system?.trainedEmphases)
+            ? i.system.trainedEmphases.join(",")
+            : "",
           freeEmphasis: i.system?.freeEmphasis || 0
         })),
       items: actor.items

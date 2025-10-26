@@ -1,0 +1,20 @@
+<div class="form-group">
+  <label>{{localize "l5r4.ui.mechanics.rolls.damageRoll"}}</label>
+  <div class="form-fields">
+    <input name="system.damageRoll" type="number" data-type="Number" value="{{system.damageRoll}}" />
+  </div>
+</div>
+{{#unless system.isBow}}
+  <div class="form-group">
+    <label>{{localize "l5r4.equipment.weapons.damageKeep"}}</label>
+    <div class="form-fields">
+      <input name="system.damageKeep" type="number" data-type="Number" value="{{system.damageKeep}}" />
+    </div>
+  </div>
+{{/unless}}
+<div class="form-group">
+  <label>{{localize "l5r4.ui.mechanics.rolls.explodesOn"}}</label>
+  <div class="form-fields">
+    <input name="system.explodesOn" type="number" data-type="Number" value="{{system.explodesOn}}" />
+  </div>
+</div>

@@ -42,7 +42,7 @@ import { TEMPLATE } from "../config/templates.js";
 import { STANCES } from "../config/localization.js";
 
 // Utils
-import { clamp, toInt } from "../utils/type-coercion.js";
+import { clamp } from "../utils/type-coercion.js";
 import { on } from "../utils/dom.js";
 import { getSortPref, sortWithPref } from "../utils/sorting.js";
 import { getSectionCollapsedMap } from "../utils/section-state.js";
@@ -56,7 +56,6 @@ import * as Fear from "../services/fear.js";
 import { applyLongRest } from "../services/rest.js";
 import { getActiveStances } from "../services/stance/core/helpers.js";
 import { getMountedStatus } from "../services/mounted-combat.js";
-import { RingRoll } from "../services/dice/rolls/ring-roll.js";
 import { SpellCastRoll } from "../services/dice/rolls/spell-cast-roll.js";
 import { MahoCastRoll } from "../services/dice/rolls/maho-cast-roll.js";
 
@@ -406,7 +405,12 @@ export default class L5R4NpcSheet extends BaseActorSheet {
           return String(loc && loc !== key ? loc : it?.system?.trait ?? "");
         },
         roll: it => Number(it?.system?.rollDice ?? it?.system?.rank ?? 0) || 0,
-        emphasis: it => String(it?.system?.emphasis ?? "")
+        emphasis: it => {
+          const trained = Array.isArray(it?.system?.trainedEmphases)
+            ? it.system.trainedEmphases
+            : [];
+          return trained.join(", ");
+        }
       };
       const pref = getSortPref(actorObj.id, "skills", Object.keys(cols), "name");
       return sortWithPref(byType("skill"), cols, pref, game.i18n?.lang);
@@ -487,8 +491,6 @@ export default class L5R4NpcSheet extends BaseActorSheet {
     );
 
     on(root, "[data-edit='img']", "click", ev => this._onEditImage(ev, ev.currentTarget));
-
-    await this._setupItemContextMenu(root);
   }
 
   /**

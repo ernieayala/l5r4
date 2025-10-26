@@ -62,7 +62,7 @@ export function calculateBowDamage(sys, actor = null) {
   const arrowKey = String(sys.arrow || "willow");
   const arrowMod = ARROW_MODS[arrowKey] ?? { r: 0, k: 0 };
 
-  // Use lower of character Strength or bow Strength per Weapons.md rules
+  // Use lower of character Strength or bow Strength per rules
   // Store in separate 'derived' properties to preserve original field values
   const derivedDamageRoll = Math.min(bowStr, actorStr) + arrowMod.r;
   const derivedDamageKeep = arrowMod.k;

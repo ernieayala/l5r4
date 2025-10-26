@@ -17,6 +17,7 @@
  * - Skills: Cost equals next rank (e.g., 2→3 = 3 XP)
  * - Emphasis: 2 XP each
  * - Advantages/Disadvantages/Kata/Kiho: Listed cost from item
+ * - Spells: Mastery level when memorized
  *
  * Foundry Integration:
  * - Uses game.i18n.localize() for all user-facing strings
@@ -88,7 +89,7 @@ const SORT_COLUMNS = {
  *
  * Transforms calculator-generated entries into human-readable, localized strings with proper
  * type labels, progression notation, and optional user-driven sorting. Handles all L5R4 XP
- * purchase types: traits, void, skills, emphasis, advantages, disadvantages, kata, kiho.
+ * purchase types: traits, void, skills, emphasis, advantages, disadvantages, kata, kiho, spells.
  *
  * Entry Processing:
  * 1. Maps entry types to localized category labels
@@ -149,6 +150,9 @@ export function formatXpEntries(entries, options = {}) {
     } else if (e.type === "kiho") {
       type = game.i18n.localize("l5r4.ui.sheets.kiho");
       formattedNote = formatItemEntry(e, "Kiho");
+    } else if (e.type === "spell") {
+      type = game.i18n.localize("l5r4.character.experience.breakdown.spells");
+      formattedNote = formatItemEntry(e, "Spell");
     } else {
       // Fallback for legacy entries that may have raw i18n keys instead of proper type identifiers.
       // This ensures backward compatibility with character data created before proper type tracking.

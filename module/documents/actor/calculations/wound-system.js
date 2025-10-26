@@ -49,7 +49,7 @@ import {
  * @returns {string[]} Array of active wound level keys in order, always ending with "out"
  */
 export function getWoundLevelsForCount(nrWoundLvls) {
-  const count = clamp(nrWoundLvls || 3, 1, 8);
+  const count = clamp(nrWoundLvls ?? 3, 1, 8);
 
   if (count === 1) {
     return ["healthy", "out"];

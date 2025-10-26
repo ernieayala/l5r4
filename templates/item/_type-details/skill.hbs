@@ -1,0 +1,64 @@
+<div class="form-group">
+  <label>{{localize "l5r4.ui.common.rank"}}</label>
+  <div class="form-fields">
+    <input name="system.rank" type="number" value="{{system.rank}}" data-type="Number" />
+  </div>
+</div>
+<div class="form-group">
+  <label>{{localize "l5r4.character.skills.properties.school"}}</label>
+  <div class="form-fields">
+    <input name="system.school" type="checkbox" {{checked system.school}} data-type="Boolean" />
+  </div>
+</div>
+<div class="form-group">
+  <label>{{localize "l5r4.character.skills.properties.emphasis"}}</label>
+  <div class="form-fields">
+    <fieldset>
+      <legend>
+        <a type="button" data-action="manageEmphases">
+          <i class="fa-solid fa-list-check"></i>
+          {{localize "l5r4.ui.emphasisManager.manage"}}
+        </a>
+      </legend>
+      <multi-checkbox name="system.trainedEmphases">
+        {{#each system.availableEmphases}}
+          <option value="{{this}}" {{#if (includes ../system.trainedEmphases this)}}selected{{/if}}>{{this}}</option>
+        {{/each}}
+      </multi-checkbox>
+    </fieldset>
+  </div>
+</div>
+<div class="form-group">
+  <label>{{localize "l5r4.character.skills.properties.type"}}</label>
+  <div class="form-fields">
+    <select name="system.type">
+      {{selectOptions config.skillTypes selected=system.type localize=true}}
+    </select>
+  </div>
+</div>
+<div class="form-group">
+  <label>{{localize "l5r4.character.skills.properties.trait"}}</label>
+  <div class="form-fields">
+    <select name="system.trait">
+      {{selectOptions config.traits selected=system.trait localize=true}}
+    </select>
+  </div>
+</div>
+<div class="form-group">
+  <label>{{localize "l5r4.character.skills.properties.mastery3"}}</label>
+  <div class="form-fields">
+    <textarea name="system.mastery3">{{system.mastery3}}</textarea>
+  </div>
+</div>
+<div class="form-group">
+  <label>{{localize "l5r4.character.skills.properties.mastery5"}}</label>
+  <div class="form-fields">
+    <textarea name="system.mastery5">{{system.mastery5}}</textarea>
+  </div>
+</div>
+<div class="form-group">
+  <label>{{localize "l5r4.character.skills.properties.mastery7"}}</label>
+  <div class="form-fields">
+    <textarea name="system.mastery7">{{system.mastery7}}</textarea>
+  </div>
+</div>

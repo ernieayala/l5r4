@@ -1,24 +1,19 @@
 /**
  * Player Character Context Builder for ActorSheetV2
  *
- * Prepares sorted and enriched item collections for PC character sheet rendering.
- * Handles skill roll formula calculation, weapon attack/damage formulas, mastery
- * ability extraction, and user-scoped sort preference management.
+ * Prepares sorted item collections for PC character sheet rendering.
+ * Handles item sorting, mastery ability extraction, and user-scoped sort preference management.
  *
- * This module serves as the data transformation layer between Actor documents and
+ * This module serves as the data organization layer between Actor documents and
  * ActorSheetV2 templates. All methods are static utilities called from the sheet's
  * `_prepareContext()` method to shape data for Handlebars templates.
  *
  * L5R4 Game Rules Implemented:
- * - **Skill Roll Formula**: (Skill Rank + Trait Value)k(Trait Value) with bonuses
- * - **Mastery Abilities**: Extracted at ranks 3, 5, 7 per core rules
- * - **Full Attack Stance**: +2k1 bonus to attack rolls (Fire Ring stance)
- * - **Weapon Formulas**: Attack (Skill+Trait)k(Trait), Damage (Roll)k(Keep)
+ * - **Mastery Abilities**: Extracted at ranks 3, 5, 7
  *
  * Foundry VTT Integration:
  * - Designed for ActorSheetV2 context preparation pattern (Foundry v13+)
- * - Uses Actor.items embedded collection for skill/weapon lookups
- * - Reads actor.system for traits, bonuses, stance effects
+ * - Uses Actor.items embedded collection for item lookups
  * - Integrates with user flag-based sort preferences via sorting utilities
  * - Produces plain objects suitable for Handlebars template consumption
  *
@@ -28,14 +23,16 @@
 
 import { getSortPref, sortWithPref } from "../../utils/sorting.js";
 import { toInt } from "../../utils/type-coercion.js";
-import { resolveWeaponSkillTrait, getEffectiveTrait } from "../../utils/mechanics.js";
+import { getActiveStances } from "../../services/stance/core/helpers.js";
+import { getMountedStatus } from "../../services/mounted-combat.js";
+import { getSectionCollapsedMap } from "../../utils/section-state.js";
 
 /**
- * Static utility class for building sorted, enriched item contexts for PC sheets.
+ * Static utility class for building sorted item contexts for PC sheets.
  *
  * All methods are static and stateless - they accept Actor and Item data as parameters
- * and return transformed data structures suitable for template rendering. This class
- * never mutates Actor or Item documents.
+ * and return sorted data structures suitable for template rendering. This class never
+ * mutates Actor or Item documents and NEVER performs calculations (per architecture rules).
  *
  * Design Pattern: Static utility class (no instantiation required)
  *
@@ -64,23 +61,21 @@ export class PcContextBuilder {
   };
 
   /**
-   * Build sorted and enriched item collections for character sheet display.
+   * Build sorted item collections for character sheet display.
    *
    * Primary context builder method that processes all Actor items into sorted,
-   * categorized collections with calculated roll formulas. Each item type is
-   * sorted according to user preferences stored in Foundry user flags.
+   * categorized collections. Each item type is sorted according to user preferences
+   * stored in Foundry user flags.
    *
-   * Enrichment performed:
-   * - **Skills**: Adds rollDice, rollKeep, rollFormula (includes trait + bonuses)
-   * - **Weapons**: Adds attackFormula, attackFormulaWithStance, damageFormula
-   * - **Bows**: Same weapon enrichment as weapons
-   * - **Other types**: Sorted only, no formula enrichment
+   * **NO CALCULATIONS PERFORMED:**
+   * All roll formulas (skills, spells, weapons) are pre-calculated in
+   * Actor.prepareDerivedData() (Documents layer). This method only sorts items.
    *
    * @param {Actor} actor - L5R4 Actor document
    * @param {Item[]} allItems - Array of all items from actor.items (any types)
    * @returns {Object} Sorted item collections by type
-   * @returns {Item[]} returns.skills - Skills with roll formulas
-   * @returns {Item[]} returns.spells - Sorted spells
+   * @returns {Item[]} returns.skills - Sorted skills (formulas pre-calculated)
+   * @returns {Item[]} returns.spells - Sorted spells (formulas pre-calculated)
    * @returns {Item[]} returns.advantages - Sorted advantages
    * @returns {Item[]} returns.disadvantages - Sorted disadvantages
    * @returns {Item[]} returns.items - Sorted items/commonItems
@@ -89,8 +84,8 @@ export class PcContextBuilder {
    * @returns {Item[]} returns.tattoos - Sorted tattoos
    * @returns {Item[]} returns.techniques - Sorted techniques
    * @returns {Item[]} returns.armors - Sorted armors
-   * @returns {Item[]} returns.weapons - Weapons with attack/damage formulas
-   * @returns {Item[]} returns.bows - Bows with attack/damage formulas
+   * @returns {Item[]} returns.weapons - Sorted weapons (formulas pre-calculated)
+   * @returns {Item[]} returns.bows - Sorted bows (formulas pre-calculated)
    */
   static buildSortedItems(actor, allItems) {
     const byType = t => allItems.filter(i => i.type === t);
@@ -170,58 +165,24 @@ export class PcContextBuilder {
   }
 
   /**
-   * Sort skills and calculate roll formulas.
+   * Sort skills by user preference.
    *
-   * Enriches each skill with calculated roll formulas following L5R4 Skill Roll rules:
-   * **Formula**: (Skill Rank + Trait Value)k(Trait Value)
+   * Sorts skill items using user-stored preferences. Roll formulas (rollDice, rollKeep,
+   * rollFormula) are pre-calculated in Actor.prepareDerivedData() - this method only sorts.
    *
-   * Calculation process:
-   * 1. Get effective trait value (includes wound penalties via `getEffectiveTrait()`)
-   * 2. Get skill rank from skill.system.rank
-   * 3. Apply bonuses from actor.system.bonuses.skill and bonuses.trait
-   * 4. Calculate rollDice = trait + rank + roll bonuses
-   * 5. Calculate rollKeep = trait + keep bonuses
-   * 6. Prevent negative values with Math.max(0, ...)
-   *
-   * Bonuses structure:
-   * - `actor.system.bonuses.skill[skillName.toLowerCase()].roll` - Extra rolled dice
-   * - `actor.system.bonuses.skill[skillName.toLowerCase()].keep` - Extra kept dice
-   * - `actor.system.bonuses.trait[traitKey].roll` - Extra rolled dice from trait bonuses
-   * - `actor.system.bonuses.trait[traitKey].keep` - Extra kept dice from trait bonuses
-   *
-   * Sorts by user preference, with column extractors for:
+   * Sorting columns:
    * - **name**: Skill name
    * - **rank**: Skill rank (0-10)
    * - **trait**: Localized trait name for display
-   * - **roll**: Total rolled dice count
+   * - **roll**: Total rolled dice count (pre-calculated)
    * - **emphasis**: Emphasis text
    *
    * @param {Actor} actor - L5R4 Actor document
-   * @param {Item[]} skillItems - Array of skill items
-   * @returns {Item[]} Sorted skills with rollDice, rollKeep, rollFormula properties added
+   * @param {Item[]} skillItems - Array of skill items (formulas already calculated)
+   * @returns {Item[]} Sorted skills
    * @private
    */
   static _sortSkills(actor, skillItems) {
-    // Enrich each skill with calculated roll formulas
-    for (const skill of skillItems) {
-      const traitKey = String(skill.system?.trait ?? "").toLowerCase();
-      const traitEff = getEffectiveTrait(actor, traitKey); // Includes wound penalties
-      const rank = toInt(skill.system?.rank);
-
-      // Extract bonuses from actor.system.bonuses (can come from advantages, techniques, etc.)
-      const bb = actor.system?.bonuses;
-      const kSkill = String(skill.name).toLowerCase?.();
-      const bSkill = (bb?.skill && bb.skill[kSkill]) || {};
-      const bTrait = (bb?.trait && bb.trait[traitKey]) || {};
-      const rollBonus = toInt(bSkill.roll) + toInt(bTrait.roll); // Extra rolled dice
-      const keepBonus = toInt(bSkill.keep) + toInt(bTrait.keep); // Extra kept dice
-
-      // L5R4 Skill Roll: (Skill + Trait)k(Trait), with bonuses applied
-      skill.system.rollDice = Math.max(0, traitEff + rank + rollBonus);
-      skill.system.rollKeep = Math.max(0, traitEff + keepBonus);
-      skill.system.rollFormula = `${skill.system.rollDice}k${skill.system.rollKeep}`;
-    }
-
     // Define sortable columns with extractor functions
     const cols = {
       name: it => String(it?.name ?? ""),
@@ -240,7 +201,10 @@ export class PcContextBuilder {
         return String(loc && loc !== key ? loc : it?.system?.trait ?? "");
       },
       roll: it => Number(it?.system?.rollDice ?? 0) || 0,
-      emphasis: it => String(it?.system?.emphasis ?? "")
+      emphasis: it => {
+        const trained = Array.isArray(it?.system?.trainedEmphases) ? it.system.trainedEmphases : [];
+        return trained.join(", ");
+      }
     };
 
     const pref = getSortPref(actor.id, "skills", Object.keys(cols), "name");
@@ -248,25 +212,10 @@ export class PcContextBuilder {
   }
 
   /**
-   * Sort spells and calculate casting formulas.
+   * Sort spells by user preference.
    *
-   * Enriches each spell with calculated casting formulas following L5R4 Spell Casting rules:
-   * **Formula**: (Ring + School Rank ± Affinity/Deficiency)k(Ring)
-   * **TN**: 5 + (Mastery Level × 5)
-   *
-   * Calculation process:
-   * 1. Get Ring value from actor.system.rings[spell.system.ring]
-   * 2. Get School Rank from actor.system.insight.rank
-   * 3. Detect affinity/deficiency from actor's shugenja school
-   * 4. Apply school rank modifier: +1 for affinity, -1 for deficiency
-   * 5. Calculate rollDice = Ring + (School Rank ± modifier)
-   * 6. Calculate rollKeep = Ring
-   * 7. Calculate TN = 5 + (Mastery Level × 5)
-   *
-   * Affinity/Deficiency Detection:
-   * - Searches for shugenja school technique in actor's items
-   * - Compares spell's ring against school's affinity/deficiency
-   * - Automatically applies +1 or -1 School Rank modifier to displayed formula
+   * Sorts spell items using user-stored preferences. Casting formulas (castRoll, castKeep,
+   * castFormula, castTN) are pre-calculated in Actor.prepareDerivedData() - this method only sorts.
    *
    * Sorting columns:
    * - **name**: Spell name
@@ -277,42 +226,11 @@ export class PcContextBuilder {
    * - **duration**: Duration text
    *
    * @param {Actor} actor - L5R4 Actor document
-   * @param {Item[]} spellItems - Array of spell items
-   * @returns {Item[]} Sorted spells with castRoll, castKeep, castFormula, castTN properties added
+   * @param {Item[]} spellItems - Array of spell items (formulas already calculated)
+   * @returns {Item[]} Sorted spells
    * @private
    */
   static _sortSpells(actor, spellItems) {
-    // Find shugenja school for affinity/deficiency detection
-    const school = actor.items.find(i => i.type === "technique" && i.system?.shugenja);
-    const schoolAffinity = school ? String(school.system?.affinity ?? "").toLowerCase() : "";
-    const schoolDeficiency = school ? String(school.system?.deficiency ?? "").toLowerCase() : "";
-
-    // Enrich each spell with calculated casting formulas
-    for (const spell of spellItems) {
-      const ringKey = String(spell.system?.ring ?? "earth").toLowerCase();
-      const ringValue = toInt(actor.system?.rings?.[ringKey]) || 2;
-      const baseSchoolRank = toInt(actor.system?.insight?.rank) || 1;
-      const masteryLevel = toInt(spell.system?.mastery) || 1;
-
-      // Apply affinity/deficiency to school rank
-      let schoolRankMod = 0;
-      if (schoolAffinity === ringKey) {
-        schoolRankMod = 1; // Affinity: +1 School Rank
-      } else if (schoolDeficiency === ringKey) {
-        schoolRankMod = -1; // Deficiency: -1 School Rank
-      }
-      const effectiveSchoolRank = baseSchoolRank + schoolRankMod;
-
-      // L5R4 Spell Casting: (Ring + School Rank)k(Ring)
-      // Affinity/Deficiency now applied to displayed formula
-      spell.system.castRoll = Math.max(0, ringValue + effectiveSchoolRank);
-      spell.system.castKeep = Math.max(0, ringValue);
-      spell.system.castFormula = `${spell.system.castRoll}k${spell.system.castKeep}`;
-
-      // Calculate Target Number: 5 + (Mastery Level × 5)
-      spell.system.castTN = 5 + masteryLevel * 5;
-    }
-
     // Define sortable columns with extractor functions
     const cols = {
       name: it => String(it?.name ?? ""),
@@ -328,18 +246,11 @@ export class PcContextBuilder {
   }
 
   /**
-   * Sort weapons and calculate attack/damage formulas.
+   * Sort weapons by user preference.
    *
-   * Enriches each weapon with calculated attack and damage roll formulas:
-   * - **attackFormula**: Base attack roll (Skill + Trait)k(Trait)
-   * - **attackFormulaWithStance**: Attack roll including Full Attack stance bonus
-   * - **damageFormula**: Weapon base damage XkY from weapon.system
-   * - **damageFormulaWithStance**: Currently same as damageFormula (reserved for future stance effects)
-   *
-   * L5R4 Full Attack Stance:
-   * Characters in Full Attack stance gain +2k1 to attack rolls per core rules.
-   * This is detected via `actor.system._stanceEffects.fullAttack` flag set by
-   * the stance management system.
+   * Sorts weapon items using user-stored preferences. Attack and damage formulas
+   * (attackFormula, attackFormulaWithStance, damageFormula) are pre-calculated in
+   * Actor.prepareDerivedData() - this method only sorts.
    *
    * Sorting columns:
    * - **name**: Weapon name
@@ -347,8 +258,8 @@ export class PcContextBuilder {
    * - **size**: Weapon size (S, M, L)
    *
    * @param {Actor} actor - L5R4 Actor document
-   * @param {Item[]} weaponItems - Array of weapon items
-   * @returns {Item[]} Sorted weapons with attack/damage formula properties
+   * @param {Item[]} weaponItems - Array of weapon items (formulas already calculated)
+   * @returns {Item[]} Sorted weapons
    * @private
    */
   static _sortWeapons(actor, weaponItems) {
@@ -359,41 +270,16 @@ export class PcContextBuilder {
     };
 
     const pref = getSortPref(actor.id, "weapons", Object.keys(cols), "name");
-
-    const withFormulas = weaponItems.map(weapon => {
-      // Resolve skill and trait for attack roll (Skill + Trait)k(Trait)
-      const weaponSkill = resolveWeaponSkillTrait(actor, weapon);
-      weapon.attackFormula = `${weaponSkill.rollBonus}k${weaponSkill.keepBonus}`;
-
-      // Apply Full Attack stance bonus: +2k1 to attack rolls (Fire Ring stance)
-      if (actor.system._stanceEffects?.fullAttack) {
-        const stanceRollBonus = weaponSkill.rollBonus + 2; // +2 rolled dice
-        const stanceKeepBonus = weaponSkill.keepBonus + 1; // +1 kept die
-        weapon.attackFormulaWithStance = `${stanceRollBonus}k${stanceKeepBonus}`;
-      } else {
-        weapon.attackFormulaWithStance = weapon.attackFormula;
-      }
-
-      const baseDamageRoll = toInt(weapon.system?.damageRoll) || 0;
-      const baseDamageKeep = toInt(weapon.system?.damageKeep) || 0;
-      weapon.damageFormula = `${baseDamageRoll}k${baseDamageKeep}`;
-      weapon.damageFormulaWithStance = weapon.damageFormula;
-
-      return weapon;
-    });
-
-    return sortWithPref(withFormulas, cols, pref, game.i18n?.lang);
+    return sortWithPref(weaponItems, cols, pref, game.i18n?.lang);
   }
 
   /**
    * Generic item sorting with user preference.
    *
    * Sorts any item collection by user-stored preferences from Foundry user flags.
-   * No enrichment or formula calculation - pure sorting based on provided column
-   * extractors.
+   * Pure sorting based on provided column extractors - no calculations performed.
    *
    * Used for item types that don't need roll formulas:
-   * - Spells
    * - Advantages/Disadvantages
    * - Items/CommonItems
    * - Katas
@@ -404,9 +290,9 @@ export class PcContextBuilder {
    *
    * @param {Actor} actor - L5R4 Actor document (used for preference scope)
    * @param {Item[]} items - Array of items to sort
-   * @param {string} scope - Sort preference scope key (e.g., "spells", "advantages")
+   * @param {string} scope - Sort preference scope key (e.g., "advantages")
    * @param {Object.<string, Function>} cols - Column extractor functions for sorting
-   * @returns {Item[]} Sorted items (same references as input, sorted in place)
+   * @returns {Item[]} Sorted items
    * @private
    */
   static _sortGeneric(actor, items, scope, cols) {
@@ -478,5 +364,128 @@ export class PcContextBuilder {
 
     const pref = getSortPref(actor.id, "advDis", Object.keys(cols), "name");
     return sortWithPref(list, cols, pref, game.i18n?.lang);
+  }
+
+  /**
+   * Extract bio items (clan, family, school) from actor items.
+   *
+   * Bio items define character identity and provide mechanical bonuses:
+   * - **Clan**: Determines available families and clan-specific abilities
+   * - **Family**: Grants +1 to one trait (e.g., Hida → Stamina +1)
+   * - **School**: Defines techniques, starting skills, honor rank, and +1 trait
+   *
+   * Characters can only have one of each bio item type at a time.
+   *
+   * @param {Item[]} allItems - Array of all items from actor.items
+   * @returns {Object} Bio items by type
+   * @returns {Item|null} returns.clan - Clan item or null
+   * @returns {Item|null} returns.family - Family item or null
+   * @returns {Item|null} returns.school - School item or null
+   */
+  static extractBioItems(allItems) {
+    const byType = t => allItems.filter(i => i.type === t);
+    return {
+      clan: byType("clan")[0] ?? null,
+      family: byType("family")[0] ?? null,
+      school: byType("school")[0] ?? null
+    };
+  }
+
+  /**
+   * Extract stance and mounted status for context.
+   *
+   * Provides current combat stance and mounted state for template rendering.
+   * Used to display stance effects, mounted combat bonuses, and UI state.
+   *
+   * **Stances:**
+   * - Attack: Standard offensive stance
+   * - Defense: +10 Armor TN, -10 to all rolls
+   * - Full Attack: +2k1 attack/damage, -10 Armor TN
+   * - Full Defense: Double Reflexes for Armor TN
+   * - Center: +1k1 to next roll
+   *
+   * **Mounted Status:**
+   * - Provides Free Raise on attack rolls per core rules
+   * - Affects movement and positioning
+   *
+   * @param {Actor} actor - L5R4 Actor document
+   * @returns {Object} Stance and mounted status
+   * @returns {string} returns.currentStance - Current stance identifier (empty if none)
+   * @returns {Object} returns.mountedStatus - Mounted combat status from service
+   */
+  static extractStanceAndMounted(actor) {
+    const activeStances = getActiveStances(actor);
+    const currentStance = activeStances[0] || "";
+    const mountedStatus = getMountedStatus(actor);
+
+    return {
+      currentStance,
+      mountedStatus
+    };
+  }
+
+  /**
+   * Extract effective traits with wound penalties.
+   *
+   * Retrieves the effective trait values (base + family bonus - wound penalties)
+   * from the actor's derived data. These values are pre-calculated in
+   * Actor.prepareDerivedData() and used throughout the sheet for display.
+   *
+   * **Wound Penalties:**
+   * Per core rules (Combat_and_Wounds.md):
+   * - Nicked: +3 TN
+   * - Grazed: +5 TN
+   * - Hurt: +10 TN
+   * - Injured: +15 TN
+   * - Crippled: +20 TN
+   * - Down: Cannot act (except one Simple Action per round)
+   * - Out: Unconscious, dying
+   *
+   * Wound penalties are pre-calculated in Actor.prepareDerivedData() and
+   * stored in system._derived.traitsEff or system.derived.traitsEff.
+   *
+   * @param {Actor} actor - L5R4 Actor document
+   * @returns {Object} Effective trait values (sta, wil, str, per, ref, awa, agi, int)
+   */
+  static extractEffectiveTraits(actor) {
+    const traitsEff = foundry.utils.duplicate(
+      actor.system?._derived?.traitsEff ?? actor.system?.derived?.traitsEff ?? {}
+    );
+
+    if (!Object.keys(traitsEff).length) {
+      console.warn(
+        "L5R4",
+        "traitsEff missing in actor.system._derived; check prepareDerivedData()"
+      );
+    }
+
+    return traitsEff;
+  }
+
+  /**
+   * Get section collapsed state map for UI persistence.
+   *
+   * Retrieves per-user, per-actor section collapse states from user flags.
+   * Allows each user to maintain their own preferred collapsed/expanded
+   * sections for each character sheet.
+   *
+   * @param {string} actorId - Actor document ID
+   * @returns {Object} Map of section keys to collapsed boolean state
+   */
+  static extractCollapsedSections(actorId) {
+    return getSectionCollapsedMap(actorId, [
+      "skills",
+      "weapons",
+      "armors",
+      "spells",
+      "techniques",
+      "katas",
+      "kihos",
+      "tattoos",
+      "advantages",
+      "disadvantages",
+      "items",
+      "bio"
+    ]);
   }
 }

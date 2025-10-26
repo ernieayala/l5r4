@@ -1,0 +1,26 @@
+<div class="chat-card l5r4-roll l5r4-damage-roll">
+  {{#if flavor}}
+    <div class="dice-flavor">
+      {{flavor}}
+    </div>
+  {{/if}}
+  {{{roll}}}
+  <div class="damage-actions flexrow -gap-sm">
+    <button 
+      type="button"
+      class="apply-wounds-btn"
+      data-action="apply-wounds"
+      data-damage="{{damageTotal}}"
+      data-actor-id="{{actorId}}">
+      {{localize "l5r4.ui.mechanics.wounds.applyWounds"}}
+    </button>
+    <button 
+      type="button"
+      class="reduce-wounds-btn"
+      data-action="reduce-wounds-void"
+      data-damage="{{damageTotal}}"
+      data-actor-id="{{actorId}}">
+      {{localize "l5r4.ui.mechanics.wounds.reduceWithVoid"}}
+    </button>
+  </div>
+</div>
