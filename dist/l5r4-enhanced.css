@@ -305,7 +305,7 @@ body > * {
 .l5r4.npc .grid > div {
   align-items: center;
   font-size: var(--font-size-16);
-  padding: 0 0.25rem;
+  padding: 0.25rem;
 }
 .l5r4.pc .grid > div > input,
 .l5r4.pc .grid > div > select,
@@ -1454,11 +1454,6 @@ body > * {
 /**
  * Initiative
  * Initiative section styling for actor sheets
- * Uses the common .grid component from components/_grids.scss
- */
-/**
- * Stances
- * Stance selection dropdown styling for actor sheets
  * Uses the common .grid component from components/_grids.scss
  */
 /**

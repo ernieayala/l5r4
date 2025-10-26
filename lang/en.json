@@ -402,8 +402,13 @@
         "insightPoints": "Insight Points"
       },
       "stance": {
-        "title": "Combat Stance",
+        "title": "Combat",
         "current": "Current Stance"
+      },
+      "movement": {
+        "title": "Movement",
+        "maximum": "Max Movement",
+        "feet": "ft"
       },
       "experience": {
         "xpAmount": "Amount",

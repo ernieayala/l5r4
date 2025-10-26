@@ -146,7 +146,8 @@ export function applyConditionEffects(actor, sys) {
     tnPenalty: 0,
     restrictions: [],
     armorTnOverride: null,
-    armorTnModifier: 0 // Additive modifier applied after override (e.g., Prone -10)
+    armorTnModifier: 0, // Additive modifier applied after override (e.g., Prone -10)
+    waterRingPenalty: 0 // Penalty to Water Ring for movement calculations (e.g., Blinded -2)
   };
 
   for (const conditionId of activeConditions) {
@@ -248,6 +249,9 @@ function applyBlindedCondition(sys) {
   ) {
     sys._conditionEffects.armorTnOverride = blindedTN;
   }
+
+  // Movement reduction: Water Ring -2 for movement calculation
+  sys._conditionEffects.waterRingPenalty += -2;
 
   sys._conditionEffects.restrictions.push("l5r4.conditions.blinded.restrictions");
 }
