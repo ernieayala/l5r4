@@ -119,5 +119,18 @@ export function prepareNpcData(actor, sys, finalizeWoundPenaltiesFn) {
   applyStanceAutomation(actor, sys);
   applyConditionEffects(actor, sys);
 
+  // Movement calculation per L5R4 combat rules:
+  // Free Action: Water Ring × 5 feet
+  // Simple Action: Water Ring × 10 feet
+  // Maximum per Round: Water Ring × 20 feet (hard limit)
+  // Conditions like Blinded reduce effective Water Ring by 2 for movement (applied after condition effects)
+  const baseWater = toInt(sys.rings.water);
+  const waterPenalty = sys._conditionEffects?.waterRingPenalty ?? 0;
+  const effectiveWater = Math.max(1, baseWater + waterPenalty); // Minimum 1 per L5R4 rules
+  sys.movement = sys.movement || {};
+  sys.movement.freeAction = effectiveWater * 5;
+  sys.movement.simpleAction = effectiveWater * 10;
+  sys.movement.maximum = effectiveWater * 20;
+
   prepareVisibleWoundLevels(sys, order);
 }

@@ -205,6 +205,8 @@ export default class L5R4PcSheet extends BaseActorSheet {
           event,
           element
         );
+      case "toggle-movement-type":
+        return StanceHandler.toggleMovementType(this._getHandlerContext(), event);
       case "wound-config":
         return AppLauncherHandler.openWoundConfig(this._getHandlerContext(), event, element);
       case "xp-modal":

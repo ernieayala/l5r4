@@ -98,6 +98,51 @@ export class StanceHandler {
   }
 
   /**
+   * Toggles movement type display between Free Action and Simple Action.
+   *
+   * Responds to the movement toggle button in the character sheet stances section.
+   * Toggles the `system.movement.showSimple` flag which controls whether Free Action
+   * (Water × 5) or Simple Action (Water × 10) movement is displayed.
+   *
+   * This is a UI-only toggle for display convenience - it does not affect the actual
+   * character stats, only which movement value is shown in the sidebar. Both values
+   * are always calculated and available.
+   *
+   * Workflow:
+   * 1. Validate user has owner permission on actor
+   * 2. Toggle system.movement.showSimple flag
+   * 3. Update actor document (triggers automatic re-render)
+   *
+   * Error Handling:
+   * - Warns users without ownership permission
+   * - Catches async errors from actor.update and shows user notification
+   *
+   * @param {Object} context - Sheet render context containing actor reference
+   * @param {Actor} context.actor - The L5R4 actor document being modified
+   * @param {Event} [event] - The DOM event that triggered the toggle (optional)
+   * @returns {Promise<void>}
+   */
+  static async toggleMovementType(context, event) {
+    event?.preventDefault?.();
+
+    const actor = context.actor;
+    if (!actor?.isOwner) {
+      ui.notifications?.warn(game.i18n.localize("l5r4.ui.notifications.noPermission"));
+      return;
+    }
+
+    try {
+      const currentValue = actor.system.movement?.showSimple ?? false;
+      await actor.update({
+        "system.movement.showSimple": !currentValue
+      });
+    } catch (err) {
+      console.error(`${SYS_ID} StanceHandler: Failed to toggle movement type`, err);
+      ui.notifications?.error("Failed to toggle movement type");
+    }
+  }
+
+  /**
    * Applies a stance effect to an actor.
    *
    * Creates and applies an Active Effect representing the selected stance's mechanical

@@ -202,6 +202,8 @@ export default class L5R4NpcSheet extends BaseActorSheet {
         return this._onTraitAdjust(event, element, +1);
       case "void-points-dots":
         return this._onVoidPointsAdjust(event, element, +1);
+      case "toggle-movement-type":
+        return StanceHandler.toggleMovementType(this._getHandlerContext(), event);
       case "wound-config":
         return AppLauncherHandler.openWoundConfig(this._getHandlerContext(), event, element);
     }

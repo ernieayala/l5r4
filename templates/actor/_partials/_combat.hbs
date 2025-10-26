@@ -1,0 +1,40 @@
+<section class="combat">
+  <div class="flexrow -gap-sm section-title">
+    <h4 class="title -compact">{{localize "l5r4.character.stance.title"}}</h4>
+  </div>
+  <div class="grid">
+    <span>{{localize "l5r4.character.stance.current"}}</span>
+    <div class="flexrow">
+      <select data-action="change-stance">
+        {{#each config.stances as |label id|}}
+          <option value="{{id}}" {{#if (eq ../currentStance id)}}selected{{/if}}>
+            {{localize label}}
+          </option>
+        {{/each}}
+      </select>
+    </div>
+    <span>{{localize "l5r4.character.movement.title"}}</span>
+    <div class="flexrow -gap-sm">
+      <div>
+        {{#if system.movement.showSimple}}
+          {{system.movement.simpleAction}}{{localize "l5r4.character.movement.feet"}}
+        {{else}}
+          {{system.movement.freeAction}}{{localize "l5r4.character.movement.feet"}}
+        {{/if}}
+      </div>
+      {{#if system.movement.showSimple}}
+        <button type="button" data-action="toggle-movement-type" 
+          title="{{localize "l5r4.ui.common.simple"}}">
+          {{localize "l5r4.ui.common.simple"}}
+        </button>
+      {{else}}
+        <button type="button" data-action="toggle-movement-type" 
+          title="{{localize "l5r4.ui.common.free"}}">
+          {{localize "l5r4.ui.common.free"}}
+        </button>
+      {{/if}}
+    </div>
+    <span>{{localize "l5r4.character.movement.maximum"}}</span>
+    <div class="flexrow -gap-sm">{{system.movement.maximum}}{{localize "l5r4.character.movement.feet"}}</div>
+  </div>
+</section>
