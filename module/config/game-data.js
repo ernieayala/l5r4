@@ -96,6 +96,8 @@ export const NPC_NUMBER_WOUND_LVLS = freeze({ 1: 1, 2: 2, 3: 3, 4: 4, 5: 5, 6: 6
  * - fatigued: +5 TN penalties (stacking), Willpower rolls to avoid sleep
  * - feared: -XkO all rolls (X = Fear Rank), lasts until encounter end
  * - grappled: Armor TN reduced to 5 + armor bonus
+ * - guarded: +10 Armor TN while protected by ally (Guard maneuver)
+ * - guarding: -5 Armor TN while protecting ally (Guard maneuver)
  * - mounted: +1k0 attack vs unmounted/lower targets
  * - prone: -10 Armor TN vs melee, movement/attack restrictions
  * - stunned: No actions, Armor TN 5 + armor, Earth roll to recover
@@ -149,6 +151,8 @@ export const STATUS_EFFECTS = freeze([
   { id: "fatigued", name: "EFFECT.fatigued", img: iconPath("fatigue.webp") },
   { id: "feared", name: "EFFECT.feared", img: iconPath("fear.webp") },
   { id: "grappled", name: "EFFECT.grappled", img: iconPath("grappled.webp") },
+  { id: "guarded", name: "EFFECT.guarded", img: iconPath("guarded.webp") },
+  { id: "guarding", name: "EFFECT.guarding", img: iconPath("guarding.webp") },
   { id: "mounted", name: "EFFECT.mounted", img: iconPath("mounted.webp") },
   { id: "prone", name: "EFFECT.prone", img: iconPath("prone.webp") },
   { id: "stunned", name: "EFFECT.stunned", img: iconPath("stunned.webp") }
