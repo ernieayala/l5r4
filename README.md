@@ -7,6 +7,8 @@
 
 Complete Legend of the Five Rings 4th Edition implementation for Foundry VTT v13+. Authentic Roll & Keep mechanics with raises and free raises, automated character management, one-click damage application with armor reduction, XP tracking, combat stances, mounted combat, fear system, spell casting, and comprehensive L5R4 rule support.
 
+**Need Help?** Reach out on Discord: **@erniez**
+
 ---
 
 ## ⚠️ Migration Required for Existing Users
@@ -1141,6 +1143,7 @@ Enable console logging:
 
 ### Getting Help
 
+- **Discord: @erniez** - Direct support for issues and questions
 - **[GitHub Discussions](https://github.com/ernieayala/l5r4/discussions)** - Questions and community support
 - **[GitHub Issues](https://github.com/ernieayala/l5r4/issues)** - Bug reports
 - **Foundry Discord** - Look for L5R4 channels
