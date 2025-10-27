@@ -255,6 +255,7 @@ export class ItemCRUDHandler {
    */
   static async inlineEdit(context, event, element) {
     event.preventDefault();
+    event.stopPropagation(); // Prevent Foundry's submitOnChange form handler from firing
     const el = this._getElement(element, event);
     const row = this._getItemRow(el);
     const id = this._getItemId(row);
@@ -291,10 +292,6 @@ export class ItemCRUDHandler {
       return;
     }
 
-    // For equipped field: need to trigger actor re-render so Armor TN recalculates
-    // For other fields: render:false avoids flicker
-    const needsActorRefresh = field === "system.equipped";
-
     await item.update({ [field]: value }, { render: false });
 
     // For checkboxes, manually update the visual state
@@ -302,9 +299,32 @@ export class ItemCRUDHandler {
       el.checked = value;
     }
 
-    // If equipped changed, trigger actor sheet refresh to recalculate Armor TN
-    if (needsActorRefresh && context.actor.sheet?.rendered) {
-      context.actor.sheet.render(false);
+    // Update affected DOM elements without re-rendering entire sheet
+    if (field === "system.trait" && item.type === "skill") {
+      // Trait change: update roll formula buttons for this skill
+      // Item update triggers actor prepareDerivedData, which recalculates formulas
+      // Wait a tick for prepareDerivedData to complete, then update DOM
+      await new Promise(resolve => setTimeout(resolve, 0));
+
+      const skillRow = row;
+      const rollButtons = skillRow.querySelectorAll('[data-action="roll-skill"]');
+      rollButtons.forEach(button => {
+        const formula = `${item.system.rollDice}k${item.system.rollKeep}`;
+        button.textContent = formula;
+        button.title = game.i18n.localize("l5r4.ui.mechanics.rolls.skillRoll");
+
+        // Also update the mask span if it exists
+        const mask = button.closest(".button-mask-container")?.querySelector(".mas");
+        if (mask) {
+          mask.textContent = formula;
+        }
+      });
+    } else if (field === "system.equipped") {
+      // Equipped change: update Armor TN in sheet
+      // Re-render is still needed here because Armor TN appears in header
+      if (context.actor.sheet?.rendered) {
+        context.actor.sheet.render(false);
+      }
     }
   }
 

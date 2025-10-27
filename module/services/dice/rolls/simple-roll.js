@@ -75,6 +75,7 @@ import { getArmorTNPenalty } from "../../../utils/armor-penalties.js";
  * @property {string|null} [ringName=null] - Ring name for ring rolls (e.g., "Earth", "Fire")
  * @property {number|null} [ringRank=null] - Ring rank value for XkX rolls
  * @property {number} [woundPenalty=0] - Current wound penalty TN modifier (e.g., +10 for Hurt)
+ * @property {number} [modifier=0] - Flat bonus/penalty to roll total (for NPC attacks/damage)
  * @property {string|null} [rollType=null] - Type of roll: "attack" or null for general rolls
  * @property {L5R4Actor|null} [actor=null] - Actor making the roll (required for attack bonuses/weapons)
  * @property {boolean} [untrained=false] - Force unskilled roll (no explosions, no raises)
@@ -169,6 +170,7 @@ export async function SimpleRoll({
   ringName = null,
   ringRank = null,
   woundPenalty = 0,
+  modifier = 0,
   rollType = null,
   actor = null,
   untrained = false,
@@ -215,7 +217,7 @@ export async function SimpleRoll({
 
   let rollMod = toInt(check.rollMod);
   let keepMod = toInt(check.keepMod);
-  let totalMod = toInt(check.totalMod);
+  let totalMod = toInt(check.totalMod) + toInt(modifier);
 
   // Unskilled roll triggered by: (1) user dialog checkbox AND trait roll, OR (2) explicit untrained param
   // Trait rolls can be unskilled if character lacks training; ring/custom rolls cannot be unskilled

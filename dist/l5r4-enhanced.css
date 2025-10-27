@@ -152,6 +152,12 @@ body > * {
   gap: 0.5rem;
   overflow: auto;
 }
+.l5r4.item .tab {
+  gap: 0.25rem;
+}
+.l5r4.item .tab .prose-title {
+  margin: 0.5rem 0 0;
+}
 .l5r4.item .header-fields > h1 {
   margin: 0;
 }
@@ -437,12 +443,15 @@ body > * {
 .xp-modal-dialog .item-list.-header .item {
   padding: 0;
 }
-.l5r4.pc .item-list.-advantages .item, .l5r4.pc .item-list.-attacks .item,
+.l5r4.pc .item-list.-advantages .item,
 .l5r4.npc .item-list.-advantages .item,
-.l5r4.npc .item-list.-attacks .item,
-.xp-modal-dialog .item-list.-advantages .item,
-.xp-modal-dialog .item-list.-attacks .item {
+.xp-modal-dialog .item-list.-advantages .item {
   grid-template-columns: 1fr 1fr 1fr 1fr var(--controls);
+}
+.l5r4.pc .item-list.-attacks .item,
+.l5r4.npc .item-list.-attacks .item,
+.xp-modal-dialog .item-list.-attacks .item {
+  grid-template-columns: 1fr 1fr 1fr 1fr 1fr var(--controls);
 }
 .l5r4.pc .item-list.-advantage .item,
 .l5r4.npc .item-list.-advantage .item,

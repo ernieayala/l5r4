@@ -9,6 +9,14 @@
     overflow: auto;
   }
 
+  .tab {
+    gap: 0.25rem;
+
+    .prose-title {
+      margin: 0.5rem 0 0;
+    }
+  }
+
   .header-fields > h1 {
     margin: 0;
 

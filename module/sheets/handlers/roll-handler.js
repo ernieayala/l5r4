@@ -228,6 +228,9 @@ export class RollHandler {
     const el = RollHandler._getElement(element, event);
     const params = extractRollParams(el, context.actor);
 
+    // Get modifier from data attribute (for NPC attacks)
+    const modifier = toInt(el.dataset.modifier) || 0;
+
     const stanceBonuses = getStanceAttackBonuses(context.actor);
     const rollName = params.label;
     const description = RollHandler._addStanceBonusText(params.description, stanceBonuses);
@@ -236,6 +239,7 @@ export class RollHandler {
       woundPenalty: readWoundPenalty(context.actor),
       diceRoll: params.diceRoll + params.traitBonus + stanceBonuses.roll,
       diceKeep: params.diceKeep + params.traitBonus + stanceBonuses.keep,
+      modifier: modifier,
       rollName,
       description,
       toggleOptions: event.shiftKey,
@@ -365,6 +369,9 @@ export class RollHandler {
     const el = RollHandler._getElement(element, event);
     const params = extractRollParams(el, context.actor);
 
+    // Get modifier from data attribute (for NPC damage)
+    const modifier = toInt(el.dataset.modifier) || 0;
+
     const stanceBonuses = getStanceDamageBonuses(context.actor);
     const rollName = params.label;
     const description = RollHandler._addStanceBonusText(params.description, stanceBonuses);
@@ -372,6 +379,7 @@ export class RollHandler {
     return SimpleRoll({
       diceRoll: params.diceRoll + params.traitBonus + stanceBonuses.roll,
       diceKeep: params.diceKeep + params.traitBonus + stanceBonuses.keep,
+      modifier: modifier,
       rollName,
       description,
       toggleOptions: event.shiftKey,

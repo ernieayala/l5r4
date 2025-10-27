@@ -60,6 +60,9 @@ import { getMountedStatus } from "../services/mounted-combat.js";
 import { SpellCastRoll } from "../services/dice/rolls/spell-cast-roll.js";
 import { MahoCastRoll } from "../services/dice/rolls/maho-cast-roll.js";
 
+// Apps
+import NpcAttackEditor from "../apps/npc-attack-editor.js";
+
 // Local
 import { BaseActorSheet } from "./base-actor-sheet.js";
 import { RollHandler } from "./handlers/roll-handler.js";
@@ -207,6 +210,8 @@ export default class L5R4NpcSheet extends BaseActorSheet {
         return StanceHandler.toggleMovementType(this._getHandlerContext(), event);
       case "wound-config":
         return AppLauncherHandler.openWoundConfig(this._getHandlerContext(), event, element);
+      case "edit-attack":
+        return this._onEditAttack(event, element);
     }
   }
 
@@ -484,6 +489,7 @@ export default class L5R4NpcSheet extends BaseActorSheet {
     const root = this.element;
 
     this._paintVoidPointsDots(root);
+
     if (!this.actor.isOwner) {
       return;
     }
@@ -621,6 +627,35 @@ export default class L5R4NpcSheet extends BaseActorSheet {
       woundPenalty: readWoundPenalty(this.actor),
       showDialog: true // Always show dialog for user control
     });
+  }
+
+  /**
+   * Opens attack editor dialog for NPC attack configuration.
+   *
+   * Launches NpcAttackEditor application to edit attack and damage values
+   * for the specified attack slot (attack1-4).
+   *
+   * @param {Event} event - Click event
+   * @param {HTMLElement} element - Element with data-attack-key attribute
+   * @returns {Promise<void>}
+   * @protected
+   * @async
+   */
+  async _onEditAttack(event, element) {
+    event?.preventDefault?.();
+
+    const attackKey = element.dataset.attackKey;
+    if (!attackKey) {
+      console.warn("L5R4 | No attack key found on element", element);
+      return;
+    }
+
+    const editor = new NpcAttackEditor({
+      actor: this.actor,
+      attackKey
+    });
+
+    editor.render(true);
   }
 
   /**

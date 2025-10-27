@@ -29,6 +29,7 @@ import {
   prepareVisibleWoundLevels
 } from "../calculations/wound-system.js";
 import { applyConditionEffects } from "../calculations/condition-effects.js";
+import { enrichActorItems } from "../calculations/item-enrichment.js";
 
 /**
  * Prepare derived data for Non-Player Character actors.
@@ -133,4 +134,9 @@ export function prepareNpcData(actor, sys, finalizeWoundPenaltiesFn) {
   sys.movement.maximum = effectiveWater * 20;
 
   prepareVisibleWoundLevels(sys, order);
+
+  // Enrich all actor items with calculated roll formulas
+  // This runs in Documents layer (prepareDerivedData) per architecture rules
+  // Sheets will only read these pre-calculated formulas, never recalculate them
+  enrichActorItems(actor);
 }
