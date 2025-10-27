@@ -64,7 +64,7 @@ jobs:
         echo "✅ Version tag is available: $VERSION"
 
     - name: Install dependencies
-      run: npm ci
+      run: npm ci --ignore-scripts
 
     - name: Run validations
       run: |
