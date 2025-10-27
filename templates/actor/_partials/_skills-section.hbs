@@ -17,6 +17,8 @@
   <section class="item-list -skill">
     {{#each skills as |skill id|}}
       {{> "systems/l5r4-enhanced/templates/cards/skill.hbs"
+          name=skill.name
+          type=skill.type
           system=skill.system
           inSheet=true
           docId=skill.id}}

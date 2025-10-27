@@ -93,23 +93,42 @@
         "keep": 2
       },
       "attack1": {
+        "name": "",
         "roll": 2,
         "keep": 2,
+        "modifier": 0,
         "type": ""
       },
       "attack2": {
+        "name": "",
         "roll": 2,
         "keep": 2,
+        "modifier": 0,
         "type": ""
       },
       "damage1": {
         "roll": 2,
         "keep": 2,
+        "modifier": 0,
         "type": ""
       },
       "damage2": {
         "roll": 2,
         "keep": 2,
+        "modifier": 0,
+        "type": ""
+      },
+      "attack3": {
+        "name": "",
+        "roll": 0,
+        "keep": 0,
+        "modifier": 0,
+        "type": ""
+      },
+      "damage3": {
+        "roll": 0,
+        "keep": 0,
+        "modifier": 0,
         "type": ""
       },
       "nrWoundLvls": 3,

@@ -26,10 +26,15 @@
 
     --controls: 102px;
 
-    &.-advantages,
-    &.-attacks {
+    &.-advantages {
       .item {
         grid-template-columns: 1fr 1fr 1fr 1fr var(--controls);
+      }
+    }
+
+    &.-attacks {
+      .item {
+        grid-template-columns: 1fr 1fr 1fr 1fr 1fr var(--controls);
       }
     }
 
