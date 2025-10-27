@@ -7,6 +7,32 @@ Versioning: [Semantic Versioning](https://semver.org/spec/v2.0.0.html)
 
 ---
 
+## [3.1.0] - 2025-10-27
+
+### Added
+
+**NPC Attack Editor**
+- ApplicationV2-based dialog for editing NPC attack and damage values
+- Form fields for attack roll (XkY format) with `roll`, `keep`, `modifier` inputs
+- Form fields for damage roll (XkY format) with `roll`, `keep`, `modifier` inputs
+- Action type selection dropdown (Simple, Complex, Free, Reaction)
+- Damage type text field for specifying damage nature
+- Edit buttons integrated into NPC sheet for all three attack slots (attack1, attack2, attack3)
+- Proper form submission handling with `_onSubmit` and `_onSave` actions
+- HandlebarsApplicationMixin template rendering
+- Localized labels using `game.i18n` for all form fields
+- Window configuration with auto-height and non-resizable settings
+- Direct actor update via `actor.update()` with proper system path targeting
+
+### Enhanced
+
+**NPC Sheet Integration**
+- Attack editing workflow streamlined with dedicated dialog
+- Consistent form patterns across NPC attack configuration
+- Improved UX for managing multiple NPC attacks
+
+---
+
 ## [3.0.0] - 2025-10-26
 
 ### Breaking Changes
