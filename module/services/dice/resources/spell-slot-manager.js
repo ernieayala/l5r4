@@ -19,7 +19,6 @@
  * - Construct dynamic property paths for Actor updates
  *
  * Foundry APIs: foundry.utils.getProperty (v13+), Actor.update
- * Game Rules: Spell slot mechanics per Spells.md
  *
  * @module services/dice/resources/spell-slot-manager
  */

@@ -11,7 +11,6 @@
  * - Spell sheet rendering and data display
  * - Item updates reflected in sheet
  *
- * @see road-map/TESTING-06-SHEETS-TESTS.md
  */
 
 import { SYS_ID } from "../../../module/config/constants.js";
@@ -291,7 +290,7 @@ export function registerItemSheetTests(quench) {
 
           const element = sheet.element;
           // Description is usually in enriched HTML editor
-          const descField = element.querySelector('[name="system.description"], .editor');
+          const _descField = element.querySelector('[name="system.description"], .editor');
 
           // Description field should exist in some form
           assert.exists(element, "Sheet has description area");

@@ -15,7 +15,6 @@
  * - Condition-based stance restrictions
  *
  * @see module/services/stance/
- * @see game-rules/Stances_Actions_Maneuvers.md
  */
 
 import { SYS_ID } from "../../../module/config/constants.js";

@@ -16,9 +16,9 @@
  * - **Click**: Direct adjustment for spell slots and UI toggles
  *
  * **Game Rules Integration:**
- * - Void Ring produces Void Points equal to rank (Rings_and_Traits.md)
- * - Spell slots per element equal Ring rank (Spells.md, line 11)
- * - Rank/points system per advancement rules (Character_Creation_and_Advancement.md)
+ * - Void Ring produces Void Points equal to rank
+ * - Spell slots per element equal Ring rank
+ * - Rank/points system per advancement rules
  *
  * **Foundry API:**
  * - Actor.update() with diff option for efficient updates
@@ -47,7 +47,7 @@ export class PcAdjustmentHandler {
    * Adjusts the Void Ring rank for a PC character.
    *
    * **Game Rules Context:**
-   * Per core rules (Rings_and_Traits.md), Void Ring is unique:
+   * Per core rules, Void Ring is unique:
    * - No associated Traits (unlike other Rings)
    * - Produces Void Points equal to rank (used to enhance rolls +1k1)
    * - Valid range: 0-9 (matches all Ring/Trait maximum)
@@ -155,7 +155,6 @@ export class PcAdjustmentHandler {
    * Adjusts rank/points values for character advancement attributes.
    *
    * **Game Rules Context:**
-   * Per Character_Creation_and_Advancement.md:
    * - Rank/points system tracks progression (rank 0-10, points 0-9)
    * - 10 points = 1 rank increase
    * - Used for: skills, traits, honor, glory, status, insight, shadowTaint

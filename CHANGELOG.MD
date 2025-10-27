@@ -7,6 +7,213 @@ Versioning: [Semantic Versioning](https://semver.org/spec/v2.0.0.html)
 
 ---
 
+## [3.0.0] - 2025-10-26
+
+### Breaking Changes
+
+**Test Infrastructure**
+- Added comprehensive test suite requiring Quench module for integration tests
+- Development workflow now includes mandatory testing before releases
+
+### Added
+
+**Raise & Free Raise System**
+- Complete raise mechanics for all roll types (skill, trait, ring, spell, weapon, NPC)
+- Declared raises increase TN by 5 each (maximum = Void Ring rank)
+- Free Raises reduce TN by 5 each without Void Ring limit
+- Raise input fields in all roll dialogs
+- Free Raise calculation from items, advantages, techniques
+- Unskilled rolls cannot declare raises
+- Affinity grants 1 free raise for spell casting
+- TN floor at 0 (cannot go negative)
+- Visual display of raises and free raises in chat cards
+- Game rules citations from Skills_and_Rolls.md
+
+**Damage Application System**
+- Apply Wounds button in damage roll chat cards
+- Reduce with Void button for Void Point damage reduction (-10)
+- Automatic armor reduction applied to incoming damage
+- Multi-step damage calculation: Void Point → Armor → Final damage
+- Visual notifications showing damage breakdown
+- Armor reduction displayed in damage notifications
+- One-click damage application to selected tokens
+
+**Armor Reduction**
+- Automatic damage reduction from equipped armor
+- Reduction value calculated in prepareDerivedData
+- Stacking rules support (highest only or all stack)
+- Integration with damage application workflow
+- Visual feedback showing armor effectiveness
+- Works with Void Point reduction (Void first, then armor)
+
+**Guard Maneuver Status Effects**
+- Guarding status: -5 Armor TN penalty while protecting ally
+- Guarded status: +10 Armor TN bonus while being protected
+- Manual application by players when Guard action declared
+- Proximity tracking per L5R4 tabletop rules (5 feet)
+- Duration until guardian's next turn
+- Integration with condition effects system
+
+**Movement Tracking**
+- Water Ring-based movement calculation
+- Movement rates displayed in Combat section
+- Condition penalties affect movement (Blinded -2 Water Ring)
+- Automatic calculation from Water Ring value
+- Visual display on character sheets
+
+**Item Sheet Redesign**
+- 4-tab modular system: Description, Details, Modifiers, Active Effects
+- Eliminated 150+ lines of duplicate template code
+- Conditional tab visibility based on item type
+- Type-specific content in organized partials
+- Improved maintainability with DRY architecture
+- Better UX with categorized item properties
+- Tab state management with ApplicationV2 PARTS pattern
+
+**Emphasis System Overhaul**
+- Multiple emphases per skill support
+- `availableEmphases` array for skill options
+- `trainedEmphases` array for purchased emphases
+- Proper XP tracking for each emphasis (2 XP each)
+- Emphasis Manager integration
+- Migration from legacy single `emphasis` string field
+
+**Spell Memorization**
+- `memorized` boolean field on spell items
+- Tracking for prepared/memorized spells
+- Integration with spell management workflow
+
+**Comprehensive Test Infrastructure**
+- 440+ passing unit tests (Vitest)
+- Integration test suite (Quench)
+- Test fixtures for actors and items
+- Smoke tests for all modules
+- Unit tests for utilities and calculations
+- Integration tests for services, sheets, workflows
+- Test documentation in tests/README.md
+- npm scripts: test, test:watch, test:ui, test:coverage
+- Automated test execution in development workflow
+
+**Void Point Combat Spending**
+- Initiative Void Point spending hook
+- Void Point expenditure tracking in combat
+- Integration with combat tracker
+
+**Healing Stamina Modifier**
+- `healingStaminaMod` field for custom healing rate adjustments
+- Allows modifying Stamina multiplier in heal rate calculation
+
+### Enhanced
+
+**Roll System**
+- All roll types support raises and free raises
+- TN calculator handles raise mechanics (+5 per raise)
+- TN calculator handles free raise mechanics (-5 per free raise)
+- Raise validation against Void Ring limit
+- Unskilled roll detection prevents raise declaration
+- Roll dialogs display raise inputs and free raise totals
+- Chat messages show declared raises and free raises
+
+**Damage System**
+- Damage rolls create interactive chat cards
+- Apply damage with single click
+- Void Point reduction option in chat
+- Armor reduction automatic and transparent
+- Damage notifications show full breakdown
+- Integration with token selection
+
+**Condition Effects**
+- Guard maneuver conditions (Guarding/Guarded)
+- Armor TN modifiers from conditions
+- Movement penalties from conditions (Blinded)
+- Comprehensive condition tracking in prepareDerivedData
+
+**Item Management**
+- Modular item sheet templates
+- Type-specific detail sections
+- Organized modifier displays
+- Cleaner Active Effects tab
+- Reduced code duplication across item types
+
+**XP System**
+- Multiple emphasis tracking per skill
+- Proper XP calculation for each trained emphasis
+- Emphasis Manager displays all trained emphases
+- XP recalculation includes emphasis costs
+
+**Migration System**
+- Free Raises field migration for all items
+- Emphasis array migration from legacy string field
+- Embedded items migration support
+- Compendium migration support
+- World-level migration execution
+
+**Documentation**
+- Comprehensive testing guide in CONTRIBUTING.md
+- Testing philosophy and tier system
+- AAA pattern examples
+- Quench integration patterns
+- Troubleshooting guide for tests
+- Inline code documentation expanded
+
+### Fixed
+
+**Critical Bugs**
+- Stance TN stacking bug (Issue #2): Removed queueMicrotask wrapper causing race condition
+- Automatic trait changes during form submissions (Issue #1): Removed convertSubmitData corruption
+- Emphasis XP tracking: Now uses trainedEmphases array instead of single string
+- Ten Dice Rule test: Corrected test expectations
+
+**Roll System**
+- Raise validation against Void Ring maximum
+- Free raise calculation from multiple sources
+- TN floor enforcement (minimum 0)
+- Unskilled roll raise prevention
+
+**Item System**
+- Equipped checkbox now functional on armor items
+- Bow weapon icons display correctly
+- Item sheet tab state persistence
+- Template path references updated
+
+**Effect System**
+- Stance conflict removal synchronized
+- Effect cleanup in test hooks
+- Duplicate status ID declarations removed
+- Guard status effect integration
+
+**Migration System**
+- Free Raises defaults backfilled for existing items
+- Emphasis migration handles legacy data
+- Embedded items properly migrated
+- Migration execution order documented
+
+### Technical
+
+**Architecture**
+- Modular item sheet template system
+- Service-oriented raise management
+- Centralized TN calculation
+- Condition effects calculation module
+- Test fixture infrastructure
+- Mock data generators
+
+**Code Quality**
+- 73 unit tests for TN calculator
+- 21 integration tests for roll types
+- 561 total tests passing
+- Comprehensive JSDoc coverage
+- Game rules citations in code
+- Linting and formatting enforced
+
+**Performance**
+- Reduced template duplication
+- Optimized item sheet rendering
+- Efficient raise calculation
+- Streamlined damage application
+
+---
+
 ## [2.2.1] - 2025-10-25
 
 ### Fixed

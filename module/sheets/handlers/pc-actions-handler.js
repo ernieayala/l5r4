@@ -10,9 +10,9 @@
  * - Void Point initiative boost (pre-roll flag)
  *
  * **Game Rules Integration:**
- * - Natural Healing: (Stamina × 2) + Insight Rank per night (Character_Creation_and_Advancement.md)
- * - Void for Armor TN: +10 TN for 1 round, must be on actor's turn (Combat_and_Wounds.md)
- * - Void for Initiative: +10 initiative, spent when rolled (Combat_and_Wounds.md)
+ * - Natural Healing: (Stamina × 2) + Insight Rank per night
+ * - Void for Armor TN: +10 TN for 1 round, must be on actor's turn
+ * - Void for Initiative: +10 initiative, spent when rolled
  *
  * **Foundry API:**
  * - Uses Actor.update() for state changes
@@ -68,7 +68,7 @@ export class PcActionsHandler {
    * Toggles Void Point armor TN boost.
    *
    * **Game Rules Context:**
-   * Per core rules (Combat_and_Wounds.md):
+   * Per core rules:
    * - Spend Void at beginning of round for +10 Armor TN for 1 round
    * - Only works if in combat on the actor's turn
    * - Void Point is spent immediately when activated
@@ -184,7 +184,7 @@ export class PcActionsHandler {
    * Toggles Void Point initiative boost flag.
    *
    * **Game Rules Context:**
-   * Per core rules (Combat_and_Wounds.md):
+   * Per core rules:
    * - Flag indicates intent to spend Void for +10 initiative
    * - Void is spent when initiative is rolled (not when flag is set)
    * - Flag clears automatically after roll

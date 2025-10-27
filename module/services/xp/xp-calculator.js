@@ -290,7 +290,7 @@ export async function buildXpHistory(actor) {
         }
       }
 
-      // Spells: Memorization costs XP equal to mastery level (L5R4 Spells.md line 25)
+      // Spells: Memorization costs XP equal to mastery level
       if (item.type === "spell") {
         const memorized = item.system?.memorized ?? false;
         if (memorized) {

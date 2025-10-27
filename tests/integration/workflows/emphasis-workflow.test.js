@@ -19,15 +19,9 @@
  * - XP calculation integration
  * - Roll mechanics with emphasis (eXkY notation)
  *
- * **Gap Filled:**
- * This test addresses the missing workflow identified in test-coverage-gap-analysis.md:
- * - ❌ Missing: Complete workflow from custom emphasis creation to roll application
- * - ❌ Missing: Max 5 per skill enforcement
- *
  * @see module/apps/emphasis-manager.js - Emphasis manager dialog
  * @see module/services/dice/rolls/skill-roll.js - Skill roll with emphasis
  * @see module/documents/actor/calculations/xp-system.js - XP calculation
- * @see for_research/test-coverage-gap-analysis.md - Gap analysis document
  */
 
 import { SYS_ID } from "../../../module/config/constants.js";

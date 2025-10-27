@@ -1,8 +1,8 @@
 /**
  * Melee Weapon Damage Calculator
  *
- * Calculates melee weapon damage formulas for L5R4 weapons based on Combat rules
- * from Combat_and_Wounds.md. Implements the core melee damage mechanic: character
+ * Calculates melee weapon damage formulas for L5R4 weapons based on Combat rules.
+ * Implements the core melee damage mechanic: character
  * Strength adds to weapon's rolled dice.
  *
  * Core L5R4 Melee Rules
@@ -55,7 +55,7 @@ export function calculateMeleeDamage(sys, actor = null) {
   const weaponKeep = toInt(sys.damageKeep);
   const actorStr = actor ? toInt(actor.system?.traits?.str) : 0;
 
-  // Add actor Strength to rolled dice per Combat_and_Wounds.md
+  // Add actor Strength to rolled dice
   // Store in separate 'derived' properties to preserve original field values
   const derivedDamageRoll = weaponRoll + actorStr;
   const derivedDamageKeep = weaponKeep;

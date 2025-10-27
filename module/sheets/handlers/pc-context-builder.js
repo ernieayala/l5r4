@@ -432,7 +432,7 @@ export class PcContextBuilder {
    * Actor.prepareDerivedData() and used throughout the sheet for display.
    *
    * **Wound Penalties:**
-   * Per core rules (Combat_and_Wounds.md):
+   * Per core rules:
    * - Nicked: +3 TN
    * - Grazed: +5 TN
    * - Hurt: +10 TN

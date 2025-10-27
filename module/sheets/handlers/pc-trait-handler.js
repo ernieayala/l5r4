@@ -18,7 +18,7 @@
  * - Form submissions contain effective values that must be converted to base values
  *
  * **Game Rules Context:**
- * Per character creation rules (Rings_and_Traits.md):
+ * Per character creation rules:
  * - All traits begin at rank 2
  * - Family selection grants +1 to one trait (making it 3 at start)
  * - Traits can increase to rank 10 ("out of a possible 10")

@@ -17,7 +17,6 @@
  * Documents are deleted in reverse creation order.
  *
  * @see https://github.com/Ethaks/FVTT-Quench
- * @see road-map/TESTING-02-QUENCH-STRATEGY.md
  */
 
 import { SYS_ID } from "../../module/config/constants.js";

@@ -4,7 +4,7 @@
  * Release preparation automation script for L5R4 Foundry VTT system.
  *
  * Orchestrates the pre-release workflow including manifest versioning,
- * asset validation, stylesheet compilation, and release checklist generation.
+ * asset validation, stylesheet compilation.
  * Ensures consistent release preparation across all versions.
  *
  * Usage: node scripts/prepare-release.js <version>
@@ -17,7 +17,6 @@
  * 4. Validates language file JSON syntax
  * 5. Updates version in package.json and system.json
  * 6. Updates @version tags in all JavaScript files
- * 7. Generates release checklist markdown file
  *
  * Exits with code 1 if any validation or build step fails.
  *
@@ -228,68 +227,8 @@ function validateLanguageFiles() {
 }
 
 /**
- * Generates a Markdown checklist documenting manual release steps.
- * Creates RELEASE_CHECKLIST_v{version}.md with validation, testing,
- * release process, and post-release verification tasks.
- *
- * @param {string} version - Semantic version embedded in checklist filename and URLs
- * @returns {void}
- */
-function generateReleaseChecklist(version) {
-  const checklist = `
-# Release Checklist for L5R4 v${version}
-
-## Pre-Release Validation
-- [ ] All tests pass
-- [ ] CSS builds without errors
-- [ ] All language files are valid JSON
-- [ ] system.json validates against Foundry schema
-- [ ] README.md is up to date
-- [ ] CHANGELOG.MD includes v${version} entry
-
-## Version Management
-- [ ] package.json version updated to ${version}
-- [ ] system.json version updated to ${version}
-- [ ] Git working directory is clean
-- [ ] All changes committed
-
-## Testing
-- [ ] Test installation via manifest URL
-- [ ] Test system in clean Foundry world
-- [ ] Verify character sheet functionality
-- [ ] Test dice rolling mechanics
-- [ ] Verify XP Manager functionality
-- [ ] Test migration from previous version
-
-## Release Process
-- [ ] Create git tag: \`git tag v${version}\`
-- [ ] Push tag: \`git push origin v${version}\`
-- [ ] Create GitHub release with tag v${version}
-- [ ] Upload system.json and l5r4.zip to release
-- [ ] Update release notes with CHANGELOG content
-- [ ] Test installation from release assets
-
-## Post-Release
-- [ ] Verify manifest URL works
-- [ ] Test installation in clean Foundry instance
-- [ ] Monitor for bug reports
-- [ ] Update any external documentation
-
-## Notes
-- Release URL: https://github.com/ernieayala/l5r4/releases/tag/v${version}
-- Manifest URL: https://github.com/ernieayala/l5r4/releases/download/v${version}/system.json
-- Download URL: https://github.com/ernieayala/l5r4/releases/download/v${version}/l5r4.zip
-`;
-
-  const checklistPath = path.join(PROJECT_ROOT, `RELEASE_CHECKLIST_v${version}.md`);
-  fs.writeFileSync(checklistPath, checklist.trim() + "\n");
-  console.log(`\n📋 Release checklist created: RELEASE_CHECKLIST_v${version}.md`);
-}
-
-/**
  * CLI entry point orchestrating the complete release preparation workflow.
- * Validates arguments, executes preparation steps in sequence, and generates
- * release checklist. Provides next-step instructions upon successful completion.
+ * Validates arguments, executes preparation steps in sequence. Provides next-step instructions upon successful completion.
  *
  * @returns {void}
  * @throws {Error} Validation or build failures terminate process with exit code 1
@@ -331,14 +270,11 @@ function main() {
   updateVersionInFile(SYSTEM_JSON_PATH, version);
   updateJSDocVersionTags(version);
 
-  generateReleaseChecklist(version);
-
   console.log("\n🎉 Release preparation completed successfully!");
   console.log(`\nNext steps:`);
-  console.log(`1. Review RELEASE_CHECKLIST_v${version}.md`);
-  console.log(`2. Commit changes: git add . && git commit -m "Prepare release v${version}"`);
-  console.log(`3. Create and push tag: git tag v${version} && git push origin v${version}`);
-  console.log(`4. Create GitHub release with tag v${version}`);
+  console.log(`1. Commit changes: git add . && git commit -m "Prepare release v${version}"`);
+  console.log(`2. Create and push tag: git tag v${version} && git push origin v${version}`);
+  console.log(`3. Create GitHub release with tag v${version}`);
 }
 
 if (require.main === module) {
@@ -355,6 +291,5 @@ module.exports = {
   updateJSDocVersionTags,
   validateProjectStructure,
   buildCSS,
-  validateLanguageFiles,
-  generateReleaseChecklist
+  validateLanguageFiles
 };

@@ -10,7 +10,6 @@
  * The TraitRoll service shows dialogs and cannot be reliably tested in Quench.
  *
  * @see module/services/dice/rolls/trait-roll.js
- * @see game-rules/Skills_and_Rolls.md
  */
 
 import { SYS_ID } from "../../../module/config/constants.js";
@@ -191,7 +190,7 @@ export function registerTraitRollTests(quench) {
         });
 
         it("should not limit free raises", () => {
-          const voidRing = 2;
+          const _voidRing = 2;
           const freeRaises = 4;
           // Free raises are NOT limited by Void Ring
 

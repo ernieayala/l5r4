@@ -11,7 +11,6 @@
  * The SpellCastRoll service shows dialogs and cannot be reliably tested in Quench.
  *
  * @see module/services/dice/rolls/spell-cast-roll.js
- * @see game-rules/Magic_and_Spells.md
  */
 
 import { SYS_ID } from "../../../module/config/constants.js";
@@ -113,7 +112,7 @@ export function registerSpellCastRollTests(quench) {
         });
 
         it("should handle no Affinity or Deficiency", () => {
-          const baseTN = 15;
+          const _baseTN = 15;
           const hasAffinity = false;
           const hasDeficiency = false;
 

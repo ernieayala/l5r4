@@ -11,11 +11,9 @@
  * - Target number evaluation
  *
  * @see module/services/dice/rolls/skill-roll.js
- * @see game-rules/Skills_and_Rolls.md
  */
 
 import { SYS_ID } from "../../../module/config/constants.js";
-import { SkillRoll } from "../../../module/services/dice/rolls/skill-roll.js";
 import { buildFormula } from "../../../module/services/dice/core/formula-builder.js";
 import { createTestPC } from "../../fixtures/actor-fixtures.js";
 import { createSkillData } from "../../fixtures/item-fixtures.js";
@@ -139,7 +137,7 @@ export function registerSkillRollTests(quench) {
       describe("Unskilled Rolls", () => {
         it("should use trait-only formula for rank 0 skills", () => {
           // Unskilled: skill rank 0 = trait only
-          const skillRank = 0;
+          const _skillRank = 0;
           const traitValue = 3;
           const rolled = traitValue; // No skill rank added
           const kept = traitValue;
@@ -231,7 +229,7 @@ export function registerSkillRollTests(quench) {
         });
 
         it("should handle zero skill rank (unskilled)", () => {
-          const skillRank = 0;
+          const _skillRank = 0;
           const traitValue = 3;
           const rolled = traitValue; // Unskilled = trait only
           const kept = traitValue;

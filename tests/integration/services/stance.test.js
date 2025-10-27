@@ -1,4 +1,4 @@
-/* global before, beforeEach, after, afterEach */
+/* global before, after */
 /**
  * Stance System Mechanics Tests
  *
@@ -13,7 +13,6 @@
  * The stance service creates ActiveEffects which are hard to test in isolation.
  *
  * @see module/services/stance/
- * @see game-rules/Stances_Actions_Maneuvers.md
  */
 
 import { SYS_ID } from "../../../module/config/constants.js";

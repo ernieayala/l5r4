@@ -412,7 +412,7 @@ export function resolveWeaponSkillTrait(actor, weapon) {
     const traitValue = getEffectiveTrait(actor, skillTrait);
     const skillName = safeString(skill.name, "Unknown Skill") || "Unknown";
 
-    // L5R4 Unskilled Roll Rule (Skills_and_Rolls.md):
+    // L5R4 Unskilled Roll Rule:
     // When skill rank = 0, "effectively making a Trait Roll" = (Trait)k(Trait) with no exploding dice
     // When skill rank > 0, roll (Skill + Trait)k(Trait) normally
     if (skillRank === 0) {

@@ -11,10 +11,10 @@
  * - Weapon damage rolls with stance bonuses
  *
  * **Game Rules Integration:**
- * - Ring Rolls: Raw elemental power checks (Rings_and_Traits.md)
- * - Spell Casting: (Ring + School Rank)k(Ring) vs TN (Spells.md)
- * - Weapon Damage: (DR + Strength)k(Keep) with exploding dice (Combat_and_Wounds.md)
- * - Full Attack Stance: +2k1 damage bonus (stances.md)
+ * - Ring Rolls: Raw elemental power checks
+ * - Spell Casting: (Ring + School Rank)k(Ring) vs TN
+ * - Weapon Damage: (DR + Strength)k(Keep) with exploding dice
+ * - Full Attack Stance: +2k1 damage bonus
  *
  * **Foundry API:**
  * - Uses RingRoll, SpellCastRoll, MahoCastRoll, WeaponRoll services

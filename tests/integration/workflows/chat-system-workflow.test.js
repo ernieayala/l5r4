@@ -3,11 +3,6 @@
  *
  * Tests the complete chat system workflows including roll-to-chat, damage buttons,
  * inline roll parsing, and whisper functionality.
- * Addresses gaps identified in test-coverage-gap-analysis.md §11:
- * - Roll to chat workflow
- * - Damage button in chat workflow
- * - Inline roll parsing workflow
- * - Whisper roll workflow
  *
  * This test suite validates:
  * 1. Roll results posted to chat with proper formatting
