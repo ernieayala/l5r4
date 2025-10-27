@@ -14,8 +14,6 @@
  *
  * @see module/documents/actor/calculations/condition-effects.js
  * @see module/config/game-data.js (STATUS_EFFECTS)
- * @see testable-workflows.md §9 (Status Effects & Conditions)
- * @see test-coverage-gap-analysis.md (Gap #7)
  */
 
 import { SYS_ID } from "../../../module/config/constants.js";

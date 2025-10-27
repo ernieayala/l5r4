@@ -2,10 +2,6 @@
  * Dice Rolling Complete Workflow Integration Tests
  *
  * Tests the complete dice rolling workflow from notation parsing through actual roll execution.
- * Addresses gaps identified in test-coverage-gap-analysis.md §3:
- * - Inline roll parsing workflow ([[XkY]])
- * - Unskilled rolls workflow (uXkY)
- * - Emphasis rolls workflow (eXkY)
  *
  * This test suite validates:
  * 1. Roll notation parsing (roll-parser.js)
@@ -19,7 +15,6 @@
  * @see module/services/dice/core/roll-parser.js
  * @see module/services/dice/core/formula-builder.js
  * @see module/services/chat.js (inline roll parsing)
- * @see game-rules/Skills_and_Rolls.md
  */
 
 import { SYS_ID } from "../../../module/config/constants.js";

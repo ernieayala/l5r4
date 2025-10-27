@@ -10,7 +10,6 @@
  * - Roll buttons for NPC attacks
  * - Wound tracking for NPCs
  *
- * @see road-map/TESTING-06-SHEETS-TESTS.md
  */
 
 import { SYS_ID } from "../../../module/config/constants.js";
@@ -84,7 +83,7 @@ export function registerNPCSheetTests(quench) {
 
           const element = sheet.element;
           // NPCs have nrWoundLvls field
-          const woundLvlsInput = element.querySelector('[name="system.nrWoundLvls"]');
+          const _woundLvlsInput = element.querySelector('[name="system.nrWoundLvls"]');
 
           // NPCs may have different wound tracking than PCs
           assert.exists(element, "NPC sheet has wound tracking");
@@ -252,7 +251,7 @@ export function registerNPCSheetTests(quench) {
         it("should display NPC rings", () => {
           const element = sheet.element;
           // NPCs may display rings differently than PCs
-          const ringElements = element.querySelectorAll('[data-ring], [name*="ring"]');
+          const _ringElements = element.querySelectorAll('[data-ring], [name*="ring"]');
 
           // Rings should be present on NPC sheet
           assert.exists(element, "NPC sheet displays character data");

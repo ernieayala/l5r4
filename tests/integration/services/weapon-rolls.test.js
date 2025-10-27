@@ -12,7 +12,6 @@
  * The WeaponRoll service shows dialogs and cannot be reliably tested in Quench.
  *
  * @see module/services/dice/rolls/weapon-roll.js
- * @see game-rules/Combat_and_Damage.md
  */
 
 import { SYS_ID } from "../../../module/config/constants.js";
@@ -25,7 +24,7 @@ export function registerWeaponRollTests(quench) {
   quench.registerBatch(
     `${SYS_ID}.services.rolls.weapon`,
     context => {
-      const { describe, it, assert, beforeEach, afterEach } = context;
+      const { describe, it, assert } = context;
 
       describe("Basic Weapon Damage", () => {
         it("should calculate damage as (Weapon Roll + Strength)k(Weapon Keep)", () => {

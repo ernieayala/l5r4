@@ -7,7 +7,7 @@
  *
  * Used by: skill-roll.js, trait-roll.js, ring-roll.js, simple-roll.js
  *
- * Game Mechanics (game-rules/Skills_and_Rolls.md):
+ * Game Mechanics:
  * - Base TN: Set by GM or automatic (e.g., Armor TN for attacks)
  * - Raises: +5 TN per Raise declared before rolling (max = Void Ring)
  *   Per rules: "[book text removed; Core Rulebook p.79]."

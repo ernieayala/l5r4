@@ -11,7 +11,6 @@
  * - Verify L5R4 game rule formulas are correct
  *
  * @see module/documents/actor/calculations/wound-system.js
- * @see road-map/TESTING-04-DOCUMENTS-TESTS.md
  */
 
 import { describe, it, expect } from "vitest";

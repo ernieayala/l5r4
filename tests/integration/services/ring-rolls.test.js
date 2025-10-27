@@ -10,7 +10,6 @@
  * The RingRoll service shows dialogs and cannot be reliably tested in Quench.
  *
  * @see module/services/dice/rolls/ring-roll.js
- * @see game-rules/Magic_and_Spells.md
  */
 
 import { SYS_ID } from "../../../module/config/constants.js";
@@ -155,7 +154,7 @@ export function registerRingRollTests(quench) {
         });
 
         it("should not limit free raises", () => {
-          const voidRing = 2;
+          const _voidRing = 2;
           const freeRaises = 5;
           // Free raises are NOT limited by Void Ring
 

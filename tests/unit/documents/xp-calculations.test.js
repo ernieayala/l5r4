@@ -10,7 +10,6 @@
  * - Test edge cases (null values, zero ranks)
  *
  * @see module/documents/actor/calculations/xp-system.js
- * @see road-map/TESTING-04-DOCUMENTS-TESTS.md
  */
 
 import { describe, it, expect } from "vitest";

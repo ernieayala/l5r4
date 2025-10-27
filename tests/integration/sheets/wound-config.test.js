@@ -12,7 +12,6 @@
  * - Multiplier and penalty settings
  * - Dialog interaction and closing
  *
- * @see road-map/TESTING-06-SHEETS-TESTS.md
  */
 
 import { SYS_ID } from "../../../module/config/constants.js";
@@ -118,7 +117,7 @@ export function registerWoundConfigTests(quench) {
 
         it("should display wound multiplier", () => {
           const element = dialog.element;
-          const multiplierInput = element.querySelector(
+          const _multiplierInput = element.querySelector(
             '[name*="woundsMultiplier"], [name*="multiplier"]'
           );
 
@@ -173,7 +172,7 @@ export function registerWoundConfigTests(quench) {
           await new Promise(resolve => setTimeout(resolve, 100));
 
           const element = dialog.element;
-          const modeInputs = element.querySelectorAll('[name*="woundMode"], input[type="radio"]');
+          const _modeInputs = element.querySelectorAll('[name*="woundMode"], input[type="radio"]');
 
           // NPC has manual/formula mode options
           assert.exists(element, "NPC wound mode configuration exists");
@@ -261,7 +260,7 @@ export function registerWoundConfigTests(quench) {
 
         it("should have close button", () => {
           const element = dialog.element;
-          const closeButton = element.querySelector('[data-action="close"], .close');
+          const _closeButton = element.querySelector('[data-action="close"], .close');
 
           // Dialog should have way to close
           assert.exists(element, "Dialog has close mechanism");
@@ -278,7 +277,7 @@ export function registerWoundConfigTests(quench) {
         });
 
         it("should not leak after close", async () => {
-          const dialogId = dialog.id;
+          const _dialogId = dialog.id;
 
           await dialog.close();
 

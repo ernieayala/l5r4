@@ -1,8 +1,8 @@
 /**
  * Bow Damage Calculator
  *
- * Calculates archery damage formulas for L5R4 bow weapons based on Equipment rules
- * from Weapons.md. Implements the core bow damage mechanic: bow Strength adds to
+ * Calculates archery damage formulas for L5R4 bow weapons based on Equipment rules.
+ * Implements the core bow damage mechanic: bow Strength adds to
  * arrow rolled dice, but character uses their own Strength if lower than bow rating.
  *
  * Core L5R4 Archery Rules:
@@ -33,7 +33,7 @@ import { toInt } from "../../../utils/type-coercion.js";
 /**
  * Calculate bow damage formula based on L5R4 archery rules.
  *
- * Implements the Equipment rules from Weapons.md: "[book text removed; Core Rulebook p.199]. [book text removed; Core Rulebook p.199]."
+ * Implements the Equipment rules: "[book text removed; Core Rulebook p.199]. [book text removed; Core Rulebook p.199]."
  *
  * Calculation Steps:
  * 1. Determine effective Strength: min(character Strength, bow Strength)

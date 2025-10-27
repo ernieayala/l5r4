@@ -12,7 +12,6 @@
  * The rest service creates chat messages and updates actors which are tested elsewhere.
  *
  * @see module/services/rest.js
- * @see game-rules/Wounds_and_Healing.md
  */
 
 import { SYS_ID } from "../../../module/config/constants.js";
@@ -129,7 +128,7 @@ export function registerRestTests(quench) {
         });
 
         it("should restore all spell slots regardless of current", () => {
-          const currentSlots = { air: 1, earth: 0, fire: 2, water: 0, void: 0 };
+          const _currentSlots = { air: 1, earth: 0, fire: 2, water: 0, void: 0 };
           const rings = { air: 4, earth: 3, fire: 3, water: 3, void: { rank: 2 } };
 
           const restored = {

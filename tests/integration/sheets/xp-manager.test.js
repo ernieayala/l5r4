@@ -11,7 +11,6 @@
  * - XP calculation and totals
  * - Dialog interaction and closing
  *
- * @see road-map/TESTING-06-SHEETS-TESTS.md
  */
 
 import { SYS_ID } from "../../../module/config/constants.js";
@@ -77,7 +76,7 @@ export function registerXpManagerTests(quench) {
           await new Promise(resolve => setTimeout(resolve, 100));
 
           const element = dialog.element;
-          const xpElements = element.querySelectorAll("[data-xp], .xp-section");
+          const _xpElements = element.querySelectorAll("[data-xp], .xp-section");
 
           // Dialog should have XP-related content
           assert.exists(element, "XP management interface exists");
@@ -293,7 +292,7 @@ export function registerXpManagerTests(quench) {
 
         it("should have action buttons", () => {
           const element = dialog.element;
-          const actionButtons = element.querySelectorAll("[data-action]");
+          const _actionButtons = element.querySelectorAll("[data-action]");
 
           // Dialog should have buttons for actions
           assert.exists(element, "Dialog has interactive elements");

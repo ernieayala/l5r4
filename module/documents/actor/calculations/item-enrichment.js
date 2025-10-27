@@ -5,7 +5,7 @@
  * All calculations follow L5R4 game rules and are stored on item.system for sheet display.
  *
  * This module runs in the Documents layer (Actor.prepareDerivedData), ensuring all
- * formula calculations happen in the correct architectural layer per 03-architecture-layers.md.
+ * formula calculations happen in the correct architectural layer
  *
  * @module documents/actor/calculations/item-enrichment
  */

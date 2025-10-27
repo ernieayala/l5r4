@@ -57,7 +57,7 @@ import { getArmorTNPenalty } from "../../../utils/armor-penalties.js";
  * bonuses from effects, void point spending, emphasis, raises, wound penalties,
  * and Honor bonuses for social resistance.
  *
- * Skill Roll Mechanics (per Skills_and_Rolls.md):
+ * Skill Roll Mechanics:
  * - Skilled formula (Rank > 0): Roll (Skill + Trait + rollMod) dice, keep (Trait + keepMod) dice
  * - Unskilled formula (Rank = 0): Roll (Trait + rollMod)k(Trait + keepMod) - no exploding dice, no raises
  * - Emphasis: When applicable, re-roll any dice showing 1 (once per die)
@@ -65,7 +65,7 @@ import { getArmorTNPenalty } from "../../../utils/armor-penalties.js";
  * - Void Points: Spending void grants +1k1 bonus to the roll
  * - Ten Dice Rule: Enforced automatically (excess dice convert to kept or bonuses)
  * - Wound Penalties: Applied to effective TN if enabled
- * - Social Resistance: Honor Rank added to total when resisting Intimidation/Temptation (Honor_Glory_Status.md)
+ * - Social Resistance: Honor Rank added to total when resisting Intimidation/Temptation
  *
  * Dialog Behavior:
  * The function conditionally shows a roll options dialog based on the askForOptions
@@ -219,7 +219,7 @@ export async function SkillRoll({
     totalMod -= woundPenalty;
   }
 
-  // L5R4 Unskilled Roll Rule (Skills_and_Rolls.md):
+  // L5R4 Unskilled Roll Rule:
   // When skill rank = 0, "effectively making a Trait Roll" = (Trait)k(Trait) with no exploding dice
   const isUnskilled = toInt(skillRank) === 0;
   let diceToRoll, diceToKeep;

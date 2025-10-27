@@ -10,8 +10,6 @@
  * Test Priority: Tier 2 (Important - Rest & Recovery mechanics)
  *
  * @see module/services/rest.js
- * @see game-rules/Wounds_and_Healing.md
- * @see testable-workflows.md §14
  */
 
 import { SYS_ID } from "../../../module/config/constants.js";

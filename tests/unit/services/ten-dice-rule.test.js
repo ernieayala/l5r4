@@ -7,7 +7,7 @@
  * - Excess dice convert to flat bonuses using specific ratios
  *
  * Test Coverage:
- * - Official game rule examples (all 4 from Rings_and_Traits.md)
+ * - Official game rule examples
  * - Edge cases (minimum values, boundaries, exact caps)
  * - Invalid inputs (negative, zero, kept > rolled)
  * - Both fast path (both >= 10) and slow path conversions

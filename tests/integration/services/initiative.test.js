@@ -9,7 +9,6 @@
  * - Combat integration
  *
  * @see module/services/initiative.js
- * @see game-rules/Combat_and_Wounds.md
  */
 
 import { SYS_ID } from "../../../module/config/constants.js";

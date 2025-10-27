@@ -21,10 +21,6 @@
  * - Tests EDGE CASES (boundaries, mode switches, invalid values)
  * - Tests fail when code breaks
  *
- * @see for_research/test-coverage-gap-analysis.md §10
- * @see for_research/testable-workflows.md §16
- * @see .windsurf/rules/12-testing-principles.md
- * @see .windsurf/rules/13-testing-implementation.md
  */
 
 import { SYS_ID } from "../../../module/config/constants.js";

@@ -9,8 +9,6 @@
  * 5. Multiple Fear sources
  * 6. Effect removal and recovery
  *
- * This covers testable-workflows.md §13 (Fear System) completely.
- *
  * @see module/services/fear.js
  * @see module/documents/actor/calculations/fear-system.js
  */

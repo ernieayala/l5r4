@@ -13,7 +13,6 @@
  * The XP service reconstructs history from Actor state which is complex.
  *
  * @see module/services/xp/xp-calculator.js
- * @see game-rules/Experience_and_Advancement.md
  */
 
 import { SYS_ID } from "../../../module/config/constants.js";
@@ -200,8 +199,8 @@ export function registerXpServiceTests(quench) {
         });
 
         it("should calculate XP only for ranks above free ranks", () => {
-          const freeRanks = 3; // Baseline 2 + family bonus 1
-          const currentRank = 5;
+          const _freeRanks = 3; // Baseline 2 + family bonus 1
+          const _currentRank = 5;
           const paidRanks = [4, 5]; // Ranks that cost XP
           const totalCost = 4 * 4 + 4 * 5;
 

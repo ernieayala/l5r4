@@ -11,7 +11,6 @@
  * The NpcRoll service shows dialogs and cannot be reliably tested in Quench.
  *
  * @see module/services/dice/rolls/npc-roll.js
- * @see game-rules/Skills_and_Rolls.md
  */
 
 import { SYS_ID } from "../../../module/config/constants.js";

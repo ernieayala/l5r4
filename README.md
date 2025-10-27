@@ -1,11 +1,11 @@
 # Legend of the Five Rings 4th Edition - Enhanced
 
 [![FoundryVTT version](https://img.shields.io/badge/FVTT-v13.x-informational)](https://foundryvtt.com/)
-[![Version](https://img.shields.io/badge/Version-2.2.0-blue)](https://github.com/ernieayala/l5r4/releases)
+[![Version](https://img.shields.io/badge/Version-3.0.0-blue)](https://github.com/ernieayala/l5r4/releases)
 [![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](LICENSE)
 [![GitHub Issues](https://img.shields.io/github/issues/ernieayala/l5r4)](https://github.com/ernieayala/l5r4/issues)
 
-Complete Legend of the Five Rings 4th Edition implementation for Foundry VTT v13+. Authentic Roll & Keep mechanics, automated character management, XP tracking, combat stances, mounted combat, fear system, spell casting, and comprehensive L5R4 rule support.
+Complete Legend of the Five Rings 4th Edition implementation for Foundry VTT v13+. Authentic Roll & Keep mechanics with raises and free raises, automated character management, one-click damage application with armor reduction, XP tracking, combat stances, mounted combat, fear system, spell casting, and comprehensive L5R4 rule support.
 
 ---
 
@@ -206,19 +206,31 @@ https://github.com/ernieayala/l5r4-migrator/releases/latest/download/module.json
 - Stance effects (Full Attack: +2k1, Defense: +Air Ring to TN)
 - Wound penalties (applied to TN, not roll)
 - Mounted combat bonuses (+1k0 vs unmounted)
+- Free Raises from items, advantages, techniques (reduce TN by 5 each)
 
 **Player-Declared Modifiers**
-- **Raises**: +5 TN each, declared before rolling
+- **Raises**: +5 TN each, declared before rolling (maximum = Void Ring rank)
+- **Free Raises**: Reduce TN by 5 each without increasing difficulty (no Void Ring limit)
 - **Void Points**: +1k1 to roll (auto-deducted from character)
 - **Custom Bonus**: Free-form modifier in roll dialog
 - **Circumstance**: Situational bonuses (lighting, terrain, etc.)
+
+**Raise Mechanics**
+- Declared raises increase TN by 5 per raise
+- Maximum raises = character's Void Ring rank
+- Unskilled rolls cannot declare raises
+- Free Raises provide raise benefits without TN increase
+- Free Raises don't count toward Void Ring maximum
+- Affinity grants 1 free raise for spell casting
+- TN cannot go below 0 (floor enforced)
 
 ### Roll Dialogs
 
 **Skill Rolls**
 - Display skill rank + trait + bonuses
 - Emphasis checkbox (reroll 1s)
-- Raise declaration
+- Raise declaration input (validated against Void Ring)
+- Free Raises display (calculated from items/effects)
 - Void Point spending
 - Custom modifiers
 - Target number input
@@ -226,6 +238,8 @@ https://github.com/ernieayala/l5r4-migrator/releases/latest/download/module.json
 **Trait/Ring Rolls**
 - Raw trait tests
 - Ring checks for spells, conditions
+- Raise declaration support
+- Free Raises display
 - Unskilled option available in roll dialog
 
 **Weapon Rolls**
@@ -233,6 +247,8 @@ https://github.com/ernieayala/l5r4-migrator/releases/latest/download/module.json
 - Damage roll (automatic after hit)
 - Target selection (uses token's Armor TN)
 - Raise declaration for special effects
+- Free Raises from advantages/techniques
+- Interactive damage application buttons in chat
 
 ### Combat Integration
 
@@ -284,11 +300,26 @@ Direct L5R4 dice rolls in chat:
 - Formula: Insight Rank + Reflexes + modifiers
 - Modifiers from Active Effects, items, conditions
 - Roll/Keep modifiers separate (for special abilities)
+- Void Point spending option for initiative rolls
 
 **Combat Tracker Integration**
 - Click initiative value to roll
 - Integrates with Foundry combat tracker
 - Initiative cards show in tracker
+- Void Point expenditure tracked
+
+### Movement
+
+**Movement Calculation**
+- Base movement: Water Ring × 5 feet
+- Displayed in Combat section on character sheet
+- Automatic calculation from Water Ring value
+- Condition penalties apply (Blinded: -2 Water Ring)
+
+**Movement Actions**
+- Move Action: Water Ring × 5 feet
+- Full Move: Water Ring × 10 feet (no other actions)
+- Visual display of movement rates on sheet
 
 ### Combat Stances
 
@@ -392,19 +423,52 @@ Five stance options with automatic effect application:
 - Checkbox in roll dialog to include/exclude
 - Displayed in chat roll results
 
-### Damage
+### Guard Maneuver
+
+**Guard Action**
+- Simple Action to protect ally within 5 feet
+- Guardian gains Guarding status: -5 Armor TN
+- Protected ally gains Guarded status: +10 Armor TN
+- Duration: Until guardian's next turn
+- Proximity requirement: 5 feet (manual tracking)
+
+**Status Effects**
+- **Guarding**: Apply to guardian character
+- **Guarded**: Apply to protected character
+- Manual application by players when declaring Guard
+- Automatic Armor TN modifiers
+- Visual indicators on tokens
+
+### Damage Application
+
+**Interactive Damage System**
+- Damage rolls create chat cards with action buttons
+- **Apply Wounds**: One-click damage application to selected token
+- **Reduce with Void**: Spend Void Point to reduce damage by 10
+- Automatic armor reduction applied
+- Visual notifications show damage breakdown
+
+**Damage Calculation Order**
+1. Void Point reduction (if used): -10 damage
+2. Armor reduction: Subtract armor's Reduction value
+3. Final damage applied to suffered wounds
+4. Minimum damage: 0 (cannot go negative)
 
 **Taking Damage**
-- Armor reduction applies first
+- Select token before clicking damage buttons
+- Armor reduction applies automatically
 - Remaining damage adds to suffered wounds
 - Wound level recalculates automatically
 - Down/Out status at severe wounds
+- Chat notifications show full damage breakdown
 
 **Damage Reduction**
-- From armor items
+- From equipped armor items
+- Reduction value calculated in prepareDerivedData
 - Multiple armors: Highest only (default) or stacking (optional)
 - Displayed on character sheet
-- Applied before wound calculation
+- Applied automatically before wound calculation
+- Works with Void Point reduction (Void first, then armor)
 
 ---
 
@@ -490,6 +554,7 @@ Five stance options with automatic effect application:
 - Mastery level
 - Associated ring(s)
 - Keywords (Battle, Craft, Thunder, etc.)
+- Memorization status (for prepared casters)
 
 **Mechanical Details**
 - Range (personal, touch, distance)
@@ -497,6 +562,13 @@ Five stance options with automatic effect application:
 - Duration (instantaneous, concentration, permanent)
 - Raises (special effects for extra raises)
 - Casting time
+- Free Raises from affinity
+
+**Spell Memorization**
+- `memorized` checkbox on spell items
+- Track prepared/memorized spells
+- Useful for house rules requiring spell preparation
+- Visual indicator on spell list
 
 ### Shugenja Schools
 
@@ -583,14 +655,33 @@ Five stance options with automatic effect application:
 
 ## 📦 Item Types
 
+### Item Sheet Interface
+
+**4-Tab System**
+- **Description**: Item name, description, special rules, keywords
+- **Details**: Type-specific properties (damage, mastery, cost, etc.)
+- **Modifiers**: Roll bonuses, keep bonuses, total bonuses, Free Raises
+- **Active Effects**: Attribute modifications
+
+---
+
 ### Skills
 
 **Core Properties**
 - Rank (0-10)
 - Type (High, Bugei, Merchant, Low)
 - Associated trait
-- Emphasis (specialty)
+- Multiple emphases support (specialties)
 - School skill flag (half XP cost)
+- Free Raises field (for advantages/techniques)
+
+**Emphasis System**
+- **Available Emphases**: List of possible specialties for the skill
+- **Trained Emphases**: Emphases purchased by character
+- Multiple emphases per skill supported
+- Each emphasis costs 2 XP
+- Emphasis Manager for easy management
+- Emphasis checkbox in roll dialog (reroll 1s)
 
 **Mastery Abilities**
 - Rank 3, 5, 7 mastery effects
@@ -602,13 +693,15 @@ Five stance options with automatic effect application:
 - Keep bonus (+0kX)
 - Total bonus (flat modifier)
 - Insight bonus (affects insight calculation)
+- Free Raises (reduce TN by 5 each)
 - Applied via Active Effects or direct values
 
 **XP Tracking**
 - Triangular cost calculation
 - School skill discount (half cost, rounded up)
 - New skill acquisition (1 XP)
-- Emphasis purchase (2 XP each)
+- Each emphasis purchase (2 XP per emphasis)
+- XP Manager tracks all trained emphases
 
 ### Family
 
@@ -688,6 +781,13 @@ Five stance options with automatic effect application:
 - Spiritual
 - Material
 
+**Free Raises**
+- Advantages can grant Free Raises
+- Set via `freeRaises` field on item
+- Free Raises reduce TN by 5 each
+- Don't count toward Void Ring maximum
+- Automatically calculated and displayed in roll dialogs
+
 **Active Effects**
 - Trait modifications
 - Skill bonuses
@@ -706,11 +806,17 @@ Five stance options with automatic effect application:
 - Mastery level (1-9)
 - XP cost
 - Description and effects
+- Free Raises field (for kata granting raise benefits)
 
 **Types**
 - Weapon kata (specific weapon schools)
 - Unarmed kata (Jiujutsu)
 - General martial techniques
+
+**Free Raises**
+- Kata can grant Free Raises to specific actions
+- Set via `freeRaises` field
+- Automatically applied in roll calculations
 
 **Active Effects**
 - Combat bonuses
@@ -918,11 +1024,20 @@ Active Effects modify character stats dynamically. Create effects on Family, Sch
 
 #### Advantages/Disadvantages
 
-| Attribute Key | Description | Example Value |
-| ------------- | ----------- | ------------- |
-| `system.cost` | Point Cost  | `5`           |
+| Attribute Key      | Description  | Example Value |
+| ------------------ | ------------ | ------------- |
+| `system.cost`      | Point Cost   | `5`           |
+| `system.freeRaises`| Free Raises  | `2`           |
 
 **Note**: Both advantages and disadvantages store positive costs. Disadvantages grant XP in calculations (handled automatically by the system).
+
+#### All Item Types
+
+| Attribute Key       | Description                        | Example Value |
+| ------------------- | ---------------------------------- | ------------- |
+| `system.freeRaises` | Free Raises granted by this item   | `1`           |
+
+**Note**: Free Raises can be added to any item type (advantages, techniques, kata, weapons, etc.) to grant raise benefits without TN increase.
 
 ### Usage Examples
 
@@ -958,12 +1073,23 @@ Create an Active Effect on a Technique item:
 - **Change Mode**: Add
 - **Effect Value**: `1`
 
+#### Free Raises from Advantage
+
+Grant Free Raises via item field (not Active Effect):
+
+- Open Advantage item sheet
+- Go to **Modifiers** tab
+- Set **Free Raises** field to desired value (e.g., `2`)
+- Free Raises automatically calculated and displayed in roll dialogs
+- Reduces TN by 5 per Free Raise without counting toward Void Ring limit
+
 ### Notes
 
 - Use dot notation for nested properties (e.g., `system.traits.str`)
 - Trait bonuses from Family items should use the trait keys above
 - School bonuses typically affect skills or provide special abilities
 - Some derived values (like elemental rings) are calculated automatically and cannot be directly modified
+- Free Raises are set via item fields, not Active Effects
 - Always test Active Effects to ensure they work as intended with your specific use case
 
 ---
@@ -987,6 +1113,9 @@ All UI elements, item types, settings, and mechanics fully localized. Want to co
 
 **Dice Visuals**
 - **[Dice So Nice!](https://foundryvtt.com/packages/dice-so-nice)** - 3D dice animations for L5R Roll & Keep dice
+
+**Testing & Development**
+- **[Quench](https://foundryvtt.com/packages/quench)** - Required for running integration tests (developers only)
 
 ---
 
@@ -1043,9 +1172,9 @@ Contributions welcome! Help improve L5R4-Enhanced for the community.
 - Circular dependency detection
 
 **Testing**
-- Vitest unit tests
+- 440+ Vitest unit tests
 - Quench integration tests
-- See `.windsurf/workflows/` for testing protocols
+- npm scripts: `test`, `test:watch`, `test:ui`, `test:coverage`
 
 ### Ways to Contribute
 
@@ -1104,19 +1233,13 @@ Software provided "as is" without warranty. Always backup worlds before system u
 
 ## 🎴 Support This Project
 
-Found this system helpful? Consider:
-- ⭐ **Star on GitHub** to show support
-- 🐛 **Report bugs** to improve quality
-- 💬 **Join discussions** to help others
-- 🌐 **Contribute translations** for your language
-- 🔧 **Submit PRs** with improvements
+Ways to contribute:
+- ⭐ Star on GitHub
+- 🐛 Report bugs
+- 💬 Join discussions
+- 🌐 Contribute translations
+- 🔧 Submit PRs
 
 ---
-
-_"In a land where honor is stronger than steel, the dice will tell your tale."_
-
-**Ready to journey through Rokugan?**
-
-Install the system and let the kami guide your destiny!
 
 **Links:** [Discussions](https://github.com/ernieayala/l5r4/discussions) | [Issues](https://github.com/ernieayala/l5r4/issues) | [Releases](https://github.com/ernieayala/l5r4/releases)

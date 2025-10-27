@@ -5,7 +5,7 @@
  * per L5R4 Equipment rules. Different armor types penalize different skill/trait
  * combinations when performing rolls.
  *
- * L5R4 Armor Penalty Rules (Equipment.md):
+ * L5R4 Armor Penalty Rules:
  * - **Ashigaru Armor**: No penalties
  * - **Light Armor**: +5 TN to Athletics and Stealth skill rolls
  * - **Heavy Armor**: +5 TN to all skill rolls using Agility or Reflexes traits
@@ -37,7 +37,7 @@ export const ARMOR_TYPES = Object.freeze({
 
 /**
  * Skills that receive TN penalties when wearing light armor.
- * Per L5R4 Equipment.md: Light armor increases TN for Athletics and Stealth by +5.
+ * Light armor increases TN for Athletics and Stealth by +5.
  * @constant {Set<string>}
  * @readonly
  */

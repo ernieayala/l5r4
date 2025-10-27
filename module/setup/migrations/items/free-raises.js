@@ -14,7 +14,7 @@ import { SYS_ID } from "../../../config/constants.js";
  * was implemented. All items using the itemDescription template (advantages, disadvantages,
  * spells, techniques, skills, etc.) should have freeRaises: 0 as default.
  *
- * L5R4 Free Raises Mechanic (game-rules/Skills_and_Rolls.md):
+ * L5R4 Free Raises Mechanic:
  * Free Raises grant Raise benefits without +5 TN increase and don't count toward
  * Void Ring maximum. Items like advantages or school techniques can grant Free Raises.
  *

@@ -2,7 +2,6 @@
  * Initiative Complete Workflow Integration Tests
  *
  * Tests complete initiative workflows from rolling to combat tracker integration.
- * Addresses test-coverage-gap-analysis.md §5 missing workflows.
  *
  * Test Priority: Tier 1 (Critical - Core combat mechanic)
  */

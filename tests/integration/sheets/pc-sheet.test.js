@@ -10,7 +10,6 @@
  * - Sheet updates when actor changes
  * - User interactions (roll buttons, item management)
  *
- * @see road-map/TESTING-06-SHEETS-TESTS.md
  */
 
 import { SYS_ID } from "../../../module/config/constants.js";
@@ -200,7 +199,7 @@ export function registerPCSheetTests(quench) {
         it("should have item management actions", () => {
           const element = sheet.element;
           // Look for edit or delete actions
-          const itemActions = element.querySelectorAll(
+          const _itemActions = element.querySelectorAll(
             '[data-action*="edit"], [data-action*="delete"]'
           );
 
@@ -211,7 +210,7 @@ export function registerPCSheetTests(quench) {
           // Wait for render to complete
           await new Promise(resolve => setTimeout(resolve, 100));
 
-          const element = sheet.element;
+          const _element = sheet.element;
           const items = actor.items.contents;
 
           assert.equal(items.length, 1, "Actor has one item");
@@ -297,7 +296,7 @@ export function registerPCSheetTests(quench) {
 
           const element = sheet.element;
           // Look for wound level displays
-          const woundElements = element.querySelectorAll("[data-wound-level], [data-wound]");
+          const _woundElements = element.querySelectorAll("[data-wound-level], [data-wound]");
 
           // Wound levels should be visible on sheet
           assert.exists(element, "Sheet displays wound tracking");
