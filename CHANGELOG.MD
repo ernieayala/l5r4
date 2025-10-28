@@ -7,6 +7,28 @@ Versioning: [Semantic Versioning](https://semver.org/spec/v2.0.0.html)
 
 ---
 
+## [3.1.1] - 2025-10-27
+
+### Fixed
+
+**Emphasis Migration**
+- Improved emphasis string-to-array migration with intelligent matching
+- Case-insensitive matching for official emphases (e.g., "katana" → "Katana")
+- Singular/plural matching (e.g., "Dog" → "Dogs", "horse" → "Horses")
+- Automatic custom emphasis creation for non-matching items
+- Backward compatibility: old `emphasis` field preserved in template.json to prevent data loss
+- Migration now merges old and new data safely (idempotent with deduplication)
+- Preserves existing `trainedEmphases` during migration
+
+### Enhanced
+
+**Migration Safety**
+- Migration can run multiple times safely without duplicating data
+- Existing emphasis data is never lost during system updates
+- Proper logging of created custom emphases during migration
+
+---
+
 ## [3.1.0] - 2025-10-27
 
 ### Added
