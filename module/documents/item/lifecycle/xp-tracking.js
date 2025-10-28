@@ -23,12 +23,7 @@
  */
 
 import { SYS_ID } from "../../../config/constants.js";
-import { toInt } from "../../../utils/type-coercion.js";
-import {
-  calculateSkillCost,
-  calculateSkillRankDelta,
-  calculateEmphasisCost
-} from "../constants/xp-costs.js";
+// Unused imports removed - XP calculation now handled by services/xp/xp-calculator.js
 
 /**
  * Invalidate XP cache to trigger recalculation.
@@ -61,7 +56,7 @@ async function invalidateXpCache(actor) {
  * @param {Object} sys - The item's system data object (unused, kept for compatibility)
  * @returns {Promise<void>} Resolves when cache is invalidated
  */
-export async function logSkillCreationXp(item, sys) {
+export async function logSkillCreationXp(item, _sys) {
   if (!item.actor) {
     return;
   }
@@ -79,7 +74,7 @@ export async function logSkillCreationXp(item, sys) {
  * @param {number} [freeRanks=0] - Number of free ranks (unused, kept for compatibility)
  * @returns {Promise<boolean>} Always returns true for compatibility
  */
-export async function logSkillRankXp(item, oldRank, newRank, freeRanks) {
+export async function logSkillRankXp(item, _oldRank, _newRank, _freeRanks) {
   if (!item.actor) {
     return false;
   }
@@ -98,7 +93,7 @@ export async function logSkillRankXp(item, oldRank, newRank, freeRanks) {
  * @param {number} [freeEmphasis=0] - Number of free emphases (unused)
  * @returns {Promise<boolean>} Always returns true for compatibility
  */
-export async function logEmphasisXp(item, oldEmphases, newEmphases, freeEmphasis) {
+export async function logEmphasisXp(item, _oldEmphases, _newEmphases, _freeEmphasis) {
   if (!item.actor) {
     return false;
   }
@@ -115,7 +110,7 @@ export async function logEmphasisXp(item, oldEmphases, newEmphases, freeEmphasis
  * @param {number} cost - The XP cost of the advantage (unused, kept for compatibility)
  * @returns {Promise<void>} Resolves when cache is invalidated
  */
-export async function logAdvantageXp(item, cost) {
+export async function logAdvantageXp(item, _cost) {
   if (!item.actor) {
     return;
   }
@@ -131,7 +126,7 @@ export async function logAdvantageXp(item, cost) {
  * @param {number} cost - The XP value of the disadvantage (unused, kept for compatibility)
  * @returns {Promise<void>} Resolves when cache is invalidated
  */
-export async function logDisadvantageXp(item, cost) {
+export async function logDisadvantageXp(item, _cost) {
   if (!item.actor) {
     return;
   }
@@ -148,7 +143,7 @@ export async function logDisadvantageXp(item, cost) {
  * @param {number} newCost - The XP cost after the update (unused)
  * @returns {Promise<boolean>} Always returns true for compatibility
  */
-export async function logCostChangeXp(item, oldCost, newCost) {
+export async function logCostChangeXp(item, _oldCost, _newCost) {
   if (!item.actor) {
     return false;
   }

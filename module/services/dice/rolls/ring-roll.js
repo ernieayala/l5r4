@@ -125,33 +125,7 @@ async function _confirmSpellSlotUsage(actor, systemRing, ringName) {
   }
 }
 
-/**
- * Generic resource spending wrapper with user notification.
- *
- * Abstracts the common pattern of spending a resource (spell slot, Void Point),
- * checking for success, displaying error notifications, and extracting values.
- * Centralizes error handling and provides consistent user feedback.
- *
- * Used for spell slot consumption where successful spends return a chat label
- * to append to the roll message (e.g., " [Fire Slot]").
- *
- * @param {Function} spendFn - Async function that returns {success, message, [successProp]}
- * @param {string} [successProp="label"] - Property name to extract from successful result
- * @returns {Promise<{success: boolean, value: *}>} Normalized result with extracted value
- * @private
- * @async
- */
-async function spendResource(spendFn, successProp = "label") {
-  const result = await spendFn();
-
-  // Display user-facing error notification if spending failed
-  if (!result.success) {
-    ui.notifications?.warn(result.message);
-    return { success: false, value: null };
-  }
-
-  return { success: true, value: result[successProp] };
-}
+// Removed unused spendResource function - spell slot consumption now handled inline
 
 /**
  * Execute a Ring roll or Spell Casting roll with full L5R4 mechanics.

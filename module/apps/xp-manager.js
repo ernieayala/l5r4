@@ -43,7 +43,7 @@
 
 import { SYS_ID } from "../config/constants.js";
 import { getSortPref, setSortPref } from "../utils/sorting.js";
-import { buildXpHistory, mergeXpHistory } from "../services/xp/xp-calculator.js";
+import { buildXpHistory } from "../services/xp/xp-calculator.js";
 import { formatXpEntries } from "../services/xp/xp-formatter.js";
 import { needsRetroactiveUpdate, calculateXpDataVersion } from "../services/xp/xp-versioning.js";
 
