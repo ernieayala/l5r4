@@ -7,7 +7,6 @@
 
 import { SYS_ID, PATHS } from "../../../config/constants.js";
 import { ICON_MIGRATION_MAP } from "./icon-map.js";
-import { hasBeenMigrated } from "../utils/helpers.js";
 
 /**
  * Directory listing cache to avoid repeated FilePicker API calls.
