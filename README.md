@@ -1,7 +1,7 @@
 # Legend of the Five Rings 4th Edition - Enhanced
 
 [![FoundryVTT version](https://img.shields.io/badge/FVTT-v13.x-informational)](https://foundryvtt.com/)
-[![Version](https://img.shields.io/badge/Version-3.0.0-blue)](https://github.com/ernieayala/l5r4/releases)
+[![Version](https://img.shields.io/badge/Version-3.1.1-blue)](https://github.com/ernieayala/l5r4/releases)
 [![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](LICENSE)
 [![GitHub Issues](https://img.shields.io/github/issues/ernieayala/l5r4)](https://github.com/ernieayala/l5r4/issues)
 
