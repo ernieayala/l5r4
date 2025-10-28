@@ -18,7 +18,386 @@
   },
   "esmodules": ["dist/l5r4-enhanced.js"],
   "styles": ["dist/l5r4-enhanced.css"],
-  "packs": [],
+  "packs": [
+    {
+      "name": "advantages",
+      "label": "Advantages",
+      "path": "packs/character-options/advantages",
+      "type": "Item",
+      "system": "l5r4-enhanced",
+      "ownership": {
+        "PLAYER": "OBSERVER",
+        "ASSISTANT": "OWNER"
+      }
+    },
+    {
+      "name": "disadvantages",
+      "label": "Disadvantages",
+      "path": "packs/character-options/disadvantages",
+      "type": "Item",
+      "system": "l5r4-enhanced",
+      "ownership": {
+        "PLAYER": "OBSERVER",
+        "ASSISTANT": "OWNER"
+      }
+    },
+    {
+      "name": "clans",
+      "label": "Clans",
+      "path": "packs/clans-and-families/clans",
+      "type": "Item",
+      "system": "l5r4-enhanced",
+      "ownership": {
+        "PLAYER": "OBSERVER",
+        "ASSISTANT": "OWNER"
+      }
+    },
+    {
+      "name": "families",
+      "label": "Families",
+      "path": "packs/clans-and-families/families",
+      "type": "Item",
+      "system": "l5r4-enhanced",
+      "ownership": {
+        "PLAYER": "OBSERVER",
+        "ASSISTANT": "OWNER"
+      }
+    },
+    {
+      "name": "schools-bushi",
+      "label": "Schools - Bushi",
+      "path": "packs/schools/bushi",
+      "type": "Item",
+      "system": "l5r4-enhanced",
+      "ownership": {
+        "PLAYER": "OBSERVER",
+        "ASSISTANT": "OWNER"
+      }
+    },
+    {
+      "name": "schools-shugenja",
+      "label": "Schools - Shugenja",
+      "path": "packs/schools/shugenja",
+      "type": "Item",
+      "system": "l5r4-enhanced",
+      "ownership": {
+        "PLAYER": "OBSERVER",
+        "ASSISTANT": "OWNER"
+      }
+    },
+    {
+      "name": "schools-courtier",
+      "label": "Schools - Courtier",
+      "path": "packs/schools/courtier",
+      "type": "Item",
+      "system": "l5r4-enhanced",
+      "ownership": {
+        "PLAYER": "OBSERVER",
+        "ASSISTANT": "OWNER"
+      }
+    },
+    {
+      "name": "schools-monk",
+      "label": "Schools - Monk",
+      "path": "packs/schools/monk",
+      "type": "Item",
+      "system": "l5r4-enhanced",
+      "ownership": {
+        "PLAYER": "OBSERVER",
+        "ASSISTANT": "OWNER"
+      }
+    },
+    {
+      "name": "schools-ninja",
+      "label": "Schools - Ninja",
+      "path": "packs/schools/ninja",
+      "type": "Item",
+      "system": "l5r4-enhanced",
+      "ownership": {
+        "PLAYER": "NONE",
+        "TRUSTED": "NONE"
+      }
+    },
+    {
+      "name": "schools-artisan",
+      "label": "Schools - Artisan",
+      "path": "packs/schools/artisan",
+      "type": "Item",
+      "system": "l5r4-enhanced",
+      "ownership": {
+        "PLAYER": "OBSERVER",
+        "ASSISTANT": "OWNER"
+      }
+    },
+    {
+      "name": "weapons-melee",
+      "label": "Weapons - Melee",
+      "path": "packs/equipment/weapons-melee",
+      "type": "Item",
+      "system": "l5r4-enhanced",
+      "ownership": {
+        "PLAYER": "OBSERVER",
+        "ASSISTANT": "OWNER"
+      }
+    },
+    {
+      "name": "weapons-ranged",
+      "label": "Weapons - Ranged",
+      "path": "packs/equipment/weapons-ranged",
+      "type": "Item",
+      "system": "l5r4-enhanced",
+      "ownership": {
+        "PLAYER": "OBSERVER",
+        "ASSISTANT": "OWNER"
+      }
+    },
+    {
+      "name": "armor",
+      "label": "Armor",
+      "path": "packs/equipment/armor",
+      "type": "Item",
+      "system": "l5r4-enhanced",
+      "ownership": {
+        "PLAYER": "OBSERVER",
+        "ASSISTANT": "OWNER"
+      }
+    },
+    {
+      "name": "equipment",
+      "label": "Equipment & Items",
+      "path": "packs/equipment/general",
+      "type": "Item",
+      "system": "l5r4-enhanced",
+      "ownership": {
+        "PLAYER": "OBSERVER",
+        "ASSISTANT": "OWNER"
+      }
+    },
+    {
+      "name": "skills-high",
+      "label": "Skills - High",
+      "path": "packs/skills/high",
+      "type": "Item",
+      "system": "l5r4-enhanced",
+      "ownership": {
+        "PLAYER": "OBSERVER",
+        "ASSISTANT": "OWNER"
+      }
+    },
+    {
+      "name": "skills-bugei",
+      "label": "Skills - Bugei",
+      "path": "packs/skills/bugei",
+      "type": "Item",
+      "system": "l5r4-enhanced",
+      "ownership": {
+        "PLAYER": "OBSERVER",
+        "ASSISTANT": "OWNER"
+      }
+    },
+    {
+      "name": "skills-low",
+      "label": "Skills - Low",
+      "path": "packs/skills/low",
+      "type": "Item",
+      "system": "l5r4-enhanced",
+      "ownership": {
+        "PLAYER": "OBSERVER",
+        "ASSISTANT": "OWNER"
+      }
+    },
+    {
+      "name": "skills-merchant",
+      "label": "Skills - Merchant",
+      "path": "packs/skills/merchant",
+      "type": "Item",
+      "system": "l5r4-enhanced",
+      "ownership": {
+        "PLAYER": "OBSERVER",
+        "ASSISTANT": "OWNER"
+      }
+    },
+    {
+      "name": "spells-air",
+      "label": "Spells - Air",
+      "path": "packs/spells/air",
+      "type": "Item",
+      "system": "l5r4-enhanced",
+      "ownership": {
+        "PLAYER": "OBSERVER",
+        "ASSISTANT": "OWNER"
+      }
+    },
+    {
+      "name": "spells-earth",
+      "label": "Spells - Earth",
+      "path": "packs/spells/earth",
+      "type": "Item",
+      "system": "l5r4-enhanced",
+      "ownership": {
+        "PLAYER": "OBSERVER",
+        "ASSISTANT": "OWNER"
+      }
+    },
+    {
+      "name": "spells-water",
+      "label": "Spells - Water",
+      "path": "packs/spells/water",
+      "type": "Item",
+      "system": "l5r4-enhanced",
+      "ownership": {
+        "PLAYER": "OBSERVER",
+        "ASSISTANT": "OWNER"
+      }
+    },
+    {
+      "name": "spells-fire",
+      "label": "Spells - Fire",
+      "path": "packs/spells/fire",
+      "type": "Item",
+      "system": "l5r4-enhanced",
+      "ownership": {
+        "PLAYER": "OBSERVER",
+        "ASSISTANT": "OWNER"
+      }
+    },
+    {
+      "name": "spells-void",
+      "label": "Spells - Void",
+      "path": "packs/spells/void",
+      "type": "Item",
+      "system": "l5r4-enhanced",
+      "ownership": {
+        "PLAYER": "OBSERVER",
+        "ASSISTANT": "OWNER"
+      }
+    },
+    {
+      "name": "spells-universal",
+      "label": "Spells - Universal",
+      "path": "packs/spells/universal",
+      "type": "Item",
+      "system": "l5r4-enhanced",
+      "ownership": {
+        "PLAYER": "OBSERVER",
+        "ASSISTANT": "OWNER"
+      }
+    },
+    {
+      "name": "spells-maho",
+      "label": "Spells - Maho (Forbidden)",
+      "path": "packs/spells/maho",
+      "type": "Item",
+      "system": "l5r4-enhanced",
+      "ownership": {
+        "PLAYER": "NONE",
+        "TRUSTED": "NONE"
+      }
+    },
+    {
+      "name": "tattoos",
+      "label": "Tattoos (Ise Zumi)",
+      "path": "packs/advanced-abilities/tattoos",
+      "type": "Item",
+      "system": "l5r4-enhanced",
+      "ownership": {
+        "PLAYER": "OBSERVER",
+        "ASSISTANT": "OWNER"
+      }
+    },
+    {
+      "name": "kata",
+      "label": "Kata",
+      "path": "packs/advanced-abilities/kata",
+      "type": "Item",
+      "system": "l5r4-enhanced",
+      "ownership": {
+        "PLAYER": "OBSERVER",
+        "ASSISTANT": "OWNER"
+      }
+    },
+    {
+      "name": "kiho",
+      "label": "Kiho",
+      "path": "packs/advanced-abilities/kiho",
+      "type": "Item",
+      "system": "l5r4-enhanced",
+      "ownership": {
+        "PLAYER": "OBSERVER",
+        "ASSISTANT": "OWNER"
+      }
+    },
+    {
+      "name": "techniques",
+      "label": "Techniques",
+      "path": "packs/advanced-abilities/techniques",
+      "type": "Item",
+      "system": "l5r4-enhanced",
+      "ownership": {
+        "PLAYER": "OBSERVER",
+        "ASSISTANT": "OWNER"
+      }
+    }
+  ],
+  "packFolders": [
+    {
+      "name": "L5R4 Enhanced",
+      "sorting": "a",
+      "color": "#8B0000",
+      "folders": [
+        {
+          "name": "Character Options",
+          "sorting": "a",
+          "packs": ["advantages", "disadvantages"]
+        },
+        {
+          "name": "Clans and Families",
+          "sorting": "a",
+          "packs": ["clans", "families"]
+        },
+        {
+          "name": "Schools",
+          "sorting": "a",
+          "packs": [
+            "schools-bushi",
+            "schools-shugenja",
+            "schools-courtier",
+            "schools-monk",
+            "schools-ninja",
+            "schools-artisan"
+          ]
+        },
+        {
+          "name": "Equipment",
+          "sorting": "a",
+          "packs": ["weapons-melee", "weapons-ranged", "armor", "equipment"]
+        },
+        {
+          "name": "Skills",
+          "sorting": "a",
+          "packs": ["skills-high", "skills-bugei", "skills-low", "skills-merchant"]
+        },
+        {
+          "name": "Spells",
+          "sorting": "a",
+          "packs": [
+            "spells-air",
+            "spells-earth",
+            "spells-water",
+            "spells-fire",
+            "spells-void",
+            "spells-universal",
+            "spells-maho"
+          ]
+        },
+        {
+          "name": "Advanced Abilities",
+          "sorting": "a",
+          "packs": ["tattoos", "kata", "kiho", "techniques"]
+        }
+      ]
+    }
+  ],
   "languages": [
     {
       "lang": "en",

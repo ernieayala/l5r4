@@ -25,6 +25,7 @@
     "check": "npm run lint && npm run format:check && npm run deps:circular",
     "deps:circular": "madge --circular module/",
     "deps:analyze": "madge --summary module/ && madge --json module/ > madge-analysis.json",
+    "packs:generate": "node scripts/generate-all-packs.js",
     "release:prepare": "node scripts/prepare-release.js",
     "release:validate": "node scripts/prepare-release.js --validate-only",
     "version:patch": "npm version patch --no-git-tag-version",
