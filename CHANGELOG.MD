@@ -7,6 +7,155 @@ Versioning: [Semantic Versioning](https://semver.org/spec/v2.0.0.html)
 
 ---
 
+## [3.1.2] - 2025-10-28
+
+### Added
+
+**Race Condition Protection**
+- Roll handlers now prevent double-click exploits using in-progress tracking
+- Each roll type tracked independently (skill, attack, trait, ring, spell, weapon, NPC)
+- Simultaneous different rolls allowed while preventing duplicate submissions
+- Protection covers all roll types: skill, attack, trait, ring, spell, weapon, NPC attacks
+- Async/await pattern ensures proper cleanup after roll completion
+
+**Hook Registration System**
+- Centralized hook registration in `register-all.js`
+- Single point of reference for all active hooks
+- Improved debugging and maintenance of hook interactions
+- Clear documentation of hook categories and execution order
+
+**Comprehensive Test Suite**
+- 18 new integration test files for edge cases and race conditions
+- 6 new unit test files for services and utilities
+- Tests cover: actor creation, attacks, conditions, damage, emphasis reroll, initiative
+- Tests cover: item creation, migrations, skill advancement, spell slots, stances, wounds, XP
+- Race condition tests for critical workflows
+- Edge case coverage for all major systems
+
+**Validators Module**
+- New `utils/validators.js` for input validation
+- Centralized validation logic for data integrity
+- Type checking and range validation utilities
+
+### Enhanced
+
+**Roll System**
+- All roll handlers now async with proper error handling
+- Race condition protection across all roll types
+- Improved roll key generation for tracking
+- Better cleanup with try/finally blocks
+- Consistent async patterns throughout roll services
+
+**Resource Management**
+- Spell slot manager enhanced with better validation
+- Void Point manager improved with edge case handling
+- Resource depletion checks more robust
+- Better error messages for resource failures
+
+**XP System**
+- XP calculations refactored for clarity
+- XP formatter improved with better output
+- XP versioning enhanced for migration tracking
+- Emphasis XP tracking more reliable
+- Better handling of custom emphases
+
+**Migration System**
+- Migration helpers improved with better error handling
+- Icon path migration more robust
+- Emphasis migration enhanced with deduplication
+- Schema application more reliable
+- Embedded items migration improved
+- Bow-to-weapon migration enhanced
+
+**Dialog System**
+- Roll modifier dialog improved with better layout
+- Spell cast dialog enhanced with clearer options
+- Maho cast dialog improved for usability
+- Better keyboard navigation in all dialogs
+
+**Chat System**
+- Chat damage buttons more reliable
+- Combat Void spending hooks improved
+- Better error handling in chat message creation
+- Improved chat card formatting
+
+**Code Quality**
+- Consistent async/await patterns throughout
+- Better error handling with try/catch/finally
+- Improved JSDoc documentation
+- Cleaner code organization
+- Reduced code duplication
+
+### Fixed
+
+**Emphasis Migration**
+- Old emphases now properly marked as trained (selected) in new system
+- Trained emphases are now correctly added to `trainedEmphases` array during migration
+- Previously purchased emphases no longer appear as unpurchased after migration
+
+**Icon Migration**
+- Fixed embedded item icons not updating on actor sheets
+- Icon migration now processes items owned by actors (embedded items)
+- Items on character sheets will now properly update from old PNG to new WebP icons
+
+**Race Conditions**
+- Fixed double-click exploits in all roll handlers
+- Fixed race conditions in actor creation workflows
+- Fixed race conditions in item creation workflows
+- Fixed race conditions in damage application
+- Fixed race conditions in initiative rolls
+- Fixed race conditions in skill advancement
+- Fixed race conditions in XP tracking
+
+**Resource Management**
+- Fixed spell slot depletion edge cases
+- Fixed Void Point spending edge cases
+- Fixed resource restoration during rest
+- Better validation prevents negative resources
+
+**Roll System**
+- Fixed NPC roll consolidation (removed duplicate npc-roll.js)
+- NPC rolls now use unified simple-roll system
+- Fixed formula builder edge cases
+- Better handling of unskilled rolls
+- Improved wound penalty application
+
+**UI/UX**
+- Removed transition animation on inline controls to prevent visual glitches
+- Fixed item list styling issues
+- Better visual feedback for roll progress
+
+### Removed
+
+**Code Cleanup**
+- Removed duplicate `npc-roll.js` (consolidated into simple-roll system)
+- Removed redundant NPC-specific roll logic
+- Cleaned up unused imports and dependencies
+
+### Technical
+
+**Architecture**
+- Centralized hook registration pattern
+- Improved separation of concerns in roll handlers
+- Better async/await patterns throughout
+- Enhanced error handling strategies
+- Race condition protection infrastructure
+
+**Testing**
+- 18 new integration test files
+- 6 new unit test files
+- Comprehensive edge case coverage
+- Race condition test suite
+- Better test organization and fixtures
+
+**Performance**
+- Reduced code duplication in roll handlers
+- More efficient roll tracking
+- Better resource cleanup
+- Optimized migration processes
+
+---
+
 ## [3.1.1] - 2025-10-27
 
 ### Fixed

@@ -86,17 +86,18 @@ async function addCustomEmphasisToWorld(emphasisName) {
  *
  * Converts old comma/semicolon-separated emphasis strings into two fields:
  * - availableEmphases: Array of emphasis names available for skill
- * - trainedEmphases: Empty array (training happens on character sheet)
+ * - trainedEmphases: Array of emphasis names that are trained (selected)
  *
  * Migration Strategy:
  * - Parse old emphasis string (comma/semicolon delimited)
- * - Merge with existing availableEmphases if present (backward compatibility)
+ * - Merge with existing availableEmphases/trainedEmphases if present (backward compatibility)
  * - For each parsed emphasis:
  *   1. Try to match with official emphases (case-insensitive, singular/plural)
  *   2. If match found, use official name
  *   3. If no match, create as custom emphasis in world settings
- * - Put matched/created emphasis names into availableEmphases array (deduplicated)
- * - Preserve existing trainedEmphases (don't reset if already set)
+ * - Put matched/created emphasis names into BOTH arrays (deduplicated)
+ *   - availableEmphases: Makes them available for selection
+ *   - trainedEmphases: Marks them as already trained (they were in old system)
  * - Skip if no old emphasis data AND already has new format populated
  *
  * Backward Compatibility:
@@ -107,7 +108,7 @@ async function addCustomEmphasisToWorld(emphasisName) {
  * Examples:
  * Old: system.emphasis = "Dog, Katana, horse, Boogie Woogie"
  * New: system.availableEmphases = ["Dogs", "Katana", "Horses", "Boogie Woogie"]
- *      system.trainedEmphases = []
+ *      system.trainedEmphases = ["Dogs", "Katana", "Horses", "Boogie Woogie"]
  *      (Dogs, Katana, Horses matched official; Boogie Woogie created as custom)
  *
  * @param {Document[]} docs - Array of Item documents to scan for skills
@@ -142,9 +143,10 @@ export async function migrateEmphasisStringToArray(docs, label) {
       }
 
       // If already has availableEmphases but also has old emphasis string, merge them
-      const existingEmphases = Array.isArray(system.availableEmphases)
+      const existingAvailable = Array.isArray(system.availableEmphases)
         ? system.availableEmphases
         : [];
+      const existingTrained = Array.isArray(system.trainedEmphases) ? system.trainedEmphases : [];
 
       const parsedNames = trimmed
         ? trimmed
@@ -154,44 +156,43 @@ export async function migrateEmphasisStringToArray(docs, label) {
         : [];
 
       // Match each parsed name to official emphases or create custom
-      const finalEmphases = [...existingEmphases];
+      const finalAvailable = [...existingAvailable];
+      const finalTrained = [...existingTrained];
 
       for (const parsedName of parsedNames) {
         // Try to find official match
         const officialMatch = findOfficialEmphasisMatch(parsedName);
 
-        if (officialMatch) {
-          // Use official emphasis name (avoid duplicates)
-          if (!finalEmphases.includes(officialMatch)) {
-            finalEmphases.push(officialMatch);
-          }
-        } else {
-          // No match found - create as custom emphasis
-          // Preserve original capitalization from user
-          const customName = parsedName.trim();
+        const emphasisName = officialMatch || parsedName.trim();
 
-          // Avoid duplicates
-          if (!finalEmphases.includes(customName)) {
-            finalEmphases.push(customName);
-          }
+        // Add to available emphases (avoid duplicates)
+        if (!finalAvailable.includes(emphasisName)) {
+          finalAvailable.push(emphasisName);
+        }
 
-          // Add to world custom emphases if not already there
-          await addCustomEmphasisToWorld(customName);
+        // Add to trained emphases (these were already trained in old system)
+        if (!finalTrained.includes(emphasisName)) {
+          finalTrained.push(emphasisName);
+        }
+
+        // If no official match, create as custom emphasis
+        if (!officialMatch) {
+          await addCustomEmphasisToWorld(emphasisName);
 
           // Track for logging
-          if (!customEmphasisNames.includes(customName)) {
-            customEmphasisNames.push(customName);
+          if (!customEmphasisNames.includes(emphasisName)) {
+            customEmphasisNames.push(emphasisName);
             customEmphasisCount++;
           }
         }
       }
 
       // Only update if we actually processed something
-      if (parsedNames.length > 0 || existingEmphases.length === 0) {
+      if (parsedNames.length > 0 || existingAvailable.length === 0) {
         await item.update(
           {
-            "system.availableEmphases": finalEmphases,
-            "system.trainedEmphases": system.trainedEmphases ?? []
+            "system.availableEmphases": finalAvailable,
+            "system.trainedEmphases": finalTrained
           },
           { diff: true, render: false }
         );

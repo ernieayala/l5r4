@@ -434,7 +434,8 @@
           "skillCreated": "Skill Created",
           "skillIncreased": "Skill Increased"
         },
-        "spellMemorized": "Memorized: {name}"
+        "spellMemorized": "Memorized: {name}",
+        "trackingFailed": "XP tracking failed for {action}: {item}. Contact GM if this persists."
       }
     },
     "equipment": {

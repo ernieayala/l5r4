@@ -48,6 +48,12 @@ async function applyWoundsToToken(damage) {
     return;
   }
 
+  // Permission check: Only owner or GM can apply wounds
+  if (!actor.isOwner && !game?.user?.isGM) {
+    ui.notifications?.warn(T("l5r4.ui.notifications.noPermission"));
+    return;
+  }
+
   // Get armor reduction from actor's equipped armor (calculated in prepareDerivedData)
   const armorReduction = actor.system?.armorTn?.reduction ?? 0;
 
@@ -108,17 +114,18 @@ async function reduceAndApplyWounds(damage, _actorId) {
     return;
   }
 
+  // Permission check: Only owner or GM can apply wounds
+  if (!targetActor.isOwner && !game?.user?.isGM) {
+    ui.notifications?.warn(T("l5r4.ui.notifications.noPermission"));
+    return;
+  }
+
   // Check if target has void points
   const voidCurrent = targetActor.system?.rings?.void?.value ?? 0;
   if (voidCurrent <= 0) {
     ui.notifications?.warn(T("l5r4.ui.mechanics.wounds.noVoidPoints"));
     return;
   }
-
-  // Spend void point
-  await targetActor.update({
-    "system.rings.void.value": voidCurrent - 1
-  });
 
   // Step 1: Reduce damage by Void Point (10 points)
   const afterVoid = Math.max(0, damage - 10);
@@ -127,11 +134,14 @@ async function reduceAndApplyWounds(damage, _actorId) {
   const armorReduction = targetActor.system?.armorTn?.reduction ?? 0;
   const finalDamage = Math.max(0, afterVoid - armorReduction);
 
-  // Apply final damage
+  // Apply final damage and spend void point in single atomic update
   const currentSuffered = targetActor.system?.suffered ?? 0;
   const newSuffered = currentSuffered + finalDamage;
 
-  await targetActor.update({ "system.suffered": newSuffered });
+  await targetActor.update({
+    "system.rings.void.value": voidCurrent - 1,
+    "system.suffered": newSuffered
+  });
 
   // Show notification with both reductions if armor applied
   if (armorReduction > 0 && finalDamage < afterVoid) {
@@ -165,22 +175,46 @@ export function registerChatDamageButtons() {
     // Apply wounds button
     const applyButton = element.querySelector("[data-action='apply-wounds']");
     if (applyButton) {
+      let isProcessing = false;
       applyButton.addEventListener("click", async event => {
         event.preventDefault();
-        const damage = parseInt(event.currentTarget.dataset.damage) || 0;
-        await applyWoundsToToken(damage);
+
+        // Debounce protection: prevent multiple simultaneous clicks
+        if (isProcessing) {
+          return;
+        }
+        isProcessing = true;
+
+        try {
+          const damage = parseInt(event.currentTarget.dataset.damage) || 0;
+          await applyWoundsToToken(damage);
+        } finally {
+          isProcessing = false;
+        }
       });
     }
 
     // Reduce with void button
     const reduceButton = element.querySelector("[data-action='reduce-wounds-void']");
     if (reduceButton) {
+      let isProcessing = false;
       reduceButton.addEventListener("click", async event => {
         event.preventDefault();
-        const button = event.currentTarget;
-        const damage = parseInt(button.dataset.damage) || 0;
-        const actorId = button.dataset.actorId;
-        await reduceAndApplyWounds(damage, actorId);
+
+        // Debounce protection: prevent multiple simultaneous clicks
+        if (isProcessing) {
+          return;
+        }
+        isProcessing = true;
+
+        try {
+          const button = event.currentTarget;
+          const damage = parseInt(button.dataset.damage) || 0;
+          const actorId = button.dataset.actorId;
+          await reduceAndApplyWounds(damage, actorId);
+        } finally {
+          isProcessing = false;
+        }
       });
     }
   });

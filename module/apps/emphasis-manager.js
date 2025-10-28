@@ -25,6 +25,7 @@
  */
 
 import { OFFICIAL_EMPHASES } from "../config/game-data.js";
+import { validateEmphasisName } from "../utils/validators.js";
 
 /**
  * Get world-level custom emphases from settings.
@@ -43,15 +44,33 @@ function getWorldCustomEmphases() {
 /**
  * Save world-level custom emphasis to settings.
  *
+ * Validates emphasis name before saving to prevent:
+ * - XSS attacks (script injection)
+ * - Data corruption (invalid characters)
+ * - Storage issues (excessive length)
+ *
  * @param {string} emphasisName - Name of custom emphasis to add
  * @returns {Promise<void>}
+ * @throws {Error} If emphasis name fails validation
  */
 async function saveWorldCustomEmphasis(emphasisName) {
-  const current = getWorldCustomEmphases();
-  if (!current.includes(emphasisName)) {
-    current.push(emphasisName);
-    await game.settings.set("l5r4-enhanced", "customEmphases", current);
+  // Validate emphasis name
+  const validation = validateEmphasisName(emphasisName);
+  if (!validation.valid) {
+    throw new Error(validation.error);
   }
+
+  const trimmed = emphasisName.trim();
+  const current = getWorldCustomEmphases();
+
+  // Check for duplicates
+  if (current.includes(trimmed)) {
+    throw new Error("Emphasis already exists");
+  }
+
+  // Save validated emphasis
+  current.push(trimmed);
+  await game.settings.set("l5r4-enhanced", "customEmphases", current);
 }
 
 /**
@@ -69,15 +88,35 @@ async function deleteWorldCustomEmphasis(emphasisName) {
 /**
  * Update world-level custom emphasis name in settings.
  *
+ * Validates new emphasis name before updating to prevent:
+ * - XSS attacks (script injection)
+ * - Data corruption (invalid characters)
+ * - Storage issues (excessive length)
+ *
  * @param {string} oldName - Current name of custom emphasis
  * @param {string} newName - New name for custom emphasis
  * @returns {Promise<void>}
+ * @throws {Error} If new emphasis name fails validation
  */
 async function updateWorldCustomEmphasis(oldName, newName) {
+  // Validate new emphasis name
+  const validation = validateEmphasisName(newName);
+  if (!validation.valid) {
+    throw new Error(validation.error);
+  }
+
+  const trimmed = newName.trim();
   const current = getWorldCustomEmphases();
   const index = current.indexOf(oldName);
+
   if (index !== -1) {
-    current[index] = newName;
+    // Check for duplicates (excluding the one being updated)
+    const otherEmphases = current.filter((_, i) => i !== index);
+    if (otherEmphases.includes(trimmed)) {
+      throw new Error("Emphasis already exists");
+    }
+
+    current[index] = trimmed;
     await game.settings.set("l5r4-enhanced", "customEmphases", current);
   }
 }
@@ -249,8 +288,13 @@ export default class EmphasisManager extends foundry.applications.api.Handlebars
 
     const trimmedName = name.trim();
 
-    // Add to world settings
-    await saveWorldCustomEmphasis(trimmedName);
+    // Add to world settings with validation
+    try {
+      await saveWorldCustomEmphasis(trimmedName);
+    } catch (error) {
+      ui.notifications.error(error.message);
+      return;
+    }
 
     // Refresh the form to show new emphasis
     this.render();
@@ -329,8 +373,13 @@ export default class EmphasisManager extends foundry.applications.api.Handlebars
 
     const trimmedNewName = newName.trim();
 
-    // Update in world settings
-    await updateWorldCustomEmphasis(oldName, trimmedNewName);
+    // Update in world settings with validation
+    try {
+      await updateWorldCustomEmphasis(oldName, trimmedNewName);
+    } catch (error) {
+      ui.notifications.error(error.message);
+      return;
+    }
 
     // Refresh the form
     this.render();

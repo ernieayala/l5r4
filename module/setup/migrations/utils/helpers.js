@@ -1,10 +1,12 @@
 /**
  * Migration Helper Utilities
- * Provides shared utility functions for data migration operations including path manipulation
- * and wound level data normalization.
+ * Provides shared utility functions for data migration operations including path manipulation,
+ * wound level data normalization, and migration marker management for idempotency.
  *
  * @module setup/migrations/utils/helpers
  */
+
+import { SYS_ID, MIGRATION_FLAG } from "../../../config/constants.js";
 
 /**
  * Retrieves a nested property value from an object using dot notation path.
@@ -112,4 +114,51 @@ export function normalizeWoundLevelData(woundData) {
   }
 
   return changed;
+}
+
+/**
+ * Checks if a document has already been migrated to a specific version.
+ *
+ * Reads the migration marker flag from document.flags.l5r4-enhanced.migratedVersion
+ * to determine if migrations have already run on this document. Prevents re-running
+ * migrations on manually-corrected data, ensuring true idempotency.
+ *
+ * @param {Document} doc - Actor or Item document to check
+ * @param {string} targetVersion - System version to check against (e.g., "1.2.3")
+ * @returns {boolean} True if document already migrated to targetVersion or later
+ */
+export function hasBeenMigrated(doc, targetVersion) {
+  const migratedVersion = doc?.flags?.[SYS_ID]?.[MIGRATION_FLAG];
+  if (!migratedVersion) {
+    return false;
+  }
+
+  // Simple string comparison works for semantic versioning (1.2.3 format)
+  // Returns true if migratedVersion >= targetVersion
+  return migratedVersion >= targetVersion;
+}
+
+/**
+ * Marks a document as migrated to a specific version.
+ *
+ * Sets the migration marker flag on document.flags.l5r4-enhanced.migratedVersion
+ * to prevent future migrations from re-running on this document. Should be called
+ * after successful migration of a document.
+ *
+ * @param {Document} doc - Actor or Item document to mark as migrated
+ * @param {string} version - System version to mark (e.g., "1.2.3")
+ * @returns {Promise<void>}
+ * @async
+ */
+export async function markAsMigrated(doc, version) {
+  try {
+    await doc.setFlag(SYS_ID, MIGRATION_FLAG, version);
+  } catch (err) {
+    console.warn(`${SYS_ID}`, "Failed to set migration flag", {
+      id: doc.id,
+      name: doc.name,
+      version,
+      error: err
+    });
+  }
 }
