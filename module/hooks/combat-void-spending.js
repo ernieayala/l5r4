@@ -14,31 +14,34 @@
 export function registerCombatVoidSpending() {
   /**
    * Check if armor TN Void should expire on turn start
+   * Checks ALL combatants in the combat, not just the current one
    */
   Hooks.on("combatTurn", async (combat, _updateData, _options) => {
-    const combatant = combat.combatant;
-    if (!combatant) {
+    if (!combat) {
       return;
     }
 
-    const actor = combatant.actor;
-    if (!actor) {
-      return;
-    }
+    // Check all combatants for expired Armor TN Void
+    for (const combatant of combat.combatants) {
+      const actor = combatant?.actor;
+      if (!actor) {
+        continue;
+      }
 
-    // Check if armor TN void is active
-    const useVoid = actor.system?.armorTn?.useVoid;
-    const voidRound = actor.system?.armorTn?.voidRound;
+      // Check if armor TN void is active
+      const useVoid = actor.system?.armorTn?.useVoid;
+      const voidRound = actor.system?.armorTn?.voidRound;
 
-    if (useVoid && voidRound !== null) {
-      // If it's been at least 1 round since activation, clear it
-      if (combat.round > voidRound) {
-        await actor.update({
-          "system.armorTn.useVoid": false,
-          "system.armorTn.voidRound": null
-        });
+      if (useVoid && voidRound !== null) {
+        // If it's been at least 1 round since activation, clear it
+        if (combat.round > voidRound) {
+          await actor.update({
+            "system.armorTn.useVoid": false,
+            "system.armorTn.voidRound": null
+          });
 
-        ui.notifications?.info(`${actor.name}'s Void Armor TN boost expired`);
+          ui.notifications?.info(`${actor.name}'s Void Armor TN boost expired`);
+        }
       }
     }
   });

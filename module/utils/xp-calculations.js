@@ -56,6 +56,63 @@ export function calculateXpStepCostForTrait(r, freeEff, discount) {
 }
 
 /**
+ * Calculate XP cost for a single Void Ring advancement step.
+ *
+ * Implements the L5R4 Void Ring advancement formula: Cost = 6 × new rank.
+ * Void Ring advancement costs more than regular traits (6 XP per rank vs 4 XP per rank)
+ * because Void is a special ring that doesn't have component traits.
+ *
+ * The `discount` parameter allows for XP cost modifiers (can be negative for discounts
+ * or positive for penalties). This is typically used for special abilities that reduce
+ * Void Ring advancement costs.
+ *
+ * Usage: Advancing Void from rank 2→3 costs 6 × 3 = 18 XP. A discount of -6 would
+ * reduce this to 12 XP.
+ *
+ * @param {number} newRank - The target Void Ring rank being purchased (1-10)
+ * @param {number} discount - XP cost adjustment (negative = discount, positive = penalty)
+ * @returns {number} XP cost for this advancement step (minimum 0)
+ */
+export function calculateVoidStepCost(newRank, discount) {
+  const rank = Number(newRank) || 0;
+  const d = Number(discount) || 0;
+  return Math.max(0, 6 * rank + d);
+}
+
+/**
+ * Calculate XP cost for a single skill rank advancement.
+ *
+ * Implements the L5R4 skill advancement formula: Cost = new rank value.
+ * Unlike traits, skills have a linear cost progression where advancing to the next
+ * rank costs exactly that rank number (e.g., advancing to rank 3 costs 3 XP).
+ *
+ * Usage: Advancing Kenjutsu from rank 2→3 costs 3 XP. Advancing from rank 4→5 costs 5 XP.
+ *
+ * @param {number} newRank - The target skill rank being purchased (1-10)
+ * @returns {number} XP cost for this skill rank advancement (minimum 0)
+ */
+export function calculateSkillStepCost(newRank) {
+  const rank = Number(newRank) || 0;
+  return Math.max(0, rank);
+}
+
+/**
+ * Calculate XP cost for learning a skill emphasis.
+ *
+ * Implements the L5R4 emphasis cost rule: Each emphasis costs 2 XP.
+ * An emphasis is a specialized aspect of a skill that allows re-rolling 1s on skill checks
+ * when the emphasis applies. The cost is constant regardless of skill rank.
+ *
+ * Usage: Learning "Katana" emphasis for Kenjutsu skill costs 2 XP. Learning a second
+ * emphasis like "Wakizashi" costs another 2 XP.
+ *
+ * @returns {number} XP cost for learning an emphasis (always 2)
+ */
+export function calculateEmphasisCost() {
+  return 2;
+}
+
+/**
  * Internal helper to calculate creation bonuses from family and school items.
  *
  * This function implements a dual-check system for maximum compatibility:

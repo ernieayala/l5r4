@@ -36,6 +36,8 @@ import { registerRestTests } from "./services/rest.test.js";
 import { registerFamilyBonusTests } from "./services/family-bonus-service.test.js";
 import { registerXpServiceTests } from "./services/xp-service.test.js";
 import { registerEmphasisXpTrackingTests } from "./services/emphasis-xp-tracking.test.js";
+import { registerVoidPointsTests } from "./services/void-points.test.js";
+import { registerSpellSlotsTests } from "./services/spell-slots.test.js";
 import { registerPCSheetTests } from "./sheets/pc-sheet.test.js";
 import { registerNPCSheetTests } from "./sheets/npc-sheet.test.js";
 import { registerItemSheetTests } from "./sheets/item-sheet.test.js";
@@ -58,6 +60,21 @@ import { registerRestRecoveryWorkflowTests } from "./workflows/rest-recovery-wor
 import { registerNPCWorkflowTests } from "./workflows/npc-workflows.test.js";
 import { registerChatSystemWorkflowTests } from "./workflows/chat-system-workflow.test.js";
 import { registerEmphasisWorkflowTests } from "./workflows/emphasis-workflow.test.js";
+import { registerEmphasisRerollMechanicsTests } from "./workflows/emphasis-reroll-mechanics.test.js";
+import { registerActorCreationRaceConditionTests } from "./workflows/actor-creation-race-conditions.test.js";
+import { registerInitiativeRaceConditionTests } from "./workflows/initiative-race-conditions.test.js";
+import { registerDamageRaceConditionTests } from "./workflows/damage-race-conditions.test.js";
+import { registerXpRaceConditionTests } from "./workflows/xp-race-conditions.test.js";
+import { registerSkillAdvancementRaceConditionTests } from "./workflows/skill-advancement-race-conditions.test.js";
+import { registerItemCreationRaceConditionTests } from "./workflows/item-creation-race-conditions.test.js";
+import { registerAttackEdgeCaseTests } from "./workflows/attack-edge-cases.test.js";
+import { registerSpellSlotsEdgeCaseTests } from "./workflows/spell-slots-edge-cases.test.js";
+import { registerStanceEdgeCaseTests } from "./workflows/stance-edge-cases.test.js";
+import { registerConditionsEdgeCaseTests } from "./workflows/conditions-edge-cases.test.js";
+import { registerXpTrackingEdgeCaseTests } from "./workflows/xp-tracking-edge-cases.test.js";
+import { registerSkillAdvancementEdgeCaseTests } from "./workflows/skill-advancement-edge-cases.test.js";
+import { registerMigrationEdgeCaseTests } from "./workflows/migration-edge-cases.test.js";
+import { registerWoundConfigEdgeCaseTests } from "./workflows/wound-config-edge-cases.test.js";
 
 /**
  * Register Quench integration tests for the L5R4 system.
@@ -94,6 +111,10 @@ export async function registerQuenchTests(quench) {
   registerXpServiceTests(quench);
   registerEmphasisXpTrackingTests(quench);
 
+  // Register Phase 4: Resource Management Tests
+  registerVoidPointsTests(quench);
+  registerSpellSlotsTests(quench);
+
   // Register sheet tests (Phase 5: User Interface)
   registerPCSheetTests(quench);
   registerNPCSheetTests(quench);
@@ -119,6 +140,29 @@ export async function registerQuenchTests(quench) {
   registerNPCWorkflowTests(quench);
   registerChatSystemWorkflowTests(quench);
   registerEmphasisWorkflowTests(quench);
+  registerEmphasisRerollMechanicsTests(quench);
+
+  // Register race condition tests (Phase 7: Critical Bug Prevention)
+  registerActorCreationRaceConditionTests(quench);
+  registerInitiativeRaceConditionTests(quench);
+  registerDamageRaceConditionTests(quench);
+  registerXpRaceConditionTests(quench);
+  registerSkillAdvancementRaceConditionTests(quench);
+  registerItemCreationRaceConditionTests(quench);
+
+  // Register edge case tests (Phase 8: Edge Case Coverage)
+  registerAttackEdgeCaseTests(quench);
+  registerSpellSlotsEdgeCaseTests(quench);
+  registerStanceEdgeCaseTests(quench);
+  registerConditionsEdgeCaseTests(quench);
+
+  // Register Phase 3: Character Advancement edge case tests
+  registerXpTrackingEdgeCaseTests(quench);
+  registerSkillAdvancementEdgeCaseTests(quench);
+
+  // Register Phase 7: Migration & Config edge case tests
+  registerMigrationEdgeCaseTests(quench);
+  registerWoundConfigEdgeCaseTests(quench);
 }
 
 /**

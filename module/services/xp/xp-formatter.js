@@ -117,7 +117,7 @@ const SORT_COLUMNS = {
  * @returns {number} return.ts - Timestamp for chronological sorting
  */
 export function formatXpEntries(entries, options = {}) {
-  const { sort = false, actorId = null, scope = "xp-purchases", sortPref = null } = options;
+  const { sort = false, actorId = null, scope = "xp-purchases", sortPref = null } = options || {};
 
   let formatted = entries.slice().map(e => {
     let formattedNote = e.note || "";

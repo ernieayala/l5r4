@@ -45,3 +45,12 @@ export const PATHS = Object.freeze({
   assets: `${ROOT}/assets`,
   icons: `${ROOT}/assets/icons`
 });
+
+/**
+ * Migration marker flag key for tracking completed migrations on documents.
+ * Stored in document.flags.l5r4-enhanced[MIGRATION_FLAG] to prevent re-running
+ * migrations on already-migrated documents, ensuring true idempotency.
+ *
+ * @constant {string}
+ */
+export const MIGRATION_FLAG = "migratedVersion";

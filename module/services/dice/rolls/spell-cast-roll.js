@@ -140,10 +140,9 @@ export async function SpellCastRoll({ actor, spell, woundPenalty = 0, showDialog
     return false;
   }
 
-  // Consume slot
+  // Store slot consumption details for later (after roll succeeds)
   const slotPath = useElementalSlot ? `system.spellSlots.${ringKey}` : "system.spellSlots.void";
   const currentSlots = useElementalSlot ? elementalCurrent : voidCurrent;
-  await actor.update({ [slotPath]: currentSlots - 1 });
 
   // Build chat label
   let label = `${game.i18n.localize("l5r4.ui.mechanics.rolls.spellCasting")}: ${spell.name}`;
@@ -227,7 +226,14 @@ export async function SpellCastRoll({ actor, spell, woundPenalty = 0, showDialog
   });
 
   try {
-    return await roll.toMessage({ speaker: ChatMessage.getSpeaker({ actor }), content });
+    const message = await roll.toMessage({ speaker: ChatMessage.getSpeaker({ actor }), content });
+
+    // Consume slot AFTER roll succeeds
+    // Per L5R4 rules: slot consumed when Spell Casting Roll is made (not before)
+    // This ensures slot is only lost if spell actually casts
+    await actor.update({ [slotPath]: currentSlots - 1 });
+
+    return message;
   } catch (err) {
     console.error(`${SYS_ID}`, "SpellCastRoll: Failed to post chat message", {
       err,

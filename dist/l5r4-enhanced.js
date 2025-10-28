@@ -55,13 +55,8 @@ import { preloadTemplates } from "../module/setup/preload-templates.js";
 import { runMigrations } from "../module/setup/migrations.js";
 import { registerSettings } from "../module/setup/register-settings.js";
 import { registerHandlebarsHelpers } from "../module/setup/register-handlebars.js";
-import { initializeStanceService } from "../module/services/stance/initialize.js";
-import { initializeChatService } from "../module/services/chat.js";
 import { initializeInitiativeSystem } from "../module/services/initiative.js";
-import { initializeWoundProneAutomation } from "../module/services/wound-prone-automation.js";
-import { registerChatDamageButtons } from "../module/hooks/chat-damage-buttons.js";
-import { registerCombatVoidSpending } from "../module/hooks/combat-void-spending.js";
-import { registerSpellMemorizationHooks } from "../module/hooks/spell-memorization.js";
+import { registerAllHooks } from "../module/hooks/register-all.js";
 
 
 /**
@@ -143,12 +138,8 @@ Hooks.once("init", async () => {
   preloadTemplates();
   registerHandlebarsHelpers();
 
-  initializeStanceService();
-  initializeChatService();
-  initializeWoundProneAutomation();
-  registerChatDamageButtons();
-  registerCombatVoidSpending();
-  registerSpellMemorizationHooks();
+  // Register all system hooks via central registry
+  registerAllHooks();
 });
 
 /**

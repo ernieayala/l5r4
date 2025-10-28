@@ -357,23 +357,35 @@ export async function RingRoll({
     diceToKeep = toInt(ringRank) + keepMod;
   }
 
-  // Spell slot consumption happens AFTER validation passes
-  // This ensures slots are only consumed when spell actually casts
+  // Validate spell slot availability BEFORE roll
+  // Actual consumption happens AFTER roll succeeds to prevent slot loss on errors
+  let slotLabel = "";
+  let shouldConsumeElementalSlot = false;
+  let shouldConsumeVoidSlot = false;
+
   if (spellSlot && systemRing) {
-    const result = await spendResource(() => spendElementalSlot(actor, systemRing));
-    if (!result.success) {
+    const validation = validateSpellSlot(actor, systemRing, false);
+    if (!validation.valid) {
+      ui.notifications?.warn(validation.message);
       return false;
-    } // Abort if slot unavailable
-    label += result.value; // Append slot label (e.g., " [Fire Slot]")
+    }
+    shouldConsumeElementalSlot = true;
+    const ringDisplay = game.i18n.localize(`l5r4.ui.mechanics.rings.${systemRing}`) || systemRing;
+    slotLabel += ` [${ringDisplay} Slot]`;
   }
 
   if (voidSlot) {
-    const result = await spendResource(() => spendVoidSlot(actor));
-    if (!result.success) {
+    const validation = validateSpellSlot(actor, "void", true);
+    if (!validation.valid) {
+      ui.notifications?.warn(validation.message);
       return false;
-    } // Abort if slot unavailable
-    label += result.value; // Append slot label (e.g., " [Void Slot]")
+    }
+    shouldConsumeVoidSlot = true;
+    const ringDisplay = game.i18n.localize(`l5r4.ui.mechanics.rings.void`) || "void";
+    slotLabel += ` [${ringDisplay} ${game.i18n.localize("l5r4.magic.spells.voidSlot") || "Slot"}]`;
   }
+
+  label += slotLabel;
 
   // Append TN and raises to label if specified
   if (__tnInput || __raisesInput || __freeRaisesInput) {
@@ -420,7 +432,19 @@ export async function RingRoll({
 
   // Post to chat with error recovery
   try {
-    return await roll.toMessage({ speaker: ChatMessage.getSpeaker(), content });
+    const message = await roll.toMessage({ speaker: ChatMessage.getSpeaker(), content });
+
+    // Consume spell slots AFTER roll succeeds
+    // Per L5R4 rules: slot consumed when Spell Casting Roll is made (not before)
+    // This ensures slots are only lost if spell actually casts
+    if (shouldConsumeElementalSlot && systemRing) {
+      await spendElementalSlot(actor, systemRing);
+    }
+    if (shouldConsumeVoidSlot) {
+      await spendVoidSlot(actor);
+    }
+
+    return message;
   } catch (err) {
     console.error(`${SYS_ID}`, "RingRoll: Failed to post chat message after roll", {
       err,

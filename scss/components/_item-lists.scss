@@ -187,6 +187,7 @@
     .inline-control {
       opacity: 0;
       pointer-events: none;
+      transition: none;
 
       &.expandable {
         display: none;
