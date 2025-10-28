@@ -37,12 +37,10 @@
  * @param {boolean} [options.unskilled=false] - If true, dice don't explode (Unskilled Roll penalty)
  * @returns {string} Foundry Roll formula string (e.g., "7d10r1k3x10+5")
  */
-export function buildFormula(
-  diceRoll,
-  diceKeep,
-  bonus,
-  { emphasis = false, unskilled = false } = {}
-) {
+export function buildFormula(diceRoll, diceKeep, bonus, options = {}) {
+  // Defensive: Handle null options (can't destructure null, only undefined)
+  const { emphasis = false, unskilled = false } = options || {};
+
   // Build formula string in correct order for Foundry Roll parser
   const baseFormula = `${diceRoll}d10`;
   const emphasisMod = emphasis ? "r1" : ""; // Re-roll 1s when Emphasis applies

@@ -1,6 +1,37 @@
 <form class="standard-form">
   {{#unless weapon}}
     <div class="form-group">
+      <label>{{localize "l5r4.ui.common.tn"}}</label>
+      <input type="number" name="tn" placeholder="" />
+    </div>
+    <div class="form-group">
+      <label>{{localize "l5r4.magic.spells.raises"}}{{#if maxRaises}} (Max: {{maxRaises}}){{/if}}</label>
+      <input type="number" name="raises" min="0" {{#if maxRaises}}max="{{maxRaises}}"{{/if}} />
+    </div>
+    <div class="form-group">
+      <label>{{localize "l5r4.ui.mechanics.rolls.freeRaises"}}</label>
+      <input type="number" name="freeRaises" min="0" value="{{freeRaises}}" />
+    </div>
+  {{/unless}}
+  {{#if attackRaises}}
+    <div class="form-group">
+      <label>{{localize "l5r4.ui.mechanics.rolls.raises"}}
+        ({{localize "l5r4.ui.mechanics.rolls.automatic"}})</label>
+      <input
+        type="text"
+        value="+{{attackRaises}}k0"
+        disabled="disabled"
+      />
+    </div>
+  {{/if}}
+  {{#if trait}}
+    <div class="form-group">
+      <label>{{localize "l5r4.ui.mechanics.rolls.unskilledRoll"}}</label>
+      <input type="checkbox" name="unskilled" />
+    </div>
+  {{/if}}
+  {{#unless weapon}}
+    <div class="form-group">
       <label>{{localize "l5r4.ui.mechanics.combat.woundPenalty"}}</label>
       <input type="checkbox" name="woundPenalty" checked="checked" />
     </div>
@@ -11,28 +42,10 @@
       <input type="checkbox" name="void" />
     </div>
   {{/unless}}
-  {{#if trait}}
-    <div class="form-group">
-      <label>{{localize "l5r4.ui.mechanics.rolls.unskilledRoll"}}</label>
-      <input type="checkbox" name="unskilled" />
-    </div>
-  {{/if}}
   {{#if isAttack}}
     <div class="form-group">
       <label>{{localize "l5r4.equipment.weapons.rangedAttack"}}</label>
       <input type="checkbox" name="isRanged" {{checked isBow}} />
-    </div>
-  {{/if}}
-  {{#if attackRaises}}
-    <div class="form-group">
-      <label>{{localize "l5r4.ui.mechanics.rolls.raises"}}
-        ({{localize "l5r4.ui.mechanics.rolls.automatic"}})</label>
-      <input
-        type="text"
-        value="+{{attackRaises}}k0"
-        disabled="disabled"
-        style="background-color: #e0e0e0;"
-      />
     </div>
   {{/if}}
   {{#if skill}}
@@ -88,18 +101,4 @@
       <input type="checkbox" name="voidSlot" />
     </div>
   {{/if}}
-  {{#unless weapon}}
-    <div class="form-group">
-      <label>{{localize "l5r4.ui.common.tn"}}</label>
-      <input type="number" name="tn" placeholder="" />
-    </div>
-    <div class="form-group">
-      <label>{{localize "l5r4.ui.mechanics.rolls.freeRaises"}}</label>
-      <input type="number" name="freeRaises" min="0" value="{{freeRaises}}" />
-    </div>
-    <div class="form-group">
-      <label>{{localize "l5r4.magic.spells.raises"}}{{#if maxRaises}} (Max: {{maxRaises}}){{/if}}</label>
-      <input type="number" name="raises" min="0" {{#if maxRaises}}max="{{maxRaises}}"{{/if}} />
-    </div>
-  {{/unless}}
 </form>

@@ -596,6 +596,7 @@ body > * {
 .xp-modal-dialog .item .inline-control {
   opacity: 0;
   pointer-events: none;
+  transition: none;
 }
 .l5r4.pc .item .inline-control.expandable,
 .l5r4.npc .item .inline-control.expandable,

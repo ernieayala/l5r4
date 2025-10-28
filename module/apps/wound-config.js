@@ -462,8 +462,9 @@ export default class WoundConfigApplication extends foundry.applications.api.Han
   /**
    * Cleanup hook when application closes.
    *
-   * Cancels any pending debounced updates to prevent orphaned actor.update()
-   * calls after the form is closed.
+   * Flushes any pending debounced updates to ensure final user input is saved
+   * before the form closes. Prevents data loss when dialog closed within 300ms
+   * of last field change.
    *
    * @param {object} [options={}] - Close options
    * @returns {Promise<void>}
@@ -471,8 +472,8 @@ export default class WoundConfigApplication extends foundry.applications.api.Han
    * @async
    */
   async close(options = {}) {
-    if (this._updateDebounced && typeof this._updateDebounced.cancel === "function") {
-      this._updateDebounced.cancel();
+    if (this._updateDebounced && typeof this._updateDebounced.flush === "function") {
+      await this._updateDebounced.flush();
     }
 
     return super.close(options);
