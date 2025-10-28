@@ -39,6 +39,9 @@
 import { SYS_ID } from "../../config/constants.js";
 import {
   calculateXpStepCostForTrait,
+  calculateVoidStepCost,
+  calculateSkillStepCost,
+  calculateEmphasisCost,
   getCreationFreeBonus,
   getCreationFreeBonusVoid
 } from "../../utils/xp-calculations.js";
@@ -69,6 +72,41 @@ function addXpEntry(spent, existingEntries, entryKey, entryData) {
     });
     existingEntries.add(entryKey);
   }
+}
+
+/**
+ * Merge retroactively calculated XP entries with existing manual entries.
+ *
+ * Preserves manual XP corrections and custom entries while updating auto-calculated entries.
+ * Manual entries are identified by the absence of `autoCalculated: true` flag.
+ *
+ * Strategy:
+ * 1. Separate existing entries into manual and auto-calculated
+ * 2. Replace all auto-calculated entries with new retroactive calculation
+ * 3. Preserve all manual entries (GM corrections, custom adjustments)
+ * 4. Merge and sort by timestamp
+ *
+ * @param {Array<Object>} existingSpent - Current xpSpent array from actor flags
+ * @param {Array<Object>} retroactiveSpent - Newly calculated XP entries from buildXpHistory
+ * @returns {Array<Object>} Merged array with manual entries preserved and auto entries updated
+ */
+export function mergeXpHistory(existingSpent, retroactiveSpent) {
+  // Separate manual entries (no autoCalculated flag or explicitly false)
+  const manualEntries = existingSpent.filter(entry => entry.autoCalculated !== true);
+
+  // Mark all retroactive entries as auto-calculated
+  const markedRetroactive = retroactiveSpent.map(entry => ({
+    ...entry,
+    autoCalculated: true
+  }));
+
+  // Merge: manual entries + new auto-calculated entries
+  const merged = [...manualEntries, ...markedRetroactive];
+
+  // Sort by timestamp for chronological display
+  merged.sort((a, b) => (a.ts || 0) - (b.ts || 0));
+
+  return merged;
 }
 
 /**
@@ -104,9 +142,9 @@ function addXpEntry(spent, existingEntries, entryKey, entryData) {
  *   Each entry contains: id (unique identifier from foundry.utils.randomID), delta (XP cost,
  *   positive = spent, negative = gained from disadvantages), note (localized description),
  *   type (entry type: "trait", "void", "skill", "advantage", etc.), ts (synthetic timestamp
- *   for sorting), plus additional type-specific properties (traitLabel, skillName, emphasis,
- *   itemName, fromValue, toValue, etc.). Typical usage: call from actor sheet or XP manager
- *   to display complete XP expenditure history.
+ *   for sorting), autoCalculated (boolean, true for retroactive entries), plus additional
+ *   type-specific properties (traitLabel, skillName, emphasis, itemName, fromValue, toValue, etc.).
+ *   Typical usage: call from actor sheet or XP manager to display complete XP expenditure history.
  * @async
  */
 export async function buildXpHistory(actor) {
@@ -185,7 +223,7 @@ export async function buildXpHistory(actor) {
     if (voidBaseCur > voidBaseline) {
       for (let r = voidBaseline + 1; r <= voidBaseCur; r++) {
         // Void Ring formula: 6 × new rank (L5R4 core rules)
-        const cost = 6 * r + parseInt(traitDiscounts?.void ?? 0);
+        const cost = calculateVoidStepCost(r, parseInt(traitDiscounts?.void ?? 0));
 
         // Localized note: "Void 2→3"
         const note = game.i18n.format("l5r4.character.experience.voidChange", {
@@ -195,7 +233,7 @@ export async function buildXpHistory(actor) {
         const entryKey = `void:${note}`;
 
         addXpEntry(spent, existingEntries, entryKey, {
-          delta: Math.max(0, cost),
+          delta: cost,
           note: note,
           type: "void",
           fromValue: r - 1,
@@ -225,7 +263,7 @@ export async function buildXpHistory(actor) {
             const entryKey = `skill:${note}`;
 
             addXpEntry(spent, existingEntries, entryKey, {
-              delta: r, // Skill advancement cost = new rank value
+              delta: calculateSkillStepCost(r), // Skill advancement cost = new rank value
               note: note,
               type: "skill",
               skillName: item.name,
@@ -251,7 +289,7 @@ export async function buildXpHistory(actor) {
             const entryKey = `skill:${note}`;
 
             addXpEntry(spent, existingEntries, entryKey, {
-              delta: 2, // Emphasis cost is always 2 XP (L5R4 core rules)
+              delta: calculateEmphasisCost(), // Emphasis cost is always 2 XP (L5R4 core rules)
               note: note,
               type: "skill",
               skillName: item.name,

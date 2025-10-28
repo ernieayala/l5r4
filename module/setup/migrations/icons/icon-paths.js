@@ -7,6 +7,7 @@
 
 import { SYS_ID, PATHS } from "../../../config/constants.js";
 import { ICON_MIGRATION_MAP } from "./icon-map.js";
+import { hasBeenMigrated } from "../utils/helpers.js";
 
 /**
  * Directory listing cache to avoid repeated FilePicker API calls.
@@ -114,6 +115,10 @@ async function getUpdatedIconPath(doc, docType) {
  * prototype token images for actors. Only runs if GM and migration setting enabled.
  * Displays notification with count of updated documents when complete.
  *
+ * Idempotency: Icon migration is called from runMigrations() which filters out already-migrated
+ * documents, so this function only processes documents that haven't been migrated yet. This
+ * prevents overwriting custom icons when forceMigration is triggered.
+ *
  * This is a world-only migration (compendiums handled separately by migrateCompendiumIconPaths).
  *
  * @returns {Promise<void>}
@@ -173,6 +178,48 @@ export async function runIconPathMigration() {
   ui.notifications?.info(
     game.i18n.format("l5r4.system.migration.iconsUpdated", { count: changed })
   );
+}
+
+/**
+ * Migrates legacy PNG icon paths to new WebP assets for embedded items.
+ *
+ * Updates item icons for items embedded within actors. This handles items on actor sheets
+ * that retain old icon paths even after world items have been migrated.
+ *
+ * @param {Document[]} docs - Array of Item documents (embedded items from actor.items.contents)
+ * @param {string} label - Migration context label for console logging
+ * @returns {Promise<void>}
+ * @async
+ * @export
+ */
+export async function migrateEmbeddedItemIcons(docs, label) {
+  const itemDocs = docs.filter(doc => doc.documentName === "Item");
+  if (itemDocs.length === 0) {
+    return;
+  }
+
+  let migratedCount = 0;
+
+  for (const item of itemDocs) {
+    try {
+      const nextImg = await getUpdatedIconPath(item, "Item");
+
+      if (nextImg && nextImg !== item.img) {
+        await item.update({ img: nextImg }, { diff: true, render: false });
+        migratedCount++;
+      }
+    } catch (err) {
+      console.warn(`${SYS_ID}`, "Failed to migrate embedded item icon", {
+        id: item.id,
+        name: item.name,
+        err
+      });
+    }
+  }
+
+  if (migratedCount > 0) {
+    console.warn(`${SYS_ID} | Migrated ${migratedCount} embedded item icons (${label})`);
+  }
 }
 
 /**

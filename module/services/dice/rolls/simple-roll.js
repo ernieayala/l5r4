@@ -359,5 +359,17 @@ export async function SimpleRoll({
     targetData,
     weaponData
   });
-  return roll.toMessage({ speaker: ChatMessage.getSpeaker(), content });
+
+  // Store attack raises in message flags to prevent HTML injection exploits
+  // Validates raises when damage button is clicked to ensure they match original roll
+  const flags = weaponData
+    ? {
+        "l5r4-enhanced": {
+          attackRaises: toInt(check.raises),
+          weaponId: weaponData.id
+        }
+      }
+    : {};
+
+  return roll.toMessage({ speaker: ChatMessage.getSpeaker(), content, flags });
 }

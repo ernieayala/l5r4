@@ -16,6 +16,10 @@ import { SCHEMA_MAP } from "./schema-map.js";
  * transformation. Only creates updates if legacy fields exist AND target fields are empty.
  * Preserves existing data at target locations (non-destructive).
  *
+ * Idempotency: Called from runMigrations() which filters out already-migrated documents,
+ * so this function only processes documents that haven't been migrated yet. This prevents
+ * overwriting manually-corrected field names when forceMigration is triggered.
+ *
  * Schema Map Example:
  * - { docType: "Actor", type: "npc", from: "system.armor.armor_tn", to: "system.armor.armorTn" }
  *

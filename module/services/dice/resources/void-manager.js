@@ -44,6 +44,44 @@
 import { T } from "../../../utils/localization.js";
 
 /**
+ * In-memory locks for preventing concurrent Void Point spending on the same actor.
+ * Maps actor ID to lock status (true = locked, undefined = unlocked).
+ * @type {Map<string, boolean>}
+ */
+const actorLocks = new Map();
+
+/**
+ * Execute a function with an exclusive lock on the specified actor.
+ * Prevents race conditions when multiple operations attempt to modify
+ * the same actor's resources simultaneously.
+ *
+ * Uses a simple spin-lock pattern: waits until lock is available,
+ * acquires lock, executes function, releases lock in finally block.
+ *
+ * @param {string} actorId - Actor ID to lock
+ * @param {Function} fn - Async function to execute with lock held
+ * @returns {Promise<*>} Result of the function execution
+ * @private
+ */
+async function withLock(actorId, fn) {
+  // Spin-lock: wait until actor is unlocked
+  while (actorLocks.get(actorId)) {
+    await new Promise(resolve => setTimeout(resolve, 10));
+  }
+
+  // Acquire lock
+  actorLocks.set(actorId, true);
+
+  try {
+    // Execute function with lock held
+    return await fn();
+  } finally {
+    // Always release lock, even if function throws
+    actorLocks.delete(actorId);
+  }
+}
+
+/**
  * Validation result from Void Point availability check.
  *
  * Returned by validateVoidPoints() to communicate validation status
@@ -206,28 +244,44 @@ export async function spendVoidPoint(actor) {
   // Step 1: Resolve actor using fallback chain (supports optional actor)
   const resolvedActor = resolveActor(actor);
 
-  // Step 2: Validate Void Point availability
-  const validation = validateVoidPoints(resolvedActor);
-
-  // Step 3: Early return if validation failed (no Void available)
-  if (!validation.valid) {
+  // Early validation: actor must exist before acquiring lock
+  if (!resolvedActor) {
     return {
       success: false,
       rollBonus: 0,
       keepBonus: 0,
-      message: validation.message
+      message: T("l5r4.ui.notifications.noActorForVoid")
     };
   }
 
-  // Step 4: Spend Void Point - decrement pool by 1
-  // Uses diff: true for optimized update (Foundry v13)
-  await resolvedActor.update({ "system.rings.void.value": validation.current - 1 }, { diff: true });
+  // Step 2: Execute spending with exclusive lock to prevent race conditions
+  return withLock(resolvedActor.id, async () => {
+    // Step 3: Validate Void Point availability (inside lock)
+    const validation = validateVoidPoints(resolvedActor);
 
-  // Step 5: Return success with L5R4 +1k1 bonuses
-  return {
-    success: true,
-    rollBonus: 1, // +1 rolled die (XkY: increase X)
-    keepBonus: 1, // +1 kept die (XkY: increase Y)
-    message: null
-  };
+    // Step 4: Early return if validation failed (no Void available)
+    if (!validation.valid) {
+      return {
+        success: false,
+        rollBonus: 0,
+        keepBonus: 0,
+        message: validation.message
+      };
+    }
+
+    // Step 5: Spend Void Point - decrement pool by 1
+    // Uses diff: true for optimized update (Foundry v13)
+    await resolvedActor.update(
+      { "system.rings.void.value": validation.current - 1 },
+      { diff: true }
+    );
+
+    // Step 6: Return success with L5R4 +1k1 bonuses
+    return {
+      success: true,
+      rollBonus: 1, // +1 rolled die (XkY: increase X)
+      keepBonus: 1, // +1 kept die (XkY: increase Y)
+      message: null
+    };
+  });
 }

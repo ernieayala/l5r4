@@ -37,6 +37,7 @@ import { DIALOG_TEMPLATES } from "../config/templates.js";
 import { R, T } from "../utils/localization.js";
 import { roll_parser } from "./dice/core/roll-parser.js";
 import { clamp } from "../utils/type-coercion.js";
+import { validateAttackRaises } from "../utils/validators.js";
 
 const DIALOG = foundry.applications.api.DialogV2;
 
@@ -170,7 +171,7 @@ export function initializeChatService() {
  * @private
  */
 function registerDamageButtonHook() {
-  Hooks.on("renderChatMessageHTML", (_app, html, _data) => {
+  Hooks.on("renderChatMessageHTML", (message, html, _data) => {
     try {
       html.querySelectorAll(".l5r4-damage-button").forEach(button => {
         let isProcessing = false;
@@ -194,10 +195,22 @@ function registerDamageButtonHook() {
             const damageRoll = clamp(rawRoll, 0, 99);
             const damageKeep = clamp(rawKeep, 0, 99);
 
-            // Extract and clamp attack raises (max 20 is generous, Void Ring caps in practice)
-            // Raises convert to damage via Increased Damage maneuver (+1k0 per raise)
+            // Extract attack raises from HTML (UNTRUSTED - user can edit HTML)
             const rawRaises = parseInt(event.currentTarget.dataset.attackRaises) || 0;
-            const attackRaises = clamp(rawRaises, 0, 20);
+
+            // SECURITY: Validate raises against trusted data in message flags
+            // Prevents HTML injection exploit where attacker edits data-attack-raises
+            const storedRaises = message?.flags?.["l5r4-enhanced"]?.attackRaises ?? 0;
+            const validation = validateAttackRaises(rawRaises, storedRaises);
+
+            if (!validation.valid) {
+              ui?.notifications?.error(validation.error ?? "Invalid attack raises");
+              console.warn("L5R4 | Security:", validation.error);
+              return;
+            }
+
+            // Use sanitized raises from validation (guaranteed to match stored value)
+            const attackRaises = validation.sanitized ?? 0;
 
             // Extract and clamp stance bonuses (Full Attack grants +2k1, max 10 for safety)
             const rawStanceRoll = parseInt(event.currentTarget.dataset.stanceRoll) || 0;
