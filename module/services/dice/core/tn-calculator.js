@@ -2,8 +2,8 @@
  * Target Number Calculator
  *
  * Core utilities for calculating effective Target Numbers (TN) in L5R4 rolls.
- * Implements the Raises mechanic (+5 TN per Raise), Free Raises (TN reduction),
- * wound penalty application, and success/failure evaluation per game rules.
+ * Implements the Raises mechanic (+5 TN per Raise), wound penalty application,
+ * and success/failure evaluation per game rules.
  *
  * Used by: skill-roll.js, trait-roll.js, ring-roll.js, simple-roll.js
  *
@@ -11,8 +11,7 @@
  * - Base TN: Set by GM or automatic (e.g., Armor TN for attacks)
  * - Raises: +5 TN per Raise declared before rolling (max = Void Ring)
  *   Per rules: "[book text removed; Core Rulebook p.79]."
- * - Free Raises: -5 TN per Free Raise (no Void Ring limit)
- *   Per rules: "[book text removed; Core Rulebook p.79]."
+ * - Free Raises: Displayed in chat for player information
  * - Wound Penalties: Added to TN when character is injured (typically for attacks)
  * - Success: Roll total >= effective TN
  *
@@ -25,19 +24,18 @@
 import { T } from "../../../utils/localization.js";
 
 /**
- * Calculates the effective Target Number for a roll including Raises, Free Raises, and wound penalties.
+ * Calculates the effective Target Number for a roll including Raises and wound penalties.
  *
  * Implements L5R4 core rules:
  * - Each Raise adds +5 to the TN (limited by Void Ring)
- * - Each Free Raise reduces TN by 5 (no limit, don't count toward Void Ring max)
  * - Wound penalties conditionally applied based on roll type
  *
  * @param {number} baseTN - The base Target Number set by GM or game mechanics
  * @param {number} raises - Number of Raises declared (each adds +5 to TN)
- * @param {number} freeRaises - Number of Free Raises available (each reduces TN by 5)
+ * @param {number} freeRaises - Number of Free Raises available (for display purposes)
  * @param {number} woundPenalty - Current wound penalty value from character's wound rank
  * @param {boolean} applyWoundPenalty - Whether to apply wound penalty to this roll
- * @returns {number} The final effective TN (baseTN + raises*5 - freeRaises*5 + conditionalWoundPenalty)
+ * @returns {number} The final effective TN (baseTN + raises*5 + conditionalWoundPenalty)
  */
 export function calculateEffectiveTN(baseTN, raises, freeRaises, woundPenalty, applyWoundPenalty) {
   const _baseTN = Number(baseTN) || 0;
@@ -45,7 +43,7 @@ export function calculateEffectiveTN(baseTN, raises, freeRaises, woundPenalty, a
   const _freeRaises = Number(freeRaises) || 0;
   const _woundPenalty = Number(woundPenalty) || 0;
 
-  let effectiveTN = _baseTN + _raises * 5 - _freeRaises * 5;
+  let effectiveTN = _baseTN + _raises * 5;
   if (applyWoundPenalty && _woundPenalty > 0) {
     effectiveTN += _woundPenalty;
   }

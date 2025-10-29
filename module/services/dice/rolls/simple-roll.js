@@ -254,7 +254,7 @@ export async function SimpleRoll({
     label += ` ${game.i18n.localize("l5r4.ui.mechanics.rings.void")}!`;
   }
 
-  // Determine final TN early to decide how to apply wound penalty
+  // Determine final TN early
   // For attack rolls, autoTN from target may override user's TN input
   const userTN = toInt(check.tn);
   let finalTN = userTN;
@@ -262,12 +262,10 @@ export async function SimpleRoll({
     finalTN = autoTN;
   }
 
-  // Apply wound penalty to roll total when rolling without a TN
-  // When no TN is specified (even after autoTN resolution), subtract wound penalty from roll result
-  // This ensures wounds affect rolls even when there's no target number to compare against
-  // Otherwise, wound penalty will be applied to TN later
+  // Apply wound penalty to roll total (ALWAYS subtract from roll, never add to TN)
+  // Wound penalties reduce the character's effectiveness by subtracting from their roll result
   const applyWoundPenalty = check.woundPenalty ?? true;
-  if (finalTN === 0 && applyWoundPenalty && woundPenalty > 0) {
+  if (applyWoundPenalty && woundPenalty > 0) {
     totalMod -= woundPenalty;
   }
 
@@ -303,17 +301,14 @@ export async function SimpleRoll({
   // Use finalTN calculated earlier (already includes autoTN resolution for attack rolls)
   const baseTN = finalTN;
 
-  // Apply wound penalties to TN when rolling with a TN and wound penalty checkbox is checked
-  // Wound penalties increase TN (+3 Nicked, +5 Grazed, +10 Hurt, +15 Injured, etc.)
-  // For attack rolls, wounds make it harder to hit (increased TN)
-  // For skill checks, wounds make it harder to succeed (increased TN)
-  // Note: If baseTN is 0, wound penalty was already subtracted from totalMod
+  // Calculate effective TN: baseTN + (raises × 5) + condition penalty + armor penalty (if applicable)
   // Only apply condition and armor TN penalties when there's an actual target (baseTN > 0)
   let effTN = calculateEffectiveTN(
     baseTN,
     toInt(check.raises),
-    applyWoundPenalty && baseTN > 0 ? woundPenalty : 0,
-    applyWoundPenalty && baseTN > 0
+    0,
+    0, // Never apply wound penalty to TN
+    false // Wound penalty flag no longer used for TN calculation
   );
   if (baseTN > 0) {
     const conditionTNPenalty = actor ? getConditionTNPenalty(actor) : 0;

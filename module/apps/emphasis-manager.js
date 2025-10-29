@@ -268,7 +268,7 @@ export default class EmphasisManager extends foundry.applications.api.Handlebars
    * @private
    */
   async _onAddCustom(_event, _target) {
-    const content = await renderTemplate(
+    const content = await foundry.applications.handlebars.renderTemplate(
       "systems/l5r4-enhanced/templates/dialogs/custom-emphasis-dialog.hbs"
     );
 
@@ -352,7 +352,7 @@ export default class EmphasisManager extends foundry.applications.api.Handlebars
       return;
     }
 
-    const content = await renderTemplate(
+    const content = await foundry.applications.handlebars.renderTemplate(
       "systems/l5r4-enhanced/templates/dialogs/custom-emphasis-dialog.hbs",
       { currentName: oldName }
     );

@@ -168,12 +168,15 @@ export async function WeaponRoll({
   await roll.evaluate();
 
   const rollHtml = await roll.render();
-  const html = await renderTemplate("systems/l5r4-enhanced/templates/chat/damage-roll.hbs", {
-    flavor: label,
-    roll: rollHtml,
-    damageTotal: roll.total,
-    actorId: actor?.id ?? null
-  });
+  const html = await foundry.applications.handlebars.renderTemplate(
+    "systems/l5r4-enhanced/templates/chat/damage-roll.hbs",
+    {
+      flavor: label,
+      roll: rollHtml,
+      damageTotal: roll.total,
+      actorId: actor?.id ?? null
+    }
+  );
 
   return ChatMessage.create({
     speaker: ChatMessage.getSpeaker({ actor }),

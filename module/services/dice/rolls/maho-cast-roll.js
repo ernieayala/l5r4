@@ -124,7 +124,13 @@ export async function MahoCastRoll({ actor, spell, woundPenalty = 0, showDialog 
   const bonuses = applyRingBonuses(actor, ringKey);
   let rollMod = options.rollMod + bonuses.roll;
   let keepMod = options.keepMod + bonuses.keep;
-  const totalMod = options.totalMod + bonuses.total;
+  let totalMod = options.totalMod + bonuses.total;
+
+  // Apply wound penalty to roll total (ALWAYS subtract from roll, never add to TN)
+  // Wound penalties reduce the character's effectiveness by subtracting from their roll result
+  if (options.applyWoundPenalty && woundPenalty > 0) {
+    totalMod -= woundPenalty;
+  }
 
   // Handle Void Point spending
   if (options.void) {
@@ -142,13 +148,14 @@ export async function MahoCastRoll({ actor, spell, woundPenalty = 0, showDialog 
   const diceToRoll = ringValue + insightRank + rollMod;
   const diceToKeep = ringValue + keepMod;
 
-  // Calculate effective TN with declared raises and free raises
+  // Calculate effective TN with declared raises
   const totalRaises = options.raises + freeRaises;
   const effTN = calculateEffectiveTN(
     baseTN,
-    options.raises, // Only declared raises add to TN, not free raises
-    woundPenalty,
-    options.applyWoundPenalty
+    options.raises,
+    freeRaises,
+    0, // Never apply wound penalty to TN
+    false // Wound penalty flag no longer used for TN calculation
   );
 
   // Append TN to label

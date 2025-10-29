@@ -152,8 +152,8 @@ export async function TraitRoll({
     const userFreeRaises = toInt(check.freeRaises) || 0;
     userRaises = toInt(check.raises);
     if (userTN || userRaises || userFreeRaises) {
-      // Calculate effective TN: base TN + (raises × 5) - (freeRaises × 5) per L5R4 core rules
-      const displayTN = userTN + userRaises * 5 - userFreeRaises * 5;
+      // Calculate effective TN: base TN + (raises × 5)
+      const displayTN = userTN + userRaises * 5;
       const raisesLabel = game.i18n.localize("l5r4.ui.mechanics.rolls.raises");
       const freeRaisesLabel = game.i18n.localize("l5r4.ui.mechanics.rolls.freeRaises");
       label += ` [TN ${displayTN}`;
@@ -191,11 +191,9 @@ export async function TraitRoll({
       label += ` ${game.i18n.localize("l5r4.ui.mechanics.rings.void")}`;
     }
 
-    // Apply wound penalty to roll total when rolling without a TN
-    // When no TN is specified, subtract wound penalty from roll result
-    // This ensures wounds affect rolls even when there's no target number to compare against
-    // Otherwise, wound penalty will be applied to TN later
-    if (userTN === 0 && applyWoundPenalty && currentWoundPenalty > 0) {
+    // Apply wound penalty to roll total (ALWAYS subtract from roll, never add to TN)
+    // Wound penalties reduce the character's effectiveness by subtracting from their roll result
+    if (applyWoundPenalty && currentWoundPenalty > 0) {
       totalMod -= currentWoundPenalty;
     }
   }
@@ -219,15 +217,15 @@ export async function TraitRoll({
   const roll = new Roll(rollFormula);
   const rollHtml = await roll.render();
 
-  // Calculate final effective TN: base + (raises × 5) + optional wound penalty + armor penalty
-  // Wound penalty only applies if user selected AND TN > 0 (must be a targeted roll)
+  // Calculate final effective TN: base + (raises × 5) + armor penalty
   // Armor penalty only applies to Agility/Reflexes trait rolls with Riding Armor (per Equipment rules)
   const armorTNPenalty = getArmorTNPenalty(targetActor, null, traitName);
   const baseTN = calculateEffectiveTN(
     userTN,
     userRaises,
-    currentWoundPenalty,
-    applyWoundPenalty && userTN > 0
+    0,
+    0, // Never apply wound penalty to TN
+    false // Wound penalty flag no longer used for TN calculation
   );
   const effTN = baseTN + armorTNPenalty;
   const tnResult = evaluateTN(roll.total ?? 0, effTN, userRaises);
