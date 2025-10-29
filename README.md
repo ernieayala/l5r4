@@ -1,7 +1,7 @@
 # Legend of the Five Rings 4th Edition - Enhanced
 
 [![FoundryVTT version](https://img.shields.io/badge/FVTT-v13.x-informational)](https://foundryvtt.com/)
-[![Version](https://img.shields.io/badge/Version-3.1.1-blue)](https://github.com/ernieayala/l5r4/releases)
+[![Version](https://img.shields.io/badge/Version-3.1.2-blue)](https://github.com/ernieayala/l5r4/releases)
 [![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](LICENSE)
 [![GitHub Issues](https://img.shields.io/github/issues/ernieayala/l5r4)](https://github.com/ernieayala/l5r4/issues)
 
@@ -46,6 +46,7 @@ https://github.com/ernieayala/l5r4-migrator/releases/latest/download/module.json
 - [Quick Start](#-quick-start)
 - [Character Management](#-character-management)
 - [XP System](#-xp-system)
+- [Wealth Manager](#-wealth-manager)
 - [Dice System](#-dice-system)
 - [Combat System](#️-combat-system)
 - [Equipment](#️-equipment)
@@ -109,7 +110,7 @@ https://github.com/ernieayala/l5r4-migrator/releases/latest/download/module.json
 - Honor, Glory, Status with ranks and points
 - Shadow Taint tracking
 - Insight Rank (auto-calculated or manual)
-- Wealth (Koku, Bu, Zeni)
+- Wealth (Koku, Bu, Zeni) with calculator-style manager
 
 **Automatic Calculations**
 - Rings derive from lowest trait pair (Earth = min(Stamina, Willpower))
@@ -181,6 +182,37 @@ https://github.com/ernieayala/l5r4-migrator/releases/latest/download/module.json
 - System detects character changes via content hash
 - Auto-rebuilds XP history from current state
 - Ensures XP costs always match actual progression
+
+---
+
+## 💰 Wealth Manager
+
+### Currency Management
+
+**L5R4 Currency System**
+- **Koku**: Gold coins (1 koku = 5 bu = 50 zeni)
+- **Bu**: Silver coins (1 bu = 10 zeni)
+- **Zeni**: Copper pennies
+
+**Wealth Manager Application**
+- Calculator icon on character sheet opens modal manager
+- Add/remove money by denomination with validation
+- Currency conversion between koku, bu, and zeni
+- Prevents negative wealth values
+- No auto-normalization (5 bu stays 5 bu, not converted to 1 koku)
+- Localized in all 6 supported languages
+
+**Currency Conversion**
+- **10 zeni → 1 bu**: Convert up button
+- **1 bu → 10 zeni**: Convert down button
+- **5 bu → 1 koku**: Convert up button
+- **1 koku → 5 bu**: Convert down button
+- Insufficient funds warning prevents invalid conversions
+
+**Direct Input**
+- Number-only fields on character sheet (koku, bu, zeni)
+- Minimum value: 0 (cannot go negative)
+- Values properly typed to prevent string concatenation bugs
 
 ---
 

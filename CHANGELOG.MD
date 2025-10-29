@@ -11,6 +11,16 @@ Versioning: [Semantic Versioning](https://semver.org/spec/v2.0.0.html)
 
 ### Added
 
+**Wealth Manager**
+- New modal wealth management application with calculator-style UI
+- Add/remove money by denomination (koku, bu, zeni) with validation
+- Currency conversion: 10 zeni ↔ 1 bu, 5 bu ↔ 1 koku
+- Prevents negative wealth values with Math.max clamping
+- No auto-normalization (5 bu stays 5 bu, not converted to 1 koku)
+- Calculator icon launcher on character sheet
+- Comprehensive localization in all 6 languages (en, de, es, fr, pt-BR, ru)
+- 24 integration tests covering edge cases and error conditions
+
 **Race Condition Protection**
 - Roll handlers now prevent double-click exploits using in-progress tracking
 - Each roll type tracked independently (skill, attack, trait, ring, spell, weapon, NPC)
