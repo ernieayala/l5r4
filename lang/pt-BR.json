@@ -212,6 +212,24 @@
         "noEmphases": "Nenhuma ênfase na lista",
         "limitReached": "Não é possível treinar mais de {max} ênfases neste grau de perícia"
       },
+      "wealthManager": {
+        "title": "Gerenciador de Riqueza",
+        "tooltip": "Gerenciar Riqueza",
+        "currentWealth": "Riqueza Atual",
+        "addMoney": "Adicionar Dinheiro",
+        "removeMoney": "Remover Dinheiro",
+        "amount": "Quantidade",
+        "denomination": "Denominação",
+        "add": "Adicionar",
+        "remove": "Remover",
+        "convert": "Converter Moeda",
+        "convertZeniToBu": "Converter 10 Zeni em 1 Bu",
+        "convertBuToZeni": "Converter 1 Bu em 10 Zeni",
+        "convertBuToKoku": "Converter 5 Bu em 1 Koku",
+        "convertKokuToBu": "Converter 1 Koku em 5 Bu",
+        "insufficientFunds": "Fundos insuficientes para esta transação",
+        "insufficientForConversion": "Fundos insuficientes para esta conversão"
+      },
       "sheets": {
         "bio": "Histórico",
         "skill": "Perícia",
@@ -266,7 +284,8 @@
         "invalidDamageValue": "Valor de dano inválido fornecido",
         "noTargetForSwap": "Nenhum alvo selecionado para troca de iniciativa",
         "noCombatActive": "Nenhum combate ativo para modificar iniciativa",
-        "notInCombat": "Personagem não está em combate ativo"
+        "notInCombat": "Personagem não está em combate ativo",
+        "wealthManagerFailed": "Falha ao abrir o Gerenciador de Riqueza"
       },
       "voidActions": {
         "title": "Ações de Pontos de Vazio",

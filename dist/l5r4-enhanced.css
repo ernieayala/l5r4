@@ -353,7 +353,9 @@ body > * {
   color: inherit;
 }
 .l5r4.pc .section-title input[type=text],
-.l5r4.npc .section-title input[type=text] {
+.l5r4.pc .section-title input[type=number],
+.l5r4.npc .section-title input[type=text],
+.l5r4.npc .section-title input[type=number] {
   max-width: 46px;
   width: auto;
 }
@@ -1010,7 +1012,66 @@ body > * {
   grid-area: rank;
   height: 28px;
   justify-content: center;
+  position: relative;
   width: 28px;
+}
+.l5r4.pc .traits-rings .trait .trait-rank:hover .trait-increase,
+.l5r4.pc .traits-rings .trait .trait-rank:hover .trait-decrease,
+.l5r4.pc .traits-rings .void-points .trait-rank:hover .trait-increase,
+.l5r4.pc .traits-rings .void-points .trait-rank:hover .trait-decrease,
+.l5r4.npc .traits-rings .trait .trait-rank:hover .trait-increase,
+.l5r4.npc .traits-rings .trait .trait-rank:hover .trait-decrease,
+.l5r4.npc .traits-rings .void-points .trait-rank:hover .trait-increase,
+.l5r4.npc .traits-rings .void-points .trait-rank:hover .trait-decrease {
+  opacity: 1;
+}
+.l5r4.pc .traits-rings .trait .trait-rank:hover .trait-increase,
+.l5r4.pc .traits-rings .void-points .trait-rank:hover .trait-increase,
+.l5r4.npc .traits-rings .trait .trait-rank:hover .trait-increase,
+.l5r4.npc .traits-rings .void-points .trait-rank:hover .trait-increase {
+  top: -16px;
+}
+.l5r4.pc .traits-rings .trait .trait-rank:hover .trait-decrease,
+.l5r4.pc .traits-rings .void-points .trait-rank:hover .trait-decrease,
+.l5r4.npc .traits-rings .trait .trait-rank:hover .trait-decrease,
+.l5r4.npc .traits-rings .void-points .trait-rank:hover .trait-decrease {
+  bottom: -16px;
+}
+.l5r4.pc .traits-rings .trait .trait-rank .trait-increase,
+.l5r4.pc .traits-rings .trait .trait-rank .trait-decrease,
+.l5r4.pc .traits-rings .void-points .trait-rank .trait-increase,
+.l5r4.pc .traits-rings .void-points .trait-rank .trait-decrease,
+.l5r4.npc .traits-rings .trait .trait-rank .trait-increase,
+.l5r4.npc .traits-rings .trait .trait-rank .trait-decrease,
+.l5r4.npc .traits-rings .void-points .trait-rank .trait-increase,
+.l5r4.npc .traits-rings .void-points .trait-rank .trait-decrease {
+  background-color: inherit;
+  border: 1px solid black;
+  border-color: inherit;
+  height: 16px;
+  display: flex;
+  color: inherit;
+  align-items: center;
+  justify-content: center;
+  font-size: 10px;
+  position: absolute;
+  opacity: 0;
+  left: -2px;
+  right: -1px;
+  transition: opacity 150ms ease-out, top 150ms ease-out, bottom 150ms ease-out;
+  z-index: 11;
+}
+.l5r4.pc .traits-rings .trait .trait-rank .trait-increase,
+.l5r4.pc .traits-rings .void-points .trait-rank .trait-increase,
+.l5r4.npc .traits-rings .trait .trait-rank .trait-increase,
+.l5r4.npc .traits-rings .void-points .trait-rank .trait-increase {
+  top: 0;
+}
+.l5r4.pc .traits-rings .trait .trait-rank .trait-decrease,
+.l5r4.pc .traits-rings .void-points .trait-rank .trait-decrease,
+.l5r4.npc .traits-rings .trait .trait-rank .trait-decrease,
+.l5r4.npc .traits-rings .void-points .trait-rank .trait-decrease {
+  bottom: 0;
 }
 .l5r4.pc .traits-rings .trait .void-points-amount,
 .l5r4.pc .traits-rings .void-points .void-points-amount,
@@ -1058,6 +1119,35 @@ body > * {
   grid-template-areas: "rank roll fill";
   grid-template-columns: 28px min-content 1fr;
   justify-items: start;
+}
+.l5r4.pc .traits-rings .trait-reflex .trait-rank .trait-increase,
+.l5r4.pc .traits-rings .trait-reflex .trait-rank .trait-decrease,
+.l5r4.pc .traits-rings .trait-awarness .trait-rank .trait-increase,
+.l5r4.pc .traits-rings .trait-awarness .trait-rank .trait-decrease,
+.l5r4.pc .traits-rings .trait-agility .trait-rank .trait-increase,
+.l5r4.pc .traits-rings .trait-agility .trait-rank .trait-decrease,
+.l5r4.pc .traits-rings .trait-intelligence .trait-rank .trait-increase,
+.l5r4.pc .traits-rings .trait-intelligence .trait-rank .trait-decrease,
+.l5r4.npc .traits-rings .trait-reflex .trait-rank .trait-increase,
+.l5r4.npc .traits-rings .trait-reflex .trait-rank .trait-decrease,
+.l5r4.npc .traits-rings .trait-awarness .trait-rank .trait-increase,
+.l5r4.npc .traits-rings .trait-awarness .trait-rank .trait-decrease,
+.l5r4.npc .traits-rings .trait-agility .trait-rank .trait-increase,
+.l5r4.npc .traits-rings .trait-agility .trait-rank .trait-decrease,
+.l5r4.npc .traits-rings .trait-intelligence .trait-rank .trait-increase,
+.l5r4.npc .traits-rings .trait-intelligence .trait-rank .trait-decrease {
+  right: -2px;
+  left: -1px;
+}
+.l5r4.pc .traits-rings .trait-willpower,
+.l5r4.pc .traits-rings .trait-intelligence,
+.l5r4.pc .traits-rings .trait-perception,
+.l5r4.pc .traits-rings .trait-awarness,
+.l5r4.npc .traits-rings .trait-willpower,
+.l5r4.npc .traits-rings .trait-intelligence,
+.l5r4.npc .traits-rings .trait-perception,
+.l5r4.npc .traits-rings .trait-awarness {
+  margin-block-start: 8px;
 }
 .l5r4.pc .traits-rings .trait-stamina,
 .l5r4.pc .traits-rings .trait-willpower,

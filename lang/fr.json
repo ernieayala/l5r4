@@ -212,6 +212,24 @@
         "noEmphases": "Aucune emphase dans la liste",
         "limitReached": "Impossible d'entraîner plus de {max} emphases à ce rang de compétence"
       },
+      "wealthManager": {
+        "title": "Gestionnaire de Richesse",
+        "tooltip": "Gérer la Richesse",
+        "currentWealth": "Richesse Actuelle",
+        "addMoney": "Ajouter de l'Argent",
+        "removeMoney": "Retirer de l'Argent",
+        "amount": "Montant",
+        "denomination": "Dénomination",
+        "add": "Ajouter",
+        "remove": "Retirer",
+        "convert": "Convertir la Monnaie",
+        "convertZeniToBu": "Convertir 10 Zeni en 1 Bu",
+        "convertBuToZeni": "Convertir 1 Bu en 10 Zeni",
+        "convertBuToKoku": "Convertir 5 Bu en 1 Koku",
+        "convertKokuToBu": "Convertir 1 Koku en 5 Bu",
+        "insufficientFunds": "Fonds insuffisants pour cette transaction",
+        "insufficientForConversion": "Fonds insuffisants pour cette conversion"
+      },
       "sheets": {
         "bio": "Historique",
         "skill": "Compétence",
@@ -266,7 +284,8 @@
         "invalidDamageValue": "Valeur de dégâts invalide fournie",
         "noTargetForSwap": "Aucune cible sélectionnée pour l'échange d'initiative",
         "noCombatActive": "Aucun combat actif pour modifier l'initiative",
-        "notInCombat": "Le personnage n'est pas dans un combat actif"
+        "notInCombat": "Le personnage n'est pas dans un combat actif",
+        "wealthManagerFailed": "Échec de l'ouverture du Gestionnaire de Richesse"
       },
       "voidActions": {
         "title": "Actions de Points de Vide",

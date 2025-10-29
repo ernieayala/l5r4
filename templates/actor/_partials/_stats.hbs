@@ -53,14 +53,30 @@
           <span class="mas">{{localize "l5r4.ui.mechanics.traits.sta"}}</span>
           <span title="{{localize "l5r4.ui.mechanics.rolls.traitRoll"}}">{{localize "l5r4.ui.mechanics.traits.sta"}}</span>
         </div>
-        <span class="trait-rank" data-action="trait-rank" data-trait="sta" role="button" title="{{localize "l5r4.ui.hints.leftClickPlusRightClickMinus"}}">{{@root.traitsEff.sta}}</span>
+        <span class="trait-rank" data-action="trait-rank" data-trait="sta" role="button" title="{{localize "l5r4.ui.hints.leftClickPlusRightClickMinus"}}">
+          <a class="trait-increase" data-action="trait-increase" data-trait="sta">
+            <i class="fas fa-chevron-up"></i>
+          </a>
+          <span>{{@root.traitsEff.sta}}</span>
+          <a class="trait-decrease" data-action="trait-decrease" data-trait="sta">
+            <i class="fas fa-chevron-down"></i>
+          </a>
+        </span>
       </div>
       <div class="trait trait-willpower">
         <div class="trait-roll" data-action="roll-trait" data-trait-rank="{{system.traits.wil}}" data-trait-name="{{localize "l5r4.ui.mechanics.traits.wil"}}">
           <span class="mas">{{localize "l5r4.ui.mechanics.traits.wil"}}</span>
           <span title="{{localize "l5r4.ui.mechanics.rolls.traitRoll"}}">{{localize "l5r4.ui.mechanics.traits.wil"}}</span>
         </div>
-        <span class="trait-rank" data-action="trait-rank" data-trait="wil" role="button" title="{{localize "l5r4.ui.hints.leftClickPlusRightClickMinus"}}">{{@root.traitsEff.wil}}</span>
+        <span class="trait-rank" data-action="trait-rank" data-trait="wil" role="button" title="{{localize "l5r4.ui.hints.leftClickPlusRightClickMinus"}}">
+          <a class="trait-increase" data-action="trait-increase" data-trait="wil">
+            <i class="fas fa-chevron-up"></i>
+          </a>
+          <span>{{@root.traitsEff.wil}}</span>
+          <a class="trait-decrease" data-action="trait-decrease" data-trait="wil">
+            <i class="fas fa-chevron-down"></i>
+          </a>
+        </span>
       </div>
 
       <!-- Air ring -->
@@ -76,14 +92,30 @@
           <span class="mas">{{localize "l5r4.ui.mechanics.traits.ref"}}</span>
           <span title="{{localize "l5r4.ui.mechanics.rolls.traitRoll"}}">{{localize "l5r4.ui.mechanics.traits.ref"}}</span>
         </div>
-        <span class="trait-rank" data-action="trait-rank" data-trait="ref" role="button" title="{{localize "l5r4.ui.hints.leftClickPlusRightClickMinus"}}">{{@root.traitsEff.ref}}</span>
+        <span class="trait-rank" data-action="trait-rank" data-trait="ref" role="button" title="{{localize "l5r4.ui.hints.leftClickPlusRightClickMinus"}}">
+          <a class="trait-increase" data-action="trait-increase" data-trait="ref">
+            <i class="fas fa-chevron-up"></i>
+          </a>
+          <span>{{@root.traitsEff.ref}}</span>
+          <a class="trait-decrease" data-action="trait-decrease" data-trait="ref">
+            <i class="fas fa-chevron-down"></i>
+          </a>
+        </span>
       </div>
       <div class="trait trait-awarness">
         <div class="trait-roll" data-action="roll-trait" data-trait-rank="{{system.traits.awa}}" data-trait-name="{{localize "l5r4.ui.mechanics.traits.awa"}}">
           <span class="mas">{{localize "l5r4.ui.mechanics.traits.awa"}}</span>
           <span title="{{localize "l5r4.ui.mechanics.rolls.traitRoll"}}">{{localize "l5r4.ui.mechanics.traits.awa"}}</span>
         </div>
-        <span class="trait-rank" data-action="trait-rank" data-trait="awa" role="button" title="{{localize "l5r4.ui.hints.leftClickPlusRightClickMinus"}}">{{@root.traitsEff.awa}}</span>
+        <span class="trait-rank" data-action="trait-rank" data-trait="awa" role="button" title="{{localize "l5r4.ui.hints.leftClickPlusRightClickMinus"}}">
+          <a class="trait-increase" data-action="trait-increase" data-trait="awa">
+            <i class="fas fa-chevron-up"></i>
+          </a>
+          <span>{{@root.traitsEff.awa}}</span>
+          <a class="trait-decrease" data-action="trait-decrease" data-trait="awa">
+            <i class="fas fa-chevron-down"></i>
+          </a>
+        </span>
       </div>
 
       <!-- Water ring -->
@@ -99,14 +131,30 @@
           <span class="mas">{{localize "l5r4.ui.mechanics.traits.str"}}</span>
           <span title="{{localize "l5r4.ui.mechanics.rolls.traitRoll"}}">{{localize "l5r4.ui.mechanics.traits.str"}}</span>
         </div>
-        <span class="trait-rank" data-action="trait-rank" data-trait="str" role="button" title="{{localize "l5r4.ui.hints.leftClickPlusRightClickMinus"}}">{{@root.traitsEff.str}}</span>
+        <span class="trait-rank" data-action="trait-rank" data-trait="str" role="button" title="{{localize "l5r4.ui.hints.leftClickPlusRightClickMinus"}}">
+          <a class="trait-increase" data-action="trait-increase" data-trait="str">
+            <i class="fas fa-chevron-up"></i>
+          </a>
+          <span>{{@root.traitsEff.str}}</span>
+          <a class="trait-decrease" data-action="trait-decrease" data-trait="str">
+            <i class="fas fa-chevron-down"></i>
+          </a>
+        </span>
       </div>
       <div class="trait trait-perception">
         <div class="trait-roll" data-action="roll-trait" data-trait-rank="{{system.traits.per}}" data-trait-name="{{localize "l5r4.ui.mechanics.traits.per"}}">
           <span class="mas">{{localize "l5r4.ui.mechanics.traits.per"}}</span>
           <span title="{{localize "l5r4.ui.mechanics.rolls.traitRoll"}}">{{localize "l5r4.ui.mechanics.traits.per"}}</span>
         </div>
-        <span class="trait-rank" data-action="trait-rank" data-trait="per" role="button" title="{{localize "l5r4.ui.hints.leftClickPlusRightClickMinus"}}">{{@root.traitsEff.per}}</span>
+        <span class="trait-rank" data-action="trait-rank" data-trait="per" role="button" title="{{localize "l5r4.ui.hints.leftClickPlusRightClickMinus"}}">
+          <a class="trait-increase" data-action="trait-increase" data-trait="per">
+            <i class="fas fa-chevron-up"></i>
+          </a>
+          <span>{{@root.traitsEff.per}}</span>
+          <a class="trait-decrease" data-action="trait-decrease" data-trait="per">
+            <i class="fas fa-chevron-down"></i>
+          </a>
+        </span>
       </div>
 
       <!-- Fire ring -->
@@ -122,14 +170,30 @@
           <span class="mas">{{localize "l5r4.ui.mechanics.traits.agi"}}</span>
           <span title="{{localize "l5r4.ui.mechanics.rolls.traitRoll"}}">{{localize "l5r4.ui.mechanics.traits.agi"}}</span>
         </div>
-        <span class="trait-rank" data-action="trait-rank" data-trait="agi" role="button" title="{{localize "l5r4.ui.hints.leftClickPlusRightClickMinus"}}">{{@root.traitsEff.agi}}</span>
+        <span class="trait-rank" data-action="trait-rank" data-trait="agi" role="button" title="{{localize "l5r4.ui.hints.leftClickPlusRightClickMinus"}}">
+          <a class="trait-increase" data-action="trait-increase" data-trait="agi">
+            <i class="fas fa-chevron-up"></i>
+          </a>
+          <span>{{@root.traitsEff.agi}}</span>
+          <a class="trait-decrease" data-action="trait-decrease" data-trait="agi">
+            <i class="fas fa-chevron-down"></i>
+          </a>
+        </span>
       </div>
       <div class="trait trait-intelligence">
         <div class="trait-roll" data-action="roll-trait" data-trait-rank="{{system.traits.int}}" data-trait-name="{{localize "l5r4.ui.mechanics.traits.int"}}">
           <span class="mas">{{localize "l5r4.ui.mechanics.traits.int"}}</span>
           <span title="{{localize "l5r4.ui.mechanics.rolls.traitRoll"}}">{{localize "l5r4.ui.mechanics.traits.int"}}</span>
         </div>
-        <span class="trait-rank" data-action="trait-rank" data-trait="int" role="button" title="{{localize "l5r4.ui.hints.leftClickPlusRightClickMinus"}}">{{@root.traitsEff.int}}</span>
+        <span class="trait-rank" data-action="trait-rank" data-trait="int" role="button" title="{{localize "l5r4.ui.hints.leftClickPlusRightClickMinus"}}">
+          <a class="trait-increase" data-action="trait-increase" data-trait="int">
+            <i class="fas fa-chevron-up"></i>
+          </a>
+          <span>{{@root.traitsEff.int}}</span>
+          <a class="trait-decrease" data-action="trait-decrease" data-trait="int">
+            <i class="fas fa-chevron-down"></i>
+          </a>
+        </span>
       </div>
 
       <!-- Void ring -->

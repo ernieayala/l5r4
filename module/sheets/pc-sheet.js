@@ -195,6 +195,10 @@ export default class L5R4PcSheet extends BaseActorSheet {
         return PcAdjustmentHandler.adjustSpellSlot(this._getHandlerContext(), event, element, +1);
       case "trait-rank":
         return PcTraitHandler.adjust(this._getHandlerContext(), event, element, +1);
+      case "trait-increase":
+        return PcTraitHandler.increase(this._getHandlerContext(), event, element);
+      case "trait-decrease":
+        return PcTraitHandler.decrease(this._getHandlerContext(), event, element);
       case "void-points-dots":
         return this._onVoidPointsAdjust(event, element, +1);
       case "toggle-armor-void":
@@ -211,6 +215,8 @@ export default class L5R4PcSheet extends BaseActorSheet {
         return AppLauncherHandler.openWoundConfig(this._getHandlerContext(), event, element);
       case "xp-modal":
         return AppLauncherHandler.openXpManager(this._getHandlerContext(), event, element);
+      case "open-wealth-manager":
+        return AppLauncherHandler.openWealthManager(this._getHandlerContext(), event, element);
     }
   }
 
