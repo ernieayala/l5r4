@@ -92,6 +92,7 @@ import { getArmorTNPenalty } from "../../../utils/armor-penalties.js";
  * @param {number} [options.totalBonus=0] - Flat bonus added to roll total
  * @param {L5R4Actor|null} [options.actor=null] - Actor performing the roll (for bonuses/void/honor)
  * @param {string|null} [options.rollType=null] - Roll type identifier (e.g., "attack")
+ * @param {string|null} [options.weaponId=null] - Item ID of weapon for attack roll damage integration
  *
  * @returns {Promise<ChatMessage|false>} The created chat message, or false on error
  *
@@ -112,7 +113,8 @@ export async function SkillRoll({
   keepBonus = 0,
   totalBonus = 0,
   actor = null,
-  rollType = null
+  rollType = null,
+  weaponId = null
 } = {}) {
   const messageTemplate = CHAT_TEMPLATES.simpleRoll;
   const traitI18nKey =
@@ -300,11 +302,54 @@ export async function SkillRoll({
   // Convert "failure" to "missed" for attack rolls (better UX messaging)
   tnResult = replaceFailureWithMissed(tnResult, rollType);
 
-  const content = await R(messageTemplate, { flavor: finalLabel, roll: rollHtml, tnResult });
+  // For successful attack rolls, prepare weapon damage data for chat button
+  // Includes stance bonuses from Full Attack (+1k0) and mounted combat bonuses
+  let weaponData = null;
+  if (
+    rollType === "attack" &&
+    weaponId &&
+    actor &&
+    tnResult &&
+    tnResult.outcome === game.i18n.localize("l5r4.ui.mechanics.rolls.success")
+  ) {
+    const weapon = actor.items.get(weaponId);
+    if (weapon && (weapon.type === "weapon" || weapon.type === "bow")) {
+      const { getStanceDamageBonuses } = await import("../../stance/rolls/attack-bonuses.js");
+      const stanceBonuses = getStanceDamageBonuses(actor);
+      weaponData = {
+        id: weaponId,
+        name: weapon.name,
+        damageRoll: weapon.system?.damageRoll || 0,
+        damageKeep: weapon.system?.damageKeep || 0,
+        actorId: actor.id,
+        raises: raises,
+        stanceRoll: stanceBonuses.roll,
+        stanceKeep: stanceBonuses.keep
+      };
+    }
+  }
+
+  const content = await R(messageTemplate, {
+    flavor: finalLabel,
+    roll: rollHtml,
+    tnResult,
+    weaponData
+  });
+
+  // Store attack raises in message flags to prevent HTML injection exploits
+  // Validates raises when damage button is clicked to ensure they match original roll
+  const flags = weaponData
+    ? {
+        "l5r4-enhanced": {
+          attackRaises: raises,
+          weaponId: weaponData.id
+        }
+      }
+    : {};
 
   // Post roll to chat, handle errors gracefully
   try {
-    return await roll.toMessage({ speaker: ChatMessage.getSpeaker(), content });
+    return await roll.toMessage({ speaker: ChatMessage.getSpeaker(), content, flags });
   } catch (err) {
     console.error(`${SYS_ID}`, "SkillRoll: Failed to post chat message after roll", {
       err,

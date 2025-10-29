@@ -292,9 +292,11 @@ export class RollHandler {
    *
    * L5R4 Mechanics:
    * - Skilled Attack: (Skill Rank + Trait)k(Trait) using weapon's associated skill
+   *   - Routes to SkillRoll for emphasis support (re-roll 1s if emphasis applies)
    * - Unskilled Attack: (Trait)k(Trait) if no skill found, dice never explode
-   * - Full Attack Stance: +2k1 attack bonus, -10 Armor TN (in SimpleRoll)
-   * - Wound Penalties: Applied to attack TN via SimpleRoll service
+   *   - Routes to SimpleRoll (no emphasis possible without skill)
+   * - Full Attack Stance: +2k1 attack bonus, -10 Armor TN
+   * - Wound Penalties: Applied to attack TN via roll service
    * - Successful Hit: Generates weapon damage button in chat with stance damage bonuses
    *
    * Resolution Process:
@@ -302,13 +304,13 @@ export class RollHandler {
    * 2. Validate weapon type (must be "weapon" or "bow")
    * 3. Resolve weapon skill and trait via resolveWeaponSkillTrait()
    * 4. Apply stance attack bonuses (Full Attack +2k1)
-   * 5. Execute SimpleRoll with rollType="attack" and weaponId for damage integration
+   * 5. Route to SkillRoll if skilled (supports emphasis) or SimpleRoll if unskilled
    *
    * @param {Object} context - Sheet context from _prepareContext()
    * @param {Actor} context.actor - The actor making the weapon attack
    * @param {Event} event - DOM click event on weapon attack trigger
    * @param {HTMLElement} element - Target element from Application v2 delegation
-   * @returns {Promise<ChatMessage|undefined>} Chat message from SimpleRoll service
+   * @returns {Promise<ChatMessage|undefined>} Chat message from SkillRoll or SimpleRoll service
    */
   static async weaponAttackRoll(context, event, element) {
     event.preventDefault();
@@ -333,29 +335,15 @@ export class RollHandler {
 
     const isUntrained = weaponSkill.skillRank === 0;
 
-    const rollName = `${weapon.name} ${game.i18n.localize("l5r4.ui.mechanics.rolls.attackRoll")}`;
-    const description =
-      `${weaponSkill.description}` +
-      `${
-        stanceBonuses.roll > 0 || stanceBonuses.keep > 0
-          ? ` (${game.i18n.localize("l5r4.ui.mechanics.stances.fullAttack")}: +${
-              stanceBonuses.roll
-            }k${stanceBonuses.keep})`
-          : ""
-      }` +
-      `${isUntrained ? ` (${game.i18n.localize("l5r4.ui.mechanics.rolls.unskilled")})` : ""}`;
-
-    // Pass isBow flag to pre-check ranged checkbox in dialog
-    const isBow = weapon.type === "bow";
-
     // Extract skill name and trait for armor penalty calculation
     const weaponSystem = weapon.system || {};
     const associatedSkill = weaponSystem.associatedSkill || null;
 
     // Find the actual skill item to get its trait (if it exists)
     let skillTrait = weaponSystem.fallbackTrait || "agi";
+    let skillItem = null;
     if (associatedSkill && context.actor.items) {
-      const skillItem = context.actor.items.find(
+      skillItem = context.actor.items.find(
         i => i.type === "skill" && i.name.toLowerCase() === associatedSkill.toLowerCase()
       );
       if (skillItem && skillItem.system?.trait) {
@@ -365,21 +353,59 @@ export class RollHandler {
 
     RollHandler._rollInProgress.add(rollKey);
     try {
-      return await SimpleRoll({
-        woundPenalty: readWoundPenalty(context.actor),
-        diceRoll: weaponSkill.rollBonus + stanceBonuses.roll,
-        diceKeep: weaponSkill.keepBonus + stanceBonuses.keep,
-        rollName,
-        description,
-        toggleOptions: event.shiftKey,
-        rollType: "attack",
-        actor: context.actor,
-        untrained: isUntrained,
-        weaponId: id,
-        isBow,
-        skillName: associatedSkill,
-        skillTrait: skillTrait
-      });
+      // Route to SkillRoll for skilled attacks (supports emphasis)
+      // Route to SimpleRoll for unskilled attacks (no emphasis possible)
+      if (!isUntrained && skillItem) {
+        return await SkillRoll({
+          woundPenalty: readWoundPenalty(context.actor),
+          actorTrait: weaponSkill.keepBonus,
+          skillRank: weaponSkill.skillRank,
+          skillName: associatedSkill,
+          skillTrait: skillTrait,
+          askForOptions: event.shiftKey,
+          npc: false,
+          rollBonus: stanceBonuses.roll,
+          keepBonus: stanceBonuses.keep,
+          totalBonus: 0,
+          actor: context.actor,
+          rollType: "attack",
+          weaponId: id
+        });
+      } else {
+        // Unskilled attack - use SimpleRoll
+        const rollName = `${weapon.name} ${game.i18n.localize(
+          "l5r4.ui.mechanics.rolls.attackRoll"
+        )}`;
+        const description =
+          `${weaponSkill.description}` +
+          `${
+            stanceBonuses.roll > 0 || stanceBonuses.keep > 0
+              ? ` (${game.i18n.localize("l5r4.ui.mechanics.stances.fullAttack")}: +${
+                  stanceBonuses.roll
+                }k${stanceBonuses.keep})`
+              : ""
+          }` +
+          ` (${game.i18n.localize("l5r4.ui.mechanics.rolls.unskilled")})`;
+
+        // Pass isBow flag to pre-check ranged checkbox in dialog
+        const isBow = weapon.type === "bow";
+
+        return await SimpleRoll({
+          woundPenalty: readWoundPenalty(context.actor),
+          diceRoll: weaponSkill.rollBonus + stanceBonuses.roll,
+          diceKeep: weaponSkill.keepBonus + stanceBonuses.keep,
+          rollName,
+          description,
+          toggleOptions: event.shiftKey,
+          rollType: "attack",
+          actor: context.actor,
+          untrained: true,
+          weaponId: id,
+          isBow,
+          skillName: associatedSkill,
+          skillTrait: skillTrait
+        });
+      }
     } finally {
       RollHandler._rollInProgress.delete(rollKey);
     }
