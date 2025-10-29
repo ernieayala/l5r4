@@ -200,7 +200,53 @@
         grid-area: rank;
         height: 28px;
         justify-content: center;
+        position: relative;
         width: 28px;
+
+        &:hover {
+          .trait-increase,
+          .trait-decrease {
+            opacity: 1;
+          }
+
+          .trait-increase {
+            top: -16px;
+          }
+
+          .trait-decrease {
+            bottom: -16px;
+          }
+        }
+
+        .trait-increase,
+        .trait-decrease {
+          align-items: center;
+          background-color: inherit;
+          border: 1px solid black;
+          border-color: inherit;
+          color: inherit;
+          display: flex;
+          font-size: 10px;
+          height: 16px;
+          justify-content: center;
+          left: -2px;
+          opacity: 0;
+          position: absolute;
+          right: -1px;
+          transition:
+            opacity 150ms ease-out,
+            top 150ms ease-out,
+            bottom 150ms ease-out;
+          z-index: 11;
+        }
+
+        .trait-increase {
+          top: 0;
+        }
+
+        .trait-decrease {
+          bottom: 0;
+        }
       }
 
       .void-points-amount {
@@ -240,6 +286,21 @@
       grid-template-areas: "rank roll fill";
       grid-template-columns: 28px min-content 1fr;
       justify-items: start;
+
+      .trait-rank {
+        .trait-increase,
+        .trait-decrease {
+          left: -1px;
+          right: -2px;
+        }
+      }
+    }
+
+    .trait-willpower,
+    .trait-intelligence,
+    .trait-perception,
+    .trait-awarness {
+      margin-block-start: 8px;
     }
 
     .trait-stamina,

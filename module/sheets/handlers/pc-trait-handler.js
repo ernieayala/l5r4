@@ -193,6 +193,66 @@ export class PcTraitHandler {
   }
 
   /**
+   * Increases a PC's trait value by 1 without requiring Shift key.
+   *
+   * This method provides direct trait increment functionality for the trait-increase
+   * buttons in the UI. Unlike adjust(), this does NOT require Shift key to be pressed.
+   *
+   * **User Interaction:**
+   * - Click trait-increase button (up chevron): Increases trait by 1
+   * - No Shift key required (direct action)
+   *
+   * **Implementation:**
+   * Delegates to adjust() with delta=+1 and bypasses shift key check by setting
+   * event.shiftKey to true internally. Prevents event propagation to avoid triggering
+   * parent trait-rank handler.
+   *
+   * @param {Object} context - Sheet render context with actor reference
+   * @param {Event} event - DOM event from button click
+   * @param {HTMLElement} element - Target element with data-trait attribute
+   * @returns {Promise<void>}
+   */
+  static async increase(context, event, element) {
+    // Stop propagation to prevent parent trait-rank handler from firing
+    event?.preventDefault?.();
+    event?.stopPropagation?.();
+
+    // Create modified event that appears to have shift key pressed
+    const modifiedEvent = event ? { ...event, shiftKey: true } : { shiftKey: true };
+    return this.adjust(context, modifiedEvent, element, +1);
+  }
+
+  /**
+   * Decreases a PC's trait value by 1 without requiring Shift key.
+   *
+   * This method provides direct trait decrement functionality for the trait-decrease
+   * buttons in the UI. Unlike adjust(), this does NOT require Shift key to be pressed.
+   *
+   * **User Interaction:**
+   * - Click trait-decrease button (down chevron): Decreases trait by 1
+   * - No Shift key required (direct action)
+   *
+   * **Implementation:**
+   * Delegates to adjust() with delta=-1 and bypasses shift key check by setting
+   * event.shiftKey to true internally. Prevents event propagation to avoid triggering
+   * parent trait-rank handler.
+   *
+   * @param {Object} context - Sheet render context with actor reference
+   * @param {Event} event - DOM event from button click
+   * @param {HTMLElement} element - Target element with data-trait attribute
+   * @returns {Promise<void>}
+   */
+  static async decrease(context, event, element) {
+    // Stop propagation to prevent parent trait-rank handler from firing
+    event?.preventDefault?.();
+    event?.stopPropagation?.();
+
+    // Create modified event that appears to have shift key pressed
+    const modifiedEvent = event ? { ...event, shiftKey: true } : { shiftKey: true };
+    return this.adjust(context, modifiedEvent, element, -1);
+  }
+
+  /**
    * Converts form submission data from effective traits to base traits.
    *
    * **⚠️ CRITICAL WARNING - DO NOT USE UNLESS TRAITS HAVE FORM INPUTS:**

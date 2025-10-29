@@ -212,6 +212,24 @@
         "noEmphases": "No hay énfasis en la lista",
         "limitReached": "No puedes entrenar más de {max} énfasis con este rango de habilidad"
       },
+      "wealthManager": {
+        "title": "Administrador de Riqueza",
+        "tooltip": "Administrar Riqueza",
+        "currentWealth": "Riqueza Actual",
+        "addMoney": "Agregar Dinero",
+        "removeMoney": "Quitar Dinero",
+        "amount": "Cantidad",
+        "denomination": "Denominación",
+        "add": "Agregar",
+        "remove": "Quitar",
+        "convert": "Convertir Moneda",
+        "convertZeniToBu": "Convertir 10 Zeni a 1 Bu",
+        "convertBuToZeni": "Convertir 1 Bu a 10 Zeni",
+        "convertBuToKoku": "Convertir 5 Bu a 1 Koku",
+        "convertKokuToBu": "Convertir 1 Koku a 5 Bu",
+        "insufficientFunds": "Fondos insuficientes para esta transacción",
+        "insufficientForConversion": "Fondos insuficientes para esta conversión"
+      },
       "sheets": {
         "bio": "Trasfondo",
         "skill": "Habilidad",
@@ -264,9 +282,10 @@
         "conditionApplyFailed": "Error al aplicar {condition} a {actor}",
         "invalidSkillName": "Nombre de habilidad inválido proporcionado",
         "invalidDamageValue": "Valor de daño inválido proporcionado",
-        "noTargetForSwap": "No hay objetivo seleccionado para intercambiar iniciativa",
+        "noTargetForSwap": "No se seleccionó objetivo para intercambio de iniciativa",
         "noCombatActive": "No hay combate activo para modificar iniciativa",
-        "notInCombat": "El personaje no está en combate activo"
+        "notInCombat": "El personaje no está en combate activo",
+        "wealthManagerFailed": "Error al abrir el Administrador de Riqueza"
       },
       "voidActions": {
         "title": "Acciones de Puntos de Vacío",

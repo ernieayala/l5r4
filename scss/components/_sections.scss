@@ -26,7 +26,8 @@
       color: inherit;
     }
 
-    input[type="text"] {
+    input[type="text"],
+    input[type="number"] {
       max-width: 46px;
       width: auto;
     }

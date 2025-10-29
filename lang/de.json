@@ -212,6 +212,24 @@
         "noEmphases": "Keine Schwerpunkte in der Liste",
         "limitReached": "Kann nicht mehr als {max} Schwerpunkte bei diesem Fertigkeitsrang trainieren"
       },
+      "wealthManager": {
+        "title": "Vermögensverwaltung",
+        "tooltip": "Vermögen Verwalten",
+        "currentWealth": "Aktuelles Vermögen",
+        "addMoney": "Geld Hinzufügen",
+        "removeMoney": "Geld Entfernen",
+        "amount": "Betrag",
+        "denomination": "Währung",
+        "add": "Hinzufügen",
+        "remove": "Entfernen",
+        "convert": "Währung Umtauschen",
+        "convertZeniToBu": "10 Zeni zu 1 Bu umtauschen",
+        "convertBuToZeni": "1 Bu zu 10 Zeni umtauschen",
+        "convertBuToKoku": "5 Bu zu 1 Koku umtauschen",
+        "convertKokuToBu": "1 Koku zu 5 Bu umtauschen",
+        "insufficientFunds": "Unzureichende Mittel für diese Transaktion",
+        "insufficientForConversion": "Unzureichende Mittel für diesen Umtausch"
+      },
       "sheets": {
         "bio": "Hintergrund",
         "skill": "Fertigkeit",
@@ -266,7 +284,8 @@
         "invalidDamageValue": "Ungültiger Schadenswert angegeben",
         "noTargetForSwap": "Kein Ziel für Initiativentausch ausgewählt",
         "noCombatActive": "Kein aktiver Kampf, um Initiative zu ändern",
-        "notInCombat": "Charakter ist nicht im aktiven Kampf"
+        "notInCombat": "Charakter ist nicht im aktiven Kampf",
+        "wealthManagerFailed": "Fehler beim Öffnen der Vermögensverwaltung"
       },
       "voidActions": {
         "title": "Leere-Punkt Aktionen",

@@ -3,16 +3,23 @@
     <h4 class="title">{{localize "l5r4.ui.sheets.items"}}</h4>
     <div class="flexrow flex0 wealth">
       <span>{{localize "l5r4.world.wealth.koku"}}:</span>
-      <input type="text" name="system.wealth.koku" value="{{system.wealth.koku}}" placeholder="0" />
+      <input type="number" name="system.wealth.koku" value="{{system.wealth.koku}}" placeholder="0" min="0" step="1" />
     </div>
     <div class="flexrow flex0 wealth">
       <span>{{localize "l5r4.world.wealth.bu"}}:</span>
-      <input type="text" name="system.wealth.bu" value="{{system.wealth.bu}}" placeholder="0" />
+      <input type="number" name="system.wealth.bu" value="{{system.wealth.bu}}" placeholder="0" min="0" step="1" />
     </div>
     <div class="flexrow flex0 wealth">
       <span>{{localize "l5r4.world.wealth.zeni"}}:</span>
-      <input type="text" name="system.wealth.zeni" value="{{system.wealth.zeni}}" placeholder="0" />
+      <input type="number" name="system.wealth.zeni" value="{{system.wealth.zeni}}" placeholder="0" min="0" step="1" />
     </div>
+    <a
+      class="button inline-control icon"
+      data-action="open-wealth-manager"
+      data-tooltip="{{localize 'l5r4.ui.wealthManager.tooltip'}}"
+    >
+      <i class="fas fa-calculator"></i>
+    </a>
     {{> "systems/l5r4-enhanced/templates/actor/_partials/_unified-item-create.hbs"}}
     {{> "systems/l5r4-enhanced/templates/actor/_partials/_expand.hbs"}}
   </div>

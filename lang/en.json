@@ -212,6 +212,24 @@
         "noEmphases": "No emphases in list",
         "limitReached": "Cannot train more than {max} emphases at this skill rank"
       },
+      "wealthManager": {
+        "title": "Wealth Manager",
+        "tooltip": "Manage Wealth",
+        "currentWealth": "Current Wealth",
+        "addMoney": "Add Money",
+        "removeMoney": "Remove Money",
+        "amount": "Amount",
+        "denomination": "Denomination",
+        "add": "Add",
+        "remove": "Remove",
+        "convert": "Convert Currency",
+        "convertZeniToBu": "Convert 10 Zeni to 1 Bu",
+        "convertBuToZeni": "Convert 1 Bu to 10 Zeni",
+        "convertBuToKoku": "Convert 5 Bu to 1 Koku",
+        "convertKokuToBu": "Convert 1 Koku to 5 Bu",
+        "insufficientFunds": "Insufficient funds for this transaction",
+        "insufficientForConversion": "Insufficient funds for this conversion"
+      },
       "sheets": {
         "bio": "Background",
         "skill": "Skill",
@@ -266,7 +284,8 @@
         "invalidDamageValue": "Invalid damage value provided",
         "noTargetForSwap": "No target selected for initiative swap",
         "noCombatActive": "No active combat to modify initiative",
-        "notInCombat": "Character not in active combat"
+        "notInCombat": "Character not in active combat",
+        "wealthManagerFailed": "Failed to open Wealth Manager"
       },
       "voidActions": {
         "title": "Void Point Actions",
