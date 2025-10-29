@@ -2,20 +2,15 @@
  * Raise Manager Service
  *
  * Calculates Free Raises from all sources (items, effects, advantages, techniques).
- * Free Raises provide Raise benefits without increasing TN and don't count toward
- * the Void Ring limit.
+ * Free Raises are displayed in roll dialogs and chat output.
  *
  * L5R4 Game Mechanics:
- * - Free Raises: Grant Raise benefits without +5 TN increase
+ * - Free Raises: Available raise effects from equipment and abilities
  * - Don't count toward Void Ring maximum
- * - Can be used to reduce TN by 5 instead of adding benefits
  * - Sources: Advantages, school techniques, items, temporary effects
- * - Per rules: "Some mechanical effects grant a character Free Raises. These give
- *   the benefit of having made a Raise without actually increasing the TN of the
- *   roll in question, and do not count toward the maximum number of Raises that
- *   may be made per roll."
+ * - Displayed in roll dialogs and chat messages
  *
- * Used by: Roll services to calculate total Free Raises before rolling
+ * Used by: Roll services to calculate total Free Raises
  *
  * @module services/dice/resources/raise-manager
  */

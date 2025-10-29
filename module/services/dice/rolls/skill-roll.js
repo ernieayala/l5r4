@@ -206,18 +206,16 @@ export async function SkillRoll({
     totalMod += honorRank;
   }
 
-  // Determine final TN early to decide how to apply wound penalty
+  // Determine final TN early
   // For attack rolls, autoTN from target may override user's TN input
   let finalTN = toInt(check.tn);
   if (rollType === "attack" && finalTN === 0 && autoTN > 0) {
     finalTN = autoTN;
   }
 
-  // Apply wound penalty to roll total when rolling without a TN
-  // When no TN is specified (even after autoTN resolution), subtract wound penalty from roll result
-  // This ensures wounds affect rolls even when there's no target number to compare against
-  // Otherwise, wound penalty will be applied to TN later
-  if (finalTN === 0 && applyWoundPenalty && woundPenalty > 0) {
+  // Apply wound penalty to roll total (ALWAYS subtract from roll, never add to TN)
+  // Wound penalties reduce the character's effectiveness by subtracting from their roll result
+  if (applyWoundPenalty && woundPenalty > 0) {
     totalMod -= woundPenalty;
   }
 
@@ -252,10 +250,18 @@ export async function SkillRoll({
   if (socialResistance && honorRank > 0) {
     baseLabel += ` [${game.i18n.localize("l5r4.character.ranks.honorRank")} +${honorRank}]`;
   }
-  if (rollMod || keepMod || totalMod) {
-    baseLabel += ` ${game.i18n.localize("l5r4.ui.common.mod")} (${rollMod}k${keepMod}${
-      totalMod < 0 ? totalMod : "+" + totalMod
-    })`;
+  // Only show modifier label if there are actual non-zero modifiers
+  if (rollMod !== 0 || keepMod !== 0 || totalMod !== 0) {
+    const modParts = [];
+    if (rollMod !== 0 || keepMod !== 0) {
+      modParts.push(`${rollMod}k${keepMod}`);
+    }
+    if (totalMod !== 0) {
+      modParts.push(totalMod < 0 ? `${totalMod}` : `+${totalMod}`);
+    }
+    if (modParts.length > 0) {
+      baseLabel += ` ${game.i18n.localize("l5r4.ui.common.mod")} (${modParts.join(" ")})`;
+    }
   }
 
   const roll = new Roll(rollFormula);
@@ -264,20 +270,19 @@ export async function SkillRoll({
   // Use finalTN calculated earlier (already includes autoTN resolution for attack rolls)
   const baseTN = finalTN;
 
-  // Use Free Raises from dialog (user editable) and clamp declared Raises to Void Ring limit
+  // Use Free Raises from dialog and clamp declared Raises to Void Ring limit
   const freeRaises = toInt(check.freeRaises) || 0;
   const voidRing = actor?.system?.rings?.void?.value ?? 0;
   const raises = clampRaises(toInt(check.raises), voidRing);
 
-  // Calculate effective TN: baseTN + (raises × 5) - (freeRaises × 5) + wound penalty + condition penalty + armor penalty (if applicable)
-  // Note: If baseTN is 0, wound penalty was already subtracted from totalMod
+  // Calculate effective TN: baseTN + (raises × 5) + condition penalty + armor penalty (if applicable)
   // Only apply condition and armor TN penalties when there's an actual target (baseTN > 0)
   let effTN = calculateEffectiveTN(
     baseTN,
     raises,
     freeRaises,
-    woundPenalty,
-    applyWoundPenalty && baseTN > 0
+    0, // Never apply wound penalty to TN
+    false // Wound penalty flag no longer used for TN calculation
   );
   if (baseTN > 0) {
     const conditionTNPenalty = getConditionTNPenalty(actor);

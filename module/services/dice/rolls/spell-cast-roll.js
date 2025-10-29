@@ -162,7 +162,13 @@ export async function SpellCastRoll({ actor, spell, woundPenalty = 0, showDialog
   const bonuses = applyRingBonuses(actor, ringKey);
   let rollMod = options.rollMod + bonuses.roll;
   let keepMod = options.keepMod + bonuses.keep;
-  const totalMod = options.totalMod + bonuses.total;
+  let totalMod = options.totalMod + bonuses.total;
+
+  // Apply wound penalty to roll total (ALWAYS subtract from roll, never add to TN)
+  // Wound penalties reduce the character's effectiveness by subtracting from their roll result
+  if (options.applyWoundPenalty && woundPenalty > 0) {
+    totalMod -= woundPenalty;
+  }
 
   // Handle Void Point spending
   if (options.void) {
@@ -183,13 +189,13 @@ export async function SpellCastRoll({ actor, spell, woundPenalty = 0, showDialog
   // Use free raises from dialog
   const freeRaises = options.freeRaises || 0;
 
-  // Calculate effective TN
+  // Calculate effective TN: baseTN + (raises × 5)
   const effTN = calculateEffectiveTN(
     baseTN,
     options.raises,
     freeRaises,
-    woundPenalty,
-    options.applyWoundPenalty
+    0, // Never apply wound penalty to TN
+    false // Wound penalty flag no longer used for TN calculation
   );
 
   // Append TN to label
