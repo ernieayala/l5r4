@@ -1045,18 +1045,18 @@ body > * {
 .l5r4.npc .traits-rings .trait .trait-rank .trait-decrease,
 .l5r4.npc .traits-rings .void-points .trait-rank .trait-increase,
 .l5r4.npc .traits-rings .void-points .trait-rank .trait-decrease {
+  align-items: center;
   background-color: inherit;
   border: 1px solid black;
   border-color: inherit;
-  height: 16px;
-  display: flex;
   color: inherit;
-  align-items: center;
-  justify-content: center;
+  display: flex;
   font-size: 10px;
-  position: absolute;
-  opacity: 0;
+  height: 16px;
+  justify-content: center;
   left: -2px;
+  opacity: 0;
+  position: absolute;
   right: -1px;
   transition: opacity 150ms ease-out, top 150ms ease-out, bottom 150ms ease-out;
   z-index: 11;
@@ -1136,8 +1136,8 @@ body > * {
 .l5r4.npc .traits-rings .trait-agility .trait-rank .trait-decrease,
 .l5r4.npc .traits-rings .trait-intelligence .trait-rank .trait-increase,
 .l5r4.npc .traits-rings .trait-intelligence .trait-rank .trait-decrease {
-  right: -2px;
   left: -1px;
+  right: -2px;
 }
 .l5r4.pc .traits-rings .trait-willpower,
 .l5r4.pc .traits-rings .trait-intelligence,
