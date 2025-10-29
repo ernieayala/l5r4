@@ -178,6 +178,6 @@ export async function WeaponRoll({
   return ChatMessage.create({
     speaker: ChatMessage.getSpeaker({ actor }),
     content: html,
-    type: CONST.CHAT_MESSAGE_TYPES.OTHER
+    style: CONST.CHAT_MESSAGE_STYLES.OTHER
   });
 }
