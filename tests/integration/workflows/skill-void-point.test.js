@@ -8,10 +8,6 @@
  * - Chat message content validation
  * - Combination with other mechanics (emphasis, modifiers, etc.)
  *
- * **Critical Test Coverage (Phase 1 Priority #1):**
- * This addresses the #1 missing test case from TEST-COVERAGE-ANALYSIS.md
- * Users report this functionality may be broken in actual gameplay.
- *
  * **L5R4 Mechanics:**
  * - Spending a Void Point grants +1k1 bonus (one additional rolled die, one additional kept die)
  * - Void Points are limited resource (max = Void Ring rank, refreshes daily)

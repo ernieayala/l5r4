@@ -51,6 +51,7 @@ import { registerEmphasisManagerTests } from "./sheets/emphasis-manager.test.js"
 import { registerNPCAttackEditorTests } from "./apps/npc-attack-editor.test.js";
 import { registerWealthManagerTests } from "./apps/wealth-manager.integration.test.js";
 import { registerCombatWorkflowTests } from "./workflows/combat-workflow.test.js";
+import { registerMeleeDamageStrengthTests } from "./workflows/melee-damage-strength.test.js";
 import { registerAdvancementWorkflowTests } from "./workflows/advancement-workflow.test.js";
 import { registerSpellCastingWorkflowTests } from "./workflows/spell-casting-workflow.test.js";
 import { registerTraitFamilyBonusTests } from "./workflows/trait-family-bonus.test.js";
@@ -143,6 +144,7 @@ export async function registerQuenchTests(quench) {
 
   // Register workflow tests (Phase 6: Complete Workflows)
   registerCombatWorkflowTests(quench);
+  registerMeleeDamageStrengthTests(quench);
   registerAdvancementWorkflowTests(quench);
   registerSpellCastingWorkflowTests(quench);
   registerTraitFamilyBonusTests(quench);

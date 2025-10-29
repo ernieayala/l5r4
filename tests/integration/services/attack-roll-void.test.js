@@ -1,9 +1,6 @@
 /**
  * Attack Roll + Void Point Integration Tests
  *
- * Tests the critical combination of weapon attack rolls with Void Point spending.
- * This is Phase 1 Priority #4 from TEST-COVERAGE-ANALYSIS.md.
- *
  * **What This Tests:**
  * - Attack rolls with Void Point spending (+1k1 bonus)
  * - Void Point depletion and validation
@@ -15,7 +12,6 @@
  * **Why This Matters:**
  * - Void Point spending on attacks is a core L5R4 combat mechanic
  * - Users report this combination is broken in production
- * - Missing from current test coverage (TEST-COVERAGE-ANALYSIS.md line 296)
  * - Critical for combat effectiveness
  *
  * **L5R4 Rules:**
@@ -28,7 +24,6 @@
  * @see module/services/dice/rolls/skill-roll.js
  * @see module/services/dice/rolls/simple-roll.js
  * @see module/services/dice/resources/void-manager.js
- * @see TEST-COVERAGE-ANALYSIS.md Line 296
  */
 
 import { SYS_ID } from "../../../module/config/constants.js";

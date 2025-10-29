@@ -1,9 +1,6 @@
 /**
  * Integration Tests: Wound Penalty Application Across All Roll Types
  *
- * Tests Phase 2 Priority #5 from TEST-COVERAGE-ANALYSIS.md:
- * "Wound Penalty + All Roll Types - Combat is deadly"
- *
  * Critical Verification:
  * - Wound penalties ALWAYS subtract from roll total (never add to TN)
  * - Wound penalties apply to ALL roll types (skill, trait, ring, spell, attack)
@@ -16,11 +13,6 @@
  * harder to meet target numbers. Penalties scale with wound severity:
  * - Healthy: 0, Nicked: +3, Grazed: +5, Hurt: +10, Injured: +15, Crippled: +20, Down: +40
  *
- * Testing Philosophy (per 12-testing-principles.md):
- * - Test edge cases and combinations, not just happy paths
- * - Tests must find real bugs when code breaks
- * - Test behavior (roll results), not implementation (internal variables)
- * - Each test verifies wound penalty actually affects the roll outcome
  */
 
 import { createTestPC } from "../../fixtures/actor-fixtures.js";

@@ -10,20 +10,11 @@
  * - Skill rolls (already tested, verified here)
  * - Attack rolls (tested via skill rolls with rollType: "attack")
  *
- * Per TEST-COVERAGE-ANALYSIS.md Phase 2 Item #4:
- * "Status Effects on All Roll Types - Common conditions"
- *
  * L5R4 Rules:
  * - Dazed: -3k0 to ALL actions (universal penalty)
  * - Fatigued: +5 TN to physical trait rolls, skills, and spellcasting
  * - Blinded: -1k1 melee, -3k3 ranged, -1k1 defense
  * - Prone: -2k0 attacks, -10 Armor TN
- *
- * Testing Principles (per 12-testing-principles.md):
- * - Test edge cases, not just happy paths
- * - Tests must find bugs when code breaks
- * - Test behavior, not implementation
- * - Validate actual roll results and chat output
  *
  * @see module/documents/actor/calculations/condition-effects.js
  * @see module/utils/condition-penalties.js

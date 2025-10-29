@@ -19,7 +19,6 @@
  *
  * @see module/services/dice/rolls/skill-roll.js
  * @see module/sheets/handlers/roll-handler.js
- * @see TEST-COVERAGE-ANALYSIS.md line 19-22
  */
 
 import { SYS_ID } from "../../../module/config/constants.js";

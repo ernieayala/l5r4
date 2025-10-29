@@ -1,9 +1,6 @@
 /**
  * Attack Roll + Emphasis Integration Tests
  *
- * Tests the critical combination of weapon attack rolls with emphasis mechanics.
- * This is Phase 1 Priority #3 from TEST-COVERAGE-ANALYSIS.md.
- *
  * **What This Tests:**
  * - Attack rolls with weapon skills that have emphasis
  * - Emphasis re-roll mechanic (r1) on attack rolls
@@ -25,7 +22,6 @@
  * - Emphasis stacks with void points, stances, and other modifiers
  *
  * @see module/services/dice/rolls/skill-roll.js
- * @see TEST-COVERAGE-ANALYSIS.md Line 323-324
  */
 
 import { SYS_ID } from "../../../module/config/constants.js";

@@ -5,13 +5,6 @@
  * Validates that stance bonuses/penalties correctly apply to skill rolls
  * and that stance restrictions are enforced.
  *
- * Test Coverage (from TEST-COVERAGE-ANALYSIS.md Phase 1 Priority #2):
- * - Skill Roll + Attack Stance (baseline, no modifiers)
- * - Skill Roll + Full Attack Stance (attack skills get +2k1)
- * - Skill Roll + Defense Stance (can use skills, cannot attack)
- * - Skill Roll + Full Defense Stance (only Free Actions allowed)
- * - Skill Roll + Center Stance (next action gets +1k1 + Void Ring)
- *
  * L5R4 Rules Context:
  * - Attack Stance: No modifiers to skill rolls
  * - Full Attack Stance: +2k1 to attack rolls (weapon skills)
@@ -27,7 +20,6 @@
  *
  * @see module/services/dice/rolls/skill-roll.js
  * @see module/services/stance/rolls/attack-bonuses.js
- * @see TEST-COVERAGE-ANALYSIS.md lines 321-327
  */
 
 import { SYS_ID } from "../../../module/config/constants.js";

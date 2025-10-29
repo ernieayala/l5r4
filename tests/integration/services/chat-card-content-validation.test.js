@@ -12,12 +12,6 @@
  * 5. Edge cases (emphasis + void + stance + wound penalty)
  * 6. Multiple modifier combinations display correctly
  *
- * Test Philosophy (per 12-testing-principles.md):
- * - Test behavior (chat output), not implementation (internal variables)
- * - Test edge cases and combinations, not just happy paths
- * - Tests must find real bugs when code breaks
- * - Verify actual HTML content users see
- *
  * Test Priority: Phase 1, Item 6 (CRITICAL)
  * Reason: Users report seeing incorrect information in chat cards
  *

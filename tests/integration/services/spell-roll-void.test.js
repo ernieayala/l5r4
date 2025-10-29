@@ -1,9 +1,6 @@
 /**
  * Spell Roll + Void Point Integration Tests
  *
- * Tests the critical combination of spell casting rolls with Void Point spending.
- * This is Phase 2 Priority #1 from TEST-COVERAGE-ANALYSIS.md.
- *
  * **What This Tests:**
  * - Spell casting rolls with Void Point spending (+1k1 bonus)
  * - Void Point depletion and validation during spell casting
@@ -15,7 +12,6 @@
  *
  * **Why This Matters:**
  * - Void Point spending on spell casting is a core L5R4 shugenja mechanic
- * - Missing from current test coverage (TEST-COVERAGE-ANALYSIS.md line 312)
  * - Critical for shugenja effectiveness in combat and non-combat scenarios
  * - Users need confidence that void + spell mechanics work correctly
  *
@@ -36,8 +32,6 @@
  *
  * @see module/services/dice/rolls/spell-cast-roll.js
  * @see module/services/dice/resources/void-manager.js
- * @see TEST-COVERAGE-ANALYSIS.md Line 312
- * @see for-research/reviews/TESTING-INSTRUCTIONS-FOR-WINDSURF.md
  */
 
 import { SYS_ID } from "../../../module/config/constants.js";

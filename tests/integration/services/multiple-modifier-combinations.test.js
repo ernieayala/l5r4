@@ -1,9 +1,6 @@
 /**
  * Multiple Modifier Combinations Integration Tests
  *
- * Tests Phase 2, Item 6 from TEST-COVERAGE-ANALYSIS.md (line 335).
- * Focuses on REAL GAMEPLAY SCENARIOS where multiple modifiers stack.
- *
  * **What This Tests:**
  * - Skill + Emphasis + Void + Stance (3-4 modifiers)
  * - Attack + Emphasis + Void + Stance + Wound + Raises (all modifiers)
@@ -22,8 +19,6 @@
  * - Validates chat card output shows all modifiers
  * - Tests edge cases where modifiers conflict
  *
- * @see TEST-COVERAGE-ANALYSIS.md Line 335
- * @see TESTING-INSTRUCTIONS-FOR-WINDSURF.md
  */
 
 import { SYS_ID } from "../../../module/config/constants.js";
