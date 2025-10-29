@@ -24,9 +24,13 @@ import { buildFormula } from "../../module/services/dice/core/formula-builder.js
 import { createTestPC, createTestNPC } from "../fixtures/actor-fixtures.js";
 import { createSkillData, createWeaponData, createArmorData } from "../fixtures/item-fixtures.js";
 import { registerSkillRollTests as registerSkillRollServiceTests } from "./services/skill-rolls.test.js";
+import { registerSkillTraitSwitchingTests } from "./services/skill-trait-switching.test.js";
 import { registerWeaponRollTests } from "./services/weapon-rolls.test.js";
+import { registerAttackRollEmphasisTests } from "./services/attack-roll-emphasis.test.js";
+import { registerAttackRollVoidTests } from "./services/attack-roll-void.test.js";
 import { registerInitiativeTests } from "./services/initiative.test.js";
 import { registerSpellCastRollTests } from "./services/spell-rolls.test.js";
+import { registerSpellRollVoidTests } from "./services/spell-roll-void.test.js";
 import { registerRingRollTests } from "./services/ring-rolls.test.js";
 import { registerTraitRollTests } from "./services/trait-rolls.test.js";
 import { registerNpcRollTests } from "./services/npc-rolls.test.js";
@@ -47,6 +51,7 @@ import { registerEmphasisManagerTests } from "./sheets/emphasis-manager.test.js"
 import { registerNPCAttackEditorTests } from "./apps/npc-attack-editor.test.js";
 import { registerWealthManagerTests } from "./apps/wealth-manager.integration.test.js";
 import { registerCombatWorkflowTests } from "./workflows/combat-workflow.test.js";
+import { registerMeleeDamageStrengthTests } from "./workflows/melee-damage-strength.test.js";
 import { registerAdvancementWorkflowTests } from "./workflows/advancement-workflow.test.js";
 import { registerSpellCastingWorkflowTests } from "./workflows/spell-casting-workflow.test.js";
 import { registerTraitFamilyBonusTests } from "./workflows/trait-family-bonus.test.js";
@@ -56,12 +61,15 @@ import { registerStanceSwitchingWorkflowTests } from "./workflows/stance-switchi
 import { registerInitiativeWorkflowTests } from "./workflows/initiative-workflow.test.js";
 import { registerItemManagementWorkflowTests } from "./workflows/item-management-workflow.test.js";
 import { registerStatusEffectsWorkflowTests } from "./workflows/status-effects-workflow.test.js";
+import { registerStatusEffectsAllRollsTests } from "./workflows/status-effects-all-rolls.test.js";
 import { registerFearWorkflowTests } from "./workflows/fear-workflow.test.js";
 import { registerRestRecoveryWorkflowTests } from "./workflows/rest-recovery-workflow.test.js";
 import { registerNPCWorkflowTests } from "./workflows/npc-workflows.test.js";
 import { registerChatSystemWorkflowTests } from "./workflows/chat-system-workflow.test.js";
 import { registerEmphasisWorkflowTests } from "./workflows/emphasis-workflow.test.js";
 import { registerEmphasisRerollMechanicsTests } from "./workflows/emphasis-reroll-mechanics.test.js";
+import { registerSkillVoidPointTests } from "./workflows/skill-void-point.test.js";
+import { registerSkillStanceCombinationTests } from "./workflows/skill-stance-combinations.test.js";
 import { registerActorCreationRaceConditionTests } from "./workflows/actor-creation-race-conditions.test.js";
 import { registerInitiativeRaceConditionTests } from "./workflows/initiative-race-conditions.test.js";
 import { registerDamageRaceConditionTests } from "./workflows/damage-race-conditions.test.js";
@@ -76,6 +84,9 @@ import { registerXpTrackingEdgeCaseTests } from "./workflows/xp-tracking-edge-ca
 import { registerSkillAdvancementEdgeCaseTests } from "./workflows/skill-advancement-edge-cases.test.js";
 import { registerMigrationEdgeCaseTests } from "./workflows/migration-edge-cases.test.js";
 import { registerWoundConfigEdgeCaseTests } from "./workflows/wound-config-edge-cases.test.js";
+import { registerChatCardContentValidationTests } from "./services/chat-card-content-validation.test.js";
+import { register as registerWoundPenaltyAllRollsTests } from "./rolls/wound-penalty-all-rolls.integration.test.js";
+import { registerMultipleModifierCombinationTests } from "./services/multiple-modifier-combinations.test.js";
 
 /**
  * Register Quench integration tests for the L5R4 system.
@@ -93,11 +104,16 @@ export async function registerQuenchTests(quench) {
 
   // Register service tests (Phase 1: Critical Rolls)
   registerSkillRollServiceTests(quench);
+  registerSkillTraitSwitchingTests(quench);
   registerWeaponRollTests(quench);
+  registerAttackRollEmphasisTests(quench);
+  registerAttackRollVoidTests(quench);
   registerInitiativeTests(quench);
+  registerChatCardContentValidationTests(quench);
 
   // Register service tests (Phase 2: Extended Rolls)
   registerSpellCastRollTests(quench);
+  registerSpellRollVoidTests(quench);
   registerRingRollTests(quench);
   registerTraitRollTests(quench);
   registerNpcRollTests(quench);
@@ -128,6 +144,7 @@ export async function registerQuenchTests(quench) {
 
   // Register workflow tests (Phase 6: Complete Workflows)
   registerCombatWorkflowTests(quench);
+  registerMeleeDamageStrengthTests(quench);
   registerAdvancementWorkflowTests(quench);
   registerSpellCastingWorkflowTests(quench);
   registerTraitFamilyBonusTests(quench);
@@ -137,12 +154,15 @@ export async function registerQuenchTests(quench) {
   registerInitiativeWorkflowTests(quench);
   registerItemManagementWorkflowTests(quench);
   registerStatusEffectsWorkflowTests(quench);
+  registerStatusEffectsAllRollsTests(quench);
   registerFearWorkflowTests(quench);
   registerRestRecoveryWorkflowTests(quench);
   registerNPCWorkflowTests(quench);
   registerChatSystemWorkflowTests(quench);
   registerEmphasisWorkflowTests(quench);
   registerEmphasisRerollMechanicsTests(quench);
+  registerSkillVoidPointTests(quench);
+  registerSkillStanceCombinationTests(quench);
 
   // Register race condition tests (Phase 7: Critical Bug Prevention)
   registerActorCreationRaceConditionTests(quench);
@@ -165,6 +185,12 @@ export async function registerQuenchTests(quench) {
   // Register Phase 7: Migration & Config edge case tests
   registerMigrationEdgeCaseTests(quench);
   registerWoundConfigEdgeCaseTests(quench);
+
+  // Register Phase 2 Priority #5: Wound Penalty + All Roll Types
+  registerWoundPenaltyAllRollsTests(quench);
+
+  // Register Phase 2 Priority #6: Multiple Modifier Combinations
+  registerMultipleModifierCombinationTests(quench);
 }
 
 /**

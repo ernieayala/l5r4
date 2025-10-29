@@ -42,9 +42,9 @@ import { T } from "../../../utils/localization.js";
 export function calculateEffectiveTN(baseTN, raises, freeRaises, woundPenalty, applyWoundPenalty) {
   const _baseTN = Number(baseTN) || 0;
   const _raises = Number(raises) || 0;
-  const _freeRaises = Number(freeRaises) || 0;
   const _woundPenalty = Number(woundPenalty) || 0;
 
+  // Free raises are purely informational and do not affect TN calculation
   let effectiveTN = _baseTN + _raises * 5;
   if (applyWoundPenalty && _woundPenalty > 0) {
     effectiveTN += _woundPenalty;
@@ -56,16 +56,17 @@ export function calculateEffectiveTN(baseTN, raises, freeRaises, woundPenalty, a
  * Evaluates a roll result against the effective TN and determines success/failure.
  *
  * Returns structured result for display in chat messages. Success requires the roll
- * total to meet or exceed the effective TN (including all Raises declared and Free Raises applied).
+ * total to meet or exceed the effective TN (including all Raises declared).
+ * Free Raises are purely informational and do not affect TN calculation.
  *
  * @param {number} rollTotal - The total value of the completed roll
  * @param {number} effectiveTN - The effective TN (from calculateEffectiveTN)
  * @param {number} raises - Number of Raises declared (for display purposes)
- * @param {number} [freeRaises=0] - Number of Free Raises applied (for display purposes)
+ * @param {number} [freeRaises=0] - Number of Free Raises available (for display purposes only)
  * @returns {Object|null} Result object with {effective, raises, freeRaises, outcome} or null if TN invalid
  * @returns {number} returns.effective - The effective TN used
  * @returns {number} returns.raises - Number of Raises declared
- * @returns {number} returns.freeRaises - Number of Free Raises applied
+ * @returns {number} returns.freeRaises - Number of Free Raises available (informational only)
  * @returns {string} returns.outcome - Localized "Success" or "Failure" string
  */
 export function evaluateTN(rollTotal, effectiveTN, raises, freeRaises = 0) {
@@ -98,7 +99,7 @@ export function evaluateTN(rollTotal, effectiveTN, raises, freeRaises = 0) {
  *
  * @param {number} effectiveTN - The effective TN to display
  * @param {number} raises - Number of Raises declared
- * @param {number} freeRaises - Number of Free Raises applied
+ * @param {number} freeRaises - Number of Free Raises available (informational only, doesn't affect TN)
  * @param {string} raisesLabel - Localized label for "Raises" text
  * @param {string} [freeRaisesLabel] - Localized label for "Free Raises" text
  * @returns {string} Formatted TN label with optional Raises and Free Raises, or empty string if no TN

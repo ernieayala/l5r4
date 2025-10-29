@@ -27,6 +27,10 @@ import { calculateEffectiveTN, evaluateTN } from "../core/tn-calculator.js";
 import { spendVoidPoint } from "../resources/void-manager.js";
 import { applyRingBonuses } from "../effects/bonus-applicator.js";
 import { GetMahoCastOptions } from "../dialogs/maho-dialog.js";
+import {
+  getConditionRollPenalties,
+  getConditionTNPenalty
+} from "../../../utils/condition-penalties.js";
 
 /**
  * Execute a maho (blood magic) casting roll with blood cost and Taint mechanics.
@@ -144,14 +148,22 @@ export async function MahoCastRoll({ actor, spell, woundPenalty = 0, showDialog 
     label += ` ${game.i18n.localize("l5r4.ui.mechanics.rings.void")}!`;
   }
 
+  // Apply condition penalties (blinded, dazed, fatigued, prone, etc.)
+  // Maho casting is a general action, so use null rollType to get universal penalties
+  const conditionPenalties = getConditionRollPenalties(actor, null, "melee");
+  rollMod += conditionPenalties.roll; // Will be negative if conditions active
+  keepMod += conditionPenalties.keep;
+
   // Calculate dice pool: (Insight Rank + Ring)k(Ring)
   const diceToRoll = ringValue + insightRank + rollMod;
   const diceToKeep = ringValue + keepMod;
 
-  // Calculate effective TN with declared raises
+  // Calculate effective TN with declared raises and condition penalties
   const totalRaises = options.raises + freeRaises;
+  const conditionTNPenalty = getConditionTNPenalty(actor); // Fatigued: +5 TN
+  const baseTNWithConditions = baseTN + conditionTNPenalty;
   const effTN = calculateEffectiveTN(
-    baseTN,
+    baseTNWithConditions,
     options.raises,
     freeRaises,
     0, // Never apply wound penalty to TN

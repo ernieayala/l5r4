@@ -19,14 +19,14 @@ describe("tn-calculator", () => {
         expect(result).toBe(25); // 15 + (2 * 5)
       });
 
-      it("should subtract 5 per free raise from baseTN", () => {
+      it("should not subtract free raises from baseTN (purely informational)", () => {
         const result = calculateEffectiveTN(20, 0, 2, 0, false);
-        expect(result).toBe(10); // 20 - (2 * 5)
+        expect(result).toBe(20); // Free raises don't affect TN
       });
 
       it("should handle both raises and free raises", () => {
         const result = calculateEffectiveTN(20, 3, 1, 0, false);
-        expect(result).toBe(30); // 20 + (3 * 5) - (1 * 5) = 20 + 15 - 5 = 30
+        expect(result).toBe(35); // 20 + (3 * 5) = 35 (free raises don't affect TN)
       });
 
       it("should add wound penalty when applyWoundPenalty is true", () => {
@@ -41,19 +41,19 @@ describe("tn-calculator", () => {
 
       it("should combine raises, free raises, and wound penalty", () => {
         const result = calculateEffectiveTN(15, 2, 1, 5, true);
-        expect(result).toBe(25); // 15 + (2*5) - (1*5) + 5 = 15 + 10 - 5 + 5 = 25
+        expect(result).toBe(30); // 15 + (2*5) + 5 = 30 (free raises don't affect TN)
       });
     });
 
     describe("TN floor at 0", () => {
-      it("should return 0 when free raises exceed baseTN", () => {
+      it("should return baseTN even with high free raises (they don't affect TN)", () => {
         const result = calculateEffectiveTN(10, 0, 3, 0, false);
-        expect(result).toBe(0); // 10 - 15 = -5, floored to 0
+        expect(result).toBe(10); // Free raises don't affect TN
       });
 
-      it("should return 0 when free raises equal baseTN", () => {
+      it("should return baseTN even when free raises equal baseTN", () => {
         const result = calculateEffectiveTN(10, 0, 2, 0, false);
-        expect(result).toBe(0); // 10 - 10 = 0
+        expect(result).toBe(10); // Free raises don't affect TN
       });
 
       it("should return 0 for negative baseTN", () => {
@@ -61,16 +61,16 @@ describe("tn-calculator", () => {
         expect(result).toBe(0);
       });
 
-      it("should not allow TN to go below 0 with complex calculation", () => {
+      it("should calculate TN correctly with raises (free raises don't affect it)", () => {
         const result = calculateEffectiveTN(10, 1, 4, 0, false);
-        expect(result).toBe(0); // 10 + 5 - 20 = -5, floored to 0
+        expect(result).toBe(15); // 10 + (1*5) = 15 (free raises don't affect TN)
       });
     });
 
     describe("type coercion", () => {
       it("should handle string numbers", () => {
         const result = calculateEffectiveTN("15", "2", "1", "5", true);
-        expect(result).toBe(25); // 15 + 10 - 5 + 5
+        expect(result).toBe(30); // 15 + (2*5) + 5 = 30 (free raises don't affect TN)
       });
 
       it("should treat null as 0", () => {
@@ -100,9 +100,9 @@ describe("tn-calculator", () => {
         expect(result).toBe(65); // 15 + (10 * 5)
       });
 
-      it("should handle very high free raises", () => {
+      it("should handle very high free raises (they don't affect TN)", () => {
         const result = calculateEffectiveTN(100, 0, 10, 0, false);
-        expect(result).toBe(50); // 100 - (10 * 5)
+        expect(result).toBe(100); // Free raises don't affect TN
       });
 
       it("should handle zero wound penalty with flag true", () => {
