@@ -45,7 +45,7 @@ export function calculateEffectiveTN(baseTN, raises, freeRaises, woundPenalty, a
   const _freeRaises = Number(freeRaises) || 0;
   const _woundPenalty = Number(woundPenalty) || 0;
 
-  let effectiveTN = _baseTN + _raises * 5;
+  let effectiveTN = _baseTN + _raises * 5 - _freeRaises * 5;
   if (applyWoundPenalty && _woundPenalty > 0) {
     effectiveTN += _woundPenalty;
   }

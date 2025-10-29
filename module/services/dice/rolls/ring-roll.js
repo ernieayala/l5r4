@@ -65,6 +65,10 @@ import {
 } from "../resources/spell-slot-manager.js";
 import { applyRingBonuses } from "../effects/bonus-applicator.js";
 import { GetRingOptions } from "../dialogs/ring-dialog.js";
+import {
+  getConditionRollPenalties,
+  getConditionTNPenalty
+} from "../../../utils/condition-penalties.js";
 
 /**
  * Confirms spell slot usage for spell casting when no slot checkbox selected.
@@ -290,6 +294,12 @@ export async function RingRoll({
     totalMod -= woundPenalty;
   }
 
+  // Apply condition penalties (blinded, dazed, fatigued, prone, etc.)
+  // Ring rolls are general actions, so use null rollType to get universal penalties
+  const conditionPenalties = getConditionRollPenalties(actor, null, "melee");
+  rollMod += conditionPenalties.roll; // Will be negative if conditions active
+  keepMod += conditionPenalties.keep;
+
   // Determine dice pool based on roll type
   let diceToRoll, diceToKeep;
 
@@ -386,9 +396,11 @@ export async function RingRoll({
   const roll = new Roll(rollFormula);
   const rollHtml = await roll.render();
 
-  // Calculate effective TN: base TN + (raises × 5)
+  // Calculate effective TN: base TN + (raises × 5) + condition TN penalty
+  const conditionTNPenalty = getConditionTNPenalty(actor); // Fatigued: +5 TN
+  const baseTNWithConditions = __tnInput + conditionTNPenalty;
   const effTN = calculateEffectiveTN(
-    __tnInput,
+    baseTNWithConditions,
     __raisesInput,
     __freeRaisesInput,
     0, // Never apply wound penalty to TN

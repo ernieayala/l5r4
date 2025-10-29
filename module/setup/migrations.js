@@ -67,7 +67,11 @@ import { migrateFreeRaisesDefaults } from "./migrations/items/free-raises.js";
 import { normalizeItems } from "./migrations/items/normalize.js";
 
 // Icon migrations
-import { runIconPathMigration, migrateCompendiumIconPaths } from "./migrations/icons/icon-paths.js";
+import {
+  runIconPathMigration,
+  migrateCompendiumIconPaths,
+  migrateEmbeddedItemIcons
+} from "./migrations/icons/icon-paths.js";
 
 /**
  * Main migration orchestration function for system version updates.
@@ -88,12 +92,13 @@ import { runIconPathMigration, migrateCompendiumIconPaths } from "./migrations/i
  * 4. Skill default values backfill (world items)
  * 5. Armor type backfill (world items)
  * 6. Free Raises field backfill (world items)
- * 7. Data normalization (world items)
- * 8. Legacy field cleanup (world actors)
- * 9. Embedded item migrations (all world actors)
- * 10. Mark documents as migrated (world actors/items)
- * 11. Compendium migrations (unlocked packs only)
- * 12. Icon path migrations (world + compendiums)
+ * 7. Icon path migration (world items) - PNG→WebP + default icon assignment
+ * 8. Data normalization (world items)
+ * 9. Legacy field cleanup (world actors)
+ * 10. Embedded item migrations (all world actors)
+ * 11. Mark documents as migrated (world actors/items)
+ * 12. Compendium migrations (unlocked packs only) - includes icon migration
+ * 13. Icon path migrations (world actors + final compendium pass)
  *
  * Foundry VTT Integration:
  * - Called from system ready hook when version mismatch detected
@@ -130,6 +135,8 @@ export async function runMigrations(fromVersion, toVersion) {
   await migrateArmorTypes(unmigratedItems, "world-armor-types");
 
   await migrateFreeRaisesDefaults(unmigratedItems, "world-free-raises");
+
+  await migrateEmbeddedItemIcons(unmigratedItems, "world-icon-migration");
 
   await normalizeItems(unmigratedItems, "world-items-norm");
 
@@ -179,6 +186,7 @@ export async function runMigrations(fromVersion, toVersion) {
       );
       await migrateArmorTypes(unmigratedDocs, `pack-armor-types:${pack.collection}`);
       await migrateFreeRaisesDefaults(unmigratedDocs, `pack-free-raises:${pack.collection}`);
+      await migrateEmbeddedItemIcons(unmigratedDocs, `pack-icon-migration:${pack.collection}`);
       await normalizeItems(unmigratedDocs, `pack-norm:${pack.collection}`);
 
       if (docType === "Actor") {
