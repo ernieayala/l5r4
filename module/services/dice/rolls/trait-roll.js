@@ -50,6 +50,10 @@ import { spendVoidPoint, resolveActor } from "../resources/void-manager.js";
 import { applyTraitBonuses } from "../effects/bonus-applicator.js";
 import { GetTraitRollOptions } from "../dialogs/trait-dialog.js";
 import { getArmorTNPenalty } from "../../../utils/armor-penalties.js";
+import {
+  getConditionRollPenalties,
+  getConditionTNPenalty
+} from "../../../utils/condition-penalties.js";
 
 /**
  * Execute a trait roll for innate ability checks in the L5R4 system.
@@ -190,13 +194,20 @@ export async function TraitRoll({
       keepMod += voidResult.keepBonus;
       label += ` ${game.i18n.localize("l5r4.ui.mechanics.rings.void")}`;
     }
-
-    // Apply wound penalty to roll total (ALWAYS subtract from roll, never add to TN)
-    // Wound penalties reduce the character's effectiveness by subtracting from their roll result
-    if (applyWoundPenalty && currentWoundPenalty > 0) {
-      totalMod -= currentWoundPenalty;
-    }
   }
+
+  // Apply wound penalty to roll total (ALWAYS subtract from roll, never add to TN)
+  // Wound penalties reduce the character's effectiveness by subtracting from their roll result
+  // CRITICAL: This must be OUTSIDE the dialog block so it applies even when dialog is skipped
+  if (applyWoundPenalty && currentWoundPenalty > 0) {
+    totalMod -= currentWoundPenalty;
+  }
+
+  // Apply condition penalties (blinded, dazed, fatigued, prone, etc.)
+  // Trait rolls are general actions, so use null rollType to get universal penalties
+  const conditionPenalties = getConditionRollPenalties(targetActor, null, "melee");
+  rollMod += conditionPenalties.roll; // Will be negative if conditions active
+  keepMod += conditionPenalties.keep;
 
   // Calculate final dice pool: trait rank + all modifiers
   const traitValue = toInt(traitRank);
@@ -217,9 +228,10 @@ export async function TraitRoll({
   const roll = new Roll(rollFormula);
   const rollHtml = await roll.render();
 
-  // Calculate final effective TN: base + (raises × 5) + armor penalty
+  // Calculate final effective TN: base + (raises × 5) + armor penalty + condition TN penalty
   // Armor penalty only applies to Agility/Reflexes trait rolls with Riding Armor (per Equipment rules)
   const armorTNPenalty = getArmorTNPenalty(targetActor, null, traitName);
+  const conditionTNPenalty = getConditionTNPenalty(targetActor); // Fatigued: +5 TN
   const baseTN = calculateEffectiveTN(
     userTN,
     userRaises,
@@ -227,7 +239,7 @@ export async function TraitRoll({
     0, // Never apply wound penalty to TN
     false // Wound penalty flag no longer used for TN calculation
   );
-  const effTN = baseTN + armorTNPenalty;
+  const effTN = baseTN + armorTNPenalty + conditionTNPenalty;
   const tnResult = evaluateTN(roll.total ?? 0, effTN, userRaises);
 
   const content = await R(messageTemplate, { flavor, roll: rollHtml, tnResult });

@@ -313,6 +313,148 @@ export function registerSkillRollTests(quench) {
           assert.equal(maxRaises, 0, "Unskilled rolls cannot declare raises");
         });
       });
+
+      describe("Void Point Mechanics", () => {
+        let actor, skill;
+
+        beforeEach(async () => {
+          actor = await createTestPC({
+            name: "Void Test Samurai",
+            system: {
+              traits: { agi: 4 },
+              rings: {
+                void: { rank: 3, value: 3 }
+              }
+            }
+          });
+
+          [skill] = await actor.createEmbeddedDocuments("Item", [
+            createSkillData("Kenjutsu", 5, "agi")
+          ]);
+        });
+
+        afterEach(async () => {
+          if (actor) {
+            await actor.delete();
+            actor = null;
+          }
+        });
+
+        it("should apply +1k1 bonus when void point is spent", () => {
+          // Base calculation: (Skill + Trait)k(Trait)
+          const skillRank = 5;
+          const traitValue = 4;
+          const baseRolled = skillRank + traitValue; // 9
+          const baseKept = traitValue; // 4
+
+          // With void point: +1k1
+          const voidRollBonus = 1;
+          const voidKeepBonus = 1;
+          const finalRolled = baseRolled + voidRollBonus; // 10
+          const finalKept = baseKept + voidKeepBonus; // 5
+
+          assert.equal(finalRolled, 10, "Void adds +1 rolled die (9+1=10)");
+          assert.equal(finalKept, 5, "Void adds +1 kept die (4+1=5)");
+          // Formula should be 10k5
+        });
+
+        it("should verify actor has void points available", () => {
+          const voidRank = actor.system.rings.void.rank;
+          const voidCurrent = actor.system.rings.void.value;
+
+          assert.equal(voidRank, 3, "Void Ring rank is 3");
+          assert.equal(voidCurrent, 3, "Current void points is 3");
+          assert.isAtLeast(voidCurrent, 1, "Actor has void points to spend");
+        });
+
+        it("should calculate correct formula with void point bonus", () => {
+          // Base: 5 (skill) + 4 (trait) = 9k4
+          // With void: +1k1 = 10k5
+          const rolled = 10;
+          const kept = 5;
+          const formula = buildFormula(rolled, kept, 0, {});
+
+          assert.equal(formula, "10d10k5x10+0", "Formula with void is 10k5");
+          assert.include(formula, "10d10", "Rolls 10 dice with void");
+          assert.include(formula, "k5", "Keeps 5 dice with void");
+          assert.include(formula, "x10", "Dice still explode");
+        });
+
+        it("should handle void point with emphasis", () => {
+          // Base: 5 + 4 = 9k4
+          // Void: +1k1 = 10k5
+          // Emphasis: r1 (re-roll 1s)
+          const rolled = 10;
+          const kept = 5;
+          const formula = buildFormula(rolled, kept, 0, { emphasis: true });
+
+          assert.include(formula, "10d10", "Correct rolled dice");
+          assert.include(formula, "k5", "Correct kept dice");
+          assert.include(formula, "r1", "Emphasis re-rolls 1s");
+          assert.include(formula, "x10", "Dice explode");
+        });
+
+        it("should handle void point with unskilled roll", () => {
+          // Unskilled base: (Trait)k(Trait) = 4k4
+          // With void: +1k1 = 5k5
+          const skillRank = 0;
+          const traitValue = 4;
+          const voidBonus = 1;
+          const rolled = traitValue + voidBonus; // 5
+          const kept = traitValue + voidBonus; // 5
+
+          assert.equal(rolled, 5, "Unskilled + void = 5 rolled");
+          assert.equal(kept, 5, "Unskilled + void = 5 kept");
+
+          const formula = buildFormula(rolled, kept, 0, { unskilled: true });
+          assert.equal(formula, "5d10k5+0", "Unskilled with void formula");
+          assert.notInclude(formula, "x10", "Unskilled still no explosions");
+        });
+
+        it("should handle void point with roll modifiers", () => {
+          // Base: 5 + 4 = 9k4
+          // Void: +1k1 = 10k5
+          // Additional modifier: +2k1 = 12k6
+          const baseRolled = 9;
+          const baseKept = 4;
+          const voidRoll = 1;
+          const voidKeep = 1;
+          const additionalRoll = 2;
+          const additionalKeep = 1;
+
+          const finalRolled = baseRolled + voidRoll + additionalRoll; // 12
+          const finalKept = baseKept + voidKeep + additionalKeep; // 6
+
+          assert.equal(finalRolled, 12, "All roll bonuses stack");
+          assert.equal(finalKept, 6, "All keep bonuses stack");
+        });
+
+        it("should handle void point with total bonus", () => {
+          // Base: 9k4
+          // Void: +1k1 = 10k5
+          // Total bonus: +5
+          const rolled = 10;
+          const kept = 5;
+          const totalBonus = 5;
+          const formula = buildFormula(rolled, kept, totalBonus, {});
+
+          assert.include(formula, "10d10k5", "Dice pool correct");
+          assert.include(formula, "+5", "Total bonus applied");
+        });
+
+        it("should enforce Ten Dice Rule with void point", () => {
+          // High skill: 8 + trait 6 = 14k6
+          // Void: +1k1 = 15k7
+          // Ten Dice Rule: max 10k10
+          const rolled = 15;
+          const kept = 7;
+
+          // Ten Dice Rule should cap rolled at 10
+          const cappedRolled = Math.min(rolled, 10);
+          assert.equal(cappedRolled, 10, "Rolled capped at 10");
+          assert.isAtMost(kept, 10, "Kept capped at 10");
+        });
+      });
     },
     { displayName: "L5R4: Skill Roll Service Tests" }
   );

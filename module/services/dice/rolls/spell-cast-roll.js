@@ -26,6 +26,10 @@ import { calculateEffectiveTN, evaluateTN } from "../core/tn-calculator.js";
 import { spendVoidPoint } from "../resources/void-manager.js";
 import { applyRingBonuses } from "../effects/bonus-applicator.js";
 import { GetSpellCastOptions } from "../dialogs/spell-dialog.js";
+import {
+  getConditionRollPenalties,
+  getConditionTNPenalty
+} from "../../../utils/condition-penalties.js";
 
 /**
  * Execute a spell casting roll with automatic affinity/deficiency/TN/slot handling.
@@ -182,6 +186,12 @@ export async function SpellCastRoll({ actor, spell, woundPenalty = 0, showDialog
     label += ` ${game.i18n.localize("l5r4.ui.mechanics.rings.void")}!`;
   }
 
+  // Apply condition penalties (blinded, dazed, fatigued, prone, etc.)
+  // Spell casting is a general action, so use null rollType to get universal penalties
+  const conditionPenalties = getConditionRollPenalties(actor, null, "melee");
+  rollMod += conditionPenalties.roll; // Will be negative if conditions active
+  keepMod += conditionPenalties.keep;
+
   // Calculate dice pool: (Ring + School Rank)k(Ring)
   const diceToRoll = ringValue + effectiveSchoolRank + rollMod;
   const diceToKeep = ringValue + keepMod;
@@ -189,9 +199,11 @@ export async function SpellCastRoll({ actor, spell, woundPenalty = 0, showDialog
   // Use free raises from dialog
   const freeRaises = options.freeRaises || 0;
 
-  // Calculate effective TN: baseTN + (raises × 5)
+  // Calculate effective TN: baseTN + (raises × 5) + condition TN penalty
+  const conditionTNPenalty = getConditionTNPenalty(actor); // Fatigued: +5 TN
+  const baseTNWithConditions = baseTN + conditionTNPenalty;
   const effTN = calculateEffectiveTN(
-    baseTN,
+    baseTNWithConditions,
     options.raises,
     freeRaises,
     0, // Never apply wound penalty to TN

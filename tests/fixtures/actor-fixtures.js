@@ -80,7 +80,7 @@ export async function createHighRankPC(overrides = {}) {
 
 /**
  * Create a wounded PC
- * @param {number} wounds - Current wound total
+ * @param {number} wounds - Current wound total (suffered damage)
  * @param {Object} overrides - Optional property overrides
  * @returns {Promise<Actor>} Created actor
  */
@@ -88,7 +88,7 @@ export async function createWoundedPC(wounds, overrides = {}) {
   const baseData = {
     system: {
       rings: { earth: 3 },
-      wounds: { value: wounds }
+      suffered: wounds // Use 'suffered' not 'wounds.value' - suffered triggers wound penalty calculation
     }
   };
 
