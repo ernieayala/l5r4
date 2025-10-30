@@ -201,7 +201,8 @@
         "mastery": "Maîtrise",
         "tn": "ND",
         "cost": "Coût",
-        "save": "Sauvegarder"
+        "save": "Sauvegarder",
+        "armor": "Armure"
       },
       "emphasisManager": {
         "title": "Gérer les Emphases de Compétence",

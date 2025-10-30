@@ -24,6 +24,7 @@
  */
 
 import { SYS_ID } from "../../config/constants.js";
+import ArmorConfigApplication from "../../apps/armor-config.js";
 import CombatConfigApplication from "../../apps/combat-config.js";
 import ConditionManager from "../../apps/condition-manager.js";
 import WoundConfigApplication from "../../apps/wound-config.js";
@@ -43,6 +44,42 @@ import WealthManagerApplication from "../../apps/wealth-manager.js";
  * All methods perform singleton checks against ui.windows registry before instantiation.
  */
 export class AppLauncherHandler {
+  /**
+   * Opens the Armor Configuration application for the actor.
+   * Implements singleton pattern: if an instance exists for this actor, focuses it instead of creating a new one.
+   *
+   * @param {Object} context - Sheet rendering context
+   * @param {L5R4Actor} context.actor - The actor whose armor configuration to open
+   * @param {Event} [event] - DOM event to prevent default behavior on
+   * @param {HTMLElement} [element] - Target element (unused)
+   * @returns {Promise<void>}
+   * @throws {Error} Logs warning and shows user notification on failure
+   *
+   * @see ArmorConfigApplication for armor mechanics implementation
+   */
+  static async openArmorConfig(context, event, _element) {
+    event?.preventDefault?.();
+
+    try {
+      const existingApp = Object.values(ui.windows).find(
+        app => app instanceof ArmorConfigApplication && app.actor.id === context.actor.id
+      );
+
+      if (existingApp) {
+        existingApp.bringToTop();
+      } else {
+        const armorConfig = new ArmorConfigApplication(context.actor);
+        await armorConfig.render(true);
+      }
+    } catch (err) {
+      console.warn(`${SYS_ID} AppLauncherHandler: Failed to open armor configuration application`, {
+        err,
+        actorId: context.actor.id
+      });
+      ui.notifications?.error("Failed to open Armor Configuration");
+    }
+  }
+
   /**
    * Opens the Combat Configuration application for the actor.
    * Implements singleton pattern: if an instance exists for this actor, focuses it instead of creating a new one.

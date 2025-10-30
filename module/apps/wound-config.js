@@ -334,7 +334,7 @@ export default class WoundConfigApplication extends foundry.applications.api.Han
    * - woundMode: Must be "manual" or "formula"
    * - woundsMultiplier: Integer 2-5 (Earth x2 default, x5 max lethality)
    * - nrWoundLvls: Integer 1-8 (NPC simplified wound levels)
-   * - woundsMod/woundsPenaltyMod: Any finite number (floored to integer)
+   * - woundsMod/woundsPenaltyMod/wounds.mod: Any finite number (floored to integer)
    *
    * @param {string} field - Field name from actor.system
    * @param {*} value - User-provided value to validate
@@ -375,7 +375,8 @@ export default class WoundConfigApplication extends foundry.applications.api.Han
       }
 
       case "woundsMod":
-      case "woundsPenaltyMod": {
+      case "woundsPenaltyMod":
+      case "wounds.mod": {
         const mod = Number(value);
         if (!Number.isFinite(mod)) {
           console.warn(`${SYS_ID}`, `Invalid ${field}: ${value}. Must be a number.`);
@@ -395,12 +396,14 @@ export default class WoundConfigApplication extends foundry.applications.api.Han
    * Validates input, constructs system.{field} update object, and applies to actor.
    * Called via 300ms debounce to batch rapid changes (e.g., typing in number inputs).
    *
+   * Handles nested field names (e.g., "wounds.mod" becomes "system.wounds.mod").
+   *
    * Defensive Checks:
    * - Bails if actor reference lost
    * - Bails if application closed (rendered = false)
    * - Validates against game rules before update
    *
-   * @param {string} field - Actor.system field name (e.g., "woundsMultiplier")
+   * @param {string} field - Actor.system field name (e.g., "woundsMultiplier" or "wounds.mod")
    * @param {*} value - New field value (pre-coerced by _onFieldChange)
    * @returns {Promise<void>}
    * @private
@@ -424,6 +427,7 @@ export default class WoundConfigApplication extends foundry.applications.api.Han
         return;
       }
 
+      // Handle nested field names (e.g., "wounds.mod" stays as "system.wounds.mod")
       const updateData = { [`system.${field}`]: validatedValue };
 
       await this.actor.update(updateData);

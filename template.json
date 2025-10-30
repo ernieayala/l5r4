@@ -197,6 +197,7 @@
       "armorTn": {
         "type": "",
         "reduction": 0,
+        "reductionMod": 0,
         "current": 0,
         "mod": 0,
         "useVoid": false,

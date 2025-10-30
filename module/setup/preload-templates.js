@@ -147,6 +147,7 @@ export async function preloadTemplates() {
     `systems/${SYS_ID}/templates/dialogs/custom-emphasis-dialog.hbs`,
 
     // Application Templates
+    `systems/${SYS_ID}/templates/apps/armor-config.hbs`,
     `systems/${SYS_ID}/templates/apps/xp-manager.hbs`,
     `systems/${SYS_ID}/templates/apps/wound-config.hbs`,
     `systems/${SYS_ID}/templates/apps/emphasis-manager.hbs`,

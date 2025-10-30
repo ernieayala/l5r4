@@ -201,7 +201,8 @@
         "mastery": "Maestria",
         "tn": "ND",
         "cost": "Custo",
-        "save": "Salvar"
+        "save": "Salvar",
+        "armor": "Armadura"
       },
       "emphasisManager": {
         "title": "Gerenciar Ênfases de Perícias",
