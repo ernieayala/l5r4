@@ -184,6 +184,7 @@
         "description": "Descrição",
         "notes": "Notas",
         "activeEffects": "Efeitos Ativos",
+        "conditions": "Condições",
         "active": "Ativo",
         "new": "Novo",
         "auto": "Auto",
@@ -286,7 +287,8 @@
         "noTargetForSwap": "Nenhum alvo selecionado para troca de iniciativa",
         "noCombatActive": "Nenhum combate ativo para modificar iniciativa",
         "notInCombat": "Personagem não está em combate ativo",
-        "wealthManagerFailed": "Falha ao abrir o Gerenciador de Riqueza"
+        "wealthManagerFailed": "Falha ao abrir o Gerenciador de Riqueza",
+        "conditionManagerFailed": "Falha ao abrir o Gerenciador de Condições"
       },
       "voidActions": {
         "title": "Ações de Pontos de Vazio",

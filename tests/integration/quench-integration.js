@@ -50,6 +50,7 @@ import { registerXpManagerTests } from "./sheets/xp-manager.test.js";
 import { registerEmphasisManagerTests } from "./sheets/emphasis-manager.test.js";
 import { registerNPCAttackEditorTests } from "./apps/npc-attack-editor.test.js";
 import { registerWealthManagerTests } from "./apps/wealth-manager.integration.test.js";
+import { registerConditionManagerTests } from "./apps/condition-manager.test.js";
 import { registerCombatWorkflowTests } from "./workflows/combat-workflow.test.js";
 import { registerMeleeDamageStrengthTests } from "./workflows/melee-damage-strength.test.js";
 import { registerAdvancementWorkflowTests } from "./workflows/advancement-workflow.test.js";
@@ -88,6 +89,7 @@ import { registerChatCardContentValidationTests } from "./services/chat-card-con
 import { register as registerWoundPenaltyAllRollsTests } from "./rolls/wound-penalty-all-rolls.integration.test.js";
 import { registerMultipleModifierCombinationTests } from "./services/multiple-modifier-combinations.test.js";
 import { registerCombatModifiersTests } from "./documents/combat-modifiers.test.js";
+import { registerStanceEffectPreservationTests } from "./services/stance-effect-preservation.test.js";
 
 /**
  * Register Quench integration tests for the L5R4 system.
@@ -143,6 +145,7 @@ export async function registerQuenchTests(quench) {
   registerEmphasisManagerTests(quench);
   registerNPCAttackEditorTests(quench);
   registerWealthManagerTests(quench);
+  registerConditionManagerTests(quench);
 
   // Register workflow tests (Phase 6: Complete Workflows)
   registerCombatWorkflowTests(quench);
@@ -193,6 +196,9 @@ export async function registerQuenchTests(quench) {
 
   // Register Phase 2 Priority #6: Multiple Modifier Combinations
   registerMultipleModifierCombinationTests(quench);
+
+  // Register Stance Effect Preservation Tests (Bug Fix Verification)
+  registerStanceEffectPreservationTests(quench);
 }
 
 /**

@@ -25,6 +25,7 @@
 
 import { SYS_ID } from "../../config/constants.js";
 import CombatConfigApplication from "../../apps/combat-config.js";
+import ConditionManager from "../../apps/condition-manager.js";
 import WoundConfigApplication from "../../apps/wound-config.js";
 import XpManagerApplication from "../../apps/xp-manager.js";
 import WealthManagerApplication from "../../apps/wealth-manager.js";
@@ -78,6 +79,42 @@ export class AppLauncherHandler {
         }
       );
       ui.notifications?.error(game.i18n.localize("l5r4.ui.notifications.combatConfigFailed"));
+    }
+  }
+
+  /**
+   * Opens the Condition Manager application for the actor.
+   * Implements singleton pattern: if an instance exists for this actor, focuses it instead of creating a new one.
+   *
+   * @param {Object} context - Sheet rendering context
+   * @param {L5R4Actor} context.actor - The actor whose conditions to manage
+   * @param {Event} [event] - DOM event to prevent default behavior on
+   * @param {HTMLElement} [element] - Target element (unused)
+   * @returns {Promise<void>}
+   * @throws {Error} Logs warning and shows user notification on failure
+   *
+   * @see ConditionManager for condition management implementation
+   */
+  static async openConditionManager(context, event, _element) {
+    event?.preventDefault?.();
+
+    try {
+      const existingApp = Object.values(ui.windows).find(
+        app => app instanceof ConditionManager && app.actor.id === context.actor.id
+      );
+
+      if (existingApp) {
+        existingApp.render(true); // Re-render to refresh checkbox state
+      } else {
+        const conditionManager = new ConditionManager(context.actor);
+        await conditionManager.render(true);
+      }
+    } catch (err) {
+      console.warn(`${SYS_ID} AppLauncherHandler: Failed to open condition manager application`, {
+        err,
+        actorId: context.actor.id
+      });
+      ui.notifications?.error(game.i18n.localize("l5r4.ui.notifications.conditionManagerFailed"));
     }
   }
 

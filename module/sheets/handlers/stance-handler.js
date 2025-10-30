@@ -178,7 +178,6 @@ export class StanceHandler {
       }
 
       const effectData = creator(actor);
-
       await actor.createEmbeddedDocuments("ActiveEffect", [effectData]);
     } catch (err) {
       console.error(`${SYS_ID} StanceHandler: Failed to add stance "${stanceId}"`, err);

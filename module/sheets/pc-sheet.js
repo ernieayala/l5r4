@@ -211,6 +211,8 @@ export default class L5R4PcSheet extends BaseActorSheet {
         );
       case "toggle-movement-type":
         return StanceHandler.toggleMovementType(this._getHandlerContext(), event);
+      case "condition-manager":
+        return AppLauncherHandler.openConditionManager(this._getHandlerContext(), event, element);
       case "combat-config":
         return AppLauncherHandler.openCombatConfig(this._getHandlerContext(), event, element);
       case "wound-config":
@@ -530,6 +532,14 @@ export default class L5R4PcSheet extends BaseActorSheet {
   async _onRender(context, options) {
     await super._onRender(context, options);
     const root = this.element;
+    if (!this._preparedOnce) {
+      this.actor?.prepareData();
+      this._preparedOnce = true;
+    }
+
+    if (this._boundRoot === root) {
+      return;
+    }
 
     // Paint Void Points dots based on current/max values
     this._paintVoidPointsDots(root);

@@ -81,6 +81,12 @@ export function prepareNpcData(actor, sys, finalizeWoundPenaltiesFn) {
   const baseKeep = toInt(sys.initiative.keep) > 0 ? toInt(sys.initiative.keep) : ref;
   const rollMod = toInt(sys.initiative.rollMod) || 0;
   const keepMod = toInt(sys.initiative.keepMod) || 0;
+
+  // Store effective values (before modifiers) for tests and UI
+  sys.initiative.effRoll = baseRoll;
+  sys.initiative.effKeep = baseKeep;
+
+  // Apply modifiers to get final roll/keep values
   sys.initiative.roll = baseRoll + rollMod;
   sys.initiative.keep = baseKeep + keepMod;
   sys.initiative.totalMod = toInt(sys.initiative.totalMod);
