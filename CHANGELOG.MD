@@ -7,9 +7,41 @@ Versioning: [Semantic Versioning](https://semver.org/spec/v2.0.0.html)
 
 ---
 
-## [3.1.2] - 2025-10-28
+## [3.1.2] - 2025-10-30
 
 ### Added
+
+**Visual Animation System**
+- New animation system for stances, conditions, and attacks using Sequencer + JB2A
+- Stance animations: Full Attack, Full Defense, Center with visual effects
+- Condition animations: Blinded, Dazed, Fatigued, Prone, Stunned, Grappled
+- Attack projectile animations: arrows and kunai for bow/weapon attacks
+- Animation manager for lifecycle control (play, remove, cleanup)
+- Asset library with JB2A asset mapping and module detection
+- Hook integration for ActiveEffect and Actor lifecycle events
+- Graceful degradation when Sequencer/JB2A modules not installed
+- Automatic animation cleanup on effect removal or actor deletion
+- Target-based attack animations triggered from chat messages
+
+**Armor Configuration Dialog**
+- ApplicationV2-based armor configuration interface
+- Edit armor TN bonus and reduction values
+- Armor stacking rules configuration (highest only or all stack)
+- Integrated with character sheet armor management
+- Form validation and proper data persistence
+
+**Condition Manager Dialog**
+- Centralized status effect management interface
+- Toggle all conditions and stances from single dialog
+- Visual status indicators for active effects
+- Quick access to all L5R4 status effects
+- Integrated with character sheet for easy condition tracking
+
+**Combat Configuration Dialog**
+- Initiative modifier configuration
+- Movement rate adjustments
+- Combat-related settings in dedicated interface
+- Streamlined combat setup workflow
 
 **Wealth Manager**
 - New modal wealth management application with calculator-style UI
@@ -89,14 +121,37 @@ Versioning: [Semantic Versioning](https://semver.org/spec/v2.0.0.html)
 - Better error handling in chat message creation
 - Improved chat card formatting
 
+**Combat System**
+- Initiative modifiers now properly configurable
+- Movement tracking enhanced with configuration options
+- Combat modifiers integrated into derived data calculations
+
 **Code Quality**
 - Consistent async/await patterns throughout
 - Better error handling with try/catch/finally
 - Improved JSDoc documentation
 - Cleaner code organization
 - Reduced code duplication
+- Resolved 18 ESLint unused variable warnings
+- Fixed deprecated CONST.CHAT_MESSAGE_TYPES usage (replaced with CONST.CHAT_MESSAGE_STYLES)
+- Improved code formatting with Prettier
+- Better JSDoc documentation for animation system
 
 ### Fixed
+
+**Roll System**
+- Removed free raises from TN calculation (was incorrectly reducing TN)
+- TN calculation now properly reflects declared raises only
+- Free raises now correctly reduce required roll result, not TN
+
+**Deprecation Warnings**
+- Updated chat message type constants to use CONST.CHAT_MESSAGE_STYLES
+- Resolved Foundry v13 API deprecation warnings
+
+**Code Cleanup**
+- Fixed race condition protection in roll handlers
+- Improved async/await patterns in animation hooks
+- Better error handling throughout animation system
 
 **Emphasis Migration**
 - Old emphases now properly marked as trained (selected) in new system
@@ -150,6 +205,16 @@ Versioning: [Semantic Versioning](https://semver.org/spec/v2.0.0.html)
 - Better async/await patterns throughout
 - Enhanced error handling strategies
 - Race condition protection infrastructure
+- New `services/animations/` module structure
+- Modular animation system with clear separation of concerns
+- Hook-based integration with Foundry lifecycle events
+- Asset library abstraction for JB2A integration
+- Animation manager service for centralized control
+
+**Dependencies**
+- Sequencer module integration (optional, graceful degradation)
+- JB2A module integration (optional, graceful degradation)
+- System functions without animation modules installed
 
 **Testing**
 - 18 new integration test files

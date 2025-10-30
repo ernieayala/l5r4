@@ -42,7 +42,10 @@
     "TextEditor": "readonly",
     "fromUuidSync": "readonly",
     "fromUuid": "readonly",
-    "FilePicker": "readonly"
+    "FilePicker": "readonly",
+    "Sequencer": "readonly",
+    "Sequence": "readonly",
+    "Ray": "readonly"
   },
   "rules": {
     "no-unused-vars": [
