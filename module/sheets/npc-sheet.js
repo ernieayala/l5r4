@@ -154,6 +154,7 @@ export default class L5R4NpcSheet extends BaseActorSheet {
    * - test-fear: Trigger Fear test for selected tokens
    * - trait-rank: Adjust trait ranks (Shift+Click)
    * - void-points-dots: Spend/regain Void Points
+   * - combat-config: Open combat configuration dialog (initiative/movement)
    * - wound-config: Open wound threshold configuration dialog
    *
    * **Implementation Note:**
@@ -208,6 +209,8 @@ export default class L5R4NpcSheet extends BaseActorSheet {
         return this._onVoidPointsAdjust(event, element, +1);
       case "toggle-movement-type":
         return StanceHandler.toggleMovementType(this._getHandlerContext(), event);
+      case "combat-config":
+        return AppLauncherHandler.openCombatConfig(this._getHandlerContext(), event, element);
       case "wound-config":
         return AppLauncherHandler.openWoundConfig(this._getHandlerContext(), event, element);
       case "edit-attack":

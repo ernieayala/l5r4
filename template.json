@@ -90,7 +90,11 @@
       },
       "initiative": {
         "roll": 2,
-        "keep": 2
+        "keep": 2,
+        "rollMod": 0,
+        "keepMod": 0,
+        "totalMod": 0,
+        "useVoid": false
       },
       "attack1": {
         "name": "",
@@ -130,6 +134,10 @@
         "keep": 0,
         "modifier": 0,
         "type": ""
+      },
+      "movement": {
+        "multiplier": 1,
+        "modifier": 0
       },
       "nrWoundLvls": 3,
       "woundMode": "manual",
@@ -197,6 +205,10 @@
       "woundsMod": 0,
       "woundsMultiplier": 2,
       "woundsPenaltyMod": 0,
+      "movement": {
+        "multiplier": 1,
+        "modifier": 0
+      },
       "wealth": {
         "koku": 0,
         "bu": 0,

@@ -96,7 +96,6 @@ export async function preloadTemplates() {
     `systems/${SYS_ID}/templates/actor/_partials/_stats.hbs`,
     `systems/${SYS_ID}/templates/actor/_partials/_stats-npc.hbs`,
     `systems/${SYS_ID}/templates/actor/_partials/_ranks.hbs`,
-    `systems/${SYS_ID}/templates/actor/_partials/_initiative.hbs`,
     `systems/${SYS_ID}/templates/actor/_partials/_combat.hbs`,
     `systems/${SYS_ID}/templates/actor/_partials/_armor.hbs`,
     `systems/${SYS_ID}/templates/actor/_partials/_wounds.hbs`,
@@ -150,7 +149,8 @@ export async function preloadTemplates() {
     // Application Templates
     `systems/${SYS_ID}/templates/apps/xp-manager.hbs`,
     `systems/${SYS_ID}/templates/apps/wound-config.hbs`,
-    `systems/${SYS_ID}/templates/apps/emphasis-manager.hbs`
+    `systems/${SYS_ID}/templates/apps/emphasis-manager.hbs`,
+    `systems/${SYS_ID}/templates/apps/combat-config.hbs`
   ];
 
   if (!globalThis.foundry?.applications?.handlebars?.loadTemplates) {

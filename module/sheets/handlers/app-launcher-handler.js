@@ -24,6 +24,7 @@
  */
 
 import { SYS_ID } from "../../config/constants.js";
+import CombatConfigApplication from "../../apps/combat-config.js";
 import WoundConfigApplication from "../../apps/wound-config.js";
 import XpManagerApplication from "../../apps/xp-manager.js";
 import WealthManagerApplication from "../../apps/wealth-manager.js";
@@ -41,6 +42,45 @@ import WealthManagerApplication from "../../apps/wealth-manager.js";
  * All methods perform singleton checks against ui.windows registry before instantiation.
  */
 export class AppLauncherHandler {
+  /**
+   * Opens the Combat Configuration application for the actor.
+   * Implements singleton pattern: if an instance exists for this actor, focuses it instead of creating a new one.
+   *
+   * @param {Object} context - Sheet rendering context
+   * @param {L5R4Actor} context.actor - The actor whose combat configuration to open
+   * @param {Event} [event] - DOM event to prevent default behavior on
+   * @param {HTMLElement} [element] - Target element (unused)
+   * @returns {Promise<void>}
+   * @throws {Error} Logs warning and shows user notification on failure
+   *
+   * @see CombatConfigApplication for combat mechanics implementation
+   */
+  static async openCombatConfig(context, event, _element) {
+    event?.preventDefault?.();
+
+    try {
+      const existingApp = Object.values(ui.windows).find(
+        app => app instanceof CombatConfigApplication && app.actor.id === context.actor.id
+      );
+
+      if (existingApp) {
+        existingApp.bringToTop();
+      } else {
+        const combatConfig = new CombatConfigApplication(context.actor);
+        await combatConfig.render(true);
+      }
+    } catch (err) {
+      console.warn(
+        `${SYS_ID} AppLauncherHandler: Failed to open combat configuration application`,
+        {
+          err,
+          actorId: context.actor.id
+        }
+      );
+      ui.notifications?.error(game.i18n.localize("l5r4.ui.notifications.combatConfigFailed"));
+    }
+  }
+
   /**
    * Opens the Wound Configuration application for the actor.
    * Implements singleton pattern: if an instance exists for this actor, focuses it instead of creating a new one.
