@@ -9,6 +9,7 @@
  * - Maintain hook-related code
  *
  * Hook Categories:
+ * - Animation System: Visual effects for stances and conditions
  * - Chat Integration: Damage buttons, inline roll parsing
  * - Combat: Void Point spending, turn tracking
  * - Spell System: Memorization XP tracking
@@ -25,6 +26,7 @@ import { registerSpellMemorizationHooks } from "./spell-memorization.js";
 import { initializeStanceService } from "../services/stance/initialize.js";
 import { initializeChatService } from "../services/chat.js";
 import { initializeWoundProneAutomation } from "../services/wound-prone-automation.js";
+import { initializeAnimations } from "../services/animations/initialize.js";
 
 /**
  * Register all system hooks
@@ -33,17 +35,21 @@ import { initializeWoundProneAutomation } from "../services/wound-prone-automati
  * This function should be called during the 'init' hook in the system entry point.
  *
  * Hook Registration Order:
- * 1. Stance Service - ActiveEffect lifecycle hooks (preCreate, create, update, delete)
- * 2. Chat Service - Chat message rendering, inline roll parsing
- * 3. Wound Prone Automation - Actor update hook for automatic prone application
- * 4. Chat Damage Buttons - Damage button click handlers in chat cards
- * 5. Combat Void Spending - Combat turn hook for Void Point duration tracking
- * 6. Spell Memorization - Item update hook for spell memorization XP tracking
+ * 1. Animation System - Visual effects for stances and conditions (ActiveEffect lifecycle)
+ * 2. Stance Service - ActiveEffect lifecycle hooks (preCreate, create, update, delete)
+ * 3. Chat Service - Chat message rendering, inline roll parsing
+ * 4. Wound Prone Automation - Actor update hook for automatic prone application
+ * 5. Chat Damage Buttons - Damage button click handlers in chat cards
+ * 6. Combat Void Spending - Combat turn hook for Void Point duration tracking
+ * 7. Spell Memorization - Item update hook for spell memorization XP tracking
  *
  * @function registerAllHooks
  * @returns {void}
  */
 export function registerAllHooks() {
+  // Animation system: Visual effects for stances and conditions
+  initializeAnimations();
+
   // Stance system: ActiveEffect lifecycle management
   initializeStanceService();
 
