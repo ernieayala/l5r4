@@ -58,6 +58,7 @@ export function createFullAttackEffect() {
     name: T("l5r4.ui.mechanics.stances.fullAttack"),
     icon: `systems/${SYS_ID}/assets/icons/full-attack-stance.webp`,
     statuses: ["fullAttackStance"],
+    changes: [], // Explicitly empty - stance effects use flags, not Active Effect changes
     flags: {
       [SYS_ID]: {
         stanceType: "fullAttack",

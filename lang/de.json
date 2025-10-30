@@ -184,6 +184,7 @@
         "description": "Beschreibung",
         "notes": "Notizen",
         "activeEffects": "Aktive Effekte",
+        "conditions": "Zustände",
         "active": "Aktiv",
         "new": "Neu",
         "auto": "Auto",
@@ -286,7 +287,8 @@
         "noTargetForSwap": "Kein Ziel für Initiativentausch ausgewählt",
         "noCombatActive": "Kein aktiver Kampf, um Initiative zu ändern",
         "notInCombat": "Charakter ist nicht im aktiven Kampf",
-        "wealthManagerFailed": "Fehler beim Öffnen der Vermögensverwaltung"
+        "wealthManagerFailed": "Fehler beim Öffnen der Vermögensverwaltung",
+        "conditionManagerFailed": "Fehler beim Öffnen des Zustandsverwalters"
       },
       "voidActions": {
         "title": "Leere-Punkt Aktionen",

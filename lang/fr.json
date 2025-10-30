@@ -184,6 +184,7 @@
         "description": "Description",
         "notes": "Notes",
         "activeEffects": "Effets Actifs",
+        "conditions": "Conditions",
         "active": "Actif",
         "new": "Nouveau",
         "auto": "Auto",
@@ -286,7 +287,8 @@
         "noTargetForSwap": "Aucune cible sélectionnée pour l'échange d'initiative",
         "noCombatActive": "Aucun combat actif pour modifier l'initiative",
         "notInCombat": "Le personnage n'est pas dans un combat actif",
-        "wealthManagerFailed": "Échec de l'ouverture du Gestionnaire de Richesse"
+        "wealthManagerFailed": "Échec de l'ouverture du Gestionnaire de Richesse",
+        "conditionManagerFailed": "Échec de l'ouverture du Gestionnaire de Conditions"
       },
       "voidActions": {
         "title": "Actions de Points de Vide",

@@ -184,6 +184,7 @@
         "description": "Descripción",
         "notes": "Notas",
         "activeEffects": "Efectos Activos",
+        "conditions": "Condiciones",
         "active": "Activo",
         "new": "Nuevo",
         "auto": "Auto",
@@ -286,7 +287,8 @@
         "noTargetForSwap": "No se seleccionó objetivo para intercambio de iniciativa",
         "noCombatActive": "No hay combate activo para modificar iniciativa",
         "notInCombat": "El personaje no está en combate activo",
-        "wealthManagerFailed": "Error al abrir el Administrador de Riqueza"
+        "wealthManagerFailed": "Error al abrir el Administrador de Riqueza",
+        "conditionManagerFailed": "Error al abrir el Administrador de Condiciones"
       },
       "voidActions": {
         "title": "Acciones de Puntos de Vacío",

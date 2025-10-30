@@ -184,6 +184,7 @@
         "description": "Description",
         "notes": "Notes",
         "activeEffects": "Active Effects",
+        "conditions": "Conditions",
         "active": "Active",
         "new": "New",
         "auto": "Auto",
@@ -286,7 +287,8 @@
         "noTargetForSwap": "No target selected for initiative swap",
         "noCombatActive": "No active combat to modify initiative",
         "notInCombat": "Character not in active combat",
-        "wealthManagerFailed": "Failed to open Wealth Manager"
+        "wealthManagerFailed": "Failed to open Wealth Manager",
+        "conditionManagerFailed": "Failed to open Condition Manager"
       },
       "voidActions": {
         "title": "Void Point Actions",

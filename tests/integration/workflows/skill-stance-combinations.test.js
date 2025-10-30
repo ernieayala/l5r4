@@ -58,6 +58,7 @@ export function registerSkillStanceCombinationTests(quench) {
           if (actor) {
             await actor.delete();
             actor = null;
+            skill = null;
           }
         });
 
@@ -124,16 +125,21 @@ export function registerSkillStanceCombinationTests(quench) {
             }
           });
 
-          [weaponSkill, socialSkill] = await actor.createEmbeddedDocuments("Item", [
+          const createdItems = await actor.createEmbeddedDocuments("Item", [
             createSkillData("Kenjutsu", 5, "agi"),
             createSkillData("Etiquette", 3, "awa")
           ]);
+
+          weaponSkill = createdItems[0];
+          socialSkill = createdItems[1];
         });
 
         afterEach(async () => {
           if (actor) {
             await actor.delete();
             actor = null;
+            weaponSkill = null;
+            socialSkill = null;
           }
         });
 
@@ -266,6 +272,8 @@ export function registerSkillStanceCombinationTests(quench) {
           if (actor) {
             await actor.delete();
             actor = null;
+            weaponSkill = null;
+            investigationSkill = null;
           }
         });
 
@@ -376,6 +384,7 @@ export function registerSkillStanceCombinationTests(quench) {
           if (actor) {
             await actor.delete();
             actor = null;
+            skill = null;
           }
         });
 
@@ -470,6 +479,7 @@ export function registerSkillStanceCombinationTests(quench) {
           if (actor) {
             await actor.delete();
             actor = null;
+            skill = null;
           }
         });
 
@@ -566,6 +576,7 @@ export function registerSkillStanceCombinationTests(quench) {
           if (actor) {
             await actor.delete();
             actor = null;
+            skill = null;
           }
         });
 
@@ -665,6 +676,7 @@ export function registerSkillStanceCombinationTests(quench) {
           if (actor) {
             await actor.delete();
             actor = null;
+            unskilledSkill = null;
           }
         });
 

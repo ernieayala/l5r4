@@ -209,6 +209,8 @@ export default class L5R4NpcSheet extends BaseActorSheet {
         return this._onVoidPointsAdjust(event, element, +1);
       case "toggle-movement-type":
         return StanceHandler.toggleMovementType(this._getHandlerContext(), event);
+      case "condition-manager":
+        return AppLauncherHandler.openConditionManager(this._getHandlerContext(), event, element);
       case "combat-config":
         return AppLauncherHandler.openCombatConfig(this._getHandlerContext(), event, element);
       case "wound-config":
