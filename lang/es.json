@@ -201,7 +201,8 @@
         "mastery": "Maestría",
         "tn": "ND",
         "cost": "Costo",
-        "save": "Guardar"
+        "save": "Guardar",
+        "armor": "Armadura"
       },
       "emphasisManager": {
         "title": "Administrar Énfasis de Habilidades",

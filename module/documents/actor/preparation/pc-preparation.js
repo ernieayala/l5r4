@@ -142,7 +142,10 @@ export function preparePcData(actor, sys, finalizeWoundPenaltiesFn, calculateIns
 
   sys.armorTn.base = baseTN;
   sys.armorTn.bonus = bonusTN;
-  sys.armorTn.reduction = reduction;
+
+  // Apply reduction modifier to armor reduction
+  const reductionMod = toInt(sys.armorTn.reductionMod);
+  sys.armorTn.reduction = Math.max(0, reduction + reductionMod);
 
   // Apply Void Point armor TN boost if active (+10)
   const voidTnBonus = sys.armorTn.useVoid ? 10 : 0;

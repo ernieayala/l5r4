@@ -201,7 +201,8 @@
         "mastery": "Meisterschaft",
         "tn": "SZ",
         "cost": "Kosten",
-        "save": "Speichern"
+        "save": "Speichern",
+        "armor": "Rüstung"
       },
       "emphasisManager": {
         "title": "Fertigkeitsschwerpunkte Verwalten",

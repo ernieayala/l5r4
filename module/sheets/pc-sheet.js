@@ -215,6 +215,8 @@ export default class L5R4PcSheet extends BaseActorSheet {
         return AppLauncherHandler.openConditionManager(this._getHandlerContext(), event, element);
       case "combat-config":
         return AppLauncherHandler.openCombatConfig(this._getHandlerContext(), event, element);
+      case "armor-config":
+        return AppLauncherHandler.openArmorConfig(this._getHandlerContext(), event, element);
       case "wound-config":
         return AppLauncherHandler.openWoundConfig(this._getHandlerContext(), event, element);
       case "xp-modal":

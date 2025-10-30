@@ -201,7 +201,8 @@
         "mastery": "Mastery",
         "tn": "TN",
         "cost": "Cost",
-        "save": "Save"
+        "save": "Save",
+        "armor": "Armor"
       },
       "emphasisManager": {
         "title": "Manage Skill Emphases",
