@@ -1,6 +1,13 @@
 <section class="combat">
   <div class="flexrow -gap-sm section-title">
     <h4 class="title -compact">{{localize "l5r4.character.stance.title"}}</h4>
+    <a
+      class="button inline-control icon"
+      data-action="combat-config"
+      title="{{localize 'l5r4.ui.combat.configuration'}}"
+    >
+      <i class="fas fa-cog"></i>
+    </a>
   </div>
   <div class="grid">
     <span>{{localize "l5r4.character.stance.current"}}</span>
@@ -12,6 +19,20 @@
           </option>
         {{/each}}
       </select>
+    </div>
+    <span>{{localize "l5r4.ui.common.init"}}</span>
+    <div class="flexrow -gap-sm">
+      <div>{{system.initiative.roll}}k{{system.initiative.keep}}+{{#if system.initiative.useVoid}}{{math system.initiative.totalMod "+" 10}}{{else}}{{system.initiative.totalMod}}{{/if}}</div>
+      {{#if (gt system.rings.void.rank 0)}}
+        <input
+            class="flex0"
+            type="checkbox"
+            name="system.initiative.useVoid"
+            {{checked system.initiative.useVoid}}
+            data-action="toggle-initiative-void"
+            title="{{localize "l5r4.ui.mechanics.rings.voidInitBoost"}}"
+          />
+      {{/if}}
     </div>
     <span>{{localize "l5r4.character.movement.title"}}</span>
     <div class="flexrow -gap-sm">

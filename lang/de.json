@@ -165,6 +165,7 @@
         "init": "Initiative",
         "bonus": "Bonus",
         "mod": "Modifikator",
+        "multi": "Multiplikator",
         "rate": "Rate",
         "current": "Aktuell",
         "total": "Gesamt",

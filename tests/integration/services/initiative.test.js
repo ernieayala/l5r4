@@ -255,7 +255,7 @@ export function registerInitiativeTests(quench) {
       });
 
       describe("Initiative Modifiers", () => {
-        let actor;
+        let combat, actor;
 
         beforeEach(async () => {
           actor = await createTestPC({
@@ -265,37 +265,207 @@ export function registerInitiativeTests(quench) {
               insight: { rank: 1 }
             }
           });
+
+          combat = await Combat.create({
+            scene: null,
+            active: false
+          });
         });
 
         afterEach(async () => {
+          if (combat) {
+            await combat.delete();
+            combat = null;
+          }
           if (actor) {
             await actor.delete();
             actor = null;
           }
         });
 
-        it("should support rollMod for initiative", async () => {
+        it("should apply rollMod to increase rolled dice", async () => {
+          // ARRANGE - Base is 4k3 (Insight 1 + Ref 3 = 4 rolled, Ref 3 kept)
           const baseRoll = actor.system.initiative.roll;
+          assert.equal(baseRoll, 4, "Base roll is 4");
 
           await actor.update({ "system.initiative.rollMod": 2 });
 
-          // rollMod should be available in system.initiative
-          assert.exists(actor.system.initiative.rollMod, "rollMod exists");
-          assert.equal(actor.system.initiative.rollMod, 2, "rollMod set correctly");
+          // ACT
+          const [combatant] = await combat.createEmbeddedDocuments("Combatant", [
+            { actorId: actor.id, tokenId: null }
+          ]);
+          const roll = combatant.getInitiativeRoll();
+
+          // ASSERT - Should now be 6k3 (4 + 2 rollMod)
+          assert.equal(actor.system.initiative.roll, 6, "Roll increased by rollMod");
+          assert.include(roll.formula, "6d10k3", "Formula contains 6 rolled dice");
         });
 
-        it("should support keepMod for initiative", async () => {
-          await actor.update({ "system.initiative.keepMod": 1 });
+        it("should apply keepMod to increase kept dice", async () => {
+          // ARRANGE - Base is 4k3
+          const baseKeep = actor.system.initiative.keep;
+          assert.equal(baseKeep, 3, "Base keep is 3");
 
-          assert.exists(actor.system.initiative.keepMod, "keepMod exists");
-          assert.equal(actor.system.initiative.keepMod, 1, "keepMod set correctly");
+          await actor.update({ "system.initiative.keepMod": 2 });
+
+          // ACT
+          const [combatant] = await combat.createEmbeddedDocuments("Combatant", [
+            { actorId: actor.id, tokenId: null }
+          ]);
+          const roll = combatant.getInitiativeRoll();
+
+          // ASSERT - Should now be 4k5 (3 + 2 keepMod)
+          assert.equal(actor.system.initiative.keep, 5, "Keep increased by keepMod");
+          assert.include(roll.formula, "4d10k5", "Formula contains 5 kept dice");
         });
 
-        it("should support totalMod for initiative", async () => {
+        it("should apply totalMod as flat bonus", async () => {
+          // ARRANGE
           await actor.update({ "system.initiative.totalMod": 5 });
 
-          assert.exists(actor.system.initiative.totalMod, "totalMod exists");
-          assert.equal(actor.system.initiative.totalMod, 5, "totalMod set correctly");
+          // ACT
+          const [combatant] = await combat.createEmbeddedDocuments("Combatant", [
+            { actorId: actor.id, tokenId: null }
+          ]);
+          const roll = combatant.getInitiativeRoll();
+
+          // ASSERT - Should be 4k3+5
+          assert.equal(actor.system.initiative.totalMod, 5, "totalMod set");
+          assert.match(roll.formula, /\+\s*5/, "Formula contains +5 flat bonus");
+        });
+
+        it("should apply negative rollMod as penalty", async () => {
+          // ARRANGE
+          await actor.update({ "system.initiative.rollMod": -1 });
+
+          // ACT
+          const [combatant] = await combat.createEmbeddedDocuments("Combatant", [
+            { actorId: actor.id, tokenId: null }
+          ]);
+          const roll = combatant.getInitiativeRoll();
+
+          // ASSERT - Should be 3k3 (4 - 1)
+          assert.equal(actor.system.initiative.roll, 3, "Roll decreased by negative rollMod");
+          assert.include(roll.formula, "3d10k3", "Formula contains 3 rolled dice");
+        });
+
+        it("should apply negative keepMod as penalty", async () => {
+          // ARRANGE
+          await actor.update({ "system.initiative.keepMod": -1 });
+
+          // ACT
+          const [combatant] = await combat.createEmbeddedDocuments("Combatant", [
+            { actorId: actor.id, tokenId: null }
+          ]);
+          const roll = combatant.getInitiativeRoll();
+
+          // ASSERT - Should be 4k2 (3 - 1)
+          assert.equal(actor.system.initiative.keep, 2, "Keep decreased by negative keepMod");
+          assert.include(roll.formula, "4d10k2", "Formula contains 2 kept dice");
+        });
+
+        it("should apply negative totalMod as penalty", async () => {
+          // ARRANGE
+          await actor.update({ "system.initiative.totalMod": -3 });
+
+          // ACT
+          const [combatant] = await combat.createEmbeddedDocuments("Combatant", [
+            { actorId: actor.id, tokenId: null }
+          ]);
+          const roll = combatant.getInitiativeRoll();
+
+          // ASSERT - Should be 4k3-3
+          assert.equal(actor.system.initiative.totalMod, -3, "totalMod set to -3");
+          assert.match(roll.formula, /-\s*3/, "Formula contains -3 penalty");
+        });
+
+        it("should apply all modifiers together", async () => {
+          // ARRANGE
+          await actor.update({
+            "system.initiative.rollMod": 2,
+            "system.initiative.keepMod": 1,
+            "system.initiative.totalMod": 5
+          });
+
+          // ACT
+          const [combatant] = await combat.createEmbeddedDocuments("Combatant", [
+            { actorId: actor.id, tokenId: null }
+          ]);
+          const roll = combatant.getInitiativeRoll();
+
+          // ASSERT - Should be 6k4+5 (4+2 rolled, 3+1 kept, +5 flat)
+          assert.equal(actor.system.initiative.roll, 6, "Roll is 6");
+          assert.equal(actor.system.initiative.keep, 4, "Keep is 4");
+          assert.equal(actor.system.initiative.totalMod, 5, "totalMod is 5");
+          assert.include(roll.formula, "6d10k4", "Formula has correct dice");
+          assert.match(roll.formula, /\+\s*5/, "Formula has flat bonus");
+        });
+
+        it("should handle modifiers with 10-dice cap", async () => {
+          // ARRANGE - Create high-level character at cap
+          await actor.update({
+            "system.traits.ref": 10,
+            "system.initiative.rollMod": 5, // Would push to 15 rolled
+            "system.initiative.keepMod": 2, // Would push to 12 kept
+            "system.initiative.totalMod": 3
+          });
+
+          // Add skills to push insight rank high
+          await actor.createEmbeddedDocuments("Item", [
+            { name: "Skill1", type: "skill", system: { rank: 10 } },
+            { name: "Skill2", type: "skill", system: { rank: 10 } },
+            { name: "Skill3", type: "skill", system: { rank: 10 } }
+          ]);
+
+          actor.prepareData();
+
+          // ACT
+          const [combatant] = await combat.createEmbeddedDocuments("Combatant", [
+            { actorId: actor.id, tokenId: null }
+          ]);
+          const roll = combatant.getInitiativeRoll();
+
+          // ASSERT - Should cap at 10k10 and convert excess to flat bonuses
+          assert.include(roll.formula, "10d10k10", "Capped at 10k10");
+          // Excess dice should be converted to flat bonuses
+          // The formula should have a positive flat bonus from conversions + totalMod
+          const match = roll.formula.match(/\+\s*(\d+)/);
+          assert.exists(match, "Has flat bonus from conversions");
+          const flatBonus = parseInt(match[1]);
+          assert.isAbove(flatBonus, 3, "Flat bonus includes conversions plus totalMod");
+        });
+
+        it("should handle zero modifiers (no change)", async () => {
+          // ARRANGE
+          await actor.update({
+            "system.initiative.rollMod": 0,
+            "system.initiative.keepMod": 0,
+            "system.initiative.totalMod": 0
+          });
+
+          // ACT
+          const [combatant] = await combat.createEmbeddedDocuments("Combatant", [
+            { actorId: actor.id, tokenId: null }
+          ]);
+          const roll = combatant.getInitiativeRoll();
+
+          // ASSERT - Should be base 4k3 with no flat bonus
+          assert.equal(actor.system.initiative.roll, 4, "Roll unchanged");
+          assert.equal(actor.system.initiative.keep, 3, "Keep unchanged");
+          assert.include(roll.formula, "4d10k3", "Formula is base 4k3");
+          assert.notInclude(roll.formula, "+0", "No +0 in formula");
+        });
+
+        it("should handle undefined modifiers as zero", async () => {
+          // ARRANGE - Don't set modifiers (undefined)
+          // ACT
+          const [combatant] = await combat.createEmbeddedDocuments("Combatant", [
+            { actorId: actor.id, tokenId: null }
+          ]);
+          const roll = combatant.getInitiativeRoll();
+
+          // ASSERT - Should treat undefined as 0
+          assert.include(roll.formula, "4d10k3", "Formula uses base values");
         });
       });
 

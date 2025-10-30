@@ -156,13 +156,16 @@ export function preparePcData(actor, sys, finalizeWoundPenaltiesFn, calculateIns
   // Simple Action: Water Ring × 10 feet
   // Maximum per Round: Water Ring × 20 feet (hard limit)
   // Conditions like Blinded reduce effective Water Ring by 2 for movement (applied after condition effects)
+  // Custom modifiers: multiplier (for water ring) and modifier (flat modifier)
   const baseWater = toInt(sys.rings.water);
   const waterPenalty = sys._conditionEffects?.waterRingPenalty ?? 0;
   const effectiveWater = Math.max(1, baseWater + waterPenalty); // Minimum 1 per L5R4 rules
   sys.movement = sys.movement || {};
-  sys.movement.freeAction = effectiveWater * 5;
-  sys.movement.simpleAction = effectiveWater * 10;
-  sys.movement.maximum = effectiveWater * 20;
+  const movementMultiplier = parseFloat(sys.movement.multiplier) || 1;
+  const movementModifier = toInt(sys.movement.modifier) || 0;
+  sys.movement.freeAction = effectiveWater * 5 * movementMultiplier + movementModifier;
+  sys.movement.simpleAction = effectiveWater * 10 * movementMultiplier + movementModifier;
+  sys.movement.maximum = effectiveWater * 20 * movementMultiplier + movementModifier;
 
   // Wound threshold calculation per L5R4 rules with lethality variants:
   // Healthy rank: Earth × 5 + modifier (buffer for normal activity)

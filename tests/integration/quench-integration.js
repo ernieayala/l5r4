@@ -87,6 +87,7 @@ import { registerWoundConfigEdgeCaseTests } from "./workflows/wound-config-edge-
 import { registerChatCardContentValidationTests } from "./services/chat-card-content-validation.test.js";
 import { register as registerWoundPenaltyAllRollsTests } from "./rolls/wound-penalty-all-rolls.integration.test.js";
 import { registerMultipleModifierCombinationTests } from "./services/multiple-modifier-combinations.test.js";
+import { registerCombatModifiersTests } from "./documents/combat-modifiers.test.js";
 
 /**
  * Register Quench integration tests for the L5R4 system.
@@ -101,6 +102,7 @@ export async function registerQuenchTests(quench) {
   registerActorXpTests(quench);
   registerItemDocumentTests(quench);
   registerSkillRollTests(quench);
+  registerCombatModifiersTests(quench);
 
   // Register service tests (Phase 1: Critical Rolls)
   registerSkillRollServiceTests(quench);
