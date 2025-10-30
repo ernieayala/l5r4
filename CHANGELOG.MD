@@ -140,9 +140,8 @@ Versioning: [Semantic Versioning](https://semver.org/spec/v2.0.0.html)
 ### Fixed
 
 **Roll System**
-- Removed free raises from TN calculation (was incorrectly reducing TN)
-- TN calculation now properly reflects declared raises only
-- Free raises now correctly reduce required roll result, not TN
+- TN calculation reflects declared raises only
+- Free raises reduce required roll result, not TN
 
 **Deprecation Warnings**
 - Updated chat message type constants to use CONST.CHAT_MESSAGE_STYLES
@@ -179,11 +178,10 @@ Versioning: [Semantic Versioning](https://semver.org/spec/v2.0.0.html)
 - Better validation prevents negative resources
 
 **Roll System**
-- Fixed NPC roll consolidation (removed duplicate npc-roll.js)
-- NPC rolls now use unified simple-roll system
-- Fixed formula builder edge cases
-- Better handling of unskilled rolls
-- Improved wound penalty application
+- NPC rolls use unified simple-roll system
+- Formula builder edge cases handled
+- Unskilled rolls properly handled
+- Wound penalty application improved
 
 **UI/UX**
 - Removed transition animation on inline controls to prevent visual glitches
@@ -193,9 +191,8 @@ Versioning: [Semantic Versioning](https://semver.org/spec/v2.0.0.html)
 ### Removed
 
 **Code Cleanup**
-- Removed duplicate `npc-roll.js` (consolidated into simple-roll system)
-- Removed redundant NPC-specific roll logic
 - Cleaned up unused imports and dependencies
+- Streamlined NPC roll system
 
 ### Technical
 
