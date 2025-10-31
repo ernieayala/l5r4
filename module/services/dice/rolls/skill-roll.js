@@ -221,7 +221,8 @@ export async function SkillRoll({
 
   // L5R4 Unskilled Roll Rule:
   // When skill rank = 0, "effectively making a Trait Roll" = (Trait)k(Trait) with no exploding dice
-  const isUnskilled = toInt(skillRank) === 0;
+  const baseSkillRank = toInt(skillRank);
+  const isUnskilled = baseSkillRank === 0;
   let diceToRoll, diceToKeep;
 
   if (isUnskilled) {
@@ -230,7 +231,7 @@ export async function SkillRoll({
     diceToKeep = toInt(actorTrait) + keepMod;
   } else {
     // Skilled formula: (Skill + Trait)k(Trait)
-    diceToRoll = toInt(actorTrait) + toInt(skillRank) + rollMod;
+    diceToRoll = toInt(actorTrait) + baseSkillRank + rollMod;
     diceToKeep = toInt(actorTrait) + keepMod;
   }
 

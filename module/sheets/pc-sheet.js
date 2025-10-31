@@ -539,12 +539,11 @@ export default class L5R4PcSheet extends BaseActorSheet {
       this._preparedOnce = true;
     }
 
+    this._paintVoidPointsDots(root);
+
     if (this._boundRoot === root) {
       return;
     }
-
-    // Paint Void Points dots based on current/max values
-    this._paintVoidPointsDots(root);
 
     // Guard: Only bind non-delegated events once per root element
     if (this._boundExtraRoot === root) {

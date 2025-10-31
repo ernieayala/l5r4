@@ -85,7 +85,8 @@
       "templates": ["common"],
       "rings": {
         "void": {
-          "rank": 0
+          "rank": 0,
+          "value": 0
         }
       },
       "initiative": {
