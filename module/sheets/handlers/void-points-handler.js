@@ -63,11 +63,13 @@ export class VoidPointsHandler {
         { "system.rings.void.value": next },
         { diff: true, render: false }
       );
+
+      // CRITICAL: After update, actor.system has been refreshed by prepareDerivedData
+      // Now paint the UI with the updated actor data
+      this.paint(context.element, context.actor);
     } catch (err) {
       console.warn(`${SYS_ID} VoidPointsHandler: failed to update void points`, { err });
     }
-
-    this.paint(context.element, context.actor);
   }
 
   /**

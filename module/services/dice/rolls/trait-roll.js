@@ -189,10 +189,22 @@ export async function TraitRoll({
         return;
       }
 
-      // Apply Void's +1k1 bonus and update roll label
-      rollMod += voidResult.rollBonus;
-      keepMod += voidResult.keepBonus;
-      label += ` ${game.i18n.localize("l5r4.ui.mechanics.rings.void")}`;
+      // L5R4 Void Point Rules:
+      // - Normal trait rolls: +1k1 bonus
+      // - Unskilled trait rolls (edge case): Treat like unskilled skill roll - +1k0 with explosions
+      if (unskilled) {
+        // Void on unskilled: Only add to rolled dice, not kept dice
+        // This makes it effectively a "skilled" roll with explosions enabled
+        rollMod += voidResult.rollBonus;
+        // Don't add to keepMod - unskilled void gives +1k0
+        unskilled = false; // Void removes unskilled penalty (enables explosions)
+        label += ` ${game.i18n.localize("l5r4.ui.mechanics.rings.void")}!`;
+      } else {
+        // Standard void on trait roll: +1k1 bonus
+        rollMod += voidResult.rollBonus;
+        keepMod += voidResult.keepBonus;
+        label += ` ${game.i18n.localize("l5r4.ui.mechanics.rings.void")}`;
+      }
     }
   }
 

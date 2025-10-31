@@ -76,8 +76,10 @@ export async function applyLongRest(actor) {
   const isFasting = actor.effects?.some(e => e.statuses?.has("fasting")) ?? false;
 
   // Restore Void Points to maximum (unless fasting)
+  // Note: Only PCs have rings.void.value property; NPCs only have rings.void.rank
   const voidMax = toInt(rings.void?.rank ?? 0);
-  const voidUpdate = isFasting ? {} : { "system.rings.void.value": voidMax };
+  const hasVoidValue = rings.void && "value" in rings.void;
+  const voidUpdate = isFasting || !hasVoidValue ? {} : { "system.rings.void.value": voidMax };
 
   // Remove Fatigued condition
   const fatigued = actor.effects?.find(e => e.statuses?.has("fatigued"));
@@ -99,6 +101,9 @@ export async function applyLongRest(actor) {
   // Apply all updates in single transaction
   try {
     await actor.update(updates, { diff: true });
+
+    // Trigger sheet re-render to update UI
+    actor.sheet?.render(false);
   } catch (err) {
     console.error(`${SYS_ID} | rest.js: Failed to update actor after rest`, { actor, err });
     ui.notifications?.error(
@@ -113,6 +118,9 @@ export async function applyLongRest(actor) {
   const newCurrentWounds = maxWounds - newSuffered;
   const wasFullyHealed = newSuffered === 0;
 
+  // Check if actor has any spells to determine if we should show spell slot restoration message
+  const hasSpells = actor.items?.some(item => item.type === "spell") ?? false;
+
   // Post chat message with rest summary
   await _postRestMessage({
     actor,
@@ -125,7 +133,7 @@ export async function applyLongRest(actor) {
     wasFullyHealed,
     voidRestored: isFasting ? 0 : voidMax,
     voidBlockedByFasting: isFasting,
-    spellSlotsRestored: true
+    spellSlotsRestored: hasSpells
   });
 }
 

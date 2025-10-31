@@ -115,8 +115,19 @@ export function prepareTraitsAndRings(sys) {
   // Calculate elemental ring ranks per L5R4 core rules: Ring = min(physical_trait, mental_trait)
   // This encourages balanced development - improving a ring requires raising BOTH component traits
   const t = sys._derived.traitsEff;
+
+  // CRITICAL: Capture void ring data BEFORE recreating sys.rings object
+  // Preserve the existing void.value to avoid resetting current void points on every data preparation cycle
+  const existingVoidRank = toInt(sys.rings?.void?.rank ?? 0);
+  const existingVoidValue = sys.rings?.void?.value;
+  const existingVoidMax = sys.rings?.void?.max;
+
+  // Spread operator copies the old void object, so we must NOT include it in the spread
+  // Instead, we'll set it explicitly after
+  const { void: _omitVoid, ...otherRings } = sys.rings || {};
+
   sys.rings = {
-    ...sys.rings,
+    ...otherRings,
     air: Math.min(t.ref, t.awa),
     earth: Math.min(t.sta, t.wil),
     fire: Math.min(t.agi, t.int),
@@ -127,8 +138,8 @@ export function prepareTraitsAndRings(sys) {
   // value (current points), and max (typically equals rank). Preserve existing structure while
   // ensuring numeric safety for all properties.
   sys.rings.void = {
-    rank: toInt(sys.rings?.void?.rank ?? 0),
-    value: toInt(sys.rings?.void?.value ?? 0),
-    max: toInt(sys.rings?.void?.max ?? 0)
+    rank: existingVoidRank,
+    value: existingVoidValue !== undefined ? toInt(existingVoidValue) : existingVoidRank,
+    max: existingVoidMax !== undefined ? toInt(existingVoidMax) : existingVoidRank
   };
 }
