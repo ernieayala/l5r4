@@ -122,24 +122,22 @@ export function prepareTraitsAndRings(sys) {
   const existingVoidValue = sys.rings?.void?.value;
   const existingVoidMax = sys.rings?.void?.max;
 
-  // Spread operator copies the old void object, so we must NOT include it in the spread
-  // Instead, we'll set it explicitly after
-  const { void: _omitVoid, ...otherRings } = sys.rings || {};
-
+  // CRITICAL: Do NOT use spread operator to preserve old sys.rings properties
+  // The rings object should ONLY contain the five rings (air, earth, fire, water, void)
+  // Any other properties (from bugs, migrations, or stale data) must be discarded
+  // Spreading ...otherRings was causing spell slot values or other data to persist in rings
   sys.rings = {
-    ...otherRings,
     air: Math.min(t.ref, t.awa),
     earth: Math.min(t.sta, t.wil),
     fire: Math.min(t.agi, t.int),
-    water: Math.min(t.str, t.per)
-  };
-
-  // Void ring is special: unlike elemental rings, it maintains a structure with rank (permanent),
-  // value (current points), and max (typically equals rank). Preserve existing structure while
-  // ensuring numeric safety for all properties.
-  sys.rings.void = {
-    rank: existingVoidRank,
-    value: existingVoidValue !== undefined ? toInt(existingVoidValue) : existingVoidRank,
-    max: existingVoidMax !== undefined ? toInt(existingVoidMax) : existingVoidRank
+    water: Math.min(t.str, t.per),
+    // Void ring is special: unlike elemental rings, it maintains a structure with rank (permanent),
+    // value (current points), and max (typically equals rank). Preserve existing structure while
+    // ensuring numeric safety for all properties.
+    void: {
+      rank: existingVoidRank,
+      value: existingVoidValue !== undefined ? toInt(existingVoidValue) : existingVoidRank,
+      max: existingVoidMax !== undefined ? toInt(existingVoidMax) : existingVoidRank
+    }
   };
 }

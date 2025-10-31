@@ -223,6 +223,8 @@ export default class L5R4PcSheet extends BaseActorSheet {
         return AppLauncherHandler.openXpManager(this._getHandlerContext(), event, element);
       case "open-wealth-manager":
         return AppLauncherHandler.openWealthManager(this._getHandlerContext(), event, element);
+      case "recalc-sheet":
+        return this._onRecalcSheet(event, element);
     }
   }
 
@@ -339,6 +341,51 @@ export default class L5R4PcSheet extends BaseActorSheet {
     }
 
     return BioItemHandler.handleDrop(this._getHandlerContext(), itemDoc);
+  }
+
+  /**
+   * Handles manual sheet recalculation for testing purposes.
+   *
+   * **Testing Tool:**
+   * Shift+Click on the character name label triggers a full actor data preparation
+   * cycle and sheet re-render. Useful for debugging data preparation issues or
+   * verifying that derived values update correctly.
+   *
+   * **What It Does:**
+   * 1. Checks for Shift key (safety mechanism)
+   * 2. Calls actor.prepareData() to recalculate all derived values
+   * 3. Re-renders the sheet to display updated values
+   * 4. Shows notification confirming recalculation
+   *
+   * **Use Cases:**
+   * - Testing trait/ring calculations after rest
+   * - Verifying wound threshold updates
+   * - Debugging derived data issues
+   * - Forcing refresh after manual data edits
+   *
+   * @param {Event} event - Click event on name label
+   * @param {HTMLElement} _element - Name label element (unused)
+   * @returns {Promise<void>}
+   * @private
+   */
+  async _onRecalcSheet(event, _element) {
+    event?.preventDefault?.();
+
+    // Require Shift key to prevent accidental triggers
+    if (!event?.shiftKey) {
+      return;
+    }
+
+    console.log("L5R4 | Manual sheet recalculation triggered");
+
+    // Force full data preparation
+    this.actor.prepareData();
+
+    // Re-render sheet to show updated values
+    this.render(false);
+
+    // Notify user
+    ui.notifications?.info(`Sheet recalculated for ${this.actor.name}`);
   }
 
   /**
