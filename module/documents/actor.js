@@ -258,6 +258,19 @@ export default class L5R4Actor extends Actor {
 
     const sys = this.system ?? {};
 
+    // Reset traits to base values from _source before Active Effects are applied
+    // Foundry's data preparation lifecycle applies Active Effects in ADD mode after prepareBaseData,
+    // so traits must start from their base values to ensure correct effect application
+    if (this._source?.system?.traits) {
+      sys.traits = sys.traits ?? {};
+      const sourceTr = this._source.system.traits;
+      for (const key of ["sta", "wil", "str", "per", "ref", "awa", "agi", "int"]) {
+        if (sourceTr[key] !== undefined) {
+          sys.traits[key] = sourceTr[key];
+        }
+      }
+    }
+
     // Initialize core data structures if not present
     sys.initiative = sys.initiative ?? {};
     sys.armorTn = sys.armorTn ?? {};
