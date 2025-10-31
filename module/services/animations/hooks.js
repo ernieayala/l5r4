@@ -229,6 +229,10 @@ export function onDeleteActorAnimation(actor, _options, _userId) {
  * Detects when an attack roll chat message is created and triggers
  * arrow animations for bow attacks if a target is selected.
  *
+ * Uses target actor ID stored in message flags to ensure animations
+ * play to the correct target across all clients, not just the current
+ * user's selected targets.
+ *
  * @param {ChatMessage} message - The newly created chat message
  * @returns {void}
  */
@@ -239,6 +243,7 @@ export function onCreateChatMessageAnimation(message) {
     // Attack rolls have weaponId in flags (only set for successful attacks)
     const flags = message.flags?.["l5r4-enhanced"] ?? {};
     const weaponId = flags.weaponId;
+    const targetActorId = flags.targetActorId;
 
     if (!weaponId) {
       return;
@@ -266,19 +271,16 @@ export function onCreateChatMessageAnimation(message) {
       return;
     }
 
-    // Get targeted tokens
-    const targets = Array.from(game.user.targets);
-
-    if (targets.length === 0) {
+    // Get target actor from stored ID instead of game.user.targets
+    // This ensures animations play to the correct target across all clients
+    if (!targetActorId) {
       return;
     }
 
-    // Use first target if multiple selected
-    const targetToken = targets[0];
-    const targetActor = targetToken.actor;
+    const targetActor = game.actors.get(targetActorId);
 
     if (!targetActor) {
-      console.warn("L5R4 | Target token has no actor");
+      console.warn("L5R4 | Could not find target actor with ID:", targetActorId);
       return;
     }
 

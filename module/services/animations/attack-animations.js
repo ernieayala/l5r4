@@ -81,8 +81,8 @@ function calculateDistance(sourceToken, targetToken) {
   };
 
   // Calculate distance using Foundry's measurement system
-  const ray = new Ray(source, target);
-  const distance = canvas.grid.measureDistances([{ ray }], { gridSpaces: true })[0];
+  const ray = new foundry.canvas.geometry.Ray(source, target);
+  const distance = canvas.grid.measurePath([{ ray }])[0];
 
   return Math.round(distance);
 }

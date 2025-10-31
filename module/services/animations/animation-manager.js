@@ -51,8 +51,8 @@ import {
  * - Logs warnings on failure (non-fatal)
  *
  * Effect Storage:
- * Stores Sequencer effect ID in actor flags for later cleanup:
- * `actor.flags[SYS_ID].animations[statusId] = effectId`
+ * Effects are named using the pattern: `${SYS_ID}.${statusId}.${token.id}`
+ * Sequencer manages cleanup via effect name pattern matching.
  *
  * @param {Actor} actor - The actor to play animation on
  * @param {string} statusId - The stance or condition ID (e.g., "fullAttackStance", "blinded")
@@ -119,11 +119,6 @@ export async function playAnimation(actor, statusId, isStance = false) {
 
       // Play the sequence
       await sequence.play();
-
-      // Store effect ID in actor flags for cleanup
-      const animations = actor.getFlag(SYS_ID, "animations") || {};
-      animations[statusId] = effectName;
-      await actor.setFlag(SYS_ID, "animations", animations);
     } catch (error) {
       console.warn(`L5R4 | Failed to play animation ${statusId} for ${actor.name}:`, error);
     }
@@ -134,11 +129,11 @@ export async function playAnimation(actor, statusId, isStance = false) {
  * Remove animation for a stance or condition.
  *
  * Ends the persistent visual effect created by playAnimation().
- * Cleans up effect from Sequencer and removes stored effect ID from actor flags.
+ * Uses Sequencer's effect name pattern matching to find and end effects.
  *
  * Defensive Coding:
  * - Returns early if Sequencer not available
- * - Returns early if no stored effect ID found
+ * - Returns early if actor has no active tokens
  * - Wraps Sequencer API calls in try/catch
  * - Logs warnings on failure (non-fatal)
  *
@@ -156,23 +151,24 @@ export async function removeAnimation(actor, statusId) {
     return;
   }
 
-  // Get stored effect ID from actor flags
-  const animations = actor.getFlag(SYS_ID, "animations") || {};
-  const effectName = animations[statusId];
+  // Get actor's active tokens
+  const tokens = actor.getActiveTokens();
 
-  if (!effectName) {
+  if (!tokens || tokens.length === 0) {
     return;
   }
 
-  try {
-    // End the effect via Sequencer
-    await Sequencer.EffectManager.endEffects({ name: effectName });
+  // Remove animation from each token
+  for (const token of tokens) {
+    try {
+      // Build effect name pattern
+      const effectName = `${SYS_ID}.${statusId}.${token.id}`;
 
-    // Remove from actor flags
-    delete animations[statusId];
-    await actor.setFlag(SYS_ID, "animations", animations);
-  } catch (error) {
-    console.warn(`L5R4 | Failed to remove animation ${statusId} for ${actor.name}:`, error);
+      // End the effect via Sequencer
+      await Sequencer.EffectManager.endEffects({ name: effectName });
+    } catch (error) {
+      console.warn(`L5R4 | Failed to remove animation ${statusId} for ${actor.name}:`, error);
+    }
   }
 }
 
@@ -180,7 +176,7 @@ export async function removeAnimation(actor, statusId) {
  * Remove all animations from an actor.
  *
  * Cleans up all persistent effects when actor is deleted or all effects are cleared.
- * Iterates through stored effect IDs and removes each one.
+ * Uses Sequencer's effect name pattern matching to find and end all system effects.
  *
  * @param {Actor} actor - The actor to remove all animations from
  * @returns {Promise<void>}
@@ -194,15 +190,20 @@ export async function removeAllAnimations(actor) {
     return;
   }
 
-  const animations = actor.getFlag(SYS_ID, "animations") || {};
-  const statusIds = Object.keys(animations);
+  // Get actor's active tokens
+  const tokens = actor.getActiveTokens();
 
-  if (statusIds.length === 0) {
+  if (!tokens || tokens.length === 0) {
     return;
   }
 
-  // Remove each animation
-  for (const statusId of statusIds) {
-    await removeAnimation(actor, statusId);
+  // Remove all animations from each token
+  for (const token of tokens) {
+    try {
+      // End all effects for this system and token using name pattern
+      await Sequencer.EffectManager.endEffects({ name: `${SYS_ID}.*${token.id}` });
+    } catch (error) {
+      console.warn(`L5R4 | Failed to remove all animations for ${actor.name}:`, error);
+    }
   }
 }

@@ -141,7 +141,7 @@ export async function SkillRoll({
   let socialResistance = false;
 
   // Resolve target TN and info string from selected tokens (attack rolls only)
-  const { autoTN, targetInfo } = resolveTargets(actor, rollType);
+  const { autoTN, targetInfo, targetData } = resolveTargets(actor, rollType);
 
   // Apply active effects and abilities that modify skill/trait rolls
   const bonuses = applySkillAndTraitBonuses(actor, skillName, skillTrait) ?? {
@@ -342,13 +342,15 @@ export async function SkillRoll({
     weaponData
   });
 
-  // Store attack raises in message flags to prevent HTML injection exploits
+  // Store attack raises and target in message flags to prevent HTML injection exploits
   // Validates raises when damage button is clicked to ensure they match original roll
+  // Target actor ID is stored for animation system to use correct target across all clients
   const flags = weaponData
     ? {
         "l5r4-enhanced": {
           attackRaises: raises,
-          weaponId: weaponData.id
+          weaponId: weaponData.id,
+          targetActorId: targetData?.actor?.id || null
         }
       }
     : {};
