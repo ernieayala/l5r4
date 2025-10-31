@@ -7,7 +7,7 @@ Versioning: [Semantic Versioning](https://semver.org/spec/v2.0.0.html)
 
 ---
 
-## [3.1.2] - 2025-10-30
+## [3.2.0] - 2025-10-30
 
 ### Added
 
@@ -142,6 +142,12 @@ Versioning: [Semantic Versioning](https://semver.org/spec/v2.0.0.html)
 **Roll System**
 - TN calculation reflects declared raises only
 - Free raises reduce required roll result, not TN
+- Void point tracking now properly handles edge cases
+- Unskilled roll mechanics fixed to prevent incorrect calculations
+
+**Character Sheet**
+- Fixed trait values stacking on sheet recalculation
+- Trait bonuses now apply correctly without duplication
 
 **Deprecation Warnings**
 - Updated chat message type constants to use CONST.CHAT_MESSAGE_STYLES
