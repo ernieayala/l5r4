@@ -376,8 +376,6 @@ export default class L5R4PcSheet extends BaseActorSheet {
       return;
     }
 
-    console.log("L5R4 | Manual sheet recalculation triggered");
-
     // Force full data preparation
     this.actor.prepareData();
 
