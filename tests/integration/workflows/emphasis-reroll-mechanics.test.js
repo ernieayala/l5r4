@@ -66,9 +66,6 @@ export function registerEmphasisRerollMechanicsTests(quench) {
 
           await actor.update({ "system.traits.agility": 3 });
 
-          // Match setting to bypass dialog
-          const skillSetting = game.settings.get("l5r4-enhanced", "showSkillRollOptions") ?? false;
-
           // ACT - Execute roll with emphasis
           // This should complete in reasonable time (< 1 second)
           // If re-roll is infinite, this will hang
@@ -80,7 +77,7 @@ export function registerEmphasisRerollMechanicsTests(quench) {
             skillRank: 3,
             actorTrait: 3,
             skillTrait: "agi",
-            askForOptions: skillSetting
+            askForOptions: false
           });
 
           const executionTime = Date.now() - startTime;
@@ -120,9 +117,6 @@ export function registerEmphasisRerollMechanicsTests(quench) {
 
           await actor.update({ "system.traits.agility": 5 });
 
-          // Match setting to bypass dialog
-          const skillSetting = game.settings.get("l5r4-enhanced", "showSkillRollOptions") ?? false;
-
           // ACT - Roll with high dice count (more chance of 1s)
           // 10k5 with emphasis - if all 10 dice are 1s, all should re-roll ONCE
           const rollResult = await SkillRoll({
@@ -131,7 +125,7 @@ export function registerEmphasisRerollMechanicsTests(quench) {
             skillRank: 5,
             actorTrait: 5,
             skillTrait: "agi",
-            askForOptions: skillSetting
+            askForOptions: false
           });
 
           // ASSERT
@@ -161,9 +155,6 @@ export function registerEmphasisRerollMechanicsTests(quench) {
 
           await actor.update({ "system.traits.agility": 3 });
 
-          // Match setting to bypass dialog
-          const skillSetting = game.settings.get("l5r4-enhanced", "showSkillRollOptions") ?? false;
-
           // ACT - Multiple rolls to test consistency
           const rolls = [];
           for (let i = 0; i < 5; i++) {
@@ -173,7 +164,7 @@ export function registerEmphasisRerollMechanicsTests(quench) {
               skillRank: 3,
               actorTrait: 3,
               skillTrait: "agi",
-              askForOptions: skillSetting
+              askForOptions: false
             });
             rolls.push(rollResult);
           }
@@ -219,9 +210,6 @@ export function registerEmphasisRerollMechanicsTests(quench) {
 
           await actor.update({ "system.traits.agility": 3 });
 
-          // Match setting to bypass dialog
-          const skillSetting = game.settings.get("l5r4-enhanced", "showSkillRollOptions") ?? false;
-
           // ACT - Roll unskilled with emphasis
           // Per L5R4 rules, you cannot have emphasis on unskilled skills
           // But if data allows it, system should handle gracefully
@@ -231,7 +219,7 @@ export function registerEmphasisRerollMechanicsTests(quench) {
             skillRank: 0,
             actorTrait: 3,
             skillTrait: "agi",
-            askForOptions: skillSetting
+            askForOptions: false
           });
 
           // ASSERT
@@ -260,9 +248,6 @@ export function registerEmphasisRerollMechanicsTests(quench) {
 
           await actor.update({ "system.traits.agility": 3 });
 
-          // Match setting to bypass dialog
-          const skillSetting = game.settings.get("l5r4-enhanced", "showSkillRollOptions") ?? false;
-
           // ACT
           const rollResult = await SkillRoll({
             actor,
@@ -270,7 +255,7 @@ export function registerEmphasisRerollMechanicsTests(quench) {
             skillRank: 0,
             actorTrait: 3,
             skillTrait: "agi",
-            askForOptions: skillSetting
+            askForOptions: false
           });
 
           // ASSERT
@@ -315,9 +300,6 @@ export function registerEmphasisRerollMechanicsTests(quench) {
 
           await actor.update({ "system.traits.agility": 3 });
 
-          // Match setting to bypass dialog
-          const skillSetting = game.settings.get("l5r4-enhanced", "showSkillRollOptions") ?? false;
-
           // ACT - Roll with multiple emphases available
           // Only ONE emphasis should apply per roll (player choice or first)
           const rollResult = await SkillRoll({
@@ -326,7 +308,7 @@ export function registerEmphasisRerollMechanicsTests(quench) {
             skillRank: 3,
             actorTrait: 3,
             skillTrait: "agi",
-            askForOptions: skillSetting
+            askForOptions: false
           });
 
           // ASSERT
@@ -359,9 +341,6 @@ export function registerEmphasisRerollMechanicsTests(quench) {
 
           await actor.update({ "system.traits.agility": 5 });
 
-          // Match setting to bypass dialog
-          const skillSetting = game.settings.get("l5r4-enhanced", "showSkillRollOptions") ?? false;
-
           // ACT - Roll with max emphases
           const rollResult = await SkillRoll({
             actor,
@@ -369,7 +348,7 @@ export function registerEmphasisRerollMechanicsTests(quench) {
             skillRank: 5,
             actorTrait: 5,
             skillTrait: "agi",
-            askForOptions: skillSetting
+            askForOptions: false
           });
 
           // ASSERT
@@ -403,9 +382,6 @@ export function registerEmphasisRerollMechanicsTests(quench) {
 
           await actor.update({ "system.traits.agility": 3 });
 
-          // Match setting to bypass dialog
-          const skillSetting = game.settings.get("l5r4-enhanced", "showSkillRollOptions") ?? false;
-
           // ACT - Multiple rolls to verify consistency
           const rolls = [];
           for (let i = 0; i < 3; i++) {
@@ -415,7 +391,7 @@ export function registerEmphasisRerollMechanicsTests(quench) {
               skillRank: 2,
               actorTrait: 3,
               skillTrait: "agi",
-              askForOptions: skillSetting
+              askForOptions: false
             });
             rolls.push(rollResult);
           }
@@ -461,9 +437,6 @@ export function registerEmphasisRerollMechanicsTests(quench) {
 
           await actor.update({ "system.traits.agility": 3 });
 
-          // Match setting to bypass dialog
-          const skillSetting = game.settings.get("l5r4-enhanced", "showSkillRollOptions") ?? false;
-
           // ACT - Rapid fire rolls (simulate button mashing)
           const rollPromises = [];
           for (let i = 0; i < 5; i++) {
@@ -474,7 +447,7 @@ export function registerEmphasisRerollMechanicsTests(quench) {
                 skillRank: 3,
                 actorTrait: 3,
                 skillTrait: "agi",
-                askForOptions: skillSetting
+                askForOptions: false
               })
             );
           }

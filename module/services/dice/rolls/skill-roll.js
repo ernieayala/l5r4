@@ -13,7 +13,6 @@
  * Foundry VTT Integration:
  * - Uses Foundry Roll API for dice mechanics
  * - Posts results via ChatMessage API
- * - Respects system settings for roll dialog display
  * - Handles localization via game.i18n
  *
  * Side Effects:
@@ -68,11 +67,11 @@ import { getArmorTNPenalty } from "../../../utils/armor-penalties.js";
  * - Social Resistance: Honor Rank added to total when resisting Intimidation/Temptation
  *
  * Dialog Behavior:
- * The function conditionally shows a roll options dialog based on the askForOptions
- * parameter and the "showSkillRollOptions" system setting. If these values differ
- * (XOR logic), the dialog is displayed. The dialog includes a checkbox for social
- * resistance which adds the character's Honor Rank as a flat bonus to the roll.
- * Otherwise, uses provided bonuses directly.
+ * Shows roll options dialog by default (askForOptions=true).
+ * Hold Shift while clicking to skip dialog (askForOptions=false).
+ * The dialog includes a checkbox for social resistance which adds the character's
+ * Honor Rank as a flat bonus to the roll. When dialog is skipped, uses provided
+ * bonuses directly.
  *
  * Attack Rolls:
  * When rollType is "attack" and no manual TN is set, automatically resolves the
@@ -121,7 +120,6 @@ export async function SkillRoll({
     skillTrait === "void"
       ? "l5r4.ui.mechanics.rings.void"
       : `l5r4.ui.mechanics.traits.${skillTrait}`;
-  const optionsSetting = game.settings.get(SYS_ID, "showSkillRollOptions");
 
   const tryKey =
     typeof skillName === "string" ? `l5r4.character.skills.names.${skillName.toLowerCase()}` : "";
@@ -158,11 +156,13 @@ export async function SkillRoll({
   rollBonus += conditionPenalties.roll; // Will be negative if conditions active
   keepBonus += conditionPenalties.keep;
 
-  // XOR logic: Show dialog if askForOptions differs from system setting
-  // This allows callers to override the global setting on a per-roll basis
+  // Dialog behavior: Show by default (askForOptions=true), skip if shift-clicked (askForOptions=false)
   let check;
-  if (askForOptions !== optionsSetting) {
-    const noVoid = npc && !game.settings.get(SYS_ID, "allowNpcVoidPoints");
+  if (askForOptions) {
+    const voidRing = npc
+      ? actor?.system?.rings?.void?.rank ?? 0
+      : actor?.system?.rings?.void?.value ?? 0;
+    const noVoid = npc && voidRing < 1;
     check = await GetSkillOptions(skillName, actor, noVoid, rollBonus, keepBonus, totalBonus);
     if (!check || check.cancelled) {
       return;

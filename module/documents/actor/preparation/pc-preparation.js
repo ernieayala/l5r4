@@ -45,11 +45,12 @@ import { enrichActorItems } from "../calculations/item-enrichment.js";
  * - Insight Rank: Character advancement tier (1-8+)
  *
  * **Armor Stacking:**
- * The `allowArmorStacking` system setting controls how multiple equipped armor pieces
+ * The per-actor `allowArmorStacking` flag controls how multiple equipped armor pieces
  * interact:
  * - Enabled: All armor bonuses and reductions stack additively
  * - Disabled (default): Only highest armor bonus and highest reduction apply
  * This is a house rule option; RAW L5R4 assumes characters wear one armor piece.
+ * Configured per-character in the Armor Config dialog.
  *
  * **Wound Calculation:**
  * Uses formula mode exclusively for PCs:
@@ -105,15 +106,11 @@ export function preparePcData(actor, sys, finalizeWoundPenaltiesFn, calculateIns
   const baseTN = 5 * ref + 5;
   const modTN = toInt(sys.armorTn.mod);
 
-  // Check armor stacking setting (house rule option)
+  // Check armor stacking flag (per-actor house rule option)
   // If disabled (default), only highest armor bonus applies (prevents exploit of wearing multiple armor)
   // If enabled, all equipped armor bonuses stack (generous house rule)
-  let allowStack = false;
-  try {
-    allowStack = game.settings.get(SYS_ID, "allowArmorStacking");
-  } catch (_) {
-    /* setting not registered: default false */
-  }
+  // Configured per-character in Armor Config dialog
+  const allowStack = actor.getFlag(SYS_ID, "allowArmorStacking") ?? false;
 
   // Iterate equipped armor items to calculate total TN bonus and damage reduction
   let bonusTN = 0;
@@ -221,9 +218,15 @@ export function preparePcData(actor, sys, finalizeWoundPenaltiesFn, calculateIns
   sys.insight = sys.insight || {};
   sys.insight.points = ringsTotal * 10 + skillTotal * 1;
 
-  // Auto-calculate Insight Rank if setting enabled (default: enabled)
-  // If disabled, GMs can manually set rank for special circumstances
-  if (game.settings.get(SYS_ID, "calculateRank")) {
+  // Auto-calculate Insight Rank if per-actor flag enabled (default: enabled)
+  // GMs can toggle this per-character by Shift+clicking the Rank label
+  // Flag stored in actor.system.insight.autoCalculate (defaults to true if undefined)
+  // Initialize flag to true for existing actors that don't have it set
+  if (sys.insight.autoCalculate === undefined) {
+    sys.insight.autoCalculate = true;
+  }
+
+  if (sys.insight.autoCalculate) {
     sys.insight.rank = calculateInsightRankFn(sys.insight.points);
   }
 

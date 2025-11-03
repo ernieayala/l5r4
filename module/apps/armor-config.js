@@ -2,7 +2,7 @@
  * Armor Configuration Application
  *
  * Provides interactive UI for configuring actor armor mechanics.
- * Manages armor TN modifier and armor reduction modifier.
+ * Manages armor TN modifier, armor reduction modifier, and armor stacking option.
  *
  * @module apps/armor-config
  * @requires Foundry VTT v13+
@@ -14,7 +14,7 @@ import { SYS_ID } from "../config/constants.js";
  * Armor Configuration Application
  *
  * ApplicationV2-based form for managing actor armor settings.
- * Handles armor TN modifier and armor reduction modifier.
+ * Handles armor TN modifier, armor reduction modifier, and armor stacking toggle.
  *
  * @extends {foundry.applications.api.ApplicationV2}
  * @mixes {foundry.applications.api.HandlebarsApplicationMixin}
@@ -86,9 +86,12 @@ export default class ArmorConfigApplication extends foundry.applications.api.Han
     }
 
     try {
+      const allowArmorStacking = this.actor.getFlag(SYS_ID, "allowArmorStacking") ?? false;
+
       return {
         actor: this.actor,
-        system: this.actor.system
+        system: this.actor.system,
+        allowArmorStacking
       };
     } catch (err) {
       console.warn(`${SYS_ID}`, "Failed to prepare armor config context", { err });
@@ -107,7 +110,8 @@ export default class ArmorConfigApplication extends foundry.applications.api.Han
       actor: this.actor,
       system: {
         armorTn: { mod: 0, reductionMod: 0 }
-      }
+      },
+      allowArmorStacking: false
     };
   }
 
@@ -178,7 +182,14 @@ export default class ArmorConfigApplication extends foundry.applications.api.Han
         return;
       }
 
-      const updateData = { [`system.${field}`]: value };
+      // Handle flag vs system data differently
+      let updateData;
+      if (field === "allowArmorStacking") {
+        updateData = { [`flags.${SYS_ID}.allowArmorStacking`]: value };
+      } else {
+        updateData = { [`system.${field}`]: value };
+      }
+
       await this.actor.update(updateData);
     } catch (err) {
       console.warn(`${SYS_ID}`, "Failed to update armor config", { err, field, value });

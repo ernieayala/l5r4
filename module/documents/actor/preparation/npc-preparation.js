@@ -77,8 +77,21 @@ export function prepareNpcData(actor, sys, finalizeWoundPenaltiesFn) {
 
   sys.initiative = sys.initiative || {};
   const ref = toInt(sys.traits?.ref);
-  const baseRoll = toInt(sys.initiative.roll) > 0 ? toInt(sys.initiative.roll) : ref;
-  const baseKeep = toInt(sys.initiative.keep) > 0 ? toInt(sys.initiative.keep) : ref;
+  const insightRank = toInt(sys.insight?.rank) || 0;
+
+  // L5R4 Rule: Initiative = (Insight Rank + Reflexes)kReflexes
+  // NPCs typically don't have Insight Rank, so they use RefkRef
+  // GMs can override by setting custom roll/keep values in Combat Config
+  const sourceRoll = toInt(actor._source?.system?.initiative?.roll);
+  const sourceKeep = toInt(actor._source?.system?.initiative?.keep);
+
+  // Use custom initiative ONLY if BOTH roll AND keep are explicitly set to non-zero
+  // If either is 0, calculate from Reflexes + Insight Rank per L5R4 rules
+  // This allows GMs to clear initiative by setting either value to 0
+  const hasCustomInitiative = sourceRoll > 0 && sourceKeep > 0;
+  const baseRoll = hasCustomInitiative ? sourceRoll : insightRank + ref;
+  const baseKeep = hasCustomInitiative ? sourceKeep : ref;
+
   const rollMod = toInt(sys.initiative.rollMod) || 0;
   const keepMod = toInt(sys.initiative.keepMod) || 0;
 
@@ -102,20 +115,9 @@ export function prepareNpcData(actor, sys, finalizeWoundPenaltiesFn) {
   const order = WOUND_LEVEL_ORDER;
 
   // Determine NPC wound calculation mode
-  // Read global default from settings, fall back to "manual" if setting unavailable
-  let globalDefault = "manual";
-  try {
-    globalDefault = game.settings.get(SYS_ID, "defaultNpcWoundMode") || "manual";
-  } catch (err) {
-    console.warn(`${SYS_ID}`, "Failed to read defaultNpcWoundMode setting, using manual mode", {
-      err,
-      actorId: actor.id,
-      actorName: actor.name
-    });
-  }
-
-  // Use actor-specific wound mode if set, otherwise use global default
-  const woundMode = sys.woundMode || globalDefault;
+  // Use actor-specific wound mode if set, otherwise default to "manual"
+  // Manual mode is appropriate as NPCs vary widely in power level and wound capacity
+  const woundMode = sys.woundMode || "manual";
 
   // Calculate wound thresholds based on mode
   if (woundMode === "manual") {

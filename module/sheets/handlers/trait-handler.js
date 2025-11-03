@@ -87,4 +87,62 @@ export class TraitHandler {
       });
     }
   }
+
+  /**
+   * Increases a trait value by 1 without requiring Shift key.
+   *
+   * Provides direct trait increment functionality for trait-increase buttons.
+   * Unlike adjust(), this does NOT require Shift key to be pressed.
+   *
+   * **User Interaction:**
+   * - Click trait-increase button (up chevron): Increases trait by 1
+   * - No Shift key required (direct action)
+   *
+   * **Implementation:**
+   * Creates a modified event with shiftKey=true to bypass the shift check in
+   * adjust(), then delegates to adjust() with delta=+1.
+   *
+   * @param {Object} context - Handler context from sheet
+   * @param {Event} event - DOM event from button click
+   * @param {HTMLElement} element - Element with data-trait attribute
+   * @returns {Promise<void>}
+   * @async
+   */
+  static async increase(context, event, element) {
+    event?.preventDefault?.();
+    event?.stopPropagation?.();
+
+    // Create modified event that appears to have shift key pressed
+    const modifiedEvent = event ? { ...event, shiftKey: true } : { shiftKey: true };
+    return this.adjust(context, modifiedEvent, element, +1);
+  }
+
+  /**
+   * Decreases a trait value by 1 without requiring Shift key.
+   *
+   * Provides direct trait decrement functionality for trait-decrease buttons.
+   * Unlike adjust(), this does NOT require Shift key to be pressed.
+   *
+   * **User Interaction:**
+   * - Click trait-decrease button (down chevron): Decreases trait by 1
+   * - No Shift key required (direct action)
+   *
+   * **Implementation:**
+   * Creates a modified event with shiftKey=true to bypass the shift check in
+   * adjust(), then delegates to adjust() with delta=-1.
+   *
+   * @param {Object} context - Handler context from sheet
+   * @param {Event} event - DOM event from button click
+   * @param {HTMLElement} element - Element with data-trait attribute
+   * @returns {Promise<void>}
+   * @async
+   */
+  static async decrease(context, event, element) {
+    event?.preventDefault?.();
+    event?.stopPropagation?.();
+
+    // Create modified event that appears to have shift key pressed
+    const modifiedEvent = event ? { ...event, shiftKey: true } : { shiftKey: true };
+    return this.adjust(context, modifiedEvent, element, -1);
+  }
 }

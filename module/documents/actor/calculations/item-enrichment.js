@@ -191,8 +191,11 @@ function enrichWeaponFormulas(actor, weapon) {
     weapon.attackFormulaWithStance = weapon.attackFormula;
   }
 
-  const baseDamageRoll = toInt(weapon.system?.damageRoll) || 0;
-  const baseDamageKeep = toInt(weapon.system?.damageKeep) || 0;
-  weapon.damageFormula = `${baseDamageRoll}k${baseDamageKeep}`;
+  // Use derivedDamageRoll/derivedDamageKeep which include actor Strength
+  // These are calculated in item.prepareDerivedData() via calculateMeleeDamage()
+  // Fallback to base damage if derived values not yet calculated
+  const damageRoll = toInt(weapon.system?.derivedDamageRoll ?? weapon.system?.damageRoll) || 0;
+  const damageKeep = toInt(weapon.system?.derivedDamageKeep ?? weapon.system?.damageKeep) || 0;
+  weapon.damageFormula = `${damageRoll}k${damageKeep}`;
   weapon.damageFormulaWithStance = weapon.damageFormula;
 }

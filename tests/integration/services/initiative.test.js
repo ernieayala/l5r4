@@ -158,10 +158,14 @@ export function registerInitiativeTests(quench) {
         });
 
         it("should use explicit roll value when > 0", async () => {
-          // Update from 0 to 7
-          await npc.update({ "system.initiative.roll": 7 });
+          // Per design: BOTH roll AND keep must be > 0 for custom initiative
+          // Setting only roll to 7 while keep is 0 will still use Reflexes fallback
+          await npc.update({
+            "system.initiative.roll": 7,
+            "system.initiative.keep": 4 // Must set both
+          });
 
-          // effRoll should use the roll value since it's > 0
+          // effRoll should use the roll value since BOTH are > 0
           assert.equal(
             npc.system.initiative.effRoll,
             7,
@@ -170,10 +174,14 @@ export function registerInitiativeTests(quench) {
         });
 
         it("should use explicit keep value when > 0", async () => {
-          // Update from 0 to 5
-          await npc.update({ "system.initiative.keep": 5 });
+          // Per design: BOTH roll AND keep must be > 0 for custom initiative
+          // Setting only keep to 5 while roll is 0 will still use Reflexes fallback
+          await npc.update({
+            "system.initiative.roll": 6, // Must set both
+            "system.initiative.keep": 5
+          });
 
-          // effKeep should use the keep value since it's > 0
+          // effKeep should use the keep value since BOTH are > 0
           assert.equal(
             npc.system.initiative.effKeep,
             5,

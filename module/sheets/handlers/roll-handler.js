@@ -22,7 +22,7 @@
  * - Uses Application v2 event delegation (element parameter pattern)
  * - Reads data-* attributes from DOM for roll parameters
  * - Integrates with Actor.items collection for skill/weapon lookups
- * - Respects event.shiftKey for optional roll dialog display
+ * - Normal click shows dialog, shift-click skips dialog
  * - Posts results via ChatMessage through dice service layer
  *
  * Related Services:
@@ -159,7 +159,8 @@ export class RollHandler {
    * - Bonuses: item.system.rollBonus, keepBonus, totalBonus plus stance bonuses
    *
    * Event Handling:
-   * - event.shiftKey: Toggles roll dialog display (XOR with system setting)
+   * - Normal click: Shows roll dialog (askForOptions=true)
+   * - Shift-click: Skips roll dialog (askForOptions=false)
    * - Prevents default to stop form submission or link navigation
    *
    * @param {Object} context - Sheet context from _prepareContext()
@@ -210,7 +211,7 @@ export class RollHandler {
         actorTrait,
         skillRank: toInt(item.system?.rank),
         skillName: item.name,
-        askForOptions: event.shiftKey,
+        askForOptions: !event.shiftKey,
         npc: isNpc,
         skillTrait: traitKey,
         rollType,
@@ -273,7 +274,7 @@ export class RollHandler {
         modifier: modifier,
         rollName,
         description,
-        toggleOptions: event.shiftKey,
+        toggleOptions: !event.shiftKey,
         rollType: "attack",
         actor: context.actor
       });
@@ -362,7 +363,7 @@ export class RollHandler {
           skillRank: weaponSkill.skillRank,
           skillName: associatedSkill,
           skillTrait: skillTrait,
-          askForOptions: event.shiftKey,
+          askForOptions: !event.shiftKey,
           npc: false,
           rollBonus: stanceBonuses.roll,
           keepBonus: stanceBonuses.keep,
@@ -396,7 +397,7 @@ export class RollHandler {
           diceKeep: weaponSkill.keepBonus + stanceBonuses.keep,
           rollName,
           description,
-          toggleOptions: event.shiftKey,
+          toggleOptions: !event.shiftKey,
           rollType: "attack",
           actor: context.actor,
           untrained: true,
@@ -461,7 +462,7 @@ export class RollHandler {
         modifier: modifier,
         rollName,
         description,
-        toggleOptions: event.shiftKey,
+        toggleOptions: !event.shiftKey,
         rollType: "damage",
         actor: context.actor
       });
@@ -528,7 +529,7 @@ export class RollHandler {
         return await TraitRoll({
           traitRank: traitValue,
           traitName: traitKey,
-          askForOptions: event.shiftKey,
+          askForOptions: !event.shiftKey,
           actor: context.actor
         });
       }
@@ -600,7 +601,7 @@ export class RollHandler {
    * - Roll type determined by data-rolltype ("attack", "damage", "simple")
    * - Attack rolls: Apply wound penalties to TN
    * - Other rolls: No wound penalties applied
-   * - Supports event.shiftKey for optional roll dialog
+   * - Normal click shows dialog, shift-click skips dialog
    *
    * Data Sources (from event.currentTarget.dataset):
    * - roll: Number of dice to roll (required)
@@ -637,7 +638,7 @@ export class RollHandler {
         diceRoll,
         diceKeep,
         rollName,
-        toggleOptions: event.shiftKey,
+        toggleOptions: !event.shiftKey,
         rollType
       });
     } finally {

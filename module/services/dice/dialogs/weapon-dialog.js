@@ -57,10 +57,13 @@ const DIALOG = foundry.applications.api.DialogV2;
  * @async
  */
 export async function GetWeaponOptions(weaponName, attackRaises = 0, actor = null) {
-  // Determine if Void checkbox should be hidden based on actor type and settings
-  // Hide for NPCs when allowNpcVoidPoints setting is disabled, always show for PCs
+  // Determine if Void checkbox should be hidden based on actor's Void Ring rank
+  // Hide for NPCs with Void Ring = 0, show for NPCs with Void Ring >= 1, always show for PCs
   const isNpc = actor ? actor.type === "npc" : false;
-  const noVoid = isNpc && !game.settings.get("l5r4", "allowNpcVoidPoints");
+  const voidRing = isNpc
+    ? actor?.system?.rings?.void?.rank ?? 0
+    : actor?.system?.rings?.void?.value ?? 0;
+  const noVoid = isNpc && voidRing < 1;
 
   // Render template with context: weapon=true enables weapon-specific UI, attackRaises shown for reference
   const content = await R(DIALOG_TEMPLATES.rollModifiers, { weapon: true, attackRaises, noVoid });

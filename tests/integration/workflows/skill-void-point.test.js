@@ -450,9 +450,6 @@ export function registerSkillVoidPointTests(quench) {
           const voidResult = await spendVoidPoint(actor);
           assert.isTrue(voidResult.success, "Void point spent");
 
-          // Match setting to bypass dialog (XOR logic)
-          const skillSetting = game.settings.get(SYS_ID, "showSkillRollOptions") ?? false;
-
           // ACT - Execute skill roll with void bonuses
           const rollResult = await SkillRoll({
             actor,
@@ -462,7 +459,7 @@ export function registerSkillVoidPointTests(quench) {
             skillTrait: "agi",
             rollBonus: voidResult.rollBonus, // +1
             keepBonus: voidResult.keepBonus, // +1
-            askForOptions: skillSetting
+            askForOptions: false
           });
 
           // ASSERT

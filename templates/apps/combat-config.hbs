@@ -1,13 +1,23 @@
 <section class="standard-form">
   <div class="flexcol -gap-sm">
     <h3>{{localize "l5r4.ui.common.init"}}</h3>
-    <div class="form-group">
-      <label>{{localize "l5r4.ui.common.roll"}}/{{localize "l5r4.ui.common.keep"}} {{localize "l5r4.ui.common.bonus"}}</label>
-      <div class="form-fields flexrow -gap-xs">
-        <input type="number" name="initiative.rollMod" value="{{system.initiative.rollMod}}" data-action="field-change" data-type="Number" />
-        <input type="number" name="initiative.keepMod" value="{{system.initiative.keepMod}}" data-action="field-change" data-type="Number" />
+    {{#if (eq actor.type "npc")}}
+      <div class="form-group">
+        <label>{{localize "l5r4.ui.common.roll"}}/{{localize "l5r4.ui.common.keep"}}</label>
+        <div class="form-fields flexrow -gap-xs">
+          <input type="number" name="initiative.roll" value="{{system.initiative.roll}}" data-action="field-change" data-type="Number" />
+          <input type="number" name="initiative.keep" value="{{system.initiative.keep}}" data-action="field-change" data-type="Number" />
+        </div>
       </div>
-    </div>
+    {{else}}
+      <div class="form-group">
+        <label>{{localize "l5r4.ui.common.roll"}}/{{localize "l5r4.ui.common.keep"}} {{localize "l5r4.ui.common.bonus"}}</label>
+        <div class="form-fields flexrow -gap-xs">
+          <input type="number" name="initiative.rollMod" value="{{system.initiative.rollMod}}" data-action="field-change" data-type="Number" />
+          <input type="number" name="initiative.keepMod" value="{{system.initiative.keepMod}}" data-action="field-change" data-type="Number" />
+        </div>
+      </div>
+    {{/if}}
     <div class="form-group">
       <label>{{localize "l5r4.ui.common.mod"}}</label>
       <div class="form-fields">

@@ -40,8 +40,6 @@ export function registerSkillTraitSwitchingTests(quench) {
         let actor, skill;
 
         beforeEach(async () => {
-          await game.settings.set(SYS_ID, "showSkillRollOptions", false);
-
           // Create actor with different trait values to verify switching
           actor = await createTestPC({
             name: "Trait Switch Test Samurai",
@@ -197,8 +195,6 @@ export function registerSkillTraitSwitchingTests(quench) {
         let actor, skill;
 
         beforeEach(async () => {
-          await game.settings.set(SYS_ID, "showSkillRollOptions", false);
-
           actor = await createTestPC({
             name: "Combined Mechanics Test",
             system: {
@@ -316,8 +312,6 @@ export function registerSkillTraitSwitchingTests(quench) {
         let actor, skill;
 
         beforeEach(async () => {
-          await game.settings.set(SYS_ID, "showSkillRollOptions", false);
-
           actor = await createTestPC({
             name: "Edge Case Test",
             system: {
@@ -472,8 +466,6 @@ export function registerSkillTraitSwitchingTests(quench) {
         let actor, skill;
 
         beforeEach(async () => {
-          await game.settings.set(SYS_ID, "showSkillRollOptions", false);
-
           actor = await createTestPC({
             name: "Chat Display Test",
             system: {

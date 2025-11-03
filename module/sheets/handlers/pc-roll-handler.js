@@ -81,7 +81,7 @@ export class PcRollHandler {
       ringRank,
       ringName,
       systemRing,
-      askForOptions: event.shiftKey,
+      askForOptions: !event.shiftKey,
       actor: context.actor,
       woundPenalty: readWoundPenalty(context.actor)
     });
@@ -206,7 +206,7 @@ export class PcRollHandler {
       diceKeep,
       weaponName: item.name,
       description,
-      askForOptions: event.shiftKey,
+      askForOptions: !event.shiftKey,
       actor: context.actor
     });
   }

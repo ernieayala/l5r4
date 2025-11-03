@@ -27,7 +27,6 @@
  * Foundry VTT Integration:
  * - Uses Roll API for dice formula evaluation and rendering (Foundry v13)
  * - Leverages ChatMessage.getSpeaker() for chat message creation
- * - Uses game.settings for user preference toggles (showSpellRollOptions)
  * - Uses game.i18n for localized labels and error messages
  * - Async operations: Dialog display, resource spending, actor updates, message posting
  *
@@ -161,9 +160,9 @@ async function _confirmSpellSlotUsage(actor, systemRing, ringName) {
  * - **Exploding Dice**: Tens reroll and add result (handled by Roll formula)
  * - **Ten Dice Rule**: Maximum 10 rolled/kept dice, overflow becomes bonuses
  *
- * User Settings:
- * - `showSpellRollOptions`: Controls whether modifier dialog appears by default
- * - `askForOptions`: Inverts settings behavior (true = show if setting false)
+ * Dialog Behavior:
+ * - Shows modifier dialog by default (askForOptions=true)
+ * - Hold Shift while clicking to skip dialog (askForOptions=false)
  *
  * Side Effects:
  * - May decrement actor.system.rings.void.value (Void Point spending)
@@ -182,7 +181,7 @@ async function _confirmSpellSlotUsage(actor, systemRing, ringName) {
  * @param {number} [options.ringRank=null] - Ring value for dice pool (e.g., Fire 3 = ringRank 3)
  * @param {string} [options.ringName=null] - Display name of Ring for chat message (e.g., "Fire", "Void")
  * @param {string} [options.systemRing=null] - System key for Ring (lowercase, e.g., "fire") for slot tracking
- * @param {boolean} [options.askForOptions=true] - Invert showSpellRollOptions setting (controls dialog display)
+ * @param {boolean} [options.askForOptions=true] - If true, shows roll options dialog; if false, skips dialog (shift-click behavior)
  * @param {L5R4Actor} [options.actor=null] - Actor performing the roll (for resource spending and bonuses)
  *
  * @returns {Promise<ChatMessage|false>} Posted ChatMessage if successful, false if cancelled/failed
@@ -205,8 +204,6 @@ export async function RingRoll({
   const messageTemplate = CHAT_TEMPLATES.simpleRoll;
   let label = ""; // Will be set after dialog processing based on roll type
 
-  const optionsSetting = game.settings.get(SYS_ID, "showSpellRollOptions");
-
   // Roll configuration variables (populated from dialog or defaults)
   let normalRoll = true; // true = Ring Roll (XkX), false = Spell Casting ((Ring+School)kRing)
   let rollMod = 0; // Additional rolled dice (situational bonuses, techniques)
@@ -222,9 +219,8 @@ export async function RingRoll({
     __raisesInput = 0,
     __freeRaisesInput = 0; // User-specified TN, raises, and free raises
 
-  // Show dialog if askForOptions inverts the setting (XOR logic)
-  // Setting ON + askForOptions false = show dialog | Setting OFF + askForOptions true = show dialog
-  if (askForOptions !== optionsSetting) {
+  // Dialog behavior: Show by default (askForOptions=true), skip if shift-clicked (askForOptions=false)
+  if (askForOptions) {
     const choice = await GetRingOptions(ringName, actor, systemRing);
 
     // User cancelled dialog - abort roll

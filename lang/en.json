@@ -202,7 +202,14 @@
         "tn": "TN",
         "cost": "Cost",
         "save": "Save",
-        "armor": "Armor"
+        "armor": "Armor",
+        "base": "Base"
+      },
+      "combat": {
+        "configuration": "Combat Configuration"
+      },
+      "armor": {
+        "allowStacking": "Allow Armor Stacking"
       },
       "emphasisManager": {
         "title": "Manage Skill Emphases",
@@ -313,7 +320,8 @@
         "voidPointsClickAdjust": "Left click: +1, Right click: -1",
         "shiftClickRankPoints": "Shift+Click: ±0.1, Shift+Ctrl+Click: ±1.0",
         "shiftClickToChat": "Shift+Click to post to chat",
-        "postToChat": "Post to chat"
+        "postToChat": "Post to chat",
+        "shiftClickToggleRankMode": "GM: Shift+Click to toggle between automatic and manual rank calculation"
       },
       "dialogs": {
         "deleteItem": {
@@ -571,33 +579,9 @@
     }
   },
   "SETTINGS": {
-    "showTraitRollOptions": {
-      "name": "Ask for Trait Rolls options by default.",
-      "label": "Hold Shift to Toggle."
-    },
-    "showSpellRollOptions": {
-      "name": "Ask if the Ring Roll is a spell by default.",
-      "label": "Hold Shift to Toggle."
-    },
-    "showSkillRollOptions": {
-      "name": "Ask for Skill Rolls and Damage Roll options by default.",
-      "label": "Hold Shift to Toggle."
-    },
-    "allowNpcVoidPoints": {
-      "name": "Display Void Point checkbox for NPC rolls.",
-      "label": "NPCs normally lack Void."
-    },
-    "calculateRank": {
-      "name": "Calculate Insight Rank automatically",
-      "label": "Insight Rank is updated automatically based on total Insight Points"
-    },
     "allowArmorStacking": {
       "name": "Allow armor stacking",
       "label": "Multiple pieces of \"armor\" can be stacked (to represent buffs, etc.)"
-    },
-    "showWeaponRollOptions": {
-      "name": "Ask for Weapon Roll options by default.",
-      "label": "Hold Shift to Toggle."
     },
     "LtException": {
       "name": "Apply Little Truths exception",
@@ -614,14 +598,6 @@
     "forceMigration": {
       "name": "Force migration on startup",
       "label": "Forces all migrations to run on next world load, regardless of version. Automatically resets after migration completes."
-    },
-    "defaultNpcWoundMode": {
-      "name": "Default NPC Wound Mode",
-      "label": "Controls whether new NPCs use formula-based (Earth Ring) or manual threshold entry for wound calculations. Existing NPCs retain their individual settings.",
-      "choices": {
-        "manual": "Manual (Direct Entry)",
-        "formula": "Formula (Earth-based)"
-      }
     }
   },
   "conditions": {

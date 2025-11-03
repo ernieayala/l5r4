@@ -204,6 +204,9 @@
         "save": "Speichern",
         "armor": "Rüstung"
       },
+      "armor": {
+        "allowStacking": "Rüstungsstapelung Erlauben"
+      },
       "emphasisManager": {
         "title": "Fertigkeitsschwerpunkte Verwalten",
         "manageFor": "Verfügbare Schwerpunkte Verwalten für",
@@ -570,33 +573,9 @@
     }
   },
   "SETTINGS": {
-    "showTraitRollOptions": {
-      "name": "Standardmäßig nach Eigenschaftswurf-Optionen fragen.",
-      "label": "Shift-Taste zum Umschalten halten."
-    },
-    "showSpellRollOptions": {
-      "name": "Standardmäßig fragen, ob der Ringwurf ein Zauber ist.",
-      "label": "Shift-Taste zum Umschalten halten."
-    },
-    "showSkillRollOptions": {
-      "name": "Standardmäßig nach Fertigkeitswurf- und Schadenswurf-Optionen fragen.",
-      "label": "Shift-Taste zum Umschalten halten."
-    },
-    "allowNpcVoidPoints": {
-      "name": "Leere-Punkt-Kontrollkästchen für NSC-Würfe anzeigen.",
-      "label": "NSCs haben normalerweise keine Leere."
-    },
-    "calculateRank": {
-      "name": "Einsichtsrang automatisch berechnen",
-      "label": "Einsichtsrang wird automatisch basierend auf Gesamt-Einsichtspunkten aktualisiert"
-    },
     "allowArmorStacking": {
       "name": "Rüstungsstapelung erlauben",
       "label": "Mehrere \"Rüstungs\"-Teile können gestapelt werden (um Boni darzustellen, usw.)"
-    },
-    "showWeaponRollOptions": {
-      "name": "Standardmäßig nach Waffenwurf-Optionen fragen.",
-      "label": "Shift-Taste zum Umschalten halten."
     },
     "LtException": {
       "name": "Kleine-Wahrheiten-Ausnahme anwenden",
@@ -613,14 +592,6 @@
     "forceMigration": {
       "name": "Migration beim Start erzwingen",
       "label": "Erzwingt die Ausführung aller Migrationen beim nächsten Weltladen, unabhängig von der Version. Setzt sich automatisch zurück, nachdem die Migration abgeschlossen ist."
-    },
-    "defaultNpcWoundMode": {
-      "name": "Standard-NSC-Wundenmodus",
-      "label": "Steuert, ob neue NSCs den formelbasierten Modus (Erde-Ring) oder die manuelle Schwelleneingabe für Wundenberechnungen verwenden. Bestehende NSCs behalten ihre individuellen Einstellungen.",
-      "choices": {
-        "manual": "Manuell (Direkte Eingabe)",
-        "formula": "Formel (Erde-basiert)"
-      }
     }
   },
   "conditions": {
