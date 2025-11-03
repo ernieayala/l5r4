@@ -224,27 +224,35 @@ export function preparePcExperience(actor, sys) {
 
   let traitsXP = 0;
   for (const k of Object.keys(sys.traits ?? {})) {
-    const effCur = toInt(sys.traits[k]);
+    // Read base trait value from _source to exclude Active Effect bonuses
+    // Active Effects (from family, school, etc.) should not count as XP expenditure
+    const baseCur = toInt(actor._source?.system?.traits?.[k] ?? sys.traits[k]);
     const freeBase = toInt(freeTraitBase?.[k] ?? 0);
 
     const freeEff = freeBase > 0 ? 0 : toInt(getCreationFreeBonus(actor, k));
     const disc = toInt(traitDiscounts?.[k] ?? 0);
 
     const baseline = 2 + freeBase;
-    const baseCur = Math.max(baseline, effCur - freeEff);
 
     if (baseCur > baseline) {
       traitsXP += calculateTraitXpCost(baseline, baseCur, freeEff, disc);
     }
   }
 
-  const voidEffCur = toInt(
-    sys?.rings?.void?.rank ?? sys?.rings?.void?.value ?? sys?.rings?.void ?? 0
+  // Read base Void Ring value from _source to exclude Active Effect bonuses
+  // Active Effects should not count as XP expenditure
+  const voidBaseCur = toInt(
+    actor._source?.system?.rings?.void?.rank ??
+      actor._source?.system?.rings?.void?.value ??
+      actor._source?.system?.rings?.void ??
+      sys?.rings?.void?.rank ??
+      sys?.rings?.void?.value ??
+      sys?.rings?.void ??
+      0
   );
   const voidFreeBase = toInt(freeTraitBase?.void ?? 0);
   const voidFreeEff = voidFreeBase > 0 ? 0 : toInt(getCreationFreeBonusVoid(actor));
   const voidBaseline = 2 + voidFreeBase;
-  const voidBaseCur = Math.max(voidBaseline, voidEffCur - voidFreeEff);
   const voidDisc = toInt(traitDiscounts?.void ?? 0);
 
   const voidXP =

@@ -225,6 +225,8 @@ export default class L5R4PcSheet extends BaseActorSheet {
         return AppLauncherHandler.openWealthManager(this._getHandlerContext(), event, element);
       case "recalc-sheet":
         return this._onRecalcSheet(event, element);
+      case "toggle-rank-mode":
+        return this._onToggleRankMode(event, element);
     }
   }
 
@@ -341,6 +343,54 @@ export default class L5R4PcSheet extends BaseActorSheet {
     }
 
     return BioItemHandler.handleDrop(this._getHandlerContext(), itemDoc);
+  }
+
+  /**
+   * Toggles Insight Rank calculation mode between automatic and manual.
+   *
+   * **GM-Only Feature:**
+   * Only GMs can toggle this setting. Shift+Click on the "Rank" label switches between:
+   * - Automatic: Rank calculated from Insight Points (default)
+   * - Manual: GM directly inputs rank value
+   *
+   * **What It Does:**
+   * 1. Checks for GM permission (non-GMs ignored)
+   * 2. Checks for Shift key (safety mechanism)
+   * 3. Toggles actor.system.insight.autoCalculate flag
+   * 4. Re-renders sheet to show input field or calculated value
+   *
+   * **Use Cases:**
+   * - Special NPCs with non-standard rank progression
+   * - Testing specific rank values
+   * - Temporary rank adjustments for story purposes
+   *
+   * @param {Event} event - Click event on rank label
+   * @param {HTMLElement} _element - Rank label element (unused)
+   * @returns {Promise<void>}
+   * @private
+   */
+  async _onToggleRankMode(event, _element) {
+    event?.preventDefault?.();
+
+    // Only GMs can toggle rank mode
+    if (!game.user.isGM) {
+      return;
+    }
+
+    // Require Shift key to prevent accidental triggers
+    if (!event?.shiftKey) {
+      return;
+    }
+
+    // Toggle autoCalculate flag (default true if undefined)
+    const current = this.actor.system.insight?.autoCalculate ?? true;
+    await this.actor.update({
+      "system.insight.autoCalculate": !current
+    });
+
+    // Notify user of mode change
+    const mode = !current ? "automatic" : "manual";
+    ui.notifications?.info(`Insight Rank calculation set to ${mode} for ${this.actor.name}`);
   }
 
   /**
@@ -585,10 +635,6 @@ export default class L5R4PcSheet extends BaseActorSheet {
     }
 
     this._paintVoidPointsDots(root);
-
-    if (this._boundRoot === root) {
-      return;
-    }
 
     // Guard: Only bind non-delegated events once per root element
     if (this._boundExtraRoot === root) {

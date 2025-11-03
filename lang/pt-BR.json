@@ -204,6 +204,9 @@
         "save": "Salvar",
         "armor": "Armadura"
       },
+      "armor": {
+        "allowStacking": "Permitir Empilhamento de Armadura"
+      },
       "emphasisManager": {
         "title": "Gerenciar Ênfases de Perícias",
         "manageFor": "Gerenciar Ênfases Disponíveis para",
@@ -570,33 +573,9 @@
     }
   },
   "SETTINGS": {
-    "showTraitRollOptions": {
-      "name": "Perguntar por opções de Rolagens de Atributo por padrão.",
-      "label": "Segure Shift para Alternar."
-    },
-    "showSpellRollOptions": {
-      "name": "Perguntar se a Rolagem de Anel é uma magia por padrão.",
-      "label": "Segure Shift para Alternar."
-    },
-    "showSkillRollOptions": {
-      "name": "Perguntar por opções de Rolagens de Perícia e Rolagens de Dano por padrão.",
-      "label": "Segure Shift para Alternar."
-    },
-    "allowNpcVoidPoints": {
-      "name": "Exibir caixa de seleção de Ponto de Vazio para rolagens de NPC.",
-      "label": "NPCs normalmente não têm Vazio."
-    },
-    "calculateRank": {
-      "name": "Calcular Grau de Discernimento automaticamente",
-      "label": "O Grau de Discernimento é atualizado automaticamente com base no total de Pontos de Discernimento"
-    },
     "allowArmorStacking": {
       "name": "Permitir empilhamento de armadura",
       "label": "Múltiplas peças de \"armadura\" podem ser empilhadas (para representar bônus, etc.)"
-    },
-    "showWeaponRollOptions": {
-      "name": "Perguntar por opções de Rolagem de Arma por padrão.",
-      "label": "Segure Shift para Alternar."
     },
     "LtException": {
       "name": "Aplicar exceção de Pequenas Verdades",
@@ -613,14 +592,6 @@
     "forceMigration": {
       "name": "Forçar migração na inicialização",
       "label": "Força todas as migrações a serem executadas no próximo carregamento do mundo, independentemente da versão. Redefine automaticamente após a conclusão da migração."
-    },
-    "defaultNpcWoundMode": {
-      "name": "Modo de Ferimentos Padrão para NPC",
-      "label": "Controla se novos NPCs usam modo baseado em fórmula (Anel de Terra) ou entrada manual de limite para cálculos de ferimentos. NPCs existentes mantêm suas configurações individuais.",
-      "choices": {
-        "manual": "Manual (Entrada Direta)",
-        "formula": "Fórmula (Baseado em Terra)"
-      }
     }
   },
   "conditions": {

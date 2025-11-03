@@ -204,6 +204,9 @@
         "save": "Sauvegarder",
         "armor": "Armure"
       },
+      "armor": {
+        "allowStacking": "Autoriser l'Empilement d'Armure"
+      },
       "emphasisManager": {
         "title": "Gérer les Emphases de Compétence",
         "manageFor": "Gérer les Emphases Disponibles pour",
@@ -570,33 +573,9 @@
     }
   },
   "SETTINGS": {
-    "showTraitRollOptions": {
-      "name": "Demander les options de Jets de Trait par défaut.",
-      "label": "Maintenez Shift pour Basculer."
-    },
-    "showSpellRollOptions": {
-      "name": "Demander si le Jet d'Anneau est un sort par défaut.",
-      "label": "Maintenez Shift pour Basculer."
-    },
-    "showSkillRollOptions": {
-      "name": "Demander les options de Jets de Compétence et Jets de Dégâts par défaut.",
-      "label": "Maintenez Shift pour Basculer."
-    },
-    "allowNpcVoidPoints": {
-      "name": "Afficher la case Point de Vide pour les jets de PNJ.",
-      "label": "Les PNJ n'ont normalement pas de Vide."
-    },
-    "calculateRank": {
-      "name": "Calculer le Rang de Perspicacité automatiquement",
-      "label": "Le Rang de Perspicacité est mis à jour automatiquement en fonction du total de Points de Perspicacité"
-    },
     "allowArmorStacking": {
       "name": "Autoriser le cumul d'armures",
       "label": "Plusieurs pièces d'\"armure\" peuvent être cumulées (pour représenter des bonus, etc.)"
-    },
-    "showWeaponRollOptions": {
-      "name": "Demander les options de Jet d'Arme par défaut.",
-      "label": "Maintenez Shift pour Basculer."
     },
     "LtException": {
       "name": "Appliquer l'exception des Petites Vérités",
@@ -613,14 +592,6 @@
     "forceMigration": {
       "name": "Forcer la migration au démarrage",
       "label": "Force l'exécution de toutes les migrations au prochain chargement du monde, quelle que soit la version. Se réinitialise automatiquement une fois la migration terminée."
-    },
-    "defaultNpcWoundMode": {
-      "name": "Mode de Blessures par Défaut pour PNJ",
-      "label": "Contrôle si les nouveaux PNJ utilisent le mode basé sur une formule (Anneau de Terre) ou la saisie manuelle du seuil pour les calculs de blessures. Les PNJ existants conservent leurs paramètres individuels.",
-      "choices": {
-        "manual": "Manuel (Saisie Directe)",
-        "formula": "Formule (Basé sur Terre)"
-      }
     }
   },
   "conditions": {

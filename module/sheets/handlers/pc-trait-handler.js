@@ -195,17 +195,9 @@ export class PcTraitHandler {
   /**
    * Increases a PC's trait value by 1 without requiring Shift key.
    *
-   * This method provides direct trait increment functionality for the trait-increase
-   * buttons in the UI. Unlike adjust(), this does NOT require Shift key to be pressed.
-   *
-   * **User Interaction:**
-   * - Click trait-increase button (up chevron): Increases trait by 1
-   * - No Shift key required (direct action)
-   *
-   * **Implementation:**
-   * Delegates to adjust() with delta=+1 and bypasses shift key check by setting
-   * event.shiftKey to true internally. Prevents event propagation to avoid triggering
-   * parent trait-rank handler.
+   * Delegates to base TraitHandler.increase() which handles the shift key bypass.
+   * The base handler will call back to this class's adjust() method which properly
+   * handles family bonuses for PCs.
    *
    * @param {Object} context - Sheet render context with actor reference
    * @param {Event} event - DOM event from button click
@@ -213,11 +205,10 @@ export class PcTraitHandler {
    * @returns {Promise<void>}
    */
   static async increase(context, event, element) {
-    // Stop propagation to prevent parent trait-rank handler from firing
+    // Delegate to base TraitHandler which will call back to our adjust() method
+    // Base handler creates modified event with shiftKey=true
     event?.preventDefault?.();
     event?.stopPropagation?.();
-
-    // Create modified event that appears to have shift key pressed
     const modifiedEvent = event ? { ...event, shiftKey: true } : { shiftKey: true };
     return this.adjust(context, modifiedEvent, element, +1);
   }
@@ -225,17 +216,9 @@ export class PcTraitHandler {
   /**
    * Decreases a PC's trait value by 1 without requiring Shift key.
    *
-   * This method provides direct trait decrement functionality for the trait-decrease
-   * buttons in the UI. Unlike adjust(), this does NOT require Shift key to be pressed.
-   *
-   * **User Interaction:**
-   * - Click trait-decrease button (down chevron): Decreases trait by 1
-   * - No Shift key required (direct action)
-   *
-   * **Implementation:**
-   * Delegates to adjust() with delta=-1 and bypasses shift key check by setting
-   * event.shiftKey to true internally. Prevents event propagation to avoid triggering
-   * parent trait-rank handler.
+   * Delegates to base TraitHandler.decrease() which handles the shift key bypass.
+   * The base handler will call back to this class's adjust() method which properly
+   * handles family bonuses for PCs.
    *
    * @param {Object} context - Sheet render context with actor reference
    * @param {Event} event - DOM event from button click
@@ -243,11 +226,10 @@ export class PcTraitHandler {
    * @returns {Promise<void>}
    */
   static async decrease(context, event, element) {
-    // Stop propagation to prevent parent trait-rank handler from firing
+    // Delegate to base TraitHandler which will call back to our adjust() method
+    // Base handler creates modified event with shiftKey=true
     event?.preventDefault?.();
     event?.stopPropagation?.();
-
-    // Create modified event that appears to have shift key pressed
     const modifiedEvent = event ? { ...event, shiftKey: true } : { shiftKey: true };
     return this.adjust(context, modifiedEvent, element, -1);
   }

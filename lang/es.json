@@ -204,6 +204,9 @@
         "save": "Guardar",
         "armor": "Armadura"
       },
+      "armor": {
+        "allowStacking": "Permitir Apilamiento de Armadura"
+      },
       "emphasisManager": {
         "title": "Administrar Énfasis de Habilidades",
         "manageFor": "Administrar Énfasis Disponibles para",
@@ -570,33 +573,9 @@
     }
   },
   "SETTINGS": {
-    "showTraitRollOptions": {
-      "name": "Preguntar por opciones de Tiradas de Atributo por defecto.",
-      "label": "Mantén presionado Shift para Alternar."
-    },
-    "showSpellRollOptions": {
-      "name": "Preguntar si la Tirada de Anillo es un hechizo por defecto.",
-      "label": "Mantén presionado Shift para Alternar."
-    },
-    "showSkillRollOptions": {
-      "name": "Preguntar por opciones de Tiradas de Habilidad y Tiradas de Daño por defecto.",
-      "label": "Mantén presionado Shift para Alternar."
-    },
-    "allowNpcVoidPoints": {
-      "name": "Mostrar casilla de Puntos de Vacío para tiradas de PNJ.",
-      "label": "Los PNJ normalmente carecen de Vacío."
-    },
-    "calculateRank": {
-      "name": "Calcular Rango de Perspicacia automáticamente",
-      "label": "El Rango de Perspicacia se actualiza automáticamente basado en los Puntos de Perspicacia totales"
-    },
     "allowArmorStacking": {
       "name": "Permitir apilamiento de armadura",
       "label": "Múltiples piezas de \"armadura\" pueden apilarse (para representar bonificaciones, etc.)"
-    },
-    "showWeaponRollOptions": {
-      "name": "Preguntar por opciones de Tirada de Arma por defecto.",
-      "label": "Mantén presionado Shift para Alternar."
     },
     "LtException": {
       "name": "Aplicar excepción de Pequeñas Verdades",
@@ -613,14 +592,6 @@
     "forceMigration": {
       "name": "Forzar migración al iniciar",
       "label": "Fuerza la ejecución de todas las migraciones en la próxima carga del mundo, independientemente de la versión. Se restablece automáticamente después de que se complete la migración."
-    },
-    "defaultNpcWoundMode": {
-      "name": "Modo de Heridas Predeterminado para PNJ",
-      "label": "Controla si los nuevos PNJ usan el modo basado en fórmula (Anillo de Tierra) o entrada manual de umbral para cálculos de heridas. Los PNJ existentes conservan sus configuraciones individuales.",
-      "choices": {
-        "manual": "Manual (Entrada Directa)",
-        "formula": "Fórmula (Basado en Tierra)"
-      }
     }
   },
   "conditions": {

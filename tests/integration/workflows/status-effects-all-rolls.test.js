@@ -49,11 +49,6 @@ export function registerStatusEffectsAllRollsTests(quench) {
         let mahoSpell;
 
         before(async () => {
-          // Disable roll dialogs for automated testing
-          await game.settings.set(SYS_ID, "showSkillRollOptions", false);
-          await game.settings.set(SYS_ID, "showTraitRollOptions", false);
-          await game.settings.set(SYS_ID, "showSpellRollOptions", false);
-
           // Create test actor with all necessary data
           actor = await createTestPC({
             name: "Status Effects Roll Test Character",

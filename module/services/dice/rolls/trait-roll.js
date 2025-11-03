@@ -70,7 +70,7 @@ import {
  * - Typical Uses: Lifting (Strength), resisting poison (Stamina), mental focus (Willpower)
  *
  * Process Flow:
- * 1. Check system setting for "always show trait roll options" vs askForOptions override
+ * 1. Show dialog by default (askForOptions=true), skip if shift-clicked (askForOptions=false)
  * 2. If showing dialog: Prompt user for raises, modifiers, Void point, wound penalty
  * 3. Apply passive bonuses from advantages/techniques via applyTraitBonuses()
  * 4. Handle Void point expenditure if requested (deduct from pool, apply +1k1)
@@ -79,7 +79,7 @@ import {
  * 7. Execute roll and calculate effective TN (base + raises*5 + wound penalties)
  * 8. Evaluate success/failure and post to chat
  *
- * Dialog Options (if askForOptions matches system setting):
+ * Dialog Options (if askForOptions=true):
  * - Raises: Number of voluntary TN increases (+5 each, max = Void Ring)
  * - Unskilled: Disables exploding dice and raises (rare for traits)
  * - Void Point: Spend for +1k1 bonus (if available)
@@ -94,14 +94,13 @@ import {
  *
  * Foundry Integration:
  * - Async operation (awaits dialog, Void spending, roll rendering, chat posting)
- * - Uses game.settings.get() for "showTraitRollOptions" world setting
  * - Posts to chat via roll.toMessage() with ChatMessage.getSpeaker()
  * - Error handling with try/catch and ui.notifications.error()
  *
  * @param {Object} options - Trait roll configuration object
  * @param {number|null} [options.traitRank=null] - Trait rank value (1-10, pre-calculated from actor)
  * @param {string|null} [options.traitName=null] - Trait name for localization (e.g., "stamina", "willpower", "void")
- * @param {boolean} [options.askForOptions=true] - Override for system setting (true=show dialog, false=skip dialog)
+ * @param {boolean} [options.askForOptions=true] - If true, shows roll options dialog; if false, skips dialog (shift-click behavior)
  * @param {boolean} [options.unskilled=false] - If true, disables exploding dice and raises per Unskilled Roll rules
  * @param {L5R4Actor|null} [options.actor=null] - Actor performing the roll (null uses resolveActor fallback chain)
  *
@@ -125,9 +124,7 @@ export async function TraitRoll({
       ? "l5r4.ui.mechanics.rings.void"
       : `l5r4.ui.mechanics.traits.${labelTrait}`;
 
-  // Read system world setting for "always show trait roll options dialog"
-  // askForOptions parameter allows per-call override of this setting
-  const optionsSetting = game.settings.get(SYS_ID, "showTraitRollOptions");
+  // Dialog behavior: Show by default, skip if shift-clicked (askForOptions=false)
   let rollMod = 0,
     keepMod = 0,
     totalMod = 0,
@@ -139,8 +136,8 @@ export async function TraitRoll({
   const targetActor = resolveActor(actor);
   const currentWoundPenalty = targetActor?.system?.woundPenalty ?? 0;
 
-  // Show dialog if askForOptions doesn't match the setting (XOR logic - show when override differs from default)
-  if (askForOptions !== optionsSetting) {
+  // Show dialog by default (askForOptions=true), skip if shift-clicked (askForOptions=false)
+  if (askForOptions) {
     const check = await GetTraitRollOptions(traitName, targetActor);
     if (check?.cancelled) {
       return;

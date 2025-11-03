@@ -217,18 +217,8 @@ https://github.com/ernieayala/l5r4-migrator/releases/latest/download/module.json
 
 ## System Settings
 
-**Automation** (World)
-- Auto-calculate Insight Rank from skills/rings (default: on)
-
-**Roll Dialogs** (Per-User)
-- Show/hide option dialogs before rolls
-- Configure separately for traits, skills, spells, weapons
-- Disable for faster rolling
-
 **House Rules** (World)
 - Little Truths Ten Dice Rule (excess dice grant +2, default: off)
-- Allow NPC Void Points without tracking (default: off)
-- Default NPC Wound Mode (manual or formula, default: manual)
 - Allow Armor Stacking (default: off, highest only)
 
 **Migration** (World)

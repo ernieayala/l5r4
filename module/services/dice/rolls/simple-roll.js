@@ -130,7 +130,7 @@ import { getArmorTNPenalty } from "../../../utils/armor-penalties.js";
  * - Represents trait-only roll without skill training
  *
  * Void Point Mechanics:
- * - NPCs respect world setting "allowNpcVoidPoints" (disabled by default)
+ * - NPCs with Void Ring >= 1 can use Void Points (most NPCs have Void Ring = 0)
  * - PCs always have access to Void checkbox (if they have Void points)
  * - Void spending adds +1 rolled die AND +1 kept die to roll
  * - Declared before rolling via dialog checkbox
@@ -185,9 +185,12 @@ export async function SimpleRoll({
   // If actor exists, use actor.type; otherwise fall back to npc parameter
   const isActuallyNpc = actor ? actor.type === "npc" : npc;
 
-  // Only hide Void checkbox for actual NPCs when setting is disabled
-  // PCs always have access to Void checkbox (assuming they have Void points)
-  const noVoid = isActuallyNpc && !game.settings.get(SYS_ID, "allowNpcVoidPoints");
+  // Only hide Void checkbox for NPCs with Void Ring = 0
+  // NPCs with Void Ring >= 1 can use Void Points, PCs always have access
+  const voidRing = isActuallyNpc
+    ? actor?.system?.rings?.void?.rank ?? 0
+    : actor?.system?.rings?.void?.value ?? 0;
+  const noVoid = isActuallyNpc && voidRing < 1;
 
   const { autoTN, targetData } = resolveTargets(actor, rollType);
 

@@ -19,8 +19,12 @@
       </div>
       <div class="flexcol flex1">
         <div class="flexrow -gap-sm">
-          <h4 class="flex0 title">{{localize "l5r4.ui.common.rank"}}</h4>
-          <div class="flex1 input-placeholder">{{system.insight.rank}}</div>
+          <h4 class="flex0 title" data-action="toggle-rank-mode" {{#if @root.isGM}}title="{{localize "l5r4.ui.hints.shiftClickToggleRankMode"}}"{{/if}}>{{localize "l5r4.ui.common.insight"}} {{localize "l5r4.ui.common.rank"}}</h4>
+          {{#if system.insight.autoCalculate}}
+            <div class="flex1 input-placeholder">{{system.insight.rank}}</div>
+          {{else}}
+            <input class="flex1" type="number" name="system.insight.rank" value="{{system.insight.rank}}" />
+          {{/if}}
         </div>
         <div class="flexrow -gap-sm">
           <h4 class="flex0 title">{{localize "l5r4.ui.common.xp"}}</h4>

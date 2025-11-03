@@ -116,16 +116,13 @@ export function registerEmphasisWorkflowTests(quench) {
           // Set actor trait for roll
           await actor.update({ "system.traits.agility": 3 });
 
-          // Match setting to bypass dialog (XOR logic: askForOptions must equal setting)
-          const skillSetting = game.settings.get("l5r4-enhanced", "showSkillRollOptions") ?? false;
-
           const rollResult = await SkillRoll({
             actor,
             skillName: "kenjutsu",
             skillRank: 3,
             actorTrait: 3,
             skillTrait: "agi",
-            askForOptions: skillSetting
+            askForOptions: false
           });
 
           // ASSERT
@@ -153,16 +150,13 @@ export function registerEmphasisWorkflowTests(quench) {
           // Set actor trait for roll
           await actor.update({ "system.traits.agility": 3 });
 
-          // Match setting to bypass dialog (XOR logic: askForOptions must equal setting)
-          const skillSetting = game.settings.get("l5r4-enhanced", "showSkillRollOptions") ?? false;
-
           const rollResult = await SkillRoll({
             actor,
             skillName: "kenjutsu",
             skillRank: 3,
             actorTrait: 3,
             skillTrait: "agi",
-            askForOptions: skillSetting
+            askForOptions: false
           });
 
           // ASSERT
@@ -530,16 +524,13 @@ export function registerEmphasisWorkflowTests(quench) {
           // Set actor trait for roll
           await actor.update({ "system.traits.agility": 3 });
 
-          // Match setting to bypass dialog (XOR logic: askForOptions must equal setting)
-          const skillSetting = game.settings.get("l5r4-enhanced", "showSkillRollOptions") ?? false;
-
           const rollResult = await SkillRoll({
             actor,
             skillName: "kenjutsu",
             skillRank: 0, // Unskilled
             actorTrait: 3,
             skillTrait: "agi",
-            askForOptions: skillSetting
+            askForOptions: false
           });
 
           assert.exists(rollResult, "Unskilled roll with emphasis executed");
@@ -671,9 +662,6 @@ export function registerEmphasisWorkflowTests(quench) {
             "system.traits.agility": 3
           });
 
-          // Match setting to bypass dialog (XOR logic: askForOptions must equal setting)
-          const skillSetting = game.settings.get("l5r4-enhanced", "showSkillRollOptions") ?? false;
-
           // ACT - Roll with emphasis enabled
           const rollResult = await SkillRoll({
             actor,
@@ -681,7 +669,7 @@ export function registerEmphasisWorkflowTests(quench) {
             skillRank: 3,
             actorTrait: 3,
             skillTrait: "agi",
-            askForOptions: skillSetting
+            askForOptions: false
           });
 
           // ASSERT
@@ -715,9 +703,6 @@ export function registerEmphasisWorkflowTests(quench) {
             "system.traits.agility": 3
           });
 
-          // Match setting to bypass dialog (XOR logic: askForOptions must equal setting)
-          const skillSetting = game.settings.get("l5r4-enhanced", "showSkillRollOptions") ?? false;
-
           // ACT - Roll without emphasis
           const rollResult = await SkillRoll({
             actor,
@@ -725,7 +710,7 @@ export function registerEmphasisWorkflowTests(quench) {
             skillRank: 3,
             actorTrait: 3,
             skillTrait: "agi",
-            askForOptions: skillSetting
+            askForOptions: false
           });
 
           // ASSERT

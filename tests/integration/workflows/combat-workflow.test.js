@@ -82,9 +82,6 @@ export function registerCombatWorkflowTests(quench) {
           const traitValue = attacker.system.traits[skillTrait] ?? 2;
 
           // ACT - Use REAL attack service (SkillRoll for weapon attacks)
-          // Match setting to bypass dialog (XOR logic: askForOptions must equal setting)
-          const skillSetting = game.settings.get(SYS_ID, "showSkillRollOptions") ?? false;
-
           const attackMessage = await SkillRoll({
             actor: attacker,
             skillRank,
@@ -92,7 +89,7 @@ export function registerCombatWorkflowTests(quench) {
             skillTrait,
             actorTrait: traitValue,
             woundPenalty: 0,
-            askForOptions: skillSetting, // Match setting to bypass dialog
+            askForOptions: false, // Match setting to bypass dialog
             rollType: "attack"
           });
 
@@ -109,15 +106,12 @@ export function registerCombatWorkflowTests(quench) {
             const diceRoll = weapon.system.derivedDamageRoll ?? weapon.system.damageRoll ?? 0;
             const diceKeep = weapon.system.derivedDamageKeep ?? weapon.system.damageKeep ?? 0;
 
-            // Get weapon roll options setting to match askForOptions
-            const setting = game.settings.get(SYS_ID, "showWeaponRollOptions") ?? false;
-
             const damageMessage = await WeaponRoll({
               actor: attacker,
               diceRoll,
               diceKeep,
               weaponName: weapon.name,
-              askForOptions: setting // Match setting to bypass dialog (XOR logic)
+              askForOptions: false // Match setting to bypass dialog (XOR logic)
             });
 
             // ASSERT damage roll executed
@@ -158,9 +152,6 @@ export function registerCombatWorkflowTests(quench) {
           const traitValue = weakAttacker.system.traits[skillTrait] ?? 1;
 
           // ACT - Attempt attack (likely to miss with low dice)
-          // Match setting to bypass dialog (XOR logic)
-          const skillSetting = game.settings.get(SYS_ID, "showSkillRollOptions") ?? false;
-
           const attackMessage = await SkillRoll({
             actor: weakAttacker,
             skillRank,
@@ -168,7 +159,7 @@ export function registerCombatWorkflowTests(quench) {
             skillTrait,
             actorTrait: traitValue,
             woundPenalty: 0,
-            askForOptions: skillSetting, // Match setting to bypass dialog
+            askForOptions: false, // Match setting to bypass dialog
             rollType: "attack"
           });
 
@@ -208,15 +199,12 @@ export function registerCombatWorkflowTests(quench) {
           const diceRoll = weapon.system.derivedDamageRoll ?? weapon.system.damageRoll ?? 0;
           const diceKeep = weapon.system.derivedDamageKeep ?? weapon.system.damageKeep ?? 0;
 
-          // Get weapon roll options setting to match askForOptions
-          const setting = game.settings.get(SYS_ID, "showWeaponRollOptions") ?? false;
-
           const damageMessage = await WeaponRoll({
             actor: strongAttacker,
             diceRoll,
             diceKeep,
             weaponName: weapon.name,
-            askForOptions: setting // Match setting to bypass dialog
+            askForOptions: false
           });
 
           // ASSERT - Verify strength is included in derivedDamageRoll
