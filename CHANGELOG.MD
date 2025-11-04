@@ -7,6 +7,38 @@ Versioning: [Semantic Versioning](https://semver.org/spec/v2.0.0.html)
 
 ---
 
+## [3.2.1] - 2025-11-03
+
+### Removed
+
+- Roll dialog settings (trait, skill, spell, weapon)
+- Automatic insight rank calculation setting
+- NPC void points display setting
+- Default NPC wound mode setting
+
+### Changed
+
+- Armor stacking setting moved to Combat Config dialog
+- NPC void points auto-show when Void Ring >= 1
+- NPC trait controls use direct increase/decrease buttons
+- TraitHandler integrated for NPC trait adjustment
+
+### Added
+
+- `TraitHandler.increase()` - direct trait increment
+- `TraitHandler.decrease()` - direct trait decrement
+- Shift+Click rank mode toggle tooltip
+- Combat configuration labels in localization
+- Armor stacking labels in localization
+
+### Fixed
+
+- `calculateXpDataVersion()` handles null/undefined actors
+- `calculateXpDataVersion()` handles missing items property
+- Test assertions updated for removed settings
+
+---
+
 ## [3.2.0] - 2025-10-30
 
 ### Added
