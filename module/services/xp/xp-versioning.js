@@ -41,13 +41,14 @@ import { SYS_ID } from "../../config/constants.js";
  */
 export function calculateXpDataVersion(actor) {
   try {
-    const sys = actor.system ?? {};
+    const sys = actor?.system ?? {};
+    const items = actor?.items ?? [];
 
     // Collect all XP-relevant data into a serializable structure
     const xpData = {
       traits: sys.traits || {},
       voidRank: sys.rings?.void?.rank || 0,
-      skills: actor.items
+      skills: items
         .filter(i => i.type === "skill")
         .map(i => ({
           id: i.id,
@@ -58,7 +59,7 @@ export function calculateXpDataVersion(actor) {
             : "",
           freeEmphasis: i.system?.freeEmphasis || 0
         })),
-      items: actor.items
+      items: items
         .filter(i => ["advantage", "disadvantage", "kata", "kiho"].includes(i.type))
         .map(i => ({
           id: i.id,
