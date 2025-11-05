@@ -182,7 +182,7 @@ https://github.com/ernieayala/l5r4-migrator/releases/latest/download/module.json
 
 **JB2A Integration** *(requires Sequencer + JB2A modules)*
 - Stance animations when entering Full Attack, Full Defense, or Center
-- Attack projectiles for ranged weapons (arrows, kunai, shuriken)
+- Attack projectiles for ranged weapons
 - Melee weapon strike effects
 - Persistent condition markers on affected tokens
 - Works with both free and Patreon versions of JB2A
