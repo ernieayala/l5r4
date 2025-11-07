@@ -7,8 +7,28 @@ A Foundry VTT system for L5R 4th Edition. Handles the Roll & Keep mechanics, cha
 [![Foundry v13](https://img.shields.io/badge/Foundry-v13-informational)](https://foundryvtt.com/)
 [![Version 3.2.0](https://img.shields.io/badge/Version-3.2.0-blue)](https://github.com/ernieayala/l5r4/releases)
 [![MIT License](https://img.shields.io/badge/License-MIT-yellow.svg)](LICENSE)
+[![JB2A Ready](https://img.shields.io/badge/JB2A-Integrated-ff69b4)](https://foundryvtt.com/packages/jb2a_patreon)
 
 **Questions?** Discord: **@erniez**
+
+---
+
+## Table of Contents
+
+- [Installation](#installation)
+- [What's Included](#whats-included)
+  - [Core Mechanics](#core-mechanics)
+  - [Combat](#combat)
+  - [Equipment & Items](#equipment--items)
+  - [Automation & Effects](#automation--effects)
+  - [Visual Effects & Animations](#visual-effects--animations)
+  - [Dialogs & Tools](#dialogs--tools)
+  - [Long Rest & Healing](#long-rest--healing)
+- [System Settings](#system-settings)
+- [Recommended Modules](#recommended-modules)
+- [Contributing](#contributing)
+- [License & Legal](#license--legal)
+- [Support](#support)
 
 ---
 
@@ -158,11 +178,20 @@ https://github.com/ernieayala/l5r4-migrator/releases/latest/download/module.json
 - Condition Manager dialog for quick toggling
 - Automatic penalties (Blinded reduces Water Ring for movement)
 
-**Animations** *(requires Sequencer + JB2A modules)*
-- Stance animations (Full Attack, Full Defense, Center)
-- Condition effects (visual indicators for status)
-- Attack projectiles (arrows, kunai)
+### Visual Effects & Animations
+
+**JB2A Integration** *(requires Sequencer + JB2A modules)*
+- Stance animations when entering Full Attack, Full Defense, or Center
+- Attack projectiles for ranged weapons
+- Melee weapon strike effects
+- Persistent condition markers on affected tokens
+- Works with both free and Patreon versions of JB2A
 - Graceful degradation if modules not installed
+
+**Setup**
+1. Install [Sequencer](https://foundryvtt.com/packages/sequencer) module
+2. Install [JB2A - Jules & Ben's Animated Assets](https://foundryvtt.com/packages/jb2a_patreon)
+3. Animations activate automatically
 
 ### Dialogs & Tools
 
@@ -275,7 +304,6 @@ Submit pull requests on [GitHub](https://github.com/ernieayala/l5r4).
 
 **Get Help:**
 - Discord: **@erniez**
-- [GitHub Discussions](https://github.com/ernieayala/l5r4/discussions) - Questions and community support
 - [GitHub Issues](https://github.com/ernieayala/l5r4/issues) - Bug reports
 
 **Support the Project:**
@@ -287,4 +315,4 @@ Submit pull requests on [GitHub](https://github.com/ernieayala/l5r4).
 
 ---
 
-**Links:** [Releases](https://github.com/ernieayala/l5r4/releases) | [Discussions](https://github.com/ernieayala/l5r4/discussions) | [Issues](https://github.com/ernieayala/l5r4/issues)
+**Links:** [Releases](https://github.com/ernieayala/l5r4/releases) | [Issues](https://github.com/ernieayala/l5r4/issues)
