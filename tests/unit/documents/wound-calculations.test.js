@@ -166,7 +166,7 @@ describe("calculateWoundPenalties", () => {
       expect(sys.woundLevels.nicked.penaltyEff).toBe(3);
     });
 
-    it("should convert negative effective penalties to absolute values", () => {
+    it("should clamp negative effective penalties to zero", () => {
       // ARRANGE
       const sys = {
         woundsPenaltyMod: -10,
@@ -179,7 +179,25 @@ describe("calculateWoundPenalties", () => {
       calculateWoundPenalties(sys);
 
       // ASSERT
-      expect(sys.woundLevels.nicked.penaltyEff).toBe(7); // |3 + (-10)| = 7
+      expect(sys.woundLevels.nicked.penaltyEff).toBe(0); // max(0, 3 + (-10)) = 0
+    });
+
+    it("should show zero penalty for Healthy level with negative modifier", () => {
+      // ARRANGE - Regression test for issue where Healthy shows penalty value
+      const sys = {
+        woundsPenaltyMod: -3,
+        woundLevels: {
+          healthy: { penalty: 0 },
+          nicked: { penalty: 3 }
+        }
+      };
+
+      // ACT
+      calculateWoundPenalties(sys);
+
+      // ASSERT
+      expect(sys.woundLevels.healthy.penaltyEff).toBe(0); // max(0, 0 + (-3)) = 0
+      expect(sys.woundLevels.nicked.penaltyEff).toBe(0); // max(0, 3 + (-3)) = 0
     });
   });
 
