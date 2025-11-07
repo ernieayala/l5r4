@@ -68,8 +68,9 @@ export function getWoundLevelsForCount(nrWoundLvls) {
  * Calculate effective wound penalties for all wound levels.
  *
  * Applies the global wound penalty modifier to each wound level's base penalty
- * and stores the absolute effective penalty value. This allows GMs to adjust
- * wound severity globally (e.g., "gritty" campaigns with +5 to all penalties).
+ * and stores the effective penalty value (minimum 0). This allows GMs to adjust
+ * wound severity globally (e.g., "gritty" campaigns with +5 to all penalties,
+ * or "heroic" campaigns with -3 to reduce penalties).
  *
  * **Side Effects:** Mutates sys.woundLevels[*].penaltyEff for each level.
  *
@@ -86,7 +87,7 @@ export function calculateWoundPenalties(sys) {
   const penaltyMod = toInt(sys.woundsPenaltyMod);
   for (const [, lvl] of Object.entries(sys.woundLevels ?? {})) {
     const eff = toInt(lvl.penalty) + penaltyMod;
-    lvl.penaltyEff = Math.abs(eff);
+    lvl.penaltyEff = Math.max(0, eff);
   }
 }
 
@@ -421,7 +422,7 @@ export function prepareVisibleWoundLevels(sys, order) {
       prev = value;
 
       const basePenalty = toInt(DEFAULT_WOUND_PENALTIES?.[key]) || 0;
-      const penaltyEff = Math.abs(basePenalty + penaltyMod);
+      const penaltyEff = Math.max(0, basePenalty + penaltyMod);
 
       sys.visibleWoundLevels[key] = {
         value,
