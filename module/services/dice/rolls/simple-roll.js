@@ -42,7 +42,6 @@
  * @requires Foundry VTT v13+
  */
 
-import { SYS_ID } from "../../../config/constants.js";
 import { CHAT_TEMPLATES } from "../../../config/templates.js";
 import { toInt } from "../../../utils/type-coercion.js";
 import { T, R } from "../../../utils/localization.js";

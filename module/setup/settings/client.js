@@ -12,8 +12,6 @@
  * @requires Foundry VTT v13+
  */
 
-import { SYS_ID } from "../../config/constants.js";
-
 /**
  * Registers all client-scoped settings for the L5R4 system.
  * Currently no client settings are registered.

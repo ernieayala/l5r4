@@ -11,9 +11,6 @@
  * @module documents/actor/preparation/npc-preparation
  */
 
-// Config
-import { SYS_ID } from "../../../config/constants.js";
-
 // Utils
 import { toInt } from "../../../utils/type-coercion.js";
 

@@ -53,8 +53,7 @@ import { SYS_ID } from "../../../config/constants.js";
 import { toInt } from "../../../utils/type-coercion.js";
 import {
   calculateXpStepCostForTrait,
-  getCreationFreeBonus,
-  getCreationFreeBonusVoid
+  getCreationFreeBonus
 } from "../../../utils/xp-calculations.js";
 
 /**
@@ -251,7 +250,6 @@ export function preparePcExperience(actor, sys) {
       0
   );
   const voidFreeBase = toInt(freeTraitBase?.void ?? 0);
-  const voidFreeEff = voidFreeBase > 0 ? 0 : toInt(getCreationFreeBonusVoid(actor));
   const voidBaseline = 2 + voidFreeBase;
   const voidDisc = toInt(traitDiscounts?.void ?? 0);
 
