@@ -50,6 +50,10 @@ import { spendVoidPoint, resolveActor } from "../resources/void-manager.js";
 import { applyTraitBonuses } from "../effects/bonus-applicator.js";
 import { GetTraitRollOptions } from "../dialogs/trait-dialog.js";
 import { getArmorTNPenalty } from "../../../utils/armor-penalties.js";
+import {
+  getConditionRollPenalties,
+  getConditionTNPenalty
+} from "../../../utils/condition-penalties.js";
 
 /**
  * Execute a trait roll for innate ability checks in the L5R4 system.
@@ -66,7 +70,7 @@ import { getArmorTNPenalty } from "../../../utils/armor-penalties.js";
  * - Typical Uses: Lifting (Strength), resisting poison (Stamina), mental focus (Willpower)
  *
  * Process Flow:
- * 1. Check system setting for "always show trait roll options" vs askForOptions override
+ * 1. Show dialog by default (askForOptions=true), skip if shift-clicked (askForOptions=false)
  * 2. If showing dialog: Prompt user for raises, modifiers, Void point, wound penalty
  * 3. Apply passive bonuses from advantages/techniques via applyTraitBonuses()
  * 4. Handle Void point expenditure if requested (deduct from pool, apply +1k1)
@@ -75,7 +79,7 @@ import { getArmorTNPenalty } from "../../../utils/armor-penalties.js";
  * 7. Execute roll and calculate effective TN (base + raises*5 + wound penalties)
  * 8. Evaluate success/failure and post to chat
  *
- * Dialog Options (if askForOptions matches system setting):
+ * Dialog Options (if askForOptions=true):
  * - Raises: Number of voluntary TN increases (+5 each, max = Void Ring)
  * - Unskilled: Disables exploding dice and raises (rare for traits)
  * - Void Point: Spend for +1k1 bonus (if available)
@@ -90,14 +94,13 @@ import { getArmorTNPenalty } from "../../../utils/armor-penalties.js";
  *
  * Foundry Integration:
  * - Async operation (awaits dialog, Void spending, roll rendering, chat posting)
- * - Uses game.settings.get() for "showTraitRollOptions" world setting
  * - Posts to chat via roll.toMessage() with ChatMessage.getSpeaker()
  * - Error handling with try/catch and ui.notifications.error()
  *
  * @param {Object} options - Trait roll configuration object
  * @param {number|null} [options.traitRank=null] - Trait rank value (1-10, pre-calculated from actor)
  * @param {string|null} [options.traitName=null] - Trait name for localization (e.g., "stamina", "willpower", "void")
- * @param {boolean} [options.askForOptions=true] - Override for system setting (true=show dialog, false=skip dialog)
+ * @param {boolean} [options.askForOptions=true] - If true, shows roll options dialog; if false, skips dialog (shift-click behavior)
  * @param {boolean} [options.unskilled=false] - If true, disables exploding dice and raises per Unskilled Roll rules
  * @param {L5R4Actor|null} [options.actor=null] - Actor performing the roll (null uses resolveActor fallback chain)
  *
@@ -121,9 +124,7 @@ export async function TraitRoll({
       ? "l5r4.ui.mechanics.rings.void"
       : `l5r4.ui.mechanics.traits.${labelTrait}`;
 
-  // Read system world setting for "always show trait roll options dialog"
-  // askForOptions parameter allows per-call override of this setting
-  const optionsSetting = game.settings.get(SYS_ID, "showTraitRollOptions");
+  // Dialog behavior: Show by default, skip if shift-clicked (askForOptions=false)
   let rollMod = 0,
     keepMod = 0,
     totalMod = 0,
@@ -135,8 +136,8 @@ export async function TraitRoll({
   const targetActor = resolveActor(actor);
   const currentWoundPenalty = targetActor?.system?.woundPenalty ?? 0;
 
-  // Show dialog if askForOptions doesn't match the setting (XOR logic - show when override differs from default)
-  if (askForOptions !== optionsSetting) {
+  // Show dialog by default (askForOptions=true), skip if shift-clicked (askForOptions=false)
+  if (askForOptions) {
     const check = await GetTraitRollOptions(traitName, targetActor);
     if (check?.cancelled) {
       return;
@@ -152,8 +153,8 @@ export async function TraitRoll({
     const userFreeRaises = toInt(check.freeRaises) || 0;
     userRaises = toInt(check.raises);
     if (userTN || userRaises || userFreeRaises) {
-      // Calculate effective TN: base TN + (raises × 5) - (freeRaises × 5) per L5R4 core rules
-      const displayTN = userTN + userRaises * 5 - userFreeRaises * 5;
+      // Calculate effective TN: base TN + (raises × 5)
+      const displayTN = userTN + userRaises * 5;
       const raisesLabel = game.i18n.localize("l5r4.ui.mechanics.rolls.raises");
       const freeRaisesLabel = game.i18n.localize("l5r4.ui.mechanics.rolls.freeRaises");
       label += ` [TN ${displayTN}`;
@@ -185,20 +186,37 @@ export async function TraitRoll({
         return;
       }
 
-      // Apply Void's +1k1 bonus and update roll label
-      rollMod += voidResult.rollBonus;
-      keepMod += voidResult.keepBonus;
-      label += ` ${game.i18n.localize("l5r4.ui.mechanics.rings.void")}`;
-    }
-
-    // Apply wound penalty to roll total when rolling without a TN
-    // When no TN is specified, subtract wound penalty from roll result
-    // This ensures wounds affect rolls even when there's no target number to compare against
-    // Otherwise, wound penalty will be applied to TN later
-    if (userTN === 0 && applyWoundPenalty && currentWoundPenalty > 0) {
-      totalMod -= currentWoundPenalty;
+      // L5R4 Void Point Rules:
+      // - Normal trait rolls: +1k1 bonus
+      // - Unskilled trait rolls (edge case): Treat like unskilled skill roll - +1k0 with explosions
+      if (unskilled) {
+        // Void on unskilled: Only add to rolled dice, not kept dice
+        // This makes it effectively a "skilled" roll with explosions enabled
+        rollMod += voidResult.rollBonus;
+        // Don't add to keepMod - unskilled void gives +1k0
+        unskilled = false; // Void removes unskilled penalty (enables explosions)
+        label += ` ${game.i18n.localize("l5r4.ui.mechanics.rings.void")}!`;
+      } else {
+        // Standard void on trait roll: +1k1 bonus
+        rollMod += voidResult.rollBonus;
+        keepMod += voidResult.keepBonus;
+        label += ` ${game.i18n.localize("l5r4.ui.mechanics.rings.void")}`;
+      }
     }
   }
+
+  // Apply wound penalty to roll total (ALWAYS subtract from roll, never add to TN)
+  // Wound penalties reduce the character's effectiveness by subtracting from their roll result
+  // CRITICAL: This must be OUTSIDE the dialog block so it applies even when dialog is skipped
+  if (applyWoundPenalty && currentWoundPenalty > 0) {
+    totalMod -= currentWoundPenalty;
+  }
+
+  // Apply condition penalties (blinded, dazed, fatigued, prone, etc.)
+  // Trait rolls are general actions, so use null rollType to get universal penalties
+  const conditionPenalties = getConditionRollPenalties(targetActor, null, "melee");
+  rollMod += conditionPenalties.roll; // Will be negative if conditions active
+  keepMod += conditionPenalties.keep;
 
   // Calculate final dice pool: trait rank + all modifiers
   const traitValue = toInt(traitRank);
@@ -219,17 +237,18 @@ export async function TraitRoll({
   const roll = new Roll(rollFormula);
   const rollHtml = await roll.render();
 
-  // Calculate final effective TN: base + (raises × 5) + optional wound penalty + armor penalty
-  // Wound penalty only applies if user selected AND TN > 0 (must be a targeted roll)
+  // Calculate final effective TN: base + (raises × 5) + armor penalty + condition TN penalty
   // Armor penalty only applies to Agility/Reflexes trait rolls with Riding Armor (per Equipment rules)
   const armorTNPenalty = getArmorTNPenalty(targetActor, null, traitName);
+  const conditionTNPenalty = getConditionTNPenalty(targetActor); // Fatigued: +5 TN
   const baseTN = calculateEffectiveTN(
     userTN,
     userRaises,
-    currentWoundPenalty,
-    applyWoundPenalty && userTN > 0
+    0,
+    0, // Never apply wound penalty to TN
+    false // Wound penalty flag no longer used for TN calculation
   );
-  const effTN = baseTN + armorTNPenalty;
+  const effTN = baseTN + armorTNPenalty + conditionTNPenalty;
   const tnResult = evaluateTN(roll.total ?? 0, effTN, userRaises);
 
   const content = await R(messageTemplate, { flavor, roll: rollHtml, tnResult });

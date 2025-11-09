@@ -165,6 +165,7 @@
         "init": "Initiative",
         "bonus": "Bonus",
         "mod": "Modificateur",
+        "multi": "Multiplicateur",
         "rate": "Taux",
         "current": "Actuel",
         "total": "Total",
@@ -183,6 +184,7 @@
         "description": "Description",
         "notes": "Notes",
         "activeEffects": "Effets Actifs",
+        "conditions": "Conditions",
         "active": "Actif",
         "new": "Nouveau",
         "auto": "Auto",
@@ -199,7 +201,11 @@
         "mastery": "Maîtrise",
         "tn": "ND",
         "cost": "Coût",
-        "save": "Sauvegarder"
+        "save": "Sauvegarder",
+        "armor": "Armure"
+      },
+      "armor": {
+        "allowStacking": "Autoriser l'Empilement d'Armure"
       },
       "emphasisManager": {
         "title": "Gérer les Emphases de Compétence",
@@ -211,6 +217,24 @@
         "help": "Sélectionnez les emphases disponibles pour cette compétence. Entraînez-les sur la feuille de personnage.",
         "noEmphases": "Aucune emphase dans la liste",
         "limitReached": "Impossible d'entraîner plus de {max} emphases à ce rang de compétence"
+      },
+      "wealthManager": {
+        "title": "Gestionnaire de Richesse",
+        "tooltip": "Gérer la Richesse",
+        "currentWealth": "Richesse Actuelle",
+        "addMoney": "Ajouter de l'Argent",
+        "removeMoney": "Retirer de l'Argent",
+        "amount": "Montant",
+        "denomination": "Dénomination",
+        "add": "Ajouter",
+        "remove": "Retirer",
+        "convert": "Convertir la Monnaie",
+        "convertZeniToBu": "Convertir 10 Zeni en 1 Bu",
+        "convertBuToZeni": "Convertir 1 Bu en 10 Zeni",
+        "convertBuToKoku": "Convertir 5 Bu en 1 Koku",
+        "convertKokuToBu": "Convertir 1 Koku en 5 Bu",
+        "insufficientFunds": "Fonds insuffisants pour cette transaction",
+        "insufficientForConversion": "Fonds insuffisants pour cette conversion"
       },
       "sheets": {
         "bio": "Historique",
@@ -266,7 +290,9 @@
         "invalidDamageValue": "Valeur de dégâts invalide fournie",
         "noTargetForSwap": "Aucune cible sélectionnée pour l'échange d'initiative",
         "noCombatActive": "Aucun combat actif pour modifier l'initiative",
-        "notInCombat": "Le personnage n'est pas dans un combat actif"
+        "notInCombat": "Le personnage n'est pas dans un combat actif",
+        "wealthManagerFailed": "Échec de l'ouverture du Gestionnaire de Richesse",
+        "conditionManagerFailed": "Échec de l'ouverture du Gestionnaire de Conditions"
       },
       "voidActions": {
         "title": "Actions de Points de Vide",
@@ -547,33 +573,9 @@
     }
   },
   "SETTINGS": {
-    "showTraitRollOptions": {
-      "name": "Demander les options de Jets de Trait par défaut.",
-      "label": "Maintenez Shift pour Basculer."
-    },
-    "showSpellRollOptions": {
-      "name": "Demander si le Jet d'Anneau est un sort par défaut.",
-      "label": "Maintenez Shift pour Basculer."
-    },
-    "showSkillRollOptions": {
-      "name": "Demander les options de Jets de Compétence et Jets de Dégâts par défaut.",
-      "label": "Maintenez Shift pour Basculer."
-    },
-    "allowNpcVoidPoints": {
-      "name": "Afficher la case Point de Vide pour les jets de PNJ.",
-      "label": "Les PNJ n'ont normalement pas de Vide."
-    },
-    "calculateRank": {
-      "name": "Calculer le Rang de Perspicacité automatiquement",
-      "label": "Le Rang de Perspicacité est mis à jour automatiquement en fonction du total de Points de Perspicacité"
-    },
     "allowArmorStacking": {
       "name": "Autoriser le cumul d'armures",
       "label": "Plusieurs pièces d'\"armure\" peuvent être cumulées (pour représenter des bonus, etc.)"
-    },
-    "showWeaponRollOptions": {
-      "name": "Demander les options de Jet d'Arme par défaut.",
-      "label": "Maintenez Shift pour Basculer."
     },
     "LtException": {
       "name": "Appliquer l'exception des Petites Vérités",
@@ -590,14 +592,6 @@
     "forceMigration": {
       "name": "Forcer la migration au démarrage",
       "label": "Force l'exécution de toutes les migrations au prochain chargement du monde, quelle que soit la version. Se réinitialise automatiquement une fois la migration terminée."
-    },
-    "defaultNpcWoundMode": {
-      "name": "Mode de Blessures par Défaut pour PNJ",
-      "label": "Contrôle si les nouveaux PNJ utilisent le mode basé sur une formule (Anneau de Terre) ou la saisie manuelle du seuil pour les calculs de blessures. Les PNJ existants conservent leurs paramètres individuels.",
-      "choices": {
-        "manual": "Manuel (Saisie Directe)",
-        "formula": "Formule (Basé sur Terre)"
-      }
     }
   },
   "conditions": {

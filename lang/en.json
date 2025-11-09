@@ -165,6 +165,7 @@
         "init": "Initiative",
         "bonus": "Bonus",
         "mod": "Modifier",
+        "multi": "Multiplier",
         "rate": "Rate",
         "current": "Current",
         "total": "Total",
@@ -183,6 +184,7 @@
         "description": "Description",
         "notes": "Notes",
         "activeEffects": "Active Effects",
+        "conditions": "Conditions",
         "active": "Active",
         "new": "New",
         "auto": "Auto",
@@ -199,7 +201,15 @@
         "mastery": "Mastery",
         "tn": "TN",
         "cost": "Cost",
-        "save": "Save"
+        "save": "Save",
+        "armor": "Armor",
+        "base": "Base"
+      },
+      "combat": {
+        "configuration": "Combat Configuration"
+      },
+      "armor": {
+        "allowStacking": "Allow Armor Stacking"
       },
       "emphasisManager": {
         "title": "Manage Skill Emphases",
@@ -211,6 +221,24 @@
         "help": "Select which emphases are available for this skill. Train them on the character sheet.",
         "noEmphases": "No emphases in list",
         "limitReached": "Cannot train more than {max} emphases at this skill rank"
+      },
+      "wealthManager": {
+        "title": "Wealth Manager",
+        "tooltip": "Manage Wealth",
+        "currentWealth": "Current Wealth",
+        "addMoney": "Add Money",
+        "removeMoney": "Remove Money",
+        "amount": "Amount",
+        "denomination": "Denomination",
+        "add": "Add",
+        "remove": "Remove",
+        "convert": "Convert Currency",
+        "convertZeniToBu": "Convert 10 Zeni to 1 Bu",
+        "convertBuToZeni": "Convert 1 Bu to 10 Zeni",
+        "convertBuToKoku": "Convert 5 Bu to 1 Koku",
+        "convertKokuToBu": "Convert 1 Koku to 5 Bu",
+        "insufficientFunds": "Insufficient funds for this transaction",
+        "insufficientForConversion": "Insufficient funds for this conversion"
       },
       "sheets": {
         "bio": "Background",
@@ -266,7 +294,9 @@
         "invalidDamageValue": "Invalid damage value provided",
         "noTargetForSwap": "No target selected for initiative swap",
         "noCombatActive": "No active combat to modify initiative",
-        "notInCombat": "Character not in active combat"
+        "notInCombat": "Character not in active combat",
+        "wealthManagerFailed": "Failed to open Wealth Manager",
+        "conditionManagerFailed": "Failed to open Condition Manager"
       },
       "voidActions": {
         "title": "Void Point Actions",
@@ -290,7 +320,8 @@
         "voidPointsClickAdjust": "Left click: +1, Right click: -1",
         "shiftClickRankPoints": "Shift+Click: ±0.1, Shift+Ctrl+Click: ±1.0",
         "shiftClickToChat": "Shift+Click to post to chat",
-        "postToChat": "Post to chat"
+        "postToChat": "Post to chat",
+        "shiftClickToggleRankMode": "GM: Shift+Click to toggle between automatic and manual rank calculation"
       },
       "dialogs": {
         "deleteItem": {
@@ -434,7 +465,8 @@
           "skillCreated": "Skill Created",
           "skillIncreased": "Skill Increased"
         },
-        "spellMemorized": "Memorized: {name}"
+        "spellMemorized": "Memorized: {name}",
+        "trackingFailed": "XP tracking failed for {action}: {item}. Contact GM if this persists."
       }
     },
     "equipment": {
@@ -547,33 +579,9 @@
     }
   },
   "SETTINGS": {
-    "showTraitRollOptions": {
-      "name": "Ask for Trait Rolls options by default.",
-      "label": "Hold Shift to Toggle."
-    },
-    "showSpellRollOptions": {
-      "name": "Ask if the Ring Roll is a spell by default.",
-      "label": "Hold Shift to Toggle."
-    },
-    "showSkillRollOptions": {
-      "name": "Ask for Skill Rolls and Damage Roll options by default.",
-      "label": "Hold Shift to Toggle."
-    },
-    "allowNpcVoidPoints": {
-      "name": "Display Void Point checkbox for NPC rolls.",
-      "label": "NPCs normally lack Void."
-    },
-    "calculateRank": {
-      "name": "Calculate Insight Rank automatically",
-      "label": "Insight Rank is updated automatically based on total Insight Points"
-    },
     "allowArmorStacking": {
       "name": "Allow armor stacking",
       "label": "Multiple pieces of \"armor\" can be stacked (to represent buffs, etc.)"
-    },
-    "showWeaponRollOptions": {
-      "name": "Ask for Weapon Roll options by default.",
-      "label": "Hold Shift to Toggle."
     },
     "LtException": {
       "name": "Apply Little Truths exception",
@@ -590,14 +598,6 @@
     "forceMigration": {
       "name": "Force migration on startup",
       "label": "Forces all migrations to run on next world load, regardless of version. Automatically resets after migration completes."
-    },
-    "defaultNpcWoundMode": {
-      "name": "Default NPC Wound Mode",
-      "label": "Controls whether new NPCs use formula-based (Earth Ring) or manual threshold entry for wound calculations. Existing NPCs retain their individual settings.",
-      "choices": {
-        "manual": "Manual (Direct Entry)",
-        "formula": "Formula (Earth-based)"
-      }
     }
   },
   "conditions": {

@@ -22,7 +22,7 @@
  * - Uses Application v2 event delegation (element parameter pattern)
  * - Reads data-* attributes from DOM for roll parameters
  * - Integrates with Actor.items collection for skill/weapon lookups
- * - Respects event.shiftKey for optional roll dialog display
+ * - Normal click shows dialog, shift-click skips dialog
  * - Posts results via ChatMessage through dice service layer
  *
  * Related Services:
@@ -61,6 +61,11 @@ import { T } from "../../utils/localization.js";
  * extract roll parameters from data-* attributes, and dispatch to appropriate
  * dice service functions. All methods are static since no instance state needed.
  *
+ * Race Condition Protection:
+ * Uses a static Set to track in-progress rolls and prevent double-click exploits.
+ * Each roll is keyed by actor ID + roll type + item ID (if applicable) to allow
+ * simultaneous different rolls while preventing duplicate submissions of the same roll.
+ *
  * Usage Pattern (in ActorSheetV2._onAction):
  * ```javascript
  * switch (action) {
@@ -72,6 +77,13 @@ import { T } from "../../utils/localization.js";
  * ```
  */
 export class RollHandler {
+  /**
+   * Set tracking in-progress rolls to prevent race conditions from double-clicks.
+   * Keys format: "actorId-rollType-itemId" or "actorId-rollType" for non-item rolls.
+   * @type {Set<string>}
+   * @private
+   */
+  static _rollInProgress = new Set();
   /**
    * Determine if the actor is an NPC based on sheet class name or actor type.
    *
@@ -147,7 +159,8 @@ export class RollHandler {
    * - Bonuses: item.system.rollBonus, keepBonus, totalBonus plus stance bonuses
    *
    * Event Handling:
-   * - event.shiftKey: Toggles roll dialog display (XOR with system setting)
+   * - Normal click: Shows roll dialog (askForOptions=true)
+   * - Shift-click: Skips roll dialog (askForOptions=false)
    * - Prevents default to stop form submission or link navigation
    *
    * @param {Object} context - Sheet context from _prepareContext()
@@ -156,12 +169,18 @@ export class RollHandler {
    * @param {HTMLElement} element - Target element from Application v2 delegation
    * @returns {void} Delegates to SkillRoll service which posts to chat
    */
-  static skillRoll(context, event, element) {
+  static async skillRoll(context, event, element) {
     event.preventDefault();
     const el = RollHandler._getElement(element, event);
     const row = el?.closest?.(".item");
     const item = row ? context.actor.items.get(row.dataset.itemId) : null;
     if (!item) {
+      return;
+    }
+
+    // Race condition protection: prevent double-click exploits
+    const rollKey = `${context.actor.id}-skill-${item.id}`;
+    if (RollHandler._rollInProgress.has(rollKey)) {
       return;
     }
 
@@ -184,20 +203,25 @@ export class RollHandler {
       keepBonus += stanceBonuses.keep;
     }
 
-    SkillRoll({
-      actor: context.actor,
-      woundPenalty: readWoundPenalty(context.actor),
-      actorTrait,
-      skillRank: toInt(item.system?.rank),
-      skillName: item.name,
-      askForOptions: event.shiftKey,
-      npc: isNpc,
-      skillTrait: traitKey,
-      rollType,
-      rollBonus,
-      keepBonus,
-      totalBonus: toInt(item.system?.totalBonus)
-    });
+    RollHandler._rollInProgress.add(rollKey);
+    try {
+      await SkillRoll({
+        actor: context.actor,
+        woundPenalty: readWoundPenalty(context.actor),
+        actorTrait,
+        skillRank: toInt(item.system?.rank),
+        skillName: item.name,
+        askForOptions: !event.shiftKey,
+        npc: isNpc,
+        skillTrait: traitKey,
+        rollType,
+        rollBonus,
+        keepBonus,
+        totalBonus: toInt(item.system?.totalBonus)
+      });
+    } finally {
+      RollHandler._rollInProgress.delete(rollKey);
+    }
   }
 
   /**
@@ -223,10 +247,16 @@ export class RollHandler {
    * @param {HTMLElement} element - Target element from Application v2 delegation
    * @returns {Promise<ChatMessage|undefined>} Chat message from SimpleRoll service
    */
-  static attackRoll(context, event, element) {
+  static async attackRoll(context, event, element) {
     event.preventDefault();
     const el = RollHandler._getElement(element, event);
     const params = extractRollParams(el, context.actor);
+
+    // Race condition protection: prevent double-click exploits
+    const rollKey = `${context.actor.id}-attack-${params.label}`;
+    if (RollHandler._rollInProgress.has(rollKey)) {
+      return;
+    }
 
     // Get modifier from data attribute (for NPC attacks)
     const modifier = toInt(el.dataset.modifier) || 0;
@@ -235,17 +265,22 @@ export class RollHandler {
     const rollName = params.label;
     const description = RollHandler._addStanceBonusText(params.description, stanceBonuses);
 
-    return SimpleRoll({
-      woundPenalty: readWoundPenalty(context.actor),
-      diceRoll: params.diceRoll + params.traitBonus + stanceBonuses.roll,
-      diceKeep: params.diceKeep + params.traitBonus + stanceBonuses.keep,
-      modifier: modifier,
-      rollName,
-      description,
-      toggleOptions: event.shiftKey,
-      rollType: "attack",
-      actor: context.actor
-    });
+    RollHandler._rollInProgress.add(rollKey);
+    try {
+      return await SimpleRoll({
+        woundPenalty: readWoundPenalty(context.actor),
+        diceRoll: params.diceRoll + params.traitBonus + stanceBonuses.roll,
+        diceKeep: params.diceKeep + params.traitBonus + stanceBonuses.keep,
+        modifier: modifier,
+        rollName,
+        description,
+        toggleOptions: !event.shiftKey,
+        rollType: "attack",
+        actor: context.actor
+      });
+    } finally {
+      RollHandler._rollInProgress.delete(rollKey);
+    }
   }
 
   /**
@@ -258,9 +293,11 @@ export class RollHandler {
    *
    * L5R4 Mechanics:
    * - Skilled Attack: (Skill Rank + Trait)k(Trait) using weapon's associated skill
+   *   - Routes to SkillRoll for emphasis support (re-roll 1s if emphasis applies)
    * - Unskilled Attack: (Trait)k(Trait) if no skill found, dice never explode
-   * - Full Attack Stance: +2k1 attack bonus, -10 Armor TN (in SimpleRoll)
-   * - Wound Penalties: Applied to attack TN via SimpleRoll service
+   *   - Routes to SimpleRoll (no emphasis possible without skill)
+   * - Full Attack Stance: +2k1 attack bonus, -10 Armor TN
+   * - Wound Penalties: Applied to attack TN via roll service
    * - Successful Hit: Generates weapon damage button in chat with stance damage bonuses
    *
    * Resolution Process:
@@ -268,15 +305,15 @@ export class RollHandler {
    * 2. Validate weapon type (must be "weapon" or "bow")
    * 3. Resolve weapon skill and trait via resolveWeaponSkillTrait()
    * 4. Apply stance attack bonuses (Full Attack +2k1)
-   * 5. Execute SimpleRoll with rollType="attack" and weaponId for damage integration
+   * 5. Route to SkillRoll if skilled (supports emphasis) or SimpleRoll if unskilled
    *
    * @param {Object} context - Sheet context from _prepareContext()
    * @param {Actor} context.actor - The actor making the weapon attack
    * @param {Event} event - DOM click event on weapon attack trigger
    * @param {HTMLElement} element - Target element from Application v2 delegation
-   * @returns {Promise<ChatMessage|undefined>} Chat message from SimpleRoll service
+   * @returns {Promise<ChatMessage|undefined>} Chat message from SkillRoll or SimpleRoll service
    */
-  static weaponAttackRoll(context, event, element) {
+  static async weaponAttackRoll(context, event, element) {
     event.preventDefault();
     const row = element.closest(".item");
     const id = row?.dataset?.itemId || row?.dataset?.documentId || row?.dataset?.id;
@@ -287,26 +324,17 @@ export class RollHandler {
       return;
     }
 
+    // Race condition protection: prevent double-click exploits
+    const rollKey = `${context.actor.id}-weapon-attack-${id}`;
+    if (RollHandler._rollInProgress.has(rollKey)) {
+      return;
+    }
+
     const weaponSkill = resolveWeaponSkillTrait(context.actor, weapon);
 
     const stanceBonuses = getStanceAttackBonuses(context.actor);
 
     const isUntrained = weaponSkill.skillRank === 0;
-
-    const rollName = `${weapon.name} ${game.i18n.localize("l5r4.ui.mechanics.rolls.attackRoll")}`;
-    const description =
-      `${weaponSkill.description}` +
-      `${
-        stanceBonuses.roll > 0 || stanceBonuses.keep > 0
-          ? ` (${game.i18n.localize("l5r4.ui.mechanics.stances.fullAttack")}: +${
-              stanceBonuses.roll
-            }k${stanceBonuses.keep})`
-          : ""
-      }` +
-      `${isUntrained ? ` (${game.i18n.localize("l5r4.ui.mechanics.rolls.unskilled")})` : ""}`;
-
-    // Pass isBow flag to pre-check ranged checkbox in dialog
-    const isBow = weapon.type === "bow";
 
     // Extract skill name and trait for armor penalty calculation
     const weaponSystem = weapon.system || {};
@@ -314,8 +342,9 @@ export class RollHandler {
 
     // Find the actual skill item to get its trait (if it exists)
     let skillTrait = weaponSystem.fallbackTrait || "agi";
+    let skillItem = null;
     if (associatedSkill && context.actor.items) {
-      const skillItem = context.actor.items.find(
+      skillItem = context.actor.items.find(
         i => i.type === "skill" && i.name.toLowerCase() === associatedSkill.toLowerCase()
       );
       if (skillItem && skillItem.system?.trait) {
@@ -323,21 +352,64 @@ export class RollHandler {
       }
     }
 
-    return SimpleRoll({
-      woundPenalty: readWoundPenalty(context.actor),
-      diceRoll: weaponSkill.rollBonus + stanceBonuses.roll,
-      diceKeep: weaponSkill.keepBonus + stanceBonuses.keep,
-      rollName,
-      description,
-      toggleOptions: event.shiftKey,
-      rollType: "attack",
-      actor: context.actor,
-      untrained: isUntrained,
-      weaponId: id,
-      isBow,
-      skillName: associatedSkill,
-      skillTrait: skillTrait
-    });
+    RollHandler._rollInProgress.add(rollKey);
+    try {
+      // Route to SkillRoll for skilled attacks (supports emphasis)
+      // Route to SimpleRoll for unskilled attacks (no emphasis possible)
+      if (!isUntrained && skillItem) {
+        return await SkillRoll({
+          woundPenalty: readWoundPenalty(context.actor),
+          actorTrait: weaponSkill.keepBonus,
+          skillRank: weaponSkill.skillRank,
+          skillName: associatedSkill,
+          skillTrait: skillTrait,
+          askForOptions: !event.shiftKey,
+          npc: false,
+          rollBonus: stanceBonuses.roll,
+          keepBonus: stanceBonuses.keep,
+          totalBonus: 0,
+          actor: context.actor,
+          rollType: "attack",
+          weaponId: id
+        });
+      } else {
+        // Unskilled attack - use SimpleRoll
+        const rollName = `${weapon.name} ${game.i18n.localize(
+          "l5r4.ui.mechanics.rolls.attackRoll"
+        )}`;
+        const description =
+          `${weaponSkill.description}` +
+          `${
+            stanceBonuses.roll > 0 || stanceBonuses.keep > 0
+              ? ` (${game.i18n.localize("l5r4.ui.mechanics.stances.fullAttack")}: +${
+                  stanceBonuses.roll
+                }k${stanceBonuses.keep})`
+              : ""
+          }` +
+          ` (${game.i18n.localize("l5r4.ui.mechanics.rolls.unskilled")})`;
+
+        // Pass isBow flag to pre-check ranged checkbox in dialog
+        const isBow = weapon.type === "bow";
+
+        return await SimpleRoll({
+          woundPenalty: readWoundPenalty(context.actor),
+          diceRoll: weaponSkill.rollBonus + stanceBonuses.roll,
+          diceKeep: weaponSkill.keepBonus + stanceBonuses.keep,
+          rollName,
+          description,
+          toggleOptions: !event.shiftKey,
+          rollType: "attack",
+          actor: context.actor,
+          untrained: true,
+          weaponId: id,
+          isBow,
+          skillName: associatedSkill,
+          skillTrait: skillTrait
+        });
+      }
+    } finally {
+      RollHandler._rollInProgress.delete(rollKey);
+    }
   }
 
   /**
@@ -364,10 +436,16 @@ export class RollHandler {
    * @param {HTMLElement} element - Target element from Application v2 delegation
    * @returns {Promise<ChatMessage|undefined>} Chat message from SimpleRoll service
    */
-  static damageRoll(context, event, element) {
+  static async damageRoll(context, event, element) {
     event.preventDefault();
     const el = RollHandler._getElement(element, event);
     const params = extractRollParams(el, context.actor);
+
+    // Race condition protection: prevent double-click exploits
+    const rollKey = `${context.actor.id}-damage-${params.label}`;
+    if (RollHandler._rollInProgress.has(rollKey)) {
+      return;
+    }
 
     // Get modifier from data attribute (for NPC damage)
     const modifier = toInt(el.dataset.modifier) || 0;
@@ -376,16 +454,21 @@ export class RollHandler {
     const rollName = params.label;
     const description = RollHandler._addStanceBonusText(params.description, stanceBonuses);
 
-    return SimpleRoll({
-      diceRoll: params.diceRoll + params.traitBonus + stanceBonuses.roll,
-      diceKeep: params.diceKeep + params.traitBonus + stanceBonuses.keep,
-      modifier: modifier,
-      rollName,
-      description,
-      toggleOptions: event.shiftKey,
-      rollType: "damage",
-      actor: context.actor
-    });
+    RollHandler._rollInProgress.add(rollKey);
+    try {
+      return await SimpleRoll({
+        diceRoll: params.diceRoll + params.traitBonus + stanceBonuses.roll,
+        diceKeep: params.diceKeep + params.traitBonus + stanceBonuses.keep,
+        modifier: modifier,
+        rollName,
+        description,
+        toggleOptions: !event.shiftKey,
+        rollType: "damage",
+        actor: context.actor
+      });
+    } finally {
+      RollHandler._rollInProgress.delete(rollKey);
+    }
   }
 
   /**
@@ -414,7 +497,7 @@ export class RollHandler {
    * @param {HTMLElement} element - Target element from Application v2 delegation
    * @returns {Promise<ChatMessage|false|undefined>} Chat message from service, false if cancelled
    */
-  static traitRoll(context, event, element) {
+  static async traitRoll(context, event, element) {
     event.preventDefault();
     const block = element.closest(".trait");
     // querySelector used here to find trait-rank element within the trait block context
@@ -423,24 +506,35 @@ export class RollHandler {
       block?.querySelector(".trait-rank")?.dataset.trait || element.dataset.traitName || "ref"
     );
 
+    // Race condition protection: prevent double-click exploits
+    const rollKey = `${context.actor.id}-trait-${traitKey}`;
+    if (RollHandler._rollInProgress.has(rollKey)) {
+      return;
+    }
+
     const traitValue = getEffectiveTrait(context.actor, traitKey);
 
     const isNpc = RollHandler._isNpc(context);
 
-    if (isNpc) {
-      return SimpleRoll({
-        npc: true,
-        rollName: element?.dataset?.traitName || traitKey,
-        traitName: traitKey,
-        traitRank: traitValue
-      });
-    } else {
-      return TraitRoll({
-        traitRank: traitValue,
-        traitName: traitKey,
-        askForOptions: event.shiftKey,
-        actor: context.actor
-      });
+    RollHandler._rollInProgress.add(rollKey);
+    try {
+      if (isNpc) {
+        return await SimpleRoll({
+          npc: true,
+          rollName: element?.dataset?.traitName || traitKey,
+          traitName: traitKey,
+          traitRank: traitValue
+        });
+      } else {
+        return await TraitRoll({
+          traitRank: traitValue,
+          traitName: traitKey,
+          askForOptions: !event.shiftKey,
+          actor: context.actor
+        });
+      }
+    } finally {
+      RollHandler._rollInProgress.delete(rollKey);
     }
   }
 
@@ -468,19 +562,31 @@ export class RollHandler {
    * @param {HTMLElement} element - Target element with data-ring-name/data-ring-rank/data-system-ring
    * @returns {Promise<ChatMessage|undefined>} Chat message from SimpleRoll service
    */
-  static npcRingRoll(context, event, element) {
+  static async npcRingRoll(context, event, element) {
     event?.preventDefault?.();
     const ringName =
       element?.dataset?.ringName ||
       T(`l5r4.ui.mechanics.rings.${element?.dataset?.systemRing || "void"}`);
     const systemRing = String(element?.dataset?.systemRing || "void").toLowerCase();
     const ringRank = toInt(element?.dataset?.ringRank);
-    return SimpleRoll({
-      npc: true,
-      rollName: ringName,
-      ringName: systemRing,
-      ringRank
-    });
+
+    // Race condition protection: prevent double-click exploits
+    const rollKey = `${context.actor.id}-ring-${systemRing}`;
+    if (RollHandler._rollInProgress.has(rollKey)) {
+      return;
+    }
+
+    RollHandler._rollInProgress.add(rollKey);
+    try {
+      return await SimpleRoll({
+        npc: true,
+        rollName: ringName,
+        ringName: systemRing,
+        ringRank
+      });
+    } finally {
+      RollHandler._rollInProgress.delete(rollKey);
+    }
   }
 
   /**
@@ -495,7 +601,7 @@ export class RollHandler {
    * - Roll type determined by data-rolltype ("attack", "damage", "simple")
    * - Attack rolls: Apply wound penalties to TN
    * - Other rolls: No wound penalties applied
-   * - Supports event.shiftKey for optional roll dialog
+   * - Normal click shows dialog, shift-click skips dialog
    *
    * Data Sources (from event.currentTarget.dataset):
    * - roll: Number of dice to roll (required)
@@ -509,7 +615,7 @@ export class RollHandler {
    * @param {Event} event - DOM click event with dataset on currentTarget
    * @returns {Promise<ChatMessage|undefined>} Chat message from SimpleRoll service
    */
-  static npcSimpleRoll(context, event) {
+  static async npcSimpleRoll(context, event) {
     event?.preventDefault?.();
     const ds = event.currentTarget?.dataset || {};
     const diceRoll = toInt(ds.roll);
@@ -519,13 +625,24 @@ export class RollHandler {
     const rollType = ds.rolltype || "simple";
     const rollName = `${rollTypeLabel} ${trait}`.trim();
 
-    return SimpleRoll({
-      woundPenalty: readWoundPenalty(context.actor),
-      diceRoll,
-      diceKeep,
-      rollName,
-      toggleOptions: event.shiftKey,
-      rollType
-    });
+    // Race condition protection: prevent double-click exploits
+    const rollKey = `${context.actor.id}-simple-${rollType}-${rollName}`;
+    if (RollHandler._rollInProgress.has(rollKey)) {
+      return;
+    }
+
+    RollHandler._rollInProgress.add(rollKey);
+    try {
+      return await SimpleRoll({
+        woundPenalty: readWoundPenalty(context.actor),
+        diceRoll,
+        diceKeep,
+        rollName,
+        toggleOptions: !event.shiftKey,
+        rollType
+      });
+    } finally {
+      RollHandler._rollInProgress.delete(rollKey);
+    }
   }
 }

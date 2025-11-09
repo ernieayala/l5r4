@@ -108,24 +108,23 @@ function triggerFullDefenseIfNeeded(effectStances, actor) {
 }
 
 /**
- * Refreshes the actor's derived data.
+ * Refreshes the actor's associated tokens.
  *
- * Calls Actor.prepareData() to recalculate all derived stats (including stance-based
- * Armor TN modifiers, attack bonuses, etc.). Foundry's reactive rendering system
- * automatically updates the UI when actor properties change.
+ * Updates all active tokens to reflect current status icons and visual appearance.
+ * Foundry automatically recalculates derived stats when effects are added/removed,
+ * so this function only handles token refresh.
  *
- * Foundry Pattern:
- * prepareData() triggers the full data preparation pipeline (prepareBaseData,
- * prepareDerivedData, prepareEmbeddedDocuments) which recalculates all derived
- * actor statistics.
- *
- * @param {Actor} actor - The actor whose data should be refreshed
+ * @param {Actor} actor - The actor whose tokens should be refreshed
  * @returns {void}
  *
  * @private
  */
 function refreshActorDisplay(actor) {
-  actor.prepareData();
+  // Refresh all active tokens to update status icons
+  const tokens = actor.getActiveTokens();
+  for (const token of tokens) {
+    token.object?.refresh();
+  }
 }
 
 /**
@@ -201,19 +200,26 @@ export async function onPreCreateActiveEffect(effect, _data, _options, _userId) 
       if (creator) {
         const templateData = creator(actor);
 
-        effect.updateSource({
+        // Build update object - only include changes if template explicitly defines them
+        // to avoid overwriting existing Active Effect changes (e.g., trait modifications)
+        const updateData = {
           name: templateData.name,
           icon: templateData.icon,
-          flags: templateData.flags || {},
-          changes: templateData.changes || []
-        });
+          flags: templateData.flags || {}
+        };
+
+        // Only update changes array if template provides changes
+        // Otherwise preserve any existing changes on the effect
+        if (templateData.changes !== undefined) {
+          updateData.changes = templateData.changes;
+        }
+
+        effect.updateSource(updateData);
       }
     }
 
     // Remove conflicting stances to enforce mutual exclusivity
-    // CRITICAL: Must await synchronously in preCreate to ensure old stance is removed
-    // BEFORE onCreate hook fires and prepareDerivedData() is called
-    // Note: Stance handler also removes conflicts, but this handles programmatic creation
+    // Must await in preCreate to ensure old stance is removed before new stance is created
     await removeConflictingStances(actor, stanceId, effect.id);
   }
 }
@@ -257,6 +263,11 @@ export function onCreateActiveEffect(effect, _options, _userId) {
 
   if (hasStance) {
     triggerFullDefenseIfNeeded(effectStances, actor);
+  }
+
+  // Always refresh display for any ActiveEffect with status IDs
+  // This ensures conditions (blinded, dazed, etc.) also trigger token updates
+  if (effectStances.length > 0) {
     refreshActorDisplay(actor);
   }
 }
@@ -315,8 +326,11 @@ export async function onUpdateActiveEffect(effect, changes, _options, _userId) {
       await removeConflictingStances(actor, stanceId, effect.id);
       triggerFullDefenseIfNeeded(effectStances, actor);
     }
+  }
 
-    // Recalculate derived stats and refresh display
+  // Refresh display for any ActiveEffect with status IDs when disabled state changes
+  // This ensures conditions also trigger token updates
+  if (effectStances.length > 0) {
     refreshActorDisplay(actor);
   }
 }
@@ -356,11 +370,16 @@ export function onDeleteActiveEffect(effect, _options, _userId) {
   }
 
   const effectStances = getEffectStatusIds(effect);
-  // Always clear flags for any effect with stance status IDs
-  clearStanceFlagsFromEffect(actor, effectStances);
+  const hasStance = effectStances.some(id => STANCE_IDS.has(id));
 
-  // Refresh display if the deleted effect was a stance
-  if (effectStances.some(id => STANCE_IDS.has(id))) {
+  // Clear stance flags if this was a stance effect
+  if (hasStance) {
+    clearStanceFlagsFromEffect(actor, effectStances);
+  }
+
+  // Refresh display for any ActiveEffect with status IDs
+  // This ensures conditions (blinded, dazed, etc.) also trigger token updates
+  if (effectStances.length > 0) {
     refreshActorDisplay(actor);
   }
 }

@@ -2,8 +2,8 @@
  * Target Number Calculator
  *
  * Core utilities for calculating effective Target Numbers (TN) in L5R4 rolls.
- * Implements the Raises mechanic (+5 TN per Raise), Free Raises (TN reduction),
- * wound penalty application, and success/failure evaluation per game rules.
+ * Implements the Raises mechanic (+5 TN per Raise), wound penalty application,
+ * and success/failure evaluation per game rules.
  *
  * Used by: skill-roll.js, trait-roll.js, ring-roll.js, simple-roll.js
  *
@@ -13,9 +13,7 @@
  *   Per rules: "When a player declares he is making a Raise, he is choosing to
  *   voluntarily increase the TN of the task his character is attempting, by an
  *   increment of 5 per Raise."
- * - Free Raises: -5 TN per Free Raise (no Void Ring limit)
- *   Per rules: "Free Raises may also be used to reduce the TN of the task being
- *   attempted by 5 instead of augmenting the roll in the same way as a normal Raise."
+ * - Free Raises: Displayed in chat for player information
  * - Wound Penalties: Added to TN when character is injured (typically for attacks)
  * - Success: Roll total >= effective TN
  *
@@ -28,27 +26,26 @@
 import { T } from "../../../utils/localization.js";
 
 /**
- * Calculates the effective Target Number for a roll including Raises, Free Raises, and wound penalties.
+ * Calculates the effective Target Number for a roll including Raises and wound penalties.
  *
  * Implements L5R4 core rules:
  * - Each Raise adds +5 to the TN (limited by Void Ring)
- * - Each Free Raise reduces TN by 5 (no limit, don't count toward Void Ring max)
  * - Wound penalties conditionally applied based on roll type
  *
  * @param {number} baseTN - The base Target Number set by GM or game mechanics
  * @param {number} raises - Number of Raises declared (each adds +5 to TN)
- * @param {number} freeRaises - Number of Free Raises available (each reduces TN by 5)
+ * @param {number} freeRaises - Number of Free Raises available (for display purposes)
  * @param {number} woundPenalty - Current wound penalty value from character's wound rank
  * @param {boolean} applyWoundPenalty - Whether to apply wound penalty to this roll
- * @returns {number} The final effective TN (baseTN + raises*5 - freeRaises*5 + conditionalWoundPenalty)
+ * @returns {number} The final effective TN (baseTN + raises*5 + conditionalWoundPenalty)
  */
 export function calculateEffectiveTN(baseTN, raises, freeRaises, woundPenalty, applyWoundPenalty) {
   const _baseTN = Number(baseTN) || 0;
   const _raises = Number(raises) || 0;
-  const _freeRaises = Number(freeRaises) || 0;
   const _woundPenalty = Number(woundPenalty) || 0;
 
-  let effectiveTN = _baseTN + _raises * 5 - _freeRaises * 5;
+  // Free raises are purely informational and do not affect TN calculation
+  let effectiveTN = _baseTN + _raises * 5;
   if (applyWoundPenalty && _woundPenalty > 0) {
     effectiveTN += _woundPenalty;
   }
@@ -59,16 +56,17 @@ export function calculateEffectiveTN(baseTN, raises, freeRaises, woundPenalty, a
  * Evaluates a roll result against the effective TN and determines success/failure.
  *
  * Returns structured result for display in chat messages. Success requires the roll
- * total to meet or exceed the effective TN (including all Raises declared and Free Raises applied).
+ * total to meet or exceed the effective TN (including all Raises declared).
+ * Free Raises are purely informational and do not affect TN calculation.
  *
  * @param {number} rollTotal - The total value of the completed roll
  * @param {number} effectiveTN - The effective TN (from calculateEffectiveTN)
  * @param {number} raises - Number of Raises declared (for display purposes)
- * @param {number} [freeRaises=0] - Number of Free Raises applied (for display purposes)
+ * @param {number} [freeRaises=0] - Number of Free Raises available (for display purposes only)
  * @returns {Object|null} Result object with {effective, raises, freeRaises, outcome} or null if TN invalid
  * @returns {number} returns.effective - The effective TN used
  * @returns {number} returns.raises - Number of Raises declared
- * @returns {number} returns.freeRaises - Number of Free Raises applied
+ * @returns {number} returns.freeRaises - Number of Free Raises available (informational only)
  * @returns {string} returns.outcome - Localized "Success" or "Failure" string
  */
 export function evaluateTN(rollTotal, effectiveTN, raises, freeRaises = 0) {
@@ -101,7 +99,7 @@ export function evaluateTN(rollTotal, effectiveTN, raises, freeRaises = 0) {
  *
  * @param {number} effectiveTN - The effective TN to display
  * @param {number} raises - Number of Raises declared
- * @param {number} freeRaises - Number of Free Raises applied
+ * @param {number} freeRaises - Number of Free Raises available (informational only, doesn't affect TN)
  * @param {string} raisesLabel - Localized label for "Raises" text
  * @param {string} [freeRaisesLabel] - Localized label for "Free Raises" text
  * @returns {string} Formatted TN label with optional Raises and Free Raises, or empty string if no TN

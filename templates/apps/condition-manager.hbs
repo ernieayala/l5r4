@@ -1,0 +1,12 @@
+<div class="condition-manager-container">
+  <fieldset>
+    <legend>{{localize "l5r4.ui.common.conditions"}}</legend>
+    <multi-checkbox name="activeConditions">
+      {{#each conditionList}}
+        <option value="{{this.id}}" {{#if this.active}}selected{{/if}}>
+          {{localize this.name}}
+        </option>
+      {{/each}}
+    </multi-checkbox>
+  </fieldset>
+</div>

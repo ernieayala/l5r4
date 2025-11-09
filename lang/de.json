@@ -165,6 +165,7 @@
         "init": "Initiative",
         "bonus": "Bonus",
         "mod": "Modifikator",
+        "multi": "Multiplikator",
         "rate": "Rate",
         "current": "Aktuell",
         "total": "Gesamt",
@@ -183,6 +184,7 @@
         "description": "Beschreibung",
         "notes": "Notizen",
         "activeEffects": "Aktive Effekte",
+        "conditions": "Zustände",
         "active": "Aktiv",
         "new": "Neu",
         "auto": "Auto",
@@ -199,7 +201,11 @@
         "mastery": "Meisterschaft",
         "tn": "SZ",
         "cost": "Kosten",
-        "save": "Speichern"
+        "save": "Speichern",
+        "armor": "Rüstung"
+      },
+      "armor": {
+        "allowStacking": "Rüstungsstapelung Erlauben"
       },
       "emphasisManager": {
         "title": "Fertigkeitsschwerpunkte Verwalten",
@@ -211,6 +217,24 @@
         "help": "Wähle aus, welche Schwerpunkte für diese Fertigkeit verfügbar sind. Trainiere sie auf dem Charakterbogen.",
         "noEmphases": "Keine Schwerpunkte in der Liste",
         "limitReached": "Kann nicht mehr als {max} Schwerpunkte bei diesem Fertigkeitsrang trainieren"
+      },
+      "wealthManager": {
+        "title": "Vermögensverwaltung",
+        "tooltip": "Vermögen Verwalten",
+        "currentWealth": "Aktuelles Vermögen",
+        "addMoney": "Geld Hinzufügen",
+        "removeMoney": "Geld Entfernen",
+        "amount": "Betrag",
+        "denomination": "Währung",
+        "add": "Hinzufügen",
+        "remove": "Entfernen",
+        "convert": "Währung Umtauschen",
+        "convertZeniToBu": "10 Zeni zu 1 Bu umtauschen",
+        "convertBuToZeni": "1 Bu zu 10 Zeni umtauschen",
+        "convertBuToKoku": "5 Bu zu 1 Koku umtauschen",
+        "convertKokuToBu": "1 Koku zu 5 Bu umtauschen",
+        "insufficientFunds": "Unzureichende Mittel für diese Transaktion",
+        "insufficientForConversion": "Unzureichende Mittel für diesen Umtausch"
       },
       "sheets": {
         "bio": "Hintergrund",
@@ -266,7 +290,9 @@
         "invalidDamageValue": "Ungültiger Schadenswert angegeben",
         "noTargetForSwap": "Kein Ziel für Initiativentausch ausgewählt",
         "noCombatActive": "Kein aktiver Kampf, um Initiative zu ändern",
-        "notInCombat": "Charakter ist nicht im aktiven Kampf"
+        "notInCombat": "Charakter ist nicht im aktiven Kampf",
+        "wealthManagerFailed": "Fehler beim Öffnen der Vermögensverwaltung",
+        "conditionManagerFailed": "Fehler beim Öffnen des Zustandsverwalters"
       },
       "voidActions": {
         "title": "Leere-Punkt Aktionen",
@@ -547,33 +573,9 @@
     }
   },
   "SETTINGS": {
-    "showTraitRollOptions": {
-      "name": "Standardmäßig nach Eigenschaftswurf-Optionen fragen.",
-      "label": "Shift-Taste zum Umschalten halten."
-    },
-    "showSpellRollOptions": {
-      "name": "Standardmäßig fragen, ob der Ringwurf ein Zauber ist.",
-      "label": "Shift-Taste zum Umschalten halten."
-    },
-    "showSkillRollOptions": {
-      "name": "Standardmäßig nach Fertigkeitswurf- und Schadenswurf-Optionen fragen.",
-      "label": "Shift-Taste zum Umschalten halten."
-    },
-    "allowNpcVoidPoints": {
-      "name": "Leere-Punkt-Kontrollkästchen für NSC-Würfe anzeigen.",
-      "label": "NSCs haben normalerweise keine Leere."
-    },
-    "calculateRank": {
-      "name": "Einsichtsrang automatisch berechnen",
-      "label": "Einsichtsrang wird automatisch basierend auf Gesamt-Einsichtspunkten aktualisiert"
-    },
     "allowArmorStacking": {
       "name": "Rüstungsstapelung erlauben",
       "label": "Mehrere \"Rüstungs\"-Teile können gestapelt werden (um Boni darzustellen, usw.)"
-    },
-    "showWeaponRollOptions": {
-      "name": "Standardmäßig nach Waffenwurf-Optionen fragen.",
-      "label": "Shift-Taste zum Umschalten halten."
     },
     "LtException": {
       "name": "Kleine-Wahrheiten-Ausnahme anwenden",
@@ -590,14 +592,6 @@
     "forceMigration": {
       "name": "Migration beim Start erzwingen",
       "label": "Erzwingt die Ausführung aller Migrationen beim nächsten Weltladen, unabhängig von der Version. Setzt sich automatisch zurück, nachdem die Migration abgeschlossen ist."
-    },
-    "defaultNpcWoundMode": {
-      "name": "Standard-NSC-Wundenmodus",
-      "label": "Steuert, ob neue NSCs den formelbasierten Modus (Erde-Ring) oder die manuelle Schwelleneingabe für Wundenberechnungen verwenden. Bestehende NSCs behalten ihre individuellen Einstellungen.",
-      "choices": {
-        "manual": "Manuell (Direkte Eingabe)",
-        "formula": "Formel (Erde-basiert)"
-      }
     }
   },
   "conditions": {

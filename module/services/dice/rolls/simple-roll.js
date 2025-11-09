@@ -42,7 +42,6 @@
  * @requires Foundry VTT v13+
  */
 
-import { SYS_ID } from "../../../config/constants.js";
 import { CHAT_TEMPLATES } from "../../../config/templates.js";
 import { toInt } from "../../../utils/type-coercion.js";
 import { T, R } from "../../../utils/localization.js";
@@ -130,7 +129,7 @@ import { getArmorTNPenalty } from "../../../utils/armor-penalties.js";
  * - Represents trait-only roll without skill training
  *
  * Void Point Mechanics:
- * - NPCs respect world setting "allowNpcVoidPoints" (disabled by default)
+ * - NPCs with Void Ring >= 1 can use Void Points (most NPCs have Void Ring = 0)
  * - PCs always have access to Void checkbox (if they have Void points)
  * - Void spending adds +1 rolled die AND +1 kept die to roll
  * - Declared before rolling via dialog checkbox
@@ -185,9 +184,12 @@ export async function SimpleRoll({
   // If actor exists, use actor.type; otherwise fall back to npc parameter
   const isActuallyNpc = actor ? actor.type === "npc" : npc;
 
-  // Only hide Void checkbox for actual NPCs when setting is disabled
-  // PCs always have access to Void checkbox (assuming they have Void points)
-  const noVoid = isActuallyNpc && !game.settings.get(SYS_ID, "allowNpcVoidPoints");
+  // Only hide Void checkbox for NPCs with Void Ring = 0
+  // NPCs with Void Ring >= 1 can use Void Points, PCs always have access
+  const voidRing = isActuallyNpc
+    ? actor?.system?.rings?.void?.rank ?? 0
+    : actor?.system?.rings?.void?.value ?? 0;
+  const noVoid = isActuallyNpc && voidRing < 1;
 
   const { autoTN, targetData } = resolveTargets(actor, rollType);
 
@@ -254,7 +256,7 @@ export async function SimpleRoll({
     label += ` ${game.i18n.localize("l5r4.ui.mechanics.rings.void")}!`;
   }
 
-  // Determine final TN early to decide how to apply wound penalty
+  // Determine final TN early
   // For attack rolls, autoTN from target may override user's TN input
   const userTN = toInt(check.tn);
   let finalTN = userTN;
@@ -262,12 +264,10 @@ export async function SimpleRoll({
     finalTN = autoTN;
   }
 
-  // Apply wound penalty to roll total when rolling without a TN
-  // When no TN is specified (even after autoTN resolution), subtract wound penalty from roll result
-  // This ensures wounds affect rolls even when there's no target number to compare against
-  // Otherwise, wound penalty will be applied to TN later
+  // Apply wound penalty to roll total (ALWAYS subtract from roll, never add to TN)
+  // Wound penalties reduce the character's effectiveness by subtracting from their roll result
   const applyWoundPenalty = check.woundPenalty ?? true;
-  if (finalTN === 0 && applyWoundPenalty && woundPenalty > 0) {
+  if (applyWoundPenalty && woundPenalty > 0) {
     totalMod -= woundPenalty;
   }
 
@@ -303,17 +303,14 @@ export async function SimpleRoll({
   // Use finalTN calculated earlier (already includes autoTN resolution for attack rolls)
   const baseTN = finalTN;
 
-  // Apply wound penalties to TN when rolling with a TN and wound penalty checkbox is checked
-  // Wound penalties increase TN (+3 Nicked, +5 Grazed, +10 Hurt, +15 Injured, etc.)
-  // For attack rolls, wounds make it harder to hit (increased TN)
-  // For skill checks, wounds make it harder to succeed (increased TN)
-  // Note: If baseTN is 0, wound penalty was already subtracted from totalMod
+  // Calculate effective TN: baseTN + (raises × 5) + condition penalty + armor penalty (if applicable)
   // Only apply condition and armor TN penalties when there's an actual target (baseTN > 0)
   let effTN = calculateEffectiveTN(
     baseTN,
     toInt(check.raises),
-    applyWoundPenalty && baseTN > 0 ? woundPenalty : 0,
-    applyWoundPenalty && baseTN > 0
+    0,
+    0, // Never apply wound penalty to TN
+    false // Wound penalty flag no longer used for TN calculation
   );
   if (baseTN > 0) {
     const conditionTNPenalty = actor ? getConditionTNPenalty(actor) : 0;
@@ -359,5 +356,19 @@ export async function SimpleRoll({
     targetData,
     weaponData
   });
-  return roll.toMessage({ speaker: ChatMessage.getSpeaker(), content });
+
+  // Store attack raises and target in message flags to prevent HTML injection exploits
+  // Validates raises when damage button is clicked to ensure they match original roll
+  // Target actor ID is stored for animation system to use correct target across all clients
+  const flags = weaponData
+    ? {
+        "l5r4-enhanced": {
+          attackRaises: toInt(check.raises),
+          weaponId: weaponData.id,
+          targetActorId: targetData?.actor?.id || null
+        }
+      }
+    : {};
+
+  return roll.toMessage({ speaker: ChatMessage.getSpeaker(), content, flags });
 }

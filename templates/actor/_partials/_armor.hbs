@@ -1,35 +1,38 @@
 {{#if (eq actor.type "pc")}}
   <section class="armor">
     <div class="flexrow -gap-sm section-title">
-      <h4 class="title -compact">{{localize "l5r4.ui.mechanics.wounds.armorTn"}}</h4>
+      <h4 class="title -compact">{{localize "l5r4.ui.common.armor"}}</h4>
+      <a
+        class="button inline-control icon"
+        data-action="armor-config"
+        title="{{localize 'l5r4.ui.common.armor'}}"
+      >
+        <i class="fas fa-cog"></i>
+      </a>
     </div>
     <div class="grid">
       <span>{{localize "l5r4.ui.mechanics.wounds.armorTn"}}</span>
-      <div class="flexrow"><span>{{system.armorTn.current}}</span></div>
+      <div class="flexrow">
+        <span>{{system.armorTn.current}}</span>
+        {{#if (gt system.rings.void.rank 0)}}
+          <input
+            class="flex0"
+            type="checkbox"
+            name="system.armorTn.useVoid"
+            {{checked system.armorTn.useVoid}}
+            data-action="toggle-armor-void"
+            title="{{localize "l5r4.ui.mechanics.rings.voidTnBoost"}}" 
+          />
+        {{/if}}
+      </div>
       <span>{{localize "l5r4.ui.mechanics.wounds.armorReduction"}}</span>
       <div class="flexrow"><span>{{system.armorTn.reduction}}</span></div>
-      <span>{{localize "l5r4.ui.common.mod"}}</span>
-      <div class="flexrow"><input
-          type="number"
-          name="system.armorTn.mod"
-          value="{{system.armorTn.mod}}"
-          data-type="Number"
-        /></div>
-      <span>{{localize "l5r4.ui.mechanics.rings.voidTnBoost"}}</span>
-      <div class="flexrow">
-        <input
-          type="checkbox"
-          name="system.armorTn.useVoid"
-          {{checked system.armorTn.useVoid}}
-          data-action="toggle-armor-void"
-        />
-      </div>
     </div>
   </section>
 {{else}}
   <section class="armor">
     <div class="flexrow -gap-sm section-title">
-      <h4 class="title -compact">{{localize "l5r4.ui.mechanics.wounds.armorTn"}}</h4>
+      <h4 class="title -compact">{{localize "l5r4.ui.common.armor"}}</h4>
     </div>
     <div class="grid">
       <span>{{localize "l5r4.ui.mechanics.wounds.armorTn"}}</span>

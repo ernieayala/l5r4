@@ -115,20 +115,29 @@ export function prepareTraitsAndRings(sys) {
   // Calculate elemental ring ranks per L5R4 core rules: Ring = min(physical_trait, mental_trait)
   // This encourages balanced development - improving a ring requires raising BOTH component traits
   const t = sys._derived.traitsEff;
+
+  // CRITICAL: Capture void ring data BEFORE recreating sys.rings object
+  // Preserve the existing void.value to avoid resetting current void points on every data preparation cycle
+  const existingVoidRank = toInt(sys.rings?.void?.rank ?? 0);
+  const existingVoidValue = sys.rings?.void?.value;
+  const existingVoidMax = sys.rings?.void?.max;
+
+  // CRITICAL: Do NOT use spread operator to preserve old sys.rings properties
+  // The rings object should ONLY contain the five rings (air, earth, fire, water, void)
+  // Any other properties (from bugs, migrations, or stale data) must be discarded
+  // Spreading ...otherRings was causing spell slot values or other data to persist in rings
   sys.rings = {
-    ...sys.rings,
     air: Math.min(t.ref, t.awa),
     earth: Math.min(t.sta, t.wil),
     fire: Math.min(t.agi, t.int),
-    water: Math.min(t.str, t.per)
-  };
-
-  // Void ring is special: unlike elemental rings, it maintains a structure with rank (permanent),
-  // value (current points), and max (typically equals rank). Preserve existing structure while
-  // ensuring numeric safety for all properties.
-  sys.rings.void = {
-    rank: toInt(sys.rings?.void?.rank ?? 0),
-    value: toInt(sys.rings?.void?.value ?? 0),
-    max: toInt(sys.rings?.void?.max ?? 0)
+    water: Math.min(t.str, t.per),
+    // Void ring is special: unlike elemental rings, it maintains a structure with rank (permanent),
+    // value (current points), and max (typically equals rank). Preserve existing structure while
+    // ensuring numeric safety for all properties.
+    void: {
+      rank: existingVoidRank,
+      value: existingVoidValue !== undefined ? toInt(existingVoidValue) : existingVoidRank,
+      max: existingVoidMax !== undefined ? toInt(existingVoidMax) : existingVoidRank
+    }
   };
 }

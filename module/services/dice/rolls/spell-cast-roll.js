@@ -26,6 +26,10 @@ import { calculateEffectiveTN, evaluateTN } from "../core/tn-calculator.js";
 import { spendVoidPoint } from "../resources/void-manager.js";
 import { applyRingBonuses } from "../effects/bonus-applicator.js";
 import { GetSpellCastOptions } from "../dialogs/spell-dialog.js";
+import {
+  getConditionRollPenalties,
+  getConditionTNPenalty
+} from "../../../utils/condition-penalties.js";
 
 /**
  * Execute a spell casting roll with automatic affinity/deficiency/TN/slot handling.
@@ -140,10 +144,9 @@ export async function SpellCastRoll({ actor, spell, woundPenalty = 0, showDialog
     return false;
   }
 
-  // Consume slot
+  // Store slot consumption details for later (after roll succeeds)
   const slotPath = useElementalSlot ? `system.spellSlots.${ringKey}` : "system.spellSlots.void";
   const currentSlots = useElementalSlot ? elementalCurrent : voidCurrent;
-  await actor.update({ [slotPath]: currentSlots - 1 });
 
   // Build chat label
   let label = `${game.i18n.localize("l5r4.ui.mechanics.rolls.spellCasting")}: ${spell.name}`;
@@ -163,7 +166,13 @@ export async function SpellCastRoll({ actor, spell, woundPenalty = 0, showDialog
   const bonuses = applyRingBonuses(actor, ringKey);
   let rollMod = options.rollMod + bonuses.roll;
   let keepMod = options.keepMod + bonuses.keep;
-  const totalMod = options.totalMod + bonuses.total;
+  let totalMod = options.totalMod + bonuses.total;
+
+  // Apply wound penalty to roll total (ALWAYS subtract from roll, never add to TN)
+  // Wound penalties reduce the character's effectiveness by subtracting from their roll result
+  if (options.applyWoundPenalty && woundPenalty > 0) {
+    totalMod -= woundPenalty;
+  }
 
   // Handle Void Point spending
   if (options.void) {
@@ -177,6 +186,12 @@ export async function SpellCastRoll({ actor, spell, woundPenalty = 0, showDialog
     label += ` ${game.i18n.localize("l5r4.ui.mechanics.rings.void")}!`;
   }
 
+  // Apply condition penalties (blinded, dazed, fatigued, prone, etc.)
+  // Spell casting is a general action, so use null rollType to get universal penalties
+  const conditionPenalties = getConditionRollPenalties(actor, null, "melee");
+  rollMod += conditionPenalties.roll; // Will be negative if conditions active
+  keepMod += conditionPenalties.keep;
+
   // Calculate dice pool: (Ring + School Rank)k(Ring)
   const diceToRoll = ringValue + effectiveSchoolRank + rollMod;
   const diceToKeep = ringValue + keepMod;
@@ -184,13 +199,15 @@ export async function SpellCastRoll({ actor, spell, woundPenalty = 0, showDialog
   // Use free raises from dialog
   const freeRaises = options.freeRaises || 0;
 
-  // Calculate effective TN
+  // Calculate effective TN: baseTN + (raises × 5) + condition TN penalty
+  const conditionTNPenalty = getConditionTNPenalty(actor); // Fatigued: +5 TN
+  const baseTNWithConditions = baseTN + conditionTNPenalty;
   const effTN = calculateEffectiveTN(
-    baseTN,
+    baseTNWithConditions,
     options.raises,
     freeRaises,
-    woundPenalty,
-    options.applyWoundPenalty
+    0, // Never apply wound penalty to TN
+    false // Wound penalty flag no longer used for TN calculation
   );
 
   // Append TN to label
@@ -227,7 +244,14 @@ export async function SpellCastRoll({ actor, spell, woundPenalty = 0, showDialog
   });
 
   try {
-    return await roll.toMessage({ speaker: ChatMessage.getSpeaker({ actor }), content });
+    const message = await roll.toMessage({ speaker: ChatMessage.getSpeaker({ actor }), content });
+
+    // Consume slot AFTER roll succeeds
+    // Per L5R4 rules: slot consumed when Spell Casting Roll is made (not before)
+    // This ensures slot is only lost if spell actually casts
+    await actor.update({ [slotPath]: currentSlots - 1 });
+
+    return message;
   } catch (err) {
     console.error(`${SYS_ID}`, "SpellCastRoll: Failed to post chat message", {
       err,

@@ -25,6 +25,11 @@
         data-type="Number"
       /></div>
 
+    {{#if (eq actor.type "pc")}}
+      <span title="(Stamina × 2) + Insight Rank + Modifier = ({{system.traits.sta}} × 2) + {{system.insight.rank}} + {{system.wounds.mod}}">{{localize "l5r4.ui.mechanics.wounds.woundHealRate"}}</span>
+      <div class="flexrow">{{system.wounds.healRate}}</div>
+    {{/if}}
+
     {{#if (and (eq actor.type "npc") (eq system.woundMode "manual"))}}
       <span>{{localize "l5r4.ui.mechanics.wounds.maxWounds"}}</span>
       <div class="flexrow"><input
@@ -67,29 +72,3 @@
   </div>
 
 </section>
-{{#if (eq actor.type "pc")}}
-  <section class="wounds">
-    <div class="flexrow -gap-sm section-title">
-      <h4 class="title -compact">{{localize "l5r4.ui.mechanics.wounds.woundHealRate"}}</h4>
-    </div>
-    <div class="grid">
-      <span>{{localize "l5r4.ui.mechanics.traits.sta"}}
-        {{localize "l5r4.ui.mechanics.wounds.healRateFormula"}}
-        {{localize "l5r4.character.ranks.insightRank"}}</span>
-      <div class="flexrow"><span>{{math
-            (math system.traits.sta "*" 2)
-            "+"
-            system.insight.rank
-          }}</span></div>
-      <span>{{localize "l5r4.ui.common.mod"}}</span>
-      <div class="flexrow"><input
-          type="text"
-          name="system.wounds.mod"
-          value="{{system.wounds.mod}}"
-          data-type="Number"
-        /></div>
-      <span>{{localize "l5r4.ui.common.current"}} {{localize "l5r4.ui.common.rate"}}</span>
-      <div class="flexrow"><span>{{system.wounds.healRate}}</span></div>
-    </div>
-  </section>
-{{/if}}

@@ -165,6 +165,7 @@
         "init": "Iniciativa",
         "bonus": "Bônus",
         "mod": "Modificador",
+        "multi": "Multiplicador",
         "rate": "Taxa",
         "current": "Atual",
         "total": "Total",
@@ -183,6 +184,7 @@
         "description": "Descrição",
         "notes": "Notas",
         "activeEffects": "Efeitos Ativos",
+        "conditions": "Condições",
         "active": "Ativo",
         "new": "Novo",
         "auto": "Auto",
@@ -199,7 +201,11 @@
         "mastery": "Maestria",
         "tn": "ND",
         "cost": "Custo",
-        "save": "Salvar"
+        "save": "Salvar",
+        "armor": "Armadura"
+      },
+      "armor": {
+        "allowStacking": "Permitir Empilhamento de Armadura"
       },
       "emphasisManager": {
         "title": "Gerenciar Ênfases de Perícias",
@@ -211,6 +217,24 @@
         "help": "Selecione quais ênfases estão disponíveis para esta perícia. Treine-as na ficha de personagem.",
         "noEmphases": "Nenhuma ênfase na lista",
         "limitReached": "Não é possível treinar mais de {max} ênfases neste grau de perícia"
+      },
+      "wealthManager": {
+        "title": "Gerenciador de Riqueza",
+        "tooltip": "Gerenciar Riqueza",
+        "currentWealth": "Riqueza Atual",
+        "addMoney": "Adicionar Dinheiro",
+        "removeMoney": "Remover Dinheiro",
+        "amount": "Quantidade",
+        "denomination": "Denominação",
+        "add": "Adicionar",
+        "remove": "Remover",
+        "convert": "Converter Moeda",
+        "convertZeniToBu": "Converter 10 Zeni em 1 Bu",
+        "convertBuToZeni": "Converter 1 Bu em 10 Zeni",
+        "convertBuToKoku": "Converter 5 Bu em 1 Koku",
+        "convertKokuToBu": "Converter 1 Koku em 5 Bu",
+        "insufficientFunds": "Fundos insuficientes para esta transação",
+        "insufficientForConversion": "Fundos insuficientes para esta conversão"
       },
       "sheets": {
         "bio": "Histórico",
@@ -266,7 +290,9 @@
         "invalidDamageValue": "Valor de dano inválido fornecido",
         "noTargetForSwap": "Nenhum alvo selecionado para troca de iniciativa",
         "noCombatActive": "Nenhum combate ativo para modificar iniciativa",
-        "notInCombat": "Personagem não está em combate ativo"
+        "notInCombat": "Personagem não está em combate ativo",
+        "wealthManagerFailed": "Falha ao abrir o Gerenciador de Riqueza",
+        "conditionManagerFailed": "Falha ao abrir o Gerenciador de Condições"
       },
       "voidActions": {
         "title": "Ações de Pontos de Vazio",
@@ -547,33 +573,9 @@
     }
   },
   "SETTINGS": {
-    "showTraitRollOptions": {
-      "name": "Perguntar por opções de Rolagens de Atributo por padrão.",
-      "label": "Segure Shift para Alternar."
-    },
-    "showSpellRollOptions": {
-      "name": "Perguntar se a Rolagem de Anel é uma magia por padrão.",
-      "label": "Segure Shift para Alternar."
-    },
-    "showSkillRollOptions": {
-      "name": "Perguntar por opções de Rolagens de Perícia e Rolagens de Dano por padrão.",
-      "label": "Segure Shift para Alternar."
-    },
-    "allowNpcVoidPoints": {
-      "name": "Exibir caixa de seleção de Ponto de Vazio para rolagens de NPC.",
-      "label": "NPCs normalmente não têm Vazio."
-    },
-    "calculateRank": {
-      "name": "Calcular Grau de Discernimento automaticamente",
-      "label": "O Grau de Discernimento é atualizado automaticamente com base no total de Pontos de Discernimento"
-    },
     "allowArmorStacking": {
       "name": "Permitir empilhamento de armadura",
       "label": "Múltiplas peças de \"armadura\" podem ser empilhadas (para representar bônus, etc.)"
-    },
-    "showWeaponRollOptions": {
-      "name": "Perguntar por opções de Rolagem de Arma por padrão.",
-      "label": "Segure Shift para Alternar."
     },
     "LtException": {
       "name": "Aplicar exceção de Pequenas Verdades",
@@ -590,14 +592,6 @@
     "forceMigration": {
       "name": "Forçar migração na inicialização",
       "label": "Força todas as migrações a serem executadas no próximo carregamento do mundo, independentemente da versão. Redefine automaticamente após a conclusão da migração."
-    },
-    "defaultNpcWoundMode": {
-      "name": "Modo de Ferimentos Padrão para NPC",
-      "label": "Controla se novos NPCs usam modo baseado em fórmula (Anel de Terra) ou entrada manual de limite para cálculos de ferimentos. NPCs existentes mantêm suas configurações individuais.",
-      "choices": {
-        "manual": "Manual (Entrada Direta)",
-        "formula": "Fórmula (Baseado em Terra)"
-      }
     }
   },
   "conditions": {

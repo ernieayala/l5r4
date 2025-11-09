@@ -27,7 +27,6 @@
  * Foundry VTT Integration:
  * - Uses Roll API for dice formula evaluation and rendering (Foundry v13)
  * - Leverages ChatMessage.getSpeaker() for chat message creation
- * - Uses game.settings for user preference toggles (showSpellRollOptions)
  * - Uses game.i18n for localized labels and error messages
  * - Async operations: Dialog display, resource spending, actor updates, message posting
  *
@@ -65,6 +64,10 @@ import {
 } from "../resources/spell-slot-manager.js";
 import { applyRingBonuses } from "../effects/bonus-applicator.js";
 import { GetRingOptions } from "../dialogs/ring-dialog.js";
+import {
+  getConditionRollPenalties,
+  getConditionTNPenalty
+} from "../../../utils/condition-penalties.js";
 
 /**
  * Confirms spell slot usage for spell casting when no slot checkbox selected.
@@ -125,33 +128,7 @@ async function _confirmSpellSlotUsage(actor, systemRing, ringName) {
   }
 }
 
-/**
- * Generic resource spending wrapper with user notification.
- *
- * Abstracts the common pattern of spending a resource (spell slot, Void Point),
- * checking for success, displaying error notifications, and extracting values.
- * Centralizes error handling and provides consistent user feedback.
- *
- * Used for spell slot consumption where successful spends return a chat label
- * to append to the roll message (e.g., " [Fire Slot]").
- *
- * @param {Function} spendFn - Async function that returns {success, message, [successProp]}
- * @param {string} [successProp="label"] - Property name to extract from successful result
- * @returns {Promise<{success: boolean, value: *}>} Normalized result with extracted value
- * @private
- * @async
- */
-async function spendResource(spendFn, successProp = "label") {
-  const result = await spendFn();
-
-  // Display user-facing error notification if spending failed
-  if (!result.success) {
-    ui.notifications?.warn(result.message);
-    return { success: false, value: null };
-  }
-
-  return { success: true, value: result[successProp] };
-}
+// Removed unused spendResource function - spell slot consumption now handled inline
 
 /**
  * Execute a Ring roll or Spell Casting roll with full L5R4 mechanics.
@@ -183,9 +160,9 @@ async function spendResource(spendFn, successProp = "label") {
  * - **Exploding Dice**: Tens reroll and add result (handled by Roll formula)
  * - **Ten Dice Rule**: Maximum 10 rolled/kept dice, overflow becomes bonuses
  *
- * User Settings:
- * - `showSpellRollOptions`: Controls whether modifier dialog appears by default
- * - `askForOptions`: Inverts settings behavior (true = show if setting false)
+ * Dialog Behavior:
+ * - Shows modifier dialog by default (askForOptions=true)
+ * - Hold Shift while clicking to skip dialog (askForOptions=false)
  *
  * Side Effects:
  * - May decrement actor.system.rings.void.value (Void Point spending)
@@ -204,7 +181,7 @@ async function spendResource(spendFn, successProp = "label") {
  * @param {number} [options.ringRank=null] - Ring value for dice pool (e.g., Fire 3 = ringRank 3)
  * @param {string} [options.ringName=null] - Display name of Ring for chat message (e.g., "Fire", "Void")
  * @param {string} [options.systemRing=null] - System key for Ring (lowercase, e.g., "fire") for slot tracking
- * @param {boolean} [options.askForOptions=true] - Invert showSpellRollOptions setting (controls dialog display)
+ * @param {boolean} [options.askForOptions=true] - If true, shows roll options dialog; if false, skips dialog (shift-click behavior)
  * @param {L5R4Actor} [options.actor=null] - Actor performing the roll (for resource spending and bonuses)
  *
  * @returns {Promise<ChatMessage|false>} Posted ChatMessage if successful, false if cancelled/failed
@@ -227,8 +204,6 @@ export async function RingRoll({
   const messageTemplate = CHAT_TEMPLATES.simpleRoll;
   let label = ""; // Will be set after dialog processing based on roll type
 
-  const optionsSetting = game.settings.get(SYS_ID, "showSpellRollOptions");
-
   // Roll configuration variables (populated from dialog or defaults)
   let normalRoll = true; // true = Ring Roll (XkX), false = Spell Casting ((Ring+School)kRing)
   let rollMod = 0; // Additional rolled dice (situational bonuses, techniques)
@@ -244,9 +219,8 @@ export async function RingRoll({
     __raisesInput = 0,
     __freeRaisesInput = 0; // User-specified TN, raises, and free raises
 
-  // Show dialog if askForOptions inverts the setting (XOR logic)
-  // Setting ON + askForOptions false = show dialog | Setting OFF + askForOptions true = show dialog
-  if (askForOptions !== optionsSetting) {
+  // Dialog behavior: Show by default (askForOptions=true), skip if shift-clicked (askForOptions=false)
+  if (askForOptions) {
     const choice = await GetRingOptions(ringName, actor, systemRing);
 
     // User cancelled dialog - abort roll
@@ -310,13 +284,17 @@ export async function RingRoll({
     label += ` ${game.i18n.localize("l5r4.ui.mechanics.rings.void")}!`;
   }
 
-  // Apply wound penalty to roll total when rolling without a TN
-  // When no TN is specified, subtract wound penalty from roll result
-  // This ensures wounds affect rolls even when there's no target number to compare against
-  // Otherwise, wound penalty will be applied to TN later
-  if (__tnInput === 0 && applyWoundPenalty && woundPenalty > 0) {
+  // Apply wound penalty to roll total (ALWAYS subtract from roll, never add to TN)
+  // Wound penalties reduce the character's effectiveness by subtracting from their roll result
+  if (applyWoundPenalty && woundPenalty > 0) {
     totalMod -= woundPenalty;
   }
+
+  // Apply condition penalties (blinded, dazed, fatigued, prone, etc.)
+  // Ring rolls are general actions, so use null rollType to get universal penalties
+  const conditionPenalties = getConditionRollPenalties(actor, null, "melee");
+  rollMod += conditionPenalties.roll; // Will be negative if conditions active
+  keepMod += conditionPenalties.keep;
 
   // Determine dice pool based on roll type
   let diceToRoll, diceToKeep;
@@ -357,27 +335,39 @@ export async function RingRoll({
     diceToKeep = toInt(ringRank) + keepMod;
   }
 
-  // Spell slot consumption happens AFTER validation passes
-  // This ensures slots are only consumed when spell actually casts
+  // Validate spell slot availability BEFORE roll
+  // Actual consumption happens AFTER roll succeeds to prevent slot loss on errors
+  let slotLabel = "";
+  let shouldConsumeElementalSlot = false;
+  let shouldConsumeVoidSlot = false;
+
   if (spellSlot && systemRing) {
-    const result = await spendResource(() => spendElementalSlot(actor, systemRing));
-    if (!result.success) {
+    const validation = validateSpellSlot(actor, systemRing, false);
+    if (!validation.valid) {
+      ui.notifications?.warn(validation.message);
       return false;
-    } // Abort if slot unavailable
-    label += result.value; // Append slot label (e.g., " [Fire Slot]")
+    }
+    shouldConsumeElementalSlot = true;
+    const ringDisplay = game.i18n.localize(`l5r4.ui.mechanics.rings.${systemRing}`) || systemRing;
+    slotLabel += ` [${ringDisplay} Slot]`;
   }
 
   if (voidSlot) {
-    const result = await spendResource(() => spendVoidSlot(actor));
-    if (!result.success) {
+    const validation = validateSpellSlot(actor, "void", true);
+    if (!validation.valid) {
+      ui.notifications?.warn(validation.message);
       return false;
-    } // Abort if slot unavailable
-    label += result.value; // Append slot label (e.g., " [Void Slot]")
+    }
+    shouldConsumeVoidSlot = true;
+    const ringDisplay = game.i18n.localize(`l5r4.ui.mechanics.rings.void`) || "void";
+    slotLabel += ` [${ringDisplay} ${game.i18n.localize("l5r4.magic.spells.voidSlot") || "Slot"}]`;
   }
+
+  label += slotLabel;
 
   // Append TN and raises to label if specified
   if (__tnInput || __raisesInput || __freeRaisesInput) {
-    const __effTN = __tnInput + __raisesInput * 5 - __freeRaisesInput * 5;
+    const __effTN = __tnInput + __raisesInput * 5;
     const raisesLabel = game.i18n.localize("l5r4.ui.mechanics.rolls.raises");
     const freeRaisesLabel = game.i18n.localize("l5r4.ui.mechanics.rolls.freeRaises");
     label += ` [TN ${__effTN}`;
@@ -402,14 +392,15 @@ export async function RingRoll({
   const roll = new Roll(rollFormula);
   const rollHtml = await roll.render();
 
-  // Calculate effective TN: base TN + (raises × 5) - (freeRaises × 5) + wound penalty
-  // Wound penalty only applied if enabled AND a TN was specified
+  // Calculate effective TN: base TN + (raises × 5) + condition TN penalty
+  const conditionTNPenalty = getConditionTNPenalty(actor); // Fatigued: +5 TN
+  const baseTNWithConditions = __tnInput + conditionTNPenalty;
   const effTN = calculateEffectiveTN(
-    __tnInput,
+    baseTNWithConditions,
     __raisesInput,
     __freeRaisesInput,
-    woundPenalty,
-    applyWoundPenalty && __tnInput > 0
+    0, // Never apply wound penalty to TN
+    false // Wound penalty flag no longer used for TN calculation
   );
 
   // Evaluate success/failure with margin calculation
@@ -420,7 +411,19 @@ export async function RingRoll({
 
   // Post to chat with error recovery
   try {
-    return await roll.toMessage({ speaker: ChatMessage.getSpeaker(), content });
+    const message = await roll.toMessage({ speaker: ChatMessage.getSpeaker(), content });
+
+    // Consume spell slots AFTER roll succeeds
+    // Per L5R4 rules: slot consumed when Spell Casting Roll is made (not before)
+    // This ensures slots are only lost if spell actually casts
+    if (shouldConsumeElementalSlot && systemRing) {
+      await spendElementalSlot(actor, systemRing);
+    }
+    if (shouldConsumeVoidSlot) {
+      await spendVoidSlot(actor);
+    }
+
+    return message;
   } catch (err) {
     console.error(`${SYS_ID}`, "RingRoll: Failed to post chat message after roll", {
       err,

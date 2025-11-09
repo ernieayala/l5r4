@@ -195,6 +195,10 @@ export default class L5R4PcSheet extends BaseActorSheet {
         return PcAdjustmentHandler.adjustSpellSlot(this._getHandlerContext(), event, element, +1);
       case "trait-rank":
         return PcTraitHandler.adjust(this._getHandlerContext(), event, element, +1);
+      case "trait-increase":
+        return PcTraitHandler.increase(this._getHandlerContext(), event, element);
+      case "trait-decrease":
+        return PcTraitHandler.decrease(this._getHandlerContext(), event, element);
       case "void-points-dots":
         return this._onVoidPointsAdjust(event, element, +1);
       case "toggle-armor-void":
@@ -207,10 +211,22 @@ export default class L5R4PcSheet extends BaseActorSheet {
         );
       case "toggle-movement-type":
         return StanceHandler.toggleMovementType(this._getHandlerContext(), event);
+      case "condition-manager":
+        return AppLauncherHandler.openConditionManager(this._getHandlerContext(), event, element);
+      case "combat-config":
+        return AppLauncherHandler.openCombatConfig(this._getHandlerContext(), event, element);
+      case "armor-config":
+        return AppLauncherHandler.openArmorConfig(this._getHandlerContext(), event, element);
       case "wound-config":
         return AppLauncherHandler.openWoundConfig(this._getHandlerContext(), event, element);
       case "xp-modal":
         return AppLauncherHandler.openXpManager(this._getHandlerContext(), event, element);
+      case "open-wealth-manager":
+        return AppLauncherHandler.openWealthManager(this._getHandlerContext(), event, element);
+      case "recalc-sheet":
+        return this._onRecalcSheet(event, element);
+      case "toggle-rank-mode":
+        return this._onToggleRankMode(event, element);
     }
   }
 
@@ -327,6 +343,97 @@ export default class L5R4PcSheet extends BaseActorSheet {
     }
 
     return BioItemHandler.handleDrop(this._getHandlerContext(), itemDoc);
+  }
+
+  /**
+   * Toggles Insight Rank calculation mode between automatic and manual.
+   *
+   * **GM-Only Feature:**
+   * Only GMs can toggle this setting. Shift+Click on the "Rank" label switches between:
+   * - Automatic: Rank calculated from Insight Points (default)
+   * - Manual: GM directly inputs rank value
+   *
+   * **What It Does:**
+   * 1. Checks for GM permission (non-GMs ignored)
+   * 2. Checks for Shift key (safety mechanism)
+   * 3. Toggles actor.system.insight.autoCalculate flag
+   * 4. Re-renders sheet to show input field or calculated value
+   *
+   * **Use Cases:**
+   * - Special NPCs with non-standard rank progression
+   * - Testing specific rank values
+   * - Temporary rank adjustments for story purposes
+   *
+   * @param {Event} event - Click event on rank label
+   * @param {HTMLElement} _element - Rank label element (unused)
+   * @returns {Promise<void>}
+   * @private
+   */
+  async _onToggleRankMode(event, _element) {
+    event?.preventDefault?.();
+
+    // Only GMs can toggle rank mode
+    if (!game.user.isGM) {
+      return;
+    }
+
+    // Require Shift key to prevent accidental triggers
+    if (!event?.shiftKey) {
+      return;
+    }
+
+    // Toggle autoCalculate flag (default true if undefined)
+    const current = this.actor.system.insight?.autoCalculate ?? true;
+    await this.actor.update({
+      "system.insight.autoCalculate": !current
+    });
+
+    // Notify user of mode change
+    const mode = !current ? "automatic" : "manual";
+    ui.notifications?.info(`Insight Rank calculation set to ${mode} for ${this.actor.name}`);
+  }
+
+  /**
+   * Handles manual sheet recalculation for testing purposes.
+   *
+   * **Testing Tool:**
+   * Shift+Click on the character name label triggers a full actor data preparation
+   * cycle and sheet re-render. Useful for debugging data preparation issues or
+   * verifying that derived values update correctly.
+   *
+   * **What It Does:**
+   * 1. Checks for Shift key (safety mechanism)
+   * 2. Calls actor.prepareData() to recalculate all derived values
+   * 3. Re-renders the sheet to display updated values
+   * 4. Shows notification confirming recalculation
+   *
+   * **Use Cases:**
+   * - Testing trait/ring calculations after rest
+   * - Verifying wound threshold updates
+   * - Debugging derived data issues
+   * - Forcing refresh after manual data edits
+   *
+   * @param {Event} event - Click event on name label
+   * @param {HTMLElement} _element - Name label element (unused)
+   * @returns {Promise<void>}
+   * @private
+   */
+  async _onRecalcSheet(event, _element) {
+    event?.preventDefault?.();
+
+    // Require Shift key to prevent accidental triggers
+    if (!event?.shiftKey) {
+      return;
+    }
+
+    // Force full data preparation
+    this.actor.prepareData();
+
+    // Re-render sheet to show updated values
+    this.render(false);
+
+    // Notify user
+    ui.notifications?.info(`Sheet recalculated for ${this.actor.name}`);
   }
 
   /**
@@ -522,8 +629,11 @@ export default class L5R4PcSheet extends BaseActorSheet {
   async _onRender(context, options) {
     await super._onRender(context, options);
     const root = this.element;
+    if (!this._preparedOnce) {
+      this.actor?.prepareData();
+      this._preparedOnce = true;
+    }
 
-    // Paint Void Points dots based on current/max values
     this._paintVoidPointsDots(root);
 
     // Guard: Only bind non-delegated events once per root element

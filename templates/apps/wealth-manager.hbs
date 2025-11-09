@@ -1,0 +1,99 @@
+<section class="standard-form">
+  <div class="flexcol -gap-sm">
+    <h3>{{localize "l5r4.ui.wealthManager.currentWealth"}}</h3>
+    <div class="wealth-display flexrow -gap-md">
+      <div class="wealth-item">
+        <label>{{localize "l5r4.world.wealth.koku"}}</label>
+        <div class="wealth-value">{{wealth.koku}}</div>
+      </div>
+      <div class="wealth-item">
+        <label>{{localize "l5r4.world.wealth.bu"}}</label>
+        <div class="wealth-value">{{wealth.bu}}</div>
+      </div>
+      <div class="wealth-item">
+        <label>{{localize "l5r4.world.wealth.zeni"}}</label>
+        <div class="wealth-value">{{wealth.zeni}}</div>
+      </div>
+    </div>
+  </div>
+
+  <div class="flexcol -gap-sm">
+    <h3>{{localize "l5r4.ui.wealthManager.addMoney"}}</h3>
+    <div class="form-group">
+      <label for="add-amount">{{localize "l5r4.ui.wealthManager.amount"}}</label>
+      <div class="form-fields">
+        <input type="number" id="add-amount" name="add-amount" step="1" value="1" min="0" />
+      </div>
+    </div>
+    <div class="form-group">
+      <label for="add-denomination">{{localize "l5r4.ui.wealthManager.denomination"}}</label>
+      <div class="form-fields">
+        <select id="add-denomination" name="add-denomination">
+          <option value="koku">{{localize "l5r4.world.wealth.koku"}}</option>
+          <option value="bu">{{localize "l5r4.world.wealth.bu"}}</option>
+          <option value="zeni">{{localize "l5r4.world.wealth.zeni"}}</option>
+        </select>
+      </div>
+    </div>
+    <div class="form-group">
+      <div class="form-fields">
+        <button type="button" data-action="add-money">
+          <i class="fas fa-plus"></i>
+          {{localize "l5r4.ui.wealthManager.add"}}
+        </button>
+      </div>
+    </div>
+  </div>
+
+  <div class="flexcol -gap-sm">
+    <h3>{{localize "l5r4.ui.wealthManager.removeMoney"}}</h3>
+    <div class="form-group">
+      <label for="remove-amount">{{localize "l5r4.ui.wealthManager.amount"}}</label>
+      <div class="form-fields">
+        <input type="number" id="remove-amount" name="remove-amount" step="1" value="1" min="0" />
+      </div>
+    </div>
+    <div class="form-group">
+      <label for="remove-denomination">{{localize "l5r4.ui.wealthManager.denomination"}}</label>
+      <div class="form-fields">
+        <select id="remove-denomination" name="remove-denomination">
+          <option value="koku">{{localize "l5r4.world.wealth.koku"}}</option>
+          <option value="bu">{{localize "l5r4.world.wealth.bu"}}</option>
+          <option value="zeni">{{localize "l5r4.world.wealth.zeni"}}</option>
+        </select>
+      </div>
+    </div>
+    <div class="form-group">
+      <div class="form-fields">
+        <button type="button" data-action="remove-money">
+          <i class="fas fa-minus"></i>
+          {{localize "l5r4.ui.wealthManager.remove"}}
+        </button>
+      </div>
+    </div>
+  </div>
+
+  <div class="flexcol -gap-sm">
+    <h3>{{localize "l5r4.ui.wealthManager.convert"}}</h3>
+    <div class="flexrow -gap-sm">
+      <button type="button" data-action="convert-up" data-from="zeni" title="{{localize 'l5r4.ui.wealthManager.convertZeniToBu'}}">
+        <i class="fas fa-arrow-up"></i>
+        10 {{localize "l5r4.world.wealth.zeni"}} → 1 {{localize "l5r4.world.wealth.bu"}}
+      </button>
+      <button type="button" data-action="convert-down" data-from="bu" title="{{localize 'l5r4.ui.wealthManager.convertBuToZeni'}}">
+        <i class="fas fa-arrow-down"></i>
+        1 {{localize "l5r4.world.wealth.bu"}} → 10 {{localize "l5r4.world.wealth.zeni"}}
+      </button>
+    </div>
+    <div class="flexrow -gap-sm">
+      <button type="button" data-action="convert-up" data-from="bu" title="{{localize 'l5r4.ui.wealthManager.convertBuToKoku'}}">
+        <i class="fas fa-arrow-up"></i>
+        5 {{localize "l5r4.world.wealth.bu"}} → 1 {{localize "l5r4.world.wealth.koku"}}
+      </button>
+      <button type="button" data-action="convert-down" data-from="koku" title="{{localize 'l5r4.ui.wealthManager.convertKokuToBu'}}">
+        <i class="fas fa-arrow-down"></i>
+        1 {{localize "l5r4.world.wealth.koku"}} → 5 {{localize "l5r4.world.wealth.bu"}}
+      </button>
+    </div>
+  </div>
+</section>

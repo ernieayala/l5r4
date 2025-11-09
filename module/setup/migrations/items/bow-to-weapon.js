@@ -15,6 +15,10 @@ import { SYS_ID } from "../../../config/constants.js";
  * the item type structure. This migration enables shared weapon systems while maintaining
  * bow-specific mechanics like ranged attacks and arrow compatibility.
  *
+ * Idempotency: Called from runMigrations() which filters out already-migrated documents,
+ * so this function only processes documents that haven't been migrated yet. This prevents
+ * re-converting already-migrated bows when forceMigration is triggered.
+ *
  * Migration Details:
  * - Sets damageKeep: 0 (bows calculate damage differently than melee weapons)
  * - Preserves bow mechanics: str (tension rating), range, arrow type

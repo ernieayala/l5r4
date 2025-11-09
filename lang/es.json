@@ -165,6 +165,7 @@
         "init": "Iniciativa",
         "bonus": "Bonificación",
         "mod": "Modificador",
+        "multi": "Multiplicador",
         "rate": "Tasa",
         "current": "Actual",
         "total": "Total",
@@ -183,6 +184,7 @@
         "description": "Descripción",
         "notes": "Notas",
         "activeEffects": "Efectos Activos",
+        "conditions": "Condiciones",
         "active": "Activo",
         "new": "Nuevo",
         "auto": "Auto",
@@ -199,7 +201,11 @@
         "mastery": "Maestría",
         "tn": "ND",
         "cost": "Costo",
-        "save": "Guardar"
+        "save": "Guardar",
+        "armor": "Armadura"
+      },
+      "armor": {
+        "allowStacking": "Permitir Apilamiento de Armadura"
       },
       "emphasisManager": {
         "title": "Administrar Énfasis de Habilidades",
@@ -211,6 +217,24 @@
         "help": "Selecciona qué énfasis están disponibles para esta habilidad. Entrénalo en la hoja de personaje.",
         "noEmphases": "No hay énfasis en la lista",
         "limitReached": "No puedes entrenar más de {max} énfasis con este rango de habilidad"
+      },
+      "wealthManager": {
+        "title": "Administrador de Riqueza",
+        "tooltip": "Administrar Riqueza",
+        "currentWealth": "Riqueza Actual",
+        "addMoney": "Agregar Dinero",
+        "removeMoney": "Quitar Dinero",
+        "amount": "Cantidad",
+        "denomination": "Denominación",
+        "add": "Agregar",
+        "remove": "Quitar",
+        "convert": "Convertir Moneda",
+        "convertZeniToBu": "Convertir 10 Zeni a 1 Bu",
+        "convertBuToZeni": "Convertir 1 Bu a 10 Zeni",
+        "convertBuToKoku": "Convertir 5 Bu a 1 Koku",
+        "convertKokuToBu": "Convertir 1 Koku a 5 Bu",
+        "insufficientFunds": "Fondos insuficientes para esta transacción",
+        "insufficientForConversion": "Fondos insuficientes para esta conversión"
       },
       "sheets": {
         "bio": "Trasfondo",
@@ -264,9 +288,11 @@
         "conditionApplyFailed": "Error al aplicar {condition} a {actor}",
         "invalidSkillName": "Nombre de habilidad inválido proporcionado",
         "invalidDamageValue": "Valor de daño inválido proporcionado",
-        "noTargetForSwap": "No hay objetivo seleccionado para intercambiar iniciativa",
+        "noTargetForSwap": "No se seleccionó objetivo para intercambio de iniciativa",
         "noCombatActive": "No hay combate activo para modificar iniciativa",
-        "notInCombat": "El personaje no está en combate activo"
+        "notInCombat": "El personaje no está en combate activo",
+        "wealthManagerFailed": "Error al abrir el Administrador de Riqueza",
+        "conditionManagerFailed": "Error al abrir el Administrador de Condiciones"
       },
       "voidActions": {
         "title": "Acciones de Puntos de Vacío",
@@ -547,33 +573,9 @@
     }
   },
   "SETTINGS": {
-    "showTraitRollOptions": {
-      "name": "Preguntar por opciones de Tiradas de Atributo por defecto.",
-      "label": "Mantén presionado Shift para Alternar."
-    },
-    "showSpellRollOptions": {
-      "name": "Preguntar si la Tirada de Anillo es un hechizo por defecto.",
-      "label": "Mantén presionado Shift para Alternar."
-    },
-    "showSkillRollOptions": {
-      "name": "Preguntar por opciones de Tiradas de Habilidad y Tiradas de Daño por defecto.",
-      "label": "Mantén presionado Shift para Alternar."
-    },
-    "allowNpcVoidPoints": {
-      "name": "Mostrar casilla de Puntos de Vacío para tiradas de PNJ.",
-      "label": "Los PNJ normalmente carecen de Vacío."
-    },
-    "calculateRank": {
-      "name": "Calcular Rango de Perspicacia automáticamente",
-      "label": "El Rango de Perspicacia se actualiza automáticamente basado en los Puntos de Perspicacia totales"
-    },
     "allowArmorStacking": {
       "name": "Permitir apilamiento de armadura",
       "label": "Múltiples piezas de \"armadura\" pueden apilarse (para representar bonificaciones, etc.)"
-    },
-    "showWeaponRollOptions": {
-      "name": "Preguntar por opciones de Tirada de Arma por defecto.",
-      "label": "Mantén presionado Shift para Alternar."
     },
     "LtException": {
       "name": "Aplicar excepción de Pequeñas Verdades",
@@ -590,14 +592,6 @@
     "forceMigration": {
       "name": "Forzar migración al iniciar",
       "label": "Fuerza la ejecución de todas las migraciones en la próxima carga del mundo, independientemente de la versión. Se restablece automáticamente después de que se complete la migración."
-    },
-    "defaultNpcWoundMode": {
-      "name": "Modo de Heridas Predeterminado para PNJ",
-      "label": "Controla si los nuevos PNJ usan el modo basado en fórmula (Anillo de Tierra) o entrada manual de umbral para cálculos de heridas. Los PNJ existentes conservan sus configuraciones individuales.",
-      "choices": {
-        "manual": "Manual (Entrada Directa)",
-        "formula": "Fórmula (Basado en Tierra)"
-      }
     }
   },
   "conditions": {

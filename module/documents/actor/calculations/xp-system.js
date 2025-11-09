@@ -53,8 +53,7 @@ import { SYS_ID } from "../../../config/constants.js";
 import { toInt } from "../../../utils/type-coercion.js";
 import {
   calculateXpStepCostForTrait,
-  getCreationFreeBonus,
-  getCreationFreeBonusVoid
+  getCreationFreeBonus
 } from "../../../utils/xp-calculations.js";
 
 /**
@@ -224,27 +223,34 @@ export function preparePcExperience(actor, sys) {
 
   let traitsXP = 0;
   for (const k of Object.keys(sys.traits ?? {})) {
-    const effCur = toInt(sys.traits[k]);
+    // Read base trait value from _source to exclude Active Effect bonuses
+    // Active Effects (from family, school, etc.) should not count as XP expenditure
+    const baseCur = toInt(actor._source?.system?.traits?.[k] ?? sys.traits[k]);
     const freeBase = toInt(freeTraitBase?.[k] ?? 0);
 
     const freeEff = freeBase > 0 ? 0 : toInt(getCreationFreeBonus(actor, k));
     const disc = toInt(traitDiscounts?.[k] ?? 0);
 
     const baseline = 2 + freeBase;
-    const baseCur = Math.max(baseline, effCur - freeEff);
 
     if (baseCur > baseline) {
       traitsXP += calculateTraitXpCost(baseline, baseCur, freeEff, disc);
     }
   }
 
-  const voidEffCur = toInt(
-    sys?.rings?.void?.rank ?? sys?.rings?.void?.value ?? sys?.rings?.void ?? 0
+  // Read base Void Ring value from _source to exclude Active Effect bonuses
+  // Active Effects should not count as XP expenditure
+  const voidBaseCur = toInt(
+    actor._source?.system?.rings?.void?.rank ??
+      actor._source?.system?.rings?.void?.value ??
+      actor._source?.system?.rings?.void ??
+      sys?.rings?.void?.rank ??
+      sys?.rings?.void?.value ??
+      sys?.rings?.void ??
+      0
   );
   const voidFreeBase = toInt(freeTraitBase?.void ?? 0);
-  const voidFreeEff = voidFreeBase > 0 ? 0 : toInt(getCreationFreeBonusVoid(actor));
   const voidBaseline = 2 + voidFreeBase;
-  const voidBaseCur = Math.max(voidBaseline, voidEffCur - voidFreeEff);
   const voidDisc = toInt(traitDiscounts?.void ?? 0);
 
   const voidXP =
@@ -318,26 +324,16 @@ export function preparePcExperience(actor, sys) {
 /**
  * Track XP expenditures when traits or Void Ring increase.
  *
- * Called during actor._preUpdate hook to log XP spending whenever traits or Void
- * Ring change. Creates timestamped log entries in flags.xpSpent array for display
- * in the XP Manager application.
+ * DEPRECATED: Real-time XP tracking has been replaced with retroactive calculation.
+ * This function now only handles free bonus consumption (converting effective bonuses
+ * to permanent base bonuses when traits reach rank 3).
  *
- * Handles free bonus consumption: When a trait with a free effective bonus is
- * advanced to rank 3 for the first time, the system converts the effective bonus
- * to a permanent base bonus (stored in xpFreeTraitBase flag). This ensures:
- * - The rank 3 purchase doesn't cost XP (uses free creation bonus)
- * - Future advancements correctly calculate costs using the updated baseline
- * - No double-counting of free bonuses
- *
- * This function mutates the `changed` object by adding entries to flags.xpSpent
- * and potentially updating flags.xpFreeTraitBase when free bonuses are consumed.
- *
- * **Important**: Only tracks trait and Void changes. Skill/advantage/disadvantage
- * purchases are tracked through item creation/deletion in separate hooks.
+ * XP expenditure tracking is now handled by buildXpHistory() in xp-calculator.js,
+ * which reconstructs the complete XP history from the character's current state.
+ * This ensures XP costs always match actual character progression without desync issues.
  *
  * @param {Actor} actor - Foundry Actor document being updated
- * @param {Object} changed - Update delta object passed to _preUpdate hook. This
- *   object will be mutated to add flag updates if XP tracking entries are created.
+ * @param {Object} changed - Update delta object passed to _preUpdate hook
  */
 export function trackXpExpenditure(actor, changed) {
   try {
@@ -346,47 +342,11 @@ export function trackXpExpenditure(actor, changed) {
     }
 
     const oldSys = actor._source?.system ?? actor.system;
-    const ns = actor.flags?.[SYS_ID] ?? {};
-    const spent = Array.isArray(ns.xpSpent) ? [...ns.xpSpent] : [];
-
-    const existingEntries = new Set();
-    for (const entry of spent) {
-      const t = String(entry?.type || "");
-      const n = String(entry?.note || "");
-      existingEntries.add(`${t}:${n}`);
-    }
-
-    const traitDiscounts = actor.flags?.[SYS_ID]?.traitDiscounts ?? {};
     const freeTraitBase = actor.flags?.[SYS_ID]?.xpFreeTraitBase ?? {};
 
-    /**
-     * Add an XP expenditure log entry to the spent array.
-     *
-     * Creates a timestamped log entry with XP delta, human-readable note, and
-     * optional metadata for filtering/display. Deduplicates entries by checking
-     * if an entry with the same type:note key already exists.
-     *
-     * @param {number} delta - XP cost (positive value)
-     * @param {string} note - Localized description of the expenditure
-     * @param {Object} [extraData={}] - Additional metadata (type, traitKey, fromValue, toValue, etc.)
-     * @private
-     */
-    const pushNote = (delta, note, extraData = {}) => {
-      const t = String(extraData?.type || "");
-      const key = `${t}:${note}`;
-      if (existingEntries.has(key)) {
-        return;
-      }
-      spent.push({
-        id: foundry.utils.randomID(),
-        delta,
-        note,
-        ts: Date.now(),
-        ...extraData
-      });
-      existingEntries.add(key);
-    };
-
+    // Handle free bonus consumption: When advancing to rank 3 with an effective bonus
+    // (e.g., family/school grant), convert the effective bonus to a permanent base
+    // bonus so it only applies once.
     if (changed?.system?.traits) {
       for (const [k, v] of Object.entries(changed.system.traits)) {
         const newBase = toInt(v);
@@ -398,80 +358,25 @@ export function trackXpExpenditure(actor, changed) {
         const freeBase = toInt(freeTraitBase?.[k] ?? 0);
         const freeEff = freeBase > 0 ? 0 : toInt(getCreationFreeBonus(actor, k));
 
-        let deltaXP = 0;
-        let stepFreeEff = freeEff;
-        let consumedFreeBase = false;
-
+        // Check if advancing to rank 3 with an effective bonus
         for (let r = oldBase + 1; r <= newBase; r++) {
-          // Free bonus consumption: When advancing to rank 3 with an effective bonus
-          // (e.g., family/school grant), convert the effective bonus to a permanent base
-          // bonus so it only applies once. This rank costs no XP.
-          if (!consumedFreeBase && freeBase === 0 && stepFreeEff > 0 && r === 3) {
+          if (freeBase === 0 && freeEff > 0 && r === 3) {
             foundry.utils.setProperty(
               changed,
               `flags.${SYS_ID}.xpFreeTraitBase.${k}`,
               (freeTraitBase?.[k] ?? 0) + 1
             );
-            consumedFreeBase = true;
-            stepFreeEff = 0;
-            continue;
+            break; // Only consume once
           }
-          const disc = toInt(traitDiscounts?.[k] ?? 0);
-          deltaXP += calculateXpStepCostForTrait(r, stepFreeEff, disc);
-        }
-
-        if (deltaXP > 0) {
-          const label = game.i18n?.localize?.(`l5r4.ui.mechanics.traits.${k}`) || k.toUpperCase();
-          pushNote(
-            deltaXP,
-            game.i18n.format("l5r4.character.experience.traitChange", {
-              label,
-              from: oldBase,
-              to: newBase
-            }),
-            {
-              type: "trait",
-              traitKey: k,
-              traitLabel: label,
-              fromValue: oldBase,
-              toValue: newBase
-            }
-          );
         }
       }
     }
 
-    const newVoid = changed?.system?.rings?.void?.rank ?? changed?.system?.rings?.void?.value;
-    if (newVoid !== undefined) {
-      const oldVoid = toInt(
-        oldSys?.rings?.void?.rank ?? oldSys?.rings?.void?.value ?? oldSys?.rings?.void
-      );
-      const next = toInt(newVoid);
-
-      if (Number.isFinite(next) && next > oldVoid) {
-        const baselineVoid = 2 + toInt(freeTraitBase?.void ?? 0);
-        const voidDisc = toInt(traitDiscounts?.void ?? 0);
-        const startRank = Math.max(oldVoid, baselineVoid);
-        const deltaXP = calculateVoidXpCost(startRank, next, voidDisc);
-
-        if (deltaXP > 0) {
-          pushNote(
-            deltaXP,
-            game.i18n.format("l5r4.character.experience.voidChange", { from: oldVoid, to: next }),
-            {
-              type: "void",
-              fromValue: oldVoid,
-              toValue: next
-            }
-          );
-        }
-      }
-    }
-
-    if (spent.length !== (ns.xpSpent?.length ?? 0)) {
-      foundry.utils.setProperty(changed, `flags.${SYS_ID}.xpSpent`, spent);
+    // Invalidate XP cache to trigger recalculation
+    if (changed?.system?.traits || changed?.system?.rings?.void) {
+      foundry.utils.setProperty(changed, `flags.${SYS_ID}.xpRetroactiveVersion`, 0);
     }
   } catch (err) {
-    console.warn(`${SYS_ID}`, "XP tracking failed", { err });
+    console.warn(`${SYS_ID}`, "Free bonus tracking failed", { err });
   }
 }

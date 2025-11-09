@@ -68,6 +68,7 @@ import { BaseActorSheet } from "./base-actor-sheet.js";
 import { RollHandler } from "./handlers/roll-handler.js";
 import { AppLauncherHandler } from "./handlers/app-launcher-handler.js";
 import { StanceHandler } from "./handlers/stance-handler.js";
+import { TraitHandler } from "./handlers/trait-handler.js";
 
 /**
  * NPC Actor Sheet for L5R4 System
@@ -154,6 +155,7 @@ export default class L5R4NpcSheet extends BaseActorSheet {
    * - test-fear: Trigger Fear test for selected tokens
    * - trait-rank: Adjust trait ranks (Shift+Click)
    * - void-points-dots: Spend/regain Void Points
+   * - combat-config: Open combat configuration dialog (initiative/movement)
    * - wound-config: Open wound threshold configuration dialog
    *
    * **Implementation Note:**
@@ -204,10 +206,18 @@ export default class L5R4NpcSheet extends BaseActorSheet {
         return this._onFearTest(event, element);
       case "trait-rank":
         return this._onTraitAdjust(event, element, +1);
+      case "trait-increase":
+        return TraitHandler.increase(this._getHandlerContext(), event, element);
+      case "trait-decrease":
+        return TraitHandler.decrease(this._getHandlerContext(), event, element);
       case "void-points-dots":
         return this._onVoidPointsAdjust(event, element, +1);
       case "toggle-movement-type":
         return StanceHandler.toggleMovementType(this._getHandlerContext(), event);
+      case "condition-manager":
+        return AppLauncherHandler.openConditionManager(this._getHandlerContext(), event, element);
+      case "combat-config":
+        return AppLauncherHandler.openCombatConfig(this._getHandlerContext(), event, element);
       case "wound-config":
         return AppLauncherHandler.openWoundConfig(this._getHandlerContext(), event, element);
       case "edit-attack":
@@ -441,8 +451,8 @@ export default class L5R4NpcSheet extends BaseActorSheet {
       mountedStatus,
       collapsedSections,
 
-      // Show Void Points section only if system setting enabled
-      showNpcVoidPoints: game.settings.get(SYS_ID, "allowNpcVoidPoints"),
+      // Show Void Points section only if NPC has Void Ring >= 1
+      showNpcVoidPoints: (actorObj.system?.rings?.void?.rank ?? 0) >= 1,
 
       traitsEff: foundry.utils.duplicate(this.actor.system?._derived?.traitsEff ?? {}),
 

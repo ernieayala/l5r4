@@ -10,6 +10,9 @@
 import { describe, it, expect, beforeEach, vi } from "vitest";
 import {
   calculateXpStepCostForTrait,
+  calculateVoidStepCost,
+  calculateSkillStepCost,
+  calculateEmphasisCost,
   getCreationFreeBonus,
   getCreationFreeBonusVoid
 } from "../../../module/utils/xp-calculations.js";
@@ -151,6 +154,306 @@ describe("calculateXpStepCostForTrait", () => {
     it("should handle fractional rank", () => {
       const cost = calculateXpStepCostForTrait(2.5, 0, 0);
       expect(cost).toBe(10); // 4 × 2.5
+    });
+  });
+});
+
+describe("calculateVoidStepCost", () => {
+  describe("standard void costs", () => {
+    it("should cost 6 × rank for rank 1", () => {
+      const cost = calculateVoidStepCost(1, 0);
+      expect(cost).toBe(6); // 6 × 1
+    });
+
+    it("should cost 6 × rank for rank 3", () => {
+      const cost = calculateVoidStepCost(3, 0);
+      expect(cost).toBe(18); // 6 × 3
+    });
+
+    it("should cost 6 × rank for rank 5", () => {
+      const cost = calculateVoidStepCost(5, 0);
+      expect(cost).toBe(30); // 6 × 5
+    });
+
+    it("should cost 6 × rank for rank 10", () => {
+      const cost = calculateVoidStepCost(10, 0);
+      expect(cost).toBe(60); // 6 × 10
+    });
+
+    it("should cost more than regular traits", () => {
+      const voidCost = calculateVoidStepCost(3, 0);
+      const traitCost = calculateXpStepCostForTrait(3, 0, 0);
+      expect(voidCost).toBeGreaterThan(traitCost); // 18 > 12
+    });
+  });
+
+  describe("discounts", () => {
+    it("should apply negative discount", () => {
+      const cost = calculateVoidStepCost(3, -6);
+      expect(cost).toBe(12); // 18 - 6
+    });
+
+    it("should apply positive discount (penalty)", () => {
+      const cost = calculateVoidStepCost(3, 6);
+      expect(cost).toBe(24); // 18 + 6
+    });
+
+    it("should allow heavy discounts", () => {
+      const cost = calculateVoidStepCost(2, -6);
+      expect(cost).toBe(6); // 12 - 6
+    });
+  });
+
+  describe("minimum cost enforcement", () => {
+    it("should never return negative cost", () => {
+      const cost = calculateVoidStepCost(1, -10);
+      expect(cost).toBe(0); // Min 0
+    });
+
+    it("should return 0 for excessive discount", () => {
+      const cost = calculateVoidStepCost(2, -20);
+      expect(cost).toBe(0); // 12 - 20 = 0 (clamped)
+    });
+
+    it("should return 0 for rank 0", () => {
+      const cost = calculateVoidStepCost(0, 0);
+      expect(cost).toBe(0);
+    });
+  });
+
+  describe("edge cases", () => {
+    it("should handle null rank", () => {
+      const cost = calculateVoidStepCost(null, 0);
+      expect(cost).toBe(0);
+    });
+
+    it("should handle undefined rank", () => {
+      const cost = calculateVoidStepCost(undefined, 0);
+      expect(cost).toBe(0);
+    });
+
+    it("should handle null discount", () => {
+      const cost = calculateVoidStepCost(3, null);
+      expect(cost).toBe(18); // Treats null as 0
+    });
+
+    it("should handle undefined discount", () => {
+      const cost = calculateVoidStepCost(3, undefined);
+      expect(cost).toBe(18); // Treats undefined as 0
+    });
+
+    it("should coerce string rank to number", () => {
+      const cost = calculateVoidStepCost("4", 0);
+      expect(cost).toBe(24); // 6 × 4
+    });
+
+    it("should handle NaN rank", () => {
+      const cost = calculateVoidStepCost(NaN, 0);
+      expect(cost).toBe(0);
+    });
+
+    it("should handle negative rank", () => {
+      const cost = calculateVoidStepCost(-2, 0);
+      expect(cost).toBe(0); // Min 0 (negative × 6 would be negative)
+    });
+
+    it("should handle Infinity rank", () => {
+      const cost = calculateVoidStepCost(Infinity, 0);
+      expect(cost).toBe(Infinity); // 6 × Infinity
+    });
+
+    it("should handle fractional rank", () => {
+      const cost = calculateVoidStepCost(2.5, 0);
+      expect(cost).toBe(15); // 6 × 2.5
+    });
+  });
+
+  describe("real-world scenarios", () => {
+    it("should calculate beginner void advancement (2→3)", () => {
+      const cost = calculateVoidStepCost(3, 0);
+      expect(cost).toBe(18);
+    });
+
+    it("should calculate advanced void advancement (5→6)", () => {
+      const cost = calculateVoidStepCost(6, 0);
+      expect(cost).toBe(36);
+    });
+
+    it("should calculate master void advancement (9→10)", () => {
+      const cost = calculateVoidStepCost(10, 0);
+      expect(cost).toBe(60);
+    });
+
+    it("should calculate void with clan discount", () => {
+      // Some clans might have -3 void discount
+      const cost = calculateVoidStepCost(3, -3);
+      expect(cost).toBe(15); // 18 - 3
+    });
+  });
+});
+
+describe("calculateSkillStepCost", () => {
+  describe("standard skill costs", () => {
+    it("should cost equal to rank for rank 1", () => {
+      const cost = calculateSkillStepCost(1);
+      expect(cost).toBe(1);
+    });
+
+    it("should cost equal to rank for rank 3", () => {
+      const cost = calculateSkillStepCost(3);
+      expect(cost).toBe(3);
+    });
+
+    it("should cost equal to rank for rank 5", () => {
+      const cost = calculateSkillStepCost(5);
+      expect(cost).toBe(5);
+    });
+
+    it("should cost equal to rank for rank 10", () => {
+      const cost = calculateSkillStepCost(10);
+      expect(cost).toBe(10);
+    });
+
+    it("should have linear cost progression", () => {
+      const cost1 = calculateSkillStepCost(1);
+      const cost2 = calculateSkillStepCost(2);
+      const cost3 = calculateSkillStepCost(3);
+      expect(cost2 - cost1).toBe(1);
+      expect(cost3 - cost2).toBe(1);
+    });
+
+    it("should cost less than trait advancement", () => {
+      const skillCost = calculateSkillStepCost(3);
+      const traitCost = calculateXpStepCostForTrait(3, 0, 0);
+      expect(skillCost).toBeLessThan(traitCost); // 3 < 12
+    });
+  });
+
+  describe("minimum cost enforcement", () => {
+    it("should return 0 for rank 0", () => {
+      const cost = calculateSkillStepCost(0);
+      expect(cost).toBe(0);
+    });
+
+    it("should return 0 for negative rank", () => {
+      const cost = calculateSkillStepCost(-5);
+      expect(cost).toBe(0); // Min 0
+    });
+  });
+
+  describe("edge cases", () => {
+    it("should handle null rank", () => {
+      const cost = calculateSkillStepCost(null);
+      expect(cost).toBe(0);
+    });
+
+    it("should handle undefined rank", () => {
+      const cost = calculateSkillStepCost(undefined);
+      expect(cost).toBe(0);
+    });
+
+    it("should coerce string rank to number", () => {
+      const cost = calculateSkillStepCost("7");
+      expect(cost).toBe(7);
+    });
+
+    it("should handle NaN rank", () => {
+      const cost = calculateSkillStepCost(NaN);
+      expect(cost).toBe(0);
+    });
+
+    it("should handle Infinity rank", () => {
+      const cost = calculateSkillStepCost(Infinity);
+      expect(cost).toBe(Infinity);
+    });
+
+    it("should handle fractional rank", () => {
+      const cost = calculateSkillStepCost(3.5);
+      expect(cost).toBe(3.5);
+    });
+
+    it("should handle very large ranks", () => {
+      const cost = calculateSkillStepCost(100);
+      expect(cost).toBe(100);
+    });
+  });
+
+  describe("real-world scenarios", () => {
+    it("should calculate learning new skill (0→1)", () => {
+      const cost = calculateSkillStepCost(1);
+      expect(cost).toBe(1);
+    });
+
+    it("should calculate early skill advancement (2→3)", () => {
+      const cost = calculateSkillStepCost(3);
+      expect(cost).toBe(3);
+    });
+
+    it("should calculate mid-tier skill advancement (5→6)", () => {
+      const cost = calculateSkillStepCost(6);
+      expect(cost).toBe(6);
+    });
+
+    it("should calculate master skill advancement (9→10)", () => {
+      const cost = calculateSkillStepCost(10);
+      expect(cost).toBe(10);
+    });
+  });
+});
+
+describe("calculateEmphasisCost", () => {
+  describe("standard emphasis cost", () => {
+    it("should always return 2", () => {
+      const cost = calculateEmphasisCost();
+      expect(cost).toBe(2);
+    });
+
+    it("should be constant regardless of skill rank", () => {
+      // Emphasis cost doesn't depend on skill rank
+      const cost1 = calculateEmphasisCost();
+      const cost2 = calculateEmphasisCost();
+      expect(cost1).toBe(cost2);
+      expect(cost1).toBe(2);
+    });
+
+    it("should cost less than skill rank advancement", () => {
+      const emphasisCost = calculateEmphasisCost();
+      const skillCost = calculateSkillStepCost(3);
+      expect(emphasisCost).toBeLessThan(skillCost); // 2 < 3
+    });
+  });
+
+  describe("multiple emphasis purchases", () => {
+    it("should cost same for first emphasis", () => {
+      const cost = calculateEmphasisCost();
+      expect(cost).toBe(2);
+    });
+
+    it("should cost same for second emphasis", () => {
+      const cost = calculateEmphasisCost();
+      expect(cost).toBe(2);
+    });
+
+    it("should have constant cost for any number of emphases", () => {
+      const costs = Array.from({ length: 10 }, () => calculateEmphasisCost());
+      expect(costs.every(c => c === 2)).toBe(true);
+    });
+  });
+
+  describe("real-world scenarios", () => {
+    it("should calculate emphasis for Kenjutsu (Katana)", () => {
+      const cost = calculateEmphasisCost();
+      expect(cost).toBe(2);
+    });
+
+    it("should calculate emphasis for Courtier (Manipulation)", () => {
+      const cost = calculateEmphasisCost();
+      expect(cost).toBe(2);
+    });
+
+    it("should calculate total cost for 3 emphases", () => {
+      const totalCost = calculateEmphasisCost() * 3;
+      expect(totalCost).toBe(6);
     });
   });
 });

@@ -114,9 +114,8 @@ export default class L5R4Actor extends Actor {
    * - `traitDiscounts`: XP cost modifiers for traits (advantages, disadvantages)
    *
    * **NPC Wound Mode:**
-   * Reads `defaultNpcWoundMode` setting ("manual" or "formula") and applies it.
-   * Manual mode lets GMs set exact wound thresholds; formula mode calculates from
-   * Earth Ring. Falls back to "manual" if setting read fails.
+   * New NPCs default to "manual" wound mode where GMs set exact wound thresholds.
+   * This is appropriate as NPCs vary widely in power level and wound capacity.
    *
    * **Side Effects:**
    * - Mutates `this.prototypeToken` with default token settings
@@ -174,25 +173,9 @@ export default class L5R4Actor extends Actor {
         this.updateSource(updates);
       }
     } else {
-      // Read default NPC wound calculation mode from system settings
-      // "manual": GM sets exact wound thresholds (good for special enemies, bosses)
-      // "formula": Auto-calculate from Earth Ring (good for standard enemies)
-      // Error handling: If settings not registered yet (e.g., during module load), fall back to "manual"
-      let defaultWoundMode = "manual"; // Fallback default
-      try {
-        defaultWoundMode = game.settings.get(SYS_ID, "defaultNpcWoundMode") || "manual";
-      } catch (err) {
-        console.warn(
-          `${SYS_ID}`,
-          "Failed to read defaultNpcWoundMode setting during NPC creation, using manual mode",
-          {
-            err,
-            actorId: this.id,
-            actorName: this.name
-          }
-        );
-      }
-
+      // NPC actors default to manual wound mode
+      // Manual mode: GM sets exact wound thresholds for each NPC individually
+      // This is appropriate as NPCs vary widely in power level and wound capacity
       this.prototypeToken.updateSource({
         bar1: { attribute: "wounds" },
         bar2: { attribute: "suffered" },
@@ -201,37 +184,18 @@ export default class L5R4Actor extends Actor {
         disposition: CONST.TOKEN_DISPOSITIONS.HOSTILE
       });
 
-      try {
-        const updates = {};
+      const updates = {};
 
-        if (!data.img) {
-          updates.img = iconPath("npc.webp");
-        }
+      if (!data.img) {
+        updates.img = iconPath("npc.webp");
+      }
 
-        if (!data.system?.woundMode) {
-          updates["system.woundMode"] = defaultWoundMode;
-        }
+      if (!data.system?.woundMode) {
+        updates["system.woundMode"] = "manual";
+      }
 
-        if (Object.keys(updates).length > 0) {
-          this.updateSource(updates);
-        }
-
-        if (CONFIG.debug?.l5r4?.wounds) {
-          console.warn(`${SYS_ID} | NPC Created with wound mode:`, {
-            actorId: this.id,
-            actorName: this.name,
-            providedWoundMode: data.system?.woundMode,
-            defaultWoundMode: defaultWoundMode,
-            finalWoundMode: data.system?.woundMode || defaultWoundMode
-          });
-        }
-      } catch (err) {
-        console.warn(`${SYS_ID}`, "Failed to set default wound mode during NPC creation", {
-          err,
-          actorId: this.id,
-          actorName: this.name,
-          defaultWoundMode
-        });
+      if (Object.keys(updates).length > 0) {
+        this.updateSource(updates);
       }
     }
   }
@@ -257,6 +221,19 @@ export default class L5R4Actor extends Actor {
     super.prepareBaseData();
 
     const sys = this.system ?? {};
+
+    // Reset traits to base values from _source before Active Effects are applied
+    // Foundry's data preparation lifecycle applies Active Effects in ADD mode after prepareBaseData,
+    // so traits must start from their base values to ensure correct effect application
+    if (this._source?.system?.traits) {
+      sys.traits = sys.traits ?? {};
+      const sourceTr = this._source.system.traits;
+      for (const key of ["sta", "wil", "str", "per", "ref", "awa", "agi", "int"]) {
+        if (sourceTr[key] !== undefined) {
+          sys.traits[key] = sourceTr[key];
+        }
+      }
+    }
 
     // Initialize core data structures if not present
     sys.initiative = sys.initiative ?? {};

@@ -7,6 +7,287 @@ Versioning: [Semantic Versioning](https://semver.org/spec/v2.0.0.html)
 
 ---
 
+## [3.2.1] - 2025-11-03
+
+### Removed
+
+- Roll dialog settings (trait, skill, spell, weapon)
+- Automatic insight rank calculation setting
+- NPC void points display setting
+- Default NPC wound mode setting
+
+### Changed
+
+- Armor stacking setting moved to Combat Config dialog
+- NPC void points auto-show when Void Ring >= 1
+- NPC trait controls use direct increase/decrease buttons
+- TraitHandler integrated for NPC trait adjustment
+
+### Added
+
+- `TraitHandler.increase()` - direct trait increment
+- `TraitHandler.decrease()` - direct trait decrement
+- Shift+Click rank mode toggle tooltip
+- Combat configuration labels in localization
+- Armor stacking labels in localization
+
+### Fixed
+
+- `calculateXpDataVersion()` handles null/undefined actors
+- `calculateXpDataVersion()` handles missing items property
+- Test assertions updated for removed settings
+
+---
+
+## [3.2.0] - 2025-10-30
+
+### Added
+
+**Visual Animation System**
+- New animation system for stances, conditions, and attacks using Sequencer + JB2A
+- Stance animations: Full Attack, Full Defense, Center with visual effects
+- Condition animations: Blinded, Dazed, Fatigued, Prone, Stunned, Grappled
+- Attack projectile animations: arrows and kunai for bow/weapon attacks
+- Animation manager for lifecycle control (play, remove, cleanup)
+- Asset library with JB2A asset mapping and module detection
+- Hook integration for ActiveEffect and Actor lifecycle events
+- Graceful degradation when Sequencer/JB2A modules not installed
+- Automatic animation cleanup on effect removal or actor deletion
+- Target-based attack animations triggered from chat messages
+
+**Armor Configuration Dialog**
+- ApplicationV2-based armor configuration interface
+- Edit armor TN bonus and reduction values
+- Armor stacking rules configuration (highest only or all stack)
+- Integrated with character sheet armor management
+- Form validation and proper data persistence
+
+**Condition Manager Dialog**
+- Centralized status effect management interface
+- Toggle all conditions and stances from single dialog
+- Visual status indicators for active effects
+- Quick access to all L5R4 status effects
+- Integrated with character sheet for easy condition tracking
+
+**Combat Configuration Dialog**
+- Initiative modifier configuration
+- Movement rate adjustments
+- Combat-related settings in dedicated interface
+- Streamlined combat setup workflow
+
+**Wealth Manager**
+- New modal wealth management application with calculator-style UI
+- Add/remove money by denomination (koku, bu, zeni) with validation
+- Currency conversion: 10 zeni ↔ 1 bu, 5 bu ↔ 1 koku
+- Prevents negative wealth values with Math.max clamping
+- No auto-normalization (5 bu stays 5 bu, not converted to 1 koku)
+- Calculator icon launcher on character sheet
+- Comprehensive localization in all 6 languages (en, de, es, fr, pt-BR, ru)
+- 24 integration tests covering edge cases and error conditions
+
+**Race Condition Protection**
+- Roll handlers now prevent double-click exploits using in-progress tracking
+- Each roll type tracked independently (skill, attack, trait, ring, spell, weapon, NPC)
+- Simultaneous different rolls allowed while preventing duplicate submissions
+- Protection covers all roll types: skill, attack, trait, ring, spell, weapon, NPC attacks
+- Async/await pattern ensures proper cleanup after roll completion
+
+**Hook Registration System**
+- Centralized hook registration in `register-all.js`
+- Single point of reference for all active hooks
+- Improved debugging and maintenance of hook interactions
+- Clear documentation of hook categories and execution order
+
+**Comprehensive Test Suite**
+- 18 new integration test files for edge cases and race conditions
+- 6 new unit test files for services and utilities
+- Tests cover: actor creation, attacks, conditions, damage, emphasis reroll, initiative
+- Tests cover: item creation, migrations, skill advancement, spell slots, stances, wounds, XP
+- Race condition tests for critical workflows
+- Edge case coverage for all major systems
+
+**Validators Module**
+- New `utils/validators.js` for input validation
+- Centralized validation logic for data integrity
+- Type checking and range validation utilities
+
+### Enhanced
+
+**Roll System**
+- All roll handlers now async with proper error handling
+- Race condition protection across all roll types
+- Improved roll key generation for tracking
+- Better cleanup with try/finally blocks
+- Consistent async patterns throughout roll services
+
+**Resource Management**
+- Spell slot manager enhanced with better validation
+- Void Point manager improved with edge case handling
+- Resource depletion checks more robust
+- Better error messages for resource failures
+
+**XP System**
+- XP calculations refactored for clarity
+- XP formatter improved with better output
+- XP versioning enhanced for migration tracking
+- Emphasis XP tracking more reliable
+- Better handling of custom emphases
+
+**Migration System**
+- Migration helpers improved with better error handling
+- Icon path migration more robust
+- Emphasis migration enhanced with deduplication
+- Schema application more reliable
+- Embedded items migration improved
+- Bow-to-weapon migration enhanced
+
+**Dialog System**
+- Roll modifier dialog improved with better layout
+- Spell cast dialog enhanced with clearer options
+- Maho cast dialog improved for usability
+- Better keyboard navigation in all dialogs
+
+**Chat System**
+- Chat damage buttons more reliable
+- Combat Void spending hooks improved
+- Better error handling in chat message creation
+- Improved chat card formatting
+
+**Combat System**
+- Initiative modifiers now properly configurable
+- Movement tracking enhanced with configuration options
+- Combat modifiers integrated into derived data calculations
+
+**Code Quality**
+- Consistent async/await patterns throughout
+- Better error handling with try/catch/finally
+- Improved JSDoc documentation
+- Cleaner code organization
+- Reduced code duplication
+- Resolved 18 ESLint unused variable warnings
+- Fixed deprecated CONST.CHAT_MESSAGE_TYPES usage (replaced with CONST.CHAT_MESSAGE_STYLES)
+- Improved code formatting with Prettier
+- Better JSDoc documentation for animation system
+
+### Fixed
+
+**Roll System**
+- TN calculation reflects declared raises only
+- Free raises reduce required roll result, not TN
+- Void point tracking now properly handles edge cases
+- Unskilled roll mechanics fixed to prevent incorrect calculations
+
+**Character Sheet**
+- Fixed trait values stacking on sheet recalculation
+- Trait bonuses now apply correctly without duplication
+
+**Deprecation Warnings**
+- Updated chat message type constants to use CONST.CHAT_MESSAGE_STYLES
+- Resolved Foundry v13 API deprecation warnings
+
+**Code Cleanup**
+- Fixed race condition protection in roll handlers
+- Improved async/await patterns in animation hooks
+- Better error handling throughout animation system
+
+**Emphasis Migration**
+- Old emphases now properly marked as trained (selected) in new system
+- Trained emphases are now correctly added to `trainedEmphases` array during migration
+- Previously purchased emphases no longer appear as unpurchased after migration
+
+**Icon Migration**
+- Fixed embedded item icons not updating on actor sheets
+- Icon migration now processes items owned by actors (embedded items)
+- Items on character sheets will now properly update from old PNG to new WebP icons
+
+**Race Conditions**
+- Fixed double-click exploits in all roll handlers
+- Fixed race conditions in actor creation workflows
+- Fixed race conditions in item creation workflows
+- Fixed race conditions in damage application
+- Fixed race conditions in initiative rolls
+- Fixed race conditions in skill advancement
+- Fixed race conditions in XP tracking
+
+**Resource Management**
+- Fixed spell slot depletion edge cases
+- Fixed Void Point spending edge cases
+- Fixed resource restoration during rest
+- Better validation prevents negative resources
+
+**Roll System**
+- NPC rolls use unified simple-roll system
+- Formula builder edge cases handled
+- Unskilled rolls properly handled
+- Wound penalty application improved
+
+**UI/UX**
+- Removed transition animation on inline controls to prevent visual glitches
+- Fixed item list styling issues
+- Better visual feedback for roll progress
+
+### Removed
+
+**Code Cleanup**
+- Cleaned up unused imports and dependencies
+- Streamlined NPC roll system
+
+### Technical
+
+**Architecture**
+- Centralized hook registration pattern
+- Improved separation of concerns in roll handlers
+- Better async/await patterns throughout
+- Enhanced error handling strategies
+- Race condition protection infrastructure
+- New `services/animations/` module structure
+- Modular animation system with clear separation of concerns
+- Hook-based integration with Foundry lifecycle events
+- Asset library abstraction for JB2A integration
+- Animation manager service for centralized control
+
+**Dependencies**
+- Sequencer module integration (optional, graceful degradation)
+- JB2A module integration (optional, graceful degradation)
+- System functions without animation modules installed
+
+**Testing**
+- 18 new integration test files
+- 6 new unit test files
+- Comprehensive edge case coverage
+- Race condition test suite
+- Better test organization and fixtures
+
+**Performance**
+- Reduced code duplication in roll handlers
+- More efficient roll tracking
+- Better resource cleanup
+- Optimized migration processes
+
+---
+
+## [3.1.1] - 2025-10-27
+
+### Fixed
+
+**Emphasis Migration**
+- Improved emphasis string-to-array migration with intelligent matching
+- Case-insensitive matching for official emphases (e.g., "katana" → "Katana")
+- Singular/plural matching (e.g., "Dog" → "Dogs", "horse" → "Horses")
+- Automatic custom emphasis creation for non-matching items
+- Backward compatibility: old `emphasis` field preserved in template.json to prevent data loss
+- Migration now merges old and new data safely (idempotent with deduplication)
+- Preserves existing `trainedEmphases` during migration
+
+### Enhanced
+
+**Migration Safety**
+- Migration can run multiple times safely without duplicating data
+- Existing emphasis data is never lost during system updates
+- Proper logging of created custom emphases during migration
+
+---
+
 ## [3.1.0] - 2025-10-27
 
 ### Added

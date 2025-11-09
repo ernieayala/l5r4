@@ -22,14 +22,13 @@
  * 5. Build and execute damage roll formula
  * 6. Post damage result to chat with annotated label
  *
- * Dialog Bypass:
- * The damage modifier dialog can be bypassed via "showWeaponRollOptions" world setting.
- * When bypassed, only base weapon damage + Strength + stance bonuses are rolled.
- * The askForOptions parameter inverts this setting for specific calls.
+ * Dialog Behavior:
+ * The damage modifier dialog appears by default when rolling.
+ * Hold Shift while clicking to skip the dialog and use default values.
+ * The askForOptions parameter controls this: true shows dialog, false skips it.
  *
  * Foundry VTT Integration:
  * - Requires: Foundry VTT v13+ (Roll API, ChatMessage.getSpeaker)
- * - Uses: game.settings.get() for dialog bypass behavior
  * - Uses: game.i18n.localize() for chat labels
  * - Returns: ChatMessage promise from Roll.toMessage()
  *
@@ -42,7 +41,6 @@
  * @requires Foundry VTT v13+
  */
 
-import { SYS_ID } from "../../../config/constants.js";
 import { toInt } from "../../../utils/type-coercion.js";
 import { TenDiceRule } from "../core/ten-dice-rule.js";
 import { buildFormula } from "../core/formula-builder.js";
@@ -67,9 +65,9 @@ import { spendVoidPoint } from "../resources/void-manager.js";
  * 6. Roll execution: Exploding d10s, post to chat with annotated label
  *
  * Dialog Behavior:
- * The damage modifier dialog appears based on inverted logic of "showWeaponRollOptions"
- * world setting. If askForOptions !== setting value, dialog is shown. This allows
- * specific calls to override the global setting (e.g., right-click to force dialog).
+ * The damage modifier dialog appears by default (askForOptions=true).
+ * Hold Shift while clicking to skip dialog (askForOptions=false).
+ * When skipped, uses base weapon damage + Strength + stance bonuses only.
  *
  * Chat Label Annotations:
  * - Base: "Damage for [Weapon Name]"
@@ -82,7 +80,7 @@ import { spendVoidPoint } from "../resources/void-manager.js";
  * @param {number} [options.diceKeep=null] - Kept dice from weapon DR (e.g., Katana 3k2, pass 2)
  * @param {string} [options.weaponName=null] - Name of weapon for chat label (e.g., "Katana", "Yumi")
  * @param {string} [options.description=null] - Optional description appended to label (e.g., "Called Shot: Head")
- * @param {boolean} [options.askForOptions=true] - If true, inverts "showWeaponRollOptions" setting (forces dialog when setting is false)
+ * @param {boolean} [options.askForOptions=true] - If true, shows damage modifier dialog; if false, skips dialog (shift-click behavior)
  * @param {number} [options.attackRaises=0] - Number of raises spent on attack roll, converted to damage via Increased Damage maneuver (+1k0 per raise)
  * @param {number} [options.stanceRollBonus=0] - Rolled dice bonus from stance effect flags (e.g., School Techniques)
  * @param {number} [options.stanceKeepBonus=0] - Kept dice bonus from stance effect flags (e.g., School Techniques)
@@ -106,12 +104,9 @@ export async function WeaponRoll({
     keepMod = 0,
     bonus = 0;
   let label = `Damage for ${weaponName}`;
-  const optionsSetting = game.settings.get(SYS_ID, "showWeaponRollOptions");
 
-  // Inverted boolean logic: Dialog appears when askForOptions !== setting
-  // This allows callers to force dialog (askForOptions=false) when setting is true,
-  // or skip dialog (askForOptions=true) when setting is false
-  if (askForOptions !== optionsSetting) {
+  // Dialog behavior: Show by default, skip if shift-clicked (askForOptions=false)
+  if (askForOptions) {
     const check = await GetWeaponOptions(weaponName, toInt(attackRaises), actor);
     if (check?.cancelled) {
       return;
@@ -168,16 +163,19 @@ export async function WeaponRoll({
   await roll.evaluate();
 
   const rollHtml = await roll.render();
-  const html = await renderTemplate("systems/l5r4-enhanced/templates/chat/damage-roll.hbs", {
-    flavor: label,
-    roll: rollHtml,
-    damageTotal: roll.total,
-    actorId: actor?.id ?? null
-  });
+  const html = await foundry.applications.handlebars.renderTemplate(
+    "systems/l5r4-enhanced/templates/chat/damage-roll.hbs",
+    {
+      flavor: label,
+      roll: rollHtml,
+      damageTotal: roll.total,
+      actorId: actor?.id ?? null
+    }
+  );
 
   return ChatMessage.create({
     speaker: ChatMessage.getSpeaker({ actor }),
     content: html,
-    type: CONST.CHAT_MESSAGE_TYPES.OTHER
+    style: CONST.CHAT_MESSAGE_STYLES.OTHER
   });
 }

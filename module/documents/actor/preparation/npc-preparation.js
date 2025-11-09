@@ -11,9 +11,6 @@
  * @module documents/actor/preparation/npc-preparation
  */
 
-// Config
-import { SYS_ID } from "../../../config/constants.js";
-
 // Utils
 import { toInt } from "../../../utils/type-coercion.js";
 
@@ -51,6 +48,7 @@ import { enrichActorItems } from "../calculations/item-enrichment.js";
  * NPCs use explicit initiative.roll and initiative.keep fields on the character sheet.
  * If these are 0 or missing, the system falls back to using Reflexes for both roll
  * and keep (simpler enemies that don't need complex initiative).
+ * Supports rollMod, keepMod, and totalMod modifiers like PCs for consistent behavior.
  *
  * **NPC Armor:**
  * Unlike PCs (who calculate armor TN from equipment), NPCs have a single armor.armorTn
@@ -76,8 +74,31 @@ export function prepareNpcData(actor, sys, finalizeWoundPenaltiesFn) {
 
   sys.initiative = sys.initiative || {};
   const ref = toInt(sys.traits?.ref);
-  sys.initiative.effRoll = toInt(sys.initiative.roll) > 0 ? toInt(sys.initiative.roll) : ref;
-  sys.initiative.effKeep = toInt(sys.initiative.keep) > 0 ? toInt(sys.initiative.keep) : ref;
+  const insightRank = toInt(sys.insight?.rank) || 0;
+
+  // L5R4 Rule: Initiative = (Insight Rank + Reflexes)kReflexes
+  // NPCs typically don't have Insight Rank, so they use RefkRef
+  // GMs can override by setting custom roll/keep values in Combat Config
+  const sourceRoll = toInt(actor._source?.system?.initiative?.roll);
+  const sourceKeep = toInt(actor._source?.system?.initiative?.keep);
+
+  // Use custom initiative ONLY if BOTH roll AND keep are explicitly set to non-zero
+  // If either is 0, calculate from Reflexes + Insight Rank per L5R4 rules
+  // This allows GMs to clear initiative by setting either value to 0
+  const hasCustomInitiative = sourceRoll > 0 && sourceKeep > 0;
+  const baseRoll = hasCustomInitiative ? sourceRoll : insightRank + ref;
+  const baseKeep = hasCustomInitiative ? sourceKeep : ref;
+
+  const rollMod = toInt(sys.initiative.rollMod) || 0;
+  const keepMod = toInt(sys.initiative.keepMod) || 0;
+
+  // Store effective values (before modifiers) for tests and UI
+  sys.initiative.effRoll = baseRoll;
+  sys.initiative.effKeep = baseKeep;
+
+  // Apply modifiers to get final roll/keep values
+  sys.initiative.roll = baseRoll + rollMod;
+  sys.initiative.keep = baseKeep + keepMod;
   sys.initiative.totalMod = toInt(sys.initiative.totalMod);
 
   sys.armorTn = sys.armorTn || {};
@@ -91,20 +112,9 @@ export function prepareNpcData(actor, sys, finalizeWoundPenaltiesFn) {
   const order = WOUND_LEVEL_ORDER;
 
   // Determine NPC wound calculation mode
-  // Read global default from settings, fall back to "manual" if setting unavailable
-  let globalDefault = "manual";
-  try {
-    globalDefault = game.settings.get(SYS_ID, "defaultNpcWoundMode") || "manual";
-  } catch (err) {
-    console.warn(`${SYS_ID}`, "Failed to read defaultNpcWoundMode setting, using manual mode", {
-      err,
-      actorId: actor.id,
-      actorName: actor.name
-    });
-  }
-
-  // Use actor-specific wound mode if set, otherwise use global default
-  const woundMode = sys.woundMode || globalDefault;
+  // Use actor-specific wound mode if set, otherwise default to "manual"
+  // Manual mode is appropriate as NPCs vary widely in power level and wound capacity
+  const woundMode = sys.woundMode || "manual";
 
   // Calculate wound thresholds based on mode
   if (woundMode === "manual") {
@@ -125,13 +135,16 @@ export function prepareNpcData(actor, sys, finalizeWoundPenaltiesFn) {
   // Simple Action: Water Ring × 10 feet
   // Maximum per Round: Water Ring × 20 feet (hard limit)
   // Conditions like Blinded reduce effective Water Ring by 2 for movement (applied after condition effects)
+  // Custom modifiers: multiplier (for water ring) and modifier (flat modifier)
   const baseWater = toInt(sys.rings.water);
   const waterPenalty = sys._conditionEffects?.waterRingPenalty ?? 0;
   const effectiveWater = Math.max(1, baseWater + waterPenalty); // Minimum 1 per L5R4 rules
   sys.movement = sys.movement || {};
-  sys.movement.freeAction = effectiveWater * 5;
-  sys.movement.simpleAction = effectiveWater * 10;
-  sys.movement.maximum = effectiveWater * 20;
+  const movementMultiplier = parseFloat(sys.movement.multiplier) || 1;
+  const movementModifier = toInt(sys.movement.modifier) || 0;
+  sys.movement.freeAction = effectiveWater * 5 * movementMultiplier + movementModifier;
+  sys.movement.simpleAction = effectiveWater * 10 * movementMultiplier + movementModifier;
+  sys.movement.maximum = effectiveWater * 20 * movementMultiplier + movementModifier;
 
   prepareVisibleWoundLevels(sys, order);
 

@@ -13,7 +13,6 @@
  * Foundry VTT Integration:
  * - Uses Foundry Roll API for dice mechanics
  * - Posts results via ChatMessage API
- * - Respects system settings for roll dialog display
  * - Handles localization via game.i18n
  *
  * Side Effects:
@@ -68,11 +67,11 @@ import { getArmorTNPenalty } from "../../../utils/armor-penalties.js";
  * - Social Resistance: Honor Rank added to total when resisting Intimidation/Temptation
  *
  * Dialog Behavior:
- * The function conditionally shows a roll options dialog based on the askForOptions
- * parameter and the "showSkillRollOptions" system setting. If these values differ
- * (XOR logic), the dialog is displayed. The dialog includes a checkbox for social
- * resistance which adds the character's Honor Rank as a flat bonus to the roll.
- * Otherwise, uses provided bonuses directly.
+ * Shows roll options dialog by default (askForOptions=true).
+ * Hold Shift while clicking to skip dialog (askForOptions=false).
+ * The dialog includes a checkbox for social resistance which adds the character's
+ * Honor Rank as a flat bonus to the roll. When dialog is skipped, uses provided
+ * bonuses directly.
  *
  * Attack Rolls:
  * When rollType is "attack" and no manual TN is set, automatically resolves the
@@ -92,6 +91,7 @@ import { getArmorTNPenalty } from "../../../utils/armor-penalties.js";
  * @param {number} [options.totalBonus=0] - Flat bonus added to roll total
  * @param {L5R4Actor|null} [options.actor=null] - Actor performing the roll (for bonuses/void/honor)
  * @param {string|null} [options.rollType=null] - Roll type identifier (e.g., "attack")
+ * @param {string|null} [options.weaponId=null] - Item ID of weapon for attack roll damage integration
  *
  * @returns {Promise<ChatMessage|false>} The created chat message, or false on error
  *
@@ -112,14 +112,14 @@ export async function SkillRoll({
   keepBonus = 0,
   totalBonus = 0,
   actor = null,
-  rollType = null
+  rollType = null,
+  weaponId = null
 } = {}) {
   const messageTemplate = CHAT_TEMPLATES.simpleRoll;
   const traitI18nKey =
     skillTrait === "void"
       ? "l5r4.ui.mechanics.rings.void"
       : `l5r4.ui.mechanics.traits.${skillTrait}`;
-  const optionsSetting = game.settings.get(SYS_ID, "showSkillRollOptions");
 
   const tryKey =
     typeof skillName === "string" ? `l5r4.character.skills.names.${skillName.toLowerCase()}` : "";
@@ -139,7 +139,7 @@ export async function SkillRoll({
   let socialResistance = false;
 
   // Resolve target TN and info string from selected tokens (attack rolls only)
-  const { autoTN, targetInfo } = resolveTargets(actor, rollType);
+  const { autoTN, targetInfo, targetData } = resolveTargets(actor, rollType);
 
   // Apply active effects and abilities that modify skill/trait rolls
   const bonuses = applySkillAndTraitBonuses(actor, skillName, skillTrait) ?? {
@@ -156,11 +156,13 @@ export async function SkillRoll({
   rollBonus += conditionPenalties.roll; // Will be negative if conditions active
   keepBonus += conditionPenalties.keep;
 
-  // XOR logic: Show dialog if askForOptions differs from system setting
-  // This allows callers to override the global setting on a per-roll basis
+  // Dialog behavior: Show by default (askForOptions=true), skip if shift-clicked (askForOptions=false)
   let check;
-  if (askForOptions !== optionsSetting) {
-    const noVoid = npc && !game.settings.get(SYS_ID, "allowNpcVoidPoints");
+  if (askForOptions) {
+    const voidRing = npc
+      ? actor?.system?.rings?.void?.rank ?? 0
+      : actor?.system?.rings?.void?.value ?? 0;
+    const noVoid = npc && voidRing < 1;
     check = await GetSkillOptions(skillName, actor, noVoid, rollBonus, keepBonus, totalBonus);
     if (!check || check.cancelled) {
       return;
@@ -204,24 +206,23 @@ export async function SkillRoll({
     totalMod += honorRank;
   }
 
-  // Determine final TN early to decide how to apply wound penalty
+  // Determine final TN early
   // For attack rolls, autoTN from target may override user's TN input
   let finalTN = toInt(check.tn);
   if (rollType === "attack" && finalTN === 0 && autoTN > 0) {
     finalTN = autoTN;
   }
 
-  // Apply wound penalty to roll total when rolling without a TN
-  // When no TN is specified (even after autoTN resolution), subtract wound penalty from roll result
-  // This ensures wounds affect rolls even when there's no target number to compare against
-  // Otherwise, wound penalty will be applied to TN later
-  if (finalTN === 0 && applyWoundPenalty && woundPenalty > 0) {
+  // Apply wound penalty to roll total (ALWAYS subtract from roll, never add to TN)
+  // Wound penalties reduce the character's effectiveness by subtracting from their roll result
+  if (applyWoundPenalty && woundPenalty > 0) {
     totalMod -= woundPenalty;
   }
 
   // L5R4 Unskilled Roll Rule:
   // When skill rank = 0, "effectively making a Trait Roll" = (Trait)k(Trait) with no exploding dice
-  const isUnskilled = toInt(skillRank) === 0;
+  const baseSkillRank = toInt(skillRank);
+  const isUnskilled = baseSkillRank === 0;
   let diceToRoll, diceToKeep;
 
   if (isUnskilled) {
@@ -230,7 +231,7 @@ export async function SkillRoll({
     diceToKeep = toInt(actorTrait) + keepMod;
   } else {
     // Skilled formula: (Skill + Trait)k(Trait)
-    diceToRoll = toInt(actorTrait) + toInt(skillRank) + rollMod;
+    diceToRoll = toInt(actorTrait) + baseSkillRank + rollMod;
     diceToKeep = toInt(actorTrait) + keepMod;
   }
 
@@ -250,10 +251,18 @@ export async function SkillRoll({
   if (socialResistance && honorRank > 0) {
     baseLabel += ` [${game.i18n.localize("l5r4.character.ranks.honorRank")} +${honorRank}]`;
   }
-  if (rollMod || keepMod || totalMod) {
-    baseLabel += ` ${game.i18n.localize("l5r4.ui.common.mod")} (${rollMod}k${keepMod}${
-      totalMod < 0 ? totalMod : "+" + totalMod
-    })`;
+  // Only show modifier label if there are actual non-zero modifiers
+  if (rollMod !== 0 || keepMod !== 0 || totalMod !== 0) {
+    const modParts = [];
+    if (rollMod !== 0 || keepMod !== 0) {
+      modParts.push(`${rollMod}k${keepMod}`);
+    }
+    if (totalMod !== 0) {
+      modParts.push(totalMod < 0 ? `${totalMod}` : `+${totalMod}`);
+    }
+    if (modParts.length > 0) {
+      baseLabel += ` ${game.i18n.localize("l5r4.ui.common.mod")} (${modParts.join(" ")})`;
+    }
   }
 
   const roll = new Roll(rollFormula);
@@ -262,20 +271,19 @@ export async function SkillRoll({
   // Use finalTN calculated earlier (already includes autoTN resolution for attack rolls)
   const baseTN = finalTN;
 
-  // Use Free Raises from dialog (user editable) and clamp declared Raises to Void Ring limit
+  // Use Free Raises from dialog and clamp declared Raises to Void Ring limit
   const freeRaises = toInt(check.freeRaises) || 0;
   const voidRing = actor?.system?.rings?.void?.value ?? 0;
   const raises = clampRaises(toInt(check.raises), voidRing);
 
-  // Calculate effective TN: baseTN + (raises × 5) - (freeRaises × 5) + wound penalty + condition penalty + armor penalty (if applicable)
-  // Note: If baseTN is 0, wound penalty was already subtracted from totalMod
+  // Calculate effective TN: baseTN + (raises × 5) + condition penalty + armor penalty (if applicable)
   // Only apply condition and armor TN penalties when there's an actual target (baseTN > 0)
   let effTN = calculateEffectiveTN(
     baseTN,
     raises,
     freeRaises,
-    woundPenalty,
-    applyWoundPenalty && baseTN > 0
+    0, // Never apply wound penalty to TN
+    false // Wound penalty flag no longer used for TN calculation
   );
   if (baseTN > 0) {
     const conditionTNPenalty = getConditionTNPenalty(actor);
@@ -300,11 +308,56 @@ export async function SkillRoll({
   // Convert "failure" to "missed" for attack rolls (better UX messaging)
   tnResult = replaceFailureWithMissed(tnResult, rollType);
 
-  const content = await R(messageTemplate, { flavor: finalLabel, roll: rollHtml, tnResult });
+  // For successful attack rolls, prepare weapon damage data for chat button
+  // Includes stance bonuses from Full Attack (+1k0) and mounted combat bonuses
+  let weaponData = null;
+  if (
+    rollType === "attack" &&
+    weaponId &&
+    actor &&
+    tnResult &&
+    tnResult.outcome === game.i18n.localize("l5r4.ui.mechanics.rolls.success")
+  ) {
+    const weapon = actor.items.get(weaponId);
+    if (weapon && (weapon.type === "weapon" || weapon.type === "bow")) {
+      const { getStanceDamageBonuses } = await import("../../stance/rolls/attack-bonuses.js");
+      const stanceBonuses = getStanceDamageBonuses(actor);
+      weaponData = {
+        id: weaponId,
+        name: weapon.name,
+        damageRoll: weapon.system?.damageRoll || 0,
+        damageKeep: weapon.system?.damageKeep || 0,
+        actorId: actor.id,
+        raises: raises,
+        stanceRoll: stanceBonuses.roll,
+        stanceKeep: stanceBonuses.keep
+      };
+    }
+  }
+
+  const content = await R(messageTemplate, {
+    flavor: finalLabel,
+    roll: rollHtml,
+    tnResult,
+    weaponData
+  });
+
+  // Store attack raises and target in message flags to prevent HTML injection exploits
+  // Validates raises when damage button is clicked to ensure they match original roll
+  // Target actor ID is stored for animation system to use correct target across all clients
+  const flags = weaponData
+    ? {
+        "l5r4-enhanced": {
+          attackRaises: raises,
+          weaponId: weaponData.id,
+          targetActorId: targetData?.actor?.id || null
+        }
+      }
+    : {};
 
   // Post roll to chat, handle errors gracefully
   try {
-    return await roll.toMessage({ speaker: ChatMessage.getSpeaker(), content });
+    return await roll.toMessage({ speaker: ChatMessage.getSpeaker(), content, flags });
   } catch (err) {
     console.error(`${SYS_ID}`, "SkillRoll: Failed to post chat message after roll", {
       err,

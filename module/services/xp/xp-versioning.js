@@ -41,13 +41,14 @@ import { SYS_ID } from "../../config/constants.js";
  */
 export function calculateXpDataVersion(actor) {
   try {
-    const sys = actor.system ?? {};
+    const sys = actor?.system ?? {};
+    const items = actor?.items ?? [];
 
     // Collect all XP-relevant data into a serializable structure
     const xpData = {
       traits: sys.traits || {},
       voidRank: sys.rings?.void?.rank || 0,
-      skills: actor.items
+      skills: items
         .filter(i => i.type === "skill")
         .map(i => ({
           id: i.id,
@@ -58,7 +59,7 @@ export function calculateXpDataVersion(actor) {
             : "",
           freeEmphasis: i.system?.freeEmphasis || 0
         })),
-      items: actor.items
+      items: items
         .filter(i => ["advantage", "disadvantage", "kata", "kiho"].includes(i.type))
         .map(i => ({
           id: i.id,
@@ -87,13 +88,12 @@ export function calculateXpDataVersion(actor) {
 /**
  * Determines if an actor's XP history requires retroactive recalculation.
  *
- * Checks three conditions that require XP history rebuild per L5R4 advancement rules:
+ * Checks two conditions that require XP history rebuild:
  * 1. **First run**: No previous version exists (xpRetroactiveVersion flag is 0)
  * 2. **Data changed**: Current XP data hash differs from stored version
- * 3. **Missing data**: xpSpent array is empty or invalid
  *
- * When an update is needed, logs diagnostic information including the specific
- * reason (first-run, missing-data, or data-changed) to aid debugging.
+ * Note: Missing cache is no longer checked - if cache is missing, version will be 0
+ * which triggers recalculation via condition 1.
  *
  * This function is called before rendering the XP Manager UI to ensure displayed
  * XP costs reflect the character's current state.
@@ -112,14 +112,11 @@ export async function needsRetroactiveUpdate(actor) {
     const lastUpdateVersion = flags.xpRetroactiveVersion || 0;
     const currentVersion = calculateXpDataVersion(actor);
 
-    // Check three conditions requiring update per L5R4 XP tracking needs
+    // Check if recalculation needed
     const isFirstRun = lastUpdateVersion === 0;
     const hasDataChanged = lastUpdateVersion !== currentVersion;
-    const hasMissingData = !Array.isArray(flags.xpSpent) || flags.xpSpent.length === 0;
 
-    const needsUpdate = isFirstRun || hasDataChanged || hasMissingData;
-
-    return needsUpdate;
+    return isFirstRun || hasDataChanged;
   } catch (err) {
     console.warn(`${SYS_ID}`, "Failed to check retroactive XP update need", err);
     return true; // Fail-safe: trigger update on error to ensure data consistency

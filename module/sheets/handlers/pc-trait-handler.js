@@ -193,6 +193,48 @@ export class PcTraitHandler {
   }
 
   /**
+   * Increases a PC's trait value by 1 without requiring Shift key.
+   *
+   * Delegates to base TraitHandler.increase() which handles the shift key bypass.
+   * The base handler will call back to this class's adjust() method which properly
+   * handles family bonuses for PCs.
+   *
+   * @param {Object} context - Sheet render context with actor reference
+   * @param {Event} event - DOM event from button click
+   * @param {HTMLElement} element - Target element with data-trait attribute
+   * @returns {Promise<void>}
+   */
+  static async increase(context, event, element) {
+    // Delegate to base TraitHandler which will call back to our adjust() method
+    // Base handler creates modified event with shiftKey=true
+    event?.preventDefault?.();
+    event?.stopPropagation?.();
+    const modifiedEvent = event ? { ...event, shiftKey: true } : { shiftKey: true };
+    return this.adjust(context, modifiedEvent, element, +1);
+  }
+
+  /**
+   * Decreases a PC's trait value by 1 without requiring Shift key.
+   *
+   * Delegates to base TraitHandler.decrease() which handles the shift key bypass.
+   * The base handler will call back to this class's adjust() method which properly
+   * handles family bonuses for PCs.
+   *
+   * @param {Object} context - Sheet render context with actor reference
+   * @param {Event} event - DOM event from button click
+   * @param {HTMLElement} element - Target element with data-trait attribute
+   * @returns {Promise<void>}
+   */
+  static async decrease(context, event, element) {
+    // Delegate to base TraitHandler which will call back to our adjust() method
+    // Base handler creates modified event with shiftKey=true
+    event?.preventDefault?.();
+    event?.stopPropagation?.();
+    const modifiedEvent = event ? { ...event, shiftKey: true } : { shiftKey: true };
+    return this.adjust(context, modifiedEvent, element, -1);
+  }
+
+  /**
    * Converts form submission data from effective traits to base traits.
    *
    * **⚠️ CRITICAL WARNING - DO NOT USE UNLESS TRAITS HAVE FORM INPUTS:**

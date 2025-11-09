@@ -7,6 +7,7 @@
 
 import { SYS_ID, PATHS } from "../../../config/constants.js";
 import { ICON_MIGRATION_MAP } from "./icon-map.js";
+import { DEFAULT_ICONS } from "../../../documents/item/constants/item-types.js";
 
 /**
  * Directory listing cache to avoid repeated FilePicker API calls.
@@ -88,7 +89,14 @@ async function computeNewIconPath(img) {
  * Determines updated icon path for a document, with special bow handling.
  *
  * Checks standard icon migration map and applies special logic for weapon items with
- * isBow flag to ensure they use the bow icon. Returns null if no migration needed.
+ * isBow flag to ensure they use the bow icon. Also assigns type-appropriate default
+ * icons to items that don't have proper system icons (e.g., Foundry defaults or
+ * unmapped legacy icons).
+ *
+ * Migration Strategy:
+ * 1. Try to migrate via ICON_MIGRATION_MAP (old PNG → new WebP)
+ * 2. For items without system icons, assign type-appropriate default icon
+ * 3. Special case: weapon.isBow=true gets bow icon
  *
  * @param {Document} doc - Document to evaluate for icon update
  * @param {string} docType - Document type ("Actor" or "Item")
@@ -97,10 +105,37 @@ async function computeNewIconPath(img) {
 async function getUpdatedIconPath(doc, docType) {
   let nextImg = await computeNewIconPath(doc.img);
 
-  if (docType === "Item" && doc.type === "weapon" && doc.system?.isBow) {
-    const bowIcon = await computeNewIconPath("bow.png");
-    if (bowIcon && doc.img !== bowIcon) {
-      nextImg = bowIcon;
+  // Special handling for Items: assign type-appropriate default icons
+  if (docType === "Item") {
+    // Check if item is using bow weapon type
+    const isBow = doc.type === "weapon" && doc.system?.isBow;
+    const iconType = isBow ? "bow" : doc.type;
+
+    // If no migration found via map, check if item needs default icon assignment
+    if (!nextImg) {
+      const currentImg = doc.img;
+      const hasSystemIcon =
+        typeof currentImg === "string" && currentImg.startsWith(PATHS.icons + "/");
+      const isFoundryDefault =
+        !currentImg || currentImg === "icons/svg/item-bag.svg" || currentImg.includes("mystery");
+
+      // Assign type-appropriate default icon if:
+      // - Using Foundry default icon, OR
+      // - Not using a system icon (might be old path or external icon)
+      if (isFoundryDefault || !hasSystemIcon) {
+        const defaultIcon = DEFAULT_ICONS[iconType];
+        if (defaultIcon && currentImg !== defaultIcon) {
+          nextImg = defaultIcon;
+        }
+      }
+    }
+
+    // Ensure bow weapons use bow icon
+    if (isBow) {
+      const bowIcon = DEFAULT_ICONS.bow;
+      if (bowIcon && doc.img !== bowIcon && nextImg !== bowIcon) {
+        nextImg = bowIcon;
+      }
     }
   }
 
@@ -113,6 +148,10 @@ async function getUpdatedIconPath(doc, docType) {
  * Updates actor and item icons from old .png format to new .webp assets. Also updates
  * prototype token images for actors. Only runs if GM and migration setting enabled.
  * Displays notification with count of updated documents when complete.
+ *
+ * Idempotency: Icon migration is called from runMigrations() which filters out already-migrated
+ * documents, so this function only processes documents that haven't been migrated yet. This
+ * prevents overwriting custom icons when forceMigration is triggered.
  *
  * This is a world-only migration (compendiums handled separately by migrateCompendiumIconPaths).
  *
@@ -173,6 +212,48 @@ export async function runIconPathMigration() {
   ui.notifications?.info(
     game.i18n.format("l5r4.system.migration.iconsUpdated", { count: changed })
   );
+}
+
+/**
+ * Migrates legacy PNG icon paths to new WebP assets for embedded items.
+ *
+ * Updates item icons for items embedded within actors. This handles items on actor sheets
+ * that retain old icon paths even after world items have been migrated.
+ *
+ * @param {Document[]} docs - Array of Item documents (embedded items from actor.items.contents)
+ * @param {string} label - Migration context label for console logging
+ * @returns {Promise<void>}
+ * @async
+ * @export
+ */
+export async function migrateEmbeddedItemIcons(docs, label) {
+  const itemDocs = docs.filter(doc => doc.documentName === "Item");
+  if (itemDocs.length === 0) {
+    return;
+  }
+
+  let migratedCount = 0;
+
+  for (const item of itemDocs) {
+    try {
+      const nextImg = await getUpdatedIconPath(item, "Item");
+
+      if (nextImg && nextImg !== item.img) {
+        await item.update({ img: nextImg }, { diff: true, render: false });
+        migratedCount++;
+      }
+    } catch (err) {
+      console.warn(`${SYS_ID}`, "Failed to migrate embedded item icon", {
+        id: item.id,
+        name: item.name,
+        err
+      });
+    }
+  }
+
+  if (migratedCount > 0) {
+    console.warn(`${SYS_ID} | Migrated ${migratedCount} embedded item icons (${label})`);
+  }
 }
 
 /**
