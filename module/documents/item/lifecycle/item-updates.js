@@ -31,7 +31,6 @@
  *
  * @module documents/item/lifecycle/item-updates
  * @see module:documents/item/lifecycle/xp-tracking - XP logging functions
- * @see module:documents/item/constants/xp-costs - XP calculation formulas
  */
 
 import { toInt } from "../../../utils/type-coercion.js";
@@ -159,8 +158,8 @@ function isSchoolSkill(item, changes) {
  *
  * **Free Ranks Handling:**
  * School skills grant free rank 1, which affects XP cost calculations.
- * The cost is calculated by xp-costs.js which subtracts free rank costs
- * from the total. This ensures characters only pay for ranks they purchased.
+ * Free rank costs are subtracted from the total cost calculation.
+ * This ensures characters only pay for ranks they purchased.
  *
  * Example: Advancing school skill from 2→3:
  * - No free rank: Pay 3 XP (cost of rank 3)
