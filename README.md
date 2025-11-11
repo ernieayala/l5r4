@@ -5,7 +5,7 @@
 A Foundry VTT system for L5R 4th Edition. Handles the Roll & Keep mechanics, character progression, combat, spellcasting, and everything else you need to run games in Rokugan.
 
 [![Foundry v13](https://img.shields.io/badge/Foundry-v13-informational)](https://foundryvtt.com/)
-[![Version 3.2.0](https://img.shields.io/badge/Version-3.2.0-blue)](https://github.com/ernieayala/l5r4/releases)
+[![Version 3.2.1](https://img.shields.io/badge/Version-3.2.1-blue)](https://github.com/ernieayala/l5r4/releases)
 [![MIT License](https://img.shields.io/badge/License-MIT-yellow.svg)](LICENSE)
 [![JB2A Ready](https://img.shields.io/badge/JB2A-Integrated-ff69b4)](https://foundryvtt.com/packages/jb2a_patreon)
 
