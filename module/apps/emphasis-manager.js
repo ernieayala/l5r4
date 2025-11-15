@@ -26,6 +26,7 @@
 // Config imports
 import { SYS_ID } from "../config/constants.js";
 import { OFFICIAL_EMPHASES } from "../config/game-data.js";
+import { TEMPLATE } from "../config/templates.js";
 
 // Utils imports
 import { T } from "../utils/localization.js";
@@ -282,7 +283,7 @@ export default class EmphasisManagerApplication extends foundry.applications.api
    */
   async _onAddCustom(_event, _target) {
     const content = await foundry.applications.handlebars.renderTemplate(
-      "systems/l5r4-enhanced/templates/dialogs/custom-emphasis-dialog.hbs"
+      TEMPLATE("dialogs/custom-emphasis-dialog.hbs")
     );
 
     const name = await foundry.applications.api.DialogV2.prompt({
@@ -363,7 +364,7 @@ export default class EmphasisManagerApplication extends foundry.applications.api
     }
 
     const content = await foundry.applications.handlebars.renderTemplate(
-      "systems/l5r4-enhanced/templates/dialogs/custom-emphasis-dialog.hbs",
+      TEMPLATE("dialogs/custom-emphasis-dialog.hbs"),
       { currentName: oldName }
     );
 

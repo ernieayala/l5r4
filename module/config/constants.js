@@ -1,56 +1,55 @@
 /**
- * System Constants
- * Defines core system identifiers and resource paths for L5R4 Enhanced system.
- * Used throughout the codebase for consistent resource references and Foundry integration.
- *
- * Foundry VTT Requirements:
- * - SYS_ID must match the ID in system.json manifest
- * - Paths follow Foundry's standard systems directory structure
- *
+ * @file System-wide constants for L5R4 Enhanced
  * @module config/constants
- * @requires Foundry VTT v13+
+ *
+ * Provides immutable configuration values used throughout the system.
+ * All path constants are relative to Foundry's systems directory.
+ *
+ * @see {@link https://foundryvtt.com/api/modules/foundry.html#.CONST|Foundry Constants}
  */
 
+const freeze = Object.freeze;
+
 /**
- * System identifier matching the ID in system.json manifest.
- * Used for settings registration (game.settings.register), flags storage (actor.flags[SYS_ID]),
- * and all Foundry API calls requiring system identification.
- *
- * @constant {string}
+ * System identifier used in Foundry VTT registration and paths.
+ * Must match the system.json "id" field.
+ * @type {string}
+ * @constant
  */
 export const SYS_ID = "l5r4-enhanced";
 
 /**
- * Root path for all system resources.
- * Constructed from Foundry's standard systems directory structure.
- * Used as base for building template, asset, and icon paths.
- *
- * @constant {string}
+ * Root path to system directory within Foundry's systems folder.
+ * Used as base for all asset and template paths.
+ * @type {string}
+ * @constant
+ * @example
+ * // Resolves to: "systems/l5r4-enhanced"
  */
 export const ROOT = `systems/${SYS_ID}`;
 
 /**
- * Frozen object containing standard resource paths for templates, assets, and icons.
- * All paths are relative to Foundry's data directory and used for resource loading.
- * Frozen to prevent runtime modification and ensure path consistency across the system.
- *
- * @constant {Object}
- * @property {string} templates - Path to Handlebars templates directory for sheet rendering
- * @property {string} assets - Path to general assets directory for images and media
- * @property {string} icons - Path to status effect and UI icons directory
- * @readonly
+ * Immutable path constants for system resources.
+ * All paths are relative to Foundry's root directory.
+ * @type {Object<string, string>}
+ * @constant
+ * @property {string} templates - Path to Handlebars templates directory
+ * @property {string} assets - Path to general assets directory
+ * @property {string} icons - Path to icon assets directory
  */
-export const PATHS = Object.freeze({
+export const PATHS = freeze({
   templates: `${ROOT}/templates`,
   assets: `${ROOT}/assets`,
   icons: `${ROOT}/assets/icons`
 });
 
 /**
- * Migration marker flag key for tracking completed migrations on documents.
- * Stored in document.flags.l5r4-enhanced[MIGRATION_FLAG] to prevent re-running
- * migrations on already-migrated documents, ensuring true idempotency.
- *
- * @constant {string}
+ * Flag key for tracking system migration version on actors and items.
+ * Stored in document flags under the system namespace.
+ * @type {string}
+ * @constant
+ * @example
+ * // Access migration version:
+ * // actor.getFlag(SYS_ID, MIGRATION_FLAG)
  */
 export const MIGRATION_FLAG = "migratedVersion";
