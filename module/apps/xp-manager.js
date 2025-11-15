@@ -28,6 +28,7 @@
 
 // Config imports
 import { SYS_ID } from "../config/constants.js";
+import { TEMPLATE } from "../config/templates.js";
 
 // Utils imports
 import { T } from "../utils/localization.js";
@@ -420,7 +421,7 @@ export default class XpManagerApplication extends foundry.applications.api.Handl
     const currentCap = Number.isFinite(+flags.disadvantageCap) ? Number(flags.disadvantageCap) : 10;
 
     const content = await foundry.applications.handlebars.renderTemplate(
-      `systems/${SYS_ID}/templates/dialogs/disadvantage-cap-dialog.hbs`,
+      TEMPLATE("dialogs/disadvantage-cap-dialog.hbs"),
       { currentCap }
     );
 

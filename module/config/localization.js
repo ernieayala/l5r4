@@ -1,38 +1,34 @@
 /**
- * Localization Configuration
- *
- * Provides frozen object mappings of game mechanic identifiers to i18n localization keys.
- * These constants are used throughout the system to reference translatable UI strings for
- * L5R4 game elements including Rings, Traits, Skills, Stances, and other mechanics.
- *
- * All exports are frozen via Object.freeze() to prevent runtime mutation and ensure
- * configuration stability. Keys correspond to entries in lang/*.json files and are
- * resolved via game.i18n.localize() by Foundry VTT's internationalization system.
- *
- * Game Mechanics Context:
- * - Rings: The Five Rings (Air, Earth, Fire, Water, Void) are fundamental to L5R4's
- *   Roll & Keep system. Each Ring comprises two Traits and influences skills and spells.
- * - Traits: Eight core attributes (Stamina, Willpower, Strength, Perception, Reflexes,
- *   Awareness, Agility, Intelligence) that define character capabilities.
- * - Skills: Character competencies categorized into High, Bugei, Merchant, and Low subtypes
- *   based on social standing and samurai traditions.
- * - Stances: Combat postures (Attack, Full Attack, Defense, Full Defense, Center) that
- *   determine available actions and tactical modifiers each round.
- *
+ * @file Localization key mappings for L5R4 game elements
  * @module config/localization
+ *
+ * Provides immutable mappings from internal identifiers to i18n localization keys.
+ * All constants map to keys in lang/*.json files for multi-language support.
+ * Used throughout the system for consistent UI text rendering.
+ *
+ * Architectural Decision: Centralized localization keys prevent hardcoded strings
+ * and enable easy translation management through Foundry's localization system.
+ *
+ * @see {@link https://foundryvtt.com/api/classes/client.Localization.html|Foundry Localization}
  */
 
 const freeze = Object.freeze;
 
 /**
- * Five Rings localization keys.
+ * Localization keys for the five elemental rings.
+ * Used in character sheets, spell displays, and roll dialogs.
  *
- * Maps the Five Rings elemental system to i18n keys. The Five Rings (Air, Earth, Fire,
- * Water, Void) are the fundamental building blocks of L5R4 mechanics. Each Ring (except Void)
- * comprises two Traits - one physical, one mental. Ring ranks equal the lower of the two
- * component Trait ranks and are used for spellcasting and various mechanical effects.
+ * @type {Object<string, string>}
+ * @constant
+ * @property {string} air - Air ring localization key
+ * @property {string} earth - Earth ring localization key
+ * @property {string} fire - Fire ring localization key
+ * @property {string} water - Water ring localization key
+ * @property {string} void - Void ring localization key
  *
- * @type {Readonly<{air: string, earth: string, fire: string, water: string, void: string}>}
+ * @example
+ * // Display localized ring name:
+ * // game.i18n.localize(RING_LABELS.fire)
  */
 export const RING_LABELS = freeze({
   air: "l5r4.ui.mechanics.rings.air",
@@ -43,15 +39,15 @@ export const RING_LABELS = freeze({
 });
 
 /**
- * Skill name localization keys.
+ * Localization keys for all L5R4 skills.
+ * Maps skill identifiers to their display names in the current language.
  *
- * Maps all L5R4 skill identifiers to i18n keys. Skills represent learned competencies
- * and are categorized into four subtypes based on social standing in Rokugani society:
- * High Skills (courtly arts), Bugei Skills (martial arts), Merchant Skills (trade crafts),
- * and Low Skills (dishonorable practices). Skills are rolled as (Skill + Trait)k(Trait)
- * using the Roll & Keep system.
+ * @type {Object<string, string>}
+ * @constant
  *
- * @type {Readonly<Record<string, string>>}
+ * @example
+ * // Display localized skill name:
+ * // game.i18n.localize(SKILL_LABELS.kenjutsu)
  */
 export const SKILL_LABELS = freeze({
   acting: "l5r4.character.skills.names.acting",
@@ -99,14 +95,16 @@ export const SKILL_LABELS = freeze({
 });
 
 /**
- * Arrow type localization keys.
+ * Localization keys for arrow types.
+ * Corresponds to ARROW_MODS in game-data.js for damage calculations.
  *
- * Maps specialized arrow types to i18n keys. L5R4 includes various arrow types with
- * different tactical effects: armor-piercing (armor), flesh-cutter (flesh), humming-bulb
- * (humming), rope-cutter (rope), and willow-leaf (willow). Each type modifies damage or
- * provides special utility in ranged combat.
- *
- * @type {Readonly<{armor: string, flesh: string, humming: string, rope: string, willow: string}>}
+ * @type {Object<string, string>}
+ * @constant
+ * @property {string} armor - Armor-piercing arrows
+ * @property {string} flesh - Flesh-cutter arrows
+ * @property {string} humming - Humming bulb arrows
+ * @property {string} rope - Rope-cutter arrows
+ * @property {string} willow - Willow leaf arrows
  */
 export const ARROWS = freeze({
   armor: "l5r4.equipment.weapons.arrows.armor",
@@ -117,18 +115,15 @@ export const ARROWS = freeze({
 });
 
 /**
- * Armor type localization keys.
+ * Localization keys for armor types.
+ * Used in equipment sheets and armor configuration dialogs.
  *
- * Maps armor categories to i18n keys for the armor penalty system. Different armor types
- * impose different TN penalties on skills and rolls based on their weight and restrictiveness.
- *
- * Armor Types and Penalties:
- * - ashigaru: Ashigaru Armor - No penalties (light peasant armor)
- * - light: Light Armor - +5 TN to Athletics and Stealth skills only
- * - heavy: Heavy Armor - +5 TN to all Agility and Reflexes-based skills
- * - riding: Riding Armor - +5 TN to all Agility and Reflexes rolls (waived when mounted)
- *
- * @type {Readonly<{ashigaru: string, light: string, heavy: string, riding: string}>}
+ * @type {Object<string, string>}
+ * @constant
+ * @property {string} ashigaru - Light armor for common soldiers
+ * @property {string} light - Light armor
+ * @property {string} heavy - Heavy armor
+ * @property {string} riding - Riding armor
  */
 export const ARMOR_TYPES = freeze({
   ashigaru: "l5r4.equipment.armor.types.ashigaru",
@@ -138,13 +133,14 @@ export const ARMOR_TYPES = freeze({
 });
 
 /**
- * Weapon size localization keys.
+ * Localization keys for weapon sizes.
+ * Affects weapon handling and combat mechanics.
  *
- * Maps weapon size categories to i18n keys. Weapons are classified as small (knives, tanto),
- * medium (katana, wakizashi), or large (no-dachi, tetsubo). Size affects reach, damage,
- * and usability in different combat situations.
- *
- * @type {Readonly<{small: string, medium: string, large: string}>}
+ * @type {Object<string, string>}
+ * @constant
+ * @property {string} small - Small weapons (knives, tanto)
+ * @property {string} medium - Medium weapons (katana, wakizashi)
+ * @property {string} large - Large weapons (no-dachi, tetsubo)
  */
 export const SIZES = freeze({
   small: "l5r4.equipment.weapons.sizes.small",
@@ -153,13 +149,11 @@ export const SIZES = freeze({
 });
 
 /**
- * Five Rings localization keys (alternative export).
+ * Localization keys for rings in standard order.
+ * Alias of RING_LABELS with different key ordering.
  *
- * Provides an alternative export of RING_LABELS with different property ordering.
- * Maintained for backwards compatibility with existing code. Prefer RING_LABELS for
- * new implementations.
- *
- * @type {Readonly<{fire: string, water: string, air: string, earth: string, void: string}>}
+ * @type {Object<string, string>}
+ * @constant
  */
 export const RINGS = freeze({
   fire: RING_LABELS.fire,
@@ -170,13 +164,12 @@ export const RINGS = freeze({
 });
 
 /**
- * Five Rings with empty option for UI dropdowns.
+ * Localization keys for rings with "none" option.
+ * Used in dropdowns where no ring selection is valid.
  *
- * Extends RING_LABELS with an empty string key mapped to "none" for use in form
- * dropdowns and selectors where no Ring selection should be available as an option.
- * Commonly used in item sheets for effects that may or may not have Ring associations.
- *
- * @type {Readonly<Record<string, string>>}
+ * @type {Object<string, string>}
+ * @constant
+ * @property {string} "" - None/empty selection
  */
 export const RINGS_WITH_NONE = freeze({
   "": "l5r4.ui.common.none",
@@ -184,19 +177,17 @@ export const RINGS_WITH_NONE = freeze({
 });
 
 /**
- * Combat stance localization keys.
+ * Localization keys for combat stances.
+ * Used in combat configuration and stance selection dialogs.
  *
- * Maps combat stances to i18n keys. Stances determine available actions and tactical
- * modifiers each round. Each stance aligns with a Ring philosophy:
- * - Attack (Water): Fluid, versatile, no action restrictions
- * - Full Attack (Fire): Aggressive, +2k1 attack / -10 Armor TN, movement bonus
- * - Defense (Air): Reactive, adds Air Ring + Defense Skill to Armor TN
- * - Full Defense (Earth): Unmoving, adds Defense/Reflexes roll to Armor TN, Complex Action
- * - Center (Void): Meditative, +1k1 to next round's action, +10 Initiative
- *
- * Includes empty string option for "no stance" in UI selections.
- *
- * @type {Readonly<Record<string, string>>}
+ * @type {Object<string, string>}
+ * @constant
+ * @property {string} "" - No stance selected
+ * @property {string} attackStance - Attack stance (+1k0 attack, -5 TN to be hit)
+ * @property {string} fullAttackStance - Full attack stance (+2k1 attack, -10 TN to be hit)
+ * @property {string} defenseStance - Defense stance (+10 TN to be hit)
+ * @property {string} fullDefenseStance - Full defense stance (+20 TN to be hit)
+ * @property {string} centerStance - Center stance (void point recovery)
  */
 export const STANCES = freeze({
   "": "l5r4.ui.common.none",
@@ -208,13 +199,12 @@ export const STANCES = freeze({
 });
 
 /**
- * Spell Ring localization keys.
+ * Localization keys for spell rings including "all" option.
+ * Used in spell filtering and spell sheet displays.
  *
- * Extends RING_LABELS with an "all" key for universal spells that can be cast using
- * any Ring. Most spells are associated with a specific Ring for casting, but universal
- * spells offer flexibility. Used in spell item sheets and spell slot management.
- *
- * @type {Readonly<Record<string, string>>}
+ * @type {Object<string, string>}
+ * @constant
+ * @property {string} all - All rings (for universal spells)
  */
 export const SPELL_RINGS = freeze({
   ...RING_LABELS,
@@ -222,19 +212,19 @@ export const SPELL_RINGS = freeze({
 });
 
 /**
- * Character Trait localization keys.
+ * Localization keys for character traits (ring components).
+ * Each ring consists of two traits that determine its value.
  *
- * Maps the eight core character Traits (abbreviated) to i18n keys. Traits represent
- * raw mental and physical capabilities and are organized by their Ring associations:
- * - Earth: Stamina (sta), Willpower (wil)
- * - Water: Strength (str), Perception (per)
- * - Fire: Agility (agi), Intelligence (int)
- * - Air: Reflexes (ref), Awareness (awa)
- *
- * Traits determine kept dice in the Roll & Keep system and are used for raw ability
- * checks. Ring rank equals the lower of its two component Traits.
- *
- * @type {Readonly<{sta: string, wil: string, str: string, per: string, ref: string, awa: string, agi: string, int: string}>}
+ * @type {Object<string, string>}
+ * @constant
+ * @property {string} sta - Stamina (Earth)
+ * @property {string} wil - Willpower (Earth)
+ * @property {string} str - Strength (Water)
+ * @property {string} per - Perception (Water)
+ * @property {string} ref - Reflexes (Fire)
+ * @property {string} awa - Awareness (Fire)
+ * @property {string} agi - Agility (Air)
+ * @property {string} int - Intelligence (Air)
  */
 export const TRAITS = freeze({
   sta: "l5r4.ui.mechanics.traits.sta",
@@ -248,13 +238,11 @@ export const TRAITS = freeze({
 });
 
 /**
- * Skill Trait options with Void Ring.
+ * Localization keys for skill-related traits including Void.
+ * Extends TRAITS with Void ring for skills that can use any trait.
  *
- * Extends TRAITS with the Void Ring for use in skill roll dialogs. While most skills
- * use one of the eight standard Traits, some mechanics allow Void to substitute as
- * the governing attribute. Used in skill roll UI to provide complete trait selection.
- *
- * @type {Readonly<Record<string, string>>}
+ * @type {Object<string, string>}
+ * @constant
  */
 export const SKILL_TRAITS = freeze({
   ...TRAITS,
@@ -262,27 +250,24 @@ export const SKILL_TRAITS = freeze({
 });
 
 /**
- * NPC Trait localization keys.
+ * Localization keys for NPC traits.
+ * Alias of TRAITS for semantic clarity in NPC contexts.
  *
- * Direct reference to TRAITS for NPC character sheets. NPCs use the same eight Traits
- * as player characters. This alias exists for semantic clarity in NPC-specific code
- * and maintains consistency with naming conventions.
- *
- * @type {Readonly<{sta: string, wil: string, str: string, per: string, ref: string, awa: string, agi: string, int: string}>}
+ * @type {Object<string, string>}
+ * @constant
  */
 export const NPC_TRAITS = TRAITS;
 
 /**
- * Skill type category localization keys.
+ * Localization keys for skill categories.
+ * Determines skill availability and social implications.
  *
- * Maps skill subtype categories to i18n keys. L5R4 classifies skills into four social
- * categories based on Rokugani traditions:
- * - High: Courtly and scholarly arts (Calligraphy, Etiquette, Tea Ceremony)
- * - Bugei: Martial skills practiced by bushi (Kenjutsu, Kyujutsu, Defense)
- * - Merchant (merch): Trade and commerce skills (Commerce, Sailing, Engineering)
- * - Low: Dishonorable practices that may cause Honor loss (Stealth, Forgery, Temptation)
- *
- * @type {Readonly<{high: string, bugei: string, merch: string, low: string}>}
+ * @type {Object<string, string>}
+ * @constant
+ * @property {string} high - High skills (courtly, scholarly)
+ * @property {string} bugei - Bugei skills (martial, combat)
+ * @property {string} merch - Merchant skills (trade, commerce)
+ * @property {string} low - Low skills (dishonorable, peasant)
  */
 export const SKILL_TYPES = freeze({
   high: "l5r4.character.skillTypes.high",
@@ -292,16 +277,14 @@ export const SKILL_TYPES = freeze({
 });
 
 /**
- * Action type localization keys.
+ * Localization keys for action types in combat.
+ * Determines how many actions can be taken per round.
  *
- * Maps action timing categories to i18n keys. L5R4 combat uses three action types:
- * - Simple: Quick tasks, characters may take two per turn (moving, drawing weapon)
- * - Complex: Elaborate tasks requiring full attention, one per turn (casting spell, Full Defense)
- * - Free: Minor activities that don't disrupt other actions (speaking, dropping item)
- *
- * Action economy follows the pattern: (One Complex + Free) OR (Two Simple + Free) per turn.
- *
- * @type {Readonly<{simple: string, complex: string, free: string}>}
+ * @type {Object<string, string>}
+ * @constant
+ * @property {string} simple - Simple action (can take multiple)
+ * @property {string} complex - Complex action (takes full round)
+ * @property {string} free - Free action (unlimited)
  */
 export const ACTION_TYPES = freeze({
   simple: "l5r4.ui.common.simple",
@@ -310,16 +293,15 @@ export const ACTION_TYPES = freeze({
 });
 
 /**
- * Kiho type localization keys.
+ * Localization keys for kiho (monk power) types.
+ * Categorizes mystical abilities available to monks and Brotherhood members.
  *
- * Maps mystical technique categories to i18n keys. Kiho are special abilities learned
- * by monks and Brotherhood members, classified into four types:
- * - Internal: Body-enhancing techniques (improved stamina, poison resistance)
- * - Karmic: Spiritual awareness and fortune manipulation
- * - Martial: Combat-focused mystical techniques
- * - Mystic: Supernatural abilities and spirit interaction
- *
- * @type {Readonly<{internal: string, karmic: string, martial: string, mystic: string}>}
+ * @type {Object<string, string>}
+ * @constant
+ * @property {string} internal - Internal kiho (body enhancement)
+ * @property {string} karmic - Karmic kiho (spiritual effects)
+ * @property {string} martial - Martial kiho (combat techniques)
+ * @property {string} mystic - Mystic kiho (supernatural abilities)
  */
 export const KIHO_TYPES = freeze({
   internal: "l5r4.magic.kiho.internal",
@@ -329,21 +311,17 @@ export const KIHO_TYPES = freeze({
 });
 
 /**
- * Advantage and Disadvantage type localization keys.
+ * Localization keys for advantage categories.
+ * Used for organizing and filtering character advantages.
  *
- * Maps advantage/disadvantage subtypes to i18n keys. These categories determine when
- * advantages can be purchased and whether they can be lost:
- * - Physical: Inherent bodily traits (Large, Quick, Missing Limb)
- * - Mental: Psychological makeup (Blackmail, Driven, Soft-Hearted)
- * - Social: Interpersonal capabilities (Allies, Nemesis, Social Position)
- * - Material: Physical possessions (Wealthy, Sacred Weapon)
- * - Spiritual: Supernatural connections (Fortune's Blessing, Cursed by Realm)
- * - Ancestor: Familial spiritual bonds (specific ancestor blessings)
- *
- * Physical and Mental types typically cannot be purchased after character creation unless
- * GM approves extenuating circumstances.
- *
- * @type {Readonly<{physical: string, mental: string, social: string, material: string, spiritual: string, ancestor: string}>}
+ * @type {Object<string, string>}
+ * @constant
+ * @property {string} physical - Physical advantages (body-related)
+ * @property {string} mental - Mental advantages (mind-related)
+ * @property {string} social - Social advantages (status, connections)
+ * @property {string} material - Material advantages (wealth, equipment)
+ * @property {string} spiritual - Spiritual advantages (supernatural)
+ * @property {string} ancestor - Ancestor advantages (bloodline blessings)
  */
 export const ADVANTAGE_TYPES = freeze({
   physical: "l5r4.character.advantages.physical",
