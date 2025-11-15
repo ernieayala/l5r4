@@ -1,34 +1,40 @@
 /**
  * Emphasis Manager Application
  *
- * ApplicationV2 dialog for managing which emphases are AVAILABLE for a skill.
- * This builds the pool of emphases that can later be trained on the character sheet.
+ * Provides an interface for managing skill emphases, including both official
+ * emphases from the game data and custom world-level emphases.
  *
- * Key Features:
- * - Browse official emphases from OFFICIAL_EMPHASES constant
- * - Add custom emphases (stored in world settings)
- * - Select which emphases should be available for this skill
- * - NO rank limits here (those apply on character sheet when training)
- * - NO XP tracking here (happens on character sheet)
+ * Key Responsibilities:
+ * - **Emphasis Selection**: Toggle available emphases for a skill item
+ * - **Custom Emphasis Management**: Add, edit, and delete world-level custom emphases
+ * - **Validation**: Ensure emphasis names meet requirements before saving
  *
  * Foundry VTT Integration:
- * - Extends ApplicationV2 (Foundry v13+)
- * - Uses HandlebarsApplicationMixin for template rendering
- * - Updates skill item.system.availableEmphases on save
+ * - Extends ApplicationV2 with HandlebarsApplicationMixin
+ * - Uses world settings to store custom emphases
+ * - Uses data-action delegation for event handling
  *
- * Workflow:
- * 1. ITEM SHEET: Add emphases to available pool (this dialog)
- * 2. CHARACTER SHEET: Check trained emphases from available pool (with rank limits & XP)
+ * Architectural Notes:
+ * - **No DebouncedFieldMixin**: Form submission pattern for bulk checkbox updates
+ * - **Options-based constructor**: Uses `options.item` instead of positional `actor`
+ *   parameter because this operates on a skill Item, not an Actor
+ * - **closeOnSubmit: true**: One-time configuration, closes after saving selections
  *
  * @module apps/emphasis-manager
- * @see module:config/game-data.OFFICIAL_EMPHASES - Official emphasis list
  */
 
+// Config imports
+import { SYS_ID } from "../config/constants.js";
 import { OFFICIAL_EMPHASES } from "../config/game-data.js";
+
+// Utils imports
+import { T } from "../utils/localization.js";
 import { validateEmphasisName } from "../utils/validators.js";
+import { logError } from "../utils/error-logging.js";
 
 /**
- * Get world-level custom emphases from settings.
+ * Retrieve custom emphases from world settings.
+ * Returns empty array if setting is not found or invalid.
  *
  * @returns {string[]} Array of custom emphasis names
  */
@@ -42,19 +48,13 @@ function getWorldCustomEmphases() {
 }
 
 /**
- * Save world-level custom emphasis to settings.
+ * Save a new custom emphasis to world settings.
+ * Validates name and checks for duplicates before saving.
  *
- * Validates emphasis name before saving to prevent:
- * - XSS attacks (script injection)
- * - Data corruption (invalid characters)
- * - Storage issues (excessive length)
- *
- * @param {string} emphasisName - Name of custom emphasis to add
- * @returns {Promise<void>}
- * @throws {Error} If emphasis name fails validation
+ * @param {string} emphasisName - The emphasis name to save
+ * @throws {Error} If validation fails or emphasis already exists
  */
 async function saveWorldCustomEmphasis(emphasisName) {
-  // Validate emphasis name
   const validation = validateEmphasisName(emphasisName);
   if (!validation.valid) {
     throw new Error(validation.error);
@@ -63,21 +63,18 @@ async function saveWorldCustomEmphasis(emphasisName) {
   const trimmed = emphasisName.trim();
   const current = getWorldCustomEmphases();
 
-  // Check for duplicates
   if (current.includes(trimmed)) {
     throw new Error("Emphasis already exists");
   }
 
-  // Save validated emphasis
   current.push(trimmed);
   await game.settings.set("l5r4-enhanced", "customEmphases", current);
 }
 
 /**
- * Delete world-level custom emphasis from settings.
+ * Delete a custom emphasis from world settings.
  *
- * @param {string} emphasisName - Name of custom emphasis to delete
- * @returns {Promise<void>}
+ * @param {string} emphasisName - The emphasis name to delete
  */
 async function deleteWorldCustomEmphasis(emphasisName) {
   const current = getWorldCustomEmphases();
@@ -86,20 +83,14 @@ async function deleteWorldCustomEmphasis(emphasisName) {
 }
 
 /**
- * Update world-level custom emphasis name in settings.
+ * Update an existing custom emphasis name in world settings.
+ * Validates new name and checks for duplicates before updating.
  *
- * Validates new emphasis name before updating to prevent:
- * - XSS attacks (script injection)
- * - Data corruption (invalid characters)
- * - Storage issues (excessive length)
- *
- * @param {string} oldName - Current name of custom emphasis
- * @param {string} newName - New name for custom emphasis
- * @returns {Promise<void>}
- * @throws {Error} If new emphasis name fails validation
+ * @param {string} oldName - The current emphasis name
+ * @param {string} newName - The new emphasis name
+ * @throws {Error} If validation fails or new name already exists
  */
 async function updateWorldCustomEmphasis(oldName, newName) {
-  // Validate new emphasis name
   const validation = validateEmphasisName(newName);
   if (!validation.valid) {
     throw new Error(validation.error);
@@ -110,7 +101,6 @@ async function updateWorldCustomEmphasis(oldName, newName) {
   const index = current.indexOf(oldName);
 
   if (index !== -1) {
-    // Check for duplicates (excluding the one being updated)
     const otherEmphases = current.filter((_, i) => i !== index);
     if (otherEmphases.includes(trimmed)) {
       throw new Error("Emphasis already exists");
@@ -121,150 +111,173 @@ async function updateWorldCustomEmphasis(oldName, newName) {
   }
 }
 
-/**
- * Emphasis Manager dialog for building available emphasis pool.
- *
- * Foundry ApplicationV2 that provides UI for selecting which emphases
- * should be available for a skill. No rank limits or training state here.
- *
- * @extends {foundry.applications.api.HandlebarsApplicationMixin(foundry.applications.api.ApplicationV2)}
- */
-export default class EmphasisManager extends foundry.applications.api.HandlebarsApplicationMixin(
+export default class EmphasisManagerApplication extends foundry.applications.api.HandlebarsApplicationMixin(
   foundry.applications.api.ApplicationV2
 ) {
-  /**
-   * @typedef {Object} EmphasisManagerOptions
-   * @property {Item} item - The skill item being edited
-   */
-
-  /**
-   * Default application configuration options.
-   * Defines window properties, CSS classes, and action handlers.
-   *
-   * @type {ApplicationConfiguration}
-   */
   static DEFAULT_OPTIONS = {
     id: "emphasis-manager-{id}",
     classes: ["l5r4", "emphasis-manager"],
     tag: "form",
     window: {
-      title: "l5r4.ui.emphasisManager.title",
+      title: "l5r4.apps.emphasisManager.title",
       icon: "fa-solid fa-list-check",
       resizable: true
-    },
-    form: {
-      handler: EmphasisManager.prototype._onSubmit,
-      closeOnSubmit: true
-    },
-    actions: {
-      addCustom: EmphasisManager.prototype._onAddCustom,
-      deleteCustom: EmphasisManager.prototype._onDeleteCustom,
-      editCustom: EmphasisManager.prototype._onEditCustom
     },
     position: {
       width: 500,
       height: 600
+    },
+    actions: {
+      addCustom: EmphasisManagerApplication.prototype._onAddCustom,
+      deleteCustom: EmphasisManagerApplication.prototype._onDeleteCustom,
+      editCustom: EmphasisManagerApplication.prototype._onEditCustom
+    },
+    form: {
+      handler: EmphasisManagerApplication.prototype._onSubmit,
+      closeOnSubmit: true // One-time configuration, closes after saving selections
     }
   };
 
-  /**
-   * Template parts for the application.
-   * Uses single template for entire form.
-   *
-   * @type {Record<string, TemplatePartConfiguration>}
-   */
   static PARTS = {
     form: {
-      template: "systems/l5r4-enhanced/templates/apps/emphasis-manager.hbs"
+      template: `systems/${SYS_ID}/templates/apps/emphasis-manager.hbs`
     }
   };
 
   /**
-   * Create EmphasisManager instance.
+   * Create a new EmphasisManager instance.
    *
-   * @param {EmphasisManagerOptions} options - Configuration options
+   * NOTE: Unlike other apps, this uses options-based constructor because it operates
+   * on an Item (skill) rather than an Actor. This is the appropriate pattern for
+   * item-specific configuration dialogs.
+   *
+   * @param {object} [options={}] - Application options including item reference
+   * @param {Item} options.item - The skill item whose emphases are being managed
+   * @throws {Error} If item is not provided or is not a skill type
    */
   constructor(options = {}) {
     super(options);
 
     if (!options.item || options.item.type !== "skill") {
-      throw new Error("EmphasisManager requires a skill item");
+      throw new Error("EmphasisManagerApplication requires a skill item");
     }
 
     this.item = options.item;
   }
 
   /**
-   * Prepare context data for template rendering.
-   * Combines official and custom emphases, marks which are available for this skill.
+   * Dynamic window title including skill name.
    *
-   * @param {RenderOptions} options - Rendering options
-   * @returns {Promise<ApplicationRenderContext>} Template context data
-   * @override
+   * @returns {string} Localized title with skill name
    */
-  async _prepareContext(options) {
-    const context = await super._prepareContext(options);
+  get title() {
+    const baseTitle = T("l5r4.apps.emphasisManager.title");
+    return `${baseTitle}: ${this.item?.name ?? "Unknown Skill"}`;
+  }
 
-    // Get available emphases for this skill
-    const availableEmphases = this.item.system?.availableEmphases ?? [];
-    const availableSet = new Set(availableEmphases);
+  /**
+   * Prepare context data for rendering the emphasis manager.
+   * Combines official and custom emphases, marks which are available for the skill.
+   *
+   * @param {object} _options - Render options (unused)
+   * @returns {Promise<object>} Context object with item and emphasis list
+   * @private
+   */
+  async _prepareContext(_options) {
+    if (!this.item) {
+      console.warn(`${SYS_ID}`, "EmphasisManager: No item reference");
+      return this._getFallbackContext();
+    }
 
-    // Combine official and custom emphases
-    const worldCustom = getWorldCustomEmphases();
-    const allEmphases = [...Array.from(OFFICIAL_EMPHASES), ...worldCustom].sort();
+    try {
+      const context = await super._prepareContext(_options);
 
-    // Map to template-friendly format
-    const emphasisList = allEmphases.map(name => ({
-      name,
-      available: availableSet.has(name),
-      custom: !OFFICIAL_EMPHASES.includes(name)
-    }));
+      const availableEmphases = this.item.system?.availableEmphases ?? [];
+      const availableSet = new Set(availableEmphases);
 
+      const worldCustom = getWorldCustomEmphases();
+      const allEmphases = [...Array.from(OFFICIAL_EMPHASES), ...worldCustom].sort();
+
+      const emphasisList = allEmphases.map(name => ({
+        name,
+        available: availableSet.has(name),
+        custom: !OFFICIAL_EMPHASES.includes(name)
+      }));
+
+      return {
+        ...context,
+        item: this.item,
+        skillName: this.item.name,
+        emphasisList
+      };
+    } catch (err) {
+      logError("Failed to prepare emphasis manager context", err, {
+        itemId: this.item?.id
+      });
+      return this._getFallbackContext();
+    }
+  }
+
+  /**
+   * Provide fallback context when item data is unavailable or errors occur.
+   * Returns safe default values to prevent rendering failures.
+   *
+   * @returns {object} Fallback context with default values
+   * @private
+   */
+  _getFallbackContext() {
     return {
-      ...context,
       item: this.item,
-      skillName: this.item.name,
-      emphasisList
+      skillName: this.item?.name ?? "Unknown Skill",
+      emphasisList: []
     };
   }
 
   /**
-   * Handle form submission - save available emphases to item.
-   * Updates item.system.availableEmphases array (just names, no state).
+   * Handle form submission to update skill's available emphases.
+   * Extracts checked emphasis checkboxes and updates item.
    *
-   * @param {SubmitEvent} event - Form submission event
-   * @param {HTMLFormElement} form - The submitted form element
-   * @param {FormDataExtended} formData - Processed form data
-   * @returns {Promise<void>}
+   * @param {Event} event - The submit event
+   * @param {HTMLFormElement} form - The form element
+   * @param {FormDataExtended} formData - The form data
    * @private
    */
   async _onSubmit(event, form, formData) {
     const item = this.item;
 
-    // Get checked emphases from form data
+    // Extract checked emphases from form data
     const formObject = formData.object;
     const checkedEmphases = [];
 
+    // Process form entries - checkboxes are prefixed with "emphasis."
     for (const [key, value] of Object.entries(formObject)) {
+      // Handle various checkbox value formats (boolean, string, "on")
       const isChecked = value === true || value === "true" || value === "on";
 
+      // Extract emphasis name from form field key (e.g., "emphasis.Archery" -> "Archery")
       if (key.startsWith("emphasis.") && isChecked) {
         const emphasisName = key.substring("emphasis.".length);
         checkedEmphases.push(emphasisName);
       }
     }
 
-    // Update item with just the array of names
-    await item.update({ "system.availableEmphases": checkedEmphases });
+    try {
+      await item.update({ "system.availableEmphases": checkedEmphases });
+    } catch (err) {
+      logError("Failed to update emphases", err, {
+        itemId: this.item?.id,
+        checkedEmphases
+      });
+      ui.notifications?.error(T("l5r4.apps.emphasisManager.errors.updateFailed"));
+    }
   }
 
   /**
-   * Handle adding custom emphasis.
-   * Prompts for emphasis name, adds to world settings, and refreshes form.
+   * Handle add custom emphasis action.
+   * Displays dialog for entering new emphasis name, validates, and saves to world settings.
    *
-   * @param {PointerEvent} event - Click event
-   * @param {HTMLElement} target - Button element
-   * @returns {Promise<void>}
+   * @param {Event} _event - The click event (unused)
+   * @param {HTMLElement} _target - The clicked element (unused)
    * @private
    */
   async _onAddCustom(_event, _target) {
@@ -273,10 +286,10 @@ export default class EmphasisManager extends foundry.applications.api.Handlebars
     );
 
     const name = await foundry.applications.api.DialogV2.prompt({
-      window: { title: game.i18n.localize("l5r4.ui.emphasisManager.addCustom") },
+      window: { title: T("l5r4.apps.emphasisManager.addCustom") },
       content,
       ok: {
-        label: game.i18n.localize("l5r4.ui.common.add"),
+        label: T("l5r4.ui.label.add"),
         callback: (_event, button, _dialog) => button.form.elements.emphasisName.value
       },
       rejectClose: false
@@ -288,39 +301,37 @@ export default class EmphasisManager extends foundry.applications.api.Handlebars
 
     const trimmedName = name.trim();
 
-    // Add to world settings with validation
     try {
       await saveWorldCustomEmphasis(trimmedName);
     } catch (error) {
-      ui.notifications.error(error.message);
+      ui.notifications?.error(T("l5r4.apps.emphasisManager.errors.saveFailed"));
       return;
     }
 
-    // Refresh the form to show new emphasis
-    this.render();
+    if (this.rendered) {
+      this.render();
+    }
   }
 
   /**
-   * Handle deleting custom emphasis.
-   * Prompts for confirmation, removes from world settings, and refreshes form.
+   * Handle delete custom emphasis action.
+   * Displays confirmation dialog and removes emphasis from world settings.
    *
-   * @param {PointerEvent} event - Click event
-   * @param {HTMLElement} target - Button element with data-emphasis-name attribute
-   * @returns {Promise<void>}
+   * @param {Event} _event - The click event (unused)
+   * @param {HTMLElement} target - The clicked element with data-emphasis-name attribute
    * @private
    */
   async _onDeleteCustom(_event, target) {
     const emphasisName = target.dataset.emphasisName;
 
     if (!emphasisName) {
-      console.warn("L5R4 | No emphasis name provided for deletion");
+      console.warn(`${SYS_ID}`, "No emphasis name provided for deletion");
       return;
     }
 
-    // Confirm deletion
     const confirmed = await foundry.applications.api.DialogV2.confirm({
-      window: { title: game.i18n.localize("l5r4.ui.common.delete") },
-      content: `${game.i18n.localize("l5r4.ui.common.delete")} "${emphasisName}"?`,
+      window: { title: T("l5r4.ui.label.delete") },
+      content: `${T("l5r4.ui.label.delete")} "${emphasisName}"?`,
       rejectClose: false
     });
 
@@ -328,27 +339,26 @@ export default class EmphasisManager extends foundry.applications.api.Handlebars
       return;
     }
 
-    // Delete from world settings
     await deleteWorldCustomEmphasis(emphasisName);
 
-    // Refresh the form
-    this.render();
+    if (this.rendered) {
+      this.render();
+    }
   }
 
   /**
-   * Handle editing custom emphasis.
-   * Prompts for new name, updates in world settings, and refreshes form.
+   * Handle edit custom emphasis action.
+   * Displays dialog for entering new name, validates, and updates in world settings.
    *
-   * @param {PointerEvent} event - Click event
-   * @param {HTMLElement} target - Button element with data-emphasis-name attribute
-   * @returns {Promise<void>}
+   * @param {Event} _event - The click event (unused)
+   * @param {HTMLElement} target - The clicked element with data-emphasis-name attribute
    * @private
    */
   async _onEditCustom(_event, target) {
     const oldName = target.dataset.emphasisName;
 
     if (!oldName) {
-      console.warn("L5R4 | No emphasis name provided for editing");
+      console.warn(`${SYS_ID}`, "No emphasis name provided for editing");
       return;
     }
 
@@ -358,10 +368,10 @@ export default class EmphasisManager extends foundry.applications.api.Handlebars
     );
 
     const newName = await foundry.applications.api.DialogV2.prompt({
-      window: { title: game.i18n.localize("l5r4.ui.common.edit") },
+      window: { title: T("l5r4.ui.label.edit") },
       content,
       ok: {
-        label: game.i18n.localize("l5r4.ui.common.save"),
+        label: T("l5r4.ui.label.save"),
         callback: (_event, button, _dialog) => button.form.elements.emphasisName.value
       },
       rejectClose: false
@@ -373,15 +383,15 @@ export default class EmphasisManager extends foundry.applications.api.Handlebars
 
     const trimmedNewName = newName.trim();
 
-    // Update in world settings with validation
     try {
       await updateWorldCustomEmphasis(oldName, trimmedNewName);
     } catch (error) {
-      ui.notifications.error(error.message);
+      ui.notifications?.error(T("l5r4.apps.emphasisManager.errors.saveFailed"));
       return;
     }
 
-    // Refresh the form
-    this.render();
+    if (this.rendered) {
+      this.render();
+    }
   }
 }

@@ -61,7 +61,7 @@ import { SpellCastRoll } from "../services/dice/rolls/spell-cast-roll.js";
 import { MahoCastRoll } from "../services/dice/rolls/maho-cast-roll.js";
 
 // Apps
-import NpcAttackEditor from "../apps/npc-attack-editor.js";
+import NpcAttackConfigApplication from "../apps/npc-attack-config.js";
 
 // Local
 import { BaseActorSheet } from "./base-actor-sheet.js";
@@ -642,7 +642,7 @@ export default class L5R4NpcSheet extends BaseActorSheet {
   /**
    * Opens attack editor dialog for NPC attack configuration.
    *
-   * Launches NpcAttackEditor application to edit attack and damage values
+   * Launches NpcAttackConfigApplication to edit attack and damage values
    * for the specified attack slot (attack1-4).
    *
    * @param {Event} event - Click event
@@ -660,10 +660,7 @@ export default class L5R4NpcSheet extends BaseActorSheet {
       return;
     }
 
-    const editor = new NpcAttackEditor({
-      actor: this.actor,
-      attackKey
-    });
+    const editor = new NpcAttackConfigApplication(this.actor, attackKey);
 
     editor.render(true);
   }

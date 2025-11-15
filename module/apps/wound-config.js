@@ -1,111 +1,80 @@
 /**
  * Wound Configuration Application
  *
- * Provides interactive UI for configuring actor wound mechanics per L5R4 core rules.
- * Manages wound calculation modes, Earth Ring multipliers, wound level counts, and penalty modifiers.
+ * Provides a form interface for configuring actor wound tracking including wound
+ * calculation mode, multipliers, modifiers, and NPC wound level settings.
  *
- * Game Mechanics Implemented:
- * - Wound Rank System: Healthy/Nicked/Grazed/Hurt/Injured/Crippled/Down/Out progression
- * - Earth Multiplier: Configurable lethality (Earth x2/x3/x4/x5) for wound capacity
- * - NPC Simplified Wounds: 1-8 wound levels instead of full 8-rank progression
- * - Manual vs Formula Modes: NPCs can use custom wounds or calculated Earth-based values
- * - Wound Penalties: TN penalties at each wound rank (+3/+5/+10/+15/+20/+40)
+ * Key Responsibilities:
+ * - **Wound Mode Selection**: Toggle between manual and formula-based wound calculation
+ * - **Multiplier Configuration**: Set wound multiplier for formula-based calculation
+ * - **Modifier Management**: Configure wound and penalty modifiers
+ * - **NPC Wound Levels**: Set number of wound levels for NPC actors
  *
  * Foundry VTT Integration:
- * - Extends ApplicationV2 with HandlebarsApplicationMixin (Foundry v13+)
- * - Uses event delegation pattern via data-action attributes
- * - Implements debounced updates to prevent excessive actor updates
- * - Leverages foundry.utils.mergeObject for option composition
+ * - Extends ApplicationV2 with HandlebarsApplicationMixin
+ * - Uses data-action delegation for event handling
+ * - Implements debounced updates for real-time field changes
+ * - Validates field values before applying updates
  *
- * Responsibilities:
- * - Render wound configuration form from wound-config.hbs template
- * - Validate wound settings against game rule bounds (multiplier 2-5, NPC levels 1-8)
- * - Update actor.system wound properties with debouncing
- * - Provide fallback context on data preparation errors
+ * Architectural Notes:
+ * - **Uses DebouncedFieldMixin**: Real-time numeric updates with validation for multipliers/modifiers
+ * - **Custom validation**: Overrides _validateFieldValue() to enforce wound calculation constraints
+ * - **Actor-based constructor**: Standard pattern for actor configuration dialogs
+ * - **closeOnSubmit: false**: Keeps dialog open for multiple adjustments during character setup
  *
  * @module apps/wound-config
- * @requires Foundry VTT v13+
- * @see {@link https://foundryvtt.com/api/classes/foundry.applications.api.ApplicationV2.html}
  */
 
+// Config imports
 import { SYS_ID } from "../config/constants.js";
 import { NPC_NUMBER_WOUND_LVLS } from "../config/game-data.js";
 
+// Utils imports
+import { T } from "../utils/localization.js";
+import { logError } from "../utils/error-logging.js";
+
+// Mixins
+import { DebouncedFieldMixin } from "../mixins/debounced-field-mixin.js";
+
 /**
- * Valid wound calculation modes for NPC actors.
- * - manual: Direct wound value entry (custom total wounds)
- * - formula: Earth Ring-based calculation (multiplier × Earth Ring)
+ * Valid wound calculation modes.
  * @constant {string[]}
  */
 const VALID_WOUND_MODES = ["manual", "formula"];
 
 /**
- * Minimum Earth Ring multiplier for wound calculation.
- * Default L5R4 lethality is Earth x2 (very lethal, 1-3 round combats).
+ * Minimum allowed wound multiplier for formula-based calculation.
  * @constant {number}
  */
 const MIN_WOUND_MULTIPLIER = 2;
 
 /**
- * Maximum Earth Ring multiplier for wound calculation.
- * Earth x5 creates "juggernaut" characters with 7+ round combats.
+ * Maximum allowed wound multiplier for formula-based calculation.
  * @constant {number}
  */
 const MAX_WOUND_MULTIPLIER = 5;
 
 /**
- * Minimum wound levels for simplified NPC stat blocks.
+ * Minimum number of wound levels for NPC actors.
  * @constant {number}
  */
 const MIN_NPC_WOUND_LEVELS = 1;
 
 /**
- * Maximum wound levels for simplified NPC stat blocks.
- * Standard progression is 8 levels (Healthy through Out).
+ * Maximum number of wound levels for NPC actors.
  * @constant {number}
  */
 const MAX_NPC_WOUND_LEVELS = 8;
 
-/**
- * @typedef {Object} WoundConfigContext
- * @property {L5R4Actor} actor - The actor being configured
- * @property {object} system - Actor.system reference
- * @property {string} woundMode - "manual" or "formula" (NPCs only)
- * @property {number} nrWoundLvls - Number of wound levels for NPCs (1-8)
- * @property {number} woundsMultiplier - Earth Ring multiplier (2-5)
- * @property {number} woundsMod - Flat bonus to total wounds
- * @property {number} woundsPenaltyMod - Modifier to wound penalties
- * @property {object} wounds - Wound tracking data
- * @property {object} visibleManualWoundLevels - Manual wound level configuration
- * @property {object} config - Static configuration data
- * @property {object} config.npcNumberWoundLvls - NPC wound level lookup
- */
-
-/**
- * Wound Configuration Application
- *
- * ApplicationV2-based form for managing actor wound system settings.
- * Supports both PC and NPC wound configuration with game rule validation.
- *
- * Features:
- * - Earth multiplier adjustment (2x-5x lethality scaling)
- * - NPC wound mode switching (manual/formula)
- * - Wound bonus/penalty modifiers
- * - Real-time validation with debounced updates
- * - Defensive error handling with fallback contexts
- *
- * @extends {foundry.applications.api.ApplicationV2}
- * @mixes {foundry.applications.api.HandlebarsApplicationMixin}
- */
-export default class WoundConfigApplication extends foundry.applications.api.HandlebarsApplicationMixin(
-  foundry.applications.api.ApplicationV2
+export default class WoundConfigApplication extends DebouncedFieldMixin(
+  foundry.applications.api.HandlebarsApplicationMixin(foundry.applications.api.ApplicationV2)
 ) {
   static DEFAULT_OPTIONS = {
     id: "wound-config-{id}",
     classes: ["l5r4", "wound-config-app"],
     tag: "form",
     window: {
-      title: "l5r4.ui.mechanics.wounds.woundConfiguration",
+      title: "l5r4.apps.woundConfig.title",
       icon: "fas fa-cog",
       resizable: true
     },
@@ -119,7 +88,7 @@ export default class WoundConfigApplication extends foundry.applications.api.Han
     form: {
       handler: WoundConfigApplication.prototype._onSubmitForm,
       submitOnChange: false,
-      closeOnSubmit: false
+      closeOnSubmit: false // Keep open for adjusting multipliers/modifiers during setup
     }
   };
 
@@ -130,46 +99,42 @@ export default class WoundConfigApplication extends foundry.applications.api.Han
   };
 
   /**
-   * Creates wound configuration application instance.
+   * Create a new WoundConfigApplication instance.
    *
-   * Initializes debounced update handler to prevent excessive actor.update() calls
-   * during rapid field changes (e.g., typing in number inputs).
-   *
-   * @param {L5R4Actor} actor - The actor to configure wounds for
-   * @param {object} [options={}] - Application options (merged with defaults)
-   * @param {string} [options.id] - Override app ID (auto-generated: wound-config-{actorId})
+   * @param {Actor} actor - The actor whose wounds are being configured
+   * @param {object} [options={}] - Additional application options
+   * @throws {Error} If actor is not provided
    */
   constructor(actor, options = {}) {
+    if (!actor) {
+      throw new Error("WoundConfigApplication requires an actor");
+    }
+
     const mergedOptions = foundry.utils.mergeObject(options, {
       id: `wound-config-${actor.id}`
     });
     super(mergedOptions);
     this.actor = actor;
-    // Debounce prevents update spam during rapid typing (300ms cooldown)
-    this._updateDebounced = foundry.utils.debounce(this._updateActor.bind(this), 300);
+    this._initializeDebouncing();
   }
 
   /**
-   * Debounced update handler for actor wound configuration.
-   * Set in constructor, called by _onFieldChange.
-   * @type {Function}
-   * @private
+   * Dynamic window title including actor name.
+   *
+   * @returns {string} Localized title with actor name
    */
-  _updateDebounced;
+  get title() {
+    const baseTitle = T("l5r4.apps.woundConfig.title");
+    return `${baseTitle}: ${this.actor?.name ?? "Unknown"}`;
+  }
 
   /**
-   * Prepares context data for wound configuration template rendering.
+   * Prepare context data for rendering the wound configuration form.
+   * Retrieves wound mode, multipliers, modifiers, and NPC wound levels.
    *
-   * Extracts actor.system wound properties and packages them with
-   * NPC wound level configuration for Handlebars template consumption.
-   *
-   * Error Resilience:
-   * Falls back to safe defaults if actor or system data is corrupted.
-   *
-   * @param {object} options - Render options from ApplicationV2
-   * @returns {Promise<WoundConfigContext>} Template context with wound settings
-   * @override
-   * @async
+   * @param {object} _options - Render options (unused)
+   * @returns {Promise<object>} Context object with wound configuration data
+   * @private
    */
   async _prepareContext(_options) {
     if (!this.actor) {
@@ -177,7 +142,7 @@ export default class WoundConfigApplication extends foundry.applications.api.Han
       return this._getFallbackContext();
     }
 
-    const sys = this.actor.system;
+    const sys = this.actor?.system ?? {};
 
     try {
       const context = {
@@ -197,8 +162,7 @@ export default class WoundConfigApplication extends foundry.applications.api.Han
 
       return context;
     } catch (err) {
-      console.warn(`${SYS_ID}`, "Failed to prepare wound config context", {
-        err,
+      logError("Failed to prepare wound config context", err, {
         actorId: this.actor?.id
       });
       return this._getFallbackContext();
@@ -206,16 +170,10 @@ export default class WoundConfigApplication extends foundry.applications.api.Han
   }
 
   /**
-   * Provides safe fallback context when actor data is unavailable or corrupted.
+   * Provide fallback context when actor data is unavailable or errors occur.
+   * Returns safe default values to prevent rendering failures.
    *
-   * Returns minimum viable context with default wound settings:
-   * - Manual mode with 3 wound levels
-   * - Earth x2 multiplier (default L5R4 lethality)
-   * - No modifiers or bonuses
-   *
-   * Prevents template rendering crashes during edge cases.
-   *
-   * @returns {WoundConfigContext} Minimal safe template context
+   * @returns {object} Fallback context with default values
    * @private
    */
   _getFallbackContext() {
@@ -235,111 +193,80 @@ export default class WoundConfigApplication extends foundry.applications.api.Han
     };
   }
 
-  /**
-   * Post-render hook for ApplicationV2 lifecycle.
-   *
-   * Attaches change event listeners to form fields for debounced updates.
-   *
-   * @param {WoundConfigContext} context - Rendered template context
-   * @param {object} options - Render options
-   * @override
-   */
-  _onRender(_context, _options) {
-    if (!this.element) {
-      console.warn(`${SYS_ID}`, "WoundConfig _onRender: No element reference available");
-      return;
-    }
-
-    // Attach change event listeners to all fields with data-action="field-change"
-    const fields = this.element.querySelectorAll('[data-action="field-change"]');
-    fields.forEach(field => {
-      field.addEventListener("change", event => {
-        this._onFieldChange(event, event.target);
-      });
-    });
-  }
+  // _onRender is provided by DebouncedFieldMixin
 
   /**
-   * Handles wound mode changes for NPC actors (manual vs formula).
+   * Handle wound mode change action.
+   * Switches between manual and formula-based wound calculation modes.
    *
-   * Manual Mode: Direct total wound value entry
-   * Formula Mode: Earth Ring-based calculation (multiplier × Earth)
-   *
-   * Triggers full re-render to show/hide mode-specific fields.
-   *
-   * @param {Event} event - Change event from select element
-   * @param {HTMLSelectElement} element - The select element (data-action="wound-mode-change")
-   * @returns {Promise<void>}
-   * @async
+   * @param {Event} event - The change event
+   * @param {HTMLElement} element - The select element with new mode value
+   * @private
    */
   async _onWoundModeChange(event, element) {
     const newMode = element.value;
 
-    if (newMode === this.actor.system.woundMode) {
+    if (newMode === this.actor?.system?.woundMode) {
       return;
     }
 
     try {
       await this.actor.update({ "system.woundMode": newMode });
-      this.render();
+      if (this.rendered) {
+        this.render();
+      }
     } catch (err) {
-      console.warn(`${SYS_ID}`, "Failed to update wound mode", {
-        err,
+      logError("Failed to update wound mode", err, {
         newMode,
         actorId: this.actor.id
       });
-      ui.notifications?.error(game.i18n.localize("l5r4.ui.notifications.woundConfigUpdateFailed"));
+      ui.notifications?.error(T("l5r4.apps.woundConfig.errors.updateFailed"));
     }
   }
 
   /**
-   * Handles field changes with debounced actor updates.
+   * Handle field change events with validation notification.
+   * Overrides DebouncedFieldMixin to add user notification on validation failure.
    *
-   * Coerces input types:
-   * - checkbox → boolean
-   * - number inputs → integer
-   * - text → string
-   *
-   * Updates are debounced (300ms) to prevent excessive actor.update() calls
-   * during rapid typing in number fields.
-   *
-   * @param {Event} event - Input/change event
-   * @param {HTMLInputElement|HTMLSelectElement} element - Form element (data-action="field-change")
-   * @returns {Promise<void>}
-   * @async
+   * @param {Event} event - The change event
+   * @param {HTMLElement} element - The form field element that changed
+   * @private
    */
   async _onFieldChange(event, element) {
     const field = element.name;
+
+    // Type coercion (inherited from mixin logic)
     const value =
       element.type === "checkbox"
         ? element.checked
         : element.type === "number" || element.dataset.type === "Number"
-          ? parseInt(element.value) || 0
+          ? parseInt(element.value, 10) || 0
           : element.value;
 
     if (!field) {
-      console.warn(`${SYS_ID}`, "Field change event with no field name", {
-        element: element.outerHTML
-      });
+      console.warn(`${SYS_ID}`, "Field change event with no field name");
       return;
     }
 
-    this._updateDebounced(field, value);
+    // Validate and notify user if validation fails
+    const validatedValue = this._validateFieldValue(field, value);
+    if (validatedValue === null) {
+      ui.notifications?.warn(T("l5r4.apps.woundConfig.errors.invalidWoundConfigValue"));
+      return;
+    }
+
+    this._updateDebounced(field, validatedValue);
   }
 
   /**
-   * Validates field values against L5R4 game rule bounds.
+   * Validate field values before applying updates.
+   * Enforces constraints on wound mode, multipliers, NPC wound levels, and modifiers.
+   * Overrides DebouncedFieldMixin validation hook.
    *
-   * Validation Rules:
-   * - woundMode: Must be "manual" or "formula"
-   * - woundsMultiplier: Integer 2-5 (Earth x2 default, x5 max lethality)
-   * - nrWoundLvls: Integer 1-8 (NPC simplified wound levels)
-   * - woundsMod/woundsPenaltyMod/wounds.mod: Any finite number (floored to integer)
-   *
-   * @param {string} field - Field name from actor.system
-   * @param {*} value - User-provided value to validate
-   * @returns {*|null} Validated value, or null if invalid
-   * @private
+   * @param {string} field - The field name being validated
+   * @param {*} value - The value to validate
+   * @returns {*|null} Validated value or null if invalid
+   * @protected
    */
   _validateFieldValue(field, value) {
     switch (field) {
@@ -391,23 +318,12 @@ export default class WoundConfigApplication extends foundry.applications.api.Han
   }
 
   /**
-   * Debounced actor update handler for wound configuration changes.
+   * Update actor with new wound configuration value.
+   * Validates field value before updating, prevents updates after application close.
    *
-   * Validates input, constructs system.{field} update object, and applies to actor.
-   * Called via 300ms debounce to batch rapid changes (e.g., typing in number inputs).
-   *
-   * Handles nested field names (e.g., "wounds.mod" becomes "system.wounds.mod").
-   *
-   * Defensive Checks:
-   * - Bails if actor reference lost
-   * - Bails if application closed (rendered = false)
-   * - Validates against game rules before update
-   *
-   * @param {string} field - Actor.system field name (e.g., "woundsMultiplier" or "wounds.mod")
-   * @param {*} value - New field value (pre-coerced by _onFieldChange)
-   * @returns {Promise<void>}
+   * @param {string} field - The field name to update
+   * @param {*} value - The new value for the field
    * @private
-   * @async
    */
   async _updateActor(field, value) {
     try {
@@ -421,41 +337,27 @@ export default class WoundConfigApplication extends foundry.applications.api.Han
         return;
       }
 
-      const validatedValue = this._validateFieldValue(field, value);
-      if (validatedValue === null) {
-        ui.notifications?.warn(game.i18n.localize("l5r4.ui.notifications.invalidWoundConfigValue"));
-        return;
-      }
-
-      // Handle nested field names (e.g., "wounds.mod" stays as "system.wounds.mod")
-      const updateData = { [`system.${field}`]: validatedValue };
+      const updateData = { [`system.${field}`]: value };
 
       await this.actor.update(updateData);
     } catch (err) {
-      console.warn(`${SYS_ID}`, "Failed to update wound configuration", {
-        err,
+      logError("Failed to update wound configuration", err, {
         field,
         value,
-        actorId: this.actor?.id,
-        errorMessage: err.message,
-        errorStack: err.stack
+        actorId: this.actor?.id
       });
-      ui.notifications?.error(game.i18n.localize("l5r4.ui.notifications.woundConfigUpdateFailed"));
+      ui.notifications?.error(T("l5r4.apps.woundConfig.errors.updateFailed"));
     }
   }
 
   /**
-   * Form submission handler (ApplicationV2 form lifecycle).
+   * Form submit handler.
+   * Prevents default form submission since updates are handled via field changes.
    *
-   * Prevents default submission - all updates handled via debounced field changes.
-   * No batch submission needed since changes apply immediately via _onFieldChange.
-   *
-   * @param {Event} event - Submit event
-   * @param {HTMLFormElement} form - The form element
-   * @param {FormData} formData - Submitted form data
-   * @returns {Promise<void>}
-   * @override
-   * @async
+   * @param {Event} event - The submit event
+   * @param {HTMLFormElement} _form - The form element (unused)
+   * @param {FormData} _formData - The form data (unused)
+   * @private
    */
   async _onSubmitForm(event, _form, _formData) {
     if (event) {
@@ -463,34 +365,5 @@ export default class WoundConfigApplication extends foundry.applications.api.Han
     }
   }
 
-  /**
-   * Cleanup hook when application closes.
-   *
-   * Flushes any pending debounced updates to ensure final user input is saved
-   * before the form closes. Prevents data loss when dialog closed within 300ms
-   * of last field change.
-   *
-   * @param {object} [options={}] - Close options
-   * @returns {Promise<void>}
-   * @override
-   * @async
-   */
-  async close(options = {}) {
-    if (this._updateDebounced && typeof this._updateDebounced.flush === "function") {
-      await this._updateDebounced.flush();
-    }
-
-    return super.close(options);
-  }
-
-  /**
-   * Dynamic window title with actor name.
-   *
-   * @returns {string} Localized title: "Wound Configuration: {ActorName}"
-   * @override
-   */
-  get title() {
-    const baseTitle = game.i18n.localize("l5r4.ui.mechanics.wounds.woundConfiguration");
-    return `${baseTitle}: ${this.actor.name}`;
-  }
+  // close() method is provided by DebouncedFieldMixin
 }

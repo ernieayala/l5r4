@@ -1,6 +1,73 @@
 {
   "l5r4": {
+    "apps": {
+      "armorConfig": {
+        "title": "Armor Configuration",
+        "errors": {
+          "updateFailed": "Failed to update armor configuration"
+        }
+      },
+      "combatConfig": {
+        "title": "Combat Configuration",
+        "errors": {
+          "updateFailed": "Failed to update combat configuration"
+        }
+      },
+      "conditionManager": {
+        "title": "Condition Manager",
+        "errors": {
+          "updateFailed": "Failed to update condition manager"
+        }
+      },
+      "emphasisManager": {
+        "title": "Emphasis Manager",
+        "addCustom": "Add Custom Emphasis",
+        "errors": {
+          "saveFailed": "Failed to save custom emphasis",
+          "updateFailed": "Failed to update emphasis manager"
+        }
+      },
+      "npcAttackConfig": {
+        "title": "NPC Attack Configuration",
+        "errors": {
+          "updateFailed": "Failed to update NPC attack configuration"
+        }
+      },
+      "wealthManager": {
+        "title": "Wealth Manager",
+        "errors": {
+          "addMoneyFailed": "Failed to add money",
+          "convertFailed": "Failed to convert currency",
+          "insufficientForConversion": "Insufficient funds for this conversion",
+          "insufficientFunds": "Insufficient funds for this transaction",
+          "removeMoneyFailed": "Failed to remove money",
+          "updateFailed": "Failed to update wealth manager"
+        }
+      },
+      "woundConfig": {
+        "title": "Wound Configuration",
+        "errors": {
+          "invalidWoundConfigValue": "Invalid wound configuration value",
+          "updateFailed": "Failed to update wound configuration"
+        }
+      },
+      "xpManager": {
+        "title": "XP Manager",
+        "disadvantageCapTitle": "Set Disadvantage Cap",
+        "errors": {
+          "updateFailed": "Failed to update XP manager"
+        }
+      }
+    },
     "ui": {
+      "label": {
+        "add": "Add",
+        "cancel": "Cancel",
+        "delete": "Delete",
+        "edit": "Edit",
+        "ok": "OK",
+        "save": "Save"
+      },
       "tabs": {
         "details": "Details",
         "modifiers": "Modifiers",
@@ -236,9 +303,7 @@
         "convertZeniToBu": "Convert 10 Zeni to 1 Bu",
         "convertBuToZeni": "Convert 1 Bu to 10 Zeni",
         "convertBuToKoku": "Convert 5 Bu to 1 Koku",
-        "convertKokuToBu": "Convert 1 Koku to 5 Bu",
-        "insufficientFunds": "Insufficient funds for this transaction",
-        "insufficientForConversion": "Insufficient funds for this conversion"
+        "convertKokuToBu": "Convert 1 Koku to 5 Bu"
       },
       "sheets": {
         "bio": "Background",

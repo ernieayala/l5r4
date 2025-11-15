@@ -52,17 +52,17 @@
   <div class="flexcol -gap-sm">
     <h3>{{localize "l5r4.character.experience.adjustExperience"}}</h3>
     <div class="form-group">
-      <label for="xp-amount">{{localize "l5r4.character.experience.xpAmount"}}</label>
+      <label>{{localize "l5r4.character.experience.xpAmount"}}</label>
       <div class="form-fields">
-        <input type="number" id="xp-amount" name="xp-amount" step="1" value="1" />
+        <input type="number" data-field="xp-amount" name="xp-amount" step="1" value="1" />
       </div>
     </div>
     <div class="form-group">
-      <label for="xp-note">{{localize "l5r4.character.experience.note"}}</label>
+      <label>{{localize "l5r4.character.experience.note"}}</label>
       <div class="form-fields">
         <input
           type="text"
-          id="xp-note"
+          data-field="xp-note"
           name="xp-note"
           placeholder="{{localize 'l5r4.character.experience.reason'}}"
         />

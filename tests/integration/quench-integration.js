@@ -48,7 +48,7 @@ import { registerItemSheetTests } from "./sheets/item-sheet.test.js";
 import { registerWoundConfigTests } from "./sheets/wound-config.test.js";
 import { registerXpManagerTests } from "./sheets/xp-manager.test.js";
 import { registerEmphasisManagerTests } from "./sheets/emphasis-manager.test.js";
-import { registerNPCAttackEditorTests } from "./apps/npc-attack-editor.test.js";
+import { registerNPCAttackConfigTests } from "./apps/npc-attack-config.test.js";
 import { registerWealthManagerTests } from "./apps/wealth-manager.integration.test.js";
 import { registerConditionManagerTests } from "./apps/condition-manager.test.js";
 import { registerCombatWorkflowTests } from "./workflows/combat-workflow.test.js";
@@ -143,7 +143,7 @@ export async function registerQuenchTests(quench) {
   registerWoundConfigTests(quench);
   registerXpManagerTests(quench);
   registerEmphasisManagerTests(quench);
-  registerNPCAttackEditorTests(quench);
+  registerNPCAttackConfigTests(quench);
   registerWealthManagerTests(quench);
   registerConditionManagerTests(quench);
 
