@@ -1,0 +1,65 @@
+<div>
+  <h3>{{localize "l5r4.ui.mechanics.combat.attack"}} {{attackNum}}</h3>
+  <div class="standard-form">
+    <div class="form-group">
+      <label>{{localize "l5r4.ui.common.name"}}</label>
+      <div class="form-fields">
+        <input name="{{attackKey}}.name" type="text" value="{{attack.name}}" placeholder="{{localize "l5r4.ui.mechanics.combat.attack"}} {{attackNum}}" data-dtype="String" />
+      </div>
+    </div>
+    
+    <div class="form-group">
+      <label>{{localize "l5r4.ui.mechanics.rolls.attackRoll"}}</label>
+      <div class="form-fields">
+        <input name="{{attackKey}}.roll" type="number" value="{{attack.roll}}" data-dtype="Number" />
+        <span class="flex0">k</span>
+        <input name="{{attackKey}}.keep" type="number" value="{{attack.keep}}" data-dtype="Number" />
+      </div>
+    </div>
+
+    <div class="form-group">
+      <label>{{localize "l5r4.ui.mechanics.combat.attack"}} {{localize "l5r4.ui.common.mod"}}</label>
+      <div class="form-fields">
+        <input name="{{attackKey}}.modifier" type="number" value="{{attack.modifier}}" data-dtype="Number" />
+      </div>
+    </div>
+
+    <div class="form-group">
+      <label>{{localize "l5r4.ui.common.damage"}}</label>
+      <div class="form-fields">
+        <input name="{{damageKey}}.roll" type="number" value="{{damage.roll}}" data-dtype="Number" />
+        <span class="flex0">k</span>
+        <input name="{{damageKey}}.keep" type="number" value="{{damage.keep}}" data-dtype="Number" />
+      </div>
+    </div>
+
+    <div class="form-group">
+      <label>{{localize "l5r4.ui.common.damage"}} {{localize "l5r4.ui.common.mod"}}</label>
+      <div class="form-fields">
+        <input name="{{damageKey}}.modifier" type="number" value="{{damage.modifier}}" data-dtype="Number" />
+      </div>
+    </div>
+    
+    <div class="form-group">
+      <label>{{localize "l5r4.ui.common.action"}}</label>
+      <div class="form-fields">
+          <select name="{{attackKey}}.type">
+              {{selectOptions config.actionTypes selected=attack.type localize=true}}
+          </select>
+      </div>
+    </div>
+    
+    <div class="form-group">
+      <label>{{localize "l5r4.ui.common.type"}}</label>
+      <div class="form-fields">
+          <input name="{{damageKey}}.type" type="text" value="{{damage.type}}" data-dtype="String" />
+      </div>
+    </div>
+
+    <footer class="flexrow">
+      <button type="button" data-action="save" class="button">
+        <i class="fas fa-save"></i> {{localize "l5r4.ui.common.save"}}
+      </button>
+    </footer>
+  </div>
+</div>
