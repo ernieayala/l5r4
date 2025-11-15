@@ -1,33 +1,46 @@
 /**
  * Combat Configuration Application
  *
- * Provides interactive UI for configuring actor combat mechanics (initiative and movement).
- * Similar pattern to WoundConfigApplication but for combat-related settings.
+ * Provides a form interface for configuring actor combat-related values including
+ * initiative modifiers and movement settings.
+ *
+ * Key Responsibilities:
+ * - **Initiative Configuration**: Manage initiative roll/keep/total modifiers
+ * - **Movement Configuration**: Manage movement multiplier and modifier values
+ * - **Real-time Updates**: Apply changes immediately with debounced updates
+ *
+ * Foundry VTT Integration:
+ * - Extends ApplicationV2 with HandlebarsApplicationMixin
+ * - Uses data-action delegation for event handling
+ * - Implements debounced updates for real-time field changes
+ *
+ * Architectural Notes:
+ * - **Uses DebouncedFieldMixin**: Real-time numeric updates for initiative/movement tweaks
+ * - **Actor-based constructor**: Standard pattern for actor configuration dialogs
+ * - **closeOnSubmit: false**: Keeps dialog open for adjustments during combat setup
  *
  * @module apps/combat-config
- * @requires Foundry VTT v13+
  */
 
+// Config imports
 import { SYS_ID } from "../config/constants.js";
 
-/**
- * Combat Configuration Application
- *
- * ApplicationV2-based form for managing actor combat settings.
- * Handles initiative modifiers and movement modifiers.
- *
- * @extends {foundry.applications.api.ApplicationV2}
- * @mixes {foundry.applications.api.HandlebarsApplicationMixin}
- */
-export default class CombatConfigApplication extends foundry.applications.api.HandlebarsApplicationMixin(
-  foundry.applications.api.ApplicationV2
+// Utils imports
+import { T } from "../utils/localization.js";
+import { logError } from "../utils/error-logging.js";
+
+// Mixins
+import { DebouncedFieldMixin } from "../mixins/debounced-field-mixin.js";
+
+export default class CombatConfigApplication extends DebouncedFieldMixin(
+  foundry.applications.api.HandlebarsApplicationMixin(foundry.applications.api.ApplicationV2)
 ) {
   static DEFAULT_OPTIONS = {
     id: "combat-config-{id}",
     classes: ["l5r4", "combat-config-app"],
     tag: "form",
     window: {
-      title: "l5r4.character.stance.title",
+      title: "l5r4.apps.combatConfig.title",
       icon: "fas fa-cog",
       resizable: true
     },
@@ -39,7 +52,7 @@ export default class CombatConfigApplication extends foundry.applications.api.Ha
     form: {
       handler: CombatConfigApplication.prototype._onSubmitForm,
       submitOnChange: false,
-      closeOnSubmit: false
+      closeOnSubmit: false // Keep open for tweaking initiative/movement during combat
     }
   };
 
@@ -50,34 +63,42 @@ export default class CombatConfigApplication extends foundry.applications.api.Ha
   };
 
   /**
-   * Creates combat configuration application instance.
+   * Create a new CombatConfigApplication instance.
    *
-   * @param {L5R4Actor} actor - The actor to configure combat for
-   * @param {object} [options={}] - Application options
+   * @param {Actor} actor - The actor whose combat settings are being configured
+   * @param {object} [options={}] - Additional application options
+   * @throws {Error} If actor is not provided
    */
   constructor(actor, options = {}) {
+    if (!actor) {
+      throw new Error("CombatConfigApplication requires an actor");
+    }
+
     const mergedOptions = foundry.utils.mergeObject(options, {
       id: `combat-config-${actor.id}`
     });
     super(mergedOptions);
     this.actor = actor;
-    this._updateDebounced = foundry.utils.debounce(this._updateActor.bind(this), 300);
+    this._initializeDebouncing();
   }
 
   /**
-   * Debounced update handler.
-   * @type {Function}
-   * @private
+   * Dynamic window title including actor name.
+   *
+   * @returns {string} Localized title with actor name
    */
-  _updateDebounced;
+  get title() {
+    const baseTitle = T("l5r4.apps.combatConfig.title");
+    return `${baseTitle}: ${this.actor?.name ?? "Unknown"}`;
+  }
 
   /**
-   * Prepares context data for template rendering.
+   * Prepare context data for rendering the combat configuration form.
+   * Retrieves initiative and movement values from actor system data.
    *
-   * @param {object} options - Render options
-   * @returns {Promise<object>} Template context
-   * @override
-   * @async
+   * @param {object} _options - Render options (unused)
+   * @returns {Promise<object>} Context object with actor and system data
+   * @private
    */
   async _prepareContext(_options) {
     if (!this.actor) {
@@ -88,18 +109,21 @@ export default class CombatConfigApplication extends foundry.applications.api.Ha
     try {
       return {
         actor: this.actor,
-        system: this.actor.system
+        system: this.actor?.system ?? {}
       };
     } catch (err) {
-      console.warn(`${SYS_ID}`, "Failed to prepare combat config context", { err });
+      logError("Failed to prepare combat config context", err, {
+        actorId: this.actor?.id
+      });
       return this._getFallbackContext();
     }
   }
 
   /**
-   * Provides fallback context.
+   * Provide fallback context when actor data is unavailable or errors occur.
+   * Returns safe default values to prevent rendering failures.
    *
-   * @returns {object} Minimal safe context
+   * @returns {object} Fallback context with default values
    * @private
    */
   _getFallbackContext() {
@@ -112,60 +136,16 @@ export default class CombatConfigApplication extends foundry.applications.api.Ha
     };
   }
 
-  /**
-   * Post-render hook.
-   *
-   * @param {object} _context - Rendered context
-   * @param {object} _options - Render options
-   * @override
-   */
-  _onRender(_context, _options) {
-    if (!this.element) {
-      console.warn(`${SYS_ID}`, "CombatConfig _onRender: No element");
-      return;
-    }
-
-    const fields = this.element.querySelectorAll('[data-action="field-change"]');
-    fields.forEach(field => {
-      field.addEventListener("change", event => {
-        this._onFieldChange(event, event.target);
-      });
-    });
-  }
+  // _onRender and _onFieldChange are provided by DebouncedFieldMixin
 
   /**
-   * Handles field changes with debounced updates.
+   * Update actor with new combat configuration value.
+   * Updates system data fields for initiative and movement settings.
+   * Includes validation to prevent updates after application close.
    *
-   * @param {Event} event - Input/change event
-   * @param {HTMLInputElement} element - Form element
-   * @returns {Promise<void>}
-   * @async
-   */
-  async _onFieldChange(event, element) {
-    const field = element.name;
-    const value =
-      element.type === "checkbox"
-        ? element.checked
-        : element.type === "number" || element.dataset.type === "Number"
-          ? parseInt(element.value) || 0
-          : element.value;
-
-    if (!field) {
-      console.warn(`${SYS_ID}`, "Field change with no field name");
-      return;
-    }
-
-    this._updateDebounced(field, value);
-  }
-
-  /**
-   * Debounced actor update handler.
-   *
-   * @param {string} field - Field name
-   * @param {*} value - New value
-   * @returns {Promise<void>}
+   * @param {string} field - The field name to update
+   * @param {*} value - The new value for the field
    * @private
-   * @async
    */
   async _updateActor(field, value) {
     try {
@@ -182,20 +162,23 @@ export default class CombatConfigApplication extends foundry.applications.api.Ha
       const updateData = { [`system.${field}`]: value };
       await this.actor.update(updateData);
     } catch (err) {
-      console.warn(`${SYS_ID}`, "Failed to update combat config", { err, field, value });
-      ui.notifications?.error("Failed to update combat configuration");
+      logError("Failed to update combat config", err, {
+        field,
+        value,
+        actorId: this.actor?.id
+      });
+      ui.notifications?.error(T("l5r4.apps.combatConfig.errors.updateFailed"));
     }
   }
 
   /**
-   * Form submission handler.
+   * Form submit handler.
+   * Prevents default form submission since updates are handled via field changes.
    *
-   * @param {Event} event - Submit event
-   * @param {HTMLFormElement} _form - Form element
-   * @param {FormData} _formData - Form data
-   * @returns {Promise<void>}
-   * @override
-   * @async
+   * @param {Event} event - The submit event
+   * @param {HTMLFormElement} _form - The form element (unused)
+   * @param {FormData} _formData - The form data (unused)
+   * @private
    */
   async _onSubmitForm(event, _form, _formData) {
     if (event) {
@@ -203,29 +186,5 @@ export default class CombatConfigApplication extends foundry.applications.api.Ha
     }
   }
 
-  /**
-   * Cleanup on close.
-   *
-   * @param {object} [options={}] - Close options
-   * @returns {Promise<void>}
-   * @override
-   * @async
-   */
-  async close(options = {}) {
-    if (this._updateDebounced && typeof this._updateDebounced.flush === "function") {
-      await this._updateDebounced.flush();
-    }
-    return super.close(options);
-  }
-
-  /**
-   * Dynamic window title.
-   *
-   * @returns {string} Localized title
-   * @override
-   */
-  get title() {
-    const baseTitle = game.i18n.localize("l5r4.character.stance.title");
-    return `${baseTitle}: ${this.actor.name}`;
-  }
+  // close() method is provided by DebouncedFieldMixin
 }

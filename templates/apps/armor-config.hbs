@@ -1,9 +1,8 @@
 <section class="standard-form">
   <div class="form-group">
-    <label for="armorTn-mod">{{localize "l5r4.ui.mechanics.wounds.armorTn"}}</label>
+    <label>{{localize "l5r4.ui.mechanics.wounds.armorTn"}}</label>
     <input
       type="number"
-      id="armorTn-mod"
       name="armorTn.mod"
       value="{{system.armorTn.mod}}"
       data-type="Number"
@@ -12,10 +11,9 @@
   </div>
 
   <div class="form-group">
-    <label for="armorTn-reductionMod">{{localize "l5r4.ui.mechanics.wounds.armorReduction"}}</label>
+    <label>{{localize "l5r4.ui.mechanics.wounds.armorReduction"}}</label>
     <input
       type="number"
-      id="armorTn-reductionMod"
       name="armorTn.reductionMod"
       value="{{system.armorTn.reductionMod}}"
       data-type="Number"
@@ -24,10 +22,9 @@
   </div>
 
   <div class="form-group">
-    <label for="allowArmorStacking">{{localize "l5r4.ui.armor.allowStacking"}}</label>
+    <label>{{localize "l5r4.ui.armor.allowStacking"}}</label>
     <input
       type="checkbox"
-      id="allowArmorStacking"
       name="allowArmorStacking"
       {{checked allowArmorStacking}}
       data-action="field-change"

@@ -1,33 +1,46 @@
 /**
  * Armor Configuration Application
  *
- * Provides interactive UI for configuring actor armor mechanics.
- * Manages armor TN modifier, armor reduction modifier, and armor stacking option.
+ * Provides a form interface for configuring actor armor values including TN modifiers,
+ * reduction modifiers, and armor stacking behavior.
+ *
+ * Key Responsibilities:
+ * - **Armor TN Configuration**: Manage armor TN bonus and modifiers
+ * - **Reduction Configuration**: Manage armor reduction values
+ * - **Stacking Behavior**: Toggle armor stacking flag for multiple armor items
+ *
+ * Foundry VTT Integration:
+ * - Extends ApplicationV2 with HandlebarsApplicationMixin
+ * - Uses data-action delegation for event handling
+ * - Implements debounced updates for real-time field changes
+ *
+ * Architectural Notes:
+ * - **Uses DebouncedFieldMixin**: Real-time numeric updates needed for TN/reduction values
+ * - **Actor-based constructor**: Standard pattern for actor configuration dialogs
+ * - **closeOnSubmit: false**: Keeps dialog open for multiple adjustments during setup
  *
  * @module apps/armor-config
- * @requires Foundry VTT v13+
  */
 
+// Config imports
 import { SYS_ID } from "../config/constants.js";
 
-/**
- * Armor Configuration Application
- *
- * ApplicationV2-based form for managing actor armor settings.
- * Handles armor TN modifier, armor reduction modifier, and armor stacking toggle.
- *
- * @extends {foundry.applications.api.ApplicationV2}
- * @mixes {foundry.applications.api.HandlebarsApplicationMixin}
- */
-export default class ArmorConfigApplication extends foundry.applications.api.HandlebarsApplicationMixin(
-  foundry.applications.api.ApplicationV2
+// Utils imports
+import { T } from "../utils/localization.js";
+import { logError } from "../utils/error-logging.js";
+
+// Mixins
+import { DebouncedFieldMixin } from "../mixins/debounced-field-mixin.js";
+
+export default class ArmorConfigApplication extends DebouncedFieldMixin(
+  foundry.applications.api.HandlebarsApplicationMixin(foundry.applications.api.ApplicationV2)
 ) {
   static DEFAULT_OPTIONS = {
     id: "armor-config-{id}",
     classes: ["l5r4", "armor-config-app"],
     tag: "form",
     window: {
-      title: "l5r4.ui.common.armor",
+      title: "l5r4.apps.armorConfig.title",
       icon: "fas fa-cog",
       resizable: true
     },
@@ -39,7 +52,7 @@ export default class ArmorConfigApplication extends foundry.applications.api.Han
     form: {
       handler: ArmorConfigApplication.prototype._onSubmitForm,
       submitOnChange: false,
-      closeOnSubmit: false
+      closeOnSubmit: false // Keep open for multiple armor adjustments
     }
   };
 
@@ -50,34 +63,42 @@ export default class ArmorConfigApplication extends foundry.applications.api.Han
   };
 
   /**
-   * Creates armor configuration application instance.
+   * Create a new ArmorConfigApplication instance.
    *
-   * @param {L5R4Actor} actor - The actor to configure armor for
-   * @param {object} [options={}] - Application options
+   * @param {Actor} actor - The actor whose armor is being configured
+   * @param {object} [options={}] - Additional application options
+   * @throws {Error} If actor is not provided
    */
   constructor(actor, options = {}) {
+    if (!actor) {
+      throw new Error("ArmorConfigApplication requires an actor");
+    }
+
     const mergedOptions = foundry.utils.mergeObject(options, {
       id: `armor-config-${actor.id}`
     });
     super(mergedOptions);
     this.actor = actor;
-    this._updateDebounced = foundry.utils.debounce(this._updateActor.bind(this), 300);
+    this._initializeDebouncing();
   }
 
   /**
-   * Debounced update handler.
-   * @type {Function}
-   * @private
+   * Dynamic window title including actor name.
+   *
+   * @returns {string} Localized title with actor name
    */
-  _updateDebounced;
+  get title() {
+    const baseTitle = T("l5r4.apps.armorConfig.title");
+    return `${baseTitle}: ${this.actor?.name ?? "Unknown"}`;
+  }
 
   /**
-   * Prepares context data for template rendering.
+   * Prepare context data for rendering the armor configuration form.
+   * Retrieves armor TN values, reduction modifiers, and stacking flag from actor.
    *
-   * @param {object} options - Render options
-   * @returns {Promise<object>} Template context
-   * @override
-   * @async
+   * @param {object} _options - Render options (unused)
+   * @returns {Promise<object>} Context object with actor, system data, and allowArmorStacking flag
+   * @private
    */
   async _prepareContext(_options) {
     if (!this.actor) {
@@ -86,23 +107,26 @@ export default class ArmorConfigApplication extends foundry.applications.api.Han
     }
 
     try {
-      const allowArmorStacking = this.actor.getFlag(SYS_ID, "allowArmorStacking") ?? false;
+      const allowArmorStacking = this.actor?.getFlag?.(SYS_ID, "allowArmorStacking") ?? false;
 
       return {
         actor: this.actor,
-        system: this.actor.system,
+        system: this.actor?.system ?? {},
         allowArmorStacking
       };
     } catch (err) {
-      console.warn(`${SYS_ID}`, "Failed to prepare armor config context", { err });
+      logError("Failed to prepare armor config context", err, {
+        actorId: this.actor?.id
+      });
       return this._getFallbackContext();
     }
   }
 
   /**
-   * Provides fallback context.
+   * Provide fallback context when actor data is unavailable or errors occur.
+   * Returns safe default values to prevent rendering failures.
    *
-   * @returns {object} Minimal safe context
+   * @returns {object} Fallback context with default values
    * @private
    */
   _getFallbackContext() {
@@ -115,60 +139,16 @@ export default class ArmorConfigApplication extends foundry.applications.api.Han
     };
   }
 
-  /**
-   * Post-render hook.
-   *
-   * @param {object} _context - Rendered context
-   * @param {object} _options - Render options
-   * @override
-   */
-  _onRender(_context, _options) {
-    if (!this.element) {
-      console.warn(`${SYS_ID}`, "ArmorConfig _onRender: No element");
-      return;
-    }
-
-    const fields = this.element.querySelectorAll('[data-action="field-change"]');
-    fields.forEach(field => {
-      field.addEventListener("change", event => {
-        this._onFieldChange(event, event.target);
-      });
-    });
-  }
+  // _onRender and _onFieldChange are provided by DebouncedFieldMixin
 
   /**
-   * Handles field changes with debounced updates.
+   * Update actor with new armor configuration value.
+   * Handles both system data fields and flag-based allowArmorStacking setting.
+   * Includes validation to prevent updates after application close.
    *
-   * @param {Event} event - Input/change event
-   * @param {HTMLInputElement} element - Form element
-   * @returns {Promise<void>}
-   * @async
-   */
-  async _onFieldChange(event, element) {
-    const field = element.name;
-    const value =
-      element.type === "checkbox"
-        ? element.checked
-        : element.type === "number" || element.dataset.type === "Number"
-          ? parseInt(element.value) || 0
-          : element.value;
-
-    if (!field) {
-      console.warn(`${SYS_ID}`, "Field change with no field name");
-      return;
-    }
-
-    this._updateDebounced(field, value);
-  }
-
-  /**
-   * Debounced actor update handler.
-   *
-   * @param {string} field - Field name
-   * @param {*} value - New value
-   * @returns {Promise<void>}
+   * @param {string} field - The field name to update
+   * @param {*} value - The new value for the field
    * @private
-   * @async
    */
   async _updateActor(field, value) {
     try {
@@ -182,7 +162,6 @@ export default class ArmorConfigApplication extends foundry.applications.api.Han
         return;
       }
 
-      // Handle flag vs system data differently
       let updateData;
       if (field === "allowArmorStacking") {
         updateData = { [`flags.${SYS_ID}.allowArmorStacking`]: value };
@@ -192,20 +171,23 @@ export default class ArmorConfigApplication extends foundry.applications.api.Han
 
       await this.actor.update(updateData);
     } catch (err) {
-      console.warn(`${SYS_ID}`, "Failed to update armor config", { err, field, value });
-      ui.notifications?.error("Failed to update armor configuration");
+      logError("Failed to update armor config", err, {
+        field,
+        value,
+        actorId: this.actor?.id
+      });
+      ui.notifications?.error(T("l5r4.apps.armorConfig.errors.updateFailed"));
     }
   }
 
   /**
-   * Form submission handler.
+   * Form submit handler.
+   * Prevents default form submission since updates are handled via field changes.
    *
-   * @param {Event} event - Submit event
-   * @param {HTMLFormElement} _form - Form element
-   * @param {FormData} _formData - Form data
-   * @returns {Promise<void>}
-   * @override
-   * @async
+   * @param {Event} event - The submit event
+   * @param {HTMLFormElement} _form - The form element (unused)
+   * @param {FormData} _formData - The form data (unused)
+   * @private
    */
   async _onSubmitForm(event, _form, _formData) {
     if (event) {
@@ -213,29 +195,5 @@ export default class ArmorConfigApplication extends foundry.applications.api.Han
     }
   }
 
-  /**
-   * Cleanup on close.
-   *
-   * @param {object} [options={}] - Close options
-   * @returns {Promise<void>}
-   * @override
-   * @async
-   */
-  async close(options = {}) {
-    if (this._updateDebounced && typeof this._updateDebounced.flush === "function") {
-      await this._updateDebounced.flush();
-    }
-    return super.close(options);
-  }
-
-  /**
-   * Dynamic window title.
-   *
-   * @returns {string} Localized title
-   * @override
-   */
-  get title() {
-    const baseTitle = game.i18n.localize("l5r4.ui.common.armor");
-    return `${baseTitle}: ${this.actor.name}`;
-  }
+  // close() method is provided by DebouncedFieldMixin
 }
