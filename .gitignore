@@ -61,3 +61,10 @@ test_priority/
 
 # Madge dependency analysis
 madge-analysis.json
+
+# Generated pack scripts
+scripts/*-pack.js
+
+# Development utilities
+list-module-js-lines.js
+generate-all-packs.js
