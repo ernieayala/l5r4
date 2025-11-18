@@ -20,7 +20,7 @@
 
 import { SYS_ID } from "../../../module/config/constants.js";
 import EmphasisManager from "../../../module/apps/emphasis-manager.js";
-import { OFFICIAL_EMPHASES } from "../../../module/config/game-data.js";
+import { OFFICIAL_EMPHASES } from "../../../module/config/reference-data.js";
 import { createSkillData } from "../../fixtures/item-fixtures.js";
 
 /**

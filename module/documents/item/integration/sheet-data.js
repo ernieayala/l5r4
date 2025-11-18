@@ -37,7 +37,7 @@ import {
   KIHO_TYPES,
   ADVANTAGE_TYPES
 } from "../../../config/localization.js";
-import { NPC_NUMBER_WOUND_LVLS } from "../../../config/game-data.js";
+import { NPC_NUMBER_WOUND_LVLS } from "../../../config/game-mechanics.js";
 
 /**
  * @typedef {Object} SheetContext
