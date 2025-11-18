@@ -124,3 +124,73 @@ export const ARROW_MODS = freeze({
  * const woundLevels = NPC_NUMBER_WOUND_LVLS[3]; // 3
  */
 export const NPC_NUMBER_WOUND_LVLS = freeze({ 1: 1, 2: 2, 3: 3, 4: 4, 5: 5, 6: 6, 7: 7, 8: 8 });
+
+/**
+ * Canonical wound level progression order for L5R4 characters.
+ * Defines the 8 wound levels from Healthy to Out in ascending severity.
+ * Used to iterate wound levels in correct sequence during damage calculations.
+ *
+ * @type {ReadonlyArray<string>}
+ * @constant
+ *
+ * @example
+ * // Iterate through wound levels
+ * for (const level of WOUND_LEVEL_ORDER) {
+ *   console.log(level); // "healthy", "nicked", "grazed", ...
+ * }
+ */
+export const WOUND_LEVEL_ORDER = freeze([
+  "healthy",
+  "nicked",
+  "grazed",
+  "hurt",
+  "injured",
+  "crippled",
+  "down",
+  "out"
+]);
+
+/**
+ * Default TN penalties for each wound level per L5R4 Combat and Wounds rules.
+ * Each wound level increases the Target Number of all rolls by the specified amount.
+ *
+ * @type {Readonly<{healthy: number, nicked: number, grazed: number, hurt: number, injured: number, crippled: number, down: number, out: number}>}
+ * @constant
+ *
+ * @example
+ * // Get penalty for Hurt level
+ * const penalty = DEFAULT_WOUND_PENALTIES.hurt; // 10
+ */
+export const DEFAULT_WOUND_PENALTIES = freeze({
+  healthy: 0,
+  nicked: 3,
+  grazed: 5,
+  hurt: 10,
+  injured: 15,
+  crippled: 20,
+  down: 40,
+  out: 40
+});
+
+/**
+ * Default wound threshold values for manual wound level configuration.
+ * Fallback values for NPCs in manual mode or actor initialization.
+ * Based on Earth Ring 3 with standard multipliers.
+ *
+ * @type {Readonly<{healthy: number, nicked: number, grazed: number, hurt: number, injured: number, crippled: number, down: number, out: number}>}
+ * @constant
+ *
+ * @example
+ * // Get default threshold for Injured level
+ * const threshold = DEFAULT_WOUND_THRESHOLDS.injured; // 35
+ */
+export const DEFAULT_WOUND_THRESHOLDS = freeze({
+  healthy: 15,
+  nicked: 20,
+  grazed: 25,
+  hurt: 30,
+  injured: 35,
+  crippled: 40,
+  down: 43,
+  out: 45
+});

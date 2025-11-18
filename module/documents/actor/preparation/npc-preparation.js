@@ -1,25 +1,27 @@
 /**
- * NPC Actor Preparation Module
- *
- * Handles derived data calculation for Non-Player Character actors. Extracted from main
- * L5R4Actor class to maintain file size limits (<300 lines per file).
- *
- * Calculates combat stats for NPCs using simplified approach compared to PCs. Supports
- * both manual wound configuration (bosses, special enemies) and formula-based calculations
- * (standard enemies).
- *
+ * @file NPC Actor Data Preparation
  * @module documents/actor/preparation/npc-preparation
+ *
+ * Handles derived data calculation for NPC actors in the L5R4 system.
+ * Coordinates trait/ring calculations, initiative, wounds, stance automation,
+ * and condition effects in the correct dependency order.
+ *
+ * Key responsibilities:
+ * - Calculate NPC initiative (custom or formula-based)
+ * - Process wound levels (manual or formula mode)
+ * - Apply stance and condition effects
+ * - Enrich embedded items
+ *
+ * Architecture: Pure calculation functions that mutate sys object in place.
+ * Foundry API: Uses actor._source for detecting custom initiative values.
  */
 
-// Utils
 import { toInt } from "../../../utils/type-coercion.js";
 
-// Services
 import { applyStanceAutomation } from "../../../services/stance/core/automation.js";
 
-// Local
-import { WOUND_LEVEL_ORDER } from "../constants/wound-constants.js";
-import { prepareTraitsAndRings } from "../calculations/shared-traits-rings.js";
+import { WOUND_LEVEL_ORDER } from "../../../config/game-mechanics.js";
+import { prepareTraitsAndRings, prepareMovement } from "../calculations/shared-traits-rings.js";
 import {
   prepareNpcManualWounds,
   prepareNpcFormulaWounds,
@@ -29,62 +31,35 @@ import { applyConditionEffects } from "../calculations/condition-effects.js";
 import { enrichActorItems } from "../calculations/item-enrichment.js";
 
 /**
- * Prepare derived data for Non-Player Character actors.
+ * Prepares derived data for NPC actors.
  *
- * Calculates combat statistics for NPC actors using a simplified approach compared
- * to PCs. Supports both manual wound configuration (for special enemies, bosses) and
- * formula-based calculations (for standard enemies).
+ * Calculates all derived values for NPCs including traits, initiative, wounds,
+ * and applies stance/condition effects. Executes calculations in dependency order.
  *
- * **Calculated Values:**
- * - Traits and Rings (via prepareTraitsAndRings)
- * - Initiative: Uses explicit roll/keep values or falls back to Reflexes
- * - Armor TN: Direct value from npc.armor.armorTn field (no equipment calculation)
- * - Armor Reduction: Direct value from npc.armor.reduction field
- * - Wound Levels: Manual thresholds OR formula-based (per wound mode)
- * - Stance Effects: Bonuses/penalties from current combat stance
- * - Visible Wound Levels: For UI display in wound configuration sheet
+ * @param {Actor} actor - The NPC actor being prepared
+ * @param {object} sys - The actor's system data object (mutated in place)
+ * @param {Function} finalizeWoundPenaltiesFn - Callback to finalize wound penalties
  *
- * **NPC Initiative:**
- * NPCs use explicit initiative.roll and initiative.keep fields on the character sheet.
- * If these are 0 or missing, the system falls back to using Reflexes for both roll
- * and keep (simpler enemies that don't need complex initiative).
- * Supports rollMod, keepMod, and totalMod modifiers like PCs for consistent behavior.
+ * @returns {void} Mutates sys object in place
  *
- * **NPC Armor:**
- * Unlike PCs (who calculate armor TN from equipment), NPCs have a single armor.armorTn
- * field that GMs set directly. This simplifies NPC creation - no need to add armor items.
- *
- * **Wound Modes:**
- * - **Manual**: GM explicitly sets wound thresholds and penalties for each rank
- *   (good for bosses, special enemies with unusual HP pools)
- * - **Formula**: Auto-calculate from Earth Ring using multiplier (good for standard enemies)
- * The mode is controlled by sys.woundMode field, defaulting to global setting.
- *
- * **Side Effects:**
- * Mutates the `sys` parameter, populating:
- * - sys.initiative, sys.armorTn, sys.woundLevels, sys.wounds, sys.visibleWoundLevels
- *
- * @param {L5R4Actor} actor - The NPC actor being prepared
- * @param {Object} sys - Actor system data (actor.system) to mutate
- * @param {Function} finalizeWoundPenaltiesFn - Function to finalize wound penalties
- * @returns {void}
+ * @example
+ * // Called from Actor.prepareData()
+ * prepareNpcData(this, this.system, finalizeWoundPenalties);
  */
 export function prepareNpcData(actor, sys, finalizeWoundPenaltiesFn) {
+  // Calculate base traits and rings first (required for initiative)
   prepareTraitsAndRings(sys);
 
+  // Initialize initiative structure
   sys.initiative = sys.initiative || {};
   const ref = toInt(sys.traits?.ref);
   const insightRank = toInt(sys.insight?.rank) || 0;
 
-  // L5R4 Rule: Initiative = (Insight Rank + Reflexes)kReflexes
-  // NPCs typically don't have Insight Rank, so they use RefkRef
-  // GMs can override by setting custom roll/keep values in Combat Config
+  // Check for custom initiative values in source data
+  // NPCs can have manually set initiative instead of formula
   const sourceRoll = toInt(actor._source?.system?.initiative?.roll);
   const sourceKeep = toInt(actor._source?.system?.initiative?.keep);
 
-  // Use custom initiative ONLY if BOTH roll AND keep are explicitly set to non-zero
-  // If either is 0, calculate from Reflexes + Insight Rank per L5R4 rules
-  // This allows GMs to clear initiative by setting either value to 0
   const hasCustomInitiative = sourceRoll > 0 && sourceKeep > 0;
   const baseRoll = hasCustomInitiative ? sourceRoll : insightRank + ref;
   const baseKeep = hasCustomInitiative ? sourceKeep : ref;
@@ -92,64 +67,52 @@ export function prepareNpcData(actor, sys, finalizeWoundPenaltiesFn) {
   const rollMod = toInt(sys.initiative.rollMod) || 0;
   const keepMod = toInt(sys.initiative.keepMod) || 0;
 
-  // Store effective values (before modifiers) for tests and UI
+  // Store effective values (before modifiers)
   sys.initiative.effRoll = baseRoll;
   sys.initiative.effKeep = baseKeep;
 
-  // Apply modifiers to get final roll/keep values
+  // Calculate final initiative with modifiers
   sys.initiative.roll = baseRoll + rollMod;
   sys.initiative.keep = baseKeep + keepMod;
   sys.initiative.totalMod = toInt(sys.initiative.totalMod);
 
+  // Initialize armor TN structure
+  // NPCs use simplified armor (single TN value, no calculation)
   sys.armorTn = sys.armorTn || {};
   sys.armorTn.base = 0;
   sys.armorTn.bonus = 0;
   sys.armorTn.reduction = toInt(sys.armor?.reduction ?? 0);
   sys.armorTn.current = toInt(sys.armor?.armorTn ?? 0);
 
+  // Initialize wound level structures
   sys.woundLevels = sys.woundLevels || {};
   sys.manualWoundLevels = sys.manualWoundLevels || {};
   const order = WOUND_LEVEL_ORDER;
 
-  // Determine NPC wound calculation mode
-  // Use actor-specific wound mode if set, otherwise default to "manual"
-  // Manual mode is appropriate as NPCs vary widely in power level and wound capacity
+  // Process wounds based on mode (manual entry or formula calculation)
   const woundMode = sys.woundMode || "manual";
 
-  // Calculate wound thresholds based on mode
   if (woundMode === "manual") {
-    // Manual mode: Use GM-configured thresholds from sys.manualWoundLevels
     prepareNpcManualWounds(sys, order);
   } else {
-    // Formula mode: Calculate from Earth Ring using multiplier (like PCs)
     prepareNpcFormulaWounds(sys, order);
   }
 
+  // Apply wound penalties to traits/rings
   finalizeWoundPenaltiesFn(sys, order, woundMode);
 
+  // Apply stance effects (must happen after traits are calculated)
   applyStanceAutomation(actor, sys);
+
+  // Apply condition effects (must happen after stance)
   applyConditionEffects(actor, sys);
 
-  // Movement calculation per L5R4 combat rules:
-  // Free Action: Water Ring × 5 feet
-  // Simple Action: Water Ring × 10 feet
-  // Maximum per Round: Water Ring × 20 feet (hard limit)
-  // Conditions like Blinded reduce effective Water Ring by 2 for movement (applied after condition effects)
-  // Custom modifiers: multiplier (for water ring) and modifier (flat modifier)
-  const baseWater = toInt(sys.rings.water);
-  const waterPenalty = sys._conditionEffects?.waterRingPenalty ?? 0;
-  const effectiveWater = Math.max(1, baseWater + waterPenalty); // Minimum 1 per L5R4 rules
-  sys.movement = sys.movement || {};
-  const movementMultiplier = parseFloat(sys.movement.multiplier) || 1;
-  const movementModifier = toInt(sys.movement.modifier) || 0;
-  sys.movement.freeAction = effectiveWater * 5 * movementMultiplier + movementModifier;
-  sys.movement.simpleAction = effectiveWater * 10 * movementMultiplier + movementModifier;
-  sys.movement.maximum = effectiveWater * 20 * movementMultiplier + movementModifier;
+  // Calculate movement rates (depends on traits)
+  prepareMovement(sys);
 
+  // Determine which wound levels to show in UI
   prepareVisibleWoundLevels(sys, order);
 
-  // Enrich all actor items with calculated roll formulas
-  // This runs in Documents layer (prepareDerivedData) per architecture rules
-  // Sheets will only read these pre-calculated formulas, never recalculate them
+  // Enrich embedded items with calculated data
   enrichActorItems(actor);
 }
