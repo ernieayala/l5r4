@@ -17,6 +17,23 @@
 const freeze = Object.freeze;
 
 /**
+ * Canonical trait key order for L5R4 system.
+ *
+ * Defines the eight traits (attributes) in the Legend of the Five Rings system,
+ * grouped by their associated Rings:
+ * - Earth Ring: Stamina (sta), Willpower (wil)
+ * - Fire Ring: Agility (agi), Intelligence (int)
+ * - Water Ring: Strength (str), Perception (per)
+ * - Air Ring: Reflexes (ref), Awareness (awa)
+ *
+ * This order is used for iteration in actor data preparation and UI display.
+ *
+ * @constant {ReadonlyArray<string>}
+ * @see module:documents/actor/calculations/shared-traits-rings for trait calculation
+ */
+export const TRAIT_KEYS = freeze(["sta", "wil", "str", "per", "ref", "awa", "agi", "int"]);
+
+/**
  * Maximum character length for custom skill emphasis names.
  * Enforces reasonable length for UI display and data storage.
  *

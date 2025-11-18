@@ -30,19 +30,8 @@ import { STATUS_EFFECTS } from "../config/status-effects.js";
 import { T } from "../utils/localization.js";
 import { logError } from "../utils/error-logging.js";
 
-/**
- * Set of stance effect IDs to exclude from condition manager.
- * Stances are managed separately via combat configuration.
- *
- * @constant {Set<string>}
- */
-const STANCE_IDS = new Set([
-  "attackStance",
-  "fullAttackStance",
-  "defenseStance",
-  "fullDefenseStance",
-  "centerStance"
-]);
+// Services imports
+import { STANCE_IDS } from "../services/stance/core/helpers.js";
 
 /**
  * Get all active non-stance conditions from an actor.
