@@ -27,7 +27,7 @@
 
 // Config imports
 import { SYS_ID } from "../config/constants.js";
-import { NPC_NUMBER_WOUND_LVLS } from "../config/game-data.js";
+import { NPC_NUMBER_WOUND_LVLS } from "../config/game-mechanics.js";
 
 // Utils imports
 import { T } from "../utils/localization.js";

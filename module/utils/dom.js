@@ -1,96 +1,84 @@
 /**
- * DOM Utility Module
+ * @module dom
+ * @description DOM manipulation utilities for event delegation.
  *
- * Provides event delegation utilities for Foundry VTT v13 Application v2.
- * Implements defensive event handling with selector validation and proper
- * event target resolution using Element.closest().
+ * Provides event delegation helpers that attach listeners to parent elements
+ * and handle events from matching child elements. This improves performance
+ * by reducing the number of event listeners and handles dynamically added elements.
  *
- * Primary use case: Delegated event listeners in ActorSheetV2 and ItemSheetV2
- * implementations following Foundry's recommended patterns.
- *
- * @module utils/dom
- * @see {@link https://foundryvtt.com/api/v13/classes/foundry.applications.api.HandlebarsApplicationMixin.html|HandlebarsApplicationMixin}
+ * Uses data attributes for element selection to maintain separation of concerns.
  */
+
+import { SYS_ID } from "../config/constants.js";
+import { logError } from "./error-logging.js";
 
 /**
- * Attach a delegated event listener to a root element.
+ * Attaches delegated event listener to root element.
  *
- * Implements event delegation pattern where a single listener on the root element
- * handles events for all matching child elements (current and future). Uses
- * Element.closest() to walk up the DOM tree from event.target to find the
- * nearest ancestor matching the selector.
+ * Uses event delegation pattern: attaches listener to parent (root) element
+ * and handles events from matching child elements. The handler is called only
+ * when the event target or its ancestors match the selector.
  *
- * Defensive implementation includes:
- * - Root element validation (must be EventTarget)
- * - Handler function type check
- * - Selector string validation
- * - Try-catch for invalid CSS selectors
- * - Containment check to prevent handling events from detached elements
- *
- * Common usage in Foundry v13 sheets:
- * ```javascript
- * _onRender(context, options) {
- *   const root = this.element;
- *   on(root, "[data-action]", "click", (ev, el) => {
- *     const action = el.getAttribute("data-action");
- *     this._onAction(action, ev, el);
- *   });
- * }
- * ```
- *
- * @param {EventTarget} root - The root element to attach the listener to (typically sheet element)
- * @param {string} selector - CSS selector for child elements to match (e.g., "[data-action]")
- * @param {string} type - Event type to listen for (e.g., "click", "change", "contextmenu")
- * @param {Function} handler - Callback function receiving (event, matchedElement)
+ * @param {Element|Document} root - Parent element to attach listener to
+ * @param {string} selector - CSS selector for target elements (use data attributes)
+ * @param {string} type - Event type (e.g., "click", "change", "submit")
+ * @param {Function} handler - Event handler function (ev, el) => void
  * @param {Object} [options={}] - Event listener options
- * @param {boolean} [options.capture=false] - Use capture phase instead of bubble phase
+ * @param {boolean} [options.capture=false] - Use capture phase
  * @returns {void}
  *
- * @see {@link https://developer.mozilla.org/en-US/docs/Web/API/Element/closest|Element.closest()}
- * @see {@link https://foundryvtt.com/api/v13/classes/foundry.applications.sheets.ActorSheetV2.html|ActorSheetV2}
+ * @example
+ * // Listen for clicks on buttons with data-action attribute
+ * on(document, '[data-action="roll"]', 'click', (ev, el) => {
+ *   console.log('Roll button clicked', el);
+ * });
+ *
+ * @example
+ * // Listen for changes on select elements
+ * on(form, 'select[data-field]', 'change', (ev, el) => {
+ *   const field = el.dataset.field;
+ *   console.log(`Field ${field} changed to ${el.value}`);
+ * });
  */
 export function on(root, selector, type, handler, options = {}) {
-  // Validate root is a valid EventTarget (Element, Document, Window, etc.)
+  // Defensive validation: ensure root is valid EventTarget
   if (!root?.addEventListener) {
-    console.warn("L5R4", "on() requires valid EventTarget root", { root });
+    logError("on() requires valid EventTarget root", new TypeError("Invalid root"), { root });
     return;
   }
 
-  // Ensure handler is callable
+  // Defensive validation: ensure handler is callable
   if (typeof handler !== "function") {
-    console.warn("L5R4", "on() requires function handler", { handler });
+    logError("on() requires function handler", new TypeError("Invalid handler"), { handler });
     return;
   }
 
-  // Validate selector is non-empty string for closest() call
+  // Defensive validation: ensure selector is valid string
   if (typeof selector !== "string" || !selector) {
-    console.warn("L5R4", "on() requires non-empty string selector", { selector });
+    logError("on() requires non-empty string selector", new TypeError("Invalid selector"), {
+      selector
+    });
     return;
   }
 
   const useCapture = options.capture ?? false;
 
-  // Attach single delegated listener - walks DOM tree to find matching elements
   root.addEventListener(
     type,
     ev => {
       let el = null;
-      // Only process events from Element nodes (not text nodes, comments, etc.)
+      // Only process events from Element nodes (not text nodes, etc.)
       if (ev.target instanceof Element) {
         try {
-          // Walk up DOM tree to find nearest ancestor matching selector
+          // Find closest ancestor (including target) matching selector
           el = ev.target.closest(selector);
         } catch (e) {
-          // Invalid CSS selector - log warning and skip this event
-          console.warn("L5R4", "on() invalid selector caused closest() error", {
-            selector,
-            error: e.message
-          });
+          // Invalid selector syntax - log and skip
+          logError("on() invalid selector caused closest() error", e, { selector });
           return;
         }
       }
-      // Only invoke handler if match found and element is still in root's tree
-      // (prevents handling events from detached/moved elements)
+      // Only call handler if matching element found and is within root
       if (el && root.contains(el)) {
         handler(ev, el);
       }

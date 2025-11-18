@@ -1,92 +1,135 @@
 /**
- * Type Coercion Utilities
+ * @module type-coercion
+ * @description Defensive type coercion utilities.
  *
- * Defensive type coercion functions for safely converting user input and DOM data
- * to numeric types. Core utilities for Foundry VTT v13+ ActorSheetV2 pattern,
- * particularly for parsing dataset attributes and sanitizing form inputs.
+ * Provides safe conversion functions that handle edge cases (null, undefined,
+ * symbols, NaN, invalid strings) with sensible fallbacks instead of throwing errors.
  *
- * Key Responsibilities:
- * - **Defensive Coercion**: Handle null, undefined, empty strings, symbols gracefully
- * - **DOM Dataset Parsing**: Convert string dataset attributes (data-roll="3") to integers
- * - **Form Data Sanitization**: Coerce user input with safe fallbacks
- * - **Bounds Enforcement**: Constrain numeric values to valid game ranges
- *
- * Foundry VTT Integration:
- * - Used extensively in ActorSheetV2._prepareContext for data preparation
- * - Powers DOM event delegation pattern (parsing data-action attributes)
- * - Handles _prepareSubmitData type coercion (case "Integer": toInt(value))
- * - Safe for reading actor.system and item.system properties with optional chaining
- *
- * @module utils/type-coercion
- * @see {@link https://foundryvtt.com/api/v13/classes/foundry.applications.api.ApplicationV2.html|Foundry ApplicationV2}
+ * Used throughout the system to safely coerce user input and data from Foundry.
  */
 
 /**
- * Safely coerce any value to an integer with fallback.
+ * Safely converts value to integer with fallback.
  *
- * Defensive utility that handles edge cases common in Foundry VTT sheets:
- * - Null/undefined from missing actor.system properties → fallback
- * - Empty/whitespace strings from DOM inputs → fallback
- * - Symbols (cannot be coerced) → fallback
- * - Invalid numeric strings ("abc") → fallback
- * - Valid numeric strings ("42", " 3 ") → integer
+ * Handles edge cases:
+ * - Symbols: returns fallback
+ * - Strings: trims whitespace before parsing
+ * - Invalid numbers: returns fallback
+ * - null/undefined: returns fallback
  *
- * Commonly used for:
- * - Parsing DOM dataset attributes: toInt(element.dataset.roll)
- * - Reading system properties: toInt(item.system?.rank)
- * - Form data coercion: toInt(formData.get("rank"), 0)
+ * @param {*} v - Value to convert
+ * @param {number} [fallback=0] - Value to return if conversion fails
+ * @returns {number} Parsed integer or fallback
  *
- * **Why not Number() or Number.parseInt() directly?**
- * - Number() treats empty string as 0, not fallback
- * - Number.parseInt() doesn't trim whitespace automatically
- * - Neither handles symbols safely (would throw or return NaN)
- * - This utility provides consistent fallback behavior
- *
- * @param {*} v - Value to coerce (any type accepted)
- * @param {number} [fallback=0] - Value to return if coercion fails
- * @returns {number} Integer value or fallback
+ * @example
+ * toInt("42") // 42
+ * toInt(" 5 ") // 5 (trimmed)
+ * toInt("invalid") // 0 (fallback)
+ * toInt(null, 10) // 10 (custom fallback)
  */
 export function toInt(v, fallback = 0) {
+  // Symbols cannot be converted to numbers
   if (typeof v === "symbol") {
     return fallback;
   }
+  // Handle null/undefined explicitly (parseInt(null) returns NaN, but be consistent)
+  if (v == null) {
+    return fallback;
+  }
+  // Trim whitespace from strings before parsing
   const s = typeof v === "string" ? v.trim() : v;
   const n = Number.parseInt(s, 10);
+  // Return fallback if parsing failed
   return Number.isNaN(n) ? fallback : n;
 }
 
 /**
- * Clamp a numeric value within an inclusive [min, max] range.
+ * Safely converts value to number with fallback.
  *
- * Defensive utility that constrains values to valid bounds, handling all edge cases:
- * - Invalid inputs (null, undefined, "", NaN) → 0
- * - Value below min → min
- * - Value above max → max
- * - Value within range → value
+ * More permissive than toInt - allows decimals.
+ * Handles edge cases:
+ * - Symbols: returns fallback
+ * - Strings: trims whitespace before parsing
+ * - Invalid numbers: returns fallback
+ * - null/undefined: returns fallback
  *
- * All three parameters (value, min, max) are coerced to numbers. If any parameter
- * cannot be coerced (results in NaN), the function returns 0 as a safe default.
+ * @param {*} v - Value to convert
+ * @param {number} [fallback=0] - Value to return if conversion fails
+ * @returns {number} Parsed number or fallback
  *
- * Commonly used for:
- * - Void points constraints: clamp(current + delta, 0, 9)
- * - Trait rank bounds: clamp(newValue, minRank, maxRank)
- * - User input sanitization in ActorSheetV2 forms
+ * @example
+ * toNumber("42.5") // 42.5
+ * toNumber(" 3.14 ") // 3.14 (trimmed)
+ * toNumber("invalid") // 0 (fallback)
+ * toNumber(null, 10) // 10 (custom fallback)
+ */
+export function toNumber(v, fallback = 0) {
+  // Symbols cannot be converted to numbers
+  if (typeof v === "symbol") {
+    return fallback;
+  }
+  // Handle null/undefined explicitly (Number(null) returns 0, not NaN)
+  if (v == null) {
+    return fallback;
+  }
+  // Trim whitespace from strings before parsing
+  const s = typeof v === "string" ? v.trim() : v;
+  const n = Number(s);
+  // Return fallback if parsing failed
+  return Number.isNaN(n) ? fallback : n;
+}
+
+/**
+ * Safely converts value to string with fallback.
  *
- * **L5R4 Game Rules:**
- * Most character attributes have bounds (traits 1-10, void points 0-9, etc.).
- * This utility enforces those constraints automatically.
+ * Handles edge cases:
+ * - Symbols: returns fallback (cannot be converted to string)
+ * - null/undefined: returns fallback
+ * - All other values: converted to string
  *
- * @param {*} value - Value to clamp (will be coerced to number)
- * @param {*} min - Minimum allowed value (will be coerced to number)
- * @param {*} max - Maximum allowed value (will be coerced to number)
- * @returns {number} Clamped value within [min, max], or 0 if any parameter is NaN
+ * @param {*} value - Value to convert
+ * @param {string} [fallback=""] - Value to return if conversion fails
+ * @returns {string} String value or fallback
+ *
+ * @example
+ * toString(42) // "42"
+ * toString(null) // "" (fallback)
+ * toString(Symbol("test")) // "" (fallback)
+ * toString(undefined, "N/A") // "N/A" (custom fallback)
+ */
+export function toString(value, fallback = "") {
+  // Symbols and null/undefined cannot be safely converted
+  if (value == null || typeof value === "symbol") {
+    return fallback;
+  }
+  return String(value);
+}
+
+/**
+ * Clamps value to range [min, max].
+ *
+ * Ensures value is between min and max (inclusive).
+ * Returns 0 if any parameter is NaN.
+ *
+ * @param {number} value - Value to clamp
+ * @param {number} min - Minimum allowed value
+ * @param {number} max - Maximum allowed value
+ * @returns {number} Clamped value or 0 if any parameter is NaN
+ *
+ * @example
+ * clamp(5, 0, 10) // 5 (within range)
+ * clamp(15, 0, 10) // 10 (clamped to max)
+ * clamp(-5, 0, 10) // 0 (clamped to min)
+ * clamp("invalid", 0, 10) // 0 (NaN fallback)
  */
 export function clamp(value, min, max) {
   const n = Number(value);
   const minVal = Number(min);
   const maxVal = Number(max);
+  // Return 0 if any parameter is invalid
   if (Number.isNaN(n) || Number.isNaN(minVal) || Number.isNaN(maxVal)) {
     return 0;
   }
+  // Clamp to [min, max] range
   return Math.max(minVal, Math.min(maxVal, n));
 }

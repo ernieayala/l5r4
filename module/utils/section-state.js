@@ -1,101 +1,68 @@
 /**
- * Section Collapse State Management
+ * @module section-state
+ * @description Manages collapsed/expanded state for actor sheet sections.
  *
- * Utilities for persisting actor sheet section collapsed/expanded states across
- * sheet re-renders and browser sessions. Uses Foundry's user flag system to store
- * per-actor, per-section UI preferences.
+ * Persists UI state in Foundry user flags so sections remember their
+ * collapsed/expanded state across sessions. Each user has their own preferences.
  *
- * **Storage Method:**
- * Uses Foundry's **database-backed User Flags system** (NOT browser localStorage).
- * Data persists in Foundry's server database and syncs automatically across sessions.
- * This is preferable to localStorage as it survives browser cache clears and works
- * across different browsers/devices when accessing the same Foundry server.
- *
- * **Storage Pattern:**
- * Flags are stored at: `game.user.flags.l5r4-enhanced.collapsedSections`
- * Structure: `{ [actorId]: { [scope]: boolean } }`
- * Example: `{ "Actor.abc123": { "skills": true, "weapons": false } }`
- *
- * **Privacy:**
- * - Only stores UI state (no sensitive data)
- * - Scoped per-user (each user has their own preferences)
- * - Stored in Foundry's database (not exposed to browsers)
- *
- * **Integration Points:**
- * - Sheet _prepareContext: Read state to inject into template context
- * - Toggle handler: Write state when user clicks expand/collapse button
- * - Templates: Apply "is-collapsed" class based on context data
- *
- * @module utils/section-state
- * @requires Foundry VTT v13+
+ * State is stored as: { [actorId]: { [scope]: boolean } }
+ * Example: { "actor123": { "skills": true, "inventory": false } }
  */
 
 import { SYS_ID } from "../config/constants.js";
+import { logError } from "./error-logging.js";
 
 /**
- * Retrieves the collapsed state for a specific section on an actor sheet.
+ * Gets collapsed state for a specific actor sheet section.
  *
- * Looks up the user's preference for whether a given section (identified by scope)
- * should be collapsed. Returns false (expanded) by default if no preference exists.
+ * Reads from Foundry user flags. Returns false if not set (expanded by default).
  *
- * **Scope Examples:**
- * - "skills" - Skills section
- * - "weapons" - Weapons section
- * - "spells" - Spells section
- * - "advantages" - Advantages section
- * - "disadvantages" - Disadvantages section
- * - "bio" - Biography section
- *
- * @param {string} actorId - The actor's UUID or ID for preference lookup
- * @param {string} scope - The section identifier (matches data-scope in templates)
- * @returns {boolean} True if section should be collapsed, false if expanded
+ * @param {string} actorId - Actor document ID
+ * @param {string} scope - Section identifier (e.g., "skills", "inventory", "techniques")
+ * @returns {boolean} True if section is collapsed, false if expanded
  *
  * @example
- * const isCollapsed = getSectionCollapsed("Actor.abc123", "skills");
- * // Returns: true (if user previously collapsed skills section)
+ * getSectionCollapsed("actor123", "skills") // true if skills section collapsed
  */
 export function getSectionCollapsed(actorId, scope) {
   try {
+    // Read collapsed sections map from user flags
     const map = game.user?.getFlag(SYS_ID, "collapsedSections") ?? {};
-    return map?.[actorId]?.[scope] ?? false; // Default: expanded
+    // Default to false (expanded) if not set
+    return map?.[actorId]?.[scope] ?? false;
   } catch (err) {
-    console.warn(`${SYS_ID}`, "Failed to get section collapsed state", { err, actorId, scope });
+    logError("Failed to get section collapsed state", err, { actorId, scope });
+    // Return expanded state on error
     return false;
   }
 }
 
 /**
- * Persists the collapsed state for a specific section on an actor sheet.
+ * Sets collapsed state for a specific actor sheet section.
  *
- * Stores the user's preference for whether a given section should be collapsed.
- * Updates are atomic and merged with existing preferences, so setting one section's
- * state doesn't affect other sections or other actors.
+ * Persists to Foundry user flags. Updates are per-user, so each user
+ * can have different collapsed sections.
  *
- * **Persistence:**
- * - Stored in user flags (per-user preferences)
- * - Survives sheet re-renders
- * - Survives browser sessions
- * - Survives world reload
- *
- * @param {string} actorId - The actor's UUID or ID
- * @param {string} scope - The section identifier (matches data-scope in templates)
+ * @param {string} actorId - Actor document ID
+ * @param {string} scope - Section identifier (e.g., "skills", "inventory")
  * @param {boolean} isCollapsed - True to collapse, false to expand
- * @returns {Promise<void>} Resolves when flag is updated
+ * @returns {Promise<void>}
  *
- * @async
  * @example
- * await setSectionCollapsed("Actor.abc123", "skills", true);
- * // Skills section will now render collapsed on all future opens
+ * await setSectionCollapsed("actor123", "skills", true) // Collapse skills section
+ * await setSectionCollapsed("actor123", "inventory", false) // Expand inventory section
  */
 export async function setSectionCollapsed(actorId, scope, isCollapsed) {
   try {
+    // Read current state from user flags
     const map = (await game.user?.getFlag(SYS_ID, "collapsedSections")) ?? {};
+    // Create new state preserving other actors and scopes
     const out = { ...map };
     out[actorId] = { ...(out[actorId] ?? {}), [scope]: isCollapsed };
+    // Persist updated state to user flags
     await game.user?.setFlag(SYS_ID, "collapsedSections", out);
   } catch (err) {
-    console.warn(`${SYS_ID}`, "Failed to set section collapsed state", {
-      err,
+    logError("Failed to set section collapsed state", err, {
       actorId,
       scope,
       isCollapsed
@@ -104,27 +71,22 @@ export async function setSectionCollapsed(actorId, scope, isCollapsed) {
 }
 
 /**
- * Builds a map of all section collapse states for an actor sheet.
+ * Gets collapsed state for multiple sections at once.
  *
- * Retrieves collapsed states for all provided section scopes at once, returning
- * a convenient map object suitable for passing into template context.
+ * Convenience function to get state for all sections in one call.
+ * Returns object mapping scope names to collapsed state.
  *
- * **Usage Pattern:**
- * This is typically called during sheet _prepareContext() to inject collapse states
- * into the template rendering data.
- *
- * @param {string} actorId - The actor's UUID or ID
- * @param {string[]} scopes - Array of section identifiers to check
+ * @param {string} actorId - Actor document ID
+ * @param {string[]} scopes - Array of section identifiers
  * @returns {Object.<string, boolean>} Map of scope to collapsed state
  *
  * @example
- * const collapsed = getSectionCollapsedMap("Actor.abc123",
- *   ["skills", "weapons", "spells", "advantages"]
- * );
- * // Returns: { skills: true, weapons: false, spells: false, advantages: true }
+ * getSectionCollapsedMap("actor123", ["skills", "inventory", "techniques"])
+ * // { skills: true, inventory: false, techniques: false }
  */
 export function getSectionCollapsedMap(actorId, scopes) {
   const result = {};
+  // Build map of scope -> collapsed state
   for (const scope of scopes) {
     result[scope] = getSectionCollapsed(actorId, scope);
   }

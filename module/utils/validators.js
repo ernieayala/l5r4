@@ -1,53 +1,45 @@
 /**
- * Input validation utilities
+ * @module validators
+ * @description Input validation utilities for L5R4 system.
  *
- * Pure validation functions for user input sanitization and security.
- * Prevents XSS, injection attacks, and data corruption.
+ * Provides validation functions that return structured results:
+ * { valid: boolean, error?: string, sanitized?: any }
  *
- * @module utils/validators
+ * Used to validate user input before processing or storing.
  */
 
-/**
- * Maximum allowed length for emphasis names
- * @type {number}
- */
-const MAX_EMPHASIS_LENGTH = 100;
+import { toNumber } from "./type-coercion.js";
+import { MAX_EMPHASIS_LENGTH, MIN_EMPHASIS_LENGTH } from "../config/reference-data.js";
+import { MAX_RAISES } from "../config/game-mechanics.js";
 
 /**
- * Minimum allowed length for emphasis names
- * @type {number}
- */
-const MIN_EMPHASIS_LENGTH = 1;
-
-/**
- * Allowed characters for emphasis names: alphanumeric, spaces, hyphens, apostrophes
- * @type {RegExp}
+ * Allowed characters for emphasis names.
+ * Permits: letters, numbers, spaces, hyphens, apostrophes.
+ * @constant {RegExp}
  */
 const EMPHASIS_NAME_PATTERN = /^[a-zA-Z0-9\s\-']+$/;
 
 /**
- * Validate emphasis name for security and data integrity.
+ * Validates skill emphasis name.
  *
- * Prevents XSS attacks and data corruption by enforcing:
- * - Length limits (1-100 characters)
- * - Character restrictions (alphanumeric, spaces, hyphens, apostrophes only)
- * - No HTML/script tags
- * - No special characters that could cause issues
+ * In L5R4, skills can have emphases (specializations) that provide bonuses
+ * in specific situations. Example: Kenjutsu (Katana), Investigation (Notice).
  *
- * @param {string} emphasisName - Name to validate
- * @returns {{valid: boolean, error?: string}} Validation result
+ * Validation rules:
+ * - Must be string
+ * - Length: 1-100 characters (after trimming)
+ * - Characters: letters, numbers, spaces, hyphens, apostrophes only
  *
- * @example
- * validateEmphasisName("Courtier")
- * // Returns: { valid: true }
- *
- * @example
- * validateEmphasisName("<script>alert('xss')</script>")
- * // Returns: { valid: false, error: "Invalid characters in emphasis name" }
+ * @param {string} emphasisName - Emphasis name to validate
+ * @returns {Object} Validation result
+ * @returns {boolean} return.valid - True if valid
+ * @returns {string} [return.error] - Error message if invalid
  *
  * @example
- * validateEmphasisName("A".repeat(200))
- * // Returns: { valid: false, error: "Emphasis name must be 1-100 characters" }
+ * validateEmphasisName("Katana") // { valid: true }
+ * validateEmphasisName("Notice") // { valid: true }
+ * validateEmphasisName("") // { valid: false, error: "..." }
+ * validateEmphasisName("Invalid@Name") // { valid: false, error: "Invalid characters..." }
  */
 export function validateEmphasisName(emphasisName) {
   // Type check
@@ -57,88 +49,74 @@ export function validateEmphasisName(emphasisName) {
       error: "Emphasis name must be a string"
     };
   }
-
-  // Trim whitespace
   const trimmed = emphasisName.trim();
-
-  // Length validation
+  // Length check
   if (trimmed.length < MIN_EMPHASIS_LENGTH || trimmed.length > MAX_EMPHASIS_LENGTH) {
     return {
       valid: false,
       error: `Emphasis name must be ${MIN_EMPHASIS_LENGTH}-${MAX_EMPHASIS_LENGTH} characters`
     };
   }
-
-  // Character validation - prevent XSS and injection
+  // Character validation
   if (!EMPHASIS_NAME_PATTERN.test(trimmed)) {
     return {
       valid: false,
       error: "Invalid characters in emphasis name"
     };
   }
-
-  // Valid
   return {
     valid: true
   };
 }
 
 /**
- * Validate attack raises against original roll data to prevent HTML injection exploits.
+ * Validates attack Raises match between claim and stored value.
  *
- * Security: Prevents attackers from manually editing chat card HTML to inject
- * arbitrary raise values. Validates that raises claimed in damage roll match
- * the raises stored in the original attack roll's chat message flags.
+ * In L5R4, players declare Raises before rolling. This validator ensures
+ * the Raises claimed in chat/damage application match what was actually
+ * declared during the attack roll.
  *
- * L5R4 Rules: Maximum raises per roll equals Void Ring (typically 1-5).
- * System enforces max 20 raises as safety cap for edge cases.
+ * Validation rules:
+ * - Both values must be finite numbers
+ * - Range: 0-20 (reasonable maximum)
+ * - Values must match exactly (prevents cheating)
  *
- * @param {number} claimedRaises - Raises value from chat card HTML (untrusted)
- * @param {number} storedRaises - Raises value from message flags (trusted)
- * @returns {{valid: boolean, error?: string, sanitized?: number}} Validation result
- *
- * @example
- * validateAttackRaises(2, 2)
- * // Returns: { valid: true, sanitized: 2 }
- *
- * @example
- * validateAttackRaises(10, 2)
- * // Returns: { valid: false, error: "Attack raises mismatch: claimed 10 but original roll had 2" }
+ * @param {number} claimedRaises - Raises claimed for damage/effect
+ * @param {number} storedRaises - Raises from original attack roll
+ * @returns {Object} Validation result
+ * @returns {boolean} return.valid - True if valid
+ * @returns {string} [return.error] - Error message if invalid
+ * @returns {number} [return.sanitized] - Validated Raises value if valid
  *
  * @example
- * validateAttackRaises("2", 2)
- * // Returns: { valid: true, sanitized: 2 } (coerces valid string to number)
+ * validateAttackRaises(2, 2) // { valid: true, sanitized: 2 }
+ * validateAttackRaises(3, 2) // { valid: false, error: "...mismatch..." }
+ * validateAttackRaises(25, 25) // { valid: false, error: "...out of valid range..." }
  */
 export function validateAttackRaises(claimedRaises, storedRaises) {
-  // Coerce to numbers
-  const claimed = Number(claimedRaises);
-  const stored = Number(storedRaises);
-
-  // Type validation
+  const claimed = toNumber(claimedRaises);
+  const stored = toNumber(storedRaises);
+  // Ensure both are valid numbers
   if (!Number.isFinite(claimed) || !Number.isFinite(stored)) {
     return {
       valid: false,
       error: "Attack raises must be valid numbers"
     };
   }
-
-  // Range validation (0-20 per system limits)
-  if (claimed < 0 || claimed > 20 || stored < 0 || stored > 20) {
+  // Range check (0-MAX_RAISES is reasonable maximum)
+  if (claimed < 0 || claimed > MAX_RAISES || stored < 0 || stored > MAX_RAISES) {
     return {
       valid: false,
       error: "Attack raises out of valid range (0-20)"
     };
   }
-
-  // Security validation: claimed must match stored
+  // Verify claimed Raises match stored value (anti-cheat)
   if (claimed !== stored) {
     return {
       valid: false,
       error: `Attack raises mismatch: claimed ${claimed} but original roll had ${stored}`
     };
   }
-
-  // Valid
   return {
     valid: true,
     sanitized: stored

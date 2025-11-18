@@ -17,10 +17,10 @@
  * - Returns structured data for roll formula construction
  *
  * @module documents/item/preparation/bow-damage
- * @see ARROW_MODS in config/game-data.js for arrow type modifiers
+ * @see ARROW_MODS in config/game-mechanics.js for arrow type modifiers
  */
 
-import { ARROW_MODS } from "../../../config/game-data.js";
+import { ARROW_MODS } from "../../../config/game-mechanics.js";
 import { toInt } from "../../../utils/type-coercion.js";
 
 /**

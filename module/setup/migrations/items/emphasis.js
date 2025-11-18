@@ -6,7 +6,7 @@
  */
 
 import { SYS_ID } from "../../../config/constants.js";
-import { OFFICIAL_EMPHASES } from "../../../config/game-data.js";
+import { OFFICIAL_EMPHASES } from "../../../config/reference-data.js";
 
 /**
  * Find best matching official emphasis for a given name.

@@ -24,7 +24,7 @@
 
 // Config imports
 import { SYS_ID } from "../config/constants.js";
-import { STATUS_EFFECTS } from "../config/game-data.js";
+import { STATUS_EFFECTS } from "../config/status-effects.js";
 
 // Utils imports
 import { T } from "../utils/localization.js";

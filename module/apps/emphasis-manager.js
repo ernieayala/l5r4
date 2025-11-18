@@ -25,7 +25,7 @@
 
 // Config imports
 import { SYS_ID } from "../config/constants.js";
-import { OFFICIAL_EMPHASES } from "../config/game-data.js";
+import { OFFICIAL_EMPHASES } from "../config/reference-data.js";
 import { TEMPLATE } from "../config/templates.js";
 
 // Utils imports

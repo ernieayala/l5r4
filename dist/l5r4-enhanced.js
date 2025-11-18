@@ -45,7 +45,8 @@ import {
   KIHO_TYPES, 
   ADVANTAGE_TYPES 
 } from "../module/config/localization.js";
-import { NPC_NUMBER_WOUND_LVLS, STATUS_EFFECTS } from "../module/config/game-data.js";
+import { NPC_NUMBER_WOUND_LVLS } from "../module/config/game-mechanics.js";
+import { STATUS_EFFECTS } from "../module/config/status-effects.js";
 import L5R4Actor from "../module/documents/actor.js";
 import L5R4Item from "../module/documents/item.js";
 import L5R4ItemSheet from "../module/sheets/item-sheet.js";

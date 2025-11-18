@@ -59,14 +59,71 @@
         }
       }
     },
+    "mechanics": {
+      "advantages": {
+        "types": {
+          "physical": "Physical",
+          "mental": "Mental",
+          "social": "Social",
+          "material": "Material",
+          "spiritual": "Spiritual",
+          "ancestor": "Ancestor"
+        }
+      },
+      "magic": {
+        "kiho": {
+          "internal": "Internal",
+          "karmic": "Karmic",
+          "martial": "Martial",
+          "mystic": "Mystic"
+        }
+      },
+      "rings": {
+        "fire": "Fire",
+        "water": "Water",
+        "air": "Air",
+        "earth": "Earth",
+        "void": "Void"
+      },
+      "skills": {
+        "types": {
+          "high": "High",
+          "bugei": "Bugei",
+          "merch": "Merchant",
+          "low": "Low"
+        }
+      },
+      "stances": {
+        "attack": "Attack Stance",
+        "fullAttack": "Full Attack Stance",
+        "defense": "Defense Stance",
+        "fullDefense": "Full Defense Stance",
+        "center": "Center Stance"
+      },
+      "traits": {
+        "agi": "Agility",
+        "aw": "Awareness",
+        "int": "Intelligence",
+        "per": "Perception",
+        "ref": "Reflexes",
+        "sta": "Stamina",
+        "str": "Strength",
+        "wil": "Willpower"
+      }
+    },
     "ui": {
       "label": {
         "add": "Add",
+        "all": "All",
         "cancel": "Cancel",
         "delete": "Delete",
         "edit": "Edit",
+        "none": "None",
         "ok": "OK",
-        "save": "Save"
+        "save": "Save",
+        "simple": "Simple",
+        "complex": "Complex",
+        "free": "Free"
       },
       "tabs": {
         "details": "Details",

@@ -1,42 +1,56 @@
 /**
- * Error Logging Utilities
+ * @module error-logging
+ * @description Centralized error logging utilities for L5R4 system.
  *
- * Provides standardized error logging functions for consistent error reporting
- * across the application. All error logs include error message, stack trace,
- * and relevant context metadata.
+ * Provides consistent error logging with system ID prefix and structured metadata.
+ * Uses console.warn instead of console.error to avoid triggering Foundry's
+ * error notification UI for recoverable errors.
  *
- * @module utils/error-logging
+ * All errors are logged with:
+ * - System ID prefix for easy filtering in console
+ * - Error object with message and stack trace
+ * - Optional metadata for debugging context
  */
 
-// Config imports
 import { SYS_ID } from "../config/constants.js";
 
 /**
- * Log an error with standardized format including error details and context.
+ * Logs error with system ID prefix and structured metadata.
  *
- * Logs to console.warn with system ID prefix, descriptive message, and metadata
- * including error message, stack trace, and any additional context fields.
+ * Uses console.warn to log errors without triggering Foundry's error UI.
+ * Includes error message, stack trace, and optional metadata for debugging.
  *
- * @param {string} message - Descriptive error message
- * @param {Error} error - The error object to log
- * @param {object} [metadata={}] - Additional context metadata (actorId, itemId, etc.)
+ * @param {string} message - Human-readable error description
+ * @param {Error|unknown} error - Error object or value that was thrown
+ * @param {Object} [metadata={}] - Additional context for debugging
+ * @returns {void}
  *
  * @example
+ * // Log error with basic context
+ * try {
+ *   riskyOperation();
+ * } catch (err) {
+ *   logError("Failed to perform risky operation", err);
+ * }
+ *
+ * @example
+ * // Log error with additional metadata
  * try {
  *   await actor.update(data);
  * } catch (err) {
- *   logError("Failed to update actor", err, {
- *     actorId: this.actor?.id,
- *     field: "wounds",
- *     value: 10
+ *   logError("Actor update failed", err, {
+ *     actorId: actor.id,
+ *     actorName: actor.name,
+ *     data
  *   });
  * }
  */
 export function logError(message, error, metadata = {}) {
+  // Use console.warn to avoid triggering Foundry's error notification UI
   console.warn(`${SYS_ID}`, message, {
     err: error,
     errorMessage: error?.message,
     errorStack: error?.stack,
-    ...metadata
+    ...metadata // Spread additional context for debugging
   });
 }
