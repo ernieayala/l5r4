@@ -13,7 +13,6 @@
  * Rolls are typically Skill Rank + Trait, using roll-and-keep dice (XkY).
  */
 
-import { SYS_ID } from "../config/constants.js";
 import { toInt, toString } from "./type-coercion.js";
 import { logError } from "./error-logging.js";
 

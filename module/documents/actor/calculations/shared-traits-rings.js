@@ -122,3 +122,56 @@ export function prepareTraitsAndRings(sys) {
     };
   }
 }
+
+/**
+ * Calculate movement distances per L5R4 combat rules.
+ *
+ * @param {Object} sys - Actor's system data object to modify
+ *
+ * @description
+ * Calculates movement distances based on Water Ring per L5R4 combat rules:
+ * - Free Action: Water Ring × 5 feet
+ * - Simple Action: Water Ring × 10 feet
+ * - Maximum per Round: Water Ring × 20 feet (hard limit)
+ *
+ * Condition Effects:
+ * - Conditions like Blinded reduce effective Water Ring by 2 for movement
+ * - Applied after condition effects via sys._conditionEffects.waterRingPenalty
+ * - Minimum effective Water Ring is 1 per L5R4 rules
+ *
+ * Custom Modifiers:
+ * - multiplier: Multiplies Water Ring (for mounts, special abilities)
+ * - modifier: Flat modifier added to all movement distances
+ *
+ * Modifies sys.movement with:
+ * - freeAction: Distance for Free Action movement
+ * - simpleAction: Distance for Simple Action movement
+ * - maximum: Maximum distance per round
+ *
+ * @example
+ * // Actor with Water Ring 3, no penalties
+ * prepareMovement(actor.system);
+ * // actor.system.movement.freeAction = 15 (3 × 5)
+ * // actor.system.movement.simpleAction = 30 (3 × 10)
+ * // actor.system.movement.maximum = 60 (3 × 20)
+ *
+ * @example
+ * // Actor with Water Ring 4, Blinded condition (-2)
+ * actor.system._conditionEffects = { waterRingPenalty: -2 };
+ * prepareMovement(actor.system);
+ * // Effective Water = max(1, 4 + (-2)) = 2
+ * // actor.system.movement.freeAction = 10 (2 × 5)
+ */
+export function prepareMovement(sys) {
+  const baseWater = toInt(sys.rings.water);
+  const waterPenalty = sys._conditionEffects?.waterRingPenalty ?? 0;
+  const effectiveWater = Math.max(1, baseWater + waterPenalty);
+
+  sys.movement = sys.movement || {};
+  const movementMultiplier = parseFloat(sys.movement.multiplier) || 1;
+  const movementModifier = toInt(sys.movement.modifier) || 0;
+
+  sys.movement.freeAction = effectiveWater * 5 * movementMultiplier + movementModifier;
+  sys.movement.simpleAction = effectiveWater * 10 * movementMultiplier + movementModifier;
+  sys.movement.maximum = effectiveWater * 20 * movementMultiplier + movementModifier;
+}

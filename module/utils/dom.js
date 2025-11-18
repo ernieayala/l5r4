@@ -9,7 +9,6 @@
  * Uses data attributes for element selection to maintain separation of concerns.
  */
 
-import { SYS_ID } from "../config/constants.js";
 import { logError } from "./error-logging.js";
 
 /**

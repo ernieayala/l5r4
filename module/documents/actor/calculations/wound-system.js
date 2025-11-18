@@ -30,7 +30,7 @@ import {
   WOUND_LEVEL_ORDER,
   DEFAULT_WOUND_PENALTIES,
   DEFAULT_WOUND_THRESHOLDS
-} from "../constants/wound-constants.js";
+} from "../../../config/game-mechanics.js";
 
 /**
  * Returns the active wound level keys for a given wound level count.

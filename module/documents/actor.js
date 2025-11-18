@@ -1,135 +1,60 @@
 /**
- * L5R4 Actor Document
- *
- * Core Actor document for Legend of the Five Rings 4th Edition system. Manages character
- * data for both Player Characters (PCs) and Non-Player Characters (NPCs), calculating
- * derived stats, wound thresholds, combat values, and experience point tracking per
- * L5R4 game rules.
- *
- * Key Responsibilities:
- * - **Character Stats**: Calculate initiative, armor TN, wound levels, insight rank
- * - **Combat Values**: Derive attack/defense modifiers, wound penalties, healing rates
- * - **Wound System**: Manage progressive wound penalties and death thresholds
- * - **Experience Points**: Track XP spending, trait costs, skill costs (PC only)
- * - **Token Configuration**: Auto-configure prototype tokens with appropriate bars/vision
- * - **Data Lifecycle**: Prepare derived data during Foundry's data preparation phase
- *
- * L5R4 Game Mechanics Implemented:
- * - **Initiative**: (Insight Rank + Reflexes)kReflexes per combat round ordering
- * - **Armor TN**: Reflexes × 5 + 5 + armor bonus (determines difficulty to hit)
- * - **Wound Levels**: 8 progressive ranks from Healthy to Out, each imposing TN penalties
- * - **Lethality Scaling**: Variable Earth multipliers (×2/×3/×4/×5) for campaign style
- * - **Insight Rank**: (Rings × 10) + Skill Ranks, determines school advancement
- * - **Healing Rate**: (Stamina × 2) + Insight Rank + modifiers
- *
- * PC vs NPC Differences:
- * - **PCs**: Automatic XP tracking, school detection, formula-based wounds from Earth Ring
- * - **NPCs**: Manual or formula wound modes, simpler stat tracking, optional fear ratings
- *
- * Foundry VTT Integration:
- * - Extends Foundry Actor document class (requires v13+)
- * - Uses _preCreate hook for initial token/flag setup
- * - Uses _preUpdate hook for XP expenditure tracking
- * - Uses prepareDerivedData for stat calculations (called automatically by Foundry)
- * - Leverages game.settings for system configuration (armor stacking, wound modes)
- * - Stores XP history in actor.flags[SYS_ID] for audit trail
- *
  * @module documents/actor
- * @see {@link https://foundryvtt.com/api/v13/classes/foundry.documents.BaseActor.html|Foundry Actor API}
+ * @description Core Actor document for L5R4 Enhanced system.
+ *
+ * Extends Foundry's Actor class to implement Legend of the Five Rings 4th Edition
+ * game mechanics including:
+ * - Wound tracking and penalties
+ * - Experience point management and insight rank calculation
+ * - Ring and trait system with derived values
+ * - Fear mechanics
+ * - Token configuration defaults for PCs and NPCs
+ *
+ * Architecture:
+ * - Uses Foundry's data preparation lifecycle (prepareBaseData → prepareDerivedData)
+ * - Delegates type-specific logic to preparation modules (pc-preparation, npc-preparation)
+ * - Wound system uses calculation modules for complex penalty logic
+ * - XP tracking uses flags for persistent character advancement data
+ *
+ * @requires Foundry VTT v11+
  */
 
-// Config
 import { SYS_ID } from "../config/constants.js";
 import { iconPath } from "../config/icons.js";
-
-// Utils
 import { toInt } from "../utils/type-coercion.js";
-
-// Local
-import { WOUND_LEVEL_ORDER } from "./actor/constants/wound-constants.js";
+import { WOUND_LEVEL_ORDER } from "../config/game-mechanics.js";
 import {
   calculateWoundPenalties,
   initializeWoundState,
   findCurrentWoundLevel,
   determineCurrentWoundLevel
 } from "./actor/calculations/wound-system.js";
-
 import {
   calculateInsightRank,
   preparePcExperience,
   trackXpExpenditure
 } from "./actor/calculations/xp-system.js";
-
 import { prepareFear } from "./actor/calculations/fear-system.js";
-
 import { preparePcData } from "./actor/preparation/pc-preparation.js";
 import { prepareNpcData } from "./actor/preparation/npc-preparation.js";
 
 /**
- * L5R4 Actor Document class.
- *
- * Represents a character or creature in the Legend of the Five Rings 4th Edition game
- * system. Handles all character data calculations including combat stats, wounds,
- * advancement, and integration with Foundry VTT's Actor Document lifecycle.
- *
- * This class is automatically instantiated by Foundry when actors are loaded. Custom
- * actor sheets (ActorSheetV2) interact with instances of this class to display and
- * modify character data.
- *
- * Requires Foundry VTT v13+ for Actor Document v2 lifecycle hooks.
- *
- * @extends {Actor}
+ * Actor document for L5R4 Enhanced system.
+ * Implements L5R4 game mechanics for player characters and NPCs.
  */
 export default class L5R4Actor extends Actor {
-  /**
-   * Exported wound level order constant for external access.
-   *
-   * Defines the canonical ordering of wound ranks: healthy, nicked, grazed, hurt,
-   * injured, crippled, down, out. Used by UI components and calculation modules
-   * to iterate wound levels in the correct sequence.
-   *
-   * @type {string[]}
-   * @static
-   */
+  /** @type {string[]} Ordered list of wound level keys for penalty calculation */
   static WOUND_LEVEL_ORDER = WOUND_LEVEL_ORDER;
 
   /**
-   * Pre-creation hook for Actor Document initialization.
+   * Configure actor defaults before creation.
+   * Sets token configuration, default images, and initializes XP tracking flags.
    *
-   * Called by Foundry before an actor is created in the world. Sets up initial
-   * prototype token configuration (bars, vision, disposition) and initializes
-   * required flags for system functionality. PC actors get XP tracking flags,
-   * NPC actors get wound mode configuration.
-   *
-   * **Token Configuration:**
-   * - PCs: bar1=wounds, bar2=suffered, vision enabled, always show name, friendly disposition, actor linking
-   * - NPCs: bar1=wounds, bar2=suffered, owner-only visibility, hostile disposition, no actor linking
-   *
-   * **XP Flag Initialization (PC only):**
-   * Creates empty arrays/objects for XP tracking:
-   * - `xpManual`: Array of manual XP adjustments (GM awards)
-   * - `xpSpent`: Array of XP expenditure log entries
-   * - `xpBase`: Starting XP (default 40 per L5R4 character creation)
-   * - `xpFreeTraitBase`: Tracks consumed free trait bonuses from family/school
-   * - `traitDiscounts`: XP cost modifiers for traits (advantages, disadvantages)
-   *
-   * **NPC Wound Mode:**
-   * New NPCs default to "manual" wound mode where GMs set exact wound thresholds.
-   * This is appropriate as NPCs vary widely in power level and wound capacity.
-   *
-   * **Side Effects:**
-   * - Mutates `this.prototypeToken` with default token settings
-   * - Mutates `this` with default actor image if not provided
-   * - Mutates `this` with initialized flags if not provided
-   *
-   * Requires Foundry v13+ for prototypeToken.updateSource() API.
-   *
-   * @param {Object} data - Initial actor data being created
-   * @param {Object} options - Creation options passed by Foundry
-   * @param {User} user - User performing the creation
+   * @param {object} data - Initial actor data
+   * @param {object} options - Creation options
+   * @param {User} user - User creating the actor
    * @returns {Promise<void>}
    * @override
-   * @async
    */
   async _preCreate(data, options, user) {
     await super._preCreate(data, options, user);
@@ -150,6 +75,8 @@ export default class L5R4Actor extends Actor {
         this.updateSource({ img: iconPath("pc.webp") });
       }
 
+      // Initialize XP tracking flags for character advancement
+      // These flags persist character creation choices and XP expenditure history
       const providedFlags = data.flags?.[SYS_ID] ?? {};
       const updates = {};
 
@@ -173,9 +100,6 @@ export default class L5R4Actor extends Actor {
         this.updateSource(updates);
       }
     } else {
-      // NPC actors default to manual wound mode
-      // Manual mode: GM sets exact wound thresholds for each NPC individually
-      // This is appropriate as NPCs vary widely in power level and wound capacity
       this.prototypeToken.updateSource({
         bar1: { attribute: "wounds" },
         bar2: { attribute: "suffered" },
@@ -201,18 +125,9 @@ export default class L5R4Actor extends Actor {
   }
 
   /**
-   * Prepare base data for the actor.
-   *
-   * Called by Foundry before prepareDerivedData. Initializes base data structure
-   * and sets defaults for actor properties. Ensures required objects exist before
-   * derived data calculations begin.
-   *
-   * **Initialization:**
-   * - Ensures system object exists
-   * - Initializes nested objects (initiative, armorTn, wounds, etc.)
-   * - Sets default values for critical properties
-   *
-   * This method mutates `this.system` to establish base structure.
+   * Initialize base actor data structures.
+   * Ensures all required system properties exist and propagates trait values from source.
+   * Called before Active Effects are applied.
    *
    * @returns {void}
    * @override
@@ -222,9 +137,8 @@ export default class L5R4Actor extends Actor {
 
     const sys = this.system ?? {};
 
-    // Reset traits to base values from _source before Active Effects are applied
-    // Foundry's data preparation lifecycle applies Active Effects in ADD mode after prepareBaseData,
-    // so traits must start from their base values to ensure correct effect application
+    // Propagate trait values from source to ensure they're available before Active Effects
+    // This prevents traits from being overwritten by effect application
     if (this._source?.system?.traits) {
       sys.traits = sys.traits ?? {};
       const sourceTr = this._source.system.traits;
@@ -235,7 +149,6 @@ export default class L5R4Actor extends Actor {
       }
     }
 
-    // Initialize core data structures if not present
     sys.initiative = sys.initiative ?? {};
     sys.armorTn = sys.armorTn ?? {};
     sys.wounds = sys.wounds ?? {};
@@ -244,7 +157,6 @@ export default class L5R4Actor extends Actor {
     sys.rings = sys.rings ?? {};
     sys.traits = sys.traits ?? {};
 
-    // Initialize actor type-specific structures
     if (this.type === "npc") {
       sys.manualWoundLevels = sys.manualWoundLevels ?? {};
       sys.armor = sys.armor ?? {};
@@ -252,45 +164,27 @@ export default class L5R4Actor extends Actor {
   }
 
   /**
-   * Get data available to roll formulas.
+   * Assemble roll data for dice formulas.
+   * Combines traits, rings, bonuses, and derived values into flat object.
    *
-   * Returns an object containing actor data that can be referenced in roll formulas
-   * using @ notation (e.g., @sta, @bonus). Used by Foundry's Roll class when
-   * evaluating dice expressions.
-   *
-   * **Available Data:**
-   * - Trait values (sta, wil, ref, awa, agi, int, str, per)
-   * - Bonus values (if defined in actor.system.bonuses)
-   * - Ring values (earth, air, fire, water, void)
-   *
-   * **Example Usage:**
-   * ```javascript
-   * const roll = new Roll("5k3 + @sta", actor.getRollData());
-   * await roll.evaluate();
-   * ```
-   *
-   * @returns {Object} Data object for roll formula evaluation
+   * @returns {object} Roll data with all actor properties available for formulas
    * @override
    */
   getRollData() {
     const data = { ...super.getRollData() };
 
-    // Add traits (sta, wil, ref, etc.)
     if (this.system?.traits) {
       Object.assign(data, this.system.traits);
     }
 
-    // Add effective traits if calculated
     if (this.system?._derived?.traitsEff) {
       Object.assign(data, this.system._derived.traitsEff);
     }
 
-    // Add rings (earth, air, fire, water, void)
     if (this.system?.rings) {
       Object.assign(data, this.system.rings);
     }
 
-    // Add bonuses if defined
     if (this.system?.bonuses) {
       Object.assign(data, this.system.bonuses);
     }
@@ -299,27 +193,14 @@ export default class L5R4Actor extends Actor {
   }
 
   /**
-   * Pre-update hook for tracking experience point expenditures.
+   * Track XP expenditure before actor updates.
+   * Monitors changes to traits, skills, and other advancement to log XP spending.
    *
-   * Called by Foundry before an actor update is applied. Monitors trait and Void Ring
-   * changes to log XP spending for character advancement tracking. Only active for PC
-   * actors; NPCs do not track XP.
-   *
-   * The trackXpExpenditure function (from xp-system.js) inspects the `changed` delta
-   * object for trait/Void updates and appends timestamped log entries to the actor's
-   * `flags.l5r4.xpSpent` array. These logs appear in the XP Manager application.
-   *
-   * **Important:** Skill/advantage/disadvantage XP tracking happens via item create/delete
-   * hooks, not here. This only tracks direct trait/Void changes on the actor document.
-   *
-   * Requires Foundry v13+ for _preUpdate hook signature.
-   *
-   * @param {Object} changed - Update delta object containing changed properties
-   * @param {Object} options - Update options passed by Foundry
-   * @param {User} user - User performing the update
+   * @param {object} changed - Changed actor data
+   * @param {object} options - Update options
+   * @param {User} user - User performing update
    * @returns {Promise<void>}
    * @override
-   * @async
    */
   async _preUpdate(changed, options, user) {
     await super._preUpdate(changed, options, user);
@@ -327,29 +208,11 @@ export default class L5R4Actor extends Actor {
   }
 
   /**
-   * Prepare derived data for the actor.
+   * Calculate derived actor data.
+   * Delegates to type-specific preparation modules for PC/NPC logic.
+   * Called after Active Effects are applied.
    *
-   * Called automatically by Foundry during the data preparation lifecycle after base
-   * data is loaded but before rendering. Calculates all derived stats (initiative,
-   * armor TN, wounds, insight, etc.) based on current actor state. Runs every time
-   * the actor or its items change.
-   *
-   * **Execution Flow:**
-   * 1. PC actors: Calculate combat stats → Calculate XP breakdown
-   * 2. NPC actors: Calculate combat stats → Calculate fear effects
-   *
-   * **Data Mutation:**
-   * This method directly mutates `this.system` (actor.system) to populate derived
-   * values. All derived properties are recalculated on every preparation cycle,
-   * ensuring consistency with base data.
-   *
-   * **Performance:**
-   * Called frequently (on every actor/item update). Calculation modules are optimized
-   * for performance. Avoid expensive operations or external API calls here.
-   *
-   * Requires Foundry v13+ for prepareDerivedData lifecycle.
-   *
-   * @returns {void} Mutates this.system in place
+   * @returns {void}
    * @override
    */
   prepareDerivedData() {
@@ -367,12 +230,10 @@ export default class L5R4Actor extends Actor {
   }
 
   /**
-   * Prepare derived data for Player Character actors.
+   * Prepare PC-specific derived data.
+   * Delegates to pc-preparation module with wound and insight calculation callbacks.
    *
-   * Delegates to preparePcData module for actual calculation. This method remains
-   * as a thin wrapper to maintain the Actor Document API interface.
-   *
-   * @param {Object} sys - Actor system data (actor.system) to mutate
+   * @param {object} sys - Actor system data
    * @returns {void}
    * @private
    */
@@ -386,12 +247,10 @@ export default class L5R4Actor extends Actor {
   }
 
   /**
-   * Prepare derived data for Non-Player Character actors.
+   * Prepare NPC-specific derived data.
+   * Delegates to npc-preparation module with wound calculation callback.
    *
-   * Delegates to prepareNpcData module for actual calculation. This method remains
-   * as a thin wrapper to maintain the Actor Document API interface.
-   *
-   * @param {Object} sys - Actor system data (actor.system) to mutate
+   * @param {object} sys - Actor system data
    * @returns {void}
    * @private
    */
@@ -400,40 +259,20 @@ export default class L5R4Actor extends Actor {
   }
 
   /**
-   * Finalize wound penalties and determine current wound level.
+   * Calculate wound penalties and current wound level.
+   * Determines wound state based on suffered wounds and wound level thresholds.
+   * Applies wound penalty modifiers from effects and conditions.
    *
-   * Integrates wound calculation results from prepareNpcManualWounds or prepareNpcFormulaWounds,
-   * applying wound penalties and determining which wound rank the character is currently in
-   * based on suffered damage. This is the final step in wound system preparation.
-   *
-   * **Process:**
-   * 1. Initialize wounds.max and wounds.value from wound thresholds
-   * 2. Cap suffered damage to Out threshold (can't exceed max damage)
-   * 3. Determine current wound level based on capped damage
-   * 4. Calculate effective wound penalty (base penalty + global modifier)
-   * 5. Store final wound penalty for use in rolls
-   *
-   * **Wound Penalties:**
-   * Each wound rank imposes a TN penalty per L5R4 rules:
-   * - Healthy: +0, Nicked: +3, Grazed: +5, Hurt: +10, Injured: +15, Crippled: +20, Down: +40
-   * The woundsPenaltyMod allows GMs to adjust severity globally (e.g., +5 for gritty campaigns).
-   *
-   * **Side Effects:**
-   * - Calls initializeWoundState() to set wounds.max and wounds.value
-   * - Calls calculateWoundPenalties() to compute penaltyEff for each level
-   * - Calls determineCurrentWoundLevel() or findCurrentWoundLevel() to mark active level
-   * - Sets sys.woundPenalty and sys.wounds.penalty to effective penalty value
-   * - Sets sys.currentWoundLevel for PC actors (legacy support)
-   *
-   * @param {Object} sys - Actor system data with wound configuration
-   * @param {string[]} order - Ordered array of wound level keys (WOUND_LEVEL_ORDER)
-   * @param {string} [woundMode] - "manual" or "formula" (NPC only, optional)
-   * @returns {Object} The current wound level object
+   * @param {object} sys - Actor system data
+   * @param {string[]} order - Ordered wound level keys
+   * @param {string} [woundMode] - Optional wound mode override for NPCs
+   * @returns {object} Current wound level object with penalty value
    * @private
    */
   _finalizeWoundPenalties(sys, order, woundMode) {
     initializeWoundState(sys, sys.suffered);
 
+    // Cap suffered wounds at Out threshold to prevent overflow
     const outMax = toInt(sys.woundLevels?.out?.value) || 0;
     const sCapped = Math.min(toInt(sys.suffered), outMax || toInt(sys.suffered));
 
@@ -441,6 +280,7 @@ export default class L5R4Actor extends Actor {
       ? determineCurrentWoundLevel(sys, order, sCapped, woundMode)
       : findCurrentWoundLevel(sys, order, sCapped);
 
+    // Apply wound penalty modifiers from effects and conditions
     sys.woundsPenaltyMod = toInt(sys.woundsPenaltyMod);
     calculateWoundPenalties(sys);
 
@@ -448,6 +288,7 @@ export default class L5R4Actor extends Actor {
       sys.currentWoundLevel = current;
     }
 
+    // Calculate effective penalty (base penalty + modifiers, minimum 0)
     const curEffPenalty = Math.max(0, toInt(current.penalty) + toInt(sys.woundsPenaltyMod));
     sys.woundPenalty = curEffPenalty;
     sys.wounds.penalty = curEffPenalty;
@@ -456,24 +297,11 @@ export default class L5R4Actor extends Actor {
   }
 
   /**
-   * Calculate Insight Rank from total insight value.
+   * Calculate insight rank from insight points.
+   * Uses L5R4 insight rank progression table.
    *
-   * Wrapper for the calculateInsightRank utility function. Converts total insight
-   * points (Rings × 10 + Skills) into Insight Rank tier per L5R4 advancement rules.
-   *
-   * **Insight Rank Thresholds:**
-   * - Rank 1: 0-149 insight
-   * - Rank 2: 150-174 insight
-   * - Rank 3: 175-199 insight
-   * - Rank 4: 200-224 insight
-   * - Rank 5: 225-249 insight
-   * - Rank 6+: +25 insight per rank
-   *
-   * Insight Rank determines when characters learn new school Techniques and is
-   * used in some game mechanics (e.g., initiative calculation).
-   *
-   * @param {number} insight - Total insight points (Rings × 10 + Skill ranks)
-   * @returns {number} Insight Rank (1-50+)
+   * @param {number} insight - Total insight points
+   * @returns {number} Insight rank (1-10+)
    * @private
    */
   _calculateInsightRank(insight) {
@@ -481,22 +309,9 @@ export default class L5R4Actor extends Actor {
   }
 
   /**
-   * Check if this actor has an active Fear effect.
+   * Check if actor has active fear effect.
    *
-   * Public API method used by sheets and other modules to determine if Fear is
-   * affecting the actor. Fear represents supernatural terror from horrifying enemies
-   * or traumatic situations, imposing penalties on all rolls.
-   *
-   * **L5R4 Fear Rules:**
-   * - Fear has a Rank from 1-10 representing severity
-   * - Characters must resist with Willpower + Honor Rank vs TN (5 + 5 × Fear Rank)
-   * - Failure inflicts -Xk0 penalty to all rolls (X = Fear Rank)
-   * - Catastrophic failure causes fleeing or cowering
-   *
-   * Fear is typically applied to NPC actors (monsters, supernatural threats) but
-   * can be applied to PCs in special circumstances.
-   *
-   * @returns {boolean} True if Fear Rank > 0 and active, false otherwise
+   * @returns {boolean} True if fear is active
    */
   hasFear() {
     return this.system?.fear?.active ?? false;
