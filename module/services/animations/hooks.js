@@ -25,39 +25,10 @@
  * @requires Foundry VTT v13+
  */
 
+import { CONDITION_IDS } from "../../config/condition-ids.js";
+import { STANCE_IDS } from "../stance/core/helpers.js";
 import { playAnimation, removeAnimation, removeAllAnimations } from "./animation-manager.js";
 import { handleAttackRoll } from "./attack-animations.js";
-
-/**
- * Stance IDs that should trigger stance animations.
- *
- * @constant {Set<string>}
- * @private
- */
-const STANCE_IDS = new Set([
-  "fullAttackStance",
-  "defenseStance",
-  "fullDefenseStance",
-  "centerStance"
-]);
-
-/**
- * Condition IDs that should trigger condition animations.
- *
- * @constant {Set<string>}
- * @private
- */
-const CONDITION_IDS = new Set([
-  "concentration",
-  "dazed",
-  "entangled",
-  "fatigued",
-  "feared",
-  "grappled",
-  "guarded",
-  "guarding",
-  "stunned"
-]);
 
 /**
  * Extract status IDs from an ActiveEffect.

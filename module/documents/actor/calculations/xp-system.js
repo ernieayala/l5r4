@@ -1,82 +1,59 @@
 /**
- * Experience Point System
+ * @module xp-system
+ * @description Manages L5R4 experience point (XP) tracking and calculations.
  *
- * Implements Legend of the Five Rings 4th Edition experience point calculations for
- * character advancement. Handles XP tracking, cost calculations, and free bonus
- * management for both character creation and post-creation advancement.
+ * L5R4 XP System:
+ * - Characters earn XP to improve traits, skills, and abilities
+ * - Traits cost increases with rank (4×rank for most traits)
+ * - Void Ring costs 6×rank
+ * - Skills use triangular number formula: rank×(rank+1)/2
+ * - Advantages/Kata/Kiho have fixed costs
+ * - Spells cost their Mastery Level when memorized
  *
- * Key Responsibilities:
- * - **XP Cost Calculation**: Compute XP costs for trait, Void, skill, emphasis,
- *   advantage, disadvantage, kata, kiho, and spell memorization purchases per L5R4 rules
- * - **Insight Rank**: Calculate Insight Rank thresholds for school advancement
- * - **Free Bonuses**: Track and apply character creation bonuses from family/school
- *   that don't cost XP (e.g., family grants +1 trait, school grants +1 trait)
- * - **XP Expenditure Tracking**: Log all XP spending for character sheet history
- * - **Disadvantage Cap**: Enforce 10 XP maximum from disadvantages per game rules
+ * XP Sources:
+ * - Base XP (starting 40 for new characters)
+ * - Disadvantages (capped, typically 10 XP max)
+ * - Manual adjustments (GM awards, session XP)
  *
- * L5R4 Game Rules Implemented:
- * - **Trait Advancement**: Cost = 4 × new rank (e.g., Reflexes 2→3 = 12 XP)
- * - **Void Advancement**: Cost = 6 × new rank (e.g., Void 2→3 = 18 XP)
- * - **Skill Advancement**: Cost = new rank (e.g., Kenjutsu 2→3 = 3 XP). Total cost
- *   from rank 0→N is sum(1 to N) = N × (N + 1) / 2
- * - **Emphasis**: 2 XP each
- * - **Advantages/Kata/Kiho**: Listed cost from item description
- * - **Disadvantages**: Grant XP up to 10 XP maximum (character creation only)
- * - **Insight Rank**: (Sum of all 5 Rings × 10) + (Sum of all Skill Ranks)
- *   - Rank 1: 0-149, Rank 2: 150-174, Rank 3: 175-199, Rank 4: 200-224,
- *     Rank 5: 225-249, then +25 insight per rank thereafter
+ * Architecture:
+ * - Calculates total XP earned and spent
+ * - Tracks XP breakdown by category
+ * - Handles free trait bonuses from character creation
+ * - Applies trait discounts from advantages/disadvantages
+ * - Calculates Insight Rank from Insight total
  *
- * Free Bonus System:
- * During character creation, family selection grants +1 to one trait and school
- * selection grants +1 to another trait. These "creation bonuses" let characters
- * start with traits at rank 3 instead of 2 without spending XP. The system tracks
- * these bonuses to ensure only the first rank-3 purchase is free; subsequent
- * advancement costs full XP.
- *
- * This module uses `xpFreeTraitBase` flags to convert free "effective" bonuses to
- * permanent "base" bonuses when a trait is first advanced to rank 3, preventing
- * double-counting and ensuring proper XP tracking.
- *
- * Foundry VTT Integration:
- * - Reads actor.flags[SYS_ID] for XP tracking data (xpBase, xpManual, xpSpent, etc.)
- * - Uses actor.items collection to sum costs from skills, advantages, disadvantages
- * - Stores computed XP breakdown in sys._xp for sheet display
- * - Uses foundry.utils.setProperty() for deep flag updates during _preUpdate hooks
- * - Leverages game.i18n for localized XP log entries
- * - Requires Foundry v10+ for foundry.utils.randomID()
- *
- * @module documents/actor/calculations/xp-system
- * @see {@link https://foundryvtt.com/api/v13/classes/foundry.abstract.Document.html#flags|Foundry Flags API}
+ * Foundry Integration:
+ * - Reads from actor flags for XP tracking
+ * - Modifies sys._xp with calculated values
+ * - Tracks retroactive free bonus application
  */
 
 import { SYS_ID } from "../../../config/constants.js";
 import { toInt } from "../../../utils/type-coercion.js";
+import { logError } from "../../../utils/error-logging.js";
 import {
   calculateXpStepCostForTrait,
   getCreationFreeBonus
 } from "../../../utils/xp-calculations.js";
 
 /**
- * Calculate total XP cost to advance a trait from oldRank to newRank.
+ * Calculates XP cost to raise a trait from one rank to another.
  *
- * Sums the XP cost for each individual rank step using the L5R4 formula (4 × rank).
- * Accounts for free effective ranks from family/school bonuses and optional discounts.
+ * @param {number} oldRank - Starting trait rank
+ * @param {number} newRank - Target trait rank
+ * @param {number} freeEff - Free bonus points available (from character creation)
+ * @param {number} disc - Discount modifier (from advantages/disadvantages)
+ * @returns {number} Total XP cost
  *
- * If a character has a free effective bonus (freeEff), the cost is reduced. For example,
- * if advancing Stamina from rank 2 to 4 with freeEff=1 and no discount:
- * - Step 2→3: 4 × (3 - 1) = 8 XP (free bonus offsets one rank)
- * - Step 3→4: 4 × (4 - 1) = 12 XP (free bonus still applies)
- * - Total: 20 XP instead of the normal 28 XP (12 + 16)
- *
- * @param {number} oldRank - Current trait rank (typically 2-9)
- * @param {number} newRank - Target trait rank (typically 3-10)
- * @param {number} freeEff - Free effective ranks from creation bonuses (usually 0 or 1)
- * @param {number} disc - XP cost discount modifier (negative = cheaper, positive = more expensive)
- * @returns {number} Total XP cost for all steps from oldRank to newRank (minimum 0)
- * @private
+ * @description
+ * Sums XP cost for each rank increase:
+ * - Standard trait cost: 4×rank (modified by discounts)
+ * - Free bonuses reduce cost at specific ranks
+ * - Discounts apply to each step
  */
 function calculateTraitXpCost(oldRank, newRank, freeEff, disc) {
   let totalXP = 0;
+  // Sum cost for each rank increase
   for (let r = oldRank + 1; r <= newRank; r++) {
     totalXP += calculateXpStepCostForTrait(r, freeEff, disc);
   }
@@ -84,126 +61,120 @@ function calculateTraitXpCost(oldRank, newRank, freeEff, disc) {
 }
 
 /**
- * Calculate total XP cost to advance Void Ring from oldRank to newRank.
+ * Calculates XP cost to raise Void Ring from one rank to another.
  *
- * Implements the L5R4 Void advancement formula: Cost = 6 × new rank.
- * Sums the cost for each rank step and applies optional discounts.
+ * @param {number} oldRank - Starting Void rank
+ * @param {number} newRank - Target Void rank
+ * @param {number} disc - Discount modifier
+ * @returns {number} Total XP cost
  *
- * Void costs more than regular traits because it directly contributes to Insight Rank
- * calculation and grants Void Points (powerful meta-currency for boosting rolls).
- *
- * If advancing Void from 2 to 4 with no discount:
- * - Step 2→3: 6 × 3 = 18 XP
- * - Step 3→4: 6 × 4 = 24 XP
- * - Total: 42 XP
- *
- * @param {number} oldRank - Current Void Ring rank (typically 2-9)
- * @param {number} newRank - Target Void Ring rank (typically 3-10)
- * @param {number} disc - XP cost discount modifier (negative = cheaper, positive = more expensive)
- * @returns {number} Total XP cost for all steps from oldRank to newRank (minimum 0)
- * @private
+ * @description
+ * Void Ring has special cost formula:
+ * - Base cost: 6×rank per step
+ * - More expensive than regular traits (4×rank)
+ * - Discounts can apply from advantages
+ * - Minimum cost per step is 0
  */
 function calculateVoidXpCost(oldRank, newRank, disc) {
   let totalXP = 0;
+  // Sum cost for each Void rank increase
   for (let r = oldRank + 1; r <= newRank; r++) {
-    // Void Ring advancement: 6 XP × new rank per L5R4 rules
-    const step = 6 * r + disc;
+    const step = 6 * r + disc; // Void costs 6×rank
     totalXP += Math.max(0, step);
   }
   return totalXP;
 }
 
 /**
- * Type guard to safely check if an item matches an expected type.
+ * Type guard to check if an item matches expected type.
  *
- * Defensive helper that validates both the item exists and has a string type
- * property matching the expected value. Prevents errors when iterating actor.items
- * with potentially malformed or null entries.
- *
- * @param {Object|null} item - Foundry Item document (or null)
- * @param {string} expectedType - Expected item.type value (e.g., "skill", "advantage")
- * @returns {boolean} True if item exists and item.type === expectedType
- * @private
+ * @param {Item} item - The item to check
+ * @param {string} expectedType - Expected item type
+ * @returns {boolean} True if item matches type
  */
 function isItemOfType(item, expectedType) {
   return item && typeof item.type === "string" && item.type === expectedType;
 }
 
 /**
- * Calculate Insight Rank from total insight value.
+ * Calculates Insight Rank from total Insight points.
  *
- * Implements L5R4 Insight Rank thresholds:
- * - Rank 1: 0-149 insight
- * - Rank 2: 150-174 insight
- * - Rank 3: 175-199 insight
- * - Rank 4: 200-224 insight
- * - Rank 5: 225-249 insight
- * - Rank 6+: +25 insight per rank
+ * @param {number} insight - Total Insight points
+ * @returns {number} Insight Rank (1-10+)
  *
- * Insight Rank determines when characters learn new school Techniques and is a
- * measure of overall character power. Total insight = (sum of 5 Ring ranks × 10)
- * + (sum of all skill ranks).
+ * @description
+ * L5R4 Insight Rank thresholds:
+ * - Rank 1: 0-149 Insight
+ * - Rank 2: 150-174 Insight
+ * - Rank 3: 175-199 Insight
+ * - Rank 4: 200-224 Insight
+ * - Rank 5: 225-249 Insight
+ * - Rank 6+: Every 25 Insight above 225
  *
- * @param {number} insight - Total insight value (Rings × 10 + Skills)
- * @returns {number} Insight Rank (1-50+)
+ * Insight Rank determines:
+ * - School Rank (techniques available)
+ * - Character power level
+ * - Mastery abilities
+ *
+ * @example
+ * calculateInsightRank(180); // Returns 3
+ * calculateInsightRank(250); // Returns 6
  */
 export function calculateInsightRank(insight) {
-  // Insight Rank thresholds per L5R4 rules: Rank 2 = 150, Rank 3 = 175, Rank 4 = 200, Rank 5 = 225
+  // Thresholds for Ranks 2-5
   const t = [150, 175, 200, 225];
   let rank = 1;
+
+  // Check standard thresholds
   for (let i = 0; i < t.length; i++) {
     if (insight >= t[i]) {
       rank = i + 2;
     }
   }
-  // Rank 6+: Each additional 25 insight grants +1 rank
+
+  // Rank 6+: Every 25 Insight above 225
   if (insight >= 225) {
     rank += Math.floor((insight - 225) / 25);
   }
+
   return rank;
 }
 
 /**
- * Calculate and store complete XP breakdown for a PC actor.
+ * Prepares PC experience point tracking and calculations.
  *
- * Computes total XP available, total XP spent, and XP remaining from all sources.
- * Stores the complete breakdown in sys._xp for sheet display. This function is
- * called during actor.prepareDerivedData() to ensure XP totals are always current.
+ * @param {Actor} actor - The PC actor
+ * @param {Object} sys - Actor's system data
  *
- * XP Sources (Total):
- * - Base XP (default 40 for starting characters)
- * - Disadvantages (up to 10 XP cap per game rules)
- * - Manual adjustments (GM-awarded XP from flags.xpManual array)
+ * @description
+ * Calculates complete XP accounting:
  *
- * XP Expenditures (Spent):
- * - Traits: Sum of all trait advancements beyond baseline (2 + free bonuses)
- * - Void Ring: Advancements beyond baseline (2 + free bonuses)
- * - Skills: Triangular sum (rank × (rank + 1) / 2) minus free ranks
- * - Emphases: 2 XP each (total emphases minus free emphases)
- * - Advantages: Sum of all advantage costs
- * - Kata: Sum of all kata costs
- * - Kiho: Sum of all kiho costs
- * - Spells: Mastery level for each memorized spell
+ * XP Earned:
+ * - Base XP (default 40 for new characters)
+ * - Disadvantages (capped, typically 10 XP max)
+ * - Manual adjustments (GM awards, session XP)
  *
- * Free Bonus Handling:
- * The system tracks two types of free bonuses to prevent double-counting:
- * - **freeEff** (effective): Ongoing bonus from family/school, reduces XP cost
- * - **freeBase** (base): Permanent bonus stored in xpFreeTraitBase flag after
- *   first advancement to rank 3, ensures bonus only applies once
+ * XP Spent:
+ * - Traits: 4×rank per step (with discounts/free bonuses)
+ * - Void: 6×rank per step
+ * - Skills: Triangular number formula
+ * - Emphases: 2 XP each
+ * - Advantages/Kata/Kiho: Fixed costs
+ * - Spells: Mastery Level (when memorized)
  *
- * @param {Actor} actor - Foundry Actor document (must be type "pc")
- * @param {Object} sys - Actor's system data object (actor.system)
+ * Stores results in sys._xp with total/spent/available breakdown.
  */
 export function preparePcExperience(actor, sys) {
   const flags = actor.flags?.[SYS_ID] ?? {};
 
-  // Base XP: Default 40 for starting L5R4 characters per game rules
+  // Base XP: Starting character points (default 40)
   const xpBase = Number.isFinite(+flags.xpBase) ? Number(flags.xpBase) : 40;
 
+  // Manual XP: GM awards, session XP, etc.
   const xpManual = Array.isArray(flags.xpManual) ? flags.xpManual : [];
   const manualSum = xpManual.reduce((a, e) => a + toInt(e?.delta), 0);
 
-  // Sum XP granted by disadvantages
+  // Calculate XP from disadvantages
   let disadvGranted = 0;
   for (const it of actor.items) {
     if (!isItemOfType(it, "disadvantage")) {
@@ -212,34 +183,38 @@ export function preparePcExperience(actor, sys) {
     disadvGranted += Math.max(0, toInt(it.system?.cost));
   }
 
-  // Disadvantage cap: Maximum XP from disadvantages (default 10 per L5R4 rules, configurable by GM)
+  // Apply disadvantage cap (default 10 XP max)
   const configuredCap = Number.isFinite(+flags.disadvantageCap)
     ? Number(flags.disadvantageCap)
     : 10;
   const disadvCap = Math.min(configuredCap, disadvGranted);
 
+  // Get trait discounts and free bonuses from flags
   const traitDiscounts = actor.flags?.[SYS_ID]?.traitDiscounts ?? {};
   const freeTraitBase = actor.flags?.[SYS_ID]?.xpFreeTraitBase ?? {};
 
+  // Calculate XP spent on traits
   let traitsXP = 0;
   for (const k of Object.keys(sys.traits ?? {})) {
-    // Read base trait value from _source to exclude Active Effect bonuses
-    // Active Effects (from family, school, etc.) should not count as XP expenditure
     const baseCur = toInt(actor._source?.system?.traits?.[k] ?? sys.traits[k]);
     const freeBase = toInt(freeTraitBase?.[k] ?? 0);
 
+    // Free bonus from character creation (e.g., clan/family bonuses)
     const freeEff = freeBase > 0 ? 0 : toInt(getCreationFreeBonus(actor, k));
     const disc = toInt(traitDiscounts?.[k] ?? 0);
 
+    // Baseline: Starting rank 2 + any free increases
     const baseline = 2 + freeBase;
 
+    // Calculate XP cost for ranks above baseline
     if (baseCur > baseline) {
       traitsXP += calculateTraitXpCost(baseline, baseCur, freeEff, disc);
     }
   }
 
-  // Read base Void Ring value from _source to exclude Active Effect bonuses
-  // Active Effects should not count as XP expenditure
+  // Calculate XP spent on Void Ring (special handling)
+  // Void Ring can be stored in multiple formats due to data model evolution
+  // Try _source first (original data), then prepared data, with multiple fallback paths
   const voidBaseCur = toInt(
     actor._source?.system?.rings?.void?.rank ??
       actor._source?.system?.rings?.void?.value ??
@@ -250,12 +225,14 @@ export function preparePcExperience(actor, sys) {
       0
   );
   const voidFreeBase = toInt(freeTraitBase?.void ?? 0);
-  const voidBaseline = 2 + voidFreeBase;
+  const voidBaseline = 2 + voidFreeBase; // Starting Void rank 2
   const voidDisc = toInt(traitDiscounts?.void ?? 0);
 
+  // Void costs 6×rank (more expensive than regular traits)
   const voidXP =
     voidBaseCur > voidBaseline ? calculateVoidXpCost(voidBaseline, voidBaseCur, voidDisc) : 0;
 
+  // Calculate XP spent on skills and emphases
   let skillsXP = 0;
   for (const it of actor.items) {
     if (!isItemOfType(it, "skill")) {
@@ -263,11 +240,15 @@ export function preparePcExperience(actor, sys) {
     }
     const r = toInt(it.system?.rank);
     const freeRanks = Math.max(0, toInt(it.system?.freeRanks ?? 0));
+
+    // Skill cost: Triangular number formula
+    // Rank 1=1 XP, Rank 2=3 XP, Rank 3=6 XP, Rank 4=10 XP, etc.
+    // Formula: rank×(rank+1)/2
     if (r > freeRanks) {
-      // Skill cost: Sum from 1 to N = N × (N + 1) / 2 (triangular sum)
-      // Subtract free ranks using same formula
       skillsXP += (r * (r + 1)) / 2 - (freeRanks * (freeRanks + 1)) / 2;
     }
+
+    // Emphasis cost: 2 XP each (after free emphases)
     const trainedEmphases = Array.isArray(it.system?.trainedEmphases)
       ? it.system.trainedEmphases
       : [];
@@ -275,33 +256,39 @@ export function preparePcExperience(actor, sys) {
       const freeEmphasis = Math.max(0, toInt(it.system?.freeEmphasis ?? 0));
       const paidEmphases = Math.max(0, trainedEmphases.length - freeEmphasis);
 
-      // Emphasis cost: 2 XP each per L5R4 rules
       skillsXP += 2 * paidEmphases;
     }
   }
 
+  // Calculate XP spent on advantages, kata, kiho, and spells
   let advantagesXP = 0;
   let kataXP = 0;
   let kihoXP = 0;
   let spellsXP = 0;
   for (const it of actor.items) {
     if (isItemOfType(it, "advantage")) {
+      // Advantages have fixed XP costs
       advantagesXP += toInt(it.system?.cost);
     } else if (isItemOfType(it, "kata")) {
+      // Kata (martial techniques) have fixed costs
       kataXP += toInt(it.system?.cost);
     } else if (isItemOfType(it, "kiho")) {
+      // Kiho (mystical abilities) have fixed costs
       kihoXP += toInt(it.system?.cost);
     } else if (isItemOfType(it, "spell")) {
+      // Spells cost their Mastery Level when memorized
       if (it.system?.memorized === true) {
         spellsXP += toInt(it.system?.mastery);
       }
     }
   }
 
+  // Calculate totals
   const total = xpBase + disadvCap + manualSum;
   const spent = traitsXP + voidXP + skillsXP + advantagesXP + kataXP + kihoXP + spellsXP;
   const available = total - spent;
 
+  // Store XP tracking data for UI display
   sys._xp = {
     total,
     spent,
@@ -322,18 +309,24 @@ export function preparePcExperience(actor, sys) {
 }
 
 /**
- * Track XP expenditures when traits or Void Ring increase.
+ * Tracks XP expenditure and applies free bonuses during actor updates.
  *
- * DEPRECATED: Real-time XP tracking has been replaced with retroactive calculation.
- * This function now only handles free bonus consumption (converting effective bonuses
- * to permanent base bonuses when traits reach rank 3).
+ * @param {Actor} actor - The PC actor being updated
+ * @param {Object} changed - Object containing changed properties
  *
- * XP expenditure tracking is now handled by buildXpHistory() in xp-calculator.js,
- * which reconstructs the complete XP history from the character's current state.
- * This ensures XP costs always match actual character progression without desync issues.
+ * @description
+ * Monitors trait increases to apply free bonuses:
+ * - When a trait reaches rank 3 for the first time
+ * - If character has unused free bonus from creation
+ * - Automatically applies free bonus to save XP
  *
- * @param {Actor} actor - Foundry Actor document being updated
- * @param {Object} changed - Update delta object passed to _preUpdate hook
+ * Free Bonus System:
+ * - Characters get free +1 to certain traits at creation
+ * - If not used during creation, can apply when raising to rank 3
+ * - Tracked in xpFreeTraitBase flag
+ * - Retroactive version flag prevents double-application
+ *
+ * Only runs for PC actors during updates.
  */
 export function trackXpExpenditure(actor, changed) {
   try {
@@ -344,9 +337,7 @@ export function trackXpExpenditure(actor, changed) {
     const oldSys = actor._source?.system ?? actor.system;
     const freeTraitBase = actor.flags?.[SYS_ID]?.xpFreeTraitBase ?? {};
 
-    // Handle free bonus consumption: When advancing to rank 3 with an effective bonus
-    // (e.g., family/school grant), convert the effective bonus to a permanent base
-    // bonus so it only applies once.
+    // Check for trait increases
     if (changed?.system?.traits) {
       for (const [k, v] of Object.entries(changed.system.traits)) {
         const newBase = toInt(v);
@@ -358,25 +349,26 @@ export function trackXpExpenditure(actor, changed) {
         const freeBase = toInt(freeTraitBase?.[k] ?? 0);
         const freeEff = freeBase > 0 ? 0 : toInt(getCreationFreeBonus(actor, k));
 
-        // Check if advancing to rank 3 with an effective bonus
+        // Apply free bonus when reaching rank 3 (if available)
         for (let r = oldBase + 1; r <= newBase; r++) {
           if (freeBase === 0 && freeEff > 0 && r === 3) {
+            // Mark free bonus as used
             foundry.utils.setProperty(
               changed,
               `flags.${SYS_ID}.xpFreeTraitBase.${k}`,
               (freeTraitBase?.[k] ?? 0) + 1
             );
-            break; // Only consume once
+            break;
           }
         }
       }
     }
 
-    // Invalidate XP cache to trigger recalculation
+    // Reset retroactive version to recalculate XP
     if (changed?.system?.traits || changed?.system?.rings?.void) {
       foundry.utils.setProperty(changed, `flags.${SYS_ID}.xpRetroactiveVersion`, 0);
     }
   } catch (err) {
-    console.warn(`${SYS_ID}`, "Free bonus tracking failed", { err });
+    logError("Free bonus tracking failed", err);
   }
 }

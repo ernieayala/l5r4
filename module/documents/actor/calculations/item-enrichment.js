@@ -1,201 +1,237 @@
 /**
- * Item Enrichment Module
+ * @module item-enrichment
+ * @description Enriches actor-owned items with calculated roll formulas and derived values.
  *
- * Calculates and enriches actor items with roll formulas during prepareDerivedData.
- * All calculations follow L5R4 game rules and are stored on item.system for sheet display.
+ * Enrichment Process:
+ * - Adds roll/keep formulas to items for quick access in UI
+ * - Calculates values based on actor traits, skills, and bonuses
+ * - Applies L5R4 game mechanics (affinity, deficiency, stance bonuses)
+ * - Runs during actor data preparation
  *
- * This module runs in the Documents layer (Actor.prepareDerivedData), ensuring all
- * formula calculations happen in the correct architectural layer
+ * Architecture:
+ * - Modifies item objects in place (non-destructive)
+ * - Each item type has specialized enrichment logic
+ * - Formulas stored as strings (e.g., "7k4") for display
  *
- * @module documents/actor/calculations/item-enrichment
+ * Foundry Integration:
+ * - Called during actor.prepareData()
+ * - Accesses actor.items collection
+ * - Modifies item.system properties for template rendering
  */
 
 import { toInt } from "../../../utils/type-coercion.js";
+import { logError } from "../../../utils/error-logging.js";
 import { getEffectiveTrait, resolveWeaponSkillTrait } from "../../../utils/mechanics.js";
 
 /**
- * Enrich all actor items with calculated roll formulas.
+ * Enriches all actor-owned items with calculated formulas and derived values.
  *
- * Iterates through actor's embedded items and calculates roll formulas based on
- * item type. Formulas are stored on item.system for direct access by sheets.
+ * @param {Actor} actor - The actor whose items to enrich
  *
- * **Item Types Enriched:**
- * - Skills: rollDice, rollKeep, rollFormula
- * - Spells: castRoll, castKeep, castFormula, castTN
- * - Weapons: attackFormula, attackFormulaWithStance, damageFormula, damageFormulaWithStance
- * - Bows: Same as weapons
+ * @description
+ * Main entry point for item enrichment during actor data preparation.
+ * Iterates through actor's items and applies type-specific enrichment:
+ * - Skills: Roll/keep formulas with trait + rank + bonuses
+ * - Spells: Casting formulas with ring + school rank, TN calculation
+ * - Weapons/Bows: Attack and damage formulas with stance modifiers
  *
- * **Architecture Note:**
- * This function is called from Actor.prepareDerivedData() (Documents layer).
- * Sheets MUST NOT recalculate these formulas - they only read and display them.
+ * Enrichment adds calculated properties to items without modifying
+ * the underlying item documents. Changes are ephemeral and recalculated
+ * each time actor data is prepared.
  *
- * @param {L5R4Actor} actor - The actor whose items to enrich
- * @returns {void} Mutates actor.items in place
+ * @example
+ * // Called during actor data preparation
+ * enrichActorItems(actor);
+ * // actor.items now have .rollFormula, .attackFormula, etc.
  */
 export function enrichActorItems(actor) {
   if (!actor?.items) {
     return;
   }
 
-  for (const item of actor.items) {
-    if (!item?.type) {
-      continue;
-    }
+  try {
+    // Process each item based on its type
+    for (const item of actor.items) {
+      if (!item?.type) {
+        continue;
+      }
 
-    switch (item.type) {
-      case "skill":
-        enrichSkillFormulas(actor, item);
-        break;
-      case "spell":
-        enrichSpellFormulas(actor, item);
-        break;
-      case "weapon":
-      case "bow":
-        enrichWeaponFormulas(actor, item);
-        break;
-      default:
-        // Other item types don't need formula enrichment
-        break;
+      switch (item.type) {
+        case "skill":
+          enrichSkillFormulas(actor, item);
+          break;
+        case "spell":
+          enrichSpellFormulas(actor, item);
+          break;
+        case "weapon":
+        case "bow":
+          enrichWeaponFormulas(actor, item);
+          break;
+        default:
+          break;
+      }
     }
+  } catch (err) {
+    logError("Failed to enrich actor items", err, {
+      actorId: actor?.id,
+      actorName: actor?.name
+    });
+    // Items remain unenriched - formulas won't display but won't break functionality
   }
 }
 
 /**
- * Enrich skill with roll formulas.
+ * Enriches skill items with roll formulas based on L5R4 skill mechanics.
  *
- * Calculates L5R4 skill check formulas: (Skill Rank + Trait Value)k(Trait Value)
- *
- * **Calculation Process:**
- * 1. Get effective trait value (includes wound penalties via getEffectiveTrait())
- * 2. Get skill rank from skill.system.rank
- * 3. Apply bonuses from actor.system.bonuses.skill and bonuses.trait
- * 4. Calculate rollDice = trait + rank + roll bonuses
- * 5. Calculate rollKeep = trait + keep bonuses
- * 6. Prevent negative values with Math.max(0, ...)
- *
- * **Bonuses Structure:**
- * - `actor.system.bonuses.skill[skillName.toLowerCase()].roll` - Extra rolled dice
- * - `actor.system.bonuses.skill[skillName.toLowerCase()].keep` - Extra kept dice
- * - `actor.system.bonuses.trait[traitKey].roll` - Extra rolled dice from trait bonuses
- * - `actor.system.bonuses.trait[traitKey].keep` - Extra kept dice from trait bonuses
- *
- * @param {L5R4Actor} actor - The actor owning the skill
+ * @param {Actor} actor - The actor who owns the skill
  * @param {Item} skill - The skill item to enrich
- * @returns {void} Mutates skill.system in place
- * @private
+ *
+ * @description
+ * Calculates skill roll formula using L5R4 rules:
+ * - Roll dice: Trait + Rank + bonuses (from advantages, techniques, etc.)
+ * - Keep dice: Trait + keep bonuses
+ * - Minimum 0 for both values
+ *
+ * Bonuses can come from:
+ * - Skill-specific bonuses (e.g., "kenjutsu" bonus)
+ * - Trait-specific bonuses (e.g., "agility" bonus)
+ * - Both roll and keep bonuses are cumulative
+ *
+ * Modifies skill.system with:
+ * - rollDice: Number of dice to roll
+ * - rollKeep: Number of dice to keep
+ * - rollFormula: String formula (e.g., "7k4")
  */
 function enrichSkillFormulas(actor, skill) {
   const traitKey = String(skill.system?.trait ?? "").toLowerCase();
-  const traitEff = getEffectiveTrait(actor, traitKey); // Includes wound penalties
+  const traitEff = getEffectiveTrait(actor, traitKey);
   const rank = toInt(skill.system?.rank);
 
-  // Extract bonuses from actor.system.bonuses (can come from advantages, techniques, etc.)
+  // Gather bonuses from actor's bonus structure
   const bb = actor.system?.bonuses;
   const kSkill = String(skill.name).toLowerCase?.();
   const bSkill = (bb?.skill && bb.skill[kSkill]) || {};
   const bTrait = (bb?.trait && bb.trait[traitKey]) || {};
-  const rollBonus = toInt(bSkill.roll) + toInt(bTrait.roll); // Extra rolled dice
-  const keepBonus = toInt(bSkill.keep) + toInt(bTrait.keep); // Extra kept dice
 
-  // L5R4 Skill Roll: (Skill + Trait)k(Trait), with bonuses applied
+  // Combine skill-specific and trait-specific bonuses
+  const rollBonus = toInt(bSkill.roll) + toInt(bTrait.roll);
+  const keepBonus = toInt(bSkill.keep) + toInt(bTrait.keep);
+
+  // Calculate final roll/keep values (minimum 0)
   skill.system.rollDice = Math.max(0, traitEff + rank + rollBonus);
   skill.system.rollKeep = Math.max(0, traitEff + keepBonus);
   skill.system.rollFormula = `${skill.system.rollDice}k${skill.system.rollKeep}`;
 }
 
 /**
- * Enrich spell with casting formulas.
+ * Enriches spell items with casting formulas based on L5R4 magic rules.
  *
- * Calculates L5R4 spell casting formulas: (Ring + School Rank ± Affinity/Deficiency)k(Ring)
- * **TN**: 5 + (Mastery Level × 5)
- *
- * **Calculation Process:**
- * 1. Get Ring value from actor.system.rings[spell.system.ring]
- * 2. Get School Rank from actor.system.insight.rank
- * 3. Detect affinity/deficiency from actor's shugenja school
- * 4. Apply school rank modifier: +1 for affinity, -1 for deficiency
- * 5. Calculate rollDice = Ring + (School Rank ± modifier)
- * 6. Calculate rollKeep = Ring
- * 7. Calculate TN = 5 + (Mastery Level × 5)
- *
- * **Affinity/Deficiency Detection:**
- * - Searches for shugenja school technique in actor's items
- * - Compares spell's ring against school's affinity/deficiency
- * - Automatically applies +1 or -1 School Rank modifier to displayed formula
- *
- * @param {L5R4Actor} actor - The actor owning the spell
+ * @param {Actor} actor - The actor who owns the spell
  * @param {Item} spell - The spell item to enrich
- * @returns {void} Mutates spell.system in place
- * @private
+ *
+ * @description
+ * Calculates spell casting formula using L5R4 shugenja rules:
+ * - Roll dice: Ring + School Rank (modified by affinity/deficiency)
+ * - Keep dice: Ring value only
+ * - Cast TN: 5 + (Mastery Level × 5)
+ *
+ * Affinity/Deficiency System:
+ * - Affinity: +1 School Rank when casting spells of that element
+ * - Deficiency: -1 School Rank when casting spells of that element
+ * - Determined by shugenja school technique
+ *
+ * Modifies spell.system with:
+ * - castRoll: Number of dice to roll for casting
+ * - castKeep: Number of dice to keep (always Ring value)
+ * - castFormula: String formula (e.g., "6k3")
+ * - castTN: Target Number to successfully cast
+ *
+ * @example
+ * // Fire shugenja (Affinity: Fire, Deficiency: Water) casting Fire spell
+ * // Ring 3, School Rank 2, Mastery 3
+ * // Roll: 3 + (2+1) = 6, Keep: 3, TN: 5 + 3*5 = 20
+ * // Formula: "6k3", TN: 20
  */
 function enrichSpellFormulas(actor, spell) {
-  // Find shugenja school for affinity/deficiency detection
+  // Find shugenja school for affinity/deficiency
   const school = actor.items.find(i => i.type === "technique" && i.system?.shugenja);
   const schoolAffinity = school ? String(school.system?.affinity ?? "").toLowerCase() : "";
   const schoolDeficiency = school ? String(school.system?.deficiency ?? "").toLowerCase() : "";
 
+  // Get spell's element and actor's ring value
   const ringKey = String(spell.system?.ring ?? "earth").toLowerCase();
   const ringValue = toInt(actor.system?.rings?.[ringKey]) || 2;
   const baseSchoolRank = toInt(actor.system?.insight?.rank) || 1;
   const masteryLevel = toInt(spell.system?.mastery) || 1;
 
-  // Apply affinity/deficiency to school rank
+  // Apply affinity/deficiency modifier to school rank
+  // Shugenja schools have elemental affinity (bonus) and deficiency (penalty)
+  // Example: Isawa (Phoenix) has Fire affinity, Water deficiency
   let schoolRankMod = 0;
   if (schoolAffinity === ringKey) {
-    schoolRankMod = 1; // Affinity: +1 School Rank
+    schoolRankMod = 1; // Affinity: +1 effective school rank (easier to cast)
   } else if (schoolDeficiency === ringKey) {
-    schoolRankMod = -1; // Deficiency: -1 School Rank
+    schoolRankMod = -1; // Deficiency: -1 effective school rank (harder to cast)
   }
   const effectiveSchoolRank = baseSchoolRank + schoolRankMod;
 
-  // L5R4 Spell Casting: (Ring + School Rank)k(Ring)
-  // Affinity/Deficiency now applied to displayed formula
+  // Calculate casting formula: Ring + School Rank to roll, Ring to keep
   spell.system.castRoll = Math.max(0, ringValue + effectiveSchoolRank);
   spell.system.castKeep = Math.max(0, ringValue);
   spell.system.castFormula = `${spell.system.castRoll}k${spell.system.castKeep}`;
 
-  // Calculate Target Number: 5 + (Mastery Level × 5)
+  // Calculate casting TN: Base 5 + (Mastery × 5)
+  // Mastery 1 = TN 10, Mastery 3 = TN 20, Mastery 5 = TN 30
   spell.system.castTN = 5 + masteryLevel * 5;
 }
 
 /**
- * Enrich weapon with attack and damage formulas.
+ * Enriches weapon/bow items with attack and damage formulas.
  *
- * Calculates attack and damage roll formulas for weapons and bows:
- * - **attackFormula**: Base attack roll (Skill + Trait)k(Trait)
- * - **attackFormulaWithStance**: Attack roll including Full Attack stance bonus
- * - **damageFormula**: Weapon base damage XkY from weapon.system
- * - **damageFormulaWithStance**: Currently same as damageFormula (reserved for future stance effects)
+ * @param {Actor} actor - The actor who owns the weapon
+ * @param {Item} weapon - The weapon or bow item to enrich
  *
- * **L5R4 Full Attack Stance:**
- * Characters in Full Attack stance gain +2k1 to attack rolls per core rules.
- * This is detected via `actor.system._stanceEffects.fullAttack` flag set by
- * the stance management system.
+ * @description
+ * Calculates weapon formulas using L5R4 combat rules:
+ * - Attack formula: Based on weapon skill + trait (from resolveWeaponSkillTrait)
+ * - Damage formula: From weapon's damage rating
+ * - Stance modifiers: Full Attack stance adds +2k1 to attack rolls
  *
- * @param {L5R4Actor} actor - The actor owning the weapon
- * @param {Item} weapon - The weapon item to enrich
- * @returns {void} Mutates weapon properties in place (not weapon.system)
- * @private
+ * Full Attack Stance Bonus:
+ * - Roll: +2 dice (more aggressive attack)
+ * - Keep: +1 die (better accuracy)
+ * - Applied only when actor is in Full Attack stance
+ *
+ * Modifies weapon with:
+ * - attackFormula: Base attack roll formula
+ * - attackFormulaWithStance: Attack formula with stance bonus applied
+ * - damageFormula: Damage roll formula (same with/without stance)
+ * - damageFormulaWithStance: Damage formula (no stance effect on damage)
+ *
+ * @example
+ * // Weapon skill 5k3, Full Attack stance
+ * // attackFormula: "5k3"
+ * // attackFormulaWithStance: "7k4" (+2k1 from Full Attack)
  */
 function enrichWeaponFormulas(actor, weapon) {
-  // Resolve skill and trait for attack roll (Skill + Trait)k(Trait)
+  // Get weapon skill roll/keep values (includes trait, skill rank, bonuses)
   const weaponSkill = resolveWeaponSkillTrait(actor, weapon);
   weapon.attackFormula = `${weaponSkill.rollBonus}k${weaponSkill.keepBonus}`;
 
-  // Apply Full Attack stance bonus: +2k1 to attack rolls (Fire Ring stance)
+  // Apply Full Attack stance bonus: +2k1 to attack rolls
   if (actor.system._stanceEffects?.fullAttack) {
-    const stanceRollBonus = weaponSkill.rollBonus + 2; // +2 rolled dice
-    const stanceKeepBonus = weaponSkill.keepBonus + 1; // +1 kept die
+    const stanceRollBonus = weaponSkill.rollBonus + 2;
+    const stanceKeepBonus = weaponSkill.keepBonus + 1;
     weapon.attackFormulaWithStance = `${stanceRollBonus}k${stanceKeepBonus}`;
   } else {
     weapon.attackFormulaWithStance = weapon.attackFormula;
   }
 
-  // Use derivedDamageRoll/derivedDamageKeep which include actor Strength
-  // These are calculated in item.prepareDerivedData() via calculateMeleeDamage()
-  // Fallback to base damage if derived values not yet calculated
+  // Get damage values (prefer derived values if available)
   const damageRoll = toInt(weapon.system?.derivedDamageRoll ?? weapon.system?.damageRoll) || 0;
   const damageKeep = toInt(weapon.system?.derivedDamageKeep ?? weapon.system?.damageKeep) || 0;
   weapon.damageFormula = `${damageRoll}k${damageKeep}`;
+
+  // Damage is not affected by stance
   weapon.damageFormulaWithStance = weapon.damageFormula;
 }

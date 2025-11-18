@@ -1,33 +1,31 @@
 /**
- * Wound System Calculations
+ * @module wound-system
+ * @description Manages L5R4 wound tracking and wound level calculations.
  *
- * Implements the Legend of the Five Rings 4th Edition wound tracking system,
- * calculating wound thresholds, penalties, and current wound state for characters.
- * Supports both formula-based (Earth Ring multipliers) and manual wound configurations.
+ * L5R4 Wound System:
+ * - Characters track cumulative wounds (damage taken)
+ * - Wound levels define thresholds and penalties
+ * - Standard levels: Healthy, Nicked, Grazed, Hurt, Injured, Crippled, Down, Out
+ * - Each level has a threshold (wounds needed) and penalty (TN increase)
+ * - "Out" level = character is incapacitated/dead
  *
- * Key Responsibilities:
- * - **Wound Threshold Calculation**: Compute damage thresholds per L5R4 wound ranks
- * - **Wound Penalty Application**: Apply TN penalties based on current wound level
- * - **Wound State Management**: Track current wound level and remaining hit points
- * - **Lethality Scaling**: Support variable Earth multipliers (×2/×3/×4/×5)
- * - **Manual Configuration**: Allow GMs to override wound thresholds and penalties
+ * Two Calculation Modes:
+ * - Formula Mode: Thresholds calculated from Earth Ring (standard L5R4)
+ * - Manual Mode: Thresholds set manually (for custom NPCs)
  *
- * L5R4 Wound Mechanics:
- * - Eight wound ranks: Healthy, Nicked, Grazed, Hurt, Injured, Crippled, Down, Out
- * - Healthy rank capacity = Earth × 5 (buffer for normal activity)
- * - Other ranks capacity = Earth × multiplier (default ×2 for standard lethality)
- * - Each rank imposes increasing TN penalties (+3 to +40) when filled
- * - Out rank = unconscious/dying; filling Out rank = instant death
+ * Architecture:
+ * - Supports variable wound level counts (1-8 levels)
+ * - Calculates effective penalties with modifiers
+ * - Tracks current wound level based on suffered wounds
+ * - Handles NPC wound scaling for balance
  *
- * Foundry VTT Integration:
- * - Pure calculation module, no direct Foundry API dependencies
- * - Operates on actor.system data structure (DataModel pattern)
- * - Called during Actor.prepareDerivedData() lifecycle
- *
- * @module documents/actor/calculations/wound-system
+ * Foundry Integration:
+ * - Called during actor data preparation
+ * - Modifies sys.woundLevels, sys.wounds, sys.visibleWoundLevels
  */
 
 import { toInt, clamp } from "../../../utils/type-coercion.js";
+import { logError } from "../../../utils/error-logging.js";
 import {
   WOUND_LEVEL_ORDER,
   DEFAULT_WOUND_PENALTIES,
@@ -35,28 +33,36 @@ import {
 } from "../constants/wound-constants.js";
 
 /**
- * Get the active wound level keys for a given count.
+ * Returns the active wound level keys for a given wound level count.
  *
- * Determines which wound ranks are active based on the number of wound levels
- * configured for the campaign. Supports simplified wound tracking for faster
- * or less lethal games (1-3 levels) or full standard tracking (8 levels).
+ * @param {number} nrWoundLvls - Number of wound levels (1-8)
+ * @returns {string[]} Array of wound level keys to use
  *
- * L5R4 Rules Context:
- * GMs can reduce wound levels for simpler tracking or adjust lethality.
- * Standard game uses all 8 levels. Simplified variants use 1-3 levels.
+ * @description
+ * Determines which wound levels are active based on count:
+ * - 1 level: ["healthy", "out"] (minimal tracking)
+ * - 2 levels: ["healthy", "nicked", "out"] (simple)
+ * - 3+ levels: First N levels from WOUND_LEVEL_ORDER
  *
- * @param {number} nrWoundLvls - Number of wound levels (1-8, clamped internally)
- * @returns {string[]} Array of active wound level keys in order, always ending with "out"
+ * Always ensures "out" is the final level (incapacitation).
+ *
+ * @example
+ * getWoundLevelsForCount(3);
+ * // Returns: ["healthy", "nicked", "grazed"]
+ * // But "grazed" becomes "out" to ensure proper end state
  */
 export function getWoundLevelsForCount(nrWoundLvls) {
   const count = clamp(nrWoundLvls ?? 3, 1, 8);
 
+  // Minimal tracking: just healthy and out
   if (count === 1) {
     return ["healthy", "out"];
   } else if (count === 2) {
     return ["healthy", "nicked", "out"];
   } else {
+    // Use first N levels from standard order
     const levels = WOUND_LEVEL_ORDER.slice(0, count);
+    // Ensure last level is always "out"
     if (!levels.includes("out")) {
       levels[levels.length - 1] = "out";
     }
@@ -65,53 +71,48 @@ export function getWoundLevelsForCount(nrWoundLvls) {
 }
 
 /**
- * Calculate effective wound penalties for all wound levels.
+ * Calculates effective wound penalties with modifiers applied.
  *
- * Applies the global wound penalty modifier to each wound level's base penalty
- * and stores the effective penalty value (minimum 0). This allows GMs to adjust
- * wound severity globally (e.g., "gritty" campaigns with +5 to all penalties,
- * or "heroic" campaigns with -3 to reduce penalties).
+ * @param {Object} sys - Actor's system data
  *
- * **Side Effects:** Mutates sys.woundLevels[*].penaltyEff for each level.
+ * @description
+ * Applies wound penalty modifier to all wound levels:
+ * - Base penalty from wound level (e.g., Hurt = -10)
+ * - Plus woundsPenaltyMod (from advantages/disadvantages)
+ * - Minimum effective penalty is 0
  *
- * L5R4 Rules Context:
- * Base wound penalties are: Nicked +3, Grazed +5, Hurt +10, Injured +15,
- * Crippled +20, Down +40. These increase the TN of all rolls made.
+ * Modifies each level's penaltyEff property.
  *
- * @param {Object} sys - Actor system data containing wound configuration
- * @param {Object} sys.woundLevels - Map of wound level keys to level data
- * @param {number} sys.woundsPenaltyMod - Global modifier to all wound penalties
- * @returns {void}
+ * @example
+ * // Hurt level: base penalty -10, modifier +5
+ * // Effective penalty: max(0, -10 + 5) = 0 (no penalty)
  */
 export function calculateWoundPenalties(sys) {
   const penaltyMod = toInt(sys.woundsPenaltyMod);
+
+  // Apply modifier to each wound level's penalty
   for (const [, lvl] of Object.entries(sys.woundLevels ?? {})) {
     const eff = toInt(lvl.penalty) + penaltyMod;
-    lvl.penaltyEff = Math.max(0, eff);
+    lvl.penaltyEff = Math.max(0, eff); // Never negative
   }
 }
 
 /**
- * Initialize wound state from wound levels and suffered damage.
+ * Initializes wound state tracking (current/max wounds).
  *
- * Sets up the wounds.max (maximum hit points) and wounds.value (current hit points)
- * based on the "Out" wound threshold. In manual mode, allows GM override of max wounds.
- * Current hit points = max - suffered damage (minimum 0).
+ * @param {Object} sys - Actor's system data
+ * @param {number} suffered - Total wounds suffered
  *
- * **Side Effects:** Mutates sys.wounds.max and sys.wounds.value.
+ * @description
+ * Sets up wound tracking:
+ * - max: Maximum wounds before "Out" (incapacitation)
+ * - value: Remaining wounds (max - suffered)
  *
- * L5R4 Rules Context:
- * When the Out rank is filled, the character is unconscious/dying.
- * The Out threshold represents total damage capacity before death.
+ * Max Wounds Determination:
+ * - Manual mode with user-set max: Use user value
+ * - Otherwise: Use "Out" level threshold
  *
- * @param {Object} sys - Actor system data
- * @param {string} sys.woundMode - "manual" or "formula" mode
- * @param {Object} sys.wounds - Wound tracking state
- * @param {number} sys.wounds.max - User-defined max wounds (manual mode only)
- * @param {Object} sys.woundLevels - Computed wound level thresholds
- * @param {number} sys.woundLevels.out.value - Out rank threshold (total HP)
- * @param {number} suffered - Total damage suffered by the character
- * @returns {void}
+ * Modifies sys.wounds with current state.
  */
 export function initializeWoundState(sys, suffered) {
   sys.wounds = sys.wounds || {};
@@ -120,38 +121,41 @@ export function initializeWoundState(sys, suffered) {
   const isManualMode = sys.woundMode === "manual";
   const userMaxWounds = toInt(sys.wounds.max);
 
+  // Determine maximum wounds
   if (isManualMode && userMaxWounds > 0) {
-    sys.wounds.max = userMaxWounds;
+    sys.wounds.max = userMaxWounds; // User-defined max
   } else {
-    sys.wounds.max = outMax;
+    sys.wounds.max = outMax; // "Out" threshold
   }
 
+  // Calculate remaining wounds
   sys.wounds.value = Math.max(0, sys.wounds.max - toInt(suffered));
 }
 
 /**
- * Find and mark the current wound level based on suffered damage.
+ * Finds the current wound level based on suffered wounds.
  *
- * Iterates through wound levels to determine which rank the character is currently
- * in based on suffered damage. Marks the matching level as current and returns it.
- * Damage is compared against cumulative thresholds (if suffered ≤ threshold).
+ * @param {Object} sys - Actor's system data
+ * @param {string[]} levelsToCheck - Ordered array of wound level keys
+ * @param {number} sCapped - Suffered wounds (capped to max)
+ * @returns {Object} The current wound level object
  *
- * **Side Effects:** Sets lvl.current = true for the active level, false for others.
+ * @description
+ * Determines which wound level the character is at:
+ * - Iterates through levels in order
+ * - Finds level where: lastThreshold < suffered <= currentThreshold
+ * - Marks that level as current
+ * - Returns the current level object
  *
- * L5R4 Rules Context:
- * Characters are "in" a wound rank when their suffered damage fills that rank
- * but hasn't yet filled the next rank. Being in a rank applies its TN penalty.
- *
- * @param {Object} sys - Actor system data
- * @param {Object} sys.woundLevels - Map of wound level keys to level data
- * @param {string[]} levelsToCheck - Ordered array of wound level keys to check
- * @param {number} sCapped - Suffered damage (capped to Out threshold)
- * @returns {Object} The current wound level object with .penalty, .value, .current properties
+ * @example
+ * // Suffered 15 wounds, thresholds: Healthy=10, Nicked=20
+ * // Current level: Nicked (15 is between 10 and 20)
  */
 export function findCurrentWoundLevel(sys, levelsToCheck, sCapped) {
   let current = sys.woundLevels.healthy;
   let lastVal = -1;
 
+  // Check each wound level threshold
   for (const key of levelsToCheck) {
     const lvl = sys.woundLevels[key];
     if (!lvl) {
@@ -159,6 +163,7 @@ export function findCurrentWoundLevel(sys, levelsToCheck, sCapped) {
     }
 
     const upper = toInt(lvl.value);
+    // Check if suffered wounds fall in this level's range
     const within = sCapped <= upper && sCapped > lastVal;
     lvl.current = within;
     if (within) {
@@ -171,183 +176,190 @@ export function findCurrentWoundLevel(sys, levelsToCheck, sCapped) {
 }
 
 /**
- * Prepare wound levels in manual configuration mode.
+ * Prepares NPC wound levels using manual mode (custom thresholds).
  *
- * In manual mode, the GM explicitly sets wound thresholds and penalties for each level.
- * This function initializes missing manual configurations with defaults, applies them
- * to woundLevels, and enforces monotonic ordering (each threshold > previous).
+ * @param {Object} sys - Actor's system data
+ * @param {string[]} order - Ordered array of wound level keys
  *
- * **Side Effects:**
- * - Populates sys.manualWoundLevels with defaults if missing
- * - Copies manual configuration to sys.woundLevels
- * - Enforces threshold ordering (see inline comments below)
+ * @description
+ * Manual mode allows custom wound thresholds for NPCs:
+ * - Initializes manualWoundLevels with defaults if not present
+ * - Copies manual values to active woundLevels
+ * - Ensures thresholds are strictly increasing
+ * - Marks levels as active/visible based on manual settings
  *
- * L5R4 Rules Context:
- * Manual mode allows GMs to customize wound thresholds for special NPCs
- * (e.g., bosses with unusual damage resistance, minions with low HP).
+ * Default active levels: healthy, nicked, out (minimal tracking).
  *
- * @param {Object} sys - Actor system data
- * @param {Object} sys.manualWoundLevels - GM-configured wound level overrides
- * @param {Object} sys.woundLevels - Output wound level data
- * @param {string[]} order - Ordered array of wound level keys (WOUND_LEVEL_ORDER)
- * @returns {void}
+ * Threshold Validation:
+ * - Each level must have higher threshold than previous
+ * - If not, sets to previous + 1
  */
 export function prepareNpcManualWounds(sys, order) {
-  if (!sys.manualWoundLevels) {
-    sys.manualWoundLevels = {};
-  }
-
-  for (const key of order) {
-    if (!sys.manualWoundLevels[key]) {
-      sys.manualWoundLevels[key] = {
-        value: DEFAULT_WOUND_THRESHOLDS[key] || 0,
-        penalty: DEFAULT_WOUND_PENALTIES[key] || 0,
-        active: key === "healthy" || key === "nicked" || key === "out"
-      };
+  try {
+    // Initialize manual wound levels with defaults
+    if (!sys.manualWoundLevels) {
+      sys.manualWoundLevels = {};
     }
-  }
 
-  for (const key of order) {
-    const manual = sys.manualWoundLevels[key];
-    const lvl =
-      sys.woundLevels[key] ?? (sys.woundLevels[key] = { value: 0, penalty: 0, current: false });
-
-    lvl.value = Math.max(0, toInt(manual.value));
-    lvl.penalty = Math.max(0, toInt(manual.penalty));
-
-    lvl.isActive = manual.active === true;
-    lvl.isVisible = true;
-  }
-
-  // Enforce monotonic threshold ordering: each rank must have higher threshold than previous
-  // This prevents invalid configurations like Hurt: 20, Injured: 15 (backwards)
-  let prevValue = 0;
-  for (const key of order) {
-    const lvl = sys.woundLevels[key];
-    if (lvl.value <= prevValue && key !== "healthy") {
-      lvl.value = prevValue + 1;
+    for (const key of order) {
+      if (!sys.manualWoundLevels[key]) {
+        sys.manualWoundLevels[key] = {
+          value: DEFAULT_WOUND_THRESHOLDS[key] || 0,
+          penalty: DEFAULT_WOUND_PENALTIES[key] || 0,
+          active: key === "healthy" || key === "nicked" || key === "out"
+        };
+      }
     }
-    prevValue = lvl.value;
+
+    // Copy manual values to active wound levels
+    for (const key of order) {
+      const manual = sys.manualWoundLevels[key];
+      const lvl =
+        sys.woundLevels[key] ?? (sys.woundLevels[key] = { value: 0, penalty: 0, current: false });
+
+      lvl.value = Math.max(0, toInt(manual.value));
+      lvl.penalty = Math.max(0, toInt(manual.penalty));
+
+      lvl.isActive = manual.active === true;
+      lvl.isVisible = true;
+    }
+
+    // Ensure thresholds are strictly increasing
+    let prevValue = 0;
+    for (const key of order) {
+      const lvl = sys.woundLevels[key];
+      if (lvl.value <= prevValue && key !== "healthy") {
+        lvl.value = prevValue + 1; // Force increment
+      }
+      prevValue = lvl.value;
+    }
+  } catch (err) {
+    logError("Failed to prepare NPC manual wounds", err);
+    // Leave sys.woundLevels unchanged or provide minimal fallback
   }
 }
 
 /**
- * Calculate wound threshold for a single rank using L5R4 formulas.
+ * Calculates a single wound threshold using L5R4 formula.
  *
- * Implements official L5R4 wound threshold calculation:
- * - Healthy: Earth × 5 + modifier (buffer for normal activity)
- * - Other ranks: Earth × multiplier + previous threshold + modifier
+ * @param {string} key - Wound level key
+ * @param {number} earth - Earth Ring value
+ * @param {number} mult - Multiplier for subsequent levels
+ * @param {number} add - Flat modifier to add
+ * @param {number} prev - Previous level's threshold
+ * @returns {number} Calculated wound threshold
  *
- * This creates cumulative thresholds where each rank adds Earth × multiplier
- * damage capacity on top of the previous rank's threshold.
+ * @description
+ * L5R4 Wound Threshold Formula:
+ * - Healthy: (5 × Earth) + modifier
+ * - Other levels: (Earth × multiplier) + previous + modifier
  *
- * @param {string} key - Wound level key (e.g., "healthy", "nicked")
- * @param {number} earth - Character's Earth Ring value
- * @param {number} mult - Wound multiplier (2=standard, 3/4/5=less lethal)
- * @param {number} add - Global modifier to all thresholds
- * @param {number} prev - Previous rank's threshold (for cumulative calculation)
- * @returns {number} Computed threshold value for this rank
+ * Standard multiplier is 2, giving progression:
+ * - Healthy: 5×Earth, Nicked: +2×Earth, Grazed: +2×Earth, etc.
  */
 function calculateWoundThreshold(key, earth, mult, add, prev) {
   return key === "healthy" ? 5 * earth + add : earth * mult + prev + add;
 }
 
 /**
- * Prepare wound levels using Earth Ring formula calculations.
+ * Prepares NPC wound levels using formula mode (Earth Ring calculation).
  *
- * Calculates wound thresholds using the character's Earth Ring and configured
- * multiplier. Supports variable lethality (Earth ×2/×3/×4/×5) and scaling when
- * GM overrides the total max wounds. Handles cases where fewer than 8 wound
- * levels are active for simplified tracking.
- *
- * **Scaling Algorithm (lines 261-274):**
- * If wounds.max is manually set and differs from the calculated Out threshold,
- * all wound thresholds are proportionally scaled to maintain relative spacing.
- * Example: If calculated Out = 40 but wounds.max = 60, all thresholds × 1.5.
- *
- * **Side Effects:** Fully populates sys.woundLevels with calculated values.
- *
- * L5R4 Rules Context:
- * Standard lethality uses Earth ×2 multiplier (very deadly, 1-3 round combats).
- * Higher multipliers (×3/×4/×5) create longer, more survivable combats.
- *
- * @param {Object} sys - Actor system data
- * @param {Object} sys.rings - Character's Ring values
- * @param {number} sys.rings.earth - Earth Ring value
- * @param {number} sys.woundsMultiplier - Earth multiplier (default 2)
- * @param {number} sys.woundsMod - Global threshold modifier
- * @param {number} sys.nrWoundLvls - Number of active wound levels (1-8)
- * @param {Object} sys.wounds - Wound tracking state
- * @param {number} sys.wounds.max - Optional manual max wounds override
- * @param {Object} sys.woundLevels - Output wound level data
+ * @param {Object} sys - Actor's system data
  * @param {string[]} order - Ordered array of wound level keys
- * @returns {void}
+ *
+ * @description
+ * Formula mode calculates thresholds from Earth Ring (standard L5R4):
+ * - Uses Earth Ring, multiplier, and modifier
+ * - Only active levels get calculated thresholds
+ * - Inactive levels are hidden and use previous threshold
+ *
+ * Optional Scaling:
+ * - If sys.wounds.max differs from calculated "Out" threshold
+ * - Scales all thresholds proportionally
+ * - Maintains relative spacing between levels
+ * - Ensures strictly increasing values
+ *
+ * @example
+ * // Earth 3, multiplier 2, modifier 0
+ * // Healthy: 5×3=15, Nicked: 15+2×3=21, Grazed: 21+2×3=27
  */
 export function prepareNpcFormulaWounds(sys, order) {
-  const earth = sys.rings.earth;
-  const mult = toInt(sys.woundsMultiplier) || 2;
-  const add = toInt(sys.woundsMod) || 0;
+  try {
+    const earth = sys.rings.earth;
+    const mult = toInt(sys.woundsMultiplier) || 2;
+    const add = toInt(sys.woundsMod) || 0;
 
-  const nrWoundLvls = toInt(sys.nrWoundLvls) || 3;
-  const activeOrder = getWoundLevelsForCount(nrWoundLvls);
+    const nrWoundLvls = toInt(sys.nrWoundLvls) || 3;
+    const activeOrder = getWoundLevelsForCount(nrWoundLvls);
 
-  let prev = 0;
-  for (const key of order) {
-    const lvl = sys.woundLevels[key] ?? (sys.woundLevels[key] = {});
-
-    lvl.current = false;
-
-    if (activeOrder.includes(key)) {
-      lvl.value = calculateWoundThreshold(key, earth, mult, add, prev);
-      prev = lvl.value;
-      lvl.isActive = true;
-      lvl.isVisible = true;
-
-      lvl.penalty = DEFAULT_WOUND_PENALTIES[key] || 0;
-    } else {
-      lvl.value = prev;
-      lvl.penalty = 0;
-      lvl.isActive = false;
-      lvl.isVisible = false;
-    }
-  }
-
-  // Apply proportional scaling when GM overrides max wounds
-  // Example: If formula gives Out: 40 but GM sets max: 60, scale all thresholds by 1.5×
-  // This maintains relative spacing between wound ranks while respecting manual max
-  const npcMax = toInt(sys.wounds?.max);
-  const outDerived = toInt(sys.woundLevels.out?.value);
-  if (npcMax > 0 && outDerived > 0 && npcMax !== outDerived) {
-    const factor = npcMax / outDerived;
-    let prevScaled = 0;
+    // Calculate thresholds for active levels
+    let prev = 0;
     for (const key of order) {
-      const lvl = sys.woundLevels[key];
-      const orig = toInt(lvl.value);
-      let scaled = Math.ceil(orig * factor);
-      // Ensure healthy ≥ 1 and each rank > previous after scaling
-      scaled = key === "healthy" ? Math.max(1, scaled) : Math.max(prevScaled + 1, scaled);
-      lvl.value = scaled;
-      prevScaled = scaled;
+      const lvl = sys.woundLevels[key] ?? (sys.woundLevels[key] = {});
+
+      lvl.current = false;
+
+      if (activeOrder.includes(key)) {
+        // Active level: calculate threshold
+        lvl.value = calculateWoundThreshold(key, earth, mult, add, prev);
+        prev = lvl.value;
+        lvl.isActive = true;
+        lvl.isVisible = true;
+
+        lvl.penalty = DEFAULT_WOUND_PENALTIES[key] || 0;
+      } else {
+        // Inactive level: hide and use previous threshold
+        lvl.value = prev;
+        lvl.penalty = 0;
+        lvl.isActive = false;
+        lvl.isVisible = false;
+      }
     }
+
+    // Optional scaling if custom max wounds set
+    // This allows GMs to adjust NPC durability while maintaining relative wound level spacing
+    const npcMax = toInt(sys.wounds?.max);
+    const outDerived = toInt(sys.woundLevels.out?.value);
+    if (npcMax > 0 && outDerived > 0 && npcMax !== outDerived) {
+      // Scale all thresholds proportionally to match custom max
+      // Example: If "Out" calculated as 40 but GM set max to 60, scale factor is 1.5
+      const factor = npcMax / outDerived;
+      let prevScaled = 0;
+      for (const key of order) {
+        const lvl = sys.woundLevels[key];
+        const orig = toInt(lvl.value);
+        let scaled = Math.ceil(orig * factor);
+        // Ensure strictly increasing and minimum values
+        // Healthy must be at least 1, others must exceed previous level
+        scaled = key === "healthy" ? Math.max(1, scaled) : Math.max(prevScaled + 1, scaled);
+        lvl.value = scaled;
+        prevScaled = scaled;
+      }
+    }
+  } catch (err) {
+    logError("Failed to prepare NPC formula wounds", err);
+    // Leave sys.woundLevels unchanged or provide minimal fallback
   }
 }
 
 /**
- * Determine the character's current wound level based on suffered damage.
+ * Determines the current wound level based on suffered wounds.
  *
- * Wrapper function that filters active wound levels based on wound mode
- * (manual mode only checks levels marked active) then delegates to
- * findCurrentWoundLevel for actual determination logic.
- *
- * @param {Object} sys - Actor system data
- * @param {Object} sys.woundLevels - Computed wound level thresholds
- * @param {Object} sys.manualWoundLevels - Manual configuration (manual mode only)
+ * @param {Object} sys - Actor's system data
  * @param {string[]} order - Ordered array of wound level keys
- * @param {number} sCapped - Suffered damage (capped to Out threshold)
+ * @param {number} sCapped - Suffered wounds (capped to max)
  * @param {string} woundMode - "manual" or "formula"
  * @returns {Object} The current wound level object
+ *
+ * @description
+ * Wrapper that filters levels based on mode:
+ * - Manual mode: Only check active manual levels
+ * - Formula mode: Check all levels in order
+ *
+ * Then finds which level the suffered wounds fall into.
  */
 export function determineCurrentWoundLevel(sys, order, sCapped, woundMode) {
+  // Filter levels based on mode
   const levelsToCheck =
     woundMode === "manual"
       ? order.filter(key => sys.manualWoundLevels?.[key]?.active === true)
@@ -357,34 +369,21 @@ export function determineCurrentWoundLevel(sys, order, sCapped, woundMode) {
 }
 
 /**
- * Prepare visible wound levels for UI display in the wound configuration sheet.
+ * Prepares visible wound levels for UI display.
  *
- * Creates a display-friendly representation of wound levels showing current values,
- * penalties, and which level the character is in. Handles both manual mode (shows
- * active levels from manual configuration) and formula mode (recalculates from
- * Earth Ring for live preview).
- *
- * **Formula Mode:** Recalculates all thresholds from scratch using current Earth,
- * multiplier, and modifiers. Determines current wound level from suffered damage.
- * Useful for previewing formula changes before saving.
- *
- * **Manual Mode:** Displays only manually activated wound levels with their
- * configured values. Does not recalculate or determine current level.
- *
- * **Side Effects:** Populates sys.visibleWoundLevels and sys.visibleManualWoundLevels.
- *
- * @param {Object} sys - Actor system data
- * @param {Object} sys.woundLevels - Current wound level data
- * @param {Object} sys.manualWoundLevels - Manual configuration
- * @param {string} sys.woundMode - "manual" or "formula"
- * @param {number} sys.nrWoundLvls - Number of wound levels
- * @param {number} sys.rings.earth - Earth Ring (formula mode only)
- * @param {number} sys.woundsMultiplier - Earth multiplier (formula mode only)
- * @param {number} sys.woundsMod - Threshold modifier (formula mode only)
- * @param {number} sys.woundsPenaltyMod - Penalty modifier (formula mode only)
- * @param {number} sys.suffered - Suffered damage (formula mode only)
+ * @param {Object} sys - Actor's system data
  * @param {string[]} order - Ordered array of wound level keys
- * @returns {void}
+ *
+ * @description
+ * Creates display-friendly wound level data:
+ * - Manual mode: Shows active manual levels only
+ * - Formula mode: Recalculates levels for current stats
+ *
+ * Formula mode recalculation ensures UI shows current values
+ * even if Earth Ring or modifiers changed.
+ *
+ * Sets sys.visibleWoundLevels and sys.visibleManualWoundLevels
+ * for template rendering.
  */
 export function prepareVisibleWoundLevels(sys, order) {
   const nrWoundLvls = clamp(toInt(sys.nrWoundLvls) || 3, 1, 8);
@@ -395,13 +394,15 @@ export function prepareVisibleWoundLevels(sys, order) {
   sys.visibleWoundLevels = {};
   sys.visibleManualWoundLevels = {};
 
+  // Copy manual wound levels for UI
   for (const key of order) {
     if (sys.manualWoundLevels && sys.manualWoundLevels[key]) {
-      sys.visibleManualWoundLevels[key] = sys.manualWoundLevels[key];
+      sys.woundLevels[key] = { ...sys.manualWoundLevels[key], key };
     }
   }
 
   if (isManualMode) {
+    // Manual mode: show only active levels
     for (const key of order) {
       const manual = sys.manualWoundLevels?.[key];
       const woundLevel = sys.woundLevels?.[key];
@@ -411,6 +412,7 @@ export function prepareVisibleWoundLevels(sys, order) {
       }
     }
   } else {
+    // Formula mode: recalculate for current stats
     const earth = toInt(sys.rings?.earth);
     const mult = toInt(sys.woundsMultiplier) || 2;
     const add = toInt(sys.woundsMod) || 0;
@@ -432,6 +434,7 @@ export function prepareVisibleWoundLevels(sys, order) {
       };
     }
 
+    // Mark current wound level
     const outMax = toInt(sys.visibleWoundLevels.out?.value) || 0;
     const sCapped = Math.min(toInt(sys.suffered), outMax || toInt(sys.suffered));
 
