@@ -160,6 +160,11 @@ export function preparePcData(actor, sys, finalizeWoundPenaltiesFn, calculateIns
       } else {
         lvl.value = earth * mult + prev + add;
       }
+      // Reset base per-level penalty (issue #32): without this, every PC wound level
+      // had penalty=0, so calculateWoundPenalties would compute the same penaltyEff
+      // for every row from the modifier alone — including Healthy, which should
+      // always be 0 regardless of modifier.
+      lvl.penalty = DEFAULT_WOUND_PENALTIES[key] ?? 0;
       prev = lvl.value;
     }
   } catch (err) {
