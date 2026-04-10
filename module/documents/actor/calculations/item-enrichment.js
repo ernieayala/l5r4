@@ -50,7 +50,15 @@ export function enrichActorItems(actor) {
   }
 
   try {
-    // Process each item based on its type
+    // First pass: aggregate skill-item bonuses into actor.system.bonuses.skill so
+    // downstream readers (enrichSkillFormulas, resolveWeaponSkillTrait,
+    // applySkillAndTraitBonuses) all see Active-Effect contributions on skill items.
+    // See issue #34: AEs targeting `skill.system.rollBonus` previously had no effect
+    // on weapon attack rolls because nothing bridged item-level bonuses into the
+    // actor-level bonus map that the dice services read.
+    aggregateSkillItemBonuses(actor);
+
+    // Second pass: enrich individual items with derived formulas
     for (const item of actor.items) {
       if (!item?.type) {
         continue;
@@ -77,6 +85,53 @@ export function enrichActorItems(actor) {
       actorName: actor?.name
     });
     // Items remain unenriched - formulas won't display but won't break functionality
+  }
+}
+
+/**
+ * Aggregate skill-item bonus fields into actor.system.bonuses.skill.
+ *
+ * @param {Actor} actor - The actor whose skill items should be aggregated
+ *
+ * @description
+ * Walks every skill item on the actor and adds its `system.rollBonus`,
+ * `system.keepBonus`, and `system.totalBonus` values into the corresponding
+ * `actor.system.bonuses.skill[skillNameLowercase]` entry. This bridges the
+ * item-level bonus storage (where Active Effects on skill items deposit values
+ * per ACTIVE_EFFECTS.md docs) into the actor-level bonus map that
+ * `applySkillAndTraitBonuses` reads at roll time.
+ *
+ * Idempotency: Foundry calls `prepareDerivedData` against a freshly-rehydrated
+ * `actor.system` each cycle, so this aggregation always runs against the base
+ * (post-Active-Effect) values — there is no accumulation across prep cycles.
+ *
+ * Multiple skill items with the same name (case-insensitive) accumulate.
+ *
+ * @private
+ */
+function aggregateSkillItemBonuses(actor) {
+  if (!actor?.system) {
+    return;
+  }
+  actor.system.bonuses = actor.system.bonuses || {};
+  actor.system.bonuses.skill = actor.system.bonuses.skill || {};
+
+  for (const item of actor.items) {
+    if (!item || item.type !== "skill") {
+      continue;
+    }
+    const key = String(item.name ?? "")
+      .toLowerCase()
+      .trim();
+    if (!key) {
+      continue;
+    }
+    const existing = actor.system.bonuses.skill[key] || {};
+    actor.system.bonuses.skill[key] = {
+      roll: toInt(existing.roll) + toInt(item.system?.rollBonus),
+      keep: toInt(existing.keep) + toInt(item.system?.keepBonus),
+      total: toInt(existing.total) + toInt(item.system?.totalBonus)
+    };
   }
 }
 

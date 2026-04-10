@@ -335,13 +335,23 @@ export function resolveWeaponSkillTrait(actor, weapon) {
     const traitValue = getEffectiveTrait(actor, skillTrait);
     const skillName = toString(skill.name, "Unknown Skill");
 
+    // Pick up skill bonuses aggregated by item-enrichment.aggregateSkillItemBonuses
+    // (issue #34): Active Effects on a skill item deposit into skill.system.rollBonus,
+    // which item-enrichment then bridges to actor.system.bonuses.skill[name]. Reading
+    // those bonuses here makes the displayed weapon attack formula match what
+    // applySkillAndTraitBonuses will compute at roll time.
+    const skillKey = skillName.toLowerCase();
+    const skillBonusMap = actor.system?.bonuses?.skill?.[skillKey] || {};
+    const skillBonusRoll = toInt(skillBonusMap.roll);
+    const skillBonusKeep = toInt(skillBonusMap.keep);
+
     // Rank 0 counts as unskilled (roll and keep both = trait)
     if (skillRank === 0) {
       return {
         skillRank: 0,
         traitValue,
-        rollBonus: traitValue,
-        keepBonus: traitValue,
+        rollBonus: traitValue + skillBonusRoll,
+        keepBonus: traitValue + skillBonusKeep,
         description: `${skillName} (${skillRank}) + ${skillTrait.toUpperCase()} (${traitValue}) [Unskilled]`
       };
     }
@@ -350,8 +360,8 @@ export function resolveWeaponSkillTrait(actor, weapon) {
     return {
       skillRank,
       traitValue,
-      rollBonus: skillRank + traitValue,
-      keepBonus: traitValue,
+      rollBonus: skillRank + traitValue + skillBonusRoll,
+      keepBonus: traitValue + skillBonusKeep,
       description: `${skillName} (${skillRank}) + ${skillTrait.toUpperCase()} (${traitValue})`
     };
   } else {

@@ -873,6 +873,101 @@ describe("resolveWeaponSkillTrait", () => {
     });
   });
 
+  // Regression tests for issue #34: skill bonuses (e.g. from Active Effects on
+  // the skill item, aggregated by item-enrichment.aggregateSkillItemBonuses)
+  // should flow into the displayed weapon attack formula.
+  describe("skill bonuses propagate to weapon attack (issue #34)", () => {
+    const buildActorWithSkillBonus = (kenjutsuRank, bonusRoll, bonusKeep) => ({
+      system: {
+        traits: { agi: 3 },
+        bonuses: {
+          skill: {
+            kenjutsu: { roll: bonusRoll, keep: bonusKeep, total: 0 }
+          }
+        }
+      },
+      items: {
+        find: vi.fn(cb => {
+          const skill = {
+            type: "skill",
+            name: "Kenjutsu",
+            system: { rank: kenjutsuRank, trait: "agi" }
+          };
+          return cb(skill) ? skill : undefined;
+        })
+      }
+    });
+
+    it("should add skill rollBonus to skilled attack rollBonus", () => {
+      // Skilled: rank 4 + agi 3 = 7, plus +2k0 from skill bonus → 9k3
+      const actor = buildActorWithSkillBonus(4, 2, 0);
+      const weapon = { system: { associatedSkill: "Kenjutsu", fallbackTrait: "agi" } };
+
+      const result = resolveWeaponSkillTrait(actor, weapon);
+
+      expect(result.rollBonus).toBe(9);
+      expect(result.keepBonus).toBe(3);
+    });
+
+    it("should add skill keepBonus to skilled attack keepBonus", () => {
+      // Skilled: rank 4 + agi 3 = 7 roll, agi 3 keep, plus +0k1 → 7k4
+      const actor = buildActorWithSkillBonus(4, 0, 1);
+      const weapon = { system: { associatedSkill: "Kenjutsu", fallbackTrait: "agi" } };
+
+      const result = resolveWeaponSkillTrait(actor, weapon);
+
+      expect(result.rollBonus).toBe(7);
+      expect(result.keepBonus).toBe(4);
+    });
+
+    it("should support negative skill bonuses (penalties)", () => {
+      // Penalty case from the issue: skilled rank 4 + agi 3 = 7k3, with -1k1 → 6k2
+      const actor = buildActorWithSkillBonus(4, -1, -1);
+      const weapon = { system: { associatedSkill: "Kenjutsu", fallbackTrait: "agi" } };
+
+      const result = resolveWeaponSkillTrait(actor, weapon);
+
+      expect(result.rollBonus).toBe(6);
+      expect(result.keepBonus).toBe(2);
+    });
+
+    it("should add skill bonuses to unskilled attack rollBonus too", () => {
+      // Unskilled (rank 0): trait 3 keep 3, with +1k0 → 4k3
+      const actor = buildActorWithSkillBonus(0, 1, 0);
+      const weapon = { system: { associatedSkill: "Kenjutsu", fallbackTrait: "agi" } };
+
+      const result = resolveWeaponSkillTrait(actor, weapon);
+
+      expect(result.skillRank).toBe(0);
+      expect(result.rollBonus).toBe(4);
+      expect(result.keepBonus).toBe(3);
+      expect(result.description).toContain("[Unskilled]");
+    });
+
+    it("should be safe when actor has no bonuses.skill map", () => {
+      // No bonus map at all — should behave exactly like the pre-fix path
+      const actor = {
+        system: { traits: { agi: 3 } },
+        items: {
+          find: vi.fn(cb => {
+            const skill = {
+              type: "skill",
+              name: "Kenjutsu",
+              system: { rank: 4, trait: "agi" }
+            };
+            return cb(skill) ? skill : undefined;
+          })
+        }
+      };
+      const weapon = { system: { associatedSkill: "Kenjutsu", fallbackTrait: "agi" } };
+
+      const result = resolveWeaponSkillTrait(actor, weapon);
+
+      expect(result.rollBonus).toBe(7);
+      expect(result.keepBonus).toBe(3);
+    });
+  });
+
   describe("edge cases", () => {
     it("should handle null weapon", () => {
       const actor = {};
