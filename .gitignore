@@ -61,3 +61,6 @@ test_priority/
 
 # Madge dependency analysis
 madge-analysis.json
+
+# Claude Code project config. Kept on disk, never committed.
+.claude/
