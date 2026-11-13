@@ -36,7 +36,7 @@ import { toInt } from "../utils/type-coercion.js";
  *
  * Implements core Fear mechanic:
  * - Roll: Willpower d10k Willpower x10 + Honor Rank + modifier
- * - Target: TN (typically 5 + 5×Fear Rank)
+ * - Target: TN (by default 5 + 5×Fear Rank)
  * - Success: No effect
  * - Failure: -Fear Rank k0 penalty to all rolls (ActiveEffect created)
  * - Catastrophic (fail by 15+): Character overwhelmed by terror
@@ -89,7 +89,7 @@ async function executeFearTest({ character, tn, modifier = 0, fearRank, targetIn
         {
           name: game.i18n.format("l5r4.ui.mechanics.fear.effectName", { rank: fearRank }),
           statuses: ["feared"],
-          icon: "systems/l5r4-enhanced/assets/icons/fear.webp",
+          img: "systems/l5r4-enhanced/assets/icons/fear.webp",
           flags: {
             [SYS_ID]: {
               fearRank: fearRank

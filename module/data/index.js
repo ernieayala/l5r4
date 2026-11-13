@@ -1,5 +1,6 @@
 import NpcData from "./actor/NpcData.js";
 import PcData from "./actor/PcData.js";
+import EffectData from "./effect/EffectData.js";
 import AdvantageData from "./item/AdvantageData.js";
 import ArmorData from "./item/ArmorData.js";
 import BowData from "./item/BowData.js";
@@ -41,5 +42,16 @@ export const DATA_MODELS = {
     tattoo: TattooData,
     technique: TechniqueData,
     weapon: WeaponData
+  }
+};
+
+/**
+ * Data model class per core type (`metadata.coreTypes`), keyed by Document name. `init` registers them in
+ * `CONFIG.<Document>.dataModels` like DATA_MODELS, but they are never declared in `documentTypes`, where a core type
+ * invalidates the whole field (common/packages/sub-types.mjs:45-47).
+ */
+export const CORE_TYPE_DATA_MODELS = {
+  ActiveEffect: {
+    base: EffectData
   }
 };

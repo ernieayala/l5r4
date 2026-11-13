@@ -48,8 +48,9 @@ export async function applyLongRest(actor) {
     return;
   }
 
-  // Read current wound state from actor
-  const currentSuffered = toInt(actor.system?.suffered ?? 0);
+  // Read current wound state from actor. Suffered Wounds are the stored value, not the prepared one, so an Active
+  // Effect on Wounds is never written into storage (B6).
+  const currentSuffered = actor._source.system.suffered;
   const maxWounds = toInt(actor.system?.wounds?.max ?? 0);
   const healRate = toInt(actor.system?.wounds?.healRate ?? 0);
 

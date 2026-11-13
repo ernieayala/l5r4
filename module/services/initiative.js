@@ -79,9 +79,10 @@ export function initializeInitiativeSystem() {
 
           if (confirmed) {
             // The +10 is held in a flag until getInitiativeRoll reads it: a system data model drops unknown
-            // keys, so it cannot live under system.initiative.
+            // keys, so it cannot live under system.initiative. The Void write starts from the stored value, so
+            // an Active Effect on Void Points is never written into storage (B6).
             await actor.update({
-              "system.rings.void.value": voidCurrent - 1,
+              "system.rings.void.value": actor._source.system.rings.void.value - 1,
               "system.initiative.useVoid": false,
               [`flags.${SYS_ID}.voidInitiative`]: true
             });

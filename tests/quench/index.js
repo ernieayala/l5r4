@@ -93,6 +93,7 @@ import { registerStanceEffectPreservationTests } from "./services/stance-effect-
 import { registerSmokeBatch } from "./smoke.js";
 import { registerDeprecationsBatch } from "./deprecations.js";
 import { registerDataModelsBatch } from "./data-models.js";
+import { registerActiveEffectsBatch } from "./active-effects.js";
 
 /**
  * Register Quench integration tests for the L5R4 system.
@@ -103,6 +104,7 @@ export async function registerQuenchTests(quench) {
   registerSmokeBatch(quench);
   registerDeprecationsBatch(quench);
   registerDataModelsBatch(quench);
+  registerActiveEffectsBatch(quench);
   registerActorDocumentTests(quench);
   registerActorWoundTests(quench);
   registerActorXpTests(quench);

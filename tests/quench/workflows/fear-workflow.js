@@ -199,7 +199,7 @@ export function registerFearWorkflowTests(quench) {
 
             assert.equal(willpower, 5, "High Willpower = 5");
             assert.equal(honorRank, 4, "High Honor = 4");
-            // Roll would be 5d10k5x10+4 vs TN 20 (very likely to succeed)
+            // Roll would be 5d10k5x10+4 vs TN 20 (likely to succeed)
           });
         });
 
@@ -227,13 +227,13 @@ export function registerFearWorkflowTests(quench) {
           });
 
           it("should NOT create ActiveEffect on success", async () => {
-            // Use NPC with very low Fear to ensure success
+            // Use NPC with a low Fear Rank to ensure success
             const npcLowFear = await Actor.create({
               name: "Weak Fear NPC",
               type: "npc",
               system: {
                 fear: {
-                  rank: 1 // TN = 10, very easy
+                  rank: 1 // TN = 10, easy
                 }
               }
             });
@@ -260,7 +260,7 @@ export function registerFearWorkflowTests(quench) {
               type: "npc",
               system: {
                 fear: {
-                  rank: 7 // TN = 40, very hard
+                  rank: 7 // TN = 40, hard
                 }
               }
             });
@@ -339,7 +339,7 @@ export function registerFearWorkflowTests(quench) {
               const fearEffect = testPC.effects.find(e => e.statuses.has("feared"));
 
               if (fearEffect) {
-                assert.include(fearEffect.icon, "fear", "Effect has Fear icon");
+                assert.include(fearEffect.img, "fear", "Effect has Fear icon");
               }
             } finally {
               await npcFear8.delete();
@@ -509,7 +509,7 @@ export function registerFearWorkflowTests(quench) {
               {
                 name: "Fear Effect (Rank 2)",
                 statuses: ["feared"],
-                icon: "systems/l5r4-enhanced/assets/icons/fear.webp",
+                img: "systems/l5r4-enhanced/assets/icons/fear.webp",
                 flags: {
                   [SYS_ID]: {
                     fearRank: 2
@@ -519,7 +519,7 @@ export function registerFearWorkflowTests(quench) {
               {
                 name: "Fear Effect (Rank 4)",
                 statuses: ["feared"],
-                icon: "systems/l5r4-enhanced/assets/icons/fear.webp",
+                img: "systems/l5r4-enhanced/assets/icons/fear.webp",
                 flags: {
                   [SYS_ID]: {
                     fearRank: 4
@@ -586,7 +586,7 @@ export function registerFearWorkflowTests(quench) {
               {
                 name: "Fear Effect (Rank 3)",
                 statuses: ["feared"],
-                icon: "systems/l5r4-enhanced/assets/icons/fear.webp",
+                img: "systems/l5r4-enhanced/assets/icons/fear.webp",
                 flags: {
                   [SYS_ID]: {
                     fearRank: 3
@@ -626,7 +626,7 @@ export function registerFearWorkflowTests(quench) {
               {
                 name: "Fear Effect (Rank 5)",
                 statuses: ["feared"],
-                icon: "systems/l5r4-enhanced/assets/icons/fear.webp",
+                img: "systems/l5r4-enhanced/assets/icons/fear.webp",
                 flags: {
                   [SYS_ID]: {
                     fearRank: 5
@@ -657,8 +657,10 @@ export function registerFearWorkflowTests(quench) {
             const fearEffect = recoveryPC.effects.find(e => e.statuses.has("feared"));
 
             assert.exists(fearEffect, "Fear effect persists");
-            assert.isUndefined(fearEffect.duration?.rounds, "No round duration");
-            assert.isUndefined(fearEffect.duration?.seconds, "No time duration");
+            // 14.370 duration shape: value / units / expiry (common/documents/active-effect.mjs:61-68)
+            assert.equal(fearEffect.duration.value, Infinity, "Unlimited duration");
+            assert.isNull(fearEffect.duration.expiry, "No expiry event");
+            assert.isFalse(fearEffect.isTemporary, "Not a temporary effect");
             // Fear persists until encounter end (manual removal)
           });
         });

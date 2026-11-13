@@ -9,12 +9,16 @@ let manifest;
 let lang;
 let pkg;
 let DATA_MODELS;
+let CORE_TYPE_DATA_MODELS;
 
 beforeAll(async () => {
-  // The data model classes extend foundry.abstract.TypeDataModel when their modules load; outside Foundry a bare
-  // class stands in for it. Nothing here builds a model, only reads which classes are registered.
-  globalThis.foundry = { abstract: { TypeDataModel: class {} } };
-  ({ DATA_MODELS } = await import("../module/data/index.js"));
+  // The data model classes extend Foundry's base models when their modules load; outside Foundry bare classes stand
+  // in for them. Nothing here builds a model, only reads which classes are registered.
+  globalThis.foundry = {
+    abstract: { TypeDataModel: class {} },
+    data: { ActiveEffectTypeDataModel: class {} }
+  };
+  ({ DATA_MODELS, CORE_TYPE_DATA_MODELS } = await import("../module/data/index.js"));
   manifest = await readJson("system.json");
   lang = await readJson("lang/en.json");
   pkg = await readJson("package.json");
@@ -73,6 +77,18 @@ describe("system.json and the registered data models", () => {
           manifest.documentTypes[documentName]?.[type],
           `${documentName}.${type}`
         ).toBeDefined();
+      }
+    }
+  });
+
+  it("gives core's base ActiveEffect type a model and leaves it out of documentTypes", () => {
+    expect(CORE_TYPE_DATA_MODELS.ActiveEffect?.base).toBeTypeOf("function");
+    for (const [documentName, models] of Object.entries(CORE_TYPE_DATA_MODELS)) {
+      for (const type of Object.keys(models)) {
+        expect(
+          manifest.documentTypes[documentName]?.[type],
+          `${documentName}.${type}`
+        ).toBeUndefined();
       }
     }
   });

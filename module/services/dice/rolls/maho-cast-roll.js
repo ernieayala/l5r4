@@ -103,11 +103,11 @@ export async function MahoCastRoll({ actor, spell, woundPenalty = 0, showDialog 
   const freeRaises = Math.floor(options.additionalBlood / baseBloodCost);
 
   // Inflict blood cost wounds (required, paid before roll)
-  const currentWounds = toInt(actor.system?.suffered) || 0;
   const maxWounds = toInt(actor.system?.wounds?.max) || 40;
 
   if (options.bloodSource === "self") {
-    const newWounds = Math.min(currentWounds + totalBloodCost, maxWounds);
+    // The stored value, not the prepared one, so an Active Effect on Wounds is never written into storage (B6)
+    const newWounds = Math.min(actor._source.system.suffered + totalBloodCost, maxWounds);
     await actor.update({ "system.suffered": newWounds });
   }
   // Note: If bloodSource is "other", wounds are inflicted on another actor
@@ -203,8 +203,10 @@ export async function MahoCastRoll({ actor, spell, woundPenalty = 0, showDialog 
       taintGain = Math.max(taintGain - earthRing, 1);
     }
 
-    const currentTaint = toInt(actor.system?.shadowTaint?.points) || 0;
-    await actor.update({ "system.shadowTaint.points": currentTaint + taintGain });
+    // The stored value, not the prepared one, so an Active Effect on Taint is never written into storage (B6)
+    await actor.update({
+      "system.shadowTaint.points": actor._source.system.shadowTaint.points + taintGain
+    });
 
     label += ` [${game.i18n.localize("l5r4.magic.maho.taintGained")}: ${taintGain}]`;
 

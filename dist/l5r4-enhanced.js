@@ -47,7 +47,7 @@ import {
 } from "../module/config/localization.js";
 import { NPC_NUMBER_WOUND_LVLS } from "../module/config/game-mechanics.js";
 import { STATUS_EFFECTS } from "../module/config/status-effects.js";
-import { DATA_MODELS } from "../module/data/index.js";
+import { CORE_TYPE_DATA_MODELS, DATA_MODELS } from "../module/data/index.js";
 import L5R4Actor from "../module/documents/actor.js";
 import L5R4Item from "../module/documents/item.js";
 import L5R4ItemSheet from "../module/sheets/item-sheet.js";
@@ -78,10 +78,12 @@ Hooks.once("init", async () => {
   CONFIG.Item.documentClass  = L5R4Item;
   CONFIG.Actor.documentClass = L5R4Actor;
 
-  // One data model per subtype declared in system.json documentTypes. Core labels each subtype with its
-  // TYPES.<Document>.<type> key from lang/*.json.
-  for (const [documentName, models] of Object.entries(DATA_MODELS)) {
-    Object.assign(CONFIG[documentName].dataModels, models);
+  // One data model per subtype declared in system.json documentTypes, plus models for core types, which are not
+  // declared. Core labels each subtype with its TYPES.<Document>.<type> key from lang/*.json.
+  for (const registry of [DATA_MODELS, CORE_TYPE_DATA_MODELS]) {
+    for (const [documentName, models] of Object.entries(registry)) {
+      Object.assign(CONFIG[documentName].dataModels, models);
+    }
   }
 
   CONFIG.l5r4 = {
@@ -100,7 +102,12 @@ Hooks.once("init", async () => {
     statusEffects: STATUS_EFFECTS
   };
 
-  CONFIG.statusEffects = STATUS_EFFECTS;
+  // CONFIG.statusEffects is an array also keyed by id (client/config.mjs:1690-1718); assigning the whole property
+  // goes through a setter deprecated in v14 (client/client.mjs:29-39). Replace core's entries with the system's.
+  CONFIG.statusEffects.length = 0;
+  for (const status of STATUS_EFFECTS) {
+    CONFIG.statusEffects[status.id] = status;
+  }
 
   CONFIG.l5r4.TRAIT_CHOICES = CONFIG.l5r4.traits;
 

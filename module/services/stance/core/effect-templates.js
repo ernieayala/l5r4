@@ -5,12 +5,13 @@ import { T } from "../../../utils/localization.js";
  * Stance Effect Templates
  *
  * Creates Active Effect data structures for L5R4 combat stances. These templates
- * define the visual presentation (name, icon) and mechanical data (bonuses, penalties,
+ * define the visual presentation (name, img) and mechanical data (bonuses, penalties,
  * descriptions) that are applied when a character adopts a stance.
  *
- * The effect templates follow the Foundry VTT v13+ Active Effects data model:
+ * The effect templates follow the Foundry VTT v14 Active Effects data model:
  * - `name`: Localized display name
- * - `icon`: Path to stance icon asset
+ * - `img`: Path to stance icon asset (v14 drops an effect's `icon`)
+ * - `system.changes`: Active Effect changes, when the template defines any
  * - `statuses`: Array of status ID strings for identification
  * - `flags[SYS_ID]`: System-specific data including stanceType and mechanical effects
  *
@@ -28,7 +29,8 @@ import { T } from "../../../utils/localization.js";
 /**
  * @typedef {Object} StanceEffectTemplate
  * @property {string} name - Localized stance name displayed in UI
- * @property {string} icon - Path to stance icon asset
+ * @property {string} img - Path to stance icon asset
+ * @property {{changes: object[]}} [system] - Active Effect changes (Full Attack only, empty)
  * @property {string[]} statuses - Status IDs for identifying active stance on actor
  * @property {Object} flags - System-specific data storage
  * @property {Object} flags.l5r4 - L5R4 system namespace
@@ -56,9 +58,9 @@ import { T } from "../../../utils/localization.js";
 export function createFullAttackEffect() {
   return {
     name: T("l5r4.ui.mechanics.stances.fullAttack"),
-    icon: `systems/${SYS_ID}/assets/icons/full-attack-stance.webp`,
+    img: `systems/${SYS_ID}/assets/icons/full-attack-stance.webp`,
     statuses: ["fullAttackStance"],
-    changes: [], // Explicitly empty - stance effects use flags, not Active Effect changes
+    system: { changes: [] }, // Explicitly empty - stance effects use flags, not Active Effect changes
     flags: {
       [SYS_ID]: {
         stanceType: "fullAttack",
@@ -85,7 +87,7 @@ export function createFullAttackEffect() {
 export function createDefenseStanceEffect() {
   return {
     name: T("l5r4.ui.mechanics.stances.defense"),
-    icon: `systems/${SYS_ID}/assets/icons/defence-stance.webp`,
+    img: `systems/${SYS_ID}/assets/icons/defence-stance.webp`,
     statuses: ["defenseStance"],
     flags: {
       [SYS_ID]: {
@@ -113,7 +115,7 @@ export function createDefenseStanceEffect() {
 export function createFullDefenseStanceEffect() {
   return {
     name: T("l5r4.ui.mechanics.stances.fullDefense"),
-    icon: `systems/${SYS_ID}/assets/icons/full-defense-stance.webp`,
+    img: `systems/${SYS_ID}/assets/icons/full-defense-stance.webp`,
     statuses: ["fullDefenseStance"],
     flags: {
       [SYS_ID]: {
@@ -140,7 +142,7 @@ export function createFullDefenseStanceEffect() {
 export function createAttackStanceEffect() {
   return {
     name: T("l5r4.ui.mechanics.stances.attack"),
-    icon: `systems/${SYS_ID}/assets/icons/attack-stance.webp`,
+    img: `systems/${SYS_ID}/assets/icons/attack-stance.webp`,
     statuses: ["attackStance"],
     flags: {
       [SYS_ID]: {
@@ -172,7 +174,7 @@ export function createAttackStanceEffect() {
 export function createCenterStanceEffect() {
   return {
     name: T("l5r4.ui.mechanics.stances.center"),
-    icon: `systems/${SYS_ID}/assets/icons/centered-stance.webp`,
+    img: `systems/${SYS_ID}/assets/icons/centered-stance.webp`,
     statuses: ["centerStance"],
     flags: {
       [SYS_ID]: {

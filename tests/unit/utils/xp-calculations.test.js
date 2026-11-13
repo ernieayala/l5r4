@@ -14,6 +14,7 @@ import {
   calculateSkillStepCost,
   calculateEmphasisCost,
   getCreationFreeBonus,
+  getCreationFreeBonusSources,
   getCreationFreeBonusVoid
 } from "../../../module/utils/xp-calculations.js";
 
@@ -372,7 +373,7 @@ describe("calculateSkillStepCost", () => {
       expect(cost).toBe(3.5);
     });
 
-    it("should handle very large ranks", () => {
+    it("should handle large ranks", () => {
       const cost = calculateSkillStepCost(100);
       expect(cost).toBe(100);
     });
@@ -460,13 +461,7 @@ describe("calculateEmphasisCost", () => {
 
 describe("getCreationFreeBonus", () => {
   beforeEach(() => {
-    // Mock CONST.ACTIVE_EFFECT_MODES
-    global.CONST = {
-      ACTIVE_EFFECT_MODES: {
-        ADD: 2
-      }
-    };
-
+    // v14 change shape: effect.system.changes with a string type; no CONST.ACTIVE_EFFECT_MODES needed
     // Mock globalThis.fromUuidSync
     global.fromUuidSync = vi.fn(() => null);
   });
@@ -480,13 +475,15 @@ describe("getCreationFreeBonus", () => {
             effects: [
               {
                 transfer: true,
-                changes: [
-                  {
-                    key: "system.traits.sta",
-                    mode: 2, // ADD
-                    value: 1
-                  }
-                ]
+                system: {
+                  changes: [
+                    {
+                      key: "system.traits.sta",
+                      type: "add",
+                      value: 1
+                    }
+                  ]
+                }
               }
             ]
           }
@@ -506,13 +503,15 @@ describe("getCreationFreeBonus", () => {
             effects: [
               {
                 transfer: true,
-                changes: [
-                  {
-                    key: "system.traits.sta",
-                    mode: 2,
-                    value: 1
-                  }
-                ]
+                system: {
+                  changes: [
+                    {
+                      key: "system.traits.sta",
+                      type: "add",
+                      value: 1
+                    }
+                  ]
+                }
               }
             ]
           },
@@ -521,13 +520,15 @@ describe("getCreationFreeBonus", () => {
             effects: [
               {
                 transfer: true,
-                changes: [
-                  {
-                    key: "system.traits.sta",
-                    mode: 2,
-                    value: 1
-                  }
-                ]
+                system: {
+                  changes: [
+                    {
+                      key: "system.traits.sta",
+                      type: "add",
+                      value: 1
+                    }
+                  ]
+                }
               }
             ]
           }
@@ -547,13 +548,15 @@ describe("getCreationFreeBonus", () => {
             effects: [
               {
                 transfer: false,
-                changes: [
-                  {
-                    key: "system.traits.sta",
-                    mode: 2,
-                    value: 1
-                  }
-                ]
+                system: {
+                  changes: [
+                    {
+                      key: "system.traits.sta",
+                      type: "add",
+                      value: 1
+                    }
+                  ]
+                }
               }
             ]
           }
@@ -565,7 +568,7 @@ describe("getCreationFreeBonus", () => {
       expect(bonus).toBe(0); // transfer=false not counted
     });
 
-    it("should ignore effects with wrong mode", () => {
+    it("should ignore changes whose type is not add", () => {
       const actor = {
         items: [
           {
@@ -573,13 +576,15 @@ describe("getCreationFreeBonus", () => {
             effects: [
               {
                 transfer: true,
-                changes: [
-                  {
-                    key: "system.traits.sta",
-                    mode: 1, // MULTIPLY, not ADD
-                    value: 1
-                  }
-                ]
+                system: {
+                  changes: [
+                    {
+                      key: "system.traits.sta",
+                      type: "multiply", // not "add"
+                      value: 1
+                    }
+                  ]
+                }
               }
             ]
           }
@@ -588,7 +593,7 @@ describe("getCreationFreeBonus", () => {
       };
 
       const bonus = getCreationFreeBonus(actor, "sta");
-      expect(bonus).toBe(0); // Wrong mode
+      expect(bonus).toBe(0); // "multiply" is not counted
     });
 
     it("should only count matching trait key", () => {
@@ -599,18 +604,20 @@ describe("getCreationFreeBonus", () => {
             effects: [
               {
                 transfer: true,
-                changes: [
-                  {
-                    key: "system.traits.sta",
-                    mode: 2,
-                    value: 1
-                  },
-                  {
-                    key: "system.traits.wil",
-                    mode: 2,
-                    value: 1
-                  }
-                ]
+                system: {
+                  changes: [
+                    {
+                      key: "system.traits.sta",
+                      type: "add",
+                      value: 1
+                    },
+                    {
+                      key: "system.traits.wil",
+                      type: "add",
+                      value: 1
+                    }
+                  ]
+                }
               }
             ]
           }
@@ -630,13 +637,15 @@ describe("getCreationFreeBonus", () => {
             effects: [
               {
                 transfer: true,
-                changes: [
-                  {
-                    key: "system.traits.agi",
-                    mode: 2,
-                    value: 0.5
-                  }
-                ]
+                system: {
+                  changes: [
+                    {
+                      key: "system.traits.agi",
+                      type: "add",
+                      value: 0.5
+                    }
+                  ]
+                }
               }
             ]
           }
@@ -681,13 +690,15 @@ describe("getCreationFreeBonus", () => {
             effects: [
               {
                 transfer: true,
-                changes: [
-                  {
-                    key: "system.traits.sta",
-                    mode: 2,
-                    value: 1 // Active Effect
-                  }
-                ]
+                system: {
+                  changes: [
+                    {
+                      key: "system.traits.sta",
+                      type: "add",
+                      value: 1 // Active Effect
+                    }
+                  ]
+                }
               }
             ]
           }
@@ -746,13 +757,15 @@ describe("getCreationFreeBonus", () => {
         effects: [
           {
             transfer: true,
-            changes: [
-              {
-                key: "system.traits.ref",
-                mode: 2,
-                value: 1
-              }
-            ]
+            system: {
+              changes: [
+                {
+                  key: "system.traits.ref",
+                  type: "add",
+                  value: 1
+                }
+              ]
+            }
           }
         ]
       };
@@ -782,13 +795,15 @@ describe("getCreationFreeBonus", () => {
         effects: [
           {
             transfer: true,
-            changes: [
-              {
-                key: "system.traits.sta",
-                mode: 2,
-                value: 1
-              }
-            ]
+            system: {
+              changes: [
+                {
+                  key: "system.traits.sta",
+                  type: "add",
+                  value: 1
+                }
+              ]
+            }
           }
         ]
       };
@@ -846,13 +861,15 @@ describe("getCreationFreeBonus", () => {
             effects: [
               {
                 transfer: true,
-                changes: [
-                  {
-                    key: "system.traits.wil",
-                    mode: 2,
-                    value: 1
-                  }
-                ]
+                system: {
+                  changes: [
+                    {
+                      key: "system.traits.wil",
+                      type: "add",
+                      value: 1
+                    }
+                  ]
+                }
               }
             ]
           }
@@ -872,13 +889,15 @@ describe("getCreationFreeBonus", () => {
             effects: [
               {
                 transfer: true,
-                changes: [
-                  {
-                    key: "system.traits.sta",
-                    mode: 2,
-                    value: 1
-                  }
-                ]
+                system: {
+                  changes: [
+                    {
+                      key: "system.traits.sta",
+                      type: "add",
+                      value: 1
+                    }
+                  ]
+                }
               }
             ]
           }
@@ -899,7 +918,7 @@ describe("getCreationFreeBonus", () => {
       };
 
       const bonus = getCreationFreeBonus(actor, "sta");
-      expect(bonus).toBe(0); // No error, just returns 0
+      expect(bonus).toBe(0); // No error; returns 0
     });
 
     it("should handle getFlag returning falsy", () => {
@@ -930,13 +949,44 @@ describe("getCreationFreeBonus", () => {
   });
 });
 
+describe("getCreationFreeBonusSources", () => {
+  beforeEach(() => {
+    global.fromUuidSync = vi.fn(() => null);
+  });
+
+  const effectItem = (type, key) => ({
+    type,
+    effects: [{ transfer: true, system: { changes: [{ key, type: "add", value: 1 }] } }]
+  });
+  const legacyItem = (type, trait) => ({ type, effects: [], system: { trait, bonus: 1 } });
+
+  it("reports an Active Effect bonus as effects, not legacy", () => {
+    const actor = { items: [effectItem("family", "system.traits.str")], getFlag: () => null };
+    expect(getCreationFreeBonusSources(actor, "str")).toEqual({ effects: 1, legacy: 0 });
+  });
+
+  it("reports the legacy trait and bonus fields as legacy, not effects", () => {
+    const actor = { items: [legacyItem("family", "str")], getFlag: () => null };
+    expect(getCreationFreeBonusSources(actor, "str")).toEqual({ effects: 0, legacy: 1 });
+  });
+
+  it("keeps the two sources apart when the Family and School use different forms", () => {
+    const actor = {
+      items: [effectItem("family", "system.traits.str"), legacyItem("school", "str")],
+      getFlag: () => null
+    };
+    expect(getCreationFreeBonusSources(actor, "str")).toEqual({ effects: 1, legacy: 1 });
+    expect(getCreationFreeBonus(actor, "str")).toBe(2);
+  });
+
+  it("returns zero for both sources when an item cannot be read", () => {
+    const actor = { items: [{ type: "family", effects: null }], getFlag: () => null };
+    expect(getCreationFreeBonusSources(actor, "str")).toEqual({ effects: 0, legacy: 0 });
+  });
+});
+
 describe("getCreationFreeBonusVoid", () => {
   beforeEach(() => {
-    global.CONST = {
-      ACTIVE_EFFECT_MODES: {
-        ADD: 2
-      }
-    };
     global.fromUuidSync = vi.fn(() => null);
   });
 
@@ -949,13 +999,15 @@ describe("getCreationFreeBonusVoid", () => {
             effects: [
               {
                 transfer: true,
-                changes: [
-                  {
-                    key: "system.rings.void.rank",
-                    mode: 2,
-                    value: 1
-                  }
-                ]
+                system: {
+                  changes: [
+                    {
+                      key: "system.rings.void.rank",
+                      type: "add",
+                      value: 1
+                    }
+                  ]
+                }
               }
             ]
           }
@@ -975,13 +1027,15 @@ describe("getCreationFreeBonusVoid", () => {
             effects: [
               {
                 transfer: true,
-                changes: [
-                  {
-                    key: "system.rings.void.value",
-                    mode: 2,
-                    value: 1
-                  }
-                ]
+                system: {
+                  changes: [
+                    {
+                      key: "system.rings.void.value",
+                      type: "add",
+                      value: 1
+                    }
+                  ]
+                }
               }
             ]
           }
@@ -1001,13 +1055,15 @@ describe("getCreationFreeBonusVoid", () => {
             effects: [
               {
                 transfer: true,
-                changes: [
-                  {
-                    key: "system.rings.void.rank",
-                    mode: 2,
-                    value: 1
-                  }
-                ]
+                system: {
+                  changes: [
+                    {
+                      key: "system.rings.void.rank",
+                      type: "add",
+                      value: 1
+                    }
+                  ]
+                }
               }
             ]
           },
@@ -1016,13 +1072,15 @@ describe("getCreationFreeBonusVoid", () => {
             effects: [
               {
                 transfer: true,
-                changes: [
-                  {
-                    key: "system.rings.void.value",
-                    mode: 2,
-                    value: 1
-                  }
-                ]
+                system: {
+                  changes: [
+                    {
+                      key: "system.rings.void.value",
+                      type: "add",
+                      value: 1
+                    }
+                  ]
+                }
               }
             ]
           }
@@ -1100,13 +1158,15 @@ describe("getCreationFreeBonusVoid", () => {
             effects: [
               {
                 transfer: true,
-                changes: [
-                  {
-                    key: "system.traits.sta",
-                    mode: 2,
-                    value: 1
-                  }
-                ]
+                system: {
+                  changes: [
+                    {
+                      key: "system.traits.sta",
+                      type: "add",
+                      value: 1
+                    }
+                  ]
+                }
               }
             ]
           }

@@ -60,8 +60,8 @@ async function applyWoundsToToken(damage) {
   // Apply armor reduction per L5R4 rules (minimum 0 damage)
   const reducedDamage = Math.max(0, damage - armorReduction);
 
-  const currentSuffered = actor.system?.suffered ?? 0;
-  const newSuffered = currentSuffered + reducedDamage;
+  // The stored value, not the prepared one, so an Active Effect on Wounds is never written into storage (B6)
+  const newSuffered = actor._source.system.suffered + reducedDamage;
 
   await actor.update({ "system.suffered": newSuffered });
 
@@ -134,13 +134,13 @@ async function reduceAndApplyWounds(damage, _actorId) {
   const armorReduction = targetActor.system?.armorTn?.reduction ?? 0;
   const finalDamage = Math.max(0, afterVoid - armorReduction);
 
-  // Apply final damage and spend void point in single atomic update
-  const currentSuffered = targetActor.system?.suffered ?? 0;
-  const newSuffered = currentSuffered + finalDamage;
+  // Apply final damage and spend void point in single atomic update. Both start from the stored values, so an
+  // Active Effect on Void Points or Wounds is never written into storage (B6).
+  const stored = targetActor._source.system;
 
   await targetActor.update({
-    "system.rings.void.value": voidCurrent - 1,
-    "system.suffered": newSuffered
+    "system.rings.void.value": stored.rings.void.value - 1,
+    "system.suffered": stored.suffered + finalDamage
   });
 
   // Show notification with both reductions if armor applied
@@ -169,7 +169,7 @@ async function reduceAndApplyWounds(damage, _actorId) {
  */
 export function registerChatDamageButtons() {
   Hooks.on("renderChatMessageHTML", (message, html) => {
-    // Foundry v13 renderChatMessageHTML passes HTMLElement directly
+    // renderChatMessageHTML passes an HTMLElement, not jQuery
     const element = html;
 
     // Apply wounds button

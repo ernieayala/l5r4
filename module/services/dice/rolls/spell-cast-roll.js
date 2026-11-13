@@ -146,7 +146,6 @@ export async function SpellCastRoll({ actor, spell, woundPenalty = 0, showDialog
 
   // Store slot consumption details for later (after roll succeeds)
   const slotPath = useElementalSlot ? `system.spellSlots.${ringKey}` : "system.spellSlots.void";
-  const currentSlots = useElementalSlot ? elementalCurrent : voidCurrent;
 
   // Build chat label
   let label = `${game.i18n.localize("l5r4.ui.mechanics.rolls.spellCasting")}: ${spell.name}`;
@@ -248,8 +247,9 @@ export async function SpellCastRoll({ actor, spell, woundPenalty = 0, showDialog
 
     // Consume slot AFTER roll succeeds
     // Per L5R4 rules: slot consumed when Spell Casting Roll is made (not before)
-    // The slot is lost only if the spell casts
-    await actor.update({ [slotPath]: currentSlots - 1 });
+    // The slot is lost only if the spell casts. The write starts from the stored count, not the prepared one
+    // checked above, so an Active Effect on spell slots is never written into storage (B6).
+    await actor.update({ [slotPath]: foundry.utils.getProperty(actor._source, slotPath) - 1 });
 
     return message;
   } catch (err) {

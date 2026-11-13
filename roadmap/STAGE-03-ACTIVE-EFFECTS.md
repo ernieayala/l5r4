@@ -51,8 +51,10 @@ the effect gets `DEFAULT_ICON` (`icons/svg/aura.svg`). Effects stored by 3.2.1 a
 |-------|--------|
 | Data | A model for core's `base` ActiveEffect type extending `foundry.data.ActiveEffectTypeDataModel`, assigned to `CONFIG.ActiveEffect.dataModels.base` and not declared in `system.json` (a core type there invalidates `documentTypes`, FOUNDRY-V14-REFERENCE.md §2.2), adding `rules` (an `ArrayField` of `ObjectField`, default empty) for Stage 7 (X6) |
 | Utils, Services | Read `effect.system.changes` and `change.type === "add"`; create effects with `system.changes` |
-| Services, Sheets | B6 (AUTOMATION.md §2): read-then-write sites take the stored value from `_source`, not the prepared one, so an effect bonus is never written into storage (`chat-damage-buttons.js:63-66, 124-143`, `void-manager.js:191, 275`, `spell-cast-roll.js:120-121, 252`, `maho-cast-roll.js:111, 206-207`, `initiative.js:70-82`, `pc-actions-handler.js:175`, `void-points-handler.js:23, 63`, `spell-slot-manager.js`, `pc-adjustment-handler.js`) |
-| Config, entry | Register status effects in the v14 form; keep every id, name, and image |
+| Services, Sheets | B6 (AUTOMATION.md §2): read-then-write sites take the stored value from `_source`, not the prepared one, so an effect bonus is never written into storage (`chat-damage-buttons.js:63-66, 124-143`, `void-manager.js:191, 275`, `spell-cast-roll.js:120-121, 252`, `maho-cast-roll.js:111, 206-207`, `initiative.js:70-82`, `pc-actions-handler.js:175`, `void-points-handler.js:23, 63`, `spell-slot-manager.js`, `pc-adjustment-handler.js`, `rest.js:52`). Availability checks keep reading the prepared value |
+| Documents, Utils, Setup | XP: only the legacy creation fields mark a free stored Trait rank, with a migration for the flag (Decision 3); #29's XP half |
+| Documents | Weapon damage is recomputed in the owner's derived preparation (`item-enrichment.js`), because item preparation runs before the owner's `"initial"` phase (`client/documents/actor.mjs:471-474`); #29's damage half |
+| Config, entry | Register status effects in the v14 form (assign by id into the `CONFIG.statusEffects` proxy, `client/config.mjs:1690-1718`; the whole-property setter is deprecated, `client/client.mjs:29-39`); keep every id, name, and image |
 | Docs | `ACTIVE_EFFECTS.md` uses change types and states the phase to pick for Trait changes |
 
 ## Acceptance
@@ -65,10 +67,8 @@ the effect gets `DEFAULT_ICON` (`icons/svg/aura.svg`). Effects stored by 3.2.1 a
 ## Decisions
 
 1. Effects stored by 3.2.1 worlds are migrated by core (`active-effect.mjs:167-191`); the system writes only the v14 shape.
-
-### Still open
-
-- Default phase for effects users build in the effect sheet: `"initial"` (Traits feed derived values) is the likely answer; confirm when the sheet's default is checked.
+2. Changes default to phase `"initial"`: the base model keeps core's change schema (`common/data/active-effect.mjs:17-24`, `phase` initial `"initial"`), and the effect sheet adds a change from that schema's initial value (`client/applications/sheets/active-effect-config.mjs:246-251`). Stored 3.2.1 changes carry no phase and take the same default.
+3. #29's XP half is fixed here (Ernie: whatever matches the rules best). Its cause is XP bookkeeping, not effect phases: `trackXpExpenditure` marked any creation bonus as a free stored rank (`xpFreeTraitBase`) when the Trait reached 3. Only the legacy `system.trait` / `bonus` fields mark it now, because an Active Effect bonus adds on top of the stored rank; every stored rank is then bought at 4 × the Trait's new rank with the bonus (Core Rulebook p.103). `module/setup/migrations/actors/xp-free-trait-base.js` clears the flag where the bonus is an effect and resets `xpRetroactiveVersion` so the XP history rebuilds.
 
 ## Out of scope
 

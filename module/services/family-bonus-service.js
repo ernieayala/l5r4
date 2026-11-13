@@ -58,7 +58,7 @@ export class FamilyBonusService {
    *
    * Calculates the total family bonus applied to a single trait by summing all
    * Active Effect changes from the actor's family Item that target the trait property.
-   * Only considers effects with transfer=true and ADD mode, and only positive values.
+   * Only considers effects with transfer=true, changes of type "add", and positive values.
    *
    * @param {L5R4Actor} actor - The actor to check for family bonuses
    * @param {string} traitKey - The trait key (e.g., "str", "agi", "int")
@@ -93,8 +93,8 @@ export class FamilyBonusService {
           continue;
         }
 
-        for (const change of effect.changes ?? []) {
-          if (change?.key === effectKey && change?.mode === CONST.ACTIVE_EFFECT_MODES.ADD) {
+        for (const change of effect.system?.changes ?? []) {
+          if (change?.key === effectKey && change?.type === "add") {
             const value = Number(change?.value ?? 0);
             // Only accept positive bonuses - negative values would be penalties, not family bonuses
             if (Number.isFinite(value) && value > 0) {
@@ -120,7 +120,7 @@ export class FamilyBonusService {
    *
    * Returns an object with all eight trait keys mapped to their family bonuses.
    * Uses Active Effects from the family Item, filtering for effects that modify
-   * trait properties (system.traits.*) with transfer=true and ADD mode.
+   * trait properties (system.traits.*) with transfer=true and change type "add".
    *
    * This is more efficient than calling getBonus() multiple times when you need
    * bonuses for multiple traits.
@@ -143,8 +143,8 @@ export class FamilyBonusService {
           continue;
         }
 
-        for (const change of effect.changes ?? []) {
-          if (change?.mode !== CONST.ACTIVE_EFFECT_MODES.ADD) {
+        for (const change of effect.system?.changes ?? []) {
+          if (change?.type !== "add") {
             continue;
           }
 
@@ -229,7 +229,7 @@ export class FamilyBonusService {
    * Gets the display name of the actor's family.
    *
    * Reads from actor flags (flags.l5r4.familyName) for display purposes.
-   * This is stored separately from the family Item for performance.
+   * The name sits in a flag apart from the family Item, so reading it needs no item lookup.
    *
    * @param {L5R4Actor} actor - The actor to retrieve the family name for
    * @returns {string|null} The family name, or null if not set or error
