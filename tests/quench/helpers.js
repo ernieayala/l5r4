@@ -2,20 +2,32 @@
 const UPDATE_TIMEOUT_MS = 5000;
 
 /**
- * How long core's chat pop-up card for a new message takes to render and animate in, with margin. A message deleted
- * before then leaves core looking up a card that is gone (client/applications/sidebar/tabs/chat.mjs:1318-1321), and
- * the promise rejects up to a second later, inside whatever test runs then. The system never deletes messages; tests
- * that clean up their messages do.
+ * Core shows a new message as a pop-up card: it adds the card hidden, waits for a spacer animation, then looks the
+ * card up again to reveal it (client/applications/sidebar/tabs/chat.mjs:1288-1327). A message deleted before the
+ * reveal takes its card with it, and the lookup rejects inside whatever test runs then. The animation waits for
+ * frames, which Chrome throttles, so no fixed delay is enough. The system never deletes messages; tests that clean
+ * up their messages do.
  */
-const CHAT_NOTIFICATION_SETTLE_MS = 2000;
+const PENDING_CHAT_CARD = "#chat-notifications .chat-log :is(.message[hidden], .spacer)";
+
+/** Time for a message created right before the call to start its pop-up. */
+const CHAT_NOTIFICATION_START_MS = 500;
+
+/** Longest wait for pending pop-ups before giving up. */
+const CHAT_NOTIFICATION_TIMEOUT_MS = 15_000;
 
 /**
- * Wait until chat pop-up cards from earlier messages have finished, so a message deleted now does not reject in a
+ * Wait until every chat pop-up card that has started is revealed, so a message deleted now does not reject in a
  * later test, and a rejection from an earlier batch lands before this one starts.
  * @returns {Promise<void>}
  */
-export function settleChatNotifications() {
-  return new Promise(resolve => setTimeout(resolve, CHAT_NOTIFICATION_SETTLE_MS));
+export async function settleChatNotifications() {
+  const wait = ms => new Promise(resolve => setTimeout(resolve, ms));
+  await wait(CHAT_NOTIFICATION_START_MS);
+  const deadline = Date.now() + CHAT_NOTIFICATION_TIMEOUT_MS;
+  while (document.querySelector(PENDING_CHAT_CARD) && Date.now() < deadline) {
+    await wait(100);
+  }
 }
 
 /**

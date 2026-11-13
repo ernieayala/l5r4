@@ -36,6 +36,7 @@ import { SYS_ID } from "../config/constants.js";
 import { enhanceItemSheetData } from "../documents/item/integration/sheet-data.js";
 import { ItemEffectsHandler } from "./handlers/item-effects-handler.js";
 import EmphasisManager from "../apps/emphasis-manager.js";
+import { parseRulesJson } from "../utils/rule-engine.js";
 
 const { HandlebarsApplicationMixin } = foundry.applications.api;
 const { ItemSheetV2 } = foundry.applications.sheets;
@@ -184,6 +185,10 @@ export default class L5R4ItemSheet extends HandlebarsApplicationMixin(ItemSheetV
     },
     effects: {
       template: `systems/${SYS_ID}/templates/item/_partials/_tab-effects.hbs`,
+      scrollable: [".tab-content"]
+    },
+    rules: {
+      template: `systems/${SYS_ID}/templates/item/_partials/_tab-rules.hbs`,
       scrollable: [".tab-content"]
     }
   };
@@ -337,6 +342,7 @@ export default class L5R4ItemSheet extends HandlebarsApplicationMixin(ItemSheetV
     context.enriched = enriched;
 
     context.effects = this.item.effects?.contents ?? [];
+    context.rulesJson = JSON.stringify(item._source.system.rules, null, 2);
 
     // Weapon skill integration: When weapon is owned by a PC, populate skill dropdown
     // from parent actor's skill items. This enables players to associate specific skills
@@ -411,8 +417,34 @@ export default class L5R4ItemSheet extends HandlebarsApplicationMixin(ItemSheetV
 
     tabs.push("description");
     tabs.push("effects");
+    tabs.push("rules");
 
     return tabs;
+  }
+
+  /**
+   * Turn the Rules tab's JSON text into `system.rules`. Text that is not a JSON list of rule objects throws, which
+   * ApplicationV2 shows as an error notification and saves nothing (client/applications/api/application.mjs:2159-2175).
+   *
+   * @param {SubmitEvent|null} event
+   * @param {HTMLFormElement} form
+   * @param {FormDataExtended} formData
+   * @returns {object}
+   * @override
+   */
+  _processFormData(event, form, formData) {
+    const data = super._processFormData(event, form, formData);
+    if (!("rulesJson" in data)) {
+      return data;
+    }
+    const { rules, error, detail } = parseRulesJson(String(data.rulesJson));
+    delete data.rulesJson;
+    if (error) {
+      throw new Error(game.i18n.localize(`l5r4.ui.rules.${error}`, { error: detail }));
+    }
+    data.system ??= {};
+    data.system.rules = rules;
+    return data;
   }
 
   /**

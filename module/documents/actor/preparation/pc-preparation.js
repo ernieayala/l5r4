@@ -41,6 +41,7 @@ import {
 import { prepareTraitsAndRings, prepareMovement } from "../calculations/shared-traits-rings.js";
 import { applyConditionEffects } from "../calculations/condition-effects.js";
 import { enrichActorItems } from "../calculations/item-enrichment.js";
+import { applyArmorRules, applyDerivedRules } from "../rules.js";
 
 /**
  * Prepares derived data for PC actors.
@@ -76,6 +77,9 @@ export function preparePcData(actor, sys, finalizeWoundPenaltiesFn, calculateIns
 
   // Calculate base traits and rings first (required for all subsequent calculations)
   prepareTraitsAndRings(sys);
+
+  // Rules that need Traits and Rings, before the values their outputs feed (Initiative, Wounds, roll bonuses)
+  applyDerivedRules(actor, sys);
 
   // Helper to access effective trait values (after all modifiers)
   const tEff = sys._derived?.traitsEff || {};
@@ -128,6 +132,7 @@ export function preparePcData(actor, sys, finalizeWoundPenaltiesFn, calculateIns
 
   // Apply stance effects (must happen after traits/armor are calculated)
   applyStanceAutomation(actor, sys);
+  applyArmorRules(sys);
 
   // Apply condition effects (must happen after stance)
   applyConditionEffects(actor, sys);

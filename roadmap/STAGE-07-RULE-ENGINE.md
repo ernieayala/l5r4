@@ -52,10 +52,21 @@ vocabulary).
 
 1. Mechanics live in `system.rules` on Items and on Active Effects; effects stay Active Effects and expire
    through the core registry (AUTOMATION.md §1, FOUNDRY-V14-REFERENCE.md §6.3).
-
-### Still open
-
-- Positional rules (auras, Guard's 5 ft) read token positions; build them here or leave them manual.
+2. Positional rules (auras, Guard's 5 ft) stay manual: a `RollOption` toggle the player sets. Token positions
+   are revisited with Guard in Stage 10 (Ernie, 2026-11-13).
+3. Only armor gates its rules on `equipped`: weapons have no equip control on the sheet, so a weapon's rules
+   always apply (a rule for attacks with one weapon waits for Stage 8 selectors).
+4. The conversions ship with their migrations here, not in Stage 12 (CLAUDE.md: a schema change ships with its
+   migration): `module/setup/migrations/items/item-rules.js` turns Family and School Trait effects into
+   TraitAdjust rules and gives a Master of Blood advantage its RollOption; `actors/status-effect-rules.js` gives
+   3.2.1 Defense Stance and Mounted effects their rules.
+5. Until the Stage 8 pipeline, rolls read `system.bonuses`: a RollModifier on a `skill:`, `trait:`, or `ring:`
+   selector whose predicate holds during preparation also lands there; `attack` rules are read from the bag with
+   the target's options. Skill bonus fields act as one synthesized RollModifier (`SkillData#ownedRules`).
+6. Rule schemas are checked in the Quench `rules` batch, since DataModels need Foundry; Vitest covers each key's
+   output through `module/utils/rule-engine.js`.
+7. Full Attack and Full Defense stay in `stance-effects.js` until Stage 9, which moves stances and conditions to
+   rule data; only Defense Stance converts here.
 
 ## Out of scope
 

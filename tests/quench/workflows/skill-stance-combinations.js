@@ -22,6 +22,7 @@
  * @see module/services/stance/rolls/attack-bonuses.js
  */
 
+import { statusRules } from "../../../module/utils/rule-engine.js";
 import { SYS_ID } from "../../../module/config/constants.js";
 import { createTestPC } from "../../fixtures/actor-fixtures.js";
 import { createSkillData } from "../../fixtures/item-fixtures.js";
@@ -287,6 +288,7 @@ export function registerSkillStanceCombinationTests(quench) {
             {
               name: "Defense Stance",
               img: "icons/svg/shield.svg",
+              system: { rules: statusRules("defenseStance") },
               statuses: ["defenseStance"]
             }
           ]);
@@ -303,6 +305,7 @@ export function registerSkillStanceCombinationTests(quench) {
             {
               name: "Defense Stance",
               img: "icons/svg/shield.svg",
+              system: { rules: statusRules("defenseStance") },
               statuses: ["defenseStance"]
             }
           ]);
@@ -324,6 +327,7 @@ export function registerSkillStanceCombinationTests(quench) {
             {
               name: "Defense Stance",
               img: "icons/svg/shield.svg",
+              system: { rules: statusRules("defenseStance") },
               statuses: ["defenseStance"]
             }
           ]);
@@ -344,6 +348,7 @@ export function registerSkillStanceCombinationTests(quench) {
             {
               name: "Defense Stance",
               img: "icons/svg/shield.svg",
+              system: { rules: statusRules("defenseStance") },
               statuses: ["defenseStance"]
             }
           ]);
@@ -614,6 +619,7 @@ export function registerSkillStanceCombinationTests(quench) {
             {
               name: "Defense Stance",
               img: "icons/svg/shield.svg",
+              system: { rules: statusRules("defenseStance") },
               statuses: ["defenseStance"]
             }
           ]);

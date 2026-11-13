@@ -12,6 +12,7 @@ import { migrateEmphasisStringToArray } from "../items/emphasis.js";
 import { migrateArmorTypes } from "../items/armor-types.js";
 import { migrateFreeRaisesDefaults } from "../items/free-raises.js";
 import { normalizeItems } from "../items/normalize.js";
+import { migrateItemRules } from "../items/item-rules.js";
 import { migrateEmbeddedItemIcons } from "../icons/icon-paths.js";
 
 /**
@@ -19,7 +20,7 @@ import { migrateEmbeddedItemIcons } from "../icons/icon-paths.js";
  *
  * Applies all item-type migrations to embedded items (skills, equipment, weapons, etc.)
  * owned by an actor. Processes schema remapping, bow→weapon conversions, skill defaults,
- * icon updates, and data normalization in sequence.
+ * icon updates, data normalization, and item mechanics into rules in sequence.
  *
  * @param {Actor} actor - Actor document containing embedded items to migrate
  * @param {string} labelPrefix - Context prefix for logging (e.g., "actor", "compendium-actor")
@@ -41,4 +42,5 @@ export async function migrateActorEmbeddedItems(actor, labelPrefix) {
   await migrateFreeRaisesDefaults(actor.items.contents, `${labelPrefix}-free-raises:${actor.id}`);
   await migrateEmbeddedItemIcons(actor.items.contents, `${labelPrefix}-icon-migration:${actor.id}`);
   await normalizeItems(actor.items.contents, `${labelPrefix}-items-norm:${actor.id}`);
+  await migrateItemRules(actor.items.contents, `${labelPrefix}-item-rules:${actor.id}`);
 }

@@ -325,7 +325,7 @@ export function preparePcExperience(actor, sys) {
  * - Characters get free +1 to certain traits at creation
  * - A legacy Family/School bonus (`system.trait`/`bonus`) is not applied to the Trait, so the player stores
  *   it as a rank: the first raise to rank 3 is that free rank
- * - An Active Effect bonus adds on top of the stored rank and never marks a free rank
+ * - A TraitAdjust rule bonus adds on top of the stored rank and never marks a free rank
  * - Tracked in xpFreeTraitBase flag
  * - Retroactive version flag prevents double-application
  *
@@ -350,7 +350,7 @@ export function trackXpExpenditure(actor, changed) {
         }
 
         const freeBase = toInt(freeTraitBase?.[k] ?? 0);
-        // Only the legacy fields are a stored rank. An Active Effect bonus adds on top of the stored rank, so
+        // Only the legacy fields are a stored rank. A TraitAdjust rule adds on top of the stored rank, so
         // every stored rank is bought and costs 4 × the Trait's new rank with the bonus (Core Rulebook p.103).
         const legacyBonus = toInt(getCreationFreeBonusSources(actor, k).legacy);
 

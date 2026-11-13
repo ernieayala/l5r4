@@ -48,6 +48,7 @@ export async function preloadTemplates() {
     `systems/${SYS_ID}/templates/item/_partials/_tab-modifiers.hbs`,
     `systems/${SYS_ID}/templates/item/_partials/_tab-description.hbs`,
     `systems/${SYS_ID}/templates/item/_partials/_tab-effects.hbs`,
+    `systems/${SYS_ID}/templates/item/_partials/_tab-rules.hbs`,
 
     // Item Sheet - Type-Specific Details Templates
     `systems/${SYS_ID}/templates/item/_type-details/advantage.hbs`,

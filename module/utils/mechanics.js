@@ -335,11 +335,9 @@ export function resolveWeaponSkillTrait(actor, weapon) {
     const traitValue = getEffectiveTrait(actor, skillTrait);
     const skillName = toString(skill.name, "Unknown Skill");
 
-    // Pick up skill bonuses aggregated by item-enrichment.aggregateSkillItemBonuses
-    // (issue #34): Active Effects on a skill item deposit into skill.system.rollBonus,
-    // which item-enrichment then bridges to actor.system.bonuses.skill[name]. Reading
-    // those bonuses here makes the displayed weapon attack formula match what
-    // applySkillAndTraitBonuses will compute at roll time.
+    // The skill's bonus fields (and Active Effects on them) reach actor.system.bonuses.skill[name] as a
+    // RollModifier rule (SkillData#ownedRules). Reading those bonuses here makes the displayed weapon attack
+    // formula match what applySkillAndTraitBonuses will compute at roll time.
     const skillKey = skillName.toLowerCase();
     const skillBonusMap = actor.system?.bonuses?.skill?.[skillKey] || {};
     const skillBonusRoll = toInt(skillBonusMap.roll);

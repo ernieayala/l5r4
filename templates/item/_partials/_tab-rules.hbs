@@ -1,0 +1,5 @@
+<section class="tab {{#if (eq currentTab "rules")}}active{{/if}}" data-tab="rules" data-application-part="rules">
+  {{!-- system.rules as JSON; the sheet parses it on submit (L5R4ItemSheet#_processFormData) --}}
+  <p class="hint">{{localize "l5r4.ui.rules.hint"}}</p>
+  <textarea class="rules-json" name="rulesJson" rows="16" spellcheck="false" {{#unless editable}}disabled{{/unless}}>{{rulesJson}}</textarea>
+</section>

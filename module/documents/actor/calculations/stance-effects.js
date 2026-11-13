@@ -5,8 +5,8 @@
  * L5R4 Stance System:
  * - Characters can adopt combat stances that modify their capabilities
  * - Full Attack: +2k1 attack, +1k1 damage, -10 Armor TN (aggressive)
- * - Defense: +[Air Ring + Defense Skill] Armor TN (cautious)
  * - Full Defense: +[Defense Roll ÷ 2] Armor TN (total defense)
+ * - Defense is an ArmorTN rule on its status effect (module/config/status-effects.js), not code here
  *
  * Architecture:
  * - Reads active stances from actor flags
@@ -24,7 +24,7 @@ import { SYS_ID } from "../../../config/constants.js";
 import { toInt } from "../../../utils/type-coercion.js";
 import { logError } from "../../../utils/error-logging.js";
 import { T } from "../../../utils/localization.js";
-import { getActiveStances, getDefenseSkillRank } from "../../../services/stance/core/helpers.js";
+import { getActiveStances } from "../../../services/stance/core/helpers.js";
 
 /**
  * Applies all active stance effects to actor's system data.
@@ -40,7 +40,7 @@ import { getActiveStances, getDefenseSkillRank } from "../../../services/stance/
  * 4. Applies cumulative armor TN modifier
  *
  * Stances can stack (e.g., multiple stance effects can apply),
- * though typically only one stance is active at a time.
+ * though the stance system keeps one stance active at a time.
  *
  * Modifies sys with:
  * - armorTn.stanceMod: Cumulative armor TN modifier from stances
@@ -71,9 +71,6 @@ export function applyStanceEffects(actor, sys) {
       switch (stanceId) {
         case "fullAttackStance":
           applyFullAttackStance(sys);
-          break;
-        case "defenseStance":
-          applyDefenseStance(actor, sys);
           break;
         case "fullDefenseStance":
           applyFullDefenseStance(actor, sys);
@@ -124,41 +121,6 @@ function applyFullAttackStance(sys) {
     armorTnPenalty: -10,
     attackBonus: "+2k1", // Applied in item enrichment
     damageBonus: "+1k1" // Future implementation
-  };
-}
-
-/**
- * Applies Defense stance effects per L5R4 rules.
- *
- * @param {Actor} actor - The actor in Defense stance
- * @param {Object} sys - Actor's system data
- *
- * @description
- * Defense stance represents a cautious, defensive posture:
- * - Armor TN: +[Air Ring + Defense Skill Rank] bonus
- * - No attack or damage modifiers
- *
- * Defense Skill Priority:
- * 1. Defense skill (if character has it)
- * 2. Reflexes trait (fallback)
- *
- * This stance provides a moderate defensive boost based on the
- * character's agility and defensive training.
- */
-function applyDefenseStance(actor, sys) {
-  const airRing = toInt(sys.rings?.air || 0);
-  const defenseSkillRank = getDefenseSkillRank(actor);
-
-  // Calculate defense bonus: Air Ring + Defense Skill
-  const defenseBonus = airRing + defenseSkillRank;
-
-  sys.armorTn.stanceMod += defenseBonus;
-
-  // Store components for UI display
-  sys._stanceEffects.defense = {
-    armorTnBonus: defenseBonus,
-    airRing: airRing,
-    defenseSkill: defenseSkillRank
   };
 }
 

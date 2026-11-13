@@ -149,10 +149,10 @@ export function applyConditionEffects(actor, sys) {
     }
 
     // Apply armor TN override if any condition set one (Blinded/Stunned/Grappled)
-    // Override replaces base TN but preserves stance modifier
+    // Override replaces base TN but preserves the stance and ArmorTN rule modifiers
     if (sys._conditionEffects.armorTnOverride !== null) {
       const stanceMod = sys.armorTn.stanceMod || 0;
-      sys.armorTn.current = sys._conditionEffects.armorTnOverride + stanceMod;
+      sys.armorTn.current = sys._conditionEffects.armorTnOverride + stanceMod + sys.armorTn.ruleMod;
       sys.armorTn.conditionOverride = true;
     }
 

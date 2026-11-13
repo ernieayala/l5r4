@@ -31,6 +31,8 @@ import {
   determineCurrentWoundLevel
 } from "./actor/calculations/wound-system.js";
 import { trackXpExpenditure } from "./actor/calculations/xp-system.js";
+import { addWoundRollOption, applyInitialRules } from "./actor/rules.js";
+import { rollDataKey } from "../utils/rule-values.js";
 
 /**
  * Actor document for L5R4 Enhanced system.
@@ -158,6 +160,21 @@ export default class L5R4Actor extends Actor {
   }
 
   /**
+   * Apply Active Effect changes for a phase; after the "initial" phase, collect `system.rules` and apply
+   * TraitAdjust (module/documents/actor/rules.js).
+   *
+   * @param {string} phase
+   * @returns {void}
+   * @override
+   */
+  applyActiveEffects(phase) {
+    super.applyActiveEffects(phase);
+    if (phase === "initial") {
+      applyInitialRules(this);
+    }
+  }
+
+  /**
    * Assemble roll data for dice formulas.
    * Combines traits, rings, bonuses, and derived values into flat object.
    *
@@ -181,6 +198,14 @@ export default class L5R4Actor extends Actor {
 
     if (this.system?.bonuses) {
       Object.assign(data, this.system.bonuses);
+    }
+
+    // Skill ranks for rule formulas, e.g. @skills.defense.rank (module/utils/rule-values.js)
+    data.skills = {};
+    for (const item of this.items) {
+      if (item.type === "skill") {
+        data.skills[rollDataKey(item.name)] = { rank: item.system.rank };
+      }
     }
 
     return data;
@@ -230,6 +255,7 @@ export default class L5R4Actor extends Actor {
     if (!woundMode) {
       sys.currentWoundLevel = current;
     }
+    addWoundRollOption(this, sys, current);
 
     // Calculate effective penalty (base penalty + modifiers, minimum 0)
     const curEffPenalty = Math.max(0, toInt(current.penalty) + toInt(sys.woundsPenaltyMod));

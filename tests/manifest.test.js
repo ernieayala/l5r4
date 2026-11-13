@@ -15,7 +15,7 @@ beforeAll(async () => {
   // The data model classes extend Foundry's base models when their modules load; outside Foundry bare classes stand
   // in for them. Nothing here builds a model, only reads which classes are registered.
   globalThis.foundry = {
-    abstract: { TypeDataModel: class {} },
+    abstract: { DataModel: class {}, TypeDataModel: class {} },
     data: { ActiveEffectTypeDataModel: class {} }
   };
   ({ DATA_MODELS, CORE_TYPE_DATA_MODELS } = await import("../module/data/index.js"));

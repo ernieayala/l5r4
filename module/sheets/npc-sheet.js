@@ -56,7 +56,6 @@ import { enhanceItemSheetData } from "../documents/item/integration/sheet-data.j
 import * as Fear from "../services/fear.js";
 import { applyLongRest } from "../services/rest.js";
 import { getActiveStances } from "../services/stance/core/helpers.js";
-import { getMountedStatus } from "../services/mounted-combat.js";
 import { SpellCastRoll } from "../services/dice/rolls/spell-cast-roll.js";
 import { MahoCastRoll } from "../services/dice/rolls/maho-cast-roll.js";
 
@@ -400,8 +399,6 @@ export default class L5R4NpcSheet extends BaseActorSheet {
     const activeStances = getActiveStances(actorObj);
     const currentStance = activeStances[0] || "";
 
-    const mountedStatus = getMountedStatus(actorObj);
-
     // Prepare sortable skills list with user preference
     const skills = (() => {
       // Define column extractors for sorting
@@ -454,7 +451,6 @@ export default class L5R4NpcSheet extends BaseActorSheet {
       actor: this.actor,
       system: actorObj.system,
       currentStance,
-      mountedStatus,
       collapsedSections,
       attacks,
       firstEmptyAttack: attacks.find(slot => slot.empty)?.key ?? null,

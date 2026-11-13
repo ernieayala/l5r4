@@ -24,7 +24,6 @@
 import { getSortPref, sortWithPref } from "../../utils/sorting.js";
 import { toInt } from "../../utils/type-coercion.js";
 import { getActiveStances } from "../../services/stance/core/helpers.js";
-import { getMountedStatus } from "../../services/mounted-combat.js";
 import { getSectionCollapsedMap } from "../../utils/section-state.js";
 
 /**
@@ -392,36 +391,13 @@ export class PcContextBuilder {
   }
 
   /**
-   * Extract stance and mounted status for context.
-   *
-   * Provides current combat stance and mounted state for template rendering.
-   * Used to display stance effects, mounted combat bonuses, and UI state.
-   *
-   * **Stances:**
-   * - Attack: Standard offensive stance
-   * - Defense: +10 Armor TN, -10 to all rolls
-   * - Full Attack: +2k1 attack/damage, -10 Armor TN
-   * - Full Defense: Double Reflexes for Armor TN
-   * - Center: +1k1 to next roll
-   *
-   * **Mounted Status:**
-   * - Provides Free Raise on attack rolls per core rules
-   * - Affects movement and positioning
+   * Extract the current combat stance for context.
    *
    * @param {Actor} actor - L5R4 Actor document
-   * @returns {Object} Stance and mounted status
-   * @returns {string} returns.currentStance - Current stance identifier (empty if none)
-   * @returns {Object} returns.mountedStatus - Mounted combat status from service
+   * @returns {string} Current stance identifier (empty if none)
    */
-  static extractStanceAndMounted(actor) {
-    const activeStances = getActiveStances(actor);
-    const currentStance = activeStances[0] || "";
-    const mountedStatus = getMountedStatus(actor);
-
-    return {
-      currentStance,
-      mountedStatus
-    };
+  static extractStance(actor) {
+    return getActiveStances(actor)[0] || "";
   }
 
   /**

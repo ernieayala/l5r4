@@ -562,7 +562,7 @@ export default class L5R4PcSheet extends BaseActorSheet {
     const masteries = PcContextBuilder.buildMasteryList(skills);
     const traitsEff = PcContextBuilder.extractEffectiveTraits(actorObj);
     const bioItems = PcContextBuilder.extractBioItems(all);
-    const { currentStance, mountedStatus } = PcContextBuilder.extractStanceAndMounted(actorObj);
+    const currentStance = PcContextBuilder.extractStance(actorObj);
     const collapsedSections = PcContextBuilder.extractCollapsedSections(actorObj.id);
 
     const context = {
@@ -576,7 +576,6 @@ export default class L5R4PcSheet extends BaseActorSheet {
       enriched: { notes: enrichedNotes },
       traitsEff,
       currentStance,
-      mountedStatus,
       collapsedSections,
       // Lazy getter: Defers expensive sorting until template accesses property
       get advDisList() {

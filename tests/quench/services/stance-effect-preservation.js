@@ -16,6 +16,7 @@
  * @module tests/quench/services/stance-effect-preservation
  */
 
+import { statusRules } from "../../../module/utils/rule-engine.js";
 import { SYS_ID } from "../../../module/config/constants.js";
 import { createTestPC } from "../../fixtures/actor-fixtures.js";
 
@@ -108,6 +109,7 @@ export function registerStanceEffectPreservationTests(quench) {
           const effectData = {
             name: "Defense Stance", // Valid name required by Foundry v13
             img: `systems/${SYS_ID}/assets/icons/defence-stance.webp`,
+            system: { rules: statusRules("defenseStance") },
             statuses: ["defenseStance"]
             // No changes array
           };
@@ -181,6 +183,7 @@ export function registerStanceEffectPreservationTests(quench) {
             {
               name: "Defense Stance",
               img: `systems/${SYS_ID}/assets/icons/defence-stance.webp`,
+              system: { rules: statusRules("defenseStance") },
               statuses: ["defenseStance"],
               flags: {
                 [SYS_ID]: {

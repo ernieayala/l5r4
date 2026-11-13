@@ -34,6 +34,20 @@ export default class SkillData extends ItemData {
     };
   }
 
+  /**
+   * The roll, keep, and total bonus fields, which the skill sheet edits and Active Effects on the skill change,
+   * act as one RollModifier on this skill's rolls.
+   * @override
+   */
+  get ownedRules() {
+    const { rollBonus: roll, keepBonus: keep, totalBonus: total } = this;
+    if (!roll && !keep && !total) {
+      return this.rules;
+    }
+    const selector = `skill:${this.parent.name.toLowerCase().trim()}`;
+    return [...this.rules, { key: "RollModifier", selector, roll, keep, total }];
+  }
+
   /** @override */
   static migrateData(source) {
     migrateSkillSource(source);

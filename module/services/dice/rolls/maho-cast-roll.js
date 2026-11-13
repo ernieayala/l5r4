@@ -70,10 +70,8 @@ export async function MahoCastRoll({ actor, spell, woundPenalty = 0, showDialog 
   // Calculate base blood cost: 2×Mastery Rank
   let baseBloodCost = masteryLevel * 2;
 
-  // Check for Master of Blood power
-  const hasMasterOfBlood = actor.items.some(
-    i => i.type === "advantage" && i.name?.toLowerCase().includes("master of blood")
-  );
+  // Master of Blood: the item carries a RollOption rule with this option
+  const hasMasterOfBlood = actor.rollOptions.has("master-of-blood");
 
   if (hasMasterOfBlood) {
     baseBloodCost = Math.max(baseBloodCost - 1, 1);

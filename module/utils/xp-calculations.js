@@ -8,12 +8,13 @@
  * - Skills: 1 × new rank
  * - Emphases: 2 XP flat cost
  *
- * Also handles character creation bonuses from Family and School items,
- * supporting both Active Effects (modern) and legacy bonus systems.
+ * Also handles character creation bonuses from Family and School items, read from their TraitAdjust rules or,
+ * for an item without one, from the legacy `trait`/`bonus` fields.
  */
 
 import { SYS_ID } from "../config/constants.js";
 import { toNumber, toString } from "./type-coercion.js";
+import { traitAdjustTotal } from "./rule-engine.js";
 import {
   TRAIT_XP_MULTIPLIER,
   VOID_XP_MULTIPLIER,
@@ -105,23 +106,22 @@ export function calculateEmphasisCost() {
  * Internal helper to calculate creation bonuses from Family/School.
  *
  * Aggregates bonuses from:
- * 1. Active Effects (modern): Checks transferred effects with matcher
- * 2. Legacy system: Checks system.trait and system.bonus fields
+ * 1. TraitAdjust rules in the item's `system.rules`
+ * 2. Legacy system: the item's system.trait and system.bonus fields, when it has no such rule
  *
  * Deduplicates by document UUID/ID to prevent double-counting.
  *
- * The two sources are summed apart because they reach the Trait differently: an effect adds on top of the
+ * The two sources are summed apart because they reach the Trait differently: a rule adds on top of the
  * stored rank, while the legacy fields are never applied, so the player stores the bonus rank themselves.
  *
  * @param {Object} actor - Foundry actor document
- * @param {Function} effectMatcher - Predicate to match Active Effect changes
- * @param {Function} legacyMatcher - Predicate to match legacy bonus (traitKey, amount)
- * @returns {{effects: number, legacy: number}} Bonus from transferred effects and from the legacy fields
+ * @param {string} trait - Trait key, or "void" for the Void Ring
+ * @returns {{rules: number, legacy: number}} Bonus from TraitAdjust rules and from the legacy fields
  * @private
  */
-function getCreationBonusInternal(actor, effectMatcher, legacyMatcher) {
+function getCreationBonusInternal(actor, trait) {
   try {
-    let effects = 0;
+    let rules = 0;
     let legacy = 0;
     // Track processed documents to prevent duplicates
     const seen = new Set();
@@ -139,33 +139,17 @@ function getCreationBonusInternal(actor, effectMatcher, legacyMatcher) {
         seen.add(did);
       }
 
-      // Check Active Effects (modern system)
-      let ae = 0;
-      for (const eff of doc.effects ?? []) {
-        // Only process transferred effects (apply to actor)
-        if (eff?.transfer !== true) {
-          continue;
-        }
-        for (const ch of eff?.system?.changes ?? []) {
-          if (effectMatcher(ch)) {
-            const v = toNumber(ch?.value, 0);
-            if (Number.isFinite(v)) {
-              ae += v;
-            }
-          }
-        }
-      }
-
-      // If Active Effects found, use those and skip legacy
-      if (ae !== 0) {
-        effects += ae;
+      // A TraitAdjust rule replaces the legacy fields
+      const fromRules = traitAdjustTotal(doc.system?.rules, trait);
+      if (fromRules !== 0) {
+        rules += fromRules;
         return;
       }
 
       // Fallback to legacy bonus system
       const tKey = toString(doc?.system?.trait).toLowerCase();
       const amt = toNumber(doc?.system?.bonus, NaN);
-      if (legacyMatcher(tKey, amt)) {
+      if (tKey === trait && Number.isFinite(amt)) {
         legacy += amt;
       }
     };
@@ -189,10 +173,10 @@ function getCreationBonusInternal(actor, effectMatcher, legacyMatcher) {
       }
     }
 
-    return { effects, legacy };
+    return { rules, legacy };
   } catch {
     // Return 0 on any error
-    return { effects: 0, legacy: 0 };
+    return { rules: 0, legacy: 0 };
   }
 }
 
@@ -201,27 +185,21 @@ function getCreationBonusInternal(actor, effectMatcher, legacyMatcher) {
  *
  * @param {Object} actor - Foundry actor document
  * @param {string} key - Trait key ("sta", "str", "ref", "agi", etc.)
- * @returns {{effects: number, legacy: number}} Bonus from Family/School Active Effects, which add on top of the
+ * @returns {{rules: number, legacy: number}} Bonus from Family/School TraitAdjust rules, which add on top of the
  *   stored rank, and from the legacy `trait`/`bonus` fields, which the player stores as a rank
  *
  * @example
- * getCreationFreeBonusSources(actor, "str") // { effects: 1, legacy: 0 } (Family effect gives +1 Strength)
+ * getCreationFreeBonusSources(actor, "str") // { rules: 1, legacy: 0 } (Family rule gives +1 Strength)
  */
 export function getCreationFreeBonusSources(actor, key) {
-  return getCreationBonusInternal(
-    actor,
-    // Match Active Effect for this trait
-    ch => ch?.key === `system.traits.${key}` && ch?.type === "add",
-    // Match legacy bonus for this trait
-    (tKey, amt) => tKey === key && Number.isFinite(amt)
-  );
+  return getCreationBonusInternal(actor, key);
 }
 
 /**
  * Gets creation bonus for a specific trait.
  *
  * Sums bonuses from Family and School items that affect the trait.
- * Supports both Active Effects and legacy bonus systems.
+ * Supports both TraitAdjust rules and the legacy bonus fields.
  *
  * @param {Object} actor - Foundry actor document
  * @param {string} key - Trait key ("sta", "str", "ref", "agi", etc.)
@@ -231,15 +209,15 @@ export function getCreationFreeBonusSources(actor, key) {
  * getCreationFreeBonus(actor, "str") // 1 (if Family gives +1 Strength)
  */
 export function getCreationFreeBonus(actor, key) {
-  const { effects, legacy } = getCreationFreeBonusSources(actor, key);
-  return effects + legacy;
+  const { rules, legacy } = getCreationFreeBonusSources(actor, key);
+  return rules + legacy;
 }
 
 /**
  * Gets creation bonus for Void Ring.
  *
  * Sums bonuses from Family and School items that affect Void.
- * Supports both Active Effects and legacy bonus systems.
+ * Supports both TraitAdjust rules and the legacy bonus fields.
  *
  * @param {Object} actor - Foundry actor document
  * @returns {number} Total creation bonus for Void Ring
@@ -248,14 +226,6 @@ export function getCreationFreeBonus(actor, key) {
  * getCreationFreeBonusVoid(actor) // 1 (if School gives +1 Void)
  */
 export function getCreationFreeBonusVoid(actor) {
-  const { effects, legacy } = getCreationBonusInternal(
-    actor,
-    // Match Active Effect for Void (rank or value)
-    ch =>
-      (ch?.key === "system.rings.void.rank" || ch?.key === "system.rings.void.value") &&
-      ch?.type === "add",
-    // Match legacy bonus for Void
-    (tKey, amt) => tKey === "void" && Number.isFinite(amt)
-  );
-  return effects + legacy;
+  const { rules, legacy } = getCreationBonusInternal(actor, "void");
+  return rules + legacy;
 }

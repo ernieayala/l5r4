@@ -29,6 +29,7 @@ import { STATUS_EFFECTS } from "../config/status-effects.js";
 // Utils imports
 import { T } from "../utils/localization.js";
 import { logError } from "../utils/error-logging.js";
+import { statusRules } from "../utils/rule-engine.js";
 
 // Services imports
 import { STANCE_IDS } from "../services/stance/core/helpers.js";
@@ -249,6 +250,7 @@ export default class ConditionManager extends foundry.applications.api.Handlebar
               name: T(statusDef.name),
               img: statusDef.img,
               statuses: [conditionId],
+              system: { rules: statusRules(conditionId) },
               flags: {
                 [SYS_ID]: {
                   conditionId: conditionId

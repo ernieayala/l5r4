@@ -11,6 +11,9 @@
  * - name: Localization key for display name
  * - img: Icon path for visual representation
  *
+ * An entry may carry `system.rules`; ActiveEffect.fromStatusEffect copies them onto the effect it creates
+ * (client/documents/active-effect.mjs:127-138), and the rule engine applies them.
+ *
  * @see {@link https://foundryvtt.com/api/classes/client.TokenDocument.html#effects}
  */
 
@@ -53,7 +56,9 @@ export const STATUS_EFFECTS = freeze([
   {
     id: "defenseStance",
     name: "l5r4.ui.mechanics.stances.defense",
-    img: iconPath("defence-stance.webp")
+    img: iconPath("defence-stance.webp"),
+    // Air Ring plus Defense Skill Rank to Armor TN (Core Rulebook p.84)
+    system: { rules: [{ key: "ArmorTN", value: "@rings.air + @skills.defense.rank" }] }
   },
   {
     id: "fullDefenseStance",
@@ -77,7 +82,22 @@ export const STATUS_EFFECTS = freeze([
   { id: "grappled", name: "EFFECT.grappled", img: iconPath("grappled.webp") },
   { id: "guarded", name: "EFFECT.guarded", img: iconPath("guarded.webp") },
   { id: "guarding", name: "EFFECT.guarding", img: iconPath("guarding.webp") },
-  { id: "mounted", name: "EFFECT.mounted", img: iconPath("mounted.webp") },
+  {
+    id: "mounted",
+    name: "EFFECT.mounted",
+    img: iconPath("mounted.webp"),
+    // +1k0 on attacks against an unmounted target (Core Rulebook p.89)
+    system: {
+      rules: [
+        {
+          key: "RollModifier",
+          selector: "attack",
+          roll: 1,
+          predicate: ["target", { not: "target:status:mounted" }]
+        }
+      ]
+    }
+  },
   { id: "prone", name: "EFFECT.prone", img: iconPath("prone.webp") },
   { id: "stunned", name: "EFFECT.stunned", img: iconPath("stunned.webp") }
 ]);

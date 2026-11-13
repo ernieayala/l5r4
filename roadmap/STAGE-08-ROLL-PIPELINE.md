@@ -26,6 +26,8 @@ Rules read with `/rule` before building: `23_roll_and_keep.md` p.75, `26_special
 | `module/services/dice/rolls/*.js` | Eight roll services, each rebuilding its modifier stack inline |
 | `module/sheets/handlers/roll-handler.js`, `pc-roll-handler.js` | Handlers add bonuses the services add again (AUTOMATION.md B1-B3) |
 | `module/services/dice/core/formula-builder.js:40-54` | Explosion fixed at 10; `explodesOn` never read (#37, B11) |
+| `module/services/dice/rolls/simple-roll.js`, `skill-roll.js` | Only `SimpleRoll` reads `attack` rules from the modifier bag, so Skill weapon attacks miss Mounted (#41) |
+| `module/services/dice/rolls/trait-roll.js` | Trait bonuses added only on the dialog path (#42) |
 | `module/services/dice/core/tn-calculator.js:47-48`, `module/services/dice/resources/raise-manager.js:35-56` | Free Raises display-only; Raise cap from current Void Points (B7) |
 | `module/services/dice/rolls/skill-roll.js:221-238, 272-274`, `weapon-roll.js:120-130` | Unskilled rolls allow Raises; Void on damage (B7) |
 | `templates/dialogs/roll-modifiers-dialog.hbs:51-55` | Emphasis is a bare checkbox |
