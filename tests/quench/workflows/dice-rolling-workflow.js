@@ -18,8 +18,7 @@
  */
 
 import { SYS_ID } from "../../../module/config/constants.js";
-import { roll_parser } from "../../../module/services/dice/core/roll-parser.js";
-import { buildFormula } from "../../../module/services/dice/core/formula-builder.js";
+import { buildFormula, parseNotation } from "../helpers.js";
 import { createTestPC } from "../../fixtures/actor-fixtures.js";
 
 /**
@@ -38,19 +37,19 @@ export function registerDiceRollingWorkflowTests(quench) {
           const notation = "7k3";
 
           // ACT - Parse notation
-          const parsed = roll_parser(notation);
+          const parsed = parseNotation(notation);
 
           // ASSERT - Parsing
-          assert.equal(parsed.dice_count, 7, "Parsed rolled dice");
-          assert.equal(parsed.kept, 3, "Parsed kept dice");
+          assert.equal(parsed.roll, 7, "Parsed rolled dice");
+          assert.equal(parsed.keep, 3, "Parsed kept dice");
           assert.equal(parsed.bonus, 0, "No bonus");
           assert.isFalse(parsed.unskilled, "Not unskilled");
-          assert.isFalse(parsed.emphasis, "No emphasis");
+          assert.isFalse(parsed.rerollOnes, "No emphasis");
 
           // ACT - Build formula
-          const formula = buildFormula(parsed.dice_count, parsed.kept, parsed.bonus, {
+          const formula = buildFormula(parsed.roll, parsed.keep, parsed.bonus, {
             unskilled: parsed.unskilled,
-            emphasis: parsed.emphasis
+            emphasis: parsed.rerollOnes
           });
 
           // ASSERT - Formula
@@ -75,8 +74,8 @@ export function registerDiceRollingWorkflowTests(quench) {
           const notation = "7k3+5";
 
           // ACT
-          const parsed = roll_parser(notation);
-          const formula = buildFormula(parsed.dice_count, parsed.kept, parsed.bonus, {});
+          const parsed = parseNotation(notation);
+          const formula = buildFormula(parsed.roll, parsed.keep, parsed.bonus, {});
           const roll = new Roll(formula);
           await roll.evaluate();
 
@@ -91,8 +90,8 @@ export function registerDiceRollingWorkflowTests(quench) {
           const notation = "5k3-10";
 
           // ACT
-          const parsed = roll_parser(notation);
-          const formula = buildFormula(parsed.dice_count, parsed.kept, parsed.bonus, {});
+          const parsed = parseNotation(notation);
+          const formula = buildFormula(parsed.roll, parsed.keep, parsed.bonus, {});
 
           const roll = new Roll(formula);
           await roll.evaluate();
@@ -108,13 +107,13 @@ export function registerDiceRollingWorkflowTests(quench) {
           const notation = "15k8";
 
           // ACT
-          const parsed = roll_parser(notation);
+          const parsed = parseNotation(notation);
 
           // ASSERT - Ten Dice Rule caps and converts excess
           // 15k8: 5 excess rolled → 2 kept (at 2:1), leaves 1 leftover → +2 bonus
           // Result: 10k10+2
-          assert.equal(parsed.dice_count, 10, "Rolled dice capped at 10");
-          assert.equal(parsed.kept, 10, "Kept dice at 10 (8 + 2 from conversion)");
+          assert.equal(parsed.roll, 10, "Rolled dice capped at 10");
+          assert.equal(parsed.keep, 10, "Kept dice at 10 (8 + 2 from conversion)");
           assert.equal(parsed.bonus, 2, "Leftover rolled die converted to bonus");
         });
 
@@ -123,14 +122,14 @@ export function registerDiceRollingWorkflowTests(quench) {
           const notation = "1k1";
 
           // ACT
-          const parsed = roll_parser(notation);
-          const formula = buildFormula(parsed.dice_count, parsed.kept, parsed.bonus, {});
+          const parsed = parseNotation(notation);
+          const formula = buildFormula(parsed.roll, parsed.keep, parsed.bonus, {});
           const roll = new Roll(formula);
           await roll.evaluate();
 
           // ASSERT
-          assert.equal(parsed.dice_count, 1, "One die rolled");
-          assert.equal(parsed.kept, 1, "One die kept");
+          assert.equal(parsed.roll, 1, "One die rolled");
+          assert.equal(parsed.keep, 1, "One die kept");
           assert.isNumber(roll.total, "Minimum roll executes");
           assert.isAtLeast(roll.total, 1, "At least 1");
         });
@@ -140,15 +139,14 @@ export function registerDiceRollingWorkflowTests(quench) {
           const notation = "5k3";
 
           // ACT
-          const parsed = roll_parser(notation);
-          const formula = buildFormula(parsed.dice_count, parsed.kept, parsed.bonus, {});
+          const parsed = parseNotation(notation);
+          const formula = buildFormula(parsed.roll, parsed.keep, parsed.bonus, {});
 
           // ASSERT
           assert.include(formula, "x10", "Formula includes explosion");
           assert.notInclude(formula, "min", "No minimum enforced");
 
-          // Execute multiple times to increase chance of seeing explosion
-          // (not asserting explosion happened, just that roll supports it)
+          // The formula allows explosions; whether one happens is chance, so it is not asserted
           const roll = new Roll(formula);
           await roll.evaluate();
           assert.exists(roll.dice[0], "Dice pool exists");
@@ -161,12 +159,12 @@ export function registerDiceRollingWorkflowTests(quench) {
           const notation = "u3k3";
 
           // ACT
-          const parsed = roll_parser(notation);
+          const parsed = parseNotation(notation);
 
           // ASSERT
           assert.isTrue(parsed.unskilled, "Unskilled flag set");
-          assert.equal(parsed.dice_count, 3, "Dice count correct");
-          assert.equal(parsed.kept, 3, "Keep count correct");
+          assert.equal(parsed.roll, 3, "Dice count correct");
+          assert.equal(parsed.keep, 3, "Keep count correct");
         });
 
         it("should prevent dice explosions for unskilled rolls", async () => {
@@ -174,8 +172,8 @@ export function registerDiceRollingWorkflowTests(quench) {
           const notation = "u5k3";
 
           // ACT
-          const parsed = roll_parser(notation);
-          const formula = buildFormula(parsed.dice_count, parsed.kept, parsed.bonus, {
+          const parsed = parseNotation(notation);
+          const formula = buildFormula(parsed.roll, parsed.keep, parsed.bonus, {
             unskilled: parsed.unskilled
           });
 
@@ -189,8 +187,8 @@ export function registerDiceRollingWorkflowTests(quench) {
           const notation = "u4k3";
 
           // ACT
-          const parsed = roll_parser(notation);
-          const formula = buildFormula(parsed.dice_count, parsed.kept, parsed.bonus, {
+          const parsed = parseNotation(notation);
+          const formula = buildFormula(parsed.roll, parsed.keep, parsed.bonus, {
             unskilled: parsed.unskilled
           });
           const roll = new Roll(formula);
@@ -208,8 +206,8 @@ export function registerDiceRollingWorkflowTests(quench) {
           const notation = "u3k3+7";
 
           // ACT
-          const parsed = roll_parser(notation);
-          const formula = buildFormula(parsed.dice_count, parsed.kept, parsed.bonus, {
+          const parsed = parseNotation(notation);
+          const formula = buildFormula(parsed.roll, parsed.keep, parsed.bonus, {
             unskilled: parsed.unskilled
           });
           const roll = new Roll(formula);
@@ -228,11 +226,11 @@ export function registerDiceRollingWorkflowTests(quench) {
           const notation = "u5k3";
 
           // ACT
-          const parsed = roll_parser(notation);
+          const parsed = parseNotation(notation);
 
           // ASSERT
           assert.isTrue(parsed.unskilled, "Unskilled set");
-          assert.isFalse(parsed.emphasis, "Emphasis not set");
+          assert.isFalse(parsed.rerollOnes, "Emphasis not set");
         });
       });
 
@@ -242,12 +240,12 @@ export function registerDiceRollingWorkflowTests(quench) {
           const notation = "e7k3";
 
           // ACT
-          const parsed = roll_parser(notation);
+          const parsed = parseNotation(notation);
 
           // ASSERT
-          assert.isTrue(parsed.emphasis, "Emphasis flag set");
-          assert.equal(parsed.dice_count, 7, "Dice count correct");
-          assert.equal(parsed.kept, 3, "Keep count correct");
+          assert.isTrue(parsed.rerollOnes, "Emphasis flag set");
+          assert.equal(parsed.roll, 7, "Dice count correct");
+          assert.equal(parsed.keep, 3, "Keep count correct");
         });
 
         it("should add re-roll modifier for emphasis", async () => {
@@ -255,9 +253,9 @@ export function registerDiceRollingWorkflowTests(quench) {
           const notation = "e7k3";
 
           // ACT
-          const parsed = roll_parser(notation);
-          const formula = buildFormula(parsed.dice_count, parsed.kept, parsed.bonus, {
-            emphasis: parsed.emphasis
+          const parsed = parseNotation(notation);
+          const formula = buildFormula(parsed.roll, parsed.keep, parsed.bonus, {
+            emphasis: parsed.rerollOnes
           });
 
           // ASSERT
@@ -271,9 +269,9 @@ export function registerDiceRollingWorkflowTests(quench) {
           const notation = "e5k3";
 
           // ACT
-          const parsed = roll_parser(notation);
-          const formula = buildFormula(parsed.dice_count, parsed.kept, parsed.bonus, {
-            emphasis: parsed.emphasis
+          const parsed = parseNotation(notation);
+          const formula = buildFormula(parsed.roll, parsed.keep, parsed.bonus, {
+            emphasis: parsed.rerollOnes
           });
           const roll = new Roll(formula);
           await roll.evaluate();
@@ -293,15 +291,15 @@ export function registerDiceRollingWorkflowTests(quench) {
           const notation = "e7k3+5";
 
           // ACT
-          const parsed = roll_parser(notation);
-          const formula = buildFormula(parsed.dice_count, parsed.kept, parsed.bonus, {
-            emphasis: parsed.emphasis
+          const parsed = parseNotation(notation);
+          const formula = buildFormula(parsed.roll, parsed.keep, parsed.bonus, {
+            emphasis: parsed.rerollOnes
           });
           const roll = new Roll(formula);
           await roll.evaluate();
 
           // ASSERT
-          assert.isTrue(parsed.emphasis, "Emphasis preserved");
+          assert.isTrue(parsed.rerollOnes, "Emphasis preserved");
           assert.equal(parsed.bonus, 5, "Bonus parsed");
           assert.include(formula, "r1", "Re-roll modifier");
           assert.include(formula, "+5", "Bonus included");
@@ -313,9 +311,9 @@ export function registerDiceRollingWorkflowTests(quench) {
           const notation = "e10k5";
 
           // ACT
-          const parsed = roll_parser(notation);
-          const formula = buildFormula(parsed.dice_count, parsed.kept, parsed.bonus, {
-            emphasis: parsed.emphasis
+          const parsed = parseNotation(notation);
+          const formula = buildFormula(parsed.roll, parsed.keep, parsed.bonus, {
+            emphasis: parsed.rerollOnes
           });
 
           // ASSERT - Both mechanics present in formula
@@ -359,12 +357,12 @@ export function registerDiceRollingWorkflowTests(quench) {
           assert.exists(match, "Whole-message pattern matched");
 
           const notation = match[1];
-          const parsed = roll_parser(notation);
+          const parsed = parseNotation(notation);
 
           // ASSERT
           assert.equal(notation, "7k3+5", "Extracted notation");
-          assert.equal(parsed.dice_count, 7, "Parsed correctly");
-          assert.equal(parsed.kept, 3, "Parsed correctly");
+          assert.equal(parsed.roll, 7, "Parsed correctly");
+          assert.equal(parsed.keep, 3, "Parsed correctly");
           assert.equal(parsed.bonus, 5, "Parsed correctly");
         });
 
@@ -382,11 +380,11 @@ export function registerDiceRollingWorkflowTests(quench) {
           assert.equal(matches[1][1], "5k3+2", "Second roll notation");
 
           // Parse each
-          const roll1 = roll_parser(matches[0][1]);
-          const roll2 = roll_parser(matches[1][1]);
+          const roll1 = parseNotation(matches[0][1]);
+          const roll2 = parseNotation(matches[1][1]);
 
-          assert.equal(roll1.dice_count, 7, "First roll parsed");
-          assert.equal(roll2.dice_count, 5, "Second roll parsed");
+          assert.equal(roll1.roll, 7, "First roll parsed");
+          assert.equal(roll2.roll, 5, "Second roll parsed");
           assert.equal(roll2.bonus, 2, "Second roll bonus");
         });
 
@@ -421,29 +419,29 @@ export function registerDiceRollingWorkflowTests(quench) {
             const match = msg.text.match(inline);
             assert.exists(match, `Found notation in: ${msg.text}`);
 
-            const parsed = roll_parser(match[1]);
+            const parsed = parseNotation(match[1]);
             if (msg.unskilled) {
               assert.isTrue(parsed.unskilled, "Unskilled flag detected");
             }
             if (msg.emphasis) {
-              assert.isTrue(parsed.emphasis, "Emphasis flag detected");
+              assert.isTrue(parsed.rerollOnes, "Emphasis flag detected");
             }
           });
         });
       });
 
       describe("Complex Roll Scenarios", () => {
-        it("should handle explode bonus notation (xN)", async () => {
+        it("should read xN as the explode threshold", async () => {
           // ARRANGE
-          const notation = "7k3x2+5";
+          const notation = "7k3x9+5";
 
           // ACT
-          const parsed = roll_parser(notation);
+          const parsed = parseNotation(notation);
 
           // ASSERT
-          assert.equal(parsed.dice_count, 7, "Base dice");
-          assert.equal(parsed.kept, 3, "Kept dice");
-          assert.equal(parsed.explode_bonus, 2, "Explode bonus parsed");
+          assert.equal(parsed.roll, 7, "Base dice");
+          assert.equal(parsed.keep, 3, "Kept dice");
+          assert.equal(parsed.explode, 9, "Explodes on 9 and 10");
           assert.equal(parsed.bonus, 5, "Flat bonus parsed");
         });
 
@@ -452,8 +450,8 @@ export function registerDiceRollingWorkflowTests(quench) {
           const notation = "3k3+0";
 
           // ACT
-          const parsed = roll_parser(notation);
-          const formula = buildFormula(parsed.dice_count, parsed.kept, parsed.bonus, {});
+          const parsed = parseNotation(notation);
+          const formula = buildFormula(parsed.roll, parsed.keep, parsed.bonus, {});
           const roll = new Roll(formula);
           await roll.evaluate();
 
@@ -472,11 +470,11 @@ export function registerDiceRollingWorkflowTests(quench) {
           const notation = match[1];
 
           // Parse
-          const parsed = roll_parser(notation);
+          const parsed = parseNotation(notation);
 
           // Build formula
-          const formula = buildFormula(parsed.dice_count, parsed.kept, parsed.bonus, {
-            emphasis: parsed.emphasis,
+          const formula = buildFormula(parsed.roll, parsed.keep, parsed.bonus, {
+            emphasis: parsed.rerollOnes,
             unskilled: parsed.unskilled
           });
 
@@ -486,9 +484,9 @@ export function registerDiceRollingWorkflowTests(quench) {
 
           // ASSERT - Complete workflow
           assert.equal(notation, "e7k3+5", "Notation extracted");
-          assert.isTrue(parsed.emphasis, "Emphasis preserved");
-          assert.equal(parsed.dice_count, 7, "Dice count preserved");
-          assert.equal(parsed.kept, 3, "Keep count preserved");
+          assert.isTrue(parsed.rerollOnes, "Emphasis preserved");
+          assert.equal(parsed.roll, 7, "Dice count preserved");
+          assert.equal(parsed.keep, 3, "Keep count preserved");
           assert.equal(parsed.bonus, 5, "Bonus preserved");
           assert.include(formula, "r1", "Emphasis in formula");
           assert.include(formula, "+5", "Bonus in formula");
@@ -503,14 +501,14 @@ export function registerDiceRollingWorkflowTests(quench) {
           const notation = "10k10";
 
           // ACT
-          const parsed = roll_parser(notation);
-          const formula = buildFormula(parsed.dice_count, parsed.kept, parsed.bonus, {});
+          const parsed = parseNotation(notation);
+          const formula = buildFormula(parsed.roll, parsed.keep, parsed.bonus, {});
           const roll = new Roll(formula);
           await roll.evaluate();
 
           // ASSERT
-          assert.equal(parsed.dice_count, 10, "Max rolled dice");
-          assert.equal(parsed.kept, 10, "Max kept dice");
+          assert.equal(parsed.roll, 10, "Max rolled dice");
+          assert.equal(parsed.keep, 10, "Max kept dice");
           assert.isNumber(roll.total, "Maximum pool executes");
         });
 
@@ -519,22 +517,22 @@ export function registerDiceRollingWorkflowTests(quench) {
           const notation = "3k5";
 
           // ACT
-          const parsed = roll_parser(notation);
+          const parsed = parseNotation(notation);
 
-          // ASSERT - Parser doesn't validate, just parses
-          assert.equal(parsed.dice_count, 3, "Parsed dice count");
-          assert.equal(parsed.kept, 3, "Keep capped at rolled by Ten Dice Rule");
+          // ASSERT - The Ten Dice Rule keeps no more dice than are rolled
+          assert.equal(parsed.roll, 3, "Parsed dice count");
+          assert.equal(parsed.keep, 3, "Keep capped at rolled by Ten Dice Rule");
 
           // Note: Foundry Roll API will handle this gracefully by keeping max available
         });
 
-        it("should handle very large bonuses", async () => {
+        it("should handle large bonuses", async () => {
           // ARRANGE
           const notation = "5k3+100";
 
           // ACT
-          const parsed = roll_parser(notation);
-          const formula = buildFormula(parsed.dice_count, parsed.kept, parsed.bonus, {});
+          const parsed = parseNotation(notation);
+          const formula = buildFormula(parsed.roll, parsed.keep, parsed.bonus, {});
           const roll = new Roll(formula);
           await roll.evaluate();
 
@@ -549,10 +547,10 @@ export function registerDiceRollingWorkflowTests(quench) {
 
           // ACT & ASSERT
           notations.forEach(notation => {
-            const parsed = roll_parser(notation);
+            const parsed = parseNotation(notation);
             assert.exists(parsed, `Parsed: ${notation}`);
-            assert.isNumber(parsed.dice_count, "Has dice_count");
-            assert.isNumber(parsed.kept, "Has kept");
+            assert.isNumber(parsed.roll, "Has dice_count");
+            assert.isNumber(parsed.keep, "Has kept");
           });
         });
 
@@ -561,10 +559,10 @@ export function registerDiceRollingWorkflowTests(quench) {
           const notation = "e5k3"; // Parser uses .includes() which is case-sensitive
 
           // ACT
-          const parsed = roll_parser(notation);
+          const parsed = parseNotation(notation);
 
           // ASSERT
-          assert.isTrue(parsed.emphasis, "Lowercase prefix works");
+          assert.isTrue(parsed.rerollOnes, "Lowercase prefix works");
         });
       });
 
@@ -599,14 +597,14 @@ export function registerDiceRollingWorkflowTests(quench) {
           const notation = `${rolled}k${kept}`;
 
           // ACT - Parse and execute
-          const parsed = roll_parser(notation);
-          const formula = buildFormula(parsed.dice_count, parsed.kept, 0, {});
+          const parsed = parseNotation(notation);
+          const formula = buildFormula(parsed.roll, parsed.keep, 0, {});
           const roll = new Roll(formula);
           await roll.evaluate();
 
           // ASSERT
-          assert.equal(parsed.dice_count, 7, "Matches skill + trait");
-          assert.equal(parsed.kept, 4, "Matches trait");
+          assert.equal(parsed.roll, 7, "Matches skill + trait");
+          assert.equal(parsed.keep, 4, "Matches trait");
           assert.isNumber(roll.total, "Roll executes with actor context");
         });
 
@@ -619,8 +617,8 @@ export function registerDiceRollingWorkflowTests(quench) {
           const notation = `5k3-${woundPenalty}`;
 
           // ACT
-          const parsed = roll_parser(notation);
-          const formula = buildFormula(parsed.dice_count, parsed.kept, parsed.bonus, {});
+          const parsed = parseNotation(notation);
+          const formula = buildFormula(parsed.roll, parsed.keep, parsed.bonus, {});
           const roll = new Roll(formula);
           await roll.evaluate();
 
@@ -635,12 +633,12 @@ export function registerDiceRollingWorkflowTests(quench) {
           const withVoid = "6k4"; // +1k1 from Void
 
           // ACT
-          const base = roll_parser(baseNotation);
-          const voided = roll_parser(withVoid);
+          const base = parseNotation(baseNotation);
+          const voided = parseNotation(withVoid);
 
           // ASSERT - Void effect visible in notation
-          assert.equal(voided.dice_count - base.dice_count, 1, "Void adds 1 rolled");
-          assert.equal(voided.kept - base.kept, 1, "Void adds 1 kept");
+          assert.equal(voided.roll - base.roll, 1, "Void adds 1 rolled");
+          assert.equal(voided.keep - base.keep, 1, "Void adds 1 kept");
         });
       });
     },

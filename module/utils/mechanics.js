@@ -4,7 +4,7 @@
  *
  * Handles:
  * - Trait and skill resolution for rolls
- * - Wound penalties
+ * - Skill, Trait, and Ring bonuses shown in sheet formulas
  * - Shugenja affinity/deficiency modifiers
  * - Weapon skill resolution
  * - Roll parameter extraction from DOM elements
@@ -15,6 +15,44 @@
 
 import { toInt, toString } from "./type-coercion.js";
 import { logError } from "./error-logging.js";
+import { selectorBonus } from "./rule-engine.js";
+
+/**
+ * The roll, keep, and total bonus a sheet formula shows for a Skill, Trait, or Ring: Active Effect values in
+ * `system.bonuses` plus the RollModifier rules whose predicates hold for the actor. The roll dialog lists the same
+ * sources one by one, with the situational ones (a target, a stance) as well.
+ *
+ * @param {Object} actor - Prepared actor document
+ * @param {Object} keys
+ * @param {string} [keys.skill] - Skill name in lower case
+ * @param {string} [keys.trait] - Trait key
+ * @param {string} [keys.ring] - Ring key
+ * @returns {{roll: number, keep: number, total: number}}
+ */
+export function displayRollBonus(actor, { skill, trait, ring }) {
+  const sum = { roll: 0, keep: 0, total: 0 };
+  const selectors = [];
+  for (const [category, name] of [
+    ["skill", skill],
+    ["trait", trait],
+    ["ring", ring]
+  ]) {
+    if (!name) {
+      continue;
+    }
+    selectors.push(`${category}:${name}`);
+    const effect = actor.system.bonuses[category][name] ?? {};
+    sum.roll += toInt(effect.roll);
+    sum.keep += toInt(effect.keep);
+    sum.total += toInt(effect.total);
+  }
+  const rules = selectorBonus(actor.ruleBag, selectors, actor.rollOptions);
+  return {
+    roll: sum.roll + rules.roll,
+    keep: sum.keep + rules.keep,
+    total: sum.total + rules.total
+  };
+}
 
 /**
  * Valid L5R4 trait abbreviations.
@@ -41,36 +79,6 @@ const ENGLISH_TRAIT_LABELS = {
   intelligence: "int",
   void: "void"
 };
-
-/**
- * Gets current wound penalty for actor.
- *
- * Wound penalties reduce dice rolled/kept based on damage taken.
- * Checks actor.system.wounds.penalty first, then calculates from wound levels.
- *
- * @param {Object} actor - Foundry actor document
- * @returns {number} Wound penalty (negative number or 0)
- *
- * @example
- * readWoundPenalty(actor) // -10 if in "Down" wound level
- */
-export function readWoundPenalty(actor) {
-  if (!actor?.system) {
-    return 0;
-  }
-
-  // Check for pre-calculated wound penalty
-  if (actor.system?.wounds?.penalty != null) {
-    return toInt(actor.system.wounds.penalty, 0);
-  }
-
-  // Calculate from wound levels - find current level with worst penalty
-  const levels = Object.values(actor.system?.woundLvlsUsed ?? {});
-  const current = levels
-    .filter(w => w?.current)
-    .reduce((a, b) => (toInt(a?.penalty, -999) > toInt(b?.penalty, -999) ? a : b), null);
-  return toInt(current?.penalty, 0);
-}
 
 /**
  * Normalizes trait key to standard abbreviation.
@@ -335,13 +343,10 @@ export function resolveWeaponSkillTrait(actor, weapon) {
     const traitValue = getEffectiveTrait(actor, skillTrait);
     const skillName = toString(skill.name, "Unknown Skill");
 
-    // The skill's bonus fields (and Active Effects on them) reach actor.system.bonuses.skill[name] as a
-    // RollModifier rule (SkillData#ownedRules). Reading those bonuses here makes the displayed weapon attack
-    // formula match what applySkillAndTraitBonuses will compute at roll time.
-    const skillKey = skillName.toLowerCase();
-    const skillBonusMap = actor.system?.bonuses?.skill?.[skillKey] || {};
-    const skillBonusRoll = toInt(skillBonusMap.roll);
-    const skillBonusKeep = toInt(skillBonusMap.keep);
+    // The same Skill and Trait bonuses the roll pipeline starts from, so the shown formula matches the roll
+    const bonus = displayRollBonus(actor, { skill: skillName.toLowerCase(), trait: skillTrait });
+    const skillBonusRoll = bonus.roll;
+    const skillBonusKeep = bonus.keep;
 
     // Rank 0 counts as unskilled (roll and keep both = trait)
     if (skillRank === 0) {

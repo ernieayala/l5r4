@@ -4,6 +4,7 @@ import {
   bagEntries,
   derivedRuleOutputs,
   parseRulesJson,
+  selectorBonus,
   statusRules,
   traitAdjustTotal,
   traitAdjustments
@@ -145,7 +146,7 @@ describe("derivedRuleOutputs", () => {
     expect(result.reduction).toBe(0);
   });
 
-  it("RollModifier: fills the bag by selector and the skill, trait, and ring bonuses", () => {
+  it("RollModifier: fills the bag by selector, which selectorBonus stacks for a sheet formula", () => {
     const result = out([
       rule("RollModifier", {
         selector: "skill:kenjutsu",
@@ -165,10 +166,21 @@ describe("derivedRuleOutputs", () => {
       rule("RollModifier", { selector: "ring:fire", roll: 2, keep: 0, total: 0, type: "untyped" }),
       rule("RollModifier", { selector: "attack", roll: 1, keep: 0, total: 0, type: "untyped" })
     ]);
-    expect(result.bonuses).toEqual({
-      skill: { kenjutsu: { roll: 2, keep: 1, total: 2 } },
-      trait: { ref: { roll: 0, keep: 1, total: 0 } },
-      ring: { fire: { roll: 2, keep: 0, total: 0 } }
+    const options = new Set();
+    expect(selectorBonus(result.bag, ["skill:kenjutsu"], options)).toEqual({
+      roll: 2,
+      keep: 1,
+      total: 2
+    });
+    expect(selectorBonus(result.bag, ["skill:kenjutsu", "trait:ref"], options)).toEqual({
+      roll: 2,
+      keep: 2,
+      total: 2
+    });
+    expect(selectorBonus(result.bag, ["ring:fire"], options)).toEqual({
+      roll: 2,
+      keep: 0,
+      total: 0
     });
     expect(result.bag.rollModifiers["skill:kenjutsu"]).toHaveLength(2);
     expect(result.bag.rollModifiers.attack[0]).toMatchObject({
@@ -179,7 +191,7 @@ describe("derivedRuleOutputs", () => {
     });
   });
 
-  it("RollModifier: a predicate that fails now stays out of the bonuses but stays in the bag for rolls", () => {
+  it("RollModifier: keeps its predicate in the bag, tested when a roll or sheet reads it", () => {
     const result = out([
       rule("RollModifier", {
         selector: "skill:kenjutsu",
@@ -190,8 +202,9 @@ describe("derivedRuleOutputs", () => {
         predicate: ["target"]
       })
     ]);
-    expect(result.bonuses).toEqual({});
     expect(result.bag.rollModifiers["skill:kenjutsu"]).toHaveLength(1);
+    expect(selectorBonus(result.bag, ["skill:kenjutsu"], new Set()).roll).toBe(0);
+    expect(selectorBonus(result.bag, ["skill:kenjutsu"], new Set(["target"])).roll).toBe(1);
   });
 
   it("TNModifier, FreeRaise, DiceRule, Substitute, and Note fill their bag kinds", () => {

@@ -136,14 +136,19 @@ export async function preloadTemplates() {
     `systems/${SYS_ID}/templates/cards/_partials/_controls.hbs`,
 
     // Chat Message Templates
+    `systems/${SYS_ID}/templates/chat/check-card.hbs`,
     `systems/${SYS_ID}/templates/chat/full-defense-roll.hbs`,
     `systems/${SYS_ID}/templates/chat/healing.hbs`,
     `systems/${SYS_ID}/templates/chat/simple-roll.hbs`,
     `systems/${SYS_ID}/templates/chat/weapon-chat.hbs`,
 
     // Dialog Templates
+    `systems/${SYS_ID}/templates/dialogs/check-dialog.hbs`,
+    `systems/${SYS_ID}/templates/dialogs/check-extras/maho.hbs`,
+    `systems/${SYS_ID}/templates/dialogs/check-extras/ring.hbs`,
+    `systems/${SYS_ID}/templates/dialogs/check-extras/slot.hbs`,
+    `systems/${SYS_ID}/templates/dialogs/check-extras/spell.hbs`,
     `systems/${SYS_ID}/templates/dialogs/disadvantage-cap-dialog.hbs`,
-    `systems/${SYS_ID}/templates/dialogs/roll-modifiers-dialog.hbs`,
     `systems/${SYS_ID}/templates/dialogs/unified-item-create-dialog.hbs`,
     `systems/${SYS_ID}/templates/dialogs/custom-emphasis-dialog.hbs`,
 

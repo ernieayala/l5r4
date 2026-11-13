@@ -1,0 +1,114 @@
+<div class="l5r4-check-dialog standard-form">
+  <p class="check-pool">{{localize "l5r4.ui.check.pool"}}: <strong>{{pool}}</strong></p>
+
+  {{#if modifiers.length}}
+    <fieldset class="check-modifiers">
+      <legend>{{localize "l5r4.ui.check.modifiers"}}</legend>
+      {{#each modifiers}}
+        <label class="check-modifier" data-range="{{range}}">
+          <input type="checkbox" name="modifier.{{@index}}" {{checked enabled}} />
+          <span class="check-modifier-label">{{label}}</span>
+          <span class="check-modifier-value">{{text}}</span>
+        </label>
+      {{/each}}
+    </fieldset>
+  {{/if}}
+
+  {{#if substitutes.length}}
+    <fieldset class="check-substitutes">
+      <legend>{{localize "l5r4.ui.check.substitutes"}}</legend>
+      {{#each substitutes}}
+        <label class="check-modifier">
+          <input type="checkbox" name="substitute.{{@index}}" />
+          <span class="check-modifier-label">{{label}}</span>
+          <span class="check-modifier-value">{{text}}</span>
+        </label>
+      {{/each}}
+    </fieldset>
+  {{/if}}
+
+  {{#if hasTN}}
+    <div class="form-group">
+      <label>{{localize "l5r4.ui.common.tn"}}</label>
+      <input type="number" name="tn" value="{{tn}}" min="0" />
+    </div>
+    {{#if tnModifiers.length}}
+      <p class="hint">
+        {{#each tnModifiers}}{{label}} {{numberFormat value sign=true}}{{#unless @last}}, {{/unless}}{{/each}}
+      </p>
+    {{/if}}
+    <div class="form-group">
+      <label>{{localize "l5r4.ui.mechanics.combat.woundPenalty"}} ({{numberFormat woundPenalty sign=true}})</label>
+      <input type="checkbox" name="woundPenalty" checked />
+    </div>
+  {{/if}}
+
+  {{#if raisesAllowed}}
+    <div class="form-group">
+      <label>{{localize "l5r4.ui.mechanics.rolls.raises"}} ({{localize "l5r4.ui.check.max"}} {{maxRaises}})</label>
+      <input type="number" name="raises" value="0" min="0" max="{{maxRaises}}" />
+    </div>
+    {{#if freeRaises}}
+      <div class="form-group">
+        <label>{{localize "l5r4.ui.check.freeRaisesToTN"}} ({{localize "l5r4.ui.check.of"}} {{freeRaises}})</label>
+        <input type="number" name="freeRaisesToTN" value="0" min="0" max="{{freeRaises}}" />
+      </div>
+    {{/if}}
+  {{else if unskilled}}
+    <p class="hint">{{localize "l5r4.ui.check.unskilledHint"}}</p>
+  {{/if}}
+
+  {{#if voidAllowed}}
+    <div class="form-group">
+      <label>{{localize "l5r4.ui.check.void"}} ({{voidPoints}})</label>
+      <input type="checkbox" name="void" {{disabled (not voidPoints)}} />
+    </div>
+  {{/if}}
+
+  {{#if emphases.length}}
+    <div class="form-group">
+      <label>{{localize "l5r4.ui.mechanics.rolls.emphasis"}}</label>
+      <select name="emphasis">
+        <option value="">{{localize "l5r4.ui.common.none"}}</option>
+        {{#each emphases}}<option value="{{this}}">{{this}}</option>{{/each}}
+      </select>
+    </div>
+  {{/if}}
+
+  {{#if isAttack}}
+    <div class="form-group">
+      <label>{{localize "l5r4.equipment.weapons.rangedAttack"}}</label>
+      <input type="checkbox" name="isRanged" {{checked ranged}} />
+    </div>
+  {{/if}}
+
+  {{#if socialResistance}}
+    <div class="form-group">
+      <label>{{localize "l5r4.ui.mechanics.rolls.socialResistance"}} ({{numberFormat honorRank sign=true}})</label>
+      <input
+        type="checkbox"
+        name="socialResistance"
+        title="{{localize "l5r4.ui.mechanics.rolls.socialResistanceDescription"}}"
+      />
+    </div>
+  {{/if}}
+
+  <div class="form-group">
+    <label>{{localize "l5r4.ui.common.roll"}} {{localize "l5r4.ui.common.mod"}}</label>
+    <input type="number" name="rollMod" value="0" />
+  </div>
+  <div class="form-group">
+    <label>{{localize "l5r4.ui.common.keep"}} {{localize "l5r4.ui.common.mod"}}</label>
+    <input type="number" name="keepMod" value="0" />
+  </div>
+  <div class="form-group">
+    <label>{{localize "l5r4.ui.common.total"}} {{localize "l5r4.ui.common.mod"}}</label>
+    <input type="number" name="totalMod" value="0" />
+  </div>
+  <div class="form-group">
+    <label>{{localize "l5r4.ui.check.keepFewer"}}</label>
+    <input type="number" name="keep" min="1" placeholder="{{localize "l5r4.ui.check.allKept"}}" />
+  </div>
+
+  {{{extras}}}
+</div>

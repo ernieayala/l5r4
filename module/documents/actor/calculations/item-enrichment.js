@@ -21,7 +21,11 @@
 
 import { toInt } from "../../../utils/type-coercion.js";
 import { logError } from "../../../utils/error-logging.js";
-import { getEffectiveTrait, resolveWeaponSkillTrait } from "../../../utils/mechanics.js";
+import {
+  displayRollBonus,
+  getEffectiveTrait,
+  resolveWeaponSkillTrait
+} from "../../../utils/mechanics.js";
 import { prepareWeaponDamage } from "../../item/preparation/derived-data.js";
 
 /**
@@ -51,8 +55,6 @@ export function enrichActorItems(actor) {
   }
 
   try {
-    // Skill items' bonus fields already reached actor.system.bonuses.skill as RollModifier rules
-    // (SkillData#ownedRules, module/documents/actor/rules.js).
     for (const item of actor.items) {
       if (!item?.type) {
         continue;
@@ -109,15 +111,11 @@ function enrichSkillFormulas(actor, skill) {
   const traitEff = getEffectiveTrait(actor, traitKey);
   const rank = toInt(skill.system?.rank);
 
-  // Gather bonuses from actor's bonus structure
-  const bb = actor.system?.bonuses;
-  const kSkill = String(skill.name).toLowerCase?.();
-  const bSkill = (bb?.skill && bb.skill[kSkill]) || {};
-  const bTrait = (bb?.trait && bb.trait[traitKey]) || {};
-
-  // Combine skill-specific and trait-specific bonuses
-  const rollBonus = toInt(bSkill.roll) + toInt(bTrait.roll);
-  const keepBonus = toInt(bSkill.keep) + toInt(bTrait.keep);
+  // Skill and Trait bonuses from Active Effects and rules, as the roll pipeline starts from
+  const { roll: rollBonus, keep: keepBonus } = displayRollBonus(actor, {
+    skill: String(skill.name).toLowerCase(),
+    trait: traitKey
+  });
 
   // Calculate final roll/keep values (minimum 0)
   skill.system.rollDice = Math.max(0, traitEff + rank + rollBonus);

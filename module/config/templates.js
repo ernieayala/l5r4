@@ -62,7 +62,8 @@ export const TEMPLATE = relPath => {
  *
  * @type {Object<string, string>}
  * @constant
- * @property {string} simpleRoll - Simple skill/trait roll results
+ * @property {string} checkCard - A roll from the roll pipeline (`roll` ChatMessage subtype)
+ * @property {string} simpleRoll - Fear roll results
  * @property {string} weaponCard - Weapon attack roll display
  * @property {string} fullDefenseRoll - Full defense action results
  * @property {string} healing - Healing action results
@@ -76,6 +77,7 @@ export const TEMPLATE = relPath => {
  * ChatMessage.create({ content: html });
  */
 export const CHAT_TEMPLATES = freeze({
+  checkCard: TEMPLATE("chat/check-card.hbs"),
   simpleRoll: TEMPLATE("chat/simple-roll.hbs"),
   weaponCard: TEMPLATE("chat/weapon-chat.hbs"),
   fullDefenseRoll: TEMPLATE("chat/full-defense-roll.hbs"),
@@ -88,21 +90,17 @@ export const CHAT_TEMPLATES = freeze({
  *
  * @type {Object<string, string>}
  * @constant
- * @property {string} rollModifiers - Roll modifier selection dialog
- * @property {string} spellCast - Spell casting configuration dialog
- * @property {string} mahoCast - Maho (blood magic) casting dialog
+ * @property {string} check - The roll pipeline's dialog
+ * @property {string} checkRing - Its Ring Roll extras (casting a spell)
+ * @property {string} checkSpell - Its spell extras (the slot)
+ * @property {string} checkMaho - Its maho extras (blood)
  * @property {string} unifiedItemCreate - Universal item creation dialog
- *
- * @example
- * // Render roll modifiers dialog:
- * const html = await foundry.applications.handlebars.renderTemplate(DIALOG_TEMPLATES.rollModifiers, {
- *   modifiers: availableModifiers
- * });
- * await foundry.applications.api.DialogV2.wait({ content: html, ... });
  */
 export const DIALOG_TEMPLATES = freeze({
-  rollModifiers: TEMPLATE("dialogs/roll-modifiers-dialog.hbs"),
-  spellCast: TEMPLATE("dialogs/spell-cast-dialog.hbs"),
-  mahoCast: TEMPLATE("dialogs/maho-cast-dialog.hbs"),
+  check: TEMPLATE("dialogs/check-dialog.hbs"),
+  checkRing: TEMPLATE("dialogs/check-extras/ring.hbs"),
+  checkSpell: TEMPLATE("dialogs/check-extras/spell.hbs"),
+  checkMaho: TEMPLATE("dialogs/check-extras/maho.hbs"),
+  checkSlot: TEMPLATE("dialogs/check-extras/slot.hbs"),
   unifiedItemCreate: TEMPLATE("dialogs/unified-item-create-dialog.hbs")
 });

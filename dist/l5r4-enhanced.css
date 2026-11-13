@@ -86,8 +86,37 @@ body > * {
   flex-direction: column;
   gap: 0.25rem;
 }
-.message-content .l5r4-damage-button {
+.message-content .l5r4-damage-button,
+.message-content .l5r4-check-damage {
   width: 100%;
+}
+.message-content .check-applied {
+  font-size: var(--font-size-12);
+  list-style: none;
+  margin: 0;
+  padding: 0;
+}
+.message-content .check-note {
+  font-style: italic;
+}
+
+.l5r4-check-dialog .check-modifiers,
+.l5r4-check-dialog .check-substitutes,
+.l5r4-check-dialog .check-extras {
+  display: flex;
+  flex-direction: column;
+  gap: 0.25rem;
+}
+.l5r4-check-dialog .check-modifier {
+  align-items: center;
+  display: flex;
+  gap: 0.5rem;
+}
+.l5r4-check-dialog .check-modifier-label {
+  flex: 1;
+}
+.l5r4-check-dialog .check-modifier-value {
+  font-family: var(--font-monospace);
 }
 
 /**

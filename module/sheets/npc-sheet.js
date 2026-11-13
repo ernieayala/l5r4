@@ -47,7 +47,6 @@ import { clamp } from "../utils/type-coercion.js";
 import { on } from "../utils/dom.js";
 import { getSortPref, sortWithPref } from "../utils/sorting.js";
 import { getSectionCollapsedMap } from "../utils/section-state.js";
-import { readWoundPenalty } from "../utils/mechanics.js";
 
 // Documents
 import { enhanceItemSheetData } from "../documents/item/integration/sheet-data.js";
@@ -625,21 +624,8 @@ export default class L5R4NpcSheet extends BaseActorSheet {
     }
 
     // Route to maho casting if spell is blood magic
-    if (spell.system?.maho) {
-      return MahoCastRoll({
-        actor: this.actor,
-        spell,
-        woundPenalty: readWoundPenalty(this.actor),
-        showDialog: true
-      });
-    }
-
-    return SpellCastRoll({
-      actor: this.actor,
-      spell,
-      woundPenalty: readWoundPenalty(this.actor),
-      showDialog: true // Always show dialog for user control
-    });
+    const cast = spell.system?.maho ? MahoCastRoll : SpellCastRoll;
+    return cast({ actor: this.actor, spell, showDialog: !event.shiftKey });
   }
 
   /**

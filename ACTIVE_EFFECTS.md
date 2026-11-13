@@ -52,11 +52,9 @@ Values marked *n/f* take a number or a formula (see **Formulas**).
 | `RollOption` | `option`, `toggleable`, `value` | Turns on a roll option other rules' predicates can test. With `"toggleable": true` it is on only while `"value"` is `true`, for situations the system cannot see (higher ground, a target within reach) |
 | `TNModifier` | `selector`, `value` *n/f*, `type` | A TN change on the selected rolls |
 | `FreeRaise` | `selector`, `value` *n/f* | Free Raises on the selected rolls |
-| `DiceRule` | `selector`, `explode` (2-10), `rerollOnes` | Dice handling on the selected rolls |
-| `Substitute` | `selector`, `replace`, `with` | Use one Trait or Skill in place of another on the selected rolls, as `"replace": "trait:agi", "with": "trait:ref"` |
-| `Note` | `selector`, `text` | Text for the selected rolls |
-
-`TNModifier`, `FreeRaise`, `DiceRule`, `Substitute`, and `Note` are stored for the roll dialog that reads them (roadmap Stage 8); until then they change no roll.
+| `DiceRule` | `selector`, `explode` (2-10), `rerollOnes` | Dice explode on `explode` or higher; `rerollOnes` re-rolls 1s once |
+| `Substitute` | `selector`, `replace`, `with` | Offers, in the roll dialog, one Trait in place of another, as `"replace": "trait:agi", "with": "trait:ref"`; off until the roller turns it on |
+| `Note` | `selector`, `text` | Text on the card of the selected rolls |
 
 ### Selectors
 
@@ -65,7 +63,17 @@ Values marked *n/f* take a number or a formula (see **Formulas**).
 | `skill:<skill name in lower case>` | That Skill's rolls, as `skill:kenjutsu` or `skill:tea ceremony` |
 | `trait:<trait>` | Rolls of that Trait, as `trait:ref`, and Skill rolls that use it |
 | `ring:<ring>` | Rolls of that Ring, as `ring:fire`, and spells of its element |
-| `attack` | Attack rolls made without a Skill (NPC attacks, unskilled weapon attacks). Skilled weapon attacks read it once the roll pipeline lands (roadmap Stage 8) |
+| `skill`, `trait`, `ring` | Every Skill, Trait, or Ring roll |
+| `attack` | Every attack roll, with or without a Skill |
+| `damage` | Every damage roll |
+| `spell` | Every Spell Casting Roll, maho included |
+| `maho` | Maho casting rolls |
+
+### The roll dialog
+
+Every roll shows one dialog (Shift-click skips it and takes the defaults). It lists each modifier from rules, Active Effects, the stance, and conditions with a box to turn it off, and offers: the TN (an attack starts at a single target's Armor TN), Raises up to the Void Ring (p.79), Free Raises spent to lower the TN by 5 each, the Wound Rank's penalty on the TN (p.82), a Void Point for +1k1 (p.78; never on damage), an Emphasis from the Skill's trained Emphases (p.133), keeping fewer dice, and situational roll, keep, and total modifiers. An Unskilled Roll takes no Raises or Free Raises and its dice never explode (p.80).
+
+Each roll posts a card holding everything it rolled with. Its context menu offers **Re-roll, keep the better** and **Contested Roll** against the last roll by someone else (p.80). In chat, `[[7k3]]` rolls 7k3; `u` makes it Unskilled, `e` adds an Emphasis, and `x9` explodes on 9 and 10.
 
 ### Formulas
 
@@ -93,6 +101,7 @@ A predicate is a list of conditions, all of which must hold:
 | `"wound:nicked"` | The character is at that Wound Rank |
 | `"armor:worn"` | The character wears armor |
 | `"target"`, `"target:status:mounted"` | On attack rules: the attack has a target, and the target has that status |
+| `"check:attack"` | The roll is of that kind: `skill`, `trait`, `ring`, `spell`, `maho`, `attack`, `damage`, or `roll` |
 | any `RollOption` | That option is on |
 | `{ "not": ... }` | The condition inside does not hold |
 | `{ "or": [ ... ] }`, `{ "and": [ ... ] }` | One, or all, of the conditions inside hold |
@@ -335,7 +344,7 @@ A `RollModifier` rule does the same with a predicate and a formula.
 2. Does the browser console (F12) show a warning naming the item? It says which field is wrong.
 3. Does the predicate hold? Remove it to check.
 4. Is the item armor that is not worn?
-5. Is the rule one the roll dialog reads later (`TNModifier`, `FreeRaise`, `DiceRule`, `Substitute`, `Note`)?
+5. Is a roll modifier switched off in the roll dialog, or is a `Substitute` left off?
 
 ### An effect does nothing
 

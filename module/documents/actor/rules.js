@@ -6,7 +6,7 @@
  * 1. `applyInitialRules`, right after core applies "initial"-phase effects: roll options from statuses and worn
  *    armor; TraitAdjust, so Rings and derived values see it as they see a Trait effect.
  * 2. `applyDerivedRules`, once Traits and Rings are known: Ring and Trait roll options, RollOption rules, the
- *    Initiative, Wounds, and RollModifier outputs, and the modifier bag rolls read by selector.
+ *    Initiative and Wounds outputs, and the modifier bag the roll pipeline reads by selector.
  * 3. `applyArmorRules`, once Armor TN and Reduction are computed: ArmorTN and Reduction.
  * 4. `addWoundRollOption`, once the Wound Rank is known.
  *
@@ -103,8 +103,8 @@ export function applyInitialRules(actor) {
 }
 
 /**
- * Run the rules that need Traits and Rings: add their roll options and write Initiative, Wounds, and RollModifier
- * outputs onto the prepared data, and fill `actor.ruleBag`. ArmorTN and Reduction wait for `applyArmorRules`.
+ * Run the rules that need Traits and Rings: add their roll options, write the Initiative and Wounds outputs onto the
+ * prepared data, and fill `actor.ruleBag`. ArmorTN and Reduction wait for `applyArmorRules`.
  * @param {Actor} actor
  * @param {object} sys  The actor's prepared system data, after prepareTraitsAndRings.
  */
@@ -131,17 +131,6 @@ export function applyDerivedRules(actor, sys) {
   sys.woundsPenaltyMod += out.woundPenalty;
   sys.armorTn.ruleMod = out.armorTn;
   sys.armorTn.ruleReduction = out.reduction;
-
-  for (const [category, byName] of Object.entries(out.bonuses)) {
-    for (const [name, bonus] of Object.entries(byName)) {
-      const current = sys.bonuses[category][name] ?? {};
-      sys.bonuses[category][name] = {
-        roll: toInt(current.roll) + bonus.roll,
-        keep: toInt(current.keep) + bonus.keep,
-        total: toInt(current.total) + bonus.total
-      };
-    }
-  }
   actor.ruleBag = out.bag;
 }
 

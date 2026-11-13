@@ -56,6 +56,25 @@ Rules read with `/rule` before building: `23_roll_and_keep.md` p.75, `26_special
 ## Decisions
 
 1. Every choice in AUTOMATION.md §4 that belongs to a roll is offered in the dialog, never made for the player.
+2. Wound penalties raise the TN (p.82) instead of coming off the roll total as in 3.2.1 (Ernie, 2026-11-13).
+3. Unskilled Rolls follow p.80 with Void: a Void Point adds +1k1, the dice still never explode, and no Raises or
+   Free Raises apply. 3.2.1 gave +1k0 with explosions (Ernie, 2026-11-13).
+4. The pipeline is `rollCheck` in `module/services/dice/check/roll-check.js`, with collection in `collect.js` and
+   the pure math in `module/utils/check.js`. The seven roll services keep their names and arguments as thin
+   adapters, so sheets and the existing Quench batches call them unchanged; their seven dialogs became one.
+5. RollModifier rules no longer write `system.bonuses` (STAGE-07 decision 5 ends here): `system.bonuses` holds only
+   Active Effect values, the pipeline lists each source, and sheet formulas read both through
+   `displayRollBonus` (`module/utils/mechanics.js`).
+6. A Ring Roll's dialog can still cast a spell without a spell item (3.2.1's second button), and a spell's slot is
+   a choice in the dialog (elemental, Void, or none) instead of a separate confirmation.
+7. Inline `xN` sets the explode threshold, as a DiceRule does; 3.2.1 parsed it into a value nothing read.
+8. Initiative is rolled by core's Combat (Stage 5) from the same pool code (`initiativeFormula` uses `buildPool`
+   and `poolFormula`). The Fear roll and the Full Defense roll stay as they are until Stage 9 moves Fear and
+   stances to rule data; the once-per-Round Void limit (p.78) is a use counter, also Stage 9.
+9. A Contested Roll is settled from the chat context menu against the last roll by someone else; a re-roll that
+   keeps the better total is the other menu entry. Both read the stored context, never the card.
+10. A ChatMessage subtype needs the manifest reread: after adding `documentTypes.ChatMessage.roll`, the test
+    server was restarted.
 
 ## Out of scope
 

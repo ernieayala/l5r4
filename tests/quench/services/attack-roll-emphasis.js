@@ -26,7 +26,7 @@
 
 import { SYS_ID } from "../../../module/config/constants.js";
 import { SkillRoll } from "../../../module/services/dice/rolls/skill-roll.js";
-import { buildFormula } from "../../../module/services/dice/core/formula-builder.js";
+import { buildFormula } from "../helpers.js";
 import { createTestPC } from "../../fixtures/actor-fixtures.js";
 import { createSkillData, createWeaponData } from "../../fixtures/item-fixtures.js";
 
