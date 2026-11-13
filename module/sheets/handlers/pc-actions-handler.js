@@ -17,7 +17,7 @@
  * **Foundry API:**
  * - Uses Actor.update() for state changes
  * - Integrates with game.combat for turn/round tracking
- * - Uses Dialog.confirm() for user confirmation
+ * - Uses DialogV2.confirm() for user confirmation
  * - Posts ui.notifications for user feedback
  *
  * @module sheets/handlers/pc-actions-handler
@@ -154,11 +154,9 @@ export class PcActionsHandler {
     }
 
     // Confirm with dialog
-    const confirmed = await Dialog.confirm({
-      title: "Spend Void Point",
-      content: "<p>Spend a Void Point to increase Armor TN by +10 for 1 round?</p>",
-      yes: () => true,
-      no: () => false
+    const confirmed = await foundry.applications.api.DialogV2.confirm({
+      window: { title: "Spend Void Point" },
+      content: "<p>Spend a Void Point to increase Armor TN by +10 for 1 round?</p>"
     });
 
     if (!confirmed) {

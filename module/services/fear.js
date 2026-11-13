@@ -51,7 +51,7 @@ async function executeFearTest({ character, tn, modifier = 0, fearRank, targetIn
   const willpower = toInt(character.system?.traits?.wil ?? 0);
   if (willpower <= 0) {
     ui.notifications?.warn(
-      game.i18n.format("l5r4.ui.mechanics.fear.noWillpower", {
+      game.i18n.localize("l5r4.ui.mechanics.fear.noWillpower", {
         character: character?.name ?? "Character"
       })
     );
@@ -87,7 +87,7 @@ async function executeFearTest({ character, tn, modifier = 0, fearRank, targetIn
     try {
       await character.createEmbeddedDocuments("ActiveEffect", [
         {
-          name: game.i18n.format("l5r4.ui.mechanics.fear.effectName", { rank: fearRank }),
+          name: game.i18n.localize("l5r4.ui.mechanics.fear.effectName", { rank: fearRank }),
           statuses: ["feared"],
           img: "systems/l5r4-enhanced/assets/icons/fear.webp",
           flags: {
@@ -101,7 +101,9 @@ async function executeFearTest({ character, tn, modifier = 0, fearRank, targetIn
       console.error(`${SYS_ID}`, "Fear test: Failed to create Fear effect", { err });
     }
 
-    penaltyInfo = game.i18n.format("l5r4.ui.mechanics.fear.penaltyApplied", { penalty: fearRank });
+    penaltyInfo = game.i18n.localize("l5r4.ui.mechanics.fear.penaltyApplied", {
+      penalty: fearRank
+    });
 
     // Catastrophic failure occurs when failing by 15+, causing the character to flee or cower
     if (margin <= -15) {
@@ -121,7 +123,7 @@ async function executeFearTest({ character, tn, modifier = 0, fearRank, targetIn
   const bonusDisplay = bonusText.length > 0 ? ` (${bonusText.join(", ")})` : "";
 
   const flavor = [
-    game.i18n.format("l5r4.ui.mechanics.fear.testResult", { rank: fearRank }),
+    game.i18n.localize("l5r4.ui.mechanics.fear.testResult", { rank: fearRank }),
     targetInfo,
     bonusDisplay
   ]
@@ -137,7 +139,7 @@ async function executeFearTest({ character, tn, modifier = 0, fearRank, targetIn
     return null;
   }
 
-  const outcomeLabel = game.i18n.format(
+  const outcomeLabel = game.i18n.localize(
     success ? "l5r4.ui.mechanics.fear.testSuccess" : "l5r4.ui.mechanics.fear.testFailure",
     { rank: fearRank }
   );
@@ -202,7 +204,7 @@ export async function testFear({ npc, character } = {}) {
     return null;
   }
 
-  const targetInfo = ` ${game.i18n.format("l5r4.ui.mechanics.fear.testAgainst", {
+  const targetInfo = ` ${game.i18n.localize("l5r4.ui.mechanics.fear.testAgainst", {
     creature: npc.name
   })}`;
 

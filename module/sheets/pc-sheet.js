@@ -90,7 +90,7 @@ export default class L5R4PcSheet extends BaseActorSheet {
    * Tracks bound root element for extra event listeners.
    *
    * Used to prevent duplicate binding of non-delegated event listeners
-   * (image edit click, context menus) during re-renders.
+   * (image edit click) during re-renders.
    *
    * @type {HTMLElement|null}
    * @private
@@ -614,7 +614,6 @@ export default class L5R4PcSheet extends BaseActorSheet {
    * Performs PC-specific rendering tasks:
    * 1. Paints Void Points dots based on current/max values
    * 2. Binds image edit click handler (non-delegated)
-   * 3. Sets up item context menus
    *
    * **Guard Logic:**
    * Tracks _boundExtraRoot to prevent duplicate event binding on re-renders.

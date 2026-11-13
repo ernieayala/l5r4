@@ -26,10 +26,6 @@ const FOUNDRY_GLOBALS = [
   "Handlebars"
 ];
 
-// Deprecated globals the code still calls (§11; client/client.mjs:170, :225, :230 in 14.370). Roadmap
-// STAGE-04 replaces each call site, then this list goes.
-const DEPRECATED_GLOBALS = ["Dialog", "FilePicker", "renderTemplate"];
-
 // The Sequencer module's globals, used by module/services/animations/ when that module is active.
 const MODULE_GLOBALS = ["Sequencer", "Sequence"];
 
@@ -47,7 +43,6 @@ export default [
       globals: {
         ...globals.browser,
         ...readonly(FOUNDRY_GLOBALS),
-        ...readonly(DEPRECATED_GLOBALS),
         ...readonly(MODULE_GLOBALS)
       }
     },

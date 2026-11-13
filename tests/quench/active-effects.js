@@ -280,15 +280,15 @@ export function registerActiveEffectsBatch(quench) {
         let confirm;
 
         afterEach(async () => {
-          Dialog.confirm = confirm;
+          foundry.applications.api.DialogV2.confirm = confirm;
           await combat?.delete();
           combat = null;
         });
 
         /** A PC with a +1 Void Points effect, in a combat, with the confirmation answered yes. */
         async function setUp(name) {
-          confirm = Dialog.confirm;
-          Dialog.confirm = async () => true;
+          confirm = foundry.applications.api.DialogV2.confirm;
+          foundry.applications.api.DialogV2.confirm = async () => true;
           actor = await createTestPC({ name });
           await actor.createEmbeddedDocuments("ActiveEffect", [
             addEffect({ "system.rings.void.value": 1 })

@@ -9,7 +9,7 @@
  * throughout the codebase and provide compile-time validation of template paths.
  * The TEMPLATE function includes defensive validation to catch errors early.
  *
- * @see {@link https://foundryvtt.com/api/functions/client.renderTemplate.html|Foundry renderTemplate}
+ * @see {@link https://foundryvtt.com/api/v14/functions/foundry.applications.handlebars.renderTemplate.html|Foundry renderTemplate}
  */
 
 import { PATHS } from "./constants.js";
@@ -32,7 +32,7 @@ const freeze = Object.freeze;
  *
  * @example
  * // Use with Foundry's renderTemplate:
- * const html = await renderTemplate(TEMPLATE("chat/weapon-chat.hbs"), data);
+ * const html = await foundry.applications.handlebars.renderTemplate(TEMPLATE("chat/weapon-chat.hbs"), data);
  *
  * @example
  * // Validation - throws TypeError:
@@ -69,7 +69,7 @@ export const TEMPLATE = relPath => {
  *
  * @example
  * // Render simple roll to chat:
- * const html = await renderTemplate(CHAT_TEMPLATES.simpleRoll, {
+ * const html = await foundry.applications.handlebars.renderTemplate(CHAT_TEMPLATES.simpleRoll, {
  *   roll: rollResult,
  *   flavor: "Kenjutsu Roll"
  * });
@@ -95,10 +95,10 @@ export const CHAT_TEMPLATES = freeze({
  *
  * @example
  * // Render roll modifiers dialog:
- * const html = await renderTemplate(DIALOG_TEMPLATES.rollModifiers, {
+ * const html = await foundry.applications.handlebars.renderTemplate(DIALOG_TEMPLATES.rollModifiers, {
  *   modifiers: availableModifiers
  * });
- * new Dialog({ content: html, ... }).render(true);
+ * await foundry.applications.api.DialogV2.wait({ content: html, ... });
  */
 export const DIALOG_TEMPLATES = freeze({
   rollModifiers: TEMPLATE("dialogs/roll-modifiers-dialog.hbs"),

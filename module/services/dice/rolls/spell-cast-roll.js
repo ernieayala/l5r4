@@ -104,7 +104,7 @@ export async function SpellCastRoll({ actor, spell, woundPenalty = 0, showDialog
   if (effectiveSchoolRank <= 0) {
     const msg =
       schoolRankMod < 0
-        ? game.i18n.format("l5r4.ui.notifications.deficiencyBlocksCasting", { ring: ringName })
+        ? game.i18n.localize("l5r4.ui.notifications.deficiencyBlocksCasting", { ring: ringName })
         : game.i18n.localize("l5r4.ui.notifications.schoolRankZero");
     ui.notifications?.warn(msg);
     return false;
@@ -139,7 +139,7 @@ export async function SpellCastRoll({ actor, spell, woundPenalty = 0, showDialog
   if (!useElementalSlot && !useVoidSlot) {
     const slotType = options.useVoidSlot ? "void" : ringName;
     ui.notifications?.warn(
-      game.i18n.format("l5r4.ui.notifications.noSpellSlots", { ring: slotType })
+      game.i18n.localize("l5r4.ui.notifications.noSpellSlots", { ring: slotType })
     );
     return false;
   }

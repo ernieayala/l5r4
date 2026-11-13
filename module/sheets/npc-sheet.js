@@ -477,10 +477,9 @@ export default class L5R4NpcSheet extends BaseActorSheet {
    * - Sets up sort indicators for skills list headers
    * - Binds simple roll handlers (non-delegated clicks)
    * - Binds image editor click handler
-   * - Initializes right-click context menu for items
    *
    * **Ownership Check:**
-   * Only sets up interactive elements (sort indicators, context menus) if current
+   * Only sets up interactive elements (sort indicators) if current
    * user owns the actor. Void Points painting happens regardless for visual consistency.
    *
    * **Foundry Lifecycle:**

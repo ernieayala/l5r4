@@ -191,7 +191,7 @@ export function registerChatSystemWorkflowTests(quench) {
           };
 
           // ACT - Render damage template
-          const html = await renderTemplate(
+          const html = await foundry.applications.handlebars.renderTemplate(
             "systems/l5r4-enhanced/templates/chat/damage-roll.hbs",
             templateData
           );
@@ -661,7 +661,7 @@ export function registerChatSystemWorkflowTests(quench) {
           };
 
           // ACT
-          const html = await renderTemplate(
+          const html = await foundry.applications.handlebars.renderTemplate(
             "systems/l5r4-enhanced/templates/chat/damage-roll.hbs",
             templateData
           );
@@ -685,7 +685,7 @@ export function registerChatSystemWorkflowTests(quench) {
           };
 
           // ACT
-          const html = await renderTemplate(
+          const html = await foundry.applications.handlebars.renderTemplate(
             "systems/l5r4-enhanced/templates/chat/simple-roll.hbs",
             templateData
           );
@@ -707,7 +707,7 @@ export function registerChatSystemWorkflowTests(quench) {
           };
 
           // ACT
-          const html = await renderTemplate(
+          const html = await foundry.applications.handlebars.renderTemplate(
             "systems/l5r4-enhanced/templates/chat/damage-roll.hbs",
             templateData
           );

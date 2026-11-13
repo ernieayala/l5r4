@@ -97,7 +97,7 @@ async function _confirmSpellSlotUsage(actor, systemRing, ringName) {
 
   if (!elementalValidation.valid && !voidValidation.valid) {
     ui.notifications?.warn(
-      game.i18n.format("l5r4.ui.notifications.noSpellSlots", { ring: ringName })
+      game.i18n.localize("l5r4.ui.notifications.noSpellSlots", { ring: ringName })
     );
     // No slots available - return null to abort the roll
     return null;
@@ -325,7 +325,7 @@ export async function RingRoll({
     if (effectiveSchoolRank <= 0) {
       const msg =
         schoolRankMod < 0
-          ? game.i18n.format("l5r4.ui.notifications.deficiencyBlocksCasting", { ring: ringName })
+          ? game.i18n.localize("l5r4.ui.notifications.deficiencyBlocksCasting", { ring: ringName })
           : game.i18n.localize("l5r4.ui.notifications.schoolRankZero");
       ui.notifications?.warn(msg);
       return false;

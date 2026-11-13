@@ -187,14 +187,12 @@ export class ItemCRUDHandler {
 
     // Skip confirmation if Shift key is held
     if (!event.shiftKey) {
-      const confirmed = await Dialog.confirm({
-        title: game.i18n.localize("l5r4.ui.dialogs.deleteItem.title"),
-        content: `<p>${game.i18n.format("l5r4.ui.dialogs.deleteItem.content", {
+      // No is the default button (client/applications/api/dialog.mjs:346-354); closing the dialog resolves null
+      const confirmed = await foundry.applications.api.DialogV2.confirm({
+        window: { title: "l5r4.ui.dialogs.deleteItem.title" },
+        content: `<p>${game.i18n.localize("l5r4.ui.dialogs.deleteItem.content", {
           name: item.name
-        })}</p>`,
-        yes: () => true,
-        no: () => false,
-        defaultYes: false
+        })}</p>`
       });
 
       if (!confirmed) {
@@ -233,7 +231,7 @@ export class ItemCRUDHandler {
   }
 
   /**
-   * Handles inline editing of item fields directly on the actor sheet.
+   * Handles inline editing of item fields on the actor sheet.
    * Reads the field path and data type from element dataset attributes,
    * coerces the input value to the appropriate type, and updates the item.
    *
