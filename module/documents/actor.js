@@ -12,7 +12,8 @@
  *
  * Architecture:
  * - Uses Foundry's data preparation lifecycle (prepareBaseData → prepareDerivedData)
- * - Delegates type-specific logic to preparation modules (pc-preparation, npc-preparation)
+ * - Type-specific derived data runs in the subtype data models (module/data/actor/PcData.js, NpcData.js),
+ *   which call the preparation modules (pc-preparation, npc-preparation)
  * - Wound system uses calculation modules for complex penalty logic
  * - XP tracking uses flags for persistent character advancement data
  *
@@ -29,14 +30,7 @@ import {
   findCurrentWoundLevel,
   determineCurrentWoundLevel
 } from "./actor/calculations/wound-system.js";
-import {
-  calculateInsightRank,
-  preparePcExperience,
-  trackXpExpenditure
-} from "./actor/calculations/xp-system.js";
-import { prepareFear } from "./actor/calculations/fear-system.js";
-import { preparePcData } from "./actor/preparation/pc-preparation.js";
-import { prepareNpcData } from "./actor/preparation/npc-preparation.js";
+import { trackXpExpenditure } from "./actor/calculations/xp-system.js";
 
 /**
  * Actor document for L5R4 Enhanced system.
@@ -208,57 +202,6 @@ export default class L5R4Actor extends Actor {
   }
 
   /**
-   * Calculate derived actor data.
-   * Delegates to type-specific preparation modules for PC/NPC logic.
-   * Called after Active Effects are applied.
-   *
-   * @returns {void}
-   * @override
-   */
-  prepareDerivedData() {
-    super.prepareDerivedData();
-
-    const sys = this.system ?? {};
-
-    if (this.type === "pc") {
-      this._preparePc(sys);
-      preparePcExperience(this, sys);
-    } else if (this.type === "npc") {
-      this._prepareNpc(sys);
-      prepareFear(sys);
-    }
-  }
-
-  /**
-   * Prepare PC-specific derived data.
-   * Delegates to pc-preparation module with wound and insight calculation callbacks.
-   *
-   * @param {object} sys - Actor system data
-   * @returns {void}
-   * @private
-   */
-  _preparePc(sys) {
-    preparePcData(
-      this,
-      sys,
-      this._finalizeWoundPenalties.bind(this),
-      this._calculateInsightRank.bind(this)
-    );
-  }
-
-  /**
-   * Prepare NPC-specific derived data.
-   * Delegates to npc-preparation module with wound calculation callback.
-   *
-   * @param {object} sys - Actor system data
-   * @returns {void}
-   * @private
-   */
-  _prepareNpc(sys) {
-    prepareNpcData(this, sys, this._finalizeWoundPenalties.bind(this));
-  }
-
-  /**
    * Calculate wound penalties and current wound level.
    * Determines wound state based on suffered wounds and wound level thresholds.
    * Applies wound penalty modifiers from effects and conditions.
@@ -294,18 +237,6 @@ export default class L5R4Actor extends Actor {
     sys.wounds.penalty = curEffPenalty;
 
     return current;
-  }
-
-  /**
-   * Calculate insight rank from insight points.
-   * Uses L5R4 insight rank progression table.
-   *
-   * @param {number} insight - Total insight points
-   * @returns {number} Insight rank (1-10+)
-   * @private
-   */
-  _calculateInsightRank(insight) {
-    return calculateInsightRank(insight);
   }
 
   /**

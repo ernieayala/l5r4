@@ -15,7 +15,7 @@
  * Foundry Integration:
  * - Uses Roll API with exploding dice notation (x10 for exploding tens)
  * - Stores roll results in actor flags under system namespace
- * - Triggers actor.prepareData() to recalculate derived stats with new armor bonus
+ * - The flag update re-prepares the actor, so Armor TN picks up the new bonus
  * - Requires Foundry v10+ for Roll API
  *
  * API References:
@@ -64,7 +64,7 @@ const pendingFullDefenseRolls = new Set();
  * Side Effects:
  * - Sets actor flag: flags[SYS_ID].fullDefenseRoll with {total, formula, timestamp}
  * - Creates chat message with roll results and armor bonus
- * - Calls actor.prepareData() to recalculate derived stats with new bonus
+ * - The awaited flag update re-prepares the actor with the new bonus
  *
  * @async
  * @param {Actor} actor - The L5R4 actor assuming Full Defense Stance
@@ -132,9 +132,6 @@ export async function triggerFullDefenseRoll(actor, sys) {
     };
 
     ChatMessage.create(messageData);
-
-    // Recalculate derived stats (Armor TN) with new Full Defense bonus
-    actor.prepareData();
   } catch (error) {
     console.error("L5R4 | Failed to trigger Full Defense roll:", error);
     ui.notifications?.error(game.i18n.localize("l5r4.ui.notifications.fullDefenseRollFailed"));

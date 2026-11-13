@@ -35,7 +35,7 @@ import { SYS_ID } from "../config/constants.js";
  * - Default initiative formula as fallback (1d10)
  * - Combatant.getInitiativeRoll override to implement L5R4 Roll & Keep mechanics
  *
- * Must be called during system initialization (typically in init or ready hook).
+ * Must be called during system initialization (the init hook calls it).
  * Safe to call multiple times - patches are idempotent.
  *
  * @function initializeInitiativeSystem
@@ -78,10 +78,12 @@ export function initializeInitiativeSystem() {
           });
 
           if (confirmed) {
+            // The +10 is held in a flag until getInitiativeRoll reads it: a system data model drops unknown
+            // keys, so it cannot live under system.initiative.
             await actor.update({
               "system.rings.void.value": voidCurrent - 1,
               "system.initiative.useVoid": false,
-              "system.initiative._voidThisRoll": true
+              [`flags.${SYS_ID}.voidInitiative`]: true
             });
             ui.notifications?.info(`${actor.name} spent Void Point for initiative (+10)`);
           } else {
@@ -93,7 +95,7 @@ export function initializeInitiativeSystem() {
         }
       }
 
-      // Call original method to actually roll
+      // The original method makes the roll
       return __origCombatRollInit.call(this, ids, options);
     };
   } catch (e) {
@@ -115,7 +117,7 @@ export function initializeInitiativeSystem() {
      * Handles L5R4 10-dice cap (Foundry limitation):
      * - Dice beyond 10 rolled or kept convert to flat bonuses
      * - Conversion: 2 extra rolled dice = 1 kept die, excess kept dice = +2 bonus each
-     * - Special case: When at 10k10 cap, all excess dice become +2 bonuses directly
+     * - Special case: at the 10k10 cap, every excess die becomes a +2 bonus
      *
      * Formula construction:
      * - Format: XdYkZx10+B where X=rolled, Z=kept, B=bonus, x10=exploding tens
@@ -157,15 +159,15 @@ export function initializeInitiativeSystem() {
         let bonus = toInt(a.system?.initiative?.totalMod);
 
         // Check if void was confirmed for this roll
-        if (a.system?.initiative?._voidThisRoll) {
+        if (a.getFlag(SYS_ID, "voidInitiative")) {
           bonus += 10;
           // Clear temp flag after using it
-          a.update({ "system.initiative._voidThisRoll": false }).catch(err => {
+          a.unsetFlag(SYS_ID, "voidInitiative").catch(err => {
             console.warn(`${SYS_ID} | Failed to clear void temp flag`, err);
           });
         }
 
-        // Apply L5R4 10-dice cap - Foundry Roll class cannot handle more than 10 dice effectively
+        // Apply the L5R4 Ten Dice Rule cap of 10 rolled and 10 kept dice
         // Excess dice convert to flat bonuses to maintain game balance
         const extras_roll = Math.max(0, roll - 10);
         const extras_keep = Math.max(0, keep - 10);

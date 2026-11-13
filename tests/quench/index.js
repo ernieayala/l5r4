@@ -92,6 +92,7 @@ import { registerCombatModifiersTests } from "./documents/combat-modifiers.js";
 import { registerStanceEffectPreservationTests } from "./services/stance-effect-preservation.js";
 import { registerSmokeBatch } from "./smoke.js";
 import { registerDeprecationsBatch } from "./deprecations.js";
+import { registerDataModelsBatch } from "./data-models.js";
 
 /**
  * Register Quench integration tests for the L5R4 system.
@@ -101,6 +102,7 @@ import { registerDeprecationsBatch } from "./deprecations.js";
 export async function registerQuenchTests(quench) {
   registerSmokeBatch(quench);
   registerDeprecationsBatch(quench);
+  registerDataModelsBatch(quench);
   registerActorDocumentTests(quench);
   registerActorWoundTests(quench);
   registerActorXpTests(quench);

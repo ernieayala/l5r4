@@ -45,15 +45,44 @@ gone, and worlds saved by 3.2.1 load with their data intact.
 ## Decisions
 
 1. Defaults equal the 3.2.1 `template.json` defaults (X3).
-2. Every item model, and an Active Effect subtype, carries `system.rules` (an `ArrayField` of `ObjectField`,
-   default empty) so Stage 7 adds behavior without reshaping stored data (X6, AUTOMATION.md §1). Nothing reads
-   it until Stage 7.
-3. B5 and B6 (AUTOMATION.md §2) are fixed here, because the schema defines what is stored and what is derived:
-   no manual `prepareData()` calls, and no derived value written back to storage.
-
-### Still open
-
-- Derived fields: keep any of the derived values in the schema? Keeping them stored preserves exports and macros that read source data; dropping them is the v14 norm. Ernie's call before the schema is written.
+2. Every item model carries `system.rules` (an `ArrayField` of `ObjectField`, default empty) so Stage 7 adds
+   behavior without reshaping stored item data (X6, AUTOMATION.md §1). Nothing reads it until Stage 7. The
+   Active Effect side comes with Stage 3's `ActiveEffectTypeDataModel` subtype, since that model replaces core's
+   effect data shape, which Stage 3 owns.
+3. B5 (AUTOMATION.md §2) is fixed here: no manual `prepareData()` on a prepared actor (`reset()` where a
+   recalculation is wanted). B6 moves to Stage 3: it bites only when an Active Effect modifies a stored value,
+   and it spans about ten read-then-write sites unrelated to the schema.
+4. Derived values are not stored: `rings.air/earth/fire/water`, `woundLevels.*`, `wounds.value`,
+   `wounds.healRate`, PC `insight.points`, PC `armorTn.reduction/current`, and PC `initiative.roll/keep` are
+   computed in preparation and absent from the schema (Ernie, 2026-11-12). Fields that are inputs as well stay
+   stored: `wounds.max` (an NPC's custom maximum, read before preparation overwrites it), `insight.rank` (the
+   GM's manual rank), NPC `initiative.roll/keep` (custom pool), NPC `manualWoundLevels`.
+5. The legacy `bow` Item subtype stays declared with a model sharing the weapon schema, because 14.370 treats a
+   stored item with an undeclared type as invalid (`common/data/fields.mjs:4293`) and leaves it out of the
+   collection (`common/abstract/embedded-collection.mjs:204`), where the bow-to-weapon migration cannot reach
+   it. It is removed in a later major (Ernie, 2026-11-12).
+6. A schema drops stored keys it does not define (`common/data/fields.mjs:1143-1146`), so every key the code
+   or sheets write is declared, including ones `template.json` never had: item `rules`, advantage `clan` and
+   `demands`, spell `maho`, family and school legacy `trait` / `bonus` (read by `module/utils/xp-calculations.js:162-163`),
+   weapon and bow `equipped` (the item-management Quench batch sets it), `insight.autoCalculate`,
+   `movement.showSimple` (both actors), NPC `woundsMultiplier` / `woundsMod` / `woundsPenaltyMod` (written by
+   the wound config app), NPC `shadowTaint` (written by maho), NPC `spellSlots` (written by rest; initial 0,
+   which blocks casting as an absent pool does). `armor` is NPC-only (`npc-preparation.js:84-85`; the PC sheet
+   never renders it, and `cleanup.js` removes it from PCs).
+7. Legacy renames move into `migrateData`, which sees raw source before the schema prunes it: actor snake_case
+   keys (`wound_lvl`, `armor_tn`, `shadow_taint`, `initiative.*_mod`), NPC `wound_lvl` / `woundLevels` to
+   `manualWoundLevels`, Traits stored as `{rank}`, skill snake_case keys, armor `equiped` / `specialRues`. The
+   ready-hook migrations in `module/setup/migrations/` then find nothing left to rename.
+8. `keywords` (weapon, bow, armor, commonItem, spell) is a `StringField`: the sheet edits it as text and nothing
+   else reads it. `migrateData` joins a stored array with ", ". Stage 11 reshapes it when spell keywords gain
+   rules.
+9. `system.initiative._voidThisRoll` moves to the actor flag `flags.l5r4-enhanced.voidInitiative` with the same
+   set-read-clear lifecycle (`module/services/initiative.js:84`, `:160-165`).
+10. Quench batches assert the paths the schema defines (Ernie, 2026-11-12): conditions through
+    `actor.toggleStatusEffect` and `actor.statuses`, `spellSlots.<ring>`, skill `trainedEmphases` and `school`,
+    weapon `damageRoll` / `damageKeep` / `associatedSkill`, NPC `damageN`, School Rank as `insight.rank`. A
+    NaN update is refused and a null cleans to the field's initial value (`common/data/fields.mjs:239-243`), so
+    tests of corrupt values pass the validators a plain object.
 
 ## Out of scope
 

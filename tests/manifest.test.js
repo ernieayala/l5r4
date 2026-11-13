@@ -8,8 +8,13 @@ const lookup = (object, path) => path.split(".").reduce((node, key) => node?.[ke
 let manifest;
 let lang;
 let pkg;
+let DATA_MODELS;
 
 beforeAll(async () => {
+  // The data model classes extend foundry.abstract.TypeDataModel when their modules load; outside Foundry a bare
+  // class stands in for it. Nothing here builds a model, only reads which classes are registered.
+  globalThis.foundry = { abstract: { TypeDataModel: class {} } };
+  ({ DATA_MODELS } = await import("../module/data/index.js"));
   manifest = await readJson("system.json");
   lang = await readJson("lang/en.json");
   pkg = await readJson("package.json");
@@ -51,5 +56,28 @@ describe("system.json for Foundry v14", () => {
       const key = `TYPES.${documentName}.${type}`;
       expect(lookup(lang, key), key).toBeTypeOf("string");
     }
+  });
+});
+
+describe("system.json and the registered data models", () => {
+  it("gives every declared subtype a data model", () => {
+    for (const [documentName, type] of declaredSubtypes()) {
+      expect(DATA_MODELS[documentName]?.[type], `${documentName}.${type}`).toBeTypeOf("function");
+    }
+  });
+
+  it("declares every registered data model in documentTypes", () => {
+    for (const [documentName, models] of Object.entries(DATA_MODELS)) {
+      for (const type of Object.keys(models)) {
+        expect(
+          manifest.documentTypes[documentName]?.[type],
+          `${documentName}.${type}`
+        ).toBeDefined();
+      }
+    }
+  });
+
+  it("ships no template.json, whose subtypes the data models replace", async () => {
+    await expect(access(new URL("template.json", root))).rejects.toThrow();
   });
 });

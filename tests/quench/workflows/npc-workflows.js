@@ -200,13 +200,13 @@ export function registerNPCWorkflowTests(quench) {
           });
 
           // ASSERT
-          assert.equal(npc.system.wounds.max, 10, "Can set very low max wounds");
+          assert.equal(npc.system.wounds.max, 10, "Can set a low max wounds");
 
           // ACT - Very high wounds
           await npc.update({ "system.wounds.max": 500 });
 
           // ASSERT
-          assert.equal(npc.system.wounds.max, 500, "Can set very high max wounds");
+          assert.equal(npc.system.wounds.max, 500, "Can set a high max wounds");
         });
 
         it("should track suffered wounds in manual mode", async () => {
@@ -519,12 +519,8 @@ export function registerNPCWorkflowTests(quench) {
           npc = await createTestNPC({
             name: "Attack1 NPC",
             system: {
-              attack1: {
-                roll: 5,
-                keep: 3,
-                dmgRoll: 3,
-                dmgKeep: 2
-              }
+              attack1: { roll: 5, keep: 3 },
+              damage1: { roll: 3, keep: 2 }
             }
           });
 
@@ -532,8 +528,8 @@ export function registerNPCWorkflowTests(quench) {
           assert.exists(npc.system.attack1, "Attack1 exists");
           assert.equal(npc.system.attack1.roll, 5, "Attack1 rolls 5 dice");
           assert.equal(npc.system.attack1.keep, 3, "Attack1 keeps 3 dice");
-          assert.equal(npc.system.attack1.dmgRoll, 3, "Attack1 damage rolls 3 dice");
-          assert.equal(npc.system.attack1.dmgKeep, 2, "Attack1 damage keeps 2 dice");
+          assert.equal(npc.system.damage1.roll, 3, "Attack1 damage rolls 3 dice");
+          assert.equal(npc.system.damage1.keep, 2, "Attack1 damage keeps 2 dice");
         });
 
         it("should configure attack2 pattern", async () => {
@@ -541,12 +537,8 @@ export function registerNPCWorkflowTests(quench) {
           npc = await createTestNPC({
             name: "Attack2 NPC",
             system: {
-              attack2: {
-                roll: 6,
-                keep: 4,
-                dmgRoll: 4,
-                dmgKeep: 3
-              }
+              attack2: { roll: 6, keep: 4 },
+              damage2: { roll: 4, keep: 3 }
             }
           });
 
@@ -561,12 +553,8 @@ export function registerNPCWorkflowTests(quench) {
           npc = await createTestNPC({
             name: "Attack3 NPC",
             system: {
-              attack3: {
-                roll: 7,
-                keep: 5,
-                dmgRoll: 5,
-                dmgKeep: 3
-              }
+              attack3: { roll: 7, keep: 5 },
+              damage3: { roll: 5, keep: 3 }
             }
           });
 
@@ -581,9 +569,12 @@ export function registerNPCWorkflowTests(quench) {
           npc = await createTestNPC({
             name: "Multi-Attack NPC",
             system: {
-              attack1: { roll: 5, keep: 3, dmgRoll: 3, dmgKeep: 2 },
-              attack2: { roll: 6, keep: 4, dmgRoll: 4, dmgKeep: 2 },
-              attack3: { roll: 4, keep: 2, dmgRoll: 2, dmgKeep: 2 }
+              attack1: { roll: 5, keep: 3 },
+              attack2: { roll: 6, keep: 4 },
+              attack3: { roll: 4, keep: 2 },
+              damage1: { roll: 3, keep: 2 },
+              damage2: { roll: 4, keep: 2 },
+              damage3: { roll: 2, keep: 2 }
             }
           });
 

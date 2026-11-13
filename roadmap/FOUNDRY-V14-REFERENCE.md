@@ -158,6 +158,7 @@ From `PackageManifestData` [S27] and `_SystemManifestData` [S28]:
 - `documentTypes` tells the server which subtypes exist so they are not flagged invalid [S18].
 - Per-subtype options observed in v14 systems: `htmlFields` (sanitized HTML paths), `filePathFields` (`{"path": ["IMAGE", ...]}`), `gmOnlyFields` [S30], [S35], [S19]. 14.365 notes fixed creation of "Document subtypes with `gmOnly` fields" [S11].
 - Subtypes can be declared for `Actor`, `Item`, `ActiveEffect`, `ChatMessage`, `Combat`, `CombatantGroup`, `JournalEntryPage`, `RegionBehavior` (all observed) [S30], [S35], [S38].
+- A core type (`metadata.coreTypes`, e.g. ActiveEffect and Combat `base`) must not be declared: validation throws "is a reserved core type", which invalidates the whole `documentTypes` field [src: common/packages/sub-types.mjs:45-47]. Give a core type a model by assigning `CONFIG.ActiveEffect.dataModels.base` in `init` only (fabula-ultima `fabula-ultima.js:82-84`).
 - Document types can declare metadata controlling whether "base" type documents can be created or shown in creation dialogs [S8].
 
 ### 2.3 `packs` and `packFolders`
@@ -186,7 +187,6 @@ Assembled from the fields above; values are placeholders.
   "documentTypes": {
     "Actor": { "character": { "htmlFields": ["biography"] }, "npc": { "htmlFields": ["description"] } },
     "Item": { "weapon": {}, "armor": {}, "shield": {}, "accessory": {}, "class": {}, "skill": {}, "spell": {} },
-    "ActiveEffect": { "base": {} },
     "ChatMessage": { "check": {} }
   },
   "packs": [],
@@ -246,7 +246,7 @@ L5R4 mapping: Active Effect changes to Traits use `phase: "initial"`, so the Rin
 
 - `static migrateData(source)` migrates source data; it runs when source is first read from disk and on update deltas, so `source` may be only the delta [S18], [S19].
 - 14.370: `migrateData` implementations must handle `ForcedReplacement` operators [S2]. Draw Steel reads possibly-wrapped values with `foundry.data.operators.DataFieldOperator.get(...)` [S34].
-- `foundry.abstract.Document._addDataFieldMigration(data, oldKey, newKey, apply)` is used by Draw Steel [S34]. It is tagged `@internal` in core [src: common/abstract/document.mjs:1254-1264]: not public API. Write the rename in `migrateData` directly.
+- `foundry.abstract.Document._addDataFieldMigration(data, oldKey, newKey, apply)` is used by Draw Steel [S34]. It is tagged `@internal` in core [src: common/abstract/document.mjs:1254-1264]: not public API. Write the rename inside `migrateData` instead.
 - `DataModel.cleanData` consolidates cleaning, `DataField#clean` handles migrations in its recursion [S4], [S6].
 
 ### 3.4 Other data-model hooks
@@ -411,7 +411,7 @@ L5R4 note: Roll & Keep rolls are `XdYkZx10` (keep the highest, tens explode); th
 - Phases: `"initial"` and `"final"` are core; see 3.2 for where each runs [src: common/constants.mjs:101].
 - Custom change types: `CONFIG.ActiveEffect.changeTypes.<key> = {label, defaultPriority, handler}` (Crucible) [S38]. dnd5e merges its own into `CONFIG.ActiveEffect.changeTypes` [S30].
 - Additional phases: `CONFIG.ActiveEffect.phases: Record<string, {hint, label}>`; you must call `Actor#applyActiveEffects(phase)` yourself at the right point [S72].
-- Subtype data models: subclass `foundry.data.ActiveEffectTypeDataModel`; register in `CONFIG.ActiveEffect.dataModels`; declare in `documentTypes.ActiveEffect` [S34], [S38], [S30]. Crucible registers `base` [S38].
+- Subtype data models: subclass `foundry.data.ActiveEffectTypeDataModel`; register in `CONFIG.ActiveEffect.dataModels`; declare a system-defined subtype in `documentTypes.ActiveEffect` [S34], [S38], [S30]. Core's `base` type takes a model through `CONFIG` only and is never declared (§2.2). Crucible registers `base` [S38].
 
 ### 6.2 Applying effects
 
@@ -596,7 +596,7 @@ The v13-era global aliases are registered by `addBackwardsCompatibilityReference
 | dnd5e | JS `.mjs` | (not checked) | ships `dnd5e.css` | (not checked) | JSDoc | [S30] |
 | pf2e | TypeScript + Svelte | Vite | Sass | ESLint + oxlint + Prettier | TS | [S95] |
 
-- Unbundled ES modules work: Crucible's source `crucible.mjs` imports `./module/...` directly and the bundle is only for release [S38], [S85]. **Inference**: a no-bundler setup with `esmodules: ["<entry>.mjs"]` is valid.
+- Unbundled ES modules work: Crucible's source `crucible.mjs` imports `./module/...` without a bundler, which it uses for release builds alone [S38], [S85]. **Inference**: a no-bundler setup with `esmodules: ["<entry>.mjs"]` is valid.
 - SCSS: no v14 system checked uses SCSS without a bundler; compiling with the `sass` CLI to the CSS path listed in `styles` matches what the manifest needs [S27]. pf2e uses `sass` [S95].
 - `fvtt-types`: npm dist-tags `beta: 14.370.0-beta.20261107215328`, `prerelease: 14.366.0-beta...`, `latest: 13.346.0-beta...` [S101]. The repo README still describes v13 as in progress [S102]. Alternative: Draw Steel's symlink of the installed Foundry `client/` and `common/` into `foundry/` with `jsconfig.json` `paths` `@client/*`, `@common/*` [S99], [S100].
 - ESLint globals for Foundry: see 10.4 [S36].

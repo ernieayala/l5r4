@@ -47,6 +47,7 @@ import {
 } from "../module/config/localization.js";
 import { NPC_NUMBER_WOUND_LVLS } from "../module/config/game-mechanics.js";
 import { STATUS_EFFECTS } from "../module/config/status-effects.js";
+import { DATA_MODELS } from "../module/data/index.js";
 import L5R4Actor from "../module/documents/actor.js";
 import L5R4Item from "../module/documents/item.js";
 import L5R4ItemSheet from "../module/sheets/item-sheet.js";
@@ -77,6 +78,12 @@ Hooks.once("init", async () => {
   CONFIG.Item.documentClass  = L5R4Item;
   CONFIG.Actor.documentClass = L5R4Actor;
 
+  // One data model per subtype declared in system.json documentTypes. Core labels each subtype with its
+  // TYPES.<Document>.<type> key from lang/*.json.
+  for (const [documentName, models] of Object.entries(DATA_MODELS)) {
+    Object.assign(CONFIG[documentName].dataModels, models);
+  }
+
   CONFIG.l5r4 = {
     arrows: ARROWS,
     sizes: SIZES,
@@ -104,7 +111,7 @@ Hooks.once("init", async () => {
   const { DocumentSheetConfig } = foundry.applications.apps;
   const { Item, Actor } = foundry.documents;
 
-  // "bow" is the legacy subtype template.json still declares until the bow-to-weapon migration converts it;
+  // "bow" is the legacy subtype kept until the bow-to-weapon migration converts it (module/data/item/BowData.js);
   // with no core sheet in 14.370 it needs this one to open.
   DocumentSheetConfig.registerSheet(Item, SYS_ID, L5R4ItemSheet, {
     makeDefault: true,
