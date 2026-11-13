@@ -172,7 +172,13 @@
         "details": "Details",
         "modifiers": "Modifiers",
         "description": "Description",
-        "effects": "Active Effects"
+        "effects": "Active Effects",
+        "rules": "Rules"
+      },
+      "rules": {
+        "hint": "The item's rules as a JSON list, such as [{\"key\": \"RollModifier\", \"selector\": \"skill:kenjutsu\", \"roll\": 1}]. ACTIVE_EFFECTS.md lists the rule keys.",
+        "invalidJson": "Rules not saved: the text is not valid JSON ({error}).",
+        "notList": "Rules not saved: the text must be a JSON list of objects, each with a \"key\"."
       },
       "mechanics": {
         "rings": {

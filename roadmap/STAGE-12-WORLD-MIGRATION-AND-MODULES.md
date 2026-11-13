@@ -24,8 +24,10 @@ and Active Effect intact, and the optional module integrations either work or sw
 
 - A test world: a copy of a real 3.2.1 world (Ernie's), upgraded on 14.370. Record anything lost or changed.
 - Fixes to `migrateData` or `module/setup/migrations/` for what the test world shows.
-- Migrations into the automation data: family and school Trait bonus effects, skill bonus fields, and stance
-  and condition effects from 3.2.1 become their Stage 7 and 9 rule forms.
+- Migrations into the automation data: check on the test world that the Stage 7 migrations (Family and School
+  Trait effects to TraitAdjust, Master of Blood, Defense Stance and Mounted effects; STAGE-07 decision 4) and the
+  Stage 9 ones for stance and condition effects left nothing behind. Skill bonus fields need none: they stay
+  fields and act as a rule.
 - Animations: confirm Sequencer's v14 support; if it has none, the integration stays off without errors.
 
 ## Acceptance

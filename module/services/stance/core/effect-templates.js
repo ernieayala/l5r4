@@ -1,5 +1,6 @@
 import { SYS_ID } from "../../../config/constants.js";
 import { T } from "../../../utils/localization.js";
+import { statusRules } from "../../../utils/rule-engine.js";
 
 /**
  * Stance Effect Templates
@@ -89,6 +90,7 @@ export function createDefenseStanceEffect() {
     name: T("l5r4.ui.mechanics.stances.defense"),
     img: `systems/${SYS_ID}/assets/icons/defence-stance.webp`,
     statuses: ["defenseStance"],
+    system: { rules: statusRules("defenseStance") },
     flags: {
       [SYS_ID]: {
         stanceType: "defense",

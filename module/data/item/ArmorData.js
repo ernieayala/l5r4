@@ -15,6 +15,14 @@ export default class ArmorData extends EquipmentData {
     };
   }
 
+  /**
+   * Armor's rules apply only while it is worn.
+   * @override
+   */
+  get rulesActive() {
+    return this.equipped;
+  }
+
   /** @override */
   static migrateData(source) {
     migrateArmorSource(source);

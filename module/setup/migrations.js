@@ -58,6 +58,7 @@ import { migrateLegacyNpcWounds } from "./migrations/actors/npc-wounds.js";
 import { migrateActorEmbeddedItems } from "./migrations/actors/embedded-items.js";
 import { cleanupLegacyFields } from "./migrations/actors/cleanup.js";
 import { migrateEffectFreeTraitBase } from "./migrations/actors/xp-free-trait-base.js";
+import { migrateStatusEffectRules } from "./migrations/actors/status-effect-rules.js";
 
 // Item migrations
 import { migrateBowsToWeapons } from "./migrations/items/bow-to-weapon.js";
@@ -66,6 +67,7 @@ import { migrateEmphasisStringToArray } from "./migrations/items/emphasis.js";
 import { migrateArmorTypes } from "./migrations/items/armor-types.js";
 import { migrateFreeRaisesDefaults } from "./migrations/items/free-raises.js";
 import { normalizeItems } from "./migrations/items/normalize.js";
+import { migrateItemRules } from "./migrations/items/item-rules.js";
 
 // Icon migrations
 import {
@@ -95,12 +97,14 @@ import {
  * 6. Free Raises field backfill (world items)
  * 7. Icon path migration (world items) - PNG→WebP + default icon assignment
  * 8. Data normalization (world items)
- * 9. Legacy field cleanup (world actors)
- * 10. Embedded item migrations (all world actors)
- * 11. Free Trait rank flags set for an Active Effect bonus (world actors)
- * 12. Mark documents as migrated (world actors/items)
- * 13. Compendium migrations (unlocked packs only) - includes icon migration
- * 14. Icon path migrations (world actors + final compendium pass)
+ * 9. Item mechanics into rules: Family/School Trait bonus effects, Master of Blood (world items)
+ * 10. Legacy field cleanup (world actors)
+ * 11. Embedded item migrations (all world actors), item rules included
+ * 12. Status effect rules: Defense Stance and Mounted effects made before the rule engine (world actors)
+ * 13. Free Trait rank flags set for a rule bonus (world actors)
+ * 14. Mark documents as migrated (world actors/items)
+ * 15. Compendium migrations (unlocked packs only) - includes icon migration
+ * 16. Icon path migrations (world actors + final compendium pass)
  *
  * Foundry VTT Integration:
  * - Called from system ready hook when version mismatch detected
@@ -142,11 +146,15 @@ export async function runMigrations(fromVersion, toVersion) {
 
   await normalizeItems(unmigratedItems, "world-items-norm");
 
+  await migrateItemRules(unmigratedItems, "world-item-rules");
+
   await cleanupLegacyFields(unmigratedActors, "world-actors-cleanup");
 
   for (const actor of unmigratedActors) {
     await migrateActorEmbeddedItems(actor, "actor");
   }
+
+  await migrateStatusEffectRules(unmigratedActors, "world-status-effect-rules");
 
   // After the embedded items, because the Trait bonus is read from the actor's Family and School items
   await migrateEffectFreeTraitBase(unmigratedActors, "world-free-trait-base");
@@ -193,11 +201,16 @@ export async function runMigrations(fromVersion, toVersion) {
       await migrateFreeRaisesDefaults(unmigratedDocs, `pack-free-raises:${pack.collection}`);
       await migrateEmbeddedItemIcons(unmigratedDocs, `pack-icon-migration:${pack.collection}`);
       await normalizeItems(unmigratedDocs, `pack-norm:${pack.collection}`);
+      await migrateItemRules(unmigratedDocs, `pack-item-rules:${pack.collection}`);
 
       if (docType === "Actor") {
         for (const actor of unmigratedDocs) {
           await migrateActorEmbeddedItems(actor, `compendium-actor:${pack.collection}`);
         }
+        await migrateStatusEffectRules(
+          unmigratedDocs,
+          `pack-status-effect-rules:${pack.collection}`
+        );
         await migrateEffectFreeTraitBase(unmigratedDocs, `pack-free-trait-base:${pack.collection}`);
       }
 

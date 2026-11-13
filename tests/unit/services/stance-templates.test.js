@@ -30,8 +30,9 @@ vi.mock("../../../module/utils/localization.js", () => ({
   T: vi.fn(key => `LOCALIZED:${key}`)
 }));
 
-// Mock constants
-vi.mock("../../../module/config/constants.js", () => ({
+// Mock constants; the rest of the module stays real for the config the templates import (status effect rules)
+vi.mock("../../../module/config/constants.js", async importOriginal => ({
+  ...(await importOriginal()),
   SYS_ID: "l5r4-enhanced"
 }));
 

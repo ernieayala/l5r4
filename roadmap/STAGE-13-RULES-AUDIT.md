@@ -33,7 +33,7 @@ Pages are the printed pages holding the paragraphs each row's code depends on, l
 | Wound Ranks, penalties, healing | `33_wounds.md`, `34_ambush_falling_drowning.md`, `35_healing_wounds.md` | 82 (Wounds), 84 (Wound Rank table, healing) | `module/documents/actor/calculations/wound-system.js`, `module/services/rest.js`, `module/services/wound-prone-automation.js` |
 | Stances | `36_stances.md` | 84 | `module/services/stance/**`, `module/documents/actor/calculations/stance-effects.js` |
 | Conditions (including Grappled), Fear | `40_grappling.md`, `41_conditional_effects.md`, `42_fear.md` | 88-89 (grappling), 89 (conditions), 90 (Fear) | `module/documents/actor/calculations/condition-effects.js`, `fear-system.js`, `module/services/fear.js`, `module/utils/condition-penalties.js` |
-| Mounted combat: attack bonus, no Full Attack while mounted, Horsemanship Rank 3 exception | `41_conditional_effects.md`, `36_stances.md`, `60_bugei_skills.md` | 89, 84, 140 | `module/services/mounted-combat.js` |
+| Mounted combat: attack bonus, no Full Attack while mounted, Horsemanship Rank 3 exception | `41_conditional_effects.md`, `36_stances.md`, `60_bugei_skills.md` | 89, 84, 140 | `mounted` in `module/config/status-effects.js` |
 | Riding armor while mounted | `73_armor.md` | 198 | `module/utils/armor-penalties.js` |
 | Bows and lance from horseback, Polearms Mastery against mounted foes | `74_weapons.md`, `60_bugei_skills.md` | 200, 203, 142 | None found (`rg -n -i "horseback\|lance\|polearm" module`); confirm the system leaves them to the GM |
 | Family and School Trait bonuses | `48_character_creation_expanded.md` | 102 | `module/services/family-bonus-service.js` |

@@ -1,8 +1,8 @@
 /**
  * Attack Bonuses Service
  *
- * Aggregates attack and damage roll bonuses from combat stances and mounted status.
- * Implements the Full Attack Stance (+2k1 attack) and integrates with mounted combat bonuses.
+ * Aggregates attack and damage roll bonuses from combat stances and attack rules.
+ * Implements the Full Attack Stance (+2k1 attack) and reads RollModifier rules on attacks.
  *
  * This module extracts roll bonuses from Foundry ActiveEffects that store L5R4 mechanics
  * in effect flags, then combines them into unified bonus structures for the dice service.
@@ -22,7 +22,8 @@
  */
 
 import { SYS_ID } from "../../../config/constants.js";
-import { getMountedAttackBonus } from "../../mounted-combat.js";
+import { bagEntries } from "../../../utils/rule-engine.js";
+import { stackModifiers } from "../../../utils/modifier-stacking.js";
 
 /**
  * Roll bonus structure used throughout L5R4 dice system.
@@ -104,26 +105,49 @@ export function getStanceAttackBonuses(actor) {
 }
 
 /**
- * Aggregates all attack roll bonuses from stance and mounted combat.
+ * Attack roll bonuses from the attacker's RollModifier rules on the "attack" selector, tested with the attacker's
+ * roll options plus `target` and the target's options prefixed `target:` (so the Mounted status rule, Core
+ * Rulebook p.89, needs a target that is not mounted).
+ *
+ * @param {Actor} attacker - The attacking actor
+ * @param {Actor|null} target - The attack's target, if any
+ * @returns {RollBonus}
+ */
+export function getRuleAttackBonuses(attacker, target = null) {
+  const options = new Set(attacker.rollOptions);
+  if (target) {
+    options.add("target");
+    for (const option of target.rollOptions) {
+      options.add(`target:${option}`);
+    }
+  }
+  const { roll, keep } = stackModifiers(
+    bagEntries(attacker.ruleBag, "rollModifiers", ["attack"], options)
+  );
+  return { roll, keep };
+}
+
+/**
+ * Aggregates all attack roll bonuses from stance effects and rules.
  *
  * Combines bonuses from:
  * 1. Stance effects (e.g., Full Attack Stance +2k1)
- * 2. Mounted combat advantages (e.g., mounted vs unmounted +1k0)
+ * 2. RollModifier rules on attacks (e.g., Mounted +1k0 against an unmounted target)
  *
  * This is the primary function used by the dice service to calculate total
  * attack roll modifications before constructing the roll formula.
  *
  * @param {Actor} attacker - The attacking actor
- * @param {Actor|null} target - Optional target actor for mounted combat bonus calculation
+ * @param {Actor|null} target - The attack's target, if any
  * @returns {RollBonus} Combined attack bonuses from all sources
  */
 export function getAllAttackBonuses(attacker, target = null) {
   const stanceBonuses = getStanceAttackBonuses(attacker);
-  const mountedBonuses = getMountedAttackBonus(attacker, target);
+  const ruleBonuses = getRuleAttackBonuses(attacker, target);
 
   return {
-    roll: stanceBonuses.roll + mountedBonuses.roll,
-    keep: stanceBonuses.keep + mountedBonuses.keep
+    roll: stanceBonuses.roll + ruleBonuses.roll,
+    keep: stanceBonuses.keep + ruleBonuses.keep
   };
 }
 

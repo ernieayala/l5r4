@@ -57,6 +57,8 @@ Reviewed 2026-11-12 (`gh issue list --state all`, `gh pr list --state all`). Eac
 | #38 | NPC formula wound mode: `woundLevels` overwritten by manual thresholds | Stage 13 |
 | #40 | NPC long rest heals no Wounds: `wounds.healRate` computed for PCs only | Stage 13 |
 | #37 | A weapon's "Explodes on" value ignored on damage rolls | Stage 8 (dice rules), checked in Stage 13 |
+| #41 | Mounted +1k0 (p.89) missing on Skill weapon attacks: only `SimpleRoll` reads attack rules | Stage 8 |
+| #42 | Shift-click Trait rolls skip `system.bonuses.trait` | Stage 8 |
 | #29 | Strength raised by an Active Effect misses weapon damage; extra effect points on Strength charged as XP | Stage 3 (Trait changes in the `"initial"` phase reach derived values), checked in Stage 13 |
 | #30 | NPC Initiative stays 2k2 | Stage 13 (Initiative row; code moves to Combat classes in Stage 5) |
 | #30 | Light-theme Ring values, Void Ring arrows, PC portrait picker, removable NPC attacks | Stage 6 (done; the portrait picker already worked in 3.2.1) |

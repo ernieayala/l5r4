@@ -15,7 +15,7 @@ import { createTestPC } from "../fixtures/actor-fixtures.js";
 import { createBow, createKatana } from "../fixtures/item-fixtures.js";
 
 /**
- * A Family or School item whose transferred effect adds +1 to a Trait, in the v14 shape.
+ * A Family or School item whose TraitAdjust rule adds +1 to a Trait (the form a 3.2.1 Trait effect migrates to).
  * @param {"family"|"school"} type  Item type.
  * @param {string} trait  Trait key.
  * @returns {object}  Item creation data.
@@ -24,13 +24,7 @@ function creationBonusItem(type, trait) {
   return {
     name: `Quench ${type}`,
     type,
-    effects: [
-      {
-        name: `Quench ${type} bonus`,
-        transfer: true,
-        system: { changes: [{ key: `system.traits.${trait}`, type: "add", value: "1" }] }
-      }
-    ]
+    system: { rules: [{ key: "TraitAdjust", trait, value: 1 }] }
   };
 }
 
@@ -371,7 +365,7 @@ export function registerActiveEffectsBatch(quench) {
       });
 
       describe("XP for a Trait with a creation bonus (#29, Core Rulebook p.103)", () => {
-        it("an Active Effect bonus counts toward each bought rank and marks no free rank", async () => {
+        it("a TraitAdjust rule bonus counts toward each bought rank and marks no free rank", async () => {
           actor = await createTestPC({ name: "AE xp", system: { traits: { str: 2 } } });
           await actor.createEmbeddedDocuments("Item", [
             creationBonusItem("family", "str"),
@@ -397,7 +391,7 @@ export function registerActiveEffectsBatch(quench) {
           assert.equal(await historyTraitXp(actor, "str"), 16, "the history charges the same");
         });
 
-        it("the migration clears a free rank marked for an Active Effect bonus", async () => {
+        it("the migration clears a free rank marked for a TraitAdjust rule bonus", async () => {
           actor = await createTestPC({ name: "AE xp migration", system: { traits: { str: 3 } } });
           await actor.createEmbeddedDocuments("Item", [
             creationBonusItem("family", "str"),

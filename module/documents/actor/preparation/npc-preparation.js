@@ -30,6 +30,7 @@ import {
 } from "../calculations/wound-system.js";
 import { applyConditionEffects } from "../calculations/condition-effects.js";
 import { enrichActorItems } from "../calculations/item-enrichment.js";
+import { applyArmorRules, applyDerivedRules } from "../rules.js";
 
 /**
  * Prepares derived data for NPC actors.
@@ -50,6 +51,9 @@ import { enrichActorItems } from "../calculations/item-enrichment.js";
 export function prepareNpcData(actor, sys, finalizeWoundPenaltiesFn) {
   // Calculate base traits and rings first (required for initiative)
   prepareTraitsAndRings(sys);
+
+  // Rules that need Traits and Rings, before the values their outputs feed (Initiative, Wounds, roll bonuses)
+  applyDerivedRules(actor, sys);
 
   // Initialize initiative structure
   sys.initiative = sys.initiative || {};
@@ -105,6 +109,7 @@ export function prepareNpcData(actor, sys, finalizeWoundPenaltiesFn) {
 
   // Apply stance effects (must happen after traits are calculated)
   applyStanceAutomation(actor, sys);
+  applyArmorRules(sys);
 
   // Apply condition effects (must happen after stance)
   applyConditionEffects(actor, sys);

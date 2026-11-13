@@ -5,27 +5,27 @@
  * In L5R4, each family grants a +1 bonus to one specific Trait (e.g., Hida: +1 Strength,
  * Yasuki: +1 Awareness), allowing that Trait to start at 3 instead of the default 2.
  *
- * This service uses Foundry VTT's Active Effects system to apply these bonuses, reading
- * from the family Item's effects that target trait properties (e.g., "system.traits.str").
+ * The family Item carries the bonus as a TraitAdjust rule in `system.rules`; the rule engine applies it to the
+ * Trait, and this service reads it back for the Trait arrows.
  *
  * Responsibilities:
  * - Retrieve family Item from actor flags
- * - Calculate trait bonuses from family Active Effects
+ * - Calculate trait bonuses from the family Item's TraitAdjust rules
  * - Provide individual trait bonuses or complete bonus maps
  * - Validate trait keys and family items
  *
- * Related Foundry APIs: Actor flags, fromUuidSync, Active Effects (v13+)
+ * Related Foundry APIs: Actor flags, fromUuidSync
  * Related Game Rules: Character Creation Step 2 (Family Selection)
  */
 
 import { SYS_ID } from "../config/constants.js";
+import { traitAdjustTotal } from "../utils/rule-engine.js";
 
 /**
  * Service for managing family trait bonuses applied to L5R4 actors.
  *
  * Families in L5R4 grant a +1 bonus to a single Trait during character creation.
- * This service calculates these bonuses by reading Active Effects from the actor's
- * assigned family Item, filtering for effects that modify trait properties.
+ * This service reads these bonuses from the TraitAdjust rules of the actor's assigned family Item.
  */
 export class FamilyBonusService {
   /**
@@ -56,9 +56,7 @@ export class FamilyBonusService {
   /**
    * Gets the family bonus for a specific trait.
    *
-   * Calculates the total family bonus applied to a single trait by summing all
-   * Active Effect changes from the actor's family Item that target the trait property.
-   * Only considers effects with transfer=true, changes of type "add", and positive values.
+   * Sums the numeric TraitAdjust rules for the trait on the actor's family Item; a negative total counts as 0.
    *
    * @param {L5R4Actor} actor - The actor to check for family bonuses
    * @param {string} traitKey - The trait key (e.g., "str", "agi", "int")
@@ -84,27 +82,8 @@ export class FamilyBonusService {
         return 0;
       }
 
-      const effectKey = `system.traits.${traitKey}`;
-      let total = 0;
-
-      for (const effect of familyItem.effects ?? []) {
-        // Only process effects that transfer to the actor (not temporary/suppressed effects)
-        if (effect?.transfer !== true) {
-          continue;
-        }
-
-        for (const change of effect.system?.changes ?? []) {
-          if (change?.key === effectKey && change?.type === "add") {
-            const value = Number(change?.value ?? 0);
-            // Only accept positive bonuses - negative values would be penalties, not family bonuses
-            if (Number.isFinite(value) && value > 0) {
-              total += value;
-            }
-          }
-        }
-      }
-
-      return total;
+      // A negative total would be a penalty, not a family bonus
+      return Math.max(0, traitAdjustTotal(familyItem.system.rules, traitKey));
     } catch (err) {
       console.warn(`${SYS_ID} FamilyBonusService: Failed to get bonus for trait`, {
         actorId: actor?.id,
@@ -118,9 +97,7 @@ export class FamilyBonusService {
   /**
    * Gets a complete map of all trait bonuses from the actor's family.
    *
-   * Returns an object with all eight trait keys mapped to their family bonuses.
-   * Uses Active Effects from the family Item, filtering for effects that modify
-   * trait properties (system.traits.*) with transfer=true and change type "add".
+   * Returns an object with all eight trait keys mapped to their family bonuses, read as in getBonus().
    *
    * This is more efficient than calling getBonus() multiple times when you need
    * bonuses for multiple traits.
@@ -136,31 +113,9 @@ export class FamilyBonusService {
       }
 
       const bonusMap = this._createZeroMap();
-
-      for (const effect of familyItem.effects ?? []) {
-        // Only process effects that transfer to the actor (not temporary/suppressed effects)
-        if (effect?.transfer !== true) {
-          continue;
-        }
-
-        for (const change of effect.system?.changes ?? []) {
-          if (change?.type !== "add") {
-            continue;
-          }
-
-          // Extract trait key from effect property path (e.g., "system.traits.str" -> "str")
-          const match = change?.key?.match(/^system\.traits\.(\w+)$/);
-          if (match && this.VALID_TRAIT_KEYS.includes(match[1])) {
-            const traitKey = match[1];
-            const value = Number(change?.value ?? 0);
-            // Only accept positive bonuses - negative values would be penalties, not family bonuses
-            if (Number.isFinite(value) && value > 0) {
-              bonusMap[traitKey] += value;
-            }
-          }
-        }
+      for (const traitKey of this.VALID_TRAIT_KEYS) {
+        bonusMap[traitKey] = Math.max(0, traitAdjustTotal(familyItem.system.rules, traitKey));
       }
-
       return bonusMap;
     } catch (err) {
       console.warn(`${SYS_ID} FamilyBonusService: Failed to get bonus map`, {
