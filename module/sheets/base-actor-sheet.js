@@ -16,7 +16,6 @@
  * - Uses HandlebarsApplicationMixin for template rendering
  * - Implements event delegation pattern via data-action attributes
  * - Leverages _onRender and _prepareContext lifecycle hooks
- * - Overrides _getHeaderControls to prevent mixin-chain duplicates
  *
  * **Event Delegation:**
  * All user interactions are handled through delegated events on [data-action] elements.
@@ -63,29 +62,16 @@ export class BaseActorSheet extends KeyboardBehaviorMixin(
   HandlebarsApplicationMixin(foundry.applications.sheets.ActorSheetV2)
 ) {
   /**
-   * Default configuration options for the actor sheet.
-   *
-   * Merges with ActorSheetV2 defaults to configure sheet behavior:
-   * - Filters out Foundry's default "pc"/"npc" classes, adds "l5r4" system class
-   * - Enables automatic form submission on change and close
-   *
-   * **Foundry v13 Pattern:**
-   * Uses static DEFAULT_OPTIONS instead of defaultOptions() getter.
+   * This class's own options: the "l5r4" class and saving each field as it changes. ApplicationV2 merges every
+   * class's DEFAULT_OPTIONS up the chain and concatenates arrays (client/applications/api/application.mjs:437-484),
+   * so a class lists only its own entries; copying the parent's in would repeat them.
    *
    * @static
    * @type {Object}
    */
   static DEFAULT_OPTIONS = {
-    ...super.DEFAULT_OPTIONS,
-    classes: [
-      ...(super.DEFAULT_OPTIONS.classes ?? []).filter(c => c !== "pc" && c !== "npc"),
-      "l5r4"
-    ],
-    form: {
-      ...(super.DEFAULT_OPTIONS.form ?? {}),
-      submitOnChange: true,
-      submitOnClose: true
-    }
+    classes: ["l5r4"],
+    form: { submitOnChange: true }
   };
 
   /**
@@ -179,29 +165,6 @@ export class BaseActorSheet extends KeyboardBehaviorMixin(
           img.src = defaultImage;
         });
       }
-    });
-  }
-
-  /**
-   * Deduplicates header controls from mixin chain.
-   *
-   * The nested mixin chain causes super._getHeaderControls() to return duplicate
-   * entries. Filters by action to ensure each control appears only once in the
-   * header dropdown menu.
-   *
-   * @returns {ApplicationHeaderControlsEntry[]} Deduplicated header controls
-   * @protected
-   * @override
-   */
-  _getHeaderControls() {
-    const controls = super._getHeaderControls();
-    const seen = new Set();
-    return controls.filter(control => {
-      if (seen.has(control.action)) {
-        return false;
-      }
-      seen.add(control.action);
-      return true;
     });
   }
 
@@ -458,7 +421,7 @@ export class BaseActorSheet extends KeyboardBehaviorMixin(
   /**
    * Handles inline editing of item properties in the sheet.
    *
-   * Delegates to ItemCRUDHandler for updating item properties directly
+   * Delegates to ItemCRUDHandler for updating item properties in place
    * from form fields in the sheet without opening the full item sheet.
    *
    * @param {Event} event - DOM change event from inline edit field
@@ -513,7 +476,7 @@ export class BaseActorSheet extends KeyboardBehaviorMixin(
   /**
    * Initiates an attack roll.
    *
-   * Delegates to RollHandler to construct an attack roll (typically a weapon
+   * Delegates to RollHandler to construct an attack roll (usually a weapon
    * skill roll against opponent's Armor TN).
    *
    * **Game Rules:**
@@ -584,7 +547,7 @@ export class BaseActorSheet extends KeyboardBehaviorMixin(
    *
    * **Without Shift Key:**
    * Performs a trait roll (XkX where X = trait rank) via TraitHandler/RollHandler.
-   * This allows quick trait rolls by clicking directly on the trait rank.
+   * This allows quick trait rolls by clicking the trait rank.
    *
    * **With Shift Key:**
    * Increments or decrements the specified trait rank, clamping to valid

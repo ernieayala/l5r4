@@ -202,7 +202,15 @@
 
       <!-- Void ring -->
       <h4 class="ring-name ring-name-void">{{localize "l5r4.ui.mechanics.rings.void"}}</h4>
-      <div class="ring-rank ring-rank-void" data-action="ring-rank-void" data-ring="void" role="button" title="{{localize "l5r4.ui.hints.leftClickPlusRightClickMinus"}}"><span>{{system.rings.void.rank}}</span></div>
+      <div class="ring-rank ring-rank-void" data-action="ring-rank-void" data-ring="void" role="button" title="{{localize "l5r4.ui.hints.leftClickPlusRightClickMinus"}}">
+        <a class="trait-increase" data-action="void-ring-increase">
+          <i class="fas fa-chevron-up"></i>
+        </a>
+        <span>{{system.rings.void.rank}}</span>
+        <a class="trait-decrease" data-action="void-ring-decrease">
+          <i class="fas fa-chevron-down"></i>
+        </a>
+      </div>
       <div class="void-ring">
         <a class="ring-roll" data-action="roll-ring" data-ring-rank="{{system.rings.void.rank}}" data-ring-name="{{localize "l5r4.ui.mechanics.rings.void"}}" data-system-ring="void">
           <img src="{{iconPath 'void.webp'}}" title="{{localize "l5r4.ui.mechanics.rolls.ringRoll"}}" class="void-ring-img" />

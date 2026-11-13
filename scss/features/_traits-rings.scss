@@ -6,6 +6,54 @@
 
 @use "../base/variables" as *;
 
+// Up and down arrows shown on hover over a rank that steps by one (Traits, the Void Ring)
+@mixin rank-arrows {
+  &:hover {
+    .trait-increase,
+    .trait-decrease {
+      opacity: 1;
+    }
+
+    .trait-increase {
+      top: -16px;
+    }
+
+    .trait-decrease {
+      bottom: -16px;
+    }
+  }
+
+  .trait-increase,
+  .trait-decrease {
+    align-items: center;
+    background-color: inherit;
+    border: 1px solid black;
+    border-color: inherit;
+    color: inherit;
+    display: flex;
+    font-size: 10px;
+    height: 16px;
+    justify-content: center;
+    left: -2px;
+    opacity: 0;
+    position: absolute;
+    right: -1px;
+    transition:
+      opacity 150ms ease-out,
+      top 150ms ease-out,
+      bottom 150ms ease-out;
+    z-index: 11;
+  }
+
+  .trait-increase {
+    top: 0;
+  }
+
+  .trait-decrease {
+    bottom: 0;
+  }
+}
+
 .l5r4.pc,
 .l5r4.npc {
   .traits-rings {
@@ -42,7 +90,11 @@
       width: 32px;
       z-index: 10;
 
+      // The backdrop comes from custom properties set per theme (below), so the nearest themed ancestor decides it:
+      // a light sheet inside a dark interface matches both .theme-light and .theme-dark as ancestors (issue #30)
       &::before {
+        background-color: var(--l5r4-ring-rank-backdrop-color);
+        background-image: var(--l5r4-ring-rank-backdrop-image);
         background-position: center;
         background-size: cover;
         border: 2px solid transparent;
@@ -50,14 +102,6 @@
         content: "";
         inset: -4px;
         position: absolute;
-
-        .theme-light & {
-          background-image: url("../../../ui/parchment.jpg");
-        }
-
-        .theme-dark & {
-          background-color: var(--color-cool-5-90);
-        }
       }
 
       &.ring-rank-fire {
@@ -89,10 +133,14 @@
       }
 
       &.ring-rank-void {
+        cursor: pointer;
+
         span {
           background-color: rgb(var(--void-ring-color), 0.1);
           border-color: rgb(var(--void-ring-color));
         }
+
+        @include rank-arrows;
       }
 
       span {
@@ -203,50 +251,7 @@
         position: relative;
         width: 28px;
 
-        &:hover {
-          .trait-increase,
-          .trait-decrease {
-            opacity: 1;
-          }
-
-          .trait-increase {
-            top: -16px;
-          }
-
-          .trait-decrease {
-            bottom: -16px;
-          }
-        }
-
-        .trait-increase,
-        .trait-decrease {
-          align-items: center;
-          background-color: inherit;
-          border: 1px solid black;
-          border-color: inherit;
-          color: inherit;
-          display: flex;
-          font-size: 10px;
-          height: 16px;
-          justify-content: center;
-          left: -2px;
-          opacity: 0;
-          position: absolute;
-          right: -1px;
-          transition:
-            opacity 150ms ease-out,
-            top 150ms ease-out,
-            bottom 150ms ease-out;
-          z-index: 11;
-        }
-
-        .trait-increase {
-          top: 0;
-        }
-
-        .trait-decrease {
-          bottom: 0;
-        }
+        @include rank-arrows;
       }
 
       .void-points-amount {

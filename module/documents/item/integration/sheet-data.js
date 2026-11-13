@@ -12,7 +12,6 @@
  * Usage Pattern:
  * - ItemSheetV2: Called in `_prepareContext()` to prepare item editing forms
  * - ActorSheetV2: Called in `_prepareContext()` for embedded item rendering
- * - Legacy Item.getData(): Called for backwards compatibility (deprecated pattern)
  *
  * Foundry VTT Integration:
  * - Follows Application v2 context preparation lifecycle (Foundry v13+)

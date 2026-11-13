@@ -340,14 +340,15 @@ export function registerActiveEffectsBatch(quench) {
             await new Promise(resolve => setTimeout(resolve, 20));
           }
           token.object.control({ releaseOthers: true });
-          const message = await ChatMessage.create({
+          // An unsaved message: renderHTML still fires renderChatMessageHTML, and nothing is posted to the chat log,
+          // whose pop-up card rejects when its message is deleted mid-animation (client/applications/sidebar/tabs/
+          // chat.mjs:1318-1321)
+          const message = new ChatMessage.implementation({
             content:
               '<button data-action="apply-wounds" data-damage="7"></button>' +
               '<button data-action="reduce-wounds-void" data-damage="15"></button>'
           });
-          const html = await message.renderHTML();
-          await message.delete();
-          return html;
+          return message.renderHTML();
         }
 
         it("Apply Wounds adds the damage to the stored Wounds", async () => {

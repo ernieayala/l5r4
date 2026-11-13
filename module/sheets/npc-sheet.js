@@ -110,34 +110,16 @@ export default class L5R4NpcSheet extends BaseActorSheet {
   };
 
   /**
-   * Default configuration options for the NPC sheet.
-   *
-   * Extends BaseActorSheet options to:
-   * - Add "npc" class for styling specificity
-   * - Set wider default width (840px) for NPC stat blocks
-   * - Enable form auto-submission on field changes
-   *
-   * Filters out Foundry's default "pc"/"npc" classes before adding system-specific
-   * "l5r4" and "npc" classes for proper CSS targeting.
-   *
-   * **Foundry v13 Pattern:**
-   * Uses static DEFAULT_OPTIONS instead of defaultOptions() getter method.
+   * NPC-specific options, merged over BaseActorSheet's by ApplicationV2: the "npc" class and an 840px width for
+   * the stat block.
    *
    * @static
    * @type {Object}
    * @override
    */
   static DEFAULT_OPTIONS = {
-    ...super.DEFAULT_OPTIONS,
-    classes: [
-      ...(super.DEFAULT_OPTIONS.classes ?? []).filter(
-        c => c !== "pc" && c !== "npc" && c !== "l5r4"
-      ),
-      "l5r4",
-      "npc"
-    ],
-    position: { ...(super.DEFAULT_OPTIONS.position ?? {}), width: 840 },
-    form: { ...(super.DEFAULT_OPTIONS.form ?? {}), submitOnChange: true }
+    classes: ["npc"],
+    position: { width: 840 }
   };
 
   /**
@@ -147,7 +129,7 @@ export default class L5R4NpcSheet extends BaseActorSheet {
    * Actions are identified by data-action attribute values on interactive elements.
    *
    * **Supported Actions:**
-   * - inline-edit: Update item properties directly in the sheet
+   * - inline-edit: Update item properties in the sheet
    * - item-create/delete/edit/expand/chat: Item CRUD operations
    * - item-sort-by: Change sort field/direction for item lists
    * - ring-rank-void: Adjust Void Ring rank (Shift+Click, NPC-specific)
@@ -188,6 +170,19 @@ export default class L5R4NpcSheet extends BaseActorSheet {
         return this._onUnifiedSortClick(event, element);
       case "ring-rank-void":
         return this._onVoidAdjust(event, element, +1);
+      // The arrows step the Void Ring without Shift, like the Trait arrows (issue #30)
+      case "void-ring-increase":
+        return this._onVoidAdjust(
+          { preventDefault: () => event.preventDefault(), shiftKey: true },
+          element,
+          +1
+        );
+      case "void-ring-decrease":
+        return this._onVoidAdjust(
+          { preventDefault: () => event.preventDefault(), shiftKey: true },
+          element,
+          -1
+        );
       case "roll-ring":
         return RollHandler.npcRingRoll(this._getHandlerContext(), event, element);
       case "roll-skill":
@@ -221,7 +216,10 @@ export default class L5R4NpcSheet extends BaseActorSheet {
       case "wound-config":
         return AppLauncherHandler.openWoundConfig(this._getHandlerContext(), event, element);
       case "edit-attack":
+      case "add-attack":
         return this._onEditAttack(event, element);
+      case "delete-attack":
+        return this._onDeleteAttack(event, element);
     }
   }
 
@@ -443,6 +441,14 @@ export default class L5R4NpcSheet extends BaseActorSheet {
       "items"
     ]);
 
+    // The three attack slots; an empty one (no name, no dice) is hidden until "Add Attack" fills it (issue #30)
+    const attacks = ["1", "2", "3"].map(num => {
+      const attack = actorObj.system[`attack${num}`];
+      const damage = actorObj.system[`damage${num}`];
+      const empty = !attack.name && !attack.roll && !attack.keep && !damage.roll && !damage.keep;
+      return { num, key: `attack${num}`, attack, damage, empty };
+    });
+
     const context = {
       ...base,
       actor: this.actor,
@@ -450,6 +456,8 @@ export default class L5R4NpcSheet extends BaseActorSheet {
       currentStance,
       mountedStatus,
       collapsedSections,
+      attacks,
+      firstEmptyAttack: attacks.find(slot => slot.empty)?.key ?? null,
 
       // Show Void Points section only if NPC has Void Ring >= 1
       showNpcVoidPoints: (actorObj.system?.rings?.void?.rank ?? 0) >= 1,
@@ -642,7 +650,7 @@ export default class L5R4NpcSheet extends BaseActorSheet {
    * Opens attack editor dialog for NPC attack configuration.
    *
    * Launches NpcAttackConfigApplication to edit attack and damage values
-   * for the specified attack slot (attack1-4).
+   * for the specified attack slot (attack1-3). "Add Attack" opens it on the first empty slot.
    *
    * @param {Event} event - Click event
    * @param {HTMLElement} element - Element with data-attack-key attribute
@@ -662,6 +670,41 @@ export default class L5R4NpcSheet extends BaseActorSheet {
     const editor = new NpcAttackConfigApplication(this.actor, attackKey);
 
     editor.render(true);
+  }
+
+  /**
+   * Removes an NPC attack by clearing its slot: the attack and its damage go back to empty, and the sheet hides
+   * the row. Asks first unless Shift is held, as deleting an item does.
+   *
+   * @param {Event} event - Click event
+   * @param {HTMLElement} element - Element with data-attack-key attribute
+   * @returns {Promise<void>}
+   * @protected
+   * @async
+   */
+  async _onDeleteAttack(event, element) {
+    event?.preventDefault?.();
+    const attackKey = element.dataset.attackKey;
+    const damageKey = attackKey.replace("attack", "damage");
+    const attack = this.actor.system[attackKey];
+
+    if (!event.shiftKey) {
+      const name =
+        attack.name ||
+        `${game.i18n.localize("l5r4.ui.mechanics.combat.attack")} ${attackKey.replace("attack", "")}`;
+      const confirmed = await foundry.applications.api.DialogV2.confirm({
+        window: { title: "l5r4.ui.dialogs.deleteAttack.title" },
+        content: `<p>${game.i18n.localize("l5r4.ui.dialogs.deleteAttack.content", { name })}</p>`
+      });
+      if (!confirmed) {
+        return;
+      }
+    }
+
+    await this.actor.update({
+      [`system.${attackKey}`]: { name: "", roll: 0, keep: 0, modifier: 0, type: "" },
+      [`system.${damageKey}`]: { roll: 0, keep: 0, modifier: 0, type: "" }
+    });
   }
 
   /**

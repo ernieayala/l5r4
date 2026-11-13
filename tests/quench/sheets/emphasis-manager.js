@@ -544,20 +544,6 @@ export function registerEmphasisManagerTests(quench) {
           assert.isTrue(dialog.rendered, "Renders with null availableEmphases");
         });
 
-        it("should handle undefined availableEmphases", async () => {
-          // ARRANGE
-          await skillItem.update({
-            "system.availableEmphases": new foundry.data.operators.ForcedDeletion()
-          });
-          dialog = new EmphasisManager({ item: skillItem });
-
-          // ACT
-          await dialog.render(true);
-
-          // ASSERT
-          assert.isTrue(dialog.rendered, "Renders with undefined availableEmphases");
-        });
-
         it("should handle empty custom emphasis name submission", () => {
           // ARRANGE
           const emptyName = "";

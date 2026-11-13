@@ -5,7 +5,7 @@ import { FamilyBonusService } from "../../module/services/family-bonus-service.j
 import { buildXpHistory } from "../../module/services/xp/xp-calculator.js";
 import { createTestNPC, createTestPC } from "../fixtures/actor-fixtures.js";
 import { createSkillData } from "../fixtures/item-fixtures.js";
-import { watchConsole } from "./helpers.js";
+import { settleChatNotifications, watchConsole } from "./helpers.js";
 
 /** The text core appends to every compatibility warning (common/utils/logging.mjs:32-34). */
 const DEPRECATION = /Deprecated since Version|Backwards-compatible support will be removed/;
@@ -59,10 +59,12 @@ export function registerDeprecationsBatch(quench) {
         });
       });
 
-      after(async () => {
+      after(async function () {
+        this.timeout(10_000);
         watch.stop();
         Hooks.off("createChatMessage", hookId);
         CONFIG.compatibility = compatibility;
+        await settleChatNotifications();
         for (const doc of [...messages, ...created]) {
           await doc.delete();
         }

@@ -114,9 +114,7 @@ export default class L5R4PcSheet extends BaseActorSheet {
       root: true,
       classes: ["flexcol"],
       template: `systems/${SYS_ID}/templates/actor/pc.hbs`,
-      scrollable: [".scrollable-content"],
-      submitOnChange: true,
-      submitOnClose: true
+      scrollable: [".scrollable-content"]
     }
   };
 
@@ -168,6 +166,21 @@ export default class L5R4PcSheet extends BaseActorSheet {
         return this._onUnifiedSortClick(event, element);
       case "ring-rank-void":
         return PcAdjustmentHandler.adjustVoidRing(this._getHandlerContext(), event, element, +1);
+      // The arrows step the Void Ring without Shift, like the Trait arrows (issue #30)
+      case "void-ring-increase":
+        return PcAdjustmentHandler.adjustVoidRing(
+          this._getHandlerContext(),
+          { preventDefault: () => event.preventDefault(), shiftKey: true },
+          element,
+          +1
+        );
+      case "void-ring-decrease":
+        return PcAdjustmentHandler.adjustVoidRing(
+          this._getHandlerContext(),
+          { preventDefault: () => event.preventDefault(), shiftKey: true },
+          element,
+          -1
+        );
       case "roll-ring":
         return PcRollHandler.handleRingRoll(this._getHandlerContext(), event, element);
       case "roll-skill":
@@ -472,34 +485,15 @@ export default class L5R4PcSheet extends BaseActorSheet {
   /* ---------------------------------- */
 
   /**
-   * Default configuration options for PC sheet.
-   *
-   * Extends BaseActorSheet options with PC-specific settings:
-   * - Width: 870px (wider than base to accommodate PC-specific columns)
-   * - Classes: Adds "pc" class for styling specificity
-   * - Form: Auto-submit on change and close for seamless editing
-   *
-   * **Foundry v13 Pattern:**
-   * Static DEFAULT_OPTIONS replaces deprecated defaultOptions() getter.
+   * PC-specific options, merged over BaseActorSheet's by ApplicationV2: the "pc" class and an 870px width for the
+   * PC columns.
    *
    * @static
    * @type {Object}
    */
   static DEFAULT_OPTIONS = {
-    ...BaseActorSheet.DEFAULT_OPTIONS,
-    classes: [
-      ...(BaseActorSheet.DEFAULT_OPTIONS.classes ?? []).filter(
-        c => c !== "pc" && c !== "npc" && c !== "l5r4"
-      ),
-      "l5r4",
-      "pc"
-    ],
-    position: { ...(BaseActorSheet.DEFAULT_OPTIONS.position ?? {}), width: 870 },
-    form: {
-      ...(BaseActorSheet.DEFAULT_OPTIONS.form ?? {}),
-      submitOnChange: true,
-      submitOnClose: true
-    }
+    classes: ["pc"],
+    position: { width: 870 }
   };
 
   /* ---------------------------------- */

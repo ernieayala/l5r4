@@ -130,25 +130,17 @@ const typeLabel = type => {
  */
 export default class L5R4ItemSheet extends HandlebarsApplicationMixin(ItemSheetV2) {
   /**
-   * Default application configuration.
-   *
-   * Configures Application v2 options including CSS styles, form behavior,
-   * and window properties. submitOnChange enables real-time updates without
-   * manual save button.
+   * This sheet's own options, merged over ItemSheetV2's by ApplicationV2 (arrays concatenated, so the parent's
+   * entries are not repeated here). submitOnChange saves each field as it changes.
    *
    * @type {ApplicationConfiguration}
    * @static
    */
   static DEFAULT_OPTIONS = {
-    ...super.DEFAULT_OPTIONS,
-    styles: ["window", "forms", "prosemirror"],
     id: "l5r4-item",
     classes: ["l5r4", "sheet", "item"],
-    form: { ...super.DEFAULT_OPTIONS.form, submitOnChange: true },
-    window: {
-      ...super.DEFAULT_OPTIONS.window,
-      contentClasses: ["standard-form"]
-    },
+    form: { submitOnChange: true },
+    window: { contentClasses: ["standard-form"] },
     actions: {
       changeTab: L5R4ItemSheet.prototype._onChangeTab,
       manageEmphases: L5R4ItemSheet.prototype._onManageEmphases

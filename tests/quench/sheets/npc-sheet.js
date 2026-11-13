@@ -451,7 +451,7 @@ export function registerNPCSheetTests(quench) {
           assert.include(title.textContent, "Katana", "Attack name displayed");
         });
 
-        it("should have edit buttons for all attack slots", () => {
+        it("should have edit buttons for the filled attack slots and Add Attack for the empty one", () => {
           const element = sheet.element;
 
           const attack1Edit = element.querySelector(
@@ -460,13 +460,14 @@ export function registerNPCSheetTests(quench) {
           const attack2Edit = element.querySelector(
             '[data-attack-section="attack2"] [data-action="edit-attack"]'
           );
-          const attack3Edit = element.querySelector(
-            '[data-attack-section="attack3"] [data-action="edit-attack"]'
-          );
+          const attack3Row = element.querySelector('[data-attack-section="attack3"]');
+          const add = element.querySelector('[data-action="add-attack"]');
 
           assert.exists(attack1Edit, "Attack 1 edit button exists");
           assert.exists(attack2Edit, "Attack 2 edit button exists");
-          assert.exists(attack3Edit, "Attack 3 edit button exists");
+          // A new NPC's third slot is empty, so it is hidden and Add Attack fills it (STAGE-06 Decision 1)
+          assert.notExists(attack3Row, "Empty attack 3 hidden");
+          assert.equal(add?.dataset.attackKey, "attack3", "Add Attack targets attack 3");
         });
       });
     },
