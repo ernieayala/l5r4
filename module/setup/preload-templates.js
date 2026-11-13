@@ -168,6 +168,6 @@ export async function preloadTemplates() {
   } catch (err) {
     const errorMessage = err?.message ?? err?.toString?.() ?? String(err);
     console.warn("L5R4 | Template preloading failed", { error: err, templatePaths });
-    throw new Error(`Failed to preload L5R4 templates: ${errorMessage}`);
+    throw new Error(`Failed to preload L5R4 templates: ${errorMessage}`, { cause: err });
   }
 }

@@ -427,8 +427,6 @@ body > * {
   display: flex;
   flex-direction: column;
   gap: 0.25rem;
-  --controls: 102px;
-  /* stylelint-disable-next-line selector-class-pattern -- Legacy class name */
 }
 .l5r4.pc .item-list.-header,
 .l5r4.npc .item-list.-header,
@@ -444,6 +442,11 @@ body > * {
 .l5r4.npc .item-list.-header .item,
 .xp-modal-dialog .item-list.-header .item {
   padding: 0;
+}
+.l5r4.pc .item-list,
+.l5r4.npc .item-list,
+.xp-modal-dialog .item-list {
+  --controls: 102px;
 }
 .l5r4.pc .item-list.-advantages .item,
 .l5r4.npc .item-list.-advantages .item,
@@ -469,6 +472,11 @@ body > * {
 .l5r4.npc .item-list.-bio .item,
 .xp-modal-dialog .item-list.-bio .item {
   grid-template-columns: 1fr var(--controls);
+}
+.l5r4.pc .item-list,
+.l5r4.npc .item-list,
+.xp-modal-dialog .item-list {
+  /* stylelint-disable-next-line selector-class-pattern -- Legacy class name */
 }
 .l5r4.pc .item-list.-commonItem .item,
 .l5r4.npc .item-list.-commonItem .item,
@@ -626,18 +634,6 @@ body > * {
   margin: 0;
 }
 
-/**
- * L5R4 Enhanced System - Main SCSS Entry Point
- * Modular CSS architecture organized by concern:
- * - base/        → Variables, resets, and foundational styles
- * - utilities/   → Single-purpose utility classes
- * - layout/      → Grid and flexbox layout patterns
- * - components/  → Reusable UI components
- * - features/    → Domain-specific feature modules
- * - apps/        → Modal dialogs and applications
- * - sheets/      → Sheet-specific overrides
- * - chat/        → Chat message styling
- */
 /**
  * Animations
  * Keyframe animations and animated components
@@ -799,18 +795,6 @@ body > * {
   min-height: calc(var(--input-height) - 0.5rem);
 }
 
-/**
- * L5R4 Enhanced System - Main SCSS Entry Point
- * Modular CSS architecture organized by concern:
- * - base/        → Variables, resets, and foundational styles
- * - utilities/   → Single-purpose utility classes
- * - layout/      → Grid and flexbox layout patterns
- * - components/  → Reusable UI components
- * - features/    → Domain-specific feature modules
- * - apps/        → Modal dialogs and applications
- * - sheets/      → Sheet-specific overrides
- * - chat/        → Chat message styling
- */
 /**
  * Traits & Rings System
  * Complex grid system displaying the five elemental rings (Earth, Air, Water, Fire, Void)

@@ -8,7 +8,7 @@
  * - Movement multiplier and modifier
  * - PC vs NPC parity for all modifiers
  *
- * @module tests/integration/documents/combat-modifiers
+ * @module tests/quench/documents/combat-modifiers
  */
 
 import { SYS_ID } from "../../../module/config/constants.js";

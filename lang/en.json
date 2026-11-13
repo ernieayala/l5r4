@@ -144,7 +144,7 @@
       },
       "traits": {
         "agi": "Agility",
-        "aw": "Awareness",
+        "awa": "Awareness",
         "int": "Intelligence",
         "per": "Perception",
         "ref": "Reflexes",
@@ -461,7 +461,14 @@
         "noCombatActive": "No active combat to modify initiative",
         "notInCombat": "Character not in active combat",
         "wealthManagerFailed": "Failed to open Wealth Manager",
-        "conditionManagerFailed": "Failed to open Condition Manager"
+        "conditionManagerFailed": "Failed to open Condition Manager",
+        "combatConfigFailed": "Failed to open Combat Configuration",
+        "woundConfigFailed": "Failed to open Wound Configuration",
+        "xpManagerFailed": "Failed to open XP Manager",
+        "noPermission": "You don't have permission to modify this actor",
+        "stanceAddFailed": "Failed to add stance",
+        "stanceRemoveFailed": "Failed to remove stance",
+        "messageTooLong": "Message too long (max 10,000 characters)"
       },
       "voidActions": {
         "title": "Void Point Actions",
@@ -732,7 +739,9 @@
         "compendiumIconsUpdated": "L5R4 Migration (Compendia): Updated {count} image path(s)."
       },
       "errors": {
-        "deleteEffect": "Failed to delete effect."
+        "deleteEffect": "Failed to delete effect.",
+        "createEffect": "Failed to create effect.",
+        "toggleEffect": "Failed to toggle effect."
       }
     },
     "world": {

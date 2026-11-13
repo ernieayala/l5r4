@@ -123,8 +123,8 @@ export async function SpellCastRoll({ actor, spell, woundPenalty = 0, showDialog
   // Determine which slot to use:
   // 1. If user explicitly checked "Use Void Spell Slot", try to use void slot
   // 2. Otherwise, use auto-detection: elemental preferred, void fallback
-  let useElementalSlot = false;
-  let useVoidSlot = false;
+  let useElementalSlot;
+  let useVoidSlot;
 
   if (options.useVoidSlot) {
     // User wants to use void slot explicitly
@@ -248,7 +248,7 @@ export async function SpellCastRoll({ actor, spell, woundPenalty = 0, showDialog
 
     // Consume slot AFTER roll succeeds
     // Per L5R4 rules: slot consumed when Spell Casting Roll is made (not before)
-    // This ensures slot is only lost if spell actually casts
+    // The slot is lost only if the spell casts
     await actor.update({ [slotPath]: currentSlots - 1 });
 
     return message;

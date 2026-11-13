@@ -72,7 +72,7 @@ export class BioItemHandler {
       console.warn(`${SYS_ID} BioItemHandler: Failed to delete prior bio item(s)`, { type, err });
     }
 
-    let newest = null;
+    let newest;
     try {
       const [created] = await context.actor.createEmbeddedDocuments("Item", [itemDoc.toObject()]);
       newest = created ?? null;

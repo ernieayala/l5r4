@@ -61,8 +61,8 @@ export async function GetWeaponOptions(weaponName, attackRaises = 0, actor = nul
   // Hide for NPCs with Void Ring = 0, show for NPCs with Void Ring >= 1, always show for PCs
   const isNpc = actor ? actor.type === "npc" : false;
   const voidRing = isNpc
-    ? actor?.system?.rings?.void?.rank ?? 0
-    : actor?.system?.rings?.void?.value ?? 0;
+    ? (actor?.system?.rings?.void?.rank ?? 0)
+    : (actor?.system?.rings?.void?.value ?? 0);
   const noVoid = isNpc && voidRing < 1;
 
   // Render template with context: weapon=true enables weapon-specific UI, attackRaises shown for reference

@@ -121,7 +121,7 @@ export function formatXpEntries(entries, options = {}) {
 
   let formatted = entries.slice().map(e => {
     let formattedNote = e.note || "";
-    let type = "";
+    let type;
 
     if (e.type === "trait" && e.traitLabel && e.toValue !== undefined) {
       type = game.i18n.localize("l5r4.character.experience.breakdown.traits");

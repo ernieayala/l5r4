@@ -99,22 +99,24 @@ Hooks.once("init", async () => {
 
   initializeInitiativeSystem();
 
+  // Core 14.370 registers no Actor or Item sheet, so these are the only ones and nothing is unregistered
+  // (client/applications/sheets/_module.mjs:83-128).
   const { DocumentSheetConfig } = foundry.applications.apps;
   const { Item, Actor } = foundry.documents;
 
-  try { DocumentSheetConfig.unregisterSheet(Item, "core", foundry.applications.sheets.ItemSheetV2); } catch (_e) { }
-
+  // "bow" is the legacy subtype template.json still declares until the bow-to-weapon migration converts it;
+  // with no core sheet in 14.370 it needs this one to open.
   DocumentSheetConfig.registerSheet(Item, SYS_ID, L5R4ItemSheet, {
     makeDefault: true,
     types: [
       "advantage",
       "armor",
+      "bow",
       "clan",
       "commonItem",
       "disadvantage",
       "family",
       "school",
-      "item",
       "kata",
       "kiho",
       "skill",
@@ -124,8 +126,6 @@ Hooks.once("init", async () => {
       "weapon"
     ]
   });
-
-  try { DocumentSheetConfig.unregisterSheet(Actor, "core", foundry.applications.sheets.ActorSheetV2, { types: ["pc", "npc"] }); } catch (_e) { }
 
   DocumentSheetConfig.registerSheet(Actor, SYS_ID, L5R4PcSheet, {
     types: ["pc"],
@@ -144,54 +144,21 @@ Hooks.once("init", async () => {
 });
 
 /**
- * Register Quench Integration Tests
- * Registers system integration tests with the Quench testing module if available.
- * Uses defensive registration with flag to prevent duplicate registration across hooks.
- * Called from both quenchReady and ready hooks to handle unpredictable hook timing.
- * 
- * **Registration Strategy:**
- * - Checks for globalThis.quench API availability
- * - Verifies Quench module is active in game.modules
- * - Uses _l5r4Registered flag to prevent duplicate registration
- * - Silently returns if already registered or Quench unavailable
- * 
- * **Hook Timing:**
- * Primary registration occurs in quenchReady hook when Quench signals readiness.
- * Fallback registration occurs in ready hook if quenchReady already fired.
- * This dual-hook pattern ensures reliable registration regardless of module load order.
- * 
- * @async
- * @returns {Promise<void>}
- */
-async function registerQuenchIfAvailable() {
-  const quench = globalThis.quench;
-  const quenchModule = game.modules.get("quench");
-  
-  if (!quench || !quenchModule?.active || quenchModule._l5r4Registered) {
-    return;
-  }
-
-  try {
-    // Dynamic import - only load tests when Quench is available
-    const { registerQuenchTests } = await import("../tests/integration/quench-integration.js");
-    await registerQuenchTests(quench);
-    quenchModule._l5r4Registered = true;
-  } catch (err) { }
-}
-
-/**
- * Quench Ready Hook
- * Fires when Quench testing module signals it's ready to accept test registrations.
- * Primary hook for registering L5R4 integration tests.
- * 
+ * Register the Quench test batches. Quench calls `quenchReady` from its `setup` hook, after this module has
+ * loaded, so worlds without Quench never import anything from tests/. A failed import or registration
+ * surfaces in the console instead of leaving the batches silently missing.
+ *
  * @listens Hooks#quenchReady
  */
-Hooks.once("quenchReady", registerQuenchIfAvailable);
+Hooks.once("quenchReady", async quench => {
+  const { registerQuenchTests } = await import("../tests/quench/index.js");
+  await registerQuenchTests(quench);
+});
 
 /**
  * Foundry VTT Ready Hook
  * Executes after Foundry completes initialization and world data is loaded.
- * Handles fallback Quench registration and executes data migrations for GMs.
+ * Executes data migrations for GMs.
  * This hook fires once per session after all modules and systems are ready.
  * 
  * **Migration System:**
@@ -205,8 +172,6 @@ Hooks.once("quenchReady", registerQuenchIfAvailable);
  */
 Hooks.once("ready", async () => {
   console.log(`${SYS_ID} | Ready`);
-
-  await registerQuenchIfAvailable();
 
   if (game.user?.isGM) {
     const currentVersion = game.system?.version ?? "0.0.0";

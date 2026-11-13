@@ -180,15 +180,15 @@ export async function SimpleRoll({
 } = {}) {
   const messageTemplate = CHAT_TEMPLATES.simpleRoll;
 
-  // Determine if actor is actually an NPC by checking actor.type
+  // Determine if actor is an NPC by checking actor.type
   // If actor exists, use actor.type; otherwise fall back to npc parameter
   const isActuallyNpc = actor ? actor.type === "npc" : npc;
 
   // Only hide Void checkbox for NPCs with Void Ring = 0
   // NPCs with Void Ring >= 1 can use Void Points, PCs always have access
   const voidRing = isActuallyNpc
-    ? actor?.system?.rings?.void?.rank ?? 0
-    : actor?.system?.rings?.void?.value ?? 0;
+    ? (actor?.system?.rings?.void?.rank ?? 0)
+    : (actor?.system?.rings?.void?.value ?? 0);
   const noVoid = isActuallyNpc && voidRing < 1;
 
   const { autoTN, targetData } = resolveTargets(actor, rollType);
@@ -204,7 +204,7 @@ export async function SimpleRoll({
     return;
   }
 
-  let label = "";
+  let label;
   if (traitName) {
     const traitKey =
       String(traitName).toLowerCase() === "void"

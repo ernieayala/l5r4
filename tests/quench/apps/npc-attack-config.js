@@ -49,10 +49,7 @@ export function registerNPCAttackConfigTests(quench) {
             }
           });
 
-          editor = new NpcAttackConfigApplication({
-            actor,
-            attackKey: "attack1"
-          });
+          editor = new NpcAttackConfigApplication(actor, "attack1");
         });
 
         afterEach(async () => {
@@ -169,10 +166,7 @@ export function registerNPCAttackConfigTests(quench) {
             }
           });
 
-          editor = new NpcAttackConfigApplication({
-            actor,
-            attackKey: "attack2"
-          });
+          editor = new NpcAttackConfigApplication(actor, "attack2");
 
           await editor.render(true);
           await new Promise(resolve => setTimeout(resolve, 100));
@@ -242,10 +236,7 @@ export function registerNPCAttackConfigTests(quench) {
             }
           });
 
-          editor = new NpcAttackConfigApplication({
-            actor,
-            attackKey: "attack3"
-          });
+          editor = new NpcAttackConfigApplication(actor, "attack3");
 
           await editor.render(true);
           await new Promise(resolve => setTimeout(resolve, 100));
@@ -346,10 +337,7 @@ export function registerNPCAttackConfigTests(quench) {
         });
 
         it("should open editor for attack1", async () => {
-          const editor = new NpcAttackConfigApplication({
-            actor,
-            attackKey: "attack1"
-          });
+          const editor = new NpcAttackConfigApplication(actor, "attack1");
 
           await editor.render(true);
           await new Promise(resolve => setTimeout(resolve, 100));
@@ -364,10 +352,7 @@ export function registerNPCAttackConfigTests(quench) {
         });
 
         it("should open editor for attack2", async () => {
-          const editor = new NpcAttackConfigApplication({
-            actor,
-            attackKey: "attack2"
-          });
+          const editor = new NpcAttackConfigApplication(actor, "attack2");
 
           await editor.render(true);
           await new Promise(resolve => setTimeout(resolve, 100));
@@ -382,10 +367,7 @@ export function registerNPCAttackConfigTests(quench) {
         });
 
         it("should open editor for attack3", async () => {
-          const editor = new NpcAttackConfigApplication({
-            actor,
-            attackKey: "attack3"
-          });
+          const editor = new NpcAttackConfigApplication(actor, "attack3");
 
           await editor.render(true);
           await new Promise(resolve => setTimeout(resolve, 100));

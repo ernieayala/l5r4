@@ -10,7 +10,7 @@
  * - Roll parameter extraction from DOM elements
  *
  * L5R4 uses traits (physical/mental attributes) and skills (trained abilities).
- * Rolls are typically Skill Rank + Trait, using roll-and-keep dice (XkY).
+ * Rolls are usually Skill Rank + Trait, using roll-and-keep dice (XkY).
  */
 
 import { toInt, toString } from "./type-coercion.js";
@@ -140,7 +140,7 @@ export function normalizeTraitKey(raw) {
  * Gets effective trait value for actor.
  *
  * Checks derived traits (with modifiers applied) first, then base traits.
- * Void is stored separately in rings.void.rank.
+ * Void is stored on its own in rings.void.rank.
  *
  * @param {Object} actor - Foundry actor document
  * @param {string} traitKey - Trait abbreviation ("agi", "str", "void", etc.)
@@ -155,7 +155,7 @@ export function getEffectiveTrait(actor, traitKey) {
     return 0;
   }
 
-  // Void is stored separately in rings
+  // Void is stored on its own in rings
   if (traitKey === "void") {
     return toInt(actor.system?.rings?.void?.rank, 0);
   }
@@ -234,7 +234,7 @@ export function getAffinityDeficiencyModifier(actor, ringKey) {
   }
 
   // Find all shugenja techniques (grant affinity/deficiency)
-  let shugenjaItems = [];
+  let shugenjaItems;
   try {
     const items = actor.items?.contents ?? actor.items ?? [];
     shugenjaItems = Array.from(items).filter(

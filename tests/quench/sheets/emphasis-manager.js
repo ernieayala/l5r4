@@ -22,6 +22,7 @@ import { SYS_ID } from "../../../module/config/constants.js";
 import EmphasisManager from "../../../module/apps/emphasis-manager.js";
 import { OFFICIAL_EMPHASES } from "../../../module/config/reference-data.js";
 import { createSkillData } from "../../fixtures/item-fixtures.js";
+import { MULTI_CLOSE_TIMEOUT_MS } from "../helpers.js";
 
 /**
  * Register emphasis manager dialog tests
@@ -69,7 +70,7 @@ export function registerEmphasisManagerTests(quench) {
           assert.throws(
             () => new EmphasisManager({}),
             Error,
-            "EmphasisManager requires a skill item"
+            "EmphasisManagerApplication requires a skill item"
           );
         });
 
@@ -86,7 +87,7 @@ export function registerEmphasisManagerTests(quench) {
             assert.throws(
               () => new EmphasisManager({ item: nonSkillItem }),
               Error,
-              "EmphasisManager requires a skill item"
+              "EmphasisManagerApplication requires a skill item"
             );
           } finally {
             await nonSkillItem.delete();
@@ -171,6 +172,8 @@ export function registerEmphasisManagerTests(quench) {
             "Custom Emphasis 1",
             "Custom Emphasis 2"
           ]);
+          // Replaces the beforeEach skill, so delete that one first or it outlives the batch.
+          await skillItem.delete();
           skillItem = await Item.create(createSkillData("Kenjutsu", 3, "agi"));
           dialog = new EmphasisManager({ item: skillItem });
 
@@ -656,7 +659,8 @@ export function registerEmphasisManagerTests(quench) {
           assert.isTrue(dialog.rendered, "Dialog remains rendered");
         });
 
-        it("should work with skill items of different types", async () => {
+        it("should work with skill items of different types", async function () {
+          this.timeout(MULTI_CLOSE_TIMEOUT_MS);
           // ARRANGE
           const bugeiSkill = await Item.create(
             createSkillData("Kenjutsu", 3, "agi", {
