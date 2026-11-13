@@ -73,6 +73,9 @@
       "tattoo": { "htmlFields": ["description", "specialRules", "effect"] },
       "technique": { "htmlFields": ["description", "specialRules"] },
       "weapon": { "htmlFields": ["description", "specialRules"] }
+    },
+    "ChatMessage": {
+      "roll": {}
     }
   },
   "grid": {

@@ -1,3 +1,40 @@
+import { buildPool, parseRollAndKeep, poolFormula } from "../../module/utils/check.js";
+
+/**
+ * The Foundry formula the roll pipeline builds for a pool already under the Ten Dice Rule
+ * (module/utils/check.js poolFormula), from rolled dice, kept dice, and a bonus.
+ * @param {number} roll
+ * @param {number} keep
+ * @param {number} bonus
+ * @param {{emphasis?: boolean, unskilled?: boolean, explode?: number}} [options]
+ * @returns {string}
+ */
+export function buildFormula(
+  roll,
+  keep,
+  bonus,
+  { emphasis = false, unskilled = false, explode = 10 } = {}
+) {
+  return poolFormula({
+    roll,
+    keep,
+    bonus,
+    explode: unskilled ? null : explode,
+    rerollOnes: emphasis
+  });
+}
+
+/**
+ * Inline Roll & Keep notation as the chat parser reads it: the parsed flags and the pool after the Ten Dice Rule.
+ * @param {string} notation  Such as "e7k3+2"
+ * @returns {{roll: number, keep: number, bonus: number, unskilled: boolean, rerollOnes: boolean,
+ *   explode: number|null}}
+ */
+export function parseNotation(notation) {
+  const parsed = parseRollAndKeep(notation);
+  return { ...buildPool(parsed), unskilled: parsed.unskilled, rerollOnes: parsed.rerollOnes };
+}
+
 /** How long a test waits for a document update before failing. */
 const UPDATE_TIMEOUT_MS = 5000;
 

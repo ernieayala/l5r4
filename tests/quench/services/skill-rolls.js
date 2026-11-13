@@ -14,7 +14,7 @@
  */
 
 import { SYS_ID } from "../../../module/config/constants.js";
-import { buildFormula } from "../../../module/services/dice/core/formula-builder.js";
+import { buildFormula } from "../helpers.js";
 import { createTestPC } from "../../fixtures/actor-fixtures.js";
 import { createSkillData } from "../../fixtures/item-fixtures.js";
 

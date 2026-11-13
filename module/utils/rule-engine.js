@@ -7,7 +7,7 @@
  * A rule whose value does not resolve is skipped and reported in `errors`; one bad rule never stops the rest.
  */
 
-import { BAG_KINDS, BONUS_SELECTOR_CATEGORIES } from "../config/rule-keys.js";
+import { BAG_KINDS } from "../config/rule-keys.js";
 import { STATUS_EFFECTS } from "../config/status-effects.js";
 import { testPredicate } from "./predicate.js";
 import { resolveValue } from "./rule-values.js";
@@ -149,8 +149,6 @@ export function traitAdjustTotal(rules, trait) {
  * @property {number} woundsPerRank   Wounds rules: Wounds added to each Wound Rank
  * @property {number} woundPenalty    Wounds rules: added to every Wound Rank's TN penalty
  * @property {{roll: number, keep: number, total: number}} initiative
- * @property {Record<string, Record<string, {roll: number, keep: number, total: number}>>} bonuses
- *   RollModifier rules on `skill:`, `trait:`, and `ring:` selectors, by category and name
  * @property {Record<string, Record<string, object[]>>} bag  Bag entries by kind, then selector
  * @property {RuleError[]} errors
  */
@@ -194,29 +192,11 @@ export function derivedRuleOutputs(entries, rollData, options) {
   });
 
   const bag = Object.fromEntries(Object.values(BAG_KINDS).map(kind => [kind, {}]));
-  const bonusModifiers = {};
   forEachRule(entries, Object.keys(BAG_KINDS), null, errors, (rule, entry) => {
+    // Resolve first, so a rule whose value fails leaves no trace in the bag
     const output = bagEntry(rule, entry, value);
-    const kind = BAG_KINDS[rule.key];
-    (bag[kind][rule.selector] ??= []).push(output);
-
-    // Rolls before the roll pipeline (Stage 8) read system.bonuses, so a RollModifier whose predicate holds now
-    // also lands there.
-    const [category, name] = splitSelector(rule.selector);
-    if (rule.key === "RollModifier" && name && testPredicate(rule.predicate, options)) {
-      if (BONUS_SELECTOR_CATEGORIES.includes(category)) {
-        ((bonusModifiers[category] ??= {})[name] ??= []).push(output);
-      }
-    }
+    (bag[BAG_KINDS[rule.key]][rule.selector] ??= []).push(output);
   });
-
-  const bonuses = {};
-  for (const [category, byName] of Object.entries(bonusModifiers)) {
-    bonuses[category] = {};
-    for (const [name, modifiers] of Object.entries(byName)) {
-      bonuses[category][name] = stackModifiers(modifiers);
-    }
-  }
 
   return {
     armorTn: stackModifiers(armor).total,
@@ -224,20 +204,9 @@ export function derivedRuleOutputs(entries, rollData, options) {
     woundsPerRank,
     woundPenalty,
     initiative,
-    bonuses,
     bag,
     errors
   };
-}
-
-/**
- * Split "skill:kenjutsu" into ["skill", "kenjutsu"]; a selector without a colon has no name.
- * @param {string} selector
- * @returns {[string, string]}
- */
-function splitSelector(selector) {
-  const at = selector.indexOf(":");
-  return at < 0 ? [selector, ""] : [selector.slice(0, at), selector.slice(at + 1)];
 }
 
 /**
@@ -290,4 +259,16 @@ export function bagEntries(bag, kind, selectors, options) {
   return selectors
     .flatMap(selector => byKind[selector] ?? [])
     .filter(entry => testPredicate(entry.predicate, options));
+}
+
+/**
+ * The roll, keep, and total bonus the RollModifier rules give rolls with any of the selectors, stacked: what a
+ * sheet shows in a formula such as a Skill's "7k3", before the roll dialog adds its situational choices.
+ * @param {Record<string, Record<string, object[]>>} bag
+ * @param {string[]} selectors
+ * @param {Set<string>} options
+ * @returns {{roll: number, keep: number, total: number}}
+ */
+export function selectorBonus(bag, selectors, options) {
+  return stackModifiers(bagEntries(bag, "rollModifiers", selectors, options));
 }

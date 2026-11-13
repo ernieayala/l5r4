@@ -40,13 +40,6 @@ export const BAG_KINDS = freeze({
 });
 
 /**
- * Selector prefixes for RollModifier rules that also write the actor's `system.bonuses` map, which the Skill,
- * Trait, Ring, and spell rolls read: `skill:<skill name in lower case>`, `trait:<trait key>`, `ring:<ring>`.
- * @type {ReadonlyArray<string>}
- */
-export const BONUS_SELECTOR_CATEGORIES = freeze(["skill", "trait", "ring"]);
-
-/**
  * TraitAdjust targets: the eight Trait keys plus the Void Ring.
  * @type {ReadonlyArray<string>}
  */

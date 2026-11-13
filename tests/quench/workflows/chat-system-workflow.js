@@ -17,14 +17,34 @@
  *
  * @see module/services/chat.js
  * @see module/hooks/chat-damage-buttons.js
- * @see module/services/dice/core/roll-parser.js
- * @see templates/chat/damage-roll.hbs
+ * @see module/utils/check.js
+ * @see templates/chat/check-card.hbs
  */
 
 import { SYS_ID } from "../../../module/config/constants.js";
-import { roll_parser } from "../../../module/services/dice/core/roll-parser.js";
-import { buildFormula } from "../../../module/services/dice/core/formula-builder.js";
+import { renderCheckCard } from "../../../module/services/dice/check/roll-check.js";
+import { buildFormula, parseNotation } from "../helpers.js";
 import { createTestPC } from "../../fixtures/actor-fixtures.js";
+
+/**
+ * The card a damage roll posts, for a roll already evaluated.
+ * @param {Roll} roll
+ * @param {string} actorId  The roller, for the Apply Wounds buttons
+ * @param {string} [label]
+ * @returns {Promise<string>}
+ */
+function damageCard(roll, actorId, label = "") {
+  const system = {
+    kind: "damage",
+    label,
+    modifiers: [],
+    notes: [],
+    target: { name: "" },
+    tn: { effective: null, freeRaises: 0, freeRaisesToTN: 0 },
+    outcome: { total: roll.total, success: null }
+  };
+  return renderCheckCard(system, roll, { actorId });
+}
 
 /**
  * Register chat system workflow tests with Quench
@@ -183,18 +203,8 @@ export function registerChatSystemWorkflowTests(quench) {
           const roll = new Roll(damageFormula);
           await roll.evaluate();
 
-          const templateData = {
-            flavor: "Katana Damage",
-            roll: await roll.render(),
-            damageTotal: roll.total,
-            actorId: attacker.id
-          };
-
-          // ACT - Render damage template
-          const html = await foundry.applications.handlebars.renderTemplate(
-            "systems/l5r4-enhanced/templates/chat/damage-roll.hbs",
-            templateData
-          );
+          // ACT - Render the damage card
+          const html = await damageCard(roll, attacker.id, "Katana Damage");
 
           // ASSERT
           assert.include(html, "apply-wounds", "Apply wounds button present");
@@ -208,7 +218,7 @@ export function registerChatSystemWorkflowTests(quench) {
           const damage = 15;
           const initialWounds = defender.system.suffered;
 
-          // ACT - Simulate button click by directly applying damage
+          // ACT - Apply the damage the button would apply
           await defender.update({
             "system.suffered": initialWounds + damage
           });
@@ -358,12 +368,12 @@ export function registerChatSystemWorkflowTests(quench) {
           const notation = "7k3+5";
 
           // ACT
-          const parsed = roll_parser(notation);
-          const formula = buildFormula(parsed.dice_count, parsed.kept, parsed.bonus, {});
+          const parsed = parseNotation(notation);
+          const formula = buildFormula(parsed.roll, parsed.keep, parsed.bonus, {});
 
           // ASSERT
-          assert.equal(parsed.dice_count, 7, "Parsed rolled dice");
-          assert.equal(parsed.kept, 3, "Parsed kept dice");
+          assert.equal(parsed.roll, 7, "Parsed rolled dice");
+          assert.equal(parsed.keep, 3, "Parsed kept dice");
           assert.equal(parsed.bonus, 5, "Parsed bonus");
           assert.equal(formula, "7d10k3x10+5", "Converted to Foundry formula");
         });
@@ -387,12 +397,12 @@ export function registerChatSystemWorkflowTests(quench) {
           const notation = "u3k3";
 
           // ACT
-          const parsed = roll_parser(notation);
+          const parsed = parseNotation(notation);
 
           // ASSERT
           assert.isTrue(parsed.unskilled, "Detected unskilled flag");
-          assert.equal(parsed.dice_count, 3, "Parsed dice count");
-          assert.equal(parsed.kept, 3, "Parsed kept");
+          assert.equal(parsed.roll, 3, "Parsed dice count");
+          assert.equal(parsed.keep, 3, "Parsed kept");
         });
 
         it("should parse emphasis inline roll", () => {
@@ -400,12 +410,12 @@ export function registerChatSystemWorkflowTests(quench) {
           const notation = "e7k3+2";
 
           // ACT
-          const parsed = roll_parser(notation);
+          const parsed = parseNotation(notation);
 
           // ASSERT
-          assert.isTrue(parsed.emphasis, "Detected emphasis flag");
-          assert.equal(parsed.dice_count, 7, "Parsed dice count");
-          assert.equal(parsed.kept, 3, "Parsed kept");
+          assert.isTrue(parsed.rerollOnes, "Detected emphasis flag");
+          assert.equal(parsed.roll, 7, "Parsed dice count");
+          assert.equal(parsed.keep, 3, "Parsed kept");
           assert.equal(parsed.bonus, 2, "Parsed bonus");
         });
 
@@ -434,16 +444,16 @@ export function registerChatSystemWorkflowTests(quench) {
 
         it("should handle complex inline notation", () => {
           // ARRANGE
-          const notation = "e7k3x2+5";
+          const notation = "e7k3x9+5";
 
           // ACT
-          const parsed = roll_parser(notation);
+          const parsed = parseNotation(notation);
 
           // ASSERT
-          assert.isTrue(parsed.emphasis, "Emphasis flag");
-          assert.equal(parsed.dice_count, 7, "Rolled dice");
-          assert.equal(parsed.kept, 3, "Kept dice");
-          assert.equal(parsed.explode_bonus, 2, "Explode bonus");
+          assert.isTrue(parsed.rerollOnes, "Emphasis flag");
+          assert.equal(parsed.roll, 7, "Rolled dice");
+          assert.equal(parsed.keep, 3, "Kept dice");
+          assert.equal(parsed.explode, 9, "Explodes on 9 and 10");
           assert.equal(parsed.bonus, 5, "Flat bonus");
         });
       });
@@ -568,7 +578,6 @@ export function registerChatSystemWorkflowTests(quench) {
           // ASSERT
           assert.isBoolean(isOwner, "Ownership check returns boolean");
           assert.isBoolean(_isGM, "GM check returns boolean");
-          // In test environment, typically true
         });
 
         it("should handle missing actor gracefully", () => {
@@ -653,22 +662,12 @@ export function registerChatSystemWorkflowTests(quench) {
           const roll = new Roll("5d10k3x10+3");
           await roll.evaluate();
 
-          const templateData = {
-            flavor: "Weapon Damage",
-            roll: await roll.render(),
-            damageTotal: roll.total,
-            actorId: actor.id
-          };
-
           // ACT
-          const html = await foundry.applications.handlebars.renderTemplate(
-            "systems/l5r4-enhanced/templates/chat/damage-roll.hbs",
-            templateData
-          );
+          const html = await damageCard(roll, actor.id, "Weapon Damage");
 
           // ASSERT
           assert.exists(html, "Template rendered");
-          assert.include(html, "l5r4-damage-roll", "Damage roll class");
+          assert.include(html, "l5r4-check", "Roll card class");
           assert.include(html, "Weapon Damage", "Flavor text");
           assert.include(html, "apply-wounds", "Apply button");
           assert.include(html, "reduce-wounds-void", "Void button");
@@ -700,17 +699,8 @@ export function registerChatSystemWorkflowTests(quench) {
           const roll = new Roll("3d10k2x10");
           await roll.evaluate();
 
-          const templateData = {
-            roll: await roll.render(),
-            damageTotal: roll.total,
-            actorId: actor.id
-          };
-
           // ACT
-          const html = await foundry.applications.handlebars.renderTemplate(
-            "systems/l5r4-enhanced/templates/chat/damage-roll.hbs",
-            templateData
-          );
+          const html = await damageCard(roll, actor.id);
 
           // ASSERT
           assert.include(html, `data-actor-id="${actor.id}"`, "Actor ID in button");

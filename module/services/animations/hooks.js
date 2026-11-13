@@ -13,7 +13,7 @@
  * Integration Strategy:
  * - Hooks into same ActiveEffect events as effect-lifecycle.js
  * - Runs after effect-lifecycle.js completes (deferred via queueMicrotask)
- * - Does not modify game mechanics (purely visual layer)
+ * - Does not modify game mechanics (a visual layer only)
  * - Gracefully degrades if Sequencer/JB2A not available
  *
  * Hook Execution Order:
@@ -195,67 +195,30 @@ export function onDeleteActorAnimation(actor, _options, _userId) {
 }
 
 /**
- * Hook handler for chat message creation to detect attack rolls.
+ * Hook handler for chat message creation: a hit with a weapon against a target plays the attack animation.
  *
- * Detects when an attack roll chat message is created and triggers
- * arrow animations for bow attacks if a target is selected.
- *
- * Uses target actor ID stored in message flags to ensure animations
- * play to the correct target across all clients, not just the current
- * user's selected targets.
+ * Reads the attacker, weapon, and target the `roll` message stored (module/data/chat/RollMessageData.js), so every
+ * client animates toward the same target, whatever each user has targeted.
  *
  * @param {ChatMessage} message - The newly created chat message
  * @returns {void}
  */
 export function onCreateChatMessageAnimation(message) {
+  if (message.type !== "roll") {
+    return;
+  }
+  const { kind, outcome, actorUuid, weaponUuid, target } = message.system;
+  if (kind !== "attack" || outcome.success !== true || !weaponUuid || !target.uuid) {
+    return;
+  }
   // Defer to next tick to ensure message is fully created
   queueMicrotask(async () => {
-    // Check if this is an attack roll with a weapon
-    // Attack rolls have weaponId in flags (only set for successful attacks)
-    const flags = message.flags?.["l5r4-enhanced"] ?? {};
-    const weaponId = flags.weaponId;
-    const targetActorId = flags.targetActorId;
-
-    if (!weaponId) {
+    const actor = fromUuidSync(actorUuid);
+    const weapon = fromUuidSync(weaponUuid);
+    const targetActor = fromUuidSync(target.uuid);
+    if (!actor || !weapon || !targetActor) {
       return;
     }
-
-    // Get the actor who made the roll
-    const speaker = message.speaker;
-    const actor = ChatMessage.getSpeakerActor(speaker);
-
-    if (!actor) {
-      console.warn("L5R4 | Could not find actor from speaker");
-      return;
-    }
-
-    // Get the weapon
-    const weapon = actor.items.get(weaponId);
-
-    if (!weapon) {
-      console.warn("L5R4 | Could not find weapon with ID:", weaponId);
-      return;
-    }
-
-    // Check if weapon is valid for animations (weapon or bow type)
-    if (weapon.type !== "weapon" && weapon.type !== "bow") {
-      return;
-    }
-
-    // Get target actor from stored ID instead of game.user.targets
-    // This ensures animations play to the correct target across all clients
-    if (!targetActorId) {
-      return;
-    }
-
-    const targetActor = game.actors.get(targetActorId);
-
-    if (!targetActor) {
-      console.warn("L5R4 | Could not find target actor with ID:", targetActorId);
-      return;
-    }
-
-    // Play attack animation
     await handleAttackRoll(actor, targetActor, weapon);
   });
 }

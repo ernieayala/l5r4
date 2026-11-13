@@ -1,0 +1,16 @@
+<fieldset class="check-extras">
+  <legend>{{localize "l5r4.ui.mechanics.rolls.spellCasting"}}</legend>
+  <div class="form-group">
+    <label>{{localize "l5r4.ui.check.castSpell"}}</label>
+    <input type="checkbox" name="spellCasting" />
+  </div>
+  <div class="form-group">
+    <label>{{localize "l5r4.magic.spells.affinity"}}</label>
+    <input type="checkbox" name="affinity" {{checked affinity}} />
+  </div>
+  <div class="form-group">
+    <label>{{localize "l5r4.magic.spells.deficiency"}}</label>
+    <input type="checkbox" name="deficiency" {{checked deficiency}} />
+  </div>
+  {{> "systems/l5r4-enhanced/templates/dialogs/check-extras/slot.hbs"}}
+</fieldset>

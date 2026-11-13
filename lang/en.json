@@ -175,6 +175,35 @@
         "effects": "Active Effects",
         "rules": "Rules"
       },
+      "check": {
+        "allKept": "All",
+        "armor": "Armor",
+        "caller": "Bonus",
+        "castSpell": "Cast as a spell",
+        "conditions": "Conditions",
+        "contest": "Contested Roll",
+        "contestTie": "Tie: roll again.",
+        "contestWinner": "{name} wins.",
+        "damageFor": "Damage for",
+        "effects": "Active Effects",
+        "freeRaisesToTN": "Free Raises spent on the TN",
+        "increasedDamage": "Increased Damage (Raises)",
+        "keepFewer": "Keep only",
+        "manual": "Situational",
+        "max": "max",
+        "modifiers": "Modifiers",
+        "of": "of",
+        "pool": "Pool",
+        "rerollKeepBetter": "Re-roll, keep the better",
+        "rerolledKeptBetter": "re-rolled, better kept",
+        "schoolRank": "School Rank",
+        "spellSlot": "Spell slot",
+        "stance": "Stance",
+        "statBlock": "Stat block",
+        "substitutes": "Substitutions",
+        "unskilledHint": "Unskilled Roll: dice do not explode, and no Raises or Free Raises apply.",
+        "void": "Spend a Void Point (+1k1)"
+      },
       "rules": {
         "hint": "The item's rules as a JSON list, such as [{\"key\": \"RollModifier\", \"selector\": \"skill:kenjutsu\", \"roll\": 1}]. ACTIVE_EFFECTS.md lists the rule keys.",
         "invalidJson": "Rules not saved: the text is not valid JSON ({error}).",
@@ -822,6 +851,9 @@
       "tattoo": "Tattoo",
       "technique": "Technique",
       "weapon": "Weapon"
+    },
+    "ChatMessage": {
+      "roll": "Roll"
     }
   }
 }

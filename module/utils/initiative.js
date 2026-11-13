@@ -4,7 +4,7 @@
  * Reflexes (Core Rulebook p.81, `game-rules/31_combat_round.md`), under the Ten Dice Rule (p.77).
  */
 
-import { applyTenDiceRule } from "./ten-dice.js";
+import { buildPool, poolFormula } from "./check.js";
 
 /**
  * The Initiative pool before the Ten Dice Rule.
@@ -36,7 +36,6 @@ export function initiativeDice({ insightRank, reflexes, rollMod = 0, keepMod = 0
  * @returns {string}  A formula such as "5d10k3x10" or "10d10k10x10+4"
  */
 export function initiativeFormula({ roll, keep, bonus = 0 }, { littleTruths = false } = {}) {
-  const pool = applyTenDiceRule(roll, keep, bonus, { littleTruths });
-  const flat = pool.bonus === 0 ? "" : pool.bonus > 0 ? `+${pool.bonus}` : `${pool.bonus}`;
-  return `${pool.diceRoll}d10k${pool.diceKeep}x10${flat}`;
+  // The roll pipeline's pool and formula (module/utils/check.js), with a zero bonus left out
+  return poolFormula(buildPool({ roll, keep, bonus, littleTruths })).replace(/\+0$/, "");
 }

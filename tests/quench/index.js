@@ -20,7 +20,7 @@
  */
 
 import { SYS_ID } from "../../module/config/constants.js";
-import { buildFormula } from "../../module/services/dice/core/formula-builder.js";
+import { buildFormula } from "./helpers.js";
 import { createTestPC, createTestNPC } from "../fixtures/actor-fixtures.js";
 import { createSkillData, createWeaponData, createArmorData } from "../fixtures/item-fixtures.js";
 import { registerSkillRollTests as registerSkillRollServiceTests } from "./services/skill-rolls.js";
@@ -96,6 +96,7 @@ import { registerDataModelsBatch } from "./data-models.js";
 import { registerActiveEffectsBatch } from "./active-effects.js";
 import { registerSheetsAndAppsBatch } from "./sheets-and-apps.js";
 import { registerRulesBatch } from "./rules.js";
+import { registerRollPipelineBatch } from "./roll-pipeline.js";
 
 /**
  * Register Quench integration tests for the L5R4 system.
@@ -109,6 +110,7 @@ export async function registerQuenchTests(quench) {
   registerActiveEffectsBatch(quench);
   registerSheetsAndAppsBatch(quench);
   registerRulesBatch(quench);
+  registerRollPipelineBatch(quench);
   registerActorDocumentTests(quench);
   registerActorWoundTests(quench);
   registerActorXpTests(quench);

@@ -1,0 +1,20 @@
+<fieldset class="check-extras maho-dialog">
+  <legend>{{localize "l5r4.magic.maho.mahoCasting"}}</legend>
+  <p class="warning-text">
+    <strong>{{localize "l5r4.magic.maho.warningTitle"}}</strong><br />
+    {{localize "l5r4.magic.maho.bloodRequired"}}: <strong>{{bloodCost}}</strong>
+    {{localize "l5r4.ui.mechanics.wounds.wounds"}}<br />
+    {{localize "l5r4.magic.maho.additionalBloodBonus"}}
+  </p>
+  <div class="form-group">
+    <label>{{localize "l5r4.magic.maho.bloodSource.label"}}</label>
+    <select name="bloodSource">
+      <option value="self">{{localize "l5r4.magic.maho.bloodSource.self"}}</option>
+      <option value="other">{{localize "l5r4.magic.maho.bloodSource.other"}}</option>
+    </select>
+  </div>
+  <div class="form-group">
+    <label>{{localize "l5r4.magic.maho.additionalBlood"}}</label>
+    <input type="number" name="additionalBlood" min="0" value="0" step="{{bloodCost}}" />
+  </div>
+</fieldset>

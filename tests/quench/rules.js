@@ -2,7 +2,8 @@ import { SYS_ID } from "../../module/config/constants.js";
 import { RULE_KEYS } from "../../module/config/rule-keys.js";
 import { createRule } from "../../module/data/rules/rule-models.js";
 import { FamilyBonusService } from "../../module/services/family-bonus-service.js";
-import { getAllAttackBonuses } from "../../module/services/stance/rolls/attack-bonuses.js";
+import { collectCheck } from "../../module/services/dice/check/collect.js";
+import { displayRollBonus } from "../../module/utils/mechanics.js";
 import { getStanceEffectCreator } from "../../module/services/stance/core/effect-templates.js";
 import { TraitRoll } from "../../module/services/dice/rolls/trait-roll.js";
 import { getCreationFreeBonusSources } from "../../module/utils/xp-calculations.js";
@@ -81,14 +82,24 @@ export function registerRulesBatch(quench) {
   quench.registerBatch(
     `${SYS_ID}.rules`,
     context => {
-      const { describe, it, afterEach, assert } = context;
+      const { describe, it, after, afterEach, assert } = context;
       const clean = cleanTest(assert);
       const actors = [];
+      const messages = [];
       const track = actor => (actors.push(actor), actor);
 
       afterEach(async () => {
         for (const actor of actors.splice(0)) {
           await actor.delete();
+        }
+      });
+
+      // Chat messages go after core's pop-up cards for them have shown (helpers.js settleChatNotifications)
+      after(async function () {
+        this.timeout(30_000);
+        await settleChatNotifications();
+        for (const message of messages) {
+          await message.delete();
         }
       });
 
@@ -262,26 +273,25 @@ export function registerRulesBatch(quench) {
 
         it(
           "a RollModifier on a Trait reaches the Trait roll",
-          clean(async function () {
-            this.timeout(10_000);
+          clean(async () => {
             const actor = track(await createTestPC({ name: "Rules roll" }));
             const ref = actor.system._derived.traitsEff.ref;
             await actor.createEmbeddedDocuments("Item", [
               ruleItem([{ key: "RollModifier", selector: "trait:ref", roll: 1, keep: 1 }])
             ]);
-            assert.deepEqual(actor.system.bonuses.trait.ref, { roll: 1, keep: 1, total: 0 });
-            // TraitRoll adds passive bonuses only on the dialog path, so answer the dialog
-            const answered = new Promise(resolve =>
-              Hooks.once("renderDialogV2", app => {
-                app.element.querySelector('[data-action="ok"]').click();
-                resolve();
-              })
-            );
-            const message = await TraitRoll({ actor, traitName: "ref", traitRank: ref });
-            await answered;
+            assert.deepEqual(displayRollBonus(actor, { trait: "ref" }), {
+              roll: 1,
+              keep: 1,
+              total: 0
+            });
+            const message = await TraitRoll({
+              actor,
+              traitName: "ref",
+              traitRank: ref,
+              askForOptions: false
+            });
+            messages.push(message);
             assert.include(message.rolls[0].formula, `${ref + 1}d10k${ref + 1}x10`);
-            await settleChatNotifications();
-            await message.delete();
           })
         );
       });
@@ -322,7 +332,7 @@ export function registerRulesBatch(quench) {
         );
 
         it(
-          "skill bonus fields reach system.bonuses.skill and the skill's formula, as in 3.2.1",
+          "skill bonus fields act as a RollModifier and reach the skill's formula, as in 3.2.1",
           clean(async () => {
             const actor = track(await createTestPC({ name: "Rules skill" }));
             const [skill] = await actor.createEmbeddedDocuments("Item", [
@@ -331,7 +341,11 @@ export function registerRulesBatch(quench) {
               })
             ]);
             const agi = actor.system._derived.traitsEff.agi;
-            assert.deepEqual(actor.system.bonuses.skill.kenjutsu, { roll: 1, keep: 1, total: 3 });
+            assert.deepEqual(displayRollBonus(actor, { skill: "kenjutsu" }), {
+              roll: 1,
+              keep: 1,
+              total: 3
+            });
             assert.equal(skill.system.rollFormula, `${agi + 2 + 1}k${agi + 1}`);
           })
         );
@@ -383,12 +397,16 @@ export function registerRulesBatch(quench) {
           clean(async () => {
             const rider = track(await createTestPC({ name: "Rules rider" }));
             const target = track(await createTestNPC({ name: "Rules target" }));
-            assert.deepEqual(getAllAttackBonuses(rider, target), { roll: 0, keep: 0 });
+            const attackBonus = against => {
+              const { modifiers } = collectCheck(rider, { kind: "attack", target: against });
+              return modifiers.reduce((sum, m) => [sum[0] + m.roll, sum[1] + m.keep], [0, 0]);
+            };
+            assert.deepEqual(attackBonus(target), [0, 0]);
             await rider.toggleStatusEffect("mounted", { active: true });
-            assert.deepEqual(getAllAttackBonuses(rider, target), { roll: 1, keep: 0 });
-            assert.deepEqual(getAllAttackBonuses(rider, null), { roll: 0, keep: 0 });
+            assert.deepEqual(attackBonus(target), [1, 0]);
+            assert.deepEqual(attackBonus(null), [0, 0]);
             await target.toggleStatusEffect("mounted", { active: true });
-            assert.deepEqual(getAllAttackBonuses(rider, target), { roll: 0, keep: 0 });
+            assert.deepEqual(attackBonus(target), [0, 0]);
           })
         );
 
