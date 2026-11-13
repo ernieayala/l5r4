@@ -211,7 +211,7 @@ export async function MahoCastRoll({ actor, spell, woundPenalty = 0, showDialog 
     label += ` [${game.i18n.localize("l5r4.magic.maho.taintGained")}: ${taintGain}]`;
 
     ui.notifications?.warn(
-      game.i18n.format("l5r4.magic.maho.taintGainedNotification", {
+      game.i18n.localize("l5r4.magic.maho.taintGainedNotification", {
         taint: taintGain
       })
     );

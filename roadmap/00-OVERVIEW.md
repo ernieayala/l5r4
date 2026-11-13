@@ -33,7 +33,7 @@ in `tests/quench/`, the transcribed rulebook in `game-rules/` (local, gitignored
 | 1 | `STAGE-01-LOAD-ON-V14.md` | The v13 code loads in 14.370 from a v14 manifest; a Quench smoke batch and a deprecation inventory run | none |
 | 2 | `STAGE-02-DATA-MODELS.md` | `template.json` replaced by one `TypeDataModel` per subtype, with migrations for stored world data | 1 |
 | 3 | `STAGE-03-ACTIVE-EFFECTS.md` | Active Effects V2: `system.changes`, string change `type`, phases, status effect registration | 2 |
-| 4 | `STAGE-04-DEPRECATED-APIS.md` | No call to an API deprecated in v14: AppV1 `Dialog`, `rollMode`, `game.i18n.format`, ContextMenu entry keys, deprecated globals | 1 |
+| 4 | `STAGE-04-DEPRECATED-APIS.md` | No call to an API deprecated in v14: AppV1 `Dialog`, `rollMode`, `game.i18n.format`, deprecated globals | 1 |
 | 5 | `STAGE-05-COMBAT.md` | Initiative and the Void prompt through `Combat` / `Combatant` subclasses instead of prototype patches | 2, 4 |
 | 6 | `STAGE-06-SHEETS-AND-APPS.md` | Every sheet and app renders, saves, and handles its actions on 14.370 with no console warnings | 2, 3, 4 |
 | 7 | `STAGE-07-RULE-ENGINE.md` | `system.rules` on items and effects, one engine applying them during preparation, the first rule keys, hard-coded bonuses converted | 2, 3, 5, 6 |
@@ -65,7 +65,7 @@ Reviewed 2026-11-12 (`gh issue list --state all`, `gh pr list --state all`). Eac
 | No issue yet | Code comments on `main` repeat rulebook wording: `skill-formulas.js`, `tn-calculator.js`, `bow-damage.js`, `chat-damage-buttons.js`, `melee-damage.js`, and `tests/quench/workflows/melee-damage-strength.js` (12-word runs matched against `game-rules/`, 2026-11-12) | Rewrite in own words with page citations, as its own change; Ernie decides when |
 | No issue yet | Probable bugs read from the code (B1-B12): bonuses counted twice, Raise and Void limits, damage button, inline rolls, Prone automation | `AUTOMATION.md` §2 assigns each a stage; each gets an issue once reproduced |
 | Closed #5, #7-#15, #32, #34 | Rule bugs fixed in 2.x-3.2 | Stage 13: each gets a regression test that names it (only #34 has one) |
-| Closed #3 | Firefox right-click context menus | Stage 4: the ContextMenu change is checked by hand in Firefox |
+| Closed #3 | Firefox right-click context menus | No item menu since v3.0.0; its unused module is deleted in Stage 4 (Decision 1) |
 
 ## Cross-stage decisions
 

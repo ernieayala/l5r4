@@ -125,7 +125,7 @@ export function validateSpellSlot(actor, ringKey, isVoidSlot = false) {
     return {
       valid: false,
       current: 0,
-      message: game.i18n.format("l5r4.ui.notifications.invalidRingForSpell", { ring: ringKey }),
+      message: game.i18n.localize("l5r4.ui.notifications.invalidRingForSpell", { ring: ringKey }),
       path: null
     };
   }

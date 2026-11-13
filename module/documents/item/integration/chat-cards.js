@@ -6,13 +6,13 @@
  * documents with appropriate speaker context and formatting.
  *
  * Integrates with Foundry's ChatMessage API to display item information
- * in a formatted card layout, respecting the user's configured roll mode
- * and generating localized type labels.
+ * in a formatted card layout, posted in the message mode selected in the chat log,
+ * with a localized type label.
  *
  * Requires Foundry VTT v10+ for:
  * - ChatMessage.create() - Chat message document creation
  * - ChatMessage.getSpeaker() - Speaker context from actor
- * - game.settings.get() - Roll mode setting retrieval
+ * - game.settings.get() - Message mode setting retrieval
  * - game.i18n.has() / localize() - Type label localization
  *
  * @module documents/item/integration/chat-cards
@@ -27,7 +27,7 @@ import { R } from "../../../utils/localization.js";
  *
  * Creates a ChatMessage displaying the item's details using a type-specific
  * Handlebars template. The message includes speaker context (from item's
- * owning actor if available), respects the current roll mode setting, and
+ * owning actor if available), uses the core messageMode setting, and
  * displays a localized item type label as flavor text.
  *
  * Template selection is based on item.type using CHAT_CARD_TEMPLATES lookup.
@@ -59,10 +59,13 @@ export async function renderItemChatCard(item) {
     ? game.i18n.localize(typeKey)
     : item.type.toLowerCase().replace(/\b[a-z]/g, m => m.toUpperCase());
 
-  return ChatMessage.create({
-    speaker: ChatMessage.getSpeaker({ actor: item.actor }),
-    rollMode: game.settings.get("core", "rollMode"),
-    flavor: `[${typeLabel}]`,
-    content: html ?? ""
-  });
+  // The mode is a creation option, applied in ChatMessage#_preCreate (client/documents/chat-message.mjs:551-556)
+  return ChatMessage.create(
+    {
+      speaker: ChatMessage.getSpeaker({ actor: item.actor }),
+      flavor: `[${typeLabel}]`,
+      content: html ?? ""
+    },
+    { messageMode: game.settings.get("core", "messageMode") }
+  );
 }

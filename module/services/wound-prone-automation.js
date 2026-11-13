@@ -163,7 +163,7 @@ async function applyProneCondition(actor) {
   } catch (err) {
     console.error(`${SYS_ID} | Failed to apply Prone condition to ${actor.name}`, err);
     ui.notifications?.error(
-      game.i18n.format("l5r4.ui.notifications.conditionApplyFailed", {
+      game.i18n.localize("l5r4.ui.notifications.conditionApplyFailed", {
         condition: game.i18n.localize("EFFECT.prone"),
         actor: actor.name
       })

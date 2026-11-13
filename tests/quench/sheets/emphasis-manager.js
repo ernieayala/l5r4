@@ -16,8 +16,6 @@
  * @see module/apps/emphasis-manager.js
  */
 
-/* global FormDataExtended */
-
 import { SYS_ID } from "../../../module/config/constants.js";
 import EmphasisManager from "../../../module/apps/emphasis-manager.js";
 import { OFFICIAL_EMPHASES } from "../../../module/config/reference-data.js";
@@ -300,7 +298,7 @@ export function registerEmphasisManagerTests(quench) {
           }
 
           // ACT
-          const formData = new FormDataExtended(element);
+          const formData = new foundry.applications.ux.FormDataExtended(element);
           await dialog._onSubmit(new Event("submit"), element, formData);
 
           // ASSERT
@@ -325,7 +323,7 @@ export function registerEmphasisManagerTests(quench) {
           }
 
           // ACT
-          const formData = new FormDataExtended(element);
+          const formData = new foundry.applications.ux.FormDataExtended(element);
           await dialog._onSubmit(new Event("submit"), element, formData);
 
           // ASSERT
@@ -347,7 +345,7 @@ export function registerEmphasisManagerTests(quench) {
           checkboxes.forEach(cb => (cb.checked = false));
 
           // ACT
-          const formData = new FormDataExtended(element);
+          const formData = new foundry.applications.ux.FormDataExtended(element);
           await dialog._onSubmit(new Event("submit"), element, formData);
 
           // ASSERT
@@ -372,7 +370,7 @@ export function registerEmphasisManagerTests(quench) {
           }
 
           // ACT
-          const formData = new FormDataExtended(element);
+          const formData = new foundry.applications.ux.FormDataExtended(element);
           await dialog._onSubmit(new Event("submit"), element, formData);
 
           // ASSERT
@@ -548,7 +546,9 @@ export function registerEmphasisManagerTests(quench) {
 
         it("should handle undefined availableEmphases", async () => {
           // ARRANGE
-          await skillItem.update({ "system.-=availableEmphases": null });
+          await skillItem.update({
+            "system.availableEmphases": new foundry.data.operators.ForcedDeletion()
+          });
           dialog = new EmphasisManager({ item: skillItem });
 
           // ACT
@@ -637,7 +637,7 @@ export function registerEmphasisManagerTests(quench) {
 
           // ACT
           const element = dialog.element;
-          const formData = new FormDataExtended(element);
+          const formData = new foundry.applications.ux.FormDataExtended(element);
           await dialog._onSubmit(new Event("submit"), element, formData);
 
           // ASSERT

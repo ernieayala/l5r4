@@ -24,11 +24,9 @@ const dirCache = new Map();
  *
  * Uses Foundry's FilePicker API to browse directory contents, extracting only the
  * filenames. Results are cached to avoid redundant API calls during bulk migrations.
- * Handles API differences between Foundry versions via optional chaining.
  *
  * Foundry VTT Integration:
- * - foundry.applications?.apps?.FilePicker?.implementation handles v13+ structure
- * - Falls back to global FilePicker for earlier versions
+ * - foundry.applications.apps.FilePicker.implementation is the configured FilePicker class
  * - browse("data", path) reads from Foundry's Data directory
  *
  * @param {string} dirPath - Directory path to list (relative to Foundry Data)
@@ -39,8 +37,7 @@ async function listDir(dirPath) {
     return dirCache.get(dirPath);
   }
   try {
-    const FP = foundry.applications?.apps?.FilePicker?.implementation ?? FilePicker;
-    const res = await FP.browse("data", dirPath);
+    const res = await foundry.applications.apps.FilePicker.implementation.browse("data", dirPath);
     const files = new Set(
       (res.files ?? []).map(f => {
         const i = f.lastIndexOf("/");
@@ -210,7 +207,7 @@ export async function runIconPathMigration() {
   }
 
   ui.notifications?.info(
-    game.i18n.format("l5r4.system.migration.iconsUpdated", { count: changed })
+    game.i18n.localize("l5r4.system.migration.iconsUpdated", { count: changed })
   );
 }
 
@@ -331,7 +328,7 @@ export async function migrateCompendiumIconPaths() {
 
   if (changed > 0) {
     ui.notifications?.info(
-      game.i18n.format("l5r4.system.migration.compendiumIconsUpdated", { count: changed })
+      game.i18n.localize("l5r4.system.migration.compendiumIconsUpdated", { count: changed })
     );
   }
 }

@@ -168,12 +168,12 @@ export function registerInitiativeWorkflowTests(quench) {
         let combat, actor, originalConfirm;
 
         before(() => {
-          originalConfirm = Dialog.confirm;
+          originalConfirm = foundry.applications.api.DialogV2.confirm;
         });
 
         after(() => {
           if (originalConfirm) {
-            Dialog.confirm = originalConfirm;
+            foundry.applications.api.DialogV2.confirm = originalConfirm;
           }
         });
 
@@ -203,10 +203,10 @@ export function registerInitiativeWorkflowTests(quench) {
         it("should prompt when useVoid flag is true", async () => {
           // ARRANGE
           let dialogShown = false;
-          Dialog.confirm = async function (config) {
+          foundry.applications.api.DialogV2.confirm = async function (config) {
             dialogShown = true;
-            assert.include(config.title, "Void", "Title mentions Void");
-            assert.include(config.title, actor.name, "Title includes actor name");
+            assert.include(config.window.title, "Void", "Title mentions Void");
+            assert.include(config.window.title, actor.name, "Title includes actor name");
             return false;
           };
 
@@ -225,7 +225,7 @@ export function registerInitiativeWorkflowTests(quench) {
 
         it("should consume void and add +10 when accepted", async () => {
           // ARRANGE
-          Dialog.confirm = async () => true;
+          foundry.applications.api.DialogV2.confirm = async () => true;
           await actor.update({ "system.initiative.useVoid": true });
 
           const initialVoid = actor.system.rings.void.value;
@@ -248,7 +248,7 @@ export function registerInitiativeWorkflowTests(quench) {
 
         it("should not consume void when declined", async () => {
           // ARRANGE
-          Dialog.confirm = async () => false;
+          foundry.applications.api.DialogV2.confirm = async () => false;
           await actor.update({ "system.initiative.useVoid": true });
 
           const initialVoid = actor.system.rings.void.value;
@@ -301,7 +301,7 @@ export function registerInitiativeWorkflowTests(quench) {
           });
 
           let dialogShown = false;
-          Dialog.confirm = async () => {
+          foundry.applications.api.DialogV2.confirm = async () => {
             dialogShown = true;
             return true;
           };

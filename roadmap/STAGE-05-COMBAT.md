@@ -17,7 +17,7 @@
 | Where | Finding |
 |-------|---------|
 | `module/services/initiative.js:45-48` | Sets `CONFIG.Combat.initiative` |
-| `module/services/initiative.js:52-98` | Replaces `Combat.prototype.rollInitiative` to prompt for Void (V1 `Dialog.confirm` at `:73`) |
+| `module/services/initiative.js:52-98` | Replaces `Combat.prototype.rollInitiative` to prompt for Void (`DialogV2.confirm` since Stage 4) |
 | `module/services/initiative.js:104-212` | Replaces `Combatant.prototype.getInitiativeRoll` with the Roll & Keep formula and the Ten Dice Rule conversion |
 | `module/services/initiative.js:84`, `:160-165` | Stores the Void choice in `system.initiative._voidThisRoll` (removed from `system` in Stage 2) and clears it with an un-awaited update |
 | `module/hooks/combat-void-spending.js` | `combatTurn` hook for Void spending duration |

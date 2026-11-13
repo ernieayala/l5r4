@@ -57,7 +57,7 @@ export const T = key => {
 /**
  * Formats a translation with variable substitution.
  *
- * Wrapper around game.i18n.format() with defensive validation.
+ * Wrapper around game.i18n.localize() with defensive validation.
  * Replaces {variable} placeholders in translation with data values.
  *
  * @param {string} key - Translation key with placeholders (e.g., "L5R4.messages.rolled")
@@ -77,7 +77,7 @@ export const T = key => {
 export const F = (key, data) => {
   const validKey = validateKey(key, "F");
 
-  // Data must be non-null object for format() variable substitution
+  // Data must be a non-null object for localize() variable substitution
   // Fall back to simple translation if invalid to prevent Foundry errors
   if (typeof data !== "object" || data === null) {
     logError("F() requires object data", new TypeError("Invalid data type"), {
@@ -88,7 +88,7 @@ export const F = (key, data) => {
   }
 
   // Use Foundry's i18n API to format translation with variable substitution
-  return game.i18n.format(validKey, data);
+  return game.i18n.localize(validKey, data);
 };
 
 /**
