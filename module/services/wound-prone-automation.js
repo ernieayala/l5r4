@@ -13,7 +13,7 @@
  * - Apply to both linked tokens and unlinked tokens
  *
  * L5R4 Game Rules Context:
- * When a character is severely wounded (Down or Out level), they typically collapse
+ * When a character reaches the Down or Out wound level, the system treats them as collapsing
  * to the ground. This automation applies the Prone condition to represent this,
  * imposing -10 Armor TN vs melee attacks and restricting movement/actions.
  *
@@ -150,7 +150,7 @@ async function applyProneCondition(actor) {
     await actor.createEmbeddedDocuments("ActiveEffect", [
       {
         name: `${autoPrefix}: ${proneName}`,
-        icon: iconPath("prone.webp"),
+        img: iconPath("prone.webp"),
         statuses: ["prone"],
         flags: {
           [SYS_ID]: {

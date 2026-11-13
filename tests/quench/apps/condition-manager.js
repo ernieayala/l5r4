@@ -130,7 +130,7 @@ export function registerConditionManagerTests(quench) {
             await actor.createEmbeddedDocuments("ActiveEffect", [
               {
                 name: "Dazed",
-                icon: `systems/${SYS_ID}/assets/icons/dazed.webp`,
+                img: `systems/${SYS_ID}/assets/icons/dazed.webp`,
                 statuses: ["dazed"]
               }
             ]);
@@ -169,7 +169,7 @@ export function registerConditionManagerTests(quench) {
             await actor.createEmbeddedDocuments("ActiveEffect", [
               {
                 name: game.i18n.localize(statusDef.name),
-                icon: statusDef.img,
+                img: statusDef.img,
                 statuses: ["blinded"],
                 flags: {
                   [SYS_ID]: {
@@ -193,7 +193,7 @@ export function registerConditionManagerTests(quench) {
             await actor.createEmbeddedDocuments("ActiveEffect", [
               {
                 name: "Dazed",
-                icon: `systems/${SYS_ID}/assets/icons/dazed.webp`,
+                img: `systems/${SYS_ID}/assets/icons/dazed.webp`,
                 statuses: ["dazed"],
                 flags: {
                   [SYS_ID]: {
@@ -220,17 +220,17 @@ export function registerConditionManagerTests(quench) {
             await actor.createEmbeddedDocuments("ActiveEffect", [
               {
                 name: "Blinded",
-                icon: `systems/${SYS_ID}/assets/icons/blinded.webp`,
+                img: `systems/${SYS_ID}/assets/icons/blinded.webp`,
                 statuses: ["blinded"]
               },
               {
                 name: "Dazed",
-                icon: `systems/${SYS_ID}/assets/icons/dazed.webp`,
+                img: `systems/${SYS_ID}/assets/icons/dazed.webp`,
                 statuses: ["dazed"]
               },
               {
                 name: "Prone",
-                icon: `systems/${SYS_ID}/assets/icons/prone.webp`,
+                img: `systems/${SYS_ID}/assets/icons/prone.webp`,
                 statuses: ["prone"]
               }
             ]);
@@ -273,7 +273,7 @@ export function registerConditionManagerTests(quench) {
             await actor.createEmbeddedDocuments("ActiveEffect", [
               {
                 name: "Full Attack Stance",
-                icon: `systems/${SYS_ID}/assets/icons/full-attack-stance.webp`,
+                img: `systems/${SYS_ID}/assets/icons/full-attack-stance.webp`,
                 statuses: ["fullAttackStance"],
                 flags: {
                   [SYS_ID]: {
@@ -301,12 +301,12 @@ export function registerConditionManagerTests(quench) {
             await actor.createEmbeddedDocuments("ActiveEffect", [
               {
                 name: "Defense Stance",
-                icon: `systems/${SYS_ID}/assets/icons/defence-stance.webp`,
+                img: `systems/${SYS_ID}/assets/icons/defence-stance.webp`,
                 statuses: ["defenseStance"]
               },
               {
                 name: "Fatigued",
-                icon: `systems/${SYS_ID}/assets/icons/fatigued.webp`,
+                img: `systems/${SYS_ID}/assets/icons/fatigued.webp`,
                 statuses: ["fatigued"]
               }
             ]);
@@ -331,7 +331,7 @@ export function registerConditionManagerTests(quench) {
             await actor.createEmbeddedDocuments("ActiveEffect", [
               {
                 name: "Stunned",
-                icon: `systems/${SYS_ID}/assets/icons/stunned.webp`,
+                img: `systems/${SYS_ID}/assets/icons/stunned.webp`,
                 statuses: ["stunned"],
                 disabled: true
               }
@@ -365,7 +365,7 @@ export function registerConditionManagerTests(quench) {
             await actor.createEmbeddedDocuments("ActiveEffect", [
               {
                 name: "Multiple Conditions",
-                icon: `systems/${SYS_ID}/assets/icons/dazed.webp`,
+                img: `systems/${SYS_ID}/assets/icons/dazed.webp`,
                 statuses: ["dazed", "fatigued"]
               }
             ]);
@@ -392,7 +392,7 @@ export function registerConditionManagerTests(quench) {
             await actor.createEmbeddedDocuments("ActiveEffect", [
               {
                 name: game.i18n.localize("EFFECT.blinded"),
-                icon: `systems/${SYS_ID}/assets/icons/blinded.webp`,
+                img: `systems/${SYS_ID}/assets/icons/blinded.webp`,
                 statuses: ["blinded"],
                 flags: { [SYS_ID]: { conditionId: "blinded" } }
               }

@@ -17,7 +17,7 @@
  * Architectural Notes:
  * - **No DebouncedFieldMixin**: Uses custom multi-checkbox component with batched updates
  * - **Actor-based constructor**: Standard pattern for actor configuration dialogs
- * - **No form submission**: Multi-checkbox component handles change events directly
+ * - **No form submission**: Multi-checkbox component handles change events itself
  *
  * @module apps/condition-manager
  */
@@ -247,7 +247,7 @@ export default class ConditionManager extends foundry.applications.api.Handlebar
           await this.actor.createEmbeddedDocuments("ActiveEffect", [
             {
               name: T(statusDef.name),
-              icon: statusDef.img,
+              img: statusDef.img,
               statuses: [conditionId],
               flags: {
                 [SYS_ID]: {

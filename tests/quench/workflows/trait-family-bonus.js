@@ -69,13 +69,15 @@ export function registerTraitFamilyBonusTests(quench) {
                   name: "Hida Family Bonus",
                   transfer: true,
                   disabled: false,
-                  changes: [
-                    {
-                      key: "system.traits.str",
-                      mode: CONST.ACTIVE_EFFECT_MODES.ADD,
-                      value: "1"
-                    }
-                  ]
+                  system: {
+                    changes: [
+                      {
+                        key: "system.traits.str",
+                        type: "add",
+                        value: "1"
+                      }
+                    ]
+                  }
                 }
               ]
             }
@@ -214,13 +216,15 @@ export function registerTraitFamilyBonusTests(quench) {
                   name: "Yasuki Family Bonus",
                   transfer: true,
                   disabled: false,
-                  changes: [
-                    {
-                      key: "system.traits.awa",
-                      mode: CONST.ACTIVE_EFFECT_MODES.ADD,
-                      value: "1"
-                    }
-                  ]
+                  system: {
+                    changes: [
+                      {
+                        key: "system.traits.awa",
+                        type: "add",
+                        value: "1"
+                      }
+                    ]
+                  }
                 }
               ]
             }
@@ -302,13 +306,15 @@ export function registerTraitFamilyBonusTests(quench) {
                   name: "Test Family Bonus",
                   transfer: true,
                   disabled: false,
-                  changes: [
-                    {
-                      key: "system.traits.agi",
-                      mode: CONST.ACTIVE_EFFECT_MODES.ADD,
-                      value: "1"
-                    }
-                  ]
+                  system: {
+                    changes: [
+                      {
+                        key: "system.traits.agi",
+                        type: "add",
+                        value: "1"
+                      }
+                    ]
+                  }
                 }
               ]
             }
@@ -442,13 +448,15 @@ export function registerTraitFamilyBonusTests(quench) {
                   name: "Hida Family Bonus",
                   transfer: true,
                   disabled: false,
-                  changes: [
-                    {
-                      key: "system.traits.str",
-                      mode: CONST.ACTIVE_EFFECT_MODES.ADD,
-                      value: "1"
-                    }
-                  ]
+                  system: {
+                    changes: [
+                      {
+                        key: "system.traits.str",
+                        type: "add",
+                        value: "1"
+                      }
+                    ]
+                  }
                 }
               ]
             }
@@ -466,13 +474,15 @@ export function registerTraitFamilyBonusTests(quench) {
                   name: "Doji Family Bonus",
                   transfer: true,
                   disabled: false,
-                  changes: [
-                    {
-                      key: "system.traits.awa",
-                      mode: CONST.ACTIVE_EFFECT_MODES.ADD,
-                      value: "1"
-                    }
-                  ]
+                  system: {
+                    changes: [
+                      {
+                        key: "system.traits.awa",
+                        type: "add",
+                        value: "1"
+                      }
+                    ]
+                  }
                 }
               ]
             }
@@ -537,13 +547,15 @@ export function registerTraitFamilyBonusTests(quench) {
                   name: "Test Family Bonus",
                   transfer: true,
                   disabled: false,
-                  changes: [
-                    {
-                      key: "system.traits.str",
-                      mode: CONST.ACTIVE_EFFECT_MODES.ADD,
-                      value: "1"
-                    }
-                  ]
+                  system: {
+                    changes: [
+                      {
+                        key: "system.traits.str",
+                        type: "add",
+                        value: "1"
+                      }
+                    ]
+                  }
                 }
               ]
             }
@@ -592,13 +604,15 @@ export function registerTraitFamilyBonusTests(quench) {
                   name: "Invalid Bonus",
                   transfer: true,
                   disabled: false,
-                  changes: [
-                    {
-                      key: "system.traits.honor", // INVALID: honor is not a trait
-                      mode: CONST.ACTIVE_EFFECT_MODES.ADD,
-                      value: "1"
-                    }
-                  ]
+                  system: {
+                    changes: [
+                      {
+                        key: "system.traits.honor", // INVALID: honor is not a trait
+                        type: "add",
+                        value: "1"
+                      }
+                    ]
+                  }
                 }
               ]
             }
@@ -697,13 +711,15 @@ export function registerTraitFamilyBonusTests(quench) {
                   name: "Ring Bonus (Invalid)",
                   transfer: true,
                   disabled: false,
-                  changes: [
-                    {
-                      key: "system.rings.earth", // INVALID: should target trait, not ring
-                      mode: CONST.ACTIVE_EFFECT_MODES.ADD,
-                      value: "1"
-                    }
-                  ]
+                  system: {
+                    changes: [
+                      {
+                        key: "system.rings.earth", // INVALID: should target trait, not ring
+                        type: "add",
+                        value: "1"
+                      }
+                    ]
+                  }
                 }
               ]
             }
@@ -767,13 +783,15 @@ export function registerTraitFamilyBonusTests(quench) {
                   name: "Negative Bonus (Invalid)",
                   transfer: true,
                   disabled: false,
-                  changes: [
-                    {
-                      key: "system.traits.str",
-                      mode: CONST.ACTIVE_EFFECT_MODES.ADD,
-                      value: "-1" // NEGATIVE value (should be rejected)
-                    }
-                  ]
+                  system: {
+                    changes: [
+                      {
+                        key: "system.traits.str",
+                        type: "add",
+                        value: "-1" // NEGATIVE value (should be rejected)
+                      }
+                    ]
+                  }
                 }
               ]
             }

@@ -3,7 +3,7 @@
  * Tests effect structure, required properties, and creator lookup mapping
  *
  * Test Philosophy:
- * - Focus on edge cases and error paths (not just happy paths)
+ * - Cover edge cases and error paths as well as happy paths
  * - Test behavior, not implementation
  * - Verify all required properties exist with correct types
  * - Ensure tests fail when code breaks (mutation testing mindset)
@@ -48,13 +48,17 @@ vi.mock("../../../module/config/constants.js", () => ({
 function validateEffectStructure(effect, expectedStanceType, expectedStatuses) {
   // Core properties
   expect(effect).toHaveProperty("name");
-  expect(effect).toHaveProperty("icon");
+  expect(effect).toHaveProperty("img");
   expect(effect).toHaveProperty("statuses");
   expect(effect).toHaveProperty("flags");
 
+  // v14 shape: 14.370 drops an effect's `icon` and reads changes from `system.changes`
+  expect(effect).not.toHaveProperty("icon");
+  expect(effect).not.toHaveProperty("changes");
+
   // Type validation
   expect(typeof effect.name).toBe("string");
-  expect(typeof effect.icon).toBe("string");
+  expect(typeof effect.img).toBe("string");
   expect(Array.isArray(effect.statuses)).toBe(true);
   expect(typeof effect.flags).toBe("object");
 
@@ -68,8 +72,8 @@ function validateEffectStructure(effect, expectedStanceType, expectedStatuses) {
   expect(effect.statuses).toEqual(expectedStatuses);
 
   // Icon path validation
-  expect(effect.icon).toContain("systems/l5r4-enhanced/assets/icons/");
-  expect(effect.icon).toMatch(/\.webp$/);
+  expect(effect.img).toContain("systems/l5r4-enhanced/assets/icons/");
+  expect(effect.img).toMatch(/\.webp$/);
 
   // Description validation
   expect(typeof effect.flags["l5r4-enhanced"].description).toBe("string");
@@ -103,7 +107,11 @@ describe("createFullAttackEffect", () => {
       const effect = createFullAttackEffect();
 
       // ASSERT
-      expect(effect.icon).toBe("systems/l5r4-enhanced/assets/icons/full-attack-stance.webp");
+      expect(effect.img).toBe("systems/l5r4-enhanced/assets/icons/full-attack-stance.webp");
+    });
+
+    it("should carry an empty system.changes array", () => {
+      expect(createFullAttackEffect().system).toEqual({ changes: [] });
     });
 
     it("should have single status ID in array", () => {
@@ -226,7 +234,7 @@ describe("createDefenseStanceEffect", () => {
       const effect = createDefenseStanceEffect();
 
       // ASSERT
-      expect(effect.icon).toBe("systems/l5r4-enhanced/assets/icons/defence-stance.webp");
+      expect(effect.img).toBe("systems/l5r4-enhanced/assets/icons/defence-stance.webp");
     });
 
     it("should have single status ID in array", () => {
@@ -315,7 +323,7 @@ describe("createFullDefenseStanceEffect", () => {
       const effect = createFullDefenseStanceEffect();
 
       // ASSERT
-      expect(effect.icon).toBe("systems/l5r4-enhanced/assets/icons/full-defense-stance.webp");
+      expect(effect.img).toBe("systems/l5r4-enhanced/assets/icons/full-defense-stance.webp");
     });
 
     it("should have single status ID in array", () => {
@@ -398,7 +406,7 @@ describe("createAttackStanceEffect", () => {
       const effect = createAttackStanceEffect();
 
       // ASSERT
-      expect(effect.icon).toBe("systems/l5r4-enhanced/assets/icons/attack-stance.webp");
+      expect(effect.img).toBe("systems/l5r4-enhanced/assets/icons/attack-stance.webp");
     });
 
     it("should have single status ID in array", () => {
@@ -481,7 +489,7 @@ describe("createCenterStanceEffect", () => {
       const effect = createCenterStanceEffect();
 
       // ASSERT
-      expect(effect.icon).toBe("systems/l5r4-enhanced/assets/icons/centered-stance.webp");
+      expect(effect.img).toBe("systems/l5r4-enhanced/assets/icons/centered-stance.webp");
     });
 
     it("should have single status ID in array", () => {
@@ -600,7 +608,7 @@ describe("getStanceEffectCreator", () => {
 
         const effect = creator();
         expect(effect).toHaveProperty("name");
-        expect(effect).toHaveProperty("icon");
+        expect(effect).toHaveProperty("img");
         expect(effect).toHaveProperty("statuses");
         expect(effect).toHaveProperty("flags");
       });
@@ -662,7 +670,7 @@ describe("getStanceEffectCreator", () => {
       const creator = getStanceEffectCreator(["attackStance"]);
 
       // ASSERT
-      // This actually works due to type coercion - array becomes string
+      // This works through type coercion - the array becomes a string
       expect(creator).toBe(createAttackStanceEffect);
     });
   });
@@ -781,7 +789,7 @@ describe("cross-function consistency", () => {
       ];
 
       // ACT
-      const allIcons = effects.map(effect => effect.icon);
+      const allIcons = effects.map(effect => effect.img);
       const uniqueIcons = new Set(allIcons);
 
       // ASSERT

@@ -1,5 +1,7 @@
 import { SYS_ID } from "../../module/config/constants.js";
 import { SkillRoll } from "../../module/services/dice/rolls/skill-roll.js";
+import { FamilyBonusService } from "../../module/services/family-bonus-service.js";
+import { buildXpHistory } from "../../module/services/xp/xp-calculator.js";
 import { createTestNPC, createTestPC } from "../fixtures/actor-fixtures.js";
 import { createSkillData } from "../fixtures/item-fixtures.js";
 import { watchConsole } from "./helpers.js";
@@ -9,7 +11,7 @@ const DEPRECATION = /Deprecated since Version|Backwards-compatible support will 
 
 /**
  * Batch `l5r4-enhanced.deprecations`: runs the common paths (document creation, every sheet, a skill roll, a
- * stance change, an item chat card) with compatibility warnings scoped to this system's files, and fails
+ * stance change, a family Trait bonus read by the bonus and XP code, an item chat card) with compatibility warnings scoped to this system's files, and fails
  * listing each distinct deprecated API it reached; that list is a checklist for Stages 2-6. Deprecated calls on
  * other paths (for example AppV1 `Dialog.confirm`) are not reached here. A warning core logs once per session and
  * already logged at load is not repeated here, so check the load-time console too.
@@ -89,6 +91,28 @@ export function registerDeprecationsBatch(quench) {
           created.push(actor);
           await actor.toggleStatusEffect("attackStance", { active: true });
           await actor.toggleStatusEffect("attackStance", { active: false });
+        });
+
+        it("applies a family Trait bonus and reads it back", async () => {
+          const actor = await createTestPC({ name: "Deprecations Family" });
+          created.push(actor);
+          const [family] = await actor.createEmbeddedDocuments("Item", [
+            {
+              name: "Deprecations Family Item",
+              type: "family",
+              effects: [
+                {
+                  name: "Family bonus",
+                  transfer: true,
+                  system: { changes: [{ key: "system.traits.str", type: "add", value: 1 }] }
+                }
+              ]
+            }
+          ]);
+          await actor.setFlag(SYS_ID, "familyItemUuid", family.uuid);
+          FamilyBonusService.getBonusMap(actor);
+          await buildXpHistory(actor);
+          await actor.update({ "system.traits.str": 3 });
         });
 
         it("posts an item chat card", async () => {

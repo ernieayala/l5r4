@@ -56,8 +56,8 @@ import { spendVoidPoint } from "../resources/void-manager.js";
  *
  * Damage Calculation Process:
  * 1. Base damage: Weapon DR + Strength (diceRoll/diceKeep) provided by caller
- *    - Melee weapons: Strength already added during item.prepareDerivedData
- *    - Bows: Bow Strength (or actor Strength if lower) already added during item.prepareDerivedData
+ *    - Melee weapons: Strength already added by prepareWeaponDamage (item/preparation/derived-data.js)
+ *    - Bows: Bow Strength (or actor Strength if lower) already added by prepareWeaponDamage
  * 2. User modifiers: Optional dialog for additional roll/keep/flat bonuses
  * 3. Attack raises: Converted to rolled dice (+1k0 per raise, Increased Damage maneuver)
  * 4. Stance bonuses: Applied if present in effect flags (via stanceRollBonus/stanceKeepBonus)

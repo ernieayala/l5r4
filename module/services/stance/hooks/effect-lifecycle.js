@@ -130,7 +130,7 @@ function refreshActorDisplay(actor) {
 /**
  * Clears persisted flag data for all stances in the given effect.
  *
- * Some stances (particularly Full Defense) store roll results or state data in
+ * Some stances (Full Defense among them) store roll results or state data in
  * actor flags. When these stances are removed or disabled, the associated flags
  * must be cleared to prevent stale data from affecting future calculations.
  *
@@ -160,7 +160,7 @@ function clearStanceFlagsFromEffect(actor, effectStances) {
  *
  * Template Hydration:
  * When stance effects are created programmatically (e.g., via token status icons),
- * they may lack proper name, icon, and flag data. This hook detects such cases and
+ * they may lack proper name, img, and flag data. This hook detects such cases and
  * applies the appropriate stance template to ensure consistent effect data.
  *
  * Conflict Resolution:
@@ -169,8 +169,8 @@ function clearStanceFlagsFromEffect(actor, effectStances) {
  *
  * Foundry Lifecycle:
  * preCreate hooks fire before the document is saved to the database. Changes made
- * via effect.updateSource() modify the creation data directly, avoiding unnecessary
- * update operations. The hook is async and awaits conflict removal to ensure
+ * via effect.updateSource() modify the creation data in place, so no separate update
+ * operation runs. The hook is async and awaits conflict removal to ensure
  * old stances are deleted before the new stance becomes active.
  *
  * @param {ActiveEffect} effect - The Active Effect being created
@@ -204,14 +204,14 @@ export async function onPreCreateActiveEffect(effect, _data, _options, _userId) 
         // to avoid overwriting existing Active Effect changes (e.g., trait modifications)
         const updateData = {
           name: templateData.name,
-          icon: templateData.icon,
+          img: templateData.img,
           flags: templateData.flags || {}
         };
 
         // Only update changes array if template provides changes
         // Otherwise preserve any existing changes on the effect
-        if (templateData.changes !== undefined) {
-          updateData.changes = templateData.changes;
+        if (templateData.system?.changes !== undefined) {
+          updateData.system = { changes: templateData.system.changes };
         }
 
         effect.updateSource(updateData);

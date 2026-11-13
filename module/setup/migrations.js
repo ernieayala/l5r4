@@ -57,6 +57,7 @@ import { applySchemaMapToDocs } from "./migrations/schema/schema-apply.js";
 import { migrateLegacyNpcWounds } from "./migrations/actors/npc-wounds.js";
 import { migrateActorEmbeddedItems } from "./migrations/actors/embedded-items.js";
 import { cleanupLegacyFields } from "./migrations/actors/cleanup.js";
+import { migrateEffectFreeTraitBase } from "./migrations/actors/xp-free-trait-base.js";
 
 // Item migrations
 import { migrateBowsToWeapons } from "./migrations/items/bow-to-weapon.js";
@@ -96,9 +97,10 @@ import {
  * 8. Data normalization (world items)
  * 9. Legacy field cleanup (world actors)
  * 10. Embedded item migrations (all world actors)
- * 11. Mark documents as migrated (world actors/items)
- * 12. Compendium migrations (unlocked packs only) - includes icon migration
- * 13. Icon path migrations (world actors + final compendium pass)
+ * 11. Free Trait rank flags set for an Active Effect bonus (world actors)
+ * 12. Mark documents as migrated (world actors/items)
+ * 13. Compendium migrations (unlocked packs only) - includes icon migration
+ * 14. Icon path migrations (world actors + final compendium pass)
  *
  * Foundry VTT Integration:
  * - Called from system ready hook when version mismatch detected
@@ -145,6 +147,9 @@ export async function runMigrations(fromVersion, toVersion) {
   for (const actor of unmigratedActors) {
     await migrateActorEmbeddedItems(actor, "actor");
   }
+
+  // After the embedded items, because the Trait bonus is read from the actor's Family and School items
+  await migrateEffectFreeTraitBase(unmigratedActors, "world-free-trait-base");
 
   // Mark all migrated documents with current version to prevent re-migration
   for (const doc of [...unmigratedActors, ...unmigratedItems]) {
@@ -193,6 +198,7 @@ export async function runMigrations(fromVersion, toVersion) {
         for (const actor of unmigratedDocs) {
           await migrateActorEmbeddedItems(actor, `compendium-actor:${pack.collection}`);
         }
+        await migrateEffectFreeTraitBase(unmigratedDocs, `pack-free-trait-base:${pack.collection}`);
       }
 
       // Mark compendium documents as migrated

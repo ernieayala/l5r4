@@ -22,6 +22,7 @@
 import { toInt } from "../../../utils/type-coercion.js";
 import { logError } from "../../../utils/error-logging.js";
 import { getEffectiveTrait, resolveWeaponSkillTrait } from "../../../utils/mechanics.js";
+import { prepareWeaponDamage } from "../../item/preparation/derived-data.js";
 
 /**
  * Enriches all actor-owned items with calculated formulas and derived values.
@@ -281,6 +282,9 @@ function enrichWeaponFormulas(actor, weapon) {
   } else {
     weapon.attackFormulaWithStance = weapon.attackFormula;
   }
+
+  // Recompute damage now that the owner's Active Effects apply: item preparation ran before them (issue #29)
+  prepareWeaponDamage(weapon);
 
   // Get damage values (prefer derived values if available)
   const damageRoll = toInt(weapon.system?.derivedDamageRoll ?? weapon.system?.damageRoll) || 0;

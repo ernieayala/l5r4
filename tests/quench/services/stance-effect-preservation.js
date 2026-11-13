@@ -64,15 +64,17 @@ export function registerStanceEffectPreservationTests(quench) {
           // (simulating what might happen via token status icon or programmatic creation)
           const effectData = {
             name: "Full Attack Stance", // Valid name required by Foundry v13
-            icon: `systems/${SYS_ID}/assets/icons/full-attack-stance.webp`,
+            img: `systems/${SYS_ID}/assets/icons/full-attack-stance.webp`,
             statuses: ["fullAttackStance"],
-            changes: [
-              {
-                key: "system.traits.ref",
-                mode: 2, // ADD
-                value: 2
-              }
-            ]
+            system: {
+              changes: [
+                {
+                  key: "system.traits.ref",
+                  type: "add",
+                  value: 2
+                }
+              ]
+            }
           };
 
           // ACT - Create the effect
@@ -84,18 +86,18 @@ export function registerStanceEffectPreservationTests(quench) {
 
           assert.exists(effect, "Stance effect created");
           assert.equal(effect.name, "Full Attack Stance", "Effect name correct");
-          assert.isNotEmpty(effect.icon, "Effect icon set");
+          assert.isNotEmpty(effect.img, "Effect img set");
 
           // CRITICAL: Changes array should still exist and contain the trait modification
           // The bug would have overwritten this with an empty array
           assert.equal(
-            effect.changes.length,
+            effect.system.changes.length,
             1,
             "Changes array preserved (bug would destroy this)"
           );
-          assert.equal(effect.changes[0].key, "system.traits.ref", "Change key preserved");
-          assert.equal(effect.changes[0].mode, 2, "Change mode preserved");
-          assert.equal(effect.changes[0].value, 2, "Change value preserved");
+          assert.equal(effect.system.changes[0].key, "system.traits.ref", "Change key preserved");
+          assert.equal(effect.system.changes[0].type, "add", "Change type preserved");
+          assert.equal(effect.system.changes[0].value, 2, "Change value preserved");
 
           // That's it - we've verified the bug fix works
           // We don't need to verify Foundry applies the changes correctly
@@ -105,7 +107,7 @@ export function registerStanceEffectPreservationTests(quench) {
           // ARRANGE - Create stance effect without any changes
           const effectData = {
             name: "Defense Stance", // Valid name required by Foundry v13
-            icon: `systems/${SYS_ID}/assets/icons/defence-stance.webp`,
+            img: `systems/${SYS_ID}/assets/icons/defence-stance.webp`,
             statuses: ["defenseStance"]
             // No changes array
           };
@@ -122,7 +124,7 @@ export function registerStanceEffectPreservationTests(quench) {
           // Changes should remain empty since we didn't provide any
           // The fix ensures we don't add an empty array if template doesn't define changes
           assert.isTrue(
-            !effect.changes || effect.changes.length === 0,
+            !effect.system.changes || effect.system.changes.length === 0,
             "No changes array added unnecessarily"
           );
         });
@@ -146,7 +148,7 @@ export function registerStanceEffectPreservationTests(quench) {
           await actor.createEmbeddedDocuments("ActiveEffect", [
             {
               name: "Full Attack Stance",
-              icon: `systems/${SYS_ID}/assets/icons/full-attack-stance.webp`,
+              img: `systems/${SYS_ID}/assets/icons/full-attack-stance.webp`,
               statuses: ["fullAttackStance"],
               flags: {
                 [SYS_ID]: {
@@ -178,7 +180,7 @@ export function registerStanceEffectPreservationTests(quench) {
           await actor.createEmbeddedDocuments("ActiveEffect", [
             {
               name: "Defense Stance",
-              icon: `systems/${SYS_ID}/assets/icons/defence-stance.webp`,
+              img: `systems/${SYS_ID}/assets/icons/defence-stance.webp`,
               statuses: ["defenseStance"],
               flags: {
                 [SYS_ID]: {
@@ -210,7 +212,7 @@ export function registerStanceEffectPreservationTests(quench) {
           await actor.createEmbeddedDocuments("ActiveEffect", [
             {
               name: "Full Defense Stance",
-              icon: `systems/${SYS_ID}/assets/icons/full-defense-stance.webp`,
+              img: `systems/${SYS_ID}/assets/icons/full-defense-stance.webp`,
               statuses: ["fullDefenseStance"],
               flags: {
                 [SYS_ID]: {
@@ -246,25 +248,27 @@ export function registerStanceEffectPreservationTests(quench) {
           // Create effect with multiple trait modifications
           const effectData = {
             name: "Attack Stance", // Valid name required by Foundry v13
-            icon: `systems/${SYS_ID}/assets/icons/attack-stance.webp`,
+            img: `systems/${SYS_ID}/assets/icons/attack-stance.webp`,
             statuses: ["attackStance"],
-            changes: [
-              {
-                key: "system.traits.ref",
-                mode: 2,
-                value: 1
-              },
-              {
-                key: "system.traits.agi",
-                mode: 2,
-                value: 1
-              },
-              {
-                key: "system.traits.str",
-                mode: 2,
-                value: 2
-              }
-            ]
+            system: {
+              changes: [
+                {
+                  key: "system.traits.ref",
+                  type: "add",
+                  value: 1
+                },
+                {
+                  key: "system.traits.agi",
+                  type: "add",
+                  value: 1
+                },
+                {
+                  key: "system.traits.str",
+                  type: "add",
+                  value: 2
+                }
+              ]
+            }
           };
 
           // ACT
@@ -273,10 +277,18 @@ export function registerStanceEffectPreservationTests(quench) {
           // ASSERT
           const effect = actor.effects.find(e => e.statuses.has("attackStance"));
 
-          assert.equal(effect.changes.length, 3, "All changes preserved (bug would destroy these)");
-          assert.equal(effect.changes[0].key, "system.traits.ref", "First change preserved");
-          assert.equal(effect.changes[1].key, "system.traits.agi", "Second change preserved");
-          assert.equal(effect.changes[2].key, "system.traits.str", "Third change preserved");
+          assert.equal(
+            effect.system.changes.length,
+            3,
+            "All changes preserved (bug would destroy these)"
+          );
+          assert.equal(effect.system.changes[0].key, "system.traits.ref", "First change preserved");
+          assert.equal(
+            effect.system.changes[1].key,
+            "system.traits.agi",
+            "Second change preserved"
+          );
+          assert.equal(effect.system.changes[2].key, "system.traits.str", "Third change preserved");
 
           // That's it - we've verified all changes are preserved
           // We don't need to verify Foundry applies them correctly

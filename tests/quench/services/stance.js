@@ -376,7 +376,7 @@ export function registerStanceTests(quench) {
           await actor.createEmbeddedDocuments("ActiveEffect", [
             {
               name: "Full Attack Stance",
-              icon: "icons/svg/sword.svg",
+              img: "icons/svg/sword.svg",
               statuses: ["fullAttackStance"]
             }
           ]);
@@ -400,7 +400,7 @@ export function registerStanceTests(quench) {
           await actor.createEmbeddedDocuments("ActiveEffect", [
             {
               name: "Defense Stance",
-              icon: "icons/svg/shield.svg",
+              img: "icons/svg/shield.svg",
               statuses: ["defenseStance"]
             }
           ]);
@@ -450,7 +450,7 @@ export function registerStanceTests(quench) {
             await actor.createEmbeddedDocuments("ActiveEffect", [
               {
                 name: `${stance.name} Stance`,
-                icon: "icons/svg/combat.svg",
+                img: "icons/svg/combat.svg",
                 statuses: [stance.id]
               }
             ]);

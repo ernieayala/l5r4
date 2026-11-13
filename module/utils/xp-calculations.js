@@ -110,15 +110,19 @@ export function calculateEmphasisCost() {
  *
  * Deduplicates by document UUID/ID to prevent double-counting.
  *
+ * The two sources are summed apart because they reach the Trait differently: an effect adds on top of the
+ * stored rank, while the legacy fields are never applied, so the player stores the bonus rank themselves.
+ *
  * @param {Object} actor - Foundry actor document
  * @param {Function} effectMatcher - Predicate to match Active Effect changes
  * @param {Function} legacyMatcher - Predicate to match legacy bonus (traitKey, amount)
- * @returns {number} Total bonus
+ * @returns {{effects: number, legacy: number}} Bonus from transferred effects and from the legacy fields
  * @private
  */
 function getCreationBonusInternal(actor, effectMatcher, legacyMatcher) {
   try {
-    let sum = 0;
+    let effects = 0;
+    let legacy = 0;
     // Track processed documents to prevent duplicates
     const seen = new Set();
 
@@ -142,7 +146,7 @@ function getCreationBonusInternal(actor, effectMatcher, legacyMatcher) {
         if (eff?.transfer !== true) {
           continue;
         }
-        for (const ch of eff?.changes ?? []) {
+        for (const ch of eff?.system?.changes ?? []) {
           if (effectMatcher(ch)) {
             const v = toNumber(ch?.value, 0);
             if (Number.isFinite(v)) {
@@ -154,7 +158,7 @@ function getCreationBonusInternal(actor, effectMatcher, legacyMatcher) {
 
       // If Active Effects found, use those and skip legacy
       if (ae !== 0) {
-        sum += ae;
+        effects += ae;
         return;
       }
 
@@ -162,7 +166,7 @@ function getCreationBonusInternal(actor, effectMatcher, legacyMatcher) {
       const tKey = toString(doc?.system?.trait).toLowerCase();
       const amt = toNumber(doc?.system?.bonus, NaN);
       if (legacyMatcher(tKey, amt)) {
-        sum += amt;
+        legacy += amt;
       }
     };
 
@@ -185,11 +189,32 @@ function getCreationBonusInternal(actor, effectMatcher, legacyMatcher) {
       }
     }
 
-    return sum ?? 0;
+    return { effects, legacy };
   } catch {
     // Return 0 on any error
-    return 0;
+    return { effects: 0, legacy: 0 };
   }
+}
+
+/**
+ * Gets the creation bonus for a trait, split by where it comes from.
+ *
+ * @param {Object} actor - Foundry actor document
+ * @param {string} key - Trait key ("sta", "str", "ref", "agi", etc.)
+ * @returns {{effects: number, legacy: number}} Bonus from Family/School Active Effects, which add on top of the
+ *   stored rank, and from the legacy `trait`/`bonus` fields, which the player stores as a rank
+ *
+ * @example
+ * getCreationFreeBonusSources(actor, "str") // { effects: 1, legacy: 0 } (Family effect gives +1 Strength)
+ */
+export function getCreationFreeBonusSources(actor, key) {
+  return getCreationBonusInternal(
+    actor,
+    // Match Active Effect for this trait
+    ch => ch?.key === `system.traits.${key}` && ch?.type === "add",
+    // Match legacy bonus for this trait
+    (tKey, amt) => tKey === key && Number.isFinite(amt)
+  );
 }
 
 /**
@@ -206,13 +231,8 @@ function getCreationBonusInternal(actor, effectMatcher, legacyMatcher) {
  * getCreationFreeBonus(actor, "str") // 1 (if Family gives +1 Strength)
  */
 export function getCreationFreeBonus(actor, key) {
-  return getCreationBonusInternal(
-    actor,
-    // Match Active Effect for this trait
-    ch => ch?.key === `system.traits.${key}` && ch?.mode === CONST.ACTIVE_EFFECT_MODES.ADD,
-    // Match legacy bonus for this trait
-    (tKey, amt) => tKey === key && Number.isFinite(amt)
-  );
+  const { effects, legacy } = getCreationFreeBonusSources(actor, key);
+  return effects + legacy;
 }
 
 /**
@@ -228,13 +248,14 @@ export function getCreationFreeBonus(actor, key) {
  * getCreationFreeBonusVoid(actor) // 1 (if School gives +1 Void)
  */
 export function getCreationFreeBonusVoid(actor) {
-  return getCreationBonusInternal(
+  const { effects, legacy } = getCreationBonusInternal(
     actor,
     // Match Active Effect for Void (rank or value)
     ch =>
       (ch?.key === "system.rings.void.rank" || ch?.key === "system.rings.void.value") &&
-      ch?.mode === CONST.ACTIVE_EFFECT_MODES.ADD,
+      ch?.type === "add",
     // Match legacy bonus for Void
     (tKey, amt) => tKey === "void" && Number.isFinite(amt)
   );
+  return effects + legacy;
 }

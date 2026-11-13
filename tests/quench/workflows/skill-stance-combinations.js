@@ -78,7 +78,7 @@ export function registerSkillStanceCombinationTests(quench) {
           await actor.createEmbeddedDocuments("ActiveEffect", [
             {
               name: "Attack Stance",
-              icon: "icons/svg/sword.svg",
+              img: "icons/svg/sword.svg",
               statuses: ["attackStance"]
             }
           ]);
@@ -100,7 +100,7 @@ export function registerSkillStanceCombinationTests(quench) {
           await actor.createEmbeddedDocuments("ActiveEffect", [
             {
               name: "Attack Stance",
-              icon: "icons/svg/sword.svg",
+              img: "icons/svg/sword.svg",
               statuses: ["attackStance"]
             }
           ]);
@@ -149,7 +149,7 @@ export function registerSkillStanceCombinationTests(quench) {
           await actor.createEmbeddedDocuments("ActiveEffect", [
             {
               name: "Full Attack Stance",
-              icon: "icons/svg/sword.svg",
+              img: "icons/svg/sword.svg",
               statuses: ["fullAttackStance"],
               flags: {
                 [SYS_ID]: {
@@ -171,7 +171,7 @@ export function registerSkillStanceCombinationTests(quench) {
           await actor.createEmbeddedDocuments("ActiveEffect", [
             {
               name: "Full Attack Stance",
-              icon: "icons/svg/sword.svg",
+              img: "icons/svg/sword.svg",
               statuses: ["fullAttackStance"],
               flags: {
                 [SYS_ID]: {
@@ -209,7 +209,7 @@ export function registerSkillStanceCombinationTests(quench) {
           await actor.createEmbeddedDocuments("ActiveEffect", [
             {
               name: "Full Attack Stance",
-              icon: "icons/svg/sword.svg",
+              img: "icons/svg/sword.svg",
               statuses: ["fullAttackStance"],
               flags: {
                 [SYS_ID]: {
@@ -238,7 +238,7 @@ export function registerSkillStanceCombinationTests(quench) {
           await actor.createEmbeddedDocuments("ActiveEffect", [
             {
               name: "Full Attack Stance",
-              icon: "icons/svg/sword.svg",
+              img: "icons/svg/sword.svg",
               statuses: ["fullAttackStance"]
               // No flags.l5r4-enhanced.attackBonus
             }
@@ -286,7 +286,7 @@ export function registerSkillStanceCombinationTests(quench) {
           await actor.createEmbeddedDocuments("ActiveEffect", [
             {
               name: "Defense Stance",
-              icon: "icons/svg/shield.svg",
+              img: "icons/svg/shield.svg",
               statuses: ["defenseStance"]
             }
           ]);
@@ -302,7 +302,7 @@ export function registerSkillStanceCombinationTests(quench) {
           await actor.createEmbeddedDocuments("ActiveEffect", [
             {
               name: "Defense Stance",
-              icon: "icons/svg/shield.svg",
+              img: "icons/svg/shield.svg",
               statuses: ["defenseStance"]
             }
           ]);
@@ -323,7 +323,7 @@ export function registerSkillStanceCombinationTests(quench) {
           await actor.createEmbeddedDocuments("ActiveEffect", [
             {
               name: "Defense Stance",
-              icon: "icons/svg/shield.svg",
+              img: "icons/svg/shield.svg",
               statuses: ["defenseStance"]
             }
           ]);
@@ -343,7 +343,7 @@ export function registerSkillStanceCombinationTests(quench) {
           await actor.createEmbeddedDocuments("ActiveEffect", [
             {
               name: "Defense Stance",
-              icon: "icons/svg/shield.svg",
+              img: "icons/svg/shield.svg",
               statuses: ["defenseStance"]
             }
           ]);
@@ -397,7 +397,7 @@ export function registerSkillStanceCombinationTests(quench) {
           await actor.createEmbeddedDocuments("ActiveEffect", [
             {
               name: "Full Defense Stance",
-              icon: "icons/svg/shield.svg",
+              img: "icons/svg/shield.svg",
               statuses: ["fullDefenseStance"]
             }
           ]);
@@ -413,7 +413,7 @@ export function registerSkillStanceCombinationTests(quench) {
           await actor.createEmbeddedDocuments("ActiveEffect", [
             {
               name: "Full Defense Stance",
-              icon: "icons/svg/shield.svg",
+              img: "icons/svg/shield.svg",
               statuses: ["fullDefenseStance"]
             }
           ]);
@@ -439,7 +439,7 @@ export function registerSkillStanceCombinationTests(quench) {
           await actor.createEmbeddedDocuments("ActiveEffect", [
             {
               name: "Full Defense Stance",
-              icon: "icons/svg/shield.svg",
+              img: "icons/svg/shield.svg",
               statuses: ["fullDefenseStance"]
             }
           ]);
@@ -492,7 +492,7 @@ export function registerSkillStanceCombinationTests(quench) {
           await actor.createEmbeddedDocuments("ActiveEffect", [
             {
               name: "Center Stance",
-              icon: "icons/svg/circle.svg",
+              img: "icons/svg/circle.svg",
               statuses: ["centerStance"]
             }
           ]);
@@ -545,7 +545,7 @@ export function registerSkillStanceCombinationTests(quench) {
           await actor.createEmbeddedDocuments("ActiveEffect", [
             {
               name: "Center Stance",
-              icon: "icons/svg/circle.svg",
+              img: "icons/svg/circle.svg",
               statuses: ["centerStance"]
             }
           ]);
@@ -589,7 +589,7 @@ export function registerSkillStanceCombinationTests(quench) {
           await actor.createEmbeddedDocuments("ActiveEffect", [
             {
               name: "Full Attack Stance",
-              icon: "icons/svg/sword.svg",
+              img: "icons/svg/sword.svg",
               statuses: ["fullAttackStance"],
               flags: {
                 [SYS_ID]: {
@@ -613,7 +613,7 @@ export function registerSkillStanceCombinationTests(quench) {
           await actor.createEmbeddedDocuments("ActiveEffect", [
             {
               name: "Defense Stance",
-              icon: "icons/svg/shield.svg",
+              img: "icons/svg/shield.svg",
               statuses: ["defenseStance"]
             }
           ]);
@@ -628,7 +628,7 @@ export function registerSkillStanceCombinationTests(quench) {
           await actor.createEmbeddedDocuments("ActiveEffect", [
             {
               name: "Full Attack Stance",
-              icon: "icons/svg/sword.svg",
+              img: "icons/svg/sword.svg",
               statuses: ["fullAttackStance"],
               flags: {
                 [SYS_ID]: {
@@ -689,7 +689,7 @@ export function registerSkillStanceCombinationTests(quench) {
           await actor.createEmbeddedDocuments("ActiveEffect", [
             {
               name: "Full Attack Stance",
-              icon: "icons/svg/sword.svg",
+              img: "icons/svg/sword.svg",
               statuses: ["fullAttackStance"],
               flags: {
                 [SYS_ID]: {
@@ -731,7 +731,7 @@ export function registerSkillStanceCombinationTests(quench) {
           await minActor.createEmbeddedDocuments("ActiveEffect", [
             {
               name: "Full Attack Stance",
-              icon: "icons/svg/sword.svg",
+              img: "icons/svg/sword.svg",
               statuses: ["fullAttackStance"],
               flags: {
                 [SYS_ID]: {

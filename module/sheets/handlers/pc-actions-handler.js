@@ -106,7 +106,7 @@ export class PcActionsHandler {
     event?.preventDefault?.();
     const checked = element.checked;
 
-    // Deactivation path: just clear flags
+    // Deactivation path: clear the flags only
     if (!checked) {
       await context.actor.update({
         "system.armorTn.useVoid": false,
@@ -170,9 +170,10 @@ export class PcActionsHandler {
       return;
     }
 
-    // Spend void and activate (useVoid stays true until round end)
+    // Spend void and activate (useVoid stays true until round end). The write starts from the stored value,
+    // so an Active Effect on Void Points is never written into storage (B6).
     await context.actor.update({
-      "system.rings.void.value": voidCurrent - 1,
+      "system.rings.void.value": context.actor._source.system.rings.void.value - 1,
       "system.armorTn.useVoid": true,
       "system.armorTn.voidRound": combat.round
     });

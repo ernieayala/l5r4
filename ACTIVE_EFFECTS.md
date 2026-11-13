@@ -9,9 +9,10 @@ Active Effects let you modify character stats dynamically. This system uses them
 When you add an item with Active Effects to a character, those effects automatically transfer to the character and modify their stats. Want a Family to grant +1 Strength? Create an Active Effect on the Family item that adds 1 to `system.traits.str`.
 
 **Key Points:**
-- Effects live on items, not directly on actors
+- Effects live on items, which pass them to the character that owns them
 - Effects transfer when items are added to characters
-- Effects can add, subtract, multiply, override, or upgrade values
+- Effects change the character only. A change aimed at an item's own fields (a skill's rank, a weapon's damage) does nothing
+- Effects can add, subtract, multiply, override, upgrade, or downgrade values
 - Use dot notation for nested properties (e.g., `system.traits.str`)
 
 ---
@@ -25,22 +26,35 @@ When you add an item with Active Effects to a character, those effects automatic
 
 **Each effect can have multiple changes.** Each change needs:
 - **Attribute Key:** The stat you're modifying (see below for all keys)
-- **Change Mode:** How to apply the change (Add, Multiply, Override, etc.)
+- **Change Type:** How to apply the change (Add, Multiply, Override, etc.)
 - **Effect Value:** The number or value to apply
+- **Phase:** When the change applies (leave it on **Initial**, see below)
 
 ---
 
-## Change Modes
+## Change Types
 
-| Mode | What It Does | Example |
-|------|--------------|---------|
-| **Add** | Adds to existing value | +1 Strength |
-| **Multiply** | Multiplies existing value | ×2 damage |
-| **Override** | Replaces value entirely | Set Armor TN to 25 |
-| **Upgrade** | Uses higher of old/new value | Take best of two bonuses |
-| **Downgrade** | Uses lower of old/new value | Take worst of two penalties |
+| Type | Stored as | What It Does | Example |
+|------|-----------|--------------|---------|
+| **Add** | `add` | Adds to existing value | +1 Strength |
+| **Subtract** | `subtract` | Subtracts from existing value | -1 Reflexes |
+| **Multiply** | `multiply` | Multiplies existing value | ×3 wound multiplier |
+| **Override** | `override` | Replaces the value | Set NPC Armor TN to 25 |
+| **Upgrade** | `upgrade` | Uses higher of old/new value | Take best of two bonuses |
+| **Downgrade** | `downgrade` | Uses lower of old/new value | Take worst of two penalties |
 
-**Most common:** Add mode. Use it for trait bonuses, skill bonuses, initiative modifiers, etc.
+**Most common:** Add. Use it for trait bonuses, initiative modifiers, Armor TN modifiers, etc.
+
+---
+
+## Phases
+
+Each change applies in a phase: **Initial** or **Final**. New changes start on Initial.
+
+- **Initial** applies before the system calculates Rings, Wound levels, Armor TN, Initiative, Insight, and weapon damage. A Trait change must be Initial, or nothing calculated from the Trait sees it.
+- **Final** applies after those calculations. A Final change to a Trait shows on the sheet but never reaches a Ring, Armor TN, or damage roll.
+
+Leave every change on Initial unless you mean to change a value after the system has finished with it.
 
 ---
 
@@ -48,7 +62,7 @@ When you add an item with Active Effects to a character, those effects automatic
 
 ### Traits
 
-These are the eight core traits. All use Add mode for bonuses.
+These are the eight core traits. All use the Add type, Initial phase, for bonuses.
 
 | Attribute Key | Trait | Example Effect |
 |---------------|-------|----------------|
@@ -63,12 +77,15 @@ These are the eight core traits. All use Add mode for bonuses.
 
 **Example:** A Family grants +1 Strength
 - Attribute Key: `system.traits.str`
-- Change Mode: Add
+- Change Type: Add
 - Effect Value: `1`
+- Phase: Initial
+
+The +1 reaches everything calculated from Strength: the Water Ring and melee and bow damage.
 
 ### Rings
 
-**Void Ring only.** The elemental rings (Air, Earth, Fire, Water) auto-calculate from trait pairs and can't be modified directly.
+**Void Ring only.** The elemental rings (Air, Earth, Fire, Water) are calculated from their Traits; change a Trait to change its Ring.
 
 | Attribute Key | Ring | Example Effect |
 |---------------|------|----------------|
@@ -107,7 +124,7 @@ These are the eight core traits. All use Add mode for bonuses.
 
 **Example:** Advantage grants +5 Armor TN
 - Attribute Key: `system.armorTn.mod`
-- Change Mode: Add
+- Change Type: Add
 - Effect Value: `5`
 
 ### Wounds & Health
@@ -124,18 +141,16 @@ These are the eight core traits. All use Add mode for bonuses.
 
 **Example:** Advantage gives tougher wound levels
 - Attribute Key: `system.woundsMultiplier`
-- Change Mode: Override
+- Change Type: Override
 - Effect Value: `3`
 
-### Experience & Advancement
+### Insight
 
 | Attribute Key | What It Affects | Example Effect |
 |---------------|-----------------|----------------|
-| `system.xp` | Total XP | +50 bonus XP |
-| `system.insight.points` | Insight Points | +10 from technique |
-| `system.insight.rank` | Insight Rank | +1 from advantage |
+| `system.insight.rank` | Insight Rank, when the sheet's automatic Insight Rank is off | +1 from advantage |
 
-**Warning:** Modifying XP or Insight manually can break XP Manager calculations. Only use if you know what you're doing.
+Insight points and, with automatic Insight Rank on, the Insight Rank are calculated from Rings and Skills after effects apply, so an effect on them changes nothing. XP comes from the XP Manager, not from an effect.
 
 ### Spell Slots
 
@@ -163,69 +178,20 @@ Optional spell slot system for tracking daily magic. One pool per element.
 
 ---
 
-## Item Attribute Keys
+## Skill Bonuses
 
-These modify specific items on the character. Useful for School bonuses to skills or weapon enhancements.
-
-### Skills
-
-Target embedded skill items with these keys. You'll need to identify the specific skill by name or use conditional effects.
+Effects change the character, never an item on it, so there is no key for a skill item's rank or bonus. Give a skill a roll bonus through the character's bonus keys instead, using the skill's name in lower case:
 
 | Attribute Key | What It Affects | Example Effect |
 |---------------|-----------------|----------------|
-| `system.rank` | Skill Rank | +1 rank from technique |
-| `system.rollBonus` | Roll Dice Bonus | +1k0 from school |
-| `system.keepBonus` | Keep Dice Bonus | +0k1 from advantage |
-| `system.totalBonus` | Flat Total Bonus | +2 from kata |
-| `system.insightBonus` | Insight Contribution | +5 insight from mastery |
+| `system.bonuses.skill.kenjutsu.roll` | Rolled dice on Kenjutsu rolls | +1k0 from school |
+| `system.bonuses.skill.kenjutsu.keep` | Kept dice on Kenjutsu rolls | +0k1 from advantage |
+| `system.bonuses.skill.kenjutsu.total` | Flat bonus on Kenjutsu rolls | +2 from kata |
+| `system.bonuses.ring.fire.roll` | Rolled dice on Fire Ring rolls and Fire spell casting | +1k0 from technique |
 
-**Example:** School grants +1k0 to Kenjutsu
-- Target: Embedded Kenjutsu skill item
-- Attribute Key: `system.rollBonus`
-- Change Mode: Add
-- Effect Value: `1`
+`keep` and `total` work the same way for Rings.
 
-**Note:** These affect skills already on the character. They won't create new skills.
-
-### Weapons
-
-| Attribute Key | What It Affects | Example Effect |
-|---------------|-----------------|----------------|
-| `system.damageRoll` | Damage Roll Dice | +1 to damage roll |
-| `system.damageKeep` | Damage Keep Dice | +1 to damage keep |
-| `system.explodesOn` | Explosion Threshold | 9+ instead of 10 |
-
-### Armor
-
-| Attribute Key | What It Affects | Example Effect |
-|---------------|-----------------|----------------|
-| `system.bonus` | Armor TN Bonus | +1 to armor bonus |
-| `system.reduction` | Damage Reduction | +1 to reduction |
-
-### Spells
-
-| Attribute Key | What It Affects | Example Effect |
-|---------------|-----------------|----------------|
-| `system.mastery` | Mastery Level | +1 effective mastery |
-
-### Advantages/Disadvantages
-
-| Attribute Key | What It Affects | Example Effect |
-|---------------|-----------------|----------------|
-| `system.cost` | XP Cost | Modify cost value |
-| `system.freeRaises` | Free Raises Granted | +1 free raise |
-
-**Note:** Both advantages and disadvantages use positive cost values. The system handles granting XP for disadvantages automatically.
-
-### All Item Types
-
-Every item type has access to:
-
-| Attribute Key | What It Affects | Example Effect |
-|---------------|-----------------|----------------|
-| `system.freeRaises` | Free Raises | +1 free raise for related rolls |
-
-**Free Raises** reduce TN by 5 each without counting toward Void Ring maximum. Set this field directly on items (not via Active Effects).
+**Free Raises** are a field on the item (Modifiers tab), not an effect key. A Free Raise counts as a Raise without adding 5 to the TN and does not count toward the Void Ring limit on Raises (Core Rulebook p.79).
 
 ---
 
@@ -241,25 +207,24 @@ Every item type has access to:
 3. Name: "Family Trait Bonus"
 4. Add change:
    - Attribute Key: `system.traits.str` (or whatever trait)
-   - Change Mode: Add
+   - Change Type: Add
    - Effect Value: `1`
+
+The bonus is free, and every rank you buy afterward costs XP at the Trait's new rank with the bonus included
+(Core Rulebook p.103): with a Family +1, raising Strength from 3 to 4 costs 16 XP.
 
 ### School Skill Bonus
 
 **Goal:** School grants +1k0 to all school skills
 
-**Setup:**
-You'll need to create separate effects for each school skill, or use a macro/module to apply conditional effects.
-
-**Manual method:**
+**Setup:** one change per school skill.
 1. Open School item
 2. Active Effects tab → Create Effect
-3. Name: "Kenjutsu School Bonus"
-4. Add change:
-   - Attribute Key: (target embedded Kenjutsu skill)
-   - Change Mode: Add
+3. Name: "School Skill Bonus"
+4. Add a change for each skill:
+   - Attribute Key: `system.bonuses.skill.kenjutsu.roll` (the skill's name in lower case)
+   - Change Type: Add
    - Effect Value: `1`
-5. Repeat for each school skill
 
 ### Armor TN Modifier
 
@@ -271,7 +236,7 @@ You'll need to create separate effects for each school skill, or use a macro/mod
 3. Name: "Armor TN Bonus"
 4. Add change:
    - Attribute Key: `system.armorTn.mod`
-   - Change Mode: Add
+   - Change Type: Add
    - Effect Value: `5`
 
 ### Initiative Bonus
@@ -284,7 +249,7 @@ You'll need to create separate effects for each school skill, or use a macro/mod
 3. Name: "Initiative Bonus"
 4. Add change:
    - Attribute Key: `system.initiative.rollMod`
-   - Change Mode: Add
+   - Change Type: Add
    - Effect Value: `1`
 
 ### Void Point Bonus
@@ -297,7 +262,7 @@ You'll need to create separate effects for each school skill, or use a macro/mod
 3. Name: "Void Bonus"
 4. Add change:
    - Attribute Key: `system.rings.void.rank`
-   - Change Mode: Add
+   - Change Type: Add
    - Effect Value: `1`
 
 ### Wound Level Enhancement
@@ -310,7 +275,7 @@ You'll need to create separate effects for each school skill, or use a macro/mod
 3. Name: "Tough"
 4. Add change:
    - Attribute Key: `system.woundsMultiplier`
-   - Change Mode: Override
+   - Change Type: Override
    - Effect Value: `3`
 
 ### Free Raises
@@ -339,11 +304,11 @@ A single Active Effect can have multiple changes. This is useful for complex bon
 3. Name: "Doji Technique"
 4. Add first change:
    - Attribute Key: `system.traits.ref`
-   - Change Mode: Add
+   - Change Type: Add
    - Effect Value: `1`
 5. Add second change:
    - Attribute Key: `system.armorTn.mod`
-   - Change Mode: Add
+   - Change Type: Add
    - Effect Value: `5`
 
 Both changes apply when the technique is on the character.
@@ -366,10 +331,10 @@ Foundry's Active Effects can be conditional based on various factors. This syste
 
 ## Effect Duration & Timing
 
-**Duration:**
-- **Unlimited** (default): Effect lasts as long as item is on character
-- **Turns/Rounds:** Set in combat for temporary effects
-- **Seconds:** Real-time duration
+**Duration:** a value and a unit (seconds, rounds, turns, or a game-time unit), set on the effect's Duration tab.
+- **No value** (default): Effect lasts as long as item is on character
+- **Rounds/Turns:** Set in combat for temporary effects
+- **Seconds and longer units:** Game-time duration
 
 **Timing:**
 Most effects are passive and always active. For temporary combat effects (like spell buffs or debuffs), set a duration in rounds.
@@ -399,36 +364,36 @@ Most effects are passive and always active. For temporary combat effects (like s
 1. Is the effect enabled? (toggle on effect)
 2. Is the effect set to transfer? (should be on for item effects)
 3. Is the attribute key correct? (check spelling and dot notation)
-4. Is the change mode appropriate? (usually Add)
+4. Is the change type right? (usually Add) Is a Trait change on the Initial phase?
 5. Is the item equipped/owned by the character?
 
 **Common mistakes:**
 - Wrong attribute key (typos, wrong path)
 - Effect not set to transfer to actor
 - Effect disabled
-- Wrong change mode (Override when you meant Add)
+- Wrong change type (Override when you meant Add)
 
 ### Effect Stacking
 
-Multiple effects to the same attribute will stack if they all use Add mode. If you want effects to NOT stack, use Upgrade or Downgrade modes, or use different attribute keys.
+Multiple effects to the same attribute will stack if they all use the Add type. If you want effects to NOT stack, use the Upgrade or Downgrade types, or use different attribute keys.
 
-**Example:** Two advantages both give +5 Armor TN using Add mode = +10 total.
+**Example:** Two advantages both give +5 Armor TN using Add = +10 total.
 
 ### Derived Values
 
-Some values are calculated and can't be modified directly:
+Some values are calculated, and an effect on them is overwritten:
 - Elemental rings (calculated from trait pairs)
 - Armor TN base (calculated from Reflexes × 5 + 5 + armor + modifiers)
 - Initiative base (calculated from Insight Rank + Reflexes)
 
 **For these, modify the components or use the `.mod` fields:**
-- Can't modify Air Ring directly → modify Reflexes or Awareness instead
+- Can't change the Air Ring itself → change Reflexes or Awareness instead
 - Can't modify base Armor TN → use `system.armorTn.mod` to add bonus
 - Can't modify base Initiative → use `system.initiative.rollMod` or `.totalMod`
 
-### XP Manager Conflicts
+### XP and Insight
 
-Active Effects that modify XP, Insight Points, or Insight Rank can confuse the XP Manager. The manager expects to calculate these from character state. If you must modify them via effects, click "Recalculate Purchase XP" in XP Manager after changes.
+An effect cannot change XP or Insight points: both are calculated from the character after effects apply. Insight Rank takes an effect only with the sheet's automatic Insight Rank off.
 
 ---
 
@@ -443,13 +408,15 @@ const token = canvas.tokens.controlled[0];
 if (!token) return ui.notifications.warn("Select a token");
 
 const effectData = {
-  label: "Blessed",
-  icon: "icons/magic/holy/angel-winged-humanoid-blue.webp",
-  duration: { rounds: 5 },
-  changes: [
-    { key: "system.armorTn.mod", mode: 2, value: 5 },
-    { key: "system.initiative.totalMod", mode: 2, value: 3 }
-  ]
+  name: "Blessed",
+  img: "icons/magic/holy/angel-winged-humanoid-blue.webp",
+  duration: { value: 5, units: "rounds" },
+  system: {
+    changes: [
+      { key: "system.armorTn.mod", type: "add", value: 5 },
+      { key: "system.initiative.totalMod", type: "add", value: 3 }
+    ]
+  }
 };
 
 await token.actor.createEmbeddedDocuments("ActiveEffect", [effectData]);
@@ -513,11 +480,19 @@ system.woundsPenaltyMod
 system.suffered
 ```
 
-### Advancement
+### Insight
 ```
-system.xp
-system.insight.points
-system.insight.rank
+system.insight.rank        (automatic Insight Rank off)
+```
+
+### Skill and Ring Bonuses
+```
+system.bonuses.skill.<skill name>.roll
+system.bonuses.skill.<skill name>.keep
+system.bonuses.skill.<skill name>.total
+system.bonuses.ring.<ring>.roll
+system.bonuses.ring.<ring>.keep
+system.bonuses.ring.<ring>.total
 ```
 
 ### Spell Slots

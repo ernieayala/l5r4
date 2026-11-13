@@ -269,10 +269,10 @@ export async function spendVoidPoint(actor) {
       };
     }
 
-    // Step 5: Spend Void Point - decrement pool by 1
-    // Uses diff: true for optimized update (Foundry v13)
+    // Step 5: Spend Void Point - decrement pool by 1. Availability was checked on the prepared pool; the write
+    // starts from the stored value, so an Active Effect on Void Points is never written into storage (B6).
     await resolvedActor.update(
-      { "system.rings.void.value": validation.current - 1 },
+      { "system.rings.void.value": resolvedActor._source.system.rings.void.value - 1 },
       { diff: true }
     );
 

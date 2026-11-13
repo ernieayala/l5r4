@@ -119,7 +119,7 @@ export class PcAdjustmentHandler {
    * @param {Object} context - Sheet render context with actor reference
    * @param {Event} event - DOM event (not required for this adjustment)
    * @param {HTMLElement} element - Target element with dataset.path attribute
-   * @param {number} delta - Amount to adjust (+1 or -1 typically)
+   * @param {number} delta - Amount to adjust (e.g. +1 or -1)
    * @returns {Promise<void>}
    */
   static async adjustSpellSlot(context, event, element, delta) {
@@ -132,8 +132,9 @@ export class PcAdjustmentHandler {
         return;
       }
 
-      // Safe property access via Foundry utility
-      const current = Number(foundry.utils.getProperty(context.actor, path) ?? 0) || 0;
+      // The stored value, not the prepared one, so an Active Effect on spell slots is never written into
+      // storage (B6)
+      const current = foundry.utils.getProperty(context.actor._source, path);
 
       // Apply delta with bounds [0, 9] matching Ring rank maximum
       const next = clamp(current + (delta || 0), 0, 9);
@@ -176,7 +177,7 @@ export class PcAdjustmentHandler {
    * @param {Object} context - Sheet render context with actor reference
    * @param {Event} event - DOM event (requires shiftKey; ctrlKey changes step size)
    * @param {HTMLElement} element - Target element with dataset.key attribute
-   * @param {number} baseDelta - Base adjustment amount (typically ±1.0 or ±0.1)
+   * @param {number} baseDelta - Base adjustment amount (e.g. ±1.0 or ±0.1)
    * @returns {Promise<void>}
    */
   static async adjustRankPoints(context, event, element, baseDelta) {
@@ -191,8 +192,9 @@ export class PcAdjustmentHandler {
         return;
       }
 
-      // Read current rank/points from actor system data
-      const sys = context.actor.system ?? {};
+      // Read the stored rank/points, not the prepared ones, so an Active Effect on them is never written into
+      // storage (B6)
+      const sys = context.actor._source.system;
       const cur = {
         rank: Number(sys?.[key]?.rank ?? 0) || 0,
         points: Number(sys?.[key]?.points ?? 0) || 0
@@ -235,7 +237,7 @@ export class PcAdjustmentHandler {
    * State is stored per-user, per-actor, per-section in user flags. This allows
    * each user to have their own preferred collapsed/expanded sections for each actor.
    *
-   * **No Game Rules:** This is purely a UI convenience feature.
+   * **No Game Rules:** A UI convenience only.
    *
    * @param {Object} context - Sheet render context with actor reference
    * @param {Event} event - DOM click event

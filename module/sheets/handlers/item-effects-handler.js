@@ -85,10 +85,10 @@ export class ItemEffectsHandler {
    *
    * Creates an effect with these defaults:
    * - name: Localized "New" string
-   * - icon: Foundry's default aura.svg
+   * - img: Foundry's default aura.svg
    * - disabled: false (effect is active)
    * - transfer: true (effect applies to owning Actor when Item is owned)
-   * - changes: [] (empty attribute modifications array)
+   * - system.changes: [] (empty attribute modifications array)
    *
    * Automatically opens Foundry's ActiveEffectConfig sheet for immediate editing.
    * If creation fails, displays error notification and logs to console.
@@ -111,10 +111,10 @@ export class ItemEffectsHandler {
       const [eff] = await item.createEmbeddedDocuments("ActiveEffect", [
         {
           name: game.i18n.localize("l5r4.ui.common.new"),
-          icon: "icons/svg/aura.svg",
+          img: "icons/svg/aura.svg",
           disabled: false,
           transfer: true,
-          changes: []
+          system: { changes: [] }
         }
       ]);
 
