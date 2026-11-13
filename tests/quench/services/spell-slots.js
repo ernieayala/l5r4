@@ -98,11 +98,13 @@ export function registerSpellSlotsTests(quench) {
         });
 
         it("should handle null slot value gracefully", async () => {
-          // ARRANGE: Corrupt data - null Air slots
+          // ARRANGE: null is not stored; the field cleans it to its initial value
+          // (common/data/fields.mjs:239-243)
           await actor.update({ "system.spellSlots.air": null });
+          assert.equal(actor.system.spellSlots.air, 2, "null reset to the initial 2");
 
-          // ACT: Attempt to spend
-          const result = await spendElementalSlot(actor, "air");
+          // ACT: Attempt to spend from a null that bypassed the schema
+          const result = await spendElementalSlot({ system: { spellSlots: { air: null } } }, "air");
 
           // ASSERT: Fails gracefully without crash
           assert.isFalse(result.success, "Spending fails gracefully");
@@ -110,11 +112,12 @@ export function registerSpellSlotsTests(quench) {
         });
 
         it("should handle undefined slot structure gracefully", async () => {
-          // ARRANGE: Corrupt data - missing spellSlots structure
+          // ARRANGE: a null spellSlots is cleaned to the initial structure
           await actor.update({ "system.spellSlots": null });
+          assert.isObject(actor.system.spellSlots, "Structure kept");
 
-          // ACT: Attempt to validate
-          const validation = validateSpellSlot(actor, "earth", false);
+          // ACT: Validate an actor whose data has no spellSlots at all
+          const validation = validateSpellSlot({ system: {} }, "earth", false);
 
           // ASSERT: Fails gracefully without crash
           assert.isFalse(validation.valid, "Validation fails gracefully");
@@ -404,7 +407,7 @@ export function registerSpellSlotsTests(quench) {
           assert.equal(actor.system.spellSlots.fire, 98, "Slots decremented to 98");
         });
 
-        it("should handle very large slot counts", async () => {
+        it("should handle large slot counts", async () => {
           // ARRANGE: Set to 999
           await actor.update({ "system.spellSlots.water": 999 });
 
@@ -547,11 +550,17 @@ export function registerSpellSlotsTests(quench) {
         });
 
         it("should handle NaN slot value", async () => {
-          // ARRANGE: NaN value
+          // ARRANGE: the schema refuses NaN, so the stored value stays
+          const before = actor.system.spellSlots.air;
           await actor.update({ "system.spellSlots.air": NaN });
+          assert.equal(actor.system.spellSlots.air, before, "NaN not stored");
 
-          // ACT: Validate
-          const validation = validateSpellSlot(actor, "air", false);
+          // ACT: Validate a NaN that bypassed the schema
+          const validation = validateSpellSlot(
+            { system: { spellSlots: { air: NaN } } },
+            "air",
+            false
+          );
 
           // ASSERT: Fails validation
           assert.isFalse(validation.valid, "NaN fails validation");

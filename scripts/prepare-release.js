@@ -140,7 +140,6 @@ function validateProjectStructure() {
     "dist/l5r4-enhanced.js",
     "dist/l5r4-enhanced.css",
     "system.json",
-    "template.json",
     "README.md",
     "CHANGELOG.MD",
     "LICENSE"

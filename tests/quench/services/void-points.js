@@ -497,11 +497,13 @@ export function registerVoidPointsTests(quench) {
         });
 
         it("should handle NaN Void value", async () => {
-          // ARRANGE: NaN value
+          // ARRANGE: the schema refuses NaN, so the stored value stays
+          const before = actor.system.rings.void.value;
           await actor.update({ "system.rings.void.value": NaN });
+          assert.equal(actor.system.rings.void.value, before, "NaN not stored");
 
-          // ACT: Validate
-          const validation = validateVoidPoints(actor);
+          // ACT: Validate a NaN that bypassed the schema
+          const validation = validateVoidPoints({ system: { rings: { void: { value: NaN } } } });
 
           // ASSERT: Fails validation
           assert.isFalse(validation.valid, "NaN fails validation");

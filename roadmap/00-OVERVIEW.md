@@ -55,6 +55,7 @@ Reviewed 2026-11-12 (`gh issue list --state all`, `gh pr list --state all`). Eac
 | Item | What | Where it is handled |
 |------|------|---------------------|
 | #38 | NPC formula wound mode: `woundLevels` overwritten by manual thresholds | Stage 13 |
+| #40 | NPC long rest heals no Wounds: `wounds.healRate` computed for PCs only | Stage 13 |
 | #37 | A weapon's "Explodes on" value ignored on damage rolls | Stage 8 (dice rules), checked in Stage 13 |
 | #29 | Strength raised by an Active Effect misses weapon damage; extra effect points on Strength charged as XP | Stage 3 (Trait changes in the `"initial"` phase reach derived values), checked in Stage 13 |
 | #30 | NPC Initiative stays 2k2 | Stage 13 (Initiative row; code moves to Combat classes in Stage 5) |

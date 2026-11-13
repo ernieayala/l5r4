@@ -54,24 +54,25 @@
   ],
   "documentTypes": {
     "Actor": {
-      "pc": {},
-      "npc": {}
+      "pc": { "htmlFields": ["notes"] },
+      "npc": { "htmlFields": ["notes"] }
     },
     "Item": {
-      "advantage": {},
-      "armor": {},
-      "clan": {},
-      "commonItem": {},
-      "disadvantage": {},
-      "family": {},
-      "school": {},
-      "kata": {},
-      "kiho": {},
-      "skill": {},
-      "spell": {},
-      "tattoo": {},
-      "technique": {},
-      "weapon": {}
+      "advantage": { "htmlFields": ["description", "specialRules", "demands"] },
+      "armor": { "htmlFields": ["description", "specialRules"] },
+      "bow": { "htmlFields": ["description", "specialRules"] },
+      "clan": { "htmlFields": ["description", "specialRules"] },
+      "commonItem": { "htmlFields": ["description", "specialRules"] },
+      "disadvantage": { "htmlFields": ["description", "specialRules"] },
+      "family": { "htmlFields": ["description", "specialRules"] },
+      "school": { "htmlFields": ["description", "specialRules"] },
+      "kata": { "htmlFields": ["description", "specialRules"] },
+      "kiho": { "htmlFields": ["description", "specialRules"] },
+      "skill": { "htmlFields": ["description", "specialRules"] },
+      "spell": { "htmlFields": ["description", "specialRules"] },
+      "tattoo": { "htmlFields": ["description", "specialRules", "effect"] },
+      "technique": { "htmlFields": ["description", "specialRules"] },
+      "weapon": { "htmlFields": ["description", "specialRules"] }
     }
   },
   "grid": {

@@ -345,7 +345,8 @@ export function registerMultipleModifierCombinationTests(quench) {
                 fire: 3,
                 void: { rank: 3, value: 3 }
               },
-              schoolRank: 3,
+              // School Rank is the Insight Rank; manual mode holds it at 3
+              insight: { rank: 3, autoCalculate: false },
               spellSlots: { fire: 3 }
             }
           });
@@ -369,7 +370,7 @@ export function registerMultipleModifierCombinationTests(quench) {
         it("should combine affinity + void + wound penalty on spell", async () => {
           // ARRANGE
           const fireRing = actor.system.rings.fire; // 3
-          const schoolRank = actor.system.schoolRank; // 3
+          const schoolRank = actor.system.insight.rank; // 3
           const voidRoll = 1;
           const voidKeep = 1;
           const woundPenalty = actor.system.woundPenalty || 0;
@@ -571,7 +572,7 @@ export function registerMultipleModifierCombinationTests(quench) {
 
           // ACT - All modifiers stack
           const finalRolled = baseRolled + voidRoll + stanceRoll; // 12
-          const totalBonus = woundPenalty; // -5 applied separately
+          const totalBonus = woundPenalty; // -5, applied on its own
 
           // ASSERT
           assert.equal(finalRolled, 12, "Positive modifiers stack");
@@ -621,7 +622,7 @@ export function registerMultipleModifierCombinationTests(quench) {
           const formula = buildFormula(rolled, kept, totalBonus, { emphasis });
 
           // ASSERT
-          // Formula format: XdYr1kZx10+B, so check components separately
+          // Formula format: XdYr1kZx10+B, so check each component on its own
           assert.include(formula, "10d10", "Rolled dice correct");
           assert.include(formula, "k5", "Kept dice correct");
           assert.include(formula, "r1", "Emphasis present");

@@ -44,7 +44,7 @@ export function registerSkillAdvancementEdgeCaseTests(quench) {
               system: {
                 rank: 0,
                 trait: "agi",
-                isSchoolSkill: true
+                school: true
               }
             },
             { parent: actor }
@@ -61,7 +61,7 @@ export function registerSkillAdvancementEdgeCaseTests(quench) {
         it("should apply free rank to school skill", async () => {
           // ARRANGE - School skill at rank 0
           assert.equal(skill.system.rank, 0, "Skill starts at 0");
-          assert.isTrue(skill.system.isSchoolSkill, "Is school skill");
+          assert.isTrue(skill.system.school, "Is school skill");
 
           // ACT - Increase to rank 1 (should be free)
           await skill.update({ "system.rank": 1 });
@@ -98,7 +98,7 @@ export function registerSkillAdvancementEdgeCaseTests(quench) {
               system: {
                 rank: 0,
                 trait: "int",
-                isSchoolSkill: false
+                school: false
               }
             },
             { parent: actor }
@@ -118,15 +118,15 @@ export function registerSkillAdvancementEdgeCaseTests(quench) {
 
         it("should handle school skill flag toggle", async () => {
           // ARRANGE - Start as non-school skill
-          await skill.update({ "system.isSchoolSkill": false });
+          await skill.update({ "system.school": false });
           await skill.update({ "system.rank": 2 });
 
           // ACT - Toggle to school skill
-          await skill.update({ "system.isSchoolSkill": true });
+          await skill.update({ "system.school": true });
 
           // ASSERT - Should not corrupt data
           assert.equal(skill.system.rank, 2, "Rank preserved");
-          assert.isTrue(skill.system.isSchoolSkill, "Now school skill");
+          assert.isTrue(skill.system.school, "Now school skill");
 
           // XP history should remain intact
           const xpSpent = actor.getFlag(SYS_ID, "xpSpent");
@@ -153,7 +153,7 @@ export function registerSkillAdvancementEdgeCaseTests(quench) {
               system: {
                 rank: 2,
                 trait: "agi",
-                emphases: []
+                trainedEmphases: []
               }
             },
             { parent: actor }
@@ -173,10 +173,10 @@ export function registerSkillAdvancementEdgeCaseTests(quench) {
 
           // ACT - Try to add 3 emphases (more than rank)
           const emphases = ["Katana", "Wakizashi", "Naginata"];
-          await skill.update({ "system.emphases": emphases });
+          await skill.update({ "system.trainedEmphases": emphases });
 
           // ASSERT - System should limit or allow
-          const actualEmphases = skill.system.emphases;
+          const actualEmphases = skill.system.trainedEmphases;
 
           assert.isArray(actualEmphases, "Emphases is array");
           // Rule: Can have emphases up to skill rank
@@ -189,10 +189,10 @@ export function registerSkillAdvancementEdgeCaseTests(quench) {
           await skill.update({ "system.rank": 0 });
 
           // ACT - Try to add emphasis
-          await skill.update({ "system.emphases": ["Katana"] });
+          await skill.update({ "system.trainedEmphases": ["Katana"] });
 
           // ASSERT - Should handle gracefully
-          const emphases = skill.system.emphases;
+          const emphases = skill.system.trainedEmphases;
 
           assert.isArray(emphases, "Emphases is array");
           // Rank 0 skills shouldn't have emphases, but system should not crash
@@ -202,14 +202,14 @@ export function registerSkillAdvancementEdgeCaseTests(quench) {
           // ARRANGE - Skill rank 3 with 3 emphases
           await skill.update({
             "system.rank": 3,
-            "system.emphases": ["Katana", "Wakizashi", "Naginata"]
+            "system.trainedEmphases": ["Katana", "Wakizashi", "Naginata"]
           });
 
           // ACT - Decrease rank to 1
           await skill.update({ "system.rank": 1 });
 
           // ASSERT - Emphases should be handled
-          const emphases = skill.system.emphases;
+          const emphases = skill.system.trainedEmphases;
 
           assert.isArray(emphases, "Emphases is array");
           // System should either trim emphases or keep them
@@ -221,10 +221,10 @@ export function registerSkillAdvancementEdgeCaseTests(quench) {
           await skill.update({ "system.rank": 3 });
 
           // ACT - Add duplicate emphasis
-          await skill.update({ "system.emphases": ["Katana", "Katana", "Wakizashi"] });
+          await skill.update({ "system.trainedEmphases": ["Katana", "Katana", "Wakizashi"] });
 
           // ASSERT - System should handle duplicates
-          const emphases = skill.system.emphases;
+          const emphases = skill.system.trainedEmphases;
 
           assert.isArray(emphases, "Emphases is array");
           // System should either deduplicate or allow
@@ -236,10 +236,10 @@ export function registerSkillAdvancementEdgeCaseTests(quench) {
           await skill.update({ "system.rank": 2 });
 
           // ACT - Add empty emphasis
-          await skill.update({ "system.emphases": ["Katana", "", "Wakizashi"] });
+          await skill.update({ "system.trainedEmphases": ["Katana", "", "Wakizashi"] });
 
           // ASSERT - System should handle empty strings
-          const emphases = skill.system.emphases;
+          const emphases = skill.system.trainedEmphases;
 
           assert.isArray(emphases, "Emphases is array");
           // System should filter out empty strings or keep them
@@ -334,15 +334,15 @@ export function registerSkillAdvancementEdgeCaseTests(quench) {
 
         it("should preserve emphases when rank decreases", async () => {
           // ARRANGE - Skill rank 3 with emphases
-          await skill.update({ "system.emphases": ["Katana", "Wakizashi"] });
+          await skill.update({ "system.trainedEmphases": ["Katana", "Wakizashi"] });
 
-          const emphasesBefore = skill.system.emphases;
+          const emphasesBefore = skill.system.trainedEmphases;
 
           // ACT - Decrease rank to 2
           await skill.update({ "system.rank": 2 });
 
           // ASSERT - Emphases should be preserved or trimmed
-          const emphasesAfter = skill.system.emphases;
+          const emphasesAfter = skill.system.trainedEmphases;
 
           assert.isArray(emphasesAfter, "Emphases is array");
           // System may trim or preserve emphases
@@ -368,7 +368,7 @@ export function registerSkillAdvancementEdgeCaseTests(quench) {
               system: {
                 rank: 5,
                 trait: "agi",
-                emphases: []
+                trainedEmphases: []
               }
             },
             { parent: actor }
@@ -384,19 +384,19 @@ export function registerSkillAdvancementEdgeCaseTests(quench) {
 
         it("should handle rapid emphasis additions with Promise.all", async () => {
           // ARRANGE - Empty emphases
-          assert.equal(skill.system.emphases.length, 0, "No emphases");
+          assert.equal(skill.system.trainedEmphases.length, 0, "No emphases");
 
           // ACT - Add multiple emphases simultaneously
           const updatePromises = [
-            skill.update({ "system.emphases": ["Katana"] }),
-            skill.update({ "system.emphases": ["Wakizashi"] }),
-            skill.update({ "system.emphases": ["Naginata"] })
+            skill.update({ "system.trainedEmphases": ["Katana"] }),
+            skill.update({ "system.trainedEmphases": ["Wakizashi"] }),
+            skill.update({ "system.trainedEmphases": ["Naginata"] })
           ];
 
           await Promise.all(updatePromises);
 
           // ASSERT - Last write wins in Foundry
-          const emphases = skill.system.emphases;
+          const emphases = skill.system.trainedEmphases;
 
           assert.isArray(emphases, "Emphases is array");
           assert.exists(emphases, "Emphases exist");
@@ -407,7 +407,7 @@ export function registerSkillAdvancementEdgeCaseTests(quench) {
         it("should handle concurrent emphasis and rank updates", async () => {
           // ARRANGE
           const updatePromises = [
-            skill.update({ "system.emphases": ["Katana", "Wakizashi"] }),
+            skill.update({ "system.trainedEmphases": ["Katana", "Wakizashi"] }),
             skill.update({ "system.rank": 6 })
           ];
 
@@ -415,7 +415,7 @@ export function registerSkillAdvancementEdgeCaseTests(quench) {
           await Promise.all(updatePromises);
 
           // ASSERT - Both should update without corruption
-          const emphases = skill.system.emphases;
+          const emphases = skill.system.trainedEmphases;
           const rank = skill.system.rank;
 
           assert.isArray(emphases, "Emphases is array");
@@ -427,19 +427,19 @@ export function registerSkillAdvancementEdgeCaseTests(quench) {
 
         it("should handle rapid emphasis array modifications", async () => {
           // ARRANGE - Start with some emphases
-          await skill.update({ "system.emphases": ["Katana"] });
+          await skill.update({ "system.trainedEmphases": ["Katana"] });
 
           // ACT - Rapid modifications
           const updatePromises = [
-            skill.update({ "system.emphases": ["Katana", "Wakizashi"] }),
-            skill.update({ "system.emphases": ["Katana", "Wakizashi", "Naginata"] }),
-            skill.update({ "system.emphases": ["Katana", "Wakizashi", "Naginata", "Yari"] })
+            skill.update({ "system.trainedEmphases": ["Katana", "Wakizashi"] }),
+            skill.update({ "system.trainedEmphases": ["Katana", "Wakizashi", "Naginata"] }),
+            skill.update({ "system.trainedEmphases": ["Katana", "Wakizashi", "Naginata", "Yari"] })
           ];
 
           await Promise.all(updatePromises);
 
           // ASSERT - No corruption
-          const emphases = skill.system.emphases;
+          const emphases = skill.system.trainedEmphases;
 
           assert.isArray(emphases, "Emphases is array");
           assert.exists(emphases, "Emphases exist");
@@ -452,19 +452,19 @@ export function registerSkillAdvancementEdgeCaseTests(quench) {
 
         it("should handle emphasis removal race condition", async () => {
           // ARRANGE - Start with emphases
-          await skill.update({ "system.emphases": ["Katana", "Wakizashi", "Naginata"] });
+          await skill.update({ "system.trainedEmphases": ["Katana", "Wakizashi", "Naginata"] });
 
           // ACT - Concurrent removals
           const updatePromises = [
-            skill.update({ "system.emphases": ["Katana", "Wakizashi"] }),
-            skill.update({ "system.emphases": ["Katana"] }),
-            skill.update({ "system.emphases": [] })
+            skill.update({ "system.trainedEmphases": ["Katana", "Wakizashi"] }),
+            skill.update({ "system.trainedEmphases": ["Katana"] }),
+            skill.update({ "system.trainedEmphases": [] })
           ];
 
           await Promise.all(updatePromises);
 
           // ASSERT - Should not corrupt
-          const emphases = skill.system.emphases;
+          const emphases = skill.system.trainedEmphases;
 
           assert.isArray(emphases, "Emphases is array");
           // Last write wins - may be empty or have values

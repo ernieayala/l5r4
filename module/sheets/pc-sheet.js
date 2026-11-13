@@ -242,7 +242,7 @@ export default class L5R4PcSheet extends BaseActorSheet {
    * - Void Points (-1)
    *
    * **User Interaction Pattern:**
-   * Right-click typically decrements values, while left-click increments.
+   * Right-click decrements values; left-click increments.
    * All context actions still respect safety mechanisms (Shift+Click requirements).
    *
    * @param {string} action - The data-action attribute value from right-clicked element
@@ -351,7 +351,7 @@ export default class L5R4PcSheet extends BaseActorSheet {
    * **GM-Only Feature:**
    * Only GMs can toggle this setting. Shift+Click on the "Rank" label switches between:
    * - Automatic: Rank calculated from Insight Points (default)
-   * - Manual: GM directly inputs rank value
+   * - Manual: the GM types the rank value
    *
    * **What It Does:**
    * 1. Checks for GM permission (non-GMs ignored)
@@ -403,7 +403,8 @@ export default class L5R4PcSheet extends BaseActorSheet {
    *
    * **What It Does:**
    * 1. Checks for Shift key (safety mechanism)
-   * 2. Calls actor.prepareData() to recalculate all derived values
+   * 2. Calls actor.reset() to rebuild data from storage and recalculate derived values once
+   *    (a bare prepareData() on a prepared actor would apply its Active Effects a second time)
    * 3. Re-renders the sheet to display updated values
    * 4. Shows notification confirming recalculation
    *
@@ -426,8 +427,8 @@ export default class L5R4PcSheet extends BaseActorSheet {
       return;
     }
 
-    // Force full data preparation
-    this.actor.prepareData();
+    // Rebuild from source and prepare once (client/documents/abstract/client-document.mjs:60-67)
+    this.actor.reset();
 
     // Re-render sheet to show updated values
     this.render(false);
@@ -629,10 +630,6 @@ export default class L5R4PcSheet extends BaseActorSheet {
   async _onRender(context, options) {
     await super._onRender(context, options);
     const root = this.element;
-    if (!this._preparedOnce) {
-      this.actor?.prepareData();
-      this._preparedOnce = true;
-    }
 
     this._paintVoidPointsDots(root);
 

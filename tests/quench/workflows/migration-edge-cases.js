@@ -202,7 +202,7 @@ export function registerMigrationEdgeCaseTests(quench) {
           assert.equal(actor.img, userIcon, "User icon preserved");
         });
 
-        it("should preserve token icon separately from actor icon", async () => {
+        it("should keep the token icon apart from the actor icon", async () => {
           // ARRANGE - Different token and actor icons
           const actorIcon = "systems/l5r4-enhanced/assets/icons/samurai.webp";
           const tokenIcon = "systems/l5r4-enhanced/assets/icons/token-samurai.webp";
@@ -362,7 +362,7 @@ export function registerMigrationEdgeCaseTests(quench) {
           assert.exists(actor.getFlag(SYS_ID, MIGRATION_FLAG), "Flag exists");
         });
 
-        it("should handle very long version strings", async () => {
+        it("should handle long version strings", async () => {
           // ARRANGE - Mark with long version
           const longVersion = "1.0.0-beta.1+build.12345.abcdef";
           await markAsMigrated(actor, longVersion);
@@ -483,7 +483,7 @@ export function registerMigrationEdgeCaseTests(quench) {
               system: {
                 rank: 7,
                 trait: "agi",
-                emphasis: ["Dueling"]
+                trainedEmphases: ["Dueling"]
               }
             }
           ]);
@@ -495,7 +495,7 @@ export function registerMigrationEdgeCaseTests(quench) {
           const item = actor.items.find(i => i.name === "Custom Skill");
           assert.equal(item.system.rank, 7, "Rank preserved");
           assert.equal(item.system.trait, "agi", "Trait preserved");
-          assert.deepEqual(item.system.emphasis, ["Dueling"], "Emphasis preserved");
+          assert.deepEqual(item.system.trainedEmphases, ["Dueling"], "Emphasis preserved");
         });
       });
     },

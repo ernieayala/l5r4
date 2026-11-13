@@ -41,14 +41,9 @@ export function registerAttackEdgeCaseTests(quench) {
 
           // Create weapon without corresponding skill
           weapon = await Item.create(
-            {
-              ...createWeaponData("Unknown Weapon", 3, 2),
-              system: {
-                roll: 3,
-                keep: 2,
-                skill: "unknown-skill" // Skill actor doesn't have
-              }
-            },
+            createWeaponData("Unknown Weapon", 3, 2, {
+              system: { associatedSkill: "unknown-skill" } // Skill actor doesn't have
+            }),
             { parent: actor }
           );
         });
@@ -70,8 +65,10 @@ export function registerAttackEdgeCaseTests(quench) {
 
           // ASSERT - Weapon data should exist even if unskilled
           assert.exists(weaponData, "Weapon data exists");
-          assert.isNumber(weaponData.roll, "Roll dice defined");
-          assert.isNumber(weaponData.keep, "Keep dice defined");
+          assert.equal(weaponData.damageRoll, 3, "Damage roll dice defined");
+          assert.equal(weaponData.damageKeep, 2, "Damage keep dice defined");
+          assert.equal(weaponData.associatedSkill, "unknown-skill", "Skill reference stored");
+          assert.equal(weaponData.fallbackTrait, "agi", "Unskilled attacks fall back to Agility");
 
           // System should handle unskilled attacks gracefully
           // (May use trait only, or default to unskilled penalty)
@@ -92,7 +89,7 @@ export function registerAttackEdgeCaseTests(quench) {
           );
 
           // Update weapon to use this skill
-          await weapon.update({ "system.skill": "kenjutsu" });
+          await weapon.update({ "system.associatedSkill": "kenjutsu" });
 
           // ACT - Calculate attack roll
           const skillRank = skill.system.rank;
@@ -110,15 +107,16 @@ export function registerAttackEdgeCaseTests(quench) {
         });
 
         it("should handle weapon with missing skill reference", async () => {
-          // ARRANGE - Weapon with null skill
-          await weapon.update({ "system.skill": null });
+          // ARRANGE - Weapon with no skill
+          await weapon.update({ "system.associatedSkill": "" });
 
           // ACT
           const weaponData = weapon.system;
 
           // ASSERT - Should not crash
           assert.exists(weaponData, "Weapon data exists");
-          assert.isNull(weaponData.skill, "Skill is null");
+          assert.equal(weaponData.associatedSkill, "", "No skill");
+          assert.equal(weaponData.fallbackTrait, "agi", "Fallback Trait kept");
 
           // System should handle gracefully (use weapon's base roll/keep)
         });
@@ -137,14 +135,7 @@ export function registerAttackEdgeCaseTests(quench) {
           });
 
           weapon = await Item.create(
-            {
-              ...createWeaponData("Katana", 3, 2),
-              system: {
-                roll: 3,
-                keep: 2,
-                skill: "kenjutsu"
-              }
-            },
+            createWeaponData("Katana", 3, 2, { system: { associatedSkill: "kenjutsu" } }),
             { parent: actor }
           );
         });
@@ -363,72 +354,56 @@ export function registerAttackEdgeCaseTests(quench) {
           }
         });
 
+        // Conditions are status effects; the penalties asserted are the ones
+        // module/documents/actor/calculations/condition-effects.js computes.
         it("should handle Blinded condition penalty", async () => {
-          // ARRANGE - Apply Blinded condition
-          // Note: Actual condition system may vary
-          await actor.update({ "system.conditions.blinded": true });
+          await actor.toggleStatusEffect("blinded", { active: true });
 
-          // ACT
-          actor.prepareData();
-
-          // ASSERT - Blinded should apply penalty
-          const isBlinded = actor.system.conditions?.blinded;
-          assert.isTrue(isBlinded, "Blinded condition active");
-
-          // Expected: Attack rolls have penalty (implementation-specific)
-          // This test documents the edge case
+          assert.isTrue(actor.statuses.has("blinded"), "Blinded condition active");
+          assert.deepEqual(
+            actor.system._conditionEffects.rollPenalties.melee,
+            { roll: -1, keep: -1 },
+            "Blinded melee penalty"
+          );
         });
 
         it("should handle Prone condition", async () => {
-          // ARRANGE
-          await actor.update({ "system.conditions.prone": true });
+          await actor.toggleStatusEffect("prone", { active: true });
 
-          // ACT
-          actor.prepareData();
-
-          // ASSERT
-          const isProne = actor.system.conditions?.prone;
-          assert.isTrue(isProne, "Prone condition active");
-
-          // Prone affects attack and defense
+          assert.isTrue(actor.statuses.has("prone"), "Prone condition active");
+          assert.equal(
+            actor.system._conditionEffects.rollPenalties.melee.roll,
+            -2,
+            "Prone melee penalty"
+          );
+          assert.equal(actor.system.armorTn.current, 3 * 5 + 5 - 10, "Prone -10 Armor TN");
         });
 
         it("should handle multiple conditions simultaneously", async () => {
-          // ARRANGE - Apply multiple conditions
-          await actor.update({
-            "system.conditions.blinded": true,
-            "system.conditions.prone": true,
-            "system.conditions.stunned": true
-          });
+          for (const id of ["blinded", "prone", "stunned"]) {
+            await actor.toggleStatusEffect(id, { active: true });
+          }
 
-          // ACT
-          actor.prepareData();
-
-          // ASSERT - All conditions should be tracked
-          const conditions = actor.system.conditions;
-          assert.isTrue(conditions?.blinded, "Blinded active");
-          assert.isTrue(conditions?.prone, "Prone active");
-          assert.isTrue(conditions?.stunned, "Stunned active");
-
-          // System should handle stacking penalties correctly
+          for (const id of ["blinded", "prone", "stunned"]) {
+            assert.isTrue(actor.statuses.has(id), `${id} active`);
+          }
+          assert.deepEqual(
+            actor.system._conditionEffects.rollPenalties.melee,
+            { roll: -3, keep: -1 },
+            "Blinded and Prone melee penalties stack"
+          );
+          assert.equal(actor.system.armorTn.current, 5, "Lowest override, Prone -10, floor 5");
         });
 
         it("should handle condition removal recalculation", async () => {
-          // ARRANGE - Apply then remove condition
-          await actor.update({ "system.conditions.stunned": true });
-          actor.prepareData();
+          await actor.toggleStatusEffect("stunned", { active: true });
           const stunnedTN = actor.system.armorTn.current;
 
-          // ACT - Remove condition
-          await actor.update({ "system.conditions.stunned": false });
-          actor.prepareData();
+          await actor.toggleStatusEffect("stunned", { active: false });
 
-          // ASSERT
-          const normalTN = actor.system.armorTn.current;
-
-          // TN should recalculate without condition penalty
-          assert.isFalse(actor.system.conditions?.stunned, "Stunned removed");
-          assert.isNumber(normalTN, "TN recalculated");
+          assert.equal(stunnedTN, 5, "Stunned TN");
+          assert.isFalse(actor.statuses.has("stunned"), "Stunned removed");
+          assert.equal(actor.system.armorTn.current, 3 * 5 + 5, "TN recalculated");
         });
       });
     },

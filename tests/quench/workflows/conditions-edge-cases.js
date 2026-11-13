@@ -1,20 +1,32 @@
 /**
  * Conditions Edge Case Tests
  *
- * Tests edge cases in condition management that could break combat.
- * Specifically tests condition stacking, removal, and interaction.
+ * Tests edge cases in condition management that could break combat. Conditions are status effects, applied with
+ * `actor.toggleStatusEffect` and read back from `actor.statuses` and the values
+ * module/documents/actor/calculations/condition-effects.js derives. Values asserted are the ones that code computes
+ * today; the rules audit (roadmap Stage 13) checks them against the book.
  *
  * **What Can Break:**
- * - Stunned Armor TN override
- * - Multiple Fatigued stacking
+ * - Stunned and Blinded Armor TN overrides
+ * - Fatigued applied twice
  * - Condition removal recalculation
- * - Conflicting conditions
- * - Condition persistence across rounds
- *
+ * - Several conditions at once
+ * - Conditions persisting across preparations
  */
 
 import { SYS_ID } from "../../../module/config/constants.js";
 import { createTestPC } from "../../fixtures/actor-fixtures.js";
+
+/**
+ * Apply or remove conditions, one status change at a time; each awaited change re-prepares the actor.
+ * @param {Actor} actor
+ * @param {Record<string, boolean>} states  Status id -> active.
+ */
+async function setConditions(actor, states) {
+  for (const [id, active] of Object.entries(states)) {
+    await actor.toggleStatusEffect(id, { active });
+  }
+}
 
 /**
  * Register conditions edge case tests
@@ -30,13 +42,7 @@ export function registerConditionsEdgeCaseTests(quench) {
         let actor;
 
         beforeEach(async () => {
-          actor = await createTestPC({
-            name: "Stunned Test",
-            system: {
-              traits: { ref: 3 },
-              rings: { earth: 2 }
-            }
-          });
+          actor = await createTestPC({ name: "Stunned Test", system: { traits: { ref: 3 } } });
         });
 
         afterEach(async () => {
@@ -47,74 +53,40 @@ export function registerConditionsEdgeCaseTests(quench) {
         });
 
         it("should apply Stunned Armor TN override (TN 5)", async () => {
-          // ARRANGE - Apply Stunned condition
-          await actor.update({ "system.conditions.stunned": true });
+          await setConditions(actor, { stunned: true });
 
-          // ACT
-          actor.prepareData();
-
-          // ASSERT
-          const isStunned = actor.system.conditions?.stunned;
-          assert.isTrue(isStunned, "Stunned condition active");
-
-          // Stunned sets Armor TN to 5 (override, not modifier)
-          const armorTN = actor.system.armorTn.current;
-
-          // Expected: TN should be 5 regardless of Reflexes
-          // This test documents expected behavior
-          assert.isNumber(armorTN, "Armor TN is number");
+          assert.isTrue(actor.statuses.has("stunned"), "Stunned condition active");
+          // Stunned: 5 + armor bonus (no armor worn), replacing Reflexes x 5 + 5
+          assert.equal(actor.system.armorTn.current, 5, "Armor TN overridden to 5");
         });
 
         it("should override high Armor TN when Stunned", async () => {
-          // ARRANGE - High Reflexes character
-          await actor.update({
-            "system.traits.ref": 10,
-            "system.conditions.stunned": true
-          });
+          await actor.update({ "system.traits.ref": 10 });
+          await setConditions(actor, { stunned: true });
 
-          // ACT
-          actor.prepareData();
-
-          // ASSERT
-          const armorTN = actor.system.armorTn.current;
-
-          // Even with Ref 10, Stunned should set TN to 5
-          // (This is an override, not a penalty)
-          assert.isNumber(armorTN, "Armor TN is number");
+          assert.equal(
+            actor.system.armorTn.current,
+            5,
+            "Reflexes 10 still gives TN 5 while Stunned"
+          );
         });
 
         it("should remove Stunned and recalculate Armor TN", async () => {
-          // ARRANGE - Apply then remove Stunned
-          await actor.update({ "system.conditions.stunned": true });
-          actor.prepareData();
-          const stunnedTN = actor.system.armorTn.current;
+          await setConditions(actor, { stunned: true });
+          await setConditions(actor, { stunned: false });
 
-          // ACT - Remove Stunned
-          await actor.update({ "system.conditions.stunned": false });
-          actor.prepareData();
-
-          // ASSERT
-          const normalTN = actor.system.armorTn.current;
-          const baseArmorTN = actor.system.traits.ref * 5 + 5;
-
-          assert.isFalse(actor.system.conditions?.stunned, "Stunned removed");
-          assert.equal(normalTN, baseArmorTN, "TN recalculated to base");
-
-          // Note: If Stunned TN override not implemented, both will equal base TN
-          // This test documents expected behavior
+          assert.isFalse(actor.statuses.has("stunned"), "Stunned removed");
+          assert.equal(actor.system.armorTn.current, 3 * 5 + 5, "TN recalculated to base");
         });
       });
 
-      describe("Fatigued Condition Stacking", () => {
+      describe("Fatigued Condition", () => {
         let actor;
 
         beforeEach(async () => {
           actor = await createTestPC({
             name: "Fatigue Test",
-            system: {
-              traits: { sta: 3, ref: 3 },
-              rings: { earth: 2 }
-            }
+            system: { traits: { sta: 3, ref: 3 } }
           });
         });
 
@@ -125,72 +97,28 @@ export function registerConditionsEdgeCaseTests(quench) {
           }
         });
 
-        it("should apply single Fatigued condition", async () => {
-          // ARRANGE
-          await actor.update({ "system.conditions.fatigued": 1 });
+        it("should apply the Fatigued TN penalty", async () => {
+          await setConditions(actor, { fatigued: true });
 
-          // ACT
-          actor.prepareData();
-
-          // ASSERT
-          const fatigueLevel = actor.system.conditions?.fatigued;
-          assert.equal(fatigueLevel, 1, "Fatigued level 1");
-
-          // Fatigued applies penalties to rolls
+          assert.isTrue(actor.statuses.has("fatigued"), "Fatigued active");
+          assert.equal(actor.system._conditionEffects.tnPenalty, 5, "+5 TN while Fatigued");
         });
 
-        it("should handle multiple Fatigued stacking", async () => {
-          // ARRANGE - Stack Fatigued conditions
-          await actor.update({ "system.conditions.fatigued": 3 });
+        it("should not stack Fatigued applied twice", async () => {
+          await setConditions(actor, { fatigued: true });
+          await actor.toggleStatusEffect("fatigued", { active: true });
 
-          // ACT
-          actor.prepareData();
-
-          // ASSERT
-          const fatigueLevel = actor.system.conditions?.fatigued;
-          assert.equal(fatigueLevel, 3, "Fatigued level 3");
-
-          // Each level applies cumulative penalty
-          // Expected: -1k0 per level or similar
+          const fatigued = actor.effects.filter(effect => effect.statuses.has("fatigued"));
+          assert.lengthOf(fatigued, 1, "One Fatigued effect");
+          assert.equal(actor.system._conditionEffects.tnPenalty, 5, "Penalty applied once");
         });
 
-        it("should handle excessive Fatigued levels (10+)", async () => {
-          // ARRANGE - Extreme fatigue
-          await actor.update({ "system.conditions.fatigued": 10 });
+        it("should remove Fatigued and its penalty", async () => {
+          await setConditions(actor, { fatigued: true });
+          await setConditions(actor, { fatigued: false });
 
-          // ACT
-          actor.prepareData();
-
-          // ASSERT
-          const fatigueLevel = actor.system.conditions?.fatigued;
-          assert.equal(fatigueLevel, 10, "Extreme fatigue");
-
-          // System should handle gracefully (character likely incapacitated)
-          assert.isNumber(fatigueLevel, "Fatigue is number");
-        });
-
-        it("should reduce Fatigued level incrementally", async () => {
-          // ARRANGE - Start at level 3
-          await actor.update({ "system.conditions.fatigued": 3 });
-
-          // ACT - Reduce by 1 (rest/recovery)
-          await actor.update({ "system.conditions.fatigued": 2 });
-
-          // ASSERT
-          const fatigueLevel = actor.system.conditions?.fatigued;
-          assert.equal(fatigueLevel, 2, "Fatigue reduced");
-        });
-
-        it("should remove all Fatigued levels", async () => {
-          // ARRANGE - Fatigued level 2
-          await actor.update({ "system.conditions.fatigued": 2 });
-
-          // ACT - Remove all fatigue
-          await actor.update({ "system.conditions.fatigued": 0 });
-
-          // ASSERT
-          const fatigueLevel = actor.system.conditions?.fatigued;
-          assert.equal(fatigueLevel, 0, "All fatigue removed");
+          assert.isFalse(actor.statuses.has("fatigued"), "Fatigued removed");
+          assert.equal(actor.system._conditionEffects.tnPenalty, 0, "No TN penalty");
         });
       });
 
@@ -200,10 +128,7 @@ export function registerConditionsEdgeCaseTests(quench) {
         beforeEach(async () => {
           actor = await createTestPC({
             name: "Multi-Condition Test",
-            system: {
-              traits: { ref: 3, sta: 3 },
-              rings: { earth: 2 }
-            }
+            system: { traits: { ref: 3, sta: 3 } }
           });
         });
 
@@ -215,113 +140,60 @@ export function registerConditionsEdgeCaseTests(quench) {
         });
 
         it("should handle Stunned + Prone simultaneously", async () => {
-          // ARRANGE - Apply both conditions
-          await actor.update({
-            "system.conditions.stunned": true,
-            "system.conditions.prone": true
-          });
+          await setConditions(actor, { stunned: true, prone: true });
 
-          // ACT
-          actor.prepareData();
-
-          // ASSERT
-          const isStunned = actor.system.conditions?.stunned;
-          const isProne = actor.system.conditions?.prone;
-
-          assert.isTrue(isStunned, "Stunned active");
-          assert.isTrue(isProne, "Prone active");
-
-          // Both penalties should apply
-          // Stunned overrides TN, Prone adds attack penalty
+          assert.isTrue(actor.statuses.has("stunned"), "Stunned active");
+          assert.isTrue(actor.statuses.has("prone"), "Prone active");
+          // Override 5, then Prone -10, then the minimum Armor TN of 5
+          assert.equal(actor.system.armorTn.current, 5, "Armor TN floors at 5");
         });
 
         it("should handle Blinded + Fatigued + Prone", async () => {
-          // ARRANGE - Multiple debilitating conditions
-          await actor.update({
-            "system.conditions.blinded": true,
-            "system.conditions.fatigued": 2,
-            "system.conditions.prone": true
-          });
+          await setConditions(actor, { blinded: true, fatigued: true, prone: true });
 
-          // ACT
-          actor.prepareData();
-
-          // ASSERT
-          const conditions = actor.system.conditions;
-
-          assert.isTrue(conditions?.blinded, "Blinded active");
-          assert.equal(conditions?.fatigued, 2, "Fatigued level 2");
-          assert.isTrue(conditions?.prone, "Prone active");
-
-          // All penalties should stack
+          const effects = actor.system._conditionEffects;
+          assert.sameMembers(effects.active, ["blinded", "fatigued", "prone"], "All three active");
+          assert.equal(effects.tnPenalty, 5, "Fatigued TN penalty");
+          assert.equal(
+            effects.rollPenalties.ranged.roll,
+            -5,
+            "Blinded -3 and Prone -2 rolled dice on ranged"
+          );
+          assert.equal(actor.system.armorTn.current, 5, "Blinded TN 8, Prone -10, floor 5");
         });
 
         it("should handle conflicting conditions (Stunned + Dazed)", async () => {
-          // ARRANGE - Conditions that might conflict
-          await actor.update({
-            "system.conditions.stunned": true,
-            "system.conditions.dazed": true
-          });
+          await setConditions(actor, { stunned: true, dazed: true });
 
-          // ACT
-          actor.prepareData();
-
-          // ASSERT
-          const isStunned = actor.system.conditions?.stunned;
-          const isDazed = actor.system.conditions?.dazed;
-
-          // System should handle both or apply precedence
-          assert.exists(isStunned, "Stunned tracked");
-          assert.exists(isDazed, "Dazed tracked");
+          assert.isTrue(actor.statuses.has("stunned"), "Stunned tracked");
+          assert.isTrue(actor.statuses.has("dazed"), "Dazed tracked");
+          assert.equal(
+            actor.system._conditionEffects.rollPenalties.melee.roll,
+            -3,
+            "Dazed melee penalty"
+          );
         });
 
         it("should remove one condition while keeping others", async () => {
-          // ARRANGE - Multiple conditions
-          await actor.update({
-            "system.conditions.stunned": true,
-            "system.conditions.prone": true,
-            "system.conditions.blinded": true
-          });
+          await setConditions(actor, { stunned: true, prone: true, blinded: true });
+          await setConditions(actor, { stunned: false });
 
-          // ACT - Remove only Stunned
-          await actor.update({ "system.conditions.stunned": false });
-          actor.prepareData();
-
-          // ASSERT
-          const isStunned = actor.system.conditions?.stunned;
-          const isProne = actor.system.conditions?.prone;
-          const isBlinded = actor.system.conditions?.blinded;
-
-          assert.isFalse(isStunned, "Stunned removed");
-          assert.isTrue(isProne, "Prone remains");
-          assert.isTrue(isBlinded, "Blinded remains");
+          assert.isFalse(actor.statuses.has("stunned"), "Stunned removed");
+          assert.isTrue(actor.statuses.has("prone"), "Prone remains");
+          assert.isTrue(actor.statuses.has("blinded"), "Blinded remains");
         });
 
         it("should clear all conditions at once", async () => {
-          // ARRANGE - Multiple conditions
-          await actor.update({
-            "system.conditions.stunned": true,
-            "system.conditions.prone": true,
-            "system.conditions.blinded": true,
-            "system.conditions.fatigued": 2
+          await setConditions(actor, { stunned: true, prone: true, blinded: true, fatigued: true });
+          await setConditions(actor, {
+            stunned: false,
+            prone: false,
+            blinded: false,
+            fatigued: false
           });
 
-          // ACT - Clear all
-          await actor.update({
-            "system.conditions.stunned": false,
-            "system.conditions.prone": false,
-            "system.conditions.blinded": false,
-            "system.conditions.fatigued": 0
-          });
-
-          // ASSERT
-          actor.prepareData();
-          const conditions = actor.system.conditions;
-
-          assert.isFalse(conditions?.stunned, "Stunned cleared");
-          assert.isFalse(conditions?.prone, "Prone cleared");
-          assert.isFalse(conditions?.blinded, "Blinded cleared");
-          assert.equal(conditions?.fatigued, 0, "Fatigue cleared");
+          assert.lengthOf(actor.system._conditionEffects.active, 0, "No conditions active");
+          assert.equal(actor.system.armorTn.current, 3 * 5 + 5, "Armor TN back to base");
         });
       });
 
@@ -331,10 +203,7 @@ export function registerConditionsEdgeCaseTests(quench) {
         beforeEach(async () => {
           actor = await createTestPC({
             name: "Recalc Test",
-            system: {
-              traits: { ref: 3, sta: 3 },
-              rings: { earth: 2 }
-            }
+            system: { traits: { ref: 3, sta: 3 } }
           });
         });
 
@@ -346,89 +215,40 @@ export function registerConditionsEdgeCaseTests(quench) {
         });
 
         it("should recalculate Armor TN when condition added", async () => {
-          // ARRANGE - Base state
-          actor.prepareData();
           const baseTN = actor.system.armorTn.current;
+          await setConditions(actor, { stunned: true });
 
-          // ACT - Add Stunned
-          await actor.update({ "system.conditions.stunned": true });
-          actor.prepareData();
-
-          // ASSERT - Verify condition tracked
-          const isStunned = actor.system.conditions?.stunned;
-          assert.isTrue(isStunned, "Stunned condition tracked");
-
-          // Note: TN change depends on implementation
-          // This test documents that condition is tracked
+          assert.equal(baseTN, 20, "Base TN from Reflexes 3");
+          assert.equal(actor.system.armorTn.current, 5, "Stunned TN after adding");
         });
 
         it("should recalculate when condition removed", async () => {
-          // ARRANGE - Stunned active
-          await actor.update({ "system.conditions.stunned": true });
-          actor.prepareData();
+          await setConditions(actor, { stunned: true });
+          await setConditions(actor, { stunned: false });
 
-          // ACT - Remove Stunned
-          await actor.update({ "system.conditions.stunned": false });
-          actor.prepareData();
-
-          // ASSERT
-          const finalTN = actor.system.armorTn.current;
-          const baseArmorTN = actor.system.traits.ref * 5 + 5;
-
-          assert.equal(finalTN, baseArmorTN, "TN recalculated to base");
-        });
-
-        it("should recalculate when condition level changes", async () => {
-          // ARRANGE - Fatigued level 1
-          await actor.update({ "system.conditions.fatigued": 1 });
-          actor.prepareData();
-
-          // ACT - Increase to level 3
-          await actor.update({ "system.conditions.fatigued": 3 });
-          actor.prepareData();
-
-          // ASSERT
-          const fatigueLevel = actor.system.conditions?.fatigued;
-          assert.equal(fatigueLevel, 3, "Fatigue increased");
-
-          // Penalties should recalculate
+          assert.equal(actor.system.armorTn.current, 3 * 5 + 5, "TN recalculated to base");
         });
 
         it("should handle rapid condition toggling", async () => {
-          // ARRANGE - Toggle Prone rapidly
-          const toggles = [true, false, true, false, true];
-
-          // ACT
-          for (const state of toggles) {
-            await actor.update({ "system.conditions.prone": state });
+          for (const active of [true, false, true, false, true]) {
+            await actor.toggleStatusEffect("prone", { active });
           }
 
-          // ASSERT
-          const finalState = actor.system.conditions?.prone;
-          assert.isTrue(finalState, "Final state correct");
+          assert.isTrue(actor.statuses.has("prone"), "Final state correct");
+          const prone = actor.effects.filter(effect => effect.statuses.has("prone"));
+          assert.lengthOf(prone, 1, "One Prone effect");
         });
 
         it("should handle concurrent condition updates", async () => {
-          // ARRANGE - Update multiple conditions simultaneously
-          const updatePromises = [
-            actor.update({ "system.conditions.stunned": true }),
-            actor.update({ "system.conditions.prone": true }),
-            actor.update({ "system.conditions.blinded": true })
-          ];
+          await Promise.all([
+            actor.toggleStatusEffect("stunned", { active: true }),
+            actor.toggleStatusEffect("prone", { active: true }),
+            actor.toggleStatusEffect("blinded", { active: true })
+          ]);
 
-          // ACT - Race condition
-          await Promise.all(updatePromises);
-
-          // ASSERT - Last write wins, verify no corruption
-          actor.prepareData();
-          const conditions = actor.system.conditions;
-
-          assert.exists(conditions, "Conditions exist");
-
-          // At least one condition should be set
-          const hasAnyCondition = conditions?.stunned || conditions?.prone || conditions?.blinded;
-
-          assert.isTrue(hasAnyCondition, "At least one condition set");
+          for (const id of ["stunned", "prone", "blinded"]) {
+            assert.isTrue(actor.statuses.has(id), `${id} applied`);
+          }
         });
       });
 
@@ -436,13 +256,7 @@ export function registerConditionsEdgeCaseTests(quench) {
         let actor;
 
         beforeEach(async () => {
-          actor = await createTestPC({
-            name: "Persistence Test",
-            system: {
-              traits: { ref: 3 },
-              rings: { earth: 2 }
-            }
-          });
+          actor = await createTestPC({ name: "Persistence Test", system: { traits: { ref: 3 } } });
         });
 
         afterEach(async () => {
@@ -452,45 +266,12 @@ export function registerConditionsEdgeCaseTests(quench) {
           }
         });
 
-        it("should persist conditions across rounds", async () => {
-          // ARRANGE - Apply Blinded
-          await actor.update({ "system.conditions.blinded": true });
+        it("should keep a condition across a fresh preparation", async () => {
+          await setConditions(actor, { blinded: true });
+          actor.reset();
 
-          // ACT - Simulate round passing
-          actor.prepareData();
-
-          // ASSERT - Condition should persist
-          const isBlinded = actor.system.conditions?.blinded;
-          assert.isTrue(isBlinded, "Blinded persists");
-        });
-
-        it("should handle duration-based condition expiration", async () => {
-          // ARRANGE - Condition with duration
-          await actor.update({
-            "system.conditions.dazed": true,
-            "system.conditions.dazedDuration": 1
-          });
-
-          // ACT - Simulate duration expiring
-          await actor.update({ "system.conditions.dazedDuration": 0 });
-
-          // ASSERT - Condition should auto-clear
-          const duration = actor.system.conditions?.dazedDuration;
-          assert.equal(duration, 0, "Duration expired");
-
-          // System may auto-remove condition when duration = 0
-        });
-
-        it("should handle permanent vs temporary conditions", async () => {
-          // ARRANGE - Permanent condition (no duration)
-          await actor.update({ "system.conditions.blinded": true });
-
-          // ACT - Multiple rounds pass
-          actor.prepareData();
-
-          // ASSERT - Permanent condition persists
-          const isBlinded = actor.system.conditions?.blinded;
-          assert.isTrue(isBlinded, "Permanent condition persists");
+          assert.isTrue(actor.statuses.has("blinded"), "Blinded persists");
+          assert.equal(actor.system.armorTn.current, 3 + 5, "Blinded TN: Reflexes + 5");
         });
       });
     },
