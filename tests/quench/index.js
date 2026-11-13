@@ -94,6 +94,7 @@ import { registerSmokeBatch } from "./smoke.js";
 import { registerDeprecationsBatch } from "./deprecations.js";
 import { registerDataModelsBatch } from "./data-models.js";
 import { registerActiveEffectsBatch } from "./active-effects.js";
+import { registerSheetsAndAppsBatch } from "./sheets-and-apps.js";
 
 /**
  * Register Quench integration tests for the L5R4 system.
@@ -105,6 +106,7 @@ export async function registerQuenchTests(quench) {
   registerDeprecationsBatch(quench);
   registerDataModelsBatch(quench);
   registerActiveEffectsBatch(quench);
+  registerSheetsAndAppsBatch(quench);
   registerActorDocumentTests(quench);
   registerActorWoundTests(quench);
   registerActorXpTests(quench);

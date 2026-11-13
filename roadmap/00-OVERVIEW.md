@@ -59,7 +59,7 @@ Reviewed 2026-11-12 (`gh issue list --state all`, `gh pr list --state all`). Eac
 | #37 | A weapon's "Explodes on" value ignored on damage rolls | Stage 8 (dice rules), checked in Stage 13 |
 | #29 | Strength raised by an Active Effect misses weapon damage; extra effect points on Strength charged as XP | Stage 3 (Trait changes in the `"initial"` phase reach derived values), checked in Stage 13 |
 | #30 | NPC Initiative stays 2k2 | Stage 13 (Initiative row; code moves to Combat classes in Stage 5) |
-| #30 | Light-theme Ring values, Void Ring arrows, PC portrait picker, removable NPC attacks | Stage 6 |
+| #30 | Light-theme Ring values, Void Ring arrows, PC portrait picker, removable NPC attacks | Stage 6 (done; the portrait picker already worked in 3.2.1) |
 | #33 | Request: a setting for 3rd Edition rules (stances) | Open question for Ernie; not planned until decided |
 | PR #25 | "Packs": compendium databases on branch `release/3.2.0`, with rulebook text in spell and advantage entries | Not mergeable as is (CLAUDE.md **Licensed material**); Ernie decides whether to close it and delete the branch |
 | No issue yet | Code comments on `main` repeat rulebook wording: `skill-formulas.js`, `tn-calculator.js`, `bow-damage.js`, `chat-damage-buttons.js`, `melee-damage.js`, and `tests/quench/workflows/melee-damage-strength.js` (12-word runs matched against `game-rules/`, 2026-11-12) | Rewrite in own words with page citations, as its own change; Ernie decides when |

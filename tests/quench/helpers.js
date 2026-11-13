@@ -2,6 +2,23 @@
 const UPDATE_TIMEOUT_MS = 5000;
 
 /**
+ * How long core's chat pop-up card for a new message takes to render and animate in, with margin. A message deleted
+ * before then leaves core looking up a card that is gone (client/applications/sidebar/tabs/chat.mjs:1318-1321), and
+ * the promise rejects up to a second later, inside whatever test runs then. The system never deletes messages; tests
+ * that clean up their messages do.
+ */
+const CHAT_NOTIFICATION_SETTLE_MS = 2000;
+
+/**
+ * Wait until chat pop-up cards from earlier messages have finished, so a message deleted now does not reject in a
+ * later test, and a rejection from an earlier batch lands before this one starts.
+ * @returns {Promise<void>}
+ */
+export function settleChatNotifications() {
+  return new Promise(resolve => setTimeout(resolve, CHAT_NOTIFICATION_SETTLE_MS));
+}
+
+/**
  * Timeout for a test that closes several windows. Foundry 14.370 animates every ApplicationV2 close (about
  * 1 s each), so two or more closes outrun Mocha's 2000 ms default.
  */
@@ -28,21 +45,42 @@ export function watchConsole(levels) {
 }
 
 /**
- * Wrap a test body so the test fails if it logs a console error. Warnings are not checked here: until
- * roadmap Stage 14 the system still calls deprecated APIs, which warn; the deprecations batch lists them.
+ * Wrap a test body so the test fails if it logs a console error or warning, posts an error notification, or
+ * leaves a promise rejection or an error unhandled (an async click handler that throws reaches neither console
+ * method). Info and warning notifications are the system telling the user why an action did nothing, so they are
+ * not echoed to the console during the test; core echoes a notification only once it is displayed, which can be
+ * after the test ends (client/applications/ui/notifications.mjs:278-281). The body runs with Mocha's test
+ * context, so it can call `this.timeout()`.
  * @param {object} assert  Chai assert from the Quench context.
  * @returns {(body: () => Promise<void>) => () => Promise<void>}
  */
 export function cleanTest(assert) {
-  return body => async () => {
-    const watch = watchConsole(["error"]);
-    try {
-      await body();
-    } finally {
-      watch.stop();
-    }
-    assert.deepEqual(watch.messages, [], "console errors during the test");
-  };
+  return body =>
+    async function () {
+      const watch = watchConsole(["error", "warn"]);
+      const onRejection = event =>
+        watch.messages.push(`unhandled rejection: ${event.reason?.stack ?? event.reason}`);
+      const onError = event =>
+        watch.messages.push(`uncaught: ${event.error?.stack ?? event.message}`);
+      const notify = ui.notifications.notify;
+      ui.notifications.notify = function (message, type, options = {}) {
+        if (type === "error") {
+          watch.messages.push(`error notification: ${message}`);
+        }
+        return notify.call(this, message, type, { ...options, console: false });
+      };
+      window.addEventListener("unhandledrejection", onRejection);
+      window.addEventListener("error", onError);
+      try {
+        await body.call(this);
+      } finally {
+        watch.stop();
+        ui.notifications.notify = notify;
+        window.removeEventListener("unhandledrejection", onRejection);
+        window.removeEventListener("error", onError);
+      }
+      assert.deepEqual(watch.messages, [], "console errors or warnings during the test");
+    };
 }
 
 /**

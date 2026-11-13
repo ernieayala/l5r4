@@ -14,7 +14,6 @@
  * - Delegates lifecycle hooks to specialized modules (item-creation, item-updates)
  * - Uses preparation modules for data calculation (base-data, derived-data)
  * - Chat card rendering for rolling items to chat
- * - Sheet data enhancement for item sheet display
  *
  * @requires Foundry VTT v11+
  */
@@ -25,7 +24,6 @@ import { handleItemPreUpdate } from "./item/lifecycle/item-updates.js";
 import { prepareItemBaseData } from "./item/preparation/base-data.js";
 import { prepareItemDerivedData } from "./item/preparation/derived-data.js";
 import { renderItemChatCard } from "./item/integration/chat-cards.js";
-import { enhanceItemSheetData } from "./item/integration/sheet-data.js";
 
 /**
  * Item document for L5R4 Enhanced system.
@@ -117,18 +115,5 @@ export default class L5R4Item extends Item {
    */
   async roll() {
     return renderItemChatCard(this);
-  }
-
-  /**
-   * Enhance item sheet data.
-   * Adds computed values and formatting for sheet display.
-   *
-   * @param {object} options - Sheet rendering options
-   * @returns {Promise<object>} Enhanced sheet data
-   * @override
-   */
-  async getData(options) {
-    const data = await super.getData(options);
-    return enhanceItemSheetData(data);
   }
 }

@@ -2,7 +2,7 @@ import { SYS_ID } from "../../module/config/constants.js";
 import L5R4ItemSheet from "../../module/sheets/item-sheet.js";
 import L5R4NpcSheet from "../../module/sheets/npc-sheet.js";
 import L5R4PcSheet from "../../module/sheets/pc-sheet.js";
-import { changeThroughSheet, cleanTest } from "./helpers.js";
+import { changeThroughSheet, cleanTest, settleChatNotifications } from "./helpers.js";
 
 /**
  * Collect every `@import` rule reachable from the page's stylesheets. Stylesheets from another origin refuse
@@ -45,9 +45,15 @@ export function registerSmokeBatch(quench) {
   quench.registerBatch(
     `${SYS_ID}.smoke`,
     context => {
-      const { describe, it, after, assert } = context;
+      const { describe, it, before, after, assert } = context;
       const clean = cleanTest(assert);
       const created = [];
+
+      // A chat pop-up rejection from an earlier batch's cleanup would otherwise land in the first clean test
+      before(async function () {
+        this.timeout(10_000);
+        await settleChatNotifications();
+      });
 
       after(async () => {
         for (const doc of created) {

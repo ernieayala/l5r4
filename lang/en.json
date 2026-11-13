@@ -499,7 +499,12 @@
         "deleteItem": {
           "title": "Delete Item?",
           "content": "Are you sure you want to delete {name}?"
-        }
+        },
+        "deleteAttack": {
+          "title": "Remove Attack?",
+          "content": "Are you sure you want to remove {name}?"
+        },
+        "addAttack": "Add Attack"
       }
     },
     "character": {

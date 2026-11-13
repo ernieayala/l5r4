@@ -170,7 +170,15 @@
 
     <!-- Void ring -->
     <h4 class="ring-name ring-name-void">{{localize "l5r4.ui.mechanics.rings.void"}}</h4>
-    <div class="ring-rank ring-rank-void" data-action="ring-rank-void" data-ring="void" role="button" title="{{localize "l5r4.ui.hints.leftClickPlusRightClickMinus"}}"><span>{{system.rings.void.rank}}</span></div>
+    <div class="ring-rank ring-rank-void" data-action="ring-rank-void" data-ring="void" role="button" title="{{localize "l5r4.ui.hints.leftClickPlusRightClickMinus"}}">
+      <a class="trait-increase" data-action="void-ring-increase">
+        <i class="fas fa-chevron-up"></i>
+      </a>
+      <span>{{system.rings.void.rank}}</span>
+      <a class="trait-decrease" data-action="void-ring-decrease">
+        <i class="fas fa-chevron-down"></i>
+      </a>
+    </div>
     <div class="void-ring">
       <a class="ring-roll" data-action="roll-ring" data-ring-rank="{{system.rings.void.rank}}" data-ring-name="{{localize "l5r4.ui.mechanics.rings.void"}}" data-system-ring="void">
         <img src="{{iconPath 'void.webp'}}" title="{{localize "l5r4.ui.mechanics.rolls.ringRoll"}}" class="void-ring-img" />
@@ -198,6 +206,9 @@
   <section class="flexcol -gap-sm">
     <div class="flexrow -gap-sm section-title">
       <h4 class="title">{{localize "l5r4.ui.mechanics.combat.attack"}} & {{localize "l5r4.ui.common.damage"}}</h4>
+      {{#if firstEmptyAttack}}
+        <a class="button inline-control icon flex0" data-action="add-attack" data-attack-key="{{firstEmptyAttack}}" title="{{localize "l5r4.ui.dialogs.addAttack"}}"><i class="fas fa-plus"></i></a>
+      {{/if}}
     </div>
     <section class="item-list -attacks -header">
       <div class="item">
@@ -210,120 +221,49 @@
       </div>
     </section>
     <section class="item-list -attacks">
-      <div class="item -attacks -expandable" data-attack-section="attack1">
-        <h4 class="flexrow -gap-sm title" data-attack-title>{{#if system.attack1.name}}{{system.attack1.name}}{{else}}{{localize "l5r4.ui.mechanics.combat.attack"}} 1{{/if}}</h4>
-        <div class="button-mask-container">
-          <span class="mas">{{system.attack1.roll}}k{{system.attack1.keep}}{{#if system.attack1.modifier}}{{numberFormat system.attack1.modifier decimals=0 sign=true}}{{/if}}</span>
-          <a class="button"
-             data-action="roll-attack"
-             data-roll="{{system.attack1.roll}}"
-             data-keep="{{system.attack1.keep}}"
-             data-modifier="{{system.attack1.modifier}}"
-             data-description="{{system.attack1.type}}"
-             data-label="{{#if system.attack1.name}}{{system.attack1.name}}{{else}}{{localize "l5r4.ui.mechanics.combat.attack"}} 1{{/if}}"
-             title="{{localize "l5r4.ui.mechanics.combat.attack"}}">
-            {{system.attack1.roll}}k{{system.attack1.keep}}{{#if system.attack1.modifier}}{{numberFormat system.attack1.modifier decimals=0 sign=true}}{{/if}}
-          </a>
-        </div>
-        <div class="button-mask-container">
-          <span class="mas">{{system.damage1.roll}}k{{system.damage1.keep}}{{#if system.damage1.modifier}}{{numberFormat system.damage1.modifier decimals=0 sign=true}}{{/if}}</span>
-          <a class="button"
-             data-action="roll-damage"
-             data-roll="{{system.damage1.roll}}"
-             data-keep="{{system.damage1.keep}}"
-             data-modifier="{{system.damage1.modifier}}"
-             data-description="{{system.damage1.type}}"
-             data-label="{{localize "l5r4.ui.common.damage"}} 1"
-             title="{{localize "l5r4.ui.mechanics.rolls.damageRoll"}}">
-            {{system.damage1.roll}}k{{system.damage1.keep}}{{#if system.damage1.modifier}}{{numberFormat system.damage1.modifier decimals=0 sign=true}}{{/if}}
-          </a>
-        </div>
-        <div>
-          {{system.attack1.type}}
-        </div>
-        <div>
-          {{system.attack1.action}}
-        </div>
-        <div class="controls flexrow -gap-xs">
-          <a class="button inline-control icon" data-action="edit-attack" data-attack-key="attack1" title="{{localize "l5r4.ui.common.edit"}}"><i class="fas fa-edit"></i></a>
-        </div>
-      </div>
-      <div class="item -attacks -expandable" data-attack-section="attack2">
-        <h4 class="flexrow -gap-sm title" data-attack-title>{{#if system.attack2.name}}{{system.attack2.name}}{{else}}{{localize "l5r4.ui.mechanics.combat.attack"}} 2{{/if}}</h4>
-        <div class="button-mask-container">
-          <span class="mas">{{system.attack2.roll}}k{{system.attack2.keep}}{{#if system.attack2.modifier}}{{numberFormat system.attack2.modifier decimals=0 sign=true}}{{/if}}</span>
-          <a class="button"
-             data-action="roll-attack"
-             data-roll="{{system.attack2.roll}}"
-             data-keep="{{system.attack2.keep}}"
-             data-modifier="{{system.attack2.modifier}}"
-             data-description="{{system.attack2.type}}"
-             data-label="{{#if system.attack2.name}}{{system.attack2.name}}{{else}}{{localize "l5r4.ui.mechanics.combat.attack"}} 2{{/if}}"
-             title="{{localize "l5r4.ui.mechanics.combat.attack"}}">
-            {{system.attack2.roll}}k{{system.attack2.keep}}{{#if system.attack2.modifier}}{{numberFormat system.attack2.modifier decimals=0 sign=true}}{{/if}}
-          </a>
-        </div>
-        <div class="button-mask-container">
-          <span class="mas">{{system.damage2.roll}}k{{system.damage2.keep}}{{#if system.damage2.modifier}}{{numberFormat system.damage2.modifier decimals=0 sign=true}}{{/if}}</span>
-          <a class="button"
-             data-action="roll-damage"
-             data-roll="{{system.damage2.roll}}"
-             data-keep="{{system.damage2.keep}}"
-             data-modifier="{{system.damage2.modifier}}"
-             data-description="{{system.damage2.type}}"
-             data-label="{{localize "l5r4.ui.common.damage"}} 2"
-             title="{{localize "l5r4.ui.mechanics.rolls.damageRoll"}}">
-            {{system.damage2.roll}}k{{system.damage2.keep}}{{#if system.damage2.modifier}}{{numberFormat system.damage2.modifier decimals=0 sign=true}}{{/if}}
-          </a>
-        </div>
-        <div>
-          {{system.attack2.type}}
-        </div>
-        <div>
-          {{system.attack2.action}}
-        </div>
-        <div class="controls flexrow -gap-xs">
-          <a class="button inline-control icon" data-action="edit-attack" data-attack-key="attack2" title="{{localize "l5r4.ui.common.edit"}}"><i class="fas fa-edit"></i></a>
-        </div>
-      </div>
-      <div class="item -attacks -expandable" data-attack-section="attack3">
-        <h4 class="flexrow -gap-sm title" data-attack-title>{{#if system.attack3.name}}{{system.attack3.name}}{{else}}{{localize "l5r4.ui.mechanics.combat.attack"}} 3{{/if}}</h4>
-        <div class="button-mask-container">
-          <span class="mas">{{system.attack3.roll}}k{{system.attack3.keep}}{{#if system.attack3.modifier}}{{numberFormat system.attack3.modifier decimals=0 sign=true}}{{/if}}</span>
-          <a class="button"
-             data-action="roll-attack"
-             data-roll="{{system.attack3.roll}}"
-             data-keep="{{system.attack3.keep}}"
-             data-modifier="{{system.attack3.modifier}}"
-             data-description="{{system.attack3.type}}"
-             data-label="{{#if system.attack3.name}}{{system.attack3.name}}{{else}}{{localize "l5r4.ui.mechanics.combat.attack"}} 3{{/if}}"
-             title="{{localize "l5r4.ui.mechanics.combat.attack"}}">
-            {{system.attack3.roll}}k{{system.attack3.keep}}{{#if system.attack3.modifier}}{{numberFormat system.attack3.modifier decimals=0 sign=true}}{{/if}}
-          </a>
-        </div>
-        <div class="button-mask-container">
-          <span class="mas">{{system.damage3.roll}}k{{system.damage3.keep}}{{#if system.damage3.modifier}}{{numberFormat system.damage3.modifier decimals=0 sign=true}}{{/if}}</span>
-          <a class="button"
-             data-action="roll-damage"
-             data-roll="{{system.damage3.roll}}"
-             data-keep="{{system.damage3.keep}}"
-             data-modifier="{{system.damage3.modifier}}"
-             data-description="{{system.damage3.type}}"
-             data-label="{{localize "l5r4.ui.common.damage"}} 3"
-             title="{{localize "l5r4.ui.mechanics.rolls.damageRoll"}}">
-            {{system.damage3.roll}}k{{system.damage3.keep}}{{#if system.damage3.modifier}}{{numberFormat system.damage3.modifier decimals=0 sign=true}}{{/if}}
-          </a>
-        </div>
-        <div>
-          {{system.attack3.type}}
-        </div>
-        <div>
-          {{system.attack3.action}}
-        </div>
-        <div class="controls flexrow -gap-xs">
-          <a class="button inline-control icon" data-action="edit-attack" data-attack-key="attack3" title="{{localize "l5r4.ui.common.edit"}}"><i class="fas fa-edit"></i></a>
-        </div>
-      </div>
+      {{#each attacks}}
+        {{#unless empty}}
+          <div class="item -attacks -expandable" data-attack-section="{{key}}">
+            <h4 class="flexrow -gap-sm title" data-attack-title>{{#if attack.name}}{{attack.name}}{{else}}{{localize "l5r4.ui.mechanics.combat.attack"}} {{num}}{{/if}}</h4>
+            <div class="button-mask-container">
+              <span class="mas">{{attack.roll}}k{{attack.keep}}{{#if attack.modifier}}{{numberFormat attack.modifier decimals=0 sign=true}}{{/if}}</span>
+              <a class="button"
+                 data-action="roll-attack"
+                 data-roll="{{attack.roll}}"
+                 data-keep="{{attack.keep}}"
+                 data-modifier="{{attack.modifier}}"
+                 data-description="{{attack.type}}"
+                 data-label="{{#if attack.name}}{{attack.name}}{{else}}{{localize "l5r4.ui.mechanics.combat.attack"}} {{num}}{{/if}}"
+                 title="{{localize "l5r4.ui.mechanics.combat.attack"}}">
+                {{attack.roll}}k{{attack.keep}}{{#if attack.modifier}}{{numberFormat attack.modifier decimals=0 sign=true}}{{/if}}
+              </a>
+            </div>
+            <div class="button-mask-container">
+              <span class="mas">{{damage.roll}}k{{damage.keep}}{{#if damage.modifier}}{{numberFormat damage.modifier decimals=0 sign=true}}{{/if}}</span>
+              <a class="button"
+                 data-action="roll-damage"
+                 data-roll="{{damage.roll}}"
+                 data-keep="{{damage.keep}}"
+                 data-modifier="{{damage.modifier}}"
+                 data-description="{{damage.type}}"
+                 data-label="{{localize "l5r4.ui.common.damage"}} {{num}}"
+                 title="{{localize "l5r4.ui.mechanics.rolls.damageRoll"}}">
+                {{damage.roll}}k{{damage.keep}}{{#if damage.modifier}}{{numberFormat damage.modifier decimals=0 sign=true}}{{/if}}
+              </a>
+            </div>
+            <div>
+              {{attack.type}}
+            </div>
+            <div>
+              {{attack.action}}
+            </div>
+            <div class="controls flexrow -gap-xs">
+              <a class="button inline-control icon" data-action="edit-attack" data-attack-key="{{key}}" title="{{localize "l5r4.ui.common.edit"}}"><i class="fas fa-edit"></i></a>
+              <a class="button inline-control icon" data-action="delete-attack" data-attack-key="{{key}}" title="{{localize "l5r4.ui.common.delete"}}"><i class="fas fa-trash"></i></a>
+            </div>
+          </div>
+        {{/unless}}
+      {{/each}}
     </section>
   </section>
 

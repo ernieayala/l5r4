@@ -23,6 +23,16 @@
   --void-ring-color: 125, 104, 98;
 }
 
+.theme-light {
+  --l5r4-ring-rank-backdrop-color: transparent;
+  --l5r4-ring-rank-backdrop-image: url("../../../ui/parchment.jpg");
+}
+
+.theme-dark {
+  --l5r4-ring-rank-backdrop-color: var(--color-cool-5-90);
+  --l5r4-ring-rank-backdrop-image: none;
+}
+
 /**
  * Base Reset
  * System-specific browser resets and base element styling
@@ -838,6 +848,8 @@ body > * {
 }
 .l5r4.pc .traits-rings .ring-rank::before,
 .l5r4.npc .traits-rings .ring-rank::before {
+  background-color: var(--l5r4-ring-rank-backdrop-color);
+  background-image: var(--l5r4-ring-rank-backdrop-image);
   background-position: center;
   background-size: cover;
   border: 2px solid transparent;
@@ -845,14 +857,6 @@ body > * {
   content: "";
   inset: -4px;
   position: absolute;
-}
-.theme-light .l5r4.pc .traits-rings .ring-rank::before,
-.theme-light .l5r4.npc .traits-rings .ring-rank::before {
-  background-image: url("../../../ui/parchment.jpg");
-}
-.theme-dark .l5r4.pc .traits-rings .ring-rank::before,
-.theme-dark .l5r4.npc .traits-rings .ring-rank::before {
-  background-color: var(--color-cool-5-90);
 }
 .l5r4.pc .traits-rings .ring-rank.ring-rank-fire span,
 .l5r4.npc .traits-rings .ring-rank.ring-rank-fire span {
@@ -874,10 +878,56 @@ body > * {
   background-color: rgb(var(--water-ring-color), 0.1);
   border-color: rgb(var(--water-ring-color));
 }
+.l5r4.pc .traits-rings .ring-rank.ring-rank-void,
+.l5r4.npc .traits-rings .ring-rank.ring-rank-void {
+  cursor: pointer;
+}
 .l5r4.pc .traits-rings .ring-rank.ring-rank-void span,
 .l5r4.npc .traits-rings .ring-rank.ring-rank-void span {
   background-color: rgb(var(--void-ring-color), 0.1);
   border-color: rgb(var(--void-ring-color));
+}
+.l5r4.pc .traits-rings .ring-rank.ring-rank-void:hover .trait-increase,
+.l5r4.pc .traits-rings .ring-rank.ring-rank-void:hover .trait-decrease,
+.l5r4.npc .traits-rings .ring-rank.ring-rank-void:hover .trait-increase,
+.l5r4.npc .traits-rings .ring-rank.ring-rank-void:hover .trait-decrease {
+  opacity: 1;
+}
+.l5r4.pc .traits-rings .ring-rank.ring-rank-void:hover .trait-increase,
+.l5r4.npc .traits-rings .ring-rank.ring-rank-void:hover .trait-increase {
+  top: -16px;
+}
+.l5r4.pc .traits-rings .ring-rank.ring-rank-void:hover .trait-decrease,
+.l5r4.npc .traits-rings .ring-rank.ring-rank-void:hover .trait-decrease {
+  bottom: -16px;
+}
+.l5r4.pc .traits-rings .ring-rank.ring-rank-void .trait-increase,
+.l5r4.pc .traits-rings .ring-rank.ring-rank-void .trait-decrease,
+.l5r4.npc .traits-rings .ring-rank.ring-rank-void .trait-increase,
+.l5r4.npc .traits-rings .ring-rank.ring-rank-void .trait-decrease {
+  align-items: center;
+  background-color: inherit;
+  border: 1px solid black;
+  border-color: inherit;
+  color: inherit;
+  display: flex;
+  font-size: 10px;
+  height: 16px;
+  justify-content: center;
+  left: -2px;
+  opacity: 0;
+  position: absolute;
+  right: -1px;
+  transition: opacity 150ms ease-out, top 150ms ease-out, bottom 150ms ease-out;
+  z-index: 11;
+}
+.l5r4.pc .traits-rings .ring-rank.ring-rank-void .trait-increase,
+.l5r4.npc .traits-rings .ring-rank.ring-rank-void .trait-increase {
+  top: 0;
+}
+.l5r4.pc .traits-rings .ring-rank.ring-rank-void .trait-decrease,
+.l5r4.npc .traits-rings .ring-rank.ring-rank-void .trait-decrease {
+  bottom: 0;
 }
 .l5r4.pc .traits-rings .ring-rank span,
 .l5r4.npc .traits-rings .ring-rank span {
