@@ -5,9 +5,9 @@
  * 
  * **Initialization Sequence:**
  * 1. Register system settings for data preparation
- * 2. Configure document classes (Actor/Item) with L5R4 implementations
+ * 2. Configure document classes (Actor, Item, Combat, Combatant) with L5R4 implementations
  * 3. Build CONFIG.l5r4 namespace with game data (rings, traits, stances, status effects)
- * 4. Initialize L5R4 initiative system with Insight/Reflexes rolls
+ * 4. Wire the Initiative Void Point prompt into L5R4Combat
  * 5. Register Application v2 sheets for all actor and item types
  * 6. Preload Handlebars templates and register custom helpers
  * 7. Initialize services (stance management, chat integration)
@@ -49,6 +49,8 @@ import { NPC_NUMBER_WOUND_LVLS } from "../module/config/game-mechanics.js";
 import { STATUS_EFFECTS } from "../module/config/status-effects.js";
 import { CORE_TYPE_DATA_MODELS, DATA_MODELS } from "../module/data/index.js";
 import L5R4Actor from "../module/documents/actor.js";
+import L5R4Combat from "../module/documents/combat.js";
+import L5R4Combatant from "../module/documents/combatant.js";
 import L5R4Item from "../module/documents/item.js";
 import L5R4ItemSheet from "../module/sheets/item-sheet.js";
 import L5R4PcSheet from "../module/sheets/pc-sheet.js";
@@ -57,7 +59,7 @@ import { preloadTemplates } from "../module/setup/preload-templates.js";
 import { runMigrations } from "../module/setup/migrations.js";
 import { registerSettings } from "../module/setup/register-settings.js";
 import { registerHandlebarsHelpers } from "../module/setup/register-handlebars.js";
-import { initializeInitiativeSystem } from "../module/services/initiative.js";
+import { resolveVoidInitiative } from "../module/services/initiative.js";
 import { registerAllHooks } from "../module/hooks/register-all.js";
 
 
@@ -77,6 +79,14 @@ Hooks.once("init", async () => {
 
   CONFIG.Item.documentClass  = L5R4Item;
   CONFIG.Actor.documentClass = L5R4Actor;
+  CONFIG.Combat.documentClass = L5R4Combat;
+  CONFIG.Combatant.documentClass = L5R4Combatant;
+
+  // Initiative is the Roll & Keep pool rolled by L5R4Combatant; core's formula is only the fallback for a
+  // combatant with no actor. Scores are whole numbers.
+  CONFIG.Combat.initiative = { formula: "1d10", decimals: 0 };
+  // Documents do not import services, so the Void Point prompt reaches L5R4Combat here
+  L5R4Combat.resolveInitiativeBonuses = resolveVoidInitiative;
 
   // One data model per subtype declared in system.json documentTypes, plus models for core types, which are not
   // declared. Core labels each subtype with its TYPES.<Document>.<type> key from lang/*.json.
@@ -110,8 +120,6 @@ Hooks.once("init", async () => {
   }
 
   CONFIG.l5r4.TRAIT_CHOICES = CONFIG.l5r4.traits;
-
-  initializeInitiativeSystem();
 
   // Core 14.370 registers no Actor or Item sheet, so these are the only ones and nothing is unregistered
   // (client/applications/sheets/_module.mjs:83-128).

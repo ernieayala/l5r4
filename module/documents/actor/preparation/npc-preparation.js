@@ -17,6 +17,7 @@
  */
 
 import { toInt } from "../../../utils/type-coercion.js";
+import { initiativeDice } from "../../../utils/initiative.js";
 
 import { applyStanceAutomation } from "../../../services/stance/core/automation.js";
 
@@ -61,8 +62,9 @@ export function prepareNpcData(actor, sys, finalizeWoundPenaltiesFn) {
   const sourceKeep = toInt(actor._source?.system?.initiative?.keep);
 
   const hasCustomInitiative = sourceRoll > 0 && sourceKeep > 0;
-  const baseRoll = hasCustomInitiative ? sourceRoll : insightRank + ref;
-  const baseKeep = hasCustomInitiative ? sourceKeep : ref;
+  const formula = initiativeDice({ insightRank, reflexes: ref });
+  const baseRoll = hasCustomInitiative ? sourceRoll : formula.roll;
+  const baseKeep = hasCustomInitiative ? sourceKeep : formula.keep;
 
   const rollMod = toInt(sys.initiative.rollMod) || 0;
   const keepMod = toInt(sys.initiative.keepMod) || 0;

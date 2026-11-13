@@ -12,6 +12,8 @@
  */
 
 import { SYS_ID } from "../../../module/config/constants.js";
+import L5R4Combat from "../../../module/documents/combat.js";
+import L5R4Combatant from "../../../module/documents/combatant.js";
 import { createTestPC, createTestNPC } from "../../fixtures/actor-fixtures.js";
 
 /**
@@ -141,7 +143,7 @@ export function registerInitiativeTests(quench) {
         });
 
         it("should default to Reflexes for NPC initiative", () => {
-          // First verify what reflexes value the NPC actually has
+          // The NPC's Reflexes, which the effective pool falls back to
           const reflexes = npc.system.traits.ref;
 
           // NPCs use effRoll/effKeep which default to Reflexes when roll/keep are 0
@@ -322,9 +324,9 @@ export function registerInitiativeTests(quench) {
           ]);
           const roll = combatant.getInitiativeRoll();
 
-          // ASSERT - Should now be 4k5 (3 + 2 keepMod)
+          // ASSERT - The pool is 4k5 (3 + 2 keepMod); a roll keeps no more dice than it rolls, so it rolls 4k4
           assert.equal(actor.system.initiative.keep, 5, "Keep increased by keepMod");
-          assert.include(roll.formula, "4d10k5", "Formula contains 5 kept dice");
+          assert.include(roll.formula, "4d10k4", "Formula keeps all 4 rolled dice");
         });
 
         it("should apply totalMod as flat bonus", async () => {
@@ -535,6 +537,119 @@ export function registerInitiativeTests(quench) {
           // Roll = Insight Rank + Reflexes
           assert.isAbove(insightRank, 1, "Insight rank increased with skills");
           assert.isAbove(roll, 10, "Roll can exceed 10 (Insight + Reflexes)");
+        });
+      });
+
+      describe("Combat and Combatant classes (roadmap Stage 5)", () => {
+        let combat, actor;
+
+        afterEach(async () => {
+          await combat?.delete();
+          await actor?.delete();
+          combat = null;
+          actor = null;
+        });
+
+        it("registers the system's Combat and Combatant classes and leaves core's prototypes alone", () => {
+          assert.equal(CONFIG.Combat.documentClass, L5R4Combat);
+          assert.equal(CONFIG.Combatant.documentClass, L5R4Combatant);
+          assert.notEqual(
+            foundry.documents.Combat.prototype.rollInitiative,
+            L5R4Combat.prototype.rollInitiative,
+            "core Combat#rollInitiative is not replaced"
+          );
+          assert.notEqual(
+            foundry.documents.Combatant.prototype._getInitiativeFormula,
+            L5R4Combatant.prototype._getInitiativeFormula,
+            "core Combatant#_getInitiativeFormula is not replaced"
+          );
+        });
+
+        it("rolls the Insight Rank computed from Rings and Skills, not the stored one (B4)", async () => {
+          actor = await createTestPC({
+            name: "B4 Insight",
+            system: { traits: { ref: 3 }, insight: { rank: 1 } }
+          });
+          // Rings 2 each (100 points) + 60 Skill ranks = 160 points: Insight Rank 2 (p.104)
+          await actor.createEmbeddedDocuments("Item", [
+            { name: "Skill A", type: "skill", system: { rank: 10 } },
+            { name: "Skill B", type: "skill", system: { rank: 10 } },
+            { name: "Skill C", type: "skill", system: { rank: 10 } },
+            { name: "Skill D", type: "skill", system: { rank: 10 } },
+            { name: "Skill E", type: "skill", system: { rank: 10 } },
+            { name: "Skill F", type: "skill", system: { rank: 10 } }
+          ]);
+          assert.equal(actor._source.system.insight.rank, 1, "stored rank");
+          assert.equal(actor.system.insight.rank, 2, "computed rank");
+          assert.equal(actor.system.initiative.roll, 5, "Insight Rank 2 + Reflexes 3");
+        });
+
+        it("rolls a 12k10 pool as 10k10 + 4 (p.77)", async () => {
+          actor = await createTestPC({
+            name: "Ten Dice Initiative",
+            system: { traits: { ref: 10 } }
+          });
+          await actor.update({ "system.initiative.rollMod": 12 - actor.system.initiative.roll });
+          combat = await Combat.create({ scene: null, active: false });
+          const [combatant] = await combat.createEmbeddedDocuments("Combatant", [
+            { actorId: actor.id }
+          ]);
+          assert.equal(actor.system.initiative.roll, 12);
+          assert.equal(combatant.getInitiativeRoll().formula, "10d10k10x10 + 4");
+        });
+
+        it("follows the Little Truths setting like every other roll", async () => {
+          const setting = game.settings.get(SYS_ID, "LtException");
+          actor = await createTestPC({ name: "Little Truths Initiative" });
+          combat = await Combat.create({ scene: null, active: false });
+          const [combatant] = await combat.createEmbeddedDocuments("Combatant", [
+            { actorId: actor.id }
+          ]);
+          try {
+            await game.settings.set(SYS_ID, "LtException", false);
+            assert.equal(combatant.getInitiativeRoll().formula, "3d10k2x10");
+            await game.settings.set(SYS_ID, "LtException", true);
+            assert.equal(combatant.getInitiativeRoll().formula, "3d10k2x10 + 2");
+          } finally {
+            await game.settings.set(SYS_ID, "LtException", setting);
+          }
+        });
+
+        it("prompts once for a marked Void Point, spends it, and adds +10 to that roll only", async () => {
+          actor = await createTestPC({ name: "Void Initiative" });
+          await actor.update({ "system.initiative.useVoid": true });
+          combat = await Combat.create({ scene: null, active: false });
+          const [combatant] = await combat.createEmbeddedDocuments("Combatant", [
+            { actorId: actor.id }
+          ]);
+          const confirm = foundry.applications.api.DialogV2.confirm;
+          let prompts = 0;
+          foundry.applications.api.DialogV2.confirm = async () => {
+            prompts += 1;
+            return true;
+          };
+          const formulas = [];
+          const hookId = Hooks.on("createChatMessage", message => {
+            if (message.flags?.core?.initiativeRoll) {
+              formulas.push(message.rolls[0].formula);
+            }
+          });
+          try {
+            await combat.rollInitiative(combatant.id);
+            await combat.rollInitiative(combatant.id);
+          } finally {
+            foundry.applications.api.DialogV2.confirm = confirm;
+            Hooks.off("createChatMessage", hookId);
+          }
+          assert.equal(prompts, 1, "one prompt");
+          assert.equal(actor.system.rings.void.value, 1, "Void Points 2 - 1");
+          assert.isFalse(actor.system.initiative.useVoid, "mark cleared");
+          assert.deepEqual(formulas, ["3d10k2x10 + 10", "3d10k2x10"], "+10 on the first roll only");
+          assert.notProperty(
+            actor.flags[SYS_ID] ?? {},
+            "voidInitiative",
+            "nothing stored for the bonus"
+          );
         });
       });
 
