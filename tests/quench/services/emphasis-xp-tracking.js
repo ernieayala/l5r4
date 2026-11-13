@@ -250,9 +250,8 @@ export function registerEmphasisXpTrackingTests(quench) {
           );
 
           // Import here to avoid circular dependency issues
-          const { calculateXpDataVersion } = await import(
-            "../../../module/services/xp/xp-versioning.js"
-          );
+          const { calculateXpDataVersion } =
+            await import("../../../module/services/xp/xp-versioning.js");
 
           const version1 = calculateXpDataVersion(actor);
           assert.isNumber(version1, "Version should be a number");
@@ -281,9 +280,8 @@ export function registerEmphasisXpTrackingTests(quench) {
             { parent: actor }
           );
 
-          const { calculateXpDataVersion } = await import(
-            "../../../module/services/xp/xp-versioning.js"
-          );
+          const { calculateXpDataVersion } =
+            await import("../../../module/services/xp/xp-versioning.js");
 
           const version = calculateXpDataVersion(actor);
           assert.isNumber(version, "Should handle empty array without error");
@@ -303,9 +301,8 @@ export function registerEmphasisXpTrackingTests(quench) {
             { parent: actor }
           );
 
-          const { calculateXpDataVersion } = await import(
-            "../../../module/services/xp/xp-versioning.js"
-          );
+          const { calculateXpDataVersion } =
+            await import("../../../module/services/xp/xp-versioning.js");
 
           const version = calculateXpDataVersion(actor);
           assert.isNumber(version, "Should handle undefined without error");

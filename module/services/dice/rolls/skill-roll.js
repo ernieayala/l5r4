@@ -70,8 +70,8 @@ import { getArmorTNPenalty } from "../../../utils/armor-penalties.js";
  * Shows roll options dialog by default (askForOptions=true).
  * Hold Shift while clicking to skip dialog (askForOptions=false).
  * The dialog includes a checkbox for social resistance which adds the character's
- * Honor Rank as a flat bonus to the roll. When dialog is skipped, uses provided
- * bonuses directly.
+ * Honor Rank as a flat bonus to the roll. When dialog is skipped, uses the provided
+ * bonuses.
  *
  * Attack Rolls:
  * When rollType is "attack" and no manual TN is set, automatically resolves the
@@ -131,12 +131,9 @@ export async function SkillRoll({
     "l5r4.ui.mechanics.rolls.skillRoll"
   )}: ${skillLabel} / ${game.i18n.localize(traitI18nKey)}`;
 
-  let emphasis = false;
   let rollMod = 0;
   let keepMod = 0;
   let totalMod = 0;
-  let applyWoundPenalty = true;
-  let socialResistance = false;
 
   // Resolve target TN and info string from selected tokens (attack rolls only)
   const { autoTN, targetInfo, targetData } = resolveTargets(actor, rollType);
@@ -160,8 +157,8 @@ export async function SkillRoll({
   let check;
   if (askForOptions) {
     const voidRing = npc
-      ? actor?.system?.rings?.void?.rank ?? 0
-      : actor?.system?.rings?.void?.value ?? 0;
+      ? (actor?.system?.rings?.void?.rank ?? 0)
+      : (actor?.system?.rings?.void?.value ?? 0);
     const noVoid = npc && voidRing < 1;
     check = await GetSkillOptions(skillName, actor, noVoid, rollBonus, keepBonus, totalBonus);
     if (!check || check.cancelled) {
@@ -194,7 +191,7 @@ export async function SkillRoll({
   }
 
   // Extract emphasis, wound penalty, and social resistance flags from dialog/default check object
-  ({ emphasis, applyWoundPenalty, socialResistance } = check);
+  const { emphasis, applyWoundPenalty, socialResistance } = check;
   rollMod += toInt(check.rollMod);
   keepMod += toInt(check.keepMod);
   totalMod += toInt(check.totalMod);

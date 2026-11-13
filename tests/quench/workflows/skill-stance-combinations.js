@@ -14,7 +14,7 @@
  *
  * Testing Principles (from rules 11-13):
  * - Test behavior, not implementation
- * - Test edge cases and combinations, not just happy paths
+ * - Test edge cases and stance combinations as well as the common case
  * - Verify tests catch bugs through mutation testing
  * - Focus on real gameplay scenarios
  *
@@ -125,13 +125,14 @@ export function registerSkillStanceCombinationTests(quench) {
             }
           });
 
+          // Foundry 14.370 does not return created embedded documents in request order; look them up by name.
           const createdItems = await actor.createEmbeddedDocuments("Item", [
             createSkillData("Kenjutsu", 5, "agi"),
             createSkillData("Etiquette", 3, "awa")
           ]);
 
-          weaponSkill = createdItems[0];
-          socialSkill = createdItems[1];
+          weaponSkill = createdItems.find(i => i.name === "Kenjutsu");
+          socialSkill = createdItems.find(i => i.name === "Etiquette");
         });
 
         afterEach(async () => {
@@ -262,10 +263,13 @@ export function registerSkillStanceCombinationTests(quench) {
             }
           });
 
-          [weaponSkill, investigationSkill] = await actor.createEmbeddedDocuments("Item", [
+          // Foundry 14.370 does not return created embedded documents in request order; look them up by name.
+          const createdItems = await actor.createEmbeddedDocuments("Item", [
             createSkillData("Kenjutsu", 4, "agi"),
             createSkillData("Investigation", 3, "per")
           ]);
+          weaponSkill = createdItems.find(i => i.name === "Kenjutsu");
+          investigationSkill = createdItems.find(i => i.name === "Investigation");
         });
 
         afterEach(async () => {
@@ -426,7 +430,7 @@ export function registerSkillStanceCombinationTests(quench) {
           // Test verifies stance is active; enforcement is in UI/handler layer
         });
 
-        it("should increase Armor TN significantly in Full Defense Stance", async () => {
+        it("should add half the Defense roll to Armor TN in Full Defense Stance", async () => {
           // Apply Full Defense Stance with stored roll result
           const defenseRollResult = 20; // Defense/Reflexes roll total
           // Flag must be an object with 'total' property (matches Roll object structure)

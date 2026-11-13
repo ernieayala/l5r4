@@ -28,7 +28,7 @@ export function registerStatusEffectsWorkflowTests(quench) {
   quench.registerBatch(
     `${SYS_ID}.workflows.status-effects`,
     context => {
-      const { describe, it, assert, before, after } = context;
+      const { describe, it, assert, before, after, afterEach } = context;
 
       describe("Status Effects Complete Workflow", () => {
         let actor;

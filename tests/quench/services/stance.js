@@ -27,7 +27,7 @@ export function registerStanceTests(quench) {
   quench.registerBatch(
     `${SYS_ID}.services.stance`,
     context => {
-      const { describe, it, assert } = context;
+      const { describe, it, assert, afterEach } = context;
 
       describe("Stance Identification", () => {
         it("should recognize all five L5R4 stances", () => {

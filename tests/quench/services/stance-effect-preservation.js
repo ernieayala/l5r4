@@ -13,7 +13,7 @@
  * the changes array with templateData.changes || [], which evaluated to [] since
  * stance templates don't define changes. This destroyed any existing modifications.
  *
- * @module tests/integration/services/stance-effect-preservation
+ * @module tests/quench/services/stance-effect-preservation
  */
 
 import { SYS_ID } from "../../../module/config/constants.js";

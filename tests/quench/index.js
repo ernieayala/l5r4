@@ -23,73 +23,75 @@ import { SYS_ID } from "../../module/config/constants.js";
 import { buildFormula } from "../../module/services/dice/core/formula-builder.js";
 import { createTestPC, createTestNPC } from "../fixtures/actor-fixtures.js";
 import { createSkillData, createWeaponData, createArmorData } from "../fixtures/item-fixtures.js";
-import { registerSkillRollTests as registerSkillRollServiceTests } from "./services/skill-rolls.test.js";
-import { registerSkillTraitSwitchingTests } from "./services/skill-trait-switching.test.js";
-import { registerWeaponRollTests } from "./services/weapon-rolls.test.js";
-import { registerAttackRollEmphasisTests } from "./services/attack-roll-emphasis.test.js";
-import { registerAttackRollVoidTests } from "./services/attack-roll-void.test.js";
-import { registerInitiativeTests } from "./services/initiative.test.js";
-import { registerSpellCastRollTests } from "./services/spell-rolls.test.js";
-import { registerSpellRollVoidTests } from "./services/spell-roll-void.test.js";
-import { registerRingRollTests } from "./services/ring-rolls.test.js";
-import { registerTraitRollTests } from "./services/trait-rolls.test.js";
-import { registerNpcRollTests } from "./services/npc-rolls.test.js";
-import { registerFearTests } from "./services/fear.test.js";
-import { registerStanceTests } from "./services/stance.test.js";
-import { registerRestTests } from "./services/rest.test.js";
-import { registerFamilyBonusTests } from "./services/family-bonus-service.test.js";
-import { registerXpServiceTests } from "./services/xp-service.test.js";
-import { registerEmphasisXpTrackingTests } from "./services/emphasis-xp-tracking.test.js";
-import { registerVoidPointsTests } from "./services/void-points.test.js";
-import { registerSpellSlotsTests } from "./services/spell-slots.test.js";
-import { registerPCSheetTests } from "./sheets/pc-sheet.test.js";
-import { registerNPCSheetTests } from "./sheets/npc-sheet.test.js";
-import { registerItemSheetTests } from "./sheets/item-sheet.test.js";
-import { registerWoundConfigTests } from "./sheets/wound-config.test.js";
-import { registerXpManagerTests } from "./sheets/xp-manager.test.js";
-import { registerEmphasisManagerTests } from "./sheets/emphasis-manager.test.js";
-import { registerNPCAttackConfigTests } from "./apps/npc-attack-config.test.js";
-import { registerWealthManagerTests } from "./apps/wealth-manager.integration.test.js";
-import { registerConditionManagerTests } from "./apps/condition-manager.test.js";
-import { registerCombatWorkflowTests } from "./workflows/combat-workflow.test.js";
-import { registerMeleeDamageStrengthTests } from "./workflows/melee-damage-strength.test.js";
-import { registerAdvancementWorkflowTests } from "./workflows/advancement-workflow.test.js";
-import { registerSpellCastingWorkflowTests } from "./workflows/spell-casting-workflow.test.js";
-import { registerTraitFamilyBonusTests } from "./workflows/trait-family-bonus.test.js";
-import { registerArmorTNCalculationTests } from "./workflows/armor-tn-calculation.test.js";
-import { registerDiceRollingWorkflowTests } from "./workflows/dice-rolling-workflow.test.js";
-import { registerStanceSwitchingWorkflowTests } from "./workflows/stance-switching-workflow.test.js";
-import { registerInitiativeWorkflowTests } from "./workflows/initiative-workflow.test.js";
-import { registerItemManagementWorkflowTests } from "./workflows/item-management-workflow.test.js";
-import { registerStatusEffectsWorkflowTests } from "./workflows/status-effects-workflow.test.js";
-import { registerStatusEffectsAllRollsTests } from "./workflows/status-effects-all-rolls.test.js";
-import { registerFearWorkflowTests } from "./workflows/fear-workflow.test.js";
-import { registerRestRecoveryWorkflowTests } from "./workflows/rest-recovery-workflow.test.js";
-import { registerNPCWorkflowTests } from "./workflows/npc-workflows.test.js";
-import { registerChatSystemWorkflowTests } from "./workflows/chat-system-workflow.test.js";
-import { registerEmphasisWorkflowTests } from "./workflows/emphasis-workflow.test.js";
-import { registerEmphasisRerollMechanicsTests } from "./workflows/emphasis-reroll-mechanics.test.js";
-import { registerSkillVoidPointTests } from "./workflows/skill-void-point.test.js";
-import { registerSkillStanceCombinationTests } from "./workflows/skill-stance-combinations.test.js";
-import { registerActorCreationRaceConditionTests } from "./workflows/actor-creation-race-conditions.test.js";
-import { registerInitiativeRaceConditionTests } from "./workflows/initiative-race-conditions.test.js";
-import { registerDamageRaceConditionTests } from "./workflows/damage-race-conditions.test.js";
-import { registerXpRaceConditionTests } from "./workflows/xp-race-conditions.test.js";
-import { registerSkillAdvancementRaceConditionTests } from "./workflows/skill-advancement-race-conditions.test.js";
-import { registerItemCreationRaceConditionTests } from "./workflows/item-creation-race-conditions.test.js";
-import { registerAttackEdgeCaseTests } from "./workflows/attack-edge-cases.test.js";
-import { registerSpellSlotsEdgeCaseTests } from "./workflows/spell-slots-edge-cases.test.js";
-import { registerStanceEdgeCaseTests } from "./workflows/stance-edge-cases.test.js";
-import { registerConditionsEdgeCaseTests } from "./workflows/conditions-edge-cases.test.js";
-import { registerXpTrackingEdgeCaseTests } from "./workflows/xp-tracking-edge-cases.test.js";
-import { registerSkillAdvancementEdgeCaseTests } from "./workflows/skill-advancement-edge-cases.test.js";
-import { registerMigrationEdgeCaseTests } from "./workflows/migration-edge-cases.test.js";
-import { registerWoundConfigEdgeCaseTests } from "./workflows/wound-config-edge-cases.test.js";
-import { registerChatCardContentValidationTests } from "./services/chat-card-content-validation.test.js";
-import { register as registerWoundPenaltyAllRollsTests } from "./rolls/wound-penalty-all-rolls.integration.test.js";
-import { registerMultipleModifierCombinationTests } from "./services/multiple-modifier-combinations.test.js";
-import { registerCombatModifiersTests } from "./documents/combat-modifiers.test.js";
-import { registerStanceEffectPreservationTests } from "./services/stance-effect-preservation.test.js";
+import { registerSkillRollTests as registerSkillRollServiceTests } from "./services/skill-rolls.js";
+import { registerSkillTraitSwitchingTests } from "./services/skill-trait-switching.js";
+import { registerWeaponRollTests } from "./services/weapon-rolls.js";
+import { registerAttackRollEmphasisTests } from "./services/attack-roll-emphasis.js";
+import { registerAttackRollVoidTests } from "./services/attack-roll-void.js";
+import { registerInitiativeTests } from "./services/initiative.js";
+import { registerSpellCastRollTests } from "./services/spell-rolls.js";
+import { registerSpellRollVoidTests } from "./services/spell-roll-void.js";
+import { registerRingRollTests } from "./services/ring-rolls.js";
+import { registerTraitRollTests } from "./services/trait-rolls.js";
+import { registerNpcRollTests } from "./services/npc-rolls.js";
+import { registerFearTests } from "./services/fear.js";
+import { registerStanceTests } from "./services/stance.js";
+import { registerRestTests } from "./services/rest.js";
+import { registerFamilyBonusTests } from "./services/family-bonus-service.js";
+import { registerXpServiceTests } from "./services/xp-service.js";
+import { registerEmphasisXpTrackingTests } from "./services/emphasis-xp-tracking.js";
+import { registerVoidPointsTests } from "./services/void-points.js";
+import { registerSpellSlotsTests } from "./services/spell-slots.js";
+import { registerPCSheetTests } from "./sheets/pc-sheet.js";
+import { registerNPCSheetTests } from "./sheets/npc-sheet.js";
+import { registerItemSheetTests } from "./sheets/item-sheet.js";
+import { registerWoundConfigTests } from "./sheets/wound-config.js";
+import { registerXpManagerTests } from "./sheets/xp-manager.js";
+import { registerEmphasisManagerTests } from "./sheets/emphasis-manager.js";
+import { registerNPCAttackConfigTests } from "./apps/npc-attack-config.js";
+import { registerWealthManagerTests } from "./apps/wealth-manager.js";
+import { registerConditionManagerTests } from "./apps/condition-manager.js";
+import { registerCombatWorkflowTests } from "./workflows/combat-workflow.js";
+import { registerMeleeDamageStrengthTests } from "./workflows/melee-damage-strength.js";
+import { registerAdvancementWorkflowTests } from "./workflows/advancement-workflow.js";
+import { registerSpellCastingWorkflowTests } from "./workflows/spell-casting-workflow.js";
+import { registerTraitFamilyBonusTests } from "./workflows/trait-family-bonus.js";
+import { registerArmorTNCalculationTests } from "./workflows/armor-tn-calculation.js";
+import { registerDiceRollingWorkflowTests } from "./workflows/dice-rolling-workflow.js";
+import { registerStanceSwitchingWorkflowTests } from "./workflows/stance-switching-workflow.js";
+import { registerInitiativeWorkflowTests } from "./workflows/initiative-workflow.js";
+import { registerItemManagementWorkflowTests } from "./workflows/item-management-workflow.js";
+import { registerStatusEffectsWorkflowTests } from "./workflows/status-effects-workflow.js";
+import { registerStatusEffectsAllRollsTests } from "./workflows/status-effects-all-rolls.js";
+import { registerFearWorkflowTests } from "./workflows/fear-workflow.js";
+import { registerRestRecoveryWorkflowTests } from "./workflows/rest-recovery-workflow.js";
+import { registerNPCWorkflowTests } from "./workflows/npc-workflows.js";
+import { registerChatSystemWorkflowTests } from "./workflows/chat-system-workflow.js";
+import { registerEmphasisWorkflowTests } from "./workflows/emphasis-workflow.js";
+import { registerEmphasisRerollMechanicsTests } from "./workflows/emphasis-reroll-mechanics.js";
+import { registerSkillVoidPointTests } from "./workflows/skill-void-point.js";
+import { registerSkillStanceCombinationTests } from "./workflows/skill-stance-combinations.js";
+import { registerActorCreationRaceConditionTests } from "./workflows/actor-creation-race-conditions.js";
+import { registerInitiativeRaceConditionTests } from "./workflows/initiative-race-conditions.js";
+import { registerDamageRaceConditionTests } from "./workflows/damage-race-conditions.js";
+import { registerXpRaceConditionTests } from "./workflows/xp-race-conditions.js";
+import { registerSkillAdvancementRaceConditionTests } from "./workflows/skill-advancement-race-conditions.js";
+import { registerItemCreationRaceConditionTests } from "./workflows/item-creation-race-conditions.js";
+import { registerAttackEdgeCaseTests } from "./workflows/attack-edge-cases.js";
+import { registerSpellSlotsEdgeCaseTests } from "./workflows/spell-slots-edge-cases.js";
+import { registerStanceEdgeCaseTests } from "./workflows/stance-edge-cases.js";
+import { registerConditionsEdgeCaseTests } from "./workflows/conditions-edge-cases.js";
+import { registerXpTrackingEdgeCaseTests } from "./workflows/xp-tracking-edge-cases.js";
+import { registerSkillAdvancementEdgeCaseTests } from "./workflows/skill-advancement-edge-cases.js";
+import { registerMigrationEdgeCaseTests } from "./workflows/migration-edge-cases.js";
+import { registerWoundConfigEdgeCaseTests } from "./workflows/wound-config-edge-cases.js";
+import { registerChatCardContentValidationTests } from "./services/chat-card-content-validation.js";
+import { register as registerWoundPenaltyAllRollsTests } from "./rolls/wound-penalty-all-rolls.js";
+import { registerMultipleModifierCombinationTests } from "./services/multiple-modifier-combinations.js";
+import { registerCombatModifiersTests } from "./documents/combat-modifiers.js";
+import { registerStanceEffectPreservationTests } from "./services/stance-effect-preservation.js";
+import { registerSmokeBatch } from "./smoke.js";
+import { registerDeprecationsBatch } from "./deprecations.js";
 
 /**
  * Register Quench integration tests for the L5R4 system.
@@ -97,8 +99,8 @@ import { registerStanceEffectPreservationTests } from "./services/stance-effect-
  * @returns {Promise<void>}
  */
 export async function registerQuenchTests(quench) {
-  // Register all test batches
-  registerSmokeTests(quench);
+  registerSmokeBatch(quench);
+  registerDeprecationsBatch(quench);
   registerActorDocumentTests(quench);
   registerActorWoundTests(quench);
   registerActorXpTests(quench);
@@ -199,81 +201,6 @@ export async function registerQuenchTests(quench) {
 
   // Register Stance Effect Preservation Tests (Bug Fix Verification)
   registerStanceEffectPreservationTests(quench);
-}
-
-/**
- * Smoke Tests - Verify basic system functionality
- * @param {Object} quench - Quench API
- */
-function registerSmokeTests(quench) {
-  quench.registerBatch(
-    `${SYS_ID}.smoke`,
-    context => {
-      const { describe, it, assert } = context;
-
-      describe("System Configuration", () => {
-        it("should have CONFIG.l5r4 namespace", () => {
-          assert.exists(CONFIG.l5r4, "CONFIG.l5r4 namespace exists");
-        });
-
-        it("should have game data configured", () => {
-          assert.exists(CONFIG.l5r4.rings, "Rings configured");
-          assert.exists(CONFIG.l5r4.traits, "Traits configured");
-          assert.exists(CONFIG.l5r4.statusEffects, "Status effects configured");
-        });
-
-        it("should have Actor document class registered", () => {
-          assert.exists(CONFIG.Actor.documentClass, "Actor document class exists");
-          assert.equal(CONFIG.Actor.documentClass.name, "L5R4Actor", "L5R4Actor registered");
-        });
-
-        it("should have Item document class registered", () => {
-          assert.exists(CONFIG.Item.documentClass, "Item document class exists");
-          assert.equal(CONFIG.Item.documentClass.name, "L5R4Item", "L5R4Item registered");
-        });
-      });
-
-      describe("Basic Document Creation", () => {
-        let actor;
-        let item;
-
-        afterEach(async () => {
-          if (item) {
-            await item.delete();
-            item = null;
-          }
-          if (actor) {
-            await actor.delete();
-            actor = null;
-          }
-        });
-
-        it("should create PC actor", async () => {
-          actor = await createTestPC({ name: "Test PC" });
-
-          assert.exists(actor, "Actor created");
-          assert.equal(actor.type, "pc", "Actor is PC type");
-          assert.equal(actor.name, "Test PC", "Actor has correct name");
-        });
-
-        it("should create NPC actor", async () => {
-          actor = await createTestNPC({ name: "Test NPC" });
-
-          assert.exists(actor, "Actor created");
-          assert.equal(actor.type, "npc", "Actor is NPC type");
-        });
-
-        it("should create skill item", async () => {
-          item = await Item.create(createSkillData("Test Skill"));
-
-          assert.exists(item, "Item created");
-          assert.equal(item.type, "skill", "Item is skill type");
-          assert.equal(item.name, "Test Skill", "Item has correct name");
-        });
-      });
-    },
-    { displayName: "L5R4: Smoke Tests" }
-  );
 }
 
 /**

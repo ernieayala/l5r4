@@ -142,15 +142,16 @@ export function registerItemManagementWorkflowTests(quench) {
         beforeEach(async () => {
           actor = await createTestPC({ name: "Update Test PC" });
 
+          // Foundry 14.370 does not return created embedded documents in request order; look them up by type.
           const items = await actor.createEmbeddedDocuments("Item", [
             createSkillData("Kenjutsu", 3, "agi"),
             createKatana(),
             createArmorData("Light Armor", 3, 1)
           ]);
 
-          skill = items[0];
-          weapon = items[1];
-          armor = items[2];
+          skill = items.find(i => i.type === "skill");
+          weapon = items.find(i => i.type === "weapon");
+          armor = items.find(i => i.type === "armor");
         });
 
         afterEach(async () => {
@@ -339,13 +340,14 @@ export function registerItemManagementWorkflowTests(quench) {
         beforeEach(async () => {
           actor = await createTestPC({ name: "Weapon Equip Test" });
 
+          // Foundry 14.370 does not return created embedded documents in request order; look them up by name.
           const weapons = await actor.createEmbeddedDocuments("Item", [
             createKatana(),
             createWeaponData("Wakizashi", 2, 2, { system: { associatedSkill: "kenjutsu" } })
           ]);
 
-          katana = weapons[0];
-          wakizashi = weapons[1];
+          katana = weapons.find(i => i.name === "Katana");
+          wakizashi = weapons.find(i => i.name === "Wakizashi");
         });
 
         afterEach(async () => {
@@ -416,13 +418,14 @@ export function registerItemManagementWorkflowTests(quench) {
         beforeEach(async () => {
           actor = await createTestPC({ name: "Armor Equip Test" });
 
+          // Foundry 14.370 does not return created embedded documents in request order; look them up by name.
           const armors = await actor.createEmbeddedDocuments("Item", [
             createArmorData("Light Armor", 3, 1),
             createArmorData("Heavy Armor", 5, 3)
           ]);
 
-          lightArmor = armors[0];
-          heavyArmor = armors[1];
+          lightArmor = armors.find(i => i.name === "Light Armor");
+          heavyArmor = armors.find(i => i.name === "Heavy Armor");
         });
 
         afterEach(async () => {

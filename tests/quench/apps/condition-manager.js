@@ -12,7 +12,7 @@
  * - Multiple conditions can be active simultaneously
  * - Stances are properly excluded from the list
  *
- * @module tests/integration/apps/condition-manager
+ * @module tests/quench/apps/condition-manager
  */
 
 import { SYS_ID } from "../../../module/config/constants.js";

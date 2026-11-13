@@ -16,7 +16,7 @@ Contributions welcome:
 
 ### Requirements
 
-- Node.js 18+
+- Node.js 24+
 - Foundry VTT v13+
 - Git
 - Editor with EditorConfig support
@@ -371,7 +371,7 @@ tests/
 │   ├── utils/              # Pure function tests
 │   ├── documents/          # Calculation tests
 │   └── smoke.test.js       # Basic sanity checks
-├── integration/            # Quench integration tests
+├── quench/                 # Quench integration tests (index.js registers every batch)
 │   ├── documents/          # Actor/Item lifecycle
 │   ├── services/           # Dice, combat, XP
 │   ├── sheets/             # UI rendering
@@ -577,7 +577,7 @@ describe('Combat Workflow', () => {
 
 **Tests pass with broken code:**
 - Test is worthless, delete it
-- Or fix test to actually validate behavior
+- Or fix the test so it checks the behavior
 
 **Flaky tests:**
 - Check for shared state between tests

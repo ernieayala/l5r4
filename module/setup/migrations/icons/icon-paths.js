@@ -22,7 +22,7 @@ const dirCache = new Map();
 /**
  * Lists files in a directory with caching for performance.
  *
- * Uses Foundry's FilePicker API to browse directory contents, extracting just the
+ * Uses Foundry's FilePicker API to browse directory contents, extracting only the
  * filenames. Results are cached to avoid redundant API calls during bulk migrations.
  * Handles API differences between Foundry versions via optional chaining.
  *
@@ -61,7 +61,7 @@ async function listDir(dirPath) {
  * Computes new icon path from legacy path using migration map.
  *
  * Checks if an image path references a legacy icon and returns the new path if the
- * target file exists. Only returns a path if the new icon file actually exists on disk,
+ * target file exists. Only returns a path if the new icon file exists on disk,
  * preventing broken image references.
  *
  * @param {string} img - Current image path to evaluate
@@ -153,7 +153,7 @@ async function getUpdatedIconPath(doc, docType) {
  * documents, so this function only processes documents that haven't been migrated yet. This
  * prevents overwriting custom icons when forceMigration is triggered.
  *
- * This is a world-only migration (compendiums handled separately by migrateCompendiumIconPaths).
+ * World-only migration (compendiums are handled by migrateCompendiumIconPaths).
  *
  * @returns {Promise<void>}
  * @async
@@ -261,7 +261,7 @@ export async function migrateEmbeddedItemIcons(docs, label) {
  *
  * Updates actor and item icons within unlocked compendium packs. Skips locked packs to
  * avoid permission errors. Displays notification with count of updated documents when
- * complete. Runs separately from world migration to handle compendium-specific loading.
+ * complete. Runs apart from the world migration to handle compendium-specific loading.
  *
  * Foundry VTT Integration:
  * - Respects pack.metadata.locked status (skips locked compendia)
@@ -285,7 +285,7 @@ export async function migrateCompendiumIconPaths() {
       continue;
     }
 
-    let docs = [];
+    let docs;
     try {
       docs = await pack.getDocuments();
     } catch (err) {

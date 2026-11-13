@@ -1,10 +1,26 @@
-import { describe, it, expect, vi, beforeEach, afterEach } from "vitest";
+import { describe, it, expect, vi } from "vitest";
 import {
   calculateEffectiveTN,
   evaluateTN,
   buildTNLabel,
   replaceFailureWithMissed
 } from "../../../module/services/dice/core/tn-calculator.js";
+
+// Module mocks are hoisted and apply to the whole file.
+vi.mock("../../../module/utils/localization.js", () => ({
+  T: key => {
+    if (key === "l5r4.ui.mechanics.rolls.success") {
+      return "Success";
+    }
+    if (key === "l5r4.ui.mechanics.rolls.failure") {
+      return "Failure";
+    }
+    if (key === "l5r4.ui.mechanics.rolls.missed") {
+      return "Missed";
+    }
+    return key;
+  }
+}));
 
 describe("tn-calculator", () => {
   describe("calculateEffectiveTN", () => {
@@ -19,7 +35,7 @@ describe("tn-calculator", () => {
         expect(result).toBe(25); // 15 + (2 * 5)
       });
 
-      it("should not subtract free raises from baseTN (purely informational)", () => {
+      it("should not subtract free raises from baseTN (free raises are informational)", () => {
         const result = calculateEffectiveTN(20, 0, 2, 0, false);
         expect(result).toBe(20); // Free raises don't affect TN
       });
@@ -95,12 +111,12 @@ describe("tn-calculator", () => {
     });
 
     describe("edge cases", () => {
-      it("should handle very high raises", () => {
+      it("should handle 10 raises", () => {
         const result = calculateEffectiveTN(15, 10, 0, 0, false);
         expect(result).toBe(65); // 15 + (10 * 5)
       });
 
-      it("should handle very high free raises (they don't affect TN)", () => {
+      it("should handle 10 free raises (they don't affect TN)", () => {
         const result = calculateEffectiveTN(100, 0, 10, 0, false);
         expect(result).toBe(100); // Free raises don't affect TN
       });
@@ -123,25 +139,6 @@ describe("tn-calculator", () => {
   });
 
   describe("evaluateTN", () => {
-    // Mock localization
-    beforeEach(() => {
-      vi.mock("../../../module/utils/localization.js", () => ({
-        T: key => {
-          if (key === "l5r4.ui.mechanics.rolls.success") {
-            return "Success";
-          }
-          if (key === "l5r4.ui.mechanics.rolls.failure") {
-            return "Failure";
-          }
-          return key;
-        }
-      }));
-    });
-
-    afterEach(() => {
-      vi.restoreAllMocks();
-    });
-
     describe("success evaluation", () => {
       it("should return success when roll equals TN", () => {
         const result = evaluateTN(20, 20, 2, 1);
@@ -285,7 +282,7 @@ describe("tn-calculator", () => {
     });
 
     describe("edge cases", () => {
-      it("should handle very high TN", () => {
+      it("should handle TN 100", () => {
         const result = buildTNLabel(100, 5, 2, "Raises", "Free");
         expect(result).toBe(" [TN 100 (Raises: 5, Free: 2)]");
       });
@@ -303,27 +300,6 @@ describe("tn-calculator", () => {
   });
 
   describe("replaceFailureWithMissed", () => {
-    beforeEach(() => {
-      vi.mock("../../../module/utils/localization.js", () => ({
-        T: key => {
-          if (key === "l5r4.ui.mechanics.rolls.success") {
-            return "Success";
-          }
-          if (key === "l5r4.ui.mechanics.rolls.failure") {
-            return "Failure";
-          }
-          if (key === "l5r4.ui.mechanics.rolls.missed") {
-            return "Missed";
-          }
-          return key;
-        }
-      }));
-    });
-
-    afterEach(() => {
-      vi.restoreAllMocks();
-    });
-
     describe("attack rolls", () => {
       it('should replace "Failure" with "Missed" for attack rolls', () => {
         const tnResult = {

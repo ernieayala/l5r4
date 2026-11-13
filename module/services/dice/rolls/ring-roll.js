@@ -2,7 +2,7 @@
  * Ring Roll and Spell Casting Service
  *
  * Handles L5R4 Ring-based rolls including raw Ring ability checks and shugenja
- * Spell Casting rolls. Ring rolls use a Ring value directly (XkX formula), while
+ * Spell Casting rolls. Ring rolls roll a Ring value as is (XkX formula), while
  * Spell Casting rolls add School Rank to dice pool ((Ring + School Rank)kRing).
  *
  * Key Responsibilities:
@@ -99,7 +99,7 @@ async function _confirmSpellSlotUsage(actor, systemRing, ringName) {
     ui.notifications?.warn(
       game.i18n.format("l5r4.ui.notifications.noSpellSlots", { ring: ringName })
     );
-    // No slots available - return null to abort roll entirely
+    // No slots available - return null to abort the roll
     return null;
   }
 
@@ -202,7 +202,7 @@ export async function RingRoll({
   actor = null
 } = {}) {
   const messageTemplate = CHAT_TEMPLATES.simpleRoll;
-  let label = ""; // Will be set after dialog processing based on roll type
+  let label; // Set after dialog processing based on roll type
 
   // Roll configuration variables (populated from dialog or defaults)
   let normalRoll = true; // true = Ring Roll (XkX), false = Spell Casting ((Ring+School)kRing)
@@ -415,7 +415,7 @@ export async function RingRoll({
 
     // Consume spell slots AFTER roll succeeds
     // Per L5R4 rules: slot consumed when Spell Casting Roll is made (not before)
-    // This ensures slots are only lost if spell actually casts
+    // Slots are lost only if the spell casts
     if (shouldConsumeElementalSlot && systemRing) {
       await spendElementalSlot(actor, systemRing);
     }

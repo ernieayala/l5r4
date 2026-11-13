@@ -16,6 +16,7 @@
 import { SYS_ID } from "../../../module/config/constants.js";
 import WoundConfigApplication from "../../../module/apps/wound-config.js";
 import { createTestPC, createTestNPC } from "../../fixtures/actor-fixtures.js";
+import { MULTI_CLOSE_TIMEOUT_MS } from "../helpers.js";
 
 /**
  * Register wound config edge case tests
@@ -28,7 +29,7 @@ export function registerWoundConfigEdgeCaseTests(quench) {
       const { describe, it, assert, beforeEach, afterEach } = context;
 
       describe("Invalid Multiplier Values", () => {
-        let actor, dialog;
+        let actor;
 
         beforeEach(async () => {
           actor = await createTestPC({
@@ -41,9 +42,6 @@ export function registerWoundConfigEdgeCaseTests(quench) {
         });
 
         afterEach(async () => {
-          if (dialog?.rendered) {
-            await dialog.close();
-          }
           if (actor) {
             await actor.delete();
           }
@@ -129,7 +127,7 @@ export function registerWoundConfigEdgeCaseTests(quench) {
 
         it("should recalculate wounds when multiplier changes", async () => {
           // ARRANGE - Start with multiplier 2, Earth 3
-          // Healthy = Earth × 5 = 3 × 5 = 15 (multiplier doesn't affect healthy directly)
+          // Healthy = Earth × 5 = 3 × 5 = 15 (the multiplier does not change Healthy)
           // But Out = (Earth × mult × 2) + healthy = (3 × 2 × 2) + 15 = 27
           const initialOut = actor.system.woundLevels.out.value;
 
@@ -170,7 +168,7 @@ export function registerWoundConfigEdgeCaseTests(quench) {
         });
 
         it("should handle immediate close (< 100ms)", async () => {
-          // ARRANGE - Dialog just opened
+          // ARRANGE - Dialog open
           assert.isTrue(dialog.rendered, "Dialog is open");
 
           // ACT - Close immediately
@@ -181,7 +179,8 @@ export function registerWoundConfigEdgeCaseTests(quench) {
           assert.isFalse(dialog.rendered, "Dialog closed");
         });
 
-        it("should handle rapid open/close cycles", async () => {
+        it("should handle rapid open/close cycles", async function () {
+          this.timeout(MULTI_CLOSE_TIMEOUT_MS);
           // ARRANGE - Close current dialog
           await dialog.close();
 
@@ -220,7 +219,8 @@ export function registerWoundConfigEdgeCaseTests(quench) {
           assert.equal(actor.system.woundsMultiplier, 2, "Data preserved");
         });
 
-        it("should handle multiple dialogs for same actor", async () => {
+        it("should handle multiple dialogs for same actor", async function () {
+          this.timeout(MULTI_CLOSE_TIMEOUT_MS);
           // ARRANGE - Open second dialog for same actor
           const dialog2 = new WoundConfigApplication(actor);
           await dialog2.render(true);
@@ -327,7 +327,7 @@ export function registerWoundConfigEdgeCaseTests(quench) {
           // ASSERT
           assert.equal(actor.system.woundsPenaltyMod, 99, "Extreme positive set");
 
-          // Penalties will be very high
+          // Penalties will be high
           const nickedPenalty = actor.system.woundLevels.nicked.penaltyEff;
           assert.isNumber(nickedPenalty, "Penalty calculated");
           assert.isAbove(nickedPenalty, 0, "Penalty is positive");
@@ -349,7 +349,7 @@ export function registerWoundConfigEdgeCaseTests(quench) {
       });
 
       describe("NPC Wound Config Edge Cases", () => {
-        let npc, dialog;
+        let npc;
 
         beforeEach(async () => {
           npc = await createTestNPC({
@@ -362,9 +362,6 @@ export function registerWoundConfigEdgeCaseTests(quench) {
         });
 
         afterEach(async () => {
-          if (dialog?.rendered) {
-            await dialog.close();
-          }
           if (npc) {
             await npc.delete();
           }

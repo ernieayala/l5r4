@@ -264,7 +264,7 @@ export function registerRestRecoveryWorkflowTests(quench) {
           // ARRANGE - Character with somehow zero heal rate
           // Note: Normally impossible with min Stamina=2, Insight=1 (rate=5)
           // This test verifies defensive coding when heal rate would be 0
-          // We can't directly set healRate as it's derived, but we can test the logic
+          // healRate is derived and cannot be set; test the logic instead
 
           // Wound the character
           await actor.update({ "system.suffered": 10 });
@@ -570,7 +570,7 @@ export function registerRestRecoveryWorkflowTests(quench) {
           actor.prepareData();
 
           // Cycle 1: Fast and rest (no void recovery)
-          let fasting = await actor.createEmbeddedDocuments("ActiveEffect", [
+          const fasting = await actor.createEmbeddedDocuments("ActiveEffect", [
             {
               name: "Fasting",
               img: "systems/l5r4-enhanced/assets/icons/fasting.webp",
@@ -591,7 +591,7 @@ export function registerRestRecoveryWorkflowTests(quench) {
 
           // Cycle 3: Fast again and rest (void stays at max but wouldn't recover if depleted)
           await actor.update({ "system.rings.void.value": 1 }); // Partially deplete
-          fasting = await actor.createEmbeddedDocuments("ActiveEffect", [
+          await actor.createEmbeddedDocuments("ActiveEffect", [
             {
               name: "Fasting",
               img: "systems/l5r4-enhanced/assets/icons/fasting.webp",

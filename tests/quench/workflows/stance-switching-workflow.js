@@ -29,7 +29,7 @@ export function registerStanceSwitchingWorkflowTests(quench) {
   quench.registerBatch(
     `${SYS_ID}.workflows.stance-switching`,
     context => {
-      const { describe, it, assert, before, after } = context;
+      const { describe, it, assert, before, after, afterEach } = context;
 
       describe("Stance Switching Workflow", () => {
         let actor;
