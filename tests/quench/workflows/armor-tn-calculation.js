@@ -15,14 +15,14 @@
  * **Test Coverage:**
  * - Correct base TN with various Reflexes values
  * - Condition floor enforcement (minimum TN of 5)
- * - Prone penalty (-10, floored at 5)
- * - Void boost integration
- * - Round-based Void expiration
+ * - Prone penalty (-10 against melee attacks only, p.89)
+ * - Void boost integration (an effect lasting the Round, p.78)
  */
 
 import { SYS_ID } from "../../../module/config/constants.js";
 import { createTestPC } from "../../fixtures/actor-fixtures.js";
 import { createArmorData } from "../../fixtures/item-fixtures.js";
+import { applyEffect } from "../../../module/services/effects/apply.js";
 
 /**
  * Register Armor TN calculation integration tests
@@ -162,9 +162,9 @@ export function registerArmorTNCalculationTests(quench) {
           // ACT
           actor.prepareDerivedData();
 
-          // ASSERT
-          const current = actor.system.armorTn.current;
-          assert.equal(current, 5, "Prone: 15 (base) - 10 (penalty) = 5 (floored)");
+          // ASSERT: Prone's -10 counts only against melee attacks (p.89), which read it from armorTn.vs
+          assert.equal(actor.system.armorTn.current, 15, "Prone: the shown Armor TN stays 15");
+          assert.equal(actor.system.armorTn.vs.melee, -10, "Prone: -10 against melee");
         });
 
         it("should enforce minimum TN of 5 with conditions", async () => {
@@ -175,11 +175,11 @@ export function registerArmorTNCalculationTests(quench) {
             }
           });
 
-          // Apply Prone
+          // Full Attack Stance: Armor TN -10 (p.84)
           await actor.createEmbeddedDocuments("ActiveEffect", [
             {
-              name: "Prone",
-              statuses: ["prone"],
+              name: "Full Attack",
+              statuses: ["fullAttackStance"],
               disabled: false
             }
           ]);
@@ -189,7 +189,7 @@ export function registerArmorTNCalculationTests(quench) {
 
           // ASSERT
           const current = actor.system.armorTn.current;
-          assert.equal(current, 5, "TN cannot go below 5 (10 - 10 prone = 0, floored to 5)");
+          assert.equal(current, 5, "TN cannot go below 5 (10 - 10 Full Attack = 0, floored to 5)");
         });
 
         it("should use condition override for Grappled", async () => {
@@ -283,73 +283,25 @@ export function registerArmorTNCalculationTests(quench) {
           }
         });
 
-        it("should add +10 when useVoid is true", async () => {
-          // ARRANGE
-          actor = await createTestPC({
-            system: {
-              traits: { ref: 2 },
-              armorTn: {
-                useVoid: true,
-                voidRound: 1
-              }
-            }
-          });
-
-          // ACT
-          actor.prepareDerivedData();
-
-          // ASSERT
-          const current = actor.system.armorTn.current;
-          assert.equal(current, 25, "Void boost: 15 (base) + 10 (void) = 25");
+        it("adds +10 while the Void Point effect lasts (p.78)", async () => {
+          actor = await createTestPC({ system: { traits: { ref: 2 } } });
+          await applyEffect(actor, "voidArmor");
+          assert.equal(actor.system.armorTn.current, 25, "Void boost: 15 (base) + 10 (void) = 25");
         });
 
-        it("should not add boost when useVoid is false", async () => {
-          // ARRANGE
-          actor = await createTestPC({
-            system: {
-              traits: { ref: 2 },
-              armorTn: {
-                useVoid: false,
-                voidRound: null
-              }
-            }
-          });
-
-          // ACT
-          actor.prepareDerivedData();
-
-          // ASSERT
-          const current = actor.system.armorTn.current;
-          assert.equal(current, 15, "No void boost: base TN only");
+        it("adds nothing without the effect", async () => {
+          actor = await createTestPC({ system: { traits: { ref: 2 } } });
+          assert.equal(actor.system.armorTn.current, 15, "No void boost: base TN only");
         });
 
-        it("should apply void boost before condition penalties", async () => {
-          // ARRANGE
-          actor = await createTestPC({
-            system: {
-              traits: { ref: 2 },
-              armorTn: {
-                useVoid: true,
-                voidRound: 1
-              }
-            }
-          });
-
+        it("adds to the Armor TN while Prone counts against melee only", async () => {
+          actor = await createTestPC({ system: { traits: { ref: 2 } } });
+          await applyEffect(actor, "voidArmor");
           await actor.createEmbeddedDocuments("ActiveEffect", [
-            {
-              name: "Prone",
-              statuses: ["prone"],
-              disabled: false
-            }
+            { name: "Prone", statuses: ["prone"], disabled: false }
           ]);
-
-          // ACT
-          actor.prepareDerivedData();
-
-          // ASSERT
-          const current = actor.system.armorTn.current;
-          // Base 15 + Void 10 - Prone 10 = 15 (but floor is 5)
-          assert.equal(current, 15, "Void + Prone: (15+10-10) = 15");
+          assert.equal(actor.system.armorTn.current, 25, "Void + Prone: 15 + 10");
+          assert.equal(actor.system.armorTn.vs.melee, -10, "a melee attack sees 15");
         });
       });
 

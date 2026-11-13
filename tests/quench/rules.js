@@ -4,7 +4,7 @@ import { createRule } from "../../module/data/rules/rule-models.js";
 import { FamilyBonusService } from "../../module/services/family-bonus-service.js";
 import { collectCheck } from "../../module/services/dice/check/collect.js";
 import { displayRollBonus } from "../../module/utils/mechanics.js";
-import { getStanceEffectCreator } from "../../module/services/stance/core/effect-templates.js";
+import { applyEffect } from "../../module/services/effects/apply.js";
 import { TraitRoll } from "../../module/services/dice/rolls/trait-roll.js";
 import { getCreationFreeBonusSources } from "../../module/utils/xp-calculations.js";
 import { migrateItemRules } from "../../module/setup/migrations/items/item-rules.js";
@@ -31,7 +31,12 @@ const MINIMAL_RULES = {
   },
   TraitAdjust: { key: "TraitAdjust", trait: "str" },
   Note: { key: "Note", selector: "attack", text: "Note" },
-  RollOption: { key: "RollOption", option: "quench" }
+  RollOption: { key: "RollOption", option: "quench" },
+  Movement: { key: "Movement" },
+  ApplyCondition: { key: "ApplyCondition", selector: "attack", condition: "dazed" },
+  ConditionImmunity: { key: "ConditionImmunity", condition: "feared" },
+  PeriodicSave: { key: "PeriodicSave", roll: "ring:earth" },
+  Resource: { key: "Resource", slug: "void" }
 };
 
 /**
@@ -117,6 +122,18 @@ export function registerRulesBatch(quench) {
           assert.equal(createRule(MINIMAL_RULES.FreeRaise).value, 1);
           assert.isNull(createRule(MINIMAL_RULES.DiceRule).explode);
           assert.isFalse(createRule(MINIMAL_RULES.RollOption).toggleable);
+          assert.equal(createRule(MINIMAL_RULES.ArmorTN).mode, "add");
+          assert.isNull(createRule(MINIMAL_RULES.ArmorTN).range);
+          assert.isFalse(createRule(MINIMAL_RULES.RollModifier).optional);
+          assert.deepInclude(createRule(MINIMAL_RULES.PeriodicSave), {
+            event: "roundEnd",
+            tn: 20,
+            step: 0,
+            min: 5,
+            onFailure: "retry"
+          });
+          assert.deepInclude(createRule(MINIMAL_RULES.Resource), { max: 1, per: "round" });
+          assert.isNull(createRule(MINIMAL_RULES.ApplyCondition).level);
         });
 
         it("keeps formulas, numbers, and predicate objects", () => {
@@ -226,8 +243,9 @@ export function registerRulesBatch(quench) {
             ]);
             const standing = actor.system.armorTn.current;
             await actor.toggleStatusEffect("prone", { active: true });
-            // Prone itself lowers Armor TN by 10 (condition-effects.js); the rule adds 3 back
-            assert.equal(actor.system.armorTn.current, Math.max(5, standing - 10 + 3));
+            // Prone's own -10 counts against melee attacks only (p.89), so the Armor TN shows the rule's +3
+            assert.equal(actor.system.armorTn.current, standing + 3);
+            assert.equal(actor.system.armorTn.vs.melee, -10);
           })
         );
 
@@ -351,13 +369,7 @@ export function registerRulesBatch(quench) {
         );
 
         for (const [path, create] of [
-          [
-            "the stance template",
-            actor =>
-              actor.createEmbeddedDocuments("ActiveEffect", [
-                getStanceEffectCreator("defenseStance")(actor)
-              ])
-          ],
+          ["the stance template", actor => applyEffect(actor, "defenseStance")],
           [
             "the token status toggle",
             actor => actor.toggleStatusEffect("defenseStance", { active: true })
@@ -382,13 +394,14 @@ export function registerRulesBatch(quench) {
         }
 
         it(
-          "Defense Stance keeps its bonus under a Stunned Armor TN override, as in 3.2.1",
+          "a Stunned Armor TN is 5 plus armor; the Defense Stance adds nothing to it (p.89; STAGE-09 decision 3)",
           clean(async () => {
             const actor = track(await createTestPC({ name: "Rules defense stunned" }));
             await actor.toggleStatusEffect("stunned", { active: true });
             const stunned = actor.system.armorTn.current;
+            assert.equal(stunned, 5 + actor.system.armorTn.bonus);
             await actor.toggleStatusEffect("defenseStance", { active: true });
-            assert.equal(actor.system.armorTn.current, stunned + actor.system.rings.air);
+            assert.equal(actor.system.armorTn.current, stunned);
           })
         );
 
@@ -488,14 +501,29 @@ export function registerRulesBatch(quench) {
           clean(async () => {
             const actor = track(await createTestPC({ name: "Rules migrate stance" }));
             const before = actor.system.armorTn.current;
-            await actor.createEmbeddedDocuments("ActiveEffect", [
-              { name: "Defense Stance", statuses: ["defenseStance"] }
+            const [stance, fear] = await actor.createEmbeddedDocuments("ActiveEffect", [
+              { name: "Defense Stance", statuses: ["defenseStance"] },
+              { name: "Fear 3", statuses: ["feared"] }
             ]);
+            // Stored as 3.2.1 left them: no rules, no group, Fear's Rank in a flag
+            await stance.update({ "system.rules": [], "system.group": "" });
+            await fear.update({
+              "system.rules": [],
+              "system.level": null,
+              [`flags.${SYS_ID}.fearRank`]: 3
+            });
             assert.equal(actor.system.armorTn.current, before, "no rules, no bonus");
             await migrateStatusEffectRules([actor], "quench");
             assert.equal(actor.system.armorTn.current, before + actor.system.rings.air);
+            assert.equal(stance.system.group, "stance");
+            assert.equal(fear.system.level, 3, "Fear Rank moved to the level");
+            assert.equal(
+              collectCheck(actor, { kind: "skill" }).modifiers[0].roll,
+              -3,
+              "Fear 3: -3k0"
+            );
             await migrateStatusEffectRules([actor], "quench");
-            assert.lengthOf(actor.effects.contents[0]._source.system.rules, 1);
+            assert.lengthOf(stance._source.system.rules, 1, "running again adds nothing");
           })
         );
       });

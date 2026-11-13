@@ -22,7 +22,12 @@ export const RULE_KEYS = freeze([
   "Substitute",
   "TraitAdjust",
   "Note",
-  "RollOption"
+  "RollOption",
+  "Movement",
+  "ApplyCondition",
+  "ConditionImmunity",
+  "PeriodicSave",
+  "Resource"
 ]);
 
 /**
@@ -36,8 +41,34 @@ export const BAG_KINDS = freeze({
   FreeRaise: "freeRaises",
   DiceRule: "diceRules",
   Substitute: "substitutes",
-  Note: "notes"
+  Note: "notes",
+  ApplyCondition: "applyConditions"
 });
+
+/**
+ * Attack ranges a RollModifier or ArmorTN rule can be limited to.
+ * @type {ReadonlyArray<string>}
+ */
+export const ATTACK_RANGES = freeze(["melee", "ranged"]);
+
+/**
+ * How an ArmorTN rule changes the Armor TN (module/utils/effects.js, resolveArmorTn).
+ * @type {ReadonlyArray<string>}
+ */
+export const ARMOR_TN_MODES = freeze(["add", "base", "total"]);
+
+/**
+ * Combat events a PeriodicSave is rolled on: the Reactions stage is the end of the Round (Core Rulebook p.82).
+ * @type {ReadonlyArray<string>}
+ */
+export const SAVE_EVENTS = freeze(["roundEnd", "turnStart", "turnEnd"]);
+
+/**
+ * What a failed PeriodicSave does: nothing (try again next time), or end the effect at the end of the next Round
+ * (Stunned, p.89).
+ * @type {ReadonlyArray<string>}
+ */
+export const SAVE_FAILURES = freeze(["retry", "endNextRound"]);
 
 /**
  * TraitAdjust targets: the eight Trait keys plus the Void Ring.

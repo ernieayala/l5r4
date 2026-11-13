@@ -13,7 +13,7 @@
  */
 
 import { DIALOG_TEMPLATES } from "../../../config/templates.js";
-import { T } from "../../../utils/localization.js";
+import { F, T } from "../../../utils/localization.js";
 import { toInt } from "../../../utils/type-coercion.js";
 import { rollCheck } from "../check/roll-check.js";
 
@@ -74,7 +74,7 @@ export async function MahoCastRoll({ actor, spell, showDialog = true } = {}) {
       await actor.update({
         "system.shadowTaint.points": actor._source.system.shadowTaint.points + taint
       });
-      ui.notifications?.warn(T("l5r4.magic.maho.taintGainedNotification", { taint }));
+      ui.notifications?.warn(F("l5r4.magic.maho.taintGainedNotification", { taint }));
       return { labelSuffix: ` [${T("l5r4.magic.maho.taintGained")}: ${taint}]` };
     }
   });

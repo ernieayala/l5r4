@@ -1,24 +1,20 @@
 /**
  * Status Effects Complete Workflow Tests
  *
- * Tests the complete status effect and condition workflows including:
- * - Apply/remove status effect workflow
- * - Conflicting status handling
- * - Fasting condition complete workflow
- * - Void recovery blocking
- * - Multiple conditions interaction
+ * Applying and removing each condition as an Active Effect, through to what the actor and its rolls get (Core
+ * Rulebook p.89, Guard p.88): Armor TN, the roll pipeline's modifiers (checkEffects), movement, stacking, disabled
+ * effects, and Fasting's block on Void recovery.
  *
- * These tests verify the COMPLETE workflow from applying status effects
- * through the Foundry ActiveEffect system to final mechanical effects on
- * actor stats and gameplay restrictions.
+ * Each effect is made from its status id alone, as a macro or another module would; the status's rules come with it
+ * (module/documents/active-effect.js).
  *
- * @see module/documents/actor/calculations/condition-effects.js
- * @see module/config/game-data.js (STATUS_EFFECTS)
+ * @see module/config/status-effects.js
  */
 
 import { SYS_ID } from "../../../module/config/constants.js";
 import { applyLongRest } from "../../../module/services/rest.js";
 import { createTestPC } from "../../fixtures/actor-fixtures.js";
+import { checkEffects } from "../helpers.js";
 
 /**
  * Register status effects workflow tests
@@ -33,625 +29,196 @@ export function registerStatusEffectsWorkflowTests(quench) {
       describe("Status Effects Complete Workflow", () => {
         let actor;
 
+        /**
+         * Create effects from status ids alone.
+         * @param {...string} ids
+         * @returns {Promise<ActiveEffect[]>}
+         */
+        const add = (...ids) =>
+          actor.createEmbeddedDocuments(
+            "ActiveEffect",
+            ids.map(id => ({ name: id, statuses: [id] }))
+          );
+
+        // Reflexes 3: base Armor TN 3 × 5 + 5 = 20 (p.82), no armor
+        const BASE_TN = 20;
+
         before(async () => {
           actor = await createTestPC({
             name: "Status Effects Test Character",
             system: {
               traits: { ref: 3, sta: 3, wil: 3, str: 3, agi: 3, int: 3, per: 3, awa: 3 },
-              rings: {
-                earth: 3,
-                air: 3,
-                fire: 3,
-                water: 3,
-                void: { rank: 3, value: 3 }
-              },
-              suffered: 10
+              rings: { void: { rank: 3, value: 3 } },
+              suffered: 0
             }
           });
-
-          actor.prepareData();
         });
 
         afterEach(async () => {
-          // Clean up ALL effects between tests
-          if (actor && actor.effects.size > 0) {
-            const effectIds = Array.from(actor.effects.keys());
-            const validIds = effectIds.filter(id => actor.effects.get(id) !== undefined);
-            if (validIds.length > 0) {
-              await actor.deleteEmbeddedDocuments("ActiveEffect", validIds);
-            }
+          const ids = actor.effects.map(e => e.id);
+          if (ids.length) {
+            await actor.deleteEmbeddedDocuments("ActiveEffect", ids);
           }
-
-          actor.prepareData();
         });
 
         after(async () => {
-          if (actor) {
-            await actor.delete();
-          }
+          await actor?.delete();
         });
 
         describe("Apply/Remove Status Effect Workflow", () => {
-          it("should apply blinded condition via ActiveEffect", async function () {
-            // ARRANGE
-            const baseArmorTN = actor.system.armorTn.current;
-
-            // ACT - Apply blinded condition
-            await actor.createEmbeddedDocuments("ActiveEffect", [
-              {
-                name: "Blinded",
-                img: "systems/l5r4-enhanced/assets/icons/blinded.webp",
-                statuses: ["blinded"]
-              }
-            ]);
-
-            actor.prepareData();
-
-            // ASSERT - Verify blinded effects applied
-            const conditionEffects = actor.system._conditionEffects;
-            assert.exists(conditionEffects, "Condition effects exist");
-            assert.include(conditionEffects.active, "blinded", "Blinded is active");
-
-            // Verify roll penalties
-            assert.equal(conditionEffects.rollPenalties.ranged.roll, -3, "Ranged roll penalty -3");
-            assert.equal(conditionEffects.rollPenalties.ranged.keep, -3, "Ranged keep penalty -3");
-            assert.equal(conditionEffects.rollPenalties.melee.roll, -1, "Melee roll penalty -1");
-            assert.equal(conditionEffects.rollPenalties.melee.keep, -1, "Melee keep penalty -1");
-
-            // Verify Armor TN override (Reflexes + 5 + armor bonus)
-            const expectedTN = 3 + 5 + (actor.system.armorTn.bonus || 0);
-            assert.equal(
-              actor.system.armorTn.current,
-              expectedTN,
-              `Armor TN overridden to ${expectedTN}`
-            );
-            assert.notEqual(
-              actor.system.armorTn.current,
-              baseArmorTN,
-              "Armor TN changed from base"
-            );
-
-            // Verify Water Ring penalty for movement
-            assert.equal(
-              conditionEffects.waterRingPenalty,
-              -2,
-              "Water Ring penalty applied for movement"
-            );
+          it("Blinded: -3k3 ranged, -1k1 melee, base Armor TN Reflexes + 5, Water -2 for movement", async () => {
+            assert.equal(actor.system.armorTn.current, BASE_TN);
+            await add("blinded");
+            assert.isTrue(actor.statuses.has("blinded"));
+            assert.deepInclude(checkEffects(actor, "attack", { range: "ranged" }), {
+              roll: -3,
+              keep: -3
+            });
+            assert.deepInclude(checkEffects(actor, "attack", { range: "melee" }), {
+              roll: -1,
+              keep: -1
+            });
+            assert.equal(actor.system.armorTn.current, 3 + 5 + actor.system.armorTn.bonus);
+            assert.equal(actor.system.movementWater, -2);
           });
 
-          it("should remove blinded condition and restore normal stats", async function () {
-            // ARRANGE - Apply blinded
-            const blind = await actor.createEmbeddedDocuments("ActiveEffect", [
-              {
-                name: "Blinded",
-                img: "systems/l5r4-enhanced/assets/icons/blinded.webp",
-                statuses: ["blinded"]
-              }
-            ]);
-            actor.prepareData();
-
-            const blindedTN = actor.system.armorTn.current;
-
-            // ACT - Remove blinded
-            await actor.deleteEmbeddedDocuments("ActiveEffect", [blind[0].id]);
-            actor.prepareData();
-
-            // ASSERT - Verify condition removed
-            const conditionEffects = actor.system._conditionEffects;
-            assert.notInclude(conditionEffects.active, "blinded", "Blinded removed");
-            assert.equal(conditionEffects.rollPenalties.melee.roll, 0, "No melee penalty");
-            assert.equal(conditionEffects.rollPenalties.ranged.roll, 0, "No ranged penalty");
-
-            // Verify Armor TN restored
-            const baseTN = 3 * 5 + 5 + (actor.system.armorTn.bonus || 0);
-            assert.equal(actor.system.armorTn.current, baseTN, "Armor TN restored to base");
-            assert.notEqual(
-              actor.system.armorTn.current,
-              blindedTN,
-              "Armor TN no longer overridden"
-            );
+          it("removing Blinded restores the stats", async () => {
+            const [blind] = await add("blinded");
+            await blind.delete();
+            assert.isFalse(actor.statuses.has("blinded"));
+            assert.deepInclude(checkEffects(actor, "attack"), { roll: 0, keep: 0 });
+            assert.equal(actor.system.armorTn.current, BASE_TN);
+            assert.equal(actor.system.movementWater, 0);
           });
 
-          it("should apply stunned condition with action restrictions", async function () {
-            // ACT - Apply stunned condition
-            await actor.createEmbeddedDocuments("ActiveEffect", [
-              {
-                name: "Stunned",
-                img: "systems/l5r4-enhanced/assets/icons/stunned.webp",
-                statuses: ["stunned"]
-              }
-            ]);
-
-            actor.prepareData();
-
-            // ASSERT
-            const conditionEffects = actor.system._conditionEffects;
-            assert.include(conditionEffects.active, "stunned", "Stunned is active");
-
-            // Verify Armor TN override (5 + armor bonus)
-            const expectedTN = 5 + (actor.system.armorTn.bonus || 0);
-            assert.equal(actor.system.armorTn.current, expectedTN, "Armor TN reduced to 5 + armor");
-
-            // Verify restrictions
-            assert.include(
-              conditionEffects.restrictions[0],
-              "stunned",
-              "Stunned restrictions present"
-            );
+          it("Stunned: Armor TN 5 plus armor", async () => {
+            await add("stunned");
+            assert.equal(actor.system.armorTn.current, 5 + actor.system.armorTn.bonus);
           });
 
-          it("should apply prone condition with armor TN and attack penalties", async function () {
-            // ARRANGE
-            const baseTN = actor.system.armorTn.current;
-
-            // ACT - Apply prone condition
-            await actor.createEmbeddedDocuments("ActiveEffect", [
-              {
-                name: "Prone",
-                img: "systems/l5r4-enhanced/assets/icons/prone.webp",
-                statuses: ["prone"]
-              }
-            ]);
-
-            actor.prepareData();
-
-            // ASSERT
-            const conditionEffects = actor.system._conditionEffects;
-            assert.include(conditionEffects.active, "prone", "Prone is active");
-
-            // Verify Armor TN penalty (-10 vs melee)
-            assert.equal(actor.system.armorTn.current, baseTN - 10, "Armor TN reduced by 10");
-            assert.equal(actor.system.armorTn.pronePenalty, -10, "Prone penalty tracked");
-
-            // Verify attack penalties (-2k0)
-            assert.equal(conditionEffects.rollPenalties.melee.roll, -2, "Melee attack -2k0");
-            assert.equal(conditionEffects.rollPenalties.ranged.roll, -2, "Ranged attack -2k0");
+          it("Prone: -10 Armor TN against melee only, -2k0 to attacks", async () => {
+            await add("prone");
+            assert.equal(actor.system.armorTn.current, BASE_TN, "the shown Armor TN is unchanged");
+            assert.deepEqual(actor.system.armorTn.vs, { melee: -10, ranged: 0 });
+            assert.equal(checkEffects(actor, "attack", { range: "melee" }).roll, -2);
+            assert.equal(checkEffects(actor, "attack", { range: "ranged" }).roll, -2);
           });
 
-          it("should apply dazed condition with universal roll penalty", async function () {
-            // ACT - Apply dazed condition
-            await actor.createEmbeddedDocuments("ActiveEffect", [
-              {
-                name: "Dazed",
-                img: "systems/l5r4-enhanced/assets/icons/dazed.webp",
-                statuses: ["dazed"]
-              }
-            ]);
-
-            actor.prepareData();
-
-            // ASSERT
-            const conditionEffects = actor.system._conditionEffects;
-            assert.include(conditionEffects.active, "dazed", "Dazed is active");
-
-            // Verify universal -3k0 penalty
-            assert.equal(conditionEffects.rollPenalties.melee.roll, -3, "Melee penalty -3k0");
-            assert.equal(conditionEffects.rollPenalties.ranged.roll, -3, "Ranged penalty -3k0");
-            assert.equal(conditionEffects.rollPenalties.defense.roll, -3, "Defense penalty -3k0");
-            assert.equal(conditionEffects.rollPenalties.melee.keep, 0, "No keep penalty");
+          it("Dazed: -3k0 to every roll", async () => {
+            await add("dazed");
+            for (const kind of ["attack", "skill", "trait", "ring", "damage"]) {
+              assert.deepInclude(checkEffects(actor, kind), { roll: -3, keep: 0 }, kind);
+            }
           });
 
-          it("should apply fatigued condition with TN penalty", async function () {
-            // ACT - Apply fatigued condition
-            await actor.createEmbeddedDocuments("ActiveEffect", [
-              {
-                name: "Fatigued",
-                img: "systems/l5r4-enhanced/assets/icons/fatigue.webp",
-                statuses: ["fatigued"]
-              }
-            ]);
-
-            actor.prepareData();
-
-            // ASSERT
-            const conditionEffects = actor.system._conditionEffects;
-            assert.include(conditionEffects.active, "fatigued", "Fatigued is active");
-
-            // Verify TN penalty (+5)
-            assert.equal(conditionEffects.tnPenalty, 5, "TN penalty +5");
-
-            // Verify restriction
-            assert.isTrue(
-              conditionEffects.restrictions.some(r => r.includes("fatigued")),
-              "Fatigued restrictions present"
-            );
+          it("Fatigued: +5 TN on Skill, physical Trait, and Spell Casting Rolls", async () => {
+            await add("fatigued");
+            assert.equal(checkEffects(actor, "skill").tn, 5);
+            assert.equal(checkEffects(actor, "trait", { trait: "str" }).tn, 5);
+            assert.equal(checkEffects(actor, "spell").tn, 5);
+            assert.equal(checkEffects(actor, "trait", { trait: "int" }).tn, 0, "a mental Trait");
           });
 
-          it("should apply grappled condition with armor TN override", async function () {
-            // ACT - Apply grappled condition
-            await actor.createEmbeddedDocuments("ActiveEffect", [
-              {
-                name: "Grappled",
-                img: "systems/l5r4-enhanced/assets/icons/grappled.webp",
-                statuses: ["grappled"]
-              }
-            ]);
-
-            actor.prepareData();
-
-            // ASSERT
-            const conditionEffects = actor.system._conditionEffects;
-            assert.include(conditionEffects.active, "grappled", "Grappled is active");
-
-            // Verify Armor TN override (5 + armor bonus)
-            const expectedTN = 5 + (actor.system.armorTn.bonus || 0);
-            assert.equal(actor.system.armorTn.current, expectedTN, "Armor TN reduced to 5 + armor");
+          it("Grappled: Armor TN 5 plus armor", async () => {
+            await add("grappled");
+            assert.equal(actor.system.armorTn.current, 5 + actor.system.armorTn.bonus);
           });
 
-          it("should apply guarded condition with armor TN bonus", async function () {
-            // ARRANGE
-            const baseTN = actor.system.armorTn.current;
-
-            // ACT - Apply guarded condition
-            await actor.createEmbeddedDocuments("ActiveEffect", [
-              {
-                name: "Guarded",
-                img: "systems/l5r4-enhanced/assets/icons/guarded.webp",
-                statuses: ["guarded"]
-              }
-            ]);
-
-            actor.prepareData();
-
-            // ASSERT
-            const conditionEffects = actor.system._conditionEffects;
-            assert.include(conditionEffects.active, "guarded", "Guarded is active");
-
-            // Verify Armor TN bonus (+10)
-            assert.equal(actor.system.armorTn.current, baseTN + 10, "Armor TN increased by 10");
-            assert.equal(conditionEffects.armorTnModifier, 10, "Armor TN modifier +10");
+          it("Guarded: +10 Armor TN (p.88)", async () => {
+            await add("guarded");
+            assert.equal(actor.system.armorTn.current, BASE_TN + 10);
           });
 
-          it("should apply guarding condition with armor TN penalty", async function () {
-            // ARRANGE
-            const baseTN = actor.system.armorTn.current;
-
-            // ACT - Apply guarding condition
-            await actor.createEmbeddedDocuments("ActiveEffect", [
-              {
-                name: "Guarding",
-                img: "systems/l5r4-enhanced/assets/icons/guarding.webp",
-                statuses: ["guarding"]
-              }
-            ]);
-
-            actor.prepareData();
-
-            // ASSERT
-            const conditionEffects = actor.system._conditionEffects;
-            assert.include(conditionEffects.active, "guarding", "Guarding is active");
-
-            // Verify Armor TN penalty (-5)
-            assert.equal(actor.system.armorTn.current, baseTN - 5, "Armor TN reduced by 5");
-            assert.equal(conditionEffects.armorTnModifier, -5, "Armor TN modifier -5");
+          it("Guarding: -5 Armor TN (p.88)", async () => {
+            await add("guarding");
+            assert.equal(actor.system.armorTn.current, BASE_TN - 5);
           });
         });
 
         describe("Multiple Conditions Stacking", () => {
-          it("should stack roll penalties from multiple conditions", async function () {
-            // ACT - Apply dazed (-3k0) AND blinded (-1k1 melee)
-            await actor.createEmbeddedDocuments("ActiveEffect", [
-              {
-                name: "Dazed",
-                img: "systems/l5r4-enhanced/assets/icons/dazed.webp",
-                statuses: ["dazed"]
-              },
-              {
-                name: "Blinded",
-                img: "systems/l5r4-enhanced/assets/icons/blinded.webp",
-                statuses: ["blinded"]
-              }
-            ]);
-
-            actor.prepareData();
-
-            // ASSERT - Verify penalties stack
-            const conditionEffects = actor.system._conditionEffects;
-            assert.include(conditionEffects.active, "dazed", "Dazed active");
-            assert.include(conditionEffects.active, "blinded", "Blinded active");
-
-            // Dazed -3k0 + Blinded -1k1 = -4k1 melee
-            assert.equal(conditionEffects.rollPenalties.melee.roll, -4, "Melee roll penalty -4");
-            assert.equal(conditionEffects.rollPenalties.melee.keep, -1, "Melee keep penalty -1");
-
-            // Dazed -3k0 + Blinded -3k3 = -6k3 ranged
-            assert.equal(conditionEffects.rollPenalties.ranged.roll, -6, "Ranged roll penalty -6");
-            assert.equal(conditionEffects.rollPenalties.ranged.keep, -3, "Ranged keep penalty -3");
+          it("dice penalties add: Dazed and Blinded", async () => {
+            await add("dazed", "blinded");
+            assert.deepInclude(checkEffects(actor, "attack", { range: "melee" }), {
+              roll: -4,
+              keep: -1
+            });
+            assert.deepInclude(checkEffects(actor, "attack", { range: "ranged" }), {
+              roll: -6,
+              keep: -3
+            });
           });
 
-          it("should use most restrictive Armor TN override", async function () {
-            // ARRANGE - Apply stunned (TN=5+armor) AND grappled (TN=5+armor)
-            // Both have same override, should result in same TN
-
-            // ACT - Apply both conditions
-            await actor.createEmbeddedDocuments("ActiveEffect", [
-              {
-                name: "Stunned",
-                img: "systems/l5r4-enhanced/assets/icons/stunned.webp",
-                statuses: ["stunned"]
-              },
-              {
-                name: "Grappled",
-                img: "systems/l5r4-enhanced/assets/icons/grappled.webp",
-                statuses: ["grappled"]
-              }
-            ]);
-
-            actor.prepareData();
-
-            // ASSERT - Both conditions active
-            const conditionEffects = actor.system._conditionEffects;
-            assert.include(conditionEffects.active, "stunned", "Stunned active");
-            assert.include(conditionEffects.active, "grappled", "Grappled active");
-
-            // Should use most restrictive (both are 5 + armor, so same result)
-            const expectedTN = 5 + (actor.system.armorTn.bonus || 0);
-            assert.equal(actor.system.armorTn.current, expectedTN, "Most restrictive TN applied");
+          it("Stunned and Grappled together: 5 plus armor", async () => {
+            await add("stunned", "grappled");
+            assert.equal(actor.system.armorTn.current, 5 + actor.system.armorTn.bonus);
           });
 
-          it("should apply additive armor modifiers after override", async function () {
-            // ACT - Apply grappled (override TN=5+armor) AND prone (modifier -10)
-            await actor.createEmbeddedDocuments("ActiveEffect", [
-              {
-                name: "Grappled",
-                img: "systems/l5r4-enhanced/assets/icons/grappled.webp",
-                statuses: ["grappled"]
-              },
-              {
-                name: "Prone",
-                img: "systems/l5r4-enhanced/assets/icons/prone.webp",
-                statuses: ["prone"]
-              }
-            ]);
-
-            actor.prepareData();
-
-            // ASSERT
-            const conditionEffects = actor.system._conditionEffects;
-            assert.include(conditionEffects.active, "grappled", "Grappled active");
-            assert.include(conditionEffects.active, "prone", "Prone active");
-
-            // Base override: 5 + armor
-            // Prone modifier: -10
-            // But enforce floor of 5
-            const baseOverride = 5 + (actor.system.armorTn.bonus || 0);
-            const expected = Math.max(5, baseOverride - 10);
-
-            assert.equal(
-              actor.system.armorTn.current,
-              expected,
-              "Override + modifier applied with floor"
-            );
+          it("Grappled sets the whole Armor TN: Prone against melee adds nothing (decision 3)", async () => {
+            await add("grappled", "prone");
+            assert.equal(actor.system.armorTn.current, 5 + actor.system.armorTn.bonus);
+            assert.deepEqual(actor.system.armorTn.vs, { melee: 0, ranged: 0 });
           });
 
-          it("should stack TN penalties correctly (fatigued)", async function () {
-            // NOTE: In real game, fatigued stacks by re-applying with higher TN penalty
-            // This tests a single fatigued effect
-
-            // ACT
-            await actor.createEmbeddedDocuments("ActiveEffect", [
-              {
-                name: "Fatigued",
-                img: "systems/l5r4-enhanced/assets/icons/fatigue.webp",
-                statuses: ["fatigued"]
-              }
-            ]);
-
-            actor.prepareData();
-
-            // ASSERT
-            const conditionEffects = actor.system._conditionEffects;
-            assert.equal(conditionEffects.tnPenalty, 5, "Single fatigued: +5 TN");
+          it("Fatigued at level 2: +10 TN", async () => {
+            const [effect] = await add("fatigued");
+            await effect.update({ "system.level": 2 });
+            assert.equal(checkEffects(actor, "skill").tn, 10);
           });
 
-          it("should track multiple active conditions simultaneously", async function () {
-            // ACT - Apply several conditions at once
-            await actor.createEmbeddedDocuments("ActiveEffect", [
-              {
-                name: "Prone",
-                img: "systems/l5r4-enhanced/assets/icons/prone.webp",
-                statuses: ["prone"]
-              },
-              {
-                name: "Dazed",
-                img: "systems/l5r4-enhanced/assets/icons/dazed.webp",
-                statuses: ["dazed"]
-              },
-              {
-                name: "Fatigued",
-                img: "systems/l5r4-enhanced/assets/icons/fatigue.webp",
-                statuses: ["fatigued"]
-              }
-            ]);
-
-            actor.prepareData();
-
-            // ASSERT - All conditions active
-            const conditionEffects = actor.system._conditionEffects;
-            assert.equal(conditionEffects.active.length, 3, "Three conditions active");
-            assert.include(conditionEffects.active, "prone", "Prone active");
-            assert.include(conditionEffects.active, "dazed", "Dazed active");
-            assert.include(conditionEffects.active, "fatigued", "Fatigued active");
-
-            // Verify cumulative effects
-            // Prone -2k0 + Dazed -3k0 = -5k0 melee
-            assert.equal(
-              conditionEffects.rollPenalties.melee.roll,
-              -5,
-              "Cumulative roll penalties"
-            );
-            assert.equal(conditionEffects.tnPenalty, 5, "TN penalty from fatigued");
+          it("Prone, Dazed, and Fatigued together", async () => {
+            await add("prone", "dazed", "fatigued");
+            for (const status of ["prone", "dazed", "fatigued"]) {
+              assert.isTrue(actor.statuses.has(status), status);
+            }
+            const attack = checkEffects(actor, "attack", { skill: "kenjutsu" });
+            assert.equal(attack.roll, -5, "Prone -2k0 and Dazed -3k0");
+            assert.equal(attack.tn, 5, "Fatigued +5");
           });
         });
 
         describe("Fasting Condition Workflow", () => {
-          it("should apply fasting condition", async function () {
-            // ACT - Apply fasting condition
-            await actor.createEmbeddedDocuments("ActiveEffect", [
-              {
-                name: "Fasting",
-                img: "systems/l5r4-enhanced/assets/icons/fasting.webp",
-                statuses: ["fasting"]
-              }
-            ]);
-
-            actor.prepareData();
-
-            // ASSERT - Fasting effect exists
-            const fastingEffect = actor.effects.find(e => e.statuses?.has("fasting"));
-            assert.exists(fastingEffect, "Fasting effect created");
-            assert.isTrue(fastingEffect.statuses.has("fasting"), "Fasting status set");
+          it("Fasting is an effect with its status", async () => {
+            await add("fasting");
+            assert.isTrue(actor.statuses.has("fasting"));
           });
 
-          it("should block void recovery during rest when fasting", async function () {
-            // ARRANGE - Deplete void points
+          it("a long rest restores no Void Points while Fasting (p.89)", async () => {
             await actor.update({ "system.rings.void.value": 0 });
-            actor.prepareData();
-
-            const voidBeforeRest = actor.system.rings.void.value;
-            assert.equal(voidBeforeRest, 0, "Void depleted before rest");
-
-            // Apply fasting condition
-            await actor.createEmbeddedDocuments("ActiveEffect", [
-              {
-                name: "Fasting",
-                img: "systems/l5r4-enhanced/assets/icons/fasting.webp",
-                statuses: ["fasting"]
-              }
-            ]);
-
-            // ACT - Take long rest while fasting
+            await add("fasting");
             await applyLongRest(actor);
-            actor.prepareData();
-
-            // ASSERT - Void should NOT recover
-            const _voidAfterRest = actor.system.rings.void.value;
-
-            // NOTE: Current implementation does NOT block void recovery on fasting
-            // This test documents EXPECTED behavior per L5R4 rules
-            // Implementation gap: fasting should block void recovery in rest.js
-
-            // WHEN IMPLEMENTED, this should pass:
-            // assert.equal(_voidAfterRest, 0, "Void recovery blocked by fasting");
-
-            // CURRENT BEHAVIOR (will change when implemented):
-            // Fasting exists but rest.js doesn't check for it yet
-            assert.exists(
-              actor.effects.find(e => e.statuses?.has("fasting")),
-              "Fasting condition still active"
-            );
+            assert.equal(actor.system.rings.void.value, 0);
           });
 
-          it("should allow void recovery when fasting is removed", async function () {
-            // ARRANGE - Deplete void and apply fasting
+          it("Void Points recover after breaking the fast", async () => {
             await actor.update({ "system.rings.void.value": 0 });
-            const fasting = await actor.createEmbeddedDocuments("ActiveEffect", [
-              {
-                name: "Fasting",
-                img: "systems/l5r4-enhanced/assets/icons/fasting.webp",
-                statuses: ["fasting"]
-              }
-            ]);
-            actor.prepareData();
-
-            const voidBeforeBreakingFast = actor.system.rings.void.value;
-            assert.equal(voidBeforeBreakingFast, 0, "Void depleted");
-
-            // ACT - Remove fasting (break fast)
-            await actor.deleteEmbeddedDocuments("ActiveEffect", [fasting[0].id]);
-
-            // Take long rest after breaking fast
+            const [fasting] = await add("fasting");
+            await fasting.delete();
             await applyLongRest(actor);
-            actor.prepareData();
-
-            // ASSERT - Void should recover normally
-            const voidAfterRest = actor.system.rings.void.value;
-            const voidMax = actor.system.rings.void.rank;
-
-            assert.equal(voidAfterRest, voidMax, "Void recovered after breaking fast");
-            assert.notEqual(voidAfterRest, 0, "Void no longer blocked");
+            assert.equal(actor.system.rings.void.value, actor.system.rings.void.rank);
           });
         });
 
         describe("Condition Edge Cases", () => {
-          it("should handle disabled status effects", async function () {
-            // ACT - Create disabled effect
-            const disabledEffect = await actor.createEmbeddedDocuments("ActiveEffect", [
-              {
-                name: "Stunned (Disabled)",
-                img: "systems/l5r4-enhanced/assets/icons/stunned.webp",
-                statuses: ["stunned"],
-                disabled: true
-              }
-            ]);
-
-            actor.prepareData();
-
-            // ASSERT - Should NOT apply effects when disabled
-            const conditionEffects = actor.system._conditionEffects;
-            assert.notInclude(conditionEffects.active, "stunned", "Disabled effect not active");
-            assert.isNull(conditionEffects.armorTnOverride, "No TN override from disabled effect");
-
-            // Cleanup
-            await actor.deleteEmbeddedDocuments("ActiveEffect", [disabledEffect[0].id]);
-          });
-
-          it("should toggle condition effects on/off via disabled flag", async function () {
-            // ARRANGE - Create active blinded effect
-            const blindEffect = await actor.createEmbeddedDocuments("ActiveEffect", [
-              {
-                name: "Blinded",
-                img: "systems/l5r4-enhanced/assets/icons/blinded.webp",
-                statuses: ["blinded"],
-                disabled: false
-              }
-            ]);
-
-            actor.prepareData();
-            const withBlind = actor.system._conditionEffects;
-            assert.include(withBlind.active, "blinded", "Blinded active initially");
-
-            // ACT - Disable effect
-            await blindEffect[0].update({ disabled: true });
-            actor.prepareData();
-
-            // ASSERT - Effects removed
-            const disabled = actor.system._conditionEffects;
-            assert.notInclude(disabled.active, "blinded", "Blinded inactive when disabled");
-            assert.equal(disabled.rollPenalties.melee.roll, 0, "No penalties when disabled");
-
-            // ACT - Re-enable effect
-            await blindEffect[0].update({ disabled: false });
-            actor.prepareData();
-
-            // ASSERT - Effects restored
-            const reEnabled = actor.system._conditionEffects;
-            assert.include(reEnabled.active, "blinded", "Blinded reactivated");
-            assert.equal(reEnabled.rollPenalties.melee.roll, -1, "Penalties restored");
-
-            // Cleanup
-            await actor.deleteEmbeddedDocuments("ActiveEffect", [blindEffect[0].id]);
-          });
-
-          it("should enforce armor TN floor of 5", async function () {
-            // ACT - Apply multiple severe conditions that would reduce TN below 5
+          it("a disabled condition does nothing", async () => {
             await actor.createEmbeddedDocuments("ActiveEffect", [
-              {
-                name: "Stunned",
-                img: "systems/l5r4-enhanced/assets/icons/stunned.webp",
-                statuses: ["stunned"]
-              },
-              {
-                name: "Prone",
-                img: "systems/l5r4-enhanced/assets/icons/prone.webp",
-                statuses: ["prone"]
-              }
+              { name: "Stunned", statuses: ["stunned"], disabled: true }
             ]);
+            assert.isFalse(actor.statuses.has("stunned"));
+            assert.equal(actor.system.armorTn.current, BASE_TN);
+          });
 
-            actor.prepareData();
+          it("disabling and enabling a condition turns its rules off and on", async () => {
+            const [blind] = await add("blinded");
+            assert.equal(checkEffects(actor, "attack").roll, -1);
+            await blind.update({ disabled: true });
+            assert.equal(checkEffects(actor, "attack").roll, 0);
+            await blind.update({ disabled: false });
+            assert.equal(checkEffects(actor, "attack").roll, -1);
+          });
 
-            // ASSERT - TN should never go below 5
-            assert.isAtLeast(actor.system.armorTn.current, 5, "Armor TN floor enforced");
+          it("the Armor TN never drops below 5", async () => {
+            await add("stunned", "guarding");
+            assert.isAtLeast(actor.system.armorTn.current, 5);
           });
         });
       });

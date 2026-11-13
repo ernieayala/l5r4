@@ -22,11 +22,21 @@
  * @see module/services/stance/rolls/attack-bonuses.js
  */
 
-import { statusRules } from "../../../module/utils/rule-engine.js";
+import { selectorBonus, statusRules } from "../../../module/utils/rule-engine.js";
 import { SYS_ID } from "../../../module/config/constants.js";
 import { createTestPC } from "../../fixtures/actor-fixtures.js";
 import { createSkillData } from "../../fixtures/item-fixtures.js";
-import { getStanceAttackBonuses } from "../../../module/services/stance/rolls/attack-bonuses.js";
+import { guardRolls, waitFor } from "../helpers.js";
+
+/**
+ * The attack bonus the actor's rules give every attack, as Full Attack's +2k1 (p.84).
+ * @param {Actor} actor
+ * @returns {{roll: number, keep: number}}
+ */
+function getStanceAttackBonuses(actor) {
+  const { roll, keep } = selectorBonus(actor.ruleBag, ["attack"], actor.rollOptions);
+  return { roll, keep };
+}
 
 /**
  * Register skill roll + stance combination tests
@@ -37,6 +47,9 @@ export function registerSkillStanceCombinationTests(quench) {
     `${SYS_ID}.workflows.skill-stance-combinations`,
     context => {
       const { describe, it, assert, beforeEach, afterEach } = context;
+
+      // Taking the Full Defense Stance opens its roll dialog (p.84)
+      guardRolls(context);
 
       describe("Skill Roll + Attack Stance (Water Ring)", () => {
         let actor, skill;
@@ -436,32 +449,21 @@ export function registerSkillStanceCombinationTests(quench) {
         });
 
         it("should add half the Defense roll to Armor TN in Full Defense Stance", async () => {
-          // Apply Full Defense Stance with stored roll result
-          const defenseRollResult = 20; // Defense/Reflexes roll total
-          // Flag must be an object with 'total' property (matches Roll object structure)
-          await actor.setFlag(SYS_ID, "fullDefenseRoll", { total: defenseRollResult });
-
+          // Taking the stance rolls Defense / Reflexes (p.84); the roll dialog is answered by guardRolls
           await actor.createEmbeddedDocuments("ActiveEffect", [
-            {
-              name: "Full Defense Stance",
-              img: "icons/svg/shield.svg",
-              statuses: ["fullDefenseStance"]
-            }
+            { name: "Full Defense Stance", statuses: ["fullDefenseStance"] }
           ]);
+          const bonus = () =>
+            actor.effects.find(e => e.getFlag(SYS_ID, "effectId") === "fullDefense");
+          assert.isTrue(await waitFor(() => Boolean(bonus())), "Full Defense bonus effect created");
 
-          // Force actor data preparation to apply stance effects
-          actor.prepareData();
-
-          // Full Defense: +(Defense roll ÷ 2, rounded up) to Armor TN
-          // Roll = 20, bonus = 10
-          // Base TN = (Reflexes 3 × 5) + 5 = 20
-          // Final TN = 20 + 10 = 30
-          const tnBonus = Math.ceil(defenseRollResult / 2);
-          const expectedTN = 20 + tnBonus;
-
+          // Base TN = (Reflexes 3 × 5) + 5 = 20, plus half the roll rounded up
+          const roll = game.messages.contents
+            .filter(m => m.type === "roll" && m.system.actorUuid === actor.uuid)
+            .at(-1);
           assert.equal(
             actor.system.armorTn.current,
-            expectedTN,
+            20 + Math.ceil(roll.system.outcome.total / 2),
             "Armor TN increased by half Defense roll"
           );
         });

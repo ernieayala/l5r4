@@ -11,6 +11,8 @@
  * @module services/initiative
  */
 
+import { voidUseUpdate, warnVoidLimit } from "./effects/uses.js";
+
 /** Initiative bonus for a Void Point (p.78). */
 const VOID_INITIATIVE_BONUS = 10;
 
@@ -46,9 +48,11 @@ export async function resolveVoidInitiative(combatants) {
 
     // Availability was checked on the prepared pool; the write starts from the stored value, so an Active Effect
     // on Void Points is never written into storage (B6)
+    warnVoidLimit(actor);
     await actor.update({
       "system.rings.void.value": actor._source.system.rings.void.value - 1,
-      "system.initiative.useVoid": false
+      "system.initiative.useVoid": false,
+      ...voidUseUpdate(actor)
     });
     ui.notifications?.info(`${actor.name} spent Void Point for initiative (+10)`);
     bonuses.set(combatant.id, VOID_INITIATIVE_BONUS);

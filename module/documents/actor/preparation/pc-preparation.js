@@ -12,7 +12,7 @@
  * - Process wound thresholds using Earth Ring formulas
  * - Calculate insight points and rank from rings/skills
  * - Calculate healing rates from Stamina
- * - Apply stance and condition effects
+ * - Apply ArmorTN rules from stances, conditions, and other effects
  *
  * Architecture: Pure calculation functions that mutate sys object in place.
  * Foundry API: Uses actor.items collection and actor flags for armor stacking.
@@ -31,15 +31,12 @@ import { toInt } from "../../../utils/type-coercion.js";
 import { logError } from "../../../utils/error-logging.js";
 import { initiativeDice } from "../../../utils/initiative.js";
 
-import { applyStanceAutomation } from "../../../services/stance/core/automation.js";
-
 import {
   WOUND_LEVEL_ORDER,
   DEFAULT_WOUND_PENALTIES,
   DEFAULT_WOUND_THRESHOLDS
 } from "../../../config/game-mechanics.js";
 import { prepareTraitsAndRings, prepareMovement } from "../calculations/shared-traits-rings.js";
-import { applyConditionEffects } from "../calculations/condition-effects.js";
 import { enrichActorItems } from "../calculations/item-enrichment.js";
 import { applyArmorRules, applyDerivedRules } from "../rules.js";
 
@@ -126,16 +123,8 @@ export function preparePcData(actor, sys, finalizeWoundPenaltiesFn, calculateIns
   const reductionMod = toInt(sys.armorTn.reductionMod);
   sys.armorTn.reduction = Math.max(0, reduction + reductionMod);
 
-  // Add Void Point bonus if active (+10 TN for spending Void Point)
-  const voidTnBonus = sys.armorTn.useVoid ? 10 : 0;
-  sys.armorTn.current = baseTN + modTN + bonusTN + voidTnBonus;
-
-  // Apply stance effects (must happen after traits/armor are calculated)
-  applyStanceAutomation(actor, sys);
-  applyArmorRules(sys);
-
-  // Apply condition effects (must happen after stance)
-  applyConditionEffects(actor, sys);
+  // Stances, conditions, and Void Points change the Armor TN through ArmorTN rules on their effects
+  applyArmorRules(actor, sys, { base: baseTN, armor: bonusTN, other: modTN });
 
   // Calculate movement rates (depends on traits)
   prepareMovement(sys);

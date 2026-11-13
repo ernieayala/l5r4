@@ -673,25 +673,16 @@ export function registerChatSystemWorkflowTests(quench) {
           assert.include(html, "reduce-wounds-void", "Void button");
         });
 
-        it("should render simple roll template", async () => {
-          // ARRANGE
-          const roll = new Roll("7d10k3x10");
-          await roll.evaluate();
-
-          const templateData = {
-            flavor: "Skill Check",
-            roll: await roll.render()
-          };
-
+        it("should render the effect prompt card with its button", async () => {
           // ACT
           const html = await foundry.applications.handlebars.renderTemplate(
-            "systems/l5r4-enhanced/templates/chat/simple-roll.hbs",
-            templateData
+            "systems/l5r4-enhanced/templates/chat/effect-prompt.hbs",
+            { title: "Dazed: save", text: "Earth roll against TN 20.", button: "Roll" }
           );
 
           // ASSERT
-          assert.exists(html, "Template rendered");
-          assert.include(html, "Skill Check", "Flavor text present");
+          assert.include(html, "Dazed: save", "Title present");
+          assert.include(html, 'data-action="effect-prompt"', "Roll button present");
         });
 
         it("should include actor ID in damage button data", async () => {

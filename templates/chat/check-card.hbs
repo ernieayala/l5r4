@@ -45,6 +45,15 @@
       </button>
     </div>
   {{/if}}
+  {{#if (and (eq outcome.success true) conditions.length)}}
+    <div class="check-conditions flexrow -gap-sm">
+      {{#each conditions}}
+        <button type="button" data-action="apply-condition" data-index="{{@index}}">
+          {{localize "l5r4.ui.effects.applyTo" effect=label target=../target.name}}
+        </button>
+      {{/each}}
+    </div>
+  {{/if}}
   {{#if damageButton}}
     <button type="button" class="l5r4-check-damage" data-action="check-damage">
       {{localize "l5r4.ui.mechanics.rolls.damageRoll"}} ({{damageButton}})

@@ -4,7 +4,7 @@
  * none, and spending it once the roll is made.
  */
 
-import { T } from "../../../utils/localization.js";
+import { F, T } from "../../../utils/localization.js";
 import { toInt } from "../../../utils/type-coercion.js";
 
 /**
@@ -39,7 +39,7 @@ export function planSlot(actor, ringKey, choice) {
   const key = choice === "void" ? "void" : ringKey;
   if (toInt(actor.system.spellSlots[key]) <= 0) {
     ui.notifications?.warn(
-      T("l5r4.ui.notifications.noSpellSlots", {
+      F("l5r4.ui.notifications.noSpellSlots", {
         ring:
           choice === "void"
             ? T("l5r4.magic.spells.voidSlot")

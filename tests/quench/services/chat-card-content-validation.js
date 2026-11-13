@@ -18,7 +18,7 @@
  * @see module/services/dice/rolls/skill-roll.js
  * @see module/services/dice/rolls/trait-roll.js
  * @see module/services/dice/rolls/spell-roll.js
- * @see templates/chat/simple-roll.hbs
+ * @see templates/chat/check-card.hbs
  */
 
 import { SYS_ID } from "../../../module/config/constants.js";

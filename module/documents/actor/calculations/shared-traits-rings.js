@@ -9,7 +9,7 @@
  * - Earth: Stamina & Willpower
  * - Fire: Agility & Intelligence
  * - Water: Strength & Perception
- * - Void: Special - purchased separately, tracks current/max values
+ * - Void: bought on its own, with no Traits; tracks current/max values
  *
  * Architecture:
  * - Normalizes trait values to integers
@@ -40,7 +40,7 @@ import { logError } from "../../../utils/error-logging.js";
  * - Earth = min(Stamina, Willpower)
  * - Fire = min(Agility, Intelligence)
  * - Water = min(Strength, Perception)
- * - Void = special (purchased separately, not calculated)
+ * - Void = bought on its own, not calculated
  *
  * Trait Normalization:
  * - Handles both object format (v.rank) and direct values
@@ -78,7 +78,7 @@ export function prepareTraitsAndRings(sys) {
     const t = sys._derived.traitsEff;
 
     // Preserve Void Ring state before recalculating rings
-    // Void is purchased separately and tracks current/max points
+    // Void is bought on its own and tracks current/max points
     const existingVoidRank = toInt(sys.rings?.void?.rank ?? 0);
     const existingVoidValue = sys.rings?.void?.value;
     const existingVoidMax = sys.rings?.void?.max;
@@ -134,9 +134,9 @@ export function prepareTraitsAndRings(sys) {
  * - Simple Action: Water Ring × 10 feet
  * - Maximum per Round: Water Ring × 20 feet (hard limit)
  *
- * Condition Effects:
- * - Conditions like Blinded reduce effective Water Ring by 2 for movement
- * - Applied after condition effects via sys._conditionEffects.waterRingPenalty
+ * Movement rules:
+ * - A Movement rule changes the Water Ring for movement only, as Blinded's -2 (p.89), through
+ *   sys.movementWater (module/documents/actor/rules.js)
  * - Minimum effective Water Ring is 1 per L5R4 rules
  *
  * Custom Modifiers:
@@ -157,15 +157,14 @@ export function prepareTraitsAndRings(sys) {
  *
  * @example
  * // Actor with Water Ring 4, Blinded condition (-2)
- * actor.system._conditionEffects = { waterRingPenalty: -2 };
+ * actor.system.movementWater = -2;
  * prepareMovement(actor.system);
  * // Effective Water = max(1, 4 + (-2)) = 2
  * // actor.system.movement.freeAction = 10 (2 × 5)
  */
 export function prepareMovement(sys) {
   const baseWater = toInt(sys.rings.water);
-  const waterPenalty = sys._conditionEffects?.waterRingPenalty ?? 0;
-  const effectiveWater = Math.max(1, baseWater + waterPenalty);
+  const effectiveWater = Math.max(1, baseWater + sys.movementWater);
 
   sys.movement = sys.movement || {};
   const movementMultiplier = parseFloat(sys.movement.multiplier) || 1;

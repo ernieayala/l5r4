@@ -4,22 +4,51 @@
  * `RULE_MODELS` registry maps a key to its class. Values that take a number take a formula too.
  */
 
-import { ADJUSTABLE_TRAITS, RULE_KEYS } from "../../config/rule-keys.js";
+import {
+  ADJUSTABLE_TRAITS,
+  ARMOR_TN_MODES,
+  ATTACK_RANGES,
+  RULE_KEYS,
+  SAVE_EVENTS,
+  SAVE_FAILURES
+} from "../../config/rule-keys.js";
+import { USE_PERIODS } from "../../utils/effects.js";
 import RuleData, { selectorField, typeField, valueField } from "./RuleData.js";
 
 const fields = () => foundry.data.fields;
 
-/** +XkY or +N on rolls matching `selector`. */
+/**
+ * An attack range a rule is limited to, or null for every roll.
+ * @returns {foundry.data.fields.StringField}
+ */
+function rangeField() {
+  return new (fields().StringField)({
+    required: true,
+    nullable: true,
+    initial: null,
+    choices: ATTACK_RANGES
+  });
+}
+
+/**
+ * +XkY or +N on rolls matching `selector`. With `range`, only attacks of that range. An `optional` modifier is
+ * offered unticked, for a bonus the roller places on one roll of their choice (Center Stance, p.84); with
+ * `consumes`, rolling with it ticked ends the Active Effect that carries it.
+ */
 export class RollModifierRule extends RuleData {
   /** @override */
   static defineSchema() {
+    const { BooleanField } = fields();
     return {
       ...super.defineSchema(),
       selector: selectorField(),
       roll: valueField(0),
       keep: valueField(0),
       total: valueField(0),
-      type: typeField()
+      type: typeField(),
+      range: rangeField(),
+      optional: new BooleanField({ initial: false }),
+      consumes: new BooleanField({ initial: false })
     };
   }
 }
@@ -37,11 +66,21 @@ export class TNModifierRule extends RuleData {
   }
 }
 
-/** A change to Armor TN. */
+/**
+ * A change to Armor TN: added, a replacement base, or a replacement total (module/utils/effects.js,
+ * resolveArmorTn). An added change with `range` counts only against attacks of that range.
+ */
 export class ArmorTNRule extends RuleData {
   /** @override */
   static defineSchema() {
-    return { ...super.defineSchema(), value: valueField(0), type: typeField() };
+    const { StringField } = fields();
+    return {
+      ...super.defineSchema(),
+      value: valueField(0),
+      type: typeField(),
+      mode: new StringField({ required: true, initial: "add", choices: ARMOR_TN_MODES }),
+      range: rangeField()
+    };
   }
 }
 
@@ -161,6 +200,94 @@ export class RollOptionRule extends RuleData {
   }
 }
 
+/** Ranks added to the Water Ring for movement only, as Blinded's -2 (p.89). */
+export class MovementRule extends RuleData {
+  /** @override */
+  static defineSchema() {
+    return { ...super.defineSchema(), water: valueField(0) };
+  }
+}
+
+/**
+ * A condition this item or effect lets its owner put on the target of a successful roll matching `selector`, such as
+ * Dazed on a hit. The roll's card offers it; nothing applies until someone clicks (AUTOMATION.md §4).
+ */
+export class ApplyConditionRule extends RuleData {
+  /** @override */
+  static defineSchema() {
+    const { NumberField, StringField } = fields();
+    return {
+      ...super.defineSchema(),
+      selector: selectorField(),
+      condition: new StringField({ required: true, blank: false }),
+      // The condition's level, as a Fear Rank; null for a condition without one
+      level: new NumberField({
+        required: true,
+        nullable: true,
+        initial: null,
+        integer: true,
+        min: 1
+      })
+    };
+  }
+}
+
+/** The owner cannot gain the status `condition`. */
+export class ConditionImmunityRule extends RuleData {
+  /** @override */
+  static defineSchema() {
+    const { StringField } = fields();
+    return {
+      ...super.defineSchema(),
+      condition: new StringField({ required: true, blank: false })
+    };
+  }
+}
+
+/**
+ * A roll that ends the Active Effect carrying it: rolled on `event` by the affected actor's owner against `tn`
+ * (Dazed and Stunned in the Reactions stage, p.89). After a failure the TN moves by `step`, never past `min`;
+ * `onFailure` says what else a failure does.
+ */
+export class PeriodicSaveRule extends RuleData {
+  /** @override */
+  static defineSchema() {
+    const { NumberField, StringField } = fields();
+    return {
+      ...super.defineSchema(),
+      event: new StringField({ required: true, initial: "roundEnd", choices: SAVE_EVENTS }),
+      // "ring:earth" or "trait:wil"
+      roll: new StringField({
+        required: true,
+        blank: false,
+        validate: value => /^(ring:(air|earth|fire|water|void)|trait:[a-z]{3})$/.test(value),
+        validationError: 'must be "ring:<ring>" or "trait:<trait>"'
+      }),
+      tn: new NumberField({ required: true, nullable: false, integer: true, min: 0, initial: 20 }),
+      step: new NumberField({ required: true, nullable: false, integer: true, initial: 0 }),
+      min: new NumberField({ required: true, nullable: false, integer: true, min: 0, initial: 5 }),
+      onFailure: new StringField({ required: true, initial: "retry", choices: SAVE_FAILURES })
+    };
+  }
+}
+
+/**
+ * Uses of a limited resource per period: adds `max` uses of `slug` each `per`. The slug "void" raises the
+ * once-per-Round Void Point limit (p.78; STAGE-09 decision 6).
+ */
+export class ResourceRule extends RuleData {
+  /** @override */
+  static defineSchema() {
+    const { StringField } = fields();
+    return {
+      ...super.defineSchema(),
+      slug: new StringField({ required: true, blank: false }),
+      max: valueField(1),
+      per: new StringField({ required: true, initial: "round", choices: USE_PERIODS })
+    };
+  }
+}
+
 /**
  * Rule key to DataModel class.
  * @type {Readonly<Record<string, typeof RuleData>>}
@@ -177,7 +304,12 @@ export const RULE_MODELS = Object.freeze({
   Substitute: SubstituteRule,
   TraitAdjust: TraitAdjustRule,
   Note: NoteRule,
-  RollOption: RollOptionRule
+  RollOption: RollOptionRule,
+  Movement: MovementRule,
+  ApplyCondition: ApplyConditionRule,
+  ConditionImmunity: ConditionImmunityRule,
+  PeriodicSave: PeriodicSaveRule,
+  Resource: ResourceRule
 });
 
 if (RULE_KEYS.some(key => !RULE_MODELS[key])) {

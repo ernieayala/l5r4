@@ -37,6 +37,12 @@ describe("migratePcSource", () => {
     });
   });
 
+  it("drops 3.2.1's Void-on-Armor-TN marker, which is an effect now", () => {
+    const source = { armorTn: { mod: 1, useVoid: true, voidRound: 3 } };
+    migratePcSource(source);
+    expect(source).toEqual({ armorTn: { mod: 1 } });
+  });
+
   it("keeps an existing camelCase value over the legacy one, and drops the legacy key", () => {
     const source = { initiative: { rollMod: 5, roll_mod: 1 } };
     migratePcSource(source);

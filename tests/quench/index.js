@@ -97,6 +97,7 @@ import { registerActiveEffectsBatch } from "./active-effects.js";
 import { registerSheetsAndAppsBatch } from "./sheets-and-apps.js";
 import { registerRulesBatch } from "./rules.js";
 import { registerRollPipelineBatch } from "./roll-pipeline.js";
+import { registerEffectsBatch } from "./effects.js";
 
 /**
  * Register Quench integration tests for the L5R4 system.
@@ -111,6 +112,7 @@ export async function registerQuenchTests(quench) {
   registerSheetsAndAppsBatch(quench);
   registerRulesBatch(quench);
   registerRollPipelineBatch(quench);
+  registerEffectsBatch(quench);
   registerActorDocumentTests(quench);
   registerActorWoundTests(quench);
   registerActorXpTests(quench);

@@ -2,9 +2,8 @@
  * Conditions Edge Case Tests
  *
  * Tests edge cases in condition management that could break combat. Conditions are status effects, applied with
- * `actor.toggleStatusEffect` and read back from `actor.statuses` and the values
- * module/documents/actor/calculations/condition-effects.js derives. Values asserted are the ones that code computes
- * today; the rules audit (roadmap Stage 13) checks them against the book.
+ * `actor.toggleStatusEffect` and read back from `actor.statuses`, the Armor TN, and what a roll collects
+ * (checkEffects). Values are the book's (p.89; STAGE-09 decision 3).
  *
  * **What Can Break:**
  * - Stunned and Blinded Armor TN overrides
@@ -16,6 +15,7 @@
 
 import { SYS_ID } from "../../../module/config/constants.js";
 import { createTestPC } from "../../fixtures/actor-fixtures.js";
+import { checkEffects } from "../helpers.js";
 
 /**
  * Apply or remove conditions, one status change at a time; each awaited change re-prepares the actor.
@@ -101,7 +101,7 @@ export function registerConditionsEdgeCaseTests(quench) {
           await setConditions(actor, { fatigued: true });
 
           assert.isTrue(actor.statuses.has("fatigued"), "Fatigued active");
-          assert.equal(actor.system._conditionEffects.tnPenalty, 5, "+5 TN while Fatigued");
+          assert.equal(checkEffects(actor, "skill").tn, 5, "+5 TN while Fatigued");
         });
 
         it("should not stack Fatigued applied twice", async () => {
@@ -110,7 +110,7 @@ export function registerConditionsEdgeCaseTests(quench) {
 
           const fatigued = actor.effects.filter(effect => effect.statuses.has("fatigued"));
           assert.lengthOf(fatigued, 1, "One Fatigued effect");
-          assert.equal(actor.system._conditionEffects.tnPenalty, 5, "Penalty applied once");
+          assert.equal(checkEffects(actor, "skill").tn, 5, "Penalty applied once");
         });
 
         it("should remove Fatigued and its penalty", async () => {
@@ -118,7 +118,7 @@ export function registerConditionsEdgeCaseTests(quench) {
           await setConditions(actor, { fatigued: false });
 
           assert.isFalse(actor.statuses.has("fatigued"), "Fatigued removed");
-          assert.equal(actor.system._conditionEffects.tnPenalty, 0, "No TN penalty");
+          assert.equal(checkEffects(actor, "skill").tn, 0, "No TN penalty");
         });
       });
 
@@ -144,22 +144,25 @@ export function registerConditionsEdgeCaseTests(quench) {
 
           assert.isTrue(actor.statuses.has("stunned"), "Stunned active");
           assert.isTrue(actor.statuses.has("prone"), "Prone active");
-          // Override 5, then Prone -10, then the minimum Armor TN of 5
-          assert.equal(actor.system.armorTn.current, 5, "Armor TN floors at 5");
+          // Stunned sets the whole Armor TN to 5 plus armor; Prone's melee -10 adds nothing (decision 3)
+          assert.equal(actor.system.armorTn.current, 5, "Stunned Armor TN");
+          assert.deepEqual(actor.system.armorTn.vs, { melee: 0, ranged: 0 });
         });
 
         it("should handle Blinded + Fatigued + Prone", async () => {
           await setConditions(actor, { blinded: true, fatigued: true, prone: true });
 
-          const effects = actor.system._conditionEffects;
-          assert.sameMembers(effects.active, ["blinded", "fatigued", "prone"], "All three active");
-          assert.equal(effects.tnPenalty, 5, "Fatigued TN penalty");
+          for (const id of ["blinded", "fatigued", "prone"]) {
+            assert.isTrue(actor.statuses.has(id), `${id} active`);
+          }
+          assert.equal(checkEffects(actor, "attack").tn, 5, "Fatigued TN penalty");
           assert.equal(
-            effects.rollPenalties.ranged.roll,
+            checkEffects(actor, "attack", { range: "ranged" }).roll,
             -5,
             "Blinded -3 and Prone -2 rolled dice on ranged"
           );
-          assert.equal(actor.system.armorTn.current, 5, "Blinded TN 8, Prone -10, floor 5");
+          assert.equal(actor.system.armorTn.current, 3 + 5, "Blinded base Reflexes + 5");
+          assert.equal(actor.system.armorTn.vs.melee, -10, "Prone counts against melee");
         });
 
         it("should handle conflicting conditions (Stunned + Dazed)", async () => {
@@ -167,11 +170,7 @@ export function registerConditionsEdgeCaseTests(quench) {
 
           assert.isTrue(actor.statuses.has("stunned"), "Stunned tracked");
           assert.isTrue(actor.statuses.has("dazed"), "Dazed tracked");
-          assert.equal(
-            actor.system._conditionEffects.rollPenalties.melee.roll,
-            -3,
-            "Dazed melee penalty"
-          );
+          assert.equal(checkEffects(actor, "attack").roll, -3, "Dazed melee penalty");
         });
 
         it("should remove one condition while keeping others", async () => {
@@ -192,7 +191,7 @@ export function registerConditionsEdgeCaseTests(quench) {
             fatigued: false
           });
 
-          assert.lengthOf(actor.system._conditionEffects.active, 0, "No conditions active");
+          assert.equal(actor.statuses.size, 0, "No conditions active");
           assert.equal(actor.system.armorTn.current, 3 * 5 + 5, "Armor TN back to base");
         });
       });

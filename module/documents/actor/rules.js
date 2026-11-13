@@ -7,7 +7,7 @@
  *    armor; TraitAdjust, so Rings and derived values see it as they see a Trait effect.
  * 2. `applyDerivedRules`, once Traits and Rings are known: Ring and Trait roll options, RollOption rules, the
  *    Initiative and Wounds outputs, and the modifier bag the roll pipeline reads by selector.
- * 3. `applyArmorRules`, once Armor TN and Reduction are computed: ArmorTN and Reduction.
+ * 3. `applyArmorRules`, once the Armor TN's base and armor are known: ArmorTN and Reduction.
  * 4. `addWoundRollOption`, once the Wound Rank is known.
  *
  * Roll options: `status:<id>` for every active status (stances included), `armor:worn`, `ring:<ring>:<value>`,
@@ -20,6 +20,8 @@ import {
   derivedRuleOutputs,
   traitAdjustments
 } from "../../utils/rule-engine.js";
+import { resolveArmorTn } from "../../utils/effects.js";
+import { stackModifiers } from "../../utils/modifier-stacking.js";
 import { toInt } from "../../utils/type-coercion.js";
 import { SYS_ID } from "../../config/constants.js";
 
@@ -56,16 +58,20 @@ export function collectRules(actor) {
     }
   }
   for (const effect of actor.appliedEffects) {
-    sources.push(...effect.system.rules.map(rule => ({ rule, source: effect.name })));
+    const extra = { effectUuid: effect.uuid };
+    if (effect.system.level !== null) {
+      extra.level = effect.system.level;
+    }
+    sources.push(...effect.system.rules.map(rule => ({ rule, source: effect.name, ...extra })));
   }
 
   const entries = [];
-  for (const { rule, source } of sources) {
+  for (const { rule, ...from } of sources) {
     // system.rules is user-authored JSON: a trust boundary, so each entry is validated.
     try {
-      entries.push({ rule: createRule(rule), source });
+      entries.push({ rule: createRule(rule), ...from });
     } catch (err) {
-      reportRuleProblem(actor, source, err.message);
+      reportRuleProblem(actor, from.source, err.message);
     }
   }
   // Array#sort is stable, so equal priorities keep their collection order.
@@ -129,18 +135,33 @@ export function applyDerivedRules(actor, sys) {
   sys.initiative.totalMod += out.initiative.total;
   sys.woundsMod += out.woundsPerRank;
   sys.woundsPenaltyMod += out.woundPenalty;
-  sys.armorTn.ruleMod = out.armorTn;
   sys.armorTn.ruleReduction = out.reduction;
+  sys.movementWater = out.movementWater;
+  actor.armorRules = out.armor;
+  actor.conditionImmunities = out.immunities;
+  actor.periodicSaves = out.saves;
+  actor.resources = out.resources;
   actor.ruleBag = out.bag;
 }
 
 /**
- * Add ArmorTN and Reduction rule outputs to the computed Armor TN and Reduction. Runs with the stance step, so
- * condition overrides keep it as they keep the stance modifier.
+ * Compute the Armor TN from its base, armor, and manual modifier with the ArmorTN rules (module/utils/effects.js,
+ * resolveArmorTn), and add Reduction rules. Sets `armorTn.current` and `armorTn.vs`, the range-limited changes an
+ * attacker's roll reads (Prone, p.89).
+ * @param {Actor} actor
  * @param {object} sys
+ * @param {{base: number, armor: number, other: number}} parts
  */
-export function applyArmorRules(sys) {
-  sys.armorTn.current += sys.armorTn.ruleMod;
+export function applyArmorRules(actor, sys, { base, armor, other }) {
+  const { current, vs } = resolveArmorTn({
+    base,
+    armor,
+    other,
+    rules: actor.armorRules,
+    stack: stackModifiers
+  });
+  sys.armorTn.current = current;
+  sys.armorTn.vs = vs;
   sys.armorTn.reduction = Math.max(0, sys.armorTn.reduction + sys.armorTn.ruleReduction);
 }
 

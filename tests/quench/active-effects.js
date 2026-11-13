@@ -1,6 +1,6 @@
 import { SYS_ID } from "../../module/config/constants.js";
 import { STATUS_EFFECTS } from "../../module/config/status-effects.js";
-import { getStanceEffectCreator } from "../../module/services/stance/core/effect-templates.js";
+import { applyEffect } from "../../module/services/effects/apply.js";
 import { spendVoidPoint } from "../../module/services/dice/resources/void-manager.js";
 import { spendElementalSlot } from "../../module/services/dice/resources/spell-slot-manager.js";
 import { SpellCastRoll } from "../../module/services/dice/rolls/spell-cast-roll.js";
@@ -115,9 +115,8 @@ export function registerActiveEffectsBatch(quench) {
           actor = await createTestPC({ name: "AE img" });
           const prone = await actor.toggleStatusEffect("prone", { active: true });
           assert.equal(prone.img, CONFIG.statusEffects.prone.img);
-          const template = getStanceEffectCreator("fullAttackStance")(actor);
-          const [stance] = await actor.createEmbeddedDocuments("ActiveEffect", [template]);
-          assert.equal(stance.img, template.img);
+          const stance = await applyEffect(actor, "fullAttackStance");
+          assert.equal(stance.img, CONFIG.statusEffects.fullAttackStance.img);
           assert.notEqual(stance.img, CONFIG.ActiveEffect.documentClass.DEFAULT_ICON);
         });
       });
@@ -306,7 +305,12 @@ export function registerActiveEffectsBatch(quench) {
           await combat.startCombat();
           assert.equal(game.combat?.id, combat.id, "the handler reads game.combat");
           await PcActionsHandler.handleToggleArmorVoid({ actor }, null, { checked: true });
-          assert.isTrue(actor.system.armorTn.useVoid, "Void spent on Armor TN");
+          assert.equal(
+            actor.effects.filter(e => e.getFlag("l5r4-enhanced", "effectId") === "voidArmor")
+              .length,
+            1,
+            "Void spent on Armor TN"
+          );
           assert.equal(actor._source.system.rings.void.value, 1, "stored 2 - 1");
         });
       });

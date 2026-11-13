@@ -38,13 +38,7 @@ export default class PcData extends ActorData {
       armorTn: new SchemaField({
         type: stringField(),
         reductionMod: numberField(0),
-        mod: numberField(0),
-        useVoid: booleanField(false),
-        voidRound: new foundry.data.fields.NumberField({
-          required: true,
-          nullable: true,
-          initial: null
-        })
+        mod: numberField(0)
       }),
       wealth: coinsField(),
       spellSlots: spellSlotsField(2)

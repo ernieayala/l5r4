@@ -3,13 +3,13 @@
  * @description Condition IDs for L5R4 status effects.
  *
  * Defines the set of condition status effect IDs that can be applied to actors.
- * Excludes stance effects which are managed separately via the stance system.
+ * Excludes the stances (module/utils/stances.js).
  *
  * Conditions affect actor capabilities through penalties, restrictions, and
  * special rules as defined in the L5R4 core rulebook.
  *
  * @see module:config/status-effects for full status effect definitions
- * @see module:services/stance/core/helpers for stance IDs
+ * @see module:utils/stances for stance IDs
  */
 
 const freeze = Object.freeze;
@@ -34,7 +34,7 @@ const freeze = Object.freeze;
  * - stunned: Armor TN override, incapacitated
  *
  * @constant {Set<string>}
- * @see module:documents/actor/calculations/condition-effects for penalty application
+ * @see module:config/status-effects for each condition's rules
  */
 export const CONDITION_IDS = freeze(
   new Set([

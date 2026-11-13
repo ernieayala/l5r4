@@ -23,7 +23,7 @@
 
 import { getSortPref, sortWithPref } from "../../utils/sorting.js";
 import { toInt } from "../../utils/type-coercion.js";
-import { getActiveStances } from "../../services/stance/core/helpers.js";
+import { activeStance } from "../../utils/stances.js";
 import { getSectionCollapsedMap } from "../../utils/section-state.js";
 
 /**
@@ -248,7 +248,7 @@ export class PcContextBuilder {
    * Sort weapons by user preference.
    *
    * Sorts weapon items using user-stored preferences. Attack and damage formulas
-   * (attackFormula, attackFormulaWithStance, damageFormula) are pre-calculated in
+   * (attackFormula, damageFormula) are pre-calculated in
    * Actor.prepareDerivedData() - this method only sorts.
    *
    * Sorting columns:
@@ -397,7 +397,7 @@ export class PcContextBuilder {
    * @returns {string} Current stance identifier (empty if none)
    */
   static extractStance(actor) {
-    return getActiveStances(actor)[0] || "";
+    return activeStance(actor.statuses);
   }
 
   /**

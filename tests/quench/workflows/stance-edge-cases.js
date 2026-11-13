@@ -15,6 +15,8 @@
 import { statusRules } from "../../../module/utils/rule-engine.js";
 import { SYS_ID } from "../../../module/config/constants.js";
 import { createTestPC } from "../../fixtures/actor-fixtures.js";
+import { guardRolls, waitFor } from "../helpers.js";
+import { rollFullDefense } from "../../../module/services/effects/prompts.js";
 
 /**
  * Register stance edge case tests
@@ -25,6 +27,9 @@ export function registerStanceEdgeCaseTests(quench) {
     `${SYS_ID}.workflows.stance-edge-cases`,
     context => {
       const { describe, it, assert, beforeEach, afterEach } = context;
+
+      // Taking the Full Defense Stance opens its roll dialog (p.84)
+      guardRolls(context);
 
       describe("Multiple Simultaneous Stances", () => {
         let actor;
@@ -208,14 +213,14 @@ export function registerStanceEdgeCaseTests(quench) {
             }
           ]);
 
-          // ACT
-          actor.prepareData();
+          // ACT: taking the stance rolls Defense / Reflexes; half the total goes to Armor TN (p.84)
+          await waitFor(() =>
+            actor.effects.some(e => e.getFlag(SYS_ID, "effectId") === "fullDefense")
+          );
 
           // ASSERT - Full Defense should boost Armor TN
           const armorTN = actor.system.armorTn.current;
           const baseArmorTN = actor.system.traits.ref * 5 + 5;
-
-          // Full Defense adds default 5 bonus before roll, or roll/2 after
           assert.isAbove(armorTN, baseArmorTN, "Armor TN boosted");
         });
 
@@ -229,27 +234,28 @@ export function registerStanceEdgeCaseTests(quench) {
             }
           ]);
 
-          // ACT
-          actor.prepareData();
+          // ACT: a second Full Defense roll replaces the first bonus
+          const bonuses = () =>
+            actor.effects.filter(e => e.getFlag(SYS_ID, "effectId") === "fullDefense");
+          await waitFor(() => bonuses().length === 1);
+          await rollFullDefense(actor);
 
-          // ASSERT - This test documents expected behavior
-          // System should prevent rolling Full Defense multiple times per round
-          const armorTN = actor.system.armorTn.current;
-          assert.isNumber(armorTN, "Armor TN calculated");
-
-          // Expected: Flag or counter to prevent duplicate use
+          // ASSERT: one bonus, never two
+          assert.lengthOf(bonuses(), 1, "One Full Defense bonus");
         });
 
-        it("should reset Full Defense at round end", async () => {
-          // ARRANGE - Full Defense with roll stored
-          await actor.setFlag("l5r4-enhanced", "fullDefenseRoll", { total: 20 });
-
-          // ACT - Simulate round end (clear flag)
-          await actor.unsetFlag("l5r4-enhanced", "fullDefenseRoll");
-
-          // ASSERT
-          const roll = actor.getFlag("l5r4-enhanced", "fullDefenseRoll");
-          assert.notExists(roll, "Full Defense roll cleared");
+        it("should end the Full Defense bonus at the start of the next Turn (p.84)", async () => {
+          await actor.createEmbeddedDocuments("ActiveEffect", [
+            { name: "Full Defense Stance", statuses: ["fullDefenseStance"] }
+          ]);
+          const bonus = () =>
+            actor.effects.find(e => e.getFlag(SYS_ID, "effectId") === "fullDefense");
+          await waitFor(() => Boolean(bonus()));
+          assert.deepInclude(bonus().toObject().duration, {
+            value: 1,
+            units: "rounds",
+            expiry: "turnStart"
+          });
         });
       });
 
@@ -461,14 +467,16 @@ export function registerStanceEdgeCaseTests(quench) {
             }
           ]);
 
-          // ACT
-          actor.prepareData();
+          // ACT: the Full Defense roll's bonus effect
+          await waitFor(() =>
+            actor.effects.some(e => e.getFlag(SYS_ID, "effectId") === "fullDefense")
+          );
 
           // ASSERT
           const armorTN = actor.system.armorTn.current;
           const baseArmorTN = 10 * 5 + 5; // 55
 
-          // High Reflexes + Full Defense = very high TN
+          // Reflexes 10 plus the Full Defense bonus
           assert.isNumber(armorTN, "Armor TN is number");
           assert.isAbove(armorTN, baseArmorTN, "Full Defense boosts high TN");
         });

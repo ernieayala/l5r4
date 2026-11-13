@@ -13,7 +13,7 @@ import {
   rollDamageFromMessage
 } from "../../module/services/dice/check/chat-actions.js";
 import { inlineFormula } from "../../module/services/chat.js";
-import { getStanceEffectCreator } from "../../module/services/stance/core/effect-templates.js";
+import { applyEffect } from "../../module/services/effects/apply.js";
 import { createTestNPC, createTestPC } from "../fixtures/actor-fixtures.js";
 import { createSkillData, createWeaponData } from "../fixtures/item-fixtures.js";
 import { cleanTest, settleChatNotifications } from "./helpers.js";
@@ -280,9 +280,7 @@ export function registerRollPipelineBatch(quench) {
           clean(async () => {
             const { actor, katana } = await swordsman();
             await actor.items.getName("Kenjutsu").update({ "system.keepBonus": 1 });
-            await actor.createEmbeddedDocuments("ActiveEffect", [
-              getStanceEffectCreator("fullAttackStance")(actor)
-            ]);
+            await applyEffect(actor, "fullAttackStance");
             const message = keep(
               await SkillRoll({
                 actor,
@@ -303,9 +301,7 @@ export function registerRollPipelineBatch(quench) {
           "B3: an NPC attack takes Full Attack +2k1 once",
           clean(async () => {
             const npc = track(await createTestNPC({ name: "Pipeline NPC" }));
-            await npc.createEmbeddedDocuments("ActiveEffect", [
-              getStanceEffectCreator("fullAttackStance")(npc)
-            ]);
+            await applyEffect(npc, "fullAttackStance");
             const message = keep(
               await SimpleRoll({
                 actor: npc,

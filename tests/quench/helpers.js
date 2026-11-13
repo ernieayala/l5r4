@@ -1,4 +1,89 @@
 import { buildPool, parseRollAndKeep, poolFormula } from "../../module/utils/check.js";
+import { collectCheck } from "../../module/services/dice/check/collect.js";
+
+/**
+ * Answer every roll dialog that opens with its defaults until the returned function is called: for batches whose
+ * actions open the roll dialog as a side effect (taking the Full Defense Stance rolls Defense / Reflexes, p.84).
+ * @returns {function(): void}  Stops answering
+ */
+export function autoAnswerRolls() {
+  const id = Hooks.on("renderDialogV2", app => {
+    app.element.querySelector('[data-action="ok"]')?.click();
+  });
+  return () => Hooks.off("renderDialogV2", id);
+}
+
+/**
+ * For a batch whose actions roll as a side effect (taking the Full Defense Stance, p.84): answer each roll dialog
+ * with its defaults while the batch runs, and delete the messages it posts afterwards.
+ * @param {{before: Function, after: Function}} context  The batch's Quench context
+ */
+export function guardRolls({ before, after }) {
+  let stop;
+  let hook;
+  const posted = [];
+  before(() => {
+    stop = autoAnswerRolls();
+    hook = Hooks.on("createChatMessage", message => posted.push(message));
+  });
+  after(async function () {
+    this.timeout(30_000);
+    stop();
+    Hooks.off("createChatMessage", hook);
+    await settleChatNotifications();
+    for (const message of posted) {
+      if (game.messages.has(message.id)) {
+        await message.delete();
+      }
+    }
+  });
+}
+
+/**
+ * Wait until a condition holds. Core runs combat turn events from `Combat#_onUpdate` without awaiting them
+ * (client/documents/combat.mjs:658-673), so what they do (effect expiry, save cards) lands after `nextTurn()`
+ * resolves.
+ * @param {function(): boolean} condition
+ * @param {number} [timeout=5000]  Milliseconds before giving up
+ * @returns {Promise<boolean>} Whether the condition held in time
+ */
+export async function waitFor(condition, timeout = 5000) {
+  const end = Date.now() + timeout;
+  while (Date.now() < end) {
+    if (condition()) {
+      return true;
+    }
+    await new Promise(resolve => setTimeout(resolve, 50));
+  }
+  return condition();
+}
+
+/**
+ * What an actor's rules, stances, and conditions give one check, read through the roll pipeline's own collection
+ * (module/services/dice/check/collect.js): the dice and total of the modifiers the dialog starts ticked for that
+ * attack range, and the TN changes.
+ * @param {Actor} actor
+ * @param {string} kind  skill, trait, ring, spell, attack, damage, ...
+ * @param {object} [spec]
+ * @param {"melee"|"ranged"} [spec.range="melee"]
+ * @param {Actor|null} [spec.target]
+ * @param {string} [spec.skill]
+ * @param {string} [spec.trait]
+ * @param {string} [spec.ring]
+ * @returns {{roll: number, keep: number, total: number, tn: number}}
+ */
+export function checkEffects(actor, kind, { range = "melee", target = null, ...spec } = {}) {
+  const ctx = collectCheck(actor, { kind, target, ...spec });
+  const inRange = m => !m.range || m.range === range;
+  const modifiers = ctx.modifiers.filter(m => m.enabled && inRange(m));
+  const sum = key => modifiers.reduce((total, m) => total + m[key], 0);
+  return {
+    roll: sum("roll"),
+    keep: sum("keep"),
+    total: sum("total"),
+    tn: ctx.tnModifiers.filter(inRange).reduce((total, m) => total + m.value, 0)
+  };
+}
 
 /**
  * The Foundry formula the roll pipeline builds for a pool already under the Ten Dice Rule

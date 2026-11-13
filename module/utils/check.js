@@ -26,7 +26,8 @@ import { applyTenDiceRule } from "./ten-dice.js";
 
 /**
  * Build the dice pool for a check: the base pool plus enabled modifiers and a Void Point (+1k1, p.78), then the
- * Ten Dice Rule last (p.77). Unskilled dice never explode (p.80).
+ * Ten Dice Rule last (p.77), which also keeps no more dice than are rolled (p.89). Unskilled dice never explode
+ * (p.80).
  *
  * @param {object} spec
  * @param {number} spec.roll                Base rolled dice

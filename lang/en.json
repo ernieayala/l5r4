@@ -180,7 +180,6 @@
         "armor": "Armor",
         "caller": "Bonus",
         "castSpell": "Cast as a spell",
-        "conditions": "Conditions",
         "contest": "Contested Roll",
         "contestTie": "Tie: roll again.",
         "contestWinner": "{name} wins.",
@@ -194,15 +193,38 @@
         "modifiers": "Modifiers",
         "of": "of",
         "pool": "Pool",
+        "range": {
+          "melee": "melee",
+          "ranged": "ranged"
+        },
         "rerollKeepBetter": "Re-roll, keep the better",
         "rerolledKeptBetter": "re-rolled, better kept",
         "schoolRank": "School Rank",
         "spellSlot": "Spell slot",
-        "stance": "Stance",
         "statBlock": "Stat block",
         "substitutes": "Substitutions",
         "unskilledHint": "Unskilled Roll: dice do not explode, and no Raises or Free Raises apply.",
         "void": "Spend a Void Point (+1k1)"
+      },
+      "effects": {
+        "alreadyEnded": "That effect has already ended.",
+        "applyTo": "{effect} on {target}",
+        "centered": "Centered",
+        "concentrationUpkeep": "{effect}: spend a Simple Action this Round to keep concentrating, or end it.",
+        "endEncounter": "End encounter",
+        "endEncounterConfirm": "End the encounter? Fear and every other effect lasting until the encounter ends will end now.",
+        "expiry": {
+          "encounterEnd": "End of the encounter"
+        },
+        "fullDefense": "Full Defense",
+        "immune": "{actor} is immune to {effect}.",
+        "noGM": "No GM is connected to apply that effect.",
+        "saveText": "{roll} roll against TN {tn}.",
+        "saveTitle": "{effect}: save",
+        "stanceNotAllowed": "{condition} rules out {stance}.",
+        "voidArmor": "Void: Armor TN +10",
+        "voidLimit": "{name} has already spent a Void Point this Round.",
+        "voidSpentThisRound": "A Void Point was already spent this Round; one per Round is the usual limit."
       },
       "rules": {
         "hint": "The item's rules as a JSON list, such as [{\"key\": \"RollModifier\", \"selector\": \"skill:kenjutsu\", \"roll\": 1}]. ACTIVE_EFFECTS.md lists the rule keys.",

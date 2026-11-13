@@ -9,7 +9,7 @@
  */
 
 import { DIALOG_TEMPLATES } from "../../../config/templates.js";
-import { T } from "../../../utils/localization.js";
+import { F, T } from "../../../utils/localization.js";
 import { toInt } from "../../../utils/type-coercion.js";
 import { getAffinityDeficiencyModifier } from "../../../utils/mechanics.js";
 import { rollCheck } from "../check/roll-check.js";
@@ -60,7 +60,7 @@ export async function RingRoll({
       if (schoolRank + shift <= 0) {
         ui.notifications?.warn(
           shift < 0
-            ? T("l5r4.ui.notifications.deficiencyBlocksCasting", { ring: ringName })
+            ? F("l5r4.ui.notifications.deficiencyBlocksCasting", { ring: ringName })
             : T("l5r4.ui.notifications.schoolRankZero")
         );
         return null;

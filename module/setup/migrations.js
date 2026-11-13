@@ -100,7 +100,8 @@ import {
  * 9. Item mechanics into rules: Family/School Trait bonus effects, Master of Blood (world items)
  * 10. Legacy field cleanup (world actors)
  * 11. Embedded item migrations (all world actors), item rules included
- * 12. Status effect rules: Defense Stance and Mounted effects made before the rule engine (world actors)
+ * 12. Status effect rules: stances, conditions, and Fear made before the rule engine get rules, group, and level
+ *     (world actors)
  * 13. Free Trait rank flags set for a rule bonus (world actors)
  * 14. Mark documents as migrated (world actors/items)
  * 15. Compendium migrations (unlocked packs only) - includes icon migration

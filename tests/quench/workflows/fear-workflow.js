@@ -277,7 +277,7 @@ export function registerFearWorkflowTests(quench) {
               if (fearEffect) {
                 assert.exists(fearEffect, "Fear ActiveEffect created on failure");
                 assert.isTrue(fearEffect.statuses.has("feared"), "Effect has 'feared' status");
-                assert.equal(fearEffect.flags[SYS_ID]?.fearRank, 7, "Effect stores Fear Rank");
+                assert.equal(fearEffect.system.level, 7, "Effect stores Fear Rank");
               } else {
                 // PC might have succeeded (rare but possible with rolls)
                 // This is acceptable - test documents behavior, not random outcomes
@@ -308,11 +308,7 @@ export function registerFearWorkflowTests(quench) {
               const fearEffect = testPC.effects.find(e => e.statuses.has("feared"));
 
               if (fearEffect) {
-                assert.equal(
-                  fearEffect.flags[SYS_ID]?.fearRank,
-                  5,
-                  "Effect stores correct Fear Rank"
-                );
+                assert.equal(fearEffect.system.level, 5, "Effect stores correct Fear Rank");
               }
             } finally {
               await npcFear5.delete();
@@ -535,7 +531,7 @@ export function registerFearWorkflowTests(quench) {
             assert.isAtLeast(fearEffects.length, 2, "Multiple Fear effects can exist");
 
             // Check that different Fear Ranks are stored
-            const fearRanks = fearEffects.map(e => e.flags[SYS_ID]?.fearRank);
+            const fearRanks = fearEffects.map(e => e.system.level);
             assert.include(fearRanks, 2, "Fear Rank 2 effect exists");
             assert.include(fearRanks, 4, "Fear Rank 4 effect exists");
           });
@@ -604,7 +600,7 @@ export function registerFearWorkflowTests(quench) {
             const fearEffect = recoveryPC.effects.find(e => e.statuses.has("feared"));
 
             assert.exists(fearEffect, "Fear effect exists initially");
-            assert.equal(fearEffect.flags[SYS_ID]?.fearRank, 3, "Correct Fear Rank");
+            assert.equal(fearEffect.system.level, 3, "Correct Fear Rank");
           });
 
           it("should allow manual removal of Fear effect", async () => {
@@ -792,7 +788,7 @@ export function registerFearWorkflowTests(quench) {
               // Effect may or may not exist depending on roll result
               // Both outcomes are valid for the workflow
               if (fearEffect) {
-                assert.equal(fearEffect.flags[SYS_ID]?.fearRank, 5, "Fear effect has correct rank");
+                assert.equal(fearEffect.system.level, 5, "Fear effect has correct rank");
               }
 
               // Step 6: Workflow completed successfully

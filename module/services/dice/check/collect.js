@@ -1,23 +1,17 @@
 /**
  * @module services/dice/check/collect
  * @description Everything that modifies a check, gathered once per roll so nothing is counted twice: the actor's
- * RollModifier, TNModifier, FreeRaise, DiceRule, Substitute, and Note rules (tested against the actor's and the
- * target's roll options), Active Effect values in `system.bonuses`, the Full Attack Stance, conditions, armor, and
- * Free Raises on items. Each modifier keeps its label so the dialog lists it with a toggle and the card shows it.
+ * RollModifier, TNModifier, FreeRaise, DiceRule, Substitute, Note, and ApplyCondition rules (tested against the
+ * actor's and the target's roll options), Active Effect values in `system.bonuses`, armor, the target's
+ * range-limited Armor TN changes, and Free Raises on items. Stances and conditions reach a check as rules on their
+ * effects (module/config/status-effects.js). Each modifier keeps its label so the dialog lists it with a toggle and
+ * the card shows it.
  */
 
 import { T } from "../../../utils/localization.js";
 import { toInt } from "../../../utils/type-coercion.js";
 import { bagEntries } from "../../../utils/rule-engine.js";
-import {
-  getConditionRollPenalties,
-  getConditionTNPenalty
-} from "../../../utils/condition-penalties.js";
 import { getArmorTNPenalty } from "../../../utils/armor-penalties.js";
-import {
-  getStanceAttackBonuses,
-  getStanceDamageBonuses
-} from "../../stance/rolls/attack-bonuses.js";
 import { calculateFreeRaises } from "../resources/raise-manager.js";
 
 /**
@@ -26,23 +20,25 @@ import { calculateFreeRaises } from "../resources/raise-manager.js";
  * @property {number} roll
  * @property {number} keep
  * @property {number} total
- * @property {boolean} enabled          On unless the roller turns it off
+ * @property {boolean} enabled          On unless the roller turns it off; an optional rule starts off
  * @property {"melee"|"ranged"} [range] Applies only to attacks of that range
+ * @property {string|null} [consumes]   UUID of the effect that ends when the modifier is used
  */
 
 /**
  * @typedef {object} CheckContext
  * @property {CheckModifier[]} modifiers
- * @property {Array<{label: string, value: number}>} tnModifiers
+ * @property {Array<{label: string, value: number, range?: string}>} tnModifiers
  * @property {number} freeRaises
  * @property {number|null} explode      Lowest explode threshold a DiceRule sets, or null for none
  * @property {boolean} rerollOnes       A DiceRule re-rolls 1s
  * @property {Array<{label: string, replace: string, with: string}>} substitutes
  * @property {string[]} notes
+ * @property {Array<{label: string, condition: string, level: number|null}>} applyConditions  Offered on success
  */
 
 /**
- * The selectors a check reads rules for, from its kind and what it rolls.
+ * The selectors a check reads rules for: "any" (every roll), its kind, and what it rolls.
  * @param {object} spec
  * @param {string} spec.kind      skill, trait, ring, spell, maho, attack, damage, or roll
  * @param {string} [spec.skill]   Skill name in lower case
@@ -51,7 +47,7 @@ import { calculateFreeRaises } from "../resources/raise-manager.js";
  * @returns {string[]}
  */
 export function checkSelectors({ kind, skill, trait, ring }) {
-  const selectors = [kind];
+  const selectors = ["any", kind];
   if (kind === "maho") {
     selectors.push("spell");
   }
@@ -109,7 +105,9 @@ export function collectCheck(actor, { kind, skill, trait, ring, target = null })
     roll: entry.roll,
     keep: entry.keep,
     total: entry.total,
-    enabled: true
+    enabled: !entry.optional,
+    ...(entry.range ? { range: entry.range } : {}),
+    consumes: entry.consumes ?? null
   }));
 
   // Active Effect changes on system.bonuses (ACTIVE_EFFECTS.md, Skill and Ring bonuses)
@@ -130,63 +128,23 @@ export function collectCheck(actor, { kind, skill, trait, ring, target = null })
     }
   }
 
-  if (kind === "attack") {
-    const stance = getStanceAttackBonuses(actor);
-    if (stance.roll || stance.keep) {
-      modifiers.push({
-        label: T("l5r4.ui.mechanics.stances.fullAttack"),
-        roll: stance.roll,
-        keep: stance.keep,
-        total: 0,
-        enabled: true
-      });
-    }
-    for (const range of ["melee", "ranged"]) {
-      const penalty = getConditionRollPenalties(actor, "attack", range);
-      if (penalty.roll || penalty.keep) {
-        modifiers.push({
-          label: T("l5r4.ui.check.conditions"),
-          roll: penalty.roll,
-          keep: penalty.keep,
-          total: 0,
-          enabled: true,
-          range
-        });
-      }
-    }
-  } else if (kind === "damage") {
-    const stance = getStanceDamageBonuses(actor);
-    if (stance.roll || stance.keep) {
-      modifiers.push({
-        label: T("l5r4.ui.check.stance"),
-        roll: stance.roll,
-        keep: stance.keep,
-        total: 0,
-        enabled: true
-      });
-    }
-  } else {
-    const penalty = getConditionRollPenalties(actor, null, "melee");
-    if (penalty.roll || penalty.keep) {
-      modifiers.push({
-        label: T("l5r4.ui.check.conditions"),
-        roll: penalty.roll,
-        keep: penalty.keep,
-        total: 0,
-        enabled: true
-      });
-    }
-  }
-
   const tnModifiers = entries("tnModifiers").map(entry => ({
     label: entry.label,
     value: entry.value
   }));
-  if (kind !== "damage") {
-    const condition = getConditionTNPenalty(actor);
-    if (condition) {
-      tnModifiers.push({ label: T("l5r4.ui.check.conditions"), value: condition });
+  // The target's Armor TN changes that count only against one attack range (Prone against melee, p.89)
+  if (kind === "attack" && target) {
+    for (const [range, value] of Object.entries(target.system.armorTn?.vs ?? {})) {
+      if (value) {
+        tnModifiers.push({
+          label: `${target.name} (${T(`l5r4.ui.check.range.${range}`)})`,
+          value,
+          range
+        });
+      }
     }
+  }
+  if (kind !== "damage") {
     const armor = getArmorTNPenalty(actor, skill ?? null, trait ?? null);
     if (armor) {
       tnModifiers.push({ label: T("l5r4.ui.check.armor"), value: armor });
@@ -213,6 +171,11 @@ export function collectCheck(actor, { kind, skill, trait, ring, target = null })
       replace: entry.replace,
       with: entry.with
     })),
-    notes: entries("notes").map(entry => entry.text)
+    notes: entries("notes").map(entry => entry.text),
+    applyConditions: entries("applyConditions").map(entry => ({
+      label: entry.label,
+      condition: entry.condition,
+      level: entry.level
+    }))
   };
 }

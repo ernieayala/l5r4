@@ -186,7 +186,12 @@ export function registerDeprecationsBatch(quench) {
           let answered = answerNextDialog("yes");
           await PcActionsHandler.handleToggleArmorVoid({ actor }, null, { checked: true });
           await answered;
-          assert.isTrue(actor.system.armorTn.useVoid, "Armor TN Void active");
+          assert.equal(
+            actor.effects.filter(e => e.getFlag("l5r4-enhanced", "effectId") === "voidArmor")
+              .length,
+            1,
+            "Armor TN Void active"
+          );
           assert.equal(actor.system.rings.void.value, 1, "Void Points 2 - 1");
 
           await actor.update({ "system.initiative.useVoid": true });

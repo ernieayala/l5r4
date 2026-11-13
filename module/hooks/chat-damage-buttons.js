@@ -20,6 +20,7 @@
  */
 
 import { T, F } from "../utils/localization.js";
+import { voidUseUpdate, warnVoidLimit } from "../services/effects/uses.js";
 
 /**
  * Applies wounds to the first selected token
@@ -138,9 +139,11 @@ async function reduceAndApplyWounds(damage, _actorId) {
   // Active Effect on Void Points or Wounds is never written into storage (B6).
   const stored = targetActor._source.system;
 
+  warnVoidLimit(targetActor);
   await targetActor.update({
     "system.rings.void.value": stored.rings.void.value - 1,
-    "system.suffered": stored.suffered + finalDamage
+    "system.suffered": stored.suffered + finalDamage,
+    ...voidUseUpdate(targetActor)
   });
 
   // Show notification with both reductions if armor applied

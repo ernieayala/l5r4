@@ -17,6 +17,7 @@ import { statusRules } from "../../../module/utils/rule-engine.js";
 import { SYS_ID } from "../../../module/config/constants.js";
 import { createTestPC } from "../../fixtures/actor-fixtures.js";
 import { createWeaponData } from "../../fixtures/item-fixtures.js";
+import { checkEffects } from "../helpers.js";
 
 /**
  * Register attack edge case tests
@@ -356,14 +357,14 @@ export function registerAttackEdgeCaseTests(quench) {
           }
         });
 
-        // Conditions are status effects; the penalties asserted are the ones
-        // module/documents/actor/calculations/condition-effects.js computes.
+        // Conditions are status effects whose rules reach the attack roll (p.89); checkEffects reads them as the
+        // roll pipeline does.
         it("should handle Blinded condition penalty", async () => {
           await actor.toggleStatusEffect("blinded", { active: true });
 
           assert.isTrue(actor.statuses.has("blinded"), "Blinded condition active");
-          assert.deepEqual(
-            actor.system._conditionEffects.rollPenalties.melee,
+          assert.deepInclude(
+            checkEffects(actor, "attack", { range: "melee" }),
             { roll: -1, keep: -1 },
             "Blinded melee penalty"
           );
@@ -373,12 +374,8 @@ export function registerAttackEdgeCaseTests(quench) {
           await actor.toggleStatusEffect("prone", { active: true });
 
           assert.isTrue(actor.statuses.has("prone"), "Prone condition active");
-          assert.equal(
-            actor.system._conditionEffects.rollPenalties.melee.roll,
-            -2,
-            "Prone melee penalty"
-          );
-          assert.equal(actor.system.armorTn.current, 3 * 5 + 5 - 10, "Prone -10 Armor TN");
+          assert.equal(checkEffects(actor, "attack").roll, -2, "Prone melee penalty");
+          assert.equal(actor.system.armorTn.vs.melee, -10, "Prone -10 Armor TN against melee");
         });
 
         it("should handle multiple conditions simultaneously", async () => {
@@ -389,12 +386,16 @@ export function registerAttackEdgeCaseTests(quench) {
           for (const id of ["blinded", "prone", "stunned"]) {
             assert.isTrue(actor.statuses.has(id), `${id} active`);
           }
-          assert.deepEqual(
-            actor.system._conditionEffects.rollPenalties.melee,
+          assert.deepInclude(
+            checkEffects(actor, "attack", { range: "melee" }),
             { roll: -3, keep: -1 },
             "Blinded and Prone melee penalties stack"
           );
-          assert.equal(actor.system.armorTn.current, 5, "Lowest override, Prone -10, floor 5");
+          assert.equal(
+            actor.system.armorTn.current,
+            5,
+            "Stunned: 5 plus armor, nothing else (decision 3)"
+          );
         });
 
         it("should handle condition removal recalculation", async () => {
