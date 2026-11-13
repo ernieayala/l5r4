@@ -24,6 +24,7 @@ import {
 import { spendVoidPoint } from "../resources/void-manager.js";
 import { resolveTargets } from "../resources/target-resolver.js";
 import { collectCheck } from "./collect.js";
+import { voidOverLimit } from "../../effects/uses.js";
 
 /**
  * @typedef {object} CheckRequest
@@ -172,6 +173,7 @@ export async function rollCheck(request) {
       freeRaises,
       voidAllowed: !isDamage,
       voidPoints: voidState.points,
+      voidOverLimit: !isDamage && voidOverLimit(actor),
       emphases,
       isAttack: kind === "attack",
       ranged: Boolean(request.ranged),
@@ -264,7 +266,12 @@ export async function rollCheck(request) {
   const roll = new foundry.dice.Roll(poolFormula(pool));
   await roll.evaluate();
 
-  const tnModifiers = isDamage ? [] : ctx.tnModifiers;
+  // A TN change for the other attack range drops out, as a modifier does
+  const tnModifiers = isDamage
+    ? []
+    : ctx.tnModifiers
+        .filter(m => !m.range || m.range === range)
+        .map(({ label: l, value }) => ({ label: l, value }));
   const tn = isDamage
     ? null
     : targetNumber({
@@ -326,7 +333,8 @@ export async function rollCheck(request) {
       margin: outcome?.margin ?? null
     },
     weaponUuid: weapon?.uuid ?? "",
-    notes: ctx.notes
+    notes: ctx.notes,
+    conditions: target ? ctx.applyConditions : []
   };
 
   const content = await renderCheckCard(system, roll, {
@@ -339,6 +347,13 @@ export async function rollCheck(request) {
     speaker: ChatMessage.getSpeaker({ actor }),
     content
   });
+
+  // A used modifier that `consumes` ends its effect (Center Stance's bonus, p.84)
+  const consumed = new Set(applied.filter(m => m.enabled && m.consumes).map(m => m.consumes));
+  for (const uuid of consumed) {
+    await (await fromUuid(uuid))?.delete();
+  }
+
   if (request.after) {
     await request.after(message, choices);
   }

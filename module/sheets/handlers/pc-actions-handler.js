@@ -28,6 +28,8 @@ import { T } from "../../utils/localization.js";
 
 // Services
 import { applyLongRest } from "../../services/rest.js";
+import { applyEffect, effectsOf } from "../../services/effects/apply.js";
+import { voidUseUpdate, warnVoidLimit } from "../../services/effects/uses.js";
 
 /**
  * Handler class for PC-specific action operations.
@@ -69,10 +71,9 @@ export class PcActionsHandler {
    *
    * **Game Rules Context:**
    * Per core rules:
-   * - Spend Void at beginning of round for +10 Armor TN for 1 round
+   * - Spend Void at beginning of round for +10 Armor TN for 1 round (p.78)
    * - Only works if in combat on the actor's turn
    * - Void Point is spent immediately when activated
-   * - Effect expires at end of round (tracked via system.armorTn.voidRound)
    *
    * **Validation:**
    * - Must be in active combat (game.combat exists and started)
@@ -81,20 +82,8 @@ export class PcActionsHandler {
    * - Requires user confirmation via dialog
    *
    * **Implementation:**
-   * On activation:
-   * - Validates all prerequisites (combat, turn, void points)
-   * - Shows confirmation dialog
-   * - Spends 1 Void Point
-   * - Sets system.armorTn.useVoid = true
-   * - Records current round in system.armorTn.voidRound
-   * - Posts notification
-   *
-   * On deactivation:
-   * - Simply clears flags without spending Void
-   *
-   * **Effect Duration:**
-   * The Void Point armor boost is automatically cleared by combat hooks when
-   * the round advances. This handler only manages the activation/deactivation.
+   * On activation the Void Point is spent and the "voidArmor" effect (+10 Armor TN) is created; core's effect
+   * registry ends it at the end of the Round (module/config/status-effects.js). Unticking ends the effect early.
    *
    * @param {Object} context - Handler context from actor sheet
    * @param {Actor} context.actor - The actor document
@@ -104,14 +93,14 @@ export class PcActionsHandler {
    */
   static async handleToggleArmorVoid(context, event, element) {
     event?.preventDefault?.();
-    const checked = element.checked;
+    const actor = context.actor;
 
-    // Deactivation path: clear the flags only
-    if (!checked) {
-      await context.actor.update({
-        "system.armorTn.useVoid": false,
-        "system.armorTn.voidRound": null
-      });
+    // Deactivation path: end the effect; the Void Point stays spent
+    if (!element.checked) {
+      const effects = effectsOf(actor, "voidArmor").map(e => e.id);
+      if (effects.length) {
+        await actor.deleteEmbeddedDocuments("ActiveEffect", effects);
+      }
       return;
     }
 
@@ -122,34 +111,22 @@ export class PcActionsHandler {
     if (!combat || !combat.started) {
       ui.notifications?.warn("Must be in active combat to use Void for Armor TN");
       element.checked = false;
-      await context.actor.update({
-        "system.armorTn.useVoid": false,
-        "system.armorTn.voidRound": null
-      });
       return;
     }
 
     // Check if it's this actor's turn
     const currentCombatant = combat.combatant;
-    if (!currentCombatant || currentCombatant.actorId !== context.actor.id) {
+    if (!currentCombatant || currentCombatant.actorId !== actor.id) {
       ui.notifications?.warn("Can only use Void for Armor TN on your turn");
       element.checked = false;
-      await context.actor.update({
-        "system.armorTn.useVoid": false,
-        "system.armorTn.voidRound": null
-      });
       return;
     }
 
     // Check void points available
-    const voidCurrent = context.actor.system?.rings?.void?.value ?? 0;
+    const voidCurrent = actor.system?.rings?.void?.value ?? 0;
     if (voidCurrent <= 0) {
       ui.notifications?.warn(T("l5r4.ui.mechanics.wounds.noVoidPoints"));
       element.checked = false;
-      await context.actor.update({
-        "system.armorTn.useVoid": false,
-        "system.armorTn.voidRound": null
-      });
       return;
     }
 
@@ -161,22 +138,19 @@ export class PcActionsHandler {
 
     if (!confirmed) {
       element.checked = false;
-      await context.actor.update({
-        "system.armorTn.useVoid": false,
-        "system.armorTn.voidRound": null
-      });
       return;
     }
 
-    // Spend void and activate (useVoid stays true until round end). The write starts from the stored value,
-    // so an Active Effect on Void Points is never written into storage (B6).
-    await context.actor.update({
-      "system.rings.void.value": context.actor._source.system.rings.void.value - 1,
-      "system.armorTn.useVoid": true,
-      "system.armorTn.voidRound": combat.round
+    // Spend the Void Point, then +10 Armor TN as an effect ending with the Round (p.78). The write starts from the
+    // stored value, so an Active Effect on Void Points is never written into storage (B6).
+    warnVoidLimit(actor);
+    await actor.update({
+      "system.rings.void.value": actor._source.system.rings.void.value - 1,
+      ...voidUseUpdate(actor)
     });
+    await applyEffect(actor, "voidArmor");
 
-    ui.notifications?.info(`${context.actor.name} spent Void Point - Armor TN +10 for 1 round`);
+    ui.notifications?.info(`${actor.name} spent Void Point - Armor TN +10 for 1 round`);
   }
 
   /**

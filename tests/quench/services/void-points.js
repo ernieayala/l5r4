@@ -3,7 +3,7 @@
  *
  * Tests L5R4 Void Point mechanics per Phase 4 requirements:
  * - Spending from empty pool
- * - Armor TN Void expiration after round
+ * - Armor TN Void lasting its Round (an effect core's registry deletes at the Round's end)
  * - Double-spending on rapid clicks (race condition)
  * - Void spending without confirmation
  *
@@ -11,7 +11,7 @@
  * Each test creates a specific failure condition to verify handling.
  *
  * @see module/services/dice/resources/void-manager.js
- * @see module/hooks/combat-void-spending.js
+ * @see module/config/status-effects.js (voidArmor)
  */
 
 import { SYS_ID } from "../../../module/config/constants.js";
@@ -20,6 +20,8 @@ import {
   spendVoidPoint,
   validateVoidPoints
 } from "../../../module/services/dice/resources/void-manager.js";
+import { applyEffect, effectsOf } from "../../../module/services/effects/apply.js";
+import { waitFor } from "../helpers.js";
 
 /**
  * Register Void Points resource management tests
@@ -118,162 +120,80 @@ export function registerVoidPointsTests(quench) {
         });
       });
 
-      describe("4.1.2 Armor TN Void Expiration After Round", () => {
-        let combat, actor, combatant;
+      describe("4.1.2 Armor TN Void lasts the Round (p.78)", function () {
+        // Combat turns run their events asynchronously
+        this.timeout(15_000);
+        let combat, actor, other;
+
+        /** The actor's Void-on-Armor effects. */
+        const voidArmor = a => effectsOf(a, "voidArmor");
 
         beforeEach(async () => {
           actor = await createTestPC({
             name: "Armor TN Void Test",
-            system: {
-              rings: { void: { value: 2, rank: 2 } },
-              armorTn: {
-                useVoid: false,
-                voidRound: null
-              }
-            }
+            system: { rings: { void: { value: 2, rank: 2 } } }
           });
-
-          combat = await Combat.create({
+          other = await createTestPC({
+            name: "Other Actor",
+            system: { rings: { void: { value: 2, rank: 2 } } }
+          });
+          combat = await foundry.documents.Combat.implementation.create({
             scene: null,
-            active: false
+            active: true
           });
-
-          [combatant] = await combat.createEmbeddedDocuments("Combatant", [
-            { actorId: actor.id, tokenId: null }
+          await combat.createEmbeddedDocuments("Combatant", [
+            { actorId: actor.id, initiative: 20 },
+            { actorId: other.id, initiative: 10 }
           ]);
+          await combat.startCombat();
         });
 
         afterEach(async () => {
-          if (combat) {
-            await combat.delete();
-            combat = null;
-          }
-          if (actor) {
-            await actor.delete();
-            actor = null;
-          }
+          await combat?.delete();
+          await actor?.delete();
+          await other?.delete();
+          combat = actor = other = null;
         });
 
-        it("should activate Armor TN Void on round 1", async () => {
-          // ARRANGE: Combat on round 1
-          await combat.update({ round: 1 });
-
-          // ACT: Activate Armor TN Void
-          await actor.update({
-            "system.armorTn.useVoid": true,
-            "system.armorTn.voidRound": 1
-          });
-
-          // ASSERT: Void activated
-          assert.isTrue(actor.system.armorTn.useVoid, "Void active");
-          assert.equal(actor.system.armorTn.voidRound, 1, "Activated on round 1");
+        it("adds +10 Armor TN while it lasts", async () => {
+          const before = actor.system.armorTn.current;
+          await applyEffect(actor, "voidArmor");
+          assert.equal(actor.system.armorTn.current, before + 10);
         });
 
-        it("should NOT expire on same round", async () => {
-          // ARRANGE: Activate on round 1
-          await combat.update({ round: 1 });
-          await actor.update({
-            "system.armorTn.useVoid": true,
-            "system.armorTn.voidRound": 1
-          });
-
-          // ACT: Trigger combatTurn hook (same round)
-          await Hooks.call("combatTurn", combat, {}, {});
-
-          // ASSERT: Still active (expires AFTER 1 round)
-          assert.isTrue(actor.system.armorTn.useVoid, "Void still active on same round");
+        it("lasts through the other Turns of its Round", async () => {
+          await applyEffect(actor, "voidArmor");
+          await combat.nextTurn();
+          // Nothing to wait for: no expiry is due, so give the turn events time to run and check it stayed
+          await waitFor(() => false, 500);
+          assert.lengthOf(voidArmor(actor), 1, "still active on the same Round");
         });
 
-        it("should expire after 1 full round", async () => {
-          // ARRANGE: Activate on round 1
-          await combat.update({ round: 1 });
-          await actor.update({
-            "system.armorTn.useVoid": true,
-            "system.armorTn.voidRound": 1
-          });
-
-          // ACT: Advance to round 2
-          await combat.update({ round: 2 });
-          await Hooks.call("combatTurn", combat, {}, {});
-
-          // Wait for async update
-          await new Promise(resolve => setTimeout(resolve, 100));
-
-          // ASSERT: Expired after 1 round
-          const updatedActor = game.actors.get(actor.id);
-          assert.isFalse(updatedActor.system.armorTn.useVoid, "Void expired");
-          assert.isNull(updatedActor.system.armorTn.voidRound, "Round cleared");
+        it("ends with its Round", async () => {
+          await applyEffect(actor, "voidArmor");
+          await combat.nextTurn();
+          await combat.nextTurn();
+          assert.equal(combat.round, 2);
+          assert.isTrue(
+            await waitFor(() => voidArmor(actor).length === 0),
+            "deleted at the end of Round 1"
+          );
         });
 
-        it("should handle activation on round 0", async () => {
-          // ARRANGE: Edge case - round 0
-          await combat.update({ round: 0 });
-          await actor.update({
-            "system.armorTn.useVoid": true,
-            "system.armorTn.voidRound": 0
-          });
-
-          // ACT: Advance to round 1
-          await combat.update({ round: 1 });
-          await Hooks.call("combatTurn", combat, {}, {});
-
-          await new Promise(resolve => setTimeout(resolve, 100));
-
-          // ASSERT: Expired (round 1 > round 0)
-          const updatedActor = game.actors.get(actor.id);
-          assert.isFalse(updatedActor.system.armorTn.useVoid, "Void expired from round 0");
-        });
-
-        it("should handle null voidRound gracefully", async () => {
-          // ARRANGE: Void active but null round (corrupt state)
-          await actor.update({
-            "system.armorTn.useVoid": true,
-            "system.armorTn.voidRound": null
-          });
-
-          // ACT: Trigger turn hook
-          await combat.update({ round: 5 });
-          await Hooks.call("combatTurn", combat, {}, {});
-
-          // ASSERT: No crash (graceful handling)
-          // Hook checks voidRound !== null before comparison
-          assert.isTrue(true, "No crash with null voidRound");
-        });
-
-        it("should not affect other actors' Void", async () => {
-          // ARRANGE: Two actors with different expiration rounds
-          const actor2 = await createTestPC({
-            name: "Other Actor",
-            system: {
-              rings: { void: { value: 2, rank: 2 } },
-              armorTn: { useVoid: true, voidRound: 2 } // Activated on round 2, should NOT expire yet
-            }
-          });
-
-          await combat.createEmbeddedDocuments("Combatant", [
-            { actorId: actor2.id, tokenId: null }
-          ]);
-
-          // ACT: Expire actor1's Void (activated round 1, expires round 2)
-          await combat.update({ round: 1 });
-          await actor.update({
-            "system.armorTn.useVoid": true,
-            "system.armorTn.voidRound": 1
-          });
-
-          await combat.update({ round: 2 });
-          await Hooks.call("combatTurn", combat, {}, {});
-
-          await new Promise(resolve => setTimeout(resolve, 100));
-
-          // ASSERT: actor1 expired, actor2 unaffected
-          const updatedActor = game.actors.get(actor.id);
-          const updatedActor2 = game.actors.get(actor2.id);
-
-          assert.isFalse(updatedActor.system.armorTn.useVoid, "Actor 1's Void expired");
-          assert.isTrue(updatedActor2.system.armorTn.useVoid, "Actor 2's Void still active");
-
-          await actor2.delete();
+        it("ends only for the Round it was spent in", async () => {
+          await applyEffect(actor, "voidArmor");
+          await combat.nextTurn();
+          await combat.nextTurn();
+          assert.isTrue(
+            await waitFor(() => voidArmor(actor).length === 0),
+            "Round 1's effect ended"
+          );
+          await applyEffect(actor, "voidArmor");
+          await applyEffect(other, "voidArmor");
+          await combat.nextTurn();
+          await waitFor(() => false, 500);
+          assert.lengthOf(voidArmor(actor), 1, "Round 2's effect lasts its Round");
+          assert.lengthOf(voidArmor(other), 1, "the other actor's too");
         });
       });
 

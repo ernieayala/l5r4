@@ -1,14 +1,16 @@
 /**
  * @module services/dice/check/chat-actions
  * @description What a `roll` message can do after it posts, rebuilt from its stored context
- * (module/data/chat/RollMessageData.js), never from the card's HTML: roll the attack's damage, re-roll keeping the
- * better total, and settle a Contested Roll (p.80) against the previous roll by someone else.
+ * (module/data/chat/RollMessageData.js), never from the card's HTML: roll the attack's damage, put an offered
+ * condition on the target, re-roll keeping the better total, and settle a Contested Roll (p.80) against the
+ * previous roll by someone else.
  */
 
-import { T } from "../../../utils/localization.js";
+import { F, T } from "../../../utils/localization.js";
 import { toInt } from "../../../utils/type-coercion.js";
 import { contest, evaluateCheck, poolFormula } from "../../../utils/check.js";
 import { WeaponRoll } from "../rolls/weapon-roll.js";
+import { applyEffectAnywhere } from "../../effects/apply.js";
 import { renderCheckCard } from "./roll-check.js";
 
 /**
@@ -133,7 +135,7 @@ export async function contestRolls(message, opponent) {
   });
   const verdict = result.tie
     ? T("l5r4.ui.check.contestTie")
-    : T("l5r4.ui.check.contestWinner", {
+    : F("l5r4.ui.check.contestWinner", {
         name: foundry.utils.escapeHTML(entries.find(e => e.id === result.winner).name)
       });
   return ChatMessage.create({
@@ -145,7 +147,31 @@ export async function contestRolls(message, opponent) {
 }
 
 /**
- * Wire a rendered `roll` card's damage button.
+ * Put a condition the roll's ApplyCondition rules offer on its target. The roll must have succeeded; the condition
+ * comes from the stored context by index, never from the card. A target the user does not own gets it through the
+ * active GM.
+ * @param {ChatMessage} message  A `roll` message
+ * @param {number} index         Index into `system.conditions`
+ * @returns {Promise<void>}
+ */
+export async function applyConditionFromMessage(message, index) {
+  const entry = message.system.conditions[index];
+  const target = message.system.target.uuid ? await fromUuid(message.system.target.uuid) : null;
+  if (!entry || !target || message.system.outcome.success !== true) {
+    return;
+  }
+  if (!mayAct(rollActor(message))) {
+    return;
+  }
+  await applyEffectAnywhere(
+    target,
+    entry.condition,
+    entry.level === null ? {} : { level: entry.level }
+  );
+}
+
+/**
+ * Wire a rendered `roll` card's damage and condition buttons.
  * @param {ChatMessage} message
  * @param {HTMLElement} html
  */
@@ -157,6 +183,12 @@ export function bindCheckCard(message, html) {
     event.preventDefault();
     rollDamageFromMessage(message, { askForOptions: !event.shiftKey });
   });
+  for (const button of html.querySelectorAll("[data-action='apply-condition']")) {
+    button.addEventListener("click", event => {
+      event.preventDefault();
+      applyConditionFromMessage(message, toInt(event.currentTarget.dataset.index));
+    });
+  }
 }
 
 /**

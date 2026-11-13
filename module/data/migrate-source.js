@@ -57,6 +57,12 @@ export function migratePcSource(source) {
   for (const name of ["roll", "keep", "total"]) {
     renameKey(source.initiative, `${name}_mod`, `${name}Mod`);
   }
+  // A Void Point on Armor TN is an effect that ends with its Round (STAGE-09); a 3.2.1 actor's marker for one
+  // lasted at most that Round and is dropped
+  if (source.armorTn) {
+    delete source.armorTn.useVoid;
+    delete source.armorTn.voidRound;
+  }
 }
 
 /**

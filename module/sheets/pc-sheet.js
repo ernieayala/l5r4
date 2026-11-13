@@ -46,6 +46,7 @@ import { PC_SORT_KEYS } from "../config/sort-keys.js";
 
 // Utils
 import { on } from "../utils/dom.js";
+import { effectsOf } from "../services/effects/apply.js";
 
 // Documents
 import { enhanceItemSheetData } from "../documents/item/integration/sheet-data.js";
@@ -576,6 +577,7 @@ export default class L5R4PcSheet extends BaseActorSheet {
       enriched: { notes: enrichedNotes },
       traitsEff,
       currentStance,
+      voidArmor: effectsOf(actorObj, "voidArmor").length > 0,
       collapsedSections,
       // Lazy getter: Defers expensive sorting until template accesses property
       get advDisList() {

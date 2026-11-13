@@ -17,7 +17,7 @@
  * - Gracefully degrades if Sequencer/JB2A not available
  *
  * Hook Execution Order:
- * 1. effect-lifecycle.js handles game mechanics (stance conflicts, Full Defense roll)
+ * 1. The effect's rules and services/effects/ handle game mechanics (one stance at a time, Full Defense roll)
  * 2. Actor.prepareDerivedData() recalculates stats
  * 3. Animation hooks trigger visual effects (this module)
  *
@@ -26,7 +26,7 @@
  */
 
 import { CONDITION_IDS } from "../../config/condition-ids.js";
-import { STANCE_IDS } from "../stance/core/helpers.js";
+import { STANCE_IDS } from "../../utils/stances.js";
 import { playAnimation, removeAnimation, removeAllAnimations } from "./animation-manager.js";
 import { handleAttackRoll } from "./attack-animations.js";
 

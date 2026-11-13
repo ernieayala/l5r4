@@ -10,23 +10,19 @@
  *
  * Hook Categories:
  * - Animation System: Visual effects for stances and conditions
- * - Chat Integration: Damage buttons, inline roll parsing
- * - Combat: Void Point spending, turn tracking
+ * - Chat Integration: Damage buttons, inline roll parsing, effect prompt cards
+ * - Effects: Full Defense roll, Prone from Wounds, Concentration checks
  * - Spell System: Memorization XP tracking
- * - Stance System: ActiveEffect lifecycle management
- * - Wound System: Prone automation on critical wounds
  *
  * @module hooks/register-all
- * @requires Foundry VTT v13+
  */
 
 import { registerChatDamageButtons } from "./chat-damage-buttons.js";
-import { registerCombatVoidSpending } from "./combat-void-spending.js";
 import { registerSpellMemorizationHooks } from "./spell-memorization.js";
-import { initializeStanceService } from "../services/stance/initialize.js";
 import { initializeChatService } from "../services/chat.js";
-import { initializeWoundProneAutomation } from "../services/wound-prone-automation.js";
 import { initializeAnimations } from "../services/animations/initialize.js";
+import { initializeEffectAutomation } from "../services/effects/automation.js";
+import { bindPromptCard } from "../services/effects/prompts.js";
 
 /**
  * Register all system hooks
@@ -36,12 +32,11 @@ import { initializeAnimations } from "../services/animations/initialize.js";
  *
  * Hook Registration Order:
  * 1. Animation System - Visual effects for stances and conditions (ActiveEffect lifecycle)
- * 2. Stance Service - ActiveEffect lifecycle hooks (preCreate, create, update, delete)
+ * 2. Effect automation - Full Defense roll, Prone from Wounds, Concentration checks
  * 3. Chat Service - Chat message rendering, inline roll parsing
- * 4. Wound Prone Automation - Actor update hook for automatic prone application
+ * 4. Effect prompt cards - Save, Full Defense, and Concentration buttons
  * 5. Chat Damage Buttons - Damage button click handlers in chat cards
- * 6. Combat Void Spending - Combat turn hook for Void Point duration tracking
- * 7. Spell Memorization - Item update hook for spell memorization XP tracking
+ * 6. Spell Memorization - Item update hook for spell memorization XP tracking
  *
  * @function registerAllHooks
  * @returns {void}
@@ -50,20 +45,17 @@ export function registerAllHooks() {
   // Animation system: Visual effects for stances and conditions
   initializeAnimations();
 
-  // Stance system: ActiveEffect lifecycle management
-  initializeStanceService();
+  // Effects: Full Defense roll, Prone from Wounds, Concentration checks
+  initializeEffectAutomation();
 
   // Chat integration: Damage buttons and inline roll parsing
   initializeChatService();
 
-  // Wound system: Automatic prone on critical wounds
-  initializeWoundProneAutomation();
+  // Effect prompt cards: the owner's roll button
+  Hooks.on("renderChatMessageHTML", bindPromptCard);
 
   // Chat damage buttons: Apply wounds and reduce with void
   registerChatDamageButtons();
-
-  // Combat: Void Point spending duration tracking
-  registerCombatVoidSpending();
 
   // Spell system: Memorization XP tracking
   registerSpellMemorizationHooks();

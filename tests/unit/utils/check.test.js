@@ -22,6 +22,13 @@ describe("buildPool", () => {
     });
   });
 
+  it("keeps no more dice than it rolls after a penalty (p.89: Dazed 6k4 rolls 3k3)", () => {
+    expect(pool({ roll: 6, keep: 4, modifiers: [{ roll: -3 }] })).toMatchObject({
+      roll: 3,
+      keep: 3
+    });
+  });
+
   it("casts with Ring + School Rank, keeping the Ring (p.80: Fire 3, Rank 1 is 4k3)", () => {
     expect(pool({ roll: 3 + 1, keep: 3 })).toMatchObject({ roll: 4, keep: 3 });
   });

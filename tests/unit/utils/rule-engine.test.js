@@ -111,20 +111,95 @@ describe("derivedRuleOutputs", () => {
       new Set(["status:defenseStance"])
     );
 
-  it("ArmorTN: resolves formulas and stacks by type", () => {
+  it("ArmorTN: resolves each rule's value with its mode, type, and range for resolveArmorTn", () => {
     const result = out([
-      rule("ArmorTN", { value: "@rings.air + @skills.defense.rank", type: "untyped" }),
-      rule("ArmorTN", { value: 3, type: "armor" }),
-      rule("ArmorTN", { value: 5, type: "armor" })
+      rule("ArmorTN", {
+        value: "@rings.air + @skills.defense.rank",
+        type: "untyped",
+        mode: "add",
+        range: null
+      }),
+      rule("ArmorTN", { value: "@ref + 5", type: "untyped", mode: "base", range: null }),
+      rule("ArmorTN", { value: -10, type: "untyped", mode: "add", range: "melee" })
     ]);
-    expect(result.armorTn).toBe(10);
+    expect(result.armor).toEqual([
+      { mode: "add", value: 5, type: "untyped", range: null },
+      { mode: "base", value: 5, type: "untyped", range: null },
+      { mode: "add", value: -10, type: "untyped", range: "melee" }
+    ]);
   });
 
   it("ArmorTN: the Defense Stance rule gives Air Ring plus Defense rank (Core Rulebook p.84)", () => {
-    expect(
-      out([rule("ArmorTN", { value: "@rings.air + @skills.defense.rank", type: "untyped" })])
-        .armorTn
-    ).toBe(5);
+    const [armor] = out([
+      rule("ArmorTN", { value: "@rings.air + @skills.defense.rank", type: "untyped", mode: "add" })
+    ]).armor;
+    expect(armor.value).toBe(5);
+  });
+
+  it("formulas read the carrying effect's level as @level (Fear Rank, p.90)", () => {
+    const fear = {
+      rule: rule("RollModifier", {
+        selector: "any",
+        roll: "-@level",
+        keep: 0,
+        total: 0,
+        type: "untyped"
+      }),
+      source: "Feared",
+      effectUuid: "Actor.a.ActiveEffect.f",
+      level: 3
+    };
+    const [modifier] = derivedRuleOutputs([fear], rollData, new Set()).bag.rollModifiers.any;
+    expect(modifier.roll).toBe(-3);
+  });
+
+  it("Movement adds Water Ring ranks for movement (Blinded, p.89)", () => {
+    expect(out([rule("Movement", { water: -2 })]).movementWater).toBe(-2);
+  });
+
+  it("ConditionImmunity collects the statuses the actor cannot gain", () => {
+    expect([...out([rule("ConditionImmunity", { condition: "feared" })]).immunities]).toEqual([
+      "feared"
+    ]);
+  });
+
+  it("PeriodicSave keeps the effect it ends; a save on an item has none and is skipped", () => {
+    const save = rule("PeriodicSave", {
+      event: "roundEnd",
+      roll: "ring:earth",
+      tn: 20,
+      step: -5,
+      min: 5,
+      onFailure: "retry"
+    });
+    const result = derivedRuleOutputs(
+      [
+        { rule: save, source: "Dazed", effectUuid: "Actor.a.ActiveEffect.d" },
+        { rule: save, source: "Some item" }
+      ],
+      rollData,
+      new Set()
+    );
+    expect(result.saves).toEqual([
+      {
+        effectUuid: "Actor.a.ActiveEffect.d",
+        source: "Dazed",
+        event: "roundEnd",
+        roll: "ring:earth",
+        tn: 20,
+        step: -5,
+        min: 5,
+        onFailure: "retry"
+      }
+    ]);
+  });
+
+  it("Resource adds the maxima of one slug", () => {
+    const result = out([
+      rule("Resource", { slug: "void", max: 1, per: "round" }),
+      rule("Resource", { slug: "void", max: "@rings.earth - 1", per: "round" })
+    ]);
+    expect(result.resources).toEqual({ void: { max: 2, per: "round" } });
   });
 
   it("Reduction, Wounds, and Initiative add up", () => {
@@ -205,6 +280,62 @@ describe("derivedRuleOutputs", () => {
     expect(result.bag.rollModifiers["skill:kenjutsu"]).toHaveLength(1);
     expect(selectorBonus(result.bag, ["skill:kenjutsu"], new Set()).roll).toBe(0);
     expect(selectorBonus(result.bag, ["skill:kenjutsu"], new Set(["target"])).roll).toBe(1);
+  });
+
+  it("RollModifier: optional and range-limited modifiers wait for the dialog, not the sheet formula", () => {
+    const base = {
+      selector: "attack",
+      keep: 0,
+      total: 0,
+      type: "untyped",
+      optional: false,
+      consumes: false
+    };
+    const result = derivedRuleOutputs(
+      [
+        entry(rule("RollModifier", { ...base, roll: 2, range: null })),
+        entry(rule("RollModifier", { ...base, roll: -1, range: "melee" })),
+        {
+          rule: rule("RollModifier", {
+            ...base,
+            roll: 1,
+            optional: true,
+            consumes: true,
+            range: null
+          }),
+          source: "Centered",
+          effectUuid: "E"
+        },
+        entry(
+          rule("RollModifier", { ...base, roll: 1, optional: true, consumes: true, range: null }),
+          "Item"
+        )
+      ],
+      rollData,
+      new Set()
+    );
+    expect(selectorBonus(result.bag, ["attack"], new Set()).roll).toBe(2);
+    const [, melee, centered, item] = result.bag.rollModifiers.attack;
+    expect(melee.range).toBe("melee");
+    expect(centered).toMatchObject({ optional: true, consumes: "E" });
+    // An item's rule has no effect for `consumes` to end
+    expect(item.consumes).toBeNull();
+  });
+
+  it("ApplyCondition fills its bag kind", () => {
+    const result = out([
+      rule("ApplyCondition", {
+        selector: "attack",
+        condition: "dazed",
+        level: null,
+        label: "Stunning Blow"
+      })
+    ]);
+    expect(result.bag.applyConditions.attack[0]).toMatchObject({
+      label: "Stunning Blow",
+      condition: "dazed",
+      level: null
+    });
   });
 
   it("TNModifier, FreeRaise, DiceRule, Substitute, and Note fill their bag kinds", () => {
@@ -297,7 +428,7 @@ describe("parseRulesJson", () => {
 });
 
 describe("statusRules", () => {
-  it("copies the Defense Stance and Mounted rules, and none for other statuses", () => {
+  it("copies a status's rules, and none for a status without them", () => {
     expect(statusRules("defenseStance")).toEqual([
       { key: "ArmorTN", value: "@rings.air + @skills.defense.rank" }
     ]);
@@ -306,7 +437,12 @@ describe("statusRules", () => {
       selector: "attack",
       roll: 1
     });
-    expect(statusRules("prone")).toEqual([]);
+    // Prone: -10 Armor TN against melee, -2k0 to attacks (p.89)
+    expect(statusRules("prone")).toEqual([
+      { key: "ArmorTN", value: -10, range: "melee" },
+      { key: "RollModifier", selector: "attack", roll: -2 }
+    ]);
+    expect(statusRules("attackStance")).toEqual([]);
   });
 
   it("returns a copy, so editing it leaves the config alone", () => {

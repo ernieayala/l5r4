@@ -44,8 +44,8 @@ Values marked *n/f* take a number or a formula (see **Formulas**).
 | Key | Fields | What it does |
 |-----|--------|--------------|
 | `TraitAdjust` | `trait` (`sta`, `wil`, `str`, `per`, `ref`, `awa`, `agi`, `int`, or `void`), `value` *n/f* | Raises or lowers a Trait or the Void Ring. Rings, Armor TN, wounds, Initiative, and damage use the new value |
-| `RollModifier` | `selector`, `roll`, `keep`, `total` *n/f*, `type` | Adds rolled dice, kept dice, and a flat bonus to the rolls the selector names |
-| `ArmorTN` | `value` *n/f*, `type` | Adds to Armor TN |
+| `RollModifier` | `selector`, `roll`, `keep`, `total` *n/f*, `type`, `range`, `optional`, `consumes` | Adds rolled dice, kept dice, and a flat bonus to the rolls the selector names. `range` (`"melee"` or `"ranged"`) limits it to attacks of that range. An `optional` one starts unticked in the roll dialog, for a bonus the player puts on one roll of their choice; with `consumes`, rolling with it ticked ends the effect that carries it |
+| `ArmorTN` | `value` *n/f*, `type`, `mode`, `range` | Changes Armor TN. `mode` `"add"` (default) adds; `"base"` replaces the Reflexes × 5 + 5 base when lower, and armor and other changes still add; `"total"` sets the whole Armor TN to the value plus armor, and nothing else adds. The lowest `base` or `total` wins; the Armor TN never drops below 5. An `add` with `range` counts only against attacks of that range |
 | `Reduction` | `value` *n/f* | Adds to Reduction |
 | `Wounds` | `perRank` *n/f*, `penalty` *n/f* | Adds Wounds to every Wound Rank, and adds to every Wound Rank's TN penalty |
 | `Initiative` | `roll`, `keep`, `total` *n/f* | Adds to Initiative |
@@ -55,13 +55,19 @@ Values marked *n/f* take a number or a formula (see **Formulas**).
 | `DiceRule` | `selector`, `explode` (2-10), `rerollOnes` | Dice explode on `explode` or higher; `rerollOnes` re-rolls 1s once |
 | `Substitute` | `selector`, `replace`, `with` | Offers, in the roll dialog, one Trait in place of another, as `"replace": "trait:agi", "with": "trait:ref"`; off until the roller turns it on |
 | `Note` | `selector`, `text` | Text on the card of the selected rolls |
+| `Movement` | `water` *n/f* | Water Ring ranks for movement only |
+| `ApplyCondition` | `selector`, `condition`, `level` | A successful selected roll with a target shows a button that puts the status `condition` (at `level`, for a Fear Rank) on the target |
+| `ConditionImmunity` | `condition` | The character cannot gain that status |
+| `PeriodicSave` | `event`, `roll`, `tn`, `step`, `min`, `onFailure` | On an effect: on `event` (`roundEnd` is the Reactions stage; `turnStart`, `turnEnd`) the owner gets a card to roll `roll` (`"ring:earth"`, `"trait:wil"`) against `tn`; success ends the effect. A failure moves the TN by `step`, never past `min`; with `"onFailure": "endNextRound"` the effect ends at the end of the next Round instead |
+| `Resource` | `slug`, `max` *n/f*, `per` | `max` more uses of `slug` each `per` (`turn`, `round`, `skirmish`, `day`). The slug `void` raises the one-Void-Point-per-Round limit |
 
 ### Selectors
 
 | Selector | Rolls |
 |----------|-------|
+| `any` | Every roll |
 | `skill:<skill name in lower case>` | That Skill's rolls, as `skill:kenjutsu` or `skill:tea ceremony` |
-| `trait:<trait>` | Rolls of that Trait, as `trait:ref`, and Skill rolls that use it |
+| `trait:<trait>` | Rolls of that Trait, as `trait:ref`, and Skill rolls that use it; add the predicate `["check:trait"]` for Trait rolls only |
 | `ring:<ring>` | Rolls of that Ring, as `ring:fire`, and spells of its element |
 | `skill`, `trait`, `ring` | Every Skill, Trait, or Ring roll |
 | `attack` | Every attack roll, with or without a Skill |
@@ -71,9 +77,9 @@ Values marked *n/f* take a number or a formula (see **Formulas**).
 
 ### The roll dialog
 
-Every roll shows one dialog (Shift-click skips it and takes the defaults). It lists each modifier from rules, Active Effects, the stance, and conditions with a box to turn it off, and offers: the TN (an attack starts at a single target's Armor TN), Raises up to the Void Ring (p.79), Free Raises spent to lower the TN by 5 each, the Wound Rank's penalty on the TN (p.82), a Void Point for +1k1 (p.78; never on damage), an Emphasis from the Skill's trained Emphases (p.133), keeping fewer dice, and situational roll, keep, and total modifiers. An Unskilled Roll takes no Raises or Free Raises and its dice never explode (p.80).
+Every roll shows one dialog (Shift-click skips it and takes the defaults). It lists each modifier from rules, Active Effects, the stance, and conditions with a box to turn it off (an `optional` one starts off), and offers: the TN (an attack starts at a single target's Armor TN; the target's changes against one attack range, such as Prone against melee, are listed with the TN), Raises up to the Void Ring (p.79), Free Raises spent to lower the TN by 5 each, the Wound Rank's penalty on the TN (p.82), a Void Point for +1k1 (p.78; never on damage; a note warns when one was already spent this Round in combat, and the choice stays yours), an Emphasis from the Skill's trained Emphases (p.133), keeping fewer dice, and situational roll, keep, and total modifiers. An Unskilled Roll takes no Raises or Free Raises and its dice never explode (p.80). A penalty that leaves more kept dice than rolled dice cuts the kept dice (p.89).
 
-Each roll posts a card holding everything it rolled with. Its context menu offers **Re-roll, keep the better** and **Contested Roll** against the last roll by someone else (p.80). In chat, `[[7k3]]` rolls 7k3; `u` makes it Unskilled, `e` adds an Emphasis, and `x9` explodes on 9 and 10.
+Each roll posts a card holding everything it rolled with. A successful roll with a target shows a button for each condition an `ApplyCondition` rule offers. Its context menu offers **Re-roll, keep the better** and **Contested Roll** against the last roll by someone else (p.80). In chat, `[[7k3]]` rolls 7k3; `u` makes it Unskilled, `e` adds an Emphasis, and `x9` explodes on 9 and 10.
 
 ### Formulas
 
@@ -87,6 +93,7 @@ A value can be a formula over the character's data, written as text: `"@rings.ai
 | `@skills.<skill>.rank` | A Skill's rank; the skill name in lower case with spaces as `_`, as `@skills.tea_ceremony.rank`. A Skill the character lacks counts as 0 |
 | `@honor.rank`, `@glory.rank`, `@status.rank`, `@shadowTaint.rank` | Ranks |
 | `@insight.rank` | Insight Rank |
+| `@level` | On an Active Effect: its level, such as a Fear Rank |
 
 A Family or School Trait bonus counts toward XP costs only as a plain number.
 
@@ -135,13 +142,13 @@ gives +5, not +8.
 
 ### Rules the system provides
 
+Every stance and condition is a status effect carrying its rules (see **Status effects**). Besides those:
+
 | Where | Rule |
 |-------|------|
-| Defense Stance | `ArmorTN` of Air Ring plus Defense rank (Core Rulebook p.84) |
-| Mounted | +1k0 on attacks against an unmounted target (Core Rulebook p.89) |
 | A skill's Roll, Keep, and Total bonus fields (Modifiers tab) | A `RollModifier` on that skill |
 
-A world made with 3.2.1 is updated when it first loads: a Family or School Trait effect becomes a `TraitAdjust` rule, a Master of Blood advantage gets `{ "key": "RollOption", "option": "master-of-blood" }`, and Defense Stance and Mounted effects get their rules. An advantage you name Master of Blood later needs that rule added by hand.
+A world made with 3.2.1 is updated when it first loads: a Family or School Trait effect becomes a `TraitAdjust` rule, a Master of Blood advantage gets `{ "key": "RollOption", "option": "master-of-blood" }`, and stance and condition effects get their rules, and a Fear effect its Rank as its level. An advantage you name Master of Blood later needs that rule added by hand.
 
 ---
 
@@ -323,16 +330,44 @@ A `RollModifier` rule does the same with a predicate and a formula.
 
 ### Duration
 
-**Duration:** a value and a unit (seconds, rounds, turns, or a game-time unit), set on the effect's Duration tab.
-- **No value** (default): the effect lasts as long as the item is on the character
-- **Rounds/Turns:** for temporary combat effects
-- **Seconds and longer units:** game-time duration
+**Duration:** a value and a unit (seconds, rounds, turns, or a game-time unit), and an event that ends it, set on the effect's Duration tab. An effect that runs out is deleted.
+- **No value and no event** (default): the effect lasts as long as the item is on the character
+- **Rounds/Turns:** combat effects. The event says when they end: the start or end of a Turn (counted from the combatant whose Turn it was when the effect began), the start or end of a Round (the end is the Reactions stage, p.82), the start or end of the combat, or **End of the encounter**
+- **Minutes, hours, days:** they end when the GM advances world time; while world time stands still, nothing ends
+- **End of the encounter:** ends when the combat the effect began in ends, or when the GM clicks **End encounter** in the token controls
+
+### Effect level and group
+
+An effect made by the system can carry two more values, which a macro sets through `system`:
+
+- `system.level`: how strong the effect is, read by its rules as `@level` (a Fear Rank, days of Fatigue)
+- `system.group`: effects in the same group are exclusive; gaining one ends the others. The stances are the group `"stance"`; give Kata effects the group `"kata"` for one Kata at a time (p.259)
 
 ---
 
 ## Status effects
 
-**Status effects** are the conditions and stances shown on tokens (Blinded, Stunned, Prone, Defense Stance, ...). Apply them from the token's status menu, the Condition Manager, or the stance controls on the sheet. Defense Stance and Mounted carry rules (see **Rules the system provides**); the other conditions and stances are calculated by the system.
+**Status effects** are the stances and conditions shown on tokens. Apply them from the token's status menu, the Condition Manager, or the stance control on the sheet. Each carries its rules; an effect a macro makes with only a status id (`{ statuses: ["prone"] }`) gets them too.
+
+| Status | What it does (Core Rulebook) |
+|--------|------------------------------|
+| Attack Stance | Nothing to calculate (p.84) |
+| Full Attack Stance | +2k1 to attacks, Armor TN -10 (p.84) |
+| Defense Stance | Armor TN + Air Ring + Defense rank (p.84) |
+| Full Defense Stance | Taking it rolls Defense / Reflexes; half the total, rounded up, adds to Armor TN until your next Turn, when you are asked to roll again (p.84) |
+| Center Stance | The next Round: +10 Initiative, and +1k1 plus the Void Ring offered (unticked) on the roll you choose during your Turn (p.84) |
+| Blinded | -3k3 ranged and -1k1 melee attacks; base Armor TN Reflexes + 5; Water Ring 2 lower for movement (p.89) |
+| Dazed | -3k0 to every roll; an Earth Ring roll at TN 20 in the Reactions stage ends it, the TN 5 lower after each failure, down to 5 (p.89) |
+| Stunned | Armor TN 5 plus armor; an Earth Ring roll at TN 20 in the Reactions stage ends it, and a failure ends it after the next Round (p.89) |
+| Grappled | Armor TN 5 plus armor (p.89) |
+| Prone | -10 Armor TN against melee attacks; -2k0 to attacks (p.89). Put on automatically at Down or Out and taken off when you rise above Down |
+| Fatigued, Fasting | +5 TN per level on Skill rolls, physical Trait rolls, and Spell Casting Rolls (p.89) |
+| Feared | -Xk0 to every roll, X its level (the Fear Rank), until the encounter ends (p.90) |
+| Guarded, Guarding | Armor TN +10 / -5 until the guard's next Turn (p.88) |
+| Mounted | +1k0 on attacks against an unmounted target (p.89) |
+| Concentration | Started by casting a spell whose Duration is Concentration; taking more Wounds than your Earth Ring in one hit asks for a Willpower roll at TN 20 + 5 per Mastery Level, and failing ends it (p.166) |
+
+The sheet warns when a condition rules out the stance you pick (Dazed, Prone, Fatigued, Mounted) and still lets you take it. Spending a Void Point on Armor TN gives +10 until the end of the Round (p.78).
 
 ---
 

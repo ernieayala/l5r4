@@ -47,7 +47,9 @@ import {
 } from "../module/config/localization.js";
 import { NPC_NUMBER_WOUND_LVLS } from "../module/config/game-mechanics.js";
 import { STATUS_EFFECTS } from "../module/config/status-effects.js";
+import { EXPIRY_ACTION, EXPIRY_EVENTS } from "../module/config/expiry-events.js";
 import { CORE_TYPE_DATA_MODELS, DATA_MODELS } from "../module/data/index.js";
+import L5R4ActiveEffect from "../module/documents/active-effect.js";
 import L5R4Actor from "../module/documents/actor.js";
 import L5R4Combat from "../module/documents/combat.js";
 import L5R4Combatant from "../module/documents/combatant.js";
@@ -60,6 +62,9 @@ import { runMigrations } from "../module/setup/migrations.js";
 import { registerSettings } from "../module/setup/register-settings.js";
 import { registerHandlebarsHelpers } from "../module/setup/register-handlebars.js";
 import { resolveVoidInitiative } from "../module/services/initiative.js";
+import { registerEffectQueries } from "../module/services/effects/apply.js";
+import { registerPromptQueries } from "../module/services/effects/prompts.js";
+import { combatEvents, registerCombatQueries } from "../module/services/effects/combat-events.js";
 import { registerAllHooks } from "../module/hooks/register-all.js";
 
 
@@ -79,14 +84,26 @@ Hooks.once("init", async () => {
 
   CONFIG.Item.documentClass  = L5R4Item;
   CONFIG.Actor.documentClass = L5R4Actor;
+  CONFIG.ActiveEffect.documentClass = L5R4ActiveEffect;
   CONFIG.Combat.documentClass = L5R4Combat;
   CONFIG.Combatant.documentClass = L5R4Combatant;
+
+  // Expired effects are deleted; Fear ends on the system's encounterEnd event (module/config/expiry-events.js)
+  CONFIG.ActiveEffect.expiryAction = EXPIRY_ACTION;
+  Object.assign(CONFIG.ActiveEffect.expiryEvents, EXPIRY_EVENTS);
 
   // Initiative is the Roll & Keep pool rolled by L5R4Combatant; core's formula is only the fallback for a
   // combatant with no actor. Scores are whole numbers.
   CONFIG.Combat.initiative = { formula: "1d10", decimals: 0 };
-  // Documents do not import services, so the Void Point prompt reaches L5R4Combat here
+  // Documents do not import services, so the Void Point prompt and the effect services reach L5R4Combat here
   L5R4Combat.resolveInitiativeBonuses = resolveVoidInitiative;
+  L5R4Combat.events = combatEvents;
+
+  // What a player's client asks the active GM to do: apply a condition to an actor the player does not own, end a
+  // Concentration, settle Center Stance when a player ends the Round
+  registerEffectQueries();
+  registerPromptQueries();
+  registerCombatQueries();
 
   // One data model per subtype declared in system.json documentTypes, plus models for core types, which are not
   // declared. Core labels each subtype with its TYPES.<Document>.<type> key from lang/*.json.

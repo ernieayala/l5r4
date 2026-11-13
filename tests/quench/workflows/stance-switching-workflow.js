@@ -19,8 +19,10 @@
 
 import { statusRules } from "../../../module/utils/rule-engine.js";
 import { SYS_ID } from "../../../module/config/constants.js";
-import { STANCE_IDS } from "../../../module/services/stance/core/helpers.js";
+import { STANCE_IDS } from "../../../module/utils/stances.js";
 import { createTestPC } from "../../fixtures/actor-fixtures.js";
+import { rollFullDefense } from "../../../module/services/effects/prompts.js";
+import { guardRolls, waitFor } from "../helpers.js";
 
 /**
  * Register stance switching workflow tests
@@ -31,6 +33,9 @@ export function registerStanceSwitchingWorkflowTests(quench) {
     `${SYS_ID}.workflows.stance-switching`,
     context => {
       const { describe, it, assert, before, after, afterEach } = context;
+
+      // Taking the Full Defense Stance opens its roll dialog (p.84)
+      guardRolls(context);
 
       describe("Stance Switching Workflow", () => {
         let actor;
@@ -64,14 +69,6 @@ export function registerStanceSwitchingWorkflowTests(quench) {
             if (validIds.length > 0) {
               await actor.deleteEmbeddedDocuments("ActiveEffect", validIds);
             }
-          }
-
-          // Clean up any stance flags
-          try {
-            await actor.unsetFlag(SYS_ID, "fullDefenseRoll");
-            await actor.unsetFlag(SYS_ID, "centerStanceBonus");
-          } catch (err) {
-            // Ignore if flags don't exist
           }
 
           actor.prepareData();
@@ -195,66 +192,17 @@ export function registerStanceSwitchingWorkflowTests(quench) {
           }
         });
 
-        it("should clean up stance flags when stance is removed", async function () {
-          // ARRANGE - Set a mock Full Defense roll flag
-          await actor.setFlag(SYS_ID, "fullDefenseRoll", {
-            total: 20,
-            formula: "5k3",
-            timestamp: Date.now()
-          });
-
+        it("a disabled stance gives nothing and does not end the other stance", async function () {
           await actor.createEmbeddedDocuments("ActiveEffect", [
-            {
-              name: "Full Defense Stance",
-              img: "icons/svg/shield.svg",
-              statuses: ["fullDefenseStance"]
-            }
+            { name: "Full Attack Stance", statuses: ["fullAttackStance"] }
           ]);
-
-          const effect = actor.effects.find(e => e.statuses?.has("fullDefenseStance"));
-          assert.exists(effect, "Full Defense stance created");
-
-          const flagBefore = actor.getFlag(SYS_ID, "fullDefenseRoll");
-          assert.exists(flagBefore, "Full Defense flag exists");
-
-          // ACT - Remove stance
-          await actor.deleteEmbeddedDocuments("ActiveEffect", [effect.id]);
-
-          // Wait for async flag cleanup (onDelete hook calls clearStanceFlags which is async)
-          await new Promise(resolve => setTimeout(resolve, 50));
-
-          // ASSERT - Flag should be cleared
-          const flagAfter = actor.getFlag(SYS_ID, "fullDefenseRoll");
-          assert.notExists(flagAfter, "Full Defense flag cleared on removal");
-        });
-
-        it("should clean up flags when stance is disabled", async function () {
-          // ARRANGE - Create stance with flag
-          await actor.setFlag(SYS_ID, "fullDefenseRoll", {
-            total: 18,
-            formula: "5k3",
-            timestamp: Date.now()
-          });
-
-          await actor.createEmbeddedDocuments("ActiveEffect", [
-            {
-              name: "Full Defense Stance",
-              img: "icons/svg/shield.svg",
-              statuses: ["fullDefenseStance"]
-            }
+          const [defense] = await actor.createEmbeddedDocuments("ActiveEffect", [
+            { name: "Defense Stance", statuses: ["defenseStance"] }
           ]);
-
-          const effect = actor.effects.find(e => e.statuses?.has("fullDefenseStance"));
-
-          // ACT - Disable stance
-          await effect.update({ disabled: true });
-
-          // Wait for async flag cleanup (onUpdate hook calls clearStanceFlags which is async)
-          await new Promise(resolve => setTimeout(resolve, 50));
-
-          // ASSERT - Flag should be cleared
-          const flagAfter = actor.getFlag(SYS_ID, "fullDefenseRoll");
-          assert.notExists(flagAfter, "Full Defense flag cleared when disabled");
+          assert.isFalse(actor.statuses.has("fullAttackStance"), "the group swapped the stance");
+          await defense.update({ disabled: true });
+          assert.isFalse(actor.statuses.has("defenseStance"), "disabled");
+          assert.equal(actor.system.armorTn.current, 20, "no stance bonus while disabled");
         });
       });
 
@@ -387,6 +335,16 @@ export function registerStanceSwitchingWorkflowTests(quench) {
       describe("Full Defense Roll Workflow", () => {
         let actor;
 
+        /** The Full Defense bonus effects on the actor. */
+        const bonusEffects = () =>
+          actor.effects.filter(e => e.getFlag(SYS_ID, "effectId") === "fullDefense");
+
+        /** The last Defense roll message of the actor. */
+        const lastDefenseRoll = () =>
+          game.messages.contents
+            .filter(m => m.type === "roll" && m.system.actorUuid === actor.uuid)
+            .at(-1);
+
         before(async () => {
           actor = await createTestPC({
             name: "Full Defense Roll Test Character",
@@ -394,164 +352,62 @@ export function registerStanceSwitchingWorkflowTests(quench) {
               traits: { ref: 4, sta: 3, wil: 3, str: 3, agi: 3, int: 3, per: 3, awa: 3 }
             }
           });
-
-          // Add Defense skill
           await actor.createEmbeddedDocuments("Item", [
-            {
-              name: "Defense",
-              type: "skill",
-              system: { rank: 3, trait: "ref" }
-            }
+            { name: "Defense", type: "skill", system: { rank: 3, trait: "ref" } }
           ]);
-
-          actor.prepareData();
         });
 
         afterEach(async () => {
-          if (actor && actor.effects.size > 0) {
-            const effectIds = Array.from(actor.effects.keys());
-            const validIds = effectIds.filter(id => actor.effects.get(id) !== undefined);
-            if (validIds.length > 0) {
-              await actor.deleteEmbeddedDocuments("ActiveEffect", validIds);
-            }
+          const ids = actor.effects.map(e => e.id);
+          if (ids.length) {
+            await actor.deleteEmbeddedDocuments("ActiveEffect", ids);
           }
-          try {
-            await actor.unsetFlag(SYS_ID, "fullDefenseRoll");
-          } catch (err) {
-            // Ignore if flag doesn't exist
-          }
-          actor.prepareData();
         });
 
         after(async () => {
-          if (actor) {
-            await actor.delete();
-          }
+          await actor?.delete();
         });
 
-        it("should trigger Full Defense roll on stance activation", async function () {
-          // ARRANGE
-          const flagBefore = actor.getFlag(SYS_ID, "fullDefenseRoll");
-          assert.notExists(flagBefore, "No Full Defense roll flag initially");
-
-          // ACT - Activate Full Defense stance
+        it("taking the stance rolls Defense / Reflexes and adds half, rounded up, to Armor TN (p.84)", async () => {
+          const base = actor.system.armorTn.current;
           await actor.createEmbeddedDocuments("ActiveEffect", [
-            {
-              name: "Full Defense Stance",
-              img: "icons/svg/shield.svg",
-              statuses: ["fullDefenseStance"]
-            }
+            { name: "Full Defense Stance", statuses: ["fullDefenseStance"] }
           ]);
-
-          // Wait for async roll trigger (uses queueMicrotask)
-          await new Promise(resolve => setTimeout(resolve, 100));
-
-          // ASSERT - Roll flag should be set
-          const flagAfter = actor.getFlag(SYS_ID, "fullDefenseRoll");
-          assert.exists(flagAfter, "Full Defense roll flag created");
-          assert.exists(flagAfter.total, "Roll total stored");
-          assert.exists(flagAfter.formula, "Roll formula stored");
-          assert.exists(flagAfter.timestamp, "Roll timestamp stored");
-          assert.isNumber(flagAfter.total, "Roll total is a number");
-          assert.isString(flagAfter.formula, "Roll formula is a string");
+          assert.isTrue(await waitFor(() => bonusEffects().length === 1), "bonus effect created");
+          const total = lastDefenseRoll().system.outcome.total;
+          assert.equal(actor.system.armorTn.current, base + Math.ceil(total / 2));
         });
 
-        it("should not trigger duplicate rolls if flag exists", async function () {
-          // ARRANGE - Set existing roll flag
-          const existingRoll = {
-            total: 22,
-            formula: "7k4",
-            timestamp: Date.now()
-          };
-          await actor.setFlag(SYS_ID, "fullDefenseRoll", existingRoll);
-
-          // ACT - Try to activate Full Defense again
+        it("rolls Defense 3 + Reflexes 4, keeping Reflexes: 7k4", async () => {
           await actor.createEmbeddedDocuments("ActiveEffect", [
-            {
-              name: "Full Defense Stance",
-              img: "icons/svg/shield.svg",
-              statuses: ["fullDefenseStance"]
-            }
+            { name: "Full Defense Stance", statuses: ["fullDefenseStance"] }
           ]);
-
-          await new Promise(resolve => setTimeout(resolve, 100));
-
-          // ASSERT - Flag should be unchanged (no duplicate roll)
-          const flagAfter = actor.getFlag(SYS_ID, "fullDefenseRoll");
-          assert.equal(flagAfter.total, existingRoll.total, "Roll total unchanged");
-          assert.equal(flagAfter.timestamp, existingRoll.timestamp, "Timestamp unchanged");
+          await waitFor(() => bonusEffects().length === 1);
+          assert.deepInclude(lastDefenseRoll().system.pool, { roll: 7, keep: 4 });
         });
 
-        it("should calculate armor bonus from roll result", async function () {
-          // ARRANGE - Simulate roll result
-          const mockRollTotal = 24;
-          await actor.setFlag(SYS_ID, "fullDefenseRoll", {
-            total: mockRollTotal,
-            formula: "7k4",
-            timestamp: Date.now()
+        it("a new roll replaces the bonus instead of adding to it", async () => {
+          await actor.createEmbeddedDocuments("ActiveEffect", [
+            { name: "Full Defense Stance", statuses: ["fullDefenseStance"] }
+          ]);
+          await waitFor(() => bonusEffects().length === 1);
+          await rollFullDefense(actor);
+          assert.lengthOf(bonusEffects(), 1);
+          const total = lastDefenseRoll().system.outcome.total;
+          assert.equal(actor.system.armorTn.current, 25 + Math.ceil(total / 2));
+        });
+
+        it("the bonus lasts until the start of the actor's next Turn", async () => {
+          await actor.createEmbeddedDocuments("ActiveEffect", [
+            { name: "Full Defense Stance", statuses: ["fullDefenseStance"] }
+          ]);
+          await waitFor(() => bonusEffects().length === 1);
+          assert.deepEqual(bonusEffects()[0].toObject().duration, {
+            value: 1,
+            units: "rounds",
+            expiry: "turnStart",
+            expired: false
           });
-
-          // ACT - Apply Full Defense stance
-          await actor.createEmbeddedDocuments("ActiveEffect", [
-            {
-              name: "Full Defense Stance",
-              img: "icons/svg/shield.svg",
-              statuses: ["fullDefenseStance"]
-            }
-          ]);
-
-          actor.prepareData();
-
-          // ASSERT - Armor bonus should be half of roll (rounded up)
-          // Roll: 24 → Bonus: 12 → TN: 25 (base) + 12 = 37
-          const expectedBonus = Math.ceil(mockRollTotal / 2);
-          assert.equal(expectedBonus, 12, "Armor bonus is half roll (rounded up)");
-
-          // Note: Actual TN calculation happens in prepareDerivedData
-          // This test verifies the roll flag is properly stored
-        });
-
-        it("should use Defense skill rank in Full Defense roll", async function () {
-          // ARRANGE
-          const defenseSkill = actor.items.find(
-            i => i.type === "skill" && i.name.toLowerCase().includes("defense")
-          );
-          assert.exists(defenseSkill, "Defense skill exists");
-          assert.equal(defenseSkill.system.rank, 3, "Defense rank = 3");
-
-          const reflexes = actor.system.traits.ref;
-          assert.equal(reflexes, 4, "Reflexes = 4");
-
-          // Expected formula: (Defense 3 + Reflexes 4)k(Reflexes 4) = 7k4
-          const expectedRoll = reflexes + defenseSkill.system.rank;
-          const expectedKeep = reflexes;
-
-          // ACT - Trigger Full Defense
-          await actor.createEmbeddedDocuments("ActiveEffect", [
-            {
-              name: "Full Defense Stance",
-              img: "icons/svg/shield.svg",
-              statuses: ["fullDefenseStance"]
-            }
-          ]);
-
-          await new Promise(resolve => setTimeout(resolve, 100));
-
-          // ASSERT
-          const rollFlag = actor.getFlag(SYS_ID, "fullDefenseRoll");
-          assert.exists(rollFlag, "Roll flag exists");
-
-          // Formula should be 7k4 (or 7d10k4x10 with exploding dice)
-          assert.include(
-            rollFlag.formula,
-            `${expectedRoll}`,
-            "Formula includes correct rolled dice"
-          );
-          assert.include(
-            rollFlag.formula,
-            `k${expectedKeep}`,
-            "Formula includes correct kept dice"
-          );
         });
       });
 
@@ -622,9 +478,9 @@ export function registerStanceSwitchingWorkflowTests(quench) {
           const proneEffect = actor.effects.find(e => e.statuses?.has("prone"));
           assert.exists(proneEffect, "Prone condition applied");
 
-          // Prone applies -10 to Armor TN vs melee per game rules
-          // Base TN: 20 → With Prone: 10
-          assert.equal(actor.system.armorTn.current, 10, "Prone TN penalty applied");
+          // Prone applies -10 to Armor TN against melee attacks only (p.89)
+          assert.equal(actor.system.armorTn.current, 20, "the shown Armor TN stays");
+          assert.equal(actor.system.armorTn.vs.melee, -10, "Prone TN penalty against melee");
         });
 
         it("should track stunned condition on actor", async function () {

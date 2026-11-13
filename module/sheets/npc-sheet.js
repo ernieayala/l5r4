@@ -54,7 +54,7 @@ import { enhanceItemSheetData } from "../documents/item/integration/sheet-data.j
 // Services
 import * as Fear from "../services/fear.js";
 import { applyLongRest } from "../services/rest.js";
-import { getActiveStances } from "../services/stance/core/helpers.js";
+import { activeStance } from "../utils/stances.js";
 import { SpellCastRoll } from "../services/dice/rolls/spell-cast-roll.js";
 import { MahoCastRoll } from "../services/dice/rolls/maho-cast-roll.js";
 
@@ -395,8 +395,7 @@ export default class L5R4NpcSheet extends BaseActorSheet {
     const all = this.actor.items.contents;
     const byType = t => all.filter(i => i.type === t);
 
-    const activeStances = getActiveStances(actorObj);
-    const currentStance = activeStances[0] || "";
+    const currentStance = activeStance(actorObj.statuses);
 
     // Prepare sortable skills list with user preference
     const skills = (() => {

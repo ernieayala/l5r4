@@ -52,6 +52,14 @@ export default class RollMessageData extends foundry.abstract.TypeDataModel {
       }),
       weaponUuid: stringField(),
       notes: new ArrayField(stringField()),
+      // Conditions the roller's ApplyCondition rules let a success put on the target; the card offers each one
+      conditions: new ArrayField(
+        new SchemaField({
+          label: stringField(),
+          condition: stringField(),
+          level: new NumberField({ required: true, nullable: true, initial: null })
+        })
+      ),
       // The message this one re-rolled, keeping the better total
       rerollOf: stringField()
     };

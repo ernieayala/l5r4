@@ -9,7 +9,7 @@
  * Key responsibilities:
  * - Calculate NPC initiative (custom or formula-based)
  * - Process wound levels (manual or formula mode)
- * - Apply stance and condition effects
+ * - Apply ArmorTN rules from stances, conditions, and other effects
  * - Enrich embedded items
  *
  * Architecture: Pure calculation functions that mutate sys object in place.
@@ -19,8 +19,6 @@
 import { toInt } from "../../../utils/type-coercion.js";
 import { initiativeDice } from "../../../utils/initiative.js";
 
-import { applyStanceAutomation } from "../../../services/stance/core/automation.js";
-
 import { WOUND_LEVEL_ORDER } from "../../../config/game-mechanics.js";
 import { prepareTraitsAndRings, prepareMovement } from "../calculations/shared-traits-rings.js";
 import {
@@ -28,7 +26,6 @@ import {
   prepareNpcFormulaWounds,
   prepareVisibleWoundLevels
 } from "../calculations/wound-system.js";
-import { applyConditionEffects } from "../calculations/condition-effects.js";
 import { enrichActorItems } from "../calculations/item-enrichment.js";
 import { applyArmorRules, applyDerivedRules } from "../rules.js";
 
@@ -36,7 +33,7 @@ import { applyArmorRules, applyDerivedRules } from "../rules.js";
  * Prepares derived data for NPC actors.
  *
  * Calculates all derived values for NPCs including traits, initiative, wounds,
- * and applies stance/condition effects. Executes calculations in dependency order.
+ * and Armor TN with its rules. Executes calculations in dependency order.
  *
  * @param {Actor} actor - The NPC actor being prepared
  * @param {object} sys - The actor's system data object (mutated in place)
@@ -88,7 +85,8 @@ export function prepareNpcData(actor, sys, finalizeWoundPenaltiesFn) {
   sys.armorTn.base = 0;
   sys.armorTn.bonus = 0;
   sys.armorTn.reduction = toInt(sys.armor?.reduction ?? 0);
-  sys.armorTn.current = toInt(sys.armor?.armorTn ?? 0);
+  // An NPC's Armor TN is one entered value with its armor in it, so it stands as the base and armor adds 0
+  applyArmorRules(actor, sys, { base: toInt(sys.armor?.armorTn ?? 0), armor: 0, other: 0 });
 
   // Initialize wound level structures
   sys.woundLevels = sys.woundLevels || {};
@@ -106,13 +104,6 @@ export function prepareNpcData(actor, sys, finalizeWoundPenaltiesFn) {
 
   // Apply wound penalties to traits/rings
   finalizeWoundPenaltiesFn(sys, order, woundMode);
-
-  // Apply stance effects (must happen after traits are calculated)
-  applyStanceAutomation(actor, sys);
-  applyArmorRules(sys);
-
-  // Apply condition effects (must happen after stance)
-  applyConditionEffects(actor, sys);
 
   // Calculate movement rates (depends on traits)
   prepareMovement(sys);

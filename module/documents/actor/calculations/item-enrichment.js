@@ -5,7 +5,7 @@
  * Enrichment Process:
  * - Adds roll/keep formulas to items for quick access in UI
  * - Calculates values based on actor traits, skills, and bonuses
- * - Applies L5R4 game mechanics (affinity, deficiency, stance bonuses)
+ * - Applies L5R4 game mechanics (affinity, deficiency, attack rules such as stances)
  * - Runs during actor data preparation
  *
  * Architecture:
@@ -26,6 +26,7 @@ import {
   getEffectiveTrait,
   resolveWeaponSkillTrait
 } from "../../../utils/mechanics.js";
+import { selectorBonus } from "../../../utils/rule-engine.js";
 import { prepareWeaponDamage } from "../../item/preparation/derived-data.js";
 
 /**
@@ -193,39 +194,18 @@ function enrichSpellFormulas(actor, spell) {
  *
  * @description
  * Calculates weapon formulas using L5R4 combat rules:
- * - Attack formula: Based on weapon skill + trait (from resolveWeaponSkillTrait)
+ * - Attack formula: weapon skill + trait (from resolveWeaponSkillTrait), plus the RollModifier rules on every
+ *   attack, such as the Full Attack Stance's +2k1 (p.84). Optional and range-limited rules wait for the roll dialog.
  * - Damage formula: From weapon's damage rating
- * - Stance modifiers: Full Attack stance adds +2k1 to attack rolls
- *
- * Full Attack Stance Bonus:
- * - Roll: +2 dice (more aggressive attack)
- * - Keep: +1 die (better accuracy)
- * - Applied only when actor is in Full Attack stance
- *
- * Modifies weapon with:
- * - attackFormula: Base attack roll formula
- * - attackFormulaWithStance: Attack formula with stance bonus applied
- * - damageFormula: Damage roll formula (same with/without stance)
- * - damageFormulaWithStance: Damage formula (no stance effect on damage)
  *
  * @example
- * // Weapon skill 5k3, Full Attack stance
- * // attackFormula: "5k3"
- * // attackFormulaWithStance: "7k4" (+2k1 from Full Attack)
+ * // Weapon skill 5k3, Full Attack Stance
+ * // attackFormula: "7k4"
  */
 function enrichWeaponFormulas(actor, weapon) {
-  // Get weapon skill roll/keep values (includes trait, skill rank, bonuses)
   const weaponSkill = resolveWeaponSkillTrait(actor, weapon);
-  weapon.attackFormula = `${weaponSkill.rollBonus}k${weaponSkill.keepBonus}`;
-
-  // Apply Full Attack stance bonus: +2k1 to attack rolls
-  if (actor.system._stanceEffects?.fullAttack) {
-    const stanceRollBonus = weaponSkill.rollBonus + 2;
-    const stanceKeepBonus = weaponSkill.keepBonus + 1;
-    weapon.attackFormulaWithStance = `${stanceRollBonus}k${stanceKeepBonus}`;
-  } else {
-    weapon.attackFormulaWithStance = weapon.attackFormula;
-  }
+  const attack = selectorBonus(actor.ruleBag, ["any", "attack"], actor.rollOptions);
+  weapon.attackFormula = `${weaponSkill.rollBonus + attack.roll}k${weaponSkill.keepBonus + attack.keep}`;
 
   // Recompute damage now that the owner's Active Effects apply: item preparation ran before them (issue #29)
   prepareWeaponDamage(weapon);
@@ -234,7 +214,4 @@ function enrichWeaponFormulas(actor, weapon) {
   const damageRoll = toInt(weapon.system?.derivedDamageRoll ?? weapon.system?.damageRoll) || 0;
   const damageKeep = toInt(weapon.system?.derivedDamageKeep ?? weapon.system?.damageKeep) || 0;
   weapon.damageFormula = `${damageRoll}k${damageKeep}`;
-
-  // Damage is not affected by stance
-  weapon.damageFormulaWithStance = weapon.damageFormula;
 }

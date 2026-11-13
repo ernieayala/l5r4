@@ -20,12 +20,16 @@ import { SYS_ID } from "../../../module/config/constants.js";
 import { STATUS_EFFECTS } from "../../../module/config/status-effects.js";
 import { createTestPC } from "../../fixtures/actor-fixtures.js";
 import ConditionManager from "../../../module/apps/condition-manager.js";
+import { checkEffects, guardRolls } from "../helpers.js";
 
 export function registerConditionManagerTests(quench) {
   quench.registerBatch(
     "l5r4-enhanced.integration.condition-manager",
     context => {
       const { describe, it, assert, before, after, beforeEach, afterEach } = context;
+
+      // Taking the Full Defense Stance opens its roll dialog (p.84)
+      guardRolls(context);
 
       describe("ConditionManager Application", () => {
         let actor;
@@ -400,28 +404,23 @@ export function registerConditionManagerTests(quench) {
               }
             ]);
 
-            // Force recalculation (hooks should do this, but be explicit for test stability)
-            actor.prepareData();
+            assert.isTrue(actor.statuses.has("blinded"), "Blinded is active");
 
-            const effects = actor.system._conditionEffects;
-            assert.exists(effects, "Condition effects tracking exists");
-            assert.include(effects.active, "blinded", "Blinded is active");
+            // Roll penalties per p.89: ranged -3k3, melee -1k1
+            assert.deepInclude(checkEffects(actor, "attack", { range: "ranged" }), {
+              roll: -3,
+              keep: -3
+            });
+            assert.deepInclude(checkEffects(actor, "attack", { range: "melee" }), {
+              roll: -1,
+              keep: -1
+            });
 
-            // Verify roll penalties per rules: ranged -3k3, melee -1k1
-            assert.equal(effects.rollPenalties.ranged.roll, -3, "Ranged roll penalty -3");
-            assert.equal(effects.rollPenalties.ranged.keep, -3, "Ranged keep penalty -3");
-            assert.equal(effects.rollPenalties.melee.roll, -1, "Melee roll penalty -1");
-            assert.equal(effects.rollPenalties.melee.keep, -1, "Melee keep penalty -1");
-
-            // Verify Armor TN override = Reflexes + 5 + armor bonus (+ stanceMod if any)
-            const ref = actor.system.traits.ref ?? 0;
-            const armorBonus = actor.system.armorTn?.bonus ?? 0;
-            const stanceMod = actor.system.armorTn?.stanceMod ?? 0;
-            const expectedTN = ref + 5 + armorBonus + stanceMod;
+            // Base Armor TN Reflexes + 5, armor still adds (p.89; STAGE-09 decision 3)
             assert.equal(
               actor.system.armorTn.current,
-              expectedTN,
-              "Armor TN overridden by Blinded (Reflexes + 5 + armor)"
+              actor.system.traits.ref + 5 + actor.system.armorTn.bonus,
+              "Armor TN base replaced by Blinded (Reflexes + 5 + armor)"
             );
           });
 
@@ -432,20 +431,11 @@ export function registerConditionManagerTests(quench) {
               await blinded.delete();
             }
 
-            actor.prepareData();
-
-            const effects = actor.system._conditionEffects;
-            assert.notInclude(effects.active, "blinded", "Blinded removed from active conditions");
-
-            // Current TN should be at least the base + bonuses (i.e., higher than blinded override)
-            const baseTN =
-              (actor.system.armorTn?.base ?? 0) +
-              (actor.system.armorTn?.bonus ?? 0) +
-              (actor.system.armorTn?.stanceMod ?? 0);
-            assert.isAtLeast(
+            assert.isFalse(actor.statuses.has("blinded"), "Blinded removed from active conditions");
+            assert.equal(
               actor.system.armorTn.current,
-              baseTN,
-              "Armor TN restored to normal (>= base + bonuses)"
+              actor.system.armorTn.base + actor.system.armorTn.bonus,
+              "Armor TN restored to Reflexes × 5 + 5 plus armor"
             );
           });
         });

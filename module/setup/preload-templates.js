@@ -137,9 +137,8 @@ export async function preloadTemplates() {
 
     // Chat Message Templates
     `systems/${SYS_ID}/templates/chat/check-card.hbs`,
-    `systems/${SYS_ID}/templates/chat/full-defense-roll.hbs`,
+    `systems/${SYS_ID}/templates/chat/effect-prompt.hbs`,
     `systems/${SYS_ID}/templates/chat/healing.hbs`,
-    `systems/${SYS_ID}/templates/chat/simple-roll.hbs`,
     `systems/${SYS_ID}/templates/chat/weapon-chat.hbs`,
 
     // Dialog Templates

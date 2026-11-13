@@ -2,7 +2,8 @@ import { SYS_ID } from "../../module/config/constants.js";
 
 /**
  * Stored paths 3.2.1 kept in template.json that the data models no longer store, by roadmap Stage 2 decision:
- * derived values (decision 4) and PC `armor`, which is NPC-only (decision 6). Paths are relative to `system`.
+ * derived values (decision 4) and PC `armor`, which is NPC-only (decision 6); and by Stage 9, the Void-on-Armor-TN
+ * marker, which is an effect now. Paths are relative to `system`.
  * @type {Record<string, string[]>}
  */
 const NOT_STORED = {
@@ -17,6 +18,8 @@ const NOT_STORED = {
     "insight.points",
     "armorTn.reduction",
     "armorTn.current",
+    "armorTn.useVoid",
+    "armorTn.voidRound",
     "initiative.roll",
     "initiative.keep",
     "armor"

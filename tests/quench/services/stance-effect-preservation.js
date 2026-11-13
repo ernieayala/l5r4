@@ -19,12 +19,16 @@
 import { statusRules } from "../../../module/utils/rule-engine.js";
 import { SYS_ID } from "../../../module/config/constants.js";
 import { createTestPC } from "../../fixtures/actor-fixtures.js";
+import { guardRolls } from "../helpers.js";
 
 export function registerStanceEffectPreservationTests(quench) {
   quench.registerBatch(
     "l5r4-enhanced.integration.stance-effect-preservation",
     context => {
       const { describe, it, assert, beforeEach, afterEach } = context;
+
+      // Taking the Full Defense Stance opens its roll dialog (p.84)
+      guardRolls(context);
 
       describe("Stance Effect Changes Preservation", () => {
         let actor;

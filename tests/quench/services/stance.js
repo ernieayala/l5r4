@@ -17,8 +17,9 @@
 
 import { statusRules } from "../../../module/utils/rule-engine.js";
 import { SYS_ID } from "../../../module/config/constants.js";
-import { STANCE_IDS } from "../../../module/services/stance/core/helpers.js";
+import { STANCE_IDS } from "../../../module/utils/stances.js";
 import { createTestPC } from "../../fixtures/actor-fixtures.js";
+import { guardRolls } from "../helpers.js";
 
 /**
  * Register Stance mechanics tests
@@ -29,6 +30,9 @@ export function registerStanceTests(quench) {
     `${SYS_ID}.services.stance`,
     context => {
       const { describe, it, assert, afterEach } = context;
+
+      // Taking the Full Defense Stance opens its roll dialog (p.84)
+      guardRolls(context);
 
       describe("Stance Identification", () => {
         it("should recognize all five L5R4 stances", () => {

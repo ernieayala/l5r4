@@ -3,17 +3,10 @@
   data-document-id="{{coalesce docId this.id _id}}">
   <h4 class="flexrow -gap-sm title">{{name}}</h4>
   {{#if inSheet}}
-    {{#if @root.system._stanceEffects.fullAttack}}
-      <div class="button-mask-container">
-        <span class="mas">{{attackFormulaWithStance}}</span>
-        <a class="button" data-action="roll-weapon-attack" title="{{localize "l5r4.ui.mechanics.rolls.attackRoll"}} ({{localize "l5r4.ui.mechanics.stances.fullAttackBonus"}})" data-stance-bonus="2,1">{{attackFormulaWithStance}}</a>
-      </div>
-    {{else}}
-      <div class="button-mask-container">
-        <span class="mas">{{attackFormula}}</span>
-        <a class="button" data-action="roll-weapon-attack" title="{{localize "l5r4.ui.mechanics.rolls.attackRoll"}}">{{attackFormula}}</a>
-      </div>
-    {{/if}}
+    <div class="button-mask-container">
+      <span class="mas">{{attackFormula}}</span>
+      <a class="button" data-action="roll-weapon-attack" title="{{localize "l5r4.ui.mechanics.rolls.attackRoll"}}">{{attackFormula}}</a>
+    </div>
     <div class="button-mask-container">
       <span class="mas">{{#if system.derivedDamageFormula}}{{system.derivedDamageFormula}}{{else}}{{system.damageRoll}}k{{system.damageKeep}}{{/if}}</span>
       <a class="button" data-action="roll-weapon" title="{{localize "l5r4.ui.mechanics.rolls.damageRoll"}}">{{#if system.derivedDamageFormula}}{{system.derivedDamageFormula}}{{else}}{{system.damageRoll}}k{{system.damageKeep}}{{/if}}</a>
