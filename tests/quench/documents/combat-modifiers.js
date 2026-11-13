@@ -35,7 +35,8 @@ export function registerCombatModifiersTests(quench) {
                   void: { rank: 2, value: 2 }
                 },
                 traits: { ref: 3 },
-                insight: { rank: 2 },
+                // A set Insight Rank: with automatic Insight Rank on, the rank is computed from Rings and Skills
+                insight: { rank: 2, autoCalculate: false },
                 initiative: {
                   roll: 0,
                   keep: 0,
@@ -399,7 +400,8 @@ export function registerCombatModifiersTests(quench) {
                   void: { rank: 2, value: 2 }
                 },
                 traits: { ref: 3, str: 3, per: 3 }, // Water = min(str, per) = 3
-                insight: { rank: 2 },
+                // A set Insight Rank: with automatic Insight Rank on, the rank is computed from Rings and Skills
+                insight: { rank: 2, autoCalculate: false },
                 initiative: {
                   rollMod: 1,
                   keepMod: 1,

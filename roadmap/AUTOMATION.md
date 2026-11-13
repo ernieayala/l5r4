@@ -55,7 +55,7 @@ Probable bugs read from the code, not yet reproduced in play (each gets an issue
 | B1 | Skill item bonus counted twice on skill rolls | `module/sheets/handlers/roll-handler.js:198-220`, `module/services/dice/rolls/skill-roll.js:142-149` | 8 |
 | B2 | Skilled weapon attack: a skill keep bonus is added to rolled and kept dice more than once | `module/utils/mechanics.js:364`, `roll-handler.js:362` | 8 |
 | B3 | Full Attack +2k1 applied twice on unskilled and NPC attacks | `roll-handler.js:264-273, 396-397`, `simple-roll.js:228-235` | 8 |
-| B4 | PC initiative reads Insight Rank before it is recomputed | `module/documents/actor/preparation/pc-preparation.js:86`, `:216` | 5 |
+| B4 | PC initiative reads Insight Rank before it is recomputed | `module/documents/actor/preparation/pc-preparation.js:86`, `:216` | 5 (fixed) |
 | B5 | Manual `actor.prepareData()` calls re-apply effects | `module/sheets/pc-sheet.js:430, 633`, `module/services/stance/rolls/full-defense-roll.js:137` | 2 |
 | B6 | Derived values written back to storage bake effect bonuses in | `chat-damage-buttons.js:63-66`, `void-manager.js:191, 274-276`, `spell-cast-roll.js:252` | 3 |
 | B7 | Unskilled rolls allow Raises; Void spendable on damage; Raise cap from current Void Points | `skill-roll.js:221-238, 272-274`, `weapon-roll.js:120-130` | 8 |

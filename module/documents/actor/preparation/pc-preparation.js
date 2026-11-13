@@ -29,6 +29,7 @@ import { SYS_ID } from "../../../config/constants.js";
 
 import { toInt } from "../../../utils/type-coercion.js";
 import { logError } from "../../../utils/error-logging.js";
+import { initiativeDice } from "../../../utils/initiative.js";
 
 import { applyStanceAutomation } from "../../../services/stance/core/automation.js";
 
@@ -46,7 +47,7 @@ import { enrichActorItems } from "../calculations/item-enrichment.js";
  *
  * Calculates all derived values for PCs including traits, initiative, armor TN,
  * wounds, insight, and healing rates. Executes calculations in dependency order.
- * PC calculations differ significantly from NPCs (see file header).
+ * PC calculations differ from NPCs (see file header).
  *
  * @param {Actor} actor - The PC actor being prepared
  * @param {object} sys - The actor's system data object (mutated in place)
@@ -79,12 +80,6 @@ export function preparePcData(actor, sys, finalizeWoundPenaltiesFn, calculateIns
   // Helper to access effective trait values (after all modifiers)
   const tEff = sys._derived?.traitsEff || {};
   const TR = k => toInt(tEff[k]);
-
-  // Calculate PC initiative using standard formula: (Insight Rank + Reflexes)k(Reflexes)
-  // This differs from NPCs which can have custom initiative values
-  sys.initiative = sys.initiative || {};
-  sys.initiative.roll = toInt(sys.insight?.rank) + TR("ref") + toInt(sys.initiative.rollMod);
-  sys.initiative.keep = TR("ref") + toInt(sys.initiative.keepMod);
 
   // Calculate PC armor TN from base formula + equipped armor
   // Base TN = Reflexes × 5 + 5 (L5R4 core rules)
@@ -160,10 +155,8 @@ export function preparePcData(actor, sys, finalizeWoundPenaltiesFn, calculateIns
       } else {
         lvl.value = earth * mult + prev + add;
       }
-      // Reset base per-level penalty (issue #32): without this, every PC wound level
-      // had penalty=0, so calculateWoundPenalties would compute the same penaltyEff
-      // for every row from the modifier alone — including Healthy, which should
-      // always be 0 regardless of modifier.
+      // Each wound level starts from its base penalty (issue #32), so calculateWoundPenalties gives every row its
+      // own penalty plus the modifier, and Healthy stays 0 whatever the modifier.
       lvl.penalty = DEFAULT_WOUND_PENALTIES[key] ?? 0;
       prev = lvl.value;
     }
@@ -215,6 +208,18 @@ export function preparePcData(actor, sys, finalizeWoundPenaltiesFn, calculateIns
   if (sys.insight.autoCalculate) {
     sys.insight.rank = calculateInsightRankFn(sys.insight.points);
   }
+
+  // Initiative pool: Insight Rank + Reflexes, keep Reflexes (p.81). Calculated once the Insight Rank above is final.
+  sys.initiative = sys.initiative || {};
+  Object.assign(
+    sys.initiative,
+    initiativeDice({
+      insightRank: toInt(sys.insight.rank),
+      reflexes: TR("ref"),
+      rollMod: toInt(sys.initiative.rollMod),
+      keepMod: toInt(sys.initiative.keepMod)
+    })
+  );
 
   // Calculate healing rate (L5R4 core rules)
   // Formula: (Stamina × 2) + Insight Rank + modifiers
