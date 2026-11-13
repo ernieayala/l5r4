@@ -48,8 +48,12 @@ Thumbs.db
 
 # Project-specific directories
 for-research/
-game-rules/
 .windsurf/
+
+# The purchased L5R 4e Core Rulebook (content/) and rules transcribed from it (game-rules/).
+# Licensed material in a public repository: never committed.
+content/
+game-rules/
 
 # Test coverage reports
 tests/coverage/
@@ -64,3 +68,4 @@ madge-analysis.json
 
 # Claude Code project config. Kept on disk, never committed.
 .claude/
+CLAUDE.md
