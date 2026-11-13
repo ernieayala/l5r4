@@ -21,14 +21,14 @@ When you add an item with Active Effects to a character, those effects automatic
 
 1. Open the item sheet (Family, School, Advantage, etc.)
 2. Go to the **Active Effects** tab
-3. Click **Create Effect**
-4. Set the effect name and configure changes
+3. Click **New**
+4. Set the effect name, then add changes on the **Changes** tab with the **+** button
 
 **Each effect can have multiple changes.** Each change needs:
 - **Attribute Key:** The stat you're modifying (see below for all keys)
-- **Change Type:** How to apply the change (Add, Multiply, Override, etc.)
-- **Effect Value:** The number or value to apply
-- **Phase:** When the change applies (leave it on **Initial**, see below)
+- **Type:** How to apply the change (Add, Multiply, Override, etc.)
+- **Value:** The number or value to apply
+- **Priority:** The order among changes to the same key (lower applies first); leave the default
 
 ---
 
@@ -49,12 +49,10 @@ When you add an item with Active Effects to a character, those effects automatic
 
 ## Phases
 
-Each change applies in a phase: **Initial** or **Final**. New changes start on Initial.
+Each change applies in a phase: **Initial** or **Final**. The effect sheet does not show the phase: every change added there is Initial.
 
-- **Initial** applies before the system calculates Rings, Wound levels, Armor TN, Initiative, Insight, and weapon damage. A Trait change must be Initial, or nothing calculated from the Trait sees it.
-- **Final** applies after those calculations. A Final change to a Trait shows on the sheet but never reaches a Ring, Armor TN, or damage roll.
-
-Leave every change on Initial unless you mean to change a value after the system has finished with it.
+- **Initial** applies before the system calculates Rings, Wound levels, Armor TN, Initiative, Insight, and weapon damage, so everything calculated from a Trait sees a Trait change.
+- **Final** applies after those calculations. A Final change to a Trait shows on the sheet but never reaches a Ring, Armor TN, or damage roll. A change gets the Final phase only when a macro or module creates it with `phase: "final"`.
 
 ---
 
@@ -62,7 +60,7 @@ Leave every change on Initial unless you mean to change a value after the system
 
 ### Traits
 
-These are the eight core traits. All use the Add type, Initial phase, for bonuses.
+These are the eight core traits. All use the Add type for bonuses.
 
 | Attribute Key | Trait | Example Effect |
 |---------------|-------|----------------|
@@ -77,9 +75,8 @@ These are the eight core traits. All use the Add type, Initial phase, for bonuse
 
 **Example:** A Family grants +1 Strength
 - Attribute Key: `system.traits.str`
-- Change Type: Add
-- Effect Value: `1`
-- Phase: Initial
+- Type: Add
+- Value: `1`
 
 The +1 reaches everything calculated from Strength: the Water Ring and melee and bow damage.
 
@@ -124,8 +121,8 @@ The +1 reaches everything calculated from Strength: the Water Ring and melee and
 
 **Example:** Advantage grants +5 Armor TN
 - Attribute Key: `system.armorTn.mod`
-- Change Type: Add
-- Effect Value: `5`
+- Type: Add
+- Value: `5`
 
 ### Wounds & Health
 
@@ -141,8 +138,8 @@ The +1 reaches everything calculated from Strength: the Water Ring and melee and
 
 **Example:** Advantage gives tougher wound levels
 - Attribute Key: `system.woundsMultiplier`
-- Change Type: Override
-- Effect Value: `3`
+- Type: Override
+- Value: `3`
 
 ### Insight
 
@@ -203,12 +200,12 @@ Effects change the character, never an item on it, so there is no key for a skil
 
 **Setup:**
 1. Open Family item
-2. Active Effects tab → Create Effect
+2. Active Effects tab → New
 3. Name: "Family Trait Bonus"
 4. Add change:
    - Attribute Key: `system.traits.str` (or whatever trait)
-   - Change Type: Add
-   - Effect Value: `1`
+   - Type: Add
+   - Value: `1`
 
 The bonus is free, and every rank you buy afterward costs XP at the Trait's new rank with the bonus included
 (Core Rulebook p.103): with a Family +1, raising Strength from 3 to 4 costs 16 XP.
@@ -219,12 +216,12 @@ The bonus is free, and every rank you buy afterward costs XP at the Trait's new 
 
 **Setup:** one change per school skill.
 1. Open School item
-2. Active Effects tab → Create Effect
+2. Active Effects tab → New
 3. Name: "School Skill Bonus"
 4. Add a change for each skill:
    - Attribute Key: `system.bonuses.skill.kenjutsu.roll` (the skill's name in lower case)
-   - Change Type: Add
-   - Effect Value: `1`
+   - Type: Add
+   - Value: `1`
 
 ### Armor TN Modifier
 
@@ -232,12 +229,12 @@ The bonus is free, and every rank you buy afterward costs XP at the Trait's new 
 
 **Setup:**
 1. Open Advantage item
-2. Active Effects tab → Create Effect
+2. Active Effects tab → New
 3. Name: "Armor TN Bonus"
 4. Add change:
    - Attribute Key: `system.armorTn.mod`
-   - Change Type: Add
-   - Effect Value: `5`
+   - Type: Add
+   - Value: `5`
 
 ### Initiative Bonus
 
@@ -245,12 +242,12 @@ The bonus is free, and every rank you buy afterward costs XP at the Trait's new 
 
 **Setup:**
 1. Open Kata item
-2. Active Effects tab → Create Effect
+2. Active Effects tab → New
 3. Name: "Initiative Bonus"
 4. Add change:
    - Attribute Key: `system.initiative.rollMod`
-   - Change Type: Add
-   - Effect Value: `1`
+   - Type: Add
+   - Value: `1`
 
 ### Void Point Bonus
 
@@ -258,12 +255,12 @@ The bonus is free, and every rank you buy afterward costs XP at the Trait's new 
 
 **Setup:**
 1. Open Technique item
-2. Active Effects tab → Create Effect
+2. Active Effects tab → New
 3. Name: "Void Bonus"
 4. Add change:
    - Attribute Key: `system.rings.void.rank`
-   - Change Type: Add
-   - Effect Value: `1`
+   - Type: Add
+   - Value: `1`
 
 ### Wound Level Enhancement
 
@@ -271,12 +268,12 @@ The bonus is free, and every rank you buy afterward costs XP at the Trait's new 
 
 **Setup:**
 1. Open Advantage item
-2. Active Effects tab → Create Effect
+2. Active Effects tab → New
 3. Name: "Tough"
 4. Add change:
    - Attribute Key: `system.woundsMultiplier`
-   - Change Type: Override
-   - Effect Value: `3`
+   - Type: Override
+   - Value: `3`
 
 ### Free Raises
 
@@ -300,16 +297,16 @@ A single Active Effect can have multiple changes. This is useful for complex bon
 **Example:** School technique that grants +1 Reflexes and +5 Armor TN
 
 1. Open Technique item
-2. Active Effects tab → Create Effect
+2. Active Effects tab → New
 3. Name: "Doji Technique"
 4. Add first change:
    - Attribute Key: `system.traits.ref`
-   - Change Type: Add
-   - Effect Value: `1`
+   - Type: Add
+   - Value: `1`
 5. Add second change:
    - Attribute Key: `system.armorTn.mod`
-   - Change Type: Add
-   - Effect Value: `5`
+   - Type: Add
+   - Value: `5`
 
 Both changes apply when the technique is on the character.
 
@@ -361,16 +358,16 @@ Most effects are passive and always active. For temporary combat effects (like s
 ### Effect Not Working
 
 **Check:**
-1. Is the effect enabled? (toggle on effect)
-2. Is the effect set to transfer? (should be on for item effects)
+1. Is **Effect Suspended** off? (Details tab)
+2. Is **Apply Effect to Actor** on? (Details tab; needed for item effects)
 3. Is the attribute key correct? (check spelling and dot notation)
-4. Is the change type right? (usually Add) Is a Trait change on the Initial phase?
+4. Is the change type right? (usually Add) A change made by a macro or module with `phase: "final"` never reaches values calculated from it.
 5. Is the item equipped/owned by the character?
 
 **Common mistakes:**
 - Wrong attribute key (typos, wrong path)
-- Effect not set to transfer to actor
-- Effect disabled
+- Apply Effect to Actor left off on an item effect
+- Effect Suspended left on
 - Wrong change type (Override when you meant Add)
 
 ### Effect Stacking
