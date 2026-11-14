@@ -64,6 +64,8 @@ export default class RollMessageData extends foundry.abstract.TypeDataModel {
       ),
       // The message this one re-rolled, keeping the better total
       rerollOf: stringField(),
+      // The failed roll this Honor Roll (p.92) re-rolled
+      honorRollOf: stringField(),
       // An attack's maneuvers (pp.86-87); increasedDamage is the declared Raises left for +1k0 each
       maneuvers: new SchemaField({
         calledShot: numberField(0),

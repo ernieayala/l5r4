@@ -30,8 +30,24 @@ export const RULE_KEYS = freeze([
   "Resource",
   "DamageSource",
   "Invulnerability",
-  "Spirit"
+  "Spirit",
+  "OpponentModifier",
+  "RaiseRule",
+  "UnskilledAs",
+  "ActionCost",
+  "Cost",
+  "Ledger",
+  "Prerequisite",
+  "ChoiceSet",
+  "GrantItem"
 ]);
+
+/**
+ * Keys that act when their item is added to an actor, not while the actor is prepared: the engine validates them and
+ * leaves them to module/documents/item/purchase.js.
+ * @type {ReadonlyArray<string>}
+ */
+export const PURCHASE_KEYS = freeze(["Prerequisite", "ChoiceSet", "GrantItem"]);
 
 /**
  * Keys whose output collects in the actor's modifier bag, keyed by selector, for rolls to read. The bag kind is
@@ -46,8 +62,43 @@ export const BAG_KINDS = freeze({
   Substitute: "substitutes",
   Note: "notes",
   ApplyCondition: "applyConditions",
-  DamageSource: "damageSources"
+  DamageSource: "damageSources",
+  OpponentModifier: "opponentModifiers",
+  RaiseRule: "raiseRules",
+  UnskilledAs: "unskilledAs",
+  ActionCost: "actionCosts",
+  Cost: "costs"
 });
+
+/**
+ * Maneuvers whose Raise cost a RaiseRule can change (module/utils/damage.js, maneuverCost; pp.86-87).
+ * @type {ReadonlyArray<string>}
+ */
+export const MANEUVERS = freeze(["calledShot", "disarm", "extraAttack", "feint", "knockdown"]);
+
+/**
+ * Action types an ActionCost rule names (p.85).
+ * @type {ReadonlyArray<string>}
+ */
+export const ACTION_TYPES = freeze(["free", "simple", "complex"]);
+
+/**
+ * Tracks a Ledger rule hooks (pp.90-95, 274): each holds a rank and points, ten points to a rank.
+ * @type {ReadonlyArray<string>}
+ */
+export const LEDGER_TRACKS = freeze(["honor", "glory", "status", "taint"]);
+
+/**
+ * Whether a Ledger rule changes the gains or the losses of its track.
+ * @type {ReadonlyArray<string>}
+ */
+export const LEDGER_DIRECTIONS = freeze(["gain", "loss"]);
+
+/**
+ * Built-in option lists a ChoiceSet can offer instead of its own list.
+ * @type {ReadonlyArray<string>}
+ */
+export const CHOICE_LISTS = freeze(["traits", "rings", "skills"]);
 
 /**
  * Attack ranges a RollModifier or ArmorTN rule can be limited to.

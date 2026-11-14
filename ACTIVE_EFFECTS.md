@@ -13,9 +13,13 @@ Use a rule when the system has a rule key for what you need; use an Active Effec
 
 ### Adding a rule
 
-1. Open the item sheet (Family, School, Advantage, Technique, Kata, ...).
+1. Open the item sheet (Family, School, Advantage, Technique, Kata, ...) or an Active Effect's sheet.
 2. Go to the **Rules** tab.
-3. Type the rules as a JSON list, then click outside the field to save.
+3. Pick a rule key at the bottom and click **Add rule**. The rule appears as a form with one field per setting; fill them in. Each field saves as you leave it on an item sheet, and with **Save** on an effect sheet.
+
+A rule the system cannot use shows its error in red above its fields until it is fixed. The trash icon removes a rule.
+
+**Edit as JSON** shows every rule as one JSON list, for copying rules between items or writing many at once:
 
 ```json
 [
@@ -26,7 +30,7 @@ Use a rule when the system has a rule key for what you need; use an Active Effec
 
 Text that is not a JSON list of objects with a `"key"` is not saved, and an error says why. A rule whose fields are wrong (an unknown key, a missing selector) is skipped, with a warning in the browser console naming the item.
 
-Rules on an item apply while the item is on the character. Armor's rules apply only while it is worn. A weapon's rules apply only to rolls made with that weapon: its attacks and its damage. Rules on an Active Effect apply while the effect is active; a macro or module can put rules on an effect through `system.rules`.
+Rules on an item apply while the item is on the character. Armor's rules apply only while it is worn. A weapon's rules apply only to rolls made with that weapon: its attacks and its damage. A kata's or kiho's rules apply only while it is active (see **Kata and kiho**). Rules on an Active Effect apply while the effect is active; a macro or module can put rules on an effect through `system.rules`.
 
 ### Fields every rule has
 
@@ -63,6 +67,15 @@ Values marked *n/f* take a number or a formula (see **Formulas**).
 | `ConditionImmunity` | `condition` | The character cannot gain that status |
 | `PeriodicSave` | `event`, `roll`, `tn`, `step`, `min`, `onFailure` | On an effect: on `event` (`roundEnd` is the Reactions stage; `turnStart`, `turnEnd`) the owner gets a card to roll `roll` (`"ring:earth"`, `"trait:wil"`) against `tn`; success ends the effect. A failure moves the TN by `step`, never past `min`; with `"onFailure": "endNextRound"` the effect ends at the end of the next Round instead |
 | `Resource` | `slug`, `max` *n/f*, `per` | `max` more uses of `slug` each `per` (`turn`, `round`, `skirmish`, `day`). The slug `void` raises the one-Void-Point-per-Round limit |
+| `OpponentModifier` | `selector`, `roll`, `keep`, `total` *n/f*, `type`, `range` | Like `RollModifier`, but on rolls other characters make with this one as their target. Its predicate tests this character's options, with the roller's prefixed `target:` |
+| `RaiseRule` | `selector`, `maneuver`, `cost` *n/f*, `cap` *n/f*, `minimum` *n/f* | On the selected rolls: `cost` changes what `maneuver` (`calledShot`, `disarm`, `extraAttack`, `feint`, `knockdown`) costs in Raises, never below 0; `cap` changes how many Raises may be declared (the Void Ring, p.79); `minimum` is how many must be |
+| `UnskilledAs` | `selector`, `rank` *n/f* | A Skill roll with no ranks in a selected Skill counts as `rank` ranks: the dice roll and explode, and Raises are allowed |
+| `ActionCost` | `selector`, `action` (`free`, `simple`, `complex`) | Names on the card of the selected rolls the action they take (p.85). The system shows it and does not enforce it |
+| `Cost` | `selector`, `value` *n/f* | The XP price of what the selector names (see **XP prices**) |
+| `Ledger` | `track` (`honor`, `glory`, `status`, `taint`), `direction` (`gain`, `loss`), `value` *n/f* | Changes the size of each gain or loss of that track recorded in the ledger (see **The ledger**) |
+| `Prerequisite` | `requires`, `label` | What a character needs before this item can be added: `requires` is a predicate, `label` explains it (see **Character options**) |
+| `ChoiceSet` | `flag`, `prompt`, `options` or `list`, `filter`, `selection` | A choice asked when the item is added; the item's other rules use the answer as `{choice:<flag>}` (see **Character options**) |
+| `GrantItem` | `uuid`, `rank`, `skillRank`, `emphasis` | An item given with this one: a School's Skills and Techniques (see **Character options**) |
 
 ### Selectors
 
@@ -73,6 +86,9 @@ Values marked *n/f* take a number or a formula (see **Formulas**).
 | `trait:<trait>` | Rolls of that Trait, as `trait:ref`, and Skill rolls that use it; add the predicate `["check:trait"]` for Trait rolls only |
 | `ring:<ring>` | Rolls of that Ring, as `ring:fire`, and spells of its element |
 | `skill`, `trait`, `ring` | Every Skill, Trait, or Ring roll |
+| `skill-type:<type>` | Rolls of Skills of that type: `high`, `bugei`, `merchant`, `low` |
+| `skill-tag:social` | Rolls of Skills marked **Social Skill** on their Details tab (p.134) |
+| `skill-tag:school` | Rolls of School Skills |
 | `attack` | Every attack roll, with or without a Skill |
 | `damage` | Every damage roll |
 | `spell` | Every Spell Casting Roll, maho included |
@@ -80,9 +96,9 @@ Values marked *n/f* take a number or a formula (see **Formulas**).
 
 ### The roll dialog
 
-Every roll shows one dialog (Shift-click skips it and takes the defaults). It lists each modifier from rules, Active Effects, the stance, and conditions with a box to turn it off (an `optional` one starts off), and offers: the TN (an attack starts at a single target's Armor TN; the target's changes against one attack range, such as Prone against melee, are listed with the TN), Raises up to the Void Ring (p.79), Free Raises spent to lower the TN by 5 each, the Wound Rank's penalty on the TN (p.82), a Void Point for +1k1 (p.78; never on damage; a note warns when one was already spent this Round in combat, and the choice stays yours), an Emphasis from the Skill's trained Emphases (p.133), keeping fewer dice, and situational roll, keep, and total modifiers. An Unskilled Roll takes no Raises or Free Raises and its dice never explode (p.80). A penalty that leaves more kept dice than rolled dice cuts the kept dice (p.89).
+Every roll shows one dialog (Shift-click skips it and takes the defaults). It lists each modifier from rules, Active Effects, the stance, and conditions with a box to turn it off (an `optional` one starts off), and offers: the TN (an attack starts at a single target's Armor TN; the target's changes against one attack range, such as Prone against melee, are listed with the TN), Raises up to the Void Ring (p.79; a `RaiseRule` moves the cap and may require some), Free Raises spent to lower the TN by 5 each, the Wound Rank's penalty on the TN (p.82), a Void Point for +1k1 (p.78; never on damage; a note warns when one was already spent this Round in combat, and the choice stays yours), an Emphasis from the Skill's trained Emphases (p.133), Embracing the Taint for +1k1 and a point of Taint on a roll with a physical Trait (Taint Level 1 or more and not Lost, p.279), keeping fewer dice, and situational roll, keep, and total modifiers. An Unskilled Roll takes no Raises or Free Raises and its dice never explode (p.80), unless an `UnskilledAs` rule covers its Skill. A penalty that leaves more kept dice than rolled dice cuts the kept dice (p.89).
 
-Each roll posts a card holding everything it rolled with. A successful roll with a target shows a button for each condition an `ApplyCondition` rule offers. Its context menu offers **Re-roll, keep the better** and **Contested Roll** against the last roll by someone else (p.80). In chat, `[[7k3]]` rolls 7k3; `u` makes it Unskilled, `e` adds an Emphasis, and `x9` explodes on 9 and 10.
+Each roll posts a card holding everything it rolled with. A successful roll with a target shows a button for each condition an `ApplyCondition` rule offers. With the optional Honor Roll on, a failed Skill, Trait, Ring, or Spell Casting roll shows an **Honor Roll** button (see **The ledger and the Honor Roll**). Its context menu offers **Re-roll, keep the better** and **Contested Roll** against the last roll by someone else (p.80). In chat, `[[7k3]]` rolls 7k3; `u` makes it Unskilled, `e` adds an Emphasis, and `x9` explodes on 9 and 10.
 
 ### Formulas
 
@@ -97,6 +113,8 @@ A value can be a formula over the character's data, written as text: `"@rings.ai
 | `@honor.rank`, `@glory.rank`, `@status.rank`, `@shadowTaint.rank` | Ranks |
 | `@insight.rank` | Insight Rank |
 | `@level` | On an Active Effect: its level, such as a Fear Rank |
+| `@cost` | In a `Cost` rule: the price before it |
+| `@points` | In a `Ledger` rule: the size of the change before it |
 
 A Family or School Trait bonus counts toward XP costs only as a plain number.
 
@@ -110,12 +128,17 @@ A predicate is a list of conditions, all of which must hold:
 | `"ring:fire:3"`, `"trait:ref:4"` | That Ring or Trait has that value |
 | `"wound:nicked"` | The character is at that Wound Rank |
 | `"armor:worn"` | The character wears armor |
+| `"skill:kenjutsu:3"` | That Skill has that rank (the name in lower case) |
+| `"clan:crane"`, `"family:kakita"`, `"school:kakita bushi"` | The character's Clan, Family, or School item has that name (lower case) |
+| `"item:advantage:allies"` | The character has an item of that type and name: `advantage`, `disadvantage`, `technique`, `kata`, `kiho`, `tattoo`, `spell` |
+| `"honor-rank:5"`, `"glory-rank:2"`, `"status-rank:1"`, `"taint-rank:0"` | That track's rank |
+| `"insight:2"`, `"school-rank:2"` | Insight Rank and School Rank |
 | `"target"`, `"target:status:mounted"` | On attack rules: the attack has a target, and the target has that status |
 | `"check:attack"` | The roll is of that kind: `skill`, `trait`, `ring`, `spell`, `maho`, `attack`, `damage`, or `roll` |
 | any `RollOption` | That option is on |
 | `{ "not": ... }` | The condition inside does not hold |
 | `{ "or": [ ... ] }`, `{ "and": [ ... ] }` | One, or all, of the conditions inside hold |
-| `{ "gte": ["ring:fire", 3] }` | The Ring or Trait is at least 3; also `gt`, `lte`, `lt`, `eq` |
+| `{ "gte": ["ring:fire", 3] }` | The Ring, Trait, Skill, or rank is at least 3, as `{ "gte": ["skill:kenjutsu", 3] }`; also `gt`, `lte`, `lt`, `eq` |
 
 **Example:** +1k0 on attacks while in Full Attack Stance against a prone target
 
@@ -152,6 +175,121 @@ Every stance and condition is a status effect carrying its rules (see **Status e
 | A skill's Roll, Keep, and Total bonus fields (Modifiers tab) | A `RollModifier` on that skill |
 
 A world made with 3.2.1 is updated when it first loads: a Family or School Trait effect becomes a `TraitAdjust` rule, a Master of Blood advantage gets `{ "key": "RollOption", "option": "master-of-blood" }`, and stance and condition effects get their rules, and a Fear effect its Rank as its level. An advantage you name Master of Blood later needs that rule added by hand.
+
+---
+
+## Character options
+
+The system ships no Schools, Advantages, or Techniques from the Core Rulebook. You build them as items with rules, and these rules make them behave on the character. The examples below are made up for this guide.
+
+### What happens when an item is dropped on a character
+
+1. **Prerequisites.** Each `Prerequisite` rule's `requires` is tested against the character. A player cannot add an item whose prerequisites they do not meet; a GM is asked whether to add it anyway.
+2. **Choices.** Each `ChoiceSet` without a `selection` asks its question, and the answer is stored in the rule. Closing the question cancels the drop.
+3. **Grants.** Each `GrantItem` rule whose School Rank has been reached gives its item.
+
+An item added another way (a macro, an import) skips the questions: its choices stay open, and the rules that use them wait, until you fill in the `selection` on the Rules tab.
+
+### A School
+
+The "Quill Courtier School" gives +1 Awareness, three Skills at rank 1, one more Skill of the player's choice, and a Technique at each School Rank:
+
+```json
+[
+  { "key": "TraitAdjust", "trait": "awa", "value": 1 },
+  { "key": "GrantItem", "uuid": "Item.<Courtier skill id>" },
+  { "key": "GrantItem", "uuid": "Item.<Etiquette skill id>" },
+  { "key": "GrantItem", "uuid": "Item.<Calligraphy skill id>", "emphasis": "Cipher" },
+  {
+    "key": "ChoiceSet",
+    "flag": "extra",
+    "prompt": "One more High Skill",
+    "list": "skills",
+    "filter": ["high"]
+  },
+  { "key": "GrantItem", "uuid": "{choice:extra}" },
+  { "key": "GrantItem", "uuid": "Item.<Rank 1 Technique id>", "rank": 1 },
+  { "key": "GrantItem", "uuid": "Item.<Rank 2 Technique id>", "rank": 2 }
+]
+```
+
+Copy an item's UUID with the passport icon in its sheet header, and paste it into the rule's `uuid` field. A granted Skill comes at rank 1 for free and counts as a School Skill (p.102); `emphasis` gives it a free Emphasis. If the character already has that Skill, it becomes a School Skill with the free rank instead of a second copy.
+
+Techniques with a `rank` wait for the School Rank, which follows Insight Rank (p.104). When it rises, the next Technique is added and a chat message says so. A character with Multiple Schools sets each School's rank on its Details tab.
+
+Removing the School takes back what it gave. A granted Skill with ranks or Emphases bought on top stays, without its free rank. Deleting a granted item yourself keeps it from being granted again.
+
+### Choices
+
+A `ChoiceSet` offers its own `options` (each `{ "value": ..., "label": ... }`) or a built-in `list`: `traits`, `rings`, or `skills` (Skill items in the world and in compendiums, kept to the Skill types in `filter`). Every other rule on the item can use the answer as `{choice:<flag>}`:
+
+```json
+[
+  {
+    "key": "ChoiceSet",
+    "flag": "weapon",
+    "prompt": "Favored weapon Skill",
+    "options": [
+      { "value": "kenjutsu", "label": "Kenjutsu" },
+      { "value": "kyujutsu", "label": "Kyujutsu" }
+    ]
+  },
+  { "key": "FreeRaise", "selector": "skill:{choice:weapon}", "value": 1 }
+]
+```
+
+### Prerequisites
+
+```json
+[
+  {
+    "key": "Prerequisite",
+    "label": "Kenjutsu 3 and an Air Ring of 3",
+    "requires": [{ "gte": ["skill:kenjutsu", 3] }, { "gte": ["ring:air", 3] }]
+  }
+]
+```
+
+### XP prices
+
+The XP Manager prices purchases as the book does (pp.102-103): a Trait rank four times the new rank, Family and School bonuses included; the Void Ring six times; a Skill rank the new rank, above the ranks a School gave; an Emphasis 2; an Advantage, kata, or kiho its cost; Disadvantages give up to 10. A `Cost` rule sets a new price with a formula over the base price `@cost`:
+
+| `selector` | Prices |
+|------------|--------|
+| `trait:<trait>`, `ring:void` | Each rank of that Trait or the Void Ring |
+| `skill:<skill>`, `skill-type:<type>` | Each rank of that Skill, or of Skills of that type |
+| `emphasis` | Each Emphasis |
+| `item:<type>` | Every `advantage`, `kata`, `kiho`, or memorized `spell` |
+| `self` | The item carrying the rule |
+
+An Advantage that costs 1 less for a Crane character:
+
+```json
+[{ "key": "Cost", "selector": "self", "value": "@cost - 1", "predicate": ["clan:crane"] }]
+```
+
+Kiho at one and a half times their price, rounded up: `{ "key": "Cost", "selector": "item:kiho", "value": "ceil(@cost * 1.5)" }`. A price never drops below 0.
+
+### Kata and kiho
+
+A kata's or kiho's rules apply while it is active, not while it is owned (pp.259, 261). The play button on its row of the character sheet activates it: the system makes an Active Effect carrying its rules. A second kata ends the first; a kiho ends another of its type, except Martial kiho. The stop button, or deleting the effect, ends it. A tattoo's rules apply while it is owned.
+
+### The ledger and the Honor Roll
+
+**Ledger** under the ranks on the character sheet records a gain or loss of Honor, Glory, Status, or Taint with its reason, and lists the latest changes. Ten points make a rank (p.90). The character's `Ledger` rules size each change by its `@points`: an oath that doubles Honor losses is `{ "key": "Ledger", "track": "honor", "direction": "loss", "value": "@points * 2" }`; a value of `0` ignores those changes. Shift-clicking a rank is a correction outside the ledger.
+
+The optional **Honor Roll** (p.92) is a world setting. Once per session, a failed Skill, Trait, Ring, or Spell Casting roll offers an **Honor Roll** button: the roll is made again at the same TN with Honor Rank in rolled and kept dice; failing it costs a Rank of Honor through the ledger. The GM's **New session** token control starts a session and gives everyone their Honor Roll back.
+
+### Shadowlands Taint
+
+The system tracks what a Taint Rank does on its own (pp.277-279): at Level 3, -1k0 on Social Skill rolls; from Level 4, -2k0 on them instead, one Void Point fewer when Void Points refill, and -2k2 on the Honor Roll. Mark a Skill as a **Social Skill** on its Details tab for the penalty to reach it. Embracing the Taint is a choice in the roll dialog; each point it costs goes into the ledger. Exposure and growth rolls stay the GM's.
+
+### Moving items between worlds
+
+Right-click an Item folder in the sidebar:
+
+- **Export items with rules** saves the folder's items, its subfolders included, with their rules and Active Effects, to one JSON file.
+- **Import items with rules** reads such a file into a new folder inside the one you clicked. A rule that named an item from the same file names its imported copy, so a School's grants keep working.
 
 ---
 
@@ -344,7 +482,7 @@ A `RollModifier` rule does the same with a predicate and a formula.
 An effect made by the system can carry two more values, which a macro sets through `system`:
 
 - `system.level`: how strong the effect is, read by its rules as `@level` (a Fear Rank, days of Fatigue)
-- `system.group`: effects in the same group are exclusive; gaining one ends the others. The stances are the group `"stance"`; give Kata effects the group `"kata"` for one Kata at a time (p.259)
+- `system.group`: effects in the same group are exclusive; gaining one ends the others. The stances are the group `"stance"`; an activated kata is `"kata"` (one at a time, p.259), and an activated kiho `"kiho-<type>"` except a Martial one (p.261)
 
 ---
 
@@ -379,10 +517,11 @@ The sheet warns when a condition rules out the stance you pick (Dazed, Prone, Fa
 ### A rule does nothing
 
 1. Is the rule in the item's **Rules** tab, and was it saved (no error when you left the field)?
-2. Does the browser console (F12) show a warning naming the item? It says which field is wrong.
+2. Does the Rules tab show an error over the rule, or the browser console (F12) a warning naming the item? It says which field is wrong.
 3. Does the predicate hold? Remove it to check.
-4. Is the item armor that is not worn?
+4. Is the item armor that is not worn, or a kata or kiho that is not active?
 5. Is a roll modifier switched off in the roll dialog, or is a `Substitute` left off?
+6. Does the rule use a `{choice:...}` that was never answered? Fill in the ChoiceSet's `selection`.
 
 ### An effect does nothing
 

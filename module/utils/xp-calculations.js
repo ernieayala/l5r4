@@ -1,106 +1,12 @@
 /**
  * @module xp-calculations
- * @description Experience point cost calculations for L5R4 character advancement.
- *
- * L5R4 uses XP to purchase character improvements:
- * - Traits: 4 × new rank (modified by bonuses/discounts)
- * - Void Ring: 6 × new rank (modified by discounts)
- * - Skills: 1 × new rank
- * - Emphases: 2 XP flat cost
- *
- * Also handles character creation bonuses from Family and School items, read from their TraitAdjust rules or,
- * for an item without one, from the legacy `trait`/`bonus` fields.
+ * @description Character creation bonuses from Family and School items (p.102), read from their TraitAdjust rules
+ * or, for an item without one, from the legacy `trait`/`bonus` fields. XP prices are module/utils/xp-ledger.js.
  */
 
 import { SYS_ID } from "../config/constants.js";
 import { toNumber, toString } from "./type-coercion.js";
 import { traitAdjustTotal } from "./rule-engine.js";
-import {
-  TRAIT_XP_MULTIPLIER,
-  VOID_XP_MULTIPLIER,
-  SKILL_XP_MULTIPLIER,
-  EMPHASIS_XP_COST
-} from "../config/game-mechanics.js";
-
-/**
- * Calculates XP cost to raise a trait by one rank.
- *
- * L5R4 formula: 4 × (current rank + free bonuses) + discount
- * Free bonuses from Family/School increase cost (you pay for higher rank).
- * Discounts reduce cost (can be negative for advantages).
- *
- * @param {number} r - Current trait rank
- * @param {number} freeEff - Free bonus from Family/School
- * @param {number} discount - XP discount (negative = discount, positive = penalty)
- * @returns {number} XP cost (minimum 0)
- *
- * @example
- * calculateXpStepCostForTrait(2, 0, 0) // 8 (4 × 2)
- * calculateXpStepCostForTrait(2, 1, 0) // 12 (4 × (2+1))
- * calculateXpStepCostForTrait(2, 0, -2) // 6 (4 × 2 - 2)
- */
-export function calculateXpStepCostForTrait(r, freeEff, discount) {
-  const rank = toNumber(r, 0);
-  const bonus = toNumber(freeEff, 0);
-  const d = toNumber(discount, 0);
-  // L5R4 trait cost: TRAIT_XP_MULTIPLIER × effective rank, minimum 0
-  return Math.max(0, TRAIT_XP_MULTIPLIER * (rank + bonus) + d);
-}
-
-/**
- * Calculates XP cost to raise Void Ring by one rank.
- *
- * L5R4 formula: 6 × new rank + discount
- * Void is more expensive than traits (6 vs 4 multiplier).
- *
- * @param {number} newRank - Target Void Ring rank
- * @param {number} discount - XP discount (negative = discount, positive = penalty)
- * @returns {number} XP cost (minimum 0)
- *
- * @example
- * calculateVoidStepCost(2, 0) // 12 (6 × 2)
- * calculateVoidStepCost(3, -3) // 15 (6 × 3 - 3)
- */
-export function calculateVoidStepCost(newRank, discount) {
-  const rank = toNumber(newRank, 0);
-  const d = toNumber(discount, 0);
-  // L5R4 Void cost: VOID_XP_MULTIPLIER × new rank, minimum 0
-  return Math.max(0, VOID_XP_MULTIPLIER * rank + d);
-}
-
-/**
- * Calculates XP cost to raise a skill by one rank.
- *
- * L5R4 formula: 1 × new rank
- * Skills are cheaper than traits, cost equals target rank.
- *
- * @param {number} newRank - Target skill rank
- * @returns {number} XP cost (minimum 0)
- *
- * @example
- * calculateSkillStepCost(1) // 1 (first rank)
- * calculateSkillStepCost(5) // 5 (fifth rank)
- */
-export function calculateSkillStepCost(newRank) {
-  const rank = toNumber(newRank, 0);
-  // L5R4 skill cost: SKILL_XP_MULTIPLIER × new rank, minimum 0
-  return Math.max(0, SKILL_XP_MULTIPLIER * rank);
-}
-
-/**
- * Calculates XP cost to purchase a skill emphasis.
- *
- * L5R4 rule: Emphases cost 2 XP flat (no rank scaling).
- *
- * @returns {number} XP cost (always 2)
- *
- * @example
- * calculateEmphasisCost() // 2
- */
-export function calculateEmphasisCost() {
-  // L5R4 emphasis cost: flat EMPHASIS_XP_COST
-  return EMPHASIS_XP_COST;
-}
 
 /**
  * Internal helper to calculate creation bonuses from Family/School.
@@ -210,22 +116,5 @@ export function getCreationFreeBonusSources(actor, key) {
  */
 export function getCreationFreeBonus(actor, key) {
   const { rules, legacy } = getCreationFreeBonusSources(actor, key);
-  return rules + legacy;
-}
-
-/**
- * Gets creation bonus for Void Ring.
- *
- * Sums bonuses from Family and School items that affect Void.
- * Supports both TraitAdjust rules and the legacy bonus fields.
- *
- * @param {Object} actor - Foundry actor document
- * @returns {number} Total creation bonus for Void Ring
- *
- * @example
- * getCreationFreeBonusVoid(actor) // 1 (if School gives +1 Void)
- */
-export function getCreationFreeBonusVoid(actor) {
-  const { rules, legacy } = getCreationBonusInternal(actor, "void");
   return rules + legacy;
 }

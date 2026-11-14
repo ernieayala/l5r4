@@ -11,7 +11,10 @@
  * 4. `addWoundRollOption`, once the Wound Rank is known.
  *
  * Roll options: `status:<id>` for every active status (stances included), `armor:worn`, `ring:<ring>:<value>`,
- * `trait:<trait>:<value>`, `wound:<rank>`, plus RollOption rules.
+ * `trait:<trait>:<value>`, `wound:<rank>`, `skill:<skill>:<rank>`, `clan:<name>`, `family:<name>`, `school:<name>`,
+ * `item:<type>:<name>` for owned Advantages, Disadvantages, Techniques, kata, kiho, tattoos, and spells,
+ * `honor-rank:<n>`, `glory-rank:<n>`, `status-rank:<n>`, `taint-rank:<n>`, `insight:<n>`, `school-rank:<n>`, plus
+ * RollOption rules.
  */
 
 import { createRule } from "../../data/rules/rule-models.js";
@@ -21,6 +24,8 @@ import {
   traitAdjustments
 } from "../../utils/rule-engine.js";
 import { resolveArmorTn } from "../../utils/effects.js";
+import { applyChoices } from "../../utils/choices.js";
+import { taintEffects } from "../../utils/taint.js";
 import { stackModifiers } from "../../utils/modifier-stacking.js";
 import { toInt } from "../../utils/type-coercion.js";
 import { SYS_ID } from "../../config/constants.js";
@@ -56,7 +61,14 @@ export function collectRules(actor) {
     if (item.system.rulesActive) {
       // A weapon's roll rules apply to rolls made with it (module/utils/rule-engine.js, bagEntries)
       const extra = item.type === "weapon" ? { weaponId: item.id } : {};
-      sources.push(...item.system.ownedRules.map(rule => ({ rule, source: item.name, ...extra })));
+      sources.push(
+        ...applyChoices(item.system.ownedRules).map(rule => ({
+          rule,
+          source: item.name,
+          itemId: item.id,
+          ...extra
+        }))
+      );
     }
   }
   for (const effect of actor.appliedEffects) {
@@ -65,6 +77,15 @@ export function collectRules(actor) {
       extra.level = effect.system.level;
     }
     sources.push(...effect.system.rules.map(rule => ({ rule, source: effect.name, ...extra })));
+  }
+  // Taint Level 3 and 4 penalize social Skill rolls (p.278; STAGE-11 decision 5)
+  const { socialPenalty } = taintEffects(toInt(actor.system.shadowTaint.rank));
+  if (socialPenalty) {
+    const source = game.i18n.localize("l5r4.ui.taint.label");
+    sources.push({
+      rule: { key: "RollModifier", selector: "skill-tag:social", roll: -socialPenalty },
+      source
+    });
   }
 
   const entries = [];
@@ -80,9 +101,39 @@ export function collectRules(actor) {
   return entries.sort((a, b) => a.rule.priority - b.rule.priority);
 }
 
+/** Item types an `item:<type>:<name>` roll option names, for prerequisites such as owning an Advantage. */
+const OPTION_ITEM_TYPES = new Set([
+  "advantage",
+  "disadvantage",
+  "technique",
+  "kata",
+  "kiho",
+  "tattoo",
+  "spell"
+]);
+
 /**
- * Collect the rules, seed the status and armor roll options, and apply TraitAdjust. Runs at the end of the
- * "initial" Active Effect phase.
+ * The roll options of what the actor owns: `skill:<skill>:<rank>`, `clan:<name>`, `family:<name>`, `school:<name>`,
+ * and `item:<type>:<name>`. Names are in lower case, as roll selectors are.
+ * @param {Actor} actor
+ * @param {Set<string>} options  Extended in place.
+ */
+function addItemRollOptions(actor, options) {
+  for (const item of actor.items) {
+    const name = item.name.toLowerCase().trim();
+    if (item.type === "skill") {
+      options.add(`skill:${name}:${toInt(item.system.rank)}`);
+    } else if (["clan", "family", "school"].includes(item.type)) {
+      options.add(`${item.type}:${name}`);
+    } else if (OPTION_ITEM_TYPES.has(item.type)) {
+      options.add(`item:${item.type}:${name}`);
+    }
+  }
+}
+
+/**
+ * Collect the rules, seed the status, armor, owned-item, and rank roll options, and apply TraitAdjust. Runs at the
+ * end of the "initial" Active Effect phase.
  * @param {Actor} actor
  */
 export function applyInitialRules(actor) {
@@ -91,6 +142,13 @@ export function applyInitialRules(actor) {
   if (actor.items.some(item => item.type === "armor" && item.system.equipped)) {
     actor.rollOptions.add("armor:worn");
   }
+  addItemRollOptions(actor, actor.rollOptions);
+  for (const track of ["honor", "glory", "status"]) {
+    if (actor.system[track]) {
+      actor.rollOptions.add(`${track}-rank:${toInt(actor.system[track].rank)}`);
+    }
+  }
+  actor.rollOptions.add(`taint-rank:${toInt(actor.system.shadowTaint.rank)}`);
 
   const { adjustments, errors } = traitAdjustments(
     actor.rules,
@@ -125,6 +183,13 @@ export function applyDerivedRules(actor, sys) {
   for (const [trait, value] of Object.entries(sys._derived.traitsEff)) {
     options.add(`trait:${trait}:${toInt(value)}`);
   }
+  if (sys.insight) {
+    options.add(`insight:${toInt(sys.insight.rank)}`);
+    const schools = actor.items.filter(item => item.type === "school");
+    if (schools.length) {
+      options.add(`school-rank:${Math.max(...schools.map(school => school.system.schoolRank))}`);
+    }
+  }
   addRuleRollOptions(actor.rules, options);
 
   const out = derivedRuleOutputs(actor.rules, actor.getRollData(), options);
@@ -145,7 +210,11 @@ export function applyDerivedRules(actor, sys) {
   actor.conditionImmunities = out.immunities;
   actor.periodicSaves = out.saves;
   actor.resources = out.resources;
+  actor.ledgerRules = out.ledger;
   actor.ruleBag = out.bag;
+  // Taint Level 4 costs a Void Point from the maximum, not from the Void Ring (p.278)
+  const { voidPointsLost } = taintEffects(toInt(sys.shadowTaint.rank));
+  sys.rings.void.max = Math.max(0, toInt(sys.rings.void.rank) - voidPointsLost);
 }
 
 /**

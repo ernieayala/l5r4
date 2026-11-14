@@ -1,0 +1,84 @@
+/**
+ * Rules Editor
+ * The rules editor on item and Active Effect sheets (module/sheets/rules-editor.js), and the dialogs and controls of
+ * character options: the ledger and kata or kiho activation.
+ */
+
+.l5r4-rules-editor {
+  .rules-toolbar {
+    align-items: center;
+
+    .hint {
+      flex: 1;
+      margin: 0;
+    }
+
+    .rules-mode {
+      flex: 0 0 auto;
+    }
+  }
+
+  .rules-json {
+    font-family: var(--font-monospace);
+    min-height: 16rem;
+    resize: vertical;
+    width: 100%;
+  }
+
+  .rule-card {
+    border: 1px solid var(--color-border-dark-tertiary);
+    border-radius: 4px;
+    margin: 0;
+    padding: 0.5rem;
+
+    legend {
+      align-items: center;
+      display: flex;
+      font-weight: bold;
+      gap: 0.5rem;
+      padding: 0 0.25rem;
+    }
+  }
+
+  .rule-error {
+    color: var(--color-level-error);
+    font-size: var(--font-size-12);
+    margin: 0 0 0.25rem;
+  }
+
+  .rule-field textarea {
+    font-family: var(--font-monospace);
+    min-height: 2.5rem;
+    resize: vertical;
+  }
+
+  .rules-add select {
+    flex: 1;
+  }
+}
+
+.l5r4-ledger .ledger-entries {
+  font-size: var(--font-size-12);
+  margin: 0.5rem 0 0;
+  max-height: 12rem;
+  overflow-y: auto;
+  padding-inline-start: 1.25rem;
+
+  li {
+    display: flex;
+    gap: 0.5rem;
+  }
+
+  .ledger-points {
+    font-weight: bold;
+  }
+}
+
+.l5r4.pc .ranks .ledger-open {
+  grid-column: 1 / -1;
+  text-align: center;
+}
+
+.l5r4 .item-activate.active {
+  color: var(--color-text-hyperlink);
+}

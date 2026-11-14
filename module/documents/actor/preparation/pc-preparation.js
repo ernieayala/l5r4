@@ -41,6 +41,44 @@ import { enrichActorItems } from "../calculations/item-enrichment.js";
 import { applyArmorRules, applyDerivedRules } from "../rules.js";
 
 /**
+ * Calculate Insight points and, unless the GM sets it by hand, Insight Rank (p.104): the Rings times ten plus every
+ * Skill rank.
+ *
+ * @param {Actor} actor
+ * @param {object} sys  Prepared system data, Rings known
+ * @param {Function} calculateInsightRankFn  Insight Rank from points
+ */
+function prepareInsight(actor, sys, calculateInsightRankFn) {
+  const ringsTotal =
+    toInt(sys.rings.air) +
+    toInt(sys.rings.earth) +
+    toInt(sys.rings.fire) +
+    toInt(sys.rings.water) +
+    toInt(sys.rings?.void?.rank);
+
+  let skillTotal = 0;
+  for (const it of actor.items) {
+    if (!it || typeof it.type !== "string" || it.type !== "skill") {
+      continue;
+    }
+    skillTotal += toInt(it.system?.rank);
+  }
+
+  sys.insight = sys.insight || {};
+  sys.insight.points = ringsTotal * 10 + skillTotal * 1;
+
+  // Default to auto-calculate insight rank from points
+  if (sys.insight.autoCalculate === undefined) {
+    sys.insight.autoCalculate = true;
+  }
+
+  // Calculate insight rank from points using school progression table
+  if (sys.insight.autoCalculate) {
+    sys.insight.rank = calculateInsightRankFn(sys.insight.points);
+  }
+}
+
+/**
  * Prepares derived data for PC actors.
  *
  * Calculates all derived values for PCs including traits, initiative, armor TN,
@@ -74,6 +112,10 @@ export function preparePcData(actor, sys, finalizeWoundPenaltiesFn, calculateIns
 
   // Calculate base traits and rings first (required for all subsequent calculations)
   prepareTraitsAndRings(sys);
+
+  // Insight needs only Rings and Skill ranks; it comes before the rules so predicates can test Insight and School
+  // Rank (p.104)
+  prepareInsight(actor, sys, calculateInsightRankFn);
 
   // Rules that need Traits and Rings, before the values their outputs feed (Initiative, Wounds, roll bonuses)
   applyDerivedRules(actor, sys);
@@ -172,36 +214,6 @@ export function preparePcData(actor, sys, finalizeWoundPenaltiesFn, calculateIns
 
   // Apply wound penalties to traits/rings
   finalizeWoundPenaltiesFn(sys, order);
-
-  // Calculate Insight Points from rings and skills (L5R4 core rules)
-  // Formula: (Sum of Rings × 10) + (Sum of Skill Ranks × 1)
-  const ringsTotal =
-    toInt(sys.rings.air) +
-    toInt(sys.rings.earth) +
-    toInt(sys.rings.fire) +
-    toInt(sys.rings.water) +
-    toInt(sys.rings?.void?.rank);
-
-  let skillTotal = 0;
-  for (const it of actor.items) {
-    if (!it || typeof it.type !== "string" || it.type !== "skill") {
-      continue;
-    }
-    skillTotal += toInt(it.system?.rank);
-  }
-
-  sys.insight = sys.insight || {};
-  sys.insight.points = ringsTotal * 10 + skillTotal * 1;
-
-  // Default to auto-calculate insight rank from points
-  if (sys.insight.autoCalculate === undefined) {
-    sys.insight.autoCalculate = true;
-  }
-
-  // Calculate insight rank from points using school progression table
-  if (sys.insight.autoCalculate) {
-    sys.insight.rank = calculateInsightRankFn(sys.insight.points);
-  }
 
   // Initiative pool: Insight Rank + Reflexes, keep Reflexes (p.81). Calculated once the Insight Rank above is final.
   sys.initiative = sys.initiative || {};

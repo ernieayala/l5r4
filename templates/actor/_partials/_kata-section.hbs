@@ -14,7 +14,7 @@
   </section>
   <section class="item-list -kata">
     {{#each katas as |kata id|}}
-      {{> "systems/l5r4-enhanced/templates/cards/kata.hbs" system=kata.system inSheet=true docId=kata.id}}
+      {{> "systems/l5r4-enhanced/templates/cards/kata.hbs" system=kata.system inSheet=true docId=kata.id active=(includes @root.activeItemIds kata.id)}}
     {{/each}}
   </section>
 </section>

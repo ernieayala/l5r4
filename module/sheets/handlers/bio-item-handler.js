@@ -20,6 +20,7 @@
  */
 
 import { SYS_ID } from "../../config/constants.js";
+import { preparePurchase } from "../../services/purchase.js";
 
 /**
  * Valid bio item types per L5R4 Character Creation (Steps 1-3).
@@ -57,6 +58,12 @@ export class BioItemHandler {
       return null;
     }
 
+    // Prerequisites and choices come before the old item is replaced (module/services/purchase.js)
+    const itemData = await preparePurchase(context.actor, itemDoc.toObject());
+    if (!itemData) {
+      return null;
+    }
+
     try {
       // Defensive access: items can be Collection or array depending on context
       const prior = (context.actor.items?.contents ?? context.actor.items).filter(
@@ -74,7 +81,7 @@ export class BioItemHandler {
 
     let newest;
     try {
-      const [created] = await context.actor.createEmbeddedDocuments("Item", [itemDoc.toObject()]);
+      const [created] = await context.actor.createEmbeddedDocuments("Item", [itemData]);
       newest = created ?? null;
     } catch (err) {
       console.warn(`${SYS_ID} BioItemHandler: Failed to embed bio item on drop`, { type, err });

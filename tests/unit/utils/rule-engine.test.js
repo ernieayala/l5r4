@@ -360,6 +360,57 @@ describe("derivedRuleOutputs", () => {
     expect(result.bag.notes.attack[0]).toMatchObject({ text: "Strike first" });
   });
 
+  it("OpponentModifier, RaiseRule, UnskilledAs, ActionCost, and Cost fill their bag kinds (STAGE-11)", () => {
+    const result = derivedRuleOutputs(
+      [
+        entry(
+          rule("OpponentModifier", {
+            selector: "attack",
+            roll: -1,
+            keep: 0,
+            total: "@rings.air",
+            type: "untyped",
+            range: null
+          })
+        ),
+        entry(
+          rule("RaiseRule", {
+            selector: "attack",
+            maneuver: "feint",
+            cost: -1,
+            cap: 1,
+            minimum: 0
+          })
+        ),
+        entry(rule("UnskilledAs", { selector: "skill-type:bugei", rank: 1 })),
+        entry(rule("ActionCost", { selector: "attack", action: "simple" })),
+        {
+          rule: rule("Cost", { selector: "self", value: "@cost - 1" }),
+          source: "Allies",
+          itemId: "I"
+        }
+      ],
+      rollData,
+      new Set()
+    );
+    expect(result.bag.opponentModifiers.attack[0]).toMatchObject({ roll: -1, total: 3 });
+    expect(result.bag.raiseRules.attack[0]).toMatchObject({ maneuver: "feint", cost: -1, cap: 1 });
+    expect(result.bag.unskilledAs["skill-type:bugei"][0]).toMatchObject({ rank: 1 });
+    expect(result.bag.actionCosts.attack[0]).toMatchObject({ action: "simple" });
+    // A Cost formula waits for the price it changes
+    expect(result.bag.costs.self[0]).toMatchObject({ value: "@cost - 1", itemId: "I" });
+  });
+
+  it("Ledger rules are kept with their formulas for the change they size", () => {
+    const result = out([
+      rule("Ledger", { track: "honor", direction: "loss", value: "@points * 2" }),
+      rule("Ledger", { track: "taint", direction: "gain", value: 0, predicate: ["status:prone"] })
+    ]);
+    expect(result.ledger).toEqual([
+      { track: "honor", direction: "loss", value: "@points * 2", source: "Source" }
+    ]);
+  });
+
   it("reports a bad formula and leaves its rule out", () => {
     const result = out([
       rule("Wounds", { perRank: 2, penalty: "bad(" }),

@@ -190,6 +190,13 @@
         "keepFewer": "Keep only",
         "manual": "Situational",
         "max": "max",
+        "min": "min",
+        "actionNote": "{action} (from {source})",
+        "actions": {
+          "free": "Free Action",
+          "simple": "Simple Action",
+          "complex": "Complex Action"
+        },
         "modifiers": "Modifiers",
         "of": "of",
         "pool": "Pool",
@@ -227,9 +234,72 @@
         "voidSpentThisRound": "A Void Point was already spent this Round; one per Round is the usual limit."
       },
       "rules": {
-        "hint": "The item's rules as a JSON list, such as [{\"key\": \"RollModifier\", \"selector\": \"skill:kenjutsu\", \"roll\": 1}]. ACTIVE_EFFECTS.md lists the rule keys.",
+        "hint": "Each rule as a form, or the whole list as JSON. ACTIVE_EFFECTS.md lists the rule keys and their fields.",
         "invalidJson": "Rules not saved: the text is not valid JSON ({error}).",
-        "notList": "Rules not saved: the text must be a JSON list of objects, each with a \"key\"."
+        "notList": "Rules not saved: the text must be a JSON list of objects, each with a \"key\".",
+        "add": "Add rule",
+        "delete": "Remove this rule",
+        "key": "Rule key",
+        "none": "No rules.",
+        "formView": "Edit as forms",
+        "jsonView": "Edit as JSON",
+        "effectSheet": "L5R4 Active Effect sheet (with Rules)"
+      },
+      "taint": {
+        "label": "Shadowlands Taint",
+        "embrace": "Embrace the Taint (+1k1)",
+        "embraceHint": "Gain a point of Taint for +1k1 on this roll.",
+        "embraceReason": "Embraced the Taint"
+      },
+      "honorRoll": {
+        "button": "Honor Roll",
+        "used": "{name} has already made an Honor Roll this session.",
+        "noDice": "{name} has no Honor Rank to call on for an Honor Roll.",
+        "failedReason": "Failed an Honor Roll"
+      },
+      "session": {
+        "new": "New session",
+        "confirm": "Start a new game session? Every character gets its Honor Roll back.",
+        "started": "A new game session has begun."
+      },
+      "ledger": {
+        "title": "Ledger",
+        "track": "Track",
+        "points": "Points (negative to lose)",
+        "reason": "Reason",
+        "record": "Record",
+        "hint": "Record a gain or loss of Honor, Glory, Status, or Taint with its reason. Ten points make a rank; the character's Ledger rules may change the amount.",
+        "tracks": {
+          "honor": "Honor",
+          "glory": "Glory",
+          "status": "Status",
+          "taint": "Taint"
+        }
+      },
+      "grants": {
+        "granted": "{name} gains {item} from {giver} (School Rank {rank}).",
+        "schoolRankHint": "0 follows the character's Insight Rank. Set it for a character with Multiple Schools."
+      },
+      "purchase": {
+        "choose": "Choose",
+        "noOptions": "{name} has a choice with nothing to choose from; it was not added.",
+        "unmet": "{name} needs: {list}.",
+        "unmetTitle": "Prerequisites not met",
+        "addAnyway": "Add it anyway?"
+      },
+      "activation": {
+        "start": "Activate",
+        "end": "End"
+      },
+      "transfer": {
+        "export": "Export items with rules",
+        "import": "Import items with rules",
+        "importHint": "Choose a file exported from an Item folder. Its items go into a new folder here.",
+        "exported": "Exported {count} items from {folder}.",
+        "imported": "Imported items",
+        "importedCount": "Imported {count} items into {folder}.",
+        "invalidJson": "That file is not valid JSON.",
+        "notExport": "That file is not an export of items with rules."
       },
       "mechanics": {
         "rings": {
@@ -647,6 +717,8 @@
           "trait": "Trait",
           "emphasis": "Emphases",
           "school": "School skill",
+          "social": "Social Skill",
+          "socialHint": "Rules select Social Skills with skill-tag:social; Taint penalties reach them.",
           "mastery3": "Rank 3 Mastery",
           "mastery5": "Rank 5 Mastery",
           "mastery7": "Rank 7 Mastery",
@@ -898,6 +970,10 @@
     "LtException": {
       "name": "Apply Little Truths exception",
       "label": "When dice keep is reduced below 10 by conversion, add 2."
+    },
+    "honorRoll": {
+      "name": "Optional rule: Honor Roll",
+      "hint": "Once per session, a character may re-roll a failed Skill, Trait, Ring, or Spell Casting roll with Honor Rank in rolled and kept dice; failing costs a Rank of Honor. The GM starts a session with the New session token control."
     },
     "runMigration": {
       "name": "Run migrations on startup",

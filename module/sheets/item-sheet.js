@@ -36,7 +36,7 @@ import { SYS_ID } from "../config/constants.js";
 import { enhanceItemSheetData } from "../documents/item/integration/sheet-data.js";
 import { ItemEffectsHandler } from "./handlers/item-effects-handler.js";
 import EmphasisManager from "../apps/emphasis-manager.js";
-import { parseRulesJson } from "../utils/rule-engine.js";
+import { RULES_EDITOR_ACTIONS, readRulesForm, rulesEditorContext } from "./rules-editor.js";
 
 const { HandlebarsApplicationMixin } = foundry.applications.api;
 const { ItemSheetV2 } = foundry.applications.sheets;
@@ -144,9 +144,16 @@ export default class L5R4ItemSheet extends HandlebarsApplicationMixin(ItemSheetV
     window: { contentClasses: ["standard-form"] },
     actions: {
       changeTab: L5R4ItemSheet.prototype._onChangeTab,
-      manageEmphases: L5R4ItemSheet.prototype._onManageEmphases
+      manageEmphases: L5R4ItemSheet.prototype._onManageEmphases,
+      ...RULES_EDITOR_ACTIONS
     }
   };
+
+  /**
+   * The Rules tab's view: a form per rule, or the JSON (module/sheets/rules-editor.js).
+   * @type {"form"|"json"}
+   */
+  rulesMode = "form";
 
   /**
    * Application template parts configuration.
@@ -342,7 +349,10 @@ export default class L5R4ItemSheet extends HandlebarsApplicationMixin(ItemSheetV
     context.enriched = enriched;
 
     context.effects = this.item.effects?.contents ?? [];
-    context.rulesJson = JSON.stringify(item._source.system.rules, null, 2);
+    Object.assign(
+      context,
+      rulesEditorContext(item._source.system.rules, this.rulesMode, this.isEditable)
+    );
 
     // Weapon skill integration: When weapon is owned by a PC, populate skill dropdown
     // from parent actor's skill items. This enables players to associate specific skills
@@ -402,8 +412,8 @@ export default class L5R4ItemSheet extends HandlebarsApplicationMixin(ItemSheetV
     // Items that have modifier/bonus fields
     const hasModifiers = ["weapon", "armor", "skill"].includes(itemType);
 
-    // Items with no Details tab (only description)
-    const noDetails = ["family", "clan", "school"].includes(itemType);
+    // Items with no Details tab (only description); a School's Details hold its School Rank
+    const noDetails = ["family", "clan"].includes(itemType);
 
     const tabs = [];
 
@@ -423,8 +433,8 @@ export default class L5R4ItemSheet extends HandlebarsApplicationMixin(ItemSheetV
   }
 
   /**
-   * Turn the Rules tab's JSON text into `system.rules`. Text that is not a JSON list of rule objects throws, which
-   * ApplicationV2 shows as an error notification and saves nothing (client/applications/api/application.mjs:2159-2175).
+   * Turn the Rules tab's fields or JSON into `system.rules` (module/sheets/rules-editor.js). Text that does not parse
+   * throws, which ApplicationV2 shows as an error notification and saves nothing.
    *
    * @param {SubmitEvent|null} event
    * @param {HTMLFormElement} form
@@ -433,18 +443,10 @@ export default class L5R4ItemSheet extends HandlebarsApplicationMixin(ItemSheetV
    * @override
    */
   _processFormData(event, form, formData) {
-    const data = super._processFormData(event, form, formData);
-    if (!("rulesJson" in data)) {
-      return data;
-    }
-    const { rules, error, detail } = parseRulesJson(String(data.rulesJson));
-    delete data.rulesJson;
-    if (error) {
-      throw new Error(game.i18n.localize(`l5r4.ui.rules.${error}`, { error: detail }));
-    }
-    data.system ??= {};
-    data.system.rules = rules;
-    return data;
+    return readRulesForm(
+      super._processFormData(event, form, formData),
+      this.item._source.system.rules
+    );
   }
 
   /**

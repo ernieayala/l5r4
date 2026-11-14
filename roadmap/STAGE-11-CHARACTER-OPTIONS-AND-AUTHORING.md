@@ -49,6 +49,48 @@ pp.274-279.
 ## Decisions
 
 1. No compendium content from the Core Rulebook ships with the system (CLAUDE.md **Licensed material**).
+2. A School's Techniques are GrantItem rules with a School Rank. Adding the School grants every Technique up to the
+   character's School Rank; when the School Rank rises, the next ones are granted and a chat note says so. School
+   Rank follows Insight Rank (p.104) unless the School item sets its own rank, as a character with Multiple Schools
+   does (Ernie, 2026-11-13).
+3. The Honor Roll (p.92) is a world setting, off by default. A GM "New session" token control starts a new session,
+   which gives every character its Honor Roll back (Ernie, 2026-11-13).
+4. Import and export work on Item folders: a folder's items, with their rules and effects, go to one JSON file, and
+   rules that point at an item in the same file point at its imported copy after import (Ernie, 2026-11-13).
+5. The Taint ledger logs every gain with its reason; Embracing the Taint is a roll-dialog choice on physical Trait
+   rolls (p.279); Taint Level 3 and 4 penalties to social Skill rolls, Level 4's lost Void Point, and its Honor Roll
+   penalty apply on their own (pp.278-279); Level 4's -2k0 replaces Level 3's -1k0, as each level describes the
+   character's state. Exposure and growth rolls stay the GM's (Ernie, 2026-11-13).
+6. `Aura` and `Mark` are not built: Stage 7 did not keep them (`module/config/rule-keys.js`).
+7. A granted Skill comes at rank 1 for free, as a School Skill (p.102). If the character already has that Skill, it
+   becomes a School Skill with a free rank instead of a second copy. Removing the giver deletes what it granted,
+   except a Skill with bought ranks or Emphases, which stays without its free rank.
+8. Kata and kiho rules apply while the item is active, not while it is owned (pp.259, 261): activating one makes an
+   Active Effect carrying its rules, one kata at a time and one kiho of each type but Martial (Stage 9 decision 13).
+   Tattoo rules apply while owned.
+9. Social Skills (p.134) are a tick box on the Skill item; rules select them with `skill-tag:social`, School Skills
+   with `skill-tag:school`, and a Skill type with `skill-type:<type>`.
+10. A roll input of Honor, Glory, Status, or Taint is the stored rank; points are the fraction (p.90). This answers
+   AUTOMATION.md Q2 for this stage's uses.
+11. Kata and kiho XP keep reading the item's `cost` field, as 3.2.1 does; the book prices them at their Mastery Level
+   (pp.259, 231). That difference is #43, for Stage 13, not part of this stage. A Cost rule's formula sees the base
+   price as `@cost`, so an author writes the 1.5× and 2× kiho prices (p.266) with the rounding they want.
+
+## Plan drift
+
+- The user guide is the **Character options** section of `ACTIVE_EFFECTS.md`, which Stage 7 made the rules guide,
+  not a new file.
+- Prerequisites and choices are asked when an item is dropped on a character sheet (`module/services/purchase.js`):
+  documents do not import services, and a prompt is UI. Grants run from the Item and Actor document lifecycle, so
+  they follow any way an item is added; an item added without the sheet keeps its choices open until they are
+  filled in on its Rules tab.
+- The XP manager's history and the sheet's XP total read one ledger (`module/utils/xp-ledger.js`). Before, the
+  history had its own arithmetic, which priced a legacy free Trait rank and a School's Void bonus differently from
+  the total; the history now lists what the total charges. The total leaving a Void bonus out of the price is #44.
+- Insight Rank is calculated before the rules run, so predicates can test Insight and School Rank; it reads only
+  Rings and Skill ranks, which are known by then.
+- `createRule` validates a copy: a DataModel cleans the source it is given in place, which wrote every default into
+  a stored rule the editor displayed.
 
 ## Out of scope
 

@@ -1,0 +1,58 @@
+{{!-- The rules editor (module/sheets/rules-editor.js): a form per rule, or the list as JSON --}}
+<div class="l5r4-rules-editor flexcol -gap-sm" data-rules-editor>
+  <div class="rules-toolbar flexrow -gap-sm">
+    <p class="hint">{{localize "l5r4.ui.rules.hint"}}</p>
+    {{#if rulesEditable}}
+      <button type="button" class="rules-mode" data-action="rulesMode">
+        {{localize (ifThen (eq rulesMode "json") "l5r4.ui.rules.formView" "l5r4.ui.rules.jsonView")}}
+      </button>
+    {{/if}}
+  </div>
+
+  {{#if (eq rulesMode "json")}}
+    <textarea class="rules-json" name="rulesJson" rows="16" spellcheck="false" {{disabled (not rulesEditable)}}>{{rulesJson}}</textarea>
+  {{else}}
+    {{#each rules as |rule|}}
+      <fieldset class="rule-card" data-rule-index="{{rule.index}}">
+        <legend>
+          {{rule.key}}
+          {{#if @root.rulesEditable}}
+            <a class="rule-delete" data-action="rulesDelete" title="{{localize "l5r4.ui.rules.delete"}}">
+              <i class="fa-solid fa-trash"></i>
+            </a>
+          {{/if}}
+        </legend>
+        {{#if rule.error}}<p class="rule-error">{{rule.error}}</p>{{/if}}
+        {{#each rule.fields as |field|}}
+          <div class="form-group rule-field" data-kind="{{field.kind}}">
+            <label>{{field.name}}</label>
+            {{#if (eq field.kind "boolean")}}
+              <input type="checkbox" name="rules.{{rule.index}}.{{field.name}}" {{checked field.value}} {{disabled (not @root.rulesEditable)}} />
+            {{else if (eq field.kind "number")}}
+              <input type="number" name="rules.{{rule.index}}.{{field.name}}" value="{{field.value}}" {{disabled (not @root.rulesEditable)}} />
+            {{else if (eq field.kind "select")}}
+              <select name="rules.{{rule.index}}.{{field.name}}" {{disabled (not @root.rulesEditable)}}>
+                {{#if field.nullable}}<option value=""></option>{{/if}}
+                {{selectOptions field.choices selected=field.value}}
+              </select>
+            {{else if (eq field.kind "json")}}
+              <textarea name="rules.{{rule.index}}.{{field.name}}" rows="2" spellcheck="false" {{disabled (not @root.rulesEditable)}}>{{field.value}}</textarea>
+            {{else}}
+              <input type="text" name="rules.{{rule.index}}.{{field.name}}" value="{{field.value}}" {{disabled (not @root.rulesEditable)}} />
+            {{/if}}
+          </div>
+        {{/each}}
+      </fieldset>
+    {{else}}
+      <p class="hint">{{localize "l5r4.ui.rules.none"}}</p>
+    {{/each}}
+    {{#if rulesEditable}}
+      <div class="rules-add flexrow -gap-sm">
+        <select data-rule-key aria-label="{{localize "l5r4.ui.rules.key"}}">{{selectOptions ruleKeys}}</select>
+        <button type="button" data-action="rulesAdd">
+          <i class="fa-solid fa-plus"></i> {{localize "l5r4.ui.rules.add"}}
+        </button>
+      </div>
+    {{/if}}
+  {{/if}}
+</div>

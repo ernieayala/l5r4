@@ -57,6 +57,7 @@ import L5R4Item from "../module/documents/item.js";
 import L5R4ItemSheet from "../module/sheets/item-sheet.js";
 import L5R4PcSheet from "../module/sheets/pc-sheet.js";
 import L5R4NpcSheet from "../module/sheets/npc-sheet.js";
+import L5R4ActiveEffectConfig from "../module/sheets/active-effect-config.js";
 import { preloadTemplates } from "../module/setup/preload-templates.js";
 import { runMigrations } from "../module/setup/migrations.js";
 import { registerSettings } from "../module/setup/register-settings.js";
@@ -173,6 +174,12 @@ Hooks.once("init", async () => {
   DocumentSheetConfig.registerSheet(Actor, SYS_ID, L5R4NpcSheet, {
     types: ["npc"],
     makeDefault: true
+  });
+
+  // Core's Active Effect sheet with a Rules tab for system.rules; core's stays selectable
+  DocumentSheetConfig.registerSheet(foundry.documents.ActiveEffect, SYS_ID, L5R4ActiveEffectConfig, {
+    makeDefault: true,
+    label: "l5r4.ui.rules.effectSheet"
   });
 
   preloadTemplates();

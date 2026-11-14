@@ -93,6 +93,7 @@ export const CHAT_TEMPLATES = freeze({
  * @property {string} checkSpell - Its spell extras (the slot)
  * @property {string} checkMaho - Its maho extras (blood)
  * @property {string} unifiedItemCreate - Universal item creation dialog
+ * @property {string} ledger - A change to Honor, Glory, Status, or Taint, with the actor's ledger
  */
 export const DIALOG_TEMPLATES = freeze({
   check: TEMPLATE("dialogs/check-dialog.hbs"),
@@ -100,5 +101,6 @@ export const DIALOG_TEMPLATES = freeze({
   checkSpell: TEMPLATE("dialogs/check-extras/spell.hbs"),
   checkMaho: TEMPLATE("dialogs/check-extras/maho.hbs"),
   checkSlot: TEMPLATE("dialogs/check-extras/slot.hbs"),
-  unifiedItemCreate: TEMPLATE("dialogs/unified-item-create-dialog.hbs")
+  unifiedItemCreate: TEMPLATE("dialogs/unified-item-create-dialog.hbs"),
+  ledger: TEMPLATE("dialogs/ledger-dialog.hbs")
 });

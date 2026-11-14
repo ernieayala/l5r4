@@ -29,6 +29,7 @@ import { SYS_ID } from "../../config/constants.js";
  * - Void ring rank
  * - All skills with their ranks, free ranks, emphasis, and free emphasis
  * - All XP-costing items (advantages, disadvantages, kata, kiho) with their costs
+ * - The price of each entry the XP ledger charged, which Cost rules change
  *
  * Uses a 32-bit hash algorithm (similar to Java's String.hashCode()) for fast,
  * consistent versioning. If hashing fails, falls back to timestamp to ensure
@@ -65,7 +66,9 @@ export function calculateXpDataVersion(actor) {
           id: i.id,
           type: i.type,
           cost: i.system?.cost || 0
-        }))
+        })),
+      // The prices the ledger charged, so a Cost rule that changes one changes the version (roadmap/STAGE-11)
+      prices: (sys._xp?.entries ?? []).map(e => e.delta)
     };
 
     // Generate hash using 32-bit algorithm (similar to Java String.hashCode)

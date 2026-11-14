@@ -45,8 +45,10 @@
 
   {{#if raisesAllowed}}
     <div class="form-group">
-      <label>{{localize "l5r4.ui.mechanics.rolls.raises"}} ({{localize "l5r4.ui.check.max"}} {{maxRaises}})</label>
-      <input type="number" name="raises" value="0" min="0" max="{{maxRaises}}" />
+      <label>
+        {{localize "l5r4.ui.mechanics.rolls.raises"}} ({{localize "l5r4.ui.check.max"}} {{maxRaises}}{{#if minRaises}}, {{localize "l5r4.ui.check.min"}} {{minRaises}}{{/if}})
+      </label>
+      <input type="number" name="raises" value="{{minRaises}}" min="{{minRaises}}" max="{{maxRaises}}" />
     </div>
     {{#if freeRaises}}
       <div class="form-group">
@@ -64,6 +66,13 @@
       <input type="checkbox" name="void" {{disabled (not voidPoints)}} />
     </div>
     {{#if voidOverLimit}}<p class="hint">{{localize "l5r4.ui.effects.voidSpentThisRound"}}</p>{{/if}}
+  {{/if}}
+
+  {{#if embraceTaint}}
+    <div class="form-group">
+      <label>{{localize "l5r4.ui.taint.embrace"}}</label>
+      <input type="checkbox" name="embraceTaint" title="{{localize "l5r4.ui.taint.embraceHint"}}" />
+    </div>
   {{/if}}
 
   {{#if emphases.length}}

@@ -1,11 +1,11 @@
 /**
  * @module services/dice/check/collect
  * @description Everything that modifies a check, gathered once per roll so nothing is counted twice: the actor's
- * RollModifier, TNModifier, FreeRaise, DiceRule, Substitute, Note, and ApplyCondition rules (tested against the
- * actor's and the target's roll options), Active Effect values in `system.bonuses`, armor, the target's
- * range-limited Armor TN changes, and Free Raises on items. Stances and conditions reach a check as rules on their
- * effects (module/config/status-effects.js). Each modifier keeps its label so the dialog lists it with a toggle and
- * the card shows it.
+ * RollModifier, TNModifier, FreeRaise, DiceRule, Substitute, Note, ApplyCondition, RaiseRule, UnskilledAs, and
+ * ActionCost rules (tested against the actor's and the target's roll options), the target's OpponentModifier rules,
+ * Active Effect values in `system.bonuses`, armor, the target's range-limited Armor TN changes, and Free Raises on
+ * items. Stances and conditions reach a check as rules on their effects (module/config/status-effects.js). Each
+ * modifier keeps its label so the dialog lists it with a toggle and the card shows it.
  */
 
 import { T } from "../../../utils/localization.js";
@@ -37,24 +37,39 @@ import { calculateFreeRaises } from "../resources/raise-manager.js";
  * @property {Array<{label: string, condition: string, level: number|null}>} applyConditions  Offered on success
  * @property {string[]} damageSources    Damage-source tags from DamageSource rules (pp.319-320)
  * @property {number} ignoreReduction    Reduction the damage ignores
+ * @property {{cap: number, minimum: number, maneuverCosts: Record<string, number>}} raises  RaiseRule rules: the
+ *   change to the Raise cap, the Raises that must be declared, and the change to each maneuver's cost
+ * @property {number} unskilledAs        Ranks an Unskilled roll counts as (UnskilledAs), 0 for none
+ * @property {Array<{label: string, action: string}>} actions  ActionCost rules, shown on the card
  */
 
 /**
- * The selectors a check reads rules for: "any" (every roll), its kind, and what it rolls.
+ * The selectors a check reads rules for: "any" (every roll), its kind, and what it rolls. A Skill's item adds its type
+ * (`skill-type:<type>`) and tags (`skill-tag:social`, `skill-tag:school`; roadmap/STAGE-11 decision 9).
  * @param {object} spec
  * @param {string} spec.kind      skill, trait, ring, spell, maho, attack, damage, or roll
  * @param {string} [spec.skill]   Skill name in lower case
  * @param {string} [spec.trait]   Trait key
  * @param {string} [spec.ring]    Ring key
+ * @param {{type: string, social: boolean, school: boolean}} [spec.skillData]  The Skill item's data
  * @returns {string[]}
  */
-export function checkSelectors({ kind, skill, trait, ring }) {
+export function checkSelectors({ kind, skill, trait, ring, skillData }) {
   const selectors = ["any", kind];
   if (kind === "maho") {
     selectors.push("spell");
   }
   if (skill) {
     selectors.push(`skill:${skill}`);
+  }
+  if (skillData) {
+    selectors.push(`skill-type:${skillData.type}`);
+    if (skillData.social) {
+      selectors.push("skill-tag:social");
+    }
+    if (skillData.school) {
+      selectors.push("skill-tag:school");
+    }
   }
   if (trait) {
     selectors.push(`trait:${trait}`);
@@ -99,20 +114,31 @@ export function checkOptions(actor, kind, target) {
  * @returns {CheckContext}
  */
 export function collectCheck(actor, { kind, skill, trait, ring, target = null, weapon = null }) {
-  const selectors = checkSelectors({ kind, skill, trait, ring });
+  const skillItem = skill
+    ? actor.items.find(i => i.type === "skill" && i.name.toLowerCase().trim() === skill)
+    : null;
+  const selectors = checkSelectors({ kind, skill, trait, ring, skillData: skillItem?.system });
   const options = checkOptions(actor, kind, target);
   const entries = bagKind =>
     bagEntries(actor.ruleBag, bagKind, selectors, options, weapon?.id ?? null);
 
-  const modifiers = entries("rollModifiers").map(entry => ({
-    label: entry.label,
+  const asModifier = (entry, label = entry.label) => ({
+    label,
     roll: entry.roll,
     keep: entry.keep,
     total: entry.total,
     enabled: !entry.optional,
     ...(entry.range ? { range: entry.range } : {}),
     consumes: entry.consumes ?? null
-  }));
+  });
+  const modifiers = entries("rollModifiers").map(entry => asModifier(entry));
+  // The target's OpponentModifier rules, tested from its side: its options, with the roller as its target
+  if (target?.ruleBag) {
+    const theirs = checkOptions(target, kind, actor);
+    for (const entry of bagEntries(target.ruleBag, "opponentModifiers", selectors, theirs)) {
+      modifiers.push(asModifier(entry, `${entry.label} (${target.name})`));
+    }
+  }
 
   // Active Effect changes on system.bonuses (ACTIVE_EFFECTS.md, Skill and Ring bonuses)
   for (const [category, name] of [
@@ -164,6 +190,13 @@ export function collectCheck(actor, { kind, skill, trait, ring, target = null, w
   const diceRules = entries("diceRules");
   const thresholds = diceRules.map(rule => rule.explode).filter(value => value !== null);
 
+  const raiseRules = entries("raiseRules");
+  const maneuverCosts = {};
+  for (const rule of raiseRules.filter(r => r.maneuver)) {
+    maneuverCosts[rule.maneuver] = (maneuverCosts[rule.maneuver] ?? 0) + rule.cost;
+  }
+  const unskilledAs = entries("unskilledAs").map(entry => entry.rank);
+
   return {
     modifiers,
     tnModifiers,
@@ -182,6 +215,16 @@ export function collectCheck(actor, { kind, skill, trait, ring, target = null, w
       level: entry.level
     })),
     damageSources: [...new Set(entries("damageSources").flatMap(entry => entry.tags))],
-    ignoreReduction: entries("damageSources").reduce((sum, entry) => sum + entry.ignoreReduction, 0)
+    ignoreReduction: entries("damageSources").reduce(
+      (sum, entry) => sum + entry.ignoreReduction,
+      0
+    ),
+    raises: {
+      cap: raiseRules.reduce((sum, rule) => sum + rule.cap, 0),
+      minimum: Math.max(0, ...raiseRules.map(rule => rule.minimum)),
+      maneuverCosts
+    },
+    unskilledAs: unskilledAs.length ? Math.max(...unskilledAs) : 0,
+    actions: entries("actionCosts").map(entry => ({ label: entry.label, action: entry.action }))
   };
 }

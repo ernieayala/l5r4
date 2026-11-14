@@ -31,6 +31,7 @@ import {
   determineCurrentWoundLevel
 } from "./actor/calculations/wound-system.js";
 import { trackXpExpenditure } from "./actor/calculations/xp-system.js";
+import { syncGrants } from "./item/lifecycle/grants.js";
 import { addWoundRollOption, applyInitialRules } from "./actor/rules.js";
 import { rollDataKey } from "../utils/rule-values.js";
 
@@ -224,6 +225,18 @@ export default class L5R4Actor extends Actor {
   async _preUpdate(changed, options, user) {
     await super._preUpdate(changed, options, user);
     trackXpExpenditure(this, changed, options);
+  }
+
+  /**
+   * A change that raises Insight Rank (a Trait, the Void Ring) can bring a School's next Technique due
+   * (roadmap/STAGE-11 decision 2). Only the user who made the change grants it.
+   * @override
+   */
+  _onUpdate(changed, options, userId) {
+    super._onUpdate(changed, options, userId);
+    if (userId === game.user.id) {
+      syncGrants(this);
+    }
   }
 
   /**

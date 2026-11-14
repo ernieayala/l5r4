@@ -6,7 +6,8 @@
  * TN, and posts a `roll` ChatMessage holding the whole context.
  *
  * Rules: Roll & Keep p.75, Ten Dice Rule and exploding dice p.77, Void Points p.78 (never on damage), Raises and
- * Free Raises p.79, Unskilled Rolls p.80, wound penalties on the TN p.82 (decision 2), Emphases p.133.
+ * Free Raises p.79, Unskilled Rolls p.80, wound penalties on the TN p.82 (decision 2), the Honor Roll p.92,
+ * Emphases p.133, Embracing the Taint p.279.
  */
 
 import { SYS_ID } from "../../../config/constants.js";
@@ -22,10 +23,12 @@ import {
   targetNumber
 } from "../../../utils/check.js";
 import { allocateRaises, maneuverCost } from "../../../utils/damage.js";
+import { canEmbraceTaint } from "../../../utils/taint.js";
 import { spendVoidPoint } from "../resources/void-manager.js";
 import { resolveTargets } from "../resources/target-resolver.js";
 import { collectCheck } from "./collect.js";
 import { voidOverLimit } from "../../effects/uses.js";
+import { recordTrackChange } from "../../ledger.js";
 
 /**
  * @typedef {object} CheckRequest
@@ -91,6 +94,19 @@ function voidOf(actor) {
     points: toInt(actor.system.rings.void.value),
     ring: toInt(actor.system.rings.void.rank)
   };
+}
+
+/**
+ * The actor's highest Ring, the Void Ring included: a Ring at 6 or higher delays being Lost to the Taint (p.278).
+ * @param {Actor} actor
+ * @returns {number}
+ */
+function highestRing(actor) {
+  const { rings } = actor.system;
+  return Math.max(
+    ...["air", "earth", "fire", "water"].map(ring => toInt(rings[ring])),
+    toInt(rings.void.rank)
+  );
 }
 
 /**
@@ -186,7 +202,6 @@ async function askChoices(request, context) {
 export async function rollCheck(request) {
   const { actor, kind } = request;
   const isDamage = kind === "damage";
-  const unskilled = Boolean(request.unskilled);
   const { autoTN, targetData } = resolveTargets(actor, kind === "attack" ? "attack" : null);
   const target = request.target !== undefined ? request.target : (targetData?.actor ?? null);
   const ctx = collectCheck(actor, {
@@ -197,14 +212,30 @@ export async function rollCheck(request) {
     target,
     weapon: request.weapon ?? null
   });
+  // An Unskilled Roll in a Skill an UnskilledAs rule covers counts as that many ranks, so it is not Unskilled (p.80)
+  const countsAs = request.unskilled ? ctx.unskilledAs : 0;
+  const unskilled = Boolean(request.unskilled) && !countsAs;
+  const basePool = countsAs
+    ? { ...request.base, roll: request.base.roll + countsAs }
+    : request.base;
   const modifiers = [
     ...ctx.modifiers,
     ...(request.modifiers ?? []).map(m => ({ roll: 0, keep: 0, total: 0, enabled: true, ...m }))
   ];
   const voidState = voidOf(actor);
   const raisesAllowed = !isDamage && !unskilled;
-  const maximum = maxRaises(voidState.ring, unskilled);
+  // RaiseRule rules move the Void Ring cap (p.79) and may require Raises
+  const maximum = raisesAllowed
+    ? Math.max(0, maxRaises(voidState.ring, unskilled) + ctx.raises.cap)
+    : 0;
+  const minimum = Math.min(Math.max(0, ctx.raises.minimum), maximum);
   const freeRaises = raisesAllowed ? ctx.freeRaises : 0;
+  const embraceAllowed = canEmbraceTaint({
+    rank: toInt(actor.system.shadowTaint.rank),
+    highestRing: highestRing(actor),
+    kind,
+    trait: request.trait
+  });
   const woundPenalty = isDamage ? 0 : toInt(actor.system.woundPenalty);
   const defaultTN = toInt(request.tn ?? 0) || (kind === "attack" ? autoTN : 0);
   const emphases = unskilled ? [] : (request.emphases ?? []).filter(Boolean);
@@ -212,7 +243,7 @@ export async function rollCheck(request) {
 
   let choices = {};
   if (request.askForOptions !== false) {
-    const base = buildPool({ ...request.base, modifiers });
+    const base = buildPool({ ...basePool, modifiers });
     choices = await askChoices(request, {
       pool: `${base.roll}k${base.keep}${base.bonus ? modifierText({ total: base.bonus }) : ""}`,
       modifiers: modifiers.map(m => ({ ...m, text: modifierText(m) })),
@@ -224,6 +255,7 @@ export async function rollCheck(request) {
       raisesAllowed,
       unskilled,
       maxRaises: maximum,
+      minRaises: minimum,
       freeRaises,
       voidAllowed: !isDamage,
       voidPoints: voidState.points,
@@ -232,7 +264,8 @@ export async function rollCheck(request) {
       isAttack: kind === "attack",
       ranged: Boolean(request.ranged),
       socialResistance: isSkill,
-      honorRank: toInt(actor.system.honor?.rank)
+      honorRank: toInt(actor.system.honor?.rank),
+      embraceTaint: embraceAllowed
     });
     if (!choices) {
       return null;
@@ -268,6 +301,11 @@ export async function rollCheck(request) {
       enabled: true
     });
   }
+  // Embracing the Taint: +1k1 for a point of Taint (p.279)
+  const embrace = embraceAllowed && Boolean(choices.embraceTaint);
+  if (embrace) {
+    applied.push({ label: T("l5r4.ui.taint.embrace"), roll: 1, keep: 1, total: 0, enabled: true });
+  }
 
   // A Substitute swaps the Trait in the pool: its rank counts in both rolled and kept dice
   const substitutes = choices.substitute ?? {};
@@ -280,7 +318,9 @@ export async function rollCheck(request) {
     }
   });
 
-  const raises = raisesAllowed ? Math.min(Math.max(0, toInt(choices.raises)), maximum) : 0;
+  const raises = raisesAllowed
+    ? Math.min(Math.max(minimum, toInt(choices.raises ?? minimum)), maximum)
+    : 0;
   const freeRaisesToTN = Math.min(Math.max(0, toInt(choices.freeRaisesToTN)), freeRaises);
   const voidPoint = !isDamage && Boolean(choices.void);
   const emphasis = emphases.includes(choices.emphasis) ? choices.emphasis : "";
@@ -298,15 +338,14 @@ export async function rollCheck(request) {
   // An attack's maneuvers, paid for out of its Raises (pp.86-87); dialog values are user input
   const maneuvers = kind === "attack" ? readManeuvers(choices.maneuver ?? {}, raisesAllowed) : null;
   if (maneuvers) {
+    const cost = maneuverCost(maneuvers, ctx.raises.maneuverCosts);
     const { affordable, increasedDamage } = allocateRaises({
       raises,
       freeRaises: totalFreeRaises - freeRaisesToTN,
-      cost: maneuverCost(maneuvers)
+      cost
     });
     if (!affordable) {
-      ui.notifications?.warn(
-        F("l5r4.ui.combat.notEnoughRaises", { cost: maneuverCost(maneuvers), raises })
-      );
+      ui.notifications?.warn(F("l5r4.ui.combat.notEnoughRaises", { cost, raises }));
       return null;
     }
     maneuvers.increasedDamage = increasedDamage;
@@ -325,7 +364,7 @@ export async function rollCheck(request) {
 
   const littleTruths = game.settings.get(SYS_ID, "LtException");
   const pool = buildPool({
-    ...request.base,
+    ...basePool,
     modifiers: applied,
     voidPoint,
     unskilled,
@@ -336,6 +375,9 @@ export async function rollCheck(request) {
   });
   const roll = new foundry.dice.Roll(poolFormula(pool));
   await roll.evaluate();
+  if (embrace) {
+    await recordTrackChange(actor, "taint", 1, T("l5r4.ui.taint.embraceReason"));
+  }
 
   // A TN change for the other attack range drops out, as a modifier does
   const tnModifiers = isDamage
@@ -409,7 +451,12 @@ export async function rollCheck(request) {
       margin: outcome?.margin ?? null
     },
     weaponUuid: weapon?.uuid ?? "",
-    notes: ctx.notes,
+    notes: [
+      ...ctx.notes,
+      ...ctx.actions.map(({ label: source, action }) =>
+        F("l5r4.ui.check.actionNote", { action: T(`l5r4.ui.check.actions.${action}`), source })
+      )
+    ],
     conditions: target ? ctx.applyConditions : [],
     ...(maneuvers ? { maneuvers } : {}),
     ...(attackDamage(request) ? { damage: attackDamage(request) } : {}),
@@ -472,6 +519,25 @@ function maneuverNotes(maneuvers) {
   return notes;
 }
 
+/** Roll kinds the Honor Roll can re-roll: Skill, Trait, Ring, and Spell Casting rolls (p.92). */
+const HONOR_ROLL_KINDS = new Set(["skill", "attack", "trait", "ring", "spell", "maho"]);
+
+/**
+ * Whether a check's card offers the optional Honor Roll (p.92; roadmap/STAGE-11 decision 3): the world setting is on
+ * and the roll failed, and it is not itself an Honor Roll. Whether the roller still has it this session is checked on
+ * the click (module/services/dice/check/chat-actions.js, honorRoll).
+ * @param {object} system  RollMessageData source
+ * @returns {boolean}
+ */
+export function offersHonorRoll(system) {
+  return (
+    game.settings.get(SYS_ID, "honorRoll") &&
+    system.outcome.success === false &&
+    HONOR_ROLL_KINDS.has(system.kind) &&
+    !system.honorRollOf
+  );
+}
+
 /**
  * Render a check's card from its stored context.
  * @param {object} system  RollMessageData source
@@ -499,6 +565,7 @@ export async function renderCheckCard(system, roll, { actorId = "" } = {}) {
     contest: hit && Boolean(system.target?.uuid) && (maneuvers.knockdown || maneuvers.disarm),
     grappleButton: hit && Boolean(system.target?.uuid) && maneuvers.grapple,
     applyTarget: system.kind === "damage" ? system.target?.name : "",
+    honorRoll: offersHonorRoll(system),
     actorId
   });
 }

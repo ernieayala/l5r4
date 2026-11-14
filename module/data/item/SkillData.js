@@ -4,8 +4,8 @@ import ItemData from "./ItemData.js";
 
 /**
  * Data model for the `skill` Item subtype: rank, Trait, skill type, Emphases, Mastery text, School skill and free
- * ranks for XP, and roll bonuses. `emphasis` is the pre-array Emphasis text, kept for
- * module/setup/migrations/items/emphasis.js.
+ * ranks for XP, whether it is a Social Skill (p.134; roadmap/STAGE-11 decision 9), and roll bonuses. `emphasis` is
+ * the pre-array Emphasis text, kept for module/setup/migrations/items/emphasis.js.
  */
 export default class SkillData extends ItemData {
   /** @override */
@@ -26,6 +26,7 @@ export default class SkillData extends ItemData {
       mastery7: stringField(),
       insightBonus: numberField(0),
       school: booleanField(false),
+      social: booleanField(false),
       freeRanks: numberField(0),
       freeEmphasis: numberField(0),
       rollBonus: numberField(0),

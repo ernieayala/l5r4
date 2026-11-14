@@ -39,7 +39,16 @@ const MINIMAL_RULES = {
   Resource: { key: "Resource", slug: "void" },
   DamageSource: { key: "DamageSource" },
   Invulnerability: { key: "Invulnerability" },
-  Spirit: { key: "Spirit" }
+  Spirit: { key: "Spirit" },
+  OpponentModifier: { key: "OpponentModifier", selector: "attack" },
+  RaiseRule: { key: "RaiseRule", selector: "attack" },
+  UnskilledAs: { key: "UnskilledAs", selector: "skill-type:bugei" },
+  ActionCost: { key: "ActionCost", selector: "attack" },
+  Cost: { key: "Cost", selector: "self" },
+  Ledger: { key: "Ledger" },
+  Prerequisite: { key: "Prerequisite" },
+  ChoiceSet: { key: "ChoiceSet" },
+  GrantItem: { key: "GrantItem", uuid: "Item.quench" }
 };
 
 /**
@@ -137,6 +146,28 @@ export function registerRulesBatch(quench) {
           });
           assert.deepInclude(createRule(MINIMAL_RULES.Resource), { max: 1, per: "round" });
           assert.isNull(createRule(MINIMAL_RULES.ApplyCondition).level);
+          assert.equal(createRule(MINIMAL_RULES.Cost).value, "@cost");
+          assert.deepInclude(createRule(MINIMAL_RULES.Ledger), {
+            track: "honor",
+            direction: "gain",
+            value: "@points"
+          });
+          assert.deepInclude(createRule(MINIMAL_RULES.ChoiceSet), {
+            flag: "choice",
+            selection: null
+          });
+          assert.deepInclude(createRule(MINIMAL_RULES.GrantItem), {
+            rank: 0,
+            skillRank: 1,
+            emphasis: ""
+          });
+          assert.equal(createRule(MINIMAL_RULES.ActionCost).action, "simple");
+          assert.deepInclude(createRule(MINIMAL_RULES.RaiseRule), {
+            maneuver: null,
+            cost: 0,
+            cap: 0,
+            minimum: 0
+          });
         });
 
         it("keeps formulas, numbers, and predicate objects", () => {
@@ -534,13 +565,14 @@ export function registerRulesBatch(quench) {
         );
       });
 
-      describe("Item sheet Rules tab", () => {
+      describe("Item sheet Rules tab, JSON view", () => {
         it(
           "saves JSON typed into the Rules field as system.rules",
           clean(async () => {
             const [item] = await Item.createDocuments([ruleItem([], "Quench sheet rules")]);
             try {
               const sheet = item.sheet;
+              sheet.rulesMode = "json";
               await sheet.render({ force: true });
               const json = '[{"key": "ArmorTN", "value": 2}]';
               await changeThroughSheet(sheet, "textarea[name=rulesJson]", json);
@@ -571,6 +603,7 @@ export function registerRulesBatch(quench) {
           const watch = watchConsole(["error"]);
           try {
             const sheet = item.sheet;
+            sheet.rulesMode = "json";
             await sheet.render({ force: true });
             for (const text of ["[{", '{"key": "Note"}']) {
               const input = sheet.element.querySelector("textarea[name=rulesJson]");

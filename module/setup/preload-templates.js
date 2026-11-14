@@ -50,6 +50,10 @@ export async function preloadTemplates() {
     `systems/${SYS_ID}/templates/item/_partials/_tab-effects.hbs`,
     `systems/${SYS_ID}/templates/item/_partials/_tab-rules.hbs`,
 
+    // Rules editor, on item and Active Effect sheets
+    `systems/${SYS_ID}/templates/rules/editor.hbs`,
+    `systems/${SYS_ID}/templates/rules/effect-tab.hbs`,
+
     // Item Sheet - Type-Specific Details Templates
     `systems/${SYS_ID}/templates/item/_type-details/advantage.hbs`,
     `systems/${SYS_ID}/templates/item/_type-details/armor.hbs`,
@@ -134,6 +138,7 @@ export async function preloadTemplates() {
 
     // Card Partials
     `systems/${SYS_ID}/templates/cards/_partials/_controls.hbs`,
+    `systems/${SYS_ID}/templates/cards/_partials/_activate.hbs`,
 
     // Chat Message Templates
     `systems/${SYS_ID}/templates/chat/check-card.hbs`,
@@ -150,6 +155,7 @@ export async function preloadTemplates() {
     `systems/${SYS_ID}/templates/dialogs/disadvantage-cap-dialog.hbs`,
     `systems/${SYS_ID}/templates/dialogs/unified-item-create-dialog.hbs`,
     `systems/${SYS_ID}/templates/dialogs/custom-emphasis-dialog.hbs`,
+    `systems/${SYS_ID}/templates/dialogs/ledger-dialog.hbs`,
 
     // Application Templates
     `systems/${SYS_ID}/templates/apps/armor-config.hbs`,

@@ -6,6 +6,7 @@
     <div>{{localize (concat "l5r4.ui.mechanics.rings." system.ring)}}</div>
     <div>{{system.mastery}}</div>
     <div>{{localize (concat "l5r4.magic.kiho." system.type)}}</div>
+    {{> "systems/l5r4-enhanced/templates/cards/_partials/_activate.hbs"}}
     {{> "systems/l5r4-enhanced/templates/cards/_partials/_controls.hbs"}}
     {{#if (or system.description system.specialRules)}}
       <div class="expanded-text">

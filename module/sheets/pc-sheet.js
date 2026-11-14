@@ -47,6 +47,8 @@ import { PC_SORT_KEYS } from "../config/sort-keys.js";
 // Utils
 import { on } from "../utils/dom.js";
 import { effectsOf } from "../services/effects/apply.js";
+import { openLedgerDialog } from "../services/ledger.js";
+import { activeItemIds, toggleActivation } from "../services/effects/activation.js";
 
 // Documents
 import { enhanceItemSheetData } from "../documents/item/integration/sheet-data.js";
@@ -237,6 +239,12 @@ export default class L5R4PcSheet extends BaseActorSheet {
         return AppLauncherHandler.openXpManager(this._getHandlerContext(), event, element);
       case "open-wealth-manager":
         return AppLauncherHandler.openWealthManager(this._getHandlerContext(), event, element);
+      case "open-ledger":
+        return openLedgerDialog(this.actor);
+      case "item-activate": {
+        const item = this.actor.items.get(element.closest("[data-item-id]")?.dataset.itemId);
+        return item ? toggleActivation(this.actor, item) : undefined;
+      }
       case "recalc-sheet":
         return this._onRecalcSheet(event, element);
       case "toggle-rank-mode":
@@ -578,6 +586,7 @@ export default class L5R4PcSheet extends BaseActorSheet {
       traitsEff,
       currentStance,
       voidArmor: effectsOf(actorObj, "voidArmor").length > 0,
+      activeItemIds: activeItemIds(actorObj),
       collapsedSections,
       // Lazy getter: Defers expensive sorting until template accesses property
       get advDisList() {

@@ -2,16 +2,19 @@
  * @module services/dice/check/chat-actions
  * @description What a `roll` message can do after it posts, rebuilt from its stored context
  * (module/data/chat/RollMessageData.js), never from the card's HTML: roll the attack's damage, put an offered
- * condition on the target, re-roll keeping the better total, and settle a Contested Roll (p.80) against the
- * previous roll by someone else.
+ * condition on the target, re-roll keeping the better total, make the optional Honor Roll (p.92), and settle a
+ * Contested Roll (p.80) against the previous roll by someone else.
  */
 
+import { SYS_ID } from "../../../config/constants.js";
 import { F, T } from "../../../utils/localization.js";
 import { toInt } from "../../../utils/type-coercion.js";
-import { contest, evaluateCheck, poolFormula } from "../../../utils/check.js";
+import { buildPool, contest, evaluateCheck, poolFormula } from "../../../utils/check.js";
+import { taintEffects } from "../../../utils/taint.js";
 import { applyEffectAnywhere } from "../../effects/apply.js";
 import { rollDamageFromAttack } from "../../combat/damage.js";
-import { renderCheckCard } from "./roll-check.js";
+import { recordTrackChange } from "../../ledger.js";
+import { offersHonorRoll, renderCheckCard } from "./roll-check.js";
 
 /**
  * The actor a roll message belongs to, resolved from its stored UUID.
@@ -78,6 +81,72 @@ export async function rerollKeepBetter(message) {
     speaker: message.speaker,
     content
   });
+}
+
+/**
+ * The optional Honor Roll (p.92; roadmap/STAGE-11 decision 3): once per session, the owner of a failed roll re-rolls
+ * it at the same TN with Honor Rank in rolled and kept dice instead of the original dice, the Ten Dice Rule last.
+ * Taint Level 4 takes 2k2 from it (p.278). Failing it costs a full Rank of Honor, through the ledger.
+ * @param {ChatMessage} message  A failed `roll` message
+ * @returns {Promise<ChatMessage|null>}
+ */
+export async function honorRoll(message) {
+  const actor = rollActor(message);
+  if (!actor?.isOwner) {
+    ui.notifications?.warn(T("l5r4.ui.notifications.noPermission"));
+    return null;
+  }
+  if (!offersHonorRoll(message.system)) {
+    return null;
+  }
+  const session = game.settings.get(SYS_ID, "session");
+  if (actor.getFlag(SYS_ID, "honorRollSession") === session) {
+    ui.notifications?.warn(F("l5r4.ui.honorRoll.used", { name: actor.name }));
+    return null;
+  }
+  // A character without an Honor Rank has nothing to call on; an NPC has no Honor at all. A Taint penalty that
+  // shrinks the pool floors at 1k1 like any other (module/utils/ten-dice.js)
+  const honor = toInt(actor.system.honor?.rank);
+  if (honor < 1) {
+    ui.notifications?.warn(F("l5r4.ui.honorRoll.noDice", { name: actor.name }));
+    return null;
+  }
+  const source = message.system.toObject();
+  const penalty = taintEffects(toInt(actor.system.shadowTaint.rank)).honorRollPenalty;
+  const modifiers = penalty.roll
+    ? [{ label: T("l5r4.ui.taint.label"), roll: -penalty.roll, keep: -penalty.keep, total: 0 }]
+    : [];
+  const pool = buildPool({
+    roll: honor,
+    keep: honor,
+    modifiers,
+    littleTruths: game.settings.get(SYS_ID, "LtException")
+  });
+  await actor.setFlag(SYS_ID, "honorRollSession", session);
+  const roll = new foundry.dice.Roll(poolFormula(pool));
+  await roll.evaluate();
+  const outcome = evaluateCheck(roll.total, source.tn.effective);
+  const system = {
+    ...source,
+    label: `${source.label} (${T("l5r4.ui.honorRoll.button")})`,
+    pool: { ...pool, unskilled: false },
+    modifiers: modifiers.map(m => ({ ...m, enabled: true })),
+    voidPoint: false,
+    emphasis: "",
+    outcome: { total: roll.total, success: outcome.success, margin: outcome.margin },
+    honorRollOf: message.id
+  };
+  const content = await renderCheckCard(system, roll, { actorId: actor.id });
+  const posted = await roll.toMessage({
+    type: "roll",
+    system,
+    speaker: message.speaker,
+    content
+  });
+  if (!outcome.success) {
+    await recordTrackChange(actor, "honor", -10, T("l5r4.ui.honorRoll.failedReason"));
+  }
+  return posted;
 }
 
 /**
@@ -171,6 +240,10 @@ export function bindCheckCard(message, html) {
       applyConditionFromMessage(message, toInt(event.currentTarget.dataset.index));
     });
   }
+  html.querySelector("[data-action='honor-roll']")?.addEventListener("click", event => {
+    event.preventDefault();
+    honorRoll(message);
+  });
 }
 
 /**

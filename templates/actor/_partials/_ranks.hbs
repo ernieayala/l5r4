@@ -59,4 +59,9 @@
       <span>{{system.shadowTaint.rank}}.{{system.shadowTaint.points}}</span>
     </div>
   </div>
+  {{#if editable}}
+    <a class="ledger-open" data-action="open-ledger" title="{{localize 'l5r4.ui.ledger.hint'}}">
+      <i class="fa-solid fa-scroll"></i> {{localize "l5r4.ui.ledger.title"}}
+    </a>
+  {{/if}}
 </section>

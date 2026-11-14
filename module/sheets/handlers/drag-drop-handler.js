@@ -24,6 +24,7 @@
  * @requires Foundry VTT v13+
  */
 import { SYS_ID } from "../../config/constants.js";
+import { preparePurchase } from "../../services/purchase.js";
 
 /**
  * Handler context object provided by actor sheets
@@ -103,8 +104,12 @@ export class DragDropHandler {
         return false;
       }
 
-      // Convert to plain object for embedding (creates copy, not reference)
-      const itemData = item.toObject();
+      // Convert to plain object for embedding (creates copy, not reference), then check its prerequisites and ask
+      // its choices (module/services/purchase.js)
+      const itemData = await preparePurchase(context.actor, item.toObject());
+      if (!itemData) {
+        return false;
+      }
       return await context.actor.createEmbeddedDocuments("Item", [itemData]);
     } catch (err) {
       console.warn(`${SYS_ID} DragDropHandler: Failed to drop item`, { err, data });

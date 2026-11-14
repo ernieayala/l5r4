@@ -5,9 +5,14 @@
  */
 
 import {
+  ACTION_TYPES,
   ADJUSTABLE_TRAITS,
   ARMOR_TN_MODES,
   ATTACK_RANGES,
+  CHOICE_LISTS,
+  LEDGER_DIRECTIONS,
+  LEDGER_TRACKS,
+  MANEUVERS,
   RULE_KEYS,
   SAVE_EVENTS,
   SAVE_FAILURES
@@ -341,6 +346,181 @@ export class ResourceRule extends RuleData {
 }
 
 /**
+ * +XkY or +N on rolls others make against the owner: a roll with this actor as its target reads it, testing the
+ * predicate against the owner's options with the roller's prefixed `target:`.
+ */
+export class OpponentModifierRule extends RuleData {
+  /** @override */
+  static defineSchema() {
+    return {
+      ...super.defineSchema(),
+      selector: selectorField(),
+      roll: valueField(0),
+      keep: valueField(0),
+      total: valueField(0),
+      type: typeField(),
+      range: rangeField()
+    };
+  }
+}
+
+/**
+ * Raises on rolls matching `selector` (p.79; maneuvers pp.86-87): `cost` changes what `maneuver` costs, `cap` changes
+ * how many Raises may be declared, and `minimum` is how many must be.
+ */
+export class RaiseRuleRule extends RuleData {
+  /** @override */
+  static defineSchema() {
+    const { StringField } = fields();
+    return {
+      ...super.defineSchema(),
+      selector: selectorField(),
+      maneuver: new StringField({
+        required: true,
+        nullable: true,
+        initial: null,
+        choices: MANEUVERS
+      }),
+      cost: valueField(0),
+      cap: valueField(0),
+      minimum: valueField(0)
+    };
+  }
+}
+
+/**
+ * Skill rolls matching `selector` with no ranks count as `rank` ranks: the dice roll and explode, and Raises are
+ * allowed (Unskilled Rolls, p.80).
+ */
+export class UnskilledAsRule extends RuleData {
+  /** @override */
+  static defineSchema() {
+    return { ...super.defineSchema(), selector: selectorField(), rank: valueField(1) };
+  }
+}
+
+/** The action a roll matching `selector` takes (p.85), shown on its card; the system does not enforce it. */
+export class ActionCostRule extends RuleData {
+  /** @override */
+  static defineSchema() {
+    const { StringField } = fields();
+    return {
+      ...super.defineSchema(),
+      selector: selectorField(),
+      action: new StringField({ required: true, initial: "simple", choices: ACTION_TYPES })
+    };
+  }
+}
+
+/**
+ * The XP price of what `selector` names (pp.102-103): `trait:<trait>`, `ring:void`, `skill:<skill>`,
+ * `skill-type:<type>`, `emphasis`, `item:<type>` for every item of a type, or `self` for the item carrying the rule.
+ * `value` is the new price, a formula over the base price `@cost`, so "@cost - 1" is a discount of 1. A Trait, Ring,
+ * or Skill is priced one rank at a time.
+ */
+export class CostRule extends RuleData {
+  /** @override */
+  static defineSchema() {
+    return { ...super.defineSchema(), selector: selectorField(), value: valueField("@cost") };
+  }
+}
+
+/**
+ * A change to the gains or losses of Honor, Glory, Status, or Taint (pp.90-95, 274). `value` is the new size of each
+ * change in points, a formula over its size `@points`: "@points + 1" gains one more, "0" ignores the change.
+ */
+export class LedgerRule extends RuleData {
+  /** @override */
+  static defineSchema() {
+    const { StringField } = fields();
+    return {
+      ...super.defineSchema(),
+      track: new StringField({ required: true, initial: "honor", choices: LEDGER_TRACKS }),
+      direction: new StringField({ required: true, initial: "gain", choices: LEDGER_DIRECTIONS }),
+      value: valueField("@points")
+    };
+  }
+}
+
+/**
+ * What the owner needs before the item can be added: `requires` is a predicate over the actor's roll options. A GM
+ * may add the item anyway. The label explains the requirement to the player.
+ */
+export class PrerequisiteRule extends RuleData {
+  /** @override */
+  static defineSchema() {
+    const { ArrayField, AnyField } = fields();
+    return {
+      ...super.defineSchema(),
+      requires: new ArrayField(new AnyField({ serializable: true, nullable: false }))
+    };
+  }
+}
+
+/**
+ * A choice made when the item is added to an actor, stored in `selection`. The item's other rules use it as
+ * `{choice:<flag>}` in their text (module/utils/choices.js). The options are the rule's own `options`, or a built-in
+ * `list`: Traits, Rings, or Skill items in the world and compendiums, limited to the Skill types in `filter`.
+ */
+export class ChoiceSetRule extends RuleData {
+  /** @override */
+  static defineSchema() {
+    const { ArrayField, SchemaField, StringField } = fields();
+    return {
+      ...super.defineSchema(),
+      flag: new StringField({
+        required: true,
+        blank: false,
+        initial: "choice",
+        validate: value => /^[a-z][a-z0-9-]*$/i.test(value),
+        validationError: "must be letters, digits, and dashes"
+      }),
+      prompt: new StringField({ required: true, blank: true, initial: "" }),
+      options: new ArrayField(
+        new SchemaField({
+          value: new StringField({ required: true, blank: false }),
+          label: new StringField({ required: true, blank: true, initial: "" })
+        })
+      ),
+      list: new StringField({
+        required: true,
+        nullable: true,
+        initial: null,
+        choices: CHOICE_LISTS
+      }),
+      filter: new ArrayField(new StringField({ required: true, blank: false })),
+      // Not blank, or the StringField would store an empty string for "no selection yet"
+      selection: new StringField({ required: true, nullable: true, blank: false, initial: null })
+    };
+  }
+}
+
+/**
+ * An item given with this one: a School's Skills and Techniques (p.102). `uuid` names the item to copy; it may use
+ * a `{choice:<flag>}`. `rank` is the School Rank it waits for (0 at once). A granted Skill comes with `skillRank` free
+ * ranks and, when set, a free `emphasis`.
+ */
+export class GrantItemRule extends RuleData {
+  /** @override */
+  static defineSchema() {
+    const { NumberField, StringField } = fields();
+    return {
+      ...super.defineSchema(),
+      uuid: new StringField({ required: true, blank: false }),
+      rank: new NumberField({ required: true, nullable: false, integer: true, min: 0, initial: 0 }),
+      skillRank: new NumberField({
+        required: true,
+        nullable: false,
+        integer: true,
+        min: 0,
+        initial: 1
+      }),
+      emphasis: new StringField({ required: true, blank: true, initial: "" })
+    };
+  }
+}
+
+/**
  * Rule key to DataModel class.
  * @type {Readonly<Record<string, typeof RuleData>>}
  */
@@ -364,7 +544,16 @@ export const RULE_MODELS = Object.freeze({
   Resource: ResourceRule,
   DamageSource: DamageSourceRule,
   Invulnerability: InvulnerabilityRule,
-  Spirit: SpiritRule
+  Spirit: SpiritRule,
+  OpponentModifier: OpponentModifierRule,
+  RaiseRule: RaiseRuleRule,
+  UnskilledAs: UnskilledAsRule,
+  ActionCost: ActionCostRule,
+  Cost: CostRule,
+  Ledger: LedgerRule,
+  Prerequisite: PrerequisiteRule,
+  ChoiceSet: ChoiceSetRule,
+  GrantItem: GrantItemRule
 });
 
 if (RULE_KEYS.some(key => !RULE_MODELS[key])) {
@@ -372,7 +561,8 @@ if (RULE_KEYS.some(key => !RULE_MODELS[key])) {
 }
 
 /**
- * Validate one stored rule.
+ * Validate one stored rule. The model is built from a copy: a DataModel cleans the source it is given in place, which
+ * would write every default into the stored rule.
  * @param {object} source  An entry of `system.rules`.
  * @returns {RuleData}
  * @throws {Error} When the key is unknown or a field fails validation.
@@ -382,5 +572,5 @@ export function createRule(source) {
   if (!Model) {
     throw new Error(`Unknown rule key "${source?.key}"`);
   }
-  return new Model(source, { strict: true });
+  return new Model(foundry.utils.deepClone(source), { strict: true });
 }

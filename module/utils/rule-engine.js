@@ -18,6 +18,7 @@ import { stackModifiers } from "./modifier-stacking.js";
  * @property {object} rule          Validated rule data: `key`, `label`, `priority`, `predicate`, and the key's fields
  * @property {string} source        Name of the Item or Active Effect that carries the rule
  * @property {string} [effectUuid]  The Active Effect that carries the rule, for rules on effects
+ * @property {string} [itemId]      The item that carries the rule, for rules on items (a Cost rule's `self`)
  * @property {string} [weaponId]    The weapon that carries the rule: its roll rules apply to rolls with it
  * @property {number} [level]       That effect's level (a Fear Rank), which formulas read as `@level`
  */
@@ -172,6 +173,8 @@ export function traitAdjustTotal(rules, trait) {
  * @property {Set<string>} immunities Statuses the actor cannot gain (ConditionImmunity)
  * @property {object[]} saves         PeriodicSave rules with the effect each one ends
  * @property {Record<string, {max: number, per: string}>} resources  Resource rules by slug, maxima added
+ * @property {Array<{track: string, direction: string, value: number|string, source: string}>} ledger  Ledger
+ *   rules, their formulas left for the change they size (module/utils/ledger.js)
  * @property {Record<string, Record<string, object[]>>} bag  Bag entries by kind, then selector
  * @property {RuleError[]} errors
  */
@@ -270,6 +273,16 @@ export function derivedRuleOutputs(entries, rollData, options) {
     resources[rule.slug].max += max;
   });
 
+  const ledger = [];
+  forEachRule(entries, ["Ledger"], options, errors, (rule, entry) => {
+    ledger.push({
+      track: rule.track,
+      direction: rule.direction,
+      value: rule.value,
+      source: entry.source
+    });
+  });
+
   const bag = Object.fromEntries(Object.values(BAG_KINDS).map(kind => [kind, {}]));
   forEachRule(entries, Object.keys(BAG_KINDS), null, errors, (rule, entry) => {
     // Resolve first, so a rule whose value fails leaves no trace in the bag
@@ -289,6 +302,7 @@ export function derivedRuleOutputs(entries, rollData, options) {
     immunities,
     saves,
     resources,
+    ledger,
     bag,
     errors
   };
@@ -311,6 +325,7 @@ function bagEntry(rule, entry, value) {
   };
   switch (rule.key) {
     case "RollModifier":
+    case "OpponentModifier":
       return {
         ...base,
         roll: value(rule.roll),
@@ -318,10 +333,25 @@ function bagEntry(rule, entry, value) {
         total: value(rule.total),
         type: rule.type,
         range: rule.range,
-        optional: rule.optional,
+        optional: Boolean(rule.optional),
         // The effect a ticked `consumes` modifier ends; an item's rule has none to end
         consumes: rule.consumes && entry.effectUuid ? entry.effectUuid : null
       };
+    case "RaiseRule":
+      return {
+        ...base,
+        maneuver: rule.maneuver,
+        cost: value(rule.cost),
+        cap: value(rule.cap),
+        minimum: value(rule.minimum)
+      };
+    case "UnskilledAs":
+      return { ...base, rank: value(rule.rank) };
+    case "ActionCost":
+      return { ...base, action: rule.action };
+    case "Cost":
+      // The price formula reads the base price, known only when something is priced (module/utils/xp-ledger.js)
+      return { ...base, value: rule.value, itemId: entry.itemId ?? null };
     case "TNModifier":
       return { ...base, value: value(rule.value), type: rule.type };
     case "FreeRaise":

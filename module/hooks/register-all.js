@@ -24,6 +24,8 @@ import { initializeAnimations } from "../services/animations/initialize.js";
 import { initializeEffectAutomation } from "../services/effects/automation.js";
 import { bindPromptCard } from "../services/effects/prompts.js";
 import { initializeCombat } from "../services/combat/index.js";
+import { initializeSessions } from "../services/session.js";
+import { initializeItemTransfer } from "../services/item-transfer.js";
 
 /**
  * Register all system hooks
@@ -57,6 +59,12 @@ export function registerAllHooks() {
 
   // Combat loop: damage, maneuvers, duel, grapple, Guard
   initializeCombat();
+
+  // Game sessions: the GM's "New session" control for once-per-session abilities
+  initializeSessions();
+
+  // Item folders: export and import items with their rules
+  initializeItemTransfer();
 
   // Damage buttons on cards posted by 3.x
   registerChatDamageButtons();

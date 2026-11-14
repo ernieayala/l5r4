@@ -76,9 +76,9 @@ export async function applyLongRest(actor) {
   // Check if character is fasting (blocks void recovery per L5R4 rules)
   const isFasting = actor.effects?.some(e => e.statuses?.has("fasting")) ?? false;
 
-  // Restore Void Points to maximum (unless fasting)
+  // Restore Void Points to maximum (unless fasting): the Void Ring, less a point at Taint Level 4 (p.278)
   // Note: Only PCs have rings.void.value property; NPCs only have rings.void.rank
-  const voidMax = toInt(rings.void?.rank ?? 0);
+  const voidMax = toInt(rings.void?.max ?? 0);
   const hasVoidValue = rings.void && "value" in rings.void;
   const voidUpdate = isFasting || !hasVoidValue ? {} : { "system.rings.void.value": voidMax };
 

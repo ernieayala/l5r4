@@ -1,0 +1,6 @@
+{{!-- Executes or ends a kata or kiho (module/services/effects/activation.js) --}}
+<a
+  class="button inline-control icon item-activate{{#if active}} active{{/if}}"
+  data-action="item-activate"
+  title="{{localize (ifThen active 'l5r4.ui.activation.end' 'l5r4.ui.activation.start')}}"
+><i class="fa-solid {{ifThen active 'fa-circle-stop' 'fa-circle-play'}}"></i></a>

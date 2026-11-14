@@ -24,6 +24,9 @@ import { SYS_ID } from "../../config/constants.js";
  *
  * Settings Registered:
  * - LtException: Little Truths spell conversion rule
+ * - customEmphases: world custom Emphases (hidden)
+ * - honorRoll: the optional Honor Roll
+ * - session: the current game session's number (hidden)
  *
  * Foundry API:
  * All settings use game.settings.register() with:
@@ -57,5 +60,24 @@ export function registerWorldSettings() {
     scope: "world",
     type: Array,
     default: []
+  });
+
+  // The optional Honor Roll (Core Rulebook p.92), off unless the GM turns it on (roadmap/STAGE-11 decision 3)
+  game.settings.register(SYS_ID, "honorRoll", {
+    config: true,
+    scope: "world",
+    name: "SETTINGS.honorRoll.name",
+    hint: "SETTINGS.honorRoll.hint",
+    type: Boolean,
+    default: false
+  });
+
+  // The game session the GM last started with the "New session" token control; once-per-session uses compare
+  // against it
+  game.settings.register(SYS_ID, "session", {
+    config: false,
+    scope: "world",
+    type: Number,
+    default: 0
   });
 }

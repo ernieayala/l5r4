@@ -22,23 +22,28 @@ export const SACRED = Object.freeze(["jade", "crystal", "obsidian"]);
 
 /**
  * Raises the chosen maneuvers cost (pp.86-87): Called Shot 1-4, Disarm 3, Extra Attack 5, Feint 2, Knockdown 2 (4
- * against a four-legged opponent). Increased Damage is whatever declared Raises are left (see allocateRaises).
+ * against a four-legged opponent). A RaiseRule changes one maneuver's cost, never below 0 (roadmap/STAGE-11).
+ * Increased Damage is whatever declared Raises are left (see allocateRaises).
  *
  * @param {Maneuvers} maneuvers
+ * @param {Record<string, number>} [adjust={}]  Change to each maneuver's cost, by maneuver key
  * @returns {number}
  *
  * @example
  * maneuverCost({ feint: true, knockdown: true }); // 4
+ * maneuverCost({ feint: true }, { feint: -1 }); // 1
  */
-export function maneuverCost(maneuvers) {
-  let cost = Math.max(0, Math.min(4, Number(maneuvers.calledShot) || 0));
+export function maneuverCost(maneuvers, adjust = {}) {
+  const priced = (key, base) => Math.max(0, base + (adjust[key] ?? 0));
+  const calledShot = Math.max(0, Math.min(4, Number(maneuvers.calledShot) || 0));
+  let cost = calledShot ? priced("calledShot", calledShot) : 0;
   for (const key of ["disarm", "extraAttack", "feint"]) {
     if (maneuvers[key]) {
-      cost += MANEUVER_RAISES[key];
+      cost += priced(key, MANEUVER_RAISES[key]);
     }
   }
   if (maneuvers.knockdown) {
-    cost += maneuvers.fourLegged ? 4 : 2;
+    cost += priced("knockdown", maneuvers.fourLegged ? 4 : 2);
   }
   return cost;
 }

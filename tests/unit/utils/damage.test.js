@@ -56,6 +56,14 @@ describe("maneuverCost (pp.86-87)", () => {
   it("adds maneuvers together and caps a Called Shot at 4", () => {
     expect(maneuverCost({ feint: true, knockdown: true, calledShot: 9 })).toBe(8);
   });
+
+  it("takes a RaiseRule's change to a chosen maneuver's cost, never below 0 (STAGE-11)", () => {
+    expect(maneuverCost({ feint: true, knockdown: true }, { feint: -1 })).toBe(3);
+    expect(maneuverCost({ disarm: true }, { disarm: -5 })).toBe(0);
+    expect(maneuverCost({ calledShot: 2 }, { calledShot: 1 })).toBe(3);
+    // A change to a maneuver not chosen adds nothing
+    expect(maneuverCost({ feint: true }, { extraAttack: -2, calledShot: 3 })).toBe(2);
+  });
 });
 
 describe("allocateRaises", () => {

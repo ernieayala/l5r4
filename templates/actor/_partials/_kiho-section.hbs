@@ -15,7 +15,7 @@
   </section>
   <section class="item-list -kiho">
     {{#each kihos as |kiho id|}}
-      {{> "systems/l5r4-enhanced/templates/cards/kiho.hbs" system=kiho.system inSheet=true docId=kiho.id}}
+      {{> "systems/l5r4-enhanced/templates/cards/kiho.hbs" system=kiho.system inSheet=true docId=kiho.id active=(includes @root.activeItemIds kiho.id)}}
     {{/each}}
   </section>
 </section>
