@@ -23,6 +23,7 @@ import { initializeChatService } from "../services/chat.js";
 import { initializeAnimations } from "../services/animations/initialize.js";
 import { initializeEffectAutomation } from "../services/effects/automation.js";
 import { bindPromptCard } from "../services/effects/prompts.js";
+import { initializeCombat } from "../services/combat/index.js";
 
 /**
  * Register all system hooks
@@ -54,7 +55,10 @@ export function registerAllHooks() {
   // Effect prompt cards: the owner's roll button
   Hooks.on("renderChatMessageHTML", bindPromptCard);
 
-  // Chat damage buttons: Apply wounds and reduce with void
+  // Combat loop: damage, maneuvers, duel, grapple, Guard
+  initializeCombat();
+
+  // Damage buttons on cards posted by 3.x
   registerChatDamageButtons();
 
   // Spell system: Memorization XP tracking

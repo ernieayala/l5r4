@@ -23,25 +23,27 @@
     <div class="check-free-raises">{{localize "l5r4.ui.mechanics.rolls.freeRaises"}}: {{freeRaisesLeft}}</div>
   {{/if}}
   {{#each notes}}<div class="check-note">{{this}}</div>{{/each}}
+  {{#each maneuverNotes}}<div class="check-note">{{this}}</div>{{/each}}
+  {{#if sources.length}}
+    <div class="check-note">{{localize "l5r4.ui.combat.sources"}}: {{#each sources}}{{this}}{{#unless @last}}, {{/unless}}{{/each}}</div>
+  {{/if}}
+  {{#if contest}}
+    <button type="button" data-action="combat-contest">{{localize "l5r4.ui.combat.contestStrength"}}</button>
+  {{/if}}
+  {{#if grappleButton}}
+    <button type="button" data-action="grapple-start">
+      {{localize "l5r4.ui.combat.grappleStart"}} {{target.name}}
+    </button>
+  {{/if}}
   {{#if (eq kind "damage")}}
     <div class="damage-actions flexrow -gap-sm">
-      <button
-        type="button"
-        class="apply-wounds-btn"
-        data-action="apply-wounds"
-        data-damage="{{outcome.total}}"
-        data-actor-id="{{actorId}}"
-      >
-        {{localize "l5r4.ui.mechanics.wounds.applyWounds"}}
-      </button>
-      <button
-        type="button"
-        class="reduce-wounds-btn"
-        data-action="reduce-wounds-void"
-        data-damage="{{outcome.total}}"
-        data-actor-id="{{actorId}}"
-      >
-        {{localize "l5r4.ui.mechanics.wounds.reduceWithVoid"}}
+      {{#if applyTarget}}
+        <button type="button" data-action="damage-apply-target">
+          {{localize "l5r4.ui.combat.applyTo"}} {{applyTarget}}
+        </button>
+      {{/if}}
+      <button type="button" data-action="damage-apply-selected">
+        {{localize "l5r4.ui.combat.applySelected"}}
       </button>
     </div>
   {{/if}}

@@ -99,6 +99,18 @@ body > * {
 .message-content .check-note {
   font-style: italic;
 }
+.message-content .l5r4-flow-card,
+.message-content .l5r4-damage-result {
+  display: flex;
+  flex-direction: column;
+  gap: 0.25rem;
+}
+.message-content .flow-actions {
+  flex-direction: column;
+}
+.message-content .l5r4-damage-result.-undone {
+  opacity: 0.7;
+}
 
 .l5r4-check-dialog .check-modifiers,
 .l5r4-check-dialog .check-substitutes,

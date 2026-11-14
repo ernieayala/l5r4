@@ -11,7 +11,7 @@
 
 import { SYS_ID } from "../../../config/constants.js";
 import { CHAT_TEMPLATES, DIALOG_TEMPLATES } from "../../../config/templates.js";
-import { T } from "../../../utils/localization.js";
+import { F, T } from "../../../utils/localization.js";
 import { toInt } from "../../../utils/type-coercion.js";
 import { getEffectiveTrait } from "../../../utils/mechanics.js";
 import {
@@ -21,6 +21,7 @@ import {
   poolFormula,
   targetNumber
 } from "../../../utils/check.js";
+import { allocateRaises, maneuverCost } from "../../../utils/damage.js";
 import { spendVoidPoint } from "../resources/void-manager.js";
 import { resolveTargets } from "../resources/target-resolver.js";
 import { collectCheck } from "./collect.js";
@@ -40,7 +41,11 @@ import { voidOverLimit } from "../../effects/uses.js";
  * @property {number} [tn]               Default TN; an attack defaults to a single target's Armor TN
  * @property {number} [explode=10]       Explode threshold (a weapon's "Explodes on")
  * @property {CheckModifierInput[]} [modifiers=[]] Extra modifiers from the caller (Increased Damage, Raises)
- * @property {Item} [weapon]             Weapon of an attack or damage roll
+ * @property {Item} [weapon]             Weapon of an attack or damage roll: its own rules apply
+ * @property {Actor|null} [target]       The target; without it, the user's single target for an attack
+ * @property {{label: string, roll: number, keep: number, bonus?: number, explode?: number|null}} [damage]
+ *   An attack's damage pool, stored on its message for the damage button
+ * @property {string} [attackOf]         The attack message a damage roll belongs to
  * @property {boolean} [ranged=false]    An attack starts as ranged
  * @property {boolean} [askForOptions=true] Show the dialog; without it every default applies
  * @property {{template: string, data: object}} [extras] Extra dialog fields for the caller
@@ -85,6 +90,54 @@ function voidOf(actor) {
   return {
     points: toInt(actor.system.rings.void.value),
     ring: toInt(actor.system.rings.void.rank)
+  };
+}
+
+/**
+ * The damage pool an attack stores for its damage button: the caller's (a stat block's damage), or the weapon's
+ * prepared pool, Strength or the bow and arrow included (pp.82, 199). None for other rolls.
+ * @param {CheckRequest} request
+ * @returns {{label: string, roll: number, keep: number, bonus: number, explode: number}|null}
+ */
+function attackDamage(request) {
+  if (request.kind !== "attack") {
+    return null;
+  }
+  if (request.damage) {
+    return { bonus: 0, explode: 10, ...request.damage };
+  }
+  const weapon = request.weapon;
+  if (!weapon) {
+    return null;
+  }
+  return {
+    label: weapon.name,
+    roll: toInt(weapon.system.derivedDamageRoll ?? weapon.system.damageRoll),
+    keep: toInt(weapon.system.derivedDamageKeep ?? weapon.system.damageKeep),
+    bonus: 0,
+    explode: toInt(weapon.system.explodesOn) || 10
+  };
+}
+
+/**
+ * An attack's maneuvers from the dialog's choices, bounded (user input). Without Raises allowed (an Unskilled
+ * attack, p.80) only Grapple, which costs none, remains.
+ * @param {object} choice  `maneuver.*` fields of the dialog
+ * @param {boolean} raisesAllowed
+ * @returns {object}
+ */
+function readManeuvers(choice, raisesAllowed) {
+  const pick = key => raisesAllowed && Boolean(choice[key]);
+  return {
+    calledShot: raisesAllowed ? Math.min(4, Math.max(0, toInt(choice.calledShot))) : 0,
+    location: raisesAllowed ? String(choice.location ?? "").trim() : "",
+    disarm: pick("disarm"),
+    extraAttack: pick("extraAttack"),
+    feint: pick("feint"),
+    knockdown: pick("knockdown"),
+    fourLegged: pick("fourLegged"),
+    grapple: Boolean(choice.grapple),
+    increasedDamage: 0
   };
 }
 
@@ -135,13 +188,14 @@ export async function rollCheck(request) {
   const isDamage = kind === "damage";
   const unskilled = Boolean(request.unskilled);
   const { autoTN, targetData } = resolveTargets(actor, kind === "attack" ? "attack" : null);
-  const target = targetData?.actor ?? null;
+  const target = request.target !== undefined ? request.target : (targetData?.actor ?? null);
   const ctx = collectCheck(actor, {
     kind,
     skill: request.skill,
     trait: request.trait,
     ring: request.ring,
-    target
+    target,
+    weapon: request.weapon ?? null
   });
   const modifiers = [
     ...ctx.modifiers,
@@ -240,6 +294,23 @@ export async function rollCheck(request) {
   }
   applied.push(...(prepared.modifiers ?? []));
   const totalFreeRaises = freeRaises + toInt(prepared.freeRaises);
+
+  // An attack's maneuvers, paid for out of its Raises (pp.86-87); dialog values are user input
+  const maneuvers = kind === "attack" ? readManeuvers(choices.maneuver ?? {}, raisesAllowed) : null;
+  if (maneuvers) {
+    const { affordable, increasedDamage } = allocateRaises({
+      raises,
+      freeRaises: totalFreeRaises - freeRaisesToTN,
+      cost: maneuverCost(maneuvers)
+    });
+    if (!affordable) {
+      ui.notifications?.warn(
+        F("l5r4.ui.combat.notEnoughRaises", { cost: maneuverCost(maneuvers), raises })
+      );
+      return null;
+    }
+    maneuvers.increasedDamage = increasedDamage;
+  }
   if (prepared.tn !== undefined) {
     tnBase = prepared.tn;
   }
@@ -272,6 +343,11 @@ export async function rollCheck(request) {
     : ctx.tnModifiers
         .filter(m => !m.range || m.range === range)
         .map(({ label: l, value }) => ({ label: l, value }));
+  // An attack starting a grapple ignores the armor in the target's Armor TN (p.88)
+  const armorBonus = toInt(target?.system.armorTn?.bonus);
+  if (maneuvers?.grapple && armorBonus) {
+    tnModifiers.push({ label: T("l5r4.ui.combat.grappleIgnoresArmor"), value: -armorBonus });
+  }
   const tn = isDamage
     ? null
     : targetNumber({
@@ -302,11 +378,11 @@ export async function rollCheck(request) {
   }
 
   const weapon = request.weapon ?? null;
-  const hit = kind === "attack" && outcome?.success === true;
   const system = {
     actorUuid: actor.uuid,
     kind,
     label,
+    skill: request.skill ?? "",
     pool: { ...pool, unskilled },
     modifiers: applied.map(({ label: l, roll: r, keep: k, total: t, enabled: e }) => ({
       label: l,
@@ -334,13 +410,15 @@ export async function rollCheck(request) {
     },
     weaponUuid: weapon?.uuid ?? "",
     notes: ctx.notes,
-    conditions: target ? ctx.applyConditions : []
+    conditions: target ? ctx.applyConditions : [],
+    ...(maneuvers ? { maneuvers } : {}),
+    ...(attackDamage(request) ? { damage: attackDamage(request) } : {}),
+    sources: isDamage ? ctx.damageSources : [],
+    ignoreReduction: isDamage ? ctx.ignoreReduction : 0,
+    attackOf: request.attackOf ?? ""
   };
 
-  const content = await renderCheckCard(system, roll, {
-    damageButton: hit && weapon ? weapon.name : "",
-    actorId: actor.id
-  });
+  const content = await renderCheckCard(system, roll, { actorId: actor.id });
   const message = await roll.toMessage({
     type: "roll",
     system,
@@ -361,17 +439,52 @@ export async function rollCheck(request) {
 }
 
 /**
+ * The lines a hit's maneuvers add to its card (pp.86-88): what each did, and the Contested Strength roll Knockdown
+ * and Disarm call for. A Called Shot's effect is the GM's (STAGE-10 decision 1).
+ * @param {object} maneuvers
+ * @returns {string[]}
+ */
+function maneuverNotes(maneuvers) {
+  const notes = [];
+  if (maneuvers.calledShot) {
+    notes.push(
+      F("l5r4.ui.combat.calledShotNote", {
+        raises: maneuvers.calledShot,
+        location: maneuvers.location || T("l5r4.ui.combat.calledShotUnnamed")
+      })
+    );
+  }
+  if (maneuvers.feint) {
+    notes.push(T("l5r4.ui.combat.feintNote"));
+  }
+  if (maneuvers.increasedDamage) {
+    notes.push(F("l5r4.ui.combat.increasedDamageNote", { dice: maneuvers.increasedDamage }));
+  }
+  if (maneuvers.knockdown) {
+    notes.push(T("l5r4.ui.combat.knockdownNote"));
+  }
+  if (maneuvers.disarm) {
+    notes.push(T("l5r4.ui.combat.disarmNote"));
+  }
+  if (maneuvers.extraAttack) {
+    notes.push(T("l5r4.ui.combat.extraAttackNote"));
+  }
+  return notes;
+}
+
+/**
  * Render a check's card from its stored context.
  * @param {object} system  RollMessageData source
  * @param {Roll} roll
- * @param {{damageButton?: string, actorId?: string}} [extra]  The weapon name on an attack's damage button; the
- *   roller's id for a damage card's Apply Wounds buttons
+ * @param {{actorId?: string}} [extra]  The roller's id
  * @returns {Promise<string>}
  */
-export async function renderCheckCard(system, roll, { damageButton = "", actorId = "" } = {}) {
+export async function renderCheckCard(system, roll, { actorId = "" } = {}) {
   const success = system.outcome.success;
-  const missed =
-    system.kind === "attack" ? "l5r4.ui.mechanics.rolls.missed" : "l5r4.ui.mechanics.rolls.failure";
+  const isAttack = system.kind === "attack";
+  const hit = isAttack && success === true;
+  const maneuvers = system.maneuvers ?? {};
+  const missed = isAttack ? "l5r4.ui.mechanics.rolls.missed" : "l5r4.ui.mechanics.rolls.failure";
   return foundry.applications.handlebars.renderTemplate(CHAT_TEMPLATES.checkCard, {
     ...system,
     tn: system.tn.effective === null ? null : system.tn,
@@ -381,7 +494,11 @@ export async function renderCheckCard(system, roll, { damageButton = "", actorId
       .filter(m => m.enabled && (m.roll || m.keep || m.total))
       .map(m => ({ label: m.label, text: modifierText(m) })),
     roll: await roll.render(),
-    damageButton,
+    damageButton: hit && !maneuvers.grapple ? (system.damage?.label ?? "") : "",
+    maneuverNotes: hit ? maneuverNotes(maneuvers) : [],
+    contest: hit && Boolean(system.target?.uuid) && (maneuvers.knockdown || maneuvers.disarm),
+    grappleButton: hit && Boolean(system.target?.uuid) && maneuvers.grapple,
+    applyTarget: system.kind === "damage" ? system.target?.name : "",
     actorId
   });
 }

@@ -84,12 +84,64 @@ export class ArmorTNRule extends RuleData {
   }
 }
 
-/** Reduction added to the actor's. */
+/**
+ * Reduction added to the actor's. `except` lists damage sources it does not reduce, for a creature with less
+ * Reduction against jade (p.318).
+ */
 export class ReductionRule extends RuleData {
   /** @override */
   static defineSchema() {
-    return { ...super.defineSchema(), value: valueField(0) };
+    return { ...super.defineSchema(), value: valueField(0), except: tagsField() };
   }
+}
+
+/**
+ * Damage sources (pp.319-320): tags such as "jade", "crystal", "obsidian", "spell", "nemuranai" on the damage of
+ * rolls matching `selector`, and Reduction those rolls ignore.
+ */
+export class DamageSourceRule extends RuleData {
+  /** @override */
+  static defineSchema() {
+    return {
+      ...super.defineSchema(),
+      selector: new (fields().StringField)({ required: true, blank: false, initial: "damage" }),
+      tags: tagsField(),
+      ignoreReduction: valueField(0)
+    };
+  }
+}
+
+/**
+ * Invulnerability (p.319): damage from a source not in `harmedBy` is one Wound. With `only`, the rule covers
+ * damage from those sources alone (partial Invulnerability); a shorter `harmedBy` is Superior Invulnerability.
+ */
+export class InvulnerabilityRule extends RuleData {
+  /** @override */
+  static defineSchema() {
+    return {
+      ...super.defineSchema(),
+      harmedBy: tagsField(["jade", "crystal", "obsidian", "spell", "nemuranai"]),
+      only: tagsField()
+    };
+  }
+}
+
+/** Spirit (p.320): damage from a source not in `harmedBy` is halved. */
+export class SpiritRule extends RuleData {
+  /** @override */
+  static defineSchema() {
+    return { ...super.defineSchema(), harmedBy: tagsField(["jade", "crystal", "obsidian"]) };
+  }
+}
+
+/**
+ * A list of damage-source tags.
+ * @param {string[]} [initial=[]]
+ * @returns {foundry.data.fields.ArrayField}
+ */
+function tagsField(initial = []) {
+  const { ArrayField, StringField } = fields();
+  return new ArrayField(new StringField({ required: true, blank: false }), { initial });
 }
 
 /** Wounds added to each Wound Rank, and a change to every Wound Rank's TN penalty. */
@@ -309,7 +361,10 @@ export const RULE_MODELS = Object.freeze({
   ApplyCondition: ApplyConditionRule,
   ConditionImmunity: ConditionImmunityRule,
   PeriodicSave: PeriodicSaveRule,
-  Resource: ResourceRule
+  Resource: ResourceRule,
+  DamageSource: DamageSourceRule,
+  Invulnerability: InvulnerabilityRule,
+  Spirit: SpiritRule
 });
 
 if (RULE_KEYS.some(key => !RULE_MODELS[key])) {

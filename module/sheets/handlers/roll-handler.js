@@ -115,6 +115,9 @@ export class RollHandler {
     event.preventDefault();
     const el = RollHandler._getElement(element, event);
     const params = extractRollParams(el, context.actor);
+    // The stat block pairs attack N with damage N; the attack stores it for its damage button. dataset is user input.
+    const num = ["1", "2", "3"].includes(el.dataset.attackNum) ? el.dataset.attackNum : null;
+    const damage = num ? context.actor.system[`damage${num}`] : null;
     return RollHandler._once(`${context.actor.id}-attack-${params.label}`, () =>
       SimpleRoll({
         diceRoll: params.diceRoll + params.traitBonus,
@@ -123,7 +126,16 @@ export class RollHandler {
         rollName: params.label,
         askForOptions: !event.shiftKey,
         rollType: "attack",
-        actor: context.actor
+        actor: context.actor,
+        damage:
+          damage && (damage.roll || damage.keep)
+            ? {
+                label: params.label,
+                roll: toInt(damage.roll),
+                keep: toInt(damage.keep),
+                bonus: toInt(damage.modifier)
+              }
+            : null
       })
     );
   }

@@ -1,0 +1,13 @@
+<div class="chat-card l5r4-damage-result{{#if undone}} -undone{{/if}}">
+  <div class="dice-flavor">{{title}}</div>
+  {{#each notes}}<div class="check-note">{{this}}</div>{{/each}}
+  {{#if undone}}<div class="check-note">{{localize "l5r4.ui.combat.undoneNote"}}</div>{{/if}}
+  {{#unless undone}}
+    <div class="damage-actions flexrow -gap-sm">
+      {{#if canVoid}}
+        <button type="button" data-action="damage-void">{{localize "l5r4.ui.mechanics.wounds.reduceWithVoid"}}</button>
+      {{/if}}
+      <button type="button" data-action="damage-undo">{{localize "l5r4.ui.combat.undo"}}</button>
+    </div>
+  {{/unless}}
+</div>

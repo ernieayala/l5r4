@@ -204,7 +204,7 @@ function enrichSpellFormulas(actor, spell) {
  */
 function enrichWeaponFormulas(actor, weapon) {
   const weaponSkill = resolveWeaponSkillTrait(actor, weapon);
-  const attack = selectorBonus(actor.ruleBag, ["any", "attack"], actor.rollOptions);
+  const attack = selectorBonus(actor.ruleBag, ["any", "attack"], actor.rollOptions, weapon.id);
   weapon.attackFormula = `${weaponSkill.rollBonus + attack.roll}k${weaponSkill.keepBonus + attack.keep}`;
 
   // Recompute damage now that the owner's Active Effects apply: item preparation ran before them (issue #29)

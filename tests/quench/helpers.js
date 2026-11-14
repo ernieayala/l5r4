@@ -2,6 +2,32 @@ import { buildPool, parseRollAndKeep, poolFormula } from "../../module/utils/che
 import { collectCheck } from "../../module/services/dice/check/collect.js";
 
 /**
+ * Answer the next check dialog: set its fields, then click Roll.
+ * @param {Record<string, string|boolean>} values  Field name to value; booleans set checkboxes
+ * @returns {Promise<string[]>} Resolves with the dialog's modifier labels once it is answered
+ */
+export function answerCheckDialog(values = {}) {
+  return new Promise(resolve => {
+    Hooks.once("renderDialogV2", app => {
+      const form = app.element.querySelector("form") ?? app.element;
+      const labels = [...app.element.querySelectorAll(".check-modifier-label")].map(e =>
+        e.textContent.trim()
+      );
+      for (const [name, value] of Object.entries(values)) {
+        const input = form.querySelector(`[name="${name}"]`);
+        if (input.type === "checkbox") {
+          input.checked = Boolean(value);
+        } else {
+          input.value = String(value);
+        }
+      }
+      app.element.querySelector('[data-action="ok"]').click();
+      resolve(labels);
+    });
+  });
+}
+
+/**
  * Answer every roll dialog that opens with its defaults until the returned function is called: for batches whose
  * actions open the roll dialog as a side effect (taking the Full Defense Stance rolls Defense / Reflexes, p.84).
  * @returns {function(): void}  Stops answering

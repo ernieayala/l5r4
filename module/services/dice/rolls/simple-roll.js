@@ -38,6 +38,8 @@ import { resolveActor } from "../resources/void-manager.js";
  * @param {string|null} [params.skillName=null] - Skill the attack would use, for armor penalties and rules
  * @param {string|null} [params.skillTrait=null] - Trait the attack uses
  * @param {boolean} [params.askForOptions=true] - Show the roll dialog
+ * @param {{label: string, roll: number, keep: number, bonus?: number}|null} [params.damage=null] - An attack's
+ *   damage pool when no weapon gives one (a stat block's damage)
  * @returns {Promise<ChatMessage|null>} The posted message, or null when cancelled
  */
 export async function SimpleRoll({
@@ -56,7 +58,8 @@ export async function SimpleRoll({
   isBow = false,
   skillName = null,
   skillTrait = null,
-  askForOptions = true
+  askForOptions = true,
+  damage = null
 } = {}) {
   const roller = resolveActor(actor);
   const traitKey = traitName ? normalizeTraitKey(traitName) : null;
@@ -92,6 +95,7 @@ export async function SimpleRoll({
     explode: kind === "damage" ? (weapon?.system.explodesOn ?? 10) : 10,
     ranged: Boolean(isBow),
     modifiers: modifier ? [{ label: T("l5r4.ui.check.statBlock"), total: toInt(modifier) }] : [],
-    askForOptions
+    askForOptions,
+    ...(damage ? { damage } : {})
   });
 }

@@ -27,7 +27,10 @@ export const RULE_KEYS = freeze([
   "ApplyCondition",
   "ConditionImmunity",
   "PeriodicSave",
-  "Resource"
+  "Resource",
+  "DamageSource",
+  "Invulnerability",
+  "Spirit"
 ]);
 
 /**
@@ -42,7 +45,8 @@ export const BAG_KINDS = freeze({
   DiceRule: "diceRules",
   Substitute: "substitutes",
   Note: "notes",
-  ApplyCondition: "applyConditions"
+  ApplyCondition: "applyConditions",
+  DamageSource: "damageSources"
 });
 
 /**

@@ -54,7 +54,9 @@ export function collectRules(actor) {
   const sources = [];
   for (const item of actor.items) {
     if (item.system.rulesActive) {
-      sources.push(...item.system.ownedRules.map(rule => ({ rule, source: item.name })));
+      // A weapon's roll rules apply to rolls made with it (module/utils/rule-engine.js, bagEntries)
+      const extra = item.type === "weapon" ? { weaponId: item.id } : {};
+      sources.push(...item.system.ownedRules.map(rule => ({ rule, source: item.name, ...extra })));
     }
   }
   for (const effect of actor.appliedEffects) {
@@ -138,6 +140,8 @@ export function applyDerivedRules(actor, sys) {
   sys.armorTn.ruleReduction = out.reduction;
   sys.movementWater = out.movementWater;
   actor.armorRules = out.armor;
+  actor.reductionParts = out.reductionParts;
+  actor.damageDefenses = out.defenses;
   actor.conditionImmunities = out.immunities;
   actor.periodicSaves = out.saves;
   actor.resources = out.resources;

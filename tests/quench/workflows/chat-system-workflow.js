@@ -207,10 +207,10 @@ export function registerChatSystemWorkflowTests(quench) {
           const html = await damageCard(roll, attacker.id, "Katana Damage");
 
           // ASSERT
-          assert.include(html, "apply-wounds", "Apply wounds button present");
-          assert.include(html, "reduce-wounds-void", "Reduce with void button present");
-          assert.include(html, `data-damage="${roll.total}"`, "Damage total in data attribute");
-          assert.include(html, `data-actor-id="${attacker.id}"`, "Actor ID in data attribute");
+          // The damage comes from the message's stored context, never from the card
+          assert.include(html, "damage-apply-selected", "Apply to selected button present");
+          assert.notInclude(html, "damage-apply-target", "No target, no Apply to target button");
+          assert.notInclude(html, "data-damage=", "No damage total in the HTML");
         });
 
         it("should apply damage to actor via button data", async () => {
@@ -669,8 +669,7 @@ export function registerChatSystemWorkflowTests(quench) {
           assert.exists(html, "Template rendered");
           assert.include(html, "l5r4-check", "Roll card class");
           assert.include(html, "Weapon Damage", "Flavor text");
-          assert.include(html, "apply-wounds", "Apply button");
-          assert.include(html, "reduce-wounds-void", "Void button");
+          assert.include(html, "damage-apply-selected", "Apply button");
         });
 
         it("should render the effect prompt card with its button", async () => {
@@ -685,17 +684,26 @@ export function registerChatSystemWorkflowTests(quench) {
           assert.include(html, 'data-action="effect-prompt"', "Roll button present");
         });
 
-        it("should include actor ID in damage button data", async () => {
+        it("offers Apply to the damage roll's target by name", async () => {
           // ARRANGE
           const roll = new Roll("3d10k2x10");
           await roll.evaluate();
+          const system = {
+            kind: "damage",
+            label: "",
+            modifiers: [],
+            notes: [],
+            target: { uuid: actor.uuid, name: actor.name },
+            tn: { effective: null, freeRaises: 0, freeRaisesToTN: 0 },
+            outcome: { total: roll.total, success: null }
+          };
 
           // ACT
-          const html = await damageCard(roll, actor.id);
+          const html = await renderCheckCard(system, roll, { actorId: actor.id });
 
           // ASSERT
-          assert.include(html, `data-actor-id="${actor.id}"`, "Actor ID in button");
-          assert.include(html, `data-damage="${roll.total}"`, "Damage total in button");
+          assert.include(html, 'data-action="damage-apply-target"', "Apply to target button");
+          assert.include(html, actor.name, "Target named on the button");
         });
       });
     },

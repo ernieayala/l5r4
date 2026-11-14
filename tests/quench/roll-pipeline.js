@@ -16,33 +16,7 @@ import { inlineFormula } from "../../module/services/chat.js";
 import { applyEffect } from "../../module/services/effects/apply.js";
 import { createTestNPC, createTestPC } from "../fixtures/actor-fixtures.js";
 import { createSkillData, createWeaponData } from "../fixtures/item-fixtures.js";
-import { cleanTest, settleChatNotifications } from "./helpers.js";
-
-/**
- * Answer the next check dialog: set its fields, then click Roll.
- * @param {Record<string, string|boolean>} values  Field name to value; booleans set checkboxes
- * @returns {Promise<string[]>} Resolves with the dialog's modifier labels once it is answered
- */
-function answerCheckDialog(values = {}) {
-  return new Promise(resolve => {
-    Hooks.once("renderDialogV2", app => {
-      const form = app.element.querySelector("form") ?? app.element;
-      const labels = [...app.element.querySelectorAll(".check-modifier-label")].map(e =>
-        e.textContent.trim()
-      );
-      for (const [name, value] of Object.entries(values)) {
-        const input = form.querySelector(`[name="${name}"]`);
-        if (input.type === "checkbox") {
-          input.checked = Boolean(value);
-        } else {
-          input.value = String(value);
-        }
-      }
-      app.element.querySelector('[data-action="ok"]').click();
-      resolve(labels);
-    });
-  });
-}
+import { answerCheckDialog, cleanTest, settleChatNotifications } from "./helpers.js";
 
 /**
  * The rolled and kept dice of a message's pool.

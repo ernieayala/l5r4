@@ -18,6 +18,7 @@ import { stackModifiers } from "./modifier-stacking.js";
  * @property {object} rule          Validated rule data: `key`, `label`, `priority`, `predicate`, and the key's fields
  * @property {string} source        Name of the Item or Active Effect that carries the rule
  * @property {string} [effectUuid]  The Active Effect that carries the rule, for rules on effects
+ * @property {string} [weaponId]    The weapon that carries the rule: its roll rules apply to rolls with it
  * @property {number} [level]       That effect's level (a Fear Rank), which formulas read as `@level`
  */
 
@@ -162,6 +163,8 @@ export function traitAdjustTotal(rules, trait) {
  * @typedef {object} DerivedRuleOutputs
  * @property {import("./effects.js").ArmorRule[]} armor  ArmorTN rules, resolved
  * @property {number} reduction       Reduction rules
+ * @property {Array<{value: number, except: string[]}>} reductionParts  Each Reduction rule with its exceptions
+ * @property {{invulnerable: object|null, spirit: object|null}} defenses  Invulnerability and Spirit rules
  * @property {number} woundsPerRank   Wounds rules: Wounds added to each Wound Rank
  * @property {number} woundPenalty    Wounds rules: added to every Wound Rank's TN penalty
  * @property {number} movementWater   Movement rules: Water Ring ranks for movement
@@ -195,8 +198,20 @@ export function derivedRuleOutputs(entries, rollData, options) {
   });
 
   let reduction = 0;
+  const reductionParts = [];
   forEachRule(entries, ["Reduction"], options, errors, (rule, entry) => {
-    reduction += value(rule.value, entry);
+    const part = value(rule.value, entry);
+    reduction += part;
+    reductionParts.push({ value: part, except: [...rule.except] });
+  });
+
+  // Creature defenses (pp.319-320); several of one kind act as the first
+  const defenses = { invulnerable: null, spirit: null };
+  forEachRule(entries, ["Invulnerability"], options, errors, rule => {
+    defenses.invulnerable ??= { harmedBy: [...rule.harmedBy], only: [...rule.only] };
+  });
+  forEachRule(entries, ["Spirit"], options, errors, rule => {
+    defenses.spirit ??= { harmedBy: [...rule.harmedBy] };
   });
 
   let movementWater = 0;
@@ -265,6 +280,8 @@ export function derivedRuleOutputs(entries, rollData, options) {
   return {
     armor,
     reduction,
+    reductionParts,
+    defenses,
     woundsPerRank,
     woundPenalty,
     movementWater,
@@ -289,7 +306,8 @@ function bagEntry(rule, entry, value) {
   const base = {
     label: rule.label || entry.source,
     source: entry.source,
-    predicate: rule.predicate
+    predicate: rule.predicate,
+    weaponId: entry.weaponId ?? null
   };
   switch (rule.key) {
     case "RollModifier":
@@ -316,22 +334,27 @@ function bagEntry(rule, entry, value) {
       return { ...base, text: rule.text };
     case "ApplyCondition":
       return { ...base, condition: rule.condition, level: rule.level };
+    case "DamageSource":
+      return { ...base, tags: [...rule.tags], ignoreReduction: value(rule.ignoreReduction) };
   }
   throw new Error(`No bag entry for ${rule.key}`);
 }
 
 /**
- * Bag entries of one kind for any of the selectors, whose predicates hold for the options.
+ * Bag entries of one kind for any of the selectors, whose predicates hold for the options. An entry from a weapon
+ * counts only for a roll made with that weapon.
  * @param {Record<string, Record<string, object[]>>} bag
  * @param {string} kind  A BAG_KINDS value.
  * @param {string[]} selectors
  * @param {Set<string>} options
+ * @param {string|null} [weaponId=null]  The weapon the roll is made with
  * @returns {object[]}
  */
-export function bagEntries(bag, kind, selectors, options) {
+export function bagEntries(bag, kind, selectors, options, weaponId = null) {
   const byKind = bag?.[kind] ?? {};
   return selectors
     .flatMap(selector => byKind[selector] ?? [])
+    .filter(entry => !entry.weaponId || entry.weaponId === weaponId)
     .filter(entry => testPredicate(entry.predicate, options));
 }
 
@@ -342,10 +365,13 @@ export function bagEntries(bag, kind, selectors, options) {
  * @param {Record<string, Record<string, object[]>>} bag
  * @param {string[]} selectors
  * @param {Set<string>} options
+ * @param {string|null} [weaponId=null]  The weapon the formula is for
  * @returns {{roll: number, keep: number, total: number}}
  */
-export function selectorBonus(bag, selectors, options) {
+export function selectorBonus(bag, selectors, options, weaponId = null) {
   return stackModifiers(
-    bagEntries(bag, "rollModifiers", selectors, options).filter(e => !e.optional && !e.range)
+    bagEntries(bag, "rollModifiers", selectors, options, weaponId).filter(
+      e => !e.optional && !e.range
+    )
   );
 }

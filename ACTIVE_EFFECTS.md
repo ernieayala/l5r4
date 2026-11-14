@@ -26,7 +26,7 @@ Use a rule when the system has a rule key for what you need; use an Active Effec
 
 Text that is not a JSON list of objects with a `"key"` is not saved, and an error says why. A rule whose fields are wrong (an unknown key, a missing selector) is skipped, with a warning in the browser console naming the item.
 
-Rules on an item apply while the item is on the character. Armor's rules apply only while it is worn. Rules on an Active Effect apply while the effect is active; a macro or module can put rules on an effect through `system.rules`.
+Rules on an item apply while the item is on the character. Armor's rules apply only while it is worn. A weapon's rules apply only to rolls made with that weapon: its attacks and its damage. Rules on an Active Effect apply while the effect is active; a macro or module can put rules on an effect through `system.rules`.
 
 ### Fields every rule has
 
@@ -46,7 +46,10 @@ Values marked *n/f* take a number or a formula (see **Formulas**).
 | `TraitAdjust` | `trait` (`sta`, `wil`, `str`, `per`, `ref`, `awa`, `agi`, `int`, or `void`), `value` *n/f* | Raises or lowers a Trait or the Void Ring. Rings, Armor TN, wounds, Initiative, and damage use the new value |
 | `RollModifier` | `selector`, `roll`, `keep`, `total` *n/f*, `type`, `range`, `optional`, `consumes` | Adds rolled dice, kept dice, and a flat bonus to the rolls the selector names. `range` (`"melee"` or `"ranged"`) limits it to attacks of that range. An `optional` one starts unticked in the roll dialog, for a bonus the player puts on one roll of their choice; with `consumes`, rolling with it ticked ends the effect that carries it |
 | `ArmorTN` | `value` *n/f*, `type`, `mode`, `range` | Changes Armor TN. `mode` `"add"` (default) adds; `"base"` replaces the Reflexes × 5 + 5 base when lower, and armor and other changes still add; `"total"` sets the whole Armor TN to the value plus armor, and nothing else adds. The lowest `base` or `total` wins; the Armor TN never drops below 5. An `add` with `range` counts only against attacks of that range |
-| `Reduction` | `value` *n/f* | Adds to Reduction |
+| `Reduction` | `value` *n/f*, `except` | Adds to Reduction. `except` lists damage sources it does not stop, as `["jade"]` |
+| `DamageSource` | `selector` (default `damage`), `tags`, `ignoreReduction` *n/f* | Marks the selected damage rolls with sources (`jade`, `crystal`, `obsidian`, `spell`, `nemuranai`, or your own) and lets them ignore that much Reduction |
+| `Invulnerability` | `harmedBy`, `only` | Damage from a source not in `harmedBy` (default jade, crystal, obsidian, spell, nemuranai) deals one Wound after Reduction (p.319). With `only`, it covers damage from those sources alone |
+| `Spirit` | `harmedBy` | Damage from a source not in `harmedBy` (default jade, crystal, obsidian) is halved after Reduction, rounding down (p.320) |
 | `Wounds` | `perRank` *n/f*, `penalty` *n/f* | Adds Wounds to every Wound Rank, and adds to every Wound Rank's TN penalty |
 | `Initiative` | `roll`, `keep`, `total` *n/f* | Adds to Initiative |
 | `RollOption` | `option`, `toggleable`, `value` | Turns on a roll option other rules' predicates can test. With `"toggleable": true` it is on only while `"value"` is `true`, for situations the system cannot see (higher ground, a target within reach) |
