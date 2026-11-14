@@ -10,9 +10,10 @@ import { STATUS_EFFECTS } from "../config/status-effects.js";
 import { toInt } from "./type-coercion.js";
 
 /**
- * The update that brings an effect's source up to its statuses' data: rules when it has none, the group, and a
- * level (a 3.2.1 Fear effect kept its Rank in `flags.<id>.fearRank`). Fields already set stay as they are, so
- * applying it again changes nothing.
+ * The update that brings an effect's source up to its statuses' data: rules when it has none, the group, a level
+ * (a 3.2.1 Fear effect kept its Rank in `flags.<id>.fearRank`), and the event that ends it (Fear ends with the
+ * encounter). A timed duration is left out: it counts from a start, which an older effect does not have. Fields
+ * already set stay as they are, so applying it again changes nothing.
  *
  * @param {object} source  ActiveEffect source data
  * @returns {object|null}  Update data, with `_id` when the source has one; null when nothing changes
@@ -38,6 +39,11 @@ export function statusEffectUpdate(source) {
   const level = fearRank || statuses.find(status => status.system?.level)?.system.level;
   if ((system.level ?? null) === null && level) {
     update["system.level"] = level;
+  }
+  const expiry = statuses.find(s => s.duration?.expiry && s.duration.value === undefined)?.duration
+    .expiry;
+  if (!source.duration?.expiry && expiry) {
+    update["duration.expiry"] = expiry;
   }
   if (Object.keys(update).length === 0) {
     return null;

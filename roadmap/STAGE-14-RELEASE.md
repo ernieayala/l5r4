@@ -31,6 +31,9 @@ batch that fails on any deprecated call.
 
 - Gate passes; `smoke` passes in `FAILURE` mode.
 - Install 4.0.0 from its manifest URL into a clean 14.370 and run `smoke`.
+- With the released 4.0.0 (`system.json` `version` "4.0.0", which is what starts the world migrations; STAGE-12
+  decision 2), rebuild the 3.2.1 fixture world (`tests/fixtures/world-3.2.1/build-world.mjs`), open it, and run the
+  `world-upgrade` batch.
 - On a Foundry 13 install that has 3.2.1, the update check reports 4.0.0 as incompatible (its `minimum` is 14.370) and 3.2.1 keeps working.
 
 ## Out of scope

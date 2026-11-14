@@ -176,6 +176,26 @@ describe("statusEffectUpdate (3.2.1 effects)", () => {
     expect(update["system.level"]).toBe(4);
   });
 
+  it("gives a 3.2.1 Fear effect its end with the encounter", () => {
+    const update = statusEffectUpdate({
+      _id: "e5",
+      statuses: ["feared"],
+      system: { rules: [], group: "", level: null },
+      duration: { value: null, units: "seconds", expiry: null }
+    });
+    expect(update["duration.expiry"]).toBe("encounterEnd");
+  });
+
+  it("leaves out a timed duration, which needs a start the old effect does not have", () => {
+    const update = statusEffectUpdate({
+      _id: "e6",
+      statuses: ["guarded"],
+      system: { rules: [], group: "", level: null },
+      duration: { value: null, units: "seconds", expiry: null }
+    });
+    expect(update).not.toHaveProperty(["duration.expiry"]);
+  });
+
   it("changes nothing on an effect already up to date, or one with no known status", () => {
     const current = {
       _id: "e3",

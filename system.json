@@ -17,6 +17,20 @@
     "verified": "14.370",
     "maximum": "14"
   },
+  "relationships": {
+    "recommends": [
+      {
+        "id": "sequencer",
+        "type": "module",
+        "reason": "Plays stance, condition, and attack animations, with JB2A"
+      },
+      {
+        "id": "JB2A_DnD5e",
+        "type": "module",
+        "reason": "Animation assets for stances, conditions, and attacks (the Patreon collection works too)"
+      }
+    ]
+  },
   "esmodules": ["dist/l5r4-enhanced.js"],
   "styles": [{ "src": "dist/l5r4-enhanced.css", "layer": "system" }],
   "packs": [],

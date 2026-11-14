@@ -100,6 +100,8 @@ import { registerRollPipelineBatch } from "./roll-pipeline.js";
 import { registerCombatBatch } from "./combat.js";
 import { registerAuthoringBatch } from "./authoring.js";
 import { registerEffectsBatch } from "./effects.js";
+import { registerAnimationsBatch } from "./animations.js";
+import { registerWorldUpgradeBatch } from "./world-upgrade.js";
 
 /**
  * Register Quench integration tests for the L5R4 system.
@@ -117,6 +119,8 @@ export async function registerQuenchTests(quench) {
   registerCombatBatch(quench);
   registerAuthoringBatch(quench);
   registerEffectsBatch(quench);
+  registerAnimationsBatch(quench);
+  registerWorldUpgradeBatch(quench);
   registerActorDocumentTests(quench);
   registerActorWoundTests(quench);
   registerActorXpTests(quench);

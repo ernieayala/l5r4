@@ -27,20 +27,28 @@ import { migrateEmbeddedItemIcons } from "../icons/icon-paths.js";
  * @returns {Promise<void>}
  */
 export async function migrateActorEmbeddedItems(actor, labelPrefix) {
-  if (actor.items.size === 0) {
+  await migrateEmbeddedItems(actor.items.contents, `${labelPrefix}:${actor.id}`);
+}
+
+/**
+ * Applies every item-type migration to a list of an actor's items.
+ *
+ * @param {Item[]} items - Embedded items to migrate
+ * @param {string} label - Context label for logging
+ * @returns {Promise<void>}
+ */
+export async function migrateEmbeddedItems(items, label) {
+  if (items.length === 0) {
     return;
   }
 
-  await applySchemaMapToDocs(actor.items.contents, `${labelPrefix}-items:${actor.id}`);
-  await migrateBowsToWeapons(actor.items.contents, `${labelPrefix}-bow-migration:${actor.id}`);
-  await migrateSkillDefaults(actor.items.contents, `${labelPrefix}-skill-defaults:${actor.id}`);
-  await migrateEmphasisStringToArray(
-    actor.items.contents,
-    `${labelPrefix}-emphasis-migration:${actor.id}`
-  );
-  await migrateArmorTypes(actor.items.contents, `${labelPrefix}-armor-types:${actor.id}`);
-  await migrateFreeRaisesDefaults(actor.items.contents, `${labelPrefix}-free-raises:${actor.id}`);
-  await migrateEmbeddedItemIcons(actor.items.contents, `${labelPrefix}-icon-migration:${actor.id}`);
-  await normalizeItems(actor.items.contents, `${labelPrefix}-items-norm:${actor.id}`);
-  await migrateItemRules(actor.items.contents, `${labelPrefix}-item-rules:${actor.id}`);
+  await applySchemaMapToDocs(items, `${label}-items`);
+  await migrateBowsToWeapons(items, `${label}-bow-migration`);
+  await migrateSkillDefaults(items, `${label}-skill-defaults`);
+  await migrateEmphasisStringToArray(items, `${label}-emphasis-migration`);
+  await migrateArmorTypes(items, `${label}-armor-types`);
+  await migrateFreeRaisesDefaults(items, `${label}-free-raises`);
+  await migrateEmbeddedItemIcons(items, `${label}-icon-migration`);
+  await normalizeItems(items, `${label}-items-norm`);
+  await migrateItemRules(items, `${label}-item-rules`);
 }

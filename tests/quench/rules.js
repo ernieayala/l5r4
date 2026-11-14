@@ -9,6 +9,7 @@ import { TraitRoll } from "../../module/services/dice/rolls/trait-roll.js";
 import { getCreationFreeBonusSources } from "../../module/utils/xp-calculations.js";
 import { migrateItemRules } from "../../module/setup/migrations/items/item-rules.js";
 import { migrateStatusEffectRules } from "../../module/setup/migrations/actors/status-effect-rules.js";
+import { migrateUnlinkedTokens } from "../../module/setup/migrations/actors/unlinked-tokens.js";
 import { createTestNPC, createTestPC } from "../fixtures/actor-fixtures.js";
 import { createArmorData, createSkillData } from "../fixtures/item-fixtures.js";
 import { changeThroughSheet, cleanTest, settleChatNotifications, watchConsole } from "./helpers.js";
@@ -547,6 +548,7 @@ export function registerRulesBatch(quench) {
             await fear.update({
               "system.rules": [],
               "system.level": null,
+              "duration.expiry": null,
               [`flags.${SYS_ID}.fearRank`]: 3
             });
             assert.equal(actor.system.armorTn.current, before, "no rules, no bonus");
@@ -554,6 +556,7 @@ export function registerRulesBatch(quench) {
             assert.equal(actor.system.armorTn.current, before + actor.system.rings.air);
             assert.equal(stance.system.group, "stance");
             assert.equal(fear.system.level, 3, "Fear Rank moved to the level");
+            assert.equal(fear.duration.expiry, "encounterEnd", "Fear ends with the encounter");
             assert.equal(
               collectCheck(actor, { kind: "skill" }).modifiers[0].roll,
               -3,
@@ -561,6 +564,55 @@ export function registerRulesBatch(quench) {
             );
             await migrateStatusEffectRules([actor], "quench");
             assert.lengthOf(stance._source.system.rules, 1, "running again adds nothing");
+          })
+        );
+
+        it(
+          "an unlinked token's own effects get their rules and stay tracked, and nothing is added to its delta",
+          clean(async () => {
+            const actor = track(
+              await createTestNPC({
+                name: "Rules migrate token",
+                prototypeToken: { actorLink: false }
+              })
+            );
+            await actor.createEmbeddedDocuments("ActiveEffect", [
+              { name: "Quench Actor Note", statuses: [] }
+            ]);
+            const data = await actor.getTokenDocument({ x: 0, y: 0 });
+            const [token] = await canvas.scene.createEmbeddedDocuments("Token", [data.toObject()]);
+            try {
+              const [fear] = await token.actor.createEmbeddedDocuments("ActiveEffect", [
+                { name: "Fear 2", statuses: ["feared"] }
+              ]);
+              // Stored as 3.2.1 left it in the delta
+              await fear.update({
+                "system.rules": [],
+                "system.level": null,
+                "duration.expiry": null,
+                [`flags.${SYS_ID}.fearRank`]: 2
+              });
+              // An effect with no expiry is not tracked, as one loaded from a 3.2.1 world is not
+              foundry.documents.ActiveEffect.registry.delete(fear);
+              // Core copies the actor's effects into the delta when the token's first own effect is made
+              const deltaIds = token.delta.effects.map(e => e.id);
+              await migrateUnlinkedTokens([token], "quench");
+              const migrated = token.delta.effects.get(fear.id);
+              assert.equal(migrated.system.level, 2);
+              assert.isNotEmpty(migrated.system.rules);
+              assert.equal(migrated.duration.expiry, "encounterEnd");
+              assert.isTrue(
+                foundry.documents.ActiveEffect.registry.has(migrated),
+                "tracked, so the end of the encounter reaches it"
+              );
+              assert.sameMembers(
+                token.delta.effects.map(e => e.id),
+                deltaIds,
+                "the migration adds nothing to the delta"
+              );
+            } finally {
+              await token.delete();
+            }
           })
         );
       });

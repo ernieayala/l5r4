@@ -61,8 +61,14 @@ export default [
     }
   },
   {
-    // Vitest runs in Node.
-    files: ["*.config.js", "*.config.mjs", "tests/unit/**/*.js", "tests/*.test.js"],
+    // Vitest and the fixture world builder run in Node.
+    files: [
+      "*.config.js",
+      "*.config.mjs",
+      "tests/unit/**/*.js",
+      "tests/*.test.js",
+      "tests/fixtures/world-3.2.1/*.mjs"
+    ],
     languageOptions: { globals: globals.node }
   },
   {

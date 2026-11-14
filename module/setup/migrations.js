@@ -59,6 +59,7 @@ import { migrateActorEmbeddedItems } from "./migrations/actors/embedded-items.js
 import { cleanupLegacyFields } from "./migrations/actors/cleanup.js";
 import { migrateEffectFreeTraitBase } from "./migrations/actors/xp-free-trait-base.js";
 import { migrateStatusEffectRules } from "./migrations/actors/status-effect-rules.js";
+import { migrateUnlinkedTokens } from "./migrations/actors/unlinked-tokens.js";
 
 // Item migrations
 import { migrateBowsToWeapons } from "./migrations/items/bow-to-weapon.js";
@@ -100,12 +101,13 @@ import {
  * 9. Item mechanics into rules: Family/School Trait bonus effects, Master of Blood (world items)
  * 10. Legacy field cleanup (world actors)
  * 11. Embedded item migrations (all world actors), item rules included
- * 12. Status effect rules: stances, conditions, and Fear made before the rule engine get rules, group, and level
- *     (world actors)
- * 13. Free Trait rank flags set for a rule bonus (world actors)
- * 14. Mark documents as migrated (world actors/items)
- * 15. Compendium migrations (unlocked packs only) - includes icon migration
- * 16. Icon path migrations (world actors + final compendium pass)
+ * 12. Status effect rules: stances, conditions, and Fear made before the rule engine get rules, group, level, and
+ *     ending event (world actors)
+ * 13. Unlinked tokens: the items and effects in each token's actor delta, through steps 11 and 12
+ * 14. Free Trait rank flags set for a rule bonus (world actors)
+ * 15. Mark documents as migrated (world actors/items)
+ * 16. Compendium migrations (unlocked packs only) - includes icon migration
+ * 17. Icon path migrations (world actors + final compendium pass)
  *
  * Foundry VTT Integration:
  * - Called from system ready hook when version mismatch detected
@@ -156,6 +158,12 @@ export async function runMigrations(fromVersion, toVersion) {
   }
 
   await migrateStatusEffectRules(unmigratedActors, "world-status-effect-rules");
+
+  // Unlinked tokens' own items and effects live in their actor deltas, which the steps above never reach
+  await migrateUnlinkedTokens(
+    game.scenes.contents.flatMap(scene => scene.tokens.contents),
+    "world-unlinked-tokens"
+  );
 
   // After the embedded items, because the Trait bonus is read from the actor's Family and School items
   await migrateEffectFreeTraitBase(unmigratedActors, "world-free-trait-base");

@@ -58,6 +58,7 @@ Reviewed 2026-11-12 (`gh issue list --state all`, `gh pr list --state all`). Eac
 | #40 | NPC long rest heals no Wounds: `wounds.healRate` computed for PCs only | Stage 13 |
 | #43 | Kata and kiho XP read the `cost` field, not the Mastery Level (pp.259, 231) | Stage 13 |
 | #44 | A Family or School Void Ring bonus is not priced into Void XP (p.103) | Stage 13 |
+| #45 | Timed effects on unlinked combatants stop expiring after a reload (core registry timing) | Stage 13 |
 | #37 | A weapon's "Explodes on" value ignored on damage rolls | Stage 8 (dice rules), checked in Stage 13 |
 | #41 | Mounted +1k0 (p.89) missing on Skill weapon attacks: only `SimpleRoll` reads attack rules | Stage 8 |
 | #42 | Shift-click Trait rolls skip `system.bonuses.trait` | Stage 8 |

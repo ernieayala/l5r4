@@ -223,13 +223,16 @@ export function getConditionAnimation(conditionId) {
   return CONDITION_ANIMATIONS[conditionId] ?? null;
 }
 
+/** Module ids of the JB2A collections: the free one and the Patreon one. */
+const JB2A_MODULE_IDS = Object.freeze(["JB2A_DnD5e", "jb2a_patreon"]);
+
 /**
- * Check if JB2A module is installed and active.
+ * Check if a JB2A collection, free or Patreon, is installed and active.
  *
  * @returns {boolean} True if JB2A is available
  */
 export function isJB2AAvailable() {
-  return game.modules.get("JB2A_DnD5e")?.active ?? false;
+  return JB2A_MODULE_IDS.some(id => game.modules.get(id)?.active);
 }
 
 /**

@@ -649,15 +649,14 @@ export function registerFearWorkflowTests(quench) {
             assert.equal(fearEffectsAfter.length, 0, "All Fear effects removed");
           });
 
-          it("should persist Fear effect until manually removed", async () => {
+          it("should last until the encounter ends, even when made with only its status", async () => {
             const fearEffect = recoveryPC.effects.find(e => e.statuses.has("feared"));
 
             assert.exists(fearEffect, "Fear effect persists");
-            // 14.370 duration shape: value / units / expiry (common/documents/active-effect.mjs:61-68)
-            assert.equal(fearEffect.duration.value, Infinity, "Unlimited duration");
-            assert.isNull(fearEffect.duration.expiry, "No expiry event");
-            assert.isFalse(fearEffect.isTemporary, "Not a temporary effect");
-            // Fear persists until encounter end (manual removal)
+            // 14.370 duration shape: value / units / expiry (common/documents/active-effect.mjs:61-68); no
+            // length, ended by the encounterEnd event (p.90; STAGE-09 decision 4)
+            assert.equal(fearEffect.duration.value, Infinity, "No length in time");
+            assert.equal(fearEffect.duration.expiry, "encounterEnd", "Ends with the encounter");
           });
         });
 

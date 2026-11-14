@@ -55,6 +55,11 @@ describe("system.json for Foundry v14", () => {
     }
   });
 
+  it("recommends the modules the animations need, Sequencer and JB2A", () => {
+    const recommended = manifest.relationships.recommends.map(({ id, type }) => `${type}:${id}`);
+    expect(recommended).toEqual(["module:sequencer", "module:JB2A_DnD5e"]);
+  });
+
   it("gives every declared subtype a display name in lang/en.json", () => {
     for (const [documentName, type] of declaredSubtypes()) {
       const key = `TYPES.${documentName}.${type}`;

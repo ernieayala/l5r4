@@ -25,43 +25,36 @@
  * @requires Foundry VTT v13+
  */
 
-import { CONDITION_IDS } from "../../config/condition-ids.js";
 import { STANCE_IDS } from "../../utils/stances.js";
 import { playAnimation, removeAnimation, removeAllAnimations } from "./animation-manager.js";
+import { getConditionAnimation, getStanceAnimation } from "./asset-library.js";
 import { handleAttackRoll } from "./attack-animations.js";
 
 /**
- * Extract status IDs from an ActiveEffect.
+ * The statuses of an effect that have an animation (module/services/animations/asset-library.js), each marked
+ * stance or not.
  *
- * @param {ActiveEffect} effect - The effect to extract status IDs from
- * @returns {string[]} Array of status IDs
+ * @param {ActiveEffect} effect
+ * @returns {Array<{statusId: string, isStance: boolean}>}
  * @private
  */
-function getEffectStatusIds(effect) {
-  const statuses = effect.statuses || new Set();
-  return Array.from(statuses);
+function animatedStatuses(effect) {
+  return [...effect.statuses]
+    .filter(statusId => getStanceAnimation(statusId) || getConditionAnimation(statusId))
+    .map(statusId => ({ statusId, isStance: STANCE_IDS.has(statusId) }));
 }
 
 /**
- * Determine if a status ID is a stance.
+ * Whether this client plays the animation for a change: only the user who made it. Every client runs these hooks,
+ * and Sequencer sends each effect to every connected client, so playing it everywhere would show it once per
+ * client.
  *
- * @param {string} statusId - The status ID to check
- * @returns {boolean} True if stance
+ * @param {string} userId - The user who made the change
+ * @returns {boolean}
  * @private
  */
-function isStance(statusId) {
-  return STANCE_IDS.has(statusId);
-}
-
-/**
- * Determine if a status ID is a condition.
- *
- * @param {string} statusId - The status ID to check
- * @returns {boolean} True if condition
- * @private
- */
-function isCondition(statusId) {
-  return CONDITION_IDS.has(statusId);
+function playsHere(userId) {
+  return userId === game.user.id;
 }
 
 /**
@@ -75,24 +68,18 @@ function isCondition(statusId) {
  * @param {string} userId - User who created the effect
  * @returns {void}
  */
-export function onCreateActiveEffectAnimation(effect, _options, _userId) {
+export function onCreateActiveEffectAnimation(effect, _options, userId) {
   const actor = effect?.parent;
 
   // Early return: Only handle Actor effects
-  if (!actor || actor.documentName !== "Actor") {
+  if (!actor || actor.documentName !== "Actor" || !playsHere(userId)) {
     return;
   }
 
   // Defer animation to ensure effect is fully applied
   queueMicrotask(async () => {
-    const statusIds = getEffectStatusIds(effect);
-
-    for (const statusId of statusIds) {
-      if (isStance(statusId)) {
-        await playAnimation(actor, statusId, true);
-      } else if (isCondition(statusId)) {
-        await playAnimation(actor, statusId, false);
-      }
+    for (const { statusId, isStance } of animatedStatuses(effect)) {
+      await playAnimation(actor, statusId, isStance);
     }
   });
 }
@@ -110,7 +97,7 @@ export function onCreateActiveEffectAnimation(effect, _options, _userId) {
  * @param {string} userId - User who updated the effect
  * @returns {void}
  */
-export function onUpdateActiveEffectAnimation(effect, changes, _options, _userId) {
+export function onUpdateActiveEffectAnimation(effect, changes, _options, userId) {
   // Early return: Only handle disabled state changes
   if (changes?.disabled === undefined) {
     return;
@@ -119,28 +106,19 @@ export function onUpdateActiveEffectAnimation(effect, changes, _options, _userId
   const actor = effect?.parent;
 
   // Early return: Only handle Actor effects
-  if (!actor || actor.documentName !== "Actor") {
+  if (!actor || actor.documentName !== "Actor" || !playsHere(userId)) {
     return;
   }
 
   // Defer animation to ensure effect state is updated
   queueMicrotask(async () => {
-    const statusIds = getEffectStatusIds(effect);
-
-    for (const statusId of statusIds) {
-      const isStanceEffect = isStance(statusId);
-      const isConditionEffect = isCondition(statusId);
-
-      if (!isStanceEffect && !isConditionEffect) {
-        continue;
-      }
-
+    for (const { statusId, isStance } of animatedStatuses(effect)) {
       if (changes.disabled === true) {
         // Effect disabled: Remove animation
         await removeAnimation(actor, statusId);
       } else if (changes.disabled === false) {
         // Effect enabled: Play animation
-        await playAnimation(actor, statusId, isStanceEffect);
+        await playAnimation(actor, statusId, isStance);
       }
     }
   });
@@ -156,22 +134,18 @@ export function onUpdateActiveEffectAnimation(effect, changes, _options, _userId
  * @param {string} userId - User who deleted the effect
  * @returns {void}
  */
-export function onDeleteActiveEffectAnimation(effect, _options, _userId) {
+export function onDeleteActiveEffectAnimation(effect, _options, userId) {
   const actor = effect?.parent;
 
   // Early return: Only handle Actor effects
-  if (!actor || actor.documentName !== "Actor") {
+  if (!actor || actor.documentName !== "Actor" || !playsHere(userId)) {
     return;
   }
 
   // Defer animation cleanup
   queueMicrotask(async () => {
-    const statusIds = getEffectStatusIds(effect);
-
-    for (const statusId of statusIds) {
-      if (isStance(statusId) || isCondition(statusId)) {
-        await removeAnimation(actor, statusId);
-      }
+    for (const { statusId } of animatedStatuses(effect)) {
+      await removeAnimation(actor, statusId);
     }
   });
 }
@@ -187,7 +161,10 @@ export function onDeleteActiveEffectAnimation(effect, _options, _userId) {
  * @param {string} userId - User who deleted the actor
  * @returns {void}
  */
-export function onDeleteActorAnimation(actor, _options, _userId) {
+export function onDeleteActorAnimation(actor, _options, userId) {
+  if (!playsHere(userId)) {
+    return;
+  }
   // Defer animation cleanup
   queueMicrotask(async () => {
     await removeAllAnimations(actor);
@@ -197,14 +174,16 @@ export function onDeleteActorAnimation(actor, _options, _userId) {
 /**
  * Hook handler for chat message creation: a hit with a weapon against a target plays the attack animation.
  *
- * Reads the attacker, weapon, and target the `roll` message stored (module/data/chat/RollMessageData.js), so every
- * client animates toward the same target, whatever each user has targeted.
+ * Reads the attacker, weapon, and target the `roll` message stored (module/data/chat/RollMessageData.js). The
+ * client that posted it plays the animation, and Sequencer shows it to everyone.
  *
  * @param {ChatMessage} message - The newly created chat message
+ * @param {object} _options - Creation options
+ * @param {string} userId - User who created the message
  * @returns {void}
  */
-export function onCreateChatMessageAnimation(message) {
-  if (message.type !== "roll") {
+export function onCreateChatMessageAnimation(message, _options, userId) {
+  if (message.type !== "roll" || !playsHere(userId)) {
     return;
   }
   const { kind, outcome, actorUuid, weaponUuid, target } = message.system;

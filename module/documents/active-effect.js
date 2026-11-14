@@ -3,7 +3,8 @@
  * @description The system's ActiveEffect: status data, exclusive groups, and condition immunity, settled before an
  * effect is created on an actor.
  *
- * - An effect made with only a status id gets the status's rules, group, and level (module/utils/status-data.js).
+ * - An effect made with only a status id gets the status's rules, group, level, and ending event
+ *   (module/utils/status-data.js).
  * - Gaining an effect with a `system.group` ends the actor's other effects of that group: one stance at a time
  *   (Core Rulebook p.84), one Kata at a time (p.259). Creations started together settle on the newest.
  * - A status the actor is immune to (ConditionImmunity rules) is not created.
@@ -15,7 +16,7 @@ import { statusEffectUpdate } from "../utils/status-data.js";
 export default class L5R4ActiveEffect extends foundry.documents.ActiveEffect {
   /**
    * An effect created with a status but none of its data (a macro, another module, `{statuses: ["prone"]}`) takes
-   * the status's rules, group, and level, so a status means the same however its effect is made.
+   * the status's rules, group, level, and ending event, so a status means the same however its effect is made.
    * @override
    */
   async _preCreate(data, options, user) {
