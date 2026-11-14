@@ -12,7 +12,7 @@
  *
  * XP Sources:
  * - Base XP (starting 40 for new characters)
- * - Disadvantages (capped, typically 10 XP max)
+ * - Disadvantages (capped at 10 XP by default)
  * - Manual adjustments (GM awards, session XP)
  *
  * Architecture:
@@ -33,7 +33,8 @@ import { toInt } from "../../../utils/type-coercion.js";
 import { logError } from "../../../utils/error-logging.js";
 import {
   calculateXpStepCostForTrait,
-  getCreationFreeBonus
+  getCreationFreeBonus,
+  getCreationFreeBonusSources
 } from "../../../utils/xp-calculations.js";
 
 /**
@@ -151,7 +152,7 @@ export function calculateInsightRank(insight) {
  *
  * XP Earned:
  * - Base XP (default 40 for new characters)
- * - Disadvantages (capped, typically 10 XP max)
+ * - Disadvantages (capped at 10 XP by default)
  * - Manual adjustments (GM awards, session XP)
  *
  * XP Spent:
@@ -322,7 +323,9 @@ export function preparePcExperience(actor, sys) {
  *
  * Free Bonus System:
  * - Characters get free +1 to certain traits at creation
- * - If not used during creation, can apply when raising to rank 3
+ * - A legacy Family/School bonus (`system.trait`/`bonus`) is not applied to the Trait, so the player stores
+ *   it as a rank: the first raise to rank 3 is that free rank
+ * - A TraitAdjust rule bonus adds on top of the stored rank and never marks a free rank
  * - Tracked in xpFreeTraitBase flag
  * - Retroactive version flag prevents double-application
  *
@@ -347,11 +350,13 @@ export function trackXpExpenditure(actor, changed) {
         }
 
         const freeBase = toInt(freeTraitBase?.[k] ?? 0);
-        const freeEff = freeBase > 0 ? 0 : toInt(getCreationFreeBonus(actor, k));
+        // Only the legacy fields are a stored rank. A TraitAdjust rule adds on top of the stored rank, so
+        // every stored rank is bought and costs 4 × the Trait's new rank with the bonus (Core Rulebook p.103).
+        const legacyBonus = toInt(getCreationFreeBonusSources(actor, k).legacy);
 
         // Apply free bonus when reaching rank 3 (if available)
         for (let r = oldBase + 1; r <= newBase; r++) {
-          if (freeBase === 0 && freeEff > 0 && r === 3) {
+          if (freeBase === 0 && legacyBonus > 0 && r === 3) {
             // Mark free bonus as used
             foundry.utils.setProperty(
               changed,

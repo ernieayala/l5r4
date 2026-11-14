@@ -6,7 +6,6 @@
  */
 
 import { SYS_ID } from "../../../config/constants.js";
-import L5R4Actor from "../../../documents/actor.js";
 import { normalizeWoundLevelData } from "../utils/helpers.js";
 
 /**
@@ -28,12 +27,10 @@ import { normalizeWoundLevelData } from "../utils/helpers.js";
  * - Sets woundsPenaltyMod: 0 (no modifier to standard wound penalties)
  * - Migrates armor_tn → armorTn (camelCase normalization)
  * - Converts string nrWoundLvls → number
- * - Normalizes wound penalties to positive absolute values (TN increases)
- * - Transforms wound_lvl/woundLevels → manualWoundLevels structure
+ * - Normalizes manualWoundLevels penalties to positive absolute values (TN increases)
  *
- * Uses actor._source to access raw pre-derived data, necessary because wound calculations
- * in prepareDerivedData may have already transformed the values. This ensures migration
- * reads the actual stored data, not computed values.
+ * Legacy wound_lvl / woundLevels become manualWoundLevels earlier, in NpcData.migrateData
+ * (module/data/migrate-source.js), because the schema drops those keys when the actor loads.
  *
  * @param {Document[]} docs - Array of Actor documents to scan for NPCs
  * @param {string} label - Migration context label for console logging
@@ -85,45 +82,8 @@ export async function migrateLegacyNpcWounds(docs, label) {
         needsUpdate = true;
       }
 
-      if (actor.system.woundLevels) {
-        const woundLevels = foundry.utils.deepClone(actor.system.woundLevels);
-
-        if (normalizeWoundLevelData(woundLevels)) {
-          updates["system.woundLevels"] = woundLevels;
-          needsUpdate = true;
-        }
-      }
-
-      // Access raw source data (pre-derivation) to read actual stored values, not calculated ones
-      const rawSource = actor._source?.system || actor.system;
-      const legacyWoundData = rawSource.wound_lvl;
-      const rawWoundLevels = rawSource.woundLevels;
-
-      // Transform legacy wound_lvl or woundLevels into current manualWoundLevels structure
-      if (legacyWoundData || !rawSource.manualWoundLevels) {
-        const sourceData = legacyWoundData || rawWoundLevels;
-
-        if (sourceData) {
-          const manualWoundLevels = {};
-          const order = L5R4Actor.WOUND_LEVEL_ORDER;
-
-          for (const key of order) {
-            const woundLevel = sourceData[key];
-            const value = woundLevel ? parseInt(woundLevel.value) || 0 : 0;
-            const penalty = woundLevel ? Math.abs(parseInt(woundLevel.penalty) || 0) : 0;
-
-            manualWoundLevels[key] = {
-              value: value,
-              penalty: penalty,
-              active: value > 0
-            };
-          }
-
-          updates["system.manualWoundLevels"] = manualWoundLevels;
-          needsUpdate = true;
-        }
-      }
-
+      // Legacy wound_lvl / woundLevels become manualWoundLevels in NpcData.migrateData, on raw source before the
+      // schema drops those keys (module/data/migrate-source.js migrateNpcSource).
       if (actor.system.manualWoundLevels) {
         const manualWoundLevels = foundry.utils.deepClone(actor.system.manualWoundLevels);
 

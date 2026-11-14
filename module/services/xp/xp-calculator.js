@@ -189,7 +189,7 @@ export async function buildXpHistory(actor) {
           game.i18n.localize(`l5r4.ui.mechanics.traits.${traitKey}`) || traitKey.toUpperCase();
 
         // Localized note: "Reflexes 2→3"
-        const note = game.i18n.format("l5r4.character.experience.traitChange", {
+        const note = game.i18n.localize("l5r4.character.experience.traitChange", {
           label: traitLabel,
           from: r - 1,
           to: r
@@ -226,7 +226,7 @@ export async function buildXpHistory(actor) {
         const cost = calculateVoidStepCost(r, parseInt(traitDiscounts?.void ?? 0));
 
         // Localized note: "Void 2→3"
-        const note = game.i18n.format("l5r4.character.experience.voidChange", {
+        const note = game.i18n.localize("l5r4.character.experience.voidChange", {
           from: r - 1,
           to: r
         });
@@ -333,7 +333,7 @@ export async function buildXpHistory(actor) {
         const memorized = item.system?.memorized ?? false;
         if (memorized) {
           const mastery = parseInt(item.system?.mastery) || 1;
-          const note = game.i18n.format("l5r4.character.experience.spellMemorized", {
+          const note = game.i18n.localize("l5r4.character.experience.spellMemorized", {
             name: item.name
           });
           const entryKey = `spell:memorized:${item.name}`;

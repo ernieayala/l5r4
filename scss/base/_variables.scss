@@ -12,6 +12,17 @@
   --void-ring-color: 125, 104, 98; // #7D6862
 }
 
+// Ring rank backdrop per theme. Set on each themed element, so a sheet's own theme overrides the interface's.
+.theme-light {
+  --l5r4-ring-rank-backdrop-color: transparent;
+  --l5r4-ring-rank-backdrop-image: url("../../../ui/parchment.jpg");
+}
+
+.theme-dark {
+  --l5r4-ring-rank-backdrop-color: var(--color-cool-5-90);
+  --l5r4-ring-rank-backdrop-image: none;
+}
+
 // SCSS Variables (Asset Paths)
 $air-ring-img: url("../assets/icons/air.webp");
 $water-ring-img: url("../assets/icons/water.webp");

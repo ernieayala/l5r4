@@ -1,43 +1,26 @@
 /**
  * Chat Service
  *
- * Centralized service for chat-related functionality including item creation dialogs,
- * inline roll parsing, and damage button event handling. Integrates L5R4 Roll & Keep
- * dice notation with Foundry's chat system and provides UI dialogs for item creation.
+ * Chat-side features: the item creation dialog, roll card actions, and inline Roll & Keep notation.
  *
- * Core Responsibilities:
  * - **Item Creation Dialog**: Unified dialog for creating actor items (skills, advantages, equipment, etc.)
- * - **Inline Roll Parsing**: Intercepts chat messages to parse L5R4 Roll & Keep notation (XkY format)
- * - **Damage Button Handling**: Attaches click handlers to weapon damage buttons in chat cards
+ * - **Roll cards**: a `roll` message's damage button and context menu entries come from
+ *   module/services/dice/check/chat-actions.js; cards posted before 4.0.0 keep their own damage button here
+ * - **Inline Roll & Keep**: [[XkY]] in a chat message rolls through the same pool code as a check (B9)
  *
- * L5R4 Mechanics Integration:
- * - Roll & Keep Notation: Parses [[XkY]] inline rolls per Skills & Rolls rules
- * - Exploding Dice: All 10s explode (re-roll and add) per core dice mechanics
- * - Unskilled Rolls: Recognizes 'u' prefix (uXkY) - dice don't explode per Unskilled Roll rules
- * - Emphasis: Recognizes 'e' prefix (eXkY) - re-roll 1s per Skill Emphasis rules
- * - Damage Rolls: Handles weapon damage with attack raises and stance bonuses per Combat rules
- *
- * Foundry VTT Integration:
- * - Requires: Foundry VTT v13+ (DialogV2 API, Hook system)
- * - Hooks: renderChatMessageHTML (damage buttons), chatMessage (inline roll parsing)
- * - Permissions: Respects actor ownership and GM privileges for damage rolls
- * - Chat System: Integrates with ChatMessage and chatlog.processMessage() for roll output
- *
- * Service Initialization:
- * Call initializeChatService() from system init hook to register all chat hooks.
- * This attaches event listeners for damage buttons and inline roll interceptors.
+ * Call initializeChatService() from the system init hook to register the hooks.
  *
  * @module services/chat
- * @requires Foundry VTT v13+
- * @see {@link https://foundryvtt.com/api/v13/classes/foundry.applications.api.DialogV2.html|DialogV2 API}
- * @see {@link https://foundryvtt.com/api/v13/classes/client.Hooks.html|Hooks API}
  */
 
+import { SYS_ID } from "../config/constants.js";
 import { DIALOG_TEMPLATES } from "../config/templates.js";
 import { R, T } from "../utils/localization.js";
-import { roll_parser } from "./dice/core/roll-parser.js";
+import { buildPool, parseRollAndKeep, poolFormula } from "../utils/check.js";
 import { clamp } from "../utils/type-coercion.js";
 import { validateAttackRaises } from "../utils/validators.js";
+import { addCheckContextOptions, bindCheckCard } from "./dice/check/chat-actions.js";
+import { WeaponRoll } from "./dice/rolls/weapon-roll.js";
 
 const DIALOG = foundry.applications.api.DialogV2;
 
@@ -118,254 +101,125 @@ export async function getUnifiedItemOptions(actorType, preferredType = null) {
 }
 
 /**
- * Initialize chat service by registering all required Foundry VTT hooks.
- *
- * Registers two critical hooks for L5R4 chat integration:
- * 1. renderChatMessageHTML: Attaches click handlers to damage buttons in weapon chat cards
- * 2. chatMessage: Intercepts outgoing chat messages to parse L5R4 inline roll notation
- *
- * This function should be called once during system initialization (typically in the
- * 'init' hook). Hooks remain active for the entire Foundry session.
- *
- * Registered Hooks:
- * - **renderChatMessageHTML**: Runs after chat HTML is rendered, before display
- * - **chatMessage**: Runs before message is sent to chat, can intercept/modify
- *
- * @see registerDamageButtonHook
- * @see registerInlineRollParsingHook
+ * Register the chat hooks, once during system init: roll card buttons and context menu entries, the damage button
+ * of cards posted before 4.0.0, and inline Roll & Keep notation.
  */
 export function initializeChatService() {
-  registerDamageButtonHook();
+  registerLegacyDamageButtonHook();
   registerInlineRollParsingHook();
+  Hooks.on("renderChatMessageHTML", bindCheckCard);
+  Hooks.on("getChatMessageContextOptions", addCheckContextOptions);
 }
 
 /**
- * Register hook to attach damage roll click handlers to weapon chat cards.
- *
- * Hooks into renderChatMessageHTML to find all damage buttons (.l5r4-damage-button)
- * and attach click event listeners. When clicked, extracts weapon data from button
- * dataset attributes and invokes WeaponRoll service to execute damage roll.
- *
- * L5R4 Damage Mechanics:
- * - Base Damage: Weapon DR (roll/keep) from dataset.damageRoll/damageKeep
- * - Attack Raises: Converted to damage (+1k0 per raise) per Increased Damage maneuver
- * - Stance Bonuses: Full Attack stance grants +2k1 to damage rolls
- * - Clamping: Enforces game bounds (roll/keep 0-99, raises 0-20, stance 0-10)
- *
- * Permission Checks:
- * - Requires actor ownership (actor.isOwner) OR GM privileges (game.user.isGM)
- * - Shows warning notification if permission denied
- *
- * Debouncing:
- * - Uses isProcessing flag to prevent double-click damage rolls
- * - Flag scoped per button instance, resets after roll completes
- *
- * Shift-Key Modifier:
- * - Holding Shift when clicking bypasses damage modifier dialog
- * - Passed to WeaponRoll as askForOptions parameter
- *
- * Foundry VTT Hook:
- * - **renderChatMessageHTML**: Fired after chat HTML rendered, before inserted into DOM
- * - Params: (_app, html, _data) - html is jQuery-wrapped chat content
+ * The damage button of attack cards posted before 4.0.0, which carried the weapon's dice in data attributes and
+ * the attack's Raises in `flags.l5r4-enhanced.attackRaises`. The card's attributes are untrusted: dice are clamped
+ * and Raises must match the flag. A `roll` message's button is wired by chat-actions.js instead.
  *
  * @private
  */
-function registerDamageButtonHook() {
-  Hooks.on("renderChatMessageHTML", (message, html, _data) => {
-    try {
-      html.querySelectorAll(".l5r4-damage-button").forEach(button => {
-        let isProcessing = false;
-
-        button.addEventListener("click", async event => {
-          event.preventDefault();
-
-          if (isProcessing) {
+function registerLegacyDamageButtonHook() {
+  Hooks.on("renderChatMessageHTML", (message, html) => {
+    if (message.type === "roll") {
+      return;
+    }
+    for (const button of html.querySelectorAll(".l5r4-damage-button")) {
+      let isProcessing = false;
+      button.addEventListener("click", async event => {
+        event.preventDefault();
+        if (isProcessing) {
+          return;
+        }
+        isProcessing = true;
+        try {
+          const data = event.currentTarget.dataset;
+          const validation = validateAttackRaises(
+            parseInt(data.attackRaises) || 0,
+            message.flags?.[SYS_ID]?.attackRaises ?? 0
+          );
+          if (!validation.valid) {
+            ui.notifications?.error(validation.error);
             return;
           }
-          isProcessing = true;
-
-          try {
-            const actorId = event.currentTarget.dataset.actorId;
-            const weaponName = event.currentTarget.dataset.weaponName;
-
-            // Extract and clamp damage dice (0-99 per Ten Dice Rule max)
-            // Weapon DR + Strength typically 1-15, but allow higher for edge cases
-            const rawRoll = parseInt(event.currentTarget.dataset.damageRoll) || 0;
-            const rawKeep = parseInt(event.currentTarget.dataset.damageKeep) || 0;
-            const damageRoll = clamp(rawRoll, 0, 99);
-            const damageKeep = clamp(rawKeep, 0, 99);
-
-            // Extract attack raises from HTML (UNTRUSTED - user can edit HTML)
-            const rawRaises = parseInt(event.currentTarget.dataset.attackRaises) || 0;
-
-            // SECURITY: Validate raises against trusted data in message flags
-            // Prevents HTML injection exploit where attacker edits data-attack-raises
-            const storedRaises = message?.flags?.["l5r4-enhanced"]?.attackRaises ?? 0;
-            const validation = validateAttackRaises(rawRaises, storedRaises);
-
-            if (!validation.valid) {
-              ui?.notifications?.error(validation.error ?? "Invalid attack raises");
-              console.warn("L5R4 | Security:", validation.error);
-              return;
-            }
-
-            // Use sanitized raises from validation (guaranteed to match stored value)
-            const attackRaises = validation.sanitized ?? 0;
-
-            // Extract and clamp stance bonuses (Full Attack grants +2k1, max 10 for safety)
-            const rawStanceRoll = parseInt(event.currentTarget.dataset.stanceRoll) || 0;
-            const rawStanceKeep = parseInt(event.currentTarget.dataset.stanceKeep) || 0;
-            const stanceRoll = clamp(rawStanceRoll, 0, 10);
-            const stanceKeep = clamp(rawStanceKeep, 0, 10);
-
-            const actor = game?.actors?.get(actorId);
-            if (!actor) {
-              const message =
-                game?.i18n?.localize?.("l5r4.ui.notifications.actorNotFound") ?? "Actor not found";
-              ui?.notifications?.warn(message);
-              return;
-            }
-
-            if (!actor.isOwner && !game?.user?.isGM) {
-              const message =
-                game?.i18n?.localize?.("l5r4.ui.notifications.noPermissionDamage") ??
-                "No permission to roll damage";
-              ui?.notifications?.warn(message);
-              return;
-            }
-
-            const { WeaponRoll } = await import("./dice/rolls/weapon-roll.js");
-
-            return WeaponRoll({
-              diceRoll: damageRoll,
-              diceKeep: damageKeep,
-              weaponName,
-              askForOptions: event.shiftKey,
-              attackRaises,
-              stanceRollBonus: stanceRoll,
-              stanceKeepBonus: stanceKeep,
-              actor
-            });
-          } finally {
-            isProcessing = false;
+          const actor = game.actors.get(data.actorId);
+          if (!actor) {
+            ui.notifications?.warn(T("l5r4.ui.notifications.actorNotFound"));
+            return;
           }
-        });
+          if (!actor.isOwner && !game.user.isGM) {
+            ui.notifications?.warn(T("l5r4.ui.notifications.noPermissionDamage"));
+            return;
+          }
+          await WeaponRoll({
+            diceRoll: clamp(parseInt(data.damageRoll) || 0, 0, 99),
+            diceKeep: clamp(parseInt(data.damageKeep) || 0, 0, 99),
+            weaponName: data.weaponName,
+            weapon: actor.items.get(data.weaponId) ?? null,
+            askForOptions: !event.shiftKey,
+            attackRaises: validation.sanitized,
+            actor
+          });
+        } finally {
+          isProcessing = false;
+        }
       });
-    } catch (error) {
-      console.warn("L5R4", "Error attaching damage button listeners:", error);
     }
   });
 }
 
 /**
- * Register hook to intercept and parse L5R4 Roll & Keep notation in chat messages.
- *
- * Hooks into chatMessage to detect and parse inline L5R4 dice notation before the
- * message is sent to Foundry's standard chat system. Supports both whole-message
- * rolls [[XkY]] and inline rolls within text "I attack [[7k3+5]] and defend [[5k3]]".
- *
- * L5R4 Roll & Keep Notation:
- * - Basic Format: [[XkY]] = Roll X dice, keep Y highest (e.g., [[7k3]])
- * - With Bonus: [[XkY+Z]] = Roll X, keep Y, add flat bonus Z (e.g., [[7k3+5]])
- * - Unskilled: [[uXkY]] = Unskilled roll (dice don't explode per Unskilled Roll rules)
- * - Emphasis: [[eXkY]] = Emphasis (re-roll 1s per Skill Emphasis rules)
- * - Exploding Dice: All 10s explode automatically (re-roll and add to total)
- *
- * Regex Patterns:
- * - Foundry Roll Commands: /^\/(r(oll)?|gmr(oll)?|br(oll)?|sr(oll)?)\s/i
- *   → Detects /roll, /r, /gmroll, /gmr, /broll, /br, /sroll, /sr commands
- *   → Passes through to Foundry's native roll handler without interception
- *
- * - L5R4 Notation: /(u|e)?\d+k\d+(x\d+)?([+]\d+)?/
- *   → Matches: [optional u/e prefix][digits]k[digits][optional xN][optional +N]
- *   → Examples: "7k3", "u3k3", "e7k3+5", "7k3x2+5"
- *
- * - Whole Message Roll: /^\[\[(.*)\]\]$/
- *   → Matches: [[content]] when it's the entire message (no surrounding text)
- *   → Extracts content and checks if it matches L5R4 notation
- *
- * - Inline Rolls: /\[\[(.*?)\]\]/g
- *   → Matches: [[content]] anywhere in message (supports multiple per message)
- *   → Global flag (/g) requires manual lastIndex reset to prevent state issues
- *
- * Hook Behavior:
- * - Returns true: Message passes through to Foundry's standard chat processing
- * - Returns false: Message intercepted, custom processing applied (prevents default)
- *
- * Character Limit:
- * - Maximum 10,000 characters enforced to prevent excessive chat message sizes
- * - Shows warning notification and prevents message submission if exceeded
- *
- * Foundry VTT Hook:
- * - **chatMessage**: Fired before message sent to chat, can intercept/modify
- * - Params: (chatlog, message, _chatData) - message is raw string input
+ * The Foundry formula for one inline Roll & Keep token, through the same pool code as a check: the Ten Dice Rule,
+ * explosions, Unskilled ("u") and Emphasis ("e") prefixes (module/utils/check.js parseRollAndKeep).
+ * @param {string} token
+ * @returns {string|null} null when the token is not Roll & Keep notation
+ */
+export function inlineFormula(token) {
+  const parsed = parseRollAndKeep(token);
+  if (!parsed) {
+    return null;
+  }
+  return poolFormula(
+    buildPool({ ...parsed, littleTruths: game.settings.get(SYS_ID, "LtException") })
+  );
+}
+
+/**
+ * Turn Roll & Keep notation in an outgoing chat message into Foundry rolls. A message that is one [[XkY]] becomes
+ * a /roll; [[XkY]] inside text becomes an inline roll. Foundry's own roll commands pass through, and so does any
+ * [[...]] that is not Roll & Keep notation.
  *
  * @private
  */
 function registerInlineRollParsingHook() {
-  Hooks.on("chatMessage", (chatlog, message, _chatData) => {
-    // Enforce character limit to prevent performance issues with massive chat messages
+  Hooks.on("chatMessage", (chatlog, message) => {
     if (message.length > 10000) {
-      const warning =
-        game?.i18n?.localize?.("l5r4.ui.notifications.messageTooLong") ??
-        "Message too long (max 10,000 characters)";
-      ui?.notifications?.warn(warning);
+      ui.notifications?.warn(T("l5r4.ui.notifications.messageTooLong"));
       return false;
     }
-
-    // Foundry native roll commands: /roll, /r, /gmroll, /gmr, /broll, /br, /sroll, /sr
-    // Pass through to Foundry's standard roll handler (don't intercept)
-    const rollCmd = /^\/(r(oll)?|gmr(oll)?|br(oll)?|sr(oll)?)\s/i;
-    if (rollCmd.test(message)) {
+    if (/^\/(r(oll)?|gmr(oll)?|br(oll)?|sr(oll)?)\s/i.test(message)) {
       return true;
     }
 
-    // L5R4 Roll & Keep notation pattern: (u|e)?XkY(xZ)?(+N)?
-    // Matches: 7k3, u3k3, e7k3+5, 7k3x2+5, etc.
-    const kxy = /(u|e)?\d+k\d+(x\d+)?([+]\d+)?/;
-
-    // Check for whole-message roll: [[XkY]] with no surrounding text
-    const whole = /^\[\[(.*)\]\]$/;
-    if (whole.test(message)) {
-      const token = message.substring(2, message.length - 2);
-
-      if (kxy.test(token)) {
-        const result = roll_parser(token);
-        chatlog.processMessage(result);
-        return false; // Intercept message, prevent Foundry default processing
-      }
+    const whole = /^\[\[(.*)\]\]$/.exec(message);
+    const wholeFormula = whole ? inlineFormula(whole[1]) : null;
+    if (wholeFormula) {
+      chatlog.processMessage(`/roll ${wholeFormula}`);
+      return false;
     }
 
-    // Check for inline rolls: text [[7k3]] more text [[5k3]] etc.
-    // Non-greedy (.*?) to capture each [[...]] separately
-    // Global flag (/g) to match all occurrences in message
-    const inline = /\[\[(.*?)\]\]/g;
-
-    // Test if message contains any [[...]] patterns
-    const hasInlineRolls = inline.test(message);
-    // CRITICAL: Reset regex state after .test() call with global flag
-    // Global regexes maintain lastIndex state between calls, causing subsequent
-    // .replace() to start mid-string instead of beginning. Reset ensures clean slate.
-    inline.lastIndex = 0;
-
-    if (hasInlineRolls) {
-      let hasL5R4Rolls = false;
-      // Replace each [[...]] with parsed roll formula, but only if it matches L5R4 notation
-      const result = message.replace(inline, (match, token) => {
-        if (!kxy.test(token)) {
-          return match;
-        } // Not L5R4 notation, leave unchanged
-        hasL5R4Rolls = true;
-        return roll_parser(token); // Parse and convert to Foundry roll formula
-      });
-
-      if (hasL5R4Rolls) {
-        chatlog.processMessage(result);
-        return false; // Intercept message, prevent Foundry default processing
+    let changed = false;
+    const text = message.replace(/\[\[(.*?)\]\]/g, (match, token) => {
+      const formula = inlineFormula(token);
+      if (!formula) {
+        return match;
       }
+      changed = true;
+      return `[[${formula}]]`;
+    });
+    if (changed) {
+      chatlog.processMessage(text);
+      return false;
     }
-
-    // No L5R4 notation found, pass through to Foundry default chat handler
     return true;
   });
 }

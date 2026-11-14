@@ -56,6 +56,14 @@
     flex-wrap: nowrap;
   }
 
+  // Rules (JSON)
+  .rules-json {
+    font-family: var(--font-monospace);
+    min-height: 16rem;
+    resize: vertical;
+    width: 100%;
+  }
+
   // Price section fieldset styling
   .price-section {
     border: 1px solid var(--color-border-dark-tertiary);

@@ -1,0 +1,11 @@
+<div class="chat-card l5r4-flow-card">
+  <div class="dice-flavor">{{title}}: {{stage}}</div>
+  {{#each lines}}<div class="check-note">{{this}}</div>{{/each}}
+  {{#if buttons.length}}
+    <div class="flow-actions flexrow -gap-sm">
+      {{#each buttons}}
+        <button type="button" data-flow-action="{{action}}" data-duelist="{{data}}" data-side="{{data}}">{{label}}</button>
+      {{/each}}
+    </div>
+  {{/if}}
+</div>

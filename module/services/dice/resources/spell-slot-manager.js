@@ -125,7 +125,7 @@ export function validateSpellSlot(actor, ringKey, isVoidSlot = false) {
     return {
       valid: false,
       current: 0,
-      message: game.i18n.format("l5r4.ui.notifications.invalidRingForSpell", { ring: ringKey }),
+      message: game.i18n.localize("l5r4.ui.notifications.invalidRingForSpell", { ring: ringKey }),
       path: null
     };
   }
@@ -195,7 +195,10 @@ async function _spendSlot(actor, ringKey, isVoidSlot) {
       };
     }
 
-    await resolvedActor.update({ [validation.path]: validation.current - 1 }, { diff: true });
+    // Availability was checked on the prepared count; the write starts from the stored one, so an Active Effect
+    // on spell slots is never written into storage (B6).
+    const stored = foundry.utils.getProperty(resolvedActor._source, validation.path);
+    await resolvedActor.update({ [validation.path]: stored - 1 }, { diff: true });
 
     const ringDisplay =
       game.i18n.localize(`l5r4.ui.mechanics.rings.${String(ringKey).toLowerCase()}`) || ringKey;

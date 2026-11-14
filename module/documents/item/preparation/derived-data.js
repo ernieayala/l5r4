@@ -98,6 +98,26 @@ export function prepareItemDerivedData(item) {
     );
   }
 
+  prepareWeaponDamage(item);
+}
+
+/**
+ * Computes a weapon's damage formula with its owner's Strength (bows: the lower of bow and owner Strength).
+ *
+ * Item preparation runs inside Actor#prepareEmbeddedDocuments, before the owner's "initial" Active Effect phase
+ * (client/documents/actor.mjs:471-474), so the Strength read here leaves out effect bonuses. The owner's derived
+ * preparation calls this again once effects apply (module/documents/actor/calculations/item-enrichment.js), so a
+ * Strength raised by an Active Effect reaches weapon damage (issue #29).
+ *
+ * Melee damage: Core Rulebook p.82, game-rules/32_attack_and_defense.md. Bow damage: Core Rulebook p.199,
+ * game-rules/74_weapons.md.
+ *
+ * @param {Item} item - A weapon Item; any other type is left unchanged
+ */
+export function prepareWeaponDamage(item) {
+  const sys = item.system ?? {};
+  const type = item.type;
+
   if (type === "weapon" && sys.isBow) {
     applyDiceFormula(
       sys,

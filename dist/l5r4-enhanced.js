@@ -5,9 +5,9 @@
  * 
  * **Initialization Sequence:**
  * 1. Register system settings for data preparation
- * 2. Configure document classes (Actor/Item) with L5R4 implementations
+ * 2. Configure document classes (Actor, Item, Combat, Combatant) with L5R4 implementations
  * 3. Build CONFIG.l5r4 namespace with game data (rings, traits, stances, status effects)
- * 4. Initialize L5R4 initiative system with Insight/Reflexes rolls
+ * 4. Wire the Initiative Void Point prompt into L5R4Combat
  * 5. Register Application v2 sheets for all actor and item types
  * 6. Preload Handlebars templates and register custom helpers
  * 7. Initialize services (stance management, chat integration)
@@ -47,7 +47,12 @@ import {
 } from "../module/config/localization.js";
 import { NPC_NUMBER_WOUND_LVLS } from "../module/config/game-mechanics.js";
 import { STATUS_EFFECTS } from "../module/config/status-effects.js";
+import { EXPIRY_ACTION, EXPIRY_EVENTS } from "../module/config/expiry-events.js";
+import { CORE_TYPE_DATA_MODELS, DATA_MODELS } from "../module/data/index.js";
+import L5R4ActiveEffect from "../module/documents/active-effect.js";
 import L5R4Actor from "../module/documents/actor.js";
+import L5R4Combat from "../module/documents/combat.js";
+import L5R4Combatant from "../module/documents/combatant.js";
 import L5R4Item from "../module/documents/item.js";
 import L5R4ItemSheet from "../module/sheets/item-sheet.js";
 import L5R4PcSheet from "../module/sheets/pc-sheet.js";
@@ -56,7 +61,10 @@ import { preloadTemplates } from "../module/setup/preload-templates.js";
 import { runMigrations } from "../module/setup/migrations.js";
 import { registerSettings } from "../module/setup/register-settings.js";
 import { registerHandlebarsHelpers } from "../module/setup/register-handlebars.js";
-import { initializeInitiativeSystem } from "../module/services/initiative.js";
+import { resolveVoidInitiative } from "../module/services/initiative.js";
+import { registerEffectQueries } from "../module/services/effects/apply.js";
+import { registerPromptQueries } from "../module/services/effects/prompts.js";
+import { combatEvents, registerCombatQueries } from "../module/services/effects/combat-events.js";
 import { registerAllHooks } from "../module/hooks/register-all.js";
 
 
@@ -76,6 +84,34 @@ Hooks.once("init", async () => {
 
   CONFIG.Item.documentClass  = L5R4Item;
   CONFIG.Actor.documentClass = L5R4Actor;
+  CONFIG.ActiveEffect.documentClass = L5R4ActiveEffect;
+  CONFIG.Combat.documentClass = L5R4Combat;
+  CONFIG.Combatant.documentClass = L5R4Combatant;
+
+  // Expired effects are deleted; Fear ends on the system's encounterEnd event (module/config/expiry-events.js)
+  CONFIG.ActiveEffect.expiryAction = EXPIRY_ACTION;
+  Object.assign(CONFIG.ActiveEffect.expiryEvents, EXPIRY_EVENTS);
+
+  // Initiative is the Roll & Keep pool rolled by L5R4Combatant; core's formula is only the fallback for a
+  // combatant with no actor. Scores are whole numbers.
+  CONFIG.Combat.initiative = { formula: "1d10", decimals: 0 };
+  // Documents do not import services, so the Void Point prompt and the effect services reach L5R4Combat here
+  L5R4Combat.resolveInitiativeBonuses = resolveVoidInitiative;
+  L5R4Combat.events = combatEvents;
+
+  // What a player's client asks the active GM to do: apply a condition to an actor the player does not own, end a
+  // Concentration, settle Center Stance when a player ends the Round
+  registerEffectQueries();
+  registerPromptQueries();
+  registerCombatQueries();
+
+  // One data model per subtype declared in system.json documentTypes, plus models for core types, which are not
+  // declared. Core labels each subtype with its TYPES.<Document>.<type> key from lang/*.json.
+  for (const registry of [DATA_MODELS, CORE_TYPE_DATA_MODELS]) {
+    for (const [documentName, models] of Object.entries(registry)) {
+      Object.assign(CONFIG[documentName].dataModels, models);
+    }
+  }
 
   CONFIG.l5r4 = {
     arrows: ARROWS,
@@ -93,28 +129,33 @@ Hooks.once("init", async () => {
     statusEffects: STATUS_EFFECTS
   };
 
-  CONFIG.statusEffects = STATUS_EFFECTS;
+  // CONFIG.statusEffects is an array also keyed by id (client/config.mjs:1690-1718); assigning the whole property
+  // goes through a setter deprecated in v14 (client/client.mjs:29-39). Replace core's entries with the system's.
+  CONFIG.statusEffects.length = 0;
+  for (const status of STATUS_EFFECTS) {
+    CONFIG.statusEffects[status.id] = status;
+  }
 
   CONFIG.l5r4.TRAIT_CHOICES = CONFIG.l5r4.traits;
 
-  initializeInitiativeSystem();
-
+  // Core 14.370 registers no Actor or Item sheet, so these are the only ones and nothing is unregistered
+  // (client/applications/sheets/_module.mjs:83-128).
   const { DocumentSheetConfig } = foundry.applications.apps;
   const { Item, Actor } = foundry.documents;
 
-  try { DocumentSheetConfig.unregisterSheet(Item, "core", foundry.applications.sheets.ItemSheetV2); } catch (_e) { }
-
+  // "bow" is the legacy subtype kept until the bow-to-weapon migration converts it (module/data/item/BowData.js);
+  // with no core sheet in 14.370 it needs this one to open.
   DocumentSheetConfig.registerSheet(Item, SYS_ID, L5R4ItemSheet, {
     makeDefault: true,
     types: [
       "advantage",
       "armor",
+      "bow",
       "clan",
       "commonItem",
       "disadvantage",
       "family",
       "school",
-      "item",
       "kata",
       "kiho",
       "skill",
@@ -124,8 +165,6 @@ Hooks.once("init", async () => {
       "weapon"
     ]
   });
-
-  try { DocumentSheetConfig.unregisterSheet(Actor, "core", foundry.applications.sheets.ActorSheetV2, { types: ["pc", "npc"] }); } catch (_e) { }
 
   DocumentSheetConfig.registerSheet(Actor, SYS_ID, L5R4PcSheet, {
     types: ["pc"],
@@ -144,54 +183,21 @@ Hooks.once("init", async () => {
 });
 
 /**
- * Register Quench Integration Tests
- * Registers system integration tests with the Quench testing module if available.
- * Uses defensive registration with flag to prevent duplicate registration across hooks.
- * Called from both quenchReady and ready hooks to handle unpredictable hook timing.
- * 
- * **Registration Strategy:**
- * - Checks for globalThis.quench API availability
- * - Verifies Quench module is active in game.modules
- * - Uses _l5r4Registered flag to prevent duplicate registration
- * - Silently returns if already registered or Quench unavailable
- * 
- * **Hook Timing:**
- * Primary registration occurs in quenchReady hook when Quench signals readiness.
- * Fallback registration occurs in ready hook if quenchReady already fired.
- * This dual-hook pattern ensures reliable registration regardless of module load order.
- * 
- * @async
- * @returns {Promise<void>}
- */
-async function registerQuenchIfAvailable() {
-  const quench = globalThis.quench;
-  const quenchModule = game.modules.get("quench");
-  
-  if (!quench || !quenchModule?.active || quenchModule._l5r4Registered) {
-    return;
-  }
-
-  try {
-    // Dynamic import - only load tests when Quench is available
-    const { registerQuenchTests } = await import("../tests/integration/quench-integration.js");
-    await registerQuenchTests(quench);
-    quenchModule._l5r4Registered = true;
-  } catch (err) { }
-}
-
-/**
- * Quench Ready Hook
- * Fires when Quench testing module signals it's ready to accept test registrations.
- * Primary hook for registering L5R4 integration tests.
- * 
+ * Register the Quench test batches. Quench calls `quenchReady` from its `setup` hook, after this module has
+ * loaded, so worlds without Quench never import anything from tests/. A failed import or registration
+ * surfaces in the console instead of leaving the batches silently missing.
+ *
  * @listens Hooks#quenchReady
  */
-Hooks.once("quenchReady", registerQuenchIfAvailable);
+Hooks.once("quenchReady", async quench => {
+  const { registerQuenchTests } = await import("../tests/quench/index.js");
+  await registerQuenchTests(quench);
+});
 
 /**
  * Foundry VTT Ready Hook
  * Executes after Foundry completes initialization and world data is loaded.
- * Handles fallback Quench registration and executes data migrations for GMs.
+ * Executes data migrations for GMs.
  * This hook fires once per session after all modules and systems are ready.
  * 
  * **Migration System:**
@@ -205,8 +211,6 @@ Hooks.once("quenchReady", registerQuenchIfAvailable);
  */
 Hooks.once("ready", async () => {
   console.log(`${SYS_ID} | Ready`);
-
-  await registerQuenchIfAvailable();
 
   if (game.user?.isGM) {
     const currentVersion = game.system?.version ?? "0.0.0";

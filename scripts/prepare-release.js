@@ -25,7 +25,6 @@
  * @requires path
  * @requires child_process
  */
-/* eslint-env node */
 /* eslint-disable no-console */
 const fs = require("fs");
 const path = require("path");
@@ -141,7 +140,6 @@ function validateProjectStructure() {
     "dist/l5r4-enhanced.js",
     "dist/l5r4-enhanced.css",
     "system.json",
-    "template.json",
     "README.md",
     "CHANGELOG.MD",
     "LICENSE"

@@ -50,7 +50,9 @@ export class VoidPointsHandler {
   static async adjust(context, event, delta) {
     event?.preventDefault?.();
 
-    const cur = this._getVoidValue(context.actor);
+    // The stored value, not the prepared one, so an Active Effect on Void Points is never written into
+    // storage (B6)
+    const cur = context.actor._source.system.rings.void.value;
     const next = clamp(cur + delta, 0, 9); // Max 9 Void Points (system constraint)
     if (next === cur) {
       return;

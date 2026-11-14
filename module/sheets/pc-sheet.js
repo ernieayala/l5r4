@@ -46,6 +46,7 @@ import { PC_SORT_KEYS } from "../config/sort-keys.js";
 
 // Utils
 import { on } from "../utils/dom.js";
+import { effectsOf } from "../services/effects/apply.js";
 
 // Documents
 import { enhanceItemSheetData } from "../documents/item/integration/sheet-data.js";
@@ -90,7 +91,7 @@ export default class L5R4PcSheet extends BaseActorSheet {
    * Tracks bound root element for extra event listeners.
    *
    * Used to prevent duplicate binding of non-delegated event listeners
-   * (image edit click, context menus) during re-renders.
+   * (image edit click) during re-renders.
    *
    * @type {HTMLElement|null}
    * @private
@@ -114,9 +115,7 @@ export default class L5R4PcSheet extends BaseActorSheet {
       root: true,
       classes: ["flexcol"],
       template: `systems/${SYS_ID}/templates/actor/pc.hbs`,
-      scrollable: [".scrollable-content"],
-      submitOnChange: true,
-      submitOnClose: true
+      scrollable: [".scrollable-content"]
     }
   };
 
@@ -168,6 +167,21 @@ export default class L5R4PcSheet extends BaseActorSheet {
         return this._onUnifiedSortClick(event, element);
       case "ring-rank-void":
         return PcAdjustmentHandler.adjustVoidRing(this._getHandlerContext(), event, element, +1);
+      // The arrows step the Void Ring without Shift, like the Trait arrows (issue #30)
+      case "void-ring-increase":
+        return PcAdjustmentHandler.adjustVoidRing(
+          this._getHandlerContext(),
+          { preventDefault: () => event.preventDefault(), shiftKey: true },
+          element,
+          +1
+        );
+      case "void-ring-decrease":
+        return PcAdjustmentHandler.adjustVoidRing(
+          this._getHandlerContext(),
+          { preventDefault: () => event.preventDefault(), shiftKey: true },
+          element,
+          -1
+        );
       case "roll-ring":
         return PcRollHandler.handleRingRoll(this._getHandlerContext(), event, element);
       case "roll-skill":
@@ -242,7 +256,7 @@ export default class L5R4PcSheet extends BaseActorSheet {
    * - Void Points (-1)
    *
    * **User Interaction Pattern:**
-   * Right-click typically decrements values, while left-click increments.
+   * Right-click decrements values; left-click increments.
    * All context actions still respect safety mechanisms (Shift+Click requirements).
    *
    * @param {string} action - The data-action attribute value from right-clicked element
@@ -351,7 +365,7 @@ export default class L5R4PcSheet extends BaseActorSheet {
    * **GM-Only Feature:**
    * Only GMs can toggle this setting. Shift+Click on the "Rank" label switches between:
    * - Automatic: Rank calculated from Insight Points (default)
-   * - Manual: GM directly inputs rank value
+   * - Manual: the GM types the rank value
    *
    * **What It Does:**
    * 1. Checks for GM permission (non-GMs ignored)
@@ -403,7 +417,8 @@ export default class L5R4PcSheet extends BaseActorSheet {
    *
    * **What It Does:**
    * 1. Checks for Shift key (safety mechanism)
-   * 2. Calls actor.prepareData() to recalculate all derived values
+   * 2. Calls actor.reset() to rebuild data from storage and recalculate derived values once
+   *    (a bare prepareData() on a prepared actor would apply its Active Effects a second time)
    * 3. Re-renders the sheet to display updated values
    * 4. Shows notification confirming recalculation
    *
@@ -426,8 +441,8 @@ export default class L5R4PcSheet extends BaseActorSheet {
       return;
     }
 
-    // Force full data preparation
-    this.actor.prepareData();
+    // Rebuild from source and prepare once (client/documents/abstract/client-document.mjs:60-67)
+    this.actor.reset();
 
     // Re-render sheet to show updated values
     this.render(false);
@@ -471,34 +486,15 @@ export default class L5R4PcSheet extends BaseActorSheet {
   /* ---------------------------------- */
 
   /**
-   * Default configuration options for PC sheet.
-   *
-   * Extends BaseActorSheet options with PC-specific settings:
-   * - Width: 870px (wider than base to accommodate PC-specific columns)
-   * - Classes: Adds "pc" class for styling specificity
-   * - Form: Auto-submit on change and close for seamless editing
-   *
-   * **Foundry v13 Pattern:**
-   * Static DEFAULT_OPTIONS replaces deprecated defaultOptions() getter.
+   * PC-specific options, merged over BaseActorSheet's by ApplicationV2: the "pc" class and an 870px width for the
+   * PC columns.
    *
    * @static
    * @type {Object}
    */
   static DEFAULT_OPTIONS = {
-    ...BaseActorSheet.DEFAULT_OPTIONS,
-    classes: [
-      ...(BaseActorSheet.DEFAULT_OPTIONS.classes ?? []).filter(
-        c => c !== "pc" && c !== "npc" && c !== "l5r4"
-      ),
-      "l5r4",
-      "pc"
-    ],
-    position: { ...(BaseActorSheet.DEFAULT_OPTIONS.position ?? {}), width: 870 },
-    form: {
-      ...(BaseActorSheet.DEFAULT_OPTIONS.form ?? {}),
-      submitOnChange: true,
-      submitOnClose: true
-    }
+    classes: ["pc"],
+    position: { width: 870 }
   };
 
   /* ---------------------------------- */
@@ -567,7 +563,7 @@ export default class L5R4PcSheet extends BaseActorSheet {
     const masteries = PcContextBuilder.buildMasteryList(skills);
     const traitsEff = PcContextBuilder.extractEffectiveTraits(actorObj);
     const bioItems = PcContextBuilder.extractBioItems(all);
-    const { currentStance, mountedStatus } = PcContextBuilder.extractStanceAndMounted(actorObj);
+    const currentStance = PcContextBuilder.extractStance(actorObj);
     const collapsedSections = PcContextBuilder.extractCollapsedSections(actorObj.id);
 
     const context = {
@@ -581,7 +577,7 @@ export default class L5R4PcSheet extends BaseActorSheet {
       enriched: { notes: enrichedNotes },
       traitsEff,
       currentStance,
-      mountedStatus,
+      voidArmor: effectsOf(actorObj, "voidArmor").length > 0,
       collapsedSections,
       // Lazy getter: Defers expensive sorting until template accesses property
       get advDisList() {
@@ -613,7 +609,6 @@ export default class L5R4PcSheet extends BaseActorSheet {
    * Performs PC-specific rendering tasks:
    * 1. Paints Void Points dots based on current/max values
    * 2. Binds image edit click handler (non-delegated)
-   * 3. Sets up item context menus
    *
    * **Guard Logic:**
    * Tracks _boundExtraRoot to prevent duplicate event binding on re-renders.
@@ -629,10 +624,6 @@ export default class L5R4PcSheet extends BaseActorSheet {
   async _onRender(context, options) {
     await super._onRender(context, options);
     const root = this.element;
-    if (!this._preparedOnce) {
-      this.actor?.prepareData();
-      this._preparedOnce = true;
-    }
 
     this._paintVoidPointsDots(root);
 

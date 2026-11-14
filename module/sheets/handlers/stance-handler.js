@@ -17,18 +17,14 @@
  * attack bonuses, and defensive capabilities.
  *
  * Foundry VTT Integration:
- * - Uses Actor.createEmbeddedDocuments/deleteEmbeddedDocuments (Foundry v13+)
- * - Leverages ActiveEffect.statuses Set pattern for stance identification
- * - Maintains compatibility with pre-v13 core.statusId flag pattern
+ * - A stance is its status effect (module/config/status-effects.js), created through the effects service
+ * - The stances share the exclusive group "stance", so the new one ends the old (module/documents/active-effect.js)
  *
  * @module sheets/handlers/stance-handler
- * @requires Foundry VTT v13+
- * @see {@link https://foundryvtt.com/api/v13/classes/foundry.documents.BaseActor.html|Actor API}
- * @see {@link https://foundryvtt.com/api/v13/classes/foundry.documents.BaseActiveEffect.html|ActiveEffect API}
  */
 
-import { STANCE_IDS } from "../../services/stance/core/helpers.js";
-import { getStanceEffectCreator } from "../../services/stance/core/effect-templates.js";
+import { STANCE_IDS, stanceConflicts } from "../../utils/stances.js";
+import { applyEffect } from "../../services/effects/apply.js";
 import { SYS_ID } from "../../config/constants.js";
 
 /**
@@ -37,13 +33,10 @@ import { SYS_ID } from "../../config/constants.js";
  * This handler responds to stance dropdown selections in the character sheet UI
  * and coordinates the Active Effect operations needed to transition between stances.
  *
- * Per L5R4 rules, characters may only have one stance active at a time. This handler
- * enforces that constraint by removing all existing stance effects before applying
- * the newly selected stance.
+ * Per L5R4 rules, characters may only have one stance active at a time; the stance
+ * group of the new effect ends the old one.
  *
- * Foundry v13 Pattern:
- * Uses event delegation pattern where sheet roots delegate to this handler.
- * Expects context.actor to be a valid L5R4Actor document with ownership verified.
+ * Sheet roots delegate to this handler; context.actor is the sheet's actor.
  *
  * @class
  */
@@ -57,11 +50,7 @@ export class StanceHandler {
    * Workflow:
    * 1. Validate user has owner permission on actor
    * 2. If stanceId is empty, remove all stance effects (neutral stance)
-   * 3. If stanceId provided, add new stance effect (removes conflicting stances first)
-   *
-   * Game Rules Implementation:
-   * Per L5R4 core rules, only one stance may be active at a time. The handler
-   * enforces this by removing all existing stances before applying a new one.
+   * 3. Warn about any condition that rules the stance out, then add it
    *
    * Error Handling:
    * - Warns users without ownership permission
@@ -73,8 +62,6 @@ export class StanceHandler {
    * @param {HTMLElement} element - The select element containing the chosen stance value
    * @param {string} element.value - The stance ID (e.g., "fullAttackStance") or empty string
    * @returns {Promise<void>}
-   *
-   * @see module:services/stance/core/effect-templates for stance effect definitions
    */
   static async changeStance(context, event, element) {
     event?.preventDefault?.();
@@ -85,16 +72,23 @@ export class StanceHandler {
       return;
     }
 
-    const stanceId = element?.value;
-
-    // Empty value indicates "no stance" selected - remove all active stances
+    // The select's value is user input: only the five stances, or "" for none
+    const stanceId = STANCE_IDS.has(element?.value) ? element.value : "";
     if (!stanceId) {
       await this._removeAllStances(actor);
-    } else {
-      // Remove conflicting stances FIRST, then apply new stance
-      await this._removeAllStances(actor);
-      await this._addStance(actor, stanceId);
+      return;
     }
+    // A condition may rule the stance out (p.84, p.89): warn, and leave the choice to the player
+    for (const status of stanceConflicts(stanceId, actor.statuses)) {
+      ui.notifications?.warn(
+        game.i18n.localize("l5r4.ui.effects.stanceNotAllowed", {
+          condition: game.i18n.localize(CONFIG.statusEffects[status].name),
+          stance: game.i18n.localize(CONFIG.statusEffects[stanceId].name)
+        })
+      );
+    }
+    // The new stance's group ends the old one (module/documents/active-effect.js)
+    await this._addStance(actor, stanceId);
   }
 
   /**
@@ -143,42 +137,17 @@ export class StanceHandler {
   }
 
   /**
-   * Applies a stance effect to an actor.
-   *
-   * Creates and applies an Active Effect representing the selected stance's mechanical
-   * bonuses/penalties and action restrictions. The effect is generated using the stance
-   * service's effect creator functions, which define the game rules for each stance type.
-   *
-   * Foundry v13 API:
-   * Uses Actor.createEmbeddedDocuments to add the effect to the actor's effects collection.
-   * The operation is async and may fail if the actor document is not available or locked.
-   *
-   * Pre-Condition:
-   * The caller (changeStance) should remove conflicting stance effects before calling this
-   * method to enforce the single-stance rule. This method does NOT check for existing stances.
-   *
-   * Error Handling:
-   * - Logs warnings if stance ID has no registered effect creator
-   * - Catches async errors from createEmbeddedDocuments and shows user notification
-   * - Silently returns on failure to prevent UI disruption
+   * Applies a stance effect to an actor: its status effect, with the stance's rules. Its group ends the actor's
+   * other stance before it is created.
    *
    * @param {Actor} actor - The L5R4 actor document to apply the stance to
    * @param {string} stanceId - Stance identifier (e.g., "attackStance", "fullDefenseStance")
    * @returns {Promise<void>}
    * @private
-   *
-   * @see {@link https://foundryvtt.com/api/v13/classes/foundry.documents.BaseActor.html#createEmbeddedDocuments|Actor.createEmbeddedDocuments}
    */
   static async _addStance(actor, stanceId) {
     try {
-      const creator = getStanceEffectCreator(stanceId);
-      if (!creator) {
-        console.warn(`${SYS_ID} StanceHandler: No effect creator found for stance "${stanceId}"`);
-        return;
-      }
-
-      const effectData = creator(actor);
-      await actor.createEmbeddedDocuments("ActiveEffect", [effectData]);
+      await applyEffect(actor, stanceId);
     } catch (err) {
       console.error(`${SYS_ID} StanceHandler: Failed to add stance "${stanceId}"`, err);
       ui.notifications?.error(game.i18n.localize("l5r4.ui.notifications.stanceAddFailed"));
@@ -186,72 +155,17 @@ export class StanceHandler {
   }
 
   /**
-   * Removes all active stance effects from an actor.
-   *
-   * Scans the actor's effects collection for any stance-related Active Effects and
-   * batch-deletes them. Used when transitioning to a new stance (to enforce single-stance
-   * rule) or when resetting to neutral/no stance.
-   *
-   * Stance Detection Logic:
-   * - Checks ActiveEffect.statuses Set for stance IDs (Foundry v13+)
-   * - Falls back to checking flags.core.statusId for pre-v13 compatibility
-   * - Ignores disabled effects (already inactive)
-   * - Uses STANCE_IDS Set to identify valid stance status IDs
-   *
-   * This dual-path detection ensures stance effects created before the Foundry v13
-   * migration continue to be recognized and removed correctly.
-   *
-   * Foundry v13 API:
-   * Uses Actor.deleteEmbeddedDocuments to batch-remove effects efficiently.
-   * Only initiates deletion if at least one stance effect is found to avoid
-   * unnecessary async operations.
-   *
-   * Error Handling:
-   * - Catches async errors from deleteEmbeddedDocuments and shows user notification
-   * - Logs detailed error context for debugging
-   * - Silently returns on failure to prevent UI disruption
+   * Removes every stance effect from an actor, for "no stance".
    *
    * @param {Actor} actor - The L5R4 actor document to remove stances from
    * @returns {Promise<void>}
    * @private
-   *
-   * @see {@link https://foundryvtt.com/api/v13/classes/foundry.documents.BaseActor.html#deleteEmbeddedDocuments|Actor.deleteEmbeddedDocuments}
-   * @see module:services/stance/core/helpers~STANCE_IDS for valid stance identifiers
    */
   static async _removeAllStances(actor) {
     try {
-      const effectsToRemove = [];
-
-      // Identify stance effects using dual-path status ID detection for v13 compatibility
-      for (const effect of actor.effects) {
-        if (effect.disabled) {
-          continue;
-        }
-
-        let isStance = false;
-
-        // Check v13+ statuses Set first (modern pattern)
-        if (effect.statuses?.size) {
-          for (const statusId of effect.statuses) {
-            if (STANCE_IDS.has(statusId)) {
-              isStance = true;
-              break;
-            }
-          }
-        }
-
-        // Fall back to legacy core.statusId flag for pre-v13 effects
-        if (!isStance) {
-          const legacyId = effect.getFlag?.("core", "statusId");
-          if (legacyId && STANCE_IDS.has(legacyId)) {
-            isStance = true;
-          }
-        }
-
-        if (isStance) {
-          effectsToRemove.push(effect.id);
-        }
-      }
+      const effectsToRemove = actor.effects
+        .filter(effect => [...effect.statuses].some(id => STANCE_IDS.has(id)))
+        .map(effect => effect.id);
 
       if (effectsToRemove.length > 0) {
         await actor.deleteEmbeddedDocuments("ActiveEffect", effectsToRemove);

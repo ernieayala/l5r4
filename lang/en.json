@@ -144,7 +144,7 @@
       },
       "traits": {
         "agi": "Agility",
-        "aw": "Awareness",
+        "awa": "Awareness",
         "int": "Intelligence",
         "per": "Perception",
         "ref": "Reflexes",
@@ -172,7 +172,64 @@
         "details": "Details",
         "modifiers": "Modifiers",
         "description": "Description",
-        "effects": "Active Effects"
+        "effects": "Active Effects",
+        "rules": "Rules"
+      },
+      "check": {
+        "allKept": "All",
+        "armor": "Armor",
+        "caller": "Bonus",
+        "castSpell": "Cast as a spell",
+        "contest": "Contested Roll",
+        "contestTie": "Tie: roll again.",
+        "contestWinner": "{name} wins.",
+        "damageFor": "Damage for",
+        "effects": "Active Effects",
+        "freeRaisesToTN": "Free Raises spent on the TN",
+        "increasedDamage": "Increased Damage (Raises)",
+        "keepFewer": "Keep only",
+        "manual": "Situational",
+        "max": "max",
+        "modifiers": "Modifiers",
+        "of": "of",
+        "pool": "Pool",
+        "range": {
+          "melee": "melee",
+          "ranged": "ranged"
+        },
+        "rerollKeepBetter": "Re-roll, keep the better",
+        "rerolledKeptBetter": "re-rolled, better kept",
+        "schoolRank": "School Rank",
+        "spellSlot": "Spell slot",
+        "statBlock": "Stat block",
+        "substitutes": "Substitutions",
+        "unskilledHint": "Unskilled Roll: dice do not explode, and no Raises or Free Raises apply.",
+        "void": "Spend a Void Point (+1k1)"
+      },
+      "effects": {
+        "alreadyEnded": "That effect has already ended.",
+        "applyTo": "{effect} on {target}",
+        "centered": "Centered",
+        "concentrationUpkeep": "{effect}: spend a Simple Action this Round to keep concentrating, or end it.",
+        "endEncounter": "End encounter",
+        "endEncounterConfirm": "End the encounter? Fear and every other effect lasting until the encounter ends will end now.",
+        "expiry": {
+          "encounterEnd": "End of the encounter"
+        },
+        "fullDefense": "Full Defense",
+        "immune": "{actor} is immune to {effect}.",
+        "noGM": "No GM is connected to apply that effect.",
+        "saveText": "{roll} roll against TN {tn}.",
+        "saveTitle": "{effect}: save",
+        "stanceNotAllowed": "{condition} rules out {stance}.",
+        "voidArmor": "Void: Armor TN +10",
+        "voidLimit": "{name} has already spent a Void Point this Round.",
+        "voidSpentThisRound": "A Void Point was already spent this Round; one per Round is the usual limit."
+      },
+      "rules": {
+        "hint": "The item's rules as a JSON list, such as [{\"key\": \"RollModifier\", \"selector\": \"skill:kenjutsu\", \"roll\": 1}]. ACTIVE_EFFECTS.md lists the rule keys.",
+        "invalidJson": "Rules not saved: the text is not valid JSON ({error}).",
+        "notList": "Rules not saved: the text must be a JSON list of objects, each with a \"key\"."
       },
       "mechanics": {
         "rings": {
@@ -373,7 +430,83 @@
         "base": "Base"
       },
       "combat": {
-        "configuration": "Combat Configuration"
+        "configuration": "Combat Configuration",
+        "maneuvers": "Maneuvers",
+        "maneuversHint": "Free Raises pay for maneuvers first, then declared Raises. Raises left over add +1k0 damage each.",
+        "calledShot": "Called Shot",
+        "calledShotLimb": "Limb (1 Raise)",
+        "calledShotHand": "Hand or foot (2 Raises)",
+        "calledShotHead": "Head (3 Raises)",
+        "calledShotSmall": "Eye, ear, finger (4 Raises)",
+        "calledShotLocation": "Called Shot location",
+        "calledShotNote": "Called Shot ({raises} Raises): {location}. The GM rules any effect on that part.",
+        "calledShotUnnamed": "unnamed part",
+        "feint": "Feint (2 Raises)",
+        "feintNote": "Feint: half the margin over the TN adds to damage (up to 5 × Insight Rank).",
+        "knockdown": "Knockdown (2 Raises, 4 vs four legs)",
+        "fourLegged": "Target has four or more legs",
+        "knockdownNote": "Knockdown: roll Contested Strength; the attacker winning knocks the target Prone.",
+        "disarm": "Disarm (3 Raises)",
+        "disarmNote": "Disarm: damage is 2k1 without Strength; roll Contested Strength, and the attacker winning makes the target drop the weapon.",
+        "extraAttack": "Extra Attack (5 Raises)",
+        "extraAttackNote": "Extra Attack: once this attack is resolved, damage included, make a second attack roll.",
+        "increasedDamageNote": "Increased Damage: +{dice}k0.",
+        "grappleManeuver": "Start a grapple (ignores armor)",
+        "grappleIgnoresArmor": "Grapple ignores armor",
+        "grappleStart": "Start grapple with",
+        "notEnoughRaises": "The maneuvers cost {cost} Raises; declare enough Raises (or have Free Raises) to pay for them. Declared: {raises}.",
+        "contestStrength": "Roll Contested Strength",
+        "contestWaiting": "You have rolled; waiting for the other side.",
+        "knockedDown": "{name} is knocked Prone.",
+        "disarmed": "{name} drops the weapon.",
+        "sources": "Damage sources",
+        "applyTo": "Apply to",
+        "applySelected": "Apply to selected",
+        "resultTitle": "{name} takes {wounds} Wounds from {damage} damage",
+        "reductionNote": "Reduction {reduction}.",
+        "spiritNote": "Spirit: the damage is halved.",
+        "invulnerableNote": "Invulnerability: one Wound.",
+        "voidNote": "Void Point spent: {wounds} fewer Wounds.",
+        "killedNote": "Past the Out Wound Rank: marked Dead. The GM can remove the status.",
+        "undo": "Undo",
+        "undoneNote": "Undone.",
+        "unarmed": "Unarmed",
+        "guard": "Guard the targeted token",
+        "guardPick": "Select your token and target the one to guard.",
+        "guardFullAttack": "You cannot Guard in the Full Attack Stance.",
+        "duel": {
+          "start": "Iaijutsu duel: selected token against targeted token",
+          "pick": "Select one duelist's token and target the other's.",
+          "title": "Iaijutsu duel",
+          "assessment": "Assessment",
+          "focus": "Focus",
+          "strike": "Strike",
+          "done": "Over",
+          "assessmentEdge": "Assessment +10",
+          "facts": "Facts {name} learns: {count}.",
+          "edgeWon": "{name} gains +1k1 on Focus.",
+          "kharmic": "Kharmic strike: both strike at once.",
+          "firstStrike": "{name} strikes first, with {raises} Free Raises.",
+          "conceded": "{name} concedes.",
+          "roll": "Roll for {name}",
+          "concede": "{name} concedes"
+        },
+        "grapple": {
+          "title": "Grapple",
+          "control": "Grapple control",
+          "rollControl": "Control roll: {name}",
+          "inControl": "{name} is in control.",
+          "hit": "Hit",
+          "throw": "Throw",
+          "break": "Break",
+          "pass": "Pass",
+          "over": "Over",
+          "hitLog": "{name} hits for {total}.",
+          "thrown": "{name} is thrown Prone.",
+          "broken": "{name} breaks the grapple.",
+          "passed": "{name} keeps control.",
+          "weaponLost": "{name} gains two Free Raises to Disarm next Turn."
+        }
       },
       "armor": {
         "allowStacking": "Allow Armor Stacking"
@@ -461,7 +594,14 @@
         "noCombatActive": "No active combat to modify initiative",
         "notInCombat": "Character not in active combat",
         "wealthManagerFailed": "Failed to open Wealth Manager",
-        "conditionManagerFailed": "Failed to open Condition Manager"
+        "conditionManagerFailed": "Failed to open Condition Manager",
+        "combatConfigFailed": "Failed to open Combat Configuration",
+        "woundConfigFailed": "Failed to open Wound Configuration",
+        "xpManagerFailed": "Failed to open XP Manager",
+        "noPermission": "You don't have permission to modify this actor",
+        "stanceAddFailed": "Failed to add stance",
+        "stanceRemoveFailed": "Failed to remove stance",
+        "messageTooLong": "Message too long (max 10,000 characters)"
       },
       "voidActions": {
         "title": "Void Point Actions",
@@ -492,7 +632,12 @@
         "deleteItem": {
           "title": "Delete Item?",
           "content": "Are you sure you want to delete {name}?"
-        }
+        },
+        "deleteAttack": {
+          "title": "Remove Attack?",
+          "content": "Are you sure you want to remove {name}?"
+        },
+        "addAttack": "Add Attack"
       }
     },
     "character": {
@@ -732,7 +877,9 @@
         "compendiumIconsUpdated": "L5R4 Migration (Compendia): Updated {count} image path(s)."
       },
       "errors": {
-        "deleteEffect": "Failed to delete effect."
+        "deleteEffect": "Failed to delete effect.",
+        "createEffect": "Failed to create effect.",
+        "toggleEffect": "Failed to toggle effect."
       }
     },
     "world": {
@@ -802,6 +949,9 @@
       "tattoo": "Tattoo",
       "technique": "Technique",
       "weapon": "Weapon"
+    },
+    "ChatMessage": {
+      "roll": "Roll"
     }
   }
 }

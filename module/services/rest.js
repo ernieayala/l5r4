@@ -48,8 +48,9 @@ export async function applyLongRest(actor) {
     return;
   }
 
-  // Read current wound state from actor
-  const currentSuffered = toInt(actor.system?.suffered ?? 0);
+  // Read current wound state from actor. Suffered Wounds are the stored value, not the prepared one, so an Active
+  // Effect on Wounds is never written into storage (B6).
+  const currentSuffered = actor._source.system.suffered;
   const maxWounds = toInt(actor.system?.wounds?.max ?? 0);
   const healRate = toInt(actor.system?.wounds?.healRate ?? 0);
 
@@ -107,7 +108,7 @@ export async function applyLongRest(actor) {
   } catch (err) {
     console.error(`${SYS_ID} | rest.js: Failed to update actor after rest`, { actor, err });
     ui.notifications?.error(
-      game.i18n.format("l5r4.ui.mechanics.wounds.healingFailed", {
+      game.i18n.localize("l5r4.ui.mechanics.wounds.healingFailed", {
         name: actor.name
       })
     );
@@ -183,12 +184,12 @@ async function _postRestMessage({
   const actorImg = actor.img || actor.prototypeToken?.texture?.src || "icons/svg/mystery-man.svg";
 
   // Build healing summary text
-  const healingText = game.i18n.format("l5r4.ui.mechanics.wounds.healingApplied", {
+  const healingText = game.i18n.localize("l5r4.ui.mechanics.wounds.healingApplied", {
     amount: healingApplied,
     rate: healRate
   });
 
-  const woundsText = game.i18n.format("l5r4.ui.mechanics.wounds.woundStatus", {
+  const woundsText = game.i18n.localize("l5r4.ui.mechanics.wounds.woundStatus", {
     current: newCurrentWounds,
     max: maxWounds,
     suffered: newSuffered

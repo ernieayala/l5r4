@@ -17,7 +17,7 @@
  * Architectural Notes:
  * - **No DebouncedFieldMixin**: Uses custom multi-checkbox component with batched updates
  * - **Actor-based constructor**: Standard pattern for actor configuration dialogs
- * - **No form submission**: Multi-checkbox component handles change events directly
+ * - **No form submission**: Multi-checkbox component handles change events itself
  *
  * @module apps/condition-manager
  */
@@ -29,9 +29,10 @@ import { STATUS_EFFECTS } from "../config/status-effects.js";
 // Utils imports
 import { T } from "../utils/localization.js";
 import { logError } from "../utils/error-logging.js";
+import { STANCE_IDS } from "../utils/stances.js";
 
 // Services imports
-import { STANCE_IDS } from "../services/stance/core/helpers.js";
+import { applyEffect } from "../services/effects/apply.js";
 
 /**
  * Get all active non-stance conditions from an actor.
@@ -239,23 +240,10 @@ export default class ConditionManager extends foundry.applications.api.Handlebar
     const toRemove = Array.from(previouslyActive).filter(id => !selectedValues.has(id));
 
     try {
-      // Create ActiveEffect documents for newly selected conditions
+      // Create the status effect for each newly selected condition, with its rules and duration
       for (const conditionId of toAdd) {
-        const statusDef = STATUS_EFFECTS.find(s => s.id === conditionId);
-
-        if (statusDef) {
-          await this.actor.createEmbeddedDocuments("ActiveEffect", [
-            {
-              name: T(statusDef.name),
-              icon: statusDef.img,
-              statuses: [conditionId],
-              flags: {
-                [SYS_ID]: {
-                  conditionId: conditionId
-                }
-              }
-            }
-          ]);
+        if (STATUS_EFFECTS.some(s => s.id === conditionId)) {
+          await applyEffect(this.actor, conditionId);
         }
       }
 

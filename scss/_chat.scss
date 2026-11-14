@@ -27,7 +27,61 @@
     gap: 0.25rem;
   }
 
-  .l5r4-damage-button {
+  .l5r4-damage-button,
+  .l5r4-check-damage {
     width: 100%;
+  }
+
+  // Roll pipeline card: the modifiers that applied, under the label
+  .check-applied {
+    font-size: var(--font-size-12);
+    list-style: none;
+    margin: 0;
+    padding: 0;
+  }
+
+  .check-note {
+    font-style: italic;
+  }
+
+  // Flow cards (duel, grapple) and damage results: one full-width button per row, so long labels stay readable
+  .l5r4-flow-card,
+  .l5r4-damage-result {
+    display: flex;
+    flex-direction: column;
+    gap: 0.25rem;
+  }
+
+  .flow-actions {
+    flex-direction: column;
+  }
+
+  .l5r4-damage-result.-undone {
+    opacity: 0.7;
+  }
+}
+
+// Roll pipeline dialog: one row per modifier, with its toggle, label, and value
+.l5r4-check-dialog {
+  .check-modifiers,
+  .check-substitutes,
+  .check-extras {
+    display: flex;
+    flex-direction: column;
+    gap: 0.25rem;
+  }
+
+  .check-modifier {
+    align-items: center;
+    display: flex;
+    gap: 0.5rem;
+  }
+
+  .check-modifier-label {
+    flex: 1;
+  }
+
+  .check-modifier-value {
+    font-family: var(--font-monospace);
   }
 }

@@ -12,7 +12,8 @@
  *
  * Architecture:
  * - Uses Foundry's data preparation lifecycle (prepareBaseData → prepareDerivedData)
- * - Delegates type-specific logic to preparation modules (pc-preparation, npc-preparation)
+ * - Type-specific derived data runs in the subtype data models (module/data/actor/PcData.js, NpcData.js),
+ *   which call the preparation modules (pc-preparation, npc-preparation)
  * - Wound system uses calculation modules for complex penalty logic
  * - XP tracking uses flags for persistent character advancement data
  *
@@ -29,14 +30,9 @@ import {
   findCurrentWoundLevel,
   determineCurrentWoundLevel
 } from "./actor/calculations/wound-system.js";
-import {
-  calculateInsightRank,
-  preparePcExperience,
-  trackXpExpenditure
-} from "./actor/calculations/xp-system.js";
-import { prepareFear } from "./actor/calculations/fear-system.js";
-import { preparePcData } from "./actor/preparation/pc-preparation.js";
-import { prepareNpcData } from "./actor/preparation/npc-preparation.js";
+import { trackXpExpenditure } from "./actor/calculations/xp-system.js";
+import { addWoundRollOption, applyInitialRules } from "./actor/rules.js";
+import { rollDataKey } from "../utils/rule-values.js";
 
 /**
  * Actor document for L5R4 Enhanced system.
@@ -164,6 +160,21 @@ export default class L5R4Actor extends Actor {
   }
 
   /**
+   * Apply Active Effect changes for a phase; after the "initial" phase, collect `system.rules` and apply
+   * TraitAdjust (module/documents/actor/rules.js).
+   *
+   * @param {string} phase
+   * @returns {void}
+   * @override
+   */
+  applyActiveEffects(phase) {
+    super.applyActiveEffects(phase);
+    if (phase === "initial") {
+      applyInitialRules(this);
+    }
+  }
+
+  /**
    * Assemble roll data for dice formulas.
    * Combines traits, rings, bonuses, and derived values into flat object.
    *
@@ -189,6 +200,14 @@ export default class L5R4Actor extends Actor {
       Object.assign(data, this.system.bonuses);
     }
 
+    // Skill ranks for rule formulas, e.g. @skills.defense.rank (module/utils/rule-values.js)
+    data.skills = {};
+    for (const item of this.items) {
+      if (item.type === "skill") {
+        data.skills[rollDataKey(item.name)] = { rank: item.system.rank };
+      }
+    }
+
     return data;
   }
 
@@ -205,57 +224,6 @@ export default class L5R4Actor extends Actor {
   async _preUpdate(changed, options, user) {
     await super._preUpdate(changed, options, user);
     trackXpExpenditure(this, changed, options);
-  }
-
-  /**
-   * Calculate derived actor data.
-   * Delegates to type-specific preparation modules for PC/NPC logic.
-   * Called after Active Effects are applied.
-   *
-   * @returns {void}
-   * @override
-   */
-  prepareDerivedData() {
-    super.prepareDerivedData();
-
-    const sys = this.system ?? {};
-
-    if (this.type === "pc") {
-      this._preparePc(sys);
-      preparePcExperience(this, sys);
-    } else if (this.type === "npc") {
-      this._prepareNpc(sys);
-      prepareFear(sys);
-    }
-  }
-
-  /**
-   * Prepare PC-specific derived data.
-   * Delegates to pc-preparation module with wound and insight calculation callbacks.
-   *
-   * @param {object} sys - Actor system data
-   * @returns {void}
-   * @private
-   */
-  _preparePc(sys) {
-    preparePcData(
-      this,
-      sys,
-      this._finalizeWoundPenalties.bind(this),
-      this._calculateInsightRank.bind(this)
-    );
-  }
-
-  /**
-   * Prepare NPC-specific derived data.
-   * Delegates to npc-preparation module with wound calculation callback.
-   *
-   * @param {object} sys - Actor system data
-   * @returns {void}
-   * @private
-   */
-  _prepareNpc(sys) {
-    prepareNpcData(this, sys, this._finalizeWoundPenalties.bind(this));
   }
 
   /**
@@ -287,6 +255,7 @@ export default class L5R4Actor extends Actor {
     if (!woundMode) {
       sys.currentWoundLevel = current;
     }
+    addWoundRollOption(this, sys, current);
 
     // Calculate effective penalty (base penalty + modifiers, minimum 0)
     const curEffPenalty = Math.max(0, toInt(current.penalty) + toInt(sys.woundsPenaltyMod));
@@ -294,18 +263,6 @@ export default class L5R4Actor extends Actor {
     sys.wounds.penalty = curEffPenalty;
 
     return current;
-  }
-
-  /**
-   * Calculate insight rank from insight points.
-   * Uses L5R4 insight rank progression table.
-   *
-   * @param {number} insight - Total insight points
-   * @returns {number} Insight rank (1-10+)
-   * @private
-   */
-  _calculateInsightRank(insight) {
-    return calculateInsightRank(insight);
   }
 
   /**

@@ -23,6 +23,16 @@
   --void-ring-color: 125, 104, 98;
 }
 
+.theme-light {
+  --l5r4-ring-rank-backdrop-color: transparent;
+  --l5r4-ring-rank-backdrop-image: url("../../../ui/parchment.jpg");
+}
+
+.theme-dark {
+  --l5r4-ring-rank-backdrop-color: var(--color-cool-5-90);
+  --l5r4-ring-rank-backdrop-image: none;
+}
+
 /**
  * Base Reset
  * System-specific browser resets and base element styling
@@ -76,8 +86,49 @@ body > * {
   flex-direction: column;
   gap: 0.25rem;
 }
-.message-content .l5r4-damage-button {
+.message-content .l5r4-damage-button,
+.message-content .l5r4-check-damage {
   width: 100%;
+}
+.message-content .check-applied {
+  font-size: var(--font-size-12);
+  list-style: none;
+  margin: 0;
+  padding: 0;
+}
+.message-content .check-note {
+  font-style: italic;
+}
+.message-content .l5r4-flow-card,
+.message-content .l5r4-damage-result {
+  display: flex;
+  flex-direction: column;
+  gap: 0.25rem;
+}
+.message-content .flow-actions {
+  flex-direction: column;
+}
+.message-content .l5r4-damage-result.-undone {
+  opacity: 0.7;
+}
+
+.l5r4-check-dialog .check-modifiers,
+.l5r4-check-dialog .check-substitutes,
+.l5r4-check-dialog .check-extras {
+  display: flex;
+  flex-direction: column;
+  gap: 0.25rem;
+}
+.l5r4-check-dialog .check-modifier {
+  align-items: center;
+  display: flex;
+  gap: 0.5rem;
+}
+.l5r4-check-dialog .check-modifier-label {
+  flex: 1;
+}
+.l5r4-check-dialog .check-modifier-value {
+  font-family: var(--font-monospace);
 }
 
 /**
@@ -185,6 +236,12 @@ body > * {
 }
 .l5r4.item .effect-controls {
   flex-wrap: nowrap;
+}
+.l5r4.item .rules-json {
+  font-family: var(--font-monospace);
+  min-height: 16rem;
+  resize: vertical;
+  width: 100%;
 }
 .l5r4.item .price-section {
   border: 1px solid var(--color-border-dark-tertiary);
@@ -427,8 +484,6 @@ body > * {
   display: flex;
   flex-direction: column;
   gap: 0.25rem;
-  --controls: 102px;
-  /* stylelint-disable-next-line selector-class-pattern -- Legacy class name */
 }
 .l5r4.pc .item-list.-header,
 .l5r4.npc .item-list.-header,
@@ -444,6 +499,11 @@ body > * {
 .l5r4.npc .item-list.-header .item,
 .xp-modal-dialog .item-list.-header .item {
   padding: 0;
+}
+.l5r4.pc .item-list,
+.l5r4.npc .item-list,
+.xp-modal-dialog .item-list {
+  --controls: 102px;
 }
 .l5r4.pc .item-list.-advantages .item,
 .l5r4.npc .item-list.-advantages .item,
@@ -469,6 +529,11 @@ body > * {
 .l5r4.npc .item-list.-bio .item,
 .xp-modal-dialog .item-list.-bio .item {
   grid-template-columns: 1fr var(--controls);
+}
+.l5r4.pc .item-list,
+.l5r4.npc .item-list,
+.xp-modal-dialog .item-list {
+  /* stylelint-disable-next-line selector-class-pattern -- Legacy class name */
 }
 .l5r4.pc .item-list.-commonItem .item,
 .l5r4.npc .item-list.-commonItem .item,
@@ -626,18 +691,6 @@ body > * {
   margin: 0;
 }
 
-/**
- * L5R4 Enhanced System - Main SCSS Entry Point
- * Modular CSS architecture organized by concern:
- * - base/        → Variables, resets, and foundational styles
- * - utilities/   → Single-purpose utility classes
- * - layout/      → Grid and flexbox layout patterns
- * - components/  → Reusable UI components
- * - features/    → Domain-specific feature modules
- * - apps/        → Modal dialogs and applications
- * - sheets/      → Sheet-specific overrides
- * - chat/        → Chat message styling
- */
 /**
  * Animations
  * Keyframe animations and animated components
@@ -800,18 +853,6 @@ body > * {
 }
 
 /**
- * L5R4 Enhanced System - Main SCSS Entry Point
- * Modular CSS architecture organized by concern:
- * - base/        → Variables, resets, and foundational styles
- * - utilities/   → Single-purpose utility classes
- * - layout/      → Grid and flexbox layout patterns
- * - components/  → Reusable UI components
- * - features/    → Domain-specific feature modules
- * - apps/        → Modal dialogs and applications
- * - sheets/      → Sheet-specific overrides
- * - chat/        → Chat message styling
- */
-/**
  * Traits & Rings System
  * Complex grid system displaying the five elemental rings (Earth, Air, Water, Fire, Void)
  * and their associated traits, with rollable buttons and rank displays
@@ -854,6 +895,8 @@ body > * {
 }
 .l5r4.pc .traits-rings .ring-rank::before,
 .l5r4.npc .traits-rings .ring-rank::before {
+  background-color: var(--l5r4-ring-rank-backdrop-color);
+  background-image: var(--l5r4-ring-rank-backdrop-image);
   background-position: center;
   background-size: cover;
   border: 2px solid transparent;
@@ -861,14 +904,6 @@ body > * {
   content: "";
   inset: -4px;
   position: absolute;
-}
-.theme-light .l5r4.pc .traits-rings .ring-rank::before,
-.theme-light .l5r4.npc .traits-rings .ring-rank::before {
-  background-image: url("../../../ui/parchment.jpg");
-}
-.theme-dark .l5r4.pc .traits-rings .ring-rank::before,
-.theme-dark .l5r4.npc .traits-rings .ring-rank::before {
-  background-color: var(--color-cool-5-90);
 }
 .l5r4.pc .traits-rings .ring-rank.ring-rank-fire span,
 .l5r4.npc .traits-rings .ring-rank.ring-rank-fire span {
@@ -890,10 +925,56 @@ body > * {
   background-color: rgb(var(--water-ring-color), 0.1);
   border-color: rgb(var(--water-ring-color));
 }
+.l5r4.pc .traits-rings .ring-rank.ring-rank-void,
+.l5r4.npc .traits-rings .ring-rank.ring-rank-void {
+  cursor: pointer;
+}
 .l5r4.pc .traits-rings .ring-rank.ring-rank-void span,
 .l5r4.npc .traits-rings .ring-rank.ring-rank-void span {
   background-color: rgb(var(--void-ring-color), 0.1);
   border-color: rgb(var(--void-ring-color));
+}
+.l5r4.pc .traits-rings .ring-rank.ring-rank-void:hover .trait-increase,
+.l5r4.pc .traits-rings .ring-rank.ring-rank-void:hover .trait-decrease,
+.l5r4.npc .traits-rings .ring-rank.ring-rank-void:hover .trait-increase,
+.l5r4.npc .traits-rings .ring-rank.ring-rank-void:hover .trait-decrease {
+  opacity: 1;
+}
+.l5r4.pc .traits-rings .ring-rank.ring-rank-void:hover .trait-increase,
+.l5r4.npc .traits-rings .ring-rank.ring-rank-void:hover .trait-increase {
+  top: -16px;
+}
+.l5r4.pc .traits-rings .ring-rank.ring-rank-void:hover .trait-decrease,
+.l5r4.npc .traits-rings .ring-rank.ring-rank-void:hover .trait-decrease {
+  bottom: -16px;
+}
+.l5r4.pc .traits-rings .ring-rank.ring-rank-void .trait-increase,
+.l5r4.pc .traits-rings .ring-rank.ring-rank-void .trait-decrease,
+.l5r4.npc .traits-rings .ring-rank.ring-rank-void .trait-increase,
+.l5r4.npc .traits-rings .ring-rank.ring-rank-void .trait-decrease {
+  align-items: center;
+  background-color: inherit;
+  border: 1px solid black;
+  border-color: inherit;
+  color: inherit;
+  display: flex;
+  font-size: 10px;
+  height: 16px;
+  justify-content: center;
+  left: -2px;
+  opacity: 0;
+  position: absolute;
+  right: -1px;
+  transition: opacity 150ms ease-out, top 150ms ease-out, bottom 150ms ease-out;
+  z-index: 11;
+}
+.l5r4.pc .traits-rings .ring-rank.ring-rank-void .trait-increase,
+.l5r4.npc .traits-rings .ring-rank.ring-rank-void .trait-increase {
+  top: 0;
+}
+.l5r4.pc .traits-rings .ring-rank.ring-rank-void .trait-decrease,
+.l5r4.npc .traits-rings .ring-rank.ring-rank-void .trait-decrease {
+  bottom: 0;
 }
 .l5r4.pc .traits-rings .ring-rank span,
 .l5r4.npc .traits-rings .ring-rank span {

@@ -1,7 +1,8 @@
 {
+  "type": "system",
   "id": "l5r4-enhanced",
   "title": "Legend of the Five Rings 4e Enhanced",
-  "description": "Enhanced implementation of Legend of the Five Rings 4th Edition for Foundry VTT v13+. Built with modern architecture featuring complete character management, authentic L5R4 mechanics, automated stance system, and comprehensive XP tracking.",
+  "description": "Enhanced implementation of Legend of the Five Rings 4th Edition for Foundry VTT v14. Built with modern architecture featuring complete character management, authentic L5R4 mechanics, automated stance system, and comprehensive XP tracking.",
   "authors": [
     {
       "name": "Ernie Ayala",
@@ -12,12 +13,12 @@
   "manifest": "https://github.com/ernieayala/l5r4/releases/latest/download/system.json",
   "download": "https://github.com/ernieayala/l5r4/releases/latest/download/l5r4.zip",
   "compatibility": {
-    "minimum": 13,
-    "verified": 13,
-    "maximum": 13
+    "minimum": "14.370",
+    "verified": "14.370",
+    "maximum": "14"
   },
   "esmodules": ["dist/l5r4-enhanced.js"],
-  "styles": ["dist/l5r4-enhanced.css"],
+  "styles": [{ "src": "dist/l5r4-enhanced.css", "layer": "system" }],
   "packs": [],
   "languages": [
     {
@@ -53,24 +54,28 @@
   ],
   "documentTypes": {
     "Actor": {
-      "pc": {},
-      "npc": {}
+      "pc": { "htmlFields": ["notes"] },
+      "npc": { "htmlFields": ["notes"] }
     },
     "Item": {
-      "advantage": {},
-      "armor": {},
-      "clan": {},
-      "commonItem": {},
-      "disadvantage": {},
-      "family": {},
-      "school": {},
-      "kata": {},
-      "kiho": {},
-      "skill": {},
-      "spell": {},
-      "tattoo": {},
-      "technique": {},
-      "weapon": {}
+      "advantage": { "htmlFields": ["description", "specialRules", "demands"] },
+      "armor": { "htmlFields": ["description", "specialRules"] },
+      "bow": { "htmlFields": ["description", "specialRules"] },
+      "clan": { "htmlFields": ["description", "specialRules"] },
+      "commonItem": { "htmlFields": ["description", "specialRules"] },
+      "disadvantage": { "htmlFields": ["description", "specialRules"] },
+      "family": { "htmlFields": ["description", "specialRules"] },
+      "school": { "htmlFields": ["description", "specialRules"] },
+      "kata": { "htmlFields": ["description", "specialRules"] },
+      "kiho": { "htmlFields": ["description", "specialRules"] },
+      "skill": { "htmlFields": ["description", "specialRules"] },
+      "spell": { "htmlFields": ["description", "specialRules"] },
+      "tattoo": { "htmlFields": ["description", "specialRules", "effect"] },
+      "technique": { "htmlFields": ["description", "specialRules"] },
+      "weapon": { "htmlFields": ["description", "specialRules"] }
+    },
+    "ChatMessage": {
+      "roll": {}
     }
   },
   "grid": {

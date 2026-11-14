@@ -1,218 +1,61 @@
 /**
- * Initiative System
+ * Initiative Void Point prompt
  *
- * Implements Legend of the Five Rings 4th Edition initiative mechanics for Foundry VTT.
- * Overrides the default Combatant.getInitiativeRoll to support the L5R4 Roll & Keep system.
+ * A character may spend a Void Point to raise their Initiative Score by 10 (Core Rulebook p.78,
+ * `game-rules/25_rings_and_traits.md`). A PC marks the intent on the sheet (`system.initiative.useVoid`); when
+ * Initiative is rolled, the player confirms, and the +10 goes to that roll only.
  *
- * Initiative Formula: Insight Rank/Reflexes keep Reflexes (noted as Insight Rank + Reflexes rolled, Reflexes kept)
- * - Dice explode on 10s (x10)
- * - Maximum 10 dice rolled and 10 dice kept (Foundry limitation)
- * - Excess dice convert to flat bonuses (+2 per excess die)
- *
- * Requires Foundry VTT v13+
+ * L5R4Combat calls `resolveVoidInitiative` before rolling (wired at init in the entry module). The Initiative pool
+ * itself is rolled by L5R4Combatant.
  *
  * @module services/initiative
- * @see {@link https://foundryvtt.com/api/classes/foundry.documents.Combat.html|Foundry Combat API}
  */
 
-import { SYS_ID } from "../config/constants.js";
+import { voidUseUpdate, warnVoidLimit } from "./effects/uses.js";
+
+/** Initiative bonus for a Void Point (p.78). */
+const VOID_INITIATIVE_BONUS = 10;
 
 /**
- * @typedef {Object} InitiativeData
- * @property {number} roll - Total dice to roll (Insight Rank + Reflexes + rollMod for PCs)
- * @property {number} keep - Dice to keep (Reflexes + keepMod for PCs)
- * @property {number} [effRoll] - Effective roll dice for NPCs (overrides roll if > 0)
- * @property {number} [effKeep] - Effective keep dice for NPCs (overrides keep if > 0)
- * @property {number} [totalMod] - Flat bonus modifier to initiative total
- * @property {number} [rollMod] - Modifier to rolled dice (PCs only)
- * @property {number} [keepMod] - Modifier to kept dice (PCs only)
+ * Prompts each PC combatant that marked a Void Point for Initiative, spends the Void Point on a yes, and clears the
+ * mark either way.
+ *
+ * @param {foundry.documents.Combatant[]} combatants  The combatants about to roll
+ * @returns {Promise<Map<string, number>>}  The +10 by combatant id, for each one that spent a Void Point
  */
+export async function resolveVoidInitiative(combatants) {
+  const bonuses = new Map();
+  for (const combatant of combatants) {
+    const actor = combatant.actor;
+    if (actor?.type !== "pc" || !actor.system.initiative.useVoid) {
+      continue;
+    }
 
-/**
- * Initializes the L5R4 initiative system by configuring Combat settings and patching Combatant.
- *
- * Sets up:
- * - Default initiative formula as fallback (1d10)
- * - Combatant.getInitiativeRoll override to implement L5R4 Roll & Keep mechanics
- *
- * Must be called during system initialization (typically in init or ready hook).
- * Safe to call multiple times - patches are idempotent.
- *
- * @function initializeInitiativeSystem
- * @returns {void}
- */
-export function initializeInitiativeSystem() {
-  CONFIG.Combat.initiative = {
-    formula: "1d10",
-    decimals: 0
-  };
+    if (actor.system.rings.void.value <= 0) {
+      await actor.update({ "system.initiative.useVoid": false });
+      ui.notifications?.warn(`${actor.name} has no Void Points available`);
+      continue;
+    }
 
-  // Override Combat.rollInitiative to handle void spending prompts
-  try {
-    const { Combat } = foundry.documents;
-    const __origCombatRollInit = Combat.prototype.rollInitiative;
+    const confirmed = await foundry.applications.api.DialogV2.confirm({
+      window: { title: `Spend Void Point for Initiative - ${actor.name}` },
+      content: `<p>Spend a Void Point to add +10 to ${actor.name}'s initiative roll?</p>`
+    });
+    if (!confirmed) {
+      await actor.update({ "system.initiative.useVoid": false });
+      continue;
+    }
 
-    Combat.prototype.rollInitiative = async function (ids, options = {}) {
-      // Get combatants that will roll
-      const combatantIds = typeof ids === "string" ? [ids] : ids;
-      const combatants = combatantIds.map(id => this.combatants.get(id)).filter(c => c);
-
-      // Check each combatant for void initiative flags
-      for (const combatant of combatants) {
-        const actor = combatant.actor;
-        if (!actor || actor.type !== "pc") {
-          continue;
-        }
-        if (!actor.system?.initiative?.useVoid) {
-          continue;
-        }
-
-        const voidCurrent = actor.system?.rings?.void?.value ?? 0;
-
-        if (voidCurrent > 0) {
-          const confirmed = await Dialog.confirm({
-            title: `Spend Void Point for Initiative - ${actor.name}`,
-            content: `<p>Spend a Void Point to add +10 to ${actor.name}'s initiative roll?</p>`,
-            yes: () => true,
-            no: () => false
-          });
-
-          if (confirmed) {
-            await actor.update({
-              "system.rings.void.value": voidCurrent - 1,
-              "system.initiative.useVoid": false,
-              "system.initiative._voidThisRoll": true
-            });
-            ui.notifications?.info(`${actor.name} spent Void Point for initiative (+10)`);
-          } else {
-            await actor.update({ "system.initiative.useVoid": false });
-          }
-        } else {
-          await actor.update({ "system.initiative.useVoid": false });
-          ui.notifications?.warn(`${actor.name} has no Void Points available`);
-        }
-      }
-
-      // Call original method to actually roll
-      return __origCombatRollInit.call(this, ids, options);
-    };
-  } catch (e) {
-    console.warn(`${SYS_ID} | Unable to override Combat.rollInitiative`, e);
+    // Availability was checked on the prepared pool; the write starts from the stored value, so an Active Effect
+    // on Void Points is never written into storage (B6)
+    warnVoidLimit(actor);
+    await actor.update({
+      "system.rings.void.value": actor._source.system.rings.void.value - 1,
+      "system.initiative.useVoid": false,
+      ...voidUseUpdate(actor)
+    });
+    ui.notifications?.info(`${actor.name} spent Void Point for initiative (+10)`);
+    bonuses.set(combatant.id, VOID_INITIATIVE_BONUS);
   }
-
-  try {
-    const { Combatant } = foundry.documents;
-    // Preserve original method for error fallback
-    const __origGetInit = Combatant.prototype.getInitiativeRoll;
-
-    /**
-     * Overridden Combatant.getInitiativeRoll - implements L5R4 initiative mechanics.
-     *
-     * Calculates initiative using L5R4 Roll & Keep system:
-     * - PCs: (Insight Rank + Reflexes + rollMod)k(Reflexes + keepMod) + totalMod
-     * - NPCs: Use effRoll/effKeep if provided, otherwise fall back to Reflexes
-     *
-     * Handles L5R4 10-dice cap (Foundry limitation):
-     * - Dice beyond 10 rolled or kept convert to flat bonuses
-     * - Conversion: 2 extra rolled dice = 1 kept die, excess kept dice = +2 bonus each
-     * - Special case: When at 10k10 cap, all excess dice become +2 bonuses directly
-     *
-     * Formula construction:
-     * - Format: XdYkZx10+B where X=rolled, Z=kept, B=bonus, x10=exploding tens
-     * - Exploding dice: Tens roll again and add to total (core L5R4 mechanic)
-     *
-     * @override
-     * @param {string} formula - Ignored, formula is calculated from actor data
-     * @returns {Roll} Foundry Roll instance with L5R4 initiative formula
-     *
-     * @see actor.system.initiative structure in L5R4Actor.prepareDerivedData
-     */
-    Combatant.prototype.getInitiativeRoll = function (formula) {
-      try {
-        const a = this.actor;
-        if (!a) {
-          return new Roll(CONFIG.Combat.initiative.formula);
-        }
-
-        // Defensive type coercion - ensures numeric values from actor data
-        // Returns 0 for undefined, null, NaN, or non-numeric values
-        const toInt = v => (Number.isFinite(+v) ? Math.trunc(Number(v)) : 0);
-
-        let roll = toInt(a.system?.initiative?.roll);
-        let keep = toInt(a.system?.initiative?.keep);
-
-        // NPCs use effRoll/effKeep if explicitly set, otherwise default to Reflexes
-        // This allows GMs to set custom initiative pools for special NPCs
-        if (a.type === "npc") {
-          const effR = toInt(a.system?.initiative?.effRoll);
-          const effK = toInt(a.system?.initiative?.effKeep);
-          if (effR > 0) {
-            roll = effR;
-          }
-          if (effK > 0) {
-            keep = effK;
-          }
-        }
-
-        let bonus = toInt(a.system?.initiative?.totalMod);
-
-        // Check if void was confirmed for this roll
-        if (a.system?.initiative?._voidThisRoll) {
-          bonus += 10;
-          // Clear temp flag after using it
-          a.update({ "system.initiative._voidThisRoll": false }).catch(err => {
-            console.warn(`${SYS_ID} | Failed to clear void temp flag`, err);
-          });
-        }
-
-        // Apply L5R4 10-dice cap - Foundry Roll class cannot handle more than 10 dice effectively
-        // Excess dice convert to flat bonuses to maintain game balance
-        const extras_roll = Math.max(0, roll - 10);
-        const extras_keep = Math.max(0, keep - 10);
-
-        roll = Math.min(roll, 10);
-        keep = Math.min(keep, 10);
-
-        // Special case: Already at 10k10 cap with extra kept dice
-        // Convert all excess to +2 bonuses (both rolled and kept extras)
-        if (roll === 10 && keep === 10 && extras_keep > 0) {
-          bonus += (extras_roll + extras_keep) * 2;
-        } else {
-          // Standard conversion: 2 rolled dice = 1 kept die
-          const converted_keep = Math.floor(extras_roll / 2);
-          const leftover = extras_roll % 2;
-          keep += converted_keep;
-
-          // If conversion pushed kept dice over 10, convert excess to +2 bonuses
-          if (keep > 10) {
-            bonus += (keep - 10) * 2;
-            keep = 10;
-          }
-
-          // Edge case: At 10k10 after conversion with 1 leftover rolled die
-          if (keep === 10 && roll === 10 && leftover > 0) {
-            bonus += leftover * 2;
-          }
-        }
-
-        const diceRoll = Number.isFinite(roll) && roll > 0 ? roll : 1;
-        const diceKeep = Number.isFinite(keep) && keep > 0 ? keep : 1;
-        const flat = Number.isFinite(bonus) ? bonus : 0;
-
-        const flatStr = flat === 0 ? "" : flat > 0 ? `+${flat}` : `${flat}`;
-        // Construct L5R4 Roll & Keep formula: XdYkZx10+B
-        const formulaStr = `${diceRoll}d10k${diceKeep}x10${flatStr}`;
-        return new Roll(formulaStr);
-      } catch (e) {
-        // Fallback to original Foundry initiative on errors
-        // Ensures combat tracker continues functioning even if actor data is malformed
-        console.warn(`${SYS_ID} | Initiative roll error for combatant ${this.id}`, e);
-        return __origGetInit.call(this, formula);
-      }
-    };
-  } catch (e) {
-    // Critical failure - system cannot override initiative
-    // Log warning but allow Foundry to continue with default initiative system
-    console.warn(`${SYS_ID} | Unable to patch Combatant.getInitiativeRoll`, e);
-  }
+  return bonuses;
 }

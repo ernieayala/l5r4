@@ -9,7 +9,6 @@
 
 import { describe, it, expect, beforeEach, vi } from "vitest";
 import {
-  readWoundPenalty,
   normalizeTraitKey,
   getEffectiveTrait,
   extractRollParams,
@@ -17,131 +16,20 @@ import {
   resolveWeaponSkillTrait
 } from "../../../module/utils/mechanics.js";
 
-describe("readWoundPenalty", () => {
-  describe("modern wound system", () => {
-    it("should read penalty from wounds.penalty", () => {
-      // ARRANGE
-      const actor = {
-        system: {
-          wounds: {
-            penalty: 15
-          }
-        }
-      };
-
-      // ACT
-      const result = readWoundPenalty(actor);
-
-      // ASSERT
-      expect(result).toBe(15);
-    });
-
-    it("should return 0 for healthy character", () => {
-      const actor = {
-        system: {
-          wounds: {
-            penalty: 0
-          }
-        }
-      };
-
-      const result = readWoundPenalty(actor);
-      expect(result).toBe(0);
-    });
-
-    it("should coerce string penalty to number", () => {
-      const actor = {
-        system: {
-          wounds: {
-            penalty: "20"
-          }
-        }
-      };
-
-      const result = readWoundPenalty(actor);
-      expect(result).toBe(20);
-    });
-  });
-
-  describe("legacy wound system", () => {
-    it("should find worst penalty from multiple wound levels", () => {
-      const actor = {
-        system: {
-          woundLvlsUsed: {
-            nicked: { current: true, penalty: 3 },
-            grazed: { current: true, penalty: 5 },
-            healthy: { current: false, penalty: 0 }
-          }
-        }
-      };
-
-      const result = readWoundPenalty(actor);
-      expect(result).toBe(5); // Highest penalty
-    });
-
-    it("should ignore non-current wound levels", () => {
-      const actor = {
-        system: {
-          woundLvlsUsed: {
-            nicked: { current: false, penalty: 3 },
-            hurt: { current: true, penalty: 10 }
-          }
-        }
-      };
-
-      const result = readWoundPenalty(actor);
-      expect(result).toBe(10);
-    });
-
-    it("should return 0 if no current wound levels", () => {
-      const actor = {
-        system: {
-          woundLvlsUsed: {
-            healthy: { current: false, penalty: 0 }
-          }
-        }
-      };
-
-      const result = readWoundPenalty(actor);
-      expect(result).toBe(0);
-    });
-  });
-
-  describe("edge cases", () => {
-    it("should handle null actor", () => {
-      const result = readWoundPenalty(null);
-      expect(result).toBe(0);
-    });
-
-    it("should handle undefined actor", () => {
-      const result = readWoundPenalty(undefined);
-      expect(result).toBe(0);
-    });
-
-    it("should handle actor without system", () => {
-      const actor = {};
-      const result = readWoundPenalty(actor);
-      expect(result).toBe(0);
-    });
-
-    it("should handle actor without wounds data", () => {
-      const actor = {
-        system: {}
-      };
-      const result = readWoundPenalty(actor);
-      expect(result).toBe(0);
-    });
-
-    it("should handle empty woundLvlsUsed", () => {
-      const actor = {
-        system: {
-          woundLvlsUsed: {}
-        }
-      };
-      const result = readWoundPenalty(actor);
-      expect(result).toBe(0);
-    });
-  });
+/**
+ * A mock actor with what preparation gives every actor: the `system.bonuses` maps, an empty rule bag, and roll
+ * options.
+ * @param {object} actor
+ * @returns {object}
+ */
+const prepared = actor => ({
+  ruleBag: {},
+  rollOptions: new Set(),
+  ...actor,
+  system: {
+    ...actor.system,
+    bonuses: { skill: {}, trait: {}, ring: {}, ...actor.system?.bonuses }
+  }
 });
 
 describe("normalizeTraitKey", () => {
@@ -741,7 +629,7 @@ describe("resolveWeaponSkillTrait", () => {
         }
       };
 
-      const result = resolveWeaponSkillTrait(actor, weapon);
+      const result = resolveWeaponSkillTrait(prepared(actor), weapon);
 
       expect(result.skillRank).toBe(4);
       expect(result.traitValue).toBe(3);
@@ -777,7 +665,7 @@ describe("resolveWeaponSkillTrait", () => {
         }
       };
 
-      const result = resolveWeaponSkillTrait(actor, weapon);
+      const result = resolveWeaponSkillTrait(prepared(actor), weapon);
       expect(result.skillRank).toBe(2);
     });
   });
@@ -811,7 +699,7 @@ describe("resolveWeaponSkillTrait", () => {
         }
       };
 
-      const result = resolveWeaponSkillTrait(actor, weapon);
+      const result = resolveWeaponSkillTrait(prepared(actor), weapon);
 
       expect(result.skillRank).toBe(0);
       expect(result.traitValue).toBe(3);
@@ -839,7 +727,7 @@ describe("resolveWeaponSkillTrait", () => {
         }
       };
 
-      const result = resolveWeaponSkillTrait(actor, weapon);
+      const result = resolveWeaponSkillTrait(prepared(actor), weapon);
 
       expect(result.skillRank).toBe(0);
       expect(result.traitValue).toBe(3);
@@ -866,16 +754,15 @@ describe("resolveWeaponSkillTrait", () => {
         }
       };
 
-      const result = resolveWeaponSkillTrait(actor, weapon);
+      const result = resolveWeaponSkillTrait(prepared(actor), weapon);
 
       expect(result.traitValue).toBe(4);
       expect(result.description).toContain("AGI");
     });
   });
 
-  // Regression tests for issue #34: skill bonuses (e.g. from Active Effects on
-  // the skill item, aggregated by item-enrichment.aggregateSkillItemBonuses)
-  // should flow into the displayed weapon attack formula.
+  // Regression tests for issue #34: skill bonuses (Active Effect values in system.bonuses) reach the displayed
+  // weapon attack formula.
   describe("skill bonuses propagate to weapon attack (issue #34)", () => {
     const buildActorWithSkillBonus = (kenjutsuRank, bonusRoll, bonusKeep) => ({
       system: {
@@ -903,7 +790,7 @@ describe("resolveWeaponSkillTrait", () => {
       const actor = buildActorWithSkillBonus(4, 2, 0);
       const weapon = { system: { associatedSkill: "Kenjutsu", fallbackTrait: "agi" } };
 
-      const result = resolveWeaponSkillTrait(actor, weapon);
+      const result = resolveWeaponSkillTrait(prepared(actor), weapon);
 
       expect(result.rollBonus).toBe(9);
       expect(result.keepBonus).toBe(3);
@@ -914,7 +801,7 @@ describe("resolveWeaponSkillTrait", () => {
       const actor = buildActorWithSkillBonus(4, 0, 1);
       const weapon = { system: { associatedSkill: "Kenjutsu", fallbackTrait: "agi" } };
 
-      const result = resolveWeaponSkillTrait(actor, weapon);
+      const result = resolveWeaponSkillTrait(prepared(actor), weapon);
 
       expect(result.rollBonus).toBe(7);
       expect(result.keepBonus).toBe(4);
@@ -925,7 +812,7 @@ describe("resolveWeaponSkillTrait", () => {
       const actor = buildActorWithSkillBonus(4, -1, -1);
       const weapon = { system: { associatedSkill: "Kenjutsu", fallbackTrait: "agi" } };
 
-      const result = resolveWeaponSkillTrait(actor, weapon);
+      const result = resolveWeaponSkillTrait(prepared(actor), weapon);
 
       expect(result.rollBonus).toBe(6);
       expect(result.keepBonus).toBe(2);
@@ -936,7 +823,7 @@ describe("resolveWeaponSkillTrait", () => {
       const actor = buildActorWithSkillBonus(0, 1, 0);
       const weapon = { system: { associatedSkill: "Kenjutsu", fallbackTrait: "agi" } };
 
-      const result = resolveWeaponSkillTrait(actor, weapon);
+      const result = resolveWeaponSkillTrait(prepared(actor), weapon);
 
       expect(result.skillRank).toBe(0);
       expect(result.rollBonus).toBe(4);
@@ -944,8 +831,7 @@ describe("resolveWeaponSkillTrait", () => {
       expect(result.description).toContain("[Unskilled]");
     });
 
-    it("should be safe when actor has no bonuses.skill map", () => {
-      // No bonus map at all — should behave exactly like the pre-fix path
+    it("should add nothing when the skill has no bonus", () => {
       const actor = {
         system: { traits: { agi: 3 } },
         items: {
@@ -961,7 +847,7 @@ describe("resolveWeaponSkillTrait", () => {
       };
       const weapon = { system: { associatedSkill: "Kenjutsu", fallbackTrait: "agi" } };
 
-      const result = resolveWeaponSkillTrait(actor, weapon);
+      const result = resolveWeaponSkillTrait(prepared(actor), weapon);
 
       expect(result.rollBonus).toBe(7);
       expect(result.keepBonus).toBe(3);
@@ -1000,7 +886,7 @@ describe("resolveWeaponSkillTrait", () => {
       };
 
       const weapon = {};
-      const result = resolveWeaponSkillTrait(actor, weapon);
+      const result = resolveWeaponSkillTrait(prepared(actor), weapon);
 
       // Should use default fallback (agi)
       expect(result.traitValue).toBe(3);
@@ -1022,7 +908,7 @@ describe("resolveWeaponSkillTrait", () => {
         }
       };
 
-      const result = resolveWeaponSkillTrait(actor, weapon);
+      const result = resolveWeaponSkillTrait(prepared(actor), weapon);
 
       // Should fall back to trait roll
       expect(result.traitValue).toBe(5);
@@ -1048,7 +934,7 @@ describe("resolveWeaponSkillTrait", () => {
         }
       };
 
-      const result = resolveWeaponSkillTrait(actor, weapon);
+      const result = resolveWeaponSkillTrait(prepared(actor), weapon);
       expect(result.traitValue).toBe(3);
     });
 
@@ -1071,7 +957,7 @@ describe("resolveWeaponSkillTrait", () => {
         }
       };
 
-      const result = resolveWeaponSkillTrait(actor, weapon);
+      const result = resolveWeaponSkillTrait(prepared(actor), weapon);
       expect(result.traitValue).toBe(3);
     });
   });

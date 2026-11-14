@@ -5,7 +5,7 @@
  * Enrichment Process:
  * - Adds roll/keep formulas to items for quick access in UI
  * - Calculates values based on actor traits, skills, and bonuses
- * - Applies L5R4 game mechanics (affinity, deficiency, stance bonuses)
+ * - Applies L5R4 game mechanics (affinity, deficiency, attack rules such as stances)
  * - Runs during actor data preparation
  *
  * Architecture:
@@ -21,7 +21,13 @@
 
 import { toInt } from "../../../utils/type-coercion.js";
 import { logError } from "../../../utils/error-logging.js";
-import { getEffectiveTrait, resolveWeaponSkillTrait } from "../../../utils/mechanics.js";
+import {
+  displayRollBonus,
+  getEffectiveTrait,
+  resolveWeaponSkillTrait
+} from "../../../utils/mechanics.js";
+import { selectorBonus } from "../../../utils/rule-engine.js";
+import { prepareWeaponDamage } from "../../item/preparation/derived-data.js";
 
 /**
  * Enriches all actor-owned items with calculated formulas and derived values.
@@ -50,15 +56,6 @@ export function enrichActorItems(actor) {
   }
 
   try {
-    // First pass: aggregate skill-item bonuses into actor.system.bonuses.skill so
-    // downstream readers (enrichSkillFormulas, resolveWeaponSkillTrait,
-    // applySkillAndTraitBonuses) all see Active-Effect contributions on skill items.
-    // See issue #34: AEs targeting `skill.system.rollBonus` previously had no effect
-    // on weapon attack rolls because nothing bridged item-level bonuses into the
-    // actor-level bonus map that the dice services read.
-    aggregateSkillItemBonuses(actor);
-
-    // Second pass: enrich individual items with derived formulas
     for (const item of actor.items) {
       if (!item?.type) {
         continue;
@@ -89,53 +86,6 @@ export function enrichActorItems(actor) {
 }
 
 /**
- * Aggregate skill-item bonus fields into actor.system.bonuses.skill.
- *
- * @param {Actor} actor - The actor whose skill items should be aggregated
- *
- * @description
- * Walks every skill item on the actor and adds its `system.rollBonus`,
- * `system.keepBonus`, and `system.totalBonus` values into the corresponding
- * `actor.system.bonuses.skill[skillNameLowercase]` entry. This bridges the
- * item-level bonus storage (where Active Effects on skill items deposit values
- * per ACTIVE_EFFECTS.md docs) into the actor-level bonus map that
- * `applySkillAndTraitBonuses` reads at roll time.
- *
- * Idempotency: Foundry calls `prepareDerivedData` against a freshly-rehydrated
- * `actor.system` each cycle, so this aggregation always runs against the base
- * (post-Active-Effect) values — there is no accumulation across prep cycles.
- *
- * Multiple skill items with the same name (case-insensitive) accumulate.
- *
- * @private
- */
-function aggregateSkillItemBonuses(actor) {
-  if (!actor?.system) {
-    return;
-  }
-  actor.system.bonuses = actor.system.bonuses || {};
-  actor.system.bonuses.skill = actor.system.bonuses.skill || {};
-
-  for (const item of actor.items) {
-    if (!item || item.type !== "skill") {
-      continue;
-    }
-    const key = String(item.name ?? "")
-      .toLowerCase()
-      .trim();
-    if (!key) {
-      continue;
-    }
-    const existing = actor.system.bonuses.skill[key] || {};
-    actor.system.bonuses.skill[key] = {
-      roll: toInt(existing.roll) + toInt(item.system?.rollBonus),
-      keep: toInt(existing.keep) + toInt(item.system?.keepBonus),
-      total: toInt(existing.total) + toInt(item.system?.totalBonus)
-    };
-  }
-}
-
-/**
  * Enriches skill items with roll formulas based on L5R4 skill mechanics.
  *
  * @param {Actor} actor - The actor who owns the skill
@@ -162,15 +112,11 @@ function enrichSkillFormulas(actor, skill) {
   const traitEff = getEffectiveTrait(actor, traitKey);
   const rank = toInt(skill.system?.rank);
 
-  // Gather bonuses from actor's bonus structure
-  const bb = actor.system?.bonuses;
-  const kSkill = String(skill.name).toLowerCase?.();
-  const bSkill = (bb?.skill && bb.skill[kSkill]) || {};
-  const bTrait = (bb?.trait && bb.trait[traitKey]) || {};
-
-  // Combine skill-specific and trait-specific bonuses
-  const rollBonus = toInt(bSkill.roll) + toInt(bTrait.roll);
-  const keepBonus = toInt(bSkill.keep) + toInt(bTrait.keep);
+  // Skill and Trait bonuses from Active Effects and rules, as the roll pipeline starts from
+  const { roll: rollBonus, keep: keepBonus } = displayRollBonus(actor, {
+    skill: String(skill.name).toLowerCase(),
+    trait: traitKey
+  });
 
   // Calculate final roll/keep values (minimum 0)
   skill.system.rollDice = Math.max(0, traitEff + rank + rollBonus);
@@ -248,45 +194,24 @@ function enrichSpellFormulas(actor, spell) {
  *
  * @description
  * Calculates weapon formulas using L5R4 combat rules:
- * - Attack formula: Based on weapon skill + trait (from resolveWeaponSkillTrait)
+ * - Attack formula: weapon skill + trait (from resolveWeaponSkillTrait), plus the RollModifier rules on every
+ *   attack, such as the Full Attack Stance's +2k1 (p.84). Optional and range-limited rules wait for the roll dialog.
  * - Damage formula: From weapon's damage rating
- * - Stance modifiers: Full Attack stance adds +2k1 to attack rolls
- *
- * Full Attack Stance Bonus:
- * - Roll: +2 dice (more aggressive attack)
- * - Keep: +1 die (better accuracy)
- * - Applied only when actor is in Full Attack stance
- *
- * Modifies weapon with:
- * - attackFormula: Base attack roll formula
- * - attackFormulaWithStance: Attack formula with stance bonus applied
- * - damageFormula: Damage roll formula (same with/without stance)
- * - damageFormulaWithStance: Damage formula (no stance effect on damage)
  *
  * @example
- * // Weapon skill 5k3, Full Attack stance
- * // attackFormula: "5k3"
- * // attackFormulaWithStance: "7k4" (+2k1 from Full Attack)
+ * // Weapon skill 5k3, Full Attack Stance
+ * // attackFormula: "7k4"
  */
 function enrichWeaponFormulas(actor, weapon) {
-  // Get weapon skill roll/keep values (includes trait, skill rank, bonuses)
   const weaponSkill = resolveWeaponSkillTrait(actor, weapon);
-  weapon.attackFormula = `${weaponSkill.rollBonus}k${weaponSkill.keepBonus}`;
+  const attack = selectorBonus(actor.ruleBag, ["any", "attack"], actor.rollOptions, weapon.id);
+  weapon.attackFormula = `${weaponSkill.rollBonus + attack.roll}k${weaponSkill.keepBonus + attack.keep}`;
 
-  // Apply Full Attack stance bonus: +2k1 to attack rolls
-  if (actor.system._stanceEffects?.fullAttack) {
-    const stanceRollBonus = weaponSkill.rollBonus + 2;
-    const stanceKeepBonus = weaponSkill.keepBonus + 1;
-    weapon.attackFormulaWithStance = `${stanceRollBonus}k${stanceKeepBonus}`;
-  } else {
-    weapon.attackFormulaWithStance = weapon.attackFormula;
-  }
+  // Recompute damage now that the owner's Active Effects apply: item preparation ran before them (issue #29)
+  prepareWeaponDamage(weapon);
 
   // Get damage values (prefer derived values if available)
   const damageRoll = toInt(weapon.system?.derivedDamageRoll ?? weapon.system?.damageRoll) || 0;
   const damageKeep = toInt(weapon.system?.derivedDamageKeep ?? weapon.system?.damageKeep) || 0;
   weapon.damageFormula = `${damageRoll}k${damageKeep}`;
-
-  // Damage is not affected by stance
-  weapon.damageFormulaWithStance = weapon.damageFormula;
 }

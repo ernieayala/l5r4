@@ -1,0 +1,12 @@
+<div class="form-group">
+  <label>{{localize "l5r4.ui.check.spellSlot"}}</label>
+  <select name="slot">
+    <option value="elemental" {{#if (eq slot "elemental")}}selected{{/if}}>
+      {{localize "l5r4.magic.spells.useSpellSlot"}} {{ringName}} ({{elementalSlots}})
+    </option>
+    <option value="void" {{#if (eq slot "void")}}selected{{/if}}>
+      {{localize "l5r4.magic.spells.voidSlot"}} ({{voidSlots}})
+    </option>
+    <option value="none" {{#if (eq slot "none")}}selected{{/if}}>{{localize "l5r4.ui.common.none"}}</option>
+  </select>
+</div>

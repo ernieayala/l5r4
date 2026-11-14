@@ -1,0 +1,64 @@
+<div class="chat-card l5r4-roll l5r4-check">
+  <div class="dice-flavor">
+    {{label}}{{#if target.name}} {{localize "l5r4.ui.mechanics.combat.targeting.vs"}} {{target.name}}{{/if}}
+  </div>
+  {{#if appliedModifiers.length}}
+    <ul class="check-applied">
+      {{#each appliedModifiers}}<li>{{label}} {{text}}</li>{{/each}}
+    </ul>
+  {{/if}}
+  {{{roll}}}
+  {{#if tn}}
+    <div class="l5r4-tn-result">
+      {{outcomeText}}
+      {{localize "l5r4.ui.mechanics.combat.targeting.vs"}}
+      {{localize "l5r4.ui.common.tn"}}
+      {{tn.effective}}
+      {{#if tn.raises}}({{localize "l5r4.magic.spells.raises"}}: {{tn.raises}}){{/if}}
+      {{#if tn.freeRaisesToTN}}({{localize "l5r4.ui.check.freeRaisesToTN"}}: {{tn.freeRaisesToTN}}){{/if}}
+      {{#if tn.woundPenalty}}({{localize "l5r4.ui.mechanics.combat.woundPenalty"}} +{{tn.woundPenalty}}){{/if}}
+    </div>
+  {{/if}}
+  {{#if freeRaisesLeft}}
+    <div class="check-free-raises">{{localize "l5r4.ui.mechanics.rolls.freeRaises"}}: {{freeRaisesLeft}}</div>
+  {{/if}}
+  {{#each notes}}<div class="check-note">{{this}}</div>{{/each}}
+  {{#each maneuverNotes}}<div class="check-note">{{this}}</div>{{/each}}
+  {{#if sources.length}}
+    <div class="check-note">{{localize "l5r4.ui.combat.sources"}}: {{#each sources}}{{this}}{{#unless @last}}, {{/unless}}{{/each}}</div>
+  {{/if}}
+  {{#if contest}}
+    <button type="button" data-action="combat-contest">{{localize "l5r4.ui.combat.contestStrength"}}</button>
+  {{/if}}
+  {{#if grappleButton}}
+    <button type="button" data-action="grapple-start">
+      {{localize "l5r4.ui.combat.grappleStart"}} {{target.name}}
+    </button>
+  {{/if}}
+  {{#if (eq kind "damage")}}
+    <div class="damage-actions flexrow -gap-sm">
+      {{#if applyTarget}}
+        <button type="button" data-action="damage-apply-target">
+          {{localize "l5r4.ui.combat.applyTo"}} {{applyTarget}}
+        </button>
+      {{/if}}
+      <button type="button" data-action="damage-apply-selected">
+        {{localize "l5r4.ui.combat.applySelected"}}
+      </button>
+    </div>
+  {{/if}}
+  {{#if (and (eq outcome.success true) conditions.length)}}
+    <div class="check-conditions flexrow -gap-sm">
+      {{#each conditions}}
+        <button type="button" data-action="apply-condition" data-index="{{@index}}">
+          {{localize "l5r4.ui.effects.applyTo" effect=label target=../target.name}}
+        </button>
+      {{/each}}
+    </div>
+  {{/if}}
+  {{#if damageButton}}
+    <button type="button" class="l5r4-check-damage" data-action="check-damage">
+      {{localize "l5r4.ui.mechanics.rolls.damageRoll"}} ({{damageButton}})
+    </button>
+  {{/if}}
+</div>

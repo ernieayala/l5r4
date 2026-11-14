@@ -14,6 +14,7 @@ import {
   calculateSkillStepCost,
   calculateEmphasisCost,
   getCreationFreeBonus,
+  getCreationFreeBonusSources,
   getCreationFreeBonusVoid
 } from "../../../module/utils/xp-calculations.js";
 
@@ -372,7 +373,7 @@ describe("calculateSkillStepCost", () => {
       expect(cost).toBe(3.5);
     });
 
-    it("should handle very large ranks", () => {
+    it("should handle large ranks", () => {
       const cost = calculateSkillStepCost(100);
       expect(cost).toBe(100);
     });
@@ -458,679 +459,247 @@ describe("calculateEmphasisCost", () => {
   });
 });
 
+/** A Family or School item whose Trait bonus is a TraitAdjust rule, as the rule engine reads it. */
+const ruleItem = (type, trait, value = 1, extra = {}) => ({
+  type,
+  system: { rules: [{ key: "TraitAdjust", trait, value }] },
+  ...extra
+});
+
+/** A Family or School item with only the legacy trait/bonus fields. */
+const legacyItem = (type, trait, bonus = 1) => ({ type, system: { trait, bonus, rules: [] } });
+
 describe("getCreationFreeBonus", () => {
   beforeEach(() => {
-    // Mock CONST.ACTIVE_EFFECT_MODES
-    global.CONST = {
-      ACTIVE_EFFECT_MODES: {
-        ADD: 2
-      }
-    };
-
-    // Mock globalThis.fromUuidSync
     global.fromUuidSync = vi.fn(() => null);
   });
 
-  describe("Active Effects approach", () => {
-    it("should detect trait bonus from Active Effect", () => {
-      const actor = {
-        items: [
-          {
-            type: "family",
-            effects: [
-              {
-                transfer: true,
-                changes: [
-                  {
-                    key: "system.traits.sta",
-                    mode: 2, // ADD
-                    value: 1
-                  }
-                ]
-              }
-            ]
-          }
-        ],
-        getFlag: () => null
-      };
-
-      const bonus = getCreationFreeBonus(actor, "sta");
-      expect(bonus).toBe(1);
+  describe("TraitAdjust rules", () => {
+    it("should detect a trait bonus from a TraitAdjust rule", () => {
+      const actor = { items: [ruleItem("family", "sta")], getFlag: () => null };
+      expect(getCreationFreeBonus(actor, "sta")).toBe(1);
     });
 
-    it("should sum multiple bonuses from different items", () => {
+    it("should sum bonuses from the Family and the School", () => {
       const actor = {
-        items: [
-          {
-            type: "family",
-            effects: [
-              {
-                transfer: true,
-                changes: [
-                  {
-                    key: "system.traits.sta",
-                    mode: 2,
-                    value: 1
-                  }
-                ]
-              }
-            ]
-          },
-          {
-            type: "school",
-            effects: [
-              {
-                transfer: true,
-                changes: [
-                  {
-                    key: "system.traits.sta",
-                    mode: 2,
-                    value: 1
-                  }
-                ]
-              }
-            ]
-          }
-        ],
+        items: [ruleItem("family", "sta"), ruleItem("school", "sta")],
         getFlag: () => null
       };
-
-      const bonus = getCreationFreeBonus(actor, "sta");
-      expect(bonus).toBe(2);
+      expect(getCreationFreeBonus(actor, "sta")).toBe(2);
     });
 
-    it("should ignore non-transfer effects", () => {
-      const actor = {
-        items: [
-          {
-            type: "family",
-            effects: [
-              {
-                transfer: false,
-                changes: [
-                  {
-                    key: "system.traits.sta",
-                    mode: 2,
-                    value: 1
-                  }
-                ]
-              }
-            ]
-          }
-        ],
-        getFlag: () => null
+    it("should only count the matching trait", () => {
+      const family = {
+        type: "family",
+        system: {
+          rules: [
+            { key: "TraitAdjust", trait: "sta", value: 1 },
+            { key: "TraitAdjust", trait: "wil", value: 1 }
+          ]
+        }
       };
-
-      const bonus = getCreationFreeBonus(actor, "sta");
-      expect(bonus).toBe(0); // transfer=false not counted
+      expect(getCreationFreeBonus({ items: [family], getFlag: () => null }, "sta")).toBe(1);
     });
 
-    it("should ignore effects with wrong mode", () => {
-      const actor = {
-        items: [
-          {
-            type: "family",
-            effects: [
-              {
-                transfer: true,
-                changes: [
-                  {
-                    key: "system.traits.sta",
-                    mode: 1, // MULTIPLY, not ADD
-                    value: 1
-                  }
-                ]
-              }
-            ]
-          }
-        ],
-        getFlag: () => null
+    it("should ignore other rule keys", () => {
+      const family = {
+        type: "family",
+        system: { rules: [{ key: "RollModifier", trait: "sta", value: 1 }] }
       };
-
-      const bonus = getCreationFreeBonus(actor, "sta");
-      expect(bonus).toBe(0); // Wrong mode
+      expect(getCreationFreeBonus({ items: [family], getFlag: () => null }, "sta")).toBe(0);
     });
 
-    it("should only count matching trait key", () => {
-      const actor = {
-        items: [
-          {
-            type: "family",
-            effects: [
-              {
-                transfer: true,
-                changes: [
-                  {
-                    key: "system.traits.sta",
-                    mode: 2,
-                    value: 1
-                  },
-                  {
-                    key: "system.traits.wil",
-                    mode: 2,
-                    value: 1
-                  }
-                ]
-              }
-            ]
-          }
-        ],
-        getFlag: () => null
-      };
-
-      const bonus = getCreationFreeBonus(actor, "sta");
-      expect(bonus).toBe(1); // Only sta counted
+    it("should ignore a formula value, which only the rule engine resolves", () => {
+      const actor = { items: [ruleItem("family", "sta", "@rings.air")], getFlag: () => null };
+      expect(getCreationFreeBonus(actor, "sta")).toBe(0);
     });
 
     it("should handle fractional bonuses", () => {
-      const actor = {
-        items: [
-          {
-            type: "family",
-            effects: [
-              {
-                transfer: true,
-                changes: [
-                  {
-                    key: "system.traits.agi",
-                    mode: 2,
-                    value: 0.5
-                  }
-                ]
-              }
-            ]
-          }
-        ],
-        getFlag: () => null
-      };
-
-      const bonus = getCreationFreeBonus(actor, "agi");
-      expect(bonus).toBe(0.5);
+      const actor = { items: [ruleItem("family", "agi", 0.5)], getFlag: () => null };
+      expect(getCreationFreeBonus(actor, "agi")).toBe(0.5);
     });
   });
 
   describe("legacy approach", () => {
     it("should detect trait bonus from legacy system.trait property", () => {
-      const actor = {
-        items: [
-          {
-            type: "family",
-            system: {
-              trait: "sta",
-              bonus: 1
-            },
-            effects: [] // No Active Effects
-          }
-        ],
-        getFlag: () => null
-      };
-
-      const bonus = getCreationFreeBonus(actor, "sta");
-      expect(bonus).toBe(1);
+      const actor = { items: [legacyItem("family", "sta")], getFlag: () => null };
+      expect(getCreationFreeBonus(actor, "sta")).toBe(1);
     });
 
-    it("should prefer Active Effects over legacy", () => {
-      const actor = {
-        items: [
-          {
-            type: "family",
-            system: {
-              trait: "sta",
-              bonus: 2 // Legacy
-            },
-            effects: [
-              {
-                transfer: true,
-                changes: [
-                  {
-                    key: "system.traits.sta",
-                    mode: 2,
-                    value: 1 // Active Effect
-                  }
-                ]
-              }
-            ]
-          }
-        ],
-        getFlag: () => null
+    it("should prefer a TraitAdjust rule over legacy", () => {
+      const family = {
+        type: "family",
+        system: { trait: "sta", bonus: 2, rules: [{ key: "TraitAdjust", trait: "sta", value: 1 }] }
       };
-
-      const bonus = getCreationFreeBonus(actor, "sta");
-      expect(bonus).toBe(1); // Uses Active Effect, ignores legacy
+      expect(getCreationFreeBonus({ items: [family], getFlag: () => null }, "sta")).toBe(1);
     });
 
     it("should be case insensitive for legacy trait key", () => {
-      const actor = {
-        items: [
-          {
-            type: "family",
-            system: {
-              trait: "STA",
-              bonus: 1
-            },
-            effects: []
-          }
-        ],
-        getFlag: () => null
-      };
-
-      const bonus = getCreationFreeBonus(actor, "sta");
-      expect(bonus).toBe(1);
+      const actor = { items: [legacyItem("family", "STA")], getFlag: () => null };
+      expect(getCreationFreeBonus(actor, "sta")).toBe(1);
     });
 
     it("should ignore legacy with non-finite bonus", () => {
-      const actor = {
-        items: [
-          {
-            type: "family",
-            system: {
-              trait: "sta",
-              bonus: NaN
-            },
-            effects: []
-          }
-        ],
-        getFlag: () => null
-      };
-
-      const bonus = getCreationFreeBonus(actor, "sta");
-      expect(bonus).toBe(0);
+      const actor = { items: [legacyItem("family", "sta", NaN)], getFlag: () => null };
+      expect(getCreationFreeBonus(actor, "sta")).toBe(0);
     });
   });
 
   describe("UUID-flagged items", () => {
     it("should resolve family item from UUID flag", () => {
-      const familyItem = {
-        type: "family",
-        uuid: "Item.abc123",
-        effects: [
-          {
-            transfer: true,
-            changes: [
-              {
-                key: "system.traits.ref",
-                mode: 2,
-                value: 1
-              }
-            ]
-          }
-        ]
-      };
-
+      const familyItem = ruleItem("family", "ref", 1, { uuid: "Item.abc123" });
       global.fromUuidSync = vi.fn(() => familyItem);
-
       const actor = {
         items: [],
-        getFlag: vi.fn((sys, key) => {
-          if (key === "familyItemUuid") {
-            return "Item.abc123";
-          }
-          return null;
-        })
+        getFlag: vi.fn((sys, key) => (key === "familyItemUuid" ? "Item.abc123" : null))
       };
 
-      const bonus = getCreationFreeBonus(actor, "ref");
-      expect(bonus).toBe(1);
+      expect(getCreationFreeBonus(actor, "ref")).toBe(1);
       expect(global.fromUuidSync).toHaveBeenCalledWith("Item.abc123");
     });
 
     it("should not double-count items in both flags and items array", () => {
-      const familyItem = {
-        type: "family",
-        uuid: "Item.abc123",
-        id: "abc123",
-        effects: [
-          {
-            transfer: true,
-            changes: [
-              {
-                key: "system.traits.sta",
-                mode: 2,
-                value: 1
-              }
-            ]
-          }
-        ]
-      };
-
+      const familyItem = ruleItem("family", "sta", 1, { uuid: "Item.abc123", id: "abc123" });
       global.fromUuidSync = vi.fn(() => familyItem);
-
       const actor = {
-        items: [familyItem], // Same item in array
-        getFlag: vi.fn((sys, key) => {
-          if (key === "familyItemUuid") {
-            return "Item.abc123";
-          }
-          return null;
-        })
+        items: [familyItem],
+        getFlag: vi.fn((sys, key) => (key === "familyItemUuid" ? "Item.abc123" : null))
       };
 
-      const bonus = getCreationFreeBonus(actor, "sta");
-      expect(bonus).toBe(1); // Should only count once
+      expect(getCreationFreeBonus(actor, "sta")).toBe(1);
     });
   });
 
   describe("edge cases", () => {
     it("should return 0 for null actor", () => {
-      const bonus = getCreationFreeBonus(null, "sta");
-      expect(bonus).toBe(0);
+      expect(getCreationFreeBonus(null, "sta")).toBe(0);
     });
 
     it("should return 0 for undefined actor", () => {
-      const bonus = getCreationFreeBonus(undefined, "sta");
-      expect(bonus).toBe(0);
+      expect(getCreationFreeBonus(undefined, "sta")).toBe(0);
     });
 
     it("should return 0 for actor without items", () => {
-      const actor = {
-        getFlag: () => null
-      };
-      const bonus = getCreationFreeBonus(actor, "sta");
-      expect(bonus).toBe(0);
+      expect(getCreationFreeBonus({ getFlag: () => null }, "sta")).toBe(0);
     });
 
     it("should return 0 for empty items array", () => {
-      const actor = {
-        items: [],
-        getFlag: () => null
-      };
-      const bonus = getCreationFreeBonus(actor, "sta");
-      expect(bonus).toBe(0);
+      expect(getCreationFreeBonus({ items: [], getFlag: () => null }, "sta")).toBe(0);
     });
 
     it("should return 0 for no matching trait", () => {
-      const actor = {
-        items: [
-          {
-            type: "family",
-            effects: [
-              {
-                transfer: true,
-                changes: [
-                  {
-                    key: "system.traits.wil",
-                    mode: 2,
-                    value: 1
-                  }
-                ]
-              }
-            ]
-          }
-        ],
-        getFlag: () => null
-      };
-
-      const bonus = getCreationFreeBonus(actor, "sta");
-      expect(bonus).toBe(0); // No sta bonus
+      const actor = { items: [ruleItem("family", "wil")], getFlag: () => null };
+      expect(getCreationFreeBonus(actor, "sta")).toBe(0);
     });
 
     it("should ignore non-family/school items", () => {
-      const actor = {
-        items: [
-          {
-            type: "weapon",
-            effects: [
-              {
-                transfer: true,
-                changes: [
-                  {
-                    key: "system.traits.sta",
-                    mode: 2,
-                    value: 1
-                  }
-                ]
-              }
-            ]
-          }
-        ],
-        getFlag: () => null
-      };
-
-      const bonus = getCreationFreeBonus(actor, "sta");
-      expect(bonus).toBe(0); // Only family/school count
+      const actor = { items: [ruleItem("weapon", "sta")], getFlag: () => null };
+      expect(getCreationFreeBonus(actor, "sta")).toBe(0);
     });
 
     it("should handle missing globalThis.fromUuidSync", () => {
       delete global.fromUuidSync;
-
-      const actor = {
-        items: [],
-        getFlag: () => "Item.abc123"
-      };
-
-      const bonus = getCreationFreeBonus(actor, "sta");
-      expect(bonus).toBe(0); // No error, just returns 0
-    });
-
-    it("should handle getFlag returning falsy", () => {
-      const actor = {
-        items: [],
-        getFlag: () => null
-      };
-
-      const bonus = getCreationFreeBonus(actor, "sta");
-      expect(bonus).toBe(0);
+      expect(getCreationFreeBonus({ items: [], getFlag: () => "Item.abc123" }, "sta")).toBe(0);
     });
 
     it("should handle errors gracefully", () => {
-      const actor = {
-        items: [
-          {
-            type: "family",
-            effects: null // Will cause error when iterating
-          }
-        ],
-        getFlag: () => null
+      const unreadable = {
+        type: "family",
+        get system() {
+          throw new Error("unreadable");
+        }
       };
+      expect(getCreationFreeBonus({ items: [unreadable], getFlag: () => null }, "sta")).toBe(0);
+    });
+  });
+});
 
-      // Should not throw, returns 0
-      const bonus = getCreationFreeBonus(actor, "sta");
-      expect(bonus).toBe(0);
+describe("getCreationFreeBonusSources", () => {
+  beforeEach(() => {
+    global.fromUuidSync = vi.fn(() => null);
+  });
+
+  it("reports a TraitAdjust rule bonus as rules, not legacy", () => {
+    const actor = { items: [ruleItem("family", "str")], getFlag: () => null };
+    expect(getCreationFreeBonusSources(actor, "str")).toEqual({ rules: 1, legacy: 0 });
+  });
+
+  it("reports the legacy trait and bonus fields as legacy, not rules", () => {
+    const actor = { items: [legacyItem("family", "str")], getFlag: () => null };
+    expect(getCreationFreeBonusSources(actor, "str")).toEqual({ rules: 0, legacy: 1 });
+  });
+
+  it("keeps the two sources apart when the Family and School use different forms", () => {
+    const actor = {
+      items: [ruleItem("family", "str"), legacyItem("school", "str")],
+      getFlag: () => null
+    };
+    expect(getCreationFreeBonusSources(actor, "str")).toEqual({ rules: 1, legacy: 1 });
+    expect(getCreationFreeBonus(actor, "str")).toBe(2);
+  });
+
+  it("returns zero for both sources when an item cannot be read", () => {
+    const unreadable = {
+      type: "family",
+      get system() {
+        throw new Error("unreadable");
+      }
+    };
+    expect(
+      getCreationFreeBonusSources({ items: [unreadable], getFlag: () => null }, "str")
+    ).toEqual({
+      rules: 0,
+      legacy: 0
     });
   });
 });
 
 describe("getCreationFreeBonusVoid", () => {
   beforeEach(() => {
-    global.CONST = {
-      ACTIVE_EFFECT_MODES: {
-        ADD: 2
-      }
-    };
     global.fromUuidSync = vi.fn(() => null);
   });
 
   describe("void ring bonuses", () => {
-    it("should detect void ring bonus from system.rings.void.rank", () => {
-      const actor = {
-        items: [
-          {
-            type: "school",
-            effects: [
-              {
-                transfer: true,
-                changes: [
-                  {
-                    key: "system.rings.void.rank",
-                    mode: 2,
-                    value: 1
-                  }
-                ]
-              }
-            ]
-          }
-        ],
-        getFlag: () => null
-      };
-
-      const bonus = getCreationFreeBonusVoid(actor);
-      expect(bonus).toBe(1);
+    it("should detect a Void bonus from a TraitAdjust rule", () => {
+      const actor = { items: [ruleItem("school", "void")], getFlag: () => null };
+      expect(getCreationFreeBonusVoid(actor)).toBe(1);
     });
 
-    it("should detect void ring bonus from system.rings.void.value", () => {
+    it("should sum Void bonuses from the Family and the School", () => {
       const actor = {
-        items: [
-          {
-            type: "school",
-            effects: [
-              {
-                transfer: true,
-                changes: [
-                  {
-                    key: "system.rings.void.value",
-                    mode: 2,
-                    value: 1
-                  }
-                ]
-              }
-            ]
-          }
-        ],
+        items: [ruleItem("family", "void"), ruleItem("school", "void")],
         getFlag: () => null
       };
-
-      const bonus = getCreationFreeBonusVoid(actor);
-      expect(bonus).toBe(1);
-    });
-
-    it("should sum bonuses from rank and value keys", () => {
-      const actor = {
-        items: [
-          {
-            type: "family",
-            effects: [
-              {
-                transfer: true,
-                changes: [
-                  {
-                    key: "system.rings.void.rank",
-                    mode: 2,
-                    value: 1
-                  }
-                ]
-              }
-            ]
-          },
-          {
-            type: "school",
-            effects: [
-              {
-                transfer: true,
-                changes: [
-                  {
-                    key: "system.rings.void.value",
-                    mode: 2,
-                    value: 1
-                  }
-                ]
-              }
-            ]
-          }
-        ],
-        getFlag: () => null
-      };
-
-      const bonus = getCreationFreeBonusVoid(actor);
-      expect(bonus).toBe(2);
+      expect(getCreationFreeBonusVoid(actor)).toBe(2);
     });
 
     it("should use legacy system.trait=void approach", () => {
-      const actor = {
-        items: [
-          {
-            type: "family",
-            system: {
-              trait: "void",
-              bonus: 1
-            },
-            effects: []
-          }
-        ],
-        getFlag: () => null
-      };
-
-      const bonus = getCreationFreeBonusVoid(actor);
-      expect(bonus).toBe(1);
+      const actor = { items: [legacyItem("family", "void")], getFlag: () => null };
+      expect(getCreationFreeBonusVoid(actor)).toBe(1);
     });
 
     it("should be case insensitive for legacy void", () => {
-      const actor = {
-        items: [
-          {
-            type: "family",
-            system: {
-              trait: "VOID",
-              bonus: 1
-            },
-            effects: []
-          }
-        ],
-        getFlag: () => null
-      };
-
-      const bonus = getCreationFreeBonusVoid(actor);
-      expect(bonus).toBe(1);
+      const actor = { items: [legacyItem("family", "VOID")], getFlag: () => null };
+      expect(getCreationFreeBonusVoid(actor)).toBe(1);
     });
   });
 
   describe("edge cases", () => {
     it("should return 0 for null actor", () => {
-      const bonus = getCreationFreeBonusVoid(null);
-      expect(bonus).toBe(0);
+      expect(getCreationFreeBonusVoid(null)).toBe(0);
     });
 
     it("should return 0 for undefined actor", () => {
-      const bonus = getCreationFreeBonusVoid(undefined);
-      expect(bonus).toBe(0);
+      expect(getCreationFreeBonusVoid(undefined)).toBe(0);
     });
 
     it("should return 0 for actor without items", () => {
-      const actor = {
-        getFlag: () => null
-      };
-      const bonus = getCreationFreeBonusVoid(actor);
-      expect(bonus).toBe(0);
+      expect(getCreationFreeBonusVoid({ getFlag: () => null })).toBe(0);
     });
 
     it("should return 0 for no void bonuses", () => {
-      const actor = {
-        items: [
-          {
-            type: "family",
-            effects: [
-              {
-                transfer: true,
-                changes: [
-                  {
-                    key: "system.traits.sta",
-                    mode: 2,
-                    value: 1
-                  }
-                ]
-              }
-            ]
-          }
-        ],
-        getFlag: () => null
-      };
-
-      const bonus = getCreationFreeBonusVoid(actor);
-      expect(bonus).toBe(0);
-    });
-
-    it("should handle errors gracefully", () => {
-      const actor = {
-        items: [
-          {
-            type: "family",
-            effects: null
-          }
-        ],
-        getFlag: () => null
-      };
-
-      const bonus = getCreationFreeBonusVoid(actor);
-      expect(bonus).toBe(0);
+      const actor = { items: [ruleItem("family", "sta")], getFlag: () => null };
+      expect(getCreationFreeBonusVoid(actor)).toBe(0);
     });
   });
 });
