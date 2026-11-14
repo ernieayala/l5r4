@@ -26,6 +26,10 @@ import { bindPromptCard } from "../services/effects/prompts.js";
 import { initializeCombat } from "../services/combat/index.js";
 import { initializeSessions } from "../services/session.js";
 import { initializeItemTransfer } from "../services/item-transfer.js";
+import { bindCheckRequestCard } from "../services/check-request.js";
+import { initializeEffectPanel } from "../apps/effect-panel.js";
+import { onHotbarDrop, registerMacroApi } from "../sheets/ui/macros.js";
+import { initializeScrollingText } from "../services/scrolling-text.js";
 
 /**
  * Register all system hooks
@@ -56,6 +60,19 @@ export function registerAllHooks() {
 
   // Effect prompt cards: the owner's roll button
   Hooks.on("renderChatMessageHTML", bindPromptCard);
+
+  // Request cards from a GM's Check link: each player's Roll button
+  Hooks.on("renderChatMessageHTML", bindCheckRequestCard);
+
+  // Effect panel: its token-controls button and redraws
+  initializeEffectPanel();
+
+  // Hotbar macros: a dropped skill, weapon, spell, kata, kiho, Trait, or Ring becomes a macro that rolls it
+  registerMacroApi();
+  Hooks.on("hotbarDrop", onHotbarDrop);
+
+  // Floating Wound and Void Point numbers over tokens
+  initializeScrollingText();
 
   // Combat loop: damage, maneuvers, duel, grapple, Guard
   initializeCombat();

@@ -125,7 +125,7 @@ Stage 6. #33 (a 3rd Edition rules option) is a feature request.
 | Item | Stage |
 |------|-------|
 | Sheet and UI parts of #30 | 6 |
-| A repeatable coverage report and its gate check | 15 |
-| Play through the real UI with player clients | 16 |
+| A repeatable coverage report and its gate check | 16 |
+| Play through the real UI with player clients | 17 |
 | A 3rd Edition rules option (#33) | Not planned |
 | Mass battle (pp.236-241) | Not planned |

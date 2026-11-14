@@ -55,6 +55,7 @@ import { RollHandler } from "./handlers/roll-handler.js";
 import { SortHandler } from "./handlers/sort-handler.js";
 import { TraitHandler } from "./handlers/trait-handler.js";
 import { openImageEditor } from "./ui/image-editor.js";
+import { TRAIT_DRAG_TYPE } from "./ui/macros.js";
 
 const { HandlebarsApplicationMixin } = foundry.applications.api;
 
@@ -282,6 +283,31 @@ export class BaseActorSheet extends KeyboardBehaviorMixin(
   /* ---------------------------------- */
   /* Shared Drag & Drop Handling        */
   /* ---------------------------------- */
+
+  /**
+   * Start a drag: a Trait or Ring carries its actor and key for a hotbar macro (module/sheets/ui/macros.js); an item
+   * row is core's Item drag data.
+   * @param {DragEvent} event
+   * @returns {Promise<void>}
+   * @protected
+   * @override
+   */
+  async _onDragStart(event) {
+    const target = event.currentTarget;
+    const key = target.classList.contains("ring-roll")
+      ? target.dataset.systemRing
+      : target.classList.contains("trait-roll")
+        ? target.closest(".trait")?.querySelector(".trait-rank")?.dataset.trait
+        : null;
+    if (key) {
+      event.dataTransfer.setData(
+        "text/plain",
+        JSON.stringify({ type: TRAIT_DRAG_TYPE, actorUuid: this.actor.uuid, key })
+      );
+      return;
+    }
+    return super._onDragStart(event);
+  }
 
   /**
    * Handles drop events on the sheet (items or actors).

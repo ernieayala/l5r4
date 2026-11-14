@@ -17,6 +17,7 @@ import TattooData from "./item/TattooData.js";
 import TechniqueData from "./item/TechniqueData.js";
 import WeaponData from "./item/WeaponData.js";
 import RollMessageData from "./chat/RollMessageData.js";
+import CheckRequestData from "./chat/CheckRequestData.js";
 
 /**
  * Data model class per subtype, keyed by Document name. `init` registers them in `CONFIG.<Document>.dataModels`;
@@ -45,7 +46,8 @@ export const DATA_MODELS = {
     weapon: WeaponData
   },
   ChatMessage: {
-    roll: RollMessageData
+    roll: RollMessageData,
+    checkRequest: CheckRequestData
   }
 };
 

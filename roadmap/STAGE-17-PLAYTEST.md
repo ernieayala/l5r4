@@ -1,10 +1,10 @@
-# Stage 16: Playtest
+# Stage 17: Playtest
 
 **Goal:** Claude plays a short original scenario through Claude in Chrome with a GM and players, each seat on its
-own client and its own Foundry user, so every `automated` entry in the Stage 15 coverage manifest is used at the
+own client and its own Foundry user, so every `automated` entry in the Stage 16 coverage manifest is used at the
 table through the real UI and real permissions; every problem found is fixed at its root with a test that fails
 first.
-**Needs:** 15 (the coverage manifest is the checklist of what play must use).
+**Needs:** 16 (the coverage manifest is the checklist of what play must use).
 
 Quench runs as the GM in one client. The paths that only a player meets (a player's roll asking the GM's client to
 write through `CONFIG.queries`, a player applying damage to a token they do not own, the Void Point prompt reaching
@@ -33,7 +33,7 @@ seat at any time.
 
 | File | Does |
 |------|------|
-| `tests/playtest/<scenario>/script.md` | The scenario as beats: each names its scene, the seat that acts, what it does, the expected result, and the manifest entries it uses. Original content only, with characters, NPCs, and items built by hand on the sheets (the system ships no compendium content, X6); cites `game-rules/` files and pages, never quotes them |
+| `tests/playtest/<scenario>/script.md` | The scenario as beats: each names its scene, the seat that acts, what it does, the expected result, and the manifest entries it uses. An original story, with characters and NPCs built from the Stage 15 pack entries through the browser and drops, plus one item the GM authors by hand in the rules editor; cites `game-rules/` files and pages, never quotes them |
 | `tests/playtest/<scenario>/coverage.md` | Every `automated` manifest entry with the beat that uses it. An entry with no beat blocks the run |
 | `tests/playtest/<scenario>/log-<date>.md` | Per session: beats played, deviations, console errors, findings with issue links. GIF recordings stay in the scratchpad and are linked from the findings, never committed |
 | GitHub label `playtest` | One issue per finding: steps, seat, expected and actual, owning stage. Pages cited, book text never quoted |
@@ -42,7 +42,7 @@ seat at any time.
 
 | Session | Uses (`game-rules/`) |
 |---------|----------------------|
-| 0: The party | Characters built on the sheets from Family and School items the GM authors with the Stage 11 rules editor; starting XP spent through the XP manager; Insight Rank shown (`48`, `49`) |
+| 0: The party | Characters built from pack Clans, Families, Schools, Skills, Advantages, and Disadvantages, found in the compendium browser by each player on their own client; one Family the GM authors with the Stage 11 rules editor; starting XP spent through the XP manager; Insight Rank shown (`48`, `49`) |
 | 1: Court | Skill, Trait, and Ring rolls from each player's client with Raises, Free Raises, Void, and an Emphasis re-roll, started from the sheet, a hotbar macro, a Check link in a shared journal, and a GM request card; an Unskilled Roll; a contested roll; Honor, Glory, and Status changes (`23`-`30`, `43`-`45`, `58`) |
 | 2: The road | A skirmish: Initiative, each stance, attacks against Armor TN, damage applied by a player to an NPC they do not own, Wound Ranks and their penalties, a maneuver bought with Raises, Fear, a grapple, Mounted, Prone at Down, Void spent to reduce damage, undo of an applied card (`31`-`33`, `36`-`38`, `40`-`42`) |
 | 3: The duel and the shrine | An iaijutsu duel; spell casting with slots, Affinity, and a spell above School Rank refused for the player and allowed by the GM; maho with blood and Taint; kata and kiho in use; a long rest healing a PC and an NPC; XP awarded and spent (`35`, `39`, `66`, `86`-`89`) |
@@ -72,7 +72,7 @@ seat at any time.
 1. The playtest is not Quench: it is played through the real UI with Claude in Chrome. A finding that can be
    scripted becomes a Quench test when it is fixed. Basis: fabula-ultima `roadmap/STAGE-19-PLAYTEST.md` decision 2.
 2. The script and logs are committed; recordings stay in the scratchpad.
-3. The scenario is rerun on each 4.0.0 release candidate before Stage 17 publishes.
+3. The scenario is rerun on each 4.0.0 release candidate before Stage 18 publishes.
 
 ### Still open
 
@@ -83,6 +83,6 @@ seat at any time.
 
 | Item | Stage |
 |------|-------|
-| Static coverage, open-question and out-of-scope sweeps | 15 |
-| Release allowlist and book-text sweep | 17 |
+| Static coverage, open-question and out-of-scope sweeps | 16 |
+| Release allowlist and book-text sweep | 18 |
 | Mass battle (pp.236-241) | Not planned |

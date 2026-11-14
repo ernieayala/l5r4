@@ -79,7 +79,18 @@ export const CHAT_TEMPLATES = freeze({
   effectPrompt: TEMPLATE("chat/effect-prompt.hbs"),
   damageResult: TEMPLATE("chat/damage-result.hbs"),
   flowCard: TEMPLATE("chat/flow-card.hbs"),
-  healing: TEMPLATE("chat/healing.hbs")
+  healing: TEMPLATE("chat/healing.hbs"),
+  checkRequest: TEMPLATE("chat/check-request.hbs")
+});
+
+/**
+ * Template paths for text links (module/setup/enrichers.js).
+ * @type {Object<string, string>}
+ * @constant
+ * @property {string} inlineLink - A Check, Damage, Condition, or Fear link, or a broken one
+ */
+export const LINK_TEMPLATES = freeze({
+  inlineLink: TEMPLATE("links/inline-link.hbs")
 });
 
 /**

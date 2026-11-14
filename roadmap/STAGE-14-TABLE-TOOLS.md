@@ -4,13 +4,14 @@
 post damage, apply conditions, and test Fear from any journal, item description, or chat message; a GM request card
 each player rolls from with their own character; an effect panel; hotbar macros; and floating Wound and Void numbers
 on tokens.
-**Needs:** 13. It ships in 4.0.0 and runs before the coverage audit (15) and playtest (16), so they cover its
+**Needs:** 13. It ships in 4.0.0 and runs before the coverage audit (16) and playtest (17), so they cover its
 actions, settings, and links.
 
 Each tool routes to a flow an earlier stage built and computes no rule itself. pf2e
 (`%LOCALAPPDATA%\FoundryVTT\Data\systems\pf2e`: `InlineCheck`, `InlineDamage`, `EffectPanel`) and fabula-ultima
-`roadmap/STAGE-12-TABLE-TOOLS.md` are the references. Left out on purpose: a compendium browser (the system ships no
-packs, X6), shops and loot, quick rolls (Shift-click already rolls without the dialog), and undo (Stage 10 has it).
+`roadmap/STAGE-12-TABLE-TOOLS.md` are the references. Left out on purpose: a compendium browser (Stage 15 builds it
+with the packs), shops and loot, quick rolls (Shift-click already rolls without the dialog), and undo (Stage 10 has
+it).
 
 ## Rules the tools route to
 
@@ -108,6 +109,21 @@ Every new string is an `l5r4.` key in `lang/en.json`.
    **AUTOMATE MATH, KEEP CHOICES**).
 
 3. The tools ship in 4.0.0, before the coverage audit and playtest (Ernie, 2026-11-14).
+4. Built as follows:
+   - The acting character for a Check or Damage link and for a request card's Roll button is
+     `resolveActor()`: the controlled token's actor, else the user's assigned character.
+   - A Check link naming a Skill uses the link's Trait, else the Skill item's own. A character without that Skill
+     and a link without a Trait gets a warning instead of a roll.
+   - A Damage link's card has no target, so it offers "Apply to selected".
+   - The Fear TN (p.90) lives once, in `module/utils/fear.js`, for NPC preparation and the Fear link.
+   - Macros cover kiho as well as kata: both are activated the same way (`module/services/effects/activation.js`).
+   - The sheet's roll handlers are split into "find what to roll" and "roll this item or key"
+     (`RollHandler.rollSkill`, `rollWeaponAttack`, `rollTrait`, `rollRing`, `PcRollHandler.castSpell`). The sheet's
+     buttons and the macros share the second half.
+   - Item rows are draggable for macros. A row dropped back on its own sheet adds nothing
+     (`module/sheets/handlers/drag-drop-handler.js`).
+   - Core prepares an effect with no set length as infinite, so `effect-duration.js` counts only a finite length.
+   - A new ChatMessage subtype in `system.json` needs the Foundry server restarted before the server accepts it.
 
 ### Still open
 
@@ -117,5 +133,6 @@ None.
 
 | Item | Stage |
 |------|-------|
-| Compendium browser, shops and loot | Not planned (no packs, X6) |
+| Compendium browser | 15 |
+| Shops and loot | Not planned |
 | Undo | 10 |

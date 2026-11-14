@@ -19,7 +19,7 @@ import { resolveActor } from "../resources/void-manager.js";
  * @param {string} skillName
  * @returns {string}
  */
-function skillLabel(skillName) {
+export function skillLabel(skillName) {
   const key = `l5r4.character.skills.names.${String(skillName).toLowerCase()}`;
   return game.i18n.has(key) ? T(key) : String(skillName);
 }

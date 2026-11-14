@@ -89,7 +89,8 @@
       "weapon": { "htmlFields": ["description", "specialRules"] }
     },
     "ChatMessage": {
-      "roll": {}
+      "roll": {},
+      "checkRequest": {}
     }
   },
   "grid": {

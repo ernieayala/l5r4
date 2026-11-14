@@ -20,6 +20,7 @@
 
 import { toInt } from "../../../utils/type-coercion.js";
 import { logError } from "../../../utils/error-logging.js";
+import { fearTN } from "../../../utils/fear.js";
 
 /**
  * Prepares Fear-related derived data for an actor.
@@ -68,7 +69,6 @@ export function prepareFear(sys) {
   sys.fear.rank = rank;
   sys.fear.active = rank > 0;
 
-  // Calculate Fear TN: Base 5 + (5 per rank)
-  // Examples: Rank 1=TN 10, Rank 3=TN 20, Rank 5=TN 30
-  sys.fear.tn = rank > 0 ? 5 + 5 * rank : 0;
+  // Fear TN: 5 + 5 × Rank (p.90)
+  sys.fear.tn = rank > 0 ? fearTN(rank) : 0;
 }

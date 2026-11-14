@@ -255,6 +255,50 @@
         "embraceReason": "Embraced the Taint",
         "lost": "Lost (Taint Rank)"
       },
+      "links": {
+        "checkTN": "{what}, TN {tn}",
+        "damage": "{pool} damage",
+        "fear": "Fear {rank}",
+        "needTrait": "{name} has no {skill} Skill, and the link names no Trait to roll it Unskilled with.",
+        "noActor": "Select a token or assign a character to roll this link.",
+        "noTargets": "Target or select the tokens this link acts on.",
+        "request": "Ask the players to roll this",
+        "requestTitle": "The GM asks for a roll",
+        "requestRoll": "Roll with my character",
+        "error": {
+          "syntax": "write it as key=value|key=value",
+          "unknownKey": "unknown key; use skill, trait, ring, or tn",
+          "traitAndRing": "a Trait and a Ring cannot both be rolled",
+          "skillWithRing": "a Skill rolls with a Trait or the Void Ring, not a Ring",
+          "nothingToRoll": "name a skill, trait, or ring",
+          "trait": "unknown Trait; use sta, wil, str, per, ref, awa, agi, or int",
+          "ring": "unknown Ring; use air, earth, fire, water, or void",
+          "tn": "the TN must be a whole number from 1 to 999",
+          "pool": "write the pool as XkY, each from 1 to 30, with an optional +N or -N",
+          "condition": "unknown condition id",
+          "fear": "the Fear Rank must be a whole number from 1 to 10"
+        }
+      },
+      "effectPanel": {
+        "title": "Effects",
+        "rounds": "Rounds left: {count}",
+        "turns": "Turns left: {count}",
+        "time": "Time left: {time}",
+        "until": "Until {event}",
+        "noEnd": "No set end",
+        "uses": "Uses left: {left} of {max}",
+        "openSource": "Open its source",
+        "remove": "Remove this effect",
+        "none": "No effects on {name}.",
+        "noActor": "Select a token, or assign a character, to see its effects."
+      },
+      "floating": {
+        "wounds": "Wounds",
+        "void": "Void Points"
+      },
+      "macros": {
+        "missing": "This macro's item or character no longer exists, or cannot be rolled from a macro."
+      },
       "honorRoll": {
         "button": "Honor Roll",
         "used": "{name} has already made an Honor Roll this session.",
@@ -1000,6 +1044,10 @@
       "name": "Apply Little Truths exception",
       "label": "When dice keep is reduced below 10 by conversion, add 2."
     },
+    "floatingNumbers": {
+      "name": "Floating Wound and Void numbers",
+      "hint": "Show each change to a character's Wounds and Void Points as text floating over its tokens, for example \"+7 Wounds\". Core's Scrolling Status Text setting also turns it off."
+    },
     "honorRoll": {
       "name": "Optional rule: Honor Roll",
       "hint": "Once per session, a character may re-roll a failed Skill, Trait, Ring, or Spell Casting roll with Honor Rank in rolled and kept dice; failing costs a Rank of Honor. The GM starts a session with the New session token control."
@@ -1056,7 +1104,8 @@
       "weapon": "Weapon"
     },
     "ChatMessage": {
-      "roll": "Roll"
+      "roll": "Roll",
+      "checkRequest": "Roll request"
     }
   }
 }

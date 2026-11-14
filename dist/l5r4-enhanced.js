@@ -68,6 +68,7 @@ import { registerEffectQueries } from "../module/services/effects/apply.js";
 import { registerPromptQueries } from "../module/services/effects/prompts.js";
 import { combatEvents, registerCombatQueries } from "../module/services/effects/combat-events.js";
 import { registerAllHooks } from "../module/hooks/register-all.js";
+import { registerEnrichers } from "../module/setup/enrichers.js";
 
 
 /**
@@ -188,6 +189,9 @@ Hooks.once("init", async () => {
 
   preloadTemplates();
   registerHandlebarsHelpers();
+
+  // Text links: @Check, @Damage, @Condition, @Fear in journals, item descriptions, and chat (roadmap/STAGE-14)
+  registerEnrichers();
 
   // Register all system hooks via central registry
   registerAllHooks();

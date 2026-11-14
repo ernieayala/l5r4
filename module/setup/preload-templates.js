@@ -145,6 +145,10 @@ export async function preloadTemplates() {
     `systems/${SYS_ID}/templates/chat/effect-prompt.hbs`,
     `systems/${SYS_ID}/templates/chat/healing.hbs`,
     `systems/${SYS_ID}/templates/chat/weapon-chat.hbs`,
+    `systems/${SYS_ID}/templates/chat/check-request.hbs`,
+
+    // Text links (module/setup/enrichers.js)
+    `systems/${SYS_ID}/templates/links/inline-link.hbs`,
 
     // Dialog Templates
     `systems/${SYS_ID}/templates/dialogs/check-dialog.hbs`,
@@ -162,7 +166,8 @@ export async function preloadTemplates() {
     `systems/${SYS_ID}/templates/apps/xp-manager.hbs`,
     `systems/${SYS_ID}/templates/apps/wound-config.hbs`,
     `systems/${SYS_ID}/templates/apps/emphasis-manager.hbs`,
-    `systems/${SYS_ID}/templates/apps/combat-config.hbs`
+    `systems/${SYS_ID}/templates/apps/combat-config.hbs`,
+    `systems/${SYS_ID}/templates/apps/effect-panel.hbs`
   ];
 
   if (!globalThis.foundry?.applications?.handlebars?.loadTemplates) {

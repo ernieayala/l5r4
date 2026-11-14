@@ -1,8 +1,9 @@
-# Stage 17: Release 4.0.0
+# Stage 18: Release 4.0.0
 
-**Goal:** 4.0.0 is published with a manifest requiring 14.370, a release zip built from an allowlist that ships no
-licensed or development file, documentation that matches it, and a smoke batch that fails on any deprecated call.
-**Needs:** 1-16. A release candidate passes the Stage 15 coverage check and a Stage 16 playtest run first.
+**Goal:** 4.0.0 is published with a manifest requiring 14.370, a release zip built from an allowlist that ships the
+compiled packs and no licensed or development file, documentation that matches it, and a smoke batch that fails on
+any deprecated call.
+**Needs:** 1-17. A release candidate passes the Stage 16 coverage check and a Stage 17 playtest run first.
 
 ## Foundry v14 APIs
 
@@ -33,9 +34,9 @@ licensed or development file, documentation that matches it, and a smoke batch t
 
 | File | Does |
 |------|------|
-| `tools/release-files.mjs` | The allowlist of paths that go into the zip: `system.json`, `dist/`, `module/`, `templates/`, `lang/`, `assets/`, the user-facing docs, `LICENSE`. Anything not listed stays out. `game-rules/`, `content/`, `roadmap/`, `tests/`, `scss/`, `tools/`, `.claude/`, `CLAUDE.md`, and `node_modules/` are never listed. A CLI wrapper prints the file list for `zip -@` |
+| `tools/release-files.mjs` | The allowlist of paths that go into the zip: `system.json`, `dist/`, `module/`, `templates/`, `lang/`, `assets/`, `packs/`, the user-facing docs, `LICENSE`. Anything not listed stays out. `game-rules/`, `content/`, `roadmap/`, `tests/`, `scss/`, `src/`, `tools/`, `.claude/`, `CLAUDE.md`, and `node_modules/` are never listed. A CLI wrapper prints the file list for `zip -@` |
 | `tools/manifest.mjs` | Pure function with a CLI wrapper: given a version and a release type, returns `system.json` with `version`, `manifest`, and `download` set (stable releases point at `releases/latest/download/`, pre-releases at the tag). Both workflows call it instead of their own rewrite |
-| `.github/workflows/create-release.yml`, `release.yml` | Build the zip from `tools/release-files.mjs`, rewrite the manifest with `tools/manifest.mjs`, validate with the whole gate, replace the retired upload action |
+| `.github/workflows/create-release.yml`, `release.yml` | Compile the packs with `npm run build:packs`, build the zip from `tools/release-files.mjs`, rewrite the manifest with `tools/manifest.mjs`, validate with the whole gate, replace the retired upload action |
 | `package.json` `release:validate` | Fixed to a mode `scripts/prepare-release.js` accepts, or removed |
 
 ### Book-text sweep (the repo is public)
@@ -43,13 +44,15 @@ licensed or development file, documentation that matches it, and a smoke batch t
 | Where | Check |
 |-------|-------|
 | Code comments, JSDoc, `lang/en.json`, templates, Vitest fixtures built from book examples, `tests/quench/` | No run of 12 or more words matching `game-rules/` (the 2026-11-12 method, run locally since `game-rules/` is gitignored). Each hit is rewritten in own words with its page citation, as its own commit |
+| `src/packs/` | `npm run packs:verify` (Stage 15) finds no run of six or more words matching `game-rules/`; flavor fields are empty and mechanical summaries are within Stage 15's cap |
 | Git history | No path under `content/` or `game-rules/` was ever committed: `git log --all -- content game-rules` prints nothing |
 
 ### Docs and release
 
 - Docs updated for Foundry 14.370; `CHANGELOG.MD` 4.0.0 entry: v14 only, data models, Active Effects V2, the
   automation (rule engine, roll pipeline, effects and durations, damage loop, rule authoring), the table tools (text
-  links, request cards, effect panel, hotbar macros, floating numbers), each rule fix from Stage 13 with its page,
+  links, request cards, effect panel, hotbar macros, floating numbers), the compendium packs and browser, each rule
+  fix from Stage 13 with its page,
   what 3.2.1 users must do.
 - 4.0.0 released through `create-release` (version, tag, manifest).
 
@@ -57,12 +60,12 @@ licensed or development file, documentation that matches it, and a smoke batch t
 
 - Vitest: `tools/manifest.mjs` gives a stable version the `latest` URLs and a pre-release its tag's URLs, and
   rejects a version that is not `X.Y.Z` or `X.Y.Z-pre`; `tools/release-files.mjs` never lists `game-rules/`,
-  `content/`, `roadmap/`, `tests/`, `tools/`, `.claude/`, `CLAUDE.md`, or `node_modules/`, and lists every file
-  `system.json` points to (`esmodules`, `styles`, `languages`).
+  `content/`, `roadmap/`, `tests/`, `src/`, `tools/`, `.claude/`, `CLAUDE.md`, or `node_modules/`, and lists every
+  file `system.json` points to (`esmodules`, `styles`, `languages`, `packs`).
 - Gate passes; `smoke` passes in `FAILURE` mode.
 - The book-text sweep finds nothing; the history check prints nothing.
 - `unzip -l` of the release zip lists only allowlisted paths.
-- Install 4.0.0 from its manifest URL into a clean 14.370 and run `smoke`.
+- Install 4.0.0 from its manifest URL into a clean 14.370 and run `smoke`; every pack opens.
 - With the released 4.0.0 (`system.json` `version` "4.0.0", which is what starts the world migrations; STAGE-12
   decision 2), rebuild the 3.2.1 fixture world (`tests/fixtures/world-3.2.1/build-world.mjs`), open it, and run the
   `world-upgrade` batch.

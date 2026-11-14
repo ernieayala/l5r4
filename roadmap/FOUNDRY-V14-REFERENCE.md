@@ -377,7 +377,7 @@ PF2e 8.7.0's actor and item sheets still extend the AppV1 `foundry.appv1.sheets.
 - `Roll.create` now invokes `defaultImplementation` [S11].
 - New core setting for the default dice fulfillment method [S8].
 
-L5R4 note: Roll & Keep rolls are `XdYkZx10` (keep the highest, tens explode); the Ten Dice Rule is applied before the formula is built (`module/services/dice/core/ten-dice-rule.js`). Read kept dice from `roll.dice` after evaluation; the rule logic lives in Utils and Services.
+L5R4 note: Roll & Keep rolls are `Xd10xa10kY` (the system's `L5R4Die`, `module/services/dice/roll-keep-die.js`, adds each explosion to its die before the highest are kept); the Ten Dice Rule is applied before the formula is built (`module/utils/ten-dice.js`). Read kept dice from `roll.dice` after evaluation; the rule logic lives in Utils and Services.
 
 ### 5.2 Chat messages
 
@@ -397,6 +397,12 @@ L5R4 note: Roll & Keep rolls are `XdYkZx10` (keep the highest, tens explode); th
 - Pattern used by Draw Steel and Crucible: one `Hooks.on("renderChatMessageHTML", ...)` that delegates to the message's data model (`message.system.alterMessageHTML(html)`, `message.system.addListeners(html)`), guarded by `message.isContentVisible` [S33], [S34c], [S38].
 - Button data read back from a rendered card is a trust boundary: re-resolve documents by UUID.
 - `getChatMessageContextOptions` hook adds context-menu entries [S30], [S38].
+
+### 5.4 Text enrichers, hotbar drops, scrolling text
+
+- `CONFIG.TextEditor.enrichers` entries are `{id, pattern, enricher, onRender, replaceParent}`; `enrichHTML` runs each with `options.custom` true (the default) [src: client/applications/ux/text-editor.mjs:144-148, 264-280]. `enricher(match, options)` returns an `HTMLElement` (or null to leave the text). With both `id` and `onRender`, the result is wrapped in `<enriched-content enricher="<id>">` [src: client/applications/ux/text-editor.mjs:265-276], whose `connectedCallback` calls `onRender(element, {signal})` and whose `disconnectedCallback` aborts that signal [src: client/applications/elements/enriched-content.mjs:39-53]. The pattern needs the `g` flag, as core's own are.
+- `hotbarDrop(hotbar, data, slot)` is called with `Hooks.call`, so a handler that returns `false` stops core's macro creation; it must return synchronously and do async work afterwards [src: client/applications/ui/hotbar.mjs:496].
+- `canvas.interface.createScrollingText(origin, content, {duration, distance, jitter, anchor, direction, ...textStyle})` returns when the animation ends and does nothing while the core `scrollingStatusText` setting is off [src: client/canvas/groups/interface.mjs:174-175]. Core's own status text skips tokens that are not `visible` or are secret [src: client/documents/active-effect.mjs:1039-1055].
 
 ---
 
@@ -643,6 +649,7 @@ Items the installed 14.370 source cannot settle:
 - Roll result replacement: `fromTerms` recomputes the total, `fromData` does not (5.1).
 - `_addDataFieldMigration` is `@internal` (3.3).
 - Default Windows user data path (13).
+- Custom text enrichers, `hotbarDrop`, `createScrollingText` (5.4).
 
 ---
 

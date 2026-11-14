@@ -233,6 +233,26 @@ https://github.com/ernieayala/l5r4-migrator/releases/latest/download/module.json
 - Edit attack and damage values
 - Action type selection
 
+### Table Tools
+
+**Text links** (in journals, item descriptions, and chat)
+- `@Check[skill=Kenjutsu|trait=agi|tn=20]`, `@Check[trait=ref]`, `@Check[ring=water|tn=15]`: opens the roll dialog for your selected token or character, filled in and still editable
+- `@Damage[3k2]`: rolls damage you apply to the selected tokens
+- `@Condition[dazed]`: applies a condition to the targeted tokens (else the selected ones)
+- `@Fear[2]`: a Fear test for the targeted tokens (else the selected ones)
+- Add `{label}` for your own text, as in `@Check[trait=ref]{Dodge}`; a link with a mistake shows what is wrong
+- The GM's Check links have a second button that posts a request card: each player rolls it with their own character
+
+**Effect panel** (the hourglass in the token controls)
+- The selected token's effects, or your character's: icon, source, and how long each lasts
+- Open an effect's source, or remove an effect you own
+
+**Hotbar macros**
+- Drag a skill, weapon, spell, kata, kiho, Trait, or Ring from a sheet to the hotbar to roll it from there
+
+**Floating numbers**
+- Changes to Wounds and Void Points float over the token, as "+7 Wounds" or "−1 Void Points"
+
 ### Long Rest & Healing
 
 **Rest Button** (on character sheets)
@@ -249,6 +269,9 @@ https://github.com/ernieayala/l5r4-migrator/releases/latest/download/module.json
 **House Rules** (World)
 - Little Truths Ten Dice Rule (excess dice grant +2, default: off)
 - Allow Armor Stacking (default: off, highest only)
+
+**Display** (Client)
+- Floating Wound and Void numbers over tokens (default: on)
 
 **Migration** (World)
 - Auto-run migrations on version updates (default: on)

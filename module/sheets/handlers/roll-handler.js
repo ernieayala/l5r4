@@ -11,11 +11,13 @@
 import { SkillRoll } from "../../services/dice/rolls/skill-roll.js";
 import { SimpleRoll } from "../../services/dice/rolls/simple-roll.js";
 import { TraitRoll } from "../../services/dice/rolls/trait-roll.js";
+import { RingRoll } from "../../services/dice/rolls/ring-roll.js";
 import {
   normalizeTraitKey,
   getEffectiveTrait,
   extractRollParams,
-  resolveWeaponSkillTrait
+  resolveWeaponSkillTrait,
+  ringRank
 } from "../../utils/mechanics.js";
 import { toInt } from "../../utils/type-coercion.js";
 import { T } from "../../utils/localization.js";
@@ -32,16 +34,6 @@ export class RollHandler {
    * @private
    */
   static _rollInProgress = new Set();
-
-  /**
-   * Whether the sheet is an NPC's.
-   * @param {Object} context - Sheet context
-   * @returns {boolean}
-   * @private
-   */
-  static _isNpc(context) {
-    return context.sheetClassName?.includes("Npc") || context.actor.type === "npc";
-  }
 
   /**
    * The element an action targets: the delegated element, or the event's current target.
@@ -87,19 +79,31 @@ export class RollHandler {
     if (!item) {
       return undefined;
     }
+    return RollHandler.rollSkill(context.actor, item, !event.shiftKey);
+  }
+
+  /**
+   * Roll a Skill item: (Skill + Trait)k(Trait) with its own Trait (p.79). The sheet's row and a hotbar macro both
+   * roll through here.
+   * @param {Actor} actor
+   * @param {Item} item  A skill the actor owns
+   * @param {boolean} askForOptions  Show the roll dialog
+   * @returns {Promise<ChatMessage|null|undefined>}
+   */
+  static rollSkill(actor, item, askForOptions) {
     const traitKey = normalizeTraitKey(item.system?.trait);
     if (!traitKey) {
       console.warn("[L5R4] Skill is missing system.trait; cannot roll:", item?.name);
       return undefined;
     }
-    return RollHandler._once(`${context.actor.id}-skill-${item.id}`, () =>
+    return RollHandler._once(`${actor.id}-skill-${item.id}`, () =>
       SkillRoll({
-        actor: context.actor,
-        actorTrait: getEffectiveTrait(context.actor, traitKey),
+        actor,
+        actorTrait: getEffectiveTrait(actor, traitKey),
         skillRank: toInt(item.system?.rank),
         skillName: item.name,
         skillTrait: traitKey,
-        askForOptions: !event.shiftKey
+        askForOptions
       })
     );
   }
@@ -157,25 +161,38 @@ export class RollHandler {
       ui.notifications?.warn(T("l5r4.ui.notifications.noValidWeapon"));
       return undefined;
     }
+    return RollHandler.rollWeaponAttack(context.actor, weapon, !event.shiftKey);
+  }
 
-    const weaponSkill = resolveWeaponSkillTrait(context.actor, weapon);
+  /**
+   * Attack with a weapon item: its associated Skill with that Skill's Trait, or the fallback Trait alone as an
+   * Unskilled Roll when the character lacks the Skill (p.80). The sheet's row and a hotbar macro both attack through
+   * here.
+   * @param {Actor} actor
+   * @param {Item} weapon  A weapon or bow the actor owns
+   * @param {boolean} askForOptions  Show the roll dialog
+   * @returns {Promise<ChatMessage|null|undefined>}
+   */
+  static rollWeaponAttack(actor, weapon, askForOptions) {
+    const id = weapon.id;
+    const weaponSkill = resolveWeaponSkillTrait(actor, weapon);
     const associatedSkill = weapon.system.associatedSkill || null;
     const skillItem = associatedSkill
-      ? context.actor.items.find(
+      ? actor.items.find(
           i => i.type === "skill" && i.name.toLowerCase() === associatedSkill.toLowerCase()
         )
       : null;
     const skillTrait = skillItem?.system.trait || weapon.system.fallbackTrait || "agi";
 
-    return RollHandler._once(`${context.actor.id}-weapon-attack-${id}`, () =>
+    return RollHandler._once(`${actor.id}-weapon-attack-${id}`, () =>
       weaponSkill.skillRank > 0 && skillItem
         ? SkillRoll({
             actorTrait: weaponSkill.traitValue,
             skillRank: weaponSkill.skillRank,
             skillName: associatedSkill,
             skillTrait,
-            askForOptions: !event.shiftKey,
-            actor: context.actor,
+            askForOptions,
+            actor,
             rollType: "attack",
             weaponId: id
           })
@@ -183,9 +200,9 @@ export class RollHandler {
             diceRoll: weaponSkill.traitValue,
             diceKeep: weaponSkill.traitValue,
             rollName: `${weapon.name} ${T("l5r4.ui.mechanics.rolls.attackRoll")}`,
-            askForOptions: !event.shiftKey,
+            askForOptions,
             rollType: "attack",
-            actor: context.actor,
+            actor,
             untrained: true,
             weaponId: id,
             isBow: weapon.type === "bow" || Boolean(weapon.system.isBow),
@@ -233,14 +250,21 @@ export class RollHandler {
     const traitKey = normalizeTraitKey(
       block?.querySelector(".trait-rank")?.dataset.trait || element.dataset.traitName || "ref"
     );
-    const traitRank = getEffectiveTrait(context.actor, traitKey);
-    const options = {
-      traitRank,
-      askForOptions: !event.shiftKey,
-      actor: context.actor
-    };
-    return RollHandler._once(`${context.actor.id}-trait-${traitKey}`, () =>
-      RollHandler._isNpc(context)
+    return RollHandler.rollTrait(context.actor, traitKey, !event.shiftKey);
+  }
+
+  /**
+   * Roll a Trait by key: roll and keep its rank (p.80). An NPC's goes through its stat-block roll. The sheet and a
+   * hotbar macro both roll through here.
+   * @param {Actor} actor
+   * @param {string} traitKey
+   * @param {boolean} askForOptions  Show the roll dialog
+   * @returns {Promise<ChatMessage|null|undefined>}
+   */
+  static rollTrait(actor, traitKey, askForOptions) {
+    const options = { traitRank: getEffectiveTrait(actor, traitKey), askForOptions, actor };
+    return RollHandler._once(`${actor.id}-trait-${traitKey}`, () =>
+      actor.type === "npc"
         ? SimpleRoll({ ...options, traitName: traitKey })
         : TraitRoll({ ...options, traitName: traitKey })
     );
@@ -256,14 +280,24 @@ export class RollHandler {
   static async npcRingRoll(context, event, element) {
     event?.preventDefault?.();
     const systemRing = String(element?.dataset?.systemRing || "void").toLowerCase();
-    return RollHandler._once(`${context.actor.id}-ring-${systemRing}`, () =>
-      SimpleRoll({
-        rollName: element?.dataset?.ringName || T(`l5r4.ui.mechanics.rings.${systemRing}`),
-        ringName: systemRing,
-        ringRank: toInt(element?.dataset?.ringRank),
-        askForOptions: !event?.shiftKey,
-        actor: context.actor
-      })
+    return RollHandler.rollRing(context.actor, systemRing, !event?.shiftKey);
+  }
+
+  /**
+   * Roll a Ring by key: roll and keep its rank (p.80). A PC's dialog can make it a Spell Casting Roll; an NPC's goes
+   * through its stat-block roll. Both sheets and a hotbar macro roll through here.
+   * @param {Actor} actor
+   * @param {string} ring  air, earth, fire, water, or void
+   * @param {boolean} askForOptions  Show the roll dialog
+   * @returns {Promise<ChatMessage|null|undefined>}
+   */
+  static rollRing(actor, ring, askForOptions) {
+    const rank = ringRank(actor, ring);
+    const ringName = T(`l5r4.ui.mechanics.rings.${ring}`);
+    return RollHandler._once(`${actor.id}-ring-${ring}`, () =>
+      actor.type === "npc"
+        ? SimpleRoll({ rollName: ringName, ringName: ring, ringRank: rank, askForOptions, actor })
+        : RingRoll({ ringRank: rank, ringName, systemRing: ring, askForOptions, actor })
     );
   }
 

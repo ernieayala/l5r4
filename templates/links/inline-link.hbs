@@ -1,0 +1,10 @@
+{{#if ok}}
+  <a class="l5r4-link" data-link-type="{{type}}" data-link-params="{{params}}" data-link-label="{{label}}" role="button" tabindex="0">
+    <i class="{{icon}}" inert></i> {{text}}
+  </a>
+{{else}}
+  <span class="l5r4-link l5r4-link-broken" data-tooltip="{{reason}}">
+    <i class="fa-solid fa-link-slash" inert></i> {{source}}
+    <span class="l5r4-link-reason">({{reason}})</span>
+  </span>
+{{/if}}

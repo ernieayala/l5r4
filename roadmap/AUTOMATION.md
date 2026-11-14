@@ -116,9 +116,10 @@ CLAUDE.md **AUTOMATE MATH, KEEP CHOICES**. The engine prompts for these and neve
 ## 5. Content and licensing
 
 pf2e ships its automation as compendium content under an open license. The L5R 4e Core Rulebook is not open
-content and this repository is public (CLAUDE.md **Licensed material**), so the system ships the engine,
-the rule editor, and import/export, never the book's schools, spells, techniques, or advantages. GMs build
-their own items or private compendiums. PR #25 ("Packs") contains rulebook text and cannot be merged.
+content and this repository is public (CLAUDE.md **Licensed material**), so the system's packs carry the book's
+names, printed numbers, and mechanics as `system.rules`, with a "Core Rulebook p.N" citation in place of every
+description; no book text ships (Stage 15 **Content policy**). PR #25 ("Packs") contains rulebook text and cannot
+be merged.
 
 ## 6. Book questions for Ernie
 

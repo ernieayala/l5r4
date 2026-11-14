@@ -34,7 +34,7 @@ pp.274-279.
 | Sheets | A rules editor on item and effect sheets: add, edit, remove rules with a form per key and a JSON view |
 | Rules | `ChoiceSet` (choice stored at purchase), `GrantItem` (school grants skills and techniques, linked both ways), `Cost`, `Prerequisite` with a GM bypass, `Ledger`, `ActionCost`, `RaiseRule`, `UnskilledAs`, `OpponentModifier`, `Aura` / `Mark` if Stage 7 keeps them |
 | Services | XP ledger reads costs and discounts from rules; Honor Roll (optional world setting); Taint ledger |
-| Services | Import and export of items with rules as JSON; no book content shipped (AUTOMATION.md §5) |
+| Services | Import and export of items with rules as JSON (AUTOMATION.md §5) |
 | Docs | User guide: authoring rules, with worked examples written for the guide, not copied from the book |
 
 ## Acceptance
@@ -48,7 +48,8 @@ pp.274-279.
 
 ## Decisions
 
-1. No compendium content from the Core Rulebook ships with the system (CLAUDE.md **Licensed material**).
+1. This stage ships no compendium content. Stage 15 ships the book's content as packs without its text (CLAUDE.md
+   **Licensed material**).
 2. A School's Techniques are GrantItem rules with a School Rank. Adding the School grants every Technique up to the
    character's School Rank; when the School Rank rises, the next ones are granted and a chat note says so. School
    Rank follows Insight Rank (p.104) unless the School item sets its own rank, as a character with Multiple Schools
@@ -96,4 +97,4 @@ pp.274-279.
 
 | Item | Stage |
 |------|-------|
-| Pre-built rules for the book's content | Not planned (licensing) |
+| Pre-built rules for the book's content | 15 |

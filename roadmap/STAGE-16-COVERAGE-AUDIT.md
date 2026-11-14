@@ -1,11 +1,11 @@
-# Stage 15: Coverage audit
+# Stage 16: Coverage audit
 
-**Goal:** a repeatable report shows, for every printed page of the Core Rulebook that holds a mechanic, every
-chat-card and sheet action, and every world setting, whether it is automated and tested, left to the table by a
-recorded decision, or advice with nothing to automate; every gap the first run finds is closed or recorded, and the
-gate fails when a new gap opens.
-**Needs:** 14. Stage 13 checks each automated rule against the book once; this stage makes that check repeatable
-and adds the actions and settings it does not cover, including those Stage 14's table tools add.
+**Goal:** a repeatable report shows, for every printed page of the Core Rulebook that holds a mechanic, every pack
+entry, every chat-card and sheet action, and every world setting, whether it is automated and tested, left to the
+table by a recorded decision, or advice with nothing to automate; every gap the first run finds is closed or
+recorded, and the gate fails when a new gap opens.
+**Needs:** 15. Stage 13 checks each automated rule against the book once; this stage makes that check repeatable
+and adds the pack entries, actions, and settings it does not cover, including those Stages 14 and 15 add.
 
 ## Foundry v14 APIs
 
@@ -35,8 +35,9 @@ State on 2026-11-14:
 | `tools/coverage/citations.mjs` | CI check: collects the page citations in `module/` JSDoc (CLAUDE.md **CITE THE RULE**) and in test names. Fails on an `automated` entry whose code paths cite none of its pages or whose test paths do not exist, and on a citation to a page no manifest entry covers |
 | `tools/coverage/actions.mjs` | CI check: every `data-action` in `templates/` and every action in a sheet's or app's `DEFAULT_OPTIONS.actions`; lists those no Quench test triggers, read from `runEveryAction`'s coverage list and from explicit test references |
 | `tools/coverage/settings.mjs` | CI check: every setting registered in `module/setup/settings/`; lists those no Quench test sets |
+| `tools/coverage/packs.mjs` | CI check: every entry in `src/packs/`; fails on a `full` or `partial` entry the Stage 15 `packs` batch does not check, and on a `partial` or `none` entry no manifest `manual` entry covers by its page |
 | `tests/lang.test.js` (extend) | Fails on `en.json` keys no module, template, or `dist/l5r4-enhanced.js` uses (the same comment-stripping and template-literal group rules as the existing checks) |
-| `package.json` | `coverage` runs all four scripts and writes `tools/coverage/report.md`; `coverage:check` runs the three CI checks and exits non-zero on a gap. Not under `coverage/`, which `test:coverage` owns |
+| `package.json` | `coverage` runs all five scripts and writes `tools/coverage/report.md`; `coverage:check` runs the four CI checks and exits non-zero on a gap. Not under `coverage/`, which `test:coverage` owns |
 | `.gitignore` | `tools/coverage/report.md` |
 | Vitest | Each script on a fixture tree under `tests/fixtures/coverage/` |
 
@@ -47,6 +48,7 @@ State on 2026-11-14:
 | Every page classified | `manifest.json` complete; each `manual` entry names its decision |
 | Every Stage 13 Audit row | Its pages are `automated` entries with the tests Stage 13 added |
 | Every action and setting | Triggered by a Quench test, or listed in the manifest's `untested` with a reason Ernie accepts |
+| Every pack entry | Checked by the `packs` batch, or its uncovered mechanics recorded as `manual` |
 | Every **Still open** item across the stage files | Answered by Ernie, or listed in the report with the stage it blocks |
 | Every **Out of scope** line across the stage files | Points to a stage or to "not planned" in the overview |
 | Every Not verified item in the closed stages' Done Blocks and PR #39's checklist | Closed, or written into a later stage's file |
@@ -63,7 +65,7 @@ State on 2026-11-14:
 
 - Vitest: on the fixture tree, an unclassified page is listed; an `automated` entry whose code cites none of its
   pages fails; a citation to an uncovered page fails; an action no test triggers is listed; a setting no test sets
-  is listed; an unused `en.json` key fails `tests/lang.test.js`.
+  is listed; a `full` pack entry no batch checks fails; an unused `en.json` key fails `tests/lang.test.js`.
 - Run: `npm run coverage` writes the report; its first-run counts go in the PR #39 checklist. After the sweeps the
   report shows zero unclassified pages, zero `automated` entries without tests, zero uncovered citations, and every
   untested action and setting accepted by Ernie.
@@ -90,6 +92,6 @@ None.
 
 | Item | Stage |
 |------|-------|
-| Playing the system end to end | 16 |
-| Book-text sweep and release allowlist | 17 |
+| Playing the system end to end | 17 |
+| Book-text sweep and release allowlist | 18 |
 | Fixing a rule the sweep finds wrong | Its own issue, fixed with a failing test first (Stage 13 pattern) |

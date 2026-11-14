@@ -8,12 +8,11 @@
  * @module sheets/handlers/pc-roll-handler
  */
 
-import { T } from "../../utils/localization.js";
 import { toInt } from "../../utils/type-coercion.js";
-import { RingRoll } from "../../services/dice/rolls/ring-roll.js";
 import { WeaponRoll } from "../../services/dice/rolls/weapon-roll.js";
 import { SpellCastRoll } from "../../services/dice/rolls/spell-cast-roll.js";
 import { MahoCastRoll } from "../../services/dice/rolls/maho-cast-roll.js";
+import { RollHandler } from "./roll-handler.js";
 
 /**
  * The item of the row the element sits in.
@@ -39,13 +38,7 @@ export class PcRollHandler {
   static async handleRingRoll(context, event, element) {
     event?.preventDefault?.();
     const systemRing = String(element.dataset?.systemRing || "void").toLowerCase();
-    return RingRoll({
-      ringRank: toInt(element.dataset?.ringRank),
-      ringName: element.dataset?.ringName || T(`l5r4.ui.mechanics.rings.${systemRing}`),
-      systemRing,
-      askForOptions: !event.shiftKey,
-      actor: context.actor
-    });
+    return RollHandler.rollRing(context.actor, systemRing, !event.shiftKey);
   }
 
   /**
@@ -62,8 +55,20 @@ export class PcRollHandler {
     if (!spell || spell.type !== "spell") {
       return undefined;
     }
+    return PcRollHandler.castSpell(context.actor, spell, !event?.shiftKey);
+  }
+
+  /**
+   * Cast a spell item: a maho spell through the maho roll, any other through the Spell Casting Roll. The sheet's row
+   * and a hotbar macro both cast through here.
+   * @param {Actor} actor
+   * @param {Item} spell  A spell the actor owns
+   * @param {boolean} showDialog
+   * @returns {Promise<ChatMessage|null>}
+   */
+  static castSpell(actor, spell, showDialog) {
     const cast = spell.system.maho ? MahoCastRoll : SpellCastRoll;
-    return cast({ actor: context.actor, spell, showDialog: !event?.shiftKey });
+    return cast({ actor, spell, showDialog });
   }
 
   /**

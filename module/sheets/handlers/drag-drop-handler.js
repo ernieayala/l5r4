@@ -103,6 +103,10 @@ export class DragDropHandler {
         console.warn(`${SYS_ID} DragDropHandler: Could not resolve item UUID`, data.uuid);
         return false;
       }
+      // A row dragged from this sheet (for a hotbar macro) and let go on it again adds nothing
+      if (item.parent === context.actor) {
+        return false;
+      }
 
       // Convert to plain object for embedding (creates copy, not reference), then check its prerequisites and ask
       // its choices (module/services/purchase.js)

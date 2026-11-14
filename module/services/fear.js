@@ -17,6 +17,7 @@ import { SYS_ID } from "../config/constants.js";
 import { F, T } from "../utils/localization.js";
 import { toInt } from "../utils/type-coercion.js";
 import { getEffectiveTrait } from "../utils/mechanics.js";
+import { fearTN } from "../utils/fear.js";
 import { rollCheck } from "./dice/check/roll-check.js";
 import { applyEffectAnywhere } from "./effects/apply.js";
 
@@ -74,6 +75,17 @@ async function executeFearTest({ character, tn, fearRank, targetInfo = "" } = {}
       }
     }
   });
+}
+
+/**
+ * Test a character against a Fear Rank with no creature behind it, as a Fear link does: TN 5 + 5 × Rank (p.90).
+ * @param {object} options
+ * @param {L5R4Actor} options.character
+ * @param {number} options.fearRank  1-10
+ * @returns {Promise<ChatMessage|null>}
+ */
+export function testFearRank({ character, fearRank }) {
+  return executeFearTest({ character, tn: fearTN(fearRank), fearRank });
 }
 
 /**

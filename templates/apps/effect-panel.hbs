@@ -1,0 +1,29 @@
+<section class="l5r4-effect-panel-body">
+  {{#if actor}}<h3 class="l5r4-effect-panel-actor">{{actor.name}}</h3>{{/if}}
+  {{#if effects.length}}
+    <ul class="l5r4-effect-panel-list">
+      {{#each effects}}
+        <li class="l5r4-effect-panel-row" data-uuid="{{uuid}}" data-source-uuid="{{sourceUuid}}">
+          <img class="l5r4-effect-panel-icon" src="{{img}}" alt="" />
+          <div class="l5r4-effect-panel-text">
+            <span class="l5r4-effect-panel-name">{{name}}</span>
+            {{#if source}}<span class="l5r4-effect-panel-source">{{source}}</span>{{/if}}
+            <span class="l5r4-effect-panel-lasts">{{lasts}}</span>
+          </div>
+          <button type="button" class="l5r4-effect-panel-button" data-action="openSource"
+            data-tooltip="{{localize "l5r4.ui.effectPanel.openSource"}}" aria-label="{{localize "l5r4.ui.effectPanel.openSource"}}">
+            <i class="fa-solid fa-up-right-from-square" inert></i>
+          </button>
+          {{#if canRemove}}
+            <button type="button" class="l5r4-effect-panel-button" data-action="removeEffect"
+              data-tooltip="{{localize "l5r4.ui.effectPanel.remove"}}" aria-label="{{localize "l5r4.ui.effectPanel.remove"}}">
+              <i class="fa-solid fa-xmark" inert></i>
+            </button>
+          {{/if}}
+        </li>
+      {{/each}}
+    </ul>
+  {{else}}
+    <p class="l5r4-effect-panel-empty">{{empty}}</p>
+  {{/if}}
+</section>
