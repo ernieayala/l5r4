@@ -1,4 +1,4 @@
-import { WOUND_LEVEL_ORDER } from "../../config/game-mechanics.js";
+import { NPC_INSIGHT_RANK, WOUND_LEVEL_ORDER } from "../../config/game-mechanics.js";
 import { booleanField, numberField, spellSlotsField, stringField } from "../fields.js";
 import { migrateNpcSource } from "../migrate-source.js";
 import { prepareNpcData } from "../../documents/actor/preparation/npc-preparation.js";
@@ -23,16 +23,17 @@ const MANUAL_WOUND_DEFAULTS = {
 /**
  * Data model for the `npc` Actor subtype.
  *
- * Initiative roll and keep are stored: a value above 0 in both is the GM's custom pool
- * (module/documents/actor/preparation/npc-preparation.js:58-65). Spell slots start at 0, which blocks casting as
- * the absent pool did in 3.2.1 until a rest sets them (roadmap/STAGE-02-DATA-MODELS.md decision 6).
+ * Initiative roll and keep are stored: a value above 0 in both is the GM's custom pool, and 0 (the default) uses
+ * the Initiative formula (module/documents/actor/preparation/npc-preparation.js; #30). Spell slots start at 0,
+ * which blocks casting as the absent pool did in 3.2.1 until a rest sets them (roadmap/STAGE-02-DATA-MODELS.md
+ * decision 6).
  */
 export default class NpcData extends ActorData {
   static VOID_RANK = 0;
 
   /** @override */
   static _initiativeFields() {
-    return { roll: numberField(2), keep: numberField(2), ...super._initiativeFields() };
+    return { roll: numberField(0), keep: numberField(0), ...super._initiativeFields() };
   }
 
   /** @override */
@@ -88,6 +89,14 @@ export default class NpcData extends ActorData {
   static migrateData(source) {
     migrateNpcSource(source);
     return super.migrateData(source);
+  }
+
+  /**
+   * The Insight Rank rules read: NPCs have no Insight and count as Rank 1 (NPC_INSIGHT_RANK).
+   * @type {number}
+   */
+  get insightRank() {
+    return NPC_INSIGHT_RANK;
   }
 
   /** @override */

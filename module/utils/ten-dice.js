@@ -1,8 +1,9 @@
 /**
  * @module ten-dice
  * @description The Ten Dice Rule (Core Rulebook p.77, `game-rules/26_special_dice_rules.md`): no roll uses more than
- * ten rolled or ten kept dice. Two extra rolled dice become one kept die; once rolled and kept dice both reach ten,
- * every extra die of either kind is +2 to the total.
+ * ten rolled or ten kept dice. Two extra rolled dice become one kept die until kept dice reach ten; once rolled and
+ * kept dice both reach ten, every extra die of either kind is +2 to the total. No roll keeps more dice than it rolls
+ * (p.89, `game-rules/41_conditional_effects.md`).
  */
 
 /**
@@ -15,10 +16,10 @@
 /**
  * Applies the Ten Dice Rule to a pool.
  *
- * A pool is at least 1k1, and keeps no more dice than it rolls while kept dice are under the cap.
+ * A pool is at least 1k1 and keeps no more dice than it rolls.
  *
  * The Little Truths exception is an optional house rule (the `LtException` world setting), not a book rule: +2
- * when the kept dice end below ten.
+ * when the rule converted extra rolled dice and the kept dice still end below ten.
  *
  * @param {number} diceRoll  Rolled dice before the rule
  * @param {number} diceKeep  Kept dice before the rule
@@ -43,42 +44,27 @@ export function applyTenDiceRule(diceRoll, diceKeep, bonus = 0, { littleTruths =
     diceKeep = 1;
   }
 
-  // Cannot keep more dice than rolled; above the cap the conversions below handle extra kept dice
-  if (diceKeep > diceRoll && diceKeep <= 10) {
+  // No roll keeps more dice than it rolls (p.89); only ten rolled dice reach the extra kept dice below
+  if (diceRoll < 10 && diceKeep > diceRoll) {
     diceKeep = diceRoll;
   }
 
-  // Rolled and kept dice both at ten: every extra die of either kind is +2
-  if (diceRoll >= 10 && diceKeep >= 10) {
-    bonus += (diceRoll - 10) * 2 + (diceKeep - 10) * 2;
-    return { diceRoll: 10, diceKeep: 10, bonus };
-  }
+  let extras = Math.max(diceRoll - 10, 0);
+  diceRoll = Math.min(diceRoll, 10);
+  const converts = extras > 0;
 
-  let extras = 0;
-  if (diceRoll > 10) {
-    extras = diceRoll - 10;
-    diceRoll = 10;
-  }
-
-  // Two extra rolled dice become one kept die
-  while (extras >= 2) {
+  // Two extra rolled dice become one kept die, until kept dice reach ten
+  while (extras >= 2 && diceKeep < 10) {
     diceKeep += 1;
     extras -= 2;
   }
 
-  // Kept dice pushed past ten by the conversion: each extra is +2
-  if (diceKeep > 10) {
-    bonus += (diceKeep - 10) * 2;
+  // Rolled and kept dice both at ten: every extra die of either kind is +2 (the 13k9 and 14k12 examples)
+  if (diceKeep >= 10) {
+    bonus += (diceKeep - 10) * 2 + extras * 2;
     diceKeep = 10;
-  }
-
-  if (littleTruths && diceKeep < 10) {
+  } else if (littleTruths && converts) {
     bonus += 2;
-  }
-
-  // An odd extra rolled die left over once kept dice reach ten is +2
-  if (diceKeep === 10 && extras > 0) {
-    bonus += extras * 2;
   }
 
   return { diceRoll, diceKeep, bonus };

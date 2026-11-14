@@ -2,8 +2,9 @@ import { numberField, stringField } from "../fields.js";
 import ItemData from "./ItemData.js";
 
 /**
- * Data model for the `kata` Item subtype: Ring, Mastery Level, XP cost. Its rules apply while it is executed, through
- * the effect its activation makes (module/services/effects/activation.js; p.259), not while it is owned.
+ * Data model for the `kata` Item subtype: Ring and Mastery Level, which is also its XP cost (p.259; #43). Its rules
+ * apply while it is executed, through the effect its activation makes (module/services/effects/activation.js), not
+ * while it is owned.
  */
 export default class KataData extends ItemData {
   /** @override */
@@ -11,8 +12,7 @@ export default class KataData extends ItemData {
     return {
       ...super.defineSchema(),
       ring: stringField("earth"),
-      mastery: numberField(1),
-      cost: numberField(0)
+      mastery: numberField(1)
     };
   }
 

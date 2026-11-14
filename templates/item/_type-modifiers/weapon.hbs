@@ -11,10 +11,26 @@
       <input name="system.damageKeep" type="number" data-type="Number" value="{{system.damageKeep}}" />
     </div>
   </div>
+  <div class="form-group">
+    <label>{{localize "l5r4.equipment.weapons.addsStrength"}}</label>
+    <div class="form-fields">
+      <input name="system.addsStrength" type="checkbox" {{checked system.addsStrength}} />
+    </div>
+    <p class="hint">{{localize "l5r4.equipment.weapons.addsStrengthHint"}}</p>
+  </div>
 {{/unless}}
 <div class="form-group">
-  <label>{{localize "l5r4.ui.mechanics.rolls.explodesOn"}}</label>
+  <label>{{localize "l5r4.equipment.weapons.explodes"}}</label>
   <div class="form-fields">
-    <input name="system.explodesOn" type="number" data-type="Number" value="{{system.explodesOn}}" />
+    <input name="system.explodes" type="checkbox" {{checked system.explodes}} />
   </div>
+  <p class="hint">{{localize "l5r4.equipment.weapons.explodesHint"}}</p>
 </div>
+{{#if system.explodes}}
+  <div class="form-group">
+    <label>{{localize "l5r4.ui.mechanics.rolls.explodesOn"}}</label>
+    <div class="form-fields">
+      <input name="system.explodesOn" type="number" data-type="Number" min="2" max="10" step="1" value="{{system.explodesOn}}" />
+    </div>
+  </div>
+{{/if}}

@@ -142,21 +142,10 @@ export function registerInitiativeTests(quench) {
           assert.exists(npc.system.initiative.keep, "Initiative keep exists");
         });
 
-        it("should default to Reflexes for NPC initiative", () => {
-          // The NPC's Reflexes, which the effective pool falls back to
+        it("should roll Insight Rank 1 + Reflexes, keep Reflexes, with no stored pool (p.81; #30)", () => {
           const reflexes = npc.system.traits.ref;
-
-          // NPCs use effRoll/effKeep which default to Reflexes when roll/keep are 0
-          assert.equal(
-            npc.system.initiative.effRoll,
-            reflexes,
-            `Effective roll defaults to Reflexes (${reflexes})`
-          );
-          assert.equal(
-            npc.system.initiative.effKeep,
-            reflexes,
-            `Effective keep defaults to Reflexes (${reflexes})`
-          );
+          assert.equal(npc.system.initiative.roll, 1 + reflexes, "Insight Rank 1 + Reflexes");
+          assert.equal(npc.system.initiative.keep, reflexes, "Reflexes");
         });
 
         it("should use explicit roll value when > 0", async () => {
@@ -167,12 +156,8 @@ export function registerInitiativeTests(quench) {
             "system.initiative.keep": 4 // Must set both
           });
 
-          // effRoll should use the roll value since BOTH are > 0
-          assert.equal(
-            npc.system.initiative.effRoll,
-            7,
-            "Effective roll uses explicit roll value (7)"
-          );
+          // The stored pool is used since BOTH are > 0
+          assert.equal(npc.system.initiative.roll, 7, "Roll uses explicit roll value (7)");
         });
 
         it("should use explicit keep value when > 0", async () => {
@@ -183,12 +168,8 @@ export function registerInitiativeTests(quench) {
             "system.initiative.keep": 5
           });
 
-          // effKeep should use the keep value since BOTH are > 0
-          assert.equal(
-            npc.system.initiative.effKeep,
-            5,
-            "Effective keep uses explicit keep value (5)"
-          );
+          // The stored pool is used since BOTH are > 0
+          assert.equal(npc.system.initiative.keep, 5, "Keep uses explicit keep value (5)");
         });
       });
 
@@ -308,7 +289,7 @@ export function registerInitiativeTests(quench) {
 
           // ASSERT - Should now be 6k3 (4 + 2 rollMod)
           assert.equal(actor.system.initiative.roll, 6, "Roll increased by rollMod");
-          assert.include(roll.formula, "6d10k3", "Formula contains 6 rolled dice");
+          assert.include(roll.formula, "6d10xa10k3", "Formula contains 6 rolled dice");
         });
 
         it("should apply keepMod to increase kept dice", async () => {
@@ -326,7 +307,7 @@ export function registerInitiativeTests(quench) {
 
           // ASSERT - The pool is 4k5 (3 + 2 keepMod); a roll keeps no more dice than it rolls, so it rolls 4k4
           assert.equal(actor.system.initiative.keep, 5, "Keep increased by keepMod");
-          assert.include(roll.formula, "4d10k4", "Formula keeps all 4 rolled dice");
+          assert.include(roll.formula, "4d10xa10k4", "Formula keeps all 4 rolled dice");
         });
 
         it("should apply totalMod as flat bonus", async () => {
@@ -356,7 +337,7 @@ export function registerInitiativeTests(quench) {
 
           // ASSERT - Should be 3k3 (4 - 1)
           assert.equal(actor.system.initiative.roll, 3, "Roll decreased by negative rollMod");
-          assert.include(roll.formula, "3d10k3", "Formula contains 3 rolled dice");
+          assert.include(roll.formula, "3d10xa10k3", "Formula contains 3 rolled dice");
         });
 
         it("should apply negative keepMod as penalty", async () => {
@@ -371,7 +352,7 @@ export function registerInitiativeTests(quench) {
 
           // ASSERT - Should be 4k2 (3 - 1)
           assert.equal(actor.system.initiative.keep, 2, "Keep decreased by negative keepMod");
-          assert.include(roll.formula, "4d10k2", "Formula contains 2 kept dice");
+          assert.include(roll.formula, "4d10xa10k2", "Formula contains 2 kept dice");
         });
 
         it("should apply negative totalMod as penalty", async () => {
@@ -407,7 +388,7 @@ export function registerInitiativeTests(quench) {
           assert.equal(actor.system.initiative.roll, 6, "Roll is 6");
           assert.equal(actor.system.initiative.keep, 4, "Keep is 4");
           assert.equal(actor.system.initiative.totalMod, 5, "totalMod is 5");
-          assert.include(roll.formula, "6d10k4", "Formula has correct dice");
+          assert.include(roll.formula, "6d10xa10k4", "Formula has correct dice");
           assert.match(roll.formula, /\+\s*5/, "Formula has flat bonus");
         });
 
@@ -436,7 +417,7 @@ export function registerInitiativeTests(quench) {
           const roll = combatant.getInitiativeRoll();
 
           // ASSERT - Should cap at 10k10 and convert excess to flat bonuses
-          assert.include(roll.formula, "10d10k10", "Capped at 10k10");
+          assert.include(roll.formula, "10d10xa10k10", "Capped at 10k10");
           // Excess dice should be converted to flat bonuses
           // The formula should have a positive flat bonus from conversions + totalMod
           const match = roll.formula.match(/\+\s*(\d+)/);
@@ -462,7 +443,7 @@ export function registerInitiativeTests(quench) {
           // ASSERT - Should be base 4k3 with no flat bonus
           assert.equal(actor.system.initiative.roll, 4, "Roll unchanged");
           assert.equal(actor.system.initiative.keep, 3, "Keep unchanged");
-          assert.include(roll.formula, "4d10k3", "Formula is base 4k3");
+          assert.include(roll.formula, "4d10xa10k3", "Formula is base 4k3");
           assert.notInclude(roll.formula, "+0", "No +0 in formula");
         });
 
@@ -475,7 +456,7 @@ export function registerInitiativeTests(quench) {
           const roll = combatant.getInitiativeRoll();
 
           // ASSERT - Should treat undefined as 0
-          assert.include(roll.formula, "4d10k3", "Formula uses base values");
+          assert.include(roll.formula, "4d10xa10k3", "Formula uses base values");
         });
       });
 
@@ -595,21 +576,25 @@ export function registerInitiativeTests(quench) {
             { actorId: actor.id }
           ]);
           assert.equal(actor.system.initiative.roll, 12);
-          assert.equal(combatant.getInitiativeRoll().formula, "10d10k10x10 + 4");
+          assert.equal(combatant.getInitiativeRoll().formula, "10d10xa10k10 + 4");
         });
 
         it("follows the Little Truths setting like every other roll", async () => {
           const setting = game.settings.get(SYS_ID, "LtException");
-          actor = await createTestPC({ name: "Little Truths Initiative" });
+          // 12k2 converts to 10k3; the exception adds 2 only to a pool the conversion left below ten kept
+          actor = await createTestPC({
+            name: "Little Truths Initiative",
+            system: { initiative: { rollMod: 9 } }
+          });
           combat = await Combat.create({ scene: null, active: false });
           const [combatant] = await combat.createEmbeddedDocuments("Combatant", [
             { actorId: actor.id }
           ]);
           try {
             await game.settings.set(SYS_ID, "LtException", false);
-            assert.equal(combatant.getInitiativeRoll().formula, "3d10k2x10");
+            assert.equal(combatant.getInitiativeRoll().formula, "10d10xa10k3");
             await game.settings.set(SYS_ID, "LtException", true);
-            assert.equal(combatant.getInitiativeRoll().formula, "3d10k2x10 + 2");
+            assert.equal(combatant.getInitiativeRoll().formula, "10d10xa10k3 + 2");
           } finally {
             await game.settings.set(SYS_ID, "LtException", setting);
           }
@@ -644,7 +629,11 @@ export function registerInitiativeTests(quench) {
           assert.equal(prompts, 1, "one prompt");
           assert.equal(actor.system.rings.void.value, 1, "Void Points 2 - 1");
           assert.isFalse(actor.system.initiative.useVoid, "mark cleared");
-          assert.deepEqual(formulas, ["3d10k2x10 + 10", "3d10k2x10"], "+10 on the first roll only");
+          assert.deepEqual(
+            formulas,
+            ["3d10xa10k2 + 10", "3d10xa10k2"],
+            "+10 on the first roll only"
+          );
           assert.notProperty(
             actor.flags[SYS_ID] ?? {},
             "voidInitiative",

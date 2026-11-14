@@ -75,7 +75,7 @@ export function registerChatSystemWorkflowTests(quench) {
 
         it("should post basic roll to chat", async () => {
           // ARRANGE
-          const formula = "7d10k3x10+5";
+          const formula = "7d10xa10k3+5";
           const roll = new Roll(formula);
           await roll.evaluate();
 
@@ -98,7 +98,7 @@ export function registerChatSystemWorkflowTests(quench) {
 
         it("should include actor name in speaker", async () => {
           // ARRANGE
-          const roll = new Roll("5d10k3x10");
+          const roll = new Roll("5d10xa10k3");
           await roll.evaluate();
 
           // ACT
@@ -136,7 +136,7 @@ export function registerChatSystemWorkflowTests(quench) {
 
         it("should preserve roll formula in chat", async () => {
           // ARRANGE
-          const formula = "7d10k3x10+5";
+          const formula = "7d10xa10k3+5";
           const roll = new Roll(formula);
           await roll.evaluate();
 
@@ -199,7 +199,7 @@ export function registerChatSystemWorkflowTests(quench) {
 
         it("should create damage roll with buttons", async () => {
           // ARRANGE
-          const damageFormula = "3d10k2x10+3"; // Weapon DR + Strength
+          const damageFormula = "3d10xa10k2+3"; // Weapon DR + Strength
           const roll = new Roll(damageFormula);
           await roll.evaluate();
 
@@ -375,7 +375,7 @@ export function registerChatSystemWorkflowTests(quench) {
           assert.equal(parsed.roll, 7, "Parsed rolled dice");
           assert.equal(parsed.keep, 3, "Parsed kept dice");
           assert.equal(parsed.bonus, 5, "Parsed bonus");
-          assert.equal(formula, "7d10k3x10+5", "Converted to Foundry formula");
+          assert.equal(formula, "7d10xa10k3+5", "Converted to Foundry formula");
         });
 
         it("should detect multiple inline rolls", () => {
@@ -473,7 +473,7 @@ export function registerChatSystemWorkflowTests(quench) {
 
         it("should create whisper message to GM", async () => {
           // ARRANGE
-          const roll = new Roll("7d10k3x10");
+          const roll = new Roll("7d10xa10k3");
           await roll.evaluate();
 
           const gmUsers = game.users.filter(u => u.isGM);
@@ -505,7 +505,7 @@ export function registerChatSystemWorkflowTests(quench) {
 
         it("should create blind roll (GM only)", async () => {
           // ARRANGE
-          const roll = new Roll("5d10k3x10");
+          const roll = new Roll("5d10xa10k3");
           await roll.evaluate();
 
           const gmUsers = game.users.filter(u => u.isGM);
@@ -538,7 +538,7 @@ export function registerChatSystemWorkflowTests(quench) {
 
         it("should create public roll (default)", async () => {
           // ARRANGE
-          const roll = new Roll("7d10k3x10");
+          const roll = new Roll("7d10xa10k3");
           await roll.evaluate();
 
           // ACT - Create public message
@@ -625,7 +625,7 @@ export function registerChatSystemWorkflowTests(quench) {
 
         it("should preserve roll data in chat message", async () => {
           // ARRANGE
-          const roll = new Roll("7d10k3x10+5");
+          const roll = new Roll("7d10xa10k3+5");
           await roll.evaluate();
 
           // ACT
@@ -659,7 +659,7 @@ export function registerChatSystemWorkflowTests(quench) {
 
         it("should render damage roll template with buttons", async () => {
           // ARRANGE
-          const roll = new Roll("5d10k3x10+3");
+          const roll = new Roll("5d10xa10k3+3");
           await roll.evaluate();
 
           // ACT
@@ -686,7 +686,7 @@ export function registerChatSystemWorkflowTests(quench) {
 
         it("offers Apply to the damage roll's target by name", async () => {
           // ARRANGE
-          const roll = new Roll("3d10k2x10");
+          const roll = new Roll("3d10xa10k2");
           await roll.evaluate();
           const system = {
             kind: "damage",

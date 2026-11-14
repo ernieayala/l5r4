@@ -43,6 +43,8 @@ export default class RollMessageData extends foundry.abstract.TypeDataModel {
         freeRaisesToTN: numberField(0),
         woundPenalty: numberField(0),
         modifiers: new ArrayField(new SchemaField({ label: stringField(), value: numberField(0) })),
+        // An attack's target Armor TN: the base and the target's own changes (Prone against melee), 0 otherwise
+        armor: numberField(0),
         // null when the roll has no TN
         effective: new NumberField({ required: true, nullable: true, initial: null })
       }),

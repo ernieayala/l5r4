@@ -1,12 +1,15 @@
 import { SYS_ID } from "../../module/config/constants.js";
-import { F } from "../../module/utils/localization.js";
+import { F, T } from "../../module/utils/localization.js";
 import { rollCheck } from "../../module/services/dice/check/roll-check.js";
+import { collectCheck } from "../../module/services/dice/check/collect.js";
 import { SimpleRoll } from "../../module/services/dice/rolls/simple-roll.js";
 import { rollDamageFromAttack, applyDamage } from "../../module/services/combat/damage.js";
 import { rollContest } from "../../module/services/combat/contest.js";
 import { startGrapple } from "../../module/services/combat/grapple.js";
 import { startDuel } from "../../module/services/combat/duel.js";
 import { guard } from "../../module/services/combat/guard.js";
+import { applyLongRest } from "../../module/services/rest.js";
+import { migrateNpcInitiative } from "../../module/setup/migrations/actors/npc-initiative.js";
 import { createTestNPC, createTestPC } from "../fixtures/actor-fixtures.js";
 import { createArmorData, createSkillData, createWeaponData } from "../fixtures/item-fixtures.js";
 import {
@@ -345,6 +348,26 @@ export function registerCombatBatch(quench) {
         );
 
         it(
+          "Feint reads the margin over the target's Armor TN + 10, not the attacker's wound penalty (Ernie's ruling)",
+          clean(async () => {
+            const { actor, katana } = await attacker();
+            // Nicked: +3 to the attacker's TN (p.82)
+            const nicked = actor.system.woundLevels.healthy.value + 1;
+            await actor.update({ "system.suffered": nicked });
+            const target = await defender({ armor: { bonus: 1, reduction: 0 } });
+            const hit = await attack(actor, katana, target, { raises: 2, "maneuver.feint": true });
+            assert.equal(hit.system.tn.effective, 34, "21 + 2 Raises + 3 for Nicked");
+            assert.equal(hit.system.tn.armor, 21);
+            const damage = await rollDamageFromAttack(hit, { askForOptions: false });
+            assert.equal(
+              damage.system.modifiers.find(m => m.total).total,
+              2,
+              "floor((36 - 31) / 2), not floor((36 - 34) / 2)"
+            );
+          })
+        );
+
+        it(
           "maneuvers the Raises cannot pay for stop the roll",
           clean(async () => {
             const { actor, katana } = await attacker();
@@ -639,6 +662,269 @@ export function registerCombatBatch(quench) {
               "the strike carries the sword's damage"
             );
             assert.include(strike.content, "check-damage", "5k3 of nines (27) hits Armor TN 20");
+          })
+        );
+
+        it(
+          "Iaijutsu Mastery: +2k2 for the Assessment edge at Rank 7, +5 on Focus from Rank 5 (p.140)",
+          clean(async () => {
+            const master = track(
+              await createTestPC({
+                name: "Combat iaijutsu master",
+                system: { traits: { awa: 5, ref: 3 } }
+              })
+            );
+            await master.createEmbeddedDocuments("Item", [createSkillData("Iaijutsu", 7, "ref")]);
+            const target = await defender();
+            const card = await startDuel(master, target);
+            const state = () => card.getFlag(SYS_ID, "flow").state;
+            const stop = autoAnswerRolls();
+            try {
+              await click(card, "[data-flow-action='roll'][data-duelist='0']");
+              await waitFor(() => state().rolls.assessment[0] !== null);
+              await click(card, "[data-flow-action='roll'][data-duelist='1']");
+              await waitFor(() => state().stage === "focus");
+              assert.deepEqual(state().focusBonus, [true, false], "54 against 27");
+              assert.include(card.content, "+2k2");
+              await click(card, "[data-flow-action='roll'][data-duelist='0']");
+              await waitFor(() => state().rolls.focus[0] !== null);
+            } finally {
+              stop();
+            }
+            const focus = game.messages.contents.findLast(
+              m => m.type === "roll" && m.system.actorUuid === master.uuid
+            );
+            const mods = focus.system.modifiers.map(m => [m.label, m.roll, m.keep, m.total]);
+            assert.deepInclude(mods, [T("l5r4.ui.combat.duel.assessmentEdge"), 2, 2, 0]);
+            assert.deepInclude(mods, [T("l5r4.ui.combat.duel.focusMastery"), 0, 0, 5]);
+          })
+        );
+
+        it("a Dazed character cannot fight a duel (p.89)", async () => {
+          const { actor } = await attacker();
+          const target = await defender();
+          await target.toggleStatusEffect("dazed", { active: true });
+          const warnings = [];
+          const warn = ui.notifications.warn;
+          ui.notifications.warn = message => warnings.push(message);
+          try {
+            assert.isNull(await startDuel(actor, target));
+          } finally {
+            ui.notifications.warn = warn;
+          }
+          assert.deepEqual(warnings, [F("l5r4.ui.combat.duel.dazed", { name: target.name })]);
+        });
+      });
+
+      describe("Armor (pp.198-199)", () => {
+        it(
+          "an Armor Piercing arrow ignores the target's armor, a Flesh Cutter doubles it",
+          clean(async () => {
+            const { actor } = await attacker();
+            const [bow] = await actor.createEmbeddedDocuments("Item", [
+              createWeaponData("Combat yumi", 0, 0, {
+                system: { isBow: true, str: 3, arrow: "armor", associatedSkill: "Kyujutsu" }
+              })
+            ]);
+            const target = await defender({ armor: { bonus: 5, reduction: 3 } });
+            assert.equal(target.system.armorTn.current, 25, "Reflexes 3: 20, light armor +5");
+            const shoot = () =>
+              rollCheck({
+                actor,
+                kind: "attack",
+                label: "Shot",
+                base: { roll: 6, keep: 4 },
+                weapon: bow,
+                target,
+                tn: target.system.armorTn.current,
+                askForOptions: false
+              });
+            assert.equal((await shoot()).system.tn.effective, 20, "Armor Piercing: 25 - 5");
+            await bow.update({ "system.arrow": "flesh" });
+            assert.equal((await shoot()).system.tn.effective, 30, "Flesh Cutter: 25 + 5");
+          })
+        );
+
+        it(
+          "a dai-kyu: Strength 3 to wield, which the GM may waive; +10 TN on foot, none mounted (p.199)",
+          clean(async () => {
+            const archer = track(
+              await createTestPC({ name: "Combat archer", system: { traits: { str: 2, ref: 3 } } })
+            );
+            const [daikyu] = await archer.createEmbeddedDocuments("Item", [
+              createWeaponData("Combat dai-kyu", 0, 0, {
+                system: {
+                  isBow: true,
+                  str: 4,
+                  minStrength: 3,
+                  tnOnFoot: 10,
+                  associatedSkill: "Kyujutsu"
+                }
+              })
+            ]);
+            const target = await defender();
+            const shoot = () =>
+              rollCheck({
+                actor: archer,
+                kind: "attack",
+                label: "Shot",
+                base: { roll: 3, keep: 3 },
+                weapon: daikyu,
+                target,
+                tn: target.system.armorTn.current,
+                askForOptions: false
+              });
+            const answer = action =>
+              new Promise(resolve =>
+                Hooks.once("renderDialogV2", app => {
+                  app.element.querySelector(`[data-action="${action}"]`).click();
+                  resolve();
+                })
+              );
+            let answered = answer("no");
+            assert.isNull(await shoot(), "Strength 2 under 3: the GM declines");
+            await answered;
+            answered = answer("yes");
+            const onFoot = await shoot();
+            await answered;
+            assert.equal(onFoot.system.tn.effective, 30, "Armor TN 20 + 10 on foot");
+            await archer.update({ "system.traits.str": 3 });
+            await archer.toggleStatusEffect("mounted", { active: true });
+            assert.equal(
+              (await shoot()).system.tn.effective,
+              20,
+              "mounted, Strength 3: no question"
+            );
+          })
+        );
+
+        it(
+          "a bow shot at a target in melee range is -10, when the roller says so (p.199)",
+          clean(async () => {
+            const { actor } = await attacker();
+            const [bow] = await actor.createEmbeddedDocuments("Item", [
+              createWeaponData("Combat yumi", 0, 0, {
+                system: { isBow: true, str: 3, associatedSkill: "Kyujutsu" }
+              })
+            ]);
+            const target = await defender();
+            const shoot = choices => {
+              const answered = answerCheckDialog(choices);
+              return rollCheck({
+                actor,
+                kind: "attack",
+                label: "Shot",
+                base: { roll: 6, keep: 4 },
+                weapon: bow,
+                ranged: true,
+                target,
+                tn: target.system.armorTn.current
+              }).then(async message => (await answered, message));
+            };
+            const label = T("l5r4.equipment.weapons.meleeRange");
+            const index = collectCheck(actor, {
+              kind: "attack",
+              weapon: bow,
+              target
+            }).modifiers.findIndex(m => m.label === label);
+            assert.isAtLeast(index, 0, "offered, unticked");
+            assert.equal((await shoot({})).rolls[0].total, 36, "6k4 of nines");
+            assert.equal((await shoot({ [`modifier.${index}`]: true })).rolls[0].total, 26);
+          })
+        );
+
+        it(
+          "riding armor's +4 is +12 on horseback",
+          clean(async () => {
+            const rider = await defender({ armor: { bonus: 4, reduction: 4 } });
+            await rider.items
+              .find(i => i.type === "armor")
+              .update({ "system.armorType": "riding" });
+            assert.equal(rider.system.armorTn.current, 24);
+            await rider.toggleStatusEffect("mounted", { active: true });
+            assert.equal(rider.system.armorTn.current, 32);
+          })
+        );
+      });
+
+      describe("NPC Initiative and healing (pp.81, 84; #30, #40)", () => {
+        it(
+          "#30: a new NPC rolls Insight Rank 1 + Reflexes, keep Reflexes, with its modifiers",
+          clean(async () => {
+            const npc = track(
+              await createTestNPC({ name: "Combat initiative", system: { traits: { ref: 3 } } })
+            );
+            assert.deepInclude(npc.system.initiative, { roll: 4, keep: 3 }, "(1 + 3)k3");
+            await npc.update({ "system.initiative.rollMod": 1 });
+            const combat = await foundry.documents.Combat.implementation.create({ scene: null });
+            try {
+              const [combatant] = await combat.createEmbeddedDocuments("Combatant", [
+                { actorId: npc.id }
+              ]);
+              assert.equal(
+                combatant._getInitiativeFormula(),
+                "5d10xa10k3",
+                "the modifier is rolled"
+              );
+            } finally {
+              await combat.delete();
+            }
+          })
+        );
+
+        it(
+          "#30: Fear's -Xk0 reaches the Initiative pool (p.90)",
+          clean(async () => {
+            const npc = track(
+              await createTestNPC({
+                name: "Combat fear initiative",
+                system: { traits: { ref: 3 } }
+              })
+            );
+            await npc.toggleStatusEffect("feared", { active: true });
+            await npc.effects.find(e => e.statuses.has("feared")).update({ "system.level": 2 });
+            assert.deepInclude(npc.system.initiative, { roll: 2, keep: 3 }, "(1 + 3 - 2)k3");
+          })
+        );
+
+        it(
+          "#30: an NPC stored with the old 2k2 default rolls the formula after the migration",
+          clean(async () => {
+            const npc = track(
+              await createTestNPC({
+                name: "Combat old initiative",
+                system: { traits: { ref: 3 }, initiative: { roll: 2, keep: 2 } }
+              })
+            );
+            assert.deepInclude(npc.system.initiative, { roll: 2, keep: 2 }, "the stored pool");
+            // Migrations report what they changed on console.warn; hold that line back so cleanTest sees the rest
+            const warn = console.warn;
+            const held = [];
+            console.warn = (...args) => held.push(args.join(" "));
+            try {
+              await migrateNpcInitiative([npc], "quench");
+            } finally {
+              console.warn = warn;
+            }
+            assert.deepEqual(held, [
+              "l5r4-enhanced | 1 NPCs now roll the Initiative formula (quench)"
+            ]);
+            assert.deepInclude(npc.system.initiative, { roll: 4, keep: 3 });
+          })
+        );
+
+        it(
+          "#40: a long rest heals an NPC 2 x Stamina + 1 (an NPC counts as Insight Rank 1)",
+          clean(async () => {
+            const npc = track(
+              await createTestNPC({
+                name: "Combat rest",
+                system: { traits: { sta: 3 }, suffered: 20 }
+              })
+            );
+            assert.equal(npc.system.wounds.healRate, 7);
+            await applyLongRest(npc);
+            assert.equal(npc.system.suffered, 13);
           })
         );
       });

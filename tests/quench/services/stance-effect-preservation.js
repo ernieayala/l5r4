@@ -7,8 +7,8 @@
  * causing permanent trait modifications.
  *
  * Bug Context:
- * When stance effects are created (especially via token status icons or programmatic
- * creation), they might have Active Effect changes that modify actor properties like
+ * When stance effects are created (from token status icons or by code), they might
+ * have Active Effect changes that modify actor properties like
  * traits. The hydration code in effect-lifecycle.js was unconditionally overwriting
  * the changes array with templateData.changes || [], which evaluated to [] since
  * stance templates don't define changes. This destroyed any existing modifications.
@@ -19,7 +19,7 @@
 import { statusRules } from "../../../module/utils/rule-engine.js";
 import { SYS_ID } from "../../../module/config/constants.js";
 import { createTestPC } from "../../fixtures/actor-fixtures.js";
-import { guardRolls } from "../helpers.js";
+import { guardRolls, settleFullDefense } from "../helpers.js";
 
 export function registerStanceEffectPreservationTests(quench) {
   quench.registerBatch(
@@ -55,6 +55,7 @@ export function registerStanceEffectPreservationTests(quench) {
         afterEach(async () => {
           // Delete actor after each test for complete cleanup
           if (actor) {
+            await settleFullDefense(actor);
             await actor.delete();
             actor = null;
           }

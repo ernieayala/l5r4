@@ -14,6 +14,7 @@ import {
 } from "../../module/services/dice/check/chat-actions.js";
 import { inlineFormula } from "../../module/services/chat.js";
 import { applyEffect } from "../../module/services/effects/apply.js";
+import { ledgerEntries, recordTrackChange } from "../../module/services/ledger.js";
 import { createTestNPC, createTestPC } from "../fixtures/actor-fixtures.js";
 import { createSkillData, createWeaponData } from "../fixtures/item-fixtures.js";
 import { answerCheckDialog, cleanTest, settleChatNotifications } from "./helpers.js";
@@ -81,6 +82,48 @@ export function registerRollPipelineBatch(quench) {
         return { actor, katana: actor.items.find(i => i.type === "weapon") };
       };
 
+      describe("Roll & Keep dice (p.77)", () => {
+        /**
+         * Evaluate a formula with the given faces in order (client/dice/terms/dice.mjs randomFace: a draw r gives
+         * ceil((1 - r) x 10)).
+         */
+        const rollWith = async (formula, faces) => {
+          const random = CONFIG.Dice.randomUniform;
+          const queue = faces.map(face => 1 - face / 10 + 0.05);
+          CONFIG.Dice.randomUniform = () => queue.shift() ?? 0.5;
+          try {
+            return await new foundry.dice.Roll(formula).evaluate();
+          } finally {
+            CONFIG.Dice.randomUniform = random;
+          }
+        };
+
+        it("each die explodes into its own total before the highest are kept", async () => {
+          // Two 10s; the first explodes into a 3 (13), the second into a 10 and a 9 (29). Keeping one die keeps 29;
+          // keeping first and exploding after would keep a single 10 and reach 13
+          const roll = await rollWith("2d10xa10k1", [10, 10, 3, 10, 9]);
+          assert.equal(roll.total, 29);
+          assert.deepEqual(
+            roll.dice[0].results.map(r => [r.result, r.active]),
+            [
+              [13, false],
+              [29, true]
+            ],
+            "one result per die, explosions added in"
+          );
+        });
+
+        it("explodes on a weapon's lower value, each die on its own", async () => {
+          // Explodes on 9: the 9 rolls again into a 4 (13), the 8 and 2 stay; keep 13 + 8
+          const roll = await rollWith("3d10xa>=9k2", [9, 8, 2, 4]);
+          assert.equal(roll.total, 21);
+        });
+
+        it("a pool's formula explodes before it keeps", () => {
+          assert.equal(inlineFormula("7k3"), "7d10xa10k3+0");
+        });
+      });
+
       describe("Every roll type posts a roll message with its context", () => {
         it(
           "Skill Roll: (Skill + Trait)k(Trait) (p.79)",
@@ -100,7 +143,7 @@ export function registerRollPipelineBatch(quench) {
             assert.equal(message.system.kind, "skill");
             assert.equal(poolOf(message), "5k3");
             assert.equal(message.system.actorUuid, actor.uuid);
-            assert.equal(message.rolls[0].formula, "5d10k3x10 + 0");
+            assert.equal(message.rolls[0].formula, "5d10xa10k3 + 0");
             assert.equal(message.system.outcome.total, message.rolls[0].total);
           })
         );
@@ -149,7 +192,7 @@ export function registerRollPipelineBatch(quench) {
           clean(async () => {
             const { actor } = await swordsman();
             const [spell] = await actor.createEmbeddedDocuments("Item", [
-              { name: "Quench Spell", type: "spell", system: { ring: "fire", mastery: 2 } }
+              { name: "Quench Spell", type: "spell", system: { ring: "fire", mastery: 1 } }
             ]);
             const fire = actor.system.rings.fire;
             const rank = actor.system.insight.rank;
@@ -157,8 +200,73 @@ export function registerRollPipelineBatch(quench) {
             const message = keep(await SpellCastRoll({ actor, spell, showDialog: false }));
             assert.equal(message.system.kind, "spell");
             assert.equal(poolOf(message), `${fire + rank}k${fire}`);
-            assert.equal(message.system.tn.base, 15);
+            assert.equal(message.system.tn.base, 10);
             assert.equal(actor._source.system.spellSlots.fire, slots - 1);
+          })
+        );
+
+        it(
+          "a Void spell rolls the Void Ring (p.163)",
+          clean(async () => {
+            const { actor } = await swordsman();
+            await actor.update({ "system.rings.void.rank": 3, "system.spellSlots.void": 3 });
+            const [spell] = await actor.createEmbeddedDocuments("Item", [
+              { name: "Quench Void Spell", type: "spell", system: { ring: "void", mastery: 1 } }
+            ]);
+            const message = keep(await SpellCastRoll({ actor, spell, showDialog: false }));
+            assert.equal(poolOf(message), `${3 + actor.system.insight.rank}k3`);
+          })
+        );
+
+        it(
+          "a universal spell is cast in the element the caster picks (pp.164-165)",
+          clean(async () => {
+            const { actor } = await swordsman();
+            const [spell] = await actor.createEmbeddedDocuments("Item", [
+              { name: "Quench Sense", type: "spell", system: { ring: "all", mastery: 1 } }
+            ]);
+            const picked = new Promise(resolve =>
+              Hooks.once("renderDialogV2", app => {
+                app.element.querySelector("[name=element]").value = "water";
+                app.element.querySelector('[data-action="ok"]').click();
+                resolve();
+              })
+            );
+            const slots = { ...actor._source.system.spellSlots };
+            const message = keep(await SpellCastRoll({ actor, spell, showDialog: false }));
+            await picked;
+            const water = actor.system.rings.water;
+            assert.equal(poolOf(message), `${water + actor.system.insight.rank}k${water}`);
+            assert.equal(
+              actor._source.system.spellSlots.water,
+              slots.water - 1,
+              "a Water slot spent"
+            );
+            assert.equal(actor._source.system.spellSlots.fire, slots.fire);
+          })
+        );
+
+        it(
+          "a spell above the School Rank asks the GM before it is cast (p.164)",
+          clean(async () => {
+            const { actor } = await swordsman();
+            const [spell] = await actor.createEmbeddedDocuments("Item", [
+              { name: "Quench Hard Spell", type: "spell", system: { ring: "fire", mastery: 3 } }
+            ]);
+            const answer = action =>
+              new Promise(resolve =>
+                Hooks.once("renderDialogV2", app => {
+                  app.element.querySelector(`[data-action="${action}"]`).click();
+                  resolve();
+                })
+              );
+            let answered = answer("no");
+            assert.isNull(await SpellCastRoll({ actor, spell, showDialog: false }), "declined");
+            await answered;
+            answered = answer("yes");
+            const message = keep(await SpellCastRoll({ actor, spell, showDialog: false }));
+            await answered;
+            assert.equal(message.system.tn.base, 20, "cast anyway");
           })
         );
 
@@ -201,6 +309,44 @@ export function registerRollPipelineBatch(quench) {
             assert.equal(message.system.kind, "maho");
             assert.equal(actor._source.system.suffered, 4, "blood cost 2 plus 2 extra");
             assert.equal(message.system.tn.freeRaises, 1);
+          })
+        );
+
+        it(
+          "maho Taint reaches a new Rank at ten points (p.275), through the ledger",
+          clean(async () => {
+            const { actor } = await swordsman();
+            await actor.update({ "system.shadowTaint.points": 9 });
+            const [spell] = await actor.createEmbeddedDocuments("Item", [
+              {
+                name: "Quench Maho",
+                type: "spell",
+                system: { ring: "earth", mastery: 2, maho: true }
+              }
+            ]);
+            // Every die a 9: the cast succeeds
+            const random = CONFIG.Dice.randomUniform;
+            CONFIG.Dice.randomUniform = () => 0.15;
+            try {
+              keep(await MahoCastRoll({ actor, spell, showDialog: false }));
+            } finally {
+              CONFIG.Dice.randomUniform = random;
+            }
+            assert.deepInclude(actor._source.system.shadowTaint, { rank: 1, points: 0 }, "9 + 1");
+            assert.equal(ledgerEntries(actor).at(-1).track, "taint");
+          })
+        );
+
+        it(
+          "Status can fall below 0 (pp.94-95)",
+          clean(async () => {
+            const { actor } = await swordsman();
+            await recordTrackChange(actor, "status", -25, "Quench");
+            assert.deepInclude(
+              actor._source.system.status,
+              { rank: -2, points: 5 },
+              "1.0 - 2.5 = -1.5"
+            );
           })
         );
 
@@ -315,7 +461,11 @@ export function registerRollPipelineBatch(quench) {
           clean(async () => {
             const { actor } = await swordsman();
             await actor.createEmbeddedDocuments("Item", [
-              { name: "Lucky charm", type: "advantage", system: { freeRaises: 1 } }
+              {
+                name: "Lucky charm",
+                type: "advantage",
+                system: { rules: [{ key: "FreeRaise", selector: "any", value: 1 }] }
+              }
             ]);
             const answered = answerCheckDialog({ tn: 10, void: true });
             const message = keep(
@@ -334,6 +484,30 @@ export function registerRollPipelineBatch(quench) {
             assert.notInclude(message.rolls[0].formula, "x");
             assert.equal(message.system.tn.raises, 0);
             assert.equal(message.system.tn.freeRaises, 0);
+          })
+        );
+
+        it(
+          "a Void Point raises an Unskilled Skill to Rank 1: one more die, dice explode, Raises apply (p.78)",
+          clean(async () => {
+            const { actor } = await swordsman();
+            const before = actor._source.system.rings.void.value;
+            const answered = answerCheckDialog({ tn: 10, voidSkill: true, raises: 1 });
+            const message = keep(
+              await SkillRoll({
+                actor,
+                actorTrait: 3,
+                skillRank: 0,
+                skillName: "Athletics",
+                skillTrait: "agi"
+              })
+            );
+            await answered;
+            assert.isFalse(message.system.pool.unskilled);
+            assert.equal(poolOf(message), "4k3", "Agility 3 + Rank 1");
+            assert.equal(message.system.pool.explode, 10);
+            assert.equal(message.system.tn.raises, 1);
+            assert.equal(actor._source.system.rings.void.value, before - 1, "one Void Point");
           })
         );
 
@@ -360,8 +534,8 @@ export function registerRollPipelineBatch(quench) {
         );
 
         it("B9: inline [[XkY]] gives a Foundry formula through the same pool code", () => {
-          assert.equal(inlineFormula("12k4+1"), "10d10k5x10+1");
-          assert.equal(inlineFormula("e5k2"), "5d10r1k2x10+0");
+          assert.equal(inlineFormula("12k4+1"), "10d10xa10k5+1");
+          assert.equal(inlineFormula("e5k2"), "5d10r1xa10k2+0");
           assert.equal(inlineFormula("u3k3"), "3d10k3+0");
           assert.isNull(inlineFormula("1d20"));
         });
@@ -372,7 +546,7 @@ export function registerRollPipelineBatch(quench) {
             const created = new Promise(resolve => Hooks.once("createChatMessage", resolve));
             await ui.chat.processMessage("[[3k2]]");
             const message = keep(await created);
-            assert.equal(message.rolls[0].formula, "3d10k2x10 + 0");
+            assert.equal(message.rolls[0].formula, "3d10xa10k2 + 0");
           })
         );
 
@@ -392,7 +566,32 @@ export function registerRollPipelineBatch(quench) {
               })
             );
             assert.equal(message.system.pool.explode, 9);
-            assert.include(message.rolls[0].formula, "x>=9");
+            assert.include(message.rolls[0].formula, "xa>=9");
+          })
+        );
+
+        it(
+          "a shuriken adds no Strength and its damage dice never explode (p.202)",
+          clean(async () => {
+            const { actor } = await swordsman();
+            const [shuriken] = await actor.createEmbeddedDocuments("Item", [
+              createWeaponData("Quench Shuriken", 1, 1, {
+                system: { addsStrength: false, explodes: false }
+              })
+            ]);
+            assert.equal(shuriken.system.derivedDamageFormula, "1k1", "no Strength");
+            const message = keep(
+              await WeaponRoll({
+                actor,
+                weapon: shuriken,
+                weaponName: shuriken.name,
+                diceRoll: shuriken.system.derivedDamageRoll,
+                diceKeep: shuriken.system.derivedDamageKeep,
+                askForOptions: false
+              })
+            );
+            assert.isNull(message.system.pool.explode);
+            assert.notInclude(message.rolls[0].formula, "xa");
           })
         );
 
@@ -522,7 +721,11 @@ export function registerRollPipelineBatch(quench) {
           clean(async () => {
             const { actor } = await swordsman();
             await actor.createEmbeddedDocuments("Item", [
-              { name: "Lucky charm", type: "advantage", system: { freeRaises: 2 } }
+              {
+                name: "Lucky charm",
+                type: "advantage",
+                system: { rules: [{ key: "FreeRaise", selector: "any", value: 2 }] }
+              }
             ]);
             const answered = answerCheckDialog({ tn: 20, freeRaisesToTN: 1 });
             const message = keep(

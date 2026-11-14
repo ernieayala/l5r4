@@ -146,10 +146,17 @@ export function registerWorldUpgradeBatch(quench) {
           assert.deepInclude(levels.out, { value: 60, penalty: 40 });
         });
 
-        it("Master of Blood carries its RollOption, in the world and on actors", () => {
-          assert.deepEqual(game.items.get("fxWiMasterBlood1").system.rules, [
-            { key: "RollOption", option: "master-of-blood" }
-          ]);
+        it("a stored 2k2 NPC Initiative becomes the formula, Insight Rank 1 + Reflexes (p.81; #30)", () => {
+          const npc = actor("fxNpFormula00001");
+          assert.deepInclude(npc._source.system.initiative, { roll: 0, keep: 0 });
+          assert.deepInclude(npc.system.initiative, { roll: 3, keep: 2 }, "Reflexes 2");
+        });
+
+        it("Master of Blood carries its rules, in the world and on actors", () => {
+          assert.deepEqual(
+            game.items.get("fxWiMasterBlood1").system.rules.map(r => r.key),
+            ["RollOption", "TNModifier"]
+          );
           assert.isTrue(actor("fxPcShugenja0001").rollOptions.has("master-of-blood"));
         });
       });

@@ -11,7 +11,7 @@
 import { DIALOG_TEMPLATES } from "../../../config/templates.js";
 import { F, T } from "../../../utils/localization.js";
 import { toInt } from "../../../utils/type-coercion.js";
-import { getAffinityDeficiencyModifier } from "../../../utils/mechanics.js";
+import { castingSchoolRank, getAffinityDeficiencyModifier } from "../../../utils/mechanics.js";
 import { rollCheck } from "../check/roll-check.js";
 import { planSlot, slotDialogData, spendSlot } from "../check/spell-slots.js";
 import { resolveActor } from "../resources/void-manager.js";
@@ -55,7 +55,7 @@ export async function RingRoll({
       if (!choices.spellCasting) {
         return {};
       }
-      const schoolRank = toInt(roller.system.insight.rank);
+      const schoolRank = castingSchoolRank(roller);
       const shift = (choices.affinity ? 1 : 0) - (choices.deficiency ? 1 : 0);
       if (schoolRank + shift <= 0) {
         ui.notifications?.warn(

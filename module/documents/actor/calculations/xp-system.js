@@ -94,11 +94,19 @@ function xpBuild(actor) {
 
   const items = [];
   for (const item of actor.items) {
-    if (["advantage", "disadvantage", "kata", "kiho"].includes(item.type)) {
+    if (["advantage", "disadvantage"].includes(item.type)) {
       items.push({ id: item.id, type: item.type, name: item.name, cost: toInt(item.system.cost) });
-    } else if (item.type === "spell" && item.system.memorized === true) {
-      // A memorized spell costs its Mastery Level
-      items.push({ id: item.id, type: "spell", name: item.name, cost: toInt(item.system.mastery) });
+    } else if (
+      ["kata", "kiho"].includes(item.type) ||
+      (item.type === "spell" && item.system.memorized === true)
+    ) {
+      // A kata, a kiho, and a memorized spell cost their Mastery Level (pp.164, 231, 259; #43)
+      items.push({
+        id: item.id,
+        type: item.type,
+        name: item.name,
+        cost: toInt(item.system.mastery)
+      });
     }
   }
 
@@ -116,6 +124,7 @@ function xpBuild(actor) {
     void: {
       stored: toInt(stored.rings.void.rank),
       freeBase: toInt(freeTraitBase.void ?? 0),
+      bonus: toInt(getCreationFreeBonus(actor, "void")),
       discount: toInt(traitDiscounts.void ?? 0)
     },
     skills: actor.items
@@ -139,15 +148,15 @@ function xpBuild(actor) {
  * @param {Object} changed - Object containing changed properties
  *
  * @description
- * Monitors trait increases to apply free bonuses:
- * - When a trait reaches rank 3 for the first time
+ * Monitors Trait and Void increases to apply free bonuses:
+ * - When a Trait or the Void Ring reaches each rank its legacy bonus covers (3, and 4 for a +2)
  * - If character has unused free bonus from creation
  * - Automatically applies free bonus to save XP
  *
  * Free Bonus System:
  * - Characters get free +1 to certain traits at creation
  * - A legacy Family/School bonus (`system.trait`/`bonus`) is not applied to the Trait, so the player stores
- *   it as a rank: the first raise to rank 3 is that free rank
+ *   it as ranks: the raises to ranks 3 up to 2 + the bonus are free
  * - A TraitAdjust rule bonus adds on top of the stored rank and never marks a free rank
  * - Tracked in xpFreeTraitBase flag
  * - Retroactive version flag prevents double-application
@@ -160,35 +169,40 @@ export function trackXpExpenditure(actor, changed) {
       return;
     }
 
-    const oldSys = actor._source?.system ?? actor.system;
+    const oldSys = actor._source.system;
     const freeTraitBase = actor.flags?.[SYS_ID]?.xpFreeTraitBase ?? {};
 
-    // Check for trait increases
-    if (changed?.system?.traits) {
-      for (const [k, v] of Object.entries(changed.system.traits)) {
-        const newBase = toInt(v);
-        const oldBase = toInt(oldSys?.traits?.[k]);
-        if (!Number.isFinite(newBase) || newBase <= oldBase) {
-          continue;
-        }
+    // Raised Traits, and the Void Ring, which a Family or School can raise as well (p.102)
+    const raised = Object.entries(changed?.system?.traits ?? {}).map(([key, value]) => [
+      key,
+      value,
+      oldSys.traits[key]
+    ]);
+    if (changed?.system?.rings?.void?.rank !== undefined) {
+      raised.push(["void", changed.system.rings.void.rank, oldSys.rings.void.rank]);
+    }
 
-        const freeBase = toInt(freeTraitBase?.[k] ?? 0);
-        // Only the legacy fields are a stored rank. A TraitAdjust rule adds on top of the stored rank, so
-        // every stored rank is bought and costs 4 × the Trait's new rank with the bonus (Core Rulebook p.103).
-        const legacyBonus = toInt(getCreationFreeBonusSources(actor, k).legacy);
+    for (const [k, v, old] of raised) {
+      const newBase = toInt(v);
+      const oldBase = toInt(old);
+      if (!Number.isFinite(newBase) || newBase <= oldBase) {
+        continue;
+      }
+      // Only the legacy fields are a stored rank. A TraitAdjust rule adds on top of the stored rank, so every
+      // stored rank is bought and costs its multiple of the new rank with the bonus (Core Rulebook p.103).
+      const legacyBonus = toInt(getCreationFreeBonusSources(actor, k).legacy);
+      const freeBase = toInt(freeTraitBase[k] ?? 0);
 
-        // Apply free bonus when reaching rank 3 (if available)
-        for (let r = oldBase + 1; r <= newBase; r++) {
-          if (freeBase === 0 && legacyBonus > 0 && r === 3) {
-            // Mark free bonus as used
-            foundry.utils.setProperty(
-              changed,
-              `flags.${SYS_ID}.xpFreeTraitBase.${k}`,
-              (freeTraitBase?.[k] ?? 0) + 1
-            );
-            break;
-          }
+      // The ranks from 3 up to 2 + the legacy bonus are free, each marked as it is reached: a Family and a School
+      // raising the same Trait give two (p.102)
+      let free = freeBase;
+      for (let r = oldBase + 1; r <= newBase; r++) {
+        if (free < legacyBonus && r === 3 + free) {
+          free++;
         }
+      }
+      if (free !== freeBase) {
+        foundry.utils.setProperty(changed, `flags.${SYS_ID}.xpFreeTraitBase.${k}`, free);
       }
     }
 

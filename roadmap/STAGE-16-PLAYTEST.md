@@ -1,0 +1,88 @@
+# Stage 16: Playtest
+
+**Goal:** Claude plays a short original scenario through Claude in Chrome with a GM and players, each seat on its
+own client and its own Foundry user, so every `automated` entry in the Stage 15 coverage manifest is used at the
+table through the real UI and real permissions; every problem found is fixed at its root with a test that fails
+first.
+**Needs:** 15 (the coverage manifest is the checklist of what play must use).
+
+Quench runs as the GM in one client. The paths that only a player meets (a player's roll asking the GM's client to
+write through `CONFIG.queries`, a player applying damage to a token they do not own, the Void Point prompt reaching
+its owner, permission-limited sheet views) have no multi-user test today: no Quench batch logs in as a player.
+
+## Foundry v14 APIs
+
+| Need | API (section of FOUNDRY-V14-REFERENCE.md) |
+|------|-------------------------------------------|
+| GM-side writes requested by players | `CONFIG.queries`, `User#query`, `game.user.isActiveGM` (§10.5); the system's queries in `module/services/combat/damage.js`, `combat/flow.js`, `effects/apply.js`, `effects/prompts.js`, `effects/combat-events.js` |
+| Ownership and limited views | Document ownership levels; sheet rendering for a non-owner (§4.7) |
+
+## Setup
+
+| Seat | User | Client |
+|------|------|--------|
+| GM | The existing Gamemaster user | `http://127.0.0.1:30000` |
+| Players | Player users Ernie adds to the test world (count is Still open 1) | One client each, with its own cookie store |
+
+Foundry keeps one login per browser cookie store, and cookies are per host. Two seats can use two hosts
+(`127.0.0.1` and `localhost`); more need other loopback hosts, the machine name, or separate Chrome profiles through
+Claude in Chrome's browser switching. Procedure step 1 finds which works and records it here. Ernie can take any
+seat at any time.
+
+## Deliverables
+
+| File | Does |
+|------|------|
+| `tests/playtest/<scenario>/script.md` | The scenario as beats: each names its scene, the seat that acts, what it does, the expected result, and the manifest entries it uses. Original content only, with characters, NPCs, and items built by hand on the sheets (the system ships no compendium content, X6); cites `game-rules/` files and pages, never quotes them |
+| `tests/playtest/<scenario>/coverage.md` | Every `automated` manifest entry with the beat that uses it. An entry with no beat blocks the run |
+| `tests/playtest/<scenario>/log-<date>.md` | Per session: beats played, deviations, console errors, findings with issue links. GIF recordings stay in the scratchpad and are linked from the findings, never committed |
+| GitHub label `playtest` | One issue per finding: steps, seat, expected and actual, owning stage. Pages cited, book text never quoted |
+
+## Scenario shape
+
+| Session | Uses (`game-rules/`) |
+|---------|----------------------|
+| 0: The party | Characters built on the sheets from Family and School items the GM authors with the Stage 11 rules editor; starting XP spent through the XP manager; Insight Rank shown (`48`, `49`) |
+| 1: Court | Skill, Trait, and Ring rolls from each player's client with Raises, Free Raises, Void, and an Emphasis re-roll, started from the sheet, a hotbar macro, a Check link in a shared journal, and a GM request card; an Unskilled Roll; a contested roll; Honor, Glory, and Status changes (`23`-`30`, `43`-`45`, `58`) |
+| 2: The road | A skirmish: Initiative, each stance, attacks against Armor TN, damage applied by a player to an NPC they do not own, Wound Ranks and their penalties, a maneuver bought with Raises, Fear, a grapple, Mounted, Prone at Down, Void spent to reduce damage, undo of an applied card (`31`-`33`, `36`-`38`, `40`-`42`) |
+| 3: The duel and the shrine | An iaijutsu duel; spell casting with slots, Affinity, and a spell above School Rank refused for the player and allowed by the GM; maho with blood and Taint; kata and kiho in use; a long rest healing a PC and an NPC; XP awarded and spent (`35`, `39`, `66`, `86`-`89`) |
+
+## Procedure
+
+1. Confirm the seats log in at once on separate cookie stores; record the method in **Setup**.
+2. Run `npm run coverage`; write the script so every `automated` entry has a beat.
+3. Play each session from the seats' own clients: a seat acts only through its client, so permissions are real.
+   Players never use the GM's client.
+4. Read each client's console after every beat (Claude in Chrome `read_console_messages`); any error or warning from
+   `l5r4-enhanced` is a finding.
+5. File each finding. Fix it at its root in the layer that owns it, with a Vitest or Quench test that fails first,
+   run the gate, and replay the beat.
+6. Ernie reviews the log and findings after each session.
+
+## Acceptance
+
+- The seats are logged in at once, each as its own user.
+- Sessions 0-3 played to the end with every beat's expected result met or filed.
+- `coverage.md` shows every `automated` manifest entry used.
+- Zero open `playtest` issues; zero console errors from `l5r4-enhanced` in the last full run.
+- The gate passes after the fixes.
+
+## Decisions
+
+1. The playtest is not Quench: it is played through the real UI with Claude in Chrome. A finding that can be
+   scripted becomes a Quench test when it is fixed. Basis: fabula-ultima `roadmap/STAGE-19-PLAYTEST.md` decision 2.
+2. The script and logs are committed; recordings stay in the scratchpad.
+3. The scenario is rerun on each 4.0.0 release candidate before Stage 17 publishes.
+
+### Still open
+
+1. How many player seats: fabula-ultima plays a GM and four players; two players cover every permission path above.
+2. Which cookie-store method gives the seats on this machine (Procedure step 1).
+
+## Out of scope
+
+| Item | Stage |
+|------|-------|
+| Static coverage, open-question and out-of-scope sweeps | 15 |
+| Release allowlist and book-text sweep | 17 |
+| Mass battle (pp.236-241) | Not planned |

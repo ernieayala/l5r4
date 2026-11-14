@@ -10,9 +10,16 @@
 
 import { SYS_ID } from "../../config/constants.js";
 import { CHAT_TEMPLATES } from "../../config/templates.js";
+import { TN_PER_RAISE } from "../../config/game-mechanics.js";
 import { F, T } from "../../utils/localization.js";
 import { toInt } from "../../utils/type-coercion.js";
-import { feintBonus, isDead, voidReduction, woundsTaken } from "../../utils/damage.js";
+import {
+  MANEUVER_RAISES,
+  feintBonus,
+  isDead,
+  voidReduction,
+  woundsTaken
+} from "../../utils/damage.js";
 import { rollCheck } from "../dice/check/roll-check.js";
 import { voidUseUpdate, warnVoidLimit } from "../effects/uses.js";
 
@@ -49,7 +56,7 @@ export async function rollDamageFromAttack(message, { askForOptions = true } = {
         roll: toInt(weapon?.system.derivedDamageRoll ?? weapon?.system.damageRoll),
         keep: toInt(weapon?.system.derivedDamageKeep ?? weapon?.system.damageKeep),
         bonus: 0,
-        explode: toInt(weapon?.system.explodesOn) || 10
+        explode: weapon ? weapon.system.damageExplode : 10
       };
   const maneuvers = attack.maneuvers;
   const base = maneuvers.disarm
@@ -59,8 +66,13 @@ export async function rollDamageFromAttack(message, { askForOptions = true } = {
   if (maneuvers.increasedDamage) {
     modifiers.push({ label: T("l5r4.ui.check.increasedDamage"), roll: maneuvers.increasedDamage });
   }
+  // Feint: half what the attack beat the target's Armor TN by, the Feint's own 2 Raises counted (p.86; Ernie's
+  // ruling, 2026-11-14): the attacker's wound penalty and other Raises do not shrink it
   const feint = maneuvers.feint
-    ? feintBonus(attack.outcome.margin ?? 0, toInt(actor.system.insight?.rank))
+    ? feintBonus(
+        attack.outcome.total - (attack.tn.armor + TN_PER_RAISE * MANEUVER_RAISES.feint),
+        actor.system.insightRank
+      )
     : 0;
   if (feint) {
     modifiers.push({ label: T("l5r4.ui.combat.feint"), total: feint });

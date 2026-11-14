@@ -36,17 +36,23 @@ export default class SkillData extends ItemData {
   }
 
   /**
-   * The roll, keep, and total bonus fields, which the skill sheet edits and Active Effects on the skill change,
-   * act as one RollModifier on this skill's rolls.
+   * Rules the skill brings by its own fields: the roll, keep, and total bonus fields, which the skill sheet edits
+   * and Active Effects on the skill change, act as one RollModifier on this skill's rolls; Rank 10 is the Mastery
+   * Ability every Skill has, a Free Raise on all rolls made with it (Core Rulebook p.133,
+   * `game-rules/58_skills_overview.md`).
    * @override
    */
   get ownedRules() {
     const { rollBonus: roll, keepBonus: keep, totalBonus: total } = this;
-    if (!roll && !keep && !total) {
-      return this.rules;
-    }
     const selector = `skill:${this.parent.name.toLowerCase().trim()}`;
-    return [...this.rules, { key: "RollModifier", selector, roll, keep, total }];
+    const own = [];
+    if (roll || keep || total) {
+      own.push({ key: "RollModifier", selector, roll, keep, total });
+    }
+    if (this.rank >= 10) {
+      own.push({ key: "FreeRaise", selector, value: 1 });
+    }
+    return own.length ? [...this.rules, ...own] : this.rules;
   }
 
   /** @override */

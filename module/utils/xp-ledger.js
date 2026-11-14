@@ -47,7 +47,7 @@ import { resolveValue } from "./rule-values.js";
  * @property {number} manual        XP the GM awarded
  * @property {number} disadvantageCap  Most XP Disadvantages give (10, p.145)
  * @property {XpTrait[]} traits
- * @property {{stored: number, freeBase: number, discount: number}} void
+ * @property {{stored: number, freeBase: number, bonus: number, discount: number}} void  As a Trait (XpTrait)
  * @property {XpSkill[]} skills
  * @property {XpItem[]} items
  */
@@ -95,9 +95,9 @@ export function costPricer({ costs, options, rollData, report = () => {} }) {
 
 /**
  * Itemize a character's XP. A Trait rank costs four times the new rank, its Family and School bonus included (p.103);
- * the Void Ring six times the new rank; a Skill rank the new rank, above the ranks a School gave; an Emphasis 2; an
- * Advantage, kata, or kiho its cost; a memorized spell its Mastery Level. Each step is priced by `price` before it is
- * added.
+ * the Void Ring six times the new rank, its bonus included too; a Skill rank the new rank, above the ranks a School
+ * gave; an Emphasis 2; an Advantage its cost; a kata, kiho, or memorized spell its Mastery Level (`cost` as gathered).
+ * Each step is priced by `price` before it is added.
  *
  * @param {XpBuild} build
  * @param {function(string[], number, string|null=): number} [price]  From costPricer; none leaves prices alone
@@ -120,8 +120,10 @@ export function xpEntries(build, price = (_selectors, base) => base) {
     }
   }
 
+  // The Void Ring's Family or School bonus raises each rank's price as a Trait's does (p.103; #44)
+  const voidBonus = build.void.freeBase > 0 ? 0 : build.void.bonus;
   for (let r = 2 + build.void.freeBase + 1; r <= build.void.stored; r++) {
-    const base = Math.max(0, VOID_XP_MULTIPLIER * r + build.void.discount);
+    const base = Math.max(0, VOID_XP_MULTIPLIER * (r + voidBonus) + build.void.discount);
     entries.push({
       type: "void",
       name: "void",

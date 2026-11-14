@@ -123,10 +123,10 @@ export function registerMultipleModifierCombinationTests(quench) {
           assert.include(formula, "10d10", "Rolled includes void");
           assert.include(formula, "k5", "Kept includes void");
           assert.include(formula, "r1", "Emphasis re-rolls 1s");
-          assert.include(formula, "x10", "Dice explode");
+          assert.include(formula, "xa10", "Dice explode");
 
           // BUG TO CATCH: If void bonus is missing, formula would be 9d10k4r1x10
-          // BUG TO CATCH: If emphasis is missing, formula would be 10d10k5x10 (no r1)
+          // BUG TO CATCH: If emphasis is missing, formula would be 10d10xa10k5 (no r1)
         });
 
         it("should handle emphasis + void with Center stance", async () => {
@@ -256,7 +256,7 @@ export function registerMultipleModifierCombinationTests(quench) {
           assert.include(formula, "12d10", "All roll bonuses applied");
           assert.include(formula, "k6", "All keep bonuses applied");
           assert.include(formula, "r1", "Emphasis re-rolls 1s");
-          assert.include(formula, "x10", "Dice explode");
+          assert.include(formula, "xa10", "Dice explode");
 
           // BUG TO CATCH: Missing any modifier results in wrong formula
         });
@@ -393,7 +393,7 @@ export function registerMultipleModifierCombinationTests(quench) {
           assert.equal(effectiveTN, 15, "TN with affinity (20-5=15)");
           assert.isAtLeast(woundPenalty, 0, "Wound penalty exists");
 
-          // Formula: 7d10k4x10 vs TN 15, with wound penalty
+          // Formula: 7d10xa10k4 vs TN 15, with wound penalty
           // BUG TO CATCH: Affinity not applied to TN
           // BUG TO CATCH: Void not applied to dice pool
           // BUG TO CATCH: Wound penalty not applied
@@ -601,7 +601,7 @@ export function registerMultipleModifierCombinationTests(quench) {
           assert.include(formula, "12d10", "Rolled dice correct");
           assert.include(formula, "k6", "Kept dice correct");
           assert.include(formula, "r1", "Emphasis present");
-          assert.include(formula, "x10", "Explode present");
+          assert.include(formula, "xa10", "Explode present");
 
           // Should be valid Roll syntax
           assert.doesNotThrow(() => {

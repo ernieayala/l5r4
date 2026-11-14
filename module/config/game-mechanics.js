@@ -64,6 +64,13 @@ export const EMPHASIS_XP_COST = 2;
 export const ARMOR_TN_PENALTY = 5;
 
 /**
+ * What riding armor adds to its Armor TN bonus while its wearer is mounted: its +4 is +12 on horseback (Core
+ * Rulebook p.198, `game-rules/73_armor.md`).
+ * @type {number}
+ */
+export const RIDING_ARMOR_MOUNTED_BONUS = 8;
+
+/**
  * TN increase per Raise called on a roll.
  * Each Raise increases the TN by this amount.
  * @type {number}
@@ -112,6 +119,16 @@ export const ARROW_MODS = freeze({
 });
 
 /**
+ * How many times an arrow counts the armor bonus in its target's Armor TN (Core Rulebook p.199, Table 3.1): an
+ * Armor Piercing arrow ignores it, a Flesh Cutter doubles it. Arrows not listed count it once.
+ * @type {Readonly<Record<string, number>>}
+ */
+export const ARROW_ARMOR_FACTOR = freeze({ armor: 0, flesh: 2 });
+
+/** Change to the total of a bow attack on a target in melee range with the archer (p.199). */
+export const BOW_IN_MELEE_PENALTY = -10;
+
+/**
  * NPC wound level configuration by rank.
  * Maps NPC rank (1-8) to number of wound levels.
  * Higher rank NPCs have more wound levels before dying.
@@ -124,6 +141,25 @@ export const ARROW_MODS = freeze({
  * const woundLevels = NPC_NUMBER_WOUND_LVLS[3]; // 3
  */
 export const NPC_NUMBER_WOUND_LVLS = freeze({ 1: 1, 2: 2, 3: 3, 4: 4, 5: 5, 6: 6, 7: 7, 8: 8 });
+
+/**
+ * The lowest and highest rank of each rank-and-points track, by its field: 0-10 (p.90), Status from -10 for the
+ * Status of geisha, ninja, and others below the samurai caste (pp.94-95; Ernie's ruling, 2026-11-14).
+ * @type {Readonly<Record<string, [number, number]>>}
+ */
+export const RANK_TRACK_RANGE = freeze({
+  honor: freeze([0, 10]),
+  glory: freeze([0, 10]),
+  status: freeze([-10, 10]),
+  shadowTaint: freeze([0, 10])
+});
+
+/**
+ * The Insight Rank an NPC counts as where a rule needs one: NPCs have no Insight, so the Initiative pool (p.81) and
+ * healing (p.84) use Rank 1 (Ernie's ruling, 2026-11-14).
+ * @type {number}
+ */
+export const NPC_INSIGHT_RANK = 1;
 
 /**
  * Canonical wound level progression order for L5R4 characters.

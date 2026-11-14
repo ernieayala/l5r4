@@ -18,7 +18,7 @@ const build = (extra = {}) => ({
   manual: 0,
   disadvantageCap: 10,
   traits: traits(),
-  void: { stored: 2, freeBase: 0, discount: 0 },
+  void: { stored: 2, freeBase: 0, bonus: 0, discount: 0 },
   skills: [],
   items: [],
   ...extra
@@ -41,7 +41,7 @@ describe("the book's character creation example (Core Rulebook pp.103-104)", () 
   // rank 2. School Skills at rank 1 for free, Meditation with its free Emphasis, Iaijutsu as the chosen Skill.
   const gyukaro = build({
     traits: traits({ per: { bonus: 1 }, agi: { bonus: 1 }, ref: { stored: 3 } }),
-    void: { stored: 3, freeBase: 0, discount: 0 },
+    void: { stored: 3, freeBase: 0, bonus: 0, discount: 0 },
     skills: [
       skill("Defense", 2),
       skill("Kenjutsu", 3),
@@ -91,6 +91,12 @@ describe("xpEntries", () => {
     // Stored 3 with a +1 bonus: the Trait goes from 3 to 4, which costs 4 × 4
     const entries = xpEntries(build({ traits: traits({ str: { stored: 3, bonus: 1 } }) }));
     expect(entries).toEqual([{ type: "trait", name: "str", from: 2, to: 3, delta: 16 }]);
+  });
+
+  it("prices a Void rank on top of its Family or School bonus, as a Trait (p.103; #44)", () => {
+    // Stored 3 with a +1 Void bonus: the Void Ring goes from 3 to 4, which costs 6 × 4
+    const entries = xpEntries(build({ void: { stored: 3, freeBase: 0, bonus: 1, discount: 0 } }));
+    expect(entries).toEqual([{ type: "void", name: "void", from: 2, to: 3, delta: 24 }]);
   });
 
   it("starts above a legacy free rank and then ignores the bonus", () => {

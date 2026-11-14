@@ -15,8 +15,16 @@ const owner = str => ({ system: { traits: { str } } });
 describe("weapon damage pools (pp.82, 198-199)", () => {
   it("a katana (3k2) with Strength 3 rolls 6k2", () => {
     expect(
-      calculateMeleeDamage({ damageRoll: 3, damageKeep: 2 }, owner(3)).derivedDamageFormula
+      calculateMeleeDamage({ damageRoll: 3, damageKeep: 2, addsStrength: true }, owner(3))
+        .derivedDamageFormula
     ).toBe("6k2");
+  });
+
+  it("a shuriken (1k1) adds no Strength (p.202)", () => {
+    expect(
+      calculateMeleeDamage({ damageRoll: 1, damageKeep: 1, addsStrength: false }, owner(3))
+        .derivedDamageFormula
+    ).toBe("1k1");
   });
 
   it("a yumi (Strength 3) with a Willow Leaf arrow (2k2) rolls 5k2", () => {
@@ -74,7 +82,7 @@ describe("allocateRaises", () => {
     });
   });
 
-  it("declared Raises with no maneuver are all Increased Damage", () => {
+  it("declared Raises with no maneuver are all Increased Damage (p.79; #5)", () => {
     expect(allocateRaises({ raises: 2, freeRaises: 0, cost: 0 }).increasedDamage).toBe(2);
   });
 

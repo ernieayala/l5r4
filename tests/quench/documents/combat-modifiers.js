@@ -190,7 +190,7 @@ export function registerCombatModifiersTests(quench) {
             assert.equal(npc.system.initiative.keep, 4, "keepMod applied");
           });
 
-          it("should fall back to Reflexes when base roll/keep are 0", async () => {
+          it("should fall back to Insight Rank 1 + Reflexes when base roll/keep are 0 (p.81; #30)", async () => {
             await npc.update({
               "system.initiative.roll": 0,
               "system.initiative.keep": 0,
@@ -198,8 +198,8 @@ export function registerCombatModifiersTests(quench) {
               "system.initiative.keepMod": 1
             });
 
-            // Should use Reflexes (3) as base, then add modifiers
-            assert.equal(npc.system.initiative.roll, 4, "Reflexes + rollMod");
+            // (1 + Reflexes 3)k(Reflexes 3), then the modifiers
+            assert.equal(npc.system.initiative.roll, 5, "Insight Rank 1 + Reflexes + rollMod");
             assert.equal(npc.system.initiative.keep, 4, "Reflexes + keepMod");
           });
 

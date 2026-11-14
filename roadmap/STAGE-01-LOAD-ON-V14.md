@@ -63,7 +63,7 @@ Link the repo with the junction command in `CLAUDE.md` (**Testing and the Gate**
 
 ## Decisions
 
-1. Version: `system.json` and `package.json` stay at 3.2.1 on `main` until Stage 14 releases 4.0.0; the `create-release` workflow sets the version (X2).
+1. Version: `system.json` and `package.json` stay at 3.2.1 on `main` until Stage 17 releases 4.0.0; the `create-release` workflow sets the version (X2).
 2. Existing Quench batches are not rewritten here; failures they show on 14.370 go to the stage that owns the code.
 3. The legacy `bow` Item subtype, still declared in `template.json`, gets the system item sheet: 14.370 has no core sheet to fall back on, and the sheet already has `bow` partials. Stage 2 decides `bow`'s fate when `template.json` goes (Ernie, 2026-11-12).
 4. Exception to 2: baseline failures whose cause sits in the test alone are fixed here: tests that read created embedded documents by position (14.370's server returns them in completion order, `dist/database/backend/server-backend.mjs` `_createDocuments`), tests that close several windows within Mocha's 2000 ms default (14.370 animates each ApplicationV2 close), tests written against an older app constructor or error message, and a test that left a world item behind (`emphasis-manager`) (Ernie, 2026-11-12).
@@ -74,4 +74,4 @@ Link the repo with the junction command in `CLAUDE.md` (**Testing and the Gate**
 |------|-------|
 | Removing `template.json`, data models | 2 |
 | Fixing deprecated calls the inventory lists | 2-6 |
-| Switching the smoke batch to `FAILURE` mode | 14 |
+| Switching the smoke batch to `FAILURE` mode | 17 |

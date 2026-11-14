@@ -240,6 +240,12 @@ describe("getArmorTNPenalty", () => {
       const penalty = getArmorTNPenalty(actor, "athletics", "str");
       expect(penalty).toBe(0); // No penalty for STR trait
     });
+
+    it("leaves a plain Agility or Reflexes Trait roll alone: the penalty is on Skill Rolls (p.198)", () => {
+      const actor = { items: [{ type: "armor", system: { equipped: true, armorType: "heavy" } }] };
+      expect(getArmorTNPenalty(actor, null, "agi")).toBe(0);
+      expect(getArmorTNPenalty(actor, null, "ref")).toBe(0);
+    });
   });
 
   describe("riding armor", () => {

@@ -33,7 +33,7 @@ export function initiativeDice({ insightRank, reflexes, rollMod = 0, keepMod = 0
  * @param {number} [pool.bonus=0]   Flat bonus (modifiers, +10 for a Void Point)
  * @param {object} [options]
  * @param {boolean} [options.littleTruths=false]  Apply the Little Truths exception (see applyTenDiceRule)
- * @returns {string}  A formula such as "5d10k3x10" or "10d10k10x10+4"
+ * @returns {string}  A formula such as "5d10xa10k3" or "10d10xa10k10+4"
  */
 export function initiativeFormula({ roll, keep, bonus = 0 }, { littleTruths = false } = {}) {
   // The roll pipeline's pool and formula (module/utils/check.js), with a zero bonus left out

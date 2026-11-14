@@ -15,7 +15,7 @@
 import { statusRules } from "../../../module/utils/rule-engine.js";
 import { SYS_ID } from "../../../module/config/constants.js";
 import { createTestPC } from "../../fixtures/actor-fixtures.js";
-import { guardRolls, waitFor } from "../helpers.js";
+import { guardRolls, settleFullDefense, waitFor } from "../helpers.js";
 import { rollFullDefense } from "../../../module/services/effects/prompts.js";
 
 /**
@@ -46,6 +46,7 @@ export function registerStanceEdgeCaseTests(quench) {
 
         afterEach(async () => {
           if (actor) {
+            await settleFullDefense(actor);
             await actor.delete();
             actor = null;
           }
@@ -198,6 +199,7 @@ export function registerStanceEdgeCaseTests(quench) {
 
         afterEach(async () => {
           if (actor) {
+            await settleFullDefense(actor);
             await actor.delete();
             actor = null;
           }
@@ -274,6 +276,7 @@ export function registerStanceEdgeCaseTests(quench) {
 
         afterEach(async () => {
           if (actor) {
+            await settleFullDefense(actor);
             await actor.delete();
             actor = null;
           }
@@ -370,6 +373,7 @@ export function registerStanceEdgeCaseTests(quench) {
 
         afterEach(async () => {
           if (actor) {
+            await settleFullDefense(actor);
             await actor.delete();
             actor = null;
           }

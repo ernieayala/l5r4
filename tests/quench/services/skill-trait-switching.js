@@ -304,7 +304,7 @@ export function registerSkillTraitSwitchingTests(quench) {
           // Expected: 9k5 with -10 penalty applied to total
           assert.include(formula, "9d10", "Dice pool unchanged");
           assert.include(formula, "k5", "Kept dice unchanged");
-          // Wound penalty applied to total, not formula directly
+          // The wound penalty changes the total; the formula stays as rolled
         });
       });
 
@@ -418,7 +418,7 @@ export function registerSkillTraitSwitchingTests(quench) {
           // Expected: Unskilled = (Trait)k(Trait) with no explosions
           assert.include(formula, `${newTraitValue}d10`, "Unskilled uses trait only");
           assert.include(formula, `k${newTraitValue}`, "Keeps trait only");
-          assert.notInclude(formula, "x10", "No explosions for unskilled");
+          assert.notInclude(formula, "xa10", "No explosions for unskilled");
 
           // Cleanup
           await unskilledSkill[0].delete();
@@ -536,7 +536,7 @@ export function registerSkillTraitSwitchingTests(quench) {
 
           // Chat should display the formula or dice pool
           // Expected: 9k5
-          assert.include(rollFormula, "9d10k5", "Roll formula is 9k5");
+          assert.include(rollFormula, "9d10xa10k5", "Roll formula is 9k5");
 
           // Content should reflect this somehow
           // (exact format depends on template)

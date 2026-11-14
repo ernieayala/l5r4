@@ -21,10 +21,14 @@
 
 import { toInt } from "../../../utils/type-coercion.js";
 import { logError } from "../../../utils/error-logging.js";
+import { T } from "../../../utils/localization.js";
 import {
+  castingSchoolRank,
   displayRollBonus,
+  getAffinityDeficiencyModifier,
   getEffectiveTrait,
-  resolveWeaponSkillTrait
+  resolveWeaponSkillTrait,
+  ringRank
 } from "../../../utils/mechanics.js";
 import { selectorBonus } from "../../../utils/rule-engine.js";
 import { prepareWeaponDamage } from "../../item/preparation/derived-data.js";
@@ -154,36 +158,26 @@ function enrichSkillFormulas(actor, skill) {
  * // Formula: "6k3", TN: 20
  */
 function enrichSpellFormulas(actor, spell) {
-  // Find shugenja school for affinity/deficiency
-  const school = actor.items.find(i => i.type === "technique" && i.system?.shugenja);
-  const schoolAffinity = school ? String(school.system?.affinity ?? "").toLowerCase() : "";
-  const schoolDeficiency = school ? String(school.system?.deficiency ?? "").toLowerCase() : "";
+  const masteryLevel = Math.max(1, toInt(spell.system.mastery));
+  // Casting TN: 5 + 5 x Mastery Level (p.163)
+  spell.system.castTN = 5 + masteryLevel * 5;
 
-  // Get spell's element and actor's ring value
-  const ringKey = String(spell.system?.ring ?? "earth").toLowerCase();
-  const ringValue = toInt(actor.system?.rings?.[ringKey]) || 2;
-  const baseSchoolRank = toInt(actor.system?.insight?.rank) || 1;
-  const masteryLevel = toInt(spell.system?.mastery) || 1;
-
-  // Apply affinity/deficiency modifier to school rank
-  // Shugenja schools have elemental affinity (bonus) and deficiency (penalty)
-  // Example: Isawa (Phoenix) has Fire affinity, Water deficiency
-  let schoolRankMod = 0;
-  if (schoolAffinity === ringKey) {
-    schoolRankMod = 1; // Affinity: +1 effective school rank (easier to cast)
-  } else if (schoolDeficiency === ringKey) {
-    schoolRankMod = -1; // Deficiency: -1 effective school rank (harder to cast)
+  // A universal spell's element is chosen when it is cast (pp.164-165)
+  const ringKey = String(spell.system.ring).toLowerCase();
+  if (ringKey === "all") {
+    spell.system.castRoll = 0;
+    spell.system.castKeep = 0;
+    spell.system.castFormula = T("l5r4.magic.spells.anyElement");
+    return;
   }
-  const effectiveSchoolRank = baseSchoolRank + schoolRankMod;
 
-  // Calculate casting formula: Ring + School Rank to roll, Ring to keep
-  spell.system.castRoll = Math.max(0, ringValue + effectiveSchoolRank);
+  // The same pool the Spell Casting Roll rolls (module/services/dice/rolls/spell-cast-roll.js): Ring + School Rank,
+  // keep Ring, the School Rank moved by Affinity or Deficiency (pp.80, 163-164)
+  const ringValue = ringRank(actor, ringKey);
+  const schoolRank = castingSchoolRank(actor) + getAffinityDeficiencyModifier(actor, ringKey);
+  spell.system.castRoll = Math.max(0, ringValue + schoolRank);
   spell.system.castKeep = Math.max(0, ringValue);
   spell.system.castFormula = `${spell.system.castRoll}k${spell.system.castKeep}`;
-
-  // Calculate casting TN: Base 5 + (Mastery × 5)
-  // Mastery 1 = TN 10, Mastery 3 = TN 20, Mastery 5 = TN 30
-  spell.system.castTN = 5 + masteryLevel * 5;
 }
 
 /**

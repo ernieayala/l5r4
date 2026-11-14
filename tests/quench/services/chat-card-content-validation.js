@@ -128,7 +128,7 @@ export function registerChatCardContentValidationTests(quench) {
           const formula = message.rolls[0].formula;
           assert.include(formula, "9d10", "Correct rolled dice (5+4=9)");
           assert.include(formula, "k4", "Correct kept dice (trait=4)");
-          assert.include(formula, "x10", "Dice explode on 10");
+          assert.include(formula, "xa10", "Dice explode on 10");
 
           // Cleanup
           await message.delete();
@@ -425,7 +425,7 @@ export function registerChatCardContentValidationTests(quench) {
           const formula = message.rolls[0].formula;
           assert.include(formula, "3d10", "Unskilled rolls trait only (3)");
           assert.include(formula, "k3", "Unskilled keeps trait only (3)");
-          assert.notInclude(formula, "x10", "Unskilled dice do NOT explode");
+          assert.notInclude(formula, "xa10", "Unskilled dice do NOT explode");
 
           // Cleanup
           await message.delete();

@@ -62,9 +62,11 @@ describe("stances (p.84)", () => {
     expect(stances).toHaveLength(5);
   });
 
-  it("Full Attack: +2k1 to attacks, Armor TN -10", () => {
+  it("Full Attack: +2k1 to melee attacks only (no ranged attacks in it), Armor TN -10", () => {
     const out = run(byId("fullAttackStance"));
-    expect(selectorBonus(out.bag, ["attack"], new Set())).toEqual({ roll: 2, keep: 1, total: 0 });
+    expect(bagEntries(out.bag, "rollModifiers", ["attack"], new Set())).toMatchObject([
+      { roll: 2, keep: 1, range: "melee" }
+    ]);
     expect(armorTn(out).current).toBe(15);
   });
 
@@ -97,9 +99,10 @@ describe("conditions (p.89)", () => {
     expect(out.movementWater).toBe(-2);
   });
 
-  it("Dazed: -3k0 to every roll; Earth save at TN 20, 5 lower per failure, never below 5", () => {
+  it("Dazed: -3k0 to every roll but damage; Earth save at TN 20, 5 lower per failure, never below 5", () => {
     const out = run(byId("dazed"));
-    expect(selectorBonus(out.bag, ["any"], new Set()).roll).toBe(-3);
+    expect(selectorBonus(out.bag, ["any"], new Set(["check:skill"])).roll).toBe(-3);
+    expect(selectorBonus(out.bag, ["any"], new Set(["check:damage"])).roll).toBe(0);
     expect(out.saves[0]).toMatchObject({
       event: "roundEnd",
       roll: "ring:earth",
@@ -115,10 +118,15 @@ describe("conditions (p.89)", () => {
     expect(run(byId("stunned")).saves[0]).toMatchObject({ tn: 20, onFailure: "endNextRound" });
   });
 
-  it("Prone: -10 Armor TN against melee only, -2k0 to attacks", () => {
+  it("Prone: -10 Armor TN against melee only, -2k0 to small and medium weapons, a large one noted", () => {
     const out = run(byId("prone"));
     expect(armorTn(out)).toMatchObject({ current: 25, vs: { melee: -10, ranged: 0 } });
-    expect(selectorBonus(out.bag, ["attack"], new Set()).roll).toBe(-2);
+    const medium = new Set(["weapon:size:medium"]);
+    const large = new Set(["weapon:size:large"]);
+    expect(selectorBonus(out.bag, ["attack"], medium).roll).toBe(-2);
+    expect(selectorBonus(out.bag, ["attack"], large).roll).toBe(0);
+    expect(bagEntries(out.bag, "notes", ["attack"], large)).toHaveLength(1);
+    expect(bagEntries(out.bag, "notes", ["attack"], medium)).toHaveLength(0);
   });
 
   it("Fatigued and Fasting: +5 TN per level on Skill, physical Trait, and Spell Casting Rolls, once each", () => {

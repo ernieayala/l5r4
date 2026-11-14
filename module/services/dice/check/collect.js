@@ -12,7 +12,7 @@ import { T } from "../../../utils/localization.js";
 import { toInt } from "../../../utils/type-coercion.js";
 import { bagEntries } from "../../../utils/rule-engine.js";
 import { getArmorTNPenalty } from "../../../utils/armor-penalties.js";
-import { calculateFreeRaises } from "../resources/raise-manager.js";
+import { BOW_IN_MELEE_PENALTY } from "../../../config/game-mechanics.js";
 
 /**
  * @typedef {object} CheckModifier
@@ -28,7 +28,8 @@ import { calculateFreeRaises } from "../resources/raise-manager.js";
 /**
  * @typedef {object} CheckContext
  * @property {CheckModifier[]} modifiers
- * @property {Array<{label: string, value: number, range?: string}>} tnModifiers
+ * @property {Array<{label: string, value: number, range?: string, fromTarget?: boolean}>} tnModifiers  A change
+ *   with `fromTarget` is part of the target's Armor TN against this attack (Prone against melee)
  * @property {number} freeRaises
  * @property {number|null} explode      Lowest explode threshold a DiceRule sets, or null for none
  * @property {boolean} rerollOnes       A DiceRule re-rolls 1s
@@ -81,16 +82,20 @@ export function checkSelectors({ kind, skill, trait, ring, skillData }) {
 }
 
 /**
- * The roll options a check's predicates test: the actor's, `check:<kind>`, and with a target, `target` plus the
- * target's options prefixed `target:`.
+ * The roll options a check's predicates test: the actor's, `check:<kind>`, with a weapon `weapon:size:<size>`
+ * (Prone forbids large weapons, p.89), and with a target, `target` plus the target's options prefixed `target:`.
  * @param {Actor} actor
  * @param {string} kind
  * @param {Actor|null} target
+ * @param {Item|null} [weapon=null]
  * @returns {Set<string>}
  */
-export function checkOptions(actor, kind, target) {
+export function checkOptions(actor, kind, target, weapon = null) {
   const options = new Set(actor.rollOptions);
   options.add(`check:${kind}`);
+  if (weapon) {
+    options.add(`weapon:size:${weapon.system.size}`);
+  }
   if (target) {
     options.add("target");
     for (const option of target.rollOptions) {
@@ -118,7 +123,7 @@ export function collectCheck(actor, { kind, skill, trait, ring, target = null, w
     ? actor.items.find(i => i.type === "skill" && i.name.toLowerCase().trim() === skill)
     : null;
   const selectors = checkSelectors({ kind, skill, trait, ring, skillData: skillItem?.system });
-  const options = checkOptions(actor, kind, target);
+  const options = checkOptions(actor, kind, target, weapon);
   const entries = bagKind =>
     bagEntries(actor.ruleBag, bagKind, selectors, options, weapon?.id ?? null);
 
@@ -127,6 +132,7 @@ export function collectCheck(actor, { kind, skill, trait, ring, target = null, w
     roll: entry.roll,
     keep: entry.keep,
     total: entry.total,
+    ...(entry.type ? { type: entry.type } : {}),
     enabled: !entry.optional,
     ...(entry.range ? { range: entry.range } : {}),
     consumes: entry.consumes ?? null
@@ -160,7 +166,8 @@ export function collectCheck(actor, { kind, skill, trait, ring, target = null, w
 
   const tnModifiers = entries("tnModifiers").map(entry => ({
     label: entry.label,
-    value: entry.value
+    value: entry.value,
+    ...(entry.type ? { type: entry.type } : {})
   }));
   // The target's Armor TN changes that count only against one attack range (Prone against melee, p.89)
   if (kind === "attack" && target) {
@@ -169,7 +176,8 @@ export function collectCheck(actor, { kind, skill, trait, ring, target = null, w
         tnModifiers.push({
           label: `${target.name} (${T(`l5r4.ui.check.range.${range}`)})`,
           value,
-          range
+          range,
+          fromTarget: true
         });
       }
     }
@@ -180,12 +188,32 @@ export function collectCheck(actor, { kind, skill, trait, ring, target = null, w
       tnModifiers.push({ label: T("l5r4.ui.check.armor"), value: armor });
     }
   }
+  if (kind === "attack" && weapon) {
+    // A weapon's own TN change mounted or on foot, as the dai-kyu's and the han-kyu's (p.199)
+    const mounted = actor.statuses.has("mounted");
+    const value = mounted ? weapon.system.tnMounted : weapon.system.tnOnFoot;
+    if (value) {
+      tnModifiers.push({
+        label: `${weapon.name} (${T(`l5r4.equipment.weapons.${mounted ? "tnMounted" : "tnOnFoot"}`)})`,
+        value
+      });
+    }
+    // A bow shot at a target in melee range is -10 (p.199); the roller judges the range, so it starts unticked
+    if (weapon.system.isBow) {
+      modifiers.push({
+        label: T("l5r4.equipment.weapons.meleeRange"),
+        roll: 0,
+        keep: 0,
+        total: BOW_IN_MELEE_PENALTY,
+        enabled: false,
+        range: "ranged",
+        consumes: null
+      });
+    }
+  }
 
   const freeRaises =
-    kind === "damage"
-      ? 0
-      : calculateFreeRaises(actor) +
-        entries("freeRaises").reduce((sum, entry) => sum + entry.value, 0);
+    kind === "damage" ? 0 : entries("freeRaises").reduce((sum, entry) => sum + entry.value, 0);
 
   const diceRules = entries("diceRules");
   const thresholds = diceRules.map(rule => rule.explode).filter(value => value !== null);

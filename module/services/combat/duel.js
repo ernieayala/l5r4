@@ -3,9 +3,10 @@
  * @description The iaijutsu duel as a guided card (Core Rulebook pp.87-88):
  * - Assessment: each duelist rolls Iaijutsu / Awareness at TN 10 + the opponent's Insight Rank × 5; a success
  *   learns one fact about the opponent plus one per Raise, which the card leaves to the players and GM to name;
- *   beating the opponent's total by 10 or more gives +1k1 on Focus. Either duelist may concede here.
- * - Focus: a Contested Iaijutsu / Void roll; beating the opponent by 5 or more wins the first strike, with a Free
- *   Raise on the strike per further 5; otherwise the strike is kharmic (simultaneous).
+ *   beating the opponent's total by 10 or more gives +1k1 on Focus (+2k2 at Iaijutsu 7, p.140). Either duelist may
+ *   concede here.
+ * - Focus: a Contested Iaijutsu / Void roll (+5 at Iaijutsu 5, p.140); beating the opponent by 5 or more wins the
+ *   first strike, with a Free Raise on the strike per further 5; otherwise the strike is kharmic (simultaneous).
  * - Strike: Iaijutsu / Reflexes attacks against the opponent's Armor TN, posted as attacks, so damage follows
  *   through the attack card.
  *
@@ -25,6 +26,18 @@ const ASSESSMENT_EDGE = 10;
 const FOCUS_STEP = 5;
 
 /**
+ * What a duelist's Iaijutsu Mastery Abilities add (p.140): from Rank 5 a Free Raise on Focus, counted as +5 since
+ * Focus has no TN (Ernie's ruling, 2026-11-14); from Rank 7 the Assessment edge is +2k2 instead of +1k1.
+ * @param {Actor} actor
+ * @returns {{focusTotal: number, edge: number}}  Flat bonus on Focus; rolled and kept dice the edge gives
+ */
+function iaijutsuMastery(actor) {
+  const skill = actor.items.find(i => i.type === "skill" && i.name.toLowerCase() === "iaijutsu");
+  const rank = toInt(skill?.system.rank);
+  return { focusTotal: rank >= 5 ? FOCUS_STEP : 0, edge: rank >= 7 ? 2 : 1 };
+}
+
+/**
  * Roll a duel stage for a duelist: Iaijutsu with the stage's Trait or Ring.
  * @param {Actor} actor
  * @param {object} spec
@@ -36,17 +49,27 @@ const FOCUS_STEP = 5;
  */
 function rollStage(actor, { stage, opponent, focusBonus = 0, freeRaises = 0 }) {
   const trait = { assessment: "awa", focus: "void", strike: "ref" }[stage];
+  const mastery = iaijutsuMastery(actor);
+  const modifiers = [];
+  if (focusBonus) {
+    modifiers.push({
+      label: T("l5r4.ui.combat.duel.assessmentEdge"),
+      roll: mastery.edge,
+      keep: mastery.edge
+    });
+  }
+  if (stage === "focus" && mastery.focusTotal) {
+    modifiers.push({ label: T("l5r4.ui.combat.duel.focusMastery"), total: mastery.focusTotal });
+  }
   const request = {
     ...skillRequest(actor, "iaijutsu", trait),
     kind: stage === "strike" ? "attack" : "skill",
     label: `${T(`l5r4.ui.combat.duel.${stage}`)}: ${actor.name}`,
     target: opponent,
-    modifiers: focusBonus
-      ? [{ label: T("l5r4.ui.combat.duel.assessmentEdge"), roll: 1, keep: 1 }]
-      : []
+    modifiers
   };
   if (stage === "assessment") {
-    request.tn = 10 + 5 * toInt(opponent.system.insight?.rank);
+    request.tn = 10 + 5 * opponent.system.insightRank;
   } else if (stage === "strike") {
     request.tn = toInt(opponent.system.armorTn.current);
     request.weapon = duelWeapon(actor);
@@ -198,7 +221,11 @@ defineFlow("duel", {
       );
       state.focusBonus.forEach((won, i) => {
         if (won) {
-          lines.push(F("l5r4.ui.combat.duel.edgeWon", { name: duelists[i].name }));
+          const actor = fromUuidSync(state.duelists[i]);
+          const edge = actor ? iaijutsuMastery(actor).edge : 1;
+          lines.push(
+            F("l5r4.ui.combat.duel.edgeWon", { name: duelists[i].name, bonus: `+${edge}k${edge}` })
+          );
         }
       });
     }
@@ -247,12 +274,17 @@ defineFlow("duel", {
 });
 
 /**
- * Start a duel between two actors (on the GM).
+ * Start a duel between two actors (on the GM). A Dazed character cannot fight an iaijutsu duel (p.89).
  * @param {Actor} first
  * @param {Actor} second
- * @returns {Promise<ChatMessage>}
+ * @returns {Promise<ChatMessage|null>} null when a duelist is Dazed
  */
 export function startDuel(first, second) {
+  const dazed = [first, second].find(actor => actor.statuses.has("dazed"));
+  if (dazed) {
+    ui.notifications?.warn(F("l5r4.ui.combat.duel.dazed", { name: dazed.name }));
+    return null;
+  }
   return startFlow(
     "duel",
     {

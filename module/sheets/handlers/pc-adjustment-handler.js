@@ -29,6 +29,7 @@
  */
 
 import { SYS_ID } from "../../config/constants.js";
+import { RANK_TRACK_RANGE } from "../../config/game-mechanics.js";
 import { applyRankPointsDelta } from "../../utils/advancement.js";
 import { clamp } from "../../utils/type-coercion.js";
 
@@ -203,8 +204,8 @@ export class PcAdjustmentHandler {
       // Ctrl key switches between point adjustment (±1) and rank adjustment (±10)
       const step = event?.ctrlKey ? (baseDelta > 0 ? +1 : -1) : baseDelta;
 
-      // Apply delta with automatic overflow/underflow handling [0, 10]
-      const next = applyRankPointsDelta(cur, step, 0, 10);
+      // Apply delta with overflow/underflow handling, within the track's range (Status reaches -10, pp.94-95)
+      const next = applyRankPointsDelta(cur, step, ...(RANK_TRACK_RANGE[key] ?? [0, 10]));
 
       const update = {};
       update[`system.${key}.rank`] = next.rank;

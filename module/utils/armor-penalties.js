@@ -2,11 +2,11 @@
  * @module armor-penalties
  * @description Calculates armor TN penalties for L5R4 combat and skill rolls.
  *
- * L5R4 armor types impose different penalties:
+ * L5R4 armor types impose different penalties (Core Rulebook p.198, `game-rules/73_armor.md`):
  * - Ashigaru: No penalties
  * - Light: Penalizes Athletics and Stealth skills
- * - Heavy: Penalizes Agility and Reflexes traits
- * - Riding: Same as Heavy, but no penalty when mounted
+ * - Heavy: Penalizes Skill Rolls using Agility or Reflexes
+ * - Riding: Penalizes every Agility and Reflexes roll, but none when mounted
  *
  * All penalties are +5 TN when applicable.
  * When wearing multiple armors, only the highest penalty applies.
@@ -108,8 +108,8 @@ function _calculateSingleArmorPenalty(armorType, skillName, traitName, isMounted
       return 0;
 
     case ARMOR_TYPES.HEAVY:
-      // Heavy armor penalizes Agility and Reflexes traits
-      if (traitName === "agi" || traitName === "ref") {
+      // Heavy armor penalizes Skill Rolls using Agility or Reflexes; a plain Trait roll is not one (p.198)
+      if (skillName && (traitName === "agi" || traitName === "ref")) {
         return ARMOR_TN_PENALTY;
       }
       return 0;
@@ -119,7 +119,7 @@ function _calculateSingleArmorPenalty(armorType, skillName, traitName, isMounted
       if (isMounted) {
         return 0;
       }
-      // When not mounted, acts like heavy armor
+      // On foot, every roll using Agility or Reflexes, Trait rolls included (p.198)
       if (traitName === "agi" || traitName === "ref") {
         return ARMOR_TN_PENALTY;
       }

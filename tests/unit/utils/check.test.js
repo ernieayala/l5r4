@@ -22,6 +22,15 @@ describe("buildPool", () => {
     });
   });
 
+  it("stacks typed modifiers as a sheet does: the best of each type, untyped all add", () => {
+    const modifiers = [
+      { roll: 1, keep: 1, type: "kata" },
+      { roll: 1, keep: 1, type: "kata" },
+      { roll: 1 }
+    ];
+    expect(pool({ roll: 5, keep: 3, modifiers })).toMatchObject({ roll: 7, keep: 4 });
+  });
+
   it("keeps no more dice than it rolls after a penalty (p.89: Dazed 6k4 rolls 3k3)", () => {
     expect(pool({ roll: 6, keep: 4, modifiers: [{ roll: -3 }] })).toMatchObject({
       roll: 3,
@@ -60,6 +69,14 @@ describe("buildPool", () => {
     expect(pool({ roll: 14, keep: 12 })).toMatchObject({ roll: 10, keep: 10, bonus: 12 });
   });
 
+  it("applies the Ten Dice Rule to a pool its modifiers push past ten: 8k3 + 4k2 is 10k6 (p.77; #14)", () => {
+    expect(pool({ roll: 8, keep: 3, modifiers: [{ roll: 4, keep: 2 }] })).toMatchObject({
+      roll: 10,
+      keep: 6,
+      bonus: 0
+    });
+  });
+
   it("never explodes an Unskilled Roll, even with a Void Point (p.80)", () => {
     expect(pool({ roll: 3, keep: 3, unskilled: true, voidPoint: true })).toMatchObject({
       roll: 4,
@@ -83,13 +100,13 @@ describe("buildPool", () => {
 
 describe("poolFormula", () => {
   it("writes roll, keep, explosions, and bonus", () => {
-    expect(poolFormula(pool({ roll: 7, keep: 3 }))).toBe("7d10k3x10+0");
-    expect(poolFormula(pool({ roll: 14, keep: 12 }))).toBe("10d10k10x10+12");
+    expect(poolFormula(pool({ roll: 7, keep: 3 }))).toBe("7d10xa10k3+0");
+    expect(poolFormula(pool({ roll: 14, keep: 12 }))).toBe("10d10xa10k10+12");
   });
 
   it("re-rolls 1s before keeping, and writes a lower threshold as x>=N", () => {
     expect(poolFormula(pool({ roll: 5, keep: 2, rerollOnes: true, explode: 9 }))).toBe(
-      "5d10r1k2x>=9+0"
+      "5d10r1xa>=9k2+0"
     );
   });
 
@@ -192,6 +209,21 @@ describe("contest", () => {
     });
   });
 
+  it("gives the win to a raiser who beats the other by exactly 5 per Raise (p.80; Ernie's ruling)", () => {
+    expect(
+      contest([
+        { id: "a", total: 22, raises: 1 },
+        { id: "b", total: 17 }
+      ])
+    ).toMatchObject({ winner: "a", tie: false });
+    expect(
+      contest([
+        { id: "a", total: 27, raises: 2 },
+        { id: "b", total: 17 }
+      ])
+    ).toMatchObject({ winner: "a", tie: false });
+  });
+
   it("picks the highest of several (p.80)", () => {
     expect(
       contest([
@@ -226,6 +258,6 @@ describe("parseRollAndKeep", () => {
 
   it("feeds the same pool and formula as a rolled check (B9)", () => {
     const parsed = parseRollAndKeep("12k4+1");
-    expect(poolFormula(buildPool(parsed))).toBe("10d10k5x10+1");
+    expect(poolFormula(buildPool(parsed))).toBe("10d10xa10k5+1");
   });
 });

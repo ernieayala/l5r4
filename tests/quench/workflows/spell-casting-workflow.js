@@ -32,8 +32,9 @@ export function registerSpellCastingWorkflowTests(quench) {
             name: "Test Shugenja"
           });
 
+          // Mastery 1: within School Rank 1, so no GM confirm opens (p.164)
           await shugenja.createEmbeddedDocuments("Item", [
-            createSpellData("Jade Strike", "fire", 3),
+            createSpellData("Jade Strike", "fire", 1),
             createSpellData("Path to Inner Peace", "void", 1)
           ]);
         });
@@ -125,12 +126,20 @@ export function registerSpellCastingWorkflowTests(quench) {
           const spell = weakCaster.items.find(i => i.name === "Difficult Spell");
           const initialSlots = weakCaster.system.spellSlots.fire;
 
-          // ACT - Attempt cast (very likely to fail with Fire 1 + School 1 = 2k1)
+          // ACT - Attempt cast (2k1 from Fire 1 + School 1 against TN 35 rarely succeeds). Mastery 6 is above School Rank 1,
+          // so the GM confirms the cast first (p.164)
+          const confirmed = new Promise(resolve =>
+            Hooks.once("renderDialogV2", app => {
+              app.element.querySelector('[data-action="yes"]').click();
+              resolve();
+            })
+          );
           const spellRoll = await SpellCastRoll({
             actor: weakCaster,
             spell,
             showDialog: false
           });
+          await confirmed;
 
           // ASSERT - Roll happened regardless of success
           assert.exists(spellRoll, "Spell roll attempted");

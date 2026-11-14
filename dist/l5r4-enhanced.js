@@ -63,6 +63,7 @@ import { runMigrations } from "../module/setup/migrations.js";
 import { registerSettings } from "../module/setup/register-settings.js";
 import { registerHandlebarsHelpers } from "../module/setup/register-handlebars.js";
 import { resolveVoidInitiative } from "../module/services/initiative.js";
+import L5R4Die from "../module/services/dice/roll-keep-die.js";
 import { registerEffectQueries } from "../module/services/effects/apply.js";
 import { registerPromptQueries } from "../module/services/effects/prompts.js";
 import { combatEvents, registerCombatQueries } from "../module/services/effects/combat-events.js";
@@ -88,6 +89,9 @@ Hooks.once("init", async () => {
   CONFIG.ActiveEffect.documentClass = L5R4ActiveEffect;
   CONFIG.Combat.documentClass = L5R4Combat;
   CONFIG.Combatant.documentClass = L5R4Combatant;
+
+  // The d10 that explodes each die into its own total before the keep (p.77; module/services/dice/roll-keep-die.js)
+  CONFIG.Dice.terms.d = L5R4Die;
 
   // Expired effects are deleted; Fear ends on the system's encounterEnd event (module/config/expiry-events.js)
   CONFIG.ActiveEffect.expiryAction = EXPIRY_ACTION;

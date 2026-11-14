@@ -53,8 +53,8 @@ export function registerDiceRollingWorkflowTests(quench) {
           });
 
           // ASSERT - Formula
-          assert.equal(formula, "7d10k3x10+0", "Correct formula");
-          assert.include(formula, "x10", "Dice explode");
+          assert.equal(formula, "7d10xa10k3+0", "Correct formula");
+          assert.include(formula, "xa10", "Dice explode");
 
           // ACT - Execute actual roll
           const roll = new Roll(formula);
@@ -98,7 +98,7 @@ export function registerDiceRollingWorkflowTests(quench) {
 
           // ASSERT
           assert.equal(parsed.bonus, -10, "Negative bonus parsed");
-          assert.include(formula, "x10-10", "Negative modifier after explode");
+          assert.include(formula, "k3-10", "Negative modifier after the keep");
           assert.isNumber(roll.total, "Roll executes with negative modifier");
         });
 
@@ -143,7 +143,7 @@ export function registerDiceRollingWorkflowTests(quench) {
           const formula = buildFormula(parsed.roll, parsed.keep, parsed.bonus, {});
 
           // ASSERT
-          assert.include(formula, "x10", "Formula includes explosion");
+          assert.include(formula, "xa10", "Formula includes explosion");
           assert.notInclude(formula, "min", "No minimum enforced");
 
           // The formula allows explosions; whether one happens is chance, so it is not asserted
@@ -178,7 +178,7 @@ export function registerDiceRollingWorkflowTests(quench) {
           });
 
           // ASSERT
-          assert.notInclude(formula, "x10", "No explosion for unskilled");
+          assert.notInclude(formula, "xa10", "No explosion for unskilled");
           assert.equal(formula, "5d10k3+0", "Formula correct without explosion");
         });
 
@@ -216,7 +216,7 @@ export function registerDiceRollingWorkflowTests(quench) {
           // ASSERT
           assert.isTrue(parsed.unskilled, "Unskilled flag preserved");
           assert.equal(parsed.bonus, 7, "Bonus parsed");
-          assert.notInclude(formula, "x10", "No explosion");
+          assert.notInclude(formula, "xa10", "No explosion");
           assert.include(formula, "+7", "Bonus included");
           assert.isAtLeast(roll.total, 10, "Minimum with bonus (3 + 7)");
         });
@@ -260,8 +260,8 @@ export function registerDiceRollingWorkflowTests(quench) {
 
           // ASSERT
           assert.include(formula, "r1", "Re-roll 1s modifier present");
-          assert.include(formula, "x10", "Still explodes on 10s");
-          assert.equal(formula, "7d10r1k3x10+0", "Complete formula correct");
+          assert.include(formula, "xa10", "Still explodes on 10s");
+          assert.equal(formula, "7d10r1xa10k3+0", "Complete formula correct");
         });
 
         it("should execute emphasis roll with re-roll mechanic", async () => {
@@ -283,7 +283,7 @@ export function registerDiceRollingWorkflowTests(quench) {
 
           // Verify formula contains both re-roll and explosion
           assert.include(formula, "r1", "Re-roll 1s");
-          assert.include(formula, "x10", "Explode 10s");
+          assert.include(formula, "xa10", "Explode 10s");
         });
 
         it("should handle emphasis with bonuses", async () => {
@@ -318,7 +318,7 @@ export function registerDiceRollingWorkflowTests(quench) {
 
           // ASSERT - Both mechanics present in formula
           assert.include(formula, "r1", "Re-roll 1s mechanic");
-          assert.include(formula, "x10", "Explosion mechanic");
+          assert.include(formula, "xa10", "Explosion mechanic");
 
           // Execute roll
           const roll = new Roll(formula);

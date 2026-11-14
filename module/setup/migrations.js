@@ -55,6 +55,7 @@ import { applySchemaMapToDocs } from "./migrations/schema/schema-apply.js";
 
 // Actor migrations
 import { migrateLegacyNpcWounds } from "./migrations/actors/npc-wounds.js";
+import { migrateNpcInitiative } from "./migrations/actors/npc-initiative.js";
 import { migrateActorEmbeddedItems } from "./migrations/actors/embedded-items.js";
 import { cleanupLegacyFields } from "./migrations/actors/cleanup.js";
 import { migrateEffectFreeTraitBase } from "./migrations/actors/xp-free-trait-base.js";
@@ -91,7 +92,7 @@ import {
  *
  * Migration Execution Order:
  * 1. Schema field remapping (world actors/items)
- * 2. NPC wound system migration (world actors)
+ * 2. NPC wound system migration, and NPCs stored with the old 2k2 Initiative default roll the formula (world actors)
  * 3. Bow → weapon type conversion (world items)
  * 4. Skill default values backfill (world items)
  * 5. Armor type backfill (world items)
@@ -134,6 +135,7 @@ export async function runMigrations(fromVersion, toVersion) {
   await applySchemaMapToDocs(unmigratedItems, "world-items");
 
   await migrateLegacyNpcWounds(unmigratedActors, "world-legacy-npc-wounds");
+  await migrateNpcInitiative(unmigratedActors, "world-npc-initiative");
 
   await migrateBowsToWeapons(unmigratedItems, "world-bow-migration");
 
@@ -199,6 +201,7 @@ export async function runMigrations(fromVersion, toVersion) {
 
       if (docType === "Actor") {
         await migrateLegacyNpcWounds(unmigratedDocs, `pack-legacy-npc-wounds:${pack.collection}`);
+        await migrateNpcInitiative(unmigratedDocs, `pack-npc-initiative:${pack.collection}`);
       }
       await migrateBowsToWeapons(unmigratedDocs, `pack-bow-migration:${pack.collection}`);
       await migrateSkillDefaults(unmigratedDocs, `pack-skill-defaults:${pack.collection}`);

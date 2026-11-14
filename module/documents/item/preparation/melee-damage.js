@@ -52,7 +52,8 @@ import { toInt } from "../../../utils/type-coercion.js";
 export function calculateMeleeDamage(sys, actor = null) {
   const weaponRoll = toInt(sys.damageRoll);
   const weaponKeep = toInt(sys.damageKeep);
-  const actorStr = actor ? toInt(actor.system?.traits?.str) : 0;
+  // Thrown weapons such as shuriken and tsubute add no Strength (pp.200, 202)
+  const actorStr = actor && sys.addsStrength ? toInt(actor.system?.traits?.str) : 0;
 
   // Add actor Strength to rolled dice
   // Store in separate 'derived' properties to preserve original field values

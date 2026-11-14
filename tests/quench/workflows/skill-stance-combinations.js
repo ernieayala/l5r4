@@ -22,19 +22,19 @@
  * @see module/services/stance/rolls/attack-bonuses.js
  */
 
-import { selectorBonus, statusRules } from "../../../module/utils/rule-engine.js";
+import { statusRules } from "../../../module/utils/rule-engine.js";
 import { SYS_ID } from "../../../module/config/constants.js";
 import { createTestPC } from "../../fixtures/actor-fixtures.js";
 import { createSkillData } from "../../fixtures/item-fixtures.js";
-import { guardRolls, waitFor } from "../helpers.js";
+import { checkEffects, guardRolls, settleFullDefense, waitFor } from "../helpers.js";
 
 /**
- * The attack bonus the actor's rules give every attack, as Full Attack's +2k1 (p.84).
+ * The attack bonus the actor's rules give a melee attack, as Full Attack's +2k1 (p.84), which is melee only.
  * @param {Actor} actor
  * @returns {{roll: number, keep: number}}
  */
 function getStanceAttackBonuses(actor) {
-  const { roll, keep } = selectorBonus(actor.ruleBag, ["attack"], actor.rollOptions);
+  const { roll, keep } = checkEffects(actor, "attack", { range: "melee" });
   return { roll, keep };
 }
 
@@ -404,6 +404,7 @@ export function registerSkillStanceCombinationTests(quench) {
 
         afterEach(async () => {
           if (actor) {
+            await settleFullDefense(actor);
             await actor.delete();
             actor = null;
             skill = null;

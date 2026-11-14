@@ -27,6 +27,20 @@ import { toInt } from "../../../utils/type-coercion.js";
 import { logError } from "../../../utils/error-logging.js";
 
 /**
+ * The four Elemental Rings from Traits: each the lower of its two Traits (p.76).
+ * @param {Record<string, number>} t  Trait ranks by key
+ * @returns {{air: number, earth: number, fire: number, water: number}}
+ */
+export function ringsFromTraits(t) {
+  return {
+    air: Math.min(t.ref, t.awa),
+    earth: Math.min(t.sta, t.wil),
+    fire: Math.min(t.agi, t.int),
+    water: Math.min(t.str, t.per)
+  };
+}
+
+/**
  * Prepares trait and Ring values for an actor using L5R4 rules.
  *
  * @param {Object} sys - Actor's system data object to modify
@@ -86,10 +100,7 @@ export function prepareTraitsAndRings(sys) {
     // Calculate Ring values using L5R4 formula: min(trait1, trait2)
     // This ensures a character must balance both traits to increase a Ring
     sys.rings = {
-      air: Math.min(t.ref, t.awa), // Reflexes & Awareness
-      earth: Math.min(t.sta, t.wil), // Stamina & Willpower
-      fire: Math.min(t.agi, t.int), // Agility & Intelligence
-      water: Math.min(t.str, t.per), // Strength & Perception
+      ...ringsFromTraits(t),
       void: {
         rank: existingVoidRank,
         // Current Void Points (spent during play)

@@ -20,7 +20,7 @@ import { SYS_ID } from "../../../module/config/constants.js";
 import { STATUS_EFFECTS } from "../../../module/config/status-effects.js";
 import { createTestPC } from "../../fixtures/actor-fixtures.js";
 import ConditionManager from "../../../module/apps/condition-manager.js";
-import { checkEffects, guardRolls } from "../helpers.js";
+import { checkEffects, guardRolls, settleFullDefense } from "../helpers.js";
 
 export function registerConditionManagerTests(quench) {
   quench.registerBatch(
@@ -55,12 +55,16 @@ export function registerConditionManagerTests(quench) {
 
         after(async () => {
           if (actor) {
+            await settleFullDefense(actor);
             await actor.delete();
           }
         });
 
         beforeEach(async () => {
           // Clean up all effects before each test
+          if (actor) {
+            await settleFullDefense(actor);
+          }
           if (actor && actor.effects) {
             const effectIds = Array.from(actor.effects).map(e => e.id);
             if (effectIds.length > 0) {

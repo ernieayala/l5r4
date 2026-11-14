@@ -93,8 +93,9 @@ export default class CombatConfigApplication extends DebouncedFieldMixin(
   }
 
   /**
-   * Prepare context data for rendering the combat configuration form.
-   * Retrieves initiative and movement values from actor system data.
+   * Prepare context data for rendering the combat configuration form. The form edits the stored values
+   * (`source`): the prepared ones already hold rule modifiers and an NPC's formula, and writing them back would
+   * count those twice (#30).
    *
    * @param {object} _options - Render options (unused)
    * @returns {Promise<object>} Context object with actor and system data
@@ -109,7 +110,7 @@ export default class CombatConfigApplication extends DebouncedFieldMixin(
     try {
       return {
         actor: this.actor,
-        system: this.actor?.system ?? {}
+        source: this.actor._source.system
       };
     } catch (err) {
       logError("Failed to prepare combat config context", err, {
@@ -129,8 +130,8 @@ export default class CombatConfigApplication extends DebouncedFieldMixin(
   _getFallbackContext() {
     return {
       actor: this.actor,
-      system: {
-        initiative: { rollMod: 0, keepMod: 0, totalMod: 0 },
+      source: {
+        initiative: { roll: 0, keep: 0, rollMod: 0, keepMod: 0, totalMod: 0 },
         movement: { multiplier: 1, modifier: 0 }
       }
     };

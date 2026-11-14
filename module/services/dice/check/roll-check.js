@@ -12,9 +12,12 @@
 
 import { SYS_ID } from "../../../config/constants.js";
 import { CHAT_TEMPLATES, DIALOG_TEMPLATES } from "../../../config/templates.js";
+import { ARROW_ARMOR_FACTOR } from "../../../config/game-mechanics.js";
 import { F, T } from "../../../utils/localization.js";
 import { toInt } from "../../../utils/type-coercion.js";
 import { getEffectiveTrait } from "../../../utils/mechanics.js";
+import { gmMayAllow } from "../../gm-allow.js";
+import { stackModifiers } from "../../../utils/modifier-stacking.js";
 import {
   buildPool,
   evaluateCheck,
@@ -23,7 +26,7 @@ import {
   targetNumber
 } from "../../../utils/check.js";
 import { allocateRaises, maneuverCost } from "../../../utils/damage.js";
-import { canEmbraceTaint } from "../../../utils/taint.js";
+import { canEmbraceTaint, highestRing, lostBonus } from "../../../utils/taint.js";
 import { spendVoidPoint } from "../resources/void-manager.js";
 import { resolveTargets } from "../resources/target-resolver.js";
 import { collectCheck } from "./collect.js";
@@ -97,19 +100,6 @@ function voidOf(actor) {
 }
 
 /**
- * The actor's highest Ring, the Void Ring included: a Ring at 6 or higher delays being Lost to the Taint (p.278).
- * @param {Actor} actor
- * @returns {number}
- */
-function highestRing(actor) {
-  const { rings } = actor.system;
-  return Math.max(
-    ...["air", "earth", "fire", "water"].map(ring => toInt(rings[ring])),
-    toInt(rings.void.rank)
-  );
-}
-
-/**
  * The damage pool an attack stores for its damage button: the caller's (a stat block's damage), or the weapon's
  * prepared pool, Strength or the bow and arrow included (pp.82, 199). None for other rolls.
  * @param {CheckRequest} request
@@ -131,7 +121,7 @@ function attackDamage(request) {
     roll: toInt(weapon.system.derivedDamageRoll ?? weapon.system.damageRoll),
     keep: toInt(weapon.system.derivedDamageKeep ?? weapon.system.damageKeep),
     bonus: 0,
-    explode: toInt(weapon.system.explodesOn) || 10
+    explode: weapon.system.damageExplode
   };
 }
 
@@ -202,6 +192,23 @@ async function askChoices(request, context) {
 export async function rollCheck(request) {
   const { actor, kind } = request;
   const isDamage = kind === "damage";
+  // A weapon needing more Strength than its wielder has cannot be used, though the GM may allow it (p.199)
+  const minStrength = kind === "attack" ? toInt(request.weapon?.system.minStrength) : 0;
+  const strength = getEffectiveTrait(actor, "str");
+  if (
+    minStrength > strength &&
+    !(await gmMayAllow({
+      title: request.weapon.name,
+      reason: F("l5r4.equipment.weapons.belowMinStrength", {
+        name: actor.name,
+        min: minStrength,
+        weapon: request.weapon.name
+      }),
+      ask: T("l5r4.equipment.weapons.belowMinStrengthGM")
+    }))
+  ) {
+    return null;
+  }
   const { autoTN, targetData } = resolveTargets(actor, kind === "attack" ? "attack" : null);
   const target = request.target !== undefined ? request.target : (targetData?.actor ?? null);
   const ctx = collectCheck(actor, {
@@ -223,19 +230,39 @@ export async function rollCheck(request) {
     ...(request.modifiers ?? []).map(m => ({ roll: 0, keep: 0, total: 0, enabled: true, ...m }))
   ];
   const voidState = voidOf(actor);
-  const raisesAllowed = !isDamage && !unskilled;
-  // RaiseRule rules move the Void Ring cap (p.79) and may require Raises
-  const maximum = raisesAllowed
-    ? Math.max(0, maxRaises(voidState.ring, unskilled) + ctx.raises.cap)
-    : 0;
-  const minimum = Math.min(Math.max(0, ctx.raises.minimum), maximum);
-  const freeRaises = raisesAllowed ? ctx.freeRaises : 0;
-  const embraceAllowed = canEmbraceTaint({
+  // The Raises a roll allows, Unskilled or not (pp.79-80); RaiseRule rules move the Void Ring cap and may require
+  // Raises
+  const raiseLimits = isUnskilled => {
+    const allowed = !isDamage && !isUnskilled;
+    const max = allowed ? Math.max(0, maxRaises(voidState.ring, isUnskilled) + ctx.raises.cap) : 0;
+    return {
+      allowed,
+      max,
+      min: Math.min(Math.max(0, ctx.raises.minimum), max),
+      free: allowed ? ctx.freeRaises : 0
+    };
+  };
+  // A Void Point can raise a Skill from 0 to 1 for the roll, which is then not Unskilled (p.78)
+  const voidSkillAllowed = unskilled && !isDamage;
+  const offered = raiseLimits(unskilled && !voidSkillAllowed);
+  const taint = {
     rank: toInt(actor.system.shadowTaint.rank),
-    highestRing: highestRing(actor),
+    highestRing: highestRing(actor.system.rings),
     kind,
     trait: request.trait
-  });
+  };
+  const embraceAllowed = canEmbraceTaint(taint);
+  // A Lost character adds the Taint Rank to every physical Trait roll, always (p.279)
+  const lost = lostBonus(taint);
+  if (lost) {
+    modifiers.push({
+      label: T("l5r4.ui.taint.lost"),
+      roll: 0,
+      keep: 0,
+      total: lost,
+      enabled: true
+    });
+  }
   const woundPenalty = isDamage ? 0 : toInt(actor.system.woundPenalty);
   const defaultTN = toInt(request.tn ?? 0) || (kind === "attack" ? autoTN : 0);
   const emphases = unskilled ? [] : (request.emphases ?? []).filter(Boolean);
@@ -252,11 +279,12 @@ export async function rollCheck(request) {
       tn: defaultTN,
       tnModifiers: ctx.tnModifiers,
       woundPenalty,
-      raisesAllowed,
+      raisesAllowed: offered.allowed,
       unskilled,
-      maxRaises: maximum,
-      minRaises: minimum,
-      freeRaises,
+      voidSkill: voidSkillAllowed,
+      maxRaises: offered.max,
+      minRaises: offered.min,
+      freeRaises: offered.free,
       voidAllowed: !isDamage,
       voidPoints: voidState.points,
       voidOverLimit: !isDamage && voidOverLimit(actor),
@@ -318,6 +346,24 @@ export async function rollCheck(request) {
     }
   });
 
+  // A Void Point spent on the Skill's rank: it rolls as Rank 1, not Unskilled (p.78)
+  const voidSkill = voidSkillAllowed && Boolean(choices.voidSkill);
+  if (voidSkill) {
+    applied.push({
+      label: T("l5r4.ui.check.voidSkill"),
+      roll: 1,
+      keep: 0,
+      total: 0,
+      enabled: true
+    });
+  }
+  const rolledUnskilled = unskilled && !voidSkill;
+  const {
+    allowed: raisesAllowed,
+    max: maximum,
+    min: minimum,
+    free: freeRaises
+  } = raiseLimits(rolledUnskilled);
   const raises = raisesAllowed
     ? Math.min(Math.max(minimum, toInt(choices.raises ?? minimum)), maximum)
     : 0;
@@ -333,7 +379,9 @@ export async function rollCheck(request) {
     return null;
   }
   applied.push(...(prepared.modifiers ?? []));
-  const totalFreeRaises = freeRaises + toInt(prepared.freeRaises);
+  // Free Raises from the roll's own preparation (a duel's Focus, maho blood) obey the same rule: none on an Unskilled
+  // Roll (p.80)
+  const totalFreeRaises = raisesAllowed ? freeRaises + toInt(prepared.freeRaises) : 0;
 
   // An attack's maneuvers, paid for out of its Raises (pp.86-87); dialog values are user input
   const maneuvers = kind === "attack" ? readManeuvers(choices.maneuver ?? {}, raisesAllowed) : null;
@@ -354,7 +402,8 @@ export async function rollCheck(request) {
     tnBase = prepared.tn;
   }
 
-  if (voidPoint) {
+  // Each Void Point use is its own point (p.78)
+  for (let i = 0; i < Number(voidPoint) + Number(voidSkill); i++) {
     const spent = await spendVoidPoint(actor);
     if (!spent.success) {
       ui.notifications?.warn(spent.message);
@@ -367,8 +416,9 @@ export async function rollCheck(request) {
     ...basePool,
     modifiers: applied,
     voidPoint,
-    unskilled,
-    explode: Math.min(request.explode ?? 10, ctx.explode ?? 10),
+    unskilled: rolledUnskilled,
+    // A weapon whose dice never explode stays so (p.202); otherwise the lowest threshold wins
+    explode: request.explode === null ? null : Math.min(request.explode ?? 10, ctx.explode ?? 10),
     rerollOnes: Boolean(emphasis) || ctx.rerollOnes,
     keepOverride,
     littleTruths
@@ -384,11 +434,26 @@ export async function rollCheck(request) {
     ? []
     : ctx.tnModifiers
         .filter(m => !m.range || m.range === range)
-        .map(({ label: l, value }) => ({ label: l, value }));
+        .map(({ label: l, value, type, fromTarget }) => ({ label: l, value, type, fromTarget }));
   // An attack starting a grapple ignores the armor in the target's Armor TN (p.88)
   const armorBonus = toInt(target?.system.armorTn?.bonus);
   if (maneuvers?.grapple && armorBonus) {
-    tnModifiers.push({ label: T("l5r4.ui.combat.grappleIgnoresArmor"), value: -armorBonus });
+    tnModifiers.push({
+      label: T("l5r4.ui.combat.grappleIgnoresArmor"),
+      value: -armorBonus,
+      fromTarget: true
+    });
+  }
+  // An Armor Piercing arrow ignores the armor in the target's Armor TN, a Flesh Cutter doubles it (p.199)
+  const arrow =
+    kind === "attack" && request.weapon?.system.isBow ? request.weapon.system.arrow : null;
+  const arrowFactor = ARROW_ARMOR_FACTOR[arrow];
+  if (arrowFactor !== undefined && armorBonus) {
+    tnModifiers.push({
+      label: T(`l5r4.ui.combat.arrowArmor.${arrow}`),
+      value: (arrowFactor - 1) * armorBonus,
+      fromTarget: true
+    });
   }
   const tn = isDamage
     ? null
@@ -397,12 +462,13 @@ export async function rollCheck(request) {
         raises,
         freeRaisesToTN,
         woundPenalty: applyWound ? woundPenalty : 0,
-        modifiers: tnModifiers.map(m => m.value)
+        // TN changes of one type do not stack, as on the sheet (module/utils/modifier-stacking.js)
+        modifiers: [stackModifiers(tnModifiers.map(m => ({ total: m.value, type: m.type }))).total]
       });
   const outcome = evaluateCheck(roll.total, tn);
 
   let label = request.label;
-  if (unskilled) {
+  if (rolledUnskilled) {
     label += ` [${T("l5r4.ui.mechanics.rolls.unskilled")}]`;
   }
   if (emphasis) {
@@ -425,7 +491,7 @@ export async function rollCheck(request) {
     kind,
     label,
     skill: request.skill ?? "",
-    pool: { ...pool, unskilled },
+    pool: { ...pool, unskilled: rolledUnskilled },
     modifiers: applied.map(({ label: l, roll: r, keep: k, total: t, enabled: e }) => ({
       label: l,
       roll: r,
@@ -442,6 +508,12 @@ export async function rollCheck(request) {
       freeRaisesToTN,
       woundPenalty: tn === null || !applyWound ? 0 : woundPenalty,
       modifiers: tn === null ? [] : tnModifiers,
+      // The target's Armor TN against this attack: the base and the target's own changes, without the attacker's
+      // Raises, wound penalty, or other TN changes (the Feint bonus reads it, p.86)
+      armor:
+        kind === "attack" && tn !== null
+          ? tnBase + tnModifiers.filter(m => m.fromTarget).reduce((sum, m) => sum + m.value, 0)
+          : 0,
       effective: tn
     },
     target: { uuid: target?.uuid ?? "", name: target?.name ?? "" },
@@ -452,7 +524,8 @@ export async function rollCheck(request) {
     },
     weaponUuid: weapon?.uuid ?? "",
     notes: [
-      ...ctx.notes,
+      // A Note rule's text is a localization key (the system's own, such as Prone's) or a GM's plain text
+      ...ctx.notes.map(text => T(text)),
       ...ctx.actions.map(({ label: source, action }) =>
         F("l5r4.ui.check.actionNote", { action: T(`l5r4.ui.check.actions.${action}`), source })
       )

@@ -121,7 +121,7 @@ export function registerSpellRollVoidTests(quench) {
 
           assert.include(formula, "7d10", "Rolled includes void bonus");
           assert.include(formula, "k5", "Kept includes void bonus");
-          assert.include(formula, "x10", "Dice explode");
+          assert.include(formula, "xa10", "Dice explode");
         });
       });
 

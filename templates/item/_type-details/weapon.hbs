@@ -12,6 +12,25 @@
     </select>
   </div>
 </div>
+<div class="form-group">
+  <label>{{localize "l5r4.equipment.weapons.minStrength"}}</label>
+  <div class="form-fields">
+    <input name="system.minStrength" type="number" min="0" value="{{system.minStrength}}" data-type="Number" />
+  </div>
+</div>
+<div class="form-group">
+  <label>{{localize "l5r4.equipment.weapons.tnMounted"}}</label>
+  <div class="form-fields">
+    <input name="system.tnMounted" type="number" value="{{system.tnMounted}}" data-type="Number" />
+  </div>
+</div>
+<div class="form-group">
+  <label>{{localize "l5r4.equipment.weapons.tnOnFoot"}}</label>
+  <div class="form-fields">
+    <input name="system.tnOnFoot" type="number" value="{{system.tnOnFoot}}" data-type="Number" />
+  </div>
+  <p class="hint">{{localize "l5r4.equipment.weapons.tnHint"}}</p>
+</div>
 {{#if isOwnedByCharacter}}
   {{#if hasCharacterSkills}}
     <div class="form-group">

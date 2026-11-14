@@ -19,9 +19,10 @@
 import { toInt } from "../../../utils/type-coercion.js";
 import { initiativeDice } from "../../../utils/initiative.js";
 
-import { WOUND_LEVEL_ORDER } from "../../../config/game-mechanics.js";
+import { NPC_INSIGHT_RANK, WOUND_LEVEL_ORDER } from "../../../config/game-mechanics.js";
 import { prepareTraitsAndRings, prepareMovement } from "../calculations/shared-traits-rings.js";
 import {
+  prepareHealRate,
   prepareNpcManualWounds,
   prepareNpcFormulaWounds,
   prepareVisibleWoundLevels
@@ -52,31 +53,17 @@ export function prepareNpcData(actor, sys, finalizeWoundPenaltiesFn) {
   // Rules that need Traits and Rings, before the values their outputs feed (Initiative, Wounds, roll bonuses)
   applyDerivedRules(actor, sys);
 
-  // Initialize initiative structure
-  sys.initiative = sys.initiative || {};
-  const ref = toInt(sys.traits?.ref);
-  const insightRank = toInt(sys.insight?.rank) || 0;
-
-  // Check for custom initiative values in source data
-  // NPCs can have manually set initiative instead of formula
-  const sourceRoll = toInt(actor._source?.system?.initiative?.roll);
-  const sourceKeep = toInt(actor._source?.system?.initiative?.keep);
-
-  const hasCustomInitiative = sourceRoll > 0 && sourceKeep > 0;
-  const formula = initiativeDice({ insightRank, reflexes: ref });
-  const baseRoll = hasCustomInitiative ? sourceRoll : formula.roll;
-  const baseKeep = hasCustomInitiative ? sourceKeep : formula.keep;
-
-  const rollMod = toInt(sys.initiative.rollMod) || 0;
-  const keepMod = toInt(sys.initiative.keepMod) || 0;
-
-  // Store effective values (before modifiers)
-  sys.initiative.effRoll = baseRoll;
-  sys.initiative.effKeep = baseKeep;
-
-  // Calculate final initiative with modifiers
-  sys.initiative.roll = baseRoll + rollMod;
-  sys.initiative.keep = baseKeep + keepMod;
+  // Initiative pool (p.81): the GM's stored pool when both its numbers are above 0, otherwise Insight Rank +
+  // Reflexes, keep Reflexes, an NPC counting as Insight Rank 1; then the modifiers, rules included
+  const sourceRoll = toInt(actor._source.system.initiative.roll);
+  const sourceKeep = toInt(actor._source.system.initiative.keep);
+  const custom = sourceRoll > 0 && sourceKeep > 0;
+  const formula = initiativeDice({
+    insightRank: NPC_INSIGHT_RANK,
+    reflexes: toInt(sys._derived.traitsEff.ref)
+  });
+  sys.initiative.roll = (custom ? sourceRoll : formula.roll) + toInt(sys.initiative.rollMod);
+  sys.initiative.keep = (custom ? sourceKeep : formula.keep) + toInt(sys.initiative.keepMod);
   sys.initiative.totalMod = toInt(sys.initiative.totalMod);
 
   // Initialize armor TN structure
@@ -104,6 +91,9 @@ export function prepareNpcData(actor, sys, finalizeWoundPenaltiesFn) {
 
   // Apply wound penalties to traits/rings
   finalizeWoundPenaltiesFn(sys, order, woundMode);
+
+  // Healing per night's rest, an NPC counting as Insight Rank 1 (#40)
+  prepareHealRate(sys, NPC_INSIGHT_RANK);
 
   // Calculate movement rates (depends on traits)
   prepareMovement(sys);

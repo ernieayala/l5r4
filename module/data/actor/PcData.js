@@ -51,6 +51,14 @@ export default class PcData extends ActorData {
     return super.migrateData(source);
   }
 
+  /**
+   * The Insight Rank rules read (p.104): the prepared rank.
+   * @type {number}
+   */
+  get insightRank() {
+    return this.insight.rank;
+  }
+
   /** @override */
   prepareDerivedData() {
     super.prepareDerivedData();

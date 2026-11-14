@@ -49,7 +49,7 @@ export async function WeaponRoll({
     label,
     base: { roll: toInt(diceRoll), keep: toInt(diceKeep) },
     weapon,
-    explode: toInt(weapon?.system.explodesOn) || 10,
+    explode: weapon ? weapon.system.damageExplode : 10,
     modifiers: raises ? [{ label: T("l5r4.ui.check.increasedDamage"), roll: raises }] : [],
     askForOptions
   });

@@ -92,7 +92,7 @@ export async function SimpleRoll({
     ring: kind === "ring" ? ringKey : undefined,
     unskilled: Boolean(untrained),
     weapon,
-    explode: kind === "damage" ? (weapon?.system.explodesOn ?? 10) : 10,
+    explode: kind === "damage" && weapon ? weapon.system.damageExplode : 10,
     ranged: Boolean(isBow),
     modifiers: modifier ? [{ label: T("l5r4.ui.check.statBlock"), total: toInt(modifier) }] : [],
     askForOptions,

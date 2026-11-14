@@ -5,7 +5,7 @@
  * Tests edge cases, boundaries, and L5R4 wound threshold formulas.
  *
  * Test Philosophy:
- * - Test edge cases, not just happy paths
+ * - Test edge cases as well as typical inputs
  * - Test boundary conditions (min/max values)
  * - Test error handling (null, undefined, invalid types)
  * - Verify L5R4 game rule formulas are correct
@@ -130,7 +130,7 @@ describe("getWoundLevelsForCount", () => {
 
 describe("calculateWoundPenalties", () => {
   describe("valid inputs", () => {
-    it("should apply penalty modifier to wound levels", () => {
+    it("should apply penalty modifier to wound levels past Healthy (p.82; #32)", () => {
       // ARRANGE
       const sys = {
         woundsPenaltyMod: 5,
@@ -145,7 +145,7 @@ describe("calculateWoundPenalties", () => {
       calculateWoundPenalties(sys);
 
       // ASSERT
-      expect(sys.woundLevels.healthy.penaltyEff).toBe(5); // 0 + 5
+      expect(sys.woundLevels.healthy.penaltyEff).toBe(0); // Healthy carries no penalty
       expect(sys.woundLevels.nicked.penaltyEff).toBe(8); // 3 + 5
       expect(sys.woundLevels.hurt.penaltyEff).toBe(15); // 10 + 5
     });

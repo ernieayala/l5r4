@@ -24,6 +24,19 @@ describe("applyTenDiceRule", () => {
     expect(applyTenDiceRule(12, 10)).toEqual({ diceRoll: 10, diceKeep: 10, bonus: 4 });
   });
 
+  it("converts rolled dice to kept only until kept reaches ten; each rolled die after that is +2 (p.77)", () => {
+    // 15k9: one pair makes 10k10, then the 3 rolled dice left are +2 each
+    expect(applyTenDiceRule(15, 9)).toEqual({ diceRoll: 10, diceKeep: 10, bonus: 6 });
+    // 14k9 and 12k10 are the same pool once one pair converts
+    expect(applyTenDiceRule(14, 9)).toEqual({ diceRoll: 10, diceKeep: 10, bonus: 4 });
+    expect(applyTenDiceRule(30, 2)).toEqual({ diceRoll: 10, diceKeep: 10, bonus: 8 });
+  });
+
+  it("never keeps more dice than it rolls (p.89), above ten kept as well", () => {
+    expect(applyTenDiceRule(8, 12)).toEqual({ diceRoll: 8, diceKeep: 8, bonus: 0 });
+    expect(applyTenDiceRule(9, 11)).toEqual({ diceRoll: 9, diceKeep: 9, bonus: 0 });
+  });
+
   it("adds the conversions to the bonus it is given", () => {
     expect(applyTenDiceRule(10, 12, 3)).toEqual({ diceRoll: 10, diceKeep: 10, bonus: 7 });
   });
@@ -43,6 +56,14 @@ describe("applyTenDiceRule", () => {
         diceRoll: 10,
         diceKeep: 5,
         bonus: 2
+      });
+    });
+
+    it("adds nothing to a pool the rule did not convert", () => {
+      expect(applyTenDiceRule(3, 2, 0, { littleTruths: true })).toEqual({
+        diceRoll: 3,
+        diceKeep: 2,
+        bonus: 0
       });
     });
 

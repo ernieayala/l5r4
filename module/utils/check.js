@@ -5,6 +5,7 @@
  * Raises, and wound penalties (pp.79, 82), success, contested rolls (p.80), and inline Roll & Keep notation.
  */
 
+import { stackModifiers } from "./modifier-stacking.js";
 import { applyTenDiceRule } from "./ten-dice.js";
 
 /**
@@ -12,6 +13,7 @@ import { applyTenDiceRule } from "./ten-dice.js";
  * @property {number} [roll=0]
  * @property {number} [keep=0]
  * @property {number} [total=0]
+ * @property {string} [type]           Modifiers of one type do not stack (module/utils/modifier-stacking.js)
  * @property {boolean} [enabled=true]  A modifier the roller switched off adds nothing
  */
 
@@ -25,9 +27,9 @@ import { applyTenDiceRule } from "./ten-dice.js";
  */
 
 /**
- * Build the dice pool for a check: the base pool plus enabled modifiers and a Void Point (+1k1, p.78), then the
- * Ten Dice Rule last (p.77), which also keeps no more dice than are rolled (p.89). Unskilled dice never explode
- * (p.80).
+ * Build the dice pool for a check: the base pool plus enabled modifiers, stacked as the sheet stacks them, and a
+ * Void Point (+1k1, p.78), then the Ten Dice Rule last (p.77), which also keeps no more dice than are rolled
+ * (p.89). Unskilled dice never explode (p.80).
  *
  * @param {object} spec
  * @param {number} spec.roll                Base rolled dice
@@ -58,17 +60,10 @@ export function buildPool({
   keepOverride = null,
   littleTruths = false
 }) {
-  let rolled = roll;
-  let kept = keep;
-  let flat = bonus;
-  for (const modifier of modifiers) {
-    if (modifier.enabled === false) {
-      continue;
-    }
-    rolled += Number(modifier.roll ?? 0);
-    kept += Number(modifier.keep ?? 0);
-    flat += Number(modifier.total ?? 0);
-  }
+  const added = stackModifiers(modifiers.filter(modifier => modifier.enabled !== false));
+  let rolled = roll + added.roll;
+  let kept = keep + added.keep;
+  const flat = bonus + added.total;
   if (voidPoint) {
     rolled += 1;
     kept += 1;
@@ -87,16 +82,30 @@ export function buildPool({
 }
 
 /**
- * The Foundry Roll formula for a pool: d10s, 1s re-rolled once, the highest kept, explosions, the flat bonus.
+ * The Roll & Keep explosion modifier (module/services/dice/roll-keep-die.js): every die that meets `explode`
+ * rolls again into its own total, before the keep (p.77). Empty when the dice do not explode.
+ *
+ * @param {number|null} explode
+ * @returns {string} "xa10", "xa>=9", or ""
+ */
+export function explodeModifier(explode) {
+  if (explode === null) {
+    return "";
+  }
+  return explode >= 10 ? "xa10" : `xa>=${explode}`;
+}
+
+/**
+ * The Foundry Roll formula for a pool: d10s, 1s re-rolled once (p.133), each die exploding into its own total
+ * (p.77), the highest kept (p.75), the flat bonus.
  *
  * @param {CheckPool} pool
- * @returns {string} Such as "7d10k3x10+0", "5d10r1k2x>=9+2", or "3d10k3-1"
+ * @returns {string} Such as "7d10xa10k3+0", "5d10r1xa>=9k2+2", or "3d10k3-1"
  */
 export function poolFormula({ roll, keep, bonus, explode, rerollOnes }) {
   const reroll = rerollOnes ? "r1" : "";
-  const explosions = explode === null ? "" : explode >= 10 ? "x10" : `x>=${explode}`;
   const flat = bonus >= 0 ? `+${bonus}` : `${bonus}`;
-  return `${roll}d10${reroll}k${keep}${explosions}${flat}`;
+  return `${roll}d10${reroll}${explodeModifier(explode)}k${keep}${flat}`;
 }
 
 /**
@@ -155,8 +164,10 @@ export function evaluateCheck(total, tn) {
 }
 
 /**
- * Resolve a Contested Roll (p.80): the highest result wins. A roller who declared Raises must beat each opponent
- * by 5 per Raise, so each total counts as total - 5 × Raises; equal best counts are a tie, which is re-rolled.
+ * Resolve a Contested Roll (p.80, `game-rules/30_skill_rolls_expanded.md`): the highest result wins. A roller who
+ * declared Raises must beat each opponent by 5 per Raise or fail, so each total counts as total - 5 × Raises. A
+ * margin of exactly 5 per Raise is enough (Ernie's ruling, 2026-11-14): a raiser level with the best count wins.
+ * Any other equal best counts are a tie, which is re-rolled.
  *
  * @param {Array<{id: string, total: number, raises?: number}>} entries
  * @returns {{winner: string|null, tie: boolean, scores: Record<string, number>}}
@@ -164,14 +175,16 @@ export function evaluateCheck(total, tn) {
  * @example
  * // 22 with one Raise counts as 17, short of 18
  * contest([{ id: "a", total: 22, raises: 1 }, { id: "b", total: 18 }]); // { winner: "b", tie: false, ... }
+ * // ...and level with 17, which is a margin of exactly 5
+ * contest([{ id: "a", total: 22, raises: 1 }, { id: "b", total: 17 }]); // { winner: "a", tie: false, ... }
  */
 export function contest(entries) {
   const scores = Object.fromEntries(entries.map(e => [e.id, e.total - 5 * (e.raises ?? 0)]));
   const best = Math.max(...Object.values(scores));
   const leaders = entries.filter(e => scores[e.id] === best);
-  return leaders.length === 1
-    ? { winner: leaders[0].id, tie: false, scores }
-    : { winner: null, tie: true, scores };
+  const raisers = leaders.filter(e => (e.raises ?? 0) > 0);
+  const winner = leaders.length === 1 ? leaders[0] : raisers.length === 1 ? raisers[0] : null;
+  return winner ? { winner: winner.id, tie: false, scores } : { winner: null, tie: true, scores };
 }
 
 /**

@@ -15,7 +15,9 @@
 import { DIALOG_TEMPLATES } from "../../../config/templates.js";
 import { F, T } from "../../../utils/localization.js";
 import { toInt } from "../../../utils/type-coercion.js";
+import { ringRank } from "../../../utils/mechanics.js";
 import { rollCheck } from "../check/roll-check.js";
+import { recordTrackChange } from "../../ledger.js";
 
 /**
  * Casts a maho spell.
@@ -28,7 +30,7 @@ import { rollCheck } from "../check/roll-check.js";
  */
 export async function MahoCastRoll({ actor, spell, showDialog = true } = {}) {
   const ring = String(spell.system.ring).toLowerCase();
-  const ringValue = toInt(actor.system.rings[ring]);
+  const ringValue = ringRank(actor, ring);
   const mastery = Math.max(1, toInt(spell.system.mastery));
   // Master of Blood: the item carries a RollOption rule with this option
   const masterOfBlood = actor.rollOptions.has("master-of-blood");
@@ -38,7 +40,7 @@ export async function MahoCastRoll({ actor, spell, showDialog = true } = {}) {
     actor,
     kind: "maho",
     label: `${T("l5r4.magic.maho.mahoCasting")}: ${spell.name}`,
-    base: { roll: ringValue + toInt(actor.system.insight.rank), keep: ringValue },
+    base: { roll: ringValue + actor.system.insightRank, keep: ringValue },
     ring,
     tn: 5 + 5 * mastery,
     askForOptions: showDialog,
@@ -70,10 +72,8 @@ export async function MahoCastRoll({ actor, spell, showDialog = true } = {}) {
       }
       const base = Math.max(mastery - 1, 1);
       const taint = masterOfBlood ? Math.max(base - toInt(actor.system.rings.earth), 1) : base;
-      // The stored value, not the prepared one, so an Active Effect on Taint is never written into storage (B6)
-      await actor.update({
-        "system.shadowTaint.points": actor._source.system.shadowTaint.points + taint
-      });
+      // Through the ledger, so ten points become a Taint Rank (p.275) and the change is logged
+      await recordTrackChange(actor, "taint", taint, T("l5r4.magic.maho.taintGained"));
       ui.notifications?.warn(F("l5r4.magic.maho.taintGainedNotification", { taint }));
       return { labelSuffix: ` [${T("l5r4.magic.maho.taintGained")}: ${taint}]` };
     }

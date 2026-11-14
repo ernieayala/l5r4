@@ -488,10 +488,21 @@ describe("statusRules", () => {
       selector: "attack",
       roll: 1
     });
-    // Prone: -10 Armor TN against melee, -2k0 to attacks (p.89)
+    // Prone: -10 Armor TN against melee, -2k0 to attacks with small and medium weapons, a note for large (p.89)
     expect(statusRules("prone")).toEqual([
       { key: "ArmorTN", value: -10, range: "melee" },
-      { key: "RollModifier", selector: "attack", roll: -2 }
+      {
+        key: "RollModifier",
+        selector: "attack",
+        roll: -2,
+        predicate: [{ not: "weapon:size:large" }]
+      },
+      {
+        key: "Note",
+        selector: "attack",
+        text: "l5r4.ui.effects.proneLargeWeapon",
+        predicate: ["weapon:size:large"]
+      }
     ]);
     expect(statusRules("attackStance")).toEqual([]);
   });

@@ -22,7 +22,7 @@ import { SYS_ID } from "../../../module/config/constants.js";
 import { STANCE_IDS } from "../../../module/utils/stances.js";
 import { createTestPC } from "../../fixtures/actor-fixtures.js";
 import { rollFullDefense } from "../../../module/services/effects/prompts.js";
-import { guardRolls, waitFor } from "../helpers.js";
+import { guardRolls, settleFullDefense, waitFor } from "../helpers.js";
 
 /**
  * Register stance switching workflow tests
@@ -62,6 +62,9 @@ export function registerStanceSwitchingWorkflowTests(quench) {
         });
 
         afterEach(async () => {
+          if (actor) {
+            await settleFullDefense(actor);
+          }
           // Clean up ALL effects between tests (check existence first)
           if (actor && actor.effects.size > 0) {
             const effectIds = Array.from(actor.effects.keys());
@@ -222,6 +225,9 @@ export function registerStanceSwitchingWorkflowTests(quench) {
         });
 
         afterEach(async () => {
+          if (actor) {
+            await settleFullDefense(actor);
+          }
           if (actor && actor.effects.size > 0) {
             const effectIds = Array.from(actor.effects.keys());
             const validIds = effectIds.filter(id => actor.effects.get(id) !== undefined);
@@ -358,6 +364,9 @@ export function registerStanceSwitchingWorkflowTests(quench) {
         });
 
         afterEach(async () => {
+          if (actor) {
+            await settleFullDefense(actor);
+          }
           const ids = actor.effects.map(e => e.id);
           if (ids.length) {
             await actor.deleteEmbeddedDocuments("ActiveEffect", ids);
@@ -426,6 +435,9 @@ export function registerStanceSwitchingWorkflowTests(quench) {
         });
 
         afterEach(async () => {
+          if (actor) {
+            await settleFullDefense(actor);
+          }
           if (actor && actor.effects.size > 0) {
             const effectIds = Array.from(actor.effects.keys());
             const validIds = effectIds.filter(id => actor.effects.get(id) !== undefined);

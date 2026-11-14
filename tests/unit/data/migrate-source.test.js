@@ -5,7 +5,8 @@ import {
   migrateKeywordsSource,
   migrateNpcSource,
   migratePcSource,
-  migrateSkillSource
+  migrateSkillSource,
+  migrateWeaponSource
 } from "../../../module/data/migrate-source.js";
 
 describe("migrateCommonActorSource", () => {
@@ -157,5 +158,30 @@ describe("migrateArmorSource", () => {
     const source = { equiped: true, specialRues: "text" };
     migrateArmorSource(source);
     expect(source).toEqual({ equipped: true, specialRules: "text" });
+  });
+});
+
+describe("migrateWeaponSource", () => {
+  it("reads an unset or zero Explodes On as 10, as 3.2.1 rolled it", () => {
+    for (const explodesOn of [0, null, "", "x"]) {
+      const source = { explodesOn };
+      migrateWeaponSource(source);
+      expect(source.explodesOn).toBe(10);
+    }
+  });
+
+  it("keeps Explodes On between 2 and 10, so a roll always ends (p.77)", () => {
+    const values = [1, 9, 9.4, 15].map(explodesOn => {
+      const source = { explodesOn };
+      migrateWeaponSource(source);
+      return source.explodesOn;
+    });
+    expect(values).toEqual([2, 9, 9, 10]);
+  });
+
+  it("leaves a source without the field alone", () => {
+    const source = { damageRoll: 3 };
+    migrateWeaponSource(source);
+    expect(source).toEqual({ damageRoll: 3 });
   });
 });

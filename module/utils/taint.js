@@ -11,7 +11,8 @@ export const PHYSICAL_TRAITS = Object.freeze(["str", "agi", "ref", "sta"]);
  * @typedef {object} TaintEffects
  * @property {number} level             Level of infection: 0 below one full Rank, up to 4 (pp.277-278)
  * @property {number} socialPenalty     Rolled dice taken from social Skill rolls: 1 at Level 3, 2 from Level 4
- * @property {number} voidPointsLost    Maximum Void Points lost: 1 from Level 4 (p.278)
+ * @property {number} voidPointsLost    Maximum Void Points lost: 1 from Level 4 (p.278); a Lost character has none
+ *   (p.279), which voidPointsMax applies
  * @property {{roll: number, keep: number}} honorRollPenalty  Dice taken from the optional Honor Roll: 2k2 from
  *   Level 4
  */
@@ -47,6 +48,27 @@ export function isLost(rank, highestRing) {
 }
 
 /**
+ * The highest of a character's Rings, the Void Ring included: a Ring at 6 or higher delays being Lost (p.278).
+ * @param {{air: number, earth: number, fire: number, water: number, void: {rank: number}}} rings  Prepared Rings
+ * @returns {number}
+ */
+export function highestRing(rings) {
+  return Math.max(rings.air, rings.earth, rings.fire, rings.water, rings.void.rank);
+}
+
+/**
+ * The most Void Points a Tainted character holds: the Void Ring, less 1 from Level 4 (p.278); none once Lost, who
+ * keeps the Void Ring itself (p.279).
+ * @param {number} voidRing
+ * @param {number} rank       Taint Rank
+ * @param {number} highestRing
+ * @returns {number}
+ */
+export function voidPointsMax(voidRing, rank, highestRing) {
+  return isLost(rank, highestRing) ? 0 : Math.max(0, voidRing - taintEffects(rank).voidPointsLost);
+}
+
+/**
  * Whether a roll can be enhanced by Embracing the Taint (p.279): a roll using a physical Trait, not damage, by a
  * character at Level 1 or higher who is not Lost.
  * @param {object} spec
@@ -57,7 +79,29 @@ export function isLost(rank, highestRing) {
  * @returns {boolean}
  */
 export function canEmbraceTaint({ rank, highestRing, kind, trait }) {
-  return (
-    kind !== "damage" && PHYSICAL_TRAITS.includes(trait) && rank >= 1 && !isLost(rank, highestRing)
-  );
+  return physicalRoll(kind, trait) && rank >= 1 && !isLost(rank, highestRing);
+}
+
+/**
+ * What the Taint adds to the total of a Lost character's roll (p.279): the Taint Rank, on every roll using a
+ * physical Trait. Not on damage, as with Embracing the Taint (Ernie's ruling, 2026-11-14).
+ * @param {object} spec  As canEmbraceTaint
+ * @returns {number}
+ *
+ * @example
+ * lostBonus({ rank: 5, highestRing: 4, kind: "skill", trait: "agi" }); // 5
+ * lostBonus({ rank: 5, highestRing: 6, kind: "skill", trait: "agi" }); // 0, not Lost until Rank 7
+ */
+export function lostBonus({ rank, highestRing, kind, trait }) {
+  return physicalRoll(kind, trait) && isLost(rank, highestRing) ? rank : 0;
+}
+
+/**
+ * Whether a roll uses a physical Trait and is not a damage roll (p.279).
+ * @param {string} kind
+ * @param {string} [trait]
+ * @returns {boolean}
+ */
+function physicalRoll(kind, trait) {
+  return kind !== "damage" && PHYSICAL_TRAITS.includes(trait);
 }

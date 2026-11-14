@@ -63,17 +63,17 @@ export function registerSkillRollTests(quench) {
         it("should build correct formula with buildFormula", () => {
           const formula = buildFormula(8, 3, 0, {});
 
-          assert.equal(formula, "8d10k3x10+0", "Formula constructed correctly");
+          assert.equal(formula, "8d10xa10k3+0", "Formula constructed correctly");
           assert.include(formula, "d10", "Uses d10 dice");
           assert.include(formula, "k3", "Keeps 3 dice");
-          assert.include(formula, "x10", "Dice explode on 10");
+          assert.include(formula, "xa10", "Dice explode on 10");
         });
 
         it("should handle unskilled rolls without explosions", () => {
           const formula = buildFormula(3, 2, 0, { unskilled: true });
 
           assert.equal(formula, "3d10k2+0", "Unskilled formula correct");
-          assert.notInclude(formula, "x10", "No explosions for unskilled");
+          assert.notInclude(formula, "xa10", "No explosions for unskilled");
         });
 
         it("should apply emphasis for re-rolling 1s", () => {
@@ -150,7 +150,7 @@ export function registerSkillRollTests(quench) {
         it("should not allow explosions on unskilled rolls", () => {
           const formula = buildFormula(3, 3, 0, { unskilled: true });
 
-          assert.notInclude(formula, "x10", "Unskilled rolls don't explode");
+          assert.notInclude(formula, "xa10", "Unskilled rolls don't explode");
         });
       });
 
@@ -261,7 +261,7 @@ export function registerSkillRollTests(quench) {
 
           assert.include(formula, "7d10", "Rolled dice in formula");
           assert.include(formula, "k4", "Kept dice in formula");
-          assert.include(formula, "x10", "Exploding dice in formula");
+          assert.include(formula, "xa10", "Exploding dice in formula");
         });
 
         it("should include bonuses in formula", () => {
@@ -374,10 +374,10 @@ export function registerSkillRollTests(quench) {
           const kept = 5;
           const formula = buildFormula(rolled, kept, 0, {});
 
-          assert.equal(formula, "10d10k5x10+0", "Formula with void is 10k5");
+          assert.equal(formula, "10d10xa10k5+0", "Formula with void is 10k5");
           assert.include(formula, "10d10", "Rolls 10 dice with void");
           assert.include(formula, "k5", "Keeps 5 dice with void");
-          assert.include(formula, "x10", "Dice still explode");
+          assert.include(formula, "xa10", "Dice still explode");
         });
 
         it("should handle void point with emphasis", () => {
@@ -391,7 +391,7 @@ export function registerSkillRollTests(quench) {
           assert.include(formula, "10d10", "Correct rolled dice");
           assert.include(formula, "k5", "Correct kept dice");
           assert.include(formula, "r1", "Emphasis re-rolls 1s");
-          assert.include(formula, "x10", "Dice explode");
+          assert.include(formula, "xa10", "Dice explode");
         });
 
         it("should handle void point with unskilled roll", () => {
@@ -408,7 +408,7 @@ export function registerSkillRollTests(quench) {
 
           const formula = buildFormula(rolled, kept, 0, { unskilled: true });
           assert.equal(formula, "5d10k5+0", "Unskilled with void formula");
-          assert.notInclude(formula, "x10", "Unskilled still no explosions");
+          assert.notInclude(formula, "xa10", "Unskilled still no explosions");
         });
 
         it("should handle void point with roll modifiers", () => {
@@ -438,7 +438,7 @@ export function registerSkillRollTests(quench) {
           const totalBonus = 5;
           const formula = buildFormula(rolled, kept, totalBonus, {});
 
-          assert.include(formula, "10d10k5", "Dice pool correct");
+          assert.include(formula, "10d10xa10k5", "Dice pool correct");
           assert.include(formula, "+5", "Total bonus applied");
         });
 

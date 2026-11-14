@@ -104,11 +104,12 @@ export function registerStatusEffectsWorkflowTests(quench) {
             assert.equal(checkEffects(actor, "attack", { range: "ranged" }).roll, -2);
           });
 
-          it("Dazed: -3k0 to every roll", async () => {
+          it("Dazed: -3k0 to every roll but damage (p.89; Ernie's ruling)", async () => {
             await add("dazed");
-            for (const kind of ["attack", "skill", "trait", "ring", "damage"]) {
+            for (const kind of ["attack", "skill", "trait", "ring"]) {
               assert.deepInclude(checkEffects(actor, kind), { roll: -3, keep: 0 }, kind);
             }
+            assert.deepInclude(checkEffects(actor, "damage"), { roll: 0, keep: 0 }, "damage");
           });
 
           it("Fatigued: +5 TN on Skill, physical Trait, and Spell Casting Rolls", async () => {

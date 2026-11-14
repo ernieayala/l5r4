@@ -163,7 +163,7 @@ export function registerFearWorkflowTests(quench) {
 
             assert.equal(willpower, 3, "Willpower = 3");
             assert.equal(honorRank, 2, "Honor Rank = 2");
-            // Roll formula would be 3d10k3x10+2 vs TN 20
+            // Roll formula would be 3d10xa10k3+2 vs TN 20
           });
 
           it("should handle PC with zero Honor", async () => {
@@ -187,7 +187,7 @@ export function registerFearWorkflowTests(quench) {
               });
 
               assert.exists(chatMessage, "Fear test executes with zero Honor");
-              // Roll would be 3d10k3x10 (no bonus) vs TN 20
+              // Roll would be 3d10xa10k3 (no bonus) vs TN 20
             } finally {
               await pcNoHonor.delete();
             }
@@ -199,7 +199,7 @@ export function registerFearWorkflowTests(quench) {
 
             assert.equal(willpower, 5, "High Willpower = 5");
             assert.equal(honorRank, 4, "High Honor = 4");
-            // Roll would be 5d10k5x10+4 vs TN 20 (likely to succeed)
+            // Roll would be 5d10xa10k5+4 vs TN 20 (likely to succeed)
           });
         });
 
@@ -387,7 +387,7 @@ export function registerFearWorkflowTests(quench) {
               assert.exists(chatMessage, "Fear test executed");
 
               // Check if chat content mentions catastrophic failure
-              // (Roll 1d10k1x10 max ~20 vs TN 50 = fail by 30+)
+              // (Roll 1d10xa10k1 max ~20 vs TN 50 = fail by 30+)
               if (chatMessage.content) {
                 const _isCatastrophic = chatMessage.content.includes("catastrophic");
                 // If the roll somehow succeeded or failed by less, that's also valid

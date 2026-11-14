@@ -6,7 +6,9 @@
  *   (B10). It runs on the active GM only, so one client makes each change;
  * - a concentrating caster who takes more Wounds than his Earth Ring in one update is asked for the Willpower
  *   roll (p.166);
- * - the GM's "End encounter" button ends Fear outside combat (p.90; STAGE-09 decision 4).
+ * - the GM's "End encounter" button ends Fear outside combat (p.90; STAGE-09 decision 4);
+ * - unlinked tokens whose actors were built before core's effect registry existed have their timed effects
+ *   registered, so they still expire (#45).
  */
 
 import { SYS_ID } from "../../config/constants.js";
@@ -138,8 +140,29 @@ function onGetSceneControlButtons(controls) {
   };
 }
 
+/**
+ * Register the timed effects of every unlinked token whose actor is already built. Core prepares world documents
+ * before it creates its effect registry (client/game.mjs:914-922), and a Combatant's preparation builds its token's
+ * actor (client/documents/combatant.mjs:160-182). Core registers a token actor's effects when the actor is built
+ * only once the registry exists (client/documents/token.mjs:318-321), and the registry's own start covers world
+ * actors only (client/helpers/active-effect-registry.mjs:29-39), so a combatant token's Fear would never end.
+ * This does what core does for a new scene's tokens (client/documents/scene.mjs:1066-1070); the registry keeps
+ * only effects that can expire, so registering twice changes nothing.
+ */
+export function registerTokenEffects() {
+  for (const scene of game.scenes) {
+    for (const token of scene.tokens) {
+      const actor = token.delta?.syntheticActor;
+      if (actor) {
+        foundry.documents.ActiveEffect.registry.addFromParent(actor);
+      }
+    }
+  }
+}
+
 /** Register the hooks, once during system init. */
 export function initializeEffectAutomation() {
+  Hooks.once("ready", registerTokenEffects);
   Hooks.on("preUpdateActor", onPreUpdateActor);
   Hooks.on("updateActor", onUpdateActor);
   Hooks.on("createActiveEffect", onCreateActiveEffect);

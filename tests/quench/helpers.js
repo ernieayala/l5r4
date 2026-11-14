@@ -85,6 +85,21 @@ export async function waitFor(condition, timeout = 5000) {
 }
 
 /**
+ * Wait for the Full Defense roll that taking the stance starts (module/services/effects/automation.js) to write its
+ * bonus, so a test deleting the actor next does not leave that write to fail on the server inside a later test.
+ * Nothing to wait for when the actor is not in the stance.
+ * @param {Actor} actor
+ * @returns {Promise<void>}
+ */
+export async function settleFullDefense(actor) {
+  if (actor.statuses.has("fullDefenseStance")) {
+    await waitFor(() =>
+      actor.effects.some(e => e.getFlag("l5r4-enhanced", "effectId") === "fullDefense")
+    );
+  }
+}
+
+/**
  * What an actor's rules, stances, and conditions give one check, read through the roll pipeline's own collection
  * (module/services/dice/check/collect.js): the dice and total of the modifiers the dialog starts ticked for that
  * attack range, and the TN changes.
@@ -153,8 +168,8 @@ const UPDATE_TIMEOUT_MS = 5000;
  * Core shows a new message as a pop-up card: it adds the card hidden, waits for a spacer animation, then looks the
  * card up again to reveal it (client/applications/sidebar/tabs/chat.mjs:1288-1327). A message deleted before the
  * reveal takes its card with it, and the lookup rejects inside whatever test runs then. The animation waits for
- * frames, which Chrome throttles, so no fixed delay is enough. The system never deletes messages; tests that clean
- * up their messages do.
+ * frames, which Chrome stops while its window is covered, so settleChatNotifications finishes the spacer animations
+ * itself rather than waiting for them. The system never deletes messages; tests that clean up their messages do.
  */
 const PENDING_CHAT_CARD = "#chat-notifications .chat-log :is(.message[hidden], .spacer)";
 
@@ -165,8 +180,29 @@ const CHAT_NOTIFICATION_START_MS = 500;
 const CHAT_NOTIFICATION_TIMEOUT_MS = 15_000;
 
 /**
- * Wait until every chat pop-up card that has started is revealed, so a message deleted now does not reject in a
- * later test, and a rejection from an earlier batch lands before this one starts.
+ * Finish each chat pop-up's spacer animation as soon as core starts it, so the card is revealed at once and a test
+ * that deletes its messages right after a roll does not reject inside a later test (see PENDING_CHAT_CARD). Core
+ * calls `animate` in the same task that appends the spacer, so the observer, which runs after that task, finds it.
+ * Installed once, for the test world only, by tests/quench/index.js.
+ */
+export function revealChatPopupsAtOnce() {
+  new MutationObserver(records => {
+    for (const record of records) {
+      for (const node of record.addedNodes) {
+        if (node.classList?.contains("spacer") && node.closest("#chat-notifications")) {
+          for (const animation of node.getAnimations()) {
+            animation.finish();
+          }
+        }
+      }
+    }
+  }).observe(document.body, { childList: true, subtree: true });
+}
+
+/**
+ * Reveal every chat pop-up card that has started, so a message deleted now does not reject in a later test, and a
+ * rejection from an earlier batch lands before this one starts. Finishing a spacer's animation resolves the promise
+ * core awaits whether or not the browser is drawing frames.
  * @returns {Promise<void>}
  */
 export async function settleChatNotifications() {
@@ -174,6 +210,11 @@ export async function settleChatNotifications() {
   await wait(CHAT_NOTIFICATION_START_MS);
   const deadline = Date.now() + CHAT_NOTIFICATION_TIMEOUT_MS;
   while (document.querySelector(PENDING_CHAT_CARD) && Date.now() < deadline) {
+    for (const spacer of document.querySelectorAll("#chat-notifications .chat-log .spacer")) {
+      for (const animation of spacer.getAnimations()) {
+        animation.finish();
+      }
+    }
     await wait(100);
   }
 }

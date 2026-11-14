@@ -1,7 +1,7 @@
 /**
  * @module config/status-effects
  * @description Every status effect: the five stances (Core Rulebook p.84) and the conditions (p.89, Fear p.90, Guard
- * p.88). Each entry is Active Effect data, so its mechanics are rules in `system.rules`, its timing is core's
+ * p.86). Each entry is Active Effect data, so its mechanics are rules in `system.rules`, its timing is core's
  * `duration` (expiry events in module/config/expiry-events.js), and stances share the exclusive group "stance".
  * ActiveEffect.fromStatusEffect copies the entry onto the effect it creates (client/documents/active-effect.mjs:
  * 127-138), so the token HUD, the sheets, and the system's services all create the same effect.
@@ -14,7 +14,7 @@ import { iconPath } from "./icons.js";
 
 const freeze = Object.freeze;
 
-/** Until the start of the Turn of the combatant whose Turn it was when the effect began (Guard, p.88). */
+/** Until the start of the Turn of the combatant whose Turn it was when the effect began (Guard, p.86). */
 const UNTIL_NEXT_TURN = freeze({ value: 1, units: "rounds", expiry: "turnStart" });
 
 /**
@@ -51,11 +51,11 @@ export const STATUS_EFFECTS = freeze([
     id: "fullAttackStance",
     name: "l5r4.ui.mechanics.stances.fullAttack",
     img: iconPath("full-attack-stance.webp"),
-    // +2k1 to attack rolls, Armor TN -10 (p.84)
+    // +2k1 to attack rolls, Armor TN -10 (p.84); no ranged attacks in this stance, so the bonus is melee only
     system: {
       group: "stance",
       rules: [
-        { key: "RollModifier", selector: "attack", roll: 2, keep: 1 },
+        { key: "RollModifier", selector: "attack", roll: 2, keep: 1, range: "melee" },
         { key: "ArmorTN", value: -10 }
       ]
     }
@@ -104,10 +104,11 @@ export const STATUS_EFFECTS = freeze([
     id: "dazed",
     name: "EFFECT.dazed",
     img: iconPath("dazed.webp"),
-    // -3k0 to all actions; Earth Ring roll in the Reactions stage at TN 20, 5 lower after each failure (p.89)
+    // -3k0 to all actions, not to damage (p.89; Ernie's ruling, 2026-11-14); Earth Ring roll in the Reactions stage
+    // at TN 20, 5 lower after each failure
     system: {
       rules: [
-        { key: "RollModifier", selector: "any", roll: -3 },
+        { key: "RollModifier", selector: "any", roll: -3, predicate: [{ not: "check:damage" }] },
         { key: "PeriodicSave", event: "roundEnd", roll: "ring:earth", tn: 20, step: -5, min: 5 }
       ]
     }
@@ -147,7 +148,7 @@ export const STATUS_EFFECTS = freeze([
     id: "guarded",
     name: "EFFECT.guarded",
     img: iconPath("guarded.webp"),
-    // +10 Armor TN until the guard's next Turn (p.88)
+    // +10 Armor TN until the guard's next Turn (p.86)
     duration: UNTIL_NEXT_TURN,
     system: { rules: [{ key: "ArmorTN", value: 10 }] }
   },
@@ -155,7 +156,7 @@ export const STATUS_EFFECTS = freeze([
     id: "guarding",
     name: "EFFECT.guarding",
     img: iconPath("guarding.webp"),
-    // -5 Armor TN until the guard's next Turn (p.88)
+    // -5 Armor TN until the guard's next Turn (p.86)
     duration: UNTIL_NEXT_TURN,
     system: { rules: [{ key: "ArmorTN", value: -5 }] }
   },
@@ -179,11 +180,23 @@ export const STATUS_EFFECTS = freeze([
     id: "prone",
     name: "EFFECT.prone",
     img: iconPath("prone.webp"),
-    // -10 Armor TN against melee attacks; -2k0 to attacks (p.89)
+    // -10 Armor TN against melee attacks; -2k0 to attacks with small and medium weapons, and no attacks with large
+    // ones, which the card notes (p.89)
     system: {
       rules: [
         { key: "ArmorTN", value: -10, range: "melee" },
-        { key: "RollModifier", selector: "attack", roll: -2 }
+        {
+          key: "RollModifier",
+          selector: "attack",
+          roll: -2,
+          predicate: [{ not: "weapon:size:large" }]
+        },
+        {
+          key: "Note",
+          selector: "attack",
+          text: "l5r4.ui.effects.proneLargeWeapon",
+          predicate: ["weapon:size:large"]
+        }
       ]
     }
   },

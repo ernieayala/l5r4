@@ -4,7 +4,9 @@
 rules against the Core Rulebook. Stages 1-6 port: each changes how the code talks to Foundry, never what a rule
 computes. Stages 7-11 build the automation (rules carried as data on items and effects, one roll pipeline,
 durations and conditions, the damage loop, rule authoring; design in `AUTOMATION.md`). Stage 12 migrates
-3.2.1 worlds into the new data, Stage 13 audits every automated rule against the book, Stage 14 releases.
+3.2.1 worlds into the new data, Stage 13 audits every automated rule against the book, Stage 14 adds table tools
+(text links, request cards, effect panel, macros), Stage 15 makes the audit a repeatable coverage check in the gate,
+Stage 16 plays the system through the real UI with GM and player clients, Stage 17 releases.
 
 ## How to read this roadmap
 
@@ -43,7 +45,10 @@ in `tests/quench/`, the transcribed rulebook in `game-rules/` (local, gitignored
 | 11 | `STAGE-11-CHARACTER-OPTIONS-AND-AUTHORING.md` | Rules editor, choices and grants for character options, XP and ledgers from rules, import and export | 7-10 |
 | 12 | `STAGE-12-WORLD-MIGRATION-AND-MODULES.md` | A 3.2.1 world opens in 4.0.0 with its data intact and converted to rule data; optional module integrations (Sequencer) checked | 2-11 |
 | 13 | `STAGE-13-RULES-AUDIT.md` | Every automated rule checked against the Core Rulebook, book examples as Vitest cases, mismatches and open rule bugs fixed | 2-12 |
-| 14 | `STAGE-14-RELEASE.md` | Docs, translations, release workflows, and the 4.0.0 release | 1-13 |
+| 14 | `STAGE-14-TABLE-TOOLS.md` | Text links for checks, damage, conditions, and Fear; GM request cards; effect panel; hotbar macros; floating Wound and Void numbers | 13 |
+| 15 | `STAGE-15-COVERAGE-AUDIT.md` | A coverage report of every rule page, action, and setting against code and tests; gaps closed or recorded; the check joins the gate | 14 |
+| 16 | `STAGE-16-PLAYTEST.md` | An original scenario played through Claude in Chrome by a GM and players on their own clients; findings fixed at the root | 15 |
+| 17 | `STAGE-17-RELEASE.md` | Docs, translations, release workflows with an allowlisted zip and a tested manifest rewrite, a book-text sweep, and the 4.0.0 release | 1-16 |
 
 Stage 4 needs only Stage 1, so it can run before Stage 2 or 3 if Ernie prefers. Stage 2's data models carry
 `system.rules` from the start so Stage 7 does not reshape them (Stage 2 Decision 2).
@@ -60,16 +65,16 @@ Reviewed 2026-11-12 (`gh issue list --state all`, `gh pr list --state all`). Eac
 | #44 | A Family or School Void Ring bonus is not priced into Void XP (p.103) | Stage 13 |
 | #45 | Timed effects on unlinked combatants stop expiring after a reload (core registry timing) | Stage 13 |
 | #37 | A weapon's "Explodes on" value ignored on damage rolls | Stage 8 (dice rules), checked in Stage 13 |
-| #41 | Mounted +1k0 (p.89) missing on Skill weapon attacks: only `SimpleRoll` reads attack rules | Stage 8 |
-| #42 | Shift-click Trait rolls skip `system.bonuses.trait` | Stage 8 |
+| #41 | Mounted +1k0 (p.89) missing on Skill weapon attacks: only `SimpleRoll` reads attack rules | Stage 8 (one roll pipeline), test in Stage 13 (`tests/quench/rules.js`) |
+| #42 | Shift-click Trait rolls skip `system.bonuses.trait` | Stage 8 (one roll pipeline), test in Stage 13 (`tests/quench/rules.js`) |
 | #29 | Strength raised by an Active Effect misses weapon damage; extra effect points on Strength charged as XP | Stage 3 (Trait changes in the `"initial"` phase reach derived values), checked in Stage 13 |
 | #30 | NPC Initiative stays 2k2 | Stage 13 (Initiative row; code moves to Combat classes in Stage 5) |
 | #30 | Light-theme Ring values, Void Ring arrows, PC portrait picker, removable NPC attacks | Stage 6 (done; the portrait picker already worked in 3.2.1) |
 | #33 | Request: a setting for 3rd Edition rules (stances) | Open question for Ernie; not planned until decided |
 | PR #25 | "Packs": compendium databases on branch `release/3.2.0`, with rulebook text in spell and advantage entries | Not mergeable as is (CLAUDE.md **Licensed material**); Ernie decides whether to close it and delete the branch |
-| No issue yet | Code comments on `main` repeat rulebook wording: `skill-formulas.js`, `tn-calculator.js`, `bow-damage.js`, `chat-damage-buttons.js`, `melee-damage.js`, and `tests/quench/workflows/melee-damage-strength.js` (12-word runs matched against `game-rules/`, 2026-11-12) | Rewrite in own words with page citations, as its own change; Ernie decides when |
+| No issue yet | Code comments on `main` repeat rulebook wording: `skill-formulas.js`, `tn-calculator.js`, `bow-damage.js`, `chat-damage-buttons.js`, `melee-damage.js`, and `tests/quench/workflows/melee-damage-strength.js` (12-word runs matched against `game-rules/`, 2026-11-12) | Stage 17 book-text sweep: rewritten in own words with page citations, as its own commit |
 | No issue yet | Probable bugs read from the code (B1-B12): bonuses counted twice, Raise and Void limits, damage button, inline rolls, Prone automation | `AUTOMATION.md` §2 assigns each a stage; each gets an issue once reproduced |
-| Closed #5, #7-#15, #32, #34 | Rule bugs fixed in 2.x-3.2 | Stage 13: each gets a regression test that names it (only #34 has one) |
+| Closed #5, #7-#15, #32, #34 | Rule bugs fixed in 2.x-3.2 | Stage 13: each has a regression test that names it, in Vitest (#5, #7, #10, #14, #32, #34) or `tests/quench/regressions.js` (#8, #9, #11, #12, #13, #15) |
 | Closed #3 | Firefox right-click context menus | No item menu since v3.0.0; its unused module is deleted in Stage 4 (Decision 1) |
 
 ## Cross-stage decisions
@@ -79,7 +84,7 @@ Reviewed 2026-11-12 (`gh issue list --state all`, `gh pr list --state all`). Eac
 | X1 | The system id stays `l5r4-enhanced`. Worlds, flags (`flags.l5r4-enhanced.*`), and template paths depend on it | Existing worlds |
 | X2 | 4.0.0 requires Foundry 14.370 (`compatibility.minimum` `"14.370"`, `verified` `"14.370"`, `maximum` `"14"`). Foundry 13 users stay on 3.2.1 | Ernie, 2026-11-10 |
 | X3 | Stages 1-6 keep behavior. A rule bug found during them becomes a GitHub issue with the printed page, fixed in the automation stage that rebuilds that code (7-11) or in Stage 13 | CLAUDE.md **PORT KEEPS BEHAVIOR**; Ernie, 2026-11-12 |
-| X4 | The smoke batch runs with `CONFIG.compatibility.mode` `WARNING` until Stage 14, which switches it to `FAILURE` scoped to `systems/l5r4-enhanced/`, so any deprecated call left fails the batch | FOUNDRY-V14-REFERENCE.md §11; fabula-ultima `tests/quench/smoke.js` |
+| X4 | The smoke batch runs with `CONFIG.compatibility.mode` `WARNING` until Stage 17, which switches it to `FAILURE` scoped to `systems/l5r4-enhanced/`, so any deprecated call left fails the batch | FOUNDRY-V14-REFERENCE.md §11; fabula-ultima `tests/quench/smoke.js` |
 | X5 | The six languages stay. New keys go in `lang/en.json`; the other files fall back to English until a translator adds them | `system.json` `languages` |
 | X6 | Automation follows pf2e's design adapted to v14: mechanics as `system.rules` on Items and Active Effects, effects expiring through the core registry, every player and GM choice prompted, no book content shipped | `AUTOMATION.md`; Ernie, 2026-11-12 |
 

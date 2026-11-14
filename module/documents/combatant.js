@@ -22,17 +22,9 @@ export default class L5R4Combatant extends foundry.documents.Combatant {
     if (!actor) {
       return super._getInitiativeFormula();
     }
+    // The prepared pool, modifiers included: an NPC's stored pool or formula is already in it (npc-preparation.js)
     const initiative = actor.system.initiative;
-    let { roll, keep } = initiative;
-    // An NPC rolls its own Initiative pool when one is set (npc-preparation.js)
-    if (actor.type === "npc") {
-      if (initiative.effRoll > 0) {
-        roll = initiative.effRoll;
-      }
-      if (initiative.effKeep > 0) {
-        keep = initiative.effKeep;
-      }
-    }
+    const { roll, keep } = initiative;
     return initiativeFormula(
       { roll, keep, bonus: toInt(initiative.totalMod) + bonus },
       { littleTruths: game.settings.get(SYS_ID, "LtException") }

@@ -4,7 +4,7 @@ import { TraitRoll } from "../../module/services/dice/rolls/trait-roll.js";
 import { applyConditionFromMessage } from "../../module/services/dice/check/chat-actions.js";
 import { applyEffect, effectsOf } from "../../module/services/effects/apply.js";
 import { onPromptClick } from "../../module/services/effects/prompts.js";
-import { syncProne } from "../../module/services/effects/automation.js";
+import { registerTokenEffects, syncProne } from "../../module/services/effects/automation.js";
 import { voidOverLimit, voidSpent } from "../../module/services/effects/uses.js";
 import { spendVoidPoint } from "../../module/services/dice/resources/void-manager.js";
 import { collectCheck } from "../../module/services/dice/check/collect.js";
@@ -278,7 +278,9 @@ export function registerEffectsBatch(quench) {
             { actorId: target.id, x: 100, y: 100 }
           ]);
           try {
-            canvas.tokens.get(token.id).setTarget(true, { releaseOthers: true });
+            // The token's placeable is drawn after the document is created
+            await waitFor(() => token.object);
+            canvas.tokens.setTargets([token.id]);
             const message = await SkillRoll({
               actor: attacker,
               skillName: "Kenjutsu",
@@ -297,7 +299,7 @@ export function registerEffectsBatch(quench) {
             const targetActor = token.actor;
             assert.isTrue(targetActor.statuses.has("dazed"));
           } finally {
-            canvas.tokens.get(token.id)?.setTarget(false);
+            canvas.tokens.setTargets([]);
             await token.delete();
           }
         });
@@ -325,6 +327,41 @@ export function registerEffectsBatch(quench) {
           assert.isTrue(actor.statuses.has("feared"), "world time alone does not end it");
           await foundry.documents.ActiveEffect.registry.refresh("encounterEnd", {});
           assert.isTrue(await waitFor(() => !actor.statuses.has("feared")));
+        });
+
+        it("on an unlinked combatant, still ends with its combat after the world reloads (#45)", async function () {
+          this.timeout(20_000);
+          const npc = track(
+            await createTestNPC({
+              name: "Effects fear token",
+              prototypeToken: { actorLink: false }
+            })
+          );
+          const data = await npc.getTokenDocument({ x: 0, y: 0 });
+          const [token] = await canvas.scene.createEmbeddedDocuments("Token", [data.toObject()]);
+          try {
+            const combat = await foundry.documents.Combat.implementation.create({
+              scene: canvas.scene.id,
+              active: true
+            });
+            combats.push(combat);
+            await combat.createEmbeddedDocuments("Combatant", [
+              { tokenId: token.id, sceneId: canvas.scene.id, actorId: npc.id }
+            ]);
+            await combat.startCombat();
+            await applyEffect(token.actor, "feared", { level: 1 });
+            const fear = effectsOf(token.actor, "feared")[0];
+            // On a reload the combatant builds the token's actor before the registry exists, so the registry
+            // never sees this effect; registerTokenEffects runs at ready to cover that
+            const registry = foundry.documents.ActiveEffect.registry;
+            registry.delete(fear);
+            registerTokenEffects();
+            assert.isTrue(registry.has(fear));
+            await combat.delete();
+            assert.isTrue(await waitFor(() => !token.actor.statuses.has("feared")));
+          } finally {
+            await token.delete();
+          }
         });
       });
 

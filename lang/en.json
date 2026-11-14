@@ -211,7 +211,9 @@
         "statBlock": "Stat block",
         "substitutes": "Substitutions",
         "unskilledHint": "Unskilled Roll: dice do not explode, and no Raises or Free Raises apply.",
-        "void": "Spend a Void Point (+1k1)"
+        "void": "Spend a Void Point (+1k1)",
+        "voidSkill": "Spend a Void Point: Skill Rank 1",
+        "voidSkillHint": "With no ranks in the Skill, a Void Point lets this roll count as Rank 1: one more die, dice explode, and Raises apply (p.78). Without it, the Raises above are ignored."
       },
       "effects": {
         "alreadyEnded": "That effect has already ended.",
@@ -223,6 +225,7 @@
         "expiry": {
           "encounterEnd": "End of the encounter"
         },
+        "proneLargeWeapon": "Prone: a large weapon cannot attack until its wielder stands.",
         "fullDefense": "Full Defense",
         "immune": "{actor} is immune to {effect}.",
         "noGM": "No GM is connected to apply that effect.",
@@ -249,7 +252,8 @@
         "label": "Shadowlands Taint",
         "embrace": "Embrace the Taint (+1k1)",
         "embraceHint": "Gain a point of Taint for +1k1 on this roll.",
-        "embraceReason": "Embraced the Taint"
+        "embraceReason": "Embraced the Taint",
+        "lost": "Lost (Taint Rank)"
       },
       "honorRoll": {
         "button": "Honor Roll",
@@ -493,6 +497,7 @@
         "type": "Type",
         "ring": "Ring",
         "mastery": "Mastery",
+        "masteryXpHint": "Costs its Mastery Level in XP (pp.231, 259). A Cost rule changes the price: a monk's free kiho, or a non-Brotherhood school's higher one (p.266).",
         "tn": "TN",
         "cost": "Cost",
         "save": "Save",
@@ -523,6 +528,11 @@
         "increasedDamageNote": "Increased Damage: +{dice}k0.",
         "grappleManeuver": "Start a grapple (ignores armor)",
         "grappleIgnoresArmor": "Grapple ignores armor",
+        "arrowArmor": {
+          "armor": "Armor Piercing arrow ignores armor",
+          "flesh": "Flesh Cutter arrow doubles armor"
+        },
+        "npcInitiativeHint": "0 rolls Insight Rank 1 + Reflexes, keep Reflexes (p.81). Above 0 in both is this NPC's own pool.",
         "grappleStart": "Start grapple with",
         "notEnoughRaises": "The maneuvers cost {cost} Raises; declare enough Raises (or have Free Raises) to pay for them. Declared: {raises}.",
         "contestStrength": "Roll Contested Strength",
@@ -547,6 +557,7 @@
         "duel": {
           "start": "Iaijutsu duel: selected token against targeted token",
           "pick": "Select one duelist's token and target the other's.",
+          "dazed": "{name} is Dazed and cannot fight an iaijutsu duel.",
           "title": "Iaijutsu duel",
           "assessment": "Assessment",
           "focus": "Focus",
@@ -554,7 +565,8 @@
           "done": "Over",
           "assessmentEdge": "Assessment +10",
           "facts": "Facts {name} learns: {count}.",
-          "edgeWon": "{name} gains +1k1 on Focus.",
+          "edgeWon": "{name} gains {bonus} on Focus.",
+          "focusMastery": "Iaijutsu Mastery (Free Raise)",
           "kharmic": "Kharmic strike: both strike at once.",
           "firstStrike": "{name} strikes first, with {raises} Free Raises.",
           "conceded": "{name} concedes.",
@@ -856,6 +868,17 @@
         "attackType": "Attack Type",
         "size": "Size",
         "damageKeep": "Damage Keep",
+        "addsStrength": "Adds Strength",
+        "minStrength": "Minimum Strength",
+        "tnMounted": "Attack TN mounted",
+        "tnOnFoot": "Attack TN on foot",
+        "tnHint": "Added to the TN of attacks with this weapon while its wielder is Mounted, or while not: the dai-kyu is +10 on foot, the han-kyu +10 mounted (p.199).",
+        "belowMinStrength": "{name} needs Strength {min} to wield {weapon}.",
+        "belowMinStrengthGM": "Attack with it anyway?",
+        "meleeRange": "Bow at a target in melee range",
+        "addsStrengthHint": "Off for thrown weapons that add no Strength, such as shuriken.",
+        "explodes": "Dice Explode",
+        "explodesHint": "Off for weapons whose damage dice never explode, such as shuriken.",
         "range": "Range",
         "arrow": "Arrow",
         "typeWeapon": "Weapon",
@@ -906,6 +929,12 @@
         "raises": "Raises",
         "affinity": "Affinity",
         "deficiency": "Deficiency",
+        "shugenjaSchool": "Shugenja School",
+        "shugenjaSchoolHint": "Spell Casting Rolls add this School's Rank. Without one, they add the Insight Rank.",
+        "anyElement": "Any element",
+        "chooseElement": "Cast {spell} in which element?",
+        "aboveSchoolRank": "{spell} is Mastery Level {mastery}; {name} can cast spells up to {limit} in this element (p.164).",
+        "aboveSchoolRankGM": "Cast it anyway?",
         "maho": "Maho",
         "useSpellSlot": "Use Spell Slot",
         "voidSlot": "Use Void Spell Slot",

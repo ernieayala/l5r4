@@ -132,7 +132,7 @@ export function registerAttackRollVoidTests(quench) {
           // ASSERT
           assert.include(formula, "10d10", "Rolled includes void bonus");
           assert.include(formula, "k5", "Kept includes void bonus");
-          assert.include(formula, "x10", "Dice explode");
+          assert.include(formula, "xa10", "Dice explode");
         });
       });
 
@@ -262,7 +262,7 @@ export function registerAttackRollVoidTests(quench) {
           assert.include(formula, "10d10", "Rolled includes void");
           assert.include(formula, "k5", "Kept includes void");
           assert.include(formula, "r1", "Emphasis re-rolls 1s");
-          assert.include(formula, "x10", "Dice explode");
+          assert.include(formula, "xa10", "Dice explode");
         });
 
         it("should spend void and apply emphasis independently", async () => {
@@ -349,7 +349,7 @@ export function registerAttackRollVoidTests(quench) {
           // ASSERT
           assert.include(formula, "12d10", "All roll bonuses applied");
           assert.include(formula, "k6", "All keep bonuses applied");
-          assert.include(formula, "x10", "Dice explode");
+          assert.include(formula, "xa10", "Dice explode");
         });
       });
 
@@ -425,7 +425,7 @@ export function registerAttackRollVoidTests(quench) {
           assert.include(formula, "12d10", "Void + stance roll bonuses");
           assert.include(formula, "k6", "Void + stance keep bonuses");
           assert.include(formula, "r1", "Emphasis re-rolls 1s");
-          assert.include(formula, "x10", "Dice explode");
+          assert.include(formula, "xa10", "Dice explode");
         });
       });
 

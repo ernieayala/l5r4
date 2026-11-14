@@ -239,7 +239,7 @@ export function registerWeaponRollTests(quench) {
         it("should create valid damage formulas", () => {
           const rolled = 6;
           const kept = 2;
-          // Would create formula like "6d10k2x10"
+          // Would create formula like "6d10xa10k2"
 
           assert.isAtLeast(rolled, 1, "Rolled dice >= 1");
           assert.isAtLeast(kept, 1, "Kept dice >= 1");

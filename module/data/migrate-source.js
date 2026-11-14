@@ -115,6 +115,19 @@ export function migrateSkillSource(source) {
 }
 
 /**
+ * A weapon's Explodes On kept to a whole face from 2 to 10, so an exploding die always stops (p.77). 0, blank, or
+ * a value that is not a number reads as 10, which is how 3.2.1 rolled it (`|| 10`).
+ * @param {object} source  Weapon system source (mutated).
+ */
+export function migrateWeaponSource(source) {
+  if (!("explodesOn" in source)) {
+    return;
+  }
+  const value = Math.round(Number(source.explodesOn));
+  source.explodesOn = value ? Math.min(10, Math.max(2, value)) : 10;
+}
+
+/**
  * Armor misspellings from before 3.0 (module/setup/migrations/schema/schema-map.js).
  * @param {object} source  Armor system source (mutated).
  */

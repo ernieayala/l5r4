@@ -14,6 +14,8 @@ export default class ItemData extends foundry.abstract.TypeDataModel {
     return {
       description: htmlField(),
       specialRules: htmlField(),
+      // 3.2.1's Free Raises on every roll; the world migration moves a value into a FreeRaise rule and sets this to
+      // 0 (module/setup/migrations/items/item-rules.js). Nothing else reads it.
       freeRaises: numberField(0),
       rules: new ArrayField(new ObjectField())
     };

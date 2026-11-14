@@ -179,6 +179,30 @@ export function getEffectiveTrait(actor, traitKey) {
 }
 
 /**
+ * A Ring's value (p.76, `game-rules/25_rings_and_traits.md`): the Void Ring's rank, or an Elemental Ring.
+ *
+ * @param {Object} actor
+ * @param {string} ring  "air", "earth", "fire", "water", or "void"
+ * @returns {number}
+ */
+export function ringRank(actor, ring) {
+  return ring === "void" ? toInt(actor.system.rings.void.rank) : toInt(actor.system.rings[ring]);
+}
+
+/**
+ * The School Rank a shugenja casts with (pp.80, 163, `game-rules/66_magic_and_spell_casting.md`): the rank of the
+ * School marked as the shugenja School, or the Insight Rank, which is the School Rank of a character with one
+ * School (p.104).
+ *
+ * @param {Object} actor
+ * @returns {number}
+ */
+export function castingSchoolRank(actor) {
+  const school = actor.items.find(item => item.type === "school" && item.system.shugenja);
+  return school ? school.system.schoolRank : actor.system.insightRank;
+}
+
+/**
  * Extracts roll parameters from DOM element data attributes.
  *
  * Reads data-roll, data-keep, data-trait, data-label, data-description.

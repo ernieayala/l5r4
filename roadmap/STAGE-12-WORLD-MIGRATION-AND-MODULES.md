@@ -43,7 +43,7 @@ and Active Effect intact, and the optional module integrations either work or sw
    Opening it runs core's Foundry 13 migration, then the system's. `tests/quench/world-upgrade.js` checks the result
    and skips in any other world.
 2. Migrations run only when `system.json` reports a version newer than the world's `lastMigratedVersion`. A 3.2.1
-   world stores "3.2.1", so nothing converts until Stage 14 sets 4.0.0. Stage 12's runs set it to 4.0.0 locally and
+   world stores "3.2.1", so nothing converts until Stage 17 sets 4.0.0. Stage 12's runs set it to 4.0.0 locally and
    put it back.
 3. An unlinked token's own items and effects (its actor delta) go through the item and status-effect migrations
    (`module/setup/migrations/actors/unlinked-tokens.js`); 3.2.1 never migrated them either.

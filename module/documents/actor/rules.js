@@ -21,11 +21,12 @@ import { createRule } from "../../data/rules/rule-models.js";
 import {
   addRuleRollOptions,
   derivedRuleOutputs,
+  selectorBonus,
   traitAdjustments
 } from "../../utils/rule-engine.js";
 import { resolveArmorTn } from "../../utils/effects.js";
 import { applyChoices } from "../../utils/choices.js";
-import { taintEffects } from "../../utils/taint.js";
+import { highestRing, taintEffects, voidPointsMax } from "../../utils/taint.js";
 import { stackModifiers } from "../../utils/modifier-stacking.js";
 import { toInt } from "../../utils/type-coercion.js";
 import { SYS_ID } from "../../config/constants.js";
@@ -212,9 +213,19 @@ export function applyDerivedRules(actor, sys) {
   actor.resources = out.resources;
   actor.ledgerRules = out.ledger;
   actor.ruleBag = out.bag;
-  // Taint Level 4 costs a Void Point from the maximum, not from the Void Ring (p.278)
-  const { voidPointsLost } = taintEffects(toInt(sys.shadowTaint.rank));
-  sys.rings.void.max = Math.max(0, toInt(sys.rings.void.rank) - voidPointsLost);
+  // Penalties on every roll reach the Initiative roll too: Fear is on all die rolls (p.90), Dazed on all actions
+  // (p.89). RollModifier rules on "any" or "initiative" join the pool; optional and range-limited ones do not.
+  const initiativeOptions = new Set([...options, "check:initiative"]);
+  const onInitiative = selectorBonus(out.bag, ["any", "initiative"], initiativeOptions);
+  sys.initiative.rollMod += onInitiative.roll;
+  sys.initiative.keepMod += onInitiative.keep;
+  sys.initiative.totalMod += onInitiative.total;
+  // Taint Level 4 costs a Void Point from the maximum, not from the Void Ring (p.278); the Lost have none (p.279)
+  sys.rings.void.max = voidPointsMax(
+    toInt(sys.rings.void.rank),
+    toInt(sys.shadowTaint.rank),
+    highestRing(sys.rings)
+  );
 }
 
 /**

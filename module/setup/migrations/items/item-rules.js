@@ -80,25 +80,67 @@ async function convertCreationBonusEffects(item) {
 }
 
 /**
- * Master of Blood: 3.2.1 recognized the advantage by name; it now carries the RollOption the maho roll reads.
+ * The rules a Master of Blood advantage carries (p.280, `game-rules/89_shadowlands_taint.md`): the RollOption the
+ * maho roll reads for its lower blood cost and Taint, and +10 to the TN of every spell that is not maho.
+ * @type {ReadonlyArray<object>}
+ */
+const MASTER_OF_BLOOD_RULES = Object.freeze([
+  { key: "RollOption", option: MASTER_OF_BLOOD },
+  {
+    key: "TNModifier",
+    selector: "spell",
+    value: 10,
+    predicate: [{ not: "check:maho" }]
+  }
+]);
+
+/**
+ * Master of Blood: 3.2.1 recognized the advantage by name; it now carries its rules. Each is added when the item
+ * lacks a rule of its key, so running again changes nothing.
  * @param {Item} item
  * @returns {Promise<boolean>} Whether the item changed.
  */
-async function addMasterOfBloodOption(item) {
+async function addMasterOfBloodRules(item) {
   const rules = item._source.system.rules;
-  if (rules.some(rule => rule.key === "RollOption" && rule.option === MASTER_OF_BLOOD)) {
+  const missing = MASTER_OF_BLOOD_RULES.filter(
+    wanted =>
+      !rules.some(
+        rule =>
+          rule.key === wanted.key && (wanted.key !== "RollOption" || rule.option === wanted.option)
+      )
+  );
+  if (missing.length === 0) {
+    return false;
+  }
+  await item.update({ "system.rules": [...rules, ...structuredClone(missing)] }, { render: false });
+  return true;
+}
+
+/**
+ * An item's `freeRaises` value, which 3.2.1 added to every roll its owner made, becomes a FreeRaise rule on "any"
+ * roll, which the GM can see and narrow in the rules editor (Ernie's ruling, 2026-11-14). The field is set to 0, so
+ * running again changes nothing.
+ * @param {Item} item
+ * @returns {Promise<boolean>} Whether the item changed.
+ */
+async function convertFreeRaises(item) {
+  const value = Number(item._source.system.freeRaises);
+  if (!(value > 0)) {
     return false;
   }
   await item.update(
-    { "system.rules": [...rules, { key: "RollOption", option: MASTER_OF_BLOOD }] },
+    {
+      "system.rules": [...item._source.system.rules, { key: "FreeRaise", selector: "any", value }],
+      "system.freeRaises": 0
+    },
     { render: false }
   );
   return true;
 }
 
 /**
- * Moves item mechanics into rules: Family and School Trait bonus effects become TraitAdjust rules, and a
- * Master of Blood advantage gets its RollOption. Running again changes nothing.
+ * Moves item mechanics into rules: Family and School Trait bonus effects become TraitAdjust rules, a Master of
+ * Blood advantage gets its rules, and any item's Free Raises become a FreeRaise rule. Running again changes nothing.
  *
  * @param {Document[]} docs - Documents to scan; non-Items are skipped
  * @param {string} label - Migration context label for console logging
@@ -111,11 +153,13 @@ export async function migrateItemRules(docs, label) {
       continue;
     }
     try {
+      let changed = await convertFreeRaises(item);
       if (item.type === "family" || item.type === "school") {
-        migrated += Number(await convertCreationBonusEffects(item));
+        changed = (await convertCreationBonusEffects(item)) || changed;
       } else if (item.type === "advantage" && item.name.toLowerCase().includes("master of blood")) {
-        migrated += Number(await addMasterOfBloodOption(item));
+        changed = (await addMasterOfBloodRules(item)) || changed;
       }
+      migrated += Number(changed);
     } catch (err) {
       console.warn(`${SYS_ID}`, "Failed to move item mechanics into rules", {
         label,

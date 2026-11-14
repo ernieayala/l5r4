@@ -54,7 +54,7 @@ import {
 export function getWoundLevelsForCount(nrWoundLvls) {
   const count = clamp(nrWoundLvls ?? 3, 1, 8);
 
-  // Minimal tracking: just healthy and out
+  // Two levels tracked: Healthy and Out
   if (count === 1) {
     return ["healthy", "out"];
   } else if (count === 2) {
@@ -76,25 +76,34 @@ export function getWoundLevelsForCount(nrWoundLvls) {
  * @param {Object} sys - Actor's system data
  *
  * @description
- * Applies wound penalty modifier to all wound levels:
- * - Base penalty from wound level (e.g., Hurt = -10)
+ * Applies wound penalty modifier to every wound level past Healthy:
+ * - Base penalty from wound level (e.g., Hurt = 10)
  * - Plus woundsPenaltyMod (from advantages/disadvantages)
- * - Minimum effective penalty is 0
+ * - Minimum effective penalty is 0; Healthy stays 0
  *
  * Modifies each level's penaltyEff property.
  *
  * @example
- * // Hurt level: base penalty -10, modifier +5
- * // Effective penalty: max(0, -10 + 5) = 0 (no penalty)
+ * // Hurt level: base penalty 10, modifier -15
+ * // Effective penalty: max(0, 10 - 15) = 0 (no penalty)
  */
 export function calculateWoundPenalties(sys) {
   const penaltyMod = toInt(sys.woundsPenaltyMod);
-
-  // Apply modifier to each wound level's penalty
-  for (const [, lvl] of Object.entries(sys.woundLevels ?? {})) {
-    const eff = toInt(lvl.penalty) + penaltyMod;
-    lvl.penaltyEff = Math.max(0, eff); // Never negative
+  for (const [key, lvl] of Object.entries(sys.woundLevels ?? {})) {
+    lvl.penaltyEff = effectiveWoundPenalty(key, lvl.penalty, penaltyMod);
   }
+}
+
+/**
+ * A Wound Rank's penalty with the penalty modifier, never below 0. Healthy carries no penalty (p.82), so a modifier
+ * never gives it one.
+ * @param {string} key      Wound level key
+ * @param {number} penalty  The level's own penalty
+ * @param {number} mod      The actor's wound penalty modifier
+ * @returns {number}
+ */
+function effectiveWoundPenalty(key, penalty, mod) {
+  return key === "healthy" ? 0 : Math.max(0, toInt(penalty) + mod);
 }
 
 /**
@@ -369,6 +378,18 @@ export function determineCurrentWoundLevel(sys, order, sCapped, woundMode) {
 }
 
 /**
+ * Healing per night's rest: twice Stamina plus Insight Rank (Core Rulebook p.84, `game-rules/35_healing_wounds.md`),
+ * plus the healing modifiers. Sets `wounds.healRate` and `_derived.healingStamina`.
+ * @param {object} sys  Prepared system data, after the effective Traits are known
+ * @param {number} insightRank  The PC's Insight Rank; an NPC counts as Rank 1 (NPC_INSIGHT_RANK)
+ */
+export function prepareHealRate(sys, insightRank) {
+  const healingStamina = toInt(sys._derived.traitsEff.sta) + toInt(sys.wounds.healingStaminaMod);
+  sys._derived.healingStamina = healingStamina;
+  sys.wounds.healRate = healingStamina * 2 + insightRank + toInt(sys.wounds.mod);
+}
+
+/**
  * Prepares visible wound levels for UI display.
  *
  * @param {Object} sys - Actor's system data
@@ -394,10 +415,11 @@ export function prepareVisibleWoundLevels(sys, order) {
   sys.visibleWoundLevels = {};
   sys.visibleManualWoundLevels = {};
 
-  // Copy manual wound levels for UI
+  // The manual levels for the wound settings table (templates/apps/wound-config.hbs). The prepared wound levels
+  // stay as the wound mode made them: formula thresholds in formula mode (#38)
   for (const key of order) {
     if (sys.manualWoundLevels && sys.manualWoundLevels[key]) {
-      sys.woundLevels[key] = { ...sys.manualWoundLevels[key], key };
+      sys.visibleManualWoundLevels[key] = sys.manualWoundLevels[key];
     }
   }
 
@@ -424,7 +446,7 @@ export function prepareVisibleWoundLevels(sys, order) {
       prev = value;
 
       const basePenalty = toInt(DEFAULT_WOUND_PENALTIES?.[key]) || 0;
-      const penaltyEff = Math.max(0, basePenalty + penaltyMod);
+      const penaltyEff = effectiveWoundPenalty(key, basePenalty, penaltyMod);
 
       sys.visibleWoundLevels[key] = {
         value,

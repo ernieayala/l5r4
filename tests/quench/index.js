@@ -20,7 +20,7 @@
  */
 
 import { SYS_ID } from "../../module/config/constants.js";
-import { buildFormula } from "./helpers.js";
+import { buildFormula, revealChatPopupsAtOnce } from "./helpers.js";
 import { createTestPC, createTestNPC } from "../fixtures/actor-fixtures.js";
 import { createSkillData, createWeaponData, createArmorData } from "../fixtures/item-fixtures.js";
 import { registerSkillRollTests as registerSkillRollServiceTests } from "./services/skill-rolls.js";
@@ -102,6 +102,7 @@ import { registerAuthoringBatch } from "./authoring.js";
 import { registerEffectsBatch } from "./effects.js";
 import { registerAnimationsBatch } from "./animations.js";
 import { registerWorldUpgradeBatch } from "./world-upgrade.js";
+import { registerRegressionsBatch } from "./regressions.js";
 
 /**
  * Register Quench integration tests for the L5R4 system.
@@ -109,6 +110,7 @@ import { registerWorldUpgradeBatch } from "./world-upgrade.js";
  * @returns {Promise<void>}
  */
 export async function registerQuenchTests(quench) {
+  revealChatPopupsAtOnce();
   registerSmokeBatch(quench);
   registerDeprecationsBatch(quench);
   registerDataModelsBatch(quench);
@@ -121,6 +123,7 @@ export async function registerQuenchTests(quench) {
   registerEffectsBatch(quench);
   registerAnimationsBatch(quench);
   registerWorldUpgradeBatch(quench);
+  registerRegressionsBatch(quench);
   registerActorDocumentTests(quench);
   registerActorWoundTests(quench);
   registerActorXpTests(quench);
@@ -875,7 +878,7 @@ function registerSkillRollTests(quench) {
 
           assert.exists(roll, "Roll created");
           assert.isNumber(roll.total, "Roll has total");
-          assert.equal(formula, "5d10k3x10+0", "Formula converted correctly");
+          assert.equal(formula, "5d10xa10k3+0", "Formula converted correctly");
         });
 
         it("should create Roll with modifier", async () => {
@@ -895,7 +898,7 @@ function registerSkillRollTests(quench) {
 
           assert.exists(roll, "Roll created");
           assert.equal(formula, "3d10k2+0", "Unskilled formula has no explosions");
-          assert.notInclude(formula, "x10", "No exploding dice for unskilled");
+          assert.notInclude(formula, "xa10", "No exploding dice for unskilled");
         });
       });
 
@@ -953,7 +956,7 @@ function registerSkillRollTests(quench) {
 
           assert.exists(roll, "Roll created");
           assert.isNumber(roll.total, "Roll has result");
-          assert.equal(formula, "8d10k3x10+0", "Formula built correctly for 8k3");
+          assert.equal(formula, "8d10xa10k3+0", "Formula built correctly for 8k3");
         });
       });
     },

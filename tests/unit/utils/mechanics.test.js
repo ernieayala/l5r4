@@ -13,7 +13,9 @@ import {
   getEffectiveTrait,
   extractRollParams,
   getAffinityDeficiencyModifier,
-  resolveWeaponSkillTrait
+  resolveWeaponSkillTrait,
+  ringRank,
+  castingSchoolRank
 } from "../../../module/utils/mechanics.js";
 
 /**
@@ -147,9 +149,41 @@ describe("normalizeTraitKey", () => {
   });
 });
 
+describe("ringRank (p.76)", () => {
+  const actor = { system: { rings: { fire: 3, void: { rank: 4, value: 2, max: 4 } } } };
+
+  it("reads an Elemental Ring", () => {
+    expect(ringRank(actor, "fire")).toBe(3);
+  });
+
+  it("reads the Void Ring's rank, so a Void spell rolls its Ring (p.163)", () => {
+    expect(ringRank(actor, "void")).toBe(4);
+  });
+});
+
+describe("castingSchoolRank (pp.80, 104-105, 163)", () => {
+  const caster = schools => ({
+    system: { insightRank: 4 },
+    items: schools.map(system => ({ type: "school", system }))
+  });
+
+  it("uses the shugenja School's Rank when a character has more than one School", () => {
+    const actor = caster([
+      { shugenja: false, schoolRank: 3 },
+      { shugenja: true, schoolRank: 1 }
+    ]);
+    expect(castingSchoolRank(actor)).toBe(1);
+  });
+
+  it("uses the Insight Rank otherwise, the School Rank of a single School", () => {
+    expect(castingSchoolRank(caster([{ shugenja: false, schoolRank: 4 }]))).toBe(4);
+    expect(castingSchoolRank(caster([]))).toBe(4);
+  });
+});
+
 describe("getEffectiveTrait", () => {
   describe("void ring special case", () => {
-    it("should read void from rings.void.rank", () => {
+    it("should read void from rings.void.rank, for a Skill rolled with the Void Ring (#7)", () => {
       const actor = {
         system: {
           rings: {

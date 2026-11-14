@@ -231,7 +231,7 @@ export function registerSkillVoidPointTests(quench) {
           // ACT
           const rolled = skillRank + traitValue + voidRoll; // 10
           const kept = traitValue + voidKeep; // 5
-          // Formula: 10d10k5x10+5
+          // Formula: 10d10xa10k5+5
 
           // ASSERT
           assert.equal(rolled, 10, "Dice pool correct");

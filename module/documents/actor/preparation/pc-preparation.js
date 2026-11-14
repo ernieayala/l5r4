@@ -34,34 +34,41 @@ import { initiativeDice } from "../../../utils/initiative.js";
 import {
   WOUND_LEVEL_ORDER,
   DEFAULT_WOUND_PENALTIES,
-  DEFAULT_WOUND_THRESHOLDS
+  DEFAULT_WOUND_THRESHOLDS,
+  RIDING_ARMOR_MOUNTED_BONUS
 } from "../../../config/game-mechanics.js";
-import { prepareTraitsAndRings, prepareMovement } from "../calculations/shared-traits-rings.js";
+import { TRAIT_KEYS } from "../../../config/reference-data.js";
+import { getCreationFreeBonusSources } from "../../../utils/xp-calculations.js";
+import {
+  prepareTraitsAndRings,
+  prepareMovement,
+  ringsFromTraits
+} from "../calculations/shared-traits-rings.js";
+import { prepareHealRate } from "../calculations/wound-system.js";
 import { enrichActorItems } from "../calculations/item-enrichment.js";
 import { applyArmorRules, applyDerivedRules } from "../rules.js";
 
 /**
  * Calculate Insight points and, unless the GM sets it by hand, Insight Rank (p.104): the Rings times ten plus every
- * Skill rank.
+ * Skill rank. The Rings come from the stored ranks plus the Family and School TraitAdjust bonuses, so an effect that
+ * raises a Trait for a while (a kata, a spell) never changes the Insight Rank.
  *
  * @param {Actor} actor
- * @param {object} sys  Prepared system data, Rings known
+ * @param {object} sys  Prepared system data
  * @param {Function} calculateInsightRankFn  Insight Rank from points
  */
 function prepareInsight(actor, sys, calculateInsightRankFn) {
-  const ringsTotal =
-    toInt(sys.rings.air) +
-    toInt(sys.rings.earth) +
-    toInt(sys.rings.fire) +
-    toInt(sys.rings.water) +
-    toInt(sys.rings?.void?.rank);
+  const stored = actor._source.system;
+  const owned = key => toInt(stored.traits[key]) + getCreationFreeBonusSources(actor, key).rules;
+  const rings = ringsFromTraits(Object.fromEntries(TRAIT_KEYS.map(key => [key, owned(key)])));
+  const voidRank = toInt(stored.rings.void.rank) + getCreationFreeBonusSources(actor, "void").rules;
+  const ringsTotal = rings.air + rings.earth + rings.fire + rings.water + voidRank;
 
   let skillTotal = 0;
   for (const it of actor.items) {
-    if (!it || typeof it.type !== "string" || it.type !== "skill") {
-      continue;
+    if (it.type === "skill") {
+      skillTotal += toInt(it._source.system.rank);
     }
-    skillTotal += toInt(it.system?.rank);
   }
 
   sys.insight = sys.insight || {};
@@ -140,6 +147,7 @@ export function preparePcData(actor, sys, finalizeWoundPenaltiesFn, calculateIns
   // Aggregate bonuses from all equipped armor items
   // Default behavior: Use highest bonus (RAW)
   // Optional behavior: Stack all bonuses (house rule)
+  const mounted = actor.statuses.has("mounted");
   for (const it of actor.items) {
     if (!it || typeof it.type !== "string" || it.type !== "armor") {
       continue;
@@ -148,7 +156,9 @@ export function preparePcData(actor, sys, finalizeWoundPenaltiesFn, calculateIns
     if (!a?.equipped) {
       continue;
     }
-    const b = toInt(a.bonus);
+    // Riding armor's +4 is +12 on horseback (p.198): 8 more than its entered bonus while mounted
+    const b =
+      toInt(a.bonus) + (mounted && a.armorType === "riding" ? RIDING_ARMOR_MOUNTED_BONUS : 0);
     const r = toInt(a.reduction);
     if (allowStack) {
       bonusTN += b;
@@ -227,16 +237,7 @@ export function preparePcData(actor, sys, finalizeWoundPenaltiesFn, calculateIns
     })
   );
 
-  // Calculate healing rate (L5R4 core rules)
-  // Formula: (Stamina × 2) + Insight Rank + modifiers
-  const baseStamina = TR("sta");
-  const healingStaminaMod = toInt(sys.wounds?.healingStaminaMod);
-  const healingStamina = baseStamina + healingStaminaMod;
-
-  sys._derived = sys._derived || {};
-  sys._derived.healingStamina = healingStamina;
-
-  sys.wounds.healRate = healingStamina * 2 + toInt(sys.insight?.rank) + toInt(sys.wounds?.mod);
+  prepareHealRate(sys, toInt(sys.insight.rank));
 
   // Enrich embedded items with calculated data
   enrichActorItems(actor);

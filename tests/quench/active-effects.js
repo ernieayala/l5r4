@@ -395,6 +395,50 @@ export function registerActiveEffectsBatch(quench) {
           assert.equal(await historyTraitXp(actor, "str"), 16, "the history charges the same");
         });
 
+        it("a legacy Family and School bonus to one Trait make two free ranks (p.102)", async () => {
+          actor = await createTestPC({ name: "Legacy xp double", system: { traits: { str: 2 } } });
+          await actor.createEmbeddedDocuments("Item", [
+            { name: "Legacy family", type: "family", system: { trait: "str", bonus: 1 } },
+            { name: "Legacy school", type: "school", system: { trait: "str", bonus: 1 } }
+          ]);
+          await actor.update({ "system.traits.str": 4 });
+          assert.equal(actor.getFlag(SYS_ID, "xpFreeTraitBase")?.str, 2, "ranks 3 and 4");
+          assert.equal(actor.system._xp.breakdown.traits, 0, "both ranks are free");
+          await actor.update({ "system.traits.str": 5 });
+          assert.equal(actor.system._xp.breakdown.traits, 20, "Strength 4 to 5 costs 4 x 5");
+        });
+
+        it("a legacy Void bonus makes the raise to Void 3 free", async () => {
+          actor = await createTestPC({ name: "Legacy xp void" });
+          await actor.createEmbeddedDocuments("Item", [
+            { name: "Legacy school", type: "school", system: { trait: "void", bonus: 1 } }
+          ]);
+          await actor.update({ "system.rings.void.rank": 3 });
+          assert.equal(actor.getFlag(SYS_ID, "xpFreeTraitBase")?.void, 1, "free stored rank");
+          assert.equal(actor.system._xp.breakdown.void, 0, "the School rank is free");
+          await actor.update({ "system.rings.void.rank": 4 });
+          assert.equal(actor.system._xp.breakdown.void, 24, "Void 3 to 4 costs 6 x 4");
+        });
+
+        it("a TraitAdjust Void bonus counts toward each bought Void rank (#44)", async () => {
+          actor = await createTestPC({ name: "AE xp void" });
+          await actor.createEmbeddedDocuments("Item", [creationBonusItem("school", "void")]);
+          assert.equal(actor.system.rings.void.rank, 3, "stored 2 + School 1");
+          await actor.update({ "system.rings.void.rank": 3 });
+          assert.notOk(actor.getFlag(SYS_ID, "xpFreeTraitBase")?.void, "no free stored rank");
+          assert.equal(actor.system._xp.breakdown.void, 24, "Void 3 to 4 costs 6 x 4");
+        });
+
+        it("a kata and a kiho cost their Mastery Level (pp.231, 259; #43)", async () => {
+          actor = await createTestPC({ name: "AE xp kata" });
+          await actor.createEmbeddedDocuments("Item", [
+            { name: "Quench kata", type: "kata", system: { mastery: 3 } },
+            { name: "Quench kiho", type: "kiho", system: { mastery: 4 } }
+          ]);
+          assert.equal(actor.system._xp.breakdown.kata, 3);
+          assert.equal(actor.system._xp.breakdown.kiho, 4);
+        });
+
         it("the migration clears a free rank marked for a TraitAdjust rule bonus", async () => {
           actor = await createTestPC({ name: "AE xp migration", system: { traits: { str: 3 } } });
           await actor.createEmbeddedDocuments("Item", [

@@ -89,7 +89,8 @@ export function register(quench) {
           await actor.createEmbeddedDocuments("Item", [
             createSkillData("Kenjutsu", 3, "agi"),
             createWeaponData("Katana", 3, 2, { system: { associatedSkill: "Kenjutsu" } }),
-            createSpellData("Test Fire Spell", "fire", 2),
+            // Mastery 1: within School Rank 1, so no GM confirm opens (p.164)
+            createSpellData("Test Fire Spell", "fire", 1),
             createSpellData("Test Maho Spell", "earth", 1, { system: { maho: true } })
           ]);
           // Past Healthy, into a Wound Rank with a penalty

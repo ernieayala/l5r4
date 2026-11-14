@@ -1,5 +1,43 @@
 import { describe, expect, it } from "vitest";
-import { canEmbraceTaint, isLost, taintEffects } from "../../../module/utils/taint.js";
+import {
+  canEmbraceTaint,
+  highestRing,
+  isLost,
+  lostBonus,
+  taintEffects,
+  voidPointsMax
+} from "../../../module/utils/taint.js";
+
+describe("lostBonus (p.279)", () => {
+  const roll = extra => ({ rank: 5, highestRing: 4, kind: "skill", trait: "agi", ...extra });
+
+  it("adds the Taint Rank to a Lost character's physical Trait rolls", () => {
+    expect(lostBonus(roll())).toBe(5);
+    expect(lostBonus(roll({ kind: "trait", trait: "sta" }))).toBe(5);
+  });
+
+  it("adds nothing to a mental Trait roll, a damage roll, or a character not yet Lost", () => {
+    expect(lostBonus(roll({ trait: "int" }))).toBe(0);
+    expect(lostBonus(roll({ kind: "damage", trait: "str" }))).toBe(0);
+    expect(lostBonus(roll({ rank: 4 }))).toBe(0);
+    expect(lostBonus(roll({ highestRing: 6 })), "a Ring at 6 holds out until Rank 7").toBe(0);
+  });
+});
+
+describe("voidPointsMax (pp.278-279)", () => {
+  it("is the Void Ring, one less from Level 4, and none once Lost", () => {
+    expect(voidPointsMax(3, 3, 3)).toBe(3);
+    expect(voidPointsMax(3, 4, 3)).toBe(2);
+    expect(voidPointsMax(3, 5, 3)).toBe(0);
+    expect(voidPointsMax(6, 6, 6), "not Lost until Rank 7").toBe(5);
+  });
+});
+
+describe("highestRing", () => {
+  it("counts the Void Ring", () => {
+    expect(highestRing({ air: 2, earth: 3, fire: 2, water: 2, void: { rank: 6 } })).toBe(6);
+  });
+});
 
 describe("taintEffects (Core Rulebook pp.277-278; STAGE-11 decision 5)", () => {
   it("does nothing below Level 3", () => {

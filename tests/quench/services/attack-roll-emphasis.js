@@ -113,7 +113,7 @@ export function registerAttackRollEmphasisTests(quench) {
           assert.include(formula, "r1", "Formula includes r1 (re-roll 1s)");
           assert.include(formula, "9d10", "Correct rolled dice");
           assert.include(formula, "k4", "Correct kept dice");
-          assert.include(formula, "x10", "Dice explode on 10");
+          assert.include(formula, "xa10", "Dice explode on 10");
         });
 
         it("should not include r1 when emphasis is false", () => {
@@ -127,7 +127,7 @@ export function registerAttackRollEmphasisTests(quench) {
 
           // ASSERT - Formula must NOT include r1
           assert.notInclude(formula, "r1", "Formula does not include r1");
-          assert.include(formula, "9d10k4", "Correct dice pool");
+          assert.include(formula, "9d10xa10k4", "Correct dice pool");
         });
 
         it("should handle weapon with no emphasis", async () => {
@@ -223,7 +223,7 @@ export function registerAttackRollEmphasisTests(quench) {
           assert.include(formula, "10d10", "Rolled dice includes void bonus");
           assert.include(formula, "k5", "Kept dice includes void bonus");
           assert.include(formula, "r1", "Emphasis re-rolls 1s");
-          assert.include(formula, "x10", "Dice explode");
+          assert.include(formula, "xa10", "Dice explode");
         });
 
         it("should verify void point available before spending", () => {
@@ -339,7 +339,7 @@ export function registerAttackRollEmphasisTests(quench) {
           assert.include(formula, "11d10", "Rolled includes stance bonus");
           assert.include(formula, "k5", "Kept includes stance bonus");
           assert.include(formula, "r1", "Emphasis re-rolls 1s");
-          assert.include(formula, "x10", "Dice explode");
+          assert.include(formula, "xa10", "Dice explode");
         });
       });
 
@@ -424,7 +424,7 @@ export function registerAttackRollEmphasisTests(quench) {
           assert.include(formula, "12d10", "All roll bonuses applied");
           assert.include(formula, "k6", "All keep bonuses applied");
           assert.include(formula, "r1", "Emphasis re-rolls 1s");
-          assert.include(formula, "x10", "Dice explode");
+          assert.include(formula, "xa10", "Dice explode");
         });
 
         it("should handle emphasis + void + stance + raises", () => {
@@ -512,7 +512,7 @@ export function registerAttackRollEmphasisTests(quench) {
 
           // ASSERT - Unskilled has no emphasis or explosions
           assert.notInclude(formula, "r1", "No emphasis for unskilled");
-          assert.notInclude(formula, "x10", "No explosions for unskilled");
+          assert.notInclude(formula, "xa10", "No explosions for unskilled");
           assert.include(formula, "3d10k3", "Correct unskilled formula");
         });
 
@@ -617,7 +617,7 @@ export function registerAttackRollEmphasisTests(quench) {
           // ASSERT
           assert.equal(voidCurrent, 0, "No void points available");
 
-          // Attack with emphasis should still work, just no void bonus
+          // The attack with an Emphasis still rolls, without the Void bonus
           const rolled = 9; // Base only
           const kept = 4;
 
@@ -683,7 +683,7 @@ export function registerAttackRollEmphasisTests(quench) {
           assert.include(formula, "d10", "Uses d10 dice");
           assert.include(formula, "k", "Has keep notation");
           assert.include(formula, "r1", "Has re-roll notation");
-          assert.include(formula, "x10", "Has explode notation");
+          assert.include(formula, "xa10", "Has explode notation");
 
           // Should be parseable by Foundry's Roll class
           assert.doesNotThrow(() => {

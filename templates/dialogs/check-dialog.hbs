@@ -65,6 +65,13 @@
       <label>{{localize "l5r4.ui.check.void"}} ({{voidPoints}})</label>
       <input type="checkbox" name="void" {{disabled (not voidPoints)}} />
     </div>
+    {{#if voidSkill}}
+      <div class="form-group">
+        <label>{{localize "l5r4.ui.check.voidSkill"}} ({{voidPoints}})</label>
+        <input type="checkbox" name="voidSkill" {{disabled (not voidPoints)}} />
+      </div>
+      <p class="hint">{{localize "l5r4.ui.check.voidSkillHint"}}</p>
+    {{/if}}
     {{#if voidOverLimit}}<p class="hint">{{localize "l5r4.ui.effects.voidSpentThisRound"}}</p>{{/if}}
   {{/if}}
 

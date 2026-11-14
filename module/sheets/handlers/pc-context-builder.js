@@ -311,8 +311,8 @@ export class PcContextBuilder {
    * display in a "Mastery Abilities" section of the character sheet.
    *
    * Note: Rank 9 masteries are not checked as they are rare and not present in
-   * most skill definitions. Rank 10 mastery (free raise) is automatic and not
-   * displayed via this list.
+   * most skill definitions. The Rank 10 Mastery (a Free Raise, p.133) is a rule the skill carries
+   * (module/data/item/SkillData.js ownedRules) and is not displayed via this list.
    *
    * @param {Item[]} skills - Array of skill items (must have system.rank and system.masteryX properties)
    * @returns {Object[]} Array of unlocked mastery ability objects

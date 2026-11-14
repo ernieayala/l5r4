@@ -71,10 +71,11 @@ export function allocateRaises({ raises, freeRaises, cost }) {
 }
 
 /**
- * The Feint bonus to damage (p.86): half the amount the attack beat its TN by, the Raises included in that TN,
- * rounded down (STAGE-10 decision 2), never more than five times the attacker's Insight Rank.
+ * The Feint bonus to damage (p.86): half the amount the attack beat the target's Armor TN by, the Feint's own 2
+ * Raises counted, rounded down (STAGE-10 decision 2; Ernie's ruling, 2026-11-14), never more than five times the
+ * attacker's Insight Rank.
  *
- * @param {number} margin       Attack total minus its effective TN
+ * @param {number} margin       Attack total minus the target's Armor TN and the Feint's 10
  * @param {number} insightRank
  * @returns {number}
  *

@@ -4,15 +4,23 @@ import { createRule } from "../../module/data/rules/rule-models.js";
 import { FamilyBonusService } from "../../module/services/family-bonus-service.js";
 import { collectCheck } from "../../module/services/dice/check/collect.js";
 import { displayRollBonus } from "../../module/utils/mechanics.js";
+import { T } from "../../module/utils/localization.js";
 import { applyEffect } from "../../module/services/effects/apply.js";
 import { TraitRoll } from "../../module/services/dice/rolls/trait-roll.js";
+import { SkillRoll } from "../../module/services/dice/rolls/skill-roll.js";
 import { getCreationFreeBonusSources } from "../../module/utils/xp-calculations.js";
 import { migrateItemRules } from "../../module/setup/migrations/items/item-rules.js";
 import { migrateStatusEffectRules } from "../../module/setup/migrations/actors/status-effect-rules.js";
 import { migrateUnlinkedTokens } from "../../module/setup/migrations/actors/unlinked-tokens.js";
 import { createTestNPC, createTestPC } from "../fixtures/actor-fixtures.js";
 import { createArmorData, createSkillData } from "../fixtures/item-fixtures.js";
-import { changeThroughSheet, cleanTest, settleChatNotifications, watchConsole } from "./helpers.js";
+import {
+  changeThroughSheet,
+  cleanTest,
+  settleChatNotifications,
+  waitFor,
+  watchConsole
+} from "./helpers.js";
 
 /** The smallest valid source for each rule key; every other field takes its default. */
 const MINIMAL_RULES = {
@@ -325,7 +333,7 @@ export function registerRulesBatch(quench) {
         });
 
         it(
-          "a RollModifier on a Trait reaches the Trait roll",
+          "a RollModifier on a Trait reaches the Trait roll made without the dialog (#42)",
           clean(async () => {
             const actor = track(await createTestPC({ name: "Rules roll" }));
             const ref = actor.system._derived.traitsEff.ref;
@@ -344,7 +352,47 @@ export function registerRulesBatch(quench) {
               askForOptions: false
             });
             messages.push(message);
-            assert.include(message.rolls[0].formula, `${ref + 1}d10k${ref + 1}x10`);
+            assert.include(message.rolls[0].formula, `${ref + 1}d10xa10k${ref + 1}`);
+          })
+        );
+
+        it(
+          "Mounted gives +1k0 to a Skill weapon attack on an unmounted target (p.89; #41)",
+          clean(async () => {
+            const actor = track(await createTestPC({ name: "Rules rider" }));
+            const target = track(await createTestNPC({ name: "Rules footman" }));
+            const [, katana] = await actor.createEmbeddedDocuments("Item", [
+              createSkillData("Kenjutsu", 2, "agi"),
+              { name: "Katana", type: "weapon", system: { associatedSkill: "kenjutsu" } }
+            ]);
+            await actor.toggleStatusEffect("mounted", { active: true });
+            const [token] = await canvas.scene.createEmbeddedDocuments("Token", [
+              (await target.getTokenDocument({ x: 0, y: 0 })).toObject()
+            ]);
+            try {
+              await waitFor(() => token.object);
+              canvas.tokens.setTargets([token.id]);
+              const agi = actor.system.traits.agi;
+              const message = await SkillRoll({
+                actor,
+                actorTrait: agi,
+                skillRank: 2,
+                skillName: "Kenjutsu",
+                skillTrait: "agi",
+                askForOptions: false,
+                rollType: "attack",
+                weaponId: katana.id
+              });
+              messages.push(message);
+              assert.deepInclude(
+                message.system.pool,
+                { roll: agi + 3, keep: agi },
+                "Agility + 2 + 1"
+              );
+            } finally {
+              canvas.tokens.setTargets([]);
+              await token.delete();
+            }
           })
         );
       });
@@ -365,6 +413,74 @@ export function registerRulesBatch(quench) {
             assert.equal(actor.system.traits.str, actor._source.system.traits.str + 1);
             assert.equal(FamilyBonusService.getBonus(actor, "str"), 1);
             assert.deepEqual(getCreationFreeBonusSources(actor, "str"), { rules: 1, legacy: 0 });
+          })
+        );
+
+        it(
+          "Insight counts a School's Void bonus but not an effect's (p.104)",
+          clean(async () => {
+            const actor = track(await createTestPC({ name: "Rules insight" }));
+            const before = actor.system.insight.points;
+            await actor.createEmbeddedDocuments("Item", [
+              {
+                name: "Quench School",
+                type: "school",
+                system: { rules: [{ key: "TraitAdjust", trait: "void", value: 1 }] }
+              }
+            ]);
+            assert.equal(actor.system.insight.points, before + 10, "the School's Void rank");
+            await actor.createEmbeddedDocuments("ActiveEffect", [
+              ruleEffect([
+                { key: "TraitAdjust", trait: "void", value: 1 },
+                { key: "TraitAdjust", trait: "str", value: 1 },
+                { key: "TraitAdjust", trait: "per", value: 1 }
+              ])
+            ]);
+            assert.equal(actor.system.rings.void.rank, actor._source.system.rings.void.rank + 2);
+            assert.equal(actor.system.rings.water, actor._source.system.traits.str + 1);
+            assert.equal(
+              actor.system.insight.points,
+              before + 10,
+              "the effect's ranks do not count"
+            );
+          })
+        );
+
+        it(
+          "a Lost character adds the Taint Rank to physical Trait rolls and has no Void Points (p.279)",
+          clean(async () => {
+            const actor = track(await createTestPC({ name: "Rules lost" }));
+            await actor.update({ "system.shadowTaint.rank": 5 });
+            assert.equal(actor.system.rings.void.max, 0, "no Void Points");
+            const lost = T("l5r4.ui.taint.lost");
+            const bonusOn = spec =>
+              collectAndRoll(actor, spec).then(message =>
+                message.system.modifiers.filter(m => m.label === lost).map(m => m.total)
+              );
+            assert.deepEqual(await bonusOn({ traitName: "agi" }), [5], "Agility");
+            assert.deepEqual(await bonusOn({ traitName: "int" }), [], "Intelligence is mental");
+            await actor.update({ "system.shadowTaint.rank": 4 });
+            assert.deepEqual(await bonusOn({ traitName: "agi" }), [], "Rank 4 is not Lost");
+            assert.equal(
+              actor.system.rings.void.max,
+              actor.system.rings.void.rank - 1,
+              "Level 4: one less"
+            );
+          })
+        );
+
+        it(
+          "a wound penalty modifier never gives Healthy a penalty (p.82)",
+          clean(async () => {
+            const pc = track(await createTestPC({ name: "Rules healthy" }));
+            const npc = track(await createTestNPC({ name: "Rules healthy NPC" }));
+            for (const actor of [pc, npc]) {
+              await actor.update({ "system.woundsPenaltyMod": 5 });
+              assert.equal(actor.system.woundLevels.healthy.penaltyEff, 0, actor.type);
+              assert.equal(actor.system.woundLevels.nicked.penaltyEff, 8, "Nicked 3 + 5");
+            }
+            // The NPC sheet's rows
+            assert.equal(npc.system.visibleWoundLevels.healthy.penaltyEff, 0);
           })
         );
 
@@ -459,6 +575,54 @@ export function registerRulesBatch(quench) {
         );
 
         it(
+          "a Skill at Rank 10 gives a Free Raise on its own rolls (p.133)",
+          clean(async () => {
+            const actor = track(await createTestPC({ name: "Rules mastery" }));
+            const [skill] = await actor.createEmbeddedDocuments("Item", [
+              createSkillData("Kenjutsu", 9, "agi")
+            ]);
+            assert.equal(collectCheck(actor, { kind: "skill", skill: "kenjutsu" }).freeRaises, 0);
+            await skill.update({ "system.rank": 10 });
+            assert.equal(collectCheck(actor, { kind: "skill", skill: "kenjutsu" }).freeRaises, 1);
+            assert.equal(
+              collectCheck(actor, { kind: "skill", skill: "iaijutsu" }).freeRaises,
+              0,
+              "only that Skill's rolls"
+            );
+          })
+        );
+
+        it(
+          "modifiers of one type count once in the roll, as on the sheet",
+          clean(async () => {
+            const actor = track(await createTestPC({ name: "Rules typed" }));
+            await actor.createEmbeddedDocuments("Item", [
+              ruleItem(
+                [{ key: "RollModifier", selector: "trait", roll: 1, keep: 1, type: "kata" }],
+                "Quench A"
+              ),
+              ruleItem(
+                [{ key: "RollModifier", selector: "trait", roll: 1, keep: 1, type: "kata" }],
+                "Quench B"
+              )
+            ]);
+            const agi = actor.system.traits.agi;
+            const message = await TraitRoll({
+              actor,
+              traitName: "agi",
+              traitRank: agi,
+              askForOptions: false
+            });
+            messages.push(message);
+            assert.deepInclude(
+              message.system.pool,
+              { roll: agi + 1, keep: agi + 1 },
+              "the Trait plus one +1k1"
+            );
+          })
+        );
+
+        it(
           "Master of Blood is a RollOption the maho roll reads",
           clean(async () => {
             const actor = track(await createTestPC({ name: "Rules maho" }));
@@ -476,6 +640,18 @@ export function registerRulesBatch(quench) {
        * console.warn) so cleanTest still catches any other warning.
        * @param {Item[]} items
        */
+      /** A Trait roll with no dialog, kept for cleanup. */
+      const collectAndRoll = async (actor, { traitName }) => {
+        const message = await TraitRoll({
+          actor,
+          traitName,
+          traitRank: actor.system.traits[traitName],
+          askForOptions: false
+        });
+        messages.push(message);
+        return message;
+      };
+
       const migrateItems = async items => {
         const warn = console.warn;
         const held = [];
@@ -516,7 +692,25 @@ export function registerRulesBatch(quench) {
         );
 
         it(
-          "a Master of Blood advantage gets its RollOption once",
+          "an item's 3.2.1 Free Raises become a FreeRaise rule on any roll, once",
+          clean(async () => {
+            const actor = track(await createTestPC({ name: "Rules migrate free raises" }));
+            const [item] = await actor.createEmbeddedDocuments("Item", [
+              { name: "Lucky charm", type: "commonItem", system: { freeRaises: 2 } }
+            ]);
+            await migrateItems(actor.items.contents);
+            await migrateItems(actor.items.contents);
+            assert.deepEqual(item._source.system.rules, [
+              { key: "FreeRaise", selector: "any", value: 2 }
+            ]);
+            assert.equal(item._source.system.freeRaises, 0);
+            assert.equal(collectCheck(actor, { kind: "skill" }).freeRaises, 2, "counted once");
+            assert.equal(collectCheck(actor, { kind: "damage" }).freeRaises, 0, "not on damage");
+          })
+        );
+
+        it(
+          "a Master of Blood advantage gets its RollOption and its +10 TN on other spells once (p.280)",
           clean(async () => {
             const actor = track(await createTestPC({ name: "Rules migrate maho" }));
             const [item] = await actor.createEmbeddedDocuments("Item", [
@@ -525,9 +719,18 @@ export function registerRulesBatch(quench) {
             await migrateItems(actor.items.contents);
             await migrateItems(actor.items.contents);
             assert.deepEqual(item._source.system.rules, [
-              { key: "RollOption", option: "master-of-blood" }
+              { key: "RollOption", option: "master-of-blood" },
+              {
+                key: "TNModifier",
+                selector: "spell",
+                value: 10,
+                predicate: [{ not: "check:maho" }]
+              }
             ]);
             assert.isTrue(actor.rollOptions.has("master-of-blood"));
+            const tn = kind => collectCheck(actor, { kind }).tnModifiers.map(m => m.value);
+            assert.deepEqual(tn("spell"), [10], "a spell");
+            assert.deepEqual(tn("maho"), [], "not maho");
           })
         );
 

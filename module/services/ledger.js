@@ -8,6 +8,7 @@
 import { SYS_ID } from "../config/constants.js";
 import { LEDGER_TRACKS } from "../config/rule-keys.js";
 import { DIALOG_TEMPLATES } from "../config/templates.js";
+import { RANK_TRACK_RANGE } from "../config/game-mechanics.js";
 import { applyRankPointsDelta } from "../utils/advancement.js";
 import { ledgerChange } from "../utils/ledger.js";
 import { T } from "../utils/localization.js";
@@ -55,7 +56,7 @@ export function ledgerEntries(actor) {
 
 /**
  * Gain or lose points on a track: the Ledger rules size the change, the stored rank and points move (ten points to a
- * rank, ranks 0-10, p.90), and the change is logged.
+ * rank, p.90, within the track's range: RANK_TRACK_RANGE), and the change is logged.
  *
  * @param {Actor} actor
  * @param {string} track   honor, glory, status, or taint
@@ -75,7 +76,7 @@ export async function recordTrackChange(actor, track, points, reason) {
     console.warn(`${SYS_ID} | Ledger rule on "${source}" (${actor.name}) skipped: ${message}`);
   }
   const stored = actor._source.system[field];
-  const next = applyRankPointsDelta(stored, sized.points / 10, 0, 10);
+  const next = applyRankPointsDelta(stored, sized.points / 10, ...RANK_TRACK_RANGE[field]);
   const entry = {
     id: foundry.utils.randomID(),
     track,
