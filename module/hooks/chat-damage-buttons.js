@@ -168,10 +168,14 @@ async function reduceAndApplyWounds(damage, _actorId) {
 }
 
 /**
- * Registers chat message hook to handle damage button clicks
+ * Registers chat message hook to handle damage button clicks on damage cards posted by 3.x, which carry their
+ * damage in the HTML. A `roll` message's damage goes through module/services/combat/damage.js.
  */
 export function registerChatDamageButtons() {
   Hooks.on("renderChatMessageHTML", (message, html) => {
+    if (message.type === "roll") {
+      return;
+    }
     // renderChatMessageHTML passes an HTMLElement, not jQuery
     const element = html;
 

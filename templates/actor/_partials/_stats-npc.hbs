@@ -229,6 +229,7 @@
               <span class="mas">{{attack.roll}}k{{attack.keep}}{{#if attack.modifier}}{{numberFormat attack.modifier decimals=0 sign=true}}{{/if}}</span>
               <a class="button"
                  data-action="roll-attack"
+                 data-attack-num="{{num}}"
                  data-roll="{{attack.roll}}"
                  data-keep="{{attack.keep}}"
                  data-modifier="{{attack.modifier}}"

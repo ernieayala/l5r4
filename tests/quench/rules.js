@@ -36,7 +36,10 @@ const MINIMAL_RULES = {
   ApplyCondition: { key: "ApplyCondition", selector: "attack", condition: "dazed" },
   ConditionImmunity: { key: "ConditionImmunity", condition: "feared" },
   PeriodicSave: { key: "PeriodicSave", roll: "ring:earth" },
-  Resource: { key: "Resource", slug: "void" }
+  Resource: { key: "Resource", slug: "void" },
+  DamageSource: { key: "DamageSource" },
+  Invulnerability: { key: "Invulnerability" },
+  Spirit: { key: "Spirit" }
 };
 
 /**
@@ -501,10 +504,13 @@ export function registerRulesBatch(quench) {
           clean(async () => {
             const actor = track(await createTestPC({ name: "Rules migrate stance" }));
             const before = actor.system.armorTn.current;
-            const [stance, fear] = await actor.createEmbeddedDocuments("ActiveEffect", [
+            const created = await actor.createEmbeddedDocuments("ActiveEffect", [
               { name: "Defense Stance", statuses: ["defenseStance"] },
               { name: "Fear 3", statuses: ["feared"] }
             ]);
+            // The server's result is not always in request order
+            const stance = created.find(e => e.statuses.has("defenseStance"));
+            const fear = created.find(e => e.statuses.has("feared"));
             // Stored as 3.2.1 left them: no rules, no group, Fear's Rank in a flag
             await stance.update({ "system.rules": [], "system.group": "" });
             await fear.update({

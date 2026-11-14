@@ -65,6 +65,8 @@ export const TEMPLATE = relPath => {
  * @property {string} checkCard - A roll from the roll pipeline (`roll` ChatMessage subtype)
  * @property {string} weaponCard - Weapon attack roll display
  * @property {string} effectPrompt - A save, Full Defense roll, or Concentration check an effect asks for
+ * @property {string} damageResult - Wounds a damage roll dealt, with Void reduction and Undo
+ * @property {string} flowCard - A guided combat flow (iaijutsu duel, grapple)
  * @property {string} healing - Healing action results
  *
  * @example
@@ -75,6 +77,8 @@ export const CHAT_TEMPLATES = freeze({
   checkCard: TEMPLATE("chat/check-card.hbs"),
   weaponCard: TEMPLATE("chat/weapon-chat.hbs"),
   effectPrompt: TEMPLATE("chat/effect-prompt.hbs"),
+  damageResult: TEMPLATE("chat/damage-result.hbs"),
+  flowCard: TEMPLATE("chat/flow-card.hbs"),
   healing: TEMPLATE("chat/healing.hbs")
 });
 

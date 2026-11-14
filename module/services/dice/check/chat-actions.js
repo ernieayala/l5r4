@@ -9,8 +9,8 @@
 import { F, T } from "../../../utils/localization.js";
 import { toInt } from "../../../utils/type-coercion.js";
 import { contest, evaluateCheck, poolFormula } from "../../../utils/check.js";
-import { WeaponRoll } from "../rolls/weapon-roll.js";
 import { applyEffectAnywhere } from "../../effects/apply.js";
+import { rollDamageFromAttack } from "../../combat/damage.js";
 import { renderCheckCard } from "./roll-check.js";
 
 /**
@@ -36,31 +36,13 @@ function mayAct(actor) {
 }
 
 /**
- * Roll damage for a hit: the weapon's DR with Strength, plus +1k0 per Raise declared on the attack (Increased
- * Damage).
+ * Roll damage for a hit from its attack's stored context (module/services/combat/damage.js).
  * @param {ChatMessage} message  A `roll` message of kind "attack"
  * @param {{askForOptions?: boolean}} [options]
  * @returns {Promise<ChatMessage|null>}
  */
-export async function rollDamageFromMessage(message, { askForOptions = true } = {}) {
-  const actor = rollActor(message);
-  const weapon = fromUuidSync(message.system.weaponUuid);
-  if (!actor || !weapon) {
-    ui.notifications?.warn(T("l5r4.ui.notifications.actorNotFound"));
-    return null;
-  }
-  if (!mayAct(actor)) {
-    return null;
-  }
-  return WeaponRoll({
-    diceRoll: toInt(weapon.system.derivedDamageRoll ?? weapon.system.damageRoll),
-    diceKeep: toInt(weapon.system.derivedDamageKeep ?? weapon.system.damageKeep),
-    weaponName: weapon.name,
-    weapon,
-    attackRaises: message.system.tn.raises,
-    askForOptions,
-    actor
-  });
+export function rollDamageFromMessage(message, options = {}) {
+  return rollDamageFromAttack(message, options);
 }
 
 /**

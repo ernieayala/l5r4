@@ -19,6 +19,7 @@ export const APPLY_EFFECT_QUERY = `${SYS_ID}.applyEffect`;
  * @property {object[]} [rules]      Rules in place of the status's
  * @property {string} [origin]       UUID of what caused the effect
  * @property {object} [start]        Duration start fields (core fills the rest)
+ * @property {string} [turnOf]       UUID of the actor whose Turn the duration counts from (ownTurnStart)
  * @property {object} [flags]        Extra `flags.l5r4-enhanced` data
  */
 
@@ -70,9 +71,10 @@ export async function effectData(actor, id, { level, name, rules, origin, start,
  * @param {EffectOptions} [options]
  * @returns {Promise<ActiveEffect|undefined>}
  */
-export async function applyEffect(actor, id, options = {}) {
+export async function applyEffect(actor, id, { turnOf, ...options } = {}) {
+  const start = turnOf ? ownTurnStart(await fromUuid(turnOf)) : options.start;
   const [effect] = await actor.createEmbeddedDocuments("ActiveEffect", [
-    await effectData(actor, id, options)
+    await effectData(actor, id, { ...options, start })
   ]);
   return effect;
 }
@@ -134,6 +136,11 @@ export function registerEffectQueries() {
       throw new Error(`Cannot apply "${id}" to ${actorUuid}`);
     }
     const level = Number.isInteger(options?.level) ? options.level : undefined;
-    await applyEffect(actor, id, { level, origin: options?.origin });
+    const turnOf = (await fromUuid(String(options?.turnOf ?? "")))?.documentName === "Actor";
+    await applyEffect(actor, id, {
+      level,
+      origin: options?.origin,
+      ...(turnOf ? { turnOf: options.turnOf } : {})
+    });
   };
 }

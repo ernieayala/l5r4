@@ -43,6 +43,22 @@
   .check-note {
     font-style: italic;
   }
+
+  // Flow cards (duel, grapple) and damage results: one full-width button per row, so long labels stay readable
+  .l5r4-flow-card,
+  .l5r4-damage-result {
+    display: flex;
+    flex-direction: column;
+    gap: 0.25rem;
+  }
+
+  .flow-actions {
+    flex-direction: column;
+  }
+
+  .l5r4-damage-result.-undone {
+    opacity: 0.7;
+  }
 }
 
 // Roll pipeline dialog: one row per modifier, with its toggle, label, and value

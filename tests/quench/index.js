@@ -97,6 +97,7 @@ import { registerActiveEffectsBatch } from "./active-effects.js";
 import { registerSheetsAndAppsBatch } from "./sheets-and-apps.js";
 import { registerRulesBatch } from "./rules.js";
 import { registerRollPipelineBatch } from "./roll-pipeline.js";
+import { registerCombatBatch } from "./combat.js";
 import { registerEffectsBatch } from "./effects.js";
 
 /**
@@ -112,6 +113,7 @@ export async function registerQuenchTests(quench) {
   registerSheetsAndAppsBatch(quench);
   registerRulesBatch(quench);
   registerRollPipelineBatch(quench);
+  registerCombatBatch(quench);
   registerEffectsBatch(quench);
   registerActorDocumentTests(quench);
   registerActorWoundTests(quench);

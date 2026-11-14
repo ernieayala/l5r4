@@ -35,6 +35,8 @@ import { calculateFreeRaises } from "../resources/raise-manager.js";
  * @property {Array<{label: string, replace: string, with: string}>} substitutes
  * @property {string[]} notes
  * @property {Array<{label: string, condition: string, level: number|null}>} applyConditions  Offered on success
+ * @property {string[]} damageSources    Damage-source tags from DamageSource rules (pp.319-320)
+ * @property {number} ignoreReduction    Reduction the damage ignores
  */
 
 /**
@@ -93,12 +95,14 @@ export function checkOptions(actor, kind, target) {
  * @param {string} [spec.trait]
  * @param {string} [spec.ring]
  * @param {Actor|null} [spec.target]
+ * @param {Item|null} [spec.weapon]  The weapon of an attack or damage roll: its own rules apply
  * @returns {CheckContext}
  */
-export function collectCheck(actor, { kind, skill, trait, ring, target = null }) {
+export function collectCheck(actor, { kind, skill, trait, ring, target = null, weapon = null }) {
   const selectors = checkSelectors({ kind, skill, trait, ring });
   const options = checkOptions(actor, kind, target);
-  const entries = bagKind => bagEntries(actor.ruleBag, bagKind, selectors, options);
+  const entries = bagKind =>
+    bagEntries(actor.ruleBag, bagKind, selectors, options, weapon?.id ?? null);
 
   const modifiers = entries("rollModifiers").map(entry => ({
     label: entry.label,
@@ -176,6 +180,8 @@ export function collectCheck(actor, { kind, skill, trait, ring, target = null })
       label: entry.label,
       condition: entry.condition,
       level: entry.level
-    }))
+    })),
+    damageSources: [...new Set(entries("damageSources").flatMap(entry => entry.tags))],
+    ignoreReduction: entries("damageSources").reduce((sum, entry) => sum + entry.ignoreReduction, 0)
   };
 }

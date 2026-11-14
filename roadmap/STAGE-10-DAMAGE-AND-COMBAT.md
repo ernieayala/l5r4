@@ -33,7 +33,7 @@ Rules read with `/rule` before building: `32_attack_and_defense.md` p.82, `33_wo
 | Services | Damage from the attack message's context (weapon DR, Strength, arrow, Increased Damage Raises, rules); apply to the attack's target, falling back to selected tokens; Reduction and Reduction-ignore rules; `DamageSource` tags for Invulnerability and Spirit |
 | Services | Void reduction after damage (p.78) offered to the damaged actor's owner; undo from the damage card |
 | Services | Maneuvers as Raise options on the attack: Called Shot (GM effect), Disarm, Extra Attack, Feint, Guard, Increased Damage, Knockdown |
-| Apps | Iaijutsu duel (Assessment, Focus, Strike) and grapple control as guided flows |
+| Services | Iaijutsu duel (Assessment, Focus, Strike) and grapple control as guided chat-card flows (`module/services/combat/`); the GM starts a duel, and Guard sets its two statuses, from the token controls |
 | Fixes | B8; NPC Apply buttons |
 
 ## Acceptance
@@ -46,6 +46,28 @@ Rules read with `/rule` before building: `32_attack_and_defense.md` p.82, `33_wo
 ## Decisions
 
 1. GM-only outcomes (Called Shot effects, improvised maneuvers) post a note on the card for the GM.
+2. Halves the book leaves unrounded round down: the Feint bonus (half the margin over the raised TN, p.86) and
+   damage to a Spirit creature (p.320) (Ernie, 2026-11-13).
+3. Damage to a creature: Reduction first, then Spirit halves it and Invulnerability turns it into one Wound
+   (pp.319-320). When Reduction leaves no damage, Invulnerability leaves none (Ernie, 2026-11-13).
+4. Damage past the Out Wound Rank marks the actor Dead (p.82) and the card says so; the GM can remove the status
+   (Ernie, 2026-11-13).
+5. Applying damage lands at once. The target's owner then gets a button on the result card to spend a Void Point
+   for 10 fewer Wounds (p.78), taken back from what was applied; nothing waits on another player
+   (Ernie, 2026-11-13).
+6. Free Raises not spent on the TN pay for an attack's maneuvers before declared Raises do; declared Raises left
+   over become Increased Damage (+1k0 each, p.87). Maneuvers the Raises cannot pay for stop the roll with a warning.
+7. Rules on a weapon item (`system.rules`) apply only to rolls made with that weapon: its attack, its damage, and
+   its sheet values. Rules on other items and on effects apply as before.
+8. The duel and the grapple run as chat cards whose state only the active GM changes; a player's step goes to the
+   GM as a query, which reads each total from the roll message it names, never from the request.
+
+## Plan drift
+
+- The duel and grapple are chat-card flows in Services, not Apps windows: each step is a roll that posts to chat,
+  so the card sits beside the rolls it settles.
+- `module/hooks/chat-damage-buttons.js` stays for damage cards posted by 3.x, which carry their damage in the HTML;
+  it skips `roll` messages.
 
 ## Out of scope
 

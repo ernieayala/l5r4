@@ -22,6 +22,8 @@ export default class RollMessageData extends foundry.abstract.TypeDataModel {
       // skill, trait, ring, spell, maho, attack, damage, or roll (a plain XkY roll)
       kind: stringField("roll"),
       label: stringField(),
+      // The Skill rolled, in lower case; a grapple's control rolls use the Skill that started it (p.89)
+      skill: stringField(),
       // The pool after modifiers, Void, and the Ten Dice Rule; explode is null for an Unskilled Roll.
       pool: new SchemaField({
         roll: numberField(1),
@@ -61,7 +63,44 @@ export default class RollMessageData extends foundry.abstract.TypeDataModel {
         })
       ),
       // The message this one re-rolled, keeping the better total
-      rerollOf: stringField()
+      rerollOf: stringField(),
+      // An attack's maneuvers (pp.86-87); increasedDamage is the declared Raises left for +1k0 each
+      maneuvers: new SchemaField({
+        calledShot: numberField(0),
+        location: stringField(),
+        disarm: booleanField(false),
+        extraAttack: booleanField(false),
+        feint: booleanField(false),
+        knockdown: booleanField(false),
+        fourLegged: booleanField(false),
+        grapple: booleanField(false),
+        increasedDamage: numberField(0)
+      }),
+      // An attack's damage pool at the time of the attack (weapon DR with Strength or arrow, or a stat block's
+      // damage); no label means none
+      damage: new SchemaField({
+        label: stringField(),
+        roll: numberField(0),
+        keep: numberField(0),
+        bonus: numberField(0),
+        explode: new NumberField({ required: true, nullable: true, initial: 10 })
+      }),
+      // A damage roll's sources (jade, spell, ...) and the Reduction it ignores (pp.319-320)
+      sources: new ArrayField(stringField()),
+      ignoreReduction: numberField(0),
+      // The attack a damage roll belongs to
+      attackOf: stringField()
     };
+  }
+
+  /**
+   * An attack posted before maneuvers were stored spent all its declared Raises on Increased Damage.
+   * @override
+   */
+  static migrateData(source) {
+    if (source.kind === "attack" && source.maneuvers === undefined && source.tn) {
+      source.maneuvers = { increasedDamage: source.tn.raises ?? 0 };
+    }
+    return super.migrateData(source);
   }
 }

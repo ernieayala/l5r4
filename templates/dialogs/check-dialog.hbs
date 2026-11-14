@@ -81,6 +81,50 @@
       <label>{{localize "l5r4.equipment.weapons.rangedAttack"}}</label>
       <input type="checkbox" name="isRanged" {{checked ranged}} />
     </div>
+    <fieldset class="check-maneuvers">
+      <legend>{{localize "l5r4.ui.combat.maneuvers"}}</legend>
+      {{#if raisesAllowed}}
+        <p class="hint">{{localize "l5r4.ui.combat.maneuversHint"}}</p>
+        <div class="form-group">
+          <label>{{localize "l5r4.ui.combat.calledShot"}}</label>
+          <select name="maneuver.calledShot">
+            <option value="0">{{localize "l5r4.ui.common.none"}}</option>
+            <option value="1">{{localize "l5r4.ui.combat.calledShotLimb"}}</option>
+            <option value="2">{{localize "l5r4.ui.combat.calledShotHand"}}</option>
+            <option value="3">{{localize "l5r4.ui.combat.calledShotHead"}}</option>
+            <option value="4">{{localize "l5r4.ui.combat.calledShotSmall"}}</option>
+          </select>
+        </div>
+        <div class="form-group">
+          <label>{{localize "l5r4.ui.combat.calledShotLocation"}}</label>
+          <input type="text" name="maneuver.location" />
+        </div>
+        <div class="form-group">
+          <label>{{localize "l5r4.ui.combat.feint"}}</label>
+          <input type="checkbox" name="maneuver.feint" />
+        </div>
+        <div class="form-group">
+          <label>{{localize "l5r4.ui.combat.knockdown"}}</label>
+          <input type="checkbox" name="maneuver.knockdown" />
+        </div>
+        <div class="form-group">
+          <label>{{localize "l5r4.ui.combat.fourLegged"}}</label>
+          <input type="checkbox" name="maneuver.fourLegged" />
+        </div>
+        <div class="form-group">
+          <label>{{localize "l5r4.ui.combat.disarm"}}</label>
+          <input type="checkbox" name="maneuver.disarm" />
+        </div>
+        <div class="form-group">
+          <label>{{localize "l5r4.ui.combat.extraAttack"}}</label>
+          <input type="checkbox" name="maneuver.extraAttack" />
+        </div>
+      {{/if}}
+      <div class="form-group">
+        <label>{{localize "l5r4.ui.combat.grappleManeuver"}}</label>
+        <input type="checkbox" name="maneuver.grapple" />
+      </div>
+    </fieldset>
   {{/if}}
 
   {{#if socialResistance}}

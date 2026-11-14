@@ -59,7 +59,7 @@ Probable bugs read from the code, not yet reproduced in play (each gets an issue
 | B5 | Manual `actor.prepareData()` calls re-apply effects | `module/sheets/pc-sheet.js:430, 633`, `module/services/stance/rolls/full-defense-roll.js:137` | 2 |
 | B6 | Derived values written back to storage bake effect bonuses in | `chat-damage-buttons.js:63-66`, `void-manager.js:191, 274-276`, `spell-cast-roll.js:252` | 3 |
 | B7 | Unskilled rolls allow Raises; Void spendable on damage; Raise cap from current Void Points | `skill-roll.js:221-238, 272-274`, `weapon-roll.js:120-130` | 8 (fixed) |
-| B8 | Damage button omits Strength and the arrow modifier | `skill-roll.js:322-331`, `simple-roll.js:336-349` | 10 |
+| B8 | Damage button omits Strength and the arrow modifier | `skill-roll.js:322-331`, `simple-roll.js:336-349` | 10 (fixed) |
 | B9 | Inline `[[XkY]]` chat rolls pass an object to `String.replace` | `module/services/chat.js:333-334, 359` | 8 (fixed) |
 | B10 | Prone automation runs on every client and is never removed | `wound-prone-automation.js:44-172` | 9 (fixed) |
 | B11 | `explodesOn`, `insightBonus`, technique `rank` shown but never read (#37) | `templates/item/_type-modifiers/weapon.hbs:16-18` | 8 (`explodesOn` fixed); `insightBonus` and technique `rank` in 13 |
