@@ -152,6 +152,12 @@ export function registerWorldUpgradeBatch(quench) {
           assert.deepInclude(npc.system.initiative, { roll: 3, keep: 2 }, "Reflexes 2");
         });
 
+        it("an item's 3.2.1 Free Raises become a FreeRaise rule on any roll", () => {
+          const lucky = game.items.get("fxWiFreeRaise001");
+          assert.deepEqual(lucky.system.rules, [{ key: "FreeRaise", selector: "any", value: 1 }]);
+          assert.equal(lucky._source.system.freeRaises, 0);
+        });
+
         it("Master of Blood carries its rules, in the world and on actors", () => {
           assert.deepEqual(
             game.items.get("fxWiMasterBlood1").system.rules.map(r => r.key),

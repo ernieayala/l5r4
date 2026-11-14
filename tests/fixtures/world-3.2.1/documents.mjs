@@ -168,7 +168,13 @@ export const WORLD_ITEMS = [
     associatedSkill: "Kenjutsu",
     keywords: ["samurai", "sword"]
   }),
-  item("fxWiMasterBlood1", "advantage", "Master of Blood", { cost: 4, type: "spiritual" })
+  item("fxWiMasterBlood1", "advantage", "Master of Blood", { cost: 4, type: "spiritual" }),
+  // 3.2.1 added an item's freeRaises to every roll its owner made
+  item("fxWiFreeRaise001", "advantage", "Fixture Lucky", {
+    cost: 2,
+    type: "spiritual",
+    freeRaises: 1
+  })
 ].map(doc => ({
   ...doc,
   flags: { "l5r4-enhanced": { migratedVersion: "3.2.1" } }

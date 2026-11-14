@@ -38,6 +38,36 @@ import {
 } from "./asset-library.js";
 
 /**
+ * Animations still starting, by effect name, so a removal that comes first does not miss the effect and leave it
+ * playing.
+ * @type {Map<string, Promise<unknown>>}
+ */
+const starting = new Map();
+
+/** Longest wait for a started effect to finish loading before it is ended anyway. */
+const LOAD_WAIT_MS = 5000;
+
+/**
+ * Wait until the named animations have started and Sequencer has finished loading them. Sequencer 4.2.3 loads an
+ * effect's video after `play()` resolves, then sets the sprite's volume without checking whether the effect was ended
+ * meanwhile, so ending one that is still loading throws inside Sequencer (`PersistentCanvasEffect._createSprite`).
+ * @param {function(string): boolean} matches  Which effect names to wait for
+ * @param {string} pattern  The Sequencer name pattern for the same effects
+ * @returns {Promise<void>}
+ */
+async function settleStarts(matches, pattern) {
+  await Promise.allSettled(
+    [...starting].filter(([name]) => matches(name)).map(([, start]) => start)
+  );
+  const end = Date.now() + LOAD_WAIT_MS;
+  const loading = () =>
+    Sequencer.EffectManager.getEffects({ name: pattern }).some(effect => !effect.ready);
+  while (loading() && Date.now() < end) {
+    await new Promise(resolve => setTimeout(resolve, 50));
+  }
+}
+
+/**
  * Play animation for a stance or condition.
  *
  * Creates a persistent visual effect attached to the actor's token(s).
@@ -117,8 +147,16 @@ export async function playAnimation(actor, statusId, isStance = false) {
       const effectName = `${SYS_ID}.${statusId}.${token.id}`;
       effectSection = effectSection.name(effectName);
 
-      // Play the sequence
-      await sequence.play();
+      // Play the sequence; a removal of this effect waits for it (see `starting`)
+      const start = sequence.play();
+      starting.set(effectName, start);
+      try {
+        await start;
+      } finally {
+        if (starting.get(effectName) === start) {
+          starting.delete(effectName);
+        }
+      }
     } catch (error) {
       console.warn(`L5R4 | Failed to play animation ${statusId} for ${actor.name}:`, error);
     }
@@ -164,7 +202,8 @@ export async function removeAnimation(actor, statusId) {
       // Build effect name pattern
       const effectName = `${SYS_ID}.${statusId}.${token.id}`;
 
-      // End the effect via Sequencer
+      // End the effect via Sequencer, once it has finished starting
+      await settleStarts(name => name === effectName, effectName);
       await Sequencer.EffectManager.endEffects({ name: effectName });
     } catch (error) {
       console.warn(`L5R4 | Failed to remove animation ${statusId} for ${actor.name}:`, error);
@@ -200,7 +239,11 @@ export async function removeAllAnimations(actor) {
   // Remove all animations from each token
   for (const token of tokens) {
     try {
-      // End all effects for this system and token using name pattern
+      // End all effects for this system and token using name pattern, once they have finished starting
+      await settleStarts(
+        name => name.startsWith(`${SYS_ID}.`) && name.endsWith(`.${token.id}`),
+        `${SYS_ID}.*${token.id}`
+      );
       await Sequencer.EffectManager.endEffects({ name: `${SYS_ID}.*${token.id}` });
     } catch (error) {
       console.warn(`L5R4 | Failed to remove all animations for ${actor.name}:`, error);

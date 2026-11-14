@@ -5,7 +5,7 @@ import {
 } from "../../module/services/animations/asset-library.js";
 import { onCreateActiveEffectAnimation } from "../../module/services/animations/hooks.js";
 import { createTestPC } from "../fixtures/actor-fixtures.js";
-import { waitFor } from "./helpers.js";
+import { cleanTest, waitFor } from "./helpers.js";
 
 /**
  * Registers the `animations` batch (roadmap/STAGE-12): with Sequencer and a JB2A collection active, a status with an
@@ -18,6 +18,7 @@ export function registerAnimationsBatch(quench) {
     `${SYS_ID}.animations`,
     context => {
       const { describe, it, before, afterEach, assert } = context;
+      const clean = cleanTest(assert);
       let actor = null;
       let token = null;
 
@@ -58,6 +59,31 @@ export function registerAnimationsBatch(quench) {
           await actor.toggleStatusEffect("concentration", { active: true });
           assert.isTrue(await waitFor(() => playing("concentration").length === 1));
         });
+
+        it(
+          "a status removed while its animation still loads ends cleanly",
+          clean(async function () {
+            this.timeout(10_000);
+            await placeActor("Quench Animated Brief");
+            await actor.toggleStatusEffect("feared", { active: true });
+            await actor.toggleStatusEffect("feared", { active: false });
+            // Let a load that was under way finish, so an error from it lands in this test
+            await new Promise(resolve => setTimeout(resolve, 3000));
+            assert.lengthOf(playing("feared"), 0);
+          })
+        );
+
+        it(
+          "a token deleted while its animation still loads leaves no error",
+          clean(async function () {
+            this.timeout(10_000);
+            await placeActor("Quench Animated Vanishing");
+            await actor.toggleStatusEffect("entangled", { active: true });
+            await token.delete();
+            token = null;
+            await new Promise(resolve => setTimeout(resolve, 3000));
+          })
+        );
 
         it("another user's change plays nothing on this client", async () => {
           await placeActor("Quench Animated Elsewhere");
