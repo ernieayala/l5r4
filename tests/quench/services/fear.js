@@ -26,7 +26,7 @@ export function registerFearTests(quench) {
     context => {
       const { describe, it, assert } = context;
 
-      describe("Fear Target Number Calculation", () => {
+      describe("Fear TN calculation", () => {
         it("should calculate TN for Fear Rank 1", () => {
           const fearRank = 1;
           const tn = 5 + 5 * fearRank;
@@ -63,7 +63,7 @@ export function registerFearTests(quench) {
         });
       });
 
-      describe("Fear Resistance Roll Formula", () => {
+      describe("Fear resistance roll formula", () => {
         it("should use Willpower for both rolled and kept dice", () => {
           const willpower = 3;
           const rolled = willpower;
@@ -102,7 +102,7 @@ export function registerFearTests(quench) {
         });
       });
 
-      describe("Fear Success and Failure", () => {
+      describe("Fear success and failure", () => {
         it("should succeed when roll meets TN", () => {
           const rollTotal = 20;
           const tn = 20;
@@ -144,7 +144,7 @@ export function registerFearTests(quench) {
         });
       });
 
-      describe("Catastrophic Failure", () => {
+      describe("Catastrophic failure", () => {
         it("should NOT be catastrophic when failing by 14", () => {
           const rollTotal = 6;
           const tn = 20;
@@ -182,7 +182,7 @@ export function registerFearTests(quench) {
         });
       });
 
-      describe("Fear Penalty Application", () => {
+      describe("Fear penalty application", () => {
         it("should apply penalty equal to Fear Rank", () => {
           const fearRank = 3;
           const penalty = fearRank;
@@ -212,8 +212,8 @@ export function registerFearTests(quench) {
         });
       });
 
-      describe("Fear Rank Range", () => {
-        it("should handle minimum Fear Rank (1)", () => {
+      describe("Fear Rank range", () => {
+        it("should handle the minimum Fear Rank of 1", () => {
           const fearRank = 1;
           const tn = 5 + 5 * fearRank;
 
@@ -221,7 +221,7 @@ export function registerFearTests(quench) {
           assert.equal(tn, 10, "Minimum TN = 10");
         });
 
-        it("should handle moderate Fear Rank (5)", () => {
+        it("should handle a moderate Fear Rank of 5", () => {
           const fearRank = 5;
           const tn = 5 + 5 * fearRank;
 
@@ -229,7 +229,7 @@ export function registerFearTests(quench) {
           assert.equal(tn, 30, "Moderate TN = 30");
         });
 
-        it("should handle maximum Fear Rank (10)", () => {
+        it("should handle the maximum Fear Rank of 10", () => {
           const fearRank = 10;
           const tn = 5 + 5 * fearRank;
 
@@ -238,7 +238,7 @@ export function registerFearTests(quench) {
         });
       });
 
-      describe("Combined Fear Scenarios", () => {
+      describe("Combined Fear scenarios", () => {
         it("should handle low Willpower vs high Fear", () => {
           const willpower = 2; // Low
           const _honorRank = 1;
@@ -275,6 +275,6 @@ export function registerFearTests(quench) {
         });
       });
     },
-    { displayName: "L5R4: Fear System Tests" }
+    { displayName: "L5R4: Fear" }
   );
 }

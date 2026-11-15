@@ -13,10 +13,10 @@ import { autoAnswerRolls, settleChatNotifications, waitFor } from "./helpers.js"
 /**
  * Registers the `effects` batch (roadmap Stage 9): stances, conditions, and timed effects as Active Effects whose
  * mechanics are rules, ending on the combat events the book names, with saves, use counters, and the effects the
- * system creates. Values are the Core Rulebook's (pp.78, 84, 88-90, 166) and the stage's decisions.
+ * system creates. Values are the Core Rulebook's, cited on each group, and the stage's decisions.
  * @param {object} quench  The Quench API object.
  */
-export function registerEffectsBatch(quench) {
+export function registerEffectsTests(quench) {
   quench.registerBatch(
     `${SYS_ID}.effects`,
     context => {
@@ -81,8 +81,9 @@ export function registerEffectsBatch(quench) {
         }
       });
 
-      describe("Stances (p.84)", () => {
-        it("one stance at a time: a new stance ends the old one", async () => {
+      // game-rules/36_stances.md, p.84
+      describe("Stances", () => {
+        it("should keep one stance at a time: a new stance ends the old one", async () => {
           const actor = track(await createTestPC({ name: "Effects one stance" }));
           await actor.toggleStatusEffect("fullAttackStance", { active: true });
           await actor.toggleStatusEffect("defenseStance", { active: true });
@@ -94,7 +95,7 @@ export function registerEffectsBatch(quench) {
           );
         });
 
-        it("stances created at the same moment settle on one", async () => {
+        it("should settle stances created at the same moment on one", async () => {
           const actor = track(await createTestPC({ name: "Effects stance race" }));
           await Promise.all(
             ["attackStance", "fullAttackStance", "defenseStance", "centerStance"].map(id =>
@@ -109,7 +110,7 @@ export function registerEffectsBatch(quench) {
           );
         });
 
-        it("a Full Defense bonus ends at the start of the actor's next Turn", async function () {
+        it("should end a Full Defense bonus at the start of the actor's next Turn", async function () {
           this.timeout(20_000);
           const actor = track(await createTestPC({ name: "Effects full defense" }));
           const other = track(await createTestPC({ name: "Effects other" }));
@@ -131,7 +132,7 @@ export function registerEffectsBatch(quench) {
           );
         });
 
-        it("Center Stance: next Round, +10 Initiative and the bonus offered unticked on one roll", async function () {
+        it("should give Center Stance +10 Initiative next Round and offer the bonus unticked on one roll", async function () {
           this.timeout(20_000);
           const actor = track(
             await createTestPC({
@@ -162,7 +163,7 @@ export function registerEffectsBatch(quench) {
           assert.equal(combatant.initiative, 10, "the +10 lasted one Round");
         });
 
-        it("Center Stance: using the bonus ends it", async () => {
+        it("should end the Center Stance bonus when it is used", async () => {
           const actor = track(await createTestPC({ name: "Effects centered use" }));
           await applyEffect(actor, "centered");
           const index = collectCheck(actor, { kind: "trait", trait: "ref" }).modifiers.findIndex(
@@ -188,8 +189,9 @@ export function registerEffectsBatch(quench) {
         });
       });
 
-      describe("Conditions (p.89)", () => {
-        it("a Dazed save in the Reactions stage removes it on success", async function () {
+      // game-rules/41_conditional_effects.md, p.89
+      describe("Conditions", () => {
+        it("should remove Dazed on a successful save in the Reactions stage", async function () {
           this.timeout(20_000);
           // Earth 10: Dazed leaves 7k7, which always meets TN 5
           const actor = track(
@@ -209,7 +211,7 @@ export function registerEffectsBatch(quench) {
           assert.isFalse(actor.statuses.has("dazed"));
         });
 
-        it("a failed Dazed save lowers the next TN by 5", async function () {
+        it("should lower the next TN by 5 on a failed Dazed save", async function () {
           this.timeout(20_000);
           const actor = track(await createTestPC({ name: "Effects dazed fail" }));
           const combat = await startCombat([actor, 10]);
@@ -222,7 +224,7 @@ export function registerEffectsBatch(quench) {
           assert.equal(effect.getFlag(SYS_ID, "saveTn"), 195);
         });
 
-        it("a failed Stunned save ends it at the end of the next Round", async function () {
+        it("should end Stunned at the end of the next Round on a failed save", async function () {
           this.timeout(20_000);
           const actor = track(await createTestPC({ name: "Effects stunned" }));
           const combat = await startCombat([actor, 10]);
@@ -245,7 +247,7 @@ export function registerEffectsBatch(quench) {
           );
         });
 
-        it("a condition the actor is immune to is not created", async () => {
+        it("should not create a condition the actor is immune to", async () => {
           const actor = track(await createTestPC({ name: "Effects immune" }));
           await actor.createEmbeddedDocuments("Item", [
             {
@@ -258,7 +260,7 @@ export function registerEffectsBatch(quench) {
           assert.isFalse(actor.statuses.has("feared"));
         });
 
-        it("a hit offers its ApplyCondition rule's condition on the target", async () => {
+        it("should offer a hit's ApplyCondition rule's condition on the target", async () => {
           const attacker = track(
             await createTestPC({ name: "Effects striker", system: { traits: { agi: 10 } } })
           );
@@ -305,8 +307,9 @@ export function registerEffectsBatch(quench) {
         });
       });
 
-      describe("Fear (p.90)", () => {
-        it("ends when the combat it began in ends", async function () {
+      // game-rules/42_fear.md, p.90
+      describe("Fear", () => {
+        it("should end when the combat it began in ends", async function () {
           this.timeout(20_000);
           const actor = track(await createTestPC({ name: "Effects fear combat" }));
           const combat = await startCombat([actor, 10]);
@@ -320,7 +323,7 @@ export function registerEffectsBatch(quench) {
           assert.isTrue(await waitFor(() => !actor.statuses.has("feared")));
         });
 
-        it("outside combat, ends when the GM ends the encounter", async () => {
+        it("should end outside combat when the GM ends the encounter", async () => {
           const actor = track(await createTestPC({ name: "Effects fear encounter" }));
           await applyEffect(actor, "feared", { level: 1 });
           await game.time.advance(3600);
@@ -329,7 +332,8 @@ export function registerEffectsBatch(quench) {
           assert.isTrue(await waitFor(() => !actor.statuses.has("feared")));
         });
 
-        it("on an unlinked combatant, still ends with its combat after the world reloads (#45)", async function () {
+        // #45
+        it("should still end with its combat on an unlinked combatant after the world reloads", async function () {
           this.timeout(20_000);
           const npc = track(
             await createTestNPC({
@@ -365,8 +369,9 @@ export function registerEffectsBatch(quench) {
         });
       });
 
-      describe("Prone from Wounds (B10)", () => {
-        it("goes on at Down and comes off above Down", async function () {
+      // roadmap/AUTOMATION.md B10
+      describe("Prone from Wounds", () => {
+        it("should go on at Down and come off above Down", async function () {
           this.timeout(10_000);
           const actor = track(await createTestPC({ name: "Effects prone" }));
           const downAt = actor.system.woundLevels.down.value;
@@ -377,7 +382,7 @@ export function registerEffectsBatch(quench) {
           assert.isTrue(await waitFor(() => !actor.statuses.has("prone")), "removed when healed");
         });
 
-        it("leaves a Prone the GM applied by hand", async () => {
+        it("should leave a Prone the GM applied by hand", async () => {
           const actor = track(await createTestPC({ name: "Effects prone manual" }));
           await actor.toggleStatusEffect("prone", { active: true });
           await syncProne(actor);
@@ -385,8 +390,9 @@ export function registerEffectsBatch(quench) {
         });
       });
 
-      describe("Concentration (p.166)", () => {
-        it("more Wounds than the Earth Ring in one hit asks for the Willpower roll", async () => {
+      // game-rules/67_universal_spells.md, p.166
+      describe("Concentration", () => {
+        it("should ask for the Willpower roll on more Wounds than the Earth Ring in one hit", async () => {
           const actor = track(await createTestPC({ name: "Effects concentration" }));
           await applyEffect(actor, "concentration", { level: 2 });
           const earth = actor.system.rings.earth;
@@ -407,8 +413,10 @@ export function registerEffectsBatch(quench) {
         });
       });
 
-      describe("Void Points (p.78; decision 6)", () => {
-        it("counts the Void Points spent this Round in combat and warns past one", async function () {
+      // roadmap/STAGE-09 decision 6
+      // game-rules/25_rings_and_traits.md, p.78
+      describe("Void Points", () => {
+        it("should count the Void Points spent this Round in combat and warn past one", async function () {
           this.timeout(10_000);
           const actor = track(
             await createTestPC({
@@ -425,7 +433,7 @@ export function registerEffectsBatch(quench) {
           assert.equal(actor.system.rings.void.value, 1, "never blocked");
         });
 
-        it("a Resource rule for void raises the limit", async () => {
+        it("should raise the limit with a Resource rule for void", async () => {
           const actor = track(
             await createTestPC({
               name: "Effects void resource",
@@ -445,6 +453,6 @@ export function registerEffectsBatch(quench) {
         });
       });
     },
-    { displayName: "L5R4: Effects, Conditions, Durations" }
+    { displayName: "L5R4: Effects, conditions, and durations" }
   );
 }

@@ -30,7 +30,7 @@ export function registerSkillAdvancementEdgeCaseTests(quench) {
 
         beforeEach(async () => {
           actor = await createTestPC({
-            name: "School Skill Test",
+            name: "Skill advancement edge cases: school skill",
             system: {
               traits: { agi: 3 },
               rings: { fire: 2 }
@@ -77,8 +77,6 @@ export function registerSkillAdvancementEdgeCaseTests(quench) {
           // ARRANGE - School skill at rank 1
           await skill.update({ "system.rank": 1 });
 
-          const xpBefore = actor.getFlag(SYS_ID, "xpSpent") || [];
-
           // ACT - Increase to rank 2 (should cost XP)
           await skill.update({ "system.rank": 2 });
 
@@ -103,8 +101,6 @@ export function registerSkillAdvancementEdgeCaseTests(quench) {
             },
             { parent: actor }
           );
-
-          const xpBefore = actor.getFlag(SYS_ID, "xpSpent") || [];
 
           // ACT - Increase to rank 1 (should cost XP)
           await nonSchoolSkill.update({ "system.rank": 1 });
@@ -134,12 +130,12 @@ export function registerSkillAdvancementEdgeCaseTests(quench) {
         });
       });
 
-      describe("Emphasis Beyond Rank Limit", () => {
+      describe("Emphasis beyond rank limit", () => {
         let actor, skill;
 
         beforeEach(async () => {
           actor = await createTestPC({
-            name: "Emphasis Limit Test",
+            name: "Skill advancement edge cases: emphasis limit",
             system: {
               traits: { agi: 3 },
               rings: { fire: 2 }
@@ -246,12 +242,12 @@ export function registerSkillAdvancementEdgeCaseTests(quench) {
         });
       });
 
-      describe("Skill Rank Decrease", () => {
+      describe("Skill Rank decrease", () => {
         let actor, skill;
 
         beforeEach(async () => {
           actor = await createTestPC({
-            name: "Rank Decrease Test",
+            name: "Skill advancement edge cases: rank decrease",
             system: {
               traits: { agi: 3 },
               rings: { fire: 2 }
@@ -289,9 +285,6 @@ export function registerSkillAdvancementEdgeCaseTests(quench) {
           // ARRANGE - Skill at rank 3
           assert.equal(skill.system.rank, 3, "Skill rank 3");
 
-          const xpBefore = actor.getFlag(SYS_ID, "xpSpent");
-          const countBefore = xpBefore.length;
-
           // ACT - Decrease to rank 2
           await skill.update({ "system.rank": 2 });
 
@@ -305,8 +298,6 @@ export function registerSkillAdvancementEdgeCaseTests(quench) {
 
         it("should handle rank decrease to 0", async () => {
           // ARRANGE - Skill at rank 3
-          const xpBefore = actor.getFlag(SYS_ID, "xpSpent");
-
           // ACT - Decrease to rank 0
           await skill.update({ "system.rank": 0 });
 
@@ -318,7 +309,7 @@ export function registerSkillAdvancementEdgeCaseTests(quench) {
           assert.isArray(xpAfter, "XP tracking intact");
         });
 
-        it("should handle negative rank (invalid input)", async () => {
+        it("should handle an invalid negative rank", async () => {
           // ARRANGE - Skill at rank 3
 
           // ACT - Try to set negative rank
@@ -336,8 +327,6 @@ export function registerSkillAdvancementEdgeCaseTests(quench) {
           // ARRANGE - Skill rank 3 with emphases
           await skill.update({ "system.trainedEmphases": ["Katana", "Wakizashi"] });
 
-          const emphasesBefore = skill.system.trainedEmphases;
-
           // ACT - Decrease rank to 2
           await skill.update({ "system.rank": 2 });
 
@@ -349,12 +338,12 @@ export function registerSkillAdvancementEdgeCaseTests(quench) {
         });
       });
 
-      describe("Multiple Emphasis Rapid Add", () => {
+      describe("Rapid emphasis additions", () => {
         let actor, skill;
 
         beforeEach(async () => {
           actor = await createTestPC({
-            name: "Emphasis Race Test",
+            name: "Skill advancement edge cases: emphasis race",
             system: {
               traits: { agi: 3 },
               rings: { fire: 2 }
@@ -471,12 +460,12 @@ export function registerSkillAdvancementEdgeCaseTests(quench) {
         });
       });
 
-      describe("Skill XP Cost Edge Cases", () => {
+      describe("Skill XP cost edge cases", () => {
         let actor, skill;
 
         beforeEach(async () => {
           actor = await createTestPC({
-            name: "XP Cost Test",
+            name: "Skill advancement edge cases: XP cost",
             system: {
               traits: { agi: 3 },
               rings: { fire: 2 }
@@ -505,8 +494,6 @@ export function registerSkillAdvancementEdgeCaseTests(quench) {
 
         it("should calculate correct XP cost for rank increase", async () => {
           // ARRANGE - Skill at rank 1
-          const xpBefore = actor.getFlag(SYS_ID, "xpSpent") || [];
-
           // ACT - Increase to rank 2 (cost = new rank)
           await skill.update({ "system.rank": 2 });
 
@@ -517,7 +504,7 @@ export function registerSkillAdvancementEdgeCaseTests(quench) {
           // Cost for rank 1→2 should be 2 XP
         });
 
-        it("should handle skill rank jump (1 to 5)", async () => {
+        it("should handle a skill rank jump from 1 to 5", async () => {
           // ARRANGE - Skill at rank 1
 
           // ACT - Jump to rank 5 (should cost 2+3+4+5 = 14 XP)
@@ -544,6 +531,6 @@ export function registerSkillAdvancementEdgeCaseTests(quench) {
         });
       });
     },
-    { displayName: "L5R4: Skill Advancement Edge Cases" }
+    { displayName: "L5R4: Skill advancement edge cases" }
   );
 }

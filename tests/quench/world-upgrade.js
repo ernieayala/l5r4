@@ -9,7 +9,7 @@ const FIXTURE_WORLD = "l5r4-321-fixture";
  * Ids and names are the fixture's (tests/fixtures/world-3.2.1/documents.mjs).
  * @param {object} quench  The Quench API object.
  */
-export function registerWorldUpgradeBatch(quench) {
+export function registerWorldUpgradeTests(quench) {
   quench.registerBatch(
     `${SYS_ID}.world-upgrade`,
     context => {
@@ -23,7 +23,7 @@ export function registerWorldUpgradeBatch(quench) {
         }
       });
 
-      it("ran the migrations for this version", () => {
+      it("should have run the migrations for this version", () => {
         assert.equal(game.settings.get(SYS_ID, "lastMigratedVersion"), game.system.version);
         for (const doc of [...game.actors, ...game.items]) {
           assert.equal(doc.getFlag(SYS_ID, "migratedVersion"), game.system.version, doc.name);
@@ -31,7 +31,7 @@ export function registerWorldUpgradeBatch(quench) {
       });
 
       describe("Family and School bonuses", () => {
-        it("Active Effect Trait bonuses are TraitAdjust rules, applied once", () => {
+        it("should turn Active Effect Trait bonuses into TraitAdjust rules, applied once", () => {
           const pc = actor("fxPcLantern00001");
           const family = pc.items.get("fxPiLanternFam01");
           const school = pc.items.get("fxPiLanternSch01");
@@ -50,13 +50,13 @@ export function registerWorldUpgradeBatch(quench) {
           assert.equal(pc.system.rings.void.rank, 3);
         });
 
-        it("the free Family rank flag is cleared for a rule bonus, and XP history stays", () => {
+        it("should clear the free Family rank flag for a rule bonus and keep the XP history", () => {
           const pc = actor("fxPcLantern00001");
           assert.equal(pc.getFlag(SYS_ID, "xpFreeTraitBase").per, 0);
           assert.lengthOf(pc.getFlag(SYS_ID, "xpManual"), 1);
         });
 
-        it("world Family and School items carry the same rules", () => {
+        it("should give world Family and School items the same rules", () => {
           assert.deepEqual(game.items.get("fxWiFamily000001").system.rules, [
             { key: "TraitAdjust", trait: "per", value: 1 }
           ]);
@@ -67,7 +67,7 @@ export function registerWorldUpgradeBatch(quench) {
       });
 
       describe("Stances and conditions", () => {
-        it("a stance taken on the 3.2.1 sheet has its rules and group", () => {
+        it("should give a stance taken before the upgrade its rules and group", () => {
           const pc = actor("fxPcLantern00001");
           const stance = effectWith(pc, "fullAttackStance");
           assert.equal(stance.system.group, "stance");
@@ -75,14 +75,14 @@ export function registerWorldUpgradeBatch(quench) {
           assert.equal(pc.system.armorTn.current, 15, "20 base + 5 armor - 10 Full Attack");
         });
 
-        it("Fear keeps its Rank as its level and ends with the encounter", () => {
+        it("should keep Fear's Rank as its level and end it with the encounter", () => {
           const fear = effectWith(actor("fxPcFearful00001"), "feared");
           assert.equal(fear.system.level, 3);
           assert.isNotEmpty(fear.system.rules);
           assert.equal(fear.duration.expiry, "encounterEnd");
         });
 
-        it("conditions from the token HUD and the Condition Manager have their rules", () => {
+        it("should give conditions from the token HUD and the Condition Manager their rules", () => {
           const pc = actor("fxPcFearful00001");
           assert.includeMembers(
             effectWith(pc, "dazed").system.rules.map(r => r.key),
@@ -91,13 +91,13 @@ export function registerWorldUpgradeBatch(quench) {
           assert.isNotEmpty(effectWith(pc, "mounted").system.rules);
         });
 
-        it("an automatic Prone keeps the flag that lets it end with Down", () => {
+        it("should keep the flag that lets an automatic Prone end with Down", () => {
           const prone = effectWith(actor("fxNpLegacyWnd001"), "prone");
           assert.isTrue(prone.getFlag(SYS_ID, "autoApplied"));
           assert.isNotEmpty(prone.system.rules);
         });
 
-        it("an unlinked token's own stance and Fear are migrated in its delta", () => {
+        it("should migrate an unlinked token's own stance and Fear in its delta", () => {
           const token = game.scenes.get("fxScScene0000001").tokens.get("fxTkUnlinked0001");
           const stance = effectWith(token.delta, "defenseStance");
           const fear = effectWith(token.delta, "feared");
@@ -113,18 +113,18 @@ export function registerWorldUpgradeBatch(quench) {
       });
 
       describe("Older data shapes", () => {
-        it("Traits stored as {rank} are numbers", () => {
+        it("should turn Traits stored as {rank} into numbers", () => {
           const traits = actor("fxPcOldShape0001").system.traits;
           assert.equal(traits.sta, 3);
           assert.equal(traits.wil, 3);
         });
 
-        it("an emphasis string becomes trained Emphases", () => {
+        it("should turn an emphasis string into trained Emphases", () => {
           const skill = actor("fxPcOldShape0001").items.get("fxPiOldShapeMed1");
           assert.deepEqual(skill.system.trainedEmphases, ["Void Recovery", "Fasting"]);
         });
 
-        it("bows are weapons marked as bows, in the world and on actors", () => {
+        it("should make bows weapons marked as bows, in the world and on actors", () => {
           for (const bow of [
             game.items.get("fxWiBow000000001"),
             actor("fxPcOldShape0001").items.get("fxPiOldShapeBow1")
@@ -134,31 +134,33 @@ export function registerWorldUpgradeBatch(quench) {
           }
         });
 
-        it("keyword lists are comma-separated text", () => {
+        it("should store keyword lists as comma-separated text", () => {
           const spell = actor("fxPcShugenja0001").items.get("fxPiShugenjaSpl1");
           assert.equal(spell.system.keywords, "thunder, fire");
         });
 
-        it("pre-3.0 NPC wound levels become manual wound levels", () => {
+        it("should turn pre-3.0 NPC wound levels into manual wound levels", () => {
           const levels = actor("fxNpLegacyWnd001").system.manualWoundLevels;
           assert.deepInclude(levels.healthy, { value: 20, penalty: 0 });
           assert.deepInclude(levels.nicked, { value: 40, penalty: 5 });
           assert.deepInclude(levels.out, { value: 60, penalty: 40 });
         });
 
-        it("a stored 2k2 NPC Initiative becomes the formula, Insight Rank 1 + Reflexes (p.81; #30)", () => {
+        // game-rules/31_combat_round.md, p.81
+        // #30
+        it("should turn a stored 2k2 NPC Initiative into Insight Rank 1 + Reflexes", () => {
           const npc = actor("fxNpFormula00001");
           assert.deepInclude(npc._source.system.initiative, { roll: 0, keep: 0 });
           assert.deepInclude(npc.system.initiative, { roll: 3, keep: 2 }, "Reflexes 2");
         });
 
-        it("an item's 3.2.1 Free Raises become a FreeRaise rule on any roll", () => {
+        it("should turn an item's freeRaises field into a FreeRaise rule on any roll", () => {
           const lucky = game.items.get("fxWiFreeRaise001");
           assert.deepEqual(lucky.system.rules, [{ key: "FreeRaise", selector: "any", value: 1 }]);
           assert.equal(lucky._source.system.freeRaises, 0);
         });
 
-        it("Master of Blood carries its rules, in the world and on actors", () => {
+        it("should give Master of Blood its rules, in the world and on actors", () => {
           assert.deepEqual(
             game.items.get("fxWiMasterBlood1").system.rules.map(r => r.key),
             ["RollOption", "TNModifier"]
@@ -168,7 +170,7 @@ export function registerWorldUpgradeBatch(quench) {
       });
 
       describe("Chat, combat, and sheets", () => {
-        it("3.2.1 chat cards keep their rolls", () => {
+        it("should keep the rolls of chat cards posted before the upgrade", () => {
           // Modules post their own welcome cards, so the fixture's messages are read by id
           assert.deepEqual(
             ["fxMsAttack000001", "fxMsDamage000001"].map(
@@ -178,7 +180,7 @@ export function registerWorldUpgradeBatch(quench) {
           );
         });
 
-        it("the combat keeps its Round and Initiative", () => {
+        it("should keep the combat's Round and Initiative", () => {
           const combat = game.combats.get("fxCbCombat000001");
           assert.equal(combat.round, 2);
           assert.sameMembers(
@@ -187,7 +189,7 @@ export function registerWorldUpgradeBatch(quench) {
           );
         });
 
-        it("every actor and world item sheet opens", async function () {
+        it("should open every actor and world item sheet", async function () {
           this.timeout(60_000);
           for (const doc of [...game.actors, ...game.items]) {
             await doc.sheet.render({ force: true });
@@ -198,6 +200,6 @@ export function registerWorldUpgradeBatch(quench) {
         });
       });
     },
-    { displayName: "L5R4: 3.2.1 world upgrade (fixture world only)" }
+    { displayName: "L5R4: World upgrade from 3.2.1" }
   );
 }

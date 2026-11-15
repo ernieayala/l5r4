@@ -10,13 +10,13 @@ import {
 } from "../../../module/data/migrate-source.js";
 
 describe("migrateCommonActorSource", () => {
-  it("turns Traits stored as {rank} into numbers", () => {
+  it("should turn Traits stored as {rank} into numbers", () => {
     const source = { traits: { sta: { rank: 3 }, wil: 2, ref: { rank: 4 } } };
     migrateCommonActorSource(source);
     expect(source.traits).toEqual({ sta: 3, wil: 2, ref: 4 });
   });
 
-  it("leaves a delta without traits alone", () => {
+  it("should leave a delta without traits alone", () => {
     const source = { suffered: 5 };
     migrateCommonActorSource(source);
     expect(source).toEqual({ suffered: 5 });
@@ -24,7 +24,7 @@ describe("migrateCommonActorSource", () => {
 });
 
 describe("migratePcSource", () => {
-  it("renames the pre-3.0 snake_case keys", () => {
+  it("should rename the pre-3.0 snake_case keys", () => {
     const source = {
       armor_tn: { mod: 2 },
       shadow_taint: { rank: 1, points: 3 },
@@ -38,19 +38,20 @@ describe("migratePcSource", () => {
     });
   });
 
-  it("drops 3.2.1's Void-on-Armor-TN marker, which is an effect now", () => {
+  // The marker 3.2.1 stored
+  it("should drop the Void-on-Armor-TN marker, which is an effect now", () => {
     const source = { armorTn: { mod: 1, useVoid: true, voidRound: 3 } };
     migratePcSource(source);
     expect(source).toEqual({ armorTn: { mod: 1 } });
   });
 
-  it("keeps an existing camelCase value over the legacy one, and drops the legacy key", () => {
+  it("should keep an existing camelCase value over the legacy one, and drop the legacy key", () => {
     const source = { initiative: { rollMod: 5, roll_mod: 1 } };
     migratePcSource(source);
     expect(source).toEqual({ initiative: { rollMod: 5 } });
   });
 
-  it("handles a delta holding only one legacy key", () => {
+  it("should handle a delta holding only one legacy key", () => {
     const source = { shadow_taint: { points: 4 } };
     migratePcSource(source);
     expect(source).toEqual({ shadowTaint: { points: 4 } });
@@ -58,13 +59,13 @@ describe("migratePcSource", () => {
 });
 
 describe("migrateNpcSource", () => {
-  it("renames armor.armor_tn", () => {
+  it("should rename armor.armor_tn", () => {
     const source = { armor: { armor_tn: 25, reduction: 2 } };
     migrateNpcSource(source);
     expect(source.armor).toEqual({ armorTn: 25, reduction: 2 });
   });
 
-  it("builds manualWoundLevels from wound_lvl with integer values, positive penalties, and active levels", () => {
+  it("should build manualWoundLevels from wound_lvl: integer values, positive penalties, active levels", () => {
     const source = {
       wound_lvl: {
         healthy: { value: "10", penalty: "0" },
@@ -80,13 +81,13 @@ describe("migrateNpcSource", () => {
     expect(source.manualWoundLevels.out).toEqual({ value: 30, penalty: 40, active: true });
   });
 
-  it("builds manualWoundLevels from a stored woundLevels when none exist", () => {
+  it("should build manualWoundLevels from a stored woundLevels when none exist", () => {
     const source = { woundLevels: { healthy: { value: 12, penalty: 0 } } };
     migrateNpcSource(source);
     expect(source.manualWoundLevels.healthy).toEqual({ value: 12, penalty: 0, active: true });
   });
 
-  it("keeps existing manualWoundLevels when woundLevels is also stored", () => {
+  it("should keep existing manualWoundLevels when woundLevels is also stored", () => {
     const manual = { healthy: { value: 15, penalty: 0, active: true } };
     const source = {
       manualWoundLevels: manual,
@@ -96,7 +97,7 @@ describe("migrateNpcSource", () => {
     expect(source.manualWoundLevels).toBe(manual);
   });
 
-  it("leaves a delta without wound data alone", () => {
+  it("should leave a delta without wound data alone", () => {
     const source = { fear: { rank: 2 } };
     migrateNpcSource(source);
     expect(source).toEqual({ fear: { rank: 2 } });
@@ -104,19 +105,20 @@ describe("migrateNpcSource", () => {
 });
 
 describe("migrateKeywordsSource", () => {
-  it("joins a keywords array into the text the sheet edits", () => {
+  it("should join a keywords array into the text the sheet edits", () => {
     const source = { keywords: ["Samurai", "Large"] };
     migrateKeywordsSource(source);
     expect(source.keywords).toBe("Samurai, Large");
   });
 
-  it("turns the 3.2.1 default [] into an empty string", () => {
+  // The default 3.2.1 stored
+  it("should turn the stored default [] into an empty string", () => {
     const source = { keywords: [] };
     migrateKeywordsSource(source);
     expect(source.keywords).toBe("");
   });
 
-  it("leaves keywords already stored as text alone", () => {
+  it("should leave keywords already stored as text alone", () => {
     const source = { keywords: "Peasant" };
     migrateKeywordsSource(source);
     expect(source.keywords).toBe("Peasant");
@@ -124,7 +126,7 @@ describe("migrateKeywordsSource", () => {
 });
 
 describe("migrateSkillSource", () => {
-  it("renames the pre-3.0 snake_case keys", () => {
+  it("should rename the pre-3.0 snake_case keys", () => {
     const source = {
       mastery_3: "a",
       mastery_5: "b",
@@ -144,7 +146,9 @@ describe("migrateSkillSource", () => {
     });
   });
 
-  it("drops the Insight bonus, which Insight never counted (p.104; #75)", () => {
+  // game-rules/49_improving_your_character.md, p.104
+  // #75
+  it("should drop the Insight bonus, which Insight never counted", () => {
     const legacy = { insight_bonus: 1, rank: 2 };
     migrateSkillSource(legacy);
     expect(legacy).toEqual({ rank: 2 });
@@ -153,7 +157,7 @@ describe("migrateSkillSource", () => {
     expect(current).toEqual({ rank: 2 });
   });
 
-  it("fills an empty-string target from the legacy key", () => {
+  it("should fill an empty-string target from the legacy key", () => {
     const source = { mastery3: "", mastery_3: "legacy" };
     migrateSkillSource(source);
     expect(source).toEqual({ mastery3: "legacy" });
@@ -161,7 +165,7 @@ describe("migrateSkillSource", () => {
 });
 
 describe("migrateArmorSource", () => {
-  it("renames equiped and specialRues", () => {
+  it("should rename equiped and specialRues", () => {
     const source = { equiped: true, specialRues: "text" };
     migrateArmorSource(source);
     expect(source).toEqual({ equipped: true, specialRules: "text" });
@@ -169,7 +173,8 @@ describe("migrateArmorSource", () => {
 });
 
 describe("migrateWeaponSource", () => {
-  it("reads an unset or zero Explodes On as 10, as 3.2.1 rolled it", () => {
+  // As 3.2.1 rolled it
+  it("should read an unset or zero Explodes On as 10", () => {
     for (const explodesOn of [0, null, "", "x"]) {
       const source = { explodesOn };
       migrateWeaponSource(source);
@@ -177,7 +182,8 @@ describe("migrateWeaponSource", () => {
     }
   });
 
-  it("keeps Explodes On between 2 and 10, so a roll always ends (p.77)", () => {
+  // game-rules/26_special_dice_rules.md, p.77
+  it("should keep Explodes On between 2 and 10, so a roll always ends", () => {
     const values = [1, 9, 9.4, 15].map(explodesOn => {
       const source = { explodesOn };
       migrateWeaponSource(source);
@@ -186,7 +192,7 @@ describe("migrateWeaponSource", () => {
     expect(values).toEqual([2, 9, 9, 10]);
   });
 
-  it("leaves a source without the field alone", () => {
+  it("should leave a source without the field alone", () => {
     const source = { damageRoll: 3 };
     migrateWeaponSource(source);
     expect(source).toEqual({ damageRoll: 3 });

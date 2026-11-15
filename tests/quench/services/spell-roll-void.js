@@ -49,17 +49,17 @@ import { createSpellData } from "../../fixtures/item-fixtures.js";
  */
 export function registerSpellRollVoidTests(quench) {
   quench.registerBatch(
-    `${SYS_ID}.services.rolls.spell-void`,
+    `${SYS_ID}.services.spell-roll-void`,
     context => {
       const { describe, it, assert, beforeEach, afterEach } = context;
 
-      describe("Spell Roll + Void Point (Basic)", () => {
-        let actor, spell;
+      describe("Spell Casting Roll with a Void Point", () => {
+        let actor;
 
         beforeEach(async () => {
           // ARRANGE - Create shugenja with Fire Ring 4, School Rank 2, Void 3
           actor = await createShugenja({
-            name: "Void Spell Test Shugenja",
+            name: "Spell Casting Roll and Void Point: shugenja",
             system: {
               traits: { agi: 4, int: 4 },
               rings: { fire: 4, void: { rank: 3, value: 3 } },
@@ -68,7 +68,7 @@ export function registerSpellRollVoidTests(quench) {
             }
           });
 
-          [spell] = await actor.createEmbeddedDocuments("Item", [
+          await actor.createEmbeddedDocuments("Item", [
             createSpellData("Fires from Within", "fire", 2)
           ]);
         });
@@ -125,12 +125,12 @@ export function registerSpellRollVoidTests(quench) {
         });
       });
 
-      describe("Spell Roll + Void Point (Empty Void Pool)", () => {
-        let actor, spell;
+      describe("Spell Casting Roll with an empty Void Point pool", () => {
+        let actor;
 
         beforeEach(async () => {
           actor = await createShugenja({
-            name: "Empty Void Spell Test",
+            name: "Spell Casting Roll and Void Point: empty pool",
             system: {
               traits: { agi: 4, int: 4 },
               rings: { fire: 4, void: { rank: 3, value: 0 } },
@@ -139,7 +139,7 @@ export function registerSpellRollVoidTests(quench) {
             }
           });
 
-          [spell] = await actor.createEmbeddedDocuments("Item", [
+          await actor.createEmbeddedDocuments("Item", [
             createSpellData("Fires from Within", "fire", 2)
           ]);
         });
@@ -178,12 +178,12 @@ export function registerSpellRollVoidTests(quench) {
         });
       });
 
-      describe("Spell Roll + Void + Affinity", () => {
-        let actor, spell, school;
+      describe("Spell Casting Roll with a Void Point and Affinity", () => {
+        let actor, school;
 
         beforeEach(async () => {
           actor = await createShugenja({
-            name: "Void + Affinity Test",
+            name: "Spell Casting Roll and Void Point: Affinity",
             system: {
               traits: { agi: 4, int: 4 },
               rings: { fire: 4, void: { rank: 3, value: 3 } },
@@ -200,7 +200,7 @@ export function registerSpellRollVoidTests(quench) {
             }
           ]);
 
-          [spell] = await actor.createEmbeddedDocuments("Item", [
+          await actor.createEmbeddedDocuments("Item", [
             createSpellData("Fires from Within", "fire", 2)
           ]);
         });
@@ -239,12 +239,12 @@ export function registerSpellRollVoidTests(quench) {
         });
       });
 
-      describe("Spell Roll + Void + Deficiency", () => {
-        let actor, spell, school;
+      describe("Spell Casting Roll with a Void Point and Deficiency", () => {
+        let actor;
 
         beforeEach(async () => {
           actor = await createShugenja({
-            name: "Void + Deficiency Test",
+            name: "Spell Casting Roll and Void Point: Deficiency",
             system: {
               traits: { sta: 3, wil: 3 },
               rings: { earth: 3, void: { rank: 3, value: 3 } },
@@ -253,7 +253,7 @@ export function registerSpellRollVoidTests(quench) {
             }
           });
 
-          [school] = await actor.createEmbeddedDocuments("Item", [
+          await actor.createEmbeddedDocuments("Item", [
             {
               name: "Isawa Shugenja School",
               type: "technique",
@@ -261,7 +261,7 @@ export function registerSpellRollVoidTests(quench) {
             }
           ]);
 
-          [spell] = await actor.createEmbeddedDocuments("Item", [
+          await actor.createEmbeddedDocuments("Item", [
             createSpellData("Earth's Strength", "earth", 2)
           ]);
         });
@@ -299,12 +299,12 @@ export function registerSpellRollVoidTests(quench) {
         });
       });
 
-      describe("Spell Roll + Void + Raises", () => {
-        let actor, spell;
+      describe("Spell Casting Roll with a Void Point and Raises", () => {
+        let actor;
 
         beforeEach(async () => {
           actor = await createShugenja({
-            name: "Void + Raises Test",
+            name: "Spell Casting Roll and Void Point: Raises",
             system: {
               traits: { agi: 4, int: 4 },
               rings: { fire: 4, void: { rank: 3, value: 3 } },
@@ -313,7 +313,7 @@ export function registerSpellRollVoidTests(quench) {
             }
           });
 
-          [spell] = await actor.createEmbeddedDocuments("Item", [
+          await actor.createEmbeddedDocuments("Item", [
             createSpellData("Fires from Within", "fire", 2)
           ]);
         });
@@ -341,12 +341,12 @@ export function registerSpellRollVoidTests(quench) {
         });
       });
 
-      describe("Spell Roll + Void (Race Conditions)", () => {
-        let actor, spell;
+      describe("Void Point race conditions on Spell Casting Rolls", () => {
+        let actor;
 
         beforeEach(async () => {
           actor = await createShugenja({
-            name: "Race Condition Test",
+            name: "Spell Casting Roll and Void Point: race condition",
             system: {
               traits: { agi: 4, int: 4 },
               rings: { fire: 4, void: { rank: 3, value: 1 } },
@@ -355,7 +355,7 @@ export function registerSpellRollVoidTests(quench) {
             }
           });
 
-          [spell] = await actor.createEmbeddedDocuments("Item", [
+          await actor.createEmbeddedDocuments("Item", [
             createSpellData("Fires from Within", "fire", 2)
           ]);
         });
@@ -382,6 +382,6 @@ export function registerSpellRollVoidTests(quench) {
         });
       });
     },
-    { displayName: "L5R4: Spell Roll + Void Point Tests" }
+    { displayName: "L5R4: Spell Casting Roll and Void Point" }
   );
 }

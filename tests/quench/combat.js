@@ -20,7 +20,7 @@ import {
   waitFor
 } from "./helpers.js";
 
-/** Every d10 shows 9: a face is ceil((1 - u) × 10) (client/dice/terms/dice.mjs:412), so no die explodes. */
+/** Every d10 shows 9: a face is ceil((1 - u) × 10) [src: client/dice/terms/dice.mjs:412], so no die explodes. */
 const NINES = () => 0.15;
 
 /**
@@ -37,7 +37,7 @@ const rankOf = actor =>
  * Guard; a grapple; an iaijutsu duel; a stat block's attack. Every die shows 9 while it runs.
  * @param {object} quench  The Quench API object.
  */
-export function registerCombatBatch(quench) {
+export function registerCombatTests(quench) {
   quench.registerBatch(
     `${SYS_ID}.combat`,
     context => {
@@ -77,7 +77,8 @@ export function registerCombatBatch(quench) {
 
       /**
        * An attacker: Agility 4, Strength 3, Kenjutsu 2, Iaijutsu 2, Jiujutsu 1, and a katana (3k2) with `rules`.
-       * Attacks roll 6k4 = 36; the katana's damage is 6k2 = 18. The Void Ring caps declared Raises (p.79).
+       * Attacks roll 6k4 = 36; the katana's damage is 6k2 = 18. The Void Ring caps declared Raises.
+       * game-rules/28_raises.md, p.79
        */
       const attacker = async (rules = [], voidRank = 2) => {
         const actor = track(
@@ -174,9 +175,11 @@ export function registerCombatBatch(quench) {
         html.querySelector(selector).click();
       };
 
-      describe("Attack to Wounds (pp.82, 78)", () => {
+      // game-rules/33_wounds.md, p.82
+      // game-rules/25_rings_and_traits.md, p.78
+      describe("Attack to Wounds", () => {
         it(
-          "a hit's damage lands on its target through Reduction; Void takes back 10; undo restores",
+          "should land a hit's damage on its target through Reduction; Void takes back 10; undo restores",
           clean(async () => {
             const { actor, katana } = await attacker();
             const target = await defender({ armor: { bonus: 1, reduction: 3 } });
@@ -215,8 +218,9 @@ export function registerCombatBatch(quench) {
           })
         );
 
+        // roadmap/STAGE-10 decision 4
         it(
-          "damage past Out marks the target Dead; undo lifts it (decision 4)",
+          "should mark the target Dead for damage past Out, and undo lifts it",
           clean(async () => {
             const { actor, katana } = await attacker();
             const target = await defender();
@@ -235,7 +239,7 @@ export function registerCombatBatch(quench) {
         );
 
         it(
-          "the hit's Damage button rolls its damage; Apply to selected applies it to the selected token",
+          "should roll damage from the hit's Damage button and apply it to the selected token",
           clean(async function () {
             if (!canvas.scene) {
               this.skip();
@@ -269,7 +273,7 @@ export function registerCombatBatch(quench) {
         );
 
         it(
-          "a miss has no damage button",
+          "should give a miss no damage button",
           clean(async () => {
             const { actor, katana } = await attacker();
             const target = await defender();
@@ -280,9 +284,11 @@ export function registerCombatBatch(quench) {
         );
       });
 
-      describe("Damage sources (pp.198, 319-320)", () => {
+      // game-rules/73_armor.md, p.198
+      // game-rules/99_creatures.md, p.319-320
+      describe("Damage sources", () => {
         it(
-          "Invulnerability turns damage into one Wound unless the weapon's DamageSource is jade",
+          "should turn damage into one Wound with Invulnerability unless the weapon's DamageSource is jade",
           clean(async () => {
             const invulnerable = [{ name: "Oni", system: { rules: [{ key: "Invulnerability" }] } }];
             const plain = await attacker();
@@ -307,7 +313,7 @@ export function registerCombatBatch(quench) {
         );
 
         it(
-          "a weapon's DamageSource is scoped to that weapon",
+          "should scope a weapon's DamageSource to that weapon",
           clean(async () => {
             const { actor } = await attacker([{ key: "DamageSource", tags: ["jade"] }]);
             const unarmed = await SimpleRoll({
@@ -323,7 +329,7 @@ export function registerCombatBatch(quench) {
         );
 
         it(
-          "Spirit halves after Reduction, rounding down; a Reduction exception skips its part",
+          "should halve Spirit damage after Reduction, rounding down; a Reduction exception skips its part",
           clean(async () => {
             const spirit = [
               {
@@ -352,9 +358,10 @@ export function registerCombatBatch(quench) {
         );
       });
 
-      describe("Maneuvers (pp.86-87)", () => {
+      // game-rules/38_maneuvers.md, p.86-87
+      describe("Maneuvers", () => {
         it(
-          "declared Raises left over are Increased Damage, +1k0 each",
+          "should make declared Raises left over Increased Damage, +1k0 each",
           clean(async () => {
             const { actor, katana } = await attacker();
             const target = await defender();
@@ -365,8 +372,9 @@ export function registerCombatBatch(quench) {
           })
         );
 
+        // roadmap/STAGE-10 decision 2
         it(
-          "Feint adds half the margin over the raised TN, rounded down (decision 2)",
+          "should add half the margin over the raised TN to Feint damage, rounded down",
           clean(async () => {
             const { actor, katana } = await attacker();
             const target = await defender({ armor: { bonus: 1, reduction: 0 } });
@@ -381,11 +389,13 @@ export function registerCombatBatch(quench) {
           })
         );
 
+        // The Feint margin leaves out the attacker's wound penalty (Ernie's ruling)
         it(
-          "Feint reads the margin over the target's Armor TN + 10, not the attacker's wound penalty (Ernie's ruling)",
+          "should read the Feint margin over the target's Armor TN + 10, not the attacker's wound penalty",
           clean(async () => {
             const { actor, katana } = await attacker();
-            // Nicked: +3 to the attacker's TN (p.82)
+            // Nicked: +3 to the attacker's TN
+            // game-rules/33_wounds.md, p.82
             const nicked = actor.system.woundLevels.healthy.value + 1;
             await actor.update({ "system.suffered": nicked });
             const target = await defender({ armor: { bonus: 1, reduction: 0 } });
@@ -402,7 +412,7 @@ export function registerCombatBatch(quench) {
         );
 
         it(
-          "maneuvers the Raises cannot pay for stop the roll",
+          "should stop the roll for maneuvers the Raises cannot pay for",
           clean(async () => {
             const { actor, katana } = await attacker();
             const target = await defender();
@@ -417,7 +427,7 @@ export function registerCombatBatch(quench) {
         );
 
         it(
-          "Free Raises pay for a maneuver before declared Raises",
+          "should pay for a maneuver with Free Raises before declared Raises",
           clean(async () => {
             const { actor, katana } = await attacker();
             await actor.createEmbeddedDocuments("ActiveEffect", [
@@ -438,7 +448,7 @@ export function registerCombatBatch(quench) {
         );
 
         it(
-          "Disarm: 2k1 damage without Strength, and the winner of Contested Strength disarms",
+          "should roll Disarm as 2k1 damage without Strength, and disarm for the winner of Contested Strength",
           clean(async () => {
             const { actor, katana } = await attacker([], 3);
             const target = await defender();
@@ -472,7 +482,7 @@ export function registerCombatBatch(quench) {
         );
 
         it(
-          "Knockdown: winning Contested Strength knocks the target Prone",
+          "should knock the target Prone on Knockdown when Contested Strength is won",
           clean(async () => {
             const { actor, katana } = await attacker();
             const target = await defender();
@@ -492,7 +502,7 @@ export function registerCombatBatch(quench) {
         );
 
         it(
-          "Knockdown against four legs costs 4 Raises",
+          "should cost 4 Raises for Knockdown against four legs",
           clean(async () => {
             const { actor, katana } = await attacker();
             const target = await defender();
@@ -505,8 +515,9 @@ export function registerCombatBatch(quench) {
           })
         );
 
+        // roadmap/STAGE-10 decision 1
         it(
-          "Called Shot and Extra Attack post their notes for the GM (decision 1)",
+          "should post the Called Shot and Extra Attack notes for the GM",
           clean(async () => {
             const { actor, katana } = await attacker([], 5);
             const target = await defender();
@@ -527,8 +538,9 @@ export function registerCombatBatch(quench) {
           })
         );
 
+        // game-rules/38_maneuvers.md, p.87
         it(
-          "Guard: the ward's Armor TN rises 10 and the guard's falls 5 (p.87)",
+          "should raise the ward's Armor TN 10 and lower the guard's 5 on Guard",
           clean(async () => {
             const { actor } = await attacker();
             const ward = await defender();
@@ -540,9 +552,10 @@ export function registerCombatBatch(quench) {
         );
       });
 
-      describe("Grapple (pp.88-89)", () => {
+      // game-rules/40_grappling.md, p.88-89
+      describe("Grapple", () => {
         it(
-          "the attack ignores armor; control, then a Throw, ends it with the target Prone",
+          "should ignore armor on the attack; control, then a Throw, ends it with the target Prone",
           clean(async () => {
             const { actor } = await attacker();
             const target = await defender({ armor: { bonus: 5, reduction: 0 } });
@@ -591,7 +604,7 @@ export function registerCombatBatch(quench) {
         );
 
         it(
-          "Hit rolls unarmed damage, Strength k1, against the other side",
+          "should roll Hit as unarmed damage, Strength keep 1, against the other side",
           clean(async () => {
             const { actor } = await attacker();
             const target = await defender();
@@ -611,8 +624,9 @@ export function registerCombatBatch(quench) {
           })
         );
 
+        // game-rules/40_grappling.md, p.89
         it(
-          "a weapon grapple hits with the weapon's damage; losing control gives two Free Raises to Disarm (p.89)",
+          "should deal weapon damage in a weapon grapple; losing control gives two Free Raises to Disarm",
           clean(async () => {
             const { actor, katana } = await attacker();
             const target = track(
@@ -666,9 +680,10 @@ export function registerCombatBatch(quench) {
         );
       });
 
-      describe("Iaijutsu duel (pp.87-88)", () => {
+      // game-rules/39_iaijutsu_dueling.md, p.87-88
+      describe("Iaijutsu duel", () => {
         it(
-          "Assessment, Focus, and Strike in order; the Focus winner strikes first",
+          "should run Assessment, Focus, and Strike in order; the Focus winner strikes first",
           clean(async () => {
             const { actor } = await attacker();
             const target = await defender();
@@ -714,8 +729,9 @@ export function registerCombatBatch(quench) {
           })
         );
 
+        // game-rules/60_bugei_skills.md, p.140
         it(
-          "Iaijutsu Mastery: +2k2 for the Assessment edge at Rank 7, +5 on Focus from Rank 5 (p.140)",
+          "should give Iaijutsu Mastery +2k2 for the Assessment edge at Rank 7 and +5 on Focus from Rank 5",
           clean(async () => {
             const master = track(
               await createTestPC({
@@ -749,7 +765,8 @@ export function registerCombatBatch(quench) {
           })
         );
 
-        it("a Dazed character cannot fight a duel (p.89)", async () => {
+        // game-rules/41_conditional_effects.md, p.89
+        it("should keep a Dazed character from fighting a duel", async () => {
           const { actor } = await attacker();
           const target = await defender();
           await target.toggleStatusEffect("dazed", { active: true });
@@ -765,9 +782,11 @@ export function registerCombatBatch(quench) {
         });
       });
 
-      describe("Armor (pp.198-199)", () => {
+      // game-rules/73_armor.md, p.198
+      // game-rules/74_weapons.md, p.198-199
+      describe("Armor", () => {
         it(
-          "an Armor Piercing arrow ignores the target's armor, a Flesh Cutter doubles it",
+          "should ignore the target's armor with an Armor Piercing arrow and double it with a Flesh Cutter",
           clean(async () => {
             const { actor } = await attacker();
             const [bow] = await actor.createEmbeddedDocuments("Item", [
@@ -794,8 +813,9 @@ export function registerCombatBatch(quench) {
           })
         );
 
+        // game-rules/74_weapons.md, p.199
         it(
-          "a dai-kyu: Strength 3 to wield, which the GM may waive; +10 TN on foot, none mounted (p.199)",
+          "should need Strength 3 to wield a dai-kyu, which the GM may waive; +10 TN on foot, none mounted",
           clean(async () => {
             const archer = track(
               await createTestPC({ name: "Combat archer", system: { traits: { str: 2, ref: 3 } } })
@@ -847,8 +867,9 @@ export function registerCombatBatch(quench) {
           })
         );
 
+        // game-rules/74_weapons.md, p.199
         it(
-          "a bow shot at a target in melee range is -10, when the roller says so (p.199)",
+          "should take -10 on a bow shot at a target in melee range, when the roller says so",
           clean(async () => {
             const { actor } = await attacker();
             const [bow] = await actor.createEmbeddedDocuments("Item", [
@@ -883,7 +904,7 @@ export function registerCombatBatch(quench) {
         );
 
         it(
-          "riding armor's +4 is +12 on horseback",
+          "should make riding armor's +4 into +12 on horseback",
           clean(async () => {
             const rider = await defender({ armor: { bonus: 4, reduction: 4 } });
             await rider.items
@@ -896,9 +917,12 @@ export function registerCombatBatch(quench) {
         );
       });
 
-      describe("NPC Initiative and healing (pp.81, 84; #30, #40)", () => {
+      // game-rules/31_combat_round.md, p.81
+      // game-rules/35_healing_wounds.md, p.84
+      describe("NPC Initiative and healing", () => {
+        // #30
         it(
-          "#30: a new NPC rolls Insight Rank 1 + Reflexes, keep Reflexes, with its modifiers",
+          "should roll a new NPC's Initiative as Insight Rank 1 + Reflexes, keep Reflexes, with its modifiers",
           clean(async () => {
             const npc = track(
               await createTestNPC({ name: "Combat initiative", system: { traits: { ref: 3 } } })
@@ -921,8 +945,10 @@ export function registerCombatBatch(quench) {
           })
         );
 
+        // #30
+        // game-rules/42_fear.md, p.90
         it(
-          "#30: Fear's -Xk0 reaches the Initiative pool (p.90)",
+          "should carry Fear's -Xk0 to the Initiative pool",
           clean(async () => {
             const npc = track(
               await createTestNPC({
@@ -936,8 +962,9 @@ export function registerCombatBatch(quench) {
           })
         );
 
+        // #30
         it(
-          "#30: an NPC stored with the old 2k2 default rolls the formula after the migration",
+          "should roll the formula for an NPC stored with the old 2k2 default after the migration",
           clean(async () => {
             const npc = track(
               await createTestNPC({
@@ -962,8 +989,9 @@ export function registerCombatBatch(quench) {
           })
         );
 
+        // #40
         it(
-          "#40: a long rest heals an NPC 2 x Stamina + 1 (an NPC counts as Insight Rank 1)",
+          "should heal an NPC 2 x Stamina + 1 on a long rest, counting it as Insight Rank 1",
           clean(async () => {
             const npc = track(
               await createTestNPC({
@@ -978,9 +1006,9 @@ export function registerCombatBatch(quench) {
         );
       });
 
-      describe("Stat block attacks (fix: NPC Apply buttons)", () => {
+      describe("Stat block attacks", () => {
         it(
-          "an NPC attack stores its stat block's damage for the damage button",
+          "should store an NPC attack's stat block damage for the damage button",
           clean(async () => {
             const npc = track(await createTestNPC({ name: "Combat bandit" }));
             const hit = await SimpleRoll({
@@ -1000,6 +1028,6 @@ export function registerCombatBatch(quench) {
         );
       });
     },
-    { displayName: "L5R4: Combat loop (Stage 10)" }
+    { displayName: "L5R4: Combat loop" }
   );
 }

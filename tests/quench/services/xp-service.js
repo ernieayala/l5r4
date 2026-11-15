@@ -23,11 +23,11 @@ import { SYS_ID } from "../../../module/config/constants.js";
  */
 export function registerXpServiceTests(quench) {
   quench.registerBatch(
-    `${SYS_ID}.services.xp`,
+    `${SYS_ID}.services.xp-service`,
     context => {
       const { describe, it, assert } = context;
 
-      describe("Trait Advancement Costs", () => {
+      describe("Trait advancement costs", () => {
         it("should calculate cost to raise trait from 2 to 3", () => {
           const newRank = 3;
           const cost = 4 * newRank;
@@ -66,7 +66,7 @@ export function registerXpServiceTests(quench) {
         });
       });
 
-      describe("Void Ring Advancement Costs", () => {
+      describe("Void Ring advancement costs", () => {
         it("should calculate cost to raise Void from 2 to 3", () => {
           const newRank = 3;
           const cost = 6 * newRank;
@@ -105,7 +105,7 @@ export function registerXpServiceTests(quench) {
         });
       });
 
-      describe("Skill Advancement Costs", () => {
+      describe("Skill advancement costs", () => {
         it("should cost 1 XP to acquire new skill at rank 1", () => {
           const newSkillCost = 1;
 
@@ -152,7 +152,7 @@ export function registerXpServiceTests(quench) {
         });
       });
 
-      describe("Emphasis Costs", () => {
+      describe("Emphasis costs", () => {
         it("should cost 2 XP per emphasis", () => {
           const emphasisCost = 2;
 
@@ -178,7 +178,7 @@ export function registerXpServiceTests(quench) {
         });
       });
 
-      describe("Starting Baseline (Free Ranks)", () => {
+      describe("Starting baseline of free ranks", () => {
         it("should not cost XP for starting trait value of 2", () => {
           const startingRank = 2;
           const freeRanks = 2;
@@ -188,7 +188,7 @@ export function registerXpServiceTests(quench) {
           assert.equal(xpCost, 0, "No XP cost for baseline");
         });
 
-        it("should not cost XP for family bonus (+1 trait)", () => {
+        it("should not cost XP for the family bonus of +1 Trait", () => {
           const baseline = 2;
           const familyBonus = 1;
           const startingValue = baseline + familyBonus;
@@ -209,7 +209,7 @@ export function registerXpServiceTests(quench) {
         });
       });
 
-      describe("Comparative Costs", () => {
+      describe("Comparative costs", () => {
         it("should compare trait vs skill advancement", () => {
           const trait2to3 = 4 * 3; // 12 XP
           const skill1to6 = 2 + 3 + 4 + 5 + 6; // 20 XP
@@ -238,7 +238,7 @@ export function registerXpServiceTests(quench) {
         });
       });
 
-      describe("Advanced XP Scenarios", () => {
+      describe("Advanced XP scenarios", () => {
         it("should calculate typical starting character advancement", () => {
           // Raise 2 traits by 1 rank each
           const trait1 = 4 * 3; // 12 XP
@@ -276,8 +276,8 @@ export function registerXpServiceTests(quench) {
         });
       });
 
-      describe("XP Gain from Disadvantages", () => {
-        it("should grant XP for disadvantages (negative cost)", () => {
+      describe("XP gain from Disadvantages", () => {
+        it("should grant XP for disadvantages as a negative cost", () => {
           const disadvantageCost = -3; // Disadvantage grants 3 XP
 
           assert.isBelow(disadvantageCost, 0, "Disadvantage cost is negative");
@@ -301,6 +301,6 @@ export function registerXpServiceTests(quench) {
         });
       });
     },
-    { displayName: "L5R4: XP Service Tests" }
+    { displayName: "L5R4: XP costs" }
   );
 }

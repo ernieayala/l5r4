@@ -21,12 +21,12 @@ import { SYS_ID } from "../../../module/config/constants.js";
  */
 export function registerNpcRollTests(quench) {
   quench.registerBatch(
-    `${SYS_ID}.services.rolls.npc`,
+    `${SYS_ID}.services.npc-rolls`,
     context => {
       const { describe, it, assert } = context;
 
       describe("NPC Trait Rolls", () => {
-        it("should use trait value for both rolled and kept (XkX)", () => {
+        it("should use the Trait value for both rolled and kept dice", () => {
           const traitValue = 3;
           const rolled = traitValue;
           const kept = traitValue;
@@ -48,7 +48,7 @@ export function registerNpcRollTests(quench) {
       });
 
       describe("NPC Ring Rolls", () => {
-        it("should use ring value for both rolled and kept (XkX)", () => {
+        it("should use the Ring value for both rolled and kept dice", () => {
           const ringValue = 4;
           const rolled = ringValue;
           const kept = ringValue;
@@ -59,7 +59,7 @@ export function registerNpcRollTests(quench) {
         });
       });
 
-      describe("Custom Dice Pools", () => {
+      describe("Custom dice pools", () => {
         it("should use explicit diceRoll and diceKeep", () => {
           const diceRoll = 7;
           const diceKeep = 3;
@@ -88,7 +88,7 @@ export function registerNpcRollTests(quench) {
         });
       });
 
-      describe("NPC Dice Pool Ranges", () => {
+      describe("NPC dice pool ranges", () => {
         it("should handle small dice pools", () => {
           const rolled = 2;
           const kept = 2;
@@ -116,7 +116,7 @@ export function registerNpcRollTests(quench) {
           // Formula would be 10k8
         });
 
-        it("should handle maximum dice pool (10k10)", () => {
+        it("should handle the maximum dice pool of 10k10", () => {
           const rolled = 10;
           const kept = 10;
 
@@ -126,7 +126,7 @@ export function registerNpcRollTests(quench) {
         });
       });
 
-      describe("NPC Dice Pool Validation", () => {
+      describe("NPC dice pool validation", () => {
         it("should validate kept <= rolled", () => {
           const rolled = 7;
           const kept = 4;
@@ -143,6 +143,6 @@ export function registerNpcRollTests(quench) {
         });
       });
     },
-    { displayName: "L5R4: NPC Roll Service Tests" }
+    { displayName: "L5R4: NPC rolls" }
   );
 }

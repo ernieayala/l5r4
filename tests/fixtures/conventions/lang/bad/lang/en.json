@@ -1,0 +1,45 @@
+{
+  "EFFECT": {
+    "prone": "Prone"
+  },
+  "l5r4": {
+    "apps": {
+      "armorConfig": {
+        "errors": {
+          "updateFailed": "Failed to update armor."
+        },
+        "title": "Armor configuration."
+      }
+    },
+    "mechanics": {
+      "rings": {
+        "fire": "Fire"
+      }
+    },
+    "ui": {
+      "check": {
+        "voidSkill": "Use a Void Point",
+        "voidSkillHint": "Spend one for the roll",
+        "fullyHealed": "Fully healed!",
+        "catastrophe": "CATASTROPHIC FAILURE now",
+        "deleteItem": "Delete item",
+        "noPermission": "You don't have permission",
+        "noWillpower": "{character} has no Willpower Trait",
+        "penalty": "-{penalty}kO",
+        "maxWounds": "Max Wounds",
+        "targets": "Several targets - set the TN",
+        "clickFear": "Click to test Fear",
+        "updated": "Updated {count} path(s)",
+        "exported": {
+          "one": "Exported 1 item"
+        },
+        "addCustom": "Add Custom Emphasis",
+        "freeRaisesToTN": "Free Raises to TN",
+        "error": {
+          "pool": "Bad pool"
+        },
+        "checkTotal": "Total"
+      }
+    }
+  }
+}

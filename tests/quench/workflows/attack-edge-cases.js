@@ -29,12 +29,12 @@ export function registerAttackEdgeCaseTests(quench) {
     context => {
       const { describe, it, assert, beforeEach, afterEach } = context;
 
-      describe("Unskilled Weapon Attacks", () => {
+      describe("Unskilled weapon attacks", () => {
         let actor, weapon;
 
         beforeEach(async () => {
           actor = await createTestPC({
-            name: "Unskilled Test",
+            name: "Attack edge cases: Unskilled Test",
             system: {
               traits: { agi: 3, str: 3 },
               rings: { earth: 2 }
@@ -124,19 +124,19 @@ export function registerAttackEdgeCaseTests(quench) {
         });
       });
 
-      describe("Full Attack Stance Bonuses", () => {
-        let actor, weapon;
+      describe("Full Attack Stance bonuses", () => {
+        let actor;
 
         beforeEach(async () => {
           actor = await createTestPC({
-            name: "Stance Test",
+            name: "Attack edge cases: Stance Test",
             system: {
               traits: { agi: 3, ref: 3 },
               rings: { earth: 2 }
             }
           });
 
-          weapon = await Item.create(
+          await Item.create(
             createWeaponData("Katana", 3, 2, { system: { associatedSkill: "kenjutsu" } }),
             { parent: actor }
           );
@@ -149,7 +149,8 @@ export function registerAttackEdgeCaseTests(quench) {
           }
         });
 
-        it("should apply Full Attack bonuses (+2k1 attack, -10 Armor TN)", async () => {
+        // game-rules/36_stances.md, p.84
+        it("should apply Full Attack bonuses of +2k1 attack and -10 Armor TN", async () => {
           // ARRANGE - Create Full Attack stance effect
           await actor.createEmbeddedDocuments("ActiveEffect", [
             {
@@ -230,12 +231,12 @@ export function registerAttackEdgeCaseTests(quench) {
         });
       });
 
-      describe("Multiple Targets", () => {
+      describe("Multiple targets", () => {
         let attacker, target1, target2;
 
         beforeEach(async () => {
           attacker = await createTestPC({
-            name: "Attacker",
+            name: "Attack edge cases: Attacker",
             system: {
               traits: { agi: 3 },
               rings: { earth: 2 }
@@ -243,7 +244,7 @@ export function registerAttackEdgeCaseTests(quench) {
           });
 
           target1 = await createTestPC({
-            name: "Target 1",
+            name: "Attack edge cases: Target 1",
             system: {
               traits: { ref: 3 }, // Armor TN 20
               rings: { earth: 2 }
@@ -251,7 +252,7 @@ export function registerAttackEdgeCaseTests(quench) {
           });
 
           target2 = await createTestPC({
-            name: "Target 2",
+            name: "Attack edge cases: Target 2",
             system: {
               traits: { ref: 5 }, // Armor TN 30
               rings: { earth: 2 }
@@ -296,7 +297,7 @@ export function registerAttackEdgeCaseTests(quench) {
         it("should handle target with no Armor TN", async () => {
           // ARRANGE - Create target with missing Armor TN data
           const brokenTarget = await createTestPC({
-            name: "Broken Target",
+            name: "Attack edge cases: Broken Target",
             system: {
               traits: { ref: null }, // Missing Reflexes
               rings: { earth: 2 }
@@ -319,7 +320,7 @@ export function registerAttackEdgeCaseTests(quench) {
         it("should handle target with undefined system data", async () => {
           // ARRANGE - Simulate corrupted target
           const emptyTarget = await createTestPC({
-            name: "Empty Target",
+            name: "Attack edge cases: Empty Target",
             system: {}
           });
 
@@ -337,12 +338,12 @@ export function registerAttackEdgeCaseTests(quench) {
         });
       });
 
-      describe("Condition Penalties on Attack", () => {
+      describe("Condition penalties on attack", () => {
         let actor;
 
         beforeEach(async () => {
           actor = await createTestPC({
-            name: "Condition Test",
+            name: "Attack edge cases: Condition Test",
             system: {
               traits: { agi: 3, ref: 3 },
               rings: { earth: 2 }
@@ -357,8 +358,9 @@ export function registerAttackEdgeCaseTests(quench) {
           }
         });
 
-        // Conditions are status effects whose rules reach the attack roll (p.89); checkEffects reads them as the
+        // Conditions are status effects whose rules reach the attack roll; checkEffects reads them as the
         // roll pipeline does.
+        // game-rules/41_conditional_effects.md, p.89
         it("should handle Blinded condition penalty", async () => {
           await actor.toggleStatusEffect("blinded", { active: true });
 
@@ -410,6 +412,6 @@ export function registerAttackEdgeCaseTests(quench) {
         });
       });
     },
-    { displayName: "L5R4: Attack Edge Cases" }
+    { displayName: "L5R4: Attack edge cases" }
   );
 }

@@ -41,7 +41,7 @@ function importRules() {
  * Documents created here are deleted after the batch.
  * @param {object} quench  The Quench API object.
  */
-export function registerSmokeBatch(quench) {
+export function registerSmokeTests(quench) {
   quench.registerBatch(
     `${SYS_ID}.smoke`,
     context => {
@@ -62,7 +62,7 @@ export function registerSmokeBatch(quench) {
       });
 
       describe("System", () => {
-        it("registers its config namespace and document classes", () => {
+        it("should register its config namespace and document classes", () => {
           assert.exists(CONFIG.l5r4?.rings, "CONFIG.l5r4.rings");
           assert.exists(CONFIG.l5r4?.traits, "CONFIG.l5r4.traits");
           assert.exists(CONFIG.l5r4?.statusEffects, "CONFIG.l5r4.statusEffects");
@@ -70,13 +70,13 @@ export function registerSmokeBatch(quench) {
           assert.equal(CONFIG.Item.documentClass.name, "L5R4Item");
         });
 
-        it("has the id and version of system.json", async () => {
+        it("should have the id and version of system.json", async () => {
           const manifest = await (await fetch(`systems/${SYS_ID}/system.json`)).json();
           assert.equal(game.system.id, manifest.id);
           assert.equal(game.system.version, manifest.version);
         });
 
-        it("loads every manifest stylesheet in its cascade layer", () => {
+        it("should load every manifest stylesheet in its cascade layer", () => {
           const rules = importRules();
           for (const style of game.system.styles) {
             const loaded = rules.some(
@@ -93,9 +93,9 @@ export function registerSmokeBatch(quench) {
       }
 
       for (const [documentName, types] of Object.entries(sheetFor)) {
-        describe(`${documentName} subtypes`, () => {
+        describe(documentName + " subtypes", () => {
           for (const [type, sheetClass] of Object.entries(types)) {
-            it(`offers only the system sheet for ${type}, as the default`, () => {
+            it("should offer only the system sheet for " + type + ", as the default", () => {
               const { DocumentSheetConfig } = foundry.applications.apps;
               const { sheetClasses, defaultClass } = DocumentSheetConfig.getSheetClassesForSubType(
                 documentName,
@@ -107,7 +107,7 @@ export function registerSmokeBatch(quench) {
             });
 
             it(
-              `creates a ${type}, opens its sheet, and saves a rename`,
+              "should create a " + type + ", open its sheet, and save a rename",
               clean(async () => {
                 const cls = getDocumentClass(documentName);
                 const doc = await cls.create({ name: `Smoke ${type}`, type });

@@ -26,8 +26,8 @@ export function registerRestTests(quench) {
     context => {
       const { describe, it, assert } = context;
 
-      describe("Heal Rate Calculation", () => {
-        it("should calculate heal rate as (Stamina × 2) + Insight Rank", () => {
+      describe("Heal rate calculation", () => {
+        it("should calculate the heal rate as Stamina × 2 + Insight Rank", () => {
           const stamina = 3;
           const insightRank = 2;
           const healRate = stamina * 2 + insightRank;
@@ -61,7 +61,7 @@ export function registerRestTests(quench) {
         });
       });
 
-      describe("Wound Healing Application", () => {
+      describe("Wound healing application", () => {
         it("should reduce suffered wounds by heal rate", () => {
           const currentSuffered = 20;
           const healRate = 8;
@@ -105,7 +105,7 @@ export function registerRestTests(quench) {
         });
       });
 
-      describe("Spell Slot Restoration", () => {
+      describe("Spell slot restoration", () => {
         it("should restore elemental slots to Ring values", () => {
           const rings = {
             air: 4,
@@ -147,8 +147,8 @@ export function registerRestTests(quench) {
         });
       });
 
-      describe("Void Point Restoration", () => {
-        it("should restore Void Points to maximum (Void Ring)", () => {
+      describe("Void Point restoration", () => {
+        it("should restore Void Points to the Void Ring maximum", () => {
           const voidRing = { rank: 3, value: 0, max: 3 };
           const restoredVoid = voidRing.rank;
 
@@ -177,8 +177,8 @@ export function registerRestTests(quench) {
         });
       });
 
-      describe("Current Wounds Calculation", () => {
-        it("should calculate current wounds as (max - suffered)", () => {
+      describe("Current Wounds calculation", () => {
+        it("should calculate current wounds as max minus suffered", () => {
           const maxWounds = 40;
           const suffered = 15;
           const currentWounds = maxWounds - suffered;
@@ -186,7 +186,7 @@ export function registerRestTests(quench) {
           assert.equal(currentWounds, 25, "Current = max - suffered (40-15=25)");
         });
 
-        it("should handle full health (0 suffered)", () => {
+        it("should handle full health with 0 suffered", () => {
           const maxWounds = 40;
           const suffered = 0;
           const currentWounds = maxWounds - suffered;
@@ -194,7 +194,7 @@ export function registerRestTests(quench) {
           assert.equal(currentWounds, 40, "Full health = max wounds");
         });
 
-        it("should handle critical wounds (at death's door)", () => {
+        it("should handle critical wounds at death's door", () => {
           const maxWounds = 40;
           const suffered = 40; // Out wound level
           const currentWounds = maxWounds - suffered;
@@ -213,7 +213,7 @@ export function registerRestTests(quench) {
         });
       });
 
-      describe("Healing Scenarios", () => {
+      describe("Healing scenarios", () => {
         it("should handle lightly wounded character", () => {
           const stamina = 3;
           const insightRank = 2;
@@ -269,6 +269,6 @@ export function registerRestTests(quench) {
         });
       });
     },
-    { displayName: "L5R4: Rest & Healing Tests" }
+    { displayName: "L5R4: Rest and healing" }
   );
 }

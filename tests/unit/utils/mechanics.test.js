@@ -7,7 +7,7 @@
  * Test Priority: Tier 1 (Critical - Core game calculations)
  */
 
-import { describe, it, expect, beforeEach, vi } from "vitest";
+import { describe, it, expect, vi } from "vitest";
 import {
   normalizeTraitKey,
   getEffectiveTrait,
@@ -36,7 +36,7 @@ const prepared = actor => ({
 });
 
 describe("normalizeTraitKey", () => {
-  describe("direct abbreviations", () => {
+  describe("Direct abbreviations", () => {
     it("should accept sta lowercase", () => {
       expect(normalizeTraitKey("sta")).toBe("sta");
     });
@@ -57,7 +57,7 @@ describe("normalizeTraitKey", () => {
     });
   });
 
-  describe("i18n key format", () => {
+  describe("Keys in i18n format", () => {
     it("should parse l5r4.ui.mechanics.traits.sta", () => {
       expect(normalizeTraitKey("l5r4.ui.mechanics.traits.sta")).toBe("sta");
     });
@@ -112,7 +112,7 @@ describe("normalizeTraitKey", () => {
     });
   });
 
-  describe("edge cases", () => {
+  describe("Edge cases", () => {
     it("should return empty string for null", () => {
       expect(normalizeTraitKey(null)).toBe("");
     });
@@ -142,7 +142,7 @@ describe("normalizeTraitKey", () => {
     });
   });
 
-  describe("i18n reverse lookup", () => {
+  describe("Reverse lookup through i18n", () => {
     it("should handle missing game.i18n gracefully", () => {
       // Should not throw when game.i18n is undefined
       expect(() => normalizeTraitKey("test")).not.toThrow();
@@ -150,19 +150,22 @@ describe("normalizeTraitKey", () => {
   });
 });
 
-describe("ringRank (p.76)", () => {
+// game-rules/25_rings_and_traits.md, p.76
+describe("ringRank", () => {
   const actor = { system: { rings: { fire: 3, void: { rank: 4, value: 2, max: 4 } } } };
 
-  it("reads an Elemental Ring", () => {
+  it("should read an Elemental Ring", () => {
     expect(ringRank(actor, "fire")).toBe(3);
   });
 
-  it("reads the Void Ring's rank, so a Void spell rolls its Ring (p.163)", () => {
+  // game-rules/66_magic_and_spell_casting.md, p.163
+  it("should read the Void Ring's rank, so a Void spell rolls its Ring", () => {
     expect(ringRank(actor, "void")).toBe(4);
   });
 });
 
-describe("highestSchoolRank (p.104)", () => {
+// game-rules/49_improving_your_character.md, p.104
+describe("highestSchoolRank", () => {
   const character = (...ranks) => ({
     items: [
       { type: "skill", system: {} },
@@ -170,22 +173,25 @@ describe("highestSchoolRank (p.104)", () => {
     ]
   });
 
-  it("is the highest rank among the character's Schools", () => {
+  it("should be the highest rank among the character's Schools", () => {
     expect(highestSchoolRank(character(2, 4, 1))).toBe(4);
   });
 
-  it("is 0 for a character with no School", () => {
+  it("should be 0 for a character with no School", () => {
     expect(highestSchoolRank(character())).toBe(0);
   });
 });
 
-describe("castingSchoolRank (pp.80, 104-105, 163)", () => {
+// game-rules/29_types_of_rolls.md, p.80
+// game-rules/49_improving_your_character.md, p.104-105
+// game-rules/66_magic_and_spell_casting.md, p.163
+describe("castingSchoolRank", () => {
   const caster = schools => ({
     system: { insightRank: 4 },
     items: schools.map(system => ({ type: "school", system }))
   });
 
-  it("uses the shugenja School's Rank when a character has more than one School", () => {
+  it("should use the shugenja School's Rank when a character has more than one School", () => {
     const actor = caster([
       { shugenja: false, schoolRank: 3 },
       { shugenja: true, schoolRank: 1 }
@@ -193,15 +199,16 @@ describe("castingSchoolRank (pp.80, 104-105, 163)", () => {
     expect(castingSchoolRank(actor)).toBe(1);
   });
 
-  it("uses the Insight Rank otherwise, the School Rank of a single School", () => {
+  it("should use the Insight Rank otherwise, the School Rank of a single School", () => {
     expect(castingSchoolRank(caster([{ shugenja: false, schoolRank: 4 }]))).toBe(4);
     expect(castingSchoolRank(caster([]))).toBe(4);
   });
 });
 
 describe("getEffectiveTrait", () => {
-  describe("void ring special case", () => {
-    it("should read void from rings.void.rank, for a Skill rolled with the Void Ring (#7)", () => {
+  describe("Void Ring special case", () => {
+    // #7
+    it("should read void from rings.void.rank, for a Skill rolled with the Void Ring", () => {
       const actor = {
         system: {
           rings: {
@@ -228,7 +235,7 @@ describe("getEffectiveTrait", () => {
     });
   });
 
-  describe("derived effective traits", () => {
+  describe("Derived effective traits", () => {
     it("should prefer _derived.traitsEff over base traits", () => {
       const actor = {
         system: {
@@ -272,7 +279,7 @@ describe("getEffectiveTrait", () => {
     });
   });
 
-  describe("edge cases", () => {
+  describe("Edge cases", () => {
     it("should handle null actor", () => {
       const result = getEffectiveTrait(null, "sta");
       expect(result).toBe(0);
@@ -305,7 +312,7 @@ describe("getEffectiveTrait", () => {
 });
 
 describe("extractRollParams", () => {
-  describe("basic extraction", () => {
+  describe("Basic extraction", () => {
     it("should extract roll and keep values", () => {
       const el = {
         dataset: {
@@ -354,7 +361,7 @@ describe("extractRollParams", () => {
     });
   });
 
-  describe("trait bonus extraction", () => {
+  describe("Trait bonus extraction", () => {
     it("should extract trait bonus when trait specified", () => {
       const el = {
         dataset: {
@@ -404,7 +411,7 @@ describe("extractRollParams", () => {
     });
   });
 
-  describe("edge cases", () => {
+  describe("Edge cases", () => {
     it("should handle missing dataset values", () => {
       const el = {
         dataset: {}
@@ -451,7 +458,7 @@ describe("extractRollParams", () => {
 });
 
 describe("getAffinityDeficiencyModifier", () => {
-  describe("affinity bonuses", () => {
+  describe("Affinity bonuses", () => {
     it("should return +1 for affinity match", () => {
       const actor = {
         items: [
@@ -504,7 +511,7 @@ describe("getAffinityDeficiencyModifier", () => {
     });
   });
 
-  describe("deficiency penalties", () => {
+  describe("Deficiency penalties", () => {
     it("should return -1 for deficiency match", () => {
       const actor = {
         items: [
@@ -540,7 +547,7 @@ describe("getAffinityDeficiencyModifier", () => {
     });
   });
 
-  describe("conflict handling", () => {
+  describe("Conflict handling", () => {
     it("should return 0 for affinity/deficiency conflict", () => {
       const actor = {
         items: [
@@ -584,7 +591,7 @@ describe("getAffinityDeficiencyModifier", () => {
     });
   });
 
-  describe("edge cases", () => {
+  describe("Edge cases", () => {
     it("should return 0 for null actor", () => {
       const result = getAffinityDeficiencyModifier(null, "fire");
       expect(result).toBe(0);
@@ -651,7 +658,7 @@ describe("getAffinityDeficiencyModifier", () => {
 });
 
 describe("resolveWeaponSkillTrait", () => {
-  describe("skilled weapon use", () => {
+  describe("Skilled weapon use", () => {
     it("should resolve skill + trait for skilled attack", () => {
       const actor = {
         system: {
@@ -722,7 +729,7 @@ describe("resolveWeaponSkillTrait", () => {
     });
   });
 
-  describe("unskilled weapon use", () => {
+  describe("Unskilled weapon use", () => {
     it("should use trait roll for rank 0 skill", () => {
       const actor = {
         system: {
@@ -813,9 +820,9 @@ describe("resolveWeaponSkillTrait", () => {
     });
   });
 
-  // Regression tests for issue #34: skill bonuses (Active Effect values in system.bonuses) reach the displayed
-  // weapon attack formula.
-  describe("skill bonuses propagate to weapon attack (issue #34)", () => {
+  // #34
+  // Skill bonuses (Active Effect values in system.bonuses) reach the displayed weapon attack formula.
+  describe("Skill bonuses that reach the weapon attack", () => {
     const buildActorWithSkillBonus = (kenjutsuRank, bonusRoll, bonusKeep) => ({
       system: {
         traits: { agi: 3 },
@@ -859,7 +866,7 @@ describe("resolveWeaponSkillTrait", () => {
       expect(result.keepBonus).toBe(4);
     });
 
-    it("should support negative skill bonuses (penalties)", () => {
+    it("should support negative skill bonuses as penalties", () => {
       // Penalty case from the issue: skilled rank 4 + agi 3 = 7k3, with -1k1 → 6k2
       const actor = buildActorWithSkillBonus(4, -1, -1);
       const weapon = { system: { associatedSkill: "Kenjutsu", fallbackTrait: "agi" } };
@@ -906,7 +913,7 @@ describe("resolveWeaponSkillTrait", () => {
     });
   });
 
-  describe("edge cases", () => {
+  describe("Edge cases", () => {
     it("should handle null weapon", () => {
       const actor = {};
       const result = resolveWeaponSkillTrait(actor, null);

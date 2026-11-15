@@ -1,12 +1,13 @@
 /**
  * Integration Tests: Wound Penalty Application Across All Roll Types
  *
- * Each Wound Rank past Healthy increases the TN of all rolls by its penalty (Core Rulebook p.82; roadmap
- * STAGE-08 decision 2): Nicked +3, Grazed +5, Hurt +10, Injured +15, Crippled +20, Down +40. The roll pipeline adds
- * it to every roll's TN, never to the total; the roll dialog can leave it off; a damage roll has no TN; a roll with
- * no TN set records none.
+ * Each Wound Rank past Healthy increases the TN of all rolls by its penalty (roadmap/STAGE-08 decision 2): Nicked +3,
+ * Grazed +5, Hurt +10, Injured +15, Crippled +20, Down +40. The roll pipeline adds it to every roll's TN, never to the
+ * total; the roll dialog can leave it off; a damage roll has no TN; a roll with no TN set records none.
+ * game-rules/33_wounds.md, p.82
  */
 
+import { SYS_ID } from "../../../module/config/constants.js";
 import { createTestPC } from "../../fixtures/actor-fixtures.js";
 import {
   createSkillData,
@@ -53,12 +54,12 @@ function answerDialog(values) {
  */
 export function register(quench) {
   quench.registerBatch(
-    "l5r4-enhanced.wound-penalty-all-rolls",
+    `${SYS_ID}.rolls.wound-penalty-all-rolls`,
     context => {
       const { describe, it, assert, before, after } = context;
       const messages = [];
 
-      describe("Wound Penalty Application Across All Roll Types", () => {
+      describe("Wound penalty application across all roll types", () => {
         let actor;
         let penalty;
 
@@ -83,13 +84,14 @@ export function register(quench) {
           this.timeout(30_000);
           await settleChatNotifications();
           actor = await createTestPC({
-            name: "Wounded Samurai",
+            name: "Wound penalty on every roll: wounded samurai",
             system: { traits: { agi: 3, str: 4, ref: 3, sta: 3, int: 3, per: 3, wil: 3, awa: 3 } }
           });
           await actor.createEmbeddedDocuments("Item", [
             createSkillData("Kenjutsu", 3, "agi"),
             createWeaponData("Katana", 3, 2, { system: { associatedSkill: "Kenjutsu" } }),
-            // Mastery 1: within School Rank 1, so no GM confirm opens (p.164)
+            // Mastery 1: within School Rank 1, so no GM confirm opens
+            // game-rules/66_magic_and_spell_casting.md, p.164
             createSpellData("Test Fire Spell", "fire", 1),
             createSpellData("Test Maho Spell", "earth", 1, { system: { maho: true } })
           ]);
@@ -107,11 +109,11 @@ export function register(quench) {
           await actor?.delete();
         });
 
-        it("the wounded actor has a penalty", () => {
+        it("should give the wounded actor a penalty", () => {
           assert.isAbove(penalty, 0);
         });
 
-        it("Skill Roll", async () => {
+        it("should add the penalty to the TN of a Skill Roll", async () => {
           await rollWithTN(() =>
             SkillRoll({
               actor,
@@ -123,7 +125,7 @@ export function register(quench) {
           );
         });
 
-        it("Unskilled Roll", async () => {
+        it("should add the penalty to the TN of an Unskilled Roll", async () => {
           await rollWithTN(() =>
             SkillRoll({
               actor,
@@ -135,7 +137,7 @@ export function register(quench) {
           );
         });
 
-        it("Skill attack", async () => {
+        it("should add the penalty to the TN of a Skill attack", async () => {
           const katana = actor.items.find(i => i.type === "weapon");
           await rollWithTN(() =>
             SkillRoll({
@@ -150,12 +152,12 @@ export function register(quench) {
           );
         });
 
-        it("Trait Roll, low and high ranks", async () => {
+        it("should add the penalty to the TN of a Trait Roll at low and high ranks", async () => {
           await rollWithTN(() => TraitRoll({ actor, traitName: "ref", traitRank: 2 }));
           await rollWithTN(() => TraitRoll({ actor, traitName: "str", traitRank: 10 }));
         });
 
-        it("Ring Rolls, the Void Ring included", async () => {
+        it("should add the penalty to the TN of a Ring Roll, the Void Ring included", async () => {
           await rollWithTN(() =>
             RingRoll({ actor, ringRank: 3, ringName: "Fire", systemRing: "fire" })
           );
@@ -164,25 +166,25 @@ export function register(quench) {
           );
         });
 
-        it("Spell Casting Roll", async () => {
+        it("should add the penalty to the TN of a Spell Casting Roll", async () => {
           const spell = actor.items.getName("Test Fire Spell");
           await rollWithTN(() => SpellCastRoll({ actor, spell }));
         });
 
-        it("Maho casting, after its blood cost", async () => {
+        it("should add the penalty to the TN of maho casting after its blood cost", async () => {
           const spell = actor.items.getName("Test Maho Spell");
           await rollWithTN(() => MahoCastRoll({ actor, spell }));
           // The blood cost may move the actor to a worse Wound Rank before the roll
           penalty = actor.system.woundPenalty;
         });
 
-        it("NPC-style XkY roll", async () => {
+        it("should add the penalty to the TN of an NPC-style XkY roll", async () => {
           await rollWithTN(() =>
             SimpleRoll({ actor, diceRoll: 4, diceKeep: 2, rollName: "Plain" })
           );
         });
 
-        it("the dialog can leave the penalty off", async () => {
+        it("should let the dialog leave the penalty off", async () => {
           const answered = answerDialog({ tn: TN, woundPenalty: false });
           const message = await TraitRoll({ actor, traitName: "ref", traitRank: 3 });
           await answered;
@@ -191,7 +193,7 @@ export function register(quench) {
           assert.equal(message.system.tn.woundPenalty, 0);
         });
 
-        it("a roll with no TN records no TN", async () => {
+        it("should record no TN for a roll with no TN", async () => {
           const message = await TraitRoll({
             actor,
             traitName: "ref",
@@ -203,7 +205,7 @@ export function register(quench) {
           assert.equal(message.system.pool.bonus, 0);
         });
 
-        it("a damage roll has no TN and no penalty", async () => {
+        it("should give a damage roll no TN and no penalty", async () => {
           const message = await WeaponRoll({
             actor,
             diceRoll: 4,
@@ -216,13 +218,13 @@ export function register(quench) {
           assert.equal(message.system.tn.woundPenalty, 0);
         });
 
-        it("a Healthy actor has no penalty on the TN", async () => {
+        it("should add no penalty to the TN of a Healthy actor", async () => {
           await actor.update({ "system.suffered": 0 });
           penalty = 0;
           await rollWithTN(() => TraitRoll({ actor, traitName: "str", traitRank: 4 }));
         });
       });
     },
-    { displayName: "L5R4: Wound Penalty - All Roll Types" }
+    { displayName: "L5R4: Wound penalty on every roll" }
   );
 }

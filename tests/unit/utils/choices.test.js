@@ -7,7 +7,7 @@ import {
 } from "../../../module/utils/choices.js";
 
 describe("choiceSelections", () => {
-  it("reads each ChoiceSet's selection by flag, and leaves out open ones", () => {
+  it("should read each ChoiceSet's selection by flag, and leave out open ones", () => {
     expect(
       choiceSelections([
         { key: "ChoiceSet", flag: "weapon", selection: "kenjutsu" },
@@ -20,7 +20,7 @@ describe("choiceSelections", () => {
 });
 
 describe("applyChoices", () => {
-  it("fills placeholders in every string of the other rules", () => {
+  it("should fill placeholders in every string of the other rules", () => {
     const [choice, raise, grant] = applyChoices([
       { key: "ChoiceSet", flag: "weapon", selection: "kenjutsu" },
       { key: "FreeRaise", selector: "skill:{choice:weapon}", value: 1 },
@@ -31,7 +31,7 @@ describe("applyChoices", () => {
     expect(grant).toMatchObject({ uuid: "kenjutsu", predicate: ["skill:kenjutsu:3"] });
   });
 
-  it("leaves a placeholder without a selection, and rules without choices untouched", () => {
+  it("should leave a placeholder without a selection, and rules without choices untouched", () => {
     const rules = [{ key: "FreeRaise", selector: "skill:{choice:weapon}", value: 1 }];
     expect(applyChoices(rules)).toBe(rules);
     expect(
@@ -44,7 +44,7 @@ describe("applyChoices", () => {
 });
 
 describe("answeredRules", () => {
-  it("answers an open choice from its list or its options, and keeps a choice already made", () => {
+  it("should answer an open choice from its list or its options, and keep a choice already made", () => {
     const [, trait, , ring, , raise] = answeredRules([
       { key: "ChoiceSet", flag: "trait", list: "traits", selection: null },
       { key: "TraitAdjust", trait: "{choice:trait}", value: -1 },
@@ -58,7 +58,7 @@ describe("answeredRules", () => {
     expect(raise.selector).toBe("skill:kyujutsu");
   });
 
-  it("leaves a skills choice open, its uuid being free text", () => {
+  it("should leave a skills choice open, its uuid being free text", () => {
     const [, grant] = answeredRules([
       { key: "ChoiceSet", flag: "extra", list: "skills" },
       { key: "GrantItem", uuid: "{choice:extra}" }
@@ -68,7 +68,7 @@ describe("answeredRules", () => {
 });
 
 describe("hasOpenChoice", () => {
-  it("finds a placeholder", () => {
+  it("should find a placeholder", () => {
     expect(hasOpenChoice("Item.{choice:skill}")).toBe(true);
     expect(hasOpenChoice("Item.abc")).toBe(false);
   });

@@ -1,21 +1,5 @@
 /**
- * @fileoverview Trait and Family Bonus Integration Tests
- *
- * Tests the interaction between trait editing and family bonuses to prevent
- * regression of Issue #1 where traits changed unexpectedly during form submissions.
- *
- * **Bug Context (Issue #1):**
- * During playtesting, character stats changed without user input:
- * - Perception changed from 4 to 2 (skipping 3)
- * - Awareness changed from 4 to 3 (without clicking)
- * - Stats added unexpectedly with false XP expenditure display
- *
- * **Root Cause:**
- * PcTraitHandler.convertSubmitData() was called on every form submission even though
- * traits have no form inputs. This corrupted data by treating base trait values as
- * effective values and subtracting family bonuses again.
- *
- * **Test Coverage:**
+ * Traits and family bonuses: a family bonus Active Effect raises the effective Trait while the stored base Trait stays.
  * - Traits remain stable during non-trait form submissions
  * - Family bonuses correctly applied without affecting base values
  * - Shift+Click trait adjustments work correctly with family bonuses
@@ -34,16 +18,17 @@ import { createTestPC } from "../../fixtures/actor-fixtures.js";
  */
 export function registerTraitFamilyBonusTests(quench) {
   quench.registerBatch(
-    `${SYS_ID}.workflows.traitFamilyBonus`,
+    `${SYS_ID}.workflows.trait-family-bonus`,
     context => {
       const { describe, it, assert, beforeEach, afterEach } = context;
 
-      describe("Trait Stability with Family Bonus", () => {
+      // #1
+      describe("Trait stability with a family bonus", () => {
         let actor, sheet, familyItem;
 
         beforeEach(async () => {
           actor = await createTestPC({
-            name: "Family Bonus Test",
+            name: "Trait and family bonus: family bonus",
             system: {
               traits: {
                 sta: 2,
@@ -185,12 +170,12 @@ export function registerTraitFamilyBonusTests(quench) {
         });
       });
 
-      describe("Trait Adjustment with Family Bonus", () => {
+      describe("Trait adjustment with a family bonus", () => {
         let actor, familyItem;
 
         beforeEach(async () => {
           actor = await createTestPC({
-            name: "Trait Adjustment Test",
+            name: "Trait and family bonus: Trait adjustment",
             system: {
               traits: {
                 sta: 2,
@@ -275,12 +260,12 @@ export function registerTraitFamilyBonusTests(quench) {
         });
       });
 
-      describe("Multiple Family Bonus Traits", () => {
+      describe("Multiple family bonus Traits", () => {
         let actor, familyItem;
 
         beforeEach(async () => {
           actor = await createTestPC({
-            name: "Multi Trait Test",
+            name: "Trait and family bonus: multiple Traits",
             system: {
               traits: {
                 sta: 2,
@@ -360,12 +345,12 @@ export function registerTraitFamilyBonusTests(quench) {
         });
       });
 
-      describe("Edge Cases", () => {
+      describe("Family bonus edge cases", () => {
         let actor;
 
         beforeEach(async () => {
           actor = await createTestPC({
-            name: "Edge Case Test",
+            name: "Trait and family bonus: edge case",
             system: {
               traits: {
                 sta: 2,
@@ -417,12 +402,12 @@ export function registerTraitFamilyBonusTests(quench) {
         });
       });
 
-      describe("Edge Case: Multiple Families", () => {
+      describe("Multiple families", () => {
         let actor, family1, _family2;
 
         beforeEach(async () => {
           actor = await createTestPC({
-            name: "Multiple Families Test",
+            name: "Trait and family bonus: multiple families",
             system: {
               traits: {
                 sta: 2,
@@ -504,7 +489,7 @@ export function registerTraitFamilyBonusTests(quench) {
           }
         });
 
-        it("should apply bonuses from both family items (Active Effects accumulate)", () => {
+        it("should apply and accumulate the Active Effects of both family items", () => {
           // Both families' Active Effects should transfer to actor
           // Strength: base 2 + Hida bonus 1 = 3
           // Awareness: base 2 + Doji bonus 1 = 3
@@ -573,12 +558,12 @@ export function registerTraitFamilyBonusTests(quench) {
         });
       });
 
-      describe("Edge Case: Family Bonus to Non-Existent Stat", () => {
+      describe("Family bonus to a stat that does not exist", () => {
         let actor, familyItem;
 
         beforeEach(async () => {
           actor = await createTestPC({
-            name: "Invalid Bonus Test",
+            name: "Trait and family bonus: invalid bonus",
             system: {
               traits: {
                 sta: 2,
@@ -680,12 +665,12 @@ export function registerTraitFamilyBonusTests(quench) {
         });
       });
 
-      describe("Edge Case: Family Bonus Targeting Ring Instead of Trait", () => {
+      describe("Family bonus targeting a Ring instead of a Trait", () => {
         let actor, familyItem;
 
         beforeEach(async () => {
           actor = await createTestPC({
-            name: "Ring Target Test",
+            name: "Trait and family bonus: Ring target",
             system: {
               traits: {
                 sta: 2,
@@ -747,17 +732,17 @@ export function registerTraitFamilyBonusTests(quench) {
           assert.equal(traits.sta, 2, "Stamina unchanged");
           assert.equal(traits.wil, 2, "Willpower unchanged");
 
-          // NOTE: The Active Effect MIGHT still modify the ring directly,
-          // but FamilyBonusService won't recognize it as a family trait bonus
+          // The Active Effect can still change the Ring itself; FamilyBonusService does not count it as a
+          // family Trait bonus
         });
       });
 
-      describe("Edge Case: Family Bonus with Invalid Value Types", () => {
+      describe("Family bonus with invalid value types", () => {
         let actor, familyItem;
 
         beforeEach(async () => {
           actor = await createTestPC({
-            name: "Invalid Value Test",
+            name: "Trait and family bonus: invalid value",
             system: {
               traits: {
                 sta: 2,
@@ -822,6 +807,6 @@ export function registerTraitFamilyBonusTests(quench) {
         });
       });
     },
-    { displayName: "L5R4: Trait & Family Bonus Integration Tests" }
+    { displayName: "L5R4: Trait and family bonus" }
   );
 }

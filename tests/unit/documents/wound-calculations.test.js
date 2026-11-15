@@ -23,11 +23,13 @@ import {
   prepareNpcManualWounds
 } from "../../../module/documents/actor/calculations/wound-system.js";
 
-describe("prepareNpcManualWounds (p.318)", () => {
+// game-rules/99_creatures.md, p.318
+describe("prepareNpcManualWounds", () => {
   const ORDER = ["healthy", "nicked", "grazed", "hurt", "injured", "crippled", "down", "out"];
 
-  it("keeps a creature's printed thresholds; an unused level never pushes the next one up", () => {
-    // Ugulu no Oni (p.329): 32: +5; 64: +10; 96: +15; 124: Dead, its middle levels unused
+  it("should keep a creature's printed thresholds; an unused level never pushes the next one up", () => {
+    // Ugulu no Oni: 32: +5; 64: +10; 96: +15; 124: Dead, its middle levels unused
+    // game-rules/99_creatures.md, p.329
     const level = (value, penalty, active) => ({ value, penalty, active });
     const sys = {
       woundLevels: {},
@@ -47,7 +49,7 @@ describe("prepareNpcManualWounds (p.318)", () => {
     expect(sys.woundLevels.hurt.value).toBe(123);
   });
 
-  it("still raises an active level that does not exceed the one before it", () => {
+  it("should still raise an active level that does not exceed the one before it", () => {
     const sys = {
       woundLevels: {},
       manualWoundLevels: Object.fromEntries(
@@ -60,7 +62,7 @@ describe("prepareNpcManualWounds (p.318)", () => {
 });
 
 describe("getWoundLevelsForCount", () => {
-  describe("valid inputs", () => {
+  describe("Valid inputs", () => {
     it("should return 2 levels for count 1", () => {
       // ARRANGE
       const count = 1;
@@ -107,7 +109,7 @@ describe("getWoundLevelsForCount", () => {
     });
   });
 
-  describe("edge cases", () => {
+  describe("Edge cases", () => {
     it("should clamp count below 1 to 1", () => {
       // ARRANGE
       const count = 0;
@@ -166,8 +168,10 @@ describe("getWoundLevelsForCount", () => {
 });
 
 describe("calculateWoundPenalties", () => {
-  describe("valid inputs", () => {
-    it("should apply penalty modifier to wound levels past Healthy (p.82; #32)", () => {
+  describe("Valid inputs", () => {
+    // game-rules/33_wounds.md, p.82
+    // #32
+    it("should apply penalty modifier to wound levels past Healthy", () => {
       // ARRANGE
       const sys = {
         woundsPenaltyMod: 5,
@@ -238,7 +242,7 @@ describe("calculateWoundPenalties", () => {
     });
   });
 
-  describe("edge cases", () => {
+  describe("Edge cases", () => {
     it("should handle null woundsPenaltyMod", () => {
       // ARRANGE
       const sys = {
@@ -285,7 +289,7 @@ describe("calculateWoundPenalties", () => {
 });
 
 describe("initializeWoundState", () => {
-  describe("formula mode", () => {
+  describe("Formula mode", () => {
     it("should set wounds.max from out threshold", () => {
       // ARRANGE
       const sys = {
@@ -343,7 +347,7 @@ describe("initializeWoundState", () => {
     });
   });
 
-  describe("manual mode", () => {
+  describe("Manual mode", () => {
     it("should use user-defined wounds.max in manual mode", () => {
       // ARRANGE
       const sys = {
@@ -382,7 +386,7 @@ describe("initializeWoundState", () => {
     });
   });
 
-  describe("edge cases", () => {
+  describe("Edge cases", () => {
     it("should handle null suffered", () => {
       // ARRANGE
       const sys = {
@@ -438,7 +442,7 @@ describe("initializeWoundState", () => {
 });
 
 describe("findCurrentWoundLevel", () => {
-  describe("valid inputs", () => {
+  describe("Valid inputs", () => {
     it("should find healthy level when no damage", () => {
       // ARRANGE
       const sys = {
@@ -501,7 +505,7 @@ describe("findCurrentWoundLevel", () => {
     });
   });
 
-  describe("edge cases", () => {
+  describe("Edge cases", () => {
     it("should handle empty levelsToCheck", () => {
       // ARRANGE
       const sys = {
@@ -623,7 +627,7 @@ describe("prepareNpcFormulaWounds", () => {
     });
   });
 
-  describe("lethality scaling", () => {
+  describe("Lethality scaling", () => {
     it("should support Earth × 3 multiplier for less lethal games", () => {
       // ARRANGE
       const sys = {
@@ -646,7 +650,7 @@ describe("prepareNpcFormulaWounds", () => {
     });
   });
 
-  describe("simplified wound levels", () => {
+  describe("Simplified wound levels", () => {
     it("should support 3-level wound tracking", () => {
       // ARRANGE
       const sys = {
@@ -670,7 +674,7 @@ describe("prepareNpcFormulaWounds", () => {
     });
   });
 
-  describe("edge cases", () => {
+  describe("Edge cases", () => {
     it("should handle null earth ring", () => {
       // ARRANGE
       const sys = {

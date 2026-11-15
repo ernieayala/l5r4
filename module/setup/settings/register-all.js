@@ -16,6 +16,7 @@
 import { registerMigrationSettings } from "./migration.js";
 import { registerClientSettings } from "./client.js";
 import { registerWorldSettings } from "./world.js";
+import { registerMenus } from "./menus.js";
 
 /**
  * Registers all game system settings with Foundry VTT
@@ -43,4 +44,7 @@ export function registerSettings() {
 
   // Register GM controls for rule variants and house rules (world scope)
   registerWorldSettings();
+
+  // Register the settings buttons that open windows (GM-only design gallery)
+  registerMenus();
 }

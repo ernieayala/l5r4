@@ -1993,6 +1993,216 @@ body > * {
 }
 
 /**
+ * Design Gallery
+ * The GM's gallery of foundations, components, and patterns (module/apps/design-gallery.js). Its own layout reads
+ * core's variables; each foundation sample reads the design-system token it shows, so a token the stylesheet does
+ * not declare yet draws nothing.
+ */
+.l5r4-design-gallery .window-content {
+  display: flex;
+  flex-direction: column;
+  gap: var(--spacer-16);
+  overflow-y: auto;
+}
+.l5r4-design-gallery .l5r4-design-gallery-part {
+  display: flex;
+  flex-direction: column;
+  gap: var(--spacer-8);
+}
+.l5r4-design-gallery .l5r4-design-gallery-toolbar {
+  align-items: center;
+  display: flex;
+  gap: var(--spacer-8);
+}
+.l5r4-design-gallery .l5r4-design-gallery-toolbar h2 {
+  flex: 1;
+  margin: 0;
+}
+.l5r4-design-gallery .l5r4-design-gallery-hidden {
+  block-size: 1px;
+  clip-path: inset(50%);
+  inline-size: 1px;
+  overflow: hidden;
+  position: absolute;
+  white-space: nowrap;
+}
+.l5r4-design-gallery .l5r4-design-gallery-note {
+  font-size: var(--font-size-12);
+  font-style: italic;
+  margin: 0;
+}
+.l5r4-design-gallery .l5r4-design-gallery-tokens {
+  font-size: var(--font-size-12);
+  font-variant-numeric: tabular-nums;
+}
+.l5r4-design-gallery .l5r4-design-gallery-tokens code {
+  overflow-wrap: anywhere;
+}
+.l5r4-design-gallery .l5r4-design-gallery-chip {
+  block-size: 1.5rem;
+  border: 1px solid var(--color-border);
+  display: block;
+  inline-size: 1.5rem;
+}
+.l5r4-design-gallery .l5r4-design-gallery-type.-meta {
+  font-size: var(--l5r4-font-size-meta);
+}
+.l5r4-design-gallery .l5r4-design-gallery-type.-body {
+  font-size: var(--l5r4-font-size-body);
+}
+.l5r4-design-gallery .l5r4-design-gallery-type.-label {
+  font-size: var(--l5r4-font-size-label);
+}
+.l5r4-design-gallery .l5r4-design-gallery-type.-title {
+  font-size: var(--l5r4-font-size-title);
+}
+.l5r4-design-gallery .l5r4-design-gallery-type.-rank {
+  font-size: var(--l5r4-font-size-rank);
+}
+.l5r4-design-gallery .l5r4-design-gallery-type.-medallion {
+  font-size: var(--l5r4-font-size-medallion);
+}
+.l5r4-design-gallery .l5r4-design-gallery-bar {
+  background: var(--color-text-primary);
+  block-size: 0.5rem;
+  display: block;
+}
+.l5r4-design-gallery .l5r4-design-gallery-bar.-space-4 {
+  inline-size: var(--l5r4-space-4, 0);
+}
+.l5r4-design-gallery .l5r4-design-gallery-bar.-space-8 {
+  inline-size: var(--l5r4-space-8, 0);
+}
+.l5r4-design-gallery .l5r4-design-gallery-bar.-space-12 {
+  inline-size: var(--l5r4-space-12, 0);
+}
+.l5r4-design-gallery .l5r4-design-gallery-bar.-space-16 {
+  inline-size: var(--l5r4-space-16, 0);
+}
+.l5r4-design-gallery .l5r4-design-gallery-bar.-space-24 {
+  inline-size: var(--l5r4-space-24, 0);
+}
+.l5r4-design-gallery .l5r4-design-gallery-bar.-space-gap-tight {
+  inline-size: var(--l5r4-space-gap-tight, 0);
+}
+.l5r4-design-gallery .l5r4-design-gallery-bar.-space-gap {
+  inline-size: var(--l5r4-space-gap, 0);
+}
+.l5r4-design-gallery .l5r4-design-gallery-bar.-space-control-block {
+  inline-size: var(--l5r4-space-control-block, 0);
+}
+.l5r4-design-gallery .l5r4-design-gallery-bar.-space-control-inline {
+  inline-size: var(--l5r4-space-control-inline, 0);
+}
+.l5r4-design-gallery .l5r4-design-gallery-bar.-space-card {
+  inline-size: var(--l5r4-space-card, 0);
+}
+.l5r4-design-gallery .l5r4-design-gallery-bar.-space-section {
+  inline-size: var(--l5r4-space-section, 0);
+}
+.l5r4-design-gallery .l5r4-design-gallery-bar.-space-indent {
+  inline-size: var(--l5r4-space-indent, 0);
+}
+.l5r4-design-gallery .l5r4-design-gallery-frame {
+  align-items: center;
+  border-color: var(--color-text-primary);
+  border-style: solid;
+  border-width: 0;
+  display: inline-flex;
+  justify-content: center;
+  min-block-size: 2rem;
+  min-inline-size: 2rem;
+}
+.l5r4-design-gallery .l5r4-design-gallery-frame.-border-width-thin {
+  border-width: var(--l5r4-border-width-thin, 0);
+}
+.l5r4-design-gallery .l5r4-design-gallery-frame.-border-width-thick {
+  border-width: var(--l5r4-border-width-thick, 0);
+}
+.l5r4-design-gallery .l5r4-design-gallery-frame.-border-width-band {
+  border-inline-start-width: var(--l5r4-border-width-band, 0);
+}
+.l5r4-design-gallery .l5r4-design-gallery-frame.-radius-sm {
+  border-radius: var(--l5r4-radius-sm, 0);
+  border-width: 1px;
+}
+.l5r4-design-gallery .l5r4-design-gallery-frame.-radius-round {
+  border-radius: var(--l5r4-radius-round, 0);
+  border-width: 1px;
+}
+.l5r4-design-gallery .l5r4-design-gallery-frame.-shadow-raised {
+  box-shadow: var(--l5r4-shadow-raised, none);
+}
+.l5r4-design-gallery .l5r4-design-gallery-frame.-shadow-drop {
+  filter: var(--l5r4-shadow-drop, none);
+}
+.l5r4-design-gallery .l5r4-design-gallery-frame.-shadow-text-halo {
+  text-shadow: var(--l5r4-shadow-text-halo, none);
+}
+.l5r4-design-gallery .l5r4-design-gallery-icons {
+  display: grid;
+  gap: var(--spacer-4) var(--spacer-16);
+  grid-template-columns: repeat(auto-fill, minmax(18rem, 1fr));
+  list-style: none;
+  margin: 0;
+  padding: 0;
+}
+.l5r4-design-gallery .l5r4-design-gallery-icons li {
+  align-items: center;
+  display: grid;
+  gap: var(--spacer-8);
+  grid-template-columns: 3rem 1fr;
+}
+.l5r4-design-gallery .l5r4-design-gallery-icons code {
+  font-size: var(--font-size-12);
+  grid-column: 2;
+}
+.l5r4-design-gallery .l5r4-design-gallery-glyphs {
+  display: inline-flex;
+  gap: var(--spacer-4);
+  grid-row: span 2;
+}
+.l5r4-design-gallery .l5r4-design-gallery-entry {
+  border-block-start: var(--sidebar-separator);
+  display: flex;
+  flex-direction: column;
+  gap: var(--spacer-8);
+  padding-block-start: var(--spacer-8);
+}
+.l5r4-design-gallery .l5r4-design-gallery-entry h3 {
+  margin: 0;
+}
+.l5r4-design-gallery .l5r4-design-gallery-facts {
+  display: grid;
+  font-size: var(--font-size-12);
+  gap: var(--spacer-4) var(--spacer-8);
+  grid-template-columns: max-content 1fr;
+  margin: 0;
+}
+.l5r4-design-gallery .l5r4-design-gallery-facts dt {
+  font-weight: bold;
+}
+.l5r4-design-gallery .l5r4-design-gallery-facts dd {
+  margin: 0;
+  overflow-wrap: anywhere;
+}
+.l5r4-design-gallery .l5r4-design-gallery-row {
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--spacer-16);
+}
+.l5r4-design-gallery .l5r4-design-gallery-sample {
+  border: 1px dashed var(--color-border);
+  margin: 0;
+  padding: var(--spacer-8);
+}
+.l5r4-design-gallery .l5r4-design-gallery-sample figcaption {
+  font-size: var(--font-size-12);
+  font-weight: bold;
+  margin-block-end: var(--spacer-4);
+}
+
+/**
  * Actor Sheet Specific Styles
  * Sheet-specific overrides and additions not covered by other modules
  * Most actor sheet styling is now in layout/, components/, and features/

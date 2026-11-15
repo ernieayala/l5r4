@@ -2,11 +2,11 @@ import { describe, expect, it } from "vitest";
 import { stackModifiers } from "../../../module/utils/modifier-stacking.js";
 
 describe("stackModifiers", () => {
-  it("returns zeros for no modifiers", () => {
+  it("should return zeros for no modifiers", () => {
     expect(stackModifiers([])).toEqual({ roll: 0, keep: 0, total: 0 });
   });
 
-  it("adds every untyped modifier", () => {
+  it("should add every untyped modifier", () => {
     expect(stackModifiers([{ roll: 1 }, { roll: 1, keep: 1 }, { total: 3 }])).toEqual({
       roll: 2,
       keep: 1,
@@ -14,7 +14,7 @@ describe("stackModifiers", () => {
     });
   });
 
-  it("treats an explicit untyped type as untyped", () => {
+  it("should treat an explicit untyped type as untyped", () => {
     expect(
       stackModifiers([
         { total: 2, type: "untyped" },
@@ -27,7 +27,7 @@ describe("stackModifiers", () => {
     });
   });
 
-  it("keeps only the largest bonus of a type", () => {
+  it("should keep only the largest bonus of a type", () => {
     expect(
       stackModifiers([
         { total: 2, type: "armor" },
@@ -40,7 +40,7 @@ describe("stackModifiers", () => {
     });
   });
 
-  it("keeps the largest bonus and the largest penalty of a type", () => {
+  it("should keep the largest bonus and the largest penalty of a type", () => {
     expect(
       stackModifiers([
         { total: 2, type: "spell" },
@@ -51,7 +51,7 @@ describe("stackModifiers", () => {
     ).toBe(2);
   });
 
-  it("stacks each component of a type on its own", () => {
+  it("should stack each component of a type on its own", () => {
     expect(
       stackModifiers([
         { roll: 2, type: "kata" },
@@ -64,7 +64,7 @@ describe("stackModifiers", () => {
     });
   });
 
-  it("adds different types and untyped together", () => {
+  it("should add different types and untyped together", () => {
     expect(
       stackModifiers([
         { roll: 1, type: "kata" },

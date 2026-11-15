@@ -1,12 +1,14 @@
 /**
- * Status Effects Complete Workflow Tests
+ * Status effects workflow
  *
- * Applying and removing each condition as an Active Effect, through to what the actor and its rolls get (Core
- * Rulebook p.89, Guard p.88): Armor TN, the roll pipeline's modifiers (checkEffects), movement, stacking, disabled
- * effects, and Fasting's block on Void recovery.
+ * Applying and removing each condition as an Active Effect, through to what the actor and its rolls get: Armor TN,
+ * the roll pipeline's modifiers (checkEffects), movement, stacking, disabled effects, and Fasting's block on Void
+ * recovery.
  *
  * Each effect is made from its status id alone, as a macro or another module would; the status's rules come with it
  * (module/documents/active-effect.js).
+ * game-rules/41_conditional_effects.md, p.89
+ * game-rules/38_maneuvers.md, p.86-87
  *
  * @see module/config/status-effects.js
  */
@@ -22,11 +24,11 @@ import { checkEffects } from "../helpers.js";
  */
 export function registerStatusEffectsWorkflowTests(quench) {
   quench.registerBatch(
-    `${SYS_ID}.workflows.status-effects`,
+    `${SYS_ID}.workflows.status-effects-workflow`,
     context => {
       const { describe, it, assert, before, after, afterEach } = context;
 
-      describe("Status Effects Complete Workflow", () => {
+      describe("Status effects complete workflow", () => {
         let actor;
 
         /**
@@ -40,12 +42,13 @@ export function registerStatusEffectsWorkflowTests(quench) {
             ids.map(id => ({ name: id, statuses: [id] }))
           );
 
-        // Reflexes 3: base Armor TN 3 × 5 + 5 = 20 (p.82), no armor
+        // Reflexes 3: base Armor TN 3 × 5 + 5 = 20, no armor
+        // game-rules/32_attack_and_defense.md, p.82
         const BASE_TN = 20;
 
         before(async () => {
           actor = await createTestPC({
-            name: "Status Effects Test Character",
+            name: "Status effects workflow: test character",
             system: {
               traits: { ref: 3, sta: 3, wil: 3, str: 3, agi: 3, int: 3, per: 3, awa: 3 },
               rings: { void: { rank: 3, value: 3 } },
@@ -65,8 +68,8 @@ export function registerStatusEffectsWorkflowTests(quench) {
           await actor?.delete();
         });
 
-        describe("Apply/Remove Status Effect Workflow", () => {
-          it("Blinded: -3k3 ranged, -1k1 melee, base Armor TN Reflexes + 5, Water -2 for movement", async () => {
+        describe("Applying and removing status effects", () => {
+          it("should give Blinded -3k3 ranged, -1k1 melee, base Armor TN Reflexes + 5, Water -2 to move", async () => {
             assert.equal(actor.system.armorTn.current, BASE_TN);
             await add("blinded");
             assert.isTrue(actor.statuses.has("blinded"));
@@ -82,7 +85,7 @@ export function registerStatusEffectsWorkflowTests(quench) {
             assert.equal(actor.system.movementWater, -2);
           });
 
-          it("removing Blinded restores the stats", async () => {
+          it("should restore the stats when Blinded is removed", async () => {
             const [blind] = await add("blinded");
             await blind.delete();
             assert.isFalse(actor.statuses.has("blinded"));
@@ -91,12 +94,12 @@ export function registerStatusEffectsWorkflowTests(quench) {
             assert.equal(actor.system.movementWater, 0);
           });
 
-          it("Stunned: Armor TN 5 plus armor", async () => {
+          it("should set a Stunned Armor TN to 5 plus armor", async () => {
             await add("stunned");
             assert.equal(actor.system.armorTn.current, 5 + actor.system.armorTn.bonus);
           });
 
-          it("Prone: -10 Armor TN against melee only, -2k0 to attacks", async () => {
+          it("should give Prone -10 Armor TN against melee only and -2k0 to attacks", async () => {
             await add("prone");
             assert.equal(actor.system.armorTn.current, BASE_TN, "the shown Armor TN is unchanged");
             assert.deepEqual(actor.system.armorTn.vs, { melee: -10, ranged: 0 });
@@ -104,7 +107,9 @@ export function registerStatusEffectsWorkflowTests(quench) {
             assert.equal(checkEffects(actor, "attack", { range: "ranged" }).roll, -2);
           });
 
-          it("Dazed: -3k0 to every roll but damage (p.89; Ernie's ruling)", async () => {
+          // Dazed leaves damage rolls alone (Ernie's ruling)
+          // game-rules/41_conditional_effects.md, p.89
+          it("should give Dazed -3k0 to every roll but damage", async () => {
             await add("dazed");
             for (const kind of ["attack", "skill", "trait", "ring"]) {
               assert.deepInclude(checkEffects(actor, kind), { roll: -3, keep: 0 }, kind);
@@ -112,7 +117,7 @@ export function registerStatusEffectsWorkflowTests(quench) {
             assert.deepInclude(checkEffects(actor, "damage"), { roll: 0, keep: 0 }, "damage");
           });
 
-          it("Fatigued: +5 TN on Skill, physical Trait, and Spell Casting Rolls", async () => {
+          it("should give Fatigued +5 TN on Skill, physical Trait, and Spell Casting Rolls", async () => {
             await add("fatigued");
             assert.equal(checkEffects(actor, "skill").tn, 5);
             assert.equal(checkEffects(actor, "trait", { trait: "str" }).tn, 5);
@@ -120,24 +125,26 @@ export function registerStatusEffectsWorkflowTests(quench) {
             assert.equal(checkEffects(actor, "trait", { trait: "int" }).tn, 0, "a mental Trait");
           });
 
-          it("Grappled: Armor TN 5 plus armor", async () => {
+          it("should set a Grappled Armor TN to 5 plus armor", async () => {
             await add("grappled");
             assert.equal(actor.system.armorTn.current, 5 + actor.system.armorTn.bonus);
           });
 
-          it("Guarded: +10 Armor TN (p.88)", async () => {
+          // game-rules/38_maneuvers.md, p.86-87
+          it("should give Guarded +10 Armor TN", async () => {
             await add("guarded");
             assert.equal(actor.system.armorTn.current, BASE_TN + 10);
           });
 
-          it("Guarding: -5 Armor TN (p.88)", async () => {
+          // game-rules/38_maneuvers.md, p.86-87
+          it("should give Guarding -5 Armor TN", async () => {
             await add("guarding");
             assert.equal(actor.system.armorTn.current, BASE_TN - 5);
           });
         });
 
-        describe("Multiple Conditions Stacking", () => {
-          it("dice penalties add: Dazed and Blinded", async () => {
+        describe("Multiple conditions stacking", () => {
+          it("should add the dice penalties of Dazed and Blinded", async () => {
             await add("dazed", "blinded");
             assert.deepInclude(checkEffects(actor, "attack", { range: "melee" }), {
               roll: -4,
@@ -149,24 +156,25 @@ export function registerStatusEffectsWorkflowTests(quench) {
             });
           });
 
-          it("Stunned and Grappled together: 5 plus armor", async () => {
+          it("should set Stunned and Grappled together to 5 plus armor", async () => {
             await add("stunned", "grappled");
             assert.equal(actor.system.armorTn.current, 5 + actor.system.armorTn.bonus);
           });
 
-          it("Grappled sets the whole Armor TN: Prone against melee adds nothing (decision 3)", async () => {
+          // roadmap/STAGE-09 decision 3
+          it("should let Grappled set the whole Armor TN, so Prone against melee adds nothing", async () => {
             await add("grappled", "prone");
             assert.equal(actor.system.armorTn.current, 5 + actor.system.armorTn.bonus);
             assert.deepEqual(actor.system.armorTn.vs, { melee: 0, ranged: 0 });
           });
 
-          it("Fatigued at level 2: +10 TN", async () => {
+          it("should give Fatigued at level 2 +10 TN", async () => {
             const [effect] = await add("fatigued");
             await effect.update({ "system.level": 2 });
             assert.equal(checkEffects(actor, "skill").tn, 10);
           });
 
-          it("Prone, Dazed, and Fatigued together", async () => {
+          it("should apply Prone, Dazed, and Fatigued together", async () => {
             await add("prone", "dazed", "fatigued");
             for (const status of ["prone", "dazed", "fatigued"]) {
               assert.isTrue(actor.statuses.has(status), status);
@@ -177,20 +185,21 @@ export function registerStatusEffectsWorkflowTests(quench) {
           });
         });
 
-        describe("Fasting Condition Workflow", () => {
-          it("Fasting is an effect with its status", async () => {
+        describe("Fasting condition", () => {
+          it("should make Fasting an effect with its status", async () => {
             await add("fasting");
             assert.isTrue(actor.statuses.has("fasting"));
           });
 
-          it("a long rest restores no Void Points while Fasting (p.89)", async () => {
+          // game-rules/41_conditional_effects.md, p.89
+          it("should restore no Void Points on a long rest while Fasting", async () => {
             await actor.update({ "system.rings.void.value": 0 });
             await add("fasting");
             await applyLongRest(actor);
             assert.equal(actor.system.rings.void.value, 0);
           });
 
-          it("Void Points recover after breaking the fast", async () => {
+          it("should recover Void Points after breaking the fast", async () => {
             await actor.update({ "system.rings.void.value": 0 });
             const [fasting] = await add("fasting");
             await fasting.delete();
@@ -199,8 +208,8 @@ export function registerStatusEffectsWorkflowTests(quench) {
           });
         });
 
-        describe("Condition Edge Cases", () => {
-          it("a disabled condition does nothing", async () => {
+        describe("Condition edge cases", () => {
+          it("should do nothing for a disabled condition", async () => {
             await actor.createEmbeddedDocuments("ActiveEffect", [
               { name: "Stunned", statuses: ["stunned"], disabled: true }
             ]);
@@ -208,7 +217,7 @@ export function registerStatusEffectsWorkflowTests(quench) {
             assert.equal(actor.system.armorTn.current, BASE_TN);
           });
 
-          it("disabling and enabling a condition turns its rules off and on", async () => {
+          it("should turn a condition's rules off and on as it is disabled and enabled", async () => {
             const [blind] = await add("blinded");
             assert.equal(checkEffects(actor, "attack").roll, -1);
             await blind.update({ disabled: true });
@@ -217,7 +226,7 @@ export function registerStatusEffectsWorkflowTests(quench) {
             assert.equal(checkEffects(actor, "attack").roll, -1);
           });
 
-          it("the Armor TN never drops below 5", async () => {
+          it("should never drop the Armor TN below 5", async () => {
             await add("stunned", "guarding");
             assert.isAtLeast(actor.system.armorTn.current, 5);
           });
@@ -225,7 +234,7 @@ export function registerStatusEffectsWorkflowTests(quench) {
       });
     },
     {
-      displayName: "L5R4 Enhanced: Status Effects Workflow"
+      displayName: "L5R4: Status effects workflow"
     }
   );
 }

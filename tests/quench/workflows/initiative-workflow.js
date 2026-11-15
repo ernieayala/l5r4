@@ -11,16 +11,16 @@ import { createTestPC, createTestNPC } from "../../fixtures/actor-fixtures.js";
 
 export function registerInitiativeWorkflowTests(quench) {
   quench.registerBatch(
-    `${SYS_ID}.workflows.initiative`,
+    `${SYS_ID}.workflows.initiative-workflow`,
     context => {
       const { describe, it, assert, before, after, beforeEach, afterEach } = context;
 
-      describe("Complete Workflow: Roll to Combat Tracker", () => {
+      describe("Complete workflow: roll to combat tracker", () => {
         let combat, pc1, pc2, npc;
 
         beforeEach(async () => {
           pc1 = await createTestPC({
-            name: "Fast Samurai",
+            name: "Initiative workflow: Fast Samurai",
             system: {
               traits: { ref: 5 },
               insight: { rank: 3 }
@@ -28,12 +28,12 @@ export function registerInitiativeWorkflowTests(quench) {
           });
 
           pc2 = await createTestPC({
-            name: "Slow Samurai",
+            name: "Initiative workflow: Slow Samurai",
             system: { traits: { ref: 2 }, insight: { rank: 1 } }
           });
 
           npc = await createTestNPC({
-            name: "Bandit",
+            name: "Initiative workflow: Bandit",
             system: { traits: { ref: 3 }, initiative: { roll: 5, keep: 3 } }
           });
 
@@ -45,7 +45,7 @@ export function registerInitiativeWorkflowTests(quench) {
           if (combat) {
             try {
               await combat.delete();
-            } catch (e) {
+            } catch {
               // Combat may already be deleted
             }
             combat = null;
@@ -55,7 +55,7 @@ export function registerInitiativeWorkflowTests(quench) {
           if (npc) {
             try {
               await npc.delete();
-            } catch (e) {
+            } catch {
               // Actor may already be deleted
             }
             npc = null;
@@ -63,7 +63,7 @@ export function registerInitiativeWorkflowTests(quench) {
           if (pc2) {
             try {
               await pc2.delete();
-            } catch (e) {
+            } catch {
               // Actor may already be deleted
             }
             pc2 = null;
@@ -71,7 +71,7 @@ export function registerInitiativeWorkflowTests(quench) {
           if (pc1) {
             try {
               await pc1.delete();
-            } catch (e) {
+            } catch {
               // Actor may already be deleted
             }
             pc1 = null;
@@ -164,7 +164,7 @@ export function registerInitiativeWorkflowTests(quench) {
         });
       });
 
-      describe("Void Point Initiative Prompt Workflow", () => {
+      describe("Void Point Initiative prompt workflow", () => {
         let combat, actor, originalConfirm;
 
         before(() => {
@@ -179,7 +179,7 @@ export function registerInitiativeWorkflowTests(quench) {
 
         beforeEach(async () => {
           actor = await createTestPC({
-            name: "Void Test",
+            name: "Initiative workflow: Void Test",
             system: {
               traits: { ref: 3 },
               insight: { rank: 2 },
@@ -293,7 +293,7 @@ export function registerInitiativeWorkflowTests(quench) {
         it("should not prompt for NPCs", async () => {
           // ARRANGE
           const npc = await createTestNPC({
-            name: "NPC Test",
+            name: "Initiative workflow: NPC Test",
             system: {
               traits: { ref: 3 },
               initiative: { useVoid: true }
@@ -321,17 +321,17 @@ export function registerInitiativeWorkflowTests(quench) {
         });
       });
 
-      describe("Adding/Removing Combatants Mid-Combat", () => {
+      describe("Adding and removing combatants mid-combat", () => {
         let combat, pc1, pc2, npc;
 
         beforeEach(async () => {
           pc1 = await createTestPC({
-            name: "PC 1",
+            name: "Initiative workflow: PC 1",
             system: { traits: { ref: 3 }, insight: { rank: 2 } }
           });
 
           npc = await createTestNPC({
-            name: "NPC 1",
+            name: "Initiative workflow: NPC 1",
             system: { traits: { ref: 3 } }
           });
 
@@ -351,7 +351,7 @@ export function registerInitiativeWorkflowTests(quench) {
           if (combat) {
             try {
               await combat.delete();
-            } catch (e) {
+            } catch {
               // Combat may already be deleted
             }
             combat = null;
@@ -361,7 +361,7 @@ export function registerInitiativeWorkflowTests(quench) {
           if (pc2) {
             try {
               await pc2.delete();
-            } catch (e) {
+            } catch {
               // Actor may already be deleted
             }
             pc2 = null;
@@ -369,7 +369,7 @@ export function registerInitiativeWorkflowTests(quench) {
           if (npc) {
             try {
               await npc.delete();
-            } catch (e) {
+            } catch {
               // Actor may already be deleted
             }
             npc = null;
@@ -377,7 +377,7 @@ export function registerInitiativeWorkflowTests(quench) {
           if (pc1) {
             try {
               await pc1.delete();
-            } catch (e) {
+            } catch {
               // Actor may already be deleted
             }
             pc1 = null;
@@ -387,7 +387,7 @@ export function registerInitiativeWorkflowTests(quench) {
         it("should add combatant during active combat", async () => {
           // ARRANGE
           pc2 = await createTestPC({
-            name: "Late Arrival",
+            name: "Initiative workflow: Late Arrival",
             system: { traits: { ref: 4 }, insight: { rank: 3 } }
           });
 
@@ -407,7 +407,7 @@ export function registerInitiativeWorkflowTests(quench) {
         it("should roll initiative for new combatant mid-combat", async () => {
           // ARRANGE
           pc2 = await createTestPC({
-            name: "Late Arrival",
+            name: "Initiative workflow: Late Arrival",
             system: { traits: { ref: 4 }, insight: { rank: 3 } }
           });
 
@@ -456,12 +456,12 @@ export function registerInitiativeWorkflowTests(quench) {
 
         beforeEach(async () => {
           pc1 = await createTestPC({
-            name: "PC 1",
+            name: "Initiative workflow: PC 1",
             system: { traits: { ref: 3 }, insight: { rank: 2 } }
           });
 
           pc2 = await createTestPC({
-            name: "PC 2",
+            name: "Initiative workflow: PC 2",
             system: { traits: { ref: 4 }, insight: { rank: 3 } }
           });
 
@@ -499,7 +499,7 @@ export function registerInitiativeWorkflowTests(quench) {
         });
       });
 
-      describe("Edge Cases", () => {
+      describe("Edge cases", () => {
         let combat;
         const actors = [];
 
@@ -519,10 +519,10 @@ export function registerInitiativeWorkflowTests(quench) {
           actors.length = 0;
         });
 
-        it("should handle minimum initiative pool (1k1)", async () => {
+        it("should handle the minimum initiative pool of 1k1", async () => {
           // ARRANGE
           const weakPC = await createTestPC({
-            name: "Weak",
+            name: "Initiative workflow: Weak",
             system: { traits: { ref: 1 }, insight: { rank: 1 } }
           });
           actors.push(weakPC);
@@ -543,7 +543,7 @@ export function registerInitiativeWorkflowTests(quench) {
         it("should handle high initiative pool with bonuses", async () => {
           // ARRANGE
           const master = await createTestPC({
-            name: "Master",
+            name: "Initiative workflow: Master",
             system: {
               traits: { ref: 10 },
               insight: { rank: 10 },
@@ -566,17 +566,17 @@ export function registerInitiativeWorkflowTests(quench) {
         });
       });
 
-      describe("Maintain Turn Order", () => {
+      describe("Turn order", () => {
         let combat, pc1, pc2;
 
         beforeEach(async () => {
           pc1 = await createTestPC({
-            name: "PC 1",
+            name: "Initiative workflow: PC 1",
             system: { traits: { ref: 3 }, insight: { rank: 2 } }
           });
 
           pc2 = await createTestPC({
-            name: "PC 2",
+            name: "Initiative workflow: PC 2",
             system: { traits: { ref: 4 }, insight: { rank: 3 } }
           });
 
@@ -605,7 +605,7 @@ export function registerInitiativeWorkflowTests(quench) {
         it("should maintain turn order when adding combatant", async () => {
           // ARRANGE
           const master = await createTestPC({
-            name: "Master",
+            name: "Initiative workflow: Master",
             system: {
               traits: { ref: 10 },
               insight: { rank: 10 },
@@ -637,6 +637,6 @@ export function registerInitiativeWorkflowTests(quench) {
         });
       });
     },
-    { displayName: "L5R4: Initiative Workflow Tests" }
+    { displayName: "L5R4: Initiative workflow" }
   );
 }

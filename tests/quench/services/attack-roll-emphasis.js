@@ -25,7 +25,6 @@
  */
 
 import { SYS_ID } from "../../../module/config/constants.js";
-import { SkillRoll } from "../../../module/services/dice/rolls/skill-roll.js";
 import { buildFormula } from "../helpers.js";
 import { createTestPC } from "../../fixtures/actor-fixtures.js";
 import { createSkillData, createWeaponData } from "../../fixtures/item-fixtures.js";
@@ -36,17 +35,17 @@ import { createSkillData, createWeaponData } from "../../fixtures/item-fixtures.
  */
 export function registerAttackRollEmphasisTests(quench) {
   quench.registerBatch(
-    `${SYS_ID}.services.rolls.attack-emphasis`,
+    `${SYS_ID}.services.attack-roll-emphasis`,
     context => {
       const { describe, it, assert, beforeEach, afterEach } = context;
 
-      describe("Attack Roll + Emphasis (Basic)", () => {
-        let actor, skill, weapon;
+      describe("Attack roll with an Emphasis", () => {
+        let actor, skill;
 
         beforeEach(async () => {
           // ARRANGE - Create actor with Kenjutsu skill that has emphasis
           actor = await createTestPC({
-            name: "Emphasis Test Samurai",
+            name: "Attack roll and Emphasis: samurai",
             system: {
               traits: { agi: 4, str: 3 },
               rings: { earth: 3, void: { rank: 3, value: 3 } }
@@ -63,7 +62,7 @@ export function registerAttackRollEmphasisTests(quench) {
           ]);
 
           // Create Katana weapon
-          [weapon] = await actor.createEmbeddedDocuments("Item", [
+          await actor.createEmbeddedDocuments("Item", [
             createWeaponData("Katana", 3, 2, {
               system: {
                 associatedSkill: "kenjutsu",
@@ -100,7 +99,7 @@ export function registerAttackRollEmphasisTests(quench) {
           // Expected: 9d10k4r1x10
         });
 
-        it("should include r1 modifier in formula when emphasis applies", () => {
+        it("should add the reroll-ones modifier to the formula when an Emphasis applies", () => {
           // ARRANGE - Emphasis flag set to true
           const emphasis = true;
           const rolled = 9;
@@ -116,7 +115,7 @@ export function registerAttackRollEmphasisTests(quench) {
           assert.include(formula, "xa10", "Dice explode on 10");
         });
 
-        it("should not include r1 when emphasis is false", () => {
+        it("should leave out the reroll-ones modifier when emphasis is off", () => {
           // ARRANGE - Emphasis flag set to false
           const emphasis = false;
           const rolled = 9;
@@ -154,25 +153,25 @@ export function registerAttackRollEmphasisTests(quench) {
         });
       });
 
-      describe("Attack Roll + Emphasis + Void Point", () => {
-        let actor, skill, weapon;
+      describe("Attack roll with an Emphasis and a Void Point", () => {
+        let actor;
 
         beforeEach(async () => {
           actor = await createTestPC({
-            name: "Void + Emphasis Test",
+            name: "Attack roll and Emphasis: Void Point",
             system: {
               traits: { agi: 4, str: 3 },
               rings: { void: { rank: 3, value: 3 } }
             }
           });
 
-          [skill] = await actor.createEmbeddedDocuments("Item", [
+          await actor.createEmbeddedDocuments("Item", [
             createSkillData("Kenjutsu", 5, "agi", {
               system: { emphasis: "Katana" }
             })
           ]);
 
-          [weapon] = await actor.createEmbeddedDocuments("Item", [
+          await actor.createEmbeddedDocuments("Item", [
             createWeaponData("Katana", 3, 2, {
               system: { associatedSkill: "kenjutsu" }
             })
@@ -238,25 +237,25 @@ export function registerAttackRollEmphasisTests(quench) {
         });
       });
 
-      describe("Attack Roll + Emphasis + Full Attack Stance", () => {
-        let actor, skill, weapon;
+      describe("Attack roll with an Emphasis in Full Attack Stance", () => {
+        let actor;
 
         beforeEach(async () => {
           actor = await createTestPC({
-            name: "Stance + Emphasis Test",
+            name: "Attack roll and Emphasis: stance",
             system: {
               traits: { agi: 4, ref: 3, str: 3 },
               rings: { earth: 3 }
             }
           });
 
-          [skill] = await actor.createEmbeddedDocuments("Item", [
+          await actor.createEmbeddedDocuments("Item", [
             createSkillData("Kenjutsu", 5, "agi", {
               system: { emphasis: "Katana" }
             })
           ]);
 
-          [weapon] = await actor.createEmbeddedDocuments("Item", [
+          await actor.createEmbeddedDocuments("Item", [
             createWeaponData("Katana", 3, 2, {
               system: { associatedSkill: "kenjutsu" }
             })
@@ -343,25 +342,25 @@ export function registerAttackRollEmphasisTests(quench) {
         });
       });
 
-      describe("Attack Roll + Emphasis + All Modifiers", () => {
-        let actor, skill, weapon;
+      describe("Attack roll with an Emphasis and every modifier", () => {
+        let actor;
 
         beforeEach(async () => {
           actor = await createTestPC({
-            name: "All Modifiers Test",
+            name: "Attack roll and Emphasis: all modifiers",
             system: {
               traits: { agi: 4, ref: 3, str: 3 },
               rings: { earth: 3, void: { rank: 3, value: 3 } }
             }
           });
 
-          [skill] = await actor.createEmbeddedDocuments("Item", [
+          await actor.createEmbeddedDocuments("Item", [
             createSkillData("Kenjutsu", 5, "agi", {
               system: { emphasis: "Katana" }
             })
           ]);
 
-          [weapon] = await actor.createEmbeddedDocuments("Item", [
+          await actor.createEmbeddedDocuments("Item", [
             createWeaponData("Katana", 3, 2, {
               system: { associatedSkill: "kenjutsu" }
             })
@@ -454,12 +453,12 @@ export function registerAttackRollEmphasisTests(quench) {
         });
       });
 
-      describe("Unskilled Attack (No Emphasis)", () => {
-        let actor, weapon;
+      describe("Unskilled attack with no Emphasis", () => {
+        let actor;
 
         beforeEach(async () => {
           actor = await createTestPC({
-            name: "Unskilled Test",
+            name: "Attack roll and Emphasis: unskilled",
             system: {
               traits: { agi: 3, str: 3 },
               rings: { earth: 2 }
@@ -467,7 +466,7 @@ export function registerAttackRollEmphasisTests(quench) {
           });
 
           // Create weapon but NO skill
-          [weapon] = await actor.createEmbeddedDocuments("Item", [
+          await actor.createEmbeddedDocuments("Item", [
             createWeaponData("Naginata", 3, 2, {
               system: {
                 associatedSkill: "polearms",
@@ -501,7 +500,7 @@ export function registerAttackRollEmphasisTests(quench) {
           // Formula should be: 3d10k3 (no r1, no x10 for unskilled)
         });
 
-        it("should not include r1 or x10 for unskilled attacks", () => {
+        it("should leave out rerolls and exploding dice on an unskilled attack", () => {
           // ARRANGE
           const rolled = 3;
           const kept = 3;
@@ -539,12 +538,12 @@ export function registerAttackRollEmphasisTests(quench) {
         });
       });
 
-      describe("Edge Cases", () => {
-        let actor, skill, weapon;
+      describe("Edge cases", () => {
+        let actor, skill;
 
         beforeEach(async () => {
           actor = await createTestPC({
-            name: "Edge Case Test",
+            name: "Attack roll and Emphasis: edge case",
             system: {
               traits: { agi: 4, str: 3 },
               rings: { earth: 3, void: { rank: 3, value: 3 } }
@@ -557,7 +556,7 @@ export function registerAttackRollEmphasisTests(quench) {
             })
           ]);
 
-          [weapon] = await actor.createEmbeddedDocuments("Item", [
+          await actor.createEmbeddedDocuments("Item", [
             createWeaponData("Katana", 3, 2, {
               system: { associatedSkill: "kenjutsu" }
             })
@@ -667,7 +666,7 @@ export function registerAttackRollEmphasisTests(quench) {
         });
       });
 
-      describe("Formula Validation", () => {
+      describe("Formula validation", () => {
         it("should create valid attack formula with emphasis", () => {
           // ARRANGE
           const rolled = 9;
@@ -709,6 +708,6 @@ export function registerAttackRollEmphasisTests(quench) {
         });
       });
     },
-    { displayName: "L5R4: Attack Roll + Emphasis Tests" }
+    { displayName: "L5R4: Attack roll and Emphasis" }
   );
 }

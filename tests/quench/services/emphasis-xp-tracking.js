@@ -31,11 +31,11 @@ export function registerEmphasisXpTrackingTests(quench) {
     context => {
       const { describe, it, assert, before, after, beforeEach, afterEach } = context;
 
-      describe("preparePcExperience() with trainedEmphases array", () => {
+      describe("Emphasis XP from the trainedEmphases array", () => {
         let actor;
 
         before(async () => {
-          actor = await createTestPC({ name: "Test Character - Emphasis XP" });
+          actor = await createTestPC({ name: "Emphasis XP tracking: skills" });
         });
 
         after(async () => {
@@ -225,11 +225,11 @@ export function registerEmphasisXpTrackingTests(quench) {
         });
       });
 
-      describe("XP Versioning with trainedEmphases", () => {
+      describe("XP versioning with trainedEmphases", () => {
         let actor;
 
         beforeEach(async () => {
-          actor = await createTestPC({ name: "Test Character - Versioning" });
+          actor = await createTestPC({ name: "Emphasis XP tracking: versioning" });
         });
 
         afterEach(async () => {
@@ -312,7 +312,7 @@ export function registerEmphasisXpTrackingTests(quench) {
       });
     },
     {
-      displayName: "L5R4: Emphasis XP Tracking (trainedEmphases Array)"
+      displayName: "L5R4: Emphasis XP tracking"
     }
   );
 }

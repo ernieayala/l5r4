@@ -30,19 +30,20 @@ import { guardRolls, settleFullDefense, waitFor } from "../helpers.js";
  */
 export function registerStanceSwitchingWorkflowTests(quench) {
   quench.registerBatch(
-    `${SYS_ID}.workflows.stance-switching`,
+    `${SYS_ID}.workflows.stance-switching-workflow`,
     context => {
       const { describe, it, assert, before, after, afterEach } = context;
 
-      // Taking the Full Defense Stance opens its roll dialog (p.84)
+      // Taking the Full Defense Stance opens its roll dialog
+      // game-rules/36_stances.md, p.84
       guardRolls(context);
 
-      describe("Stance Switching Workflow", () => {
+      describe("Stance switching", () => {
         let actor;
 
         before(async () => {
           actor = await createTestPC({
-            name: "Stance Workflow Test Character",
+            name: "Stance switching workflow: stance character",
             system: {
               traits: { ref: 3, sta: 3, wil: 3, str: 3, agi: 3, int: 3, per: 3, awa: 3 },
               rings: { void: 2 }
@@ -195,7 +196,7 @@ export function registerStanceSwitchingWorkflowTests(quench) {
           }
         });
 
-        it("a disabled stance gives nothing and does not end the other stance", async function () {
+        it("should give nothing for a disabled stance and not end the other stance", async function () {
           await actor.createEmbeddedDocuments("ActiveEffect", [
             { name: "Full Attack Stance", statuses: ["fullAttackStance"] }
           ]);
@@ -209,12 +210,12 @@ export function registerStanceSwitchingWorkflowTests(quench) {
         });
       });
 
-      describe("Center Stance Bonus Tracking", () => {
+      describe("Center Stance bonus tracking", () => {
         let actor;
 
         before(async () => {
           actor = await createTestPC({
-            name: "Center Stance Test Character",
+            name: "Stance switching workflow: Center Stance character",
             system: {
               traits: { ref: 3, sta: 3, wil: 3, str: 3, agi: 3, int: 3, per: 3, awa: 3 },
               rings: { void: { rank: 3, value: 3 } }
@@ -237,7 +238,7 @@ export function registerStanceSwitchingWorkflowTests(quench) {
           }
           try {
             await actor.unsetFlag(SYS_ID, "centerStanceBonus");
-          } catch (err) {
+          } catch {
             // Ignore if flag doesn't exist
           }
           actor.prepareData();
@@ -338,7 +339,7 @@ export function registerStanceSwitchingWorkflowTests(quench) {
         });
       });
 
-      describe("Full Defense Roll Workflow", () => {
+      describe("Full Defense roll", () => {
         let actor;
 
         /** The Full Defense bonus effects on the actor. */
@@ -353,7 +354,7 @@ export function registerStanceSwitchingWorkflowTests(quench) {
 
         before(async () => {
           actor = await createTestPC({
-            name: "Full Defense Roll Test Character",
+            name: "Stance switching workflow: Full Defense roll character",
             system: {
               traits: { ref: 4, sta: 3, wil: 3, str: 3, agi: 3, int: 3, per: 3, awa: 3 }
             }
@@ -377,7 +378,8 @@ export function registerStanceSwitchingWorkflowTests(quench) {
           await actor?.delete();
         });
 
-        it("taking the stance rolls Defense / Reflexes and adds half, rounded up, to Armor TN (p.84)", async () => {
+        // game-rules/36_stances.md, p.84
+        it("should roll Defense / Reflexes and add half, rounded up, to Armor TN", async () => {
           const base = actor.system.armorTn.current;
           await actor.createEmbeddedDocuments("ActiveEffect", [
             { name: "Full Defense Stance", statuses: ["fullDefenseStance"] }
@@ -387,7 +389,7 @@ export function registerStanceSwitchingWorkflowTests(quench) {
           assert.equal(actor.system.armorTn.current, base + Math.ceil(total / 2));
         });
 
-        it("rolls Defense 3 + Reflexes 4, keeping Reflexes: 7k4", async () => {
+        it("should roll Defense 3 + Reflexes 4, keeping Reflexes: 7k4", async () => {
           await actor.createEmbeddedDocuments("ActiveEffect", [
             { name: "Full Defense Stance", statuses: ["fullDefenseStance"] }
           ]);
@@ -395,7 +397,7 @@ export function registerStanceSwitchingWorkflowTests(quench) {
           assert.deepInclude(lastDefenseRoll().system.pool, { roll: 7, keep: 4 });
         });
 
-        it("a new roll replaces the bonus instead of adding to it", async () => {
+        it("should replace the bonus on a new roll instead of adding to it", async () => {
           await actor.createEmbeddedDocuments("ActiveEffect", [
             { name: "Full Defense Stance", statuses: ["fullDefenseStance"] }
           ]);
@@ -406,7 +408,7 @@ export function registerStanceSwitchingWorkflowTests(quench) {
           assert.equal(actor.system.armorTn.current, 25 + Math.ceil(total / 2));
         });
 
-        it("the bonus lasts until the start of the actor's next Turn", async () => {
+        it("should keep the bonus until the start of the actor's next Turn", async () => {
           await actor.createEmbeddedDocuments("ActiveEffect", [
             { name: "Full Defense Stance", statuses: ["fullDefenseStance"] }
           ]);
@@ -420,12 +422,12 @@ export function registerStanceSwitchingWorkflowTests(quench) {
         });
       });
 
-      describe("Stance Restrictions from Conditions", () => {
+      describe("Stance restrictions from conditions", () => {
         let actor;
 
         before(async () => {
           actor = await createTestPC({
-            name: "Stance Restrictions Test Character",
+            name: "Stance switching workflow: stance restrictions character",
             system: {
               traits: { ref: 3, sta: 3, wil: 3, str: 3, agi: 3, int: 3, per: 3, awa: 3 }
             }
@@ -490,7 +492,8 @@ export function registerStanceSwitchingWorkflowTests(quench) {
           const proneEffect = actor.effects.find(e => e.statuses?.has("prone"));
           assert.exists(proneEffect, "Prone condition applied");
 
-          // Prone applies -10 to Armor TN against melee attacks only (p.89)
+          // Prone applies -10 to Armor TN against melee attacks only
+          // game-rules/41_conditional_effects.md, p.89
           assert.equal(actor.system.armorTn.current, 20, "the shown Armor TN stays");
           assert.equal(actor.system.armorTn.vs.melee, -10, "Prone TN penalty against melee");
         });
@@ -535,7 +538,7 @@ export function registerStanceSwitchingWorkflowTests(quench) {
           // No TN modification, but actions are restricted
         });
 
-        it("should allow stances with conditions (stance system independent of conditions)", async function () {
+        it("should allow stances alongside conditions", async function () {
           // ARRANGE - Apply prone condition
           await actor.createEmbeddedDocuments("ActiveEffect", [
             {
@@ -601,6 +604,6 @@ export function registerStanceSwitchingWorkflowTests(quench) {
         });
       });
     },
-    { displayName: "L5R4: Stance Switching Workflow Tests" }
+    { displayName: "L5R4: Stance switching workflow" }
   );
 }

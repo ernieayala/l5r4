@@ -116,7 +116,7 @@ async function runEveryAction(app, baseline, skip = new Set()) {
  * warning and no unhandled rejection. Windows the actions open are dismissed.
  * @param {object} quench  The Quench API object.
  */
-export function registerSheetsAndAppsBatch(quench) {
+export function registerSheetsAndAppsTests(quench) {
   quench.registerBatch(
     `${SYS_ID}.sheets-and-apps`,
     context => {
@@ -176,7 +176,7 @@ export function registerSheetsAndAppsBatch(quench) {
 
         for (const which of ["pc", "npc"]) {
           it(
-            `${which} sheet renders, saves a renamed field, and runs every action`,
+            "should render the " + which + " sheet, save a renamed field, and run every action",
             clean(async function () {
               this.timeout(SURFACE_TIMEOUT_MS);
               const actor = which === "pc" ? pc : npc;
@@ -193,7 +193,7 @@ export function registerSheetsAndAppsBatch(quench) {
 
         for (const type of Object.keys(game.system.documentTypes.Item)) {
           it(
-            `${type} item sheet renders, saves a renamed field, and runs every action`,
+            "should render the " + type + " item sheet, save a renamed field, and run every action",
             clean(async function () {
               this.timeout(SURFACE_TIMEOUT_MS);
               const item = await Item.create({ name: `Sheets ${type}`, type });
@@ -209,9 +209,10 @@ export function registerSheetsAndAppsBatch(quench) {
         }
       });
 
-      describe("Sheet fixes (issue #30, header controls)", () => {
+      describe("Sheet controls and themes", () => {
+        // #30
         it(
-          "lists each header control once",
+          "should list each header control once",
           clean(async () => {
             for (const doc of [pc, npc]) {
               const actions = doc.sheet._getHeaderControls().map(control => control.action);
@@ -220,8 +221,9 @@ export function registerSheetsAndAppsBatch(quench) {
           })
         );
 
+        // #76
         it(
-          "opens the file picker from an item's image, as from an actor's (#76)",
+          "should open the file picker from an item's image, as from an actor's",
           clean(async function () {
             this.timeout(SURFACE_TIMEOUT_MS);
             const item = await Item.create({ name: "Sheets image", type: "skill" });
@@ -244,7 +246,7 @@ export function registerSheetsAndAppsBatch(quench) {
         );
 
         it(
-          "steps the Void Ring with its arrows on both sheets",
+          "should step the Void Ring with its arrows on both sheets",
           clean(async () => {
             for (const actor of [pc, npc]) {
               await actor.update({ "system.rings.void.rank": 2 });
@@ -265,7 +267,7 @@ export function registerSheetsAndAppsBatch(quench) {
         );
 
         it(
-          "removes an NPC attack after its confirmation, hides the empty slot, and adds into it",
+          "should remove an NPC attack after its confirmation, hide the empty slot, and add into it",
           clean(async function () {
             this.timeout(SURFACE_TIMEOUT_MS);
             const sheet = npc.sheet;
@@ -307,7 +309,7 @@ export function registerSheetsAndAppsBatch(quench) {
         );
 
         it(
-          "gives a light sheet in a dark interface the light Ring backdrop",
+          "should give a light sheet in a dark interface the light Ring backdrop",
           clean(async () => {
             const themes = game.settings.get("core", "sheetThemes");
             const bodyHadDark = document.body.classList.contains("theme-dark");
@@ -366,7 +368,7 @@ export function registerSheetsAndAppsBatch(quench) {
         };
 
         it(
-          "combat config saves a field and runs every action",
+          "should save a combat config field and run every action",
           clean(async function () {
             this.timeout(SURFACE_TIMEOUT_MS);
             await exercise(
@@ -378,7 +380,7 @@ export function registerSheetsAndAppsBatch(quench) {
         );
 
         it(
-          "armor config saves a field and runs every action",
+          "should save an armor config field and run every action",
           clean(async function () {
             this.timeout(SURFACE_TIMEOUT_MS);
             await exercise(new ArmorConfigApplication(pc), changeField(pc, "armorTn.mod", "3"));
@@ -387,7 +389,7 @@ export function registerSheetsAndAppsBatch(quench) {
         );
 
         it(
-          "wound config saves a field and runs every action",
+          "should save a wound config field and run every action",
           clean(async function () {
             this.timeout(SURFACE_TIMEOUT_MS);
             await exercise(new WoundConfigApplication(pc), changeField(pc, "woundsMod", "2"));
@@ -396,7 +398,7 @@ export function registerSheetsAndAppsBatch(quench) {
         );
 
         it(
-          "condition manager applies a checked condition and runs every action",
+          "should apply a condition checked in the condition manager and run every action",
           clean(async function () {
             this.timeout(SURFACE_TIMEOUT_MS);
             await exercise(new ConditionManager(pc), async app => {
@@ -411,7 +413,7 @@ export function registerSheetsAndAppsBatch(quench) {
         );
 
         it(
-          "wealth manager adds money and runs every action",
+          "should add money in the wealth manager and run every action",
           clean(async function () {
             this.timeout(SURFACE_TIMEOUT_MS);
             const koku = pc.system.wealth.koku;
@@ -427,7 +429,7 @@ export function registerSheetsAndAppsBatch(quench) {
         );
 
         it(
-          "XP manager adds an award and runs every action",
+          "should add an award in the XP manager and run every action",
           clean(async function () {
             this.timeout(SURFACE_TIMEOUT_MS);
             await exercise(new XpManagerApplication(pc), async app => {
@@ -443,7 +445,7 @@ export function registerSheetsAndAppsBatch(quench) {
         );
 
         it(
-          "NPC attack config saves an attack and runs every action",
+          "should save an attack in the NPC attack config and run every action",
           clean(async function () {
             this.timeout(SURFACE_TIMEOUT_MS);
             const app = new NpcAttackConfigApplication(npc, "attack1");
@@ -459,7 +461,7 @@ export function registerSheetsAndAppsBatch(quench) {
         );
 
         it(
-          "emphasis manager saves a checked emphasis and runs every action",
+          "should save an emphasis checked in the emphasis manager and run every action",
           clean(async function () {
             this.timeout(SURFACE_TIMEOUT_MS);
             const skill = pc.items.getName("Kenjutsu");
@@ -477,7 +479,7 @@ export function registerSheetsAndAppsBatch(quench) {
         );
       });
 
-      describe("Buttons the click-through's fixtures do not show (roadmap/STAGE-16)", () => {
+      describe("Buttons the click-through's fixtures do not show", () => {
         /** Answer the next DialogV2 with `answer(app)`; resolves once answered. */
         const answerDialog = answer =>
           new Promise(resolve =>
@@ -488,7 +490,7 @@ export function registerSheetsAndAppsBatch(quench) {
           );
 
         it(
-          "the NPC wound config switches the wound mode",
+          "should switch the wound mode in the NPC wound config",
           clean(async function () {
             this.timeout(SURFACE_TIMEOUT_MS);
             const before = npc.system.woundMode;
@@ -510,7 +512,7 @@ export function registerSheetsAndAppsBatch(quench) {
         );
 
         it(
-          "the XP manager sets the Disadvantage cap and deletes a manual award",
+          "should set the Disadvantage cap and delete a manual award in the XP manager",
           clean(async function () {
             this.timeout(SURFACE_TIMEOUT_MS);
             const actor = await createTestPC({ name: "Sheets XP" });
@@ -548,7 +550,7 @@ export function registerSheetsAndAppsBatch(quench) {
         );
 
         it(
-          "the emphasis manager renames and deletes a world custom emphasis",
+          "should rename and delete a world custom emphasis in the emphasis manager",
           clean(async function () {
             this.timeout(SURFACE_TIMEOUT_MS);
             const saved = game.settings.get(SYS_ID, "customEmphases");
@@ -584,7 +586,7 @@ export function registerSheetsAndAppsBatch(quench) {
         );
 
         it(
-          "the NPC's Fear button tests the selected characters",
+          "should test the selected characters from the NPC's Fear button",
           clean(async function () {
             this.timeout(SURFACE_TIMEOUT_MS);
             if (!canvas.scene) {
@@ -618,8 +620,8 @@ export function registerSheetsAndAppsBatch(quench) {
         );
       });
 
-      describe("Coverage list (roadmap/STAGE-16)", () => {
-        it("the click-through ran exactly the actions every-action.js lists", () => {
+      describe("Coverage list", () => {
+        it("should run in the click-through exactly the actions every-action.js lists", () => {
           assert.deepEqual([...ran].sort(), [...EVERY_ACTION].sort());
         });
       });

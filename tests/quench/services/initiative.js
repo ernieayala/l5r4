@@ -26,12 +26,12 @@ export function registerInitiativeTests(quench) {
     context => {
       const { describe, it, assert, beforeEach, afterEach } = context;
 
-      describe("PC Initiative Calculation", () => {
+      describe("PC Initiative calculation", () => {
         let actor;
 
         beforeEach(async () => {
           actor = await createTestPC({
-            name: "Initiative Test PC",
+            name: "Initiative: PC",
             system: {
               traits: {
                 sta: 3,
@@ -116,12 +116,12 @@ export function registerInitiativeTests(quench) {
         });
       });
 
-      describe("NPC Initiative Calculation", () => {
+      describe("NPC Initiative calculation", () => {
         let npc;
 
         beforeEach(async () => {
           npc = await createTestNPC({
-            name: "Initiative Test NPC",
+            name: "Initiative: NPC",
             system: {
               traits: { ref: 3 },
               initiative: { roll: 0, keep: 0 } // Set to 0 to test Reflexes fallback
@@ -142,7 +142,9 @@ export function registerInitiativeTests(quench) {
           assert.exists(npc.system.initiative.keep, "Initiative keep exists");
         });
 
-        it("should roll Insight Rank 1 + Reflexes, keep Reflexes, with no stored pool (p.81; #30)", () => {
+        // game-rules/31_combat_round.md, p.81
+        // #30
+        it("should roll Insight Rank 1 + Reflexes, keep Reflexes, with no stored pool", () => {
           const reflexes = npc.system.traits.ref;
           assert.equal(npc.system.initiative.roll, 1 + reflexes, "Insight Rank 1 + Reflexes");
           assert.equal(npc.system.initiative.keep, reflexes, "Reflexes");
@@ -173,12 +175,12 @@ export function registerInitiativeTests(quench) {
         });
       });
 
-      describe("Combat Integration", () => {
+      describe("Combat integration", () => {
         let combat, actor;
 
         beforeEach(async () => {
           actor = await createTestPC({
-            name: "Combat Test",
+            name: "Initiative: combat",
             system: {
               traits: { ref: 4 },
               insight: { rank: 2 }
@@ -245,12 +247,12 @@ export function registerInitiativeTests(quench) {
         });
       });
 
-      describe("Initiative Modifiers", () => {
+      describe("Initiative modifiers", () => {
         let combat, actor;
 
         beforeEach(async () => {
           actor = await createTestPC({
-            name: "Modifier Test",
+            name: "Initiative: modifiers",
             system: {
               traits: { ref: 3 },
               insight: { rank: 1 }
@@ -426,7 +428,7 @@ export function registerInitiativeTests(quench) {
           assert.isAbove(flatBonus, 3, "Flat bonus includes conversions plus totalMod");
         });
 
-        it("should handle zero modifiers (no change)", async () => {
+        it("should leave the pool unchanged with zero modifiers", async () => {
           // ARRANGE
           await actor.update({
             "system.initiative.rollMod": 0,
@@ -460,12 +462,12 @@ export function registerInitiativeTests(quench) {
         });
       });
 
-      describe("Edge Cases", () => {
+      describe("Edge cases", () => {
         let actor;
 
         beforeEach(async () => {
           actor = await createTestPC({
-            name: "Edge Case Test",
+            name: "Initiative: edge case",
             system: {
               traits: { ref: 2 },
               insight: { rank: 1 }
@@ -480,7 +482,7 @@ export function registerInitiativeTests(quench) {
           }
         });
 
-        it("should handle minimum Reflexes (2)", () => {
+        it("should handle the minimum Reflexes of 2", () => {
           assert.equal(actor.system.traits.ref, 2, "Reflexes is 2");
           assert.equal(actor.system.initiative.keep, 2, "Initiative keep is 2");
         });
@@ -521,7 +523,7 @@ export function registerInitiativeTests(quench) {
         });
       });
 
-      describe("Combat and Combatant classes (roadmap Stage 5)", () => {
+      describe("Combat document classes", () => {
         let combat, actor;
 
         afterEach(async () => {
@@ -531,7 +533,7 @@ export function registerInitiativeTests(quench) {
           actor = null;
         });
 
-        it("registers the system's Combat and Combatant classes and leaves core's prototypes alone", () => {
+        it("should register the system's Combat and Combatant classes and leave core's prototypes alone", () => {
           assert.equal(CONFIG.Combat.documentClass, L5R4Combat);
           assert.equal(CONFIG.Combatant.documentClass, L5R4Combatant);
           assert.notEqual(
@@ -546,12 +548,14 @@ export function registerInitiativeTests(quench) {
           );
         });
 
-        it("rolls the Insight Rank computed from Rings and Skills, not the stored one (B4)", async () => {
+        // game-rules/31_combat_round.md, p.81
+        // game-rules/49_improving_your_character.md, p.104
+        it("should roll the Insight Rank computed from Rings and Skills, not the stored one", async () => {
           actor = await createTestPC({
-            name: "B4 Insight",
+            name: "Initiative: computed Insight Rank",
             system: { traits: { ref: 3 }, insight: { rank: 1 } }
           });
-          // Rings 2 each (100 points) + 60 Skill ranks = 160 points: Insight Rank 2 (p.104)
+          // Rings 2 each (100 points) + 60 Skill ranks = 160 points: Insight Rank 2
           await actor.createEmbeddedDocuments("Item", [
             { name: "Skill A", type: "skill", system: { rank: 10 } },
             { name: "Skill B", type: "skill", system: { rank: 10 } },
@@ -565,9 +569,10 @@ export function registerInitiativeTests(quench) {
           assert.equal(actor.system.initiative.roll, 5, "Insight Rank 2 + Reflexes 3");
         });
 
-        it("rolls a 12k10 pool as 10k10 + 4 (p.77)", async () => {
+        // game-rules/26_special_dice_rules.md, p.77
+        it("should roll a 12k10 pool as 10k10 + 4", async () => {
           actor = await createTestPC({
-            name: "Ten Dice Initiative",
+            name: "Initiative: Ten Dice Rule",
             system: { traits: { ref: 10 } }
           });
           await actor.update({ "system.initiative.rollMod": 12 - actor.system.initiative.roll });
@@ -579,11 +584,11 @@ export function registerInitiativeTests(quench) {
           assert.equal(combatant.getInitiativeRoll().formula, "10d10xa10k10 + 4");
         });
 
-        it("follows the Little Truths setting like every other roll", async () => {
+        it("should follow the Little Truths setting like every other roll", async () => {
           const setting = game.settings.get(SYS_ID, "LtException");
           // 12k2 converts to 10k3; the exception adds 2 only to a pool the conversion left below ten kept
           actor = await createTestPC({
-            name: "Little Truths Initiative",
+            name: "Initiative: Little Truths",
             system: { initiative: { rollMod: 9 } }
           });
           combat = await Combat.create({ scene: null, active: false });
@@ -600,8 +605,8 @@ export function registerInitiativeTests(quench) {
           }
         });
 
-        it("prompts once for a marked Void Point, spends it, and adds +10 to that roll only", async () => {
-          actor = await createTestPC({ name: "Void Initiative" });
+        it("should prompt once for a marked Void Point, spend it, and add +10 to that roll only", async () => {
+          actor = await createTestPC({ name: "Initiative: Void Point" });
           await actor.update({ "system.initiative.useVoid": true });
           combat = await Combat.create({ scene: null, active: false });
           const [combatant] = await combat.createEmbeddedDocuments("Combatant", [
@@ -642,12 +647,12 @@ export function registerInitiativeTests(quench) {
         });
       });
 
-      describe("Multiple Combatants", () => {
+      describe("Multiple combatants", () => {
         let combat, actor1, actor2, npc;
 
         beforeEach(async () => {
           actor1 = await createTestPC({
-            name: "Fast PC",
+            name: "Initiative: fast PC",
             system: {
               traits: { ref: 5 },
               insight: { rank: 3 }
@@ -655,7 +660,7 @@ export function registerInitiativeTests(quench) {
           });
 
           actor2 = await createTestPC({
-            name: "Slow PC",
+            name: "Initiative: slow PC",
             system: {
               traits: { ref: 2 },
               insight: { rank: 1 }
@@ -663,7 +668,7 @@ export function registerInitiativeTests(quench) {
           });
 
           npc = await createTestNPC({
-            name: "NPC",
+            name: "Initiative: NPC combatant",
             system: {
               traits: { ref: 3 }
             }
@@ -732,6 +737,6 @@ export function registerInitiativeTests(quench) {
         });
       });
     },
-    { displayName: "L5R4: Initiative Service Tests" }
+    { displayName: "L5R4: Initiative" }
   );
 }

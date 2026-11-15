@@ -26,12 +26,12 @@ export function registerSkillAdvancementRaceConditionTests(quench) {
     context => {
       const { describe, it, assert, beforeEach, afterEach } = context;
 
-      describe("Rapid Emphasis Addition", () => {
+      describe("Rapid emphasis addition", () => {
         let actor, skill;
 
         beforeEach(async () => {
           actor = await createTestPC({
-            name: "Emphasis Race Test",
+            name: "Skill advancement race conditions: emphasis race",
             system: { rings: { void: 2 } }
           });
 
@@ -133,7 +133,7 @@ export function registerSkillAdvancementRaceConditionTests(quench) {
           assert.isNumber(xpBreakdown.skills, "XP calculated for 5 emphases");
         });
 
-        it("should handle emphasis beyond rank limit (rule violation)", async () => {
+        it("should store more emphases than the Skill Rank allows", async () => {
           // ARRANGE - Skill rank 3, try to add 4 emphases (violates rank limit)
           await skill.update({ "system.rank": 3 });
 
@@ -158,12 +158,12 @@ export function registerSkillAdvancementRaceConditionTests(quench) {
         });
       });
 
-      describe("Skill Rank Changes", () => {
+      describe("Skill Rank changes", () => {
         let actor, skill;
 
         beforeEach(async () => {
           actor = await createTestPC({
-            name: "Rank Change Test",
+            name: "Skill advancement race conditions: rank change",
             system: { rings: { void: 2 } }
           });
 
@@ -247,7 +247,7 @@ export function registerSkillAdvancementRaceConditionTests(quench) {
           assert.isNumber(xpBreakdown.skills, "XP calculated despite violation");
         });
 
-        it("should handle rank set to zero (unskilled)", async () => {
+        it("should handle a rank set to zero as unskilled", async () => {
           // ARRANGE - Set rank to 0
           await skill.update({ "system.rank": 0 });
 
@@ -268,7 +268,7 @@ export function registerSkillAdvancementRaceConditionTests(quench) {
 
         beforeEach(async () => {
           actor = await createTestPC({
-            name: "School Skill Test",
+            name: "Skill advancement race conditions: school skill",
             system: { rings: { void: 2 } }
           });
 
@@ -329,12 +329,12 @@ export function registerSkillAdvancementRaceConditionTests(quench) {
         });
       });
 
-      describe("Multiple Skills Race Conditions", () => {
+      describe("Multiple Skill race conditions", () => {
         let actor, skills;
 
         beforeEach(async () => {
           actor = await createTestPC({
-            name: "Multi-Skill Test",
+            name: "Skill advancement race conditions: multiple skills",
             system: { rings: { void: 2 } }
           });
 
@@ -364,7 +364,7 @@ export function registerSkillAdvancementRaceConditionTests(quench) {
 
         it("should handle 3 skills updated with Promise.all", async () => {
           // ARRANGE - Update all skills simultaneously
-          const updatePromises = skills.map((skill, i) =>
+          const updatePromises = skills.map(skill =>
             skill.update({ "system.rank": skill.system.rank + 1 })
           );
 
@@ -410,6 +410,6 @@ export function registerSkillAdvancementRaceConditionTests(quench) {
         });
       });
     },
-    { displayName: "L5R4: Skill Advancement Race Conditions" }
+    { displayName: "L5R4: Skill advancement race conditions" }
   );
 }

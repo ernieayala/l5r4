@@ -1,0 +1,11 @@
+{
+  "files": {
+    "templates/apps/effect-panel.hbs": "<section class=\"l5r4-effect-panel\">\n  <button type=\"button\" data-action=\"delete-effect\"></button>\n</section>\n",
+    "templates/actor/pc.hbs": "<button type=\"button\" data-action=\"roll-trait\"></button>\n",
+    "templates/chat/check-request.hbs": "<button type=\"button\" data-action=\"check-request-roll\"></button>\n",
+    "templates/chat/damage-result.hbs": "<button type=\"button\" data-action=\"damage-void\"></button>\n",
+    "module/apps/effect-panel.js": "export default class EffectPanelApplication {\n  static DEFAULT_OPTIONS = {\n    actions: { \"delete-effect\": EffectPanelApplication.#onDeleteEffect }\n  };\n\n  static #onDeleteEffect() {}\n}\n",
+    "module/sheets/pc-sheet.js": "function onAction(action) {\n  switch (action) {\n    case \"roll-trait\":\n      return 1;\n  }\n}\n",
+    "module/services/check-request.js": "html.querySelector(\"[data-action='check-request-roll']\");\n"
+  }
+}

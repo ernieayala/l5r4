@@ -34,12 +34,12 @@ export function registerSkillVoidPointTests(quench) {
     context => {
       const { describe, it, assert, beforeEach, afterEach } = context;
 
-      describe("Skill Roll + Void Point: Basic Mechanics", () => {
-        let actor, skill;
+      describe("Skill Roll and Void Point basics", () => {
+        let actor;
 
         beforeEach(async () => {
           actor = await createTestPC({
-            name: "Void Test Samurai",
+            name: "Skill Roll and Void Point: void samurai",
             system: {
               traits: { agi: 4, ref: 3 },
               rings: {
@@ -48,7 +48,7 @@ export function registerSkillVoidPointTests(quench) {
             }
           });
 
-          skill = await Item.create(
+          await Item.create(
             {
               ...createSkillData({ name: "Kenjutsu", rank: 5 }),
               system: {
@@ -122,7 +122,7 @@ export function registerSkillVoidPointTests(quench) {
           assert.exists(voidResult.message, "Error message provided");
         });
 
-        it("should handle multiple void point spends (sequential)", async () => {
+        it("should handle sequential Void Point spends", async () => {
           // ARRANGE
           const initialVoid = 3;
           assert.equal(actor.system.rings.void.value, initialVoid, "Start with 3 void");
@@ -154,12 +154,12 @@ export function registerSkillVoidPointTests(quench) {
         });
       });
 
-      describe("Skill Roll + Void Point: Combination Mechanics", () => {
-        let actor, skill;
+      describe("Skill Roll and Void Point combinations", () => {
+        let actor;
 
         beforeEach(async () => {
           actor = await createTestPC({
-            name: "Combo Test Samurai",
+            name: "Skill Roll and Void Point: combination samurai",
             system: {
               traits: { agi: 4 },
               rings: {
@@ -168,7 +168,7 @@ export function registerSkillVoidPointTests(quench) {
             }
           });
 
-          skill = await Item.create(
+          await Item.create(
             {
               ...createSkillData({ name: "Kenjutsu", rank: 5 }),
               system: {
@@ -226,7 +226,6 @@ export function registerSkillVoidPointTests(quench) {
           const traitValue = 4;
           const voidRoll = 1;
           const voidKeep = 1;
-          const totalBonus = 5; // Flat bonus to result
 
           // ACT
           const rolled = skillRank + traitValue + voidRoll; // 10
@@ -240,12 +239,12 @@ export function registerSkillVoidPointTests(quench) {
         });
       });
 
-      describe("Skill Roll + Void Point: Unskilled Rolls", () => {
-        let actor, skill;
+      describe("Skill Roll and Void Point unskilled rolls", () => {
+        let actor;
 
         beforeEach(async () => {
           actor = await createTestPC({
-            name: "Unskilled Samurai",
+            name: "Skill Roll and Void Point: unskilled samurai",
             system: {
               traits: { per: 3 },
               rings: {
@@ -254,7 +253,7 @@ export function registerSkillVoidPointTests(quench) {
             }
           });
 
-          skill = await Item.create(
+          await Item.create(
             {
               ...createSkillData({ name: "Medicine", rank: 0 }),
               system: {
@@ -274,7 +273,6 @@ export function registerSkillVoidPointTests(quench) {
 
         it("should allow void point spending on unskilled roll", async () => {
           // ARRANGE
-          const skillRank = 0; // Unskilled
           const traitValue = 3;
           const voidBonus = 1;
 
@@ -307,12 +305,12 @@ export function registerSkillVoidPointTests(quench) {
         });
       });
 
-      describe("Skill Roll + Void Point: Edge Cases", () => {
+      describe("Skill Roll and Void Point edge cases", () => {
         let actor;
 
         beforeEach(async () => {
           actor = await createTestPC({
-            name: "Edge Case Samurai",
+            name: "Skill Roll and Void Point: edge case samurai",
             system: {
               traits: { agi: 8 },
               rings: {
@@ -328,7 +326,7 @@ export function registerSkillVoidPointTests(quench) {
 
         it("should enforce Ten Dice Rule with void point", async () => {
           // ARRANGE - High skill + trait + void exceeds 10 dice
-          const skill = await Item.create(
+          await Item.create(
             {
               ...createSkillData({ name: "Kenjutsu", rank: 8 }),
               system: {
@@ -359,11 +357,11 @@ export function registerSkillVoidPointTests(quench) {
           // Excess rolled dice (7) convert to +7 bonus
         });
 
-        it("should handle minimum trait value (2) with void", async () => {
+        it("should handle the minimum Trait value of 2 with a Void Point", async () => {
           // ARRANGE
           await actor.update({ "system.traits.agi": 2 });
 
-          const skill = await Item.create(
+          await Item.create(
             {
               ...createSkillData({ name: "Kenjutsu", rank: 1 }),
               system: {
@@ -387,10 +385,10 @@ export function registerSkillVoidPointTests(quench) {
           assert.equal(kept, 3, "Minimum trait + void kept = 3");
         });
 
-        it("should handle void ring rank 0 (no void points)", async () => {
+        it("should handle Void Ring rank 0 with no Void Points", async () => {
           // ARRANGE - Create actor with no void ring
           const noVoidActor = await createTestPC({
-            name: "No Void Samurai",
+            name: "Skill Roll and Void Point: no Void samurai",
             system: {
               traits: { agi: 3 },
               rings: {
@@ -412,12 +410,12 @@ export function registerSkillVoidPointTests(quench) {
         });
       });
 
-      describe("Skill Roll + Void Point: Chat Message Validation", () => {
-        let actor, skill;
+      describe("Skill Roll and Void Point chat messages", () => {
+        let actor;
 
         beforeEach(async () => {
           actor = await createTestPC({
-            name: "Chat Test Samurai",
+            name: "Skill Roll and Void Point: chat samurai",
             system: {
               traits: { agi: 4 },
               rings: {
@@ -426,7 +424,7 @@ export function registerSkillVoidPointTests(quench) {
             }
           });
 
-          skill = await Item.create(
+          await Item.create(
             {
               ...createSkillData({ name: "Kenjutsu", rank: 5 }),
               system: {
@@ -473,6 +471,6 @@ export function registerSkillVoidPointTests(quench) {
         });
       });
     },
-    { displayName: "L5R4: Skill Roll + Void Point Integration Tests" }
+    { displayName: "L5R4: Skill Roll and Void Point" }
   );
 }

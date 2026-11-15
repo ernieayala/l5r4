@@ -20,8 +20,9 @@ const rollData = {
   honor: { rank: 4 }
 };
 
-describe("traitAdjustments (TraitAdjust)", () => {
-  it("sums numbers and formulas per Trait, the Void Ring included", () => {
+// TraitAdjust rules
+describe("traitAdjustments", () => {
+  it("should sum numbers and formulas per Trait, the Void Ring included", () => {
     const { adjustments, errors } = traitAdjustments(
       [
         entry(rule("TraitAdjust", { trait: "str", value: 1 })),
@@ -35,7 +36,7 @@ describe("traitAdjustments (TraitAdjust)", () => {
     expect(errors).toEqual([]);
   });
 
-  it("skips a rule whose predicate fails and ignores other keys", () => {
+  it("should skip a rule whose predicate fails and ignore other keys", () => {
     const { adjustments } = traitAdjustments(
       [
         entry(rule("TraitAdjust", { trait: "agi", value: 1, predicate: ["status:prone"] })),
@@ -47,7 +48,7 @@ describe("traitAdjustments (TraitAdjust)", () => {
     expect(adjustments).toEqual({});
   });
 
-  it("reports a formula that does not resolve and keeps the other rules", () => {
+  it("should report a formula that does not resolve and keep the other rules", () => {
     const { adjustments, errors } = traitAdjustments(
       [
         entry(rule("TraitAdjust", { trait: "str", value: "nope(1)" }), "Bad Family"),
@@ -63,7 +64,7 @@ describe("traitAdjustments (TraitAdjust)", () => {
 });
 
 describe("traitAdjustTotal", () => {
-  it("sums numeric TraitAdjust values for one Trait", () => {
+  it("should sum numeric TraitAdjust values for one Trait", () => {
     const rules = [
       { key: "TraitAdjust", trait: "str", value: 1 },
       { key: "TraitAdjust", trait: "str", value: "2" },
@@ -73,7 +74,7 @@ describe("traitAdjustTotal", () => {
     expect(traitAdjustTotal(rules, "str")).toBe(3);
   });
 
-  it("skips a formula and anything that is not a rule", () => {
+  it("should skip a formula and anything that is not a rule", () => {
     expect(
       traitAdjustTotal([{ key: "TraitAdjust", trait: "str", value: "@rings.air" }, null], "str")
     ).toBe(0);
@@ -81,8 +82,9 @@ describe("traitAdjustTotal", () => {
   });
 });
 
-describe("addRuleRollOptions (RollOption)", () => {
-  it("adds an option, a toggle only when on, and lets later predicates see earlier options", () => {
+// RollOption rules
+describe("addRuleRollOptions", () => {
+  it("should add an option, a toggle only when on, and let later predicates see earlier options", () => {
     const options = addRuleRollOptions(
       [
         entry(rule("RollOption", { option: "master-of-blood", toggleable: false, value: false })),
@@ -111,7 +113,7 @@ describe("derivedRuleOutputs", () => {
       new Set(["status:defenseStance"])
     );
 
-  it("ArmorTN: resolves each rule's value with its mode, type, and range for resolveArmorTn", () => {
+  it("should resolve each ArmorTN rule's value with its mode, type, and range for resolveArmorTn", () => {
     const result = out([
       rule("ArmorTN", {
         value: "@rings.air + @skills.defense.rank",
@@ -129,14 +131,17 @@ describe("derivedRuleOutputs", () => {
     ]);
   });
 
-  it("ArmorTN: the Defense Stance rule gives Air Ring plus Defense rank (Core Rulebook p.84)", () => {
+  // game-rules/36_stances.md, p.84
+  it("should give Air Ring plus Defense rank through the Defense Stance ArmorTN rule", () => {
     const [armor] = out([
       rule("ArmorTN", { value: "@rings.air + @skills.defense.rank", type: "untyped", mode: "add" })
     ]).armor;
     expect(armor.value).toBe(5);
   });
 
-  it("formulas read the carrying effect's level as @level (Fear Rank, p.90)", () => {
+  // Fear Rank
+  // game-rules/42_fear.md, p.90
+  it("should read the carrying effect's level as @level in formulas", () => {
     const fear = {
       rule: rule("RollModifier", {
         selector: "any",
@@ -153,17 +158,19 @@ describe("derivedRuleOutputs", () => {
     expect(modifier.roll).toBe(-3);
   });
 
-  it("Movement adds Water Ring ranks for movement (Blinded, p.89)", () => {
+  // Blinded
+  // game-rules/41_conditional_effects.md, p.89
+  it("should add Water Ring ranks for movement through Movement", () => {
     expect(out([rule("Movement", { water: -2 })]).movementWater).toBe(-2);
   });
 
-  it("ConditionImmunity collects the statuses the actor cannot gain", () => {
+  it("should collect the statuses the actor cannot gain through ConditionImmunity", () => {
     expect([...out([rule("ConditionImmunity", { condition: "feared" })]).immunities]).toEqual([
       "feared"
     ]);
   });
 
-  it("PeriodicSave keeps the effect it ends; a save on an item has none and is skipped", () => {
+  it("should keep the effect a PeriodicSave ends; a save on an item has none and is skipped", () => {
     const save = rule("PeriodicSave", {
       event: "roundEnd",
       roll: "ring:earth",
@@ -194,7 +201,7 @@ describe("derivedRuleOutputs", () => {
     ]);
   });
 
-  it("Resource adds the maxima of one slug", () => {
+  it("should add the Resource maxima of one slug", () => {
     const result = out([
       rule("Resource", { slug: "void", max: 1, per: "round" }),
       rule("Resource", { slug: "void", max: "@rings.earth - 1", per: "round" })
@@ -202,7 +209,7 @@ describe("derivedRuleOutputs", () => {
     expect(result.resources).toEqual({ void: { max: 2, per: "round" } });
   });
 
-  it("Reduction, Wounds, and Initiative add up", () => {
+  it("should add up Reduction, Wounds, and Initiative", () => {
     const result = out([
       rule("Reduction", { value: 2 }),
       rule("Reduction", { value: 1 }),
@@ -216,12 +223,12 @@ describe("derivedRuleOutputs", () => {
     expect(result.initiative).toEqual({ roll: 1, keep: 1, total: 5 });
   });
 
-  it("skips derived rules whose predicate fails", () => {
+  it("should skip derived rules whose predicate fails", () => {
     const result = out([rule("Reduction", { value: 2, predicate: ["status:prone"] })]);
     expect(result.reduction).toBe(0);
   });
 
-  it("RollModifier: fills the bag by selector, which selectorBonus stacks for a sheet formula", () => {
+  it("should fill the RollModifier bag by selector, which selectorBonus stacks for a sheet formula", () => {
     const result = out([
       rule("RollModifier", {
         selector: "skill:kenjutsu",
@@ -266,7 +273,7 @@ describe("derivedRuleOutputs", () => {
     });
   });
 
-  it("RollModifier: keeps its predicate in the bag, tested when a roll or sheet reads it", () => {
+  it("should keep a RollModifier's predicate in the bag, tested when a roll or sheet reads it", () => {
     const result = out([
       rule("RollModifier", {
         selector: "skill:kenjutsu",
@@ -282,7 +289,7 @@ describe("derivedRuleOutputs", () => {
     expect(selectorBonus(result.bag, ["skill:kenjutsu"], new Set(["target"])).roll).toBe(1);
   });
 
-  it("RollModifier: optional and range-limited modifiers wait for the dialog, not the sheet formula", () => {
+  it("should hold optional and range-limited RollModifiers for the dialog, not the sheet formula", () => {
     const base = {
       selector: "attack",
       keep: 0,
@@ -322,7 +329,7 @@ describe("derivedRuleOutputs", () => {
     expect(item.consumes).toBeNull();
   });
 
-  it("ApplyCondition fills its bag kind", () => {
+  it("should fill the ApplyCondition bag kind", () => {
     const result = out([
       rule("ApplyCondition", {
         selector: "attack",
@@ -338,7 +345,7 @@ describe("derivedRuleOutputs", () => {
     });
   });
 
-  it("TNModifier, FreeRaise, DiceRule, Substitute, and Note fill their bag kinds", () => {
+  it("should fill the TNModifier, FreeRaise, DiceRule, Substitute, and Note bag kinds", () => {
     const result = out([
       rule("TNModifier", { selector: "spell", value: -5, type: "untyped", label: "Affinity" }),
       rule("FreeRaise", { selector: "skill:iaijutsu", value: "floor(@honor.rank / 2)" }),
@@ -360,7 +367,8 @@ describe("derivedRuleOutputs", () => {
     expect(result.bag.notes.attack[0]).toMatchObject({ text: "Strike first" });
   });
 
-  it("OpponentModifier, RaiseRule, UnskilledAs, ActionCost, and Cost fill their bag kinds (STAGE-11)", () => {
+  // roadmap/STAGE-11
+  it("should fill the OpponentModifier, RaiseRule, UnskilledAs, ActionCost, and Cost bag kinds", () => {
     const result = derivedRuleOutputs(
       [
         entry(
@@ -401,7 +409,7 @@ describe("derivedRuleOutputs", () => {
     expect(result.bag.costs.self[0]).toMatchObject({ value: "@cost - 1", itemId: "I" });
   });
 
-  it("Ledger rules are kept with their formulas for the change they size", () => {
+  it("should keep Ledger rules with their formulas for the change they size", () => {
     const result = out([
       rule("Ledger", { track: "honor", direction: "loss", value: "@points * 2" }),
       rule("Ledger", { track: "taint", direction: "gain", value: 0, predicate: ["status:prone"] })
@@ -411,7 +419,7 @@ describe("derivedRuleOutputs", () => {
     ]);
   });
 
-  it("reports a bad formula and leaves its rule out", () => {
+  it("should report a bad formula and leave its rule out", () => {
     const result = out([
       rule("Wounds", { perRank: 2, penalty: "bad(" }),
       rule("RollModifier", { selector: "attack", roll: "bad(", keep: 0, total: 0, type: "untyped" })
@@ -434,7 +442,7 @@ describe("bagEntries", () => {
     }
   };
 
-  it("returns the selectors' entries whose predicates hold", () => {
+  it("should return the selectors' entries whose predicates hold", () => {
     expect(
       bagEntries(bag, "rollModifiers", ["attack"], new Set(["target"])).map(e => e.roll)
     ).toEqual([1, 2]);
@@ -449,7 +457,7 @@ describe("bagEntries", () => {
     expect(bagEntries(bag, "rollModifiers", ["attack"], new Set()).map(e => e.roll)).toEqual([2]);
   });
 
-  it("returns nothing for a missing kind, selector, or bag", () => {
+  it("should return nothing for a missing kind, selector, or bag", () => {
     expect(bagEntries(bag, "notes", ["attack"], new Set())).toEqual([]);
     expect(bagEntries(bag, "rollModifiers", ["spell"], new Set())).toEqual([]);
     expect(bagEntries(undefined, "rollModifiers", ["attack"], new Set())).toEqual([]);
@@ -457,20 +465,20 @@ describe("bagEntries", () => {
 });
 
 describe("parseRulesJson", () => {
-  it("parses a list of rules, and blank text as no rules", () => {
+  it("should parse a list of rules, and blank text as no rules", () => {
     expect(parseRulesJson('[{"key": "Note", "selector": "attack", "text": "Hi"}]')).toEqual({
       rules: [{ key: "Note", selector: "attack", text: "Hi" }]
     });
     expect(parseRulesJson("  ")).toEqual({ rules: [] });
   });
 
-  it("reports text that is not JSON", () => {
+  it("should report text that is not JSON", () => {
     const { error, detail } = parseRulesJson("[{");
     expect(error).toBe("invalidJson");
     expect(detail).toBeTruthy();
   });
 
-  it("reports JSON that is not a list of objects with a key", () => {
+  it("should report JSON that is not a list of objects with a key", () => {
     expect(parseRulesJson('{"key": "Note"}')).toEqual({ error: "notList" });
     expect(parseRulesJson('[{"selector": "attack"}]')).toEqual({ error: "notList" });
     expect(parseRulesJson("[null]")).toEqual({ error: "notList" });
@@ -479,7 +487,7 @@ describe("parseRulesJson", () => {
 });
 
 describe("statusRules", () => {
-  it("copies a status's rules, and none for a status without them", () => {
+  it("should copy a status's rules, and none for a status without them", () => {
     expect(statusRules("defenseStance")).toEqual([
       { key: "ArmorTN", value: "@rings.air + @skills.defense.rank" }
     ]);
@@ -488,7 +496,8 @@ describe("statusRules", () => {
       selector: "attack",
       roll: 1
     });
-    // Prone: -10 Armor TN against melee, -2k0 to attacks with small and medium weapons, a note for large (p.89)
+    // Prone: -10 Armor TN against melee, -2k0 to attacks with small and medium weapons, a note for large
+    // game-rules/41_conditional_effects.md, p.89
     expect(statusRules("prone")).toEqual([
       { key: "ArmorTN", value: -10, range: "melee" },
       {
@@ -507,7 +516,7 @@ describe("statusRules", () => {
     expect(statusRules("attackStance")).toEqual([]);
   });
 
-  it("returns a copy, so editing it leaves the config alone", () => {
+  it("should return a copy, so editing it leaves the config alone", () => {
     statusRules("defenseStance")[0].value = 99;
     expect(statusRules("defenseStance")[0].value).toBe("@rings.air + @skills.defense.rank");
   });

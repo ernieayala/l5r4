@@ -1,11 +1,12 @@
 /**
- * Status Effects on All Roll Types - Integration Tests
+ * Status effects on all roll types
  *
  * Conditions reach every roll type through their rules (module/config/status-effects.js) and the roll pipeline:
- * - Dazed: -3k0 to every roll, keeping no more dice than are rolled (p.89: 6k4 becomes 3k3)
- * - Fatigued: +5 TN per level on Skill, physical Trait, and Spell Casting Rolls (p.89)
- * - Blinded: -1k1 melee and -3k3 ranged attacks (p.89)
- * - Prone: -2k0 to attacks (p.89)
+ * - Dazed: -3k0 to every roll, keeping no more dice than are rolled, so 6k4 becomes 3k3
+ * - Fatigued: +5 TN per level on Skill, physical Trait, and Spell Casting Rolls
+ * - Blinded: -1k1 melee and -3k3 ranged attacks
+ * - Prone: -2k0 to attacks
+ * game-rules/41_conditional_effects.md, p.89
  *
  * @see module/services/dice/check/collect.js
  */
@@ -24,7 +25,7 @@ import { checkEffects, settleChatNotifications } from "../helpers.js";
  * @param {number} tn
  * @returns {Promise<void>}
  */
-function answerWithTN(tn) {
+function answerWithTn(tn) {
   return new Promise(resolve => {
     Hooks.once("renderDialogV2", app => {
       app.element.querySelector('[name="tn"]').value = String(tn);
@@ -44,7 +45,7 @@ export function registerStatusEffectsAllRollsTests(quench) {
     context => {
       const { describe, it, assert, before, after, afterEach } = context;
 
-      describe("Status Effects on All Roll Types", () => {
+      describe("Status effects on all roll types", () => {
         let actor;
         let spell;
         let mahoSpell;
@@ -67,7 +68,7 @@ export function registerStatusEffectsAllRollsTests(quench) {
           this.timeout(30_000);
           await settleChatNotifications();
           actor = await createTestPC({
-            name: "Status Effects Roll Test Character",
+            name: "Status effects on all roll types: roll character",
             system: {
               traits: { ref: 4, sta: 4, wil: 4, str: 4, agi: 4, int: 4, per: 4, awa: 4 },
               rings: { void: { rank: 4, value: 4 } },
@@ -104,8 +105,8 @@ export function registerStatusEffectsAllRollsTests(quench) {
           await actor?.delete();
         });
 
-        describe("Dazed Condition (-3k0 to ALL actions)", () => {
-          it("Trait roll: 4k4 rolls 1k1", async () => {
+        describe("Dazed condition at -3k0 to all actions", () => {
+          it("should roll a 4k4 Trait roll as 1k1", async () => {
             await add("dazed");
             const message = keep(
               await TraitRoll({ traitRank: 4, traitName: "sta", askForOptions: false, actor })
@@ -113,7 +114,7 @@ export function registerStatusEffectsAllRollsTests(quench) {
             assert.deepInclude(message.system.pool, { roll: 1, keep: 1 });
           });
 
-          it("Ring roll: 4k4 rolls 1k1", async () => {
+          it("should roll a 4k4 Ring roll as 1k1", async () => {
             await add("dazed");
             const message = keep(
               await RingRoll({
@@ -127,7 +128,7 @@ export function registerStatusEffectsAllRollsTests(quench) {
             assert.deepInclude(message.system.pool, { roll: 1, keep: 1 });
           });
 
-          it("Skill roll: 9k4 rolls 6k4", async () => {
+          it("should roll a 9k4 Skill roll as 6k4", async () => {
             await add("dazed");
             const message = keep(
               await SkillRoll({
@@ -142,7 +143,7 @@ export function registerStatusEffectsAllRollsTests(quench) {
             assert.deepInclude(message.system.pool, { roll: 6, keep: 4 });
           });
 
-          it("Attack roll: 9k4 rolls 6k4", async () => {
+          it("should roll a 9k4 attack roll as 6k4", async () => {
             await add("dazed");
             const message = keep(
               await SkillRoll({
@@ -158,13 +159,13 @@ export function registerStatusEffectsAllRollsTests(quench) {
             assert.deepInclude(message.system.pool, { roll: 6, keep: 4 });
           });
 
-          it("Spell Casting Roll: Fire 4 + School Rank 3 = 7k4 rolls 4k4", async () => {
+          it("should roll a Spell Casting Roll of Fire 4 + School Rank 3 = 7k4 as 4k4", async () => {
             await add("dazed");
             const message = keep(await SpellCastRoll({ actor, spell, showDialog: false }));
             assert.deepInclude(message.system.pool, { roll: 4, keep: 4 });
           });
 
-          it("maho casting gets the penalty too", async () => {
+          it("should give maho casting the penalty too", async () => {
             await add("dazed");
             const message = keep(
               await MahoCastRoll({ actor, spell: mahoSpell, showDialog: false })
@@ -176,49 +177,49 @@ export function registerStatusEffectsAllRollsTests(quench) {
           });
         });
 
-        describe("Fatigued Condition (+5 TN penalty)", () => {
-          it("a physical Trait roll's TN rises by 5", async () => {
+        describe("Fatigued condition at +5 TN", () => {
+          it("should raise a physical Trait roll's TN by 5", async () => {
             await add("fatigued");
-            const answered = answerWithTN(15);
+            const answered = answerWithTn(15);
             const message = keep(await TraitRoll({ traitRank: 4, traitName: "sta", actor }));
             await answered;
             assert.equal(message.system.tn.effective, 20);
           });
 
-          it("a mental Trait roll's TN stays", async () => {
+          it("should leave a mental Trait roll's TN unchanged", async () => {
             await add("fatigued");
             assert.equal(checkEffects(actor, "trait", { trait: "int" }).tn, 0);
           });
 
-          it("a Spell Casting Roll's TN rises by 5: 5 + 5 × 2 + 5 = 20", async () => {
+          it("should raise a Spell Casting Roll's TN by 5: 5 + 5 × 2 + 5 = 20", async () => {
             await add("fatigued");
             const message = keep(await SpellCastRoll({ actor, spell, showDialog: false }));
             assert.equal(message.system.tn.effective, 20);
           });
 
-          it("Skill and attack rolls' TN rises by 5", async () => {
+          it("should raise the TN of Skill and attack rolls by 5", async () => {
             await add("fatigued");
             assert.equal(checkEffects(actor, "skill", { skill: "kenjutsu", trait: "agi" }).tn, 5);
             assert.equal(checkEffects(actor, "attack", { skill: "kenjutsu", trait: "agi" }).tn, 5);
           });
 
-          it("a Ring roll is not a physical Trait roll: no change", async () => {
+          it("should leave a Ring roll's TN unchanged, since it is not a physical Trait roll", async () => {
             await add("fatigued");
             assert.equal(checkEffects(actor, "ring", { ring: "water" }).tn, 0);
           });
         });
 
-        describe("Multiple Conditions Stacking on All Roll Types", () => {
-          it("Dazed and Fatigued on a physical Trait roll: 1k1 at TN + 5", async () => {
+        describe("Multiple conditions stacking on all roll types", () => {
+          it("should roll a Dazed and Fatigued physical Trait roll as 1k1 at TN + 5", async () => {
             await add("dazed", "fatigued");
-            const answered = answerWithTN(15);
+            const answered = answerWithTn(15);
             const message = keep(await TraitRoll({ traitRank: 4, traitName: "sta", actor }));
             await answered;
             assert.deepInclude(message.system.pool, { roll: 1, keep: 1 });
             assert.equal(message.system.tn.effective, 20);
           });
 
-          it("Dazed and Blinded on a melee attack: -4k1", async () => {
+          it("should give a Dazed and Blinded melee attack -4k1", async () => {
             await add("dazed", "blinded");
             assert.deepInclude(checkEffects(actor, "attack", { range: "melee" }), {
               roll: -4,
@@ -226,7 +227,7 @@ export function registerStatusEffectsAllRollsTests(quench) {
             });
           });
 
-          it("Prone and Dazed on an attack: -5k0", async () => {
+          it("should give a Prone and Dazed attack -5k0", async () => {
             await add("prone", "dazed");
             assert.equal(checkEffects(actor, "attack").roll, -5);
             assert.equal(
@@ -237,8 +238,8 @@ export function registerStatusEffectsAllRollsTests(quench) {
           });
         });
 
-        describe("Condition Removal Restores Normal Rolls", () => {
-          it("removing Dazed restores 4k4", async () => {
+        describe("Condition removal restoring normal rolls", () => {
+          it("should restore 4k4 when Dazed is removed", async () => {
             const [dazed] = await add("dazed");
             await dazed.delete();
             const message = keep(
@@ -247,7 +248,7 @@ export function registerStatusEffectsAllRollsTests(quench) {
             assert.deepInclude(message.system.pool, { roll: 4, keep: 4 });
           });
 
-          it("removing Fatigued restores the spell's TN", async () => {
+          it("should restore the spell's TN when Fatigued is removed", async () => {
             const [fatigued] = await add("fatigued");
             await fatigued.delete();
             const message = keep(await SpellCastRoll({ actor, spell, showDialog: false }));
@@ -255,8 +256,8 @@ export function registerStatusEffectsAllRollsTests(quench) {
           });
         });
 
-        describe("Edge Cases", () => {
-          it("a disabled Dazed gives no penalty", async () => {
+        describe("Status effect edge cases", () => {
+          it("should give no penalty from a disabled Dazed", async () => {
             await actor.createEmbeddedDocuments("ActiveEffect", [
               { name: "Dazed", statuses: ["dazed"], disabled: true }
             ]);
@@ -266,7 +267,8 @@ export function registerStatusEffectsAllRollsTests(quench) {
             assert.deepInclude(message.system.pool, { roll: 4, keep: 4 });
           });
 
-          it("penalties past the whole pool leave the 1k1 minimum (Ten Dice Rule helper)", async () => {
+          // The Ten Dice Rule helper holds the floor
+          it("should leave the 1k1 minimum when penalties pass the whole pool", async () => {
             await add("dazed", "blinded", "prone");
             const message = keep(
               await SkillRoll({
@@ -285,7 +287,7 @@ export function registerStatusEffectsAllRollsTests(quench) {
       });
     },
     {
-      displayName: "L5R4 Enhanced: Status Effects on All Roll Types"
+      displayName: "L5R4: Status effects on all roll types"
     }
   );
 }

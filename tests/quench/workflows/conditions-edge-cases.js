@@ -3,7 +3,8 @@
  *
  * Tests edge cases in condition management that could break combat. Conditions are status effects, applied with
  * `actor.toggleStatusEffect` and read back from `actor.statuses`, the Armor TN, and what a roll collects
- * (checkEffects). Values are the book's (p.89; STAGE-09 decision 3).
+ * (checkEffects). Values are the book's (roadmap/STAGE-09 decision 3).
+ * game-rules/41_conditional_effects.md, p.89
  *
  * **What Can Break:**
  * - Stunned and Blinded Armor TN overrides
@@ -38,11 +39,14 @@ export function registerConditionsEdgeCaseTests(quench) {
     context => {
       const { describe, it, assert, beforeEach, afterEach } = context;
 
-      describe("Stunned Condition", () => {
+      describe("Stunned condition", () => {
         let actor;
 
         beforeEach(async () => {
-          actor = await createTestPC({ name: "Stunned Test", system: { traits: { ref: 3 } } });
+          actor = await createTestPC({
+            name: "Conditions edge cases: Stunned Test",
+            system: { traits: { ref: 3 } }
+          });
         });
 
         afterEach(async () => {
@@ -52,7 +56,7 @@ export function registerConditionsEdgeCaseTests(quench) {
           }
         });
 
-        it("should apply Stunned Armor TN override (TN 5)", async () => {
+        it("should apply the Stunned Armor TN override of TN 5", async () => {
           await setConditions(actor, { stunned: true });
 
           assert.isTrue(actor.statuses.has("stunned"), "Stunned condition active");
@@ -80,12 +84,12 @@ export function registerConditionsEdgeCaseTests(quench) {
         });
       });
 
-      describe("Fatigued Condition", () => {
+      describe("Fatigued condition", () => {
         let actor;
 
         beforeEach(async () => {
           actor = await createTestPC({
-            name: "Fatigue Test",
+            name: "Conditions edge cases: Fatigue Test",
             system: { traits: { sta: 3, ref: 3 } }
           });
         });
@@ -122,12 +126,12 @@ export function registerConditionsEdgeCaseTests(quench) {
         });
       });
 
-      describe("Multiple Conditions Simultaneously", () => {
+      describe("Multiple conditions at once", () => {
         let actor;
 
         beforeEach(async () => {
           actor = await createTestPC({
-            name: "Multi-Condition Test",
+            name: "Conditions edge cases: Multi-Condition Test",
             system: { traits: { ref: 3, sta: 3 } }
           });
         });
@@ -144,7 +148,8 @@ export function registerConditionsEdgeCaseTests(quench) {
 
           assert.isTrue(actor.statuses.has("stunned"), "Stunned active");
           assert.isTrue(actor.statuses.has("prone"), "Prone active");
-          // Stunned sets the whole Armor TN to 5 plus armor; Prone's melee -10 adds nothing (decision 3)
+          // Stunned sets the whole Armor TN to 5 plus armor; Prone's melee -10 adds nothing
+          // (roadmap/STAGE-09 decision 3)
           assert.equal(actor.system.armorTn.current, 5, "Stunned Armor TN");
           assert.deepEqual(actor.system.armorTn.vs, { melee: 0, ranged: 0 });
         });
@@ -165,7 +170,7 @@ export function registerConditionsEdgeCaseTests(quench) {
           assert.equal(actor.system.armorTn.vs.melee, -10, "Prone counts against melee");
         });
 
-        it("should handle conflicting conditions (Stunned + Dazed)", async () => {
+        it("should handle the conflicting conditions Stunned and Dazed", async () => {
           await setConditions(actor, { stunned: true, dazed: true });
 
           assert.isTrue(actor.statuses.has("stunned"), "Stunned tracked");
@@ -196,12 +201,12 @@ export function registerConditionsEdgeCaseTests(quench) {
         });
       });
 
-      describe("Condition Recalculation", () => {
+      describe("Condition recalculation", () => {
         let actor;
 
         beforeEach(async () => {
           actor = await createTestPC({
-            name: "Recalc Test",
+            name: "Conditions edge cases: Recalc Test",
             system: { traits: { ref: 3, sta: 3 } }
           });
         });
@@ -251,11 +256,14 @@ export function registerConditionsEdgeCaseTests(quench) {
         });
       });
 
-      describe("Condition Persistence", () => {
+      describe("Condition persistence", () => {
         let actor;
 
         beforeEach(async () => {
-          actor = await createTestPC({ name: "Persistence Test", system: { traits: { ref: 3 } } });
+          actor = await createTestPC({
+            name: "Conditions edge cases: Persistence Test",
+            system: { traits: { ref: 3 } }
+          });
         });
 
         afterEach(async () => {
@@ -274,6 +282,6 @@ export function registerConditionsEdgeCaseTests(quench) {
         });
       });
     },
-    { displayName: "L5R4: Conditions Edge Cases" }
+    { displayName: "L5R4: Conditions edge cases" }
   );
 }

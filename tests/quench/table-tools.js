@@ -10,7 +10,7 @@ import { cleanTest, settleChatNotifications, waitFor } from "./helpers.js";
  * link, the GM's request card, the effect panel, a hotbar macro, and floating Wound and Void numbers.
  * @param {object} quench  The Quench API object.
  */
-export function registerTableToolsBatch(quench) {
+export function registerTableToolsTests(quench) {
   quench.registerBatch(
     `${SYS_ID}.table-tools`,
     context => {
@@ -63,7 +63,10 @@ export function registerTableToolsBatch(quench) {
       /** A PC with Kenjutsu 2 and a token the user controls, so links and macros act for it. */
       const actingPC = async () => {
         const actor = track(
-          await createTestPC({ name: "Tools samurai", system: { traits: { agi: 3, wil: 3 } } })
+          await createTestPC({
+            name: "Table tools: samurai",
+            system: { traits: { agi: 3, wil: 3 } }
+          })
         );
         await actor.createEmbeddedDocuments("Item", [createSkillData("Kenjutsu", 2, "agi")]);
         const token = await placeToken(actor);
@@ -78,7 +81,7 @@ export function registerTableToolsBatch(quench) {
       const journalWith = async text => {
         const entry = track(
           await foundry.documents.JournalEntry.implementation.create({
-            name: "Tools journal",
+            name: "Table tools: journal",
             pages: [{ name: "Links", type: "text", text: { content: `<p>${text}</p>` } }]
           })
         );
@@ -108,9 +111,13 @@ export function registerTableToolsBatch(quench) {
           })
         );
 
-      describe("Text links (pp.79-80, 82, 89, 90)", () => {
+      // game-rules/29_types_of_rolls.md, p.79-80
+      // game-rules/33_wounds.md, p.82
+      // game-rules/41_conditional_effects.md, p.89
+      // game-rules/42_fear.md, p.90
+      describe("Text links", () => {
         it(
-          "a Check link opens the roll dialog for the acting character, filled with its TN",
+          "should open the roll dialog from a Check link for the acting character, filled with its TN",
           clean(async function () {
             // A sheet render and a roll can outrun Mocha's 2 s default
             this.timeout(10_000);
@@ -127,7 +134,7 @@ export function registerTableToolsBatch(quench) {
         );
 
         it(
-          "a Damage link posts a damage card with its Apply buttons",
+          "should post a damage card with its Apply buttons from a Damage link",
           clean(async function () {
             // A sheet render and a roll can outrun Mocha's 2 s default
             this.timeout(10_000);
@@ -150,11 +157,11 @@ export function registerTableToolsBatch(quench) {
         );
 
         it(
-          "a Condition link applies its status to the targeted token",
+          "should apply a Condition link's status to the targeted token",
           clean(async function () {
             // A sheet render and a roll can outrun Mocha's 2 s default
             this.timeout(10_000);
-            const npc = track(await createTestNPC({ name: "Tools target" }));
+            const npc = track(await createTestNPC({ name: "Table tools: target" }));
             const token = await placeToken(npc, 200);
             canvas.tokens.setTargets([token.id]);
             const { sheet, element } = await journalWith("@Condition[dazed]");
@@ -164,12 +171,13 @@ export function registerTableToolsBatch(quench) {
           })
         );
 
+        // game-rules/42_fear.md, p.90
         it(
-          "a Fear link starts the Fear test at TN 5 + 5 × Rank on the targeted token (p.90)",
+          "should start a Fear link's test at TN 5 + 5 × Rank on the targeted token",
           clean(async function () {
             // A sheet render and a roll can outrun Mocha's 2 s default
             this.timeout(10_000);
-            const pc = track(await createTestPC({ name: "Tools frightened" }));
+            const pc = track(await createTestPC({ name: "Table tools: frightened" }));
             const token = await placeToken(pc, 200);
             canvas.tokens.setTargets([token.id]);
             const { sheet, element } = await journalWith("@Fear[2]");
@@ -188,7 +196,7 @@ export function registerTableToolsBatch(quench) {
         );
 
         it(
-          "a link that does not parse renders broken, with its reason",
+          "should render a link that does not parse as broken, with its reason",
           clean(async function () {
             // A sheet render and a roll can outrun Mocha's 2 s default
             this.timeout(10_000);
@@ -204,7 +212,7 @@ export function registerTableToolsBatch(quench) {
 
       describe("Request card", () => {
         it(
-          "a GM's Check link posts a request card that rolls for the clicking user's character",
+          "should post a request card from a GM's Check link that rolls for the clicking user's character",
           clean(async function () {
             // A sheet render and a roll can outrun Mocha's 2 s default
             this.timeout(10_000);
@@ -235,7 +243,7 @@ export function registerTableToolsBatch(quench) {
 
       describe("Effect panel", () => {
         it(
-          "lists the controlled token's effects with how long they last, and removes one",
+          "should list the controlled token's effects with how long they last, and remove one",
           clean(async function () {
             this.timeout(10_000);
             const { actor } = await actingPC();
@@ -269,7 +277,7 @@ export function registerTableToolsBatch(quench) {
 
       describe("Hotbar macros", () => {
         it(
-          "a dropped skill makes one macro per user, which opens the skill's roll",
+          "should make one macro per user from a dropped skill, which opens the skill's roll",
           clean(async function () {
             // A sheet render and a roll can outrun Mocha's 2 s default
             this.timeout(10_000);
@@ -306,12 +314,14 @@ export function registerTableToolsBatch(quench) {
         );
 
         it(
-          "a drop this system does not make a macro for is left to core",
+          "should leave to core a drop this system makes no macro for",
           clean(async function () {
             // A sheet render and a roll can outrun Mocha's 2 s default
             this.timeout(10_000);
             const journal = track(
-              await foundry.documents.JournalEntry.implementation.create({ name: "Tools plain" })
+              await foundry.documents.JournalEntry.implementation.create({
+                name: "Table tools: plain"
+              })
             );
             assert.isUndefined(onHotbarDrop(ui.hotbar, journal.toDragData(), 50));
           })
@@ -320,7 +330,7 @@ export function registerTableToolsBatch(quench) {
 
       describe("Floating numbers", () => {
         it(
-          "an update floats the Wound and Void change over the token, unless the setting is off",
+          "should float an update's Wound and Void change over the token, unless the setting is off",
           clean(async function () {
             // A sheet render and a roll can outrun Mocha's 2 s default
             this.timeout(10_000);
@@ -351,9 +361,6 @@ export function registerTableToolsBatch(quench) {
         );
       });
     },
-    {
-      displayName:
-        "L5R4: Table tools (links, request cards, effect panel, macros, floating numbers)"
-    }
+    { displayName: "L5R4: Table tools" }
   );
 }

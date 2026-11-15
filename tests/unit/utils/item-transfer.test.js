@@ -9,8 +9,9 @@ import {
 const A = "aaaaaaaaaaaaaaaa";
 const B = "bbbbbbbbbbbbbbbb";
 
-describe("transferPayload and readTransfer (STAGE-11 decision 4)", () => {
-  it("round-trips a folder of items", () => {
+// roadmap/STAGE-11 decision 4
+describe("The transferPayload and readTransfer helpers", () => {
+  it("should round-trip a folder of items", () => {
     const items = [{ _id: A, name: "Kenjutsu", type: "skill", system: { rules: [] } }];
     const text = JSON.stringify(
       transferPayload("Homebrew", items, { system: "4.0.0", core: "14" })
@@ -18,7 +19,7 @@ describe("transferPayload and readTransfer (STAGE-11 decision 4)", () => {
     expect(readTransfer(text)).toEqual({ folder: "Homebrew", items });
   });
 
-  it("refuses text that is not JSON, or not an export of items", () => {
+  it("should refuse text that is not JSON, or not an export of items", () => {
     expect(readTransfer("{")).toEqual({ error: "invalidJson" });
     expect(readTransfer(JSON.stringify({ items: [] }))).toEqual({ error: "notExport" });
     expect(
@@ -28,7 +29,7 @@ describe("transferPayload and readTransfer (STAGE-11 decision 4)", () => {
 });
 
 describe("remapItemUuids", () => {
-  it("points world item uuids at their imported copies", () => {
+  it("should point world item uuids at their imported copies", () => {
     const rules = [
       { key: "GrantItem", uuid: `Item.${A}` },
       { key: "ChoiceSet", options: [{ value: `Item.${A}` }, { value: `Item.${B}` }] }
@@ -39,7 +40,7 @@ describe("remapItemUuids", () => {
     ]);
   });
 
-  it("leaves uuids of other items, compendium entries, and embedded items alone", () => {
+  it("should leave uuids of other items, compendium entries, and embedded items alone", () => {
     const rules = [
       { uuid: `Item.${B}` },
       { uuid: `Compendium.world.items.Item.${A}` },

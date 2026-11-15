@@ -154,9 +154,9 @@ ships with a fixture it fails on. No check adds a dependency (decision 5).
 
 ### 5. Multi-agent review and fix pass
 
-Run with the Workflow tool. Ernie asked for this stage to use as many agents as can work without breaking things
-(2026-11-14). Parallelism is bounded by file ownership, not by agent count; the test-name and template work splits
-into many small disjoint partitions.
+Run with the Workflow tool, at the default workflow size (under 10 agents per workflow; decision 14), so a wave with
+more partitions than that runs as several workflows in turn. Parallelism is bounded by file ownership; the test-name
+and template work splits into many small disjoint partitions.
 
 | Wave | Agents | Writes | Output |
 |------|--------|--------|--------|
@@ -248,8 +248,7 @@ into many small disjoint partitions.
    vocabulary and predicate prefixes; the identifier stems for Armor TN, target number, and dice pools; token names
    and the space scale.
 5. No new dependency without Ernie's approval (CLAUDE.md **Change Control**). Checks use ESLint core rules, local
-   rules in `tools/eslint/`, Stylelint with its approved plugins, and Vitest; Still open items 1, 2, and 4 ask about
-   the rest.
+   rules in `tools/eslint/`, `eslint-plugin-jsdoc` (decision 14), Stylelint with its approved plugins, and Vitest.
 6. The systems live in `docs/`, not `roadmap/`: they describe the code that ships and carry no book text. `CLAUDE.md`,
    `CONTRIBUTING.md`, and `DEVELOPER.md` keep one-line rules and point to `docs/` for detail; a rule's detail lives in
    one place. `docs/` stays off the Stage 19 release allowlist.
@@ -259,7 +258,7 @@ into many small disjoint partitions.
    comment above the test.
 9. The system has no mock-up to design toward, so the pre-stage captures are the visual reference: the pass unifies
    tokens, spacing, states, and icons, and changes no layout or visual direction. Visual review is by eye against
-   committed captures until Still open item 4 is answered.
+   committed captures (decision 14).
 10. The pass changes no behavior (CLAUDE.md **PORT KEEPS BEHAVIOR** applied to this stage). A finding that needs a
     behavior change, or a rule bug a reviewer finds, becomes a GitHub issue with its printed page, fixed in its own
     change with a failing test first.
@@ -270,16 +269,79 @@ into many small disjoint partitions.
 13. The stage runs after the Stage 16 coverage audit, so the coverage manifest and a full Quench run give the
     behavior baseline, and before the Stage 18 playtest, so play exercises the result. Basis: Ernie, 2026-11-14.
 
+14. Ernie, 2026-11-14, on the questions this stage opened with:
+
+    | Question | Answer |
+    |----------|--------|
+    | `eslint-plugin-jsdoc` for the JSDoc and citation check | Approved as a dev dependency |
+    | `@html-eslint/eslint-plugin` for templates | Not added: the Vitest scan (`tests/conventions/templates.test.js`) checks templates |
+    | Workflow size | The default (under 10 agents per workflow); the pass runs in more waves |
+    | `pixelmatch` and `pngjs` for visual diffs | Not added: captures are reviewed by eye against the committed pre-stage captures |
+
+15. Ernie, 2026-11-14, on the splits the wave 1 survey found (245 across nine areas; the rest follow each area's
+    majority, as the code system records):
+
+    | Split | Pick |
+    |-------|------|
+    | `data-action` casing | kebab-case everywhere; the 15 camelCase names (and their `DEFAULT_OPTIONS.actions` keys) are renamed |
+    | Template CSS classes | Every system class carries `l5r4-`; classes inside posted chat cards stay as fixed names (decision 2) and keep their styles; renames listed in `CHANGELOG.MD` |
+    | `it` names | "should …" |
+    | Label and button case | Sentence case; game terms keep the book's capitals |
+    | Verb vocabulary | Read `get*` (no side effects) or `<noun>Of`; create `create*`; change `update*` / `apply*`; remove `delete*`; roll `roll*`; post a card `post*`; ask the GM `request*`; open a window `open*`; prompt for an answer `ask*`. Predicates `is*` (state), `has*` (owns), `can*` (permission). Foundry overrides keep core's names |
+    | Glossary stems | Armor TN `armorTn` (`getArmorTNPenalty` becomes `getArmorTnPenalty`); target number `tn`, `Tn` inside a name; dice pool `{ roll, keep }`; Wound Rank `woundLevel` in code (the stored field) and "Wound Rank" in UI copy. Stored fields stay (decision 2) |
+    | Game terms in copy | The book's capitalization: Void Point, Free Raise, Insight Rank, School Rank, Trait, Ring, Skill, Wound |
+    | Code shape | `_name` only for Foundry's protected overrides, `#name` for the system's own private members; data-model files renamed to kebab-case; Font Awesome as `fa-solid`; notifications without a trailing period; tokens `--l5r4-{category}-{name}` on one rem space scale (0.25, 0.5, 0.75, 1, 1.5) |
+
+16. Ernie, 2026-11-15, on what the docs drafts left open:
+
+    | Question | Pick |
+    |----------|------|
+    | Look changes the pass may make (decision 9) | Fix the seven text/surface pairings under their contrast minimum; map the six core variables that exist only in AppV1 windows (`--color-text-hyperlink`, `--color-border-highlight`, ...) to role tokens so their colors render; give dropped dice a mark that is not color alone. Hit areas keep their size: the 24 px minimum target applies to new controls only |
+    | Clickable elements | Native `<button type="button">` in place of `<a>` with no `href`; in a locked compendium core then disables them |
+    | Tooltips | `data-tooltip` plus `aria-label` on icon-only controls, in place of `title` |
+    | Motion | Every animation gets a `prefers-reduced-motion` rule; floating numbers then appear and fade without moving |
+    | Actor sheet clicks | The PC and NPC sheets keep their own `data-action` switch, which skips binding for non-owners; the code system records it as the actor-sheet exception |
+    | Hook registration | Services export handlers; `module/hooks/register-all.js` wires them (CLAUDE.md **Layers**) |
+    | Verbs | Game verbs stay (`spendVoidPoint`, `testFear`, `startDuel`); `data-action` names are verb-first too (`edit-item`, `open-xp-manager`), posted chat-card actions excepted; the extra verbs the areas use are allowed (`prepare`, `migrate`, `register`, `bind`, `on`, `build` for plain data, `parse`, `format`, `render`, `validate`, `to*`, `*Field`) |
+    | Copy and test names | Labels say "Honor Rank" and "Glory Rank"; remove buttons say "Remove" (code keeps `delete*`); Quench `describe` names in sentence case |
+
+17. Ernie, 2026-11-15, standing rules while he is away:
+
+    | Situation | Rule |
+    |-----------|------|
+    | A question the decisions do not settle (ambiguous rename, which convention wins) | Decide by the docs, then the majority form, then the smallest change; never change behavior or a fixed name; log it under **Decided while Ernie was away** below for his review |
+    | Files over their size limit | Split only a file that plainly does two jobs (a pure refactor, gated and Quench-tested); otherwise its reason goes in `tests/conventions/exceptions.json` |
+    | Checkpoints | Commit locally on `release/4.0.0` after each wave passes the gate and a full Quench run (#76 in its own commit first); do not push |
+    | A fix that needs a behavior change, or a rule bug | Fix forward in its own commit with a failing test first, then continue |
+
+### Decided while Ernie was away
+
+None yet.
+
+### Progress (handoff, 2026-11-15)
+
+| Step | State |
+|------|-------|
+| Baseline | Gate green, `coverage:check` 0 gaps, full Quench 1693/0/20 (commit `2297a12`). Captures not taken yet: they come after the gallery, before wave 5. Save route: `upload_image` into an injected file input, then `FilePicker.upload` |
+| Foundry APIs | Checked; recorded in FOUNDRY-V14-REFERENCE.md §10.2 (`registerMenu`, Font Awesome 7.2.0 `fa-solid`, `foundry2.css` theme variables) |
+| `eslint-plugin-jsdoc` | Installed (`^65.4.7`); not yet configured in `eslint.config.mjs`. npm also updated 10 packages within range: run the gate before relying on it |
+| Wave 1 survey | Done: workflow `wf_b2dabad5-8cc`, journal under the session's `subagents/workflows/` folder; 245 splits |
+| Wave 2 decisions | Done: decisions 15 and 16 |
+| Docs drafts | Written by workflow `wf_b65e3442-807`: `docs/code-system/` (9 files), `docs/design-system/` (README, 8 foundations, 34 components + README, 5 patterns, 2 content). A reconciliation agent was fixing cross-page conflicts when work paused; rerun `npx prettier --check --ignore-path "" docs` and re-read docs for conflicts before relying on them |
+| Docs reconciled | 13 cross-page conflicts fixed; Prettier clean (`npx prettier --check --ignore-path "" docs`; `.prettierignore` skips `*.md`, so `format:check` never sees docs). `--write` rewrites quotes in `hbs` fences, so those blocks carry `<!-- prettier-ignore -->` |
+| Gallery | Built (`module/apps/design-gallery.js`, Configure Settings > System, GM-only): 97 samples through the real templates. `design-gallery` + `smoke`: 45 of 47; the 2 failures are the accessible-name test in each theme, 252 icon-only controls with no name today, which the fix waves clear. Cannot show yet: hover/focus/press, states no template has, JavaScript-set states (filled Void dots, sorted column), floating numbers |
+| Checks | Built in report mode: `tests/conventions/*.test.js` (with `eslint.test.js` and `stylelint.test.js` holding lint warnings), local ESLint rules in `tools/eslint/`, parsers in `tools/conventions/`. 144 rules, each with a count in `tests/conventions/baseline.json`; a test fails only when a count rises (a ratchet), and a count of 0 is strict (27 are). Every rule has a failing and a passing fixture under `tests/fixtures/conventions/`. Re-take a baseline: empty `baseline.json`, run `npx vitest run tests/conventions tests/lang.test.js`, copy the printed counts back. Gate green: Vitest 1352 |
+| First-run counts (largest) | templates: class-prefix 553, action-element 160, modifier-without-block 138, title-attribute 103, repeated-markup 86. Tests: it-should 696, describe-case 498, it-note 334, batch-display-name 78. Copy: key-order 344, translation-key 115, sentence-case 81. Glossary: banned-identifier 166. Design system: doc-token 712. ESLint: l5r4/doc-format 627, l5r4/naming 458, jsdoc/check-tag-names 392, l5r4/module-shape 316. Stylelint: selector-class-pattern 195. The full list is in `baseline.json` |
+| Captures | 168 in `docs/design-system/captures/pre-stage/` (14 MB JPEG, index in its README): the gallery in both themes, PC/NPC/weapon/skill sheets in both themes at default width and 420 px. Saved through a local sink (scratchpad `capture-server.mjs`, port 8765) because Foundry's upload route received no session cookie. PC and NPC clip their sidebar at 420 px (fixed 756 px content): today's behavior, kept as reference |
+| Wave A (tests) | Done: 7 partitions renamed test names, describe names, batch ids and display names, moved notes and citations into comments; 20 register functions renamed across `tests/quench/`; a dead `close` selector removed and a real close test added. Baseline total 8591 → 6765 (it-should 696 → 11, describe-case 498 → 13, it-note 334 → 0); 32 of 144 rules strict. Full Quench 1702 passed; failures: the 2 expected gallery accessible-name tests, and core's `sounds/dice.wav` load error once (the batch passes on rerun) |
+| Next | Waves for templates/SCSS/copy and for `module/` code, each with the baseline lowered and the gate and Quench after; then switch checks to strict; Ernie's visual sign-off. Baselines are lowered with scratchpad `lower-baseline.mjs` (runs the checks with `--silent=false`, never raises a count) |
+| Exceptions for Ernie | 14 files over their size limit are in the baseline without a reason; `tests/conventions/exceptions.json` holds one (`module/data/rules/rule-models.js`). Each needs a reason or a split (decision 3) |
+| Found on the way | #76: the item sheet image opened no file picker; fixed in the working tree (`data-action="editImage"`, a `sheets-and-apps` test that failed first), its own commit. `templates/chat/weapon-chat.hbs` is preloaded but never rendered: dead, removed in the fix waves. `damage-result.hbs` and `flow-card.hbs` are not preloaded, which costs only a first-render fetch |
+| Gate after the npm update | Green: Vitest 932, ESLint 0 errors, Stylelint, Prettier, build:css, deps:circular, `coverage:check` 0 gaps |
+
 ### Still open
 
-1. Approve `eslint-plugin-jsdoc` (Crucible's choice, FOUNDRY-V14-REFERENCE.md §13) for the JSDoc and citation check,
-   instead of a local rule in `tools/eslint/`?
-2. Approve `@html-eslint/eslint-plugin` with its parser (Draw Steel's choice for `.hbs`) for the template check,
-   instead of the Vitest scan?
-3. Raise the Workflow size setting ("Dynamic workflow size" in `/config`) for this stage, or keep the default (under
-   10 agents) and run more waves?
-4. Approve `pixelmatch` and `pngjs` as dev dependencies for automated visual diffs of the captures, with baselines
-   committed under `tests/visual/`?
+None.
 
 ## Out of scope
 

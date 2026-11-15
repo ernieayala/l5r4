@@ -82,7 +82,7 @@ describe("getCreationFreeBonus", () => {
     });
   });
 
-  describe("legacy approach", () => {
+  describe("Legacy approach", () => {
     it("should detect trait bonus from legacy system.trait property", () => {
       const actor = { items: [legacyItem("family", "sta")], getFlag: () => null };
       expect(getCreationFreeBonus(actor, "sta")).toBe(1);
@@ -132,7 +132,7 @@ describe("getCreationFreeBonus", () => {
     });
   });
 
-  describe("edge cases", () => {
+  describe("Edge cases", () => {
     it("should return 0 for null actor", () => {
       expect(getCreationFreeBonus(null, "sta")).toBe(0);
     });
@@ -181,17 +181,17 @@ describe("getCreationFreeBonusSources", () => {
     global.fromUuidSync = vi.fn(() => null);
   });
 
-  it("reports a TraitAdjust rule bonus as rules, not legacy", () => {
+  it("should report a TraitAdjust rule bonus as rules, not legacy", () => {
     const actor = { items: [ruleItem("family", "str")], getFlag: () => null };
     expect(getCreationFreeBonusSources(actor, "str")).toEqual({ rules: 1, legacy: 0 });
   });
 
-  it("reports the legacy trait and bonus fields as legacy, not rules", () => {
+  it("should report the legacy trait and bonus fields as legacy, not rules", () => {
     const actor = { items: [legacyItem("family", "str")], getFlag: () => null };
     expect(getCreationFreeBonusSources(actor, "str")).toEqual({ rules: 0, legacy: 1 });
   });
 
-  it("keeps the two sources apart when the Family and School use different forms", () => {
+  it("should keep the two sources apart when the Family and School use different forms", () => {
     const actor = {
       items: [ruleItem("family", "str"), legacyItem("school", "str")],
       getFlag: () => null
@@ -200,7 +200,7 @@ describe("getCreationFreeBonusSources", () => {
     expect(getCreationFreeBonus(actor, "str")).toBe(2);
   });
 
-  it("returns zero for both sources when an item cannot be read", () => {
+  it("should return zero for both sources when an item cannot be read", () => {
     const unreadable = {
       type: "family",
       get system() {

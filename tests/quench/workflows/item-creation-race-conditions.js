@@ -30,12 +30,12 @@ export function registerItemCreationRaceConditionTests(quench) {
     context => {
       const { describe, it, assert, beforeEach, afterEach } = context;
 
-      describe("Rapid Item Creation", () => {
+      describe("Rapid item creation", () => {
         let actor;
 
         beforeEach(async () => {
           actor = await createTestPC({
-            name: "Item Race Test",
+            name: "Item creation race conditions: Item Race Test",
             system: { rings: { void: 2 } }
           });
         });
@@ -139,12 +139,12 @@ export function registerItemCreationRaceConditionTests(quench) {
         });
       });
 
-      describe("Large Dataset Handling (100+ Items)", () => {
+      describe("Large dataset handling with 100+ items", () => {
         let actor;
 
         beforeEach(async () => {
           actor = await createTestPC({
-            name: "Large Dataset Test",
+            name: "Item creation race conditions: Large Dataset Test",
             system: { rings: { void: 2 } }
           });
         });
@@ -188,7 +188,7 @@ export function registerItemCreationRaceConditionTests(quench) {
           }
         });
 
-        it("should handle prepareDerivedData with 100+ items (performance)", async function () {
+        it("should handle prepareDerivedData performance with 100+ items", async function () {
           // ARRANGE - Create 100 skills (worst case for XP calculation)
           const skillData = Array.from({ length: 100 }, (_, i) =>
             createSkillData({ name: `Skill ${i}`, rank: (i % 10) + 1 })
@@ -240,12 +240,12 @@ export function registerItemCreationRaceConditionTests(quench) {
         });
       });
 
-      describe("Concurrent Creation and Deletion", () => {
+      describe("Concurrent creation and deletion", () => {
         let actor;
 
         beforeEach(async () => {
           actor = await createTestPC({
-            name: "Concurrent Test",
+            name: "Item creation race conditions: Concurrent Test",
             system: { rings: { void: 2 } }
           });
         });
@@ -311,12 +311,12 @@ export function registerItemCreationRaceConditionTests(quench) {
         });
       });
 
-      describe("Item Update Race Conditions", () => {
+      describe("Item update race conditions", () => {
         let actor, items;
 
         beforeEach(async () => {
           actor = await createTestPC({
-            name: "Update Race Test",
+            name: "Item creation race conditions: Update Race Test",
             system: { rings: { void: 2 } }
           });
 
@@ -380,6 +380,6 @@ export function registerItemCreationRaceConditionTests(quench) {
         });
       });
     },
-    { displayName: "L5R4: Item Creation Race Conditions" }
+    { displayName: "L5R4: Item creation race conditions" }
   );
 }

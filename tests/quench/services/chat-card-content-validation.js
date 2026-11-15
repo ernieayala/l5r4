@@ -32,16 +32,16 @@ import { createSkillData } from "../../fixtures/item-fixtures.js";
  */
 export function registerChatCardContentValidationTests(quench) {
   quench.registerBatch(
-    `${SYS_ID}.services.chat-card-validation`,
+    `${SYS_ID}.services.chat-card-content-validation`,
     context => {
       const { describe, it, assert, beforeEach, afterEach } = context;
 
-      describe("Basic Chat Card Content", () => {
+      describe("Basic chat card content", () => {
         let actor, skill;
 
         beforeEach(async () => {
           actor = await createTestPC({
-            name: "Chat Test Samurai",
+            name: "Chat card content: samurai",
             system: {
               traits: { agi: 4, str: 3, per: 3 }
             }
@@ -159,19 +159,19 @@ export function registerChatCardContentValidationTests(quench) {
         });
       });
 
-      describe("Modifier Display in Chat Cards", () => {
-        let actor, skill;
+      describe("Modifier display in chat cards", () => {
+        let actor;
 
         beforeEach(async () => {
           actor = await createTestPC({
-            name: "Modifier Test Samurai",
+            name: "Chat card content: modifiers",
             system: {
               traits: { agi: 4 },
               rings: { void: { rank: 3, value: 3 } }
             }
           });
 
-          [skill] = await actor.createEmbeddedDocuments("Item", [
+          await actor.createEmbeddedDocuments("Item", [
             createSkillData("Kenjutsu", 5, "agi", { emphasis: ["Katana"] })
           ]);
         });
@@ -279,20 +279,18 @@ export function registerChatCardContentValidationTests(quench) {
         });
       });
 
-      describe("TN and Success/Failure Display", () => {
-        let actor, skill;
+      describe("TN and success or failure display", () => {
+        let actor;
 
         beforeEach(async () => {
           actor = await createTestPC({
-            name: "TN Test Samurai",
+            name: "Chat card content: TN",
             system: {
               traits: { agi: 4 }
             }
           });
 
-          [skill] = await actor.createEmbeddedDocuments("Item", [
-            createSkillData("Kenjutsu", 5, "agi")
-          ]);
+          await actor.createEmbeddedDocuments("Item", [createSkillData("Kenjutsu", 5, "agi")]);
         });
 
         afterEach(async () => {
@@ -362,12 +360,12 @@ export function registerChatCardContentValidationTests(quench) {
         });
       });
 
-      describe("Unskilled Roll Display", () => {
+      describe("Unskilled Roll display", () => {
         let actor;
 
         beforeEach(async () => {
           actor = await createTestPC({
-            name: "Unskilled Test",
+            name: "Chat card content: no ranks",
             system: {
               traits: { agi: 3 }
             }
@@ -405,7 +403,7 @@ export function registerChatCardContentValidationTests(quench) {
           await message.delete();
         });
 
-        it("should display correct unskilled formula (no explosions)", async () => {
+        it("should display the unskilled formula with no exploding dice", async () => {
           // ARRANGE - Unskilled: Trait only, no explosions
           const skillRank = 0;
           const traitValue = 3;
@@ -432,12 +430,12 @@ export function registerChatCardContentValidationTests(quench) {
         });
       });
 
-      describe("Edge Cases - Multiple Modifiers", () => {
-        let actor, skill;
+      describe("Edge cases with multiple modifiers", () => {
+        let actor;
 
         beforeEach(async () => {
           actor = await createTestPC({
-            name: "Complex Modifier Test",
+            name: "Chat card content: many modifiers",
             system: {
               traits: { agi: 4, sta: 3, wil: 3 },
               rings: { void: { rank: 3, value: 3 } },
@@ -445,7 +443,7 @@ export function registerChatCardContentValidationTests(quench) {
             }
           });
 
-          [skill] = await actor.createEmbeddedDocuments("Item", [
+          await actor.createEmbeddedDocuments("Item", [
             createSkillData("Kenjutsu", 5, "agi", { emphasis: ["Katana"] })
           ]);
         });
@@ -559,12 +557,12 @@ export function registerChatCardContentValidationTests(quench) {
         });
       });
 
-      describe("Formula Accuracy Validation", () => {
+      describe("Formula accuracy", () => {
         let actor;
 
         beforeEach(async () => {
           actor = await createTestPC({
-            name: "Formula Test",
+            name: "Chat card content: formula",
             system: {
               traits: { agi: 4, str: 3 }
             }
@@ -655,12 +653,12 @@ export function registerChatCardContentValidationTests(quench) {
         });
       });
 
-      describe("Chat Card Regression Tests", () => {
+      describe("Chat card fallbacks", () => {
         let actor, skill;
 
         beforeEach(async () => {
           actor = await createTestPC({
-            name: "Regression Test",
+            name: "Chat card content: fallbacks",
             system: {
               traits: { agi: 4 }
             }
@@ -753,7 +751,7 @@ export function registerChatCardContentValidationTests(quench) {
       });
     },
     {
-      displayName: "L5R4: Chat Card Content Validation"
+      displayName: "L5R4: Chat card content"
     }
   );
 }

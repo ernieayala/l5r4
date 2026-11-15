@@ -23,7 +23,7 @@
 
 import { SYS_ID } from "../../../module/config/constants.js";
 import { buildFormula } from "../helpers.js";
-import { createTestPC, createWoundedPC, createShugenja } from "../../fixtures/actor-fixtures.js";
+import { createTestPC, createWoundedPC } from "../../fixtures/actor-fixtures.js";
 import {
   createSkillData,
   createWeaponData,
@@ -36,23 +36,23 @@ import {
  */
 export function registerMultipleModifierCombinationTests(quench) {
   quench.registerBatch(
-    `${SYS_ID}.services.rolls.multiple-modifiers`,
+    `${SYS_ID}.services.multiple-modifier-combinations`,
     context => {
       const { describe, it, assert, beforeEach, afterEach } = context;
 
-      describe("Skill Roll: Emphasis + Void + Stance (3 Modifiers)", () => {
-        let actor, skill;
+      describe("Skill Roll with an Emphasis, a Void Point, and a Stance", () => {
+        let actor;
 
         beforeEach(async () => {
           actor = await createTestPC({
-            name: "Triple Modifier Test",
+            name: "Multiple modifier combinations: three modifiers",
             system: {
               traits: { agi: 4, ref: 3, str: 3 },
               rings: { earth: 3, void: { rank: 3, value: 3 } }
             }
           });
 
-          [skill] = await actor.createEmbeddedDocuments("Item", [
+          await actor.createEmbeddedDocuments("Item", [
             createSkillData("Kenjutsu", 5, "agi", {
               system: { emphasis: "Katana" }
             })
@@ -83,8 +83,7 @@ export function registerMultipleModifierCombinationTests(quench) {
           const traitValue = 4;
           const voidRoll = 1;
           const voidKeep = 1;
-          const stanceRoll = 2; // Full Attack gives +2k1 to attacks, not skills
-          const stanceKeep = 1;
+          // Full Attack gives +2k1 to attacks, not skills
 
           const baseRolled = skillRank + traitValue; // 9
           const baseKept = traitValue; // 4
@@ -166,26 +165,26 @@ export function registerMultipleModifierCombinationTests(quench) {
         });
       });
 
-      describe("Attack Roll: All Modifiers (6+ Modifiers)", () => {
-        let actor, skill, weapon;
+      describe("Attack roll with every modifier", () => {
+        let actor;
 
         beforeEach(async () => {
           // Create wounded actor
           actor = await createWoundedPC(15, {
-            name: "All Modifiers Test",
+            name: "Multiple modifier combinations: all modifiers",
             system: {
               traits: { agi: 4, ref: 3, str: 3 },
               rings: { earth: 3, void: { rank: 3, value: 3 } }
             }
           });
 
-          [skill] = await actor.createEmbeddedDocuments("Item", [
+          await actor.createEmbeddedDocuments("Item", [
             createSkillData("Kenjutsu", 5, "agi", {
               system: { emphasis: "Katana" }
             })
           ]);
 
-          [weapon] = await actor.createEmbeddedDocuments("Item", [
+          await actor.createEmbeddedDocuments("Item", [
             createWeaponData("Katana", 3, 2, {
               system: { associatedSkill: "kenjutsu" }
             })
@@ -332,12 +331,12 @@ export function registerMultipleModifierCombinationTests(quench) {
         });
       });
 
-      describe("Spell Roll: Affinity + Void + Stance + Wound", () => {
-        let actor, spell;
+      describe("Spell Casting Roll with Affinity, a Void Point, a Stance, and Wounds", () => {
+        let actor;
 
         beforeEach(async () => {
           actor = await createWoundedPC(10, {
-            name: "Wounded Shugenja",
+            name: "Multiple modifier combinations: wounded shugenja",
             system: {
               traits: { sta: 3, wil: 3, agi: 3, int: 3 },
               rings: {
@@ -351,7 +350,7 @@ export function registerMultipleModifierCombinationTests(quench) {
             }
           });
 
-          [spell] = await actor.createEmbeddedDocuments("Item", [
+          await actor.createEmbeddedDocuments("Item", [
             createSpellData("Katana of Fire", "fire", 3, {
               system: {
                 affinity: true // Affinity grants free raise
@@ -435,7 +434,7 @@ export function registerMultipleModifierCombinationTests(quench) {
 
         it("should handle deficiency + void + wound", async () => {
           // ARRANGE - Create spell with deficiency
-          const [deficiencySpell] = await actor.createEmbeddedDocuments("Item", [
+          await actor.createEmbeddedDocuments("Item", [
             createSpellData("Earth Spell", "earth", 2, {
               system: {
                 deficiency: true // Deficiency adds +5 TN
@@ -470,19 +469,19 @@ export function registerMultipleModifierCombinationTests(quench) {
         });
       });
 
-      describe("Edge Cases: Conflicting Modifiers", () => {
-        let actor, skill;
+      describe("Edge cases: conflicting modifiers", () => {
+        let actor;
 
         beforeEach(async () => {
           actor = await createTestPC({
-            name: "Edge Case Test",
+            name: "Multiple modifier combinations: edge case",
             system: {
               traits: { agi: 4, str: 3 },
               rings: { earth: 3, void: { rank: 3, value: 3 } }
             }
           });
 
-          [skill] = await actor.createEmbeddedDocuments("Item", [
+          await actor.createEmbeddedDocuments("Item", [
             createSkillData("Kenjutsu", 5, "agi", {
               system: { emphasis: "Katana" }
             })
@@ -496,9 +495,8 @@ export function registerMultipleModifierCombinationTests(quench) {
           }
         });
 
-        it("should handle unskilled roll with void (no emphasis)", () => {
+        it("should handle an unskilled roll with a Void Point and no Emphasis", () => {
           // ARRANGE - Unskilled = rank 0
-          const skillRank = 0;
           const traitValue = 4;
           const voidRoll = 1;
           const voidKeep = 1;
@@ -584,7 +582,7 @@ export function registerMultipleModifierCombinationTests(quench) {
         });
       });
 
-      describe("Formula Validation: Multiple Modifiers", () => {
+      describe("Formula validation with multiple modifiers", () => {
         it("should create valid formula with 3 modifiers", () => {
           // ARRANGE
           const rolled = 12; // Base + void + stance
@@ -650,6 +648,6 @@ export function registerMultipleModifierCombinationTests(quench) {
         });
       });
     },
-    { displayName: "L5R4: Multiple Modifier Combinations Tests" }
+    { displayName: "L5R4: Multiple modifier combinations" }
   );
 }

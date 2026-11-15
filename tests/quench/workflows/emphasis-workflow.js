@@ -35,18 +35,20 @@ import { SkillRoll } from "../../../module/services/dice/rolls/skill-roll.js";
  */
 export function registerEmphasisWorkflowTests(quench) {
   quench.registerBatch(
-    `${SYS_ID}.workflows.emphasis-complete`,
+    `${SYS_ID}.workflows.emphasis-workflow`,
     context => {
       const { describe, it, assert, beforeEach, afterEach } = context;
 
-      describe("Complete Emphasis Workflow: Creation to Roll", () => {
+      describe("Emphasis workflow from creation to roll", () => {
         let actor, skill;
 
         beforeEach(async () => {
           // Clear custom emphases before each test
           await game.settings.set("l5r4-enhanced", "customEmphases", []);
 
-          actor = await createTestPC({ name: "Test Samurai - Emphasis Workflow" });
+          actor = await createTestPC({
+            name: "Emphasis workflow: Test Samurai - Emphasis Workflow"
+          });
         });
 
         afterEach(async () => {
@@ -130,7 +132,7 @@ export function registerEmphasisWorkflowTests(quench) {
           assert.isTrue(rollResult instanceof ChatMessage, "Roll created chat message");
         });
 
-        it("should apply emphasis in roll (re-roll 1s mechanic)", async () => {
+        it("should apply emphasis in a roll with the re-roll 1s mechanic", async () => {
           // ARRANGE
           skill = await Item.create(
             {
@@ -202,12 +204,12 @@ export function registerEmphasisWorkflowTests(quench) {
         });
       });
 
-      describe("Max 5 Emphases Per Skill Enforcement", () => {
+      describe("Max 5 emphases per skill", () => {
         let actor, skill;
 
         beforeEach(async () => {
           await game.settings.set("l5r4-enhanced", "customEmphases", []);
-          actor = await createTestPC({ name: "Test Samurai - Max Emphases" });
+          actor = await createTestPC({ name: "Emphasis workflow: Test Samurai - Max Emphases" });
         });
 
         afterEach(async () => {
@@ -309,7 +311,7 @@ export function registerEmphasisWorkflowTests(quench) {
           );
         });
 
-        it("should enforce rank requirement (max emphases = skill rank)", async () => {
+        it("should enforce the rank requirement of max emphases equal to skill rank", async () => {
           // ARRANGE - Skill rank 3
           skill = await Item.create(
             {
@@ -397,12 +399,12 @@ export function registerEmphasisWorkflowTests(quench) {
         });
       });
 
-      describe("Emphasis Workflow Edge Cases", () => {
+      describe("Emphasis workflow edge cases", () => {
         let actor, skill;
 
         beforeEach(async () => {
           await game.settings.set("l5r4-enhanced", "customEmphases", []);
-          actor = await createTestPC({ name: "Test Samurai - Edge Cases" });
+          actor = await createTestPC({ name: "Emphasis workflow: Test Samurai - Edge Cases" });
         });
 
         afterEach(async () => {
@@ -488,7 +490,7 @@ export function registerEmphasisWorkflowTests(quench) {
           assert.equal(finalXP, initialXP - 2, "XP reduced by 2 when emphasis removed");
         });
 
-        it("should handle emphasis with rank 0 skill (unskilled)", async () => {
+        it("should handle emphasis with an unskilled rank 0 skill", async () => {
           // ARRANGE
           skill = await Item.create(
             {
@@ -627,12 +629,14 @@ export function registerEmphasisWorkflowTests(quench) {
         });
       });
 
-      describe("Emphasis Roll Integration", () => {
+      describe("Emphasis roll integration", () => {
         let actor, _skill;
 
         beforeEach(async () => {
           await game.settings.set("l5r4-enhanced", "customEmphases", []);
-          actor = await createTestPC({ name: "Test Samurai - Roll Integration" });
+          actor = await createTestPC({
+            name: "Emphasis workflow: Test Samurai - Roll Integration"
+          });
         });
 
         afterEach(async () => {
@@ -720,7 +724,7 @@ export function registerEmphasisWorkflowTests(quench) {
       });
     },
     {
-      displayName: "L5R4: Emphasis Complete Workflow"
+      displayName: "L5R4: Emphasis workflow"
     }
   );
 }

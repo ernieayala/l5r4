@@ -1,5 +1,5 @@
 /**
- * @fileoverview Armor TN Calculation Integration Tests
+ * Armor TN Calculation Integration Tests
  *
  * Tests complete Armor TN calculation for PC actors including:
  * - Base TN from Reflexes (Reflexes × 5 + 5)
@@ -8,15 +8,18 @@
  * - Condition overrides (Prone, Grappled, Stunned)
  * - Stance modifiers (Full Attack -10, Defense +Air+Defense skill)
  *
- * **Bug Context:**
- * Armor TN was calculated as 5 instead of 15 because Reflexes read as 0
- * when traits stored as objects. Fixed by reading from _derived.traitsEff.
+ * Reflexes is read from _derived.traitsEff, so traits stored as objects still give the right base TN.
  *
  * **Test Coverage:**
  * - Correct base TN with various Reflexes values
  * - Condition floor enforcement (minimum TN of 5)
- * - Prone penalty (-10 against melee attacks only, p.89)
- * - Void boost integration (an effect lasting the Round, p.78)
+ * - Prone penalty (-10 against melee attacks only)
+ * - Void boost integration (an effect lasting the Round)
+ *
+ * game-rules/32_attack_and_defense.md, p.82
+ * game-rules/41_conditional_effects.md, p.89
+ * game-rules/25_rings_and_traits.md, p.78
+ * game-rules/36_stances.md, p.84
  */
 
 import { SYS_ID } from "../../../module/config/constants.js";
@@ -28,13 +31,13 @@ import { applyEffect } from "../../../module/services/effects/apply.js";
  * Register Armor TN calculation integration tests
  * @param {Object} quench - Quench test framework API
  */
-export function registerArmorTNCalculationTests(quench) {
+export function registerArmorTnCalculationTests(quench) {
   quench.registerBatch(
-    `${SYS_ID}.workflows.armorTNCalculation`,
+    `${SYS_ID}.workflows.armor-tn-calculation`,
     context => {
-      const { describe, it, assert, beforeEach, afterEach } = context;
+      const { describe, it, assert, afterEach } = context;
 
-      describe("Base Armor TN Calculation", () => {
+      describe("Base Armor TN calculation", () => {
         let actor;
 
         afterEach(async () => {
@@ -100,7 +103,7 @@ export function registerArmorTNCalculationTests(quench) {
         });
       });
 
-      describe("Armor TN with Armor Bonus", () => {
+      describe("Armor TN with an armor bonus", () => {
         let actor;
 
         afterEach(async () => {
@@ -133,7 +136,7 @@ export function registerArmorTNCalculationTests(quench) {
         });
       });
 
-      describe("Condition Effects on Armor TN", () => {
+      describe("Condition effects on Armor TN", () => {
         let actor;
 
         afterEach(async () => {
@@ -162,7 +165,8 @@ export function registerArmorTNCalculationTests(quench) {
           // ACT
           actor.prepareDerivedData();
 
-          // ASSERT: Prone's -10 counts only against melee attacks (p.89), which read it from armorTn.vs
+          // ASSERT: Prone's -10 counts only against melee attacks, which read it from armorTn.vs
+          // game-rules/41_conditional_effects.md, p.89
           assert.equal(actor.system.armorTn.current, 15, "Prone: the shown Armor TN stays 15");
           assert.equal(actor.system.armorTn.vs.melee, -10, "Prone: -10 against melee");
         });
@@ -175,7 +179,8 @@ export function registerArmorTNCalculationTests(quench) {
             }
           });
 
-          // Full Attack Stance: Armor TN -10 (p.84)
+          // Full Attack Stance: Armor TN -10
+          // game-rules/36_stances.md, p.84
           await actor.createEmbeddedDocuments("ActiveEffect", [
             {
               name: "Full Attack",
@@ -274,7 +279,7 @@ export function registerArmorTNCalculationTests(quench) {
         });
       });
 
-      describe("Void Point Armor TN Boost", () => {
+      describe("Void Point Armor TN boost", () => {
         let actor;
 
         afterEach(async () => {
@@ -283,18 +288,19 @@ export function registerArmorTNCalculationTests(quench) {
           }
         });
 
-        it("adds +10 while the Void Point effect lasts (p.78)", async () => {
+        // game-rules/25_rings_and_traits.md, p.78
+        it("should add +10 while the Void Point effect lasts", async () => {
           actor = await createTestPC({ system: { traits: { ref: 2 } } });
           await applyEffect(actor, "voidArmor");
           assert.equal(actor.system.armorTn.current, 25, "Void boost: 15 (base) + 10 (void) = 25");
         });
 
-        it("adds nothing without the effect", async () => {
+        it("should add nothing without the effect", async () => {
           actor = await createTestPC({ system: { traits: { ref: 2 } } });
           assert.equal(actor.system.armorTn.current, 15, "No void boost: base TN only");
         });
 
-        it("adds to the Armor TN while Prone counts against melee only", async () => {
+        it("should add to the Armor TN while Prone counts against melee only", async () => {
           actor = await createTestPC({ system: { traits: { ref: 2 } } });
           await applyEffect(actor, "voidArmor");
           await actor.createEmbeddedDocuments("ActiveEffect", [
@@ -305,7 +311,7 @@ export function registerArmorTNCalculationTests(quench) {
         });
       });
 
-      describe("Regression Prevention", () => {
+      describe("Reflexes read for the base TN", () => {
         let actor;
 
         afterEach(async () => {
@@ -315,7 +321,7 @@ export function registerArmorTNCalculationTests(quench) {
         });
 
         it("should never calculate TN as 5 with Reflexes 2 and no conditions", async () => {
-          // ARRANGE - This was the original bug
+          // ARRANGE
           actor = await createTestPC({
             system: {
               traits: { ref: 2 }
@@ -352,6 +358,6 @@ export function registerArmorTNCalculationTests(quench) {
         });
       });
     },
-    { displayName: "L5R4: Armor TN Calculation Integration Tests" }
+    { displayName: "L5R4: Armor TN calculation" }
   );
 }

@@ -1,0 +1,30 @@
+{{!-- Components: one entry per page in docs/design-system/components/, each sample rendered by the system's own
+template (module/config/design-gallery.js names them) --}}
+<section class="l5r4-design-gallery-part">
+  <h2>{{localize "l5r4.apps.designGallery.sections.components"}}</h2>
+  {{#each components}}
+    <article class="l5r4-design-gallery-entry" data-gallery-page="{{page}}">
+      <h3>{{title}}</h3>
+      <dl class="l5r4-design-gallery-facts">
+        <dt>{{localize "l5r4.apps.designGallery.entry.page"}}</dt>
+        <dd><code>docs/design-system/components/{{page}}.md</code></dd>
+        <dt>{{localize "l5r4.apps.designGallery.entry.templates"}}</dt>
+        <dd>
+          {{#each partials}}<code>{{this}}</code> {{else}}{{localize "l5r4.apps.designGallery.entry.none"}}{{/each}}
+        </dd>
+        <dt>{{localize "l5r4.apps.designGallery.entry.styles"}}</dt>
+        <dd>
+          {{#each scss}}<code data-gallery-scss="{{this}}">{{this}}</code> {{else}}{{localize "l5r4.apps.designGallery.entry.none"}}{{/each}}
+        </dd>
+        {{#if seeAlso.length}}
+          <dt>{{localize "l5r4.apps.designGallery.entry.seeAlso"}}</dt>
+          <dd>{{#each seeAlso}}<code>{{this}}</code> {{/each}}</dd>
+        {{/if}}
+      </dl>
+      {{#each notes}}<p class="l5r4-design-gallery-note">{{localize this}}</p>{{/each}}
+      {{#each samples}}
+        {{> "systems/l5r4-enhanced/templates/apps/design-gallery/_partials/_sample.hbs"}}
+      {{/each}}
+    </article>
+  {{/each}}
+</section>

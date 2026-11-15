@@ -24,7 +24,7 @@ export function registerActorCreationRaceConditionTests(quench) {
     context => {
       const { describe, it, assert, afterEach } = context;
 
-      describe("Rapid Actor Creation - Race Conditions", () => {
+      describe("Rapid actor creation", () => {
         let createdActors = [];
 
         afterEach(async () => {
@@ -41,7 +41,7 @@ export function registerActorCreationRaceConditionTests(quench) {
           // ARRANGE - Create 3 PCs simultaneously
           const createPromises = [
             Actor.create({
-              name: "Concurrent PC 1",
+              name: "Actor creation race conditions: Concurrent PC 1",
               type: "pc",
               system: {
                 traits: { ref: 3 },
@@ -49,7 +49,7 @@ export function registerActorCreationRaceConditionTests(quench) {
               }
             }),
             Actor.create({
-              name: "Concurrent PC 2",
+              name: "Actor creation race conditions: Concurrent PC 2",
               type: "pc",
               system: {
                 traits: { ref: 3 },
@@ -57,7 +57,7 @@ export function registerActorCreationRaceConditionTests(quench) {
               }
             }),
             Actor.create({
-              name: "Concurrent PC 3",
+              name: "Actor creation race conditions: Concurrent PC 3",
               type: "pc",
               system: {
                 traits: { ref: 3 },
@@ -102,7 +102,7 @@ export function registerActorCreationRaceConditionTests(quench) {
           // ARRANGE - Create 5 NPCs simultaneously
           const createPromises = Array.from({ length: 5 }, (_, i) =>
             Actor.create({
-              name: `Concurrent NPC ${i + 1}`,
+              name: `Actor creation race conditions: Concurrent NPC ${i + 1}`,
               type: "npc",
               system: {
                 traits: { ref: 3 }
@@ -130,10 +130,26 @@ export function registerActorCreationRaceConditionTests(quench) {
         it("should handle mixed PC/NPC creation without type confusion", async () => {
           // ARRANGE - Create mix of PCs and NPCs simultaneously
           const createPromises = [
-            Actor.create({ name: "PC 1", type: "pc", system: { rings: { void: { rank: 2 } } } }),
-            Actor.create({ name: "NPC 1", type: "npc", system: { traits: { ref: 3 } } }),
-            Actor.create({ name: "PC 2", type: "pc", system: { rings: { void: { rank: 2 } } } }),
-            Actor.create({ name: "NPC 2", type: "npc", system: { traits: { ref: 3 } } })
+            Actor.create({
+              name: "Actor creation race conditions: PC 1",
+              type: "pc",
+              system: { rings: { void: { rank: 2 } } }
+            }),
+            Actor.create({
+              name: "Actor creation race conditions: NPC 1",
+              type: "npc",
+              system: { traits: { ref: 3 } }
+            }),
+            Actor.create({
+              name: "Actor creation race conditions: PC 2",
+              type: "pc",
+              system: { rings: { void: { rank: 2 } } }
+            }),
+            Actor.create({
+              name: "Actor creation race conditions: NPC 2",
+              type: "npc",
+              system: { traits: { ref: 3 } }
+            })
           ];
 
           // ACT
@@ -160,7 +176,7 @@ export function registerActorCreationRaceConditionTests(quench) {
           // ARRANGE - Create actors with complex nested data
           const createPromises = Array.from({ length: 3 }, (_, i) =>
             Actor.create({
-              name: `Complex PC ${i + 1}`,
+              name: `Actor creation race conditions: Complex PC ${i + 1}`,
               type: "pc",
               system: {
                 traits: {
@@ -210,7 +226,7 @@ export function registerActorCreationRaceConditionTests(quench) {
           // ARRANGE
           const createPromises = Array.from({ length: 3 }, (_, i) =>
             Actor.create({
-              name: `Token Test PC ${i + 1}`,
+              name: `Actor creation race conditions: Token Test PC ${i + 1}`,
               type: "pc",
               system: { rings: { void: { rank: 2 } } }
             })
@@ -227,7 +243,7 @@ export function registerActorCreationRaceConditionTests(quench) {
         });
       });
 
-      describe("XP Flag Initialization Edge Cases", () => {
+      describe("XP flag initialization edge cases", () => {
         let actor;
 
         afterEach(async () => {
@@ -240,7 +256,7 @@ export function registerActorCreationRaceConditionTests(quench) {
         it("should initialize XP flags even with empty system data", async () => {
           // ARRANGE & ACT - Create with minimal data
           actor = await Actor.create({
-            name: "Minimal PC",
+            name: "Actor creation race conditions: Minimal PC",
             type: "pc"
           });
 
@@ -261,7 +277,7 @@ export function registerActorCreationRaceConditionTests(quench) {
         it("should not corrupt XP flags when updating actor immediately after creation", async () => {
           // ARRANGE - Create actor
           actor = await Actor.create({
-            name: "Update Test PC",
+            name: "Actor creation race conditions: Update Test PC",
             type: "pc",
             system: { rings: { void: { rank: 2 } } }
           });
@@ -281,7 +297,7 @@ export function registerActorCreationRaceConditionTests(quench) {
         it("should handle negative XP values without corruption", async () => {
           // ARRANGE - Create actor
           actor = await Actor.create({
-            name: "Negative XP Test",
+            name: "Actor creation race conditions: Negative XP Test",
             type: "pc",
             system: { rings: { void: { rank: 2 } } }
           });
@@ -297,6 +313,6 @@ export function registerActorCreationRaceConditionTests(quench) {
         });
       });
     },
-    { displayName: "L5R4: Actor Creation Race Conditions" }
+    { displayName: "L5R4: Actor creation race conditions" }
   );
 }

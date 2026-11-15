@@ -1,0 +1,33 @@
+.sample {
+  $local-gap: 1px;
+  --controls: 102px;
+  background: rgb(var(--air-ring-color), 0.1);
+  border-radius: 3px;
+  color: #fff;
+  gap: 0.15rem;
+  outline-color: var(--l5r4-missing-token);
+  transition: all 150ms ease-out;
+  z-index: 11;
+}
+
+.l5r4-sample {
+  color: var(--l5r4-color-text);
+
+  &:hover {
+    opacity: 0.5;
+  }
+
+  &:hover .l5r4-sample-controls {
+    opacity: 1;
+  }
+}
+
+.ring-rank-fire {
+  font-weight: bold;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .l5r4-sample {
+    transition: none;
+  }
+}

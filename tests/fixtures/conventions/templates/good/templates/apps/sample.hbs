@@ -1,0 +1,20 @@
+{{!-- A conforming template: one root block, localized text, named icon-only controls --}}
+<section class="l5r4-sample">
+  <span class="l5r4-sample-value -compact">{{value}}</span>
+  <button
+    type="button"
+    class="l5r4-sample-button"
+    data-action="delete-item"
+    data-tooltip="{{localize "l5r4.ui.common.delete"}}"
+    aria-label="{{localize "l5r4.ui.common.delete"}}"
+  >
+    <i class="fa-solid fa-trash" inert></i>
+  </button>
+  <button type="button" class="l5r4-sample-button" data-action="expand-section" aria-expanded="true">
+    <i class="fa-solid fa-angle-down" inert></i> {{localize "l5r4.ui.common.expand"}}
+  </button>
+  <img class="l5r4-sample-icon" src="{{img}}" alt="" />
+  <input class="l5r4-sample-search" name="search" placeholder="{{localize "l5r4.ui.common.search"}}" />
+  {{> "systems/l5r4-enhanced/templates/apps/_partials/_row.hbs" item=this}}
+  {{> (concat "systems/l5r4-enhanced/templates/item/_type-details/" type ".hbs")}}
+</section>

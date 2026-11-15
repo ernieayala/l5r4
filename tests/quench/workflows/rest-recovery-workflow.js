@@ -1,13 +1,11 @@
 /**
- * Rest & Recovery Complete Workflow Integration Tests
+ * Rest and recovery workflow
  *
  * Tests complete rest and recovery workflows including:
  * - Long rest with all recovery mechanics (healing, spell slots, void, fatigue)
  * - Natural healing over multiple consecutive rests
  * - Fasting condition blocking void recovery
  * - Edge cases and boundary conditions
- *
- * Test Priority: Tier 2 (Important - Rest & Recovery mechanics)
  *
  * @see module/services/rest.js
  */
@@ -23,16 +21,16 @@ import { createSpellData } from "../../fixtures/item-fixtures.js";
  */
 export function registerRestRecoveryWorkflowTests(quench) {
   quench.registerBatch(
-    `${SYS_ID}.workflows.rest-recovery`,
+    `${SYS_ID}.workflows.rest-recovery-workflow`,
     context => {
       const { describe, it, assert, beforeEach, afterEach } = context;
 
-      describe("Complete Long Rest Workflow", () => {
+      describe("Complete long rest", () => {
         let actor;
 
         beforeEach(async () => {
           actor = await createTestPC({
-            name: "Test Character",
+            name: "Rest and recovery workflow: test character",
             system: {
               traits: {
                 sta: 3,
@@ -287,12 +285,12 @@ export function registerRestRecoveryWorkflowTests(quench) {
         });
       });
 
-      describe("Natural Healing Over Multiple Rests", () => {
+      describe("Natural healing over multiple rests", () => {
         let actor;
 
         beforeEach(async () => {
           actor = await createTestPC({
-            name: "Wounded Character",
+            name: "Rest and recovery workflow: wounded character",
             system: {
               traits: {
                 sta: 3, // Heal rate = (3×2) + 2 = 8
@@ -401,12 +399,12 @@ export function registerRestRecoveryWorkflowTests(quench) {
         });
       });
 
-      describe("Fasting Condition Blocking Void Recovery", () => {
+      describe("Fasting condition blocking Void recovery", () => {
         let actor;
 
         beforeEach(async () => {
           actor = await createTestPC({
-            name: "Fasting Character",
+            name: "Rest and recovery workflow: fasting character",
             system: {
               traits: {
                 sta: 3,
@@ -606,12 +604,12 @@ export function registerRestRecoveryWorkflowTests(quench) {
         });
       });
 
-      describe("Edge Cases and Boundary Conditions", () => {
+      describe("Rest edge cases and boundary conditions", () => {
         let actor;
 
         beforeEach(async () => {
           actor = await createTestPC({
-            name: "Edge Case Character"
+            name: "Rest and recovery workflow: edge case character"
           });
         });
 
@@ -705,6 +703,6 @@ export function registerRestRecoveryWorkflowTests(quench) {
         });
       });
     },
-    { displayName: "L5R4: Rest & Recovery Workflow Tests" }
+    { displayName: "L5R4: Rest and recovery workflow" }
   );
 }

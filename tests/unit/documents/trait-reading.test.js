@@ -18,8 +18,8 @@
 import { describe, it, expect } from "vitest";
 import { toInt } from "../../../module/utils/type-coercion.js";
 
-describe("Trait Reading from _derived.traitsEff", () => {
-  describe("toInt with object trait format", () => {
+describe("Trait reading from _derived.traitsEff", () => {
+  describe("Object trait format through toInt", () => {
     it("should return 0 when trait is object {rank: 2}", () => {
       // ARRANGE
       const traitObject = { rank: 2 };
@@ -54,7 +54,7 @@ describe("Trait Reading from _derived.traitsEff", () => {
     });
   });
 
-  describe("derived traitsEff format (simulated)", () => {
+  describe("Simulated derived traitsEff format", () => {
     it("should read numeric value from traitsEff", () => {
       // ARRANGE - simulates sys._derived.traitsEff structure
       const sys = {
@@ -112,7 +112,7 @@ describe("Trait Reading from _derived.traitsEff", () => {
       expect(baseTN).toBe(15); // NOT 5
     });
 
-    it("should fail with wrong base TN when reading trait object directly", () => {
+    it("should get a wrong base TN when reading the trait object itself", () => {
       // ARRANGE - wrong approach (reading object)
       const sys = {
         traits: { ref: { rank: 2 } }

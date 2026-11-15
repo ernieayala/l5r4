@@ -42,13 +42,13 @@ import { registerXpServiceTests } from "./services/xp-service.js";
 import { registerEmphasisXpTrackingTests } from "./services/emphasis-xp-tracking.js";
 import { registerVoidPointsTests } from "./services/void-points.js";
 import { registerSpellSlotsTests } from "./services/spell-slots.js";
-import { registerPCSheetTests } from "./sheets/pc-sheet.js";
-import { registerNPCSheetTests } from "./sheets/npc-sheet.js";
+import { registerPcSheetTests } from "./sheets/pc-sheet.js";
+import { registerNpcSheetTests } from "./sheets/npc-sheet.js";
 import { registerItemSheetTests } from "./sheets/item-sheet.js";
 import { registerWoundConfigTests } from "./sheets/wound-config.js";
 import { registerXpManagerTests } from "./sheets/xp-manager.js";
 import { registerEmphasisManagerTests } from "./sheets/emphasis-manager.js";
-import { registerNPCAttackConfigTests } from "./apps/npc-attack-config.js";
+import { registerNpcAttackConfigTests } from "./apps/npc-attack-config.js";
 import { registerWealthManagerTests } from "./apps/wealth-manager.js";
 import { registerConditionManagerTests } from "./apps/condition-manager.js";
 import { registerCombatWorkflowTests } from "./workflows/combat-workflow.js";
@@ -56,7 +56,7 @@ import { registerMeleeDamageStrengthTests } from "./workflows/melee-damage-stren
 import { registerAdvancementWorkflowTests } from "./workflows/advancement-workflow.js";
 import { registerSpellCastingWorkflowTests } from "./workflows/spell-casting-workflow.js";
 import { registerTraitFamilyBonusTests } from "./workflows/trait-family-bonus.js";
-import { registerArmorTNCalculationTests } from "./workflows/armor-tn-calculation.js";
+import { registerArmorTnCalculationTests } from "./workflows/armor-tn-calculation.js";
 import { registerDiceRollingWorkflowTests } from "./workflows/dice-rolling-workflow.js";
 import { registerStanceSwitchingWorkflowTests } from "./workflows/stance-switching-workflow.js";
 import { registerInitiativeWorkflowTests } from "./workflows/initiative-workflow.js";
@@ -65,7 +65,7 @@ import { registerStatusEffectsWorkflowTests } from "./workflows/status-effects-w
 import { registerStatusEffectsAllRollsTests } from "./workflows/status-effects-all-rolls.js";
 import { registerFearWorkflowTests } from "./workflows/fear-workflow.js";
 import { registerRestRecoveryWorkflowTests } from "./workflows/rest-recovery-workflow.js";
-import { registerNPCWorkflowTests } from "./workflows/npc-workflows.js";
+import { registerNpcWorkflowTests } from "./workflows/npc-workflows.js";
 import { registerChatSystemWorkflowTests } from "./workflows/chat-system-workflow.js";
 import { registerEmphasisWorkflowTests } from "./workflows/emphasis-workflow.js";
 import { registerEmphasisRerollMechanicsTests } from "./workflows/emphasis-reroll-mechanics.js";
@@ -90,21 +90,22 @@ import { register as registerWoundPenaltyAllRollsTests } from "./rolls/wound-pen
 import { registerMultipleModifierCombinationTests } from "./services/multiple-modifier-combinations.js";
 import { registerCombatModifiersTests } from "./documents/combat-modifiers.js";
 import { registerStanceEffectPreservationTests } from "./services/stance-effect-preservation.js";
-import { registerSmokeBatch } from "./smoke.js";
-import { registerDeprecationsBatch } from "./deprecations.js";
-import { registerDataModelsBatch } from "./data-models.js";
-import { registerActiveEffectsBatch } from "./active-effects.js";
-import { registerSheetsAndAppsBatch } from "./sheets-and-apps.js";
-import { registerRulesBatch } from "./rules.js";
-import { registerRollPipelineBatch } from "./roll-pipeline.js";
-import { registerCombatBatch } from "./combat.js";
-import { registerAuthoringBatch } from "./authoring.js";
-import { registerEffectsBatch } from "./effects.js";
-import { registerAnimationsBatch } from "./animations.js";
-import { registerWorldUpgradeBatch } from "./world-upgrade.js";
-import { registerRegressionsBatch } from "./regressions.js";
-import { registerTableToolsBatch } from "./table-tools.js";
-import { registerPacksBatch } from "./packs.js";
+import { registerSmokeTests } from "./smoke.js";
+import { registerDeprecationsTests } from "./deprecations.js";
+import { registerDataModelsTests } from "./data-models.js";
+import { registerActiveEffectsTests } from "./active-effects.js";
+import { registerSheetsAndAppsTests } from "./sheets-and-apps.js";
+import { registerRulesTests } from "./rules.js";
+import { registerRollPipelineTests } from "./roll-pipeline.js";
+import { registerCombatTests } from "./combat.js";
+import { registerAuthoringTests } from "./authoring.js";
+import { registerEffectsTests } from "./effects.js";
+import { registerAnimationsTests } from "./animations.js";
+import { registerWorldUpgradeTests } from "./world-upgrade.js";
+import { registerRegressionsTests } from "./regressions.js";
+import { registerTableToolsTests } from "./table-tools.js";
+import { registerPacksTests } from "./packs.js";
+import { registerDesignGalleryTests } from "./design-gallery.js";
 
 /**
  * Register Quench integration tests for the L5R4 system.
@@ -113,21 +114,22 @@ import { registerPacksBatch } from "./packs.js";
  */
 export async function registerQuenchTests(quench) {
   revealChatPopupsAtOnce();
-  registerSmokeBatch(quench);
-  registerDeprecationsBatch(quench);
-  registerDataModelsBatch(quench);
-  registerActiveEffectsBatch(quench);
-  registerSheetsAndAppsBatch(quench);
-  registerRulesBatch(quench);
-  registerRollPipelineBatch(quench);
-  registerCombatBatch(quench);
-  registerAuthoringBatch(quench);
-  registerEffectsBatch(quench);
-  registerAnimationsBatch(quench);
-  registerWorldUpgradeBatch(quench);
-  registerRegressionsBatch(quench);
-  registerTableToolsBatch(quench);
-  registerPacksBatch(quench);
+  registerSmokeTests(quench);
+  registerDeprecationsTests(quench);
+  registerDataModelsTests(quench);
+  registerActiveEffectsTests(quench);
+  registerSheetsAndAppsTests(quench);
+  registerRulesTests(quench);
+  registerRollPipelineTests(quench);
+  registerCombatTests(quench);
+  registerAuthoringTests(quench);
+  registerEffectsTests(quench);
+  registerAnimationsTests(quench);
+  registerWorldUpgradeTests(quench);
+  registerRegressionsTests(quench);
+  registerTableToolsTests(quench);
+  registerPacksTests(quench);
+  registerDesignGalleryTests(quench);
   registerActorDocumentTests(quench);
   registerActorWoundTests(quench);
   registerActorXpTests(quench);
@@ -166,13 +168,13 @@ export async function registerQuenchTests(quench) {
   registerSpellSlotsTests(quench);
 
   // Register sheet tests (Phase 5: User Interface)
-  registerPCSheetTests(quench);
-  registerNPCSheetTests(quench);
+  registerPcSheetTests(quench);
+  registerNpcSheetTests(quench);
   registerItemSheetTests(quench);
   registerWoundConfigTests(quench);
   registerXpManagerTests(quench);
   registerEmphasisManagerTests(quench);
-  registerNPCAttackConfigTests(quench);
+  registerNpcAttackConfigTests(quench);
   registerWealthManagerTests(quench);
   registerConditionManagerTests(quench);
 
@@ -182,7 +184,7 @@ export async function registerQuenchTests(quench) {
   registerAdvancementWorkflowTests(quench);
   registerSpellCastingWorkflowTests(quench);
   registerTraitFamilyBonusTests(quench);
-  registerArmorTNCalculationTests(quench);
+  registerArmorTnCalculationTests(quench);
   registerDiceRollingWorkflowTests(quench);
   registerStanceSwitchingWorkflowTests(quench);
   registerInitiativeWorkflowTests(quench);
@@ -191,7 +193,7 @@ export async function registerQuenchTests(quench) {
   registerStatusEffectsAllRollsTests(quench);
   registerFearWorkflowTests(quench);
   registerRestRecoveryWorkflowTests(quench);
-  registerNPCWorkflowTests(quench);
+  registerNpcWorkflowTests(quench);
   registerChatSystemWorkflowTests(quench);
   registerEmphasisWorkflowTests(quench);
   registerEmphasisRerollMechanicsTests(quench);

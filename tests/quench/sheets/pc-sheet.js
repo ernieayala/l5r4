@@ -20,13 +20,13 @@ import { createSkillData } from "../../fixtures/item-fixtures.js";
  * Register PC sheet tests
  * @param {Object} quench - Quench test framework API
  */
-export function registerPCSheetTests(quench) {
+export function registerPcSheetTests(quench) {
   quench.registerBatch(
-    `${SYS_ID}.sheets.pc`,
+    `${SYS_ID}.sheets.pc-sheet`,
     context => {
       const { describe, it, assert, beforeEach, afterEach } = context;
 
-      describe("PC Sheet Rendering", () => {
+      describe("PC sheet rendering", () => {
         let actor, sheet;
 
         beforeEach(async () => {
@@ -110,12 +110,12 @@ export function registerPCSheetTests(quench) {
         });
       });
 
-      describe("PC Sheet Data Updates", () => {
+      describe("PC sheet data updates", () => {
         let actor, sheet;
 
         beforeEach(async () => {
           actor = await createTestPC({
-            name: "Update Test",
+            name: "PC sheet: update test",
             system: {
               traits: { sta: 3, wil: 3 } // Earth = 3
             }
@@ -160,12 +160,12 @@ export function registerPCSheetTests(quench) {
         });
       });
 
-      describe("PC Sheet Interactions", () => {
+      describe("PC sheet interactions", () => {
         let actor, sheet;
 
         beforeEach(async () => {
           actor = await createTestPC({
-            name: "Interaction Test",
+            name: "PC sheet: interaction test",
             system: {
               traits: { agi: 3, ref: 3 }
             }
@@ -218,11 +218,11 @@ export function registerPCSheetTests(quench) {
         });
       });
 
-      describe("PC Sheet Item Management", () => {
+      describe("PC sheet item management", () => {
         let actor, sheet;
 
         beforeEach(async () => {
-          actor = await createTestPC({ name: "Item Test" });
+          actor = await createTestPC({ name: "PC sheet: item test" });
           sheet = actor.sheet;
           await sheet.render(true);
         });
@@ -268,12 +268,12 @@ export function registerPCSheetTests(quench) {
         });
       });
 
-      describe("PC Sheet Wound Display", () => {
+      describe("PC sheet Wound display", () => {
         let actor, sheet;
 
         beforeEach(async () => {
           actor = await createTestPC({
-            name: "Wound Display Test",
+            name: "PC sheet: Wound display test",
             system: {
               traits: { sta: 3, wil: 3 } // Earth = 3
             }
@@ -311,6 +311,6 @@ export function registerPCSheetTests(quench) {
         });
       });
     },
-    { displayName: "L5R4: PC Sheet Tests" }
+    { displayName: "L5R4: PC sheet" }
   );
 }

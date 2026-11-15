@@ -27,11 +27,11 @@ import { createTestPC } from "../../fixtures/actor-fixtures.js";
  */
 export function registerDiceRollingWorkflowTests(quench) {
   quench.registerBatch(
-    `${SYS_ID}.workflows.dice-rolling`,
+    `${SYS_ID}.workflows.dice-rolling-workflow`,
     context => {
       const { describe, it, assert, beforeEach, afterEach } = context;
 
-      describe("Standard Roll & Keep Workflow", () => {
+      describe("Standard Roll & Keep workflow", () => {
         it("should parse basic notation and create valid Roll", async () => {
           // ARRANGE
           const notation = "7k3";
@@ -117,7 +117,7 @@ export function registerDiceRollingWorkflowTests(quench) {
           assert.equal(parsed.bonus, 2, "Leftover rolled die converted to bonus");
         });
 
-        it("should handle minimum rolls (1k1)", async () => {
+        it("should handle the minimum roll of 1k1", async () => {
           // ARRANGE
           const notation = "1k1";
 
@@ -153,7 +153,7 @@ export function registerDiceRollingWorkflowTests(quench) {
         });
       });
 
-      describe("Unskilled Roll Workflow (uXkY)", () => {
+      describe("Unskilled Roll workflow with uXkY", () => {
         it("should parse unskilled notation correctly", async () => {
           // ARRANGE
           const notation = "u3k3";
@@ -234,7 +234,7 @@ export function registerDiceRollingWorkflowTests(quench) {
         });
       });
 
-      describe("Emphasis Roll Workflow (eXkY)", () => {
+      describe("Emphasis roll workflow with eXkY", () => {
         it("should parse emphasis notation correctly", async () => {
           // ARRANGE
           const notation = "e7k3";
@@ -327,7 +327,7 @@ export function registerDiceRollingWorkflowTests(quench) {
         });
       });
 
-      describe("Inline Roll Parsing Workflow [[XkY]]", () => {
+      describe("Inline roll parsing workflow [[XkY]]", () => {
         it("should detect L5R4 notation in inline format", () => {
           // ARRANGE - Test inline roll detection patterns
           const patterns = [
@@ -430,7 +430,7 @@ export function registerDiceRollingWorkflowTests(quench) {
         });
       });
 
-      describe("Complex Roll Scenarios", () => {
+      describe("Complex roll scenarios", () => {
         it("should read xN as the explode threshold", async () => {
           // ARRANGE
           const notation = "7k3x9+5";
@@ -495,7 +495,7 @@ export function registerDiceRollingWorkflowTests(quench) {
         });
       });
 
-      describe("Edge Cases and Error Handling", () => {
+      describe("Edge cases and error handling", () => {
         it("should handle maximum dice pools", async () => {
           // ARRANGE - At Ten Dice Rule limit
           const notation = "10k10";
@@ -512,7 +512,7 @@ export function registerDiceRollingWorkflowTests(quench) {
           assert.isNumber(roll.total, "Maximum pool executes");
         });
 
-        it("should handle keep greater than roll (invalid but test gracefully)", async () => {
+        it("should cap keep at the rolled dice when keep exceeds roll", async () => {
           // ARRANGE - Invalid notation (keep > roll) but parser accepts it
           const notation = "3k5";
 
@@ -566,12 +566,12 @@ export function registerDiceRollingWorkflowTests(quench) {
         });
       });
 
-      describe("Integration with Actor Context", () => {
+      describe("Integration with actor context", () => {
         let actor;
 
         beforeEach(async () => {
           actor = await createTestPC({
-            name: "Dice Test Samurai",
+            name: "Dice rolling workflow: Dice Test Samurai",
             system: {
               traits: { agi: 4, per: 3 },
               rings: { earth: 3, void: 3 }
@@ -642,6 +642,6 @@ export function registerDiceRollingWorkflowTests(quench) {
         });
       });
     },
-    { displayName: "L5R4: Dice Rolling Complete Workflow Tests" }
+    { displayName: "L5R4: Dice rolling workflow" }
   );
 }

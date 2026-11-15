@@ -28,12 +28,12 @@ export function registerWoundConfigEdgeCaseTests(quench) {
     context => {
       const { describe, it, assert, beforeEach, afterEach } = context;
 
-      describe("Invalid Multiplier Values", () => {
+      describe("Invalid multiplier values", () => {
         let actor;
 
         beforeEach(async () => {
           actor = await createTestPC({
-            name: "Multiplier Test",
+            name: "Wound config edge cases: multiplier",
             system: {
               traits: { sta: 3, wil: 3 },
               woundsMultiplier: 2
@@ -47,7 +47,7 @@ export function registerWoundConfigEdgeCaseTests(quench) {
           }
         });
 
-        it("should handle extremely high multiplier (99)", async () => {
+        it("should handle an extremely high multiplier of 99", async () => {
           // ARRANGE - Set extreme multiplier
           await actor.update({ "system.woundsMultiplier": 99 });
 
@@ -106,7 +106,7 @@ export function registerWoundConfigEdgeCaseTests(quench) {
           assert.isNumber(actor.system.woundLevels.healthy.value, "Healthy wounds calculated");
         });
 
-        it("should handle multiplier = 1 (minimum reasonable)", async () => {
+        it("should handle the minimum reasonable multiplier of 1", async () => {
           // ARRANGE - Minimum multiplier
           await actor.update({ "system.woundsMultiplier": 1 });
 
@@ -142,12 +142,12 @@ export function registerWoundConfigEdgeCaseTests(quench) {
         });
       });
 
-      describe("Debounce Data Loss Prevention", () => {
+      describe("Debounce data loss prevention", () => {
         let actor, dialog;
 
         beforeEach(async () => {
           actor = await createTestPC({
-            name: "Debounce Test",
+            name: "Wound config edge cases: debounce",
             system: {
               traits: { sta: 3, wil: 3 },
               woundsMultiplier: 2
@@ -167,7 +167,7 @@ export function registerWoundConfigEdgeCaseTests(quench) {
           }
         });
 
-        it("should handle immediate close (< 100ms)", async () => {
+        it("should handle a close within 100 ms", async () => {
           // ARRANGE - Dialog open
           assert.isTrue(dialog.rendered, "Dialog is open");
 
@@ -197,7 +197,7 @@ export function registerWoundConfigEdgeCaseTests(quench) {
           assert.equal(actor.system.woundsMultiplier, 2, "Multiplier unchanged");
         });
 
-        it("should preserve data when closing after short delay (100ms)", async () => {
+        it("should preserve data when closing after a short delay of 100 ms", async () => {
           // ARRANGE - Wait short time
           await new Promise(resolve => setTimeout(resolve, 100));
 
@@ -208,7 +208,7 @@ export function registerWoundConfigEdgeCaseTests(quench) {
           assert.equal(actor.system.woundsMultiplier, 2, "Data preserved");
         });
 
-        it("should preserve data when closing after medium delay (300ms)", async () => {
+        it("should preserve data when closing after a medium delay of 300 ms", async () => {
           // ARRANGE - Wait medium time (typical debounce threshold)
           await new Promise(resolve => setTimeout(resolve, 300));
 
@@ -235,12 +235,12 @@ export function registerWoundConfigEdgeCaseTests(quench) {
         });
       });
 
-      describe("Negative Wound Modifiers", () => {
+      describe("Negative wound modifiers", () => {
         let actor;
 
         beforeEach(async () => {
           actor = await createTestPC({
-            name: "Negative Mod Test",
+            name: "Wound config edge cases: negative modifier",
             system: {
               traits: { sta: 3, wil: 3 },
               woundsPenaltyMod: 0
@@ -302,7 +302,7 @@ export function registerWoundConfigEdgeCaseTests(quench) {
           assert.isAbove(nickedPenalty, 0, "Penalty is positive");
         });
 
-        it("should handle extreme negative modifier (-99)", async () => {
+        it("should handle an extreme negative modifier of -99", async () => {
           // ARRANGE - Extreme negative
           await actor.update({ "system.woundsPenaltyMod": -99 });
 
@@ -317,7 +317,7 @@ export function registerWoundConfigEdgeCaseTests(quench) {
           assert.isNumber(actor.system.woundLevels.nicked.penaltyEff, "Penalty is number");
         });
 
-        it("should handle extreme positive modifier (99)", async () => {
+        it("should handle an extreme positive modifier of 99", async () => {
           // ARRANGE - Extreme positive
           await actor.update({ "system.woundsPenaltyMod": 99 });
 
@@ -348,12 +348,12 @@ export function registerWoundConfigEdgeCaseTests(quench) {
         });
       });
 
-      describe("NPC Wound Config Edge Cases", () => {
+      describe("NPC wound config edge cases", () => {
         let npc;
 
         beforeEach(async () => {
           npc = await createTestNPC({
-            name: "NPC Config Test",
+            name: "Wound config edge cases: NPC config",
             system: {
               woundMode: "manual",
               wounds: { max: 50 }
@@ -395,7 +395,7 @@ export function registerWoundConfigEdgeCaseTests(quench) {
           assert.isAbove(npc.system.wounds.max, 0, "Falls back to formula value");
         });
 
-        it("should handle manual mode with extreme max wounds (9999)", async () => {
+        it("should handle manual mode with extreme max wounds of 9999", async () => {
           // ARRANGE - Extreme max
           await npc.update({ "system.wounds.max": 9999 });
 
@@ -450,12 +450,12 @@ export function registerWoundConfigEdgeCaseTests(quench) {
         });
       });
 
-      describe("Wound Level Count Edge Cases", () => {
+      describe("Wound level count edge cases", () => {
         let npc;
 
         beforeEach(async () => {
           npc = await createTestNPC({
-            name: "Wound Levels Test",
+            name: "Wound config edge cases: wound levels",
             system: {
               nrWoundLvls: 8 // Standard L5R4
             }
@@ -468,7 +468,7 @@ export function registerWoundConfigEdgeCaseTests(quench) {
           }
         });
 
-        it("should handle minimum wound levels (1)", async () => {
+        it("should handle the minimum of 1 wound level", async () => {
           // ARRANGE - Single wound level
           await npc.update({ "system.nrWoundLvls": 1 });
 
@@ -479,7 +479,7 @@ export function registerWoundConfigEdgeCaseTests(quench) {
           assert.equal(npc.system.nrWoundLvls, 1, "One wound level");
         });
 
-        it("should handle maximum wound levels (15)", async () => {
+        it("should handle a maximum of 15 wound levels", async () => {
           // ARRANGE - Many wound levels
           await npc.update({ "system.nrWoundLvls": 15 });
 
@@ -512,7 +512,7 @@ export function registerWoundConfigEdgeCaseTests(quench) {
           assert.equal(npc.system.nrWoundLvls, -5, "Negative wound levels set");
         });
 
-        it("should handle standard L5R4 wound levels (8)", async () => {
+        it("should handle the standard 8 wound levels", async () => {
           // ARRANGE - Standard 8 levels
           await npc.update({ "system.nrWoundLvls": 8 });
 
@@ -527,12 +527,12 @@ export function registerWoundConfigEdgeCaseTests(quench) {
         });
       });
 
-      describe("Rapid Configuration Changes", () => {
+      describe("Rapid configuration changes", () => {
         let actor;
 
         beforeEach(async () => {
           actor = await createTestPC({
-            name: "Rapid Change Test",
+            name: "Wound config edge cases: rapid change",
             system: {
               traits: { sta: 3, wil: 3 },
               woundsMultiplier: 2
@@ -586,6 +586,6 @@ export function registerWoundConfigEdgeCaseTests(quench) {
         });
       });
     },
-    { displayName: "L5R4: Wound Config Edge Cases" }
+    { displayName: "L5R4: Wound config edge cases" }
   );
 }

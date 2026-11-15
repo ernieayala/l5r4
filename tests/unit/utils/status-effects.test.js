@@ -1,6 +1,10 @@
 /**
- * The status effects carry the book's numbers as rules (Core Rulebook pp.84, 88-90): each is run through the rule
- * engine and Armor TN resolution the way a prepared actor runs it, and 3.2.1's stored effects get the same data.
+ * The status effects carry the book's numbers as rules: each is run through the rule engine and Armor TN resolution
+ * the way a prepared actor runs it, and 3.2.1's stored effects get the same data.
+ * game-rules/36_stances.md, p.84
+ * game-rules/38_maneuvers.md, p.87
+ * game-rules/41_conditional_effects.md, p.89
+ * game-rules/42_fear.md, p.90
  */
 import { describe, expect, it } from "vitest";
 import { STATUS_EFFECTS, SYSTEM_EFFECTS } from "../../../module/config/status-effects.js";
@@ -56,13 +60,15 @@ const byId = id => STATUS_EFFECTS.find(s => s.id === id);
 const armorTn = out =>
   resolveArmorTn({ base: 20, armor: 5, other: 0, rules: out.armor, stack: stackModifiers });
 
-describe("stances (p.84)", () => {
-  it("share the exclusive group", () => {
+// game-rules/36_stances.md, p.84
+describe("Stances", () => {
+  it("should share the exclusive group", () => {
     const stances = STATUS_EFFECTS.filter(s => s.system?.group === "stance").map(s => s.id);
     expect(stances).toHaveLength(5);
   });
 
-  it("Full Attack: +2k1 to melee attacks only (no ranged attacks in it), Armor TN -10", () => {
+  // Full Attack allows no ranged attacks
+  it("should give Full Attack +2k1 to melee attacks only, and Armor TN -10", () => {
     const out = run(byId("fullAttackStance"));
     expect(bagEntries(out.bag, "rollModifiers", ["attack"], new Set())).toMatchObject([
       { roll: 2, keep: 1, range: "melee" }
@@ -70,11 +76,12 @@ describe("stances (p.84)", () => {
     expect(armorTn(out).current).toBe(15);
   });
 
-  it("Defense: Air Ring plus Defense rank to Armor TN", () => {
+  it("should give Defense the Air Ring plus Defense rank to Armor TN", () => {
     expect(armorTn(run(byId("defenseStance"))).current).toBe(25 + 3 + 2);
   });
 
-  it("Center: next Round, +1k1 plus the Void Ring on one roll, offered unticked (decision 7)", () => {
+  // roadmap/STAGE-09 decision 7
+  it("should give Center +1k1 plus the Void Ring on one roll next Round, offered unticked", () => {
     const [bonus] = run({ id: "centered", ...SYSTEM_EFFECTS.centered }).bag.rollModifiers.any;
     // Ticking it ends the effect that carries it
     expect(bonus).toMatchObject({
@@ -87,8 +94,9 @@ describe("stances (p.84)", () => {
   });
 });
 
-describe("conditions (p.89)", () => {
-  it("Blinded: -3k3 ranged and -1k1 melee attacks, base Armor TN Reflexes + 5, Water -2 for movement", () => {
+// game-rules/41_conditional_effects.md, p.89
+describe("Conditions", () => {
+  it("should give Blinded -3k3 ranged, -1k1 melee, base Armor TN Reflexes + 5, Water -2 to move", () => {
     const out = run(byId("blinded"));
     const attacks = bagEntries(out.bag, "rollModifiers", ["attack"], new Set());
     expect(attacks.map(a => [a.roll, a.keep, a.range])).toEqual([
@@ -99,7 +107,7 @@ describe("conditions (p.89)", () => {
     expect(out.movementWater).toBe(-2);
   });
 
-  it("Dazed: -3k0 to every roll but damage; Earth save at TN 20, 5 lower per failure, never below 5", () => {
+  it("should give Dazed -3k0 except on damage; Earth save at TN 20, 5 lower per failure, never below 5", () => {
     const out = run(byId("dazed"));
     expect(selectorBonus(out.bag, ["any"], new Set(["check:skill"])).roll).toBe(-3);
     expect(selectorBonus(out.bag, ["any"], new Set(["check:damage"])).roll).toBe(0);
@@ -112,13 +120,14 @@ describe("conditions (p.89)", () => {
     });
   });
 
-  it("Stunned and Grappled: Armor TN 5 plus armor, nothing else (decision 3)", () => {
+  // roadmap/STAGE-09 decision 3
+  it("should set Stunned and Grappled to Armor TN 5 plus armor, nothing else", () => {
     expect(armorTn(run(byId("stunned"))).current).toBe(10);
     expect(armorTn(run(byId("grappled"))).current).toBe(10);
     expect(run(byId("stunned")).saves[0]).toMatchObject({ tn: 20, onFailure: "endNextRound" });
   });
 
-  it("Prone: -10 Armor TN against melee only, -2k0 to small and medium weapons, a large one noted", () => {
+  it("should give Prone -10 Armor TN in melee only, -2k0 to small and medium weapons, a large one noted", () => {
     const out = run(byId("prone"));
     expect(armorTn(out)).toMatchObject({ current: 25, vs: { melee: -10, ranged: 0 } });
     const medium = new Set(["weapon:size:medium"]);
@@ -129,7 +138,8 @@ describe("conditions (p.89)", () => {
     expect(bagEntries(out.bag, "notes", ["attack"], medium)).toHaveLength(0);
   });
 
-  it("Fatigued and Fasting: +5 TN per level on Skill, physical Trait, and Spell Casting Rolls, once each", () => {
+  // Each roll takes the penalty once
+  it("should give Fatigued and Fasting +5 TN per level on Skill, physical Trait, and Spell Casting Rolls", () => {
     for (const id of ["fatigued", "fasting"]) {
       const out = run(byId(id), 2);
       // The selectors and options the roll pipeline gives each kind of roll (collect.js)
@@ -149,22 +159,25 @@ describe("conditions (p.89)", () => {
     }
   });
 
-  it("Guarded +10 and Guarding -5 Armor TN until the guard's next Turn (p.88)", () => {
+  // game-rules/38_maneuvers.md, p.87
+  it("should give Guarded +10 and Guarding -5 Armor TN until the guard's next Turn", () => {
     expect(armorTn(run(byId("guarded"))).current).toBe(35);
     expect(armorTn(run(byId("guarding"))).current).toBe(20);
     expect(byId("guarded").duration).toEqual({ value: 1, units: "rounds", expiry: "turnStart" });
   });
 });
 
-describe("Fear (p.90)", () => {
-  it("-Xk0 to every roll at Fear Rank X, ending with the encounter", () => {
+// game-rules/42_fear.md, p.90
+describe("Fear", () => {
+  it("should give -Xk0 to every roll at Fear Rank X, ending with the encounter", () => {
     expect(selectorBonus(run(byId("feared"), 3).bag, ["any"], new Set()).roll).toBe(-3);
     expect(byId("feared").duration).toEqual({ expiry: "encounterEnd" });
   });
 });
 
-describe("statusEffectUpdate (3.2.1 effects)", () => {
-  it("gives a stance its rules and group", () => {
+// Effects 3.2.1 stored
+describe("statusEffectUpdate", () => {
+  it("should give a stance its rules and group", () => {
     const update = statusEffectUpdate({
       _id: "e1",
       statuses: ["fullAttackStance"],
@@ -174,7 +187,7 @@ describe("statusEffectUpdate (3.2.1 effects)", () => {
     expect(update["system.rules"]).toHaveLength(2);
   });
 
-  it("moves a Fear effect's Rank from its flag to its level", () => {
+  it("should move a Fear effect's Rank from its flag to its level", () => {
     const update = statusEffectUpdate({
       _id: "e2",
       statuses: ["feared"],
@@ -184,7 +197,7 @@ describe("statusEffectUpdate (3.2.1 effects)", () => {
     expect(update["system.level"]).toBe(4);
   });
 
-  it("gives a 3.2.1 Fear effect its end with the encounter", () => {
+  it("should give a stored Fear effect its end with the encounter", () => {
     const update = statusEffectUpdate({
       _id: "e5",
       statuses: ["feared"],
@@ -194,7 +207,7 @@ describe("statusEffectUpdate (3.2.1 effects)", () => {
     expect(update["duration.expiry"]).toBe("encounterEnd");
   });
 
-  it("leaves out a timed duration, which needs a start the old effect does not have", () => {
+  it("should leave out a timed duration, which needs a start the old effect does not have", () => {
     const update = statusEffectUpdate({
       _id: "e6",
       statuses: ["guarded"],
@@ -204,7 +217,7 @@ describe("statusEffectUpdate (3.2.1 effects)", () => {
     expect(update).not.toHaveProperty(["duration.expiry"]);
   });
 
-  it("changes nothing on an effect already up to date, or one with no known status", () => {
+  it("should change nothing on an effect already up to date, or one with no known status", () => {
     const current = {
       _id: "e3",
       statuses: ["defenseStance"],

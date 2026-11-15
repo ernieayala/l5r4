@@ -41,28 +41,26 @@ import { createSkillData, createWeaponData } from "../../fixtures/item-fixtures.
  */
 export function registerAttackRollVoidTests(quench) {
   quench.registerBatch(
-    `${SYS_ID}.services.rolls.attack-void`,
+    `${SYS_ID}.services.attack-roll-void`,
     context => {
       const { describe, it, assert, beforeEach, afterEach } = context;
 
-      describe("Attack Roll + Void Point (Basic)", () => {
-        let actor, skill, weapon;
+      describe("Attack roll with a Void Point", () => {
+        let actor;
 
         beforeEach(async () => {
           // ARRANGE - Create actor with Kenjutsu skill and Void Points
           actor = await createTestPC({
-            name: "Void Attack Test Samurai",
+            name: "Attack roll and Void Point: samurai",
             system: {
               traits: { agi: 4, str: 3 },
               rings: { void: { rank: 3, value: 3 } }
             }
           });
 
-          [skill] = await actor.createEmbeddedDocuments("Item", [
-            createSkillData("Kenjutsu", 5, "agi")
-          ]);
+          await actor.createEmbeddedDocuments("Item", [createSkillData("Kenjutsu", 5, "agi")]);
 
-          [weapon] = await actor.createEmbeddedDocuments("Item", [
+          await actor.createEmbeddedDocuments("Item", [
             createWeaponData("Katana", 3, 2, {
               system: {
                 associatedSkill: "kenjutsu",
@@ -136,23 +134,21 @@ export function registerAttackRollVoidTests(quench) {
         });
       });
 
-      describe("Attack Roll + Void Point (Empty Pool)", () => {
-        let actor, skill, weapon;
+      describe("Attack roll with an empty Void Point pool", () => {
+        let actor;
 
         beforeEach(async () => {
           actor = await createTestPC({
-            name: "Empty Void Test",
+            name: "Attack roll and Void Point: empty pool",
             system: {
               traits: { agi: 4, str: 3 },
               rings: { void: { rank: 3, value: 0 } } // Empty pool
             }
           });
 
-          [skill] = await actor.createEmbeddedDocuments("Item", [
-            createSkillData("Kenjutsu", 5, "agi")
-          ]);
+          await actor.createEmbeddedDocuments("Item", [createSkillData("Kenjutsu", 5, "agi")]);
 
-          [weapon] = await actor.createEmbeddedDocuments("Item", [
+          await actor.createEmbeddedDocuments("Item", [
             createWeaponData("Katana", 3, 2, {
               system: { associatedSkill: "kenjutsu" }
             })
@@ -200,12 +196,12 @@ export function registerAttackRollVoidTests(quench) {
         });
       });
 
-      describe("Attack Roll + Void + Emphasis", () => {
-        let actor, skill, weapon;
+      describe("Attack roll with a Void Point and an Emphasis", () => {
+        let actor, skill;
 
         beforeEach(async () => {
           actor = await createTestPC({
-            name: "Void + Emphasis Test",
+            name: "Attack roll and Void Point: Emphasis",
             system: {
               traits: { agi: 4, str: 3 },
               rings: { void: { rank: 3, value: 3 } }
@@ -218,7 +214,7 @@ export function registerAttackRollVoidTests(quench) {
             })
           ]);
 
-          [weapon] = await actor.createEmbeddedDocuments("Item", [
+          await actor.createEmbeddedDocuments("Item", [
             createWeaponData("Katana", 3, 2, {
               system: { associatedSkill: "kenjutsu" }
             })
@@ -279,23 +275,21 @@ export function registerAttackRollVoidTests(quench) {
         });
       });
 
-      describe("Attack Roll + Void + Full Attack Stance", () => {
-        let actor, skill, weapon;
+      describe("Attack roll with a Void Point in Full Attack Stance", () => {
+        let actor;
 
         beforeEach(async () => {
           actor = await createTestPC({
-            name: "Void + Stance Test",
+            name: "Attack roll and Void Point: stance",
             system: {
               traits: { agi: 4, ref: 3, str: 3 },
               rings: { earth: 3, void: { rank: 3, value: 3 } }
             }
           });
 
-          [skill] = await actor.createEmbeddedDocuments("Item", [
-            createSkillData("Kenjutsu", 5, "agi")
-          ]);
+          await actor.createEmbeddedDocuments("Item", [createSkillData("Kenjutsu", 5, "agi")]);
 
-          [weapon] = await actor.createEmbeddedDocuments("Item", [
+          await actor.createEmbeddedDocuments("Item", [
             createWeaponData("Katana", 3, 2, {
               system: { associatedSkill: "kenjutsu" }
             })
@@ -353,25 +347,25 @@ export function registerAttackRollVoidTests(quench) {
         });
       });
 
-      describe("Attack Roll + Void + All Modifiers", () => {
-        let actor, skill, weapon;
+      describe("Attack roll with a Void Point and every modifier", () => {
+        let actor;
 
         beforeEach(async () => {
           actor = await createTestPC({
-            name: "All Modifiers Test",
+            name: "Attack roll and Void Point: all modifiers",
             system: {
               traits: { agi: 4, ref: 3, str: 3 },
               rings: { earth: 3, void: { rank: 3, value: 3 } }
             }
           });
 
-          [skill] = await actor.createEmbeddedDocuments("Item", [
+          await actor.createEmbeddedDocuments("Item", [
             createSkillData("Kenjutsu", 5, "agi", {
               system: { emphasis: "Katana" }
             })
           ]);
 
-          [weapon] = await actor.createEmbeddedDocuments("Item", [
+          await actor.createEmbeddedDocuments("Item", [
             createWeaponData("Katana", 3, 2, {
               system: { associatedSkill: "kenjutsu" }
             })
@@ -429,19 +423,19 @@ export function registerAttackRollVoidTests(quench) {
         });
       });
 
-      describe("Unskilled Attack + Void Point", () => {
-        let actor, weapon;
+      describe("Unskilled attack with a Void Point", () => {
+        let actor;
 
         beforeEach(async () => {
           actor = await createTestPC({
-            name: "Unskilled Void Test",
+            name: "Attack roll and Void Point: unskilled",
             system: {
               traits: { agi: 3, str: 3 },
               rings: { void: { rank: 2, value: 2 } }
             }
           });
 
-          [weapon] = await actor.createEmbeddedDocuments("Item", [
+          await actor.createEmbeddedDocuments("Item", [
             createWeaponData("Naginata", 3, 2, {
               system: {
                 associatedSkill: "polearms",
@@ -489,6 +483,6 @@ export function registerAttackRollVoidTests(quench) {
         });
       });
     },
-    { displayName: "L5R4: Attack Roll + Void Point Tests" }
+    { displayName: "L5R4: Attack roll and Void Point" }
   );
 }

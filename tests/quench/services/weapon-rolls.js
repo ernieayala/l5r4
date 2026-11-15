@@ -22,12 +22,12 @@ import { SYS_ID } from "../../../module/config/constants.js";
  */
 export function registerWeaponRollTests(quench) {
   quench.registerBatch(
-    `${SYS_ID}.services.rolls.weapon`,
+    `${SYS_ID}.services.weapon-rolls`,
     context => {
       const { describe, it, assert } = context;
 
-      describe("Basic Weapon Damage", () => {
-        it("should calculate damage as (Weapon Roll + Strength)k(Weapon Keep)", () => {
+      describe("Basic weapon damage", () => {
+        it("should roll the weapon's dice + Strength and keep the weapon's kept dice", () => {
           const weaponRoll = 3; // Katana base damage
           const weaponKeep = 2;
           const strength = 3; // Character STR
@@ -74,7 +74,7 @@ export function registerWeaponRollTests(quench) {
         });
       });
 
-      describe("Stance Bonuses", () => {
+      describe("Stance bonuses", () => {
         it("should apply stance roll bonus", () => {
           const weaponRoll = 3;
           const strength = 3;
@@ -119,8 +119,8 @@ export function registerWeaponRollTests(quench) {
         });
       });
 
-      describe("Different Weapon Types", () => {
-        it("should handle heavy weapons (tetsubo, no-dachi)", () => {
+      describe("Different weapon types", () => {
+        it("should handle heavy weapons such as the tetsubo and no-dachi", () => {
           const weaponRoll = 5; // Tetsubo high damage
           const weaponKeep = 2;
           const strength = 4;
@@ -133,7 +133,7 @@ export function registerWeaponRollTests(quench) {
           // Formula would be 9k2
         });
 
-        it("should handle light weapons (tanto, sai)", () => {
+        it("should handle light weapons such as the tanto and sai", () => {
           const weaponRoll = 1; // Tanto low damage
           const weaponKeep = 1;
           const strength = 4;
@@ -146,7 +146,7 @@ export function registerWeaponRollTests(quench) {
           // Formula would be 5k1
         });
 
-        it("should handle bows (yumi)", () => {
+        it("should handle bows such as the yumi", () => {
           const weaponRoll = 2; // Yumi
           const weaponKeep = 2;
           // Bows add STR differently (half or fraction)
@@ -160,7 +160,7 @@ export function registerWeaponRollTests(quench) {
         });
       });
 
-      describe("Combined Modifiers", () => {
+      describe("Combined modifiers", () => {
         it("should combine raises and stance bonuses", () => {
           const weaponRoll = 3;
           const strength = 3;
@@ -189,7 +189,7 @@ export function registerWeaponRollTests(quench) {
         });
       });
 
-      describe("Edge Cases", () => {
+      describe("Edge cases", () => {
         it("should handle minimum damage weapon", () => {
           const weaponRoll = 1;
           const weaponKeep = 1;
@@ -235,7 +235,7 @@ export function registerWeaponRollTests(quench) {
         });
       });
 
-      describe("Damage Formula Validation", () => {
+      describe("Damage formula validation", () => {
         it("should create valid damage formulas", () => {
           const rolled = 6;
           const kept = 2;
@@ -256,6 +256,6 @@ export function registerWeaponRollTests(quench) {
         });
       });
     },
-    { displayName: "L5R4: Weapon Roll Service Tests" }
+    { displayName: "L5R4: Weapon rolls" }
   );
 }

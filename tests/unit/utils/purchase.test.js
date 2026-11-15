@@ -8,20 +8,20 @@ describe("unmetPrerequisites", () => {
     requires: [{ gte: ["skill:kenjutsu", 3] }]
   };
 
-  it("lists the requirements the buyer's options do not meet", () => {
+  it("should list the requirements the buyer's options do not meet", () => {
     expect(unmetPrerequisites([kenjutsu3], new Set(["skill:kenjutsu:2"]))).toEqual([
       { label: "Kenjutsu 3", requires: kenjutsu3.requires }
     ]);
     expect(unmetPrerequisites([kenjutsu3], new Set(["skill:kenjutsu:3"]))).toEqual([]);
   });
 
-  it("checks a prerequisite only when its own predicate holds", () => {
+  it("should check a prerequisite only when its own predicate holds", () => {
     const forNonCrane = { ...kenjutsu3, predicate: [{ not: "clan:crane" }] };
     expect(unmetPrerequisites([forNonCrane], new Set(["clan:crane"]))).toEqual([]);
     expect(unmetPrerequisites([forNonCrane], new Set())).toHaveLength(1);
   });
 
-  it("combines requirements with or, and skips rules without a requires list", () => {
+  it("should combine requirements with or, and skip rules without a requires list", () => {
     const either = {
       key: "Prerequisite",
       requires: [{ or: ["school:kakita bushi", "school:bayushi bushi"] }]
@@ -34,7 +34,7 @@ describe("unmetPrerequisites", () => {
 });
 
 describe("openChoices", () => {
-  it("returns ChoiceSets without a selection, with their index and checked options", () => {
+  it("should return ChoiceSets without a selection, with their index and checked options", () => {
     const rules = [
       { key: "Note", text: "x" },
       {
@@ -66,7 +66,7 @@ describe("openChoices", () => {
 });
 
 describe("withSelections", () => {
-  it("stores selections by rule index in a copy", () => {
+  it("should store selections by rule index in a copy", () => {
     const rules = [{ key: "ChoiceSet", flag: "a" }, { key: "Note" }];
     const chosen = withSelections(rules, { 0: "kenjutsu" });
     expect(chosen[0].selection).toBe("kenjutsu");

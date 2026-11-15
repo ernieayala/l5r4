@@ -51,7 +51,7 @@ const SPELLS = [
 ];
 
 describe("filterEntries", () => {
-  it("keeps the tab's types, sorted by name", () => {
+  it("should keep the tab's types, sorted by name", () => {
     expect(names(filterEntries(SPELLS, tab("spells")))).toEqual([
       "Ashigaru's Blood",
       "Fires of Purity",
@@ -60,7 +60,7 @@ describe("filterEntries", () => {
     ]);
   });
 
-  it("filters by each filter alone", () => {
+  it("should filter by each filter alone", () => {
     const spells = tab("spells");
     expect(names(filterEntries(SPELLS, spells, { choices: { ring: "earth" } }))).toEqual([
       "Jade Strike"
@@ -81,7 +81,7 @@ describe("filterEntries", () => {
     expect(names(filterEntries(SPELLS, spells, { search: "FURY" }))).toEqual(["Fury of Osano-wo"]);
   });
 
-  it("filters by several at once: Fire, Mastery Level 2, not maho", () => {
+  it("should filter by several at once: Fire, Mastery Level 2, not maho", () => {
     const shown = filterEntries(SPELLS, tab("spells"), {
       choices: { ring: "fire", mastery: "2", maho: "false" },
       search: "of"
@@ -89,7 +89,7 @@ describe("filterEntries", () => {
     expect(names(shown)).toEqual(["Fires of Purity", "Fury of Osano-wo"]);
   });
 
-  it("treats a blank choice as no filter", () => {
+  it("should treat a blank choice as no filter", () => {
     expect(filterEntries(SPELLS, tab("spells"), { choices: { ring: "", maho: "" } })).toHaveLength(
       4
     );
@@ -97,7 +97,7 @@ describe("filterEntries", () => {
 });
 
 describe("filterOptions", () => {
-  it("offers the distinct values present, numbers in numeric order", () => {
+  it("should offer the distinct values present, numbers in numeric order", () => {
     const spells = SPELLS.filter(entry => entry.type === "spell");
     expect(filterOptions(spells, "ring")).toEqual(["earth", "fire"]);
     expect(filterOptions(spells, "mastery")).toEqual(["1", "2"]);
@@ -110,7 +110,7 @@ describe("filterOptions", () => {
 });
 
 describe("browserIndexFields", () => {
-  it("lists each filter's system field and a row's numbers once, and none of core's", () => {
+  it("should list each filter's system field and a row's numbers once, and none of core's", () => {
     const fields = browserIndexFields("Item");
     expect(fields).toContain("system.ring");
     expect(fields).toContain("system.source.page");
@@ -120,7 +120,7 @@ describe("browserIndexFields", () => {
     expect(browserIndexFields("Actor")).toEqual(["system.source.page", "system.source.book"]);
   });
 
-  it("knows every filter a tab names", () => {
+  it("should know every filter a tab names", () => {
     for (const t of BROWSER_TABS) {
       for (const id of t.filters) {
         expect(BROWSER_FILTERS[id], `${t.id}: ${id}`).toBeDefined();
@@ -129,8 +129,8 @@ describe("browserIndexFields", () => {
   });
 });
 
-describe("entryNumbers and valueAt", () => {
-  it("gives a weapon's DR and armor's numbers, and nothing for a bow or a spell", () => {
+describe("The entryNumbers and valueAt helpers", () => {
+  it("should give a weapon's DR and armor's numbers, and nothing for a bow or a spell", () => {
     expect(entryNumbers(SPELLS[4])).toEqual({
       key: "l5r4.ui.browser.numbers.weapon",
       data: { pool: "3k2" }
@@ -150,7 +150,7 @@ describe("entryNumbers and valueAt", () => {
     expect(entryNumbers({ type: "commonItem", system: {} })).toBeNull();
   });
 
-  it("reads a dotted path and gives undefined past a missing step", () => {
+  it("should read a dotted path and give undefined past a missing step", () => {
     expect(valueAt(SPELLS[0], "system.source.page")).toBe(170);
     expect(valueAt(SPELLS[0], "system.nothing.here")).toBeUndefined();
   });

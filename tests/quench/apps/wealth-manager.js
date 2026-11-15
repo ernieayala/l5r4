@@ -10,22 +10,22 @@
  * Uses Quench for Foundry VTT integration testing.
  */
 
-import WealthManagerApplication from "../../../module/apps/wealth-manager.js";
+import { SYS_ID } from "../../../module/config/constants.js";
 
 export function registerWealthManagerTests(quench) {
   quench.registerBatch(
-    "l5r4-enhanced.wealth-manager",
+    `${SYS_ID}.apps.wealth-manager`,
     context => {
       const { describe, it, assert, before, after, beforeEach, afterEach } = context;
 
-      describe("Wealth Manager Application", () => {
+      describe("Wealth manager application", () => {
         let actor;
         let wealthManager;
 
         before(async () => {
           // Create test actor
           actor = await Actor.create({
-            name: "Test Character",
+            name: "Wealth manager: test character",
             type: "pc",
             system: {
               wealth: {
@@ -59,7 +59,7 @@ export function registerWealthManagerTests(quench) {
           }
         });
 
-        describe("Adding Money", () => {
+        describe("Adding money", () => {
           it("should add koku correctly", async () => {
             // ARRANGE
             await actor.update({ "system.wealth.koku": 0 });
@@ -72,7 +72,7 @@ export function registerWealthManagerTests(quench) {
             assert.equal(actor.system.wealth.koku, 5, "Should add 5 koku");
           });
 
-          it("should handle string values (prevent concatenation)", async () => {
+          it("should add string values numerically instead of concatenating them", async () => {
             // ARRANGE - Set wealth as strings (simulating text input)
             await actor.update({
               "system.wealth": { koku: "5", bu: "0", zeni: "0" }
@@ -91,7 +91,7 @@ export function registerWealthManagerTests(quench) {
             );
           });
 
-          it("should handle zero amount (no-op)", async () => {
+          it("should leave wealth unchanged for a zero amount", async () => {
             // ARRANGE
             await actor.update({ "system.wealth.koku": 10 });
 
@@ -111,7 +111,7 @@ export function registerWealthManagerTests(quench) {
             assert.equal(actor.system.wealth.koku, 10, "Should not change wealth when adding 0");
           });
 
-          it("should handle negative amount (no-op)", async () => {
+          it("should leave wealth unchanged for a negative amount", async () => {
             // ARRANGE
             await actor.update({ "system.wealth.koku": 10 });
 
@@ -165,7 +165,7 @@ export function registerWealthManagerTests(quench) {
           });
         });
 
-        describe("Removing Money", () => {
+        describe("Removing money", () => {
           it("should remove money from specific denomination", async () => {
             // ARRANGE
             await actor.update({
@@ -225,7 +225,7 @@ export function registerWealthManagerTests(quench) {
           });
         });
 
-        describe("Currency Conversion", () => {
+        describe("Currency conversion", () => {
           it("should convert 10 zeni to 1 bu", async () => {
             // ARRANGE
             await actor.update({
@@ -361,7 +361,7 @@ export function registerWealthManagerTests(quench) {
             assert.equal(actor.system.wealth.koku, 0, "Should not auto-convert to koku");
           });
 
-          it("should not auto-normalize on add (zeni)", async () => {
+          it("should not auto-normalize zeni on add", async () => {
             // ARRANGE
             await actor.update({
               "system.wealth": { koku: 0, bu: 0, zeni: 0 }
@@ -380,7 +380,7 @@ export function registerWealthManagerTests(quench) {
           });
         });
 
-        describe("Data Persistence", () => {
+        describe("Data persistence", () => {
           it("should persist wealth changes to actor", async () => {
             // ARRANGE
             await actor.update({
@@ -415,8 +415,8 @@ export function registerWealthManagerTests(quench) {
           });
         });
 
-        describe("Edge Cases", () => {
-          it("should handle very large numbers", async () => {
+        describe("Edge cases", () => {
+          it("should store a large koku amount", async () => {
             // ARRANGE
             const largeNumber = 999999;
 
@@ -427,7 +427,7 @@ export function registerWealthManagerTests(quench) {
             assert.equal(actor.system.wealth.koku, largeNumber, "Should handle large numbers");
           });
 
-          it("should handle decimal inputs (should round)", async () => {
+          it("should round decimal inputs down", async () => {
             // ARRANGE & ACT
             const decimalValue = 5.7;
             const rounded = Math.floor(decimalValue);
@@ -459,6 +459,6 @@ export function registerWealthManagerTests(quench) {
         });
       });
     },
-    { displayName: "L5R4: Wealth Manager" }
+    { displayName: "L5R4: Wealth manager" }
   );
 }

@@ -1,10 +1,8 @@
 /**
- * Spell Casting Workflow Integration Tests
+ * Spell casting workflow
  *
  * Tests complete spell casting sequences from slot availability through
  * spell effect resolution. Validates multi-step spell casting processes.
- *
- * Test Priority: Tier 1 (Critical - Spellcasting mechanics)
  */
 
 import { SYS_ID } from "../../../module/config/constants.js";
@@ -18,21 +16,22 @@ import { SpellCastRoll } from "../../../module/services/dice/rolls/spell-cast-ro
  */
 export function registerSpellCastingWorkflowTests(quench) {
   quench.registerBatch(
-    `${SYS_ID}.workflows.spellcasting`,
+    `${SYS_ID}.workflows.spell-casting-workflow`,
     context => {
       const { describe, it, assert, beforeEach, afterEach } = context;
 
-      describe("Spell Casting Workflow: Basic Casting", () => {
+      describe("Spell casting basics", () => {
         let shugenja;
 
         beforeEach(async () => {
           // createShugenja already sets up traits that calculate to these rings:
           // Earth=3, Air=4, Fire=4, Water=3, Void=3
           shugenja = await createShugenja({
-            name: "Test Shugenja"
+            name: "Spell casting workflow: test shugenja"
           });
 
-          // Mastery 1: within School Rank 1, so no GM confirm opens (p.164)
+          // Mastery 1: within School Rank 1, so no GM confirm opens
+          // game-rules/66_magic_and_spell_casting.md, p.164
           await shugenja.createEmbeddedDocuments("Item", [
             createSpellData("Jade Strike", "fire", 1),
             createSpellData("Path to Inner Peace", "void", 1)
@@ -101,7 +100,7 @@ export function registerSpellCastingWorkflowTests(quench) {
         it("should handle spell cast that fails to meet TN", async () => {
           // ARRANGE - Low ring shugenja vs high mastery spell
           const weakCaster = await createShugenja({
-            name: "Weak Caster",
+            name: "Spell casting workflow: weak caster",
             system: {
               traits: {
                 agi: 1,
@@ -127,7 +126,8 @@ export function registerSpellCastingWorkflowTests(quench) {
           const initialSlots = weakCaster.system.spellSlots.fire;
 
           // ACT - Attempt cast (2k1 from Fire 1 + School 1 against TN 35 rarely succeeds). Mastery 6 is above School Rank 1,
-          // so the GM confirms the cast first (p.164)
+          // so the GM confirms the cast first
+          // game-rules/66_magic_and_spell_casting.md, p.164
           const confirmed = new Promise(resolve =>
             Hooks.once("renderDialogV2", app => {
               app.element.querySelector('[data-action="yes"]').click();
@@ -188,12 +188,12 @@ export function registerSpellCastingWorkflowTests(quench) {
         });
       });
 
-      describe("Spell Casting Workflow: Multiple Spells", () => {
+      describe("Spell casting with multiple spells", () => {
         let shugenja;
 
         beforeEach(async () => {
           shugenja = await createShugenja({
-            name: "Multi-Spell Shugenja",
+            name: "Spell casting workflow: multi-spell shugenja",
             system: {
               rings: {
                 earth: 3,
@@ -276,12 +276,12 @@ export function registerSpellCastingWorkflowTests(quench) {
         });
       });
 
-      describe("Spell Casting Workflow: Void Point Integration", () => {
+      describe("Spell casting with Void Points", () => {
         let shugenja;
 
         beforeEach(async () => {
           shugenja = await createShugenja({
-            name: "Void-Using Shugenja",
+            name: "Spell casting workflow: Void-using shugenja",
             system: {
               rings: {
                 earth: 3,
@@ -340,12 +340,12 @@ export function registerSpellCastingWorkflowTests(quench) {
         });
       });
 
-      describe("Spell Casting Workflow: Mastery Levels", () => {
+      describe("Spell casting Mastery Levels", () => {
         let shugenja;
 
         beforeEach(async () => {
           shugenja = await createShugenja({
-            name: "Mastery Test Shugenja",
+            name: "Spell casting workflow: Mastery shugenja",
             system: {
               // Set traits to get Fire Ring = 5 (Fire = min(agi, int))
               traits: {
@@ -394,6 +394,6 @@ export function registerSpellCastingWorkflowTests(quench) {
         });
       });
     },
-    { displayName: "L5R4: Spell Casting Workflow Tests" }
+    { displayName: "L5R4: Spell casting workflow" }
   );
 }

@@ -9,7 +9,7 @@ import { describe, it, expect } from "vitest";
 import { toInt, clamp } from "../../../module/utils/type-coercion.js";
 
 describe("toInt", () => {
-  describe("valid numeric inputs", () => {
+  describe("Valid numeric inputs", () => {
     it("should convert integer to itself", () => {
       // ARRANGE
       const input = 42;
@@ -66,7 +66,7 @@ describe("toInt", () => {
     });
   });
 
-  describe("whitespace handling", () => {
+  describe("Whitespace handling", () => {
     it("should trim leading whitespace from string", () => {
       // ARRANGE
       const input = "  42";
@@ -101,7 +101,7 @@ describe("toInt", () => {
     });
   });
 
-  describe("floating point handling", () => {
+  describe("Floating point handling", () => {
     it("should truncate floating point number to integer", () => {
       // ARRANGE
       const input = 42.7;
@@ -125,7 +125,7 @@ describe("toInt", () => {
     });
   });
 
-  describe("edge cases with fallback", () => {
+  describe("Edge cases with fallback", () => {
     it("should return fallback for null", () => {
       // ARRANGE
       const input = null;
@@ -236,7 +236,7 @@ describe("toInt", () => {
     });
   });
 
-  describe("custom fallback values", () => {
+  describe("Custom fallback values", () => {
     it("should use custom fallback when provided", () => {
       // ARRANGE
       const input = null;
@@ -273,7 +273,7 @@ describe("toInt", () => {
     });
   });
 
-  describe("special numeric values", () => {
+  describe("Special numeric values", () => {
     it("should handle Infinity as fallback", () => {
       // ARRANGE
       const input = Infinity;
@@ -299,7 +299,7 @@ describe("toInt", () => {
 });
 
 describe("clamp", () => {
-  describe("value within range", () => {
+  describe("Value within range", () => {
     it("should return value when within range", () => {
       // ARRANGE
       const value = 5;
@@ -340,7 +340,7 @@ describe("clamp", () => {
     });
   });
 
-  describe("value outside range", () => {
+  describe("Value outside range", () => {
     it("should clamp to min when value below min", () => {
       // ARRANGE
       const value = -5;
@@ -381,7 +381,7 @@ describe("clamp", () => {
     });
   });
 
-  describe("string coercion", () => {
+  describe("String coercion", () => {
     it("should coerce string values to numbers", () => {
       // ARRANGE
       const value = "5";
@@ -409,7 +409,7 @@ describe("clamp", () => {
     });
   });
 
-  describe("negative ranges", () => {
+  describe("Negative ranges", () => {
     it("should handle negative ranges", () => {
       // ARRANGE
       const value = -5;
@@ -450,7 +450,7 @@ describe("clamp", () => {
     });
   });
 
-  describe("floating point values", () => {
+  describe("Floating point values", () => {
     it("should handle floating point value", () => {
       // ARRANGE
       const value = 5.7;
@@ -478,8 +478,8 @@ describe("clamp", () => {
     });
   });
 
-  describe("edge cases with invalid inputs", () => {
-    it("should clamp null (coerced to 0) to min when min > 0", () => {
+  describe("Edge cases with invalid inputs", () => {
+    it("should clamp null, coerced to 0, to min when min > 0", () => {
       // ARRANGE
       const value = null;
       const min = 1;
@@ -572,7 +572,7 @@ describe("clamp", () => {
     });
   });
 
-  describe("special numeric values", () => {
+  describe("Special numeric values", () => {
     it("should clamp Infinity to max", () => {
       // ARRANGE
       const value = Infinity;
@@ -600,7 +600,7 @@ describe("clamp", () => {
     });
   });
 
-  describe("zero-based ranges", () => {
+  describe("Zero-based ranges", () => {
     it("should handle 0 as minimum", () => {
       // ARRANGE
       const value = 5;

@@ -72,14 +72,14 @@ const SAMPLES = [
 ];
 
 describe("ruleSummary", () => {
-  it("has a summary key for every rule key, each in lang/en.json", () => {
+  it("should have a summary key for every rule key, each in lang/en.json", () => {
     for (const key of RULE_KEYS) {
       expect(SUMMARY_KEYS[key], key).toBe(`l5r4.ui.ruleSummary.${key}`);
       expect(hasKey(SUMMARY_KEYS[key]), key).toBe(true);
     }
   });
 
-  it("covers every rule key with a sample, and every key a sample uses is in lang/en.json", () => {
+  it("should cover every rule key with a sample, and every key a sample uses is in lang/en.json", () => {
     expect(new Set(SAMPLES.map(rule => rule.key))).toEqual(new Set(RULE_KEYS));
     for (const rule of SAMPLES) {
       const keys = ruleSummary(rule).flatMap(keysOf);
@@ -90,7 +90,7 @@ describe("ruleSummary", () => {
     }
   });
 
-  it("writes a modifier's pool and the rolls it names", () => {
+  it("should write a modifier's pool and the rolls it names", () => {
     const [line, range, optional] = ruleSummary(SAMPLES[0]);
     expect(line).toEqual({
       key: "l5r4.ui.ruleSummary.RollModifier",
@@ -106,7 +106,7 @@ describe("ruleSummary", () => {
     expect(optional.key).toBe("l5r4.ui.ruleSummary.optional");
   });
 
-  it("says an ActionCost limited to one attack range is limited to it", () => {
+  it("should say an ActionCost limited to one attack range is limited to it", () => {
     const rule = { key: "ActionCost", selector: "attack", action: "simple", range: "melee" };
     expect(ruleSummary(rule).map(line => line.key)).toEqual([
       "l5r4.ui.ruleSummary.ActionCost",
@@ -115,17 +115,17 @@ describe("ruleSummary", () => {
     expect(ruleSummary({ ...rule, range: null })).toHaveLength(1);
   });
 
-  it("names a Trait through its own key and a condition through its status name", () => {
+  it("should name a Trait through its own key and a condition through its status name", () => {
     expect(selectorPhrase("trait:ref").data.name.key).toBe("l5r4.ui.mechanics.traits.ref");
     expect(ruleSummary(SAMPLES[16])[0].data.condition.key).toBe("EFFECT.dazed");
   });
 
-  it("names a granted item through the resolver it is given", () => {
+  it("should name a granted item through the resolver it is given", () => {
     const [line] = ruleSummary(SAMPLES.at(-1), { itemName: () => "Kenjutsu" });
     expect(line.data).toEqual({ item: "Kenjutsu", rank: 2 });
   });
 
-  it("says when a rule has a predicate", () => {
+  it("should say when a rule has a predicate", () => {
     const [line] = ruleSummary({
       key: "RollModifier",
       selector: "attack",
@@ -137,7 +137,7 @@ describe("ruleSummary", () => {
     expect(line.data.rule.key).toBe("l5r4.ui.ruleSummary.RollModifier");
   });
 
-  it("gives a line, not an error, for an unknown or broken rule", () => {
+  it("should give a line, not an error, for an unknown or broken rule", () => {
     expect(ruleSummary({ key: "Nope" })).toEqual([
       { key: "l5r4.ui.ruleSummary.unknown", data: { key: "Nope" } }
     ]);
@@ -145,20 +145,20 @@ describe("ruleSummary", () => {
     expect(ruleSummary({ key: "TNModifier" })[0].data.value).toBe("+0");
   });
 
-  it("joins the lines of a rule list, and takes a missing list as none", () => {
+  it("should join the lines of a rule list, and take a missing list as none", () => {
     expect(rulesSummary([SAMPLES[1], SAMPLES[5]])).toHaveLength(2);
     expect(rulesSummary(undefined)).toEqual([]);
   });
 });
 
-describe("signed and poolText", () => {
-  it("signs numbers and keeps formulas as written", () => {
+describe("The signed and poolText helpers", () => {
+  it("should sign numbers and keep formulas as written", () => {
     expect(signed(2)).toBe("+2");
     expect(signed(-1)).toBe("-1");
     expect(signed("@rings.air")).toBe("@rings.air");
   });
 
-  it("writes a pool as dice and a flat bonus", () => {
+  it("should write a pool as dice and a flat bonus", () => {
     expect(poolText({ roll: 1 })).toBe("+1k0");
     expect(poolText({ keep: 1, total: 5 })).toBe("+0k1+5");
     expect(poolText({ total: -5 })).toBe("-5");
@@ -167,7 +167,7 @@ describe("signed and poolText", () => {
 });
 
 describe("sourceCitation", () => {
-  it("cites the book and printed page", () => {
+  it("should cite the book and printed page", () => {
     expect(sourceCitation({ book: "core", page: 204 })).toEqual({
       key: "l5r4.ui.ruleSummary.citation",
       data: { book: { key: "l5r4.ui.sources.core", data: {} }, page: 204 }
@@ -175,7 +175,7 @@ describe("sourceCitation", () => {
     expect(hasKey("l5r4.ui.sources.core")).toBe(true);
   });
 
-  it("is null for an item that cites nothing", () => {
+  it("should be null for an item that cites nothing", () => {
     expect(sourceCitation({ book: "", page: 0 })).toBeNull();
     expect(sourceCitation({ book: "core", page: 0 })).toBeNull();
     expect(sourceCitation(undefined)).toBeNull();

@@ -20,7 +20,10 @@ const skill = (extra = {}) => ({
 });
 
 describe("pendingGrants", () => {
-  // A School's Skills at once, its Techniques by School Rank (Core Rulebook pp.102, 104; STAGE-11 decision 2)
+  // A School's Skills at once, its Techniques by School Rank
+  // game-rules/48_character_creation_expanded.md, p.102
+  // game-rules/49_improving_your_character.md, p.104
+  // roadmap/STAGE-11 decision 2
   const school = [
     rule("Item.kenjutsu"),
     rule("Item.technique1", 1),
@@ -28,7 +31,7 @@ describe("pendingGrants", () => {
     rule("Item.technique3", 3)
   ];
 
-  it("grants what the School Rank has reached and is not recorded", () => {
+  it("should grant what the School Rank has reached and is not recorded", () => {
     expect(pendingGrants(school, [], 1).map(r => r.uuid)).toEqual([
       "Item.kenjutsu",
       "Item.technique1"
@@ -37,17 +40,18 @@ describe("pendingGrants", () => {
     expect(pendingGrants(school, granted, 2).map(r => r.uuid)).toEqual(["Item.technique2"]);
   });
 
-  it("does not grant again what the owner removed", () => {
+  it("should not grant again what the owner removed", () => {
     expect(pendingGrants([rule("Item.a")], [record("Item.a", { itemId: null })], 5)).toEqual([]);
   });
 
-  it("waits for an open choice", () => {
+  it("should wait for an open choice", () => {
     expect(pendingGrants([rule("{choice:extra}")], [], 5)).toEqual([]);
   });
 });
 
 describe("grantSkill", () => {
-  it("makes a Skill a School Skill with its free rank and Emphasis (p.102)", () => {
+  // game-rules/48_character_creation_expanded.md, p.102
+  it("should make a Skill a School Skill with its free rank and Emphasis", () => {
     expect(grantSkill(skill(), rule("u", 0, { emphasis: "Void Recovery" }))).toEqual({
       update: {
         rank: 1,
@@ -60,7 +64,7 @@ describe("grantSkill", () => {
     });
   });
 
-  it("keeps a higher rank, and does not repeat an Emphasis already trained", () => {
+  it("should keep a higher rank, and not repeat an Emphasis already trained", () => {
     const { update, record: rec } = grantSkill(
       skill({ rank: 3, trainedEmphases: ["Katana"] }),
       rule("u", 0, { emphasis: "Katana" })
@@ -70,18 +74,19 @@ describe("grantSkill", () => {
   });
 });
 
-describe("ungrantSkill (STAGE-11 decision 7)", () => {
-  it("deletes a granted Skill nothing was bought on", () => {
+// roadmap/STAGE-11 decision 7
+describe("ungrantSkill", () => {
+  it("should delete a granted Skill nothing was bought on", () => {
     expect(ungrantSkill(skill({ rank: 1, freeRanks: 1 }), record("u"))).toEqual({ delete: true });
   });
 
-  it("keeps a Skill with bought ranks, without the free rank", () => {
+  it("should keep a Skill with bought ranks, without the free rank", () => {
     expect(ungrantSkill(skill({ rank: 3, freeRanks: 1 }), record("u"))).toEqual({
       update: { freeRanks: 0, school: false, trainedEmphases: [], freeEmphasis: 0 }
     });
   });
 
-  it("keeps a Skill with a bought Emphasis, and takes back the granted one", () => {
+  it("should keep a Skill with a bought Emphasis, and take back the granted one", () => {
     const granted = skill({
       rank: 1,
       freeRanks: 1,
@@ -95,7 +100,7 @@ describe("ungrantSkill (STAGE-11 decision 7)", () => {
     });
   });
 
-  it("never deletes a Skill the character had before the grant", () => {
+  it("should never delete a Skill the character had before the grant", () => {
     expect(
       ungrantSkill(skill({ rank: 1, freeRanks: 1 }), record("u", { created: false }))
     ).toMatchObject({ update: { freeRanks: 0 } });

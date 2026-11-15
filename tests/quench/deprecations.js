@@ -7,7 +7,7 @@ import { createTestNPC, createTestPC } from "../fixtures/actor-fixtures.js";
 import { createSkillData } from "../fixtures/item-fixtures.js";
 import { settleChatNotifications, watchConsole } from "./helpers.js";
 
-/** The text core appends to every compatibility warning (common/utils/logging.mjs:32-34). */
+/** The text core appends to every compatibility warning [src: common/utils/logging.mjs:32-34]. */
 const DEPRECATION = /Deprecated since Version|Backwards-compatible support will be removed/;
 
 /**
@@ -33,7 +33,7 @@ function answerNextDialog(action) {
  * console too.
  * @param {object} quench  The Quench API object.
  */
-export function registerDeprecationsBatch(quench) {
+export function registerDeprecationsTests(quench) {
   quench.registerBatch(
     `${SYS_ID}.deprecations`,
     context => {
@@ -71,7 +71,7 @@ export function registerDeprecationsBatch(quench) {
       });
 
       describe("Common paths", () => {
-        it("creates every subtype and renders its sheet", async () => {
+        it("should create every subtype and render its sheet", async () => {
           const types = game.system.documentTypes;
           for (const [documentName, subtypes] of [
             ["Actor", types.Actor],
@@ -79,7 +79,7 @@ export function registerDeprecationsBatch(quench) {
           ]) {
             for (const type of Object.keys(subtypes)) {
               const doc = await getDocumentClass(documentName).create({
-                name: `Deprecations ${type}`,
+                name: `Deprecated API: ${type}`,
                 type
               });
               created.push(doc);
@@ -90,8 +90,8 @@ export function registerDeprecationsBatch(quench) {
           }
         });
 
-        it("rolls a skill without the options dialog", async () => {
-          const actor = await createTestPC({ name: "Deprecations Roller" });
+        it("should roll a skill without the options dialog", async () => {
+          const actor = await createTestPC({ name: "Deprecated API: roller" });
           created.push(actor);
           await actor.createEmbeddedDocuments("Item", [createSkillData("Kenjutsu", 3, "agi")]);
           await SkillRoll({
@@ -104,15 +104,15 @@ export function registerDeprecationsBatch(quench) {
           });
         });
 
-        it("changes stance", async () => {
-          const actor = await createTestNPC({ name: "Deprecations Stance" });
+        it("should change stance", async () => {
+          const actor = await createTestNPC({ name: "Deprecated API: stance" });
           created.push(actor);
           await actor.toggleStatusEffect("attackStance", { active: true });
           await actor.toggleStatusEffect("attackStance", { active: false });
         });
 
-        it("applies a family Trait bonus and reads it back", async () => {
-          const actor = await createTestPC({ name: "Deprecations Family" });
+        it("should apply a family Trait bonus and read it back", async () => {
+          const actor = await createTestPC({ name: "Deprecated API: family" });
           created.push(actor);
           const [family] = await actor.createEmbeddedDocuments("Item", [
             {
@@ -133,10 +133,10 @@ export function registerDeprecationsBatch(quench) {
           await actor.update({ "system.traits.str": 3 });
         });
 
-        it("posts an item chat card in each message mode, with that mode's visibility", async function () {
+        it("should post an item chat card in each message mode, with that mode's visibility", async function () {
           // A setting write and a message per mode: ten server round trips, past Mocha's 2 s default under load
           this.timeout(15_000);
-          const item = await Item.create(createSkillData("Deprecations Card", 1, "agi"));
+          const item = await Item.create(createSkillData("Deprecated API: card", 1, "agi"));
           created.push(item);
           const selected = game.settings.get("core", "messageMode");
           try {
@@ -156,8 +156,8 @@ export function registerDeprecationsBatch(quench) {
           }
         });
 
-        it("deletes an item from the sheet after its confirmation", async () => {
-          const actor = await createTestPC({ name: "Deprecations Delete" });
+        it("should delete an item from the sheet after its confirmation", async () => {
+          const actor = await createTestPC({ name: "Deprecated API: delete" });
           created.push(actor);
           const [skill] = await actor.createEmbeddedDocuments("Item", [
             createSkillData("Deprecations Skill", 1, "agi")
@@ -175,8 +175,8 @@ export function registerDeprecationsBatch(quench) {
           assert.isUndefined(actor.items.get(skill.id), "item deleted");
         });
 
-        it("spends Void on Armor TN and on Initiative after their confirmations", async () => {
-          const actor = await createTestPC({ name: "Deprecations Void" });
+        it("should spend Void on Armor TN and on Initiative after their confirmations", async () => {
+          const actor = await createTestPC({ name: "Deprecated API: void" });
           created.push(actor);
           const combat = await Combat.create({ scene: null, active: true });
           created.push(combat);
@@ -206,7 +206,7 @@ export function registerDeprecationsBatch(quench) {
       });
 
       describe("Inventory", () => {
-        it(`calls no deprecated API from systems/${SYS_ID}/`, () => {
+        it("should call no deprecated API from the system's files", () => {
           const found = [
             ...new Set(watch.messages.filter(m => DEPRECATION.test(m)).map(m => m.split("\n")[0]))
           ];

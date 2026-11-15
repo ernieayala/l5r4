@@ -1,8 +1,6 @@
 /**
  * Emphasis Re-roll Mechanics Integration Tests
  *
- * **Phase 5: Roll System - Emphasis Edge Cases**
- *
  * Tests the critical emphasis re-roll mechanic to catch bugs:
  * 1. Re-roll 1s exactly once (not infinite loop)
  * 2. Emphasis without skill rank (unskilled)
@@ -37,11 +35,13 @@ export function registerEmphasisRerollMechanicsTests(quench) {
     context => {
       const { describe, it, assert, beforeEach, afterEach } = context;
 
-      describe("Emphasis Re-roll 1s Exactly Once", () => {
-        let actor, skill;
+      describe("Emphasis re-roll of 1s exactly once", () => {
+        let actor;
 
         beforeEach(async () => {
-          actor = await createTestPC({ name: "Test Samurai - Reroll Mechanics" });
+          actor = await createTestPC({
+            name: "Emphasis re-roll mechanics: Test Samurai - Reroll Mechanics"
+          });
         });
 
         afterEach(async () => {
@@ -50,7 +50,7 @@ export function registerEmphasisRerollMechanicsTests(quench) {
 
         it("should re-roll 1s exactly once, not infinitely", async () => {
           // ARRANGE
-          skill = await Item.create(
+          await Item.create(
             {
               ...createSkillData({ name: "Kenjutsu", rank: 3 }),
               system: {
@@ -101,7 +101,7 @@ export function registerEmphasisRerollMechanicsTests(quench) {
 
         it("should handle emphasis when all dice roll 1s initially", async () => {
           // ARRANGE
-          skill = await Item.create(
+          await Item.create(
             {
               ...createSkillData({ name: "Kenjutsu", rank: 5 }),
               system: {
@@ -139,7 +139,7 @@ export function registerEmphasisRerollMechanicsTests(quench) {
 
         it("should not re-roll 1s on the re-rolled dice", async () => {
           // ARRANGE
-          skill = await Item.create(
+          await Item.create(
             {
               ...createSkillData({ name: "Kenjutsu", rank: 3 }),
               system: {
@@ -181,20 +181,22 @@ export function registerEmphasisRerollMechanicsTests(quench) {
         });
       });
 
-      describe("Emphasis Without Skill Rank (Unskilled)", () => {
-        let actor, skill;
+      describe("Emphasis without a Skill Rank", () => {
+        let actor;
 
         beforeEach(async () => {
-          actor = await createTestPC({ name: "Test Samurai - Unskilled Emphasis" });
+          actor = await createTestPC({
+            name: "Emphasis re-roll mechanics: Test Samurai - Unskilled Emphasis"
+          });
         });
 
         afterEach(async () => {
           await actor?.delete();
         });
 
-        it("should handle emphasis on rank 0 (unskilled) skill", async () => {
+        it("should handle emphasis on an unskilled rank 0 skill", async () => {
           // ARRANGE
-          skill = await Item.create(
+          await Item.create(
             {
               ...createSkillData({ name: "Kenjutsu", rank: 0 }),
               system: {
@@ -232,7 +234,7 @@ export function registerEmphasisRerollMechanicsTests(quench) {
 
         it("should not apply emphasis to unskilled roll", async () => {
           // ARRANGE
-          skill = await Item.create(
+          await Item.create(
             {
               ...createSkillData({ name: "Kenjutsu", rank: 0 }),
               system: {
@@ -271,11 +273,13 @@ export function registerEmphasisRerollMechanicsTests(quench) {
         });
       });
 
-      describe("Multiple Emphases - Which Applies?", () => {
-        let actor, skill;
+      describe("Multiple emphases", () => {
+        let actor;
 
         beforeEach(async () => {
-          actor = await createTestPC({ name: "Test Samurai - Multiple Emphases" });
+          actor = await createTestPC({
+            name: "Emphasis re-roll mechanics: Test Samurai - Multiple Emphases"
+          });
         });
 
         afterEach(async () => {
@@ -284,7 +288,7 @@ export function registerEmphasisRerollMechanicsTests(quench) {
 
         it("should handle skill with multiple trained emphases", async () => {
           // ARRANGE
-          skill = await Item.create(
+          await Item.create(
             {
               ...createSkillData({ name: "Kenjutsu", rank: 3 }),
               system: {
@@ -325,7 +329,7 @@ export function registerEmphasisRerollMechanicsTests(quench) {
 
         it("should not stack multiple emphasis bonuses", async () => {
           // ARRANGE
-          skill = await Item.create(
+          await Item.create(
             {
               ...createSkillData({ name: "Kenjutsu", rank: 5 }),
               system: {
@@ -366,7 +370,7 @@ export function registerEmphasisRerollMechanicsTests(quench) {
 
         it("should handle emphasis selection when multiple available", async () => {
           // ARRANGE
-          skill = await Item.create(
+          await Item.create(
             {
               ...createSkillData({ name: "Kenjutsu", rank: 2 }),
               system: {
@@ -408,11 +412,13 @@ export function registerEmphasisRerollMechanicsTests(quench) {
         });
       });
 
-      describe("Emphasis Edge Cases - Race Conditions", () => {
+      describe("Emphasis race conditions", () => {
         let actor, skill;
 
         beforeEach(async () => {
-          actor = await createTestPC({ name: "Test Samurai - Race Conditions" });
+          actor = await createTestPC({
+            name: "Emphasis re-roll mechanics: Test Samurai - Race Conditions"
+          });
         });
 
         afterEach(async () => {
@@ -474,7 +480,7 @@ export function registerEmphasisRerollMechanicsTests(quench) {
       });
     },
     {
-      displayName: "L5R4: Emphasis Re-roll Mechanics (Phase 5)"
+      displayName: "L5R4: Emphasis re-roll mechanics"
     }
   );
 }

@@ -26,12 +26,12 @@ export function registerXpRaceConditionTests(quench) {
     context => {
       const { describe, it, assert, beforeEach, afterEach } = context;
 
-      describe("Rapid Trait Advancement", () => {
+      describe("Rapid Trait advancement", () => {
         let actor;
 
         beforeEach(async () => {
           actor = await createTestPC({
-            name: "XP Race Test",
+            name: "XP race conditions: XP race",
             system: {
               traits: {
                 sta: 2,
@@ -137,12 +137,12 @@ export function registerXpRaceConditionTests(quench) {
         });
       });
 
-      describe("Free Bonus Consumption", () => {
+      describe("Free bonus consumption", () => {
         let actor;
 
         beforeEach(async () => {
           actor = await createTestPC({
-            name: "Free Bonus Test",
+            name: "XP race conditions: free bonus",
             system: {
               traits: { sta: 2 },
               rings: { earth: 2 }
@@ -199,12 +199,12 @@ export function registerXpRaceConditionTests(quench) {
         });
       });
 
-      describe("Negative XP Costs", () => {
+      describe("Negative XP costs", () => {
         let actor;
 
         beforeEach(async () => {
           actor = await createTestPC({
-            name: "Negative XP Test",
+            name: "XP race conditions: negative XP",
             system: {
               rings: { earth: 2 }
             }
@@ -218,7 +218,7 @@ export function registerXpRaceConditionTests(quench) {
           }
         });
 
-        it("should handle negative XP costs (disadvantages)", async () => {
+        it("should handle negative XP costs from disadvantages", async () => {
           // ARRANGE - Add negative XP entry (disadvantage grants XP)
           await actor.setFlag(SYS_ID, "xpManual", [{ delta: -10, note: "Disadvantage" }]);
 
@@ -257,12 +257,12 @@ export function registerXpRaceConditionTests(quench) {
         });
       });
 
-      describe("Free Rank Changes and XP History", () => {
+      describe("Free rank changes and XP history", () => {
         let actor;
 
         beforeEach(async () => {
           actor = await createTestPC({
-            name: "Free Rank Test",
+            name: "XP race conditions: free rank",
             system: {
               traits: { sta: 4 },
               rings: { earth: 2 }
@@ -298,7 +298,6 @@ export function registerXpRaceConditionTests(quench) {
         it("should recalculate XP when free ranks change", async () => {
           // ARRANGE
           actor.prepareData();
-          const initialXPBreakdown = actor.system._xp?.breakdown?.traits;
 
           // ACT - Add free rank (should reduce calculated XP)
           await actor.setFlag(SYS_ID, "freeRanks", { sta: 1 });
@@ -330,12 +329,12 @@ export function registerXpRaceConditionTests(quench) {
         });
       });
 
-      describe("Ring Advancement Race Conditions", () => {
+      describe("Ring advancement race conditions", () => {
         let actor;
 
         beforeEach(async () => {
           actor = await createTestPC({
-            name: "Ring Race Test",
+            name: "XP race conditions: Ring race",
             system: {
               rings: { earth: 2, air: 2, fire: 2, water: 2, void: { rank: 2 } }
             }
@@ -375,9 +374,8 @@ export function registerXpRaceConditionTests(quench) {
           assert.isNumber(ringXP, "Ring XP is number");
         });
 
-        it("should handle Void ring advancement (higher cost)", async () => {
+        it("should handle Void Ring advancement at its higher cost", async () => {
           // ARRANGE - Void costs 6×rank instead of 4×rank
-          const initialVoid = actor.system.rings.void.rank;
 
           // ACT - Increase Void
           await actor.update({ "system.rings.void.rank": 3 });
@@ -418,6 +416,6 @@ export function registerXpRaceConditionTests(quench) {
         });
       });
     },
-    { displayName: "L5R4: XP Race Conditions" }
+    { displayName: "L5R4: XP race conditions" }
   );
 }

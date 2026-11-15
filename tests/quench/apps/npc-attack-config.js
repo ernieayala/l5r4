@@ -19,18 +19,18 @@ import NpcAttackConfigApplication from "../../../module/apps/npc-attack-config.j
  * Register NPC Attack Config tests
  * @param {Object} quench - Quench test framework API
  */
-export function registerNPCAttackConfigTests(quench) {
+export function registerNpcAttackConfigTests(quench) {
   quench.registerBatch(
     `${SYS_ID}.apps.npc-attack-config`,
     context => {
       const { describe, it, assert, beforeEach, afterEach } = context;
 
-      describe("NPC Attack Config Rendering", () => {
+      describe("NPC attack config rendering", () => {
         let actor, editor;
 
         beforeEach(async () => {
           actor = await createTestNPC({
-            name: "Test NPC",
+            name: "NPC attack config: test NPC",
             system: {
               attack1: {
                 name: "Katana",
@@ -142,12 +142,12 @@ export function registerNPCAttackConfigTests(quench) {
         });
       });
 
-      describe("NPC Attack Config Form Behavior", () => {
+      describe("NPC attack config form behavior", () => {
         let actor, editor;
 
         beforeEach(async () => {
           actor = await createTestNPC({
-            name: "Test NPC",
+            name: "NPC attack config: test NPC",
             system: {
               attack2: {
                 name: "Wakizashi",
@@ -212,12 +212,12 @@ export function registerNPCAttackConfigTests(quench) {
         });
       });
 
-      describe("NPC Attack Config Data Updates", () => {
+      describe("NPC attack config data updates", () => {
         let actor, editor;
 
         beforeEach(async () => {
           actor = await createTestNPC({
-            name: "Test NPC",
+            name: "NPC attack config: test NPC",
             system: {
               attack3: {
                 name: "Yari",
@@ -313,12 +313,12 @@ export function registerNPCAttackConfigTests(quench) {
         });
       });
 
-      describe("NPC Attack Config for Different Attack Slots", () => {
+      describe("NPC attack config for different attack slots", () => {
         let actor;
 
         beforeEach(async () => {
           actor = await createTestNPC({
-            name: "Multi-Attack NPC",
+            name: "NPC attack config: multi-attack NPC",
             system: {
               attack1: { name: "Attack 1", roll: 5, keep: 3 },
               attack2: { name: "Attack 2", roll: 4, keep: 2 },
@@ -382,6 +382,6 @@ export function registerNPCAttackConfigTests(quench) {
         });
       });
     },
-    { displayName: "L5R4: NPC Attack Config Tests" }
+    { displayName: "L5R4: NPC attack config" }
   );
 }

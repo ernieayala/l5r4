@@ -24,20 +24,21 @@ import { checkEffects, guardRolls, settleFullDefense } from "../helpers.js";
 
 export function registerConditionManagerTests(quench) {
   quench.registerBatch(
-    "l5r4-enhanced.integration.condition-manager",
+    `${SYS_ID}.apps.condition-manager`,
     context => {
       const { describe, it, assert, before, after, beforeEach, afterEach } = context;
 
-      // Taking the Full Defense Stance opens its roll dialog (p.84)
+      // Taking the Full Defense Stance opens its roll dialog
+      // game-rules/36_stances.md, p.84
       guardRolls(context);
 
-      describe("ConditionManager Application", () => {
+      describe("ConditionManager application", () => {
         let actor;
 
         before(async () => {
           // Create test actor using fixture
           actor = await createTestPC({
-            name: "Test Character - Condition Manager",
+            name: "Condition manager: test character",
             system: {
               traits: {
                 ref: 3,
@@ -97,7 +98,7 @@ export function registerConditionManagerTests(quench) {
           });
         });
 
-        describe("Condition List Preparation", () => {
+        describe("Condition list preparation", () => {
           it("should exclude stance effects from condition list", async () => {
             const manager = new ConditionManager(actor);
             const context = await manager._prepareContext({});
@@ -165,7 +166,7 @@ export function registerConditionManagerTests(quench) {
           });
         });
 
-        describe("Condition Toggling", () => {
+        describe("Condition toggling", () => {
           it("should create ActiveEffect when condition toggled on", async () => {
             // ARRANGE - Verify no effects initially
             assert.equal(actor.effects.size, 0, "No effects initially");
@@ -276,7 +277,7 @@ export function registerConditionManagerTests(quench) {
           });
         });
 
-        describe("Stance Exclusion", () => {
+        describe("Stance exclusion", () => {
           it("should not include stance effects in condition list even if active", async () => {
             // ARRANGE - Add a stance effect to the actor
             await actor.createEmbeddedDocuments("ActiveEffect", [
@@ -335,7 +336,7 @@ export function registerConditionManagerTests(quench) {
           });
         });
 
-        describe("Edge Cases", () => {
+        describe("Edge cases", () => {
           it("should handle disabled effects correctly", async () => {
             // ARRANGE - Create a disabled effect
             await actor.createEmbeddedDocuments("ActiveEffect", [
@@ -393,8 +394,8 @@ export function registerConditionManagerTests(quench) {
           });
         });
 
-        describe("Condition Effects Application", () => {
-          it("should apply Blinded condition to actor data (penalties and Armor TN)", async () => {
+        describe("Condition effects application", () => {
+          it("should apply the Blinded roll penalties and Armor TN to actor data", async () => {
             // Ensure clean state
             assert.equal(actor.effects.size, 0, "No effects initially");
 
@@ -410,7 +411,8 @@ export function registerConditionManagerTests(quench) {
 
             assert.isTrue(actor.statuses.has("blinded"), "Blinded is active");
 
-            // Roll penalties per p.89: ranged -3k3, melee -1k1
+            // Roll penalties: ranged -3k3, melee -1k1
+            // game-rules/41_conditional_effects.md, p.89
             assert.deepInclude(checkEffects(actor, "attack", { range: "ranged" }), {
               roll: -3,
               keep: -3
@@ -420,7 +422,8 @@ export function registerConditionManagerTests(quench) {
               keep: -1
             });
 
-            // Base Armor TN Reflexes + 5, armor still adds (p.89; STAGE-09 decision 3)
+            // Base Armor TN Reflexes + 5, armor still adds (roadmap/STAGE-09 decision 3)
+            // game-rules/41_conditional_effects.md, p.89
             assert.equal(
               actor.system.armorTn.current,
               actor.system.traits.ref + 5 + actor.system.armorTn.bonus,
@@ -445,6 +448,6 @@ export function registerConditionManagerTests(quench) {
         });
       });
     },
-    { displayName: "L5R4: Condition Manager Tests" }
+    { displayName: "L5R4: Condition manager" }
   );
 }

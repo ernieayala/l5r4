@@ -1,0 +1,22 @@
+{{!-- Patterns: one sample of each page in docs/design-system/patterns/ --}}
+<section class="l5r4-design-gallery-part">
+  <h2>{{localize "l5r4.apps.designGallery.sections.patterns"}}</h2>
+  {{#each patterns}}
+    <article class="l5r4-design-gallery-entry" data-gallery-pattern="{{page}}">
+      <h3>{{localize label}}</h3>
+      <dl class="l5r4-design-gallery-facts">
+        <dt>{{localize "l5r4.apps.designGallery.entry.page"}}</dt>
+        <dd><code>docs/design-system/patterns/{{page}}.md</code></dd>
+      </dl>
+      {{#if dialog}}
+        <p class="l5r4-design-gallery-note">{{localize "l5r4.apps.designGallery.notes.dialogPattern"}}</p>
+        <button type="button" data-action="open-sample-dialog">{{localize "l5r4.apps.designGallery.patterns.openDialog"}}</button>
+      {{/if}}
+      <div class="l5r4-design-gallery-row">
+        {{#each samples}}
+          {{> "systems/l5r4-enhanced/templates/apps/design-gallery/_partials/_sample.hbs"}}
+        {{/each}}
+      </div>
+    </article>
+  {{/each}}
+</section>

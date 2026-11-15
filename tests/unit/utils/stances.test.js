@@ -2,7 +2,8 @@ import { describe, expect, it } from "vitest";
 import { STANCE_IDS, activeStance, stanceConflicts } from "../../../module/utils/stances.js";
 
 describe("STANCE_IDS", () => {
-  it("is the five stances of p.84", () => {
+  // game-rules/36_stances.md, p.84
+  it("should be the five stances", () => {
     expect([...STANCE_IDS].sort()).toEqual([
       "attackStance",
       "centerStance",
@@ -14,27 +15,31 @@ describe("STANCE_IDS", () => {
 });
 
 describe("activeStance", () => {
-  it("finds the stance among other statuses", () => {
+  it("should find the stance among other statuses", () => {
     expect(activeStance(new Set(["prone", "defenseStance"]))).toBe("defenseStance");
   });
 
-  it("is empty with no stance", () => {
+  it("should be empty with no stance", () => {
     expect(activeStance(["prone"])).toBe("");
   });
 });
 
 describe("stanceConflicts", () => {
-  it("Dazed allows only Defense and Full Defense (p.89)", () => {
+  // game-rules/41_conditional_effects.md, p.89
+  it("should allow only Defense and Full Defense while Dazed", () => {
     expect(stanceConflicts("attackStance", ["dazed"])).toEqual(["dazed"]);
     expect(stanceConflicts("fullDefenseStance", ["dazed"])).toEqual([]);
   });
 
-  it("Prone allows only Attack and Defense (p.89)", () => {
+  // game-rules/41_conditional_effects.md, p.89
+  it("should allow only Attack and Defense while Prone", () => {
     expect(stanceConflicts("centerStance", ["prone"])).toEqual(["prone"]);
     expect(stanceConflicts("attackStance", ["prone"])).toEqual([]);
   });
 
-  it("Mounted and Fatigued rule out Full Attack (pp.84, 89)", () => {
+  // game-rules/36_stances.md, p.84
+  // game-rules/41_conditional_effects.md, p.89
+  it("should rule out Full Attack while Mounted or Fatigued", () => {
     expect(stanceConflicts("fullAttackStance", ["mounted", "fatigued", "blinded"])).toEqual([
       "mounted",
       "fatigued"

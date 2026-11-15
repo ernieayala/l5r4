@@ -21,12 +21,12 @@ import { SYS_ID } from "../../../module/config/constants.js";
  */
 export function registerSpellCastRollTests(quench) {
   quench.registerBatch(
-    `${SYS_ID}.services.rolls.spell`,
+    `${SYS_ID}.services.spell-rolls`,
     context => {
       const { describe, it, assert } = context;
 
-      describe("Spell Casting Formula", () => {
-        it("should calculate dice pool as (Ring + School Rank)k(Ring)", () => {
+      describe("Spell Casting formula", () => {
+        it("should roll Ring + School Rank and keep Ring", () => {
           const ringValue = 3; // Fire Ring
           const schoolRank = 2; // Shugenja Rank 2
           const rolled = ringValue + schoolRank;
@@ -49,7 +49,7 @@ export function registerSpellCastRollTests(quench) {
         });
       });
 
-      describe("Target Number (TN) Calculation", () => {
+      describe("TN calculation", () => {
         it("should calculate TN for Mastery 1 spell", () => {
           const masteryLevel = 1;
           const tn = 5 + 5 * masteryLevel;
@@ -124,7 +124,7 @@ export function registerSpellCastRollTests(quench) {
         });
       });
 
-      describe("Ring Types for Spell Casting", () => {
+      describe("Ring types for Spell Casting", () => {
         it("should calculate Fire spells with Fire Ring", () => {
           const fireRing = 4;
           const schoolRank = 2;
@@ -176,7 +176,7 @@ export function registerSpellCastRollTests(quench) {
         });
       });
 
-      describe("Raise Mechanics for Spell Casting", () => {
+      describe("Raise mechanics for Spell Casting", () => {
         it("should increase spell TN by 5 per raise", () => {
           const baseTN = 15; // Mastery 2
           const raises = 2;
@@ -213,6 +213,6 @@ export function registerSpellCastRollTests(quench) {
         });
       });
     },
-    { displayName: "L5R4: Spell Casting Service Tests" }
+    { displayName: "L5R4: Spell Casting Rolls" }
   );
 }

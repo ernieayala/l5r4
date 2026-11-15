@@ -30,12 +30,12 @@ const declaredSubtypes = () =>
     Object.keys(types).map(type => [documentName, type])
   );
 
-describe("system.json for Foundry v14", () => {
-  it("declares itself a system", () => {
+describe("The system.json manifest for Foundry v14", () => {
+  it("should declare itself a system", () => {
     expect(manifest.type).toBe("system");
   });
 
-  it("requires Foundry 14.370 and stops at 14", () => {
+  it("should require Foundry 14.370 and stop at 14", () => {
     expect(manifest.compatibility).toEqual({
       minimum: "14.370",
       verified: "14.370",
@@ -43,24 +43,24 @@ describe("system.json for Foundry v14", () => {
     });
   });
 
-  it("loads only the stylesheet that build:css writes, in the system cascade layer", () => {
+  it("should load only the stylesheet that build:css writes, in the system cascade layer", () => {
     const output = pkg.scripts["build:css"].split(/\s+/).at(-1);
     expect(manifest.styles).toEqual([{ src: output, layer: "system" }]);
   });
 
-  it("points every language at a JSON file that parses", async () => {
+  it("should point every language at a JSON file that parses", async () => {
     for (const { path } of manifest.languages) {
       await expect(access(new URL(path, root))).resolves.toBeUndefined();
       await expect(readJson(path)).resolves.toBeTypeOf("object");
     }
   });
 
-  it("recommends the modules the animations need, Sequencer and JB2A", () => {
+  it("should recommend the modules the animations need, Sequencer and JB2A", () => {
     const recommended = manifest.relationships.recommends.map(({ id, type }) => `${type}:${id}`);
     expect(recommended).toEqual(["module:sequencer", "module:JB2A_DnD5e"]);
   });
 
-  it("gives every declared subtype a display name in lang/en.json", () => {
+  it("should give every declared subtype a display name in lang/en.json", () => {
     for (const [documentName, type] of declaredSubtypes()) {
       const key = `TYPES.${documentName}.${type}`;
       expect(lookup(lang, key), key).toBeTypeOf("string");
@@ -68,14 +68,14 @@ describe("system.json for Foundry v14", () => {
   });
 });
 
-describe("system.json and the registered data models", () => {
-  it("gives every declared subtype a data model", () => {
+describe("The system.json manifest and the registered data models", () => {
+  it("should give every declared subtype a data model", () => {
     for (const [documentName, type] of declaredSubtypes()) {
       expect(DATA_MODELS[documentName]?.[type], `${documentName}.${type}`).toBeTypeOf("function");
     }
   });
 
-  it("declares every registered data model in documentTypes", () => {
+  it("should declare every registered data model in documentTypes", () => {
     for (const [documentName, models] of Object.entries(DATA_MODELS)) {
       for (const type of Object.keys(models)) {
         expect(
@@ -86,7 +86,7 @@ describe("system.json and the registered data models", () => {
     }
   });
 
-  it("gives core's base ActiveEffect type a model and leaves it out of documentTypes", () => {
+  it("should give core's base ActiveEffect type a model and leave it out of documentTypes", () => {
     expect(CORE_TYPE_DATA_MODELS.ActiveEffect?.base).toBeTypeOf("function");
     for (const [documentName, models] of Object.entries(CORE_TYPE_DATA_MODELS)) {
       for (const type of Object.keys(models)) {
@@ -98,7 +98,7 @@ describe("system.json and the registered data models", () => {
     }
   });
 
-  it("ships no template.json, whose subtypes the data models replace", async () => {
+  it("should ship no template.json, whose subtypes the data models replace", async () => {
     await expect(access(new URL("template.json", root))).rejects.toThrow();
   });
 });

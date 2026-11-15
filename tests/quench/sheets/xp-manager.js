@@ -23,15 +23,15 @@ import { createTestPC, createTestNPC } from "../../fixtures/actor-fixtures.js";
  */
 export function registerXpManagerTests(quench) {
   quench.registerBatch(
-    `${SYS_ID}.apps.xp-manager`,
+    `${SYS_ID}.sheets.xp-manager`,
     context => {
       const { describe, it, assert, beforeEach, afterEach } = context;
 
-      describe("XP Manager Dialog Rendering", () => {
+      describe("XP manager dialog rendering", () => {
         let actor, dialog;
 
         beforeEach(async () => {
-          actor = await createTestPC({ name: "XP Manager Test" });
+          actor = await createTestPC({ name: "XP manager: test PC" });
         });
 
         afterEach(async () => {
@@ -76,18 +76,17 @@ export function registerXpManagerTests(quench) {
           await new Promise(resolve => setTimeout(resolve, 100));
 
           const element = dialog.element;
-          const _xpElements = element.querySelectorAll("[data-xp], .xp-section");
 
           // Dialog should have XP-related content
           assert.exists(element, "XP management interface exists");
         });
       });
 
-      describe("XP Manager Data Display", () => {
+      describe("XP manager data display", () => {
         let actor, dialog;
 
         beforeEach(async () => {
-          actor = await createTestPC({ name: "XP Display Test" });
+          actor = await createTestPC({ name: "XP manager: display test" });
           dialog = new XpManagerApplication(actor);
           await dialog.render(true);
           await new Promise(resolve => setTimeout(resolve, 100));
@@ -133,11 +132,11 @@ export function registerXpManagerTests(quench) {
         });
       });
 
-      describe("XP Manager Calculations", () => {
+      describe("XP manager calculations", () => {
         let actor, dialog;
 
         beforeEach(async () => {
-          actor = await createTestPC({ name: "XP Calc Test" });
+          actor = await createTestPC({ name: "XP manager: calculation test" });
 
           // Add some manual XP (use delta not amount, note not reason)
           await actor.update({
@@ -197,12 +196,12 @@ export function registerXpManagerTests(quench) {
         });
       });
 
-      describe("XP Manager with Spent XP", () => {
+      describe("XP manager with spent XP", () => {
         let actor, dialog;
 
         beforeEach(async () => {
           actor = await createTestPC({
-            name: "Spent XP Test",
+            name: "XP manager: spent XP test",
             system: {
               // Set one trait above baseline to generate XP cost
               // Stamina 3 (baseline 2 → 3) costs 12 XP per L5R4 rules (4 × 3)
@@ -271,11 +270,11 @@ export function registerXpManagerTests(quench) {
         });
       });
 
-      describe("XP Manager Dialog Interaction", () => {
+      describe("XP manager dialog interaction", () => {
         let actor, dialog;
 
         beforeEach(async () => {
-          actor = await createTestPC({ name: "Interaction Test" });
+          actor = await createTestPC({ name: "XP manager: interaction test" });
           dialog = new XpManagerApplication(actor);
           await dialog.render(true);
           await new Promise(resolve => setTimeout(resolve, 100));
@@ -316,7 +315,7 @@ export function registerXpManagerTests(quench) {
         });
       });
 
-      describe("XP Manager for PC Only", () => {
+      describe("XP manager for PCs only", () => {
         let npc;
 
         afterEach(async () => {
@@ -326,7 +325,7 @@ export function registerXpManagerTests(quench) {
         });
 
         it("should not have XP flags for NPCs", async () => {
-          npc = await createTestNPC({ name: "Test NPC" });
+          npc = await createTestNPC({ name: "XP manager: test NPC" });
 
           const flags = npc.flags[SYS_ID];
 
@@ -337,18 +336,18 @@ export function registerXpManagerTests(quench) {
         });
 
         it("should not have _xp breakdown for NPCs", async () => {
-          npc = await createTestNPC({ name: "Test NPC" });
+          npc = await createTestNPC({ name: "XP manager: test NPC" });
 
           assert.isUndefined(npc.system._xp, "NPC has no XP breakdown");
         });
       });
 
-      describe("XP Manager Insight Display", () => {
+      describe("XP manager Insight display", () => {
         let actor, dialog;
 
         beforeEach(async () => {
           actor = await createTestPC({
-            name: "Insight Test",
+            name: "XP manager: Insight test",
             system: {
               traits: {
                 sta: 3,
@@ -407,6 +406,6 @@ export function registerXpManagerTests(quench) {
         });
       });
     },
-    { displayName: "L5R4: XP Manager Tests" }
+    { displayName: "L5R4: XP manager" }
   );
 }

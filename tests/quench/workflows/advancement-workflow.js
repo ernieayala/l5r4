@@ -17,16 +17,16 @@ import { createSkillData } from "../../fixtures/item-fixtures.js";
  */
 export function registerAdvancementWorkflowTests(quench) {
   quench.registerBatch(
-    `${SYS_ID}.workflows.advancement`,
+    `${SYS_ID}.workflows.advancement-workflow`,
     context => {
       const { describe, it, assert, beforeEach, afterEach } = context;
 
-      describe("Advancement Workflow: Skill Progression", () => {
+      describe("Skill progression", () => {
         let character;
 
         beforeEach(async () => {
           character = await createTestPC({
-            name: "Advancing Character",
+            name: "Advancement workflow: Advancing Character",
             system: {
               rings: { earth: 2, air: 2, fire: 2, water: 2, void: { rank: 2 } },
               traits: { agi: 3, per: 3 }
@@ -101,12 +101,12 @@ export function registerAdvancementWorkflowTests(quench) {
         });
       });
 
-      describe("Advancement Workflow: Ring Advancement", () => {
+      describe("Ring advancement", () => {
         let character;
 
         beforeEach(async () => {
           character = await createTestPC({
-            name: "Ring Advancement Test",
+            name: "Advancement workflow: Ring Advancement Test",
             system: {
               traits: { sta: 3, wil: 3, ref: 3, awa: 3 }
             }
@@ -156,7 +156,6 @@ export function registerAdvancementWorkflowTests(quench) {
         it("should recalculate wound capacity when Earth Ring changes", async () => {
           // ARRANGE
           const initialWoundCapacity = character.system.woundLevels.healthy.value;
-          const initialEarth = character.system.rings.earth;
 
           // ACT - Advance Earth Ring by advancing both traits
           await character.update({
@@ -177,12 +176,12 @@ export function registerAdvancementWorkflowTests(quench) {
         });
       });
 
-      describe("Advancement Workflow: Insight Rank Progression", () => {
+      describe("Insight Rank progression", () => {
         let character;
 
         beforeEach(async () => {
           character = await createTestPC({
-            name: "Insight Progression Test",
+            name: "Advancement workflow: Insight Progression Test",
             system: {
               rings: { earth: 2, air: 2, fire: 2, water: 2, void: { rank: 2 } }
             }
@@ -198,7 +197,6 @@ export function registerAdvancementWorkflowTests(quench) {
         it("should progress through insight ranks", async () => {
           // ARRANGE
           const initialRank = character.system.insight.rank;
-          const initialPoints = character.system.insight.points;
 
           assert.equal(initialRank, 1, "Starting at Insight Rank 1");
 
@@ -224,12 +222,12 @@ export function registerAdvancementWorkflowTests(quench) {
         });
       });
 
-      describe("Advancement Workflow: Complete Progression", () => {
+      describe("Complete progression", () => {
         let character;
 
         beforeEach(async () => {
           character = await createTestPC({
-            name: "Complete Progression Test",
+            name: "Advancement workflow: Complete Progression Test",
             system: {
               rings: { earth: 2, air: 2, fire: 2, water: 2, void: { rank: 2 } },
               traits: { agi: 2, per: 2, sta: 2, wil: 2 }
@@ -280,12 +278,12 @@ export function registerAdvancementWorkflowTests(quench) {
           assert.isTrue(final.earth >= initial.earth, "Earth Ring maintained or increased");
           assert.isTrue(final.wounds >= initial.wounds, "Wound capacity maintained or increased");
 
-          // Verify all systems updated consistently
+          // Insight Rank and Wounds are derived again after the update
           assert.exists(final.insightRank, "Insight rank calculated");
           assert.exists(final.wounds, "Wounds recalculated");
         });
       });
     },
-    { displayName: "L5R4: Advancement Workflow Tests" }
+    { displayName: "L5R4: Advancement workflow" }
   );
 }

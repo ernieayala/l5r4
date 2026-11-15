@@ -19,22 +19,22 @@ const sources = readdirSync(SOURCES)
   .map(name => JSON.parse(readFileSync(path.join(SOURCES, name), "utf8")));
 const manifest = JSON.parse(readFileSync("system.json", "utf8"));
 
-describe.each(sources.map(source => [source.name, source]))("pack %s", (_name, source) => {
+describe.each(sources.map(source => [source.name, source]))("Pack %s", (_name, source) => {
   const { documents } = buildPack(source, sources);
   const entries = documents.filter(doc => !doc._key.startsWith("!folders!"));
 
-  it("has no problems", () => {
+  it("should have no problems", () => {
     expect(sourceProblems(source)).toEqual([]);
   });
 
-  it("gives the same ids on a second build, and no id twice", () => {
+  it("should give the same ids on a second build, and no id twice", () => {
     expect(buildPack(source, sources).documents.map(doc => doc._id)).toEqual(
       documents.map(doc => doc._id)
     );
     expect(new Set(documents.map(doc => doc._id)).size).toBe(documents.length);
   });
 
-  it("leaves every flavor field empty", () => {
+  it("should leave every flavor field empty", () => {
     for (const doc of entries) {
       for (const field of FLAVOR_FIELDS) {
         expect(doc.system[field] ?? "", `${doc.name}: ${field}`).toBe("");
@@ -42,7 +42,7 @@ describe.each(sources.map(source => [source.name, source]))("pack %s", (_name, s
     }
   });
 
-  it(`keeps each mechanical field to ${SUMMARY_MAX} characters, empty in a full-coverage entry`, () => {
+  it("should keep each mechanical field to the summary limit, empty in a full-coverage entry", () => {
     for (const entry of source.entries) {
       for (const field of MECHANICAL_FIELDS) {
         const text = entry.system?.[field] ?? "";
@@ -54,7 +54,7 @@ describe.each(sources.map(source => [source.name, source]))("pack %s", (_name, s
     }
   });
 
-  it("gives every Note rule the item's name and citation as its text", () => {
+  it("should give every Note rule the item's name and citation as its text", () => {
     for (const entry of source.entries) {
       for (const rule of (entry.system?.rules ?? []).filter(r => r.key === "Note")) {
         expect(rule.text).toBe(noteText(entry.name, entry.page));
@@ -62,19 +62,19 @@ describe.each(sources.map(source => [source.name, source]))("pack %s", (_name, s
     }
   });
 
-  it("cites the Core Rulebook on a page in the pack's range", () => {
+  it("should cite the Core Rulebook on a page in the pack's range", () => {
     for (const doc of entries) {
       expect(doc.system.source.book).toBe("core");
       expect(pageInRanges(source.pages, doc.system.source.page), doc.name).toBe(true);
     }
   });
 
-  it("repeats no name", () => {
+  it("should repeat no name", () => {
     const names = source.entries.map(entry => entry.name);
     expect(new Set(names).size).toBe(names.length);
   });
 
-  it("is declared in system.json with its label, path, and type", () => {
+  it("should be declared in system.json with its label, path, and type", () => {
     const pack = manifest.packs.find(p => p.name === source.name);
     expect(pack).toMatchObject({
       label: source.label,
@@ -87,16 +87,16 @@ describe.each(sources.map(source => [source.name, source]))("pack %s", (_name, s
   });
 });
 
-describe("pack sources", () => {
-  it("cover every pack system.json declares", () => {
+describe("Pack sources", () => {
+  it("should cover every pack system.json declares", () => {
     expect(manifest.packs.map(p => p.name).sort()).toEqual(sources.map(s => s.name).sort());
   });
 
-  it("name only entries that exist when they reference one", () => {
+  it("should name only entries that exist when they reference one", () => {
     expect(referenceProblems(sources)).toEqual([]);
   });
 
-  it("turn a reference into the UUID of the entry it names, and catch one naming no entry", () => {
+  it("should turn a reference into the UUID of the entry it names, and catch one naming no entry", () => {
     const skills = {
       name: "skills",
       label: "Skills",
@@ -136,7 +136,7 @@ describe("pack sources", () => {
     ]);
   });
 
-  it("embed a creature's Skills as copies of the skills pack and its abilities as an effect with rules", () => {
+  it("should embed a creature's Skills as skills pack copies and its abilities as an effect with rules", () => {
     const skills = {
       name: "skills",
       label: "Skills",
@@ -193,7 +193,7 @@ describe("pack sources", () => {
     ]);
   });
 
-  it("catch a broken entry", () => {
+  it("should catch a broken entry", () => {
     const broken = {
       name: "test",
       label: "Test",

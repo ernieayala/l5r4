@@ -18,7 +18,7 @@ import {
   waitFor
 } from "./helpers.js";
 
-/** Every d10 shows 9 (client/dice/terms/dice.mjs:412), so no die explodes. */
+/** Every d10 shows 9 [src: client/dice/terms/dice.mjs:412], so no die explodes. */
 const NINES = () => 0.15;
 
 /**
@@ -42,7 +42,7 @@ function answerConfirm(action) {
  * export.
  * @param {object} quench  The Quench API object.
  */
-export function registerAuthoringBatch(quench) {
+export function registerAuthoringTests(quench) {
   quench.registerBatch(
     `${SYS_ID}.authoring`,
     context => {
@@ -131,18 +131,21 @@ export function registerAuthoringBatch(quench) {
       /** A PC with the School dropped on its sheet, its first grants done. */
       const schooled = async () => {
         const set = await schoolSet();
-        const actor = track(await createTestPC({ name: "Quench Student" }));
+        const actor = track(await createTestPC({ name: "Character options: student" }));
         await addItem(actor, set.school.toObject());
         await waitFor(() => named(actor, "Quench Technique 1") && named(actor, "Meditation"));
         return { actor, ...set };
       };
 
-      describe("School grants (pp.102, 104; decisions 2, 7)", function () {
+      // roadmap/STAGE-11 decisions 2 and 7
+      // game-rules/48_character_creation_expanded.md, p.102
+      // game-rules/49_improving_your_character.md, p.104
+      describe("School grants", function () {
         // Grants run in the background, one after another; a School's take a few round trips
         this.timeout(15_000);
 
         it(
-          "dropping a School grants its Skills free and its Rank 1 Technique, with its Trait bonus",
+          "should grant a dropped School's Skills free and its Rank 1 Technique, with its Trait bonus",
           clean(async () => {
             const { actor } = await schooled();
             const kenjutsu = named(actor, "Kenjutsu");
@@ -158,7 +161,7 @@ export function registerAuthoringBatch(quench) {
         );
 
         it(
-          "a rise in School Rank grants the next Technique and says so",
+          "should grant the next Technique on a rise in School Rank and say so",
           clean(async () => {
             const { actor } = await schooled();
             await actor.update({ "system.insight.autoCalculate": false, "system.insight.rank": 2 });
@@ -175,7 +178,7 @@ export function registerAuthoringBatch(quench) {
         );
 
         it(
-          "removing the School takes its grants back and keeps a Skill with bought ranks",
+          "should take a removed School's grants back and keep a Skill with bought ranks",
           clean(async () => {
             const { actor } = await schooled();
             await named(actor, "Kenjutsu").update({ "system.rank": 3 });
@@ -193,7 +196,7 @@ export function registerAuthoringBatch(quench) {
         );
 
         it(
-          "a granted item the owner removes is not granted again",
+          "should not grant again a granted item the owner removes",
           clean(async () => {
             const { actor } = await schooled();
             await named(actor, "Kenjutsu").delete();
@@ -210,9 +213,9 @@ export function registerAuthoringBatch(quench) {
 
       describe("Purchase: prerequisites and choices", () => {
         it(
-          "a GM is asked to add an item whose prerequisites are not met",
+          "should ask a GM to add an item whose prerequisites are not met",
           clean(async () => {
-            const actor = track(await createTestPC({ name: "Quench Buyer" }));
+            const actor = track(await createTestPC({ name: "Character options: buyer" }));
             const data = {
               name: "Quench Kata",
               type: "kata",
@@ -242,9 +245,9 @@ export function registerAuthoringBatch(quench) {
         );
 
         it(
-          "a choice made at purchase reaches the item's other rules",
+          "should carry a choice made at purchase to the item's other rules",
           clean(async () => {
-            const actor = track(await createTestPC({ name: "Quench Chooser" }));
+            const actor = track(await createTestPC({ name: "Character options: chooser" }));
             await actor.createEmbeddedDocuments("Item", [createSkillData("Kenjutsu", 2)]);
             const answered = answerCheckDialog({ selection: "kenjutsu" });
             const data = await preparePurchase(actor, {
@@ -274,10 +277,10 @@ export function registerAuthoringBatch(quench) {
 
       describe("Rules editor", () => {
         it(
-          "a Technique's rule authored in the editor reaches its owner's roll",
+          "should carry a Technique's rule authored in the editor to its owner's roll",
           clean(async function () {
             this.timeout(15_000);
-            const actor = track(await createTestPC({ name: "Quench Author" }));
+            const actor = track(await createTestPC({ name: "Character options: author" }));
             await actor.createEmbeddedDocuments("Item", [createSkillData("Kenjutsu", 2)]);
             const [technique] = await actor.createEmbeddedDocuments("Item", [
               { name: "Quench Way of the Blade", type: "technique" }
@@ -337,10 +340,10 @@ export function registerAuthoringBatch(quench) {
         );
 
         it(
-          "a choice named in a field with fixed values shows no error and survives a save",
+          "should show no error for a choice in a field with fixed values and keep it through a save",
           clean(async function () {
             this.timeout(15_000);
-            const actor = track(await createTestPC({ name: "Quench Chooser" }));
+            const actor = track(await createTestPC({ name: "Character options: chooser" }));
             const [weakness] = await actor.createEmbeddedDocuments("Item", [
               {
                 name: "Quench Weakness",
@@ -372,10 +375,10 @@ export function registerAuthoringBatch(quench) {
         );
 
         it(
-          "the Active Effect sheet has a Rules tab that saves system.rules",
+          "should give the Active Effect sheet a Rules tab that saves system.rules",
           clean(async function () {
             this.timeout(15_000);
-            const actor = track(await createTestPC({ name: "Quench Effect Author" }));
+            const actor = track(await createTestPC({ name: "Character options: effect author" }));
             const [effect] = await actor.createEmbeddedDocuments("ActiveEffect", [
               { name: "Quench Blessing" }
             ]);
@@ -401,12 +404,15 @@ export function registerAuthoringBatch(quench) {
 
       describe("New rule keys in rolls and XP", () => {
         it(
-          "OpponentModifier, UnskilledAs, RaiseRule, and ActionCost reach a check",
+          "should carry OpponentModifier, UnskilledAs, RaiseRule, and ActionCost to a check",
           clean(async () => {
             const attacker = track(
-              await createTestPC({ name: "Quench Attacker", system: { traits: { agi: 3 } } })
+              await createTestPC({
+                name: "Character options: attacker",
+                system: { traits: { agi: 3 } }
+              })
             );
-            const target = track(await createTestPC({ name: "Quench Slippery" }));
+            const target = track(await createTestPC({ name: "Character options: slippery" }));
             await target.createEmbeddedDocuments("Item", [
               {
                 name: "Quench Evasive",
@@ -453,9 +459,9 @@ export function registerAuthoringBatch(quench) {
         );
 
         it(
-          "a Cost rule prices an Advantage",
+          "should price an Advantage with a Cost rule",
           clean(async () => {
-            const actor = track(await createTestPC({ name: "Quench Discount" }));
+            const actor = track(await createTestPC({ name: "Character options: discount" }));
             await actor.createEmbeddedDocuments("Item", [
               {
                 name: "Quench Allies",
@@ -469,11 +475,13 @@ export function registerAuthoringBatch(quench) {
         );
       });
 
-      describe("Ledger and Honor Roll (pp.90-92; decision 3)", () => {
+      // roadmap/STAGE-11 decision 3
+      // game-rules/43_honor.md, p.90-92
+      describe("Ledger and Honor Roll", () => {
         it(
-          "a Ledger rule sizes a change, and the ledger logs it",
+          "should size a change with a Ledger rule and log it in the ledger",
           clean(async () => {
-            const actor = track(await createTestPC({ name: "Quench Sworn" }));
+            const actor = track(await createTestPC({ name: "Character options: sworn" }));
             await actor.createEmbeddedDocuments("Item", [
               {
                 name: "Quench Oath",
@@ -498,7 +506,7 @@ export function registerAuthoringBatch(quench) {
         );
 
         it(
-          "a failed roll offers the Honor Roll once a session, and failing it costs a Rank",
+          "should offer the Honor Roll on a failed roll once a session, and cost a Rank when it fails",
           clean(async function () {
             this.timeout(15_000);
             const enabled = game.settings.get(SYS_ID, "honorRoll");
@@ -507,7 +515,10 @@ export function registerAuthoringBatch(quench) {
             CONFIG.Dice.randomUniform = NINES;
             try {
               const actor = track(
-                await createTestPC({ name: "Quench Honorable", system: { honor: { rank: 3 } } })
+                await createTestPC({
+                  name: "Character options: honorable",
+                  system: { honor: { rank: 3 } }
+                })
               );
               const failed = await rollCheck({
                 actor,
@@ -539,14 +550,14 @@ export function registerAuthoringBatch(quench) {
 
       describe("Honor Roll without Honor", () => {
         it(
-          "a character with no Honor Rank has no Honor Roll to make",
+          "should give a character with no Honor Rank no Honor Roll to make",
           clean(async () => {
             const enabled = game.settings.get(SYS_ID, "honorRoll");
             await game.settings.set(SYS_ID, "honorRoll", true);
             try {
               const actor = track(
                 await createTestPC({
-                  name: "Quench Dishonored",
+                  name: "Character options: dishonored",
                   system: { honor: { rank: 0, points: 0 } }
                 })
               );
@@ -573,11 +584,13 @@ export function registerAuthoringBatch(quench) {
         );
       });
 
-      describe("Shadowlands Taint (pp.277-279; decision 5)", () => {
+      // roadmap/STAGE-11 decision 5
+      // game-rules/89_shadowlands_taint.md, p.277-279
+      describe("Shadowlands Taint", () => {
         it(
-          "Level 3 and 4 penalize social Skills, and Level 4 costs a Void Point",
+          "should penalize social Skills at Level 3 and 4, and cost a Void Point at Level 4",
           clean(async () => {
-            const actor = track(await createTestPC({ name: "Quench Tainted" }));
+            const actor = track(await createTestPC({ name: "Character options: tainted" }));
             await actor.createEmbeddedDocuments("Item", [
               createSkillData("Courtier", 1, "awa", { system: { social: true } }),
               createSkillData("Hunting", 1, "per", { system: { type: "low" } })
@@ -592,10 +605,13 @@ export function registerAuthoringBatch(quench) {
         );
 
         it(
-          "Embracing the Taint gives +1k1 on a physical roll for a point of Taint",
+          "should give +1k1 on a physical roll for a point of Taint when Embracing the Taint",
           clean(async () => {
             const actor = track(
-              await createTestPC({ name: "Quench Embrace", system: { shadowTaint: { rank: 1 } } })
+              await createTestPC({
+                name: "Character options: embrace",
+                system: { shadowTaint: { rank: 1 } }
+              })
             );
             const answered = answerCheckDialog({ embraceTaint: true });
             const message = await rollCheck({
@@ -613,11 +629,14 @@ export function registerAuthoringBatch(quench) {
         );
       });
 
-      describe("Kata and kiho activation (pp.259, 261; decision 8)", () => {
+      // roadmap/STAGE-11 decision 8
+      // game-rules/86_kata.md, p.259
+      // game-rules/87_kiho.md, p.261
+      describe("Kata and kiho activation", () => {
         it(
-          "a kata's rules apply only while active, one kata at a time",
+          "should apply a kata's rules only while active, one kata at a time",
           clean(async () => {
-            const actor = track(await createTestPC({ name: "Quench Stylist" }));
+            const actor = track(await createTestPC({ name: "Character options: stylist" }));
             const kata = (name, roll) => ({
               name,
               type: "kata",
@@ -643,9 +662,9 @@ export function registerAuthoringBatch(quench) {
         );
 
         it(
-          "one kiho of each type is active at a time, but any number of Martial kiho",
+          "should keep one kiho of each type active at a time, but any number of Martial kiho",
           clean(async () => {
-            const actor = track(await createTestPC({ name: "Quench Monk" }));
+            const actor = track(await createTestPC({ name: "Character options: monk" }));
             const kiho = (name, type, roll) => ({
               name,
               type: "kiho",
@@ -677,9 +696,10 @@ export function registerAuthoringBatch(quench) {
         );
       });
 
-      describe("Folder export and import (decision 4)", () => {
+      // roadmap/STAGE-11 decision 4
+      describe("Folder export and import", () => {
         it(
-          "exports a folder's items and imports them with their grants pointing at the copies",
+          "should export a folder's items and import them with their grants pointing at the copies",
           clean(async () => {
             const folder = await foundry.documents.Folder.implementation.create({
               name: "Quench Homebrew",

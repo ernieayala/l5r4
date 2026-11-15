@@ -26,12 +26,12 @@ export function registerXpTrackingEdgeCaseTests(quench) {
     context => {
       const { describe, it, assert, beforeEach, afterEach } = context;
 
-      describe("Free Bonus Consumption at Rank 3", () => {
+      describe("Free bonus consumption at rank 3", () => {
         let actor;
 
         beforeEach(async () => {
           actor = await createTestPC({
-            name: "Free Bonus Test",
+            name: "XP tracking edge cases: free bonus",
             system: {
               traits: { sta: 2, wil: 2 },
               rings: { earth: 2 }
@@ -48,8 +48,6 @@ export function registerXpTrackingEdgeCaseTests(quench) {
 
         it("should consume free bonus when raising trait to rank 3", async () => {
           // ARRANGE - Actor starts with traits at rank 2
-          const xpBefore = actor.getFlag(SYS_ID, "xpSpent") || [];
-          const xpCountBefore = xpBefore.length;
 
           // ACT - Raise Stamina to 3 (may use free bonus from family/school)
           await actor.update({ "system.traits.sta": 3 });
@@ -67,7 +65,6 @@ export function registerXpTrackingEdgeCaseTests(quench) {
 
         it("should handle multiple traits at rank 3 without double-consuming bonus", async () => {
           // ARRANGE - Actor starts with traits at rank 2
-          const xpBefore = actor.getFlag(SYS_ID, "xpSpent") || [];
 
           // ACT - Raise both traits to 3
           await actor.update({
@@ -90,9 +87,6 @@ export function registerXpTrackingEdgeCaseTests(quench) {
           // ARRANGE - Raise Stamina to 3 first (consumes one free bonus)
           await actor.update({ "system.traits.sta": 3 });
 
-          const xpBefore = actor.getFlag(SYS_ID, "xpSpent") || [];
-          const xpCountBefore = xpBefore.length;
-
           // ACT - Raise Willpower to 3 (second trait to rank 3)
           await actor.update({ "system.traits.wil": 3 });
 
@@ -110,7 +104,7 @@ export function registerXpTrackingEdgeCaseTests(quench) {
         it("should handle free bonus with rank 3+ starting trait", async () => {
           // ARRANGE - Create actor with trait already at 3
           const highActor = await createTestPC({
-            name: "High Trait Test",
+            name: "XP tracking edge cases: high Trait",
             system: {
               traits: { sta: 3, wil: 2 },
               rings: { earth: 2 }
@@ -132,12 +126,12 @@ export function registerXpTrackingEdgeCaseTests(quench) {
         });
       });
 
-      describe("Rapid Trait Increases Race Condition", () => {
+      describe("Rapid Trait increases race condition", () => {
         let actor;
 
         beforeEach(async () => {
           actor = await createTestPC({
-            name: "Race Condition Test",
+            name: "XP tracking edge cases: race condition",
             system: {
               traits: { sta: 2, wil: 2, ref: 2, awa: 2 },
               rings: { earth: 2, air: 2 }
@@ -153,9 +147,6 @@ export function registerXpTrackingEdgeCaseTests(quench) {
         });
 
         it("should handle simultaneous trait increases with Promise.all", async () => {
-          // ARRANGE - Get initial XP state
-          const xpBefore = actor.getFlag(SYS_ID, "xpSpent") || [];
-
           // ACT - Increase multiple traits simultaneously
           const updatePromises = [
             actor.update({ "system.traits.sta": 3 }),
@@ -179,9 +170,6 @@ export function registerXpTrackingEdgeCaseTests(quench) {
         });
 
         it("should handle rapid ring increases without corruption", async () => {
-          // ARRANGE
-          const xpBefore = actor.getFlag(SYS_ID, "xpSpent") || [];
-
           // ACT - Increase both Earth traits simultaneously
           const updatePromises = [
             actor.update({ "system.traits.sta": 3 }),
@@ -233,11 +221,11 @@ export function registerXpTrackingEdgeCaseTests(quench) {
         });
       });
 
-      describe("XP Tracking Without Actor (Compendium)", () => {
+      describe("XP tracking without an actor", () => {
         it("should handle skill in compendium without actor", async () => {
           // ARRANGE - Create skill without parent actor
           const compendiumSkill = await Item.create({
-            name: "Compendium Skill",
+            name: "XP tracking edge cases: compendium skill",
             type: "skill",
             system: {
               rank: 3,
@@ -260,7 +248,7 @@ export function registerXpTrackingEdgeCaseTests(quench) {
         it("should handle item transfer from compendium to actor", async () => {
           // ARRANGE - Create compendium item
           const compendiumItem = await Item.create({
-            name: "Compendium Item",
+            name: "XP tracking edge cases: compendium item",
             type: "skill",
             system: {
               rank: 2,
@@ -269,7 +257,7 @@ export function registerXpTrackingEdgeCaseTests(quench) {
           });
 
           const actor = await createTestPC({
-            name: "Transfer Test",
+            name: "XP tracking edge cases: transfer",
             system: { traits: { int: 3 } }
           });
 
@@ -289,12 +277,12 @@ export function registerXpTrackingEdgeCaseTests(quench) {
         });
       });
 
-      describe("Negative XP Costs", () => {
+      describe("Negative XP costs", () => {
         let actor;
 
         beforeEach(async () => {
           actor = await createTestPC({
-            name: "Negative XP Test",
+            name: "XP tracking edge cases: negative XP",
             system: {
               traits: { sta: 2 },
               rings: { earth: 2 }
@@ -379,12 +367,12 @@ export function registerXpTrackingEdgeCaseTests(quench) {
         });
       });
 
-      describe("Free Rank Change Deletes XP History", () => {
+      describe("Free rank changes and XP history", () => {
         let actor;
 
         beforeEach(async () => {
           actor = await createTestPC({
-            name: "XP History Test",
+            name: "XP tracking edge cases: XP history",
             system: {
               traits: { sta: 3 },
               rings: { earth: 2 }
@@ -437,9 +425,6 @@ export function registerXpTrackingEdgeCaseTests(quench) {
         });
 
         it("should handle XP refund without corrupting history", async () => {
-          // ARRANGE - Get initial history
-          const historyBefore = actor.getFlag(SYS_ID, "xpSpent");
-
           // ACT - Decrease trait (refund XP)
           await actor.update({ "system.traits.sta": 2 });
 
@@ -476,6 +461,6 @@ export function registerXpTrackingEdgeCaseTests(quench) {
         });
       });
     },
-    { displayName: "L5R4: XP Tracking Edge Cases" }
+    { displayName: "L5R4: XP tracking edge cases" }
   );
 }

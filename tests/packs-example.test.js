@@ -17,9 +17,10 @@ const entry = (pack, name) => {
 const referenced = uuid => uuid.match(/^@entry\[skills\/(.+)\]$/)?.[1];
 
 /**
- * Shiba Gyukaro, the character the book builds on pp.103-104, from the pack entries: the Shiba family and the
- * Shiba Bushi School give their Trait bonuses and the School its Skills at rank 1 with Meditation's Emphasis; the
- * player picks Iaijutsu as the School's Bugei or High Skill, then spends XP as the example does.
+ * Shiba Gyukaro, the character the book's character creation example builds, from the pack entries: the Shiba
+ * family and the Shiba Bushi School give their Trait bonuses and the School its Skills at rank 1 with Meditation's
+ * Emphasis; the player picks Iaijutsu as the School's Bugei or High Skill, then spends XP as the example does.
+ * game-rules/48_character_creation_expanded.md, p.103-104
  */
 function gyukaro() {
   const family = entry("families", "Shiba");
@@ -38,7 +39,8 @@ function gyukaro() {
       skillRank: r.skillRank ?? 1
     }));
   grants.push({ name: "Iaijutsu", emphasis: "", skillRank: 1 });
-  // The ranks bought on p.104: Kenjutsu to 3, Kyujutsu, Iaijutsu, and Defense to 2
+  // The ranks the example buys: Kenjutsu to 3, Kyujutsu, Iaijutsu, and Defense to 2
+  // game-rules/48_character_creation_expanded.md, p.104
   const bought = { Kenjutsu: 3, Kyujutsu: 2, Iaijutsu: 2, Defense: 2 };
   const item = (pack, name) => {
     const { type, system } = entry(pack, name);
@@ -73,14 +75,14 @@ function gyukaro() {
   };
 }
 
-describe("the book's character creation example from the pack entries (Core Rulebook pp.103-104)", () => {
-  it("gives the Shiba family's Perception and the Shiba Bushi School's Agility", () => {
+describe("Book example: character creation from the pack entries (p.103-104)", () => {
+  it("should give the Shiba family's Perception and the Shiba Bushi School's Agility", () => {
     const { traits } = gyukaro();
     expect(traits.find(t => t.key === "per").bonus).toBe(1);
     expect(traits.find(t => t.key === "agi").bonus).toBe(1);
   });
 
-  it("has 46 XP and spends all of it, priced as the example does", () => {
+  it("should have 46 XP and spend all of it, priced as the example does", () => {
     const build = gyukaro();
     const totals = xpTotals(build, xpEntries(build));
     expect(totals).toMatchObject({ total: 46, spent: 46, available: 0 });

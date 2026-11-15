@@ -20,11 +20,11 @@ import { SYS_ID } from "../../../module/config/constants.js";
  */
 export function registerTraitRollTests(quench) {
   quench.registerBatch(
-    `${SYS_ID}.services.rolls.trait`,
+    `${SYS_ID}.services.trait-rolls`,
     context => {
       const { describe, it, assert } = context;
 
-      describe("Trait Roll Formula (XkX)", () => {
+      describe("Trait Roll formula", () => {
         it("should use trait value for both rolled and kept dice", () => {
           const traitValue = 3;
           const rolled = traitValue;
@@ -35,7 +35,7 @@ export function registerTraitRollTests(quench) {
           // Formula would be 3k3
         });
 
-        it("should handle minimum trait value (2)", () => {
+        it("should handle the minimum Trait value of 2", () => {
           const traitValue = 2;
           const rolled = traitValue;
           const kept = traitValue;
@@ -45,7 +45,7 @@ export function registerTraitRollTests(quench) {
           // Formula would be 2k2
         });
 
-        it("should handle maximum trait value (10)", () => {
+        it("should handle the maximum Trait value of 10", () => {
           const traitValue = 10;
           const rolled = traitValue;
           const kept = traitValue;
@@ -144,27 +144,27 @@ export function registerTraitRollTests(quench) {
         });
       });
 
-      describe("Trait Roll Range", () => {
-        it("should handle low trait values (2-3)", () => {
+      describe("Trait Roll range", () => {
+        it("should handle low Trait values of 2 to 3", () => {
           const lowTrait = 2;
           assert.equal(lowTrait, 2, "Low trait = 2");
           // 2k2 formula
         });
 
-        it("should handle medium trait values (4-6)", () => {
+        it("should handle medium Trait values of 4 to 6", () => {
           const mediumTrait = 5;
           assert.equal(mediumTrait, 5, "Medium trait = 5");
           // 5k5 formula
         });
 
-        it("should handle high trait values (7-10)", () => {
+        it("should handle high Trait values of 7 to 10", () => {
           const highTrait = 8;
           assert.equal(highTrait, 8, "High trait = 8");
           // 8k8 formula
         });
       });
 
-      describe("Raise Mechanics for Trait Rolls", () => {
+      describe("Raise mechanics for Trait Rolls", () => {
         it("should increase effective TN by 5 per raise", () => {
           const baseTN = 15;
           const raises = 2;
@@ -215,6 +215,6 @@ export function registerTraitRollTests(quench) {
         });
       });
     },
-    { displayName: "L5R4: Trait Roll Service Tests" }
+    { displayName: "L5R4: Trait Rolls" }
   );
 }

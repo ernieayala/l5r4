@@ -1,0 +1,28 @@
+{
+  "files": {
+    "module/data/item/skill-data.js": "export default class SkillData {}\n",
+    "module/services/dice/check/roll-check.js": "",
+    "module/services/xp/calculator.js": "",
+    "module/sheets/handlers/roll-handler.js": "",
+    "module/documents/actor/calculations/fear-system.js": "",
+    "module/services/combat/grapple.js": "",
+    "module/mixins/debounced-field-mixin.js": "",
+    "module/config/constants.js": "export const SYS_ID = \"l5r4-enhanced\";\n",
+    "tools/pack-sources.mjs": "",
+    "tools/coverage/actions.mjs": "",
+    "scripts/prepare-release.js": "",
+    "templates/apps/effect-panel.hbs": "",
+    "templates/actor/_partials/_expand.hbs": "",
+    "templates/actor/_partials/_weapon-section.hbs": "",
+    "templates/item/_type-details/commonItem.hbs": "",
+    "templates/cards/commonItem.hbs": "",
+    "templates/dialogs/ledger-dialog.hbs": "",
+    "templates/dialogs/check-extras/ring.hbs": "",
+    "templates/chat/damage-result.hbs": "",
+    "scss/l5r4-enhanced.scss": "",
+    "scss/components/_effect-panel.scss": "",
+    "tests/quench/services/fear.js": "",
+    "tests/unit/utils/check.test.js": "",
+    "tests/lang.test.js": ""
+  }
+}

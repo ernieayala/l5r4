@@ -2,7 +2,7 @@ import { describe, expect, it } from "vitest";
 import { effectEnd, expiryEventKey, usesLeft } from "../../../module/utils/effect-duration.js";
 
 describe("effectEnd", () => {
-  it("counts rounds and turns left from core's remaining value", () => {
+  it("should count rounds and turns left from core's remaining value", () => {
     expect(effectEnd({ value: 3, units: "rounds", remaining: 2 })).toEqual({
       key: "l5r4.ui.effectPanel.rounds",
       data: { count: 2 }
@@ -17,14 +17,14 @@ describe("effectEnd", () => {
     ).toBe(0);
   });
 
-  it("uses core's label for world time", () => {
+  it("should use core's label for world time", () => {
     expect(effectEnd({ value: 10, units: "minutes", remaining: 4, label: "4m" })).toEqual({
       key: "l5r4.ui.effectPanel.time",
       data: { time: "4m" }
     });
   });
 
-  it("names each expiry event that ends an effect with no set length", () => {
+  it("should name each expiry event that ends an effect with no set length", () => {
     expect(effectEnd({ value: null, units: "seconds", expiry: "encounterEnd" })).toEqual({
       key: "l5r4.ui.effectPanel.until",
       data: { event: "l5r4.ui.effects.expiry.encounterEnd" }
@@ -43,7 +43,7 @@ describe("effectEnd", () => {
     }
   });
 
-  it("treats core's prepared infinite length as no set length", () => {
+  it("should treat core's prepared infinite length as no set length", () => {
     expect(
       effectEnd({ value: Infinity, units: "seconds", remaining: Infinity, expiry: null })
     ).toEqual({
@@ -55,7 +55,7 @@ describe("effectEnd", () => {
     );
   });
 
-  it("says when nothing ends an effect", () => {
+  it("should say when nothing ends an effect", () => {
     expect(effectEnd({ value: null, units: "seconds", expiry: null })).toEqual({
       key: "l5r4.ui.effectPanel.noEnd",
       data: {}
@@ -63,12 +63,12 @@ describe("effectEnd", () => {
   });
 });
 
-describe("expiryEventKey and usesLeft", () => {
-  it("prefers the system's own event label", () => {
+describe("The expiryEventKey and usesLeft helpers", () => {
+  it("should prefer the system's own event label", () => {
     expect(expiryEventKey("encounterEnd")).toBe("l5r4.ui.effects.expiry.encounterEnd");
   });
 
-  it("gives a use counter's uses left, never below 0", () => {
+  it("should give a use counter's uses left, never below 0", () => {
     expect(usesLeft(2, 1)).toEqual({ key: "l5r4.ui.effectPanel.uses", data: { left: 1, max: 2 } });
     expect(usesLeft(1, 3).data.left).toBe(0);
   });

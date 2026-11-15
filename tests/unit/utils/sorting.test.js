@@ -23,7 +23,7 @@ describe("getSortPref", () => {
     };
   });
 
-  describe("stored preferences", () => {
+  describe("Stored preferences", () => {
     it("should retrieve stored preference", () => {
       global.game.user.flags["l5r4-enhanced"].sortByActor = {
         actor123: {
@@ -54,7 +54,7 @@ describe("getSortPref", () => {
     });
   });
 
-  describe("default values and validation", () => {
+  describe("Default values and validation", () => {
     it("should return default key when no preference stored", () => {
       const pref = getSortPref("actor123", "skills", ["name", "rank"], "name");
       expect(pref.key).toBe("name");
@@ -84,7 +84,7 @@ describe("getSortPref", () => {
     });
   });
 
-  describe("edge cases", () => {
+  describe("Edge cases", () => {
     it("should handle missing game.user", () => {
       global.game = {};
 
@@ -115,7 +115,7 @@ describe("setSortPref", () => {
     };
   });
 
-  describe("setting and toggle behavior", () => {
+  describe("Setting and toggle behavior", () => {
     it("should set preference with ascending direction", async () => {
       await setSortPref("actor123", "skills", "rank");
 
@@ -196,7 +196,7 @@ describe("setSortPref", () => {
 });
 
 describe("sortWithPref", () => {
-  describe("basic sorting", () => {
+  describe("Basic sorting", () => {
     it("should sort by name ascending", () => {
       const items = [{ name: "Charlie" }, { name: "Alice" }, { name: "Bob" }];
 
@@ -246,7 +246,7 @@ describe("sortWithPref", () => {
     });
   });
 
-  describe("tiebreaker sorting", () => {
+  describe("Tiebreaker sorting", () => {
     it("should use secondary column for tiebreaks", () => {
       const items = [
         { rank: 2, name: "Charlie" },
@@ -290,7 +290,7 @@ describe("sortWithPref", () => {
     });
   });
 
-  describe("edge cases", () => {
+  describe("Edge cases", () => {
     it("should handle empty array", () => {
       const items = [];
       const columns = { name: i => i.name };

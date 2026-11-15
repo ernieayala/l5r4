@@ -15,7 +15,7 @@ import {
 } from "../../../module/utils/advancement.js";
 
 describe("rankPointsToValue", () => {
-  describe("standard conversions", () => {
+  describe("Standard conversions", () => {
     it("should convert rank 3, 0 points to 3.0", () => {
       const result = rankPointsToValue({ rank: 3, points: 0 });
       expect(result).toBe(3.0);
@@ -47,7 +47,7 @@ describe("rankPointsToValue", () => {
     });
   });
 
-  describe("edge cases", () => {
+  describe("Edge cases", () => {
     it("should handle null object", () => {
       const result = rankPointsToValue(null);
       expect(result).toBe(0);
@@ -111,7 +111,7 @@ describe("rankPointsToValue", () => {
 });
 
 describe("valueToRankPoints", () => {
-  describe("standard conversions", () => {
+  describe("Standard conversions", () => {
     it("should convert 3.0 to rank 3, 0 points", () => {
       const result = valueToRankPoints(3.0);
       expect(result.rank).toBe(3);
@@ -155,7 +155,7 @@ describe("valueToRankPoints", () => {
     });
   });
 
-  describe("rounding behavior", () => {
+  describe("Rounding behavior", () => {
     it("should round 3.14 to rank 3, 1 point", () => {
       const result = valueToRankPoints(3.14);
       expect(result.rank).toBe(3);
@@ -181,15 +181,15 @@ describe("valueToRankPoints", () => {
     });
   });
 
-  describe("bounds enforcement", () => {
-    it("should clamp to maxRank (default 10)", () => {
+  describe("Bounds enforcement", () => {
+    it("should clamp to maxRank, 10 by default", () => {
       const result = valueToRankPoints(15.0);
       expect(result.rank).toBe(10);
       expect(result.points).toBe(0);
       expect(result.value).toBe(10);
     });
 
-    it("should clamp to minRank (default 0)", () => {
+    it("should clamp to minRank, 0 by default", () => {
       const result = valueToRankPoints(-5.0);
       expect(result.rank).toBe(0);
       expect(result.points).toBe(0);
@@ -223,7 +223,7 @@ describe("valueToRankPoints", () => {
     });
   });
 
-  describe("points overflow handling", () => {
+  describe("Points overflow handling", () => {
     it("should increment rank when points reach 10", () => {
       // Simulating adding to 2.95 which rounds to 3.0 after overflow
       const result = valueToRankPoints(2.99);
@@ -247,7 +247,7 @@ describe("valueToRankPoints", () => {
     });
   });
 
-  describe("edge cases", () => {
+  describe("Edge cases", () => {
     it("should handle null value", () => {
       const result = valueToRankPoints(null);
       expect(result.rank).toBe(0);
@@ -294,7 +294,7 @@ describe("valueToRankPoints", () => {
       expect(result.rank).toBe(5);
     });
 
-    it("should handle minRank > maxRank (edge case)", () => {
+    it("should handle minRank > maxRank", () => {
       const result = valueToRankPoints(5.0, 10, 0);
       // Behavior may vary, but should not crash
       expect(result).toHaveProperty("rank");
@@ -304,7 +304,7 @@ describe("valueToRankPoints", () => {
 });
 
 describe("applyRankPointsDelta", () => {
-  describe("positive deltas (increase)", () => {
+  describe("Positive deltas", () => {
     it("should add 1.0 to rank 2, 0 points", () => {
       const current = { rank: 2, points: 0 };
       const result = applyRankPointsDelta(current, 1.0);
@@ -319,7 +319,7 @@ describe("applyRankPointsDelta", () => {
       expect(result.points).toBe(8);
     });
 
-    it("should add 0.1 to rank 3, 9 points (overflow)", () => {
+    it("should add 0.1 to rank 3, 9 points with overflow", () => {
       const current = { rank: 3, points: 9 };
       const result = applyRankPointsDelta(current, 0.1);
       expect(result.rank).toBe(4);
@@ -334,7 +334,7 @@ describe("applyRankPointsDelta", () => {
     });
   });
 
-  describe("negative deltas (decrease)", () => {
+  describe("Negative deltas", () => {
     it("should subtract 1.0 from rank 3, 0 points", () => {
       const current = { rank: 3, points: 0 };
       const result = applyRankPointsDelta(current, -1.0);
@@ -349,14 +349,14 @@ describe("applyRankPointsDelta", () => {
       expect(result.points).toBe(2);
     });
 
-    it("should subtract 0.3 from rank 2, 2 points (underflow)", () => {
+    it("should subtract 0.3 from rank 2, 2 points with underflow", () => {
       const current = { rank: 2, points: 2 };
       const result = applyRankPointsDelta(current, -0.3);
       expect(result.rank).toBe(1);
       expect(result.points).toBe(9);
     });
 
-    it("should subtract 5.0 from rank 3, 0 points (clamp to min)", () => {
+    it("should subtract 5.0 from rank 3, 0 points and clamp to min", () => {
       const current = { rank: 3, points: 0 };
       const result = applyRankPointsDelta(current, -5.0);
       expect(result.rank).toBe(0); // Clamped to minRank
@@ -364,7 +364,7 @@ describe("applyRankPointsDelta", () => {
     });
   });
 
-  describe("bounds enforcement", () => {
+  describe("Bounds enforcement", () => {
     it("should not exceed maxRank", () => {
       const current = { rank: 9, points: 0 };
       const result = applyRankPointsDelta(current, 5.0, 0, 10);
@@ -394,7 +394,7 @@ describe("applyRankPointsDelta", () => {
     });
   });
 
-  describe("zero delta", () => {
+  describe("Zero delta", () => {
     it("should return same value for delta 0", () => {
       const current = { rank: 3, points: 5 };
       const result = applyRankPointsDelta(current, 0);
@@ -403,7 +403,7 @@ describe("applyRankPointsDelta", () => {
     });
   });
 
-  describe("edge cases", () => {
+  describe("Edge cases", () => {
     it("should handle null current object", () => {
       const result = applyRankPointsDelta(null, 1.0);
       expect(result.rank).toBe(1);
@@ -480,7 +480,7 @@ describe("applyRankPointsDelta", () => {
     });
   });
 
-  describe("typical UI increment/decrement", () => {
+  describe("Typical UI increment/decrement", () => {
     it("should handle +1 button click", () => {
       const current = { rank: 2, points: 3 };
       const result = applyRankPointsDelta(current, 1);

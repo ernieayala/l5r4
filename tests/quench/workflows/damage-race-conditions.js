@@ -26,12 +26,12 @@ export function registerDamageRaceConditionTests(quench) {
     context => {
       const { describe, it, assert, beforeEach, afterEach } = context;
 
-      describe("Rapid Damage Application", () => {
+      describe("Rapid damage application", () => {
         let actor;
 
         beforeEach(async () => {
           actor = await createTestPC({
-            name: "Damage Race Test",
+            name: "Damage race conditions: Damage Race Test",
             system: {
               rings: { earth: 3, void: { rank: 3 } },
               traits: { ref: 3 }
@@ -97,7 +97,7 @@ export function registerDamageRaceConditionTests(quench) {
           assert.isNumber(finalWounds, "Wounds is number");
         });
 
-        it("should handle damage exceeding max wounds (100 wounds on Earth 2)", async () => {
+        it("should handle damage exceeding max wounds: 100 wounds on Earth 2", async () => {
           // ARRANGE - Low Earth character
           await actor.update({ "system.rings.earth": 2 });
 
@@ -116,7 +116,7 @@ export function registerDamageRaceConditionTests(quench) {
           assert.isTrue(isOut, "Character marked as Out");
         });
 
-        it("should handle negative damage values (healing)", async () => {
+        it("should handle negative damage values as healing", async () => {
           // ARRANGE - Apply initial damage
           await actor.update({ "system.suffered": 20 });
 
@@ -137,7 +137,7 @@ export function registerDamageRaceConditionTests(quench) {
           const grazedMax = actor.system.woundLevels.grazed?.value || nickedMax + 3;
 
           // ACT - Apply damage to cross multiple thresholds rapidly
-          // Use absolute values that will definitely cross levels
+          // Absolute values, each one past the next threshold
           const damageSequence = [
             healthyMax + 1, // Cross into nicked
             nickedMax + 1, // Cross into grazed
@@ -161,12 +161,12 @@ export function registerDamageRaceConditionTests(quench) {
         });
       });
 
-      describe("Void Damage Reduction Race Conditions", () => {
+      describe("Void damage reduction race conditions", () => {
         let actor;
 
         beforeEach(async () => {
           actor = await createTestPC({
-            name: "Void Damage Test",
+            name: "Damage race conditions: Void Damage Test",
             system: {
               rings: { earth: 3, void: { rank: 3, value: 3 } },
               traits: { ref: 3 }
@@ -227,7 +227,7 @@ export function registerDamageRaceConditionTests(quench) {
           // ACT - Attempt to spend 2 (more than available)
           try {
             await actor.update({ "system.rings.void.value": -1 });
-          } catch (error) {
+          } catch {
             // May throw or be prevented
           }
 
@@ -241,12 +241,12 @@ export function registerDamageRaceConditionTests(quench) {
         });
       });
 
-      describe("Armor Reduction Edge Cases", () => {
+      describe("Armor reduction edge cases", () => {
         let actor;
 
         beforeEach(async () => {
           actor = await createTestPC({
-            name: "Armor Test",
+            name: "Damage race conditions: Armor Test",
             system: {
               rings: { earth: 3 },
               traits: { ref: 3 }
@@ -290,7 +290,7 @@ export function registerDamageRaceConditionTests(quench) {
           assert.equal(armorTN, baseArmorTN, "Zero bonus = base TN");
         });
 
-        it("should handle very high armor bonus without overflow", async () => {
+        it("should handle a high armor bonus without overflow", async () => {
           // ARRANGE - Massive armor bonus
           await actor.update({ "system.armorTn.mod": 999 });
 
@@ -311,7 +311,7 @@ export function registerDamageRaceConditionTests(quench) {
 
         beforeEach(async () => {
           actor = await createTestPC({
-            name: "Prone Test",
+            name: "Damage race conditions: Prone Test",
             system: {
               rings: { earth: 2 },
               traits: { ref: 3 }
@@ -330,7 +330,6 @@ export function registerDamageRaceConditionTests(quench) {
           // ARRANGE
           actor.prepareData(); // Ensure wound levels calculated
           const downThreshold = actor.system.woundLevels.down.value;
-          const crippledThreshold = actor.system.woundLevels.crippled?.value || 0;
 
           // ACT - Apply damage to reach Down (must be > crippled but <= down)
           await actor.update({ "system.suffered": downThreshold });
@@ -371,6 +370,6 @@ export function registerDamageRaceConditionTests(quench) {
         });
       });
     },
-    { displayName: "L5R4: Damage Race Conditions" }
+    { displayName: "L5R4: Damage race conditions" }
   );
 }

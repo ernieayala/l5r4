@@ -1,0 +1,23 @@
+.l5r4-sample {
+  border-radius: var(--l5r4-radius-sm);
+  color: var(--l5r4-color-text);
+  gap: var(--l5r4-space-gap);
+  margin: 0 auto;
+  transition: filter var(--l5r4-duration-fast) var(--l5r4-easing-standard);
+  z-index: var(--l5r4-layer-control);
+
+  &:hover {
+    filter: var(--l5r4-state-hover-filter);
+  }
+
+  &:hover,
+  &:focus-within {
+    .l5r4-sample-controls {
+      opacity: 1;
+    }
+  }
+
+  .l5r4-sample-name.-fire {
+    font-weight: bold;
+  }
+}

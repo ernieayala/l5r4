@@ -13,7 +13,7 @@ import { cleanTest, waitFor } from "./helpers.js";
  * batch skips itself when either module is inactive.
  * @param {object} quench  The Quench API object.
  */
-export function registerAnimationsBatch(quench) {
+export function registerAnimationsTests(quench) {
   quench.registerBatch(
     `${SYS_ID}.animations`,
     context => {
@@ -46,25 +46,25 @@ export function registerAnimationsBatch(quench) {
       }
 
       describe("Status animations", () => {
-        it("a stance plays once on the token and ends with the stance", async () => {
-          await placeActor("Quench Animated Stance");
+        it("should play a stance once on the token and end it with the stance", async () => {
+          await placeActor("Sequencer: stance");
           await actor.toggleStatusEffect("fullAttackStance", { active: true });
           assert.isTrue(await waitFor(() => playing("fullAttackStance").length === 1));
           await actor.toggleStatusEffect("fullAttackStance", { active: false });
           assert.isTrue(await waitFor(() => playing("fullAttackStance").length === 0));
         });
 
-        it("Concentration plays its animation", async () => {
-          await placeActor("Quench Animated Concentration");
+        it("should play the Concentration animation", async () => {
+          await placeActor("Sequencer: concentration");
           await actor.toggleStatusEffect("concentration", { active: true });
           assert.isTrue(await waitFor(() => playing("concentration").length === 1));
         });
 
         it(
-          "a status removed while its animation still loads ends cleanly",
+          "should end cleanly when a status is removed while its animation still loads",
           clean(async function () {
             this.timeout(10_000);
-            await placeActor("Quench Animated Brief");
+            await placeActor("Sequencer: brief");
             await actor.toggleStatusEffect("feared", { active: true });
             await actor.toggleStatusEffect("feared", { active: false });
             // Let a load that was under way finish, so an error from it lands in this test
@@ -74,10 +74,10 @@ export function registerAnimationsBatch(quench) {
         );
 
         it(
-          "a token deleted while its animation still loads leaves no error",
+          "should leave no error when a token is deleted while its animation still loads",
           clean(async function () {
             this.timeout(10_000);
-            await placeActor("Quench Animated Vanishing");
+            await placeActor("Sequencer: vanishing");
             await actor.toggleStatusEffect("entangled", { active: true });
             await token.delete();
             token = null;
@@ -85,8 +85,8 @@ export function registerAnimationsBatch(quench) {
           })
         );
 
-        it("another user's change plays nothing on this client", async () => {
-          await placeActor("Quench Animated Elsewhere");
+        it("should play nothing on this client for another user's change", async () => {
+          await placeActor("Sequencer: elsewhere");
           const [effect] = await actor.createEmbeddedDocuments(
             "ActiveEffect",
             [{ name: "Quench Daze", statuses: ["dazed"] }],

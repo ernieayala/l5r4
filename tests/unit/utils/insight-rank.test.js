@@ -52,7 +52,7 @@ function calculateInsightRank(insightPoints) {
 }
 
 describe("calculateInsightRank", () => {
-  describe("Edge Case: Insight = 0", () => {
+  describe("Edge case: Insight = 0", () => {
     it("should return rank 1 for 0 insight", () => {
       // ARRANGE
       const insight = 0;
@@ -64,7 +64,7 @@ describe("calculateInsightRank", () => {
       expect(rank).toBe(1);
     });
 
-    it("should return rank 1 for very low insight (1-10)", () => {
+    it("should return rank 1 for low insight from 1 to 10", () => {
       // ARRANGE & ACT & ASSERT
       expect(calculateInsightRank(1)).toBe(1);
       expect(calculateInsightRank(5)).toBe(1);
@@ -72,7 +72,7 @@ describe("calculateInsightRank", () => {
     });
   });
 
-  describe("Edge Case: Exact Thresholds", () => {
+  describe("Edge case: exact thresholds", () => {
     it("should return rank 2 at exactly 150 insight", () => {
       // ARRANGE
       const insight = 150;
@@ -84,7 +84,7 @@ describe("calculateInsightRank", () => {
       expect(rank).toBe(2);
     });
 
-    it("should return rank 1 at 149 insight (just below threshold)", () => {
+    it("should return rank 1 at 149 insight, one below the threshold", () => {
       // ARRANGE
       const insight = 149;
 
@@ -106,7 +106,7 @@ describe("calculateInsightRank", () => {
       expect(rank).toBe(3);
     });
 
-    it("should return rank 2 at 174 insight (just below threshold)", () => {
+    it("should return rank 2 at 174 insight, one below the threshold", () => {
       // ARRANGE
       const insight = 174;
 
@@ -128,7 +128,7 @@ describe("calculateInsightRank", () => {
       expect(rank).toBe(4);
     });
 
-    it("should return rank 3 at 199 insight (just below threshold)", () => {
+    it("should return rank 3 at 199 insight, one below the threshold", () => {
       // ARRANGE
       const insight = 199;
 
@@ -162,7 +162,7 @@ describe("calculateInsightRank", () => {
     });
   });
 
-  describe("Edge Case: Very High Insight (500+)", () => {
+  describe("Edge case: insight of 500 and up", () => {
     it("should calculate rank 6+ correctly for 500 insight", () => {
       // ARRANGE
       const insight = 500;
@@ -199,7 +199,7 @@ describe("calculateInsightRank", () => {
     it("should handle insight between 25-point intervals", () => {
       // ARRANGE & ACT & ASSERT
       expect(calculateInsightRank(260)).toBe(6); // 250 + 10 (not enough for rank 7)
-      expect(calculateInsightRank(274)).toBe(6); // 250 + 24 (just below rank 7)
+      expect(calculateInsightRank(274)).toBe(6); // 250 + 24 (one below rank 7)
       expect(calculateInsightRank(290)).toBe(7); // 250 + 40 (rank 7)
     });
 
@@ -217,7 +217,7 @@ describe("calculateInsightRank", () => {
     });
   });
 
-  describe("Edge Case: Negative Insight", () => {
+  describe("Edge case: negative insight", () => {
     it("should return rank 1 for -1 insight", () => {
       // ARRANGE
       const insight = -1;
@@ -240,7 +240,7 @@ describe("calculateInsightRank", () => {
       expect(rank).toBe(1);
     });
 
-    it("should return rank 1 for very negative insight", () => {
+    it("should return rank 1 for -999999 insight", () => {
       // ARRANGE
       const insight = -999999;
 
@@ -252,7 +252,7 @@ describe("calculateInsightRank", () => {
     });
   });
 
-  describe("Edge Case: Invalid Inputs", () => {
+  describe("Edge case: invalid inputs", () => {
     it("should handle null by treating as 0", () => {
       // ARRANGE
       const insight = null;
@@ -317,7 +317,7 @@ describe("calculateInsightRank", () => {
     });
   });
 
-  describe("Boundary Testing", () => {
+  describe("Boundary testing", () => {
     it("should handle all rank 1-5 boundaries correctly", () => {
       // ARRANGE & ACT & ASSERT
       // Rank 1: 0-149
@@ -354,7 +354,7 @@ describe("calculateInsightRank", () => {
     });
   });
 
-  describe("Mutation Testing", () => {
+  describe("Mutation testing", () => {
     it("should FAIL if threshold changed from 150 to 151", () => {
       // This test documents what SHOULD happen if bug is introduced
       // If someone changes threshold to 151, this test should FAIL

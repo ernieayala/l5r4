@@ -22,13 +22,13 @@ import { createTestNPC } from "../../fixtures/actor-fixtures.js";
  * Register NPC sheet tests
  * @param {Object} quench - Quench test framework API
  */
-export function registerNPCSheetTests(quench) {
+export function registerNpcSheetTests(quench) {
   quench.registerBatch(
-    `${SYS_ID}.sheets.npc`,
+    `${SYS_ID}.sheets.npc-sheet`,
     context => {
       const { describe, it, assert, beforeEach, afterEach } = context;
 
-      describe("NPC Sheet Rendering", () => {
+      describe("NPC sheet rendering", () => {
         let actor, sheet;
 
         beforeEach(async () => {
@@ -93,12 +93,12 @@ export function registerNPCSheetTests(quench) {
         });
       });
 
-      describe("NPC Sheet Attack Display", () => {
+      describe("NPC sheet attack display", () => {
         let actor, sheet;
 
         beforeEach(async () => {
           actor = await createTestNPC({
-            name: "Combat NPC",
+            name: "NPC sheet: combat NPC",
             system: {
               attack1: { roll: 6, keep: 4, dmgRoll: 4, dmgKeep: 2 },
               attack2: { roll: 5, keep: 3, dmgRoll: 3, dmgKeep: 2 },
@@ -137,12 +137,12 @@ export function registerNPCSheetTests(quench) {
         });
       });
 
-      describe("NPC Sheet Wound Tracking", () => {
+      describe("NPC sheet Wound tracking", () => {
         let actor, sheet;
 
         beforeEach(async () => {
           actor = await createTestNPC({
-            name: "Wound NPC",
+            name: "NPC sheet: Wound NPC",
             system: {
               nrWoundLvls: 4,
               woundMode: "manual",
@@ -177,12 +177,12 @@ export function registerNPCSheetTests(quench) {
         });
       });
 
-      describe("NPC Sheet Data Updates", () => {
+      describe("NPC sheet data updates", () => {
         let actor, sheet;
 
         beforeEach(async () => {
           actor = await createTestNPC({
-            name: "Update NPC",
+            name: "NPC sheet: update NPC",
             system: {
               attack1: { roll: 5, keep: 3 }
             }
@@ -226,12 +226,12 @@ export function registerNPCSheetTests(quench) {
         });
       });
 
-      describe("NPC Sheet Ring Display", () => {
+      describe("NPC sheet Ring display", () => {
         let actor, sheet;
 
         beforeEach(async () => {
           actor = await createTestNPC({
-            name: "Ring NPC",
+            name: "NPC sheet: Ring NPC",
             system: {
               traits: { sta: 4, wil: 3 } // Earth = 3
             }
@@ -264,12 +264,12 @@ export function registerNPCSheetTests(quench) {
         });
       });
 
-      describe("NPC Sheet Skill CRUD Operations", () => {
+      describe("NPC sheet Skill CRUD operations", () => {
         let actor, sheet, skill;
 
         beforeEach(async () => {
           actor = await createTestNPC({
-            name: "Skilled NPC",
+            name: "NPC sheet: skilled NPC",
             system: {}
           });
 
@@ -360,12 +360,12 @@ export function registerNPCSheetTests(quench) {
         });
       });
 
-      describe("NPC Attack Editor Integration", () => {
+      describe("NPC attack editor integration", () => {
         let actor, sheet;
 
         beforeEach(async () => {
           actor = await createTestNPC({
-            name: "Attack NPC",
+            name: "NPC sheet: attack NPC",
             system: {
               attack1: {
                 name: "Katana",
@@ -465,12 +465,12 @@ export function registerNPCSheetTests(quench) {
 
           assert.exists(attack1Edit, "Attack 1 edit button exists");
           assert.exists(attack2Edit, "Attack 2 edit button exists");
-          // A new NPC's third slot is empty, so it is hidden and Add Attack fills it (STAGE-06 Decision 1)
+          // A new NPC's third slot is empty, so it is hidden and Add Attack fills it (roadmap/STAGE-06 decision 1)
           assert.notExists(attack3Row, "Empty attack 3 hidden");
           assert.equal(add?.dataset.attackKey, "attack3", "Add Attack targets attack 3");
         });
       });
     },
-    { displayName: "L5R4: NPC Sheet Tests" }
+    { displayName: "L5R4: NPC sheet" }
   );
 }

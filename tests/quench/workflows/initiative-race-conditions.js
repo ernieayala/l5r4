@@ -25,12 +25,12 @@ export function registerInitiativeRaceConditionTests(quench) {
     context => {
       const { describe, it, assert, beforeEach, afterEach } = context;
 
-      describe("Void Spending Race Conditions", () => {
+      describe("Void spending race conditions", () => {
         let actor, combat, combatant;
 
         beforeEach(async () => {
           actor = await createTestPC({
-            name: "Initiative Race Test",
+            name: "Initiative race conditions: Initiative Race Test",
             system: {
               traits: { ref: 3 },
               rings: { void: { rank: 3 } },
@@ -100,7 +100,7 @@ export function registerInitiativeRaceConditionTests(quench) {
           // System should prevent or handle gracefully
           try {
             await actor.update({ "system.rings.void.value": -1 });
-          } catch (error) {
+          } catch {
             // Expected to fail or be prevented
           }
 
@@ -172,12 +172,12 @@ export function registerInitiativeRaceConditionTests(quench) {
         });
       });
 
-      describe("Initiative with Edge Cases", () => {
+      describe("Initiative edge cases", () => {
         let actor, combat, combatant;
 
         beforeEach(async () => {
           actor = await createTestPC({
-            name: "Initiative Edge Case Test",
+            name: "Initiative race conditions: Initiative Edge Case Test",
             system: {
               traits: { ref: 3 },
               insight: { rank: 1 }
@@ -238,7 +238,7 @@ export function registerInitiativeRaceConditionTests(quench) {
         it("should handle NPC initiative with missing effRoll/effKeep", async () => {
           // ARRANGE - Create NPC with missing initiative data
           const npc = await Actor.create({
-            name: "Broken NPC",
+            name: "Initiative race conditions: Broken NPC",
             type: "npc",
             system: {
               traits: { ref: 3 }
@@ -265,7 +265,7 @@ export function registerInitiativeRaceConditionTests(quench) {
         });
       });
 
-      describe("Multiple Combatants Race Conditions", () => {
+      describe("Multiple combatants race conditions", () => {
         let combat, actors;
 
         beforeEach(async () => {
@@ -276,9 +276,18 @@ export function registerInitiativeRaceConditionTests(quench) {
 
           // Create multiple actors
           actors = await Promise.all([
-            createTestPC({ name: "PC 1", system: { traits: { ref: 3 } } }),
-            createTestPC({ name: "PC 2", system: { traits: { ref: 4 } } }),
-            createTestPC({ name: "PC 3", system: { traits: { ref: 2 } } })
+            createTestPC({
+              name: "Initiative race conditions: PC 1",
+              system: { traits: { ref: 3 } }
+            }),
+            createTestPC({
+              name: "Initiative race conditions: PC 2",
+              system: { traits: { ref: 4 } }
+            }),
+            createTestPC({
+              name: "Initiative race conditions: PC 3",
+              system: { traits: { ref: 2 } }
+            })
           ]);
         });
 
@@ -334,6 +343,6 @@ export function registerInitiativeRaceConditionTests(quench) {
         });
       });
     },
-    { displayName: "L5R4: Initiative Race Conditions" }
+    { displayName: "L5R4: Initiative race conditions" }
   );
 }

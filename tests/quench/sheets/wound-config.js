@@ -24,16 +24,16 @@ import { createTestPC, createTestNPC } from "../../fixtures/actor-fixtures.js";
  */
 export function registerWoundConfigTests(quench) {
   quench.registerBatch(
-    `${SYS_ID}.apps.wound-config`,
+    `${SYS_ID}.sheets.wound-config`,
     context => {
       const { describe, it, assert, beforeEach, afterEach } = context;
 
-      describe("Wound Config Dialog Rendering", () => {
+      describe("Wound config dialog rendering", () => {
         let actor, dialog;
 
         beforeEach(async () => {
           actor = await createTestPC({
-            name: "Wound Config Test",
+            name: "Wound config: test PC",
             system: {
               traits: { sta: 3, wil: 3 }, // Earth = 3
               woundsMultiplier: 2
@@ -89,12 +89,12 @@ export function registerWoundConfigTests(quench) {
         });
       });
 
-      describe("Wound Config Data Display", () => {
+      describe("Wound config data display", () => {
         let actor, dialog;
 
         beforeEach(async () => {
           actor = await createTestPC({
-            name: "Config Display Test",
+            name: "Wound config: display test",
             system: {
               traits: { sta: 4, wil: 4 }, // Earth = 4
               woundsMultiplier: 3,
@@ -136,12 +136,12 @@ export function registerWoundConfigTests(quench) {
         });
       });
 
-      describe("Wound Config for NPC", () => {
+      describe("Wound config for NPC", () => {
         let npc, dialog;
 
         beforeEach(async () => {
           npc = await createTestNPC({
-            name: "NPC Config Test",
+            name: "Wound config: NPC test",
             system: {
               woundMode: "manual",
               wounds: { max: 50 },
@@ -188,12 +188,12 @@ export function registerWoundConfigTests(quench) {
         });
       });
 
-      describe("Wound Config Formula Mode", () => {
+      describe("Wound config formula mode", () => {
         let npc, dialog;
 
         beforeEach(async () => {
           npc = await createTestNPC({
-            name: "Formula NPC",
+            name: "Wound config: formula NPC",
             system: {
               traits: { sta: 4, wil: 4 }, // Earth = 4
               woundMode: "formula",
@@ -234,12 +234,12 @@ export function registerWoundConfigTests(quench) {
         });
       });
 
-      describe("Wound Config Dialog Interaction", () => {
+      describe("Wound config dialog interaction", () => {
         let actor, dialog;
 
         beforeEach(async () => {
           actor = await createTestPC({
-            name: "Interaction Test",
+            name: "Wound config: interaction test",
             system: {
               traits: { sta: 3, wil: 3 }
             }
@@ -260,7 +260,6 @@ export function registerWoundConfigTests(quench) {
 
         it("should have close button", () => {
           const element = dialog.element;
-          const _closeButton = element.querySelector('[data-action="close"], .close');
 
           // Dialog should have way to close
           assert.exists(element, "Dialog has close mechanism");
@@ -286,12 +285,12 @@ export function registerWoundConfigTests(quench) {
         });
       });
 
-      describe("Wound Config Updates", () => {
+      describe("Wound config updates", () => {
         let actor, dialog;
 
         beforeEach(async () => {
           actor = await createTestPC({
-            name: "Update Test",
+            name: "Wound config: update test",
             system: {
               traits: { sta: 3, wil: 3 },
               woundsMultiplier: 2
@@ -326,6 +325,6 @@ export function registerWoundConfigTests(quench) {
         });
       });
     },
-    { displayName: "L5R4: Wound Config Tests" }
+    { displayName: "L5R4: Wound config" }
   );
 }

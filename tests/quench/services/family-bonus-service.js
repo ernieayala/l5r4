@@ -22,11 +22,11 @@ import { FamilyBonusService } from "../../../module/services/family-bonus-servic
  */
 export function registerFamilyBonusTests(quench) {
   quench.registerBatch(
-    `${SYS_ID}.services.familyBonus`,
+    `${SYS_ID}.services.family-bonus-service`,
     context => {
       const { describe, it, assert } = context;
 
-      describe("Valid Trait Keys", () => {
+      describe("Valid Trait keys", () => {
         it("should recognize all 8 L5R4 traits", () => {
           const expectedTraits = ["sta", "wil", "str", "per", "ref", "awa", "agi", "int"];
 
@@ -54,7 +54,7 @@ export function registerFamilyBonusTests(quench) {
         });
       });
 
-      describe("Trait Bonus Calculation", () => {
+      describe("Trait bonus calculation", () => {
         it("should calculate standard +1 family bonus", () => {
           const familyBonus = 1; // Standard family bonus
           const baseTrait = 2; // Starting trait value
@@ -63,7 +63,7 @@ export function registerFamilyBonusTests(quench) {
           assert.equal(finalTrait, 3, "Family bonus allows starting at 3 (2+1)");
         });
 
-        it("should handle Earth traits (Stamina, Willpower)", () => {
+        it("should handle the Earth Traits Stamina and Willpower", () => {
           const staminaBonus = 1; // Hida family
           const willpowerBonus = 0; // No bonus to Willpower
 
@@ -71,7 +71,7 @@ export function registerFamilyBonusTests(quench) {
           assert.equal(willpowerBonus, 0, "Willpower gets +0");
         });
 
-        it("should handle Air traits (Reflexes, Awareness)", () => {
+        it("should handle the Air Traits Reflexes and Awareness", () => {
           const reflexesBonus = 0;
           const awarenessBonus = 1; // Yasuki family
 
@@ -79,7 +79,7 @@ export function registerFamilyBonusTests(quench) {
           assert.equal(awarenessBonus, 1, "Awareness gets +1");
         });
 
-        it("should handle Fire traits (Agility, Intelligence)", () => {
+        it("should handle the Fire Traits Agility and Intelligence", () => {
           const agilityBonus = 1; // Shosuro family
           const intelligenceBonus = 0;
 
@@ -87,7 +87,7 @@ export function registerFamilyBonusTests(quench) {
           assert.equal(intelligenceBonus, 0, "Intelligence gets +0");
         });
 
-        it("should handle Water traits (Strength, Perception)", () => {
+        it("should handle the Water Traits Strength and Perception", () => {
           const strengthBonus = 1; // Hida family
           const perceptionBonus = 0;
 
@@ -96,7 +96,7 @@ export function registerFamilyBonusTests(quench) {
         });
       });
 
-      describe("Trait Bonus Combinations", () => {
+      describe("Trait bonus combinations", () => {
         it("should grant bonus to only one trait", () => {
           const bonusMap = {
             sta: 1, // Hida family grants +1 Stamina
@@ -140,7 +140,7 @@ export function registerFamilyBonusTests(quench) {
         });
       });
 
-      describe("Starting Trait Values", () => {
+      describe("Starting Trait values", () => {
         it("should start at 2 without family bonus", () => {
           const baseTrait = 2;
           const familyBonus = 0;
@@ -178,7 +178,7 @@ export function registerFamilyBonusTests(quench) {
         });
       });
 
-      describe("Bonus Validation", () => {
+      describe("Bonus validation", () => {
         it("should only accept positive bonuses", () => {
           const validBonus = 1;
           const negativeValue = -1;
@@ -208,7 +208,7 @@ export function registerFamilyBonusTests(quench) {
         });
       });
 
-      describe("Trait Property Paths", () => {
+      describe("Trait property paths", () => {
         it("should construct correct property path for each trait", () => {
           const traits = ["sta", "wil", "str", "per", "ref", "awa", "agi", "int"];
 
@@ -235,8 +235,8 @@ export function registerFamilyBonusTests(quench) {
         });
       });
 
-      describe("Family Bonus Examples", () => {
-        it("should calculate Hida family bonus (+1 Stamina)", () => {
+      describe("Family bonus examples", () => {
+        it("should calculate the Hida family bonus of +1 Stamina", () => {
           const bonusMap = {
             sta: 1,
             wil: 0,
@@ -251,7 +251,7 @@ export function registerFamilyBonusTests(quench) {
           assert.equal(bonusMap.sta, 1, "Hida grants +1 Stamina");
         });
 
-        it("should calculate Doji family bonus (+1 Awareness)", () => {
+        it("should calculate the Doji family bonus of +1 Awareness", () => {
           const bonusMap = {
             sta: 0,
             wil: 0,
@@ -266,7 +266,7 @@ export function registerFamilyBonusTests(quench) {
           assert.equal(bonusMap.awa, 1, "Doji grants +1 Awareness");
         });
 
-        it("should calculate Isawa family bonus (+1 Intelligence)", () => {
+        it("should calculate the Isawa family bonus of +1 Intelligence", () => {
           const bonusMap = {
             sta: 0,
             wil: 0,
@@ -281,7 +281,7 @@ export function registerFamilyBonusTests(quench) {
           assert.equal(bonusMap.int, 1, "Isawa grants +1 Intelligence");
         });
 
-        it("should calculate Shosuro family bonus (+1 Agility)", () => {
+        it("should calculate the Shosuro family bonus of +1 Agility", () => {
           const bonusMap = {
             sta: 0,
             wil: 0,
@@ -297,7 +297,7 @@ export function registerFamilyBonusTests(quench) {
         });
       });
 
-      describe("Edge Case: Invalid Trait Keys", () => {
+      describe("Edge case: invalid Trait keys", () => {
         it("should return 0 for family bonus targeting non-existent trait", () => {
           // Simulate family with effect targeting invalid trait (e.g., "honor")
           const invalidEffectKey = "system.traits.honor";
@@ -349,8 +349,8 @@ export function registerFamilyBonusTests(quench) {
         });
       });
 
-      describe("Edge Case: Multiple Family Items", () => {
-        it("should handle multiple family effects on same trait (accumulation)", () => {
+      describe("Edge case: multiple family items", () => {
+        it("should accumulate multiple family effects on the same Trait", () => {
           // If multiple family effects target the same trait, they should accumulate
           const bonusMap = {
             sta: 2, // Two effects targeting Stamina
@@ -367,7 +367,7 @@ export function registerFamilyBonusTests(quench) {
           assert.equal(totalStaminaBonus, 2, "Multiple effects accumulate");
         });
 
-        it("should handle family with multiple trait bonuses (theoretically invalid)", () => {
+        it("should handle a misconfigured family with bonuses to several Traits", () => {
           // L5R4 rules: families grant ONE bonus
           // But service should handle gracefully if configured incorrectly
           const multiTraitMap = {
@@ -406,7 +406,7 @@ export function registerFamilyBonusTests(quench) {
         });
       });
 
-      describe("Edge Case: Malformed Effect Data", () => {
+      describe("Edge case: malformed effect data", () => {
         it("should reject negative bonus values", () => {
           const negativeValue = -1;
           const isValidBonus = Number.isFinite(negativeValue) && negativeValue > 0;
@@ -456,7 +456,7 @@ export function registerFamilyBonusTests(quench) {
         });
       });
 
-      describe("Edge Case: Service Defensive Behavior", () => {
+      describe("Edge case: service defensive behavior", () => {
         it("should return 0 for null actor", () => {
           const result = FamilyBonusService.getBonus(null, "str");
           assert.equal(result, 0, "Null actor returns 0");
@@ -525,6 +525,6 @@ export function registerFamilyBonusTests(quench) {
         });
       });
     },
-    { displayName: "L5R4: Family Bonus Service Tests" }
+    { displayName: "L5R4: Family bonus" }
   );
 }

@@ -1,0 +1,1 @@
+export const STYLE = CONST.CHAT_MESSAGE_TYPES.OTHER;

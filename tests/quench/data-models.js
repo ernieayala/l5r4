@@ -4,7 +4,8 @@ import { SYS_ID } from "../../module/config/constants.js";
  * Stored paths 3.2.1 kept in template.json that the data models no longer store, by roadmap Stage 2 decision:
  * derived values (decision 4) and PC `armor`, which is NPC-only (decision 6); by Stage 9, the Void-on-Armor-TN
  * marker, which is an effect now; by Stage 13, kata and kiho `cost`, since their Mastery Level is their XP cost
- * (#43); and the Skill's `insightBonus`, which Insight never counted (p.104; #75). Paths are relative to `system`.
+ * (#43); and the Skill's `insightBonus`, which Insight never counted (#75). Paths are relative to `system`.
+ * game-rules/49_improving_your_character.md, p.104
  * @type {Record<string, string[]>}
  */
 const NOT_STORED = {
@@ -41,7 +42,8 @@ const NOT_STORED = {
 
 /**
  * Stored defaults a later stage changed on purpose, by subtype and path. Stage 13: an NPC's Initiative pool is 0k0,
- * meaning Insight Rank 1 + Reflexes (p.81; #30), where 3.2.1 stored 2k2.
+ * meaning Insight Rank 1 + Reflexes (#30), where 3.2.1 stored 2k2.
+ * game-rules/31_combat_round.md, p.81
  * @type {Record<string, Record<string, *>>}
  */
 const CHANGED = {
@@ -69,7 +71,7 @@ function templateDefaults(section, type) {
  * when a document is built from it.
  * @param {object} quench  The Quench API object.
  */
-export function registerDataModelsBatch(quench) {
+export function registerDataModelsTests(quench) {
   quench.registerBatch(
     `${SYS_ID}.data-models`,
     context => {
@@ -88,9 +90,9 @@ export function registerDataModelsBatch(quench) {
             continue;
           }
           for (const type of Object.keys(types)) {
-            it(`${documentName} ${type}`, () => {
+            it("should match the template defaults for " + documentName + " " + type, () => {
               const cls = getDocumentClass(documentName);
-              const stored = new cls({ name: `Defaults ${type}`, type })._source.system;
+              const stored = new cls({ name: `Data models: ${type}`, type })._source.system;
               const skipped = NOT_STORED[type] ?? [];
               for (const [path, expected] of Object.entries(
                 templateDefaults(template[documentName], type)
@@ -114,10 +116,10 @@ export function registerDataModelsBatch(quench) {
       });
 
       describe("Older source migrates on load", () => {
-        it("NPC wound_lvl and armor_tn", () => {
+        it("should migrate NPC wound_lvl and armor_tn", () => {
           const cls = getDocumentClass("Actor");
           const npc = new cls({
-            name: "Legacy NPC",
+            name: "Data models: legacy NPC",
             type: "npc",
             system: {
               armor: { armor_tn: 25 },
@@ -141,10 +143,10 @@ export function registerDataModelsBatch(quench) {
           assert.notProperty(npc._source.system, "wound_lvl");
         });
 
-        it("PC Traits stored as {rank} and snake_case keys", () => {
+        it("should migrate PC Traits stored as {rank} and snake_case keys", () => {
           const cls = getDocumentClass("Actor");
           const pc = new cls({
-            name: "Legacy PC",
+            name: "Data models: legacy PC",
             type: "pc",
             system: {
               traits: { ref: { rank: 4 } },
@@ -157,17 +159,17 @@ export function registerDataModelsBatch(quench) {
           assert.equal(pc._source.system.initiative.rollMod, 1);
         });
 
-        it("Skill snake_case keys, armor misspellings, keywords arrays", () => {
+        it("should migrate Skill snake_case keys, armor misspellings, and keywords arrays", () => {
           const cls = getDocumentClass("Item");
           const skill = new cls({
-            name: "Legacy Skill",
+            name: "Data models: legacy Skill",
             type: "skill",
             system: { mastery_3: "m3", roll_bonus: 2 }
           });
           assert.equal(skill._source.system.mastery3, "m3");
           assert.equal(skill._source.system.rollBonus, 2);
           const armor = new cls({
-            name: "Legacy Armor",
+            name: "Data models: legacy armor",
             type: "armor",
             system: { equiped: true, keywords: ["Samurai", "Heavy"] }
           });
@@ -177,10 +179,10 @@ export function registerDataModelsBatch(quench) {
       });
 
       describe("Prepared values are derived, not stored", () => {
-        it("a PC's Rings, Armor TN, and Initiative pool come from its Traits", () => {
+        it("should derive a PC's Rings, Armor TN, and Initiative pool from its Traits", () => {
           const cls = getDocumentClass("Actor");
           const pc = new cls({
-            name: "Derived PC",
+            name: "Data models: derived PC",
             type: "pc",
             system: { traits: { ref: 3, awa: 4, sta: 2, wil: 3 } }
           });

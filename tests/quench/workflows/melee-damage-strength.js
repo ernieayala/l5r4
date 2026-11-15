@@ -1,15 +1,6 @@
 /**
- * Melee Weapon Damage + Strength Integration Tests
- *
- * Tests that melee weapons correctly add actor Strength to damage rolls
- * per L5R4 Combat rules: "[book text removed; Core Rulebook p.82]."
- *
- * Bug Report Verification:
- * - Issue: "Kojin's katana damage: Only rolling 3-keep-2 base damage instead
- *   of adding her Strength modifier (should be 5-keep-2 or 6-keep-2)"
- * - Expected: Katana (3k2) + Strength 3 = 6k2 damage
- *
- * Test Priority: Tier 1 (Critical - Core combat mechanics)
+ * Melee weapon damage and Strength: a melee weapon's derived damage adds the owner's Strength to the rolled dice
+ * of its damage, so a katana (3k2) held by Strength 3 rolls 6k2.
  *
  * @see module/documents/item/preparation/melee-damage.js
  * @see module/documents/item/preparation/derived-data.js
@@ -27,14 +18,13 @@ export function registerMeleeDamageStrengthTests(quench) {
   quench.registerBatch(
     `${SYS_ID}.workflows.melee-damage-strength`,
     context => {
-      const { describe, it, assert, after } = context;
+      const { describe, it, assert } = context;
 
-      describe("Melee Damage: Strength Addition", () => {
-        it("should add Strength to katana damage (Bug Report: Kojin scenario)", async () => {
-          // ARRANGE - Create character matching bug report
-          // Kojin with Strength 3, Katana 3k2
+      describe("Melee damage with Strength", () => {
+        it("should add Strength to katana damage", async () => {
+          // ARRANGE - Kojin with Strength 3, Katana 3k2
           const actor = await createTestPC({
-            name: "Kojin",
+            name: "Melee damage: Kojin",
             system: {
               traits: { str: 3 },
               rings: { earth: 2, air: 2, fire: 2, water: 2, void: 2 }
@@ -79,7 +69,7 @@ export function registerMeleeDamageStrengthTests(quench) {
         it("should add Strength to various melee weapons", async () => {
           // ARRANGE - Character with Strength 4
           const actor = await createTestPC({
-            name: "Strong Samurai",
+            name: "Melee damage: strong samurai",
             system: {
               traits: { str: 4 },
               rings: { earth: 3, air: 3, fire: 3, water: 3, void: 3 }
@@ -116,7 +106,7 @@ export function registerMeleeDamageStrengthTests(quench) {
         it("should handle zero Strength", async () => {
           // ARRANGE - Character with Strength 0 (edge case)
           const actor = await createTestPC({
-            name: "Weak Character",
+            name: "Melee damage: weak character",
             system: {
               traits: { str: 0 },
               rings: { earth: 2, air: 2, fire: 2, water: 2, void: 2 }
@@ -142,9 +132,9 @@ export function registerMeleeDamageStrengthTests(quench) {
         });
 
         it("should handle high Strength values", async () => {
-          // ARRANGE - Character with very high Strength
+          // ARRANGE - Character with Strength 8
           const actor = await createTestPC({
-            name: "Mighty Warrior",
+            name: "Melee damage: mighty warrior",
             system: {
               traits: { str: 8 },
               rings: { earth: 4, air: 4, fire: 4, water: 4, void: 4 }
@@ -172,7 +162,7 @@ export function registerMeleeDamageStrengthTests(quench) {
         it("should recalculate when Strength changes", async () => {
           // ARRANGE
           const actor = await createTestPC({
-            name: "Growing Samurai",
+            name: "Melee damage: growing samurai",
             system: {
               traits: { str: 2 },
               rings: { earth: 2, air: 2, fire: 2, water: 2, void: 2 }
@@ -198,10 +188,10 @@ export function registerMeleeDamageStrengthTests(quench) {
           await actor.delete();
         });
 
-        it("should handle unowned weapons (no actor)", async () => {
+        it("should use base damage for a weapon with no owning actor", async () => {
           // ARRANGE - Create weapon item without owner
           const weapon = await Item.create({
-            name: "Unowned Katana",
+            name: "Melee damage: unowned katana",
             type: "weapon",
             system: {
               damageRoll: 3,
@@ -227,11 +217,11 @@ export function registerMeleeDamageStrengthTests(quench) {
         });
       });
 
-      describe("Melee Damage: Edge Cases", () => {
+      describe("Melee damage edge cases", () => {
         it("should handle undefined Strength trait", async () => {
           // ARRANGE - Actor with missing traits object
           const actor = await createTestPC({
-            name: "Broken Character",
+            name: "Melee damage: broken character",
             system: {
               rings: { earth: 2, air: 2, fire: 2, water: 2, void: 2 }
             }
@@ -256,10 +246,10 @@ export function registerMeleeDamageStrengthTests(quench) {
           await actor.delete();
         });
 
-        it("should handle negative Strength (edge case)", async () => {
+        it("should handle negative Strength", async () => {
           // ARRANGE - Character with negative Strength (shouldn't happen, but test)
           const actor = await createTestPC({
-            name: "Cursed Character",
+            name: "Melee damage: cursed character",
             system: {
               traits: { str: -2 },
               rings: { earth: 2, air: 2, fire: 2, water: 2, void: 2 }
@@ -284,6 +274,6 @@ export function registerMeleeDamageStrengthTests(quench) {
         });
       });
     },
-    { displayName: "L5R4: Melee Damage + Strength Tests" }
+    { displayName: "L5R4: Melee damage and Strength" }
   );
 }

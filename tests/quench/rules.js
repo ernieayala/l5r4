@@ -104,7 +104,7 @@ function effectFamily(trait) {
  * Master of Blood), their migrations, the item sheet's Rules tab, and a rule reaching a roll.
  * @param {object} quench  The Quench API object.
  */
-export function registerRulesBatch(quench) {
+export function registerRulesTests(quench) {
   quench.registerBatch(
     `${SYS_ID}.rules`,
     context => {
@@ -130,7 +130,7 @@ export function registerRulesBatch(quench) {
       });
 
       describe("Rule data models", () => {
-        it("every rule key has a model that fills its defaults", () => {
+        it("should give every rule key a model that fills its defaults", () => {
           assert.sameMembers(Object.keys(MINIMAL_RULES), [...RULE_KEYS]);
           for (const source of Object.values(MINIMAL_RULES)) {
             const rule = createRule(source);
@@ -179,7 +179,7 @@ export function registerRulesBatch(quench) {
           });
         });
 
-        it("keeps formulas, numbers, and predicate objects", () => {
+        it("should keep formulas, numbers, and predicate objects", () => {
           const rule = createRule({
             key: "ArmorTN",
             value: "@rings.air + 1",
@@ -190,7 +190,7 @@ export function registerRulesBatch(quench) {
           assert.equal(createRule({ key: "Reduction", value: 3 }).value, 3);
         });
 
-        it("rejects an unknown key and invalid fields", () => {
+        it("should reject an unknown key and invalid fields", () => {
           assert.throws(() => createRule({ key: "Nope" }), /Unknown rule key/);
           assert.throws(() => createRule({ key: "RollModifier" }), /selector/);
           assert.throws(() => createRule({ key: "TraitAdjust", trait: "luck" }), /trait/);
@@ -208,9 +208,9 @@ export function registerRulesBatch(quench) {
 
       describe("Engine on actors", () => {
         it(
-          "a rule on an item and a rule on an effect reach Armor TN, Reduction, Wounds, and Initiative",
+          "should apply item and effect rules to Armor TN, Reduction, Wounds, and Initiative",
           clean(async () => {
-            const actor = track(await createTestPC({ name: "Rules engine" }));
+            const actor = track(await createTestPC({ name: "Rule engine: items and effects" }));
             const before = {
               armor: actor.system.armorTn.current,
               reduction: actor.system.armorTn.reduction,
@@ -235,9 +235,9 @@ export function registerRulesBatch(quench) {
         );
 
         it(
-          "a disabled effect's rules do not apply",
+          "should not apply a disabled effect's rules",
           clean(async () => {
-            const actor = track(await createTestPC({ name: "Rules disabled" }));
+            const actor = track(await createTestPC({ name: "Rule engine: disabled" }));
             const before = actor.system.armorTn.current;
             await actor.createEmbeddedDocuments("ActiveEffect", [
               { ...ruleEffect([{ key: "ArmorTN", value: 5 }]), disabled: true }
@@ -247,9 +247,9 @@ export function registerRulesBatch(quench) {
         );
 
         it(
-          "a rule on unworn armor does not apply; worn, it does",
+          "should apply a rule on armor only while the armor is worn",
           clean(async () => {
-            const actor = track(await createTestPC({ name: "Rules armor" }));
+            const actor = track(await createTestPC({ name: "Rule engine: armor" }));
             const [armor] = await actor.createEmbeddedDocuments("Item", [
               createArmorData("Quench Armor", 0, 0, {
                 system: { rules: [{ key: "ArmorTN", value: 4 }] }
@@ -264,9 +264,9 @@ export function registerRulesBatch(quench) {
         );
 
         it(
-          "seeds roll options from statuses, Rings, Traits, and the Wound Rank",
+          "should seed roll options from statuses, Rings, Traits, and the Wound Rank",
           clean(async () => {
-            const actor = track(await createTestPC({ name: "Rules options" }));
+            const actor = track(await createTestPC({ name: "Rule engine: options" }));
             await actor.toggleStatusEffect("prone", { active: true });
             const options = [...actor.rollOptions];
             assert.include(options, "status:prone");
@@ -278,24 +278,25 @@ export function registerRulesBatch(quench) {
         );
 
         it(
-          "a predicate gates a rule on the actor's options",
+          "should gate a rule on the actor's options through its predicate",
           clean(async () => {
-            const actor = track(await createTestPC({ name: "Rules predicate" }));
+            const actor = track(await createTestPC({ name: "Rule engine: predicate" }));
             await actor.createEmbeddedDocuments("Item", [
               ruleItem([{ key: "ArmorTN", value: 3, predicate: ["status:prone"] }])
             ]);
             const standing = actor.system.armorTn.current;
             await actor.toggleStatusEffect("prone", { active: true });
-            // Prone's own -10 counts against melee attacks only (p.89), so the Armor TN shows the rule's +3
+            // Prone's own -10 counts against melee attacks only, so the Armor TN shows the rule's +3
+            // game-rules/41_conditional_effects.md, p.89
             assert.equal(actor.system.armorTn.current, standing + 3);
             assert.equal(actor.system.armorTn.vs.melee, -10);
           })
         );
 
         it(
-          "a RollOption rule turns on a predicate of another rule",
+          "should turn on a predicate of another rule with a RollOption rule",
           clean(async () => {
-            const actor = track(await createTestPC({ name: "Rules option" }));
+            const actor = track(await createTestPC({ name: "Rule engine: option" }));
             const before = actor.system.armorTn.current;
             const [item] = await actor.createEmbeddedDocuments("Item", [
               ruleItem([
@@ -311,10 +312,10 @@ export function registerRulesBatch(quench) {
           })
         );
 
-        it("an invalid rule warns once and the other rules still apply", async () => {
+        it("should warn once for an invalid rule and still apply the other rules", async () => {
           const watch = watchConsole(["warn"]);
           try {
-            const actor = track(await createTestPC({ name: "Rules invalid" }));
+            const actor = track(await createTestPC({ name: "Rule engine: invalid" }));
             const before = actor.system.armorTn.current;
             await actor.createEmbeddedDocuments("Item", [
               ruleItem([
@@ -332,10 +333,11 @@ export function registerRulesBatch(quench) {
           assert.lengthOf(ruleWarnings, 2, ruleWarnings.join("\n"));
         });
 
+        // #42
         it(
-          "a RollModifier on a Trait reaches the Trait roll made without the dialog (#42)",
+          "should add a RollModifier on a Trait to the Trait roll made without the dialog",
           clean(async () => {
-            const actor = track(await createTestPC({ name: "Rules roll" }));
+            const actor = track(await createTestPC({ name: "Rule engine: roll" }));
             const ref = actor.system._derived.traitsEff.ref;
             await actor.createEmbeddedDocuments("Item", [
               ruleItem([{ key: "RollModifier", selector: "trait:ref", roll: 1, keep: 1 }])
@@ -356,11 +358,13 @@ export function registerRulesBatch(quench) {
           })
         );
 
+        // game-rules/41_conditional_effects.md, p.89
+        // #41
         it(
-          "Mounted gives +1k0 to a Skill weapon attack on an unmounted target (p.89; #41)",
+          "should give Mounted +1k0 to a Skill weapon attack on an unmounted target",
           clean(async () => {
-            const actor = track(await createTestPC({ name: "Rules rider" }));
-            const target = track(await createTestNPC({ name: "Rules footman" }));
+            const actor = track(await createTestPC({ name: "Rule engine: rider" }));
+            const target = track(await createTestNPC({ name: "Rule engine: footman" }));
             const [, katana] = await actor.createEmbeddedDocuments("Item", [
               createSkillData("Kenjutsu", 2, "agi"),
               { name: "Katana", type: "weapon", system: { associatedSkill: "kenjutsu" } }
@@ -399,9 +403,9 @@ export function registerRulesBatch(quench) {
 
       describe("Converted mechanics", () => {
         it(
-          "a Family TraitAdjust rule raises the Trait and its Ring, and XP and the Trait arrows read it",
+          "should raise the Trait and its Ring by a Family TraitAdjust rule that XP and the arrows read",
           clean(async () => {
-            const actor = track(await createTestPC({ name: "Rules family" }));
+            const actor = track(await createTestPC({ name: "Rule engine: family" }));
             const [family] = await actor.createEmbeddedDocuments("Item", [
               {
                 name: "Quench Family",
@@ -416,10 +420,11 @@ export function registerRulesBatch(quench) {
           })
         );
 
+        // game-rules/49_improving_your_character.md, p.104
         it(
-          "Insight counts a School's Void bonus but not an effect's (p.104)",
+          "should count a School's Void bonus in Insight but not an effect's",
           clean(async () => {
-            const actor = track(await createTestPC({ name: "Rules insight" }));
+            const actor = track(await createTestPC({ name: "Rule engine: insight" }));
             const before = actor.system.insight.points;
             await actor.createEmbeddedDocuments("Item", [
               {
@@ -446,10 +451,11 @@ export function registerRulesBatch(quench) {
           })
         );
 
+        // game-rules/89_shadowlands_taint.md, p.279
         it(
-          "a Lost character adds the Taint Rank to physical Trait rolls and has no Void Points (p.279)",
+          "should add the Taint Rank to a Lost character's physical Trait rolls and give no Void Points",
           clean(async () => {
-            const actor = track(await createTestPC({ name: "Rules lost" }));
+            const actor = track(await createTestPC({ name: "Rule engine: lost" }));
             await actor.update({ "system.shadowTaint.rank": 5 });
             assert.equal(actor.system.rings.void.max, 0, "no Void Points");
             const lost = T("l5r4.ui.taint.lost");
@@ -469,11 +475,12 @@ export function registerRulesBatch(quench) {
           })
         );
 
+        // game-rules/33_wounds.md, p.82
         it(
-          "a wound penalty modifier never gives Healthy a penalty (p.82)",
+          "should never give Healthy a penalty from a wound penalty modifier",
           clean(async () => {
-            const pc = track(await createTestPC({ name: "Rules healthy" }));
-            const npc = track(await createTestNPC({ name: "Rules healthy NPC" }));
+            const pc = track(await createTestPC({ name: "Rule engine: healthy" }));
+            const npc = track(await createTestNPC({ name: "Rule engine: healthy NPC" }));
             for (const actor of [pc, npc]) {
               await actor.update({ "system.woundsPenaltyMod": 5 });
               assert.equal(actor.system.woundLevels.healthy.penaltyEff, 0, actor.type);
@@ -485,9 +492,9 @@ export function registerRulesBatch(quench) {
         );
 
         it(
-          "a School TraitAdjust rule on the Void Ring raises it",
+          "should raise the Void Ring with a School TraitAdjust rule",
           clean(async () => {
-            const actor = track(await createTestPC({ name: "Rules void" }));
+            const actor = track(await createTestPC({ name: "Rule engine: void" }));
             const before = actor.system.rings.void.rank;
             await actor.createEmbeddedDocuments("Item", [
               {
@@ -501,9 +508,9 @@ export function registerRulesBatch(quench) {
         );
 
         it(
-          "skill bonus fields act as a RollModifier and reach the skill's formula, as in 3.2.1",
+          "should treat skill bonus fields as a RollModifier that reaches the skill's formula",
           clean(async () => {
-            const actor = track(await createTestPC({ name: "Rules skill" }));
+            const actor = track(await createTestPC({ name: "Rule engine: skill" }));
             const [skill] = await actor.createEmbeddedDocuments("Item", [
               createSkillData("Kenjutsu", 2, "agi", {
                 system: { rollBonus: 1, keepBonus: 1, totalBonus: 3 }
@@ -526,12 +533,13 @@ export function registerRulesBatch(quench) {
             actor => actor.toggleStatusEffect("defenseStance", { active: true })
           ]
         ]) {
+          // game-rules/36_stances.md, p.84
           it(
-            `Defense Stance from ${path} adds Air Ring plus Defense rank to Armor TN (p.84)`,
+            "should add Air Ring plus Defense rank to Armor TN for a Defense Stance from " + path,
             clean(async () => {
               const actor = track(
                 await createTestPC({
-                  name: "Rules defense",
+                  name: "Rule engine: defense",
                   system: { traits: { ref: 3, awa: 3 } }
                 })
               );
@@ -544,10 +552,12 @@ export function registerRulesBatch(quench) {
           );
         }
 
+        // Stunned sets the Armor TN and nothing else adds (roadmap/STAGE-09 decision 3)
+        // game-rules/41_conditional_effects.md, p.89
         it(
-          "a Stunned Armor TN is 5 plus armor; the Defense Stance adds nothing to it (p.89; STAGE-09 decision 3)",
+          "should set a Stunned Armor TN to 5 plus armor, with nothing from the Defense Stance",
           clean(async () => {
-            const actor = track(await createTestPC({ name: "Rules defense stunned" }));
+            const actor = track(await createTestPC({ name: "Rule engine: defense stunned" }));
             await actor.toggleStatusEffect("stunned", { active: true });
             const stunned = actor.system.armorTn.current;
             assert.equal(stunned, 5 + actor.system.armorTn.bonus);
@@ -556,11 +566,12 @@ export function registerRulesBatch(quench) {
           })
         );
 
+        // game-rules/41_conditional_effects.md, p.89
         it(
-          "Mounted gives +1k0 on attacks against an unmounted target only (p.89)",
+          "should give Mounted +1k0 on attacks against an unmounted target only",
           clean(async () => {
-            const rider = track(await createTestPC({ name: "Rules rider" }));
-            const target = track(await createTestNPC({ name: "Rules target" }));
+            const rider = track(await createTestPC({ name: "Rule engine: rider" }));
+            const target = track(await createTestNPC({ name: "Rule engine: target" }));
             const attackBonus = against => {
               const { modifiers } = collectCheck(rider, { kind: "attack", target: against });
               return modifiers.reduce((sum, m) => [sum[0] + m.roll, sum[1] + m.keep], [0, 0]);
@@ -574,10 +585,11 @@ export function registerRulesBatch(quench) {
           })
         );
 
+        // game-rules/58_skills_overview.md, p.133
         it(
-          "a Skill at Rank 10 gives a Free Raise on its own rolls (p.133)",
+          "should give a Skill at Rank 10 a Free Raise on its own rolls",
           clean(async () => {
-            const actor = track(await createTestPC({ name: "Rules mastery" }));
+            const actor = track(await createTestPC({ name: "Rule engine: mastery" }));
             const [skill] = await actor.createEmbeddedDocuments("Item", [
               createSkillData("Kenjutsu", 9, "agi")
             ]);
@@ -593,9 +605,9 @@ export function registerRulesBatch(quench) {
         );
 
         it(
-          "modifiers of one type count once in the roll, as on the sheet",
+          "should count modifiers of one type once in the roll, as on the sheet",
           clean(async () => {
-            const actor = track(await createTestPC({ name: "Rules typed" }));
+            const actor = track(await createTestPC({ name: "Rule engine: typed" }));
             await actor.createEmbeddedDocuments("Item", [
               ruleItem(
                 [{ key: "RollModifier", selector: "trait", roll: 1, keep: 1, type: "kata" }],
@@ -623,9 +635,9 @@ export function registerRulesBatch(quench) {
         );
 
         it(
-          "Master of Blood is a RollOption the maho roll reads",
+          "should make Master of Blood a RollOption the maho roll reads",
           clean(async () => {
-            const actor = track(await createTestPC({ name: "Rules maho" }));
+            const actor = track(await createTestPC({ name: "Rule engine: maho" }));
             assert.isFalse(actor.rollOptions.has("master-of-blood"));
             await actor.createEmbeddedDocuments("Item", [
               ruleItem([{ key: "RollOption", option: "master-of-blood" }], "Master of Blood")
@@ -635,11 +647,6 @@ export function registerRulesBatch(quench) {
         );
       });
 
-      /**
-       * Run migrateItemRules, holding back its summary warning (migrations report what they changed on
-       * console.warn) so cleanTest still catches any other warning.
-       * @param {Item[]} items
-       */
       /** A Trait roll with no dialog, kept for cleanup. */
       const collectAndRoll = async (actor, { traitName }) => {
         const message = await TraitRoll({
@@ -652,6 +659,11 @@ export function registerRulesBatch(quench) {
         return message;
       };
 
+      /**
+       * Run migrateItemRules, holding back its summary warning (migrations report what they changed on
+       * console.warn) so cleanTest still catches any other warning.
+       * @param {Item[]} items
+       */
       const migrateItems = async items => {
         const warn = console.warn;
         const held = [];
@@ -668,9 +680,9 @@ export function registerRulesBatch(quench) {
 
       describe("Migrations into rules", () => {
         it(
-          "a Family Trait effect becomes a TraitAdjust rule, the Trait stays the same, and running again changes nothing",
+          "should migrate a Family Trait effect into a TraitAdjust rule once, keeping the Trait",
           clean(async () => {
-            const actor = track(await createTestPC({ name: "Rules migrate family" }));
+            const actor = track(await createTestPC({ name: "Rule engine: migrate family" }));
             const [family] = await actor.createEmbeddedDocuments("Item", [effectFamily("agi")]);
             const agi = actor.system.traits.agi;
             assert.equal(
@@ -692,9 +704,9 @@ export function registerRulesBatch(quench) {
         );
 
         it(
-          "an item's 3.2.1 Free Raises become a FreeRaise rule on any roll, once",
+          "should migrate an item's freeRaises field into a FreeRaise rule on any roll, once",
           clean(async () => {
-            const actor = track(await createTestPC({ name: "Rules migrate free raises" }));
+            const actor = track(await createTestPC({ name: "Rule engine: migrate free raises" }));
             const [item] = await actor.createEmbeddedDocuments("Item", [
               { name: "Lucky charm", type: "commonItem", system: { freeRaises: 2 } }
             ]);
@@ -709,10 +721,11 @@ export function registerRulesBatch(quench) {
           })
         );
 
+        // game-rules/89_shadowlands_taint.md, p.280
         it(
-          "a Master of Blood advantage gets its RollOption and its +10 TN on other spells once (p.280)",
+          "should give a Master of Blood advantage its RollOption and its +10 TN on other spells once",
           clean(async () => {
-            const actor = track(await createTestPC({ name: "Rules migrate maho" }));
+            const actor = track(await createTestPC({ name: "Rule engine: migrate maho" }));
             const [item] = await actor.createEmbeddedDocuments("Item", [
               { name: "Master of Blood", type: "advantage" }
             ]);
@@ -735,9 +748,9 @@ export function registerRulesBatch(quench) {
         );
 
         it(
-          "a Defense Stance effect made without rules gets them back",
+          "should give a Defense Stance effect made without rules its rules back",
           clean(async () => {
-            const actor = track(await createTestPC({ name: "Rules migrate stance" }));
+            const actor = track(await createTestPC({ name: "Rule engine: migrate stance" }));
             const before = actor.system.armorTn.current;
             const created = await actor.createEmbeddedDocuments("ActiveEffect", [
               { name: "Defense Stance", statuses: ["defenseStance"] },
@@ -771,11 +784,11 @@ export function registerRulesBatch(quench) {
         );
 
         it(
-          "an unlinked token's own effects get their rules and stay tracked, and nothing is added to its delta",
+          "should migrate an unlinked token's own effects, keep them tracked, and add nothing to its delta",
           clean(async () => {
             const actor = track(
               await createTestNPC({
-                name: "Rules migrate token",
+                name: "Rule engine: migrate token",
                 prototypeToken: { actorLink: false }
               })
             );
@@ -822,7 +835,7 @@ export function registerRulesBatch(quench) {
 
       describe("Item sheet Rules tab, JSON view", () => {
         it(
-          "saves JSON typed into the Rules field as system.rules",
+          "should save JSON typed into the Rules field as system.rules",
           clean(async () => {
             const [item] = await Item.createDocuments([ruleItem([], "Quench sheet rules")]);
             try {
@@ -843,7 +856,7 @@ export function registerRulesBatch(quench) {
           })
         );
 
-        it("shows an error and saves nothing for text that is not a list of rules", async () => {
+        it("should show an error and save nothing for text that is not a list of rules", async () => {
           const [item] = await Item.createDocuments([
             ruleItem([{ key: "Note", selector: "attack", text: "Kept" }], "Quench sheet bad rules")
           ]);

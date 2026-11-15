@@ -23,11 +23,11 @@ import { createTestPC } from "../../fixtures/actor-fixtures.js";
  */
 export function registerFearWorkflowTests(quench) {
   quench.registerBatch(
-    `${SYS_ID}.workflows.fear`,
+    `${SYS_ID}.workflows.fear-workflow`,
     context => {
       const { describe, it, assert, before, after, beforeEach, afterEach } = context;
 
-      describe("Fear System Complete Workflow", () => {
+      describe("Fear system workflow", () => {
         let npcWithFear;
         let pcLowWillpower;
         let pcHighWillpower;
@@ -36,7 +36,7 @@ export function registerFearWorkflowTests(quench) {
         before(async () => {
           // Create NPC with Fear 3
           npcWithFear = await Actor.create({
-            name: "Terror Oni (Fear 3)",
+            name: "Fear system workflow: Terror Oni (Fear 3)",
             type: "npc",
             system: {
               fear: {
@@ -47,7 +47,7 @@ export function registerFearWorkflowTests(quench) {
 
           // Create PCs with different Willpower levels
           pcLowWillpower = await createTestPC({
-            name: "Low Willpower PC",
+            name: "Fear system workflow: Low Willpower PC",
             system: {
               traits: {
                 wil: 2 // Low Willpower
@@ -60,7 +60,7 @@ export function registerFearWorkflowTests(quench) {
           });
 
           pcHighWillpower = await createTestPC({
-            name: "High Willpower PC",
+            name: "Fear system workflow: High Willpower PC",
             system: {
               traits: {
                 wil: 5 // High Willpower
@@ -73,7 +73,7 @@ export function registerFearWorkflowTests(quench) {
           });
 
           pcMediumWillpower = await createTestPC({
-            name: "Medium Willpower PC",
+            name: "Fear system workflow: Medium Willpower PC",
             system: {
               traits: {
                 wil: 3
@@ -93,7 +93,7 @@ export function registerFearWorkflowTests(quench) {
           await pcMediumWillpower?.delete();
         });
 
-        describe("Step 1: NPC Fear Rating Configuration", () => {
+        describe("Step 1: NPC Fear rating configuration", () => {
           it("should have Fear rating configured on NPC", () => {
             const fearRank = npcWithFear.system.fear.rank;
             const fearTN = npcWithFear.system.fear.tn;
@@ -104,9 +104,9 @@ export function registerFearWorkflowTests(quench) {
             assert.isTrue(fearActive, "Fear is active (rank > 0)");
           });
 
-          it("should handle Fear Rank 0 (no Fear)", async () => {
+          it("should handle Fear Rank 0 as no Fear", async () => {
             const npcNoFear = await Actor.create({
-              name: "Harmless NPC",
+              name: "Fear system workflow: Harmless NPC",
               type: "npc",
               system: {
                 fear: {
@@ -124,9 +124,9 @@ export function registerFearWorkflowTests(quench) {
             }
           });
 
-          it("should handle maximum Fear Rank (10)", async () => {
+          it("should handle the maximum Fear Rank of 10", async () => {
             const npcMaxFear = await Actor.create({
-              name: "Nightmare Entity (Fear 10)",
+              name: "Fear system workflow: Nightmare Entity (Fear 10)",
               type: "npc",
               system: {
                 fear: {
@@ -145,7 +145,7 @@ export function registerFearWorkflowTests(quench) {
           });
         });
 
-        describe("Step 2: PC Resistance Test Execution", () => {
+        describe("Step 2: PC resistance test execution", () => {
           it("should execute Fear test for single PC", async () => {
             // Test Fear test execution (should create chat message)
             const chatMessage = await testFear({
@@ -168,7 +168,7 @@ export function registerFearWorkflowTests(quench) {
 
           it("should handle PC with zero Honor", async () => {
             const pcNoHonor = await createTestPC({
-              name: "Disgraced PC",
+              name: "Fear system workflow: Disgraced PC",
               system: {
                 traits: {
                   wil: 3
@@ -203,13 +203,13 @@ export function registerFearWorkflowTests(quench) {
           });
         });
 
-        describe("Step 3: ActiveEffect Application on Failure", () => {
+        describe("Step 3: ActiveEffect application on failure", () => {
           let testPC;
 
           beforeEach(async () => {
             // Create fresh PC for each test
             testPC = await createTestPC({
-              name: "Test PC for Effects",
+              name: "Fear system workflow: Test PC for Effects",
               system: {
                 traits: {
                   wil: 1 // Very low Willpower = likely to fail
@@ -229,7 +229,7 @@ export function registerFearWorkflowTests(quench) {
           it("should NOT create ActiveEffect on success", async () => {
             // Use NPC with a low Fear Rank to ensure success
             const npcLowFear = await Actor.create({
-              name: "Weak Fear NPC",
+              name: "Fear system workflow: Weak Fear NPC",
               type: "npc",
               system: {
                 fear: {
@@ -256,7 +256,7 @@ export function registerFearWorkflowTests(quench) {
           it("should create ActiveEffect with feared status on failure", async () => {
             // Use high Fear NPC to ensure failure for low Willpower PC
             const npcHighFear = await Actor.create({
-              name: "Terrifying NPC",
+              name: "Fear system workflow: Terrifying NPC",
               type: "npc",
               system: {
                 fear: {
@@ -290,7 +290,7 @@ export function registerFearWorkflowTests(quench) {
 
           it("should store Fear Rank in effect flags", async () => {
             const npcFear5 = await Actor.create({
-              name: "Fear 5 NPC",
+              name: "Fear system workflow: Fear 5 NPC",
               type: "npc",
               system: {
                 fear: {
@@ -317,7 +317,7 @@ export function registerFearWorkflowTests(quench) {
 
           it("should have Fear icon on ActiveEffect", async () => {
             const npcFear8 = await Actor.create({
-              name: "Fear 8 NPC",
+              name: "Fear system workflow: Fear 8 NPC",
               type: "npc",
               system: {
                 fear: {
@@ -343,13 +343,13 @@ export function registerFearWorkflowTests(quench) {
           });
         });
 
-        describe("Step 4: Catastrophic Failure Handling", () => {
+        describe("Step 4: catastrophic failure handling", () => {
           let catastrophicPC;
 
           beforeEach(async () => {
             // PC with Willpower 1 + no Honor vs high Fear
             catastrophicPC = await createTestPC({
-              name: "Catastrophic Test PC",
+              name: "Fear system workflow: Catastrophic Test PC",
               system: {
                 traits: {
                   wil: 1 // Minimum Willpower
@@ -366,10 +366,10 @@ export function registerFearWorkflowTests(quench) {
             await catastrophicPC?.delete();
           });
 
-          it("should detect catastrophic failure condition (fail by 15+)", async () => {
+          it("should detect the catastrophic failure condition of failing by 15 or more", async () => {
             // High Fear TN makes catastrophic failure likely
             const npcExtremeFear = await Actor.create({
-              name: "Extreme Fear NPC",
+              name: "Fear system workflow: Extreme Fear NPC",
               type: "npc",
               system: {
                 fear: {
@@ -427,14 +427,14 @@ export function registerFearWorkflowTests(quench) {
           });
         });
 
-        describe("Step 5: Multiple Fear Sources", () => {
+        describe("Step 5: multiple Fear sources", () => {
           let npcFear2;
           let npcFear4;
           let multipleTestPC;
 
           beforeEach(async () => {
             npcFear2 = await Actor.create({
-              name: "Lesser Oni (Fear 2)",
+              name: "Fear system workflow: Lesser Oni (Fear 2)",
               type: "npc",
               system: {
                 fear: {
@@ -444,7 +444,7 @@ export function registerFearWorkflowTests(quench) {
             });
 
             npcFear4 = await Actor.create({
-              name: "Greater Oni (Fear 4)",
+              name: "Fear system workflow: Greater Oni (Fear 4)",
               type: "npc",
               system: {
                 fear: {
@@ -454,7 +454,7 @@ export function registerFearWorkflowTests(quench) {
             });
 
             multipleTestPC = await createTestPC({
-              name: "Multiple Fear Test PC",
+              name: "Fear system workflow: Multiple Fear Test PC",
               system: {
                 traits: {
                   wil: 2
@@ -560,12 +560,12 @@ export function registerFearWorkflowTests(quench) {
           });
         });
 
-        describe("Step 6: Effect Removal and Recovery", () => {
+        describe("Step 6: effect removal and recovery", () => {
           let recoveryPC;
 
           beforeEach(async () => {
             recoveryPC = await createTestPC({
-              name: "Recovery Test PC",
+              name: "Fear system workflow: Recovery Test PC",
               system: {
                 traits: {
                   wil: 3
@@ -653,14 +653,15 @@ export function registerFearWorkflowTests(quench) {
             const fearEffect = recoveryPC.effects.find(e => e.statuses.has("feared"));
 
             assert.exists(fearEffect, "Fear effect persists");
-            // 14.370 duration shape: value / units / expiry (common/documents/active-effect.mjs:61-68); no
-            // length, ended by the encounterEnd event (p.90; STAGE-09 decision 4)
+            // 14.370 duration shape: value / units / expiry [src: common/documents/active-effect.mjs:61-68];
+            // no length, ended by the encounterEnd event (roadmap/STAGE-09 decision 4)
+            // game-rules/42_fear.md, p.90
             assert.equal(fearEffect.duration.value, Infinity, "No length in time");
             assert.equal(fearEffect.duration.expiry, "encounterEnd", "Ends with the encounter");
           });
         });
 
-        describe("Edge Cases and Error Handling", () => {
+        describe("Edge cases and error handling", () => {
           it("should handle missing NPC gracefully", async () => {
             const result = await testFear({
               npc: null,
@@ -681,7 +682,7 @@ export function registerFearWorkflowTests(quench) {
 
           it("should handle NPC with Fear Rank 0", async () => {
             const npcNoFear = await Actor.create({
-              name: "No Fear NPC",
+              name: "Fear system workflow: No Fear NPC",
               type: "npc",
               system: {
                 fear: {
@@ -704,7 +705,7 @@ export function registerFearWorkflowTests(quench) {
 
           it("should handle PC with zero Willpower", async () => {
             const pcNoWillpower = await createTestPC({
-              name: "No Willpower PC",
+              name: "Fear system workflow: No Willpower PC",
               system: {
                 traits: {
                   wil: 0
@@ -729,7 +730,7 @@ export function registerFearWorkflowTests(quench) {
             }
           });
 
-          it("should handle invalid NPC (PC type instead)", async () => {
+          it("should handle an invalid NPC that is a PC", async () => {
             const result = await testFear({
               npc: pcMediumWillpower, // Wrong type
               character: pcLowWillpower
@@ -740,11 +741,11 @@ export function registerFearWorkflowTests(quench) {
           });
         });
 
-        describe("Integration: Complete End-to-End Workflow", () => {
+        describe("Integration: complete end-to-end workflow", () => {
           it("should execute complete workflow: NPC → Test → Effect", async () => {
             // Step 1: Create NPC with Fear
             const testNPC = await Actor.create({
-              name: "Workflow Test Oni",
+              name: "Fear system workflow: Workflow Test Oni",
               type: "npc",
               system: {
                 fear: {
@@ -755,7 +756,7 @@ export function registerFearWorkflowTests(quench) {
 
             // Step 2: Create PC likely to fail
             const testPC = await createTestPC({
-              name: "Workflow Test PC",
+              name: "Fear system workflow: Workflow Test PC",
               system: {
                 traits: {
                   wil: 1 // Very low
@@ -800,6 +801,6 @@ export function registerFearWorkflowTests(quench) {
         });
       });
     },
-    { displayName: "L5R4: Fear System Workflow Tests" }
+    { displayName: "L5R4: Fear system workflow" }
   );
 }

@@ -1,26 +1,8 @@
 /**
- * @fileoverview NPC-Specific Workflow Tests
- *
- * Tests complete NPC workflows that differ from PC mechanics:
- * - NPC wound mode switching (manual vs formula)
- * - NPC simplified wound levels (1-8 levels)
- * - NPC attack patterns (attack1/attack2/attack3)
- * - NPC roll mechanics (direct XkY values)
- *
- * **Test Coverage:**
- * - Wound mode switching workflow
- * - Manual wound configuration
- * - Formula-based wound calculation
- * - Simplified wound level progression (1-8)
- * - Attack pattern configuration
- * - NPC-specific roll mechanics
- *
- * **Testing Principles Applied:**
- * - Tests BEHAVIOR, not implementation
- * - Uses REAL services and document updates
- * - Tests EDGE CASES (boundaries, mode switches, invalid values)
- * - Tests fail when code breaks
- *
+ * NPC workflows that differ from a PC's:
+ * - Wound mode switching (manual and formula)
+ * - Simplified wound levels (1 to 8 levels)
+ * - Attack patterns (attack1, attack2, attack3) as direct XkY values
  */
 
 import { SYS_ID } from "../../../module/config/constants.js";
@@ -30,13 +12,13 @@ import { createTestNPC } from "../../fixtures/actor-fixtures.js";
  * Register NPC workflow tests
  * @param {Object} quench - Quench test framework
  */
-export function registerNPCWorkflowTests(quench) {
+export function registerNpcWorkflowTests(quench) {
   quench.registerBatch(
-    `${SYS_ID}.workflows.npc`,
+    `${SYS_ID}.workflows.npc-workflows`,
     context => {
       const { describe, it, assert, afterEach } = context;
 
-      describe("NPC Wound Mode Switching Workflow", () => {
+      describe("NPC wound mode switching", () => {
         let npc;
 
         afterEach(async () => {
@@ -48,7 +30,7 @@ export function registerNPCWorkflowTests(quench) {
         it("should create NPC with manual wound mode by default", async () => {
           // ARRANGE & ACT
           npc = await createTestNPC({
-            name: "Manual Mode NPC",
+            name: "NPC workflows: manual mode NPC",
             system: {
               traits: { sta: 3, wil: 3 } // Earth = 3
             }
@@ -62,7 +44,7 @@ export function registerNPCWorkflowTests(quench) {
         it("should switch from manual to formula mode", async () => {
           // ARRANGE
           npc = await createTestNPC({
-            name: "Mode Switch NPC",
+            name: "NPC workflows: mode switch NPC",
             system: {
               traits: { sta: 4, wil: 4 }, // Earth = 4
               woundMode: "manual",
@@ -84,7 +66,7 @@ export function registerNPCWorkflowTests(quench) {
         it("should switch from formula to manual mode", async () => {
           // ARRANGE
           npc = await createTestNPC({
-            name: "Formula to Manual NPC",
+            name: "NPC workflows: formula to manual NPC",
             system: {
               traits: { sta: 3, wil: 3 }, // Earth = 3
               woundMode: "formula",
@@ -104,7 +86,7 @@ export function registerNPCWorkflowTests(quench) {
         it("should preserve wound data when switching modes", async () => {
           // ARRANGE
           npc = await createTestNPC({
-            name: "Data Preservation NPC",
+            name: "NPC workflows: data preservation NPC",
             system: {
               traits: { sta: 4, wil: 4 }, // Earth = 4
               woundMode: "manual",
@@ -125,7 +107,7 @@ export function registerNPCWorkflowTests(quench) {
         it("should recalculate wound levels after mode switch", async () => {
           // ARRANGE
           npc = await createTestNPC({
-            name: "Recalc NPC",
+            name: "NPC workflows: recalc NPC",
             system: {
               traits: { sta: 3, wil: 3 }, // Earth = 3
               woundMode: "manual",
@@ -146,7 +128,7 @@ export function registerNPCWorkflowTests(quench) {
         });
       });
 
-      describe("NPC Manual Wound Configuration", () => {
+      describe("NPC manual wound configuration", () => {
         let npc;
 
         afterEach(async () => {
@@ -158,7 +140,7 @@ export function registerNPCWorkflowTests(quench) {
         it("should set manual max wounds", async () => {
           // ARRANGE & ACT
           npc = await createTestNPC({
-            name: "Manual Wounds NPC",
+            name: "NPC workflows: manual wounds NPC",
             system: {
               woundMode: "manual",
               wounds: { max: 75 }
@@ -173,7 +155,7 @@ export function registerNPCWorkflowTests(quench) {
         it("should update manual max wounds", async () => {
           // ARRANGE
           npc = await createTestNPC({
-            name: "Update Manual NPC",
+            name: "NPC workflows: update manual NPC",
             system: {
               woundMode: "manual",
               wounds: { max: 50 }
@@ -192,7 +174,7 @@ export function registerNPCWorkflowTests(quench) {
         it("should handle manual wounds at boundaries", async () => {
           // ARRANGE & ACT - Very low wounds
           npc = await createTestNPC({
-            name: "Low Wounds NPC",
+            name: "NPC workflows: low wounds NPC",
             system: {
               woundMode: "manual",
               wounds: { max: 10 }
@@ -212,7 +194,7 @@ export function registerNPCWorkflowTests(quench) {
         it("should track suffered wounds in manual mode", async () => {
           // ARRANGE
           npc = await createTestNPC({
-            name: "Suffered Manual NPC",
+            name: "NPC workflows: suffered manual NPC",
             system: {
               woundMode: "manual",
               wounds: { max: 60 },
@@ -229,7 +211,7 @@ export function registerNPCWorkflowTests(quench) {
         });
       });
 
-      describe("NPC Formula Wound Calculation", () => {
+      describe("NPC formula wound calculation", () => {
         let npc;
 
         afterEach(async () => {
@@ -241,7 +223,7 @@ export function registerNPCWorkflowTests(quench) {
         it("should calculate wounds from Earth Ring with multiplier", async () => {
           // ARRANGE & ACT
           npc = await createTestNPC({
-            name: "Formula NPC",
+            name: "NPC workflows: formula NPC",
             system: {
               traits: { sta: 4, wil: 4 }, // Earth = 4
               woundMode: "formula",
@@ -259,7 +241,7 @@ export function registerNPCWorkflowTests(quench) {
         it("should recalculate wounds when Earth Ring changes", async () => {
           // ARRANGE
           npc = await createTestNPC({
-            name: "Earth Change NPC",
+            name: "NPC workflows: earth change NPC",
             system: {
               traits: { sta: 3, wil: 3 }, // Earth = 3
               woundMode: "formula",
@@ -287,7 +269,7 @@ export function registerNPCWorkflowTests(quench) {
         it("should recalculate wounds when multiplier changes", async () => {
           // ARRANGE
           npc = await createTestNPC({
-            name: "Multiplier Change NPC",
+            name: "NPC workflows: multiplier change NPC",
             system: {
               traits: { sta: 4, wil: 4 }, // Earth = 4
               woundMode: "formula",
@@ -305,10 +287,10 @@ export function registerNPCWorkflowTests(quench) {
           assert.exists(npc.system.woundLevels, "Wound levels recalculated");
         });
 
-        it("should handle multiplier boundaries (2-5)", async () => {
+        it("should handle multipliers from 2 to 5", async () => {
           // ARRANGE
           npc = await createTestNPC({
-            name: "Multiplier Bounds NPC",
+            name: "NPC workflows: multiplier bounds NPC",
             system: {
               traits: { sta: 3, wil: 3 }, // Earth = 3
               woundMode: "formula",
@@ -328,7 +310,7 @@ export function registerNPCWorkflowTests(quench) {
         it("should calculate wounds with Earth Ring = 1", async () => {
           // ARRANGE & ACT - Edge case: minimum Earth
           npc = await createTestNPC({
-            name: "Min Earth NPC",
+            name: "NPC workflows: min earth NPC",
             system: {
               traits: { sta: 1, wil: 1 }, // Earth = 1
               woundMode: "formula",
@@ -344,7 +326,7 @@ export function registerNPCWorkflowTests(quench) {
         it("should calculate wounds with Earth Ring = 10", async () => {
           // ARRANGE & ACT - Edge case: maximum Earth
           npc = await createTestNPC({
-            name: "Max Earth NPC",
+            name: "NPC workflows: max earth NPC",
             system: {
               traits: { sta: 10, wil: 10 }, // Earth = 10
               woundMode: "formula",
@@ -358,7 +340,7 @@ export function registerNPCWorkflowTests(quench) {
         });
       });
 
-      describe("NPC Simplified Wound Levels (1-8)", () => {
+      describe("NPC simplified wound levels from 1 to 8", () => {
         let npc;
 
         afterEach(async () => {
@@ -367,10 +349,10 @@ export function registerNPCWorkflowTests(quench) {
           }
         });
 
-        it("should create NPC with 1 wound level (instant death)", async () => {
+        it("should create NPC with 1 wound level", async () => {
           // ARRANGE & ACT
           npc = await createTestNPC({
-            name: "One Level NPC",
+            name: "NPC workflows: one level NPC",
             system: {
               nrWoundLvls: 1,
               woundMode: "manual",
@@ -383,10 +365,10 @@ export function registerNPCWorkflowTests(quench) {
           assert.exists(npc.system.woundLevels, "Wound levels exist");
         });
 
-        it("should create NPC with 3 wound levels (default)", async () => {
+        it("should create NPC with the default 3 wound levels", async () => {
           // ARRANGE & ACT
           npc = await createTestNPC({
-            name: "Three Level NPC",
+            name: "NPC workflows: three level NPC",
             system: {
               nrWoundLvls: 3
             }
@@ -396,10 +378,10 @@ export function registerNPCWorkflowTests(quench) {
           assert.equal(npc.system.nrWoundLvls, 3, "NPC has 3 wound levels");
         });
 
-        it("should create NPC with 8 wound levels (full PC rules)", async () => {
+        it("should create NPC with the 8 wound levels of a PC", async () => {
           // ARRANGE & ACT
           npc = await createTestNPC({
-            name: "Eight Level NPC",
+            name: "NPC workflows: eight level NPC",
             system: {
               nrWoundLvls: 8,
               traits: { sta: 4, wil: 4 } // Earth = 4
@@ -414,7 +396,7 @@ export function registerNPCWorkflowTests(quench) {
         it("should update wound level count", async () => {
           // ARRANGE
           npc = await createTestNPC({
-            name: "Update Levels NPC",
+            name: "NPC workflows: update levels NPC",
             system: {
               nrWoundLvls: 3
             }
@@ -429,10 +411,10 @@ export function registerNPCWorkflowTests(quench) {
           assert.equal(npc.system.nrWoundLvls, 5, "Updated to 5 levels");
         });
 
-        it("should handle wound level boundaries (1-8)", async () => {
+        it("should handle wound level counts from 1 to 8", async () => {
           // ARRANGE
           npc = await createTestNPC({
-            name: "Bounds NPC",
+            name: "NPC workflows: bounds NPC",
             system: {
               nrWoundLvls: 1
             }
@@ -451,7 +433,7 @@ export function registerNPCWorkflowTests(quench) {
         it("should progress through simplified wound levels", async () => {
           // ARRANGE
           npc = await createTestNPC({
-            name: "Progression NPC",
+            name: "NPC workflows: progression NPC",
             system: {
               nrWoundLvls: 4,
               woundMode: "manual",
@@ -482,7 +464,7 @@ export function registerNPCWorkflowTests(quench) {
         it("should apply wound penalties at each level", async () => {
           // ARRANGE
           npc = await createTestNPC({
-            name: "Penalty NPC",
+            name: "NPC workflows: penalty NPC",
             system: {
               nrWoundLvls: 4,
               woundMode: "manual",
@@ -505,7 +487,7 @@ export function registerNPCWorkflowTests(quench) {
         });
       });
 
-      describe("NPC Attack Pattern Configuration", () => {
+      describe("NPC attack pattern configuration", () => {
         let npc;
 
         afterEach(async () => {
@@ -517,7 +499,7 @@ export function registerNPCWorkflowTests(quench) {
         it("should configure attack1 pattern", async () => {
           // ARRANGE & ACT
           npc = await createTestNPC({
-            name: "Attack1 NPC",
+            name: "NPC workflows: attack1 NPC",
             system: {
               attack1: { roll: 5, keep: 3 },
               damage1: { roll: 3, keep: 2 }
@@ -535,7 +517,7 @@ export function registerNPCWorkflowTests(quench) {
         it("should configure attack2 pattern", async () => {
           // ARRANGE & ACT
           npc = await createTestNPC({
-            name: "Attack2 NPC",
+            name: "NPC workflows: attack2 NPC",
             system: {
               attack2: { roll: 6, keep: 4 },
               damage2: { roll: 4, keep: 3 }
@@ -551,7 +533,7 @@ export function registerNPCWorkflowTests(quench) {
         it("should configure attack3 pattern", async () => {
           // ARRANGE & ACT
           npc = await createTestNPC({
-            name: "Attack3 NPC",
+            name: "NPC workflows: attack3 NPC",
             system: {
               attack3: { roll: 7, keep: 5 },
               damage3: { roll: 5, keep: 3 }
@@ -567,7 +549,7 @@ export function registerNPCWorkflowTests(quench) {
         it("should configure multiple attack patterns", async () => {
           // ARRANGE & ACT
           npc = await createTestNPC({
-            name: "Multi-Attack NPC",
+            name: "NPC workflows: multi-attack NPC",
             system: {
               attack1: { roll: 5, keep: 3 },
               attack2: { roll: 6, keep: 4 },
@@ -592,7 +574,7 @@ export function registerNPCWorkflowTests(quench) {
         it("should update attack pattern values", async () => {
           // ARRANGE
           npc = await createTestNPC({
-            name: "Update Attack NPC",
+            name: "NPC workflows: update attack NPC",
             system: {
               attack1: { roll: 5, keep: 3 }
             }
@@ -610,7 +592,7 @@ export function registerNPCWorkflowTests(quench) {
         it("should handle asymmetric dice pools", async () => {
           // ARRANGE & ACT
           npc = await createTestNPC({
-            name: "Asymmetric NPC",
+            name: "NPC workflows: asymmetric NPC",
             system: {
               attack1: { roll: 10, keep: 5, dmgRoll: 8, dmgKeep: 3 }
             }
@@ -629,7 +611,7 @@ export function registerNPCWorkflowTests(quench) {
         it("should handle symmetric dice pools", async () => {
           // ARRANGE & ACT
           npc = await createTestNPC({
-            name: "Symmetric NPC",
+            name: "NPC workflows: symmetric NPC",
             system: {
               attack1: { roll: 6, keep: 6, dmgRoll: 4, dmgKeep: 4 }
             }
@@ -644,7 +626,7 @@ export function registerNPCWorkflowTests(quench) {
         it("should handle minimum dice pools", async () => {
           // ARRANGE & ACT
           npc = await createTestNPC({
-            name: "Min Dice NPC",
+            name: "NPC workflows: min dice NPC",
             system: {
               attack1: { roll: 1, keep: 1, dmgRoll: 1, dmgKeep: 1 }
             }
@@ -658,7 +640,7 @@ export function registerNPCWorkflowTests(quench) {
         it("should handle maximum dice pools", async () => {
           // ARRANGE & ACT
           npc = await createTestNPC({
-            name: "Max Dice NPC",
+            name: "NPC workflows: max dice NPC",
             system: {
               attack1: { roll: 10, keep: 10, dmgRoll: 10, dmgKeep: 10 }
             }
@@ -670,7 +652,7 @@ export function registerNPCWorkflowTests(quench) {
         });
       });
 
-      describe("NPC Complete Workflow Integration", () => {
+      describe("NPC complete workflow", () => {
         let npc;
 
         afterEach(async () => {
@@ -682,7 +664,7 @@ export function registerNPCWorkflowTests(quench) {
         it("should create combat-ready NPC with all features", async () => {
           // ARRANGE & ACT - Create complete NPC
           npc = await createTestNPC({
-            name: "Complete Combat NPC",
+            name: "NPC workflows: complete combat NPC",
             system: {
               traits: { sta: 4, wil: 4, str: 5, ref: 4 },
               nrWoundLvls: 4,
@@ -706,7 +688,7 @@ export function registerNPCWorkflowTests(quench) {
         it("should handle NPC taking damage in formula mode", async () => {
           // ARRANGE
           npc = await createTestNPC({
-            name: "Damage Test NPC",
+            name: "NPC workflows: damage test NPC",
             system: {
               traits: { sta: 3, wil: 3 }, // Earth = 3
               nrWoundLvls: 3,
@@ -730,7 +712,7 @@ export function registerNPCWorkflowTests(quench) {
         it("should handle NPC taking damage in manual mode", async () => {
           // ARRANGE
           npc = await createTestNPC({
-            name: "Manual Damage NPC",
+            name: "NPC workflows: manual damage NPC",
             system: {
               nrWoundLvls: 3,
               woundMode: "manual",
@@ -752,7 +734,7 @@ export function registerNPCWorkflowTests(quench) {
         it("should handle NPC reaching Out state", async () => {
           // ARRANGE
           npc = await createTestNPC({
-            name: "Out State NPC",
+            name: "NPC workflows: out state NPC",
             system: {
               nrWoundLvls: 3,
               woundMode: "manual",
@@ -772,7 +754,7 @@ export function registerNPCWorkflowTests(quench) {
         it("should reconfigure NPC mid-combat", async () => {
           // ARRANGE - Start with one configuration
           npc = await createTestNPC({
-            name: "Reconfigure NPC",
+            name: "NPC workflows: reconfigure NPC",
             system: {
               nrWoundLvls: 3,
               woundMode: "manual",
@@ -799,6 +781,6 @@ export function registerNPCWorkflowTests(quench) {
         });
       });
     },
-    { displayName: "L5R4: NPC Workflow Tests" }
+    { displayName: "L5R4: NPC workflows" }
   );
 }

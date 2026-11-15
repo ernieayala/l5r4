@@ -33,7 +33,7 @@ const poolOf = message => `${message.system.pool.roll}k${message.system.pool.kee
  * re-rolls, and contests rebuild from the stored context.
  * @param {object} quench  The Quench API object.
  */
-export function registerRollPipelineBatch(quench) {
+export function registerRollPipelineTests(quench) {
   quench.registerBatch(
     `${SYS_ID}.roll-pipeline`,
     context => {
@@ -70,7 +70,7 @@ export function registerRollPipelineBatch(quench) {
       const swordsman = async (overrides = {}) => {
         const actor = track(
           await createTestPC({
-            name: "Pipeline swordsman",
+            name: "Roll pipeline: swordsman",
             system: { traits: { agi: 3, ref: 3, awa: 3 } },
             ...overrides
           })
@@ -82,10 +82,11 @@ export function registerRollPipelineBatch(quench) {
         return { actor, katana: actor.items.find(i => i.type === "weapon") };
       };
 
-      describe("Roll & Keep dice (p.77)", () => {
+      // game-rules/26_special_dice_rules.md, p.77
+      describe("Roll & Keep dice", () => {
         /**
-         * Evaluate a formula with the given faces in order (client/dice/terms/dice.mjs randomFace: a draw r gives
-         * ceil((1 - r) x 10)).
+         * Evaluate a formula with the given faces in order: a draw r gives the face ceil((1 - r) x 10)
+         * [src: client/dice/terms/dice.mjs:409-425].
          */
         const rollWith = async (formula, faces) => {
           const random = CONFIG.Dice.randomUniform;
@@ -98,7 +99,7 @@ export function registerRollPipelineBatch(quench) {
           }
         };
 
-        it("each die explodes into its own total before the highest are kept", async () => {
+        it("should explode each die into its own total before the highest are kept", async () => {
           // Two 10s; the first explodes into a 3 (13), the second into a 10 and a 9 (29). Keeping one die keeps 29;
           // keeping first and exploding after would keep a single 10 and reach 13
           const roll = await rollWith("2d10xa10k1", [10, 10, 3, 10, 9]);
@@ -113,20 +114,21 @@ export function registerRollPipelineBatch(quench) {
           );
         });
 
-        it("explodes on a weapon's lower value, each die on its own", async () => {
+        it("should explode on a weapon's lower value, each die on its own", async () => {
           // Explodes on 9: the 9 rolls again into a 4 (13), the 8 and 2 stay; keep 13 + 8
           const roll = await rollWith("3d10xa>=9k2", [9, 8, 2, 4]);
           assert.equal(roll.total, 21);
         });
 
-        it("a pool's formula explodes before it keeps", () => {
+        it("should explode a pool's formula before it keeps", () => {
           assert.equal(inlineFormula("7k3"), "7d10xa10k3+0");
         });
       });
 
       describe("Every roll type posts a roll message with its context", () => {
+        // game-rules/29_types_of_rolls.md, p.79
         it(
-          "Skill Roll: (Skill + Trait)k(Trait) (p.79)",
+          "should roll Skill + Trait and keep Trait on a Skill Roll",
           clean(async () => {
             const { actor } = await swordsman();
             const message = keep(
@@ -148,8 +150,9 @@ export function registerRollPipelineBatch(quench) {
           })
         );
 
+        // game-rules/29_types_of_rolls.md, p.80
         it(
-          "Trait, Ring, and plain rolls roll and keep the same rank (p.80)",
+          "should roll and keep the same rank on Trait, Ring, and plain rolls",
           clean(async () => {
             const { actor } = await swordsman();
             const trait = keep(
@@ -187,8 +190,9 @@ export function registerRollPipelineBatch(quench) {
           })
         );
 
+        // game-rules/29_types_of_rolls.md, p.80
         it(
-          "Spell Casting Roll: (Ring + School Rank)k(Ring) against 5 + 5 × Mastery, spending a slot (p.80)",
+          "should cast at Ring + School Rank, keep Ring, against 5 + 5 × Mastery, spending a slot",
           clean(async () => {
             const { actor } = await swordsman();
             const [spell] = await actor.createEmbeddedDocuments("Item", [
@@ -205,8 +209,9 @@ export function registerRollPipelineBatch(quench) {
           })
         );
 
+        // game-rules/66_magic_and_spell_casting.md, p.163
         it(
-          "a Void spell rolls the Void Ring (p.163)",
+          "should roll the Void Ring for a Void spell",
           clean(async () => {
             const { actor } = await swordsman();
             await actor.update({ "system.rings.void.rank": 3, "system.spellSlots.void": 3 });
@@ -218,8 +223,9 @@ export function registerRollPipelineBatch(quench) {
           })
         );
 
+        // game-rules/67_universal_spells.md, p.164-165
         it(
-          "a universal spell is cast in the element the caster picks (pp.164-165)",
+          "should cast a universal spell in the element the caster picks",
           clean(async () => {
             const { actor } = await swordsman();
             const [spell] = await actor.createEmbeddedDocuments("Item", [
@@ -246,8 +252,9 @@ export function registerRollPipelineBatch(quench) {
           })
         );
 
+        // game-rules/66_magic_and_spell_casting.md, p.164
         it(
-          "a spell above the School Rank asks the GM before it is cast (p.164)",
+          "should ask the GM before a spell above the School Rank is cast",
           clean(async () => {
             const { actor } = await swordsman();
             const [spell] = await actor.createEmbeddedDocuments("Item", [
@@ -271,7 +278,7 @@ export function registerRollPipelineBatch(quench) {
         );
 
         it(
-          "A Ring Roll cast as a spell adds the School Rank and spends the chosen slot",
+          "should add the School Rank and spend the chosen slot when a Ring Roll is cast as a spell",
           clean(async () => {
             const { actor } = await swordsman();
             const rank = actor.system.insight.rank;
@@ -293,7 +300,7 @@ export function registerRollPipelineBatch(quench) {
         );
 
         it(
-          "Maho: (Insight Rank + Ring)k(Ring), blood paid, extra blood as Free Raises",
+          "should cast maho at Insight Rank + Ring, keep Ring, paying blood, with extra blood as Free Raises",
           clean(async () => {
             const { actor } = await swordsman();
             const [spell] = await actor.createEmbeddedDocuments("Item", [
@@ -312,8 +319,9 @@ export function registerRollPipelineBatch(quench) {
           })
         );
 
+        // game-rules/89_shadowlands_taint.md, p.275
         it(
-          "maho Taint reaches a new Rank at ten points (p.275), through the ledger",
+          "should raise maho Taint to a new Rank at ten points, through the ledger",
           clean(async () => {
             const { actor } = await swordsman();
             await actor.update({ "system.shadowTaint.points": 9 });
@@ -337,8 +345,9 @@ export function registerRollPipelineBatch(quench) {
           })
         );
 
+        // game-rules/45_status.md, p.94-95
         it(
-          "Status can fall below 0 (pp.94-95)",
+          "should let Status fall below 0",
           clean(async () => {
             const { actor } = await swordsman();
             await recordTrackChange(actor, "status", -25, "Quench");
@@ -350,8 +359,10 @@ export function registerRollPipelineBatch(quench) {
           })
         );
 
+        // game-rules/25_rings_and_traits.md, p.78
+        // game-rules/29_types_of_rolls.md, p.80
         it(
-          "Weapon damage: DR with Strength, Raises as Increased Damage, no Void (p.78, p.80)",
+          "should roll weapon damage as DR with Strength, Raises as Increased Damage, and no Void",
           clean(async () => {
             const { actor, katana } = await swordsman();
             const message = keep(
@@ -376,8 +387,9 @@ export function registerRollPipelineBatch(quench) {
       });
 
       describe("Bugs the pipeline fixes", () => {
+        // AUTOMATION.md B1
         it(
-          "B1: a skill's bonus field counts once",
+          "should count a skill's bonus field once",
           clean(async () => {
             const { actor } = await swordsman();
             await actor.items.getName("Kenjutsu").update({ "system.rollBonus": 1 });
@@ -395,8 +407,10 @@ export function registerRollPipelineBatch(quench) {
           })
         );
 
+        // AUTOMATION.md B2, B3
+        // game-rules/36_stances.md, p.84
         it(
-          "B2 and B3: a skilled attack takes the skill's keep bonus and Full Attack +2k1 once (p.84)",
+          "should give a skilled attack the skill's keep bonus and Full Attack +2k1 once",
           clean(async () => {
             const { actor, katana } = await swordsman();
             await actor.items.getName("Kenjutsu").update({ "system.keepBonus": 1 });
@@ -417,10 +431,11 @@ export function registerRollPipelineBatch(quench) {
           })
         );
 
+        // AUTOMATION.md B3
         it(
-          "B3: an NPC attack takes Full Attack +2k1 once",
+          "should give an NPC attack Full Attack +2k1 once",
           clean(async () => {
-            const npc = track(await createTestNPC({ name: "Pipeline NPC" }));
+            const npc = track(await createTestNPC({ name: "Roll pipeline: NPC" }));
             await applyEffect(npc, "fullAttackStance");
             const message = keep(
               await SimpleRoll({
@@ -435,8 +450,10 @@ export function registerRollPipelineBatch(quench) {
           })
         );
 
+        // AUTOMATION.md B7
+        // game-rules/28_raises.md, p.79
         it(
-          "B7: Raises are capped by the Void Ring, not the Void Points left (p.79)",
+          "should cap Raises by the Void Ring, not the Void Points left",
           clean(async () => {
             const { actor } = await swordsman();
             await actor.update({ "system.rings.void": { rank: 3, value: 0 } });
@@ -456,8 +473,10 @@ export function registerRollPipelineBatch(quench) {
           })
         );
 
+        // AUTOMATION.md B7
+        // game-rules/30_skill_rolls_expanded.md, p.80
         it(
-          "B7: an Unskilled Roll takes no Raises or Free Raises, and its dice never explode (p.80)",
+          "should give an Unskilled Roll no Raises or Free Raises, and never explode its dice",
           clean(async () => {
             const { actor } = await swordsman();
             await actor.createEmbeddedDocuments("Item", [
@@ -487,8 +506,9 @@ export function registerRollPipelineBatch(quench) {
           })
         );
 
+        // game-rules/25_rings_and_traits.md, p.78
         it(
-          "a Void Point raises an Unskilled Skill to Rank 1: one more die, dice explode, Raises apply (p.78)",
+          "should raise an Unskilled Skill to Rank 1 for a Void Point, so dice explode and Raises apply",
           clean(async () => {
             const { actor } = await swordsman();
             const before = actor._source.system.rings.void.value;
@@ -511,8 +531,10 @@ export function registerRollPipelineBatch(quench) {
           })
         );
 
+        // AUTOMATION.md B7
+        // game-rules/25_rings_and_traits.md, p.78
         it(
-          "B7: no Void Point on a damage roll (p.78)",
+          "should offer no Void Point on a damage roll",
           clean(async () => {
             const { actor, katana } = await swordsman();
             const before = actor._source.system.rings.void.value;
@@ -533,15 +555,17 @@ export function registerRollPipelineBatch(quench) {
           })
         );
 
-        it("B9: inline [[XkY]] gives a Foundry formula through the same pool code", () => {
+        // AUTOMATION.md B9
+        it("should turn inline [[XkY]] into a Foundry formula through the same pool code", () => {
           assert.equal(inlineFormula("12k4+1"), "10d10xa10k5+1");
           assert.equal(inlineFormula("e5k2"), "5d10r1xa10k2+0");
           assert.equal(inlineFormula("u3k3"), "3d10k3+0");
           assert.isNull(inlineFormula("1d20"));
         });
 
+        // AUTOMATION.md B9
         it(
-          "B9: a chat message of one [[XkY]] posts a roll",
+          "should post a roll for a chat message of one [[XkY]]",
           clean(async () => {
             const created = new Promise(resolve => Hooks.once("createChatMessage", resolve));
             await ui.chat.processMessage("[[3k2]]");
@@ -550,8 +574,10 @@ export function registerRollPipelineBatch(quench) {
           })
         );
 
+        // AUTOMATION.md B11
+        // #37
         it(
-          "B11 and #37: damage dice explode on the weapon's Explodes on value",
+          "should explode damage dice on the weapon's Explodes on value",
           clean(async () => {
             const { actor, katana } = await swordsman();
             await katana.update({ "system.explodesOn": 9 });
@@ -570,8 +596,9 @@ export function registerRollPipelineBatch(quench) {
           })
         );
 
+        // game-rules/74_weapons.md, p.202
         it(
-          "a shuriken adds no Strength and its damage dice never explode (p.202)",
+          "should add no Strength to a shuriken and never explode its damage dice",
           clean(async () => {
             const { actor } = await swordsman();
             const [shuriken] = await actor.createEmbeddedDocuments("Item", [
@@ -595,11 +622,13 @@ export function registerRollPipelineBatch(quench) {
           })
         );
 
+        // #41
+        // game-rules/41_conditional_effects.md, p.89
         it(
-          "#41: Mounted +1k0 reaches a Skill attack against an unmounted target (p.89)",
+          "should add Mounted +1k0 to a Skill attack against an unmounted target",
           clean(async () => {
             const { actor } = await swordsman();
-            const target = track(await createTestNPC({ name: "Pipeline target" }));
+            const target = track(await createTestNPC({ name: "Roll pipeline: target" }));
             await actor.toggleStatusEffect("mounted", { active: true });
             const ctx = collectCheck(actor, {
               kind: "attack",
@@ -622,8 +651,9 @@ export function registerRollPipelineBatch(quench) {
           })
         );
 
+        // #42
         it(
-          "#42: a Trait roll without the dialog keeps its Trait bonuses",
+          "should keep its Trait bonuses on a Trait roll made without the dialog",
           clean(async () => {
             const { actor } = await swordsman();
             await actor.createEmbeddedDocuments("Item", [
@@ -643,7 +673,7 @@ export function registerRollPipelineBatch(quench) {
 
       describe("Dialog choices", () => {
         it(
-          "lists each modifier with a toggle, and a modifier switched off adds nothing",
+          "should list each modifier with a toggle, and add nothing for one switched off",
           clean(async () => {
             const { actor } = await swordsman();
             await actor.createEmbeddedDocuments("Item", [
@@ -674,8 +704,9 @@ export function registerRollPipelineBatch(quench) {
           })
         );
 
+        // game-rules/25_rings_and_traits.md, p.78
         it(
-          "spends a Void Point for +1k1 and records it (p.78)",
+          "should spend a Void Point for +1k1 and record it",
           clean(async () => {
             const { actor } = await swordsman();
             const before = actor._source.system.rings.void.value;
@@ -696,8 +727,9 @@ export function registerRollPipelineBatch(quench) {
           })
         );
 
+        // game-rules/58_skills_overview.md, p.133
         it(
-          "offers trained Emphases and re-rolls 1s for the one chosen (p.133)",
+          "should offer trained Emphases and re-roll 1s for the one chosen",
           clean(async () => {
             const { actor } = await swordsman();
             const answered = answerCheckDialog({ emphasis: "Katana" });
@@ -716,8 +748,9 @@ export function registerRollPipelineBatch(quench) {
           })
         );
 
+        // game-rules/28_raises.md, p.79
         it(
-          "spends Free Raises on the TN, 5 each (p.79)",
+          "should spend Free Raises on the TN, 5 each",
           clean(async () => {
             const { actor } = await swordsman();
             await actor.createEmbeddedDocuments("Item", [
@@ -744,8 +777,10 @@ export function registerRollPipelineBatch(quench) {
           })
         );
 
+        // Wound penalties raise the TN (roadmap/STAGE-08 decision 2)
+        // game-rules/33_wounds.md, p.82
         it(
-          "adds the Wound Rank's penalty to the TN, not to the total (decision 2, p.82)",
+          "should add the Wound Rank's penalty to the TN, not to the total",
           clean(async () => {
             const { actor } = await swordsman();
             const healthy = actor.system.woundLevels.healthy.value;
@@ -772,7 +807,7 @@ export function registerRollPipelineBatch(quench) {
 
       describe("Rebuilt from the stored context", () => {
         it(
-          "a hit's damage button rolls the weapon with the attack's Raises",
+          "should roll the weapon with the attack's Raises from a hit's damage button",
           clean(async () => {
             const { actor, katana } = await swordsman();
             const answered = answerCheckDialog({ tn: 5, raises: 1 });
@@ -799,7 +834,7 @@ export function registerRollPipelineBatch(quench) {
         );
 
         it(
-          "a re-roll keeps the better total and points at the first roll",
+          "should keep the better total on a re-roll and point at the first roll",
           clean(async () => {
             const { actor } = await swordsman();
             const first = keep(
@@ -819,11 +854,12 @@ export function registerRollPipelineBatch(quench) {
           })
         );
 
+        // game-rules/29_types_of_rolls.md, p.80
         it(
-          "a contest names the higher total, counting each Raise as -5 (p.80)",
+          "should name the higher total in a contest, counting each Raise as -5",
           clean(async () => {
             const { actor } = await swordsman();
-            const npc = track(await createTestNPC({ name: "Pipeline rival" }));
+            const npc = track(await createTestNPC({ name: "Roll pipeline: rival" }));
             const mine = keep(
               await SimpleRoll({
                 actor,

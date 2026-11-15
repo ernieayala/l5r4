@@ -7,7 +7,7 @@
  * Test Priority: Tier 1 (Critical - Core combat mechanics)
  */
 
-import { describe, it, expect, beforeEach } from "vitest";
+import { describe, it, expect } from "vitest";
 import {
   ARMOR_TYPES,
   getArmorTNPenalty,
@@ -22,7 +22,7 @@ describe("ARMOR_TYPES", () => {
     expect(ARMOR_TYPES.RIDING).toBe("riding");
   });
 
-  it("should be frozen (immutable)", () => {
+  it("should be frozen", () => {
     expect(() => {
       ARMOR_TYPES.NEW_TYPE = "new";
     }).toThrow();
@@ -30,7 +30,7 @@ describe("ARMOR_TYPES", () => {
 });
 
 describe("getArmorTNPenalty", () => {
-  describe("ashigaru armor", () => {
+  describe("Ashigaru armor", () => {
     it("should return 0 penalty for ashigaru armor", () => {
       const actor = {
         items: [
@@ -67,7 +67,7 @@ describe("getArmorTNPenalty", () => {
     });
   });
 
-  describe("light armor", () => {
+  describe("Light armor", () => {
     it("should return 5 penalty for athletics skill", () => {
       const actor = {
         items: [
@@ -154,7 +154,7 @@ describe("getArmorTNPenalty", () => {
     });
   });
 
-  describe("heavy armor", () => {
+  describe("Heavy armor", () => {
     it("should return 5 penalty for agility trait", () => {
       const actor = {
         items: [
@@ -241,14 +241,15 @@ describe("getArmorTNPenalty", () => {
       expect(penalty).toBe(0); // No penalty for STR trait
     });
 
-    it("leaves a plain Agility or Reflexes Trait roll alone: the penalty is on Skill Rolls (p.198)", () => {
+    // game-rules/73_armor.md, p.198
+    it("should leave a plain Agility or Reflexes Trait roll alone: the penalty is on Skill Rolls", () => {
       const actor = { items: [{ type: "armor", system: { equipped: true, armorType: "heavy" } }] };
       expect(getArmorTNPenalty(actor, null, "agi")).toBe(0);
       expect(getArmorTNPenalty(actor, null, "ref")).toBe(0);
     });
   });
 
-  describe("riding armor", () => {
+  describe("Riding armor", () => {
     it("should return 5 penalty for agi when not mounted", () => {
       const actor = {
         items: [
@@ -328,7 +329,7 @@ describe("getArmorTNPenalty", () => {
     });
   });
 
-  describe("equipped status", () => {
+  describe("Equipped status", () => {
     it("should ignore unequipped armor", () => {
       const actor = {
         items: [
@@ -371,7 +372,7 @@ describe("getArmorTNPenalty", () => {
     });
   });
 
-  describe("multiple armor pieces", () => {
+  describe("Multiple armor pieces", () => {
     it("should use highest penalty from multiple armor", () => {
       const actor = {
         items: [
@@ -421,7 +422,7 @@ describe("getArmorTNPenalty", () => {
     });
   });
 
-  describe("edge cases", () => {
+  describe("Edge cases", () => {
     it("should return 0 for null actor", () => {
       const penalty = getArmorTNPenalty(null, "athletics", "agi");
       expect(penalty).toBe(0);
@@ -570,7 +571,7 @@ describe("getArmorTNPenalty", () => {
     });
   });
 
-  describe("mounted status detection", () => {
+  describe("Mounted status detection", () => {
     it("should detect mounted from effects.statuses", () => {
       const actor = {
         items: [
@@ -675,7 +676,7 @@ describe("getArmorTNPenalty", () => {
 });
 
 describe("getArmorPenaltyDescription", () => {
-  describe("penalty descriptions", () => {
+  describe("Penalty descriptions", () => {
     it("should return description for light armor athletics penalty", () => {
       const actor = {
         items: [
@@ -784,7 +785,7 @@ describe("getArmorPenaltyDescription", () => {
     });
   });
 
-  describe("edge cases", () => {
+  describe("Edge cases", () => {
     it("should return null for null actor", () => {
       const description = getArmorPenaltyDescription(null, "athletics", "str");
       expect(description).toBeNull();

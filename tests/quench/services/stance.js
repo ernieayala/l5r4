@@ -31,10 +31,11 @@ export function registerStanceTests(quench) {
     context => {
       const { describe, it, assert, afterEach } = context;
 
-      // Taking the Full Defense Stance opens its roll dialog (p.84)
+      // Taking the Full Defense Stance opens its roll dialog
+      // game-rules/36_stances.md, p.84
       guardRolls(context);
 
-      describe("Stance Identification", () => {
+      describe("Stance identification", () => {
         it("should recognize all five L5R4 stances", () => {
           const expectedStances = [
             "attackStance",
@@ -148,7 +149,7 @@ export function registerStanceTests(quench) {
           assert.equal(modifiedTN, 27, "Total TN = 27 (20+7)");
         });
 
-        it("should work with zero Defense Skill (untrained)", () => {
+        it("should work with zero Defense Skill ranks", () => {
           const baseArmorTN = 20;
           const airRing = 3;
           const defenseSkill = 0; // Untrained
@@ -248,8 +249,8 @@ export function registerStanceTests(quench) {
         });
       });
 
-      describe("Stance TN Modifiers Summary", () => {
-        it("should calculate Attack Stance TN (no change)", () => {
+      describe("Stance TN modifiers summary", () => {
+        it("should leave the TN unchanged in Attack Stance", () => {
           const baseTN = 25;
           const modifier = 0;
           const finalTN = baseTN + modifier;
@@ -257,7 +258,7 @@ export function registerStanceTests(quench) {
           assert.equal(finalTN, 25, "Attack Stance: TN unchanged");
         });
 
-        it("should calculate Full Attack Stance TN (reduced)", () => {
+        it("should lower the TN in Full Attack Stance", () => {
           const baseTN = 25;
           const modifier = -10;
           const finalTN = baseTN + modifier;
@@ -265,7 +266,7 @@ export function registerStanceTests(quench) {
           assert.equal(finalTN, 15, "Full Attack Stance: TN -10");
         });
 
-        it("should calculate Defense Stance TN (increased)", () => {
+        it("should raise the TN in Defense Stance", () => {
           const baseTN = 25;
           const airRing = 3;
           const defenseSkill = 2;
@@ -274,7 +275,7 @@ export function registerStanceTests(quench) {
           assert.equal(finalTN, 30, "Defense Stance: TN +5 (Air+Defense)");
         });
 
-        it("should calculate Full Defense Stance TN (increased)", () => {
+        it("should raise the TN in Full Defense Stance", () => {
           const baseTN = 25;
           const defenseRoll = 20;
           const tnBonus = Math.ceil(defenseRoll / 2);
@@ -283,7 +284,7 @@ export function registerStanceTests(quench) {
           assert.equal(finalTN, 35, "Full Defense Stance: TN +10 (half roll)");
         });
 
-        it("should calculate Center Stance TN (no change)", () => {
+        it("should leave the TN unchanged in Center Stance", () => {
           const baseTN = 25;
           const modifier = 0;
           const finalTN = baseTN + modifier;
@@ -292,7 +293,7 @@ export function registerStanceTests(quench) {
         });
       });
 
-      describe("Stance Attack Modifiers Summary", () => {
+      describe("Stance attack modifiers summary", () => {
         it("should have Attack Stance modifiers", () => {
           const rollBonus = 0;
           const keepBonus = 0;
@@ -336,12 +337,12 @@ export function registerStanceTests(quench) {
         });
       });
 
-      describe("Stance Transitions (Regression Tests)", () => {
+      describe("Stance transitions", () => {
         let actor;
 
         before(async () => {
           actor = await createTestPC({
-            name: "Stance Transition Test Character",
+            name: "Stances: transitions",
             system: {
               traits: { ref: 3, sta: 3, wil: 3, str: 3, agi: 3, int: 3, per: 3, awa: 3 }
             }
@@ -369,7 +370,8 @@ export function registerStanceTests(quench) {
           }
         });
 
-        it("should replace stance modifiers, not stack them (Issue #2)", async function () {
+        // #2
+        it("should replace stance modifiers, not stack them", async function () {
           // Base TN: (Reflexes 3 × 5) + 5 = 20
           const baseTN = 20;
 
@@ -480,6 +482,6 @@ export function registerStanceTests(quench) {
         });
       });
     },
-    { displayName: "L5R4: Stance System Tests" }
+    { displayName: "L5R4: Stances" }
   );
 }

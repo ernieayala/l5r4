@@ -23,20 +23,21 @@ import { guardRolls, settleFullDefense } from "../helpers.js";
 
 export function registerStanceEffectPreservationTests(quench) {
   quench.registerBatch(
-    "l5r4-enhanced.integration.stance-effect-preservation",
+    `${SYS_ID}.services.stance-effect-preservation`,
     context => {
       const { describe, it, assert, beforeEach, afterEach } = context;
 
-      // Taking the Full Defense Stance opens its roll dialog (p.84)
+      // Taking the Full Defense Stance opens its roll dialog
+      // game-rules/36_stances.md, p.84
       guardRolls(context);
 
-      describe("Stance Effect Changes Preservation", () => {
+      describe("Stance effect changes", () => {
         let actor;
 
         beforeEach(async () => {
           // Create fresh test actor for each test to ensure complete isolation
           actor = await createTestPC({
-            name: "Test Character - Stance Effects",
+            name: "Stance effect preservation: samurai",
             system: {
               traits: {
                 ref: 3,
@@ -62,9 +63,8 @@ export function registerStanceEffectPreservationTests(quench) {
         });
 
         it("should preserve Active Effect changes when hydrating stance effect", async () => {
-          // ARRANGE - Ensure actor is fully prepared and get initial trait value
+          // ARRANGE - Ensure actor is fully prepared
           actor.prepareData();
-          const initialRef = actor.system.traits.ref;
 
           // Create Full Attack stance effect with a trait change
           // (simulating what might happen via token status icon or programmatic creation)
@@ -247,11 +247,8 @@ export function registerStanceEffectPreservationTests(quench) {
         });
 
         it("should preserve multiple changes on a single effect", async () => {
-          // ARRANGE - Ensure actor is fully prepared and get initial trait values
+          // ARRANGE - Ensure actor is fully prepared
           actor.prepareData();
-          const initialRef = actor.system.traits.ref;
-          const initialAgi = actor.system.traits.agi;
-          const initialStr = actor.system.traits.str;
 
           // Create effect with multiple trait modifications
           const effectData = {
@@ -303,6 +300,6 @@ export function registerStanceEffectPreservationTests(quench) {
         });
       });
     },
-    { displayName: "L5R4: Stance Effect Preservation Tests" }
+    { displayName: "L5R4: Stance effect preservation" }
   );
 }

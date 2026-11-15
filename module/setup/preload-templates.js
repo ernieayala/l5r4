@@ -170,7 +170,10 @@ export async function preloadTemplates() {
     `systems/${SYS_ID}/templates/apps/combat-config.hbs`,
     `systems/${SYS_ID}/templates/apps/effect-panel.hbs`,
     `systems/${SYS_ID}/templates/apps/compendium-browser.hbs`,
-    `systems/${SYS_ID}/templates/apps/compendium-browser-results.hbs`
+    `systems/${SYS_ID}/templates/apps/compendium-browser-results.hbs`,
+
+    // Design gallery (module/apps/design-gallery.js): its parts include this partial
+    `systems/${SYS_ID}/templates/apps/design-gallery/_partials/_sample.hbs`
   ];
 
   if (!globalThis.foundry?.applications?.handlebars?.loadTemplates) {

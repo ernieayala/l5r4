@@ -28,11 +28,11 @@ import { MULTI_CLOSE_TIMEOUT_MS } from "../helpers.js";
  */
 export function registerEmphasisManagerTests(quench) {
   quench.registerBatch(
-    `${SYS_ID}.apps.emphasis-manager`,
+    `${SYS_ID}.sheets.emphasis-manager`,
     context => {
       const { describe, it, assert, beforeEach, afterEach } = context;
 
-      describe("Dialog Creation and Validation", () => {
+      describe("Dialog creation and validation", () => {
         let skillItem, dialog;
 
         beforeEach(async () => {
@@ -75,7 +75,7 @@ export function registerEmphasisManagerTests(quench) {
         it("should throw error if item is not a skill", async () => {
           // ARRANGE
           const nonSkillItem = await Item.create({
-            name: "Test Weapon",
+            name: "Emphasis manager: test weapon",
             type: "weapon",
             system: {}
           });
@@ -117,9 +117,20 @@ export function registerEmphasisManagerTests(quench) {
           assert.exists(element, "Dialog DOM element exists");
           assert.isTrue(element.offsetHeight > 0, "Dialog is visible");
         });
+
+        it("should close from its close button", async function () {
+          this.timeout(5000);
+          dialog = new EmphasisManager({ item: skillItem });
+          await dialog.render(true);
+          dialog.element.querySelector('[data-action="close"]').click();
+          for (let i = 0; i < 40 && dialog.rendered; i++) {
+            await new Promise(resolve => setTimeout(resolve, 50));
+          }
+          assert.isFalse(dialog.rendered, "Dialog closed");
+        });
       });
 
-      describe("Template Context Preparation", () => {
+      describe("Template context preparation", () => {
         let skillItem, dialog;
 
         beforeEach(async () => {
@@ -257,7 +268,7 @@ export function registerEmphasisManagerTests(quench) {
         });
       });
 
-      describe("Form Submission", () => {
+      describe("Form submission", () => {
         let skillItem, dialog;
 
         beforeEach(async () => {
@@ -379,7 +390,7 @@ export function registerEmphasisManagerTests(quench) {
         });
       });
 
-      describe("Custom Emphasis Management", () => {
+      describe("Custom Emphasis management", () => {
         let skillItem, dialog;
 
         beforeEach(async () => {
@@ -502,7 +513,7 @@ export function registerEmphasisManagerTests(quench) {
         });
       });
 
-      describe("Edge Cases and Error Handling", () => {
+      describe("Edge cases and error handling", () => {
         let skillItem, dialog;
 
         beforeEach(async () => {
@@ -588,7 +599,7 @@ export function registerEmphasisManagerTests(quench) {
         });
       });
 
-      describe("Integration with Item System", () => {
+      describe("Integration with the item system", () => {
         let skillItem, dialog;
 
         beforeEach(async () => {
@@ -679,6 +690,6 @@ export function registerEmphasisManagerTests(quench) {
         });
       });
     },
-    { displayName: "L5R4: Emphasis Manager" }
+    { displayName: "L5R4: Emphasis manager" }
   );
 }

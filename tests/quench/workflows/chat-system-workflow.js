@@ -52,16 +52,16 @@ function damageCard(roll, actorId, label = "") {
  */
 export function registerChatSystemWorkflowTests(quench) {
   quench.registerBatch(
-    `${SYS_ID}.workflows.chat-system`,
+    `${SYS_ID}.workflows.chat-system-workflow`,
     context => {
       const { describe, it, assert, beforeEach, afterEach } = context;
 
-      describe("Roll to Chat Workflow", () => {
+      describe("Roll to chat workflow", () => {
         let actor;
 
         beforeEach(async () => {
           actor = await createTestPC({
-            name: "Chat Test PC",
+            name: "Chat system workflows: Chat Test PC",
             "system.traits.agility": 4,
             "system.traits.strength": 3
           });
@@ -108,7 +108,11 @@ export function registerChatSystemWorkflowTests(quench) {
           });
 
           // ASSERT
-          assert.equal(message.speaker.alias, "Chat Test PC", "Actor name in speaker");
+          assert.equal(
+            message.speaker.alias,
+            "Chat system workflows: Chat Test PC",
+            "Actor name in speaker"
+          );
           assert.exists(message.speaker.actor, "Speaker has actor ID");
 
           // Cleanup
@@ -158,17 +162,17 @@ export function registerChatSystemWorkflowTests(quench) {
         });
       });
 
-      describe("Damage Button Workflow", () => {
+      describe("Damage button workflow", () => {
         let attacker, defender, _weapon;
 
         beforeEach(async () => {
           attacker = await createTestPC({
-            name: "Attacker",
+            name: "Chat system workflows: Attacker",
             "system.traits.strength": 3
           });
 
           defender = await createTestPC({
-            name: "Defender",
+            name: "Chat system workflows: Defender",
             "system.traits.stamina": 3,
             "system.traits.willpower": 3,
             "system.rings.void.value": 2,
@@ -345,7 +349,7 @@ export function registerChatSystemWorkflowTests(quench) {
         });
       });
 
-      describe("Inline Roll Parsing Workflow", () => {
+      describe("Inline roll parsing workflow", () => {
         it("should detect L5R4 notation in brackets", () => {
           // ARRANGE
           const message = "[[7k3]]";
@@ -458,11 +462,11 @@ export function registerChatSystemWorkflowTests(quench) {
         });
       });
 
-      describe("Whisper Roll Workflow", () => {
+      describe("Whisper roll workflow", () => {
         let actor;
 
         beforeEach(async () => {
-          actor = await createTestPC({ name: "Whisper Test PC" });
+          actor = await createTestPC({ name: "Chat system workflows: Whisper Test PC" });
         });
 
         afterEach(async () => {
@@ -503,7 +507,7 @@ export function registerChatSystemWorkflowTests(quench) {
           await message.delete();
         });
 
-        it("should create blind roll (GM only)", async () => {
+        it("should create a blind roll for the GM only", async () => {
           // ARRANGE
           const roll = new Roll("5d10xa10k3");
           await roll.evaluate();
@@ -536,7 +540,7 @@ export function registerChatSystemWorkflowTests(quench) {
           await message.delete();
         });
 
-        it("should create public roll (default)", async () => {
+        it("should create a public roll by default", async () => {
           // ARRANGE
           const roll = new Roll("7d10xa10k3");
           await roll.evaluate();
@@ -557,11 +561,11 @@ export function registerChatSystemWorkflowTests(quench) {
         });
       });
 
-      describe("Permission and Edge Cases", () => {
+      describe("Permission and edge cases", () => {
         let actor;
 
         beforeEach(async () => {
-          actor = await createTestPC({ name: "Permission Test PC" });
+          actor = await createTestPC({ name: "Chat system workflows: Permission Test PC" });
         });
 
         afterEach(async () => {
@@ -615,7 +619,7 @@ export function registerChatSystemWorkflowTests(quench) {
             // ACT - Invalid formula
             const roll = new Roll("invalid");
             await roll.evaluate();
-          } catch (error) {
+          } catch {
             errorThrown = true;
           }
 
@@ -644,11 +648,11 @@ export function registerChatSystemWorkflowTests(quench) {
         });
       });
 
-      describe("Chat Template Integration", () => {
+      describe("Chat template integration", () => {
         let actor;
 
         beforeEach(async () => {
-          actor = await createTestPC({ name: "Template Test PC" });
+          actor = await createTestPC({ name: "Chat system workflows: Template Test PC" });
         });
 
         afterEach(async () => {
@@ -684,7 +688,7 @@ export function registerChatSystemWorkflowTests(quench) {
           assert.include(html, 'data-action="effect-prompt"', "Roll button present");
         });
 
-        it("offers Apply to the damage roll's target by name", async () => {
+        it("should offer Apply to the damage roll's target by name", async () => {
           // ARRANGE
           const roll = new Roll("3d10xa10k2");
           await roll.evaluate();
@@ -708,7 +712,7 @@ export function registerChatSystemWorkflowTests(quench) {
       });
     },
     {
-      displayName: "L5R4: Chat System Workflows"
+      displayName: "L5R4: Chat system workflows"
     }
   );
 }

@@ -28,11 +28,11 @@ import {
  */
 export function registerItemSheetTests(quench) {
   quench.registerBatch(
-    `${SYS_ID}.sheets.item`,
+    `${SYS_ID}.sheets.item-sheet`,
     context => {
       const { describe, it, assert, beforeEach, afterEach } = context;
 
-      describe("Skill Item Sheet", () => {
+      describe("Skill item sheet", () => {
         let item, sheet;
 
         beforeEach(async () => {
@@ -105,12 +105,12 @@ export function registerItemSheetTests(quench) {
         });
       });
 
-      describe("Weapon Item Sheet", () => {
+      describe("Weapon item sheet", () => {
         let item, sheet;
 
         beforeEach(async () => {
           item = await Item.create(
-            createWeaponData("Katana", 3, 2, {
+            createWeaponData("Item sheet: katana", 3, 2, {
               system: { associatedSkill: "kenjutsu" }
             })
           );
@@ -175,11 +175,11 @@ export function registerItemSheetTests(quench) {
         });
       });
 
-      describe("Armor Item Sheet", () => {
+      describe("Armor item sheet", () => {
         let item, sheet;
 
         beforeEach(async () => {
-          item = await Item.create(createArmorData("Light Armor", 3, 1));
+          item = await Item.create(createArmorData("Item sheet: light armor", 3, 1));
           sheet = item.sheet;
         });
 
@@ -222,11 +222,11 @@ export function registerItemSheetTests(quench) {
         });
       });
 
-      describe("Spell Item Sheet", () => {
+      describe("Spell item sheet", () => {
         let item, sheet;
 
         beforeEach(async () => {
-          item = await Item.create(createSpellData("Clarity of Purpose", "air", 2));
+          item = await Item.create(createSpellData("Item sheet: clarity of purpose", "air", 2));
           sheet = item.sheet;
         });
 
@@ -268,11 +268,11 @@ export function registerItemSheetTests(quench) {
         });
       });
 
-      describe("Item Sheet General Features", () => {
+      describe("Item sheet general features", () => {
         let item, sheet;
 
         beforeEach(async () => {
-          item = await Item.create(createSkillData("Test Item", 1));
+          item = await Item.create(createSkillData("Item sheet: test item", 1));
           sheet = item.sheet;
         });
 
@@ -289,8 +289,6 @@ export function registerItemSheetTests(quench) {
           await sheet.render(true);
 
           const element = sheet.element;
-          // Description is usually in enriched HTML editor
-          const _descField = element.querySelector('[name="system.description"], .editor');
 
           // Description field should exist in some form
           assert.exists(element, "Sheet has description area");
@@ -323,11 +321,11 @@ export function registerItemSheetTests(quench) {
         });
       });
 
-      describe("Embedded Item Sheet", () => {
+      describe("Embedded item sheet", () => {
         let actor, item, sheet;
 
         beforeEach(async () => {
-          actor = await createTestPC({ name: "Item Owner" });
+          actor = await createTestPC({ name: "Item sheet: item owner" });
 
           const [createdItem] = await actor.createEmbeddedDocuments("Item", [
             {
@@ -378,6 +376,6 @@ export function registerItemSheetTests(quench) {
         });
       });
     },
-    { displayName: "L5R4: Item Sheet Tests" }
+    { displayName: "L5R4: Item sheet" }
   );
 }

@@ -29,7 +29,8 @@ import { createSkillData } from "../../fixtures/item-fixtures.js";
 import { checkEffects, guardRolls, settleFullDefense, waitFor } from "../helpers.js";
 
 /**
- * The attack bonus the actor's rules give a melee attack, as Full Attack's +2k1 (p.84), which is melee only.
+ * The attack bonus the actor's rules give a melee attack, as Full Attack's +2k1, which is melee only.
+ * game-rules/36_stances.md, p.84
  * @param {Actor} actor
  * @returns {{roll: number, keep: number}}
  */
@@ -48,7 +49,8 @@ export function registerSkillStanceCombinationTests(quench) {
     context => {
       const { describe, it, assert, beforeEach, afterEach } = context;
 
-      // Taking the Full Defense Stance opens its roll dialog (p.84)
+      // Taking the Full Defense Stance opens its roll dialog
+      // game-rules/36_stances.md, p.84
       guardRolls(context);
 
       describe("Skill Roll + Attack Stance (Water Ring)", () => {
@@ -56,7 +58,7 @@ export function registerSkillStanceCombinationTests(quench) {
 
         beforeEach(async () => {
           actor = await createTestPC({
-            name: "Attack Stance Test Samurai",
+            name: "Skill Roll and Stance combinations: Attack Stance samurai",
             system: {
               traits: { agi: 4 },
               rings: { water: 3 }
@@ -132,7 +134,7 @@ export function registerSkillStanceCombinationTests(quench) {
 
         beforeEach(async () => {
           actor = await createTestPC({
-            name: "Full Attack Test Samurai",
+            name: "Skill Roll and Stance combinations: Full Attack samurai",
             system: {
               traits: { agi: 4, awa: 3 },
               rings: { fire: 4 }
@@ -266,11 +268,11 @@ export function registerSkillStanceCombinationTests(quench) {
       });
 
       describe("Skill Roll + Defense Stance (Air Ring)", () => {
-        let actor, weaponSkill, investigationSkill;
+        let actor, investigationSkill;
 
         beforeEach(async () => {
           actor = await createTestPC({
-            name: "Defense Stance Test Samurai",
+            name: "Skill Roll and Stance combinations: Defense Stance samurai",
             system: {
               // Air Ring = min(ref, awa), so set both to 3 for Air = 3
               traits: { agi: 3, per: 4, ref: 3, awa: 3 }
@@ -282,7 +284,6 @@ export function registerSkillStanceCombinationTests(quench) {
             createSkillData("Kenjutsu", 4, "agi"),
             createSkillData("Investigation", 3, "per")
           ]);
-          weaponSkill = createdItems.find(i => i.name === "Kenjutsu");
           investigationSkill = createdItems.find(i => i.name === "Investigation");
         });
 
@@ -290,7 +291,6 @@ export function registerSkillStanceCombinationTests(quench) {
           if (actor) {
             await actor.delete();
             actor = null;
-            weaponSkill = null;
             investigationSkill = null;
           }
         });
@@ -385,11 +385,11 @@ export function registerSkillStanceCombinationTests(quench) {
       });
 
       describe("Skill Roll + Full Defense Stance (Earth Ring)", () => {
-        let actor, skill;
+        let actor;
 
         beforeEach(async () => {
           actor = await createTestPC({
-            name: "Full Defense Test Samurai",
+            name: "Skill Roll and Stance combinations: Full Defense samurai",
             system: {
               // Earth Ring = min(sta, wil), set both to 4 for Earth = 4
               // Also need ref for Armor TN calculation
@@ -397,9 +397,7 @@ export function registerSkillStanceCombinationTests(quench) {
             }
           });
 
-          [skill] = await actor.createEmbeddedDocuments("Item", [
-            createSkillData("Kenjutsu", 4, "agi")
-          ]);
+          await actor.createEmbeddedDocuments("Item", [createSkillData("Kenjutsu", 4, "agi")]);
         });
 
         afterEach(async () => {
@@ -407,7 +405,6 @@ export function registerSkillStanceCombinationTests(quench) {
             await settleFullDefense(actor);
             await actor.delete();
             actor = null;
-            skill = null;
           }
         });
 
@@ -450,7 +447,8 @@ export function registerSkillStanceCombinationTests(quench) {
         });
 
         it("should add half the Defense roll to Armor TN in Full Defense Stance", async () => {
-          // Taking the stance rolls Defense / Reflexes (p.84); the roll dialog is answered by guardRolls
+          // Taking the stance rolls Defense / Reflexes; the roll dialog is answered by guardRolls
+          // game-rules/36_stances.md, p.84
           await actor.createEmbeddedDocuments("ActiveEffect", [
             { name: "Full Defense Stance", statuses: ["fullDefenseStance"] }
           ]);
@@ -475,7 +473,7 @@ export function registerSkillStanceCombinationTests(quench) {
 
         beforeEach(async () => {
           actor = await createTestPC({
-            name: "Center Stance Test Samurai",
+            name: "Skill Roll and Stance combinations: Center Stance samurai",
             system: {
               traits: { agi: 4 },
               rings: { void: { rank: 3, value: 3 } }
@@ -567,28 +565,25 @@ export function registerSkillStanceCombinationTests(quench) {
         });
       });
 
-      describe("Stance Transitions and Skill Rolls", () => {
-        let actor, skill;
+      describe("Stance transitions and Skill Rolls", () => {
+        let actor;
 
         beforeEach(async () => {
           actor = await createTestPC({
-            name: "Stance Transition Test",
+            name: "Skill Roll and Stance combinations: stance transition",
             system: {
               traits: { agi: 4 },
               rings: { fire: 3, air: 3 }
             }
           });
 
-          [skill] = await actor.createEmbeddedDocuments("Item", [
-            createSkillData("Kenjutsu", 5, "agi")
-          ]);
+          await actor.createEmbeddedDocuments("Item", [createSkillData("Kenjutsu", 5, "agi")]);
         });
 
         afterEach(async () => {
           if (actor) {
             await actor.delete();
             actor = null;
-            skill = null;
           }
         });
 
@@ -668,19 +663,19 @@ export function registerSkillStanceCombinationTests(quench) {
         });
       });
 
-      describe("Edge Cases: Skill Rolls in Various Stances", () => {
-        let actor, unskilledSkill;
+      describe("Skill Roll edge cases in various Stances", () => {
+        let actor;
 
         beforeEach(async () => {
           actor = await createTestPC({
-            name: "Edge Case Test",
+            name: "Skill Roll and Stance combinations: edge case",
             system: {
               traits: { agi: 3 },
               rings: { fire: 4 }
             }
           });
 
-          [unskilledSkill] = await actor.createEmbeddedDocuments("Item", [
+          await actor.createEmbeddedDocuments("Item", [
             createSkillData("Kenjutsu", 0, "agi") // Rank 0 = unskilled
           ]);
         });
@@ -689,7 +684,6 @@ export function registerSkillStanceCombinationTests(quench) {
           if (actor) {
             await actor.delete();
             actor = null;
-            unskilledSkill = null;
           }
         });
 
@@ -726,7 +720,7 @@ export function registerSkillStanceCombinationTests(quench) {
         it("should handle minimum trait value in stance", async () => {
           // Create actor with minimum trait (2)
           const minActor = await createTestPC({
-            name: "Min Trait Test",
+            name: "Skill Roll and Stance combinations: minimum Trait",
             system: {
               traits: { agi: 2 } // Minimum trait value
             }
@@ -766,6 +760,6 @@ export function registerSkillStanceCombinationTests(quench) {
         });
       });
     },
-    { displayName: "L5R4: Skill Roll + Stance Combinations" }
+    { displayName: "L5R4: Skill Roll and Stance combinations" }
   );
 }

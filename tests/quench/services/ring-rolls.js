@@ -20,11 +20,11 @@ import { SYS_ID } from "../../../module/config/constants.js";
  */
 export function registerRingRollTests(quench) {
   quench.registerBatch(
-    `${SYS_ID}.services.rolls.ring`,
+    `${SYS_ID}.services.ring-rolls`,
     context => {
       const { describe, it, assert } = context;
 
-      describe("Ring Roll Formula (XkX)", () => {
+      describe("Ring Roll formula", () => {
         it("should use ring value for both rolled and kept dice", () => {
           const ringValue = 3;
           const rolled = ringValue;
@@ -35,7 +35,7 @@ export function registerRingRollTests(quench) {
           // Formula would be 3k3
         });
 
-        it("should handle minimum ring value (2)", () => {
+        it("should handle the minimum Ring value of 2", () => {
           const ringValue = 2;
           const rolled = ringValue;
           const kept = ringValue;
@@ -45,7 +45,7 @@ export function registerRingRollTests(quench) {
           // Formula would be 2k2
         });
 
-        it("should handle maximum ring value (10)", () => {
+        it("should handle the maximum Ring value of 10", () => {
           const ringValue = 10;
           const rolled = ringValue;
           const kept = ringValue;
@@ -108,27 +108,27 @@ export function registerRingRollTests(quench) {
         });
       });
 
-      describe("Ring Value Range", () => {
-        it("should handle low ring values (2-3)", () => {
+      describe("Ring value range", () => {
+        it("should handle low Ring values of 2 to 3", () => {
           const lowRing = 2;
           assert.equal(lowRing, 2, "Low ring = 2");
           // 2k2 formula
         });
 
-        it("should handle medium ring values (4-6)", () => {
+        it("should handle medium Ring values of 4 to 6", () => {
           const mediumRing = 5;
           assert.equal(mediumRing, 5, "Medium ring = 5");
           // 5k5 formula
         });
 
-        it("should handle high ring values (7-10)", () => {
+        it("should handle high Ring values of 7 to 10", () => {
           const highRing = 7;
           assert.equal(highRing, 7, "High ring = 7");
           // 7k7 formula
         });
       });
 
-      describe("Raise Mechanics for Ring Rolls", () => {
+      describe("Raise mechanics for Ring Rolls", () => {
         it("should increase effective TN by 5 per raise", () => {
           const baseTN = 15;
           const raises = 2;
@@ -170,6 +170,6 @@ export function registerRingRollTests(quench) {
         });
       });
     },
-    { displayName: "L5R4: Ring Roll Service Tests" }
+    { displayName: "L5R4: Ring Rolls" }
   );
 }

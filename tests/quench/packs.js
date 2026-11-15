@@ -22,7 +22,7 @@ const PACKS = () => game.packs.filter(pack => pack.metadata.packageName === SYS_
  * place of the book's text, and the compendium browser filters, adds, and drags.
  * @param {object} quench  The Quench API object.
  */
-export function registerPacksBatch(quench) {
+export function registerPacksTests(quench) {
   quench.registerBatch(
     `${SYS_ID}.packs`,
     context => {
@@ -116,7 +116,9 @@ export function registerPacksBatch(quench) {
         name,
         { traits = { str: 2, ref: 2, agi: 2 }, clan = null, picks = [] } = {}
       ) => {
-        const actor = track(await createTestPC({ name: `Packs ${name}`, system: { traits } }));
+        const actor = track(
+          await createTestPC({ name: `Compendium packs: ${name}`, system: { traits } })
+        );
         if (clan) {
           await actor.createEmbeddedDocuments("Item", [{ name: clan, type: "clan" }]);
         }
@@ -153,13 +155,16 @@ export function registerPacksBatch(quench) {
         }
       };
 
-      /** The XP an actor's entry of a type and name cost (pp.102-103). */
+      /**
+       * The XP an actor's entry of a type and name cost.
+       * game-rules/48_character_creation_expanded.md, p.102-103
+       */
       const xpOf = (actor, type, name) =>
         actor.system._xp.entries.find(e => e.type === type && e.name === name)?.delta;
 
       describe("Packs", () => {
         it(
-          "every pack system.json declares opens, with entries",
+          "should open every pack system.json declares, with entries",
           clean(async () => {
             const packs = PACKS();
             assert.sameMembers(
@@ -174,7 +179,7 @@ export function registerPacksBatch(quench) {
         );
 
         it(
-          "every entry cites a Core Rulebook page and its rules validate",
+          "should cite a Core Rulebook page on every entry and validate its rules",
           clean(async () => {
             for (const pack of PACKS()) {
               for (const doc of await pack.getDocuments()) {
@@ -198,7 +203,7 @@ export function registerPacksBatch(quench) {
         // The title names the coverage check's generic rule check (tools/coverage/packs.mjs, roadmap/STAGE-16
         // decision 5): every entry is checked, the full and partial ones among them
         it(
-          "every item drops on a PC through the sheet's drop path, and every full or partial entry's rules reach the actor",
+          "should drop every item on a PC so every full or partial entry's rules reach the actor",
           clean(async function () {
             this.timeout(240_000);
             // One actor per pack takes every entry of it, so the GM adds those whose prerequisites it misses
@@ -208,7 +213,9 @@ export function registerPacksBatch(quench) {
             try {
               for (const pack of PACKS().filter(p => p.documentName === "Item")) {
                 const actor = track(
-                  await createTestPC({ name: `Packs collector (${pack.metadata.name})` })
+                  await createTestPC({
+                    name: `Compendium packs: collector (${pack.metadata.name})`
+                  })
                 );
                 const dropped = [];
                 for (const index of pack.index) {
@@ -224,7 +231,8 @@ export function registerPacksBatch(quench) {
                 }
                 // Schools grant in the background; the actor is deleted only once that work is done
                 await grantsSettled(actor);
-                // A Clan or Family replaces the one before it (p.102); everything else stays
+                // A Clan or Family replaces the one before it; everything else stays
+                // game-rules/48_character_creation_expanded.md, p.102
                 for (const item of dropped.filter(i => !["clan", "family"].includes(i.type))) {
                   assert.ok(actor.items.has(item.id), `${item.type} ${item.name} stayed`);
                 }
@@ -247,9 +255,12 @@ export function registerPacksBatch(quench) {
         );
       });
 
-      describe("Expected effects (pp.198-205)", () => {
+      // game-rules/73_armor.md, p.198
+      // game-rules/74_weapons.md, p.198-205
+      describe("Expected effects: armor and weapons", () => {
+        // game-rules/73_armor.md, p.198
         it(
-          "Heavy Armor worn: Armor TN +10, Reduction 5, +5 TN on Agility and Reflexes Skill Rolls (p.198)",
+          "should give worn Heavy Armor Armor TN +10, Reduction 5, and +5 TN on Agility and Reflexes Skills",
           clean(async () => {
             const { actor, item } = await holding("armor", "Heavy Armor");
             await item.update({ "system.equipped": true });
@@ -259,8 +270,9 @@ export function registerPacksBatch(quench) {
           })
         );
 
+        // game-rules/73_armor.md, p.198
         it(
-          "Light Armor worn: +5 TN on Athletics (p.198)",
+          "should give worn Light Armor +5 TN on Athletics",
           clean(async () => {
             const { actor, item } = await holding("armor", "Light Armor");
             await item.update({ "system.equipped": true });
@@ -270,8 +282,9 @@ export function registerPacksBatch(quench) {
           })
         );
 
+        // game-rules/73_armor.md, p.198
         it(
-          "Riding Armor: +4, and +12 on horseback (p.198)",
+          "should give Riding Armor +4, and +12 on horseback",
           clean(async () => {
             const { actor, item } = await holding("armor", "Riding Armor");
             await item.update({ "system.equipped": true });
@@ -281,8 +294,9 @@ export function registerPacksBatch(quench) {
           })
         );
 
+        // game-rules/74_weapons.md, p.198, 204
         it(
-          "Katana: DR 3k2 plus Strength (pp.198, 204)",
+          "should give a Katana DR 3k2 plus Strength",
           clean(async () => {
             const { item } = await holding("weapons", "Katana");
             assert.equal(item.system.derivedDamageFormula, "5k2");
@@ -290,8 +304,9 @@ export function registerPacksBatch(quench) {
           })
         );
 
+        // game-rules/74_weapons.md, p.202
         it(
-          "Shuriken: no Strength, no exploding dice (p.202)",
+          "should give a Shuriken no Strength and no exploding dice",
           clean(async () => {
             const { item } = await holding("weapons", "Shuriken");
             assert.equal(item.system.derivedDamageFormula, "1k1");
@@ -299,8 +314,9 @@ export function registerPacksBatch(quench) {
           })
         );
 
+        // game-rules/74_weapons.md, p.199-200
         it(
-          "Dai-kyu with a Willow Leaf: the lower of bow and wielder Strength plus 2k2; +10 TN on foot (pp.199-200)",
+          "should give a Dai-kyu the lower of bow and wielder Strength plus 2k2, and +10 TN on foot",
           clean(async () => {
             const { item } = await holding("weapons", "Dai-kyu");
             assert.equal(item.system.derivedDamageFormula, "4k2");
@@ -310,7 +326,11 @@ export function registerPacksBatch(quench) {
         );
       });
 
-      describe("Expected effects: Skill Mastery Abilities (pp.135-145)", () => {
+      // game-rules/59_high_skills.md, p.135-139
+      // game-rules/60_bugei_skills.md, p.139-143
+      // game-rules/61_merchant_skills.md, p.143-144
+      // game-rules/62_low_skills.md, p.144-145
+      describe("Expected effects: Mastery Ability of each Skill", () => {
         /** A PC holding a pack Skill at a rank, and optionally a pack weapon. */
         const skilled = async (skillName, rank, weaponName = null) => {
           const { actor, item: skill } = await holding("skills", skillName);
@@ -323,8 +343,9 @@ export function registerPacksBatch(quench) {
           return { actor, skill, weapon };
         };
 
+        // game-rules/60_bugei_skills.md, p.141
         it(
-          "Kenjutsu 3: +1k0 on a sword's damage, not at 2 and not with a spear; Kenjutsu 7: dice explode on 9 (p.141)",
+          "should give Kenjutsu 3 +1k0 on a sword's damage, not a spear's, and explode on 9 at Kenjutsu 7",
           clean(async () => {
             const { actor, skill, weapon } = await skilled("Kenjutsu", 2, "Katana");
             const damage = w => collectCheck(actor, { kind: "damage", weapon: w });
@@ -350,8 +371,9 @@ export function registerPacksBatch(quench) {
           })
         );
 
+        // game-rules/60_bugei_skills.md, p.141
         it(
-          "Heavy Weapons: ignore 2 Reduction at 3, a cheaper Knockdown at 5 (p.141)",
+          "should ignore 2 Reduction at Heavy Weapons 3, and make Knockdown cheaper at 5",
           clean(async () => {
             const { actor, skill, weapon } = await skilled("Heavy Weapons", 3, "Tetsubo");
             assert.equal(collectCheck(actor, { kind: "damage", weapon }).ignoreReduction, 2);
@@ -364,8 +386,9 @@ export function registerPacksBatch(quench) {
           })
         );
 
+        // game-rules/60_bugei_skills.md, p.141
         it(
-          "Knives 5: a cheaper Disarm with a sai, not with a tanto (p.141)",
+          "should make Disarm cheaper at Knives 5 with a sai, not with a tanto",
           clean(async () => {
             const { actor, weapon: sai } = await skilled("Knives", 5, "Sai");
             const tanto = await DragDropHandler.handleItemDrop({ actor }, null, {
@@ -379,8 +402,9 @@ export function registerPacksBatch(quench) {
           })
         );
 
+        // game-rules/59_high_skills.md, p.138
         it(
-          "Spellcraft 5: +1k0 on Spell Casting Rolls (p.138)",
+          "should give Spellcraft 5 +1k0 on Spell Casting Rolls",
           clean(async () => {
             const { actor, skill } = await skilled("Spellcraft", 4);
             const spell = () => collectCheck(actor, { kind: "spell", ring: "fire" }).modifiers;
@@ -396,8 +420,9 @@ export function registerPacksBatch(quench) {
           })
         );
 
+        // game-rules/60_bugei_skills.md, p.139
         it(
-          "Defense 5: Armor TN +3 in the Defense Stance only (p.139)",
+          "should give Defense 5 Armor TN +3 in the Defense Stance only",
           clean(async () => {
             const { actor, skill } = await skilled("Defense", 5);
             const outOfStance = actor.system.armorTn.current;
@@ -406,13 +431,15 @@ export function registerPacksBatch(quench) {
             await actor.toggleStatusEffect("defenseStance", { active: true });
             const atFour = actor.system.armorTn.current;
             await skill.update({ "system.rank": 5 });
-            // The stance adds the Defense rank (p.84), so rank 5 is 1 more from it, and the Mastery adds 3
+            // The stance adds the Defense rank, so rank 5 is 1 more from it, and the Mastery adds 3
+            // game-rules/36_stances.md, p.84
             assert.equal(actor.system.armorTn.current - atFour, 4);
           })
         );
 
+        // game-rules/60_bugei_skills.md, p.139
         it(
-          "Battle 5: the Battle rank is added to Initiative (p.139)",
+          "should add the Battle rank to Initiative at Battle 5",
           clean(async () => {
             const { actor, skill } = await skilled("Battle", 4);
             assert.equal(actor.system.initiative.totalMod, 0);
@@ -421,8 +448,9 @@ export function registerPacksBatch(quench) {
           })
         );
 
+        // game-rules/60_bugei_skills.md, p.140
         it(
-          "Hunting 5: an optional +1k0 on Stealth, off until the roller ticks it (p.140)",
+          "should give Hunting 5 an optional +1k0 on Stealth, off until the roller ticks it",
           clean(async () => {
             const { actor } = await skilled("Hunting", 5);
             const modifier = collectCheck(actor, {
@@ -434,8 +462,9 @@ export function registerPacksBatch(quench) {
           })
         );
 
+        // game-rules/58_skills_overview.md, p.133
         it(
-          "Rank 10 of a pack Skill gives its Free Raise (p.133)",
+          "should give a pack Skill its Free Raise at Rank 10",
           clean(async () => {
             const { actor } = await skilled("Investigation", 10);
             assert.equal(
@@ -446,7 +475,11 @@ export function registerPacksBatch(quench) {
         );
       });
 
-      describe("Expected effects: Advantages and Disadvantages (pp.146-162, 241-244)", () => {
+      // game-rules/63_advantages_and_disadvantages.md, p.146
+      // game-rules/64_advantages.md, p.146-155
+      // game-rules/65_disadvantages.md, p.156-162
+      // game-rules/83_ancestors.md, p.241-244
+      describe("Expected effects: Advantages and Disadvantages", () => {
         /** The sum of an actor's modifiers named `label` on a check. */
         const fromRule = (actor, spec, label) =>
           collectCheck(actor, spec)
@@ -456,8 +489,9 @@ export function registerPacksBatch(quench) {
               keep: 0
             });
 
+        // game-rules/83_ancestors.md, p.241-242
         it(
-          "Akodo (p.242): a Lion gets +1k0 on Kenjutsu, not on Iaijutsu; no second Ancestor (p.241)",
+          "should give a Lion with Akodo +1k0 on Kenjutsu, not on Iaijutsu, and refuse a second Ancestor",
           clean(async () => {
             const { actor } = await holding("advantages", "Akodo", { clan: "Lion" });
             const bugei = skill => fromRule(actor, { kind: "skill", skill }, "Akodo: Bugei Skills");
@@ -470,11 +504,15 @@ export function registerPacksBatch(quench) {
           })
         );
 
+        // game-rules/83_ancestors.md, p.243
         it(
-          "Shiba (p.243): a Phoenix adds Intelligence to Armor TN",
+          "should add Intelligence to a Phoenix's Armor TN with Shiba",
           clean(async () => {
             const actor = track(
-              await createTestPC({ name: "Packs Shiba", system: { traits: { int: 3 } } })
+              await createTestPC({
+                name: "Compendium packs: Shiba",
+                system: { traits: { int: 3 } }
+              })
             );
             await actor.createEmbeddedDocuments("Item", [{ name: "Phoenix", type: "clan" }]);
             const before = actor.system.armorTn.current;
@@ -483,8 +521,9 @@ export function registerPacksBatch(quench) {
           })
         );
 
+        // game-rules/64_advantages.md, p.148
         it(
-          "Elemental Blessing, Earth (p.148): Stamina and Willpower ranks cost 1 less, Reflexes does not",
+          "should make Stamina and Willpower ranks cost 1 less with Elemental Blessing, Earth, not Reflexes",
           clean(async () => {
             const { actor } = await holding("advantages", "Elemental Blessing", {
               traits: { sta: 3, wil: 3, ref: 3 },
@@ -496,8 +535,9 @@ export function registerPacksBatch(quench) {
           })
         );
 
+        // game-rules/64_advantages.md, p.149
         it(
-          "Friend of the Elements, Water (p.149): a Free Raise on Strength Trait rolls only",
+          "should give Friend of the Elements, Water, a Free Raise on Strength Trait rolls only",
           clean(async () => {
             const { actor } = await holding("advantages", "Friend of the Elements", {
               picks: ["water"]
@@ -509,8 +549,9 @@ export function registerPacksBatch(quench) {
           })
         );
 
+        // game-rules/64_advantages.md, p.146, 149, 155
         it(
-          "Wealthy (pp.146, 149, 155): 4 ranks cost 4, 3 for a Crane, 1 with Blissful Betrothal too",
+          "should cost 4 for 4 ranks of Wealthy, 3 for a Crane, and 1 with Blissful Betrothal too",
           clean(async () => {
             const { actor, item } = await holding("advantages", "Wealthy");
             await item.update({ "system.cost": 4 });
@@ -522,8 +563,9 @@ export function registerPacksBatch(quench) {
           })
         );
 
+        // game-rules/64_advantages.md, p.147
         it(
-          "Crafty (p.147): an Unskilled Low Skill roll counts as rank 1, a High Skill does not",
+          "should count an Unskilled Low Skill roll as rank 1 with Crafty, not a High Skill",
           clean(async () => {
             const { actor } = await holding("advantages", "Crafty");
             for (const name of ["Stealth", "Courtier"]) {
@@ -535,8 +577,10 @@ export function registerPacksBatch(quench) {
           })
         );
 
+        // game-rules/64_advantages.md, p.151
+        // game-rules/65_disadvantages.md, p.162
         it(
-          "Large (p.151): +1k0 damage with a large weapon, not with a katana; not with Small (p.162)",
+          "should give Large +1k0 damage with a large weapon, not a katana, and refuse Small beside it",
           clean(async () => {
             const { actor } = await holding("advantages", "Large");
             const damage = weapon => fromRule(actor, { kind: "damage", weapon }, "Large").roll;
@@ -549,8 +593,10 @@ export function registerPacksBatch(quench) {
           })
         );
 
+        // game-rules/65_disadvantages.md, p.160
+        // game-rules/64_advantages.md, p.154
         it(
-          "Low Pain Threshold (p.160): +5 on each Wound Rank's penalty past Healthy; Strength of the Earth (p.154): 3 less",
+          "should add 5 to each penalty past Healthy for Low Pain Threshold, 3 less for Strength of the Earth",
           clean(async () => {
             const { actor: frail } = await holding("disadvantages", "Low Pain Threshold");
             const { actor: tough } = await holding("advantages", "Strength of the Earth");
@@ -566,8 +612,9 @@ export function registerPacksBatch(quench) {
           })
         );
 
+        // game-rules/65_disadvantages.md, p.162
         it(
-          "Weakness, Strength (p.162): Strength counts one rank lower",
+          "should count Strength one rank lower with Weakness, Strength",
           clean(async () => {
             const { actor } = await holding("disadvantages", "Weakness", {
               traits: { str: 3 },
@@ -577,8 +624,9 @@ export function registerPacksBatch(quench) {
           })
         );
 
+        // game-rules/65_disadvantages.md, p.156
         it(
-          "Antisocial (p.156): -1k0 on Social Skill rolls, -1k1 in the 4-point version",
+          "should give Antisocial -1k0 on Social Skill rolls, -1k1 in the 4-point version",
           clean(async () => {
             for (const [version, keep] of [
               ["minor", 0],
@@ -595,8 +643,9 @@ export function registerPacksBatch(quench) {
           })
         );
 
+        // game-rules/64_advantages.md, p.148
         it(
-          "Paragon (p.148): refused beside Dark Paragon",
+          "should refuse Paragon beside Dark Paragon",
           clean(async () => {
             const { actor } = await holding("advantages", "Dark Paragon", { picks: ["control"] });
             assert.notOk(await drop(actor, "advantages", "Paragon", { confirm: "no" }));
@@ -604,10 +653,11 @@ export function registerPacksBatch(quench) {
           })
         );
 
+        // game-rules/64_advantages.md, p.154
         it(
-          "Touch of the Spirit Realms (Jigoku) (p.154): needs the Shadowlands Taint",
+          "should need the Shadowlands Taint for Touch of the Spirit Realms, Jigoku",
           clean(async () => {
-            const actor = track(await createTestPC({ name: "Packs Jigoku" }));
+            const actor = track(await createTestPC({ name: "Compendium packs: Jigoku" }));
             const jigoku = "Touch of the Spirit Realms (Jigoku)";
             assert.notOk(await drop(actor, "advantages", jigoku, { confirm: "no" }), "no Taint");
             assert.ok(await drop(actor, "disadvantages", "Shadowlands Taint"));
@@ -616,15 +666,27 @@ export function registerPacksBatch(quench) {
         );
       });
 
-      describe("Expected effects: Schools and Techniques (pp.102-132, 245-257)", () => {
+      // game-rules/48_character_creation_expanded.md, p.102-104
+      // game-rules/50_crab_schools.md, p.105-108
+      // game-rules/51_crane_schools.md, p.109-111
+      // game-rules/52_dragon_schools.md, p.112-115
+      // game-rules/53_lion_schools.md, p.116-119
+      // game-rules/54_mantis_schools.md, p.120-122
+      // game-rules/55_phoenix_schools.md, p.123-125
+      // game-rules/56_scorpion_schools.md, p.126-129
+      // game-rules/57_unicorn_schools.md, p.129-132
+      // game-rules/84_advanced_schools_and_alternate_paths.md, p.245-257
+      describe("Expected effects: Schools and Techniques", () => {
         const owns = (actor, type, name) =>
           actor.items.some(item => item.type === type && item.name === name);
 
+        // game-rules/48_character_creation_expanded.md, p.102
+        // game-rules/50_crab_schools.md, p.106
         it(
-          "a School drop grants its Skills, with Emphasis, and its Rank 1 Technique only (pp.102, 106)",
+          "should grant a dropped School's Skills, with Emphasis, and its Rank 1 Technique only",
           clean(async function () {
             this.timeout(30_000);
-            const actor = track(await createTestPC({ name: "Packs Hida" }));
+            const actor = track(await createTestPC({ name: "Compendium packs: Hida" }));
             assert.ok(await drop(actor, "schools", "Hida Bushi School"));
             for (const skill of [
               "Athletics",
@@ -645,11 +707,12 @@ export function registerPacksBatch(quench) {
           })
         );
 
+        // game-rules/84_advanced_schools_and_alternate_paths.md, p.245-247
         it(
-          "a second School asks: Add keeps both, and an Advanced School starts at its Rank 1 (pp.245-247)",
+          "should keep both Schools on Add, and start an Advanced School at its Rank 1",
           clean(async function () {
             this.timeout(30_000);
-            const actor = track(await createTestPC({ name: "Packs Defender" }));
+            const actor = track(await createTestPC({ name: "Compendium packs: Defender" }));
             assert.ok(await drop(actor, "schools", "Hida Bushi School"));
             // The GM adds it although the character misses its requirements
             const advanced = await drop(actor, "schools", "Defender of the Wall", {
@@ -668,9 +731,9 @@ export function registerPacksBatch(quench) {
           })
         );
 
-        it("grant work queued for a character deleted meanwhile stops, and reports no grant error", async function () {
+        it("should stop grant work queued for a character deleted meanwhile, and report no grant error", async function () {
           this.timeout(30_000);
-          const actor = await createTestPC({ name: "Packs Deleted" });
+          const actor = await createTestPC({ name: "Compendium packs: Deleted" });
           const source = await entry("schools", "Hida Bushi School");
           const grants = source.system.rules.filter(r => r.key === "GrantItem" && !r.rank);
           const logged = [];
@@ -695,11 +758,12 @@ export function registerPacksBatch(quench) {
           assert.isBelow(logged.length, grants.length, logged.join("\n"));
         });
 
+        // game-rules/48_character_creation_expanded.md, p.102
         it(
-          "Replace swaps the School and takes back what it granted (p.102)",
+          "should swap the School on Replace and take back what it granted",
           clean(async function () {
             this.timeout(30_000);
-            const actor = track(await createTestPC({ name: "Packs Switch" }));
+            const actor = track(await createTestPC({ name: "Compendium packs: Switch" }));
             assert.ok(await drop(actor, "schools", "Hida Bushi School"));
             assert.ok(await drop(actor, "schools", "Kakita Bushi School", { school: "replace" }));
             assert.deepEqual(
@@ -711,8 +775,9 @@ export function registerPacksBatch(quench) {
           })
         );
 
+        // game-rules/50_crab_schools.md, p.106
         it(
-          "The Mountain Does Not Move: Reduction equal to the Earth Ring (p.106)",
+          "should give The Mountain Does Not Move Reduction equal to the Earth Ring",
           clean(async () => {
             const { actor } = await holding("techniques", "The Mountain Does Not Move", {
               traits: { sta: 3, wil: 3 }
@@ -722,8 +787,9 @@ export function registerPacksBatch(quench) {
           })
         );
 
+        // game-rules/53_lion_schools.md, p.117
         it(
-          "Strength of My Ancestors: a Samurai-keyword weapon attacks as a Simple Action, a spear does not (p.117)",
+          "should attack as a Simple Action with a Samurai weapon under Strength of My Ancestors, not a spear",
           clean(async () => {
             const { actor } = await holding("techniques", "Strength of My Ancestors");
             const actions = name =>
@@ -739,8 +805,9 @@ export function registerPacksBatch(quench) {
           })
         );
 
+        // game-rules/56_scorpion_schools.md, p.126
         it(
-          "Strike From Above, Strike From Below: the Simple Action note shows on a melee attack's card only (p.126)",
+          "should show the Strike From Above, Strike From Below note on a melee attack's card only",
           clean(async () => {
             const { actor } = await holding("techniques", "Strike From Above, Strike From Below");
             const notes = async ranged => {
@@ -761,8 +828,9 @@ export function registerPacksBatch(quench) {
           })
         );
 
+        // game-rules/56_scorpion_schools.md, p.129
         it(
-          "@school.rank: Strike From Darkness rolls School Rank more dice (p.129)",
+          "should roll School Rank more dice with Strike From Darkness, through @school.rank",
           clean(async () => {
             const { actor } = await holding("techniques", "Strike From Darkness");
             await actor.createEmbeddedDocuments("Item", [
@@ -776,7 +844,10 @@ export function registerPacksBatch(quench) {
         );
       });
 
-      describe("Expected effects: kata, kiho, and tattoos (pp.115, 259-267)", () => {
+      // game-rules/52_dragon_schools.md, p.115
+      // game-rules/86_kata.md, p.259-260
+      // game-rules/87_kiho.md, p.261-267
+      describe("Expected effects: kata, kiho, and tattoos", () => {
         /** A PC at a School Rank, holding a pack entry. */
         const ranked = async (pack, name, rank, traits) => {
           const { actor, item } = await holding(pack, name, { traits });
@@ -786,11 +857,13 @@ export function registerPacksBatch(quench) {
           return { actor, item };
         };
 
+        // game-rules/52_dragon_schools.md, p.115
         it(
-          "Bamboo: Armor TN +2 x School Rank +5 only while activated, for 2 x School Rank Rounds (p.115)",
+          "should give Bamboo Armor TN +2 x School Rank +5 while activated, for 2 x School Rank Rounds",
           clean(async () => {
             const { actor, item } = await ranked("tattoos", "Bamboo", 2);
-            // Reflexes 2, no armor: the base Armor TN (p.82), so owning the tattoo adds nothing
+            // Reflexes 2, no armor: the base Armor TN, so owning the tattoo adds nothing
+            // game-rules/32_attack_and_defense.md, p.82
             const before = actor.system.armorTn.current;
             assert.equal(before, 15, "owned, not active: no bonus");
             await toggleActivation(actor, item);
@@ -802,8 +875,9 @@ export function registerPacksBatch(quench) {
           })
         );
 
+        // game-rules/52_dragon_schools.md, p.115
         it(
-          "one tattoo at a time: activating Crab ends Bamboo (p.115)",
+          "should end Bamboo when Crab is activated, one tattoo at a time",
           clean(async () => {
             const { actor, item: bamboo } = await ranked("tattoos", "Bamboo", 1);
             const crab = await drop(actor, "tattoos", "Crab");
@@ -815,8 +889,9 @@ export function registerPacksBatch(quench) {
           })
         );
 
+        // game-rules/52_dragon_schools.md, p.115
         it(
-          "Mantis: always active, Fear immunity while owned, and no activation (p.115)",
+          "should keep Mantis always active, with Fear immunity while owned and no activation",
           clean(async () => {
             const { actor, item } = await holding("tattoos", "Mantis");
             assert.isTrue(item.system.passive);
@@ -827,10 +902,11 @@ export function registerPacksBatch(quench) {
           })
         );
 
+        // game-rules/86_kata.md, p.259
         it(
-          "Striking as Air: needs Air 3; executed, Armor TN + Air Ring in the Defense Stance only (p.259)",
+          "should need Air 3 for Striking as Air, then add the Air Ring to Armor TN in the Defense Stance",
           clean(async () => {
-            const low = track(await createTestPC({ name: "Packs Low Air" }));
+            const low = track(await createTestPC({ name: "Compendium packs: Low Air" }));
             assert.notOk(await drop(low, "kata", "Striking as Air", { confirm: "no" }), "Air 2");
             const { actor, item } = await holding("kata", "Striking as Air", {
               traits: { ref: 3, awa: 3 }
@@ -839,13 +915,15 @@ export function registerPacksBatch(quench) {
             const base = actor.system.armorTn.current;
             await actor.toggleStatusEffect("defenseStance", { active: true });
             const defense = actor.items.find(i => i.name === "Defense")?.system.rank ?? 0;
-            // The stance itself adds Air + Defense (p.84); the kata adds Air again
+            // The stance itself adds Air + Defense; the kata adds Air again
+            // game-rules/36_stances.md, p.84
             assert.equal(actor.system.armorTn.current - base, 2 * actor.system.rings.air + defense);
           })
         );
 
+        // game-rules/87_kiho.md, p.262
         it(
-          "Soul of the Four Winds: Armor TN + Insight Rank + Air Ring while active (p.262)",
+          "should add Insight Rank + Air Ring to Armor TN while Soul of the Four Winds is active",
           clean(async () => {
             const { actor, item } = await holding("kiho", "Soul of the Four Winds");
             const before = actor.system.armorTn.current;
@@ -858,7 +936,8 @@ export function registerPacksBatch(quench) {
         );
       });
 
-      describe("Creatures (pp.318-331)", () => {
+      // game-rules/99_creatures.md, p.318-331
+      describe("Creatures", () => {
         const pack = () => game.packs.get(`${SYS_ID}.creatures`);
         /** A creature imported from the pack, as the GM's Import does. */
         const imported = async name =>
@@ -869,14 +948,15 @@ export function registerPacksBatch(quench) {
             )
           );
 
+        // The creatures pack is GM-only (roadmap/STAGE-15 decision 7)
         it(
-          "the pack is the GM's: players have no access (decision 7)",
+          "should keep the pack the GM's, with no access for players",
           clean(async function () {
             const player = game.users.find(user => user.role === CONST.USER_ROLES.PLAYER);
             if (!player) {
               this.skip();
             }
-            // client/documents/collections/compendium-collection.mjs:433-455
+            // [src: client/documents/collections/compendium-collection.mjs:433-455]
             assert.isFalse(pack().testUserPermission(player, "LIMITED"), "a player");
             assert.isTrue(pack().testUserPermission(game.user, "OWNER"), "the GM");
             assert.isTrue(
@@ -886,7 +966,7 @@ export function registerPacksBatch(quench) {
         );
 
         it(
-          "every creature imports as an NPC with its page, every creature's rules reach it, and no console error",
+          "should import every creature as an NPC with its page; every creature's rules reach it",
           clean(async function () {
             this.timeout(60_000);
             assert.isAbove(pack().index.size, 0);
@@ -902,8 +982,9 @@ export function registerPacksBatch(quench) {
           })
         );
 
+        // game-rules/99_creatures.md, p.319, 329
         it(
-          "Oni: Reduction 24, 12 against jade; Invulnerable save to jade; Fear 3 (pp.319, 329)",
+          "should give the Oni Reduction 24, 12 against jade, Invulnerable save to jade, and Fear 3",
           clean(async () => {
             const oni = await imported("Oni (Ugulu no Oni)");
             const { reduction, ruleReduction } = oni.system.armorTn;
@@ -926,8 +1007,9 @@ export function registerPacksBatch(quench) {
           })
         );
 
+        // game-rules/99_creatures.md, p.320
         it(
-          "Dog: Hunting 3 with Tracking, and Swift 2 moves it as Water 3 (p.320)",
+          "should give the Dog Hunting 3 with Tracking, and move it as Water 3 with Swift 2",
           clean(async () => {
             const dog = await imported("Dog");
             const hunting = dog.items.find(i => i.type === "skill" && i.name === "Hunting");
@@ -937,8 +1019,9 @@ export function registerPacksBatch(quench) {
           })
         );
 
+        // game-rules/99_creatures.md, p.330
         it(
-          "Tsuno: two attacks, Tsuno blade 7k3 and unarmed 6k3, with their damage (p.330)",
+          "should give the Tsuno two attacks, Tsuno blade 7k3 and unarmed 6k3, with their damage",
           clean(async () => {
             const tsuno = await imported("Tsuno");
             const pools = ["attack1", "damage1", "attack2", "damage2"].map(
@@ -949,7 +1032,15 @@ export function registerPacksBatch(quench) {
         );
       });
 
-      describe("Expected effects: spells (pp.163-197, 267-274)", () => {
+      // game-rules/66_magic_and_spell_casting.md, p.163-164
+      // game-rules/67_universal_spells.md, p.164-166
+      // game-rules/68_air_spells.md, p.167-173
+      // game-rules/69_earth_spells.md, p.173-180
+      // game-rules/70_fire_spells.md, p.180-186
+      // game-rules/71_water_spells.md, p.187-193
+      // game-rules/72_void_spells.md, p.193-197
+      // game-rules/88_maho.md, p.267-274
+      describe("Expected effects: spells", () => {
         /**
          * The index entries of the spells pack matching a test. The index the world loads at startup holds core's
          * fields only; getIndex reads the configured ones (CONFIG.Item.compendiumIndexFields).
@@ -957,12 +1048,13 @@ export function registerPacksBatch(quench) {
         const spells = async test =>
           (await game.packs.get(`${SYS_ID}.spells`).getIndex()).filter(e => test(e.system ?? {}));
 
+        // game-rules/66_magic_and_spell_casting.md, p.163
         it(
-          "a pack Fire spell of Mastery Level 1 casts at TN 10 (5 + 5 x ML, p.163)",
+          "should cast a pack Fire spell of Mastery Level 1 at TN 10, 5 + 5 x Mastery Level",
           clean(async () => {
             const [fire] = await spells(s => s.ring === "fire" && s.mastery === 1 && !s.maho);
             assert.ok(fire, "a Fire spell of Mastery Level 1");
-            const actor = track(await createShugenja({ name: "Packs caster" }));
+            const actor = track(await createShugenja({ name: "Compendium packs: caster" }));
             const spell = await DragDropHandler.handleItemDrop({ actor }, null, {
               uuid: fire.uuid
             });
@@ -974,7 +1066,7 @@ export function registerPacksBatch(quench) {
         );
 
         it(
-          "the browser's Spells tab, filtered to Fire and Mastery Level 2, lists only those",
+          "should list only Fire spells of Mastery Level 2 on the browser's Spells tab filtered to them",
           clean(async () => {
             const expected = (await spells(s => s.ring === "fire" && s.mastery === 2)).length;
             assert.isAbove(expected, 0, "Fire spells of Mastery Level 2 exist");
@@ -999,7 +1091,7 @@ export function registerPacksBatch(quench) {
 
       describe("Citation in place of the book's text", () => {
         it(
-          "the item sheet shows the page under the name, and the chat card ends with it",
+          "should show the page under the item sheet's name, and end the chat card with it",
           clean(async () => {
             const { item } = await holding("weapons", "Katana");
             await item.sheet.render({ force: true });
@@ -1032,7 +1124,7 @@ export function registerPacksBatch(quench) {
         };
 
         it(
-          "filters the Equipment tab by group, size, and name",
+          "should filter the Equipment tab by group, size, and name",
           clean(async () => {
             const app = await openOn("equipment");
             try {
@@ -1053,7 +1145,7 @@ export function registerPacksBatch(quench) {
         );
 
         it(
-          "a tab switches the list, Clear filters empties the search, a name opens its sheet, and Import brings in a creature",
+          "should switch tabs, clear filters, open a name's sheet, and import a creature",
           clean(async () => {
             const app = await openOn("equipment");
             const before = new Set(game.actors.map(a => a.id));
@@ -1086,12 +1178,12 @@ export function registerPacksBatch(quench) {
         );
 
         it(
-          "Add puts the item on the controlled token's actor through the purchase path",
+          "should put the item on the controlled token's actor through the purchase path on Add",
           clean(async function () {
             if (!canvas.scene) {
               this.skip();
             }
-            const actor = track(await createTestPC({ name: "Packs shopper" }));
+            const actor = track(await createTestPC({ name: "Compendium packs: shopper" }));
             const [token] = await canvas.scene.createEmbeddedDocuments("Token", [
               (await actor.getTokenDocument({ x: 0, y: 0 })).toObject()
             ]);
@@ -1111,13 +1203,14 @@ export function registerPacksBatch(quench) {
         );
 
         it(
-          "a row drags from its icon as an Item drop a sheet takes, and core does not cancel the drag",
+          "should drag a row from its icon as an Item drop a sheet takes, without core cancelling it",
           clean(async () => {
             const app = await openOn("equipment");
             try {
               app.search = "Light Armor";
               await app.render();
-              // A user grabs the icon or the name, which carry no draggable attribute (client/game.mjs:2239-2245)
+              // A user grabs the icon or the name, which carry no draggable attribute
+              // [src: client/game.mjs:2239-2245]
               const icon = app.element.querySelector(".l5r4-browser-row .l5r4-browser-icon");
               const transfer = new DataTransfer();
               const event = new DragEvent("dragstart", {
@@ -1129,7 +1222,7 @@ export function registerPacksBatch(quench) {
               assert.isFalse(event.defaultPrevented, "core cancelled the drag");
               const data = JSON.parse(transfer.getData("text/plain"));
               assert.equal(data.type, "Item");
-              const actor = track(await createTestPC({ name: "Packs dragger" }));
+              const actor = track(await createTestPC({ name: "Compendium packs: dragger" }));
               const item = await DragDropHandler.handleItemDrop({ actor }, null, data);
               assert.equal(item.name, "Light Armor");
             } finally {
@@ -1139,7 +1232,7 @@ export function registerPacksBatch(quench) {
         );
 
         it(
-          "reopened, it lists an entry added to a world compendium since",
+          "should list an entry added to a world compendium since, once reopened",
           clean(async () => {
             const pack = await foundry.documents.collections.CompendiumCollection.createCompendium({
               label: "Packs Quench pack",
@@ -1164,7 +1257,7 @@ export function registerPacksBatch(quench) {
         );
 
         it(
-          "the Compendium sidebar has a Browse button that opens it",
+          "should open it from a Browse button in the Compendium sidebar",
           clean(async () => {
             const id = `${SYS_ID}-compendium-browser`;
             await foundry.applications.instances.get(id)?.close({ animate: false });

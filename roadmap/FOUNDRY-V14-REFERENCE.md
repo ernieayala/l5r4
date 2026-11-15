@@ -536,6 +536,15 @@ For L5R4, a `Combatant` subclass overriding `getInitiativeRoll` replaces patchin
 
 - `game.settings.register(namespace, key, {name, hint, scope: "world"|"user"|"client", config, type, default, choices, requiresReload, onChange})`; `registerMenu(namespace, key, {..., restricted})`; `get(ns, key, {document})`; `set(ns, key, value, {document})` [S86].
 - `type` must be a DataField instance, a DataModel, or a callable; anything else throws "Setting ... type must be a DataField, DataModel, or callable function" [src: client/helpers/client-settings.mjs:133-137]. A DataField `type` supplies the default from `getInitialValue()` and takes `label`/`hint` from the setting [src: ...client-settings.mjs:140-145]. A DataModel subclass as `type` is supported: its default becomes `{}` [src: ...client-settings.mjs:148] and stored values are built with `type.fromSource(value || {}, {strict: true})` [src: ...client-settings.mjs:349-350]. Draw Steel registers DataModel-typed settings (`data/settings/*.mjs`) [S87].
+- `registerMenu(namespace, key, {name, label, hint, icon, type, restricted})`: `type` must be a FormApplication or an
+  ApplicationV2 subclass, or it throws; `restricted: true` limits the button to GMs [src:
+  client/helpers/client-settings.mjs:166-194].
+- Core's icons: Font Awesome Pro 7.2.0 [src: public/fonts/fontawesome/css/all.min.css]; core's templates and client
+  write `fa-solid` 871 times, `fa-regular` 32, `fas` 20, `far` 3 (counted 2026-11-14). Core's theme colors are
+  variables in `public/css/foundry2.css`: palette steps (`--color-cool-*`, `--color-warm-*`, `--color-light-*`,
+  `--color-dark-*`) and roles (`--color-text-primary`, `--color-text-secondary`, `--color-text-subtle`,
+  `--color-text-emphatic`, `--color-border`, `--color-level-warning`, `--color-level-error`), set per `.theme-light` /
+  `.theme-dark`.
 - `SettingsConfig` V2 `input` functions work (14.356 fix) [S9].
 - `game.settings.get` for a user-changeable setting is a trust boundary (project rule).
 

@@ -78,7 +78,7 @@ function addEffect(adds) {
  * plus the change, never an effect bonus (AUTOMATION.md B6).
  * @param {object} quench  The Quench API object.
  */
-export function registerActiveEffectsBatch(quench) {
+export function registerActiveEffectsTests(quench) {
   quench.registerBatch(
     `${SYS_ID}.active-effects`,
     context => {
@@ -91,8 +91,8 @@ export function registerActiveEffectsBatch(quench) {
       });
 
       describe("Effect data", () => {
-        it("core's base type uses the system model: rules, and changes default to phase initial", async () => {
-          actor = await createTestPC({ name: "AE model" });
+        it("should use core's base type with the system model: rules, and changes in phase initial", async () => {
+          actor = await createTestPC({ name: "Active effects: model" });
           const [effect] = await actor.createEmbeddedDocuments("ActiveEffect", [
             addEffect({ "system.traits.ref": 1 })
           ]);
@@ -101,7 +101,7 @@ export function registerActiveEffectsBatch(quench) {
           assert.equal(effect.system.changes[0].phase, "initial");
         });
 
-        it("CONFIG.statusEffects holds the system's statuses only, by id, with their images", () => {
+        it("should hold only the system's statuses in CONFIG.statusEffects, by id, with their images", () => {
           assert.deepEqual(
             CONFIG.statusEffects.map(s => s.id),
             STATUS_EFFECTS.map(s => s.id)
@@ -111,8 +111,9 @@ export function registerActiveEffectsBatch(quench) {
           }
         });
 
-        it("a toggled status and a stance template keep their image (14.370 drops icon)", async () => {
-          actor = await createTestPC({ name: "AE img" });
+        // Core 14.370 drops the icon field, so the image is the only picture an effect has
+        it("should keep the image of a toggled status and a stance template", async () => {
+          actor = await createTestPC({ name: "Active effects: img" });
           const prone = await actor.toggleStatusEffect("prone", { active: true });
           assert.equal(prone.img, CONFIG.statusEffects.prone.img);
           const stance = await applyEffect(actor, "fullAttackStance");
@@ -122,9 +123,9 @@ export function registerActiveEffectsBatch(quench) {
       });
 
       describe("Trait changes reach derived values", () => {
-        it("Stamina and Willpower raise Earth and the wound thresholds; Reflexes raises Armor TN", async () => {
+        it("should raise Earth and the wound thresholds from Stamina and Willpower, Armor TN from Reflexes", async () => {
           actor = await createTestPC({
-            name: "AE traits",
+            name: "Active effects: traits",
             system: { traits: { sta: 2, wil: 2, ref: 2 } }
           });
           assert.equal(actor.system.rings.earth, 2);
@@ -138,8 +139,12 @@ export function registerActiveEffectsBatch(quench) {
           assert.equal(actor.system.armorTn.current, 20, "Armor TN = Reflexes 3 x 5 + 5");
         });
 
-        it("Strength raised by an effect reaches melee and bow damage (#29)", async () => {
-          actor = await createTestPC({ name: "AE strength", system: { traits: { str: 2 } } });
+        // #29
+        it("should carry Strength raised by an effect to melee and bow damage", async () => {
+          actor = await createTestPC({
+            name: "Active effects: strength",
+            system: { traits: { str: 2 } }
+          });
           await actor.createEmbeddedDocuments("Item", [createKatana(), createBow()]);
           await actor.createEmbeddedDocuments("ActiveEffect", [
             addEffect({ "system.traits.str": 1 })
@@ -156,10 +161,11 @@ export function registerActiveEffectsBatch(quench) {
         });
       });
 
-      describe("Spending writes the stored value (B6)", () => {
-        it("a Void Point spent with an effect bonus to the pool", async () => {
+      // roadmap/AUTOMATION.md B6
+      describe("Spending writes the stored value", () => {
+        it("should write the stored value for a Void Point spent with an effect bonus to the pool", async () => {
           actor = await createTestPC({
-            name: "AE void",
+            name: "Active effects: void",
             system: { rings: { void: { rank: 2, value: 2 } } }
           });
           await actor.createEmbeddedDocuments("ActiveEffect", [
@@ -172,8 +178,11 @@ export function registerActiveEffectsBatch(quench) {
           assert.equal(actor.system.rings.void.value, 2, "prepared 1 + 1");
         });
 
-        it("a spell slot spent with an effect bonus to the slots", async () => {
-          actor = await createTestPC({ name: "AE slots", system: { spellSlots: { fire: 2 } } });
+        it("should write the stored value for a spell slot spent with an effect bonus to the slots", async () => {
+          actor = await createTestPC({
+            name: "Active effects: slots",
+            system: { spellSlots: { fire: 2 } }
+          });
           await actor.createEmbeddedDocuments("ActiveEffect", [
             addEffect({ "system.spellSlots.fire": 1 })
           ]);
@@ -183,8 +192,11 @@ export function registerActiveEffectsBatch(quench) {
           assert.equal(actor.system.spellSlots.fire, 2, "prepared 1 + 1");
         });
 
-        it("casting a spell spends the slot from the stored count", async () => {
-          actor = await createTestPC({ name: "AE cast", system: { spellSlots: { fire: 2 } } });
+        it("should spend the slot from the stored count when casting a spell", async () => {
+          actor = await createTestPC({
+            name: "Active effects: cast",
+            system: { spellSlots: { fire: 2 } }
+          });
           await actor.createEmbeddedDocuments("ActiveEffect", [
             addEffect({ "system.spellSlots.fire": 1 })
           ]);
@@ -196,8 +208,8 @@ export function registerActiveEffectsBatch(quench) {
           assert.equal(actor._source.system.spellSlots.fire, 1, "stored 2 - 1");
         });
 
-        it("maho adds its blood cost and Taint to the stored values", async () => {
-          actor = await createTestPC({ name: "AE maho" });
+        it("should add the maho blood cost and Taint to the stored values", async () => {
+          actor = await createTestPC({ name: "Active effects: maho" });
           // The +10 to Fire rolls makes the TN 10 cast certain, so the Taint write always runs
           await actor.createEmbeddedDocuments("ActiveEffect", [
             addEffect({
@@ -215,8 +227,8 @@ export function registerActiveEffectsBatch(quench) {
           assert.equal(actor._source.system.shadowTaint.points, 1, "stored 0 + Taint 1");
         });
 
-        it("a long rest heals from the stored Wounds", async () => {
-          actor = await createTestPC({ name: "AE rest", system: { suffered: 10 } });
+        it("should heal from the stored Wounds on a long rest", async () => {
+          actor = await createTestPC({ name: "Active effects: rest", system: { suffered: 10 } });
           await actor.createEmbeddedDocuments("ActiveEffect", [
             addEffect({ "system.suffered": 5 })
           ]);
@@ -227,8 +239,8 @@ export function registerActiveEffectsBatch(quench) {
           assert.equal(actor._source.system.suffered, 10 - healRate, "stored 10 - heal rate");
         });
 
-        it("the Void dots step from the stored Void Points", async () => {
-          actor = await createTestPC({ name: "AE void dots" });
+        it("should step the Void dots from the stored Void Points", async () => {
+          actor = await createTestPC({ name: "Active effects: void dots" });
           await actor.createEmbeddedDocuments("ActiveEffect", [
             addEffect({ "system.rings.void.value": 1 })
           ]);
@@ -236,9 +248,9 @@ export function registerActiveEffectsBatch(quench) {
           assert.equal(actor._source.system.rings.void.value, 1, "stored 2 - 1");
         });
 
-        it("the spell slot adjuster steps from the stored slots", async () => {
+        it("should step the spell slot adjuster from the stored slots", async () => {
           actor = await createTestPC({
-            name: "AE slot adjust",
+            name: "Active effects: slot adjust",
             system: { spellSlots: { fire: 2 } }
           });
           await actor.createEmbeddedDocuments("ActiveEffect", [
@@ -253,8 +265,8 @@ export function registerActiveEffectsBatch(quench) {
           assert.equal(actor._source.system.spellSlots.fire, 1, "stored 2 - 1");
         });
 
-        it("the rank/points adjuster steps from the stored rank", async () => {
-          actor = await createTestPC({ name: "AE rank adjust" });
+        it("should step the rank/points adjuster from the stored rank", async () => {
+          actor = await createTestPC({ name: "Active effects: rank adjust" });
           await actor.createEmbeddedDocuments("ActiveEffect", [
             addEffect({ "system.honor.rank": 1 })
           ]);
@@ -268,7 +280,8 @@ export function registerActiveEffectsBatch(quench) {
         });
       });
 
-      describe("Void Points spent through a confirmation write the stored value (B6)", () => {
+      // roadmap/AUTOMATION.md B6
+      describe("Void Points spent through a confirmation write the stored value", () => {
         let combat;
         let confirm;
 
@@ -293,15 +306,15 @@ export function registerActiveEffectsBatch(quench) {
           return combatant;
         }
 
-        it("for +10 Initiative", async () => {
-          const combatant = await setUp("AE initiative");
+        it("should write the stored value for +10 Initiative", async () => {
+          const combatant = await setUp("Active effects: initiative");
           await actor.update({ "system.initiative.useVoid": true });
           await combat.rollInitiative(combatant.id);
           assert.equal(actor._source.system.rings.void.value, 1, "stored 2 - 1");
         });
 
-        it("for +10 Armor TN", async () => {
-          await setUp("AE armor void");
+        it("should write the stored value for +10 Armor TN", async () => {
+          await setUp("Active effects: armor void");
           await combat.startCombat();
           assert.equal(game.combat?.id, combat.id, "the handler reads game.combat");
           await PcActionsHandler.handleToggleArmorVoid({ actor }, null, { checked: true });
@@ -315,7 +328,8 @@ export function registerActiveEffectsBatch(quench) {
         });
       });
 
-      describe("Chat damage buttons write the stored value (B6)", () => {
+      // roadmap/AUTOMATION.md B6
+      describe("Chat damage buttons write the stored value", () => {
         let token;
 
         afterEach(async () => {
@@ -339,8 +353,8 @@ export function registerActiveEffectsBatch(quench) {
           }
           token.object.control({ releaseOthers: true });
           // An unsaved message: renderHTML still fires renderChatMessageHTML, and nothing is posted to the chat log,
-          // whose pop-up card rejects when its message is deleted mid-animation (client/applications/sidebar/tabs/
-          // chat.mjs:1318-1321)
+          // whose pop-up card rejects when its message is deleted mid-animation
+          // [src: client/applications/sidebar/tabs/chat.mjs:1318-1321]
           const message = new ChatMessage.implementation({
             content:
               '<button data-action="apply-wounds" data-damage="7"></button>' +
@@ -349,8 +363,8 @@ export function registerActiveEffectsBatch(quench) {
           return message.renderHTML();
         }
 
-        it("Apply Wounds adds the damage to the stored Wounds", async () => {
-          const html = await setUp("AE apply wounds");
+        it("should add the damage to the stored Wounds on Apply Wounds", async () => {
+          const html = await setUp("Active effects: apply wounds");
           const updated = nextUpdate(actor);
           html.querySelector("[data-action='apply-wounds']").click();
           await updated;
@@ -358,8 +372,8 @@ export function registerActiveEffectsBatch(quench) {
           assert.equal(actor.system.suffered, 12, "prepared 7 + 5");
         });
 
-        it("Reduce with Void spends from the stored Void Points and adds to the stored Wounds", async () => {
-          const html = await setUp("AE reduce wounds");
+        it("should spend the stored Void Points and add to the stored Wounds on Reduce with Void", async () => {
+          const html = await setUp("Active effects: reduce wounds");
           const updated = nextUpdate(actor);
           html.querySelector("[data-action='reduce-wounds-void']").click();
           await updated;
@@ -368,9 +382,14 @@ export function registerActiveEffectsBatch(quench) {
         });
       });
 
-      describe("XP for a Trait with a creation bonus (#29, Core Rulebook p.103)", () => {
-        it("a TraitAdjust rule bonus counts toward each bought rank and marks no free rank", async () => {
-          actor = await createTestPC({ name: "AE xp", system: { traits: { str: 2 } } });
+      // #29
+      // game-rules/48_character_creation_expanded.md, p.103
+      describe("XP for a Trait with a creation bonus", () => {
+        it("should count a TraitAdjust rule bonus toward each bought rank and mark no free rank", async () => {
+          actor = await createTestPC({
+            name: "Active effects: xp",
+            system: { traits: { str: 2 } }
+          });
           await actor.createEmbeddedDocuments("Item", [
             creationBonusItem("family", "str"),
             creationBonusItem("school", "str")
@@ -382,8 +401,11 @@ export function registerActiveEffectsBatch(quench) {
           assert.equal(await historyTraitXp(actor, "str"), 20, "the history charges the same");
         });
 
-        it("the legacy trait and bonus fields still make the raise to 3 the free rank", async () => {
-          actor = await createTestPC({ name: "Legacy xp", system: { traits: { str: 2 } } });
+        it("should still make the raise to 3 the free rank from the legacy trait and bonus fields", async () => {
+          actor = await createTestPC({
+            name: "Active effects: legacy xp",
+            system: { traits: { str: 2 } }
+          });
           await actor.createEmbeddedDocuments("Item", [
             { name: "Legacy family", type: "family", system: { trait: "str", bonus: 1 } }
           ]);
@@ -395,8 +417,12 @@ export function registerActiveEffectsBatch(quench) {
           assert.equal(await historyTraitXp(actor, "str"), 16, "the history charges the same");
         });
 
-        it("a legacy Family and School bonus to one Trait make two free ranks (p.102)", async () => {
-          actor = await createTestPC({ name: "Legacy xp double", system: { traits: { str: 2 } } });
+        // game-rules/48_character_creation_expanded.md, p.102
+        it("should make two free ranks from a legacy Family and School bonus to one Trait", async () => {
+          actor = await createTestPC({
+            name: "Active effects: legacy xp double",
+            system: { traits: { str: 2 } }
+          });
           await actor.createEmbeddedDocuments("Item", [
             { name: "Legacy family", type: "family", system: { trait: "str", bonus: 1 } },
             { name: "Legacy school", type: "school", system: { trait: "str", bonus: 1 } }
@@ -408,8 +434,8 @@ export function registerActiveEffectsBatch(quench) {
           assert.equal(actor.system._xp.breakdown.traits, 20, "Strength 4 to 5 costs 4 x 5");
         });
 
-        it("a legacy Void bonus makes the raise to Void 3 free", async () => {
-          actor = await createTestPC({ name: "Legacy xp void" });
+        it("should make the raise to Void 3 free from a legacy Void bonus", async () => {
+          actor = await createTestPC({ name: "Active effects: legacy xp void" });
           await actor.createEmbeddedDocuments("Item", [
             { name: "Legacy school", type: "school", system: { trait: "void", bonus: 1 } }
           ]);
@@ -420,8 +446,9 @@ export function registerActiveEffectsBatch(quench) {
           assert.equal(actor.system._xp.breakdown.void, 24, "Void 3 to 4 costs 6 x 4");
         });
 
-        it("a TraitAdjust Void bonus counts toward each bought Void rank (#44)", async () => {
-          actor = await createTestPC({ name: "AE xp void" });
+        // #44
+        it("should count a TraitAdjust Void bonus toward each bought Void rank", async () => {
+          actor = await createTestPC({ name: "Active effects: xp void" });
           await actor.createEmbeddedDocuments("Item", [creationBonusItem("school", "void")]);
           assert.equal(actor.system.rings.void.rank, 3, "stored 2 + School 1");
           await actor.update({ "system.rings.void.rank": 3 });
@@ -429,8 +456,11 @@ export function registerActiveEffectsBatch(quench) {
           assert.equal(actor.system._xp.breakdown.void, 24, "Void 3 to 4 costs 6 x 4");
         });
 
-        it("a kata and a kiho cost their Mastery Level (pp.231, 259; #43)", async () => {
-          actor = await createTestPC({ name: "AE xp kata" });
+        // #43
+        // game-rules/80_brotherhood_of_shinsei.md, p.231
+        // game-rules/86_kata.md, p.259
+        it("should cost a kata and a kiho their Mastery Level", async () => {
+          actor = await createTestPC({ name: "Active effects: xp kata" });
           await actor.createEmbeddedDocuments("Item", [
             { name: "Quench kata", type: "kata", system: { mastery: 3 } },
             { name: "Quench kiho", type: "kiho", system: { mastery: 4 } }
@@ -439,8 +469,11 @@ export function registerActiveEffectsBatch(quench) {
           assert.equal(actor.system._xp.breakdown.kiho, 4);
         });
 
-        it("the migration clears a free rank marked for a TraitAdjust rule bonus", async () => {
-          actor = await createTestPC({ name: "AE xp migration", system: { traits: { str: 3 } } });
+        it("should clear in the migration a free rank marked for a TraitAdjust rule bonus", async () => {
+          actor = await createTestPC({
+            name: "Active effects: xp migration",
+            system: { traits: { str: 3 } }
+          });
           await actor.createEmbeddedDocuments("Item", [
             creationBonusItem("family", "str"),
             creationBonusItem("school", "str")
@@ -455,6 +488,6 @@ export function registerActiveEffectsBatch(quench) {
         });
       });
     },
-    { displayName: "L5R4: Active Effects" }
+    { displayName: "L5R4: Active effects" }
   );
 }

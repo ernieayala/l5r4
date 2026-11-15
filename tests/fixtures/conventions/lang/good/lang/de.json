@@ -1,0 +1,13 @@
+{
+  "l5r4": {
+    "ui": {
+      "check": {
+        "exported": {
+          "one": "1 Gegenstand aus {folder} exportiert.",
+          "other": "{count} Gegenstände aus {folder} exportiert."
+        },
+        "voidSkill": "Einen Leerenpunkt nutzen"
+      }
+    }
+  }
+}

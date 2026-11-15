@@ -1,0 +1,12 @@
+{
+  "l5r4": {
+    "ui": {
+      "check": {
+        "maxWounds": "Maximale Wunden",
+        "noWillpower": "{name} hat keine Willenskraft",
+        "oldName": "Alter Name",
+        "voidSkill": "Einen Leerenpunkt nutzen"
+      }
+    }
+  }
+}

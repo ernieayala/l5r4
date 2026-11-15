@@ -31,11 +31,14 @@ export function registerSpellSlotsEdgeCaseTests(quench) {
     context => {
       const { describe, it, assert, beforeEach, afterEach } = context;
 
-      describe("Casting with No Slots", () => {
+      describe("Casting with no slots", () => {
         let actor;
 
         beforeEach(async () => {
-          actor = await createTestPC({ name: "Spell Slot Test", system: { traits: { int: 3 } } });
+          actor = await createTestPC({
+            name: "Spell slots edge cases: slot test",
+            system: { traits: { int: 3 } }
+          });
         });
 
         afterEach(async () => {
@@ -85,12 +88,12 @@ export function registerSpellSlotsEdgeCaseTests(quench) {
         });
       });
 
-      describe("Slot Consumption Timing", () => {
+      describe("Slot consumption timing", () => {
         let actor;
 
         beforeEach(async () => {
           actor = await createTestPC({
-            name: "Slot Timing Test",
+            name: "Spell slots edge cases: slot timing",
             system: { traits: { int: 3 }, spellSlots: { fire: 3 } }
           });
         });
@@ -145,11 +148,14 @@ export function registerSpellSlotsEdgeCaseTests(quench) {
         });
       });
 
-      describe("Large Slot Counts", () => {
+      describe("Large slot counts", () => {
         let actor;
 
         beforeEach(async () => {
-          actor = await createTestPC({ name: "Overflow Test", system: { traits: { int: 3 } } });
+          actor = await createTestPC({
+            name: "Spell slots edge cases: overflow",
+            system: { traits: { int: 3 } }
+          });
         });
 
         afterEach(async () => {
@@ -174,12 +180,12 @@ export function registerSpellSlotsEdgeCaseTests(quench) {
         });
       });
 
-      describe("Multiple Element Slots", () => {
+      describe("Multiple element slots", () => {
         let actor;
 
         beforeEach(async () => {
           actor = await createTestPC({
-            name: "Multi-Element Test",
+            name: "Spell slots edge cases: multiple elements",
             system: {
               traits: { int: 3 },
               spellSlots: { fire: 3, water: 2, earth: 1, air: 4 }
@@ -225,6 +231,6 @@ export function registerSpellSlotsEdgeCaseTests(quench) {
         });
       });
     },
-    { displayName: "L5R4: Spell Slots Edge Cases" }
+    { displayName: "L5R4: Spell slots edge cases" }
   );
 }

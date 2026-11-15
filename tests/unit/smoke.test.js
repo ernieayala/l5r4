@@ -13,8 +13,8 @@ import {
   getValidRingValues
 } from "../fixtures/test-helpers.js";
 
-describe("Vitest Setup Smoke Test", () => {
-  describe("basic assertions", () => {
+describe("Vitest setup smoke test", () => {
+  describe("Basic assertions", () => {
     it("should perform basic equality checks", () => {
       expect(1 + 1).toBe(2);
       expect("test").toBe("test");
@@ -42,7 +42,7 @@ describe("Vitest Setup Smoke Test", () => {
     });
   });
 
-  describe("test helpers", () => {
+  describe("Test helpers", () => {
     it("should create mock actor data", () => {
       // ARRANGE & ACT
       const mockActor = createMockActorData();
@@ -99,7 +99,7 @@ describe("Vitest Setup Smoke Test", () => {
     });
   });
 
-  describe("array operations", () => {
+  describe("Array operations", () => {
     it("should check array length", () => {
       const arr = [1, 2, 3];
       expect(arr).toHaveLength(3);
@@ -112,7 +112,7 @@ describe("Vitest Setup Smoke Test", () => {
     });
   });
 
-  describe("object operations", () => {
+  describe("Object operations", () => {
     it("should check object has property", () => {
       const obj = { name: "Test", value: 5 };
       expect(obj).toHaveProperty("name");
@@ -125,7 +125,7 @@ describe("Vitest Setup Smoke Test", () => {
     });
   });
 
-  describe("error handling", () => {
+  describe("Error handling", () => {
     it("should catch thrown errors", () => {
       const throwError = () => {
         throw new Error("Test error");

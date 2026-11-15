@@ -10,7 +10,7 @@ import { autoAnswerRolls, cleanTest, settleChatNotifications, waitFor } from "./
  * in Foundry, named for its issue. The pure-math ones are Vitest cases (#5, #7, #10, #14, #32).
  * @param {object} quench  The Quench API object.
  */
-export function registerRegressionsBatch(quench) {
+export function registerRegressionsTests(quench) {
   quench.registerBatch(
     `${SYS_ID}.regressions`,
     context => {
@@ -23,7 +23,8 @@ export function registerRegressionsBatch(quench) {
 
       before(() => {
         hook = Hooks.on("createChatMessage", message => posted.push(message));
-        // Taking the Full Defense Stance opens its roll dialog (p.84)
+        // Taking the Full Defense Stance opens its roll dialog
+        // game-rules/36_stances.md, p.84
         stopAnswering = autoAnswerRolls();
       });
 
@@ -48,7 +49,7 @@ export function registerRegressionsBatch(quench) {
       /** Reflexes 3 and Awareness 3 (Air 3, Armor TN 20), Agility 3, Defense 2, Kenjutsu 2. */
       const samurai = async () => {
         const actor = await createTestPC({
-          name: "Regression samurai",
+          name: "Closed rule bugs: samurai",
           system: { traits: { ref: 3, awa: 3, agi: 3 } }
         });
         actors.push(actor);
@@ -77,9 +78,11 @@ export function registerRegressionsBatch(quench) {
         return message;
       };
 
-      describe("Stances (p.84)", () => {
+      // game-rules/36_stances.md, p.84
+      describe("Stances", () => {
+        // #9, #12
         it(
-          "the Armor TN follows each stance picked, and back again (#9, #12)",
+          "should move the Armor TN with each stance picked, and back again",
           clean(async () => {
             const actor = await samurai();
             const tn = () => actor.system.armorTn.current;
@@ -95,8 +98,9 @@ export function registerRegressionsBatch(quench) {
           })
         );
 
+        // #11
         it(
-          "picking each stance in turn logs no error and leaves one stance (#11)",
+          "should leave one stance and log no error when each stance is picked in turn",
           clean(async function () {
             this.timeout(10_000);
             const actor = await samurai();
@@ -118,8 +122,9 @@ export function registerRegressionsBatch(quench) {
           })
         );
 
+        // #8
         it(
-          "taking Full Defense rolls Defense / Reflexes once (#8)",
+          "should roll Defense / Reflexes once when Full Defense is taken",
           clean(async () => {
             const actor = await samurai();
             const rolls = () =>
@@ -137,8 +142,9 @@ export function registerRegressionsBatch(quench) {
           })
         );
 
+        // #13
         it(
-          "Full Attack's +2k1 reaches a Skill attack (#13)",
+          "should add Full Attack's +2k1 to a Skill attack",
           clean(async () => {
             const actor = await samurai();
             await pick(actor, "fullAttackStance");
@@ -148,8 +154,9 @@ export function registerRegressionsBatch(quench) {
         );
       });
 
+      // #15
       it(
-        "a Skill's roll, keep, and total bonus fields reach its roll (#15)",
+        "should add a Skill's roll, keep, and total bonus fields to its roll",
         clean(async () => {
           const actor = await samurai();
           const kenjutsu = actor.items.getName("Kenjutsu");
@@ -163,6 +170,6 @@ export function registerRegressionsBatch(quench) {
         })
       );
     },
-    { displayName: "L5R4: Closed rule bugs (regressions)" }
+    { displayName: "L5R4: Closed rule bugs" }
   );
 }

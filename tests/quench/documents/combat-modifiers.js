@@ -19,17 +19,17 @@ import { createTestPC, createTestNPC } from "../../fixtures/actor-fixtures.js";
  */
 export function registerCombatModifiersTests(quench) {
   quench.registerBatch(
-    `${SYS_ID}.integration.documents.combat-modifiers`,
+    `${SYS_ID}.documents.combat-modifiers`,
     context => {
       const { describe, it, assert, beforeEach, afterEach } = context;
 
-      describe("Combat Modifiers Integration Tests", () => {
-        describe("PC Initiative Modifiers", () => {
+      describe("Combat modifiers", () => {
+        describe("PC initiative modifiers", () => {
           let pc;
 
           beforeEach(async () => {
             pc = await createTestPC({
-              name: "Initiative Modifier Test PC",
+              name: "Combat modifiers: initiative PC",
               system: {
                 rings: {
                   void: { rank: 2, value: 2 }
@@ -128,12 +128,12 @@ export function registerCombatModifiersTests(quench) {
           });
         });
 
-        describe("NPC Initiative Modifiers", () => {
+        describe("NPC initiative modifiers", () => {
           let npc;
 
           beforeEach(async () => {
             npc = await createTestNPC({
-              name: "Initiative Modifier Test NPC",
+              name: "Combat modifiers: initiative NPC",
               system: {
                 rings: {
                   void: { rank: 1 }
@@ -190,7 +190,9 @@ export function registerCombatModifiersTests(quench) {
             assert.equal(npc.system.initiative.keep, 4, "keepMod applied");
           });
 
-          it("should fall back to Insight Rank 1 + Reflexes when base roll/keep are 0 (p.81; #30)", async () => {
+          // game-rules/31_combat_round.md, p.81
+          // #30
+          it("should fall back to Insight Rank 1 + Reflexes when base roll and keep are 0", async () => {
             await npc.update({
               "system.initiative.roll": 0,
               "system.initiative.keep": 0,
@@ -240,12 +242,12 @@ export function registerCombatModifiersTests(quench) {
           });
         });
 
-        describe("PC Movement Modifiers", () => {
+        describe("PC movement modifiers", () => {
           let pc;
 
           beforeEach(async () => {
             pc = await createTestPC({
-              name: "Movement Modifier Test PC",
+              name: "Combat modifiers: movement PC",
               system: {
                 traits: { str: 3, per: 3 }, // Water = min(str, per) = 3
                 movement: {
@@ -319,12 +321,12 @@ export function registerCombatModifiersTests(quench) {
           });
         });
 
-        describe("NPC Movement Modifiers", () => {
+        describe("NPC movement modifiers", () => {
           let npc;
 
           beforeEach(async () => {
             npc = await createTestNPC({
-              name: "Movement Modifier Test NPC",
+              name: "Combat modifiers: movement NPC",
               system: {
                 traits: { str: 4, per: 4 }, // Water = min(str, per) = 4
                 movement: {
@@ -389,12 +391,12 @@ export function registerCombatModifiersTests(quench) {
           });
         });
 
-        describe("PC vs NPC Parity", () => {
+        describe("PC vs NPC parity", () => {
           let pc, npc;
 
           beforeEach(async () => {
             pc = await createTestPC({
-              name: "Parity Test PC",
+              name: "Combat modifiers: parity PC",
               system: {
                 rings: {
                   void: { rank: 2, value: 2 }
@@ -416,7 +418,7 @@ export function registerCombatModifiersTests(quench) {
             });
 
             npc = await createTestNPC({
-              name: "Parity Test NPC",
+              name: "Combat modifiers: parity NPC",
               system: {
                 rings: {
                   void: { rank: 2 }
@@ -493,6 +495,6 @@ export function registerCombatModifiersTests(quench) {
         });
       });
     },
-    { displayName: "L5R4: Combat Modifiers (Initiative & Movement)" }
+    { displayName: "L5R4: Combat modifiers" }
   );
 }

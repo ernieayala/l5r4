@@ -29,15 +29,15 @@ import {
  */
 export function registerItemManagementWorkflowTests(quench) {
   quench.registerBatch(
-    `${SYS_ID}.workflows.item-management`,
+    `${SYS_ID}.workflows.item-management-workflow`,
     context => {
       const { describe, it, assert, beforeEach, afterEach } = context;
 
-      describe("Item Creation Workflow", () => {
+      describe("Item creation workflow", () => {
         let actor;
 
         beforeEach(async () => {
-          actor = await createTestPC({ name: "Item Test PC" });
+          actor = await createTestPC({ name: "Item management workflow: Item Test PC" });
         });
 
         afterEach(async () => {
@@ -120,7 +120,7 @@ export function registerItemManagementWorkflowTests(quench) {
           assert.equal(actor.items.size, 3, "Actor has 3 items");
         });
 
-        it("should require name field (Foundry validation)", async () => {
+        it("should require the name field through Foundry validation", async () => {
           // ARRANGE - Item without name (invalid)
           const itemData = {
             type: "skill",
@@ -136,11 +136,11 @@ export function registerItemManagementWorkflowTests(quench) {
         });
       });
 
-      describe("Item Update Workflow", () => {
+      describe("Item update workflow", () => {
         let actor, skill, weapon, armor;
 
         beforeEach(async () => {
-          actor = await createTestPC({ name: "Update Test PC" });
+          actor = await createTestPC({ name: "Item management workflow: Update Test PC" });
 
           // Foundry 14.370 does not return created embedded documents in request order; look them up by type.
           const items = await actor.createEmbeddedDocuments("Item", [
@@ -230,7 +230,7 @@ export function registerItemManagementWorkflowTests(quench) {
           assert.equal(updated.system.trait, "ref", "Trait updated");
         });
 
-        it("should allow negative rank (no validation)", async () => {
+        it("should allow a negative rank without validation", async () => {
           // ARRANGE
           const initialRank = skill.system.rank;
 
@@ -244,11 +244,11 @@ export function registerItemManagementWorkflowTests(quench) {
         });
       });
 
-      describe("Item Deletion Workflow", () => {
+      describe("Item deletion workflow", () => {
         let actor;
 
         beforeEach(async () => {
-          actor = await createTestPC({ name: "Delete Test PC" });
+          actor = await createTestPC({ name: "Item management workflow: Delete Test PC" });
         });
 
         afterEach(async () => {
@@ -334,11 +334,11 @@ export function registerItemManagementWorkflowTests(quench) {
         });
       });
 
-      describe("Equip/Unequip Weapon Workflow", () => {
+      describe("Equip and unequip weapon workflow", () => {
         let actor, katana, wakizashi;
 
         beforeEach(async () => {
-          actor = await createTestPC({ name: "Weapon Equip Test" });
+          actor = await createTestPC({ name: "Item management workflow: Weapon Equip Test" });
 
           // Foundry 14.370 does not return created embedded documents in request order; look them up by name.
           const weapons = await actor.createEmbeddedDocuments("Item", [
@@ -412,11 +412,11 @@ export function registerItemManagementWorkflowTests(quench) {
         });
       });
 
-      describe("Equip/Unequip Armor Workflow", () => {
+      describe("Equip and unequip armor workflow", () => {
         let actor, lightArmor, heavyArmor;
 
         beforeEach(async () => {
-          actor = await createTestPC({ name: "Armor Equip Test" });
+          actor = await createTestPC({ name: "Item management workflow: Armor Equip Test" });
 
           // Foundry 14.370 does not return created embedded documents in request order; look them up by name.
           const armors = await actor.createEmbeddedDocuments("Item", [
@@ -458,7 +458,7 @@ export function registerItemManagementWorkflowTests(quench) {
           assert.isFalse(updated.system.equipped, "Armor unequipped");
         });
 
-        it("should allow multiple armor pieces (stacking depends on setting)", async () => {
+        it("should allow multiple armor pieces, stacking by setting", async () => {
           // ACT
           await lightArmor.update({ "system.equipped": true });
           await heavyArmor.update({ "system.equipped": true });
@@ -476,12 +476,12 @@ export function registerItemManagementWorkflowTests(quench) {
         });
       });
 
-      describe("Item Type Restrictions (NPC vs PC)", () => {
+      describe("Item type restrictions for NPC and PC", () => {
         let pc, npc;
 
         beforeEach(async () => {
-          pc = await createTestPC({ name: "PC for Restrictions" });
-          npc = await createTestNPC({ name: "NPC for Restrictions" });
+          pc = await createTestPC({ name: "Item management workflow: PC for Restrictions" });
+          npc = await createTestNPC({ name: "Item management workflow: NPC for Restrictions" });
         });
 
         afterEach(async () => {
@@ -518,7 +518,7 @@ export function registerItemManagementWorkflowTests(quench) {
           assert.equal(npc.items.size, 1, "Skill added to NPC");
         });
 
-        it("should handle NPC with weapons (implementation-dependent)", async () => {
+        it("should handle NPC with weapons, implementation-dependent", async () => {
           // ACT - NPCs may or may not use weapon items (they have attack configs)
           try {
             const [weapon] = await npc.createEmbeddedDocuments("Item", [createKatana()]);
@@ -564,12 +564,12 @@ export function registerItemManagementWorkflowTests(quench) {
         });
       });
 
-      describe("Drag & Drop Workflow", () => {
+      describe("Drag and drop workflow", () => {
         let sourceActor, targetActor, item;
 
         beforeEach(async () => {
-          sourceActor = await createTestPC({ name: "Source Actor" });
-          targetActor = await createTestPC({ name: "Target Actor" });
+          sourceActor = await createTestPC({ name: "Item management workflow: Source Actor" });
+          targetActor = await createTestPC({ name: "Item management workflow: Target Actor" });
 
           const [skill] = await sourceActor.createEmbeddedDocuments("Item", [
             createSkillData("Kenjutsu", 5, "agi")
@@ -645,11 +645,11 @@ export function registerItemManagementWorkflowTests(quench) {
         });
       });
 
-      describe("Edge Cases: Item Management", () => {
+      describe("Edge cases: item management", () => {
         let actor;
 
         beforeEach(async () => {
-          actor = await createTestPC({ name: "Edge Case Test" });
+          actor = await createTestPC({ name: "Item management workflow: Edge Case Test" });
         });
 
         afterEach(async () => {
@@ -669,7 +669,7 @@ export function registerItemManagementWorkflowTests(quench) {
           assert.equal(result.length, 0, "No items created with empty name");
         });
 
-        it("should handle skill rank at maximum (10)", async () => {
+        it("should handle skill rank at the maximum of 10", async () => {
           // ACT
           const [skill] = await actor.createEmbeddedDocuments("Item", [
             createSkillData("Master Skill", 10, "agi")
@@ -679,7 +679,7 @@ export function registerItemManagementWorkflowTests(quench) {
           assert.equal(skill.system.rank, 10, "Rank at maximum");
         });
 
-        it("should handle skill rank at minimum (0)", async () => {
+        it("should handle skill rank at the minimum of 0", async () => {
           // ACT
           const [skill] = await actor.createEmbeddedDocuments("Item", [
             createSkillData("Untrained Skill", 0, "agi")
@@ -734,6 +734,6 @@ export function registerItemManagementWorkflowTests(quench) {
         });
       });
     },
-    { displayName: "L5R4: Item Management Workflow Tests" }
+    { displayName: "L5R4: Item management workflow" }
   );
 }

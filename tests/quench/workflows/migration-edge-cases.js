@@ -28,12 +28,12 @@ export function registerMigrationEdgeCaseTests(quench) {
     context => {
       const { describe, it, assert, beforeEach, afterEach } = context;
 
-      describe("Repeated Migrations - Data Corruption Prevention", () => {
+      describe("Repeated migrations without data corruption", () => {
         let actor;
 
         beforeEach(async () => {
           actor = await createTestPC({
-            name: "Migration Test PC",
+            name: "Migration edge cases: test PC",
             system: {
               traits: { sta: 3, wil: 3 },
               rings: { earth: 3 }
@@ -162,12 +162,12 @@ export function registerMigrationEdgeCaseTests(quench) {
         });
       });
 
-      describe("Custom Icon Preservation", () => {
+      describe("Custom icon preservation", () => {
         let actor;
 
         beforeEach(async () => {
           actor = await createTestPC({
-            name: "Icon Test PC",
+            name: "Migration edge cases: icon PC",
             img: "systems/l5r4-enhanced/assets/icons/custom-character.webp"
           });
         });
@@ -248,10 +248,13 @@ export function registerMigrationEdgeCaseTests(quench) {
         });
       });
 
-      describe("runMigration setting (roadmap/STAGE-16)", () => {
-        it("the icon migration leaves a legacy icon while it is off and moves it once it is on", async () => {
+      describe("The runMigration setting", () => {
+        it("should leave a legacy icon while the setting is off and move it once it is on", async () => {
           const legacy = `${PATHS.icons}/attackstance.png`;
-          const actor = await createTestPC({ name: "Icon migration PC", img: legacy });
+          const actor = await createTestPC({
+            name: "Migration edge cases: icon migration PC",
+            img: legacy
+          });
           const saved = game.settings.get(SYS_ID, "runMigration");
           try {
             await game.settings.set(SYS_ID, "runMigration", false);
@@ -271,7 +274,7 @@ export function registerMigrationEdgeCaseTests(quench) {
         });
       });
 
-      describe("forceMigration Flag Management", () => {
+      describe("The forceMigration flag", () => {
         let originalSetting;
 
         beforeEach(() => {
@@ -335,12 +338,12 @@ export function registerMigrationEdgeCaseTests(quench) {
         });
       });
 
-      describe("Migration Marker Edge Cases", () => {
+      describe("Migration marker edge cases", () => {
         let actor;
 
         beforeEach(async () => {
           actor = await createTestPC({
-            name: "Marker Test PC"
+            name: "Migration edge cases: marker PC"
           });
         });
 
@@ -380,7 +383,7 @@ export function registerMigrationEdgeCaseTests(quench) {
           await markAsMigrated(actor, "1.0.0");
 
           // ACT - Check with invalid format
-          const isMigrated = hasBeenMigrated(actor, "invalid-version");
+          hasBeenMigrated(actor, "invalid-version");
 
           // ASSERT - Should handle gracefully
           assert.exists(actor.getFlag(SYS_ID, MIGRATION_FLAG), "Flag exists");
@@ -399,12 +402,12 @@ export function registerMigrationEdgeCaseTests(quench) {
         });
       });
 
-      describe("NPC Migration Edge Cases", () => {
+      describe("NPC migration edge cases", () => {
         let npc;
 
         beforeEach(async () => {
           npc = await createTestNPC({
-            name: "Migration NPC",
+            name: "Migration edge cases: NPC",
             system: {
               woundMode: "formula",
               traits: { sta: 4, wil: 4 }
@@ -458,12 +461,12 @@ export function registerMigrationEdgeCaseTests(quench) {
         });
       });
 
-      describe("Embedded Items Migration", () => {
+      describe("Embedded items migration", () => {
         let actor;
 
         beforeEach(async () => {
           actor = await createTestPC({
-            name: "Embedded Items Test"
+            name: "Migration edge cases: embedded items PC"
           });
         });
 
@@ -523,6 +526,6 @@ export function registerMigrationEdgeCaseTests(quench) {
         });
       });
     },
-    { displayName: "L5R4: Migration Edge Cases" }
+    { displayName: "L5R4: Migration edge cases" }
   );
 }

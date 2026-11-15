@@ -27,16 +27,16 @@ import {
  */
 export function registerSpellSlotsTests(quench) {
   quench.registerBatch(
-    `${SYS_ID}.resources.spell-slots`,
+    `${SYS_ID}.services.spell-slots`,
     context => {
       const { describe, it, assert, beforeEach, afterEach } = context;
 
-      describe("4.2.1 Casting with No Slots", () => {
+      describe("Casting with no spell slots", () => {
         let actor;
 
         beforeEach(async () => {
           actor = await createTestPC({
-            name: "Empty Slots Test",
+            name: "Spell slots: empty",
             system: {
               spellSlots: {
                 water: 0,
@@ -99,7 +99,7 @@ export function registerSpellSlotsTests(quench) {
 
         it("should handle null slot value gracefully", async () => {
           // ARRANGE: null is not stored; the field cleans it to its initial value
-          // (common/data/fields.mjs:239-243)
+          // [src: common/data/fields.mjs:239-243]
           await actor.update({ "system.spellSlots.air": null });
           assert.equal(actor.system.spellSlots.air, 2, "null reset to the initial 2");
 
@@ -136,12 +136,12 @@ export function registerSpellSlotsTests(quench) {
         });
       });
 
-      describe("4.2.2 Fallback to Void Slot", () => {
+      describe("Fallback to the Void slot", () => {
         let actor;
 
         beforeEach(async () => {
           actor = await createTestPC({
-            name: "Void Slot Test",
+            name: "Spell slots: Void slot",
             system: {
               spellSlots: {
                 water: 0,
@@ -247,12 +247,12 @@ export function registerSpellSlotsTests(quench) {
         });
       });
 
-      describe("4.2.3 Slot Consumption Before Roll Completes", () => {
+      describe("Slot consumption before the roll completes", () => {
         let actor;
 
         beforeEach(async () => {
           actor = await createTestPC({
-            name: "Race Condition Test",
+            name: "Spell slots: race condition",
             system: {
               spellSlots: {
                 water: 1,
@@ -361,12 +361,12 @@ export function registerSpellSlotsTests(quench) {
         });
       });
 
-      describe("4.2.4 Slot Count Overflow (99)", () => {
+      describe("Slot count overflow", () => {
         let actor;
 
         beforeEach(async () => {
           actor = await createTestPC({
-            name: "Overflow Test",
+            name: "Spell slots: overflow",
             system: {
               spellSlots: {
                 water: 99,
@@ -458,12 +458,12 @@ export function registerSpellSlotsTests(quench) {
         });
       });
 
-      describe("Edge Cases: Spell Slot Validation", () => {
+      describe("Edge cases: spell slot validation", () => {
         let actor;
 
         beforeEach(async () => {
           actor = await createTestPC({
-            name: "Validation Edge Cases",
+            name: "Spell slots: validation",
             system: {
               spellSlots: {
                 water: 2,
@@ -588,6 +588,6 @@ export function registerSpellSlotsTests(quench) {
         });
       });
     },
-    { displayName: "L5R4: Spell Slots Resource Management" }
+    { displayName: "L5R4: Spell slots" }
   );
 }

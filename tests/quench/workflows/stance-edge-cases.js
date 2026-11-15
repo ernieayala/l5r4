@@ -28,15 +28,16 @@ export function registerStanceEdgeCaseTests(quench) {
     context => {
       const { describe, it, assert, beforeEach, afterEach } = context;
 
-      // Taking the Full Defense Stance opens its roll dialog (p.84)
+      // Taking the Full Defense Stance opens its roll dialog
+      // game-rules/36_stances.md, p.84
       guardRolls(context);
 
-      describe("Multiple Simultaneous Stances", () => {
+      describe("Multiple simultaneous Stances", () => {
         let actor;
 
         beforeEach(async () => {
           actor = await createTestPC({
-            name: "Stance Test",
+            name: "Stance edge cases: stance test",
             system: {
               traits: { ref: 3, agi: 3 },
               rings: { earth: 2 }
@@ -184,12 +185,12 @@ export function registerStanceEdgeCaseTests(quench) {
         });
       });
 
-      describe("Full Defense Duplicate Rolls", () => {
+      describe("Full Defense duplicate rolls", () => {
         let actor;
 
         beforeEach(async () => {
           actor = await createTestPC({
-            name: "Full Defense Test",
+            name: "Stance edge cases: Full Defense",
             system: {
               traits: { ref: 3 },
               rings: { earth: 2 }
@@ -215,7 +216,8 @@ export function registerStanceEdgeCaseTests(quench) {
             }
           ]);
 
-          // ACT: taking the stance rolls Defense / Reflexes; half the total goes to Armor TN (p.84)
+          // ACT: taking the stance rolls Defense / Reflexes; half the total goes to Armor TN
+          // game-rules/36_stances.md, p.84
           await waitFor(() =>
             actor.effects.some(e => e.getFlag(SYS_ID, "effectId") === "fullDefense")
           );
@@ -246,7 +248,8 @@ export function registerStanceEdgeCaseTests(quench) {
           assert.lengthOf(bonuses(), 1, "One Full Defense bonus");
         });
 
-        it("should end the Full Defense bonus at the start of the next Turn (p.84)", async () => {
+        // game-rules/36_stances.md, p.84
+        it("should end the Full Defense bonus at the start of the next Turn", async () => {
           await actor.createEmbeddedDocuments("ActiveEffect", [
             { name: "Full Defense Stance", statuses: ["fullDefenseStance"] }
           ]);
@@ -261,12 +264,12 @@ export function registerStanceEdgeCaseTests(quench) {
         });
       });
 
-      describe("Stance Expiration Timing", () => {
+      describe("Stance expiration timing", () => {
         let actor;
 
         beforeEach(async () => {
           actor = await createTestPC({
-            name: "Timing Test",
+            name: "Stance edge cases: timing",
             system: {
               traits: { ref: 3, agi: 3 },
               rings: { earth: 2 }
@@ -358,12 +361,12 @@ export function registerStanceEdgeCaseTests(quench) {
         });
       });
 
-      describe("Stance Bonuses and Penalties", () => {
+      describe("Stance bonuses and penalties", () => {
         let actor;
 
         beforeEach(async () => {
           actor = await createTestPC({
-            name: "Bonus Test",
+            name: "Stance edge cases: bonus",
             system: {
               traits: { ref: 3, agi: 3 },
               rings: { earth: 2 }
@@ -379,7 +382,7 @@ export function registerStanceEdgeCaseTests(quench) {
           }
         });
 
-        it("should apply Attack stance bonuses (+1k1 attack)", async () => {
+        it("should apply Attack Stance bonuses of +1k1 to attack", async () => {
           // ARRANGE - Note: "attack" stance may not be implemented, only fullAttack
           // This test documents expected behavior if basic Attack stance exists
 
@@ -395,7 +398,7 @@ export function registerStanceEdgeCaseTests(quench) {
           // This test documents the expected behavior
         });
 
-        it("should apply Defense stance bonuses (Air Ring + Defense Skill)", async () => {
+        it("should apply Defense Stance bonuses of Air Ring plus Defense Skill", async () => {
           // ARRANGE - Create Defense stance effect
           await actor.createEmbeddedDocuments("ActiveEffect", [
             {
@@ -417,7 +420,7 @@ export function registerStanceEdgeCaseTests(quench) {
           assert.isAbove(armorTN, baseArmorTN, "Armor TN boosted");
         });
 
-        it("should apply Center stance (no bonuses/penalties)", async () => {
+        it("should apply Center Stance with no bonuses or penalties", async () => {
           // ARRANGE - No stance effects (center is default)
           const stanceEffects = actor.effects.filter(e =>
             e.statuses?.some(s => s.includes("Stance"))
@@ -460,7 +463,7 @@ export function registerStanceEdgeCaseTests(quench) {
           assert.isAtLeast(armorTN, 5, "Base TN + Defense bonus");
         });
 
-        it("should handle stance with maximum Reflexes (10)", async () => {
+        it("should handle stance with maximum Reflexes of 10", async () => {
           // ARRANGE - Max Reflexes
           await actor.update({ "system.traits.ref": 10 });
           await actor.createEmbeddedDocuments("ActiveEffect", [
@@ -486,6 +489,6 @@ export function registerStanceEdgeCaseTests(quench) {
         });
       });
     },
-    { displayName: "L5R4: Stance Edge Cases" }
+    { displayName: "L5R4: Stance edge cases" }
   );
 }

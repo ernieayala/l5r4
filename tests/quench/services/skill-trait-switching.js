@@ -32,17 +32,17 @@ import { createSkillData } from "../../fixtures/item-fixtures.js";
  */
 export function registerSkillTraitSwitchingTests(quench) {
   quench.registerBatch(
-    `${SYS_ID}.services.rolls.skill-trait-switching`,
+    `${SYS_ID}.services.skill-trait-switching`,
     context => {
       const { describe, it, assert, beforeEach, afterEach } = context;
 
-      describe("Trait Switching - Basic Mechanics", () => {
+      describe("Trait switching basics", () => {
         let actor, skill;
 
         beforeEach(async () => {
           // Create actor with different trait values to verify switching
           actor = await createTestPC({
-            name: "Trait Switch Test Samurai",
+            name: "Skill Trait switching: samurai",
             system: {
               traits: {
                 agi: 3, // Default trait for Kenjutsu
@@ -191,12 +191,12 @@ export function registerSkillTraitSwitchingTests(quench) {
         });
       });
 
-      describe("Trait Switching - Combined with Other Mechanics", () => {
+      describe("Trait switching combined with other mechanics", () => {
         let actor, skill;
 
         beforeEach(async () => {
           actor = await createTestPC({
-            name: "Combined Mechanics Test",
+            name: "Skill Trait switching: combined",
             system: {
               traits: {
                 agi: 3,
@@ -308,12 +308,12 @@ export function registerSkillTraitSwitchingTests(quench) {
         });
       });
 
-      describe("Trait Switching - Edge Cases", () => {
+      describe("Trait switching edge cases", () => {
         let actor, skill;
 
         beforeEach(async () => {
           actor = await createTestPC({
-            name: "Edge Case Test",
+            name: "Skill Trait switching: edge case",
             system: {
               traits: {
                 agi: 3,
@@ -335,7 +335,7 @@ export function registerSkillTraitSwitchingTests(quench) {
           }
         });
 
-        it("should handle minimum trait value (2)", async () => {
+        it("should handle the minimum Trait value of 2", async () => {
           // ARRANGE - Change skill's trait to minimum value trait
           await skill.update({ "system.trait": "str" });
 
@@ -361,7 +361,7 @@ export function registerSkillTraitSwitchingTests(quench) {
           assert.include(formula, "k2", "Minimum trait kept (2)");
         });
 
-        it("should handle maximum trait value (10)", async () => {
+        it("should handle the maximum Trait value of 10", async () => {
           // ARRANGE - Change skill's trait to maximum value trait
           await skill.update({ "system.trait": "sta" });
 
@@ -462,12 +462,12 @@ export function registerSkillTraitSwitchingTests(quench) {
         });
       });
 
-      describe("Trait Switching - Chat Card Display", () => {
+      describe("Trait switching in the chat card", () => {
         let actor, skill;
 
         beforeEach(async () => {
           actor = await createTestPC({
-            name: "Chat Display Test",
+            name: "Skill Trait switching: chat card",
             system: {
               traits: {
                 agi: 3,
@@ -532,7 +532,6 @@ export function registerSkillTraitSwitchingTests(quench) {
           // ASSERT
           const roll = message.rolls[0];
           const rollFormula = roll.formula;
-          const content = message.content;
 
           // Chat should display the formula or dice pool
           // Expected: 9k5
@@ -543,6 +542,6 @@ export function registerSkillTraitSwitchingTests(quench) {
         });
       });
     },
-    { displayName: "L5R4: Skill Trait Switching Tests" }
+    { displayName: "L5R4: Skill Trait switching" }
   );
 }

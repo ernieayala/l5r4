@@ -24,16 +24,16 @@ import { createSkillData } from "../../fixtures/item-fixtures.js";
  */
 export function registerSkillRollTests(quench) {
   quench.registerBatch(
-    `${SYS_ID}.services.rolls.skill`,
+    `${SYS_ID}.services.skill-rolls`,
     context => {
       const { describe, it, assert, beforeEach, afterEach } = context;
 
-      describe("Skill Roll Formula Construction", () => {
+      describe("Skill Roll formula construction", () => {
         let actor, skill;
 
         beforeEach(async () => {
           actor = await createTestPC({
-            name: "Test Samurai",
+            name: "Skill Rolls: samurai",
             system: {
               traits: { agi: 3, per: 4 }
             }
@@ -51,7 +51,7 @@ export function registerSkillRollTests(quench) {
           }
         });
 
-        it("should calculate correct dice pool (skill + trait)", () => {
+        it("should calculate the dice pool as Skill + Trait", () => {
           const traitValue = actor.system.traits[skill.system.trait];
           const rolled = skill.system.rank + traitValue; // 5 + 3 = 8
           const kept = traitValue; // 3
@@ -83,12 +83,12 @@ export function registerSkillRollTests(quench) {
         });
       });
 
-      describe("Skill Roll Execution", () => {
+      describe("Skill Roll execution", () => {
         let actor, skill;
 
         beforeEach(async () => {
           actor = await createTestPC({
-            name: "Roll Test Samurai",
+            name: "Skill Rolls: roll",
             system: {
               traits: { agi: 4, sta: 3, wil: 3 }
             }
@@ -154,7 +154,7 @@ export function registerSkillRollTests(quench) {
         });
       });
 
-      describe("Roll Modifiers", () => {
+      describe("Roll modifiers", () => {
         it("should apply roll bonus to dice pool", () => {
           const skillRank = 4;
           const traitValue = 3;
@@ -186,12 +186,12 @@ export function registerSkillRollTests(quench) {
         });
       });
 
-      describe("Wound Penalties", () => {
+      describe("Wound penalties", () => {
         let actor;
 
         beforeEach(async () => {
           actor = await createTestPC({
-            name: "Wounded Samurai",
+            name: "Skill Rolls: wounded",
             system: {
               traits: { sta: 3, wil: 3, agi: 3 },
               suffered: 20 // Wounded
@@ -216,8 +216,8 @@ export function registerSkillRollTests(quench) {
         });
       });
 
-      describe("Edge Cases", () => {
-        it("should handle minimum trait value (2)", () => {
+      describe("Edge cases", () => {
+        it("should handle the minimum Trait value of 2", () => {
           const skillRank = 1;
           const traitValue = 2;
           const rolled = skillRank + traitValue;
@@ -228,7 +228,7 @@ export function registerSkillRollTests(quench) {
           // Formula would be 3k2
         });
 
-        it("should handle zero skill rank (unskilled)", () => {
+        it("should handle a Skill Rank of zero as unskilled", () => {
           const _skillRank = 0;
           const traitValue = 3;
           const rolled = traitValue; // Unskilled = trait only
@@ -252,7 +252,7 @@ export function registerSkillRollTests(quench) {
         });
       });
 
-      describe("Formula Building", () => {
+      describe("Formula building", () => {
         it("should create proper Roll formula string", () => {
           const rolled = 7;
           const kept = 4;
@@ -271,7 +271,7 @@ export function registerSkillRollTests(quench) {
         });
       });
 
-      describe("Raise Mechanics", () => {
+      describe("Raise mechanics", () => {
         it("should increase effective TN by 5 per raise", () => {
           const baseTN = 15;
           const raises = 2;
@@ -314,12 +314,12 @@ export function registerSkillRollTests(quench) {
         });
       });
 
-      describe("Void Point Mechanics", () => {
-        let actor, skill;
+      describe("Void Point mechanics", () => {
+        let actor;
 
         beforeEach(async () => {
           actor = await createTestPC({
-            name: "Void Test Samurai",
+            name: "Skill Rolls: Void Point",
             system: {
               traits: { agi: 4 },
               rings: {
@@ -328,9 +328,7 @@ export function registerSkillRollTests(quench) {
             }
           });
 
-          [skill] = await actor.createEmbeddedDocuments("Item", [
-            createSkillData("Kenjutsu", 5, "agi")
-          ]);
+          await actor.createEmbeddedDocuments("Item", [createSkillData("Kenjutsu", 5, "agi")]);
         });
 
         afterEach(async () => {
@@ -397,7 +395,6 @@ export function registerSkillRollTests(quench) {
         it("should handle void point with unskilled roll", () => {
           // Unskilled base: (Trait)k(Trait) = 4k4
           // With void: +1k1 = 5k5
-          const skillRank = 0;
           const traitValue = 4;
           const voidBonus = 1;
           const rolled = traitValue + voidBonus; // 5
@@ -456,6 +453,6 @@ export function registerSkillRollTests(quench) {
         });
       });
     },
-    { displayName: "L5R4: Skill Roll Service Tests" }
+    { displayName: "L5R4: Skill Rolls" }
   );
 }

@@ -29,16 +29,16 @@ import { waitFor } from "../helpers.js";
  */
 export function registerVoidPointsTests(quench) {
   quench.registerBatch(
-    `${SYS_ID}.resources.void-points`,
+    `${SYS_ID}.services.void-points`,
     context => {
       const { describe, it, assert, beforeEach, afterEach } = context;
 
-      describe("4.1.1 Spending from Empty Pool", () => {
+      describe("Spending from an empty pool", () => {
         let actor;
 
         beforeEach(async () => {
           actor = await createTestPC({
-            name: "Empty Void Test",
+            name: "Void Points: empty pool",
             system: {
               rings: {
                 void: { value: 0, rank: 2 } // Empty pool but has capacity
@@ -120,7 +120,8 @@ export function registerVoidPointsTests(quench) {
         });
       });
 
-      describe("4.1.2 Armor TN Void lasts the Round (p.78)", function () {
+      // game-rules/25_rings_and_traits.md, p.78
+      describe("Void Point on Armor TN for one round", function () {
         // Combat turns run their events asynchronously
         this.timeout(15_000);
         let combat, actor, other;
@@ -130,11 +131,11 @@ export function registerVoidPointsTests(quench) {
 
         beforeEach(async () => {
           actor = await createTestPC({
-            name: "Armor TN Void Test",
+            name: "Void Points: Armor TN",
             system: { rings: { void: { value: 2, rank: 2 } } }
           });
           other = await createTestPC({
-            name: "Other Actor",
+            name: "Void Points: other actor",
             system: { rings: { void: { value: 2, rank: 2 } } }
           });
           combat = await foundry.documents.Combat.implementation.create({
@@ -155,13 +156,13 @@ export function registerVoidPointsTests(quench) {
           combat = actor = other = null;
         });
 
-        it("adds +10 Armor TN while it lasts", async () => {
+        it("should add +10 Armor TN while it lasts", async () => {
           const before = actor.system.armorTn.current;
           await applyEffect(actor, "voidArmor");
           assert.equal(actor.system.armorTn.current, before + 10);
         });
 
-        it("lasts through the other Turns of its Round", async () => {
+        it("should last through the other Turns of its Round", async () => {
           await applyEffect(actor, "voidArmor");
           await combat.nextTurn();
           // Nothing to wait for: no expiry is due, so give the turn events time to run and check it stayed
@@ -169,7 +170,7 @@ export function registerVoidPointsTests(quench) {
           assert.lengthOf(voidArmor(actor), 1, "still active on the same Round");
         });
 
-        it("ends with its Round", async () => {
+        it("should end with its Round", async () => {
           await applyEffect(actor, "voidArmor");
           await combat.nextTurn();
           await combat.nextTurn();
@@ -180,7 +181,7 @@ export function registerVoidPointsTests(quench) {
           );
         });
 
-        it("ends only for the Round it was spent in", async () => {
+        it("should end only for the Round it was spent in", async () => {
           await applyEffect(actor, "voidArmor");
           await combat.nextTurn();
           await combat.nextTurn();
@@ -197,12 +198,12 @@ export function registerVoidPointsTests(quench) {
         });
       });
 
-      describe("4.1.3 Double-Spending Race Condition", () => {
+      describe("Double-spending race condition", () => {
         let actor;
 
         beforeEach(async () => {
           actor = await createTestPC({
-            name: "Race Condition Test",
+            name: "Void Points: race condition",
             system: {
               rings: { void: { value: 1, rank: 2 } } // Only 1 Void Point
             }
@@ -289,12 +290,12 @@ export function registerVoidPointsTests(quench) {
         });
       });
 
-      describe("4.1.4 Void Spending Without Confirmation", () => {
+      describe("Void Point spending without confirmation", () => {
         let actor;
 
         beforeEach(async () => {
           actor = await createTestPC({
-            name: "Confirmation Test",
+            name: "Void Points: confirmation",
             system: {
               rings: { void: { value: 2, rank: 2 } }
             }
@@ -374,12 +375,12 @@ export function registerVoidPointsTests(quench) {
         });
       });
 
-      describe("Edge Cases: Void Point Validation", () => {
+      describe("Edge cases: Void Point validation", () => {
         let actor;
 
         beforeEach(async () => {
           actor = await createTestPC({
-            name: "Validation Edge Cases",
+            name: "Void Points: validation",
             system: {
               rings: { void: { value: 2, rank: 2 } }
             }
@@ -464,6 +465,6 @@ export function registerVoidPointsTests(quench) {
         });
       });
     },
-    { displayName: "L5R4: Void Points Resource Management" }
+    { displayName: "L5R4: Void Points" }
   );
 }

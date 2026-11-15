@@ -19,18 +19,18 @@ import { WeaponRoll } from "../../../module/services/dice/rolls/weapon-roll.js";
  */
 export function registerCombatWorkflowTests(quench) {
   quench.registerBatch(
-    `${SYS_ID}.workflows.combat`,
+    `${SYS_ID}.workflows.combat-workflow`,
     context => {
       const { describe, it, assert, beforeEach, afterEach } = context;
 
-      describe("Combat Workflow: Attack Sequence", () => {
+      describe("Attack sequence", () => {
         let attacker;
         let defender;
 
         beforeEach(async () => {
           // Create attacker with weapon and skill
           attacker = await createTestPC({
-            name: "Attacker Samurai",
+            name: "Combat workflow: Attacker Samurai",
             system: {
               traits: { agi: 3, str: 4 },
               rings: { earth: 3, air: 3, fire: 3, water: 3, void: 3 }
@@ -46,7 +46,7 @@ export function registerCombatWorkflowTests(quench) {
 
           // Create defender
           defender = await createTestPC({
-            name: "Defender Samurai",
+            name: "Combat workflow: Defender Samurai",
             system: {
               traits: { ref: 3 },
               rings: { earth: 3, air: 3, fire: 3, water: 3, void: 3 }
@@ -125,7 +125,7 @@ export function registerCombatWorkflowTests(quench) {
         it("should handle attack that misses", async () => {
           // ARRANGE - Set up low skill attacker vs high TN defender
           const weakAttacker = await createTestPC({
-            name: "Weak Attacker",
+            name: "Combat workflow: Weak Attacker",
             system: {
               traits: { agi: 1, str: 1 },
               rings: { earth: 2, air: 2, fire: 2, water: 2, void: 2 }
@@ -178,7 +178,7 @@ export function registerCombatWorkflowTests(quench) {
         it("should apply strength bonus to damage roll", async () => {
           // ARRANGE - High strength attacker
           const strongAttacker = await createTestPC({
-            name: "Strong Attacker",
+            name: "Combat workflow: Strong Attacker",
             system: {
               traits: { str: 5, agi: 3 },
               rings: { earth: 3, air: 3, fire: 3, water: 3, void: 3 }
@@ -265,13 +265,13 @@ export function registerCombatWorkflowTests(quench) {
         });
       });
 
-      describe("Combat Workflow: Multiple Attacks", () => {
+      describe("Multiple attacks", () => {
         let samurai;
         let enemies;
 
         beforeEach(async () => {
           samurai = await createTestPC({
-            name: "Combat Samurai",
+            name: "Combat workflow: Combat Samurai",
             system: {
               traits: { agi: 4, str: 3 }
             }
@@ -282,7 +282,7 @@ export function registerCombatWorkflowTests(quench) {
           // Create multiple enemies
           enemies = [];
           for (let i = 0; i < 3; i++) {
-            const enemy = await createTestNPC({ name: `Enemy ${i + 1}` });
+            const enemy = await createTestNPC({ name: `Combat workflow: Enemy ${i + 1}` });
             enemies.push(enemy);
           }
         });
@@ -326,6 +326,6 @@ export function registerCombatWorkflowTests(quench) {
         });
       });
     },
-    { displayName: "L5R4: Combat Workflow Tests" }
+    { displayName: "L5R4: Combat workflow" }
   );
 }
