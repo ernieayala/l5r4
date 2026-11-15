@@ -484,6 +484,36 @@ export function registerNpcSheetTests(quench) {
           assert.equal(add?.dataset.attackKey, "attack3", "Add Attack targets attack 3");
         });
       });
+
+      describe("NPC sheet sections", () => {
+        let actor, sheet;
+
+        beforeEach(async () => {
+          actor = await createTestNPC({ name: "NPC sheet: section NPC" });
+          sheet = actor.sheet;
+          await sheet.render(true);
+        });
+
+        afterEach(async () => {
+          await sheet?.close({ animate: false });
+          const map = game.user.getFlag(SYS_ID, "collapsedSections") ?? {};
+          if (actor?.id in map) {
+            await game.user.unsetFlag(SYS_ID, `collapsedSections.${actor.id}`);
+          }
+          await actor?.delete();
+        });
+
+        it("should collapse the Skills section and keep it collapsed after a render", async () => {
+          const title = () =>
+            sheet.element.querySelector('.l5r4-section-title[data-scope="skills"]');
+          title().querySelector('[data-action="expand-section"]').click();
+          await new Promise(resolve => setTimeout(resolve, 300));
+
+          assert.isTrue(title().classList.contains("is-collapsed"));
+          await sheet.render(true);
+          assert.isTrue(title().classList.contains("is-collapsed"), "after a render");
+        });
+      });
     },
     { displayName: "L5R4: NPC sheet" }
   );

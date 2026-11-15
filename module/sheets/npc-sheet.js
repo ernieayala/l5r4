@@ -67,6 +67,7 @@ import NpcAttackConfigApplication from "../apps/npc-attack-config.js";
 import { BaseActorSheet } from "./base-actor-sheet.js";
 import { RollHandler } from "./handlers/roll-handler.js";
 import { AppLauncherHandler } from "./handlers/app-launcher-handler.js";
+import { ItemCRUDHandler } from "./handlers/item-crud-handler.js";
 import { StanceHandler } from "./handlers/stance-handler.js";
 import { TraitHandler } from "./handlers/trait-handler.js";
 
@@ -131,6 +132,7 @@ export default class L5R4NpcSheet extends BaseActorSheet {
    * **Supported Actions:**
    * - update-item-field: Update item properties in the sheet
    * - create-item, delete-item, edit-item, expand-item, post-item: Item CRUD operations
+   * - expand-section: Collapse or expand an item list section
    * - sort-items: Change sort field/direction for item lists
    * - adjust-void-ring: Adjust Void Ring rank (Shift+Click, NPC-specific)
    * - roll-ring/skill/trait/attack/damage/weapon-attack: Initiate dice rolls
@@ -164,6 +166,8 @@ export default class L5R4NpcSheet extends BaseActorSheet {
         return this._onItemEdit(event, element);
       case "expand-item":
         return this._onItemExpand(event, element);
+      case "expand-section":
+        return ItemCRUDHandler.toggleSection(this._getHandlerContext(), event, element);
       case "post-item":
         return this._onItemHeaderToChat(event, element);
       case "sort-items":

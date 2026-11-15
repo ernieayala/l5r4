@@ -4,15 +4,15 @@ An icon button that shows or hides content in place: a section's body, or an ite
 special rules, Mastery abilities). The section's state is stored per user and actor; a row's lasts until the sheet
 renders again.
 
-| Item        | Detail                                                                                                                                                                                          |
-| ----------- | ----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| Partial     | `templates/actor/_partials/_expand.hbs` (sections, 12 uses); the row's expand control is the last button of `templates/cards/_partials/_controls.hbs`                                           |
-| Parameters  | `_expand.hbs`: `collapsed` (boolean, from `collapsedSections.<scope>`). `_controls.hbs`: `expandable` (boolean, the row has details). Both target; neither partial takes parameters today       |
-| SCSS        | None of its own. `_item-row.scss` shows the row control only on an expandable row; `_section.scss` hides a collapsed body                                                                       |
-| Block class | `l5r4-expand-control`, beside core's `inline-control icon`                                                                                                                                      |
-| Shows in    | Every collapsible section title; every item row with details                                                                                                                                    |
-| Handlers    | Section: `PcAdjustmentHandler.toggleSection` (`module/sheets/handlers/pc-adjustment-handler.js:249-279`). Row: `ItemCrudHandler.expand` (`module/sheets/handlers/item-crud-handler.js:218-231`) |
-| Gallery     | A section and a row, each open and closed, at rest and focused                                                                                                                                  |
+| Item        | Detail                                                                                                                                                                                    |
+| ----------- | ----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| Partial     | `templates/actor/_partials/_expand.hbs` (sections, 12 uses); the row's expand control is the last button of `templates/cards/_partials/_controls.hbs`                                     |
+| Parameters  | `_expand.hbs`: `collapsed` (boolean, from `collapsedSections.<scope>`). `_controls.hbs`: `expandable` (boolean, the row has details). Both target; neither partial takes parameters today |
+| SCSS        | None of its own. `_item-row.scss` shows the row control only on an expandable row; `_section.scss` hides a collapsed body                                                                 |
+| Block class | `l5r4-expand-control`, beside core's `inline-control icon`                                                                                                                                |
+| Shows in    | Every collapsible section title; every item row with details                                                                                                                              |
+| Handlers    | Section: `ItemCRUDHandler.toggleSection` (`module/sheets/handlers/item-crud-handler.js:259-287`). Row: `ItemCRUDHandler.expand` (`module/sheets/handlers/item-crud-handler.js:219-232`)   |
+| Gallery     | A section and a row, each open and closed, at rest and focused                                                                                                                            |
 
 ## Anatomy
 
@@ -75,9 +75,9 @@ column and wraps (`item-row.md`).
 | #   | Conforming                                                                                                | Non-conforming                                                                                                                  |
 | --- | --------------------------------------------------------------------------------------------------------- | ------------------------------------------------------------------------------------------------------------------------------- |
 | X1  | The `foundations/states.md` rule 4 example: `aria-expanded="{{#if collapsed}}false{{else}}true{{/if}}"`   | `<a class="button inline-control icon" data-action="section-expand">` with no state (`templates/actor/_partials/_expand.hbs:1`) |
-| X2  | `<i class="fa-solid {{#if collapsed}}fa-angle-down{{else}}fa-angle-up{{/if}}" inert></i>`                 | `icon.classList.toggle("fa-chevron-down")` (`module/sheets/handlers/pc-adjustment-handler.js:271`)                              |
+| X2  | `<i class="fa-solid {{#if collapsed}}fa-angle-down{{else}}fa-angle-up{{/if}}" inert></i>`                 | `icon.classList.toggle("fa-chevron-down")` (`module/sheets/handlers/item-crud-handler.js:279`)                                  |
 | X3  | `data-tooltip="{{localize "l5r4.ui.common.expand"}}" aria-label="{{localize "l5r4.ui.common.expand"}}"`   | No name on `_expand.hbs:1` (12 sections) or `_controls.hbs:5` (every row)                                                       |
-| X4  | `element.closest("[data-scope]")` (modeled on `pc-adjustment-handler.js:262`)                             | `element.closest(".section-title")` (`module/sheets/handlers/pc-adjustment-handler.js:255`)                                     |
+| X4  | `element.closest("[data-scope]")` (modeled on `item-crud-handler.js:270`)                                 | `element.closest(".section-title")` (`module/sheets/handlers/item-crud-handler.js:263`)                                         |
 | X5  | `{{#if (or system.description system.specialRules)}}` around the control (modeled on `cards/kata.hbs:10`) | The control rendered on every row and hidden by `.inline-control.expandable { display: none; }` (`_item-lists.scss:192-194`)    |
 
 ## Do and don't

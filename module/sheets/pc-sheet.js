@@ -55,6 +55,7 @@ import { enhanceItemSheetData } from "../documents/item/integration/sheet-data.j
 // Local
 import { BaseActorSheet } from "./base-actor-sheet.js";
 import { AppLauncherHandler } from "./handlers/app-launcher-handler.js";
+import { ItemCRUDHandler } from "./handlers/item-crud-handler.js";
 import { PcAdjustmentHandler } from "./handlers/pc-adjustment-handler.js";
 import { PcTraitHandler } from "./handlers/pc-trait-handler.js";
 import { PcContextBuilder } from "./handlers/pc-context-builder.js";
@@ -197,7 +198,7 @@ export default class L5R4PcSheet extends BaseActorSheet {
           +0.1
         );
       case "expand-section":
-        return PcAdjustmentHandler.toggleSection(this._getHandlerContext(), event, element);
+        return ItemCRUDHandler.toggleSection(this._getHandlerContext(), event, element);
       case "adjust-spell-slot":
         return PcAdjustmentHandler.adjustSpellSlot(this._getHandlerContext(), event, element, +1);
       case "adjust-trait":
