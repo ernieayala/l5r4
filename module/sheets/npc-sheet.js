@@ -39,11 +39,12 @@
 // Config
 import { SYS_ID } from "../config/constants.js";
 import { TEMPLATE } from "../config/templates.js";
-import { STANCES } from "../config/localization.js";
+import { ACTION_TYPES, STANCES } from "../config/localization.js";
 import { NPC_SORT_KEYS } from "../config/sort-keys.js";
 
 // Utils
 import { clamp } from "../utils/type-coercion.js";
+import { T } from "../utils/localization.js";
 import { on } from "../utils/dom.js";
 import { getSortPref, sortWithPref } from "../utils/sorting.js";
 import { getSectionCollapsedMap } from "../utils/section-state.js";
@@ -437,12 +438,15 @@ export default class L5R4NpcSheet extends BaseActorSheet {
       "items"
     ]);
 
-    // The three attack slots; an empty one (no name, no dice) is hidden until "Add Attack" fills it (issue #30)
+    // The three attack slots; an empty one (no name, no dice) is hidden until "Add Attack" fills it (issue #30).
+    // `attack.type` stores the action key the attack config's select writes; a value from older data that is no
+    // key shows as stored.
     const attacks = ["1", "2", "3"].map(num => {
       const attack = actorObj.system[`attack${num}`];
       const damage = actorObj.system[`damage${num}`];
       const empty = !attack.name && !attack.roll && !attack.keep && !damage.roll && !damage.keep;
-      return { num, key: `attack${num}`, attack, damage, empty };
+      const actionLabel = attack.type in ACTION_TYPES ? T(ACTION_TYPES[attack.type]) : attack.type;
+      return { num, key: `attack${num}`, attack, damage, empty, actionLabel };
     });
 
     const context = {

@@ -12,6 +12,7 @@ import {
   sourceProblems,
   SUMMARY_MAX
 } from "../tools/pack-sources.mjs";
+import { ACTION_TYPES } from "../module/config/localization.js";
 
 const SOURCES = "src/packs";
 const sources = readdirSync(SOURCES)
@@ -90,6 +91,18 @@ describe.each(sources.map(source => [source.name, source]))("Pack %s", (_name, s
 describe("Pack sources", () => {
   it("should cover every pack system.json declares", () => {
     expect(manifest.packs.map(p => p.name).sort()).toEqual(sources.map(s => s.name).sort());
+  });
+
+  it("should store each creature attack's action as a key the attack config's select offers", () => {
+    const creatures = sources.find(source => source.name === "creatures");
+    for (const entry of creatures.entries) {
+      for (const key of ["attack1", "attack2", "attack3"]) {
+        const action = entry.system?.[key]?.type ?? "";
+        if (action) {
+          expect(Object.keys(ACTION_TYPES), `${entry.name}: ${key}`).toContain(action);
+        }
+      }
+    }
   });
 
   it("should name only entries that exist when they reference one", () => {

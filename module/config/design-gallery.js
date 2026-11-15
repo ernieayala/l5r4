@@ -572,14 +572,16 @@ export const GALLERY_CONTEXTS = freeze({
       {
         key: "attack1",
         num: 1,
-        attack: { name: "Claws", roll: 6, keep: 3, modifier: 0, type: "Melee", action: "Simple" },
-        damage: { roll: 4, keep: 2, modifier: 2 }
+        attack: { name: "Claws", roll: 6, keep: 3, modifier: 0, type: "simple" },
+        damage: { roll: 4, keep: 2, modifier: 2 },
+        actionLabel: "Simple"
       },
       {
         key: "attack2",
         num: 2,
-        attack: { name: "", roll: 5, keep: 2, modifier: 0, type: "Melee", action: "Complex" },
-        damage: { roll: 3, keep: 2, modifier: 0 }
+        attack: { name: "", roll: 5, keep: 2, modifier: 0, type: "complex" },
+        damage: { roll: 3, keep: 2, modifier: 0 },
+        actionLabel: "Complex"
       }
     ],
     skills: ROWS.skills

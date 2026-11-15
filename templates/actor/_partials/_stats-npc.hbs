@@ -236,7 +236,7 @@
                  data-roll="{{attack.roll}}"
                  data-keep="{{attack.keep}}"
                  data-modifier="{{attack.modifier}}"
-                 data-description="{{attack.type}}"
+                 data-description="{{actionLabel}}"
                  data-label="{{#if attack.name}}{{attack.name}}{{else}}{{localize "l5r4.ui.mechanics.combat.attack"}} {{num}}{{/if}}"
                  title="{{localize "l5r4.ui.mechanics.combat.attack"}}">
                 {{attack.roll}}k{{attack.keep}}{{#if attack.modifier}}{{numberFormat attack.modifier decimals=0 sign=true}}{{/if}}
@@ -256,7 +256,7 @@
               </a>
             </div>
             <div>
-              {{attack.type}}
+              {{actionLabel}}
             </div>
             <div>
               {{attack.action}}

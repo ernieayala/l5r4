@@ -442,6 +442,20 @@ export function registerNpcSheetTests(quench) {
           assert.match(damageText, /3k2/, "Damage shows correct roll/keep");
         });
 
+        it("should show an attack's action as its localized label, on the row and the roll", async () => {
+          await actor.update({ "system.attack1.type": "complex" });
+          await sheet.render(true);
+          const attackSection = sheet.element.querySelector('[data-attack-section="attack1"]');
+          const label = game.i18n.localize("l5r4.ui.common.complex");
+
+          assert.include(attackSection.textContent, label);
+          assert.notInclude(attackSection.textContent, "complex", "the stored key never shows");
+          assert.equal(
+            attackSection.querySelector('[data-action="roll-attack"]').dataset.description,
+            label
+          );
+        });
+
         it("should display attack name", () => {
           const element = sheet.element;
           const attackSection = element.querySelector('[data-attack-section="attack1"]');

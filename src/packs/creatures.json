@@ -44,7 +44,7 @@
           "roll": 5,
           "keep": 3,
           "modifier": 0,
-          "type": "Simple"
+          "type": "simple"
         },
         "attack2": {
           "name": "",
@@ -209,7 +209,7 @@
           "roll": 3,
           "keep": 3,
           "modifier": 0,
-          "type": "Complex"
+          "type": "complex"
         },
         "attack2": {
           "name": "",
@@ -362,7 +362,7 @@
           "roll": 5,
           "keep": 4,
           "modifier": 0,
-          "type": "Simple"
+          "type": "simple"
         },
         "attack2": {
           "name": "",
@@ -513,7 +513,7 @@
           "roll": 4,
           "keep": 4,
           "modifier": 0,
-          "type": "Complex"
+          "type": "complex"
         },
         "attack2": {
           "name": "",
@@ -649,7 +649,7 @@
           "roll": 4,
           "keep": 2,
           "modifier": 0,
-          "type": "Simple"
+          "type": "simple"
         },
         "attack2": {
           "name": "",
@@ -791,7 +791,7 @@
           "roll": 4,
           "keep": 2,
           "modifier": 0,
-          "type": "Simple"
+          "type": "simple"
         },
         "attack2": {
           "name": "",
@@ -941,14 +941,14 @@
           "roll": 5,
           "keep": 3,
           "modifier": 0,
-          "type": "Simple"
+          "type": "simple"
         },
         "attack2": {
           "name": "Bite",
           "roll": 6,
           "keep": 3,
           "modifier": 0,
-          "type": "Complex"
+          "type": "complex"
         },
         "attack3": {
           "name": "",
@@ -1078,7 +1078,7 @@
           "roll": 5,
           "keep": 4,
           "modifier": 0,
-          "type": "Complex"
+          "type": "complex"
         },
         "attack2": {
           "name": "",
@@ -1201,7 +1201,7 @@
           "roll": 7,
           "keep": 4,
           "modifier": 0,
-          "type": "Simple"
+          "type": "simple"
         },
         "attack2": {
           "name": "",
@@ -1343,14 +1343,14 @@
           "roll": 3,
           "keep": 2,
           "modifier": 0,
-          "type": "Complex"
+          "type": "complex"
         },
         "attack2": {
           "name": "Trample",
           "roll": 4,
           "keep": 3,
           "modifier": 0,
-          "type": "Complex"
+          "type": "complex"
         },
         "attack3": {
           "name": "",
@@ -1466,7 +1466,7 @@
           "roll": 4,
           "keep": 3,
           "modifier": 0,
-          "type": "Complex"
+          "type": "complex"
         },
         "attack2": {
           "name": "",
@@ -1573,7 +1573,7 @@
           "roll": 3,
           "keep": 2,
           "modifier": 0,
-          "type": "Complex"
+          "type": "complex"
         },
         "attack2": {
           "name": "",
@@ -1724,14 +1724,14 @@
           "roll": 7,
           "keep": 3,
           "modifier": 0,
-          "type": "Complex"
+          "type": "complex"
         },
         "attack2": {
           "name": "Unarmed",
           "roll": 6,
           "keep": 3,
           "modifier": 0,
-          "type": "Complex"
+          "type": "complex"
         },
         "attack3": {
           "name": "",
@@ -1873,14 +1873,14 @@
           "roll": 5,
           "keep": 3,
           "modifier": 0,
-          "type": "Complex"
+          "type": "complex"
         },
         "attack2": {
           "name": "Sword",
           "roll": 5,
           "keep": 3,
           "modifier": 0,
-          "type": "Complex"
+          "type": "complex"
         },
         "attack3": {
           "name": "",
@@ -2007,7 +2007,7 @@
           "roll": 4,
           "keep": 3,
           "modifier": 0,
-          "type": "Complex"
+          "type": "complex"
         },
         "attack2": {
           "name": "",
@@ -2158,7 +2158,7 @@
           "roll": 5,
           "keep": 4,
           "modifier": 0,
-          "type": "Simple"
+          "type": "simple"
         },
         "attack2": {
           "name": "",
@@ -2317,14 +2317,14 @@
           "roll": 4,
           "keep": 3,
           "modifier": 0,
-          "type": "Simple"
+          "type": "simple"
         },
         "attack2": {
           "name": "Trample",
           "roll": 6,
           "keep": 4,
           "modifier": 0,
-          "type": "Complex"
+          "type": "complex"
         },
         "attack3": {
           "name": "",
@@ -2451,7 +2451,7 @@
           "roll": 4,
           "keep": 3,
           "modifier": 0,
-          "type": "Complex"
+          "type": "complex"
         },
         "attack2": {
           "name": "",
@@ -2601,14 +2601,14 @@
           "roll": 4,
           "keep": 2,
           "modifier": 0,
-          "type": "Complex"
+          "type": "complex"
         },
         "attack2": {
           "name": "Club",
           "roll": 4,
           "keep": 2,
           "modifier": 0,
-          "type": "Complex"
+          "type": "complex"
         },
         "attack3": {
           "name": "",
