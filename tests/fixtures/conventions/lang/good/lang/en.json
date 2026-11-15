@@ -29,8 +29,11 @@
           "other": "Exported {count} items from {folder}."
         },
         "fullyHealed": "Fully healed.",
+        "manageEmphases": "Manage Emphases",
         "maximumWounds": "Maximum Wounds",
         "pool": "Pool {roll}k{keep}",
+        "source": "Core Rulebook",
+        "tenDice": "Apply Little Truths exception",
         "voidSkill": "Use a Void Point",
         "voidSkillHint": "Spend one Void Point for the roll.",
         "willowArmor": "Willow Leaf arrow against armor"

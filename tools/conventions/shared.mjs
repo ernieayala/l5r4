@@ -329,8 +329,14 @@ export function parseScss(text) {
   return { blocks, statements };
 }
 
-/** Capitalized words a sentence-case name may hold besides game terms: Ring and Trait names, products. */
+/**
+ * Capitalized words a sentence-case name may hold besides game terms: Ring and Trait names, the book's own titles
+ * (the Core Rulebook, its Little Truths sidebar), products.
+ */
 const PROPER_NAMES = Object.freeze([
+  "Rulebook",
+  "Little",
+  "Truths",
   "Air",
   "Earth",
   "Fire",
@@ -387,7 +393,9 @@ export function isSentenceCase(text, names = new Set()) {
     if (!/^[A-Z]/.test(word) || /^[A-Z0-9]{2,}s?$/.test(word) || /[a-z][A-Z]|\d/.test(word)) {
       return true;
     }
-    return [word, word.replace(/e?s$/, ""), word.replace(/s$/, "")].some(form => allowed.has(form));
+    // Plurals: Skills, Wounds, Emphases (Emphasis)
+    const forms = [word, word.replace(/e?s$/, ""), word.replace(/s$/, ""), word.replace(/es$/, "is")];
+    return forms.some(form => allowed.has(form));
   });
 }
 
