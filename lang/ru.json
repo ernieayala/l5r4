@@ -59,8 +59,8 @@
           "traits": "Черты",
           "void": "Пустота"
         },
+        "changeDisadvantageCap": "Нажмите, чтобы изменить максимальный опыт, полученный от недостатков",
         "disadvantageCapLabel": "Макс. Опыт",
-        "disadvantageCapTooltip": "Нажмите, чтобы изменить максимальный опыт, полученный от недостатков",
         "fallbackLabels": {
           "skillCreated": "Навык Создан",
           "skillIncreased": "Навык Увеличен",
@@ -247,8 +247,14 @@
         "deleteEffect": "Не удалось удалить эффект."
       },
       "migration": {
-        "compendiumIconsUpdated": "Миграция L5R4 (Компендиумы): Обновлено {count} путей изображений.",
-        "iconsUpdated": "Миграция L5R4: Обновлено {count} путей изображений мира."
+        "compendiumIconsUpdated": {
+          "one": "Миграция L5R4 (Компендиумы): Обновлено {count} путей изображений.",
+          "other": "Миграция L5R4 (Компендиумы): Обновлено {count} путей изображений."
+        },
+        "iconsUpdated": {
+          "one": "Миграция L5R4: Обновлено {count} путей изображений мира.",
+          "other": "Миграция L5R4: Обновлено {count} путей изображений мира."
+        }
       },
       "settings": {
         "forceMigration": {
@@ -332,15 +338,15 @@
         },
         "fear": {
           "catastrophicFailure": "КАТАСТРОФИЧЕСКИЙ ПРОВАЛ! Персонаж убегает или съёживается в ужасе.",
-          "clickToTest": "Нажмите, чтобы проверить Страх против выбранных персонажей",
           "effectName": "Страх {rank}",
           "label": "Страх {rank}",
           "noFear": "У этого НПС не настроен эффект Страха",
           "noTargets": "Не выбраны токены для проверки Страха",
-          "noWillpower": "У {character} нет черты Воля",
+          "noWillpower": "У {name} нет черты Воля",
           "penaltyApplied": "Штраф: -{penalty}к0 ко всем броскам",
           "rank": "Ранг Страха",
-          "testAgainst": "против {creature}",
+          "rollForSelected": "Нажмите, чтобы проверить Страх против выбранных персонажей",
+          "testAgainst": "против {name}",
           "testResult": "Проверка Страха {rank}"
         },
         "rings": {
@@ -368,7 +374,7 @@
           "ringRoll": "Бросок Кольца",
           "skillRoll": "Бросок Навыка",
           "socialResistance": "Социальное Сопротивление",
-          "socialResistanceDescription": "Сопротивление Запугиванию или Искушению",
+          "socialResistanceHint": "Сопротивление Запугиванию или Искушению",
           "spellCasting": "Бросок Заклинания",
           "success": "Успех",
           "traitRoll": "Бросок Черты",

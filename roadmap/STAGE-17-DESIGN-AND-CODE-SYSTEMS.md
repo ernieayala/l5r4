@@ -393,6 +393,14 @@ Template wave (C1 attributes, C2 markup), each by decision 17:
 - Row controls and rank arrows also show while keyboard focus is inside the row or rank (`.l5r4-item-row:has(:focus-visible)`), so a focused button can be seen; `:focus-within` would leave them showing after a mouse click on the row's select.
 - Item subtype partials and window templates gained a root block class (`l5r4-item-details`, `l5r4-item-modifiers` with `display: contents`; `l5r4-<window>-body`, `l5r4-<name>-dialog`) where no page names one. kata and kiho stay without: their shared fields are one `repeated-markup` run, and a wrapper adds a second.
 
+Copy wave (C4), each by decision 17:
+
+- Three gaps in `lang/sentence-case` fixed with a failing fixture first: it now accepts the words of the book's Skill and arrow names (voice.md **Names of game things**), the plural Emphases, and the book's own titles (Core Rulebook, the Little Truths setting).
+- Plural groups: the two migration notifications are `{one, other}` groups, read through `pluralKeyOf` (`module/utils/localization.js`), which picks the Intl category and falls back to `other`. localization.md says Russian adds `few` and `many`, but `lang/translation-key` refuses a translation key `lang/en.json` lacks; the check wins (smallest change) and Russian reads `other` until the two agree. For review.
+- Placeholders follow localization.md: `{name}` replaces `{actor}`, `{character}`, and `{creature}` in three values and every translation, with their callers.
+- Key renames: `disadvantageCapTooltip` → `changeDisadvantageCap`, `fear.clickToTest` → `fear.rollForSelected` (fear-block.md), `socialResistanceDescription` → `socialResistanceHint`, `equipment.weapons.tnHint` → `tnOnFootHint`, `ui.grants.schoolRankHint` → `ui.check.schoolRankHint`.
+- Left: the stance error keys at depth 6 (two targets fit); `unskilledHint`, `npcInitiativeHint`, `masteryXpHint` with no sibling field (copy judgment); "this actor" in the two permission notifications (naming the actor needs data at about 17 call sites); `transfer.exported` / `importedCount` read "1 items" for one item (no check covers it); 14 `glossary/term-case` hits that read placeholders (`{ring}`, `{skill}`) or typed link syntax as words.
+
 ### Progress (handoff, 2026-11-15)
 
 | Step | State |

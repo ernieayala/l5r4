@@ -59,8 +59,8 @@
           "traits": "Atributos",
           "void": "Vazio"
         },
+        "changeDisadvantageCap": "Clique para alterar o XP máximo ganho de desvantagens",
         "disadvantageCapLabel": "XP Máximo",
-        "disadvantageCapTooltip": "Clique para alterar o XP máximo ganho de desvantagens",
         "fallbackLabels": {
           "skillCreated": "Perícia Criada",
           "skillIncreased": "Perícia Aumentada",
@@ -247,8 +247,14 @@
         "deleteEffect": "Falha ao excluir efeito."
       },
       "migration": {
-        "compendiumIconsUpdated": "Migração L5R4 (Compêndios): Atualizou {count} caminho(s) de imagem.",
-        "iconsUpdated": "Migração L5R4: Atualizou {count} caminho(s) de imagem do mundo."
+        "compendiumIconsUpdated": {
+          "one": "Migração L5R4 (Compêndios): Atualizou {count} caminho(s) de imagem.",
+          "other": "Migração L5R4 (Compêndios): Atualizou {count} caminho(s) de imagem."
+        },
+        "iconsUpdated": {
+          "one": "Migração L5R4: Atualizou {count} caminho(s) de imagem do mundo.",
+          "other": "Migração L5R4: Atualizou {count} caminho(s) de imagem do mundo."
+        }
       },
       "settings": {
         "forceMigration": {
@@ -332,15 +338,15 @@
         },
         "fear": {
           "catastrophicFailure": "FALHA CATASTRÓFICA! O personagem foge ou se encolhe aterrorizado.",
-          "clickToTest": "Clique para testar Medo contra personagens selecionados",
           "effectName": "Medo {rank}",
           "label": "Medo {rank}",
           "noFear": "Este NPC não tem efeito de Medo configurado",
           "noTargets": "Nenhum token selecionado para teste de Medo",
-          "noWillpower": "{character} não tem atributo Vontade",
+          "noWillpower": "{name} não tem atributo Vontade",
           "penaltyApplied": "Penalidade: -{penalty}k0 em todas as rolagens",
           "rank": "Grau de Medo",
-          "testAgainst": "vs {creature}",
+          "rollForSelected": "Clique para testar Medo contra personagens selecionados",
+          "testAgainst": "vs {name}",
           "testResult": "Teste de Medo {rank}"
         },
         "rings": {
@@ -368,7 +374,7 @@
           "ringRoll": "Rolagem de Anel",
           "skillRoll": "Rolagem de Perícia",
           "socialResistance": "Resistência Social",
-          "socialResistanceDescription": "Resistindo Intimidação ou Tentação",
+          "socialResistanceHint": "Resistindo Intimidação ou Tentação",
           "spellCasting": "Rolagem de Conjuração",
           "success": "Sucesso",
           "traitRoll": "Rolagem de Atributo",

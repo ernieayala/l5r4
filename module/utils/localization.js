@@ -16,6 +16,21 @@ import { SYS_ID } from "../config/constants.js";
 import { logError } from "./error-logging.js";
 
 /**
+ * The key of a plural group's leaf for a count: the Intl plural category of the count in the user's language
+ * (docs/design-system/content/localization.md, Plurals). A category no lang file defines reads `other`, because
+ * `lang/en.json` defines only `one` and `other` and a translation holds no key `lang/en.json` lacks, so Russian's
+ * `few` and `many` would otherwise show the raw key.
+ * @param {{pluralRules: Intl.PluralRules, has: (key: string) => boolean}} i18n - The localization, `game.i18n`
+ * @param {number} count - The count that picks the plural
+ * @param {(category: string) => string} keyOf - The leaf key for a category
+ * @returns {string} The key to localize
+ */
+export function pluralKeyOf(i18n, count, keyOf) {
+  const key = keyOf(i18n.pluralRules.select(count));
+  return i18n.has(key) ? key : keyOf("other");
+}
+
+/**
  * Validates and coerces translation key to string.
  *
  * @param {*} key - Translation key to validate

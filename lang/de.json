@@ -59,8 +59,8 @@
           "traits": "Eigenschaften",
           "void": "Leere"
         },
+        "changeDisadvantageCap": "Klicken, um die maximalen durch Nachteile erhaltenen EP zu ändern",
         "disadvantageCapLabel": "Max. EP",
-        "disadvantageCapTooltip": "Klicken, um die maximalen durch Nachteile erhaltenen EP zu ändern",
         "fallbackLabels": {
           "skillCreated": "Fertigkeit Erstellt",
           "skillIncreased": "Fertigkeit Erhöht",
@@ -247,8 +247,14 @@
         "deleteEffect": "Fehler beim Löschen des Effekts."
       },
       "migration": {
-        "compendiumIconsUpdated": "L5R4 Migration (Kompendien): {count} Bildpfad(e) aktualisiert.",
-        "iconsUpdated": "L5R4 Migration: {count} Weltbildpfad(e) aktualisiert."
+        "compendiumIconsUpdated": {
+          "one": "L5R4 Migration (Kompendien): {count} Bildpfad(e) aktualisiert.",
+          "other": "L5R4 Migration (Kompendien): {count} Bildpfad(e) aktualisiert."
+        },
+        "iconsUpdated": {
+          "one": "L5R4 Migration: {count} Weltbildpfad(e) aktualisiert.",
+          "other": "L5R4 Migration: {count} Weltbildpfad(e) aktualisiert."
+        }
       },
       "settings": {
         "forceMigration": {
@@ -332,15 +338,15 @@
         },
         "fear": {
           "catastrophicFailure": "KATASTROPHALER FEHLSCHLAG! Charakter flieht oder kauert sich hilflos zusammen.",
-          "clickToTest": "Klicken, um Furcht gegen ausgewählte Charaktere zu testen",
           "effectName": "Furcht {rank}",
           "label": "Furcht {rank}",
           "noFear": "Dieser NSC hat keinen Furchteffekt konfiguriert",
           "noTargets": "Keine Spielsteine für Furchttest ausgewählt",
-          "noWillpower": "{character} hat keine Willenskraft-Eigenschaft",
+          "noWillpower": "{name} hat keine Willenskraft-Eigenschaft",
           "penaltyApplied": "Strafe: -{penalty}k0 auf alle Würfe",
           "rank": "Furchtrang",
-          "testAgainst": "vs {creature}",
+          "rollForSelected": "Klicken, um Furcht gegen ausgewählte Charaktere zu testen",
+          "testAgainst": "vs {name}",
           "testResult": "Furcht {rank} Test"
         },
         "rings": {
@@ -368,7 +374,7 @@
           "ringRoll": "Ringwurf",
           "skillRoll": "Fertigkeitswurf",
           "socialResistance": "Sozialer Widerstand",
-          "socialResistanceDescription": "Einschüchterung oder Versuchung widerstehen",
+          "socialResistanceHint": "Einschüchterung oder Versuchung widerstehen",
           "spellCasting": "Zauberspruch Wurf",
           "success": "Erfolg",
           "traitRoll": "Eigenschaftswurf",

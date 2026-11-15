@@ -394,7 +394,12 @@ export function isSentenceCase(text, names = new Set()) {
       return true;
     }
     // Plurals: Skills, Wounds, Emphases (Emphasis)
-    const forms = [word, word.replace(/e?s$/, ""), word.replace(/s$/, ""), word.replace(/es$/, "is")];
+    const forms = [
+      word,
+      word.replace(/e?s$/, ""),
+      word.replace(/s$/, ""),
+      word.replace(/es$/, "is")
+    ];
     return forms.some(form => allowed.has(form));
   });
 }

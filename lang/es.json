@@ -59,8 +59,8 @@
           "traits": "Atributos",
           "void": "Vacío"
         },
+        "changeDisadvantageCap": "Clic para cambiar la EXP máxima obtenida de desventajas",
         "disadvantageCapLabel": "EXP Máximo",
-        "disadvantageCapTooltip": "Clic para cambiar la EXP máxima obtenida de desventajas",
         "fallbackLabels": {
           "skillCreated": "Habilidad Creada",
           "skillIncreased": "Habilidad Aumentada",
@@ -247,8 +247,14 @@
         "deleteEffect": "Error al eliminar efecto."
       },
       "migration": {
-        "compendiumIconsUpdated": "Migración L5R4 (Compendios): Actualizada(s) {count} ruta(s) de imagen.",
-        "iconsUpdated": "Migración L5R4: Actualizada(s) {count} ruta(s) de imagen del mundo."
+        "compendiumIconsUpdated": {
+          "one": "Migración L5R4 (Compendios): Actualizada(s) {count} ruta(s) de imagen.",
+          "other": "Migración L5R4 (Compendios): Actualizada(s) {count} ruta(s) de imagen."
+        },
+        "iconsUpdated": {
+          "one": "Migración L5R4: Actualizada(s) {count} ruta(s) de imagen del mundo.",
+          "other": "Migración L5R4: Actualizada(s) {count} ruta(s) de imagen del mundo."
+        }
       },
       "settings": {
         "forceMigration": {
@@ -332,15 +338,15 @@
         },
         "fear": {
           "catastrophicFailure": "¡FALLO CATASTRÓFICO! El personaje huye o se encoge aterrorizado.",
-          "clickToTest": "Clic para probar Miedo contra personajes seleccionados",
           "effectName": "Miedo {rank}",
           "label": "Miedo {rank}",
           "noFear": "Este PNJ no tiene efecto de Miedo configurado",
           "noTargets": "No hay fichas seleccionadas para la prueba de Miedo",
-          "noWillpower": "{character} no tiene el atributo Voluntad",
+          "noWillpower": "{name} no tiene el atributo Voluntad",
           "penaltyApplied": "Penalización: -{penalty}k0 a todas las tiradas",
           "rank": "Rango de Miedo",
-          "testAgainst": "vs {creature}",
+          "rollForSelected": "Clic para probar Miedo contra personajes seleccionados",
+          "testAgainst": "vs {name}",
           "testResult": "Prueba de Miedo {rank}"
         },
         "rings": {
@@ -368,7 +374,7 @@
           "ringRoll": "Tirada de Anillo",
           "skillRoll": "Tirada de Habilidad",
           "socialResistance": "Resistencia Social",
-          "socialResistanceDescription": "Resistiendo Intimidación o Tentación",
+          "socialResistanceHint": "Resistiendo Intimidación o Tentación",
           "spellCasting": "Tirada de Lanzar Hechizo",
           "success": "Éxito",
           "traitRoll": "Tirada de Atributo",

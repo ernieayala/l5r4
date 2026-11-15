@@ -6,6 +6,7 @@
  */
 
 import { SYS_ID, PATHS } from "../../../config/constants.js";
+import { pluralKeyOf } from "../../../utils/localization.js";
 import { ICON_MIGRATION_MAP } from "./icon-map.js";
 import { DEFAULT_ICONS } from "../../../documents/item/constants/item-types.js";
 
@@ -207,7 +208,10 @@ export async function runIconPathMigration() {
   }
 
   ui.notifications?.info(
-    game.i18n.localize("l5r4.system.migration.iconsUpdated", { count: changed })
+    game.i18n.localize(
+      pluralKeyOf(game.i18n, changed, category => `l5r4.system.migration.iconsUpdated.${category}`),
+      { count: changed }
+    )
   );
 }
 
@@ -328,7 +332,14 @@ export async function migrateCompendiumIconPaths() {
 
   if (changed > 0) {
     ui.notifications?.info(
-      game.i18n.localize("l5r4.system.migration.compendiumIconsUpdated", { count: changed })
+      game.i18n.localize(
+        pluralKeyOf(
+          game.i18n,
+          changed,
+          category => `l5r4.system.migration.compendiumIconsUpdated.${category}`
+        ),
+        { count: changed }
+      )
     );
   }
 }

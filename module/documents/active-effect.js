@@ -50,7 +50,7 @@ export default class L5R4ActiveEffect extends foundry.documents.ActiveEffect {
       const blocked = [...documents[i].statuses].find(status => immune.has(status));
       if (blocked) {
         ui.notifications?.info(
-          F("l5r4.ui.effects.immune", { actor: actor.name, effect: documents[i].name })
+          F("l5r4.ui.effects.immune", { name: actor.name, effect: documents[i].name })
         );
         documents.splice(i, 1);
       }

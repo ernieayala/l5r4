@@ -42,7 +42,7 @@ const CATASTROPHIC_MARGIN = 15;
 async function executeFearTest({ character, tn, fearRank, targetInfo = "" } = {}) {
   const willpower = getEffectiveTrait(character, "wil");
   if (willpower <= 0) {
-    ui.notifications?.warn(F("l5r4.ui.mechanics.fear.noWillpower", { character: character.name }));
+    ui.notifications?.warn(F("l5r4.ui.mechanics.fear.noWillpower", { name: character.name }));
     return null;
   }
   const honorRank = toInt(character.system.honor?.rank);
@@ -114,7 +114,7 @@ export async function testFear({ npc, character } = {}) {
     return null;
   }
 
-  const targetInfo = ` ${F("l5r4.ui.mechanics.fear.testAgainst", { creature: npc.name })}`;
+  const targetInfo = ` ${F("l5r4.ui.mechanics.fear.testAgainst", { name: npc.name })}`;
 
   return executeFearTest({ character, tn, fearRank, targetInfo });
 }

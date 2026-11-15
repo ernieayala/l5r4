@@ -59,8 +59,8 @@
           "traits": "Traits",
           "void": "Vide"
         },
+        "changeDisadvantageCap": "Cliquez pour modifier l'EXP maximum gagnée des désavantages",
         "disadvantageCapLabel": "EXP Maximum",
-        "disadvantageCapTooltip": "Cliquez pour modifier l'EXP maximum gagnée des désavantages",
         "fallbackLabels": {
           "skillCreated": "Compétence Créée",
           "skillIncreased": "Compétence Augmentée",
@@ -247,8 +247,14 @@
         "deleteEffect": "Échec de la suppression de l'effet."
       },
       "migration": {
-        "compendiumIconsUpdated": "Migration L5R4 (Compendiums) : Mis à jour {count} chemin(s) d'image.",
-        "iconsUpdated": "Migration L5R4 : Mis à jour {count} chemin(s) d'image du monde."
+        "compendiumIconsUpdated": {
+          "one": "Migration L5R4 (Compendiums) : Mis à jour {count} chemin(s) d'image.",
+          "other": "Migration L5R4 (Compendiums) : Mis à jour {count} chemin(s) d'image."
+        },
+        "iconsUpdated": {
+          "one": "Migration L5R4 : Mis à jour {count} chemin(s) d'image du monde.",
+          "other": "Migration L5R4 : Mis à jour {count} chemin(s) d'image du monde."
+        }
       },
       "settings": {
         "forceMigration": {
@@ -332,15 +338,15 @@
         },
         "fear": {
           "catastrophicFailure": "ÉCHEC CATASTROPHIQUE ! Le personnage fuit ou se recroqueville de terreur.",
-          "clickToTest": "Cliquez pour tester la Peur contre les personnages sélectionnés",
           "effectName": "Peur {rank}",
           "label": "Peur {rank}",
           "noFear": "Ce PNJ n'a pas d'effet de Peur configuré",
           "noTargets": "Aucun pion sélectionné pour le test de Peur",
-          "noWillpower": "{character} n'a pas de trait Volonté",
+          "noWillpower": "{name} n'a pas de trait Volonté",
           "penaltyApplied": "Pénalité : -{penalty}k0 à tous les jets",
           "rank": "Rang de Peur",
-          "testAgainst": "vs {creature}",
+          "rollForSelected": "Cliquez pour tester la Peur contre les personnages sélectionnés",
+          "testAgainst": "vs {name}",
           "testResult": "Test de Peur {rank}"
         },
         "rings": {
@@ -368,7 +374,7 @@
           "ringRoll": "Jet d'Anneau",
           "skillRoll": "Jet de Compétence",
           "socialResistance": "Résistance Sociale",
-          "socialResistanceDescription": "Résister à l'Intimidation ou la Tentation",
+          "socialResistanceHint": "Résister à l'Intimidation ou la Tentation",
           "spellCasting": "Jet de Lancement de Sort",
           "success": "Succès",
           "traitRoll": "Jet de Trait",
