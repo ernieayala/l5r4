@@ -11,7 +11,7 @@ category.
 | SCSS        | `scss/components/_tabs.scss` (target), holding `_compendium-browser.scss:30-45`. Sheet tabs take core's `.sheet-tabs.tabs` look and add nothing     |
 | Block class | `l5r4-tabs` on the `<nav>`                                                                                                                          |
 | Shows in    | Item sheet; compendium browser; the Active Effect sheet's Rules panel (`templates/rules/effect-tab.hbs`) under core's tabs                          |
-| Gallery     | Each variant with two, four, and six tabs, one selected, one focused, at the default width and at 420 px                                            |
+| Gallery     | Each variant with two, four, and six tabs, one selected, one focused, at the default width                                                          |
 
 ## Anatomy
 
@@ -72,7 +72,7 @@ in system windows; `foundations/color.md` maps it to `--l5r4-color-accent`, and 
 ## Long text
 
 A tab label is one line (`foundations/typography.md` T7) and short: the tab's name in one or two words. Filter tabs
-wrap to a second row at 420 px (`flex-wrap: wrap`); sheet tabs take core's overflow.
+wrap to a second row when they do not fit (`flex-wrap: wrap`); sheet tabs take core's overflow.
 
 ## Rules
 

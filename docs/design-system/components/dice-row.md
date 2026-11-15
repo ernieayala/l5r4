@@ -71,7 +71,7 @@ color token.
 
 The formula is one token with no spaces; core breaks it anywhere (`word-break: break-all`, `foundry2.css:5627`), so a
 long pool wraps inside the sidebar. The dice float in rows and wrap (`foundry2.css:5684-5688`); the Ten Dice Rule
-caps a roll at ten dice (`game-rules/26_special_dice_rules.md, p.77`). Review checks the row at 420 px in the gallery.
+caps a roll at ten dice (`game-rules/26_special_dice_rules.md, p.77`). Review checks the row in the gallery.
 
 ## Rules
 

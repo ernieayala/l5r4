@@ -73,7 +73,7 @@ The order matches the cards today.
 
 No visible text. The cluster has a fixed column (`--l5r4-size-column-controls`, 102 px) in the item row grid, which
 holds four 24 px buttons and their gaps. The activation toggle is its own cell before the cluster (`cards/kata.hbs:8`);
-the gallery checks at 420 px that the kata, kiho, and tattoo rows keep it on the row's first line.
+the gallery checks at the sheet's default width that the kata, kiho, and tattoo rows keep it on the row's first line.
 
 ## Rules
 

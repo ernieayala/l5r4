@@ -14,7 +14,7 @@ foundations (`../foundations/`) define every token a page names.
 | States                     | Every state the component can show, with the look from `foundations/states.md` and the markup     |
 | Tokens                     | Every token the component reads                                                                   |
 | Keyboard and screen reader | What each key does and what assistive technology announces                                        |
-| Long text                  | Wrapping and truncation at the sheet's default width and at 420 px                                |
+| Long text                  | Wrapping and truncation at the sheet's default width                                              |
 | Rules                      | Each rule with the check that enforces it, then one conforming and one non-conforming example     |
 | Do and don't               | Short guidance a reviewer applies                                                                 |
 | Names                      | Fixed names the component keeps (Stage 17 decision 2), current to target action and class renames |

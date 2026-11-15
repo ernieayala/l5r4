@@ -143,4 +143,4 @@ under 24 px:
 | Trait and Void Ring step arrows          | 16 px tall | `scss/features/_traits-rings.scss:35`; `templates/actor/_partials/_stats.hbs:61-67`                                                        |
 | Void Point dots, one target for all nine | 12 px tall | `scss/features/_traits-rings.scss:575`; `templates/actor/_partials/_stats.hbs:220-231`, `templates/actor/_partials/_stats-npc.hbs:192-202` |
 
-A new control's rendered size is measured in the gallery, in both themes, at the sheet's default width and at 420 px.
+A new control's rendered size is measured in the gallery, in both themes, at the sheet's default width.

@@ -94,8 +94,8 @@ Contrast: `text` on `row-alt` is 8.51:1 light and 9.35:1 dark (`foundations/colo
 ## Long text
 
 A name wraps inside its column (`text-wrap: revert`, `_item-lists.scss:173`) and the row grows; numbers never wrap.
-Emphases join with ", " and wrap inside their column. The details cell spans every column and wraps as prose. At
-420 px the `1fr` columns shrink first; fixed columns keep their width.
+Emphases join with ", " and wrap inside their column. The details cell spans every column and wraps as prose. When
+a window is made narrower the `1fr` columns shrink first; fixed columns keep their width.
 
 ## Rules
 

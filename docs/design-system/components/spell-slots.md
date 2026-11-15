@@ -71,7 +71,7 @@ The cursor reads core's pointer, not the Shift-held cursor (`--conditional-curso
 ## Long text
 
 The count is one digit in a 32 px circle. The label "Spell slots" stays on one line in the title bar
-(`foundations/typography.md` T7); at 420 px the heading, label, and five slots must fit beside the title buttons, which
+(`foundations/typography.md` T7); at the sheet's default width the heading, label, and five slots must fit beside the title buttons, which
 the gallery checks.
 
 ## Rules

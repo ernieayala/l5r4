@@ -101,7 +101,7 @@ Actor, item, and target names reach titles, notes, and button labels. Core break
 (`word-break: break-word`, `foundry2.css:10011`), so titles and notes wrap. Core fixes a chat button's height at
 `--input-height` (`foundry2.css:9969-9971`), so a label that wraps to two lines overflows its button. Target: a card's
 button takes `height: auto` and `min-height: var(--input-height)`, so a wrapped label grows the button (typography.md
-rule T7: text is never clipped). Enforced by review, in the gallery at 420 px.
+rule T7: text is never clipped). Enforced by review, in the gallery.
 
 ## Rules
 

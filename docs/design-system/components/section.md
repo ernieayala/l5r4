@@ -72,7 +72,7 @@ literal (`foundations/space-and-size.md` S4).
 ## Long text
 
 The title bar is one line (`text-wrap: nowrap`, `foundations/typography.md` T7). A heading must fit beside its tools
-at 420 px; a translation that does not fit truncates with an ellipsis and keeps its full text in `data-tooltip`. Title tools
+at the sheet's default width; a translation that does not fit truncates with an ellipsis and keeps its full text in `data-tooltip`. Title tools
 never wrap below the heading.
 
 ## Rules

@@ -96,7 +96,7 @@ the text.
 ## Long text
 
 The chip stays on one line (`white-space: nowrap`, `_effect-panel.scss:69`; typography.md, text links). A labelled link
-keeps its label short enough to fit a sidebar journal at 420 px; a link wider than its text column overflows it, so
+keeps its label short enough to fit a journal at its default width; a link wider than its text column overflows it, so
 review checks long labels in the gallery. A broken link's reason sits outside the chip's nowrap and wraps.
 
 ## Rules

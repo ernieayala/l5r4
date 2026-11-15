@@ -298,14 +298,14 @@ a `{{!-- --}}` comment at the partial's top (`docs/code-system/templates-and-sty
 
 ## Long text
 
-| Element                 | Behavior                                                                                        |
-| ----------------------- | ----------------------------------------------------------------------------------------------- |
-| Actor and item name     | An input: a long name scrolls inside it. The Limited heading wraps                              |
-| Section title           | One line (`foundations/typography.md`, Wrapping); a label that cannot fit at 420 px is too long |
-| Item row name           | Wraps (`scss/components/_item-row.scss:173`); the row grows, its controls stay at the end       |
-| Clan, School            | Text in the header field; wraps inside its box                                                  |
-| Emphases on a Skill row | Joined with ", " and wraps (`templates/cards/skill.hbs:25-31`)                                  |
-| Notes and descriptions  | Core's editor; the section grows                                                                |
+| Element                 | Behavior                                                                                                           |
+| ----------------------- | ------------------------------------------------------------------------------------------------------------------ |
+| Actor and item name     | An input: a long name scrolls inside it. The Limited heading wraps                                                 |
+| Section title           | One line (`foundations/typography.md`, Wrapping); a label that cannot fit at the sheet's default width is too long |
+| Item row name           | Wraps (`scss/components/_item-row.scss:173`); the row grows, its controls stay at the end                          |
+| Clan, School            | Text in the header field; wraps inside its box                                                                     |
+| Emphases on a Skill row | Joined with ", " and wraps (`templates/cards/skill.hbs:25-31`)                                                     |
+| Notes and descriptions  | Core's editor; the section grows                                                                                   |
 
 ## Do and don't
 
