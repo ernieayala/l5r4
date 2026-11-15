@@ -17,13 +17,23 @@ import {
   createSkillData,
   createSpellData
 } from "../fixtures/item-fixtures.js";
-import { changeThroughSheet, cleanTest, nextUpdate, settleChatNotifications } from "./helpers.js";
+import {
+  changeThroughSheet,
+  cleanTest,
+  nextUpdate,
+  settleChatNotifications,
+  waitFor
+} from "./helpers.js";
+import { EVERY_ACTION } from "./every-action.js";
 
 /** A test that opens, clicks through, and closes a window can take a few seconds per action. */
 const SURFACE_TIMEOUT_MS = 120_000;
 
 /** Actions skipped by the click-through: they close the window under test. */
 const SKIPPED_ACTIONS = new Set(["close"]);
+
+/** Every action the click-through ran in this batch, checked against its coverage list at the end. */
+const ran = new Set();
 
 const settle = ms => new Promise(resolve => setTimeout(resolve, ms));
 
@@ -86,6 +96,7 @@ async function runEveryAction(app, baseline, skip = new Set()) {
     } else {
       el.click();
     }
+    ran.add(action);
     await dismissNewWindows(baseline, app);
     const again = app.rendered && find(action);
     if (again) {
@@ -438,6 +449,153 @@ export function registerSheetsAndAppsBatch(quench) {
             await exercise(new EmphasisManagerApplication({ item: skill }), async () => {});
           })
         );
+      });
+
+      describe("Buttons the click-through's fixtures do not show (roadmap/STAGE-16)", () => {
+        /** Answer the next DialogV2 with `answer(app)`; resolves once answered. */
+        const answerDialog = answer =>
+          new Promise(resolve =>
+            Hooks.once("renderDialogV2", async app => {
+              await answer(app);
+              resolve();
+            })
+          );
+
+        it(
+          "the NPC wound config switches the wound mode",
+          clean(async function () {
+            this.timeout(SURFACE_TIMEOUT_MS);
+            const before = npc.system.woundMode;
+            const next = before === "manual" ? "formula" : "manual";
+            const app = new WoundConfigApplication(npc);
+            await app.render({ force: true });
+            try {
+              const select = app.element.querySelector('[data-action="wound-mode-change"]');
+              select.value = next;
+              const saved = nextUpdate(npc);
+              select.click();
+              await saved;
+              assert.equal(npc.system.woundMode, next);
+            } finally {
+              await app.close({ animate: false });
+              await npc.update({ "system.woundMode": before });
+            }
+          })
+        );
+
+        it(
+          "the XP manager sets the Disadvantage cap and deletes a manual award",
+          clean(async function () {
+            this.timeout(SURFACE_TIMEOUT_MS);
+            const actor = await createTestPC({ name: "Sheets XP" });
+            created.push(actor);
+            await actor.createEmbeddedDocuments("Item", [
+              { name: "Sheets Doubt", type: "disadvantage", system: { cost: 4 } }
+            ]);
+            await actor.setFlag(SYS_ID, "xpManual", [
+              { id: "sheetsaward", delta: 5, note: "Sheets award" }
+            ]);
+            const app = new XpManagerApplication(actor);
+            await app.render({ force: true });
+            try {
+              const answered = answerDialog(dialog => {
+                dialog.element.querySelector("[data-field='disadvantage-cap']").value = "3";
+                dialog.element.querySelector('[data-action="ok"]').click();
+              });
+              const capped = nextUpdate(actor);
+              app.element.querySelector('[data-action="change-disadvantage-cap"]').click();
+              await answered;
+              await capped;
+              assert.equal(actor.getFlag(SYS_ID, "disadvantageCap"), 3);
+
+              await app.render();
+              const deleted = nextUpdate(actor);
+              app.element
+                .querySelector('[data-action="xp-delete-manual"][data-entry-id="sheetsaward"]')
+                .click();
+              await deleted;
+              assert.deepEqual(actor.getFlag(SYS_ID, "xpManual"), []);
+            } finally {
+              await app.close({ animate: false });
+            }
+          })
+        );
+
+        it(
+          "the emphasis manager renames and deletes a world custom emphasis",
+          clean(async function () {
+            this.timeout(SURFACE_TIMEOUT_MS);
+            const saved = game.settings.get(SYS_ID, "customEmphases");
+            await game.settings.set(SYS_ID, "customEmphases", ["Sheets Custom"]);
+            const app = new EmphasisManagerApplication({ item: pc.items.getName("Kenjutsu") });
+            try {
+              await app.render({ force: true });
+              const renamed = answerDialog(dialog => {
+                dialog.element.querySelector('[name="emphasisName"]').value = "Sheets Renamed";
+                dialog.element.querySelector('[data-action="ok"]').click();
+              });
+              app.element
+                .querySelector('[data-action="editCustom"][data-emphasis-name="Sheets Custom"]')
+                .click();
+              await renamed;
+              const customs = () => game.settings.get(SYS_ID, "customEmphases");
+              assert.isTrue(await waitFor(() => customs().includes("Sheets Renamed")));
+
+              await app.render();
+              const deleted = answerDialog(dialog =>
+                dialog.element.querySelector('[data-action="yes"]').click()
+              );
+              app.element
+                .querySelector('[data-action="deleteCustom"][data-emphasis-name="Sheets Renamed"]')
+                .click();
+              await deleted;
+              assert.isTrue(await waitFor(() => !customs().includes("Sheets Renamed")));
+            } finally {
+              await app.close({ animate: false });
+              await game.settings.set(SYS_ID, "customEmphases", saved);
+            }
+          })
+        );
+
+        it(
+          "the NPC's Fear button tests the selected characters",
+          clean(async function () {
+            this.timeout(SURFACE_TIMEOUT_MS);
+            if (!canvas.scene) {
+              this.skip();
+            }
+            const target = await createTestPC({ name: "Sheets Fear target" });
+            created.push(target);
+            const data = (await target.getTokenDocument({ x: 0, y: 0 })).toObject();
+            const [token] = await canvas.scene.createEmbeddedDocuments("Token", [data]);
+            const fearRank = npc.system.fear.rank;
+            await npc.update({ "system.fear.rank": 2 });
+            const posted = messages.length;
+            try {
+              await waitFor(() => token.object);
+              token.object.control({ releaseOthers: true });
+              await npc.sheet.render({ force: true });
+              npc.sheet.element.querySelector('[data-action="test-fear"]').click();
+              assert.isTrue(
+                await waitFor(() =>
+                  messages.slice(posted).some(m => m.speaker?.actor === target.id)
+                ),
+                "the selected character's Fear test posted"
+              );
+            } finally {
+              canvas.tokens.releaseAll();
+              await token.delete();
+              await npc.sheet.close({ animate: false });
+              await npc.update({ "system.fear.rank": fearRank });
+            }
+          })
+        );
+      });
+
+      describe("Coverage list (roadmap/STAGE-16)", () => {
+        it("the click-through ran exactly the actions every-action.js lists", () => {
+          assert.deepEqual([...ran].sort(), [...EVERY_ACTION].sort());
+        });
       });
     },
     { displayName: "L5R4: Sheets and apps" }

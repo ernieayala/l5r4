@@ -35,7 +35,6 @@
           "failure": "Fracaso",
           "missed": "Fallado",
           "explodesOn": "Explota En",
-          "withEmphasis": "con Énfasis",
           "unskilled": "Sin Habilidad",
           "traitRoll": "Tirada de Atributo",
           "ringRoll": "Tirada de Anillo",
@@ -43,34 +42,16 @@
           "damageRoll": "Tirada de Daño",
           "attackRoll": "Tirada de Ataque",
           "spellCasting": "Tirada de Lanzar Hechizo",
-          "castSpell": "Lanzar {spell} ({ring})",
-          "castMaho": "Lanzar Maho: {spell} ({ring})",
-          "unskilledRoll": "Tirada sin Habilidad",
           "emphasis": "Énfasis",
           "raise": "Incremento",
           "raises": "Incrementos",
           "freeRaises": "Incrementos Gratis",
-          "automatic": "Automático",
-          "formula": "Fórmula",
-          "result": "Resultado",
           "socialResistance": "Resistencia Social",
           "socialResistanceDescription": "Resistiendo Intimidación o Tentación"
         },
-        "notifications": {
-          "itemCreated": "Creado {type}: {name}",
-          "itemDeleted": "Eliminado {type}: {name}",
-          "itemUpdated": "Actualizado {type}: {name}",
-          "woundConfigFailed": "Error al abrir configuración de heridas",
-          "woundConfigUpdateFailed": "Error al actualizar configuración de heridas",
-          "invalidWoundConfigValue": "Valor de configuración de heridas inválido"
-        },
         "combat": {
           "attack": "Ataque",
-          "melee": "Cuerpo a Cuerpo",
-          "ranged": "A Distancia",
-          "multiplier": "Multiplicador",
           "woundPenalty": "Penalización por Heridas",
-          "armorTnBonus": "Bonificación de ND de Armadura",
           "targeting": {
             "vs": "vs",
             "multipleTargets": "objetivos - ND no establecido automáticamente"
@@ -122,19 +103,12 @@
           "noVoidPoints": "No hay Puntos de Vacío disponibles para reducir daño"
         },
         "stances": {
-          "pending": "Pendiente",
           "attack": "Postura de Ataque",
           "fullAttack": "Postura de Ataque Total",
           "defense": "Postura de Defensa",
           "fullDefense": "Postura de Defensa Total",
           "center": "Postura Centrada",
-          "fullDefenseDescription": "Realiza una tirada de Defensa/Reflejos. Suma la mitad del resultado (redondeado hacia arriba) a tu ND de Armadura durante esta postura.",
-          "cannotAttackDefense": "No puedes atacar mientras estás en Postura de Defensa",
-          "fullAttackBonus": "Postura de Ataque Total: +2k1"
-        },
-        "mounted": {
-          "fullAttackRestriction": "La postura de Ataque Total requiere Equitación 3+ mientras estás montado",
-          "attackBonus": "Montado/Posición Superior: +1k0"
+          "fullDefenseDescription": "Realiza una tirada de Defensa/Reflejos. Suma la mitad del resultado (redondeado hacia arriba) a tu ND de Armadura durante esta postura."
         },
         "fear": {
           "fearRank": "Rango de Miedo",
@@ -142,26 +116,20 @@
           "effectName": "Miedo {rank}",
           "clickToTest": "Clic para probar Miedo contra personajes seleccionados",
           "testResult": "Prueba de Miedo {rank}",
-          "testSuccess": "Resistió Miedo {rank}",
-          "testFailure": "Falló Prueba de Miedo {rank}",
           "penaltyApplied": "Penalización: -{penalty}k0 a todas las tiradas",
           "catastrophicFailure": "¡FALLO CATASTRÓFICO! El personaje huye o se encoge aterrorizado.",
           "noTargets": "No hay fichas seleccionadas para la prueba de Miedo",
           "noWillpower": "{character} no tiene el atributo Voluntad",
           "noFear": "Este PNJ no tiene efecto de Miedo configurado",
-          "testAgainst": "vs {creature}",
-          "rollFailed": "Tirada de prueba de Miedo falló - fórmula inválida o datos corruptos",
-          "templateFailed": "Plantilla de chat de prueba de Miedo falló al renderizar"
+          "testAgainst": "vs {creature}"
         }
       },
       "common": {
         "roll": "Tirar",
         "cancel": "Cancelar",
         "ok": "Aceptar",
-        "add": "Agregar",
         "none": "Ninguno",
         "keep": "Conservar",
-        "raise": "Incremento",
         "init": "Iniciativa",
         "bonus": "Bonificación",
         "mod": "Modificador",
@@ -169,21 +137,13 @@
         "rate": "Tasa",
         "current": "Actual",
         "total": "Total",
-        "left": "restante",
-        "close": "Cerrar",
-        "apply": "Aplicar",
-        "toChat": "Al Chat",
         "effect": "Efecto",
         "simple": "Simple",
-        "complex": "Complejo",
         "free": "Libre",
         "action": "Acción",
         "edit": "Editar",
         "delete": "Eliminar",
         "name": "Nombre",
-        "description": "Descripción",
-        "notes": "Notas",
-        "activeEffects": "Efectos Activos",
         "conditions": "Condiciones",
         "active": "Activo",
         "new": "Nuevo",
@@ -194,7 +154,6 @@
         "school": "Escuela",
         "xp": "Puntos de Experiencia",
         "insight": "Perspicacia",
-        "skill": "Habilidad",
         "damage": "Daño",
         "type": "Tipo",
         "ring": "Anillo",
@@ -208,18 +167,13 @@
         "allowStacking": "Permitir Apilamiento de Armadura"
       },
       "emphasisManager": {
-        "title": "Administrar Énfasis de Habilidades",
-        "manageFor": "Administrar Énfasis Disponibles para",
         "manage": "Administrar Énfasis",
         "addCustom": "Agregar Énfasis Personalizado",
         "custom": "Personalizado",
-        "none": "No hay énfasis disponibles",
         "help": "Selecciona qué énfasis están disponibles para esta habilidad. Entrénalo en la hoja de personaje.",
-        "noEmphases": "No hay énfasis en la lista",
-        "limitReached": "No puedes entrenar más de {max} énfasis con este rango de habilidad"
+        "noEmphases": "No hay énfasis en la lista"
       },
       "wealthManager": {
-        "title": "Administrador de Riqueza",
         "tooltip": "Administrar Riqueza",
         "currentWealth": "Riqueza Actual",
         "addMoney": "Agregar Dinero",
@@ -251,15 +205,12 @@
         "spells": "Hechizos",
         "technique": "Técnica",
         "techniques": "Técnicas",
-        "armors": "Armaduras",
         "advantage": "Ventaja",
         "advantages": "Ventajas",
         "disadvantage": "Desventaja",
         "disadvantages": "Desventajas",
         "kata": "Kata",
-        "katas": "Katas",
         "kiho": "Kiho",
-        "kihos": "Kihos",
         "tattoo": "Tatuaje",
         "tattoos": "Tatuajes",
         "equipment": "Equipamiento",
@@ -269,53 +220,25 @@
         "description": "Descripción",
         "woundLevels": "Niveles de Heridas",
         "spellSlots": "Espacios de Hechizo",
-        "demands": "Demandas",
-        "traits": "Atributos",
-        "itemSheetTitle": "Hoja de Objeto",
-        "xpModal": "Experiencia"
+        "demands": "Demandas"
       },
       "notifications": {
         "actorNotFound": "Actor no encontrado para tirada de daño",
         "noPermissionDamage": "No tienes permiso para tirar daño para este actor",
         "noValidWeapon": "No se encontró arma válida para tirada de ataque",
-        "fullDefenseRollFailed": "Error al realizar tirada de Defensa Total. Por favor, tira manualmente.",
         "invalidRingForSpell": "Anillo inválido para espacio de hechizo: {ring}",
         "noActorForVoid": "No hay actor disponible para gastar puntos de vacío",
-        "chatMessageFailed": "Error al publicar tirada en el chat - ver consola para detalles",
         "schoolRankZero": "No puedes lanzar un hechizo con Rango de Escuela reducido a cero",
         "deficiencyBlocksCasting": "Deficiencia en {ring} reduce tu Rango de Escuela a cero - no puedes lanzar",
         "noSpellSlots": "Te quedaste sin espacios de hechizo para este anillo",
-        "conditionApplyFailed": "Error al aplicar {condition} a {actor}",
-        "invalidSkillName": "Nombre de habilidad inválido proporcionado",
-        "invalidDamageValue": "Valor de daño inválido proporcionado",
-        "noTargetForSwap": "No se seleccionó objetivo para intercambio de iniciativa",
-        "noCombatActive": "No hay combate activo para modificar iniciativa",
-        "notInCombat": "El personaje no está en combate activo",
         "wealthManagerFailed": "Error al abrir el Administrador de Riqueza",
         "conditionManagerFailed": "Error al abrir el Administrador de Condiciones"
-      },
-      "voidActions": {
-        "title": "Acciones de Puntos de Vacío",
-        "enhanceRoll": "Mejorar Tirada (+1k1)",
-        "tempSkill": "Obtener Habilidad Temporal",
-        "reduceDamage": "Reducir Daño (-10)",
-        "increaseArmorTN": "Aumentar ND de Armadura (+10)",
-        "swapInitiative": "Intercambiar Iniciativa",
-        "increaseInitiative": "Aumentar Iniciativa (+10)",
-        "tempSkillGranted": "Punto de Vacío gastado: Obtenido rango temporal en {skill}",
-        "damageReduced": "Punto de Vacío gastado: Daño reducido de {original} a {reduced} (-{amount})",
-        "armorTnBonus": "Vacío: ND de Armadura +10",
-        "armorTnIncreased": "Punto de Vacío gastado: ND de Armadura aumentado en 10 para esta Ronda",
-        "armorTnAlreadyActive": "La bonificación de ND de Armadura por Punto de Vacío ya está activa",
-        "initiativeSwapped": "Punto de Vacío gastado: {source} intercambió iniciativa con {target}",
-        "initiativeIncreased": "Punto de Vacío gastado: Iniciativa aumentada de {oldValue} a {newValue}"
       },
       "hints": {
         "leftRightToAdjust": "Izquierda y Derecha para Ajustar",
         "leftClickPlusRightClickMinus": "Shift+Clic izquierdo: +1, Shift+Clic derecho: -1",
         "voidPointsClickAdjust": "Clic izquierdo: +1, Clic derecho: -1",
         "shiftClickRankPoints": "Shift+Clic: ±0.1, Shift+Ctrl+Clic: ±1.0",
-        "shiftClickToChat": "Shift+Clic para publicar en el chat",
         "postToChat": "Publicar en el chat"
       },
       "dialogs": {
@@ -398,15 +321,9 @@
       },
       "ranks": {
         "honorRank": "Honor",
-        "honorPoints": "Puntos de Honor",
         "gloryRank": "Gloria",
-        "gloryPoints": "Puntos de Gloria",
         "statusRank": "Rango de Estatus",
-        "statusPoints": "Puntos de Estatus",
-        "shadowRank": "Corrupción de las Tierras de Sombra",
-        "shadowPoints": "Puntos de Sombra",
-        "insightRank": "Rango de Perspicacia",
-        "insightPoints": "Puntos de Perspicacia"
+        "shadowRank": "Corrupción de las Tierras de Sombra"
       },
       "stance": {
         "title": "Combate",
@@ -424,20 +341,13 @@
         "adjustExperience": "Ajustar Experiencia",
         "experienceSummary": "Resumen de Experiencia",
         "usedTotal": "Usado / Total",
-        "poolChanges": "Cambios de Reserva",
-        "when": "Cuándo",
-        "none": "Sin entradas",
         "purchases": "Compras",
-        "xpLog": "Registro de EXP",
         "traitChange": "{label} {from}→{to}",
         "voidChange": "Vacío {from}→{to}",
         "skillCreate": "{name} 0→{rank}",
         "skillChange": "{name} {from}→{to}",
         "recalculateTooltip": "Recalcular compras de EXP desde el estado actual del personaje",
-        "recalculateSuccess": "Compras de EXP recalculadas exitosamente",
-        "recalculateFailed": "Error al recalcular compras de EXP",
         "disadvantageCapLabel": "EXP Máximo",
-        "disadvantageCapTitle": "Establecer Límite de Desventajas",
         "disadvantageCapTooltip": "Clic para cambiar la EXP máxima obtenida de desventajas",
         "breakdown": {
           "base": "Base",
@@ -453,8 +363,6 @@
           "spells": "Hechizos"
         },
         "fallbackLabels": {
-          "advantage": "Ventaja",
-          "disadvantage": "Desventaja",
           "traitIncrease": "Aumento de Atributo",
           "voidIncrease": "Aumento de Vacío",
           "skillCreated": "Habilidad Creada",
@@ -535,10 +443,8 @@
           "other": "Otro"
         },
         "additionalBlood": "Sangre Adicional",
-        "castMaho": "Lanzar Hechizo Maho",
         "mahoCasting": "Lanzamiento de Maho",
         "bloodCost": "Sangre",
-        "freeRaises": "Incrementos Gratis",
         "taintGained": "Corrupción Obtenida",
         "taintGainedNotification": "Obtenido {taint} puntos de Corrupción de las Tierras de Sombra por lanzar maho"
       },
@@ -547,16 +453,10 @@
         "karmic": "Kármico",
         "martial": "Marcial",
         "mystic": "Místico"
-      },
-      "techniques": {
-        "single": "Técnica",
-        "plural": "Técnicas"
       }
     },
     "system": {
       "migration": {
-        "itemTypeChangeInfo": "L5R4: migrado {count} Objeto(s) de \"commonItem\" a \"item\".",
-        "itemTypeChangeError": "L5R4: Error en migración de tipo de objeto. Ver consola para detalles.",
         "iconsUpdated": "Migración L5R4: Actualizada(s) {count} ruta(s) de imagen del mundo.",
         "compendiumIconsUpdated": "Migración L5R4 (Compendios): Actualizada(s) {count} ruta(s) de imagen."
       },
@@ -573,10 +473,6 @@
     }
   },
   "SETTINGS": {
-    "allowArmorStacking": {
-      "name": "Permitir apilamiento de armadura",
-      "label": "Múltiples piezas de \"armadura\" pueden apilarse (para representar bonificaciones, etc.)"
-    },
     "LtException": {
       "name": "Aplicar excepción de Pequeñas Verdades",
       "label": "Cuando los dados conservados se reducen por debajo de 10 por conversión, suma 2."
@@ -584,10 +480,6 @@
     "runMigration": {
       "name": "Ejecutar migraciones al iniciar",
       "label": "Si está habilitado, las migraciones de datos pendientes se ejecutarán la próxima vez que cargue el mundo. Deshabilita para omitir migraciones en caso de problemas."
-    },
-    "lastMigratedVersion": {
-      "name": "Última versión migrada",
-      "label": "Interno. No cambiar."
     },
     "forceMigration": {
       "name": "Forzar migración al iniciar",

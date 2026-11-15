@@ -160,7 +160,7 @@ export function registerWoundConfigEdgeCaseTests(quench) {
 
         afterEach(async () => {
           if (dialog?.rendered) {
-            await dialog.close();
+            await dialog.close({ animate: false });
           }
           if (actor) {
             await actor.delete();
@@ -182,7 +182,7 @@ export function registerWoundConfigEdgeCaseTests(quench) {
         it("should handle rapid open/close cycles", async function () {
           this.timeout(MULTI_CLOSE_TIMEOUT_MS);
           // ARRANGE - Close current dialog
-          await dialog.close();
+          await dialog.close({ animate: false });
 
           // ACT - Rapid open/close cycles
           for (let i = 0; i < 3; i++) {
@@ -202,7 +202,7 @@ export function registerWoundConfigEdgeCaseTests(quench) {
           await new Promise(resolve => setTimeout(resolve, 100));
 
           // ACT - Close
-          await dialog.close();
+          await dialog.close({ animate: false });
 
           // ASSERT
           assert.equal(actor.system.woundsMultiplier, 2, "Data preserved");
@@ -213,7 +213,7 @@ export function registerWoundConfigEdgeCaseTests(quench) {
           await new Promise(resolve => setTimeout(resolve, 300));
 
           // ACT - Close
-          await dialog.close();
+          await dialog.close({ animate: false });
 
           // ASSERT
           assert.equal(actor.system.woundsMultiplier, 2, "Data preserved");
@@ -227,7 +227,7 @@ export function registerWoundConfigEdgeCaseTests(quench) {
           await new Promise(resolve => setTimeout(resolve, 100));
 
           // ACT - Close both
-          await dialog.close();
+          await dialog.close({ animate: false });
           await dialog2.close();
 
           // ASSERT - No data corruption

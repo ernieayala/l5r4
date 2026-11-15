@@ -126,6 +126,33 @@ export function registerPacksBatch(quench) {
         return { actor, item };
       };
 
+      /**
+       * The rule keys a document carries that the actor's rule list lacks: each rule, its choices answered, reaches
+       * `actor.rules` under the document's name unless validation skipped it (module/documents/actor/rules.js,
+       * collectRules). Counted per key, so a second rule of one key needs its own entry.
+       * @param {Actor} actor
+       * @param {{name: string, system: {rules: object[]}}} doc  An owned item or an applied effect
+       * @returns {string[]}
+       */
+      const missingRules = (actor, doc) => {
+        const reached = actor.rules.filter(e => e.source === doc.name).map(e => e.rule.key);
+        return doc.system.rules
+          .map(rule => rule.key)
+          .filter(key => {
+            const at = reached.indexOf(key);
+            return at < 0 || !reached.splice(at, 1);
+          });
+      };
+
+      /** Make an owned item's rules apply as play does: armor worn, a kata, kiho, or tattoo activated. */
+      const applyItem = async (actor, item) => {
+        if (item.type === "armor") {
+          await item.update({ "system.equipped": true });
+        } else if (!item.system.rulesActive && ["kata", "kiho", "tattoo"].includes(item.type)) {
+          await toggleActivation(actor, item);
+        }
+      };
+
       /** The XP an actor's entry of a type and name cost (pp.102-103). */
       const xpOf = (actor, type, name) =>
         actor.system._xp.entries.find(e => e.type === type && e.name === name)?.delta;
@@ -168,10 +195,12 @@ export function registerPacksBatch(quench) {
           })
         );
 
+        // The title names the coverage check's generic rule check (tools/coverage/packs.mjs, roadmap/STAGE-16
+        // decision 5): every entry is checked, the full and partial ones among them
         it(
-          "every item drops on a PC through the sheet's drop path",
+          "every item drops on a PC through the sheet's drop path, and every full or partial entry's rules reach the actor",
           clean(async function () {
-            this.timeout(120_000);
+            this.timeout(240_000);
             // One actor per pack takes every entry of it, so the GM adds those whose prerequisites it misses
             // anyway, and each School is added beside the others
             const stop = answerPurchase();
@@ -188,6 +217,9 @@ export function registerPacksBatch(quench) {
                   });
                   assert.ok(item, `${pack.metadata.name}: ${index.name}`);
                   assert.isNull(item.folder, `${index.name} keeps no pack folder`);
+                  // Checked before the next drop, which replaces a Clan or Family and ends an activation's group
+                  await applyItem(actor, item);
+                  assert.deepEqual(missingRules(actor, item), [], `${index.name}: rules skipped`);
                   dropped.push(item);
                 }
                 // Schools grant in the background; the actor is deleted only once that work is done
@@ -854,7 +886,7 @@ export function registerPacksBatch(quench) {
         );
 
         it(
-          "every creature imports as an NPC with its page, and no console error",
+          "every creature imports as an NPC with its page, every creature's rules reach it, and no console error",
           clean(async function () {
             this.timeout(60_000);
             assert.isAbove(pack().index.size, 0);
@@ -862,6 +894,10 @@ export function registerPacksBatch(quench) {
               const actor = await imported(index.name);
               assert.equal(actor.type, "npc", index.name);
               assert.isAbove(actor.system.source.page, 317, index.name);
+              // The special abilities' rules and the Skills' own rules reach the creature
+              for (const doc of [...actor.appliedEffects, ...actor.items]) {
+                assert.deepEqual(missingRules(actor, doc), [], `${index.name}: ${doc.name}`);
+              }
             }
           })
         );
@@ -1010,6 +1046,39 @@ export function registerPacksBatch(quench) {
               const row = app.element.querySelector(".l5r4-browser-row");
               assert.include(row.textContent, "DR 3k2");
               assert.include(row.textContent, "Core Rulebook p.204");
+            } finally {
+              await app.close({ animate: false });
+            }
+          })
+        );
+
+        it(
+          "a tab switches the list, Clear filters empties the search, a name opens its sheet, and Import brings in a creature",
+          clean(async () => {
+            const app = await openOn("equipment");
+            const before = new Set(game.actors.map(a => a.id));
+            try {
+              app.element.querySelector("[data-action='selectTab'][data-tab='creatures']").click();
+              assert.isTrue(await waitFor(() => app.tab === "creatures"));
+              await waitFor(() => app.element.querySelector("[data-action='importEntry']"));
+
+              app.search = "Oni";
+              await app.render();
+              app.element.querySelector("[data-action='clearFilters']").click();
+              assert.isTrue(await waitFor(() => app.search === ""), "the search is cleared");
+
+              app.search = "Kappa";
+              await app.render();
+              const row = app.element.querySelector(".l5r4-browser-row");
+              const entry = await fromUuid(row.dataset.uuid);
+              row.querySelector("[data-action='openEntry']").click();
+              assert.isTrue(await waitFor(() => entry.sheet?.rendered), "the entry's sheet opens");
+              await entry.sheet.close({ animate: false });
+
+              row.querySelector("[data-action='importEntry']").click();
+              const imported = () => game.actors.find(a => !before.has(a.id) && a.name === "Kappa");
+              assert.isTrue(await waitFor(imported), "the creature is in the world");
+              track(imported());
             } finally {
               await app.close({ animate: false });
             }

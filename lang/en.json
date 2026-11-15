@@ -40,8 +40,7 @@
           "convertFailed": "Failed to convert currency",
           "insufficientForConversion": "Insufficient funds for this conversion",
           "insufficientFunds": "Insufficient funds for this transaction",
-          "removeMoneyFailed": "Failed to remove money",
-          "updateFailed": "Failed to update wealth manager"
+          "removeMoneyFailed": "Failed to remove money"
         }
       },
       "woundConfig": {
@@ -53,10 +52,7 @@
       },
       "xpManager": {
         "title": "XP Manager",
-        "disadvantageCapTitle": "Set Disadvantage Cap",
-        "errors": {
-          "updateFailed": "Failed to update XP manager"
-        }
+        "disadvantageCapTitle": "Set Disadvantage Cap"
       }
     },
     "mechanics": {
@@ -68,48 +64,6 @@
           "material": "Material",
           "spiritual": "Spiritual",
           "ancestor": "Ancestor"
-        }
-      },
-      "conditions": {
-        "blinded": {
-          "label": "Blinded",
-          "restrictions": "-3k3 ranged attacks, -1k1 melee attacks, -1k1 Defense rolls, Armor TN = Ref+5+Armor, Water Ring -2 for movement"
-        },
-        "dazed": {
-          "label": "Dazed",
-          "restrictions": "-3k0 to all actions, only Defense/Full Defense stances, cannot duel"
-        },
-        "entangled": {
-          "label": "Entangled",
-          "restrictions": "Cannot Move or take Complex Actions except Strength roll to break free"
-        },
-        "fatigued": {
-          "label": "Fatigued",
-          "restrictions": "+5 TN to physical rolls, skills, and spellcasting (stacks per day), cannot use Full Attack stance"
-        },
-        "feared": {
-          "label": "Feared",
-          "restrictions": "-Xk0 to all rolls (X = Fear Rank), lasts until encounter end"
-        },
-        "grappled": {
-          "label": "Grappled",
-          "restrictions": "Armor TN = 5 + armor bonus only"
-        },
-        "guarded": {
-          "label": "Guarded",
-          "restrictions": "+10 Armor TN while protected by ally within 5 feet (until guardian's next turn)"
-        },
-        "guarding": {
-          "label": "Guarding",
-          "restrictions": "-5 Armor TN while protecting ally within 5 feet (until your next turn)"
-        },
-        "prone": {
-          "label": "Prone",
-          "restrictions": "-10 Armor TN vs melee, -2k0 attacks, cannot Move, only Attack/Defense stances"
-        },
-        "stunned": {
-          "label": "Stunned",
-          "restrictions": "Cannot take any actions, Armor TN = 5 + armor bonus"
         }
       },
       "magic": {
@@ -165,8 +119,7 @@
         "save": "Save",
         "simple": "Simple",
         "complex": "Complex",
-        "free": "Free",
-        "pending": "Pending"
+        "free": "Free"
       },
       "tabs": {
         "details": "Details",
@@ -520,7 +473,6 @@
           "failure": "Failure",
           "missed": "Missed",
           "explodesOn": "Explodes On",
-          "withEmphasis": "with Emphasis",
           "unskilled": "Unskilled",
           "traitRoll": "Trait Roll",
           "ringRoll": "Ring Roll",
@@ -528,34 +480,16 @@
           "damageRoll": "Damage Roll",
           "attackRoll": "Attack Roll",
           "spellCasting": "Spell Casting Roll",
-          "castSpell": "Cast {spell} ({ring})",
-          "castMaho": "Cast Maho: {spell} ({ring})",
-          "unskilledRoll": "Unskilled Roll",
           "emphasis": "Emphasis",
           "raise": "Raise",
           "raises": "Raises",
           "freeRaises": "Free Raises",
-          "automatic": "Automatic",
-          "formula": "Formula",
-          "result": "Result",
           "socialResistance": "Social Resistance",
           "socialResistanceDescription": "Resisting Intimidation or Temptation"
         },
-        "notifications": {
-          "itemCreated": "Created {type}: {name}",
-          "itemDeleted": "Deleted {type}: {name}",
-          "itemUpdated": "Updated {type}: {name}",
-          "woundConfigFailed": "Failed to open wound configuration",
-          "woundConfigUpdateFailed": "Failed to update wound configuration",
-          "invalidWoundConfigValue": "Invalid wound configuration value"
-        },
         "combat": {
           "attack": "Attack",
-          "melee": "Melee",
-          "ranged": "Ranged",
-          "multiplier": "Multiplier",
           "woundPenalty": "Wound Penalty",
-          "armorTnBonus": "Armor TN Bonus",
           "targeting": {
             "vs": "vs",
             "multipleTargets": "targets - TN not auto-set"
@@ -607,19 +541,12 @@
           "noVoidPoints": "No Void Points available to reduce damage"
         },
         "stances": {
-          "pending": "Pending",
           "attack": "Attack Stance",
           "fullAttack": "Full Attack Stance",
           "defense": "Defense Stance",
           "fullDefense": "Full Defense Stance",
           "center": "Center Stance",
-          "fullDefenseDescription": "Make a Defense/Reflexes roll. Add half the result (rounded up) to your Armor TN for the duration of this stance.",
-          "cannotAttackDefense": "Cannot attack while in Defense Stance",
-          "fullAttackBonus": "Full Attack Stance: +2k1"
-        },
-        "mounted": {
-          "fullAttackRestriction": "Full Attack stance requires Horsemanship 3+ when mounted",
-          "attackBonus": "Mounted/Higher: +1k0"
+          "fullDefenseDescription": "Make a Defense/Reflexes roll. Add half the result (rounded up) to your Armor TN for the duration of this stance."
         },
         "fear": {
           "fearRank": "Fear Rank",
@@ -627,26 +554,20 @@
           "effectName": "Fear {rank}",
           "clickToTest": "Click to test Fear against selected characters",
           "testResult": "Fear {rank} Test",
-          "testSuccess": "Resisted Fear {rank}",
-          "testFailure": "Failed Fear {rank} Test",
           "penaltyApplied": "Penalty: -{penalty}kO to all rolls",
           "catastrophicFailure": "CATASTROPHIC FAILURE! Character flees or cowers helplessly.",
           "noTargets": "No tokens selected for Fear test",
           "noWillpower": "{character} has no Willpower trait",
           "noFear": "This NPC has no Fear effect configured",
-          "testAgainst": "vs {creature}",
-          "rollFailed": "Fear test roll failed - invalid formula or corrupted data",
-          "templateFailed": "Fear test chat template failed to render"
+          "testAgainst": "vs {creature}"
         }
       },
       "common": {
         "roll": "Roll",
         "cancel": "Cancel",
         "ok": "OK",
-        "add": "Add",
         "none": "None",
         "keep": "Keep",
-        "raise": "Raise",
         "init": "Initiative",
         "bonus": "Bonus",
         "mod": "Modifier",
@@ -654,21 +575,13 @@
         "rate": "Rate",
         "current": "Current",
         "total": "Total",
-        "left": "left",
-        "close": "Close",
-        "apply": "Apply",
-        "toChat": "To Chat",
         "effect": "Effect",
         "simple": "Simple",
-        "complex": "Complex",
         "free": "Free",
         "action": "Action",
         "edit": "Edit",
         "delete": "Delete",
         "name": "Name",
-        "description": "Description",
-        "notes": "Notes",
-        "activeEffects": "Active Effects",
         "conditions": "Conditions",
         "active": "Active",
         "new": "New",
@@ -679,7 +592,6 @@
         "school": "School",
         "xp": "Experience Points",
         "insight": "Insight",
-        "skill": "Skill",
         "damage": "Damage",
         "type": "Type",
         "ring": "Ring",
@@ -688,8 +600,7 @@
         "tn": "TN",
         "cost": "Cost",
         "save": "Save",
-        "armor": "Armor",
-        "base": "Base"
+        "armor": "Armor"
       },
       "combat": {
         "configuration": "Combat Configuration",
@@ -781,18 +692,13 @@
         "allowStacking": "Allow Armor Stacking"
       },
       "emphasisManager": {
-        "title": "Manage Skill Emphases",
-        "manageFor": "Manage Available Emphases for",
         "manage": "Manage Emphases",
         "addCustom": "Add Custom Emphasis",
         "custom": "Custom",
-        "none": "No emphases available",
         "help": "Select which emphases are available for this skill. Train them on the character sheet.",
-        "noEmphases": "No emphases in list",
-        "limitReached": "Cannot train more than {max} emphases at this skill rank"
+        "noEmphases": "No emphases in list"
       },
       "wealthManager": {
-        "title": "Wealth Manager",
         "tooltip": "Manage Wealth",
         "currentWealth": "Current Wealth",
         "addMoney": "Add Money",
@@ -822,15 +728,12 @@
         "spells": "Spells",
         "technique": "Technique",
         "techniques": "Techniques",
-        "armors": "Armors",
         "advantage": "Advantage",
         "advantages": "Advantages",
         "disadvantage": "Disadvantage",
         "disadvantages": "Disadvantages",
         "kata": "Kata",
-        "katas": "Katas",
         "kiho": "Kiho",
-        "kihos": "Kihos",
         "tattoo": "Tattoo",
         "tattoos": "Tattoos",
         "tattooPassive": "Always active",
@@ -842,28 +745,17 @@
         "description": "Description",
         "woundLevels": "Wound Levels",
         "spellSlots": "Spell Slots",
-        "demands": "Demands",
-        "traits": "Traits",
-        "itemSheetTitle": "Item Sheet",
-        "xpModal": "Experience"
+        "demands": "Demands"
       },
       "notifications": {
         "actorNotFound": "Actor not found for damage roll",
         "noPermissionDamage": "You don't have permission to roll damage for this actor",
         "noValidWeapon": "No valid weapon found for attack roll",
-        "fullDefenseRollFailed": "Failed to make Full Defense roll. Please roll manually.",
         "invalidRingForSpell": "Invalid ring for spell slot: {ring}",
         "noActorForVoid": "No actor available for void point spending",
-        "chatMessageFailed": "Failed to post roll to chat - see console for details",
         "schoolRankZero": "You can't cast a spell with School Rank reduced to zero",
         "deficiencyBlocksCasting": "Deficiency in {ring} reduces your School Rank to zero - cannot cast",
         "noSpellSlots": "You ran out of spell slots for this ring",
-        "conditionApplyFailed": "Failed to apply {condition} to {actor}",
-        "invalidSkillName": "Invalid skill name provided",
-        "invalidDamageValue": "Invalid damage value provided",
-        "noTargetForSwap": "No target selected for initiative swap",
-        "noCombatActive": "No active combat to modify initiative",
-        "notInCombat": "Character not in active combat",
         "wealthManagerFailed": "Failed to open Wealth Manager",
         "conditionManagerFailed": "Failed to open Condition Manager",
         "combatConfigFailed": "Failed to open Combat Configuration",
@@ -874,28 +766,11 @@
         "stanceRemoveFailed": "Failed to remove stance",
         "messageTooLong": "Message too long (max 10,000 characters)"
       },
-      "voidActions": {
-        "title": "Void Point Actions",
-        "enhanceRoll": "Enhance Roll (+1k1)",
-        "tempSkill": "Gain Temporary Skill",
-        "reduceDamage": "Reduce Damage (-10)",
-        "increaseArmorTN": "Increase Armor TN (+10)",
-        "swapInitiative": "Swap Initiative",
-        "increaseInitiative": "Increase Initiative (+10)",
-        "tempSkillGranted": "Void Point spent: Gained temporary rank in {skill}",
-        "damageReduced": "Void Point spent: Damage reduced from {original} to {reduced} (-{amount})",
-        "armorTnBonus": "Void: Armor TN +10",
-        "armorTnIncreased": "Void Point spent: Armor TN increased by 10 for this Round",
-        "armorTnAlreadyActive": "Armor TN bonus from Void Point already active",
-        "initiativeSwapped": "Void Point spent: {source} swapped initiative with {target}",
-        "initiativeIncreased": "Void Point spent: Initiative increased from {oldValue} to {newValue}"
-      },
       "hints": {
         "leftRightToAdjust": "Left and Right to Adjust",
         "leftClickPlusRightClickMinus": "Shift+Left click: +1, Shift+Right click: -1",
         "voidPointsClickAdjust": "Left click: +1, Right click: -1",
         "shiftClickRankPoints": "Shift+Click: ±0.1, Shift+Ctrl+Click: ±1.0",
-        "shiftClickToChat": "Shift+Click to post to chat",
         "postToChat": "Post to chat",
         "shiftClickToggleRankMode": "GM: Shift+Click to toggle between automatic and manual rank calculation"
       },
@@ -986,15 +861,9 @@
       },
       "ranks": {
         "honorRank": "Honor",
-        "honorPoints": "Honor Points",
         "gloryRank": "Glory",
-        "gloryPoints": "Glory Points",
         "statusRank": "Status Rank",
-        "statusPoints": "Status Points",
-        "shadowRank": "Shadowland Taint",
-        "shadowPoints": "Shadow Points",
-        "insightRank": "Insight Rank",
-        "insightPoints": "Insight Points"
+        "shadowRank": "Shadowland Taint"
       },
       "stance": {
         "title": "Combat",
@@ -1012,20 +881,13 @@
         "adjustExperience": "Adjust Experience",
         "experienceSummary": "Experience Summary",
         "usedTotal": "Used / Total",
-        "poolChanges": "Pool Changes",
-        "when": "When",
-        "none": "No entries",
         "purchases": "Purchases",
-        "xpLog": "XP Log",
         "traitChange": "{label} {from}→{to}",
         "voidChange": "Void {from}→{to}",
         "skillCreate": "{name} 0→{rank}",
         "skillChange": "{name} {from}→{to}",
         "recalculateTooltip": "Recalculate XP purchases from current character state",
-        "recalculateSuccess": "XP purchases recalculated successfully",
-        "recalculateFailed": "Failed to recalculate XP purchases",
         "disadvantageCapLabel": "Max XP",
-        "disadvantageCapTitle": "Set Disadvantage Cap",
         "disadvantageCapTooltip": "Click to change the maximum XP gained from disadvantages",
         "breakdown": {
           "base": "Base",
@@ -1041,15 +903,12 @@
           "spells": "Spells"
         },
         "fallbackLabels": {
-          "advantage": "Advantage",
-          "disadvantage": "Disadvantage",
           "traitIncrease": "Trait Increase",
           "voidIncrease": "Void Increase",
           "skillCreated": "Skill Created",
           "skillIncreased": "Skill Increased"
         },
-        "spellMemorized": "Memorized: {name}",
-        "trackingFailed": "XP tracking failed for {action}: {item}. Contact GM if this persists."
+        "spellMemorized": "Memorized: {name}"
       }
     },
     "equipment": {
@@ -1141,10 +1000,8 @@
           "other": "Other"
         },
         "additionalBlood": "Additional Blood",
-        "castMaho": "Cast Maho Spell",
         "mahoCasting": "Maho Casting",
         "bloodCost": "Blood",
-        "freeRaises": "Free Raises",
         "taintGained": "Taint Gained",
         "taintGainedNotification": "Gained {taint} points of Shadowlands Taint from maho casting"
       },
@@ -1153,16 +1010,10 @@
         "karmic": "Karmic",
         "martial": "Martial",
         "mystic": "Mystic"
-      },
-      "techniques": {
-        "single": "Technique",
-        "plural": "Techniques"
       }
     },
     "system": {
       "migration": {
-        "itemTypeChangeInfo": "L5R4: migrated {count} Item(s) from \"commonItem\" to \"item\".",
-        "itemTypeChangeError": "L5R4: Item type migration failed. See console for details.",
         "iconsUpdated": "L5R4 Migration: Updated {count} world image path(s).",
         "compendiumIconsUpdated": "L5R4 Migration (Compendia): Updated {count} image path(s)."
       },
@@ -1181,10 +1032,6 @@
     }
   },
   "SETTINGS": {
-    "allowArmorStacking": {
-      "name": "Allow armor stacking",
-      "label": "Multiple pieces of \"armor\" can be stacked (to represent buffs, etc.)"
-    },
     "LtException": {
       "name": "Apply Little Truths exception",
       "label": "When dice keep is reduced below 10 by conversion, add 2."
@@ -1200,10 +1047,6 @@
     "runMigration": {
       "name": "Run migrations on startup",
       "label": "If enabled, pending data migrations will run the next time the world loads. Disable to skip migrations for troubleshooting."
-    },
-    "lastMigratedVersion": {
-      "name": "Last migrated version",
-      "label": "Internal. Do not change."
     },
     "forceMigration": {
       "name": "Force migration on startup",

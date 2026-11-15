@@ -78,9 +78,28 @@ Reviewed 2026-11-12 (`gh issue list --state all`, `gh pr list --state all`). Eac
 | #33 | Request: a setting for 3rd Edition rules (stances) | Open question for Ernie; not planned until decided |
 | PR #25 | "Packs": compendium databases on branch `release/3.2.0`, with rulebook text in spell and advantage entries | Not mergeable as is (CLAUDE.md **Licensed material**); Stage 15 builds new packs without book text and uses it only as a list of entries. Ernie decides whether to close it and delete the branch |
 | No issue yet | Code comments on `main` repeat rulebook wording: `skill-formulas.js`, `tn-calculator.js`, `bow-damage.js`, `chat-damage-buttons.js`, `melee-damage.js`, and `tests/quench/workflows/melee-damage-strength.js` (12-word runs matched against `game-rules/`, 2026-11-12) | Stage 19 book-text sweep: rewritten in own words with page citations, as its own commit |
-| No issue yet | Probable bugs read from the code (B1-B12): bonuses counted twice, Raise and Void limits, damage button, inline rolls, Prone automation | `AUTOMATION.md` §2 assigns each a stage; each gets an issue once reproduced |
+| No issue | Probable bugs read from the code (B1-B12): bonuses counted twice, Raise and Void limits, damage button, inline rolls, Prone automation | Fixed in the stages `AUTOMATION.md` §2 names; B11's unread Insight bonus field is #75 |
+| #75 | Skill Insight bonus field shown but never counted (p.104) | Found by the Stage 16 sweep; Ernie, 2026-11-14: remove the field, with a migration, as its own change |
 | Closed #5, #7-#15, #32, #34 | Rule bugs fixed in 2.x-3.2 | Stage 13: each has a regression test that names it, in Vitest (#5, #7, #10, #14, #32, #34) or `tests/quench/regressions.js` (#8, #9, #11, #12, #13, #15) |
 | Closed #3 | Firefox right-click context menus | No item menu since v3.0.0; its unused module is deleted in Stage 4 (Decision 1) |
+
+## Not planned
+
+Out of 4.0.0, each recorded by the stage that set it aside. The coverage manifest marks the pages of these
+topics `out` (Stage 16).
+
+| Item | Recorded in |
+|------|-------------|
+| Mass battle (pp.236-241) | Stages 10, 13, 15, 18 |
+| A 3rd Edition rules option (#33) | Stage 13 |
+| Shadowlands Powers and Mutations as items (pp.274-284); the GM picks them | Stage 15 |
+| Content beyond the Core Rulebook; translated pack entry names | Stage 15 |
+| Shops and loot | Stages 14, 15 |
+| Combat tracker UI changes | Stage 5 |
+| A visual redesign or new visual direction; new accessibility rules | Stages 6, 17 (decision 9) |
+| Renaming names worlds store | Stage 17 (decision 2) |
+| Changes to the separate `l5r4-migrator` module, unless Ernie asks | Stage 12 |
+| New features | Stage 19: after 4.0.0 |
 
 ## Cross-stage decisions
 

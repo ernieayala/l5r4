@@ -72,6 +72,12 @@ Stage 18 playtest run first.
   `world-upgrade` batch.
 - On a Foundry 13 install that has 3.2.1, the update check reports 4.0.0 as incompatible (its `minimum` is 14.370)
   and 3.2.1 keeps working.
+- A world that released 3.2.1 saved on that Foundry 13 install, with a world compendium of Items, opens in 4.0.0
+  on 14.370 and the `world-upgrade` batch passes; the fixture world (Stage 12) is built from the 3.2.1 code, never
+  saved by Foundry 13. Written here by the Stage 16 sweep.
+- The setup screen's Game Systems list shows 4.0.0 as verified for 14.370, and the `animations` batch passes with
+  the free JB2A collection as well as the Patreon one (Stage 12 ran Patreon only). Written here by the Stage 16
+  sweep.
 
 ## Decisions
 

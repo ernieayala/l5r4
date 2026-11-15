@@ -246,6 +246,14 @@ export function registerTableToolsBatch(quench) {
                 row.querySelector(".l5r4-effect-panel-lasts").textContent,
                 game.i18n.localize("l5r4.ui.effectPanel.noEnd")
               );
+              // A status has no source, so its own sheet opens
+              const source = await fromUuid(row.dataset.sourceUuid);
+              row.querySelector("[data-action='openSource']").click();
+              assert.isTrue(
+                await waitFor(() => source.sheet?.rendered),
+                "the source's sheet opens"
+              );
+              await source.sheet.close({ animate: false });
               row.querySelector("[data-action='removeEffect']").click();
               assert.isTrue(await waitFor(() => !actor.statuses.has("dazed")), "removed");
             } finally {

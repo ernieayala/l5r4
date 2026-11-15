@@ -46,6 +46,33 @@ describe("lang/en.json covers every key the system uses", () => {
     expect([...new Set(missing)]).toEqual([]);
   });
 
+  it("holds no key the system never uses (roadmap/STAGE-16)", async () => {
+    const text = sources.map(({ text }) => text).join("\n");
+    // A key built at runtime: "prefix." + x, `prefix.${x}`, or Handlebars (concat "prefix." x)
+    const prefixes = [
+      ...text.matchAll(/[`"']([A-Za-z0-9_]+\.[A-Za-z0-9_.]*\.)(?:\$\{|["']\s*\+)/g),
+      ...text.matchAll(/\(concat ["']([A-Za-z0-9_]+\.[A-Za-z0-9_.]*\.)["']/g)
+    ].map(([, prefix]) => prefix);
+    // Core labels each declared subtype with TYPES.<Document>.<subtype>
+    const { documentTypes } = JSON.parse(await readFile(new URL("system.json", root), "utf8"));
+    const types = Object.entries(documentTypes).flatMap(([doc, subtypes]) =>
+      Object.keys(subtypes).map(type => `TYPES.${doc}.${type}`)
+    );
+    const leaves = (node, path) =>
+      typeof node === "string"
+        ? [path]
+        : Object.entries(node).flatMap(([key, child]) =>
+            leaves(child, path ? `${path}.${key}` : key)
+          );
+    const unused = leaves(lang, "").filter(
+      key =>
+        !text.includes(key) &&
+        !prefixes.some(prefix => key.startsWith(prefix)) &&
+        !types.includes(key)
+    );
+    expect(unused).toEqual([]);
+  });
+
   it("defines the group under every key built from a template literal", () => {
     const missing = sources.flatMap(({ path, text }) =>
       [...text.matchAll(/`(l5r4\.[A-Za-z0-9_.]+)\.\$\{/g)]

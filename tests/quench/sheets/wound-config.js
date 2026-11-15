@@ -43,7 +43,7 @@ export function registerWoundConfigTests(quench) {
 
         afterEach(async () => {
           if (dialog?.rendered) {
-            await dialog.close();
+            await dialog.close({ animate: false });
           }
           if (actor) {
             await actor.delete();
@@ -108,7 +108,7 @@ export function registerWoundConfigTests(quench) {
 
         afterEach(async () => {
           if (dialog?.rendered) {
-            await dialog.close();
+            await dialog.close({ animate: false });
           }
           if (actor) {
             await actor.delete();
@@ -152,7 +152,7 @@ export function registerWoundConfigTests(quench) {
 
         afterEach(async () => {
           if (dialog?.rendered) {
-            await dialog.close();
+            await dialog.close({ animate: false });
           }
           if (npc) {
             await npc.delete();
@@ -207,7 +207,7 @@ export function registerWoundConfigTests(quench) {
 
         afterEach(async () => {
           if (dialog?.rendered) {
-            await dialog.close();
+            await dialog.close({ animate: false });
           }
           if (npc) {
             await npc.delete();
@@ -251,7 +251,7 @@ export function registerWoundConfigTests(quench) {
 
         afterEach(async () => {
           if (dialog?.rendered) {
-            await dialog.close();
+            await dialog.close({ animate: false });
           }
           if (actor) {
             await actor.delete();
@@ -269,7 +269,7 @@ export function registerWoundConfigTests(quench) {
         it("should close when requested", async () => {
           assert.isTrue(dialog.rendered, "Dialog is open");
 
-          await dialog.close();
+          await dialog.close({ animate: false });
 
           await new Promise(resolve => setTimeout(resolve, 100));
 
@@ -279,7 +279,7 @@ export function registerWoundConfigTests(quench) {
         it("should not leak after close", async () => {
           const _dialogId = dialog.id;
 
-          await dialog.close();
+          await dialog.close({ animate: false });
 
           // Dialog should be cleaned up
           assert.isFalse(dialog.rendered, "Dialog not rendered");
@@ -304,7 +304,7 @@ export function registerWoundConfigTests(quench) {
 
         afterEach(async () => {
           if (dialog?.rendered) {
-            await dialog.close();
+            await dialog.close({ animate: false });
           }
           if (actor) {
             await actor.delete();

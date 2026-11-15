@@ -1,7 +1,6 @@
 import { SYS_ID } from "../../module/config/constants.js";
 import { SkillRoll } from "../../module/services/dice/rolls/skill-roll.js";
 import { TraitRoll } from "../../module/services/dice/rolls/trait-roll.js";
-import { applyConditionFromMessage } from "../../module/services/dice/check/chat-actions.js";
 import { applyEffect, effectsOf } from "../../module/services/effects/apply.js";
 import { onPromptClick } from "../../module/services/effects/prompts.js";
 import { registerTokenEffects, syncProne } from "../../module/services/effects/automation.js";
@@ -295,9 +294,10 @@ export function registerEffectsBatch(quench) {
               message.system.conditions.map(c => c.condition),
               ["dazed"]
             );
-            await applyConditionFromMessage(message, 0);
-            const targetActor = token.actor;
-            assert.isTrue(targetActor.statuses.has("dazed"));
+            // The card's button, as the player clicks it
+            const html = await message.renderHTML();
+            html.querySelector('[data-action="apply-condition"][data-index="0"]').click();
+            assert.isTrue(await waitFor(() => token.actor.statuses.has("dazed")));
           } finally {
             canvas.tokens.setTargets([]);
             await token.delete();

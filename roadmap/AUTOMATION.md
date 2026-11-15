@@ -48,7 +48,8 @@ and three flags (`attackBonus`, `damageBonus`, `fearRank`).
 | Items | Skill bonus fields, weapon and armor stats, spell mastery, XP costs, family and school Trait bonus | Rules on advantages, techniques, kata, kiho, tattoos, spells |
 | Resources | Void Points, spell slots, XP ledger, Honor/Glory/Status/Taint tracks | Per-round Void limit, use counters, ledger hooks |
 
-Probable bugs read from the code, not yet reproduced in play (each gets an issue once reproduced):
+Probable bugs read from the code when the roadmap was written. Each is fixed in the stage named, except B11's
+Insight bonus field, which is #75 (Stage 16 sweep):
 
 | # | Finding | Code | Stage |
 |---|---------|------|-------|
@@ -56,14 +57,14 @@ Probable bugs read from the code, not yet reproduced in play (each gets an issue
 | B2 | Skilled weapon attack: a skill keep bonus is added to rolled and kept dice more than once | `module/utils/mechanics.js:364`, `roll-handler.js:362` | 8 (fixed) |
 | B3 | Full Attack +2k1 applied twice on unskilled and NPC attacks | `roll-handler.js:264-273, 396-397`, `simple-roll.js:228-235` | 8 (fixed) |
 | B4 | PC initiative reads Insight Rank before it is recomputed | `module/documents/actor/preparation/pc-preparation.js:86`, `:216` | 5 (fixed) |
-| B5 | Manual `actor.prepareData()` calls re-apply effects | `module/sheets/pc-sheet.js:430, 633`, `module/services/stance/rolls/full-defense-roll.js:137` | 2 |
-| B6 | Derived values written back to storage bake effect bonuses in | `chat-damage-buttons.js:63-66`, `void-manager.js:191, 274-276`, `spell-cast-roll.js:252` | 3 |
+| B5 | Manual `actor.prepareData()` calls re-apply effects | `module/sheets/pc-sheet.js:430, 633`, `module/services/stance/rolls/full-defense-roll.js:137` | 2 (fixed) |
+| B6 | Derived values written back to storage bake effect bonuses in | `chat-damage-buttons.js:63-66`, `void-manager.js:191, 274-276`, `spell-cast-roll.js:252` | 3 (fixed) |
 | B7 | Unskilled rolls allow Raises; Void spendable on damage; Raise cap from current Void Points | `skill-roll.js:221-238, 272-274`, `weapon-roll.js:120-130` | 8 (fixed) |
 | B8 | Damage button omits Strength and the arrow modifier | `skill-roll.js:322-331`, `simple-roll.js:336-349` | 10 (fixed) |
 | B9 | Inline `[[XkY]]` chat rolls pass an object to `String.replace` | `module/services/chat.js:333-334, 359` | 8 (fixed) |
 | B10 | Prone automation runs on every client and is never removed | `wound-prone-automation.js:44-172` | 9 (fixed) |
-| B11 | `explodesOn`, `insightBonus`, technique `rank` shown but never read (#37) | `templates/item/_type-modifiers/weapon.hbs:16-18` | 8 (`explodesOn` fixed); `insightBonus` and technique `rank` in 13 |
-| B12 | `ACTIVE_EFFECTS.md` documents keys that change nothing (item keys, `system.xp`, Insight) | `ACTIVE_EFFECTS.md:166-228` | 3 |
+| B11 | `explodesOn`, `insightBonus`, technique `rank` shown but never read (#37) | `templates/item/_type-modifiers/weapon.hbs:16-18` | 8 (`explodesOn` fixed); `insightBonus` is #75; technique `rank` is the printed Rank, which `packs:verify` checks (Stage 15) |
+| B12 | `ACTIVE_EFFECTS.md` documents keys that change nothing (item keys, `system.xp`, Insight) | `ACTIVE_EFFECTS.md:166-228` | 7 (fixed: rewritten as the rules guide) |
 
 ## 3. Rule vocabulary for L5R 4e
 
@@ -125,20 +126,25 @@ be merged.
 
 Found while surveying; each needs a ruling before the stage that automates it (CLAUDE.md **Ask Ernie when**).
 
-| # | Question | Pages |
-|---|----------|-------|
-| Q1 | Monk starting Status and Glory differ between two passages | 95, 231 |
-| Q2 | A fractional Honor (e.g. 6.5) as a roll input: rank 6? Rounding for half Honor | 90, 252 |
-| Q3 | Does the Weakness Disadvantage lower the Ring derived from the weakened Trait? | 162 |
-| Q4 | Blind's replacement Armor TN: stacking order with armor and stance | 89, 157 |
-| Q5 | War Fan Mastery 7 and 5: do the bonuses stack? | 143 |
-| Q6 | Ichiro Rank 3 grants Reduction in "Ranks" with no unit | 216 |
-| Q7 | Scorpion Instigator Rank 1 uses an Honor difference: signed or absolute? | 250 |
-| Q8 | Kakita Rank 1 adds School Rank: to which value? | 109 |
-| Q9 | Hiruma Rank 5's "two attacks in a row" wording | 108 |
-| Q10 | No Pure Breaths (maho) damage wording | 273 |
-| Q11 | The "Ninja" weapon keyword is used but not defined | 204 |
+Status as of Stage 16 (2026-11-14). "With the table" means the system computes nothing that depends on the answer:
+the pack entry records `partial` or `none` coverage with a summary (Stage 15 decision 9), so the GM reads the
+book. Such a question blocks no stage; it needs an answer only if a later change automates that rule.
 
-Transcription gaps to fix in `game-rules/` against the PDF before the stage that needs them: the Battle Table
-(p.240), the crafting tables (p.258), missing page markers for pp.282-283 in `89_shadowlands_taint.md`, and the
-Advantages after Silent that landed in `65_disadvantages.md`.
+| # | Question | Pages | Status |
+|---|----------|-------|--------|
+| Q1 | Monk starting Status and Glory differ between two passages | 95, 231 | Open, with the table: no starting Status or Glory is set for monks (Stage 16 decision 6) |
+| Q2 | A fractional Honor (e.g. 6.5) as a roll input: rank 6? Rounding for half Honor | 90, 252 | Answered for roll inputs: the stored rank (Stage 11 decision 10). Halving Honor stays with the table |
+| Q3 | Does the Weakness Disadvantage lower the Ring derived from the weakened Trait? | 162 | Answered: yes; the entry's TraitAdjust lowers the Trait, and the Ring follows it (p.76) (Ernie, 2026-11-14) |
+| Q4 | Blind's replacement Armor TN: stacking order with armor and stance | 89, 157 | Answered (Stage 9 decision 3) |
+| Q5 | War Fan Mastery 7 and 5: do the bonuses stack? | 143 | Open, with the table: the War Fan Skill entry is `partial` |
+| Q6 | Ichiro Rank 3 grants Reduction in "Ranks" with no unit | 216 | Open, with the table: the Ichiro technique entries are `none` |
+| Q7 | Scorpion Instigator Rank 1 uses an Honor difference: signed or absolute? | 250 | Open, with the table: The Depths of Dishonor is `none` |
+| Q8 | Kakita Rank 1 adds School Rank: to which value? | 109 | Answered: the attack or Focus roll's total, as The Way of the Crane is built (Ernie, 2026-11-14) |
+| Q9 | Hiruma Rank 5's "two attacks in a row" wording | 108 | Open, with the table: Daylight Wastes No Movement is `none` |
+| Q10 | No Pure Breaths (maho) damage wording | 273 | Open, with the table: spells are `none` |
+| Q11 | The "Ninja" weapon keyword is used but not defined | 204 | Open, with the table: the Ninja-to entry is `partial` |
+
+Transcription gaps to fix in `game-rules/` against the PDF before a stage needs them: the Battle Table (p.240,
+mass battle, not planned) and the crafting tables (p.258, with the table). Pages with no marker (pp.51, 54,
+72-73, 96-97, 208-209, 282-283, 385-388) are full-page art with no text (checked 2026-11-14), and the Advantages after
+Silent are in `64_advantages.md`.

@@ -4,7 +4,7 @@
 post damage, apply conditions, and test Fear from any journal, item description, or chat message; a GM request card
 each player rolls from with their own character; an effect panel; hotbar macros; and floating Wound and Void numbers
 on tokens.
-**Needs:** 13. It ships in 4.0.0 and runs before the coverage audit (16) and playtest (17), so they cover its
+**Needs:** 13. It ships in 4.0.0 and runs before the coverage audit (16) and playtest (18), so they cover its
 actions, settings, and links.
 
 Each tool routes to a flow an earlier stage built and computes no rule itself. pf2e

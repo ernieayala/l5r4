@@ -41,7 +41,7 @@ export function registerEmphasisManagerTests(quench) {
 
         afterEach(async () => {
           if (dialog?.rendered) {
-            await dialog.close();
+            await dialog.close({ animate: false });
           }
           if (skillItem) {
             await skillItem.delete();
@@ -137,7 +137,7 @@ export function registerEmphasisManagerTests(quench) {
 
         afterEach(async () => {
           if (dialog?.rendered) {
-            await dialog.close();
+            await dialog.close({ animate: false });
           }
           if (skillItem) {
             await skillItem.delete();
@@ -218,7 +218,7 @@ export function registerEmphasisManagerTests(quench) {
             assert.isTrue(dialog.rendered, "Dialog renders without errors");
           } finally {
             if (dialog?.rendered) {
-              await dialog.close();
+              await dialog.close({ animate: false });
             }
             await itemNoEmphases.delete();
           }
@@ -274,7 +274,7 @@ export function registerEmphasisManagerTests(quench) {
 
         afterEach(async () => {
           if (dialog?.rendered) {
-            await dialog.close();
+            await dialog.close({ animate: false });
           }
           if (skillItem) {
             await skillItem.delete();
@@ -390,7 +390,7 @@ export function registerEmphasisManagerTests(quench) {
 
         afterEach(async () => {
           if (dialog?.rendered) {
-            await dialog.close();
+            await dialog.close({ animate: false });
           }
           if (skillItem) {
             await skillItem.delete();
@@ -513,7 +513,7 @@ export function registerEmphasisManagerTests(quench) {
 
         afterEach(async () => {
           if (dialog?.rendered) {
-            await dialog.close();
+            await dialog.close({ animate: false });
           }
           if (skillItem) {
             await skillItem.delete();
@@ -605,7 +605,7 @@ export function registerEmphasisManagerTests(quench) {
 
         afterEach(async () => {
           if (dialog?.rendered) {
-            await dialog.close();
+            await dialog.close({ animate: false });
           }
           if (skillItem) {
             await skillItem.delete();

@@ -1,12 +1,13 @@
 /**
  * Maho Casting Roll Service
  *
- * Blood magic through the roll pipeline (module/services/dice/check/roll-check.js):
- * - Casting Roll: (Insight Rank + Ring)k(Ring) against TN 5 + 5 × Mastery Level
- * - Blood cost: 2 × Mastery Level Wounds, paid before the roll whatever its result
- * - One Free Raise per additional full blood cost paid
- * - Taint on a successful cast: Mastery Level - 1, at least 1
- * - Master of Blood (its RollOption): 1 Wound less, Taint reduced by the Earth Ring, at least 1
+ * Blood magic through the roll pipeline (module/services/dice/check/roll-check.js), Core Rulebook pp.267-268
+ * (`game-rules/88_maho.md`):
+ * - Casting Roll: (Insight Rank + Ring)k(Ring) against TN 5 + 5 × Mastery Level (p.267)
+ * - Blood cost: 2 × Mastery Level Wounds, paid before the roll whatever its result (p.268)
+ * - One Free Raise per additional full blood cost paid (p.268)
+ * - Taint on a successful cast: Mastery Level - 1, at least 1 (p.268)
+ * - Master of Blood (its RollOption): 1 Wound less, Taint reduced by the Earth Ring, at least 1 (p.280)
  * - No spell slot
  *
  * @module services/dice/rolls/maho-cast-roll

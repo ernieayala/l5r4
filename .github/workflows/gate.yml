@@ -42,3 +42,8 @@ jobs:
 
       - name: Compendium packs
         run: npm run build:packs
+
+      # Citations, actions, settings, and pack entries against tools/coverage/manifest.json; the page check needs
+      # game-rules/, which is not in the repo, and runs locally (roadmap/STAGE-16 decision 3)
+      - name: Coverage
+        run: npm run coverage:check

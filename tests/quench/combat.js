@@ -235,6 +235,40 @@ export function registerCombatBatch(quench) {
         );
 
         it(
+          "the hit's Damage button rolls its damage; Apply to selected applies it to the selected token",
+          clean(async function () {
+            if (!canvas.scene) {
+              this.skip();
+            }
+            const { actor, katana } = await attacker();
+            const target = await defender();
+            const hit = await attack(actor, katana, target);
+            const damageOf = () =>
+              game.messages.contents.find(m => m.type === "roll" && m.system.attackOf === hit.id);
+            // Shift-click skips the damage options, as on the card
+            (await hit.renderHTML())
+              .querySelector("[data-action='check-damage']")
+              .dispatchEvent(
+                new MouseEvent("click", { bubbles: true, cancelable: true, shiftKey: true })
+              );
+            assert.isTrue(await waitFor(damageOf), "the damage roll posted");
+            assert.equal(damageOf().system.outcome.total, 18, "6k2 of nines");
+
+            const data = (await target.getTokenDocument({ x: 0, y: 0 })).toObject();
+            const [token] = await canvas.scene.createEmbeddedDocuments("Token", [data]);
+            try {
+              await waitFor(() => token.object);
+              token.object.control({ releaseOthers: true });
+              await click(damageOf(), "[data-action='damage-apply-selected']");
+              assert.isTrue(await waitFor(() => token.actor._source.system.suffered === 18));
+            } finally {
+              canvas.tokens.releaseAll();
+              await token.delete();
+            }
+          })
+        );
+
+        it(
           "a miss has no damage button",
           clean(async () => {
             const { actor, katana } = await attacker();
@@ -413,9 +447,14 @@ export function registerCombatBatch(quench) {
             assert.include(hit.content, "combat-contest");
             const damage = await rollDamageFromAttack(hit, { askForOptions: false });
             assert.equal(`${damage.system.pool.roll}k${damage.system.pool.keep}`, "2k1");
+            const winner = game.i18n.format("l5r4.ui.check.contestWinner", { name: actor.name });
             const stop = autoAnswerRolls();
             try {
-              await rollContest(hit);
+              // The card's Contested Strength button
+              await click(hit, "[data-action='combat-contest']");
+              assert.isTrue(
+                await waitFor(() => game.messages.contents.at(-1).content.includes(winner))
+              );
             } finally {
               stop();
             }
@@ -512,8 +551,18 @@ export function registerCombatBatch(quench) {
             assert.include(hit.content, "grapple-start");
             assert.notInclude(hit.content, "check-damage", "starting a grapple deals no damage");
 
-            const card = await startGrapple(hit);
-            assert.isTrue(actor.statuses.has("grappled") && target.statuses.has("grappled"));
+            // The card's Start grapple button; the grapple's flow card is the first posted after it
+            const before = game.messages.size;
+            await click(hit, "[data-action='grapple-start']");
+            const flowCard = () =>
+              game.messages.contents.slice(before).find(m => m.getFlag(SYS_ID, "flow"));
+            assert.isTrue(
+              await waitFor(
+                () =>
+                  flowCard() && actor.statuses.has("grappled") && target.statuses.has("grappled")
+              )
+            );
+            const card = flowCard();
             const stop = autoAnswerRolls();
             try {
               await click(card, "[data-flow-action='control'][data-side='1']");

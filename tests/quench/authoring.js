@@ -301,6 +301,21 @@ export function registerAuthoringBatch(quench) {
               sheet.element.querySelector(".rule-error"),
               "the rule is valid as authored"
             );
+            // A second rule (valid as added: selector "any") deleted again leaves the first
+            sheet.element.querySelector("[data-rule-key]").value = "RollModifier";
+            const second = nextUpdate(technique);
+            sheet.element.querySelector('[data-action="rulesAdd"]').click();
+            await second;
+            await sheet.render();
+            const removed = nextUpdate(technique);
+            sheet.element
+              .querySelector('[data-rule-index="1"] [data-action="rulesDelete"]')
+              .click();
+            await removed;
+            assert.deepEqual(
+              technique._source.system.rules.map(rule => rule.selector),
+              ["skill:kenjutsu"]
+            );
             await sheet.close();
 
             assert.equal(checkEffects(actor, "skill", { skill: "kenjutsu" }).roll, 1);

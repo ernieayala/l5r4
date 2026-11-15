@@ -33,6 +33,8 @@
     "deps:circular": "madge --circular module/",
     "build:packs": "node --disable-warning=MODULE_TYPELESS_PACKAGE_JSON tools/packs.mjs",
     "packs:verify": "node tools/packs-verify.mjs",
+    "coverage": "node --disable-warning=MODULE_TYPELESS_PACKAGE_JSON tools/coverage/index.mjs",
+    "coverage:check": "node --disable-warning=MODULE_TYPELESS_PACKAGE_JSON tools/coverage/index.mjs --check",
     "deps:analyze": "madge --summary module/ && madge --json module/ > madge-analysis.json",
     "release:prepare": "node scripts/prepare-release.js",
     "release:validate": "node scripts/prepare-release.js --validate-only",

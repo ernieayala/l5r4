@@ -13,7 +13,8 @@
  *
  */
 
-import { SYS_ID, MIGRATION_FLAG } from "../../../module/config/constants.js";
+import { SYS_ID, MIGRATION_FLAG, PATHS } from "../../../module/config/constants.js";
+import { runIconPathMigration } from "../../../module/setup/migrations/icons/icon-paths.js";
 import { createTestPC, createTestNPC } from "../../fixtures/actor-fixtures.js";
 import { hasBeenMigrated, markAsMigrated } from "../../../module/setup/migrations/utils/helpers.js";
 
@@ -244,6 +245,29 @@ export function registerMigrationEdgeCaseTests(quench) {
 
           // ASSERT
           assert.equal(actor.img, customIcon, "Icon preserved across migrations");
+        });
+      });
+
+      describe("runMigration setting (roadmap/STAGE-16)", () => {
+        it("the icon migration leaves a legacy icon while it is off and moves it once it is on", async () => {
+          const legacy = `${PATHS.icons}/attackstance.png`;
+          const actor = await createTestPC({ name: "Icon migration PC", img: legacy });
+          const saved = game.settings.get(SYS_ID, "runMigration");
+          try {
+            await game.settings.set(SYS_ID, "runMigration", false);
+            await runIconPathMigration();
+            assert.equal(actor.img, legacy, "off: left alone");
+            await game.settings.set(SYS_ID, "runMigration", true);
+            await runIconPathMigration();
+            assert.equal(
+              actor.img,
+              `${PATHS.icons}/attack-stance.webp`,
+              "on: moved to the WebP icon"
+            );
+          } finally {
+            await game.settings.set(SYS_ID, "runMigration", saved);
+            await actor.delete();
+          }
         });
       });
 

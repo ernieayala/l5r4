@@ -35,7 +35,6 @@
           "failure": "Fehlschlag",
           "missed": "Verfehlt",
           "explodesOn": "Explodiert Bei",
-          "withEmphasis": "mit Schwerpunkt",
           "unskilled": "Ungeübt",
           "traitRoll": "Eigenschaftswurf",
           "ringRoll": "Ringwurf",
@@ -43,34 +42,16 @@
           "damageRoll": "Schadenswurf",
           "attackRoll": "Angriffswurf",
           "spellCasting": "Zauberspruch Wurf",
-          "castSpell": "{spell} wirken ({ring})",
-          "castMaho": "Maho wirken: {spell} ({ring})",
-          "unskilledRoll": "Ungeübter Wurf",
           "emphasis": "Schwerpunkt",
           "raise": "Erhöhung",
           "raises": "Erhöhungen",
           "freeRaises": "Freie Erhöhungen",
-          "automatic": "Automatisch",
-          "formula": "Formel",
-          "result": "Ergebnis",
           "socialResistance": "Sozialer Widerstand",
           "socialResistanceDescription": "Einschüchterung oder Versuchung widerstehen"
         },
-        "notifications": {
-          "itemCreated": "{type} erstellt: {name}",
-          "itemDeleted": "{type} gelöscht: {name}",
-          "itemUpdated": "{type} aktualisiert: {name}",
-          "woundConfigFailed": "Fehler beim Öffnen der Wundenkonfiguration",
-          "woundConfigUpdateFailed": "Fehler beim Aktualisieren der Wundenkonfiguration",
-          "invalidWoundConfigValue": "Ungültiger Wundenkonfigurationswert"
-        },
         "combat": {
           "attack": "Angriff",
-          "melee": "Nahkampf",
-          "ranged": "Fernkampf",
-          "multiplier": "Multiplikator",
           "woundPenalty": "Wundenstrafe",
-          "armorTnBonus": "Rüstungs-SZ Bonus",
           "targeting": {
             "vs": "vs",
             "multipleTargets": "Ziele - SZ nicht automatisch gesetzt"
@@ -122,19 +103,12 @@
           "noVoidPoints": "Keine Leere-Punkte verfügbar, um Schaden zu reduzieren"
         },
         "stances": {
-          "pending": "Ausstehend",
           "attack": "Angriffshaltung",
           "fullAttack": "Voller Angriff",
           "defense": "Verteidigungshaltung",
           "fullDefense": "Volle Verteidigung",
           "center": "Zentrierte Haltung",
-          "fullDefenseDescription": "Mache einen Verteidigungs-/Reflexwurf. Addiere die Hälfte des Ergebnisses (aufgerundet) zu deinem Rüstungs-SZ für die Dauer dieser Haltung.",
-          "cannotAttackDefense": "Kann nicht angreifen in Verteidigungshaltung",
-          "fullAttackBonus": "Voller Angriff: +2k1"
-        },
-        "mounted": {
-          "fullAttackRestriction": "Voller Angriff erfordert Reiten 3+, wenn beritten",
-          "attackBonus": "Beritten/Höhere Position: +1k0"
+          "fullDefenseDescription": "Mache einen Verteidigungs-/Reflexwurf. Addiere die Hälfte des Ergebnisses (aufgerundet) zu deinem Rüstungs-SZ für die Dauer dieser Haltung."
         },
         "fear": {
           "fearRank": "Furchtrang",
@@ -142,26 +116,20 @@
           "effectName": "Furcht {rank}",
           "clickToTest": "Klicken, um Furcht gegen ausgewählte Charaktere zu testen",
           "testResult": "Furcht {rank} Test",
-          "testSuccess": "Furcht {rank} widerstanden",
-          "testFailure": "Furcht {rank} Test fehlgeschlagen",
           "penaltyApplied": "Strafe: -{penalty}k0 auf alle Würfe",
           "catastrophicFailure": "KATASTROPHALER FEHLSCHLAG! Charakter flieht oder kauert sich hilflos zusammen.",
           "noTargets": "Keine Spielsteine für Furchttest ausgewählt",
           "noWillpower": "{character} hat keine Willenskraft-Eigenschaft",
           "noFear": "Dieser NSC hat keinen Furchteffekt konfiguriert",
-          "testAgainst": "vs {creature}",
-          "rollFailed": "Furchttest-Wurf fehlgeschlagen - ungültige Formel oder beschädigte Daten",
-          "templateFailed": "Furchttest-Chat-Vorlage konnte nicht gerendert werden"
+          "testAgainst": "vs {creature}"
         }
       },
       "common": {
         "roll": "Würfeln",
         "cancel": "Abbrechen",
         "ok": "OK",
-        "add": "Hinzufügen",
         "none": "Keine",
         "keep": "Behalten",
-        "raise": "Erhöhung",
         "init": "Initiative",
         "bonus": "Bonus",
         "mod": "Modifikator",
@@ -169,21 +137,13 @@
         "rate": "Rate",
         "current": "Aktuell",
         "total": "Gesamt",
-        "left": "übrig",
-        "close": "Schließen",
-        "apply": "Anwenden",
-        "toChat": "In Chat",
         "effect": "Effekt",
         "simple": "Einfach",
-        "complex": "Komplex",
         "free": "Frei",
         "action": "Aktion",
         "edit": "Bearbeiten",
         "delete": "Löschen",
         "name": "Name",
-        "description": "Beschreibung",
-        "notes": "Notizen",
-        "activeEffects": "Aktive Effekte",
         "conditions": "Zustände",
         "active": "Aktiv",
         "new": "Neu",
@@ -194,7 +154,6 @@
         "school": "Schule",
         "xp": "Erfahrungspunkte",
         "insight": "Einsicht",
-        "skill": "Fertigkeit",
         "damage": "Schaden",
         "type": "Typ",
         "ring": "Ring",
@@ -208,18 +167,13 @@
         "allowStacking": "Rüstungsstapelung Erlauben"
       },
       "emphasisManager": {
-        "title": "Fertigkeitsschwerpunkte Verwalten",
-        "manageFor": "Verfügbare Schwerpunkte Verwalten für",
         "manage": "Schwerpunkte Verwalten",
         "addCustom": "Benutzerdefinierten Schwerpunkt Hinzufügen",
         "custom": "Benutzerdefiniert",
-        "none": "Keine Schwerpunkte verfügbar",
         "help": "Wähle aus, welche Schwerpunkte für diese Fertigkeit verfügbar sind. Trainiere sie auf dem Charakterbogen.",
-        "noEmphases": "Keine Schwerpunkte in der Liste",
-        "limitReached": "Kann nicht mehr als {max} Schwerpunkte bei diesem Fertigkeitsrang trainieren"
+        "noEmphases": "Keine Schwerpunkte in der Liste"
       },
       "wealthManager": {
-        "title": "Vermögensverwaltung",
         "tooltip": "Vermögen Verwalten",
         "currentWealth": "Aktuelles Vermögen",
         "addMoney": "Geld Hinzufügen",
@@ -251,15 +205,12 @@
         "spells": "Zauber",
         "technique": "Technik",
         "techniques": "Techniken",
-        "armors": "Rüstungen",
         "advantage": "Vorteil",
         "advantages": "Vorteile",
         "disadvantage": "Nachteil",
         "disadvantages": "Nachteile",
         "kata": "Kata",
-        "katas": "Katas",
         "kiho": "Kiho",
-        "kihos": "Kihos",
         "tattoo": "Tätowierung",
         "tattoos": "Tätowierungen",
         "equipment": "Ausrüstung",
@@ -269,53 +220,25 @@
         "description": "Beschreibung",
         "woundLevels": "Wundenstufen",
         "spellSlots": "Zauberplätze",
-        "demands": "Anforderungen",
-        "traits": "Eigenschaften",
-        "itemSheetTitle": "Gegenstandsbogen",
-        "xpModal": "Erfahrung"
+        "demands": "Anforderungen"
       },
       "notifications": {
         "actorNotFound": "Akteur für Schadenswurf nicht gefunden",
         "noPermissionDamage": "Du hast keine Berechtigung, Schaden für diesen Akteur zu würfeln",
         "noValidWeapon": "Keine gültige Waffe für Angriffswurf gefunden",
-        "fullDefenseRollFailed": "Volle Verteidigung Wurf fehlgeschlagen. Bitte manuell würfeln.",
         "invalidRingForSpell": "Ungültiger Ring für Zauberplatz: {ring}",
         "noActorForVoid": "Kein Akteur verfügbar, um Leere-Punkte auszugeben",
-        "chatMessageFailed": "Fehler beim Posten des Wurfs im Chat - siehe Konsole für Details",
         "schoolRankZero": "Du kannst keinen Zauber wirken, wenn der Schulrang auf null reduziert ist",
         "deficiencyBlocksCasting": "Mangel in {ring} reduziert deinen Schulrang auf null - kann nicht wirken",
         "noSpellSlots": "Dir sind die Zauberplätze für diesen Ring ausgegangen",
-        "conditionApplyFailed": "Fehler beim Anwenden von {condition} auf {actor}",
-        "invalidSkillName": "Ungültiger Fertigkeitsname angegeben",
-        "invalidDamageValue": "Ungültiger Schadenswert angegeben",
-        "noTargetForSwap": "Kein Ziel für Initiativentausch ausgewählt",
-        "noCombatActive": "Kein aktiver Kampf, um Initiative zu ändern",
-        "notInCombat": "Charakter ist nicht im aktiven Kampf",
         "wealthManagerFailed": "Fehler beim Öffnen der Vermögensverwaltung",
         "conditionManagerFailed": "Fehler beim Öffnen des Zustandsverwalters"
-      },
-      "voidActions": {
-        "title": "Leere-Punkt Aktionen",
-        "enhanceRoll": "Wurf Verbessern (+1k1)",
-        "tempSkill": "Temporäre Fertigkeit Erhalten",
-        "reduceDamage": "Schaden Reduzieren (-10)",
-        "increaseArmorTN": "Rüstungs-SZ Erhöhen (+10)",
-        "swapInitiative": "Initiative Tauschen",
-        "increaseInitiative": "Initiative Erhöhen (+10)",
-        "tempSkillGranted": "Leere-Punkt ausgegeben: Temporären Rang in {skill} erhalten",
-        "damageReduced": "Leere-Punkt ausgegeben: Schaden von {original} auf {reduced} reduziert (-{amount})",
-        "armorTnBonus": "Leere: Rüstungs-SZ +10",
-        "armorTnIncreased": "Leere-Punkt ausgegeben: Rüstungs-SZ für diese Runde um 10 erhöht",
-        "armorTnAlreadyActive": "Rüstungs-SZ Bonus durch Leere-Punkt bereits aktiv",
-        "initiativeSwapped": "Leere-Punkt ausgegeben: {source} hat Initiative mit {target} getauscht",
-        "initiativeIncreased": "Leere-Punkt ausgegeben: Initiative von {oldValue} auf {newValue} erhöht"
       },
       "hints": {
         "leftRightToAdjust": "Links und Rechts zum Anpassen",
         "leftClickPlusRightClickMinus": "Shift+Linksklick: +1, Shift+Rechtsklick: -1",
         "voidPointsClickAdjust": "Linksklick: +1, Rechtsklick: -1",
         "shiftClickRankPoints": "Shift+Klick: ±0.1, Shift+Strg+Klick: ±1.0",
-        "shiftClickToChat": "Shift+Klick, um im Chat zu posten",
         "postToChat": "Im Chat posten"
       },
       "dialogs": {
@@ -398,15 +321,9 @@
       },
       "ranks": {
         "honorRank": "Ehre",
-        "honorPoints": "Ehrenpunkte",
         "gloryRank": "Ruhm",
-        "gloryPoints": "Ruhmespunkte",
         "statusRank": "Statusrang",
-        "statusPoints": "Statuspunkte",
-        "shadowRank": "Schattenland-Verderben",
-        "shadowPoints": "Schattenpunkte",
-        "insightRank": "Einsichtsrang",
-        "insightPoints": "Einsichtspunkte"
+        "shadowRank": "Schattenland-Verderben"
       },
       "stance": {
         "title": "Kampf",
@@ -424,20 +341,13 @@
         "adjustExperience": "Erfahrung Anpassen",
         "experienceSummary": "Erfahrungszusammenfassung",
         "usedTotal": "Verwendet / Gesamt",
-        "poolChanges": "Pool-Änderungen",
-        "when": "Wann",
-        "none": "Keine Einträge",
         "purchases": "Käufe",
-        "xpLog": "EP-Protokoll",
         "traitChange": "{label} {from}→{to}",
         "voidChange": "Leere {from}→{to}",
         "skillCreate": "{name} 0→{rank}",
         "skillChange": "{name} {from}→{to}",
         "recalculateTooltip": "EP-Käufe vom aktuellen Charakterstatus neu berechnen",
-        "recalculateSuccess": "EP-Käufe erfolgreich neu berechnet",
-        "recalculateFailed": "Fehler beim Neuberechnen der EP-Käufe",
         "disadvantageCapLabel": "Max. EP",
-        "disadvantageCapTitle": "Nachteilslimit Festlegen",
         "disadvantageCapTooltip": "Klicken, um die maximalen durch Nachteile erhaltenen EP zu ändern",
         "breakdown": {
           "base": "Basis",
@@ -453,8 +363,6 @@
           "spells": "Zauber"
         },
         "fallbackLabels": {
-          "advantage": "Vorteil",
-          "disadvantage": "Nachteil",
           "traitIncrease": "Eigenschaftserhöhung",
           "voidIncrease": "Leere-Erhöhung",
           "skillCreated": "Fertigkeit Erstellt",
@@ -535,10 +443,8 @@
           "other": "Andere"
         },
         "additionalBlood": "Zusätzliches Blut",
-        "castMaho": "Maho-Zauber Wirken",
         "mahoCasting": "Maho Wirken",
         "bloodCost": "Blut",
-        "freeRaises": "Freie Erhöhungen",
         "taintGained": "Verderben Erhalten",
         "taintGainedNotification": "{taint} Punkte Schattenland-Verderben durch Maho-Wirken erhalten"
       },
@@ -547,16 +453,10 @@
         "karmic": "Karmisch",
         "martial": "Kampf",
         "mystic": "Mystisch"
-      },
-      "techniques": {
-        "single": "Technik",
-        "plural": "Techniken"
       }
     },
     "system": {
       "migration": {
-        "itemTypeChangeInfo": "L5R4: {count} Gegenstand/Gegenstände von \"commonItem\" zu \"item\" migriert.",
-        "itemTypeChangeError": "L5R4: Gegenstandstyp-Migration fehlgeschlagen. Siehe Konsole für Details.",
         "iconsUpdated": "L5R4 Migration: {count} Weltbildpfad(e) aktualisiert.",
         "compendiumIconsUpdated": "L5R4 Migration (Kompendien): {count} Bildpfad(e) aktualisiert."
       },
@@ -573,10 +473,6 @@
     }
   },
   "SETTINGS": {
-    "allowArmorStacking": {
-      "name": "Rüstungsstapelung erlauben",
-      "label": "Mehrere \"Rüstungs\"-Teile können gestapelt werden (um Boni darzustellen, usw.)"
-    },
     "LtException": {
       "name": "Kleine-Wahrheiten-Ausnahme anwenden",
       "label": "Wenn behaltene Würfel durch Umwandlung unter 10 reduziert werden, 2 hinzufügen."
@@ -584,10 +480,6 @@
     "runMigration": {
       "name": "Migrationen beim Start ausführen",
       "label": "Falls aktiviert, werden ausstehende Datenmigrationen beim nächsten Laden der Welt ausgeführt. Deaktivieren, um Migrationen zur Fehlersuche zu überspringen."
-    },
-    "lastMigratedVersion": {
-      "name": "Zuletzt migrierte Version",
-      "label": "Intern. Nicht ändern."
     },
     "forceMigration": {
       "name": "Migration beim Start erzwingen",

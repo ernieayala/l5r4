@@ -133,7 +133,9 @@ export function registerDeprecationsBatch(quench) {
           await actor.update({ "system.traits.str": 3 });
         });
 
-        it("posts an item chat card in each message mode, with that mode's visibility", async () => {
+        it("posts an item chat card in each message mode, with that mode's visibility", async function () {
+          // A setting write and a message per mode: ten server round trips, past Mocha's 2 s default under load
+          this.timeout(15_000);
           const item = await Item.create(createSkillData("Deprecations Card", 1, "agi"));
           created.push(item);
           const selected = game.settings.get("core", "messageMode");

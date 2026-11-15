@@ -36,7 +36,7 @@ export function registerXpManagerTests(quench) {
 
         afterEach(async () => {
           if (dialog?.rendered) {
-            await dialog.close();
+            await dialog.close({ animate: false });
           }
           if (actor) {
             await actor.delete();
@@ -95,7 +95,7 @@ export function registerXpManagerTests(quench) {
 
         afterEach(async () => {
           if (dialog?.rendered) {
-            await dialog.close();
+            await dialog.close({ animate: false });
           }
           if (actor) {
             await actor.delete();
@@ -163,7 +163,7 @@ export function registerXpManagerTests(quench) {
 
         afterEach(async () => {
           if (dialog?.rendered) {
-            await dialog.close();
+            await dialog.close({ animate: false });
           }
           if (actor) {
             await actor.delete();
@@ -236,7 +236,7 @@ export function registerXpManagerTests(quench) {
 
         afterEach(async () => {
           if (dialog?.rendered) {
-            await dialog.close();
+            await dialog.close({ animate: false });
           }
           if (actor) {
             await actor.delete();
@@ -256,8 +256,8 @@ export function registerXpManagerTests(quench) {
         it("should calculate spent total", () => {
           const xp = actor.system._xp;
 
-          // Spent = calculated from actual trait ranks and skills
-          // Will be calculated by system - just verify it's non-zero
+          // Spent comes from the bought Trait ranks and Skills; the exact sum is tested elsewhere, so this checks
+          // only that it is above zero
           assert.isAtLeast(xp.spent, 1, "Total spent XP is non-zero");
         });
 
@@ -283,7 +283,7 @@ export function registerXpManagerTests(quench) {
 
         afterEach(async () => {
           if (dialog?.rendered) {
-            await dialog.close();
+            await dialog.close({ animate: false });
           }
           if (actor) {
             await actor.delete();
@@ -301,7 +301,7 @@ export function registerXpManagerTests(quench) {
         it("should close when requested", async () => {
           assert.isTrue(dialog.rendered, "Dialog is open");
 
-          await dialog.close();
+          await dialog.close({ animate: false });
 
           await new Promise(resolve => setTimeout(resolve, 100));
 
@@ -309,7 +309,7 @@ export function registerXpManagerTests(quench) {
         });
 
         it("should not leak after close", async () => {
-          await dialog.close();
+          await dialog.close({ animate: false });
 
           // Dialog should be cleaned up
           assert.isFalse(dialog.rendered, "Dialog not rendered");
@@ -371,7 +371,7 @@ export function registerXpManagerTests(quench) {
 
         afterEach(async () => {
           if (dialog?.rendered) {
-            await dialog.close();
+            await dialog.close({ animate: false });
           }
           if (actor) {
             await actor.delete();

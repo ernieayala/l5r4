@@ -74,4 +74,4 @@ Link the repo with the junction command in `CLAUDE.md` (**Testing and the Gate**
 |------|-------|
 | Removing `template.json`, data models | 2 |
 | Fixing deprecated calls the inventory lists | 2-6 |
-| Switching the smoke batch to `FAILURE` mode | 18 |
+| Switching the smoke batch to `FAILURE` mode | 19 |

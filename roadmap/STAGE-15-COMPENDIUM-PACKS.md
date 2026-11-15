@@ -5,7 +5,7 @@ entry holds its name, its printed numbers, its mechanics as `system.rules` with 
 a one-line summary of any mechanic the rules do not model, and a "Core Rulebook p.N" citation where the book's text
 would go. A filtered browser searches these packs and every world compendium, and adds an entry to a
 character through the same purchase flow a drop uses.
-**Needs:** 14. It runs before the coverage audit (16) and playtest (17), so both cover the pack entries.
+**Needs:** 14. It runs before the coverage audit (16) and playtest (18), so both cover the pack entries.
 
 ## Content policy
 
@@ -269,4 +269,4 @@ None.
 | Content beyond the Core Rulebook | Not planned |
 | Translated entry names | Not planned |
 | Shops and loot | Not planned |
-| Book-text sweep of `src/packs/` before release | 18 |
+| Book-text sweep of `src/packs/` before release | 19 |

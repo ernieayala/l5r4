@@ -66,6 +66,12 @@ seat at any time.
 - Sessions 0-3 played to the end with every beat's expected result met or filed.
 - `coverage.md` shows every `automated` manifest entry used.
 - Zero open `playtest` issues; zero console errors from `l5r4-enhanced` in the last full run.
+- Written here by the Stage 16 sweep, each left open by an earlier stage: a real mouse drag from the compendium
+  browser and from a compendium window onto a sheet (Claude in Chrome's drag reaches no drop target, so a person
+  makes this one gesture if the tool still cannot); the Active Effect sheet's phase dropdown, the Token HUD status
+  icons, and the subtype labels of the create-document dialog clicked through; and none of the intermittent console
+  errors Stages 6-13 saw once in full runs (`TypeError: Failed to fetch`, unhandled rejections from core's chat
+  pop-up, core `#postNotification` errors) in any seat's console.
 - The gate passes after the fixes.
 
 ## Decisions

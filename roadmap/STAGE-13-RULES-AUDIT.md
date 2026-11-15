@@ -117,8 +117,9 @@ Stage 6. #33 (a 3rd Edition rules option) is a feature request.
 
 ### Still open
 
-- The book questions in AUTOMATION.md §6 (Q1-Q11), each answered by Ernie before the stage that automates
-  it, and the `game-rules/` transcription gaps listed there.
+- The book questions in AUTOMATION.md §6 (Q1-Q11) and the `game-rules/` transcription gaps listed there. Its
+  Status column (Stage 16) says where each stands: Q2, Q3, Q4, and Q8 are answered; the rest stay with the
+  table and block no stage.
 
 ## Out of scope
 
@@ -126,6 +127,6 @@ Stage 6. #33 (a 3rd Edition rules option) is a feature request.
 |------|-------|
 | Sheet and UI parts of #30 | 6 |
 | A repeatable coverage report and its gate check | 16 |
-| Play through the real UI with player clients | 17 |
+| Play through the real UI with player clients | 18 |
 | A 3rd Edition rules option (#33) | Not planned |
 | Mass battle (pp.236-241) | Not planned |

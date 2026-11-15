@@ -74,4 +74,4 @@ the effect gets `DEFAULT_ICON` (`icons/svg/aura.svg`). Effects stored by 3.2.1 a
 
 | Item | Stage |
 |------|-------|
-| Effect duration and expiry automation beyond what 3.2.1 does | Not planned |
+| Effect duration and expiry automation beyond what 3.2.1 does | 9 |
