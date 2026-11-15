@@ -8,7 +8,7 @@ import { voidOverLimit, voidSpent } from "../../module/services/effects/uses.js"
 import { spendVoidPoint } from "../../module/services/dice/resources/void-points.js";
 import { collectCheck } from "../../module/services/dice/check/collect.js";
 import { createTestNPC, createTestPC } from "../fixtures/actor-fixtures.js";
-import { autoAnswerRolls, settleChatNotifications, waitFor } from "./helpers.js";
+import { autoAnswerRolls, createDrawnToken, settleChatNotifications, waitFor } from "./helpers.js";
 
 /**
  * Registers the `effects` batch (roadmap Stage 9): stances, conditions, and timed effects as Active Effects whose
@@ -275,12 +275,8 @@ export function registerEffectsTests(quench) {
           const target = track(
             await createTestNPC({ name: "Effects target", system: { armor: { armorTn: 5 } } })
           );
-          const [token] = await canvas.scene.createEmbeddedDocuments("Token", [
-            { actorId: target.id, x: 100, y: 100 }
-          ]);
+          const token = await createDrawnToken({ actorId: target.id, x: 100, y: 100 });
           try {
-            // The token's placeable is drawn after the document is created
-            await waitFor(() => token.object);
             canvas.tokens.setTargets([token.id]);
             const message = await SkillRoll({
               actor: attacker,

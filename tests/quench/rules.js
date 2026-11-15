@@ -17,8 +17,8 @@ import { createArmorData, createSkillData } from "../fixtures/item-fixtures.js";
 import {
   changeThroughSheet,
   cleanTest,
+  createDrawnToken,
   settleChatNotifications,
-  waitFor,
   watchConsole
 } from "./helpers.js";
 
@@ -370,11 +370,10 @@ export function registerRulesTests(quench) {
               { name: "Katana", type: "weapon", system: { associatedSkill: "kenjutsu" } }
             ]);
             await actor.toggleStatusEffect("mounted", { active: true });
-            const [token] = await canvas.scene.createEmbeddedDocuments("Token", [
+            const token = await createDrawnToken(
               (await target.getTokenDocument({ x: 0, y: 0 })).toObject()
-            ]);
+            );
             try {
-              await waitFor(() => token.object);
               canvas.tokens.setTargets([token.id]);
               const agi = actor.system.traits.agi;
               const message = await SkillRoll({

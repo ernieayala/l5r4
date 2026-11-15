@@ -85,6 +85,31 @@ export async function waitFor(condition, timeout = 5000) {
 }
 
 /**
+ * Create a token on the viewed scene and wait until core has drawn it. The placeable exists before its draw
+ * finishes, and the draw loads the texture [src: client/canvas/placeables/token.mjs:1229] before it adds the target
+ * arrows [src: client/canvas/placeables/token.mjs:1279], so a token targeted earlier throws on the next canvas tick
+ * [src: client/canvas/layers/tokens.mjs:466].
+ *
+ * @param {object} data  Token data
+ * @returns {Promise<TokenDocument>}
+ */
+export async function createDrawnToken(data) {
+  const drawn = new Set();
+  // Core calls drawToken at the end of each draw [src: client/canvas/placeables/placeable-object.mjs:546]
+  const hook = Hooks.on("drawToken", token => drawn.add(token.document.id));
+  try {
+    const [token] = await canvas.scene.createEmbeddedDocuments("Token", [data]);
+    if (!(await waitFor(() => drawn.has(token.id)))) {
+      await token.delete();
+      throw new Error(`Token ${token.name} was not drawn`);
+    }
+    return token;
+  } finally {
+    Hooks.off("drawToken", hook);
+  }
+}
+
+/**
  * Wait for the Full Defense roll that taking the stance starts (module/services/effects/automation.js) to write its
  * bonus, so a test deleting the actor next does not leave that write to fail on the server inside a later test.
  * Nothing to wait for when the actor is not in the stance.

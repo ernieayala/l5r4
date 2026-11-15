@@ -3,7 +3,7 @@ import EffectPanel from "../../module/apps/effect-panel.js";
 import { onHotbarDrop } from "../../module/sheets/ui/macros.js";
 import { createTestNPC, createTestPC } from "../fixtures/actor-fixtures.js";
 import { createSkillData } from "../fixtures/item-fixtures.js";
-import { cleanTest, settleChatNotifications, waitFor } from "./helpers.js";
+import { cleanTest, createDrawnToken, settleChatNotifications, waitFor } from "./helpers.js";
 
 /**
  * Registers the `table-tools` batch (roadmap/STAGE-14): text links rendered in a journal page and clicked, a broken
@@ -53,11 +53,9 @@ export function registerTableToolsTests(quench) {
 
       /** A token for an actor on the viewed scene, drawn. */
       const placeToken = async (actor, x = 0) => {
-        const data = (await actor.getTokenDocument({ x, y: 0 })).toObject();
-        const [token] = await canvas.scene.createEmbeddedDocuments("Token", [data]);
-        track(token);
-        await waitFor(() => token.object);
-        return token;
+        return track(
+          await createDrawnToken((await actor.getTokenDocument({ x, y: 0 })).toObject())
+        );
       };
 
       /** A PC with Kenjutsu 2 and a token the user controls, so links and macros act for it. */
