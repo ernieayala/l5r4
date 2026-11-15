@@ -231,10 +231,34 @@ function valuesMatching(tree, pattern, rule) {
     .map(({ key, value }) => `lang/en.json ${key}: "${value}" ${rule}`);
 }
 
+/**
+ * The groups holding the book's names of game things, which keep the book's capitals as proper names
+ * (docs/design-system/content/voice.md, Names of game things).
+ */
+const NAME_GROUPS = Object.freeze([
+  "l5r4.character.skills.names.",
+  "l5r4.equipment.weapons.arrows."
+]);
+
+/**
+ * The words of the book's names of game things in a tree's English copy.
+ * @param {import("../tools/conventions/shared.mjs").Tree} tree - The tree
+ * @returns {Set<string>} The capitalized words
+ */
+function nameWordsOf(tree) {
+  return new Set(
+    englishOf(tree)
+      .filter(({ key }) => NAME_GROUPS.some(group => key.startsWith(group)))
+      .flatMap(({ value }) => value.split(/\s+/))
+      .filter(word => /^[A-Z]/.test(word))
+  );
+}
+
 /** docs/design-system/content/voice.md and localization.md, the rules a pattern can test. */
 const COPY_RULES = {
-  "lang/sentence-case": tree =>
-    englishOf(tree)
+  "lang/sentence-case": tree => {
+    const names = nameWordsOf(tree);
+    return englishOf(tree)
       .filter(
         ({ key }) => !key.startsWith("TYPES.") && !fixedSegmentsOf().has(key.split(".").at(-1))
       )
@@ -242,8 +266,9 @@ const COPY_RULES = {
         const words = value.trim().split(/\s+/);
         return words.length >= 2 && words.length <= 6 && !/[{}.!?:;]/.test(value);
       })
-      .filter(({ value }) => !isSentenceCase(value))
-      .map(({ key, value }) => `lang/en.json ${key}: "${value}" is not in sentence case`),
+      .filter(({ value }) => !isSentenceCase(value, names))
+      .map(({ key, value }) => `lang/en.json ${key}: "${value}" is not in sentence case`);
+  },
 
   "lang/label-period": tree =>
     englishOf(tree)

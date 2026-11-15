@@ -8,6 +8,20 @@
         "title": "Armor configuration"
       }
     },
+    "character": {
+      "skills": {
+        "names": {
+          "teaCeremony": "Tea Ceremony"
+        }
+      }
+    },
+    "equipment": {
+      "weapons": {
+        "arrows": {
+          "willow": "Willow Leaf"
+        }
+      }
+    },
     "ui": {
       "check": {
         "exported": {
@@ -18,7 +32,8 @@
         "maximumWounds": "Maximum Wounds",
         "pool": "Pool {roll}k{keep}",
         "voidSkill": "Use a Void Point",
-        "voidSkillHint": "Spend one Void Point for the roll."
+        "voidSkillHint": "Spend one Void Point for the roll.",
+        "willowArmor": "Willow Leaf arrow against armor"
       },
       "ruleSummary": {
         "TNModifier": {

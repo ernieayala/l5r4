@@ -377,10 +377,11 @@ export function getCapitalizedWords() {
  * Whether text is in sentence case: after the first word, a capital only on a game term, a proper name, an
  * acronym, or an identifier.
  * @param {string} text - The name or label
+ * @param {Set<string>} [names] - More words that keep a capital, such as the words of the book's Skill names
  * @returns {boolean} True for sentence case
  */
-export function isSentenceCase(text) {
-  const allowed = getCapitalizedWords();
+export function isSentenceCase(text, names = new Set()) {
+  const allowed = new Set([...getCapitalizedWords(), ...names]);
   const words = text.split(/\s+/).map(word => word.replace(/^[^\w]+|[^\w]+$/g, ""));
   return words.slice(1).every(word => {
     if (!/^[A-Z]/.test(word) || /^[A-Z0-9]{2,}s?$/.test(word) || /[a-z][A-Z]|\d/.test(word)) {

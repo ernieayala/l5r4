@@ -43,7 +43,8 @@ proper names keep their capitals inside the label (next section). Window titles 
 | Non-conforming | "Explodes On" (write "Explodes on")                             | `:475`  |
 
 **Check.** `tests/lang.test.js`: in a value of two to six words with no placeholder and no sentence punctuation, every
-capitalized word after the first is a glossary term or a listed proper name.
+capitalized word after the first is a glossary term, a listed proper name, or a word of a Skill or arrow name in
+`lang/en.json` (**Names of game things**).
 
 ## Game terms
 
