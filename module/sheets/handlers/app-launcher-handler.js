@@ -115,7 +115,7 @@ export class AppLauncherHandler {
           actorId: context.actor.id
         }
       );
-      ui.notifications?.error(game.i18n.localize("l5r4.ui.notifications.combatConfigFailed"));
+      ui.notifications?.error(game.i18n.localize("l5r4.apps.combatConfig.errors.openFailed"));
     }
   }
 
@@ -151,7 +151,7 @@ export class AppLauncherHandler {
         err,
         actorId: context.actor.id
       });
-      ui.notifications?.error(game.i18n.localize("l5r4.ui.notifications.conditionManagerFailed"));
+      ui.notifications?.error(game.i18n.localize("l5r4.apps.conditionManager.errors.openFailed"));
     }
   }
 
@@ -190,7 +190,7 @@ export class AppLauncherHandler {
         err,
         actorId: context.actor.id
       });
-      ui.notifications?.error(game.i18n.localize("l5r4.ui.notifications.woundConfigFailed"));
+      ui.notifications?.error(game.i18n.localize("l5r4.apps.woundConfig.errors.openFailed"));
     }
   }
 
@@ -229,7 +229,7 @@ export class AppLauncherHandler {
         err,
         actorId: context.actor.id
       });
-      ui.notifications?.error(game.i18n.localize("l5r4.ui.notifications.xpManagerFailed"));
+      ui.notifications?.error(game.i18n.localize("l5r4.apps.xpManager.errors.openFailed"));
     }
   }
 
@@ -268,7 +268,7 @@ export class AppLauncherHandler {
         err,
         actorId: context.actor.id
       });
-      ui.notifications?.error(game.i18n.localize("l5r4.ui.notifications.wealthManagerFailed"));
+      ui.notifications?.error(game.i18n.localize("l5r4.apps.wealthManager.errors.openFailed"));
     }
   }
 }

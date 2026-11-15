@@ -17,7 +17,7 @@ import {
 import { phraseText, T } from "../utils/localization.js";
 import { sourceCitation } from "../utils/rule-summary.js";
 import { addItem } from "../services/purchase.js";
-import { resolveActor } from "../services/dice/resources/void-manager.js";
+import { resolveActor } from "../services/dice/resources/void-points.js";
 
 const { ApplicationV2, HandlebarsApplicationMixin } = foundry.applications.api;
 
@@ -44,14 +44,18 @@ export default class CompendiumBrowser extends HandlebarsApplicationMixin(Applic
   static DEFAULT_OPTIONS = {
     id: `${SYS_ID}-compendium-browser`,
     classes: ["l5r4", "l5r4-compendium-browser"],
-    window: { title: "l5r4.ui.browser.title", icon: "fa-solid fa-book-open", resizable: true },
+    window: {
+      title: "l5r4.apps.compendiumBrowser.title",
+      icon: "fa-solid fa-book-atlas",
+      resizable: true
+    },
     position: { width: 760, height: 660 },
     actions: {
-      selectTab: CompendiumBrowser.#onSelectTab,
-      clearFilters: CompendiumBrowser.#onClearFilters,
-      addEntry: CompendiumBrowser.#onAddEntry,
-      importEntry: CompendiumBrowser.#onImportEntry,
-      openEntry: CompendiumBrowser.#onOpenEntry
+      "select-tab": CompendiumBrowser.#onSelectTab,
+      "clear-filters": CompendiumBrowser.#onClearFilters,
+      "add-entry": CompendiumBrowser.#onAddEntry,
+      "import-entry": CompendiumBrowser.#onImportEntry,
+      "open-entry": CompendiumBrowser.#onOpenEntry
     }
   };
 
@@ -60,7 +64,7 @@ export default class CompendiumBrowser extends HandlebarsApplicationMixin(Applic
     controls: { template: `systems/${SYS_ID}/templates/apps/compendium-browser.hbs` },
     results: {
       template: `systems/${SYS_ID}/templates/apps/compendium-browser-results.hbs`,
-      scrollable: [".l5r4-browser-results"]
+      scrollable: [".l5r4-compendium-browser-results"]
     }
   };
 
@@ -125,7 +129,7 @@ export default class CompendiumBrowser extends HandlebarsApplicationMixin(Applic
     return Object.assign(context, {
       tabs: BROWSER_TABS.map(t => ({
         id: t.id,
-        label: T(`l5r4.ui.browser.tabs.${t.id}`),
+        label: T(`l5r4.apps.compendiumBrowser.tabs.${t.id}`),
         active: t.id === tab.id
       })),
       search: this.search,
@@ -182,7 +186,7 @@ export default class CompendiumBrowser extends HandlebarsApplicationMixin(Applic
       }
     }
     if (options.parts.includes("results")) {
-      for (const row of this.element.querySelectorAll(".l5r4-browser-row[data-uuid]")) {
+      for (const row of this.element.querySelectorAll(".l5r4-compendium-browser-row[data-uuid]")) {
         row.addEventListener("dragstart", event => {
           event.dataTransfer.setData(
             "text/plain",
@@ -237,7 +241,7 @@ export default class CompendiumBrowser extends HandlebarsApplicationMixin(Applic
   static async #onAddEntry(_event, target) {
     const actor = resolveActor();
     if (!actor) {
-      ui.notifications?.warn(T("l5r4.ui.browser.noActor"));
+      ui.notifications?.warn(T("l5r4.apps.compendiumBrowser.noActor"));
       return;
     }
     const item = await fromUuid(target.closest("[data-uuid]").dataset.uuid);
@@ -293,7 +297,7 @@ function onRenderCompendiumDirectory(_app, element) {
   const button = document.createElement("button");
   button.type = "button";
   button.dataset.l5r4Browser = "";
-  button.innerHTML = `<i class="fa-solid fa-book-open" inert></i><span>${T("l5r4.ui.browser.open")}</span>`;
+  button.innerHTML = `<i class="fa-solid fa-book-atlas" inert></i><span>${T("l5r4.apps.compendiumBrowser.open")}</span>`;
   button.addEventListener("click", () => CompendiumBrowser.open());
   actions.append(button);
 }

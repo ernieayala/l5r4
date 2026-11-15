@@ -3,7 +3,7 @@
  *
  * Tests edge cases in spell slot management that could break spellcasting. Slots are one number per Ring in
  * `system.spellSlots` (water, fire, earth, air, void), spent through
- * module/services/dice/resources/spell-slot-manager.js.
+ * module/services/dice/resources/spell-slots.js.
  *
  * **What Can Break:**
  * - Casting with no slots
@@ -18,7 +18,7 @@ import {
   spendElementalSlot,
   spendVoidSlot,
   validateSpellSlot
-} from "../../../module/services/dice/resources/spell-slot-manager.js";
+} from "../../../module/services/dice/resources/spell-slots.js";
 import { createTestPC } from "../../fixtures/actor-fixtures.js";
 
 /**

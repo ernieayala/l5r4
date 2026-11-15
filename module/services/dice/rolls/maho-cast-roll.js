@@ -40,7 +40,7 @@ export async function MahoCastRoll({ actor, spell, showDialog = true } = {}) {
   return rollCheck({
     actor,
     kind: "maho",
-    label: `${T("l5r4.magic.maho.mahoCasting")}: ${spell.name}`,
+    label: `${T("l5r4.magic.maho.casting")}: ${spell.name}`,
     base: { roll: ringValue + actor.system.insightRank, keep: ringValue },
     ring,
     tn: 5 + 5 * mastery,

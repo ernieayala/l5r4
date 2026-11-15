@@ -13,7 +13,7 @@
 import { F, T } from "../utils/localization.js";
 import { getEffectiveTrait, ringRank } from "../utils/mechanics.js";
 import { rollCheck } from "./dice/check/roll-check.js";
-import { resolveActor } from "./dice/resources/void-manager.js";
+import { resolveActor } from "./dice/resources/void-points.js";
 import { skillLabel } from "./dice/rolls/skill-roll.js";
 import { skillRequest } from "./combat/flow.js";
 import { applyEffectAnywhere } from "./effects/apply.js";
@@ -45,7 +45,7 @@ export function linkText(spec) {
       : spec.trait
         ? traitName(spec.trait)
         : T(`l5r4.ui.mechanics.rings.${spec.ring}`);
-    return spec.tn ? F("l5r4.ui.links.checkTN", { what, tn: spec.tn }) : what;
+    return spec.tn ? F("l5r4.ui.links.checkTn", { what, tn: spec.tn }) : what;
   }
   if (spec.type === "Damage") {
     const { roll, keep, bonus } = spec.pool;

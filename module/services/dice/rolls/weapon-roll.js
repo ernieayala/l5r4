@@ -12,7 +12,7 @@
 import { T } from "../../../utils/localization.js";
 import { toInt } from "../../../utils/type-coercion.js";
 import { rollCheck } from "../check/roll-check.js";
-import { resolveActor } from "../resources/void-manager.js";
+import { resolveActor } from "../resources/void-points.js";
 
 /**
  * Rolls weapon damage.

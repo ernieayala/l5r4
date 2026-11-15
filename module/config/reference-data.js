@@ -29,7 +29,7 @@ const freeze = Object.freeze;
  * This order is used for iteration in actor data preparation and UI display.
  *
  * @constant {ReadonlyArray<string>}
- * @see module:documents/actor/calculations/shared-traits-rings for trait calculation
+ * @see module:documents/actor/calculations/shared-traits-rings-system for trait calculation
  */
 export const TRAIT_KEYS = freeze(["sta", "wil", "str", "per", "ref", "awa", "agi", "int"]);
 

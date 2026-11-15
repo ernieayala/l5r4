@@ -9,22 +9,22 @@
 // Up and down arrows shown on hover over a rank that steps by one (Traits, the Void Ring)
 @mixin rank-arrows {
   &:hover {
-    .trait-increase,
-    .trait-decrease {
+    .l5r4-rank-control-arrow.-up,
+    .l5r4-rank-control-arrow.-down {
       opacity: 1;
     }
 
-    .trait-increase {
+    .l5r4-rank-control-arrow.-up {
       top: -16px;
     }
 
-    .trait-decrease {
+    .l5r4-rank-control-arrow.-down {
       bottom: -16px;
     }
   }
 
-  .trait-increase,
-  .trait-decrease {
+  .l5r4-rank-control-arrow.-up,
+  .l5r4-rank-control-arrow.-down {
     align-items: center;
     background-color: inherit;
     border: 1px solid black;
@@ -45,11 +45,11 @@
     z-index: 11;
   }
 
-  .trait-increase {
+  .l5r4-rank-control-arrow.-up {
     top: 0;
   }
 
-  .trait-decrease {
+  .l5r4-rank-control-arrow.-down {
     bottom: 0;
   }
 }
@@ -63,7 +63,7 @@
     overflow: hidden;
     place-items: center center;
 
-    .ring-name {
+    .l5r4-ring-name {
       align-items: center;
       align-self: start;
       display: inline-flex;
@@ -74,7 +74,7 @@
       width: 100%;
     }
 
-    .ring-rank {
+    .l5r4-ring-rank {
       background-color: var(--content-link-background);
       border: 1px solid var(--table-header-border-color);
       border-radius: 50%;
@@ -93,8 +93,8 @@
       // The backdrop comes from custom properties set per theme (below), so the nearest themed ancestor decides it:
       // a light sheet inside a dark interface matches both .theme-light and .theme-dark as ancestors (issue #30)
       &::before {
-        background-color: var(--l5r4-ring-rank-backdrop-color);
-        background-image: var(--l5r4-ring-rank-backdrop-image);
+        background-color: var(--l5r4-color-ring-rank-backdrop);
+        background-image: var(--l5r4-image-ring-rank-backdrop);
         background-position: center;
         background-size: cover;
         border: 2px solid transparent;
@@ -104,40 +104,40 @@
         position: absolute;
       }
 
-      &.ring-rank-fire {
+      &.-fire {
         span {
-          background-color: rgb(var(--fire-ring-color), 0.1);
-          border-color: rgb(var(--fire-ring-color));
+          background-color: color-mix(in srgb, var(--l5r4-color-ring-fire) 10%, transparent);
+          border-color: var(--l5r4-color-ring-fire);
         }
       }
 
-      &.ring-rank-earth {
+      &.-earth {
         span {
-          background-color: rgb(var(--earth-ring-color), 0.1);
-          border-color: rgb(var(--earth-ring-color));
+          background-color: color-mix(in srgb, var(--l5r4-color-ring-earth) 10%, transparent);
+          border-color: var(--l5r4-color-ring-earth);
         }
       }
 
-      &.ring-rank-air {
+      &.-air {
         span {
           background-color: rgb(var(--air-ring-color), 0.1);
           border-color: rgb(var(--air-ring-color));
         }
       }
 
-      &.ring-rank-water {
+      &.-water {
         span {
-          background-color: rgb(var(--water-ring-color), 0.1);
-          border-color: rgb(var(--water-ring-color));
+          background-color: color-mix(in srgb, var(--l5r4-color-ring-water) 10%, transparent);
+          border-color: var(--l5r4-color-ring-water);
         }
       }
 
-      &.ring-rank-void {
+      &.-void {
         cursor: pointer;
 
         span {
-          background-color: rgb(var(--void-ring-color), 0.1);
-          border-color: rgb(var(--void-ring-color));
+          background-color: color-mix(in srgb, var(--l5r4-color-ring-void) 10%, transparent);
+          border-color: var(--l5r4-color-ring-void);
         }
 
         @include rank-arrows;
@@ -174,16 +174,16 @@
       }
     }
 
-    .trait {
+    .l5r4-trait {
       height: 28px;
     }
 
-    .void-points {
+    .l5r4-void-points {
       column-gap: 0.5rem;
     }
 
-    .trait,
-    .void-points {
+    .l5r4-trait,
+    .l5r4-void-points {
       align-self: center;
       display: grid;
       grid-template-areas: "fill roll rank";
@@ -192,7 +192,7 @@
       place-items: center right;
       width: 100%;
 
-      .trait-roll {
+      .l5r4-button.-roll {
         border-radius: 0;
         cursor: pointer;
         grid-area: roll;
@@ -201,7 +201,7 @@
         position: relative;
         transition: all 150ms ease-out;
 
-        .mas {
+        .l5r4-button-under {
           align-items: center;
           color: var(--color-text-primary);
           display: flex;
@@ -215,7 +215,7 @@
           width: 100%;
         }
 
-        span:not(.mas) {
+        span:not(.l5r4-button-under) {
           align-items: center;
           background: #000;
           border: none;
@@ -238,7 +238,7 @@
         }
       }
 
-      .trait-rank {
+      .l5r4-rank-control.-trait {
         align-items: center;
         cursor: pointer;
         display: flex;
@@ -253,283 +253,254 @@
 
         @include rank-arrows;
       }
-
-      .void-points-amount {
-        align-items: center;
-        background-color: var(--table-header-bg-color);
-        border-radius: 50%;
-        color: var(--color-text-primary);
-        cursor: pointer;
-        display: inline-flex;
-        font-family: var(--font-h3);
-        font-size: 22px;
-        font-weight: 600;
-        grid-area: rank;
-        height: 24px;
-        justify-content: center;
-        padding: 0;
-        text-align: center;
-        transition: all 150ms ease-out;
-        width: 24px;
-        z-index: 10;
-
-        &:hover {
-          filter: brightness(1.1);
-        }
-
-        &:active {
-          filter: brightness(0.95);
-          transform: scale(0.98);
-        }
-      }
     }
 
-    .trait-reflex,
-    .trait-awarness,
-    .trait-agility,
-    .trait-intelligence {
+    .l5r4-trait.-air.-reflexes,
+    .l5r4-trait.-air.-awareness,
+    .l5r4-trait.-fire.-agility,
+    .l5r4-trait.-fire.-intelligence {
       grid-template-areas: "rank roll fill";
       grid-template-columns: 28px min-content 1fr;
       justify-items: start;
 
-      .trait-rank {
-        .trait-increase,
-        .trait-decrease {
+      .l5r4-rank-control.-trait {
+        .l5r4-rank-control-arrow.-up,
+        .l5r4-rank-control-arrow.-down {
           left: -1px;
           right: -2px;
         }
       }
     }
 
-    .trait-willpower,
-    .trait-intelligence,
-    .trait-perception,
-    .trait-awarness {
+    .l5r4-trait.-earth.-willpower,
+    .l5r4-trait.-fire.-intelligence,
+    .l5r4-trait.-water.-perception,
+    .l5r4-trait.-air.-awareness {
       margin-block-start: 8px;
     }
 
-    .trait-stamina,
-    .trait-willpower {
-      border-inline-end: 32px solid rgb(var(--earth-ring-color));
+    .l5r4-trait.-earth.-stamina,
+    .l5r4-trait.-earth.-willpower {
+      border-inline-end: 32px solid var(--l5r4-color-ring-earth);
 
-      .trait-rank {
-        background-color: rgb(var(--earth-ring-color), 0.9);
-        border: 1px solid rgb(var(--earth-ring-color));
+      .l5r4-rank-control.-trait {
+        background-color: color-mix(in srgb, var(--l5r4-color-ring-earth) 90%, transparent);
+        border: 1px solid var(--l5r4-color-ring-earth);
         color: #fff;
       }
 
-      .trait-roll {
-        border: 1px solid rgb(var(--earth-ring-color));
+      .l5r4-button.-roll {
+        border: 1px solid var(--l5r4-color-ring-earth);
 
-        span:not(.mas) {
-          background: rgb(var(--earth-ring-color));
+        span:not(.l5r4-button-under) {
+          background: var(--l5r4-color-ring-earth);
         }
       }
     }
 
-    .trait-strength,
-    .trait-perception {
-      border-inline-end: 32px solid rgb(var(--water-ring-color));
+    .l5r4-trait.-water.-strength,
+    .l5r4-trait.-water.-perception {
+      border-inline-end: 32px solid var(--l5r4-color-ring-water);
 
-      .trait-rank {
-        background-color: rgb(var(--water-ring-color), 0.9);
-        border: 1px solid rgb(var(--water-ring-color));
+      .l5r4-rank-control.-trait {
+        background-color: color-mix(in srgb, var(--l5r4-color-ring-water) 90%, transparent);
+        border: 1px solid var(--l5r4-color-ring-water);
         color: #fff;
       }
 
-      .trait-roll {
-        border: 1px solid rgb(var(--water-ring-color));
+      .l5r4-button.-roll {
+        border: 1px solid var(--l5r4-color-ring-water);
 
-        span:not(.mas) {
-          background: rgb(var(--water-ring-color));
+        span:not(.l5r4-button-under) {
+          background: var(--l5r4-color-ring-water);
         }
       }
     }
 
-    .trait-agility,
-    .trait-intelligence {
-      border-inline-start: 32px solid rgb(var(--fire-ring-color));
+    .l5r4-trait.-fire.-agility,
+    .l5r4-trait.-fire.-intelligence {
+      border-inline-start: 32px solid var(--l5r4-color-ring-fire);
 
-      .trait-rank {
-        background-color: rgb(var(--fire-ring-color), 0.9);
-        border: 1px solid rgb(var(--fire-ring-color));
+      .l5r4-rank-control.-trait {
+        background-color: color-mix(in srgb, var(--l5r4-color-ring-fire) 90%, transparent);
+        border: 1px solid var(--l5r4-color-ring-fire);
         color: #fff;
       }
 
-      .trait-roll {
-        border: 1px solid rgb(var(--fire-ring-color));
+      .l5r4-button.-roll {
+        border: 1px solid var(--l5r4-color-ring-fire);
 
-        span:not(.mas) {
-          background: rgb(var(--fire-ring-color));
+        span:not(.l5r4-button-under) {
+          background: var(--l5r4-color-ring-fire);
         }
       }
     }
 
-    .trait-reflex,
-    .trait-awarness {
+    .l5r4-trait.-air.-reflexes,
+    .l5r4-trait.-air.-awareness {
       border-inline-start: 32px solid rgb(var(--air-ring-color));
 
-      .trait-rank {
+      .l5r4-rank-control.-trait {
         background-color: rgb(var(--air-ring-color), 0.9);
         border: 1px solid rgb(var(--air-ring-color));
         color: #fff;
       }
 
-      .trait-roll {
+      .l5r4-button.-roll {
         border: 1px solid rgb(var(--air-ring-color));
 
-        span:not(.mas) {
+        span:not(.l5r4-button-under) {
           background: rgb(var(--air-ring-color));
         }
       }
     }
 
-    .trait-willpower,
-    .trait-perception {
+    .l5r4-trait.-earth.-willpower,
+    .l5r4-trait.-water.-perception {
       align-self: start;
     }
 
     // Earth Ring Positioning
-    .ring-name-earth {
+    .l5r4-ring-name.-earth {
       align-self: end;
       grid-column: 5/8;
       grid-row: 1/2;
     }
 
-    .earth-ring {
+    .l5r4-ring.-earth {
       grid-column: 5/8;
       grid-row: 2/4;
 
-      .earth-ring-img {
+      .l5r4-ring-image {
         border: none;
         content: $earth-ring-img;
       }
     }
 
-    .ring-rank-earth {
+    .l5r4-ring-rank.-earth {
       grid-column: 6/8;
       grid-row: 3/4;
       place-self: end end;
     }
 
-    .trait-stamina {
+    .l5r4-trait.-earth.-stamina {
       grid-column: 1/6;
       grid-row: 2/3;
     }
 
-    .trait-willpower {
+    .l5r4-trait.-earth.-willpower {
       grid-column: 1/6;
       grid-row: 3/4;
     }
 
     // Air Ring Positioning
-    .ring-name-air {
+    .l5r4-ring-name.-air {
       align-self: end;
       grid-column: 10/13;
       grid-row: 1/2;
     }
 
-    .air-ring {
+    .l5r4-ring.-air {
       grid-column: 10/13;
       grid-row: 2/4;
 
-      .air-ring-img {
+      .l5r4-ring-image {
         border: none;
         content: $air-ring-img;
       }
     }
 
-    .ring-rank-air {
+    .l5r4-ring-rank.-air {
       grid-column: 10/11;
       grid-row: 3/4;
       place-self: end start;
     }
 
-    .trait-reflex {
+    .l5r4-trait.-air.-reflexes {
       grid-column: 12/18;
       grid-row: 2/3;
     }
 
-    .trait-awarness {
+    .l5r4-trait.-air.-awareness {
       align-self: start;
       grid-column: 12/18;
       grid-row: 3/4;
     }
 
     // Water Ring Positioning
-    .ring-name-water {
+    .l5r4-ring-name.-water {
       grid-column: 4/7;
       grid-row: 7/8;
     }
 
-    .water-ring {
+    .l5r4-ring.-water {
       grid-column: 4/7;
       grid-row: 5/7;
 
-      .water-ring-img {
+      .l5r4-ring-image {
         border: none;
         content: $water-ring-img;
       }
     }
 
-    .ring-rank-water {
+    .l5r4-ring-rank.-water {
       grid-column: 6/7;
       grid-row: 5/6;
       justify-self: end;
       margin-inline-end: -12px;
     }
 
-    .trait-strength {
+    .l5r4-trait.-water.-strength {
       grid-column: 1/5;
       grid-row: 5/6;
     }
 
-    .trait-perception {
+    .l5r4-trait.-water.-perception {
       grid-column: 1/5;
       grid-row: 6/7;
     }
 
     // Fire Ring Positioning
-    .ring-name-fire {
+    .l5r4-ring-name.-fire {
       grid-column: 11/14;
       grid-row: 7/8;
     }
 
-    .fire-ring {
+    .l5r4-ring.-fire {
       grid-column: 11/14;
       grid-row: 5/7;
 
-      .fire-ring-img {
+      .l5r4-ring-image {
         border: none;
         content: $fire-ring-img;
       }
     }
 
-    .ring-rank-fire {
+    .l5r4-ring-rank.-fire {
       grid-column: 11/12;
       grid-row: 5/6;
       justify-self: start;
       margin-inline-start: -12px;
     }
 
-    .trait-agility {
+    .l5r4-trait.-fire.-agility {
       grid-column: 13/17;
       grid-row: 5/6;
     }
 
-    .trait-intelligence {
+    .l5r4-trait.-fire.-intelligence {
       align-self: start;
       grid-column: 13/17;
       grid-row: 6/7;
     }
 
     // Void Ring Positioning
-    .ring-name-void {
+    .l5r4-ring-name.-void {
       grid-column: 7/11;
       grid-row: 8/9;
     }
 
-    .ring-rank-void {
+    .l5r4-ring-rank.-void {
       align-self: start;
       grid-column: 8/10;
       grid-row: 6/7;
@@ -537,17 +508,17 @@
       text-align: center;
     }
 
-    .void-ring {
+    .l5r4-ring.-void {
       grid-column: 6/12;
       grid-row: 6/8;
 
-      .void-ring-img {
+      .l5r4-ring-image {
         border: none;
         content: $void-ring-img;
       }
     }
 
-    .void-points {
+    .l5r4-void-points {
       align-items: center;
       display: flex;
       flex-direction: column;
@@ -558,11 +529,11 @@
       width: max-content;
     }
 
-    .void-points-name {
+    .l5r4-void-points-label {
       margin: 0;
     }
 
-    .void-points-dots {
+    .l5r4-void-points-dots {
       align-items: center;
       cursor: pointer;
       display: flex;
@@ -580,7 +551,7 @@
         transform: scale(1.2);
       }
 
-      &.-filled {
+      &.is-filled {
         background-color: #666;
 
         &:hover {

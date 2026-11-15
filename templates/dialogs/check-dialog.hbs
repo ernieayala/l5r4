@@ -1,27 +1,27 @@
 <div class="l5r4-check-dialog standard-form">
-  <p class="check-pool">{{localize "l5r4.ui.check.pool"}}: <strong>{{pool}}</strong></p>
+  <p class="l5r4-check-dialog-pool">{{localize "l5r4.ui.check.pool"}}: <strong>{{pool}}</strong></p>
 
   {{#if modifiers.length}}
-    <fieldset class="check-modifiers">
+    <fieldset class="l5r4-check-dialog-group">
       <legend>{{localize "l5r4.ui.check.modifiers"}}</legend>
       {{#each modifiers}}
-        <label class="check-modifier" data-range="{{range}}">
+        <label class="l5r4-check-dialog-modifier" data-range="{{range}}">
           <input type="checkbox" name="modifier.{{@index}}" {{checked enabled}} />
-          <span class="check-modifier-label">{{label}}</span>
-          <span class="check-modifier-value">{{text}}</span>
+          <span class="l5r4-check-dialog-modifier-label">{{label}}</span>
+          <span class="l5r4-check-dialog-modifier-value">{{text}}</span>
         </label>
       {{/each}}
     </fieldset>
   {{/if}}
 
   {{#if substitutes.length}}
-    <fieldset class="check-substitutes">
+    <fieldset class="l5r4-check-dialog-group">
       <legend>{{localize "l5r4.ui.check.substitutes"}}</legend>
       {{#each substitutes}}
-        <label class="check-modifier">
+        <label class="l5r4-check-dialog-modifier">
           <input type="checkbox" name="substitute.{{@index}}" />
-          <span class="check-modifier-label">{{label}}</span>
-          <span class="check-modifier-value">{{text}}</span>
+          <span class="l5r4-check-dialog-modifier-label">{{label}}</span>
+          <span class="l5r4-check-dialog-modifier-value">{{text}}</span>
         </label>
       {{/each}}
     </fieldset>
@@ -52,7 +52,7 @@
     </div>
     {{#if freeRaises}}
       <div class="form-group">
-        <label>{{localize "l5r4.ui.check.freeRaisesToTN"}} ({{localize "l5r4.ui.check.of"}} {{freeRaises}})</label>
+        <label>{{localize "l5r4.ui.check.freeRaisesToTn"}} ({{localize "l5r4.ui.check.of"}} {{freeRaises}})</label>
         <input type="number" name="freeRaisesToTN" value="0" min="0" max="{{freeRaises}}" />
       </div>
     {{/if}}
@@ -155,15 +155,15 @@
   {{/if}}
 
   <div class="form-group">
-    <label>{{localize "l5r4.ui.common.roll"}} {{localize "l5r4.ui.common.mod"}}</label>
+    <label>{{localize "l5r4.ui.common.roll"}} {{localize "l5r4.ui.common.modifier"}}</label>
     <input type="number" name="rollMod" value="0" />
   </div>
   <div class="form-group">
-    <label>{{localize "l5r4.ui.common.keep"}} {{localize "l5r4.ui.common.mod"}}</label>
+    <label>{{localize "l5r4.ui.common.keep"}} {{localize "l5r4.ui.common.modifier"}}</label>
     <input type="number" name="keepMod" value="0" />
   </div>
   <div class="form-group">
-    <label>{{localize "l5r4.ui.common.total"}} {{localize "l5r4.ui.common.mod"}}</label>
+    <label>{{localize "l5r4.ui.common.total"}} {{localize "l5r4.ui.common.modifier"}}</label>
     <input type="number" name="totalMod" value="0" />
   </div>
   <div class="form-group">

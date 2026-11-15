@@ -132,7 +132,7 @@ describe("browserIndexFields", () => {
 describe("The entryNumbers and valueAt helpers", () => {
   it("should give a weapon's DR and armor's numbers, and nothing for a bow or a spell", () => {
     expect(entryNumbers(SPELLS[4])).toEqual({
-      key: "l5r4.ui.browser.numbers.weapon",
+      key: "l5r4.apps.compendiumBrowser.numbers.weapon",
       data: { pool: "3k2" }
     });
     expect(entryNumbers({ type: "armor", system: { bonus: 5, reduction: 3 } }).data).toEqual({
@@ -141,11 +141,11 @@ describe("The entryNumbers and valueAt helpers", () => {
     });
     expect(entryNumbers({ type: "weapon", system: { isBow: true } })).toBeNull();
     expect(entryNumbers(SPELLS[1])).toEqual({
-      key: "l5r4.ui.browser.numbers.spell",
+      key: "l5r4.apps.compendiumBrowser.numbers.spell",
       data: { ring: { key: "l5r4.ui.mechanics.rings.fire", data: {} }, mastery: 2 }
     });
     expect(entryNumbers({ type: "spell", system: { ring: "all", mastery: 1 } }).data.ring.key).toBe(
-      "l5r4.ui.label.all"
+      "l5r4.ui.common.all"
     );
     expect(entryNumbers({ type: "commonItem", system: {} })).toBeNull();
   });

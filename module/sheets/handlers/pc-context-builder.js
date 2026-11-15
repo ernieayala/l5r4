@@ -187,7 +187,7 @@ export class PcContextBuilder {
       name: it => String(it?.name ?? ""),
       rank: it => Number(it?.system?.rank ?? 0) || 0,
       // Trait column: Localize trait key for display sorting
-      // Handles both raw keys ("sta") and i18n keys ("l5r4.mechanics.traits.sta")
+      // Handles both raw keys ("sta") and i18n keys ("l5r4.ui.mechanics.traits.sta")
       trait: it => {
         const raw = String(it?.system?.trait ?? "").toLowerCase();
         const key =
@@ -312,7 +312,7 @@ export class PcContextBuilder {
    *
    * Note: Rank 9 masteries are not checked as they are rare and not present in
    * most skill definitions. The Rank 10 Mastery (a Free Raise, p.133) is a rule the skill carries
-   * (module/data/item/SkillData.js ownedRules) and is not displayed via this list.
+   * (module/data/item/skill-data.js ownedRules) and is not displayed via this list.
    *
    * @param {Item[]} skills - Array of skill items (must have system.rank and system.masteryX properties)
    * @returns {Object[]} Array of unlocked mastery ability objects

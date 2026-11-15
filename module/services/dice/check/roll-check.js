@@ -27,7 +27,7 @@ import {
 } from "../../../utils/check.js";
 import { allocateRaises, maneuverCost } from "../../../utils/damage.js";
 import { canEmbraceTaint, highestRing, lostBonus } from "../../../utils/taint.js";
-import { spendVoidPoint } from "../resources/void-manager.js";
+import { spendVoidPoint } from "../resources/void-points.js";
 import { resolveTargets } from "../resources/target-resolver.js";
 import { collectCheck } from "./collect.js";
 import { voidOverLimit } from "../../effects/uses.js";

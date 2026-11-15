@@ -206,18 +206,6 @@ export const GALLERY_COLORS = freeze([
       },
       { token: "--l5r4-color-float-stroke", against: "--l5r4-color-float-wounds-up" }
     ]
-  },
-  {
-    group: "l5r4.apps.designGallery.color.renamed",
-    tokens: [
-      { token: "--air-ring-color" },
-      { token: "--water-ring-color" },
-      { token: "--earth-ring-color" },
-      { token: "--fire-ring-color" },
-      { token: "--void-ring-color" },
-      { token: "--l5r4-ring-rank-backdrop-color" },
-      { token: "--l5r4-ring-rank-backdrop-image", image: true }
-    ]
   }
 ]);
 
@@ -773,11 +761,11 @@ export const GALLERY_COMPONENTS = freeze([
     page: "button",
     partials: [
       `${T}/actor/_partials/_fear.hbs`,
-      `${T}/actor/_partials/_skills-section.hbs`,
+      `${T}/actor/_partials/_skill-section.hbs`,
       `${T}/cards/skill.hbs`
     ],
     scss: [
-      "scss/components/_buttons.scss",
+      "scss/components/_button.scss",
       "scss/components/_animations.scss",
       "scss/features/_traits-rings.scss"
     ],
@@ -790,7 +778,7 @@ export const GALLERY_COMPONENTS = freeze([
       },
       {
         label: "l5r4.apps.designGallery.samples.rollButton",
-        partial: `${T}/actor/_partials/_skills-section.hbs`,
+        partial: `${T}/actor/_partials/_skill-section.hbs`,
         scope: "pc",
         context: "pc",
         with: { skills: ROWS.skills }
@@ -822,9 +810,9 @@ export const GALLERY_COMPONENTS = freeze([
       `${T}/item/_partials/_tab-effects.hbs`
     ],
     scss: [
-      "scss/components/_item-lists.scss",
-      "scss/components/_forms.scss",
-      "scss/components/_rules-editor.scss"
+      "scss/components/_item-row.scss",
+      "scss/components/_form-field.scss",
+      "scss/components/_inline-control.scss"
     ],
     samples: [
       {
@@ -876,7 +864,7 @@ export const GALLERY_COMPONENTS = freeze([
   {
     page: "form-field",
     partials: [`${T}/item/_partials/_tab-details.hbs`, `${T}/item/_partials/_tab-modifiers.hbs`],
-    scss: ["scss/components/_forms.scss"],
+    scss: ["scss/components/_form-field.scss"],
     samples: [
       {
         label: "l5r4.apps.designGallery.samples.coreFields",
@@ -898,7 +886,7 @@ export const GALLERY_COMPONENTS = freeze([
   {
     page: "grid",
     partials: [`${T}/actor/_partials/_wounds.hbs`],
-    scss: ["scss/components/_grids.scss"],
+    scss: ["scss/components/_grid.scss"],
     samples: [
       {
         label: "l5r4.apps.designGallery.samples.gridWithFullRow",
@@ -913,22 +901,22 @@ export const GALLERY_COMPONENTS = freeze([
   {
     page: "section",
     partials: [
-      `${T}/actor/_partials/_skills-section.hbs`,
+      `${T}/actor/_partials/_skill-section.hbs`,
       `${T}/actor/_partials/_item-section.hbs`,
       `${T}/actor/_partials/_bio.hbs`
     ],
-    scss: ["scss/components/_sections.scss"],
+    scss: ["scss/components/_section.scss"],
     samples: [
       {
         label: "l5r4.apps.designGallery.samples.listOpen",
-        partial: `${T}/actor/_partials/_skills-section.hbs`,
+        partial: `${T}/actor/_partials/_skill-section.hbs`,
         scope: "pc",
         context: "pc",
         with: { skills: ROWS.skills }
       },
       {
         label: "l5r4.apps.designGallery.samples.listCollapsed",
-        partial: `${T}/actor/_partials/_skills-section.hbs`,
+        partial: `${T}/actor/_partials/_skill-section.hbs`,
         scope: "pc",
         context: "pc",
         with: { skills: ROWS.skills, collapsedSections: { skills: true } }
@@ -972,7 +960,7 @@ export const GALLERY_COMPONENTS = freeze([
   {
     page: "item-row",
     partials: [
-      `${T}/actor/_partials/_skills-section.hbs`,
+      `${T}/actor/_partials/_skill-section.hbs`,
       `${T}/actor/_partials/_weapon-section.hbs`,
       `${T}/actor/_partials/_armor-section.hbs`,
       `${T}/actor/_partials/_item-section.hbs`,
@@ -984,11 +972,11 @@ export const GALLERY_COMPONENTS = freeze([
       `${T}/actor/_partials/_advantage-section.hbs`,
       `${T}/actor/_partials/_disadvantage-section.hbs`
     ],
-    scss: ["scss/components/_item-lists.scss"],
+    scss: ["scss/components/_item-row.scss"],
     samples: [
       {
         label: "l5r4.apps.designGallery.samples.skillRows",
-        partial: `${T}/actor/_partials/_skills-section.hbs`,
+        partial: `${T}/actor/_partials/_skill-section.hbs`,
         scope: "pc",
         context: "pc",
         with: { skills: ROWS.skills }
@@ -1076,7 +1064,7 @@ export const GALLERY_COMPONENTS = freeze([
   {
     page: "sort-header",
     partials: [`${T}/actor/_partials/_spell-section.hbs`],
-    scss: ["scss/components/_item-lists.scss"],
+    scss: ["scss/components/_item-row.scss"],
     samples: [
       {
         label: "l5r4.apps.designGallery.samples.sortHeader",
@@ -1092,7 +1080,7 @@ export const GALLERY_COMPONENTS = freeze([
   {
     page: "tabs",
     partials: [`${T}/item/_partials/_tabs.hbs`],
-    scss: ["scss/components/_compendium-browser.scss"],
+    scss: ["scss/apps/_compendium-browser.scss"],
     samples: [
       {
         label: "l5r4.apps.designGallery.samples.twoTabs",
@@ -1174,10 +1162,7 @@ export const GALLERY_COMPONENTS = freeze([
       }
     ],
     seeAlso: ["rank-control", "void-point-dots", "button"],
-    notes: [
-      "l5r4.apps.designGallery.notes.pseudoStates",
-      "l5r4.apps.designGallery.notes.notesEditor"
-    ]
+    notes: ["l5r4.apps.designGallery.notes.pseudoStates", "l5r4.apps.designGallery.notes.editor"]
   },
   {
     page: "rank-control",
@@ -1206,7 +1191,7 @@ export const GALLERY_COMPONENTS = freeze([
   {
     page: "wound-track",
     partials: [`${T}/actor/_partials/_wounds.hbs`],
-    scss: ["scss/features/_wounds.scss"],
+    scss: ["scss/features/_wound-track.scss"],
     samples: [
       {
         label: "l5r4.apps.designGallery.samples.healthy",
@@ -1258,7 +1243,7 @@ export const GALLERY_COMPONENTS = freeze([
   {
     page: "initiative-block",
     partials: [`${T}/actor/_partials/_combat.hbs`],
-    scss: ["scss/features/_initiative.scss"],
+    scss: ["scss/components/_section.scss", "scss/components/_grid.scss"],
     samples: [
       {
         label: "l5r4.apps.designGallery.samples.voidOffSimple",
@@ -1290,7 +1275,7 @@ export const GALLERY_COMPONENTS = freeze([
   {
     page: "armor-tn-block",
     partials: [`${T}/actor/_partials/_armor.hbs`],
-    scss: ["scss/features/_armor.scss"],
+    scss: ["scss/components/_section.scss", "scss/components/_grid.scss"],
     samples: [
       {
         label: "l5r4.apps.designGallery.samples.pcVoidOff",
@@ -1354,7 +1339,7 @@ export const GALLERY_COMPONENTS = freeze([
   {
     page: "spell-slots",
     partials: [`${T}/actor/_partials/_spell-section.hbs`],
-    scss: ["scss/components/_sections.scss"],
+    scss: ["scss/components/_section.scss"],
     samples: [
       {
         label: "l5r4.apps.designGallery.samples.slotCounts",
@@ -1370,7 +1355,7 @@ export const GALLERY_COMPONENTS = freeze([
   {
     page: "chat-card",
     partials: [`${T}/chat/healing.hbs`, `${T}/chat/weapon-chat.hbs`],
-    scss: ["scss/_chat.scss"],
+    scss: ["scss/components/_chat-card.scss"],
     samples: [
       {
         label: "l5r4.apps.designGallery.samples.healingCard",
@@ -1384,7 +1369,7 @@ export const GALLERY_COMPONENTS = freeze([
             data: { amount: 6, rate: 6 }
           },
           woundsText: {
-            i18n: "l5r4.ui.mechanics.wounds.woundStatus",
+            i18n: "l5r4.ui.mechanics.wounds.status",
             data: { current: 38, max: 38, suffered: 0 }
           },
           wasFullyHealed: true,
@@ -1406,12 +1391,12 @@ export const GALLERY_COMPONENTS = freeze([
   },
   {
     page: "dice-row",
-    partials: [`${T}/chat/check-card.hbs`],
-    scss: ["scss/_chat.scss"],
+    partials: [`${T}/chat/check.hbs`],
+    scss: ["scss/components/_chat-card.scss"],
     samples: [
       {
         label: "l5r4.apps.designGallery.samples.skilledRoll",
-        partial: `${T}/chat/check-card.hbs`,
+        partial: `${T}/chat/check.hbs`,
         scope: "chat",
         context: "plain",
         roll: "skilled",
@@ -1419,7 +1404,7 @@ export const GALLERY_COMPONENTS = freeze([
       },
       {
         label: "l5r4.apps.designGallery.samples.unskilledRoll",
-        partial: `${T}/chat/check-card.hbs`,
+        partial: `${T}/chat/check.hbs`,
         scope: "chat",
         context: "plain",
         roll: "unskilled",
@@ -1427,7 +1412,7 @@ export const GALLERY_COMPONENTS = freeze([
       },
       {
         label: "l5r4.apps.designGallery.samples.emphasisRoll",
-        partial: `${T}/chat/check-card.hbs`,
+        partial: `${T}/chat/check.hbs`,
         scope: "chat",
         context: "plain",
         roll: "emphasis",
@@ -1439,12 +1424,12 @@ export const GALLERY_COMPONENTS = freeze([
   },
   {
     page: "check-card",
-    partials: [`${T}/chat/check-card.hbs`],
-    scss: ["scss/_chat.scss"],
+    partials: [`${T}/chat/check.hbs`],
+    scss: ["scss/components/_chat-card.scss"],
     samples: [
       {
         label: "l5r4.apps.designGallery.samples.success",
-        partial: `${T}/chat/check-card.hbs`,
+        partial: `${T}/chat/check.hbs`,
         scope: "chat",
         context: "plain",
         roll: "skilled",
@@ -1456,7 +1441,7 @@ export const GALLERY_COMPONENTS = freeze([
       },
       {
         label: "l5r4.apps.designGallery.samples.failureHonorRoll",
-        partial: `${T}/chat/check-card.hbs`,
+        partial: `${T}/chat/check.hbs`,
         scope: "chat",
         context: "plain",
         roll: "unskilled",
@@ -1470,7 +1455,7 @@ export const GALLERY_COMPONENTS = freeze([
       },
       {
         label: "l5r4.apps.designGallery.samples.attackHit",
-        partial: `${T}/chat/check-card.hbs`,
+        partial: `${T}/chat/check.hbs`,
         scope: "chat",
         context: "plain",
         roll: "skilled",
@@ -1487,7 +1472,7 @@ export const GALLERY_COMPONENTS = freeze([
       },
       {
         label: "l5r4.apps.designGallery.samples.damage",
-        partial: `${T}/chat/check-card.hbs`,
+        partial: `${T}/chat/check.hbs`,
         scope: "chat",
         context: "plain",
         roll: "emphasis",
@@ -1506,7 +1491,7 @@ export const GALLERY_COMPONENTS = freeze([
   {
     page: "request-card",
     partials: [`${T}/chat/check-request.hbs`],
-    scss: ["scss/components/_effect-panel.scss"],
+    scss: ["scss/components/_request-card.scss"],
     samples: [
       {
         label: "l5r4.apps.designGallery.samples.request",
@@ -1514,7 +1499,7 @@ export const GALLERY_COMPONENTS = freeze([
         scope: "chat",
         context: "plain",
         with: {
-          text: { i18n: "l5r4.ui.links.checkTN", data: { what: "Kenjutsu / Agility", tn: 20 } }
+          text: { i18n: "l5r4.ui.links.checkTn", data: { what: "Kenjutsu / Agility", tn: 20 } }
         }
       }
     ],
@@ -1524,7 +1509,7 @@ export const GALLERY_COMPONENTS = freeze([
   {
     page: "damage-result",
     partials: [`${T}/chat/damage-result.hbs`],
-    scss: ["scss/_chat.scss"],
+    scss: ["scss/components/_chat-card.scss"],
     samples: [
       {
         label: "l5r4.apps.designGallery.samples.woundsTaken",
@@ -1593,7 +1578,7 @@ export const GALLERY_COMPONENTS = freeze([
   {
     page: "effect-prompt",
     partials: [`${T}/chat/effect-prompt.hbs`],
-    scss: ["scss/_chat.scss"],
+    scss: ["scss/components/_chat-card.scss"],
     samples: [
       {
         label: "l5r4.apps.designGallery.samples.save",
@@ -1613,7 +1598,7 @@ export const GALLERY_COMPONENTS = freeze([
         context: "plain",
         with: {
           title: { i18n: "l5r4.ui.mechanics.stances.fullDefense" },
-          text: { i18n: "l5r4.ui.mechanics.stances.fullDefenseDescription" },
+          text: { i18n: "l5r4.ui.mechanics.stances.fullDefenseHint" },
           button: { i18n: "l5r4.ui.common.roll" }
         }
       }
@@ -1623,12 +1608,12 @@ export const GALLERY_COMPONENTS = freeze([
   },
   {
     page: "flow-card",
-    partials: [`${T}/chat/flow-card.hbs`],
-    scss: ["scss/_chat.scss"],
+    partials: [`${T}/chat/flow.hbs`],
+    scss: ["scss/components/_chat-card.scss"],
     samples: [
       {
         label: "l5r4.apps.designGallery.samples.duel",
-        partial: `${T}/chat/flow-card.hbs`,
+        partial: `${T}/chat/flow.hbs`,
         scope: "chat",
         context: "plain",
         with: {
@@ -1657,7 +1642,7 @@ export const GALLERY_COMPONENTS = freeze([
       },
       {
         label: "l5r4.apps.designGallery.samples.grapple",
-        partial: `${T}/chat/flow-card.hbs`,
+        partial: `${T}/chat/flow.hbs`,
         scope: "chat",
         context: "plain",
         with: {
@@ -1679,7 +1664,7 @@ export const GALLERY_COMPONENTS = freeze([
       },
       {
         label: "l5r4.apps.designGallery.samples.flowOver",
-        partial: `${T}/chat/flow-card.hbs`,
+        partial: `${T}/chat/flow.hbs`,
         scope: "chat",
         context: "plain",
         with: {
@@ -1705,7 +1690,7 @@ export const GALLERY_COMPONENTS = freeze([
       `${T}/chat/item-summary.hbs`,
       `${T}/item/_partials/_tab-description.hbs`
     ],
-    scss: ["scss/components/_compendium-browser.scss", "scss/_chat.scss"],
+    scss: ["scss/components/_item-summary-card.scss", "scss/components/_chat-card.scss"],
     samples: [
       {
         label: "l5r4.apps.designGallery.samples.postedItem",
@@ -1759,7 +1744,7 @@ export const GALLERY_COMPONENTS = freeze([
       `${T}/dialogs/check-extras/ring.hbs`,
       `${T}/dialogs/check-extras/maho.hbs`
     ],
-    scss: ["scss/_chat.scss"],
+    scss: ["scss/components/_check-dialog.scss"],
     samples: [
       {
         label: "l5r4.apps.designGallery.samples.everyPart",
@@ -1803,7 +1788,7 @@ export const GALLERY_COMPONENTS = freeze([
   {
     page: "ledger-dialog",
     partials: [`${T}/dialogs/ledger-dialog.hbs`],
-    scss: ["scss/components/_rules-editor.scss"],
+    scss: ["scss/components/_ledger-dialog.scss"],
     samples: [
       {
         label: "l5r4.apps.designGallery.samples.withEntries",
@@ -1838,7 +1823,7 @@ export const GALLERY_COMPONENTS = freeze([
         partial: `${T}/dialogs/ledger-dialog.hbs`,
         scope: "plain",
         context: "plain",
-        with: { tracks: { shadowTaint: { i18n: "l5r4.character.ranks.shadowRank" } }, entries: [] }
+        with: { tracks: { shadowTaint: { i18n: "l5r4.character.ranks.taintRank" } }, entries: [] }
       }
     ],
     seeAlso: [],
@@ -1846,7 +1831,7 @@ export const GALLERY_COMPONENTS = freeze([
   },
   {
     page: "rules-editor",
-    partials: [`${T}/item/_partials/_tab-rules.hbs`, `${T}/rules/editor.hbs`],
+    partials: [`${T}/item/_partials/_tab-rules.hbs`, `${T}/rules/_partials/_editor.hbs`],
     scss: ["scss/components/_rules-editor.scss"],
     samples: [
       {
@@ -1889,7 +1874,7 @@ export const GALLERY_COMPONENTS = freeze([
       },
       {
         label: "l5r4.apps.designGallery.samples.jsonView",
-        partial: `${T}/rules/editor.hbs`,
+        partial: `${T}/rules/_partials/_editor.hbs`,
         scope: "item",
         context: "item",
         with: {
@@ -1900,7 +1885,7 @@ export const GALLERY_COMPONENTS = freeze([
       },
       {
         label: "l5r4.apps.designGallery.samples.readOnlyEmpty",
-        partial: `${T}/rules/editor.hbs`,
+        partial: `${T}/rules/_partials/_editor.hbs`,
         scope: "item",
         context: "item",
         with: { rulesMode: "form", rulesEditable: false, rules: [] }
@@ -1912,7 +1897,7 @@ export const GALLERY_COMPONENTS = freeze([
   {
     page: "effect-panel",
     partials: [`${T}/apps/effect-panel.hbs`],
-    scss: ["scss/components/_effect-panel.scss"],
+    scss: ["scss/apps/_effect-panel.scss"],
     samples: [
       {
         label: "l5r4.apps.designGallery.samples.effects",
@@ -1928,7 +1913,7 @@ export const GALLERY_COMPONENTS = freeze([
               name: "Dazed",
               img: "icons/svg/daze.svg",
               source: "Striking as Air",
-              lasts: { i18n: "l5r4.ui.effectPanel.rounds", data: { count: 2 } },
+              lasts: { i18n: "l5r4.apps.effectPanel.rounds", data: { count: 2 } },
               canRemove: true
             },
             {
@@ -1937,7 +1922,7 @@ export const GALLERY_COMPONENTS = freeze([
               name: { i18n: "l5r4.apps.designGallery.sample.effectName" },
               img: "icons/svg/aura.svg",
               source: "",
-              lasts: { i18n: "l5r4.ui.effectPanel.uses", data: { left: 1, max: 3 } },
+              lasts: { i18n: "l5r4.apps.effectPanel.uses", data: { left: 1, max: 3 } },
               canRemove: false
             }
           ]
@@ -1952,7 +1937,7 @@ export const GALLERY_COMPONENTS = freeze([
           actor: { name: { i18n: "l5r4.apps.designGallery.sample.pcName" } },
           effects: [],
           empty: {
-            i18n: "l5r4.ui.effectPanel.none",
+            i18n: "l5r4.apps.effectPanel.none",
             data: { name: { i18n: "l5r4.apps.designGallery.sample.pcName" } }
           }
         }
@@ -1962,7 +1947,7 @@ export const GALLERY_COMPONENTS = freeze([
         partial: `${T}/apps/effect-panel.hbs`,
         scope: "effect-panel",
         context: "plain",
-        with: { effects: [], empty: { i18n: "l5r4.ui.effectPanel.noActor" } }
+        with: { effects: [], empty: { i18n: "l5r4.apps.effectPanel.noActor" } }
       }
     ],
     seeAlso: [],
@@ -1971,7 +1956,7 @@ export const GALLERY_COMPONENTS = freeze([
   {
     page: "compendium-browser",
     partials: [`${T}/apps/compendium-browser.hbs`, `${T}/apps/compendium-browser-results.hbs`],
-    scss: ["scss/components/_compendium-browser.scss"],
+    scss: ["scss/apps/_compendium-browser.scss"],
     samples: [
       {
         label: "l5r4.apps.designGallery.samples.browserControls",
@@ -1980,9 +1965,21 @@ export const GALLERY_COMPONENTS = freeze([
         context: "plain",
         with: {
           tabs: [
-            { id: "skills", label: { i18n: "l5r4.ui.browser.tabs.skills" }, active: true },
-            { id: "spells", label: { i18n: "l5r4.ui.browser.tabs.spells" }, active: false },
-            { id: "creatures", label: { i18n: "l5r4.ui.browser.tabs.creatures" }, active: false }
+            {
+              id: "skills",
+              label: { i18n: "l5r4.apps.compendiumBrowser.tabs.skills" },
+              active: true
+            },
+            {
+              id: "spells",
+              label: { i18n: "l5r4.apps.compendiumBrowser.tabs.spells" },
+              active: false
+            },
+            {
+              id: "creatures",
+              label: { i18n: "l5r4.apps.compendiumBrowser.tabs.creatures" },
+              active: false
+            }
           ],
           search: "",
           filters: [
@@ -2049,7 +2046,7 @@ export const GALLERY_COMPONENTS = freeze([
   {
     page: "inline-link",
     partials: [`${T}/links/inline-link.hbs`],
-    scss: ["scss/components/_effect-panel.scss"],
+    scss: ["scss/components/_inline-link.scss"],
     samples: [
       {
         label: "l5r4.apps.designGallery.samples.checkLink",
@@ -2062,7 +2059,7 @@ export const GALLERY_COMPONENTS = freeze([
           params: "skill=Kenjutsu|tn=20",
           label: "",
           icon: "fa-solid fa-dice-d10",
-          text: { i18n: "l5r4.ui.links.checkTN", data: { what: "Kenjutsu", tn: 20 } }
+          text: { i18n: "l5r4.ui.links.checkTn", data: { what: "Kenjutsu", tn: 20 } }
         }
       },
       {
@@ -2112,7 +2109,7 @@ export const GALLERY_COMPONENTS = freeze([
         partial: `${T}/links/inline-link.hbs`,
         scope: "plain",
         context: "plain",
-        with: { ok: false, source: "@Fear[11]", reason: { i18n: "l5r4.ui.links.error.fear" } }
+        with: { ok: false, source: "@Fear[11]", reason: { i18n: "l5r4.ui.links.errors.fear" } }
       }
     ],
     seeAlso: ["request-card"],
@@ -2150,7 +2147,7 @@ export const GALLERY_PATTERNS = freeze([
     label: "l5r4.apps.designGallery.patterns.chatCard",
     samples: [
       {
-        partial: `${T}/chat/check-card.hbs`,
+        partial: `${T}/chat/check.hbs`,
         scope: "chat",
         context: "plain",
         roll: "skilled",
@@ -2203,7 +2200,7 @@ export const GALLERY_PATTERNS = freeze([
               name: "Dazed",
               img: "icons/svg/daze.svg",
               source: "Striking as Air",
-              lasts: { i18n: "l5r4.ui.effectPanel.noEnd" },
+              lasts: { i18n: "l5r4.apps.effectPanel.noEnd" },
               canRemove: true
             }
           ]

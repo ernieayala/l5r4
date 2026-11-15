@@ -51,7 +51,7 @@ import { SYS_ID } from "../config/constants.js";
 import { hasBeenMigrated, markAsMigrated } from "./migrations/utils/helpers.js";
 
 // Schema migrations
-import { applySchemaMapToDocs } from "./migrations/schema/schema-apply.js";
+import { applySchemaMapToDocs } from "./migrations/schema/apply.js";
 
 // Actor migrations
 import { migrateLegacyNpcWounds } from "./migrations/actors/npc-wounds.js";

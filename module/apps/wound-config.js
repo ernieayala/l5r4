@@ -71,11 +71,11 @@ export default class WoundConfigApplication extends DebouncedFieldMixin(
 ) {
   static DEFAULT_OPTIONS = {
     id: "wound-config-{id}",
-    classes: ["l5r4", "wound-config-app"],
+    classes: ["l5r4", "l5r4-wound-config"],
     tag: "form",
     window: {
       title: "l5r4.apps.woundConfig.title",
-      icon: "fas fa-cog",
+      icon: "fa-solid fa-gear",
       resizable: true
     },
     position: {
@@ -83,7 +83,7 @@ export default class WoundConfigApplication extends DebouncedFieldMixin(
       height: 400
     },
     actions: {
-      "wound-mode-change": WoundConfigApplication.prototype._onWoundModeChange
+      "update-wound-mode": WoundConfigApplication.prototype._onWoundModeChange
     },
     form: {
       handler: WoundConfigApplication.prototype._onSubmitForm,

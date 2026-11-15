@@ -1,8 +1,8 @@
 import { SYS_ID } from "../../module/config/constants.js";
 import { PcActionsHandler } from "../../module/sheets/handlers/pc-actions-handler.js";
 import { SkillRoll } from "../../module/services/dice/rolls/skill-roll.js";
-import { FamilyBonusService } from "../../module/services/family-bonus-service.js";
-import { buildXpHistory } from "../../module/services/xp/xp-calculator.js";
+import { FamilyBonusService } from "../../module/services/family-bonus.js";
+import { buildXpHistory } from "../../module/services/xp/calculator.js";
 import { createTestNPC, createTestPC } from "../fixtures/actor-fixtures.js";
 import { createSkillData } from "../fixtures/item-fixtures.js";
 import { settleChatNotifications, watchConsole } from "./helpers.js";
@@ -164,7 +164,7 @@ export function registerDeprecationsTests(quench) {
           ]);
           await actor.sheet.render({ force: true });
           const control = actor.sheet.element.querySelector(
-            `.item[data-item-id="${skill.id}"] [data-action="item-delete"]`
+            `.item[data-item-id="${skill.id}"] [data-action="delete-item"]`
           );
           const answered = answerNextDialog("yes");
           const deleted = new Promise(resolve => Hooks.once("deleteItem", resolve));

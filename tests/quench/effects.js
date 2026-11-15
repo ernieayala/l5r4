@@ -5,7 +5,7 @@ import { applyEffect, effectsOf } from "../../module/services/effects/apply.js";
 import { onPromptClick } from "../../module/services/effects/prompts.js";
 import { registerTokenEffects, syncProne } from "../../module/services/effects/automation.js";
 import { voidOverLimit, voidSpent } from "../../module/services/effects/uses.js";
-import { spendVoidPoint } from "../../module/services/dice/resources/void-manager.js";
+import { spendVoidPoint } from "../../module/services/dice/resources/void-points.js";
 import { collectCheck } from "../../module/services/dice/check/collect.js";
 import { createTestNPC, createTestPC } from "../fixtures/actor-fixtures.js";
 import { autoAnswerRolls, settleChatNotifications, waitFor } from "./helpers.js";

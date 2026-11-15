@@ -11,7 +11,7 @@ and core draws the window, the footer, and the keyboard handling.
 | Templates  | `templates/dialogs/check-dialog.hbs` with `check-extras/ring.hbs`, `spell.hbs`, `slot.hbs`, `maho.hbs`; `ledger-dialog.hbs`, `unified-item-create-dialog.hbs`, `custom-emphasis-dialog.hbs`, `disadvantage-cap-dialog.hbs`     |
 | Paths      | `DIALOG_TEMPLATES` in `module/config/templates.js:112-120`                                                                                                                                                                     |
 | Callers    | `ask*` functions in services (`docs/code-system/naming.md`, verb vocabulary): `askChoices` (`module/services/dice/check/roll-check.js:165-184`), `askChoice` and `askSchool` (`module/services/purchase.js:58-81`, `:157-172`) |
-| SCSS       | `scss/_chat.scss:64-87` today (`l5r4-check-dialog`); `scss/components/_check-dialog.scss` (target) and `scss/components/_ledger-dialog.scss` (target)                                                                          |
+| SCSS       | `scss/components/_check-dialog.scss:5-28` today (`l5r4-check-dialog`); `scss/components/_check-dialog.scss` and `scss/components/_ledger-dialog.scss`                                                                          |
 | Tokens     | `--l5r4-space-gap-tight`, `--l5r4-space-gap`, `--l5r4-font-code`, `--l5r4-font-size-meta`, `--l5r4-color-warning`, `--l5r4-color-text`, `--l5r4-state-disabled-opacity`                                                        |
 | Components | Check dialog, ledger dialog, form field, button                                                                                                                                                                                |
 | Checks     | ESLint `no-restricted-syntax` (no global `Dialog`, no HTML strings), `tests/conventions/templates.test.js`, `tests/conventions/names.test.js`, `tests/lang.test.js`; "review" where no tool can judge                          |
@@ -148,7 +148,7 @@ code face and in `XkY` notation (`content/voice.md`, Numbers and dice). A row th
 `data-tooltip` says why (`foundations/states.md` rule 5). A warning about the roll (a Void Point already spent this Round, the
 blood maho costs) uses the warning look, not the hint look. Enforced by review and the gallery's check dialog entries.
 
-Conforming, `templates/dialogs/check-dialog.hbs:10-11` with `scss/_chat.scss:84-86`: the label, then the value in the
+Conforming, `templates/dialogs/check-dialog.hbs:10-11` with `scss/components/_check-dialog.scss:25-27`: the label, then the value in the
 monospace face.
 
 Non-conforming, `templates/dialogs/check-dialog.hbs:66`: the Void Point box disables at zero with no reason, and
@@ -207,12 +207,12 @@ Non-conforming, modeled: a prompt with a free-text field for a choice the rules 
 
 ## Long text
 
-| Element         | Behavior                                                                                           |
-| --------------- | -------------------------------------------------------------------------------------------------- |
-| Title           | One line in core's title bar; a title that names an item and a choice stays under 420 px           |
-| Modifier labels | Wrap inside their row; the value stays at the row's end (`scss/_chat.scss:74-82`)                  |
-| Question text   | Wraps; a long list of names (the Schools in `askSchool`) wraps in the sentence                     |
-| Dialog height   | Grows with its rows; the rows that do not apply are left out, so a short roll gives a short dialog |
+| Element         | Behavior                                                                                             |
+| --------------- | ---------------------------------------------------------------------------------------------------- |
+| Title           | One line in core's title bar; a title that names an item and a choice stays under 420 px             |
+| Modifier labels | Wrap inside their row; the value stays at the row's end (`scss/components/_check-dialog.scss:15-23`) |
+| Question text   | Wraps; a long list of names (the Schools in `askSchool`) wraps in the sentence                       |
+| Dialog height   | Grows with its rows; the rows that do not apply are left out, so a short roll gives a short dialog   |
 
 ## Do and don't
 

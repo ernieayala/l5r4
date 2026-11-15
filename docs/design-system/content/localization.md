@@ -103,18 +103,18 @@ the constants in `module/config/localization.js` point at the winners. Basis: al
 winning trees and none carries `l5r4.mechanics`, and templates read the winners in about 150 places against 33 lines
 in one config file.
 
-| Meaning                  | Wins                                 | Removed                                                                                    |
-| ------------------------ | ------------------------------------ | ------------------------------------------------------------------------------------------ |
-| Ring names               | `l5r4.ui.mechanics.rings` (`:449`)   | `l5r4.mechanics.rings` (`:77`)                                                             |
-| Trait names              | `l5r4.ui.mechanics.traits` (`:461`)  | `l5r4.mechanics.traits` (`:99`)                                                            |
-| Stance names             | `l5r4.ui.mechanics.stances` (`:543`) | `l5r4.mechanics.stances` (`:92`)                                                           |
-| Skill types              | `l5r4.character.skillTypes` (`:847`) | `l5r4.mechanics.skills.types` (`:85`)                                                      |
-| Advantage types          | `l5r4.character.advantages` (`:853`) | `l5r4.mechanics.advantages.types` (`:60`)                                                  |
-| Kiho types               | `l5r4.magic.kiho` (`:1007`)          | `l5r4.mechanics.magic.kiho` (`:70`)                                                        |
-| Shared labels            | `l5r4.ui.common` (`:565`)            | `l5r4.ui.label` (`:111`): its 8 copies go, and `add`, `all`, `complex` move to `ui.common` |
-| Emphasis Manager strings | `l5r4.apps.emphasisManager` (`:22`)  | `l5r4.ui.emphasisManager` (`:694`)                                                         |
-| Wealth Manager strings   | `l5r4.apps.wealthManager` (`:36`)    | `l5r4.ui.wealthManager` (`:701`)                                                           |
-| Window titles            | `l5r4.apps.<app>.title`              | `ui.combat.configuration` (`:606`), `ui.mechanics.wounds.woundConfiguration` (`:512`)      |
+| Meaning                  | Wins                                                           | Removed                                                                               |
+| ------------------------ | -------------------------------------------------------------- | ------------------------------------------------------------------------------------- |
+| Ring names               | `l5r4.ui.mechanics.rings` (`:449`)                             | `l5r4.mechanics.rings` (`:77`)                                                        |
+| Trait names              | `l5r4.ui.mechanics.traits` (`:461`)                            | `l5r4.mechanics.traits` (`:99`)                                                       |
+| Stance names             | `l5r4.ui.mechanics.stances` (`:543`)                           | `l5r4.mechanics.stances` (`:92`)                                                      |
+| Skill types              | `l5r4.character.skillTypes` (`:847`)                           | `l5r4.mechanics.skills.types` (`:85`)                                                 |
+| Advantage types          | `l5r4.character.advantages` (`:853`)                           | `l5r4.mechanics.advantages.types` (`:60`)                                             |
+| Kiho types               | `l5r4.magic.kiho` (`:1007`)                                    | `l5r4.mechanics.magic.kiho` (`:70`)                                                   |
+| Shared labels            | `l5r4.ui.common` (`:565`), which takes `add`, `all`, `complex` | `l5r4.ui.label` (`:111`): its 8 copies go                                             |
+| Emphasis Manager strings | `l5r4.apps.emphasisManager` (`:22`)                            | `l5r4.ui.emphasisManager` (`:694`)                                                    |
+| Wealth Manager strings   | `l5r4.apps.wealthManager` (`:36`)                              | `l5r4.ui.wealthManager` (`:701`)                                                      |
+| Window titles            | `l5r4.apps.<app>.title`                                        | `ui.combat.configuration` (`:606`), `ui.mechanics.wounds.woundConfiguration` (`:512`) |
 
 **Check.** `tests/lang.test.js`: the removed trees above do not exist. Review for other repeated values (two meanings
 may share a word) and for fragments.

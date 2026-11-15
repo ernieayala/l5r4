@@ -8,8 +8,8 @@ window shape, one row shape, and one rule for how each saves.
 | Item       | Detail                                                                                                                                                                                                                                                                                                                                                                                                        |
 | ---------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
 | Classes    | `module/apps/*.js`; the rules editor's context and actions in `module/sheets/rules-editor.js`                                                                                                                                                                                                                                                                                                                 |
-| Templates  | `templates/apps/<file-name>.hbs`, one per app; `templates/apps/compendium-browser-results.hbs`; `templates/rules/editor.hbs`, `effect-tab.hbs`                                                                                                                                                                                                                                                                |
-| SCSS       | `scss/components/_effect-panel.scss`, `_compendium-browser.scss`, `_rules-editor.scss`; `scss/apps/_xp-manager.scss`, `_wound-config.scss`, `_emphasis-manager.scss`. The target is one `scss/apps/_<file-name>.scss` per window (rule 7)                                                                                                                                                                     |
+| Templates  | `templates/apps/<file-name>.hbs`, one per app; `templates/apps/compendium-browser-results.hbs`; `templates/rules/_partials/_editor.hbs`, `effect-tab.hbs`                                                                                                                                                                                                                                                     |
+| SCSS       | `scss/apps/_effect-panel.scss`, `_compendium-browser.scss`, `_rules-editor.scss`; `scss/apps/_xp-manager.scss`, `_wound-config.scss`, `_emphasis-manager.scss`. The target is one `scss/apps/_<file-name>.scss` per window (rule 7)                                                                                                                                                                           |
 | Tokens     | `--l5r4-space-gap-tight`, `--l5r4-space-gap`, `--l5r4-space-card`, `--l5r4-space-indent`, `--l5r4-space-control-block`, `--l5r4-space-control-inline`; `--l5r4-size-item-icon`; `--l5r4-font-size-meta`, `--l5r4-font-code`; `--l5r4-color-line-muted`, `--l5r4-color-divider`, `--l5r4-color-danger`, `--l5r4-color-accent`; `--l5r4-radius-sm`, `--l5r4-border-width-thin`; `--l5r4-state-selected-outline` |
 | Components | Effect panel, compendium browser, rules editor, item row and item list, sort header, form field, button, icon button                                                                                                                                                                                                                                                                                          |
 | Checks     | `tests/conventions/actions.test.js`, `tests/conventions/templates.test.js`, `tests/conventions/styles.test.js`, Stylelint; "review" where no tool can judge                                                                                                                                                                                                                                                   |
@@ -80,7 +80,7 @@ A search or filter change re-renders the results part only, so the control in us
 
 | Part      | Holds                                                                                                                                  |
 | --------- | -------------------------------------------------------------------------------------------------------------------------------------- |
-| Toolbar   | The hint, and the switch between the form view and the JSON view (`templates/rules/editor.hbs:3-10`)                                   |
+| Toolbar   | The hint, and the switch between the form view and the JSON view (`templates/rules/_partials/_editor.hbs:3-10`)                        |
 | Rule card | A `fieldset` per rule: the rule key in the `legend` with the remove control, an error line, then one field per schema field (`:15-45`) |
 | JSON view | One `textarea` with the whole list (`:12-13`)                                                                                          |
 | Add row   | A select of the rule keys and an "Add rule" button (`:49-56`)                                                                          |
@@ -95,7 +95,7 @@ not rendered (`editor.hbs:5`, `:19`, `:49`).
 | ------------ | ------------------------------------------------------------------------------------------- | ----------------------------------------------------------------- |
 | No actor     | The panel says to select a token or assign a character                                      | Effect panel (`l5r4.ui.effectPanel.noActor`)                      |
 | Empty        | One italic line in the list's place (`foundations/states.md` rule 9)                        | Effect panel, browser, rules editor; the managers' lists (rule 4) |
-| Selected tab | Bold and the selected outline (`foundations/states.md`, Selected), `aria-pressed="true"`    | Browser tabs (`scss/components/_compendium-browser.scss:41-44`)   |
+| Selected tab | Bold and the selected outline (`foundations/states.md`, Selected), `aria-pressed="true"`    | Browser tabs (`scss/apps/_compendium-browser.scss:40-43`)         |
 | Can't act    | The control is not rendered: remove on an effect the user does not own, Import for a player | `effect-panel.js:85`, `compendium-browser.js:159-160`             |
 | Invalid rule | The error line under the legend with the invalid look (`foundations/states.md` rule 7)      | Rules editor (`editor.hbs:25`)                                    |
 | Read-only    | Fields disabled, edit controls left out                                                     | Rules editor on a document the user cannot edit                   |
@@ -157,7 +157,7 @@ shrinks and wraps (`min-width: 0`). A control acts on its row through `closest("
 row's index. Enforced by `tests/conventions/templates.test.js` (`<img>` has `alt`) and review; the gallery shows a row
 of each window.
 
-Conforming, `templates/apps/effect-panel.hbs:6-23` with `scss/components/_effect-panel.scss:21-55`.
+Conforming, `templates/apps/effect-panel.hbs:6-23` with `scss/apps/_effect-panel.scss:20-54`.
 
 Non-conforming, `templates/apps/compendium-browser-results.hbs:9`: the entry's name is an `<a>` with no `href`, so the
 one control that opens the entry takes no focus. Target: a `<button type="button" data-action="open-entry">`.
@@ -172,7 +172,7 @@ Conforming, `templates/apps/effect-panel.hbs:26-28`: "No effects on {name}." and
 assign a character, to see its effects."
 
 Non-conforming, `templates/apps/xp-manager.hbs:89` and `:134`: `{{#if manualEntries}}` and `{{#if spentEntries}}` with
-no `{{else}}`, so an empty ledger shows a header over nothing. `templates/rules/editor.hbs:47` sets its empty line in
+no `{{else}}`, so an empty ledger shows a header over nothing. `templates/rules/_partials/_editor.hbs:47` sets its empty line in
 the hint look; `templates/apps/emphasis-manager.hbs:50` in a bare `<p>`.
 
 ### 5. The browser filters without losing the user's place
@@ -196,9 +196,9 @@ legend, in words, with the invalid icon, and its fields link to it with `aria-de
 field names show as stored, since they are fixed names (Stage 17 decision 2). Enforced by review and the
 `l5r4-enhanced.rules` Quench batch.
 
-Conforming, `templates/rules/editor.hbs:16-45`: one `fieldset` per rule with its key as the `legend`.
+Conforming, `templates/rules/_partials/_editor.hbs:16-45`: one `fieldset` per rule with its key as the `legend`.
 
-Non-conforming, `templates/rules/editor.hbs:20-22`: the remove control is an `<a>` with no `href` and an icon with no
+Non-conforming, `templates/rules/_partials/_editor.hbs:20-22`: the remove control is an `<a>` with no `href` and an icon with no
 `inert`; `:25` shows the error in color alone.
 
 ### 7. One stylesheet per window
@@ -208,16 +208,16 @@ Folders). A part shared with another window or a sheet (the row, the rule card) 
 `scss/components/`. Enforced by `tests/conventions/names.test.js` and `tests/conventions/styles.test.js` (one component
 per file).
 
-| Now                                                                                                                      | Target                                                                                                                                                                                                                |
-| ------------------------------------------------------------------------------------------------------------------------ | --------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| `scss/components/_effect-panel.scss` (panel, text links `:63-83`, request card `:85-87`)                                 | `scss/apps/_effect-panel.scss` (target); links to `scss/components/_inline-link.scss` (target); the request card to `scss/components/_request-card.scss` (target)                                                     |
-| `scss/components/_compendium-browser.scss` (browser, item summary `:128-143`)                                            | `scss/apps/_compendium-browser.scss` (target); the summary to `scss/components/_item-summary-card.scss` (target)                                                                                                      |
-| `scss/components/_rules-editor.scss` (editor, ledger dialog `:60-75`, ledger button `:77-80`, activate control `:82-84`) | The editor stays a component; the ledger to `scss/components/_ledger-dialog.scss` (target); the activate control to `scss/components/_inline-control.scss` (target); the ledger button to the component that draws it |
+| Now                                                                                                                      | Target                                                                                                                                                                                              |
+| ------------------------------------------------------------------------------------------------------------------------ | --------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| `scss/apps/_effect-panel.scss` (panel, text links `:63-83`, request card `:85-87`)                                       | `scss/apps/_effect-panel.scss`; links to `scss/components/_inline-link.scss`; the request card to `scss/components/_request-card.scss`                                                              |
+| `scss/apps/_compendium-browser.scss` (browser, item summary `:128-143`)                                                  | `scss/apps/_compendium-browser.scss`; the summary to `scss/components/_item-summary-card.scss`                                                                                                      |
+| `scss/components/_rules-editor.scss` (editor, ledger dialog `:60-75`, ledger button `:77-80`, activate control `:82-84`) | The editor stays a component; the ledger to `scss/components/_ledger-dialog.scss`; the activate control to `scss/components/_inline-control.scss`; the ledger button to the component that draws it |
 
 Conforming, `scss/apps/_wound-config.scss:6-10`: one window's rules under its root class (renamed `l5r4-wound-config`
 by rule 1).
 
-Non-conforming, `scss/components/_effect-panel.scss:1-5`: a header titled "Table tools" over three components.
+Non-conforming, `scss/apps/_effect-panel.scss:0-4`: a header titled "Table tools" over three components.
 
 ### 8. Actions are kebab-case, verb first
 

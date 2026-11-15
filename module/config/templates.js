@@ -20,15 +20,15 @@ const freeze = Object.freeze;
  * Resolves a relative template path to a full system template path.
  * Includes defensive validation to ensure path is valid before use.
  *
- * @param {string} relPath - Relative path from templates directory (e.g., "chat/check-card.hbs")
+ * @param {string} relPath - Relative path from templates directory (e.g., "chat/check.hbs")
  * @returns {string} Full template path suitable for Foundry's renderTemplate
  * @throws {TypeError} If relPath is not a string
  * @throws {Error} If relPath is empty
  *
  * @example
  * // Basic usage:
- * const path = TEMPLATE("chat/check-card.hbs");
- * // Returns: "systems/l5r4-enhanced/templates/chat/check-card.hbs"
+ * const path = TEMPLATE("chat/check.hbs");
+ * // Returns: "systems/l5r4-enhanced/templates/chat/check.hbs"
  *
  * @example
  * // Use with Foundry's renderTemplate:
@@ -76,11 +76,11 @@ export const TEMPLATE = relPath => {
  * ChatMessage.create({ content: html });
  */
 export const CHAT_TEMPLATES = freeze({
-  checkCard: TEMPLATE("chat/check-card.hbs"),
+  checkCard: TEMPLATE("chat/check.hbs"),
   weaponCard: TEMPLATE("chat/weapon-chat.hbs"),
   effectPrompt: TEMPLATE("chat/effect-prompt.hbs"),
   damageResult: TEMPLATE("chat/damage-result.hbs"),
-  flowCard: TEMPLATE("chat/flow-card.hbs"),
+  flowCard: TEMPLATE("chat/flow.hbs"),
   healing: TEMPLATE("chat/healing.hbs"),
   checkRequest: TEMPLATE("chat/check-request.hbs"),
   itemSummary: TEMPLATE("chat/item-summary.hbs")

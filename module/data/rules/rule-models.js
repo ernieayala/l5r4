@@ -18,7 +18,7 @@ import {
   SAVE_FAILURES
 } from "../../config/rule-keys.js";
 import { USE_PERIODS } from "../../utils/effects.js";
-import RuleData, { selectorField, typeField, valueField } from "./RuleData.js";
+import RuleData, { selectorField, typeField, valueField } from "./rule-data.js";
 
 const fields = () => foundry.data.fields;
 

@@ -22,14 +22,14 @@ export default class EffectPanel extends HandlebarsApplicationMixin(ApplicationV
     id: `${SYS_ID}-effect-panel`,
     classes: ["l5r4", "l5r4-effect-panel"],
     window: {
-      title: "l5r4.ui.effectPanel.title",
+      title: "l5r4.apps.effectPanel.title",
       icon: "fa-solid fa-hourglass-half",
       resizable: true
     },
     position: { width: 320, height: "auto", top: 80, left: 120 },
     actions: {
-      openSource: EffectPanel.#onOpenSource,
-      removeEffect: EffectPanel.#onRemoveEffect
+      "open-source": EffectPanel.#onOpenSource,
+      "delete-effect": EffectPanel.#onDeleteEffect
     }
   };
 
@@ -52,8 +52,8 @@ export default class EffectPanel extends HandlebarsApplicationMixin(ApplicationV
     context.actor = actor;
     context.effects = actor ? actor.appliedEffects.map(effect => this.#row(actor, effect)) : [];
     context.empty = actor
-      ? F("l5r4.ui.effectPanel.none", { name: actor.name })
-      : T("l5r4.ui.effectPanel.noActor");
+      ? F("l5r4.apps.effectPanel.none", { name: actor.name })
+      : T("l5r4.apps.effectPanel.noActor");
     return context;
   }
 
@@ -115,7 +115,7 @@ export default class EffectPanel extends HandlebarsApplicationMixin(ApplicationV
    * @param {PointerEvent} _event
    * @param {HTMLElement} target
    */
-  static async #onRemoveEffect(_event, target) {
+  static async #onDeleteEffect(_event, target) {
     const effect = await fromUuid(target.closest("[data-uuid]").dataset.uuid);
     if (effect?.isOwner) {
       await effect.delete();
@@ -160,7 +160,7 @@ function onGetSceneControlButtons(controls) {
   tools[`${SYS_ID}-effects`] = {
     name: `${SYS_ID}-effects`,
     order: Object.keys(tools).length,
-    title: "l5r4.ui.effectPanel.title",
+    title: "l5r4.apps.effectPanel.title",
     icon: "fa-solid fa-hourglass-half",
     button: true,
     onChange: () => EffectPanel.toggle()

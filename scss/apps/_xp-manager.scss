@@ -3,7 +3,7 @@
  * Modal dialog for managing character experience points
  */
 
-.xp-modal-dialog {
+.l5r4-xp-manager {
   .window-content {
     overflow-y: auto;
 
@@ -13,7 +13,7 @@
     }
   }
 
-  .xp-breakdown-list {
+  .l5r4-xp-manager-breakdown {
     list-style: none;
     margin: 0;
     padding: 0;
@@ -31,8 +31,8 @@
     }
   }
 
-  .item-list {
-    &.-header {
+  .l5r4-item-row-list {
+    &.l5r4-sort-header {
       border-inline-start: 1px solid var(--table-header-border-color);
     }
 

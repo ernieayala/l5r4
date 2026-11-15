@@ -75,7 +75,7 @@ export function preparePcExperience(actor, sys) {
       console.warn(`${SYS_ID} | Cost rule on "${source}" (${actor.name}) skipped: ${message}`)
   });
   const entries = xpEntries(build, price);
-  // The entries stay on the prepared data for the XP manager's history (module/services/xp/xp-calculator.js)
+  // The entries stay on the prepared data for the XP manager's history (module/services/xp/calculator.js)
   sys._xp = { ...xpTotals(build, entries), entries };
 }
 

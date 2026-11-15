@@ -402,7 +402,7 @@ export function registerConditionManagerTests(quench) {
             // Create Blinded effect
             await actor.createEmbeddedDocuments("ActiveEffect", [
               {
-                name: game.i18n.localize("EFFECT.blinded"),
+                name: game.i18n.localize("l5r4.ui.statusEffects.blinded"),
                 img: `systems/${SYS_ID}/assets/icons/blinded.webp`,
                 statuses: ["blinded"],
                 flags: { [SYS_ID]: { conditionId: "blinded" } }

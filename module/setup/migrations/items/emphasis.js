@@ -101,7 +101,7 @@ async function addCustomEmphasisToWorld(emphasisName) {
  * - Skip if no old emphasis data AND already has new format populated
  *
  * Backward Compatibility:
- * - Old "emphasis" field kept in the skill data model (module/data/item/SkillData.js) to prevent data loss
+ * - Old "emphasis" field kept in the skill data model (module/data/item/skill-data.js) to prevent data loss
  * - Migration merges old and new data if both exist
  * - Can run multiple times safely (idempotent with deduplication)
  *

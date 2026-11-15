@@ -44,7 +44,7 @@ Invalid and warning take no state token of their own: they read color.md's `--l5
 | Expanded         | The angle icon points up and the content shows                                                                                                                                                          | `aria-expanded` on the toggle, `is-collapsed` / `is-expanded` on the block                                                                                                           | Section titles and item rows (`_sections.scss:16-20`, `_item-lists.scss:155-163`), with no `aria-expanded`                                                                                                                                        |
 | Disabled         | Core's disabled look on core controls; `opacity: var(--l5r4-state-disabled-opacity)` on a system-drawn one. The reason sits in the control's `data-tooltip`                                             | `disabled` attribute                                                                                                                                                                 | Check dialog Void Point boxes (`templates/dialogs/check-dialog.hbs:66`, `:71`); undone damage card at `opacity: 0.7` (`_chat.scss:59-61`)                                                                                                         |
 | Read-only        | A value the viewer cannot change reads as text. On a sheet the viewer cannot edit, core disables every input (`client/applications/api/document-sheet.mjs:212-222`, `:253`) and its disabled look shows | Text, or core's `disabled` on a non-editable sheet                                                                                                                                   | Computed values in disabled inputs (`templates/apps/xp-manager.hbs:7`, `templates/actor/_partials/_wounds.hbs:39`)                                                                                                                                |
-| Invalid          | `aria-invalid="true"` on the field, and below it a message in `--l5r4-color-danger` led by `fa-circle-exclamation`                                                                                      | `aria-invalid`, `aria-describedby` to the message                                                                                                                                    | Rule editor errors in error color, with no icon or link to the field (`templates/rules/editor.hbs:25`, `_rules-editor.scss:43-47`)                                                                                                                |
+| Invalid          | `aria-invalid="true"` on the field, and below it a message in `--l5r4-color-danger` led by `fa-circle-exclamation`                                                                                      | `aria-invalid`, `aria-describedby` to the message                                                                                                                                    | Rule editor errors in error color, with no icon or link to the field (`templates/rules/_partials/_editor.hbs:25`, `_rules-editor.scss:43-47`)                                                                                                     |
 | Warning          | A line led by `fa-triangle-exclamation` in `--l5r4-color-warning`, then the label in bold in `--l5r4-color-text`                                                                                        | `role="note"` on the line                                                                                                                                                            | Maho casting warning in a `.warning-text` no stylesheet styles (`templates/dialogs/check-extras/maho.hbs:3`); the Void-spent warning set as a plain hint (`check-dialog.hbs:75`)                                                                  |
 | Loading          | The control is disabled and its icon is `fa-spinner fa-spin` until the action ends                                                                                                                      | `aria-busy="true"` and `disabled`                                                                                                                                                    | None shown; the effect delete guard keeps a `data-busy` flag with no visible state (`module/sheets/handlers/item-effects-handler.js:233-236`)                                                                                                     |
 | Empty            | One italic line saying what is missing, where the list would be                                                                                                                                         | A `<p>` in the list's place                                                                                                                                                          | Italic in the effect panel and the browser (`templates/apps/effect-panel.hbs:27`, `compendium-browser-results.hbs:27`); a hint (`rules/editor.hbs:47`); a bare `<p>` (`apps/emphasis-manager.hbs:50`); nothing (`apps/xp-manager.hbs:89`, `:134`) |
@@ -103,11 +103,11 @@ A `<span>` with `role="button"` and no `tabindex` never takes focus.
 ### 3. A control hidden until hover also shows on focus
 
 Item controls and rank step arrows sit at `opacity: 0` until the pointer is over their row
-(`scss/components/_item-lists.scss:138-142`, `:187-190`; `_forms.scss:36-40`; `_traits-rings.scss:11-15`, `:38`).
+(`scss/components/_item-row.scss:138-142`, `:187-190`; `_forms.scss:36-40`; `_traits-rings.scss:11-15`, `:38`).
 Each such rule also matches `:focus-within`, so a keyboard user who tabs into the row sees the controls. Enforced by
 `tests/conventions/styles.test.js` (a `:hover` rule that sets `opacity: 1` has a matching `:focus-within` selector).
 
-Conforming, modeled on `scss/components/_item-lists.scss:138-142`:
+Conforming, modeled on `scss/components/_item-row.scss:138-142`:
 
 ```scss
 .l5r4-item {
@@ -121,7 +121,7 @@ Conforming, modeled on `scss/components/_item-lists.scss:138-142`:
 }
 ```
 
-Non-conforming, `scss/components/_item-lists.scss:138-142` today: `&:hover` alone.
+Non-conforming, `scss/components/_item-row.scss:138-142` today: `&:hover` alone.
 
 ### 4. A state rides on its attribute; a class mirrors it only for CSS
 
@@ -133,7 +133,7 @@ card keeps `-undone`: it is stored in posted messages (fixed name, Stage 17 deci
 Enforced by `tests/conventions/templates.test.js` (an `is-` class needs an `l5r4-` class on the same element; an
 expand toggle carries `aria-expanded`; a toggle button carries `aria-pressed`) and review.
 
-Conforming, modeled on `templates/actor/_partials/_skills-section.hbs:2` and `_expand.hbs:1`:
+Conforming, modeled on `templates/actor/_partials/_skill-section.hbs:2` and `_expand.hbs:1`:
 
 ```hbs
 <div class="l5r4-section-title{{#if collapsed}} is-collapsed{{/if}}" data-scope="skills">
@@ -194,7 +194,7 @@ warning's icon is in `--l5r4-color-warning`, an indicator pairing, and its words
 field links to its message with `aria-describedby`. Enforced by `tests/conventions/contrast.test.js` (the danger and
 warning pairings in `foundations/color.md`, in both themes) and review for the icon and the words.
 
-Conforming, modeled on `templates/rules/editor.hbs:25`:
+Conforming, modeled on `templates/rules/_partials/_editor.hbs:25`:
 
 ```hbs
 {{#if rule.error}}
@@ -237,11 +237,11 @@ shows a header over nothing.
 
 ## Partials and files
 
-| Item     | Where                                                                                                                                                                                       |
-| -------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| Tokens   | `scss/base/_variables.scss`                                                                                                                                                                 |
-| Users    | `scss/features/_ranks.scss`, `_traits-rings.scss`; `scss/components/_item-lists.scss`, `_forms.scss`, `_sections.scss`, `_compendium-browser.scss`, `_rules-editor.scss`; `scss/_chat.scss` |
-| Partials | `templates/actor/_partials/_expand.hbs`, `templates/cards/_partials/_controls.hbs`, `templates/cards/_partials/_activate.hbs`                                                               |
-| Icons    | iconography.md                                                                                                                                                                              |
-| Motion   | motion.md                                                                                                                                                                                   |
-| Frames   | frames.md                                                                                                                                                                                   |
+| Item     | Where                                                                                                                                                                                                     |
+| -------- | --------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| Tokens   | `scss/base/_variables.scss`                                                                                                                                                                               |
+| Users    | `scss/features/_ranks.scss`, `_traits-rings.scss`; `scss/components/_item-row.scss`, `_forms.scss`, `_sections.scss`, `_compendium-browser.scss`, `_rules-editor.scss`; `scss/components/_chat-card.scss` |
+| Partials | `templates/actor/_partials/_expand.hbs`, `templates/cards/_partials/_controls.hbs`, `templates/cards/_partials/_activate.hbs`                                                                             |
+| Icons    | iconography.md                                                                                                                                                                                            |
+| Motion   | motion.md                                                                                                                                                                                                 |
+| Frames   | frames.md                                                                                                                                                                                                 |

@@ -9,7 +9,7 @@ own page in `components/`; this page sets how they fit together and the rules th
 | Classes    | `L5R4PcSheet` (`module/sheets/pc-sheet.js`), `L5R4NpcSheet` (`module/sheets/npc-sheet.js`), both over `BaseActorSheet` (`module/sheets/base-actor-sheet.js`); `L5R4ItemSheet` (`module/sheets/item-sheet.js`)                                                                                             |
 | Templates  | `templates/actor/pc.hbs`, `npc.hbs`, `pc-limited.hbs`, `npc-limited.hbs`, and `templates/actor/_partials/`; the item sheet's parts in `templates/item/_partials/`, with `templates/item/_type-details/<subtype>.hbs` and `_type-modifiers/<subtype>.hbs`                                                  |
 | Partials   | Registered by path in `module/setup/preload-templates.js:43-174`                                                                                                                                                                                                                                          |
-| SCSS       | `scss/layout/_actor-layout.scss`, `_sidebar.scss`, `_item-layout.scss` (grids); `scss/features/_pc-info.scss` (header); `scss/components/_sections.scss`, `_item-lists.scss`, `_forms.scss`, `_grids.scss` (blocks)                                                                                       |
+| SCSS       | `scss/layout/_actor-layout.scss`, `_sidebar.scss`, `_item-layout.scss` (grids); `scss/features/_pc-info.scss` (header); `scss/components/_section.scss`, `_item-lists.scss`, `_forms.scss`, `_grids.scss` (blocks)                                                                                        |
 | Tokens     | `--l5r4-space-section`, `--l5r4-space-card`, `--l5r4-space-gap`, `--l5r4-space-gap-tight`; `--l5r4-size-portrait`, `--l5r4-size-column-*`; `--l5r4-color-header`, `--l5r4-color-text-on-header`, `--l5r4-color-panel`, `--l5r4-color-row-alt`, `--l5r4-color-line`, `--l5r4-color-text`; `--l5r4-state-*` |
 | Components | Section and section title, expand control, sort header, item row and item list, tabs, item header, Ring and Trait block, rank control, Void Point dots, Wound track, Initiative block, Armor TN block, Fear block, spell slots, button, icon button, inline control, form field                           |
 | Checks     | `tests/conventions/templates.test.js`, `tests/conventions/actions.test.js`, `tests/conventions/styles.test.js`, Stylelint, the `l5r4-enhanced.design-gallery` Quench batch; "review" where no tool can judge                                                                                              |
@@ -44,15 +44,15 @@ own page in `components/`; this page sets how they fit together and the rules th
 The item sheet is the one tabbed sheet. Its parts render in order: header, tab strip, then one part per tab
 (`module/sheets/item-sheet.js:174-200`). Width 640 px for every subtype (`item-sheet.js:80`).
 
-| Part        | Holds                                                                                                                                                       | Partial                                               |
-| ----------- | ----------------------------------------------------------------------------------------------------------------------------------------------------------- | ----------------------------------------------------- |
-| Header      | Image, name input, book citation                                                                                                                            | `templates/item/_partials/_header.hbs`                |
-| Tabs        | One tab per available part: Details (not on a Clan or Family), Modifiers (Weapon, Armor, Skill only), Description, Effects, Rules (`item-sheet.js:414-436`) | `_tabs.hbs`                                           |
-| Details     | The subtype's fields, then keywords, nemuranai, and price for physical items                                                                                | `_tab-details.hbs`, `_type-details/<subtype>.hbs`     |
-| Modifiers   | The subtype's bonus fields                                                                                                                                  | `_tab-modifiers.hbs`, `_type-modifiers/<subtype>.hbs` |
-| Description | Rule summary lines, description, special rules                                                                                                              | `_tab-description.hbs`                                |
-| Effects     | The item's Active Effects with edit, toggle, and delete controls                                                                                            | `_tab-effects.hbs`                                    |
-| Rules       | The rules editor (`patterns/panels-and-browsers.md`)                                                                                                        | `_tab-rules.hbs` over `templates/rules/editor.hbs`    |
+| Part        | Holds                                                                                                                                                       | Partial                                                       |
+| ----------- | ----------------------------------------------------------------------------------------------------------------------------------------------------------- | ------------------------------------------------------------- |
+| Header      | Image, name input, book citation                                                                                                                            | `templates/item/_partials/_header.hbs`                        |
+| Tabs        | One tab per available part: Details (not on a Clan or Family), Modifiers (Weapon, Armor, Skill only), Description, Effects, Rules (`item-sheet.js:414-436`) | `_tabs.hbs`                                                   |
+| Details     | The subtype's fields, then keywords, nemuranai, and price for physical items                                                                                | `_tab-details.hbs`, `_type-details/<subtype>.hbs`             |
+| Modifiers   | The subtype's bonus fields                                                                                                                                  | `_tab-modifiers.hbs`, `_type-modifiers/<subtype>.hbs`         |
+| Description | Rule summary lines, description, special rules                                                                                                              | `_tab-description.hbs`                                        |
+| Effects     | The item's Active Effects with edit, toggle, and delete controls                                                                                            | `_tab-effects.hbs`                                            |
+| Rules       | The rules editor (`patterns/panels-and-browsers.md`)                                                                                                        | `_tab-rules.hbs` over `templates/rules/_partials/_editor.hbs` |
 
 ### Views
 
@@ -134,7 +134,7 @@ Conforming, modeled on `templates/actor/_partials/_item-section.hbs:2-25`:
 {{/"systems/l5r4-enhanced/templates/actor/_partials/_section-title.hbs"}}
 ```
 
-Non-conforming, `templates/actor/_partials/_skills-section.hbs:2-6` and `_weapon-section.hbs:2-6`: the same five lines
+Non-conforming, `templates/actor/_partials/_skill-section.hbs:2-6` and `_weapon-section.hbs:2-6`: the same five lines
 copied into twelve section partials.
 
 ### 2. The expand control states its state
@@ -165,7 +165,7 @@ icon after it, `fa-sort-up` or `fa-sort-down` (`foundations/iconography.md` rule
 `tests/conventions/templates.test.js` (interactive elements are native controls; a toggle carries `aria-pressed`),
 `tests/conventions/actions.test.js`, and review for the visible state.
 
-Conforming, modeled on `templates/actor/_partials/_skills-section.hbs:9`:
+Conforming, modeled on `templates/actor/_partials/_skill-section.hbs:9`:
 
 ```hbs
 <button type="button" class="l5r4-sort-header-button" data-action="sort-items" data-sort-by="name"
@@ -241,9 +241,9 @@ classes item cards post to chat stay as they are. A component's styles sit under
 | `sheet-header` (item sheet)  | `l5r4-item-header`        |
 | `section-container`          | `l5r4-section-body`       |
 
-Conforming, `scss/components/_effect-panel.scss:7-61`: every rule sits under `.l5r4-effect-panel`.
+Conforming, `scss/apps/_effect-panel.scss:6-60`: every rule sits under `.l5r4-effect-panel`.
 
-Non-conforming, `scss/components/_sections.scss` and `_item-lists.scss`: rules scoped under `.l5r4.pc` and `.l5r4.npc`,
+Non-conforming, `scss/components/_section.scss` and `_item-lists.scss`: rules scoped under `.l5r4.pc` and `.l5r4.npc`,
 so the XP manager copies `.title` (`scss/apps/_xp-manager.scss:39-46`) to get the same look.
 
 ### 8. Tabs use core's tab markup with a kebab-case action
@@ -302,7 +302,7 @@ a `{{!-- --}}` comment at the partial's top (`docs/code-system/templates-and-sty
 | ----------------------- | ----------------------------------------------------------------------------------------------- |
 | Actor and item name     | An input: a long name scrolls inside it. The Limited heading wraps                              |
 | Section title           | One line (`foundations/typography.md`, Wrapping); a label that cannot fit at 420 px is too long |
-| Item row name           | Wraps (`scss/components/_item-lists.scss:173`); the row grows, its controls stay at the end     |
+| Item row name           | Wraps (`scss/components/_item-row.scss:173`); the row grows, its controls stay at the end       |
 | Clan, School            | Text in the header field; wraps inside its box                                                  |
 | Emphases on a Skill row | Joined with ", " and wraps (`templates/cards/skill.hbs:25-31`)                                  |
 | Notes and descriptions  | Core's editor; the section grows                                                                |

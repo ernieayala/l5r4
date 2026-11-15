@@ -8,7 +8,7 @@ pool and rolls it, drawn with the brush-stroke sprite mask.
 | ----------- | ------------------------------------------------------------------------------------------------------------------------------------- |
 | Partial     | Core button: none, one element. Roll button: `templates/cards/_partials/_roll-button.hbs` (target)                                    |
 | Parameters  | `action` (the `data-action` value), `pool` (the label, an `XkY` string the context computes), `tooltip` (localized roll kind), `ring` |
-| SCSS        | `scss/components/_button.scss` (target), holding `_buttons.scss`, `_animations.scss:9-49`, `_traits-rings.scss:195-239`               |
+| SCSS        | `scss/components/_button.scss`, holding `_buttons.scss`, `_animations.scss:9-49`, `_traits-rings.scss:195-239`                        |
 | Block class | `l5r4-button` on the roll button's root; core's button takes no system class                                                          |
 | Shows in    | Item rows (Skills, weapons, spells), NPC attacks, Trait rows, sidebar blocks, dialogs, chat cards                                     |
 | Game terms  | Skill Roll, Trait Roll (`game-rules/29_types_of_rolls.md, p.79`); dice pool `XkY` (`game-rules/26_special_dice_rules.md, p.77`)       |

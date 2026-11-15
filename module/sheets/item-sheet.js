@@ -144,8 +144,8 @@ export default class L5R4ItemSheet extends HandlebarsApplicationMixin(ItemSheetV
     form: { submitOnChange: true },
     window: { contentClasses: ["standard-form"] },
     actions: {
-      changeTab: L5R4ItemSheet.prototype._onChangeTab,
-      manageEmphases: L5R4ItemSheet.prototype._onManageEmphases,
+      "change-tab": L5R4ItemSheet.prototype._onChangeTab,
+      "open-emphasis-manager": L5R4ItemSheet.prototype._onManageEmphases,
       ...RULES_EDITOR_ACTIONS
     }
   };
@@ -483,7 +483,7 @@ export default class L5R4ItemSheet extends HandlebarsApplicationMixin(ItemSheetV
    * and XP tracking for trained emphases.
    *
    * @param {Event} event - Click event from button
-   * @param {HTMLElement} target - Button element with data-action="manageEmphases"
+   * @param {HTMLElement} target - Button element with data-action="open-emphasis-manager"
    * @private
    */
   async _onManageEmphases(_event, _target) {

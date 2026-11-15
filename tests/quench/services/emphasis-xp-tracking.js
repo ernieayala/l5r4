@@ -13,8 +13,8 @@
  * - Edge cases (null, undefined, empty array)
  *
  * @see module/documents/actor/calculations/xp-system.js
- * @see module/services/xp/xp-calculator.js
- * @see module/services/xp/xp-versioning.js
+ * @see module/services/xp/calculator.js
+ * @see module/services/xp/versioning.js
  */
 
 import { SYS_ID } from "../../../module/config/constants.js";
@@ -251,7 +251,7 @@ export function registerEmphasisXpTrackingTests(quench) {
 
           // Import here to avoid circular dependency issues
           const { calculateXpDataVersion } =
-            await import("../../../module/services/xp/xp-versioning.js");
+            await import("../../../module/services/xp/versioning.js");
 
           const version1 = calculateXpDataVersion(actor);
           assert.isNumber(version1, "Version should be a number");
@@ -281,7 +281,7 @@ export function registerEmphasisXpTrackingTests(quench) {
           );
 
           const { calculateXpDataVersion } =
-            await import("../../../module/services/xp/xp-versioning.js");
+            await import("../../../module/services/xp/versioning.js");
 
           const version = calculateXpDataVersion(actor);
           assert.isNumber(version, "Should handle empty array without error");
@@ -302,7 +302,7 @@ export function registerEmphasisXpTrackingTests(quench) {
           );
 
           const { calculateXpDataVersion } =
-            await import("../../../module/services/xp/xp-versioning.js");
+            await import("../../../module/services/xp/versioning.js");
 
           const version = calculateXpDataVersion(actor);
           assert.isNumber(version, "Should handle undefined without error");

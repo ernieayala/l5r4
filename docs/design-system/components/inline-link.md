@@ -12,7 +12,7 @@ reason.
 | Rendered by | The core text enricher `l5r4-link` (`module/setup/enrichers.js:134-141`): `enrichLink` renders the template; `onRenderLink` wires it when core's `<enriched-content>` joins the page     |
 | Runs        | `runLink(spec)` (`module/services/links.js:104-136`); the request control calls `postCheckRequest(spec)`                                                                                 |
 | Syntax      | `module/utils/link-syntax.js` (`LINK_PATTERN`, `parseLink`). The link syntax and the `data-link-type` values `Check`, `Damage`, `Condition`, `Fear` are fixed names: journals store them |
-| SCSS        | Now `scss/components/_effect-panel.scss:63-83`, in the effect panel's file. `scss/components/_inline-link.scss` (target), styling `.l5r4-inline-link`                                    |
+| SCSS        | Now `scss/components/_inline-link.scss:6-26`, in the effect panel's file. `scss/components/_inline-link.scss`, styling `.l5r4-inline-link`                                               |
 | Quench      | `l5r4-enhanced.table-tools`                                                                                                                                                              |
 
 ## Anatomy
@@ -109,7 +109,7 @@ review checks long labels in the gallery. A broken link's reason sits outside th
 | IL4 | A click re-parses the link from its attributes and runs nothing that did not parse | Quench `l5r4-enhanced.table-tools`                          | `const spec = specOf(link); if (spec.ok) runLink(spec);` (`enrichers.js:100-103`)      | Running the text the link displays (modeled)                                                 |
 | IL5 | A broken link shows its reason in words                                            | Quench `l5r4-enhanced.table-tools`, review                  | `<span class="l5r4-link-reason">({{reason}})</span>` (`inline-link.hbs:8`)             | A broken link marked by a dashed frame alone (modeled)                                       |
 | IL6 | The link syntax and `data-link-type` values never change                           | Review (fixed names)                                        | `@Check[skill=…]` in stored journals keeps working                                     | Renaming `Check` to `SkillCheck` (modeled)                                                   |
-| IL7 | The link's styles live in their own file                                           | `tests/conventions/styles.test.js` (one component per file) | `scss/components/_inline-link.scss` (target)                                           | `.l5r4-link` in `scss/components/_effect-panel.scss:63-83`                                   |
+| IL7 | The link's styles live in their own file                                           | `tests/conventions/styles.test.js` (one component per file) | `scss/components/_inline-link.scss`                                                    | `.l5r4-link` in `scss/components/_inline-link.scss:6-26`                                     |
 
 The Quench batch selects links by class today (`tests/quench/table-tools.js:120-213`); those selectors move to
 `[data-link-type]` with the rename (templates-and-styles.md: the rules apply to `tests/quench/`).

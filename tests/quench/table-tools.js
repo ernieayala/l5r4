@@ -124,10 +124,10 @@ export function registerTableToolsTests(quench) {
             const { actor } = await actingPC();
             const { sheet, element } = await journalWith("@Check[skill=Kenjutsu|tn=20]");
             const dialog = nextDialog("cancel");
-            element.querySelector(".l5r4-link[data-link-type='Check']").click();
+            element.querySelector(".l5r4-inline-link[data-link-type='Check']").click();
             const { values } = await dialog;
             assert.equal(values.tn, "20");
-            assert.include(element.querySelector(".l5r4-link").textContent, "Kenjutsu");
+            assert.include(element.querySelector(".l5r4-inline-link").textContent, "Kenjutsu");
             await sheet.close({ animate: false });
             assert.isOk(actor);
           })
@@ -141,7 +141,7 @@ export function registerTableToolsTests(quench) {
             const { actor } = await actingPC();
             const { sheet, element } = await journalWith("@Damage[3k2+1]");
             const dialog = nextDialog("ok");
-            element.querySelector(".l5r4-link[data-link-type='Damage']").click();
+            element.querySelector(".l5r4-inline-link[data-link-type='Damage']").click();
             await dialog;
             const card = await waitFor(() =>
               posted.find(m => m.type === "roll" && m.system.kind === "damage")
@@ -165,7 +165,7 @@ export function registerTableToolsTests(quench) {
             const token = await placeToken(npc, 200);
             canvas.tokens.setTargets([token.id]);
             const { sheet, element } = await journalWith("@Condition[dazed]");
-            element.querySelector(".l5r4-link[data-link-type='Condition']").click();
+            element.querySelector(".l5r4-inline-link[data-link-type='Condition']").click();
             assert.isTrue(await waitFor(() => token.actor.statuses.has("dazed")));
             await sheet.close({ animate: false });
           })
@@ -181,7 +181,7 @@ export function registerTableToolsTests(quench) {
             const token = await placeToken(pc, 200);
             canvas.tokens.setTargets([token.id]);
             const { sheet, element } = await journalWith("@Fear[2]");
-            element.querySelector(".l5r4-link[data-link-type='Fear']").click();
+            element.querySelector(".l5r4-inline-link[data-link-type='Fear']").click();
             assert.isTrue(
               await waitFor(() =>
                 posted.some(m => m.type === "roll" && m.system.actorUuid === token.actor.uuid)
@@ -201,10 +201,10 @@ export function registerTableToolsTests(quench) {
             // A sheet render and a roll can outrun Mocha's 2 s default
             this.timeout(10_000);
             const { sheet, element } = await journalWith("@Fear[11] @Check[trait=luck]");
-            const broken = [...element.querySelectorAll(".l5r4-link-broken")];
+            const broken = [...element.querySelectorAll(".l5r4-inline-link.-broken")];
             assert.lengthOf(broken, 2);
-            assert.include(broken[0].textContent, game.i18n.localize("l5r4.ui.links.error.fear"));
-            assert.isNull(element.querySelector(".l5r4-link[data-link-type]"));
+            assert.include(broken[0].textContent, game.i18n.localize("l5r4.ui.links.errors.fear"));
+            assert.isNull(element.querySelector(".l5r4-inline-link[data-link-type]"));
             await sheet.close({ animate: false });
           })
         );
@@ -218,7 +218,7 @@ export function registerTableToolsTests(quench) {
             this.timeout(10_000);
             const { actor } = await actingPC();
             const { sheet, element } = await journalWith("@Check[trait=wil|tn=10]");
-            element.querySelector(".l5r4-link-request").click();
+            element.querySelector(".l5r4-inline-link-request").click();
             assert.isTrue(await waitFor(() => posted.some(m => m.type === "checkRequest")));
             const card = posted.find(m => m.type === "checkRequest");
             assert.deepInclude(card.system, { trait: "wil", tn: 10 });
@@ -253,20 +253,20 @@ export function registerTableToolsTests(quench) {
             try {
               await waitFor(() => panel.element?.querySelector(".l5r4-effect-panel-row"));
               const row = panel.element.querySelector(".l5r4-effect-panel-row");
-              assert.include(row.textContent, game.i18n.localize("EFFECT.dazed"));
+              assert.include(row.textContent, game.i18n.localize("l5r4.ui.statusEffects.dazed"));
               assert.include(
                 row.querySelector(".l5r4-effect-panel-lasts").textContent,
-                game.i18n.localize("l5r4.ui.effectPanel.noEnd")
+                game.i18n.localize("l5r4.apps.effectPanel.noEnd")
               );
               // A status has no source, so its own sheet opens
               const source = await fromUuid(row.dataset.sourceUuid);
-              row.querySelector("[data-action='openSource']").click();
+              row.querySelector("[data-action='open-source']").click();
               assert.isTrue(
                 await waitFor(() => source.sheet?.rendered),
                 "the source's sheet opens"
               );
               await source.sheet.close({ animate: false });
-              row.querySelector("[data-action='removeEffect']").click();
+              row.querySelector("[data-action='delete-effect']").click();
               assert.isTrue(await waitFor(() => !actor.statuses.has("dazed")), "removed");
             } finally {
               await panel.close({ animate: false });

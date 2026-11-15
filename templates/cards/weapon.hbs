@@ -1,25 +1,25 @@
-<div class="item -{{type}}{{#if system.description}} -expandable{{/if}}{{#if inSheet}} draggable{{/if}}"
+<div class="item l5r4-item-row -{{type}}{{#if system.description}} -expandable{{/if}}{{#if inSheet}} draggable{{/if}}"
   data-item-id="{{coalesce docId this.id _id}}"
   data-document-id="{{coalesce docId this.id _id}}">
   <h4 class="flexrow -gap-sm title">{{name}}</h4>
   {{#if inSheet}}
-    <div class="button-mask-container">
-      <span class="mas">{{attackFormula}}</span>
+    <div class="l5r4-button -roll">
+      <span class="l5r4-button-under">{{attackFormula}}</span>
       <a class="button" data-action="roll-weapon-attack" title="{{localize "l5r4.ui.mechanics.rolls.attackRoll"}}">{{attackFormula}}</a>
     </div>
-    <div class="button-mask-container">
-      <span class="mas">{{#if system.derivedDamageFormula}}{{system.derivedDamageFormula}}{{else}}{{system.damageRoll}}k{{system.damageKeep}}{{/if}}</span>
-      <a class="button" data-action="roll-weapon" title="{{localize "l5r4.ui.mechanics.rolls.damageRoll"}}">{{#if system.derivedDamageFormula}}{{system.derivedDamageFormula}}{{else}}{{system.damageRoll}}k{{system.damageKeep}}{{/if}}</a>
+    <div class="l5r4-button -roll">
+      <span class="l5r4-button-under">{{#if system.derivedDamageFormula}}{{system.derivedDamageFormula}}{{else}}{{system.damageRoll}}k{{system.damageKeep}}{{/if}}</span>
+      <a class="button" data-action="roll-weapon-damage" title="{{localize "l5r4.ui.mechanics.rolls.damageRoll"}}">{{#if system.derivedDamageFormula}}{{system.derivedDamageFormula}}{{else}}{{system.damageRoll}}k{{system.damageKeep}}{{/if}}</a>
     </div>
     {{#if ranged}}
-        <select data-action="inline-edit" data-field="system.arrow">{{selectOptions @root.config.arrows selected=system.arrow localize=true}}</select>
+        <select data-action="update-item-field" data-field="system.arrow">{{selectOptions @root.config.arrows selected=system.arrow localize=true}}</select>
     {{/if}}
     {{#unless ranged}}
       <span></span>
     {{/unless}}
     {{> "systems/l5r4-enhanced/templates/cards/_partials/_controls.hbs"}}
     {{#if system.description}}
-      <div class="expanded-text">
+      <div class="l5r4-item-row-details">
         <p>{{{system.description}}}</p>
       </div>
     {{/if}}

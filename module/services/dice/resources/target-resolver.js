@@ -118,12 +118,12 @@ export function resolveTargets(actor, rollType) {
     if (armorTN > 0) {
       return {
         autoTN: armorTN,
-        targetInfo: ` ${T("l5r4.ui.mechanics.combat.targeting.vs")} ${targetActor.name}`,
+        targetInfo: ` ${T("l5r4.ui.combat.vs")} ${targetActor.name}`,
         targetData: {
           name: targetActor.name,
           armorTN: armorTN,
           single: true,
-          vsText: T("l5r4.ui.mechanics.combat.targeting.vs"),
+          vsText: T("l5r4.ui.combat.vs"),
           actor: targetActor
         }
       };
@@ -133,11 +133,11 @@ export function resolveTargets(actor, rollType) {
   if (targetedTokens.length > 1) {
     return {
       autoTN: 0,
-      targetInfo: ` (${T("l5r4.ui.mechanics.combat.targeting.multipleTargets")})`,
+      targetInfo: ` (${T("l5r4.ui.combat.multipleTargets")})`,
       targetData: {
         multiple: true,
         count: targetedTokens.length,
-        multipleText: T("l5r4.ui.mechanics.combat.targeting.multipleTargets")
+        multipleText: T("l5r4.ui.combat.multipleTargets")
       }
     };
   }

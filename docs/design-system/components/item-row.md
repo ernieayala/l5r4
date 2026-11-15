@@ -8,7 +8,7 @@ header. The same template, without `inSheet`, is the item card posted to chat.
 | ----------- | --------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
 | Partial     | `templates/cards/<subtype>.hbs` with `inSheet=true` (one per Item subtype, `advantage-disadvantage.hbs` for both); NPC attack rows inline in `_stats-npc.hbs:229-268` |
 | Parameters  | `name`, `type`, `system`, `docId`, `inSheet` (all rows); `ranged` (weapons: `weapon.system.isBow`). Example: `_skills-section.hbs:19-24`                              |
-| SCSS        | `scss/components/_item-row.scss` (target), the rename of `scss/components/_item-lists.scss`                                                                           |
+| SCSS        | `scss/components/_item-row.scss`, the rename of `scss/components/_item-row.scss`                                                                                      |
 | Block class | `l5r4-item-row` on the row, beside its fixed classes; `l5r4-item-row-list` on the list                                                                                |
 | Shows in    | Every list section of the PC and NPC sheets, the bio section, the XP manager's ledgers (`templates/apps/xp-manager.hbs:81-140`)                                       |
 | Game terms  | Skill, Skill Rank, Emphasis (`game-rules/58_skills_overview.md, p.133`); Mastery Level (`game-rules/66_magic_and_spell_casting.md, p.163`)                            |
@@ -109,15 +109,15 @@ Emphases join with ", " and wrap inside their column. The details cell spans eve
 | R6  | Every `<img>` has `alt`: the badge names what it marks                                                                          | `tests/conventions/templates.test.js`; review for the value               |
 | R7  | Column widths read size tokens; a width only one subtype uses is still a column token, because the columns are one scale        | `tests/conventions/styles.test.js`                                        |
 
-| #   | Conforming                                                                                                                                        | Non-conforming                                                                                                               |
-| --- | ------------------------------------------------------------------------------------------------------------------------------------------------- | ---------------------------------------------------------------------------------------------------------------------------- |
-| R1  | `.l5r4-item-row-list > .l5r4-item-row:nth-of-type(even) { background-color: var(--l5r4-color-row-alt); }` (modeled on `_item-lists.scss:126-128`) | `.l5r4.pc .item { display: grid; ... }` (`scss/components/_item-lists.scss:131-136`), which any `.item` in the sheet matches |
-| R2  | `<div class="l5r4-item-row item -{{type}}{{#if expandable}} -expandable{{/if}}" data-item-id=... data-document-id=...>` (modeled)                 | Renaming `item` to `l5r4-item-row`, which unstyles every item card already posted                                            |
-| R3  | `element.closest("[data-item-id]")` (`module/sheets/pc-sheet.js:246`)                                                                             | `element?.closest?.(".item")` (`module/sheets/handlers/item-crud-handler.js:53`)                                             |
-| R4  | `item-list -commonItem` with rows `item -commonItem` (`_item-section.hbs:32`, `cards/commonItem.hbs:1`)                                           | `&.-advantages` (`scss/components/_item-lists.scss:29`), which no template uses: the lists say `-advantage`                  |
-| R5  | `.l5r4-item-row-badge { block-size: 16px; inline-size: 16px; }` (modeled)                                                                         | `<img class="flex0" width="16px" height="16px" ...>` (`templates/cards/skill.hbs:8`)                                         |
-| R6  | `<img class="l5r4-item-row-badge" src=... alt="{{localize "l5r4.ui.common.school"}}" />` (modeled)                                                | The same image with no `alt` (`templates/cards/skill.hbs:8`)                                                                 |
-| R7  | `grid-template-columns: 1fr var(--l5r4-size-column-80) var(--l5r4-size-column-80) var(--l5r4-size-column-controls);`                              | `grid-template-columns: 1fr 80px 80px var(--controls);` (`scss/components/_item-lists.scss:43`)                              |
+| #   | Conforming                                                                                                                                        | Non-conforming                                                                                                             |
+| --- | ------------------------------------------------------------------------------------------------------------------------------------------------- | -------------------------------------------------------------------------------------------------------------------------- |
+| R1  | `.l5r4-item-row-list > .l5r4-item-row:nth-of-type(even) { background-color: var(--l5r4-color-row-alt); }` (modeled on `_item-lists.scss:126-128`) | `.l5r4.pc .item { display: grid; ... }` (`scss/components/_item-row.scss:131-136`), which any `.item` in the sheet matches |
+| R2  | `<div class="l5r4-item-row item -{{type}}{{#if expandable}} -expandable{{/if}}" data-item-id=... data-document-id=...>` (modeled)                 | Renaming `item` to `l5r4-item-row`, which unstyles every item card already posted                                          |
+| R3  | `element.closest("[data-item-id]")` (`module/sheets/pc-sheet.js:246`)                                                                             | `element?.closest?.(".item")` (`module/sheets/handlers/item-crud-handler.js:53`)                                           |
+| R4  | `item-list -commonItem` with rows `item -commonItem` (`_item-section.hbs:32`, `cards/commonItem.hbs:1`)                                           | `&.-advantages` (`scss/components/_item-row.scss:29`), which no template uses: the lists say `-advantage`                  |
+| R5  | `.l5r4-item-row-badge { block-size: 16px; inline-size: 16px; }` (modeled)                                                                         | `<img class="flex0" width="16px" height="16px" ...>` (`templates/cards/skill.hbs:8`)                                       |
+| R6  | `<img class="l5r4-item-row-badge" src=... alt="{{localize "l5r4.ui.common.school"}}" />` (modeled)                                                | The same image with no `alt` (`templates/cards/skill.hbs:8`)                                                               |
+| R7  | `grid-template-columns: 1fr var(--l5r4-size-column-80) var(--l5r4-size-column-80) var(--l5r4-size-column-controls);`                              | `grid-template-columns: 1fr 80px 80px var(--controls);` (`scss/components/_item-row.scss:43`)                              |
 
 ## Do and don't
 
@@ -129,15 +129,15 @@ Emphases join with ", " and wrap inside their column. The details cell spans eve
 
 ## Names
 
-| Current                                                                                                                                        | Target                                    | Why                             |
-| ---------------------------------------------------------------------------------------------------------------------------------------------- | ----------------------------------------- | ------------------------------- |
-| `item-list`                                                                                                                                    | `l5r4-item-row-list`                      | Decision 15                     |
-| `expanded-text`                                                                                                                                | `l5r4-item-row-details`                   | Decision 15                     |
-| `emphasis-display`                                                                                                                             | `l5r4-item-row-emphases`                  | Decision 15                     |
-| `--controls`                                                                                                                                   | `--l5r4-size-column-controls`             | `foundations/space-and-size.md` |
-| `item -attacks` (NPC attack row)                                                                                                               | `l5r4-item-row -attacks`                  | Not posted, so not fixed        |
-| `scss/components/_item-lists.scss`                                                                                                             | `scss/components/_item-row.scss` (target) | The file takes its block's name |
-| Dead: `-advantages`, `.expanded-text.-npc`, `.title a[data-action="item-chat"]` (`_item-lists.scss:29-33`, `:159-161`, `:175-180`, `:203-211`) | Removed                                   | They match no template          |
+| Current                                                                                                                                        | Target                           | Why                             |
+| ---------------------------------------------------------------------------------------------------------------------------------------------- | -------------------------------- | ------------------------------- |
+| `item-list`                                                                                                                                    | `l5r4-item-row-list`             | Decision 15                     |
+| `expanded-text`                                                                                                                                | `l5r4-item-row-details`          | Decision 15                     |
+| `emphasis-display`                                                                                                                             | `l5r4-item-row-emphases`         | Decision 15                     |
+| `--controls`                                                                                                                                   | `--l5r4-size-column-controls`    | `foundations/space-and-size.md` |
+| `item -attacks` (NPC attack row)                                                                                                               | `l5r4-item-row -attacks`         | Not posted, so not fixed        |
+| `scss/components/_item-row.scss`                                                                                                               | `scss/components/_item-row.scss` | The file takes its block's name |
+| Dead: `-advantages`, `.expanded-text.-npc`, `.title a[data-action="item-chat"]` (`_item-lists.scss:29-33`, `:159-161`, `:175-180`, `:203-211`) | Removed                          | They match no template          |
 
 Fixed (Stage 17 decision 2), because posted item cards store them: the root's `item`, `-<subtype>`, `-expandable`,
 `-bio`; the name's `title`, `flexrow`, `-gap-sm`; `data-item-id`, `data-document-id`; the template files

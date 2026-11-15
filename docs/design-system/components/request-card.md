@@ -3,14 +3,14 @@
 The GM's ask for a roll: a [chat card](chat-card.md) naming the check, with one button that rolls it for whoever
 clicks, with that player's own character. The GM posts it from the second button on a Check [inline link](inline-link.md).
 
-| Item      | Detail                                                                                                                                                                                                                    |
-| --------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| Template  | `templates/chat/check-request.hbs`, `CHAT_TEMPLATES.checkRequest`. The file is named after the `checkRequest` ChatMessage subtype: a fixed name                                                                           |
-| Posted by | `postCheckRequest(spec)` (`module/services/check-request.js:19-44`), GMs only, as a `checkRequest` message whose `system` holds the check                                                                                 |
-| Wired by  | `bindCheckRequestCard` (`check-request.js:52-70`), from `module/hooks/register-all.js:66`                                                                                                                                 |
-| Rolls     | `rollCheck(checkRequestFor(actor, message.system))`, the same request a Check link makes (`module/services/links.js:68-87`)                                                                                               |
-| SCSS      | Now `scss/components/_effect-panel.scss:85-87`, beside two other components. `scss/components/_request-card.scss` (target), named for this page and styling the fixed block `l5r4-check-request` (one component per file) |
-| Quench    | `l5r4-enhanced.table-tools`                                                                                                                                                                                               |
+| Item      | Detail                                                                                                                                                                                                         |
+| --------- | -------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| Template  | `templates/chat/check-request.hbs`, `CHAT_TEMPLATES.checkRequest`. The file is named after the `checkRequest` ChatMessage subtype: a fixed name                                                                |
+| Posted by | `postCheckRequest(spec)` (`module/services/check-request.js:19-44`), GMs only, as a `checkRequest` message whose `system` holds the check                                                                      |
+| Wired by  | `bindCheckRequestCard` (`check-request.js:52-70`), from `module/hooks/register-all.js:66`                                                                                                                      |
+| Rolls     | `rollCheck(checkRequestFor(actor, message.system))`, the same request a Check link makes (`module/services/links.js:68-87`)                                                                                    |
+| SCSS      | Now `scss/components/_request-card.scss:6-8`, beside two other components. `scss/components/_request-card.scss`, named for this page and styling the fixed block `l5r4-check-request` (one component per file) |
+| Quench    | `l5r4-enhanced.table-tools`                                                                                                                                                                                    |
 
 ## Anatomy
 
@@ -76,7 +76,7 @@ A long Skill name or label wraps in the request paragraph and in no other part.
 | RQ1 | The button rolls from the message's `system`, never from the card's text      | Quench `l5r4-enhanced.table-tools`                                  | `checkRequestFor(actor, message.system)` (`check-request.js:65`)                                              | Parsing `.l5r4-check-request-text` back into a check (modeled) |
 | RQ2 | Only a GM posts a request card                                                | Quench `l5r4-enhanced.table-tools`                                  | `if (!game.user.isGM)` warns and returns (`check-request.js:20-23`)                                           | Offering the request button to players (modeled)               |
 | RQ3 | The button's icon is `fa-dice-d10`, `inert`, before its label                 | `tests/conventions/templates.test.js` (`inert`, one prefix), review | `<i class="fa-solid fa-dice-d10" inert></i> {{localize "l5r4.ui.links.requestRoll"}}` (`check-request.hbs:5`) | An icon-only roll button (modeled)                             |
-| RQ4 | The request card's styles live in their own file, under `.l5r4-check-request` | `tests/conventions/styles.test.js` (one component per file)         | `scss/components/_request-card.scss` (target) holding `.l5r4-check-request`                                   | The rule inside `scss/components/_effect-panel.scss:85-87`     |
+| RQ4 | The request card's styles live in their own file, under `.l5r4-check-request` | `tests/conventions/styles.test.js` (one component per file)         | `scss/components/_request-card.scss` holding `.l5r4-check-request`                                            | The rule inside `scss/components/_request-card.scss:6-8`       |
 
 ## Do and don't
 

@@ -35,11 +35,11 @@ export default class WealthManagerApplication extends foundry.applications.api.H
 ) {
   static DEFAULT_OPTIONS = {
     id: "wealth-manager-{id}",
-    classes: ["l5r4", "wealth-manager"],
+    classes: ["l5r4", "l5r4-wealth-manager"],
     tag: "form",
     window: {
       title: "l5r4.apps.wealthManager.title",
-      icon: "fas fa-calculator",
+      icon: "fa-solid fa-calculator",
       resizable: true
     },
     position: {

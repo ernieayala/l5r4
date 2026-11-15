@@ -94,7 +94,7 @@ export class VoidPointsHandler {
     // semantically correct for styling-related component queries
     // Additionally, using querySelector for void dots UI allows for easy styling
     // and layout changes without modifying the underlying JavaScript code.
-    const node = root?.querySelector?.(".void-points-dots");
+    const node = root?.querySelector?.(".l5r4-void-points-dots");
     if (!node) {
       return;
     }
@@ -104,7 +104,7 @@ export class VoidPointsHandler {
     // Data attributes used for dot index values (data-idx)
     node.querySelectorAll(".void-dot").forEach(d => {
       const idx = Number(d.getAttribute("data-idx") || "0") || 0;
-      d.classList.toggle("-filled", idx <= cur);
+      d.classList.toggle("is-filled", idx <= cur);
     });
     node.setAttribute("data-value", String(cur));
   }

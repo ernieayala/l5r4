@@ -1,6 +1,57 @@
 {
   "l5r4": {
+    "apps": {
+      "conditionManager": {
+        "errors": {
+          "openFailed": "Falha ao abrir o Gerenciador de Condições"
+        }
+      },
+      "emphasisManager": {
+        "custom": "Personalizado",
+        "hint": "Selecione quais ênfases estão disponíveis para esta perícia. Treine-as na ficha de personagem.",
+        "manage": "Gerenciar Ênfases",
+        "noEmphases": "Nenhuma ênfase na lista",
+        "addCustom": "Adicionar Ênfase Personalizada"
+      },
+      "wealthManager": {
+        "add": "Adicionar",
+        "addMoney": "Adicionar Dinheiro",
+        "amount": "Quantidade",
+        "convert": "Converter Moeda",
+        "convertBuToKoku": "Converter 5 Bu em 1 Koku",
+        "convertBuToZeni": "Converter 1 Bu em 10 Zeni",
+        "convertKokuToBu": "Converter 1 Koku em 5 Bu",
+        "convertZeniToBu": "Converter 10 Zeni em 1 Bu",
+        "currentWealth": "Riqueza Atual",
+        "denomination": "Denominação",
+        "open": "Gerenciar Riqueza",
+        "remove": "Remover",
+        "removeMoney": "Remover Dinheiro",
+        "errors": {
+          "openFailed": "Falha ao abrir o Gerenciador de Riqueza"
+        }
+      },
+      "woundConfig": {
+        "title": "Configuração de Ferimentos"
+      }
+    },
     "ui": {
+      "statusEffects": {
+        "blinded": "Cego",
+        "concentration": "Concentração",
+        "dazed": "Atordoado",
+        "dead": "Morto",
+        "entangled": "Enredado",
+        "fasting": "Jejum",
+        "fatigued": "Fatigado",
+        "feared": "Amedrontado",
+        "grappled": "Agarrado",
+        "guarded": "Protegido",
+        "guarding": "Guardião",
+        "mounted": "Montado/Posição Superior",
+        "prone": "Caído",
+        "stunned": "Atordoado"
+      },
       "tabs": {
         "details": "Detalhes",
         "modifiers": "Modificadores",
@@ -31,6 +82,7 @@
           "int": "Inteligência"
         },
         "rolls": {
+          "socialResistanceDescription": "Resistindo Intimidação ou Tentação",
           "success": "Sucesso",
           "failure": "Falha",
           "missed": "Errou",
@@ -46,24 +98,24 @@
           "raise": "Aumento",
           "raises": "Aumentos",
           "freeRaises": "Aumentos Grátis",
-          "socialResistance": "Resistência Social",
-          "socialResistanceDescription": "Resistindo Intimidação ou Tentação"
+          "socialResistance": "Resistência Social"
         },
         "combat": {
           "attack": "Ataque",
-          "woundPenalty": "Penalidade de Ferimento",
-          "targeting": {
-            "vs": "vs",
-            "multipleTargets": "alvos - ND não definido automaticamente"
-          }
+          "woundPenalty": "Penalidade de Ferimento"
         },
         "wounds": {
-          "wounds": "Ferimentos",
+          "applied": "Aplicados {amount} ferimentos a {name}",
+          "appliedWithArmor": "{name} recebeu {original} de dano. Armadura reduziu {reduction}. Aplicados {final} ferimentos.",
           "armorTn": "ND de Armadura",
           "armorTnBase": "ND de Armadura Base",
           "armorReduction": "Redução",
+          "label": "Ferimentos",
+          "reducedApplied": "Ponto de Vazio gasto: Dano reduzido em 10. Aplicados {amount} ferimentos a {name}",
+          "reducedWithArmor": "{name} recebeu {original} de dano. Vazio reduziu para {afterVoid}, armadura reduziu {reduction}. Aplicados {final} ferimentos.",
+          "status": "Ferimentos: {current}/{max} (sofridos: {suffered})",
+          "suffered": "Ferimentos Sofridos",
           "woundLevel": "Nível",
-          "woundsSuffered": "Ferimentos Sofridos",
           "maxWounds": "Ferimentos Máximos",
           "penalty": "Penalidade",
           "woundHealRate": "Taxa de Cura de Ferimentos",
@@ -71,7 +123,6 @@
           "woundMode": "Modo de Ferimentos",
           "manual": "Manual",
           "formula": "Fórmula",
-          "woundConfiguration": "Configuração de Ferimentos",
           "earthMultiplier": "Multiplicador de Terra",
           "woundBonus": "Bônus de Ferimentos",
           "threshold": "Limite",
@@ -88,17 +139,12 @@
           "naturalHealing": "Cura Natural",
           "restedAndRecovered": "descansou e recuperou ferimentos",
           "healingApplied": "Curou {amount} ferimentos (taxa de cura: {rate})",
-          "woundStatus": "Ferimentos: {current}/{max} (sofridos: {suffered})",
           "fullyHealed": "Completamente curado!",
           "alreadyFullHealth": "{name} já está com saúde completa",
           "noHealRate": "{name} não tem taxa de cura configurada",
           "healingFailed": "Falha ao aplicar cura em {name}",
           "applyWounds": "Aplicar Ferimentos",
           "reduceWithVoid": "Reduzir com Vazio",
-          "woundsApplied": "Aplicados {amount} ferimentos a {name}",
-          "woundsAppliedWithArmor": "{name} recebeu {original} de dano. Armadura reduziu {reduction}. Aplicados {final} ferimentos.",
-          "woundsReducedApplied": "Ponto de Vazio gasto: Dano reduzido em 10. Aplicados {amount} ferimentos a {name}",
-          "woundsReducedWithArmor": "{name} recebeu {original} de dano. Vazio reduziu para {afterVoid}, armadura reduziu {reduction}. Aplicados {final} ferimentos.",
           "noTokenSelected": "Nenhum token selecionado. Selecione um token para aplicar ferimentos.",
           "noVoidPoints": "Nenhum Ponto de Vazio disponível para reduzir dano"
         },
@@ -108,13 +154,13 @@
           "defense": "Postura de Defesa",
           "fullDefense": "Defesa Total",
           "center": "Postura Centrada",
-          "fullDefenseDescription": "Faça um teste de Defesa/Reflexos. Adicione metade do resultado (arredondado para cima) ao seu ND de Armadura pela duração desta postura."
+          "fullDefenseHint": "Faça um teste de Defesa/Reflexos. Adicione metade do resultado (arredondado para cima) ao seu ND de Armadura pela duração desta postura."
         },
         "fear": {
-          "fearRank": "Grau de Medo",
-          "fearLabel": "Medo {rank}",
           "effectName": "Medo {rank}",
           "clickToTest": "Clique para testar Medo contra personagens selecionados",
+          "label": "Medo {rank}",
+          "rank": "Grau de Medo",
           "testResult": "Teste de Medo {rank}",
           "penaltyApplied": "Penalidade: -{penalty}k0 em todas as rolagens",
           "catastrophicFailure": "FALHA CATASTRÓFICA! O personagem foge ou se encolhe aterrorizado.",
@@ -125,14 +171,14 @@
         }
       },
       "common": {
+        "initiative": "Iniciativa",
+        "modifier": "Modificador",
         "roll": "Rolar",
         "cancel": "Cancelar",
         "ok": "OK",
         "none": "Nenhum",
         "keep": "Manter",
-        "init": "Iniciativa",
         "bonus": "Bônus",
-        "mod": "Modificador",
         "multi": "Multiplicador",
         "rate": "Taxa",
         "current": "Atual",
@@ -163,35 +209,15 @@
         "save": "Salvar",
         "armor": "Armadura"
       },
+      "combat": {
+        "multipleTargets": "alvos - ND não definido automaticamente",
+        "vs": "vs"
+      },
       "armor": {
         "allowStacking": "Permitir Empilhamento de Armadura"
       },
-      "emphasisManager": {
-        "manage": "Gerenciar Ênfases",
-        "addCustom": "Adicionar Ênfase Personalizada",
-        "custom": "Personalizado",
-        "help": "Selecione quais ênfases estão disponíveis para esta perícia. Treine-as na ficha de personagem.",
-        "noEmphases": "Nenhuma ênfase na lista"
-      },
-      "wealthManager": {
-        "tooltip": "Gerenciar Riqueza",
-        "currentWealth": "Riqueza Atual",
-        "addMoney": "Adicionar Dinheiro",
-        "removeMoney": "Remover Dinheiro",
-        "amount": "Quantidade",
-        "denomination": "Denominação",
-        "add": "Adicionar",
-        "remove": "Remover",
-        "convert": "Converter Moeda",
-        "convertZeniToBu": "Converter 10 Zeni em 1 Bu",
-        "convertBuToZeni": "Converter 1 Bu em 10 Zeni",
-        "convertBuToKoku": "Converter 5 Bu em 1 Koku",
-        "convertKokuToBu": "Converter 1 Koku em 5 Bu",
-        "insufficientFunds": "Fundos insuficientes para esta transação",
-        "insufficientForConversion": "Fundos insuficientes para esta conversão"
-      },
       "sheets": {
-        "bio": "Histórico",
+        "background": "Histórico",
         "skill": "Perícia",
         "skills": "Perícias",
         "weapon": "Arma",
@@ -230,9 +256,7 @@
         "noActorForVoid": "Nenhum ator disponível para gastar pontos de vazio",
         "schoolRankZero": "Você não pode conjurar uma magia com Grau de Escola reduzido a zero",
         "deficiencyBlocksCasting": "Deficiência em {ring} reduz seu Grau de Escola a zero - não pode conjurar",
-        "noSpellSlots": "Você ficou sem espaços de magia para este anel",
-        "wealthManagerFailed": "Falha ao abrir o Gerenciador de Riqueza",
-        "conditionManagerFailed": "Falha ao abrir o Gerenciador de Condições"
+        "noSpellSlots": "Você ficou sem espaços de magia para este anel"
       },
       "hints": {
         "leftRightToAdjust": "Esquerda e Direita para Ajustar",
@@ -322,7 +346,7 @@
         "honorRank": "Honra",
         "gloryRank": "Glória",
         "statusRank": "Grau de Status",
-        "shadowRank": "Corrupção das Terras Sombrias"
+        "taintRank": "Corrupção das Terras Sombrias"
       },
       "stance": {
         "title": "Combate",
@@ -334,20 +358,20 @@
         "feet": "pés"
       },
       "experience": {
+        "disadvantageCapTooltip": "Clique para alterar o XP máximo ganho de desvantagens",
+        "recalculate": "Recalcular compras de XP do estado atual do personagem",
+        "summary": "Resumo de Experiência",
         "xpAmount": "Quantidade",
         "note": "Nota",
         "reason": "Motivo",
         "adjustExperience": "Ajustar Experiência",
-        "experienceSummary": "Resumo de Experiência",
         "usedTotal": "Usado / Total",
         "purchases": "Compras",
         "traitChange": "{label} {from}→{to}",
         "voidChange": "Vazio {from}→{to}",
         "skillCreate": "{name} 0→{rank}",
         "skillChange": "{name} {from}→{to}",
-        "recalculateTooltip": "Recalcular compras de XP do estado atual do personagem",
         "disadvantageCapLabel": "XP Máximo",
-        "disadvantageCapTooltip": "Clique para alterar o XP máximo ganho de desvantagens",
         "breakdown": {
           "base": "Base",
           "disadvantagesGrant": "Desvantagens",
@@ -402,7 +426,7 @@
       "armor": {
         "reduction": "Redução",
         "equipped": "Equipado",
-        "armorType": "Tipo de Armadura",
+        "type": "Tipo de Armadura",
         "types": {
           "ashigaru": "Armadura Ashigaru",
           "light": "Armadura Leve",
@@ -410,16 +434,17 @@
           "riding": "Armadura de Montaria"
         }
       },
-      "keywords": "Palavras-chave",
-      "keywordsPlaceholder": "ex., Samurai, Camponês",
-      "nemuranai": "Nemuranai",
-      "price": "Preço",
-      "general": {}
+      "general": {
+        "keywords": "Palavras-chave",
+        "keywordsPlaceholder": "ex., Samurai, Camponês",
+        "nemuranai": "Nemuranai",
+        "price": "Preço"
+      }
     },
     "magic": {
       "spells": {
+        "areaOfEffect": "Área de Efeito",
         "range": "Alcance",
-        "aoe": "Área de Efeito",
         "duration": "Duração",
         "cast": "Conjurar",
         "raises": "Aumentos",
@@ -433,6 +458,7 @@
         "memorized": "Memorizada"
       },
       "maho": {
+        "casting": "Conjuração de Maho",
         "warningTitle": "Magia de Sangue - Maho Proibido",
         "bloodRequired": "Custo de Sangue Necessário",
         "additionalBloodBonus": "Cada custo de sangue adicional concede +1 Aumento Grátis",
@@ -442,7 +468,6 @@
           "other": "Outro"
         },
         "additionalBlood": "Sangue Adicional",
-        "mahoCasting": "Conjuração de Maho",
         "bloodCost": "Sangue",
         "taintGained": "Corrupção Ganha",
         "taintGainedNotification": "Ganhou {taint} pontos de Corrupção das Terras Sombrias ao conjurar maho"
@@ -461,6 +486,20 @@
       },
       "errors": {
         "deleteEffect": "Falha ao excluir efeito."
+      },
+      "settings": {
+        "forceMigration": {
+          "hint": "Força todas as migrações a serem executadas no próximo carregamento do mundo, independentemente da versão. Redefine automaticamente após a conclusão da migração.",
+          "name": "Forçar migração na inicialização"
+        },
+        "LtException": {
+          "hint": "Quando dados mantidos são reduzidos abaixo de 10 por conversão, adicionar 2.",
+          "name": "Aplicar exceção de Pequenas Verdades"
+        },
+        "runMigration": {
+          "hint": "Se habilitado, migrações de dados pendentes serão executadas na próxima vez que o mundo carregar. Desabilite para pular migrações para solução de problemas.",
+          "name": "Executar migrações na inicialização"
+        }
       }
     },
     "world": {
@@ -470,68 +509,6 @@
         "zeni": "Zeni"
       }
     }
-  },
-  "SETTINGS": {
-    "LtException": {
-      "name": "Aplicar exceção de Pequenas Verdades",
-      "label": "Quando dados mantidos são reduzidos abaixo de 10 por conversão, adicionar 2."
-    },
-    "runMigration": {
-      "name": "Executar migrações na inicialização",
-      "label": "Se habilitado, migrações de dados pendentes serão executadas na próxima vez que o mundo carregar. Desabilite para pular migrações para solução de problemas."
-    },
-    "forceMigration": {
-      "name": "Forçar migração na inicialização",
-      "label": "Força todas as migrações a serem executadas no próximo carregamento do mundo, independentemente da versão. Redefine automaticamente após a conclusão da migração."
-    }
-  },
-  "conditions": {
-    "blinded": {
-      "restrictions": "Cego: -3k3 ataques à distância, -1k1 ataques corpo a corpo, -1k1 rolagens de Defesa, ND de Armadura = Ref+5+Armadura, Anel de Água -2 para movimento"
-    },
-    "dazed": {
-      "restrictions": "Atordoado: -3k0 para todas as ações, apenas posturas Defesa/Defesa Total, não pode duelar"
-    },
-    "entangled": {
-      "restrictions": "Enredado: Não pode Mover ou realizar Ações Complexas exceto teste de Força para se libertar"
-    },
-    "fatigued": {
-      "restrictions": "Fatigado: +5 ND para rolagens físicas, perícias e conjuração de magias (cumulativo por dia), não pode usar postura de Ataque Total"
-    },
-    "feared": {
-      "restrictions": "Amedrontado: -Xk0 para todas as rolagens (X = Grau de Medo), dura até o fim do encontro"
-    },
-    "grappled": {
-      "restrictions": "Agarrado: ND de Armadura = 5 + apenas bônus de armadura"
-    },
-    "guarded": {
-      "restrictions": "Protegido: +10 ND de Armadura enquanto protegido por aliado a 5 pés (até o próximo turno do guardião)"
-    },
-    "guarding": {
-      "restrictions": "Guardião: -5 ND de Armadura enquanto protege aliado a 5 pés (até seu próximo turno)"
-    },
-    "prone": {
-      "restrictions": "Caído: -10 ND de Armadura vs corpo a corpo, -2k0 ataques, não pode Mover, apenas posturas Ataque/Defesa"
-    },
-    "stunned": {
-      "restrictions": "Atordoado: Não pode realizar nenhuma ação, ND de Armadura = 5 + bônus de armadura"
-    }
-  },
-  "EFFECT": {
-    "blinded": "Cego",
-    "concentration": "Concentração",
-    "dazed": "Atordoado",
-    "dead": "Morto",
-    "entangled": "Enredado",
-    "fasting": "Jejum",
-    "fatigued": "Fatigado",
-    "feared": "Amedrontado",
-    "grappled": "Agarrado",
-    "guarded": "Protegido",
-    "guarding": "Guardião",
-    "mounted": "Montado/Posição Superior",
-    "prone": "Caído",
-    "stunned": "Atordoado"
   },
   "TYPES": {
     "Actor": {

@@ -1,15 +1,15 @@
 import { SYS_ID } from "../../module/config/constants.js";
 import { STATUS_EFFECTS } from "../../module/config/status-effects.js";
 import { applyEffect } from "../../module/services/effects/apply.js";
-import { spendVoidPoint } from "../../module/services/dice/resources/void-manager.js";
-import { spendElementalSlot } from "../../module/services/dice/resources/spell-slot-manager.js";
+import { spendVoidPoint } from "../../module/services/dice/resources/void-points.js";
+import { spendElementalSlot } from "../../module/services/dice/resources/spell-slots.js";
 import { SpellCastRoll } from "../../module/services/dice/rolls/spell-cast-roll.js";
 import { MahoCastRoll } from "../../module/services/dice/rolls/maho-cast-roll.js";
 import { applyLongRest } from "../../module/services/rest.js";
 import { VoidPointsHandler } from "../../module/sheets/handlers/void-points-handler.js";
 import { PcAdjustmentHandler } from "../../module/sheets/handlers/pc-adjustment-handler.js";
 import { PcActionsHandler } from "../../module/sheets/handlers/pc-actions-handler.js";
-import { buildXpHistory } from "../../module/services/xp/xp-calculator.js";
+import { buildXpHistory } from "../../module/services/xp/calculator.js";
 import { migrateEffectFreeTraitBase } from "../../module/setup/migrations/actors/xp-free-trait-base.js";
 import { createTestPC } from "../fixtures/actor-fixtures.js";
 import { createBow, createKatana } from "../fixtures/item-fixtures.js";

@@ -5,7 +5,7 @@
  * @module setup/migrations/actors/embedded-items
  */
 
-import { applySchemaMapToDocs } from "../schema/schema-apply.js";
+import { applySchemaMapToDocs } from "../schema/apply.js";
 import { migrateBowsToWeapons } from "../items/bow-to-weapon.js";
 import { migrateSkillDefaults } from "../items/skill-defaults.js";
 import { migrateEmphasisStringToArray } from "../items/emphasis.js";

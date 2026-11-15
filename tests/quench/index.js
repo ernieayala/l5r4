@@ -46,7 +46,7 @@ import { registerPcSheetTests } from "./sheets/pc-sheet.js";
 import { registerNpcSheetTests } from "./sheets/npc-sheet.js";
 import { registerItemSheetTests } from "./sheets/item-sheet.js";
 import { registerWoundConfigTests } from "./sheets/wound-config.js";
-import { registerXpManagerTests } from "./sheets/xp-manager.js";
+import { registerXpManagerTests } from "./apps/xp-manager.js";
 import { registerEmphasisManagerTests } from "./sheets/emphasis-manager.js";
 import { registerNpcAttackConfigTests } from "./apps/npc-attack-config.js";
 import { registerWealthManagerTests } from "./apps/wealth-manager.js";

@@ -35,70 +35,78 @@ export const BROWSER_FILTERS = freeze({
   type: {
     path: "type",
     kind: "select",
-    label: "l5r4.ui.browser.filters.type",
+    label: "l5r4.apps.compendiumBrowser.filters.type",
     labelPrefix: "TYPES.Item."
   },
-  folder: { path: "folderName", kind: "select", label: "l5r4.ui.browser.filters.folder" },
+  folder: {
+    path: "folderName",
+    kind: "select",
+    label: "l5r4.apps.compendiumBrowser.filters.folder"
+  },
   skillType: {
     path: "system.type",
     kind: "select",
-    label: "l5r4.ui.browser.filters.skillType",
+    label: "l5r4.apps.compendiumBrowser.filters.skillType",
     labels: SKILL_TYPES
   },
   trait: {
     path: "system.trait",
     kind: "select",
-    label: "l5r4.ui.browser.filters.trait",
+    label: "l5r4.apps.compendiumBrowser.filters.trait",
     labels: TRAITS
   },
   advantageType: {
     path: "system.type",
     kind: "select",
-    label: "l5r4.ui.browser.filters.advantageType",
+    label: "l5r4.apps.compendiumBrowser.filters.advantageType",
     labels: ADVANTAGE_TYPES
   },
   cost: {
     path: "system.cost",
     kind: "select",
-    label: "l5r4.ui.browser.filters.cost",
+    label: "l5r4.apps.compendiumBrowser.filters.cost",
     numeric: true
   },
   ring: {
     path: "system.ring",
     kind: "select",
-    label: "l5r4.ui.browser.filters.ring",
+    label: "l5r4.apps.compendiumBrowser.filters.ring",
     labels: RING_LABELS
   },
   mastery: {
     path: "system.mastery",
     kind: "select",
-    label: "l5r4.ui.browser.filters.mastery",
+    label: "l5r4.apps.compendiumBrowser.filters.mastery",
     numeric: true
   },
-  keyword: { path: "system.keywords", kind: "contains", label: "l5r4.ui.browser.filters.keyword" },
-  maho: { path: "system.maho", kind: "bool", label: "l5r4.ui.browser.filters.maho" },
+  keyword: {
+    path: "system.keywords",
+    kind: "contains",
+    label: "l5r4.apps.compendiumBrowser.filters.keyword"
+  },
+  maho: { path: "system.maho", kind: "bool", label: "l5r4.apps.compendiumBrowser.filters.maho" },
   kihoType: {
     path: "system.type",
     kind: "select",
-    label: "l5r4.ui.browser.filters.kihoType",
+    label: "l5r4.apps.compendiumBrowser.filters.kihoType",
     labels: KIHO_TYPES
   },
   size: {
     path: "system.size",
     kind: "select",
-    label: "l5r4.ui.browser.filters.size",
+    label: "l5r4.apps.compendiumBrowser.filters.size",
     labels: SIZES
   },
   armorType: {
     path: "system.armorType",
     kind: "select",
-    label: "l5r4.ui.browser.filters.armorType",
+    label: "l5r4.apps.compendiumBrowser.filters.armorType",
     labels: ARMOR_TYPES
   },
   page: {
     path: "system.source.page",
     kind: "select",
-    label: "l5r4.ui.browser.filters.page",
+    label: "l5r4.apps.compendiumBrowser.filters.page",
     numeric: true
   }
 });

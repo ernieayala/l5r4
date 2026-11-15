@@ -90,7 +90,7 @@ export function promptFullDefense(actor) {
     { kind: "fullDefense" },
     {
       title: T("l5r4.ui.mechanics.stances.fullDefense"),
-      text: T("l5r4.ui.mechanics.stances.fullDefenseDescription"),
+      text: T("l5r4.ui.mechanics.stances.fullDefenseHint"),
       button: T("l5r4.ui.common.roll")
     }
   );

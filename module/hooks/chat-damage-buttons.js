@@ -68,7 +68,7 @@ async function applyWoundsToToken(damage) {
   // Show appropriate notification based on whether armor reduced damage
   if (armorReduction > 0 && reducedDamage < damage) {
     ui.notifications?.info(
-      F("l5r4.ui.mechanics.wounds.woundsAppliedWithArmor", {
+      F("l5r4.ui.mechanics.wounds.appliedWithArmor", {
         original: damage,
         reduction: armorReduction,
         final: reducedDamage,
@@ -77,7 +77,7 @@ async function applyWoundsToToken(damage) {
     );
   } else {
     ui.notifications?.info(
-      F("l5r4.ui.mechanics.wounds.woundsApplied", {
+      F("l5r4.ui.mechanics.wounds.applied", {
         amount: reducedDamage,
         name: actor.name
       })
@@ -148,7 +148,7 @@ async function reduceAndApplyWounds(damage, _actorId) {
   // Show notification with both reductions if armor applied
   if (armorReduction > 0 && finalDamage < afterVoid) {
     ui.notifications?.info(
-      F("l5r4.ui.mechanics.wounds.woundsReducedWithArmor", {
+      F("l5r4.ui.mechanics.wounds.reducedWithArmor", {
         original: damage,
         afterVoid: afterVoid,
         reduction: armorReduction,
@@ -158,7 +158,7 @@ async function reduceAndApplyWounds(damage, _actorId) {
     );
   } else {
     ui.notifications?.info(
-      F("l5r4.ui.mechanics.wounds.woundsReducedApplied", {
+      F("l5r4.ui.mechanics.wounds.reducedApplied", {
         amount: finalDamage,
         name: targetActor.name
       })

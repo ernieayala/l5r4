@@ -34,17 +34,17 @@ describe("Check links in parseLink", () => {
 
   it("should reject an unknown Trait or Ring, both at once, nothing to roll, and a bad TN", () => {
     const error = params => parseLink("Check", params).error;
-    expect(error("trait=luck")).toBe("l5r4.ui.links.error.trait");
-    expect(error("trait=void")).toBe("l5r4.ui.links.error.trait");
-    expect(error("ring=wood")).toBe("l5r4.ui.links.error.ring");
-    expect(error("trait=agi|ring=fire")).toBe("l5r4.ui.links.error.traitAndRing");
-    expect(error("skill=Kenjutsu|ring=fire")).toBe("l5r4.ui.links.error.skillWithRing");
-    expect(error("tn=20")).toBe("l5r4.ui.links.error.nothingToRoll");
+    expect(error("trait=luck")).toBe("l5r4.ui.links.errors.trait");
+    expect(error("trait=void")).toBe("l5r4.ui.links.errors.trait");
+    expect(error("ring=wood")).toBe("l5r4.ui.links.errors.ring");
+    expect(error("trait=agi|ring=fire")).toBe("l5r4.ui.links.errors.traitAndRing");
+    expect(error("skill=Kenjutsu|ring=fire")).toBe("l5r4.ui.links.errors.skillWithRing");
+    expect(error("tn=20")).toBe("l5r4.ui.links.errors.nothingToRoll");
     for (const tn of ["0", "-5", "12.5", "abc", "1000"]) {
-      expect(error(`trait=agi|tn=${tn}`), tn).toBe("l5r4.ui.links.error.tn");
+      expect(error(`trait=agi|tn=${tn}`), tn).toBe("l5r4.ui.links.errors.tn");
     }
-    expect(error("trait=agi|speed=3")).toBe("l5r4.ui.links.error.unknownKey");
-    expect(error("agi")).toBe("l5r4.ui.links.error.syntax");
+    expect(error("trait=agi|speed=3")).toBe("l5r4.ui.links.errors.unknownKey");
+    expect(error("agi")).toBe("l5r4.ui.links.errors.syntax");
   });
 });
 
@@ -60,14 +60,14 @@ describe("Damage, condition, and Fear links in parseLink", () => {
 
   it("should reject a pool that is not whole dice in range", () => {
     for (const pool of ["0k1", "3k0", "31k2", "3k", "2d10", "3.5k2", ""]) {
-      expect(parseLink("Damage", pool).error, pool).toBe("l5r4.ui.links.error.pool");
+      expect(parseLink("Damage", pool).error, pool).toBe("l5r4.ui.links.errors.pool");
     }
   });
 
   it("should read a condition by its status id and reject another", () => {
     expect(parseLink("Condition", "dazed")).toMatchObject({ ok: true, condition: "dazed" });
-    expect(parseLink("Condition", "Dazed").error).toBe("l5r4.ui.links.error.condition");
-    expect(parseLink("Condition", "sleepy").error).toBe("l5r4.ui.links.error.condition");
+    expect(parseLink("Condition", "Dazed").error).toBe("l5r4.ui.links.errors.condition");
+    expect(parseLink("Condition", "sleepy").error).toBe("l5r4.ui.links.errors.condition");
   });
 
   // game-rules/42_fear.md, p.90
@@ -75,7 +75,7 @@ describe("Damage, condition, and Fear links in parseLink", () => {
     expect(parseLink("Fear", "2")).toMatchObject({ ok: true, rank: 2 });
     expect(parseLink("Fear", "10")).toMatchObject({ ok: true, rank: 10 });
     for (const rank of ["0", "11", "2.5", "two"]) {
-      expect(parseLink("Fear", rank).error, rank).toBe("l5r4.ui.links.error.fear");
+      expect(parseLink("Fear", rank).error, rank).toBe("l5r4.ui.links.errors.fear");
     }
   });
 });

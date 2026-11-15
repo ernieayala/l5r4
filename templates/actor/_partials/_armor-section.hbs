@@ -1,19 +1,19 @@
 <section class="flexcol -gap-sm">
-  <div class="flexrow -gap-sm section-title{{#if collapsedSections.armors}} is-collapsed{{/if}}" data-scope="armors">
-    <h4 class="title">{{localize "l5r4.ui.sheets.armor"}}</h4>
+  <div class="flexrow -gap-sm l5r4-section-title{{#if collapsedSections.armors}} is-collapsed{{/if}}" data-scope="armors">
+    <h4 class="l5r4-section-heading">{{localize "l5r4.ui.sheets.armor"}}</h4>
     {{> "systems/l5r4-enhanced/templates/actor/_partials/_unified-item-create.hbs"}}
     {{> "systems/l5r4-enhanced/templates/actor/_partials/_expand.hbs"}}
   </div>
-  <section class="item-list -armor -header" data-scope="armors">
-    <div class="item">
-      <a class="item-sort-by" data-action="item-sort-by" data-sortby="name">{{localize "l5r4.ui.common.name"}}</a>
-      <a class="item-sort-by" data-action="item-sort-by" data-sortby="bonus">{{localize "l5r4.ui.common.bonus"}}</a>
-      <a class="item-sort-by" data-action="item-sort-by" data-sortby="reduction">{{localize "l5r4.equipment.armor.reduction"}}</a>
-      <a class="item-sort-by" data-action="item-sort-by" data-sortby="equipped">{{localize "l5r4.equipment.armor.equipped"}}</a>
+  <section class="l5r4-item-row-list -armor l5r4-sort-header" data-scope="armors">
+    <div class="l5r4-item-row">
+      <a class="l5r4-sort-header-button" data-action="sort-items" data-sortby="name">{{localize "l5r4.ui.common.name"}}</a>
+      <a class="l5r4-sort-header-button" data-action="sort-items" data-sortby="bonus">{{localize "l5r4.ui.common.bonus"}}</a>
+      <a class="l5r4-sort-header-button" data-action="sort-items" data-sortby="reduction">{{localize "l5r4.equipment.armor.reduction"}}</a>
+      <a class="l5r4-sort-header-button" data-action="sort-items" data-sortby="equipped">{{localize "l5r4.equipment.armor.equipped"}}</a>
       <span></span>
     </div>
   </section>
-  <section class="item-list -armor">
+  <section class="l5r4-item-row-list -armor">
     {{#each armors as |armor id|}}
       {{> "systems/l5r4-enhanced/templates/cards/armor.hbs"
           system=armor.system

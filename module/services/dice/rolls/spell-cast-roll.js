@@ -157,7 +157,7 @@ async function beginConcentration(actor, spell) {
     await effect.delete();
   }
   await applyEffect(actor, "concentration", {
-    name: `${T("EFFECT.concentration")}: ${spell.name}`,
+    name: `${T("l5r4.ui.statusEffects.concentration")}: ${spell.name}`,
     level: Math.max(1, toInt(spell.system.mastery)),
     origin: spell.uuid
   });

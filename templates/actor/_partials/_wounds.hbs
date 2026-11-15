@@ -1,23 +1,23 @@
-<section class="wounds">
-  <div class="flexrow -gap-sm section-title">
-    <h4 class="title -compact">{{localize "l5r4.ui.mechanics.wounds.wounds"}}</h4>
+<section class="l5r4-section">
+  <div class="flexrow -gap-sm l5r4-section-title">
+    <h4 class="l5r4-section-heading -compact">{{localize "l5r4.ui.mechanics.wounds.label"}}</h4>
     <a
       class="button inline-control icon"
       data-action="apply-healing"
       title="{{localize 'l5r4.ui.mechanics.wounds.applyHealingTitle'}}"
     >
-      <i class="fas fa-bed"></i>
+      <i class="fa-solid fa-bed"></i>
     </a>
     <a
       class="button inline-control icon"
-      data-action="wound-config"
-      title="{{localize 'l5r4.ui.mechanics.wounds.woundConfiguration'}}"
+      data-action="open-wound-config"
+      title="{{localize 'l5r4.apps.woundConfig.title'}}"
     >
-      <i class="fas fa-cog"></i>
+      <i class="fa-solid fa-gear"></i>
     </a>
   </div>
-  <div class="grid">
-    <span>{{localize "l5r4.ui.mechanics.wounds.woundsSuffered"}}</span>
+  <div class="l5r4-grid">
+    <span>{{localize "l5r4.ui.mechanics.wounds.suffered"}}</span>
     <div class="flexrow"><input
         type="number"
         name="system.suffered"
@@ -40,7 +40,7 @@
         /></div>
     {{/if}}
 
-    <div class="wound-grid">
+    <div class="l5r4-wound-track">
       <span>{{localize "l5r4.ui.mechanics.wounds.woundLevel"}}</span>
       <span>{{localize "l5r4.ui.mechanics.wounds.penalty"}}</span>
       <span>{{localize "l5r4.ui.mechanics.wounds.threshold"}}</span>

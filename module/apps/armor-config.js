@@ -37,11 +37,11 @@ export default class ArmorConfigApplication extends DebouncedFieldMixin(
 ) {
   static DEFAULT_OPTIONS = {
     id: "armor-config-{id}",
-    classes: ["l5r4", "armor-config-app"],
+    classes: ["l5r4", "l5r4-armor-config"],
     tag: "form",
     window: {
       title: "l5r4.apps.armorConfig.title",
-      icon: "fas fa-cog",
+      icon: "fa-solid fa-gear",
       resizable: true
     },
     position: {

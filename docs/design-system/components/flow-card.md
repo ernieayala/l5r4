@@ -4,15 +4,15 @@ A card that runs a combat flow of several steps, an iaijutsu duel or a grapple: 
 log of what happened, and one button per step the flow allows now. The GM's client re-renders the same message after
 each step. It is a [chat card](chat-card.md).
 
-| Item      | Detail                                                                                                                                                                                                                                                     |
-| --------- | ---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| Template  | `templates/chat/flow-card.hbs`, `CHAT_TEMPLATES.flowCard`, renamed `templates/chat/flow.hbs` (target): no `-card` suffix ([naming.md](../../code-system/naming.md#templates-and-actions)). Not in the preload list; `renderTemplate` loads it on first use |
-| Flows     | `module/services/combat/duel.js` (`render` at `:201`), `module/services/combat/grapple.js` (`render` at `:193`), registered with `defineFlow` (`module/services/combat/flow.js:59`)                                                                        |
-| Posted by | `startFlow(name, state, speaker)` (`flow.js:70-76`)                                                                                                                                                                                                        |
-| Stored in | `flags.l5r4-enhanced.flow` (fixed flag): the flow's name and state                                                                                                                                                                                         |
-| Wired by  | `bindFlowCards` (`flow.js:132-147`): each `[data-flow-action]` calls the flow's `click`, then `requestStep`                                                                                                                                                |
-| SCSS      | Now `scss/_chat.scss:48-57`; `scss/components/_flow-card.scss` (target)                                                                                                                                                                                    |
-| Quench    | `l5r4-enhanced.combat`                                                                                                                                                                                                                                     |
+| Item      | Detail                                                                                                                                                                                                                                       |
+| --------- | -------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| Template  | `templates/chat/flow.hbs`, `CHAT_TEMPLATES.flowCard`, renamed `templates/chat/flow.hbs`: no `-card` suffix ([naming.md](../../code-system/naming.md#templates-and-actions)). Not in the preload list; `renderTemplate` loads it on first use |
+| Flows     | `module/services/combat/duel.js` (`render` at `:201`), `module/services/combat/grapple.js` (`render` at `:193`), registered with `defineFlow` (`module/services/combat/flow.js:59`)                                                          |
+| Posted by | `startFlow(name, state, speaker)` (`flow.js:70-76`)                                                                                                                                                                                          |
+| Stored in | `flags.l5r4-enhanced.flow` (fixed flag): the flow's name and state                                                                                                                                                                           |
+| Wired by  | `bindFlowCards` (`flow.js:132-147`): each `[data-flow-action]` calls the flow's `click`, then `requestStep`                                                                                                                                  |
+| SCSS      | Now `scss/components/_chat-card.scss:48-57`; `scss/components/_flow-card.scss` (target)                                                                                                                                                      |
+| Quench    | `l5r4-enhanced.combat`                                                                                                                                                                                                                       |
 
 ## Anatomy
 

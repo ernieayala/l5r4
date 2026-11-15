@@ -69,7 +69,7 @@ export default class ConditionManager extends foundry.applications.api.Handlebar
 ) {
   static DEFAULT_OPTIONS = {
     id: "condition-manager-{id}",
-    classes: ["l5r4", "condition-manager"],
+    classes: ["l5r4", "l5r4-condition-manager"],
     window: {
       title: "l5r4.apps.conditionManager.title",
       icon: "fa-solid fa-heart-pulse",

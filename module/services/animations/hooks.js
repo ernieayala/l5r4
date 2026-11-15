@@ -174,7 +174,7 @@ export function onDeleteActorAnimation(actor, _options, userId) {
 /**
  * Hook handler for chat message creation: a hit with a weapon against a target plays the attack animation.
  *
- * Reads the attacker, weapon, and target the `roll` message stored (module/data/chat/RollMessageData.js). The
+ * Reads the attacker, weapon, and target the `roll` message stored (module/data/chat/roll-message-data.js). The
  * client that posted it plays the animation, and Sequencer shows it to everyone.
  *
  * @param {ChatMessage} message - The newly created chat message

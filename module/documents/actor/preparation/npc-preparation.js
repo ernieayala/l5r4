@@ -20,14 +20,17 @@ import { toInt } from "../../../utils/type-coercion.js";
 import { initiativeDice } from "../../../utils/initiative.js";
 
 import { NPC_INSIGHT_RANK, WOUND_LEVEL_ORDER } from "../../../config/game-mechanics.js";
-import { prepareTraitsAndRings, prepareMovement } from "../calculations/shared-traits-rings.js";
+import {
+  prepareTraitsAndRings,
+  prepareMovement
+} from "../calculations/shared-traits-rings-system.js";
 import {
   prepareHealRate,
   prepareNpcManualWounds,
   prepareNpcFormulaWounds,
   prepareVisibleWoundLevels
 } from "../calculations/wound-system.js";
-import { enrichActorItems } from "../calculations/item-enrichment.js";
+import { enrichActorItems } from "../calculations/item-enrichment-system.js";
 import { applyArmorRules, applyDerivedRules } from "../rules.js";
 
 /**

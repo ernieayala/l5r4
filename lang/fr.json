@@ -1,6 +1,57 @@
 {
   "l5r4": {
+    "apps": {
+      "conditionManager": {
+        "errors": {
+          "openFailed": "Échec de l'ouverture du Gestionnaire de Conditions"
+        }
+      },
+      "emphasisManager": {
+        "custom": "Personnalisée",
+        "hint": "Sélectionnez les emphases disponibles pour cette compétence. Entraînez-les sur la feuille de personnage.",
+        "manage": "Gérer les Emphases",
+        "noEmphases": "Aucune emphase dans la liste",
+        "addCustom": "Ajouter une Emphase Personnalisée"
+      },
+      "wealthManager": {
+        "add": "Ajouter",
+        "addMoney": "Ajouter de l'Argent",
+        "amount": "Montant",
+        "convert": "Convertir la Monnaie",
+        "convertBuToKoku": "Convertir 5 Bu en 1 Koku",
+        "convertBuToZeni": "Convertir 1 Bu en 10 Zeni",
+        "convertKokuToBu": "Convertir 1 Koku en 5 Bu",
+        "convertZeniToBu": "Convertir 10 Zeni en 1 Bu",
+        "currentWealth": "Richesse Actuelle",
+        "denomination": "Dénomination",
+        "open": "Gérer la Richesse",
+        "remove": "Retirer",
+        "removeMoney": "Retirer de l'Argent",
+        "errors": {
+          "openFailed": "Échec de l'ouverture du Gestionnaire de Richesse"
+        }
+      },
+      "woundConfig": {
+        "title": "Configuration des Blessures"
+      }
+    },
     "ui": {
+      "statusEffects": {
+        "blinded": "Aveuglé",
+        "concentration": "Concentration",
+        "dazed": "Étourdi",
+        "dead": "Mort",
+        "entangled": "Entravé",
+        "fasting": "Jeûne",
+        "fatigued": "Fatigué",
+        "feared": "Apeuré",
+        "grappled": "Agrippé",
+        "guarded": "Protégé",
+        "guarding": "Protecteur",
+        "mounted": "Monté/Position Supérieure",
+        "prone": "À Terre",
+        "stunned": "Sonné"
+      },
       "tabs": {
         "details": "Détails",
         "modifiers": "Modificateurs",
@@ -31,6 +82,7 @@
           "int": "Intelligence"
         },
         "rolls": {
+          "socialResistanceDescription": "Résister à l'Intimidation ou la Tentation",
           "success": "Succès",
           "failure": "Échec",
           "missed": "Raté",
@@ -46,24 +98,24 @@
           "raise": "Relance",
           "raises": "Relances",
           "freeRaises": "Relances Gratuites",
-          "socialResistance": "Résistance Sociale",
-          "socialResistanceDescription": "Résister à l'Intimidation ou la Tentation"
+          "socialResistance": "Résistance Sociale"
         },
         "combat": {
           "attack": "Attaque",
-          "woundPenalty": "Pénalité de Blessure",
-          "targeting": {
-            "vs": "vs",
-            "multipleTargets": "cibles - ND non défini automatiquement"
-          }
+          "woundPenalty": "Pénalité de Blessure"
         },
         "wounds": {
-          "wounds": "Blessures",
+          "applied": "Appliqué {amount} blessures à {name}",
+          "appliedWithArmor": "{name} a reçu {original} dégâts. L'armure a réduit de {reduction}. Appliqué {final} blessures.",
           "armorTn": "ND d'Armure",
           "armorTnBase": "ND d'Armure de Base",
           "armorReduction": "Réduction",
+          "label": "Blessures",
+          "reducedApplied": "Point de Vide dépensé : Dégâts réduits de 10. Appliqué {amount} blessures à {name}",
+          "reducedWithArmor": "{name} a reçu {original} dégâts. Vide réduit à {afterVoid}, armure réduite de {reduction}. Appliqué {final} blessures.",
+          "status": "Blessures : {current}/{max} (subies : {suffered})",
+          "suffered": "Blessures Subies",
           "woundLevel": "Niveau",
-          "woundsSuffered": "Blessures Subies",
           "maxWounds": "Blessures Maximum",
           "penalty": "Pénalité",
           "woundHealRate": "Taux de Guérison des Blessures",
@@ -71,7 +123,6 @@
           "woundMode": "Mode de Blessures",
           "manual": "Manuel",
           "formula": "Formule",
-          "woundConfiguration": "Configuration des Blessures",
           "earthMultiplier": "Multiplicateur de Terre",
           "woundBonus": "Bonus de Blessures",
           "threshold": "Seuil",
@@ -88,17 +139,12 @@
           "naturalHealing": "Guérison Naturelle",
           "restedAndRecovered": "s'est reposé et a récupéré des blessures",
           "healingApplied": "Guéri {amount} blessures (taux de guérison : {rate})",
-          "woundStatus": "Blessures : {current}/{max} (subies : {suffered})",
           "fullyHealed": "Complètement guéri !",
           "alreadyFullHealth": "{name} est déjà en pleine santé",
           "noHealRate": "{name} n'a pas de taux de guérison configuré",
           "healingFailed": "Échec de l'application de la guérison à {name}",
           "applyWounds": "Appliquer Blessures",
           "reduceWithVoid": "Réduire avec Vide",
-          "woundsApplied": "Appliqué {amount} blessures à {name}",
-          "woundsAppliedWithArmor": "{name} a reçu {original} dégâts. L'armure a réduit de {reduction}. Appliqué {final} blessures.",
-          "woundsReducedApplied": "Point de Vide dépensé : Dégâts réduits de 10. Appliqué {amount} blessures à {name}",
-          "woundsReducedWithArmor": "{name} a reçu {original} dégâts. Vide réduit à {afterVoid}, armure réduite de {reduction}. Appliqué {final} blessures.",
           "noTokenSelected": "Aucun pion sélectionné. Sélectionnez un pion pour appliquer des blessures.",
           "noVoidPoints": "Aucun Point de Vide disponible pour réduire les dégâts"
         },
@@ -108,13 +154,13 @@
           "defense": "Posture de Défense",
           "fullDefense": "Posture de Défense Totale",
           "center": "Posture Centrée",
-          "fullDefenseDescription": "Effectuez un jet de Défense/Réflexes. Ajoutez la moitié du résultat (arrondi au supérieur) à votre ND d'Armure pour la durée de cette posture."
+          "fullDefenseHint": "Effectuez un jet de Défense/Réflexes. Ajoutez la moitié du résultat (arrondi au supérieur) à votre ND d'Armure pour la durée de cette posture."
         },
         "fear": {
-          "fearRank": "Rang de Peur",
-          "fearLabel": "Peur {rank}",
           "effectName": "Peur {rank}",
           "clickToTest": "Cliquez pour tester la Peur contre les personnages sélectionnés",
+          "label": "Peur {rank}",
+          "rank": "Rang de Peur",
           "testResult": "Test de Peur {rank}",
           "penaltyApplied": "Pénalité : -{penalty}k0 à tous les jets",
           "catastrophicFailure": "ÉCHEC CATASTROPHIQUE ! Le personnage fuit ou se recroqueville de terreur.",
@@ -125,14 +171,14 @@
         }
       },
       "common": {
+        "initiative": "Initiative",
+        "modifier": "Modificateur",
         "roll": "Lancer",
         "cancel": "Annuler",
         "ok": "OK",
         "none": "Aucun",
         "keep": "Conserver",
-        "init": "Initiative",
         "bonus": "Bonus",
-        "mod": "Modificateur",
         "multi": "Multiplicateur",
         "rate": "Taux",
         "current": "Actuel",
@@ -163,35 +209,15 @@
         "save": "Sauvegarder",
         "armor": "Armure"
       },
+      "combat": {
+        "multipleTargets": "cibles - ND non défini automatiquement",
+        "vs": "vs"
+      },
       "armor": {
         "allowStacking": "Autoriser l'Empilement d'Armure"
       },
-      "emphasisManager": {
-        "manage": "Gérer les Emphases",
-        "addCustom": "Ajouter une Emphase Personnalisée",
-        "custom": "Personnalisée",
-        "help": "Sélectionnez les emphases disponibles pour cette compétence. Entraînez-les sur la feuille de personnage.",
-        "noEmphases": "Aucune emphase dans la liste"
-      },
-      "wealthManager": {
-        "tooltip": "Gérer la Richesse",
-        "currentWealth": "Richesse Actuelle",
-        "addMoney": "Ajouter de l'Argent",
-        "removeMoney": "Retirer de l'Argent",
-        "amount": "Montant",
-        "denomination": "Dénomination",
-        "add": "Ajouter",
-        "remove": "Retirer",
-        "convert": "Convertir la Monnaie",
-        "convertZeniToBu": "Convertir 10 Zeni en 1 Bu",
-        "convertBuToZeni": "Convertir 1 Bu en 10 Zeni",
-        "convertBuToKoku": "Convertir 5 Bu en 1 Koku",
-        "convertKokuToBu": "Convertir 1 Koku en 5 Bu",
-        "insufficientFunds": "Fonds insuffisants pour cette transaction",
-        "insufficientForConversion": "Fonds insuffisants pour cette conversion"
-      },
       "sheets": {
-        "bio": "Historique",
+        "background": "Historique",
         "skill": "Compétence",
         "skills": "Compétences",
         "weapon": "Arme",
@@ -230,9 +256,7 @@
         "noActorForVoid": "Aucun acteur disponible pour dépenser des points de vide",
         "schoolRankZero": "Vous ne pouvez pas lancer un sort avec un Rang d'École réduit à zéro",
         "deficiencyBlocksCasting": "Déficience en {ring} réduit votre Rang d'École à zéro - impossible de lancer",
-        "noSpellSlots": "Vous n'avez plus d'emplacements de sort pour cet anneau",
-        "wealthManagerFailed": "Échec de l'ouverture du Gestionnaire de Richesse",
-        "conditionManagerFailed": "Échec de l'ouverture du Gestionnaire de Conditions"
+        "noSpellSlots": "Vous n'avez plus d'emplacements de sort pour cet anneau"
       },
       "hints": {
         "leftRightToAdjust": "Gauche et Droite pour Ajuster",
@@ -322,7 +346,7 @@
         "honorRank": "Honneur",
         "gloryRank": "Gloire",
         "statusRank": "Rang de Statut",
-        "shadowRank": "Corruption des Terres de l'Ombre"
+        "taintRank": "Corruption des Terres de l'Ombre"
       },
       "stance": {
         "title": "Combat",
@@ -334,20 +358,20 @@
         "feet": "pieds"
       },
       "experience": {
+        "disadvantageCapTooltip": "Cliquez pour modifier l'EXP maximum gagnée des désavantages",
+        "recalculate": "Recalculer les achats d'EXP à partir de l'état actuel du personnage",
+        "summary": "Résumé de l'Expérience",
         "xpAmount": "Montant",
         "note": "Note",
         "reason": "Raison",
         "adjustExperience": "Ajuster l'Expérience",
-        "experienceSummary": "Résumé de l'Expérience",
         "usedTotal": "Utilisé / Total",
         "purchases": "Achats",
         "traitChange": "{label} {from}→{to}",
         "voidChange": "Vide {from}→{to}",
         "skillCreate": "{name} 0→{rank}",
         "skillChange": "{name} {from}→{to}",
-        "recalculateTooltip": "Recalculer les achats d'EXP à partir de l'état actuel du personnage",
         "disadvantageCapLabel": "EXP Maximum",
-        "disadvantageCapTooltip": "Cliquez pour modifier l'EXP maximum gagnée des désavantages",
         "breakdown": {
           "base": "Base",
           "disadvantagesGrant": "Désavantages",
@@ -402,7 +426,7 @@
       "armor": {
         "reduction": "Réduction",
         "equipped": "Équipé",
-        "armorType": "Type d'Armure",
+        "type": "Type d'Armure",
         "types": {
           "ashigaru": "Armure Ashigaru",
           "light": "Armure Légère",
@@ -410,16 +434,17 @@
           "riding": "Armure de Monte"
         }
       },
-      "keywords": "Mots-clés",
-      "keywordsPlaceholder": "ex., Samouraï, Paysan",
-      "nemuranai": "Nemuranai",
-      "price": "Prix",
-      "general": {}
+      "general": {
+        "keywords": "Mots-clés",
+        "keywordsPlaceholder": "ex., Samouraï, Paysan",
+        "nemuranai": "Nemuranai",
+        "price": "Prix"
+      }
     },
     "magic": {
       "spells": {
+        "areaOfEffect": "Zone d'Effet",
         "range": "Portée",
-        "aoe": "Zone d'Effet",
         "duration": "Durée",
         "cast": "Lancer",
         "raises": "Relances",
@@ -433,6 +458,7 @@
         "memorized": "Mémorisé"
       },
       "maho": {
+        "casting": "Lancement de Maho",
         "warningTitle": "Magie de Sang - Maho Interdit",
         "bloodRequired": "Coût en Sang Requis",
         "additionalBloodBonus": "Chaque quantité supplémentaire de coût en sang accorde +1 Relance Gratuite",
@@ -442,7 +468,6 @@
           "other": "Autre"
         },
         "additionalBlood": "Sang Supplémentaire",
-        "mahoCasting": "Lancement de Maho",
         "bloodCost": "Sang",
         "taintGained": "Corruption Gagnée",
         "taintGainedNotification": "Gagné {taint} points de Corruption des Terres de l'Ombre en lançant du maho"
@@ -461,6 +486,20 @@
       },
       "errors": {
         "deleteEffect": "Échec de la suppression de l'effet."
+      },
+      "settings": {
+        "forceMigration": {
+          "hint": "Force l'exécution de toutes les migrations au prochain chargement du monde, quelle que soit la version. Se réinitialise automatiquement une fois la migration terminée.",
+          "name": "Forcer la migration au démarrage"
+        },
+        "LtException": {
+          "hint": "Lorsque les dés conservés sont réduits en dessous de 10 par conversion, ajouter 2.",
+          "name": "Appliquer l'exception des Petites Vérités"
+        },
+        "runMigration": {
+          "hint": "Si activé, les migrations de données en attente s'exécuteront la prochaine fois que le monde se chargera. Désactivez pour ignorer les migrations en cas de dépannage.",
+          "name": "Exécuter les migrations au démarrage"
+        }
       }
     },
     "world": {
@@ -470,68 +509,6 @@
         "zeni": "Zeni"
       }
     }
-  },
-  "SETTINGS": {
-    "LtException": {
-      "name": "Appliquer l'exception des Petites Vérités",
-      "label": "Lorsque les dés conservés sont réduits en dessous de 10 par conversion, ajouter 2."
-    },
-    "runMigration": {
-      "name": "Exécuter les migrations au démarrage",
-      "label": "Si activé, les migrations de données en attente s'exécuteront la prochaine fois que le monde se chargera. Désactivez pour ignorer les migrations en cas de dépannage."
-    },
-    "forceMigration": {
-      "name": "Forcer la migration au démarrage",
-      "label": "Force l'exécution de toutes les migrations au prochain chargement du monde, quelle que soit la version. Se réinitialise automatiquement une fois la migration terminée."
-    }
-  },
-  "conditions": {
-    "blinded": {
-      "restrictions": "Aveuglé : -3k3 attaques à distance, -1k1 attaques au corps à corps, -1k1 jets de Défense, ND d'Armure = Réf+5+Armure, Anneau d'Eau -2 pour le mouvement"
-    },
-    "dazed": {
-      "restrictions": "Étourdi : -3k0 à toutes les actions, uniquement postures Défense/Défense Totale, impossible de dueler"
-    },
-    "entangled": {
-      "restrictions": "Entravé : Impossible de Se Déplacer ou de prendre des Actions Complexes sauf jet de Force pour se libérer"
-    },
-    "fatigued": {
-      "restrictions": "Fatigué : +5 ND aux jets physiques, compétences et lancement de sorts (cumulatif par jour), impossible d'utiliser la posture d'Attaque Totale"
-    },
-    "feared": {
-      "restrictions": "Apeuré : -Xk0 à tous les jets (X = Rang de Peur), dure jusqu'à la fin de la rencontre"
-    },
-    "grappled": {
-      "restrictions": "Agrippé : ND d'Armure = 5 + bonus d'armure uniquement"
-    },
-    "guarded": {
-      "restrictions": "Protégé : +10 ND d'Armure tant que protégé par un allié à 5 pieds (jusqu'au prochain tour du gardien)"
-    },
-    "guarding": {
-      "restrictions": "Protecteur : -5 ND d'Armure tant que protégeant un allié à 5 pieds (jusqu'à votre prochain tour)"
-    },
-    "prone": {
-      "restrictions": "À Terre : -10 ND d'Armure vs corps à corps, -2k0 attaques, impossible de Se Déplacer, uniquement postures Attaque/Défense"
-    },
-    "stunned": {
-      "restrictions": "Sonné : Impossible de prendre la moindre action, ND d'Armure = 5 + bonus d'armure"
-    }
-  },
-  "EFFECT": {
-    "blinded": "Aveuglé",
-    "concentration": "Concentration",
-    "dazed": "Étourdi",
-    "dead": "Mort",
-    "entangled": "Entravé",
-    "fasting": "Jeûne",
-    "fatigued": "Fatigué",
-    "feared": "Apeuré",
-    "grappled": "Agrippé",
-    "guarded": "Protégé",
-    "guarding": "Protecteur",
-    "mounted": "Monté/Position Supérieure",
-    "prone": "À Terre",
-    "stunned": "Sonné"
   },
   "TYPES": {
     "Actor": {

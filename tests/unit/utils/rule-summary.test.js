@@ -117,7 +117,7 @@ describe("ruleSummary", () => {
 
   it("should name a Trait through its own key and a condition through its status name", () => {
     expect(selectorPhrase("trait:ref").data.name.key).toBe("l5r4.ui.mechanics.traits.ref");
-    expect(ruleSummary(SAMPLES[16])[0].data.condition.key).toBe("EFFECT.dazed");
+    expect(ruleSummary(SAMPLES[16])[0].data.condition.key).toBe("l5r4.ui.statusEffects.dazed");
   });
 
   it("should name a granted item through the resolver it is given", () => {

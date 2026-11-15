@@ -6,7 +6,7 @@ it: stance, Initiative, and movement; Armor TN and Reduction; Wounds; Fear Rank.
 | Item        | Detail                                                                                                                                 |
 | ----------- | -------------------------------------------------------------------------------------------------------------------------------------- |
 | Partial     | None: the grid is one element whose cells the enclosing partial writes (`_combat.hbs`, `_armor.hbs`, `_wounds.hbs`, `_fear.hbs`)       |
-| SCSS        | `scss/components/_grid.scss` (target), the rename of `scss/components/_grids.scss`, which styles `.grid`                               |
+| SCSS        | `scss/components/_grid.scss`, the rename of `scss/components/_grid.scss`, which styles `.grid`                                         |
 | Block class | `l5r4-grid`                                                                                                                            |
 | Shows in    | PC and NPC sheet sidebar; the Wound Ranks table in the wound configuration window holds a Wound track inside a grid (`wound-track.md`) |
 | Gallery     | A grid with a text value, a number input, a select, a checkbox beside a value, and a long label                                        |
@@ -73,12 +73,12 @@ use tabular figures (`foundations/typography.md` T5).
 | G3  | A control in a value cell names itself with its label cell's key                                                      | Review, in the gallery                                                 |
 | G4  | Labels and values alternate; a row never has two labels or two values side by side, except a `-full` value            | Review                                                                 |
 
-| #   | Conforming                                                                                                                                              | Non-conforming                                                                                     |
-| --- | ------------------------------------------------------------------------------------------------------------------------------------------------------- | -------------------------------------------------------------------------------------------------- |
-| G1  | `.l5r4-grid-label { background: var(--l5r4-color-panel); }` (modeled on `_grids.scss:19-21`)                                                            | `.grid > span { background: var(--table-header-bg-color); }` (`scss/components/_grids.scss:19-21`) |
-| G2  | `border: var(--l5r4-border-width-thin) solid var(--l5r4-color-line);` (`foundations/frames.md` rule 1)                                                  | `border: 1px solid var(--table-header-border-color);` (`scss/components/_grids.scss:9`)            |
-| G3  | `<input type="number" name="system.suffered" aria-label="{{localize "l5r4.ui.mechanics.wounds.woundsSuffered"}}" ...>` (modeled on `_wounds.hbs:21-26`) | The same input with no name (`templates/actor/_partials/_wounds.hbs:21-26`)                        |
-| G4  | Label, value, label, value (`templates/actor/_partials/_armor.hbs:14-28`)                                                                               | A checkbox placed as a third cell after the value (modeled)                                        |
+| #   | Conforming                                                                                                                                              | Non-conforming                                                                                    |
+| --- | ------------------------------------------------------------------------------------------------------------------------------------------------------- | ------------------------------------------------------------------------------------------------- |
+| G1  | `.l5r4-grid-label { background: var(--l5r4-color-panel); }` (modeled on `_grids.scss:19-21`)                                                            | `.grid > span { background: var(--table-header-bg-color); }` (`scss/components/_grid.scss:19-21`) |
+| G2  | `border: var(--l5r4-border-width-thin) solid var(--l5r4-color-line);` (`foundations/frames.md` rule 1)                                                  | `border: 1px solid var(--table-header-border-color);` (`scss/components/_grid.scss:9`)            |
+| G3  | `<input type="number" name="system.suffered" aria-label="{{localize "l5r4.ui.mechanics.wounds.woundsSuffered"}}" ...>` (modeled on `_wounds.hbs:21-26`) | The same input with no name (`templates/actor/_partials/_wounds.hbs:21-26`)                       |
+| G4  | Label, value, label, value (`templates/actor/_partials/_armor.hbs:14-28`)                                                                               | A checkbox placed as a third cell after the value (modeled)                                       |
 
 ## Do and don't
 
@@ -90,9 +90,9 @@ use tabular figures (`foundations/typography.md` T5).
 
 ## Names
 
-| Current                       | Target                                | Why                                                            |
-| ----------------------------- | ------------------------------------- | -------------------------------------------------------------- |
-| `grid`                        | `l5r4-grid`                           | Decision 15                                                    |
-| `> span` label cells          | `l5r4-grid-label`                     | G1                                                             |
-| `> div` value cells           | `l5r4-grid-value`                     | G1                                                             |
-| `scss/components/_grids.scss` | `scss/components/_grid.scss` (target) | The file takes its block's name (`docs/code-system/naming.md`) |
+| Current                      | Target                       | Why                                                            |
+| ---------------------------- | ---------------------------- | -------------------------------------------------------------- |
+| `grid`                       | `l5r4-grid`                  | Decision 15                                                    |
+| `> span` label cells         | `l5r4-grid-label`            | G1                                                             |
+| `> div` value cells          | `l5r4-grid-value`            | G1                                                             |
+| `scss/components/_grid.scss` | `scss/components/_grid.scss` | The file takes its block's name (`docs/code-system/naming.md`) |

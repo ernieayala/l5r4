@@ -225,8 +225,8 @@ export class ItemCRUDHandler {
     // querySelector used here to find icon element within the clicked button (scoped query)
     const icon = element.querySelector("i");
     if (icon) {
-      icon.classList.toggle("fa-chevron-down");
-      icon.classList.toggle("fa-chevron-up");
+      icon.classList.toggle("fa-angle-down");
+      icon.classList.toggle("fa-angle-up");
     }
   }
 
@@ -235,9 +235,9 @@ export class ItemCRUDHandler {
    * Reads the field path and data type from element dataset attributes,
    * coerces the input value to the appropriate type, and updates the item.
    *
-   * HTML elements should include data-action="inline-edit", data-field="path.to.field",
+   * HTML elements should include data-action="update-item-field", data-field="path.to.field",
    * and data-dtype="TypeName" attributes. For example, to edit a skill rank:
-   * <input data-action="inline-edit" data-field="system.rank" data-dtype="Integer" value="3">
+   * <input data-action="update-item-field" data-field="system.rank" data-dtype="Integer" value="3">
    *
    * Supported data types (via data-dtype attribute):
    * - "Integer" → Converts to integer (default 0)
@@ -312,7 +312,7 @@ export class ItemCRUDHandler {
         button.title = game.i18n.localize("l5r4.ui.mechanics.rolls.skillRoll");
 
         // Also update the mask span if it exists
-        const mask = button.closest(".button-mask-container")?.querySelector(".mas");
+        const mask = button.closest(".l5r4-button.-roll")?.querySelector(".l5r4-button-under");
         if (mask) {
           mask.textContent = formula;
         }

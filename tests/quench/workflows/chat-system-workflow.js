@@ -18,7 +18,7 @@
  * @see module/services/chat.js
  * @see module/hooks/chat-damage-buttons.js
  * @see module/utils/check.js
- * @see templates/chat/check-card.hbs
+ * @see templates/chat/check.hbs
  */
 
 import { SYS_ID } from "../../../module/config/constants.js";

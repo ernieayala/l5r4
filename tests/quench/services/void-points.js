@@ -10,7 +10,7 @@
  * CRITICAL: These tests FIND BUGS, not validate working code.
  * Each test creates a specific failure condition to verify handling.
  *
- * @see module/services/dice/resources/void-manager.js
+ * @see module/services/dice/resources/void-points.js
  * @see module/config/status-effects.js (voidArmor)
  */
 
@@ -19,7 +19,7 @@ import { createTestPC } from "../../fixtures/actor-fixtures.js";
 import {
   spendVoidPoint,
   validateVoidPoints
-} from "../../../module/services/dice/resources/void-manager.js";
+} from "../../../module/services/dice/resources/void-points.js";
 import { applyEffect, effectsOf } from "../../../module/services/effects/apply.js";
 import { waitFor } from "../helpers.js";
 

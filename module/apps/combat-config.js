@@ -37,11 +37,11 @@ export default class CombatConfigApplication extends DebouncedFieldMixin(
 ) {
   static DEFAULT_OPTIONS = {
     id: "combat-config-{id}",
-    classes: ["l5r4", "combat-config-app"],
+    classes: ["l5r4", "l5r4-combat-config"],
     tag: "form",
     window: {
       title: "l5r4.apps.combatConfig.title",
-      icon: "fas fa-cog",
+      icon: "fa-solid fa-gear",
       resizable: true
     },
     position: {

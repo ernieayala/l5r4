@@ -1,0 +1,192 @@
+/**
+ * Item Lists
+ * Grid layouts and styling for item lists in actor sheets
+ */
+
+.l5r4.pc,
+.l5r4.npc,
+.l5r4-xp-manager {
+  .l5r4-item-row-list {
+    display: flex;
+    flex-direction: column;
+    gap: 0.25rem;
+
+    &.l5r4-sort-header {
+      background: var(--table-header-bg-color);
+      border: 1px solid var(--table-header-border-color);
+      border-inline-start: none;
+      color: var(--table-header-text-color);
+      font-weight: 600;
+      padding: 0.5rem;
+
+      .l5r4-item-row {
+        padding: 0;
+      }
+    }
+
+    &.-attacks {
+      .l5r4-item-row {
+        grid-template-columns: 1fr 1fr 1fr 1fr 1fr var(--l5r4-size-column-controls);
+      }
+    }
+
+    &.-advantage {
+      .l5r4-item-row {
+        grid-template-columns: 1fr 80px 80px var(--l5r4-size-column-controls);
+      }
+    }
+
+    &.-armor {
+      .l5r4-item-row {
+        grid-template-columns: 1fr 80px 100px 100px var(--l5r4-size-column-controls);
+      }
+    }
+
+    &.-bio {
+      .l5r4-item-row {
+        grid-template-columns: 1fr var(--l5r4-size-column-controls);
+      }
+    }
+
+    /* stylelint-disable-next-line selector-class-pattern -- Legacy class name */
+    &.-commonItem {
+      .l5r4-item-row {
+        grid-template-columns: 1fr var(--l5r4-size-column-controls);
+      }
+    }
+
+    &.-disadvantage {
+      .l5r4-item-row {
+        grid-template-columns: 1fr 80px 80px var(--l5r4-size-column-controls);
+      }
+    }
+
+    &.-kata {
+      .l5r4-item-row {
+        grid-template-columns: 1fr 80px 80px var(--l5r4-size-column-controls);
+      }
+    }
+
+    &.-kiho {
+      .l5r4-item-row {
+        grid-template-columns: 1fr 80px 80px 80px var(--l5r4-size-column-controls);
+      }
+    }
+
+    &.-skill {
+      .l5r4-item-row {
+        grid-template-columns: 1fr 60px 120px 60px 1fr var(--l5r4-size-column-controls);
+      }
+    }
+
+    &.-spell {
+      .l5r4-item-row {
+        grid-template-columns: 1fr 80px 60px 60px var(--l5r4-size-column-controls);
+      }
+    }
+
+    &.-tattoo {
+      .l5r4-item-row {
+        grid-template-columns: 1fr 1fr var(--l5r4-size-column-controls);
+      }
+    }
+
+    &.-technique {
+      .l5r4-item-row {
+        grid-template-columns: 1fr 1fr 1fr var(--l5r4-size-column-controls);
+      }
+    }
+
+    &.-weapon {
+      .l5r4-item-row {
+        grid-template-columns: 1fr 80px 80px 150px var(--l5r4-size-column-controls);
+      }
+    }
+
+    &.-xp {
+      .l5r4-item-row {
+        grid-template-columns: 150px 1fr var(--l5r4-size-column-controls);
+      }
+    }
+
+    &.-xp-spent {
+      .l5r4-item-row {
+        grid-template-columns: 1fr 80px 120px var(--l5r4-size-column-controls);
+      }
+    }
+
+    > .l5r4-item-row:nth-of-type(even) {
+      background-color: var(--table-row-color-even);
+    }
+  }
+
+  .l5r4-item-row {
+    align-items: center;
+    column-gap: 0.25rem;
+    display: grid;
+    grid-template-rows: min-content min-content;
+    padding: 0 0.5rem;
+
+    &:hover {
+      .inline-control {
+        opacity: 1;
+        pointer-events: all;
+      }
+    }
+
+    &.-bio {
+      background: var(--table-header-bg-color);
+    }
+
+    &.-expandable {
+      .inline-control.l5r4-expand-control {
+        display: flex;
+      }
+    }
+
+    &.is-expanded {
+      .l5r4-item-row-details {
+        display: block;
+      }
+    }
+
+    select,
+    input[type="number"] {
+      border: 1px solid var(--input-border-color);
+      height: 2em;
+      min-height: 2em;
+    }
+
+    .title {
+      text-wrap: revert;
+
+      a[data-action="post-item"] {
+        color: inherit;
+        cursor: var(--conditional-cursor);
+        text-decoration: none;
+        text-shadow: none;
+      }
+    }
+
+    .controls {
+      justify-content: flex-end;
+    }
+
+    .inline-control {
+      opacity: 0;
+      pointer-events: none;
+      transition: none;
+
+      &.l5r4-expand-control {
+        display: none;
+      }
+    }
+
+    .l5r4-item-row-details {
+      display: none;
+      font-size: var(--font-size-14);
+      grid-column: 1 / -1;
+      grid-row: 2;
+    }
+  }
+}

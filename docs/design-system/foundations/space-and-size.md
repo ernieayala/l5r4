@@ -14,13 +14,13 @@ literals and do not change with the theme.
 | S4  | A size two or more components share, or one listed in **Size scale**, reads its `--l5r4-size-*` token. A size only one component uses is a literal in that component's file         | Review; `tests/conventions/styles.test.js` checks every size token is declared, read, and listed here |
 | S5  | Every new pointer target is at least 24 by 24 px, or has 24 px of clear space around it. Existing controls keep their size (**Minimum target**). A link inside a sentence is exempt | Review, in the gallery's state sections                                                               |
 
-| #   | Conforming                                                                                         | Non-conforming                                                                                          |
-| --- | -------------------------------------------------------------------------------------------------- | ------------------------------------------------------------------------------------------------------- |
-| S1  | `gap: 0.5rem;` (`scss/components/_effect-panel.scss:24`), written as `gap: var(--l5r4-space-gap);` | `gap: 0.15rem;` (`scss/components/_compendium-browser.scss:59`)                                         |
-| S2  | `padding: 0.5rem;` on the section title (`scss/components/_sections.scss:14`)                      | `margin-block-start: 8px;` (`scss/features/_traits-rings.scss:308`)                                     |
-| S3  | Card padding as `var(--l5r4-space-card)` on the section title and the rule card alike              | `padding: var(--l5r4-space-8);` on a card, where `--l5r4-space-card` fits (modeled)                     |
-| S4  | `width: var(--l5r4-size-item-icon);` on the effect panel and browser icons, which share 32 px      | `--controls: 102px;` declared inside a rule, with no entry here (`scss/components/_item-lists.scss:27`) |
-| S5  | The Ring medallion, 96 px (`scss/features/_traits-rings.scss:170-173`)                             | A new icon button set to `width: 16px` (modeled)                                                        |
+| #   | Conforming                                                                                    | Non-conforming                                                                                        |
+| --- | --------------------------------------------------------------------------------------------- | ----------------------------------------------------------------------------------------------------- |
+| S1  | `gap: 0.5rem;` (`scss/apps/_effect-panel.scss:23`), written as `gap: var(--l5r4-space-gap);`  | `gap: 0.15rem;` (`scss/apps/_compendium-browser.scss:58`)                                             |
+| S2  | `padding: 0.5rem;` on the section title (`scss/components/_section.scss:14`)                  | `margin-block-start: 8px;` (`scss/features/_traits-rings.scss:308`)                                   |
+| S3  | Card padding as `var(--l5r4-space-card)` on the section title and the rule card alike         | `padding: var(--l5r4-space-8);` on a card, where `--l5r4-space-card` fits (modeled)                   |
+| S4  | `width: var(--l5r4-size-item-icon);` on the effect panel and browser icons, which share 32 px | `--controls: 102px;` declared inside a rule, with no entry here (`scss/components/_item-row.scss:27`) |
+| S5  | The Ring medallion, 96 px (`scss/features/_traits-rings.scss:170-173`)                        | A new icon button set to `width: 16px` (modeled)                                                      |
 
 ## Space scale
 
@@ -42,20 +42,20 @@ The tokens hold the rem literals, not core's variables, so the scale is fixed by
 A value maps to the nearest step. A value under 0.25rem maps to 0.25rem, so no gap collapses to zero. A value halfway
 between two steps maps to the larger one.
 
-| Read at                                                                                 | Literal                   | Step                              |
-| --------------------------------------------------------------------------------------- | ------------------------- | --------------------------------- |
-| `scss/features/_wounds.scss:39`                                                         | `0.1rem` (block padding)  | `--l5r4-space-4`                  |
-| `scss/_utilities.scss:7`                                                                | `0.125rem` (`.-gap-xs`)   | `--l5r4-space-4`                  |
-| `scss/components/_effect-panel.scss:73`                                                 | `0.15rem`                 | `--l5r4-space-4`                  |
-| `scss/components/_compendium-browser.scss:59`, `:131`                                   | `0.15rem`                 | `--l5r4-space-4`                  |
-| `scss/features/_ranks.scss:11`                                                          | `0.2rem`                  | `--l5r4-space-4`                  |
-| `scss/components/_compendium-browser.scss:38`, `:119`                                   | `0.2rem` (block padding)  | `--l5r4-space-4`                  |
-| `scss/components/_effect-panel.scss:53`                                                 | `0.4rem` (inline padding) | `--l5r4-space-8`                  |
-| `scss/components/_compendium-browser.scss:136`, `scss/components/_rules-editor.scss:65` | `1.25rem` (list indent)   | `--l5r4-space-24`                 |
-| `scss/features/_traits-rings.scss:554`, `:569`                                          | `2px`                     | `--l5r4-space-4`                  |
-| `scss/features/_traits-rings.scss:557`                                                  | `4px`                     | `--l5r4-space-4`                  |
-| `scss/features/_traits-rings.scss:308`                                                  | `8px`                     | `--l5r4-space-8`                  |
-| `scss/features/_traits-rings.scss:479`, `:512`, `:536`                                  | `-12px`                   | `calc(-1 * var(--l5r4-space-12))` |
+| Read at                                                                                | Literal                   | Step                              |
+| -------------------------------------------------------------------------------------- | ------------------------- | --------------------------------- |
+| `scss/features/_wound-track.scss:39`                                                   | `0.1rem` (block padding)  | `--l5r4-space-4`                  |
+| `scss/base/_utilities.scss:7`                                                          | `0.125rem` (`.-gap-xs`)   | `--l5r4-space-4`                  |
+| `scss/components/_inline-link.scss:16`                                                 | `0.15rem`                 | `--l5r4-space-4`                  |
+| `scss/apps/_compendium-browser.scss:58`, `:131`                                        | `0.15rem`                 | `--l5r4-space-4`                  |
+| `scss/features/_ranks.scss:11`                                                         | `0.2rem`                  | `--l5r4-space-4`                  |
+| `scss/apps/_compendium-browser.scss:37`, `:119`                                        | `0.2rem` (block padding)  | `--l5r4-space-4`                  |
+| `scss/apps/_effect-panel.scss:52`                                                      | `0.4rem` (inline padding) | `--l5r4-space-8`                  |
+| `scss/components/_item-summary-card.scss:14`, `scss/components/_ledger-dialog.scss:11` | `1.25rem` (list indent)   | `--l5r4-space-24`                 |
+| `scss/features/_traits-rings.scss:554`, `:569`                                         | `2px`                     | `--l5r4-space-4`                  |
+| `scss/features/_traits-rings.scss:557`                                                 | `4px`                     | `--l5r4-space-4`                  |
+| `scss/features/_traits-rings.scss:308`                                                 | `8px`                     | `--l5r4-space-8`                  |
+| `scss/features/_traits-rings.scss:479`, `:512`, `:536`                                 | `-12px`                   | `calc(-1 * var(--l5r4-space-12))` |
 
 ### Gap utilities
 
@@ -75,15 +75,15 @@ stays either way.
 
 ## Semantic spacing
 
-| Token                         | Value             | Job                                                                                       | Read at                                                                                                                                                           |
-| ----------------------------- | ----------------- | ----------------------------------------------------------------------------------------- | ----------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| `--l5r4-space-gap-tight`      | `--l5r4-space-4`  | Between stacked rows: list rows, card rows, dialog rows                                   | `scss/components/_item-lists.scss:12`, `scss/_chat.scss:27`, `:52`, `:71`, `scss/components/_effect-panel.scss:15`, `scss/components/_compendium-browser.scss:80` |
-| `--l5r4-space-gap`            | `--l5r4-space-8`  | Between parts of one row: icon and text, toggle and label, label and value                | `scss/components/_effect-panel.scss:24`, `scss/components/_compendium-browser.scss:91`, `scss/_chat.scss:77`, `scss/apps/_xp-manager.scss:24`                     |
-| `--l5r4-space-control-block`  | `--l5r4-space-4`  | Block padding inside a compact button or tab                                              | `scss/components/_effect-panel.scss:53`, `scss/components/_compendium-browser.scss:38`, `:119`                                                                    |
-| `--l5r4-space-control-inline` | `--l5r4-space-8`  | Inline padding inside a compact button or tab                                             | As above                                                                                                                                                          |
-| `--l5r4-space-card`           | `--l5r4-space-8`  | Padding of a card, a section title, a list header, a rule card                            | `scss/components/_sections.scss:14`, `scss/components/_item-lists.scss:20`, `:206`, `scss/components/_rules-editor.scss:32`                                       |
-| `--l5r4-space-section`        | `--l5r4-space-16` | Between sheet columns and between sections; padding of the PC header and the Limited view | `scss/layout/_actor-layout.scss:15`, `:29`, `:37`, `scss/features/_pc-info.scss:10`, `scss/apps/_emphasis-manager.scss:9`                                         |
-| `--l5r4-space-indent`         | `--l5r4-space-24` | Start padding of a bulleted list                                                          | `scss/components/_compendium-browser.scss:136`, `scss/components/_rules-editor.scss:65`                                                                           |
+| Token                         | Value             | Job                                                                                       | Read at                                                                                                                                                             |
+| ----------------------------- | ----------------- | ----------------------------------------------------------------------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| `--l5r4-space-gap-tight`      | `--l5r4-space-4`  | Between stacked rows: list rows, card rows, dialog rows                                   | `scss/components/_item-row.scss:12`, `scss/components/_chat-card.scss:27`, `:52`, `:71`, `scss/apps/_effect-panel.scss:14`, `scss/apps/_compendium-browser.scss:79` |
+| `--l5r4-space-gap`            | `--l5r4-space-8`  | Between parts of one row: icon and text, toggle and label, label and value                | `scss/apps/_effect-panel.scss:23`, `scss/apps/_compendium-browser.scss:90`, `scss/components/_check-dialog.scss:18`, `scss/apps/_xp-manager.scss:24`                |
+| `--l5r4-space-control-block`  | `--l5r4-space-4`  | Block padding inside a compact button or tab                                              | `scss/apps/_effect-panel.scss:52`, `scss/apps/_compendium-browser.scss:37`, `:119`                                                                                  |
+| `--l5r4-space-control-inline` | `--l5r4-space-8`  | Inline padding inside a compact button or tab                                             | As above                                                                                                                                                            |
+| `--l5r4-space-card`           | `--l5r4-space-8`  | Padding of a card, a section title, a list header, a rule card                            | `scss/components/_section.scss:14`, `scss/components/_item-row.scss:20`, `:206`, `scss/components/_rules-editor.scss:32`                                            |
+| `--l5r4-space-section`        | `--l5r4-space-16` | Between sheet columns and between sections; padding of the PC header and the Limited view | `scss/layout/_actor-layout.scss:15`, `:29`, `:37`, `scss/features/_pc-info.scss:10`, `scss/apps/_emphasis-manager.scss:9`                                           |
+| `--l5r4-space-indent`         | `--l5r4-space-24` | Start padding of a bulleted list                                                          | `scss/components/_item-summary-card.scss:14`, `scss/components/_ledger-dialog.scss:11`                                                                              |
 
 ## Density
 
@@ -94,28 +94,28 @@ stays either way.
 | Dialogs                | `gap-tight`  | `gap`                             | Core's window padding  | `gap`                         |
 | Panels and browsers    | `gap-tight`  | `gap`                             | Core's window padding  | `gap`                         |
 
-Chat card buttons run full width, one per row (`scss/_chat.scss:47-53`), so a long label wraps and the button keeps its
+Chat card buttons run full width, one per row (`scss/components/_chat-card.scss:47-53`), so a long label wraps and the button keeps its
 height.
 
 ## Size scale
 
-| Token                         | Value | Job                                                                      | Read at                                                                                                                                            |
-| ----------------------------- | ----- | ------------------------------------------------------------------------ | -------------------------------------------------------------------------------------------------------------------------------------------------- |
-| `--l5r4-size-portrait`        | 240px | Actor image box on PC and NPC sheets                                     | `scss/layout/_sidebar.scss:11-15`                                                                                                                  |
-| `--l5r4-size-medallion`       | 96px  | Ring medallion image                                                     | `scss/features/_traits-rings.scss:170`, `:173`                                                                                                     |
-| `--l5r4-size-ring-rank`       | 32px  | Ring rank disc; the Ring and Trait grid's columns                        | `scss/features/_traits-rings.scss:61`, `:86`, `:90`                                                                                                |
-| `--l5r4-size-trait-rank`      | 28px  | Trait rank box and Trait row height                                      | `scss/features/_traits-rings.scss:178`, `:190`, `:249`, `:252`, `:292`                                                                             |
-| `--l5r4-size-item-icon`       | 32px  | Document icon in a row: effect panel, compendium browser, spell slots    | `scss/components/_effect-panel.scss:29-31`, `scss/components/_compendium-browser.scss:96-98`, `scss/components/_sections.scss:49-50`, `:59`, `:68` |
-| `--l5r4-size-rank-block`      | 64px  | Honor, Glory, Status, and Taint block height                             | `scss/components/_animations.scss:53`                                                                                                              |
-| `--l5r4-size-void-point`      | 12px  | Void Point dot                                                           | `scss/features/_traits-rings.scss:575-576`                                                                                                         |
-| `--l5r4-size-stepper`         | 16px  | Trait and Void Ring step arrow height, and the arrow's offset when shown | `scss/features/_traits-rings.scss:18`, `:22`, `:35`                                                                                                |
-| `--l5r4-size-target`          | 24px  | Minimum pointer target (S5); Ring name height; Wound track row height    | `scss/features/_traits-rings.scss:72`, `scss/features/_wounds.scss:38`                                                                             |
-| `--l5r4-size-column-60`       | 60px  | Item list column                                                         | `scss/components/_item-lists.scss:86`, `:92`                                                                                                       |
-| `--l5r4-size-column-80`       | 80px  | Item list column                                                         | `scss/components/_item-lists.scss:43`, `:49`, `:68`, `:74`, `:80`, `:92`, `:110`, `:122`                                                           |
-| `--l5r4-size-column-100`      | 100px | Item list column                                                         | `scss/components/_item-lists.scss:49`                                                                                                              |
-| `--l5r4-size-column-120`      | 120px | Item list column                                                         | `scss/components/_item-lists.scss:86`, `:122`                                                                                                      |
-| `--l5r4-size-column-150`      | 150px | Item list column                                                         | `scss/components/_item-lists.scss:110`, `:116`                                                                                                     |
-| `--l5r4-size-column-controls` | 102px | Item list column holding the row's controls                              | `scss/components/_item-lists.scss:27`                                                                                                              |
+| Token                         | Value | Job                                                                      | Read at                                                                                                                               |
+| ----------------------------- | ----- | ------------------------------------------------------------------------ | ------------------------------------------------------------------------------------------------------------------------------------- |
+| `--l5r4-size-portrait`        | 240px | Actor image box on PC and NPC sheets                                     | `scss/layout/_sidebar.scss:11-15`                                                                                                     |
+| `--l5r4-size-medallion`       | 96px  | Ring medallion image                                                     | `scss/features/_traits-rings.scss:170`, `:173`                                                                                        |
+| `--l5r4-size-ring-rank`       | 32px  | Ring rank disc; the Ring and Trait grid's columns                        | `scss/features/_traits-rings.scss:61`, `:86`, `:90`                                                                                   |
+| `--l5r4-size-trait-rank`      | 28px  | Trait rank box and Trait row height                                      | `scss/features/_traits-rings.scss:178`, `:190`, `:249`, `:252`, `:292`                                                                |
+| `--l5r4-size-item-icon`       | 32px  | Document icon in a row: effect panel, compendium browser, spell slots    | `scss/apps/_effect-panel.scss:28-30`, `scss/apps/_compendium-browser.scss:95-97`, `scss/components/_section.scss:49-50`, `:59`, `:68` |
+| `--l5r4-size-rank-block`      | 64px  | Honor, Glory, Status, and Taint block height                             | `scss/components/_animations.scss:53`                                                                                                 |
+| `--l5r4-size-void-point`      | 12px  | Void Point dot                                                           | `scss/features/_traits-rings.scss:575-576`                                                                                            |
+| `--l5r4-size-stepper`         | 16px  | Trait and Void Ring step arrow height, and the arrow's offset when shown | `scss/features/_traits-rings.scss:18`, `:22`, `:35`                                                                                   |
+| `--l5r4-size-target`          | 24px  | Minimum pointer target (S5); Ring name height; Wound track row height    | `scss/features/_traits-rings.scss:72`, `scss/features/_wound-track.scss:38`                                                           |
+| `--l5r4-size-column-60`       | 60px  | Item list column                                                         | `scss/components/_item-row.scss:86`, `:92`                                                                                            |
+| `--l5r4-size-column-80`       | 80px  | Item list column                                                         | `scss/components/_item-row.scss:43`, `:49`, `:68`, `:74`, `:80`, `:92`, `:110`, `:122`                                                |
+| `--l5r4-size-column-100`      | 100px | Item list column                                                         | `scss/components/_item-row.scss:49`                                                                                                   |
+| `--l5r4-size-column-120`      | 120px | Item list column                                                         | `scss/components/_item-row.scss:86`, `:122`                                                                                           |
+| `--l5r4-size-column-150`      | 150px | Item list column                                                         | `scss/components/_item-row.scss:110`, `:116`                                                                                          |
+| `--l5r4-size-column-controls` | 102px | Item list column holding the row's controls                              | `scss/components/_item-row.scss:27`                                                                                                   |
 
 Glyph sizes for icons are in `foundations/iconography.md`. Components read core's field height (`--input-height`, 2rem)
 as core sets it.
@@ -124,11 +124,11 @@ Literal sizes that leave the scale:
 
 | Read at                                        | Literal                                    | Result                                                                                                                           |
 | ---------------------------------------------- | ------------------------------------------ | -------------------------------------------------------------------------------------------------------------------------------- |
-| `scss/features/_wounds.scss:38`                | `min-height: 25px`                         | `--l5r4-size-target` (24 px), the nearest size; 1 px shorter                                                                     |
+| `scss/features/_wound-track.scss:38`           | `min-height: 25px`                         | `--l5r4-size-target` (24 px), the nearest size; 1 px shorter                                                                     |
 | `scss/features/_traits-rings.scss:268`, `:273` | `24px` on `.void-points-amount`            | Removed: the rule matches no template                                                                                            |
-| `scss/components/_forms.scss:46`               | `var(--form-field-height)` on `.clear-btn` | Removed: the rule matches no template, and core declares the variable only for ApplicationV1 windows (`foundry2.css:61`, `:131`) |
-| `scss/components/_sections.scss:31`            | `max-width: 46px` on section title fields  | Stays a literal: one component                                                                                                   |
-| `scss/components/_forms.scss:26`, `:48`        | `min-width: 20px`                          | Stays a literal: one component each                                                                                              |
+| `scss/components/_form-field.scss:46`          | `var(--form-field-height)` on `.clear-btn` | Removed: the rule matches no template, and core declares the variable only for ApplicationV1 windows (`foundry2.css:61`, `:131`) |
+| `scss/components/_section.scss:31`             | `max-width: 46px` on section title fields  | Stays a literal: one component                                                                                                   |
+| `scss/components/_form-field.scss:26`, `:48`   | `min-width: 20px`                          | Stays a literal: one component each                                                                                              |
 
 Renamed for `CHANGELOG.MD`: `--controls` becomes `--l5r4-size-column-controls`.
 

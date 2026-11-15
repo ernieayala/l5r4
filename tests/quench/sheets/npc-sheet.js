@@ -307,7 +307,7 @@ export function registerNpcSheetTests(quench) {
 
           assert.exists(skillRow, "Skill row exists");
 
-          const editButton = skillRow.querySelector('[data-action="item-edit"]');
+          const editButton = skillRow.querySelector('[data-action="edit-item"]');
           assert.exists(editButton, "Edit button exists on skill");
         });
 
@@ -317,7 +317,7 @@ export function registerNpcSheetTests(quench) {
 
           assert.exists(skillRow, "Skill row exists");
 
-          const deleteButton = skillRow.querySelector('[data-action="item-delete"]');
+          const deleteButton = skillRow.querySelector('[data-action="delete-item"]');
           assert.exists(deleteButton, "Delete button exists on skill");
         });
 
@@ -338,23 +338,23 @@ export function registerNpcSheetTests(quench) {
         it("should have clickable edit button", () => {
           const element = sheet.element;
           const skillRow = element.querySelector(`[data-item-id="${skill.id}"]`);
-          const editButton = skillRow.querySelector('[data-action="item-edit"]');
+          const editButton = skillRow.querySelector('[data-action="edit-item"]');
 
           assert.exists(editButton, "Edit button exists");
           assert.isNotNull(editButton.getAttribute("data-action"), "Edit button has action");
-          assert.equal(editButton.getAttribute("data-action"), "item-edit", "Edit action correct");
+          assert.equal(editButton.getAttribute("data-action"), "edit-item", "Edit action correct");
         });
 
         it("should have clickable delete button", () => {
           const element = sheet.element;
           const skillRow = element.querySelector(`[data-item-id="${skill.id}"]`);
-          const deleteButton = skillRow.querySelector('[data-action="item-delete"]');
+          const deleteButton = skillRow.querySelector('[data-action="delete-item"]');
 
           assert.exists(deleteButton, "Delete button exists");
           assert.isNotNull(deleteButton.getAttribute("data-action"), "Delete button has action");
           assert.equal(
             deleteButton.getAttribute("data-action"),
-            "item-delete",
+            "delete-item",
             "Delete action correct"
           );
         });

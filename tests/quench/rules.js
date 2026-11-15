@@ -1,7 +1,7 @@
 import { SYS_ID } from "../../module/config/constants.js";
 import { RULE_KEYS } from "../../module/config/rule-keys.js";
 import { createRule } from "../../module/data/rules/rule-models.js";
-import { FamilyBonusService } from "../../module/services/family-bonus-service.js";
+import { FamilyBonusService } from "../../module/services/family-bonus.js";
 import { collectCheck } from "../../module/services/dice/check/collect.js";
 import { displayRollBonus } from "../../module/utils/mechanics.js";
 import { T } from "../../module/utils/localization.js";

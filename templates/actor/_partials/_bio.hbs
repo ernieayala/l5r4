@@ -1,9 +1,9 @@
-<section class="flexcol -gap-sm -bio-section">
-  <div class="flexrow -gap-sm section-title{{#if collapsedSections.bio}} is-collapsed{{/if}}" data-scope="bio">
-    <h4 class="title">{{localize "l5r4.ui.sheets.bio"}}</h4>
+<section class="flexcol -gap-sm l5r4-section -bio">
+  <div class="flexrow -gap-sm l5r4-section-title{{#if collapsedSections.bio}} is-collapsed{{/if}}" data-scope="bio">
+    <h4 class="l5r4-section-heading">{{localize "l5r4.ui.sheets.background"}}</h4>
     {{> "systems/l5r4-enhanced/templates/actor/_partials/_expand.hbs"}}
   </div>
-  <section class="item-list -bio">
+  <section class="l5r4-item-row-list -bio">
     {{#if bioClan}}
       {{> "systems/l5r4-enhanced/templates/cards/clan.hbs"
           inSheet=true

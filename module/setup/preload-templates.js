@@ -51,7 +51,7 @@ export async function preloadTemplates() {
     `systems/${SYS_ID}/templates/item/_partials/_tab-rules.hbs`,
 
     // Rules editor, on item and Active Effect sheets
-    `systems/${SYS_ID}/templates/rules/editor.hbs`,
+    `systems/${SYS_ID}/templates/rules/_partials/_editor.hbs`,
     `systems/${SYS_ID}/templates/rules/effect-tab.hbs`,
 
     // Item Sheet - Type-Specific Details Templates
@@ -109,7 +109,7 @@ export async function preloadTemplates() {
     `systems/${SYS_ID}/templates/actor/_partials/_unified-item-create.hbs`,
 
     // Actor Partials - Item Sections
-    `systems/${SYS_ID}/templates/actor/_partials/_skills-section.hbs`,
+    `systems/${SYS_ID}/templates/actor/_partials/_skill-section.hbs`,
     `systems/${SYS_ID}/templates/actor/_partials/_weapon-section.hbs`,
     `systems/${SYS_ID}/templates/actor/_partials/_armor-section.hbs`,
     `systems/${SYS_ID}/templates/actor/_partials/_item-section.hbs`,
@@ -141,7 +141,7 @@ export async function preloadTemplates() {
     `systems/${SYS_ID}/templates/cards/_partials/_activate.hbs`,
 
     // Chat Message Templates
-    `systems/${SYS_ID}/templates/chat/check-card.hbs`,
+    `systems/${SYS_ID}/templates/chat/check.hbs`,
     `systems/${SYS_ID}/templates/chat/effect-prompt.hbs`,
     `systems/${SYS_ID}/templates/chat/healing.hbs`,
     `systems/${SYS_ID}/templates/chat/weapon-chat.hbs`,

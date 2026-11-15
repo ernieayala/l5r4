@@ -7,6 +7,169 @@ Versioning: [Semantic Versioning](https://semver.org/spec/v2.0.0.html)
 
 ---
 
+## [4.0.0] - Unreleased
+
+### Changed
+
+CSS custom properties renamed. The Ring colors now hold whole colors instead of RGB triplets: read them as
+`var(--l5r4-color-ring-water)`, not `rgb(var(--water-ring-color))`.
+
+- `--water-ring-color` -> `--l5r4-color-ring-water`
+- `--earth-ring-color` -> `--l5r4-color-ring-earth`
+- `--fire-ring-color` -> `--l5r4-color-ring-fire`
+- `--void-ring-color` -> `--l5r4-color-ring-void`
+- `--l5r4-ring-rank-backdrop-color` -> `--l5r4-color-ring-rank-backdrop`
+- `--l5r4-ring-rank-backdrop-image` -> `--l5r4-image-ring-rank-backdrop`
+- `--controls` -> `--l5r4-size-column-controls`
+
+CSS classes renamed. Posted chat cards keep their stored classes (`chat-card`, `item`, `title`, and the rest), so
+their styles are unchanged.
+
+- `main-sheet` -> `l5r4-sheet-body`
+- `stats` -> `l5r4-sheet-main`
+- `sidebar` (actor sheet column) -> `l5r4-sheet-sidebar`
+- `actor-img` -> `l5r4-portrait`
+- `actor-header` -> `l5r4-actor-header`
+- `pc-info` -> `l5r4-pc-info`
+- `limited-sheet` -> `l5r4-limited`
+- `name` (Limited view heading) -> `l5r4-limited-name`
+- `section-title` -> `l5r4-section-title`
+- `section-container` -> `l5r4-section-body`
+- `-bio-section` -> `l5r4-section -bio`
+- `title` (section heading) -> `l5r4-section-heading`
+- `title` (PC and NPC header label) -> `l5r4-form-field-label`
+- `armor` -> `l5r4-section l5r4-armor`
+- `combat` -> `l5r4-section l5r4-combat`
+- `fear` -> `l5r4-section l5r4-fear`
+- `wounds` (Wounds section root) -> `l5r4-section`
+- `item-list` -> `l5r4-item-row-list`
+- `-header` (sort header list) -> `l5r4-sort-header`
+- `item` (header rows, NPC attack rows, XP manager rows) -> `l5r4-item-row`
+- `item` (item card root on a sheet) -> `item l5r4-item-row` (`item` stays for posted cards)
+- `item` (item sheet tab) -> `l5r4-tabs-tab`
+- `item-sort-by` -> `l5r4-sort-header-button`
+- `expanded-text` -> `l5r4-item-row-details`
+- `emphasis-display` -> `l5r4-item-row-emphases`
+- `spell-ring` -> `l5r4-item-row-cell`
+- `spell-mastery` -> `l5r4-item-row-cell`
+- `spell-cast` -> `l5r4-item-row-cell`
+- `spell-range` -> `(removed)`
+- `item-activate` -> `l5r4-inline-control-activate`
+- `effect-controls` -> `l5r4-inline-control`
+- `expandable` -> `l5r4-expand-control`
+- `input-placeholder` -> `l5r4-form-field-value`
+- `grid` -> `l5r4-grid`
+- `wound-grid` -> `l5r4-wound-track`
+- `fear-test` -> `l5r4-fear-test`
+- `button-mask-container` -> `l5r4-button -roll`
+- `trait-roll` -> `l5r4-button -roll`
+- `mas` (roll button) -> `l5r4-button-under`
+- `mas` (rank track) -> `l5r4-rank-control-under`
+- `trait-rank` -> `l5r4-rank-control -trait`
+- `trait-increase` -> `l5r4-rank-control-arrow -up`
+- `trait-decrease` -> `l5r4-rank-control-arrow -down`
+- `rank-name-container` -> `l5r4-rank-control -track`
+- `rank-name` -> `l5r4-rank-control-value`
+- `ranks` -> `l5r4-ranks`
+- `ledger-open` -> `l5r4-ranks-ledger`
+- `ring-name` -> `l5r4-ring-name`
+- `ring-name-<ring>` -> `l5r4-ring-name -<ring>`
+- `<ring>-ring` -> `l5r4-ring -<ring>`
+- `<ring>-ring-img` -> `l5r4-ring-image`
+- `ring-rank` -> `l5r4-ring-rank`
+- `ring-rank-<ring>` -> `l5r4-ring-rank -<ring>`
+- `trait` -> `l5r4-trait`
+- `trait-stamina` -> `l5r4-trait -earth -stamina`
+- `trait-willpower` -> `l5r4-trait -earth -willpower`
+- `trait-strength` -> `l5r4-trait -water -strength`
+- `trait-perception` -> `l5r4-trait -water -perception`
+- `trait-reflex` -> `l5r4-trait -air -reflexes`
+- `trait-awarness` -> `l5r4-trait -air -awareness`
+- `trait-agility` -> `l5r4-trait -fire -agility`
+- `trait-intelligence` -> `l5r4-trait -fire -intelligence`
+- `void-points` -> `l5r4-void-points`
+- `void-points-dots` -> `l5r4-void-points-dots`
+- `-filled` (Void Point dot) -> `is-filled`
+- `void-points-name` -> `l5r4-void-points-label`
+- `spells` (spell slot group) -> `l5r4-spell-slots`
+- `slots` -> `l5r4-spell-slot`
+- `wealth` (item section fields) -> `l5r4-wealth`
+- `l5r4-browser-tabs` -> `l5r4-tabs -filter`
+- `l5r4-browser-tab` -> `l5r4-tabs-tab`
+- `l5r4-browser-controls` -> `l5r4-compendium-browser-controls`
+- `l5r4-browser-filters` -> `l5r4-compendium-browser-filters`
+- `l5r4-browser-filter` -> `l5r4-compendium-browser-filter`
+- `l5r4-browser-search` -> `l5r4-compendium-browser-search`
+- `l5r4-browser-clear` -> `l5r4-compendium-browser-clear`
+- `l5r4-browser-results-part` -> `l5r4-compendium-browser-results-part`
+- `l5r4-browser-count` -> `l5r4-compendium-browser-count`
+- `l5r4-browser-results` -> `l5r4-compendium-browser-results`
+- `l5r4-browser-row` -> `l5r4-compendium-browser-row`
+- `l5r4-browser-icon` -> `l5r4-compendium-browser-icon`
+- `l5r4-browser-text` -> `l5r4-compendium-browser-text`
+- `l5r4-browser-name` -> `l5r4-compendium-browser-name`
+- `l5r4-browser-details` -> `l5r4-compendium-browser-details`
+- `l5r4-browser-source` -> `l5r4-compendium-browser-source`
+- `l5r4-browser-button` -> `l5r4-compendium-browser-button`
+- `l5r4-browser-empty` -> `l5r4-compendium-browser-empty`
+- `sheet-header` (item sheet) -> `l5r4-item-header`
+- `profile` -> `l5r4-item-header-image`
+- `header-fields` -> `l5r4-item-header-fields`
+- `document-name` (item sheet) -> `l5r4-item-header-name`
+- `prose-title` -> `l5r4-item-description-heading`
+- `effects-list` -> `l5r4-effect-list`
+- `effect` -> `l5r4-effect-list-row`
+- `effect-name` -> `l5r4-effect-list-name`
+- `l5r4-link` -> `l5r4-inline-link`
+- `l5r4-link-request` -> `l5r4-inline-link-request`
+- `l5r4-link-broken` -> `l5r4-inline-link -broken`
+- `l5r4-link-reason` -> `l5r4-inline-link-reason`
+- `check-pool` -> `l5r4-check-dialog-pool`
+- `check-modifiers` -> `l5r4-check-dialog-group`
+- `check-substitutes` -> `l5r4-check-dialog-group`
+- `check-extras` -> `l5r4-check-dialog-group`
+- `maho-dialog` -> `l5r4-check-dialog-group`
+- `check-modifier` -> `l5r4-check-dialog-modifier`
+- `check-modifier-label` -> `l5r4-check-dialog-modifier-label`
+- `check-modifier-value` -> `l5r4-check-dialog-modifier-value`
+- `warning-text` -> `l5r4-check-dialog-warning`
+- `l5r4-ledger` -> `l5r4-ledger-dialog`
+- `ledger-entries` -> `l5r4-ledger-dialog-entries`
+- `ledger-track` -> `l5r4-ledger-dialog-track`
+- `ledger-points` -> `l5r4-ledger-dialog-points`
+- `ledger-reason` -> `l5r4-ledger-dialog-reason`
+- `rules-toolbar` -> `l5r4-rules-editor-toolbar`
+- `rules-mode` -> `l5r4-rules-editor-mode`
+- `rules-json` -> `l5r4-rules-editor-json`
+- `rules-add` -> `l5r4-rules-editor-add`
+- `rule-card` -> `l5r4-rules-editor-card`
+- `rule-delete` -> `l5r4-rules-editor-delete`
+- `rule-error` -> `l5r4-rules-editor-error`
+- `rule-field` -> `l5r4-rules-editor-field`
+- `xp-modal-dialog` (window) -> `l5r4-xp-manager`
+- `xp-breakdown-list` -> `l5r4-xp-manager-breakdown`
+- `wound-config-app` (window) -> `l5r4-wound-config`
+- `armor-config-app` (window) -> `l5r4-armor-config`
+- `combat-config-app` (window) -> `l5r4-combat-config`
+- `condition-manager` (window) -> `l5r4-condition-manager`
+- `condition-manager-container` -> `l5r4-condition-manager-body`
+- `emphasis-manager` (window) -> `l5r4-emphasis-manager`
+- `emphasis-manager-container` -> `l5r4-emphasis-manager-body`
+- `emphasis-list-container` -> `l5r4-emphasis-manager-list`
+- `custom-emphasis` -> `l5r4-emphasis-manager-item -custom`
+- `npc-attack-config` (window) -> `l5r4-npc-attack-config`
+- `wealth-manager` (window) -> `l5r4-wealth-manager`
+- `wealth-display` -> `l5r4-wealth-manager-display`
+- `wealth-item` -> `l5r4-wealth-manager-item`
+- `wealth-value` -> `l5r4-wealth-manager-value`
+
+### Removed
+
+- CSS rules no template used: `-gap-xl`, `clear-btn`, `void-points-amount`, `item-list -advantages`,
+  `expanded-text -npc`, `editor-container`, `price-section`, `price-field`, `sheet-content > h4`
+
+---
+
 ## [3.2.1] - 2025-11-03
 
 ### Removed

@@ -3,13 +3,13 @@
  * Styles for the EmphasisManager ApplicationV2 dialog
  */
 
-.emphasis-manager-container {
+.l5r4-emphasis-manager-body {
   display: flex;
   flex-direction: column;
   gap: 1rem;
   height: 100%;
 
-  .emphasis-list-container {
+  .l5r4-emphasis-manager-list {
     border: 1px solid var(--table-header-border-color);
     flex: 1;
     overflow-y: auto;

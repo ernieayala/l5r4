@@ -1,7 +1,7 @@
 /**
  * @module services/dice/check/chat-actions
  * @description What a `roll` message can do after it posts, rebuilt from its stored context
- * (module/data/chat/RollMessageData.js), never from the card's HTML: roll the attack's damage, put an offered
+ * (module/data/chat/roll-message-data.js), never from the card's HTML: roll the attack's damage, put an offered
  * condition on the target, re-roll keeping the better total, make the optional Honor Roll (p.92), and settle a
  * Contested Roll (p.80) against the previous roll by someone else.
  */

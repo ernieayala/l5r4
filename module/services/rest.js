@@ -189,7 +189,7 @@ async function _postRestMessage({
     rate: healRate
   });
 
-  const woundsText = game.i18n.localize("l5r4.ui.mechanics.wounds.woundStatus", {
+  const woundsText = game.i18n.localize("l5r4.ui.mechanics.wounds.status", {
     current: newCurrentWounds,
     max: maxWounds,
     suffered: newSuffered

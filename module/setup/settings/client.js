@@ -21,8 +21,8 @@ export function registerClientSettings() {
   game.settings.register(SYS_ID, "floatingNumbers", {
     config: true,
     scope: "client",
-    name: "SETTINGS.floatingNumbers.name",
-    hint: "SETTINGS.floatingNumbers.hint",
+    name: "l5r4.system.settings.floatingNumbers.name",
+    hint: "l5r4.system.settings.floatingNumbers.hint",
     type: Boolean,
     default: true
   });

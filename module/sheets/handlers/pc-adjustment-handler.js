@@ -231,7 +231,7 @@ export class PcAdjustmentHandler {
    * **Implementation:**
    * - Finds parent .section-title element
    * - Toggles "is-collapsed" class for immediate CSS-driven visibility
-   * - Swaps chevron icon direction (fa-chevron-down ↔ fa-chevron-up)
+   * - Swaps chevron icon direction (fa-angle-down ↔ fa-angle-up)
    * - Persists state to user flags via setSectionCollapsed()
    *
    * **Persistence:**
@@ -252,7 +252,7 @@ export class PcAdjustmentHandler {
     const { setSectionCollapsed } = await import("../../utils/section-state.js");
 
     // Find parent section title container
-    const sectionTitle = element.closest(".section-title");
+    const sectionTitle = element.closest(".l5r4-section-title");
     if (!sectionTitle) {
       return;
     }
@@ -268,8 +268,8 @@ export class PcAdjustmentHandler {
     // querySelector used here to find icon element within the clicked button (scoped query)
     const icon = element.querySelector("i");
     if (icon) {
-      icon.classList.toggle("fa-chevron-down");
-      icon.classList.toggle("fa-chevron-up");
+      icon.classList.toggle("fa-angle-down");
+      icon.classList.toggle("fa-angle-up");
     }
 
     // Persist state to user flags if we have a valid scope

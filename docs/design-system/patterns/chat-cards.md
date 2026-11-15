@@ -7,11 +7,11 @@ This page lists them and the rules that keep new cards and old ones looking the 
 
 | Item       | Detail                                                                                                                                                                                                                                                                                                                                           |
 | ---------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------ |
-| Templates  | `templates/chat/check-card.hbs`, `check-request.hbs`, `damage-result.hbs`, `effect-prompt.hbs`, `flow-card.hbs`, `healing.hbs`, `item-summary.hbs`, `weapon-chat.hbs`; item cards `templates/cards/<subtype>.hbs` with `inSheet` false                                                                                                           |
+| Templates  | `templates/chat/check.hbs`, `check-request.hbs`, `damage-result.hbs`, `effect-prompt.hbs`, `flow-card.hbs`, `healing.hbs`, `item-summary.hbs`, `weapon-chat.hbs`; item cards `templates/cards/<subtype>.hbs` with `inSheet` false                                                                                                                |
 | Paths      | `CHAT_TEMPLATES` in `module/config/templates.js:78-87`                                                                                                                                                                                                                                                                                           |
 | Posted by  | `rollCheck` (`module/services/dice/check/roll-check.js:543-549`), `postCheckRequest` (`module/services/check-request.js:19-44`), damage results (`module/services/combat/damage.js:153-190`), effect prompts (`module/services/effects/prompts.js:35-45`), flow cards (`module/services/combat/flow.js:70-76`), rest (`module/services/rest.js`) |
 | Wired by   | `bind<Card>Card(message, html)` on `renderChatMessageHTML` (`docs/code-system/foundry-patterns.md`, Chat cards)                                                                                                                                                                                                                                  |
-| SCSS       | `scss/_chat.scss` today; target one file per card component in `scss/components/` (rule 6)                                                                                                                                                                                                                                                       |
+| SCSS       | `scss/components/_chat-card.scss` today; target one file per card component in `scss/components/` (rule 6)                                                                                                                                                                                                                                       |
 | Tokens     | `--l5r4-space-gap-tight`, `--l5r4-space-gap`, `--l5r4-font-size-meta`, `--l5r4-color-text`, `--l5r4-color-line-muted`, `--l5r4-state-disabled-opacity`                                                                                                                                                                                           |
 | Components | Chat card, dice row, check card, request card, damage result, effect prompt, flow card, item summary card, button                                                                                                                                                                                                                                |
 | Checks     | `tests/conventions/actions.test.js` (fixed names exempt by name), `tests/conventions/templates.test.js`, `tests/conventions/styles.test.js`, ESLint `no-restricted-syntax`; "review" where no tool can judge                                                                                                                                     |
@@ -25,7 +25,7 @@ Every card has the parts below in this order. A part with nothing to show render
 | 1   | Speaker           | Core's message header, from `speaker: ChatMessage.getSpeaker({ actor })`                                                | The actor who rolled or is affected; the GM's name on a request card (`check-request.js:42`). The card never repeats it       |
 | 2   | Root              | `<div class="chat-card l5r4-<card>">`                                                                                   | One root per card                                                                                                             |
 | 3   | Title             | `div.dice-flavor`                                                                                                       | What happened: the roll's label and its target (`check-card.hbs:2-4`), the result (`damage-result.hbs:2`), the flow and stage |
-| 4   | Applied modifiers | `ul.check-applied`, one `li` per modifier with its label and pool change                                                | `meta` size (`scss/_chat.scss:36-41`)                                                                                         |
+| 4   | Applied modifiers | `ul.check-applied`, one `li` per modifier with its label and pool change                                                | `meta` size (`scss/components/_chat-card.scss:36-41`)                                                                         |
 | 5   | Dice row          | `{{{roll}}}`: core's `roll.render()` (`roll-check.js:637`)                                                              | Core's formula, dice, and total; see **Dice row**                                                                             |
 | 6   | TN and outcome    | `div.l5r4-tn-result`: outcome, TN, then Raises, Free Raises spent on the TN, and the Wound penalty in parentheses       | Only when the roll had a TN (`check-card.hbs:11-21`)                                                                          |
 | 7   | Free Raises left  | `div.check-free-raises`                                                                                                 | Only when some remain                                                                                                         |
@@ -160,11 +160,11 @@ Each card component has one file in `scss/components/`, named for its page: `_ch
 column layout, buttons one per row), `_check-card.scss`, `_damage-result.scss`, `_flow-card.scss`,
 `_request-card.scss`, `_item-summary-card.scss`, all targets. The selectors start at the card's fixed root class
 (`l5r4-check`, `l5r4-check-request`, `l5r4-item-summary`, ...); none reaches into core's dice row except the
-dropped-dice mark in `_check-card.scss` (`components/dice-row.md` DR5). `scss/_chat.scss` goes, and the check
-dialog's rules in it (`:64-87`) move to `scss/components/_check-dialog.scss` (target). Enforced by `tests/conventions/names.test.js` (the entry is the only top-level
+dropped-dice mark in `_check-card.scss` (`components/dice-row.md` DR5). `scss/components/_chat-card.scss` goes, and the check
+dialog's rules in it (`:64-87`) move to `scss/components/_check-dialog.scss`. Enforced by `tests/conventions/names.test.js` (the entry is the only top-level
 file) and `tests/conventions/styles.test.js` (one component per file).
 
-Conforming, modeled on `scss/_chat.scss:48-61`:
+Conforming, modeled on `scss/components/_chat-card.scss:48-61`:
 
 ```scss
 .l5r4-damage-result {
@@ -178,8 +178,8 @@ Conforming, modeled on `scss/_chat.scss:48-61`:
 }
 ```
 
-Non-conforming, `scss/components/_effect-panel.scss:85-87`: the request card's rule in the effect panel's file, and
-`scss/_chat.scss:59-61`: the undone card at a literal `opacity: 0.7`.
+Non-conforming, `scss/components/_request-card.scss:6-8`: the request card's rule in the effect panel's file, and
+`scss/components/_chat-card.scss:59-61`: the undone card at a literal `opacity: 0.7`.
 
 ### 7. One key per line of card text
 
@@ -188,13 +188,13 @@ with a verb and names its object (`content/voice.md`, Buttons). Copy is not a fi
 cards only (`content/voice.md`, Fixed names). Enforced by review (`docs/code-system/templates-and-styles.md`, one key
 per label) and `tests/lang.test.js` for the letter case.
 
-Conforming, `templates/chat/check-card.hbs:54`:
+Conforming, `templates/chat/check.hbs:54`:
 
 ```hbs
 {{localize "l5r4.ui.effects.applyTo" effect=label target=../target.name}}
 ```
 
-Non-conforming, `templates/chat/check-card.hbs:42`: `{{localize "l5r4.ui.combat.applyTo"}} {{applyTarget}}` joins
+Non-conforming, `templates/chat/check.hbs:42`: `{{localize "l5r4.ui.combat.applyTo"}} {{applyTarget}}` joins
 "Apply to" and a name; `:13-19` builds the TN line from five keys and literal parentheses.
 
 ## States
@@ -222,13 +222,13 @@ A state never rests on color: the outcome is a word, the undone card says so.
 
 ## Long text
 
-| Element       | Behavior                                                                                                                                           |
-| ------------- | -------------------------------------------------------------------------------------------------------------------------------------------------- |
-| Title         | Wraps; a long label or target name takes a second line                                                                                             |
-| Buttons       | Full width, one per row, so a long label wraps and the button keeps its height (`scss/_chat.scss:47-57`; `foundations/space-and-size.md`, Density) |
-| Notes         | Wrap                                                                                                                                               |
-| Modifier list | One line per modifier; a long source name wraps inside its line                                                                                    |
-| Dice          | Core's: a pool past one line of dice wraps in the tooltip                                                                                          |
+| Element       | Behavior                                                                                                                                                           |
+| ------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------ |
+| Title         | Wraps; a long label or target name takes a second line                                                                                                             |
+| Buttons       | Full width, one per row, so a long label wraps and the button keeps its height (`scss/components/_chat-card.scss:47-57`; `foundations/space-and-size.md`, Density) |
+| Notes         | Wrap                                                                                                                                                               |
+| Modifier list | One line per modifier; a long source name wraps inside its line                                                                                                    |
+| Dice          | Core's: a pool past one line of dice wraps in the tooltip                                                                                                          |
 
 ## Do and don't
 

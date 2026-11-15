@@ -128,20 +128,20 @@ export default class L5R4NpcSheet extends BaseActorSheet {
    * Actions are identified by data-action attribute values on interactive elements.
    *
    * **Supported Actions:**
-   * - inline-edit: Update item properties in the sheet
-   * - item-create/delete/edit/expand/chat: Item CRUD operations
-   * - item-sort-by: Change sort field/direction for item lists
-   * - ring-rank-void: Adjust Void Ring rank (Shift+Click, NPC-specific)
+   * - update-item-field: Update item properties in the sheet
+   * - create-item, delete-item, edit-item, expand-item, post-item: Item CRUD operations
+   * - sort-items: Change sort field/direction for item lists
+   * - adjust-void-ring: Adjust Void Ring rank (Shift+Click, NPC-specific)
    * - roll-ring/skill/trait/attack/damage/weapon-attack: Initiate dice rolls
    * - test-fear: Trigger Fear test for selected tokens
-   * - trait-rank: Adjust trait ranks (Shift+Click)
-   * - void-points-dots: Spend/regain Void Points
-   * - combat-config: Open combat configuration dialog (initiative/movement)
-   * - wound-config: Open wound threshold configuration dialog
+   * - adjust-trait: Adjust trait ranks (Shift+Click)
+   * - adjust-void-points: Spend/regain Void Points
+   * - open-combat-config: Open combat configuration dialog (initiative/movement)
+   * - open-wound-config: Open wound threshold configuration dialog
    *
    * **Implementation Note:**
    * Most actions delegate to BaseActorSheet or specialized handlers. NPC-specific
-   * actions include ring-rank-void (direct Void Ring editing) and test-fear.
+   * actions include adjust-void-ring (direct Void Ring editing) and test-fear.
    *
    * @param {string} action - The data-action attribute value from the clicked element
    * @param {Event} event - The click event
@@ -153,30 +153,30 @@ export default class L5R4NpcSheet extends BaseActorSheet {
     switch (action) {
       case "apply-healing":
         return this._onApplyHealing(event, element);
-      case "inline-edit":
+      case "update-item-field":
         return this._onInlineItemEdit(event, element);
-      case "item-create":
+      case "create-item":
         return this._onItemCreate(event, element);
-      case "item-delete":
+      case "delete-item":
         return this._onItemDelete(event, element);
-      case "item-edit":
+      case "edit-item":
         return this._onItemEdit(event, element);
-      case "item-expand":
+      case "expand-item":
         return this._onItemExpand(event, element);
-      case "item-chat":
+      case "post-item":
         return this._onItemHeaderToChat(event, element);
-      case "item-sort-by":
+      case "sort-items":
         return this._onUnifiedSortClick(event, element);
-      case "ring-rank-void":
+      case "adjust-void-ring":
         return this._onVoidAdjust(event, element, +1);
       // The arrows step the Void Ring without Shift, like the Trait arrows (issue #30)
-      case "void-ring-increase":
+      case "increase-void-ring":
         return this._onVoidAdjust(
           { preventDefault: () => event.preventDefault(), shiftKey: true },
           element,
           +1
         );
-      case "void-ring-decrease":
+      case "decrease-void-ring":
         return this._onVoidAdjust(
           { preventDefault: () => event.preventDefault(), shiftKey: true },
           element,
@@ -198,21 +198,21 @@ export default class L5R4NpcSheet extends BaseActorSheet {
         return this._onCastSpell(event, element);
       case "test-fear":
         return this._onFearTest(event, element);
-      case "trait-rank":
+      case "adjust-trait":
         return this._onTraitAdjust(event, element, +1);
-      case "trait-increase":
+      case "increase-trait":
         return TraitHandler.increase(this._getHandlerContext(), event, element);
-      case "trait-decrease":
+      case "decrease-trait":
         return TraitHandler.decrease(this._getHandlerContext(), event, element);
-      case "void-points-dots":
+      case "adjust-void-points":
         return this._onVoidPointsAdjust(event, element, +1);
       case "toggle-movement-type":
         return StanceHandler.toggleMovementType(this._getHandlerContext(), event);
-      case "condition-manager":
+      case "open-condition-manager":
         return AppLauncherHandler.openConditionManager(this._getHandlerContext(), event, element);
-      case "combat-config":
+      case "open-combat-config":
         return AppLauncherHandler.openCombatConfig(this._getHandlerContext(), event, element);
-      case "wound-config":
+      case "open-wound-config":
         return AppLauncherHandler.openWoundConfig(this._getHandlerContext(), event, element);
       case "edit-attack":
       case "add-attack":
@@ -229,9 +229,9 @@ export default class L5R4NpcSheet extends BaseActorSheet {
    * increment). Falls back to _onAction for actions that don't have context variants.
    *
    * **Context-Specific Actions:**
-   * - trait-rank: Decrement trait (Shift+Right-Click)
-   * - ring-rank-void: Decrement Void Ring (Shift+Right-Click, NPC-specific)
-   * - void-points-dots: Regain Void Point (Right-Click)
+   * - adjust-trait: Decrement trait (Shift+Right-Click)
+   * - adjust-void-ring: Decrement Void Ring (Shift+Right-Click, NPC-specific)
+   * - adjust-void-points: Regain Void Point (Right-Click)
    *
    * @param {string} action - The data-action attribute value
    * @param {Event} event - The contextmenu event
@@ -241,11 +241,11 @@ export default class L5R4NpcSheet extends BaseActorSheet {
    */
   _onActionContext(action, event, element) {
     switch (action) {
-      case "trait-rank":
+      case "adjust-trait":
         return this._onTraitAdjust(event, element, -1);
-      case "ring-rank-void":
+      case "adjust-void-ring":
         return this._onVoidAdjust(event, element, -1);
-      case "void-points-dots":
+      case "adjust-void-points":
         return this._onVoidPointsAdjust(event, element, -1);
       default:
         return this._onAction(action, event, element);
@@ -259,8 +259,8 @@ export default class L5R4NpcSheet extends BaseActorSheet {
    * Only processes actions that require change event handling.
    *
    * **Supported Actions:**
-   * - inline-edit: Update item properties from form fields
-   * - change-stance: Update character's combat stance
+   * - update-item-field: Update item properties from form fields
+   * - apply-stance: Update character's combat stance
    *
    * @param {string} action - The data-action attribute value
    * @param {Event} event - The change event
@@ -269,10 +269,10 @@ export default class L5R4NpcSheet extends BaseActorSheet {
    * @override
    */
   _onActionChange(action, event, element) {
-    if (action === "inline-edit") {
+    if (action === "update-item-field") {
       return this._onInlineItemEdit(event, element);
     }
-    if (action === "change-stance") {
+    if (action === "apply-stance") {
       return StanceHandler.changeStance(this._getHandlerContext(), event, element);
     }
   }

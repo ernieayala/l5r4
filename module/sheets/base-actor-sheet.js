@@ -47,7 +47,7 @@ import { iconPath } from "../config/icons.js";
 import { on } from "../utils/dom.js";
 
 // Local
-import { KeyboardBehaviorMixin } from "./mixins/keyboard-behavior.js";
+import { KeyboardBehaviorMixin } from "../mixins/keyboard-behavior-mixin.js";
 import { VoidPointsHandler } from "./handlers/void-points-handler.js";
 import { DragDropHandler } from "./handlers/drag-drop-handler.js";
 import { ItemCRUDHandler } from "./handlers/item-crud-handler.js";
@@ -296,8 +296,8 @@ export class BaseActorSheet extends KeyboardBehaviorMixin(
     const target = event.currentTarget;
     const key = target.classList.contains("ring-roll")
       ? target.dataset.systemRing
-      : target.classList.contains("trait-roll")
-        ? target.closest(".trait")?.querySelector(".trait-rank")?.dataset.trait
+      : target.classList.contains("l5r4-button") && target.classList.contains("-roll")
+        ? target.closest(".l5r4-trait")?.querySelector(".l5r4-rank-control.-trait")?.dataset.trait
         : null;
     if (key) {
       event.dataTransfer.setData(

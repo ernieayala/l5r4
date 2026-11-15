@@ -1,6 +1,57 @@
 {
   "l5r4": {
+    "apps": {
+      "conditionManager": {
+        "errors": {
+          "openFailed": "Fehler beim Öffnen des Zustandsverwalters"
+        }
+      },
+      "emphasisManager": {
+        "custom": "Benutzerdefiniert",
+        "hint": "Wähle aus, welche Schwerpunkte für diese Fertigkeit verfügbar sind. Trainiere sie auf dem Charakterbogen.",
+        "manage": "Schwerpunkte Verwalten",
+        "noEmphases": "Keine Schwerpunkte in der Liste",
+        "addCustom": "Benutzerdefinierten Schwerpunkt Hinzufügen"
+      },
+      "wealthManager": {
+        "add": "Hinzufügen",
+        "addMoney": "Geld Hinzufügen",
+        "amount": "Betrag",
+        "convert": "Währung Umtauschen",
+        "convertBuToKoku": "5 Bu zu 1 Koku umtauschen",
+        "convertBuToZeni": "1 Bu zu 10 Zeni umtauschen",
+        "convertKokuToBu": "1 Koku zu 5 Bu umtauschen",
+        "convertZeniToBu": "10 Zeni zu 1 Bu umtauschen",
+        "currentWealth": "Aktuelles Vermögen",
+        "denomination": "Währung",
+        "open": "Vermögen Verwalten",
+        "remove": "Entfernen",
+        "removeMoney": "Geld Entfernen",
+        "errors": {
+          "openFailed": "Fehler beim Öffnen der Vermögensverwaltung"
+        }
+      },
+      "woundConfig": {
+        "title": "Wundenkonfiguration"
+      }
+    },
     "ui": {
+      "statusEffects": {
+        "blinded": "Geblendet",
+        "concentration": "Konzentration",
+        "dazed": "Benommen",
+        "dead": "Tot",
+        "entangled": "Verstrickt",
+        "fasting": "Fastend",
+        "fatigued": "Erschöpft",
+        "feared": "Verängstigt",
+        "grappled": "Festgehalten",
+        "guarded": "Beschützt",
+        "guarding": "Beschützend",
+        "mounted": "Beritten/Höhere Position",
+        "prone": "Am Boden",
+        "stunned": "Betäubt"
+      },
       "tabs": {
         "details": "Details",
         "modifiers": "Modifikatoren",
@@ -31,6 +82,7 @@
           "int": "Intelligenz"
         },
         "rolls": {
+          "socialResistanceDescription": "Einschüchterung oder Versuchung widerstehen",
           "success": "Erfolg",
           "failure": "Fehlschlag",
           "missed": "Verfehlt",
@@ -46,24 +98,24 @@
           "raise": "Erhöhung",
           "raises": "Erhöhungen",
           "freeRaises": "Freie Erhöhungen",
-          "socialResistance": "Sozialer Widerstand",
-          "socialResistanceDescription": "Einschüchterung oder Versuchung widerstehen"
+          "socialResistance": "Sozialer Widerstand"
         },
         "combat": {
           "attack": "Angriff",
-          "woundPenalty": "Wundenstrafe",
-          "targeting": {
-            "vs": "vs",
-            "multipleTargets": "Ziele - SZ nicht automatisch gesetzt"
-          }
+          "woundPenalty": "Wundenstrafe"
         },
         "wounds": {
-          "wounds": "Wunden",
+          "applied": "{amount} Wunden auf {name} angewendet",
+          "appliedWithArmor": "{name} erhielt {original} Schaden. Rüstung reduzierte um {reduction}. {final} Wunden angewendet.",
           "armorTn": "Rüstungs-SZ",
           "armorTnBase": "Basis Rüstungs-SZ",
           "armorReduction": "Reduzierung",
+          "label": "Wunden",
+          "reducedApplied": "Leere-Punkt ausgegeben: Schaden um 10 reduziert. {amount} Wunden auf {name} angewendet",
+          "reducedWithArmor": "{name} erhielt {original} Schaden. Leere reduzierte auf {afterVoid}, Rüstung reduzierte um {reduction}. {final} Wunden angewendet.",
+          "status": "Wunden: {current}/{max} (erlitten: {suffered})",
+          "suffered": "Erlittene Wunden",
           "woundLevel": "Stufe",
-          "woundsSuffered": "Erlittene Wunden",
           "maxWounds": "Max. Wunden",
           "penalty": "Strafe",
           "woundHealRate": "Wundheilungsrate",
@@ -71,7 +123,6 @@
           "woundMode": "Wundenmodus",
           "manual": "Manuell",
           "formula": "Formel",
-          "woundConfiguration": "Wundenkonfiguration",
           "earthMultiplier": "Erde-Multiplikator",
           "woundBonus": "Wundenbonus",
           "threshold": "Schwelle",
@@ -88,17 +139,12 @@
           "naturalHealing": "Natürliche Heilung",
           "restedAndRecovered": "hat sich ausgeruht und Wunden geheilt",
           "healingApplied": "{amount} Wunden geheilt (Heilungsrate: {rate})",
-          "woundStatus": "Wunden: {current}/{max} (erlitten: {suffered})",
           "fullyHealed": "Vollständig geheilt!",
           "alreadyFullHealth": "{name} ist bereits bei voller Gesundheit",
           "noHealRate": "{name} hat keine Heilungsrate konfiguriert",
           "healingFailed": "Fehler beim Anwenden der Heilung auf {name}",
           "applyWounds": "Wunden Anwenden",
           "reduceWithVoid": "Mit Leere Reduzieren",
-          "woundsApplied": "{amount} Wunden auf {name} angewendet",
-          "woundsAppliedWithArmor": "{name} erhielt {original} Schaden. Rüstung reduzierte um {reduction}. {final} Wunden angewendet.",
-          "woundsReducedApplied": "Leere-Punkt ausgegeben: Schaden um 10 reduziert. {amount} Wunden auf {name} angewendet",
-          "woundsReducedWithArmor": "{name} erhielt {original} Schaden. Leere reduzierte auf {afterVoid}, Rüstung reduzierte um {reduction}. {final} Wunden angewendet.",
           "noTokenSelected": "Kein Spielstein ausgewählt. Wähle einen Spielstein aus, um Wunden anzuwenden.",
           "noVoidPoints": "Keine Leere-Punkte verfügbar, um Schaden zu reduzieren"
         },
@@ -108,13 +154,13 @@
           "defense": "Verteidigungshaltung",
           "fullDefense": "Volle Verteidigung",
           "center": "Zentrierte Haltung",
-          "fullDefenseDescription": "Mache einen Verteidigungs-/Reflexwurf. Addiere die Hälfte des Ergebnisses (aufgerundet) zu deinem Rüstungs-SZ für die Dauer dieser Haltung."
+          "fullDefenseHint": "Mache einen Verteidigungs-/Reflexwurf. Addiere die Hälfte des Ergebnisses (aufgerundet) zu deinem Rüstungs-SZ für die Dauer dieser Haltung."
         },
         "fear": {
-          "fearRank": "Furchtrang",
-          "fearLabel": "Furcht {rank}",
           "effectName": "Furcht {rank}",
           "clickToTest": "Klicken, um Furcht gegen ausgewählte Charaktere zu testen",
+          "label": "Furcht {rank}",
+          "rank": "Furchtrang",
           "testResult": "Furcht {rank} Test",
           "penaltyApplied": "Strafe: -{penalty}k0 auf alle Würfe",
           "catastrophicFailure": "KATASTROPHALER FEHLSCHLAG! Charakter flieht oder kauert sich hilflos zusammen.",
@@ -125,14 +171,14 @@
         }
       },
       "common": {
+        "initiative": "Initiative",
+        "modifier": "Modifikator",
         "roll": "Würfeln",
         "cancel": "Abbrechen",
         "ok": "OK",
         "none": "Keine",
         "keep": "Behalten",
-        "init": "Initiative",
         "bonus": "Bonus",
-        "mod": "Modifikator",
         "multi": "Multiplikator",
         "rate": "Rate",
         "current": "Aktuell",
@@ -163,35 +209,15 @@
         "save": "Speichern",
         "armor": "Rüstung"
       },
+      "combat": {
+        "multipleTargets": "Ziele - SZ nicht automatisch gesetzt",
+        "vs": "vs"
+      },
       "armor": {
         "allowStacking": "Rüstungsstapelung Erlauben"
       },
-      "emphasisManager": {
-        "manage": "Schwerpunkte Verwalten",
-        "addCustom": "Benutzerdefinierten Schwerpunkt Hinzufügen",
-        "custom": "Benutzerdefiniert",
-        "help": "Wähle aus, welche Schwerpunkte für diese Fertigkeit verfügbar sind. Trainiere sie auf dem Charakterbogen.",
-        "noEmphases": "Keine Schwerpunkte in der Liste"
-      },
-      "wealthManager": {
-        "tooltip": "Vermögen Verwalten",
-        "currentWealth": "Aktuelles Vermögen",
-        "addMoney": "Geld Hinzufügen",
-        "removeMoney": "Geld Entfernen",
-        "amount": "Betrag",
-        "denomination": "Währung",
-        "add": "Hinzufügen",
-        "remove": "Entfernen",
-        "convert": "Währung Umtauschen",
-        "convertZeniToBu": "10 Zeni zu 1 Bu umtauschen",
-        "convertBuToZeni": "1 Bu zu 10 Zeni umtauschen",
-        "convertBuToKoku": "5 Bu zu 1 Koku umtauschen",
-        "convertKokuToBu": "1 Koku zu 5 Bu umtauschen",
-        "insufficientFunds": "Unzureichende Mittel für diese Transaktion",
-        "insufficientForConversion": "Unzureichende Mittel für diesen Umtausch"
-      },
       "sheets": {
-        "bio": "Hintergrund",
+        "background": "Hintergrund",
         "skill": "Fertigkeit",
         "skills": "Fertigkeiten",
         "weapon": "Waffe",
@@ -230,9 +256,7 @@
         "noActorForVoid": "Kein Akteur verfügbar, um Leere-Punkte auszugeben",
         "schoolRankZero": "Du kannst keinen Zauber wirken, wenn der Schulrang auf null reduziert ist",
         "deficiencyBlocksCasting": "Mangel in {ring} reduziert deinen Schulrang auf null - kann nicht wirken",
-        "noSpellSlots": "Dir sind die Zauberplätze für diesen Ring ausgegangen",
-        "wealthManagerFailed": "Fehler beim Öffnen der Vermögensverwaltung",
-        "conditionManagerFailed": "Fehler beim Öffnen des Zustandsverwalters"
+        "noSpellSlots": "Dir sind die Zauberplätze für diesen Ring ausgegangen"
       },
       "hints": {
         "leftRightToAdjust": "Links und Rechts zum Anpassen",
@@ -322,7 +346,7 @@
         "honorRank": "Ehre",
         "gloryRank": "Ruhm",
         "statusRank": "Statusrang",
-        "shadowRank": "Schattenland-Verderben"
+        "taintRank": "Schattenland-Verderben"
       },
       "stance": {
         "title": "Kampf",
@@ -334,20 +358,20 @@
         "feet": "Fuß"
       },
       "experience": {
+        "disadvantageCapTooltip": "Klicken, um die maximalen durch Nachteile erhaltenen EP zu ändern",
+        "recalculate": "EP-Käufe vom aktuellen Charakterstatus neu berechnen",
+        "summary": "Erfahrungszusammenfassung",
         "xpAmount": "Menge",
         "note": "Notiz",
         "reason": "Grund",
         "adjustExperience": "Erfahrung Anpassen",
-        "experienceSummary": "Erfahrungszusammenfassung",
         "usedTotal": "Verwendet / Gesamt",
         "purchases": "Käufe",
         "traitChange": "{label} {from}→{to}",
         "voidChange": "Leere {from}→{to}",
         "skillCreate": "{name} 0→{rank}",
         "skillChange": "{name} {from}→{to}",
-        "recalculateTooltip": "EP-Käufe vom aktuellen Charakterstatus neu berechnen",
         "disadvantageCapLabel": "Max. EP",
-        "disadvantageCapTooltip": "Klicken, um die maximalen durch Nachteile erhaltenen EP zu ändern",
         "breakdown": {
           "base": "Basis",
           "disadvantagesGrant": "Nachteile",
@@ -402,7 +426,7 @@
       "armor": {
         "reduction": "Reduzierung",
         "equipped": "Angelegt",
-        "armorType": "Rüstungstyp",
+        "type": "Rüstungstyp",
         "types": {
           "ashigaru": "Ashigaru-Rüstung",
           "light": "Leichte Rüstung",
@@ -410,16 +434,17 @@
           "riding": "Reitrüstung"
         }
       },
-      "keywords": "Schlüsselwörter",
-      "keywordsPlaceholder": "z.B. Samurai, Bauer",
-      "nemuranai": "Nemuranai",
-      "price": "Preis",
-      "general": {}
+      "general": {
+        "keywords": "Schlüsselwörter",
+        "keywordsPlaceholder": "z.B. Samurai, Bauer",
+        "nemuranai": "Nemuranai",
+        "price": "Preis"
+      }
     },
     "magic": {
       "spells": {
+        "areaOfEffect": "Wirkungsbereich",
         "range": "Reichweite",
-        "aoe": "Wirkungsbereich",
         "duration": "Dauer",
         "cast": "Wirken",
         "raises": "Erhöhungen",
@@ -433,6 +458,7 @@
         "memorized": "Gelernt"
       },
       "maho": {
+        "casting": "Maho Wirken",
         "warningTitle": "Blutmagie - Verbotenes Maho",
         "bloodRequired": "Blutkosten Erforderlich",
         "additionalBloodBonus": "Jede zusätzliche Blutkostenmenge gewährt +1 Freie Erhöhung",
@@ -442,7 +468,6 @@
           "other": "Andere"
         },
         "additionalBlood": "Zusätzliches Blut",
-        "mahoCasting": "Maho Wirken",
         "bloodCost": "Blut",
         "taintGained": "Verderben Erhalten",
         "taintGainedNotification": "{taint} Punkte Schattenland-Verderben durch Maho-Wirken erhalten"
@@ -461,6 +486,20 @@
       },
       "errors": {
         "deleteEffect": "Fehler beim Löschen des Effekts."
+      },
+      "settings": {
+        "forceMigration": {
+          "hint": "Erzwingt die Ausführung aller Migrationen beim nächsten Weltladen, unabhängig von der Version. Setzt sich automatisch zurück, nachdem die Migration abgeschlossen ist.",
+          "name": "Migration beim Start erzwingen"
+        },
+        "LtException": {
+          "hint": "Wenn behaltene Würfel durch Umwandlung unter 10 reduziert werden, 2 hinzufügen.",
+          "name": "Kleine-Wahrheiten-Ausnahme anwenden"
+        },
+        "runMigration": {
+          "hint": "Falls aktiviert, werden ausstehende Datenmigrationen beim nächsten Laden der Welt ausgeführt. Deaktivieren, um Migrationen zur Fehlersuche zu überspringen.",
+          "name": "Migrationen beim Start ausführen"
+        }
       }
     },
     "world": {
@@ -470,68 +509,6 @@
         "zeni": "Zeni"
       }
     }
-  },
-  "SETTINGS": {
-    "LtException": {
-      "name": "Kleine-Wahrheiten-Ausnahme anwenden",
-      "label": "Wenn behaltene Würfel durch Umwandlung unter 10 reduziert werden, 2 hinzufügen."
-    },
-    "runMigration": {
-      "name": "Migrationen beim Start ausführen",
-      "label": "Falls aktiviert, werden ausstehende Datenmigrationen beim nächsten Laden der Welt ausgeführt. Deaktivieren, um Migrationen zur Fehlersuche zu überspringen."
-    },
-    "forceMigration": {
-      "name": "Migration beim Start erzwingen",
-      "label": "Erzwingt die Ausführung aller Migrationen beim nächsten Weltladen, unabhängig von der Version. Setzt sich automatisch zurück, nachdem die Migration abgeschlossen ist."
-    }
-  },
-  "conditions": {
-    "blinded": {
-      "restrictions": "Geblendet: -3k3 Fernkampfangriffe, -1k1 Nahkampfangriffe, -1k1 Verteidigungswürfe, Rüstungs-SZ = Ref+5+Rüstung, Wasser-Ring -2 für Bewegung"
-    },
-    "dazed": {
-      "restrictions": "Benommen: -3k0 auf alle Aktionen, nur Verteidigungs-/Volle Verteidigung Haltungen, kann nicht duellieren"
-    },
-    "entangled": {
-      "restrictions": "Verstrickt: Kann sich nicht Bewegen oder Komplexe Aktionen ausführen außer Stärkewurf zum Befreien"
-    },
-    "fatigued": {
-      "restrictions": "Erschöpft: +5 SZ auf körperliche Würfe, Fertigkeiten und Zauberwirken (kumulativ pro Tag), kann keine Voller Angriff Haltung verwenden"
-    },
-    "feared": {
-      "restrictions": "Verängstigt: -Xk0 auf alle Würfe (X = Furchtrang), dauert bis Begegnungsende"
-    },
-    "grappled": {
-      "restrictions": "Festgehalten: Rüstungs-SZ = 5 + nur Rüstungsbonus"
-    },
-    "guarded": {
-      "restrictions": "Beschützt: +10 Rüstungs-SZ während Schutz durch Verbündeten in 5 Fuß (bis zum nächsten Zug des Beschützers)"
-    },
-    "guarding": {
-      "restrictions": "Beschützend: -5 Rüstungs-SZ während Schutz eines Verbündeten in 5 Fuß (bis zum eigenen nächsten Zug)"
-    },
-    "prone": {
-      "restrictions": "Am Boden: -10 Rüstungs-SZ vs Nahkampf, -2k0 Angriffe, kann sich nicht Bewegen, nur Angriffs-/Verteidigungshaltungen"
-    },
-    "stunned": {
-      "restrictions": "Betäubt: Kann keine Aktionen ausführen, Rüstungs-SZ = 5 + Rüstungsbonus"
-    }
-  },
-  "EFFECT": {
-    "blinded": "Geblendet",
-    "concentration": "Konzentration",
-    "dazed": "Benommen",
-    "dead": "Tot",
-    "entangled": "Verstrickt",
-    "fasting": "Fastend",
-    "fatigued": "Erschöpft",
-    "feared": "Verängstigt",
-    "grappled": "Festgehalten",
-    "guarded": "Beschützt",
-    "guarding": "Beschützend",
-    "mounted": "Beritten/Höhere Position",
-    "prone": "Am Boden",
-    "stunned": "Betäubt"
   },
   "TYPES": {
     "Actor": {

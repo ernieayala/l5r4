@@ -1,12 +1,12 @@
-<section class="ranks">
-  <div class="rank-name-container">
-    <div class="mas">
+<section class="l5r4-ranks">
+  <div class="l5r4-rank-control -track">
+    <div class="l5r4-rank-control-under">
       <span>{{localize "l5r4.character.ranks.honorRank"}}</span>
       <span>{{system.honor.rank}}.{{system.honor.points}}</span>
     </div>
     <div
-      class="flexcol -gap-xs rank-name"
-      data-action="rp-step"
+      class="flexcol -gap-xs l5r4-rank-control-value"
+      data-action="adjust-rank-points"
       data-key="honor"
       title="{{localize 'l5r4.ui.hints.shiftClickRankPoints'}}"
     >
@@ -14,14 +14,14 @@
       <span>{{system.honor.rank}}.{{system.honor.points}}</span>
     </div>
   </div>
-  <div class="rank-name-container">
-    <div class="mas">
+  <div class="l5r4-rank-control -track">
+    <div class="l5r4-rank-control-under">
       <span>{{localize "l5r4.character.ranks.gloryRank"}}</span>
       <span>{{system.glory.rank}}.{{system.glory.points}}</span>
     </div>
     <div
-      class="flexcol -gap-xs rank-name"
-      data-action="rp-step"
+      class="flexcol -gap-xs l5r4-rank-control-value"
+      data-action="adjust-rank-points"
       data-key="glory"
       title="{{localize 'l5r4.ui.hints.shiftClickRankPoints'}}"
     >
@@ -29,14 +29,14 @@
       <span>{{system.glory.rank}}.{{system.glory.points}}</span>
     </div>
   </div>
-  <div class="rank-name-container">
-    <div class="mas">
+  <div class="l5r4-rank-control -track">
+    <div class="l5r4-rank-control-under">
       <span>{{localize "l5r4.character.ranks.statusRank"}}</span>
       <span>{{system.status.rank}}.{{system.status.points}}</span>
     </div>
     <div
-      class="flexcol -gap-xs rank-name"
-      data-action="rp-step"
+      class="flexcol -gap-xs l5r4-rank-control-value"
+      data-action="adjust-rank-points"
       data-key="status"
       title="{{localize 'l5r4.ui.hints.shiftClickRankPoints'}}"
     >
@@ -44,24 +44,24 @@
       <span>{{system.status.rank}}.{{system.status.points}}</span>
     </div>
   </div>
-  <div class="rank-name-container">
-    <div class="mas">
-      <span>{{localize "l5r4.character.ranks.shadowRank"}}</span>
+  <div class="l5r4-rank-control -track">
+    <div class="l5r4-rank-control-under">
+      <span>{{localize "l5r4.character.ranks.taintRank"}}</span>
       <span>{{system.shadowTaint.rank}}.{{system.shadowTaint.points}}</span>
     </div>
     <div
-      class="flexcol -gap-xs rank-name"
-      data-action="rp-step"
+      class="flexcol -gap-xs l5r4-rank-control-value"
+      data-action="adjust-rank-points"
       data-key="shadowTaint"
       title="{{localize 'l5r4.ui.hints.shiftClickRankPoints'}}"
     >
-      <span>{{localize "l5r4.character.ranks.shadowRank"}}</span>
+      <span>{{localize "l5r4.character.ranks.taintRank"}}</span>
       <span>{{system.shadowTaint.rank}}.{{system.shadowTaint.points}}</span>
     </div>
   </div>
   {{#if editable}}
-    <a class="ledger-open" data-action="open-ledger" title="{{localize 'l5r4.ui.ledger.hint'}}">
-      <i class="fa-solid fa-scroll"></i> {{localize "l5r4.ui.ledger.title"}}
+    <a class="l5r4-ranks-ledger" data-action="open-ledger" title="{{localize 'l5r4.ui.ledger.hint'}}">
+      <i class="fa-solid fa-book-bookmark"></i> {{localize "l5r4.ui.ledger.title"}}
     </a>
   {{/if}}
 </section>

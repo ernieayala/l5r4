@@ -5,7 +5,7 @@
 
 .l5r4.pc,
 .l5r4.npc {
-  .pc-info {
+  .l5r4-pc-info {
     flex-wrap: nowrap;
     padding: 1rem;
     position: relative;
@@ -24,14 +24,14 @@
     }
 
     input,
-    .input-placeholder {
+    .l5r4-form-field-value {
       background: none;
       font-size: var(--font-size-16);
       height: calc(var(--input-height) - 0.5rem);
       line-height: 1;
     }
 
-    .title {
+    .l5r4-form-field-label {
       min-height: calc(var(--input-height) - 0.5rem);
     }
   }

@@ -117,7 +117,7 @@ export default class EmphasisManagerApplication extends foundry.applications.api
 ) {
   static DEFAULT_OPTIONS = {
     id: "emphasis-manager-{id}",
-    classes: ["l5r4", "emphasis-manager"],
+    classes: ["l5r4", "l5r4-emphasis-manager"],
     tag: "form",
     window: {
       title: "l5r4.apps.emphasisManager.title",
@@ -129,9 +129,9 @@ export default class EmphasisManagerApplication extends foundry.applications.api
       height: 600
     },
     actions: {
-      addCustom: EmphasisManagerApplication.prototype._onAddCustom,
-      deleteCustom: EmphasisManagerApplication.prototype._onDeleteCustom,
-      editCustom: EmphasisManagerApplication.prototype._onEditCustom
+      "add-emphasis": EmphasisManagerApplication.prototype._onAddCustom,
+      "delete-emphasis": EmphasisManagerApplication.prototype._onDeleteCustom,
+      "edit-emphasis": EmphasisManagerApplication.prototype._onEditCustom
     },
     form: {
       handler: EmphasisManagerApplication.prototype._onSubmit,
@@ -290,7 +290,7 @@ export default class EmphasisManagerApplication extends foundry.applications.api
       window: { title: T("l5r4.apps.emphasisManager.addCustom") },
       content,
       ok: {
-        label: T("l5r4.ui.label.add"),
+        label: T("l5r4.ui.common.add"),
         callback: (_event, button, _dialog) => button.form.elements.emphasisName.value
       },
       rejectClose: false
@@ -331,8 +331,8 @@ export default class EmphasisManagerApplication extends foundry.applications.api
     }
 
     const confirmed = await foundry.applications.api.DialogV2.confirm({
-      window: { title: T("l5r4.ui.label.delete") },
-      content: `${T("l5r4.ui.label.delete")} "${emphasisName}"?`,
+      window: { title: T("l5r4.ui.common.delete") },
+      content: `${T("l5r4.ui.common.delete")} "${emphasisName}"?`,
       rejectClose: false
     });
 
@@ -369,10 +369,10 @@ export default class EmphasisManagerApplication extends foundry.applications.api
     );
 
     const newName = await foundry.applications.api.DialogV2.prompt({
-      window: { title: T("l5r4.ui.label.edit") },
+      window: { title: T("l5r4.ui.common.edit") },
       content,
       ok: {
-        label: T("l5r4.ui.label.save"),
+        label: T("l5r4.ui.common.save"),
         callback: (_event, button, _dialog) => button.form.elements.emphasisName.value
       },
       rejectClose: false

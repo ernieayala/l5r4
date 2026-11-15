@@ -7,7 +7,7 @@ compact section over a grid, with a stance select, a computed pool, and a button
 | ----------- | ------------------------------------------------------------------------------------------------------------------------------------------------------- |
 | Partial     | `templates/actor/_partials/_combat.hbs`                                                                                                                 |
 | Parameters  | The sheet context: `config.stances`, `currentStance`, `system.initiative`, `system.rings.void.rank`, `system.movement`; target adds `initiativeFormula` |
-| SCSS        | None of its own: `section.md` and `grid.md` draw it. `scss/features/_initiative.scss` compiles to nothing and is removed                                |
+| SCSS        | None of its own: `section.md` and `grid.md` draw it                                                                                                     |
 | Block class | `l5r4-combat` on the section                                                                                                                            |
 | Shows in    | PC sidebar (`pc.hbs:9`), NPC sidebar (`npc.hbs:6`)                                                                                                      |
 | Game terms  | Initiative (`game-rules/31_combat_round.md, p.81`); Stance (`game-rules/36_stances.md, p.84`); Void Point (`game-rules/25_rings_and_traits.md, p.78`)   |
@@ -80,7 +80,7 @@ name in its open list. The pool string is short (`5k3+10`). Movement values carr
 | C2  | `5k3+2` (`content/voice.md`)                                                                                                                                                                           | `5k3+-2`, which the template's literal `+` gives for a negative total (`_combat.hbs:32`)                                                                                                    |
 | C3  | `<select data-action="apply-stance" aria-label="{{localize "l5r4.character.stance.current"}}">` (modeled)                                                                                              | `<select data-action="change-stance">` with no name (`templates/actor/_partials/_combat.hbs:22`)                                                                                            |
 | C4  | `<input type="checkbox" ... data-tooltip="{{localize "l5r4.ui.mechanics.rings.voidInitBoost"}}" aria-label="{{localize "l5r4.ui.mechanics.rings.voidInitBoost"}}" />` (modeled on `_combat.hbs:34-41`) | The two movement buttons whose `title` repeats their label (`_combat.hbs:54-62`): the `title` adds nothing, so it goes                                                                      |
-| C5  | The block styled by `_section.scss` and `_grid.scss` alone                                                                                                                                             | `scss/features/_initiative.scss`, which holds only comments                                                                                                                                 |
+| C5  | The block styled by `_section.scss` and `_grid.scss` alone                                                                                                                                             | A stylesheet of the block's own that holds only comments (modeled)                                                                                                                          |
 
 ## Do and don't
 

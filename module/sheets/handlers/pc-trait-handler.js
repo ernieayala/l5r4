@@ -44,7 +44,7 @@
  */
 
 import { SYS_ID } from "../../config/constants.js";
-import { FamilyBonusService } from "../../services/family-bonus-service.js";
+import { FamilyBonusService } from "../../services/family-bonus.js";
 import { clamp } from "../../utils/type-coercion.js";
 import { RollHandler } from "./roll-handler.js";
 

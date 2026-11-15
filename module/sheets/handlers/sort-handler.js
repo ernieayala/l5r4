@@ -11,7 +11,7 @@
  * - Integrates with user flag system via sorting.js utilities (getSortPref, setSortPref)
  *
  * Visual Indicator Convention:
- * - `.item-sort-by` elements receive `.is-active` class when they're the active sort column
+ * - `.l5r4-sort-header-button` elements receive `.is-active` class when they're the active sort column
  * - `data-dir="asc"|"desc"` attribute shows current sort direction on active column
  * - Relies on CSS to render direction arrows based on these attributes
  *
@@ -30,7 +30,7 @@ import { getSortPref, setSortPref } from "../../utils/sorting.js";
  * to be called from sheet event delegation callbacks with appropriate parameters.
  *
  * Typical workflow:
- * 1. User clicks a `.item-sort-by` element in an `.item-list.-header`
+ * 1. User clicks a `.l5r4-sort-header-button` element in an `.l5r4-sort-header`
  * 2. Sheet's delegated event handler calls `SortHandler.handleClick(...)`
  * 3. Handler updates user preferences, visual indicators, and triggers re-render
  * 4. Sheet re-renders with newly sorted item list
@@ -46,13 +46,13 @@ export class SortHandler {
    * its `data-dir` attribute to show sort direction. Removes indicators from
    * all other columns. CSS uses these attributes to render direction arrows.
    *
-   * @param {HTMLElement} header - The `.item-list.-header` container element
+   * @param {HTMLElement} header - The `.l5r4-sort-header` container element
    * @param {string} activeKey - The data-sortby value of the active column
    * @param {"asc"|"desc"} direction - Current sort direction for the active column
    * @private
    */
   static _updateVisualIndicators(header, activeKey, direction) {
-    header.querySelectorAll(".item-sort-by").forEach(a => {
+    header.querySelectorAll(".l5r4-sort-header-button").forEach(a => {
       const sortKey = a.dataset.sortby;
       const isActive = sortKey === activeKey;
       a.classList.toggle("is-active", isActive);
@@ -85,7 +85,9 @@ export class SortHandler {
     try {
       // querySelector used here to find header element by data-scope attribute
       // This is proper use of data attributes for behavior targeting
-      const header = root.querySelector(`.item-list.-header[data-scope="${scope}"]`);
+      const header = root.querySelector(
+        `.l5r4-item-row-list.l5r4-sort-header[data-scope="${scope}"]`
+      );
       if (!header) {
         return;
       }
@@ -117,7 +119,7 @@ export class SortHandler {
    *
    * @param {string} actorId - The actor's UUID or ID for preference storage
    * @param {Event} event - The DOM click event (preventDefault called automatically)
-   * @param {HTMLElement} element - The clicked `.item-sort-by` element (Application v2 pattern)
+   * @param {HTMLElement} element - The clicked `.l5r4-sort-header-button` element (Application v2 pattern)
    * @param {Function} getAllowedKeys - Callback to get valid keys for a scope: (scope) => string[]
    * @param {Function} renderSheet - Callback to trigger sheet re-render after sort change
    * @returns {Promise<void>}
@@ -130,7 +132,7 @@ export class SortHandler {
 
     try {
       const el = element || event.currentTarget;
-      const header = el.closest(".item-list.-header");
+      const header = el.closest(".l5r4-item-row-list.l5r4-sort-header");
       const scope = header?.dataset?.scope || "items";
       const key = el.dataset.sortby || "name";
 
@@ -154,7 +156,7 @@ export class SortHandler {
       console.warn(`${SYS_ID}`, "Unified sort click failed", {
         err,
         actorId,
-        scope: element?.closest(".item-list.-header")?.dataset?.scope
+        scope: element?.closest(".l5r4-item-row-list.l5r4-sort-header")?.dataset?.scope
       });
     }
   }

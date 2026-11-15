@@ -253,12 +253,12 @@ export function registerSheetsAndAppsTests(quench) {
               const sheet = actor.sheet;
               await sheet.render({ force: true });
               let saved = nextUpdate(actor);
-              sheet.element.querySelector('[data-action="void-ring-increase"]').click();
+              sheet.element.querySelector('[data-action="increase-void-ring"]').click();
               await saved;
               assert.equal(actor.system.rings.void.rank, 3, `${actor.type} up`);
               await sheet.render();
               saved = nextUpdate(actor);
-              sheet.element.querySelector('[data-action="void-ring-decrease"]').click();
+              sheet.element.querySelector('[data-action="decrease-void-ring"]').click();
               await saved;
               assert.equal(actor.system.rings.void.rank, 2, `${actor.type} down`);
               await sheet.close({ animate: false });
@@ -325,7 +325,7 @@ export function registerSheetsAndAppsTests(quench) {
               await sheet.render({ force: true });
               assert.isTrue(sheet.element.classList.contains("theme-light"));
               const backdrop = getComputedStyle(
-                sheet.element.querySelector(".ring-rank-earth"),
+                sheet.element.querySelector(".l5r4-ring-rank.-earth"),
                 "::before"
               );
               assert.include(backdrop.backgroundImage, "parchment");
@@ -436,7 +436,7 @@ export function registerSheetsAndAppsTests(quench) {
               const saved = nextUpdate(pc);
               app.element.querySelector('[name="xp-amount"]').value = "10";
               app.element.querySelector('[name="xp-note"]').value = "Sheets award";
-              app.element.querySelector('[data-action="xp-add-confirm"]').click();
+              app.element.querySelector('[data-action="add-xp"]').click();
               await saved;
             });
             const notes = (pc.getFlag(SYS_ID, "xpManual") ?? []).map(entry => entry.note);
@@ -452,7 +452,7 @@ export function registerSheetsAndAppsTests(quench) {
             await app.render({ force: true });
             const saved = nextUpdate(npc);
             app.element.querySelector('[name="attack1.name"]').value = "Claw";
-            app.element.querySelector('[data-action="save"]').click();
+            app.element.querySelector('[data-action="save-attack"]').click();
             await saved;
             assert.equal(npc.system.attack1.name, "Claw");
             const again = new NpcAttackConfigApplication(npc, "attack2");
@@ -498,7 +498,7 @@ export function registerSheetsAndAppsTests(quench) {
             const app = new WoundConfigApplication(npc);
             await app.render({ force: true });
             try {
-              const select = app.element.querySelector('[data-action="wound-mode-change"]');
+              const select = app.element.querySelector('[data-action="update-wound-mode"]');
               select.value = next;
               const saved = nextUpdate(npc);
               select.click();
@@ -539,7 +539,7 @@ export function registerSheetsAndAppsTests(quench) {
               await app.render();
               const deleted = nextUpdate(actor);
               app.element
-                .querySelector('[data-action="xp-delete-manual"][data-entry-id="sheetsaward"]')
+                .querySelector('[data-action="delete-xp-entry"][data-entry-id="sheetsaward"]')
                 .click();
               await deleted;
               assert.deepEqual(actor.getFlag(SYS_ID, "xpManual"), []);
@@ -563,7 +563,7 @@ export function registerSheetsAndAppsTests(quench) {
                 dialog.element.querySelector('[data-action="ok"]').click();
               });
               app.element
-                .querySelector('[data-action="editCustom"][data-emphasis-name="Sheets Custom"]')
+                .querySelector('[data-action="edit-emphasis"][data-emphasis-name="Sheets Custom"]')
                 .click();
               await renamed;
               const customs = () => game.settings.get(SYS_ID, "customEmphases");
@@ -574,7 +574,9 @@ export function registerSheetsAndAppsTests(quench) {
                 dialog.element.querySelector('[data-action="yes"]').click()
               );
               app.element
-                .querySelector('[data-action="deleteCustom"][data-emphasis-name="Sheets Renamed"]')
+                .querySelector(
+                  '[data-action="delete-emphasis"][data-emphasis-name="Sheets Renamed"]'
+                )
                 .click();
               await deleted;
               assert.isTrue(await waitFor(() => !customs().includes("Sheets Renamed")));

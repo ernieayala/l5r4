@@ -33,23 +33,23 @@ export function expiryEventKey(event) {
  * @returns {DurationPhrase}
  *
  * @example
- * effectEnd({ value: 3, units: "rounds", remaining: 2 }); // { key: "l5r4.ui.effectPanel.rounds", data: { count: 2 } }
+ * effectEnd({ value: 3, units: "rounds", remaining: 2 }); // { key: "l5r4.apps.effectPanel.rounds", data: { count: 2 } }
  * effectEnd({ value: null, units: "seconds", expiry: "encounterEnd" });
- * // { key: "l5r4.ui.effectPanel.until", data: { event: "l5r4.ui.effects.expiry.encounterEnd" } }
+ * // { key: "l5r4.apps.effectPanel.until", data: { event: "l5r4.ui.effects.expiry.encounterEnd" } }
  */
 export function effectEnd({ value, units, remaining, label, expiry }) {
   // Core prepares an effect with no set length as an infinite one, so only a finite length counts
   if (Number.isFinite(value)) {
     const count = Math.max(0, remaining ?? value);
     if (units === "rounds" || units === "turns") {
-      return { key: `l5r4.ui.effectPanel.${units}`, data: { count } };
+      return { key: `l5r4.apps.effectPanel.${units}`, data: { count } };
     }
-    return { key: "l5r4.ui.effectPanel.time", data: { time: label ?? String(count) } };
+    return { key: "l5r4.apps.effectPanel.time", data: { time: label ?? String(count) } };
   }
   if (expiry) {
-    return { key: "l5r4.ui.effectPanel.until", data: { event: expiryEventKey(expiry) } };
+    return { key: "l5r4.apps.effectPanel.until", data: { event: expiryEventKey(expiry) } };
   }
-  return { key: "l5r4.ui.effectPanel.noEnd", data: {} };
+  return { key: "l5r4.apps.effectPanel.noEnd", data: {} };
 }
 
 /**
@@ -59,8 +59,8 @@ export function effectEnd({ value, units, remaining, label, expiry }) {
  * @returns {DurationPhrase}
  *
  * @example
- * usesLeft(2, 1); // { key: "l5r4.ui.effectPanel.uses", data: { left: 1, max: 2 } }
+ * usesLeft(2, 1); // { key: "l5r4.apps.effectPanel.uses", data: { left: 1, max: 2 } }
  */
 export function usesLeft(max, spent) {
-  return { key: "l5r4.ui.effectPanel.uses", data: { left: Math.max(0, max - spent), max } };
+  return { key: "l5r4.apps.effectPanel.uses", data: { left: Math.max(0, max - spent), max } };
 }

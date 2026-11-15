@@ -37,20 +37,20 @@ import { getSortPref, setSortPref } from "../utils/sorting.js";
 import { logError } from "../utils/error-logging.js";
 
 // Services imports
-import { buildXpHistory } from "../services/xp/xp-calculator.js";
-import { formatXpEntries } from "../services/xp/xp-formatter.js";
-import { needsRetroactiveUpdate, calculateXpDataVersion } from "../services/xp/xp-versioning.js";
+import { buildXpHistory } from "../services/xp/calculator.js";
+import { formatXpEntries } from "../services/xp/formatter.js";
+import { needsRetroactiveUpdate, calculateXpDataVersion } from "../services/xp/versioning.js";
 
 export default class XpManagerApplication extends foundry.applications.api.HandlebarsApplicationMixin(
   foundry.applications.api.ApplicationV2
 ) {
   static DEFAULT_OPTIONS = {
     id: "xp-manager-{id}",
-    classes: ["l5r4", "xp-modal-dialog"],
+    classes: ["l5r4", "l5r4-xp-manager"],
     tag: "form",
     window: {
       title: "l5r4.apps.xpManager.title",
-      icon: "fas fa-star",
+      icon: "fa-solid fa-chart-line",
       resizable: true
     },
     position: {
@@ -58,10 +58,10 @@ export default class XpManagerApplication extends foundry.applications.api.Handl
       height: 700
     },
     actions: {
-      "xp-add-confirm": XpManagerApplication.prototype._onAddXp,
-      "xp-delete-manual": XpManagerApplication.prototype._onDeleteEntry,
-      "item-sort-by": XpManagerApplication.prototype._onSortClick,
-      "recalculate-xp-purchase": XpManagerApplication.prototype._onRecalculateXpPurchase,
+      "add-xp": XpManagerApplication.prototype._onAddXp,
+      "delete-xp-entry": XpManagerApplication.prototype._onDeleteEntry,
+      "sort-items": XpManagerApplication.prototype._onSortClick,
+      "recalculate-xp": XpManagerApplication.prototype._onRecalculateXpPurchase,
       "change-disadvantage-cap": XpManagerApplication.prototype._onChangeDisadvantageCap
     }
   };
@@ -351,7 +351,7 @@ export default class XpManagerApplication extends foundry.applications.api.Handl
     event.preventDefault();
     event.stopPropagation();
 
-    const header = target.closest(".item-list.-header");
+    const header = target.closest(".l5r4-item-row-list.l5r4-sort-header");
     const scope = header?.dataset?.scope || "xp-purchases";
     const key = target.dataset.sortby || "note";
     const allowed = ["note", "cost", "type"];
@@ -364,7 +364,7 @@ export default class XpManagerApplication extends foundry.applications.api.Handl
     await setSortPref(this.actor.id, scope, key, { toggleFrom: cur });
 
     if (header) {
-      header.querySelectorAll(".item-sort-by").forEach(a => {
+      header.querySelectorAll(".l5r4-sort-header-button").forEach(a => {
         a.classList.toggle("is-active", a === target);
         if (a !== target) {
           a.removeAttribute("data-dir");
@@ -430,14 +430,14 @@ export default class XpManagerApplication extends foundry.applications.api.Handl
         window: { title: T("l5r4.apps.xpManager.disadvantageCapTitle") },
         content,
         ok: {
-          label: T("l5r4.ui.label.ok"),
+          label: T("l5r4.ui.common.ok"),
           callback: (_e, b, d) => {
             const form = b.form ?? d.form;
             const input = form?.querySelector("[data-field='disadvantage-cap']");
             return input ? toInt(input.value, null) : null;
           }
         },
-        cancel: { label: T("l5r4.ui.label.cancel") },
+        cancel: { label: T("l5r4.ui.common.cancel") },
         rejectClose: false,
         modal: true
       });

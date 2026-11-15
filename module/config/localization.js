@@ -31,11 +31,11 @@ const freeze = Object.freeze;
  * // game.i18n.localize(RING_LABELS.fire)
  */
 export const RING_LABELS = freeze({
-  air: "l5r4.mechanics.rings.air",
-  earth: "l5r4.mechanics.rings.earth",
-  fire: "l5r4.mechanics.rings.fire",
-  water: "l5r4.mechanics.rings.water",
-  void: "l5r4.mechanics.rings.void"
+  air: "l5r4.ui.mechanics.rings.air",
+  earth: "l5r4.ui.mechanics.rings.earth",
+  fire: "l5r4.ui.mechanics.rings.fire",
+  water: "l5r4.ui.mechanics.rings.water",
+  void: "l5r4.ui.mechanics.rings.void"
 });
 
 /**
@@ -116,7 +116,7 @@ export const RINGS = freeze({
  * @property {string} "" - None/empty selection
  */
 export const RINGS_WITH_NONE = freeze({
-  "": "l5r4.ui.label.none",
+  "": "l5r4.ui.common.none",
   ...RING_LABELS
 });
 
@@ -134,12 +134,12 @@ export const RINGS_WITH_NONE = freeze({
  * @property {string} centerStance - Center stance (void point recovery)
  */
 export const STANCES = freeze({
-  "": "l5r4.ui.label.none",
-  attackStance: "l5r4.mechanics.stances.attack",
-  fullAttackStance: "l5r4.mechanics.stances.fullAttack",
-  defenseStance: "l5r4.mechanics.stances.defense",
-  fullDefenseStance: "l5r4.mechanics.stances.fullDefense",
-  centerStance: "l5r4.mechanics.stances.center"
+  "": "l5r4.ui.common.none",
+  attackStance: "l5r4.ui.mechanics.stances.attack",
+  fullAttackStance: "l5r4.ui.mechanics.stances.fullAttack",
+  defenseStance: "l5r4.ui.mechanics.stances.defense",
+  fullDefenseStance: "l5r4.ui.mechanics.stances.fullDefense",
+  centerStance: "l5r4.ui.mechanics.stances.center"
 });
 
 /**
@@ -152,7 +152,7 @@ export const STANCES = freeze({
  */
 export const SPELL_RINGS = freeze({
   ...RING_LABELS,
-  all: "l5r4.ui.label.all"
+  all: "l5r4.ui.common.all"
 });
 
 /**
@@ -171,14 +171,14 @@ export const SPELL_RINGS = freeze({
  * @property {string} int - Intelligence (Air)
  */
 export const TRAITS = freeze({
-  sta: "l5r4.mechanics.traits.sta",
-  wil: "l5r4.mechanics.traits.wil",
-  str: "l5r4.mechanics.traits.str",
-  per: "l5r4.mechanics.traits.per",
-  ref: "l5r4.mechanics.traits.ref",
-  awa: "l5r4.mechanics.traits.awa",
-  agi: "l5r4.mechanics.traits.agi",
-  int: "l5r4.mechanics.traits.int"
+  sta: "l5r4.ui.mechanics.traits.sta",
+  wil: "l5r4.ui.mechanics.traits.wil",
+  str: "l5r4.ui.mechanics.traits.str",
+  per: "l5r4.ui.mechanics.traits.per",
+  ref: "l5r4.ui.mechanics.traits.ref",
+  awa: "l5r4.ui.mechanics.traits.awa",
+  agi: "l5r4.ui.mechanics.traits.agi",
+  int: "l5r4.ui.mechanics.traits.int"
 });
 
 /**
@@ -190,7 +190,7 @@ export const TRAITS = freeze({
  */
 export const SKILL_TRAITS = freeze({
   ...TRAITS,
-  void: "l5r4.mechanics.rings.void"
+  void: "l5r4.ui.mechanics.rings.void"
 });
 
 /**
@@ -214,10 +214,10 @@ export const NPC_TRAITS = TRAITS;
  * @property {string} low - Low skills (dishonorable, peasant)
  */
 export const SKILL_TYPES = freeze({
-  high: "l5r4.mechanics.skills.types.high",
-  bugei: "l5r4.mechanics.skills.types.bugei",
-  merch: "l5r4.mechanics.skills.types.merch",
-  low: "l5r4.mechanics.skills.types.low"
+  high: "l5r4.character.skillTypes.high",
+  bugei: "l5r4.character.skillTypes.bugei",
+  merch: "l5r4.character.skillTypes.merch",
+  low: "l5r4.character.skillTypes.low"
 });
 
 /**
@@ -231,9 +231,9 @@ export const SKILL_TYPES = freeze({
  * @property {string} free - Free action (unlimited)
  */
 export const ACTION_TYPES = freeze({
-  simple: "l5r4.ui.label.simple",
-  complex: "l5r4.ui.label.complex",
-  free: "l5r4.ui.label.free"
+  simple: "l5r4.ui.common.simple",
+  complex: "l5r4.ui.common.complex",
+  free: "l5r4.ui.common.free"
 });
 
 /**
@@ -248,10 +248,10 @@ export const ACTION_TYPES = freeze({
  * @property {string} mystic - Mystic kiho (supernatural abilities)
  */
 export const KIHO_TYPES = freeze({
-  internal: "l5r4.mechanics.magic.kiho.internal",
-  karmic: "l5r4.mechanics.magic.kiho.karmic",
-  martial: "l5r4.mechanics.magic.kiho.martial",
-  mystic: "l5r4.mechanics.magic.kiho.mystic"
+  internal: "l5r4.magic.kiho.internal",
+  karmic: "l5r4.magic.kiho.karmic",
+  martial: "l5r4.magic.kiho.martial",
+  mystic: "l5r4.magic.kiho.mystic"
 });
 
 /**
@@ -268,10 +268,10 @@ export const KIHO_TYPES = freeze({
  * @property {string} ancestor - Ancestor advantages (bloodline blessings)
  */
 export const ADVANTAGE_TYPES = freeze({
-  physical: "l5r4.mechanics.advantages.types.physical",
-  mental: "l5r4.mechanics.advantages.types.mental",
-  social: "l5r4.mechanics.advantages.types.social",
-  material: "l5r4.mechanics.advantages.types.material",
-  spiritual: "l5r4.mechanics.advantages.types.spiritual",
-  ancestor: "l5r4.mechanics.advantages.types.ancestor"
+  physical: "l5r4.character.advantages.physical",
+  mental: "l5r4.character.advantages.mental",
+  social: "l5r4.character.advantages.social",
+  material: "l5r4.character.advantages.material",
+  spiritual: "l5r4.character.advantages.spiritual",
+  ancestor: "l5r4.character.advantages.ancestor"
 });

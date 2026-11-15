@@ -40,21 +40,21 @@ export function entryNumbers(entry) {
   const system = entry.system ?? {};
   if (entry.type === "armor") {
     return {
-      key: "l5r4.ui.browser.numbers.armor",
+      key: "l5r4.apps.compendiumBrowser.numbers.armor",
       data: { bonus: system.bonus ?? 0, reduction: system.reduction ?? 0 }
     };
   }
   if (entry.type === "spell") {
     const ring =
-      system.ring === "all" ? "l5r4.ui.label.all" : `l5r4.ui.mechanics.rings.${system.ring}`;
+      system.ring === "all" ? "l5r4.ui.common.all" : `l5r4.ui.mechanics.rings.${system.ring}`;
     return {
-      key: "l5r4.ui.browser.numbers.spell",
+      key: "l5r4.apps.compendiumBrowser.numbers.spell",
       data: { ring: { key: ring, data: {} }, mastery: system.mastery ?? 1 }
     };
   }
   if ((entry.type === "weapon" || entry.type === "bow") && !system.isBow) {
     return {
-      key: "l5r4.ui.browser.numbers.weapon",
+      key: "l5r4.apps.compendiumBrowser.numbers.weapon",
       data: { pool: `${system.damageRoll ?? 0}k${system.damageKeep ?? 0}` }
     };
   }

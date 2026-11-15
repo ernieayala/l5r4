@@ -41,8 +41,8 @@ export function registerMigrationSettings() {
   game.settings.register(SYS_ID, "runMigration", {
     scope: "world", // Shared setting across all users in this world
     config: true, // Visible in Foundry settings menu
-    name: "SETTINGS.runMigration.name",
-    hint: "SETTINGS.runMigration.label",
+    name: "l5r4.system.settings.runMigration.name",
+    hint: "l5r4.system.settings.runMigration.hint",
     type: Boolean,
     default: true
   });
@@ -54,8 +54,8 @@ export function registerMigrationSettings() {
   game.settings.register(SYS_ID, "forceMigration", {
     scope: "world", // Shared setting across all users in this world
     config: true, // Visible in Foundry settings menu
-    name: "SETTINGS.forceMigration.name",
-    hint: "SETTINGS.forceMigration.label",
+    name: "l5r4.system.settings.forceMigration.name",
+    hint: "l5r4.system.settings.forceMigration.hint",
     type: Boolean,
     default: false
   });

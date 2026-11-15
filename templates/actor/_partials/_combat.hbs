@@ -1,25 +1,25 @@
-<section class="combat">
-  <div class="flexrow -gap-sm section-title">
-    <h4 class="title -compact">{{localize "l5r4.character.stance.title"}}</h4>
+<section class="l5r4-section l5r4-combat">
+  <div class="flexrow -gap-sm l5r4-section-title">
+    <h4 class="l5r4-section-heading -compact">{{localize "l5r4.character.stance.title"}}</h4>
     <a
       class="button inline-control icon"
-      data-action="condition-manager"
+      data-action="open-condition-manager"
       title="{{localize 'l5r4.ui.common.conditions'}}"
     >
-      <i class="fas fa-heart-pulse"></i>
+      <i class="fa-solid fa-heart-pulse"></i>
     </a>
     <a
       class="button inline-control icon"
-      data-action="combat-config"
-      title="{{localize 'l5r4.ui.combat.configuration'}}"
+      data-action="open-combat-config"
+      title="{{localize 'l5r4.apps.combatConfig.title'}}"
     >
-      <i class="fas fa-cog"></i>
+      <i class="fa-solid fa-gear"></i>
     </a>
   </div>
-  <div class="grid">
+  <div class="l5r4-grid">
     <span>{{localize "l5r4.character.stance.current"}}</span>
     <div class="flexrow">
-      <select data-action="change-stance">
+      <select data-action="apply-stance">
         {{#each config.stances as |label id|}}
           <option value="{{id}}" {{#if (eq ../currentStance id)}}selected{{/if}}>
             {{localize label}}
@@ -27,7 +27,7 @@
         {{/each}}
       </select>
     </div>
-    <span>{{localize "l5r4.ui.common.init"}}</span>
+    <span>{{localize "l5r4.ui.common.initiative"}}</span>
     <div class="flexrow -gap-sm">
       <div>{{system.initiative.roll}}k{{system.initiative.keep}}+{{#if system.initiative.useVoid}}{{math system.initiative.totalMod "+" 10}}{{else}}{{system.initiative.totalMod}}{{/if}}</div>
       {{#if (gt system.rings.void.rank 0)}}

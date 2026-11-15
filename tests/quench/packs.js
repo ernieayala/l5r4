@@ -1077,7 +1077,7 @@ export function registerPacksTests(quench) {
               app.search = "";
               app.choices = { ring: "fire", mastery: "2" };
               await app.render();
-              const rows = [...app.element.querySelectorAll(".l5r4-browser-row")];
+              const rows = [...app.element.querySelectorAll(".l5r4-compendium-browser-row")];
               assert.lengthOf(rows, expected);
               for (const row of rows) {
                 assert.include(row.textContent, "Fire, Mastery Level 2");
@@ -1131,11 +1131,11 @@ export function registerPacksTests(quench) {
               app.choices = { folder: "Swords", size: "medium" };
               app.search = "ka";
               await app.render();
-              const names = [...app.element.querySelectorAll(".l5r4-browser-name")].map(
+              const names = [...app.element.querySelectorAll(".l5r4-compendium-browser-name")].map(
                 a => a.textContent
               );
               assert.sameMembers(names, ["Katana"]);
-              const row = app.element.querySelector(".l5r4-browser-row");
+              const row = app.element.querySelector(".l5r4-compendium-browser-row");
               assert.include(row.textContent, "DR 3k2");
               assert.include(row.textContent, "Core Rulebook p.204");
             } finally {
@@ -1150,24 +1150,24 @@ export function registerPacksTests(quench) {
             const app = await openOn("equipment");
             const before = new Set(game.actors.map(a => a.id));
             try {
-              app.element.querySelector("[data-action='selectTab'][data-tab='creatures']").click();
+              app.element.querySelector("[data-action='select-tab'][data-tab='creatures']").click();
               assert.isTrue(await waitFor(() => app.tab === "creatures"));
-              await waitFor(() => app.element.querySelector("[data-action='importEntry']"));
+              await waitFor(() => app.element.querySelector("[data-action='import-entry']"));
 
               app.search = "Oni";
               await app.render();
-              app.element.querySelector("[data-action='clearFilters']").click();
+              app.element.querySelector("[data-action='clear-filters']").click();
               assert.isTrue(await waitFor(() => app.search === ""), "the search is cleared");
 
               app.search = "Kappa";
               await app.render();
-              const row = app.element.querySelector(".l5r4-browser-row");
+              const row = app.element.querySelector(".l5r4-compendium-browser-row");
               const entry = await fromUuid(row.dataset.uuid);
-              row.querySelector("[data-action='openEntry']").click();
+              row.querySelector("[data-action='open-entry']").click();
               assert.isTrue(await waitFor(() => entry.sheet?.rendered), "the entry's sheet opens");
               await entry.sheet.close({ animate: false });
 
-              row.querySelector("[data-action='importEntry']").click();
+              row.querySelector("[data-action='import-entry']").click();
               const imported = () => game.actors.find(a => !before.has(a.id) && a.name === "Kappa");
               assert.isTrue(await waitFor(imported), "the creature is in the world");
               track(imported());
@@ -1194,7 +1194,7 @@ export function registerPacksTests(quench) {
             try {
               app.search = "Tetsubo";
               await app.render();
-              app.element.querySelector("[data-action='addEntry']").click();
+              app.element.querySelector("[data-action='add-entry']").click();
               assert.isTrue(await waitFor(() => actor.items.some(i => i.name === "Tetsubo")));
             } finally {
               await app.close({ animate: false });
@@ -1211,7 +1211,9 @@ export function registerPacksTests(quench) {
               await app.render();
               // A user grabs the icon or the name, which carry no draggable attribute
               // [src: client/game.mjs:2239-2245]
-              const icon = app.element.querySelector(".l5r4-browser-row .l5r4-browser-icon");
+              const icon = app.element.querySelector(
+                ".l5r4-compendium-browser-row .l5r4-compendium-browser-icon"
+              );
               const transfer = new DataTransfer();
               const event = new DragEvent("dragstart", {
                 dataTransfer: transfer,
@@ -1248,7 +1250,7 @@ export function registerPacksTests(quench) {
               const reopened = await openOn("equipment");
               reopened.search = "Quench Lantern";
               await reopened.render();
-              assert.lengthOf(reopened.element.querySelectorAll(".l5r4-browser-row"), 1);
+              assert.lengthOf(reopened.element.querySelectorAll(".l5r4-compendium-browser-row"), 1);
               await reopened.close({ animate: false });
             } finally {
               await pack.deleteCompendium();

@@ -72,7 +72,7 @@ async function askChoice(itemName, choice) {
       select.outerHTML
     }</div>`,
     ok: {
-      label: T("l5r4.ui.label.ok"),
+      label: T("l5r4.ui.common.ok"),
       callback: (_event, button) => button.form.elements.selection.value || null
     },
     rejectClose: false,

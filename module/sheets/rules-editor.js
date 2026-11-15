@@ -12,7 +12,7 @@ import { answeredRules } from "../utils/choices.js";
 import { parseRulesJson } from "../utils/rule-engine.js";
 
 /** The editor's template, rendered inside each sheet's Rules tab. */
-export const RULES_EDITOR_TEMPLATE = `systems/${SYS_ID}/templates/rules/editor.hbs`;
+export const RULES_EDITOR_TEMPLATE = `systems/${SYS_ID}/templates/rules/_partials/_editor.hbs`;
 
 /**
  * The editor's template context.
@@ -85,7 +85,7 @@ async function changeRules(sheet, change) {
  */
 export const RULES_EDITOR_ACTIONS = {
   /** Add a rule of the key the editor's select names. */
-  async rulesAdd(_event, target) {
+  async "create-rule"(_event, target) {
     const key = target.closest("[data-rules-editor]").querySelector("[data-rule-key]").value;
     if (RULE_KEYS.includes(key)) {
       await changeRules(this, rules => [...rules, newRule(key)]);
@@ -93,13 +93,13 @@ export const RULES_EDITOR_ACTIONS = {
   },
 
   /** Remove the rule whose card holds the button. */
-  async rulesDelete(_event, target) {
+  async "delete-rule"(_event, target) {
     const index = Number(target.closest("[data-rule-index]").dataset.ruleIndex);
     await changeRules(this, rules => rules.filter((_rule, i) => i !== index));
   },
 
   /** Switch between the forms and the JSON, keeping what the form holds. */
-  async rulesMode() {
+  async "toggle-rules-view"() {
     await changeRules(this, rules => rules);
     this.rulesMode = this.rulesMode === "json" ? "form" : "json";
     await this.render();

@@ -8,7 +8,7 @@ edited in place.
 | ----------- | --------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
 | Partial     | `templates/actor/_partials/_wound-track.hbs` (target), included by `_wounds.hbs` and `templates/apps/wound-config.hbs`. Today written out in `_wounds.hbs:43-71` and `wound-config.hbs:63-76` |
 | Parameters  | `levels` (`system.woundLevels`, or `system.visibleWoundLevels` on an NPC), `editable` (the wound configuration window's manual track)                                                         |
-| SCSS        | `scss/features/_wound-track.scss` (target), the rename of `scss/features/_wounds.scss`                                                                                                        |
+| SCSS        | `scss/features/_wound-track.scss`, the rename of `scss/features/_wound-track.scss`                                                                                                            |
 | Block class | `l5r4-wound-track`                                                                                                                                                                            |
 | Shows in    | The Wounds section of the PC and NPC sidebar (`_wounds.hbs`), inside a full-row grid cell (`grid.md`); the wound configuration window                                                         |
 | Game terms  | Wound, Wound Rank (`game-rules/33_wounds.md, p.82`; `game-rules/34_ambush_falling_drowning.md, p.84`)                                                                                         |
@@ -111,12 +111,12 @@ W6's tooltip goes; whether the heal rate explains itself in a hint is a copy que
 
 ## Names
 
-| Current                                     | Target                                     | Why                                                    |
-| ------------------------------------------- | ------------------------------------------ | ------------------------------------------------------ |
-| `wounds` (section root)                     | `l5r4-section -compact` around the grid    | `section.md`                                           |
-| `wound-grid`                                | `l5r4-wound-track`                         | Decision 15                                            |
-| `scss/features/_wounds.scss`                | `scss/features/_wound-track.scss` (target) | The file takes its block's name                        |
-| `wound-config-app` scope (`_wounds.scss:8`) | none: the track's block class scopes it    | One block, styled the same in the sheet and the window |
+| Current                                     | Target                                  | Why                                                    |
+| ------------------------------------------- | --------------------------------------- | ------------------------------------------------------ |
+| `wounds` (section root)                     | `l5r4-section -compact` around the grid | `section.md`                                           |
+| `wound-grid`                                | `l5r4-wound-track`                      | Decision 15                                            |
+| `scss/features/_wound-track.scss`           | `scss/features/_wound-track.scss`       | The file takes its block's name                        |
+| `wound-config-app` scope (`_wounds.scss:8`) | none: the track's block class scopes it | One block, styled the same in the sheet and the window |
 
 Fixed (Stage 17 decision 2): the stored `woundLevels`, `woundLevel`, and `manualWoundLevels` fields and the wound
 setting keys. The copy says Wound Rank; the code keeps `woundLevel` (Stage 17 decision 15).

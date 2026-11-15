@@ -74,8 +74,8 @@ describe("coverage audit (roadmap/STAGE-16)", () => {
   });
 
   it("finds template and option actions", () => {
-    expect(templateActions('<a data-action="item-edit"></a><a data-action="{{x}}"></a>')).toEqual([
-      "item-edit"
+    expect(templateActions('<a data-action="edit-item"></a><a data-action="{{x}}"></a>')).toEqual([
+      "edit-item"
     ]);
     expect(
       optionActions("actions: { a: f, 'b-c': g, async d() { return { e: 1 }; }, ...h }")

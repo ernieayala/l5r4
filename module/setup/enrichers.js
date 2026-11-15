@@ -90,7 +90,7 @@ function onActivate(link, action, signal) {
  * @param {{signal: AbortSignal}} options
  */
 function onRenderLink(element, { signal }) {
-  const link = element.querySelector(".l5r4-link[data-link-type]");
+  const link = element.querySelector(".l5r4-inline-link[data-link-type]");
   if (!link) {
     return;
   }
@@ -107,10 +107,10 @@ function onRenderLink(element, { signal }) {
   if (
     game.user.isGM &&
     link.dataset.linkType === "Check" &&
-    !element.querySelector(".l5r4-link-request")
+    !element.querySelector(".l5r4-inline-link-request")
   ) {
     const request = document.createElement("a");
-    request.className = "l5r4-link-request";
+    request.className = "l5r4-inline-link-request";
     request.setAttribute("role", "button");
     request.tabIndex = 0;
     request.dataset.tooltip = T("l5r4.ui.links.request");

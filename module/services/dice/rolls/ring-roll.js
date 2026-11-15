@@ -14,7 +14,7 @@ import { toInt } from "../../../utils/type-coercion.js";
 import { castingSchoolRank, getAffinityDeficiencyModifier } from "../../../utils/mechanics.js";
 import { rollCheck } from "../check/roll-check.js";
 import { planSlot, slotDialogData, spendSlot } from "../check/spell-slots.js";
-import { resolveActor } from "../resources/void-manager.js";
+import { resolveActor } from "../resources/void-points.js";
 
 /**
  * Executes a Ring Roll, or a Spell Casting Roll when the dialog asks for one.

@@ -10,7 +10,7 @@ Concentration check. The active GM posts it on a combat event or after damage; t
 | Posted by | `postPrompt(actor, request, card)` (`module/services/effects/prompts.js:35-45`), from `promptSaves`, `promptFullDefense`, `promptConcentration` |
 | Stored in | `flags.l5r4-enhanced.prompt` (fixed flag): the actor and the request; the button reads it, never the HTML                                       |
 | Wired by  | `bindPromptCard` (`prompts.js:263-271`), from `module/hooks/register-all.js:63`                                                                 |
-| SCSS      | None of its own. The root column comes from the shared chat card rules in `scss/components/_chat-card.scss` (target)                            |
+| SCSS      | None of its own. The root column comes from the shared chat card rules in `scss/components/_chat-card.scss`                                     |
 | Quench    | `l5r4-enhanced.effects`                                                                                                                         |
 
 ## Anatomy

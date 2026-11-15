@@ -287,11 +287,11 @@ export function registerAuthoringTests(quench) {
             ]);
             const sheet = technique.sheet;
             await sheet.render({ force: true });
-            sheet.element.querySelector('[data-action="changeTab"][data-tab="rules"]').click();
+            sheet.element.querySelector('[data-action="change-tab"][data-tab="rules"]').click();
             await sheet.render();
             sheet.element.querySelector("[data-rule-key]").value = "RollModifier";
             const added = nextUpdate(technique);
-            sheet.element.querySelector('[data-action="rulesAdd"]').click();
+            sheet.element.querySelector('[data-action="create-rule"]').click();
             await added;
             await changeThroughSheet(sheet, '[name="rules.0.selector"]', "skill:kenjutsu");
             await changeThroughSheet(sheet, '[name="rules.0.roll"]', "1");
@@ -301,18 +301,18 @@ export function registerAuthoringTests(quench) {
               roll: 1
             });
             assert.isNull(
-              sheet.element.querySelector(".rule-error"),
+              sheet.element.querySelector(".l5r4-rules-editor-error"),
               "the rule is valid as authored"
             );
             // A second rule (valid as added: selector "any") deleted again leaves the first
             sheet.element.querySelector("[data-rule-key]").value = "RollModifier";
             const second = nextUpdate(technique);
-            sheet.element.querySelector('[data-action="rulesAdd"]').click();
+            sheet.element.querySelector('[data-action="create-rule"]').click();
             await second;
             await sheet.render();
             const removed = nextUpdate(technique);
             sheet.element
-              .querySelector('[data-rule-index="1"] [data-action="rulesDelete"]')
+              .querySelector('[data-rule-index="1"] [data-action="delete-rule"]')
               .click();
             await removed;
             assert.deepEqual(
@@ -358,9 +358,12 @@ export function registerAuthoringTests(quench) {
             ]);
             const sheet = weakness.sheet;
             await sheet.render({ force: true });
-            sheet.element.querySelector('[data-action="changeTab"][data-tab="rules"]').click();
+            sheet.element.querySelector('[data-action="change-tab"][data-tab="rules"]').click();
             await sheet.render();
-            assert.isNull(sheet.element.querySelector(".rule-error"), "no error over the rules");
+            assert.isNull(
+              sheet.element.querySelector(".l5r4-rules-editor-error"),
+              "no error over the rules"
+            );
             assert.equal(
               sheet.element.querySelector('[name="rules.1.trait"]').value,
               "{choice:trait}"
@@ -388,7 +391,7 @@ export function registerAuthoringTests(quench) {
             sheet.changeTab("rules", "sheet");
             sheet.element.querySelector("[data-rule-key]").value = "Reduction";
             const added = nextUpdate(effect);
-            sheet.element.querySelector('[data-action="rulesAdd"]').click();
+            sheet.element.querySelector('[data-action="create-rule"]').click();
             await added;
             await sheet.render();
             sheet.element.querySelector('[name="rules.0.value"]').value = "2";

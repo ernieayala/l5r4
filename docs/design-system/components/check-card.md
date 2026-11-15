@@ -4,15 +4,15 @@ The card the roll pipeline posts for every Skill, Trait, Ring, spell, attack, an
 modifiers that applied, the dice, the outcome against the TN, the notes the roll's rules add, and the buttons for what
 comes next. It is a [chat card](chat-card.md) on a `roll` ChatMessage, whose `system` holds the whole roll context.
 
-| Item         | Detail                                                                                                                                                                                                           |
-| ------------ | ---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| Template     | `templates/chat/check-card.hbs`, `CHAT_TEMPLATES.checkCard`, renamed `templates/chat/check.hbs` (target): chat templates take no `-card` suffix ([naming.md](../../code-system/naming.md#templates-and-actions)) |
-| Rendered by  | `renderCheckCard(system, roll, { actorId })` (`module/services/dice/check/roll-check.js:623-646`)                                                                                                                |
-| Posted by    | `rollCheck` with `roll.toMessage({ type: "roll", system, speaker, content })` (`roll-check.js:543-549`)                                                                                                          |
-| Wired by     | `bindCheckCard` (`module/services/dice/check/chat-actions.js:229-247`), `bindAttackCard` and `bindDamageCards` (`module/services/combat/index.js:67-68`)                                                         |
-| Context menu | Re-roll and keep the better, Contested Roll (`chat-actions.js:255-280`)                                                                                                                                          |
-| SCSS         | Now `scss/_chat.scss:24-45`; `scss/components/_check-card.scss` (target), under the fixed root `.l5r4-check`, which also holds the dropped-dice mark ([dice row](dice-row.md))                                   |
-| Quench       | `l5r4-enhanced.roll-pipeline`, `l5r4-enhanced.combat`                                                                                                                                                            |
+| Item         | Detail                                                                                                                                                                                             |
+| ------------ | -------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| Template     | `templates/chat/check.hbs`, `CHAT_TEMPLATES.checkCard`, renamed `templates/chat/check.hbs`: chat templates take no `-card` suffix ([naming.md](../../code-system/naming.md#templates-and-actions)) |
+| Rendered by  | `renderCheckCard(system, roll, { actorId })` (`module/services/dice/check/roll-check.js:623-646`)                                                                                                  |
+| Posted by    | `rollCheck` with `roll.toMessage({ type: "roll", system, speaker, content })` (`roll-check.js:543-549`)                                                                                            |
+| Wired by     | `bindCheckCard` (`module/services/dice/check/chat-actions.js:229-247`), `bindAttackCard` and `bindDamageCards` (`module/services/combat/index.js:67-68`)                                           |
+| Context menu | Re-roll and keep the better, Contested Roll (`chat-actions.js:255-280`)                                                                                                                            |
+| SCSS         | Now `scss/components/_chat-card.scss:24-45`; `scss/components/_check-card.scss` (target), under the fixed root `.l5r4-check`, which also holds the dropped-dice mark ([dice row](dice-row.md))     |
+| Quench       | `l5r4-enhanced.roll-pipeline`, `l5r4-enhanced.combat`                                                                                                                                              |
 
 ## Anatomy
 

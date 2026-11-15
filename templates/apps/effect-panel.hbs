@@ -10,14 +10,14 @@
             {{#if source}}<span class="l5r4-effect-panel-source">{{source}}</span>{{/if}}
             <span class="l5r4-effect-panel-lasts">{{lasts}}</span>
           </div>
-          <button type="button" class="l5r4-effect-panel-button" data-action="openSource"
-            data-tooltip="{{localize "l5r4.ui.effectPanel.openSource"}}" aria-label="{{localize "l5r4.ui.effectPanel.openSource"}}">
+          <button type="button" class="l5r4-effect-panel-button" data-action="open-source"
+            data-tooltip="{{localize "l5r4.apps.effectPanel.openSource"}}" aria-label="{{localize "l5r4.apps.effectPanel.openSource"}}">
             <i class="fa-solid fa-up-right-from-square" inert></i>
           </button>
           {{#if canRemove}}
-            <button type="button" class="l5r4-effect-panel-button" data-action="removeEffect"
-              data-tooltip="{{localize "l5r4.ui.effectPanel.remove"}}" aria-label="{{localize "l5r4.ui.effectPanel.remove"}}">
-              <i class="fa-solid fa-xmark" inert></i>
+            <button type="button" class="l5r4-effect-panel-button" data-action="delete-effect"
+              data-tooltip="{{localize "l5r4.apps.effectPanel.remove"}}" aria-label="{{localize "l5r4.apps.effectPanel.remove"}}">
+              <i class="fa-solid fa-trash" inert></i>
             </button>
           {{/if}}
         </li>

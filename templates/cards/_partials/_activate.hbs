@@ -1,6 +1,6 @@
 {{!-- Executes or ends a kata, kiho, or tattoo (module/services/effects/activation.js) --}}
 <a
-  class="button inline-control icon item-activate{{#if active}} active{{/if}}"
-  data-action="item-activate"
+  class="button inline-control icon l5r4-inline-control-activate{{#if active}} active{{/if}}"
+  data-action="toggle-activation"
   title="{{localize (ifThen active 'l5r4.ui.activation.end' 'l5r4.ui.activation.start')}}"
 ><i class="fa-solid {{ifThen active 'fa-circle-stop' 'fa-circle-play'}}"></i></a>

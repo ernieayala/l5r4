@@ -9,8 +9,6 @@
  * Uses handler delegation pattern where UI interactions route to specialized handler classes:
  * - PcAdjustmentHandler: Void Ring, spell slots, rank/points adjustments
  * - PcTraitHandler: Trait rank adjustments with Shift+Click safety
- * - BioItemHandler: Clan/family/school item linking (a drop of one replaces the old through
- *   module/services/purchase.js)
  * - AppLauncherHandler: XP Manager and Wound Configuration dialogs
  * - StanceHandler: Stance changes (Attack, Defense, Full Attack, Full Defense, Center)
  * - PcContextBuilder: Sorted item lists with roll formulas and mastery abilities
@@ -58,7 +56,6 @@ import { enhanceItemSheetData } from "../documents/item/integration/sheet-data.j
 import { BaseActorSheet } from "./base-actor-sheet.js";
 import { AppLauncherHandler } from "./handlers/app-launcher-handler.js";
 import { PcAdjustmentHandler } from "./handlers/pc-adjustment-handler.js";
-import { BioItemHandler } from "./handlers/bio-item-handler.js";
 import { PcTraitHandler } from "./handlers/pc-trait-handler.js";
 import { PcContextBuilder } from "./handlers/pc-context-builder.js";
 import { PcRollHandler } from "./handlers/pc-roll-handler.js";
@@ -128,7 +125,6 @@ export default class L5R4PcSheet extends BaseActorSheet {
    * Implements Application v2 event delegation pattern by dispatching data-action
    * values to specialized handler methods or handler classes. Supports all PC-specific
    * interactions including:
-   * - Bio item linking (clan, family, school)
    * - Item CRUD operations (create, edit, delete, expand)
    * - Roll actions (ring, skill, trait, weapon, weapon attack)
    * - Adjustments (Void Ring, spell slots, rank points, traits, Void Points)
@@ -138,7 +134,7 @@ export default class L5R4PcSheet extends BaseActorSheet {
    *
    * **Implementation Note:**
    * Some actions delegate to base class methods (inherited from BaseActorSheet),
-   * others to specialized PC handler classes (PcAdjustmentHandler, BioItemHandler, etc.).
+   * others to specialized PC handler classes (PcAdjustmentHandler, PcTraitHandler, etc.).
    *
    * @param {string} action - The data-action attribute value from clicked element
    * @param {Event} event - The click event
@@ -150,35 +146,31 @@ export default class L5R4PcSheet extends BaseActorSheet {
     switch (action) {
       case "apply-healing":
         return PcActionsHandler.handleApplyHealing(this._getHandlerContext(), event, element);
-      case "clan-link":
-        return BioItemHandler.openLinked(this.actor, "clan");
-      case "family-open":
-        return BioItemHandler.openLinked(this.actor, "family");
-      case "inline-edit":
+      case "update-item-field":
         return this._onInlineItemEdit(event, element);
-      case "item-chat":
+      case "post-item":
         return this._onItemHeaderToChat(event, element);
-      case "item-create":
+      case "create-item":
         return this._onItemCreate(event, element);
-      case "item-delete":
+      case "delete-item":
         return this._onItemDelete(event, element);
-      case "item-edit":
+      case "edit-item":
         return this._onItemEdit(event, element);
-      case "item-expand":
+      case "expand-item":
         return this._onItemExpand(event, element);
-      case "item-sort-by":
+      case "sort-items":
         return this._onUnifiedSortClick(event, element);
-      case "ring-rank-void":
+      case "adjust-void-ring":
         return PcAdjustmentHandler.adjustVoidRing(this._getHandlerContext(), event, element, +1);
       // The arrows step the Void Ring without Shift, like the Trait arrows (issue #30)
-      case "void-ring-increase":
+      case "increase-void-ring":
         return PcAdjustmentHandler.adjustVoidRing(
           this._getHandlerContext(),
           { preventDefault: () => event.preventDefault(), shiftKey: true },
           element,
           +1
         );
-      case "void-ring-decrease":
+      case "decrease-void-ring":
         return PcAdjustmentHandler.adjustVoidRing(
           this._getHandlerContext(),
           { preventDefault: () => event.preventDefault(), shiftKey: true },
@@ -191,32 +183,30 @@ export default class L5R4PcSheet extends BaseActorSheet {
         return this._onSkillRoll(event, element);
       case "roll-trait":
         return this._onTraitRoll(event, element);
-      case "roll-weapon":
+      case "roll-weapon-damage":
         return PcRollHandler.handleWeaponRoll(this._getHandlerContext(), event, element);
       case "roll-weapon-attack":
         return this._onWeaponAttackRoll(event, element);
       case "cast-spell":
         return PcRollHandler.handleCastSpell(this._getHandlerContext(), event, element);
-      case "rp-step":
+      case "adjust-rank-points":
         return PcAdjustmentHandler.adjustRankPoints(
           this._getHandlerContext(),
           event,
           element,
           +0.1
         );
-      case "school-link":
-        return BioItemHandler.openLinked(this.actor, "school");
-      case "section-expand":
+      case "expand-section":
         return PcAdjustmentHandler.toggleSection(this._getHandlerContext(), event, element);
-      case "spell-slot":
+      case "adjust-spell-slot":
         return PcAdjustmentHandler.adjustSpellSlot(this._getHandlerContext(), event, element, +1);
-      case "trait-rank":
+      case "adjust-trait":
         return PcTraitHandler.adjust(this._getHandlerContext(), event, element, +1);
-      case "trait-increase":
+      case "increase-trait":
         return PcTraitHandler.increase(this._getHandlerContext(), event, element);
-      case "trait-decrease":
+      case "decrease-trait":
         return PcTraitHandler.decrease(this._getHandlerContext(), event, element);
-      case "void-points-dots":
+      case "adjust-void-points":
         return this._onVoidPointsAdjust(event, element, +1);
       case "toggle-armor-void":
         return PcActionsHandler.handleToggleArmorVoid(this._getHandlerContext(), event, element);
@@ -228,25 +218,25 @@ export default class L5R4PcSheet extends BaseActorSheet {
         );
       case "toggle-movement-type":
         return StanceHandler.toggleMovementType(this._getHandlerContext(), event);
-      case "condition-manager":
+      case "open-condition-manager":
         return AppLauncherHandler.openConditionManager(this._getHandlerContext(), event, element);
-      case "combat-config":
+      case "open-combat-config":
         return AppLauncherHandler.openCombatConfig(this._getHandlerContext(), event, element);
-      case "armor-config":
+      case "open-armor-config":
         return AppLauncherHandler.openArmorConfig(this._getHandlerContext(), event, element);
-      case "wound-config":
+      case "open-wound-config":
         return AppLauncherHandler.openWoundConfig(this._getHandlerContext(), event, element);
-      case "xp-modal":
+      case "open-xp-manager":
         return AppLauncherHandler.openXpManager(this._getHandlerContext(), event, element);
       case "open-wealth-manager":
         return AppLauncherHandler.openWealthManager(this._getHandlerContext(), event, element);
       case "open-ledger":
         return openLedgerDialog(this.actor);
-      case "item-activate": {
+      case "toggle-activation": {
         const item = this.actor.items.get(element.closest("[data-item-id]")?.dataset.itemId);
         return item ? toggleActivation(this.actor, item) : undefined;
       }
-      case "recalc-sheet":
+      case "recalculate-sheet":
         return this._onRecalcSheet(event, element);
       case "toggle-rank-mode":
         return this._onToggleRankMode(event, element);
@@ -276,20 +266,20 @@ export default class L5R4PcSheet extends BaseActorSheet {
    */
   _onActionContext(action, event, element) {
     switch (action) {
-      case "ring-rank-void":
+      case "adjust-void-ring":
         return PcAdjustmentHandler.adjustVoidRing(this._getHandlerContext(), event, element, -1);
-      case "rp-step":
+      case "adjust-rank-points":
         return PcAdjustmentHandler.adjustRankPoints(
           this._getHandlerContext(),
           event,
           element,
           -0.1
         );
-      case "spell-slot":
+      case "adjust-spell-slot":
         return PcAdjustmentHandler.adjustSpellSlot(this._getHandlerContext(), event, element, -1);
-      case "trait-rank":
+      case "adjust-trait":
         return PcTraitHandler.adjust(this._getHandlerContext(), event, element, -1);
-      case "void-points-dots":
+      case "adjust-void-points":
         return this._onVoidPointsAdjust(event, element, -1);
     }
   }
@@ -313,10 +303,10 @@ export default class L5R4PcSheet extends BaseActorSheet {
    * @override
    */
   _onActionChange(action, event, element) {
-    if (action === "inline-edit") {
+    if (action === "update-item-field") {
       return this._onInlineItemEdit(event, element);
     }
-    if (action === "change-stance") {
+    if (action === "apply-stance") {
       return StanceHandler.changeStance(this._getHandlerContext(), event, element);
     }
   }

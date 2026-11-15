@@ -12,7 +12,7 @@
  * NOTE: These tests verify MECHANICS (XP cost formulas), not the service layer.
  * The XP service reconstructs history from Actor state which is complex.
  *
- * @see module/services/xp/xp-calculator.js
+ * @see module/services/xp/calculator.js
  */
 
 import { SYS_ID } from "../../../module/config/constants.js";

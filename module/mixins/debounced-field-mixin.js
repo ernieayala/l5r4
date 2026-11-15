@@ -101,8 +101,8 @@ export function DebouncedFieldMixin(Base) {
         return;
       }
 
-      // Attach change listeners to all fields with data-action="field-change"
-      const fields = this.element.querySelectorAll('[data-action="field-change"]');
+      // Attach change listeners to all fields with data-action="update-field"
+      const fields = this.element.querySelectorAll('[data-action="update-field"]');
       fields.forEach(field => {
         field.addEventListener("change", event => {
           this._onFieldChange(event, event.target);

@@ -18,7 +18,7 @@
  *
  * @module documents/item/lifecycle/xp-tracking
  * @requires Foundry v13+ (uses foundry.utils, flag system, optional chaining)
- * @see module:services/xp/xp-calculator - Retroactive XP calculation (single source of truth)
+ * @see module:services/xp/calculator - Retroactive XP calculation (single source of truth)
  * @see module:apps/xp-manager - XP Manager UI that displays XP history
  */
 

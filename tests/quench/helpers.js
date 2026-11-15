@@ -10,7 +10,7 @@ export function answerCheckDialog(values = {}) {
   return new Promise(resolve => {
     Hooks.once("renderDialogV2", app => {
       const form = app.element.querySelector("form") ?? app.element;
-      const labels = [...app.element.querySelectorAll(".check-modifier-label")].map(e =>
+      const labels = [...app.element.querySelectorAll(".l5r4-check-dialog-modifier-label")].map(e =>
         e.textContent.trim()
       );
       for (const [name, value] of Object.entries(values)) {

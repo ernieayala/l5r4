@@ -8,7 +8,7 @@ every sidebar block (stance, armor, Wounds, Fear) is a section. A list section c
 | ----------- | ----------------------------------------------------------------------------------------------------------------------------------------------------- |
 | Partial     | Each section is its own partial: `templates/actor/_partials/_<noun>-section.hbs`, `_combat.hbs`, `_armor.hbs`, `_wounds.hbs`, `_fear.hbs`, `_bio.hbs` |
 | Parameters  | The sheet context: the section's list (`skills`, `weapons`, ...), `collapsedSections.<scope>` for its collapsed state                                 |
-| SCSS        | `scss/components/_section.scss` (target), the rename of `scss/components/_sections.scss`                                                              |
+| SCSS        | `scss/components/_section.scss`, the rename of `scss/components/_section.scss`                                                                        |
 | Block class | `l5r4-section`                                                                                                                                        |
 | Shows in    | PC sheet (`_stats.hbs:237-290`), NPC sheet (`_stats-npc.hbs:209-296`), both sidebars (`pc.hbs:8-11`, `npc.hbs:6-9`), the XP manager                   |
 | Gallery     | A list section open and collapsed, a compact sidebar section, a section with title tools (wealth, spell slots), a Notes section                       |
@@ -88,12 +88,12 @@ never wrap below the heading.
 
 | #   | Conforming                                                                                                        | Non-conforming                                                                                                                           |
 | --- | ----------------------------------------------------------------------------------------------------------------- | ---------------------------------------------------------------------------------------------------------------------------------------- |
-| S1  | `<h4 class="title">{{localize "l5r4.ui.sheets.skills"}}</h4>` (`templates/actor/_partials/_skills-section.hbs:3`) | `<h4 class="flex0 title" data-action="recalc-sheet">` (`templates/actor/_partials/_stats.hbs:6`)                                         |
+| S1  | `<h4 class="title">{{localize "l5r4.ui.sheets.skills"}}</h4>` (`templates/actor/_partials/_skill-section.hbs:3`)  | `<h4 class="flex0 title" data-action="recalc-sheet">` (`templates/actor/_partials/_stats.hbs:6`)                                         |
 | S2  | The `foundations/states.md` rule 4 example: `aria-expanded` on the toggle, `is-collapsed` on `l5r4-section-title` | `templates/actor/_partials/_expand.hbs:1`: the toggle states nothing                                                                     |
-| S3  | `.l5r4-section-title.is-collapsed ~ .l5r4-item-row-list { display: none; }` (modeled on `_sections.scss:16-20`)   | `&.is-collapsed { ~ .item-list { display: none; } }` keyed to a bare class (`scss/components/_sections.scss:16-20`)                      |
+| S3  | `.l5r4-section-title.is-collapsed ~ .l5r4-item-row-list { display: none; }` (modeled on `_sections.scss:16-20`)   | `&.is-collapsed { ~ .item-list { display: none; } }` keyed to a bare class (`scss/components/_section.scss:16-20`)                       |
 | S4  | `{{localize "l5r4.ui.sheets.attacksAndDamage"}}` (modeled)                                                        | `{{localize "l5r4.ui.mechanics.combat.attack"}} & {{localize "l5r4.ui.common.damage"}}` (`templates/actor/_partials/_stats-npc.hbs:211`) |
-| S5  | `.l5r4-section-title { background: var(--l5r4-color-header); }` (modeled)                                         | `.title` styled twice, in `scss/components/_sections.scss:81-92` for sheets and `scss/apps/_xp-manager.scss:39-46` for the XP manager    |
-| S6  | Add, then expand (`templates/actor/_partials/_skills-section.hbs:4-5`)                                            | Expand before a section's other tools (modeled)                                                                                          |
+| S5  | `.l5r4-section-title { background: var(--l5r4-color-header); }` (modeled)                                         | `.title` styled twice, in `scss/components/_section.scss:81-92` for sheets and `scss/apps/_xp-manager.scss:39-46` for the XP manager     |
+| S6  | Add, then expand (`templates/actor/_partials/_skill-section.hbs:4-5`)                                             | Expand before a section's other tools (modeled)                                                                                          |
 
 ## Do and don't
 

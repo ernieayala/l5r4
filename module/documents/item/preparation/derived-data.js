@@ -106,7 +106,7 @@ export function prepareItemDerivedData(item) {
  *
  * Item preparation runs inside Actor#prepareEmbeddedDocuments, before the owner's "initial" Active Effect phase
  * (client/documents/actor.mjs:471-474), so the Strength read here leaves out effect bonuses. The owner's derived
- * preparation calls this again once effects apply (module/documents/actor/calculations/item-enrichment.js), so a
+ * preparation calls this again once effects apply (module/documents/actor/calculations/item-enrichment-system.js), so a
  * Strength raised by an Active Effect reaches weapon damage (issue #29).
  *
  * Melee damage: Core Rulebook p.82, game-rules/32_attack_and_defense.md. Bow damage: Core Rulebook p.199,

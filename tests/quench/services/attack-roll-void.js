@@ -23,7 +23,7 @@
  *
  * @see module/services/dice/rolls/skill-roll.js
  * @see module/services/dice/rolls/simple-roll.js
- * @see module/services/dice/resources/void-manager.js
+ * @see module/services/dice/resources/void-points.js
  */
 
 import { SYS_ID } from "../../../module/config/constants.js";
@@ -31,7 +31,7 @@ import { buildFormula } from "../helpers.js";
 import {
   spendVoidPoint,
   validateVoidPoints
-} from "../../../module/services/dice/resources/void-manager.js";
+} from "../../../module/services/dice/resources/void-points.js";
 import { createTestPC } from "../../fixtures/actor-fixtures.js";
 import { createSkillData, createWeaponData } from "../../fixtures/item-fixtures.js";
 

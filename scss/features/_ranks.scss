@@ -6,14 +6,14 @@
 
 .l5r4.pc,
 .l5r4.npc {
-  .ranks {
+  .l5r4-ranks {
     display: grid;
     gap: 0.2rem;
     grid-template-columns: 1fr 1fr;
     grid-template-rows: 1fr 1fr;
   }
 
-  .rank-name {
+  .l5r4-rank-control-value {
     background: var(--table-header-bg-color);
     border: 1px solid var(--table-header-border-color);
     color: var(--table-header-text-color);
@@ -26,12 +26,12 @@
     transition: all 150ms ease-out;
 
     &:hover {
-      filter: brightness(1.1);
+      filter: var(--l5r4-state-hover-filter);
     }
 
     &:active {
-      filter: brightness(0.95);
-      transform: scale(0.98);
+      filter: var(--l5r4-state-pressed-filter);
+      transform: var(--l5r4-state-pressed-transform);
     }
 
     span:first-child {

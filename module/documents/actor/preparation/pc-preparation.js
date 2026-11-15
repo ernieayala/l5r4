@@ -43,9 +43,9 @@ import {
   prepareTraitsAndRings,
   prepareMovement,
   ringsFromTraits
-} from "../calculations/shared-traits-rings.js";
+} from "../calculations/shared-traits-rings-system.js";
 import { prepareHealRate } from "../calculations/wound-system.js";
-import { enrichActorItems } from "../calculations/item-enrichment.js";
+import { enrichActorItems } from "../calculations/item-enrichment-system.js";
 import { applyArmorRules, applyDerivedRules } from "../rules.js";
 
 /**

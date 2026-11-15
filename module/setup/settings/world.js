@@ -45,8 +45,8 @@ export function registerWorldSettings() {
   game.settings.register(SYS_ID, "LtException", {
     config: true,
     scope: "world",
-    name: "SETTINGS.LtException.name",
-    hint: "SETTINGS.LtException.label",
+    name: "l5r4.system.settings.LtException.name",
+    hint: "l5r4.system.settings.LtException.hint",
     type: Boolean,
     default: false
   });
@@ -66,8 +66,8 @@ export function registerWorldSettings() {
   game.settings.register(SYS_ID, "honorRoll", {
     config: true,
     scope: "world",
-    name: "SETTINGS.honorRoll.name",
-    hint: "SETTINGS.honorRoll.hint",
+    name: "l5r4.system.settings.honorRoll.name",
+    hint: "l5r4.system.settings.honorRoll.hint",
     type: Boolean,
     default: false
   });

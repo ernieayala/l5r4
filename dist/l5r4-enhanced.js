@@ -149,7 +149,7 @@ Hooks.once("init", async () => {
   const { DocumentSheetConfig } = foundry.applications.apps;
   const { Item, Actor } = foundry.documents;
 
-  // "bow" is the legacy subtype kept until the bow-to-weapon migration converts it (module/data/item/BowData.js);
+  // "bow" is the legacy subtype kept until the bow-to-weapon migration converts it (module/data/item/bow-data.js);
   // with no core sheet in 14.370 it needs this one to open.
   DocumentSheetConfig.registerSheet(Item, SYS_ID, L5R4ItemSheet, {
     makeDefault: true,

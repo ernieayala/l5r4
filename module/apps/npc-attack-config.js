@@ -36,11 +36,11 @@ export default class NpcAttackConfigApplication extends foundry.applications.api
 ) {
   static DEFAULT_OPTIONS = {
     id: "npc-attack-config-{id}",
-    classes: ["l5r4", "npc-attack-config"],
+    classes: ["l5r4", "l5r4-npc-attack-config"],
     tag: "form",
     window: {
       title: "l5r4.apps.npcAttackConfig.title",
-      icon: "fas fa-swords",
+      icon: "fa-solid fa-swords",
       resizable: false
     },
     position: {
@@ -48,7 +48,7 @@ export default class NpcAttackConfigApplication extends foundry.applications.api
       height: "auto"
     },
     actions: {
-      save: NpcAttackConfigApplication.prototype._onSave
+      "save-attack": NpcAttackConfigApplication.prototype._onSave
     },
     form: {
       handler: NpcAttackConfigApplication.prototype._onSubmit,

@@ -7,7 +7,7 @@ a PC both are computed and the Armor TN has a Void toggle; on an NPC both are ty
 | ----------- | ------------------------------------------------------------------------------------------------------------------------------------- |
 | Partial     | `templates/actor/_partials/_armor.hbs`, with a PC branch (`:1-30`) and an NPC branch (`:31-52`)                                       |
 | Parameters  | The sheet context: `actor.type`, `system.armorTn` (PC, computed), `system.armor` (NPC, stored), `voidArmor`, `system.rings.void.rank` |
-| SCSS        | None of its own: `section.md` and `grid.md` draw it. `scss/features/_armor.scss` compiles to nothing and is removed                   |
+| SCSS        | None of its own: `section.md` and `grid.md` draw it                                                                                   |
 | Block class | `l5r4-armor` on the section                                                                                                           |
 | Shows in    | PC sidebar (`pc.hbs:10`), NPC sidebar (`npc.hbs:7`)                                                                                   |
 | Game terms  | Armor TN (`game-rules/32_attack_and_defense.md, p.82`); Reduction (`game-rules/73_armor.md, p.198`)                                   |

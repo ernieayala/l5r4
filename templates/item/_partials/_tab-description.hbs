@@ -1,7 +1,7 @@
 <section class="tab {{#if (eq currentTab "description")}}active{{/if}}" data-tab="description" data-application-part="description">
   {{!-- What the item's rules do, one line each --}}
   {{#if summary.lines.length}}
-    <h4 class="prose-title">{{localize "l5r4.ui.ruleSummary.heading"}}</h4>
+    <h4 class="l5r4-item-description-heading">{{localize "l5r4.ui.ruleSummary.heading"}}</h4>
     <ul class="l5r4-rule-lines">
       {{#each summary.lines}}
         <li>{{this}}</li>
@@ -10,7 +10,7 @@
   {{/if}}
 
   {{!-- Main Description --}}
-  <h4 class="prose-title">{{localize "l5r4.ui.sheets.description"}}</h4>
+  <h4 class="l5r4-item-description-heading">{{localize "l5r4.ui.sheets.description"}}</h4>
   {{#if editable}}
     <prose-mirror name="system.description" value="{{ system.description }}" document-uuid="{{ item.uuid }}" class="sized" compact>
       {{{ enriched.description }}}
@@ -26,7 +26,7 @@
 
   {{!-- Special Rules (show if editable OR if content exists) --}}
   {{#if (or editable system.specialRules)}}
-    <h4 class="prose-title">{{localize "l5r4.ui.sheets.rulesSummary"}}</h4>
+    <h4 class="l5r4-item-description-heading">{{localize "l5r4.ui.sheets.rulesSummary"}}</h4>
     {{#if editable}}
       <prose-mirror name="system.specialRules" value="{{system.specialRules}}" document-uuid="{{item.uuid}}" class="sized" compact>
         {{{enriched.specialRules}}}

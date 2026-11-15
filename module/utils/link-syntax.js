@@ -84,32 +84,32 @@ function parseCheck(values) {
   const fail = error => ({ ok: false, error });
   const known = new Set(["skill", "trait", "ring", "tn"]);
   if (Object.keys(values).some(key => !known.has(key))) {
-    return fail("l5r4.ui.links.error.unknownKey");
+    return fail("l5r4.ui.links.errors.unknownKey");
   }
   const skill = values.skill ?? "";
   const trait = (values.trait ?? "").toLowerCase();
   const ring = (values.ring ?? "").toLowerCase();
   if (trait && ring) {
-    return fail("l5r4.ui.links.error.traitAndRing");
+    return fail("l5r4.ui.links.errors.traitAndRing");
   }
   if (!skill && !trait && !ring) {
-    return fail("l5r4.ui.links.error.nothingToRoll");
+    return fail("l5r4.ui.links.errors.nothingToRoll");
   }
   if (skill && ring) {
-    return fail("l5r4.ui.links.error.skillWithRing");
+    return fail("l5r4.ui.links.errors.skillWithRing");
   }
   // A Skill may be rolled with the Void Ring in place of a Trait (#7)
   if (trait && !TRAIT_KEYS.includes(trait) && !(skill && trait === "void")) {
-    return fail("l5r4.ui.links.error.trait");
+    return fail("l5r4.ui.links.errors.trait");
   }
   if (ring && !RING_KEYS.includes(ring)) {
-    return fail("l5r4.ui.links.error.ring");
+    return fail("l5r4.ui.links.errors.ring");
   }
   let tn = null;
   if (values.tn !== undefined) {
     tn = whole(values.tn);
     if (tn === null || tn < 1 || tn > MAX_LINK_TN) {
-      return fail("l5r4.ui.links.error.tn");
+      return fail("l5r4.ui.links.errors.tn");
     }
   }
   return { ok: true, skill, trait, ring, tn };
@@ -124,7 +124,7 @@ function parseDamage(params) {
   const roll = match ? Number(match[1]) : 0;
   const keep = match ? Number(match[2]) : 0;
   if (!match || roll < 1 || keep < 1 || roll > MAX_LINK_DICE || keep > MAX_LINK_DICE) {
-    return { ok: false, error: "l5r4.ui.links.error.pool" };
+    return { ok: false, error: "l5r4.ui.links.errors.pool" };
   }
   const bonus = match[3] ? Number(`${match[3]}${match[4]}`) : 0;
   return { ok: true, pool: { roll, keep, bonus } };
@@ -138,7 +138,7 @@ function parseCondition(params) {
   const condition = params.trim();
   return CONDITION_IDS.includes(condition)
     ? { ok: true, condition }
-    : { ok: false, error: "l5r4.ui.links.error.condition" };
+    : { ok: false, error: "l5r4.ui.links.errors.condition" };
 }
 
 /**
@@ -149,7 +149,7 @@ function parseFear(params) {
   const rank = whole(params.trim());
   return rank !== null && rank >= FEAR_RANKS.min && rank <= FEAR_RANKS.max
     ? { ok: true, rank }
-    : { ok: false, error: "l5r4.ui.links.error.fear" };
+    : { ok: false, error: "l5r4.ui.links.errors.fear" };
 }
 
 /**
@@ -162,14 +162,14 @@ function parseFear(params) {
  * @example
  * parseLink("Check", "skill=Kenjutsu|trait=agi|tn=20");
  * // { ok: true, type: "Check", label: "", skill: "Kenjutsu", trait: "agi", ring: "", tn: 20 }
- * parseLink("Fear", "11"); // { ok: false, type: "Fear", label: "", error: "l5r4.ui.links.error.fear" }
+ * parseLink("Fear", "11"); // { ok: false, type: "Fear", label: "", error: "l5r4.ui.links.errors.fear" }
  */
 export function parseLink(type, params, label = "") {
   const base = { type, label: (label ?? "").trim() };
   let parsed;
   if (type === "Check") {
     const values = keyValues(params);
-    parsed = values ? parseCheck(values) : { ok: false, error: "l5r4.ui.links.error.syntax" };
+    parsed = values ? parseCheck(values) : { ok: false, error: "l5r4.ui.links.errors.syntax" };
   } else if (type === "Damage") {
     parsed = parseDamage(params);
   } else if (type === "Condition") {
@@ -177,7 +177,7 @@ export function parseLink(type, params, label = "") {
   } else if (type === "Fear") {
     parsed = parseFear(params);
   } else {
-    parsed = { ok: false, error: "l5r4.ui.links.error.syntax" };
+    parsed = { ok: false, error: "l5r4.ui.links.errors.syntax" };
   }
   return { ...base, ...parsed };
 }

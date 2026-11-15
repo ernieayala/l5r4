@@ -10,11 +10,11 @@
  * NOTE: These tests verify MECHANICS (trait bonus calculations), not the service layer.
  * The service reads from family Items which requires complex Actor/Item setup.
  *
- * @see module/services/family-bonus-service.js
+ * @see module/services/family-bonus.js
  */
 
 import { SYS_ID } from "../../../module/config/constants.js";
-import { FamilyBonusService } from "../../../module/services/family-bonus-service.js";
+import { FamilyBonusService } from "../../../module/services/family-bonus.js";
 
 /**
  * Register Family Bonus Service mechanics tests

@@ -10,7 +10,7 @@
  * CRITICAL: These tests FIND BUGS, not validate working code.
  * Each test creates a specific failure condition to verify handling.
  *
- * @see module/services/dice/resources/spell-slot-manager.js
+ * @see module/services/dice/resources/spell-slots.js
  */
 
 import { SYS_ID } from "../../../module/config/constants.js";
@@ -19,7 +19,7 @@ import {
   validateSpellSlot,
   spendElementalSlot,
   spendVoidSlot
-} from "../../../module/services/dice/resources/spell-slot-manager.js";
+} from "../../../module/services/dice/resources/spell-slots.js";
 
 /**
  * Register Spell Slots resource management tests

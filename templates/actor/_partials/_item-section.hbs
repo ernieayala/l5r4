@@ -1,35 +1,35 @@
 <section class="flexcol -gap-sm">
-  <div class="flexrow -gap-sm section-title{{#if collapsedSections.items}} is-collapsed{{/if}}" data-scope="items">
-    <h4 class="title">{{localize "l5r4.ui.sheets.items"}}</h4>
-    <div class="flexrow flex0 wealth">
+  <div class="flexrow -gap-sm l5r4-section-title{{#if collapsedSections.items}} is-collapsed{{/if}}" data-scope="items">
+    <h4 class="l5r4-section-heading">{{localize "l5r4.ui.sheets.items"}}</h4>
+    <div class="flexrow flex0 l5r4-wealth">
       <span>{{localize "l5r4.world.wealth.koku"}}:</span>
       <input type="number" name="system.wealth.koku" value="{{system.wealth.koku}}" placeholder="0" min="0" step="1" />
     </div>
-    <div class="flexrow flex0 wealth">
+    <div class="flexrow flex0 l5r4-wealth">
       <span>{{localize "l5r4.world.wealth.bu"}}:</span>
       <input type="number" name="system.wealth.bu" value="{{system.wealth.bu}}" placeholder="0" min="0" step="1" />
     </div>
-    <div class="flexrow flex0 wealth">
+    <div class="flexrow flex0 l5r4-wealth">
       <span>{{localize "l5r4.world.wealth.zeni"}}:</span>
       <input type="number" name="system.wealth.zeni" value="{{system.wealth.zeni}}" placeholder="0" min="0" step="1" />
     </div>
     <a
       class="button inline-control icon"
       data-action="open-wealth-manager"
-      data-tooltip="{{localize 'l5r4.ui.wealthManager.tooltip'}}"
+      data-tooltip="{{localize 'l5r4.apps.wealthManager.open'}}"
     >
-      <i class="fas fa-calculator"></i>
+      <i class="fa-solid fa-calculator"></i>
     </a>
     {{> "systems/l5r4-enhanced/templates/actor/_partials/_unified-item-create.hbs"}}
     {{> "systems/l5r4-enhanced/templates/actor/_partials/_expand.hbs"}}
   </div>
   {{#if items.length}}
-    <section class="item-list -commonItem -header" data-scope="items">
-      <div class="item">
-        <a class="item-sort-by" data-action="item-sort-by" data-sortby="name">{{localize "l5r4.ui.common.name"}}</a>
+    <section class="l5r4-item-row-list -commonItem l5r4-sort-header" data-scope="items">
+      <div class="l5r4-item-row">
+        <a class="l5r4-sort-header-button" data-action="sort-items" data-sortby="name">{{localize "l5r4.ui.common.name"}}</a>
       </div>
     </section>
-    <section class="item-list -commonItem">
+    <section class="l5r4-item-row-list -commonItem">
       {{#each items as |item id|}}
         {{> "systems/l5r4-enhanced/templates/cards/commonItem.hbs"
             system=item.system

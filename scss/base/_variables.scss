@@ -3,24 +3,28 @@
  * CSS custom properties and SCSS variables used throughout the system
  */
 
-// CSS Custom Properties (Ring Colors)
+// CSS Custom Properties (Ring Colors, sizes, state looks)
 :root {
   --air-ring-color: 136, 158, 179; // #889EB3
-  --water-ring-color: 64, 89, 132; // #405984
-  --earth-ring-color: 89, 72, 57; // #594839
-  --fire-ring-color: 171, 73, 19; // #AB4913
-  --void-ring-color: 125, 104, 98; // #7D6862
+  --l5r4-color-ring-water: #405984;
+  --l5r4-color-ring-earth: #594839;
+  --l5r4-color-ring-fire: #ab4913;
+  --l5r4-color-ring-void: #7d6862;
+  --l5r4-size-column-controls: 102px;
+  --l5r4-state-hover-filter: brightness(1.1);
+  --l5r4-state-pressed-filter: brightness(0.95);
+  --l5r4-state-pressed-transform: scale(0.98);
 }
 
 // Ring rank backdrop per theme. Set on each themed element, so a sheet's own theme overrides the interface's.
 .theme-light {
-  --l5r4-ring-rank-backdrop-color: transparent;
-  --l5r4-ring-rank-backdrop-image: url("../../../ui/parchment.jpg");
+  --l5r4-color-ring-rank-backdrop: transparent;
+  --l5r4-image-ring-rank-backdrop: url("../../../ui/parchment.jpg");
 }
 
 .theme-dark {
-  --l5r4-ring-rank-backdrop-color: var(--color-cool-5-90);
-  --l5r4-ring-rank-backdrop-image: none;
+  --l5r4-color-ring-rank-backdrop: var(--color-cool-5-90);
+  --l5r4-image-ring-rank-backdrop: none;
 }
 
 // SCSS Variables (Asset Paths)

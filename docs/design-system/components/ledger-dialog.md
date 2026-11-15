@@ -9,7 +9,7 @@ recorded one when they differ. It is a `DialogV2.prompt` whose content is a temp
 | Template  | `templates/dialogs/ledger-dialog.hbs`, `DIALOG_TEMPLATES.ledger`                                                                                                                                                                                             |
 | Opened by | `openLedgerDialog(actor)` (`module/services/ledger.js:103-138`), from the PC sheet's ledger control (`module/sheets/pc-sheet.js:244`): width 440, title the ledger's title and the actor's name, one button `l5r4.ui.ledger.record`; closing records nothing |
 | Records   | `recordTrackChange(actor, track, points, reason)` (`ledger.js:67-95`) into `flags.l5r4-enhanced.ledger` (a fixed flag)                                                                                                                                       |
-| SCSS      | Now `scss/components/_rules-editor.scss:60-75`, inside another component's file. `scss/components/_ledger-dialog.scss` (target), styling `.l5r4-ledger-dialog`                                                                                               |
+| SCSS      | Now `scss/components/_ledger-dialog.scss:6-21`, inside another component's file. `scss/components/_ledger-dialog.scss`, styling `.l5r4-ledger-dialog`                                                                                                        |
 | Quench    | `l5r4-enhanced.authoring`                                                                                                                                                                                                                                    |
 
 ## Anatomy
@@ -80,7 +80,7 @@ A reason wraps inside its entry; the track and points stay at the start of the r
 | LD2 | When the rules change an amount, the dialog shows both                              | Review                                                                     | `{{#if changed}}… ({{numberFormat asked sign=true}}){{/if}}` (`ledger-dialog.hbs:21`) | Showing only the recorded points (modeled)                                |
 | LD3 | The title is one key with `{name}`                                                  | Review ([localization.md](../content/localization.md#one-key-per-meaning)) | `F("l5r4.ui.ledger.titleFor", { name: actor.name })` (modeled)                        | `` `${T("l5r4.ui.ledger.title")}: ${actor.name}` `` (`ledger.js:117`)     |
 | LD4 | An empty ledger says so                                                             | Review (states.md rule 9)                                                  | `{{else}}<p class="l5r4-ledger-dialog-empty">…</p>` (modeled)                         | `{{#if entries.length}}` with no `{{else}}` (`ledger-dialog.hbs:15`)      |
-| LD5 | The dialog's styles live in their own file, under its own block                     | `tests/conventions/styles.test.js` (one component per file)                | `.l5r4-ledger-dialog` in `scss/components/_ledger-dialog.scss` (target)               | `.l5r4-ledger .ledger-entries` in `scss/components/_rules-editor.scss:60` |
+| LD5 | The dialog's styles live in their own file, under its own block                     | `tests/conventions/styles.test.js` (one component per file)                | `.l5r4-ledger-dialog` in `scss/components/_ledger-dialog.scss`                        | `.l5r4-ledger .ledger-entries` in `scss/components/_ledger-dialog.scss:6` |
 
 ## Do and don't
 

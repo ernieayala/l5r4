@@ -31,7 +31,7 @@
  * 4. Test combinations - Real gameplay scenarios (void + affinity + raises)
  *
  * @see module/services/dice/rolls/spell-cast-roll.js
- * @see module/services/dice/resources/void-manager.js
+ * @see module/services/dice/resources/void-points.js
  */
 
 import { SYS_ID } from "../../../module/config/constants.js";
@@ -39,7 +39,7 @@ import { buildFormula } from "../helpers.js";
 import {
   spendVoidPoint,
   validateVoidPoints
-} from "../../../module/services/dice/resources/void-manager.js";
+} from "../../../module/services/dice/resources/void-points.js";
 import { createShugenja } from "../../fixtures/actor-fixtures.js";
 import { createSpellData } from "../../fixtures/item-fixtures.js";
 

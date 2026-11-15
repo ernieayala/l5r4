@@ -19,13 +19,13 @@
     > .flexcol {
       flex: 1 1 100%;
 
-      &.sidebar {
+      &.l5r4-sheet-sidebar {
         flex: 0;
       }
     }
   }
 
-  .main-sheet {
+  .l5r4-sheet-body {
     column-gap: 1rem;
     display: inline-grid;
     grid-template-columns: 1fr min-content;
@@ -33,7 +33,7 @@
     width: calc(100% - 2px);
   }
 
-  .limited-sheet {
+  .l5r4-limited {
     padding: 1rem;
 
     > * {

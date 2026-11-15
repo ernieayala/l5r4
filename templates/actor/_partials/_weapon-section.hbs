@@ -1,18 +1,18 @@
 <section class="flexcol -gap-sm">
-  <div class="flexrow -gap-sm section-title{{#if collapsedSections.weapons}} is-collapsed{{/if}}" data-scope="weapons">
-    <h4 class="title">{{localize "l5r4.ui.sheets.weapons"}}</h4>
+  <div class="flexrow -gap-sm l5r4-section-title{{#if collapsedSections.weapons}} is-collapsed{{/if}}" data-scope="weapons">
+    <h4 class="l5r4-section-heading">{{localize "l5r4.ui.sheets.weapons"}}</h4>
     {{> "systems/l5r4-enhanced/templates/actor/_partials/_unified-item-create.hbs"}}
     {{> "systems/l5r4-enhanced/templates/actor/_partials/_expand.hbs"}}
   </div>
-  <section class="item-list -weapon -header" data-scope="weapons">
-    <div class="item">
-      <a class="item-sort-by" data-action="item-sort-by" data-sortby="name">{{localize "l5r4.ui.common.name"}}</a>
-      <a class="item-sort-by" data-action="item-sort-by" data-sortby="damage">{{localize "l5r4.ui.mechanics.combat.attack"}}</a>
-      <a class="item-sort-by" data-action="item-sort-by" data-sortby="damage">{{localize "l5r4.ui.common.damage"}}</a>
+  <section class="l5r4-item-row-list -weapon l5r4-sort-header" data-scope="weapons">
+    <div class="l5r4-item-row">
+      <a class="l5r4-sort-header-button" data-action="sort-items" data-sortby="name">{{localize "l5r4.ui.common.name"}}</a>
+      <a class="l5r4-sort-header-button" data-action="sort-items" data-sortby="damage">{{localize "l5r4.ui.mechanics.combat.attack"}}</a>
+      <a class="l5r4-sort-header-button" data-action="sort-items" data-sortby="damage">{{localize "l5r4.ui.common.damage"}}</a>
       <span></span>
     </div>
   </section>
-  <section class="item-list -weapon" data-scope="weapons">
+  <section class="l5r4-item-row-list -weapon" data-scope="weapons">
     {{#each weapons as |weapon id|}}
       {{> "systems/l5r4-enhanced/templates/cards/weapon.hbs"
           system=weapon.system

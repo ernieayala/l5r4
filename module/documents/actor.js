@@ -12,7 +12,7 @@
  *
  * Architecture:
  * - Uses Foundry's data preparation lifecycle (prepareBaseData → prepareDerivedData)
- * - Type-specific derived data runs in the subtype data models (module/data/actor/PcData.js, NpcData.js),
+ * - Type-specific derived data runs in the subtype data models (module/data/actor/pc-data.js, NpcData.js),
  *   which call the preparation modules (pc-preparation, npc-preparation)
  * - Wound system uses calculation modules for complex penalty logic
  * - XP tracking uses flags for persistent character advancement data

@@ -1,14 +1,14 @@
-<div class="item -{{type}}{{#if system.description}} -expandable{{/if}}"
+<div class="item l5r4-item-row -{{type}}{{#if system.description}} -expandable{{/if}}"
   data-item-id="{{coalesce docId this.id _id}}"
   data-document-id="{{coalesce docId this.id _id}}">
   <h4 class="flexrow -gap-sm title">{{name}}</h4>
   {{#if inSheet}}
     <div>{{system.bonus}}</div>
     <div>{{system.reduction}}</div>
-    <div><input data-action="inline-edit" data-field="system.equipped" type="checkbox" {{checked system.equipped}} data-dtype="Boolean" /></div>
+    <div><input data-action="update-item-field" data-field="system.equipped" type="checkbox" {{checked system.equipped}} data-dtype="Boolean" /></div>
     {{> "systems/l5r4-enhanced/templates/cards/_partials/_controls.hbs"}}
     {{#if system.description}}
-      <div class="expanded-text">
+      <div class="l5r4-item-row-details">
         <p>{{{system.description}}}</p>
       </div>
     {{/if}}

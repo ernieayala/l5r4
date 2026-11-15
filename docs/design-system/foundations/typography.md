@@ -20,23 +20,23 @@ C4: declared in both theme blocks in `scss/base/_variables.scss`, never only on 
 | --- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------- | -------------------------------------------------------------------------- |
 | T1  | `font-family: var(--font-h3);` on the Trait rank (`scss/features/_traits-rings.scss:245`), written as `var(--l5r4-font-number)`                                     | `font-family: "Signika", sans-serif;` (modeled)                            |
 | T2  | `font-size: var(--font-size-12);` (`scss/components/_rules-editor.scss:45`), written as `var(--l5r4-font-size-meta)`                                                | `font-size: 29px;` (`scss/features/_traits-rings.scss:84`)                 |
-| T3  | `font-weight: bold;` (`scss/components/_effect-panel.scss:42`)                                                                                                      | `font-weight: 600;` (`scss/features/_traits-rings.scss:85`)                |
+| T3  | `font-weight: bold;` (`scss/apps/_effect-panel.scss:41`)                                                                                                            | `font-weight: 600;` (`scss/features/_traits-rings.scss:85`)                |
 | T4  | `"voidPoints": "Void Points"` (`lang/en.json:456`), shown as written                                                                                                | `text-transform: uppercase;` on a label (modeled)                          |
 | T5  | The roll button's `{{system.rollDice}}k{{system.rollKeep}}` (`templates/cards/skill.hbs:22-23`) in tabular figures, so `10k3` and `6k3` line up in the Skill column | The same pool in proportional figures, shifting the column as ranks change |
 | T6  | `line-height: 1;` on the Ring rank number in its disc (`scss/features/_traits-rings.scss:154`)                                                                      | `line-height: 1.4;` on a label (modeled)                                   |
-| T7  | `.l5r4-effect-panel-text { min-width: 0; }` (`scss/components/_effect-panel.scss:38`) lets the effect text wrap in its row                                          | A row name cut off by `overflow: hidden` with no tooltip (modeled)         |
+| T7  | `.l5r4-effect-panel-text { min-width: 0; }` (`scss/apps/_effect-panel.scss:37`) lets the effect text wrap in its row                                                | A row name cut off by `overflow: hidden` with no tooltip (modeled)         |
 
 ## Faces
 
 Core sets the faces in `resources/app/public/css/foundry2.css:262-301`.
 
-| Token                 | Built on           | Face                                                     | Job                                                                           | Read at                                                                                           |
-| --------------------- | ------------------ | -------------------------------------------------------- | ----------------------------------------------------------------------------- | ------------------------------------------------------------------------------------------------- |
-| `--l5r4-font-body`    | `--font-body`      | Signika                                                  | All text not listed below. Inherited from core's window; never declared       | Inherited                                                                                         |
-| `--l5r4-font-display` | `--font-h1`        | Modesto Condensed                                        | Ring rank numbers                                                             | `scss/features/_traits-rings.scss:83`                                                             |
-| `--l5r4-font-label`   | `--font-h4`        | Modesto Condensed (core sets `--font-h4` to `--font-h1`) | Grid label cells (Initiative, Armor TN), Wound track labels, rank block names | `scss/components/_grids.scss:24`, `scss/features/_wounds.scss:22`, `scss/features/_ranks.scss:38` |
-| `--l5r4-font-number`  | `--font-h3`        | Signika                                                  | Trait rank and Void Points numbers                                            | `scss/features/_traits-rings.scss:245`, `:264`                                                    |
-| `--l5r4-font-code`    | `--font-monospace` | The platform's monospace                                 | Modifier values in the check dialog, the rules JSON editor, rule fields       | `scss/_chat.scss:85`, `scss/components/_rules-editor.scss:22`, `:50`                              |
+| Token                 | Built on           | Face                                                     | Job                                                                           | Read at                                                                                               |
+| --------------------- | ------------------ | -------------------------------------------------------- | ----------------------------------------------------------------------------- | ----------------------------------------------------------------------------------------------------- |
+| `--l5r4-font-body`    | `--font-body`      | Signika                                                  | All text not listed below. Inherited from core's window; never declared       | Inherited                                                                                             |
+| `--l5r4-font-display` | `--font-h1`        | Modesto Condensed                                        | Ring rank numbers                                                             | `scss/features/_traits-rings.scss:83`                                                                 |
+| `--l5r4-font-label`   | `--font-h4`        | Modesto Condensed (core sets `--font-h4` to `--font-h1`) | Grid label cells (Initiative, Armor TN), Wound track labels, rank block names | `scss/components/_grid.scss:24`, `scss/features/_wound-track.scss:22`, `scss/features/_ranks.scss:38` |
+| `--l5r4-font-number`  | `--font-h3`        | Signika                                                  | Trait rank and Void Points numbers                                            | `scss/features/_traits-rings.scss:245`, `:264`                                                        |
+| `--l5r4-font-code`    | `--font-monospace` | The platform's monospace                                 | Modifier values in the check dialog, the rules JSON editor, rule fields       | `scss/components/_check-dialog.scss:26`, `scss/components/_rules-editor.scss:22`, `:50`               |
 
 Signika carries tabular figures (`tnum` in `public/fonts/signika/signika-regular.woff2`), so T5 takes effect wherever
 the body or number face sets digits. Modesto Condensed has no `tnum`; the Ring rank is one number per disc, so it needs
@@ -50,7 +50,7 @@ core size variable.
 | Step      | Token                        | Value            | Built on            | Line height                    | Weight                             | Use                                                                                                             |
 | --------- | ---------------------------- | ---------------- | ------------------- | ------------------------------ | ---------------------------------- | --------------------------------------------------------------------------------------------------------------- |
 | meta      | `--l5r4-font-size-meta`      | 0.75rem (12 px)  | `--font-size-12`    | inherited                      | normal                             | Sources, counts, citations, link reasons, rule errors, applied modifiers, ledger entries, browser filter labels |
-| body      | `--l5r4-font-size-body`      | 0.875rem (14 px) | `--font-size-14`    | inherited                      | normal; bold for a name in a row   | Window text, expanded item text (`scss/components/_item-lists.scss:199`)                                        |
+| body      | `--l5r4-font-size-body`      | 0.875rem (14 px) | `--font-size-14`    | inherited                      | normal; bold for a name in a row   | Window text, expanded item text (`scss/components/_item-row.scss:199`)                                          |
 | label     | `--l5r4-font-size-label`     | 1rem (16 px)     | `--font-size-16`    | inherited, or 1 in a fixed box | normal                             | Grid cells, Wound track, rank block values, PC header fields, chat item headings                                |
 | title     | `--l5r4-font-size-title`     | 1.125rem (18 px) | `--font-size-18`    | inherited                      | normal; bold for a rank block name | Section titles, rank block names                                                                                |
 | rank      | `--l5r4-font-size-rank`      | 1.375rem (22 px) | none: a system step | 1                              | bold                               | Trait rank, Void Points number                                                                                  |
@@ -79,10 +79,10 @@ Literal sizes in `scss/` map to the scale as follows.
 
 ## Wrapping and truncation
 
-| Element                         | Behavior                                          | Read at                                                                                        |
-| ------------------------------- | ------------------------------------------------- | ---------------------------------------------------------------------------------------------- |
-| Section titles and their labels | One line                                          | `scss/components/_sections.scss:36`, `:87`                                                     |
-| Item row names                  | Wrap                                              | `scss/components/_item-lists.scss:173`                                                         |
-| Chat card buttons               | Full width, one per row, so long labels wrap      | `scss/_chat.scss:47-53`                                                                        |
-| Text links                      | One line                                          | `scss/components/_effect-panel.scss:69`                                                        |
-| Effect panel and browser rows   | The text column shrinks and wraps beside its icon | `scss/components/_effect-panel.scss:34-39`, `scss/components/_compendium-browser.scss:101-106` |
+| Element                         | Behavior                                          | Read at                                                                            |
+| ------------------------------- | ------------------------------------------------- | ---------------------------------------------------------------------------------- |
+| Section titles and their labels | One line                                          | `scss/components/_section.scss:36`, `:87`                                          |
+| Item row names                  | Wrap                                              | `scss/components/_item-row.scss:173`                                               |
+| Chat card buttons               | Full width, one per row, so long labels wrap      | `scss/components/_chat-card.scss:47-53`                                            |
+| Text links                      | One line                                          | `scss/components/_inline-link.scss:12`                                             |
+| Effect panel and browser rows   | The text column shrinks and wraps beside its icon | `scss/apps/_effect-panel.scss:33-38`, `scss/apps/_compendium-browser.scss:100-105` |

@@ -14,7 +14,7 @@ import { WOUND_LEVEL_ORDER } from "../config/game-mechanics.js";
 
 /**
  * Move `object[from]` to `object[to]` when the target is empty, then drop `from`. Matches the 3.2.1
- * schema-map rule: an existing target value wins (module/setup/migrations/schema/schema-apply.js).
+ * schema-map rule: an existing target value wins (module/setup/migrations/schema/apply.js).
  * @param {object} object  Mutated.
  * @param {string} from
  * @param {string} to
@@ -31,7 +31,7 @@ function renameKey(object, from, to) {
 
 /**
  * Traits stored as `{rank}` by older versions become plain numbers
- * (module/documents/actor/calculations/shared-traits-rings.js reads both shapes).
+ * (module/documents/actor/calculations/shared-traits-rings-system.js reads both shapes).
  * @param {object} source  Actor system source (mutated).
  */
 export function migrateCommonActorSource(source) {
@@ -48,7 +48,7 @@ export function migrateCommonActorSource(source) {
 }
 
 /**
- * PC snake_case keys from before 3.0 (module/setup/migrations/schema/schema-map.js).
+ * PC snake_case keys from before 3.0 (module/setup/migrations/schema/map.js).
  * @param {object} source  PC system source (mutated).
  */
 export function migratePcSource(source) {
@@ -101,7 +101,7 @@ export function migrateKeywordsSource(source) {
 }
 
 /**
- * Skill snake_case keys from before 3.0 (module/setup/migrations/schema/schema-map.js). The Insight bonus field is
+ * Skill snake_case keys from before 3.0 (module/setup/migrations/schema/map.js). The Insight bonus field is
  * dropped: Insight comes from Rings and Skill ranks only (p.104), and nothing ever counted it (#75).
  * @param {object} source  Skill system source (mutated).
  */
@@ -130,7 +130,7 @@ export function migrateWeaponSource(source) {
 }
 
 /**
- * Armor misspellings from before 3.0 (module/setup/migrations/schema/schema-map.js).
+ * Armor misspellings from before 3.0 (module/setup/migrations/schema/map.js).
  * @param {object} source  Armor system source (mutated).
  */
 export function migrateArmorSource(source) {

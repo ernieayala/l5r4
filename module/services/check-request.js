@@ -8,7 +8,7 @@
 import { CHAT_TEMPLATES } from "../config/templates.js";
 import { T } from "../utils/localization.js";
 import { rollCheck } from "./dice/check/roll-check.js";
-import { resolveActor } from "./dice/resources/void-manager.js";
+import { resolveActor } from "./dice/resources/void-points.js";
 import { checkRequestFor, linkText } from "./links.js";
 
 /**

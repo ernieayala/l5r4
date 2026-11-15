@@ -128,7 +128,7 @@
       "pages": "76",
       "status": "automated",
       "code": [
-        "module/documents/actor/calculations/shared-traits-rings.js",
+        "module/documents/actor/calculations/shared-traits-rings-system.js",
         "module/utils/mechanics.js"
       ],
       "tests": [
@@ -141,10 +141,10 @@
       "status": "automated",
       "code": [
         "module/config/status-effects.js",
-        "module/data/item/WeaponData.js",
+        "module/data/item/weapon-data.js",
         "module/data/migrate-source.js",
         "module/data/rules/rule-models.js",
-        "module/documents/actor/calculations/shared-traits-rings.js",
+        "module/documents/actor/calculations/shared-traits-rings-system.js",
         "module/documents/combat.js",
         "module/documents/combatant.js",
         "module/services/combat/damage.js",
@@ -180,7 +180,7 @@
       "pages": "77",
       "status": "automated",
       "code": [
-        "module/data/item/WeaponData.js",
+        "module/data/item/weapon-data.js",
         "module/data/migrate-source.js",
         "module/documents/combatant.js",
         "module/services/dice/check/roll-check.js",
@@ -243,9 +243,9 @@
       "pages": "79-80",
       "status": "automated",
       "code": [
-        "module/data/item/SchoolData.js",
+        "module/data/item/school-data.js",
         "module/data/rules/rule-models.js",
-        "module/documents/actor/calculations/item-enrichment.js",
+        "module/documents/actor/calculations/item-enrichment-system.js",
         "module/services/combat/contest.js",
         "module/services/combat/flow.js",
         "module/services/combat/grapple.js",
@@ -278,9 +278,9 @@
       "pages": "80",
       "status": "automated",
       "code": [
-        "module/data/item/SchoolData.js",
+        "module/data/item/school-data.js",
         "module/data/rules/rule-models.js",
-        "module/documents/actor/calculations/item-enrichment.js",
+        "module/documents/actor/calculations/item-enrichment-system.js",
         "module/services/combat/contest.js",
         "module/services/combat/flow.js",
         "module/services/combat/grapple.js",
@@ -431,10 +431,10 @@
       "code": [
         "module/config/game-mechanics.js",
         "module/config/status-effects.js",
-        "module/data/effect/EffectData.js",
+        "module/data/effect/effect-data.js",
         "module/data/rules/rule-models.js",
         "module/documents/active-effect.js",
-        "module/documents/actor/calculations/item-enrichment.js",
+        "module/documents/actor/calculations/item-enrichment-system.js",
         "module/documents/actor/calculations/wound-system.js",
         "module/documents/combat.js",
         "module/services/dice/check/roll-check.js",
@@ -473,10 +473,10 @@
       "code": [
         "module/config/game-mechanics.js",
         "module/config/status-effects.js",
-        "module/data/effect/EffectData.js",
+        "module/data/effect/effect-data.js",
         "module/data/rules/rule-models.js",
         "module/documents/active-effect.js",
-        "module/documents/actor/calculations/item-enrichment.js",
+        "module/documents/actor/calculations/item-enrichment-system.js",
         "module/documents/actor/calculations/wound-system.js",
         "module/documents/combat.js",
         "module/services/dice/check/roll-check.js",
@@ -515,10 +515,10 @@
       "code": [
         "module/config/game-mechanics.js",
         "module/config/status-effects.js",
-        "module/data/effect/EffectData.js",
+        "module/data/effect/effect-data.js",
         "module/data/rules/rule-models.js",
         "module/documents/active-effect.js",
-        "module/documents/actor/calculations/item-enrichment.js",
+        "module/documents/actor/calculations/item-enrichment-system.js",
         "module/documents/actor/calculations/wound-system.js",
         "module/documents/combat.js",
         "module/services/dice/check/roll-check.js",
@@ -576,7 +576,7 @@
       "code": [
         "module/config/rule-keys.js",
         "module/config/status-effects.js",
-        "module/data/chat/RollMessageData.js",
+        "module/data/chat/roll-message-data.js",
         "module/data/rules/rule-models.js",
         "module/services/combat/contest.js",
         "module/services/combat/damage.js",
@@ -596,7 +596,7 @@
       "status": "automated",
       "code": [
         "module/config/rule-keys.js",
-        "module/data/chat/RollMessageData.js",
+        "module/data/chat/roll-message-data.js",
         "module/data/rules/rule-models.js",
         "module/services/combat/contest.js",
         "module/services/combat/damage.js",
@@ -621,10 +621,10 @@
       "code": [
         "module/config/rule-keys.js",
         "module/config/status-effects.js",
-        "module/data/chat/RollMessageData.js",
-        "module/data/effect/EffectData.js",
+        "module/data/chat/roll-message-data.js",
+        "module/data/effect/effect-data.js",
         "module/data/rules/rule-models.js",
-        "module/documents/actor/calculations/shared-traits-rings.js",
+        "module/documents/actor/calculations/shared-traits-rings-system.js",
         "module/documents/actor/rules.js",
         "module/documents/combat.js",
         "module/services/combat/duel.js",
@@ -667,10 +667,10 @@
       "code": [
         "module/config/rule-keys.js",
         "module/config/status-effects.js",
-        "module/data/chat/RollMessageData.js",
-        "module/data/effect/EffectData.js",
+        "module/data/chat/roll-message-data.js",
+        "module/data/effect/effect-data.js",
         "module/data/rules/rule-models.js",
-        "module/documents/actor/calculations/shared-traits-rings.js",
+        "module/documents/actor/calculations/shared-traits-rings-system.js",
         "module/documents/actor/rules.js",
         "module/documents/combat.js",
         "module/services/combat/duel.js",
@@ -714,7 +714,7 @@
         "module/config/game-mechanics.js",
         "module/config/rule-keys.js",
         "module/config/status-effects.js",
-        "module/data/effect/EffectData.js",
+        "module/data/effect/effect-data.js",
         "module/data/rules/rule-models.js",
         "module/documents/actor/calculations/fear-system.js",
         "module/documents/actor/rules.js",
@@ -748,8 +748,8 @@
         "module/config/game-mechanics.js",
         "module/config/rule-keys.js",
         "module/config/status-effects.js",
-        "module/data/chat/RollMessageData.js",
-        "module/data/effect/EffectData.js",
+        "module/data/chat/roll-message-data.js",
+        "module/data/effect/effect-data.js",
         "module/data/rules/rule-models.js",
         "module/documents/actor/calculations/fear-system.js",
         "module/documents/actor/rules.js",
@@ -853,8 +853,8 @@
       "pages": "102-104",
       "status": "automated",
       "code": [
-        "module/data/actor/PcData.js",
-        "module/data/item/SchoolData.js",
+        "module/data/actor/pc-data.js",
+        "module/data/item/school-data.js",
         "module/data/rules/rule-models.js",
         "module/documents/actor/calculations/xp-system.js",
         "module/documents/actor/preparation/pc-preparation.js",
@@ -885,8 +885,8 @@
       "pages": "104-105",
       "status": "automated",
       "code": [
-        "module/data/actor/PcData.js",
-        "module/data/item/SchoolData.js",
+        "module/data/actor/pc-data.js",
+        "module/data/item/school-data.js",
         "module/documents/actor/preparation/pc-preparation.js",
         "module/documents/item/lifecycle/grants.js",
         "module/utils/mechanics.js",
@@ -909,7 +909,7 @@
       "pages": "105-108",
       "status": "automated",
       "code": [
-        "module/data/item/SchoolData.js",
+        "module/data/item/school-data.js",
         "module/services/dice/check/collect.js",
         "src/packs/families.json",
         "src/packs/schools.json",
@@ -952,7 +952,7 @@
       "pages": "112-115",
       "status": "automated",
       "code": [
-        "module/data/item/TattooData.js",
+        "module/data/item/tattoo-data.js",
         "module/services/effects/activation.js",
         "src/packs/families.json",
         "src/packs/schools.json",
@@ -1075,7 +1075,7 @@
       "pages": "133",
       "status": "automated",
       "code": [
-        "module/data/item/SkillData.js",
+        "module/data/item/skill-data.js",
         "module/services/dice/check/roll-check.js",
         "module/services/dice/rolls/skill-roll.js",
         "module/sheets/handlers/pc-context-builder.js",
@@ -1093,7 +1093,7 @@
       "pages": "134",
       "status": "automated",
       "code": [
-        "module/data/item/SkillData.js"
+        "module/data/item/skill-data.js"
       ],
       "tests": [
         "tests/quench/authoring.js",
@@ -1253,8 +1253,8 @@
       "pages": "163-164",
       "status": "automated",
       "code": [
-        "module/data/item/SchoolData.js",
-        "module/documents/actor/calculations/item-enrichment.js",
+        "module/data/item/school-data.js",
+        "module/documents/actor/calculations/item-enrichment-system.js",
         "module/documents/actor/calculations/xp-system.js",
         "module/services/dice/rolls/spell-cast-roll.js",
         "module/utils/mechanics.js",
@@ -1273,7 +1273,7 @@
       "pages": "164-166",
       "status": "automated",
       "code": [
-        "module/documents/actor/calculations/item-enrichment.js",
+        "module/documents/actor/calculations/item-enrichment-system.js",
         "module/documents/actor/calculations/xp-system.js",
         "module/documents/combat.js",
         "module/services/dice/rolls/spell-cast-roll.js",
@@ -1356,7 +1356,7 @@
       "status": "automated",
       "code": [
         "module/config/game-mechanics.js",
-        "module/data/item/WeaponData.js",
+        "module/data/item/weapon-data.js",
         "module/documents/actor/preparation/pc-preparation.js",
         "module/documents/item/preparation/derived-data.js",
         "module/services/dice/check/collect.js",
@@ -1377,7 +1377,7 @@
       "pages": "200-205",
       "status": "automated",
       "code": [
-        "module/data/item/WeaponData.js",
+        "module/data/item/weapon-data.js",
         "module/documents/item/preparation/melee-damage.js",
         "module/services/dice/check/roll-check.js",
         "src/packs/equipment.json",
@@ -1516,7 +1516,7 @@
       "pages": "231",
       "status": "automated",
       "code": [
-        "module/data/item/KihoData.js",
+        "module/data/item/kiho-data.js",
         "module/documents/actor/calculations/xp-system.js",
         "src/packs/schools.json",
         "src/packs/techniques.json"
@@ -1530,7 +1530,7 @@
       "pages": "231-233",
       "status": "automated",
       "code": [
-        "module/data/item/KihoData.js",
+        "module/data/item/kiho-data.js",
         "module/documents/actor/calculations/xp-system.js",
         "src/packs/schools.json",
         "src/packs/techniques.json"
@@ -1638,8 +1638,8 @@
       "pages": "259",
       "status": "automated",
       "code": [
-        "module/data/effect/EffectData.js",
-        "module/data/item/KataData.js",
+        "module/data/effect/effect-data.js",
+        "module/data/item/kata-data.js",
         "module/documents/active-effect.js",
         "module/documents/actor/calculations/xp-system.js",
         "module/services/effects/activation.js",
@@ -1656,8 +1656,8 @@
       "pages": "259-260",
       "status": "automated",
       "code": [
-        "module/data/effect/EffectData.js",
-        "module/data/item/KataData.js",
+        "module/data/effect/effect-data.js",
+        "module/data/item/kata-data.js",
         "module/documents/active-effect.js",
         "module/documents/actor/calculations/xp-system.js",
         "module/services/effects/activation.js",
@@ -1681,7 +1681,7 @@
       "pages": "261",
       "status": "automated",
       "code": [
-        "module/data/item/KihoData.js",
+        "module/data/item/kiho-data.js",
         "module/services/effects/activation.js"
       ],
       "tests": [
@@ -1858,7 +1858,7 @@
       "pages": "318-320",
       "status": "automated",
       "code": [
-        "module/data/chat/RollMessageData.js",
+        "module/data/chat/roll-message-data.js",
         "module/data/rules/rule-models.js",
         "module/documents/actor/calculations/wound-system.js",
         "module/services/dice/check/collect.js",

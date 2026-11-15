@@ -15,14 +15,14 @@
  * - Void bonus stacks with all other bonuses (emphasis, stance, effects)
  *
  * @see module/services/dice/rolls/skill-roll.js - Skill roll service
- * @see module/services/dice/resources/void-manager.js - Void point management
+ * @see module/services/dice/resources/void-points.js - Void point management
  */
 
 import { SYS_ID } from "../../../module/config/constants.js";
 import { createTestPC } from "../../fixtures/actor-fixtures.js";
 import { createSkillData } from "../../fixtures/item-fixtures.js";
 import { SkillRoll } from "../../../module/services/dice/rolls/skill-roll.js";
-import { spendVoidPoint } from "../../../module/services/dice/resources/void-manager.js";
+import { spendVoidPoint } from "../../../module/services/dice/resources/void-points.js";
 
 /**
  * Register skill roll + void point integration tests

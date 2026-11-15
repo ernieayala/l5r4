@@ -245,10 +245,12 @@ export class RollHandler {
    */
   static async traitRoll(context, event, element) {
     event.preventDefault();
-    const block = element.closest(".trait");
+    const block = element.closest(".l5r4-trait");
     // The rank element inside this trait block names the Trait
     const traitKey = normalizeTraitKey(
-      block?.querySelector(".trait-rank")?.dataset.trait || element.dataset.traitName || "ref"
+      block?.querySelector(".l5r4-rank-control.-trait")?.dataset.trait ||
+        element.dataset.traitName ||
+        "ref"
     );
     return RollHandler.rollTrait(context.actor, traitKey, !event.shiftKey);
   }

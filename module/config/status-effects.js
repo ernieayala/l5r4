@@ -87,7 +87,7 @@ export const STATUS_EFFECTS = freeze([
 
   {
     id: "blinded",
-    name: "EFFECT.blinded",
+    name: "l5r4.ui.statusEffects.blinded",
     img: iconPath("blinded.webp"),
     // -3k3 ranged and -1k1 melee attacks; base Armor TN Reflexes + 5; Water Ring 2 lower for movement (p.89)
     system: {
@@ -99,10 +99,14 @@ export const STATUS_EFFECTS = freeze([
       ]
     }
   },
-  { id: "concentration", name: "EFFECT.concentration", img: iconPath("concentration.webp") },
+  {
+    id: "concentration",
+    name: "l5r4.ui.statusEffects.concentration",
+    img: iconPath("concentration.webp")
+  },
   {
     id: "dazed",
-    name: "EFFECT.dazed",
+    name: "l5r4.ui.statusEffects.dazed",
     img: iconPath("dazed.webp"),
     // -3k0 to all actions, not to damage (p.89; Ernie's ruling, 2026-11-14); Earth Ring roll in the Reactions stage
     // at TN 20, 5 lower after each failure
@@ -113,25 +117,25 @@ export const STATUS_EFFECTS = freeze([
       ]
     }
   },
-  { id: "dead", name: "EFFECT.dead", img: iconPath("dead.webp") },
-  { id: "entangled", name: "EFFECT.entangled", img: iconPath("entangled.webp") },
+  { id: "dead", name: "l5r4.ui.statusEffects.dead", img: iconPath("dead.webp") },
+  { id: "entangled", name: "l5r4.ui.statusEffects.entangled", img: iconPath("entangled.webp") },
   {
     id: "fasting",
-    name: "EFFECT.fasting",
+    name: "l5r4.ui.statusEffects.fasting",
     img: iconPath("fasting.webp"),
     // +5 TN per level to Skill, physical Trait, and Spell Casting Rolls; the GM sets the level (p.89)
     system: { level: 1, rules: physicalTnRules() }
   },
   {
     id: "fatigued",
-    name: "EFFECT.fatigued",
+    name: "l5r4.ui.statusEffects.fatigued",
     img: iconPath("fatigue.webp"),
     // +5 TN per level to Skill, physical Trait, and Spell Casting Rolls (p.89)
     system: { level: 1, rules: physicalTnRules() }
   },
   {
     id: "feared",
-    name: "EFFECT.feared",
+    name: "l5r4.ui.statusEffects.feared",
     img: iconPath("fear.webp"),
     // -Xk0 to all rolls, X the Fear Rank, until the end of the encounter (p.90; STAGE-09 decision 4)
     duration: { expiry: "encounterEnd" },
@@ -139,14 +143,14 @@ export const STATUS_EFFECTS = freeze([
   },
   {
     id: "grappled",
-    name: "EFFECT.grappled",
+    name: "l5r4.ui.statusEffects.grappled",
     img: iconPath("grappled.webp"),
     // Armor TN 5 plus armor (p.89; STAGE-09 decision 3)
     system: { rules: [{ key: "ArmorTN", mode: "total", value: 5 }] }
   },
   {
     id: "guarded",
-    name: "EFFECT.guarded",
+    name: "l5r4.ui.statusEffects.guarded",
     img: iconPath("guarded.webp"),
     // +10 Armor TN until the guard's next Turn (p.86)
     duration: UNTIL_NEXT_TURN,
@@ -154,7 +158,7 @@ export const STATUS_EFFECTS = freeze([
   },
   {
     id: "guarding",
-    name: "EFFECT.guarding",
+    name: "l5r4.ui.statusEffects.guarding",
     img: iconPath("guarding.webp"),
     // -5 Armor TN until the guard's next Turn (p.86)
     duration: UNTIL_NEXT_TURN,
@@ -162,7 +166,7 @@ export const STATUS_EFFECTS = freeze([
   },
   {
     id: "mounted",
-    name: "EFFECT.mounted",
+    name: "l5r4.ui.statusEffects.mounted",
     img: iconPath("mounted.webp"),
     // +1k0 on attacks against an unmounted target (p.89)
     system: {
@@ -178,7 +182,7 @@ export const STATUS_EFFECTS = freeze([
   },
   {
     id: "prone",
-    name: "EFFECT.prone",
+    name: "l5r4.ui.statusEffects.prone",
     img: iconPath("prone.webp"),
     // -10 Armor TN against melee attacks; -2k0 to attacks with small and medium weapons, and no attacks with large
     // ones, which the card notes (p.89)
@@ -202,7 +206,7 @@ export const STATUS_EFFECTS = freeze([
   },
   {
     id: "stunned",
-    name: "EFFECT.stunned",
+    name: "l5r4.ui.statusEffects.stunned",
     img: iconPath("stunned.webp"),
     // Armor TN 5 plus armor; Earth Ring roll at TN 20 in the Reactions stage, or it ends after the next Round (p.89)
     system: {
