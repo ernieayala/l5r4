@@ -48,8 +48,8 @@ and three flags (`attackBonus`, `damageBonus`, `fearRank`).
 | Items | Skill bonus fields, weapon and armor stats, spell mastery, XP costs, family and school Trait bonus | Rules on advantages, techniques, kata, kiho, tattoos, spells |
 | Resources | Void Points, spell slots, XP ledger, Honor/Glory/Status/Taint tracks | Per-round Void limit, use counters, ledger hooks |
 
-Probable bugs read from the code when the roadmap was written. Each is fixed in the stage named, except B11's
-Insight bonus field, which is #75 (Stage 16 sweep):
+Probable bugs read from the code when the roadmap was written. Each is fixed in the stage named; B11's Insight
+bonus field, found by the Stage 16 sweep, was removed by #75:
 
 | # | Finding | Code | Stage |
 |---|---------|------|-------|
@@ -63,7 +63,7 @@ Insight bonus field, which is #75 (Stage 16 sweep):
 | B8 | Damage button omits Strength and the arrow modifier | `skill-roll.js:322-331`, `simple-roll.js:336-349` | 10 (fixed) |
 | B9 | Inline `[[XkY]]` chat rolls pass an object to `String.replace` | `module/services/chat.js:333-334, 359` | 8 (fixed) |
 | B10 | Prone automation runs on every client and is never removed | `wound-prone-automation.js:44-172` | 9 (fixed) |
-| B11 | `explodesOn`, `insightBonus`, technique `rank` shown but never read (#37) | `templates/item/_type-modifiers/weapon.hbs:16-18` | 8 (`explodesOn` fixed); `insightBonus` is #75; technique `rank` is the printed Rank, which `packs:verify` checks (Stage 15) |
+| B11 | `explodesOn`, `insightBonus`, technique `rank` shown but never read (#37) | `templates/item/_type-modifiers/weapon.hbs:16-18` | 8 (`explodesOn` fixed); `insightBonus` removed (#75); technique `rank` is the printed Rank, which `packs:verify` checks (Stage 15) |
 | B12 | `ACTIVE_EFFECTS.md` documents keys that change nothing (item keys, `system.xp`, Insight) | `ACTIVE_EFFECTS.md:166-228` | 7 (fixed: rewritten as the rules guide) |
 
 ## 3. Rule vocabulary for L5R 4e

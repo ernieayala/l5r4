@@ -129,7 +129,6 @@ describe("migrateSkillSource", () => {
       mastery_3: "a",
       mastery_5: "b",
       mastery_7: "c",
-      insight_bonus: 1,
       roll_bonus: 2,
       keep_bonus: 3,
       total_bonus: 4
@@ -139,11 +138,19 @@ describe("migrateSkillSource", () => {
       mastery3: "a",
       mastery5: "b",
       mastery7: "c",
-      insightBonus: 1,
       rollBonus: 2,
       keepBonus: 3,
       totalBonus: 4
     });
+  });
+
+  it("drops the Insight bonus, which Insight never counted (p.104; #75)", () => {
+    const legacy = { insight_bonus: 1, rank: 2 };
+    migrateSkillSource(legacy);
+    expect(legacy).toEqual({ rank: 2 });
+    const current = { insightBonus: 3, rank: 2 };
+    migrateSkillSource(current);
+    expect(current).toEqual({ rank: 2 });
   });
 
   it("fills an empty-string target from the legacy key", () => {

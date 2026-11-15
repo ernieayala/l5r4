@@ -101,14 +101,16 @@ export function migrateKeywordsSource(source) {
 }
 
 /**
- * Skill snake_case keys from before 3.0 (module/setup/migrations/schema/schema-map.js).
+ * Skill snake_case keys from before 3.0 (module/setup/migrations/schema/schema-map.js). The Insight bonus field is
+ * dropped: Insight comes from Rings and Skill ranks only (p.104), and nothing ever counted it (#75).
  * @param {object} source  Skill system source (mutated).
  */
 export function migrateSkillSource(source) {
   renameKey(source, "mastery_3", "mastery3");
   renameKey(source, "mastery_5", "mastery5");
   renameKey(source, "mastery_7", "mastery7");
-  renameKey(source, "insight_bonus", "insightBonus");
+  delete source.insight_bonus;
+  delete source.insightBonus;
   renameKey(source, "roll_bonus", "rollBonus");
   renameKey(source, "keep_bonus", "keepBonus");
   renameKey(source, "total_bonus", "totalBonus");

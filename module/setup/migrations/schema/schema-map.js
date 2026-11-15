@@ -77,7 +77,6 @@ export const SCHEMA_MAP = [
   { docType: "Item", type: "skill", from: "system.mastery_3", to: "system.mastery3" },
   { docType: "Item", type: "skill", from: "system.mastery_5", to: "system.mastery5" },
   { docType: "Item", type: "skill", from: "system.mastery_7", to: "system.mastery7" },
-  { docType: "Item", type: "skill", from: "system.insight_bonus", to: "system.insightBonus" },
   { docType: "Item", type: "skill", from: "system.roll_bonus", to: "system.rollBonus" },
   { docType: "Item", type: "skill", from: "system.keep_bonus", to: "system.keepBonus" },
   { docType: "Item", type: "skill", from: "system.total_bonus", to: "system.totalBonus" },

@@ -3,8 +3,8 @@ import { SYS_ID } from "../../module/config/constants.js";
 /**
  * Stored paths 3.2.1 kept in template.json that the data models no longer store, by roadmap Stage 2 decision:
  * derived values (decision 4) and PC `armor`, which is NPC-only (decision 6); by Stage 9, the Void-on-Armor-TN
- * marker, which is an effect now; and by Stage 13, kata and kiho `cost`, since their Mastery Level is their XP cost
- * (#43). Paths are relative to `system`.
+ * marker, which is an effect now; by Stage 13, kata and kiho `cost`, since their Mastery Level is their XP cost
+ * (#43); and the Skill's `insightBonus`, which Insight never counted (p.104; #75). Paths are relative to `system`.
  * @type {Record<string, string[]>}
  */
 const NOT_STORED = {
@@ -35,7 +35,8 @@ const NOT_STORED = {
     "wounds.healRate"
   ],
   kata: ["cost"],
-  kiho: ["cost"]
+  kiho: ["cost"],
+  skill: ["insightBonus"]
 };
 
 /**

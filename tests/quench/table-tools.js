@@ -83,7 +83,11 @@ export function registerTableToolsBatch(quench) {
           })
         );
         await entry.sheet.render({ force: true });
-        await waitFor(() => entry.sheet.element?.querySelector("enriched-content"));
+        // Under a full run the journal's enrichment can take longer than waitFor's 5 s default
+        assert.isTrue(
+          await waitFor(() => entry.sheet.element?.querySelector("enriched-content"), 8000),
+          "the journal rendered its text"
+        );
         return { sheet: entry.sheet, element: entry.sheet.element };
       };
 

@@ -797,8 +797,7 @@
           "socialHint": "Rules select Social Skills with skill-tag:social; Taint penalties reach them.",
           "mastery3": "Rank 3 Mastery",
           "mastery5": "Rank 5 Mastery",
-          "mastery7": "Rank 7 Mastery",
-          "insightbonus": "Insight Bonus"
+          "mastery7": "Rank 7 Mastery"
         },
         "names": {
           "acting": "Acting",

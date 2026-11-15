@@ -24,7 +24,6 @@ export default class SkillData extends ItemData {
       mastery3: stringField(),
       mastery5: stringField(),
       mastery7: stringField(),
-      insightBonus: numberField(0),
       school: booleanField(false),
       social: booleanField(false),
       freeRanks: numberField(0),
