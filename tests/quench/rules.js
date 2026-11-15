@@ -848,7 +848,8 @@ export function registerRulesTests(quench) {
                 JSON.parse(sheet.element.querySelector("textarea[name=rulesJson]").value)[0].value,
                 2
               );
-              await sheet.close();
+              // Core animates a close for about a second, which would crowd Mocha's 2000 ms default
+              await sheet.close({ animate: false });
             } finally {
               await item.delete();
             }
@@ -878,7 +879,7 @@ export function registerRulesTests(quench) {
               input.dispatchEvent(new Event("change", { bubbles: true }));
               await new Promise(resolve => setTimeout(resolve, 200));
             }
-            await sheet.close();
+            await sheet.close({ animate: false });
           } finally {
             watch.stop();
             ui.notifications.notify = notify;
