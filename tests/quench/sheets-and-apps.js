@@ -29,8 +29,11 @@ import { EVERY_ACTION } from "./every-action.js";
 /** A test that opens, clicks through, and closes a window can take a few seconds per action. */
 const SURFACE_TIMEOUT_MS = 120_000;
 
-/** Actions skipped by the click-through: they close the window under test. */
-const SKIPPED_ACTIONS = new Set(["close"]);
+/**
+ * Actions skipped by the click-through: `close` closes the window under test; core's `editImage` opens a file picker
+ * that errors when dismissed before its directory loads, so its own test opens and closes it (#76).
+ */
+const SKIPPED_ACTIONS = new Set(["close", "editImage"]);
 
 /** Every action the click-through ran in this batch, checked against its coverage list at the end. */
 const ran = new Set();
@@ -214,6 +217,29 @@ export function registerSheetsAndAppsBatch(quench) {
               const actions = doc.sheet._getHeaderControls().map(control => control.action);
               assert.deepEqual(actions, [...new Set(actions)], doc.type);
             }
+          })
+        );
+
+        it(
+          "opens the file picker from an item's image, as from an actor's (#76)",
+          clean(async function () {
+            this.timeout(SURFACE_TIMEOUT_MS);
+            const item = await Item.create({ name: "Sheets image", type: "skill" });
+            created.push(item);
+            await item.sheet.render({ force: true });
+            const pickers = () =>
+              [...foundry.applications.instances.values()].filter(
+                app => app instanceof foundry.applications.apps.FilePicker && app.rendered
+              );
+            const open = pickers().length;
+            item.sheet.element.querySelector('[data-action="editImage"]').click();
+            assert.isTrue(await waitFor(() => pickers().length > open), "the picker opens");
+            // Closing before the picker lists its directory errors in core, so it is left to finish first
+            await new Promise(resolve => setTimeout(resolve, 1000));
+            for (const picker of pickers()) {
+              await picker.close({ animate: false });
+            }
+            await item.sheet.close({ animate: false });
           })
         );
 
