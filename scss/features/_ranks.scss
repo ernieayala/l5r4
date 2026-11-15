@@ -13,14 +13,17 @@
     grid-template-rows: 1fr 1fr;
   }
 
+  // A <button>: `font` and `min-height` undo core's button face, so the value reads as before
   .l5r4-rank-control-value {
     background: var(--table-header-bg-color);
     border: 1px solid var(--table-header-border-color);
     color: var(--table-header-text-color);
     cursor: pointer;
     display: flex;
+    font: inherit;
     font-size: var(--font-size-16);
     line-height: 1;
+    min-height: 0;
     padding: 0.25rem 0;
     text-align: center;
     transition: all 150ms ease-out;

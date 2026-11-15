@@ -5,11 +5,11 @@
   {{#if inSheet}}
     <div class="l5r4-button -roll">
       <span class="l5r4-button-under">{{attackFormula}}</span>
-      <a class="button" data-action="roll-weapon-attack" title="{{localize "l5r4.ui.mechanics.rolls.attackRoll"}}">{{attackFormula}}</a>
+      <button type="button" class="l5r4-button-face" data-action="roll-weapon-attack" data-tooltip="{{localize "l5r4.ui.mechanics.rolls.attackRoll"}}">{{attackFormula}}</button>
     </div>
     <div class="l5r4-button -roll">
       <span class="l5r4-button-under">{{#if system.derivedDamageFormula}}{{system.derivedDamageFormula}}{{else}}{{system.damageRoll}}k{{system.damageKeep}}{{/if}}</span>
-      <a class="button" data-action="roll-weapon-damage" title="{{localize "l5r4.ui.mechanics.rolls.damageRoll"}}">{{#if system.derivedDamageFormula}}{{system.derivedDamageFormula}}{{else}}{{system.damageRoll}}k{{system.damageKeep}}{{/if}}</a>
+      <button type="button" class="l5r4-button-face" data-action="roll-weapon-damage" data-tooltip="{{localize "l5r4.ui.mechanics.rolls.damageRoll"}}">{{#if system.derivedDamageFormula}}{{system.derivedDamageFormula}}{{else}}{{system.damageRoll}}k{{system.damageKeep}}{{/if}}</button>
     </div>
     {{#if ranged}}
         <select data-action="update-item-field" data-field="system.arrow">{{selectOptions @root.config.arrows selected=system.arrow localize=true}}</select>

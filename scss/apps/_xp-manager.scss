@@ -31,12 +31,29 @@
     }
   }
 
+  // Buttons that read as the text they replace: core's button look undone, its focus ring kept. A sort head is a
+  // grid item, so its display computes to block
+  .l5r4-xp-manager-cap,
+  .l5r4-sort-header-button {
+    background: none;
+    border: none;
+    border-radius: 0;
+    color: inherit;
+    display: inline;
+    font: inherit;
+    height: auto;
+    line-height: inherit;
+    min-height: 0;
+    padding: 0;
+    text-align: start;
+  }
+
   .l5r4-item-row-list {
     &.l5r4-sort-header {
       border-inline-start: 1px solid var(--table-header-border-color);
     }
 
-    .title {
+    .l5r4-item-row-name {
       align-items: center;
       display: inline-flex;
       font-size: var(--font-size-18);

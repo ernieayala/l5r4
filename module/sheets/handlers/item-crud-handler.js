@@ -222,7 +222,7 @@ export class ItemCRUDHandler {
     if (!row) {
       return;
     }
-    row.classList.toggle("is-expanded");
+    element.setAttribute("aria-expanded", String(row.classList.toggle("is-expanded")));
     // querySelector used here to find icon element within the clicked button (scoped query)
     const icon = element.querySelector("i");
     if (icon) {
@@ -271,6 +271,7 @@ export class ItemCRUDHandler {
 
     // Toggle collapsed state (CSS-driven visibility)
     const isNowCollapsed = sectionTitle.classList.toggle("is-collapsed");
+    element.setAttribute("aria-expanded", String(!isNowCollapsed));
 
     // Swap chevron icon direction for visual feedback
     // querySelector used here to find icon element within the clicked button (scoped query)
@@ -365,7 +366,6 @@ export class ItemCRUDHandler {
       rollButtons.forEach(button => {
         const formula = `${item.system.rollDice}k${item.system.rollKeep}`;
         button.textContent = formula;
-        button.title = game.i18n.localize("l5r4.ui.mechanics.rolls.skillRoll");
 
         // Also update the mask span if it exists
         const mask = button.closest(".l5r4-button.-roll")?.querySelector(".l5r4-button-under");

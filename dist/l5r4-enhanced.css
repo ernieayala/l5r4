@@ -20,6 +20,7 @@
   --l5r4-color-ring-earth: #594839;
   --l5r4-color-ring-fire: #ab4913;
   --l5r4-color-ring-void: #7d6862;
+  --l5r4-palette-amber-500: #ab6600;
   --l5r4-size-column-controls: 102px;
   --l5r4-state-hover-filter: brightness(1.1);
   --l5r4-state-pressed-filter: brightness(0.95);
@@ -27,13 +28,23 @@
 }
 
 .theme-light {
+  --l5r4-color-accent: var(--l5r4-palette-amber-500);
   --l5r4-color-ring-rank-backdrop: transparent;
   --l5r4-image-ring-rank-backdrop: url("../../../ui/parchment.jpg");
+  --l5r4-state-focus-color: var(--color-warm-2);
+  --l5r4-state-focus-outline: 1px solid var(--l5r4-state-focus-color);
+  --l5r4-state-focus-shadow: 0 0 4px var(--l5r4-state-focus-color);
+  --l5r4-state-selected-outline: 1px solid var(--l5r4-color-accent);
 }
 
 .theme-dark {
+  --l5r4-color-accent: var(--color-text-accent);
   --l5r4-color-ring-rank-backdrop: var(--color-cool-5-90);
   --l5r4-image-ring-rank-backdrop: none;
+  --l5r4-state-focus-color: var(--color-warm-2);
+  --l5r4-state-focus-outline: 1px solid var(--l5r4-state-focus-color);
+  --l5r4-state-focus-shadow: 0 0 4px var(--l5r4-state-focus-color);
+  --l5r4-state-selected-outline: 1px solid var(--l5r4-color-accent);
 }
 
 /**
@@ -233,6 +244,16 @@ body > * {
   flex-wrap: nowrap;
 }
 
+.l5r4-item-header .l5r4-item-header-image {
+  block-size: 64px;
+  inline-size: 64px;
+}
+
+.l5r4-item-details,
+.l5r4-item-modifiers {
+  display: contents;
+}
+
 /**
  * Form Controls
  * Styling for input, select, and textarea elements
@@ -263,15 +284,6 @@ body > * {
   text-align: inherit;
   user-select: text;
   width: calc(100% - 2px);
-}
-.l5r4.pc .info-group,
-.l5r4.npc .info-group {
-  flex-wrap: nowrap;
-}
-.l5r4.pc .info-group:hover .inline-control,
-.l5r4.npc .info-group:hover .inline-control {
-  opacity: 1;
-  pointer-events: all;
 }
 
 /**
@@ -350,10 +362,12 @@ body > * {
 }
 .l5r4.pc .l5r4-section-title .l5r4-section-heading,
 .l5r4.pc .l5r4-section-title .button,
+.l5r4.pc .l5r4-section-title button,
 .l5r4.pc .l5r4-section-title input,
 .l5r4.pc .l5r4-section-title input::placeholder,
 .l5r4.npc .l5r4-section-title .l5r4-section-heading,
 .l5r4.npc .l5r4-section-title .button,
+.l5r4.npc .l5r4-section-title button,
 .l5r4.npc .l5r4-section-title input,
 .l5r4.npc .l5r4-section-title input::placeholder {
   color: inherit;
@@ -385,20 +399,24 @@ body > * {
   height: 32px;
   width: 32px;
 }
-.l5r4.pc .l5r4-section-title .l5r4-spell-slot > span,
-.l5r4.npc .l5r4-section-title .l5r4-spell-slot > span {
+.l5r4.pc .l5r4-section-title .l5r4-spell-slot .l5r4-spell-slot-count,
+.l5r4.npc .l5r4-section-title .l5r4-spell-slot .l5r4-spell-slot-count {
   align-items: center;
   background: rgba(0, 0, 0, 0.4);
+  border: none;
   border-radius: 50%;
   cursor: var(--conditional-cursor);
   display: inline-flex;
+  font: inherit;
   height: 32px;
   justify-content: center;
   left: 0;
+  min-height: 0;
   padding: 0;
   position: absolute;
   text-shadow: 1px 1px 1px #000, -1px -1px 1px #000;
   top: 0;
+  transition: none;
   width: 32px;
 }
 .l5r4.pc .l5r4-section-body,
@@ -452,6 +470,21 @@ body > * {
 .l5r4.npc .l5r4-item-row-list.l5r4-sort-header .l5r4-item-row,
 .l5r4-xp-manager .l5r4-item-row-list.l5r4-sort-header .l5r4-item-row {
   padding: 0;
+}
+.l5r4.pc .l5r4-item-row-list.l5r4-sort-header .l5r4-sort-header-button,
+.l5r4.npc .l5r4-item-row-list.l5r4-sort-header .l5r4-sort-header-button,
+.l5r4-xp-manager .l5r4-item-row-list.l5r4-sort-header .l5r4-sort-header-button {
+  background: none;
+  border: none;
+  border-radius: 0;
+  color: inherit;
+  display: block;
+  font: inherit;
+  height: auto;
+  min-height: 0;
+  padding: 0;
+  text-align: inherit;
+  transition: none;
 }
 .l5r4.pc .l5r4-item-row-list.-attacks .l5r4-item-row,
 .l5r4.npc .l5r4-item-row-list.-attacks .l5r4-item-row,
@@ -547,9 +580,11 @@ body > * {
   grid-template-rows: min-content min-content;
   padding: 0 0.5rem;
 }
-.l5r4.pc .l5r4-item-row:hover .inline-control,
+.l5r4.pc .l5r4-item-row:hover .inline-control, .l5r4.pc .l5r4-item-row:has(:focus-visible) .inline-control,
 .l5r4.npc .l5r4-item-row:hover .inline-control,
-.l5r4-xp-manager .l5r4-item-row:hover .inline-control {
+.l5r4.npc .l5r4-item-row:has(:focus-visible) .inline-control,
+.l5r4-xp-manager .l5r4-item-row:hover .inline-control,
+.l5r4-xp-manager .l5r4-item-row:has(:focus-visible) .inline-control {
   opacity: 1;
   pointer-events: all;
 }
@@ -578,6 +613,12 @@ body > * {
   height: 2em;
   min-height: 2em;
 }
+.l5r4.pc .l5r4-item-row .l5r4-item-row-badge,
+.l5r4.npc .l5r4-item-row .l5r4-item-row-badge,
+.l5r4-xp-manager .l5r4-item-row .l5r4-item-row-badge {
+  block-size: 16px;
+  inline-size: 16px;
+}
 .l5r4.pc .l5r4-item-row .title,
 .l5r4.npc .l5r4-item-row .title,
 .l5r4-xp-manager .l5r4-item-row .title {
@@ -591,9 +632,9 @@ body > * {
   text-decoration: none;
   text-shadow: none;
 }
-.l5r4.pc .l5r4-item-row .controls,
-.l5r4.npc .l5r4-item-row .controls,
-.l5r4-xp-manager .l5r4-item-row .controls {
+.l5r4.pc .l5r4-item-row .l5r4-inline-control,
+.l5r4.npc .l5r4-item-row .l5r4-inline-control,
+.l5r4-xp-manager .l5r4-item-row .l5r4-inline-control {
   justify-content: flex-end;
 }
 .l5r4.pc .l5r4-item-row .inline-control,
@@ -643,13 +684,14 @@ body > * {
   text-align: center;
   width: 100%;
 }
-.l5r4.pc .l5r4-button.-roll .button,
-.l5r4.npc .l5r4-button.-roll .button {
+.l5r4.pc .l5r4-button.-roll .l5r4-button-face,
+.l5r4.npc .l5r4-button.-roll .l5r4-button-face {
   background: var(--button-hover-background-color);
   border: none;
   border-radius: 0;
   color: var(--button-hover-text-color);
   cursor: pointer;
+  display: inline-flex;
   font-weight: bold;
   height: 100%;
   mask: url("../assets/animation/urban-sprite.webp");
@@ -657,8 +699,8 @@ body > * {
   mask-size: 3000% 100%;
   width: 100%;
 }
-.l5r4.pc .l5r4-button.-roll .button:hover,
-.l5r4.npc .l5r4-button.-roll .button:hover {
+.l5r4.pc .l5r4-button.-roll .l5r4-button-face:hover,
+.l5r4.npc .l5r4-button.-roll .l5r4-button-face:hover {
   animation: mask-reverse-urban 0.5s steps(29) forwards;
 }
 .l5r4.pc .l5r4-rank-control.-track,
@@ -775,6 +817,18 @@ body > * {
   gap: 0.5rem;
   padding: 0 0.25rem;
 }
+.l5r4-rules-editor .l5r4-rules-editor-delete {
+  background: none;
+  border: none;
+  border-radius: 0;
+  color: inherit;
+  display: inline;
+  font: inherit;
+  height: auto;
+  line-height: inherit;
+  min-height: 0;
+  padding: 0;
+}
 .l5r4-rules-editor .l5r4-rules-editor-error {
   color: var(--color-level-error);
   font-size: var(--font-size-12);
@@ -818,7 +872,13 @@ body > * {
  * Small controls inside a row: the kata or kiho activation toggle
  */
 .l5r4 .l5r4-inline-control-activate.active {
-  color: var(--color-text-hyperlink);
+  box-shadow: none;
+  color: var(--l5r4-color-accent);
+  outline: none;
+}
+.l5r4 .l5r4-inline-control-activate.active:focus-visible {
+  box-shadow: var(--l5r4-state-focus-shadow);
+  outline: var(--l5r4-state-focus-outline);
 }
 
 /**
@@ -938,8 +998,12 @@ body > * {
   width: auto;
 }
 .l5r4-compendium-browser .l5r4-tabs-tab.active {
+  box-shadow: none;
   font-weight: bold;
-  outline: 1px solid var(--color-border-highlight);
+  outline: var(--l5r4-state-selected-outline);
+}
+.l5r4-compendium-browser .l5r4-tabs-tab.active:focus-visible {
+  box-shadow: var(--l5r4-state-focus-shadow);
 }
 .l5r4-compendium-browser .l5r4-compendium-browser-filters {
   align-items: end;
@@ -994,7 +1058,18 @@ body > * {
   min-width: 0;
 }
 .l5r4-compendium-browser .l5r4-compendium-browser-name {
+  background: none;
+  border: none;
+  border-radius: 0;
+  color: inherit;
+  display: block;
+  font: inherit;
   font-weight: bold;
+  height: auto;
+  line-height: inherit;
+  min-height: 0;
+  padding: 0;
+  text-align: start;
 }
 .l5r4-compendium-browser .l5r4-compendium-browser-details,
 .l5r4-compendium-browser .l5r4-compendium-browser-source {
@@ -1065,6 +1140,19 @@ body > * {
 .l5r4.pc .l5r4-pc-info .l5r4-form-field-label,
 .l5r4.npc .l5r4-pc-info .l5r4-form-field-label {
   min-height: calc(var(--input-height) - 0.5rem);
+}
+.l5r4.pc .l5r4-pc-info .l5r4-form-field-label-button,
+.l5r4.npc .l5r4-pc-info .l5r4-form-field-label-button {
+  align-self: stretch;
+  background: none;
+  border: none;
+  border-radius: 0;
+  color: inherit;
+  cursor: inherit;
+  font: inherit;
+  height: auto;
+  min-height: 0;
+  padding: 0;
 }
 
 /**
@@ -1150,17 +1238,22 @@ body > * {
   border-color: var(--l5r4-color-ring-void);
 }
 .l5r4.pc .traits-rings .l5r4-ring-rank.-void:hover .l5r4-rank-control-arrow.-up,
-.l5r4.pc .traits-rings .l5r4-ring-rank.-void:hover .l5r4-rank-control-arrow.-down,
+.l5r4.pc .traits-rings .l5r4-ring-rank.-void:hover .l5r4-rank-control-arrow.-down, .l5r4.pc .traits-rings .l5r4-ring-rank.-void:has(:focus-visible) .l5r4-rank-control-arrow.-up,
+.l5r4.pc .traits-rings .l5r4-ring-rank.-void:has(:focus-visible) .l5r4-rank-control-arrow.-down,
 .l5r4.npc .traits-rings .l5r4-ring-rank.-void:hover .l5r4-rank-control-arrow.-up,
-.l5r4.npc .traits-rings .l5r4-ring-rank.-void:hover .l5r4-rank-control-arrow.-down {
+.l5r4.npc .traits-rings .l5r4-ring-rank.-void:hover .l5r4-rank-control-arrow.-down,
+.l5r4.npc .traits-rings .l5r4-ring-rank.-void:has(:focus-visible) .l5r4-rank-control-arrow.-up,
+.l5r4.npc .traits-rings .l5r4-ring-rank.-void:has(:focus-visible) .l5r4-rank-control-arrow.-down {
   opacity: 1;
 }
-.l5r4.pc .traits-rings .l5r4-ring-rank.-void:hover .l5r4-rank-control-arrow.-up,
-.l5r4.npc .traits-rings .l5r4-ring-rank.-void:hover .l5r4-rank-control-arrow.-up {
+.l5r4.pc .traits-rings .l5r4-ring-rank.-void:hover .l5r4-rank-control-arrow.-up, .l5r4.pc .traits-rings .l5r4-ring-rank.-void:has(:focus-visible) .l5r4-rank-control-arrow.-up,
+.l5r4.npc .traits-rings .l5r4-ring-rank.-void:hover .l5r4-rank-control-arrow.-up,
+.l5r4.npc .traits-rings .l5r4-ring-rank.-void:has(:focus-visible) .l5r4-rank-control-arrow.-up {
   top: -16px;
 }
-.l5r4.pc .traits-rings .l5r4-ring-rank.-void:hover .l5r4-rank-control-arrow.-down,
-.l5r4.npc .traits-rings .l5r4-ring-rank.-void:hover .l5r4-rank-control-arrow.-down {
+.l5r4.pc .traits-rings .l5r4-ring-rank.-void:hover .l5r4-rank-control-arrow.-down, .l5r4.pc .traits-rings .l5r4-ring-rank.-void:has(:focus-visible) .l5r4-rank-control-arrow.-down,
+.l5r4.npc .traits-rings .l5r4-ring-rank.-void:hover .l5r4-rank-control-arrow.-down,
+.l5r4.npc .traits-rings .l5r4-ring-rank.-void:has(:focus-visible) .l5r4-rank-control-arrow.-down {
   bottom: -16px;
 }
 .l5r4.pc .traits-rings .l5r4-ring-rank.-void .l5r4-rank-control-arrow.-up,
@@ -1171,13 +1264,18 @@ body > * {
   background-color: inherit;
   border: 1px solid black;
   border-color: inherit;
+  border-radius: 0;
   color: inherit;
   display: flex;
+  font-family: inherit;
   font-size: 10px;
   height: 16px;
   justify-content: center;
   left: -2px;
+  line-height: inherit;
+  min-height: 0;
   opacity: 0;
+  padding: 0;
   position: absolute;
   right: -1px;
   transition: opacity 150ms ease-out, top 150ms ease-out, bottom 150ms ease-out;
@@ -1206,6 +1304,15 @@ body > * {
 }
 .l5r4.pc .traits-rings .ring-roll,
 .l5r4.npc .traits-rings .ring-roll {
+  background: none;
+  border: none;
+  border-radius: 0;
+  color: inherit;
+  display: block;
+  font: inherit;
+  height: auto;
+  min-height: 0;
+  padding: 0;
   position: relative;
 }
 .l5r4.pc .traits-rings .ring-roll:hover img,
@@ -1269,10 +1376,10 @@ body > * {
   text-align: center;
   width: 100%;
 }
-.l5r4.pc .traits-rings .l5r4-trait .l5r4-button.-roll span:not(.l5r4-button-under),
-.l5r4.pc .traits-rings .l5r4-void-points .l5r4-button.-roll span:not(.l5r4-button-under),
-.l5r4.npc .traits-rings .l5r4-trait .l5r4-button.-roll span:not(.l5r4-button-under),
-.l5r4.npc .traits-rings .l5r4-void-points .l5r4-button.-roll span:not(.l5r4-button-under) {
+.l5r4.pc .traits-rings .l5r4-trait .l5r4-button.-roll .l5r4-button-face,
+.l5r4.pc .traits-rings .l5r4-void-points .l5r4-button.-roll .l5r4-button-face,
+.l5r4.npc .traits-rings .l5r4-trait .l5r4-button.-roll .l5r4-button-face,
+.l5r4.npc .traits-rings .l5r4-void-points .l5r4-button.-roll .l5r4-button-face {
   align-items: center;
   background: #000;
   border: none;
@@ -1280,19 +1387,21 @@ body > * {
   color: #fff;
   cursor: pointer;
   display: flex;
+  font: inherit;
   font-weight: bold;
   height: 100%;
   justify-content: center;
   mask: url("../assets/animation/urban-sprite.webp");
   mask-position: 100% 0;
   mask-size: 3000% 100%;
+  min-height: 0;
   padding: 0 0.5rem;
   width: 100%;
 }
-.l5r4.pc .traits-rings .l5r4-trait .l5r4-button.-roll span:not(.l5r4-button-under):hover,
-.l5r4.pc .traits-rings .l5r4-void-points .l5r4-button.-roll span:not(.l5r4-button-under):hover,
-.l5r4.npc .traits-rings .l5r4-trait .l5r4-button.-roll span:not(.l5r4-button-under):hover,
-.l5r4.npc .traits-rings .l5r4-void-points .l5r4-button.-roll span:not(.l5r4-button-under):hover {
+.l5r4.pc .traits-rings .l5r4-trait .l5r4-button.-roll .l5r4-button-face:hover,
+.l5r4.pc .traits-rings .l5r4-void-points .l5r4-button.-roll .l5r4-button-face:hover,
+.l5r4.npc .traits-rings .l5r4-trait .l5r4-button.-roll .l5r4-button-face:hover,
+.l5r4.npc .traits-rings .l5r4-void-points .l5r4-button.-roll .l5r4-button-face:hover {
   animation: mask-reverse-urban 0.5s steps(29) forwards;
 }
 .l5r4.pc .traits-rings .l5r4-trait .l5r4-rank-control.-trait,
@@ -1312,25 +1421,38 @@ body > * {
   width: 28px;
 }
 .l5r4.pc .traits-rings .l5r4-trait .l5r4-rank-control.-trait:hover .l5r4-rank-control-arrow.-up,
-.l5r4.pc .traits-rings .l5r4-trait .l5r4-rank-control.-trait:hover .l5r4-rank-control-arrow.-down,
+.l5r4.pc .traits-rings .l5r4-trait .l5r4-rank-control.-trait:hover .l5r4-rank-control-arrow.-down, .l5r4.pc .traits-rings .l5r4-trait .l5r4-rank-control.-trait:has(:focus-visible) .l5r4-rank-control-arrow.-up,
+.l5r4.pc .traits-rings .l5r4-trait .l5r4-rank-control.-trait:has(:focus-visible) .l5r4-rank-control-arrow.-down,
 .l5r4.pc .traits-rings .l5r4-void-points .l5r4-rank-control.-trait:hover .l5r4-rank-control-arrow.-up,
 .l5r4.pc .traits-rings .l5r4-void-points .l5r4-rank-control.-trait:hover .l5r4-rank-control-arrow.-down,
+.l5r4.pc .traits-rings .l5r4-void-points .l5r4-rank-control.-trait:has(:focus-visible) .l5r4-rank-control-arrow.-up,
+.l5r4.pc .traits-rings .l5r4-void-points .l5r4-rank-control.-trait:has(:focus-visible) .l5r4-rank-control-arrow.-down,
 .l5r4.npc .traits-rings .l5r4-trait .l5r4-rank-control.-trait:hover .l5r4-rank-control-arrow.-up,
 .l5r4.npc .traits-rings .l5r4-trait .l5r4-rank-control.-trait:hover .l5r4-rank-control-arrow.-down,
+.l5r4.npc .traits-rings .l5r4-trait .l5r4-rank-control.-trait:has(:focus-visible) .l5r4-rank-control-arrow.-up,
+.l5r4.npc .traits-rings .l5r4-trait .l5r4-rank-control.-trait:has(:focus-visible) .l5r4-rank-control-arrow.-down,
 .l5r4.npc .traits-rings .l5r4-void-points .l5r4-rank-control.-trait:hover .l5r4-rank-control-arrow.-up,
-.l5r4.npc .traits-rings .l5r4-void-points .l5r4-rank-control.-trait:hover .l5r4-rank-control-arrow.-down {
+.l5r4.npc .traits-rings .l5r4-void-points .l5r4-rank-control.-trait:hover .l5r4-rank-control-arrow.-down,
+.l5r4.npc .traits-rings .l5r4-void-points .l5r4-rank-control.-trait:has(:focus-visible) .l5r4-rank-control-arrow.-up,
+.l5r4.npc .traits-rings .l5r4-void-points .l5r4-rank-control.-trait:has(:focus-visible) .l5r4-rank-control-arrow.-down {
   opacity: 1;
 }
-.l5r4.pc .traits-rings .l5r4-trait .l5r4-rank-control.-trait:hover .l5r4-rank-control-arrow.-up,
+.l5r4.pc .traits-rings .l5r4-trait .l5r4-rank-control.-trait:hover .l5r4-rank-control-arrow.-up, .l5r4.pc .traits-rings .l5r4-trait .l5r4-rank-control.-trait:has(:focus-visible) .l5r4-rank-control-arrow.-up,
 .l5r4.pc .traits-rings .l5r4-void-points .l5r4-rank-control.-trait:hover .l5r4-rank-control-arrow.-up,
+.l5r4.pc .traits-rings .l5r4-void-points .l5r4-rank-control.-trait:has(:focus-visible) .l5r4-rank-control-arrow.-up,
 .l5r4.npc .traits-rings .l5r4-trait .l5r4-rank-control.-trait:hover .l5r4-rank-control-arrow.-up,
-.l5r4.npc .traits-rings .l5r4-void-points .l5r4-rank-control.-trait:hover .l5r4-rank-control-arrow.-up {
+.l5r4.npc .traits-rings .l5r4-trait .l5r4-rank-control.-trait:has(:focus-visible) .l5r4-rank-control-arrow.-up,
+.l5r4.npc .traits-rings .l5r4-void-points .l5r4-rank-control.-trait:hover .l5r4-rank-control-arrow.-up,
+.l5r4.npc .traits-rings .l5r4-void-points .l5r4-rank-control.-trait:has(:focus-visible) .l5r4-rank-control-arrow.-up {
   top: -16px;
 }
-.l5r4.pc .traits-rings .l5r4-trait .l5r4-rank-control.-trait:hover .l5r4-rank-control-arrow.-down,
+.l5r4.pc .traits-rings .l5r4-trait .l5r4-rank-control.-trait:hover .l5r4-rank-control-arrow.-down, .l5r4.pc .traits-rings .l5r4-trait .l5r4-rank-control.-trait:has(:focus-visible) .l5r4-rank-control-arrow.-down,
 .l5r4.pc .traits-rings .l5r4-void-points .l5r4-rank-control.-trait:hover .l5r4-rank-control-arrow.-down,
+.l5r4.pc .traits-rings .l5r4-void-points .l5r4-rank-control.-trait:has(:focus-visible) .l5r4-rank-control-arrow.-down,
 .l5r4.npc .traits-rings .l5r4-trait .l5r4-rank-control.-trait:hover .l5r4-rank-control-arrow.-down,
-.l5r4.npc .traits-rings .l5r4-void-points .l5r4-rank-control.-trait:hover .l5r4-rank-control-arrow.-down {
+.l5r4.npc .traits-rings .l5r4-trait .l5r4-rank-control.-trait:has(:focus-visible) .l5r4-rank-control-arrow.-down,
+.l5r4.npc .traits-rings .l5r4-void-points .l5r4-rank-control.-trait:hover .l5r4-rank-control-arrow.-down,
+.l5r4.npc .traits-rings .l5r4-void-points .l5r4-rank-control.-trait:has(:focus-visible) .l5r4-rank-control-arrow.-down {
   bottom: -16px;
 }
 .l5r4.pc .traits-rings .l5r4-trait .l5r4-rank-control.-trait .l5r4-rank-control-arrow.-up,
@@ -1345,13 +1467,18 @@ body > * {
   background-color: inherit;
   border: 1px solid black;
   border-color: inherit;
+  border-radius: 0;
   color: inherit;
   display: flex;
+  font-family: inherit;
   font-size: 10px;
   height: 16px;
   justify-content: center;
   left: -2px;
+  line-height: inherit;
+  min-height: 0;
   opacity: 0;
+  padding: 0;
   position: absolute;
   right: -1px;
   transition: opacity 150ms ease-out, top 150ms ease-out, bottom 150ms ease-out;
@@ -1430,10 +1557,10 @@ body > * {
 .l5r4.npc .traits-rings .l5r4-trait.-earth.-willpower .l5r4-button.-roll {
   border: 1px solid var(--l5r4-color-ring-earth);
 }
-.l5r4.pc .traits-rings .l5r4-trait.-earth.-stamina .l5r4-button.-roll span:not(.l5r4-button-under),
-.l5r4.pc .traits-rings .l5r4-trait.-earth.-willpower .l5r4-button.-roll span:not(.l5r4-button-under),
-.l5r4.npc .traits-rings .l5r4-trait.-earth.-stamina .l5r4-button.-roll span:not(.l5r4-button-under),
-.l5r4.npc .traits-rings .l5r4-trait.-earth.-willpower .l5r4-button.-roll span:not(.l5r4-button-under) {
+.l5r4.pc .traits-rings .l5r4-trait.-earth.-stamina .l5r4-button.-roll .l5r4-button-face,
+.l5r4.pc .traits-rings .l5r4-trait.-earth.-willpower .l5r4-button.-roll .l5r4-button-face,
+.l5r4.npc .traits-rings .l5r4-trait.-earth.-stamina .l5r4-button.-roll .l5r4-button-face,
+.l5r4.npc .traits-rings .l5r4-trait.-earth.-willpower .l5r4-button.-roll .l5r4-button-face {
   background: var(--l5r4-color-ring-earth);
 }
 .l5r4.pc .traits-rings .l5r4-trait.-water.-strength,
@@ -1456,10 +1583,10 @@ body > * {
 .l5r4.npc .traits-rings .l5r4-trait.-water.-perception .l5r4-button.-roll {
   border: 1px solid var(--l5r4-color-ring-water);
 }
-.l5r4.pc .traits-rings .l5r4-trait.-water.-strength .l5r4-button.-roll span:not(.l5r4-button-under),
-.l5r4.pc .traits-rings .l5r4-trait.-water.-perception .l5r4-button.-roll span:not(.l5r4-button-under),
-.l5r4.npc .traits-rings .l5r4-trait.-water.-strength .l5r4-button.-roll span:not(.l5r4-button-under),
-.l5r4.npc .traits-rings .l5r4-trait.-water.-perception .l5r4-button.-roll span:not(.l5r4-button-under) {
+.l5r4.pc .traits-rings .l5r4-trait.-water.-strength .l5r4-button.-roll .l5r4-button-face,
+.l5r4.pc .traits-rings .l5r4-trait.-water.-perception .l5r4-button.-roll .l5r4-button-face,
+.l5r4.npc .traits-rings .l5r4-trait.-water.-strength .l5r4-button.-roll .l5r4-button-face,
+.l5r4.npc .traits-rings .l5r4-trait.-water.-perception .l5r4-button.-roll .l5r4-button-face {
   background: var(--l5r4-color-ring-water);
 }
 .l5r4.pc .traits-rings .l5r4-trait.-fire.-agility,
@@ -1482,10 +1609,10 @@ body > * {
 .l5r4.npc .traits-rings .l5r4-trait.-fire.-intelligence .l5r4-button.-roll {
   border: 1px solid var(--l5r4-color-ring-fire);
 }
-.l5r4.pc .traits-rings .l5r4-trait.-fire.-agility .l5r4-button.-roll span:not(.l5r4-button-under),
-.l5r4.pc .traits-rings .l5r4-trait.-fire.-intelligence .l5r4-button.-roll span:not(.l5r4-button-under),
-.l5r4.npc .traits-rings .l5r4-trait.-fire.-agility .l5r4-button.-roll span:not(.l5r4-button-under),
-.l5r4.npc .traits-rings .l5r4-trait.-fire.-intelligence .l5r4-button.-roll span:not(.l5r4-button-under) {
+.l5r4.pc .traits-rings .l5r4-trait.-fire.-agility .l5r4-button.-roll .l5r4-button-face,
+.l5r4.pc .traits-rings .l5r4-trait.-fire.-intelligence .l5r4-button.-roll .l5r4-button-face,
+.l5r4.npc .traits-rings .l5r4-trait.-fire.-agility .l5r4-button.-roll .l5r4-button-face,
+.l5r4.npc .traits-rings .l5r4-trait.-fire.-intelligence .l5r4-button.-roll .l5r4-button-face {
   background: var(--l5r4-color-ring-fire);
 }
 .l5r4.pc .traits-rings .l5r4-trait.-air.-reflexes,
@@ -1508,10 +1635,10 @@ body > * {
 .l5r4.npc .traits-rings .l5r4-trait.-air.-awareness .l5r4-button.-roll {
   border: 1px solid rgb(var(--air-ring-color));
 }
-.l5r4.pc .traits-rings .l5r4-trait.-air.-reflexes .l5r4-button.-roll span:not(.l5r4-button-under),
-.l5r4.pc .traits-rings .l5r4-trait.-air.-awareness .l5r4-button.-roll span:not(.l5r4-button-under),
-.l5r4.npc .traits-rings .l5r4-trait.-air.-reflexes .l5r4-button.-roll span:not(.l5r4-button-under),
-.l5r4.npc .traits-rings .l5r4-trait.-air.-awareness .l5r4-button.-roll span:not(.l5r4-button-under) {
+.l5r4.pc .traits-rings .l5r4-trait.-air.-reflexes .l5r4-button.-roll .l5r4-button-face,
+.l5r4.pc .traits-rings .l5r4-trait.-air.-awareness .l5r4-button.-roll .l5r4-button-face,
+.l5r4.npc .traits-rings .l5r4-trait.-air.-reflexes .l5r4-button.-roll .l5r4-button-face,
+.l5r4.npc .traits-rings .l5r4-trait.-air.-awareness .l5r4-button.-roll .l5r4-button-face {
   background: rgb(var(--air-ring-color));
 }
 .l5r4.pc .traits-rings .l5r4-trait.-earth.-willpower,
@@ -1691,15 +1818,22 @@ body > * {
 .l5r4.pc .traits-rings .l5r4-void-points-dots,
 .l5r4.npc .traits-rings .l5r4-void-points-dots {
   align-items: center;
+  background: none;
+  border: none;
+  border-radius: 0;
   cursor: pointer;
   display: flex;
   gap: 2px;
+  height: auto;
+  min-height: 0;
+  padding: 0;
 }
 .l5r4.pc .traits-rings .void-dot,
 .l5r4.npc .traits-rings .void-dot {
   border: 2px solid #666;
   border-radius: 50%;
   height: 12px;
+  pointer-events: auto;
   width: 12px;
 }
 .l5r4.pc .traits-rings .void-dot:hover,
@@ -1735,8 +1869,10 @@ body > * {
   color: var(--table-header-text-color);
   cursor: pointer;
   display: flex;
+  font: inherit;
   font-size: var(--font-size-16);
   line-height: 1;
+  min-height: 0;
   padding: 0.25rem 0;
   text-align: center;
   transition: all 150ms ease-out;
@@ -1846,10 +1982,24 @@ body > * {
 .l5r4-xp-manager .l5r4-xp-manager-breakdown li:last-child {
   border-block-end: none;
 }
+.l5r4-xp-manager .l5r4-xp-manager-cap,
+.l5r4-xp-manager .l5r4-sort-header-button {
+  background: none;
+  border: none;
+  border-radius: 0;
+  color: inherit;
+  display: inline;
+  font: inherit;
+  height: auto;
+  line-height: inherit;
+  min-height: 0;
+  padding: 0;
+  text-align: start;
+}
 .l5r4-xp-manager .l5r4-item-row-list.l5r4-sort-header {
   border-inline-start: 1px solid var(--table-header-border-color);
 }
-.l5r4-xp-manager .l5r4-item-row-list .title {
+.l5r4-xp-manager .l5r4-item-row-list .l5r4-item-row-name {
   align-items: center;
   display: inline-flex;
   font-size: var(--font-size-18);
@@ -1948,6 +2098,10 @@ body > * {
   border: 1px solid var(--color-border);
   display: block;
   inline-size: 1.5rem;
+}
+.l5r4-design-gallery .l5r4-design-gallery-chip rect {
+  height: 100%;
+  width: 100%;
 }
 .l5r4-design-gallery .l5r4-design-gallery-type.-meta {
   font-size: var(--l5r4-font-size-meta);

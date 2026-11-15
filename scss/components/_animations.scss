@@ -29,12 +29,14 @@
       width: 100%;
     }
 
-    .button {
+    // The face is a <button>; this rule overrides core's button look with the sprite
+    .l5r4-button-face {
       background: var(--button-hover-background-color);
       border: none;
       border-radius: 0;
       color: var(--button-hover-text-color);
       cursor: pointer;
+      display: inline-flex;
       font-weight: bold;
       height: 100%;
       mask: url("../assets/animation/urban-sprite.webp");

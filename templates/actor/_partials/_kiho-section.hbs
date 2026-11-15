@@ -1,15 +1,15 @@
-<section class="flexcol -gap-sm">
+<section class="l5r4-section flexcol -gap-sm">
   <div class="flexrow -gap-sm l5r4-section-title{{#if collapsedSections.kihos}} is-collapsed{{/if}}" data-scope="kihos">
     <h4 class="l5r4-section-heading">{{localize "l5r4.ui.sheets.kiho"}}</h4>
     {{> "systems/l5r4-enhanced/templates/actor/_partials/_unified-item-create.hbs"}}
-    {{> "systems/l5r4-enhanced/templates/actor/_partials/_expand.hbs"}}
+    {{> "systems/l5r4-enhanced/templates/actor/_partials/_expand.hbs" collapsed=collapsedSections.kihos}}
   </div>
   <section class="l5r4-item-row-list -kiho l5r4-sort-header" data-scope="kihos">
     <div class="l5r4-item-row">
-      <a class="l5r4-sort-header-button" data-action="sort-items" data-sortby="name">{{localize "l5r4.ui.common.name"}}</a>
-      <a class="l5r4-sort-header-button" data-action="sort-items" data-sortby="ring">{{localize "l5r4.ui.common.ring"}}</a>
-      <a class="l5r4-sort-header-button" data-action="sort-items" data-sortby="mastery">{{localize "l5r4.ui.common.mastery"}}</a>
-      <a class="l5r4-sort-header-button" data-action="sort-items" data-sortby="type">{{localize "l5r4.ui.common.type"}}</a>
+      <button type="button" class="l5r4-sort-header-button" data-action="sort-items" data-sortby="name">{{localize "l5r4.ui.common.name"}}</button>
+      <button type="button" class="l5r4-sort-header-button" data-action="sort-items" data-sortby="ring">{{localize "l5r4.ui.common.ring"}}</button>
+      <button type="button" class="l5r4-sort-header-button" data-action="sort-items" data-sortby="mastery">{{localize "l5r4.ui.common.mastery"}}</button>
+      <button type="button" class="l5r4-sort-header-button" data-action="sort-items" data-sortby="type">{{localize "l5r4.ui.common.type"}}</button>
       <span></span>
     </div>
   </section>

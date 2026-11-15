@@ -2,17 +2,17 @@
   "l5r4": {
     "apps": {
       "armorConfig": {
-        "title": "Armor Configuration",
         "errors": {
           "updateFailed": "Failed to update armor configuration"
-        }
+        },
+        "title": "Armor Configuration"
       },
       "combatConfig": {
-        "title": "Combat Configuration",
         "errors": {
           "openFailed": "Failed to open Combat Configuration",
           "updateFailed": "Failed to update combat configuration"
-        }
+        },
+        "title": "Combat Configuration"
       },
       "compendiumBrowser": {
         "add": "Add",
@@ -60,11 +60,11 @@
         "yes": "Yes"
       },
       "conditionManager": {
-        "title": "Condition Manager",
         "errors": {
           "openFailed": "Failed to open Condition Manager",
           "updateFailed": "Failed to update condition manager"
-        }
+        },
+        "title": "Condition Manager"
       },
       "designGallery": {
         "color": {
@@ -121,8 +121,8 @@
           "builtOn": "Built on {core}",
           "color": "Color",
           "contrast": "Contrast",
-          "frameSample": "Aa",
           "frames": "Frames, motion, layers, and states",
+          "frameSample": "Aa",
           "icons": "Icons",
           "meets": "{ratio} against {against}: meets {minimum}",
           "noRatio": "No ratio",
@@ -291,8 +291,8 @@
           "rowControls": "Row controls",
           "save": "Save",
           "sixTabs": "Six tabs",
-          "skillRows": "Skills: a School Skill and a long name",
           "skilledRoll": "Skilled roll: a 10 exploded",
+          "skillRows": "Skills: a School Skill and a long name",
           "slotCounts": "Spell slots 0, 1, 3, and 9",
           "sortHeader": "Sortable heads and a plain one",
           "spellRows": "Spells",
@@ -340,22 +340,23 @@
         "uses": "Uses left: {left} of {max}"
       },
       "emphasisManager": {
-        "custom": "Custom",
-        "hint": "Select which emphases are available for this skill. Train them on the character sheet.",
-        "manage": "Manage Emphases",
-        "noEmphases": "No emphases in list",
-        "title": "Emphasis Manager",
         "addCustom": "Add Custom Emphasis",
+        "custom": "Custom",
+        "emphasisName": "Emphasis name",
         "errors": {
           "saveFailed": "Failed to save custom emphasis",
           "updateFailed": "Failed to update emphasis manager"
-        }
+        },
+        "hint": "Select which emphases are available for this skill. Train them on the character sheet.",
+        "manage": "Manage Emphases",
+        "noEmphases": "No emphases in list",
+        "title": "Emphasis Manager"
       },
       "npcAttackConfig": {
-        "title": "NPC Attack Configuration",
         "errors": {
           "updateFailed": "Failed to update NPC attack configuration"
-        }
+        },
+        "title": "NPC Attack Configuration"
       },
       "wealthManager": {
         "add": "Add",
@@ -368,10 +369,6 @@
         "convertZeniToBu": "Convert 10 Zeni to 1 Bu",
         "currentWealth": "Current Wealth",
         "denomination": "Denomination",
-        "open": "Manage Wealth",
-        "remove": "Remove",
-        "removeMoney": "Remove Money",
-        "title": "Wealth Manager",
         "errors": {
           "addMoneyFailed": "Failed to add money",
           "convertFailed": "Failed to convert currency",
@@ -379,635 +376,86 @@
           "insufficientFunds": "Insufficient funds for this transaction",
           "openFailed": "Failed to open Wealth Manager",
           "removeMoneyFailed": "Failed to remove money"
-        }
+        },
+        "open": "Manage Wealth",
+        "remove": "Remove",
+        "removeMoney": "Remove Money",
+        "title": "Wealth Manager"
       },
       "woundConfig": {
-        "title": "Wound Configuration",
         "errors": {
           "invalidWoundConfigValue": "Invalid wound configuration value",
           "openFailed": "Failed to open Wound Configuration",
           "updateFailed": "Failed to update wound configuration"
-        }
+        },
+        "title": "Wound Configuration"
       },
       "xpManager": {
+        "disadvantageCapTitle": "Set Disadvantage Cap",
         "errors": {
           "openFailed": "Failed to open XP Manager"
         },
-        "title": "XP Manager",
-        "disadvantageCapTitle": "Set Disadvantage Cap"
-      }
-    },
-    "ui": {
-      "statusEffects": {
-        "blinded": "Blinded",
-        "concentration": "Concentration",
-        "dazed": "Dazed",
-        "dead": "Dead",
-        "entangled": "Entangled",
-        "fasting": "Fasting",
-        "fatigued": "Fatigued",
-        "feared": "Feared",
-        "grappled": "Grappled",
-        "guarded": "Guarded",
-        "guarding": "Guarding",
-        "mounted": "Mounted/Higher",
-        "prone": "Prone",
-        "stunned": "Stunned"
-      },
-      "tabs": {
-        "details": "Details",
-        "modifiers": "Modifiers",
-        "description": "Description",
-        "effects": "Active Effects",
-        "rules": "Rules"
-      },
-      "check": {
-        "allKept": "All",
-        "armor": "Armor",
-        "caller": "Bonus",
-        "castSpell": "Cast as a spell",
-        "contest": "Contested Roll",
-        "contestTie": "Tie: roll again.",
-        "contestWinner": "{name} wins.",
-        "damageFor": "Damage for",
-        "effects": "Active Effects",
-        "freeRaisesToTn": "Free Raises spent on the TN",
-        "increasedDamage": "Increased Damage (Raises)",
-        "keepFewer": "Keep only",
-        "manual": "Situational",
-        "max": "max",
-        "min": "min",
-        "actionNote": "{action} (from {source})",
-        "actions": {
-          "free": "Free Action",
-          "simple": "Simple Action",
-          "complex": "Complex Action"
-        },
-        "modifiers": "Modifiers",
-        "of": "of",
-        "pool": "Pool",
-        "range": {
-          "melee": "melee",
-          "ranged": "ranged"
-        },
-        "rerollKeepBetter": "Re-roll, keep the better",
-        "rerolledKeptBetter": "re-rolled, better kept",
-        "schoolRank": "School Rank",
-        "spellSlot": "Spell slot",
-        "statBlock": "Stat block",
-        "substitutes": "Substitutions",
-        "unskilledHint": "Unskilled Roll: dice do not explode, and no Raises or Free Raises apply.",
-        "void": "Spend a Void Point (+1k1)",
-        "voidSkill": "Spend a Void Point: Skill Rank 1",
-        "voidSkillHint": "With no ranks in the Skill, a Void Point lets this roll count as Rank 1: one more die, dice explode, and Raises apply (p.78). Without it, the Raises above are ignored."
-      },
-      "effects": {
-        "alreadyEnded": "That effect has already ended.",
-        "applyTo": "{effect} on {target}",
-        "centered": "Centered",
-        "concentrationUpkeep": "{effect}: spend a Simple Action this Round to keep concentrating, or end it.",
-        "endEncounter": "End encounter",
-        "endEncounterConfirm": "End the encounter? Fear and every other effect lasting until the encounter ends will end now.",
-        "expiry": {
-          "encounterEnd": "End of the encounter"
-        },
-        "proneLargeWeapon": "Prone: a large weapon cannot attack until its wielder stands.",
-        "fullDefense": "Full Defense",
-        "immune": "{actor} is immune to {effect}.",
-        "noGM": "No GM is connected to apply that effect.",
-        "saveText": "{roll} roll against TN {tn}.",
-        "saveTitle": "{effect}: save",
-        "stanceNotAllowed": "{condition} rules out {stance}.",
-        "voidArmor": "Void: Armor TN +10",
-        "voidLimit": "{name} has already spent a Void Point this Round.",
-        "voidSpentThisRound": "A Void Point was already spent this Round; one per Round is the usual limit."
-      },
-      "rules": {
-        "hint": "Each rule as a form, or the whole list as JSON. ACTIVE_EFFECTS.md lists the rule keys and their fields.",
-        "invalidJson": "Rules not saved: the text is not valid JSON ({error}).",
-        "notList": "Rules not saved: the text must be a JSON list of objects, each with a \"key\".",
-        "add": "Add rule",
-        "delete": "Remove this rule",
-        "key": "Rule key",
-        "none": "No rules.",
-        "formView": "Edit as forms",
-        "jsonView": "Edit as JSON",
-        "effectSheet": "L5R4 Active Effect sheet (with Rules)"
-      },
-      "ruleSummary": {
-        "heading": "What it does",
-        "RollModifier": "{bonus} on {rolls}",
-        "TNModifier": "TN {value} on {rolls}",
-        "ArmorTN": "Armor TN {value}",
-        "Reduction": "Reduction {value}",
-        "Wounds": "Wounds per Wound Rank {perRank}, Wound Rank penalties {penalty}",
-        "Initiative": "Initiative {bonus}",
-        "FreeRaise": "Free Raises on {rolls}: {value}",
-        "DiceRule": "Dice explode on {explode} or higher on {rolls}",
-        "Substitute": "May roll {with} in place of {replace} on {rolls}",
-        "TraitAdjust": "{trait} {value}",
-        "Note": "Note on {rolls}: {text}",
-        "RollOption": "Roll option: {option}",
-        "Movement": "Water {value} for movement",
-        "ApplyCondition": "A successful roll on {rolls} can apply {condition}",
-        "ConditionImmunity": "Immune to {condition}",
-        "PeriodicSave": "Ends on a {roll} roll against TN {tn}",
-        "Resource": "Uses of {slug}: {max} per {per}",
-        "DamageSource": "{rolls} count as {tags}",
-        "Invulnerability": "Invulnerable: harmed only by {harmedBy}",
-        "Spirit": "Spirit: damage halved unless from {harmedBy}",
-        "OpponentModifier": "{bonus} on {rolls} made against this character",
-        "RaiseRule": "{maneuver} costs {cost} Raises on {rolls}",
-        "UnskilledAs": "{rolls} without ranks count as Rank {rank}",
-        "ActionCost": "{rolls}: {action}",
-        "Cost": "XP price of {what}: {value}",
-        "Ledger": "{track} {direction}: {value}",
-        "Prerequisite": "Requires {requires}",
-        "ChoiceSet": "Choice when added: {prompt}",
-        "GrantItem": "Grants {item} at School Rank {rank}",
-        "reductionExcept": "Reduction {value}, except against {except}",
-        "rerollOnes": "Re-roll 1s on {rolls}",
-        "ignoreReduction": "Ignores {value} Reduction",
-        "raiseCap": "Raise limit {value} on {rolls}",
-        "raiseMinimum": "At least {value} Raises on {rolls}",
-        "chosen": "Chosen: {selection}",
-        "optional": "Optional: the roller picks the roll",
-        "unknown": "Unknown rule {key}",
-        "when": "{rule} (when {when})",
-        "text": "{text}",
-        "citation": "{book} p.{page}",
-        "range": {
-          "melee": "Melee attacks only",
-          "ranged": "Ranged attacks only"
-        },
-        "armorTn": {
-          "base": "Armor TN base becomes {value}",
-          "total": "Armor TN becomes {value}"
-        },
-        "selector": {
-          "any": "every roll",
-          "skill": "Skill rolls",
-          "trait": "Trait rolls",
-          "ring": "Ring rolls",
-          "attack": "attack rolls",
-          "damage": "damage rolls",
-          "spell": "Spell Casting Rolls",
-          "maho": "maho rolls",
-          "named": "{name} rolls",
-          "skill-type": "{name} Skill rolls",
-          "skill-tag": "{name} Skill rolls"
-        },
-        "per": {
-          "turn": "Turn",
-          "round": "Round",
-          "skirmish": "skirmish",
-          "day": "day"
-        },
-        "maneuver": {
-          "calledShot": "Called Shot",
-          "disarm": "Disarm",
-          "extraAttack": "Extra Attack",
-          "feint": "Feint",
-          "knockdown": "Knockdown"
-        },
-        "action": {
-          "free": "a Free Action",
-          "simple": "a Simple Action",
-          "complex": "a Complex Action"
-        },
-        "direction": {
-          "gain": "gains",
-          "loss": "losses"
-        },
-        "priced": {
-          "self": "this item",
-          "emphasis": "an Emphasis",
-          "items": "every {type} item"
-        }
-      },
-      "sources": {
-        "core": "Core Rulebook"
-      },
-      "taint": {
-        "label": "Shadowlands Taint",
-        "embrace": "Embrace the Taint (+1k1)",
-        "embraceHint": "Gain a point of Taint for +1k1 on this roll.",
-        "embraceReason": "Embraced the Taint",
-        "lost": "Lost (Taint Rank)"
-      },
-      "links": {
-        "checkTn": "{what}, TN {tn}",
-        "damage": "{pool} damage",
-        "errors": {
-          "condition": "unknown condition id",
-          "fear": "the Fear Rank must be a whole number from 1 to 10",
-          "nothingToRoll": "name a skill, trait, or ring",
-          "pool": "write the pool as XkY, each from 1 to 30, with an optional +N or -N",
-          "ring": "unknown Ring; use air, earth, fire, water, or void",
-          "skillWithRing": "a Skill rolls with a Trait or the Void Ring, not a Ring",
-          "syntax": "write it as key=value|key=value",
-          "tn": "the TN must be a whole number from 1 to 999",
-          "trait": "unknown Trait; use sta, wil, str, per, ref, awa, agi, or int",
-          "traitAndRing": "a Trait and a Ring cannot both be rolled",
-          "unknownKey": "unknown key; use skill, trait, ring, or tn"
-        },
-        "fear": "Fear {rank}",
-        "needTrait": "{name} has no {skill} Skill, and the link names no Trait to roll it Unskilled with.",
-        "noActor": "Select a token or assign a character to roll this link.",
-        "noTargets": "Target or select the tokens this link acts on.",
-        "request": "Ask the players to roll this",
-        "requestTitle": "The GM asks for a roll",
-        "requestRoll": "Roll with my character"
-      },
-      "floating": {
-        "wounds": "Wounds",
-        "void": "Void Points"
-      },
-      "macros": {
-        "missing": "This macro's item or character no longer exists, or cannot be rolled from a macro."
-      },
-      "honorRoll": {
-        "button": "Honor Roll",
-        "used": "{name} has already made an Honor Roll this session.",
-        "noDice": "{name} has no Honor Rank to call on for an Honor Roll.",
-        "failedReason": "Failed an Honor Roll"
-      },
-      "session": {
-        "new": "New session",
-        "confirm": "Start a new game session? Every character gets its Honor Roll back.",
-        "started": "A new game session has begun."
-      },
-      "ledger": {
-        "title": "Ledger",
-        "track": "Track",
-        "points": "Points (negative to lose)",
-        "reason": "Reason",
-        "record": "Record",
-        "hint": "Record a gain or loss of Honor, Glory, Status, or Taint with its reason. Ten points make a rank; the character's Ledger rules may change the amount.",
-        "tracks": {
-          "honor": "Honor",
-          "glory": "Glory",
-          "status": "Status",
-          "taint": "Taint"
-        }
-      },
-      "grants": {
-        "granted": "{name} gains {item} from {giver} (School Rank {rank}).",
-        "schoolRankHint": "0 follows the character's Insight Rank. Set it for a character with Multiple Schools."
-      },
-      "purchase": {
-        "choose": "Choose",
-        "noOptions": "{name} has a choice with nothing to choose from; it was not added.",
-        "unmet": "{name} needs: {list}.",
-        "unmetTitle": "Prerequisites not met",
-        "addAnyway": "Add it anyway?",
-        "schoolTitle": "A second School",
-        "schoolQuestion": "{name} already studies at {schools}. Replace it, or add {school} as another School (an Advanced School, or the Multiple Schools Advantage)?",
-        "schoolReplace": "Replace",
-        "schoolAdd": "Add as another School"
-      },
-      "activation": {
-        "start": "Activate",
-        "end": "End"
-      },
-      "transfer": {
-        "export": "Export items with rules",
-        "import": "Import items with rules",
-        "importHint": "Choose a file exported from an Item folder. Its items go into a new folder here.",
-        "exported": "Exported {count} items from {folder}.",
-        "imported": "Imported items",
-        "importedCount": "Imported {count} items into {folder}.",
-        "invalidJson": "That file is not valid JSON.",
-        "notExport": "That file is not an export of items with rules."
-      },
-      "mechanics": {
-        "rings": {
-          "ring": "Ring",
-          "fire": "Fire",
-          "water": "Water",
-          "air": "Air",
-          "earth": "Earth",
-          "void": "Void",
-          "voidPoints": "Void Points",
-          "all": "All",
-          "voidTnBoost": "Use Void",
-          "voidInitBoost": "Use Void"
-        },
-        "traits": {
-          "sta": "Stamina",
-          "wil": "Willpower",
-          "str": "Strength",
-          "per": "Perception",
-          "ref": "Reflexes",
-          "awa": "Awareness",
-          "agi": "Agility",
-          "int": "Intelligence"
-        },
-        "rolls": {
-          "socialResistanceDescription": "Resisting Intimidation or Temptation",
-          "success": "Success",
-          "failure": "Failure",
-          "missed": "Missed",
-          "explodesOn": "Explodes On",
-          "unskilled": "Unskilled",
-          "traitRoll": "Trait Roll",
-          "ringRoll": "Ring Roll",
-          "skillRoll": "Skill Roll",
-          "damageRoll": "Damage Roll",
-          "attackRoll": "Attack Roll",
-          "spellCasting": "Spell Casting Roll",
-          "emphasis": "Emphasis",
-          "raise": "Raise",
-          "raises": "Raises",
-          "freeRaises": "Free Raises",
-          "socialResistance": "Social Resistance"
-        },
-        "combat": {
-          "attack": "Attack",
-          "woundPenalty": "Wound Penalty"
-        },
-        "wounds": {
-          "applied": "Applied {amount} wounds to {name}",
-          "appliedWithArmor": "{name} took {original} damage. Armor reduced by {reduction}. Applied {final} wounds.",
-          "armorTn": "Armor TN",
-          "armorTnBase": "Armor TN Base",
-          "armorReduction": "Reduction",
-          "label": "Wounds",
-          "reducedApplied": "Void Point spent: Reduced damage by 10. Applied {amount} wounds to {name}",
-          "reducedWithArmor": "{name} took {original} damage. Void reduced to {afterVoid}, armor reduced by {reduction}. Applied {final} wounds.",
-          "status": "Wounds: {current}/{max} (suffered: {suffered})",
-          "suffered": "Wounds Suffered",
-          "woundLevel": "Level",
-          "maxWounds": "Max Wounds",
-          "penalty": "Penalty",
-          "woundHealRate": "Rate of Wound Heal",
-          "healRateFormula": "x 2 +",
-          "woundMode": "Wound Mode",
-          "manual": "Manual",
-          "formula": "Formula",
-          "earthMultiplier": "Earth Multiplier",
-          "woundBonus": "Wound Bonus",
-          "threshold": "Threshold",
-          "healthy": "Healthy",
-          "nicked": "Nicked",
-          "grazed": "Grazed",
-          "hurt": "Hurt",
-          "injured": "Injured",
-          "crippled": "Crippled",
-          "down": "Down",
-          "out": "Out",
-          "applyHealing": "Apply Healing",
-          "applyHealingTitle": "Apply natural healing from rest",
-          "naturalHealing": "Natural Healing",
-          "restedAndRecovered": "rested and recovered wounds",
-          "healingApplied": "Healed {amount} wounds (heal rate: {rate})",
-          "fullyHealed": "Fully healed!",
-          "alreadyFullHealth": "{name} is already at full health",
-          "noHealRate": "{name} has no healing rate configured",
-          "healingFailed": "Failed to apply healing to {name}",
-          "applyWounds": "Apply Wounds",
-          "reduceWithVoid": "Reduce with Void",
-          "noTokenSelected": "No token selected. Select a token to apply wounds.",
-          "noVoidPoints": "No Void Points available to reduce damage"
-        },
-        "stances": {
-          "attack": "Attack Stance",
-          "errors": {
-            "addFailed": "Failed to add stance",
-            "removeFailed": "Failed to remove stance"
-          },
-          "fullAttack": "Full Attack Stance",
-          "defense": "Defense Stance",
-          "fullDefense": "Full Defense Stance",
-          "center": "Center Stance",
-          "fullDefenseHint": "Make a Defense/Reflexes roll. Add half the result (rounded up) to your Armor TN for the duration of this stance."
-        },
-        "fear": {
-          "effectName": "Fear {rank}",
-          "clickToTest": "Click to test Fear against selected characters",
-          "label": "Fear {rank}",
-          "rank": "Fear Rank",
-          "testResult": "Fear {rank} Test",
-          "penaltyApplied": "Penalty: -{penalty}kO to all rolls",
-          "catastrophicFailure": "CATASTROPHIC FAILURE! Character flees or cowers helplessly.",
-          "noTargets": "No tokens selected for Fear test",
-          "noWillpower": "{character} has no Willpower trait",
-          "noFear": "This NPC has no Fear effect configured",
-          "testAgainst": "vs {creature}"
-        }
-      },
-      "common": {
-        "add": "Add",
-        "all": "All",
-        "complex": "Complex",
-        "initiative": "Initiative",
-        "modifier": "Modifier",
-        "roll": "Roll",
-        "cancel": "Cancel",
-        "ok": "OK",
-        "none": "None",
-        "keep": "Keep",
-        "bonus": "Bonus",
-        "multi": "Multiplier",
-        "rate": "Rate",
-        "current": "Current",
-        "total": "Total",
-        "effect": "Effect",
-        "simple": "Simple",
-        "free": "Free",
-        "action": "Action",
-        "edit": "Edit",
-        "delete": "Delete",
-        "name": "Name",
-        "conditions": "Conditions",
-        "active": "Active",
-        "new": "New",
-        "auto": "Auto",
-        "disabled": "disabled",
-        "rank": "Rank",
-        "clan": "Clan",
-        "school": "School",
-        "xp": "Experience Points",
-        "insight": "Insight",
-        "damage": "Damage",
-        "type": "Type",
-        "ring": "Ring",
-        "mastery": "Mastery",
-        "masteryXpHint": "Costs its Mastery Level in XP (pp.231, 259). A Cost rule changes the price: a monk's free kiho, or a non-Brotherhood school's higher one (p.266).",
-        "tn": "TN",
-        "cost": "Cost",
-        "save": "Save",
-        "armor": "Armor"
-      },
-      "combat": {
-        "maneuvers": "Maneuvers",
-        "maneuversHint": "Free Raises pay for maneuvers first, then declared Raises. Raises left over add +1k0 damage each.",
-        "calledShot": "Called Shot",
-        "calledShotLimb": "Limb (1 Raise)",
-        "calledShotHand": "Hand or foot (2 Raises)",
-        "calledShotHead": "Head (3 Raises)",
-        "calledShotSmall": "Eye, ear, finger (4 Raises)",
-        "calledShotLocation": "Called Shot location",
-        "calledShotNote": "Called Shot ({raises} Raises): {location}. The GM rules any effect on that part.",
-        "calledShotUnnamed": "unnamed part",
-        "feint": "Feint (2 Raises)",
-        "feintNote": "Feint: half the margin over the TN adds to damage (up to 5 × Insight Rank).",
-        "knockdown": "Knockdown (2 Raises, 4 vs four legs)",
-        "fourLegged": "Target has four or more legs",
-        "knockdownNote": "Knockdown: roll Contested Strength; the attacker winning knocks the target Prone.",
-        "disarm": "Disarm (3 Raises)",
-        "disarmNote": "Disarm: damage is 2k1 without Strength; roll Contested Strength, and the attacker winning makes the target drop the weapon.",
-        "extraAttack": "Extra Attack (5 Raises)",
-        "extraAttackNote": "Extra Attack: once this attack is resolved, damage included, make a second attack roll.",
-        "increasedDamageNote": "Increased Damage: +{dice}k0.",
-        "grappleManeuver": "Start a grapple (ignores armor)",
-        "grappleIgnoresArmor": "Grapple ignores armor",
-        "arrowArmor": {
-          "armor": "Armor Piercing arrow ignores armor",
-          "flesh": "Flesh Cutter arrow doubles armor"
-        },
-        "multipleTargets": "targets - TN not auto-set",
-        "npcInitiativeHint": "0 rolls Insight Rank 1 + Reflexes, keep Reflexes (p.81). Above 0 in both is this NPC's own pool.",
-        "grappleStart": "Start grapple with",
-        "notEnoughRaises": "The maneuvers cost {cost} Raises; declare enough Raises (or have Free Raises) to pay for them. Declared: {raises}.",
-        "contestStrength": "Roll Contested Strength",
-        "contestWaiting": "You have rolled; waiting for the other side.",
-        "knockedDown": "{name} is knocked Prone.",
-        "disarmed": "{name} drops the weapon.",
-        "sources": "Damage sources",
-        "applyTo": "Apply to",
-        "applySelected": "Apply to selected",
-        "resultTitle": "{name} takes {wounds} Wounds from {damage} damage",
-        "reductionNote": "Reduction {reduction}.",
-        "spiritNote": "Spirit: the damage is halved.",
-        "invulnerableNote": "Invulnerability: one Wound.",
-        "voidNote": "Void Point spent: {wounds} fewer Wounds.",
-        "killedNote": "Past the Out Wound Rank: marked Dead. The GM can remove the status.",
-        "undo": "Undo",
-        "undoneNote": "Undone.",
-        "unarmed": "Unarmed",
-        "guard": "Guard the targeted token",
-        "guardPick": "Select your token and target the one to guard.",
-        "guardFullAttack": "You cannot Guard in the Full Attack Stance.",
-        "duel": {
-          "start": "Iaijutsu duel: selected token against targeted token",
-          "pick": "Select one duelist's token and target the other's.",
-          "dazed": "{name} is Dazed and cannot fight an iaijutsu duel.",
-          "title": "Iaijutsu duel",
-          "assessment": "Assessment",
-          "focus": "Focus",
-          "strike": "Strike",
-          "done": "Over",
-          "assessmentEdge": "Assessment +10",
-          "facts": "Facts {name} learns: {count}.",
-          "edgeWon": "{name} gains {bonus} on Focus.",
-          "focusMastery": "Iaijutsu Mastery (Free Raise)",
-          "kharmic": "Kharmic strike: both strike at once.",
-          "firstStrike": "{name} strikes first, with {raises} Free Raises.",
-          "conceded": "{name} concedes.",
-          "roll": "Roll for {name}",
-          "concede": "{name} concedes"
-        },
-        "grapple": {
-          "title": "Grapple",
-          "control": "Grapple control",
-          "rollControl": "Control roll: {name}",
-          "inControl": "{name} is in control.",
-          "hit": "Hit",
-          "throw": "Throw",
-          "break": "Break",
-          "pass": "Pass",
-          "over": "Over",
-          "hitLog": "{name} hits for {total}.",
-          "thrown": "{name} is thrown Prone.",
-          "broken": "{name} breaks the grapple.",
-          "passed": "{name} keeps control.",
-          "weaponLost": "{name} gains two Free Raises to Disarm next Turn."
-        },
-        "vs": "vs"
-      },
-      "armor": {
-        "allowStacking": "Allow Armor Stacking"
-      },
-      "sheets": {
-        "background": "Background",
-        "skill": "Skill",
-        "skills": "Skills",
-        "weapon": "Weapon",
-        "weapons": "Weapons",
-        "armor": "Armor",
-        "item": "Item",
-        "items": "Items",
-        "addItem": "Add Item",
-        "notes": "Notes",
-        "spell": "Spell",
-        "spells": "Spells",
-        "technique": "Technique",
-        "techniques": "Techniques",
-        "advantage": "Advantage",
-        "advantages": "Advantages",
-        "disadvantage": "Disadvantage",
-        "disadvantages": "Disadvantages",
-        "kata": "Kata",
-        "kiho": "Kiho",
-        "tattoo": "Tattoo",
-        "tattoos": "Tattoos",
-        "tattooPassive": "Always active",
-        "tattooPassiveHint": "On: its rules apply while the character has it. Off: the play button on the character sheet activates it, one tattoo at a time, for twice the School Rank in Rounds.",
-        "equipment": "Equipment",
-        "abilities": "Abilities",
-        "character": "Character",
-        "rulesSummary": "Rules Summary",
-        "description": "Description",
-        "woundLevels": "Wound Levels",
-        "spellSlots": "Spell Slots",
-        "demands": "Demands"
-      },
-      "notifications": {
-        "actorNotFound": "Actor not found for damage roll",
-        "noPermissionDamage": "You don't have permission to roll damage for this actor",
-        "noValidWeapon": "No valid weapon found for attack roll",
-        "invalidRingForSpell": "Invalid ring for spell slot: {ring}",
-        "noActorForVoid": "No actor available for void point spending",
-        "schoolRankZero": "You can't cast a spell with School Rank reduced to zero",
-        "deficiencyBlocksCasting": "Deficiency in {ring} reduces your School Rank to zero - cannot cast",
-        "noSpellSlots": "You ran out of spell slots for this ring",
-        "noPermission": "You don't have permission to modify this actor",
-        "messageTooLong": "Message too long (max 10,000 characters)"
-      },
-      "hints": {
-        "leftRightToAdjust": "Left and Right to Adjust",
-        "leftClickPlusRightClickMinus": "Shift+Left click: +1, Shift+Right click: -1",
-        "voidPointsClickAdjust": "Left click: +1, Right click: -1",
-        "shiftClickRankPoints": "Shift+Click: ±0.1, Shift+Ctrl+Click: ±1.0",
-        "postToChat": "Post to chat",
-        "shiftClickToggleRankMode": "GM: Shift+Click to toggle between automatic and manual rank calculation"
-      },
-      "dialogs": {
-        "deleteItem": {
-          "title": "Delete Item?",
-          "content": "Are you sure you want to delete {name}?"
-        },
-        "deleteAttack": {
-          "title": "Remove Attack?",
-          "content": "Are you sure you want to remove {name}?"
-        },
-        "addAttack": "Add Attack"
+        "open": "Open the XP manager",
+        "title": "XP Manager"
       }
     },
     "character": {
-      "skills": {
-        "properties": {
-          "type": "Type",
-          "trait": "Trait",
-          "emphasis": "Emphases",
-          "school": "School skill",
-          "social": "Social Skill",
-          "socialHint": "Rules select Social Skills with skill-tag:social; Taint penalties reach them.",
-          "mastery3": "Rank 3 Mastery",
-          "mastery5": "Rank 5 Mastery",
-          "mastery7": "Rank 7 Mastery"
+      "advantages": {
+        "ancestor": "Ancestor",
+        "material": "Material",
+        "mental": "Mental",
+        "physical": "Physical",
+        "social": "Social",
+        "spiritual": "Spiritual"
+      },
+      "experience": {
+        "adjustExperience": "Adjust Experience",
+        "breakdown": {
+          "advantages": "Advantages",
+          "base": "Base",
+          "cap": "cap",
+          "disadvantagesGrant": "Disadvantages",
+          "kata": "Kata",
+          "kiho": "Kiho",
+          "manualAdjustments": "Manual adjustments",
+          "skills": "Skills",
+          "spells": "Spells",
+          "traits": "Traits",
+          "void": "Void"
         },
+        "disadvantageCapLabel": "Max XP",
+        "disadvantageCapTooltip": "Click to change the maximum XP gained from disadvantages",
+        "fallbackLabels": {
+          "skillCreated": "Skill Created",
+          "skillIncreased": "Skill Increased",
+          "traitIncrease": "Trait Increase",
+          "voidIncrease": "Void Increase"
+        },
+        "note": "Note",
+        "purchases": "Purchases",
+        "reason": "Reason",
+        "recalculate": "Recalculate XP purchases from current character state",
+        "skillChange": "{name} {from}→{to}",
+        "skillCreate": "{name} 0→{rank}",
+        "spellMemorized": "Memorized: {name}",
+        "summary": "Experience Summary",
+        "traitChange": "{label} {from}→{to}",
+        "usedTotal": "Used / Total",
+        "voidChange": "Void {from}→{to}",
+        "xpAmount": "Amount"
+      },
+      "movement": {
+        "feet": "ft",
+        "maximum": "Max Movement",
+        "title": "Movement"
+      },
+      "ranks": {
+        "gloryRank": "Glory",
+        "honorRank": "Honor",
+        "statusRank": "Status Rank",
+        "taintRank": "Shadowland Taint"
+      },
+      "skills": {
         "names": {
           "acting": "Acting",
           "animalHandling": "Animal Handling",
@@ -1017,8 +465,8 @@
           "calligraphy": "Calligraphy",
           "chainWeapons": "Chain Weapons",
           "commerce": "Commerce",
-          "craft": "Craft",
           "courtier": "Courtier",
+          "craft": "Craft",
           "defense": "Defense",
           "divination": "Divination",
           "engineering": "Engineering",
@@ -1051,122 +499,39 @@
           "temptation": "Temptation",
           "warFan": "War Fan",
           "weapons": "Weapons"
+        },
+        "properties": {
+          "emphasis": "Emphases",
+          "mastery3": "Rank 3 Mastery",
+          "mastery5": "Rank 5 Mastery",
+          "mastery7": "Rank 7 Mastery",
+          "school": "School skill",
+          "social": "Social Skill",
+          "socialHint": "Rules select Social Skills with skill-tag:social; Taint penalties reach them.",
+          "trait": "Trait",
+          "type": "Type"
         }
       },
       "skillTypes": {
-        "high": "High",
         "bugei": "Bugei",
-        "merch": "Merchant",
-        "low": "Low"
-      },
-      "advantages": {
-        "physical": "Physical",
-        "mental": "Mental",
-        "social": "Social",
-        "material": "Material",
-        "spiritual": "Spiritual",
-        "ancestor": "Ancestor"
-      },
-      "ranks": {
-        "honorRank": "Honor",
-        "gloryRank": "Glory",
-        "statusRank": "Status Rank",
-        "taintRank": "Shadowland Taint"
+        "high": "High",
+        "low": "Low",
+        "merch": "Merchant"
       },
       "stance": {
-        "title": "Combat",
-        "current": "Current Stance"
-      },
-      "movement": {
-        "title": "Movement",
-        "maximum": "Max Movement",
-        "feet": "ft"
-      },
-      "experience": {
-        "disadvantageCapTooltip": "Click to change the maximum XP gained from disadvantages",
-        "recalculate": "Recalculate XP purchases from current character state",
-        "summary": "Experience Summary",
-        "xpAmount": "Amount",
-        "note": "Note",
-        "reason": "Reason",
-        "adjustExperience": "Adjust Experience",
-        "usedTotal": "Used / Total",
-        "purchases": "Purchases",
-        "traitChange": "{label} {from}→{to}",
-        "voidChange": "Void {from}→{to}",
-        "skillCreate": "{name} 0→{rank}",
-        "skillChange": "{name} {from}→{to}",
-        "disadvantageCapLabel": "Max XP",
-        "breakdown": {
-          "base": "Base",
-          "disadvantagesGrant": "Disadvantages",
-          "cap": "cap",
-          "manualAdjustments": "Manual adjustments",
-          "traits": "Traits",
-          "void": "Void",
-          "skills": "Skills",
-          "advantages": "Advantages",
-          "kata": "Kata",
-          "kiho": "Kiho",
-          "spells": "Spells"
-        },
-        "fallbackLabels": {
-          "traitIncrease": "Trait Increase",
-          "voidIncrease": "Void Increase",
-          "skillCreated": "Skill Created",
-          "skillIncreased": "Skill Increased"
-        },
-        "spellMemorized": "Memorized: {name}"
+        "current": "Current Stance",
+        "title": "Combat"
       }
     },
     "equipment": {
-      "weapons": {
-        "attackType": "Attack Type",
-        "size": "Size",
-        "damageKeep": "Damage Keep",
-        "addsStrength": "Adds Strength",
-        "minStrength": "Minimum Strength",
-        "tnMounted": "Attack TN mounted",
-        "tnOnFoot": "Attack TN on foot",
-        "tnHint": "Added to the TN of attacks with this weapon while its wielder is Mounted, or while not: the dai-kyu is +10 on foot, the han-kyu +10 mounted (p.199).",
-        "belowMinStrength": "{name} needs Strength {min} to wield {weapon}.",
-        "belowMinStrengthGM": "Attack with it anyway?",
-        "meleeRange": "Bow at a target in melee range",
-        "addsStrengthHint": "Off for thrown weapons that add no Strength, such as shuriken.",
-        "explodes": "Dice Explode",
-        "explodesHint": "Off for weapons whose damage dice never explode, such as shuriken.",
-        "range": "Range",
-        "arrow": "Arrow",
-        "typeWeapon": "Weapon",
-        "typeBow": "Bow",
-        "rangedAttack": "Ranged Attack",
-        "associatedSkill": "Associated Skill",
-        "fallback": "Fallback",
-        "skillExample": {
-          "bow": "Kyujutsu",
-          "weapon": "Kenjutsu"
-        },
-        "arrows": {
-          "armor": "Armor Piercing",
-          "flesh": "Flesh Cutter",
-          "humming": "Humming Bulb",
-          "rope": "Rope Cutter",
-          "willow": "Willow Leaf"
-        },
-        "sizes": {
-          "small": "Small",
-          "medium": "Medium",
-          "large": "Large"
-        }
-      },
       "armor": {
-        "reduction": "Reduction",
         "equipped": "Equipped",
+        "reduction": "Reduction",
         "type": "Armor Type",
         "types": {
           "ashigaru": "Ashigaru Armor",
-          "light": "Light Armor",
           "heavy": "Heavy Armor",
+          "light": "Light Armor",
           "riding": "Riding Armor"
         }
       },
@@ -1175,61 +540,101 @@
         "keywordsPlaceholder": "e.g., Samurai, Peasant",
         "nemuranai": "Nemuranai",
         "price": "Price"
+      },
+      "weapons": {
+        "addsStrength": "Adds Strength",
+        "addsStrengthHint": "Off for thrown weapons that add no Strength, such as shuriken.",
+        "arrow": "Arrow",
+        "arrows": {
+          "armor": "Armor Piercing",
+          "flesh": "Flesh Cutter",
+          "humming": "Humming Bulb",
+          "rope": "Rope Cutter",
+          "willow": "Willow Leaf"
+        },
+        "associatedSkill": "Associated Skill",
+        "attackType": "Attack Type",
+        "belowMinStrength": "{name} needs Strength {min} to wield {weapon}.",
+        "belowMinStrengthGM": "Attack with it anyway?",
+        "damageKeep": "Damage Keep",
+        "explodes": "Dice Explode",
+        "explodesHint": "Off for weapons whose damage dice never explode, such as shuriken.",
+        "fallback": "Fallback",
+        "meleeRange": "Bow at a target in melee range",
+        "minStrength": "Minimum Strength",
+        "range": "Range",
+        "rangedAttack": "Ranged Attack",
+        "size": "Size",
+        "sizes": {
+          "large": "Large",
+          "medium": "Medium",
+          "small": "Small"
+        },
+        "skillExample": {
+          "bow": "Kyujutsu",
+          "weapon": "Kenjutsu"
+        },
+        "tnHint": "Added to the TN of attacks with this weapon while its wielder is Mounted, or while not: the dai-kyu is +10 on foot, the han-kyu +10 mounted (p.199).",
+        "tnMounted": "Attack TN mounted",
+        "tnOnFoot": "Attack TN on foot",
+        "typeBow": "Bow",
+        "typeWeapon": "Weapon"
       }
     },
     "magic": {
-      "spells": {
-        "areaOfEffect": "Area of Effect",
-        "range": "Range",
-        "duration": "Duration",
-        "cast": "Cast",
-        "raises": "Raises",
-        "affinity": "Affinity",
-        "deficiency": "Deficiency",
-        "shugenjaSchool": "Shugenja School",
-        "shugenjaSchoolHint": "Spell Casting Rolls add this School's Rank. Without one, they add the Insight Rank.",
-        "anyElement": "Any element",
-        "chooseElement": "Cast {spell} in which element?",
-        "aboveSchoolRank": "{spell} is Mastery Level {mastery}; {name} can cast spells up to {limit} in this element (p.164).",
-        "aboveSchoolRankGM": "Cast it anyway?",
-        "maho": "Maho",
-        "useSpellSlot": "Use Spell Slot",
-        "voidSlot": "Use Void Spell Slot",
-        "slotsRestored": "All spell slots restored to maximum",
-        "restored": "restored",
-        "memorized": "Memorized"
-      },
-      "maho": {
-        "casting": "Maho Casting",
-        "warningTitle": "Blood Magic - Forbidden Maho",
-        "bloodRequired": "Blood Cost Required",
-        "additionalBloodBonus": "Each additional blood cost amount grants +1 Free Raise",
-        "bloodSource": {
-          "label": "Blood Source",
-          "self": "Self",
-          "other": "Other"
-        },
-        "additionalBlood": "Additional Blood",
-        "bloodCost": "Blood",
-        "taintGained": "Taint Gained",
-        "taintGainedNotification": "Gained {taint} points of Shadowlands Taint from maho casting"
-      },
       "kiho": {
         "internal": "Internal",
         "karmic": "Karmic",
         "martial": "Martial",
         "mystic": "Mystic"
+      },
+      "maho": {
+        "additionalBlood": "Additional Blood",
+        "additionalBloodBonus": "Each additional blood cost amount grants +1 Free Raise",
+        "bloodCost": "Blood",
+        "bloodRequired": "Blood Cost Required",
+        "bloodSource": {
+          "label": "Blood Source",
+          "other": "Other",
+          "self": "Self"
+        },
+        "casting": "Maho Casting",
+        "taintGained": "Taint Gained",
+        "taintGainedNotification": "Gained {taint} points of Shadowlands Taint from maho casting",
+        "warningTitle": "Blood Magic - Forbidden Maho"
+      },
+      "spells": {
+        "aboveSchoolRank": "{spell} is Mastery Level {mastery}; {name} can cast spells up to {limit} in this element (p.164).",
+        "aboveSchoolRankGM": "Cast it anyway?",
+        "affinity": "Affinity",
+        "anyElement": "Any element",
+        "areaOfEffect": "Area of Effect",
+        "cast": "Cast",
+        "chooseElement": "Cast {spell} in which element?",
+        "deficiency": "Deficiency",
+        "duration": "Duration",
+        "maho": "Maho",
+        "memorized": "Memorized",
+        "raises": "Raises",
+        "range": "Range",
+        "restored": "restored",
+        "shugenja": "Shugenja",
+        "shugenjaSchool": "Shugenja School",
+        "shugenjaSchoolHint": "Spell Casting Rolls add this School's Rank. Without one, they add the Insight Rank.",
+        "slotsRestored": "All spell slots restored to maximum",
+        "useSpellSlot": "Use Spell Slot",
+        "voidSlot": "Use Void Spell Slot"
       }
     },
     "system": {
-      "migration": {
-        "iconsUpdated": "L5R4 Migration: Updated {count} world image path(s).",
-        "compendiumIconsUpdated": "L5R4 Migration (Compendia): Updated {count} image path(s)."
-      },
       "errors": {
-        "deleteEffect": "Failed to delete effect.",
         "createEffect": "Failed to create effect.",
+        "deleteEffect": "Failed to delete effect.",
         "toggleEffect": "Failed to toggle effect."
+      },
+      "migration": {
+        "compendiumIconsUpdated": "L5R4 Migration (Compendia): Updated {count} image path(s).",
+        "iconsUpdated": "L5R4 Migration: Updated {count} world image path(s)."
       },
       "settings": {
         "designGallery": {
@@ -1259,18 +664,625 @@
         }
       }
     },
+    "ui": {
+      "activation": {
+        "end": "End",
+        "start": "Activate"
+      },
+      "armor": {
+        "allowStacking": "Allow Armor Stacking"
+      },
+      "check": {
+        "actionNote": "{action} (from {source})",
+        "actions": {
+          "complex": "Complex Action",
+          "free": "Free Action",
+          "simple": "Simple Action"
+        },
+        "allKept": "All",
+        "armor": "Armor",
+        "caller": "Bonus",
+        "castSpell": "Cast as a spell",
+        "contest": "Contested Roll",
+        "contestTie": "Tie: roll again.",
+        "contestWinner": "{name} wins.",
+        "damageFor": "Damage for",
+        "effects": "Active Effects",
+        "freeRaisesToTn": "Free Raises spent on the TN",
+        "increasedDamage": "Increased Damage (Raises)",
+        "keepFewer": "Keep only",
+        "manual": "Situational",
+        "max": "max",
+        "min": "min",
+        "modifiers": "Modifiers",
+        "of": "of",
+        "pool": "Pool",
+        "range": {
+          "melee": "melee",
+          "ranged": "ranged"
+        },
+        "rerolledKeptBetter": "re-rolled, better kept",
+        "rerollKeepBetter": "Re-roll, keep the better",
+        "schoolRank": "School Rank",
+        "spellSlot": "Spell slot",
+        "statBlock": "Stat block",
+        "substitutes": "Substitutions",
+        "unskilledHint": "Unskilled Roll: dice do not explode, and no Raises or Free Raises apply.",
+        "void": "Spend a Void Point (+1k1)",
+        "voidSkill": "Spend a Void Point: Skill Rank 1",
+        "voidSkillHint": "With no ranks in the Skill, a Void Point lets this roll count as Rank 1: one more die, dice explode, and Raises apply (p.78). Without it, the Raises above are ignored."
+      },
+      "combat": {
+        "applySelected": "Apply to selected",
+        "applyTo": "Apply to",
+        "arrowArmor": {
+          "armor": "Armor Piercing arrow ignores armor",
+          "flesh": "Flesh Cutter arrow doubles armor"
+        },
+        "calledShot": "Called Shot",
+        "calledShotHand": "Hand or foot (2 Raises)",
+        "calledShotHead": "Head (3 Raises)",
+        "calledShotLimb": "Limb (1 Raise)",
+        "calledShotLocation": "Called Shot location",
+        "calledShotNote": "Called Shot ({raises} Raises): {location}. The GM rules any effect on that part.",
+        "calledShotSmall": "Eye, ear, finger (4 Raises)",
+        "calledShotUnnamed": "unnamed part",
+        "contestStrength": "Roll Contested Strength",
+        "contestWaiting": "You have rolled; waiting for the other side.",
+        "disarm": "Disarm (3 Raises)",
+        "disarmed": "{name} drops the weapon.",
+        "disarmNote": "Disarm: damage is 2k1 without Strength; roll Contested Strength, and the attacker winning makes the target drop the weapon.",
+        "duel": {
+          "assessment": "Assessment",
+          "assessmentEdge": "Assessment +10",
+          "concede": "{name} concedes",
+          "conceded": "{name} concedes.",
+          "dazed": "{name} is Dazed and cannot fight an iaijutsu duel.",
+          "done": "Over",
+          "edgeWon": "{name} gains {bonus} on Focus.",
+          "facts": "Facts {name} learns: {count}.",
+          "firstStrike": "{name} strikes first, with {raises} Free Raises.",
+          "focus": "Focus",
+          "focusMastery": "Iaijutsu Mastery (Free Raise)",
+          "kharmic": "Kharmic strike: both strike at once.",
+          "pick": "Select one duelist's token and target the other's.",
+          "roll": "Roll for {name}",
+          "start": "Iaijutsu duel: selected token against targeted token",
+          "strike": "Strike",
+          "title": "Iaijutsu duel"
+        },
+        "extraAttack": "Extra Attack (5 Raises)",
+        "extraAttackNote": "Extra Attack: once this attack is resolved, damage included, make a second attack roll.",
+        "feint": "Feint (2 Raises)",
+        "feintNote": "Feint: half the margin over the TN adds to damage (up to 5 × Insight Rank).",
+        "fourLegged": "Target has four or more legs",
+        "grapple": {
+          "break": "Break",
+          "broken": "{name} breaks the grapple.",
+          "control": "Grapple control",
+          "hit": "Hit",
+          "hitLog": "{name} hits for {total}.",
+          "inControl": "{name} is in control.",
+          "over": "Over",
+          "pass": "Pass",
+          "passed": "{name} keeps control.",
+          "rollControl": "Control roll: {name}",
+          "throw": "Throw",
+          "thrown": "{name} is thrown Prone.",
+          "title": "Grapple",
+          "weaponLost": "{name} gains two Free Raises to Disarm next Turn."
+        },
+        "grappleIgnoresArmor": "Grapple ignores armor",
+        "grappleManeuver": "Start a grapple (ignores armor)",
+        "grappleStart": "Start grapple with",
+        "guard": "Guard the targeted token",
+        "guardFullAttack": "You cannot Guard in the Full Attack Stance.",
+        "guardPick": "Select your token and target the one to guard.",
+        "increasedDamageNote": "Increased Damage: +{dice}k0.",
+        "invulnerableNote": "Invulnerability: one Wound.",
+        "killedNote": "Past the Out Wound Rank: marked Dead. The GM can remove the status.",
+        "knockdown": "Knockdown (2 Raises, 4 vs four legs)",
+        "knockdownNote": "Knockdown: roll Contested Strength; the attacker winning knocks the target Prone.",
+        "knockedDown": "{name} is knocked Prone.",
+        "maneuvers": "Maneuvers",
+        "maneuversHint": "Free Raises pay for maneuvers first, then declared Raises. Raises left over add +1k0 damage each.",
+        "multipleTargets": "targets - TN not auto-set",
+        "notEnoughRaises": "The maneuvers cost {cost} Raises; declare enough Raises (or have Free Raises) to pay for them. Declared: {raises}.",
+        "npcInitiativeHint": "0 rolls Insight Rank 1 + Reflexes, keep Reflexes (p.81). Above 0 in both is this NPC's own pool.",
+        "reductionNote": "Reduction {reduction}.",
+        "resultTitle": "{name} takes {wounds} Wounds from {damage} damage",
+        "sources": "Damage sources",
+        "spiritNote": "Spirit: the damage is halved.",
+        "unarmed": "Unarmed",
+        "undo": "Undo",
+        "undoneNote": "Undone.",
+        "voidNote": "Void Point spent: {wounds} fewer Wounds.",
+        "vs": "vs"
+      },
+      "common": {
+        "action": "Action",
+        "active": "Active",
+        "add": "Add",
+        "all": "All",
+        "armor": "Armor",
+        "auto": "Auto",
+        "bonus": "Bonus",
+        "cancel": "Cancel",
+        "clan": "Clan",
+        "complex": "Complex",
+        "conditions": "Conditions",
+        "cost": "Cost",
+        "current": "Current",
+        "damage": "Damage",
+        "decrease": "Decrease",
+        "delete": "Delete",
+        "disabled": "disabled",
+        "edit": "Edit",
+        "effect": "Effect",
+        "expand": "Expand",
+        "free": "Free",
+        "increase": "Increase",
+        "initiative": "Initiative",
+        "insight": "Insight",
+        "keep": "Keep",
+        "mastery": "Mastery",
+        "masteryXpHint": "Costs its Mastery Level in XP (pp.231, 259). A Cost rule changes the price: a monk's free kiho, or a non-Brotherhood school's higher one (p.266).",
+        "modifier": "Modifier",
+        "multi": "Multiplier",
+        "name": "Name",
+        "new": "New",
+        "none": "None",
+        "ok": "OK",
+        "rank": "Rank",
+        "rate": "Rate",
+        "ring": "Ring",
+        "roll": "Roll",
+        "save": "Save",
+        "school": "School",
+        "simple": "Simple",
+        "tn": "TN",
+        "toggle": "Turn on or off",
+        "total": "Total",
+        "type": "Type",
+        "xp": "Experience Points"
+      },
+      "dialogs": {
+        "addAttack": "Add Attack",
+        "deleteAttack": {
+          "content": "Are you sure you want to remove {name}?",
+          "title": "Remove Attack?"
+        },
+        "deleteItem": {
+          "content": "Are you sure you want to delete {name}?",
+          "title": "Delete Item?"
+        }
+      },
+      "effects": {
+        "alreadyEnded": "That effect has already ended.",
+        "applyTo": "{effect} on {target}",
+        "centered": "Centered",
+        "concentrationUpkeep": "{effect}: spend a Simple Action this Round to keep concentrating, or end it.",
+        "endEncounter": "End encounter",
+        "endEncounterConfirm": "End the encounter? Fear and every other effect lasting until the encounter ends will end now.",
+        "expiry": {
+          "encounterEnd": "End of the encounter"
+        },
+        "fullDefense": "Full Defense",
+        "immune": "{actor} is immune to {effect}.",
+        "noGM": "No GM is connected to apply that effect.",
+        "proneLargeWeapon": "Prone: a large weapon cannot attack until its wielder stands.",
+        "saveText": "{roll} roll against TN {tn}.",
+        "saveTitle": "{effect}: save",
+        "stanceNotAllowed": "{condition} rules out {stance}.",
+        "voidArmor": "Void: Armor TN +10",
+        "voidLimit": "{name} has already spent a Void Point this Round.",
+        "voidSpentThisRound": "A Void Point was already spent this Round; one per Round is the usual limit."
+      },
+      "floating": {
+        "void": "Void Points",
+        "wounds": "Wounds"
+      },
+      "grants": {
+        "granted": "{name} gains {item} from {giver} (School Rank {rank}).",
+        "schoolRankHint": "0 follows the character's Insight Rank. Set it for a character with Multiple Schools."
+      },
+      "hints": {
+        "leftClickPlusRightClickMinus": "Shift+Left click: +1, Shift+Right click: -1",
+        "leftRightToAdjust": "Left and Right to Adjust",
+        "postToChat": "Post to chat",
+        "shiftClickRankPoints": "Shift+Click: ±0.1, Shift+Ctrl+Click: ±1.0",
+        "shiftClickToggleRankMode": "GM: Shift+Click to toggle between automatic and manual rank calculation",
+        "voidPointsClickAdjust": "Left click: +1, Right click: -1"
+      },
+      "honorRoll": {
+        "button": "Honor Roll",
+        "failedReason": "Failed an Honor Roll",
+        "noDice": "{name} has no Honor Rank to call on for an Honor Roll.",
+        "used": "{name} has already made an Honor Roll this session."
+      },
+      "ledger": {
+        "hint": "Record a gain or loss of Honor, Glory, Status, or Taint with its reason. Ten points make a rank; the character's Ledger rules may change the amount.",
+        "points": "Points (negative to lose)",
+        "reason": "Reason",
+        "record": "Record",
+        "title": "Ledger",
+        "track": "Track",
+        "tracks": {
+          "glory": "Glory",
+          "honor": "Honor",
+          "status": "Status",
+          "taint": "Taint"
+        }
+      },
+      "links": {
+        "checkTn": "{what}, TN {tn}",
+        "damage": "{pool} damage",
+        "errors": {
+          "condition": "unknown condition id",
+          "fear": "the Fear Rank must be a whole number from 1 to 10",
+          "nothingToRoll": "name a skill, trait, or ring",
+          "pool": "write the pool as XkY, each from 1 to 30, with an optional +N or -N",
+          "ring": "unknown Ring; use air, earth, fire, water, or void",
+          "skillWithRing": "a Skill rolls with a Trait or the Void Ring, not a Ring",
+          "syntax": "write it as key=value|key=value",
+          "tn": "the TN must be a whole number from 1 to 999",
+          "trait": "unknown Trait; use sta, wil, str, per, ref, awa, agi, or int",
+          "traitAndRing": "a Trait and a Ring cannot both be rolled",
+          "unknownKey": "unknown key; use skill, trait, ring, or tn"
+        },
+        "fear": "Fear {rank}",
+        "needTrait": "{name} has no {skill} Skill, and the link names no Trait to roll it Unskilled with.",
+        "noActor": "Select a token or assign a character to roll this link.",
+        "noTargets": "Target or select the tokens this link acts on.",
+        "request": "Ask the players to roll this",
+        "requestRoll": "Roll with my character",
+        "requestTitle": "The GM asks for a roll"
+      },
+      "macros": {
+        "missing": "This macro's item or character no longer exists, or cannot be rolled from a macro."
+      },
+      "mechanics": {
+        "combat": {
+          "attack": "Attack",
+          "woundPenalty": "Wound Penalty"
+        },
+        "fear": {
+          "catastrophicFailure": "CATASTROPHIC FAILURE! Character flees or cowers helplessly.",
+          "clickToTest": "Click to test Fear against selected characters",
+          "effectName": "Fear {rank}",
+          "label": "Fear {rank}",
+          "noFear": "This NPC has no Fear effect configured",
+          "noTargets": "No tokens selected for Fear test",
+          "noWillpower": "{character} has no Willpower trait",
+          "penaltyApplied": "Penalty: -{penalty}kO to all rolls",
+          "rank": "Fear Rank",
+          "testAgainst": "vs {creature}",
+          "testResult": "Fear {rank} Test"
+        },
+        "rings": {
+          "air": "Air",
+          "all": "All",
+          "earth": "Earth",
+          "fire": "Fire",
+          "ring": "Ring",
+          "void": "Void",
+          "voidInitBoost": "Use Void",
+          "voidPoints": "Void Points",
+          "voidTnBoost": "Use Void",
+          "water": "Water"
+        },
+        "rolls": {
+          "attackRoll": "Attack Roll",
+          "damageRoll": "Damage Roll",
+          "emphasis": "Emphasis",
+          "explodesOn": "Explodes On",
+          "failure": "Failure",
+          "freeRaises": "Free Raises",
+          "missed": "Missed",
+          "raise": "Raise",
+          "raises": "Raises",
+          "ringRoll": "Ring Roll",
+          "skillRoll": "Skill Roll",
+          "socialResistance": "Social Resistance",
+          "socialResistanceDescription": "Resisting Intimidation or Temptation",
+          "spellCasting": "Spell Casting Roll",
+          "success": "Success",
+          "traitRoll": "Trait Roll",
+          "unskilled": "Unskilled"
+        },
+        "stances": {
+          "attack": "Attack Stance",
+          "center": "Center Stance",
+          "defense": "Defense Stance",
+          "errors": {
+            "addFailed": "Failed to add stance",
+            "removeFailed": "Failed to remove stance"
+          },
+          "fullAttack": "Full Attack Stance",
+          "fullDefense": "Full Defense Stance",
+          "fullDefenseHint": "Make a Defense/Reflexes roll. Add half the result (rounded up) to your Armor TN for the duration of this stance."
+        },
+        "traits": {
+          "agi": "Agility",
+          "awa": "Awareness",
+          "int": "Intelligence",
+          "per": "Perception",
+          "ref": "Reflexes",
+          "sta": "Stamina",
+          "str": "Strength",
+          "wil": "Willpower"
+        },
+        "wounds": {
+          "alreadyFullHealth": "{name} is already at full health",
+          "applied": "Applied {amount} wounds to {name}",
+          "appliedWithArmor": "{name} took {original} damage. Armor reduced by {reduction}. Applied {final} wounds.",
+          "applyHealing": "Apply Healing",
+          "applyHealingTitle": "Apply natural healing from rest",
+          "applyWounds": "Apply Wounds",
+          "armorReduction": "Reduction",
+          "armorTn": "Armor TN",
+          "armorTnBase": "Armor TN Base",
+          "crippled": "Crippled",
+          "down": "Down",
+          "earthMultiplier": "Earth Multiplier",
+          "formula": "Formula",
+          "fullyHealed": "Fully healed!",
+          "grazed": "Grazed",
+          "healingApplied": "Healed {amount} wounds (heal rate: {rate})",
+          "healingFailed": "Failed to apply healing to {name}",
+          "healRateBreakdown": "(Stamina × 2) + Insight Rank + Modifier = ({sta} × 2) + {rank} + {mod}",
+          "healRateFormula": "x 2 +",
+          "healthy": "Healthy",
+          "hurt": "Hurt",
+          "injured": "Injured",
+          "label": "Wounds",
+          "manual": "Manual",
+          "maxWounds": "Max Wounds",
+          "naturalHealing": "Natural Healing",
+          "nicked": "Nicked",
+          "noHealRate": "{name} has no healing rate configured",
+          "noTokenSelected": "No token selected. Select a token to apply wounds.",
+          "noVoidPoints": "No Void Points available to reduce damage",
+          "out": "Out",
+          "penalty": "Penalty",
+          "reducedApplied": "Void Point spent: Reduced damage by 10. Applied {amount} wounds to {name}",
+          "reducedWithArmor": "{name} took {original} damage. Void reduced to {afterVoid}, armor reduced by {reduction}. Applied {final} wounds.",
+          "reduceWithVoid": "Reduce with Void",
+          "restedAndRecovered": "rested and recovered wounds",
+          "status": "Wounds: {current}/{max} (suffered: {suffered})",
+          "suffered": "Wounds Suffered",
+          "threshold": "Threshold",
+          "woundBonus": "Wound Bonus",
+          "woundHealRate": "Rate of Wound Heal",
+          "woundLevel": "Level",
+          "woundMode": "Wound Mode"
+        }
+      },
+      "notifications": {
+        "actorNotFound": "Actor not found for damage roll",
+        "deficiencyBlocksCasting": "Deficiency in {ring} reduces your School Rank to zero - cannot cast",
+        "invalidRingForSpell": "Invalid ring for spell slot: {ring}",
+        "messageTooLong": "Message too long (max 10,000 characters)",
+        "noActorForVoid": "No actor available for void point spending",
+        "noPermission": "You don't have permission to modify this actor",
+        "noPermissionDamage": "You don't have permission to roll damage for this actor",
+        "noSpellSlots": "You ran out of spell slots for this ring",
+        "noValidWeapon": "No valid weapon found for attack roll",
+        "schoolRankZero": "You can't cast a spell with School Rank reduced to zero"
+      },
+      "purchase": {
+        "addAnyway": "Add it anyway?",
+        "choose": "Choose",
+        "noOptions": "{name} has a choice with nothing to choose from; it was not added.",
+        "schoolAdd": "Add as another School",
+        "schoolQuestion": "{name} already studies at {schools}. Replace it, or add {school} as another School (an Advanced School, or the Multiple Schools Advantage)?",
+        "schoolReplace": "Replace",
+        "schoolTitle": "A second School",
+        "unmet": "{name} needs: {list}.",
+        "unmetTitle": "Prerequisites not met"
+      },
+      "rules": {
+        "add": "Add rule",
+        "delete": "Remove this rule",
+        "effectSheet": "L5R4 Active Effect sheet (with Rules)",
+        "formView": "Edit as forms",
+        "hint": "Each rule as a form, or the whole list as JSON. ACTIVE_EFFECTS.md lists the rule keys and their fields.",
+        "invalidJson": "Rules not saved: the text is not valid JSON ({error}).",
+        "jsonView": "Edit as JSON",
+        "key": "Rule key",
+        "none": "No rules.",
+        "notList": "Rules not saved: the text must be a JSON list of objects, each with a \"key\"."
+      },
+      "ruleSummary": {
+        "action": {
+          "complex": "a Complex Action",
+          "free": "a Free Action",
+          "simple": "a Simple Action"
+        },
+        "ActionCost": "{rolls}: {action}",
+        "ApplyCondition": "A successful roll on {rolls} can apply {condition}",
+        "armorTn": {
+          "base": "Armor TN base becomes {value}",
+          "total": "Armor TN becomes {value}"
+        },
+        "ArmorTN": "Armor TN {value}",
+        "ChoiceSet": "Choice when added: {prompt}",
+        "chosen": "Chosen: {selection}",
+        "citation": "{book} p.{page}",
+        "ConditionImmunity": "Immune to {condition}",
+        "Cost": "XP price of {what}: {value}",
+        "DamageSource": "{rolls} count as {tags}",
+        "DiceRule": "Dice explode on {explode} or higher on {rolls}",
+        "direction": {
+          "gain": "gains",
+          "loss": "losses"
+        },
+        "FreeRaise": "Free Raises on {rolls}: {value}",
+        "GrantItem": "Grants {item} at School Rank {rank}",
+        "heading": "What it does",
+        "ignoreReduction": "Ignores {value} Reduction",
+        "Initiative": "Initiative {bonus}",
+        "Invulnerability": "Invulnerable: harmed only by {harmedBy}",
+        "Ledger": "{track} {direction}: {value}",
+        "maneuver": {
+          "calledShot": "Called Shot",
+          "disarm": "Disarm",
+          "extraAttack": "Extra Attack",
+          "feint": "Feint",
+          "knockdown": "Knockdown"
+        },
+        "Movement": "Water {value} for movement",
+        "Note": "Note on {rolls}: {text}",
+        "OpponentModifier": "{bonus} on {rolls} made against this character",
+        "optional": "Optional: the roller picks the roll",
+        "per": {
+          "day": "day",
+          "round": "Round",
+          "skirmish": "skirmish",
+          "turn": "Turn"
+        },
+        "PeriodicSave": "Ends on a {roll} roll against TN {tn}",
+        "Prerequisite": "Requires {requires}",
+        "priced": {
+          "emphasis": "an Emphasis",
+          "items": "every {type} item",
+          "self": "this item"
+        },
+        "raiseCap": "Raise limit {value} on {rolls}",
+        "raiseMinimum": "At least {value} Raises on {rolls}",
+        "RaiseRule": "{maneuver} costs {cost} Raises on {rolls}",
+        "range": {
+          "melee": "Melee attacks only",
+          "ranged": "Ranged attacks only"
+        },
+        "Reduction": "Reduction {value}",
+        "reductionExcept": "Reduction {value}, except against {except}",
+        "rerollOnes": "Re-roll 1s on {rolls}",
+        "Resource": "Uses of {slug}: {max} per {per}",
+        "RollModifier": "{bonus} on {rolls}",
+        "RollOption": "Roll option: {option}",
+        "selector": {
+          "any": "every roll",
+          "attack": "attack rolls",
+          "damage": "damage rolls",
+          "maho": "maho rolls",
+          "named": "{name} rolls",
+          "ring": "Ring rolls",
+          "skill": "Skill rolls",
+          "skill-tag": "{name} Skill rolls",
+          "skill-type": "{name} Skill rolls",
+          "spell": "Spell Casting Rolls",
+          "trait": "Trait rolls"
+        },
+        "Spirit": "Spirit: damage halved unless from {harmedBy}",
+        "Substitute": "May roll {with} in place of {replace} on {rolls}",
+        "text": "{text}",
+        "TNModifier": "TN {value} on {rolls}",
+        "TraitAdjust": "{trait} {value}",
+        "unknown": "Unknown rule {key}",
+        "UnskilledAs": "{rolls} without ranks count as Rank {rank}",
+        "when": "{rule} (when {when})",
+        "Wounds": "Wounds per Wound Rank {perRank}, Wound Rank penalties {penalty}"
+      },
+      "session": {
+        "confirm": "Start a new game session? Every character gets its Honor Roll back.",
+        "new": "New session",
+        "started": "A new game session has begun."
+      },
+      "sheets": {
+        "abilities": "Abilities",
+        "addItem": "Add Item",
+        "advantage": "Advantage",
+        "advantages": "Advantages",
+        "armor": "Armor",
+        "background": "Background",
+        "character": "Character",
+        "demands": "Demands",
+        "description": "Description",
+        "disadvantage": "Disadvantage",
+        "disadvantages": "Disadvantages",
+        "equipment": "Equipment",
+        "item": "Item",
+        "items": "Items",
+        "kata": "Kata",
+        "kiho": "Kiho",
+        "notes": "Notes",
+        "rulesSummary": "Rules Summary",
+        "skill": "Skill",
+        "skills": "Skills",
+        "spell": "Spell",
+        "spells": "Spells",
+        "spellSlots": "Spell Slots",
+        "tattoo": "Tattoo",
+        "tattooPassive": "Always active",
+        "tattooPassiveHint": "On: its rules apply while the character has it. Off: the play button on the character sheet activates it, one tattoo at a time, for twice the School Rank in Rounds.",
+        "tattoos": "Tattoos",
+        "technique": "Technique",
+        "techniques": "Techniques",
+        "weapon": "Weapon",
+        "weapons": "Weapons",
+        "woundLevels": "Wound Levels"
+      },
+      "sources": {
+        "core": "Core Rulebook"
+      },
+      "statusEffects": {
+        "blinded": "Blinded",
+        "concentration": "Concentration",
+        "dazed": "Dazed",
+        "dead": "Dead",
+        "entangled": "Entangled",
+        "fasting": "Fasting",
+        "fatigued": "Fatigued",
+        "feared": "Feared",
+        "grappled": "Grappled",
+        "guarded": "Guarded",
+        "guarding": "Guarding",
+        "mounted": "Mounted/Higher",
+        "prone": "Prone",
+        "stunned": "Stunned"
+      },
+      "tabs": {
+        "description": "Description",
+        "details": "Details",
+        "effects": "Active Effects",
+        "modifiers": "Modifiers",
+        "rules": "Rules"
+      },
+      "taint": {
+        "embrace": "Embrace the Taint (+1k1)",
+        "embraceHint": "Gain a point of Taint for +1k1 on this roll.",
+        "embraceReason": "Embraced the Taint",
+        "label": "Shadowlands Taint",
+        "lost": "Lost (Taint Rank)"
+      },
+      "transfer": {
+        "export": "Export items with rules",
+        "exported": "Exported {count} items from {folder}.",
+        "import": "Import items with rules",
+        "imported": "Imported items",
+        "importedCount": "Imported {count} items into {folder}.",
+        "importHint": "Choose a file exported from an Item folder. Its items go into a new folder here.",
+        "invalidJson": "That file is not valid JSON.",
+        "notExport": "That file is not an export of items with rules."
+      }
+    },
     "world": {
       "wealth": {
-        "koku": "Koku",
         "bu": "Bu",
+        "koku": "Koku",
         "zeni": "Zeni"
       }
     }
   },
   "TYPES": {
     "Actor": {
-      "pc": "PC",
-      "npc": "NPC"
+      "npc": "NPC",
+      "pc": "PC"
+    },
+    "ChatMessage": {
+      "checkRequest": "Roll request",
+      "roll": "Roll"
     },
     "Item": {
       "advantage": "Advantage",
@@ -1288,10 +1300,6 @@
       "tattoo": "Tattoo",
       "technique": "Technique",
       "weapon": "Weapon"
-    },
-    "ChatMessage": {
-      "roll": "Roll",
-      "checkRequest": "Roll request"
     }
   }
 }

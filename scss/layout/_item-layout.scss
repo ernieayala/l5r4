@@ -48,3 +48,14 @@
     flex-wrap: nowrap;
   }
 }
+
+.l5r4-item-header .l5r4-item-header-image {
+  block-size: 64px;
+  inline-size: 64px;
+}
+
+// A subtype partial's root draws no box, so each of its fields stays a flex item of the tab, spaced by the tab's gap
+.l5r4-item-details,
+.l5r4-item-modifiers {
+  display: contents;
+}

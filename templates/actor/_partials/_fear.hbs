@@ -2,7 +2,7 @@
   <div class="flexrow -gap-sm l5r4-section-title">
     <h4 class="l5r4-section-heading -compact">{{localize "l5r4.ui.mechanics.fear.rank"}}</h4>
   </div>
-  <div class="flexcol -gap-sm">
+  <div class="flexcol -gap-sm l5r4-fear-body">
     <div class="l5r4-grid">
       <span>{{localize "l5r4.ui.common.rank"}}</span>
       <div class="flexrow">
@@ -17,14 +17,15 @@
       </div>
     </div>
     {{#if system.fear.rank}}
-      <a
+      <button
+        type="button"
         class="button l5r4-fear-test"
         data-action="test-fear"
         data-fear-rank="{{system.fear.rank}}"
-        title="{{localize 'l5r4.ui.mechanics.fear.clickToTest'}}"
+        data-tooltip="{{localize "l5r4.ui.mechanics.fear.clickToTest"}}"
       >
         {{localize "l5r4.ui.mechanics.fear.label" rank=system.fear.rank}}
-      </a>
+      </button>
     {{/if}}
   </div>
 </section>

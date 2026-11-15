@@ -7,11 +7,11 @@
         }
       },
       "emphasisManager": {
+        "addCustom": "Benutzerdefinierten Schwerpunkt Hinzufügen",
         "custom": "Benutzerdefiniert",
         "hint": "Wähle aus, welche Schwerpunkte für diese Fertigkeit verfügbar sind. Trainiere sie auf dem Charakterbogen.",
         "manage": "Schwerpunkte Verwalten",
-        "noEmphases": "Keine Schwerpunkte in der Liste",
-        "addCustom": "Benutzerdefinierten Schwerpunkt Hinzufügen"
+        "noEmphases": "Keine Schwerpunkte in der Liste"
       },
       "wealthManager": {
         "add": "Hinzufügen",
@@ -24,265 +24,74 @@
         "convertZeniToBu": "10 Zeni zu 1 Bu umtauschen",
         "currentWealth": "Aktuelles Vermögen",
         "denomination": "Währung",
-        "open": "Vermögen Verwalten",
-        "remove": "Entfernen",
-        "removeMoney": "Geld Entfernen",
         "errors": {
           "openFailed": "Fehler beim Öffnen der Vermögensverwaltung"
-        }
+        },
+        "open": "Vermögen Verwalten",
+        "remove": "Entfernen",
+        "removeMoney": "Geld Entfernen"
       },
       "woundConfig": {
         "title": "Wundenkonfiguration"
       }
     },
-    "ui": {
-      "statusEffects": {
-        "blinded": "Geblendet",
-        "concentration": "Konzentration",
-        "dazed": "Benommen",
-        "dead": "Tot",
-        "entangled": "Verstrickt",
-        "fasting": "Fastend",
-        "fatigued": "Erschöpft",
-        "feared": "Verängstigt",
-        "grappled": "Festgehalten",
-        "guarded": "Beschützt",
-        "guarding": "Beschützend",
-        "mounted": "Beritten/Höhere Position",
-        "prone": "Am Boden",
-        "stunned": "Betäubt"
-      },
-      "tabs": {
-        "details": "Details",
-        "modifiers": "Modifikatoren",
-        "description": "Beschreibung",
-        "effects": "Aktive Effekte"
-      },
-      "mechanics": {
-        "rings": {
-          "ring": "Ring",
-          "fire": "Feuer",
-          "water": "Wasser",
-          "air": "Luft",
-          "earth": "Erde",
-          "void": "Leere",
-          "voidPoints": "Leere-Punkte",
-          "all": "Alle",
-          "voidTnBoost": "Leere Nutzen",
-          "voidInitBoost": "Leere Nutzen"
-        },
-        "traits": {
-          "sta": "Ausdauer",
-          "wil": "Willenskraft",
-          "str": "Stärke",
-          "per": "Wahrnehmung",
-          "ref": "Reflexe",
-          "awa": "Aufmerksamkeit",
-          "agi": "Gewandtheit",
-          "int": "Intelligenz"
-        },
-        "rolls": {
-          "socialResistanceDescription": "Einschüchterung oder Versuchung widerstehen",
-          "success": "Erfolg",
-          "failure": "Fehlschlag",
-          "missed": "Verfehlt",
-          "explodesOn": "Explodiert Bei",
-          "unskilled": "Ungeübt",
-          "traitRoll": "Eigenschaftswurf",
-          "ringRoll": "Ringwurf",
-          "skillRoll": "Fertigkeitswurf",
-          "damageRoll": "Schadenswurf",
-          "attackRoll": "Angriffswurf",
-          "spellCasting": "Zauberspruch Wurf",
-          "emphasis": "Schwerpunkt",
-          "raise": "Erhöhung",
-          "raises": "Erhöhungen",
-          "freeRaises": "Freie Erhöhungen",
-          "socialResistance": "Sozialer Widerstand"
-        },
-        "combat": {
-          "attack": "Angriff",
-          "woundPenalty": "Wundenstrafe"
-        },
-        "wounds": {
-          "applied": "{amount} Wunden auf {name} angewendet",
-          "appliedWithArmor": "{name} erhielt {original} Schaden. Rüstung reduzierte um {reduction}. {final} Wunden angewendet.",
-          "armorTn": "Rüstungs-SZ",
-          "armorTnBase": "Basis Rüstungs-SZ",
-          "armorReduction": "Reduzierung",
-          "label": "Wunden",
-          "reducedApplied": "Leere-Punkt ausgegeben: Schaden um 10 reduziert. {amount} Wunden auf {name} angewendet",
-          "reducedWithArmor": "{name} erhielt {original} Schaden. Leere reduzierte auf {afterVoid}, Rüstung reduzierte um {reduction}. {final} Wunden angewendet.",
-          "status": "Wunden: {current}/{max} (erlitten: {suffered})",
-          "suffered": "Erlittene Wunden",
-          "woundLevel": "Stufe",
-          "maxWounds": "Max. Wunden",
-          "penalty": "Strafe",
-          "woundHealRate": "Wundheilungsrate",
-          "healRateFormula": "x 2 +",
-          "woundMode": "Wundenmodus",
-          "manual": "Manuell",
-          "formula": "Formel",
-          "earthMultiplier": "Erde-Multiplikator",
-          "woundBonus": "Wundenbonus",
-          "threshold": "Schwelle",
-          "healthy": "Gesund",
-          "nicked": "Angekratzt",
-          "grazed": "Gestreift",
-          "hurt": "Verletzt",
-          "injured": "Verwundet",
-          "crippled": "Verkrüppelt",
-          "down": "Am Boden",
-          "out": "Kampfunfähig",
-          "applyHealing": "Heilung Anwenden",
-          "applyHealingTitle": "Natürliche Heilung durch Ruhe anwenden",
-          "naturalHealing": "Natürliche Heilung",
-          "restedAndRecovered": "hat sich ausgeruht und Wunden geheilt",
-          "healingApplied": "{amount} Wunden geheilt (Heilungsrate: {rate})",
-          "fullyHealed": "Vollständig geheilt!",
-          "alreadyFullHealth": "{name} ist bereits bei voller Gesundheit",
-          "noHealRate": "{name} hat keine Heilungsrate konfiguriert",
-          "healingFailed": "Fehler beim Anwenden der Heilung auf {name}",
-          "applyWounds": "Wunden Anwenden",
-          "reduceWithVoid": "Mit Leere Reduzieren",
-          "noTokenSelected": "Kein Spielstein ausgewählt. Wähle einen Spielstein aus, um Wunden anzuwenden.",
-          "noVoidPoints": "Keine Leere-Punkte verfügbar, um Schaden zu reduzieren"
-        },
-        "stances": {
-          "attack": "Angriffshaltung",
-          "fullAttack": "Voller Angriff",
-          "defense": "Verteidigungshaltung",
-          "fullDefense": "Volle Verteidigung",
-          "center": "Zentrierte Haltung",
-          "fullDefenseHint": "Mache einen Verteidigungs-/Reflexwurf. Addiere die Hälfte des Ergebnisses (aufgerundet) zu deinem Rüstungs-SZ für die Dauer dieser Haltung."
-        },
-        "fear": {
-          "effectName": "Furcht {rank}",
-          "clickToTest": "Klicken, um Furcht gegen ausgewählte Charaktere zu testen",
-          "label": "Furcht {rank}",
-          "rank": "Furchtrang",
-          "testResult": "Furcht {rank} Test",
-          "penaltyApplied": "Strafe: -{penalty}k0 auf alle Würfe",
-          "catastrophicFailure": "KATASTROPHALER FEHLSCHLAG! Charakter flieht oder kauert sich hilflos zusammen.",
-          "noTargets": "Keine Spielsteine für Furchttest ausgewählt",
-          "noWillpower": "{character} hat keine Willenskraft-Eigenschaft",
-          "noFear": "Dieser NSC hat keinen Furchteffekt konfiguriert",
-          "testAgainst": "vs {creature}"
-        }
-      },
-      "common": {
-        "initiative": "Initiative",
-        "modifier": "Modifikator",
-        "roll": "Würfeln",
-        "cancel": "Abbrechen",
-        "ok": "OK",
-        "none": "Keine",
-        "keep": "Behalten",
-        "bonus": "Bonus",
-        "multi": "Multiplikator",
-        "rate": "Rate",
-        "current": "Aktuell",
-        "total": "Gesamt",
-        "effect": "Effekt",
-        "simple": "Einfach",
-        "free": "Frei",
-        "action": "Aktion",
-        "edit": "Bearbeiten",
-        "delete": "Löschen",
-        "name": "Name",
-        "conditions": "Zustände",
-        "active": "Aktiv",
-        "new": "Neu",
-        "auto": "Auto",
-        "disabled": "deaktiviert",
-        "rank": "Rang",
-        "clan": "Klan",
-        "school": "Schule",
-        "xp": "Erfahrungspunkte",
-        "insight": "Einsicht",
-        "damage": "Schaden",
-        "type": "Typ",
-        "ring": "Ring",
-        "mastery": "Meisterschaft",
-        "tn": "SZ",
-        "cost": "Kosten",
-        "save": "Speichern",
-        "armor": "Rüstung"
-      },
-      "combat": {
-        "multipleTargets": "Ziele - SZ nicht automatisch gesetzt",
-        "vs": "vs"
-      },
-      "armor": {
-        "allowStacking": "Rüstungsstapelung Erlauben"
-      },
-      "sheets": {
-        "background": "Hintergrund",
-        "skill": "Fertigkeit",
-        "skills": "Fertigkeiten",
-        "weapon": "Waffe",
-        "weapons": "Waffen",
-        "armor": "Rüstung",
-        "item": "Gegenstand",
-        "items": "Gegenstände",
-        "addItem": "Gegenstand Hinzufügen",
-        "notes": "Notizen",
-        "spell": "Zauber",
-        "spells": "Zauber",
-        "technique": "Technik",
-        "techniques": "Techniken",
-        "advantage": "Vorteil",
-        "advantages": "Vorteile",
-        "disadvantage": "Nachteil",
-        "disadvantages": "Nachteile",
-        "kata": "Kata",
-        "kiho": "Kiho",
-        "tattoo": "Tätowierung",
-        "tattoos": "Tätowierungen",
-        "equipment": "Ausrüstung",
-        "abilities": "Fähigkeiten",
-        "character": "Charakter",
-        "rulesSummary": "Regelzusammenfassung",
-        "description": "Beschreibung",
-        "woundLevels": "Wundenstufen",
-        "spellSlots": "Zauberplätze",
-        "demands": "Anforderungen"
-      },
-      "notifications": {
-        "actorNotFound": "Akteur für Schadenswurf nicht gefunden",
-        "noPermissionDamage": "Du hast keine Berechtigung, Schaden für diesen Akteur zu würfeln",
-        "noValidWeapon": "Keine gültige Waffe für Angriffswurf gefunden",
-        "invalidRingForSpell": "Ungültiger Ring für Zauberplatz: {ring}",
-        "noActorForVoid": "Kein Akteur verfügbar, um Leere-Punkte auszugeben",
-        "schoolRankZero": "Du kannst keinen Zauber wirken, wenn der Schulrang auf null reduziert ist",
-        "deficiencyBlocksCasting": "Mangel in {ring} reduziert deinen Schulrang auf null - kann nicht wirken",
-        "noSpellSlots": "Dir sind die Zauberplätze für diesen Ring ausgegangen"
-      },
-      "hints": {
-        "leftRightToAdjust": "Links und Rechts zum Anpassen",
-        "leftClickPlusRightClickMinus": "Shift+Linksklick: +1, Shift+Rechtsklick: -1",
-        "voidPointsClickAdjust": "Linksklick: +1, Rechtsklick: -1",
-        "shiftClickRankPoints": "Shift+Klick: ±0.1, Shift+Strg+Klick: ±1.0",
-        "postToChat": "Im Chat posten"
-      },
-      "dialogs": {
-        "deleteItem": {
-          "title": "Gegenstand Löschen?",
-          "content": "Bist du sicher, dass du {name} löschen möchtest?"
-        }
-      }
-    },
     "character": {
-      "skills": {
-        "properties": {
-          "type": "Typ",
-          "trait": "Eigenschaft",
-          "emphasis": "Schwerpunkt",
-          "school": "Schulfertigkeit",
-          "mastery3": "Meisterschaft Rang 3",
-          "mastery5": "Meisterschaft Rang 5",
-          "mastery7": "Meisterschaft Rang 7"
+      "advantages": {
+        "ancestor": "Ahne",
+        "material": "Materiell",
+        "mental": "Mental",
+        "physical": "Physisch",
+        "social": "Sozial",
+        "spiritual": "Spirituell"
+      },
+      "experience": {
+        "adjustExperience": "Erfahrung Anpassen",
+        "breakdown": {
+          "advantages": "Vorteile",
+          "base": "Basis",
+          "cap": "Limit",
+          "disadvantagesGrant": "Nachteile",
+          "kata": "Kata",
+          "kiho": "Kiho",
+          "manualAdjustments": "Manuelle Anpassungen",
+          "skills": "Fertigkeiten",
+          "spells": "Zauber",
+          "traits": "Eigenschaften",
+          "void": "Leere"
         },
+        "disadvantageCapLabel": "Max. EP",
+        "disadvantageCapTooltip": "Klicken, um die maximalen durch Nachteile erhaltenen EP zu ändern",
+        "fallbackLabels": {
+          "skillCreated": "Fertigkeit Erstellt",
+          "skillIncreased": "Fertigkeit Erhöht",
+          "traitIncrease": "Eigenschaftserhöhung",
+          "voidIncrease": "Leere-Erhöhung"
+        },
+        "note": "Notiz",
+        "purchases": "Käufe",
+        "reason": "Grund",
+        "recalculate": "EP-Käufe vom aktuellen Charakterstatus neu berechnen",
+        "skillChange": "{name} {from}→{to}",
+        "skillCreate": "{name} 0→{rank}",
+        "spellMemorized": "Gelernt: {name}",
+        "summary": "Erfahrungszusammenfassung",
+        "traitChange": "{label} {from}→{to}",
+        "usedTotal": "Verwendet / Gesamt",
+        "voidChange": "Leere {from}→{to}",
+        "xpAmount": "Menge"
+      },
+      "movement": {
+        "feet": "Fuß",
+        "maximum": "Maximale Bewegung",
+        "title": "Bewegung"
+      },
+      "ranks": {
+        "gloryRank": "Ruhm",
+        "honorRank": "Ehre",
+        "statusRank": "Statusrang",
+        "taintRank": "Schattenland-Verderben"
+      },
+      "skills": {
         "names": {
           "acting": "Schauspielerei",
           "animalHandling": "Tierpflege",
@@ -292,8 +101,8 @@
           "calligraphy": "Kalligraphie",
           "chainWeapons": "Kettenwaffen",
           "commerce": "Handel",
-          "craft": "Handwerk",
           "courtier": "Höfling",
+          "craft": "Handwerk",
           "defense": "Verteidigung",
           "divination": "Wahrsagung",
           "engineering": "Ingenieurswesen",
@@ -326,111 +135,37 @@
           "temptation": "Versuchung",
           "warFan": "Kriegsfächer",
           "weapons": "Waffen"
+        },
+        "properties": {
+          "emphasis": "Schwerpunkt",
+          "mastery3": "Meisterschaft Rang 3",
+          "mastery5": "Meisterschaft Rang 5",
+          "mastery7": "Meisterschaft Rang 7",
+          "school": "Schulfertigkeit",
+          "trait": "Eigenschaft",
+          "type": "Typ"
         }
       },
       "skillTypes": {
-        "high": "Hoch",
         "bugei": "Bugei",
-        "merch": "Händler",
-        "low": "Niedrig"
-      },
-      "advantages": {
-        "physical": "Physisch",
-        "mental": "Mental",
-        "social": "Sozial",
-        "material": "Materiell",
-        "spiritual": "Spirituell",
-        "ancestor": "Ahne"
-      },
-      "ranks": {
-        "honorRank": "Ehre",
-        "gloryRank": "Ruhm",
-        "statusRank": "Statusrang",
-        "taintRank": "Schattenland-Verderben"
+        "high": "Hoch",
+        "low": "Niedrig",
+        "merch": "Händler"
       },
       "stance": {
-        "title": "Kampf",
-        "current": "Aktuelle Haltung"
-      },
-      "movement": {
-        "title": "Bewegung",
-        "maximum": "Maximale Bewegung",
-        "feet": "Fuß"
-      },
-      "experience": {
-        "disadvantageCapTooltip": "Klicken, um die maximalen durch Nachteile erhaltenen EP zu ändern",
-        "recalculate": "EP-Käufe vom aktuellen Charakterstatus neu berechnen",
-        "summary": "Erfahrungszusammenfassung",
-        "xpAmount": "Menge",
-        "note": "Notiz",
-        "reason": "Grund",
-        "adjustExperience": "Erfahrung Anpassen",
-        "usedTotal": "Verwendet / Gesamt",
-        "purchases": "Käufe",
-        "traitChange": "{label} {from}→{to}",
-        "voidChange": "Leere {from}→{to}",
-        "skillCreate": "{name} 0→{rank}",
-        "skillChange": "{name} {from}→{to}",
-        "disadvantageCapLabel": "Max. EP",
-        "breakdown": {
-          "base": "Basis",
-          "disadvantagesGrant": "Nachteile",
-          "cap": "Limit",
-          "manualAdjustments": "Manuelle Anpassungen",
-          "traits": "Eigenschaften",
-          "void": "Leere",
-          "skills": "Fertigkeiten",
-          "advantages": "Vorteile",
-          "kata": "Kata",
-          "kiho": "Kiho",
-          "spells": "Zauber"
-        },
-        "fallbackLabels": {
-          "traitIncrease": "Eigenschaftserhöhung",
-          "voidIncrease": "Leere-Erhöhung",
-          "skillCreated": "Fertigkeit Erstellt",
-          "skillIncreased": "Fertigkeit Erhöht"
-        },
-        "spellMemorized": "Gelernt: {name}"
+        "current": "Aktuelle Haltung",
+        "title": "Kampf"
       }
     },
     "equipment": {
-      "weapons": {
-        "attackType": "Angriffsart",
-        "size": "Größe",
-        "damageKeep": "Behaltene Schadenswürfel",
-        "range": "Reichweite",
-        "arrow": "Pfeil",
-        "typeWeapon": "Waffe",
-        "typeBow": "Bogen",
-        "rangedAttack": "Fernkampfangriff",
-        "associatedSkill": "Zugeordnete Fertigkeit",
-        "fallback": "Ersatz",
-        "skillExample": {
-          "bow": "Kyujutsu",
-          "weapon": "Kenjutsu"
-        },
-        "arrows": {
-          "armor": "Panzerbrecher",
-          "flesh": "Fleischschneider",
-          "humming": "Summende Kugel",
-          "rope": "Seilschneider",
-          "willow": "Weidenblatt"
-        },
-        "sizes": {
-          "small": "Klein",
-          "medium": "Mittel",
-          "large": "Groß"
-        }
-      },
       "armor": {
-        "reduction": "Reduzierung",
         "equipped": "Angelegt",
+        "reduction": "Reduzierung",
         "type": "Rüstungstyp",
         "types": {
           "ashigaru": "Ashigaru-Rüstung",
-          "light": "Leichte Rüstung",
           "heavy": "Schwere Rüstung",
+          "light": "Leichte Rüstung",
           "riding": "Reitrüstung"
         }
       },
@@ -439,53 +174,81 @@
         "keywordsPlaceholder": "z.B. Samurai, Bauer",
         "nemuranai": "Nemuranai",
         "price": "Preis"
+      },
+      "weapons": {
+        "arrow": "Pfeil",
+        "arrows": {
+          "armor": "Panzerbrecher",
+          "flesh": "Fleischschneider",
+          "humming": "Summende Kugel",
+          "rope": "Seilschneider",
+          "willow": "Weidenblatt"
+        },
+        "associatedSkill": "Zugeordnete Fertigkeit",
+        "attackType": "Angriffsart",
+        "damageKeep": "Behaltene Schadenswürfel",
+        "fallback": "Ersatz",
+        "range": "Reichweite",
+        "rangedAttack": "Fernkampfangriff",
+        "size": "Größe",
+        "sizes": {
+          "large": "Groß",
+          "medium": "Mittel",
+          "small": "Klein"
+        },
+        "skillExample": {
+          "bow": "Kyujutsu",
+          "weapon": "Kenjutsu"
+        },
+        "typeBow": "Bogen",
+        "typeWeapon": "Waffe"
       }
     },
     "magic": {
-      "spells": {
-        "areaOfEffect": "Wirkungsbereich",
-        "range": "Reichweite",
-        "duration": "Dauer",
-        "cast": "Wirken",
-        "raises": "Erhöhungen",
-        "affinity": "Affinität",
-        "deficiency": "Mangel",
-        "maho": "Maho",
-        "useSpellSlot": "Zauberplatz Verwenden",
-        "voidSlot": "Leere-Zauberplatz Verwenden",
-        "slotsRestored": "Alle Zauberplätze auf Maximum wiederhergestellt",
-        "restored": "wiederhergestellt",
-        "memorized": "Gelernt"
-      },
-      "maho": {
-        "casting": "Maho Wirken",
-        "warningTitle": "Blutmagie - Verbotenes Maho",
-        "bloodRequired": "Blutkosten Erforderlich",
-        "additionalBloodBonus": "Jede zusätzliche Blutkostenmenge gewährt +1 Freie Erhöhung",
-        "bloodSource": {
-          "label": "Blutquelle",
-          "self": "Selbst",
-          "other": "Andere"
-        },
-        "additionalBlood": "Zusätzliches Blut",
-        "bloodCost": "Blut",
-        "taintGained": "Verderben Erhalten",
-        "taintGainedNotification": "{taint} Punkte Schattenland-Verderben durch Maho-Wirken erhalten"
-      },
       "kiho": {
         "internal": "Intern",
         "karmic": "Karmisch",
         "martial": "Kampf",
         "mystic": "Mystisch"
+      },
+      "maho": {
+        "additionalBlood": "Zusätzliches Blut",
+        "additionalBloodBonus": "Jede zusätzliche Blutkostenmenge gewährt +1 Freie Erhöhung",
+        "bloodCost": "Blut",
+        "bloodRequired": "Blutkosten Erforderlich",
+        "bloodSource": {
+          "label": "Blutquelle",
+          "other": "Andere",
+          "self": "Selbst"
+        },
+        "casting": "Maho Wirken",
+        "taintGained": "Verderben Erhalten",
+        "taintGainedNotification": "{taint} Punkte Schattenland-Verderben durch Maho-Wirken erhalten",
+        "warningTitle": "Blutmagie - Verbotenes Maho"
+      },
+      "spells": {
+        "affinity": "Affinität",
+        "areaOfEffect": "Wirkungsbereich",
+        "cast": "Wirken",
+        "deficiency": "Mangel",
+        "duration": "Dauer",
+        "maho": "Maho",
+        "memorized": "Gelernt",
+        "raises": "Erhöhungen",
+        "range": "Reichweite",
+        "restored": "wiederhergestellt",
+        "slotsRestored": "Alle Zauberplätze auf Maximum wiederhergestellt",
+        "useSpellSlot": "Zauberplatz Verwenden",
+        "voidSlot": "Leere-Zauberplatz Verwenden"
       }
     },
     "system": {
-      "migration": {
-        "iconsUpdated": "L5R4 Migration: {count} Weltbildpfad(e) aktualisiert.",
-        "compendiumIconsUpdated": "L5R4 Migration (Kompendien): {count} Bildpfad(e) aktualisiert."
-      },
       "errors": {
         "deleteEffect": "Fehler beim Löschen des Effekts."
+      },
+      "migration": {
+        "compendiumIconsUpdated": "L5R4 Migration (Kompendien): {count} Bildpfad(e) aktualisiert.",
+        "iconsUpdated": "L5R4 Migration: {count} Weltbildpfad(e) aktualisiert."
       },
       "settings": {
         "forceMigration": {
@@ -502,18 +265,255 @@
         }
       }
     },
+    "ui": {
+      "armor": {
+        "allowStacking": "Rüstungsstapelung Erlauben"
+      },
+      "combat": {
+        "multipleTargets": "Ziele - SZ nicht automatisch gesetzt",
+        "vs": "vs"
+      },
+      "common": {
+        "action": "Aktion",
+        "active": "Aktiv",
+        "armor": "Rüstung",
+        "auto": "Auto",
+        "bonus": "Bonus",
+        "cancel": "Abbrechen",
+        "clan": "Klan",
+        "conditions": "Zustände",
+        "cost": "Kosten",
+        "current": "Aktuell",
+        "damage": "Schaden",
+        "delete": "Löschen",
+        "disabled": "deaktiviert",
+        "edit": "Bearbeiten",
+        "effect": "Effekt",
+        "free": "Frei",
+        "initiative": "Initiative",
+        "insight": "Einsicht",
+        "keep": "Behalten",
+        "mastery": "Meisterschaft",
+        "modifier": "Modifikator",
+        "multi": "Multiplikator",
+        "name": "Name",
+        "new": "Neu",
+        "none": "Keine",
+        "ok": "OK",
+        "rank": "Rang",
+        "rate": "Rate",
+        "ring": "Ring",
+        "roll": "Würfeln",
+        "save": "Speichern",
+        "school": "Schule",
+        "simple": "Einfach",
+        "tn": "SZ",
+        "total": "Gesamt",
+        "type": "Typ",
+        "xp": "Erfahrungspunkte"
+      },
+      "dialogs": {
+        "deleteItem": {
+          "content": "Bist du sicher, dass du {name} löschen möchtest?",
+          "title": "Gegenstand Löschen?"
+        }
+      },
+      "hints": {
+        "leftClickPlusRightClickMinus": "Shift+Linksklick: +1, Shift+Rechtsklick: -1",
+        "leftRightToAdjust": "Links und Rechts zum Anpassen",
+        "postToChat": "Im Chat posten",
+        "shiftClickRankPoints": "Shift+Klick: ±0.1, Shift+Strg+Klick: ±1.0",
+        "voidPointsClickAdjust": "Linksklick: +1, Rechtsklick: -1"
+      },
+      "mechanics": {
+        "combat": {
+          "attack": "Angriff",
+          "woundPenalty": "Wundenstrafe"
+        },
+        "fear": {
+          "catastrophicFailure": "KATASTROPHALER FEHLSCHLAG! Charakter flieht oder kauert sich hilflos zusammen.",
+          "clickToTest": "Klicken, um Furcht gegen ausgewählte Charaktere zu testen",
+          "effectName": "Furcht {rank}",
+          "label": "Furcht {rank}",
+          "noFear": "Dieser NSC hat keinen Furchteffekt konfiguriert",
+          "noTargets": "Keine Spielsteine für Furchttest ausgewählt",
+          "noWillpower": "{character} hat keine Willenskraft-Eigenschaft",
+          "penaltyApplied": "Strafe: -{penalty}k0 auf alle Würfe",
+          "rank": "Furchtrang",
+          "testAgainst": "vs {creature}",
+          "testResult": "Furcht {rank} Test"
+        },
+        "rings": {
+          "air": "Luft",
+          "all": "Alle",
+          "earth": "Erde",
+          "fire": "Feuer",
+          "ring": "Ring",
+          "void": "Leere",
+          "voidInitBoost": "Leere Nutzen",
+          "voidPoints": "Leere-Punkte",
+          "voidTnBoost": "Leere Nutzen",
+          "water": "Wasser"
+        },
+        "rolls": {
+          "attackRoll": "Angriffswurf",
+          "damageRoll": "Schadenswurf",
+          "emphasis": "Schwerpunkt",
+          "explodesOn": "Explodiert Bei",
+          "failure": "Fehlschlag",
+          "freeRaises": "Freie Erhöhungen",
+          "missed": "Verfehlt",
+          "raise": "Erhöhung",
+          "raises": "Erhöhungen",
+          "ringRoll": "Ringwurf",
+          "skillRoll": "Fertigkeitswurf",
+          "socialResistance": "Sozialer Widerstand",
+          "socialResistanceDescription": "Einschüchterung oder Versuchung widerstehen",
+          "spellCasting": "Zauberspruch Wurf",
+          "success": "Erfolg",
+          "traitRoll": "Eigenschaftswurf",
+          "unskilled": "Ungeübt"
+        },
+        "stances": {
+          "attack": "Angriffshaltung",
+          "center": "Zentrierte Haltung",
+          "defense": "Verteidigungshaltung",
+          "fullAttack": "Voller Angriff",
+          "fullDefense": "Volle Verteidigung",
+          "fullDefenseHint": "Mache einen Verteidigungs-/Reflexwurf. Addiere die Hälfte des Ergebnisses (aufgerundet) zu deinem Rüstungs-SZ für die Dauer dieser Haltung."
+        },
+        "traits": {
+          "agi": "Gewandtheit",
+          "awa": "Aufmerksamkeit",
+          "int": "Intelligenz",
+          "per": "Wahrnehmung",
+          "ref": "Reflexe",
+          "sta": "Ausdauer",
+          "str": "Stärke",
+          "wil": "Willenskraft"
+        },
+        "wounds": {
+          "alreadyFullHealth": "{name} ist bereits bei voller Gesundheit",
+          "applied": "{amount} Wunden auf {name} angewendet",
+          "appliedWithArmor": "{name} erhielt {original} Schaden. Rüstung reduzierte um {reduction}. {final} Wunden angewendet.",
+          "applyHealing": "Heilung Anwenden",
+          "applyHealingTitle": "Natürliche Heilung durch Ruhe anwenden",
+          "applyWounds": "Wunden Anwenden",
+          "armorReduction": "Reduzierung",
+          "armorTn": "Rüstungs-SZ",
+          "armorTnBase": "Basis Rüstungs-SZ",
+          "crippled": "Verkrüppelt",
+          "down": "Am Boden",
+          "earthMultiplier": "Erde-Multiplikator",
+          "formula": "Formel",
+          "fullyHealed": "Vollständig geheilt!",
+          "grazed": "Gestreift",
+          "healingApplied": "{amount} Wunden geheilt (Heilungsrate: {rate})",
+          "healingFailed": "Fehler beim Anwenden der Heilung auf {name}",
+          "healRateFormula": "x 2 +",
+          "healthy": "Gesund",
+          "hurt": "Verletzt",
+          "injured": "Verwundet",
+          "label": "Wunden",
+          "manual": "Manuell",
+          "maxWounds": "Max. Wunden",
+          "naturalHealing": "Natürliche Heilung",
+          "nicked": "Angekratzt",
+          "noHealRate": "{name} hat keine Heilungsrate konfiguriert",
+          "noTokenSelected": "Kein Spielstein ausgewählt. Wähle einen Spielstein aus, um Wunden anzuwenden.",
+          "noVoidPoints": "Keine Leere-Punkte verfügbar, um Schaden zu reduzieren",
+          "out": "Kampfunfähig",
+          "penalty": "Strafe",
+          "reducedApplied": "Leere-Punkt ausgegeben: Schaden um 10 reduziert. {amount} Wunden auf {name} angewendet",
+          "reducedWithArmor": "{name} erhielt {original} Schaden. Leere reduzierte auf {afterVoid}, Rüstung reduzierte um {reduction}. {final} Wunden angewendet.",
+          "reduceWithVoid": "Mit Leere Reduzieren",
+          "restedAndRecovered": "hat sich ausgeruht und Wunden geheilt",
+          "status": "Wunden: {current}/{max} (erlitten: {suffered})",
+          "suffered": "Erlittene Wunden",
+          "threshold": "Schwelle",
+          "woundBonus": "Wundenbonus",
+          "woundHealRate": "Wundheilungsrate",
+          "woundLevel": "Stufe",
+          "woundMode": "Wundenmodus"
+        }
+      },
+      "notifications": {
+        "actorNotFound": "Akteur für Schadenswurf nicht gefunden",
+        "deficiencyBlocksCasting": "Mangel in {ring} reduziert deinen Schulrang auf null - kann nicht wirken",
+        "invalidRingForSpell": "Ungültiger Ring für Zauberplatz: {ring}",
+        "noActorForVoid": "Kein Akteur verfügbar, um Leere-Punkte auszugeben",
+        "noPermissionDamage": "Du hast keine Berechtigung, Schaden für diesen Akteur zu würfeln",
+        "noSpellSlots": "Dir sind die Zauberplätze für diesen Ring ausgegangen",
+        "noValidWeapon": "Keine gültige Waffe für Angriffswurf gefunden",
+        "schoolRankZero": "Du kannst keinen Zauber wirken, wenn der Schulrang auf null reduziert ist"
+      },
+      "sheets": {
+        "abilities": "Fähigkeiten",
+        "addItem": "Gegenstand Hinzufügen",
+        "advantage": "Vorteil",
+        "advantages": "Vorteile",
+        "armor": "Rüstung",
+        "background": "Hintergrund",
+        "character": "Charakter",
+        "demands": "Anforderungen",
+        "description": "Beschreibung",
+        "disadvantage": "Nachteil",
+        "disadvantages": "Nachteile",
+        "equipment": "Ausrüstung",
+        "item": "Gegenstand",
+        "items": "Gegenstände",
+        "kata": "Kata",
+        "kiho": "Kiho",
+        "notes": "Notizen",
+        "rulesSummary": "Regelzusammenfassung",
+        "skill": "Fertigkeit",
+        "skills": "Fertigkeiten",
+        "spell": "Zauber",
+        "spells": "Zauber",
+        "spellSlots": "Zauberplätze",
+        "tattoo": "Tätowierung",
+        "tattoos": "Tätowierungen",
+        "technique": "Technik",
+        "techniques": "Techniken",
+        "weapon": "Waffe",
+        "weapons": "Waffen",
+        "woundLevels": "Wundenstufen"
+      },
+      "statusEffects": {
+        "blinded": "Geblendet",
+        "concentration": "Konzentration",
+        "dazed": "Benommen",
+        "dead": "Tot",
+        "entangled": "Verstrickt",
+        "fasting": "Fastend",
+        "fatigued": "Erschöpft",
+        "feared": "Verängstigt",
+        "grappled": "Festgehalten",
+        "guarded": "Beschützt",
+        "guarding": "Beschützend",
+        "mounted": "Beritten/Höhere Position",
+        "prone": "Am Boden",
+        "stunned": "Betäubt"
+      },
+      "tabs": {
+        "description": "Beschreibung",
+        "details": "Details",
+        "effects": "Aktive Effekte",
+        "modifiers": "Modifikatoren"
+      }
+    },
     "world": {
       "wealth": {
-        "koku": "Koku",
         "bu": "Bu",
+        "koku": "Koku",
         "zeni": "Zeni"
       }
     }
   },
   "TYPES": {
     "Actor": {
-      "pc": "SC",
-      "npc": "NSC"
+      "npc": "NSC",
+      "pc": "SC"
     },
     "Item": {
       "advantage": "Vorteil",

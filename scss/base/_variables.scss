@@ -10,21 +10,33 @@
   --l5r4-color-ring-earth: #594839;
   --l5r4-color-ring-fire: #ab4913;
   --l5r4-color-ring-void: #7d6862;
+  --l5r4-palette-amber-500: #ab6600;
   --l5r4-size-column-controls: 102px;
   --l5r4-state-hover-filter: brightness(1.1);
   --l5r4-state-pressed-filter: brightness(0.95);
   --l5r4-state-pressed-transform: scale(0.98);
 }
 
-// Ring rank backdrop per theme. Set on each themed element, so a sheet's own theme overrides the interface's.
+// Per-theme roles. Set on each themed element, so a sheet's own theme overrides the interface's. Tokens built from
+// these sit here too: a var() resolves where the token is declared.
 .theme-light {
+  --l5r4-color-accent: var(--l5r4-palette-amber-500);
   --l5r4-color-ring-rank-backdrop: transparent;
   --l5r4-image-ring-rank-backdrop: url("../../../ui/parchment.jpg");
+  --l5r4-state-focus-color: var(--color-warm-2);
+  --l5r4-state-focus-outline: 1px solid var(--l5r4-state-focus-color);
+  --l5r4-state-focus-shadow: 0 0 4px var(--l5r4-state-focus-color);
+  --l5r4-state-selected-outline: 1px solid var(--l5r4-color-accent);
 }
 
 .theme-dark {
+  --l5r4-color-accent: var(--color-text-accent);
   --l5r4-color-ring-rank-backdrop: var(--color-cool-5-90);
   --l5r4-image-ring-rank-backdrop: none;
+  --l5r4-state-focus-color: var(--color-warm-2);
+  --l5r4-state-focus-outline: 1px solid var(--l5r4-state-focus-color);
+  --l5r4-state-focus-shadow: 0 0 4px var(--l5r4-state-focus-color);
+  --l5r4-state-selected-outline: 1px solid var(--l5r4-color-accent);
 }
 
 // SCSS Variables (Asset Paths)

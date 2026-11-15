@@ -37,9 +37,15 @@
     padding: 0.2rem 0.5rem;
     width: auto;
 
+    // Selected (states.md): bold with the selected outline in place of core's active ring, so focus shows its own
     &.active {
+      box-shadow: none;
       font-weight: bold;
-      outline: 1px solid var(--color-border-highlight);
+      outline: var(--l5r4-state-selected-outline);
+
+      &:focus-visible {
+        box-shadow: var(--l5r4-state-focus-shadow);
+      }
     }
   }
 
@@ -104,8 +110,20 @@
     min-width: 0;
   }
 
+  // A button that reads as the row's bold name: core's button look undone, its focus ring kept
   .l5r4-compendium-browser-name {
+    background: none;
+    border: none;
+    border-radius: 0;
+    color: inherit;
+    display: block;
+    font: inherit;
     font-weight: bold;
+    height: auto;
+    line-height: inherit;
+    min-height: 0;
+    padding: 0;
+    text-align: start;
   }
 
   .l5r4-compendium-browser-details,

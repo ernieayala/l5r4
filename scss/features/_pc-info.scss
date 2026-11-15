@@ -34,5 +34,19 @@
     .l5r4-form-field-label {
       min-height: calc(var(--input-height) - 0.5rem);
     }
+
+    // The label's text as a <button> (Shift+click actions): it fills the label and undoes core's button face
+    .l5r4-form-field-label-button {
+      align-self: stretch;
+      background: none;
+      border: none;
+      border-radius: 0;
+      color: inherit;
+      cursor: inherit;
+      font: inherit;
+      height: auto;
+      min-height: 0;
+      padding: 0;
+    }
   }
 }

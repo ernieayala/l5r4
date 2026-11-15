@@ -3,6 +3,14 @@
  * Small controls inside a row: the kata or kiho activation toggle
  */
 
+// On: the accent icon says so (states.md Checked); core's active ring stays off, so focus shows its own ring
 .l5r4 .l5r4-inline-control-activate.active {
-  color: var(--color-text-hyperlink);
+  box-shadow: none;
+  color: var(--l5r4-color-accent);
+  outline: none;
+
+  &:focus-visible {
+    box-shadow: var(--l5r4-state-focus-shadow);
+    outline: var(--l5r4-state-focus-outline);
+  }
 }

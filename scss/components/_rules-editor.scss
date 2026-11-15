@@ -40,6 +40,20 @@
     }
   }
 
+  // An icon that reads as the link it replaces: core's button look undone, its focus ring kept
+  .l5r4-rules-editor-delete {
+    background: none;
+    border: none;
+    border-radius: 0;
+    color: inherit;
+    display: inline;
+    font: inherit;
+    height: auto;
+    line-height: inherit;
+    min-height: 0;
+    padding: 0;
+  }
+
   .l5r4-rules-editor-error {
     color: var(--color-level-error);
     font-size: var(--font-size-12);

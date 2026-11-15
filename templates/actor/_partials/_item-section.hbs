@@ -1,4 +1,4 @@
-<section class="flexcol -gap-sm">
+<section class="l5r4-section flexcol -gap-sm">
   <div class="flexrow -gap-sm l5r4-section-title{{#if collapsedSections.items}} is-collapsed{{/if}}" data-scope="items">
     <h4 class="l5r4-section-heading">{{localize "l5r4.ui.sheets.items"}}</h4>
     <div class="flexrow flex0 l5r4-wealth">
@@ -13,20 +13,22 @@
       <span>{{localize "l5r4.world.wealth.zeni"}}:</span>
       <input type="number" name="system.wealth.zeni" value="{{system.wealth.zeni}}" placeholder="0" min="0" step="1" />
     </div>
-    <a
-      class="button inline-control icon"
+    <button
+      type="button"
+      class="inline-control icon"
       data-action="open-wealth-manager"
-      data-tooltip="{{localize 'l5r4.apps.wealthManager.open'}}"
+      data-tooltip="{{localize "l5r4.apps.wealthManager.open"}}"
+      aria-label="{{localize "l5r4.apps.wealthManager.open"}}"
     >
-      <i class="fa-solid fa-calculator"></i>
-    </a>
+      <i class="fa-solid fa-calculator" inert></i>
+    </button>
     {{> "systems/l5r4-enhanced/templates/actor/_partials/_unified-item-create.hbs"}}
-    {{> "systems/l5r4-enhanced/templates/actor/_partials/_expand.hbs"}}
+    {{> "systems/l5r4-enhanced/templates/actor/_partials/_expand.hbs" collapsed=collapsedSections.items}}
   </div>
   {{#if items.length}}
     <section class="l5r4-item-row-list -commonItem l5r4-sort-header" data-scope="items">
       <div class="l5r4-item-row">
-        <a class="l5r4-sort-header-button" data-action="sort-items" data-sortby="name">{{localize "l5r4.ui.common.name"}}</a>
+        <button type="button" class="l5r4-sort-header-button" data-action="sort-items" data-sortby="name">{{localize "l5r4.ui.common.name"}}</button>
       </div>
     </section>
     <section class="l5r4-item-row-list -commonItem">

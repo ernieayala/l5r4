@@ -1,15 +1,15 @@
-<section class="flexcol -gap-sm">
+<section class="l5r4-section flexcol -gap-sm">
   <div class="flexrow -gap-sm l5r4-section-title{{#if collapsedSections.armors}} is-collapsed{{/if}}" data-scope="armors">
     <h4 class="l5r4-section-heading">{{localize "l5r4.ui.sheets.armor"}}</h4>
     {{> "systems/l5r4-enhanced/templates/actor/_partials/_unified-item-create.hbs"}}
-    {{> "systems/l5r4-enhanced/templates/actor/_partials/_expand.hbs"}}
+    {{> "systems/l5r4-enhanced/templates/actor/_partials/_expand.hbs" collapsed=collapsedSections.armors}}
   </div>
   <section class="l5r4-item-row-list -armor l5r4-sort-header" data-scope="armors">
     <div class="l5r4-item-row">
-      <a class="l5r4-sort-header-button" data-action="sort-items" data-sortby="name">{{localize "l5r4.ui.common.name"}}</a>
-      <a class="l5r4-sort-header-button" data-action="sort-items" data-sortby="bonus">{{localize "l5r4.ui.common.bonus"}}</a>
-      <a class="l5r4-sort-header-button" data-action="sort-items" data-sortby="reduction">{{localize "l5r4.equipment.armor.reduction"}}</a>
-      <a class="l5r4-sort-header-button" data-action="sort-items" data-sortby="equipped">{{localize "l5r4.equipment.armor.equipped"}}</a>
+      <button type="button" class="l5r4-sort-header-button" data-action="sort-items" data-sortby="name">{{localize "l5r4.ui.common.name"}}</button>
+      <button type="button" class="l5r4-sort-header-button" data-action="sort-items" data-sortby="bonus">{{localize "l5r4.ui.common.bonus"}}</button>
+      <button type="button" class="l5r4-sort-header-button" data-action="sort-items" data-sortby="reduction">{{localize "l5r4.equipment.armor.reduction"}}</button>
+      <button type="button" class="l5r4-sort-header-button" data-action="sort-items" data-sortby="equipped">{{localize "l5r4.equipment.armor.equipped"}}</button>
       <span></span>
     </div>
   </section>

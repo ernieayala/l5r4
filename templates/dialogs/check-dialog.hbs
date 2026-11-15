@@ -78,7 +78,7 @@
   {{#if embraceTaint}}
     <div class="form-group">
       <label>{{localize "l5r4.ui.taint.embrace"}}</label>
-      <input type="checkbox" name="embraceTaint" title="{{localize "l5r4.ui.taint.embraceHint"}}" />
+      <input type="checkbox" name="embraceTaint" data-tooltip="{{localize "l5r4.ui.taint.embraceHint"}}" />
     </div>
   {{/if}}
 
@@ -97,7 +97,7 @@
       <label>{{localize "l5r4.equipment.weapons.rangedAttack"}}</label>
       <input type="checkbox" name="isRanged" {{checked ranged}} />
     </div>
-    <fieldset class="check-maneuvers">
+    <fieldset class="l5r4-check-dialog-maneuvers">
       <legend>{{localize "l5r4.ui.combat.maneuvers"}}</legend>
       {{#if raisesAllowed}}
         <p class="hint">{{localize "l5r4.ui.combat.maneuversHint"}}</p>
@@ -149,7 +149,7 @@
       <input
         type="checkbox"
         name="socialResistance"
-        title="{{localize "l5r4.ui.mechanics.rolls.socialResistanceDescription"}}"
+        data-tooltip="{{localize "l5r4.ui.mechanics.rolls.socialResistanceDescription"}}"
       />
     </div>
   {{/if}}

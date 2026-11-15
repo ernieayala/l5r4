@@ -1,14 +1,16 @@
-<div class="form-group">
-  <label>{{localize "l5r4.ui.check.schoolRank"}}</label>
-  <div class="form-fields">
-    <input name="system.rank" type="number" value="{{system.rank}}" data-type="Number" min="0" />
+<div class="l5r4-item-details">
+  <div class="form-group">
+    <label>{{localize "l5r4.ui.check.schoolRank"}}</label>
+    <div class="form-fields">
+      <input name="system.rank" type="number" value="{{system.rank}}" data-type="Number" min="0" />
+    </div>
+    <p class="hint">{{localize "l5r4.ui.grants.schoolRankHint"}}</p>
   </div>
-  <p class="hint">{{localize "l5r4.ui.grants.schoolRankHint"}}</p>
-</div>
-<div class="form-group">
-  <label>{{localize "l5r4.magic.spells.shugenjaSchool"}}</label>
-  <div class="form-fields">
-    <input name="system.shugenja" type="checkbox" {{checked system.shugenja}} />
+  <div class="form-group">
+    <label>{{localize "l5r4.magic.spells.shugenjaSchool"}}</label>
+    <div class="form-fields">
+      <input name="system.shugenja" type="checkbox" {{checked system.shugenja}} />
+    </div>
+    <p class="hint">{{localize "l5r4.magic.spells.shugenjaSchoolHint"}}</p>
   </div>
-  <p class="hint">{{localize "l5r4.magic.spells.shugenjaSchoolHint"}}</p>
 </div>

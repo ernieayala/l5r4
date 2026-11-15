@@ -6,9 +6,12 @@
 
 @use "../base/variables" as *;
 
-// Up and down arrows shown on hover over a rank that steps by one (Traits, the Void Ring)
+// Up and down arrows shown on hover over a rank that steps by one (Traits, the Void Ring). Each arrow is a <button>:
+// `border-radius`, `font-family`, `line-height`, `min-height`, and `padding` undo core's button face
 @mixin rank-arrows {
-  &:hover {
+  // Keyboard focus on an arrow shows both, as the pointer does
+  &:hover,
+  &:has(:focus-visible) {
     .l5r4-rank-control-arrow.-up,
     .l5r4-rank-control-arrow.-down {
       opacity: 1;
@@ -29,13 +32,18 @@
     background-color: inherit;
     border: 1px solid black;
     border-color: inherit;
+    border-radius: 0;
     color: inherit;
     display: flex;
+    font-family: inherit;
     font-size: 10px;
     height: 16px;
     justify-content: center;
     left: -2px;
+    line-height: inherit;
+    min-height: 0;
     opacity: 0;
+    padding: 0;
     position: absolute;
     right: -1px;
     transition:
@@ -157,7 +165,18 @@
       }
     }
 
+    // A <button> laid out as the inline link it replaced: block keeps the medallion's line box, the rest undoes core's
+    // button face
     .ring-roll {
+      background: none;
+      border: none;
+      border-radius: 0;
+      color: inherit;
+      display: block;
+      font: inherit;
+      height: auto;
+      min-height: 0;
+      padding: 0;
       position: relative;
 
       &:hover img {
@@ -215,7 +234,8 @@
           width: 100%;
         }
 
-        span:not(.l5r4-button-under) {
+        // A <button>: `font` and `min-height` undo core's button face
+        .l5r4-button-face {
           align-items: center;
           background: #000;
           border: none;
@@ -223,12 +243,14 @@
           color: #fff;
           cursor: pointer;
           display: flex;
+          font: inherit;
           font-weight: bold;
           height: 100%;
           justify-content: center;
           mask: url("../assets/animation/urban-sprite.webp");
           mask-position: 100% 0;
           mask-size: 3000% 100%;
+          min-height: 0;
           padding: 0 0.5rem;
           width: 100%;
 
@@ -292,7 +314,7 @@
       .l5r4-button.-roll {
         border: 1px solid var(--l5r4-color-ring-earth);
 
-        span:not(.l5r4-button-under) {
+        .l5r4-button-face {
           background: var(--l5r4-color-ring-earth);
         }
       }
@@ -311,7 +333,7 @@
       .l5r4-button.-roll {
         border: 1px solid var(--l5r4-color-ring-water);
 
-        span:not(.l5r4-button-under) {
+        .l5r4-button-face {
           background: var(--l5r4-color-ring-water);
         }
       }
@@ -330,7 +352,7 @@
       .l5r4-button.-roll {
         border: 1px solid var(--l5r4-color-ring-fire);
 
-        span:not(.l5r4-button-under) {
+        .l5r4-button-face {
           background: var(--l5r4-color-ring-fire);
         }
       }
@@ -349,7 +371,7 @@
       .l5r4-button.-roll {
         border: 1px solid rgb(var(--air-ring-color));
 
-        span:not(.l5r4-button-under) {
+        .l5r4-button-face {
           background: rgb(var(--air-ring-color));
         }
       }
@@ -533,17 +555,26 @@
       margin: 0;
     }
 
+    // A <button>: everything past `gap` undoes core's button face
     .l5r4-void-points-dots {
       align-items: center;
+      background: none;
+      border: none;
+      border-radius: 0;
       cursor: pointer;
       display: flex;
       gap: 2px;
+      height: auto;
+      min-height: 0;
+      padding: 0;
     }
 
+    // Core stops pointer events on a button's children; each dot keeps its own hover
     .void-dot {
       border: 2px solid #666;
       border-radius: 50%;
       height: 12px;
+      pointer-events: auto;
       width: 12px;
 
       &:hover {

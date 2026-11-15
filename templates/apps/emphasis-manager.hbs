@@ -1,7 +1,7 @@
 <div class="l5r4-emphasis-manager-body">
   <p>{{localize "l5r4.apps.emphasisManager.hint"}}</p>
   <button type="button" data-action="add-emphasis">
-    <i class="fa-solid fa-plus"></i>
+    <i class="fa-solid fa-plus" inert></i>
     {{localize "l5r4.apps.emphasisManager.addCustom"}}
   </button>
   <div class="l5r4-emphasis-manager-list">
@@ -22,15 +22,16 @@
               {{/if}}
             </label>
             {{#if this.custom}}
-              <div class="flexrow -gap-sm">
-                <button 
+              <div class="l5r4-inline-control flexrow -gap-sm">
+                <button
                   type="button" 
                   class="button inline-control icon" 
                   data-action="edit-emphasis" 
                   data-emphasis-name="{{this.name}}"
                   data-tooltip="{{localize 'l5r4.ui.common.edit'}}"
+                  aria-label="{{localize "l5r4.ui.common.edit"}}"
                 >
-                  <i class="fa-solid fa-pen-to-square"></i>
+                  <i class="fa-solid fa-pen-to-square" inert></i>
                 </button>
                 <button 
                   type="button" 
@@ -38,8 +39,9 @@
                   data-action="delete-emphasis" 
                   data-emphasis-name="{{this.name}}"
                   data-tooltip="{{localize 'l5r4.ui.common.delete'}}"
+                  aria-label="{{localize "l5r4.ui.common.delete"}}"
                 >
-                  <i class="fa-solid fa-trash"></i>
+                  <i class="fa-solid fa-trash" inert></i>
                 </button>
               </div>
             {{/if}}
@@ -50,9 +52,9 @@
       <p>{{localize "l5r4.apps.emphasisManager.noEmphases"}}</p>
     {{/if}}
   </div>
-  <footer class="flexrow -gap-sm">
+  <footer class="l5r4-emphasis-manager-footer flexrow -gap-sm">
     <button type="submit">
-      <i class="fa-solid fa-floppy-disk"></i>
+      <i class="fa-solid fa-floppy-disk" inert></i>
       {{localize "l5r4.ui.common.save"}}
     </button>
     <button type="button" data-action="close">

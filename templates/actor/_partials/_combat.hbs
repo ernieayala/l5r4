@@ -1,20 +1,24 @@
 <section class="l5r4-section l5r4-combat">
   <div class="flexrow -gap-sm l5r4-section-title">
     <h4 class="l5r4-section-heading -compact">{{localize "l5r4.character.stance.title"}}</h4>
-    <a
+    <button
+      type="button"
       class="button inline-control icon"
       data-action="open-condition-manager"
-      title="{{localize 'l5r4.ui.common.conditions'}}"
+      data-tooltip="{{localize "l5r4.ui.common.conditions"}}"
+      aria-label="{{localize "l5r4.ui.common.conditions"}}"
     >
-      <i class="fa-solid fa-heart-pulse"></i>
-    </a>
-    <a
+      <i class="fa-solid fa-heart-pulse" inert></i>
+    </button>
+    <button
+      type="button"
       class="button inline-control icon"
       data-action="open-combat-config"
-      title="{{localize 'l5r4.apps.combatConfig.title'}}"
+      data-tooltip="{{localize "l5r4.apps.combatConfig.title"}}"
+      aria-label="{{localize "l5r4.apps.combatConfig.title"}}"
     >
-      <i class="fa-solid fa-gear"></i>
-    </a>
+      <i class="fa-solid fa-gear" inert></i>
+    </button>
   </div>
   <div class="l5r4-grid">
     <span>{{localize "l5r4.character.stance.current"}}</span>
@@ -28,7 +32,7 @@
       </select>
     </div>
     <span>{{localize "l5r4.ui.common.initiative"}}</span>
-    <div class="flexrow -gap-sm">
+    <div class="flexrow -gap-sm l5r4-grid-value">
       <div>{{system.initiative.roll}}k{{system.initiative.keep}}+{{#if system.initiative.useVoid}}{{math system.initiative.totalMod "+" 10}}{{else}}{{system.initiative.totalMod}}{{/if}}</div>
       {{#if (gt system.rings.void.rank 0)}}
         <input
@@ -37,12 +41,12 @@
             name="system.initiative.useVoid"
             {{checked system.initiative.useVoid}}
             data-action="toggle-initiative-void"
-            title="{{localize "l5r4.ui.mechanics.rings.voidInitBoost"}}"
+            data-tooltip="{{localize "l5r4.ui.mechanics.rings.voidInitBoost"}}"
           />
       {{/if}}
     </div>
     <span>{{localize "l5r4.character.movement.title"}}</span>
-    <div class="flexrow -gap-sm">
+    <div class="flexrow -gap-sm l5r4-grid-value">
       <div>
         {{#if system.movement.showSimple}}
           {{system.movement.simpleAction}}{{localize "l5r4.character.movement.feet"}}
@@ -52,17 +56,17 @@
       </div>
       {{#if system.movement.showSimple}}
         <button type="button" data-action="toggle-movement-type" 
-          title="{{localize "l5r4.ui.common.simple"}}">
+          data-tooltip="{{localize "l5r4.ui.common.simple"}}">
           {{localize "l5r4.ui.common.simple"}}
         </button>
       {{else}}
         <button type="button" data-action="toggle-movement-type" 
-          title="{{localize "l5r4.ui.common.free"}}">
+          data-tooltip="{{localize "l5r4.ui.common.free"}}">
           {{localize "l5r4.ui.common.free"}}
         </button>
       {{/if}}
     </div>
     <span>{{localize "l5r4.character.movement.maximum"}}</span>
-    <div class="flexrow -gap-sm">{{system.movement.maximum}}{{localize "l5r4.character.movement.feet"}}</div>
+    <div class="flexrow -gap-sm l5r4-grid-value">{{system.movement.maximum}}{{localize "l5r4.character.movement.feet"}}</div>
   </div>
 </section>

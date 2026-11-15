@@ -7,7 +7,7 @@ template (module/config/design-gallery.js names them) --}}
       <h3>{{title}}</h3>
       <dl class="l5r4-design-gallery-facts">
         <dt>{{localize "l5r4.apps.designGallery.entry.page"}}</dt>
-        <dd><code>docs/design-system/components/{{page}}.md</code></dd>
+        <dd><code>{{concat "docs/design-system/components/" page ".md"}}</code></dd>
         <dt>{{localize "l5r4.apps.designGallery.entry.templates"}}</dt>
         <dd>
           {{#each partials}}<code>{{this}}</code> {{else}}{{localize "l5r4.apps.designGallery.entry.none"}}{{/each}}

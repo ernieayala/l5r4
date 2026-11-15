@@ -1,14 +1,14 @@
-<section class="flexcol -gap-sm">
+<section class="l5r4-section flexcol -gap-sm">
   <div class="flexrow -gap-sm l5r4-section-title{{#if collapsedSections.disadvantages}} is-collapsed{{/if}}" data-scope="disadvantages">
     <h4 class="l5r4-section-heading">{{localize "l5r4.ui.sheets.disadvantages"}}</h4>
     {{> "systems/l5r4-enhanced/templates/actor/_partials/_unified-item-create.hbs"}}
-    {{> "systems/l5r4-enhanced/templates/actor/_partials/_expand.hbs"}}
+    {{> "systems/l5r4-enhanced/templates/actor/_partials/_expand.hbs" collapsed=collapsedSections.disadvantages}}
   </div>
   <section class="l5r4-item-row-list -disadvantage l5r4-sort-header" data-scope="disadvantages">
     <div class="l5r4-item-row">
-      <a class="l5r4-sort-header-button" data-action="sort-items" data-sortby="name">{{localize "l5r4.ui.common.name"}}</a>
-      <a class="l5r4-sort-header-button" data-action="sort-items" data-sortby="type">{{localize "l5r4.ui.common.type"}}</a>
-      <a class="l5r4-sort-header-button" data-action="sort-items" data-sortby="cost">{{localize "l5r4.ui.common.cost"}}</a>
+      <button type="button" class="l5r4-sort-header-button" data-action="sort-items" data-sortby="name">{{localize "l5r4.ui.common.name"}}</button>
+      <button type="button" class="l5r4-sort-header-button" data-action="sort-items" data-sortby="type">{{localize "l5r4.ui.common.type"}}</button>
+      <button type="button" class="l5r4-sort-header-button" data-action="sort-items" data-sortby="cost">{{localize "l5r4.ui.common.cost"}}</button>
     </div>
   </section>
   <section class="l5r4-item-row-list -disadvantage">

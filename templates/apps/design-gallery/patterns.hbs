@@ -6,7 +6,7 @@
       <h3>{{localize label}}</h3>
       <dl class="l5r4-design-gallery-facts">
         <dt>{{localize "l5r4.apps.designGallery.entry.page"}}</dt>
-        <dd><code>docs/design-system/patterns/{{page}}.md</code></dd>
+        <dd><code>{{concat "docs/design-system/patterns/" page ".md"}}</code></dd>
       </dl>
       {{#if dialog}}
         <p class="l5r4-design-gallery-note">{{localize "l5r4.apps.designGallery.notes.dialogPattern"}}</p>

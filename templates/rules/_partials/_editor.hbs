@@ -17,9 +17,9 @@
         <legend>
           {{rule.key}}
           {{#if @root.rulesEditable}}
-            <a class="l5r4-rules-editor-delete" data-action="delete-rule" title="{{localize "l5r4.ui.rules.delete"}}">
-              <i class="fa-solid fa-trash"></i>
-            </a>
+            <button type="button" class="l5r4-rules-editor-delete" data-action="delete-rule" data-tooltip="{{localize "l5r4.ui.rules.delete"}}" aria-label="{{localize "l5r4.ui.rules.delete"}}">
+              <i class="fa-solid fa-trash" inert></i>
+            </button>
           {{/if}}
         </legend>
         {{#if rule.error}}<p class="l5r4-rules-editor-error">{{rule.error}}</p>{{/if}}
@@ -50,7 +50,7 @@
       <div class="l5r4-rules-editor-add flexrow -gap-sm">
         <select data-rule-key aria-label="{{localize "l5r4.ui.rules.key"}}">{{selectOptions ruleKeys}}</select>
         <button type="button" data-action="create-rule">
-          <i class="fa-solid fa-plus"></i> {{localize "l5r4.ui.rules.add"}}
+          <i class="fa-solid fa-plus" inert></i> {{localize "l5r4.ui.rules.add"}}
         </button>
       </div>
     {{/if}}

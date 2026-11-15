@@ -5,7 +5,7 @@
     {{#if inSheet}}
       {{name}}
       {{#if system.school}}
-        <img class="flex0" width="16px" height="16px" src="{{iconPath 'school.webp'}}" />
+        <img class="l5r4-item-row-badge flex0" src="{{iconPath 'school.webp'}}" alt="{{localize "l5r4.character.skills.properties.school"}}" />
       {{/if}}
     {{else}}
       {{name}}
@@ -20,7 +20,7 @@
     </div>
     <div class="l5r4-button -roll">
       <span class="l5r4-button-under">{{system.rollDice}}k{{system.rollKeep}}</span>
-      <a class="button" data-action="roll-skill" title="{{localize "l5r4.ui.mechanics.rolls.skillRoll"}}">{{system.rollDice}}k{{system.rollKeep}}</a>
+      <button type="button" class="l5r4-button-face" data-action="roll-skill" data-tooltip="{{localize "l5r4.ui.mechanics.rolls.skillRoll"}}">{{system.rollDice}}k{{system.rollKeep}}</button>
     </div>
     <div class="l5r4-item-row-emphases">
       {{#if system.trainedEmphases.length}}

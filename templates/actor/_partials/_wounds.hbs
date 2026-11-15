@@ -1,20 +1,24 @@
 <section class="l5r4-section">
   <div class="flexrow -gap-sm l5r4-section-title">
     <h4 class="l5r4-section-heading -compact">{{localize "l5r4.ui.mechanics.wounds.label"}}</h4>
-    <a
+    <button
+      type="button"
       class="button inline-control icon"
       data-action="apply-healing"
-      title="{{localize 'l5r4.ui.mechanics.wounds.applyHealingTitle'}}"
+      data-tooltip="{{localize "l5r4.ui.mechanics.wounds.applyHealingTitle"}}"
+      aria-label="{{localize "l5r4.ui.mechanics.wounds.applyHealingTitle"}}"
     >
-      <i class="fa-solid fa-bed"></i>
-    </a>
-    <a
+      <i class="fa-solid fa-bed" inert></i>
+    </button>
+    <button
+      type="button"
       class="button inline-control icon"
       data-action="open-wound-config"
-      title="{{localize 'l5r4.apps.woundConfig.title'}}"
+      data-tooltip="{{localize "l5r4.apps.woundConfig.title"}}"
+      aria-label="{{localize "l5r4.apps.woundConfig.title"}}"
     >
-      <i class="fa-solid fa-gear"></i>
-    </a>
+      <i class="fa-solid fa-gear" inert></i>
+    </button>
   </div>
   <div class="l5r4-grid">
     <span>{{localize "l5r4.ui.mechanics.wounds.suffered"}}</span>
@@ -26,7 +30,7 @@
       /></div>
 
     {{#if (eq actor.type "pc")}}
-      <span title="(Stamina × 2) + Insight Rank + Modifier = ({{system.traits.sta}} × 2) + {{system.insight.rank}} + {{system.wounds.mod}}">{{localize "l5r4.ui.mechanics.wounds.woundHealRate"}}</span>
+      <span data-tooltip="{{localize "l5r4.ui.mechanics.wounds.healRateBreakdown" sta=system.traits.sta rank=system.insight.rank mod=system.wounds.mod}}">{{localize "l5r4.ui.mechanics.wounds.woundHealRate"}}</span>
       <div class="flexrow">{{system.wounds.healRate}}</div>
     {{/if}}
 

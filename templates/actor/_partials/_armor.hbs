@@ -2,13 +2,15 @@
   <section class="l5r4-section l5r4-armor">
     <div class="flexrow -gap-sm l5r4-section-title">
       <h4 class="l5r4-section-heading -compact">{{localize "l5r4.ui.common.armor"}}</h4>
-      <a
+      <button
+        type="button"
         class="button inline-control icon"
         data-action="open-armor-config"
-        title="{{localize 'l5r4.ui.common.armor'}}"
+        data-tooltip="{{localize "l5r4.ui.common.armor"}}"
+        aria-label="{{localize "l5r4.ui.common.armor"}}"
       >
-        <i class="fa-solid fa-gear"></i>
-      </a>
+        <i class="fa-solid fa-gear" inert></i>
+      </button>
     </div>
     <div class="l5r4-grid">
       <span>{{localize "l5r4.ui.mechanics.wounds.armorTn"}}</span>
@@ -20,7 +22,7 @@
             type="checkbox"
             {{checked voidArmor}}
             data-action="toggle-armor-void"
-            title="{{localize "l5r4.ui.mechanics.rings.voidTnBoost"}}" 
+            data-tooltip="{{localize "l5r4.ui.mechanics.rings.voidTnBoost"}}"
           />
         {{/if}}
       </div>

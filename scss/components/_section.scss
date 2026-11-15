@@ -21,6 +21,7 @@
 
     .l5r4-section-heading,
     .button,
+    button,
     input,
     input::placeholder {
       color: inherit;
@@ -50,21 +51,26 @@
         width: 32px;
       }
 
-      > span {
+      // A <button>: border, font, min-height, and transition undo core's button look so the count keeps its circle
+      .l5r4-spell-slot-count {
         align-items: center;
         background: rgb(0 0 0 / 40%);
+        border: none;
         border-radius: 50%;
         cursor: var(--conditional-cursor);
         display: inline-flex;
+        font: inherit;
         height: 32px;
         justify-content: center;
         left: 0;
+        min-height: 0;
         padding: 0;
         position: absolute;
         text-shadow:
           1px 1px 1px #000,
           -1px -1px 1px #000;
         top: 0;
+        transition: none;
         width: 32px;
       }
     }

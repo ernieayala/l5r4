@@ -22,6 +22,21 @@
       .l5r4-item-row {
         padding: 0;
       }
+
+      // A <button>: undo core's button look so the head reads as the header's text
+      .l5r4-sort-header-button {
+        background: none;
+        border: none;
+        border-radius: 0;
+        color: inherit;
+        display: block;
+        font: inherit;
+        height: auto;
+        min-height: 0;
+        padding: 0;
+        text-align: inherit;
+        transition: none;
+      }
     }
 
     &.-attacks {
@@ -127,7 +142,9 @@
     grid-template-rows: min-content min-content;
     padding: 0 0.5rem;
 
-    &:hover {
+    // Keyboard focus shows the row's controls; :focus-visible keeps a mouse press from leaving them shown
+    &:hover,
+    &:has(:focus-visible) {
       .inline-control {
         opacity: 1;
         pointer-events: all;
@@ -157,6 +174,11 @@
       min-height: 2em;
     }
 
+    .l5r4-item-row-badge {
+      block-size: 16px;
+      inline-size: 16px;
+    }
+
     .title {
       text-wrap: revert;
 
@@ -168,7 +190,7 @@
       }
     }
 
-    .controls {
+    .l5r4-inline-control {
       justify-content: flex-end;
     }
 

@@ -17,6 +17,7 @@
 
 import { SYS_ID } from "../../../module/config/constants.js";
 import { createTestNPC } from "../../fixtures/actor-fixtures.js";
+import { createSkillData } from "../../fixtures/item-fixtures.js";
 
 /**
  * Register NPC sheet tests
@@ -506,12 +507,27 @@ export function registerNpcSheetTests(quench) {
         it("should collapse the Skills section and keep it collapsed after a render", async () => {
           const title = () =>
             sheet.element.querySelector('.l5r4-section-title[data-scope="skills"]');
-          title().querySelector('[data-action="expand-section"]').click();
+          const toggle = () => title().querySelector('[data-action="expand-section"]');
+          assert.equal(toggle().getAttribute("aria-expanded"), "true", "open before the click");
+          toggle().click();
           await new Promise(resolve => setTimeout(resolve, 300));
 
           assert.isTrue(title().classList.contains("is-collapsed"));
+          assert.equal(toggle().getAttribute("aria-expanded"), "false", "closed after the click");
           await sheet.render(true);
           assert.isTrue(title().classList.contains("is-collapsed"), "after a render");
+          assert.equal(toggle().getAttribute("aria-expanded"), "false", "closed after a render");
+        });
+
+        it("should mark a Skill row's expand control as expanded when clicked", async () => {
+          await actor.createEmbeddedDocuments("Item", [createSkillData("Kenjutsu", 2, "agi")]);
+          await sheet.render(true);
+          const toggle = sheet.element.querySelector('[data-action="expand-item"]');
+          assert.equal(toggle.getAttribute("aria-expanded"), "false", "closed before the click");
+          toggle.click();
+
+          assert.isTrue(toggle.closest("[data-item-id]").classList.contains("is-expanded"));
+          assert.equal(toggle.getAttribute("aria-expanded"), "true", "open after the click");
         });
       });
     },

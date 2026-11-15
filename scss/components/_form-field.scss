@@ -29,13 +29,4 @@
     user-select: text;
     width: calc(100% - 2px);
   }
-
-  .info-group {
-    flex-wrap: nowrap;
-
-    &:hover .inline-control {
-      opacity: 1;
-      pointer-events: all;
-    }
-  }
 }

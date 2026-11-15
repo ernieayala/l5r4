@@ -1,5 +1,5 @@
-<section class="standard-form">
-  <div class="flexcol -gap-sm">
+<section class="l5r4-xp-manager-body standard-form">
+  <div class="l5r4-xp-manager-group flexcol -gap-sm">
     <h3>{{localize "l5r4.character.experience.summary"}}</h3>
     <div class="form-group">
       <label>{{localize "l5r4.character.experience.usedTotal"}}</label>
@@ -15,7 +15,7 @@
               "l5r4.character.experience.breakdown.disadvantagesGrant"
             }}</strong>:</span>
         <span>{{xp.breakdown.disadvantagesGranted}}
-          (<span class="clickable" data-action="change-disadvantage-cap" title="{{localize 'l5r4.character.experience.disadvantageCapTooltip'}}">{{localize "l5r4.character.experience.breakdown.cap"}} {{disadvantageCap}}</span>)</span></li>{{/if}}
+          (<button type="button" class="l5r4-xp-manager-cap" data-action="change-disadvantage-cap" data-tooltip="{{localize "l5r4.character.experience.disadvantageCapTooltip"}}">{{localize "l5r4.character.experience.breakdown.cap"}} {{disadvantageCap}}</button>)</span></li>{{/if}}
     {{#if xp.breakdown.manual}}<li><span><strong>{{localize
               "l5r4.character.experience.breakdown.manualAdjustments"
             }}</strong>:</span>
@@ -49,7 +49,7 @@
             }}</strong>:</span>
         <span>{{xp.breakdown.spells}}</span></li>{{/if}}
   </ul>
-  <div class="flexcol -gap-sm">
+  <div class="l5r4-xp-manager-group flexcol -gap-sm">
     <h3>{{localize "l5r4.character.experience.adjustExperience"}}</h3>
     <div class="form-group">
       <label>{{localize "l5r4.character.experience.xpAmount"}}</label>
@@ -71,13 +71,13 @@
     <div class="form-group">
       <div class="form-fields">
         <button type="button" data-action="add-xp">
-          <i class="fa-solid fa-plus"></i>
+          <i class="fa-solid fa-plus" inert></i>
           {{localize "l5r4.ui.common.ok"}}
         </button>
       </div>
     </div>
   </div>
-  <div class="flexcol -gap-sm">
+  <div class="l5r4-xp-manager-group flexcol -gap-sm">
     <section class="l5r4-item-row-list -xp l5r4-sort-header">
       <div class="l5r4-item-row">
         <span>{{localize "l5r4.ui.common.xp"}}</span>
@@ -89,52 +89,56 @@
       {{#if manualEntries}}
         {{#each manualEntries}}
           <div class="l5r4-item-row -xp -expandable" data-entry-id="{{this.id}}">
-            <h4 class="flexrow -gap-sm title">
+            <h4 class="l5r4-item-row-name flexrow -gap-sm">
               <span>{{this.deltaFormatted}}</span>
             </h4>
             <div>{{this.note}}</div>
             <div>
-              <a
-                class="button inline-control icon"
+              <button
+                type="button"
+                class="inline-control icon"
                 data-action="delete-xp-entry"
                 data-entry-id="{{this.id}}"
-                title="{{localize 'l5r4.ui.common.delete'}}"
+                data-tooltip="{{localize "l5r4.ui.common.delete"}}"
+                aria-label="{{localize "l5r4.ui.common.delete"}}"
               >
-                <i class="fa-solid fa-trash"></i>
-              </a>
+                <i class="fa-solid fa-trash" inert></i>
+              </button>
             </div>
           </div>
         {{/each}}
       {{/if}}
     </section>
   </div>
-  <div class="flexcol -gap-sm">
+  <div class="l5r4-xp-manager-group flexcol -gap-sm">
     <div class="flexrow">
       <h3>{{localize "l5r4.character.experience.purchases"}}</h3>
-      <a
-        class="button inline-control icon"
+      <button
+        type="button"
+        class="inline-control icon"
         data-action="recalculate-xp"
         data-tooltip="{{localize 'l5r4.character.experience.recalculate'}}"
-      ><i class="fa-solid fa-arrows-rotate"></i></a>
+        aria-label="{{localize "l5r4.character.experience.recalculate"}}"
+      ><i class="fa-solid fa-arrows-rotate" inert></i></button>
     </div>
     <section class="l5r4-item-row-list -xp-spent l5r4-sort-header" data-scope="xp-purchases">
       <div class="l5r4-item-row">
-        <a class="l5r4-sort-header-button" data-action="sort-items" data-sortby="note">{{localize
+        <button type="button" class="l5r4-sort-header-button" data-action="sort-items" data-sortby="note">{{localize
             "l5r4.character.experience.reason"
-          }}</a>
-        <a class="l5r4-sort-header-button" data-action="sort-items" data-sortby="cost">{{localize
+          }}</button>
+        <button type="button" class="l5r4-sort-header-button" data-action="sort-items" data-sortby="cost">{{localize
             "l5r4.character.experience.xpAmount"
-          }}</a>
-        <a class="l5r4-sort-header-button" data-action="sort-items" data-sortby="type">{{localize
+          }}</button>
+        <button type="button" class="l5r4-sort-header-button" data-action="sort-items" data-sortby="type">{{localize
             "l5r4.ui.common.type"
-          }}</a>
+          }}</button>
       </div>
     </section>
     <section class="l5r4-item-row-list -xp-spent">
       {{#if spentEntries}}
         {{#each spentEntries}}
           <div class="l5r4-item-row -xp-spent -expandable">
-            <h4 class="flexrow -gap-sm title">
+            <h4 class="l5r4-item-row-name flexrow -gap-sm">
               <span>{{this.note}}</span>
             </h4>
             <div>{{this.deltaFormatted}}</div>
