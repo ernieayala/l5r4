@@ -323,8 +323,12 @@ const RULES = {
       if (!hasAttribute(attrs, "data-action")) {
         return null;
       }
+      // Core's own sheets open the file picker from the image itself (templates/sheets/base-sheet.hbs:4)
+      const coreImagePicker = name === "img" && attributeOf(attrs, "data-action") === "editImage";
       const native =
-        NATIVE_CONTROLS.includes(name) || (name === "a" && hasAttribute(attrs, "href"));
+        NATIVE_CONTROLS.includes(name) ||
+        (name === "a" && hasAttribute(attrs, "href")) ||
+        coreImagePicker;
       return native ? null : `<${name}> with data-action is not a native control`;
     }),
 

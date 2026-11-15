@@ -13,7 +13,18 @@
   <button type="button" class="l5r4-sample-button" data-action="expand-section" aria-expanded="true">
     <i class="fa-solid fa-angle-down" inert></i> {{localize "l5r4.ui.common.expand"}}
   </button>
+  <button
+    type="button"
+    class="l5r4-sample-button inline-control icon"
+    data-action="edit-item"
+    data-tooltip="{{localize "l5r4.ui.common.edit"}}"
+    aria-label="{{localize "l5r4.ui.common.edit"}}"
+  >
+    <i class="fa-solid fa-pen-to-square" inert></i>
+  </button>
+  <p class="l5r4-sample-note flex0 hint draggable">{{localize "l5r4.ui.common.none"}}</p>
   <img class="l5r4-sample-icon" src="{{img}}" alt="" />
+  <img class="l5r4-sample-portrait" src="{{img}}" data-action="editImage" data-edit="img" alt="{{name}}" />
   <input class="l5r4-sample-search" name="search" placeholder="{{localize "l5r4.ui.common.search"}}" />
   {{> "systems/l5r4-enhanced/templates/apps/_partials/_row.hbs" item=this}}
   {{> (concat "systems/l5r4-enhanced/templates/item/_type-details/" type ".hbs")}}
