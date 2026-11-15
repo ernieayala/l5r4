@@ -154,6 +154,22 @@ export function registerConditionManagerTests(quench) {
             assert.isTrue(dazedCondition.active, "Dazed marked as active");
           });
 
+          it("should uncheck a condition removed elsewhere while it is open", async () => {
+            const [dazed] = await actor.createEmbeddedDocuments("ActiveEffect", [
+              { name: "Dazed", statuses: ["dazed"] }
+            ]);
+            const manager = new ConditionManager(actor);
+            await manager.render(true);
+            const checked = () =>
+              manager.element.querySelector("multi-checkbox").value.includes("dazed");
+            assert.isTrue(checked(), "checked while the effect exists");
+
+            await dazed.delete();
+            await new Promise(resolve => setTimeout(resolve, 300));
+            assert.isFalse(checked(), "unchecked after the effect is deleted");
+            await manager.close({ animate: false });
+          });
+
           it("should mark inactive conditions correctly", async () => {
             // Don't add any conditions
             const manager = new ConditionManager(actor);

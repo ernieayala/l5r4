@@ -175,6 +175,19 @@ export default class ConditionManager extends foundry.applications.api.Handlebar
   }
 
   /**
+   * Registers the window with its actor, as core's document sheets do
+   * [src: client/applications/api/document-sheet.mjs:243-246], so a condition added or removed anywhere re-renders it.
+   *
+   * @param {object} context - Render context
+   * @param {object} options - Render options
+   * @returns {Promise<void>}
+   */
+  async _onFirstRender(context, options) {
+    await super._onFirstRender(context, options);
+    this.actor.apps[this.id] = this;
+  }
+
+  /**
    * Foundry lifecycle hook called after rendering.
    * Attaches change event listener to multi-checkbox component.
    *
@@ -195,6 +208,17 @@ export default class ConditionManager extends foundry.applications.api.Handlebar
     if (multiCheckbox) {
       multiCheckbox.addEventListener("change", this._onCheckboxChange.bind(this));
     }
+  }
+
+  /**
+   * Removes the window from its actor's registered apps
+   * [src: client/applications/api/document-sheet.mjs:259-262].
+   *
+   * @param {object} options - Close options
+   */
+  _onClose(options) {
+    super._onClose(options);
+    delete this.actor.apps[this.id];
   }
 
   /**
