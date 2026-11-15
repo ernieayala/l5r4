@@ -1,0 +1,2707 @@
+{
+  "name": "creatures",
+  "label": "Creatures",
+  "documentType": "Actor",
+  "types": [
+    "npc"
+  ],
+  "pages": [
+    [
+      318,
+      331
+    ]
+  ],
+  "entries": [
+    {
+      "name": "Bog Hag",
+      "type": "npc",
+      "folder": "Monsters and Nonhuman Races",
+      "page": 324,
+      "coverage": "partial",
+      "system": {
+        "traits": {
+          "sta": 3,
+          "wil": 3,
+          "str": 3,
+          "per": 2,
+          "ref": 3,
+          "awa": 3,
+          "agi": 3,
+          "int": 3
+        },
+        "rings": {
+          "void": {
+            "rank": 0,
+            "value": 0
+          }
+        },
+        "initiative": {
+          "roll": 5,
+          "keep": 3
+        },
+        "attack1": {
+          "name": "Claws",
+          "roll": 5,
+          "keep": 3,
+          "modifier": 0,
+          "type": "Simple"
+        },
+        "attack2": {
+          "name": "",
+          "roll": 0,
+          "keep": 0,
+          "modifier": 0,
+          "type": ""
+        },
+        "attack3": {
+          "name": "",
+          "roll": 0,
+          "keep": 0,
+          "modifier": 0,
+          "type": ""
+        },
+        "damage1": {
+          "roll": 3,
+          "keep": 2,
+          "modifier": 0,
+          "type": ""
+        },
+        "damage2": {
+          "roll": 0,
+          "keep": 0,
+          "modifier": 0,
+          "type": ""
+        },
+        "damage3": {
+          "roll": 0,
+          "keep": 0,
+          "modifier": 0,
+          "type": ""
+        },
+        "armor": {
+          "armorTn": 20,
+          "reduction": 5
+        },
+        "woundMode": "manual",
+        "manualWoundLevels": {
+          "healthy": {
+            "value": 15,
+            "penalty": 0,
+            "active": true
+          },
+          "nicked": {
+            "value": 31,
+            "penalty": 5,
+            "active": true
+          },
+          "grazed": {
+            "value": 47,
+            "penalty": 10,
+            "active": true
+          },
+          "hurt": {
+            "value": 71,
+            "penalty": 15,
+            "active": true
+          },
+          "injured": {
+            "value": 0,
+            "penalty": 0,
+            "active": false
+          },
+          "crippled": {
+            "value": 0,
+            "penalty": 0,
+            "active": false
+          },
+          "down": {
+            "value": 0,
+            "penalty": 0,
+            "active": false
+          },
+          "out": {
+            "value": 72,
+            "penalty": 0,
+            "active": true
+          }
+        },
+        "fear": {
+          "rank": 0
+        },
+        "shadowTaint": {
+          "rank": 4,
+          "points": 0
+        },
+        "notes": "Swims at land speed, no roll. Claw wounds: 1 in 5 chance of a wasting disease. Wears victims' skins and memories."
+      },
+      "items": [
+        {
+          "from": "@entry[skills/Acting]",
+          "system": {
+            "rank": 4
+          }
+        },
+        {
+          "from": "@entry[skills/Sincerity]",
+          "system": {
+            "rank": 4,
+            "trainedEmphases": [
+              "Deceit"
+            ]
+          }
+        },
+        {
+          "from": "@entry[skills/Stealth]",
+          "system": {
+            "rank": 3
+          }
+        },
+        {
+          "from": "@entry[skills/Temptation]",
+          "system": {
+            "rank": 4,
+            "trainedEmphases": [
+              "Seduction"
+            ]
+          }
+        }
+      ],
+      "effects": [
+        {
+          "name": "Special abilities",
+          "rules": [
+            {
+              "key": "Invulnerability"
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "name": "Dog",
+      "type": "npc",
+      "folder": "Natural Creatures",
+      "page": 320,
+      "coverage": "full",
+      "system": {
+        "traits": {
+          "sta": 2,
+          "wil": 2,
+          "str": 1,
+          "per": 3,
+          "ref": 3,
+          "awa": 1,
+          "agi": 3,
+          "int": 1
+        },
+        "rings": {
+          "void": {
+            "rank": 0,
+            "value": 0
+          }
+        },
+        "initiative": {
+          "roll": 4,
+          "keep": 3
+        },
+        "attack1": {
+          "name": "Bite",
+          "roll": 3,
+          "keep": 3,
+          "modifier": 0,
+          "type": "Complex"
+        },
+        "attack2": {
+          "name": "",
+          "roll": 0,
+          "keep": 0,
+          "modifier": 0,
+          "type": ""
+        },
+        "attack3": {
+          "name": "",
+          "roll": 0,
+          "keep": 0,
+          "modifier": 0,
+          "type": ""
+        },
+        "damage1": {
+          "roll": 2,
+          "keep": 1,
+          "modifier": 0,
+          "type": ""
+        },
+        "damage2": {
+          "roll": 0,
+          "keep": 0,
+          "modifier": 0,
+          "type": ""
+        },
+        "damage3": {
+          "roll": 0,
+          "keep": 0,
+          "modifier": 0,
+          "type": ""
+        },
+        "armor": {
+          "armorTn": 20,
+          "reduction": 0
+        },
+        "woundMode": "manual",
+        "manualWoundLevels": {
+          "healthy": {
+            "value": 11,
+            "penalty": 0,
+            "active": true
+          },
+          "nicked": {
+            "value": 23,
+            "penalty": 10,
+            "active": true
+          },
+          "grazed": {
+            "value": 0,
+            "penalty": 0,
+            "active": false
+          },
+          "hurt": {
+            "value": 0,
+            "penalty": 0,
+            "active": false
+          },
+          "injured": {
+            "value": 0,
+            "penalty": 0,
+            "active": false
+          },
+          "crippled": {
+            "value": 0,
+            "penalty": 0,
+            "active": false
+          },
+          "down": {
+            "value": 0,
+            "penalty": 0,
+            "active": false
+          },
+          "out": {
+            "value": 24,
+            "penalty": 0,
+            "active": true
+          }
+        },
+        "fear": {
+          "rank": 0
+        },
+        "shadowTaint": {
+          "rank": 0,
+          "points": 0
+        },
+        "notes": ""
+      },
+      "items": [
+        {
+          "from": "@entry[skills/Hunting]",
+          "system": {
+            "rank": 3,
+            "trainedEmphases": [
+              "Tracking"
+            ]
+          }
+        }
+      ],
+      "effects": [
+        {
+          "name": "Special abilities",
+          "rules": [
+            {
+              "key": "Movement",
+              "water": 2
+            },
+            {
+              "key": "RollModifier",
+              "selector": "trait:per",
+              "roll": 2,
+              "keep": 1,
+              "optional": true,
+              "label": "Scent"
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "name": "Falcon",
+      "type": "npc",
+      "folder": "Natural Creatures",
+      "page": 321,
+      "coverage": "partial",
+      "system": {
+        "traits": {
+          "sta": 1,
+          "wil": 1,
+          "str": 1,
+          "per": 3,
+          "ref": 5,
+          "awa": 1,
+          "agi": 4,
+          "int": 1
+        },
+        "rings": {
+          "void": {
+            "rank": 0,
+            "value": 0
+          }
+        },
+        "initiative": {
+          "roll": 5,
+          "keep": 5
+        },
+        "attack1": {
+          "name": "Claw/beak",
+          "roll": 5,
+          "keep": 4,
+          "modifier": 0,
+          "type": "Simple"
+        },
+        "attack2": {
+          "name": "",
+          "roll": 0,
+          "keep": 0,
+          "modifier": 0,
+          "type": ""
+        },
+        "attack3": {
+          "name": "",
+          "roll": 0,
+          "keep": 0,
+          "modifier": 0,
+          "type": ""
+        },
+        "damage1": {
+          "roll": 3,
+          "keep": 2,
+          "modifier": 0,
+          "type": ""
+        },
+        "damage2": {
+          "roll": 0,
+          "keep": 0,
+          "modifier": 0,
+          "type": ""
+        },
+        "damage3": {
+          "roll": 0,
+          "keep": 0,
+          "modifier": 0,
+          "type": ""
+        },
+        "armor": {
+          "armorTn": 30,
+          "reduction": 0
+        },
+        "woundMode": "manual",
+        "manualWoundLevels": {
+          "healthy": {
+            "value": 4,
+            "penalty": 0,
+            "active": true
+          },
+          "nicked": {
+            "value": 9,
+            "penalty": 5,
+            "active": true
+          },
+          "grazed": {
+            "value": 0,
+            "penalty": 0,
+            "active": false
+          },
+          "hurt": {
+            "value": 0,
+            "penalty": 0,
+            "active": false
+          },
+          "injured": {
+            "value": 0,
+            "penalty": 0,
+            "active": false
+          },
+          "crippled": {
+            "value": 0,
+            "penalty": 0,
+            "active": false
+          },
+          "down": {
+            "value": 0,
+            "penalty": 0,
+            "active": false
+          },
+          "out": {
+            "value": 10,
+            "penalty": 0,
+            "active": true
+          }
+        },
+        "fear": {
+          "rank": 0
+        },
+        "shadowTaint": {
+          "rank": 0,
+          "points": 0
+        },
+        "notes": "Swift 5 only in flight. 10+ Wounds in one hit blind the target until treated; 20+ destroy an eye (Missing Eye)."
+      },
+      "items": [
+        {
+          "from": "@entry[skills/Hunting]",
+          "system": {
+            "rank": 4,
+            "trainedEmphases": [
+              "Tracking"
+            ]
+          }
+        },
+        {
+          "from": "@entry[skills/Intimidation]",
+          "system": {
+            "rank": 2
+          }
+        }
+      ],
+      "effects": [
+        {
+          "name": "Special abilities",
+          "rules": [
+            {
+              "key": "Movement",
+              "water": 5
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "name": "Gaki",
+      "type": "npc",
+      "folder": "Monsters and Nonhuman Races",
+      "page": 325,
+      "coverage": "partial",
+      "system": {
+        "traits": {
+          "sta": 2,
+          "wil": 2,
+          "str": 4,
+          "per": 3,
+          "ref": 4,
+          "awa": 2,
+          "agi": 4,
+          "int": 2
+        },
+        "rings": {
+          "void": {
+            "rank": 0,
+            "value": 0
+          }
+        },
+        "initiative": {
+          "roll": 4,
+          "keep": 4
+        },
+        "attack1": {
+          "name": "Claw",
+          "roll": 4,
+          "keep": 4,
+          "modifier": 0,
+          "type": "Complex"
+        },
+        "attack2": {
+          "name": "",
+          "roll": 0,
+          "keep": 0,
+          "modifier": 0,
+          "type": ""
+        },
+        "attack3": {
+          "name": "",
+          "roll": 0,
+          "keep": 0,
+          "modifier": 0,
+          "type": ""
+        },
+        "damage1": {
+          "roll": 3,
+          "keep": 3,
+          "modifier": 0,
+          "type": ""
+        },
+        "damage2": {
+          "roll": 0,
+          "keep": 0,
+          "modifier": 0,
+          "type": ""
+        },
+        "damage3": {
+          "roll": 0,
+          "keep": 0,
+          "modifier": 0,
+          "type": ""
+        },
+        "armor": {
+          "armorTn": 25,
+          "reduction": 5
+        },
+        "woundMode": "manual",
+        "manualWoundLevels": {
+          "healthy": {
+            "value": 11,
+            "penalty": 0,
+            "active": true
+          },
+          "nicked": {
+            "value": 23,
+            "penalty": 5,
+            "active": true
+          },
+          "grazed": {
+            "value": 35,
+            "penalty": 10,
+            "active": true
+          },
+          "hurt": {
+            "value": 0,
+            "penalty": 0,
+            "active": false
+          },
+          "injured": {
+            "value": 0,
+            "penalty": 0,
+            "active": false
+          },
+          "crippled": {
+            "value": 0,
+            "penalty": 0,
+            "active": false
+          },
+          "down": {
+            "value": 0,
+            "penalty": 0,
+            "active": false
+          },
+          "out": {
+            "value": 36,
+            "penalty": 0,
+            "active": true
+          }
+        },
+        "fear": {
+          "rank": 3
+        },
+        "shadowTaint": {
+          "rank": 0,
+          "points": 0
+        },
+        "notes": "Claw ignores armor. Drains 12 Wounds to heal. Reforms if slain. Invisible, insect form, possession. Mind immune."
+      },
+      "effects": [
+        {
+          "name": "Special abilities",
+          "rules": [
+            {
+              "key": "Invulnerability"
+            },
+            {
+              "key": "Spirit"
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "name": "Goblin",
+      "type": "npc",
+      "folder": "Monsters and Nonhuman Races",
+      "page": 327,
+      "coverage": "full",
+      "system": {
+        "traits": {
+          "sta": 2,
+          "wil": 2,
+          "str": 2,
+          "per": 1,
+          "ref": 2,
+          "awa": 1,
+          "agi": 2,
+          "int": 1
+        },
+        "rings": {
+          "void": {
+            "rank": 0,
+            "value": 0
+          }
+        },
+        "initiative": {
+          "roll": 3,
+          "keep": 2
+        },
+        "attack1": {
+          "name": "Knife",
+          "roll": 4,
+          "keep": 2,
+          "modifier": 0,
+          "type": "Simple"
+        },
+        "attack2": {
+          "name": "",
+          "roll": 0,
+          "keep": 0,
+          "modifier": 0,
+          "type": ""
+        },
+        "attack3": {
+          "name": "",
+          "roll": 0,
+          "keep": 0,
+          "modifier": 0,
+          "type": ""
+        },
+        "damage1": {
+          "roll": 4,
+          "keep": 2,
+          "modifier": 0,
+          "type": ""
+        },
+        "damage2": {
+          "roll": 0,
+          "keep": 0,
+          "modifier": 0,
+          "type": ""
+        },
+        "damage3": {
+          "roll": 0,
+          "keep": 0,
+          "modifier": 0,
+          "type": ""
+        },
+        "armor": {
+          "armorTn": 15,
+          "reduction": 3
+        },
+        "woundMode": "manual",
+        "manualWoundLevels": {
+          "healthy": {
+            "value": 8,
+            "penalty": 0,
+            "active": true
+          },
+          "nicked": {
+            "value": 17,
+            "penalty": 5,
+            "active": true
+          },
+          "grazed": {
+            "value": 0,
+            "penalty": 0,
+            "active": false
+          },
+          "hurt": {
+            "value": 0,
+            "penalty": 0,
+            "active": false
+          },
+          "injured": {
+            "value": 0,
+            "penalty": 0,
+            "active": false
+          },
+          "crippled": {
+            "value": 0,
+            "penalty": 0,
+            "active": false
+          },
+          "down": {
+            "value": 0,
+            "penalty": 0,
+            "active": false
+          },
+          "out": {
+            "value": 18,
+            "penalty": 0,
+            "active": true
+          }
+        },
+        "fear": {
+          "rank": 0
+        },
+        "shadowTaint": {
+          "rank": 2,
+          "points": 0
+        },
+        "notes": ""
+      },
+      "items": [
+        {
+          "from": "@entry[skills/Stealth]",
+          "system": {
+            "rank": 2
+          }
+        }
+      ],
+      "effects": [
+        {
+          "name": "Special abilities",
+          "rules": [
+            {
+              "key": "Movement",
+              "water": 2
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "name": "Kappa",
+      "type": "npc",
+      "folder": "Monsters and Nonhuman Races",
+      "page": 327,
+      "coverage": "partial",
+      "system": {
+        "traits": {
+          "sta": 2,
+          "wil": 2,
+          "str": 3,
+          "per": 3,
+          "ref": 3,
+          "awa": 3,
+          "agi": 2,
+          "int": 3
+        },
+        "rings": {
+          "void": {
+            "rank": 0,
+            "value": 0
+          }
+        },
+        "initiative": {
+          "roll": 4,
+          "keep": 3
+        },
+        "attack1": {
+          "name": "Claws",
+          "roll": 4,
+          "keep": 2,
+          "modifier": 0,
+          "type": "Simple"
+        },
+        "attack2": {
+          "name": "",
+          "roll": 0,
+          "keep": 0,
+          "modifier": 0,
+          "type": ""
+        },
+        "attack3": {
+          "name": "",
+          "roll": 0,
+          "keep": 0,
+          "modifier": 0,
+          "type": ""
+        },
+        "damage1": {
+          "roll": 3,
+          "keep": 2,
+          "modifier": 0,
+          "type": ""
+        },
+        "damage2": {
+          "roll": 0,
+          "keep": 0,
+          "modifier": 0,
+          "type": ""
+        },
+        "damage3": {
+          "roll": 0,
+          "keep": 0,
+          "modifier": 0,
+          "type": ""
+        },
+        "armor": {
+          "armorTn": 20,
+          "reduction": 15
+        },
+        "woundMode": "manual",
+        "manualWoundLevels": {
+          "healthy": {
+            "value": 11,
+            "penalty": 0,
+            "active": true
+          },
+          "nicked": {
+            "value": 23,
+            "penalty": 5,
+            "active": true
+          },
+          "grazed": {
+            "value": 35,
+            "penalty": 10,
+            "active": true
+          },
+          "hurt": {
+            "value": 47,
+            "penalty": 15,
+            "active": true
+          },
+          "injured": {
+            "value": 0,
+            "penalty": 0,
+            "active": false
+          },
+          "crippled": {
+            "value": 0,
+            "penalty": 0,
+            "active": false
+          },
+          "down": {
+            "value": 0,
+            "penalty": 0,
+            "active": false
+          },
+          "out": {
+            "value": 48,
+            "penalty": 0,
+            "active": true
+          }
+        },
+        "fear": {
+          "rank": 0
+        },
+        "shadowTaint": {
+          "rank": 0,
+          "points": 0
+        },
+        "notes": "Swims at land speed. Illusions 3 times a day. Head-water spilled: no Reduction, every Ring and Trait 1 for a day."
+      },
+      "items": [
+        {
+          "from": "@entry[skills/Athletics]",
+          "system": {
+            "rank": 5,
+            "trainedEmphases": [
+              "Swimming"
+            ]
+          }
+        },
+        {
+          "from": "@entry[skills/Stealth]",
+          "system": {
+            "rank": 3
+          }
+        }
+      ],
+      "effects": [
+        {
+          "name": "Special abilities",
+          "rules": [
+            {
+              "key": "Spirit"
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "name": "Lion",
+      "type": "npc",
+      "folder": "Natural Creatures",
+      "page": 323,
+      "coverage": "full",
+      "system": {
+        "traits": {
+          "sta": 4,
+          "wil": 4,
+          "str": 6,
+          "per": 3,
+          "ref": 3,
+          "awa": 2,
+          "agi": 3,
+          "int": 1
+        },
+        "rings": {
+          "void": {
+            "rank": 0,
+            "value": 0
+          }
+        },
+        "initiative": {
+          "roll": 4,
+          "keep": 3
+        },
+        "attack1": {
+          "name": "Claws",
+          "roll": 5,
+          "keep": 3,
+          "modifier": 0,
+          "type": "Simple"
+        },
+        "attack2": {
+          "name": "Bite",
+          "roll": 6,
+          "keep": 3,
+          "modifier": 0,
+          "type": "Complex"
+        },
+        "attack3": {
+          "name": "",
+          "roll": 0,
+          "keep": 0,
+          "modifier": 0,
+          "type": ""
+        },
+        "damage1": {
+          "roll": 4,
+          "keep": 3,
+          "modifier": 0,
+          "type": ""
+        },
+        "damage2": {
+          "roll": 4,
+          "keep": 4,
+          "modifier": 0,
+          "type": ""
+        },
+        "damage3": {
+          "roll": 0,
+          "keep": 0,
+          "modifier": 0,
+          "type": ""
+        },
+        "armor": {
+          "armorTn": 20,
+          "reduction": 3
+        },
+        "woundMode": "manual",
+        "manualWoundLevels": {
+          "healthy": {
+            "value": 11,
+            "penalty": 0,
+            "active": true
+          },
+          "nicked": {
+            "value": 23,
+            "penalty": 5,
+            "active": true
+          },
+          "grazed": {
+            "value": 35,
+            "penalty": 10,
+            "active": true
+          },
+          "hurt": {
+            "value": 47,
+            "penalty": 15,
+            "active": true
+          },
+          "injured": {
+            "value": 0,
+            "penalty": 0,
+            "active": false
+          },
+          "crippled": {
+            "value": 0,
+            "penalty": 0,
+            "active": false
+          },
+          "down": {
+            "value": 0,
+            "penalty": 0,
+            "active": false
+          },
+          "out": {
+            "value": 48,
+            "penalty": 0,
+            "active": true
+          }
+        },
+        "fear": {
+          "rank": 1
+        },
+        "shadowTaint": {
+          "rank": 0,
+          "points": 0
+        },
+        "notes": ""
+      },
+      "items": [
+        {
+          "from": "@entry[skills/Hunting]",
+          "system": {
+            "rank": 3
+          }
+        },
+        {
+          "from": "@entry[skills/Stealth]",
+          "system": {
+            "rank": 3
+          }
+        }
+      ]
+    },
+    {
+      "name": "Ogre",
+      "type": "npc",
+      "folder": "Monsters and Nonhuman Races",
+      "page": 328,
+      "coverage": "partial",
+      "system": {
+        "traits": {
+          "sta": 6,
+          "wil": 3,
+          "str": 6,
+          "per": 2,
+          "ref": 3,
+          "awa": 1,
+          "agi": 3,
+          "int": 3
+        },
+        "rings": {
+          "void": {
+            "rank": 0,
+            "value": 0
+          }
+        },
+        "initiative": {
+          "roll": 4,
+          "keep": 3
+        },
+        "attack1": {
+          "name": "Club",
+          "roll": 5,
+          "keep": 4,
+          "modifier": 0,
+          "type": "Complex"
+        },
+        "attack2": {
+          "name": "",
+          "roll": 0,
+          "keep": 0,
+          "modifier": 0,
+          "type": ""
+        },
+        "attack3": {
+          "name": "",
+          "roll": 0,
+          "keep": 0,
+          "modifier": 0,
+          "type": ""
+        },
+        "damage1": {
+          "roll": 8,
+          "keep": 2,
+          "modifier": 0,
+          "type": ""
+        },
+        "damage2": {
+          "roll": 0,
+          "keep": 0,
+          "modifier": 0,
+          "type": ""
+        },
+        "damage3": {
+          "roll": 0,
+          "keep": 0,
+          "modifier": 0,
+          "type": ""
+        },
+        "armor": {
+          "armorTn": 25,
+          "reduction": 10
+        },
+        "woundMode": "manual",
+        "manualWoundLevels": {
+          "healthy": {
+            "value": 19,
+            "penalty": 0,
+            "active": true
+          },
+          "nicked": {
+            "value": 39,
+            "penalty": 5,
+            "active": true
+          },
+          "grazed": {
+            "value": 59,
+            "penalty": 10,
+            "active": true
+          },
+          "hurt": {
+            "value": 79,
+            "penalty": 15,
+            "active": true
+          },
+          "injured": {
+            "value": 0,
+            "penalty": 0,
+            "active": false
+          },
+          "crippled": {
+            "value": 0,
+            "penalty": 0,
+            "active": false
+          },
+          "down": {
+            "value": 0,
+            "penalty": 0,
+            "active": false
+          },
+          "out": {
+            "value": 80,
+            "penalty": 0,
+            "active": true
+          }
+        },
+        "fear": {
+          "rank": 2
+        },
+        "shadowTaint": {
+          "rank": 3,
+          "points": 0
+        },
+        "notes": "Huge."
+      }
+    },
+    {
+      "name": "Oni (Ugulu no Oni)",
+      "type": "npc",
+      "folder": "Monsters and Nonhuman Races",
+      "page": 328,
+      "coverage": "partial",
+      "system": {
+        "traits": {
+          "sta": 6,
+          "wil": 6,
+          "str": 8,
+          "per": 2,
+          "ref": 1,
+          "awa": 1,
+          "agi": 4,
+          "int": 2
+        },
+        "rings": {
+          "void": {
+            "rank": 0,
+            "value": 0
+          }
+        },
+        "initiative": {
+          "roll": 3,
+          "keep": 1
+        },
+        "attack1": {
+          "name": "Claws",
+          "roll": 7,
+          "keep": 4,
+          "modifier": 0,
+          "type": "Simple"
+        },
+        "attack2": {
+          "name": "",
+          "roll": 0,
+          "keep": 0,
+          "modifier": 0,
+          "type": ""
+        },
+        "attack3": {
+          "name": "",
+          "roll": 0,
+          "keep": 0,
+          "modifier": 0,
+          "type": ""
+        },
+        "damage1": {
+          "roll": 9,
+          "keep": 3,
+          "modifier": 0,
+          "type": ""
+        },
+        "damage2": {
+          "roll": 0,
+          "keep": 0,
+          "modifier": 0,
+          "type": ""
+        },
+        "damage3": {
+          "roll": 0,
+          "keep": 0,
+          "modifier": 0,
+          "type": ""
+        },
+        "armor": {
+          "armorTn": 10,
+          "reduction": 12
+        },
+        "woundMode": "manual",
+        "manualWoundLevels": {
+          "healthy": {
+            "value": 31,
+            "penalty": 0,
+            "active": true
+          },
+          "nicked": {
+            "value": 63,
+            "penalty": 5,
+            "active": true
+          },
+          "grazed": {
+            "value": 95,
+            "penalty": 10,
+            "active": true
+          },
+          "hurt": {
+            "value": 123,
+            "penalty": 15,
+            "active": true
+          },
+          "injured": {
+            "value": 0,
+            "penalty": 0,
+            "active": false
+          },
+          "crippled": {
+            "value": 0,
+            "penalty": 0,
+            "active": false
+          },
+          "down": {
+            "value": 0,
+            "penalty": 0,
+            "active": false
+          },
+          "out": {
+            "value": 124,
+            "penalty": 0,
+            "active": true
+          }
+        },
+        "fear": {
+          "rank": 3
+        },
+        "shadowTaint": {
+          "rank": 6,
+          "points": 0
+        },
+        "notes": "Takes no harm from arrows other than armor-piercing ones. Immune to two spells, which vary from oni to oni."
+      },
+      "effects": [
+        {
+          "name": "Special abilities",
+          "rules": [
+            {
+              "key": "Reduction",
+              "value": 12,
+              "except": [
+                "jade",
+                "crystal",
+                "obsidian"
+              ]
+            },
+            {
+              "key": "Invulnerability"
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "name": "Ox",
+      "type": "npc",
+      "folder": "Natural Creatures",
+      "page": 323,
+      "coverage": "partial",
+      "system": {
+        "traits": {
+          "sta": 6,
+          "wil": 2,
+          "str": 6,
+          "per": 2,
+          "ref": 3,
+          "awa": 2,
+          "agi": 2,
+          "int": 1
+        },
+        "rings": {
+          "void": {
+            "rank": 0,
+            "value": 0
+          }
+        },
+        "initiative": {
+          "roll": 2,
+          "keep": 2
+        },
+        "attack1": {
+          "name": "Gore",
+          "roll": 3,
+          "keep": 2,
+          "modifier": 0,
+          "type": "Complex"
+        },
+        "attack2": {
+          "name": "Trample",
+          "roll": 4,
+          "keep": 3,
+          "modifier": 0,
+          "type": "Complex"
+        },
+        "attack3": {
+          "name": "",
+          "roll": 0,
+          "keep": 0,
+          "modifier": 0,
+          "type": ""
+        },
+        "damage1": {
+          "roll": 6,
+          "keep": 3,
+          "modifier": 0,
+          "type": ""
+        },
+        "damage2": {
+          "roll": 6,
+          "keep": 4,
+          "modifier": 0,
+          "type": ""
+        },
+        "damage3": {
+          "roll": 0,
+          "keep": 0,
+          "modifier": 0,
+          "type": ""
+        },
+        "armor": {
+          "armorTn": 10,
+          "reduction": 4
+        },
+        "woundMode": "manual",
+        "manualWoundLevels": {
+          "healthy": {
+            "value": 19,
+            "penalty": 0,
+            "active": true
+          },
+          "nicked": {
+            "value": 39,
+            "penalty": 5,
+            "active": true
+          },
+          "grazed": {
+            "value": 59,
+            "penalty": 10,
+            "active": true
+          },
+          "hurt": {
+            "value": 0,
+            "penalty": 0,
+            "active": false
+          },
+          "injured": {
+            "value": 0,
+            "penalty": 0,
+            "active": false
+          },
+          "crippled": {
+            "value": 0,
+            "penalty": 0,
+            "active": false
+          },
+          "down": {
+            "value": 0,
+            "penalty": 0,
+            "active": false
+          },
+          "out": {
+            "value": 60,
+            "penalty": 0,
+            "active": true
+          }
+        },
+        "fear": {
+          "rank": 0
+        },
+        "shadowTaint": {
+          "rank": 0,
+          "points": 0
+        },
+        "notes": "Huge. On its first Turn after being wounded it ignores Wound penalties and adds +10 to its attack roll."
+      }
+    },
+    {
+      "name": "Ratling",
+      "type": "npc",
+      "folder": "Monsters and Nonhuman Races",
+      "page": 329,
+      "coverage": "partial",
+      "system": {
+        "traits": {
+          "sta": 2,
+          "wil": 2,
+          "str": 2,
+          "per": 2,
+          "ref": 3,
+          "awa": 1,
+          "agi": 3,
+          "int": 2
+        },
+        "rings": {
+          "void": {
+            "rank": 1,
+            "value": 0
+          }
+        },
+        "initiative": {
+          "roll": 4,
+          "keep": 3
+        },
+        "attack1": {
+          "name": "Crude spear",
+          "roll": 4,
+          "keep": 3,
+          "modifier": 0,
+          "type": "Complex"
+        },
+        "attack2": {
+          "name": "",
+          "roll": 0,
+          "keep": 0,
+          "modifier": 0,
+          "type": ""
+        },
+        "attack3": {
+          "name": "",
+          "roll": 0,
+          "keep": 0,
+          "modifier": 0,
+          "type": ""
+        },
+        "damage1": {
+          "roll": 4,
+          "keep": 2,
+          "modifier": 0,
+          "type": ""
+        },
+        "damage2": {
+          "roll": 0,
+          "keep": 0,
+          "modifier": 0,
+          "type": ""
+        },
+        "damage3": {
+          "roll": 0,
+          "keep": 0,
+          "modifier": 0,
+          "type": ""
+        },
+        "armor": {
+          "armorTn": 20,
+          "reduction": 0
+        },
+        "woundMode": "formula",
+        "nrWoundLvls": 8,
+        "fear": {
+          "rank": 0
+        },
+        "shadowTaint": {
+          "rank": 0,
+          "points": 0
+        },
+        "notes": "Name Ring stored as Void. Never gains Taint or casts maho. No meditation or tea for Name Points; no Center Stance."
+      },
+      "items": [
+        {
+          "from": "@entry[skills/Athletics]",
+          "system": {
+            "rank": 3
+          }
+        },
+        {
+          "from": "@entry[skills/Stealth]",
+          "system": {
+            "rank": 3
+          }
+        }
+      ],
+      "effects": [
+        {
+          "name": "Special abilities",
+          "rules": [
+            {
+              "key": "Movement",
+              "water": 2
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "name": "Rokugani Pony",
+      "type": "npc",
+      "folder": "Natural Creatures",
+      "page": 322,
+      "coverage": "partial",
+      "system": {
+        "traits": {
+          "sta": 4,
+          "wil": 2,
+          "str": 4,
+          "per": 2,
+          "ref": 2,
+          "awa": 2,
+          "agi": 2,
+          "int": 1
+        },
+        "rings": {
+          "void": {
+            "rank": 0,
+            "value": 0
+          }
+        },
+        "initiative": {
+          "roll": 3,
+          "keep": 2
+        },
+        "attack1": {
+          "name": "Kick",
+          "roll": 3,
+          "keep": 2,
+          "modifier": 0,
+          "type": "Complex"
+        },
+        "attack2": {
+          "name": "",
+          "roll": 0,
+          "keep": 0,
+          "modifier": 0,
+          "type": ""
+        },
+        "attack3": {
+          "name": "",
+          "roll": 0,
+          "keep": 0,
+          "modifier": 0,
+          "type": ""
+        },
+        "damage1": {
+          "roll": 4,
+          "keep": 2,
+          "modifier": 0,
+          "type": ""
+        },
+        "damage2": {
+          "roll": 0,
+          "keep": 0,
+          "modifier": 0,
+          "type": ""
+        },
+        "damage3": {
+          "roll": 0,
+          "keep": 0,
+          "modifier": 0,
+          "type": ""
+        },
+        "armor": {
+          "armorTn": 15,
+          "reduction": 3
+        },
+        "woundMode": "manual",
+        "manualWoundLevels": {
+          "healthy": {
+            "value": 15,
+            "penalty": 0,
+            "active": true
+          },
+          "nicked": {
+            "value": 31,
+            "penalty": 5,
+            "active": true
+          },
+          "grazed": {
+            "value": 47,
+            "penalty": 10,
+            "active": true
+          },
+          "hurt": {
+            "value": 0,
+            "penalty": 0,
+            "active": false
+          },
+          "injured": {
+            "value": 0,
+            "penalty": 0,
+            "active": false
+          },
+          "crippled": {
+            "value": 0,
+            "penalty": 0,
+            "active": false
+          },
+          "down": {
+            "value": 0,
+            "penalty": 0,
+            "active": false
+          },
+          "out": {
+            "value": 48,
+            "penalty": 0,
+            "active": true
+          }
+        },
+        "fear": {
+          "rank": 0
+        },
+        "shadowTaint": {
+          "rank": 0,
+          "points": 0
+        },
+        "notes": "Huge. Attacks only after a TN 20 Horsemanship/Awareness roll each round; at 32+ Wounds flees unless held (TN 25)."
+      },
+      "items": [
+        {
+          "from": "@entry[skills/Hunting]",
+          "system": {
+            "rank": 4,
+            "trainedEmphases": [
+              "Tracking"
+            ]
+          }
+        },
+        {
+          "from": "@entry[skills/Intimidation]",
+          "system": {
+            "rank": 2
+          }
+        }
+      ],
+      "effects": [
+        {
+          "name": "Special abilities",
+          "rules": [
+            {
+              "key": "Movement",
+              "water": 3
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "name": "Tsuno",
+      "type": "npc",
+      "folder": "Monsters and Nonhuman Races",
+      "page": 330,
+      "coverage": "partial",
+      "system": {
+        "traits": {
+          "sta": 4,
+          "wil": 4,
+          "str": 3,
+          "per": 3,
+          "ref": 4,
+          "awa": 2,
+          "agi": 3,
+          "int": 2
+        },
+        "rings": {
+          "void": {
+            "rank": 0,
+            "value": 0
+          }
+        },
+        "initiative": {
+          "roll": 5,
+          "keep": 4
+        },
+        "attack1": {
+          "name": "Tsuno blade",
+          "roll": 7,
+          "keep": 3,
+          "modifier": 0,
+          "type": "Complex"
+        },
+        "attack2": {
+          "name": "Unarmed",
+          "roll": 6,
+          "keep": 3,
+          "modifier": 0,
+          "type": "Complex"
+        },
+        "attack3": {
+          "name": "",
+          "roll": 0,
+          "keep": 0,
+          "modifier": 0,
+          "type": ""
+        },
+        "damage1": {
+          "roll": 6,
+          "keep": 3,
+          "modifier": 0,
+          "type": ""
+        },
+        "damage2": {
+          "roll": 3,
+          "keep": 2,
+          "modifier": 0,
+          "type": ""
+        },
+        "damage3": {
+          "roll": 0,
+          "keep": 0,
+          "modifier": 0,
+          "type": ""
+        },
+        "armor": {
+          "armorTn": 30,
+          "reduction": 8
+        },
+        "woundMode": "formula",
+        "nrWoundLvls": 8,
+        "fear": {
+          "rank": 2
+        },
+        "shadowTaint": {
+          "rank": 4,
+          "points": 0
+        },
+        "notes": "Tsuno blade: +1k0 to attack a foe with Taint, the Spirit quality, or Touched by the Realms."
+      },
+      "items": [
+        {
+          "from": "@entry[skills/Athletics]",
+          "system": {
+            "rank": 3
+          }
+        },
+        {
+          "from": "@entry[skills/Battle]",
+          "system": {
+            "rank": 2
+          }
+        },
+        {
+          "from": "@entry[skills/Defense]",
+          "system": {
+            "rank": 3
+          }
+        },
+        {
+          "from": "@entry[skills/Heavy Weapons]",
+          "system": {
+            "rank": 4,
+            "trainedEmphases": [
+              "Tsuno Blade"
+            ]
+          }
+        },
+        {
+          "from": "@entry[skills/Jiujutsu]",
+          "system": {
+            "rank": 3
+          }
+        },
+        {
+          "from": "@entry[skills/Lore: Shadowlands]",
+          "system": {
+            "rank": 3
+          }
+        },
+        {
+          "from": "@entry[skills/Lore: Spirit Realms]",
+          "system": {
+            "rank": 4
+          }
+        },
+        {
+          "from": "@entry[skills/Stealth]",
+          "system": {
+            "rank": 3
+          }
+        }
+      ],
+      "effects": [
+        {
+          "name": "Special abilities",
+          "rules": [
+            {
+              "key": "Spirit"
+            },
+            {
+              "key": "Movement",
+              "water": 3
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "name": "Undead Revenant",
+      "type": "npc",
+      "folder": "Monsters and Nonhuman Races",
+      "page": 330,
+      "coverage": "partial",
+      "system": {
+        "traits": {
+          "sta": 3,
+          "wil": 3,
+          "str": 3,
+          "per": 2,
+          "ref": 3,
+          "awa": 0,
+          "agi": 3,
+          "int": 1
+        },
+        "rings": {
+          "void": {
+            "rank": 0,
+            "value": 0
+          }
+        },
+        "initiative": {
+          "roll": 3,
+          "keep": 3
+        },
+        "attack1": {
+          "name": "Fist",
+          "roll": 5,
+          "keep": 3,
+          "modifier": 0,
+          "type": "Complex"
+        },
+        "attack2": {
+          "name": "Sword",
+          "roll": 5,
+          "keep": 3,
+          "modifier": 0,
+          "type": "Complex"
+        },
+        "attack3": {
+          "name": "",
+          "roll": 0,
+          "keep": 0,
+          "modifier": 0,
+          "type": ""
+        },
+        "damage1": {
+          "roll": 3,
+          "keep": 1,
+          "modifier": 0,
+          "type": ""
+        },
+        "damage2": {
+          "roll": 5,
+          "keep": 2,
+          "modifier": 0,
+          "type": ""
+        },
+        "damage3": {
+          "roll": 0,
+          "keep": 0,
+          "modifier": 0,
+          "type": ""
+        },
+        "armor": {
+          "armorTn": 15,
+          "reduction": 5
+        },
+        "woundMode": "manual",
+        "manualWoundLevels": {
+          "healthy": {
+            "value": 71,
+            "penalty": 0,
+            "active": true
+          },
+          "nicked": {
+            "value": 0,
+            "penalty": 0,
+            "active": false
+          },
+          "grazed": {
+            "value": 0,
+            "penalty": 0,
+            "active": false
+          },
+          "hurt": {
+            "value": 0,
+            "penalty": 0,
+            "active": false
+          },
+          "injured": {
+            "value": 0,
+            "penalty": 0,
+            "active": false
+          },
+          "crippled": {
+            "value": 0,
+            "penalty": 0,
+            "active": false
+          },
+          "down": {
+            "value": 0,
+            "penalty": 0,
+            "active": false
+          },
+          "out": {
+            "value": 72,
+            "penalty": 0,
+            "active": true
+          }
+        },
+        "fear": {
+          "rank": 3
+        },
+        "shadowTaint": {
+          "rank": 3,
+          "points": 0
+        },
+        "notes": "Immune to effects on the mind or emotions. A Called Shot to the head dealing 18+ Wounds destroys it."
+      },
+      "effects": [
+        {
+          "name": "Special abilities",
+          "rules": [
+            {
+              "key": "ConditionImmunity",
+              "condition": "feared"
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "name": "Unicorn Riding Horse",
+      "type": "npc",
+      "folder": "Natural Creatures",
+      "page": 322,
+      "coverage": "partial",
+      "system": {
+        "traits": {
+          "sta": 4,
+          "wil": 3,
+          "str": 5,
+          "per": 2,
+          "ref": 2,
+          "awa": 2,
+          "agi": 3,
+          "int": 1
+        },
+        "rings": {
+          "void": {
+            "rank": 0,
+            "value": 0
+          }
+        },
+        "initiative": {
+          "roll": 4,
+          "keep": 2
+        },
+        "attack1": {
+          "name": "Kick",
+          "roll": 4,
+          "keep": 3,
+          "modifier": 0,
+          "type": "Complex"
+        },
+        "attack2": {
+          "name": "",
+          "roll": 0,
+          "keep": 0,
+          "modifier": 0,
+          "type": ""
+        },
+        "attack3": {
+          "name": "",
+          "roll": 0,
+          "keep": 0,
+          "modifier": 0,
+          "type": ""
+        },
+        "damage1": {
+          "roll": 5,
+          "keep": 2,
+          "modifier": 0,
+          "type": ""
+        },
+        "damage2": {
+          "roll": 0,
+          "keep": 0,
+          "modifier": 0,
+          "type": ""
+        },
+        "damage3": {
+          "roll": 0,
+          "keep": 0,
+          "modifier": 0,
+          "type": ""
+        },
+        "armor": {
+          "armorTn": 15,
+          "reduction": 3
+        },
+        "woundMode": "manual",
+        "manualWoundLevels": {
+          "healthy": {
+            "value": 11,
+            "penalty": 0,
+            "active": true
+          },
+          "nicked": {
+            "value": 23,
+            "penalty": 5,
+            "active": true
+          },
+          "grazed": {
+            "value": 35,
+            "penalty": 10,
+            "active": true
+          },
+          "hurt": {
+            "value": 47,
+            "penalty": 15,
+            "active": true
+          },
+          "injured": {
+            "value": 0,
+            "penalty": 0,
+            "active": false
+          },
+          "crippled": {
+            "value": 0,
+            "penalty": 0,
+            "active": false
+          },
+          "down": {
+            "value": 0,
+            "penalty": 0,
+            "active": false
+          },
+          "out": {
+            "value": 48,
+            "penalty": 0,
+            "active": true
+          }
+        },
+        "fear": {
+          "rank": 0
+        },
+        "shadowTaint": {
+          "rank": 0,
+          "points": 0
+        },
+        "notes": "Huge. One TN 10 Horsemanship/Awareness roll when a skirmish starts has it attack every round."
+      },
+      "items": [
+        {
+          "from": "@entry[skills/Hunting]",
+          "system": {
+            "rank": 4,
+            "trainedEmphases": [
+              "Tracking"
+            ]
+          }
+        },
+        {
+          "from": "@entry[skills/Intimidation]",
+          "system": {
+            "rank": 2
+          }
+        }
+      ],
+      "effects": [
+        {
+          "name": "Special abilities",
+          "rules": [
+            {
+              "key": "Movement",
+              "water": 3
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "name": "Unicorn War Dog",
+      "type": "npc",
+      "folder": "Natural Creatures",
+      "page": 321,
+      "coverage": "partial",
+      "system": {
+        "traits": {
+          "sta": 3,
+          "wil": 3,
+          "str": 3,
+          "per": 3,
+          "ref": 4,
+          "awa": 2,
+          "agi": 4,
+          "int": 2
+        },
+        "rings": {
+          "void": {
+            "rank": 0,
+            "value": 0
+          }
+        },
+        "initiative": {
+          "roll": 5,
+          "keep": 4
+        },
+        "attack1": {
+          "name": "Bite",
+          "roll": 5,
+          "keep": 4,
+          "modifier": 0,
+          "type": "Simple"
+        },
+        "attack2": {
+          "name": "",
+          "roll": 0,
+          "keep": 0,
+          "modifier": 0,
+          "type": ""
+        },
+        "attack3": {
+          "name": "",
+          "roll": 0,
+          "keep": 0,
+          "modifier": 0,
+          "type": ""
+        },
+        "damage1": {
+          "roll": 3,
+          "keep": 2,
+          "modifier": 0,
+          "type": ""
+        },
+        "damage2": {
+          "roll": 0,
+          "keep": 0,
+          "modifier": 0,
+          "type": ""
+        },
+        "damage3": {
+          "roll": 0,
+          "keep": 0,
+          "modifier": 0,
+          "type": ""
+        },
+        "armor": {
+          "armorTn": 25,
+          "reduction": 3
+        },
+        "woundMode": "manual",
+        "manualWoundLevels": {
+          "healthy": {
+            "value": 17,
+            "penalty": 0,
+            "active": true
+          },
+          "nicked": {
+            "value": 35,
+            "penalty": 10,
+            "active": true
+          },
+          "grazed": {
+            "value": 0,
+            "penalty": 0,
+            "active": false
+          },
+          "hurt": {
+            "value": 0,
+            "penalty": 0,
+            "active": false
+          },
+          "injured": {
+            "value": 0,
+            "penalty": 0,
+            "active": false
+          },
+          "crippled": {
+            "value": 0,
+            "penalty": 0,
+            "active": false
+          },
+          "down": {
+            "value": 0,
+            "penalty": 0,
+            "active": false
+          },
+          "out": {
+            "value": 36,
+            "penalty": 0,
+            "active": true
+          }
+        },
+        "fear": {
+          "rank": 0
+        },
+        "shadowTaint": {
+          "rank": 0,
+          "points": 0
+        },
+        "notes": "In Full Attack Stance it may move up to Water x 10 feet as a Free Action."
+      },
+      "items": [
+        {
+          "from": "@entry[skills/Hunting]",
+          "system": {
+            "rank": 4,
+            "trainedEmphases": [
+              "Tracking"
+            ]
+          }
+        },
+        {
+          "from": "@entry[skills/Intimidation]",
+          "system": {
+            "rank": 2
+          }
+        }
+      ],
+      "effects": [
+        {
+          "name": "Special abilities",
+          "rules": [
+            {
+              "key": "Movement",
+              "water": 2
+            },
+            {
+              "key": "RollModifier",
+              "selector": "trait:per",
+              "roll": 2,
+              "keep": 1,
+              "optional": true,
+              "label": "Scent"
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "name": "Utaku Battle Steed",
+      "type": "npc",
+      "folder": "Natural Creatures",
+      "page": 323,
+      "coverage": "partial",
+      "system": {
+        "traits": {
+          "sta": 4,
+          "wil": 4,
+          "str": 6,
+          "per": 3,
+          "ref": 3,
+          "awa": 2,
+          "agi": 3,
+          "int": 2
+        },
+        "rings": {
+          "void": {
+            "rank": 0,
+            "value": 0
+          }
+        },
+        "initiative": {
+          "roll": 4,
+          "keep": 3
+        },
+        "attack1": {
+          "name": "Kick",
+          "roll": 4,
+          "keep": 3,
+          "modifier": 0,
+          "type": "Simple"
+        },
+        "attack2": {
+          "name": "Trample",
+          "roll": 6,
+          "keep": 4,
+          "modifier": 0,
+          "type": "Complex"
+        },
+        "attack3": {
+          "name": "",
+          "roll": 0,
+          "keep": 0,
+          "modifier": 0,
+          "type": ""
+        },
+        "damage1": {
+          "roll": 6,
+          "keep": 2,
+          "modifier": 0,
+          "type": ""
+        },
+        "damage2": {
+          "roll": 6,
+          "keep": 4,
+          "modifier": 0,
+          "type": ""
+        },
+        "damage3": {
+          "roll": 0,
+          "keep": 0,
+          "modifier": 0,
+          "type": ""
+        },
+        "armor": {
+          "armorTn": 20,
+          "reduction": 5
+        },
+        "woundMode": "manual",
+        "manualWoundLevels": {
+          "healthy": {
+            "value": 15,
+            "penalty": 0,
+            "active": true
+          },
+          "nicked": {
+            "value": 31,
+            "penalty": 5,
+            "active": true
+          },
+          "grazed": {
+            "value": 47,
+            "penalty": 10,
+            "active": true
+          },
+          "hurt": {
+            "value": 63,
+            "penalty": 15,
+            "active": true
+          },
+          "injured": {
+            "value": 0,
+            "penalty": 0,
+            "active": false
+          },
+          "crippled": {
+            "value": 0,
+            "penalty": 0,
+            "active": false
+          },
+          "down": {
+            "value": 0,
+            "penalty": 0,
+            "active": false
+          },
+          "out": {
+            "value": 64,
+            "penalty": 0,
+            "active": true
+          }
+        },
+        "fear": {
+          "rank": 2
+        },
+        "shadowTaint": {
+          "rank": 0,
+          "points": 0
+        },
+        "notes": "Huge. Its Fear 2 applies only while it charges. Fights beside its rider with no Skill roll."
+      },
+      "effects": [
+        {
+          "name": "Special abilities",
+          "rules": [
+            {
+              "key": "Movement",
+              "water": 3
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "name": "Wolf",
+      "type": "npc",
+      "folder": "Natural Creatures",
+      "page": 323,
+      "coverage": "full",
+      "system": {
+        "traits": {
+          "sta": 3,
+          "wil": 3,
+          "str": 3,
+          "per": 4,
+          "ref": 3,
+          "awa": 1,
+          "agi": 3,
+          "int": 2
+        },
+        "rings": {
+          "void": {
+            "rank": 0,
+            "value": 0
+          }
+        },
+        "initiative": {
+          "roll": 4,
+          "keep": 3
+        },
+        "attack1": {
+          "name": "Bite",
+          "roll": 4,
+          "keep": 3,
+          "modifier": 0,
+          "type": "Complex"
+        },
+        "attack2": {
+          "name": "",
+          "roll": 0,
+          "keep": 0,
+          "modifier": 0,
+          "type": ""
+        },
+        "attack3": {
+          "name": "",
+          "roll": 0,
+          "keep": 0,
+          "modifier": 0,
+          "type": ""
+        },
+        "damage1": {
+          "roll": 5,
+          "keep": 2,
+          "modifier": 0,
+          "type": ""
+        },
+        "damage2": {
+          "roll": 0,
+          "keep": 0,
+          "modifier": 0,
+          "type": ""
+        },
+        "damage3": {
+          "roll": 0,
+          "keep": 0,
+          "modifier": 0,
+          "type": ""
+        },
+        "armor": {
+          "armorTn": 20,
+          "reduction": 3
+        },
+        "woundMode": "manual",
+        "manualWoundLevels": {
+          "healthy": {
+            "value": 17,
+            "penalty": 0,
+            "active": true
+          },
+          "nicked": {
+            "value": 35,
+            "penalty": 10,
+            "active": true
+          },
+          "grazed": {
+            "value": 0,
+            "penalty": 0,
+            "active": false
+          },
+          "hurt": {
+            "value": 0,
+            "penalty": 0,
+            "active": false
+          },
+          "injured": {
+            "value": 0,
+            "penalty": 0,
+            "active": false
+          },
+          "crippled": {
+            "value": 0,
+            "penalty": 0,
+            "active": false
+          },
+          "down": {
+            "value": 0,
+            "penalty": 0,
+            "active": false
+          },
+          "out": {
+            "value": 36,
+            "penalty": 0,
+            "active": true
+          }
+        },
+        "fear": {
+          "rank": 0
+        },
+        "shadowTaint": {
+          "rank": 0,
+          "points": 0
+        },
+        "notes": ""
+      },
+      "items": [
+        {
+          "from": "@entry[skills/Stealth]",
+          "system": {
+            "rank": 2
+          }
+        }
+      ],
+      "effects": [
+        {
+          "name": "Special abilities",
+          "rules": [
+            {
+              "key": "Movement",
+              "water": 2
+            },
+            {
+              "key": "RollModifier",
+              "selector": "trait:per",
+              "roll": 2,
+              "keep": 1,
+              "optional": true,
+              "label": "Scent"
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "name": "Zombie",
+      "type": "npc",
+      "folder": "Monsters and Nonhuman Races",
+      "page": 331,
+      "coverage": "partial",
+      "system": {
+        "traits": {
+          "sta": 3,
+          "wil": 3,
+          "str": 3,
+          "per": 1,
+          "ref": 1,
+          "awa": 0,
+          "agi": 2,
+          "int": 0
+        },
+        "rings": {
+          "void": {
+            "rank": 0,
+            "value": 0
+          }
+        },
+        "initiative": {
+          "roll": 1,
+          "keep": 1
+        },
+        "attack1": {
+          "name": "Fist",
+          "roll": 4,
+          "keep": 2,
+          "modifier": 0,
+          "type": "Complex"
+        },
+        "attack2": {
+          "name": "Club",
+          "roll": 4,
+          "keep": 2,
+          "modifier": 0,
+          "type": "Complex"
+        },
+        "attack3": {
+          "name": "",
+          "roll": 0,
+          "keep": 0,
+          "modifier": 0,
+          "type": ""
+        },
+        "damage1": {
+          "roll": 3,
+          "keep": 1,
+          "modifier": 0,
+          "type": ""
+        },
+        "damage2": {
+          "roll": 3,
+          "keep": 2,
+          "modifier": 0,
+          "type": ""
+        },
+        "damage3": {
+          "roll": 0,
+          "keep": 0,
+          "modifier": 0,
+          "type": ""
+        },
+        "armor": {
+          "armorTn": 10,
+          "reduction": 5
+        },
+        "woundMode": "manual",
+        "manualWoundLevels": {
+          "healthy": {
+            "value": 71,
+            "penalty": 0,
+            "active": true
+          },
+          "nicked": {
+            "value": 0,
+            "penalty": 0,
+            "active": false
+          },
+          "grazed": {
+            "value": 0,
+            "penalty": 0,
+            "active": false
+          },
+          "hurt": {
+            "value": 0,
+            "penalty": 0,
+            "active": false
+          },
+          "injured": {
+            "value": 0,
+            "penalty": 0,
+            "active": false
+          },
+          "crippled": {
+            "value": 0,
+            "penalty": 0,
+            "active": false
+          },
+          "down": {
+            "value": 0,
+            "penalty": 0,
+            "active": false
+          },
+          "out": {
+            "value": 72,
+            "penalty": 0,
+            "active": true
+          }
+        },
+        "fear": {
+          "rank": 3
+        },
+        "shadowTaint": {
+          "rank": 3,
+          "points": 0
+        },
+        "notes": "Immune to effects on the mind or emotions. A Called Shot to the head dealing 18+ Wounds destroys it."
+      },
+      "effects": [
+        {
+          "name": "Special abilities",
+          "rules": [
+            {
+              "key": "ConditionImmunity",
+              "condition": "feared"
+            }
+          ]
+        }
+      ]
+    }
+  ]
+}

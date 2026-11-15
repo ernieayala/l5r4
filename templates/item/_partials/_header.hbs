@@ -4,5 +4,8 @@
     <h1 class="document-name">
       <input type="text" name="name" value="{{item.name}}" placeholder="{{localize 'l5r4.ui.common.name'}}"/>
     </h1>
+    {{#if summary.citation}}
+      <p class="l5r4-citation">{{summary.citation}}</p>
+    {{/if}}
   </div>
 </header>

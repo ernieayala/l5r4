@@ -1,10 +1,11 @@
-# Stage 17: Playtest
+# Stage 18: Playtest
 
 **Goal:** Claude plays a short original scenario through Claude in Chrome with a GM and players, each seat on its
 own client and its own Foundry user, so every `automated` entry in the Stage 16 coverage manifest is used at the
 table through the real UI and real permissions; every problem found is fixed at its root with a test that fails
 first.
-**Needs:** 16 (the coverage manifest is the checklist of what play must use).
+**Needs:** 16 (the coverage manifest is the checklist of what play must use) and 17 (play uses the code and look
+the design and code systems pass left).
 
 Quench runs as the GM in one client. The paths that only a player meets (a player's roll asking the GM's client to
 write through `CONFIG.queries`, a player applying damage to a token they do not own, the Void Point prompt reaching
@@ -72,7 +73,7 @@ seat at any time.
 1. The playtest is not Quench: it is played through the real UI with Claude in Chrome. A finding that can be
    scripted becomes a Quench test when it is fixed. Basis: fabula-ultima `roadmap/STAGE-19-PLAYTEST.md` decision 2.
 2. The script and logs are committed; recordings stay in the scratchpad.
-3. The scenario is rerun on each 4.0.0 release candidate before Stage 18 publishes.
+3. The scenario is rerun on each 4.0.0 release candidate before Stage 19 publishes.
 
 ### Still open
 
@@ -84,5 +85,6 @@ seat at any time.
 | Item | Stage |
 |------|-------|
 | Static coverage, open-question and out-of-scope sweeps | 16 |
-| Release allowlist and book-text sweep | 18 |
+| Design system, code system, and consistency checks | 17 |
+| Release allowlist and book-text sweep | 19 |
 | Mass battle (pp.236-241) | Not planned |

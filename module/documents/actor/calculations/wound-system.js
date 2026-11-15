@@ -233,10 +233,14 @@ export function prepareNpcManualWounds(sys, order) {
       lvl.isVisible = true;
     }
 
-    // Ensure thresholds are strictly increasing
+    // Ensure the levels in use have strictly increasing thresholds; an unused level holds no Wounds, so its value
+    // never pushes the next one up (a creature's "124: Dead" stays 124, p.318)
     let prevValue = 0;
     for (const key of order) {
       const lvl = sys.woundLevels[key];
+      if (!lvl.isActive) {
+        continue;
+      }
       if (lvl.value <= prevValue && key !== "healthy") {
         lvl.value = prevValue + 1; // Force increment
       }

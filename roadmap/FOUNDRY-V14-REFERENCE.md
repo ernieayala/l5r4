@@ -514,7 +514,9 @@ For L5R4, a `Combatant` subclass overriding `getInitiativeRoll` replaces patchin
 - Draw Steel: JSON sources in `src/packs/<pack>/`, `compilePack(src, dest, {yaml: false, recursive: true, transformEntry})` [S83].
 - Commit the source JSON/YAML; build `packs/` in CI (both systems build packs in their release workflow) [S84], [S85]. Packs cannot be compiled while a running world has them open: `compilePack` fails with `LEVEL_DATABASE_NOT_OPEN`, cause `LEVEL_LOCKED` on the pack's `LOCK` file, and writes nothing (observed with 14.370 and CLI 3.0.5, `npm run build:packs` against a running world).
 - v14: compendium "replace" imports preserve ownership; Active Effects in compendiums are indexed; pack indexes no longer polluted by embedded paths [S2], [S11].
-- `CONFIG.<Doc>.compendiumIndexFields` adds index fields (dnd5e, Crucible, Draw Steel) [S30], [S38], [S33].
+- `CONFIG.<Doc>.compendiumIndexFields` adds index fields (dnd5e, Crucible, Draw Steel) [S30], [S38], [S33]. Core starts each as `[]` [src: client/config.mjs:151, 177] and a pack's index reads it beside the document's own `metadata.compendiumIndexFields` [src: client/documents/collections/compendium-collection.mjs:262-263]; set it during `init`, before the indexes load. Nested paths such as `system.source.page` work.
+- Importing from a pack: `WorldCollection#importFromCompendium(pack, id, updateData={}, options={})` gets the document, clones it with `updateData`, imports it through `importDocument`, and switches the sidebar to that collection's directory [src: client/documents/abstract/world-collection.mjs:80-91]. `fromCompendium(document, {clearFolder, clearState, clearSort, clearOwnership, keepId})` sets `_stats.compendiumSource` [src: world-collection.mjs:109-121].
+- The Compendium sidebar is `foundry.applications.sidebar.tabs.CompendiumDirectory`, a Handlebars AppV2 with `header`, `directory`, and `footer` parts; the header's buttons sit in `.header-actions` [src: client/applications/sidebar/tabs/compendium-directory.mjs:39-74], [src: templates/sidebar/tabs/compendiums.hbs:4-15]. Every render, a part re-render included, calls `renderCompendiumDirectory(app, element, context, options)` [src: client/applications/api/application.mjs:590-593, 1684-1705], so a system's button is added again whenever it is missing.
 
 ---
 
@@ -650,6 +652,7 @@ Items the installed 14.370 source cannot settle:
 - `_addDataFieldMigration` is `@internal` (3.3).
 - Default Windows user data path (13).
 - Custom text enrichers, `hotbarDrop`, `createScrollingText` (5.4).
+- `compendiumIndexFields`, `importFromCompendium`, and the Compendium sidebar's header and render hook (9).
 
 ---
 

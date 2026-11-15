@@ -20,7 +20,9 @@
  */
 
 import { CHAT_CARD_TEMPLATES } from "../constants/item-types.js";
+import { CHAT_TEMPLATES } from "../../../config/templates.js";
 import { R } from "../../../utils/localization.js";
+import { summaryText } from "../../summary.js";
 
 /**
  * Render an item as a chat card in the Foundry VTT chat log.
@@ -50,7 +52,9 @@ export async function renderItemChatCard(item) {
     return;
   }
 
-  const html = await R(templatePath, item);
+  // The card, then what the item's rules do and the book page it cites (roadmap/STAGE-15)
+  const html =
+    (await R(templatePath, item)) + (await R(CHAT_TEMPLATES.itemSummary, summaryText(item.system)));
 
   // Localize item type label from TYPES.Item.{type} key, with title-case fallback
   // Uses optional chaining for has() as defensive check for older Foundry versions
@@ -64,7 +68,7 @@ export async function renderItemChatCard(item) {
     {
       speaker: ChatMessage.getSpeaker({ actor: item.actor }),
       flavor: `[${typeLabel}]`,
-      content: html ?? ""
+      content: html
     },
     { messageMode: game.settings.get("core", "messageMode") }
   );

@@ -1,123 +1,27 @@
 /**
  * Bio Item Handler
  *
- * Manages clan, family, and school items for L5R4 character sheets.
- * Enforces singleton pattern per L5R4 Character Creation rules (Steps 1-3):
- * each character has exactly one clan, one family, and one school.
+ * Opens and clears the clan, family, and school items linked from L5R4 character sheets. Each character has one
+ * clan, one family, and one school (Character Creation Steps 1-3); a dropped one replaces the old through
+ * module/services/purchase.js (addItem), which also sets the links this handler reads.
  *
  * Responsibilities:
- * - Handle drag-drop of bio items onto character sheets
- * - Enforce singleton constraint (auto-replace existing bio items of same type)
- * - Sync actor flags and system fields with embedded bio item data
  * - Manage family name integration into character display name
  * - Provide bio item sheet access and clearing operations
  *
  * Foundry APIs:
- * - Actor.createEmbeddedDocuments / deleteEmbeddedDocuments
+ * - Actor.deleteEmbeddedDocuments
  * - Actor.update, Actor.getFlag
  * - fromUuid (requires Foundry v10+)
- * - Document.toObject, sheet.render
+ * - sheet.render
  */
 
 import { SYS_ID } from "../../config/constants.js";
-import { preparePurchase } from "../../services/purchase.js";
 
 /**
- * Valid bio item types per L5R4 Character Creation (Steps 1-3).
- * Each character has exactly one of each type.
- * @type {Set<string>}
- */
-const BIO_TYPES = new Set(["clan", "family", "school"]);
-
-/**
- * Handler for L5R4 biographical items (clan, family, school).
- *
- * Implements singleton pattern enforcement and actor data synchronization
- * for character creation bio items per core L5R4 rules.
+ * Handler for L5R4 biographical items (clan, family, school): opening the linked item and clearing it.
  */
 export class BioItemHandler {
-  /**
-   * Handles drag-drop of a bio item (clan/family/school) onto an actor sheet.
-   *
-   * Enforces singleton constraint: automatically removes any existing bio item
-   * of the same type before creating the new one. Updates actor flags and
-   * system fields to reference the newly embedded item.
-   *
-   * For families: embeds the item and stores UUID/name in flags only.
-   * For clan/school: embeds item, stores UUID in flags, AND copies name to system fields.
-   *
-   * @param {Object} context - Sheet context containing the actor
-   * @param {Item} itemDoc - The bio item document being dropped
-   * @returns {Promise<Item|null>} The newly created embedded item, or null on failure
-   */
-  static async handleDrop(context, itemDoc) {
-    const type = String(itemDoc.type);
-
-    if (!BIO_TYPES.has(type)) {
-      console.warn(`${SYS_ID} BioItemHandler: Invalid bio item type`, { type });
-      return null;
-    }
-
-    // Prerequisites and choices come before the old item is replaced (module/services/purchase.js)
-    const itemData = await preparePurchase(context.actor, itemDoc.toObject());
-    if (!itemData) {
-      return null;
-    }
-
-    try {
-      // Defensive access: items can be Collection or array depending on context
-      const prior = (context.actor.items?.contents ?? context.actor.items).filter(
-        i => i.type === type
-      );
-      if (prior.length) {
-        await context.actor.deleteEmbeddedDocuments(
-          "Item",
-          prior.map(i => i.id)
-        );
-      }
-    } catch (err) {
-      console.warn(`${SYS_ID} BioItemHandler: Failed to delete prior bio item(s)`, { type, err });
-    }
-
-    let newest;
-    try {
-      const [created] = await context.actor.createEmbeddedDocuments("Item", [itemData]);
-      newest = created ?? null;
-    } catch (err) {
-      console.warn(`${SYS_ID} BioItemHandler: Failed to embed bio item on drop`, { type, err });
-      return null;
-    }
-
-    // Build actor updates based on bio type
-    // Clan/School: sync name to system field + store UUID in flags
-    // Family: store UUID and name in flags only (name handled by extractBaseName during clear)
-    const updates = {};
-    if (type === "clan") {
-      updates["system.clan"] = newest?.name ?? "";
-      updates[`flags.${SYS_ID}.clanItemUuid`] = newest?.uuid ?? null;
-    } else if (type === "school") {
-      updates["system.school"] = newest?.name ?? "";
-      updates[`flags.${SYS_ID}.schoolItemUuid`] = newest?.uuid ?? null;
-    } else if (type === "family") {
-      updates[`flags.${SYS_ID}.familyItemUuid`] = newest?.uuid ?? null;
-      updates[`flags.${SYS_ID}.familyName`] = newest?.name ?? null;
-    }
-
-    if (Object.keys(updates).length) {
-      try {
-        await context.actor.update(updates);
-      } catch (err) {
-        console.warn(`${SYS_ID} BioItemHandler: actor.update failed after bio drop`, {
-          type,
-          updates,
-          err
-        });
-      }
-    }
-
-    return newest;
-  }
-
   /**
    * Opens the sheet for a linked bio item (clan/family/school).
    *

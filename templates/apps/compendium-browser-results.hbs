@@ -1,0 +1,30 @@
+<section class="l5r4-browser-results-part">
+  <p class="l5r4-browser-count">{{localize "l5r4.ui.browser.count" count=count}}</p>
+  <ul class="l5r4-browser-results">
+    {{#each rows}}
+      <li class="l5r4-browser-row" draggable="true" data-uuid="{{uuid}}" data-id="{{id}}" data-pack="{{pack}}"
+        data-document-name="{{../documentName}}">
+        <img class="l5r4-browser-icon" src="{{img}}" alt="" />
+        <div class="l5r4-browser-text">
+          <a class="l5r4-browser-name" data-action="openEntry">{{name}}</a>
+          <span class="l5r4-browser-details">
+            {{typeLabel}}{{#if numbers}} · {{numbers}}{{/if}}{{#if folderName}} · {{folderName}}{{/if}}
+          </span>
+          <span class="l5r4-browser-source">{{#if citation}}{{citation}} · {{/if}}{{packTitle}}</span>
+        </div>
+        {{#if ../canAdd}}
+          <button type="button" class="l5r4-browser-button" data-action="addEntry">
+            <i class="fa-solid fa-plus" inert></i> {{localize "l5r4.ui.browser.add"}}
+          </button>
+        {{/if}}
+        {{#if ../canImport}}
+          <button type="button" class="l5r4-browser-button" data-action="importEntry">
+            <i class="fa-solid fa-download" inert></i> {{localize "l5r4.ui.browser.import"}}
+          </button>
+        {{/if}}
+      </li>
+    {{else}}
+      <li class="l5r4-browser-empty">{{localize "l5r4.ui.browser.none"}}</li>
+    {{/each}}
+  </ul>
+</section>

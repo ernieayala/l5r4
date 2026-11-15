@@ -65,6 +65,14 @@ export function rankPointsField(rank) {
 }
 
 /**
+ * The book and printed page a document comes from (module/config/sources.js); blank for one made at the table.
+ * @returns {foundry.data.fields.SchemaField}
+ */
+export function sourceField() {
+  return new foundry.data.fields.SchemaField({ book: stringField(), page: numberField(0) });
+}
+
+/**
  * One entry per Elemental Ring plus Void, each starting at `initial`.
  * @param {number} initial
  * @returns {foundry.data.fields.SchemaField}

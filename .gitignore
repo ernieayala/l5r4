@@ -63,6 +63,9 @@ test_priority/
 # Vitest cache
 .vitest/
 
+# Compendium packs, built from src/packs/ by npm run build:packs (the sources are committed)
+/packs/
+
 # Madge dependency analysis
 madge-analysis.json
 

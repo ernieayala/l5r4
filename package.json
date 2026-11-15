@@ -31,6 +31,8 @@
     "format": "prettier --write \"**/*.{js,mjs,css,scss,json,md}\"",
     "format:check": "prettier --check \"**/*.{js,mjs,css,scss,json,md}\"",
     "deps:circular": "madge --circular module/",
+    "build:packs": "node --disable-warning=MODULE_TYPELESS_PACKAGE_JSON tools/packs.mjs",
+    "packs:verify": "node tools/packs-verify.mjs",
     "deps:analyze": "madge --summary module/ && madge --json module/ > madge-analysis.json",
     "release:prepare": "node scripts/prepare-release.js",
     "release:validate": "node scripts/prepare-release.js --validate-only",
@@ -41,6 +43,7 @@
   },
   "devDependencies": {
     "@eslint/js": "^10.0.1",
+    "@foundryvtt/foundryvtt-cli": "3.0.5",
     "@vitest/coverage-v8": "^5.1.0",
     "@vitest/ui": "^5.1.0",
     "eslint": "^10.14.0",

@@ -19,8 +19,45 @@ import {
   calculateWoundPenalties,
   initializeWoundState,
   findCurrentWoundLevel,
-  prepareNpcFormulaWounds
+  prepareNpcFormulaWounds,
+  prepareNpcManualWounds
 } from "../../../module/documents/actor/calculations/wound-system.js";
+
+describe("prepareNpcManualWounds (p.318)", () => {
+  const ORDER = ["healthy", "nicked", "grazed", "hurt", "injured", "crippled", "down", "out"];
+
+  it("keeps a creature's printed thresholds; an unused level never pushes the next one up", () => {
+    // Ugulu no Oni (p.329): 32: +5; 64: +10; 96: +15; 124: Dead, its middle levels unused
+    const level = (value, penalty, active) => ({ value, penalty, active });
+    const sys = {
+      woundLevels: {},
+      manualWoundLevels: {
+        healthy: level(31, 0, true),
+        nicked: level(63, 5, true),
+        grazed: level(95, 10, true),
+        hurt: level(123, 15, true),
+        injured: level(0, 0, false),
+        crippled: level(0, 0, false),
+        down: level(0, 0, false),
+        out: level(124, 0, true)
+      }
+    };
+    prepareNpcManualWounds(sys, ORDER);
+    expect(sys.woundLevels.out.value).toBe(124);
+    expect(sys.woundLevels.hurt.value).toBe(123);
+  });
+
+  it("still raises an active level that does not exceed the one before it", () => {
+    const sys = {
+      woundLevels: {},
+      manualWoundLevels: Object.fromEntries(
+        ORDER.map(key => [key, { value: 10, penalty: 0, active: ["healthy", "out"].includes(key) }])
+      )
+    };
+    prepareNpcManualWounds(sys, ORDER);
+    expect(sys.woundLevels.out.value).toBe(11);
+  });
+});
 
 describe("getWoundLevelsForCount", () => {
   describe("valid inputs", () => {

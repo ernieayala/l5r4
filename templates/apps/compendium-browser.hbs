@@ -1,0 +1,37 @@
+<section class="l5r4-browser-controls">
+  <nav class="l5r4-browser-tabs" aria-label="{{localize "l5r4.ui.browser.title"}}">
+    {{#each tabs}}
+      <button type="button" class="l5r4-browser-tab{{#if active}} active{{/if}}" data-action="selectTab"
+        data-tab="{{id}}" aria-pressed="{{#if active}}true{{else}}false{{/if}}">{{label}}</button>
+    {{/each}}
+  </nav>
+
+  <div class="l5r4-browser-filters">
+    <label class="l5r4-browser-filter l5r4-browser-search">
+      <span>{{localize "l5r4.ui.browser.search"}}</span>
+      <input type="search" name="search" value="{{search}}" data-browser-search autocomplete="off" />
+    </label>
+    {{#each filters}}
+      <label class="l5r4-browser-filter">
+        <span>{{label}}</span>
+        {{#if options}}
+          <select name="filter-{{id}}" data-browser-filter="{{id}}">
+            <option value="">{{localize "l5r4.ui.label.all"}}</option>
+            {{#each options}}
+              <option value="{{value}}" {{#if (eq value ../value)}}selected{{/if}}>{{label}}</option>
+            {{/each}}
+          </select>
+        {{else if (eq kind "bool")}}
+          <select name="filter-{{id}}" data-browser-filter="{{id}}">
+            <option value="">{{localize "l5r4.ui.label.all"}}</option>
+            <option value="true" {{#if (eq value "true")}}selected{{/if}}>{{localize "l5r4.ui.browser.yes"}}</option>
+            <option value="false" {{#if (eq value "false")}}selected{{/if}}>{{localize "l5r4.ui.browser.no"}}</option>
+          </select>
+        {{else}}
+          <input type="text" name="filter-{{id}}" value="{{value}}" data-browser-filter="{{id}}" />
+        {{/if}}
+      </label>
+    {{/each}}
+    <button type="button" class="l5r4-browser-clear" data-action="clearFilters">{{localize "l5r4.ui.browser.clear"}}</button>
+  </div>
+</section>

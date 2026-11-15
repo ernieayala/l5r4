@@ -25,8 +25,9 @@ import {
   traitAdjustments
 } from "../../utils/rule-engine.js";
 import { resolveArmorTn } from "../../utils/effects.js";
-import { applyChoices } from "../../utils/choices.js";
+import { applyChoices, hasOpenChoice } from "../../utils/choices.js";
 import { highestRing, taintEffects, voidPointsMax } from "../../utils/taint.js";
+import { highestSchoolRank } from "../../utils/mechanics.js";
 import { stackModifiers } from "../../utils/modifier-stacking.js";
 import { toInt } from "../../utils/type-coercion.js";
 import { SYS_ID } from "../../config/constants.js";
@@ -63,12 +64,15 @@ export function collectRules(actor) {
       // A weapon's roll rules apply to rolls made with it (module/utils/rule-engine.js, bagEntries)
       const extra = item.type === "weapon" ? { weaponId: item.id } : {};
       sources.push(
-        ...applyChoices(item.system.ownedRules).map(rule => ({
-          rule,
-          source: item.name,
-          itemId: item.id,
-          ...extra
-        }))
+        ...applyChoices(item.system.ownedRules)
+          // A rule naming a choice not yet made waits for it (an item granted or imported skips the question)
+          .filter(rule => rule?.key === "ChoiceSet" || !hasOpenChoice(JSON.stringify(rule)))
+          .map(rule => ({
+            rule,
+            source: item.name,
+            itemId: item.id,
+            ...extra
+          }))
       );
     }
   }
@@ -186,9 +190,8 @@ export function applyDerivedRules(actor, sys) {
   }
   if (sys.insight) {
     options.add(`insight:${toInt(sys.insight.rank)}`);
-    const schools = actor.items.filter(item => item.type === "school");
-    if (schools.length) {
-      options.add(`school-rank:${Math.max(...schools.map(school => school.system.schoolRank))}`);
+    if (actor.items.some(item => item.type === "school")) {
+      options.add(`school-rank:${highestSchoolRank(actor)}`);
     }
   }
   addRuleRollOptions(actor.rules, options);

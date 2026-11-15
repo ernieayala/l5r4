@@ -1,0 +1,143 @@
+/**
+ * Compendium packs
+ * The compendium browser (module/apps/compendium-browser.js), and the rule lines and book citation an item or
+ * creature shows in place of the book's text (module/documents/summary.js).
+ */
+
+.l5r4-compendium-browser {
+  .window-content {
+    display: flex;
+    flex-direction: column;
+    gap: 0.5rem;
+    overflow: hidden;
+  }
+
+  .l5r4-browser-controls {
+    display: flex;
+    flex: 0 0 auto;
+    flex-direction: column;
+    gap: 0.5rem;
+  }
+
+  .l5r4-browser-results-part {
+    display: flex;
+    flex: 1;
+    flex-direction: column;
+    gap: 0.25rem;
+    min-height: 0;
+  }
+
+  .l5r4-browser-tabs {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 0.25rem;
+  }
+
+  .l5r4-browser-tab {
+    flex: 0 0 auto;
+    padding: 0.2rem 0.5rem;
+    width: auto;
+
+    &.active {
+      font-weight: bold;
+      outline: 1px solid var(--color-border-highlight);
+    }
+  }
+
+  .l5r4-browser-filters {
+    align-items: end;
+    display: flex;
+    flex-wrap: wrap;
+    gap: 0.5rem;
+  }
+
+  .l5r4-browser-filter {
+    display: flex;
+    flex: 0 1 9rem;
+    flex-direction: column;
+    font-size: var(--font-size-12);
+    gap: 0.15rem;
+  }
+
+  .l5r4-browser-search {
+    flex-basis: 14rem;
+  }
+
+  .l5r4-browser-clear {
+    flex: 0 0 auto;
+    width: auto;
+  }
+
+  .l5r4-browser-count {
+    font-size: var(--font-size-12);
+    margin: 0;
+  }
+
+  .l5r4-browser-results {
+    display: flex;
+    flex: 1;
+    flex-direction: column;
+    gap: 0.25rem;
+    list-style: none;
+    margin: 0;
+    overflow-y: auto;
+    padding: 0;
+  }
+
+  .l5r4-browser-row {
+    align-items: center;
+    cursor: grab;
+    display: flex;
+    gap: 0.5rem;
+  }
+
+  .l5r4-browser-icon {
+    border: none;
+    flex: 0 0 32px;
+    height: 32px;
+    width: 32px;
+  }
+
+  .l5r4-browser-text {
+    display: flex;
+    flex: 1;
+    flex-direction: column;
+    min-width: 0;
+  }
+
+  .l5r4-browser-name {
+    font-weight: bold;
+  }
+
+  .l5r4-browser-details,
+  .l5r4-browser-source {
+    font-size: var(--font-size-12);
+  }
+
+  .l5r4-browser-button {
+    flex: 0 0 auto;
+    padding: 0.2rem 0.5rem;
+    width: auto;
+  }
+
+  .l5r4-browser-empty {
+    font-style: italic;
+  }
+}
+
+.l5r4-citation {
+  font-size: var(--font-size-12);
+  font-style: italic;
+  margin: 0.15rem 0 0;
+}
+
+.l5r4-rule-lines {
+  margin: 0.25rem 0 0.5rem;
+  padding-inline-start: 1.25rem;
+}
+
+.l5r4-item-summary {
+  border-top: 1px solid var(--color-border-light-tertiary);
+  margin-top: 0.25rem;
+  padding-top: 0.25rem;
+}

@@ -526,9 +526,11 @@ export async function rollCheck(request) {
     notes: [
       // A Note rule's text is a localization key (the system's own, such as Prone's) or a GM's plain text
       ...ctx.notes.map(text => T(text)),
-      ...ctx.actions.map(({ label: source, action }) =>
-        F("l5r4.ui.check.actionNote", { action: T(`l5r4.ui.check.actions.${action}`), source })
-      )
+      ...ctx.actions
+        .filter(a => !a.range || a.range === range)
+        .map(({ label: source, action }) =>
+          F("l5r4.ui.check.actionNote", { action: T(`l5r4.ui.check.actions.${action}`), source })
+        )
     ],
     conditions: target ? ctx.applyConditions : [],
     ...(maneuvers ? { maneuvers } : {}),

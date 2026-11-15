@@ -5,6 +5,8 @@
  * "skill:{choice:weapon}" or a GrantItem's uuid.
  */
 
+import { CHOICE_LIST_VALUES } from "../config/rule-keys.js";
+
 const PLACEHOLDER = /\{choice:([a-z][a-z0-9-]*)\}/gi;
 
 /**
@@ -71,6 +73,32 @@ export function applyChoices(rules) {
     return rules ?? [];
   }
   return rules.map(rule => (rule?.key === "ChoiceSet" ? rule : fill(rule, selections)));
+}
+
+/**
+ * An item's rules as they read once each choice is made: an open ChoiceSet takes its first option, or the first value
+ * of its "traits" or "rings" list, and the placeholders are filled. The rules editor validates this copy, so a rule
+ * that names a choice is judged by what it becomes, not by its `{choice:...}` text. A "skills" choice is a uuid, which
+ * any text field takes, so its placeholder stays.
+ * @param {object[]} rules  Raw `system.rules` of one item
+ * @returns {object[]}
+ *
+ * @example
+ * answeredRules([
+ *   { key: "ChoiceSet", flag: "trait", list: "traits" },
+ *   { key: "TraitAdjust", trait: "{choice:trait}", value: -1 }
+ * ])[1].trait; // "sta"
+ */
+export function answeredRules(rules) {
+  return applyChoices(
+    (rules ?? []).map(rule => {
+      if (rule?.key !== "ChoiceSet" || rule.selection) {
+        return rule;
+      }
+      const sample = rule.options?.[0]?.value ?? CHOICE_LIST_VALUES[rule.list]?.[0];
+      return sample === undefined ? rule : { ...rule, selection: sample };
+    })
+  );
 }
 
 /**

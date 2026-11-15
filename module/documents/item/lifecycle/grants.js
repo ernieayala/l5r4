@@ -28,7 +28,10 @@ const queues = new Map();
 function queued(actor, task) {
   const previous = queues.get(actor.uuid) ?? Promise.resolve();
   const next = previous.then(task).catch(err => {
-    console.error(`${SYS_ID} | Grants for ${actor.name} failed`, err);
+    // A request already sent when the actor was deleted fails with it; there is nothing left to grant
+    if (fromUuidSync(actor.uuid)) {
+      console.error(`${SYS_ID} | Grants for ${actor.name} failed`, err);
+    }
   });
   queues.set(actor.uuid, next);
   next.finally(() => {
@@ -122,6 +125,8 @@ async function grantOne(actor, giver, source, rule) {
  * @returns {Promise<void>}
  */
 async function grantDue(actor) {
+  // Grant work queued before the actor was deleted has nothing left to grant to
+  const gone = () => !fromUuidSync(actor.uuid);
   for (const giver of actor.items.contents) {
     const rules = grantRules(giver);
     if (!rules.length || !actor.items.has(giver.id)) {
@@ -130,6 +135,9 @@ async function grantDue(actor) {
     const records = [...recordsOf(giver)];
     const due = pendingGrants(rules, records, rankOf(giver));
     for (const rule of due) {
+      if (gone()) {
+        return;
+      }
       const source = await fromUuid(rule.uuid);
       if (source?.documentName !== "Item") {
         console.warn(`${SYS_ID} | "${giver.name}" grants ${rule.uuid}, which is not an item`);
@@ -156,10 +164,19 @@ async function grantDue(actor) {
         });
       }
     }
-    if (due.length) {
+    if (due.length && !gone()) {
       await giver.setFlag(SYS_ID, "grants", records);
     }
   }
+}
+
+/**
+ * Once the actor's grant work queued so far has run.
+ * @param {Actor} actor
+ * @returns {Promise<void>}
+ */
+export function grantsSettled(actor) {
+  return queues.get(actor.uuid) ?? Promise.resolve();
 }
 
 /**

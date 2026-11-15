@@ -34,6 +34,7 @@ import { trackXpExpenditure } from "./actor/calculations/xp-system.js";
 import { syncGrants } from "./item/lifecycle/grants.js";
 import { addWoundRollOption, applyInitialRules } from "./actor/rules.js";
 import { rollDataKey } from "../utils/rule-values.js";
+import { highestSchoolRank } from "../utils/mechanics.js";
 
 /**
  * Actor document for L5R4 Enhanced system.
@@ -208,6 +209,9 @@ export default class L5R4Actor extends Actor {
         data.skills[rollDataKey(item.name)] = { rank: item.system.rank };
       }
     }
+
+    // The School Rank a Technique scales with, as @school.rank
+    data.school = { rank: highestSchoolRank(this) };
 
     return data;
   }

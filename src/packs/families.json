@@ -1,0 +1,948 @@
+{
+  "name": "families",
+  "label": "Families",
+  "documentType": "Item",
+  "types": [
+    "family"
+  ],
+  "pages": [
+    [
+      105,
+      132
+    ],
+    [
+      211,
+      230
+    ]
+  ],
+  "entries": [
+    {
+      "name": "Agasha",
+      "type": "family",
+      "folder": "Phoenix",
+      "page": 123,
+      "coverage": "full",
+      "system": {
+        "rules": [
+          {
+            "key": "TraitAdjust",
+            "trait": "per",
+            "value": 1
+          }
+        ]
+      }
+    },
+    {
+      "name": "Akodo",
+      "type": "family",
+      "folder": "Lion",
+      "page": 116,
+      "coverage": "full",
+      "system": {
+        "rules": [
+          {
+            "key": "TraitAdjust",
+            "trait": "agi",
+            "value": 1
+          }
+        ]
+      }
+    },
+    {
+      "name": "Asahina",
+      "type": "family",
+      "folder": "Crane",
+      "page": 109,
+      "coverage": "full",
+      "system": {
+        "rules": [
+          {
+            "key": "TraitAdjust",
+            "trait": "int",
+            "value": 1
+          }
+        ]
+      }
+    },
+    {
+      "name": "Asako",
+      "type": "family",
+      "folder": "Phoenix",
+      "page": 123,
+      "coverage": "full",
+      "system": {
+        "rules": [
+          {
+            "key": "TraitAdjust",
+            "trait": "awa",
+            "value": 1
+          }
+        ]
+      }
+    },
+    {
+      "name": "Bayushi",
+      "type": "family",
+      "folder": "Scorpion",
+      "page": 126,
+      "coverage": "full",
+      "system": {
+        "rules": [
+          {
+            "key": "TraitAdjust",
+            "trait": "agi",
+            "value": 1
+          }
+        ]
+      }
+    },
+    {
+      "name": "Chuda",
+      "type": "family",
+      "folder": "Spider",
+      "page": 211,
+      "coverage": "full",
+      "system": {
+        "rules": [
+          {
+            "key": "TraitAdjust",
+            "trait": "int",
+            "value": 1
+          }
+        ]
+      }
+    },
+    {
+      "name": "Chuda (Snake)",
+      "type": "family",
+      "folder": "Snake",
+      "page": 224,
+      "coverage": "full",
+      "system": {
+        "rules": [
+          {
+            "key": "TraitAdjust",
+            "trait": "str",
+            "value": 1
+          }
+        ]
+      }
+    },
+    {
+      "name": "Daidoji",
+      "type": "family",
+      "folder": "Crane",
+      "page": 109,
+      "coverage": "full",
+      "system": {
+        "rules": [
+          {
+            "key": "TraitAdjust",
+            "trait": "sta",
+            "value": 1
+          }
+        ]
+      }
+    },
+    {
+      "name": "Daigotsu",
+      "type": "family",
+      "folder": "Spider",
+      "page": 211,
+      "coverage": "full",
+      "system": {
+        "rules": [
+          {
+            "key": "TraitAdjust",
+            "trait": "sta",
+            "value": 1
+          }
+        ]
+      }
+    },
+    {
+      "name": "Doji",
+      "type": "family",
+      "folder": "Crane",
+      "page": 109,
+      "coverage": "full",
+      "system": {
+        "rules": [
+          {
+            "key": "TraitAdjust",
+            "trait": "awa",
+            "value": 1
+          }
+        ]
+      }
+    },
+    {
+      "name": "Fuzake",
+      "type": "family",
+      "folder": "Monkey",
+      "page": 221,
+      "coverage": "full",
+      "system": {
+        "rules": [
+          {
+            "key": "TraitAdjust",
+            "trait": "per",
+            "value": 1
+          }
+        ]
+      }
+    },
+    {
+      "name": "Goju",
+      "type": "family",
+      "folder": "Spider",
+      "page": 211,
+      "coverage": "full",
+      "system": {
+        "rules": [
+          {
+            "key": "TraitAdjust",
+            "trait": "agi",
+            "value": 1
+          }
+        ]
+      }
+    },
+    {
+      "name": "Hantei",
+      "type": "family",
+      "folder": "Imperial",
+      "page": 228,
+      "coverage": "full",
+      "system": {
+        "rules": [
+          {
+            "key": "TraitAdjust",
+            "trait": "void",
+            "value": 1
+          }
+        ]
+      }
+    },
+    {
+      "name": "Heichi",
+      "type": "family",
+      "folder": "Boar",
+      "page": 217,
+      "coverage": "full",
+      "system": {
+        "rules": [
+          {
+            "key": "TraitAdjust",
+            "trait": "wil",
+            "value": 1
+          }
+        ]
+      }
+    },
+    {
+      "name": "Hida",
+      "type": "family",
+      "folder": "Crab",
+      "page": 105,
+      "coverage": "full",
+      "system": {
+        "rules": [
+          {
+            "key": "TraitAdjust",
+            "trait": "str",
+            "value": 1
+          }
+        ]
+      }
+    },
+    {
+      "name": "Hiruma",
+      "type": "family",
+      "folder": "Crab",
+      "page": 105,
+      "coverage": "full",
+      "system": {
+        "rules": [
+          {
+            "key": "TraitAdjust",
+            "trait": "agi",
+            "value": 1
+          }
+        ]
+      }
+    },
+    {
+      "name": "Horiuchi",
+      "type": "family",
+      "folder": "Unicorn",
+      "page": 129,
+      "coverage": "full",
+      "system": {
+        "rules": [
+          {
+            "key": "TraitAdjust",
+            "trait": "wil",
+            "value": 1
+          }
+        ]
+      }
+    },
+    {
+      "name": "Ichiro",
+      "type": "family",
+      "folder": "Badger",
+      "page": 215,
+      "coverage": "full",
+      "system": {
+        "rules": [
+          {
+            "key": "TraitAdjust",
+            "trait": "str",
+            "value": 1
+          }
+        ]
+      }
+    },
+    {
+      "name": "Ide",
+      "type": "family",
+      "folder": "Unicorn",
+      "page": 129,
+      "coverage": "full",
+      "system": {
+        "rules": [
+          {
+            "key": "TraitAdjust",
+            "trait": "per",
+            "value": 1
+          }
+        ]
+      }
+    },
+    {
+      "name": "Ikoma",
+      "type": "family",
+      "folder": "Lion",
+      "page": 116,
+      "coverage": "full",
+      "system": {
+        "rules": [
+          {
+            "key": "TraitAdjust",
+            "trait": "awa",
+            "value": 1
+          }
+        ]
+      }
+    },
+    {
+      "name": "Isawa",
+      "type": "family",
+      "folder": "Phoenix",
+      "page": 123,
+      "coverage": "full",
+      "system": {
+        "rules": [
+          {
+            "key": "TraitAdjust",
+            "trait": "wil",
+            "value": 1
+          }
+        ]
+      }
+    },
+    {
+      "name": "Iuchi",
+      "type": "family",
+      "folder": "Unicorn",
+      "page": 129,
+      "coverage": "full",
+      "system": {
+        "rules": [
+          {
+            "key": "TraitAdjust",
+            "trait": "int",
+            "value": 1
+          }
+        ]
+      }
+    },
+    {
+      "name": "Kaiu",
+      "type": "family",
+      "folder": "Crab",
+      "page": 105,
+      "coverage": "full",
+      "system": {
+        "rules": [
+          {
+            "key": "TraitAdjust",
+            "trait": "int",
+            "value": 1
+          }
+        ]
+      }
+    },
+    {
+      "name": "Kakita",
+      "type": "family",
+      "folder": "Crane",
+      "page": 109,
+      "coverage": "full",
+      "system": {
+        "rules": [
+          {
+            "key": "TraitAdjust",
+            "trait": "agi",
+            "value": 1
+          }
+        ]
+      }
+    },
+    {
+      "name": "Kasuga",
+      "type": "family",
+      "folder": "Tortoise",
+      "page": 225,
+      "coverage": "full",
+      "system": {
+        "rules": [
+          {
+            "key": "TraitAdjust",
+            "trait": "per",
+            "value": 1
+          }
+        ]
+      }
+    },
+    {
+      "name": "Kitsu",
+      "type": "family",
+      "folder": "Lion",
+      "page": 116,
+      "coverage": "full",
+      "system": {
+        "rules": [
+          {
+            "key": "TraitAdjust",
+            "trait": "int",
+            "value": 1
+          }
+        ]
+      }
+    },
+    {
+      "name": "Kitsuki",
+      "type": "family",
+      "folder": "Dragon",
+      "page": 112,
+      "coverage": "full",
+      "system": {
+        "rules": [
+          {
+            "key": "TraitAdjust",
+            "trait": "awa",
+            "value": 1
+          }
+        ]
+      }
+    },
+    {
+      "name": "Kitsune",
+      "type": "family",
+      "folder": "Mantis",
+      "page": 120,
+      "coverage": "full",
+      "system": {
+        "rules": [
+          {
+            "key": "TraitAdjust",
+            "trait": "awa",
+            "value": 1
+          }
+        ]
+      }
+    },
+    {
+      "name": "Kitsune (Fox)",
+      "type": "family",
+      "folder": "Fox",
+      "page": 219,
+      "coverage": "full",
+      "system": {
+        "rules": [
+          {
+            "key": "TraitAdjust",
+            "trait": "wil",
+            "value": 1
+          }
+        ]
+      }
+    },
+    {
+      "name": "Komori",
+      "type": "family",
+      "folder": "Bat",
+      "page": 216,
+      "coverage": "full",
+      "system": {
+        "rules": [
+          {
+            "key": "TraitAdjust",
+            "trait": "int",
+            "value": 1
+          }
+        ]
+      }
+    },
+    {
+      "name": "Kuni",
+      "type": "family",
+      "folder": "Crab",
+      "page": 105,
+      "coverage": "full",
+      "system": {
+        "rules": [
+          {
+            "key": "TraitAdjust",
+            "trait": "int",
+            "value": 1
+          }
+        ]
+      }
+    },
+    {
+      "name": "Matsu",
+      "type": "family",
+      "folder": "Lion",
+      "page": 116,
+      "coverage": "full",
+      "system": {
+        "rules": [
+          {
+            "key": "TraitAdjust",
+            "trait": "str",
+            "value": 1
+          }
+        ]
+      }
+    },
+    {
+      "name": "Mirumoto",
+      "type": "family",
+      "folder": "Dragon",
+      "page": 112,
+      "coverage": "full",
+      "system": {
+        "rules": [
+          {
+            "key": "TraitAdjust",
+            "trait": "agi",
+            "value": 1
+          }
+        ]
+      }
+    },
+    {
+      "name": "Miya",
+      "type": "family",
+      "folder": "Imperial",
+      "page": 227,
+      "coverage": "full",
+      "system": {
+        "rules": [
+          {
+            "key": "TraitAdjust",
+            "trait": "ref",
+            "value": 1
+          }
+        ]
+      }
+    },
+    {
+      "name": "Morito",
+      "type": "family",
+      "folder": "Ox",
+      "page": 223,
+      "coverage": "full",
+      "system": {
+        "rules": [
+          {
+            "key": "TraitAdjust",
+            "trait": "sta",
+            "value": 1
+          }
+        ]
+      }
+    },
+    {
+      "name": "Moshi",
+      "type": "family",
+      "folder": "Mantis",
+      "page": 120,
+      "coverage": "full",
+      "system": {
+        "rules": [
+          {
+            "key": "TraitAdjust",
+            "trait": "int",
+            "value": 1
+          }
+        ]
+      }
+    },
+    {
+      "name": "Moto",
+      "type": "family",
+      "folder": "Unicorn",
+      "page": 130,
+      "coverage": "full",
+      "system": {
+        "rules": [
+          {
+            "key": "TraitAdjust",
+            "trait": "agi",
+            "value": 1
+          }
+        ]
+      }
+    },
+    {
+      "name": "Otomo",
+      "type": "family",
+      "folder": "Imperial",
+      "page": 227,
+      "coverage": "full",
+      "system": {
+        "rules": [
+          {
+            "key": "TraitAdjust",
+            "trait": "int",
+            "value": 1
+          }
+        ]
+      }
+    },
+    {
+      "name": "Seppun",
+      "type": "family",
+      "folder": "Imperial",
+      "page": 227,
+      "coverage": "full",
+      "system": {
+        "rules": [
+          {
+            "key": "TraitAdjust",
+            "trait": "agi",
+            "value": 1
+          }
+        ]
+      }
+    },
+    {
+      "name": "Shiba",
+      "type": "family",
+      "folder": "Phoenix",
+      "page": 123,
+      "coverage": "full",
+      "system": {
+        "rules": [
+          {
+            "key": "TraitAdjust",
+            "trait": "per",
+            "value": 1
+          }
+        ]
+      }
+    },
+    {
+      "name": "Shinjo",
+      "type": "family",
+      "folder": "Unicorn",
+      "page": 130,
+      "coverage": "full",
+      "system": {
+        "rules": [
+          {
+            "key": "TraitAdjust",
+            "trait": "ref",
+            "value": 1
+          }
+        ]
+      }
+    },
+    {
+      "name": "Shosuro",
+      "type": "family",
+      "folder": "Scorpion",
+      "page": 126,
+      "coverage": "full",
+      "system": {
+        "rules": [
+          {
+            "key": "TraitAdjust",
+            "trait": "awa",
+            "value": 1
+          }
+        ]
+      }
+    },
+    {
+      "name": "Soshi",
+      "type": "family",
+      "folder": "Scorpion",
+      "page": 126,
+      "coverage": "full",
+      "system": {
+        "rules": [
+          {
+            "key": "TraitAdjust",
+            "trait": "int",
+            "value": 1
+          }
+        ]
+      }
+    },
+    {
+      "name": "Spider Monks",
+      "type": "family",
+      "folder": "Spider",
+      "page": 212,
+      "coverage": "full",
+      "system": {
+        "rules": [
+          {
+            "key": "TraitAdjust",
+            "trait": "ref",
+            "value": 1
+          }
+        ]
+      }
+    },
+    {
+      "name": "Suzume",
+      "type": "family",
+      "folder": "Sparrow",
+      "page": 224,
+      "coverage": "full",
+      "system": {
+        "rules": [
+          {
+            "key": "TraitAdjust",
+            "trait": "awa",
+            "value": 1
+          }
+        ]
+      }
+    },
+    {
+      "name": "Tamori",
+      "type": "family",
+      "folder": "Dragon",
+      "page": 112,
+      "coverage": "full",
+      "system": {
+        "rules": [
+          {
+            "key": "TraitAdjust",
+            "trait": "wil",
+            "value": 1
+          }
+        ]
+      }
+    },
+    {
+      "name": "Toku",
+      "type": "family",
+      "folder": "Monkey",
+      "page": 221,
+      "coverage": "full",
+      "system": {
+        "rules": [
+          {
+            "key": "TraitAdjust",
+            "trait": "sta",
+            "value": 1
+          }
+        ]
+      }
+    },
+    {
+      "name": "Tonbo",
+      "type": "family",
+      "folder": "Dragonfly",
+      "page": 218,
+      "coverage": "full",
+      "system": {
+        "rules": [
+          {
+            "key": "TraitAdjust",
+            "trait": "awa",
+            "value": 1
+          }
+        ]
+      }
+    },
+    {
+      "name": "Toritaka",
+      "type": "family",
+      "folder": "Crab",
+      "page": 106,
+      "coverage": "full",
+      "system": {
+        "rules": [
+          {
+            "key": "TraitAdjust",
+            "trait": "per",
+            "value": 1
+          }
+        ]
+      }
+    },
+    {
+      "name": "Toturi",
+      "type": "family",
+      "folder": "Imperial",
+      "page": 228,
+      "coverage": "full",
+      "system": {
+        "rules": [
+          {
+            "key": "TraitAdjust",
+            "trait": "wil",
+            "value": 1
+          }
+        ]
+      }
+    },
+    {
+      "name": "Tsi",
+      "type": "family",
+      "folder": "Oriole",
+      "page": 222,
+      "coverage": "full",
+      "system": {
+        "rules": [
+          {
+            "key": "TraitAdjust",
+            "trait": "str",
+            "value": 1
+          }
+        ]
+      }
+    },
+    {
+      "name": "Tsuruchi",
+      "type": "family",
+      "folder": "Mantis",
+      "page": 120,
+      "coverage": "full",
+      "system": {
+        "rules": [
+          {
+            "key": "TraitAdjust",
+            "trait": "per",
+            "value": 1
+          }
+        ]
+      }
+    },
+    {
+      "name": "Ujina",
+      "type": "family",
+      "folder": "Hare",
+      "page": 220,
+      "coverage": "full",
+      "system": {
+        "rules": [
+          {
+            "key": "TraitAdjust",
+            "trait": "agi",
+            "value": 1
+          }
+        ]
+      }
+    },
+    {
+      "name": "Usagi",
+      "type": "family",
+      "folder": "Hare",
+      "page": 220,
+      "coverage": "full",
+      "system": {
+        "rules": [
+          {
+            "key": "TraitAdjust",
+            "trait": "awa",
+            "value": 1
+          }
+        ]
+      }
+    },
+    {
+      "name": "Utaku",
+      "type": "family",
+      "folder": "Unicorn",
+      "page": 130,
+      "coverage": "full",
+      "system": {
+        "rules": [
+          {
+            "key": "TraitAdjust",
+            "trait": "sta",
+            "value": 1
+          }
+        ]
+      }
+    },
+    {
+      "name": "Yasuki",
+      "type": "family",
+      "folder": "Crab",
+      "page": 106,
+      "coverage": "full",
+      "system": {
+        "rules": [
+          {
+            "key": "TraitAdjust",
+            "trait": "awa",
+            "value": 1
+          }
+        ]
+      }
+    },
+    {
+      "name": "Yogo",
+      "type": "family",
+      "folder": "Scorpion",
+      "page": 126,
+      "coverage": "full",
+      "system": {
+        "rules": [
+          {
+            "key": "TraitAdjust",
+            "trait": "wil",
+            "value": 1
+          }
+        ]
+      }
+    },
+    {
+      "name": "Yoritomo",
+      "type": "family",
+      "folder": "Mantis",
+      "page": 120,
+      "coverage": "full",
+      "system": {
+        "rules": [
+          {
+            "key": "TraitAdjust",
+            "trait": "sta",
+            "value": 1
+          }
+        ]
+      }
+    }
+  ]
+}

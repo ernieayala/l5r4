@@ -190,6 +190,20 @@ export function ringRank(actor, ring) {
 }
 
 /**
+ * The highest rank among the actor's Schools (p.104), 0 with none: the School Rank a Technique scales with. The
+ * `school-rank` roll option and `@school.rank` in rule formulas both read it.
+ *
+ * @param {Object} actor
+ * @returns {number}
+ */
+export function highestSchoolRank(actor) {
+  const ranks = actor.items
+    .filter(item => item.type === "school")
+    .map(item => item.system.schoolRank);
+  return ranks.length ? Math.max(...ranks) : 0;
+}
+
+/**
  * The School Rank a shugenja casts with (pp.80, 163, `game-rules/66_magic_and_spell_casting.md`): the rank of the
  * School marked as the shugenja School, or the Insight Rank, which is the School Rank of a character with one
  * School (p.104).

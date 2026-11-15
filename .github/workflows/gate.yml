@@ -39,3 +39,6 @@ jobs:
 
       - name: Circular imports
         run: npm run deps:circular
+
+      - name: Compendium packs
+        run: npm run build:packs

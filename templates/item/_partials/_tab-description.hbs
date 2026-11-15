@@ -1,14 +1,27 @@
 <section class="tab {{#if (eq currentTab "description")}}active{{/if}}" data-tab="description" data-application-part="description">
+  {{!-- What the item's rules do, one line each --}}
+  {{#if summary.lines.length}}
+    <h4 class="prose-title">{{localize "l5r4.ui.ruleSummary.heading"}}</h4>
+    <ul class="l5r4-rule-lines">
+      {{#each summary.lines}}
+        <li>{{this}}</li>
+      {{/each}}
+    </ul>
+  {{/if}}
+
   {{!-- Main Description --}}
   <h4 class="prose-title">{{localize "l5r4.ui.sheets.description"}}</h4>
   {{#if editable}}
     <prose-mirror name="system.description" value="{{ system.description }}" document-uuid="{{ item.uuid }}" class="sized" compact>
       {{{ enriched.description }}}
     </prose-mirror>
-  {{else}}
+  {{else if enriched.description}}
     <div class="editor editor-content">
       {{{ enriched.description }}}
     </div>
+  {{else if summary.citation}}
+    {{!-- A pack entry carries no text of the book's: the reader is pointed to the page instead --}}
+    <p class="l5r4-citation">{{summary.citation}}</p>
   {{/if}}
 
   {{!-- Special Rules (show if editable OR if content exists) --}}

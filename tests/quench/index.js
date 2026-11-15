@@ -104,6 +104,7 @@ import { registerAnimationsBatch } from "./animations.js";
 import { registerWorldUpgradeBatch } from "./world-upgrade.js";
 import { registerRegressionsBatch } from "./regressions.js";
 import { registerTableToolsBatch } from "./table-tools.js";
+import { registerPacksBatch } from "./packs.js";
 
 /**
  * Register Quench integration tests for the L5R4 system.
@@ -126,6 +127,7 @@ export async function registerQuenchTests(quench) {
   registerWorldUpgradeBatch(quench);
   registerRegressionsBatch(quench);
   registerTableToolsBatch(quench);
+  registerPacksBatch(quench);
   registerActorDocumentTests(quench);
   registerActorWoundTests(quench);
   registerActorXpTests(quench);

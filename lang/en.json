@@ -248,6 +248,145 @@
         "jsonView": "Edit as JSON",
         "effectSheet": "L5R4 Active Effect sheet (with Rules)"
       },
+      "ruleSummary": {
+        "heading": "What it does",
+        "RollModifier": "{bonus} on {rolls}",
+        "TNModifier": "TN {value} on {rolls}",
+        "ArmorTN": "Armor TN {value}",
+        "Reduction": "Reduction {value}",
+        "Wounds": "Wounds per Wound Rank {perRank}, Wound Rank penalties {penalty}",
+        "Initiative": "Initiative {bonus}",
+        "FreeRaise": "Free Raises on {rolls}: {value}",
+        "DiceRule": "Dice explode on {explode} or higher on {rolls}",
+        "Substitute": "May roll {with} in place of {replace} on {rolls}",
+        "TraitAdjust": "{trait} {value}",
+        "Note": "Note on {rolls}: {text}",
+        "RollOption": "Roll option: {option}",
+        "Movement": "Water {value} for movement",
+        "ApplyCondition": "A successful roll on {rolls} can apply {condition}",
+        "ConditionImmunity": "Immune to {condition}",
+        "PeriodicSave": "Ends on a {roll} roll against TN {tn}",
+        "Resource": "Uses of {slug}: {max} per {per}",
+        "DamageSource": "{rolls} count as {tags}",
+        "Invulnerability": "Invulnerable: harmed only by {harmedBy}",
+        "Spirit": "Spirit: damage halved unless from {harmedBy}",
+        "OpponentModifier": "{bonus} on {rolls} made against this character",
+        "RaiseRule": "{maneuver} costs {cost} Raises on {rolls}",
+        "UnskilledAs": "{rolls} without ranks count as Rank {rank}",
+        "ActionCost": "{rolls}: {action}",
+        "Cost": "XP price of {what}: {value}",
+        "Ledger": "{track} {direction}: {value}",
+        "Prerequisite": "Requires {requires}",
+        "ChoiceSet": "Choice when added: {prompt}",
+        "GrantItem": "Grants {item} at School Rank {rank}",
+        "reductionExcept": "Reduction {value}, except against {except}",
+        "rerollOnes": "Re-roll 1s on {rolls}",
+        "ignoreReduction": "Ignores {value} Reduction",
+        "raiseCap": "Raise limit {value} on {rolls}",
+        "raiseMinimum": "At least {value} Raises on {rolls}",
+        "chosen": "Chosen: {selection}",
+        "optional": "Optional: the roller picks the roll",
+        "unknown": "Unknown rule {key}",
+        "when": "{rule} (when {when})",
+        "text": "{text}",
+        "citation": "{book} p.{page}",
+        "range": {
+          "melee": "Melee attacks only",
+          "ranged": "Ranged attacks only"
+        },
+        "armorTn": {
+          "base": "Armor TN base becomes {value}",
+          "total": "Armor TN becomes {value}"
+        },
+        "selector": {
+          "any": "every roll",
+          "skill": "Skill rolls",
+          "trait": "Trait rolls",
+          "ring": "Ring rolls",
+          "attack": "attack rolls",
+          "damage": "damage rolls",
+          "spell": "Spell Casting Rolls",
+          "maho": "maho rolls",
+          "named": "{name} rolls",
+          "skill-type": "{name} Skill rolls",
+          "skill-tag": "{name} Skill rolls"
+        },
+        "per": {
+          "turn": "Turn",
+          "round": "Round",
+          "skirmish": "skirmish",
+          "day": "day"
+        },
+        "maneuver": {
+          "calledShot": "Called Shot",
+          "disarm": "Disarm",
+          "extraAttack": "Extra Attack",
+          "feint": "Feint",
+          "knockdown": "Knockdown"
+        },
+        "action": {
+          "free": "a Free Action",
+          "simple": "a Simple Action",
+          "complex": "a Complex Action"
+        },
+        "direction": {
+          "gain": "gains",
+          "loss": "losses"
+        },
+        "priced": {
+          "self": "this item",
+          "emphasis": "an Emphasis",
+          "items": "every {type} item"
+        }
+      },
+      "sources": {
+        "core": "Core Rulebook"
+      },
+      "browser": {
+        "title": "Compendium Browser",
+        "open": "Browse",
+        "search": "Name",
+        "clear": "Clear filters",
+        "count": "Entries: {count}",
+        "none": "Nothing matches.",
+        "add": "Add",
+        "import": "Import",
+        "yes": "Yes",
+        "no": "No",
+        "noActor": "Select a token or assign a character to add items to.",
+        "tabs": {
+          "schools": "Schools and Techniques",
+          "skills": "Skills",
+          "advantages": "Advantages and Disadvantages",
+          "spells": "Spells",
+          "kata": "Kata",
+          "kiho": "Kiho and Tattoos",
+          "equipment": "Equipment",
+          "clans": "Clans and Families",
+          "creatures": "Creatures"
+        },
+        "filters": {
+          "type": "Type",
+          "folder": "Group",
+          "skillType": "Skill type",
+          "trait": "Trait",
+          "advantageType": "Kind",
+          "cost": "Cost",
+          "ring": "Ring",
+          "mastery": "Mastery Level",
+          "keyword": "Keyword",
+          "maho": "Maho",
+          "kihoType": "Kiho type",
+          "size": "Size",
+          "armorType": "Armor type",
+          "page": "Page"
+        },
+        "numbers": {
+          "weapon": "DR {pool}",
+          "armor": "Armor TN +{bonus}, Reduction {reduction}",
+          "spell": "{ring}, Mastery Level {mastery}"
+        }
+      },
       "taint": {
         "label": "Shadowlands Taint",
         "embrace": "Embrace the Taint (+1k1)",
@@ -333,7 +472,11 @@
         "noOptions": "{name} has a choice with nothing to choose from; it was not added.",
         "unmet": "{name} needs: {list}.",
         "unmetTitle": "Prerequisites not met",
-        "addAnyway": "Add it anyway?"
+        "addAnyway": "Add it anyway?",
+        "schoolTitle": "A second School",
+        "schoolQuestion": "{name} already studies at {schools}. Replace it, or add {school} as another School (an Advanced School, or the Multiple Schools Advantage)?",
+        "schoolReplace": "Replace",
+        "schoolAdd": "Add as another School"
       },
       "activation": {
         "start": "Activate",
@@ -690,6 +833,8 @@
         "kihos": "Kihos",
         "tattoo": "Tattoo",
         "tattoos": "Tattoos",
+        "tattooPassive": "Always active",
+        "tattooPassiveHint": "On: its rules apply while the character has it. Off: the play button on the character sheet activates it, one tattoo at a time, for twice the School Rank in Rounds.",
         "equipment": "Equipment",
         "abilities": "Abilities",
         "character": "Character",

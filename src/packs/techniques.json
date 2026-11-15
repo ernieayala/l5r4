@@ -1,0 +1,5589 @@
+{
+  "name": "techniques",
+  "label": "Techniques",
+  "documentType": "Item",
+  "types": [
+    "technique"
+  ],
+  "pages": [
+    [
+      105,
+      132
+    ],
+    [
+      211,
+      235
+    ],
+    [
+      245,
+      257
+    ]
+  ],
+  "entries": [
+    {
+      "name": "A Crafter's Dedication",
+      "type": "technique",
+      "folder": "Tsi Smith School",
+      "page": 223,
+      "coverage": "none",
+      "system": {
+        "rank": 3,
+        "shugenja": false,
+        "affinity": "",
+        "deficiency": "",
+        "rules": [],
+        "specialRules": "Crafting time uses half the price. Complex Action: someone using your work gets +(School Rank)k1 on that roll."
+      }
+    },
+    {
+      "name": "A Single Moment",
+      "type": "technique",
+      "folder": "Kenshinzen",
+      "page": 247,
+      "coverage": "none",
+      "system": {
+        "rank": 3,
+        "rules": [],
+        "specialRules": "On a Turn you make one attack only, each opponent it hits is Stunned until your next Turn starts."
+      }
+    },
+    {
+      "name": "Akodo's Final Lesson",
+      "type": "technique",
+      "folder": "Akodo Bushi School",
+      "page": 117,
+      "coverage": "none",
+      "system": {
+        "rank": 5,
+        "rules": [],
+        "specialRules": "A Bugei roll with Raises that reaches the base TN but misses the raised one still succeeds, without the Raises."
+      }
+    },
+    {
+      "name": "All Things in Time",
+      "type": "technique",
+      "folder": "Suzume Bushi School",
+      "page": 225,
+      "coverage": "partial",
+      "system": {
+        "rank": 1,
+        "shugenja": false,
+        "affinity": "",
+        "deficiency": "",
+        "rules": [
+          {
+            "key": "RollModifier",
+            "selector": "attack",
+            "roll": 1,
+            "optional": true,
+            "label": "All Things in Time: Initiative lowered this Round"
+          },
+          {
+            "key": "RollModifier",
+            "selector": "damage",
+            "roll": 1,
+            "optional": true,
+            "label": "All Things in Time: Initiative lowered this Round"
+          }
+        ],
+        "specialRules": "Before the first Turn of a Round, lower your Initiative by 5 to take the bonus for that Round."
+      }
+    },
+    {
+      "name": "Always Be Ready",
+      "type": "technique",
+      "folder": "Tsuruchi Archer School",
+      "page": 122,
+      "coverage": "full",
+      "system": {
+        "rank": 1,
+        "rules": [
+          {
+            "key": "RollModifier",
+            "selector": "attack",
+            "roll": 1,
+            "predicate": [
+              "weapon:skill:kyujutsu"
+            ]
+          },
+          {
+            "key": "Initiative",
+            "total": 3
+          }
+        ],
+        "specialRules": ""
+      }
+    },
+    {
+      "name": "Answering the Heart",
+      "type": "technique",
+      "folder": "Ide Emissary School",
+      "page": 131,
+      "coverage": "none",
+      "system": {
+        "rank": 4,
+        "rules": [],
+        "specialRules": "Rolls for your Rank 2 and Rank 3 Techniques add unkept dice equal to School Rank."
+      }
+    },
+    {
+      "name": "Asahina Fetishist",
+      "type": "technique",
+      "folder": "Alternate Paths",
+      "page": 252,
+      "coverage": "none",
+      "system": {
+        "rank": 2,
+        "shugenja": true,
+        "affinity": "",
+        "deficiency": "",
+        "rules": [],
+        "specialRules": "Replaces Asahina Shugenja 2. Needs a Craft or Artisan at 3. Void into a crafted token: +2k0 on one High Skill roll."
+      }
+    },
+    {
+      "name": "Ashura's Wing",
+      "type": "technique",
+      "folder": "Daigotsu Bushi School",
+      "page": 212,
+      "coverage": "full",
+      "system": {
+        "rank": 3,
+        "shugenja": false,
+        "affinity": "",
+        "deficiency": "",
+        "rules": [
+          {
+            "key": "ActionCost",
+            "selector": "attack",
+            "action": "simple",
+            "range": "melee"
+          }
+        ],
+        "specialRules": ""
+      }
+    },
+    {
+      "name": "Aura of Blood",
+      "type": "technique",
+      "folder": "Daigotsu Bushi School",
+      "page": 212,
+      "coverage": "none",
+      "system": {
+        "rank": 2,
+        "shugenja": false,
+        "affinity": "",
+        "deficiency": "",
+        "rules": [],
+        "specialRules": "Void, Simple Action: you and allies in 30' get +2k0 damage for Taint Rank + Strength Rounds; no stacking."
+      }
+    },
+    {
+      "name": "Beyond the Mountains",
+      "type": "technique",
+      "folder": "Heichi Bushi School",
+      "page": 218,
+      "coverage": "partial",
+      "system": {
+        "rank": 5,
+        "shugenja": false,
+        "affinity": "",
+        "deficiency": "",
+        "rules": [
+          {
+            "key": "RollModifier",
+            "selector": "attack",
+            "roll": 2,
+            "predicate": [
+              "status:fullDefenseStance",
+              {
+                "or": [
+                  "weapon:skill:spears",
+                  "weapon:keyword:samurai"
+                ]
+              }
+            ]
+          },
+          {
+            "key": "ActionCost",
+            "selector": "attack",
+            "action": "free",
+            "predicate": [
+              "status:fullDefenseStance",
+              {
+                "or": [
+                  "weapon:skill:spears",
+                  "weapon:keyword:samurai"
+                ]
+              }
+            ]
+          }
+        ],
+        "specialRules": "Allows one such attack while in Full Defense."
+      }
+    },
+    {
+      "name": "Bishamon's Chosen",
+      "type": "technique",
+      "folder": "Alternate Paths",
+      "page": 253,
+      "coverage": "none",
+      "system": {
+        "rank": 3,
+        "shugenja": true,
+        "affinity": "",
+        "deficiency": "",
+        "rules": [
+          {
+            "key": "Prerequisite",
+            "label": "Battle 3",
+            "requires": [
+              {
+                "gte": [
+                  "skill:battle",
+                  3
+                ]
+              }
+            ]
+          }
+        ],
+        "specialRules": "Replaces Kitsu Shugenja 3. Slot, Free: +1k0 on a Strength roll (melee damage too) or on casting a Battle spell."
+      }
+    },
+    {
+      "name": "Bitter Lies Swordsman",
+      "type": "technique",
+      "folder": "Alternate Paths",
+      "page": 254,
+      "coverage": "none",
+      "system": {
+        "rank": 3,
+        "rules": [
+          {
+            "key": "Prerequisite",
+            "label": "Kenjutsu 3",
+            "requires": [
+              {
+                "gte": [
+                  "skill:kenjutsu",
+                  3
+                ]
+              }
+            ]
+          }
+        ],
+        "specialRules": "Replaces Bayushi Bushi 3. Void: re-roll any roll once, no TN penalty, keep either; that roll can't be re-rolled again."
+      }
+    },
+    {
+      "name": "Blessing of the Kami",
+      "type": "technique",
+      "folder": "Togashi Tattooed Order",
+      "page": 115,
+      "coverage": "none",
+      "system": {
+        "rank": 3,
+        "rules": [],
+        "specialRules": "Gain two more Tattoos."
+      }
+    },
+    {
+      "name": "Blessings of the Emperor",
+      "type": "technique",
+      "folder": "Miya Herald School",
+      "page": 230,
+      "coverage": "none",
+      "system": {
+        "rank": 4,
+        "shugenja": false,
+        "affinity": "",
+        "deficiency": "",
+        "rules": [],
+        "specialRules": "School Rank times a session, Complex: contested roll stops honorable listeners from fighting for a minute."
+      }
+    },
+    {
+      "name": "Blood Like Water",
+      "type": "technique",
+      "folder": "Chuda Shugenja School",
+      "page": 213,
+      "coverage": "none",
+      "system": {
+        "rank": 1,
+        "shugenja": true,
+        "affinity": "",
+        "deficiency": "",
+        "rules": [],
+        "specialRules": "Affinity: non-Void maho; Deficiency: plain spells of a chosen element. Raises hide maho or cut its Taint to 1."
+      }
+    },
+    {
+      "name": "Blood of the Kami",
+      "type": "technique",
+      "folder": "Togashi Tattooed Order",
+      "page": 114,
+      "coverage": "none",
+      "system": {
+        "rank": 1,
+        "rules": [],
+        "specialRules": "Gain two Tattoos."
+      }
+    },
+    {
+      "name": "Body of Stone",
+      "type": "technique",
+      "folder": "Togashi Tattooed Order",
+      "page": 115,
+      "coverage": "full",
+      "system": {
+        "rank": 2,
+        "rules": [
+          {
+            "key": "RollModifier",
+            "selector": "attack",
+            "roll": 1,
+            "keep": 1,
+            "optional": true,
+            "label": "Unarmed attack"
+          },
+          {
+            "key": "RollModifier",
+            "selector": "damage",
+            "roll": 1,
+            "keep": 1,
+            "optional": true,
+            "label": "Unarmed damage"
+          }
+        ],
+        "specialRules": ""
+      }
+    },
+    {
+      "name": "Child of Osano-wo",
+      "type": "technique",
+      "folder": "Storm Riders",
+      "page": 249,
+      "coverage": "partial",
+      "system": {
+        "rank": 3,
+        "shugenja": true,
+        "affinity": "",
+        "deficiency": "",
+        "rules": [
+          {
+            "key": "RollModifier",
+            "selector": "ring:water",
+            "roll": 1,
+            "predicate": [
+              "check:spell"
+            ]
+          }
+        ],
+        "specialRules": "Void, Free Action: 3 Rounds immune to Thunder spells of Mastery Level 3 or less."
+      }
+    },
+    {
+      "name": "Chuda Subversive",
+      "type": "technique",
+      "folder": "Alternate Paths",
+      "page": 255,
+      "coverage": "none",
+      "system": {
+        "rank": 4,
+        "shugenja": true,
+        "affinity": "",
+        "deficiency": "",
+        "rules": [
+          {
+            "key": "Prerequisite",
+            "label": "Lore: Shadowlands 4",
+            "requires": [
+              {
+                "gte": [
+                  "skill:lore: shadowlands",
+                  4
+                ]
+              }
+            ]
+          }
+        ],
+        "specialRules": "Replaces Chuda Shugenja 4. 3 spell slots: hide your Taint or a willing touched one's for School Rank hours."
+      }
+    },
+    {
+      "name": "Claws of the Falcon",
+      "type": "technique",
+      "folder": "Toritaka Bushi School",
+      "page": 219,
+      "coverage": "partial",
+      "system": {
+        "rank": 5,
+        "shugenja": false,
+        "affinity": "",
+        "deficiency": "",
+        "rules": [
+          {
+            "key": "DamageSource",
+            "selector": "damage",
+            "tags": [],
+            "ignoreReduction": 5
+          }
+        ],
+        "specialRules": "Void (Free): one Spirit Realm creature loses 10 Reduction for a Round."
+      }
+    },
+    {
+      "name": "Command the Winds",
+      "type": "technique",
+      "folder": "Yoritomo Courtier School",
+      "page": 121,
+      "coverage": "none",
+      "system": {
+        "rank": 3,
+        "rules": [],
+        "specialRules": "School Rank times a session, re-roll a failed Sincerity roll as Intimidation (Control); the new result stands."
+      }
+    },
+    {
+      "name": "Courage Above All",
+      "type": "technique",
+      "folder": "Toku Bushi School",
+      "page": 222,
+      "coverage": "full",
+      "system": {
+        "rank": 3,
+        "shugenja": false,
+        "affinity": "",
+        "deficiency": "",
+        "rules": [
+          {
+            "key": "ActionCost",
+            "selector": "attack",
+            "action": "simple",
+            "range": "melee"
+          }
+        ],
+        "specialRules": ""
+      }
+    },
+    {
+      "name": "Crab Berserker",
+      "type": "technique",
+      "folder": "Alternate Paths",
+      "page": 251,
+      "coverage": "partial",
+      "system": {
+        "rank": 2,
+        "rules": [
+          {
+            "key": "Prerequisite",
+            "label": "Earth 4",
+            "requires": [
+              {
+                "gte": [
+                  "ring:earth",
+                  4
+                ]
+              }
+            ]
+          },
+          {
+            "key": "RollModifier",
+            "selector": "attack",
+            "roll": 2,
+            "keep": 1,
+            "optional": true,
+            "label": "Crab Berserker: raging"
+          },
+          {
+            "key": "RollModifier",
+            "selector": "damage",
+            "roll": 2,
+            "keep": 1,
+            "optional": true,
+            "label": "Crab Berserker: raging"
+          }
+        ],
+        "specialRules": "Replaces Crab Bushi 2. Rage 1/skirmish, 2x Earth Rounds: no Wound effects, Center/Defense or non-Bugei; outlives death."
+      }
+    },
+    {
+      "name": "Cracks in the Wall",
+      "type": "technique",
+      "folder": "Daigotsu Courtier School",
+      "page": 213,
+      "coverage": "none",
+      "system": {
+        "rank": 2,
+        "shugenja": false,
+        "affinity": "",
+        "deficiency": "",
+        "rules": [],
+        "specialRules": "Void, Simple: Courtier (Manipulation) / Awareness, TN 25: all within 20' get -1k1 on Etiquette and Perform for an hour."
+      }
+    },
+    {
+      "name": "Crashing Stones",
+      "type": "technique",
+      "folder": "Ichiro Bushi School",
+      "page": 216,
+      "coverage": "partial",
+      "system": {
+        "rank": 4,
+        "shugenja": false,
+        "affinity": "",
+        "deficiency": "",
+        "rules": [
+          {
+            "key": "ActionCost",
+            "selector": "attack",
+            "action": "simple",
+            "label": "Crashing Stones",
+            "predicate": [
+              "weapon:keyword:samurai"
+            ]
+          }
+        ],
+        "specialRules": "Unarmed attacks are Simple too."
+      }
+    },
+    {
+      "name": "Crushing Blow",
+      "type": "technique",
+      "folder": "Ichiro Bushi School",
+      "page": 216,
+      "coverage": "none",
+      "system": {
+        "rank": 3,
+        "shugenja": false,
+        "affinity": "",
+        "deficiency": "",
+        "rules": [],
+        "specialRules": "Armor adds nothing to the Armor TN of your targets. Unarmed blows ignore 1 Reduction."
+      }
+    },
+    {
+      "name": "Dancing With the Elements",
+      "type": "technique",
+      "folder": "Shiba Bushi School",
+      "page": 123,
+      "coverage": "none",
+      "system": {
+        "rank": 2,
+        "rules": [],
+        "specialRules": "Pick someone within 30' with your Stance: shift by 5 the TN of spells they cast or that target them or you."
+      }
+    },
+    {
+      "name": "Darkness Cannot Be Trapped",
+      "type": "technique",
+      "folder": "Daigotsu Courtier School",
+      "page": 213,
+      "coverage": "none",
+      "system": {
+        "rank": 3,
+        "shugenja": false,
+        "affinity": "",
+        "deficiency": "",
+        "rules": [],
+        "specialRules": "Void, Simple: contested Sincerity (Deceit) vs Sincerity (Honesty) pins the blame on someone present."
+      }
+    },
+    {
+      "name": "Darkness Is My Light",
+      "type": "technique",
+      "folder": "Obsidian Warrior",
+      "page": 250,
+      "coverage": "none",
+      "system": {
+        "rank": 1,
+        "rules": [],
+        "specialRules": "No limit on how many Raises you may declare."
+      }
+    },
+    {
+      "name": "Darkness Unleashed",
+      "type": "technique",
+      "folder": "Order of the Spider Monks",
+      "page": 215,
+      "coverage": "none",
+      "system": {
+        "rank": 5,
+        "shugenja": false,
+        "affinity": "",
+        "deficiency": "",
+        "rules": [],
+        "specialRules": "More Void Points a day: the higher of Taint Rank and Earth; these may also buy +1k1 on damage."
+      }
+    },
+    {
+      "name": "Daylight Wastes No Movement",
+      "type": "technique",
+      "folder": "Hiruma Bushi School",
+      "page": 108,
+      "coverage": "none",
+      "system": {
+        "rank": 5,
+        "rules": [],
+        "specialRules": "Wounds past a kill carry to your next hit this skirmish, but not on two attacks in a row."
+      }
+    },
+    {
+      "name": "Deathseeker",
+      "type": "technique",
+      "folder": "Alternate Paths",
+      "page": 253,
+      "coverage": "partial",
+      "system": {
+        "rank": 1,
+        "rules": [
+          {
+            "key": "Prerequisite",
+            "label": "Honor Rank 5, Dishonored",
+            "requires": [
+              {
+                "gte": [
+                  "honor-rank",
+                  5
+                ]
+              },
+              "item:disadvantage:dishonored"
+            ]
+          },
+          {
+            "key": "RollModifier",
+            "selector": "attack",
+            "roll": 1,
+            "predicate": [
+              "status:fullAttackStance"
+            ]
+          }
+        ],
+        "specialRules": "Replaces a Lion Bushi 1, giving its Rank 1 Benefit, Skills, Honor, outfit. Honor Rank on one damage a Turn: Armor TN -5."
+      }
+    },
+    {
+      "name": "Desert Wind Strike",
+      "type": "technique",
+      "folder": "Moto Bushi School",
+      "page": 130,
+      "coverage": "full",
+      "system": {
+        "rank": 3,
+        "rules": [
+          {
+            "key": "ActionCost",
+            "selector": "attack",
+            "action": "simple",
+            "range": "melee"
+          }
+        ],
+        "specialRules": ""
+      }
+    },
+    {
+      "name": "Destiny Has No Secrets",
+      "type": "technique",
+      "folder": "Otomo Courtier School",
+      "page": 229,
+      "coverage": "none",
+      "system": {
+        "rank": 2,
+        "shugenja": false,
+        "affinity": "",
+        "deficiency": "",
+        "rules": [],
+        "specialRules": "With your contacts near, Void and Courtier / Awareness at TN 25 learns one vital fact from the GM."
+      }
+    },
+    {
+      "name": "Destiny's Hand",
+      "type": "technique",
+      "folder": "Order of Heroes Monk",
+      "page": 232,
+      "coverage": "none",
+      "system": {
+        "rank": 1,
+        "shugenja": false,
+        "affinity": "",
+        "deficiency": "",
+        "rules": [],
+        "specialRules": "Void (Free): an ally yet to act this Round gets +1k1 on one roll that Void could help."
+      }
+    },
+    {
+      "name": "Devastating Blow",
+      "type": "technique",
+      "folder": "Hida Bushi School",
+      "page": 106,
+      "coverage": "none",
+      "system": {
+        "rank": 4,
+        "rules": [],
+        "specialRules": "Once per encounter, Heavy Weapon: foe's Reduction -4 for one attack; a hit Dazes, ended by Earth vs your damage."
+      }
+    },
+    {
+      "name": "Devouring Wrath",
+      "type": "technique",
+      "folder": "Daigotsu Bushi School",
+      "page": 212,
+      "coverage": "none",
+      "system": {
+        "rank": 4,
+        "shugenja": false,
+        "affinity": "",
+        "deficiency": "",
+        "rules": [],
+        "specialRules": "Heal 5 Wounds per melee hit; may pass your maximum by up to 20, and the excess fades when the skirmish ends."
+      }
+    },
+    {
+      "name": "Disciples of Sun Tao",
+      "type": "technique",
+      "folder": "Ronin Paths",
+      "page": 234,
+      "coverage": "partial",
+      "system": {
+        "rank": 1,
+        "shugenja": false,
+        "affinity": "",
+        "deficiency": "",
+        "rules": [
+          {
+            "key": "TraitAdjust",
+            "trait": "ref",
+            "value": 1
+          },
+          {
+            "key": "GrantItem",
+            "uuid": "@entry[skills/Athletics]"
+          },
+          {
+            "key": "GrantItem",
+            "uuid": "@entry[skills/Defense]"
+          },
+          {
+            "key": "GrantItem",
+            "uuid": "@entry[skills/Hunting]"
+          },
+          {
+            "key": "GrantItem",
+            "uuid": "@entry[skills/Iaijutsu]"
+          },
+          {
+            "key": "GrantItem",
+            "uuid": "@entry[skills/Kenjutsu]"
+          },
+          {
+            "key": "ChoiceSet",
+            "flag": "any-1",
+            "prompt": "One more Skill",
+            "list": "skills",
+            "filter": []
+          },
+          {
+            "key": "GrantItem",
+            "uuid": "{choice:any-1}"
+          },
+          {
+            "key": "ChoiceSet",
+            "flag": "any-2",
+            "prompt": "Another Skill",
+            "list": "skills",
+            "filter": []
+          },
+          {
+            "key": "GrantItem",
+            "uuid": "{choice:any-2}"
+          },
+          {
+            "key": "RollModifier",
+            "selector": "skill:iaijutsu",
+            "total": "@honor.rank"
+          }
+        ],
+        "specialRules": "Starting Honor 4.5. Outfit as printed."
+      }
+    },
+    {
+      "name": "Do As We Say",
+      "type": "technique",
+      "folder": "Yasuki Courtier School",
+      "page": 108,
+      "coverage": "none",
+      "system": {
+        "rank": 2,
+        "rules": [],
+        "specialRules": "School Rank times per session, a failed Intimidation or Sincerity roll is rolled again; the new result stands."
+      }
+    },
+    {
+      "name": "Drawing in the Strike",
+      "type": "technique",
+      "folder": "Order of the Spider Monks",
+      "page": 215,
+      "coverage": "full",
+      "system": {
+        "rank": 2,
+        "shugenja": false,
+        "affinity": "",
+        "deficiency": "",
+        "rules": [
+          {
+            "key": "ChoiceSet",
+            "flag": "ring",
+            "prompt": "Ring for Reduction",
+            "options": [
+              {
+                "value": "air",
+                "label": "Air"
+              },
+              {
+                "value": "earth",
+                "label": "Earth"
+              },
+              {
+                "value": "fire",
+                "label": "Fire"
+              },
+              {
+                "value": "water",
+                "label": "Water"
+              }
+            ]
+          },
+          {
+            "key": "Reduction",
+            "value": "@rings.{choice:ring} + @shadowTaint.rank"
+          }
+        ],
+        "specialRules": ""
+      }
+    },
+    {
+      "name": "Drawing the Void",
+      "type": "technique",
+      "folder": "Kenshinzen",
+      "page": 247,
+      "coverage": "full",
+      "system": {
+        "rank": 1,
+        "rules": [
+          {
+            "key": "ArmorTN",
+            "value": 10,
+            "predicate": [
+              "status:centerStance"
+            ]
+          }
+        ],
+        "specialRules": ""
+      }
+    },
+    {
+      "name": "Duty Before Honor",
+      "type": "technique",
+      "folder": "Yoritomo Courtier School",
+      "page": 121,
+      "coverage": "none",
+      "system": {
+        "rank": 1,
+        "rules": [],
+        "specialRules": "Public Commerce and Intimidation (Control) cost no Honor/Glory. Social rolls vs outlaws: School Rank Free Raises."
+      }
+    },
+    {
+      "name": "Elements of All Things",
+      "type": "technique",
+      "folder": "Agasha Shugenja School",
+      "page": 125,
+      "coverage": "partial",
+      "system": {
+        "rank": 1,
+        "shugenja": true,
+        "affinity": "fire",
+        "deficiency": "water",
+        "rules": [],
+        "specialRules": "Void Point: cast a spell with another Ring, spending that Ring's slot. Free Raise on Craft spells."
+      }
+    },
+    {
+      "name": "Emerald Magistrate",
+      "type": "technique",
+      "folder": "Alternate Paths",
+      "page": 256,
+      "coverage": "partial",
+      "system": {
+        "rank": 4,
+        "rules": [
+          {
+            "key": "Prerequisite",
+            "label": "Investigation 3, Lore: Law 3, appointed Emerald Magistrate (Imperials may skip one Skill)",
+            "requires": [
+              {
+                "gte": [
+                  "skill:investigation",
+                  3
+                ]
+              },
+              {
+                "gte": [
+                  "skill:lore: law",
+                  3
+                ]
+              }
+            ]
+          },
+          {
+            "key": "Reduction",
+            "value": "ceil(@honor.rank / 2)"
+          }
+        ],
+        "specialRules": "Replaces a Bushi, Courtier, or Shugenja 4 (GM may allow 3 or 5). Needs the appointment; Imperials skip one Skill."
+      }
+    },
+    {
+      "name": "Empress Guard",
+      "type": "technique",
+      "folder": "Alternate Paths",
+      "page": 252,
+      "coverage": "none",
+      "system": {
+        "rank": 3,
+        "rules": [
+          {
+            "key": "Prerequisite",
+            "label": "Perception 3",
+            "requires": [
+              {
+                "gte": [
+                  "trait:per",
+                  3
+                ]
+              }
+            ]
+          }
+        ],
+        "specialRules": "Replaces Daidoji Iron Warrior 4 or Kakita Bushi 3. Half Honor Rank: attack, Perception; +10 Armor TN guarding Imperials."
+      }
+    },
+    {
+      "name": "Essence of Chikushudo",
+      "type": "technique",
+      "folder": "Kitsune Shugenja School",
+      "page": 220,
+      "coverage": "none",
+      "system": {
+        "rank": 1,
+        "shugenja": true,
+        "affinity": "earth",
+        "deficiency": "air",
+        "rules": [],
+        "specialRules": "Sense, Commune, and Summon reach animal spirits too. Free Raise on non-damaging spells cast on an animal."
+      }
+    },
+    {
+      "name": "Every Lion Is Your Brother",
+      "type": "technique",
+      "folder": "Ikoma Bard School",
+      "page": 119,
+      "coverage": "none",
+      "system": {
+        "rank": 5,
+        "rules": [],
+        "specialRules": "Five times per session on a Contested Social roll, add unkept dice equal to your Perform: Storytelling rank."
+      }
+    },
+    {
+      "name": "Exhaustive Knowledge",
+      "type": "technique",
+      "folder": "Tsi Smith School",
+      "page": 223,
+      "coverage": "none",
+      "system": {
+        "rank": 4,
+        "shugenja": false,
+        "affinity": "",
+        "deficiency": "",
+        "rules": [],
+        "specialRules": "Void, Free Action: attacks with a weapon you made are Simple for School Rank Rounds."
+      }
+    },
+    {
+      "name": "Eyes of the Ancestors",
+      "type": "technique",
+      "folder": "Kitsu Shugenja School",
+      "page": 118,
+      "coverage": "none",
+      "system": {
+        "rank": 1,
+        "rules": [],
+        "specialRules": "Water casting vs Willpower x 5 shows Spiritual Advantages and Disadvantages; Void: negate one. Free Raise: Battle.",
+        "shugenja": true,
+        "affinity": "water",
+        "deficiency": "fire"
+      }
+    },
+    {
+      "name": "Eyes of the Emperor",
+      "type": "technique",
+      "folder": "Miya Herald School",
+      "page": 230,
+      "coverage": "full",
+      "system": {
+        "rank": 2,
+        "shugenja": false,
+        "affinity": "",
+        "deficiency": "",
+        "rules": [
+          {
+            "key": "RollModifier",
+            "selector": "skill:etiquette",
+            "total": "@honor.rank",
+            "optional": true,
+            "label": "Eyes of the Emperor: resisting influence"
+          }
+        ],
+        "specialRules": ""
+      }
+    },
+    {
+      "name": "Fast and Furious",
+      "type": "technique",
+      "folder": "Morito Bushi School",
+      "page": 224,
+      "coverage": "full",
+      "system": {
+        "rank": 5,
+        "shugenja": false,
+        "affinity": "",
+        "deficiency": "",
+        "rules": [
+          {
+            "key": "RollModifier",
+            "selector": "attack",
+            "roll": 2,
+            "keep": 2,
+            "optional": true,
+            "label": "Fast and Furious: foe with lower Initiative"
+          },
+          {
+            "key": "RollModifier",
+            "selector": "damage",
+            "roll": 2,
+            "keep": 2,
+            "optional": true,
+            "label": "Fast and Furious: foe with lower Initiative"
+          }
+        ],
+        "specialRules": ""
+      }
+    },
+    {
+      "name": "Favor of the Sun",
+      "type": "technique",
+      "folder": "Moshi Shugenja School",
+      "page": 121,
+      "coverage": "partial",
+      "system": {
+        "rank": 1,
+        "shugenja": true,
+        "affinity": "air",
+        "deficiency": "earth",
+        "rules": [],
+        "specialRules": "In daylight Fire is a second Affinity, lost at night. Free Raise on Thunder spells."
+      }
+    },
+    {
+      "name": "Finding the Path",
+      "type": "technique",
+      "folder": "Kitsuki Investigator School",
+      "page": 114,
+      "coverage": "none",
+      "system": {
+        "rank": 4,
+        "rules": [],
+        "specialRules": "Investigation/Intelligence vs Etiquette/Intelligence names an ally or enemy, one more per Raise; daily per person."
+      }
+    },
+    {
+      "name": "First and Last Strike",
+      "type": "technique",
+      "folder": "Kakita Bushi School",
+      "page": 109,
+      "coverage": "none",
+      "system": {
+        "rank": 3,
+        "rules": [],
+        "specialRules": "Duel: win the Focus contest by 3 or more to Strike first; each further 3 of margin is a Free Raise on the Strike."
+      }
+    },
+    {
+      "name": "Flesh of the Elements",
+      "type": "technique",
+      "folder": "Tamori Shugenja School",
+      "page": 113,
+      "coverage": "none",
+      "system": {
+        "rank": 1,
+        "rules": [],
+        "specialRules": "A slot stores a one-target spell in a potion, drunk or thrown later; it holds the slot each day. Free Raise: Craft.",
+        "shugenja": true,
+        "affinity": "earth",
+        "deficiency": "air"
+      }
+    },
+    {
+      "name": "Flight of No-Mind",
+      "type": "technique",
+      "folder": "Tsuruchi Archer School",
+      "page": 122,
+      "coverage": "none",
+      "system": {
+        "rank": 4,
+        "rules": [],
+        "specialRules": "Once a skirmish, Void, Complex Action: a bow shot in range ignoring armor, Wound and sight penalties; no Extra Attack."
+      }
+    },
+    {
+      "name": "Forest Killers",
+      "type": "technique",
+      "folder": "Ronin Paths",
+      "page": 234,
+      "coverage": "partial",
+      "system": {
+        "rank": 1,
+        "shugenja": false,
+        "affinity": "",
+        "deficiency": "",
+        "rules": [
+          {
+            "key": "TraitAdjust",
+            "trait": "agi",
+            "value": 1
+          },
+          {
+            "key": "GrantItem",
+            "uuid": "@entry[skills/Athletics]"
+          },
+          {
+            "key": "GrantItem",
+            "uuid": "@entry[skills/Defense]"
+          },
+          {
+            "key": "GrantItem",
+            "uuid": "@entry[skills/Hunting]"
+          },
+          {
+            "key": "GrantItem",
+            "uuid": "@entry[skills/Kenjutsu]"
+          },
+          {
+            "key": "GrantItem",
+            "uuid": "@entry[skills/Kyujutsu]"
+          },
+          {
+            "key": "GrantItem",
+            "uuid": "@entry[skills/Stealth]"
+          },
+          {
+            "key": "ChoiceSet",
+            "flag": "weapon",
+            "prompt": "One Weapon Skill",
+            "options": [
+              {
+                "value": "@entry[skills/Chain Weapons]",
+                "label": "Chain Weapons"
+              },
+              {
+                "value": "@entry[skills/Heavy Weapons]",
+                "label": "Heavy Weapons"
+              },
+              {
+                "value": "@entry[skills/Kenjutsu]",
+                "label": "Kenjutsu"
+              },
+              {
+                "value": "@entry[skills/Knives]",
+                "label": "Knives"
+              },
+              {
+                "value": "@entry[skills/Kyujutsu]",
+                "label": "Kyujutsu"
+              },
+              {
+                "value": "@entry[skills/Ninjutsu]",
+                "label": "Ninjutsu"
+              },
+              {
+                "value": "@entry[skills/Polearms]",
+                "label": "Polearms"
+              },
+              {
+                "value": "@entry[skills/Spears]",
+                "label": "Spears"
+              },
+              {
+                "value": "@entry[skills/Staves]",
+                "label": "Staves"
+              },
+              {
+                "value": "@entry[skills/War Fan]",
+                "label": "War Fan"
+              }
+            ]
+          },
+          {
+            "key": "GrantItem",
+            "uuid": "{choice:weapon}"
+          },
+          {
+            "key": "Wounds",
+            "perRank": "@traits.sta"
+          },
+          {
+            "key": "RollModifier",
+            "selector": "damage",
+            "total": "@traits.sta",
+            "range": "melee"
+          }
+        ],
+        "specialRules": "Starting Honor 1.5. Outfit as printed."
+      }
+    },
+    {
+      "name": "Forge Your Own Fate",
+      "type": "technique",
+      "folder": "Toku Bushi School",
+      "page": 222,
+      "coverage": "none",
+      "system": {
+        "rank": 4,
+        "shugenja": false,
+        "affinity": "",
+        "deficiency": "",
+        "rules": [],
+        "specialRules": "Void when taking Wounds: the attacker drops his two highest damage dice, never below 1k1."
+      }
+    },
+    {
+      "name": "Fortune Favors the Mortal Man",
+      "type": "technique",
+      "folder": "Toku Bushi School",
+      "page": 222,
+      "coverage": "none",
+      "system": {
+        "rank": 5,
+        "shugenja": false,
+        "affinity": "",
+        "deficiency": "",
+        "rules": [],
+        "specialRules": "Once a Round, Void to re-roll any roll at +2k1, keeping either result."
+      }
+    },
+    {
+      "name": "From the Ashes",
+      "type": "technique",
+      "folder": "Asako Loremaster School",
+      "page": 125,
+      "coverage": "none",
+      "system": {
+        "rank": 2,
+        "rules": [],
+        "specialRules": "After a day watching a court, Lore: History/Perception TN 20 gives +2k0 Social there for two days; renewable."
+      }
+    },
+    {
+      "name": "Furious Retaliation",
+      "type": "technique",
+      "folder": "Mirumoto Bushi School",
+      "page": 113,
+      "coverage": "full",
+      "system": {
+        "rank": 4,
+        "rules": [
+          {
+            "key": "RollModifier",
+            "selector": "attack",
+            "roll": 3,
+            "optional": true,
+            "label": "Foe picked in Reactions after attacking you"
+          }
+        ],
+        "specialRules": ""
+      }
+    },
+    {
+      "name": "Fury of Heaven",
+      "type": "technique",
+      "folder": "The White Guard",
+      "page": 250,
+      "coverage": "none",
+      "system": {
+        "rank": 3,
+        "rules": [],
+        "specialRules": "On any attack, a Void Point adds 5x your Lore: Theology rank to the roll's total."
+      }
+    },
+    {
+      "name": "Gaze Into Shadow",
+      "type": "technique",
+      "folder": "Kuni Shugenja School",
+      "page": 107,
+      "coverage": "partial",
+      "system": {
+        "rank": 1,
+        "rules": [
+          {
+            "key": "RollModifier",
+            "selector": "spell",
+            "roll": 1,
+            "optional": true,
+            "label": "Spell aimed at a non-human"
+          },
+          {
+            "key": "RollModifier",
+            "selector": "damage",
+            "roll": 1,
+            "keep": 1,
+            "optional": true,
+            "label": "Spell damage against a Tainted target"
+          }
+        ],
+        "specialRules": "Free Raise on spells with the Jade keyword.",
+        "shugenja": true,
+        "affinity": "earth",
+        "deficiency": "air"
+      }
+    },
+    {
+      "name": "Glory of the Emperor",
+      "type": "technique",
+      "folder": "Miya Herald School",
+      "page": 230,
+      "coverage": "full",
+      "system": {
+        "rank": 5,
+        "shugenja": false,
+        "affinity": "",
+        "deficiency": "",
+        "rules": [
+          {
+            "key": "RollModifier",
+            "selector": "skill:courtier",
+            "roll": 5,
+            "optional": true,
+            "label": "Glory of the Emperor: target of Honor 1.0 or more"
+          },
+          {
+            "key": "RollModifier",
+            "selector": "skill:etiquette",
+            "roll": 5,
+            "optional": true,
+            "label": "Glory of the Emperor: target of Honor 1.0 or more"
+          }
+        ],
+        "specialRules": ""
+      }
+    },
+    {
+      "name": "Guarded by Chi",
+      "type": "technique",
+      "folder": "Order of the Spider Monks",
+      "page": 215,
+      "coverage": "none",
+      "system": {
+        "rank": 4,
+        "shugenja": false,
+        "affinity": "",
+        "deficiency": "",
+        "rules": [],
+        "specialRules": "Pick a non-Void Ring: spells cast at you take TN +2 x that Ring + Taint Rank, unless you waive it."
+      }
+    },
+    {
+      "name": "Guided by Fate",
+      "type": "technique",
+      "folder": "Tonbo Shugenja School",
+      "page": 218,
+      "coverage": "none",
+      "system": {
+        "rank": 1,
+        "shugenja": true,
+        "affinity": "water",
+        "deficiency": "fire",
+        "rules": [],
+        "specialRules": "Each spell slot spent, up to School Rank, gives +1k0 on a Social Skill roll. Free Raise on Divination spells."
+      }
+    },
+    {
+      "name": "Hand in Hand",
+      "type": "technique",
+      "folder": "Kasuga Smuggler School",
+      "page": 227,
+      "coverage": "none",
+      "system": {
+        "rank": 4,
+        "shugenja": false,
+        "affinity": "",
+        "deficiency": "",
+        "rules": [],
+        "specialRules": "Once a session, among commoners: a TN 25 Lore: Underworld roll (Awareness) yields one fact the GM picks."
+      }
+    },
+    {
+      "name": "Hand of Osano-wo",
+      "type": "technique",
+      "folder": "Yoritomo Bushi School",
+      "page": 120,
+      "coverage": "none",
+      "system": {
+        "rank": 5,
+        "rules": [],
+        "specialRules": "Void Point (Free Action): keep extra damage dice equal to Strength; +0k2 more damage against a Prone target."
+      }
+    },
+    {
+      "name": "Hand of the Emperor",
+      "type": "technique",
+      "folder": "Miya Herald School",
+      "page": 230,
+      "coverage": "none",
+      "system": {
+        "rank": 3,
+        "shugenja": false,
+        "affinity": "",
+        "deficiency": "",
+        "rules": [],
+        "specialRules": "Void (Free) at skirmish start or in Reactions: those who revere the Emperor cannot harm you while you stay out."
+      }
+    },
+    {
+      "name": "Harmony and Precision",
+      "type": "technique",
+      "folder": "Swordmasters",
+      "page": 247,
+      "coverage": "none",
+      "system": {
+        "rank": 3,
+        "rules": [],
+        "specialRules": "Katana in the main hand and wakizashi in the off hand: your attacks ignore Reduction."
+      }
+    },
+    {
+      "name": "Heart of the Dragon",
+      "type": "technique",
+      "folder": "Mirumoto Bushi School",
+      "page": 113,
+      "coverage": "none",
+      "system": {
+        "rank": 5,
+        "rules": [],
+        "specialRules": "Two attacks in a Turn with katana and wakizashi: one more off-hand attack as a Free Action."
+      }
+    },
+    {
+      "name": "Heaven Never Falls",
+      "type": "technique",
+      "folder": "Seppun Guardsman School",
+      "page": 228,
+      "coverage": "none",
+      "system": {
+        "rank": 5,
+        "shugenja": false,
+        "affinity": "",
+        "deficiency": "",
+        "rules": [],
+        "specialRules": "Void: take a blow or spell aimed at your charge within 20'; still standing, gain a Simple Action."
+      }
+    },
+    {
+      "name": "Hida's Strength",
+      "type": "technique",
+      "folder": "Defender of the Wall",
+      "page": 247,
+      "coverage": "full",
+      "system": {
+        "rank": 2,
+        "rules": [
+          {
+            "key": "Reduction",
+            "value": 8
+          }
+        ],
+        "specialRules": ""
+      }
+    },
+    {
+      "name": "Hummingbird Wings",
+      "type": "technique",
+      "folder": "Hiruma Bushi School",
+      "page": 108,
+      "coverage": "none",
+      "system": {
+        "rank": 3,
+        "rules": [],
+        "specialRules": "Once per Round when attacked: Armor TN + twice School Rank against that attack, stacking with other bonuses."
+      }
+    },
+    {
+      "name": "Imperial Legionnaire",
+      "type": "technique",
+      "folder": "Alternate Paths",
+      "page": 256,
+      "coverage": "none",
+      "system": {
+        "rank": 2,
+        "rules": [
+          {
+            "key": "Prerequisite",
+            "label": "Glory 2, appointed to the Imperial Legions",
+            "requires": [
+              {
+                "gte": [
+                  "glory-rank",
+                  2
+                ]
+              }
+            ]
+          }
+        ],
+        "specialRules": "Replaces a Bushi 2; needs the appointment. Void-boosted roll: + allied legionnaires and magistrates within 25'."
+      }
+    },
+    {
+      "name": "In Defense of the Throne",
+      "type": "technique",
+      "folder": "Seppun Shugenja School",
+      "page": 229,
+      "coverage": "none",
+      "system": {
+        "rank": 1,
+        "shugenja": true,
+        "affinity": "fire",
+        "deficiency": "water",
+        "rules": [],
+        "specialRules": "Free Raise on honorable spells guarding the Emperor or Imperial kin, and on spells only Imperial families know."
+      }
+    },
+    {
+      "name": "Inhuman Assault",
+      "type": "technique",
+      "folder": "Daigotsu Bushi School",
+      "page": 213,
+      "coverage": "none",
+      "system": {
+        "rank": 5,
+        "shugenja": false,
+        "affinity": "",
+        "deficiency": "",
+        "rules": [],
+        "specialRules": "Once a skirmish, a Complex melee attack ignoring armor and Stance; a hit strips both for Taint + Strength Rounds."
+      }
+    },
+    {
+      "name": "Insidious Whispers",
+      "type": "technique",
+      "folder": "Daigotsu Courtier School",
+      "page": 213,
+      "coverage": "none",
+      "system": {
+        "rank": 1,
+        "shugenja": false,
+        "affinity": "",
+        "deficiency": "",
+        "rules": [],
+        "specialRules": "Free Raise on Sincerity (Deceit). Rolls to find your Taint: TN +5 x School Rank. Your Honor reads School Rank higher."
+      }
+    },
+    {
+      "name": "Invincible Mind",
+      "type": "technique",
+      "folder": "Asako Loremaster School",
+      "page": 125,
+      "coverage": "none",
+      "system": {
+        "rank": 4,
+        "rules": [],
+        "specialRules": "Failing a contested Social roll to resist influence (not Fear): re-roll it on Intelligence and keep the new result."
+      }
+    },
+    {
+      "name": "Isawa Tensai",
+      "type": "technique",
+      "folder": "Alternate Paths",
+      "page": 254,
+      "coverage": "none",
+      "system": {
+        "rank": 2,
+        "shugenja": true,
+        "affinity": "",
+        "deficiency": "",
+        "rules": [
+          {
+            "key": "Prerequisite",
+            "label": "Lore: Elements 3, Spellcraft 3",
+            "requires": [
+              {
+                "gte": [
+                  "skill:lore: elements",
+                  3
+                ]
+              },
+              {
+                "gte": [
+                  "skill:spellcraft",
+                  3
+                ]
+              }
+            ]
+          }
+        ],
+        "specialRules": "Replaces Isawa Shugenja 2. A second Affinity in an Element you have one for; Deficiency in every other Element."
+      }
+    },
+    {
+      "name": "Isawa's Gift",
+      "type": "technique",
+      "folder": "Isawa Shugenja School",
+      "page": 124,
+      "coverage": "partial",
+      "system": {
+        "rank": 1,
+        "shugenja": true,
+        "affinity": "",
+        "deficiency": "",
+        "rules": [],
+        "specialRules": "Choose any Affinity, Void allowed, and enter it here; no Deficiency. Free Raise on Spell Casting Rolls of that element."
+      }
+    },
+    {
+      "name": "Iuchi Traveler",
+      "type": "technique",
+      "folder": "Alternate Paths",
+      "page": 255,
+      "coverage": "none",
+      "system": {
+        "rank": 3,
+        "shugenja": true,
+        "affinity": "",
+        "deficiency": "",
+        "rules": [
+          {
+            "key": "Prerequisite",
+            "label": "Athletics 2, Horsemanship 2",
+            "requires": [
+              {
+                "gte": [
+                  "skill:athletics",
+                  2
+                ]
+              },
+              {
+                "gte": [
+                  "skill:horsemanship",
+                  2
+                ]
+              }
+            ]
+          }
+        ],
+        "specialRules": "Replaces Iuchi/Horiuchi Shugenja 3. Void+Air/Water slot, Simple: teleport School Rank x 100'/slot; 2nd Void: +mount."
+      }
+    },
+    {
+      "name": "Jade Legionnaire",
+      "type": "technique",
+      "folder": "Alternate Paths",
+      "page": 257,
+      "coverage": "none",
+      "system": {
+        "rank": 2,
+        "rules": [
+          {
+            "key": "Prerequisite",
+            "label": "Glory 2, appointed to the Jade Legion",
+            "requires": [
+              {
+                "gte": [
+                  "glory-rank",
+                  2
+                ]
+              }
+            ]
+          }
+        ],
+        "specialRules": "Replaces a Bushi or Shugenja 2. Attack and damage: + your Honor Rank minus a lower foe's (no Honor counts as 0)."
+      }
+    },
+    {
+      "name": "Jade Magistrate",
+      "type": "technique",
+      "folder": "Alternate Paths",
+      "page": 257,
+      "coverage": "none",
+      "system": {
+        "rank": 4,
+        "rules": [
+          {
+            "key": "Prerequisite",
+            "label": "Lore: Law 3, Spellcraft 3, appointed Jade Magistrate (Imperials may skip one Skill)",
+            "requires": [
+              {
+                "gte": [
+                  "skill:lore: law",
+                  3
+                ]
+              },
+              {
+                "gte": [
+                  "skill:spellcraft",
+                  3
+                ]
+              }
+            ]
+          }
+        ],
+        "specialRules": "Replaces a Bushi, Courtier, or Shugenja 4. Spellcraft/Perception at a spell's casting TN names spells cast here in 48h."
+      }
+    },
+    {
+      "name": "Kakita's Strength",
+      "type": "technique",
+      "folder": "Kenshinzen",
+      "page": 247,
+      "coverage": "none",
+      "system": {
+        "rank": 2,
+        "rules": [],
+        "specialRules": "In an iaijutsu duel, Assessment and Focus roll dice explode on 9 and 10."
+      }
+    },
+    {
+      "name": "Kick of the Hare",
+      "type": "technique",
+      "folder": "Usagi Bushi School",
+      "page": 221,
+      "coverage": "none",
+      "system": {
+        "rank": 4,
+        "shugenja": false,
+        "affinity": "",
+        "deficiency": "",
+        "rules": [],
+        "specialRules": "The Rank 2 leap works in the Attack Stance; in Full Attack, the second attack may target another foe within 15'."
+      }
+    },
+    {
+      "name": "Kitsuki's Method",
+      "type": "technique",
+      "folder": "Kitsuki Investigator School",
+      "page": 114,
+      "coverage": "full",
+      "system": {
+        "rank": 1,
+        "rules": [
+          {
+            "key": "FreeRaise",
+            "selector": "skill:investigation",
+            "value": 1
+          },
+          {
+            "key": "ArmorTN",
+            "value": "@traits.per"
+          }
+        ],
+        "specialRules": ""
+      }
+    },
+    {
+      "name": "Know the Rhythm of the Heart",
+      "type": "technique",
+      "folder": "Kitsuki Investigator School",
+      "page": 114,
+      "coverage": "none",
+      "system": {
+        "rank": 3,
+        "rules": [],
+        "specialRules": "After brief talk, Investigation (Notice)/Perception vs their Intelligence x 5 reveals their real character."
+      }
+    },
+    {
+      "name": "Leap of the Hare",
+      "type": "technique",
+      "folder": "Usagi Bushi School",
+      "page": 221,
+      "coverage": "none",
+      "system": {
+        "rank": 2,
+        "shugenja": false,
+        "affinity": "",
+        "deficiency": "",
+        "rules": [],
+        "specialRules": "In Full Attack, leap up to 15' and attack with no Move action; every attack that Turn targets that foe."
+      }
+    },
+    {
+      "name": "Legacy of the Four Winds",
+      "type": "technique",
+      "folder": "Morito Bushi School",
+      "page": 224,
+      "coverage": "full",
+      "system": {
+        "rank": 1,
+        "shugenja": false,
+        "affinity": "",
+        "deficiency": "",
+        "rules": [
+          {
+            "key": "Initiative",
+            "roll": 1,
+            "predicate": [
+              "status:mounted"
+            ]
+          },
+          {
+            "key": "RollModifier",
+            "selector": "attack",
+            "roll": 1,
+            "predicate": [
+              "status:mounted"
+            ]
+          }
+        ],
+        "specialRules": ""
+      }
+    },
+    {
+      "name": "Mantis Navigator",
+      "type": "technique",
+      "folder": "Alternate Paths",
+      "page": 253,
+      "coverage": "none",
+      "system": {
+        "rank": 3,
+        "shugenja": true,
+        "affinity": "",
+        "deficiency": "",
+        "rules": [
+          {
+            "key": "Prerequisite",
+            "label": "Sailing (Navigation) 3",
+            "requires": [
+              {
+                "gte": [
+                  "skill:sailing",
+                  3
+                ]
+              }
+            ]
+          }
+        ],
+        "specialRules": "Replaces a Mantis Shugenja 3; needs Navigation. Void, Simple: end bad weather in School Rank x 20'; spells cost slots."
+      }
+    },
+    {
+      "name": "Matsu's Courage",
+      "type": "technique",
+      "folder": "Matsu Berserker School",
+      "page": 119,
+      "coverage": "none",
+      "system": {
+        "rank": 4,
+        "rules": [],
+        "specialRules": "Ignore Wound TN penalties up to your Honor Rank, or up to twice it in the Full Attack Stance."
+      }
+    },
+    {
+      "name": "Matsu's Fury",
+      "type": "technique",
+      "folder": "Matsu Berserker School",
+      "page": 119,
+      "coverage": "none",
+      "system": {
+        "rank": 2,
+        "rules": [],
+        "specialRules": "Full Attack: a hit on a chosen foe within 30' roots it; Willpower vs damage in Reactions frees it. Fear-immune: no."
+      }
+    },
+    {
+      "name": "Matsu's Technique",
+      "type": "technique",
+      "folder": "The Lion's Pride",
+      "page": 248,
+      "coverage": "none",
+      "system": {
+        "rank": 3,
+        "rules": [],
+        "specialRules": "Before your Turn, a declared melee attack on you: Void Point to hit back first (Simple); one Simple Action left."
+      }
+    },
+    {
+      "name": "Mirumoto Mountaineer",
+      "type": "technique",
+      "folder": "Alternate Paths",
+      "page": 252,
+      "coverage": "partial",
+      "system": {
+        "rank": 2,
+        "rules": [
+          {
+            "key": "Prerequisite",
+            "label": "Athletics (Climbing) 3",
+            "requires": [
+              {
+                "gte": [
+                  "skill:athletics",
+                  3
+                ]
+              }
+            ]
+          },
+          {
+            "key": "RollModifier",
+            "selector": "attack",
+            "total": "ceil(@skills.athletics.rank / 2)",
+            "range": "ranged"
+          }
+        ],
+        "specialRules": "Replaces Mirumoto Bushi 2. Needs the Climbing Emphasis. Surprised by a failed Notice roll: retry with Athletics/Agility."
+      }
+    },
+    {
+      "name": "Mirumoto's Strength",
+      "type": "technique",
+      "folder": "Swordmasters",
+      "page": 247,
+      "coverage": "full",
+      "system": {
+        "rank": 2,
+        "rules": [
+          {
+            "key": "RollModifier",
+            "selector": "skill:iaijutsu",
+            "roll": 1,
+            "keep": 1,
+            "optional": true,
+            "label": "Mirumoto's Strength: Focus roll in an iaijutsu duel, won Assessment or not"
+          }
+        ],
+        "specialRules": ""
+      }
+    },
+    {
+      "name": "Moto Cannot Yield",
+      "type": "technique",
+      "folder": "Moto Bushi School",
+      "page": 130,
+      "coverage": "full",
+      "system": {
+        "rank": 5,
+        "rules": [
+          {
+            "key": "RollModifier",
+            "selector": "damage",
+            "keep": "floor(@traits.str / 2)",
+            "optional": true,
+            "predicate": [
+              {
+                "or": [
+                  "status:mounted",
+                  "status:fullAttackStance"
+                ]
+              }
+            ],
+            "label": "Moto Cannot Yield: two-handed or Samurai weapon"
+          }
+        ],
+        "specialRules": ""
+      }
+    },
+    {
+      "name": "Moto's Strength",
+      "type": "technique",
+      "folder": "The White Guard",
+      "page": 250,
+      "coverage": "none",
+      "system": {
+        "rank": 2,
+        "rules": [],
+        "specialRules": "Ignore Wound Rank TN penalties up to twice your Lore: Theology rank."
+      }
+    },
+    {
+      "name": "Move With the World",
+      "type": "technique",
+      "folder": "Shiba Bushi School",
+      "page": 123,
+      "coverage": "full",
+      "system": {
+        "rank": 4,
+        "rules": [
+          {
+            "key": "ActionCost",
+            "selector": "attack",
+            "action": "simple",
+            "predicate": [
+              {
+                "or": [
+                  "weapon:skill:polearms",
+                  "weapon:skill:spears",
+                  "weapon:keyword:samurai"
+                ]
+              }
+            ]
+          }
+        ],
+        "specialRules": ""
+      }
+    },
+    {
+      "name": "My Master's Voice",
+      "type": "technique",
+      "folder": "Otomo Courtier School",
+      "page": 229,
+      "coverage": "none",
+      "system": {
+        "rank": 3,
+        "shugenja": false,
+        "affinity": "",
+        "deficiency": "",
+        "rules": [],
+        "specialRules": "Complex Action, contested Intimidation (Control): an honorable foe cannot act against you or allies next Turn."
+      }
+    },
+    {
+      "name": "My Strength Has No Limits",
+      "type": "technique",
+      "folder": "Obsidian Warrior",
+      "page": 250,
+      "coverage": "none",
+      "system": {
+        "rank": 3,
+        "rules": [],
+        "specialRules": "Strength + Taint Rank in unkept dice resisting Intimidation or Fear, and on melee weapon damage."
+      }
+    },
+    {
+      "name": "Name of the Elements",
+      "type": "technique",
+      "folder": "Elemental Guard",
+      "page": 249,
+      "coverage": "none",
+      "system": {
+        "rank": 1,
+        "shugenja": true,
+        "affinity": "",
+        "deficiency": "",
+        "rules": [],
+        "specialRules": "School Rank +1 casting the chosen Element. Void, Free: Armor TN + 2x that Ring for School Rank minutes."
+      }
+    },
+    {
+      "name": "Never in Darkness",
+      "type": "technique",
+      "folder": "Seppun Guardsman School",
+      "page": 228,
+      "coverage": "full",
+      "system": {
+        "rank": 1,
+        "shugenja": false,
+        "affinity": "",
+        "deficiency": "",
+        "rules": [
+          {
+            "key": "RollModifier",
+            "selector": "skill",
+            "roll": "@school.rank",
+            "optional": true,
+            "label": "Never in Darkness: resisting a pull from your duty"
+          },
+          {
+            "key": "RollModifier",
+            "selector": "skill:investigation",
+            "roll": 1,
+            "keep": 1,
+            "optional": true,
+            "label": "Never in Darkness: spotting an ambush"
+          }
+        ],
+        "specialRules": ""
+      }
+    },
+    {
+      "name": "No More Masks",
+      "type": "technique",
+      "folder": "Bayushi Courtier School",
+      "page": 128,
+      "coverage": "none",
+      "system": {
+        "rank": 5,
+        "rules": [],
+        "specialRules": "School Rank/session: Courtier/Awareness vs Etiquette/Awareness (+5k0 if Blackmail): a social Disadvantage for a month."
+      }
+    },
+    {
+      "name": "Obsidian Magistrate",
+      "type": "technique",
+      "folder": "Alternate Paths",
+      "page": 255,
+      "coverage": "partial",
+      "system": {
+        "rank": 1,
+        "rules": [
+          {
+            "key": "Prerequisite",
+            "label": "Investigation 2",
+            "requires": [
+              {
+                "gte": [
+                  "skill:investigation",
+                  2
+                ]
+              }
+            ]
+          },
+          {
+            "key": "RollModifier",
+            "selector": "skill-type:high",
+            "total": "@traits.per + @shadowTaint.rank"
+          },
+          {
+            "key": "RollModifier",
+            "selector": "skill:athletics",
+            "total": "@traits.per + @shadowTaint.rank"
+          },
+          {
+            "key": "RollModifier",
+            "selector": "skill:battle",
+            "total": "@traits.per + @shadowTaint.rank"
+          },
+          {
+            "key": "RollModifier",
+            "selector": "skill:defense",
+            "total": "@traits.per + @shadowTaint.rank"
+          },
+          {
+            "key": "RollModifier",
+            "selector": "skill:horsemanship",
+            "total": "@traits.per + @shadowTaint.rank"
+          },
+          {
+            "key": "RollModifier",
+            "selector": "skill:hunting",
+            "total": "@traits.per + @shadowTaint.rank"
+          },
+          {
+            "key": "RollModifier",
+            "selector": "skill:iaijutsu",
+            "total": "@traits.per + @shadowTaint.rank"
+          },
+          {
+            "key": "RollModifier",
+            "selector": "skill:jiujutsu",
+            "total": "@traits.per + @shadowTaint.rank"
+          }
+        ],
+        "specialRules": "Replaces Daigotsu Bushi 1, giving its Rank 1 Benefit, Skills, Honor, outfit. Attacks: + your Honor minus the foe's."
+      }
+    },
+    {
+      "name": "One Strike, Two Cuts",
+      "type": "technique",
+      "folder": "Kakita Bushi School",
+      "page": 109,
+      "coverage": "full",
+      "system": {
+        "rank": 4,
+        "rules": [
+          {
+            "key": "ActionCost",
+            "selector": "attack",
+            "action": "simple",
+            "predicate": [
+              "weapon:keyword:samurai"
+            ]
+          }
+        ],
+        "specialRules": ""
+      }
+    },
+    {
+      "name": "One With the Void",
+      "type": "technique",
+      "folder": "Shiba Bushi School",
+      "page": 123,
+      "coverage": "none",
+      "system": {
+        "rank": 3,
+        "rules": [],
+        "specialRules": "Twice a skirmish, in Reactions after anyone spent Void that Round, gain a Void Point; excess fades after combat."
+      }
+    },
+    {
+      "name": "Oni Slayer",
+      "type": "technique",
+      "folder": "Alternate Paths",
+      "page": 251,
+      "coverage": "none",
+      "system": {
+        "rank": 3,
+        "shugenja": true,
+        "affinity": "",
+        "deficiency": "",
+        "rules": [
+          {
+            "key": "Prerequisite",
+            "label": "Lore: Shadowlands 3",
+            "requires": [
+              {
+                "gte": [
+                  "skill:lore: shadowlands",
+                  3
+                ]
+              }
+            ]
+          }
+        ],
+        "specialRules": "Replaces Kuni Shugenja 3. Earth slot, casting roll, 1 hour: a circle an oni leaves only on Willpower vs that total."
+      }
+    },
+    {
+      "name": "Otaku's Blessing",
+      "type": "technique",
+      "folder": "Utaku Battle Maiden",
+      "page": 132,
+      "coverage": "none",
+      "system": {
+        "rank": 5,
+        "rules": [],
+        "specialRules": "Void Point (Free Action) at Turn start: for this Turn, Honor Rank is added to every damage roll and Bugei roll."
+      }
+    },
+    {
+      "name": "Pale Face of Death",
+      "type": "technique",
+      "folder": "The White Guard",
+      "page": 250,
+      "coverage": "none",
+      "system": {
+        "rank": 1,
+        "rules": [],
+        "specialRules": "Turn start, Void, Free: one foe in 30' takes TN penalty = Lore: Theology on all actions this encounter; one at a time."
+      }
+    },
+    {
+      "name": "Paragon of Honor",
+      "type": "technique",
+      "folder": "The Lion's Pride",
+      "page": 248,
+      "coverage": "none",
+      "system": {
+        "rank": 2,
+        "rules": [],
+        "specialRules": "Foes within 30' of lower Honor Rank get no exploding 10s; 2 Void Points in Reactions frees one all encounter."
+      }
+    },
+    {
+      "name": "Piercing the Veils",
+      "type": "technique",
+      "folder": "Ide Emissary School",
+      "page": 131,
+      "coverage": "none",
+      "system": {
+        "rank": 2,
+        "rules": [],
+        "specialRules": "Etiquette/Awareness vs Etiquette/Willpower reads a person's real feelings; Raises give more detail (GM's call)."
+      }
+    },
+    {
+      "name": "Pincers and Tail",
+      "type": "technique",
+      "folder": "Bayushi Bushi School",
+      "page": 126,
+      "coverage": "full",
+      "system": {
+        "rank": 2,
+        "rules": [
+          {
+            "key": "RaiseRule",
+            "selector": "attack",
+            "maneuver": "feint",
+            "cost": -1
+          }
+        ],
+        "specialRules": ""
+      }
+    },
+    {
+      "name": "Pull the String",
+      "type": "technique",
+      "folder": "Scorpion Instigator",
+      "page": 250,
+      "coverage": "none",
+      "system": {
+        "rank": 3,
+        "rules": [],
+        "specialRules": "Blackmailed target, 10 min, Void, Complex, Courtier (Manipulation)/Awa vs Etiquette (Courtesy)/Wil: obey or -4 Honor."
+      }
+    },
+    {
+      "name": "Purity of Chi",
+      "type": "technique",
+      "folder": "Suzume Bushi School",
+      "page": 225,
+      "coverage": "none",
+      "system": {
+        "rank": 2,
+        "shugenja": false,
+        "affinity": "",
+        "deficiency": "",
+        "rules": [],
+        "specialRules": "Armor TN +5 against creatures and against people of lower Honor."
+      }
+    },
+    {
+      "name": "Quiet Spirit, Steady Blade",
+      "type": "technique",
+      "folder": "Suzume Bushi School",
+      "page": 225,
+      "coverage": "full",
+      "system": {
+        "rank": 4,
+        "shugenja": false,
+        "affinity": "",
+        "deficiency": "",
+        "rules": [
+          {
+            "key": "ActionCost",
+            "selector": "attack",
+            "action": "simple",
+            "range": "melee",
+            "predicate": [
+              "status:attackStance"
+            ]
+          }
+        ],
+        "specialRules": ""
+      }
+    },
+    {
+      "name": "Reichin's Style",
+      "type": "technique",
+      "folder": "Usagi Bushi School",
+      "page": 221,
+      "coverage": "partial",
+      "system": {
+        "rank": 5,
+        "shugenja": false,
+        "affinity": "",
+        "deficiency": "",
+        "rules": [
+          {
+            "key": "RaiseRule",
+            "selector": "attack",
+            "maneuver": "feint",
+            "cost": -1
+          }
+        ],
+        "specialRules": "A Feint's damage bonus has no Insight Rank cap."
+      }
+    },
+    {
+      "name": "Return the Strike",
+      "type": "technique",
+      "folder": "Ichiro Bushi School",
+      "page": 216,
+      "coverage": "none",
+      "system": {
+        "rank": 5,
+        "shugenja": false,
+        "affinity": "",
+        "deficiency": "",
+        "rules": [],
+        "specialRules": "Before Initiative, take -20 Initiative for the skirmish to roll Strength more dice on attack and damage for 2 Rounds."
+      }
+    },
+    {
+      "name": "Riding in Harmony",
+      "type": "technique",
+      "folder": "Utaku Battle Maiden",
+      "page": 132,
+      "coverage": "full",
+      "system": {
+        "rank": 1,
+        "rules": [
+          {
+            "key": "RollModifier",
+            "selector": "skill:horsemanship",
+            "total": "@honor.rank"
+          },
+          {
+            "key": "RollModifier",
+            "selector": "attack",
+            "total": "@honor.rank",
+            "optional": true,
+            "label": "Riding in Harmony: one attack roll a Round"
+          },
+          {
+            "key": "RollModifier",
+            "selector": "damage",
+            "total": "@honor.rank",
+            "optional": true,
+            "predicate": [
+              "status:mounted"
+            ],
+            "label": "Riding in Harmony: on damage instead of the attack"
+          }
+        ],
+        "specialRules": ""
+      }
+    },
+    {
+      "name": "Scrutiny's Sweet Sting",
+      "type": "technique",
+      "folder": "Bayushi Courtier School",
+      "page": 128,
+      "coverage": "none",
+      "system": {
+        "rank": 4,
+        "rules": [],
+        "specialRules": "Contested Social vs someone you Blackmail: their dice never explode. Void: they roll a Mental Trait of your choosing."
+      }
+    },
+    {
+      "name": "Secrets Are Birthmarks",
+      "type": "technique",
+      "folder": "Bayushi Courtier School",
+      "page": 128,
+      "coverage": "none",
+      "system": {
+        "rank": 3,
+        "rules": [],
+        "specialRules": "Courtier/Awareness vs Etiquette/Awareness reveals a Mental or Social Disadvantage (else Advantage); free 2-pt Blackmail."
+      }
+    },
+    {
+      "name": "Sensing the Breeze",
+      "type": "technique",
+      "folder": "Utaku Battle Maiden",
+      "page": 132,
+      "coverage": "full",
+      "system": {
+        "rank": 3,
+        "rules": [
+          {
+            "key": "ActionCost",
+            "selector": "attack",
+            "action": "simple",
+            "predicate": [
+              "status:mounted"
+            ]
+          }
+        ],
+        "specialRules": ""
+      }
+    },
+    {
+      "name": "Shadow Hunter",
+      "type": "technique",
+      "folder": "Alternate Paths",
+      "page": 254,
+      "coverage": "partial",
+      "system": {
+        "rank": 3,
+        "shugenja": true,
+        "affinity": "",
+        "deficiency": "",
+        "rules": [
+          {
+            "key": "Prerequisite",
+            "label": "Stealth 3",
+            "requires": [
+              {
+                "gte": [
+                  "skill:stealth",
+                  3
+                ]
+              }
+            ]
+          },
+          {
+            "key": "RollModifier",
+            "selector": "spell",
+            "roll": 2,
+            "optional": true,
+            "label": "Shadow Hunter: damaging spell at a foe unaware of you"
+          }
+        ],
+        "specialRules": "Replaces a Scorpion Shugenja 3. One spell slot, Free Action: +1k1 on a Stealth or Knives roll."
+      }
+    },
+    {
+      "name": "Shallow Waters",
+      "type": "technique",
+      "folder": "Bayushi Courtier School",
+      "page": 127,
+      "coverage": "none",
+      "system": {
+        "rank": 2,
+        "rules": [],
+        "specialRules": "Talk, Investigation/Awareness vs Etiquette/Awareness: learn lowest Mental Trait and Social Skill; Void: next lowest too."
+      }
+    },
+    {
+      "name": "Shape of the Elements",
+      "type": "technique",
+      "folder": "Elemental Guard",
+      "page": 249,
+      "coverage": "none",
+      "system": {
+        "rank": 3,
+        "shugenja": true,
+        "affinity": "",
+        "deficiency": "",
+        "rules": [],
+        "specialRules": "School Rank +1 casting the chosen Element. One of its spells, ML 3+: cast as a Simple Action, Void Ring times a day."
+      }
+    },
+    {
+      "name": "Shark Smells Blood",
+      "type": "technique",
+      "folder": "Hiruma Bushi School",
+      "page": 108,
+      "coverage": "full",
+      "system": {
+        "rank": 4,
+        "rules": [
+          {
+            "key": "ActionCost",
+            "selector": "attack",
+            "action": "simple",
+            "predicate": [
+              "weapon:keyword:samurai"
+            ]
+          }
+        ],
+        "specialRules": ""
+      }
+    },
+    {
+      "name": "Sheath Your Lies in Truth",
+      "type": "technique",
+      "folder": "Scorpion Instigator",
+      "page": 250,
+      "coverage": "none",
+      "system": {
+        "rank": 2,
+        "rules": [],
+        "specialRules": "A Void Point spent to hide a lie in a Contested Social roll gives +3k3, not +1k1."
+      }
+    },
+    {
+      "name": "Shiba Yojimbo",
+      "type": "technique",
+      "folder": "Alternate Paths",
+      "page": 254,
+      "coverage": "none",
+      "system": {
+        "rank": 3,
+        "rules": [
+          {
+            "key": "Prerequisite",
+            "label": "Honor Rank 5",
+            "requires": [
+              {
+                "gte": [
+                  "honor-rank",
+                  5
+                ]
+              }
+            ]
+          }
+        ],
+        "specialRules": "Replaces Shiba Bushi 3. Name a charge each skirmish; within 10', Defense/Reflexes TN 25 takes its hit; Void cuts 20."
+      }
+    },
+    {
+      "name": "Shinjo Scout",
+      "type": "technique",
+      "folder": "Alternate Paths",
+      "page": 255,
+      "coverage": "partial",
+      "system": {
+        "rank": 2,
+        "rules": [
+          {
+            "key": "Prerequisite",
+            "label": "Stealth 3",
+            "requires": [
+              {
+                "gte": [
+                  "skill:stealth",
+                  3
+                ]
+              }
+            ]
+          },
+          {
+            "key": "RollModifier",
+            "selector": "attack",
+            "roll": 1,
+            "predicate": [
+              "status:mounted"
+            ]
+          }
+        ],
+        "specialRules": "Replaces Shinjo Bushi 2 or Moto Bushi 2. Stealth works on horseback; Way of the Land holds everywhere."
+      }
+    },
+    {
+      "name": "Shinsei's Smile",
+      "type": "technique",
+      "folder": "Moto Bushi School",
+      "page": 130,
+      "coverage": "none",
+      "system": {
+        "rank": 2,
+        "rules": [],
+        "specialRules": "Attack bonus equal to half the target's Wound Rank TN penalty, rounded down."
+      }
+    },
+    {
+      "name": "Slow and Deadly",
+      "type": "technique",
+      "folder": "Suzume Bushi School",
+      "page": 225,
+      "coverage": "full",
+      "system": {
+        "rank": 5,
+        "shugenja": false,
+        "affinity": "",
+        "deficiency": "",
+        "rules": [
+          {
+            "key": "RollModifier",
+            "selector": "attack",
+            "total": 10,
+            "optional": true,
+            "label": "Slow and Deadly: Round after Center Stance, not in a duel"
+          },
+          {
+            "key": "RollModifier",
+            "selector": "damage",
+            "total": 10,
+            "optional": true,
+            "label": "Slow and Deadly: Round after Center Stance, not in a duel"
+          }
+        ],
+        "specialRules": ""
+      }
+    },
+    {
+      "name": "Soul of Civility",
+      "type": "technique",
+      "folder": "Four Temples Monk",
+      "page": 231,
+      "coverage": "none",
+      "system": {
+        "rank": 1,
+        "shugenja": false,
+        "affinity": "",
+        "deficiency": "",
+        "rules": [],
+        "specialRules": "A Void Point on a High or Social Skill roll gives +2k2 in place of +1k1."
+      }
+    },
+    {
+      "name": "Speaking in Silence",
+      "type": "technique",
+      "folder": "Doji Courtier School",
+      "page": 110,
+      "coverage": "none",
+      "system": {
+        "rank": 2,
+        "rules": [],
+        "specialRules": "Courtier/Intelligence TN 15 sends a simple silent signal to a Doji-trained or Courtier 5 Crane; Raises for more."
+      }
+    },
+    {
+      "name": "Speed of Darkness",
+      "type": "technique",
+      "folder": "Order of the Spider Monks",
+      "page": 215,
+      "coverage": "partial",
+      "system": {
+        "rank": 3,
+        "shugenja": false,
+        "affinity": "",
+        "deficiency": "",
+        "rules": [
+          {
+            "key": "ActionCost",
+            "selector": "attack",
+            "action": "simple",
+            "label": "Speed of Darkness",
+            "predicate": [
+              "weapon:skill:polearms"
+            ]
+          }
+        ],
+        "specialRules": "Unarmed attacks are Simple too."
+      }
+    },
+    {
+      "name": "Speed of Heaven",
+      "type": "technique",
+      "folder": "Seppun Guardsman School",
+      "page": 228,
+      "coverage": "full",
+      "system": {
+        "rank": 4,
+        "shugenja": false,
+        "affinity": "",
+        "deficiency": "",
+        "rules": [
+          {
+            "key": "ActionCost",
+            "selector": "attack",
+            "action": "simple",
+            "label": "Speed of Heaven",
+            "predicate": [
+              "weapon:keyword:samurai"
+            ]
+          }
+        ],
+        "specialRules": ""
+      }
+    },
+    {
+      "name": "Speed of Lightning",
+      "type": "technique",
+      "folder": "Kakita Bushi School",
+      "page": 109,
+      "coverage": "full",
+      "system": {
+        "rank": 2,
+        "rules": [
+          {
+            "key": "RollModifier",
+            "selector": "attack",
+            "roll": 2,
+            "optional": true,
+            "label": "Target's Initiative is lower than yours"
+          }
+        ],
+        "specialRules": ""
+      }
+    },
+    {
+      "name": "Speed of the Hare",
+      "type": "technique",
+      "folder": "Usagi Bushi School",
+      "page": 221,
+      "coverage": "full",
+      "system": {
+        "rank": 1,
+        "shugenja": false,
+        "affinity": "",
+        "deficiency": "",
+        "rules": [
+          {
+            "key": "RollOption",
+            "option": "usagi-room-to-dodge",
+            "toggleable": true,
+            "value": true,
+            "label": "Speed of the Hare: room to dodge"
+          },
+          {
+            "key": "ArmorTN",
+            "value": "@skills.athletics.rank",
+            "predicate": [
+              "usagi-room-to-dodge",
+              {
+                "not": "status:fullAttackStance"
+              },
+              {
+                "not": "status:centerStance"
+              }
+            ]
+          },
+          {
+            "key": "Movement",
+            "water": 1
+          }
+        ],
+        "specialRules": ""
+      }
+    },
+    {
+      "name": "Spirit of the Wind",
+      "type": "technique",
+      "folder": "Iuchi Shugenja School",
+      "page": 131,
+      "coverage": "partial",
+      "system": {
+        "rank": 1,
+        "shugenja": true,
+        "affinity": "water",
+        "deficiency": "fire",
+        "rules": [],
+        "specialRules": "Complex Action, one spell slot: a target gains an extra Simple Move Action next Turn. Free Raise on Travel spells."
+      }
+    },
+    {
+      "name": "Star-Filled Steel",
+      "type": "technique",
+      "folder": "Tsi Smith School",
+      "page": 223,
+      "coverage": "none",
+      "system": {
+        "rank": 5,
+        "shugenja": false,
+        "affinity": "",
+        "deficiency": "",
+        "rules": [],
+        "specialRules": "Once a day, all your Void Points make a weapon you finish a Sacred Weapon: Balanced, Swift, or Unbreakable."
+      }
+    },
+    {
+      "name": "Steel Within Silk",
+      "type": "technique",
+      "folder": "Shosuro Infiltrator School",
+      "page": 129,
+      "coverage": "partial",
+      "system": {
+        "rank": 3,
+        "rules": [
+          {
+            "key": "ActionCost",
+            "selector": "attack",
+            "action": "simple",
+            "predicate": [
+              "weapon:skill:ninjutsu"
+            ]
+          }
+        ],
+        "specialRules": "Attacks from ambush also take a Simple Action, with any weapon."
+      }
+    },
+    {
+      "name": "Storm Heart",
+      "type": "technique",
+      "folder": "Yoritomo Courtier School",
+      "page": 121,
+      "coverage": "full",
+      "system": {
+        "rank": 2,
+        "rules": [
+          {
+            "key": "RollModifier",
+            "selector": "skill:intimidation",
+            "roll": 1,
+            "keep": 1,
+            "type": "storm-heart",
+            "optional": true,
+            "label": "Storm Heart: Intimidation (Control), Willpower +1"
+          },
+          {
+            "key": "RollModifier",
+            "selector": "skill:intimidation",
+            "roll": 2,
+            "keep": 2,
+            "type": "storm-heart",
+            "optional": true,
+            "label": "Storm Heart: Control against lower Status, Willpower +2"
+          }
+        ],
+        "specialRules": ""
+      }
+    },
+    {
+      "name": "Strength in All Things",
+      "type": "technique",
+      "folder": "Yoritomo Courtier School",
+      "page": 121,
+      "coverage": "full",
+      "system": {
+        "rank": 5,
+        "rules": [
+          {
+            "key": "RollModifier",
+            "selector": "skill:intimidation",
+            "roll": 5
+          },
+          {
+            "key": "RollModifier",
+            "selector": "any",
+            "roll": 5,
+            "optional": true,
+            "label": "Strength in All Things: resisting Intimidation, Temptation, or Fear"
+          }
+        ],
+        "specialRules": ""
+      }
+    },
+    {
+      "name": "Strength of My Ancestors",
+      "type": "technique",
+      "folder": "Akodo Bushi School",
+      "page": 117,
+      "coverage": "full",
+      "system": {
+        "rank": 3,
+        "rules": [
+          {
+            "key": "ActionCost",
+            "selector": "attack",
+            "action": "simple",
+            "predicate": [
+              "weapon:keyword:samurai"
+            ]
+          }
+        ],
+        "specialRules": ""
+      }
+    },
+    {
+      "name": "Strength of Purity",
+      "type": "technique",
+      "folder": "Akodo Bushi School",
+      "page": 117,
+      "coverage": "full",
+      "system": {
+        "rank": 2,
+        "rules": [
+          {
+            "key": "RollModifier",
+            "selector": "any",
+            "total": "@honor.rank",
+            "optional": true,
+            "label": "One roll per Turn in a skirmish",
+            "predicate": [
+              {
+                "not": "check:damage"
+              },
+              {
+                "not": "status:centerStance"
+              }
+            ]
+          }
+        ],
+        "specialRules": ""
+      }
+    },
+    {
+      "name": "Strength of Suitengu",
+      "type": "technique",
+      "folder": "Storm Riders",
+      "page": 249,
+      "coverage": "partial",
+      "system": {
+        "rank": 1,
+        "shugenja": true,
+        "affinity": "",
+        "deficiency": "",
+        "rules": [
+          {
+            "key": "RollModifier",
+            "selector": "ring:water",
+            "roll": 1,
+            "predicate": [
+              "check:spell"
+            ]
+          }
+        ],
+        "specialRules": "Void, Complex: bolt within 10' x Water, Air k Air damage; +1k0 per spell slot spent, at most Storm Rider Rank."
+      }
+    },
+    {
+      "name": "Strength of the Badger",
+      "type": "technique",
+      "folder": "Ichiro Bushi School",
+      "page": 216,
+      "coverage": "none",
+      "system": {
+        "rank": 2,
+        "shugenja": false,
+        "affinity": "",
+        "deficiency": "",
+        "rules": [],
+        "specialRules": "Strength times a session, re-roll damage and keep the better."
+      }
+    },
+    {
+      "name": "Strike at the Tail",
+      "type": "technique",
+      "folder": "Bayushi Bushi School",
+      "page": 126,
+      "coverage": "partial",
+      "system": {
+        "rank": 3,
+        "rules": [
+          {
+            "key": "ApplyCondition",
+            "selector": "attack",
+            "condition": "fatigued"
+          }
+        ],
+        "specialRules": "Only the foe named with your Stance. Earth Ring TN 25 in Reactions ends it; failing, it ends at the next Reactions."
+      }
+    },
+    {
+      "name": "Strike Beneath the Veil",
+      "type": "technique",
+      "folder": "Daidoji Iron Warrior",
+      "page": 111,
+      "coverage": "full",
+      "system": {
+        "rank": 3,
+        "rules": [
+          {
+            "key": "ActionCost",
+            "selector": "attack",
+            "action": "simple",
+            "range": "melee",
+            "predicate": [
+              "status:attackStance"
+            ]
+          }
+        ],
+        "specialRules": ""
+      }
+    },
+    {
+      "name": "Strike From Above, Strike From Below",
+      "type": "technique",
+      "folder": "Bayushi Bushi School",
+      "page": 126,
+      "coverage": "full",
+      "system": {
+        "rank": 4,
+        "rules": [
+          {
+            "key": "ActionCost",
+            "selector": "attack",
+            "action": "simple",
+            "range": "melee"
+          }
+        ],
+        "specialRules": ""
+      }
+    },
+    {
+      "name": "Strike From Darkness",
+      "type": "technique",
+      "folder": "Shosuro Infiltrator School",
+      "page": 129,
+      "coverage": "partial",
+      "system": {
+        "rank": 2,
+        "rules": [
+          {
+            "key": "RollModifier",
+            "selector": "attack",
+            "roll": "@school.rank",
+            "type": "strike-from-darkness",
+            "optional": true,
+            "label": "Strike From Darkness: target unaware of you"
+          },
+          {
+            "key": "RollModifier",
+            "selector": "attack",
+            "roll": "floor(@school.rank / 2)",
+            "type": "strike-from-darkness",
+            "optional": true,
+            "label": "Strike From Darkness: target under a Condition"
+          }
+        ],
+        "specialRules": "Against an unaware target, Raises are not limited by the Void Ring."
+      }
+    },
+    {
+      "name": "Strike of the Mantis",
+      "type": "technique",
+      "folder": "Yoritomo Bushi School",
+      "page": 120,
+      "coverage": "full",
+      "system": {
+        "rank": 3,
+        "rules": [
+          {
+            "key": "ActionCost",
+            "selector": "attack",
+            "action": "simple",
+            "predicate": [
+              {
+                "or": [
+                  "weapon:keyword:samurai",
+                  "weapon:keyword:peasant"
+                ]
+              }
+            ]
+          }
+        ],
+        "specialRules": ""
+      }
+    },
+    {
+      "name": "Strike with No Thought",
+      "type": "technique",
+      "folder": "Kakita Bushi School",
+      "page": 110,
+      "coverage": "none",
+      "system": {
+        "rank": 5,
+        "rules": [],
+        "specialRules": "Center Stance: one Simple Action (a Move allowed) per Turn, its benefits now, held for any number of Turns."
+      }
+    },
+    {
+      "name": "Strong and Swift",
+      "type": "technique",
+      "folder": "Mirumoto Bushi School",
+      "page": 113,
+      "coverage": "full",
+      "system": {
+        "rank": 3,
+        "rules": [
+          {
+            "key": "ActionCost",
+            "selector": "attack",
+            "action": "simple",
+            "predicate": [
+              "weapon:keyword:samurai"
+            ]
+          }
+        ],
+        "specialRules": ""
+      }
+    },
+    {
+      "name": "Sun's Light Reveals",
+      "type": "technique",
+      "folder": "Seppun Guardsman School",
+      "page": 228,
+      "coverage": "none",
+      "system": {
+        "rank": 3,
+        "shugenja": false,
+        "affinity": "",
+        "deficiency": "",
+        "rules": [],
+        "specialRules": "Void (Free): a TN 25 Investigation (Notice) roll pierces disguises and illusions; no Void needed near the Emperor."
+      }
+    },
+    {
+      "name": "Swift as Lightning",
+      "type": "technique",
+      "folder": "Usagi Bushi School",
+      "page": 221,
+      "coverage": "partial",
+      "system": {
+        "rank": 3,
+        "shugenja": false,
+        "affinity": "",
+        "deficiency": "",
+        "rules": [
+          {
+            "key": "ActionCost",
+            "selector": "attack",
+            "action": "simple",
+            "label": "Swift as Lightning",
+            "predicate": [
+              {
+                "or": [
+                  "weapon:skill:knives",
+                  "weapon:keyword:samurai"
+                ]
+              }
+            ]
+          }
+        ],
+        "specialRules": "Unarmed attacks are Simple too."
+      }
+    },
+    {
+      "name": "Tamori Warrior Priest",
+      "type": "technique",
+      "folder": "Alternate Paths",
+      "page": 252,
+      "coverage": "none",
+      "system": {
+        "rank": 4,
+        "shugenja": true,
+        "affinity": "",
+        "deficiency": "",
+        "rules": [
+          {
+            "key": "Prerequisite",
+            "label": "A Weapon Skill at 3",
+            "requires": [
+              {
+                "or": [
+                  {
+                    "gte": [
+                      "skill:chain weapons",
+                      3
+                    ]
+                  },
+                  {
+                    "gte": [
+                      "skill:heavy weapons",
+                      3
+                    ]
+                  },
+                  {
+                    "gte": [
+                      "skill:kenjutsu",
+                      3
+                    ]
+                  },
+                  {
+                    "gte": [
+                      "skill:knives",
+                      3
+                    ]
+                  },
+                  {
+                    "gte": [
+                      "skill:kyujutsu",
+                      3
+                    ]
+                  },
+                  {
+                    "gte": [
+                      "skill:ninjutsu",
+                      3
+                    ]
+                  },
+                  {
+                    "gte": [
+                      "skill:polearms",
+                      3
+                    ]
+                  },
+                  {
+                    "gte": [
+                      "skill:spears",
+                      3
+                    ]
+                  },
+                  {
+                    "gte": [
+                      "skill:staves",
+                      3
+                    ]
+                  },
+                  {
+                    "gte": [
+                      "skill:war fan",
+                      3
+                    ]
+                  }
+                ]
+              }
+            ]
+          }
+        ],
+        "specialRules": "Replaces Tamori Shugenja 4. Slot, Free: +1k0 on a Bugei roll, School Rank a Round. Spell-made weapons attack as Simple."
+      }
+    },
+    {
+      "name": "Tawagoto's Army",
+      "type": "technique",
+      "folder": "Ronin Paths",
+      "page": 235,
+      "coverage": "partial",
+      "system": {
+        "rank": 1,
+        "shugenja": false,
+        "affinity": "",
+        "deficiency": "",
+        "rules": [
+          {
+            "key": "TraitAdjust",
+            "trait": "agi",
+            "value": 1
+          },
+          {
+            "key": "GrantItem",
+            "uuid": "@entry[skills/Battle]"
+          },
+          {
+            "key": "GrantItem",
+            "uuid": "@entry[skills/Defense]"
+          },
+          {
+            "key": "GrantItem",
+            "uuid": "@entry[skills/Etiquette]"
+          },
+          {
+            "key": "GrantItem",
+            "uuid": "@entry[skills/Investigation]"
+          },
+          {
+            "key": "GrantItem",
+            "uuid": "@entry[skills/Kenjutsu]"
+          },
+          {
+            "key": "GrantItem",
+            "uuid": "@entry[skills/Spears]"
+          },
+          {
+            "key": "ChoiceSet",
+            "flag": "any",
+            "prompt": "One more Skill",
+            "list": "skills",
+            "filter": []
+          },
+          {
+            "key": "GrantItem",
+            "uuid": "{choice:any}"
+          }
+        ],
+        "specialRules": "Starting Honor 4.5. Outfit as printed. The People's Will: Void's +1k1 on a Skill or Trait roll adds Honor Rank too."
+      }
+    },
+    {
+      "name": "Temple of the Soul",
+      "type": "technique",
+      "folder": "Asako Loremaster School",
+      "page": 125,
+      "coverage": "partial",
+      "system": {
+        "rank": 1,
+        "rules": [
+          {
+            "key": "FreeRaise",
+            "selector": "skill:lore: architecture",
+            "value": 1
+          },
+          {
+            "key": "FreeRaise",
+            "selector": "skill:lore: bushido",
+            "value": 1
+          },
+          {
+            "key": "FreeRaise",
+            "selector": "skill:lore: elements",
+            "value": 1
+          },
+          {
+            "key": "FreeRaise",
+            "selector": "skill:lore: ghosts",
+            "value": 1
+          },
+          {
+            "key": "FreeRaise",
+            "selector": "skill:lore: heraldry",
+            "value": 1
+          },
+          {
+            "key": "FreeRaise",
+            "selector": "skill:lore: history",
+            "value": 1
+          },
+          {
+            "key": "FreeRaise",
+            "selector": "skill:lore: nature",
+            "value": 1
+          },
+          {
+            "key": "FreeRaise",
+            "selector": "skill:lore: omens",
+            "value": 1
+          },
+          {
+            "key": "FreeRaise",
+            "selector": "skill:lore: shugenja",
+            "value": 1
+          },
+          {
+            "key": "FreeRaise",
+            "selector": "skill:lore: spirit realms",
+            "value": 1
+          },
+          {
+            "key": "FreeRaise",
+            "selector": "skill:lore: theology",
+            "value": 1
+          },
+          {
+            "key": "FreeRaise",
+            "selector": "skill:lore: war",
+            "value": 1
+          },
+          {
+            "key": "FreeRaise",
+            "selector": "skill:lore: anatomy",
+            "value": 1
+          },
+          {
+            "key": "FreeRaise",
+            "selector": "skill:lore: maho",
+            "value": 1
+          },
+          {
+            "key": "FreeRaise",
+            "selector": "skill:lore: shadowlands",
+            "value": 1
+          },
+          {
+            "key": "FreeRaise",
+            "selector": "skill:lore: underworld",
+            "value": 1
+          }
+        ],
+        "specialRules": "A Void Point on Etiquette gives +3k1 rather than +1k1. Lore Skills outside this pack get the Free Raise too."
+      }
+    },
+    {
+      "name": "Tengoku's Justice",
+      "type": "technique",
+      "folder": "Ronin Paths",
+      "page": 235,
+      "coverage": "partial",
+      "system": {
+        "rank": 1,
+        "shugenja": false,
+        "affinity": "",
+        "deficiency": "",
+        "rules": [
+          {
+            "key": "TraitAdjust",
+            "trait": "str",
+            "value": 1
+          },
+          {
+            "key": "GrantItem",
+            "uuid": "@entry[skills/Athletics]"
+          },
+          {
+            "key": "GrantItem",
+            "uuid": "@entry[skills/Defense]"
+          },
+          {
+            "key": "GrantItem",
+            "uuid": "@entry[skills/Horsemanship]"
+          },
+          {
+            "key": "GrantItem",
+            "uuid": "@entry[skills/Hunting]"
+          },
+          {
+            "key": "GrantItem",
+            "uuid": "@entry[skills/Kenjutsu]"
+          },
+          {
+            "key": "GrantItem",
+            "uuid": "@entry[skills/Kyujutsu]"
+          },
+          {
+            "key": "ChoiceSet",
+            "flag": "any",
+            "prompt": "One more Skill",
+            "list": "skills",
+            "filter": []
+          },
+          {
+            "key": "GrantItem",
+            "uuid": "{choice:any}"
+          },
+          {
+            "key": "RollModifier",
+            "selector": "damage",
+            "roll": "@traits.str",
+            "optional": true,
+            "label": "Heaven's Curse: you surprised the target"
+          }
+        ],
+        "specialRules": "Starting Honor 4.5. Outfit as printed."
+      }
+    },
+    {
+      "name": "The Amethyst Champion",
+      "type": "technique",
+      "folder": "Alternate Paths",
+      "page": 256,
+      "coverage": "none",
+      "system": {
+        "rank": 1,
+        "rules": [],
+        "specialRules": "Courtier Champion only; replaces any rank. Void, Free: use a courtier Technique used on you in the last 7 days."
+      }
+    },
+    {
+      "name": "The Anger of the Boar",
+      "type": "technique",
+      "folder": "Heichi Bushi School",
+      "page": 218,
+      "coverage": "none",
+      "system": {
+        "rank": 4,
+        "shugenja": false,
+        "affinity": "",
+        "deficiency": "",
+        "rules": [],
+        "specialRules": "Void in the Reactions Stage: your Wound penalty is one Wound Rank lighter for the rest of the skirmish."
+      }
+    },
+    {
+      "name": "The Arrow Knows the Way",
+      "type": "technique",
+      "folder": "Tsuruchi Archer School",
+      "page": 122,
+      "coverage": "full",
+      "system": {
+        "rank": 2,
+        "rules": [
+          {
+            "key": "RaiseRule",
+            "selector": "attack",
+            "maneuver": "calledShot",
+            "cost": -1
+          },
+          {
+            "key": "RollModifier",
+            "selector": "damage",
+            "roll": 2,
+            "predicate": [
+              "weapon:skill:kyujutsu"
+            ]
+          }
+        ],
+        "specialRules": ""
+      }
+    },
+    {
+      "name": "The Blade Upon the Wind",
+      "type": "technique",
+      "folder": "Morito Bushi School",
+      "page": 224,
+      "coverage": "none",
+      "system": {
+        "rank": 4,
+        "shugenja": false,
+        "affinity": "",
+        "deficiency": "",
+        "rules": [],
+        "specialRules": "Once a skirmish, Void (Free): set your Initiative to another's; then it drops 5 each Reactions Stage."
+      }
+    },
+    {
+      "name": "The Calm in Midst of Thunder",
+      "type": "technique",
+      "folder": "Mirumoto Bushi School",
+      "page": 113,
+      "coverage": "full",
+      "system": {
+        "rank": 2,
+        "rules": [
+          {
+            "key": "RollModifier",
+            "selector": "skill:iaijutsu",
+            "total": "@skills.kenjutsu.rank",
+            "predicate": [
+              "status:centerStance"
+            ]
+          }
+        ],
+        "specialRules": ""
+      }
+    },
+    {
+      "name": "The Charge of Madness",
+      "type": "technique",
+      "folder": "Moto Bushi School",
+      "page": 130,
+      "coverage": "none",
+      "system": {
+        "rank": 4,
+        "rules": [],
+        "specialRules": "Once a skirmish, dropping a foe to Out gives a Free Action attack on a different target, with no Raises."
+      }
+    },
+    {
+      "name": "The Charge of the Boar",
+      "type": "technique",
+      "folder": "Heichi Bushi School",
+      "page": 218,
+      "coverage": "partial",
+      "system": {
+        "rank": 1,
+        "shugenja": false,
+        "affinity": "",
+        "deficiency": "",
+        "rules": [
+          {
+            "key": "RollModifier",
+            "selector": "damage",
+            "keep": 1,
+            "predicate": [
+              "weapon:skill:spears"
+            ]
+          }
+        ],
+        "specialRules": "In Full Attack, readying a spear or medium weapon is Free."
+      }
+    },
+    {
+      "name": "The Clouds Part",
+      "type": "technique",
+      "folder": "Seppun Guardsman School",
+      "page": 228,
+      "coverage": "none",
+      "system": {
+        "rank": 2,
+        "shugenja": false,
+        "affinity": "",
+        "deficiency": "",
+        "rules": [],
+        "specialRules": "Void as your Turn begins: Honor Rank on attack and damage totals until your next Turn."
+      }
+    },
+    {
+      "name": "The Crab Are the Wall",
+      "type": "technique",
+      "folder": "Defender of the Wall",
+      "page": 247,
+      "coverage": "none",
+      "system": {
+        "rank": 3,
+        "rules": [],
+        "specialRules": "Once each Round, end one Condition on yourself at once; Mounted and Grappled cannot be ended so."
+      }
+    },
+    {
+      "name": "The Dark Path",
+      "type": "technique",
+      "folder": "Order of the Spider Monks",
+      "page": 215,
+      "coverage": "partial",
+      "system": {
+        "rank": 1,
+        "shugenja": false,
+        "affinity": "",
+        "deficiency": "",
+        "rules": [
+          {
+            "key": "RollModifier",
+            "selector": "attack",
+            "roll": 1,
+            "predicate": [
+              "weapon:skill:polearms"
+            ]
+          },
+          {
+            "key": "ArmorTN",
+            "value": "@school.rank * 2",
+            "range": "melee"
+          }
+        ],
+        "specialRules": "Unarmed attacks get the +1k0 as well."
+      }
+    },
+    {
+      "name": "The Depths of Dishonor",
+      "type": "technique",
+      "folder": "Scorpion Instigator",
+      "page": 250,
+      "coverage": "none",
+      "system": {
+        "rank": 1,
+        "rules": [],
+        "specialRules": "Contested Social Skill rolls: +Xk0, X the gap between your Honor Rank and the opponent's."
+      }
+    },
+    {
+      "name": "The Embrace of Darkness",
+      "type": "technique",
+      "folder": "Daigotsu Courtier School",
+      "page": 214,
+      "coverage": "none",
+      "system": {
+        "rank": 5,
+        "shugenja": false,
+        "affinity": "",
+        "deficiency": "",
+        "rules": [],
+        "specialRules": "Monthly per target: contested roll (+5k0 if Consumed) makes them see a party you name as their enemy."
+      }
+    },
+    {
+      "name": "The Emerald Champion",
+      "type": "technique",
+      "folder": "Alternate Paths",
+      "page": 256,
+      "coverage": "partial",
+      "system": {
+        "rank": 1,
+        "rules": [
+          {
+            "key": "RollModifier",
+            "selector": "skill-type:high",
+            "roll": 1,
+            "keep": 1
+          },
+          {
+            "key": "RollModifier",
+            "selector": "skill-type:bugei",
+            "roll": 1,
+            "keep": 1
+          },
+          {
+            "key": "RollModifier",
+            "selector": "skill-tag:school",
+            "roll": 1
+          }
+        ],
+        "specialRules": "Bushi Champion only; replaces any rank. Daily Void Points = highest Ring, only for allies in sight; Free, once a Round."
+      }
+    },
+    {
+      "name": "The Emperor's Protection",
+      "type": "technique",
+      "folder": "Otomo Courtier School",
+      "page": 229,
+      "coverage": "none",
+      "system": {
+        "rank": 4,
+        "shugenja": false,
+        "affinity": "",
+        "deficiency": "",
+        "rules": [],
+        "specialRules": "In a debate, Void and a contested roll: the loser agrees with you or loses 5 Honor points."
+      }
+    },
+    {
+      "name": "The Eyes Betray the Heart",
+      "type": "technique",
+      "folder": "Kitsuki Investigator School",
+      "page": 114,
+      "coverage": "none",
+      "system": {
+        "rank": 5,
+        "rules": [],
+        "specialRules": "A knowing lie to you prompts Investigation/Perception vs Sincerity/Willpower; +5k0 and Raises if you know it."
+      }
+    },
+    {
+      "name": "The Eyes of the Emperor",
+      "type": "technique",
+      "folder": "Kasuga Smuggler School",
+      "page": 227,
+      "coverage": "partial",
+      "system": {
+        "rank": 3,
+        "shugenja": false,
+        "affinity": "",
+        "deficiency": "",
+        "rules": [
+          {
+            "key": "RollModifier",
+            "selector": "skill-type:low",
+            "roll": "@school.rank",
+            "optional": true,
+            "label": "The Eyes of the Emperor: on clan business"
+          }
+        ],
+        "specialRules": "Needs a rank in the Skill; also covers Sincerity used with Deceit."
+      }
+    },
+    {
+      "name": "The Falcon Takes Flight",
+      "type": "technique",
+      "folder": "Toritaka Bushi School",
+      "page": 219,
+      "coverage": "none",
+      "system": {
+        "rank": 2,
+        "shugenja": false,
+        "affinity": "",
+        "deficiency": "",
+        "rules": [],
+        "specialRules": "A Perception roll at TN (creature's Air x 5) senses nearby beings from other Spirit Realms."
+      }
+    },
+    {
+      "name": "The Falcon's Eyes",
+      "type": "technique",
+      "folder": "Toritaka Bushi School",
+      "page": 219,
+      "coverage": "full",
+      "system": {
+        "rank": 1,
+        "shugenja": false,
+        "affinity": "",
+        "deficiency": "",
+        "rules": [
+          {
+            "key": "RollModifier",
+            "selector": "trait:per",
+            "roll": 1
+          },
+          {
+            "key": "RollModifier",
+            "selector": "damage",
+            "roll": 1,
+            "optional": true,
+            "label": "The Falcon's Eyes: target from another Spirit Realm"
+          }
+        ],
+        "specialRules": ""
+      }
+    },
+    {
+      "name": "The Falcon's Wings",
+      "type": "technique",
+      "folder": "Toritaka Bushi School",
+      "page": 219,
+      "coverage": "full",
+      "system": {
+        "rank": 3,
+        "shugenja": false,
+        "affinity": "",
+        "deficiency": "",
+        "rules": [
+          {
+            "key": "ActionCost",
+            "selector": "attack",
+            "action": "simple",
+            "label": "The Falcon's Wings",
+            "predicate": [
+              {
+                "or": [
+                  "weapon:skill:spears",
+                  "weapon:keyword:samurai"
+                ]
+              }
+            ]
+          }
+        ],
+        "specialRules": ""
+      }
+    },
+    {
+      "name": "The Final Silence",
+      "type": "technique",
+      "folder": "Shosuro Infiltrator School",
+      "page": 129,
+      "coverage": "none",
+      "system": {
+        "rank": 5,
+        "rules": [],
+        "specialRules": "After a hit, each Void Point turns up to two damage dice into 10s, which do not explode."
+      }
+    },
+    {
+      "name": "The Flames of Purity",
+      "type": "technique",
+      "folder": "Defender of the Wall",
+      "page": 247,
+      "coverage": "none",
+      "system": {
+        "rank": 1,
+        "rules": [],
+        "specialRules": "Tainted foes get no exploding 10s on their attack and damage rolls against you."
+      }
+    },
+    {
+      "name": "The Force of Honor",
+      "type": "technique",
+      "folder": "Daidoji Iron Warrior",
+      "page": 111,
+      "coverage": "full",
+      "system": {
+        "rank": 1,
+        "rules": [
+          {
+            "key": "Wounds",
+            "perRank": "max(floor(@honor.rank) - 4, 1)"
+          },
+          {
+            "key": "RollModifier",
+            "selector": "attack",
+            "roll": 1,
+            "predicate": [
+              "status:attackStance"
+            ]
+          }
+        ],
+        "specialRules": ""
+      }
+    },
+    {
+      "name": "The Fury of Matsu",
+      "type": "technique",
+      "folder": "The Lion's Pride",
+      "page": 248,
+      "coverage": "full",
+      "system": {
+        "rank": 1,
+        "rules": [
+          {
+            "key": "ArmorTN",
+            "value": 10,
+            "predicate": [
+              "status:fullAttackStance"
+            ]
+          }
+        ],
+        "specialRules": ""
+      }
+    },
+    {
+      "name": "The Gift of the Lady",
+      "type": "technique",
+      "folder": "Doji Courtier School",
+      "page": 111,
+      "coverage": "none",
+      "system": {
+        "rank": 5,
+        "rules": [],
+        "specialRules": "Courtier/Awareness vs Etiquette/Willpower, +5k0 on an Ally: success inclines the target to heed your advice."
+      }
+    },
+    {
+      "name": "The Hand of Thunder",
+      "type": "technique",
+      "folder": "Temple of Osano-wo Monk",
+      "page": 233,
+      "coverage": "none",
+      "system": {
+        "rank": 1,
+        "shugenja": false,
+        "affinity": "",
+        "deficiency": "",
+        "rules": [],
+        "specialRules": "Unarmed damage +0k1, stacking with other unarmed damage dice."
+      }
+    },
+    {
+      "name": "The Heart Listens",
+      "type": "technique",
+      "folder": "Ide Emissary School",
+      "page": 131,
+      "coverage": "none",
+      "system": {
+        "rank": 3,
+        "rules": [],
+        "specialRules": "After 10 minutes' talk, Sincerity/Awareness vs Etiquette/Willpower warms their attitude; 2 Raises: an Ally for the day."
+      }
+    },
+    {
+      "name": "The Heart of the Lion",
+      "type": "technique",
+      "folder": "Ikoma Bard School",
+      "page": 119,
+      "coverage": "none",
+      "system": {
+        "rank": 2,
+        "rules": [],
+        "specialRules": "No Honor or Glory lost for emotion shown for a Lion or noble cause. Intimidation, Temptation on you: +5 TN/Rank."
+      }
+    },
+    {
+      "name": "The Heart Speaks",
+      "type": "technique",
+      "folder": "Ide Emissary School",
+      "page": 131,
+      "coverage": "none",
+      "system": {
+        "rank": 1,
+        "rules": [],
+        "specialRules": "Etiquette (Courtesy)/Awareness TN 20 avoids an unwitting offense. Free Raise on Sincerity (Honesty); TN +5 on Deceit."
+      }
+    },
+    {
+      "name": "The Herald of Glory",
+      "type": "technique",
+      "folder": "Ikoma Bard School",
+      "page": 118,
+      "coverage": "none",
+      "system": {
+        "rank": 1,
+        "rules": [],
+        "specialRules": "Precise Memory free (refunded if owned). Storytelling/Awareness TN 20 praise gives another School Rank Glory."
+      }
+    },
+    {
+      "name": "The Immovable Hand of Peace",
+      "type": "technique",
+      "folder": "Ide Emissary School",
+      "page": 131,
+      "coverage": "none",
+      "system": {
+        "rank": 5,
+        "rules": [],
+        "specialRules": "Void, Sincerity/Awareness vs Etiquette/Awareness: no hostility to you for 2 x School Rank hours. Needs target Honor 2+."
+      }
+    },
+    {
+      "name": "The Jade Champion",
+      "type": "technique",
+      "folder": "Alternate Paths",
+      "page": 257,
+      "coverage": "partial",
+      "system": {
+        "rank": 1,
+        "rules": [
+          {
+            "key": "FreeRaise",
+            "selector": "spell",
+            "value": 1
+          }
+        ],
+        "specialRules": "Shugenja Champion only; replaces any rank. One more Free Raise casting at users of outlawed magic or the Tainted."
+      }
+    },
+    {
+      "name": "The Kami's Whisper",
+      "type": "technique",
+      "folder": "Soshi Shugenja School",
+      "page": 127,
+      "coverage": "partial",
+      "system": {
+        "rank": 1,
+        "shugenja": true,
+        "affinity": "air",
+        "deficiency": "earth",
+        "rules": [],
+        "specialRules": "Spend one more slot of the element on a harmless spell to leave no sign it was cast. Free Raise on Illusion spells."
+      }
+    },
+    {
+      "name": "The Kami's Whispers",
+      "type": "technique",
+      "folder": "Komori Shugenja School",
+      "page": 217,
+      "coverage": "none",
+      "system": {
+        "rank": 1,
+        "shugenja": true,
+        "affinity": "air",
+        "deficiency": "earth",
+        "rules": [],
+        "specialRules": "Spend a spell slot to whisper to someone you know: 30 seconds and 100 miles per School Rank."
+      }
+    },
+    {
+      "name": "The Lion's Charge",
+      "type": "technique",
+      "folder": "Matsu Berserker School",
+      "page": 119,
+      "coverage": "full",
+      "system": {
+        "rank": 3,
+        "rules": [
+          {
+            "key": "ActionCost",
+            "selector": "attack",
+            "action": "simple",
+            "range": "melee"
+          }
+        ],
+        "specialRules": ""
+      }
+    },
+    {
+      "name": "The Lion's Roar",
+      "type": "technique",
+      "folder": "Matsu Berserker School",
+      "page": 119,
+      "coverage": "partial",
+      "system": {
+        "rank": 1,
+        "rules": [
+          {
+            "key": "RollModifier",
+            "selector": "damage",
+            "total": "@honor.rank"
+          }
+        ],
+        "specialRules": "Full Attack Stance: move 5' more per Turn, never past your maximum."
+      }
+    },
+    {
+      "name": "The Lion's Victory",
+      "type": "technique",
+      "folder": "Matsu Berserker School",
+      "page": 119,
+      "coverage": "none",
+      "system": {
+        "rank": 5,
+        "rules": [],
+        "specialRules": "Once per encounter after rolling damage, a Void Point (Free Action) makes every kept die explode."
+      }
+    },
+    {
+      "name": "The Mountain Does Not Fall",
+      "type": "technique",
+      "folder": "Hida Bushi School",
+      "page": 107,
+      "coverage": "none",
+      "system": {
+        "rank": 5,
+        "rules": [],
+        "specialRules": "Void Point in Reactions: until the next Reactions, act as Healthy, unaffected by Dazed, Fatigued, or Stunned."
+      }
+    },
+    {
+      "name": "The Mountain Does Not Move",
+      "type": "technique",
+      "folder": "Hida Bushi School",
+      "page": 106,
+      "coverage": "full",
+      "system": {
+        "rank": 2,
+        "rules": [
+          {
+            "key": "Reduction",
+            "value": "@rings.earth"
+          }
+        ],
+        "specialRules": ""
+      }
+    },
+    {
+      "name": "The Path of Purity",
+      "type": "technique",
+      "folder": "Temple of Kaimetsu-uo Monk",
+      "page": 233,
+      "coverage": "none",
+      "system": {
+        "rank": 1,
+        "shugenja": false,
+        "affinity": "",
+        "deficiency": "",
+        "rules": [],
+        "specialRules": "In a contested Social roll another starts, you may swap the usual Trait for any Ring."
+      }
+    },
+    {
+      "name": "The Path of Shadows",
+      "type": "technique",
+      "folder": "Shosuro Infiltrator School",
+      "page": 129,
+      "coverage": "partial",
+      "system": {
+        "rank": 1,
+        "rules": [
+          {
+            "key": "RollModifier",
+            "selector": "skill:stealth",
+            "roll": 2
+          }
+        ],
+        "specialRules": "Low Skills and Ninjutsu weapons used for the Scorpion cost no Honor (GM's call)."
+      }
+    },
+    {
+      "name": "The Perfect Gift",
+      "type": "technique",
+      "folder": "Doji Courtier School",
+      "page": 110,
+      "coverage": "none",
+      "system": {
+        "rank": 3,
+        "rules": [],
+        "specialRules": "In court or a city, Courtier/Awareness TN 20 finds a gift or favor; once accepted, a 1-Devotion Ally free (GM)."
+      }
+    },
+    {
+      "name": "The Pincers Hold, the Tail Strikes",
+      "type": "technique",
+      "folder": "Bayushi Bushi School",
+      "page": 126,
+      "coverage": "none",
+      "system": {
+        "rank": 5,
+        "rules": [],
+        "specialRules": "Once an encounter, Void, Complex Action: a melee hit Stuns; Earth Ring vs damage dealt ends it, else next Reactions."
+      }
+    },
+    {
+      "name": "The Power of Impurity",
+      "type": "technique",
+      "folder": "Obsidian Warrior",
+      "page": 250,
+      "coverage": "none",
+      "system": {
+        "rank": 2,
+        "rules": [],
+        "specialRules": "Foes within 30': Bugei and damage roll totals minus your Strength + Taint Rank; a Void Point frees one for its Turn."
+      }
+    },
+    {
+      "name": "The Raging Ocean",
+      "type": "technique",
+      "folder": "Storm Riders",
+      "page": 249,
+      "coverage": "partial",
+      "system": {
+        "rank": 2,
+        "shugenja": true,
+        "affinity": "",
+        "deficiency": "",
+        "rules": [
+          {
+            "key": "RollModifier",
+            "selector": "spell",
+            "roll": 1
+          }
+        ],
+        "specialRules": "School Rank +1 for every other use too. Water counts 2 higher for daily spell slots."
+      }
+    },
+    {
+      "name": "The Rolling Wave",
+      "type": "technique",
+      "folder": "Yoritomo Bushi School",
+      "page": 120,
+      "coverage": "none",
+      "system": {
+        "rank": 4,
+        "rules": [],
+        "specialRules": "After moving 5'+, +10 Armor TN to your next Turn; or give it up before attacking for 2 Free Raises usable on Knockdown."
+      }
+    },
+    {
+      "name": "The Ruby Champion",
+      "type": "technique",
+      "folder": "Alternate Paths",
+      "page": 257,
+      "coverage": "none",
+      "system": {
+        "rank": 1,
+        "rules": [],
+        "specialRules": "Bushi Champion only; replaces any rank. Void, Complex: an ally under your command uses one of your Techniques a Turn."
+      }
+    },
+    {
+      "name": "The Shell of the Tortoise",
+      "type": "technique",
+      "folder": "Kasuga Smuggler School",
+      "page": 227,
+      "coverage": "none",
+      "system": {
+        "rank": 2,
+        "shugenja": false,
+        "affinity": "",
+        "deficiency": "",
+        "rules": [],
+        "specialRules": "A samurai who attacks or slanders you unprovoked loses 2 x your School Rank in Honor."
+      }
+    },
+    {
+      "name": "The Shield of Faith",
+      "type": "technique",
+      "folder": "Daidoji Iron Warrior",
+      "page": 111,
+      "coverage": "partial",
+      "system": {
+        "rank": 2,
+        "rules": [
+          {
+            "key": "ArmorTN",
+            "value": 5,
+            "predicate": [
+              "status:guarding"
+            ]
+          }
+        ],
+        "specialRules": "A Guard lasts one more Round, and the guarded ally's Armor TN bonus is 5 higher."
+      }
+    },
+    {
+      "name": "The Silence of Two Strikes",
+      "type": "technique",
+      "folder": "Swordmasters",
+      "page": 247,
+      "coverage": "none",
+      "system": {
+        "rank": 1,
+        "rules": [],
+        "specialRules": "Katana in the main hand and wakizashi in the off hand: spend Void Points up to twice per Turn."
+      }
+    },
+    {
+      "name": "The Soul of Honor",
+      "type": "technique",
+      "folder": "Doji Courtier School",
+      "page": 110,
+      "coverage": "partial",
+      "system": {
+        "rank": 1,
+        "rules": [
+          {
+            "key": "FreeRaise",
+            "selector": "skill:courtier",
+            "value": 1,
+            "predicate": [
+              {
+                "gte": [
+                  "honor-rank",
+                  6
+                ]
+              }
+            ]
+          },
+          {
+            "key": "FreeRaise",
+            "selector": "skill:sincerity",
+            "value": 1,
+            "predicate": [
+              {
+                "gte": [
+                  "honor-rank",
+                  6
+                ]
+              }
+            ]
+          },
+          {
+            "key": "FreeRaise",
+            "selector": "skill:etiquette",
+            "value": 1,
+            "predicate": [
+              {
+                "gte": [
+                  "honor-rank",
+                  6
+                ]
+              }
+            ]
+          }
+        ],
+        "specialRules": "After a short talk, Courtier/Awareness vs Etiquette/Awareness tells whether the target needs a favor."
+      }
+    },
+    {
+      "name": "The Soul's Grace",
+      "type": "technique",
+      "folder": "Asahina Shugenja School",
+      "page": 110,
+      "coverage": "none",
+      "system": {
+        "rank": 1,
+        "rules": [],
+        "specialRules": "Void Point: foes' damage within 20' is -0k1 for School Rank Rounds; reuse resets it. Free Raise on Defense spells.",
+        "shugenja": true,
+        "affinity": "air",
+        "deficiency": "fire"
+      }
+    },
+    {
+      "name": "The Speed of the Boar",
+      "type": "technique",
+      "folder": "Heichi Bushi School",
+      "page": 218,
+      "coverage": "full",
+      "system": {
+        "rank": 3,
+        "shugenja": false,
+        "affinity": "",
+        "deficiency": "",
+        "rules": [
+          {
+            "key": "ActionCost",
+            "selector": "attack",
+            "action": "simple",
+            "label": "The Speed of the Boar",
+            "predicate": [
+              "weapon:skill:spears"
+            ]
+          }
+        ],
+        "specialRules": ""
+      }
+    },
+    {
+      "name": "The Strength of One Man",
+      "type": "technique",
+      "folder": "Toku Bushi School",
+      "page": 222,
+      "coverage": "full",
+      "system": {
+        "rank": 2,
+        "shugenja": false,
+        "affinity": "",
+        "deficiency": "",
+        "rules": [
+          {
+            "key": "RollModifier",
+            "selector": "attack",
+            "roll": 1,
+            "keep": 1,
+            "optional": true,
+            "label": "The Strength of One Man: several foes, or a foe of higher Insight Rank"
+          },
+          {
+            "key": "RollModifier",
+            "selector": "damage",
+            "roll": 1,
+            "keep": 1,
+            "optional": true,
+            "label": "The Strength of One Man: several foes, or a foe of higher Insight Rank"
+          }
+        ],
+        "specialRules": ""
+      }
+    },
+    {
+      "name": "The Strength of Opposition",
+      "type": "technique",
+      "folder": "Heichi Bushi School",
+      "page": 218,
+      "coverage": "none",
+      "system": {
+        "rank": 2,
+        "shugenja": false,
+        "affinity": "",
+        "deficiency": "",
+        "rules": [],
+        "specialRules": "Entangle costs 2 Raises with a Mai Chong, 3 with another spear."
+      }
+    },
+    {
+      "name": "The Strength of Tradition",
+      "type": "technique",
+      "folder": "Ikoma Bard School",
+      "page": 119,
+      "coverage": "none",
+      "system": {
+        "rank": 4,
+        "rules": [],
+        "specialRules": "Rank/session: Storytelling/Awareness TN 25; ally's next failure re-rolls +Honor Rank dice; fail again: -2 Honor."
+      }
+    },
+    {
+      "name": "The Tessen",
+      "type": "technique",
+      "folder": "Ronin Paths",
+      "page": 235,
+      "coverage": "partial",
+      "system": {
+        "rank": 1,
+        "shugenja": false,
+        "affinity": "",
+        "deficiency": "",
+        "rules": [
+          {
+            "key": "TraitAdjust",
+            "trait": "sta",
+            "value": 1
+          },
+          {
+            "key": "GrantItem",
+            "uuid": "@entry[skills/Battle]"
+          },
+          {
+            "key": "GrantItem",
+            "uuid": "@entry[skills/Defense]"
+          },
+          {
+            "key": "GrantItem",
+            "uuid": "@entry[skills/Investigation]"
+          },
+          {
+            "key": "GrantItem",
+            "uuid": "@entry[skills/Jiujutsu]"
+          },
+          {
+            "key": "GrantItem",
+            "uuid": "@entry[skills/War Fan]"
+          },
+          {
+            "key": "ChoiceSet",
+            "flag": "any-1",
+            "prompt": "One more Skill",
+            "list": "skills",
+            "filter": []
+          },
+          {
+            "key": "GrantItem",
+            "uuid": "{choice:any-1}"
+          },
+          {
+            "key": "ChoiceSet",
+            "flag": "any-2",
+            "prompt": "Another Skill",
+            "list": "skills",
+            "filter": []
+          },
+          {
+            "key": "GrantItem",
+            "uuid": "{choice:any-2}"
+          },
+          {
+            "key": "RollOption",
+            "option": "tessen-war-fan",
+            "toggleable": true,
+            "value": true,
+            "label": "Folds of the Iron Fan: wielding a war fan"
+          },
+          {
+            "key": "ArmorTN",
+            "value": "@skills.war_fan.rank",
+            "predicate": [
+              "tessen-war-fan"
+            ]
+          }
+        ],
+        "specialRules": "Starting Honor 3.5. Outfit as printed. Folds of the Iron Fan: no off-hand penalty attacking with a war fan."
+      }
+    },
+    {
+      "name": "The Thousand Forms",
+      "type": "technique",
+      "folder": "Temples of the Thousand Fortunes Monk",
+      "page": 233,
+      "coverage": "none",
+      "system": {
+        "rank": 1,
+        "shugenja": false,
+        "affinity": "",
+        "deficiency": "",
+        "rules": [],
+        "specialRules": "Begin with four kiho, not three; the extra one does not count as a bought kiho."
+      }
+    },
+    {
+      "name": "The Topaz Champion",
+      "type": "technique",
+      "folder": "Alternate Paths",
+      "page": 257,
+      "coverage": "none",
+      "system": {
+        "rank": 1,
+        "rules": [],
+        "specialRules": "Champion; replaces any rank, granting that Technique too. Daily Void Points = highest Ring, for School Skill rolls only."
+      }
+    },
+    {
+      "name": "The Tortoise Smiles",
+      "type": "technique",
+      "folder": "Kasuga Smuggler School",
+      "page": 227,
+      "coverage": "none",
+      "system": {
+        "rank": 5,
+        "shugenja": false,
+        "affinity": "",
+        "deficiency": "",
+        "rules": [],
+        "specialRules": "School Skill rolls ignore the Void Ring cap on Raises. Void Ring times a session: +5k0 on a School Skill roll."
+      }
+    },
+    {
+      "name": "The Touch of Sin",
+      "type": "technique",
+      "folder": "Daigotsu Courtier School",
+      "page": 214,
+      "coverage": "none",
+      "system": {
+        "rank": 4,
+        "shugenja": false,
+        "affinity": "",
+        "deficiency": "",
+        "rules": [],
+        "specialRules": "School Rank times a session: contested roll gives a target a Consumed by Shourido flaw for School Rank hours."
+      }
+    },
+    {
+      "name": "The Virtues of Command",
+      "type": "technique",
+      "folder": "Otomo Courtier School",
+      "page": 229,
+      "coverage": "full",
+      "system": {
+        "rank": 5,
+        "shugenja": false,
+        "affinity": "",
+        "deficiency": "",
+        "rules": [
+          {
+            "key": "RollModifier",
+            "selector": "skill-tag:social",
+            "roll": 5,
+            "optional": true,
+            "label": "The Virtues of Command: contested, against one who reveres Imperial rule"
+          }
+        ],
+        "specialRules": ""
+      }
+    },
+    {
+      "name": "The Voice of Heaven",
+      "type": "technique",
+      "folder": "Otomo Courtier School",
+      "page": 229,
+      "coverage": "none",
+      "system": {
+        "rank": 1,
+        "shugenja": false,
+        "affinity": "",
+        "deficiency": "",
+        "rules": [],
+        "specialRules": "Intimidation (Control) costs no Honor. A contested roll sets a clan samurai against a faction you name."
+      }
+    },
+    {
+      "name": "The Voice of the Ancestors",
+      "type": "technique",
+      "folder": "Ikoma Bard School",
+      "page": 119,
+      "coverage": "none",
+      "system": {
+        "rank": 3,
+        "rules": [],
+        "specialRules": "Pre-fight Oratory/Awareness, TN 15 +5 a listener (+5 more if not Lion): each adds Honor Rank to one Skill roll."
+      }
+    },
+    {
+      "name": "The Void of War",
+      "type": "technique",
+      "folder": "Utaku Battle Maiden",
+      "page": 132,
+      "coverage": "none",
+      "system": {
+        "rank": 2,
+        "rules": [],
+        "specialRules": "In Stage 1 of a Round, add 5 to Initiative or Armor TN; it lasts until you use this again or the skirmish ends."
+      }
+    },
+    {
+      "name": "The Wasp's Sting",
+      "type": "technique",
+      "folder": "Tsuruchi Archer School",
+      "page": 122,
+      "coverage": "full",
+      "system": {
+        "rank": 3,
+        "rules": [
+          {
+            "key": "ActionCost",
+            "selector": "attack",
+            "action": "simple",
+            "predicate": [
+              "weapon:skill:kyujutsu"
+            ]
+          }
+        ],
+        "specialRules": ""
+      }
+    },
+    {
+      "name": "The Way of the Carp",
+      "type": "technique",
+      "folder": "Yasuki Courtier School",
+      "page": 107,
+      "coverage": "partial",
+      "system": {
+        "rank": 1,
+        "rules": [
+          {
+            "key": "FreeRaise",
+            "selector": "skill:commerce",
+            "value": 1
+          }
+        ],
+        "specialRules": "Public Commerce costs no Honor or Glory. Commerce/Perception vs Etiquette/Awareness learns a thing someone wants."
+      }
+    },
+    {
+      "name": "The Way of the Crab",
+      "type": "technique",
+      "folder": "Hida Bushi School",
+      "page": 106,
+      "coverage": "partial",
+      "system": {
+        "rank": 1,
+        "rules": [
+          {
+            "key": "RollModifier",
+            "selector": "damage",
+            "roll": 1,
+            "predicate": [
+              "weapon:skill:heavy weapons"
+            ]
+          }
+        ],
+        "specialRules": "Heavy armor's TN penalty no longer applies to your Skill rolls, except Stealth."
+      }
+    },
+    {
+      "name": "The Way of the Crane",
+      "type": "technique",
+      "folder": "Kakita Bushi School",
+      "page": 109,
+      "coverage": "full",
+      "system": {
+        "rank": 1,
+        "rules": [
+          {
+            "key": "Initiative",
+            "total": "@skills.iaijutsu.rank * 2"
+          },
+          {
+            "key": "RollModifier",
+            "selector": "attack",
+            "roll": 1,
+            "keep": 1,
+            "total": "@school.rank",
+            "optional": true,
+            "label": "Center Stance this Round or the last"
+          },
+          {
+            "key": "RollModifier",
+            "selector": "skill:iaijutsu",
+            "roll": 1,
+            "keep": 1,
+            "total": "@school.rank",
+            "optional": true,
+            "label": "Focus roll, Center Stance this Round or the last"
+          }
+        ],
+        "specialRules": ""
+      }
+    },
+    {
+      "name": "The Way of the Lion",
+      "type": "technique",
+      "folder": "Akodo Bushi School",
+      "page": 117,
+      "coverage": "partial",
+      "system": {
+        "rank": 1,
+        "rules": [
+          {
+            "key": "RollModifier",
+            "selector": "attack",
+            "roll": 1,
+            "optional": true,
+            "label": "First melee attack on this foe, or a foe who Raised against you"
+          }
+        ],
+        "specialRules": "Each attack: ignore the armor part of the target's Armor TN (its Reduction still counts), or take a Free Raise."
+      }
+    },
+    {
+      "name": "The Way of the Mantis",
+      "type": "technique",
+      "folder": "Yoritomo Bushi School",
+      "page": 120,
+      "coverage": "partial",
+      "system": {
+        "rank": 1,
+        "rules": [
+          {
+            "key": "RollModifier",
+            "selector": "attack",
+            "roll": 1
+          }
+        ],
+        "specialRules": "No rough-terrain penalty. Improvised and Peasant weapons cost no Honor or Glory; no off-hand penalty with Peasant ones."
+      }
+    },
+    {
+      "name": "The Way of the Phoenix",
+      "type": "technique",
+      "folder": "Shiba Bushi School",
+      "page": 123,
+      "coverage": "none",
+      "system": {
+        "rank": 1,
+        "rules": [],
+        "specialRules": "May spend 2 Void Points on a roll for +2k2. Guard as a Free Action, but the ward gains +5 Armor TN instead of +10."
+      }
+    },
+    {
+      "name": "The Way of the Scorpion",
+      "type": "technique",
+      "folder": "Bayushi Bushi School",
+      "page": 126,
+      "coverage": "partial",
+      "system": {
+        "rank": 1,
+        "rules": [
+          {
+            "key": "Initiative",
+            "roll": 1,
+            "keep": 1
+          }
+        ],
+        "specialRules": "+5 Armor TN against any opponent whose Initiative is lower than yours."
+      }
+    },
+    {
+      "name": "The Way of the Spider",
+      "type": "technique",
+      "folder": "Daigotsu Bushi School",
+      "page": 212,
+      "coverage": "partial",
+      "system": {
+        "rank": 1,
+        "shugenja": false,
+        "affinity": "",
+        "deficiency": "",
+        "rules": [
+          {
+            "key": "RollModifier",
+            "selector": "damage",
+            "total": "@traits.str + @shadowTaint.rank",
+            "optional": true,
+            "label": "The Way of the Spider: damage picked this Round"
+          }
+        ],
+        "specialRules": "Each Round pick: that bonus on damage, or Wound penalties cut by the same. Rolls to find your Taint: TN +10."
+      }
+    },
+    {
+      "name": "The Way of the Unicorn",
+      "type": "technique",
+      "folder": "Moto Bushi School",
+      "page": 130,
+      "coverage": "partial",
+      "system": {
+        "rank": 1,
+        "rules": [
+          {
+            "key": "RollModifier",
+            "selector": "damage",
+            "roll": 1,
+            "type": "way-of-the-unicorn",
+            "predicate": [
+              {
+                "or": [
+                  "status:mounted",
+                  "weapon:name:scimitar"
+                ]
+              }
+            ]
+          }
+        ],
+        "specialRules": "Two-handed weapons (not bows) in one hand; the +1k0 also with two-handed melee weapons. Scimitars are Samurai weapons."
+      }
+    },
+    {
+      "name": "The Wind Blows Many Ways",
+      "type": "technique",
+      "folder": "Morito Bushi School",
+      "page": 224,
+      "coverage": "none",
+      "system": {
+        "rank": 2,
+        "shugenja": false,
+        "affinity": "",
+        "deficiency": "",
+        "rules": [],
+        "specialRules": "When combat starts, name School Rank Bugei Skills: +1k0 on their rolls."
+      }
+    },
+    {
+      "name": "Thunder and Fury",
+      "type": "technique",
+      "folder": "Morito Bushi School",
+      "page": 224,
+      "coverage": "full",
+      "system": {
+        "rank": 3,
+        "shugenja": false,
+        "affinity": "",
+        "deficiency": "",
+        "rules": [
+          {
+            "key": "ActionCost",
+            "selector": "attack",
+            "action": "simple",
+            "label": "Thunder and Fury",
+            "predicate": [
+              "status:mounted"
+            ]
+          }
+        ],
+        "specialRules": ""
+      }
+    },
+    {
+      "name": "To Punish the Wicked",
+      "type": "technique",
+      "folder": "Chuda Shugenja School (Original)",
+      "page": 224,
+      "coverage": "none",
+      "system": {
+        "rank": 1,
+        "shugenja": true,
+        "affinity": "earth",
+        "deficiency": "air",
+        "rules": [],
+        "specialRules": "Void (Free): one foe loses School Rank Reduction. Your spells deal +School Rank damage to the Tainted."
+      }
+    },
+    {
+      "name": "To Tread on the Sword",
+      "type": "technique",
+      "folder": "Daidoji Iron Warrior",
+      "page": 111,
+      "coverage": "none",
+      "system": {
+        "rank": 5,
+        "rules": [],
+        "specialRules": "Two Void Points: an action declared on your charge targets you instead, and a Free Action to move toward them."
+      }
+    },
+    {
+      "name": "Toku's Lesson",
+      "type": "technique",
+      "folder": "Toku Bushi School",
+      "page": 222,
+      "coverage": "full",
+      "system": {
+        "rank": 1,
+        "shugenja": false,
+        "affinity": "",
+        "deficiency": "",
+        "rules": [
+          {
+            "key": "RollModifier",
+            "selector": "skill",
+            "roll": 1,
+            "optional": true,
+            "label": "Toku's Lesson: TN 25 or higher"
+          },
+          {
+            "key": "RollModifier",
+            "selector": "attack",
+            "roll": 1,
+            "optional": true,
+            "label": "Toku's Lesson: TN 25 or higher"
+          },
+          {
+            "key": "Wounds",
+            "penalty": "0 - @traits.wil - 2 * @school.rank"
+          }
+        ],
+        "specialRules": ""
+      }
+    },
+    {
+      "name": "Tools of the Fortunes",
+      "type": "technique",
+      "folder": "Tsi Smith School",
+      "page": 223,
+      "coverage": "none",
+      "system": {
+        "rank": 1,
+        "shugenja": false,
+        "affinity": "",
+        "deficiency": "",
+        "rules": [],
+        "specialRules": "Craft Skills count as School Skills. A Craft roll at TN 10 + 5 x School Rank or more earns Glory: 1, +1 per 5 over."
+      }
+    },
+    {
+      "name": "Torch's Flame Flickers",
+      "type": "technique",
+      "folder": "Hiruma Bushi School",
+      "page": 108,
+      "coverage": "partial",
+      "system": {
+        "rank": 1,
+        "rules": [
+          {
+            "key": "RollModifier",
+            "selector": "attack",
+            "roll": 1,
+            "predicate": [
+              "status:attackStance"
+            ]
+          }
+        ],
+        "specialRules": "Supplies of food, water, and jade go 2x as far for up to Hunting rank people."
+      }
+    },
+    {
+      "name": "Touch of the Elements",
+      "type": "technique",
+      "folder": "Elemental Guard",
+      "page": 249,
+      "coverage": "none",
+      "system": {
+        "rank": 2,
+        "shugenja": true,
+        "affinity": "",
+        "deficiency": "",
+        "rules": [],
+        "specialRules": "School Rank +1. The chosen Ring counts 2 higher for that Element's daily spell slots."
+      }
+    },
+    {
+      "name": "Touch of the Kami",
+      "type": "technique",
+      "folder": "Togashi Tattooed Order",
+      "page": 115,
+      "coverage": "none",
+      "system": {
+        "rank": 5,
+        "rules": [],
+        "specialRules": "Gain two more Tattoos."
+      }
+    },
+    {
+      "name": "Touch of the Void",
+      "type": "technique",
+      "folder": "Shiba Bushi School",
+      "page": 123,
+      "coverage": "partial",
+      "system": {
+        "rank": 5,
+        "rules": [
+          {
+            "key": "Resource",
+            "slug": "void",
+            "max": 1,
+            "per": "round"
+          }
+        ],
+        "specialRules": "Each Void Point spent counts as two wherever that matters."
+      }
+    },
+    {
+      "name": "Transcend the Mountain",
+      "type": "technique",
+      "folder": "Ichiro Bushi School",
+      "page": 216,
+      "coverage": "none",
+      "system": {
+        "rank": 1,
+        "shugenja": false,
+        "affinity": "",
+        "deficiency": "",
+        "rules": [],
+        "specialRules": "Re-roll a Strength Skill or Trait roll, keeping the new result. Moderate terrain costs nothing; Difficult half."
+      }
+    },
+    {
+      "name": "Treasures of the Carp",
+      "type": "technique",
+      "folder": "Yasuki Courtier School",
+      "page": 108,
+      "coverage": "none",
+      "system": {
+        "rank": 3,
+        "rules": [],
+        "specialRules": "Commerce/Awareness at TN 20 locates a rare item for someone else (GM's call); Raises find finer ones."
+      }
+    },
+    {
+      "name": "Triumph Before Battle",
+      "type": "technique",
+      "folder": "Akodo Bushi School",
+      "page": 117,
+      "coverage": "none",
+      "system": {
+        "rank": 4,
+        "rules": [],
+        "specialRules": "Once per skirmish in Reactions, pick a foe: next Round, its Stance adds nothing to its Armor TN against you."
+      }
+    },
+    {
+      "name": "Tsi Xing Guo's Blessing",
+      "type": "technique",
+      "folder": "Tsi Smith School",
+      "page": 223,
+      "coverage": "none",
+      "system": {
+        "rank": 2,
+        "shugenja": false,
+        "affinity": "",
+        "deficiency": "",
+        "rules": [],
+        "specialRules": "Void on rolls using your own work gives +2k1. Your work given as a gift: you and the giver gain School Rank Glory."
+      }
+    },
+    {
+      "name": "Tsuruchi's Eye",
+      "type": "technique",
+      "folder": "Tsuruchi Archer School",
+      "page": 122,
+      "coverage": "partial",
+      "system": {
+        "rank": 5,
+        "rules": [
+          {
+            "key": "RollModifier",
+            "selector": "attack",
+            "roll": 4,
+            "keep": 1,
+            "range": "ranged",
+            "optional": true,
+            "label": "Tsuruchi's Eye: Complex Action shot"
+          },
+          {
+            "key": "RollModifier",
+            "selector": "damage",
+            "roll": 4,
+            "keep": 1,
+            "optional": true,
+            "label": "Tsuruchi's Eye: Complex Action shot"
+          }
+        ],
+        "specialRules": "The shot takes a Complex Action. Not with Flight of No-Mind."
+      }
+    },
+    {
+      "name": "Two Pincers, One Mind",
+      "type": "technique",
+      "folder": "Hida Bushi School",
+      "page": 106,
+      "coverage": "full",
+      "system": {
+        "rank": 3,
+        "rules": [
+          {
+            "key": "ActionCost",
+            "selector": "attack",
+            "action": "simple",
+            "predicate": [
+              {
+                "or": [
+                  "weapon:skill:heavy weapons",
+                  "weapon:keyword:samurai"
+                ]
+              }
+            ]
+          }
+        ],
+        "specialRules": ""
+      }
+    },
+    {
+      "name": "Vigilance of Mind",
+      "type": "technique",
+      "folder": "Daidoji Iron Warrior",
+      "page": 111,
+      "coverage": "none",
+      "system": {
+        "rank": 4,
+        "rules": [],
+        "specialRules": "Void Point in Reactions: +2k1 attack and damage next Round on one foe who struck at you or your charge."
+      }
+    },
+    {
+      "name": "Vigilant and Strong",
+      "type": "technique",
+      "folder": "Toritaka Bushi School",
+      "page": 219,
+      "coverage": "none",
+      "system": {
+        "rank": 4,
+        "shugenja": false,
+        "affinity": "",
+        "deficiency": "",
+        "rules": [],
+        "specialRules": "Void: ignore darkness and blindness penalties until the Reactions Stage two Rounds later."
+      }
+    },
+    {
+      "name": "Voice of Honor",
+      "type": "technique",
+      "folder": "Doji Courtier School",
+      "page": 111,
+      "coverage": "none",
+      "system": {
+        "rank": 4,
+        "rules": [],
+        "specialRules": "In a debate, beat Courtier/Awareness vs Etiquette/Awareness: holding the position becomes a breach of etiquette."
+      }
+    },
+    {
+      "name": "Voice of the Emperor",
+      "type": "technique",
+      "folder": "Miya Herald School",
+      "page": 230,
+      "coverage": "none",
+      "system": {
+        "rank": 1,
+        "shugenja": false,
+        "affinity": "",
+        "deficiency": "",
+        "rules": [],
+        "specialRules": "Void: Way of the Land for this province until you sleep. Those who knowingly attack you lose 2 x School Rank Honor."
+      }
+    },
+    {
+      "name": "Voice of the Storm",
+      "type": "technique",
+      "folder": "Yoritomo Bushi School",
+      "page": 120,
+      "coverage": "none",
+      "system": {
+        "rank": 2,
+        "rules": [],
+        "specialRules": "Each melee hit lowers that foe's Armor TN by 5 against you for 2 Rounds; stacks to School Rank times, renewing duration."
+      }
+    },
+    {
+      "name": "Voice of the Universe",
+      "type": "technique",
+      "folder": "Asako Loremaster School",
+      "page": 125,
+      "coverage": "none",
+      "system": {
+        "rank": 3,
+        "rules": [],
+        "specialRules": "Hour's talk, Lore: History/Intelligence TN 25: an ally adds your Lore: History to Social rolls 24h; 2 Raises: 2 allies."
+      }
+    },
+    {
+      "name": "Walk with the Prophet",
+      "type": "technique",
+      "folder": "Shrine of the Seven Thunders Monk",
+      "page": 232,
+      "coverage": "none",
+      "system": {
+        "rank": 1,
+        "shugenja": false,
+        "affinity": "",
+        "deficiency": "",
+        "rules": [],
+        "specialRules": "Your three first kiho share one element; Insight Rank counts 1 higher for kiho of that element."
+      }
+    },
+    {
+      "name": "Way of the Dragon",
+      "type": "technique",
+      "folder": "Mirumoto Bushi School",
+      "page": 113,
+      "coverage": "partial",
+      "system": {
+        "rank": 1,
+        "rules": [
+          {
+            "key": "RollOption",
+            "option": "niten",
+            "toggleable": true,
+            "value": false,
+            "label": "Katana in main hand, wakizashi in off hand"
+          },
+          {
+            "key": "ArmorTN",
+            "value": "@school.rank",
+            "predicate": [
+              "niten"
+            ]
+          }
+        ],
+        "specialRules": "Katana and wakizashi: no dual-wield penalties. When a spell targets you, move its casting TN 5 up or down."
+      }
+    },
+    {
+      "name": "Way of the Tortoise",
+      "type": "technique",
+      "folder": "Kasuga Smuggler School",
+      "page": 227,
+      "coverage": "partial",
+      "system": {
+        "rank": 1,
+        "shugenja": false,
+        "affinity": "",
+        "deficiency": "",
+        "rules": [
+          {
+            "key": "RollModifier",
+            "selector": "skill-tag:social",
+            "roll": 2,
+            "optional": true,
+            "label": "Way of the Tortoise: dealing with heimin or hinin"
+          }
+        ],
+        "specialRules": "A free gaijin language with each Languages. On clan duty, Low Skills cost no Honor and Commerce no Glory."
+      }
+    },
+    {
+      "name": "Weakness Is My Strength",
+      "type": "technique",
+      "folder": "Bayushi Courtier School",
+      "page": 127,
+      "coverage": "none",
+      "system": {
+        "rank": 1,
+        "rules": [],
+        "specialRules": "Contested Social: Free Raise per 3 pts of foe's Mental/Social Disadvantages, max 5. Gossip: Free Raise, unsourced."
+      }
+    },
+    {
+      "name": "What Is Yours Is Mine",
+      "type": "technique",
+      "folder": "Yasuki Courtier School",
+      "page": 108,
+      "coverage": "none",
+      "system": {
+        "rank": 5,
+        "rules": [],
+        "specialRules": "Get someone an item they need: +5k0 on Contested Social rolls against them for a day."
+      }
+    },
+    {
+      "name": "Whisper of Steel",
+      "type": "technique",
+      "folder": "Shosuro Infiltrator School",
+      "page": 129,
+      "coverage": "none",
+      "system": {
+        "rank": 4,
+        "rules": [],
+        "specialRules": "With one attack a Round you stay hidden unless foes win Investigation (Notice)/Perception vs your Stealth/Agility."
+      }
+    },
+    {
+      "name": "Wiles of the Carp",
+      "type": "technique",
+      "folder": "Yasuki Courtier School",
+      "page": 108,
+      "coverage": "none",
+      "system": {
+        "rank": 4,
+        "rules": [],
+        "specialRules": "Social rolls meant to deceive you take +5 TN per School Rank."
+      }
+    },
+    {
+      "name": "Will of Stone",
+      "type": "technique",
+      "folder": "Togashi Tattooed Order",
+      "page": 115,
+      "coverage": "none",
+      "system": {
+        "rank": 4,
+        "rules": [],
+        "specialRules": "Unarmed attacks take a Simple Action."
+      }
+    },
+    {
+      "name": "Will of the Storm",
+      "type": "technique",
+      "folder": "Yoritomo Courtier School",
+      "page": 121,
+      "coverage": "none",
+      "system": {
+        "rank": 4,
+        "rules": [],
+        "specialRules": "Opening a talk: Intimidation/Willpower vs Etiquette/Willpower. Win: for an hour, no Void and -3k0 Social against you."
+      }
+    },
+    {
+      "name": "Wind Never Stops",
+      "type": "technique",
+      "folder": "Utaku Battle Maiden",
+      "page": 132,
+      "coverage": "none",
+      "system": {
+        "rank": 4,
+        "rules": [],
+        "specialRules": "Mounted, Void: one Simple Action both moves and attacks; on a hit, +2k1 to damage rolls this Turn."
+      }
+    },
+    {
+      "name": "Wisdom Is the Greatest Weapon",
+      "type": "technique",
+      "folder": "Suzume Bushi School",
+      "page": 225,
+      "coverage": "none",
+      "system": {
+        "rank": 3,
+        "shugenja": false,
+        "affinity": "",
+        "deficiency": "",
+        "rules": [],
+        "specialRules": "Void: add your Honor Rank to a Perform or Lore roll."
+      }
+    },
+    {
+      "name": "Wisdom of the Ages",
+      "type": "technique",
+      "folder": "Asako Loremaster School",
+      "page": 125,
+      "coverage": "partial",
+      "system": {
+        "rank": 5,
+        "rules": [
+          {
+            "key": "RollModifier",
+            "selector": "skill:lore: architecture",
+            "roll": 5
+          },
+          {
+            "key": "RollModifier",
+            "selector": "skill:lore: bushido",
+            "roll": 5
+          },
+          {
+            "key": "RollModifier",
+            "selector": "skill:lore: elements",
+            "roll": 5
+          },
+          {
+            "key": "RollModifier",
+            "selector": "skill:lore: ghosts",
+            "roll": 5
+          },
+          {
+            "key": "RollModifier",
+            "selector": "skill:lore: heraldry",
+            "roll": 5
+          },
+          {
+            "key": "RollModifier",
+            "selector": "skill:lore: history",
+            "roll": 5
+          },
+          {
+            "key": "RollModifier",
+            "selector": "skill:lore: nature",
+            "roll": 5
+          },
+          {
+            "key": "RollModifier",
+            "selector": "skill:lore: omens",
+            "roll": 5
+          },
+          {
+            "key": "RollModifier",
+            "selector": "skill:lore: shugenja",
+            "roll": 5
+          },
+          {
+            "key": "RollModifier",
+            "selector": "skill:lore: spirit realms",
+            "roll": 5
+          },
+          {
+            "key": "RollModifier",
+            "selector": "skill:lore: theology",
+            "roll": 5
+          },
+          {
+            "key": "RollModifier",
+            "selector": "skill:lore: war",
+            "roll": 5
+          },
+          {
+            "key": "RollModifier",
+            "selector": "skill:lore: anatomy",
+            "roll": 5
+          },
+          {
+            "key": "RollModifier",
+            "selector": "skill:lore: maho",
+            "roll": 5
+          },
+          {
+            "key": "RollModifier",
+            "selector": "skill:lore: shadowlands",
+            "roll": 5
+          },
+          {
+            "key": "RollModifier",
+            "selector": "skill:lore: underworld",
+            "roll": 5
+          }
+        ],
+        "specialRules": "Lore Skills outside this pack get the +5k0 too."
+      }
+    },
+    {
+      "name": "Wisdom the Wind Brings",
+      "type": "technique",
+      "folder": "Kitsuki Investigator School",
+      "page": 114,
+      "coverage": "none",
+      "system": {
+        "rank": 2,
+        "rules": [],
+        "specialRules": "Deceiving Social rolls, Feints, and Disarms against you take +5 TN per Kitsuki Investigator School Rank."
+      }
+    },
+    {
+      "name": "Wolf's Little Lesson",
+      "type": "technique",
+      "folder": "Hiruma Bushi School",
+      "page": 108,
+      "coverage": "none",
+      "system": {
+        "rank": 2,
+        "rules": [],
+        "specialRules": "Attack Stance: each melee hit gives +5 Armor TN, stacking up to School Rank times, until the skirmish ends."
+      }
+    },
+    {
+      "name": "Yoritomo Scoundrel",
+      "type": "technique",
+      "folder": "Alternate Paths",
+      "page": 253,
+      "coverage": "partial",
+      "system": {
+        "rank": 2,
+        "rules": [
+          {
+            "key": "Prerequisite",
+            "label": "Commerce 2, Sailing 2",
+            "requires": [
+              {
+                "gte": [
+                  "skill:commerce",
+                  2
+                ]
+              },
+              {
+                "gte": [
+                  "skill:sailing",
+                  2
+                ]
+              }
+            ]
+          },
+          {
+            "key": "RollModifier",
+            "selector": "skill:athletics",
+            "total": "2 * @school.rank",
+            "optional": true,
+            "label": "Yoritomo Scoundrel: Void Point spent on this roll"
+          },
+          {
+            "key": "RollModifier",
+            "selector": "skill:commerce",
+            "total": "2 * @school.rank",
+            "optional": true,
+            "label": "Yoritomo Scoundrel: Void Point spent on this roll"
+          },
+          {
+            "key": "RollModifier",
+            "selector": "skill:sailing",
+            "total": "2 * @school.rank",
+            "optional": true,
+            "label": "Yoritomo Scoundrel: Void Point spent on this roll"
+          },
+          {
+            "key": "RollModifier",
+            "selector": "skill:sincerity",
+            "total": "2 * @school.rank",
+            "optional": true,
+            "label": "Yoritomo Scoundrel: Void Point spent on this roll"
+          },
+          {
+            "key": "RollModifier",
+            "selector": "skill-type:low",
+            "total": "2 * @school.rank",
+            "optional": true,
+            "label": "Yoritomo Scoundrel: Void Point spent on this roll"
+          }
+        ],
+        "specialRules": "Replaces Yoritomo Bushi 2."
+      }
+    }
+  ]
+}

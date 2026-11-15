@@ -1,5 +1,5 @@
 import { NPC_INSIGHT_RANK, WOUND_LEVEL_ORDER } from "../../config/game-mechanics.js";
-import { booleanField, numberField, spellSlotsField, stringField } from "../fields.js";
+import { booleanField, numberField, sourceField, spellSlotsField, stringField } from "../fields.js";
 import { migrateNpcSource } from "../migrate-source.js";
 import { prepareNpcData } from "../../documents/actor/preparation/npc-preparation.js";
 import { prepareFear } from "../../documents/actor/calculations/fear-system.js";
@@ -81,7 +81,9 @@ export default class NpcData extends ActorData {
         )
       ),
       fear: new SchemaField({ rank: numberField(0) }),
-      spellSlots: spellSlotsField(0)
+      spellSlots: spellSlotsField(0),
+      // The book and page a creature comes from (roadmap/STAGE-15); blank for one the GM made
+      source: sourceField()
     };
   }
 

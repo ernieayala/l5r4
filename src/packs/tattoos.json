@@ -1,0 +1,187 @@
+{
+  "name": "tattoos",
+  "label": "Tattoos",
+  "documentType": "Item",
+  "types": [
+    "tattoo"
+  ],
+  "pages": [
+    [
+      112,
+      115
+    ]
+  ],
+  "entries": [
+    {
+      "name": "Balance",
+      "type": "tattoo",
+      "page": 115,
+      "coverage": "none",
+      "system": {
+        "rules": [],
+        "passive": false,
+        "effect": "Spells aimed at you: TN up or down (chosen on activation) by 2 x School Rank + 5."
+      }
+    },
+    {
+      "name": "Bamboo",
+      "type": "tattoo",
+      "page": 115,
+      "coverage": "full",
+      "system": {
+        "rules": [
+          {
+            "key": "ArmorTN",
+            "value": "2 * @school.rank + 5"
+          }
+        ],
+        "passive": false,
+        "effect": ""
+      }
+    },
+    {
+      "name": "Blaze",
+      "type": "tattoo",
+      "page": 115,
+      "coverage": "full",
+      "system": {
+        "rules": [
+          {
+            "key": "RollModifier",
+            "selector": "damage",
+            "total": "@rings.fire + @school.rank",
+            "optional": true,
+            "label": "Unarmed attack"
+          }
+        ],
+        "passive": false,
+        "effect": ""
+      }
+    },
+    {
+      "name": "Centipede",
+      "type": "tattoo",
+      "page": 115,
+      "coverage": "none",
+      "system": {
+        "rules": [],
+        "passive": false,
+        "effect": "Complex Move of Water x 100' for a day; a stop over 1 minute ends it, then 12 hours with no physical actions."
+      }
+    },
+    {
+      "name": "Crab",
+      "type": "tattoo",
+      "page": 115,
+      "coverage": "full",
+      "system": {
+        "rules": [
+          {
+            "key": "Reduction",
+            "value": "@rings.earth"
+          }
+        ],
+        "passive": false,
+        "effect": ""
+      }
+    },
+    {
+      "name": "Crane",
+      "type": "tattoo",
+      "page": 115,
+      "coverage": "none",
+      "system": {
+        "rules": [],
+        "passive": false,
+        "effect": "School Rank + Air pool of +1k0 for Social Skill rolls, 1 hour; at most Void Ring per roll; lost on a new tattoo."
+      }
+    },
+    {
+      "name": "Dragon",
+      "type": "tattoo",
+      "page": 115,
+      "coverage": "none",
+      "system": {
+        "rules": [],
+        "passive": false,
+        "effect": "Complex Action: fire cone 10' + School Rank long, 5' wide, DR Fire Ring to all in it; you take Fire Ring damage."
+      }
+    },
+    {
+      "name": "Hawk",
+      "type": "tattoo",
+      "page": 115,
+      "coverage": "none",
+      "system": {
+        "rules": [],
+        "passive": false,
+        "effect": "Complex Action: leap up to Water Ring x 25'."
+      }
+    },
+    {
+      "name": "Ki-Rin",
+      "type": "tattoo",
+      "page": 115,
+      "coverage": "none",
+      "system": {
+        "rules": [],
+        "passive": false,
+        "effect": "Once per Round, re-roll one roll and keep the better result."
+      }
+    },
+    {
+      "name": "Lion",
+      "type": "tattoo",
+      "page": 115,
+      "coverage": "none",
+      "system": {
+        "rules": [],
+        "passive": false,
+        "effect": "Gain School Rank ranks in one Bugei Skill you pick."
+      }
+    },
+    {
+      "name": "Mantis",
+      "type": "tattoo",
+      "page": 115,
+      "coverage": "full",
+      "system": {
+        "rules": [
+          {
+            "key": "ConditionImmunity",
+            "condition": "feared"
+          }
+        ],
+        "passive": true,
+        "effect": ""
+      }
+    },
+    {
+      "name": "Mountain",
+      "type": "tattoo",
+      "page": 115,
+      "coverage": "full",
+      "system": {
+        "rules": [
+          {
+            "key": "Wounds",
+            "penalty": "0 - @school.rank - 2"
+          }
+        ],
+        "passive": false,
+        "effect": ""
+      }
+    },
+    {
+      "name": "Ocean",
+      "type": "tattoo",
+      "page": 115,
+      "coverage": "none",
+      "system": {
+        "rules": [],
+        "passive": false,
+        "effect": "Owned: no need to eat or drink. Activated, once per 3 days: rested as by 8 hours' sleep, all Void Points back."
+      }
+    }
+  ]
+}

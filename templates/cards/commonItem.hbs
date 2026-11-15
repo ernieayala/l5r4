@@ -11,6 +11,12 @@
     {{/if}}
   {{/if}}
   {{#unless inSheet}}
+    {{#if system.specialRules}}
+      <h5>{{localize "l5r4.ui.sheets.rulesSummary"}}</h5>
+      <p>
+        {{{system.specialRules}}}
+      </p>
+    {{/if}}
     {{#if system.description}}
       <h5>{{localize "l5r4.ui.sheets.description"}}</h5>
       <p>

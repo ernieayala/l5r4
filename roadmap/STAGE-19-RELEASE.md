@@ -1,9 +1,10 @@
-# Stage 18: Release 4.0.0
+# Stage 19: Release 4.0.0
 
 **Goal:** 4.0.0 is published with a manifest requiring 14.370, a release zip built from an allowlist that ships the
 compiled packs and no licensed or development file, documentation that matches it, and a smoke batch that fails on
 any deprecated call.
-**Needs:** 1-17. A release candidate passes the Stage 16 coverage check and a Stage 17 playtest run first.
+**Needs:** 1-18. A release candidate passes the Stage 16 coverage check, the Stage 17 convention checks, and a
+Stage 18 playtest run first.
 
 ## Foundry v14 APIs
 
@@ -34,7 +35,7 @@ any deprecated call.
 
 | File | Does |
 |------|------|
-| `tools/release-files.mjs` | The allowlist of paths that go into the zip: `system.json`, `dist/`, `module/`, `templates/`, `lang/`, `assets/`, `packs/`, the user-facing docs, `LICENSE`. Anything not listed stays out. `game-rules/`, `content/`, `roadmap/`, `tests/`, `scss/`, `src/`, `tools/`, `.claude/`, `CLAUDE.md`, and `node_modules/` are never listed. A CLI wrapper prints the file list for `zip -@` |
+| `tools/release-files.mjs` | The allowlist of paths that go into the zip: `system.json`, `dist/`, `module/`, `templates/`, `lang/`, `assets/`, `packs/`, the user-facing docs, `LICENSE`. Anything not listed stays out. `game-rules/`, `content/`, `roadmap/`, `tests/`, `scss/`, `src/`, `tools/`, `.claude/`, `CLAUDE.md`, `docs/`, and `node_modules/` are never listed. A CLI wrapper prints the file list for `zip -@` |
 | `tools/manifest.mjs` | Pure function with a CLI wrapper: given a version and a release type, returns `system.json` with `version`, `manifest`, and `download` set (stable releases point at `releases/latest/download/`, pre-releases at the tag). Both workflows call it instead of their own rewrite |
 | `.github/workflows/create-release.yml`, `release.yml` | Compile the packs with `npm run build:packs`, build the zip from `tools/release-files.mjs`, rewrite the manifest with `tools/manifest.mjs`, validate with the whole gate, replace the retired upload action |
 | `package.json` `release:validate` | Fixed to a mode `scripts/prepare-release.js` accepts, or removed |

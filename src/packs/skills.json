@@ -1,0 +1,291 @@
+{
+  "name": "skills",
+  "label": "Skills",
+  "documentType": "Item",
+  "types": ["skill"],
+  "pages": [[133, 145]],
+  "entries": [
+    { "name": "Acting", "type": "skill", "folder": "High Skills", "page": 135, "coverage": "partial", "system": { "type": "high", "trait": "awa", "social": true, "availableEmphases": ["Clan", "Gender", "Profession"], "specialRules": "Counts as a Perform Skill where an effect names Perform Skills.", "mastery3": "Disguise TN -5.", "mastery5": "Disguise TN -10 in all.", "mastery7": "Disguise TN -15 in all." } },
+    { "name": "Calligraphy", "type": "skill", "folder": "High Skills", "page": 135, "coverage": "partial", "system": { "type": "high", "trait": "int", "availableEmphases": ["Cipher", "High Rokugani"], "specialRules": "Counts as an Artisan Skill where an effect names Artisan Skills.", "mastery5": "+10 when cracking a cipher." } },
+    { "name": "Courtier", "type": "skill", "folder": "High Skills", "page": 135, "coverage": "partial", "system": { "type": "high", "trait": "awa", "social": true, "availableEmphases": ["Gossip", "Manipulation", "Rhetoric"], "mastery3": "Insight +3.", "mastery5": "+1k0 on Contested Rolls with this Skill.", "mastery7": "Insight +7 more (+10 in all)." } },
+    { "name": "Divination", "type": "skill", "folder": "High Skills", "page": 135, "coverage": "partial", "system": { "type": "high", "trait": "int", "availableEmphases": ["Astrology", "Kawaru"], "mastery5": "The day's second reading costs no Void Point." } },
+    { "name": "Etiquette", "type": "skill", "folder": "High Skills", "page": 136, "coverage": "partial", "system": { "type": "high", "trait": "awa", "social": true, "availableEmphases": ["Bureaucracy", "Conversation", "Courtesy"], "mastery3": "Insight +3.", "mastery5": "+1k0 on Contested Rolls with this Skill.", "mastery7": "Insight +7 more (+10 in all)." } },
+    { "name": "Investigation", "type": "skill", "folder": "High Skills", "page": 136, "coverage": "partial", "system": { "type": "high", "trait": "per", "availableEmphases": ["Interrogation", "Notice", "Search"], "mastery3": "A second Search attempt keeps the first attempt's TN.", "mastery5": "+5 on Contested Rolls with this Skill.", "mastery7": "A failed second Search attempt may be followed by a third." } },
+    { "name": "Medicine", "type": "skill", "folder": "High Skills", "page": 137, "coverage": "partial", "system": { "type": "high", "trait": "int", "availableEmphases": ["Antidotes", "Disease", "Herbalism", "Non-Humans", "Wound Treatment"], "mastery5": "Wounds healed with this Skill: +1k0." } },
+    { "name": "Meditation", "type": "skill", "folder": "High Skills", "page": 137, "coverage": "partial", "system": { "type": "high", "trait": "void", "availableEmphases": ["Fasting", "Void Recovery"], "mastery3": "A success regains as many as 2 Void Points.", "mastery5": "Fasting rolls: TN -5.", "mastery7": "A success regains as many as 3 Void Points." } },
+    { "name": "Sincerity", "type": "skill", "folder": "High Skills", "page": 138, "coverage": "partial", "system": { "type": "high", "trait": "awa", "social": true, "availableEmphases": ["Honesty", "Deceit"], "specialRules": "The Deceit Emphasis counts as a Low Skill.", "mastery5": "+5 on Contested Rolls with this Skill." } },
+    {
+      "name": "Spellcraft",
+      "type": "skill",
+      "folder": "High Skills",
+      "page": 138,
+      "coverage": "partial",
+      "system": {
+        "type": "high",
+        "trait": "int",
+        "availableEmphases": ["Importune", "Spell Research"],
+        "specialRules": "Importune used with kami counts as a Social Skill.",
+        "rules": [{ "key": "RollModifier", "selector": "spell", "roll": 1, "predicate": [{ "gte": ["skill:spellcraft", 5] }] }]
+      }
+    },
+    { "name": "Tea Ceremony", "type": "skill", "folder": "High Skills", "page": 139, "coverage": "partial", "system": { "type": "high", "trait": "void", "mastery5": "Each participant regains 2 Void Points instead of 1." } },
+    { "name": "Artisan: Bonsai", "type": "skill", "folder": "High Skills", "page": 135, "coverage": "full", "system": { "type": "high", "trait": "awa" } },
+    { "name": "Artisan: Gardening", "type": "skill", "folder": "High Skills", "page": 135, "coverage": "full", "system": { "type": "high", "trait": "awa" } },
+    { "name": "Artisan: Ikebana", "type": "skill", "folder": "High Skills", "page": 135, "coverage": "full", "system": { "type": "high", "trait": "awa" } },
+    { "name": "Artisan: Origami", "type": "skill", "folder": "High Skills", "page": 135, "coverage": "full", "system": { "type": "high", "trait": "awa" } },
+    { "name": "Artisan: Painting", "type": "skill", "folder": "High Skills", "page": 135, "coverage": "full", "system": { "type": "high", "trait": "awa" } },
+    { "name": "Artisan: Poetry", "type": "skill", "folder": "High Skills", "page": 135, "coverage": "full", "system": { "type": "high", "trait": "awa" } },
+    { "name": "Artisan: Sculpture", "type": "skill", "folder": "High Skills", "page": 135, "coverage": "full", "system": { "type": "high", "trait": "awa" } },
+    { "name": "Artisan: Tattooing", "type": "skill", "folder": "High Skills", "page": 135, "coverage": "full", "system": { "type": "high", "trait": "awa" } },
+    { "name": "Games: Fortunes & Winds", "type": "skill", "folder": "High Skills", "page": 136, "coverage": "full", "system": { "type": "high", "trait": "awa" } },
+    { "name": "Games: Go", "type": "skill", "folder": "High Skills", "page": 136, "coverage": "full", "system": { "type": "high", "trait": "int" } },
+    { "name": "Games: Kemari", "type": "skill", "folder": "High Skills", "page": 136, "coverage": "full", "system": { "type": "high", "trait": "agi" } },
+    { "name": "Games: Letters", "type": "skill", "folder": "High Skills", "page": 136, "coverage": "full", "system": { "type": "high", "trait": "awa" } },
+    { "name": "Games: Sadane", "type": "skill", "folder": "High Skills", "page": 136, "coverage": "full", "system": { "type": "high", "trait": "awa" } },
+    { "name": "Games: Shogi", "type": "skill", "folder": "High Skills", "page": 136, "coverage": "full", "system": { "type": "high", "trait": "int" } },
+    { "name": "Lore: Architecture", "type": "skill", "folder": "High Skills", "page": 137, "coverage": "full", "system": { "type": "high", "trait": "int" } },
+    { "name": "Lore: Bushido", "type": "skill", "folder": "High Skills", "page": 137, "coverage": "full", "system": { "type": "high", "trait": "int" } },
+    { "name": "Lore: Elements", "type": "skill", "folder": "High Skills", "page": 137, "coverage": "full", "system": { "type": "high", "trait": "int" } },
+    { "name": "Lore: Ghosts", "type": "skill", "folder": "High Skills", "page": 137, "coverage": "full", "system": { "type": "high", "trait": "int" } },
+    { "name": "Lore: Heraldry", "type": "skill", "folder": "High Skills", "page": 137, "coverage": "full", "system": { "type": "high", "trait": "int" } },
+    { "name": "Lore: History", "type": "skill", "folder": "High Skills", "page": 137, "coverage": "full", "system": { "type": "high", "trait": "int" } },
+    { "name": "Lore: Nature", "type": "skill", "folder": "High Skills", "page": 137, "coverage": "full", "system": { "type": "high", "trait": "int" } },
+    { "name": "Lore: Omens", "type": "skill", "folder": "High Skills", "page": 137, "coverage": "full", "system": { "type": "high", "trait": "int" } },
+    { "name": "Lore: Shugenja", "type": "skill", "folder": "High Skills", "page": 137, "coverage": "full", "system": { "type": "high", "trait": "int" } },
+    { "name": "Lore: Spirit Realms", "type": "skill", "folder": "High Skills", "page": 137, "coverage": "full", "system": { "type": "high", "trait": "int" } },
+    { "name": "Lore: Theology", "type": "skill", "folder": "High Skills", "page": 137, "coverage": "full", "system": { "type": "high", "trait": "int" } },
+    { "name": "Lore: War", "type": "skill", "folder": "High Skills", "page": 137, "coverage": "full", "system": { "type": "high", "trait": "int" } },
+    { "name": "Perform: Biwa", "type": "skill", "folder": "High Skills", "page": 137, "coverage": "full", "system": { "type": "high", "trait": "agi", "social": true } },
+    { "name": "Perform: Dance", "type": "skill", "folder": "High Skills", "page": 137, "coverage": "full", "system": { "type": "high", "trait": "agi", "social": true } },
+    { "name": "Perform: Drums", "type": "skill", "folder": "High Skills", "page": 137, "coverage": "full", "system": { "type": "high", "trait": "agi", "social": true } },
+    { "name": "Perform: Flute", "type": "skill", "folder": "High Skills", "page": 137, "coverage": "full", "system": { "type": "high", "trait": "agi", "social": true } },
+    { "name": "Perform: Oratory", "type": "skill", "folder": "High Skills", "page": 137, "coverage": "full", "system": { "type": "high", "trait": "awa", "social": true } },
+    { "name": "Perform: Puppeteer", "type": "skill", "folder": "High Skills", "page": 137, "coverage": "full", "system": { "type": "high", "trait": "agi", "social": true } },
+    { "name": "Perform: Samisen", "type": "skill", "folder": "High Skills", "page": 137, "coverage": "full", "system": { "type": "high", "trait": "agi", "social": true } },
+    { "name": "Perform: Song", "type": "skill", "folder": "High Skills", "page": 137, "coverage": "full", "system": { "type": "high", "trait": "awa", "social": true } },
+    { "name": "Perform: Storytelling", "type": "skill", "folder": "High Skills", "page": 137, "coverage": "full", "system": { "type": "high", "trait": "awa", "social": true } },
+    { "name": "Athletics", "type": "skill", "folder": "Bugei Skills", "page": 139, "coverage": "partial", "system": { "type": "bugei", "trait": "str", "availableEmphases": ["Climbing", "Running", "Swimming", "Throwing"], "mastery3": "Moderate Terrain no longer slows; Difficult Terrain costs 1 Water for movement, not 2.", "mastery5": "No terrain slows movement.", "mastery7": "+5' to one Move Action each Round, never past the most a Round allows." } },
+    {
+      "name": "Battle",
+      "type": "skill",
+      "folder": "Bugei Skills",
+      "page": 139,
+      "coverage": "full",
+      "system": {
+        "type": "bugei",
+        "trait": "per",
+        "availableEmphases": ["Mass Combat", "Skirmish"],
+        "rules": [{ "key": "Initiative", "total": "@skills.battle.rank", "predicate": [{ "gte": ["skill:battle", 5] }] }]
+      }
+    },
+    {
+      "name": "Defense",
+      "type": "skill",
+      "folder": "Bugei Skills",
+      "page": 139,
+      "coverage": "partial",
+      "system": {
+        "type": "bugei",
+        "trait": "ref",
+        "mastery3": "While Full Defense goes on, the last Defense roll may stand instead of a new roll.",
+        "mastery7": "One Simple Action, never an attack, while holding Full Defense.",
+        "rules": [
+          {
+            "key": "ArmorTN",
+            "value": 3,
+            "predicate": [{ "gte": ["skill:defense", 5] }, { "or": ["status:defenseStance", "status:fullDefenseStance"] }]
+          }
+        ]
+      }
+    },
+    { "name": "Horsemanship", "type": "skill", "folder": "Bugei Skills", "page": 139, "coverage": "partial", "system": { "type": "bugei", "trait": "agi", "availableEmphases": ["Gaijin Riding Horse", "Rokugani Pony", "Utaku Steed"], "mastery3": "May take the Full Attack Stance while mounted.", "mastery5": "Mounting is a Simple Action, dismounting a Free Action.", "mastery7": "Mounting is a Free Action." } },
+    {
+      "name": "Hunting",
+      "type": "skill",
+      "folder": "Bugei Skills",
+      "page": 140,
+      "coverage": "full",
+      "system": {
+        "type": "bugei",
+        "trait": "per",
+        "availableEmphases": ["Survival", "Tracking", "Trailblazing"],
+        "rules": [{ "key": "RollModifier", "selector": "skill:stealth", "roll": 1, "optional": true, "label": "Hunting: in the wilderness", "predicate": [{ "gte": ["skill:hunting", 5] }] }]
+      }
+    },
+    { "name": "Iaijutsu", "type": "skill", "folder": "Bugei Skills", "page": 140, "coverage": "partial", "system": { "type": "bugei", "trait": "ref", "availableEmphases": ["Assessment", "Focus"], "mastery3": "Draws a katana as a Free Action." } },
+    {
+      "name": "Jiujutsu",
+      "type": "skill",
+      "folder": "Bugei Skills",
+      "page": 140,
+      "coverage": "partial",
+      "system": {
+        "type": "bugei",
+        "trait": "agi",
+        "availableEmphases": ["Grappling", "Improvised Weapons", "Martial Arts"],
+        "mastery5": "A Free Raise toward starting a Grapple.",
+        "rules": [
+          { "key": "RollModifier", "selector": "damage", "roll": 1, "predicate": [{ "gte": ["skill:jiujutsu", 3] }, "weapon:skill:jiujutsu"] },
+          { "key": "RollModifier", "selector": "damage", "keep": 1, "predicate": [{ "gte": ["skill:jiujutsu", 7] }, "weapon:skill:jiujutsu"] }
+        ]
+      }
+    },
+    {
+      "name": "Chain Weapons",
+      "type": "skill",
+      "folder": "Bugei Skills",
+      "page": 141,
+      "coverage": "partial",
+      "system": {
+        "type": "bugei",
+        "trait": "agi",
+        "availableEmphases": ["Kusarigama", "Kyoketsu-shogi", "Manrikikusari"],
+        "mastery3": "A chain weapon can start a Grapple.",
+        "mastery5": "+1k0 on Contested Rolls against a foe the chain weapon holds entangled or Grappled.",
+        "rules": [
+          { "key": "RaiseRule", "selector": "attack", "maneuver": "disarm", "cost": -1, "predicate": [{ "gte": ["skill:chain weapons", 7] }, "weapon:skill:chain weapons"] },
+          { "key": "RaiseRule", "selector": "attack", "maneuver": "knockdown", "cost": -1, "predicate": [{ "gte": ["skill:chain weapons", 7] }, "weapon:skill:chain weapons"] }
+        ]
+      }
+    },
+    {
+      "name": "Heavy Weapons",
+      "type": "skill",
+      "folder": "Bugei Skills",
+      "page": 141,
+      "coverage": "full",
+      "system": {
+        "type": "bugei",
+        "trait": "agi",
+        "availableEmphases": ["Dai Tsuchi", "Masakari", "Ono", "Tetsubo"],
+        "rules": [
+          { "key": "DamageSource", "selector": "damage", "ignoreReduction": 2, "predicate": [{ "gte": ["skill:heavy weapons", 3] }, "weapon:skill:heavy weapons"] },
+          { "key": "RaiseRule", "selector": "attack", "maneuver": "knockdown", "cost": -1, "predicate": [{ "gte": ["skill:heavy weapons", 5] }, "weapon:skill:heavy weapons"] },
+          { "key": "DiceRule", "selector": "damage", "explode": 9, "predicate": [{ "gte": ["skill:heavy weapons", 7] }, "weapon:skill:heavy weapons"] }
+        ]
+      }
+    },
+    {
+      "name": "Kenjutsu",
+      "type": "skill",
+      "folder": "Bugei Skills",
+      "page": 141,
+      "coverage": "partial",
+      "system": {
+        "type": "bugei",
+        "trait": "agi",
+        "availableEmphases": ["Katana", "Ninja-to", "No-dachi", "Parangu", "Scimitar", "Wakizashi"],
+        "mastery5": "Readying a sword is a Free Action.",
+        "rules": [
+          { "key": "RollModifier", "selector": "damage", "roll": 1, "predicate": [{ "gte": ["skill:kenjutsu", 3] }, "weapon:skill:kenjutsu"] },
+          { "key": "DiceRule", "selector": "damage", "explode": 9, "predicate": [{ "gte": ["skill:kenjutsu", 7] }, "weapon:skill:kenjutsu"] }
+        ]
+      }
+    },
+    {
+      "name": "Knives",
+      "type": "skill",
+      "folder": "Bugei Skills",
+      "page": 141,
+      "coverage": "partial",
+      "system": {
+        "type": "bugei",
+        "trait": "agi",
+        "availableEmphases": ["Aiguchi", "Jitte", "Kama", "Sai", "Tanto"],
+        "mastery3": "No off-hand penalty with a knife.",
+        "rules": [
+          { "key": "RaiseRule", "selector": "attack", "maneuver": "disarm", "cost": -1, "predicate": [{ "gte": ["skill:knives", 5] }, { "or": ["weapon:name:sai", "weapon:name:jitte"] }] },
+          { "key": "RaiseRule", "selector": "attack", "maneuver": "extraAttack", "cost": -1, "predicate": [{ "gte": ["skill:knives", 7] }, "weapon:skill:knives"] }
+        ]
+      }
+    },
+    { "name": "Kyujutsu", "type": "skill", "folder": "Bugei Skills", "page": 142, "coverage": "partial", "system": { "type": "bugei", "trait": "ref", "availableEmphases": ["Dai-kyu", "Han-kyu", "Yumi"], "mastery3": "Stringing a bow is a Simple Action.", "mastery5": "Every bow's maximum range +50%.", "mastery7": "Every bow counts as 1 Strength higher." } },
+    {
+      "name": "Ninjutsu",
+      "type": "skill",
+      "folder": "Bugei Skills",
+      "page": 142,
+      "coverage": "partial",
+      "system": {
+        "type": "bugei",
+        "trait": "agi",
+        "availableEmphases": ["Blowgun", "Shuriken", "Tsubute"],
+        "specialRules": "Rolled with Agility or Reflexes. Counts as a Low Skill.",
+        "mastery5": "Ninjutsu weapons' damage dice explode as usual.",
+        "rules": [
+          { "key": "RollModifier", "selector": "damage", "roll": 1, "predicate": [{ "gte": ["skill:ninjutsu", 3] }, "weapon:skill:ninjutsu"] },
+          { "key": "RollModifier", "selector": "damage", "keep": 1, "predicate": [{ "gte": ["skill:ninjutsu", 7] }, "weapon:skill:ninjutsu"] }
+        ]
+      }
+    },
+    {
+      "name": "Polearms",
+      "type": "skill",
+      "folder": "Bugei Skills",
+      "page": 142,
+      "coverage": "partial",
+      "system": {
+        "type": "bugei",
+        "trait": "agi",
+        "availableEmphases": ["Bisento", "Nagamaki", "Naginata", "Sasumata", "Sodegarami"],
+        "mastery3": "+5 Initiative for a skirmish's first Round while wielding a polearm.",
+        "mastery5": "The +1k0 damage also counts against a much larger foe.",
+        "mastery7": "Readying a polearm is a Free Action.",
+        "rules": [
+          { "key": "RollModifier", "selector": "damage", "roll": 1, "predicate": [{ "gte": ["skill:polearms", 5] }, "weapon:skill:polearms", "target:status:mounted"] }
+        ]
+      }
+    },
+    { "name": "Spears", "type": "skill", "folder": "Bugei Skills", "page": 142, "coverage": "partial", "system": { "type": "bugei", "trait": "agi", "availableEmphases": ["Mai Chong", "Kumade", "Lance", "Nage-yari", "Yari"], "mastery3": "A skirmish's first Round: melee spear attacks ignore 3 Reduction.", "mastery5": "+5' to a thrown spear's range.", "mastery7": "Readying a spear is a Free Action." } },
+    {
+      "name": "Staves",
+      "type": "skill",
+      "folder": "Bugei Skills",
+      "page": 142,
+      "coverage": "partial",
+      "system": {
+        "type": "bugei",
+        "trait": "agi",
+        "availableEmphases": ["Bo", "Jo", "Machi-kanshisha", "Nunchaku", "Sang Kauw", "Tonfa"],
+        "mastery3": "Armor bonuses no longer count twice against staff attacks.",
+        "mastery7": "Readying a large staff is a Free Action.",
+        "rules": [
+          { "key": "RaiseRule", "selector": "attack", "maneuver": "knockdown", "cost": -1, "predicate": [{ "gte": ["skill:staves", 5] }, "weapon:skill:staves"] },
+          { "key": "RollModifier", "selector": "damage", "roll": 1, "predicate": [{ "gte": ["skill:staves", 7] }, "weapon:skill:staves", "weapon:size:small"] }
+        ]
+      }
+    },
+    { "name": "War Fan", "type": "skill", "folder": "Bugei Skills", "page": 142, "coverage": "partial", "system": { "type": "bugei", "trait": "agi", "mastery3": "No off-hand penalty with a war fan.", "mastery5": "Armor TN +1 while using a war fan.", "mastery7": "Armor TN +3 while using a war fan." } },
+    { "name": "Animal Handling", "type": "skill", "folder": "Merchant Skills", "page": 143, "coverage": "partial", "system": { "type": "merch", "trait": "awa", "availableEmphases": ["Dogs", "Horses", "Falcons"], "mastery3": "May train dogs, horses, or falcons for others to use.", "mastery5": "Its trained animals still held attack on command; a badly hurt one flees.", "mastery7": "Its trained animals obey commands given without words." } },
+    { "name": "Commerce", "type": "skill", "folder": "Merchant Skills", "page": 143, "coverage": "partial", "system": { "type": "merch", "trait": "int", "availableEmphases": ["Appraisal", "Mathematics"], "mastery5": "May move the price of an item bought or sold by up to 20%." } },
+    { "name": "Engineering", "type": "skill", "folder": "Merchant Skills", "page": 143, "coverage": "partial", "system": { "type": "merch", "trait": "int", "availableEmphases": ["Construction", "Siege"], "specialRules": "Counts as a Craft Skill where an effect names Craft Skills.", "mastery5": "+5 on its Cooperative or Cumulative rolls." } },
+    { "name": "Sailing", "type": "skill", "folder": "Merchant Skills", "page": 144, "coverage": "partial", "system": { "type": "merch", "trait": "agi", "availableEmphases": ["Knot-work", "Navigation"], "specialRules": "Rolled with Agility or Intelligence. Counts as a Craft Skill where an effect names Craft Skills.", "mastery5": "+5 on its Cooperative or Cumulative rolls." } },
+    { "name": "Craft: Armorsmithing", "type": "skill", "folder": "High Skills", "page": 143, "coverage": "full", "system": { "type": "high", "trait": "int" } },
+    { "name": "Craft: Blacksmithing", "type": "skill", "folder": "Merchant Skills", "page": 143, "coverage": "full", "system": { "type": "merch", "trait": "int" } },
+    { "name": "Craft: Bowyer", "type": "skill", "folder": "High Skills", "page": 143, "coverage": "full", "system": { "type": "high", "trait": "int" } },
+    { "name": "Craft: Brewing", "type": "skill", "folder": "Merchant Skills", "page": 143, "coverage": "full", "system": { "type": "merch", "trait": "int" } },
+    { "name": "Craft: Carpentry", "type": "skill", "folder": "Merchant Skills", "page": 143, "coverage": "full", "system": { "type": "merch", "trait": "int" } },
+    { "name": "Craft: Cartography", "type": "skill", "folder": "Merchant Skills", "page": 143, "coverage": "full", "system": { "type": "merch", "trait": "int" } },
+    { "name": "Craft: Cobbling", "type": "skill", "folder": "Merchant Skills", "page": 143, "coverage": "full", "system": { "type": "merch", "trait": "int" } },
+    { "name": "Craft: Cooking", "type": "skill", "folder": "Merchant Skills", "page": 143, "coverage": "full", "system": { "type": "merch", "trait": "int" } },
+    { "name": "Craft: Farming", "type": "skill", "folder": "Merchant Skills", "page": 143, "coverage": "full", "system": { "type": "merch", "trait": "int" } },
+    { "name": "Craft: Fishing", "type": "skill", "folder": "Merchant Skills", "page": 143, "coverage": "full", "system": { "type": "merch", "trait": "int" } },
+    { "name": "Craft: Masonry", "type": "skill", "folder": "Merchant Skills", "page": 143, "coverage": "full", "system": { "type": "merch", "trait": "int" } },
+    { "name": "Craft: Mining", "type": "skill", "folder": "Merchant Skills", "page": 143, "coverage": "full", "system": { "type": "merch", "trait": "int" } },
+    { "name": "Craft: Pottery", "type": "skill", "folder": "Merchant Skills", "page": 143, "coverage": "full", "system": { "type": "merch", "trait": "int" } },
+    { "name": "Craft: Shipbuilding", "type": "skill", "folder": "Merchant Skills", "page": 143, "coverage": "full", "system": { "type": "merch", "trait": "int" } },
+    { "name": "Craft: Tailoring", "type": "skill", "folder": "Merchant Skills", "page": 143, "coverage": "full", "system": { "type": "merch", "trait": "int" } },
+    { "name": "Craft: Weaponsmithing", "type": "skill", "folder": "High Skills", "page": 143, "coverage": "full", "system": { "type": "high", "trait": "int" } },
+    { "name": "Craft: Weaving", "type": "skill", "folder": "Merchant Skills", "page": 143, "coverage": "full", "system": { "type": "merch", "trait": "int" } },
+    { "name": "Craft: Poison", "type": "skill", "folder": "Low Skills", "page": 143, "coverage": "full", "system": { "type": "low", "trait": "int" } },
+    { "name": "Lore: Anatomy", "type": "skill", "folder": "Low Skills", "page": 137, "coverage": "full", "system": { "type": "low", "trait": "int" } },
+    { "name": "Lore: Maho", "type": "skill", "folder": "Low Skills", "page": 137, "coverage": "full", "system": { "type": "low", "trait": "int" } },
+    { "name": "Lore: Shadowlands", "type": "skill", "folder": "Low Skills", "page": 137, "coverage": "full", "system": { "type": "low", "trait": "int" } },
+    { "name": "Lore: Underworld", "type": "skill", "folder": "Low Skills", "page": 137, "coverage": "full", "system": { "type": "low", "trait": "int" } },
+    { "name": "Forgery", "type": "skill", "folder": "Low Skills", "page": 144, "coverage": "partial", "system": { "type": "low", "trait": "agi", "availableEmphases": ["Artwork", "Documents", "Personal Seals"], "specialRules": "Counts as a Craft Skill where an effect names Craft Skills.", "mastery3": "+1k0 to the TN others roll against to spot its forgeries.", "mastery5": "+1k0 on rolls to spot another's forgery.", "mastery7": "+1k1 in all to the TN others roll against to spot its forgeries." } },
+    { "name": "Intimidation", "type": "skill", "folder": "Low Skills", "page": 144, "coverage": "partial", "system": { "type": "low", "trait": "awa", "social": true, "availableEmphases": ["Bullying", "Control", "Torture"], "mastery5": "+5 on Contested Rolls with this Skill." } },
+    { "name": "Sleight of Hand", "type": "skill", "folder": "Low Skills", "page": 145, "coverage": "partial", "system": { "type": "low", "trait": "agi", "availableEmphases": ["Conceal", "Escape", "Pick Pocket", "Prestidigitation"], "mastery5": "Conceal can hide small weapons." } },
+    { "name": "Stealth", "type": "skill", "folder": "Low Skills", "page": 145, "coverage": "partial", "system": { "type": "low", "trait": "agi", "availableEmphases": ["Ambush", "Shadowing", "Sneaking", "Spell Casting"], "mastery3": "A Simple Move while hidden covers Water x 5 feet.", "mastery5": "A Simple Move while hidden covers Water x 10 feet.", "mastery7": "Free Move Actions as usual while hidden." } },
+    { "name": "Temptation", "type": "skill", "folder": "Low Skills", "page": 145, "coverage": "partial", "system": { "type": "low", "trait": "awa", "social": true, "availableEmphases": ["Bribery", "Seduction"], "mastery5": "+5 on Contested Rolls with this Skill." } }
+  ]
+}

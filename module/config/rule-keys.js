@@ -101,6 +101,15 @@ export const LEDGER_DIRECTIONS = freeze(["gain", "loss"]);
 export const CHOICE_LISTS = freeze(["traits", "rings", "skills"]);
 
 /**
+ * The values the "traits" and "rings" lists offer. The "skills" list is built from the Skill items there are.
+ * @type {Readonly<Record<string, ReadonlyArray<string>>>}
+ */
+export const CHOICE_LIST_VALUES = freeze({
+  traits: freeze(["sta", "wil", "str", "per", "ref", "awa", "agi", "int"]),
+  rings: freeze(["air", "earth", "fire", "water", "void"])
+});
+
+/**
  * Attack ranges a RollModifier or ArmorTN rule can be limited to.
  * @type {ReadonlyArray<string>}
  */

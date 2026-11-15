@@ -1,28 +1,43 @@
 /**
  * @module services/effects/activation
- * @description Kata and kiho apply while active, not while owned (roadmap/STAGE-11 decision 8; Core Rulebook pp.259,
- * 261). Activating one makes an Active Effect that carries the item's rules (its choices filled in) and an exclusive
- * group: one kata at a time, and one kiho of each type but Martial. Starting a second in a group ends the first
- * (module/documents/active-effect.js). Deactivating deletes the effect.
+ * @description Kata, kiho, and tattoos apply while active, not while owned (roadmap/STAGE-11 decision 8,
+ * roadmap/STAGE-15; Core Rulebook pp.259, 261, 115). Activating one makes an Active Effect that carries the item's
+ * rules (its choices filled in) and an exclusive group: one kata at a time, one kiho of each type but Martial, and one
+ * tattoo. Starting a second in a group ends the first (module/documents/active-effect.js). A tattoo lasts twice the
+ * School Rank in Rounds (p.115); a passive tattoo applies while owned and is not activated. Deactivating deletes the
+ * effect.
  */
 
 import { SYS_ID } from "../../config/constants.js";
 import { applyChoices } from "../../utils/choices.js";
+import { highestSchoolRank } from "../../utils/mechanics.js";
 
 /** Item types activated rather than applied while owned. */
-export const ACTIVATED_TYPES = Object.freeze(["kata", "kiho"]);
+export const ACTIVATED_TYPES = Object.freeze(["kata", "kiho", "tattoo"]);
 
 /**
- * The exclusive group of an item's effect: "kata", "kiho-<type>", or "" for a Martial kiho, of which several may be
- * active (p.261).
+ * The exclusive group of an item's effect: "kata", "tattoo", "kiho-<type>", or "" for a Martial kiho, of which
+ * several may be active (p.261).
  * @param {Item} item
  * @returns {string}
  */
 function groupOf(item) {
-  if (item.type === "kata") {
-    return "kata";
+  if (item.type === "kata" || item.type === "tattoo") {
+    return item.type;
   }
   return item.system.type === "martial" ? "" : `kiho-${item.system.type}`;
+}
+
+/**
+ * How long an activation lasts: a tattoo twice the School Rank in Rounds (p.115); a kata or kiho, or the tattoo of a
+ * character with no School, until it is ended.
+ * @param {Actor} actor
+ * @param {Item} item
+ * @returns {object}
+ */
+function durationOf(actor, item) {
+  const rank = item.type === "tattoo" ? highestSchoolRank(actor) : 0;
+  return rank ? { duration: { value: 2 * rank, units: "rounds" } } : {};
 }
 
 /**
@@ -51,7 +66,7 @@ export function activeItemIds(actor) {
  * @returns {Promise<void>}
  */
 export async function toggleActivation(actor, item) {
-  if (!ACTIVATED_TYPES.includes(item.type)) {
+  if (!ACTIVATED_TYPES.includes(item.type) || item.system.passive) {
     return;
   }
   const active = activationOf(actor, item);
@@ -65,6 +80,7 @@ export async function toggleActivation(actor, item) {
       img: item.img,
       origin: item.uuid,
       system: { rules: applyChoices(item.system.rules), group: groupOf(item) },
+      ...durationOf(actor, item),
       flags: { [SYS_ID]: { activatedFrom: item.id } }
     }
   ]);

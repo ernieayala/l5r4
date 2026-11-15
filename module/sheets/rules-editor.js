@@ -8,6 +8,7 @@
 import { SYS_ID } from "../config/constants.js";
 import { RULE_KEYS } from "../config/rule-keys.js";
 import { describeRule, newRule, ruleFromForm } from "../documents/rule-fields.js";
+import { answeredRules } from "../utils/choices.js";
 import { parseRulesJson } from "../utils/rule-engine.js";
 
 /** The editor's template, rendered inside each sheet's Rules tab. */
@@ -21,11 +22,12 @@ export const RULES_EDITOR_TEMPLATE = `systems/${SYS_ID}/templates/rules/editor.h
  * @returns {object}
  */
 export function rulesEditorContext(rules, mode, editable) {
+  const answered = answeredRules(rules);
   return {
     rulesMode: mode,
     rulesEditable: editable,
     ruleKeys: Object.fromEntries(RULE_KEYS.map(key => [key, key])),
-    rules: rules.map((rule, index) => ({ index, ...describeRule(rule) })),
+    rules: rules.map((rule, index) => ({ index, ...describeRule(rule, answered[index]) })),
     rulesJson: JSON.stringify(rules, null, 2)
   };
 }

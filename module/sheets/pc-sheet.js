@@ -9,7 +9,8 @@
  * Uses handler delegation pattern where UI interactions route to specialized handler classes:
  * - PcAdjustmentHandler: Void Ring, spell slots, rank/points adjustments
  * - PcTraitHandler: Trait rank adjustments with Shift+Click safety
- * - BioItemHandler: Clan/family/school item drag-drop and linking
+ * - BioItemHandler: Clan/family/school item linking (a drop of one replaces the old through
+ *   module/services/purchase.js)
  * - AppLauncherHandler: XP Manager and Wound Configuration dialogs
  * - StanceHandler: Stance changes (Attack, Defense, Full Attack, Full Defense, Center)
  * - PcContextBuilder: Sorted item lists with roll formulas and mastery abilities
@@ -318,53 +319,6 @@ export default class L5R4PcSheet extends BaseActorSheet {
     if (action === "change-stance") {
       return StanceHandler.changeStance(this._getHandlerContext(), event, element);
     }
-  }
-
-  /**
-   * Handles drop events with special bio item (clan/family/school) routing.
-   *
-   * **Game Rules Context:**
-   * Bio items are special Item types that define character identity:
-   * - **Clan**: Determines starting family options and clan-specific abilities
-   * - **Family**: Grants +1 to a specific trait (e.g., Mirumoto → Agility +1)
-   * - **School**: Defines techniques, starting skills, honor rank, and +1 trait
-   *
-   * Characters can only have one of each bio item type at a time. Dropping a new
-   * bio item replaces the existing one (e.g., dropping Crane Clan removes Dragon Clan).
-   *
-   * **Implementation:**
-   * Bio items route to BioItemHandler for replacement logic and trait recalculation.
-   * All other item types delegate to base class for standard item creation.
-   *
-   * @param {DragEvent} event - Drop event from Foundry drag-drop system
-   * @returns {Promise<void>}
-   * @protected
-   * @async
-   * @override
-   */
-  async _onDrop(event) {
-    const ev = event?.originalEvent ?? event;
-    if (!ev?.dataTransfer) {
-      return super._onDrop(event);
-    }
-
-    const data = foundry.applications.ux.TextEditor.getDragEventData(ev);
-    if (!data || data.type !== "Item") {
-      return super._onDrop(event);
-    }
-
-    const itemDoc = await fromUuid(data.uuid ?? "");
-    if (!itemDoc) {
-      return super._onDrop(event);
-    }
-
-    const type = String(itemDoc.type);
-    const BIO_TYPES = new Set(["clan", "family", "school"]);
-    if (!BIO_TYPES.has(type)) {
-      return super._onDropItem(event, data);
-    }
-
-    return BioItemHandler.handleDrop(this._getHandlerContext(), itemDoc);
   }
 
   /**

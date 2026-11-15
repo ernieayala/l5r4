@@ -92,6 +92,27 @@ export const F = (key, data) => {
 };
 
 /**
+ * Localizes a phrase: a key and its data, where a data value may itself be a phrase, localized first
+ * (module/utils/rule-summary.js).
+ *
+ * @param {{key: string, data?: object}} phrase
+ * @returns {string}
+ *
+ * @example
+ * phraseText({ key: "l5r4.ui.ruleSummary.TraitAdjust", data: { trait: { key: "l5r4.ui.mechanics.traits.agi" }, value: "+1" } })
+ * // "Agility +1"
+ */
+export const phraseText = phrase => {
+  const data = Object.fromEntries(
+    Object.entries(phrase.data ?? {}).map(([name, value]) => [
+      name,
+      value && typeof value === "object" ? phraseText(value) : value
+    ])
+  );
+  return F(phrase.key, data);
+};
+
+/**
  * Renders a Handlebars template.
  *
  * Wrapper around Foundry's renderTemplate() with validation.

@@ -1,6 +1,5 @@
 import { SYS_ID } from "../../module/config/constants.js";
-import { BioItemHandler } from "../../module/sheets/handlers/bio-item-handler.js";
-import { preparePurchase } from "../../module/services/purchase.js";
+import { addItem, preparePurchase } from "../../module/services/purchase.js";
 import { recordTrackChange, ledgerEntries } from "../../module/services/ledger.js";
 import { toggleActivation } from "../../module/services/effects/activation.js";
 import { folderTransfer, importItems } from "../../module/services/item-transfer.js";
@@ -133,7 +132,7 @@ export function registerAuthoringBatch(quench) {
       const schooled = async () => {
         const set = await schoolSet();
         const actor = track(await createTestPC({ name: "Quench Student" }));
-        await BioItemHandler.handleDrop({ actor }, set.school);
+        await addItem(actor, set.school.toObject());
         await waitFor(() => named(actor, "Quench Technique 1") && named(actor, "Meditation"));
         return { actor, ...set };
       };
@@ -319,6 +318,41 @@ export function registerAuthoringBatch(quench) {
               "Quench Way of the Blade"
             );
             assert.equal(message.system.pool.roll, 5);
+          })
+        );
+
+        it(
+          "a choice named in a field with fixed values shows no error and survives a save",
+          clean(async function () {
+            this.timeout(15_000);
+            const actor = track(await createTestPC({ name: "Quench Chooser" }));
+            const [weakness] = await actor.createEmbeddedDocuments("Item", [
+              {
+                name: "Quench Weakness",
+                type: "disadvantage",
+                system: {
+                  rules: [
+                    { key: "ChoiceSet", flag: "trait", list: "traits", selection: "str" },
+                    { key: "TraitAdjust", trait: "{choice:trait}", value: -1 }
+                  ]
+                }
+              }
+            ]);
+            const sheet = weakness.sheet;
+            await sheet.render({ force: true });
+            sheet.element.querySelector('[data-action="changeTab"][data-tab="rules"]').click();
+            await sheet.render();
+            assert.isNull(sheet.element.querySelector(".rule-error"), "no error over the rules");
+            assert.equal(
+              sheet.element.querySelector('[name="rules.1.trait"]').value,
+              "{choice:trait}"
+            );
+            await changeThroughSheet(sheet, '[name="rules.1.label"]', "edited");
+            assert.deepInclude(weakness._source.system.rules[1], {
+              trait: "{choice:trait}",
+              label: "edited"
+            });
+            await sheet.close();
           })
         );
 

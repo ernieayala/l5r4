@@ -30,6 +30,7 @@ import { bindCheckRequestCard } from "../services/check-request.js";
 import { initializeEffectPanel } from "../apps/effect-panel.js";
 import { onHotbarDrop, registerMacroApi } from "../sheets/ui/macros.js";
 import { initializeScrollingText } from "../services/scrolling-text.js";
+import { initializeCompendiumBrowser } from "../apps/compendium-browser.js";
 
 /**
  * Register all system hooks
@@ -73,6 +74,9 @@ export function registerAllHooks() {
 
   // Floating Wound and Void Point numbers over tokens
   initializeScrollingText();
+
+  // Compendium browser: its index fields and the Compendium sidebar's button
+  initializeCompendiumBrowser();
 
   // Combat loop: damage, maneuvers, duel, grapple, Guard
   initializeCombat();

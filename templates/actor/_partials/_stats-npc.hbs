@@ -7,6 +7,9 @@
           <input class="flex1" type="text" name="name" value="{{actor.name}}" placeholder="{{localize 'l5r4.ui.common.name'}}" />
         </div>
       </div>
+      {{#if summary.citation}}
+        <p class="l5r4-citation">{{summary.citation}}</p>
+      {{/if}}
     </div>
   </div>
   <div class="traits-rings">

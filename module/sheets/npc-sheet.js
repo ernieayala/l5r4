@@ -50,6 +50,7 @@ import { getSectionCollapsedMap } from "../utils/section-state.js";
 
 // Documents
 import { enhanceItemSheetData } from "../documents/item/integration/sheet-data.js";
+import { summaryText } from "../documents/summary.js";
 
 // Services
 import * as Fear from "../services/fear.js";
@@ -452,6 +453,8 @@ export default class L5R4NpcSheet extends BaseActorSheet {
       collapsedSections,
       attacks,
       firstEmptyAttack: attacks.find(slot => slot.empty)?.key ?? null,
+      // The book page a creature from the packs cites (roadmap/STAGE-15)
+      summary: summaryText(actorObj.system),
 
       // Show Void Points section only if NPC has Void Ring >= 1
       showNpcVoidPoints: (actorObj.system?.rings?.void?.rank ?? 0) >= 1,

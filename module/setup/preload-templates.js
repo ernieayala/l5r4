@@ -146,6 +146,7 @@ export async function preloadTemplates() {
     `systems/${SYS_ID}/templates/chat/healing.hbs`,
     `systems/${SYS_ID}/templates/chat/weapon-chat.hbs`,
     `systems/${SYS_ID}/templates/chat/check-request.hbs`,
+    `systems/${SYS_ID}/templates/chat/item-summary.hbs`,
 
     // Text links (module/setup/enrichers.js)
     `systems/${SYS_ID}/templates/links/inline-link.hbs`,
@@ -167,7 +168,9 @@ export async function preloadTemplates() {
     `systems/${SYS_ID}/templates/apps/wound-config.hbs`,
     `systems/${SYS_ID}/templates/apps/emphasis-manager.hbs`,
     `systems/${SYS_ID}/templates/apps/combat-config.hbs`,
-    `systems/${SYS_ID}/templates/apps/effect-panel.hbs`
+    `systems/${SYS_ID}/templates/apps/effect-panel.hbs`,
+    `systems/${SYS_ID}/templates/apps/compendium-browser.hbs`,
+    `systems/${SYS_ID}/templates/apps/compendium-browser-results.hbs`
   ];
 
   if (!globalThis.foundry?.applications?.handlebars?.loadTemplates) {

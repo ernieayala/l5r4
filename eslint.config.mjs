@@ -61,15 +61,21 @@ export default [
     }
   },
   {
-    // Vitest and the fixture world builder run in Node.
+    // Vitest, the fixture world builder, and the pack tools run in Node.
     files: [
       "*.config.js",
       "*.config.mjs",
       "tests/unit/**/*.js",
       "tests/*.test.js",
-      "tests/fixtures/world-3.2.1/*.mjs"
+      "tests/fixtures/world-3.2.1/*.mjs",
+      "tools/**/*.mjs"
     ],
     languageOptions: { globals: globals.node }
+  },
+  {
+    // The pack tools are command-line programs that report what they did.
+    files: ["tools/**/*.mjs"],
+    rules: { "no-console": "off" }
   },
   {
     // Release and maintenance scripts are CommonJS run by Node.

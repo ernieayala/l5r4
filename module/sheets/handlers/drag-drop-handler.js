@@ -24,7 +24,7 @@
  * @requires Foundry VTT v13+
  */
 import { SYS_ID } from "../../config/constants.js";
-import { preparePurchase } from "../../services/purchase.js";
+import { addItem } from "../../services/purchase.js";
 
 /**
  * Handler context object provided by actor sheets
@@ -76,20 +76,17 @@ export class DragDropHandler {
   /**
    * Handles dropping an Item document onto an actor sheet
    *
-   * Resolves the item by UUID, converts to plain object data, and embeds it
-   * on the target actor using createEmbeddedDocuments. This creates a copy
-   * of the source item owned by the actor.
+   * Resolves the item by UUID and adds a copy of it to the actor through the purchase service, which checks its
+   * prerequisites, asks its choices, and replaces a character's Clan, Family, or School
+   * (module/services/purchase.js, addItem).
    *
-   * Permission check ensures only owners can modify the actor. UUID resolution
-   * and embedding are wrapped in try-catch for defensive error handling.
+   * UUID resolution and adding are wrapped in try-catch for defensive error handling.
    *
    * @param {HandlerContext} context - Sheet context with actor reference
    * @param {DragEvent} event - Browser drag event (unused but required by signature)
    * @param {Object} data - Parsed drag data from getDragEventData
    * @param {string} data.uuid - Universal unique identifier for the source item
-   * @returns {Promise<Item[]|false>} Array containing created item, or false on failure
-   *
-   * @see https://foundryvtt.com/api/classes/client.Actor.html#createEmbeddedDocuments
+   * @returns {Promise<Item|false>} The created item, or false when nothing was added
    */
   static async handleItemDrop(context, event, data) {
     if (!context.actor.isOwner) {
@@ -108,13 +105,7 @@ export class DragDropHandler {
         return false;
       }
 
-      // Convert to plain object for embedding (creates copy, not reference), then check its prerequisites and ask
-      // its choices (module/services/purchase.js)
-      const itemData = await preparePurchase(context.actor, item.toObject());
-      if (!itemData) {
-        return false;
-      }
-      return await context.actor.createEmbeddedDocuments("Item", [itemData]);
+      return (await addItem(context.actor, item.toObject())) ?? false;
     } catch (err) {
       console.warn(`${SYS_ID} DragDropHandler: Failed to drop item`, { err, data });
       return false;

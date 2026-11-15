@@ -348,7 +348,7 @@ function bagEntry(rule, entry, value) {
     case "UnskilledAs":
       return { ...base, rank: value(rule.rank) };
     case "ActionCost":
-      return { ...base, action: rule.action };
+      return { ...base, action: rule.action, range: rule.range };
     case "Cost":
       // The price formula reads the base price, known only when something is priced (module/utils/xp-ledger.js)
       return { ...base, value: rule.value, itemId: entry.itemId ?? null };

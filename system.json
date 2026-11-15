@@ -33,7 +33,165 @@
   },
   "esmodules": ["dist/l5r4-enhanced.js"],
   "styles": [{ "src": "dist/l5r4-enhanced.css", "layer": "system" }],
-  "packs": [],
+  "packs": [
+    {
+      "name": "clans",
+      "label": "Clans",
+      "path": "packs/clans",
+      "type": "Item",
+      "system": "l5r4-enhanced",
+      "ownership": { "PLAYER": "OBSERVER", "ASSISTANT": "OWNER" }
+    },
+    {
+      "name": "families",
+      "label": "Families",
+      "path": "packs/families",
+      "type": "Item",
+      "system": "l5r4-enhanced",
+      "ownership": { "PLAYER": "OBSERVER", "ASSISTANT": "OWNER" }
+    },
+    {
+      "name": "schools",
+      "label": "Schools",
+      "path": "packs/schools",
+      "type": "Item",
+      "system": "l5r4-enhanced",
+      "ownership": { "PLAYER": "OBSERVER", "ASSISTANT": "OWNER" }
+    },
+    {
+      "name": "techniques",
+      "label": "Techniques",
+      "path": "packs/techniques",
+      "type": "Item",
+      "system": "l5r4-enhanced",
+      "ownership": { "PLAYER": "OBSERVER", "ASSISTANT": "OWNER" }
+    },
+    {
+      "name": "advantages",
+      "label": "Advantages",
+      "path": "packs/advantages",
+      "type": "Item",
+      "system": "l5r4-enhanced",
+      "ownership": { "PLAYER": "OBSERVER", "ASSISTANT": "OWNER" }
+    },
+    {
+      "name": "disadvantages",
+      "label": "Disadvantages",
+      "path": "packs/disadvantages",
+      "type": "Item",
+      "system": "l5r4-enhanced",
+      "ownership": { "PLAYER": "OBSERVER", "ASSISTANT": "OWNER" }
+    },
+    {
+      "name": "skills",
+      "label": "Skills",
+      "path": "packs/skills",
+      "type": "Item",
+      "system": "l5r4-enhanced",
+      "ownership": { "PLAYER": "OBSERVER", "ASSISTANT": "OWNER" }
+    },
+    {
+      "name": "kata",
+      "label": "Kata",
+      "path": "packs/kata",
+      "type": "Item",
+      "system": "l5r4-enhanced",
+      "ownership": { "PLAYER": "OBSERVER", "ASSISTANT": "OWNER" }
+    },
+    {
+      "name": "spells",
+      "label": "Spells",
+      "path": "packs/spells",
+      "type": "Item",
+      "system": "l5r4-enhanced",
+      "ownership": { "PLAYER": "OBSERVER", "ASSISTANT": "OWNER" }
+    },
+    {
+      "name": "kiho",
+      "label": "Kiho",
+      "path": "packs/kiho",
+      "type": "Item",
+      "system": "l5r4-enhanced",
+      "ownership": { "PLAYER": "OBSERVER", "ASSISTANT": "OWNER" }
+    },
+    {
+      "name": "tattoos",
+      "label": "Tattoos",
+      "path": "packs/tattoos",
+      "type": "Item",
+      "system": "l5r4-enhanced",
+      "ownership": { "PLAYER": "OBSERVER", "ASSISTANT": "OWNER" }
+    },
+    {
+      "name": "weapons",
+      "label": "Weapons",
+      "path": "packs/weapons",
+      "type": "Item",
+      "system": "l5r4-enhanced",
+      "ownership": { "PLAYER": "OBSERVER", "ASSISTANT": "OWNER" }
+    },
+    {
+      "name": "armor",
+      "label": "Armor",
+      "path": "packs/armor",
+      "type": "Item",
+      "system": "l5r4-enhanced",
+      "ownership": { "PLAYER": "OBSERVER", "ASSISTANT": "OWNER" }
+    },
+    {
+      "name": "equipment",
+      "label": "Equipment",
+      "path": "packs/equipment",
+      "type": "Item",
+      "system": "l5r4-enhanced",
+      "ownership": { "PLAYER": "OBSERVER", "ASSISTANT": "OWNER" }
+    },
+    {
+      "name": "creatures",
+      "label": "Creatures",
+      "path": "packs/creatures",
+      "type": "Actor",
+      "system": "l5r4-enhanced",
+      "ownership": { "PLAYER": "NONE", "ASSISTANT": "OWNER" }
+    }
+  ],
+  "packFolders": [
+    {
+      "name": "L5R4 Core Rulebook",
+      "sorting": "m",
+      "folders": [
+        {
+          "name": "Character",
+          "sorting": "m",
+          "packs": [
+            "clans",
+            "families",
+            "schools",
+            "techniques",
+            "kata",
+            "skills",
+            "advantages",
+            "disadvantages"
+          ]
+        },
+        {
+          "name": "Magic",
+          "sorting": "m",
+          "packs": ["spells", "kiho", "tattoos"]
+        },
+        {
+          "name": "Equipment",
+          "sorting": "m",
+          "packs": ["weapons", "armor", "equipment"]
+        },
+        {
+          "name": "Creatures",
+          "sorting": "m",
+          "packs": ["creatures"]
+        }
+      ]
+    }
+  ],
   "languages": [
     {
       "lang": "en",

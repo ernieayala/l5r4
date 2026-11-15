@@ -15,7 +15,8 @@ import {
   getAffinityDeficiencyModifier,
   resolveWeaponSkillTrait,
   ringRank,
-  castingSchoolRank
+  castingSchoolRank,
+  highestSchoolRank
 } from "../../../module/utils/mechanics.js";
 
 /**
@@ -158,6 +159,23 @@ describe("ringRank (p.76)", () => {
 
   it("reads the Void Ring's rank, so a Void spell rolls its Ring (p.163)", () => {
     expect(ringRank(actor, "void")).toBe(4);
+  });
+});
+
+describe("highestSchoolRank (p.104)", () => {
+  const character = (...ranks) => ({
+    items: [
+      { type: "skill", system: {} },
+      ...ranks.map(schoolRank => ({ type: "school", system: { schoolRank } }))
+    ]
+  });
+
+  it("is the highest rank among the character's Schools", () => {
+    expect(highestSchoolRank(character(2, 4, 1))).toBe(4);
+  });
+
+  it("is 0 for a character with no School", () => {
+    expect(highestSchoolRank(character())).toBe(0);
   });
 });
 

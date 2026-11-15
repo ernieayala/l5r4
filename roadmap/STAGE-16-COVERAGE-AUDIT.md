@@ -92,6 +92,7 @@ None.
 
 | Item | Stage |
 |------|-------|
-| Playing the system end to end | 17 |
-| Book-text sweep and release allowlist | 18 |
+| Design system, code system, and consistency checks | 17 |
+| Playing the system end to end | 18 |
+| Book-text sweep and release allowlist | 19 |
 | Fixing a rule the sweep finds wrong | Its own issue, fixed with a failing test first (Stage 13 pattern) |

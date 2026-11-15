@@ -68,6 +68,8 @@ export const TEMPLATE = relPath => {
  * @property {string} damageResult - Wounds a damage roll dealt, with Void reduction and Undo
  * @property {string} flowCard - A guided combat flow (iaijutsu duel, grapple)
  * @property {string} healing - Healing action results
+ * @property {string} checkRequest - A GM's request for a roll (module/services/check-request.js)
+ * @property {string} itemSummary - An item card's rule lines and book citation (module/utils/rule-summary.js)
  *
  * @example
  * const html = await foundry.applications.handlebars.renderTemplate(CHAT_TEMPLATES.healing, data);
@@ -80,7 +82,8 @@ export const CHAT_TEMPLATES = freeze({
   damageResult: TEMPLATE("chat/damage-result.hbs"),
   flowCard: TEMPLATE("chat/flow-card.hbs"),
   healing: TEMPLATE("chat/healing.hbs"),
-  checkRequest: TEMPLATE("chat/check-request.hbs")
+  checkRequest: TEMPLATE("chat/check-request.hbs"),
+  itemSummary: TEMPLATE("chat/item-summary.hbs")
 });
 
 /**

@@ -399,7 +399,10 @@ export class UnskilledAsRule extends RuleData {
   }
 }
 
-/** The action a roll matching `selector` takes (p.85), shown on its card; the system does not enforce it. */
+/**
+ * The action a roll matching `selector` takes (p.85), shown on its card; the system does not enforce it. `range`
+ * limits it to attacks of that range, as a Technique's "melee attacks as a Simple Action" (p.212).
+ */
 export class ActionCostRule extends RuleData {
   /** @override */
   static defineSchema() {
@@ -407,7 +410,8 @@ export class ActionCostRule extends RuleData {
     return {
       ...super.defineSchema(),
       selector: selectorField(),
-      action: new StringField({ required: true, initial: "simple", choices: ACTION_TYPES })
+      action: new StringField({ required: true, initial: "simple", choices: ACTION_TYPES }),
+      range: rangeField()
     };
   }
 }

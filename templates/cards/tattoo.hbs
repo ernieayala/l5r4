@@ -4,6 +4,9 @@
   <h4 class="flexrow -gap-sm title">{{name}}</h4>
   {{#if inSheet}}
     <div>{{system.effect}}</div>
+    {{#unless system.passive}}
+      {{> "systems/l5r4-enhanced/templates/cards/_partials/_activate.hbs"}}
+    {{/unless}}
     {{> "systems/l5r4-enhanced/templates/cards/_partials/_controls.hbs"}}
     {{#if (or system.description system.specialRules)}}
       <div class="expanded-text">

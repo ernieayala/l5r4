@@ -6,6 +6,7 @@
  */
 
 import { createRule, RULE_MODELS } from "../data/rules/rule-models.js";
+import { hasOpenChoice } from "../utils/choices.js";
 
 /**
  * @typedef {object} RuleFieldView
@@ -71,10 +72,14 @@ function shown(kind, value) {
 
 /**
  * The editor's view of one stored rule: its fields, and the validation error that keeps the engine from using it.
- * @param {object} source  An entry of `system.rules`, stored user JSON
+ * The error comes from the rule as the engine reads it, its choices made (`answered`, from `answeredRules`), so a
+ * `{choice:...}` in a field with fixed values is no error. Such a field's select keeps the placeholder as an option,
+ * so saving the form leaves it in place.
+ * @param {object} source    An entry of `system.rules`, stored user JSON
+ * @param {object} [answered=source]  The same rule with its item's choices made
  * @returns {{key: string, error: string|null, fields: RuleFieldView[]}}
  */
-export function describeRule(source) {
+export function describeRule(source, answered = source) {
   const Model = RULE_MODELS[source?.key];
   if (!Model) {
     return {
@@ -85,7 +90,7 @@ export function describeRule(source) {
   }
   let error = null;
   try {
-    createRule(source);
+    createRule(answered);
   } catch (err) {
     error = err.message;
   }
@@ -94,11 +99,13 @@ export function describeRule(source) {
     .map(([name, field]) => {
       const kind = kindOf(field);
       const value = name in source ? source[name] : field.getInitialValue({});
+      const placeholder =
+        typeof value === "string" && hasOpenChoice(value) ? { [value]: value } : {};
       return {
         name,
         kind,
         value: shown(kind, value),
-        choices: kind === "select" ? choicesOf(field) : null,
+        choices: kind === "select" ? { ...placeholder, ...choicesOf(field) } : null,
         nullable: Boolean(field.nullable)
       };
     });

@@ -41,7 +41,8 @@ import { BOW_IN_MELEE_PENALTY } from "../../../config/game-mechanics.js";
  * @property {{cap: number, minimum: number, maneuverCosts: Record<string, number>}} raises  RaiseRule rules: the
  *   change to the Raise cap, the Raises that must be declared, and the change to each maneuver's cost
  * @property {number} unskilledAs        Ranks an Unskilled roll counts as (UnskilledAs), 0 for none
- * @property {Array<{label: string, action: string}>} actions  ActionCost rules, shown on the card
+ * @property {Array<{label: string, action: string, range?: string}>} actions  ActionCost rules, shown on the card;
+ *   one with a range only on an attack of that range
  */
 
 /**
@@ -82,8 +83,11 @@ export function checkSelectors({ kind, skill, trait, ring, skillData }) {
 }
 
 /**
- * The roll options a check's predicates test: the actor's, `check:<kind>`, with a weapon `weapon:size:<size>`
- * (Prone forbids large weapons, p.89), and with a target, `target` plus the target's options prefixed `target:`.
+ * The roll options a check's predicates test: the actor's, `check:<kind>`; with a weapon `weapon:size:<size>`
+ * (Prone forbids large weapons, p.89), `weapon:skill:<skill>`, `weapon:name:<name>`, and `weapon:keyword:<keyword>`
+ * for each of its comma-separated keywords, in lower case, so a Weapon Skill's Mastery Abilities reach the damage
+ * of its own weapons (pp.140-143) and a Technique its Samurai weapons (p.106); and with a target, `target` plus the
+ * target's options prefixed `target:`.
  * @param {Actor} actor
  * @param {string} kind
  * @param {Actor|null} target
@@ -95,6 +99,15 @@ export function checkOptions(actor, kind, target, weapon = null) {
   options.add(`check:${kind}`);
   if (weapon) {
     options.add(`weapon:size:${weapon.system.size}`);
+    options.add(`weapon:name:${weapon.name.toLowerCase().trim()}`);
+    for (const keyword of String(weapon.system.keywords ?? "").split(",")) {
+      if (keyword.trim()) {
+        options.add(`weapon:keyword:${keyword.toLowerCase().trim()}`);
+      }
+    }
+    if (weapon.system.associatedSkill) {
+      options.add(`weapon:skill:${weapon.system.associatedSkill.toLowerCase().trim()}`);
+    }
   }
   if (target) {
     options.add("target");
@@ -253,6 +266,10 @@ export function collectCheck(actor, { kind, skill, trait, ring, target = null, w
       maneuverCosts
     },
     unskilledAs: unskilledAs.length ? Math.max(...unskilledAs) : 0,
-    actions: entries("actionCosts").map(entry => ({ label: entry.label, action: entry.action }))
+    actions: entries("actionCosts").map(entry => ({
+      label: entry.label,
+      action: entry.action,
+      ...(entry.range ? { range: entry.range } : {})
+    }))
   };
 }

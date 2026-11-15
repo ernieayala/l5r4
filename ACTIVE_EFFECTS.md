@@ -30,7 +30,7 @@ A rule the system cannot use shows its error in red above its fields until it is
 
 Text that is not a JSON list of objects with a `"key"` is not saved, and an error says why. A rule whose fields are wrong (an unknown key, a missing selector) is skipped, with a warning in the browser console naming the item.
 
-Rules on an item apply while the item is on the character. Armor's rules apply only while it is worn. A weapon's rules apply only to rolls made with that weapon: its attacks and its damage. A kata's or kiho's rules apply only while it is active (see **Kata and kiho**). Rules on an Active Effect apply while the effect is active; a macro or module can put rules on an effect through `system.rules`.
+Rules on an item apply while the item is on the character. Armor's rules apply only while it is worn. A weapon's rules apply only to rolls made with that weapon: its attacks and its damage. A kata's, kiho's, or tattoo's rules apply only while it is active, an always-active tattoo's while it is owned (see **Kata and kiho**). Rules on an Active Effect apply while the effect is active; a macro or module can put rules on an effect through `system.rules`.
 
 ### Fields every rule has
 
@@ -70,7 +70,7 @@ Values marked *n/f* take a number or a formula (see **Formulas**).
 | `OpponentModifier` | `selector`, `roll`, `keep`, `total` *n/f*, `type`, `range` | Like `RollModifier`, but on rolls other characters make with this one as their target. Its predicate tests this character's options, with the roller's prefixed `target:` |
 | `RaiseRule` | `selector`, `maneuver`, `cost` *n/f*, `cap` *n/f*, `minimum` *n/f* | On the selected rolls: `cost` changes what `maneuver` (`calledShot`, `disarm`, `extraAttack`, `feint`, `knockdown`) costs in Raises, never below 0; `cap` changes how many Raises may be declared (the Void Ring, p.79); `minimum` is how many must be |
 | `UnskilledAs` | `selector`, `rank` *n/f* | A Skill roll with no ranks in a selected Skill counts as `rank` ranks: the dice roll and explode, and Raises are allowed |
-| `ActionCost` | `selector`, `action` (`free`, `simple`, `complex`) | Names on the card of the selected rolls the action they take (p.85). The system shows it and does not enforce it |
+| `ActionCost` | `selector`, `action` (`free`, `simple`, `complex`), `range` | Names on the card of the selected rolls the action they take (p.85); with `range` (`"melee"` or `"ranged"`) only on attacks of that range. The system shows it and does not enforce it |
 | `Cost` | `selector`, `value` *n/f* | The XP price of what the selector names (see **XP prices**) |
 | `Ledger` | `track` (`honor`, `glory`, `status`, `taint`), `direction` (`gain`, `loss`), `value` *n/f* | Changes the size of each gain or loss of that track recorded in the ledger (see **The ledger**) |
 | `Prerequisite` | `requires`, `label` | What a character needs before this item can be added: `requires` is a predicate, `label` explains it (see **Character options**) |
@@ -112,6 +112,7 @@ A value can be a formula over the character's data, written as text: `"@rings.ai
 | `@skills.<skill>.rank` | A Skill's rank; the skill name in lower case with spaces as `_`, as `@skills.tea_ceremony.rank`. A Skill the character lacks counts as 0 |
 | `@honor.rank`, `@glory.rank`, `@status.rank`, `@shadowTaint.rank` | Ranks |
 | `@insight.rank` | Insight Rank |
+| `@school.rank` | School Rank: the highest of the character's Schools, 0 with none |
 | `@level` | On an Active Effect: its level, such as a Fear Rank |
 | `@cost` | In a `Cost` rule: the price before it |
 | `@points` | In a `Ledger` rule: the size of the change before it |
@@ -135,6 +136,7 @@ A predicate is a list of conditions, all of which must hold:
 | `"insight:2"`, `"school-rank:2"` | Insight Rank and School Rank |
 | `"target"`, `"target:status:mounted"` | On attack rules: the attack has a target, and the target has that status |
 | `"check:attack"` | The roll is of that kind: `skill`, `trait`, `ring`, `spell`, `maho`, `attack`, `damage`, or `roll` |
+| `"weapon:size:large"`, `"weapon:skill:kenjutsu"`, `"weapon:name:katana"`, `"weapon:keyword:samurai"` | On a weapon's attack or damage: its size, its Skill, its name, and each of its keywords (lower case). A Weapon Skill's rule reaches its own weapons' damage this way |
 | any `RollOption` | That option is on |
 | `{ "not": ... }` | The condition inside does not hold |
 | `{ "or": [ ... ] }`, `{ "and": [ ... ] }` | One, or all, of the conditions inside hold |
@@ -180,7 +182,7 @@ A world made with 3.2.1 is updated when it first loads: a Family or School Trait
 
 ## Character options
 
-The system ships no Schools, Advantages, or Techniques from the Core Rulebook. You build them as items with rules, and these rules make them behave on the character. The examples below are made up for this guide.
+The system's compendium packs hold the Core Rulebook's Clans, Families, Schools, Techniques, Skills, Advantages, and Disadvantages with their rules; anything else you build as items with rules. These rules make them behave on the character. The examples below are made up for this guide.
 
 ### What happens when an item is dropped on a character
 
@@ -217,6 +219,8 @@ Copy an item's UUID with the passport icon in its sheet header, and paste it int
 
 Techniques with a `rank` wait for the School Rank, which follows Insight Rank (p.104). When it rises, the next Technique is added and a chat message says so. A character with Multiple Schools sets each School's rank on its Details tab.
 
+Dropping a School on a character who already has one asks whether it replaces that School or is added beside it, for an Advanced School (pp.245-247) or the Multiple Schools Advantage (p.151). The pack's Advanced Schools start at rank 1, set on their Details tab as the character advances in them. A Technique a School grants does not ask its own choices; fill in its ChoiceSet's `selection` on its Rules tab.
+
 Removing the School takes back what it gave. A granted Skill with ranks or Emphases bought on top stays, without its free rank. Deleting a granted item yourself keeps it from being granted again.
 
 ### Choices
@@ -237,6 +241,8 @@ A `ChoiceSet` offers its own `options` (each `{ "value": ..., "label": ... }`) o
   { "key": "FreeRaise", "selector": "skill:{choice:weapon}", "value": 1 }
 ]
 ```
+
+A choice can fill a field with fixed values too, as a Trait: `{ "key": "TraitAdjust", "trait": "{choice:trait}", "value": -1 }` with a ChoiceSet of `"list": "traits"`. The Rules tab checks such a rule as it reads once the choice is made, and keeps the `{choice:...}` text when the sheet is saved.
 
 ### Prerequisites
 
@@ -272,7 +278,7 @@ Kiho at one and a half times their price, rounded up: `{ "key": "Cost", "selecto
 
 ### Kata and kiho
 
-A kata's or kiho's rules apply while it is active, not while it is owned (pp.259, 261). The play button on its row of the character sheet activates it: the system makes an Active Effect carrying its rules. A second kata ends the first; a kiho ends another of its type, except Martial kiho. The stop button, or deleting the effect, ends it. A tattoo's rules apply while it is owned.
+A kata's or kiho's rules apply while it is active, not while it is owned (pp.259, 261). The play button on its row of the character sheet activates it: the system makes an Active Effect carrying its rules. A second kata ends the first; a kiho ends another of its type, except Martial kiho. The stop button, or deleting the effect, ends it. A tattoo works the same way (p.115): one at a time, and its effect lasts twice the School Rank in Rounds. A tattoo marked **Always active** on its Details tab, such as the Mantis, applies while it is owned instead.
 
 ### The ledger and the Honor Roll
 
@@ -482,7 +488,7 @@ A `RollModifier` rule does the same with a predicate and a formula.
 An effect made by the system can carry two more values, which a macro sets through `system`:
 
 - `system.level`: how strong the effect is, read by its rules as `@level` (a Fear Rank, days of Fatigue)
-- `system.group`: effects in the same group are exclusive; gaining one ends the others. The stances are the group `"stance"`; an activated kata is `"kata"` (one at a time, p.259), and an activated kiho `"kiho-<type>"` except a Martial one (p.261)
+- `system.group`: effects in the same group are exclusive; gaining one ends the others. The stances are the group `"stance"`; an activated kata is `"kata"` (one at a time, p.259), an activated tattoo `"tattoo"` (p.115), and an activated kiho `"kiho-<type>"` except a Martial one (p.261)
 
 ---
 

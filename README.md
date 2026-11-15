@@ -253,6 +253,23 @@ https://github.com/ernieayala/l5r4-migrator/releases/latest/download/module.json
 **Floating numbers**
 - Changes to Wounds and Void Points float over the token, as "+7 Wounds" or "−1 Void Points"
 
+### Compendium Packs
+
+**Packs** (in the "L5R4 Core Rulebook" compendium folder)
+- Clans, Families, Schools (Advanced Schools included), Techniques (Alternate and Ronin Paths included), Skills, Advantages (Ancestors included), Disadvantages, Spells (maho included), Kata, Kiho, Tattoos, Weapons, Armor, and Equipment from the Core Rulebook, poisons included
+- Creatures (GM only): the book's animals and monsters as NPCs with their attacks, Wound levels, Fear, Taint, Skills, and special abilities such as Invulnerability, Spirit, Swift, and jade-limited Reduction
+- Kata, kiho, and tattoos work while activated with the play button on the character sheet: one kata, one tattoo, and one kiho of each type but Martial at a time; a tattoo lasts twice the School Rank in Rounds, and an always-active tattoo such as the Mantis works while owned
+- A School gives its Trait bonus, its Skills with their Emphases, and each Technique as its School Rank arrives; a shugenja School also gives Sense, Commune, and Summon. Dropping a second School asks whether to replace the first or add it beside it
+- A Skill's Mastery Abilities apply on their own once its rank reaches them, where the system can automate them
+- Advantages and Disadvantages ask their choices when added, check the book's limits (one Ancestor, matched sets, Large or Small), and price Clan discounts in the XP totals
+- Each entry carries the book's numbers and its page ("Core Rulebook p.204"); the book's text is not included, so keep your copy handy
+- What an entry's rules do is listed on its sheet and chat card; a mechanic the system does not automate has a one-line summary
+
+**Compendium Browser** (the Browse button in the Compendium sidebar)
+- Every system and world compendium you can see, in tabs, with filters and a name search
+- Drag an entry to a sheet, or click Add to give it to your selected token or your character; prerequisites and choices are asked as for a drop
+- The GM imports creatures with Import
+
 ### Long Rest & Healing
 
 **Rest Button** (on character sheets)

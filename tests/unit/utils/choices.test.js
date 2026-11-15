@@ -1,5 +1,10 @@
 import { describe, expect, it } from "vitest";
-import { applyChoices, choiceSelections, hasOpenChoice } from "../../../module/utils/choices.js";
+import {
+  answeredRules,
+  applyChoices,
+  choiceSelections,
+  hasOpenChoice
+} from "../../../module/utils/choices.js";
 
 describe("choiceSelections", () => {
   it("reads each ChoiceSet's selection by flag, and leaves out open ones", () => {
@@ -35,6 +40,30 @@ describe("applyChoices", () => {
         { key: "Note", selector: "{choice:weapon}", text: "t" }
       ])[1].selector
     ).toBe("{choice:weapon}");
+  });
+});
+
+describe("answeredRules", () => {
+  it("answers an open choice from its list or its options, and keeps a choice already made", () => {
+    const [, trait, , ring, , raise] = answeredRules([
+      { key: "ChoiceSet", flag: "trait", list: "traits", selection: null },
+      { key: "TraitAdjust", trait: "{choice:trait}", value: -1 },
+      { key: "ChoiceSet", flag: "ring", list: "rings" },
+      { key: "RollOption", option: "blessing:{choice:ring}" },
+      { key: "ChoiceSet", flag: "weapon", options: [{ value: "kenjutsu" }], selection: "kyujutsu" },
+      { key: "FreeRaise", selector: "skill:{choice:weapon}", value: 1 }
+    ]);
+    expect(trait.trait).toBe("sta");
+    expect(ring.option).toBe("blessing:air");
+    expect(raise.selector).toBe("skill:kyujutsu");
+  });
+
+  it("leaves a skills choice open, its uuid being free text", () => {
+    const [, grant] = answeredRules([
+      { key: "ChoiceSet", flag: "extra", list: "skills" },
+      { key: "GrantItem", uuid: "{choice:extra}" }
+    ]);
+    expect(grant.uuid).toBe("{choice:extra}");
   });
 });
 

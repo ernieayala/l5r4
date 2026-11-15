@@ -34,6 +34,7 @@
 
 import { SYS_ID } from "../config/constants.js";
 import { enhanceItemSheetData } from "../documents/item/integration/sheet-data.js";
+import { summaryText } from "../documents/summary.js";
 import { ItemEffectsHandler } from "./handlers/item-effects-handler.js";
 import EmphasisManager from "../apps/emphasis-manager.js";
 import { RULES_EDITOR_ACTIONS, readRulesForm, rulesEditorContext } from "./rules-editor.js";
@@ -347,6 +348,8 @@ export default class L5R4ItemSheet extends HandlebarsApplicationMixin(ItemSheetV
     context.editable = this.isEditable;
     enhanceItemSheetData(context);
     context.enriched = enriched;
+    // What the item's rules do, and the book page it cites in place of the book's text (roadmap/STAGE-15)
+    context.summary = summaryText(item.system);
 
     context.effects = this.item.effects?.contents ?? [];
     Object.assign(

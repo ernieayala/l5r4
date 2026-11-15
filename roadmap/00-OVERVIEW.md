@@ -7,7 +7,9 @@ durations and conditions, the damage loop, rule authoring; design in `AUTOMATION
 3.2.1 worlds into the new data, Stage 13 audits every automated rule against the book, Stage 14 adds table tools
 (text links, request cards, effect panel, macros), Stage 15 ships compendium packs of the book's content (names,
 numbers, rules, and page citations, never its text) with a browser, Stage 16 makes the audit a repeatable coverage
-check in the gate, Stage 17 plays the system through the real UI with GM and player clients, Stage 18 releases.
+check in the gate, Stage 17 writes a design system and a code system, enforces them with checks in the gate, and
+brings the repo into line through a multi-agent review-and-fix pass, Stage 18 plays the system through the real UI
+with GM and player clients, Stage 19 releases.
 
 ## How to read this roadmap
 
@@ -49,8 +51,9 @@ in `tests/quench/`, the transcribed rulebook in `game-rules/` (local, gitignored
 | 14 | `STAGE-14-TABLE-TOOLS.md` | Text links for checks, damage, conditions, and Fear; GM request cards; effect panel; hotbar macros; floating Wound and Void numbers | 13 |
 | 15 | `STAGE-15-COMPENDIUM-PACKS.md` | Packs of the Core Rulebook's character options, equipment, and creatures with names, numbers, rules, and page citations; a filtered compendium browser | 14 |
 | 16 | `STAGE-16-COVERAGE-AUDIT.md` | A coverage report of every rule page, pack entry, action, and setting against code and tests; gaps closed or recorded; the check joins the gate | 15 |
-| 17 | `STAGE-17-PLAYTEST.md` | An original scenario played through Claude in Chrome by a GM and players on their own clients; findings fixed at the root | 16 |
-| 18 | `STAGE-18-RELEASE.md` | Docs, translations, release workflows with an allowlisted zip and a tested manifest rewrite, a book-text sweep, and the 4.0.0 release | 1-17 |
+| 17 | `STAGE-17-DESIGN-AND-CODE-SYSTEMS.md` | A design system (foundations, components, patterns, copy) with a living gallery in Foundry, a code system (naming dictionary, glossary, code shapes, test system), a check for each checkable rule in the gate, and a multi-agent review-and-fix pass that brings the repo into line without changing behavior | 16 |
+| 18 | `STAGE-18-PLAYTEST.md` | An original scenario played through Claude in Chrome by a GM and players on their own clients; findings fixed at the root | 16, 17 |
+| 19 | `STAGE-19-RELEASE.md` | Docs, translations, release workflows with an allowlisted zip and a tested manifest rewrite, a book-text sweep, and the 4.0.0 release | 1-18 |
 
 Stage 4 needs only Stage 1, so it can run before Stage 2 or 3 if Ernie prefers. Stage 2's data models carry
 `system.rules` from the start so Stage 7 does not reshape them (Stage 2 Decision 2).
@@ -74,7 +77,7 @@ Reviewed 2026-11-12 (`gh issue list --state all`, `gh pr list --state all`). Eac
 | #30 | Light-theme Ring values, Void Ring arrows, PC portrait picker, removable NPC attacks | Stage 6 (done; the portrait picker already worked in 3.2.1) |
 | #33 | Request: a setting for 3rd Edition rules (stances) | Open question for Ernie; not planned until decided |
 | PR #25 | "Packs": compendium databases on branch `release/3.2.0`, with rulebook text in spell and advantage entries | Not mergeable as is (CLAUDE.md **Licensed material**); Stage 15 builds new packs without book text and uses it only as a list of entries. Ernie decides whether to close it and delete the branch |
-| No issue yet | Code comments on `main` repeat rulebook wording: `skill-formulas.js`, `tn-calculator.js`, `bow-damage.js`, `chat-damage-buttons.js`, `melee-damage.js`, and `tests/quench/workflows/melee-damage-strength.js` (12-word runs matched against `game-rules/`, 2026-11-12) | Stage 18 book-text sweep: rewritten in own words with page citations, as its own commit |
+| No issue yet | Code comments on `main` repeat rulebook wording: `skill-formulas.js`, `tn-calculator.js`, `bow-damage.js`, `chat-damage-buttons.js`, `melee-damage.js`, and `tests/quench/workflows/melee-damage-strength.js` (12-word runs matched against `game-rules/`, 2026-11-12) | Stage 19 book-text sweep: rewritten in own words with page citations, as its own commit |
 | No issue yet | Probable bugs read from the code (B1-B12): bonuses counted twice, Raise and Void limits, damage button, inline rolls, Prone automation | `AUTOMATION.md` §2 assigns each a stage; each gets an issue once reproduced |
 | Closed #5, #7-#15, #32, #34 | Rule bugs fixed in 2.x-3.2 | Stage 13: each has a regression test that names it, in Vitest (#5, #7, #10, #14, #32, #34) or `tests/quench/regressions.js` (#8, #9, #11, #12, #13, #15) |
 | Closed #3 | Firefox right-click context menus | No item menu since v3.0.0; its unused module is deleted in Stage 4 (Decision 1) |
@@ -86,7 +89,7 @@ Reviewed 2026-11-12 (`gh issue list --state all`, `gh pr list --state all`). Eac
 | X1 | The system id stays `l5r4-enhanced`. Worlds, flags (`flags.l5r4-enhanced.*`), and template paths depend on it | Existing worlds |
 | X2 | 4.0.0 requires Foundry 14.370 (`compatibility.minimum` `"14.370"`, `verified` `"14.370"`, `maximum` `"14"`). Foundry 13 users stay on 3.2.1 | Ernie, 2026-11-10 |
 | X3 | Stages 1-6 keep behavior. A rule bug found during them becomes a GitHub issue with the printed page, fixed in the automation stage that rebuilds that code (7-11) or in Stage 13 | CLAUDE.md **PORT KEEPS BEHAVIOR**; Ernie, 2026-11-12 |
-| X4 | The smoke batch runs with `CONFIG.compatibility.mode` `WARNING` until Stage 18, which switches it to `FAILURE` scoped to `systems/l5r4-enhanced/`, so any deprecated call left fails the batch | FOUNDRY-V14-REFERENCE.md §11; fabula-ultima `tests/quench/smoke.js` |
+| X4 | The smoke batch runs with `CONFIG.compatibility.mode` `WARNING` until Stage 19, which switches it to `FAILURE` scoped to `systems/l5r4-enhanced/`, so any deprecated call left fails the batch | FOUNDRY-V14-REFERENCE.md §11; fabula-ultima `tests/quench/smoke.js` |
 | X5 | The six languages stay. New keys go in `lang/en.json`; the other files fall back to English until a translator adds them | `system.json` `languages` |
 | X6 | Automation follows pf2e's design adapted to v14: mechanics as `system.rules` on Items and Active Effects, effects expiring through the core registry, every player and GM choice prompted. The book's content ships as packs of names, printed numbers, rules, short mechanical summaries, and page citations, never its text (Stage 15 **Content policy**) | `AUTOMATION.md`; Ernie, 2026-11-12, packs 2026-11-14 |
 
