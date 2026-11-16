@@ -353,7 +353,7 @@ export default class XpManagerApplication extends foundry.applications.api.Handl
     event.preventDefault();
     event.stopPropagation();
 
-    const header = element.closest(".l5r4-item-row-list.l5r4-sort-header");
+    const header = element.closest("[data-sort-header]");
     const scope = header?.dataset?.scope || "xp-purchases";
     const key = element.dataset.sortby || "note";
     const allowed = ["note", "cost", "type"];
@@ -366,7 +366,7 @@ export default class XpManagerApplication extends foundry.applications.api.Handl
     await updateSortPref(this.actor.id, scope, key, { toggleFrom: cur });
 
     if (header) {
-      header.querySelectorAll(".l5r4-sort-header-button").forEach(a => {
+      header.querySelectorAll("[data-action='sort-items']").forEach(a => {
         a.classList.toggle("is-active", a === element);
         if (a !== element) {
           a.removeAttribute("data-dir");

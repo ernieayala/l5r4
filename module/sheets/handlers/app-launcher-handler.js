@@ -8,6 +8,7 @@
  */
 
 import { SYS_ID } from "../../config/constants.js";
+import { T } from "../../utils/localization.js";
 import ArmorConfigApplication from "../../apps/armor-config.js";
 import CombatConfigApplication from "../../apps/combat-config.js";
 import ConditionManager from "../../apps/condition-manager.js";
@@ -60,7 +61,7 @@ export class AppLauncherHandler {
         err,
         actorId: context.actor.id
       });
-      ui.notifications?.error("Failed to open Armor Configuration");
+      ui.notifications?.error(T("l5r4.apps.armorConfig.errors.openFailed"));
     }
   }
 

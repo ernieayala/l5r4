@@ -69,7 +69,7 @@ export class RollHandler {
    */
   static async rollClickedSkill(context, event, element) {
     event.preventDefault();
-    const row = RollHandler.#getElement(element, event)?.closest?.(".item");
+    const row = RollHandler.#getElement(element, event)?.closest?.("[data-item-id]");
     const item = row ? context.actor.items.get(row.dataset.itemId) : null;
     if (!item) {
       return undefined;
@@ -151,7 +151,7 @@ export class RollHandler {
    */
   static async rollClickedWeaponAttack(context, event, element) {
     event.preventDefault();
-    const row = element.closest(".item");
+    const row = element.closest("[data-item-id]");
     const id = row?.dataset?.itemId || row?.dataset?.documentId || row?.dataset?.id;
     const weapon = id ? context.actor.items.get(id) : null;
     if (!weapon || (weapon.type !== "weapon" && weapon.type !== "bow")) {
@@ -244,10 +244,10 @@ export class RollHandler {
    */
   static async rollClickedTrait(context, event, element) {
     event.preventDefault();
-    const block = element.closest(".l5r4-trait");
+    const block = element.closest("[data-trait-block]");
     // The rank element inside this trait block names the Trait
     const traitKey = toTraitKey(
-      block?.querySelector(".l5r4-rank-control.-trait")?.dataset.trait ||
+      block?.querySelector("[data-action='adjust-trait']")?.dataset.trait ||
         element.dataset.traitName ||
         "ref"
     );

@@ -9,7 +9,8 @@
  */
 
 import { SYS_ID } from "../../config/constants.js";
-import { F, T } from "../../utils/localization.js";
+import { CHAT_TEMPLATES } from "../../config/templates.js";
+import { F, R, T } from "../../utils/localization.js";
 import { getContestResult } from "../../utils/check.js";
 import { getEffectiveTrait } from "../../utils/mechanics.js";
 import { rollTrait } from "../dice/rolls/trait-roll.js";
@@ -67,30 +68,26 @@ async function postContestResult(attack, sides) {
   if (result.tie) {
     await ChatMessage.create({
       speaker,
-      content: `<p>${T("l5r4.ui.check.contestTie")}</p>`,
+      content: await R(CHAT_TEMPLATES.note, { lines: [T("l5r4.ui.check.contestTie")] }),
       flags: { [SYS_ID]: { contestTie: attack.id } }
     });
     return;
   }
   const { knockdown, disarm } = attack.system.maneuvers;
   const winner = sides[result.winner];
-  const lines = [F("l5r4.ui.check.contestWinner", { name: foundry.utils.escapeHTML(winner.name) })];
+  const lines = [F("l5r4.ui.check.contestWinner", { name: winner.name })];
   if (result.winner === "attacker") {
     if (knockdown) {
       if (!sides.target.statuses.has("prone")) {
         await applyEffectAnywhere(sides.target, "prone");
       }
-      lines.push(
-        F("l5r4.ui.combat.knockedDown", { name: foundry.utils.escapeHTML(sides.target.name) })
-      );
+      lines.push(F("l5r4.ui.combat.knockedDown", { name: sides.target.name }));
     }
     if (disarm) {
-      lines.push(
-        F("l5r4.ui.combat.disarmed", { name: foundry.utils.escapeHTML(sides.target.name) })
-      );
+      lines.push(F("l5r4.ui.combat.disarmed", { name: sides.target.name }));
     }
   }
-  await ChatMessage.create({ speaker, content: lines.map(line => `<p>${line}</p>`).join("") });
+  await ChatMessage.create({ speaker, content: await R(CHAT_TEMPLATES.note, { lines }) });
 }
 
 /**

@@ -15,7 +15,8 @@
  */
 
 import { SYS_ID } from "../../config/constants.js";
-import { T } from "../../utils/localization.js";
+import { DIALOG_TEMPLATES } from "../../config/templates.js";
+import { R, T } from "../../utils/localization.js";
 import { toInt } from "../../utils/type-coercion.js";
 import { applyEffect, effectsOf } from "./apply.js";
 import { postConcentrationPrompt, rollFullDefense } from "./prompts.js";
@@ -51,7 +52,9 @@ export async function updateProne(actor) {
 export async function endEncounter() {
   const confirmed = await foundry.applications.api.DialogV2.confirm({
     window: { title: T("l5r4.ui.effects.endEncounter") },
-    content: `<p>${T("l5r4.ui.effects.endEncounterConfirm")}</p>`
+    content: await R(DIALOG_TEMPLATES.confirm, {
+      question: T("l5r4.ui.effects.endEncounterConfirm")
+    })
   });
   if (confirmed) {
     await foundry.documents.ActiveEffect.registry.refresh("encounterEnd", {});

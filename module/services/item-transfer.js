@@ -133,7 +133,7 @@ function onGetFolderContextOptions(app, entries) {
   if (app.documentName !== "Item") {
     return;
   }
-  const folderOf = header => fromUuidSync(header.closest(".directory-item").dataset.uuid);
+  const folderOf = header => fromUuidSync(header.closest("[data-folder-id]").dataset.uuid);
   entries.push(
     {
       label: "l5r4.ui.transfer.export",

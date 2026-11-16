@@ -5,10 +5,13 @@
 
 .l5r4.pc,
 .l5r4.npc {
-  --conditional-cursor: default;
-
   display: flex;
   flex-direction: column;
+
+  // Shift held: the Shift+Click controls show the pointer (module/mixins/keyboard-behavior-mixin.js)
+  &.is-shift-held {
+    --conditional-cursor: pointer;
+  }
 
   .window-content {
     flex-flow: row;

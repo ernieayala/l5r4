@@ -14,7 +14,8 @@
 
 import { SYS_ID } from "../../../module/config/constants.js";
 import { createTestPC } from "../../fixtures/actor-fixtures.js";
-import { createSkillData } from "../../fixtures/item-fixtures.js";
+import { createKatana, createSkillData, createSpellData } from "../../fixtures/item-fixtures.js";
+import { waitFor } from "../helpers.js";
 
 /**
  * Register PC sheet tests
@@ -204,6 +205,94 @@ export function registerPcSheetTests(quench) {
           );
 
           assert.exists(element, "Sheet element exists with potential item actions");
+        });
+
+        it("should drag a Trait as the Trait its block names", async () => {
+          const face = sheet.element.querySelector("[data-trait-block] [data-action='roll-trait']");
+          const dataTransfer = new DataTransfer();
+          await sheet._onDragStart({ currentTarget: face.parentElement, dataTransfer });
+          assert.equal(JSON.parse(dataTransfer.getData("text/plain")).key, "sta", "Stamina first");
+        });
+
+        it("should roll the Skill and the weapon of the row a Shift-click lands in", async () => {
+          await actor.createEmbeddedDocuments("Item", [createKatana()]);
+          await sheet.render(true);
+          const posted = [];
+          const hook = Hooks.on("createChatMessage", message => posted.push(message));
+          const shiftClick = action =>
+            sheet.element
+              .querySelector(`[data-action='${action}']`)
+              .dispatchEvent(
+                new MouseEvent("click", { bubbles: true, cancelable: true, shiftKey: true })
+              );
+          try {
+            shiftClick("roll-skill");
+            assert.isTrue(await waitFor(() => posted.length === 1), "the Skill rolls");
+            shiftClick("roll-weapon-attack");
+            assert.isTrue(await waitFor(() => posted.length === 2), "the weapon attacks");
+            shiftClick("roll-weapon-damage");
+            assert.isTrue(await waitFor(() => posted.length === 3), "the weapon rolls damage");
+          } finally {
+            Hooks.off("createChatMessage", hook);
+            for (const message of posted) {
+              await message.delete();
+            }
+          }
+        });
+
+        it("should open the casting roll for the spell of the row clicked", async () => {
+          await actor.createEmbeddedDocuments("Item", [createSpellData("Quench Sense")]);
+          await sheet.render(true);
+          const opened = new Promise(resolve => {
+            Hooks.once("renderDialogV2", app => {
+              resolve(app.title);
+              app.close();
+            });
+          });
+          sheet.element.querySelector("[data-action='cast-spell']").click();
+          const title = await Promise.race([
+            opened,
+            new Promise(resolve => setTimeout(() => resolve(""), 5000))
+          ]);
+          assert.include(title, "Quench Sense");
+        });
+
+        it("should show a Skill's new pool on its roll button after its Trait changes", async () => {
+          const skill = actor.items.getName("Kenjutsu");
+          const row = sheet.element.querySelector(`[data-item-id="${skill.id}"]`);
+          const button = row.querySelector("[data-action='roll-skill']");
+          const before = button.textContent;
+          const select = row.querySelector("[data-field='system.trait']");
+          select.value = "sta";
+          select.dispatchEvent(new Event("change", { bubbles: true }));
+          assert.isTrue(await waitFor(() => button.textContent !== before), "the button changes");
+          assert.equal(button.textContent, `${skill.system.roll}k${skill.system.keep}`);
+          assert.equal(
+            button.parentElement.querySelector("span").textContent,
+            button.textContent,
+            "the mask shows the same pool"
+          );
+        });
+
+        it("should fill one Void Point dot per Void Point", () => {
+          const dots = [
+            ...sheet.element.querySelectorAll("[data-action='adjust-void-points'] [data-idx]")
+          ];
+          assert.lengthOf(dots, 9);
+          assert.isAbove(actor.system.rings.void.value, 0, "the PC has Void Points to show");
+          assert.equal(
+            dots.filter(dot => dot.classList.contains("is-filled")).length,
+            actor.system.rings.void.value
+          );
+        });
+
+        it("should set the Shift+Click cursor while Shift is held", () => {
+          const cursor = () =>
+            getComputedStyle(sheet.element).getPropertyValue("--conditional-cursor").trim();
+          document.dispatchEvent(new KeyboardEvent("keydown", { key: "Shift" }));
+          assert.equal(cursor(), "pointer", "Shift held");
+          document.dispatchEvent(new KeyboardEvent("keyup", { key: "Shift" }));
+          assert.notEqual(cursor(), "pointer", "Shift released");
         });
 
         it("should display embedded items", async () => {

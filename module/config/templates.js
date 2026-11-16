@@ -45,6 +45,8 @@ export function TEMPLATE(relPath) {
  * @property {string} healing - Healing action results
  * @property {string} checkRequest - A GM's request for a roll (module/services/check-request.js)
  * @property {string} itemSummary - An item card's rule lines and book citation (module/utils/rule-summary.js)
+ * @property {string} note - One or more sentences: a grant, a session, a Concentration upkeep, a contest's outcome
+ * @property {string} contest - A Contested Roll between two roll messages
  */
 export const CHAT_TEMPLATES = Object.freeze({
   checkCard: TEMPLATE("chat/check.hbs"),
@@ -54,7 +56,9 @@ export const CHAT_TEMPLATES = Object.freeze({
   flowCard: TEMPLATE("chat/flow.hbs"),
   healing: TEMPLATE("chat/healing.hbs"),
   checkRequest: TEMPLATE("chat/check-request.hbs"),
-  itemSummary: TEMPLATE("chat/item-summary.hbs")
+  itemSummary: TEMPLATE("chat/item-summary.hbs"),
+  note: TEMPLATE("chat/note.hbs"),
+  contest: TEMPLATE("chat/contest.hbs")
 });
 
 /**
@@ -65,6 +69,16 @@ export const CHAT_TEMPLATES = Object.freeze({
  */
 export const LINK_TEMPLATES = Object.freeze({
   inlineLink: TEMPLATE("links/inline-link.hbs")
+});
+
+/**
+ * Template paths for markup an app adds outside its own window.
+ * @type {Readonly<Record<string, string>>}
+ * @constant
+ * @property {string} browserOpen - The Compendium sidebar's Browse button (module/apps/compendium-browser.js)
+ */
+export const APP_TEMPLATES = Object.freeze({
+  browserOpen: TEMPLATE("apps/compendium-browser-open.hbs")
 });
 
 /**
@@ -79,6 +93,9 @@ export const LINK_TEMPLATES = Object.freeze({
  * @property {string} checkMaho - Its maho extras (blood)
  * @property {string} unifiedItemCreate - Universal item creation dialog
  * @property {string} ledger - A change to Honor, Glory, Status, or Taint, with the actor's ledger
+ * @property {string} confirm - A confirmation: its question and an optional consequence
+ * @property {string} choice - A choice prompt: a label and a select
+ * @property {string} removeEmphasis - The question before a custom Emphasis is removed
  */
 export const DIALOG_TEMPLATES = Object.freeze({
   check: TEMPLATE("dialogs/check-dialog.hbs"),
@@ -87,5 +104,8 @@ export const DIALOG_TEMPLATES = Object.freeze({
   checkMaho: TEMPLATE("dialogs/check-extras/maho.hbs"),
   checkSlot: TEMPLATE("dialogs/check-extras/slot.hbs"),
   unifiedItemCreate: TEMPLATE("dialogs/unified-item-create-dialog.hbs"),
-  ledger: TEMPLATE("dialogs/ledger-dialog.hbs")
+  ledger: TEMPLATE("dialogs/ledger-dialog.hbs"),
+  confirm: TEMPLATE("dialogs/confirm-dialog.hbs"),
+  choice: TEMPLATE("dialogs/choice-dialog.hbs"),
+  removeEmphasis: TEMPLATE("dialogs/remove-emphasis-dialog.hbs")
 });

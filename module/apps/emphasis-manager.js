@@ -7,7 +7,7 @@
  */
 import { SYS_ID } from "../config/constants.js";
 import { OFFICIAL_EMPHASES } from "../config/reference-data.js";
-import { TEMPLATE } from "../config/templates.js";
+import { DIALOG_TEMPLATES, TEMPLATE } from "../config/templates.js";
 import { T } from "../utils/localization.js";
 import { validateEmphasisName } from "../utils/validators.js";
 import { logError } from "../utils/error-logging.js";
@@ -233,7 +233,10 @@ export default class EmphasisManagerApplication extends foundry.applications.api
 
     const confirmed = await foundry.applications.api.DialogV2.confirm({
       window: { title: T("l5r4.ui.common.delete") },
-      content: `${T("l5r4.ui.common.delete")} "${emphasisName}"?`,
+      content: await foundry.applications.handlebars.renderTemplate(
+        DIALOG_TEMPLATES.removeEmphasis,
+        { name: emphasisName }
+      ),
       rejectClose: false
     });
 

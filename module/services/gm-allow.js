@@ -4,6 +4,8 @@
  * a player is told why it cannot be made; a GM is asked whether to make it anyway.
  */
 
+import { DIALOG_TEMPLATES } from "../config/templates.js";
+
 /**
  * Refuse a forbidden roll for a player, or ask the GM to allow it.
  * @param {object} spec
@@ -17,9 +19,11 @@ export async function askGmAllow({ title, reason, ask }) {
     ui.notifications?.warn(reason);
     return false;
   }
-  const escape = foundry.utils.escapeHTML;
   return foundry.applications.api.DialogV2.confirm({
     window: { title },
-    content: `<p>${escape(reason)}</p><p>${escape(ask)}</p>`
+    content: await foundry.applications.handlebars.renderTemplate(DIALOG_TEMPLATES.confirm, {
+      question: reason,
+      consequence: ask
+    })
   });
 }

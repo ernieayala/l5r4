@@ -88,7 +88,7 @@ async function applyWoundsToToken(damage) {
   const actor = token.actor;
 
   if (!actor) {
-    ui.notifications?.warn("Token has no actor");
+    ui.notifications?.warn(T("l5r4.ui.notifications.tokenNoActor"));
     return;
   }
 
@@ -151,7 +151,7 @@ async function applyWoundsWithVoid(damage, _actorId) {
   const targetActor = token.actor;
 
   if (!targetActor) {
-    ui.notifications?.warn("Token has no actor");
+    ui.notifications?.warn(T("l5r4.ui.notifications.tokenNoActor"));
     return;
   }
 

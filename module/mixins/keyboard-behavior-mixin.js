@@ -3,25 +3,26 @@
  * @description Cursor feedback while Shift is held, for the system's Shift+Click guard against accidental changes to
  * Traits, Skills, the Void Ring, and other character values (PcTraitHandler, PcAdjustmentHandler, and
  * ItemCrudHandler's chat posts). A sheet class applies the mixin, calls `_setupConditionalCursor(root)` from
- * `_onRender`, and styles its guarded elements with `cursor: var(--conditional-cursor)`. The mixin needs the
+ * `_onRender`, and styles its guarded elements with `cursor: var(--conditional-cursor, default)`. The mixin needs the
  * Application's `element` and overrides `close` to remove its document-level listeners.
  */
 
 /**
  * Mixin factory that adds keyboard behavior for conditional cursor changes.
  *
- * Adds document-level event listeners for Shift key state tracking and updates
- * a CSS custom property (`--conditional-cursor`) that sheets use to provide
- * visual feedback when Shift+Click actions are available.
+ * Adds document-level event listeners for Shift key state tracking and toggles
+ * the `is-shift-held` state class on the sheet, which sets the `--conditional-cursor`
+ * CSS custom property that sheets use to provide visual feedback when Shift+Click
+ * actions are available.
  *
  * **Lifecycle Integration:**
  * - Call `_setupConditionalCursor(root)` from _onRender to initialize
  * - Automatically cleans up event listeners when sheet closes
  *
  * **CSS Integration:**
- * Sheet styles should use `cursor: var(--conditional-cursor)` on elements that
- * require Shift+Click. The variable changes from 'default' to 'pointer' when
- * Shift is held, providing visual affordance.
+ * Sheet styles should use `cursor: var(--conditional-cursor, default)` on elements that
+ * require Shift+Click. The variable is 'pointer' while Shift is held, providing visual
+ * affordance.
  *
  * @param {class} Base - The base class to extend (must have `element` property and `close` method)
  * @returns {class} Extended class with keyboard behavior methods
@@ -32,7 +33,7 @@ export function KeyboardBehaviorMixin(Base) {
      * Initializes keyboard event listeners for Shift key tracking.
      *
      * Sets up document-level keydown/keyup listeners that track Shift key state
-     * and update the `--conditional-cursor` CSS custom property. Removes any
+     * and toggle the `is-shift-held` state class. Removes any
      * existing listeners before adding new ones to prevent duplicate handlers.
      *
      * **Lifecycle:**
@@ -101,14 +102,14 @@ export function KeyboardBehaviorMixin(Base) {
     }
 
     /**
-     * Updates the CSS custom property that controls conditional cursor style.
+     * Toggles the state class that controls conditional cursor style.
      *
-     * Sets the `--conditional-cursor` CSS variable on the sheet root element,
-     * which sheet styles can reference to provide visual feedback for
-     * Shift+Click interactions.
+     * Puts `is-shift-held` on the sheet root element while Shift is held; the
+     * stylesheet then sets the `--conditional-cursor` CSS variable, which sheet
+     * styles reference to provide visual feedback for Shift+Click interactions.
      *
      * **CSS Integration:**
-     * Sheet SCSS files use `cursor: var(--conditional-cursor)` on elements
+     * Sheet SCSS files use `cursor: var(--conditional-cursor, default)` on elements
      * requiring Shift+Click (e.g., trait adjustment buttons, item chat links).
      *
      * **Visual Feedback:**
@@ -124,8 +125,8 @@ export function KeyboardBehaviorMixin(Base) {
         return;
       }
 
-      const cursorValue = showPointer ? "pointer" : "default";
-      root.style.setProperty("--conditional-cursor", cursorValue);
+      // scss/layout/_actor-layout.scss sets --conditional-cursor to pointer while the class is on
+      root.classList.toggle("is-shift-held", showPointer);
     }
 
     /**

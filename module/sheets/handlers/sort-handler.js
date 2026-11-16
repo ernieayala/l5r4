@@ -36,7 +36,7 @@ export class SortHandler {
    * @param {"asc"|"desc"} direction - Current sort direction for the active column
    */
   static #updateHeaderIndicators(header, activeKey, direction) {
-    header.querySelectorAll(".l5r4-sort-header-button").forEach(a => {
+    header.querySelectorAll("[data-action='sort-items']").forEach(a => {
       const sortKey = a.dataset.sortby;
       const isActive = sortKey === activeKey;
       a.classList.toggle("is-active", isActive);
@@ -68,9 +68,7 @@ export class SortHandler {
     try {
       // querySelector used here to find header element by data-scope attribute
       // This is proper use of data attributes for behavior targeting
-      const header = root.querySelector(
-        `.l5r4-item-row-list.l5r4-sort-header[data-scope="${scope}"]`
-      );
+      const header = root.querySelector(`[data-sort-header][data-scope="${scope}"]`);
       if (!header) {
         return;
       }
@@ -113,7 +111,7 @@ export class SortHandler {
 
     try {
       const el = element || event.currentTarget;
-      const header = el.closest(".l5r4-item-row-list.l5r4-sort-header");
+      const header = el.closest("[data-sort-header]");
       const scope = header?.dataset?.scope || "items";
       const key = el.dataset.sortby || "name";
 
@@ -137,7 +135,7 @@ export class SortHandler {
       console.warn(`${SYS_ID}`, "Unified sort click failed", {
         err,
         actorId,
-        scope: element?.closest(".l5r4-item-row-list.l5r4-sort-header")?.dataset?.scope
+        scope: element?.closest("[data-sort-header]")?.dataset?.scope
       });
     }
   }

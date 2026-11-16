@@ -122,9 +122,8 @@ string. Enforced by ESLint `no-restricted-syntax` (no HTML strings) and review.
 
 Conforming, `module/services/check-request.js:31-37`.
 
-Non-conforming, `module/services/dice/check/chat-actions.js:192-197`: the contest card's
-`<div class="chat-card l5r4-contest">` is a template literal; it moves to `templates/chat/contest.hbs` (target) with
-the same classes. `module/services/session.js:23` and `module/services/combat/contest.js:111` post `<p>` strings.
+Conforming, `templates/chat/contest.hbs`: the contest card, rendered with the classes posted cards already store.
+Non-conforming (modeled): a card built as a template literal or a `<p>` string in JavaScript.
 
 ### 4. Who may act decides what the viewer sees
 

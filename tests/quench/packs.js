@@ -1273,7 +1273,13 @@ export function registerPacksTests(quench) {
             assert.isTrue(
               await waitFor(() => ui.compendium.element.querySelector("[data-l5r4-browser]"))
             );
-            ui.compendium.element.querySelector("[data-l5r4-browser]").click();
+            const browse = ui.compendium.element.querySelector("button[data-l5r4-browser]");
+            assert.isNotNull(browse.querySelector("i[inert]"));
+            assert.equal(
+              browse.querySelector("span").textContent,
+              game.i18n.localize("l5r4.apps.compendiumBrowser.open")
+            );
+            browse.click();
             assert.isTrue(await waitFor(() => foundry.applications.instances.get(id)?.rendered));
             await foundry.applications.instances.get(id).close({ animate: false });
           })

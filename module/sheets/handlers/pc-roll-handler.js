@@ -88,7 +88,7 @@ export class PcRollHandler {
  * @returns {Item|null}
  */
 function getRowItem(actor, element) {
-  const row = element.closest(".item");
+  const row = element.closest("[data-item-id]");
   const id = row?.dataset?.itemId || row?.dataset?.documentId || row?.dataset?.id;
   return id ? actor.items.get(id) : null;
 }

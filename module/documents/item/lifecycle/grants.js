@@ -9,9 +9,10 @@
  */
 
 import { SYS_ID } from "../../../config/constants.js";
+import { CHAT_TEMPLATES } from "../../../config/templates.js";
 import { applyChoices } from "../../../utils/choices.js";
 import { buildGrantedSkill, getPendingGrants, buildUngrantedSkill } from "../../../utils/grants.js";
-import { F } from "../../../utils/localization.js";
+import { F, R } from "../../../utils/localization.js";
 import { toInt } from "../../../utils/type-coercion.js";
 import { createRule } from "../../../data/rules/rule-models.js";
 
@@ -233,12 +234,16 @@ async function createDueGrants(actor) {
       if (rule.rank > 0) {
         await ChatMessage.create({
           speaker: ChatMessage.getSpeaker({ actor }),
-          content: `<p>${F("l5r4.ui.grants.granted", {
-            name: foundry.utils.escapeHTML(actor.name),
-            item: foundry.utils.escapeHTML(source.name),
-            giver: foundry.utils.escapeHTML(giver.name),
-            rank: rule.rank
-          })}</p>`
+          content: await R(CHAT_TEMPLATES.note, {
+            lines: [
+              F("l5r4.ui.grants.granted", {
+                name: actor.name,
+                item: source.name,
+                giver: giver.name,
+                rank: rule.rank
+              })
+            ]
+          })
         });
       }
     }

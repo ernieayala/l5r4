@@ -6,7 +6,8 @@
  */
 
 import { SYS_ID } from "../config/constants.js";
-import { T } from "../utils/localization.js";
+import { CHAT_TEMPLATES, DIALOG_TEMPLATES } from "../config/templates.js";
+import { R, T } from "../utils/localization.js";
 
 /**
  * Start a new game session after the GM confirms, and say so in chat.
@@ -15,13 +16,15 @@ import { T } from "../utils/localization.js";
 export async function startNewSession() {
   const confirmed = await foundry.applications.api.DialogV2.confirm({
     window: { title: T("l5r4.ui.session.new") },
-    content: `<p>${T("l5r4.ui.session.confirm")}</p>`
+    content: await R(DIALOG_TEMPLATES.confirm, { question: T("l5r4.ui.session.confirm") })
   });
   if (!confirmed) {
     return;
   }
   await game.settings.set(SYS_ID, "session", game.settings.get(SYS_ID, "session") + 1);
-  await ChatMessage.create({ content: `<p>${T("l5r4.ui.session.started")}</p>` });
+  await ChatMessage.create({
+    content: await R(CHAT_TEMPLATES.note, { lines: [T("l5r4.ui.session.started")] })
+  });
 }
 
 /** Register the session control, once during system init. */

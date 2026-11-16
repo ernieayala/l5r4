@@ -317,7 +317,17 @@ export function registerActiveEffectsTests(quench) {
           await setUp("Active effects: armor void");
           await combat.startCombat();
           assert.equal(game.combat?.id, combat.id, "the handler reads game.combat");
+          let content = "";
+          foundry.applications.api.DialogV2.confirm = async options => {
+            content = options.content;
+            return true;
+          };
           await PcActionsHandler.updateArmorVoid({ actor }, null, { checked: true });
+          assert.equal(
+            foundry.utils.parseHTML(content).textContent,
+            game.i18n.localize("l5r4.ui.effects.voidArmorQuestion"),
+            "the question renders from its template"
+          );
           assert.equal(
             actor.effects.filter(e => e.getFlag("l5r4-enhanced", "effectId") === "voidArmor")
               .length,

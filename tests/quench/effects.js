@@ -3,7 +3,12 @@ import { rollSkill } from "../../module/services/dice/rolls/skill-roll.js";
 import { rollTrait } from "../../module/services/dice/rolls/trait-roll.js";
 import { applyEffect, effectsOf } from "../../module/services/effects/apply.js";
 import { onPromptClick } from "../../module/services/effects/prompts.js";
-import { registerTokenEffects, updateProne } from "../../module/services/effects/automation.js";
+import {
+  endEncounter,
+  registerTokenEffects,
+  updateProne
+} from "../../module/services/effects/automation.js";
+import { COMBAT_EVENTS } from "../../module/services/effects/combat-events.js";
 import { isVoidOverLimit, voidSpentOf } from "../../module/services/effects/uses.js";
 import { spendVoidPoint } from "../../module/services/dice/resources/void-points.js";
 import { getCheckContext } from "../../module/services/dice/check/collect.js";
@@ -324,7 +329,16 @@ export function registerEffectsTests(quench) {
           await applyEffect(actor, "feared", { level: 1 });
           await game.time.advance(3600);
           assert.isTrue(actor.statuses.has("feared"), "world time alone does not end it");
-          await foundry.documents.ActiveEffect.registry.refresh("encounterEnd", {});
+          let question = "";
+          const answered = new Promise(resolve => {
+            Hooks.once("renderDialogV2", app => {
+              question = app.element.querySelector("form").textContent;
+              app.element.querySelector('[data-action="yes"]').click();
+              resolve();
+            });
+          });
+          await Promise.all([answered, endEncounter()]);
+          assert.include(question, game.i18n.localize("l5r4.ui.effects.endEncounterConfirm"));
           assert.isTrue(await waitFor(() => !actor.statuses.has("feared")));
         });
 
@@ -405,6 +419,20 @@ export function registerEffectsTests(quench) {
             prompts(actor, "concentration")[0].getFlag(SYS_ID, "prompt").tn,
             30,
             "20 + 5 × 2"
+          );
+        });
+
+        it("should remind the caster of the upkeep at the start of his Turn", async () => {
+          const actor = track(await createTestPC({ name: "Effects concentration upkeep" }));
+          await applyEffect(actor, "concentration", { level: 1 });
+          const [effect] = effectsOf(actor, "concentration");
+          const before = messages.length;
+          await COMBAT_EVENTS.turn("turnStart", null, { actor });
+          const note = messages.slice(before).find(m => m.speaker.actor === actor.id);
+          assert.exists(note, "a note is posted");
+          assert.equal(
+            foundry.utils.parseHTML(note.content).textContent,
+            game.i18n.localize("l5r4.ui.effects.concentrationUpkeep", { effect: effect.name })
           );
         });
       });

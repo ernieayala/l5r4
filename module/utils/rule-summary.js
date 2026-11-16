@@ -18,10 +18,10 @@ import { STATUS_EFFECTS } from "../config/status-effects.js";
  */
 
 /** Trait keys, each named by `l5r4.ui.mechanics.traits.<key>`. */
-const TRAITS = new Set(["sta", "wil", "str", "per", "ref", "awa", "agi", "int"]);
+const TRAITS = Object.freeze(new Set(["sta", "wil", "str", "per", "ref", "awa", "agi", "int"]));
 
 /** Ring keys, each named by `l5r4.ui.mechanics.rings.<key>`. */
-const RINGS = new Set(["air", "earth", "fire", "water", "void"]);
+const RINGS = Object.freeze(new Set(["air", "earth", "fire", "water", "void"]));
 
 /**
  * The summary key of each rule key.

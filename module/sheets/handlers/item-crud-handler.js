@@ -6,6 +6,7 @@
  */
 
 import { SYS_ID } from "../../config/constants.js";
+import { DIALOG_TEMPLATES } from "../../config/templates.js";
 import { toInt } from "../../utils/type-coercion.js";
 import { updateSectionCollapsed } from "../../utils/section-state.js";
 import * as Chat from "../../services/chat.js";
@@ -30,13 +31,13 @@ export class ItemCrudHandler {
 
   /**
    * Finds the closest ancestor item row element.
-   * Item rows are expected to have the CSS class "item".
+   * Item rows carry data-item-id (templates/cards/).
    *
    * @param {HTMLElement} element - Starting element for traversal
    * @returns {HTMLElement|null} The item row element or null if not found
    */
   static #getItemRow(element) {
-    return element?.closest?.(".item");
+    return element?.closest?.("[data-item-id]");
   }
 
   /**
@@ -175,9 +176,9 @@ export class ItemCrudHandler {
       // No is the default button [src: client/applications/api/dialog.mjs:346-354]; closing the dialog resolves null
       const confirmed = await foundry.applications.api.DialogV2.confirm({
         window: { title: "l5r4.ui.dialogs.deleteItem.title" },
-        content: `<p>${game.i18n.localize("l5r4.ui.dialogs.deleteItem.content", {
-          name: item.name
-        })}</p>`
+        content: await foundry.applications.handlebars.renderTemplate(DIALOG_TEMPLATES.confirm, {
+          question: game.i18n.localize("l5r4.ui.dialogs.deleteItem.content", { name: item.name })
+        })
       });
 
       if (!confirmed) {
@@ -243,7 +244,7 @@ export class ItemCrudHandler {
     event?.preventDefault?.();
 
     // Find parent section title container
-    const sectionTitle = element.closest(".l5r4-section-title");
+    const sectionTitle = element.closest("[data-section-title]");
     if (!sectionTitle) {
       return;
     }
@@ -350,8 +351,8 @@ export class ItemCrudHandler {
         const formula = `${item.system.roll}k${item.system.keep}`;
         button.textContent = formula;
 
-        // Also update the mask span if it exists
-        const mask = button.closest(".l5r4-button.-roll")?.querySelector(".l5r4-button-under");
+        // Also update the mask span before the button (templates/cards/skill.hbs)
+        const mask = button.previousElementSibling;
         if (mask) {
           mask.textContent = formula;
         }

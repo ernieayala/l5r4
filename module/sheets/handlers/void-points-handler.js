@@ -79,20 +79,13 @@ export class VoidPointsHandler {
    * @returns {void}
    */
   static updateVoidDots(root, actor) {
-    // querySelector used here to find specific UI component container by class
-    // Alternative would require data-attribute on container, but class selector is
-    // semantically correct for styling-related component queries
-    // Additionally, using querySelector for void dots UI allows for easy styling
-    // and layout changes without modifying the underlying JavaScript code.
-    const node = root?.querySelector?.(".l5r4-void-points-dots");
+    const node = root?.querySelector?.("[data-action='adjust-void-points']");
     if (!node) {
       return;
     }
 
     const cur = this.#getVoidPoints(actor);
-    // querySelectorAll used to find all dot elements within the container
-    // Data attributes used for dot index values (data-idx)
-    node.querySelectorAll(".void-dot").forEach(d => {
+    node.querySelectorAll("[data-idx]").forEach(d => {
       const idx = Number(d.getAttribute("data-idx") || "0") || 0;
       d.classList.toggle("is-filled", idx <= cur);
     });

@@ -50,9 +50,7 @@ async function renderLink(match) {
     source,
     reason: spec.ok ? "" : T(spec.error)
   });
-  const holder = document.createElement("span");
-  holder.innerHTML = html.trim();
-  return holder.firstElementChild;
+  return foundry.utils.parseHTML(html);
 }
 
 /**
@@ -99,7 +97,7 @@ function onActivate(link, action, signal) {
  * @param {{signal: AbortSignal}} options
  */
 function onRenderLink(element, { signal }) {
-  const link = element.querySelector(".l5r4-inline-link[data-link-type]");
+  const link = element.querySelector("[data-link-type]");
   if (!link) {
     return;
   }
@@ -116,15 +114,19 @@ function onRenderLink(element, { signal }) {
   if (
     game.user.isGM &&
     link.dataset.linkType === "Check" &&
-    !element.querySelector(".l5r4-inline-link-request")
+    !element.querySelector("[data-link-request]")
   ) {
     const request = document.createElement("a");
     request.className = "l5r4-inline-link-request";
     request.setAttribute("role", "button");
     request.tabIndex = 0;
+    request.dataset.linkRequest = "";
     request.dataset.tooltip = T("l5r4.ui.links.request");
     request.setAttribute("aria-label", T("l5r4.ui.links.request"));
-    request.innerHTML = '<i class="fa-solid fa-comment-dots" inert></i>';
+    const icon = document.createElement("i");
+    icon.className = "fa-solid fa-comment-dots";
+    icon.inert = true;
+    request.append(icon);
     link.after(request);
     onActivate(
       request,

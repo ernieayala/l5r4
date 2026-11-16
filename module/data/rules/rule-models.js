@@ -308,7 +308,8 @@ export class PeriodicSaveRule extends RuleData {
         required: true,
         blank: false,
         validate: value => /^(ring:(air|earth|fire|water|void)|trait:[a-z]{3})$/.test(value),
-        validationError: 'must be "ring:<ring>" or "trait:<trait>"'
+        validationError:
+          'must be "ring:" and a Ring, such as "ring:earth", or "trait:" and a Trait, such as "trait:wil"'
       }),
       tn: new NumberField({ required: true, nullable: false, integer: true, min: 0, initial: 20 }),
       step: new NumberField({ required: true, nullable: false, integer: true, initial: 0 }),

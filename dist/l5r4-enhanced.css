@@ -241,9 +241,12 @@ body > * {
  */
 .l5r4.pc,
 .l5r4.npc {
-  --conditional-cursor: default;
   display: flex;
   flex-direction: column;
+}
+.l5r4.pc.is-shift-held,
+.l5r4.npc.is-shift-held {
+  --conditional-cursor: pointer;
 }
 .l5r4.pc .window-content,
 .l5r4.npc .window-content {
@@ -497,7 +500,7 @@ body > * {
   background: var(--l5r4-color-scrim);
   border: none;
   border-radius: var(--l5r4-radius-round);
-  cursor: var(--conditional-cursor);
+  cursor: var(--conditional-cursor, default);
   display: inline-flex;
   font: inherit;
   height: 32px;
@@ -720,7 +723,7 @@ body > * {
 .l5r4.npc .l5r4-item-row .title a[data-action=post-item],
 .l5r4-xp-manager .l5r4-item-row .title a[data-action=post-item] {
   color: inherit;
-  cursor: var(--conditional-cursor);
+  cursor: var(--conditional-cursor, default);
   text-decoration: none;
   text-shadow: none;
 }

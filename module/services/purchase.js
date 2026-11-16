@@ -9,7 +9,8 @@
 
 import { SYS_ID } from "../config/constants.js";
 import { CHOICE_LIST_VALUES } from "../config/rule-keys.js";
-import { F, T } from "../utils/localization.js";
+import { DIALOG_TEMPLATES } from "../config/templates.js";
+import { F, R, T } from "../utils/localization.js";
 import { openChoices, getUnmetPrerequisites, buildRulesWithSelections } from "../utils/purchase.js";
 
 /**
@@ -37,9 +38,10 @@ export async function preparePurchase(actor, data) {
     }
     const bypass = await foundry.applications.api.DialogV2.confirm({
       window: { title: T("l5r4.ui.purchase.unmetTitle") },
-      content: `<p>${foundry.utils.escapeHTML(
-        F("l5r4.ui.purchase.unmet", { name: data.name, list })
-      )}</p><p>${T("l5r4.ui.purchase.addAnyway")}</p>`
+      content: await R(DIALOG_TEMPLATES.confirm, {
+        question: F("l5r4.ui.purchase.unmet", { name: data.name, list }),
+        consequence: T("l5r4.ui.purchase.addAnyway")
+      })
     });
     if (!bypass) {
       return null;
@@ -151,16 +153,14 @@ async function askChoice(itemName, choice) {
     ui.notifications?.warn(F("l5r4.ui.purchase.noOptions", { name: itemName }));
     return null;
   }
-  const select = foundry.applications.fields.createSelectInput({
-    name: "selection",
-    options: options.map(({ value, label }) => ({ value, label }))
-  });
   const prompt = choice.prompt || T("l5r4.ui.purchase.choose");
   return foundry.applications.api.DialogV2.prompt({
     window: { title: `${itemName}: ${prompt}` },
-    content: `<div class="form-group"><label>${foundry.utils.escapeHTML(prompt)}</label>${
-      select.outerHTML
-    }</div>`,
+    content: await R(DIALOG_TEMPLATES.choice, {
+      label: prompt,
+      name: "selection",
+      options: options.map(({ value, label }) => ({ value, label }))
+    }),
     ok: {
       label: T("l5r4.ui.common.ok"),
       callback: (_event, button) => button.form.elements.selection.value || null
@@ -199,16 +199,16 @@ function buildBioLinks(type, item) {
  * @param {Item[]} schools - The character's Schools
  * @returns {Promise<"replace"|"add"|null>} null when the dialog is closed
  */
-function askSchool(actor, name, schools) {
+async function askSchool(actor, name, schools) {
   return foundry.applications.api.DialogV2.wait({
     window: { title: T("l5r4.ui.purchase.schoolTitle") },
-    content: `<p>${foundry.utils.escapeHTML(
-      F("l5r4.ui.purchase.schoolQuestion", {
+    content: await R(DIALOG_TEMPLATES.confirm, {
+      question: F("l5r4.ui.purchase.schoolQuestion", {
         name: actor.name,
         schools: schools.map(school => school.name).join(", "),
         school: name
       })
-    )}</p>`,
+    }),
     buttons: [
       { action: "add", label: T("l5r4.ui.purchase.schoolAdd"), default: true },
       { action: "replace", label: T("l5r4.ui.purchase.schoolReplace") }

@@ -881,6 +881,11 @@ export function registerRollPipelineTests(quench) {
             const card = keep(await postContestedRoll(mine, theirs));
             assert.include(card.content, actor.name);
             assert.match(card.content, /wins/);
+            assert.lengthOf(
+              foundry.utils.parseHTML(card.content).querySelectorAll("li"),
+              2,
+              "one line per roll"
+            );
           })
         );
       });

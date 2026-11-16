@@ -4,7 +4,8 @@
  * heals (Stamina × 2) + Insight Rank Wounds; Void for Armor TN gives +10 for one Round and only on the actor's turn
  * in combat, after a DialogV2 confirmation; Void for Initiative sets a flag the initiative roll spends for +10.
  */
-import { T } from "../../utils/localization.js";
+import { DIALOG_TEMPLATES } from "../../config/templates.js";
+import { F, R, T } from "../../utils/localization.js";
 import { applyLongRest } from "../../services/rest.js";
 import { applyEffect, effectsOf } from "../../services/effects/apply.js";
 import { buildVoidUseUpdate, warnVoidLimit } from "../../services/effects/uses.js";
@@ -88,7 +89,7 @@ export class PcActionsHandler {
     // Check if in combat
     const combat = game.combat;
     if (!combat || !combat.started) {
-      ui.notifications?.warn("Must be in active combat to use Void for Armor TN");
+      ui.notifications?.warn(T("l5r4.ui.effects.voidArmorNoCombat"));
       element.checked = false;
       return;
     }
@@ -96,7 +97,7 @@ export class PcActionsHandler {
     // Check if it's this actor's turn
     const currentCombatant = combat.combatant;
     if (!currentCombatant || currentCombatant.actorId !== actor.id) {
-      ui.notifications?.warn("Can only use Void for Armor TN on your turn");
+      ui.notifications?.warn(T("l5r4.ui.effects.voidArmorNotTurn"));
       element.checked = false;
       return;
     }
@@ -112,7 +113,9 @@ export class PcActionsHandler {
     // Confirm with dialog
     const confirmed = await foundry.applications.api.DialogV2.confirm({
       window: { title: "Spend Void Point" },
-      content: "<p>Spend a Void Point to increase Armor TN by +10 for 1 round?</p>"
+      content: await R(DIALOG_TEMPLATES.confirm, {
+        question: T("l5r4.ui.effects.voidArmorQuestion")
+      })
     });
 
     if (!confirmed) {
@@ -130,7 +133,7 @@ export class PcActionsHandler {
     });
     await applyEffect(actor, "voidArmor");
 
-    ui.notifications?.info(`${actor.name} spent Void Point - Armor TN +10 for 1 round`);
+    ui.notifications?.info(F("l5r4.ui.effects.voidArmorSpent", { name: actor.name }));
   }
 
   /**

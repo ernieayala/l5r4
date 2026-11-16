@@ -57,7 +57,7 @@
         background: var(--l5r4-color-scrim);
         border: none;
         border-radius: var(--l5r4-radius-round);
-        cursor: var(--conditional-cursor);
+        cursor: var(--conditional-cursor, default);
         display: inline-flex;
         font: inherit;
         height: 32px;

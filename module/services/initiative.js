@@ -9,6 +9,8 @@
  * game-rules/25_rings_and_traits.md, p.78
  */
 
+import { DIALOG_TEMPLATES } from "../config/templates.js";
+import { F, R } from "../utils/localization.js";
 import { buildVoidUseUpdate, warnVoidLimit } from "./effects/uses.js";
 
 /**
@@ -34,13 +36,15 @@ export async function spendInitiativeVoidPoints(combatants) {
 
     if (actor.system.rings.void.value <= 0) {
       await actor.update({ "system.initiative.useVoid": false });
-      ui.notifications?.warn(`${actor.name} has no Void Points available`);
+      ui.notifications?.warn(F("l5r4.ui.combat.initiativeVoidNone", { name: actor.name }));
       continue;
     }
 
     const confirmed = await foundry.applications.api.DialogV2.confirm({
       window: { title: `Spend Void Point for Initiative - ${actor.name}` },
-      content: `<p>Spend a Void Point to add +10 to ${actor.name}'s initiative roll?</p>`
+      content: await R(DIALOG_TEMPLATES.confirm, {
+        question: F("l5r4.ui.combat.initiativeVoidQuestion", { name: actor.name })
+      })
     });
     if (!confirmed) {
       await actor.update({ "system.initiative.useVoid": false });
@@ -55,7 +59,7 @@ export async function spendInitiativeVoidPoints(combatants) {
       "system.initiative.useVoid": false,
       ...buildVoidUseUpdate(actor)
     });
-    ui.notifications?.info(`${actor.name} spent Void Point for initiative (+10)`);
+    ui.notifications?.info(F("l5r4.ui.combat.initiativeVoidSpent", { name: actor.name }));
     bonuses.set(combatant.id, VOID_INITIATIVE_BONUS);
   }
   return bonuses;

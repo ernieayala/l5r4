@@ -7,6 +7,7 @@
  */
 import { BROWSER_FILTERS, BROWSER_TABS } from "../config/browser.js";
 import { SYS_ID } from "../config/constants.js";
+import { APP_TEMPLATES } from "../config/templates.js";
 import {
   getBrowserIndexFields,
   getEntryNumbers,
@@ -145,7 +146,7 @@ export default class CompendiumBrowser extends HandlebarsApplicationMixin(Applic
       }
     }
     if (options.parts.includes("results")) {
-      for (const row of this.element.querySelectorAll(".l5r4-compendium-browser-row[data-uuid]")) {
+      for (const row of this.element.querySelectorAll("li[data-uuid]")) {
         row.addEventListener("dragstart", event => {
           event.dataTransfer.setData(
             "text/plain",
@@ -309,16 +310,22 @@ function getOptionLabel(filter, value) {
  * is added again whenever it is missing.
  * @param {foundry.applications.sidebar.tabs.CompendiumDirectory} _app
  * @param {HTMLElement} element
+ * @returns {Promise<void>}
  */
-function onRenderCompendiumDirectory(_app, element) {
+async function onRenderCompendiumDirectory(_app, element) {
+  // Core's header shows its own buttons only to a GM, so its class is the one anchor every user has
+  // eslint-disable-next-line no-restricted-syntax -- core markup, templates/sidebar/tabs/compendiums.hbs:4
   const actions = element.querySelector(".header-actions");
   if (!actions || actions.querySelector("[data-l5r4-browser]")) {
     return;
   }
-  const button = document.createElement("button");
-  button.type = "button";
-  button.dataset.l5r4Browser = "";
-  button.innerHTML = `<i class="fa-solid fa-book-atlas" inert></i><span>${T("l5r4.apps.compendiumBrowser.open")}</span>`;
+  const button = foundry.utils.parseHTML(
+    await foundry.applications.handlebars.renderTemplate(APP_TEMPLATES.browserOpen)
+  );
+  // A second render of the header may have added the button while the template rendered
+  if (actions.querySelector("[data-l5r4-browser]")) {
+    return;
+  }
   button.addEventListener("click", () => CompendiumBrowser.open());
   actions.append(button);
 }

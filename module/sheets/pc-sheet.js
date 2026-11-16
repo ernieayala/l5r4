@@ -11,6 +11,7 @@ import { TEMPLATE } from "../config/templates.js";
 import { STANCES } from "../config/localization.js";
 import { PC_SORT_KEYS } from "../config/sort-keys.js";
 import { on } from "../utils/dom.js";
+import { F } from "../utils/localization.js";
 import { prepareItemSheetOptions } from "../documents/item/integration/sheet-data.js";
 import { effectsOf } from "../services/effects/apply.js";
 import { openLedgerDialog } from "../services/ledger.js";
@@ -417,8 +418,10 @@ export default class L5R4PcSheet extends BaseActorSheet {
     });
 
     // Notify user of mode change
-    const mode = !current ? "automatic" : "manual";
-    ui.notifications?.info(`Insight Rank calculation set to ${mode} for ${this.actor.name}`);
+    const key = !current
+      ? "l5r4.character.ranks.insightAutomatic"
+      : "l5r4.character.ranks.insightManual";
+    ui.notifications?.info(F(key, { name: this.actor.name }));
   }
 
   /**
@@ -461,7 +464,7 @@ export default class L5R4PcSheet extends BaseActorSheet {
     this.render(false);
 
     // Notify user
-    ui.notifications?.info(`Sheet recalculated for ${this.actor.name}`);
+    ui.notifications?.info(F("l5r4.ui.sheets.recalculated", { name: this.actor.name }));
   }
 
   /**
@@ -484,11 +487,8 @@ export default class L5R4PcSheet extends BaseActorSheet {
     const isLimited = !game.user.isGM && this.actor.limited;
     const path = isLimited ? TEMPLATE("actor/pc-limited.hbs") : TEMPLATE("actor/pc.hbs");
     const html = await foundry.applications.handlebars.renderTemplate(path, context);
-    const host = document.createElement("div");
-    host.innerHTML = html;
-    // querySelector used here for template host parsing (temporary DOM, not live application)
-    // to extract the form element from the rendered template string
-    const form = host.querySelector("form") || host.firstElementChild || host;
+    // Both templates render one <form> root
+    const form = foundry.utils.parseHTML(html);
     return { form };
   }
 

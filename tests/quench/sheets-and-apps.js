@@ -128,9 +128,14 @@ export function registerSheetsAndAppsTests(quench) {
       let hookId;
       let pc;
       let npc;
+      let diceSound;
 
       before(async function () {
         this.timeout(SURFACE_TIMEOUT_MS);
+        // Core gives each roll message the dice sound (client/documents/chat-message.mjs:540); the click-through posts
+        // a burst of rolls, and Chrome at times fails to load that many audio elements, an error core logs
+        diceSound = CONFIG.sounds.dice;
+        CONFIG.sounds.dice = null;
         await settleChatNotifications();
         baseline = new Set(
           [...foundry.applications.instances.values()].filter(app => app.rendered)
@@ -160,6 +165,7 @@ export function registerSheetsAndAppsTests(quench) {
 
       after(async function () {
         this.timeout(SURFACE_TIMEOUT_MS);
+        CONFIG.sounds.dice = diceSound;
         Hooks.off("createChatMessage", hookId);
         await settleChatNotifications();
         for (const message of messages) {
@@ -570,15 +576,21 @@ export function registerSheetsAndAppsTests(quench) {
               assert.isTrue(await waitFor(() => customs().includes("Sheets Renamed")));
 
               await app.render();
-              const deleted = answerDialog(dialog =>
-                dialog.element.querySelector('[data-action="yes"]').click()
-              );
+              let question = "";
+              const deleted = answerDialog(dialog => {
+                question = dialog.element.querySelector("form").textContent;
+                dialog.element.querySelector('[data-action="yes"]').click();
+              });
               app.element
                 .querySelector(
                   '[data-action="delete-emphasis"][data-emphasis-name="Sheets Renamed"]'
                 )
                 .click();
               await deleted;
+              assert.include(
+                question,
+                `${game.i18n.localize("l5r4.ui.common.delete")} "Sheets Renamed"?`
+              );
               assert.isTrue(await waitFor(() => !customs().includes("Sheets Renamed")));
             } finally {
               await app.close({ animate: false });

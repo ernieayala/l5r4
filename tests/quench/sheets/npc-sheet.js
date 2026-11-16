@@ -18,6 +18,7 @@
 import { SYS_ID } from "../../../module/config/constants.js";
 import { createTestNPC } from "../../fixtures/actor-fixtures.js";
 import { createSkillData } from "../../fixtures/item-fixtures.js";
+import { waitFor } from "../helpers.js";
 
 /**
  * Register NPC sheet tests
@@ -528,6 +529,21 @@ export function registerNpcSheetTests(quench) {
 
           assert.isTrue(toggle.closest("[data-item-id]").classList.contains("is-expanded"));
           assert.equal(toggle.getAttribute("aria-expanded"), "true", "open after the click");
+        });
+
+        it("should mark the Skill column a sort click chose, with its direction", async () => {
+          await actor.createEmbeddedDocuments("Item", [createSkillData("Kenjutsu", 2, "agi")]);
+          await sheet.render(true);
+          const column = () =>
+            sheet.element.querySelector(
+              "[data-sort-header][data-scope='skills'] [data-sortby='rank']"
+            );
+          try {
+            column().click();
+            assert.isTrue(await waitFor(() => column()?.dataset.dir === "asc"), "rank ascending");
+          } finally {
+            await game.user.unsetFlag(SYS_ID, `sortByActor.${actor.id}`);
+          }
         });
       });
     },

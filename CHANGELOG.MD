@@ -21,6 +21,8 @@ CSS custom properties renamed. The Ring colors now hold whole colors instead of 
 - `--l5r4-ring-rank-backdrop-color` -> `--l5r4-color-ring-rank-backdrop`
 - `--l5r4-ring-rank-backdrop-image` -> `--l5r4-image-ring-rank-backdrop`
 - `--controls` -> `--l5r4-size-column-controls`
+- `--air-ring-color` -> `--l5r4-color-ring-air`, also darker: `#64798d` in place of `#889eb3`, so ring text on
+  it meets its contrast minimum
 
 CSS classes renamed. Posted chat cards keep their stored classes (`chat-card`, `item`, `title`, and the rest), so
 their styles are unchanged.
@@ -162,11 +164,34 @@ their styles are unchanged.
 - `wealth-display` -> `l5r4-wealth-manager-display`
 - `wealth-item` -> `l5r4-wealth-manager-item`
 - `wealth-value` -> `l5r4-wealth-manager-value`
+- `controls` (row control cluster) -> `l5r4-inline-control -reveal`
+- `button` (roll button face) -> `l5r4-button-face`; the face is a `<button>`
+- `title` (XP manager and NPC attack row names) -> `l5r4-item-row-name`
+- `clickable` (XP manager cap) -> `l5r4-xp-manager-cap`
+- `check-maneuvers` -> `l5r4-check-dialog-maneuvers`
+- Section roots, template roots, and item tab panels gained `l5r4-` block classes (`l5r4-section`,
+  `l5r4-item-details`, `l5r4-item-modifiers`, `l5r4-<window>-body`); their old classes stay
+
+Clickable controls are `<button type="button">` in place of `<a>`, `<span>`, and `<div>`; core's focus ring shows on
+them, and on a sheet the viewer cannot edit core disables them. Icon-only controls carry `data-tooltip` and
+`aria-label` in place of `title`.
+
+Data attributes and prepared values renamed (none is stored in world data):
+
+- `data-system-ring` (Ring roll) -> `data-ring-key`
+- A Skill's prepared `system.rollDice`, `system.rollKeep`, and `system.keepDice` -> `system.roll`, `system.keep`
+- A spell's prepared `system.castTN` -> `system.castTn`
+- `L5R4Combat.resolveInitiativeBonuses` -> `L5R4Combat.askInitiativeBonuses`; `L5R4Combat.events` ->
+  `L5R4Combat.EVENTS`
+
+`game.system.api.rollItem` and `rollTrait`, which hotbar macros call, are unchanged.
 
 ### Removed
 
 - CSS rules no template used: `-gap-xl`, `clear-btn`, `void-points-amount`, `item-list -advantages`,
   `expanded-text -npc`, `editor-container`, `price-section`, `price-field`, `sheet-content > h4`
+- Classes no style or script read: `info-group`, `sized`, `effects` (item effects tab wrapper), `message` (design
+  gallery), `rules` (Active Effect Rules tab)
 
 ---
 

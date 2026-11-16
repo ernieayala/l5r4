@@ -228,7 +228,8 @@ export class BaseActorSheet extends KeyboardBehaviorMixin(
     const key = target.classList.contains("ring-roll")
       ? target.dataset.ringKey
       : target.classList.contains("l5r4-button") && target.classList.contains("-roll")
-        ? target.closest(".l5r4-trait")?.querySelector(".l5r4-rank-control.-trait")?.dataset.trait
+        ? target.closest("[data-trait-block]")?.querySelector("[data-action='adjust-trait']")
+            ?.dataset.trait
         : null;
     if (key) {
       event.dataTransfer.setData(

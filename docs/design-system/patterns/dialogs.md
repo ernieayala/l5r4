@@ -73,7 +73,7 @@ The one button is "Roll" (`roll-check.js:180`). Closing the dialog cancels the r
 A dialog's content is a template in `templates/dialogs/`, named `<name>-dialog.hbs`, rendered with
 `foundry.applications.handlebars.renderTemplate` and listed in `DIALOG_TEMPLATES`. No dialog content is an HTML string
 built in JavaScript, and none uses the global `Dialog`. The template has no `<form>` of its own: core's form wraps it,
-and a nested form breaks the submit. A confirmation shares one template, `templates/dialogs/confirm-dialog.hbs` (target), with
+and a nested form breaks the submit. A confirmation shares one template, `templates/dialogs/confirm-dialog.hbs`, with
 two parameters, `question` and `consequence`, each already localized. Enforced by ESLint `no-restricted-syntax` (no
 HTML strings; `DialogV2` content is a template; no global `Dialog`) and `tests/conventions/names.test.js` (the
 `-dialog.hbs` suffix).

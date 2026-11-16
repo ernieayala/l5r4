@@ -1,359 +1,55 @@
 # Developer Guide
 
-**Status**: ✅ 100% Architecture Compliant  
-**Last Updated**: 2025-10-04
-
-This guide explains the system architecture and how to contribute.
-
-## Table of Contents
-
-- [Getting Started](#getting-started)
-- [Architecture](#project-architecture)
-- [Guidelines](#development-guidelines)
-- [Contributing](#how-to-contribute)
-- [Troubleshooting](#troubleshooting)
-
----
-
-## Getting Started
-
-### Setup
-
-```bash
-cd [foundry-data-path]/systems/
-git clone https://github.com/ernieayala/l5r4.git
-cd l5r4
-npm install
-npm run build:css
-```
-
-### Verify Architecture
-
-```bash
-npm run madge:check    # Check for circular dependencies
-npm run madge:summary  # View statistics
-npm run madge:json     # Export graph
-```
-
----
-
-## Project Architecture
-
-### Layer System
-
-The system uses strict layers for clean, maintainable code:
-
-```
-┌───────────────────────────────────┐
-│  SHEETS (UI)                      │
-│  → Render UI, handle events       │
-│  ✓ Can import: documents, services│
-└─────────────┬─────────────────────┘
-              │
-┌─────────────▼─────────────────────┐
-│  SERVICES (Logic)                 │
-│  → Dice, chat, utilities          │
-│  ✓ Can import: utils, config      │
-└─────────────┬─────────────────────┘
-              │
-┌─────────────▼─────────────────────┐
-│  DOCUMENTS (Data)                 │
-│  → Data prep, calculations        │
-│  ✓ Can import: utils, config      │
-└─────────────┬─────────────────────┘
-              │
-┌─────────────▼─────────────────────┐
-│  UTILS (Helpers)                  │
-│  → Pure functions                 │
-│  ✓ Can import: config only        │
-└─────────────┬─────────────────────┘
-              │
-┌─────────────▼─────────────────────┐
-│  CONFIG (Constants)               │
-│  → System constants               │
-│  ✓ No imports                     │
-└───────────────────────────────────┘
-```
-
-### Directory Structure
-
-```
-module/
-├── documents/     # Actor/Item classes with game rule logic
-├── sheets/        # UI rendering with ActorSheetV2/ItemSheetV2
-├── services/      # Dice mechanics, chat rendering, utilities
-├── apps/          # XP Manager, Wound Config applications
-├── utils/         # Shared pure functions
-├── config/        # System constants
-└── setup/         # Settings, templates, migrations
-```
-
-**Status**: ✅ 100% Compliant (Zero circular dependencies)
-
-- Automatic verification ensures code quality
-- Layer separation strictly enforced
-
----
-
-## Development Guidelines
-
-### Import Rules
-
-Follow the layer flow (top to bottom):
-
-**✅ Allowed**
-
-```javascript
-// Sheets → Services
-import { rollSkill } from "../services/dice/index.js";
-
-// Services → Utils
-import { toInt } from "../../../utils/index.js";
-
-// Documents → Utils
-import { calculateXpStepCostForTrait } from "../../utils/xp-calculations.js";
-```
-
-**❌ Forbidden**
-
-```javascript
-// Documents → Services (WRONG!)
-import { rollSkill } from "../services/dice/index.js";
-
-// Services → Documents (WRONG!)
-import { preparePcExperience } from "../../documents/actor/calculations/xp-system.js";
-
-// Utils → Anything except Config (WRONG!)
-import { L5R4Actor } from "../documents/actor.js";
-```
-
-### Shared Logic
-
-**Need the same function in multiple layers?**  
-Extract it to Utils!
-
-```javascript
-// utils/xp-calculations.js
-export function calculateXpStepCostForTrait(rank, freeBonus, discount) {
-  return Math.max(0, 4 * (rank + freeBonus) + discount);
-}
-
-// Both documents and services can import from utils
-import { calculateXpStepCostForTrait } from "../../utils/xp-calculations.js";
-```
-
----
-
-## Layer Responsibilities
-
-### Documents (`module/documents/`)
-
-**Purpose**: Calculate derived data
-
-**Do**:
-
-- Calculate stats (Armor TN, wounds, insight)
-- Prepare data for display
-- Apply Active Effects
-
-**Don't**:
-
-- Roll dice (use Services)
-- Show UI (use Sheets)
-- Use async in `prepareDerivedData()`
-
-### Services (`module/services/`)
-
-**Purpose**: Business logic with side effects
-
-**Do**:
-
-- Roll dice
-- Create chat messages
-- Show dialogs
-- Manipulate documents
-
-**Don't**:
-
-- Calculate derived data (use Documents)
-- Render sheets (use Sheets)
-
-### Sheets (`module/sheets/`)
-
-**Purpose**: UI rendering and interaction
-
-**Do**:
-
-- Render HTML
-- Handle events
-- Coordinate Documents and Services
-
-**Don't**:
-
-- Calculate data (read from Documents)
-- Implement logic (call Services)
-
-### Utils (`module/utils/`)
-
-**Purpose**: Pure helper functions
-
-**Do**:
-
-- Type coercion
-- Localization helpers
-- Math functions
-- Game mechanics calculations
-
-**Don't**:
-
-- Import from Documents or Services
-- Use async operations
-- Mutate global state
-
-### Config (`module/config/`)
-
-**Purpose**: Constants only
-
-**Do**:
-
-- System IDs and paths
-- Game data constants
-- Localization keys
-
-**Don't**:
-
-- Import from other modules
-- Have side effects
-
----
-
-## Common Patterns
-
-### Pattern 1: Separation of Concerns
-
-**Rolling a skill check:**
-
-```javascript
-// ❌ BAD: Document handles presentation
-class L5R4Actor extends Actor {
-  prepareDerivedData() {
-    this.rollSkill("kenjutsu"); // WRONG!
-  }
-}
-
-// ✅ GOOD: Document computes, Service presents
-class L5R4Actor extends Actor {
-  prepareDerivedData() {
-    sys.skills = this.items.filter(i => i.type === "skill");
-  }
-}
-
-export async function rollSkill(actor, skillId) {
-  const roll = new Roll(formula);
-  await roll.evaluate();
-  await ChatMessage.create({
-    /* ... */
-  });
-}
-```
-
-### Pattern 2: Shared Functions
-
-**When multiple layers need the same function:**
-
-```javascript
-// ✅ Extract to utils
-export function calculateXpStepCostForTrait(rank, freeBonus, discount) {
-  return Math.max(0, 4 * (rank + freeBonus) + discount);
-}
-
-// Both Documents and Services import from utils
-import { calculateXpStepCostForTrait } from "../../utils/xp-calculations.js";
-```
-
----
-
-## Troubleshooting
-
-### Circular Dependency Error
-
-**Problem**: Modules import from each other
-
-**Solution**:
-
-1. Run `npm run madge:check` to see the cycle
-2. Extract shared logic to Utils
-3. Use events/hooks instead of direct imports
-
-**Example Fix**:
-
-```javascript
-// ❌ Circular
-import { applyStanceAutomation } from "../services/stance/index.js";
-
-// ✅ Fixed: Extract to documents layer
-export function applyStanceEffects(actor, sys) {
-  /* ... */
-}
-```
-
-### Wrong Layer Import
-
-**Problem**: Documents importing from Services (or vice versa)
-
-**Solution**: Extract shared logic to Utils layer
-
-### Architecture Benefits
-
-- **Maintainability** - Clear responsibilities per layer
-- **Organization** - Easy to find where logic lives
-- **Reusability** - Utils work anywhere, Documents compute once
-- **Debugging** - No circular dependencies, clear data flow
-- **Performance** - Efficient calculations, no redundancy
-
----
-
-## How to Contribute
-
-1. **Fork** the repo on [GitHub](https://github.com/ernieayala/l5r4)
-2. **Clone** your fork
-3. **Create** a feature branch (`git checkout -b feature/name`)
-4. **Follow** code style:
-   - JSDoc comments for functions
-   - kebab-case for files
-   - PascalCase for classes
-   - Run `npm run madge:check` before committing
-5. **Test** thoroughly
-6. **Submit** a pull request
-
-### Code Style
-
-- JSDoc for all functions
-- Follow layer architecture
-- Verify with `npm run madge:check`
-
-### Report Bugs
-
-[GitHub Issues](https://github.com/ernieayala/l5r4/issues)
-
-Include:
-
-- Foundry VTT version
-- System version
-- Steps to reproduce
-- Console errors (F12)
-- Screenshots
-
----
-
-## Quick Reference
-
-### Import Cheat Sheet
-
-| Layer         | Can Import                         | Cannot Import               |
-| ------------- | ---------------------------------- | --------------------------- |
-| **Sheets**    | documents, services, utils, config | -                           |
-| **Services**  | utils, config                      | documents, sheets           |
-| **Documents** | utils, config                      | services, sheets            |
-| **Utils**     | config only                        | documents, services, sheets |
-| **Config**    | nothing                            | anything                    |
+How the code is laid out and where to put a change. Setup and the gate are in [CONTRIBUTING.md](CONTRIBUTING.md);
+the full rules are in [docs/code-system/](docs/code-system/README.md).
+
+## Layers
+
+Each folder under `module/` has one job. Imports flow downward, and `npm run deps:circular` finds no cycle. ESLint's
+`no-restricted-imports` and `no-restricted-globals` enforce the boundaries per folder.
+
+| Layer       | Path                  | Does                                                                     | Never does                     |
+| ----------- | --------------------- | ------------------------------------------------------------------------ | ------------------------------ |
+| Data models | `module/data/`        | One `TypeDataModel` per subtype: schema, `migrateData`, derived values  | UI, DOM, rolling               |
+| Rule models | `module/data/rules/`  | One `DataModel` per rule key in `system.rules`: validation only          | Computing outputs              |
+| Documents   | `module/documents/`   | Actor, Item, Combat, Combatant: data preparation, lifecycle hooks        | Rolling, UI, DOM               |
+| Services    | `module/services/`    | Rolls, roll dialogs, chat messages, effects, multi-step operations       | Sheet references, derived data |
+| Sheets      | `module/sheets/`      | Render document data; `handlers/` route actions to services and documents | Calculations, rules, rolling   |
+| Apps        | `module/apps/`        | Standalone ApplicationV2 windows                                         | Rules the utils can hold       |
+| Hooks       | `module/hooks/`       | Foundry hook registration that wires events to services                  | Logic beyond routing           |
+| Setup       | `module/setup/`       | Settings, template registration, Handlebars helpers, world migrations    | Rules                          |
+| Utils       | `module/utils/`       | Pure functions: rule math, validation, formatting                        | Side effects, Foundry globals  |
+| Config      | `module/config/`      | Constants, keys, option lists                                            | Functions, logic               |
+
+Sheets and apps may import services, documents, utils, and config; services and documents import utils and config,
+never each other; utils import config only. [docs/code-system/modules.md](docs/code-system/modules.md) has the full
+table and the import order.
+
+`dist/l5r4-enhanced.js` is the entry module, written by hand: it registers the data models, sheets, settings, and
+hooks during `init` and runs migrations during `ready`. `dist/l5r4-enhanced.css` is compiled from `scss/`.
+
+## Where a change goes
+
+| Change                                    | Where                                                                                                 |
+| ----------------------------------------- | ----------------------------------------------------------------------------------------------------- |
+| A rule's math                             | A pure function in `module/utils/`, with the book's worked examples in `tests/unit/`                  |
+| A value derived from actor data           | The subtype's data model or `module/documents/actor/`                                                 |
+| What a rule key in `system.rules` does    | `module/utils/rule-engine.js`; its validation in `module/data/rules/rule-models.js`                   |
+| A roll, a chat card, a dialog             | `module/services/`, its markup in `templates/`                                                        |
+| A sheet control                           | A `data-action` in the template, routed in the sheet; see [foundry-patterns.md](docs/code-system/foundry-patterns.md) |
+| Stored data outside the schema            | `flags.l5r4-enhanced.*`                                                                               |
+| A schema change                           | The data model with `migrateData`, or a world migration in `module/setup/migrations/`                 |
+| Text a user reads                         | A key in `lang/en.json`; see [docs/design-system/content/](docs/design-system/content/)               |
+| Markup and looks                          | `templates/` and `scss/`, on the tokens in [docs/design-system/foundations/](docs/design-system/foundations/) |
+
+## Tests
+
+Vitest runs in Node for pure code (`tests/unit/`, mirroring `module/`) and for the repo-level checks
+(`tests/*.test.js`, `tests/conventions/`). Quench runs in Foundry for documents, sheets, services, and workflows
+(`tests/quench/`, registered by `tests/quench/index.js`). [docs/code-system/testing.md](docs/code-system/testing.md)
+has the naming and structure rules.
+
+## Foundry APIs
+
+The target is Foundry VTT 14.370. Check an API against the installed source before using it; `roadmap/FOUNDRY-V14-REFERENCE.md`
+lists the ones the system uses with their sources.

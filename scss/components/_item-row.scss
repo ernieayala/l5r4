@@ -184,7 +184,7 @@
 
       a[data-action="post-item"] {
         color: inherit;
-        cursor: var(--conditional-cursor);
+        cursor: var(--conditional-cursor, default);
         text-decoration: none;
         text-shadow: none;
       }

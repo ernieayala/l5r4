@@ -13,7 +13,8 @@
  */
 
 import { SYS_ID } from "../../config/constants.js";
-import { F } from "../../utils/localization.js";
+import { CHAT_TEMPLATES } from "../../config/templates.js";
+import { F, R } from "../../utils/localization.js";
 import { applyEffect, effectsOf } from "./apply.js";
 import { postFullDefensePrompt, postSavePrompts } from "./prompts.js";
 
@@ -51,7 +52,9 @@ export const COMBAT_EVENTS = Object.freeze({
     for (const effect of effectsOf(actor, "concentration")) {
       await ChatMessage.create({
         speaker: ChatMessage.getSpeaker({ actor }),
-        content: `<p>${F("l5r4.ui.effects.concentrationUpkeep", { effect: effect.name })}</p>`
+        content: await R(CHAT_TEMPLATES.note, {
+          lines: [F("l5r4.ui.effects.concentrationUpkeep", { effect: effect.name })]
+        })
       });
     }
   },

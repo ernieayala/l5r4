@@ -129,6 +129,7 @@ function registerLegacyDamageButtonHook() {
     if (message.type === "roll") {
       return;
     }
+    // eslint-disable-next-line no-restricted-syntax -- fixed name, Stage 17 decision 2
     for (const button of html.querySelectorAll(".l5r4-damage-button")) {
       let isProcessing = false;
       button.addEventListener("click", async event => {

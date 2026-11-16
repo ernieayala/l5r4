@@ -6,7 +6,7 @@
  * player who does not own the NPC.
  */
 import { SYS_ID } from "../config/constants.js";
-import { TEMPLATE } from "../config/templates.js";
+import { DIALOG_TEMPLATES, TEMPLATE } from "../config/templates.js";
 import { ACTION_TYPES, STANCES } from "../config/localization.js";
 import { NPC_SORT_KEYS } from "../config/sort-keys.js";
 import { getClamped } from "../utils/type-coercion.js";
@@ -420,11 +420,8 @@ export default class L5R4NpcSheet extends BaseActorSheet {
     const isLimited = !game.user.isGM && this.actor.limited;
     const path = isLimited ? TEMPLATE("actor/npc-limited.hbs") : TEMPLATE("actor/npc.hbs");
     const html = await foundry.applications.handlebars.renderTemplate(path, context);
-    const host = document.createElement("div");
-    host.innerHTML = html;
-    // querySelector used here for template host parsing (temporary DOM, not live application)
-    // to extract the form element from the rendered template string
-    const form = host.querySelector("form") || host.firstElementChild || host;
+    // Both templates render one <form> root
+    const form = foundry.utils.parseHTML(html);
     return { form };
   }
 
@@ -563,7 +560,7 @@ export default class L5R4NpcSheet extends BaseActorSheet {
    */
   _onCastSpell(event, element) {
     event.preventDefault();
-    const row = element.closest(".item");
+    const row = element.closest("[data-item-id]");
     const id = row?.dataset?.itemId || row?.dataset?.documentId || row?.dataset?.id;
     const spell = id ? this.actor.items.get(id) : null;
     if (!spell || spell.type !== "spell") {
@@ -619,7 +616,9 @@ export default class L5R4NpcSheet extends BaseActorSheet {
         `${game.i18n.localize("l5r4.ui.mechanics.combat.attack")} ${attackKey.replace("attack", "")}`;
       const confirmed = await foundry.applications.api.DialogV2.confirm({
         window: { title: "l5r4.ui.dialogs.deleteAttack.title" },
-        content: `<p>${game.i18n.localize("l5r4.ui.dialogs.deleteAttack.content", { name })}</p>`
+        content: await foundry.applications.handlebars.renderTemplate(DIALOG_TEMPLATES.confirm, {
+          question: game.i18n.localize("l5r4.ui.dialogs.deleteAttack.content", { name })
+        })
       });
       if (!confirmed) {
         return;

@@ -3,6 +3,7 @@
     "apps": {
       "armorConfig": {
         "errors": {
+          "openFailed": "Failed to open armor configuration",
           "updateFailed": "Failed to update armor configuration"
         },
         "title": "Armor configuration"
@@ -445,6 +446,9 @@
         "xpAmount": "Amount"
       },
       "movement": {
+        "errors": {
+          "toggleFailed": "Failed to toggle movement type"
+        },
         "feet": "ft",
         "maximum": "Maximum movement",
         "title": "Movement"
@@ -452,6 +456,8 @@
       "ranks": {
         "gloryRank": "Glory Rank",
         "honorRank": "Honor Rank",
+        "insightAutomatic": "Insight Rank calculation set to automatic for {name}",
+        "insightManual": "Insight Rank calculation set to manual for {name}",
         "statusRank": "Status Rank",
         "taintRank": "Shadowlands Taint"
       },
@@ -786,6 +792,9 @@
         "guardFullAttack": "You cannot Guard in the Full Attack Stance",
         "guardPick": "Select your token and target the one to guard",
         "increasedDamageNote": "Increased Damage: +{dice}k0.",
+        "initiativeVoidNone": "{name} has no Void Points available",
+        "initiativeVoidQuestion": "Spend a Void Point to add +10 to {name}'s initiative roll?",
+        "initiativeVoidSpent": "{name} spent Void Point for initiative (+10)",
         "invulnerableNote": "Invulnerability: one Wound.",
         "killedNote": "Past the Out Wound Rank: marked Dead. The GM can remove the status.",
         "knockdown": "Knockdown (2 Raises, 4 against 4 or more legs)",
@@ -882,6 +891,10 @@
         "saveTitle": "{effect}: save",
         "stanceNotAllowed": "{condition} rules out {stance}",
         "voidArmor": "Void: Armor TN +10",
+        "voidArmorNoCombat": "Must be in active combat to use Void for Armor TN",
+        "voidArmorNotTurn": "Can only use Void for Armor TN on your turn",
+        "voidArmorQuestion": "Spend a Void Point to increase Armor TN by +10 for 1 round?",
+        "voidArmorSpent": "{name} spent a Void Point: Armor TN +10 for 1 Round",
         "voidLimit": "{name} has already spent a Void Point this Round",
         "voidSpentThisRound": "A Void Point was already spent this Round; one per Round is the usual limit."
       },
@@ -1074,7 +1087,8 @@
         "noPermissionDamage": "You do not have permission to roll damage for this actor",
         "noSpellSlots": "You ran out of spell slots for this Ring",
         "noValidWeapon": "No valid weapon found for attack roll",
-        "schoolRankZero": "You cannot cast a spell with School Rank reduced to 0"
+        "schoolRankZero": "You cannot cast a spell with School Rank reduced to 0",
+        "tokenNoActor": "Token has no actor"
       },
       "purchase": {
         "addAnyway": "Add it anyway?",
@@ -1213,6 +1227,7 @@
         "kata": "Kata",
         "kiho": "Kiho",
         "notes": "Notes",
+        "recalculated": "Sheet recalculated for {name}",
         "rulesSummary": "Rules summary",
         "skill": "Skill",
         "skills": "Skills",

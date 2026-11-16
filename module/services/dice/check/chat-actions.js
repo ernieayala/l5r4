@@ -9,6 +9,7 @@
  */
 
 import { SYS_ID } from "../../../config/constants.js";
+import { CHAT_TEMPLATES } from "../../../config/templates.js";
 import { F, T } from "../../../utils/localization.js";
 import { toInt } from "../../../utils/type-coercion.js";
 import {
@@ -168,20 +169,17 @@ export async function postContestedRoll(message, opponent) {
     raises: m.system.tn.raises
   }));
   const result = getContestResult(entries);
-  const lines = entries.map(e => {
-    const raises = e.raises ? ` (${T("l5r4.ui.mechanics.rolls.raises")}: ${e.raises})` : "";
-    return `<li>${foundry.utils.escapeHTML(e.name)}: ${e.total}${raises}</li>`;
-  });
   const verdict = result.tie
     ? T("l5r4.ui.check.contestTie")
     : F("l5r4.ui.check.contestWinner", {
-        name: foundry.utils.escapeHTML(entries.find(e => e.id === result.winner).name)
+        name: entries.find(e => e.id === result.winner).name
       });
   return ChatMessage.create({
     speaker: message.speaker,
-    content: `<div class="chat-card l5r4-contest"><div class="dice-flavor">${T(
-      "l5r4.ui.check.contest"
-    )}</div><ul>${lines.join("")}</ul><p><strong>${verdict}</strong></p></div>`
+    content: await foundry.applications.handlebars.renderTemplate(CHAT_TEMPLATES.contest, {
+      entries,
+      verdict
+    })
   });
 }
 

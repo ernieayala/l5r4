@@ -101,6 +101,7 @@ and `fas`.
 | No jQuery                                                                                                                                                                        | ESLint `no-restricted-syntax` |
 | `DialogV2` content is a template from `templates/dialogs/`                                                                                                                       | ESLint `no-restricted-syntax` |
 | A selector on a fixed chat-card class (posted before 4.0.0, so it has no `data-*`) carries `// eslint-disable-next-line no-restricted-syntax -- fixed name, Stage 17 decision 2` | review                        |
+| A selector on core's own markup that carries no `data-*` names core's class and carries `// eslint-disable-next-line no-restricted-syntax -- core markup, <its template>`        | review                        |
 
 The rules apply to `module/`, `dist/l5r4-enhanced.js`, and `tests/quench/`: a test that selects by class breaks when a
 class is renamed.

@@ -1,6 +1,7 @@
 import { SYS_ID } from "../../module/config/constants.js";
 import { createPurchasedItem, preparePurchase } from "../../module/services/purchase.js";
 import { applyTrackChange, ledgerEntriesOf } from "../../module/services/ledger.js";
+import { startNewSession } from "../../module/services/session.js";
 import { updateActivation } from "../../module/services/effects/activation.js";
 import { buildFolderTransfer, createImportedItems } from "../../module/services/item-transfer.js";
 import { rollCheck } from "../../module/services/dice/check/roll-check.js";
@@ -552,6 +553,28 @@ export function registerAuthoringTests(quench) {
             }
           })
         );
+
+        it(
+          "should start a new session after the GM confirms, and say so in chat",
+          clean(async () => {
+            const session = game.settings.get(SYS_ID, "session");
+            let question = "";
+            const answered = new Promise(resolve => {
+              Hooks.once("renderDialogV2", app => {
+                question = app.element.querySelector("form").textContent;
+                app.element.querySelector('[data-action="yes"]').click();
+                resolve();
+              });
+            });
+            await Promise.all([answered, startNewSession()]);
+            assert.include(question, game.i18n.localize("l5r4.ui.session.confirm"));
+            assert.equal(game.settings.get(SYS_ID, "session"), session + 1);
+            assert.equal(
+              foundry.utils.parseHTML(posted.at(-1).content).textContent,
+              game.i18n.localize("l5r4.ui.session.started")
+            );
+          })
+        );
       });
 
       describe("Honor Roll without Honor", () => {
@@ -743,6 +766,31 @@ export function registerAuthoringTests(quench) {
             for (const copy of imported) {
               assert.deepEqual(copy.ownership, { default: O.NONE, [game.user.id]: O.OWNER });
             }
+          })
+        );
+
+        it(
+          "should ask for a file when Import items is chosen on a folder's menu",
+          clean(async () => {
+            const folder = await foundry.documents.Folder.implementation.create({
+              name: "Quench Menu Folder",
+              type: "Item"
+            });
+            folders.push(folder);
+            await ui.items.render({ force: true });
+            const selector = `[data-folder-id="${folder.id}"] > header`;
+            assert.isTrue(await waitFor(() => ui.items.element.querySelector(selector)));
+            const entries = [];
+            Hooks.callAll("getFolderContextOptions", ui.items, entries);
+            const entry = entries.find(e => e.label === "l5r4.ui.transfer.import");
+            const opened = new Promise(resolve => {
+              Hooks.once("renderDialogV2", app => {
+                resolve(app.title);
+                app.close();
+              });
+            });
+            entry.onClick(new PointerEvent("click"), ui.items.element.querySelector(selector));
+            assert.equal(await opened, game.i18n.localize("l5r4.ui.transfer.import"));
           })
         );
       });

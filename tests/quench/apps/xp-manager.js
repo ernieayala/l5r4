@@ -16,6 +16,7 @@
 import { SYS_ID } from "../../../module/config/constants.js";
 import XpManagerApplication from "../../../module/apps/xp-manager.js";
 import { createTestPC, createTestNPC } from "../../fixtures/actor-fixtures.js";
+import { waitFor } from "../helpers.js";
 
 /**
  * Register XP manager dialog tests
@@ -295,6 +296,16 @@ export function registerXpManagerTests(quench) {
 
           // Dialog should have buttons for actions
           assert.exists(element, "Dialog has interactive elements");
+        });
+
+        it("should mark the purchases column a sort click chose, with its direction", async () => {
+          const cost = dialog.element.querySelector("[data-sort-header] [data-sortby='cost']");
+          try {
+            cost.click();
+            assert.isTrue(await waitFor(() => cost.dataset.dir === "asc"), "cost ascending");
+          } finally {
+            await game.user.unsetFlag(SYS_ID, `sortByActor.${actor.id}`);
+          }
         });
 
         it("should close when requested", async () => {

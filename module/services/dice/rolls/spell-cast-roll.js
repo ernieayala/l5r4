@@ -100,18 +100,16 @@ export async function rollSpellCast({ actor, spell, showDialog = true } = {}) {
  * @returns {Promise<string|null>} The element, or null when the caster cancels
  */
 async function askElement(spell) {
-  const select = foundry.applications.fields.createSelectInput({
-    name: "element",
-    options: UNIVERSAL_ELEMENTS.map(value => ({
-      value,
-      label: T(`l5r4.ui.mechanics.rings.${value}`)
-    }))
-  });
   return foundry.applications.api.DialogV2.prompt({
     window: { title: spell.name },
-    content: `<div class="form-group"><label>${foundry.utils.escapeHTML(
-      F("l5r4.magic.spells.chooseElement", { spell: spell.name })
-    )}</label>${select.outerHTML}</div>`,
+    content: await foundry.applications.handlebars.renderTemplate(DIALOG_TEMPLATES.choice, {
+      label: F("l5r4.magic.spells.chooseElement", { spell: spell.name }),
+      name: "element",
+      options: UNIVERSAL_ELEMENTS.map(value => ({
+        value,
+        label: T(`l5r4.ui.mechanics.rings.${value}`)
+      }))
+    }),
     ok: { callback: (_event, button) => button.form.elements.element.value || null },
     rejectClose: false,
     modal: true

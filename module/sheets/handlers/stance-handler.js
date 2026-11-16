@@ -8,6 +8,7 @@
  */
 
 import { SYS_ID } from "../../config/constants.js";
+import { T } from "../../utils/localization.js";
 import { STANCE_IDS, getStanceConflicts } from "../../utils/stances.js";
 import { applyEffect } from "../../services/effects/apply.js";
 
@@ -118,7 +119,7 @@ export class StanceHandler {
       });
     } catch (err) {
       console.error(`${SYS_ID} StanceHandler: Failed to toggle movement type`, err);
-      ui.notifications?.error("Failed to toggle movement type");
+      ui.notifications?.error(T("l5r4.character.movement.errors.toggleFailed"));
     }
   }
 

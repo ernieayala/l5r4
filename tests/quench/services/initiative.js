@@ -614,8 +614,10 @@ export function registerInitiativeTests(quench) {
           ]);
           const confirm = foundry.applications.api.DialogV2.confirm;
           let prompts = 0;
-          foundry.applications.api.DialogV2.confirm = async () => {
+          let content = "";
+          foundry.applications.api.DialogV2.confirm = async options => {
             prompts += 1;
+            content = options.content;
             return true;
           };
           const formulas = [];
@@ -632,6 +634,12 @@ export function registerInitiativeTests(quench) {
             Hooks.off("createChatMessage", hookId);
           }
           assert.equal(prompts, 1, "one prompt");
+          const question = foundry.utils.parseHTML(content);
+          assert.equal(question.tagName, "P", "the question renders from its template");
+          assert.equal(
+            question.textContent,
+            game.i18n.localize("l5r4.ui.combat.initiativeVoidQuestion", { name: actor.name })
+          );
           assert.equal(actor.system.rings.void.value, 1, "Void Points 2 - 1");
           assert.isFalse(actor.system.initiative.useVoid, "mark cleared");
           assert.deepEqual(

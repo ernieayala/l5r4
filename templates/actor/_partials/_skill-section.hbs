@@ -1,10 +1,10 @@
 <section class="l5r4-section flexcol -gap-sm">
-  <div class="flexrow -gap-sm l5r4-section-title{{#if collapsedSections.skills}} is-collapsed{{/if}}" data-scope="skills">
+  <div class="flexrow -gap-sm l5r4-section-title{{#if collapsedSections.skills}} is-collapsed{{/if}}" data-section-title data-scope="skills">
     <h4 class="l5r4-section-heading">{{localize "l5r4.ui.sheets.skills"}}</h4>
     {{> "systems/l5r4-enhanced/templates/actor/_partials/_unified-item-create.hbs"}}
     {{> "systems/l5r4-enhanced/templates/actor/_partials/_expand.hbs" collapsed=collapsedSections.skills}}
   </div>
-  <section class="l5r4-item-row-list -skill l5r4-sort-header" data-scope="skills">
+  <section class="l5r4-item-row-list -skill l5r4-sort-header" data-sort-header data-scope="skills">
     <div class="l5r4-item-row">
       <button type="button" class="l5r4-sort-header-button" data-action="sort-items" data-sortby="name">{{localize "l5r4.ui.common.name"}}</button>
       <button type="button" class="l5r4-sort-header-button" data-action="sort-items" data-sortby="rank">{{localize "l5r4.ui.common.rank"}}</button>
