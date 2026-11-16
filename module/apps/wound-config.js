@@ -61,7 +61,7 @@ export default class WoundConfigApplication extends DebouncedFieldMixin(
       height: 400
     },
     actions: {
-      "update-wound-mode": WoundConfigApplication.prototype._onWoundModeChange
+      "update-wound-mode": WoundConfigApplication.#onUpdateWoundMode
     },
     form: {
       handler: WoundConfigApplication.prototype._onSubmitForm,
@@ -134,7 +134,7 @@ export default class WoundConfigApplication extends DebouncedFieldMixin(
         wounds: sys.wounds ?? {},
         visibleManualWoundLevels: sys.visibleManualWoundLevels ?? {},
         config: {
-          npcNumberWoundLvls: NPC_NUMBER_WOUND_LVLS
+          npcNumberWoundLevels: NPC_NUMBER_WOUND_LVLS
         }
       };
 
@@ -165,40 +165,12 @@ export default class WoundConfigApplication extends DebouncedFieldMixin(
       wounds: {},
       visibleManualWoundLevels: {},
       config: {
-        npcNumberWoundLvls: { 1: 1, 2: 2, 3: 3, 4: 4, 5: 5, 6: 6, 7: 7, 8: 8 }
+        npcNumberWoundLevels: { 1: 1, 2: 2, 3: 3, 4: 4, 5: 5, 6: 6, 7: 7, 8: 8 }
       }
     };
   }
 
   // _onRender is provided by DebouncedFieldMixin
-
-  /**
-   * Handle wound mode change action.
-   * Switches between manual and formula-based wound calculation modes.
-   *
-   * @param {Event} event - The change event
-   * @param {HTMLElement} element - The select element with new mode value
-   */
-  async _onWoundModeChange(event, element) {
-    const newMode = element.value;
-
-    if (newMode === this.actor?.system?.woundMode) {
-      return;
-    }
-
-    try {
-      await this.actor.update({ "system.woundMode": newMode });
-      if (this.rendered) {
-        this.render();
-      }
-    } catch (err) {
-      logError("Failed to update wound mode", err, {
-        newMode,
-        actorId: this.actor.id
-      });
-      ui.notifications?.error(T("l5r4.apps.woundConfig.errors.updateFailed"));
-    }
-  }
 
   /**
    * Handle field change events with validation notification.
@@ -231,7 +203,7 @@ export default class WoundConfigApplication extends DebouncedFieldMixin(
       return;
     }
 
-    this._updateDebounced(field, validatedValue);
+    this.updateDebounced(field, validatedValue);
   }
 
   /**
@@ -340,4 +312,33 @@ export default class WoundConfigApplication extends DebouncedFieldMixin(
   }
 
   // close() method is provided by DebouncedFieldMixin
+
+  /**
+   * Handle wound mode change action.
+   * Switches between manual and formula-based wound calculation modes.
+   *
+   * @this {WoundConfigApplication}
+   * @param {Event} event - The change event
+   * @param {HTMLElement} element - The select element with new mode value
+   */
+  static async #onUpdateWoundMode(event, element) {
+    const newMode = element.value;
+
+    if (newMode === this.actor?.system?.woundMode) {
+      return;
+    }
+
+    try {
+      await this.actor.update({ "system.woundMode": newMode });
+      if (this.rendered) {
+        this.render();
+      }
+    } catch (err) {
+      logError("Failed to update wound mode", err, {
+        newMode,
+        actorId: this.actor.id
+      });
+      ui.notifications?.error(T("l5r4.apps.woundConfig.errors.updateFailed"));
+    }
+  }
 }

@@ -15,7 +15,7 @@ const PLACEHOLDER = /\{choice:([a-z][a-z0-9-]*)\}/gi;
  * @param {object[]} rules - Raw `system.rules` of one item, stored data that may hold anything
  * @returns {Record<string, string>}
  */
-export function choiceSelections(rules) {
+export function getChoiceSelections(rules) {
   const selections = {};
   for (const rule of rules ?? []) {
     if (rule?.key === "ChoiceSet" && typeof rule.flag === "string" && rule.selection) {
@@ -32,11 +32,11 @@ export function choiceSelections(rules) {
  * @returns {object[]}
  */
 export function applyChoices(rules) {
-  const selections = choiceSelections(rules);
+  const selections = getChoiceSelections(rules);
   if (Object.keys(selections).length === 0) {
     return rules ?? [];
   }
-  return rules.map(rule => (rule?.key === "ChoiceSet" ? rule : fill(rule, selections)));
+  return rules.map(rule => (rule?.key === "ChoiceSet" ? rule : getFilledValue(rule, selections)));
 }
 
 /**
@@ -47,7 +47,7 @@ export function applyChoices(rules) {
  * @param {object[]} rules - Raw `system.rules` of one item
  * @returns {object[]}
  */
-export function answeredRules(rules) {
+export function getAnsweredRules(rules) {
   return applyChoices(
     (rules ?? []).map(rule => {
       if (rule?.key !== "ChoiceSet" || rule.selection) {
@@ -74,7 +74,7 @@ export function hasOpenChoice(text) {
  * @param {Record<string, string>} selections
  * @returns {string}
  */
-function fillText(text, selections) {
+function getFilledText(text, selections) {
   return text.replace(PLACEHOLDER, (whole, flag) => selections[flag] ?? whole);
 }
 
@@ -84,15 +84,17 @@ function fillText(text, selections) {
  * @param {Record<string, string>} selections
  * @returns {*}
  */
-function fill(value, selections) {
+function getFilledValue(value, selections) {
   if (typeof value === "string") {
-    return fillText(value, selections);
+    return getFilledText(value, selections);
   }
   if (Array.isArray(value)) {
-    return value.map(v => fill(v, selections));
+    return value.map(v => getFilledValue(v, selections));
   }
   if (value && typeof value === "object") {
-    return Object.fromEntries(Object.entries(value).map(([k, v]) => [k, fill(v, selections)]));
+    return Object.fromEntries(
+      Object.entries(value).map(([k, v]) => [k, getFilledValue(v, selections)])
+    );
   }
   return value;
 }

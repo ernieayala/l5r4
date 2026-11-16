@@ -17,7 +17,7 @@
  * @see module/services/stance/
  */
 
-import { statusRules } from "../../../module/utils/rule-engine.js";
+import { getStatusRules } from "../../../module/utils/rule-engine.js";
 import { SYS_ID } from "../../../module/config/constants.js";
 import { STANCE_IDS } from "../../../module/utils/stances.js";
 import { createTestPC } from "../../fixtures/actor-fixtures.js";
@@ -127,7 +127,7 @@ export function registerStanceSwitchingWorkflowTests(quench) {
             {
               name: "Defense Stance",
               img: "icons/svg/shield.svg",
-              system: { rules: statusRules("defenseStance") },
+              system: { rules: getStatusRules("defenseStance") },
               statuses: ["defenseStance"]
             }
           ]);
@@ -173,7 +173,7 @@ export function registerStanceSwitchingWorkflowTests(quench) {
               {
                 name: `${stance.id} Stance`,
                 img: "icons/svg/combat.svg",
-                system: { rules: statusRules(stance.id) },
+                system: { rules: getStatusRules(stance.id) },
                 statuses: [stance.id]
               }
             ]);
@@ -576,7 +576,7 @@ export function registerStanceSwitchingWorkflowTests(quench) {
             {
               name: "Defense Stance",
               img: "icons/svg/shield.svg",
-              system: { rules: statusRules("defenseStance") },
+              system: { rules: getStatusRules("defenseStance") },
               statuses: ["defenseStance"]
             }
           ]);

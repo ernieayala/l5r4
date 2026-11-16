@@ -11,12 +11,17 @@
 import { SYS_ID } from "../../../config/constants.js";
 import { F, T } from "../../../utils/localization.js";
 import { toInt } from "../../../utils/type-coercion.js";
-import { buildPool, contest, evaluateCheck, poolFormula } from "../../../utils/check.js";
-import { taintEffects } from "../../../utils/taint.js";
+import {
+  buildPool,
+  getContestResult,
+  getCheckResult,
+  getPoolFormula
+} from "../../../utils/check.js";
+import { getTaintEffects } from "../../../utils/taint.js";
 import { applyEffectAnywhere } from "../../effects/apply.js";
 import { rollDamageFromAttack } from "../../combat/damage.js";
-import { recordTrackChange } from "../../ledger.js";
-import { offersHonorRoll, renderCheckCard } from "./roll-check.js";
+import { applyTrackChange } from "../../ledger.js";
+import { isHonorRollOffered, renderCheckCard } from "./roll-check.js";
 
 /**
  * Roll damage for a hit from its attack's stored context (module/services/combat/damage.js).
@@ -34,16 +39,16 @@ export function rollDamageFromMessage(message, options = {}) {
  * @param {ChatMessage} message - A `roll` message
  * @returns {Promise<ChatMessage|null>}
  */
-export async function rerollKeepBetter(message) {
+export async function rollAgainKeepBetter(message) {
   const actor = rollActor(message);
-  if (!mayAct(actor)) {
+  if (!canAct(actor)) {
     return null;
   }
   const source = message.system.toObject();
-  const roll = new foundry.dice.Roll(poolFormula(source.pool));
+  const roll = new foundry.dice.Roll(getPoolFormula(source.pool));
   await roll.evaluate();
   const kept = roll.total >= source.outcome.total ? roll : message.rolls[0];
-  const outcome = evaluateCheck(kept.total, source.tn.effective);
+  const outcome = getCheckResult(kept.total, source.tn.effective);
   const system = {
     ...source,
     label: `${source.label} (${T("l5r4.ui.check.rerolledKeptBetter")})`,
@@ -72,13 +77,13 @@ export async function rerollKeepBetter(message) {
  * @param {ChatMessage} message - A failed `roll` message
  * @returns {Promise<ChatMessage|null>}
  */
-export async function honorRoll(message) {
+export async function rollHonor(message) {
   const actor = rollActor(message);
   if (!actor?.isOwner) {
     ui.notifications?.warn(T("l5r4.ui.notifications.noPermission"));
     return null;
   }
-  if (!offersHonorRoll(message.system)) {
+  if (!isHonorRollOffered(message.system)) {
     return null;
   }
   const session = game.settings.get(SYS_ID, "session");
@@ -94,7 +99,7 @@ export async function honorRoll(message) {
     return null;
   }
   const source = message.system.toObject();
-  const penalty = taintEffects(toInt(actor.system.shadowTaint.rank)).honorRollPenalty;
+  const penalty = getTaintEffects(toInt(actor.system.shadowTaint.rank)).honorRollPenalty;
   const modifiers = penalty.roll
     ? [{ label: T("l5r4.ui.taint.label"), roll: -penalty.roll, keep: -penalty.keep, total: 0 }]
     : [];
@@ -105,9 +110,9 @@ export async function honorRoll(message) {
     littleTruths: game.settings.get(SYS_ID, "LtException")
   });
   await actor.setFlag(SYS_ID, "honorRollSession", session);
-  const roll = new foundry.dice.Roll(poolFormula(pool));
+  const roll = new foundry.dice.Roll(getPoolFormula(pool));
   await roll.evaluate();
-  const outcome = evaluateCheck(roll.total, source.tn.effective);
+  const outcome = getCheckResult(roll.total, source.tn.effective);
   const system = {
     ...source,
     label: `${source.label} (${T("l5r4.ui.honorRoll.button")})`,
@@ -126,7 +131,7 @@ export async function honorRoll(message) {
     content
   });
   if (!outcome.success) {
-    await recordTrackChange(actor, "honor", -10, T("l5r4.ui.honorRoll.failedReason"));
+    await applyTrackChange(actor, "honor", -10, T("l5r4.ui.honorRoll.failedReason"));
   }
   return posted;
 }
@@ -136,7 +141,7 @@ export async function honorRoll(message) {
  * @param {ChatMessage} message
  * @returns {ChatMessage|null}
  */
-export function previousOpponentRoll(message) {
+export function previousOpponentRollOf(message) {
   const messages = game.messages.contents;
   for (let i = messages.indexOf(message) - 1; i >= 0; i--) {
     const other = messages[i];
@@ -155,14 +160,14 @@ export function previousOpponentRoll(message) {
  * @param {ChatMessage} opponent
  * @returns {Promise<ChatMessage>}
  */
-export async function contestRolls(message, opponent) {
+export async function postContestedRoll(message, opponent) {
   const entries = [message, opponent].map(m => ({
     id: m.id,
     name: m.speaker.alias,
     total: m.system.outcome.total,
     raises: m.system.tn.raises
   }));
-  const result = contest(entries);
+  const result = getContestResult(entries);
   const lines = entries.map(e => {
     const raises = e.raises ? ` (${T("l5r4.ui.mechanics.rolls.raises")}: ${e.raises})` : "";
     return `<li>${foundry.utils.escapeHTML(e.name)}: ${e.total}${raises}</li>`;
@@ -194,7 +199,7 @@ export async function applyConditionFromMessage(message, index) {
   if (!entry || !target || message.system.outcome.success !== true) {
     return;
   }
-  if (!mayAct(rollActor(message))) {
+  if (!canAct(rollActor(message))) {
     return;
   }
   await applyEffectAnywhere(
@@ -225,7 +230,7 @@ export function bindCheckCard(message, html) {
   }
   html.querySelector("[data-action='honor-roll']")?.addEventListener("click", event => {
     event.preventDefault();
-    honorRoll(message);
+    rollHonor(message);
   });
 }
 
@@ -235,7 +240,7 @@ export function bindCheckCard(message, html) {
  * @param {HTMLElement} _app
  * @param {object[]} options - Entries of the chat log's context menu, extended in place
  */
-export function addCheckContextOptions(_app, options) {
+export function onGetChatMessageContextOptions(_app, options) {
   const messageOf = li => game.messages.get(li.dataset.messageId);
   options.push(
     {
@@ -245,18 +250,18 @@ export function addCheckContextOptions(_app, options) {
         const message = messageOf(li);
         return message?.type === "roll" && message.isAuthor;
       },
-      onClick: (_event, li) => rerollKeepBetter(messageOf(li))
+      onClick: (_event, li) => rollAgainKeepBetter(messageOf(li))
     },
     {
       label: "l5r4.ui.check.contest",
       icon: "fa-solid fa-scale-balanced",
       visible: li => {
         const message = messageOf(li);
-        return message?.type === "roll" && Boolean(previousOpponentRoll(message));
+        return message?.type === "roll" && Boolean(previousOpponentRollOf(message));
       },
       onClick: (_event, li) => {
         const message = messageOf(li);
-        return contestRolls(message, previousOpponentRoll(message));
+        return postContestedRoll(message, previousOpponentRollOf(message));
       }
     }
   );
@@ -276,7 +281,7 @@ function rollActor(message) {
  * @param {Actor|null} actor
  * @returns {boolean}
  */
-function mayAct(actor) {
+function canAct(actor) {
   if (actor?.isOwner || game.user.isGM) {
     return true;
   }

@@ -2,16 +2,16 @@
  * @module sheets/item-sheet
  * @description The item sheet for every L5R4 item type: a tabbed form (details, modifiers, description, effects,
  * rules) that saves each field as it changes. It enriches the description, special rules, demands, and effect
- * text with TextEditor.enrichHTML, adds the L5R4 config through enhanceItemSheetData(), manages the item's Active
+ * text with TextEditor.enrichHTML, adds the L5R4 config through prepareItemSheetOptions(), manages the item's Active
  * Effects through ItemEffectsHandler, and for a weapon a PC owns lists that PC's skills to associate with it.
  */
 
 import { SYS_ID } from "../config/constants.js";
-import { enhanceItemSheetData } from "../documents/item/integration/sheet-data.js";
-import { summaryText } from "../documents/summary.js";
+import { prepareItemSheetOptions } from "../documents/item/integration/sheet-data.js";
+import { summaryOf } from "../documents/summary.js";
 import EmphasisManager from "../apps/emphasis-manager.js";
 import { ItemEffectsHandler } from "./handlers/item-effects-handler.js";
-import { RULES_EDITOR_ACTIONS, readRulesForm, rulesEditorContext } from "./rules-editor.js";
+import { RULES_EDITOR_ACTIONS, parseRulesForm, buildRulesEditorContext } from "./rules-editor.js";
 
 const { HandlebarsApplicationMixin } = foundry.applications.api;
 const { ItemSheetV2 } = foundry.applications.sheets;
@@ -81,8 +81,8 @@ export default class L5R4ItemSheet extends HandlebarsApplicationMixin(ItemSheetV
     form: { submitOnChange: true },
     window: { contentClasses: ["standard-form"] },
     actions: {
-      "change-tab": L5R4ItemSheet.prototype._onChangeTab,
-      "open-emphasis-manager": L5R4ItemSheet.prototype._onManageEmphases,
+      "change-tab": L5R4ItemSheet.#onChangeTab,
+      "open-emphasis-manager": L5R4ItemSheet.#onOpenEmphasisManager,
       ...RULES_EDITOR_ACTIONS
     }
   };
@@ -178,7 +178,7 @@ export default class L5R4ItemSheet extends HandlebarsApplicationMixin(ItemSheetV
    */
   get title() {
     const name = this.item?.name || game.i18n.localize("DOCUMENT.Item");
-    return `${name} [${typeLabel(this.item?.type)}]`;
+    return `${name} [${getTypeLabel(this.item?.type)}]`;
   }
 
   /**
@@ -191,7 +191,7 @@ export default class L5R4ItemSheet extends HandlebarsApplicationMixin(ItemSheetV
    * 1. Deep clone item.system to prevent mutation
    * 2. Ensure string types for HTML fields (description, specialRules, demands, effect)
    * 3. Enrich HTML with Foundry links, secrets, and @UUID references
-   * 4. Inject L5R4 config data (rings, traits, sizes, etc.) via enhanceItemSheetData()
+   * 4. Inject L5R4 config data (rings, traits, sizes, etc.) via prepareItemSheetOptions()
    * 5. Add ActiveEffect collection for effects list rendering
    * 6. For weapons owned by PCs: build skill dropdown from parent actor's skills
    *
@@ -216,7 +216,7 @@ export default class L5R4ItemSheet extends HandlebarsApplicationMixin(ItemSheetV
     const item = this.item;
     const system = foundry.utils.deepClone(item.system ?? {});
 
-    const ensureStr = k => {
+    const toSystemString = k => {
       if (system[k] == null) {
         system[k] = "";
       } else if (typeof system[k] !== "string") {
@@ -225,10 +225,10 @@ export default class L5R4ItemSheet extends HandlebarsApplicationMixin(ItemSheetV
     };
 
     for (const k of ["description", "specialRules", "demands", "effect"]) {
-      ensureStr(k);
+      toSystemString(k);
     }
 
-    const enrich = html =>
+    const formatEnrichedHtml = html =>
       TextEditor.enrichHTML(html ?? "", {
         async: true,
         secrets: this.isEditable,
@@ -237,22 +237,22 @@ export default class L5R4ItemSheet extends HandlebarsApplicationMixin(ItemSheetV
       });
 
     const keys = ["description", "specialRules", "demands", "effect"];
-    const values = await Promise.all(keys.map(k => enrich(system[k])));
+    const values = await Promise.all(keys.map(k => formatEnrichedHtml(system[k])));
     const enriched = Object.fromEntries(keys.map((k, i) => [k, values[i]]));
 
     context.item = item;
     context.system = system;
     context.SYS_ID = SYS_ID;
     context.editable = this.isEditable;
-    enhanceItemSheetData(context);
+    prepareItemSheetOptions(context);
     context.enriched = enriched;
     // What the item's rules do, and the book page it cites in place of the book's text (roadmap/STAGE-15)
-    context.summary = summaryText(item.system);
+    context.summary = summaryOf(item.system);
 
     context.effects = this.item.effects?.contents ?? [];
     Object.assign(
       context,
-      rulesEditorContext(item._source.system.rules, this.rulesMode, this.isEditable)
+      buildRulesEditorContext(item._source.system.rules, this.rulesMode, this.isEditable)
     );
 
     // Weapon skill integration: When weapon is owned by a PC, populate skill dropdown
@@ -325,7 +325,7 @@ export default class L5R4ItemSheet extends HandlebarsApplicationMixin(ItemSheetV
 
     options.position ??= {};
     if (!options.position.width) {
-      options.position.width = widthFor(doc?.type ?? "item");
+      options.position.width = getSheetWidth(doc?.type ?? "item");
     }
 
     return options;
@@ -378,57 +378,10 @@ export default class L5R4ItemSheet extends HandlebarsApplicationMixin(ItemSheetV
    * @override
    */
   _processFormData(event, form, formData) {
-    return readRulesForm(
+    return parseRulesForm(
       super._processFormData(event, form, formData),
       this.item._source.system.rules
     );
-  }
-
-  /**
-   * Handle tab change action.
-   *
-   * Updates the active tab and triggers a re-render to display the new tab content.
-   * Foundry Application v2 action handler bound via DEFAULT_OPTIONS.actions.
-   *
-   * @param {Event} event - Click event from tab navigation
-   * @param {HTMLElement} target - Clicked tab element with data-tab attribute
-   */
-  _onChangeTab(event, target) {
-    const tabId = target.dataset.tab;
-    if (!tabId) {
-      return;
-    }
-
-    this.#currentTab = tabId;
-    this.render();
-  }
-
-  /**
-   * Handle manage emphases button click.
-   *
-   * Opens the EmphasisManager ApplicationV2 dialog for the skill item.
-   * Only applicable to skill-type items.
-   *
-   * Foundry Application v2 action handler bound via DEFAULT_OPTIONS.actions.
-   * EmphasisManager handles emphasis selection, custom emphasis addition,
-   * and XP tracking for trained emphases.
-   *
-   * @param {Event} _event - Click event from button
-   * @param {HTMLElement} _target - Button element with data-action="open-emphasis-manager"
-   */
-  async _onManageEmphases(_event, _target) {
-    if (this.item.type !== "skill") {
-      console.warn("Emphasis manager only available for skill items");
-      return;
-    }
-
-    const manager = new EmphasisManager({ item: this.item });
-    await manager.render(true);
-
-    // Wait for dialog to close, then refresh this sheet
-    manager.addEventListener("close", () => {
-      this.render(false);
-    });
   }
 
   /**
@@ -457,6 +410,55 @@ export default class L5R4ItemSheet extends HandlebarsApplicationMixin(ItemSheetV
 
     ItemEffectsHandler.bind({ item: this.item, element: root });
   }
+
+  /**
+   * Handle tab change action.
+   *
+   * Updates the active tab and triggers a re-render to display the new tab content.
+   * Foundry Application v2 action handler bound via DEFAULT_OPTIONS.actions.
+   *
+   * @this {L5R4ItemSheet}
+   * @param {Event} event - Click event from tab navigation
+   * @param {HTMLElement} element - Clicked tab element with data-tab attribute
+   */
+  static #onChangeTab(event, element) {
+    const tabId = element.dataset.tab;
+    if (!tabId) {
+      return;
+    }
+
+    this.#currentTab = tabId;
+    this.render();
+  }
+
+  /**
+   * Handle manage emphases button click.
+   *
+   * Opens the EmphasisManager ApplicationV2 dialog for the skill item.
+   * Only applicable to skill-type items.
+   *
+   * Foundry Application v2 action handler bound via DEFAULT_OPTIONS.actions.
+   * EmphasisManager handles emphasis selection, custom emphasis addition,
+   * and XP tracking for trained emphases.
+   *
+   * @this {L5R4ItemSheet}
+   * @param {Event} _event - Click event from button
+   * @param {HTMLElement} _element - Button element with data-action="open-emphasis-manager"
+   */
+  static async #onOpenEmphasisManager(_event, _element) {
+    if (this.item.type !== "skill") {
+      console.warn("Emphasis manager only available for skill items");
+      return;
+    }
+
+    const manager = new EmphasisManager({ item: this.item });
+    await manager.render(true);
+
+    // Wait for dialog to close, then refresh this sheet
+    manager.addEventListener("close", () => {
+      this.render(false);
+    });
+  }
 }
 
 /**
@@ -465,7 +467,7 @@ export default class L5R4ItemSheet extends HandlebarsApplicationMixin(ItemSheetV
  * @param {string} type - Item type (advantage, weapon, spell, etc.)
  * @returns {number} Width in pixels (defaults to 640 if type not found)
  */
-const widthFor = type => WIDTH_BY_TYPE[type] ?? 640;
+const getSheetWidth = type => WIDTH_BY_TYPE[type] ?? 640;
 
 /**
  * Convert string to title case (first letter of each word capitalized).
@@ -476,7 +478,7 @@ const widthFor = type => WIDTH_BY_TYPE[type] ?? 640;
  * @param {string|null|undefined} str - String to convert
  * @returns {string} Title-cased string
  */
-const titleCase = str =>
+const formatTitleCase = str =>
   String(str ?? "")
     .toLowerCase()
     .replace(/\b[a-z]/g, m => m.toUpperCase());
@@ -490,7 +492,7 @@ const titleCase = str =>
  * @param {string} type - Item type key
  * @returns {string} Localized type label or fallback
  */
-const typeLabel = type => {
+const getTypeLabel = type => {
   const key = `TYPES.Item.${type}`;
-  return game.i18n.has?.(key) ? game.i18n.localize(key) : titleCase(type);
+  return game.i18n.has?.(key) ? game.i18n.localize(key) : formatTitleCase(type);
 };

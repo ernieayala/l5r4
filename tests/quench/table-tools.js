@@ -246,7 +246,7 @@ export function registerTableToolsTests(quench) {
             this.timeout(10_000);
             const { actor } = await actingPC();
             await actor.toggleStatusEffect("dazed", { active: true });
-            await EffectPanel.toggle();
+            await EffectPanel.openOrClose();
             const panel = foundry.applications.instances.get(`${SYS_ID}-effect-panel`);
             try {
               await waitFor(() => panel.element?.querySelector(".l5r4-effect-panel-row"));

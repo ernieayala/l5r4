@@ -12,20 +12,20 @@ import { toInt } from "../../../utils/type-coercion.js";
  * those. A rank that cannot be read gives 0k0 with a warning.
  * @param {object} sys - The skill item's system data from item.system
  * @param {number} sys.rank - The character's rank in this skill (0-10)
- * @returns {{rollDice: number, keepDice: number, rollFormula: string}} The rolled dice (the rank), the kept dice
+ * @returns {{roll: number, keep: number, rollFormula: string}} The rolled dice (the rank), the kept dice
  *   (always 0), and the "Xk0" formula for display
  */
-export function calculateSkillFormula(sys) {
+export function getSkillFormula(sys) {
   try {
     const rank = toInt(sys.rank);
-    const rollDice = Math.max(0, rank);
-    const keepDice = 0; // Skills contribute rolled dice only; traits determine kept dice
-    const rollFormula = `${rollDice}k${keepDice}`;
+    const roll = Math.max(0, rank);
+    const keep = 0; // Skills contribute rolled dice only; traits determine kept dice
+    const rollFormula = `${roll}k${keep}`;
 
-    return { rollDice, keepDice, rollFormula };
+    return { roll, keep, rollFormula };
   } catch (err) {
     // Return safe defaults if rank parsing fails
     console.warn("L5R4", "Failed to parse skill rank, defaulting to 0k0", { sys, err });
-    return { rollDice: 0, keepDice: 0, rollFormula: "0k0" };
+    return { roll: 0, keep: 0, rollFormula: "0k0" };
   }
 }

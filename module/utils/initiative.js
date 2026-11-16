@@ -6,7 +6,7 @@
  * game-rules/31_combat_round.md, p.81
  */
 
-import { buildPool, poolFormula } from "./check.js";
+import { buildPool, getPoolFormula } from "./check.js";
 
 /**
  * The Initiative pool before the Ten Dice Rule: Insight Rank 2 and Reflexes 3 give `{ roll: 5, keep: 3 }`.
@@ -18,7 +18,7 @@ import { buildPool, poolFormula } from "./check.js";
  * @param {number} [pool.keepMod=0] - Kept-dice modifier
  * @returns {{roll: number, keep: number}}
  */
-export function initiativeDice({ insightRank, reflexes, rollMod = 0, keepMod = 0 }) {
+export function getInitiativePool({ insightRank, reflexes, rollMod = 0, keepMod = 0 }) {
   return { roll: insightRank + reflexes + rollMod, keep: reflexes + keepMod };
 }
 
@@ -33,7 +33,7 @@ export function initiativeDice({ insightRank, reflexes, rollMod = 0, keepMod = 0
  * @param {boolean} [options.littleTruths=false] - Apply the Little Truths exception (see applyTenDiceRule)
  * @returns {string}  A formula such as "5d10xa10k3" or "10d10xa10k10+4"
  */
-export function initiativeFormula({ roll, keep, bonus = 0 }, { littleTruths = false } = {}) {
+export function getInitiativeFormula({ roll, keep, bonus = 0 }, { littleTruths = false } = {}) {
   // The roll pipeline's pool and formula (module/utils/check.js), with a zero bonus left out
-  return poolFormula(buildPool({ roll, keep, bonus, littleTruths })).replace(/\+0$/, "");
+  return getPoolFormula(buildPool({ roll, keep, bonus, littleTruths })).replace(/\+0$/, "");
 }

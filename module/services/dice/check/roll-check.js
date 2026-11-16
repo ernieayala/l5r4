@@ -25,28 +25,28 @@ import { ARROW_ARMOR_FACTOR } from "../../../config/game-mechanics.js";
 import { F, T } from "../../../utils/localization.js";
 import { toInt } from "../../../utils/type-coercion.js";
 import { getEffectiveTrait } from "../../../utils/mechanics.js";
-import { stackModifiers } from "../../../utils/modifier-stacking.js";
+import { getStackedModifiers } from "../../../utils/modifier-stacking.js";
 import {
   buildPool,
-  evaluateCheck,
-  maxRaises,
-  poolFormula,
-  targetNumber
+  getCheckResult,
+  getMaxRaises,
+  getPoolFormula,
+  getTn
 } from "../../../utils/check.js";
-import { allocateRaises, maneuverCost } from "../../../utils/damage.js";
-import { canEmbraceTaint, highestRing, lostBonus } from "../../../utils/taint.js";
-import { gmMayAllow } from "../../gm-allow.js";
+import { getRaiseAllocation, getManeuverCost } from "../../../utils/damage.js";
+import { canEmbraceTaint, getHighestRing, getLostBonus } from "../../../utils/taint.js";
+import { askGmAllow } from "../../gm-allow.js";
 import { spendVoidPoint } from "../resources/void-points.js";
-import { resolveTargets } from "../resources/target-resolver.js";
-import { voidOverLimit } from "../../effects/uses.js";
-import { recordTrackChange } from "../../ledger.js";
-import { collectCheck } from "./collect.js";
+import { getTargets } from "../resources/target-resolver.js";
+import { isVoidOverLimit } from "../../effects/uses.js";
+import { applyTrackChange } from "../../ledger.js";
+import { getCheckContext } from "./collect.js";
 
 /**
  * Roll kinds the Honor Roll can re-roll: Skill, Trait, Ring, and Spell Casting rolls.
  * game-rules/43_honor.md, p.92
  */
-const HONOR_ROLL_KINDS = new Set(["skill", "attack", "trait", "ring", "spell", "maho"]);
+const honorRollKinds = new Set(["skill", "attack", "trait", "ring", "spell", "maho"]);
 
 /**
  * What a caller asks the pipeline to roll.
@@ -103,7 +103,7 @@ export async function rollCheck(request) {
   const strength = getEffectiveTrait(actor, "str");
   if (
     minStrength > strength &&
-    !(await gmMayAllow({
+    !(await askGmAllow({
       title: request.weapon.name,
       reason: F("l5r4.equipment.weapons.belowMinStrength", {
         name: actor.name,
@@ -115,9 +115,9 @@ export async function rollCheck(request) {
   ) {
     return null;
   }
-  const { autoTN, targetData } = resolveTargets(actor, kind === "attack" ? "attack" : null);
+  const { autoTn, targetData } = getTargets(actor, kind === "attack" ? "attack" : null);
   const target = request.target !== undefined ? request.target : (targetData?.actor ?? null);
-  const ctx = collectCheck(actor, {
+  const ctx = getCheckContext(actor, {
     kind,
     skill: request.skill,
     trait: request.trait,
@@ -140,9 +140,11 @@ export async function rollCheck(request) {
   // The Raises a roll allows, Unskilled or not; RaiseRule rules move the Void Ring cap and may require Raises
   // game-rules/28_raises.md, p.79
   // game-rules/30_skill_rolls_expanded.md, p.80
-  const raiseLimits = isUnskilled => {
+  const getRaiseLimits = isUnskilled => {
     const allowed = !isDamage && !isUnskilled;
-    const max = allowed ? Math.max(0, maxRaises(voidState.ring, isUnskilled) + ctx.raises.cap) : 0;
+    const max = allowed
+      ? Math.max(0, getMaxRaises(voidState.ring, isUnskilled) + ctx.raises.cap)
+      : 0;
     return {
       allowed,
       max,
@@ -153,17 +155,17 @@ export async function rollCheck(request) {
   // A Void Point can raise a Skill from 0 to 1 for the roll, which is then not Unskilled
   // game-rules/25_rings_and_traits.md, p.78
   const voidSkillAllowed = unskilled && !isDamage;
-  const offered = raiseLimits(unskilled && !voidSkillAllowed);
+  const offered = getRaiseLimits(unskilled && !voidSkillAllowed);
   const taint = {
     rank: toInt(actor.system.shadowTaint.rank),
-    highestRing: highestRing(actor.system.rings),
+    highestRing: getHighestRing(actor.system.rings),
     kind,
     trait: request.trait
   };
   const embraceAllowed = canEmbraceTaint(taint);
   // A Lost character adds the Taint Rank to every physical Trait roll, always
   // game-rules/89_shadowlands_taint.md, p.279
-  const lost = lostBonus(taint);
+  const lost = getLostBonus(taint);
   if (lost) {
     modifiers.push({
       label: T("l5r4.ui.taint.lost"),
@@ -174,7 +176,7 @@ export async function rollCheck(request) {
     });
   }
   const woundPenalty = isDamage ? 0 : toInt(actor.system.woundPenalty);
-  const defaultTN = toInt(request.tn ?? 0) || (kind === "attack" ? autoTN : 0);
+  const defaultTn = toInt(request.tn ?? 0) || (kind === "attack" ? autoTn : 0);
   const emphases = unskilled ? [] : (request.emphases ?? []).filter(Boolean);
   const isSkill = ["skill", "attack"].includes(kind);
 
@@ -182,11 +184,11 @@ export async function rollCheck(request) {
   if (request.askForOptions !== false) {
     const base = buildPool({ ...basePool, modifiers });
     choices = await askChoices(request, {
-      pool: `${base.roll}k${base.keep}${base.bonus ? modifierText({ total: base.bonus }) : ""}`,
-      modifiers: modifiers.map(m => ({ ...m, text: modifierText(m) })),
+      pool: `${base.roll}k${base.keep}${base.bonus ? formatModifier({ total: base.bonus }) : ""}`,
+      modifiers: modifiers.map(m => ({ ...m, text: formatModifier(m) })),
       substitutes: ctx.substitutes.map(s => ({ ...s, text: `${s.replace} → ${s.with}` })),
-      hasTN: !isDamage,
-      tn: defaultTN,
+      hasTn: !isDamage,
+      tn: defaultTn,
       tnModifiers: ctx.tnModifiers,
       woundPenalty,
       raisesAllowed: offered.allowed,
@@ -197,7 +199,7 @@ export async function rollCheck(request) {
       freeRaises: offered.free,
       voidAllowed: !isDamage,
       voidPoints: voidState.points,
-      voidOverLimit: !isDamage && voidOverLimit(actor),
+      voidOverLimit: !isDamage && isVoidOverLimit(actor),
       emphases,
       isAttack: kind === "attack",
       ranged: Boolean(request.ranged),
@@ -275,7 +277,7 @@ export async function rollCheck(request) {
     max: maximum,
     min: minimum,
     free: freeRaises
-  } = raiseLimits(rolledUnskilled);
+  } = getRaiseLimits(rolledUnskilled);
   const raises = raisesAllowed
     ? Math.min(Math.max(minimum, toInt(choices.raises ?? minimum)), maximum)
     : 0;
@@ -283,7 +285,7 @@ export async function rollCheck(request) {
   const voidPoint = !isDamage && Boolean(choices.void);
   const emphasis = emphases.includes(choices.emphasis) ? choices.emphasis : "";
   const keepOverride = toInt(choices.keep) > 0 ? toInt(choices.keep) : null;
-  let tnBase = Math.max(0, toInt(choices.tn ?? defaultTN));
+  let tnBase = Math.max(0, toInt(choices.tn ?? defaultTn));
   const applyWound = choices.woundPenalty ?? true;
 
   const prepared = request.prepare ? await request.prepare(choices) : {};
@@ -298,10 +300,11 @@ export async function rollCheck(request) {
 
   // An attack's maneuvers, paid for out of its Raises; dialog values are user input
   // game-rules/38_maneuvers.md, p.86-87
-  const maneuvers = kind === "attack" ? readManeuvers(choices.maneuver ?? {}, raisesAllowed) : null;
+  const maneuvers =
+    kind === "attack" ? buildManeuvers(choices.maneuver ?? {}, raisesAllowed) : null;
   if (maneuvers) {
-    const cost = maneuverCost(maneuvers, ctx.raises.maneuverCosts);
-    const { affordable, increasedDamage } = allocateRaises({
+    const cost = getManeuverCost(maneuvers, ctx.raises.maneuverCosts);
+    const { affordable, increasedDamage } = getRaiseAllocation({
       raises,
       freeRaises: totalFreeRaises - freeRaisesToTN,
       cost
@@ -339,10 +342,10 @@ export async function rollCheck(request) {
     keepOverride,
     littleTruths
   });
-  const roll = new foundry.dice.Roll(poolFormula(pool));
+  const roll = new foundry.dice.Roll(getPoolFormula(pool));
   await roll.evaluate();
   if (embrace) {
-    await recordTrackChange(actor, "taint", 1, T("l5r4.ui.taint.embraceReason"));
+    await applyTrackChange(actor, "taint", 1, T("l5r4.ui.taint.embraceReason"));
   }
 
   // A TN change for the other attack range drops out, as a modifier does
@@ -375,15 +378,17 @@ export async function rollCheck(request) {
   }
   const tn = isDamage
     ? null
-    : targetNumber({
+    : getTn({
         base: tnBase,
         raises,
         freeRaisesToTN,
         woundPenalty: applyWound ? woundPenalty : 0,
         // TN changes of one type do not stack, as on the sheet (module/utils/modifier-stacking.js)
-        modifiers: [stackModifiers(tnModifiers.map(m => ({ total: m.value, type: m.type }))).total]
+        modifiers: [
+          getStackedModifiers(tnModifiers.map(m => ({ total: m.value, type: m.type }))).total
+        ]
       });
-  const outcome = evaluateCheck(roll.total, tn);
+  const outcome = getCheckResult(roll.total, tn);
 
   let label = request.label;
   if (rolledUnskilled) {
@@ -453,7 +458,7 @@ export async function rollCheck(request) {
     ],
     conditions: target ? ctx.applyConditions : [],
     ...(maneuvers ? { maneuvers } : {}),
-    ...(attackDamage(request) ? { damage: attackDamage(request) } : {}),
+    ...(attackDamageOf(request) ? { damage: attackDamageOf(request) } : {}),
     sources: isDamage ? ctx.damageSources : [],
     ignoreReduction: isDamage ? ctx.ignoreReduction : 0,
     attackOf: request.attackOf ?? ""
@@ -483,16 +488,16 @@ export async function rollCheck(request) {
 /**
  * Whether a check's card offers the optional Honor Roll (roadmap/STAGE-11 decision 3): the world setting is on and
  * the roll failed, and it is not itself an Honor Roll. Whether the roller still has it this session is checked on the
- * click (module/services/dice/check/chat-actions.js, honorRoll).
+ * click (module/services/dice/check/chat-actions.js, rollHonor).
  * game-rules/43_honor.md, p.92
  * @param {object} system - RollMessageData source
  * @returns {boolean}
  */
-export function offersHonorRoll(system) {
+export function isHonorRollOffered(system) {
   return (
     game.settings.get(SYS_ID, "honorRoll") &&
     system.outcome.success === false &&
-    HONOR_ROLL_KINDS.has(system.kind) &&
+    honorRollKinds.has(system.kind) &&
     !system.honorRollOf
   );
 }
@@ -517,14 +522,14 @@ export async function renderCheckCard(system, roll, { actorId = "" } = {}) {
     outcomeText: T(success ? "l5r4.ui.mechanics.rolls.success" : missed),
     appliedModifiers: system.modifiers
       .filter(m => m.enabled && (m.roll || m.keep || m.total))
-      .map(m => ({ label: m.label, text: modifierText(m) })),
+      .map(m => ({ label: m.label, text: formatModifier(m) })),
     roll: await roll.render(),
     damageButton: hit && !maneuvers.grapple ? (system.damage?.label ?? "") : "",
-    maneuverNotes: hit ? maneuverNotes(maneuvers) : [],
+    maneuverNotes: hit ? formatManeuverNotes(maneuvers) : [],
     contest: hit && Boolean(system.target?.uuid) && (maneuvers.knockdown || maneuvers.disarm),
     grappleButton: hit && Boolean(system.target?.uuid) && maneuvers.grapple,
     applyTarget: system.kind === "damage" ? system.target?.name : "",
-    honorRoll: offersHonorRoll(system),
+    honorRoll: isHonorRollOffered(system),
     actorId
   });
 }
@@ -534,7 +539,7 @@ export async function renderCheckCard(system, roll, { actorId = "" } = {}) {
  * @param {{roll?: number, keep?: number, total?: number}} modifier
  * @returns {string}
  */
-function modifierText({ roll = 0, keep = 0, total = 0 }) {
+function formatModifier({ roll = 0, keep = 0, total = 0 }) {
   const parts = [];
   if (roll || keep) {
     parts.push(`${roll >= 0 ? "+" : ""}${roll}k${keep}`);
@@ -565,7 +570,7 @@ function voidOf(actor) {
  * @param {CheckRequest} request
  * @returns {{label: string, roll: number, keep: number, bonus: number, explode: number}|null}
  */
-function attackDamage(request) {
+function attackDamageOf(request) {
   if (request.kind !== "attack") {
     return null;
   }
@@ -593,16 +598,16 @@ function attackDamage(request) {
  * @param {boolean} raisesAllowed
  * @returns {object}
  */
-function readManeuvers(choice, raisesAllowed) {
-  const pick = key => raisesAllowed && Boolean(choice[key]);
+function buildManeuvers(choice, raisesAllowed) {
+  const isPicked = key => raisesAllowed && Boolean(choice[key]);
   return {
     calledShot: raisesAllowed ? Math.min(4, Math.max(0, toInt(choice.calledShot))) : 0,
     location: raisesAllowed ? String(choice.location ?? "").trim() : "",
-    disarm: pick("disarm"),
-    extraAttack: pick("extraAttack"),
-    feint: pick("feint"),
-    knockdown: pick("knockdown"),
-    fourLegged: pick("fourLegged"),
+    disarm: isPicked("disarm"),
+    extraAttack: isPicked("extraAttack"),
+    feint: isPicked("feint"),
+    knockdown: isPicked("knockdown"),
+    fourLegged: isPicked("fourLegged"),
     grapple: Boolean(choice.grapple),
     increasedDamage: 0
   };
@@ -613,7 +618,7 @@ function readManeuvers(choice, raisesAllowed) {
  * @param {HTMLFormElement} form
  * @returns {object}
  */
-function readForm(form) {
+function formDataOf(form) {
   return foundry.utils.expandObject(new foundry.applications.ux.FormDataExtended(form).object);
 }
 
@@ -638,7 +643,7 @@ async function askChoices(request, context) {
     window: { title: request.label },
     position: { width: 420 },
     content,
-    ok: { label: T("l5r4.ui.common.roll"), callback: (_event, button) => readForm(button.form) },
+    ok: { label: T("l5r4.ui.common.roll"), callback: (_event, button) => formDataOf(button.form) },
     rejectClose: false,
     modal: true
   });
@@ -651,7 +656,7 @@ async function askChoices(request, context) {
  * @param {object} maneuvers
  * @returns {string[]}
  */
-function maneuverNotes(maneuvers) {
+function formatManeuverNotes(maneuvers) {
   const notes = [];
   if (maneuvers.calledShot) {
     notes.push(

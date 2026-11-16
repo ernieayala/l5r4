@@ -9,11 +9,11 @@ import { SYS_ID } from "../config/constants.js";
 import { TEMPLATE } from "../config/templates.js";
 import { T } from "../utils/localization.js";
 import { toInt } from "../utils/type-coercion.js";
-import { getSortPref, setSortPref } from "../utils/sorting.js";
+import { getSortPref, updateSortPref } from "../utils/sorting.js";
 import { logError } from "../utils/error-logging.js";
 import { buildXpHistory } from "../services/xp/calculator.js";
 import { formatXpEntries } from "../services/xp/formatter.js";
-import { needsRetroactiveUpdate, calculateXpDataVersion } from "../services/xp/versioning.js";
+import { isRetroactiveUpdateDue, getXpDataVersion } from "../services/xp/versioning.js";
 
 /**
  * The XP manager window for one actor.
@@ -35,11 +35,11 @@ export default class XpManagerApplication extends foundry.applications.api.Handl
       height: 700
     },
     actions: {
-      "add-xp": XpManagerApplication.prototype._onAddXp,
-      "delete-xp-entry": XpManagerApplication.prototype._onDeleteEntry,
-      "sort-items": XpManagerApplication.prototype._onSortClick,
-      "recalculate-xp": XpManagerApplication.prototype._onRecalculateXpPurchase,
-      "change-disadvantage-cap": XpManagerApplication.prototype._onChangeDisadvantageCap
+      "add-xp": XpManagerApplication.#onAddXp,
+      "delete-xp-entry": XpManagerApplication.#onDeleteXpEntry,
+      "sort-items": XpManagerApplication.#onSortItems,
+      "recalculate-xp": XpManagerApplication.#onRecalculateXp,
+      "change-disadvantage-cap": XpManagerApplication.#onChangeDisadvantageCap
     }
   };
 
@@ -94,7 +94,7 @@ export default class XpManagerApplication extends foundry.applications.api.Handl
     }
 
     try {
-      if (await needsRetroactiveUpdate(this.actor)) {
+      if (await isRetroactiveUpdateDue(this.actor)) {
         await this._performRetroactiveUpdate();
       }
       const sys = this.actor.system ?? {};
@@ -230,14 +230,45 @@ export default class XpManagerApplication extends foundry.applications.api.Handl
   }
 
   /**
+   * Perform retroactive XP update.
+   * Rebuilds XP spending history from actor items and updates version flag.
+   * Only updates cache if spending history has changed.
+   */
+  async _performRetroactiveUpdate() {
+    try {
+      // Rebuild XP spending history from current actor items
+      // This recalculates all XP costs based on current item data
+      const retroactiveSpent = await buildXpHistory(this.actor);
+      const existingCache = this._getXpSpent();
+
+      // Write the cache only when the spending history differs
+      // This prevents unnecessary flag updates and re-renders
+      const changed = JSON.stringify(existingCache) !== JSON.stringify(retroactiveSpent);
+      if (changed) {
+        await this.actor.setFlag(SYS_ID, "xpSpentCache", retroactiveSpent);
+      }
+
+      // Update version flag to prevent redundant recalculations
+      // Version is based on item count and modification timestamps
+      const currentVersion = getXpDataVersion(this.actor);
+      await this.actor.setFlag(SYS_ID, "xpRetroactiveVersion", currentVersion);
+    } catch (err) {
+      logError("Failed to perform retroactive XP update", err, {
+        actorId: this.actor?.id
+      });
+    }
+  }
+
+  /**
    * Handle add XP action.
    * Extracts amount and note from form, creates new manual XP entry,
    * and clears form fields after successful addition.
    *
+   * @this {XpManagerApplication}
    * @param {Event} event - The click event
-   * @param {HTMLElement} _target - The clicked element (unused)
+   * @param {HTMLElement} _element - The clicked element (unused)
    */
-  async _onAddXp(event, _target) {
+  static async #onAddXp(event, _element) {
     event.preventDefault();
 
     const form = this.element;
@@ -282,13 +313,14 @@ export default class XpManagerApplication extends foundry.applications.api.Handl
    * Handle delete manual XP entry action.
    * Removes entry by ID from manual XP entries.
    *
+   * @this {XpManagerApplication}
    * @param {Event} event - The click event
-   * @param {HTMLElement} target - The clicked element with data-entry-id attribute
+   * @param {HTMLElement} element - The clicked element with data-entry-id attribute
    */
-  async _onDeleteEntry(event, target) {
+  static async #onDeleteXpEntry(event, element) {
     event.preventDefault();
 
-    const entryId = target.dataset.entryId;
+    const entryId = element.dataset.entryId;
     if (!entryId) {
       return;
     }
@@ -313,16 +345,17 @@ export default class XpManagerApplication extends foundry.applications.api.Handl
    * Toggles sort direction and updates sort preferences for XP entries.
    * Allowed sort keys: note, cost, type.
    *
+   * @this {XpManagerApplication}
    * @param {Event} event - The click event
-   * @param {HTMLElement} target - The clicked sort header with data-sortby attribute
+   * @param {HTMLElement} element - The clicked sort header with data-sortby attribute
    */
-  async _onSortClick(event, target) {
+  static async #onSortItems(event, element) {
     event.preventDefault();
     event.stopPropagation();
 
-    const header = target.closest(".l5r4-item-row-list.l5r4-sort-header");
+    const header = element.closest(".l5r4-item-row-list.l5r4-sort-header");
     const scope = header?.dataset?.scope || "xp-purchases";
-    const key = target.dataset.sortby || "note";
+    const key = element.dataset.sortby || "note";
     const allowed = ["note", "cost", "type"];
 
     if (!allowed.includes(key)) {
@@ -330,18 +363,18 @@ export default class XpManagerApplication extends foundry.applications.api.Handl
     }
 
     const cur = getSortPref(this.actor.id, scope, allowed, "note");
-    await setSortPref(this.actor.id, scope, key, { toggleFrom: cur });
+    await updateSortPref(this.actor.id, scope, key, { toggleFrom: cur });
 
     if (header) {
       header.querySelectorAll(".l5r4-sort-header-button").forEach(a => {
-        a.classList.toggle("is-active", a === target);
-        if (a !== target) {
+        a.classList.toggle("is-active", a === element);
+        if (a !== element) {
           a.removeAttribute("data-dir");
         }
       });
 
       const newPref = getSortPref(this.actor.id, scope, allowed, "note");
-      target.setAttribute("data-dir", newPref.dir);
+      element.setAttribute("data-dir", newPref.dir);
     }
 
     if (this.rendered) {
@@ -353,10 +386,11 @@ export default class XpManagerApplication extends foundry.applications.api.Handl
    * Handle recalculate XP purchases action.
    * Resets retroactive version flag and rebuilds XP spending history.
    *
+   * @this {XpManagerApplication}
    * @param {Event} event - The click event
-   * @param {HTMLElement} _target - The clicked element (unused)
+   * @param {HTMLElement} _element - The clicked element (unused)
    */
-  async _onRecalculateXpPurchase(event, _target) {
+  static async #onRecalculateXp(event, _element) {
     event.preventDefault();
 
     try {
@@ -378,10 +412,11 @@ export default class XpManagerApplication extends foundry.applications.api.Handl
    * Handle change disadvantage cap action.
    * Displays dialog for entering new disadvantage XP cap value.
    *
+   * @this {XpManagerApplication}
    * @param {Event} event - The click event
-   * @param {HTMLElement} _target - The clicked element (unused)
+   * @param {HTMLElement} _element - The clicked element (unused)
    */
-  async _onChangeDisadvantageCap(event, _target) {
+  static async #onChangeDisadvantageCap(event, _element) {
     event.preventDefault();
 
     const flags = this._getFlags();
@@ -421,36 +456,6 @@ export default class XpManagerApplication extends foundry.applications.api.Handl
           actorId: this.actor?.id
         });
       }
-    }
-  }
-
-  /**
-   * Perform retroactive XP update.
-   * Rebuilds XP spending history from actor items and updates version flag.
-   * Only updates cache if spending history has changed.
-   */
-  async _performRetroactiveUpdate() {
-    try {
-      // Rebuild XP spending history from current actor items
-      // This recalculates all XP costs based on current item data
-      const retroactiveSpent = await buildXpHistory(this.actor);
-      const existingCache = this._getXpSpent();
-
-      // Write the cache only when the spending history differs
-      // This prevents unnecessary flag updates and re-renders
-      const changed = JSON.stringify(existingCache) !== JSON.stringify(retroactiveSpent);
-      if (changed) {
-        await this.actor.setFlag(SYS_ID, "xpSpentCache", retroactiveSpent);
-      }
-
-      // Update version flag to prevent redundant recalculations
-      // Version is based on item count and modification timestamps
-      const currentVersion = calculateXpDataVersion(this.actor);
-      await this.actor.setFlag(SYS_ID, "xpRetroactiveVersion", currentVersion);
-    } catch (err) {
-      logError("Failed to perform retroactive XP update", err, {
-        actorId: this.actor?.id
-      });
     }
   }
 }

@@ -14,7 +14,7 @@ import { PATHS } from "./constants.js";
  * @param {string|null|undefined} nameOrPath - Icon filename, relative path, absolute path, URL, or data URI
  * @returns {string} Resolved icon path suitable for Foundry image sources
  */
-export function iconPath(nameOrPath) {
+export function getIconPath(nameOrPath) {
   const n = nameOrPath ?? "";
 
   // Early return for empty input

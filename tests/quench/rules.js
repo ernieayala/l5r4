@@ -2,12 +2,12 @@ import { SYS_ID } from "../../module/config/constants.js";
 import { RULE_KEYS } from "../../module/config/rule-keys.js";
 import { createRule } from "../../module/data/rules/rule-models.js";
 import { FamilyBonusService } from "../../module/services/family-bonus.js";
-import { collectCheck } from "../../module/services/dice/check/collect.js";
-import { displayRollBonus } from "../../module/utils/mechanics.js";
+import { getCheckContext } from "../../module/services/dice/check/collect.js";
+import { getFormulaBonus } from "../../module/utils/mechanics.js";
 import { T } from "../../module/utils/localization.js";
 import { applyEffect } from "../../module/services/effects/apply.js";
-import { TraitRoll } from "../../module/services/dice/rolls/trait-roll.js";
-import { SkillRoll } from "../../module/services/dice/rolls/skill-roll.js";
+import { rollTrait } from "../../module/services/dice/rolls/trait-roll.js";
+import { rollSkill } from "../../module/services/dice/rolls/skill-roll.js";
 import { getCreationFreeBonusSources } from "../../module/utils/xp-calculations.js";
 import { migrateItemRules } from "../../module/setup/migrations/items/item-rules.js";
 import { migrateStatusEffectRules } from "../../module/setup/migrations/actors/status-effect-rules.js";
@@ -342,12 +342,12 @@ export function registerRulesTests(quench) {
             await actor.createEmbeddedDocuments("Item", [
               ruleItem([{ key: "RollModifier", selector: "trait:ref", roll: 1, keep: 1 }])
             ]);
-            assert.deepEqual(displayRollBonus(actor, { trait: "ref" }), {
+            assert.deepEqual(getFormulaBonus(actor, { trait: "ref" }), {
               roll: 1,
               keep: 1,
               total: 0
             });
-            const message = await TraitRoll({
+            const message = await rollTrait({
               actor,
               traitName: "ref",
               traitRank: ref,
@@ -376,9 +376,9 @@ export function registerRulesTests(quench) {
             try {
               canvas.tokens.setTargets([token.id]);
               const agi = actor.system.traits.agi;
-              const message = await SkillRoll({
+              const message = await rollSkill({
                 actor,
-                actorTrait: agi,
+                traitRank: agi,
                 skillRank: 2,
                 skillName: "Kenjutsu",
                 skillTrait: "agi",
@@ -516,7 +516,7 @@ export function registerRulesTests(quench) {
               })
             ]);
             const agi = actor.system._derived.traitsEff.agi;
-            assert.deepEqual(displayRollBonus(actor, { skill: "kenjutsu" }), {
+            assert.deepEqual(getFormulaBonus(actor, { skill: "kenjutsu" }), {
               roll: 1,
               keep: 1,
               total: 3
@@ -572,7 +572,7 @@ export function registerRulesTests(quench) {
             const rider = track(await createTestPC({ name: "Rule engine: rider" }));
             const target = track(await createTestNPC({ name: "Rule engine: target" }));
             const attackBonus = against => {
-              const { modifiers } = collectCheck(rider, { kind: "attack", target: against });
+              const { modifiers } = getCheckContext(rider, { kind: "attack", target: against });
               return modifiers.reduce((sum, m) => [sum[0] + m.roll, sum[1] + m.keep], [0, 0]);
             };
             assert.deepEqual(attackBonus(target), [0, 0]);
@@ -592,11 +592,17 @@ export function registerRulesTests(quench) {
             const [skill] = await actor.createEmbeddedDocuments("Item", [
               createSkillData("Kenjutsu", 9, "agi")
             ]);
-            assert.equal(collectCheck(actor, { kind: "skill", skill: "kenjutsu" }).freeRaises, 0);
-            await skill.update({ "system.rank": 10 });
-            assert.equal(collectCheck(actor, { kind: "skill", skill: "kenjutsu" }).freeRaises, 1);
             assert.equal(
-              collectCheck(actor, { kind: "skill", skill: "iaijutsu" }).freeRaises,
+              getCheckContext(actor, { kind: "skill", skill: "kenjutsu" }).freeRaises,
+              0
+            );
+            await skill.update({ "system.rank": 10 });
+            assert.equal(
+              getCheckContext(actor, { kind: "skill", skill: "kenjutsu" }).freeRaises,
+              1
+            );
+            assert.equal(
+              getCheckContext(actor, { kind: "skill", skill: "iaijutsu" }).freeRaises,
               0,
               "only that Skill's rolls"
             );
@@ -618,7 +624,7 @@ export function registerRulesTests(quench) {
               )
             ]);
             const agi = actor.system.traits.agi;
-            const message = await TraitRoll({
+            const message = await rollTrait({
               actor,
               traitName: "agi",
               traitRank: agi,
@@ -648,7 +654,7 @@ export function registerRulesTests(quench) {
 
       /** A Trait roll with no dialog, kept for cleanup. */
       const collectAndRoll = async (actor, { traitName }) => {
-        const message = await TraitRoll({
+        const message = await rollTrait({
           actor,
           traitName,
           traitRank: actor.system.traits[traitName],
@@ -715,8 +721,8 @@ export function registerRulesTests(quench) {
               { key: "FreeRaise", selector: "any", value: 2 }
             ]);
             assert.equal(item._source.system.freeRaises, 0);
-            assert.equal(collectCheck(actor, { kind: "skill" }).freeRaises, 2, "counted once");
-            assert.equal(collectCheck(actor, { kind: "damage" }).freeRaises, 0, "not on damage");
+            assert.equal(getCheckContext(actor, { kind: "skill" }).freeRaises, 2, "counted once");
+            assert.equal(getCheckContext(actor, { kind: "damage" }).freeRaises, 0, "not on damage");
           })
         );
 
@@ -740,7 +746,7 @@ export function registerRulesTests(quench) {
               }
             ]);
             assert.isTrue(actor.rollOptions.has("master-of-blood"));
-            const tn = kind => collectCheck(actor, { kind }).tnModifiers.map(m => m.value);
+            const tn = kind => getCheckContext(actor, { kind }).tnModifiers.map(m => m.value);
             assert.deepEqual(tn("spell"), [10], "a spell");
             assert.deepEqual(tn("maho"), [], "not maho");
           })
@@ -773,7 +779,7 @@ export function registerRulesTests(quench) {
             assert.equal(fear.system.level, 3, "Fear Rank moved to the level");
             assert.equal(fear.duration.expiry, "encounterEnd", "Fear ends with the encounter");
             assert.equal(
-              collectCheck(actor, { kind: "skill" }).modifiers[0].roll,
+              getCheckContext(actor, { kind: "skill" }).modifiers[0].roll,
               -3,
               "Fear 3: -3k0"
             );

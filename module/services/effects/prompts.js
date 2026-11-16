@@ -21,12 +21,12 @@
 import { SYS_ID } from "../../config/constants.js";
 import { CHAT_TEMPLATES } from "../../config/templates.js";
 import { F, T } from "../../utils/localization.js";
-import { nextSaveTn } from "../../utils/effects.js";
+import { getNextSaveTn } from "../../utils/effects.js";
 import { toInt } from "../../utils/type-coercion.js";
 import { getEffectiveTrait } from "../../utils/mechanics.js";
 import { rollCheck } from "../dice/check/roll-check.js";
-import { SkillRoll } from "../dice/rolls/skill-roll.js";
-import { applyEffect, ownTurnStart } from "./apply.js";
+import { rollSkill } from "../dice/rolls/skill-roll.js";
+import { applyEffect, ownTurnStartOf } from "./apply.js";
 
 /** Name of the GM query that ends a Concentration for a player. */
 const END_CONCENTRATION_QUERY = `${SYS_ID}.endConcentration`;
@@ -37,7 +37,7 @@ const END_CONCENTRATION_QUERY = `${SYS_ID}.endConcentration`;
  * @param {string} event
  * @returns {Promise<void>}
  */
-export async function promptSaves(actor, event) {
+export async function postSavePrompts(actor, event) {
   for (const save of actor.periodicSaves ?? []) {
     if (save.event !== event) {
       continue;
@@ -63,7 +63,7 @@ export async function promptSaves(actor, event) {
  * @param {Actor} actor
  * @returns {Promise<ChatMessage>}
  */
-export function promptFullDefense(actor) {
+export function postFullDefensePrompt(actor) {
   return postPrompt(
     actor,
     { kind: "fullDefense" },
@@ -82,7 +82,7 @@ export function promptFullDefense(actor) {
  * @param {ActiveEffect} effect - The Concentration effect; its level is the spell's Mastery Level
  * @returns {Promise<ChatMessage>}
  */
-export function promptConcentration(actor, effect) {
+export function postConcentrationPrompt(actor, effect) {
   const tn = 20 + 5 * toInt(effect.system.level);
   return postPrompt(
     actor,
@@ -104,10 +104,10 @@ export function promptConcentration(actor, effect) {
  */
 export async function rollFullDefense(actor) {
   const defense = actor.items.find(i => i.type === "skill" && i.name.toLowerCase() === "defense");
-  const message = await SkillRoll({
+  const message = await rollSkill({
     actor,
     skillName: defense?.name ?? "Defense",
-    actorTrait: getEffectiveTrait(actor, "ref"),
+    traitRank: getEffectiveTrait(actor, "ref"),
     skillRank: toInt(defense?.system.rank),
     skillTrait: "ref"
   });
@@ -122,7 +122,7 @@ export async function rollFullDefense(actor) {
   await applyEffect(actor, "fullDefense", {
     name: `${T("l5r4.ui.effects.fullDefense")} (+${bonus})`,
     rules: [{ key: "ArmorTN", value: bonus }],
-    start: ownTurnStart(actor)
+    start: ownTurnStartOf(actor)
   });
   return message;
 }
@@ -205,7 +205,7 @@ export async function onPromptClick(message) {
       start: foundry.documents.ActiveEffect.getEffectStart()
     });
   } else {
-    await effect.setFlag(SYS_ID, "saveTn", nextSaveTn(request.tn, request.step, request.min));
+    await effect.setFlag(SYS_ID, "saveTn", getNextSaveTn(request.tn, request.step, request.min));
   }
 }
 

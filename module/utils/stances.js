@@ -21,7 +21,7 @@ export const STANCE_IDS = Object.freeze(
  * @param {Iterable<string>} statuses
  * @returns {string}
  */
-export function activeStance(statuses) {
+export function getActiveStance(statuses) {
   return [...statuses].find(id => STANCE_IDS.has(id)) ?? "";
 }
 
@@ -34,6 +34,6 @@ export function activeStance(statuses) {
  * @param {Iterable<string>} statuses
  * @returns {string[]}
  */
-export function stanceConflicts(stanceId, statuses) {
+export function getStanceConflicts(stanceId, statuses) {
   return [...statuses].filter(status => STANCE_LIMITS[status]?.includes(stanceId));
 }

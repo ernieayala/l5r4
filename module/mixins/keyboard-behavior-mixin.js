@@ -2,7 +2,7 @@
  * @module mixins/keyboard-behavior-mixin
  * @description Cursor feedback while Shift is held, for the system's Shift+Click guard against accidental changes to
  * Traits, Skills, the Void Ring, and other character values (PcTraitHandler, PcAdjustmentHandler, and
- * ItemCRUDHandler's chat posts). A sheet class applies the mixin, calls `_setupConditionalCursor(root)` from
+ * ItemCrudHandler's chat posts). A sheet class applies the mixin, calls `_setupConditionalCursor(root)` from
  * `_onRender`, and styles its guarded elements with `cursor: var(--conditional-cursor)`. The mixin needs the
  * Application's `element` and overrides `close` to remove its document-level listeners.
  */

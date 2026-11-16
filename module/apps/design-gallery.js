@@ -22,7 +22,7 @@ import {
   GALLERY_TYPE
 } from "../config/design-gallery.js";
 import { F, T } from "../utils/localization.js";
-import { enhanceItemSheetData } from "../documents/item/integration/sheet-data.js";
+import { prepareItemSheetOptions } from "../documents/item/integration/sheet-data.js";
 
 const { ApplicationV2, DialogV2, HandlebarsApplicationMixin } = foundry.applications.api;
 const { renderTemplate } = foundry.applications.handlebars;
@@ -31,7 +31,7 @@ const { renderTemplate } = foundry.applications.handlebars;
 const TEMPLATES = `systems/${SYS_ID}/templates/apps/design-gallery`;
 
 /** Each color token's entry, by token, for the over and against lookups. */
-const COLOR_ENTRIES = new Map(
+const colorEntries = new Map(
   GALLERY_COLORS.flatMap(group => group.tokens).map(entry => [entry.token, entry])
 );
 
@@ -71,11 +71,11 @@ export default class DesignGalleryApplication extends HandlebarsApplicationMixin
       space: GALLERY_SPACE,
       frames: GALLERY_FRAMES,
       icons: GALLERY_ICONS,
-      components: await Promise.all(GALLERY_COMPONENTS.map(entry => this.#entry(entry))),
+      components: await Promise.all(GALLERY_COMPONENTS.map(entry => this.#renderComponent(entry))),
       patterns: await Promise.all(
         GALLERY_PATTERNS.map(async pattern => ({
           ...pattern,
-          samples: await Promise.all(pattern.samples.map(sample => this.#sample(sample)))
+          samples: await Promise.all(pattern.samples.map(sample => this.#renderSample(sample)))
         }))
       )
     });
@@ -107,7 +107,7 @@ export default class DesignGalleryApplication extends HandlebarsApplicationMixin
    */
   async _onRender(context, options) {
     await super._onRender(context, options);
-    this.#measure();
+    this.#renderTokenValues();
   }
 
   /**
@@ -118,7 +118,7 @@ export default class DesignGalleryApplication extends HandlebarsApplicationMixin
     const next = themeOf(this.element) === "dark" ? "light" : "dark";
     this.element.classList.remove("theme-light", "theme-dark");
     this.element.classList.add("themed", `theme-${next}`);
-    this.#measure();
+    this.#renderTokenValues();
   }
 
   /**
@@ -153,11 +153,11 @@ export default class DesignGalleryApplication extends HandlebarsApplicationMixin
    * @param {object} entry - A GALLERY_COMPONENTS entry
    * @returns {Promise<object>}
    */
-  async #entry(entry) {
+  async #renderComponent(entry) {
     return {
       ...entry,
       title: T(`l5r4.apps.designGallery.components.${camelOf(entry.page)}`),
-      samples: await Promise.all(entry.samples.map(sample => this.#sample(sample)))
+      samples: await Promise.all(entry.samples.map(sample => this.#renderSample(sample)))
     };
   }
 
@@ -166,7 +166,7 @@ export default class DesignGalleryApplication extends HandlebarsApplicationMixin
    * @param {object} sample
    * @returns {Promise<{label: string, partial: string, scope: string, html: string}>}
    */
-  async #sample(sample) {
+  async #renderSample(sample) {
     const context = this.#contextOf(sample);
     if (sample.roll) {
       context.roll = await Roll.fromData(GALLERY_ROLLS[sample.roll]).render();
@@ -197,14 +197,14 @@ export default class DesignGalleryApplication extends HandlebarsApplicationMixin
       foundry.utils.deepClone(sample.with ?? {}),
       { inplace: false }
     );
-    const context = enhanceItemSheetData(localized(merged));
+    const context = prepareItemSheetOptions(formatPhrases(merged));
     context.config.stances = STANCES;
     context.SYS_ID = SYS_ID;
     return context;
   }
 
   /** Write each token's value and ratio, and paint its chip, for the window's theme. */
-  #measure() {
+  #renderTokenValues() {
     const theme = themeOf(this.element);
     const probe = document.createElement("canvas").getContext("2d");
     const styles = getComputedStyle(this.element);
@@ -221,16 +221,16 @@ export default class DesignGalleryApplication extends HandlebarsApplicationMixin
       if (!ratioCell) {
         continue;
       }
-      const entry = COLOR_ENTRIES.get(token);
-      const color = resolve(token, styles, theme, probe);
+      const entry = colorEntries.get(token);
+      const color = colorOf(token, styles, theme, probe);
       chip?.setAttribute("fill", color ? `rgb(${color.slice(0, 3).join(" ")})` : "none");
       const against = entry.against ?? GALLERY_SURFACE.token;
-      const other = resolve(against, styles, theme, probe);
+      const other = colorOf(against, styles, theme, probe);
       if (entry.image || !color || !other) {
         ratioCell.textContent = T("l5r4.apps.designGallery.foundations.noRatio");
         continue;
       }
-      const value = contrast(color, other).toFixed(2);
+      const value = getContrastRatio(color, other).toFixed(2);
       ratioCell.textContent = entry.minimum
         ? F(
             Number(value) >= entry.minimum
@@ -248,15 +248,17 @@ export default class DesignGalleryApplication extends HandlebarsApplicationMixin
  * @param {*} value
  * @returns {*}
  */
-function localized(value) {
+function formatPhrases(value) {
   if (Array.isArray(value)) {
-    return value.map(localized);
+    return value.map(formatPhrases);
   }
   if (value && typeof value === "object") {
     if (typeof value.i18n === "string") {
-      return F(value.i18n, localized(value.data ?? {}));
+      return F(value.i18n, formatPhrases(value.data ?? {}));
     }
-    return Object.fromEntries(Object.entries(value).map(([key, child]) => [key, localized(child)]));
+    return Object.fromEntries(
+      Object.entries(value).map(([key, child]) => [key, formatPhrases(child)])
+    );
   }
   return value;
 }
@@ -307,13 +309,13 @@ function rawOf(token, styles, theme) {
  * @param {CanvasRenderingContext2D} probe
  * @returns {number[]|null}  [r, g, b, a] with a = 1, or null when the token holds no color
  */
-function resolve(token, styles, theme, probe) {
+function colorOf(token, styles, theme, probe) {
   const color = parseColor(rawOf(token, styles, theme), probe);
   if (!color || color[3] >= 1 || token === GALLERY_SURFACE.token) {
     return color;
   }
-  const under = resolve(
-    COLOR_ENTRIES.get(token)?.over ?? GALLERY_SURFACE.token,
+  const under = colorOf(
+    colorEntries.get(token)?.over ?? GALLERY_SURFACE.token,
     styles,
     theme,
     probe
@@ -335,13 +337,13 @@ function parseColor(value, probe) {
   if (!value) {
     return null;
   }
-  const read = sentinel => {
+  const toCanvasColor = sentinel => {
     probe.fillStyle = sentinel;
     probe.fillStyle = value;
     return probe.fillStyle;
   };
-  const normal = read("#000000");
-  if (normal !== read("#ffffff")) {
+  const normal = toCanvasColor("#000000");
+  if (normal !== toCanvasColor("#ffffff")) {
     return null;
   }
   const hex = normal.match(/^#([0-9a-f]{2})([0-9a-f]{2})([0-9a-f]{2})$/i);
@@ -365,8 +367,8 @@ function parseColor(value, probe) {
  * @param {number[]} b
  * @returns {number}
  */
-function contrast(a, b) {
-  const [light, dark] = [luminance(a), luminance(b)].sort((x, y) => y - x);
+function getContrastRatio(a, b) {
+  const [light, dark] = [luminanceOf(a), luminanceOf(b)].sort((x, y) => y - x);
   return (light + 0.05) / (dark + 0.05);
 }
 
@@ -375,7 +377,7 @@ function contrast(a, b) {
  * @param {number[]} color
  * @returns {number}
  */
-function luminance(color) {
+function luminanceOf(color) {
   const [r, g, b] = color.slice(0, 3).map(channel => {
     const c = channel / 255;
     return c <= 0.04045 ? c / 12.92 : ((c + 0.055) / 1.055) ** 2.4;

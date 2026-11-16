@@ -1,11 +1,11 @@
 import { SYS_ID } from "../../module/config/constants.js";
-import { addItem, preparePurchase } from "../../module/services/purchase.js";
-import { recordTrackChange, ledgerEntries } from "../../module/services/ledger.js";
-import { toggleActivation } from "../../module/services/effects/activation.js";
-import { folderTransfer, importItems } from "../../module/services/item-transfer.js";
+import { createPurchasedItem, preparePurchase } from "../../module/services/purchase.js";
+import { applyTrackChange, ledgerEntriesOf } from "../../module/services/ledger.js";
+import { updateActivation } from "../../module/services/effects/activation.js";
+import { buildFolderTransfer, createImportedItems } from "../../module/services/item-transfer.js";
 import { rollCheck } from "../../module/services/dice/check/roll-check.js";
-import { honorRoll } from "../../module/services/dice/check/chat-actions.js";
-import { collectCheck } from "../../module/services/dice/check/collect.js";
+import { rollHonor } from "../../module/services/dice/check/chat-actions.js";
+import { getCheckContext } from "../../module/services/dice/check/collect.js";
 import { createTestPC } from "../fixtures/actor-fixtures.js";
 import { createSchoolData, createSkillData } from "../fixtures/item-fixtures.js";
 import {
@@ -132,7 +132,7 @@ export function registerAuthoringTests(quench) {
       const schooled = async () => {
         const set = await schoolSet();
         const actor = track(await createTestPC({ name: "Character options: student" }));
-        await addItem(actor, set.school.toObject());
+        await createPurchasedItem(actor, set.school.toObject());
         await waitFor(() => named(actor, "Quench Technique 1") && named(actor, "Meditation"));
         return { actor, ...set };
       };
@@ -270,7 +270,10 @@ export function registerAuthoringTests(quench) {
             await answered;
             assert.equal(data.system.rules[0].selection, "kenjutsu");
             await actor.createEmbeddedDocuments("Item", [data]);
-            assert.equal(collectCheck(actor, { kind: "skill", skill: "kenjutsu" }).freeRaises, 1);
+            assert.equal(
+              getCheckContext(actor, { kind: "skill", skill: "kenjutsu" }).freeRaises,
+              1
+            );
           })
         );
       });
@@ -438,7 +441,7 @@ export function registerAuthoringTests(quench) {
               }
             ]);
             assert.equal(checkEffects(attacker, "attack", { target }).roll, -1);
-            const ctx = collectCheck(attacker, { kind: "attack", skill: "kyujutsu" });
+            const ctx = getCheckContext(attacker, { kind: "attack", skill: "kyujutsu" });
             assert.deepEqual(ctx.raises, { cap: 1, minimum: 0, maneuverCosts: { feint: -1 } });
             assert.equal(ctx.unskilledAs, 1);
 
@@ -496,9 +499,9 @@ export function registerAuthoringTests(quench) {
                 }
               }
             ]);
-            await recordTrackChange(actor, "honor", -3, "Quench breach");
+            await applyTrackChange(actor, "honor", -3, "Quench breach");
             assert.deepInclude(actor.system.honor, { rank: 1, points: 4 });
-            const [entry] = ledgerEntries(actor);
+            const [entry] = ledgerEntriesOf(actor);
             assert.deepInclude(entry, {
               track: "honor",
               asked: -3,
@@ -533,16 +536,16 @@ export function registerAuthoringTests(quench) {
                 askForOptions: false
               });
               assert.include(failed.content, 'data-action="honor-roll"');
-              const reroll = await honorRoll(failed);
+              const reroll = await rollHonor(failed);
               assert.deepInclude(reroll.system.pool, { roll: 3, keep: 3 });
               assert.equal(reroll.system.honorRollOf, failed.id);
               assert.notInclude(reroll.content, 'data-action="honor-roll"');
               assert.isFalse(reroll.system.outcome.success);
               assert.equal(actor.system.honor.rank, 2, "a failed Honor Roll costs a Rank");
-              assert.isNull(await honorRoll(failed), "once a session");
+              assert.isNull(await rollHonor(failed), "once a session");
 
               await game.settings.set(SYS_ID, "session", game.settings.get(SYS_ID, "session") + 1);
-              assert.ok(await honorRoll(failed), "a new session gives it back");
+              assert.ok(await rollHonor(failed), "a new session gives it back");
             } finally {
               CONFIG.Dice.randomUniform = uniform;
               await game.settings.set(SYS_ID, "honorRoll", enabled);
@@ -574,7 +577,7 @@ export function registerAuthoringTests(quench) {
                 askForOptions: false
               });
               const before = game.messages.size;
-              assert.isNull(await honorRoll(failed));
+              assert.isNull(await rollHonor(failed));
               assert.equal(game.messages.size, before, "no roll posted");
               assert.isUndefined(
                 actor.getFlag(SYS_ID, "honorRollSession"),
@@ -627,7 +630,7 @@ export function registerAuthoringTests(quench) {
             await answered;
             assert.deepInclude(message.system.pool, { roll: 3, keep: 3 });
             assert.deepInclude(actor.system.shadowTaint, { rank: 1, points: 1 });
-            assert.equal(ledgerEntries(actor).at(-1).track, "taint");
+            assert.equal(ledgerEntriesOf(actor).at(-1).track, "taint");
           })
         );
       });
@@ -652,14 +655,14 @@ export function registerAuthoringTests(quench) {
               ])
             );
             assert.equal(checkEffects(actor, "attack").roll, 0, "owning is not executing");
-            await toggleActivation(actor, air);
+            await updateActivation(actor, air);
             assert.equal(checkEffects(actor, "attack").roll, 1);
-            await toggleActivation(actor, fire);
+            await updateActivation(actor, fire);
             assert.isTrue(
               await waitFor(() => checkEffects(actor, "attack").roll === 2),
               "the second kata ends the first"
             );
-            await toggleActivation(actor, fire);
+            await updateActivation(actor, fire);
             assert.equal(checkEffects(actor, "attack").roll, 0);
           })
         );
@@ -682,14 +685,14 @@ export function registerAuthoringTests(quench) {
               ])
             );
             assert.equal(checkEffects(actor, "attack").roll, 0, "owning is not executing");
-            await toggleActivation(actor, items["Quench Inner A"]);
-            await toggleActivation(actor, items["Quench Inner B"]);
+            await updateActivation(actor, items["Quench Inner A"]);
+            await updateActivation(actor, items["Quench Inner B"]);
             assert.isTrue(
               await waitFor(() => checkEffects(actor, "attack").roll === 2),
               "the second Internal kiho ends the first"
             );
-            await toggleActivation(actor, items["Quench Fist A"]);
-            await toggleActivation(actor, items["Quench Fist B"]);
+            await updateActivation(actor, items["Quench Fist A"]);
+            await updateActivation(actor, items["Quench Fist B"]);
             assert.equal(checkEffects(actor, "attack").roll, 14, "both Martial kiho stay active");
             assert.sameMembers(
               actor.effects.map(e => e.system.group),
@@ -720,7 +723,7 @@ export function registerAuthoringTests(quench) {
             ]);
 
             // The export's content; exportItemFolder hands the same to the browser's download
-            const payload = folderTransfer(folder);
+            const payload = buildFolderTransfer(folder);
             assert.lengthOf(payload.items, 2);
             assert.equal(payload.folder, "Quench Homebrew");
 
@@ -731,7 +734,7 @@ export function registerAuthoringTests(quench) {
             }
 
             // The new folder sits inside `folder`, so deleting that afterwards removes it too
-            const imported = await importItems(JSON.stringify(payload), folder);
+            const imported = await createImportedItems(JSON.stringify(payload), folder);
             const copySchool = imported.find(i => i.type === "school");
             const copySkill = imported.find(i => i.type === "skill");
             assert.notEqual(copySchool.id, school.id);

@@ -51,15 +51,15 @@ export class ItemEffectsHandler {
     });
 
     on(root, ".effect-edit", "click", (ev, el) => {
-      this.edit(context, ev, el);
+      this.openEffectSheet(context, ev, el);
     });
 
     on(root, ".effect-toggle", "click", async (ev, el) => {
-      await this.toggle(context, ev, el);
+      await this.updateEffectDisabled(context, ev, el);
     });
 
     on(root, ".effect-delete", "click", async (ev, el) => {
-      await this.remove(context, ev, el);
+      await this.deleteEffect(context, ev, el);
     });
   }
 
@@ -125,7 +125,7 @@ export class ItemEffectsHandler {
    * @param {HTMLElement} targetElement - Button that triggered the event
    * @returns {void}
    */
-  static edit(context, event, targetElement) {
+  static openEffectSheet(context, event, targetElement) {
     event?.preventDefault?.();
 
     const { item } = context;
@@ -157,7 +157,7 @@ export class ItemEffectsHandler {
    * @param {HTMLElement} targetElement - Button that triggered the event
    * @returns {Promise<void>}
    */
-  static async toggle(context, event, targetElement) {
+  static async updateEffectDisabled(context, event, targetElement) {
     event?.preventDefault?.();
 
     const { item } = context;
@@ -198,7 +198,7 @@ export class ItemEffectsHandler {
    * @param {HTMLElement} targetElement - Button that triggered the event
    * @returns {Promise<void>}
    */
-  static async remove(context, event, targetElement) {
+  static async deleteEffect(context, event, targetElement) {
     event?.preventDefault?.();
 
     const { item } = context;

@@ -8,9 +8,9 @@
 
 import { T } from "../../../utils/localization.js";
 import { toInt } from "../../../utils/type-coercion.js";
-import { normalizeTraitKey } from "../../../utils/mechanics.js";
+import { toTraitKey } from "../../../utils/mechanics.js";
 import { rollCheck } from "../check/roll-check.js";
-import { resolveActor } from "../resources/void-points.js";
+import { getRollActor } from "../resources/void-points.js";
 
 /**
  * Executes a Trait Roll, or an Unskilled Roll with `unskilled`.
@@ -24,15 +24,15 @@ import { resolveActor } from "../resources/void-points.js";
  * @param {L5R4Actor|null} [options.actor=null] - The roller
  * @returns {Promise<ChatMessage|null>} The posted message, or null when cancelled
  */
-export async function TraitRoll({
+export async function rollTrait({
   traitRank = null,
   traitName = null,
   askForOptions = true,
   unskilled = false,
   actor = null
 } = {}) {
-  const roller = resolveActor(actor);
-  const trait = normalizeTraitKey(traitName);
+  const roller = getRollActor(actor);
+  const trait = toTraitKey(traitName);
   const rank = toInt(traitRank);
   const name = T(
     trait === "void" ? "l5r4.ui.mechanics.rings.void" : `l5r4.ui.mechanics.traits.${trait}`

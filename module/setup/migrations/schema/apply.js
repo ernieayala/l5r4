@@ -3,7 +3,7 @@
  * @description Renames legacy field names to the current schema (snake_case to camelCase).
  */
 import { SYS_ID } from "../../../config/constants.js";
-import { getByPath, setByPath, deleteByPath } from "../utils/helpers.js";
+import { getByPath, updateByPath, deleteByPath } from "../utils/helpers.js";
 import { SCHEMA_MAP } from "./map.js";
 
 /**
@@ -13,7 +13,7 @@ import { SCHEMA_MAP } from "./map.js";
  * transformation. Only creates updates if legacy fields exist AND target fields are empty.
  * Preserves existing data at target locations (non-destructive).
  *
- * Idempotency: Called from runMigrations() which filters out already-migrated documents,
+ * Idempotency: Called from migrateWorld() which filters out already-migrated documents,
  * so this function only processes documents that haven't been migrated yet. This prevents
  * overwriting manually-corrected field names when forceMigration is triggered.
  *
@@ -46,7 +46,7 @@ export function buildSchemaUpdate(doc) {
       continue;
     }
 
-    setByPath(patch, rule.to, fromVal);
+    updateByPath(patch, rule.to, fromVal);
     deleteByPath(patch, rule.from);
     touched = true;
   }

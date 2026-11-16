@@ -38,7 +38,7 @@ export function getByPath(obj, path) {
  * @param {*} value - Value to assign at the target path
  * @returns {void}
  */
-export function setByPath(obj, path, value) {
+export function updateByPath(obj, path, value) {
   const parts = path.split(".");
   const last = parts.pop();
   let cur = obj;
@@ -92,7 +92,7 @@ export function deleteByPath(obj, path) {
  * @param {object} woundData - Wound level data object with penalty/value properties (mutated)
  * @returns {boolean} True if any normalization changes were made, false otherwise
  */
-export function normalizeWoundLevelData(woundData) {
+export function migrateWoundLevelData(woundData) {
   let changed = false;
 
   for (const [_key, level] of Object.entries(woundData)) {
@@ -146,7 +146,7 @@ export function hasBeenMigrated(doc, targetVersion) {
  * @param {string} version - System version to mark (e.g., "1.2.3")
  * @returns {Promise<void>}
  */
-export async function markAsMigrated(doc, version) {
+export async function updateMigratedVersion(doc, version) {
   try {
     await doc.setFlag(SYS_ID, MIGRATION_FLAG, version);
   } catch (err) {

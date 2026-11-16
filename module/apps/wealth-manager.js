@@ -29,10 +29,10 @@ export default class WealthManagerApplication extends foundry.applications.api.H
       height: "auto"
     },
     actions: {
-      "add-money": WealthManagerApplication.prototype._onAddMoney,
-      "remove-money": WealthManagerApplication.prototype._onRemoveMoney,
-      "convert-up": WealthManagerApplication.prototype._onConvertUp,
-      "convert-down": WealthManagerApplication.prototype._onConvertDown
+      "add-money": WealthManagerApplication.#onAddMoney,
+      "remove-money": WealthManagerApplication.#onRemoveMoney,
+      "convert-up": WealthManagerApplication.#onConvertUp,
+      "convert-down": WealthManagerApplication.#onConvertDown
     }
   };
 
@@ -130,10 +130,11 @@ export default class WealthManagerApplication extends foundry.applications.api.H
    * Extracts amount and denomination from form, validates positive amount,
    * and updates actor wealth.
    *
+   * @this {WealthManagerApplication}
    * @param {Event} event - The click event
-   * @param {HTMLElement} _target - The clicked element (unused)
+   * @param {HTMLElement} _element - The clicked element (unused)
    */
-  async _onAddMoney(event, _target) {
+  static async #onAddMoney(event, _element) {
     event.preventDefault();
 
     const formData = new FormData(this.element);
@@ -167,10 +168,11 @@ export default class WealthManagerApplication extends foundry.applications.api.H
    * Extracts amount and denomination from form, validates positive amount
    * and sufficient funds, then updates actor wealth.
    *
+   * @this {WealthManagerApplication}
    * @param {Event} event - The click event
-   * @param {HTMLElement} _target - The clicked element (unused)
+   * @param {HTMLElement} _element - The clicked element (unused)
    */
-  async _onRemoveMoney(event, _target) {
+  static async #onRemoveMoney(event, _element) {
     event.preventDefault();
 
     const formData = new FormData(this.element);
@@ -210,13 +212,14 @@ export default class WealthManagerApplication extends foundry.applications.api.H
    * Conversion rates: 10 zeni → 1 bu, 5 bu → 1 koku.
    * Validates sufficient funds before converting.
    *
+   * @this {WealthManagerApplication}
    * @param {Event} event - The click event
-   * @param {HTMLElement} target - The clicked element with data-from attribute
+   * @param {HTMLElement} element - The clicked element with data-from attribute
    */
-  async _onConvertUp(event, target) {
+  static async #onConvertUp(event, element) {
     event.preventDefault();
 
-    const from = target.dataset.from;
+    const from = element.dataset.from;
     const wealth = this._getWealth();
 
     // L5R4 currency conversion rates (smaller to larger denomination):
@@ -255,13 +258,14 @@ export default class WealthManagerApplication extends foundry.applications.api.H
    * Conversion rates: 1 koku → 5 bu, 1 bu → 10 zeni.
    * Validates sufficient funds before converting.
    *
+   * @this {WealthManagerApplication}
    * @param {Event} event - The click event
-   * @param {HTMLElement} target - The clicked element with data-from attribute
+   * @param {HTMLElement} element - The clicked element with data-from attribute
    */
-  async _onConvertDown(event, target) {
+  static async #onConvertDown(event, element) {
     event.preventDefault();
 
-    const from = target.dataset.from;
+    const from = element.dataset.from;
     const wealth = this._getWealth();
 
     // L5R4 currency conversion rates (larger to smaller denomination):

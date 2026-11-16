@@ -13,43 +13,43 @@
  */
 
 import { describe, it, expect } from "vitest";
-import { calculateInsightRank } from "../../../../../module/documents/actor/calculations/xp-system.js";
+import { getInsightRank } from "../../../../../module/documents/actor/calculations/xp-system.js";
 
-describe("calculateInsightRank", () => {
+describe("getInsightRank", () => {
   describe("L5R4 Insight Rank thresholds", () => {
     it("should return rank 1 for insight 0-149", () => {
       // ACT & ASSERT
-      expect(calculateInsightRank(0)).toBe(1);
-      expect(calculateInsightRank(75)).toBe(1);
-      expect(calculateInsightRank(149)).toBe(1);
+      expect(getInsightRank(0)).toBe(1);
+      expect(getInsightRank(75)).toBe(1);
+      expect(getInsightRank(149)).toBe(1);
     });
 
     it("should return rank 2 for insight 150-174", () => {
       // ACT & ASSERT
-      expect(calculateInsightRank(150)).toBe(2);
-      expect(calculateInsightRank(162)).toBe(2);
-      expect(calculateInsightRank(174)).toBe(2);
+      expect(getInsightRank(150)).toBe(2);
+      expect(getInsightRank(162)).toBe(2);
+      expect(getInsightRank(174)).toBe(2);
     });
 
     it("should return rank 3 for insight 175-199", () => {
       // ACT & ASSERT
-      expect(calculateInsightRank(175)).toBe(3);
-      expect(calculateInsightRank(187)).toBe(3);
-      expect(calculateInsightRank(199)).toBe(3);
+      expect(getInsightRank(175)).toBe(3);
+      expect(getInsightRank(187)).toBe(3);
+      expect(getInsightRank(199)).toBe(3);
     });
 
     it("should return rank 4 for insight 200-224", () => {
       // ACT & ASSERT
-      expect(calculateInsightRank(200)).toBe(4);
-      expect(calculateInsightRank(212)).toBe(4);
-      expect(calculateInsightRank(224)).toBe(4);
+      expect(getInsightRank(200)).toBe(4);
+      expect(getInsightRank(212)).toBe(4);
+      expect(getInsightRank(224)).toBe(4);
     });
 
     it("should return rank 5 for insight 225-249", () => {
       // ACT & ASSERT
-      expect(calculateInsightRank(225)).toBe(5);
-      expect(calculateInsightRank(237)).toBe(5);
-      expect(calculateInsightRank(249)).toBe(5);
+      expect(getInsightRank(225)).toBe(5);
+      expect(getInsightRank(237)).toBe(5);
+      expect(getInsightRank(249)).toBe(5);
     });
 
     it("should return rank 6 for insight 250-274", () => {
@@ -57,7 +57,7 @@ describe("calculateInsightRank", () => {
       const insight = 250;
 
       // ACT
-      const result = calculateInsightRank(insight);
+      const result = getInsightRank(insight);
 
       // ASSERT
       expect(result).toBe(6);
@@ -65,21 +65,21 @@ describe("calculateInsightRank", () => {
 
     it("should calculate rank 6+ as +25 insight per rank", () => {
       // ACT & ASSERT
-      expect(calculateInsightRank(250)).toBe(6); // 225 + 25
-      expect(calculateInsightRank(275)).toBe(7); // 225 + 50
-      expect(calculateInsightRank(300)).toBe(8); // 225 + 75
-      expect(calculateInsightRank(325)).toBe(9); // 225 + 100
-      expect(calculateInsightRank(350)).toBe(10); // 225 + 125
+      expect(getInsightRank(250)).toBe(6); // 225 + 25
+      expect(getInsightRank(275)).toBe(7); // 225 + 50
+      expect(getInsightRank(300)).toBe(8); // 225 + 75
+      expect(getInsightRank(325)).toBe(9); // 225 + 100
+      expect(getInsightRank(350)).toBe(10); // 225 + 125
     });
   });
 
   describe("Boundary conditions", () => {
     it("should handle exact threshold values", () => {
       // ACT & ASSERT
-      expect(calculateInsightRank(149)).toBe(1); // Just before rank 2
-      expect(calculateInsightRank(150)).toBe(2); // Exactly rank 2
-      expect(calculateInsightRank(174)).toBe(2); // Just before rank 3
-      expect(calculateInsightRank(175)).toBe(3); // Exactly rank 3
+      expect(getInsightRank(149)).toBe(1); // Just before rank 2
+      expect(getInsightRank(150)).toBe(2); // Exactly rank 2
+      expect(getInsightRank(174)).toBe(2); // Just before rank 3
+      expect(getInsightRank(175)).toBe(3); // Exactly rank 3
     });
 
     it("should handle an insight of 1000", () => {
@@ -87,7 +87,7 @@ describe("calculateInsightRank", () => {
       const veryHighInsight = 1000;
 
       // ACT
-      const result = calculateInsightRank(veryHighInsight);
+      const result = getInsightRank(veryHighInsight);
 
       // ASSERT
       // 1000 - 225 = 775, 775 / 25 = 31, rank = 5 + 31 = 36
@@ -101,7 +101,7 @@ describe("calculateInsightRank", () => {
       const insight = 0;
 
       // ACT
-      const result = calculateInsightRank(insight);
+      const result = getInsightRank(insight);
 
       // ASSERT
       expect(result).toBe(1); // Minimum rank is 1
@@ -112,7 +112,7 @@ describe("calculateInsightRank", () => {
       const insight = -10;
 
       // ACT
-      const result = calculateInsightRank(insight);
+      const result = getInsightRank(insight);
 
       // ASSERT
       expect(result).toBe(1); // Should not go below rank 1
@@ -123,7 +123,7 @@ describe("calculateInsightRank", () => {
       const insight = null;
 
       // ACT
-      const result = calculateInsightRank(insight);
+      const result = getInsightRank(insight);
 
       // ASSERT
       expect(result).toBe(1); // Treat as 0, return rank 1
@@ -134,7 +134,7 @@ describe("calculateInsightRank", () => {
       const insight = undefined;
 
       // ACT
-      const result = calculateInsightRank(insight);
+      const result = getInsightRank(insight);
 
       // ASSERT
       expect(result).toBe(1); // Treat as 0, return rank 1
@@ -145,7 +145,7 @@ describe("calculateInsightRank", () => {
       const insight = NaN;
 
       // ACT
-      const result = calculateInsightRank(insight);
+      const result = getInsightRank(insight);
 
       // ASSERT
       expect(result).toBe(1); // Comparison with NaN returns false, should default to rank 1
@@ -156,7 +156,7 @@ describe("calculateInsightRank", () => {
       const insight = 150.7;
 
       // ACT
-      const result = calculateInsightRank(insight);
+      const result = getInsightRank(insight);
 
       // ASSERT
       expect(result).toBe(2); // 150.7 >= 150, so rank 2
@@ -171,7 +171,7 @@ describe("calculateInsightRank", () => {
       const insight = 130;
 
       // ACT
-      const result = calculateInsightRank(insight);
+      const result = getInsightRank(insight);
 
       // ASSERT
       expect(result).toBe(1); // Starting characters are rank 1
@@ -184,7 +184,7 @@ describe("calculateInsightRank", () => {
       const insight = 192;
 
       // ACT
-      const result = calculateInsightRank(insight);
+      const result = getInsightRank(insight);
 
       // ASSERT
       expect(result).toBe(3); // Rank 3
@@ -197,7 +197,7 @@ describe("calculateInsightRank", () => {
       const insight = 280;
 
       // ACT
-      const result = calculateInsightRank(insight);
+      const result = getInsightRank(insight);
 
       // ASSERT
       expect(result).toBe(7); // Rank 7 (225 + 55, 55/25 = 2.2, so rank 5 + 2)
@@ -220,7 +220,7 @@ describe("calculateInsightRank", () => {
 
       // ACT & ASSERT
       thresholds.forEach(({ insight, expected }) => {
-        expect(calculateInsightRank(insight)).toBe(expected);
+        expect(getInsightRank(insight)).toBe(expected);
       });
     });
 
@@ -232,7 +232,7 @@ describe("calculateInsightRank", () => {
       for (let i = 0; i < 10; i++) {
         const insight = baseInsight + i * 25;
         const expectedRank = 5 + i;
-        expect(calculateInsightRank(insight)).toBe(expectedRank);
+        expect(getInsightRank(insight)).toBe(expectedRank);
       }
     });
   });

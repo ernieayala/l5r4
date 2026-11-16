@@ -29,14 +29,14 @@ export function prepareItemBaseData(item) {
 
   // Normalize item icon: assign type-specific default if using Foundry's generic bag icon.
   // Handles bow weapons specially (type='weapon' but isBow=true uses bow icon).
-  // Coordinates with handleItemPreCreate() for initial assignment during item creation.
+  // Coordinates with onItemPreCreate() for initial assignment during item creation.
   if (!item.img || typeof item.img !== "string" || item.img === "icons/svg/item-bag.svg") {
     const isBow = type === "weapon" && sys.isBow;
     const iconType = isBow ? "bow" : type;
     item.img = DEFAULT_ICONS[iconType] ?? "icons/svg/item-bag.svg";
   }
 
-  normalizeRichTextFields(sys, type);
+  prepareRichTextFields(sys, type);
 }
 
 /**
@@ -46,8 +46,8 @@ export function prepareItemBaseData(item) {
  * @param {object} sys - The item's system data object (item.system)
  * @param {string} type - The item type (weapon, spell, armor, etc.)
  */
-function normalizeRichTextFields(sys, type) {
-  const ensureString = (obj, keys) => {
+function prepareRichTextFields(sys, type) {
+  const toStringFields = (obj, keys) => {
     for (const k of keys) {
       if (obj[k] == null) {
         obj[k] = "";
@@ -57,23 +57,23 @@ function normalizeRichTextFields(sys, type) {
     }
   };
 
-  ensureString(sys, ["description", "specialRules", "demands", "notes", "text"]);
+  toStringFields(sys, ["description", "specialRules", "demands", "notes", "text"]);
 
   switch (type) {
     case "spell":
-      ensureString(sys, ["effect", "raiseEffects"]);
+      toStringFields(sys, ["effect", "raiseEffects"]);
       break;
     case "weapon":
     case "armor":
-      ensureString(sys, ["special"]);
+      toStringFields(sys, ["special"]);
       break;
     case "kata":
     case "kiho":
     case "tattoo":
-      ensureString(sys, ["effect"]);
+      toStringFields(sys, ["effect"]);
       break;
     case "technique":
-      ensureString(sys, ["effect", "benefit", "drawback"]);
+      toStringFields(sys, ["effect", "benefit", "drawback"]);
       break;
   }
 }

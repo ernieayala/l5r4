@@ -6,7 +6,7 @@
  */
 
 import { SYS_ID } from "../../config/constants.js";
-import { clamp } from "../../utils/type-coercion.js";
+import { getClamped } from "../../utils/type-coercion.js";
 import { RollHandler } from "./roll-handler.js";
 
 /**
@@ -17,7 +17,7 @@ export class TraitHandler {
    * Handles trait rank click - rolls trait or adjusts rank based on Shift key.
    *
    * **Without Shift Key:**
-   * Performs a trait roll (XkX where X = trait rank) via RollHandler.traitRoll().
+   * Performs a trait roll (XkX where X = trait rank) via RollHandler.rollClickedTrait().
    * A click on the trait rank rolls the trait.
    *
    * **With Shift Key:**
@@ -41,7 +41,7 @@ export class TraitHandler {
    * @param {number} delta - Direction to adjust (+1 to increase, -1 to decrease)
    * @returns {Promise<void>}
    */
-  static async adjust(context, event, element, delta) {
+  static async updateTraitRank(context, event, element, delta) {
     event?.preventDefault?.();
 
     const { actor, sheetClassName } = context;
@@ -53,12 +53,12 @@ export class TraitHandler {
 
     // If shift key NOT pressed, perform trait roll instead of adjustment
     if (!event?.shiftKey) {
-      return RollHandler.traitRoll(context, event, element);
+      return RollHandler.rollClickedTrait(context, event, element);
     }
 
     const cur = Number(actor.system?.traits?.[key] ?? 0) || 0;
     // Clamp to 0-10 per L5R4 rules (traits ranked 1-10, but 0 allowed for flexibility)
-    const next = clamp(cur + (delta > 0 ? 1 : -1), 0, 10);
+    const next = getClamped(cur + (delta > 0 ? 1 : -1), 0, 10);
 
     if (next === cur) {
       return;
@@ -80,7 +80,7 @@ export class TraitHandler {
    * Increases a trait value by 1 without requiring Shift key.
    *
    * Provides direct trait increment functionality for trait-increase buttons.
-   * Unlike adjust(), this does NOT require Shift key to be pressed.
+   * Unlike updateTraitRank(), this does NOT require Shift key to be pressed.
    *
    * **User Interaction:**
    * - Click trait-increase button (up chevron): Increases trait by 1
@@ -88,27 +88,27 @@ export class TraitHandler {
    *
    * **Implementation:**
    * Creates a modified event with shiftKey=true to bypass the shift check in
-   * adjust(), then delegates to adjust() with delta=+1.
+   * updateTraitRank(), then delegates to updateTraitRank() with delta=+1.
    *
    * @param {object} context - Handler context from sheet
    * @param {Event} event - DOM event from button click
    * @param {HTMLElement} element - Element with data-trait attribute
    * @returns {Promise<void>}
    */
-  static async increase(context, event, element) {
+  static async updateTraitRankUp(context, event, element) {
     event?.preventDefault?.();
     event?.stopPropagation?.();
 
     // Create modified event that appears to have shift key pressed
     const modifiedEvent = event ? { ...event, shiftKey: true } : { shiftKey: true };
-    return this.adjust(context, modifiedEvent, element, +1);
+    return this.updateTraitRank(context, modifiedEvent, element, +1);
   }
 
   /**
    * Decreases a trait value by 1 without requiring Shift key.
    *
    * Provides direct trait decrement functionality for trait-decrease buttons.
-   * Unlike adjust(), this does NOT require Shift key to be pressed.
+   * Unlike updateTraitRank(), this does NOT require Shift key to be pressed.
    *
    * **User Interaction:**
    * - Click trait-decrease button (down chevron): Decreases trait by 1
@@ -116,19 +116,19 @@ export class TraitHandler {
    *
    * **Implementation:**
    * Creates a modified event with shiftKey=true to bypass the shift check in
-   * adjust(), then delegates to adjust() with delta=-1.
+   * updateTraitRank(), then delegates to updateTraitRank() with delta=-1.
    *
    * @param {object} context - Handler context from sheet
    * @param {Event} event - DOM event from button click
    * @param {HTMLElement} element - Element with data-trait attribute
    * @returns {Promise<void>}
    */
-  static async decrease(context, event, element) {
+  static async updateTraitRankDown(context, event, element) {
     event?.preventDefault?.();
     event?.stopPropagation?.();
 
     // Create modified event that appears to have shift key pressed
     const modifiedEvent = event ? { ...event, shiftKey: true } : { shiftKey: true };
-    return this.adjust(context, modifiedEvent, element, -1);
+    return this.updateTraitRank(context, modifiedEvent, element, -1);
   }
 }

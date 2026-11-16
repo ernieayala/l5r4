@@ -1,20 +1,20 @@
 import { SYS_ID } from "../../module/config/constants.js";
-import { SkillRoll } from "../../module/services/dice/rolls/skill-roll.js";
-import { SimpleRoll } from "../../module/services/dice/rolls/simple-roll.js";
-import { TraitRoll } from "../../module/services/dice/rolls/trait-roll.js";
-import { RingRoll } from "../../module/services/dice/rolls/ring-roll.js";
-import { WeaponRoll } from "../../module/services/dice/rolls/weapon-roll.js";
-import { SpellCastRoll } from "../../module/services/dice/rolls/spell-cast-roll.js";
-import { MahoCastRoll } from "../../module/services/dice/rolls/maho-cast-roll.js";
-import { collectCheck } from "../../module/services/dice/check/collect.js";
+import { rollSkill } from "../../module/services/dice/rolls/skill-roll.js";
+import { rollPool } from "../../module/services/dice/rolls/simple-roll.js";
+import { rollTrait } from "../../module/services/dice/rolls/trait-roll.js";
+import { rollRing } from "../../module/services/dice/rolls/ring-roll.js";
+import { rollWeaponDamage } from "../../module/services/dice/rolls/weapon-roll.js";
+import { rollSpellCast } from "../../module/services/dice/rolls/spell-cast-roll.js";
+import { rollMahoCast } from "../../module/services/dice/rolls/maho-cast-roll.js";
+import { getCheckContext } from "../../module/services/dice/check/collect.js";
 import {
-  contestRolls,
-  rerollKeepBetter,
+  postContestedRoll,
+  rollAgainKeepBetter,
   rollDamageFromMessage
 } from "../../module/services/dice/check/chat-actions.js";
-import { inlineFormula } from "../../module/services/chat.js";
+import { parseInlineFormula } from "../../module/services/chat.js";
 import { applyEffect } from "../../module/services/effects/apply.js";
-import { ledgerEntries, recordTrackChange } from "../../module/services/ledger.js";
+import { ledgerEntriesOf, applyTrackChange } from "../../module/services/ledger.js";
 import { createTestNPC, createTestPC } from "../fixtures/actor-fixtures.js";
 import { createSkillData, createWeaponData } from "../fixtures/item-fixtures.js";
 import { answerCheckDialog, cleanTest, settleChatNotifications } from "./helpers.js";
@@ -121,7 +121,7 @@ export function registerRollPipelineTests(quench) {
         });
 
         it("should explode a pool's formula before it keeps", () => {
-          assert.equal(inlineFormula("7k3"), "7d10xa10k3+0");
+          assert.equal(parseInlineFormula("7k3"), "7d10xa10k3+0");
         });
       });
 
@@ -132,9 +132,9 @@ export function registerRollPipelineTests(quench) {
           clean(async () => {
             const { actor } = await swordsman();
             const message = keep(
-              await SkillRoll({
+              await rollSkill({
                 actor,
-                actorTrait: 3,
+                traitRank: 3,
                 skillRank: 2,
                 skillName: "Kenjutsu",
                 skillTrait: "agi",
@@ -156,22 +156,22 @@ export function registerRollPipelineTests(quench) {
           clean(async () => {
             const { actor } = await swordsman();
             const trait = keep(
-              await TraitRoll({ actor, traitName: "ref", traitRank: 3, askForOptions: false })
+              await rollTrait({ actor, traitName: "ref", traitRank: 3, askForOptions: false })
             );
             const ring = keep(
-              await RingRoll({
+              await rollRing({
                 actor,
                 ringName: "Air",
                 ringRank: 3,
-                systemRing: "air",
+                ringKey: "air",
                 askForOptions: false
               })
             );
             const plain = keep(
-              await SimpleRoll({
+              await rollPool({
                 actor,
-                diceRoll: 4,
-                diceKeep: 2,
+                roll: 4,
+                keep: 2,
                 rollName: "Plain",
                 askForOptions: false
               })
@@ -201,7 +201,7 @@ export function registerRollPipelineTests(quench) {
             const fire = actor.system.rings.fire;
             const rank = actor.system.insight.rank;
             const slots = actor._source.system.spellSlots.fire;
-            const message = keep(await SpellCastRoll({ actor, spell, showDialog: false }));
+            const message = keep(await rollSpellCast({ actor, spell, showDialog: false }));
             assert.equal(message.system.kind, "spell");
             assert.equal(poolOf(message), `${fire + rank}k${fire}`);
             assert.equal(message.system.tn.base, 10);
@@ -218,7 +218,7 @@ export function registerRollPipelineTests(quench) {
             const [spell] = await actor.createEmbeddedDocuments("Item", [
               { name: "Quench Void Spell", type: "spell", system: { ring: "void", mastery: 1 } }
             ]);
-            const message = keep(await SpellCastRoll({ actor, spell, showDialog: false }));
+            const message = keep(await rollSpellCast({ actor, spell, showDialog: false }));
             assert.equal(poolOf(message), `${3 + actor.system.insight.rank}k3`);
           })
         );
@@ -239,7 +239,7 @@ export function registerRollPipelineTests(quench) {
               })
             );
             const slots = { ...actor._source.system.spellSlots };
-            const message = keep(await SpellCastRoll({ actor, spell, showDialog: false }));
+            const message = keep(await rollSpellCast({ actor, spell, showDialog: false }));
             await picked;
             const water = actor.system.rings.water;
             assert.equal(poolOf(message), `${water + actor.system.insight.rank}k${water}`);
@@ -268,10 +268,10 @@ export function registerRollPipelineTests(quench) {
                 })
               );
             let answered = answer("no");
-            assert.isNull(await SpellCastRoll({ actor, spell, showDialog: false }), "declined");
+            assert.isNull(await rollSpellCast({ actor, spell, showDialog: false }), "declined");
             await answered;
             answered = answer("yes");
-            const message = keep(await SpellCastRoll({ actor, spell, showDialog: false }));
+            const message = keep(await rollSpellCast({ actor, spell, showDialog: false }));
             await answered;
             assert.equal(message.system.tn.base, 20, "cast anyway");
           })
@@ -285,11 +285,11 @@ export function registerRollPipelineTests(quench) {
             const voidSlots = actor._source.system.spellSlots.void;
             const answered = answerCheckDialog({ spellCasting: true, slot: "void" });
             const message = keep(
-              await RingRoll({
+              await rollRing({
                 actor,
                 ringName: "Air",
                 ringRank: 3,
-                systemRing: "air",
+                ringKey: "air",
                 askForOptions: true
               })
             );
@@ -311,7 +311,7 @@ export function registerRollPipelineTests(quench) {
               }
             ]);
             const answered = answerCheckDialog({ additionalBlood: 2 });
-            const message = keep(await MahoCastRoll({ actor, spell, showDialog: true }));
+            const message = keep(await rollMahoCast({ actor, spell, showDialog: true }));
             await answered;
             assert.equal(message.system.kind, "maho");
             assert.equal(actor._source.system.suffered, 4, "blood cost 2 plus 2 extra");
@@ -336,12 +336,12 @@ export function registerRollPipelineTests(quench) {
             const random = CONFIG.Dice.randomUniform;
             CONFIG.Dice.randomUniform = () => 0.15;
             try {
-              keep(await MahoCastRoll({ actor, spell, showDialog: false }));
+              keep(await rollMahoCast({ actor, spell, showDialog: false }));
             } finally {
               CONFIG.Dice.randomUniform = random;
             }
             assert.deepInclude(actor._source.system.shadowTaint, { rank: 1, points: 0 }, "9 + 1");
-            assert.equal(ledgerEntries(actor).at(-1).track, "taint");
+            assert.equal(ledgerEntriesOf(actor).at(-1).track, "taint");
           })
         );
 
@@ -350,7 +350,7 @@ export function registerRollPipelineTests(quench) {
           "should let Status fall below 0",
           clean(async () => {
             const { actor } = await swordsman();
-            await recordTrackChange(actor, "status", -25, "Quench");
+            await applyTrackChange(actor, "status", -25, "Quench");
             assert.deepInclude(
               actor._source.system.status,
               { rank: -2, points: 5 },
@@ -366,12 +366,12 @@ export function registerRollPipelineTests(quench) {
           clean(async () => {
             const { actor, katana } = await swordsman();
             const message = keep(
-              await WeaponRoll({
+              await rollWeaponDamage({
                 actor,
                 weapon: katana,
                 weaponName: katana.name,
-                diceRoll: katana.system.derivedDamageRoll,
-                diceKeep: katana.system.derivedDamageKeep,
+                roll: katana.system.derivedDamageRoll,
+                keep: katana.system.derivedDamageKeep,
                 attackRaises: 2,
                 askForOptions: false
               })
@@ -394,9 +394,9 @@ export function registerRollPipelineTests(quench) {
             const { actor } = await swordsman();
             await actor.items.getName("Kenjutsu").update({ "system.rollBonus": 1 });
             const message = keep(
-              await SkillRoll({
+              await rollSkill({
                 actor,
-                actorTrait: 3,
+                traitRank: 3,
                 skillRank: 2,
                 skillName: "Kenjutsu",
                 skillTrait: "agi",
@@ -416,9 +416,9 @@ export function registerRollPipelineTests(quench) {
             await actor.items.getName("Kenjutsu").update({ "system.keepBonus": 1 });
             await applyEffect(actor, "fullAttackStance");
             const message = keep(
-              await SkillRoll({
+              await rollSkill({
                 actor,
-                actorTrait: 3,
+                traitRank: 3,
                 skillRank: 2,
                 skillName: "Kenjutsu",
                 skillTrait: "agi",
@@ -438,10 +438,10 @@ export function registerRollPipelineTests(quench) {
             const npc = track(await createTestNPC({ name: "Roll pipeline: NPC" }));
             await applyEffect(npc, "fullAttackStance");
             const message = keep(
-              await SimpleRoll({
+              await rollPool({
                 actor: npc,
-                diceRoll: 3,
-                diceKeep: 2,
+                roll: 3,
+                keep: 2,
                 rollType: "attack",
                 askForOptions: false
               })
@@ -459,9 +459,9 @@ export function registerRollPipelineTests(quench) {
             await actor.update({ "system.rings.void": { rank: 3, value: 0 } });
             const answered = answerCheckDialog({ tn: 10, raises: 3 });
             const message = keep(
-              await SkillRoll({
+              await rollSkill({
                 actor,
-                actorTrait: 3,
+                traitRank: 3,
                 skillRank: 2,
                 skillName: "Kenjutsu",
                 skillTrait: "agi"
@@ -488,9 +488,9 @@ export function registerRollPipelineTests(quench) {
             ]);
             const answered = answerCheckDialog({ tn: 10, void: true });
             const message = keep(
-              await SkillRoll({
+              await rollSkill({
                 actor,
-                actorTrait: 3,
+                traitRank: 3,
                 skillRank: 0,
                 skillName: "Athletics",
                 skillTrait: "agi"
@@ -514,9 +514,9 @@ export function registerRollPipelineTests(quench) {
             const before = actor._source.system.rings.void.value;
             const answered = answerCheckDialog({ tn: 10, voidSkill: true, raises: 1 });
             const message = keep(
-              await SkillRoll({
+              await rollSkill({
                 actor,
-                actorTrait: 3,
+                traitRank: 3,
                 skillRank: 0,
                 skillName: "Athletics",
                 skillTrait: "agi"
@@ -540,12 +540,12 @@ export function registerRollPipelineTests(quench) {
             const before = actor._source.system.rings.void.value;
             const answered = answerCheckDialog({});
             const message = keep(
-              await WeaponRoll({
+              await rollWeaponDamage({
                 actor,
                 weapon: katana,
                 weaponName: katana.name,
-                diceRoll: 4,
-                diceKeep: 2
+                roll: 4,
+                keep: 2
               })
             );
             const labels = await answered;
@@ -557,10 +557,10 @@ export function registerRollPipelineTests(quench) {
 
         // AUTOMATION.md B9
         it("should turn inline [[XkY]] into a Foundry formula through the same pool code", () => {
-          assert.equal(inlineFormula("12k4+1"), "10d10xa10k5+1");
-          assert.equal(inlineFormula("e5k2"), "5d10r1xa10k2+0");
-          assert.equal(inlineFormula("u3k3"), "3d10k3+0");
-          assert.isNull(inlineFormula("1d20"));
+          assert.equal(parseInlineFormula("12k4+1"), "10d10xa10k5+1");
+          assert.equal(parseInlineFormula("e5k2"), "5d10r1xa10k2+0");
+          assert.equal(parseInlineFormula("u3k3"), "3d10k3+0");
+          assert.isNull(parseInlineFormula("1d20"));
         });
 
         // AUTOMATION.md B9
@@ -582,12 +582,12 @@ export function registerRollPipelineTests(quench) {
             const { actor, katana } = await swordsman();
             await katana.update({ "system.explodesOn": 9 });
             const message = keep(
-              await WeaponRoll({
+              await rollWeaponDamage({
                 actor,
                 weapon: katana,
                 weaponName: katana.name,
-                diceRoll: 4,
-                diceKeep: 2,
+                roll: 4,
+                keep: 2,
                 askForOptions: false
               })
             );
@@ -608,12 +608,12 @@ export function registerRollPipelineTests(quench) {
             ]);
             assert.equal(shuriken.system.derivedDamageFormula, "1k1", "no Strength");
             const message = keep(
-              await WeaponRoll({
+              await rollWeaponDamage({
                 actor,
                 weapon: shuriken,
                 weaponName: shuriken.name,
-                diceRoll: shuriken.system.derivedDamageRoll,
-                diceKeep: shuriken.system.derivedDamageKeep,
+                roll: shuriken.system.derivedDamageRoll,
+                keep: shuriken.system.derivedDamageKeep,
                 askForOptions: false
               })
             );
@@ -630,7 +630,7 @@ export function registerRollPipelineTests(quench) {
             const { actor } = await swordsman();
             const target = track(await createTestNPC({ name: "Roll pipeline: target" }));
             await actor.toggleStatusEffect("mounted", { active: true });
-            const ctx = collectCheck(actor, {
+            const ctx = getCheckContext(actor, {
               kind: "attack",
               skill: "kenjutsu",
               trait: "agi",
@@ -641,7 +641,7 @@ export function registerRollPipelineTests(quench) {
               [1, 0]
             );
             await target.toggleStatusEffect("mounted", { active: true });
-            const mounted = collectCheck(actor, {
+            const mounted = getCheckContext(actor, {
               kind: "attack",
               skill: "kenjutsu",
               trait: "agi",
@@ -664,7 +664,7 @@ export function registerRollPipelineTests(quench) {
               }
             ]);
             const message = keep(
-              await TraitRoll({ actor, traitName: "ref", traitRank: 3, askForOptions: false })
+              await rollTrait({ actor, traitName: "ref", traitRank: 3, askForOptions: false })
             );
             assert.equal(poolOf(message), "4k3");
           })
@@ -689,9 +689,9 @@ export function registerRollPipelineTests(quench) {
             ]);
             const answered = answerCheckDialog({ "modifier.0": false });
             const message = keep(
-              await SkillRoll({
+              await rollSkill({
                 actor,
-                actorTrait: 3,
+                traitRank: 3,
                 skillRank: 2,
                 skillName: "Kenjutsu",
                 skillTrait: "agi"
@@ -712,9 +712,9 @@ export function registerRollPipelineTests(quench) {
             const before = actor._source.system.rings.void.value;
             const answered = answerCheckDialog({ void: true });
             const message = keep(
-              await SkillRoll({
+              await rollSkill({
                 actor,
-                actorTrait: 3,
+                traitRank: 3,
                 skillRank: 2,
                 skillName: "Kenjutsu",
                 skillTrait: "agi"
@@ -734,9 +734,9 @@ export function registerRollPipelineTests(quench) {
             const { actor } = await swordsman();
             const answered = answerCheckDialog({ emphasis: "Katana" });
             const message = keep(
-              await SkillRoll({
+              await rollSkill({
                 actor,
-                actorTrait: 3,
+                traitRank: 3,
                 skillRank: 2,
                 skillName: "Kenjutsu",
                 skillTrait: "agi"
@@ -762,9 +762,9 @@ export function registerRollPipelineTests(quench) {
             ]);
             const answered = answerCheckDialog({ tn: 20, freeRaisesToTN: 1 });
             const message = keep(
-              await SkillRoll({
+              await rollSkill({
                 actor,
-                actorTrait: 3,
+                traitRank: 3,
                 skillRank: 2,
                 skillName: "Kenjutsu",
                 skillTrait: "agi"
@@ -789,9 +789,9 @@ export function registerRollPipelineTests(quench) {
             assert.isAbove(penalty, 0);
             const answered = answerCheckDialog({ tn: 15 });
             const message = keep(
-              await SkillRoll({
+              await rollSkill({
                 actor,
-                actorTrait: 3,
+                traitRank: 3,
                 skillRank: 2,
                 skillName: "Kenjutsu",
                 skillTrait: "agi"
@@ -812,9 +812,9 @@ export function registerRollPipelineTests(quench) {
             const { actor, katana } = await swordsman();
             const answered = answerCheckDialog({ tn: 5, raises: 1 });
             const attack = keep(
-              await SkillRoll({
+              await rollSkill({
                 actor,
-                actorTrait: 3,
+                traitRank: 3,
                 skillRank: 2,
                 skillName: "Kenjutsu",
                 skillTrait: "agi",
@@ -838,16 +838,16 @@ export function registerRollPipelineTests(quench) {
           clean(async () => {
             const { actor } = await swordsman();
             const first = keep(
-              await SkillRoll({
+              await rollSkill({
                 actor,
-                actorTrait: 3,
+                traitRank: 3,
                 skillRank: 2,
                 skillName: "Kenjutsu",
                 skillTrait: "agi",
                 askForOptions: false
               })
             );
-            const second = keep(await rerollKeepBetter(first));
+            const second = keep(await rollAgainKeepBetter(first));
             assert.equal(second.system.rerollOf, first.id);
             assert.isAtLeast(second.system.outcome.total, first.system.outcome.total);
             assert.equal(poolOf(second), poolOf(first));
@@ -861,24 +861,24 @@ export function registerRollPipelineTests(quench) {
             const { actor } = await swordsman();
             const npc = track(await createTestNPC({ name: "Roll pipeline: rival" }));
             const mine = keep(
-              await SimpleRoll({
+              await rollPool({
                 actor,
-                diceRoll: 10,
-                diceKeep: 10,
+                roll: 10,
+                keep: 10,
                 rollName: "Mine",
                 askForOptions: false
               })
             );
             const theirs = keep(
-              await SimpleRoll({
+              await rollPool({
                 actor: npc,
-                diceRoll: 1,
-                diceKeep: 1,
+                roll: 1,
+                keep: 1,
                 rollName: "Theirs",
                 askForOptions: false
               })
             );
-            const card = keep(await contestRolls(mine, theirs));
+            const card = keep(await postContestedRoll(mine, theirs));
             assert.include(card.content, actor.name);
             assert.match(card.content, /wins/);
           })

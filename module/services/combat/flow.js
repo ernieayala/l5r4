@@ -26,7 +26,7 @@ const FLOW_QUERY = `${SYS_ID}.flow`;
  * Registered flows by name.
  * @type {Map<string, Flow>}
  */
-const FLOWS = new Map();
+const flows = new Map();
 
 /**
  * The parts of a check request for a Skill Roll with a Trait or the Void Ring: the pool, the selectors, the
@@ -37,7 +37,7 @@ const FLOWS = new Map();
  * @param {string} trait - Trait key, or "void"
  * @returns {object}
  */
-export function skillRequest(actor, skill, trait) {
+export function buildSkillRequest(actor, skill, trait) {
   const item = actor.items.find(i => i.type === "skill" && i.name.toLowerCase() === skill);
   const rank = toInt(item?.system.rank);
   const value =
@@ -57,8 +57,8 @@ export function skillRequest(actor, skill, trait) {
  * @param {string} name
  * @param {Flow} flow
  */
-export function defineFlow(name, flow) {
-  FLOWS.set(name, flow);
+export function registerFlow(name, flow) {
+  flows.set(name, flow);
 }
 
 /**
@@ -71,7 +71,7 @@ export function defineFlow(name, flow) {
 export async function startFlow(name, state, speaker) {
   return ChatMessage.create({
     speaker: ChatMessage.getSpeaker({ actor: speaker }),
-    content: await FLOWS.get(name).render(state),
+    content: await flows.get(name).render(state),
     flags: { [SYS_ID]: { flow: { name, state } } }
   });
 }
@@ -84,7 +84,7 @@ export async function startFlow(name, state, speaker) {
  */
 export async function requestStep(card, data) {
   if (game.user.isGM) {
-    return runStep({ messageId: card.id, data }, game.user);
+    return applyFlowStep({ messageId: card.id, data }, game.user);
   }
   const gm = game.users.activeGM;
   if (!gm) {
@@ -100,7 +100,7 @@ export async function requestStep(card, data) {
  * @param {Actor|null} actor
  * @returns {boolean}
  */
-export function mayActFor(user, actor) {
+export function canActFor(user, actor) {
   return Boolean(actor) && (user.isGM || actor.testUserPermission(user, "OWNER"));
 }
 
@@ -112,7 +112,7 @@ export function mayActFor(user, actor) {
  */
 export function bindFlowCards(message, html) {
   const flow = message.getFlag(SYS_ID, "flow");
-  const handler = flow ? FLOWS.get(flow.name) : null;
+  const handler = flow ? flows.get(flow.name) : null;
   if (!handler) {
     return;
   }
@@ -129,7 +129,7 @@ export function bindFlowCards(message, html) {
 
 /** Register the GM side of flow steps. */
 export function registerFlowQueries() {
-  CONFIG.queries[FLOW_QUERY] = (request, { user }) => runStep(request, user);
+  CONFIG.queries[FLOW_QUERY] = (request, { user }) => applyFlowStep(request, user);
 }
 
 /**
@@ -138,10 +138,10 @@ export function registerFlowQueries() {
  * @param {User} user - The requesting user
  * @returns {Promise<void>}
  */
-async function runStep({ messageId, data }, user) {
+async function applyFlowStep({ messageId, data }, user) {
   const card = game.messages.get(String(messageId));
   const flow = card?.getFlag(SYS_ID, "flow");
-  const handler = flow ? FLOWS.get(flow.name) : null;
+  const handler = flow ? flows.get(flow.name) : null;
   if (!handler) {
     throw new Error(`Not a flow card: ${messageId}`);
   }

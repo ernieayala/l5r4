@@ -20,7 +20,7 @@ import { CHAT_TEMPLATES } from "../../config/templates.js";
 import { F, T } from "../../utils/localization.js";
 import { toInt } from "../../utils/type-coercion.js";
 import { rollCheck } from "../dice/check/roll-check.js";
-import { defineFlow, mayActFor, skillRequest, startFlow } from "./flow.js";
+import { registerFlow, canActFor, buildSkillRequest, startFlow } from "./flow.js";
 
 /**
  * Assessment margin that wins +1k1 on Focus.
@@ -67,7 +67,7 @@ export function startDuel(first, second) {
  * The GM's "Iaijutsu duel" control: the selected token's actor against the targeted token's actor.
  * @returns {Promise<void>}
  */
-export async function duelFromCanvas() {
+export async function startDuelFromCanvas() {
   const first = canvas.tokens.controlled[0]?.actor;
   const second = [...game.user.targets][0]?.actor;
   if (!first || !second || first === second) {
@@ -84,7 +84,7 @@ export async function duelFromCanvas() {
  * @param {Actor} actor
  * @returns {{focusTotal: number, edge: number}} Flat bonus on Focus; rolled and kept dice the edge gives
  */
-function iaijutsuMastery(actor) {
+function iaijutsuMasteryOf(actor) {
   const skill = actor.items.find(i => i.type === "skill" && i.name.toLowerCase() === "iaijutsu");
   const rank = toInt(skill?.system.rank);
   return { focusTotal: rank >= 5 ? FOCUS_STEP : 0, edge: rank >= 7 ? 2 : 1 };
@@ -102,7 +102,7 @@ function iaijutsuMastery(actor) {
  */
 function rollStage(actor, { stage, opponent, focusBonus = 0, freeRaises = 0 }) {
   const trait = { assessment: "awa", focus: "void", strike: "ref" }[stage];
-  const mastery = iaijutsuMastery(actor);
+  const mastery = iaijutsuMasteryOf(actor);
   const modifiers = [];
   if (focusBonus) {
     modifiers.push({
@@ -115,7 +115,7 @@ function rollStage(actor, { stage, opponent, focusBonus = 0, freeRaises = 0 }) {
     modifiers.push({ label: T("l5r4.ui.combat.duel.focusMastery"), total: mastery.focusTotal });
   }
   const request = {
-    ...skillRequest(actor, "iaijutsu", trait),
+    ...buildSkillRequest(actor, "iaijutsu", trait),
     kind: stage === "strike" ? "attack" : "skill",
     label: `${T(`l5r4.ui.combat.duel.${stage}`)}: ${actor.name}`,
     target: opponent,
@@ -125,7 +125,7 @@ function rollStage(actor, { stage, opponent, focusBonus = 0, freeRaises = 0 }) {
     request.tn = 10 + 5 * opponent.system.insightRank;
   } else if (stage === "strike") {
     request.tn = toInt(opponent.system.armorTn.current);
-    request.weapon = duelWeapon(actor);
+    request.weapon = duelWeaponOf(actor);
     request.prepare = async () => ({ freeRaises });
   }
   return rollCheck(request);
@@ -137,10 +137,11 @@ function rollStage(actor, { stage, opponent, focusBonus = 0, freeRaises = 0 }) {
  * @param {Actor} actor
  * @returns {Item|null}
  */
-function duelWeapon(actor) {
+function duelWeaponOf(actor) {
   const weapons = actor.items.filter(i => i.type === "weapon");
-  const tiedTo = skill => weapons.find(w => w.system.associatedSkill.toLowerCase() === skill);
-  return tiedTo("iaijutsu") ?? tiedTo("kenjutsu") ?? null;
+  const getTiedWeapon = skill =>
+    weapons.find(w => w.system.associatedSkill.toLowerCase() === skill);
+  return getTiedWeapon("iaijutsu") ?? getTiedWeapon("kenjutsu") ?? null;
 }
 
 /**
@@ -149,7 +150,7 @@ function duelWeapon(actor) {
  * @param {number} i
  * @returns {{actor: Actor|null, opponent: Actor|null}}
  */
-function sides(state, i) {
+function sidesOf(state, i) {
   return {
     actor: fromUuidSync(state.duelists[i]),
     opponent: fromUuidSync(state.duelists[1 - i])
@@ -161,7 +162,7 @@ function sides(state, i) {
  * @param {object} state
  * @returns {object}
  */
-function settle(state) {
+function updateStage(state) {
   const totals = state.rolls[state.stage];
   if (totals.length < 2 || totals.some(t => t === null)) {
     return state;
@@ -188,7 +189,7 @@ function settle(state) {
   return state;
 }
 
-defineFlow("duel", {
+registerFlow("duel", {
   /**
    * A button on the duel card: roll this stage for the duelist the user owns, or concede.
    * @param {ChatMessage} _card
@@ -198,7 +199,7 @@ defineFlow("duel", {
    */
   async click(_card, state, dataset) {
     const i = Number(dataset.duelist);
-    const { actor, opponent } = sides(state, i);
+    const { actor, opponent } = sidesOf(state, i);
     if (!actor?.isOwner) {
       ui.notifications?.warn(T("l5r4.ui.notifications.noPermission"));
       return null;
@@ -225,8 +226,8 @@ defineFlow("duel", {
    */
   async step(_card, state, data, user) {
     const i = Number(data.duelist);
-    const { actor } = sides(state, i);
-    if (![0, 1].includes(i) || !mayActFor(user, actor) || state.stage === "done") {
+    const { actor } = sidesOf(state, i);
+    if (![0, 1].includes(i) || !canActFor(user, actor) || state.stage === "done") {
       throw new Error("Not this user's duelist, or the duel is over");
     }
     if (data.action === "concede") {
@@ -243,7 +244,7 @@ defineFlow("duel", {
       success: roll.system.outcome.success,
       raises: roll.system.tn.raises
     };
-    return settle(state);
+    return updateStage(state);
   },
 
   /**
@@ -275,7 +276,7 @@ defineFlow("duel", {
       state.focusBonus.forEach((won, i) => {
         if (won) {
           const actor = fromUuidSync(state.duelists[i]);
-          const edge = actor ? iaijutsuMastery(actor).edge : 1;
+          const edge = actor ? iaijutsuMasteryOf(actor).edge : 1;
           lines.push(
             F("l5r4.ui.combat.duel.edgeWon", { name: duelists[i].name, bonus: `+${edge}k${edge}` })
           );

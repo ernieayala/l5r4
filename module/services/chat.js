@@ -3,18 +3,18 @@
  * @description Chat-side features: the dialog that creates an actor's items, roll card actions, and inline Roll &
  * Keep notation. A `roll` message's damage button and context menu entries come from
  * module/services/dice/check/chat-actions.js; cards posted before 4.0.0 keep their own damage button here. [[XkY]]
- * in a chat message rolls through the same pool code as a check (B9). initializeChatService() registers the hooks
+ * in a chat message rolls through the same pool code as a check (B9). registerChatHooks() registers the hooks
  * from the system init hook.
  */
 
 import { SYS_ID } from "../config/constants.js";
 import { DIALOG_TEMPLATES } from "../config/templates.js";
 import { R, T } from "../utils/localization.js";
-import { buildPool, parseRollAndKeep, poolFormula } from "../utils/check.js";
-import { clamp } from "../utils/type-coercion.js";
+import { buildPool, parseRollAndKeep, getPoolFormula } from "../utils/check.js";
+import { getClamped } from "../utils/type-coercion.js";
 import { validateAttackRaises } from "../utils/validators.js";
-import { addCheckContextOptions, bindCheckCard } from "./dice/check/chat-actions.js";
-import { WeaponRoll } from "./dice/rolls/weapon-roll.js";
+import { onGetChatMessageContextOptions, bindCheckCard } from "./dice/check/chat-actions.js";
+import { rollWeaponDamage } from "./dice/rolls/weapon-roll.js";
 
 const DIALOG = foundry.applications.api.DialogV2;
 
@@ -96,11 +96,11 @@ export async function getUnifiedItemOptions(actorType, preferredType = null) {
  * Register the chat hooks, once during system init: roll card buttons and context menu entries, the damage button
  * of cards posted before 4.0.0, and inline Roll & Keep notation.
  */
-export function initializeChatService() {
+export function registerChatHooks() {
   registerLegacyDamageButtonHook();
   registerInlineRollParsingHook();
   Hooks.on("renderChatMessageHTML", bindCheckCard);
-  Hooks.on("getChatMessageContextOptions", addCheckContextOptions);
+  Hooks.on("getChatMessageContextOptions", onGetChatMessageContextOptions);
 }
 
 /**
@@ -109,12 +109,12 @@ export function initializeChatService() {
  * @param {string} token
  * @returns {string|null} null when the token is not Roll & Keep notation
  */
-export function inlineFormula(token) {
+export function parseInlineFormula(token) {
   const parsed = parseRollAndKeep(token);
   if (!parsed) {
     return null;
   }
-  return poolFormula(
+  return getPoolFormula(
     buildPool({ ...parsed, littleTruths: game.settings.get(SYS_ID, "LtException") })
   );
 }
@@ -156,9 +156,9 @@ function registerLegacyDamageButtonHook() {
             ui.notifications?.warn(T("l5r4.ui.notifications.noPermissionDamage"));
             return;
           }
-          await WeaponRoll({
-            diceRoll: clamp(parseInt(data.damageRoll) || 0, 0, 99),
-            diceKeep: clamp(parseInt(data.damageKeep) || 0, 0, 99),
+          await rollWeaponDamage({
+            roll: getClamped(parseInt(data.damageRoll) || 0, 0, 99),
+            keep: getClamped(parseInt(data.damageKeep) || 0, 0, 99),
             weaponName: data.weaponName,
             weapon: actor.items.get(data.weaponId) ?? null,
             askForOptions: !event.shiftKey,
@@ -189,7 +189,7 @@ function registerInlineRollParsingHook() {
     }
 
     const whole = /^\[\[(.*)\]\]$/.exec(message);
-    const wholeFormula = whole ? inlineFormula(whole[1]) : null;
+    const wholeFormula = whole ? parseInlineFormula(whole[1]) : null;
     if (wholeFormula) {
       chatlog.processMessage(`/roll ${wholeFormula}`);
       return false;
@@ -197,7 +197,7 @@ function registerInlineRollParsingHook() {
 
     let changed = false;
     const text = message.replace(/\[\[(.*?)\]\]/g, (match, token) => {
-      const formula = inlineFormula(token);
+      const formula = parseInlineFormula(token);
       if (!formula) {
         return match;
       }

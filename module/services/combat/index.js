@@ -10,11 +10,11 @@ import { bindDamageCards, registerDamageQueries } from "./damage.js";
 import { bindFlowCards, registerFlowQueries } from "./flow.js";
 import { rollContest } from "./contest.js";
 import { startGrapple } from "./grapple.js";
-import { duelFromCanvas } from "./duel.js";
+import { startDuelFromCanvas } from "./duel.js";
 import { guardFromCanvas } from "./guard.js";
 
 /** Register the combat loop's hooks and GM queries, once during system init. */
-export function initializeCombat() {
+export function registerCombat() {
   registerDamageQueries();
   registerFlowQueries();
   Hooks.on("renderChatMessageHTML", bindAttackCard);
@@ -58,7 +58,7 @@ function onGetSceneControlButtons(controls) {
     icon: "fa-solid fa-khanda",
     visible: game.user.isGM,
     button: true,
-    onChange: () => duelFromCanvas()
+    onChange: () => startDuelFromCanvas()
   };
   tools[`${SYS_ID}-guard`] = {
     name: `${SYS_ID}-guard`,

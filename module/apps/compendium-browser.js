@@ -3,20 +3,20 @@
  * @description The compendium browser (roadmap/STAGE-15): one window over every system pack and world compendium
  * the user can see, in tabs by kind of entry, with filters. A row shows the entry's name, key numbers, and the book
  * page it cites. A row drags onto a sheet; Add puts the item on the user's character or the controlled token's actor
- * through the same path a drop takes (module/services/purchase.js, addItem); the GM imports a creature with Import.
+ * through the same path a drop takes (module/services/purchase.js, createPurchasedItem); the GM imports a creature with Import.
  */
 import { BROWSER_FILTERS, BROWSER_TABS } from "../config/browser.js";
 import { SYS_ID } from "../config/constants.js";
 import {
-  browserIndexFields,
-  entryNumbers,
-  filterEntries,
-  filterOptions
+  getBrowserIndexFields,
+  getEntryNumbers,
+  getFilteredEntries,
+  getFilterOptions
 } from "../utils/browser-filter.js";
-import { phraseText, T } from "../utils/localization.js";
-import { sourceCitation } from "../utils/rule-summary.js";
-import { addItem } from "../services/purchase.js";
-import { resolveActor } from "../services/dice/resources/void-points.js";
+import { formatPhrase, T } from "../utils/localization.js";
+import { buildSourceCitation } from "../utils/rule-summary.js";
+import { createPurchasedItem } from "../services/purchase.js";
+import { getRollActor } from "../services/dice/resources/void-points.js";
 
 const { ApplicationV2, HandlebarsApplicationMixin } = foundry.applications.api;
 
@@ -81,10 +81,10 @@ export default class CompendiumBrowser extends HandlebarsApplicationMixin(Applic
   async _prepareContext(options) {
     const context = await super._prepareContext(options);
     const tab = this.currentTab;
-    const entries = (await this.#load(tab.documentName)).filter(entry =>
+    const entries = (await this.#getEntries(tab.documentName)).filter(entry =>
       tab.types.includes(entry.type)
     );
-    const shown = filterEntries(entries, tab, { search: this.search, choices: this.choices });
+    const shown = getFilteredEntries(entries, tab, { search: this.search, choices: this.choices });
     return Object.assign(context, {
       tabs: BROWSER_TABS.map(t => ({
         id: t.id,
@@ -101,21 +101,21 @@ export default class CompendiumBrowser extends HandlebarsApplicationMixin(Applic
           value: this.choices[id] ?? "",
           options:
             filter.kind === "select"
-              ? filterOptions(entries, id).map(value => ({
+              ? getFilterOptions(entries, id).map(value => ({
                   value,
-                  label: optionLabel(filter, value)
+                  label: getOptionLabel(filter, value)
                 }))
               : null
         };
       }),
       rows: shown.map(entry => {
-        const numbers = entryNumbers(entry);
-        const citation = sourceCitation(entry.system.source);
+        const numbers = getEntryNumbers(entry);
+        const citation = buildSourceCitation(entry.system.source);
         return {
           ...entry,
           typeLabel: T(`TYPES.${tab.documentName}.${entry.type}`),
-          numbers: numbers ? phraseText(numbers) : "",
-          citation: citation ? phraseText(citation) : ""
+          numbers: numbers ? formatPhrase(numbers) : "",
+          citation: citation ? formatPhrase(citation) : ""
         };
       }),
       count: shown.length,
@@ -207,14 +207,14 @@ export default class CompendiumBrowser extends HandlebarsApplicationMixin(Applic
    * @param {HTMLElement} element
    */
   static async #onAddEntry(_event, element) {
-    const actor = resolveActor();
+    const actor = getRollActor();
     if (!actor) {
       ui.notifications?.warn(T("l5r4.apps.compendiumBrowser.noActor"));
       return;
     }
     const item = await fromUuid(element.closest("[data-uuid]").dataset.uuid);
     if (item) {
-      await addItem(actor, item.toObject());
+      await createPurchasedItem(actor, item.toObject());
     }
   }
 
@@ -249,9 +249,9 @@ export default class CompendiumBrowser extends HandlebarsApplicationMixin(Applic
    * @param {"Item"|"Actor"} documentName
    * @returns {Promise<object[]>}
    */
-  async #load(documentName) {
+  async #getEntries(documentName) {
     if (!this.#entries[documentName]) {
-      const fields = browserIndexFields(documentName);
+      const fields = getBrowserIndexFields(documentName);
       const rows = [];
       for (const pack of game.packs.filter(p => p.documentName === documentName && p.visible)) {
         const index = await pack.getIndex({ fields });
@@ -276,13 +276,13 @@ export default class CompendiumBrowser extends HandlebarsApplicationMixin(Applic
 }
 
 /** Register the browser's button and its index fields, once during init. */
-export function initializeCompendiumBrowser() {
+export function registerCompendiumBrowser() {
   for (const documentName of ["Item", "Actor"]) {
     const config = CONFIG[documentName];
     // Core starts each list empty [src: client/config.mjs:151, :479], and a pack index reads it
     // [src: client/documents/collections/compendium-collection.mjs:263]
     config.compendiumIndexFields = [
-      ...new Set([...config.compendiumIndexFields, ...browserIndexFields(documentName)])
+      ...new Set([...config.compendiumIndexFields, ...getBrowserIndexFields(documentName)])
     ];
   }
   Hooks.on("renderCompendiumDirectory", onRenderCompendiumDirectory);
@@ -294,7 +294,7 @@ export function initializeCompendiumBrowser() {
  * @param {string} value
  * @returns {string}
  */
-function optionLabel(filter, value) {
+function getOptionLabel(filter, value) {
   if (filter.labels?.[value]) {
     return T(filter.labels[value]);
   }

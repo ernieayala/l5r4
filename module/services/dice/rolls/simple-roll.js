@@ -7,21 +7,21 @@
 
 import { T } from "../../../utils/localization.js";
 import { toInt } from "../../../utils/type-coercion.js";
-import { normalizeTraitKey } from "../../../utils/mechanics.js";
+import { toTraitKey } from "../../../utils/mechanics.js";
 import { rollCheck } from "../check/roll-check.js";
-import { resolveActor } from "../resources/void-points.js";
+import { getRollActor } from "../resources/void-points.js";
 
 /**
  * Executes a roll from a known pool.
  *
- * Pool source, in order: diceRoll/diceKeep when both are given, else traitRank (a Trait Roll), else ringRank (a
- * Ring Roll). With `untrained` the roll is an Unskilled Roll.
+ * Pool source, in order: roll/keep when both are given, else traitRank (a Trait Roll), else ringRank (a
+ * Ring Roll). With `unskilled` the roll is an Unskilled Roll.
  * game-rules/30_skill_rolls_expanded.md, p.80
  *
  * @param {object} params
  * @param {string|null} [params.rollName=null] - Name for a plain roll's label
- * @param {number|null} [params.diceRoll=null] - Rolled dice
- * @param {number|null} [params.diceKeep=null] - Kept dice
+ * @param {number|null} [params.roll=null] - Rolled dice
+ * @param {number|null} [params.keep=null] - Kept dice
  * @param {string|null} [params.traitName=null] - Trait of a Trait Roll
  * @param {number|null} [params.traitRank=null] - Its rank
  * @param {string|null} [params.ringName=null] - Ring of a Ring Roll
@@ -29,7 +29,7 @@ import { resolveActor } from "../resources/void-points.js";
  * @param {number} [params.modifier=0] - Flat bonus from the stat block, listed as a modifier
  * @param {string|null} [params.rollType=null] - "attack", "damage", or null
  * @param {L5R4Actor|null} [params.actor=null] - The roller
- * @param {boolean} [params.untrained=false] - An Unskilled Roll
+ * @param {boolean} [params.unskilled=false] - An Unskilled Roll
  * @param {string|null} [params.weaponId=null] - The attacking weapon's item id
  * @param {boolean} [params.isBow=false] - The attack starts as ranged
  * @param {string|null} [params.skillName=null] - Skill the attack would use, for armor penalties and rules
@@ -39,10 +39,10 @@ import { resolveActor } from "../resources/void-points.js";
  *   damage pool when no weapon gives one (a stat block's damage)
  * @returns {Promise<ChatMessage|null>} The posted message, or null when cancelled
  */
-export async function SimpleRoll({
+export async function rollPool({
   rollName = null,
-  diceRoll = null,
-  diceKeep = null,
+  roll = null,
+  keep = null,
   traitName = null,
   traitRank = null,
   ringName = null,
@@ -50,7 +50,7 @@ export async function SimpleRoll({
   modifier = 0,
   rollType = null,
   actor = null,
-  untrained = false,
+  unskilled = false,
   weaponId = null,
   isBow = false,
   skillName = null,
@@ -58,15 +58,15 @@ export async function SimpleRoll({
   askForOptions = true,
   damage = null
 } = {}) {
-  const roller = resolveActor(actor);
-  const traitKey = traitName ? normalizeTraitKey(traitName) : null;
+  const roller = getRollActor(actor);
+  const traitKey = traitName ? toTraitKey(traitName) : null;
   const ringKey = ringName ? String(ringName).toLowerCase() : null;
 
   let base;
   let label;
   let kind = rollType === "attack" || rollType === "damage" ? rollType : "roll";
-  if (diceRoll !== null && diceKeep !== null) {
-    base = { roll: toInt(diceRoll), keep: toInt(diceKeep) };
+  if (roll !== null && keep !== null) {
+    base = { roll: toInt(roll), keep: toInt(keep) };
     label = `${T("l5r4.ui.common.roll")}: ${String(rollName ?? "")}`;
   } else if (traitKey) {
     base = { roll: toInt(traitRank), keep: toInt(traitRank) };
@@ -87,7 +87,7 @@ export async function SimpleRoll({
     skill: skillName ? String(skillName).toLowerCase() : undefined,
     trait: skillTrait ?? traitKey ?? undefined,
     ring: kind === "ring" ? ringKey : undefined,
-    unskilled: Boolean(untrained),
+    unskilled: Boolean(unskilled),
     weapon,
     explode: kind === "damage" && weapon ? weapon.system.damageExplode : 10,
     ranged: Boolean(isBow),

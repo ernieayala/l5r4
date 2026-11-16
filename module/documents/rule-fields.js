@@ -20,14 +20,14 @@ import { createRule, RULE_MODELS } from "../data/rules/rule-models.js";
 
 /**
  * The editor's view of one stored rule: its fields, and the validation error that keeps the engine from using it.
- * The error comes from the rule as the engine reads it, its choices made (`answered`, from `answeredRules`), so a
+ * The error comes from the rule as the engine reads it, its choices made (`answered`, from `getAnsweredRules`), so a
  * `{choice:...}` in a field with fixed values is no error. Such a field's select keeps the placeholder as an option,
  * so saving the form leaves it in place.
  * @param {object} source - An entry of `system.rules`, stored user JSON
  * @param {object} [answered=source] - The same rule with its item's choices made
  * @returns {{key: string, error: string|null, fields: RuleFieldView[]}}
  */
-export function describeRule(source, answered = source) {
+export function buildRuleView(source, answered = source) {
   const Model = RULE_MODELS[source?.key];
   if (!Model) {
     return {
@@ -52,7 +52,7 @@ export function describeRule(source, answered = source) {
       return {
         name,
         kind,
-        value: shown(kind, value),
+        value: formatFieldValue(kind, value),
         choices: kind === "select" ? { ...placeholder, ...choicesOf(field) } : null,
         nullable: Boolean(field.nullable)
       };
@@ -68,7 +68,7 @@ export function describeRule(source, answered = source) {
  * @param {string} key - A key of RULE_MODELS
  * @returns {object}
  */
-export function newRule(key) {
+export function buildNewRule(key) {
   const { fields } = RULE_MODELS[key].schema;
   const rule = { key };
   for (const [name, field] of Object.entries(fields)) {
@@ -92,7 +92,7 @@ export function newRule(key) {
  * @param {Record<string, *>} values - Submitted fields by name
  * @returns {object}
  */
-export function ruleFromForm(source, values) {
+export function parseRuleForm(source, values) {
   const Model = RULE_MODELS[source?.key];
   if (!Model) {
     return source;
@@ -100,7 +100,7 @@ export function ruleFromForm(source, values) {
   const rule = { ...source };
   for (const [name, field] of Object.entries(Model.schema.fields)) {
     if (name !== "key" && name in values) {
-      rule[name] = parsed(field, name, values[name]);
+      rule[name] = parseFieldValue(field, name, values[name]);
     }
   }
   return rule;
@@ -146,7 +146,7 @@ function choicesOf(field) {
  * @param {*} value
  * @returns {*}
  */
-function shown(kind, value) {
+function formatFieldValue(kind, value) {
   switch (kind) {
     case "boolean":
       return Boolean(value);
@@ -167,7 +167,7 @@ function shown(kind, value) {
  * @param {*} raw
  * @returns {*}
  */
-function parsed(field, name, raw) {
+function parseFieldValue(field, name, raw) {
   const kind = kindOf(field);
   const text = raw === null || raw === undefined ? "" : String(raw).trim();
   switch (kind) {

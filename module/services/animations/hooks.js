@@ -7,9 +7,9 @@
  */
 
 import { STANCE_IDS } from "../../utils/stances.js";
-import { playAnimation, removeAnimation, removeAllAnimations } from "./animation-manager.js";
+import { startAnimation, deleteAnimation, deleteAllAnimations } from "./animation-manager.js";
 import { getConditionAnimation, getStanceAnimation } from "./asset-library.js";
-import { handleAttackRoll } from "./attack-animations.js";
+import { startAttackAnimation } from "./attack-animations.js";
 
 /**
  * Hook handler for ActiveEffect create event.
@@ -26,14 +26,14 @@ export function onCreateActiveEffectAnimation(effect, _options, userId) {
   const actor = effect?.parent;
 
   // Early return: Only handle Actor effects
-  if (!actor || actor.documentName !== "Actor" || !playsHere(userId)) {
+  if (!actor || actor.documentName !== "Actor" || !isOwnChange(userId)) {
     return;
   }
 
   // Defer animation to ensure effect is fully applied
   queueMicrotask(async () => {
-    for (const { statusId, isStance } of animatedStatuses(effect)) {
-      await playAnimation(actor, statusId, isStance);
+    for (const { statusId, isStance } of animatedStatusesOf(effect)) {
+      await startAnimation(actor, statusId, isStance);
     }
   });
 }
@@ -60,19 +60,19 @@ export function onUpdateActiveEffectAnimation(effect, changes, _options, userId)
   const actor = effect?.parent;
 
   // Early return: Only handle Actor effects
-  if (!actor || actor.documentName !== "Actor" || !playsHere(userId)) {
+  if (!actor || actor.documentName !== "Actor" || !isOwnChange(userId)) {
     return;
   }
 
   // Defer animation to ensure effect state is updated
   queueMicrotask(async () => {
-    for (const { statusId, isStance } of animatedStatuses(effect)) {
+    for (const { statusId, isStance } of animatedStatusesOf(effect)) {
       if (changes.disabled === true) {
         // Effect disabled: Remove animation
-        await removeAnimation(actor, statusId);
+        await deleteAnimation(actor, statusId);
       } else if (changes.disabled === false) {
         // Effect enabled: Play animation
-        await playAnimation(actor, statusId, isStance);
+        await startAnimation(actor, statusId, isStance);
       }
     }
   });
@@ -92,14 +92,14 @@ export function onDeleteActiveEffectAnimation(effect, _options, userId) {
   const actor = effect?.parent;
 
   // Early return: Only handle Actor effects
-  if (!actor || actor.documentName !== "Actor" || !playsHere(userId)) {
+  if (!actor || actor.documentName !== "Actor" || !isOwnChange(userId)) {
     return;
   }
 
   // Defer animation cleanup
   queueMicrotask(async () => {
-    for (const { statusId } of animatedStatuses(effect)) {
-      await removeAnimation(actor, statusId);
+    for (const { statusId } of animatedStatusesOf(effect)) {
+      await deleteAnimation(actor, statusId);
     }
   });
 }
@@ -116,12 +116,12 @@ export function onDeleteActiveEffectAnimation(effect, _options, userId) {
  * @returns {void}
  */
 export function onDeleteActorAnimation(actor, _options, userId) {
-  if (!playsHere(userId)) {
+  if (!isOwnChange(userId)) {
     return;
   }
   // Defer animation cleanup
   queueMicrotask(async () => {
-    await removeAllAnimations(actor);
+    await deleteAllAnimations(actor);
   });
 }
 
@@ -137,7 +137,7 @@ export function onDeleteActorAnimation(actor, _options, userId) {
  * @returns {void}
  */
 export function onCreateChatMessageAnimation(message, _options, userId) {
-  if (message.type !== "roll" || !playsHere(userId)) {
+  if (message.type !== "roll" || !isOwnChange(userId)) {
     return;
   }
   const { kind, outcome, actorUuid, weaponUuid, target } = message.system;
@@ -152,7 +152,7 @@ export function onCreateChatMessageAnimation(message, _options, userId) {
     if (!actor || !weapon || !targetActor) {
       return;
     }
-    await handleAttackRoll(actor, targetActor, weapon);
+    await startAttackAnimation(actor, targetActor, weapon);
   });
 }
 
@@ -179,7 +179,7 @@ export function registerAnimationHooks() {
  * @param {ActiveEffect} effect
  * @returns {Array<{statusId: string, isStance: boolean}>}
  */
-function animatedStatuses(effect) {
+function animatedStatusesOf(effect) {
   return [...effect.statuses]
     .filter(statusId => getStanceAnimation(statusId) || getConditionAnimation(statusId))
     .map(statusId => ({ statusId, isStance: STANCE_IDS.has(statusId) }));
@@ -193,6 +193,6 @@ function animatedStatuses(effect) {
  * @param {string} userId - The user who made the change
  * @returns {boolean}
  */
-function playsHere(userId) {
+function isOwnChange(userId) {
   return userId === game.user.id;
 }

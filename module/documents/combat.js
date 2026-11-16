@@ -28,7 +28,7 @@ export default class L5R4Combat extends foundry.documents.Combat {
    * the entry module sets this at init to the initiative service's Void Point prompt.
    * @type {(combatants: foundry.documents.Combatant[]) => Promise<Map<string, number>>}
    */
-  static resolveInitiativeBonuses = async () => new Map();
+  static askInitiativeBonuses = async () => new Map();
 
   /**
    * The effect services' handlers for combat events, set by the entry module at init (documents do not import
@@ -39,7 +39,7 @@ export default class L5R4Combat extends foundry.documents.Combat {
    *   beforeNextRound: (combat: L5R4Combat) => Promise<void>
    * }}
    */
-  static events = {
+  static EVENTS = {
     turn: async () => {},
     round: async () => {},
     beforeNextRound: async () => {}
@@ -53,7 +53,7 @@ export default class L5R4Combat extends foundry.documents.Combat {
   async rollInitiative(ids, options = {}) {
     ids = typeof ids === "string" ? [ids] : ids;
     const combatants = ids.map(id => this.combatants.get(id)).filter(c => c?.isOwner);
-    const bonuses = await this.constructor.resolveInitiativeBonuses(combatants);
+    const bonuses = await this.constructor.askInitiativeBonuses(combatants);
     const plain = ids.filter(id => !bonuses.has(id));
     if (plain.length) {
       await super.rollInitiative(plain, options);
@@ -71,7 +71,7 @@ export default class L5R4Combat extends foundry.documents.Combat {
    */
   async nextRound() {
     if (this.started) {
-      await this.constructor.events.beforeNextRound(this);
+      await this.constructor.EVENTS.beforeNextRound(this);
     }
     return super.nextRound();
   }
@@ -79,19 +79,19 @@ export default class L5R4Combat extends foundry.documents.Combat {
   /** @override */
   async _onStartTurn(combatant, context) {
     await super._onStartTurn(combatant, context);
-    await this.constructor.events.turn("turnStart", this, combatant);
+    await this.constructor.EVENTS.turn("turnStart", this, combatant);
   }
 
   /** @override */
   async _onEndTurn(combatant, context) {
     await super._onEndTurn(combatant, context);
-    await this.constructor.events.turn("turnEnd", this, combatant);
+    await this.constructor.EVENTS.turn("turnEnd", this, combatant);
   }
 
   /** @override */
   async _onEndRound(context) {
     await super._onEndRound(context);
-    await this.constructor.events.round("roundEnd", this);
+    await this.constructor.EVENTS.round("roundEnd", this);
   }
 
   /**

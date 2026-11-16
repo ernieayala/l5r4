@@ -11,12 +11,12 @@ import { SYS_ID } from "../../config/constants.js";
 import { TRAIT_KEYS } from "../../config/reference-data.js";
 import { RING_LABELS } from "../../config/localization.js";
 import { T } from "../../utils/localization.js";
-import { toggleActivation } from "../../services/effects/activation.js";
+import { updateActivation } from "../../services/effects/activation.js";
 import { RollHandler } from "../handlers/roll-handler.js";
 import { PcRollHandler } from "../handlers/pc-roll-handler.js";
 
 /** Item types a macro rolls. */
-const MACRO_ITEM_TYPES = new Set(["skill", "weapon", "bow", "spell", "kata", "kiho"]);
+const macroItemTypes = new Set(["skill", "weapon", "bow", "spell", "kata", "kiho"]);
 
 /** Ring keys a macro rolls. */
 const RING_KEYS = Object.keys(RING_LABELS);
@@ -33,7 +33,7 @@ export const TRAIT_DRAG_TYPE = `${SYS_ID}.trait`;
 export async function rollItem(uuid) {
   const item = await fromUuid(String(uuid));
   const actor = item?.actor;
-  if (!actor || !MACRO_ITEM_TYPES.has(item.type)) {
+  if (!actor || !macroItemTypes.has(item.type)) {
     ui.notifications?.warn(T("l5r4.ui.macros.missing"));
     return null;
   }
@@ -45,10 +45,10 @@ export async function rollItem(uuid) {
     case "skill":
       return RollHandler.rollSkill(actor, item, true);
     case "spell":
-      return PcRollHandler.castSpell(actor, item, true);
+      return PcRollHandler.rollSpellCast(actor, item, true);
     case "kata":
     case "kiho":
-      return toggleActivation(actor, item);
+      return updateActivation(actor, item);
     default:
       return RollHandler.rollWeaponAttack(actor, item, true);
   }
@@ -81,8 +81,8 @@ export async function rollTrait(actorUuid, key) {
  * @param {number|string} slot
  * @returns {Promise<Macro|null>}
  */
-export async function assignMacro(data, slot) {
-  const spec = await macroFor(data);
+export async function createHotbarMacro(data, slot) {
+  const spec = await buildMacroData(data);
   if (!spec) {
     return null;
   }
@@ -111,10 +111,10 @@ export async function assignMacro(data, slot) {
  * @returns {boolean|void}
  */
 export function onHotbarDrop(_hotbar, data, slot) {
-  if (!handles(data)) {
+  if (!isMacroDrop(data)) {
     return undefined;
   }
-  assignMacro(data, slot);
+  createHotbarMacro(data, slot);
   return false;
 }
 
@@ -128,10 +128,10 @@ export function registerMacroApi() {
  * @param {object} data - Drag data: user input
  * @returns {Promise<{key: string, name: string, img: string, command: string}|null>}
  */
-async function macroFor(data) {
+async function buildMacroData(data) {
   if (data?.type === "Item" && typeof data.uuid === "string") {
     const item = await fromUuid(data.uuid);
-    if (!item?.actor || !MACRO_ITEM_TYPES.has(item.type)) {
+    if (!item?.actor || !macroItemTypes.has(item.type)) {
       return null;
     }
     return {
@@ -165,7 +165,7 @@ async function macroFor(data) {
  * @param {object} data
  * @returns {boolean}
  */
-function handles(data) {
+function isMacroDrop(data) {
   if (data?.type === TRAIT_DRAG_TYPE) {
     return true;
   }
@@ -173,5 +173,5 @@ function handles(data) {
     return false;
   }
   const item = fromUuidSync(data.uuid, { strict: false });
-  return Boolean(item?.actor && MACRO_ITEM_TYPES.has(item.type));
+  return Boolean(item?.actor && macroItemTypes.has(item.type));
 }

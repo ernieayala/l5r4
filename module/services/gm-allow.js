@@ -12,7 +12,7 @@
  * @param {string} spec.ask - The GM's question, already localized
  * @returns {Promise<boolean>} Whether the roll goes ahead
  */
-export async function gmMayAllow({ title, reason, ask }) {
+export async function askGmAllow({ title, reason, ask }) {
   if (!game.user.isGM) {
     ui.notifications?.warn(reason);
     return false;

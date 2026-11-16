@@ -25,7 +25,7 @@ export async function startNewSession() {
 }
 
 /** Register the session control, once during system init. */
-export function initializeSessions() {
+export function registerSessions() {
   Hooks.on("getSceneControlButtons", onGetSceneControlButtons);
 }
 

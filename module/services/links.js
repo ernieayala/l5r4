@@ -13,11 +13,11 @@
  */
 
 import { F, T } from "../utils/localization.js";
-import { getEffectiveTrait, ringRank } from "../utils/mechanics.js";
+import { getEffectiveTrait, ringRankOf } from "../utils/mechanics.js";
 import { rollCheck } from "./dice/check/roll-check.js";
-import { resolveActor } from "./dice/resources/void-points.js";
-import { skillLabel } from "./dice/rolls/skill-roll.js";
-import { skillRequest } from "./combat/flow.js";
+import { getRollActor } from "./dice/resources/void-points.js";
+import { formatSkillLabel } from "./dice/rolls/skill-roll.js";
+import { buildSkillRequest } from "./combat/flow.js";
 import { applyEffectAnywhere } from "./effects/apply.js";
 import { testFearRank } from "./fear.js";
 
@@ -26,17 +26,17 @@ import { testFearRank } from "./fear.js";
  * @param {import("../utils/link-syntax.js").LinkSpec} spec - A link that parsed
  * @returns {string}
  */
-export function linkText(spec) {
+export function formatLinkText(spec) {
   if (spec.label) {
     return spec.label;
   }
   if (spec.type === "Check") {
     const what = spec.skill
-      ? [skillLabel(spec.skill), spec.trait ? traitName(spec.trait) : ""]
+      ? [formatSkillLabel(spec.skill), spec.trait ? formatTraitName(spec.trait) : ""]
           .filter(Boolean)
           .join(" / ")
       : spec.trait
-        ? traitName(spec.trait)
+        ? formatTraitName(spec.trait)
         : T(`l5r4.ui.mechanics.rings.${spec.ring}`);
     return spec.tn ? F("l5r4.ui.links.checkTn", { what, tn: spec.tn }) : what;
   }
@@ -58,8 +58,8 @@ export function linkText(spec) {
  * @param {{skill: string, trait: string, ring: string, tn: number|null, label?: string}} spec
  * @returns {object|null}
  */
-export function checkRequestFor(actor, spec) {
-  const label = linkText({ ...spec, type: "Check" });
+export function checkRequestOf(actor, spec) {
+  const label = formatLinkText({ ...spec, type: "Check" });
   const common = { label, askForOptions: true, ...(spec.tn ? { tn: spec.tn } : {}) };
   if (spec.skill) {
     const key = spec.skill.toLowerCase().trim();
@@ -69,13 +69,13 @@ export function checkRequestFor(actor, spec) {
       ui.notifications?.warn(F("l5r4.ui.links.needTrait", { skill: spec.skill, name: actor.name }));
       return null;
     }
-    return { ...skillRequest(actor, key, trait), kind: "skill", ...common };
+    return { ...buildSkillRequest(actor, key, trait), kind: "skill", ...common };
   }
   if (spec.trait) {
     const rank = getEffectiveTrait(actor, spec.trait);
     return { actor, kind: "trait", trait: spec.trait, base: { roll: rank, keep: rank }, ...common };
   }
-  const rank = ringRank(actor, spec.ring);
+  const rank = ringRankOf(actor, spec.ring);
   return { actor, kind: "ring", ring: spec.ring, base: { roll: rank, keep: rank }, ...common };
 }
 
@@ -84,9 +84,9 @@ export function checkRequestFor(actor, spec) {
  * @param {import("../utils/link-syntax.js").LinkSpec} spec
  * @returns {Promise<unknown>}
  */
-export async function runLink(spec) {
+export async function onLinkClick(spec) {
   if (spec.type === "Check" || spec.type === "Damage") {
-    const actor = resolveActor();
+    const actor = getRollActor();
     if (!actor) {
       ui.notifications?.warn(T("l5r4.ui.links.noActor"));
       return null;
@@ -95,15 +95,15 @@ export async function runLink(spec) {
       return rollCheck({
         actor,
         kind: "damage",
-        label: linkText(spec),
+        label: formatLinkText(spec),
         base: spec.pool,
         askForOptions: true
       });
     }
-    const request = checkRequestFor(actor, spec);
+    const request = checkRequestOf(actor, spec);
     return request ? rollCheck(request) : null;
   }
-  const actors = linkTargets();
+  const actors = getLinkTargets();
   if (!actors.length) {
     ui.notifications?.warn(T("l5r4.ui.links.noTargets"));
     return null;
@@ -123,7 +123,7 @@ export async function runLink(spec) {
  * @param {string} trait
  * @returns {string}
  */
-function traitName(trait) {
+function formatTraitName(trait) {
   return T(trait === "void" ? "l5r4.ui.mechanics.rings.void" : `l5r4.ui.mechanics.traits.${trait}`);
 }
 
@@ -131,7 +131,7 @@ function traitName(trait) {
  * The actors a Condition or Fear link acts on: the targeted tokens', else the controlled tokens'.
  * @returns {Actor[]}
  */
-function linkTargets() {
+function getLinkTargets() {
   const targeted = [...game.user.targets].map(token => token.actor);
   const tokens = targeted.length ? targeted : canvas.tokens.controlled.map(token => token.actor);
   return [...new Set(tokens.filter(Boolean))];

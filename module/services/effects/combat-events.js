@@ -15,7 +15,7 @@
 import { SYS_ID } from "../../config/constants.js";
 import { F } from "../../utils/localization.js";
 import { applyEffect, effectsOf } from "./apply.js";
-import { promptFullDefense, promptSaves } from "./prompts.js";
+import { postFullDefensePrompt, postSavePrompts } from "./prompts.js";
 
 /**
  * Initiative added for the Round after Center Stance.
@@ -27,9 +27,9 @@ const CENTER_INITIATIVE = 10;
 const CENTER_QUERY = `${SYS_ID}.settleCenter`;
 
 /**
- * The handlers L5R4Combat calls; the entry module sets `L5R4Combat.events` to this.
+ * The handlers L5R4Combat calls; the entry module sets `L5R4Combat.EVENTS` to this.
  */
-export const combatEvents = {
+export const COMBAT_EVENTS = Object.freeze({
   /**
    * A combatant's Turn starts or ends.
    * @param {string} event - "turnStart" or "turnEnd"
@@ -41,12 +41,12 @@ export const combatEvents = {
     if (!actor) {
       return;
     }
-    await promptSaves(actor, event);
+    await postSavePrompts(actor, event);
     if (event !== "turnStart") {
       return;
     }
     if (actor.statuses.has("fullDefenseStance")) {
-      await promptFullDefense(actor);
+      await postFullDefensePrompt(actor);
     }
     for (const effect of effectsOf(actor, "concentration")) {
       await ChatMessage.create({
@@ -63,7 +63,7 @@ export const combatEvents = {
    */
   async round(event, combat) {
     for (const actor of new Set(combat.combatants.map(c => c.actor).filter(Boolean))) {
-      await promptSaves(actor, event);
+      await postSavePrompts(actor, event);
     }
   },
 
@@ -73,12 +73,12 @@ export const combatEvents = {
    */
   async beforeNextRound(combat) {
     if (game.user.isGM) {
-      await settleCenter(combat);
+      await applyCenterStance(combat);
     } else {
       await game.users.activeGM?.query(CENTER_QUERY, { combatId: combat.id });
     }
   }
-};
+});
 
 /** Register the GM side of beforeNextRound for players who end the Round. */
 export function registerCombatQueries() {
@@ -87,7 +87,7 @@ export function registerCombatQueries() {
     if (!combat?.started) {
       throw new Error(`No started combat ${combatId}`);
     }
-    await settleCenter(combat);
+    await applyCenterStance(combat);
   };
 }
 
@@ -98,7 +98,7 @@ export function registerCombatQueries() {
  * @param {Combat} combat
  * @returns {Promise<void>}
  */
-async function settleCenter(combat) {
+async function applyCenterStance(combat) {
   const updates = [];
   for (const combatant of combat.combatants) {
     const actor = combatant.actor;

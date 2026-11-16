@@ -35,7 +35,7 @@ export function rollDataKey(name) {
  * @returns {number}
  * @throws {Error} When the formula does not parse.
  */
-export function resolveValue(value, rollData) {
+export function getRuleValue(value, rollData) {
   if (typeof value === "number") {
     return value;
   }
@@ -43,7 +43,7 @@ export function resolveValue(value, rollData) {
   if (!text) {
     return 0;
   }
-  return evaluate(text, rollData ?? {});
+  return getFormulaValue(text, rollData ?? {});
 }
 
 /**
@@ -61,7 +61,7 @@ function getPath(data, path) {
  * @param {string} formula
  * @returns {string[]}
  */
-function tokenize(formula) {
+function parseTokens(formula) {
   const tokens = formula.match(/\d+(?:\.\d+)?|@[\p{L}\p{N}_.]+|[A-Za-z_]\w*|[-+*/(),]/gu) ?? [];
   if (tokens.join("") !== formula.replace(/\s+/g, "")) {
     throw new Error(`Unexpected character in "${formula}"`);
@@ -75,45 +75,45 @@ function tokenize(formula) {
  * @param {object} rollData
  * @returns {number}
  */
-function evaluate(formula, rollData) {
-  const tokens = tokenize(formula);
+function getFormulaValue(formula, rollData) {
+  const tokens = parseTokens(formula);
   let i = 0;
-  const peek = () => tokens[i];
-  const next = () => tokens[i++];
-  const expect = token => {
-    if (next() !== token) {
+  const getCurrentToken = () => tokens[i];
+  const parseToken = () => tokens[i++];
+  const parseExpected = token => {
+    if (parseToken() !== token) {
       throw new Error(`Expected "${token}" in "${formula}"`);
     }
   };
 
-  const expression = () => {
-    let value = term();
-    while (peek() === "+" || peek() === "-") {
-      value = next() === "+" ? value + term() : value - term();
+  const parseExpression = () => {
+    let value = parseTerm();
+    while (getCurrentToken() === "+" || getCurrentToken() === "-") {
+      value = parseToken() === "+" ? value + parseTerm() : value - parseTerm();
     }
     return value;
   };
-  const term = () => {
-    let value = factor();
-    while (peek() === "*" || peek() === "/") {
-      value = next() === "*" ? value * factor() : value / factor();
+  const parseTerm = () => {
+    let value = parseFactor();
+    while (getCurrentToken() === "*" || getCurrentToken() === "/") {
+      value = parseToken() === "*" ? value * parseFactor() : value / parseFactor();
     }
     return value;
   };
-  const factor = () => {
-    const token = next();
+  const parseFactor = () => {
+    const token = parseToken();
     if (token === undefined) {
       throw new Error(`Formula "${formula}" ends early`);
     }
     if (token === "-") {
-      return -factor();
+      return -parseFactor();
     }
     if (token === "+") {
-      return factor();
+      return parseFactor();
     }
     if (token === "(") {
-      const value = expression();
-      expect(")");
+      const value = parseExpression();
+      parseExpected(")");
       return value;
     }
     if (token.startsWith("@")) {
@@ -124,19 +124,19 @@ function evaluate(formula, rollData) {
       return Number(token);
     }
     if (token in FUNCTIONS) {
-      expect("(");
-      const args = [expression()];
-      while (peek() === ",") {
-        next();
-        args.push(expression());
+      parseExpected("(");
+      const args = [parseExpression()];
+      while (getCurrentToken() === ",") {
+        parseToken();
+        args.push(parseExpression());
       }
-      expect(")");
+      parseExpected(")");
       return FUNCTIONS[token](...args);
     }
     throw new Error(`Unknown name "${token}" in "${formula}"`);
   };
 
-  const value = expression();
+  const value = parseExpression();
   if (i !== tokens.length) {
     throw new Error(`Unexpected "${tokens[i]}" in "${formula}"`);
   }

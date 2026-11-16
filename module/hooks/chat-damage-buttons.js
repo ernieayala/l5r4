@@ -8,7 +8,7 @@
  * game-rules/73_armor.md, p.198
  */
 import { T, F } from "../utils/localization.js";
-import { voidUseUpdate, warnVoidLimit } from "../services/effects/uses.js";
+import { buildVoidUseUpdate, warnVoidLimit } from "../services/effects/uses.js";
 
 /**
  * Registers chat message hook to handle damage button clicks on damage cards posted by 3.x, which carry their
@@ -61,7 +61,7 @@ export function registerChatDamageButtons() {
           const button = event.currentTarget;
           const damage = parseInt(button.dataset.damage) || 0;
           const actorId = button.dataset.actorId;
-          await reduceAndApplyWounds(damage, actorId);
+          await applyWoundsWithVoid(damage, actorId);
         } finally {
           isProcessing = false;
         }
@@ -139,7 +139,7 @@ async function applyWoundsToToken(damage) {
  * @param {string} _actorId - ID of actor who can spend void
  * @returns {Promise<void>}
  */
-async function reduceAndApplyWounds(damage, _actorId) {
+async function applyWoundsWithVoid(damage, _actorId) {
   const tokens = canvas.tokens?.controlled ?? [];
 
   if (tokens.length === 0) {
@@ -183,7 +183,7 @@ async function reduceAndApplyWounds(damage, _actorId) {
   await targetActor.update({
     "system.rings.void.value": stored.rings.void.value - 1,
     "system.suffered": stored.suffered + finalDamage,
-    ...voidUseUpdate(targetActor)
+    ...buildVoidUseUpdate(targetActor)
   });
 
   // Show notification with both reductions if armor applied

@@ -8,7 +8,7 @@ import { migrateSkillDefaults } from "../items/skill-defaults.js";
 import { migrateEmphasisStringToArray } from "../items/emphasis.js";
 import { migrateArmorTypes } from "../items/armor-types.js";
 import { migrateFreeRaisesDefaults } from "../items/free-raises.js";
-import { normalizeItems } from "../items/normalize.js";
+import { migrateWeaponSizes } from "../items/normalize.js";
 import { migrateItemRules } from "../items/item-rules.js";
 import { migrateEmbeddedItemIcons } from "../icons/icon-paths.js";
 
@@ -46,6 +46,6 @@ export async function migrateEmbeddedItems(items, label) {
   await migrateArmorTypes(items, `${label}-armor-types`);
   await migrateFreeRaisesDefaults(items, `${label}-free-raises`);
   await migrateEmbeddedItemIcons(items, `${label}-icon-migration`);
-  await normalizeItems(items, `${label}-items-norm`);
+  await migrateWeaponSizes(items, `${label}-items-norm`);
   await migrateItemRules(items, `${label}-item-rules`);
 }

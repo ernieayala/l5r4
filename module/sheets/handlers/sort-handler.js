@@ -1,12 +1,12 @@
 /**
  * @module sheets/handlers/sort-handler
  * @description Column sorting for actor item lists (skills, weapons, techniques, and the rest): a click on a sortable
- * column header stores the user's preference in user flags (getSortPref, setSortPref), marks the active column with
+ * column header stores the user's preference in user flags (getSortPref, updateSortPref), marks the active column with
  * `.is-active` and its direction with `data-dir="asc"|"desc"` for the CSS arrows, and re-renders the sheet.
  */
 
 import { SYS_ID } from "../../config/constants.js";
-import { getSortPref, setSortPref } from "../../utils/sorting.js";
+import { getSortPref, updateSortPref } from "../../utils/sorting.js";
 
 /**
  * Static utility class for handling sortable column header interactions.
@@ -17,7 +17,7 @@ import { getSortPref, setSortPref } from "../../utils/sorting.js";
  *
  * Typical workflow:
  * 1. User clicks a `.l5r4-sort-header-button` element in an `.l5r4-sort-header`
- * 2. Sheet's delegated event handler calls `SortHandler.handleClick(...)`
+ * 2. Sheet's delegated event handler calls `SortHandler.updateSortPref(...)`
  * 3. Handler updates user preferences, visual indicators, and triggers re-render
  * 4. Sheet re-renders with newly sorted item list
  *
@@ -35,7 +35,7 @@ export class SortHandler {
    * @param {string} activeKey - The data-sortby value of the active column
    * @param {"asc"|"desc"} direction - Current sort direction for the active column
    */
-  static _updateVisualIndicators(header, activeKey, direction) {
+  static #updateHeaderIndicators(header, activeKey, direction) {
     header.querySelectorAll(".l5r4-sort-header-button").forEach(a => {
       const sortKey = a.dataset.sortby;
       const isActive = sortKey === activeKey;
@@ -64,7 +64,7 @@ export class SortHandler {
    * @param {string} scope - Sort scope identifier (e.g., "skills", "weapons", "techniques")
    * @param {string[]} allowedKeys - Valid sort keys for this scope (security whitelist)
    */
-  static initializeIndicators(root, actorId, scope, allowedKeys) {
+  static updateSortIndicators(root, actorId, scope, allowedKeys) {
     try {
       // querySelector used here to find header element by data-scope attribute
       // This is proper use of data attributes for behavior targeting
@@ -76,7 +76,7 @@ export class SortHandler {
       }
 
       const pref = getSortPref(actorId, scope, allowedKeys, allowedKeys[0]);
-      this._updateVisualIndicators(header, pref.key, pref.dir);
+      this.#updateHeaderIndicators(header, pref.key, pref.dir);
     } catch (err) {
       console.warn(`${SYS_ID}`, "Failed to initialize sort indicators", { err, scope });
     }
@@ -107,7 +107,7 @@ export class SortHandler {
    * @param {Function} renderSheet - Callback to trigger sheet re-render after sort change
    * @returns {Promise<void>}
    */
-  static async handleClick(actorId, event, element, getAllowedKeys, renderSheet) {
+  static async updateSortPref(actorId, event, element, getAllowedKeys, renderSheet) {
     event.preventDefault();
     event.stopPropagation();
 
@@ -125,11 +125,11 @@ export class SortHandler {
       }
 
       const cur = getSortPref(actorId, scope, allowed, allowed[0]);
-      await setSortPref(actorId, scope, key, { toggleFrom: cur });
+      await updateSortPref(actorId, scope, key, { toggleFrom: cur });
 
       if (header) {
         const newPref = getSortPref(actorId, scope, allowed, allowed[0]);
-        this._updateVisualIndicators(header, newPref.key, newPref.dir);
+        this.#updateHeaderIndicators(header, newPref.key, newPref.dir);
       }
 
       renderSheet();

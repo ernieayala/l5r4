@@ -8,7 +8,7 @@
  * - Spell slot consumption
  *
  * NOTE: These tests verify MECHANICS (spell calculations), not the service layer.
- * The SpellCastRoll service shows dialogs and cannot be reliably tested in Quench.
+ * The rollSpellCast service shows dialogs and cannot be reliably tested in Quench.
  *
  * @see module/services/dice/rolls/spell-cast-roll.js
  */

@@ -6,7 +6,7 @@
  */
 
 import { TEMPLATE } from "../../../config/templates.js";
-import { iconPath } from "../../../config/icons.js";
+import { getIconPath } from "../../../config/icons.js";
 
 /**
  * Chat card template paths by item type, read by `renderItemChatCard` (chat-cards.js). A `bow` posts the weapon
@@ -33,23 +33,23 @@ export const CHAT_CARD_TEMPLATES = Object.freeze({
 
 /**
  * Default icon paths by item type, given to an item created or prepared with core's bag icon
- * (`handleItemPreCreate`, `prepareItemBaseData`). A weapon with `system.isBow` takes the `bow` icon.
+ * (`onItemPreCreate`, `prepareItemBaseData`). A weapon with `system.isBow` takes the `bow` icon.
  * @type {Readonly<Record<string, string>>}
  */
 export const DEFAULT_ICONS = Object.freeze({
-  advantage: iconPath("advantage.webp"),
-  armor: iconPath("armor.webp"),
-  bow: iconPath("bow.webp"),
-  clan: iconPath("clan.webp"),
-  disadvantage: iconPath("disadvantage.webp"),
-  family: iconPath("family.webp"),
-  commonItem: iconPath("item.webp"),
-  kata: iconPath("kata.webp"),
-  kiho: iconPath("kiho.webp"),
-  school: iconPath("school.webp"),
-  skill: iconPath("skill.webp"),
-  spell: iconPath("spell.webp"),
-  tattoo: iconPath("tattoo.webp"),
-  technique: iconPath("technique.webp"),
-  weapon: iconPath("weapon.webp")
+  advantage: getIconPath("advantage.webp"),
+  armor: getIconPath("armor.webp"),
+  bow: getIconPath("bow.webp"),
+  clan: getIconPath("clan.webp"),
+  disadvantage: getIconPath("disadvantage.webp"),
+  family: getIconPath("family.webp"),
+  commonItem: getIconPath("item.webp"),
+  kata: getIconPath("kata.webp"),
+  kiho: getIconPath("kiho.webp"),
+  school: getIconPath("school.webp"),
+  skill: getIconPath("skill.webp"),
+  spell: getIconPath("spell.webp"),
+  tattoo: getIconPath("tattoo.webp"),
+  technique: getIconPath("technique.webp"),
+  weapon: getIconPath("weapon.webp")
 });

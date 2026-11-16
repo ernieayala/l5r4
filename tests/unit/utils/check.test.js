@@ -1,12 +1,12 @@
 import { describe, expect, it } from "vitest";
 import {
   buildPool,
-  contest,
-  evaluateCheck,
-  maxRaises,
+  getContestResult,
+  getCheckResult,
+  getMaxRaises,
   parseRollAndKeep,
-  poolFormula,
-  targetNumber
+  getPoolFormula,
+  getTn
 } from "../../../module/utils/check.js";
 
 const pool = spec => buildPool(spec);
@@ -113,80 +113,80 @@ describe("buildPool", () => {
   });
 });
 
-describe("poolFormula", () => {
+describe("getPoolFormula", () => {
   it("should write roll, keep, explosions, and bonus", () => {
-    expect(poolFormula(pool({ roll: 7, keep: 3 }))).toBe("7d10xa10k3+0");
-    expect(poolFormula(pool({ roll: 14, keep: 12 }))).toBe("10d10xa10k10+12");
+    expect(getPoolFormula(pool({ roll: 7, keep: 3 }))).toBe("7d10xa10k3+0");
+    expect(getPoolFormula(pool({ roll: 14, keep: 12 }))).toBe("10d10xa10k10+12");
   });
 
   it("should re-roll 1s before keeping, and write a lower threshold as x>=N", () => {
-    expect(poolFormula(pool({ roll: 5, keep: 2, rerollOnes: true, explode: 9 }))).toBe(
+    expect(getPoolFormula(pool({ roll: 5, keep: 2, rerollOnes: true, explode: 9 }))).toBe(
       "5d10r1xa>=9k2+0"
     );
   });
 
   it("should leave out explosions for an Unskilled Roll and keep a negative bonus's sign", () => {
-    expect(poolFormula(pool({ roll: 3, keep: 3, unskilled: true, bonus: -1 }))).toBe("3d10k3-1");
+    expect(getPoolFormula(pool({ roll: 3, keep: 3, unskilled: true, bonus: -1 }))).toBe("3d10k3-1");
   });
 });
 
-describe("maxRaises", () => {
+describe("getMaxRaises", () => {
   // game-rules/28_raises.md, p.79
   // game-rules/30_skill_rolls_expanded.md, p.80
   it("should allow Raises up to the Void Ring, none Unskilled", () => {
-    expect(maxRaises(2)).toBe(2);
-    expect(maxRaises(3, true)).toBe(0);
-    expect(maxRaises(-1)).toBe(0);
+    expect(getMaxRaises(2)).toBe(2);
+    expect(getMaxRaises(3, true)).toBe(0);
+    expect(getMaxRaises(-1)).toBe(0);
   });
 });
 
-describe("targetNumber", () => {
+describe("getTn", () => {
   // game-rules/28_raises.md, p.79
   it("should add 5 per Raise", () => {
-    expect(targetNumber({ base: 20, raises: 2 })).toBe(30);
+    expect(getTn({ base: 20, raises: 2 })).toBe(30);
   });
 
   // game-rules/28_raises.md, p.79
   it("should take 5 off per Free Raise spent on the TN", () => {
-    expect(targetNumber({ base: 20, freeRaisesToTN: 1 })).toBe(15);
+    expect(getTn({ base: 20, freeRaisesToTN: 1 })).toBe(15);
   });
 
   // Nicked is +3
   // game-rules/33_wounds.md, p.82
   it("should add the Wound Rank's penalty", () => {
-    expect(targetNumber({ base: 15, woundPenalty: 3 })).toBe(18);
+    expect(getTn({ base: 15, woundPenalty: 3 })).toBe(18);
   });
 
   it("should add other TN modifiers and never go below 0", () => {
-    expect(targetNumber({ base: 10, modifiers: [5, -2] })).toBe(13);
-    expect(targetNumber({ base: 5, freeRaisesToTN: 3 })).toBe(0);
+    expect(getTn({ base: 10, modifiers: [5, -2] })).toBe(13);
+    expect(getTn({ base: 5, freeRaisesToTN: 3 })).toBe(0);
   });
 
   it("should give no TN to a roll with no TN and no Raises", () => {
-    expect(targetNumber({ base: 0, woundPenalty: 10 })).toBeNull();
-    expect(targetNumber({ base: 0, raises: 1 })).toBe(5);
+    expect(getTn({ base: 0, woundPenalty: 10 })).toBeNull();
+    expect(getTn({ base: 0, raises: 1 })).toBe(5);
   });
 });
 
-describe("evaluateCheck", () => {
+describe("getCheckResult", () => {
   // The book's example: 27 against 20 strikes
   // game-rules/23_roll_and_keep.md, p.75
   // game-rules/28_raises.md, p.79
   it("should succeed on meeting the TN", () => {
-    expect(evaluateCheck(27, 20)).toEqual({ success: true, margin: 7 });
-    expect(evaluateCheck(20, 20)).toEqual({ success: true, margin: 0 });
+    expect(getCheckResult(27, 20)).toEqual({ success: true, margin: 7 });
+    expect(getCheckResult(20, 20)).toEqual({ success: true, margin: 0 });
   });
 
   // game-rules/28_raises.md, p.79
   it("should fail short of a raised TN even above the original", () => {
-    expect(evaluateCheck(22, targetNumber({ base: 20, raises: 1 }))).toEqual({
+    expect(getCheckResult(22, getTn({ base: 20, raises: 1 }))).toEqual({
       success: false,
       margin: -3
     });
   });
 
   it("should evaluate nothing without a TN", () => {
-    expect(evaluateCheck(14, null)).toBeNull();
+    expect(getCheckResult(14, null)).toBeNull();
   });
 });
 
@@ -194,7 +194,7 @@ describe("contest", () => {
   // game-rules/29_types_of_rolls.md, p.80
   it("should give the win to the higher total", () => {
     expect(
-      contest([
+      getContestResult([
         { id: "a", total: 21 },
         { id: "b", total: 17 }
       ])
@@ -206,7 +206,7 @@ describe("contest", () => {
 
   it("should call a tie for a re-roll", () => {
     expect(
-      contest([
+      getContestResult([
         { id: "a", total: 17 },
         { id: "b", total: 17 }
       ])
@@ -219,7 +219,7 @@ describe("contest", () => {
   // game-rules/29_types_of_rolls.md, p.80
   it("should make a roller with Raises beat the other by 5 per Raise", () => {
     expect(
-      contest([
+      getContestResult([
         { id: "a", total: 22, raises: 1 },
         { id: "b", total: 18 }
       ])
@@ -227,7 +227,7 @@ describe("contest", () => {
       winner: "b"
     });
     expect(
-      contest([
+      getContestResult([
         { id: "a", total: 24, raises: 1 },
         { id: "b", total: 18 }
       ])
@@ -240,13 +240,13 @@ describe("contest", () => {
   // game-rules/29_types_of_rolls.md, p.80
   it("should give the win to a raiser who beats the other by exactly 5 per Raise", () => {
     expect(
-      contest([
+      getContestResult([
         { id: "a", total: 22, raises: 1 },
         { id: "b", total: 17 }
       ])
     ).toMatchObject({ winner: "a", tie: false });
     expect(
-      contest([
+      getContestResult([
         { id: "a", total: 27, raises: 2 },
         { id: "b", total: 17 }
       ])
@@ -256,7 +256,7 @@ describe("contest", () => {
   // game-rules/29_types_of_rolls.md, p.80
   it("should pick the highest of several", () => {
     expect(
-      contest([
+      getContestResult([
         { id: "a", total: 12 },
         { id: "b", total: 30 },
         { id: "c", total: 25 }
@@ -289,6 +289,6 @@ describe("parseRollAndKeep", () => {
   // B9 in roadmap/AUTOMATION.md
   it("should feed the same pool and formula as a rolled check", () => {
     const parsed = parseRollAndKeep("12k4+1");
-    expect(poolFormula(buildPool(parsed))).toBe("10d10xa10k5+1");
+    expect(getPoolFormula(buildPool(parsed))).toBe("10d10xa10k5+1");
   });
 });

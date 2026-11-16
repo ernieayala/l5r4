@@ -3,7 +3,7 @@
  * @description Removes legacy field names from actors after the migration to the new schema.
  */
 import { SYS_ID } from "../../../config/constants.js";
-import { getByPath, setByPath } from "../utils/helpers.js";
+import { getByPath, updateByPath } from "../utils/helpers.js";
 
 /**
  * Removes legacy field names after successful migration to new schema.
@@ -17,7 +17,7 @@ import { getByPath, setByPath } from "../utils/helpers.js";
  * @param {string} label - Migration context label for console logging
  * @returns {Promise<void>}
  */
-export async function cleanupLegacyFields(docs, label) {
+export async function deleteLegacyFields(docs, label) {
   for (const doc of docs) {
     try {
       if (doc.documentName !== "Actor") {
@@ -42,7 +42,7 @@ export async function cleanupLegacyFields(docs, label) {
       if (doc.type === "pc") {
         const pcArmorProp = getByPath(doc, "system.armor");
         if (pcArmorProp !== undefined) {
-          setByPath(updates, "system.armor", null);
+          updateByPath(updates, "system.armor", null);
           needsUpdate = true;
         }
       }
@@ -52,7 +52,7 @@ export async function cleanupLegacyFields(docs, label) {
         const newVal = getByPath(doc, rule.new);
 
         if (oldVal !== undefined && newVal !== undefined) {
-          setByPath(updates, rule.old, null);
+          updateByPath(updates, rule.old, null);
           needsUpdate = true;
         }
       }

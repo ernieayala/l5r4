@@ -1,6 +1,6 @@
 import { SYS_ID } from "../../module/config/constants.js";
 import {
-  isJB2AAvailable,
+  isJb2aAvailable,
   isSequencerAvailable
 } from "../../module/services/animations/asset-library.js";
 import { onCreateActiveEffectAnimation } from "../../module/services/animations/hooks.js";
@@ -27,7 +27,7 @@ export function registerAnimationsTests(quench) {
         Sequencer.EffectManager.getEffects({ name: `${SYS_ID}.${statusId}.${token.id}` });
 
       before(function () {
-        if (!isSequencerAvailable() || !isJB2AAvailable() || !canvas.scene) {
+        if (!isSequencerAvailable() || !isJb2aAvailable() || !canvas.scene) {
           this.skip();
         }
       });

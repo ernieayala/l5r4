@@ -12,7 +12,7 @@
  *
  */
 
-import { statusRules } from "../../../module/utils/rule-engine.js";
+import { getStatusRules } from "../../../module/utils/rule-engine.js";
 import { SYS_ID } from "../../../module/config/constants.js";
 import { createTestPC } from "../../fixtures/actor-fixtures.js";
 import { guardRolls, settleFullDefense, waitFor } from "../helpers.js";
@@ -73,7 +73,7 @@ export function registerStanceEdgeCaseTests(quench) {
           await actor.createEmbeddedDocuments("ActiveEffect", [
             {
               name: "Defense Stance",
-              system: { rules: statusRules("defenseStance") },
+              system: { rules: getStatusRules("defenseStance") },
               statuses: ["defenseStance"],
               disabled: false
             }
@@ -126,7 +126,7 @@ export function registerStanceEdgeCaseTests(quench) {
             actor.createEmbeddedDocuments("ActiveEffect", [
               {
                 name: "Defense",
-                system: { rules: statusRules("defenseStance") },
+                system: { rules: getStatusRules("defenseStance") },
                 statuses: ["defenseStance"],
                 disabled: false
               }
@@ -334,7 +334,7 @@ export function registerStanceEdgeCaseTests(quench) {
           const defenseEffect = await actor.createEmbeddedDocuments("ActiveEffect", [
             {
               name: "Defense Stance",
-              system: { rules: statusRules("defenseStance") },
+              system: { rules: getStatusRules("defenseStance") },
               statuses: ["defenseStance"],
               disabled: false
             }
@@ -403,7 +403,7 @@ export function registerStanceEdgeCaseTests(quench) {
           await actor.createEmbeddedDocuments("ActiveEffect", [
             {
               name: "Defense Stance",
-              system: { rules: statusRules("defenseStance") },
+              system: { rules: getStatusRules("defenseStance") },
               statuses: ["defenseStance"],
               disabled: false
             }
@@ -446,7 +446,7 @@ export function registerStanceEdgeCaseTests(quench) {
           await actor.createEmbeddedDocuments("ActiveEffect", [
             {
               name: "Defense Stance",
-              system: { rules: statusRules("defenseStance") },
+              system: { rules: getStatusRules("defenseStance") },
               statuses: ["defenseStance"],
               disabled: false
             }

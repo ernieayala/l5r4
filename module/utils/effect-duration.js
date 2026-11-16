@@ -18,7 +18,7 @@ import { EXPIRY_EVENTS } from "../config/expiry-events.js";
  * @param {string} event
  * @returns {string}
  */
-export function expiryEventKey(event) {
+export function getExpiryEventKey(event) {
   return EXPIRY_EVENTS[event] ?? `EFFECT.DURATION.EXPIRY_EVENTS.${event}`;
 }
 
@@ -33,7 +33,7 @@ export function expiryEventKey(event) {
  * @param {string|null} [duration.expiry] - The event that ends it
  * @returns {DurationPhrase}
  */
-export function effectEnd({ value, units, remaining, label, expiry }) {
+export function getEffectEnd({ value, units, remaining, label, expiry }) {
   // Core prepares an effect with no set length as an infinite one, so only a finite length counts
   if (Number.isFinite(value)) {
     const count = Math.max(0, remaining ?? value);
@@ -43,7 +43,7 @@ export function effectEnd({ value, units, remaining, label, expiry }) {
     return { key: "l5r4.apps.effectPanel.time", data: { time: label ?? String(count) } };
   }
   if (expiry) {
-    return { key: "l5r4.apps.effectPanel.until", data: { event: expiryEventKey(expiry) } };
+    return { key: "l5r4.apps.effectPanel.until", data: { event: getExpiryEventKey(expiry) } };
   }
   return { key: "l5r4.apps.effectPanel.noEnd", data: {} };
 }
@@ -55,6 +55,6 @@ export function effectEnd({ value, units, remaining, label, expiry }) {
  * @param {number} spent - Uses spent this period
  * @returns {DurationPhrase}
  */
-export function usesLeft(max, spent) {
+export function getUsesLeft(max, spent) {
   return { key: "l5r4.apps.effectPanel.uses", data: { left: Math.max(0, max - spent), max } };
 }

@@ -1,6 +1,6 @@
 import { readFileSync } from "node:fs";
 import { describe, expect, it } from "vitest";
-import { xpEntries, xpTotals } from "../module/utils/xp-ledger.js";
+import { getXpEntries, getXpTotals } from "../module/utils/xp-ledger.js";
 
 /** A pack source's entry by name. */
 const entry = (pack, name) => {
@@ -84,7 +84,7 @@ describe("Book example: character creation from the pack entries (p.103-104)", (
 
   it("should have 46 XP and spend all of it, priced as the example does", () => {
     const build = gyukaro();
-    const totals = xpTotals(build, xpEntries(build));
+    const totals = getXpTotals(build, getXpEntries(build));
     expect(totals).toMatchObject({ total: 46, spent: 46, available: 0 });
     expect(totals.breakdown).toMatchObject({
       disadvantagesGranted: 6,

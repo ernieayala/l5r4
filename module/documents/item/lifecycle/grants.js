@@ -10,7 +10,7 @@
 
 import { SYS_ID } from "../../../config/constants.js";
 import { applyChoices } from "../../../utils/choices.js";
-import { grantSkill, pendingGrants, ungrantSkill } from "../../../utils/grants.js";
+import { buildGrantedSkill, getPendingGrants, buildUngrantedSkill } from "../../../utils/grants.js";
 import { F } from "../../../utils/localization.js";
 import { toInt } from "../../../utils/type-coercion.js";
 import { createRule } from "../../../data/rules/rule-models.js";
@@ -26,7 +26,7 @@ const queues = new Map();
  * @param {Actor} actor
  * @returns {Promise<void>}
  */
-export function grantsSettled(actor) {
+export function grantQueueOf(actor) {
   return queues.get(actor.uuid) ?? Promise.resolve();
 }
 
@@ -35,8 +35,8 @@ export function grantsSettled(actor) {
  * @param {Actor} actor
  * @returns {Promise<void>}
  */
-export function syncGrants(actor) {
-  return queued(actor, () => grantDue(actor));
+export function applyGrants(actor) {
+  return updateGrantQueue(actor, () => createDueGrants(actor));
 }
 
 /**
@@ -46,8 +46,8 @@ export function syncGrants(actor) {
  * @param {Item} giver - The deleted item, its flags still readable
  * @returns {Promise<void>}
  */
-export function ungrant(actor, giver) {
-  return queued(actor, async () => {
+export function deleteGrantedItems(actor, giver) {
+  return updateGrantQueue(actor, async () => {
     const deletes = [];
     const updates = [];
     for (const record of recordsOf(giver)) {
@@ -57,7 +57,7 @@ export function ungrant(actor, giver) {
       }
       const plan =
         target.type === "skill"
-          ? ungrantSkill(target._source.system, record)
+          ? buildUngrantedSkill(target._source.system, record)
           : { delete: record.created };
       if (plan.delete) {
         deletes.push(target.id);
@@ -84,8 +84,8 @@ export function ungrant(actor, giver) {
  * @param {Item} granted - The deleted item
  * @returns {Promise<void>}
  */
-export function forgetGrant(actor, granted) {
-  return queued(actor, async () => {
+export function updateGrantRecords(actor, granted) {
+  return updateGrantQueue(actor, async () => {
     const giver = actor.items.get(granted.getFlag(SYS_ID, "grantedBy"));
     if (!giver) {
       return;
@@ -103,7 +103,7 @@ export function forgetGrant(actor, granted) {
  * @param {function(): Promise<void>} task
  * @returns {Promise<void>}
  */
-function queued(actor, task) {
+function updateGrantQueue(actor, task) {
   const previous = queues.get(actor.uuid) ?? Promise.resolve();
   const next = previous.then(task).catch(err => {
     // A request already sent when the actor was deleted fails with it; there is nothing left to grant
@@ -126,7 +126,7 @@ function queued(actor, task) {
  * @param {Item} item
  * @returns {import("../../../utils/grants.js").GrantRule[]}
  */
-function grantRules(item) {
+function grantRulesOf(item) {
   const rules = [];
   for (const source of applyChoices(item.system.rules)) {
     if (source?.key !== "GrantItem") {
@@ -172,13 +172,13 @@ function recordsOf(giver) {
  * @param {import("../../../utils/grants.js").GrantRule} rule
  * @returns {Promise<import("../../../utils/grants.js").GrantRecord>}
  */
-async function grantOne(actor, giver, source, rule) {
+async function createGrantedItem(actor, giver, source, rule) {
   const link = { [`flags.${SYS_ID}.grantedBy`]: giver.id };
   if (source.type === "skill") {
     const name = source.name.toLowerCase().trim();
     const owned = actor.items.find(i => i.type === "skill" && i.name.toLowerCase().trim() === name);
     if (owned) {
-      const { update, record } = grantSkill(owned._source.system, rule);
+      const { update, record } = buildGrantedSkill(owned._source.system, rule);
       await owned.update({ system: update, ...link });
       return { uuid: rule.uuid, itemId: owned.id, created: false, ...record };
     }
@@ -187,7 +187,7 @@ async function grantOne(actor, giver, source, rule) {
   delete data._id;
   let record = { freeRanks: 0, emphasis: "", freeEmphasis: 0 };
   if (source.type === "skill") {
-    const granted = grantSkill(data.system, rule);
+    const granted = buildGrantedSkill(data.system, rule);
     Object.assign(data.system, granted.update);
     record = granted.record;
   }
@@ -202,18 +202,18 @@ async function grantOne(actor, giver, source, rule) {
  * @param {Actor} actor
  * @returns {Promise<void>}
  */
-async function grantDue(actor) {
+async function createDueGrants(actor) {
   // Grant work queued before the actor was deleted has nothing left to grant to
-  const gone = () => !fromUuidSync(actor.uuid);
+  const isActorGone = () => !fromUuidSync(actor.uuid);
   for (const giver of actor.items.contents) {
-    const rules = grantRules(giver);
+    const rules = grantRulesOf(giver);
     if (!rules.length || !actor.items.has(giver.id)) {
       continue;
     }
     const records = [...recordsOf(giver)];
-    const due = pendingGrants(rules, records, rankOf(giver));
+    const due = getPendingGrants(rules, records, rankOf(giver));
     for (const rule of due) {
-      if (gone()) {
+      if (isActorGone()) {
         return;
       }
       const source = await fromUuid(rule.uuid);
@@ -229,7 +229,7 @@ async function grantDue(actor) {
         });
         continue;
       }
-      records.push(await grantOne(actor, giver, source, rule));
+      records.push(await createGrantedItem(actor, giver, source, rule));
       if (rule.rank > 0) {
         await ChatMessage.create({
           speaker: ChatMessage.getSpeaker({ actor }),
@@ -242,7 +242,7 @@ async function grantDue(actor) {
         });
       }
     }
-    if (due.length && !gone()) {
+    if (due.length && !isActorGone()) {
       await giver.setFlag(SYS_ID, "grants", records);
     }
   }

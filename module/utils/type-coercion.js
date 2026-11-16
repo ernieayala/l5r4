@@ -101,7 +101,7 @@ export function toString(value, fallback = "") {
  * @param {number} max - Maximum allowed value
  * @returns {number} Clamped value or 0 if any parameter is NaN
  */
-export function clamp(value, min, max) {
+export function getClamped(value, min, max) {
   const n = Number(value);
   const minVal = Number(min);
   const maxVal = Number(max);

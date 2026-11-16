@@ -3,7 +3,7 @@
  * @description Migrates legacy NPC wound structures to the current schema with manual and formula modes.
  */
 import { SYS_ID } from "../../../config/constants.js";
-import { normalizeWoundLevelData } from "../utils/helpers.js";
+import { migrateWoundLevelData } from "../utils/helpers.js";
 
 /**
  * Migrates legacy NPC wound system to current schema with manual/formula modes.
@@ -84,7 +84,7 @@ export async function migrateLegacyNpcWounds(docs, label) {
       if (actor.system.manualWoundLevels) {
         const manualWoundLevels = foundry.utils.deepClone(actor.system.manualWoundLevels);
 
-        if (normalizeWoundLevelData(manualWoundLevels)) {
+        if (migrateWoundLevelData(manualWoundLevels)) {
           updates["system.manualWoundLevels"] = manualWoundLevels;
           needsUpdate = true;
         }

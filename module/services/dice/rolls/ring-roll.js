@@ -9,10 +9,10 @@
 import { DIALOG_TEMPLATES } from "../../../config/templates.js";
 import { F, T } from "../../../utils/localization.js";
 import { toInt } from "../../../utils/type-coercion.js";
-import { castingSchoolRank, getAffinityDeficiencyModifier } from "../../../utils/mechanics.js";
+import { getCastingSchoolRank, getAffinityDeficiencyModifier } from "../../../utils/mechanics.js";
 import { rollCheck } from "../check/roll-check.js";
-import { planSlot, slotDialogData, spendSlot } from "../check/spell-slots.js";
-import { resolveActor } from "../resources/void-points.js";
+import { getSlotToSpend, getSlotDialogData, spendSlot } from "../check/spell-slots.js";
+import { getRollActor } from "../resources/void-points.js";
 
 /**
  * Executes a Ring Roll, or a Spell Casting Roll when the dialog asks for one.
@@ -20,20 +20,20 @@ import { resolveActor } from "../resources/void-points.js";
  * @param {object} options
  * @param {number} [options.ringRank=null] - The Ring's rank
  * @param {string} [options.ringName=null] - Display name of the Ring
- * @param {string} [options.systemRing=null] - Ring key ("fire", "void", ...)
+ * @param {string} [options.ringKey=null] - Ring key ("fire", "void", ...)
  * @param {boolean} [options.askForOptions=true] - Show the roll dialog (Shift-click skips it)
  * @param {L5R4Actor} [options.actor=null] - The roller
  * @returns {Promise<ChatMessage|null>} The posted message, or null when cancelled or casting is blocked
  */
-export async function RingRoll({
+export async function rollRing({
   ringRank = null,
   ringName = null,
-  systemRing = null,
+  ringKey = null,
   askForOptions = true,
   actor = null
 } = {}) {
-  const roller = resolveActor(actor);
-  const ring = String(systemRing ?? "void").toLowerCase();
+  const roller = getRollActor(actor);
+  const ring = String(ringKey ?? "void").toLowerCase();
   const rank = toInt(ringRank);
   const affinity = getAffinityDeficiencyModifier(roller, ring);
   let slotPath = null;
@@ -47,13 +47,13 @@ export async function RingRoll({
     askForOptions,
     extras: {
       template: DIALOG_TEMPLATES.checkRing,
-      data: { ...slotDialogData(roller, ring), affinity: affinity > 0, deficiency: affinity < 0 }
+      data: { ...getSlotDialogData(roller, ring), affinity: affinity > 0, deficiency: affinity < 0 }
     },
     prepare: async choices => {
       if (!choices.spellCasting) {
         return {};
       }
-      const schoolRank = castingSchoolRank(roller);
+      const schoolRank = getCastingSchoolRank(roller);
       const shift = (choices.affinity ? 1 : 0) - (choices.deficiency ? 1 : 0);
       if (schoolRank + shift <= 0) {
         ui.notifications?.warn(
@@ -63,7 +63,7 @@ export async function RingRoll({
         );
         return null;
       }
-      const slot = planSlot(roller, ring, choices.slot);
+      const slot = getSlotToSpend(roller, ring, choices.slot);
       if (!slot) {
         return null;
       }

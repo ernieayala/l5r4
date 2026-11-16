@@ -18,15 +18,15 @@ export default class SkillData extends ItemData {
   static defineSchema() {
     const { ArrayField, StringField } = foundry.data.fields;
     // Blank entries are allowed: one blank in a stored list must not invalidate the whole list.
-    const strings = () => new ArrayField(new StringField({ required: true, blank: true }));
+    const stringsField = () => new ArrayField(new StringField({ required: true, blank: true }));
     return {
       ...super.defineSchema(),
       rank: numberField(0),
       type: stringField("high"),
       trait: stringField("sta"),
       emphasis: stringField(),
-      availableEmphases: strings(),
-      trainedEmphases: strings(),
+      availableEmphases: stringsField(),
+      trainedEmphases: stringsField(),
       mastery3: stringField(),
       mastery5: stringField(),
       mastery7: stringField(),

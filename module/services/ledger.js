@@ -10,7 +10,7 @@ import { LEDGER_TRACKS } from "../config/rule-keys.js";
 import { DIALOG_TEMPLATES } from "../config/templates.js";
 import { RANK_TRACK_RANGE } from "../config/game-mechanics.js";
 import { applyRankPointsDelta } from "../utils/advancement.js";
-import { ledgerChange } from "../utils/ledger.js";
+import { getLedgerChange } from "../utils/ledger.js";
 import { T } from "../utils/localization.js";
 import { toInt } from "../utils/type-coercion.js";
 
@@ -41,7 +41,7 @@ const TRACK_FIELDS = Object.freeze({
  * @param {Actor} actor
  * @returns {string[]}
  */
-export function ledgerTracks(actor) {
+export function ledgerTracksOf(actor) {
   return LEDGER_TRACKS.filter(track => actor.system[TRACK_FIELDS[track]] !== undefined);
 }
 
@@ -50,7 +50,7 @@ export function ledgerTracks(actor) {
  * @param {Actor} actor
  * @returns {LedgerEntry[]}
  */
-export function ledgerEntries(actor) {
+export function ledgerEntriesOf(actor) {
   return actor.getFlag(SYS_ID, "ledger") ?? [];
 }
 
@@ -65,9 +65,9 @@ export function ledgerEntries(actor) {
  * @param {string} reason
  * @returns {Promise<LedgerEntry>}
  */
-export async function recordTrackChange(actor, track, points, reason) {
+export async function applyTrackChange(actor, track, points, reason) {
   const field = TRACK_FIELDS[track];
-  const sized = ledgerChange({
+  const sized = getLedgerChange({
     track,
     points,
     rules: actor.ledgerRules,
@@ -90,7 +90,7 @@ export async function recordTrackChange(actor, track, points, reason) {
   await actor.update({
     [`system.${field}.rank`]: next.rank,
     [`system.${field}.points`]: next.points,
-    [`flags.${SYS_ID}.ledger`]: [...ledgerEntries(actor), entry]
+    [`flags.${SYS_ID}.ledger`]: [...ledgerEntriesOf(actor), entry]
   });
   return entry;
 }
@@ -102,15 +102,15 @@ export async function recordTrackChange(actor, track, points, reason) {
  * @returns {Promise<LedgerEntry|null>} The recorded change, or null when nothing was recorded
  */
 export async function openLedgerDialog(actor) {
-  const label = track => T(`l5r4.ui.ledger.tracks.${track}`);
+  const formatTrack = track => T(`l5r4.ui.ledger.tracks.${track}`);
   const content = await foundry.applications.handlebars.renderTemplate(DIALOG_TEMPLATES.ledger, {
-    tracks: Object.fromEntries(ledgerTracks(actor).map(track => [track, label(track)])),
-    entries: ledgerEntries(actor)
+    tracks: Object.fromEntries(ledgerTracksOf(actor).map(track => [track, formatTrack(track)])),
+    entries: ledgerEntriesOf(actor)
       .slice(-SHOWN_ENTRIES)
       .reverse()
       .map(entry => ({
         ...entry,
-        track: label(entry.track),
+        track: formatTrack(entry.track),
         changed: entry.asked !== entry.points
       }))
   });
@@ -132,8 +132,8 @@ export async function openLedgerDialog(actor) {
     rejectClose: false
   });
   // The form is user input: the track must be one the actor has, and nothing is recorded for 0 points
-  if (!choice || !ledgerTracks(actor).includes(choice.track) || !choice.points) {
+  if (!choice || !ledgerTracksOf(actor).includes(choice.track) || !choice.points) {
     return null;
   }
-  return recordTrackChange(actor, choice.track, choice.points, choice.reason.trim());
+  return applyTrackChange(actor, choice.track, choice.points, choice.reason.trim());
 }

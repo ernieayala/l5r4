@@ -37,8 +37,8 @@ const ROWS = Object.freeze({
         rank: 3,
         trait: "agi",
         school: true,
-        rollDice: 7,
-        rollKeep: 4,
+        roll: 7,
+        keep: 4,
         trainedEmphases: ["Katana"],
         description: DESCRIPTION
       }
@@ -47,7 +47,7 @@ const ROWS = Object.freeze({
       id: "gallerySkill2",
       name: { i18n: "l5r4.apps.designGallery.sample.longName" },
       type: "skill",
-      system: { rank: 1, trait: "awa", rollDice: 4, rollKeep: 3, trainedEmphases: [] }
+      system: { rank: 1, trait: "awa", roll: 4, keep: 3, trainedEmphases: [] }
     }
   ],
   weapons: [
@@ -174,7 +174,7 @@ const DIALOG = Object.freeze({
   substitutes: [
     { label: { i18n: "l5r4.apps.designGallery.sample.substitute" }, text: "Agility → Reflexes" }
   ],
-  hasTN: true,
+  hasTn: true,
   tn: 20,
   tnModifiers: [{ label: { i18n: "l5r4.apps.designGallery.sample.modifier" }, value: 5 }],
   woundPenalty: 3,
@@ -491,7 +491,7 @@ export const GALLERY_ICONS = Object.freeze([
   { meaning: "l5r4.apps.designGallery.icons.expand", icons: ["fa-angle-down", "fa-angle-up"] },
   { meaning: "l5r4.apps.designGallery.icons.step", icons: ["fa-chevron-up", "fa-chevron-down"] },
   { meaning: "l5r4.apps.designGallery.icons.sorted", icons: ["fa-sort-up", "fa-sort-down"] },
-  { meaning: "l5r4.apps.designGallery.icons.currentWoundRank", icons: ["fa-check"] },
+  { meaning: "l5r4.apps.designGallery.icons.currentWoundLevel", icons: ["fa-check"] },
   { meaning: "l5r4.apps.designGallery.icons.convertCoin", icons: ["fa-arrow-up", "fa-arrow-down"] },
   { meaning: "l5r4.apps.designGallery.icons.recalculate", icons: ["fa-arrows-rotate"] },
   { meaning: "l5r4.apps.designGallery.icons.openWealthManager", icons: ["fa-calculator"] },
@@ -1772,7 +1772,7 @@ export const GALLERY_COMPONENTS = Object.freeze([
         extras: { partial: `${T}/dialogs/check-extras/maho.hbs`, with: { bloodCost: 2 } },
         with: {
           pool: "3k2",
-          hasTN: true,
+          hasTn: true,
           tn: 15,
           woundPenalty: 0,
           unskilled: true,

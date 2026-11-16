@@ -4,7 +4,7 @@
  * carries.
  */
 import { SYS_ID } from "../../../config/constants.js";
-import { statusEffectUpdate } from "../../../utils/status-data.js";
+import { buildStatusEffectUpdate } from "../../../utils/status-data.js";
 
 /**
  * Bring each actor's stored status effects up to date (module/utils/status-data.js). The code that gave 3.2.1's
@@ -21,7 +21,7 @@ export async function migrateStatusEffectRules(docs, label) {
     }
     try {
       const updates = actor.effects
-        .map(effect => statusEffectUpdate(effect._source))
+        .map(effect => buildStatusEffectUpdate(effect._source))
         .filter(Boolean);
       if (updates.length > 0) {
         await actor.updateEmbeddedDocuments("ActiveEffect", updates, { render: false });

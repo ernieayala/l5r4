@@ -16,15 +16,15 @@ import {
 import { TRAIT_KEYS } from "../../../config/reference-data.js";
 import { toInt } from "../../../utils/type-coercion.js";
 import { logError } from "../../../utils/error-logging.js";
-import { initiativeDice } from "../../../utils/initiative.js";
+import { getInitiativePool } from "../../../utils/initiative.js";
 import { getCreationFreeBonusSources } from "../../../utils/xp-calculations.js";
 import {
   prepareTraitsAndRings,
   prepareMovement,
-  ringsFromTraits
+  ringsOf
 } from "../calculations/shared-traits-rings-system.js";
 import { prepareHealRate } from "../calculations/wound-system.js";
-import { enrichActorItems } from "../calculations/item-enrichment-system.js";
+import { prepareItemFormulas } from "../calculations/item-enrichment-system.js";
 import { applyArmorRules, applyDerivedRules } from "../rules.js";
 
 /**
@@ -68,19 +68,19 @@ export function preparePcData(actor, sys, finalizeWoundPenaltiesFn, calculateIns
 
   // Helper to access effective trait values (after all modifiers)
   const tEff = sys._derived?.traitsEff || {};
-  const TR = k => toInt(tEff[k]);
+  const effectiveTraitOf = k => toInt(tEff[k]);
 
   // Calculate PC armor TN from base formula + equipped armor
   // Base TN = Reflexes × 5 + 5 (L5R4 core rules)
   sys.armorTn = sys.armorTn || {};
-  const ref = TR("ref");
-  const baseTN = 5 * ref + 5;
-  const modTN = toInt(sys.armorTn.mod);
+  const ref = effectiveTraitOf("ref");
+  const baseTn = 5 * ref + 5;
+  const modTn = toInt(sys.armorTn.mod);
 
   // Check if armor stacking is allowed (optional house rule)
   const allowStack = actor.getFlag(SYS_ID, "allowArmorStacking") ?? false;
 
-  let bonusTN = 0;
+  let bonusTn = 0;
   let reduction = 0;
 
   // Aggregate bonuses from all equipped armor items
@@ -101,22 +101,22 @@ export function preparePcData(actor, sys, finalizeWoundPenaltiesFn, calculateIns
       toInt(a.bonus) + (mounted && a.armorType === "riding" ? RIDING_ARMOR_MOUNTED_BONUS : 0);
     const r = toInt(a.reduction);
     if (allowStack) {
-      bonusTN += b;
+      bonusTn += b;
       reduction += r;
     } else {
-      bonusTN = Math.max(bonusTN, b);
+      bonusTn = Math.max(bonusTn, b);
       reduction = Math.max(reduction, r);
     }
   }
 
-  sys.armorTn.base = baseTN;
-  sys.armorTn.bonus = bonusTN;
+  sys.armorTn.base = baseTn;
+  sys.armorTn.bonus = bonusTn;
 
   const reductionMod = toInt(sys.armorTn.reductionMod);
   sys.armorTn.reduction = Math.max(0, reduction + reductionMod);
 
   // Stances, conditions, and Void Points change the Armor TN through ArmorTN rules on their effects
-  applyArmorRules(actor, sys, { base: baseTN, armor: bonusTN, other: modTN });
+  applyArmorRules(actor, sys, { base: baseTn, armor: bonusTn, other: modTn });
 
   // Calculate movement rates (depends on traits)
   prepareMovement(sys);
@@ -141,7 +141,7 @@ export function preparePcData(actor, sys, finalizeWoundPenaltiesFn, calculateIns
       } else {
         lvl.value = earth * mult + prev + add;
       }
-      // Each wound level starts from its base penalty (issue #32), so calculateWoundPenalties gives every row its
+      // Each wound level starts from its base penalty (issue #32), so prepareWoundPenalties gives every row its
       // own penalty plus the modifier, and Healthy stays 0 whatever the modifier.
       lvl.penalty = DEFAULT_WOUND_PENALTIES[key] ?? 0;
       prev = lvl.value;
@@ -170,9 +170,9 @@ export function preparePcData(actor, sys, finalizeWoundPenaltiesFn, calculateIns
   sys.initiative = sys.initiative || {};
   Object.assign(
     sys.initiative,
-    initiativeDice({
+    getInitiativePool({
       insightRank: toInt(sys.insight.rank),
-      reflexes: TR("ref"),
+      reflexes: effectiveTraitOf("ref"),
       rollMod: toInt(sys.initiative.rollMod),
       keepMod: toInt(sys.initiative.keepMod)
     })
@@ -181,7 +181,7 @@ export function preparePcData(actor, sys, finalizeWoundPenaltiesFn, calculateIns
   prepareHealRate(sys, toInt(sys.insight.rank));
 
   // Enrich embedded items with calculated data
-  enrichActorItems(actor);
+  prepareItemFormulas(actor);
 }
 
 /**
@@ -195,8 +195,9 @@ export function preparePcData(actor, sys, finalizeWoundPenaltiesFn, calculateIns
  */
 function prepareInsight(actor, sys, calculateInsightRankFn) {
   const stored = actor._source.system;
-  const owned = key => toInt(stored.traits[key]) + getCreationFreeBonusSources(actor, key).rules;
-  const rings = ringsFromTraits(Object.fromEntries(TRAIT_KEYS.map(key => [key, owned(key)])));
+  const ownedTraitOf = key =>
+    toInt(stored.traits[key]) + getCreationFreeBonusSources(actor, key).rules;
+  const rings = ringsOf(Object.fromEntries(TRAIT_KEYS.map(key => [key, ownedTraitOf(key)])));
   const voidRank = toInt(stored.rings.void.rank) + getCreationFreeBonusSources(actor, "void").rules;
   const ringsTotal = rings.air + rings.earth + rings.fire + rings.water + voidRank;
 

@@ -22,7 +22,7 @@
  */
 
 import { SYS_ID } from "../../../module/config/constants.js";
-import { SkillRoll } from "../../../module/services/dice/rolls/skill-roll.js";
+import { rollSkill } from "../../../module/services/dice/rolls/skill-roll.js";
 import { createTestPC } from "../../fixtures/actor-fixtures.js";
 import { createSkillData } from "../../fixtures/item-fixtures.js";
 
@@ -76,10 +76,10 @@ export function registerSkillTraitSwitchingTests(quench) {
           const traitValue = actor.system.traits[skillTrait]; // 3
 
           // ACT - Roll with skill's current trait
-          const message = await SkillRoll({
+          const message = await rollSkill({
             actor,
             skillRank: skill.system.rank, // 4
-            actorTrait: traitValue, // 3
+            traitRank: traitValue, // 3
             skillName: skill.name,
             skillTrait: skillTrait,
             askForOptions: false
@@ -109,10 +109,10 @@ export function registerSkillTraitSwitchingTests(quench) {
           const newTraitValue = actor.system.traits[newTrait]; // 5
 
           // ACT - Roll with new trait (Strength instead of Agility)
-          const message = await SkillRoll({
+          const message = await rollSkill({
             actor,
             skillRank: skill.system.rank, // 4
-            actorTrait: newTraitValue, // 5
+            traitRank: newTraitValue, // 5
             skillName: skill.name,
             skillTrait: newTrait, // "str"
             askForOptions: false
@@ -141,10 +141,10 @@ export function registerSkillTraitSwitchingTests(quench) {
           const newTraitValue = actor.system.traits[newTrait]; // 2
 
           // ACT - Roll with new trait (Stamina instead of Agility)
-          const message = await SkillRoll({
+          const message = await rollSkill({
             actor,
             skillRank: skill.system.rank, // 4
-            actorTrait: newTraitValue, // 2
+            traitRank: newTraitValue, // 2
             skillName: skill.name,
             skillTrait: newTrait, // "sta"
             askForOptions: false
@@ -173,10 +173,10 @@ export function registerSkillTraitSwitchingTests(quench) {
           const newTraitValue = actor.system.traits[newTrait]; // 5
 
           // ACT
-          const message = await SkillRoll({
+          const message = await rollSkill({
             actor,
             skillRank: skill.system.rank,
-            actorTrait: newTraitValue,
+            traitRank: newTraitValue,
             skillName: skill.name,
             skillTrait: newTrait,
             askForOptions: false
@@ -229,10 +229,10 @@ export function registerSkillTraitSwitchingTests(quench) {
           const newTraitValue = actor.system.traits[newTrait]; // 5
 
           // ACT - Roll with changed trait
-          const message = await SkillRoll({
+          const message = await rollSkill({
             actor,
             skillRank: skill.system.rank, // 4
-            actorTrait: newTraitValue, // 5
+            traitRank: newTraitValue, // 5
             skillName: skill.name,
             skillTrait: newTrait,
             askForOptions: false
@@ -258,10 +258,10 @@ export function registerSkillTraitSwitchingTests(quench) {
           const voidKeepBonus = 1;
 
           // ACT - Roll with changed trait + Void Point
-          const message = await SkillRoll({
+          const message = await rollSkill({
             actor,
             skillRank: skill.system.rank, // 4
-            actorTrait: newTraitValue, // 5
+            traitRank: newTraitValue, // 5
             skillName: skill.name,
             skillTrait: newTrait,
             rollBonus: voidRollBonus,
@@ -287,10 +287,10 @@ export function registerSkillTraitSwitchingTests(quench) {
           const woundPenalty = 10;
 
           // ACT - Roll with changed trait + Wound Penalty
-          const message = await SkillRoll({
+          const message = await rollSkill({
             actor,
             skillRank: skill.system.rank, // 4
-            actorTrait: newTraitValue, // 5
+            traitRank: newTraitValue, // 5
             skillName: skill.name,
             skillTrait: newTrait,
             woundPenalty: woundPenalty,
@@ -343,10 +343,10 @@ export function registerSkillTraitSwitchingTests(quench) {
           const newTraitValue = actor.system.traits[newTrait]; // 2
 
           // ACT
-          const message = await SkillRoll({
+          const message = await rollSkill({
             actor,
             skillRank: skill.system.rank, // 5
-            actorTrait: newTraitValue, // 2
+            traitRank: newTraitValue, // 2
             skillName: skill.name,
             skillTrait: newTrait,
             askForOptions: false
@@ -369,10 +369,10 @@ export function registerSkillTraitSwitchingTests(quench) {
           const newTraitValue = actor.system.traits[newTrait]; // 10
 
           // ACT
-          const message = await SkillRoll({
+          const message = await rollSkill({
             actor,
             skillRank: skill.system.rank, // 5
-            actorTrait: newTraitValue, // 10
+            traitRank: newTraitValue, // 10
             skillName: skill.name,
             skillTrait: newTrait,
             askForOptions: false
@@ -402,10 +402,10 @@ export function registerSkillTraitSwitchingTests(quench) {
           const newTraitValue = actor.system.traits[newTrait] || 3;
 
           // ACT - Unskilled roll with changed trait
-          const message = await SkillRoll({
+          const message = await rollSkill({
             actor,
             skillRank: 0, // Unskilled
-            actorTrait: newTraitValue,
+            traitRank: newTraitValue,
             skillName: "Calligraphy",
             skillTrait: newTrait,
             askForOptions: false
@@ -432,19 +432,19 @@ export function registerSkillTraitSwitchingTests(quench) {
           const newTraitValue = actor.system.traits[newTrait]; // 2
 
           // ACT - Roll twice with same changed trait
-          const message1 = await SkillRoll({
+          const message1 = await rollSkill({
             actor,
             skillRank: skill.system.rank, // 5
-            actorTrait: newTraitValue, // 2
+            traitRank: newTraitValue, // 2
             skillName: skill.name,
             skillTrait: newTrait,
             askForOptions: false
           });
 
-          const message2 = await SkillRoll({
+          const message2 = await rollSkill({
             actor,
             skillRank: skill.system.rank, // 5
-            actorTrait: newTraitValue, // 2
+            traitRank: newTraitValue, // 2
             skillName: skill.name,
             skillTrait: newTrait,
             askForOptions: false
@@ -496,10 +496,10 @@ export function registerSkillTraitSwitchingTests(quench) {
           const newTraitValue = actor.system.traits[newTrait];
 
           // ACT
-          const message = await SkillRoll({
+          const message = await rollSkill({
             actor,
             skillRank: skill.system.rank,
-            actorTrait: newTraitValue,
+            traitRank: newTraitValue,
             skillName: skill.name,
             skillTrait: newTrait,
             askForOptions: false
@@ -520,10 +520,10 @@ export function registerSkillTraitSwitchingTests(quench) {
           const newTraitValue = actor.system.traits[newTrait]; // 5
 
           // ACT
-          const message = await SkillRoll({
+          const message = await rollSkill({
             actor,
             skillRank: skill.system.rank, // 4
-            actorTrait: newTraitValue, // 5
+            traitRank: newTraitValue, // 5
             skillName: skill.name,
             skillTrait: newTrait,
             askForOptions: false

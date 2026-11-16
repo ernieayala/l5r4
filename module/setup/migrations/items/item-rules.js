@@ -5,7 +5,7 @@
 import { SYS_ID } from "../../../config/constants.js";
 
 const TRAIT_CHANGE = /^system\.traits\.(sta|wil|str|per|ref|awa|agi|int)$/;
-const VOID_CHANGE_KEYS = new Set(["system.rings.void.rank", "system.rings.void.value"]);
+const voidChangeKeys = new Set(["system.rings.void.rank", "system.rings.void.value"]);
 const MASTER_OF_BLOOD = "master-of-blood";
 
 /**
@@ -39,11 +39,11 @@ export async function migrateItemRules(docs, label) {
       continue;
     }
     try {
-      let changed = await convertFreeRaises(item);
+      let changed = await migrateFreeRaises(item);
       if (item.type === "family" || item.type === "school") {
-        changed = (await convertCreationBonusEffects(item)) || changed;
+        changed = (await migrateCreationBonusEffects(item)) || changed;
       } else if (item.type === "advantage" && item.name.toLowerCase().includes("master of blood")) {
-        changed = (await addMasterOfBloodRules(item)) || changed;
+        changed = (await migrateMasterOfBloodRules(item)) || changed;
       }
       migrated += Number(changed);
     } catch (err) {
@@ -65,11 +65,11 @@ export async function migrateItemRules(docs, label) {
  * @param {object} change
  * @returns {string|null}
  */
-function changeTrait(change) {
+function changedTraitOf(change) {
   if (change.type !== "add") {
     return null;
   }
-  if (VOID_CHANGE_KEYS.has(change.key)) {
+  if (voidChangeKeys.has(change.key)) {
     return "void";
   }
   return TRAIT_CHANGE.exec(change.key)?.[1] ?? null;
@@ -82,7 +82,7 @@ function changeTrait(change) {
  * @param {Item} item
  * @returns {Promise<boolean>} Whether the item changed.
  */
-async function convertCreationBonusEffects(item) {
+async function migrateCreationBonusEffects(item) {
   const rules = [];
   const deletions = [];
   const updates = [];
@@ -93,7 +93,7 @@ async function convertCreationBonusEffects(item) {
     const kept = [];
     let moved = false;
     for (const change of effect._source.system.changes) {
-      const trait = changeTrait(change);
+      const trait = changedTraitOf(change);
       const value = Number(change.value);
       if (trait && Number.isFinite(value)) {
         rules.push({ key: "TraitAdjust", trait, value });
@@ -134,7 +134,7 @@ async function convertCreationBonusEffects(item) {
  * @param {Item} item
  * @returns {Promise<boolean>} Whether the item changed.
  */
-async function addMasterOfBloodRules(item) {
+async function migrateMasterOfBloodRules(item) {
   const rules = item._source.system.rules;
   const missing = MASTER_OF_BLOOD_RULES.filter(
     wanted =>
@@ -157,7 +157,7 @@ async function addMasterOfBloodRules(item) {
  * @param {Item} item
  * @returns {Promise<boolean>} Whether the item changed.
  */
-async function convertFreeRaises(item) {
+async function migrateFreeRaises(item) {
   const value = Number(item._source.system.freeRaises);
   if (!(value > 0)) {
     return false;

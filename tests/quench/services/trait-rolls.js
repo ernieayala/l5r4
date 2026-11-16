@@ -7,7 +7,7 @@
  * - Trait values range from 2-10
  *
  * NOTE: These tests verify MECHANICS (trait roll calculations), not the service layer.
- * The TraitRoll service shows dialogs and cannot be reliably tested in Quench.
+ * The rollTrait service shows dialogs and cannot be reliably tested in Quench.
  *
  * @see module/services/dice/rolls/trait-roll.js
  */

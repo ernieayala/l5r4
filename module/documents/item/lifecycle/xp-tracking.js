@@ -3,7 +3,7 @@
  * @description Marks an actor's XP history for rebuilding when an item changes what the character spent: Skills,
  * Emphases, Advantages, and Disadvantages. Setting `flags.l5r4-enhanced.xpRetroactiveVersion` to 0 makes
  * buildXpHistory() (module/services/xp/calculator.js) rebuild the history from the actor's current state; the
- * manual entries in `xpManual` are kept. The `log*` functions keep the parameters their callers pass.
+ * manual entries in `xpManual` are kept. The `updateXpAfter*` functions keep the parameters their callers pass.
  * @see module:services/xp/calculator - Retroactive XP calculation (single source of truth)
  * @see module:apps/xp-manager - XP Manager UI that displays XP history
  */
@@ -19,11 +19,11 @@ import { SYS_ID } from "../../../config/constants.js";
  * @param {object} _sys - The item's system data object (unused)
  * @returns {Promise<void>} Resolves when cache is invalidated
  */
-export async function logSkillCreationXp(item, _sys) {
+export async function updateXpAfterSkillCreate(item, _sys) {
   if (!item.actor) {
     return;
   }
-  await invalidateXpCache(item.actor);
+  await updateXpHistoryStale(item.actor);
 }
 
 /**
@@ -37,11 +37,11 @@ export async function logSkillCreationXp(item, _sys) {
  * @param {number} _freeRanks - Number of free ranks (unused)
  * @returns {Promise<boolean>} False for an unowned item, otherwise true
  */
-export async function logSkillRankXp(item, _oldRank, _newRank, _freeRanks) {
+export async function updateXpAfterSkillRank(item, _oldRank, _newRank, _freeRanks) {
   if (!item.actor) {
     return false;
   }
-  await invalidateXpCache(item.actor);
+  await updateXpHistoryStale(item.actor);
   return true;
 }
 
@@ -56,11 +56,11 @@ export async function logSkillRankXp(item, _oldRank, _newRank, _freeRanks) {
  * @param {number} _freeEmphasis - Number of free emphases (unused)
  * @returns {Promise<boolean>} False for an unowned item, otherwise true
  */
-export async function logEmphasisXp(item, _oldEmphases, _newEmphases, _freeEmphasis) {
+export async function updateXpAfterEmphasis(item, _oldEmphases, _newEmphases, _freeEmphasis) {
   if (!item.actor) {
     return false;
   }
-  await invalidateXpCache(item.actor);
+  await updateXpHistoryStale(item.actor);
   return true;
 }
 
@@ -73,11 +73,11 @@ export async function logEmphasisXp(item, _oldEmphases, _newEmphases, _freeEmpha
  * @param {number} _cost - The XP cost of the advantage (unused)
  * @returns {Promise<void>} Resolves when cache is invalidated
  */
-export async function logAdvantageXp(item, _cost) {
+export async function updateXpAfterAdvantage(item, _cost) {
   if (!item.actor) {
     return;
   }
-  await invalidateXpCache(item.actor);
+  await updateXpHistoryStale(item.actor);
 }
 
 /**
@@ -89,11 +89,11 @@ export async function logAdvantageXp(item, _cost) {
  * @param {number} _cost - The XP value of the disadvantage (unused)
  * @returns {Promise<void>} Resolves when cache is invalidated
  */
-export async function logDisadvantageXp(item, _cost) {
+export async function updateXpAfterDisadvantage(item, _cost) {
   if (!item.actor) {
     return;
   }
-  await invalidateXpCache(item.actor);
+  await updateXpHistoryStale(item.actor);
 }
 
 /**
@@ -106,11 +106,11 @@ export async function logDisadvantageXp(item, _cost) {
  * @param {number} _newCost - The XP cost after the update (unused)
  * @returns {Promise<boolean>} False for an unowned item, otherwise true
  */
-export async function logCostChangeXp(item, _oldCost, _newCost) {
+export async function updateXpAfterCostChange(item, _oldCost, _newCost) {
   if (!item.actor) {
     return false;
   }
-  await invalidateXpCache(item.actor);
+  await updateXpHistoryStale(item.actor);
   return true;
 }
 
@@ -124,7 +124,7 @@ export async function logCostChangeXp(item, _oldCost, _newCost) {
  * @param {L5R4Actor} actor - The actor document to reset XP cache for
  * @returns {Promise<void>} Resolves when cache is invalidated and sheet is re-rendered
  */
-export async function resetCalculatedXp(actor) {
+export async function updateXpHistoryReset(actor) {
   if (!actor) {
     return;
   }
@@ -150,7 +150,7 @@ export async function resetCalculatedXp(actor) {
  * @param {L5R4Actor} actor - The actor document to invalidate cache for
  * @returns {Promise<void>} Resolves when flag is updated
  */
-async function invalidateXpCache(actor) {
+async function updateXpHistoryStale(actor) {
   if (!actor) {
     return;
   }

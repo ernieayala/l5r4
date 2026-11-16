@@ -8,7 +8,7 @@
 import { SYS_ID } from "../../../module/config/constants.js";
 import { createShugenja } from "../../fixtures/actor-fixtures.js";
 import { createSpellData } from "../../fixtures/item-fixtures.js";
-import { SpellCastRoll } from "../../../module/services/dice/rolls/spell-cast-roll.js";
+import { rollSpellCast } from "../../../module/services/dice/rolls/spell-cast-roll.js";
 
 /**
  * Register spell casting workflow tests with Quench
@@ -54,7 +54,7 @@ export function registerSpellCastingWorkflowTests(quench) {
           assert.isTrue(initialSlots > 0, "Has spell slots available");
 
           // ACT - Use REAL service
-          const spellRoll = await SpellCastRoll({
+          const spellRoll = await rollSpellCast({
             actor: shugenja,
             spell,
             showDialog: false
@@ -134,7 +134,7 @@ export function registerSpellCastingWorkflowTests(quench) {
               resolve();
             })
           );
-          const spellRoll = await SpellCastRoll({
+          const spellRoll = await rollSpellCast({
             actor: weakCaster,
             spell,
             showDialog: false

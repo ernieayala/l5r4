@@ -12,14 +12,14 @@
 import { T } from "../../../utils/localization.js";
 import { toInt } from "../../../utils/type-coercion.js";
 import { rollCheck } from "../check/roll-check.js";
-import { resolveActor } from "../resources/void-points.js";
+import { getRollActor } from "../resources/void-points.js";
 
 /**
  * The localized name of a Skill: its translation when the system has one, else the item's name.
  * @param {string} skillName
  * @returns {string}
  */
-export function skillLabel(skillName) {
+export function formatSkillLabel(skillName) {
   const key = `l5r4.character.skills.names.${String(skillName).toLowerCase()}`;
   return game.i18n.has(key) ? T(key) : String(skillName);
 }
@@ -28,7 +28,7 @@ export function skillLabel(skillName) {
  * Executes a Skill Roll or a Skill attack.
  *
  * @param {object} options
- * @param {number|null} [options.actorTrait=null] - The Trait's effective rank (kept dice)
+ * @param {number|null} [options.traitRank=null] - The Trait's effective rank (kept dice)
  * @param {number|null} [options.skillRank=null] - Skill rank (rolled dice); 0 is an Unskilled Roll
  * @param {string|null} [options.skillName=null] - Skill name, for its item, Emphases, and rules
  * @param {string|null} [options.skillTrait=null] - Trait key ("void" for the Void Ring)
@@ -41,8 +41,8 @@ export function skillLabel(skillName) {
  * @param {string|null} [options.weaponId=null] - The attacking weapon's item id
  * @returns {Promise<ChatMessage|null>} The posted message, or null when cancelled
  */
-export async function SkillRoll({
-  actorTrait = null,
+export async function rollSkill({
+  traitRank = null,
   skillRank = null,
   skillName = null,
   skillTrait = null,
@@ -54,8 +54,8 @@ export async function SkillRoll({
   rollType = null,
   weaponId = null
 } = {}) {
-  const roller = resolveActor(actor);
-  const trait = toInt(actorTrait);
+  const roller = getRollActor(actor);
+  const trait = toInt(traitRank);
   const rank = toInt(skillRank);
   const skillKey = String(skillName ?? "").toLowerCase();
   const skillItem = roller.items.find(i => i.type === "skill" && i.name.toLowerCase() === skillKey);
@@ -79,7 +79,7 @@ export async function SkillRoll({
   return rollCheck({
     actor: roller,
     kind: rollType === "attack" ? "attack" : "skill",
-    label: `${T("l5r4.ui.mechanics.rolls.skillRoll")}: ${skillLabel(skillName)} / ${traitLabel}`,
+    label: `${T("l5r4.ui.mechanics.rolls.skillRoll")}: ${formatSkillLabel(skillName)} / ${traitLabel}`,
     base: { roll: trait + rank, keep: trait },
     skill: skillKey,
     trait: skillTrait,

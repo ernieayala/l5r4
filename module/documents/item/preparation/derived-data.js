@@ -7,12 +7,12 @@
 
 import { SYS_ID } from "../../../config/constants.js";
 import { toInt } from "../../../utils/type-coercion.js";
-import { calculateSkillFormula } from "./skill-formulas.js";
-import { calculateBowDamage } from "./bow-damage.js";
-import { calculateMeleeDamage } from "./melee-damage.js";
+import { getSkillFormula } from "./skill-formulas.js";
+import { getBowDamage } from "./bow-damage.js";
+import { getMeleeDamage } from "./melee-damage.js";
 
 /**
- * Prepare an item's derived data: a Skill's `rollDice`, `rollKeep`, and `rollFormula` from its rank, then a
+ * Prepare an item's derived data: a Skill's `roll`, `keep`, and `rollFormula` from its rank, then a
  * weapon's damage (prepareWeaponDamage). Changes `item.system` in place.
  * @param {Item} item - The L5R4 item being prepared (requires item.system and item.type)
  */
@@ -25,9 +25,9 @@ export function prepareItemDerivedData(item) {
     const rank = Math.max(0, parseInt(sys.rank) || 0);
     applyDiceFormula(
       sys,
-      () => calculateSkillFormula(sys),
+      () => getSkillFormula(sys),
       // Fallback: Safe {rank}k0 formula if calculation fails
-      { rollDice: rank, rollKeep: 0, rollFormula: `${rank}k0` },
+      { roll: rank, keep: 0, rollFormula: `${rank}k0` },
       "Failed to compute skill roll formula",
       item
     );
@@ -55,7 +55,7 @@ export function prepareWeaponDamage(item) {
     applyDiceFormula(
       sys,
       // Actor reference needed to get actor's Strength for bow damage limit
-      () => calculateBowDamage(sys, item.actor),
+      () => getBowDamage(sys, item.actor),
       // Fallback: Default 0k0 prevents undefined values in damage rolls
       { derivedDamageRoll: 0, derivedDamageKeep: 0, derivedDamageFormula: "0k0" },
       "Failed to compute bow damage formula",
@@ -67,7 +67,7 @@ export function prepareWeaponDamage(item) {
     applyDiceFormula(
       sys,
       // Actor reference needed to get actor's Strength for melee damage
-      () => calculateMeleeDamage(sys, item.actor),
+      () => getMeleeDamage(sys, item.actor),
       // Fallback: Use base weapon DR without Strength if calculation fails
       {
         derivedDamageRoll: toInt(sys.damageRoll),

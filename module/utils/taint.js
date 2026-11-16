@@ -12,7 +12,7 @@
 export const PHYSICAL_TRAITS = Object.freeze(["str", "agi", "ref", "sta"]);
 
 /**
- * The effects of one Taint Rank; a Lost character has no Void Points, which voidPointsMax applies.
+ * The effects of one Taint Rank; a Lost character has no Void Points, which getMaxVoidPoints applies.
  * game-rules/89_shadowlands_taint.md, p.277-279
  * @typedef {object} TaintEffects
  * @property {number} level             Level of infection: 0 below one full Rank, up to 4
@@ -28,7 +28,7 @@ export const PHYSICAL_TRAITS = Object.freeze(["str", "agi", "ref", "sta"]);
  * @param {number} rank - Taint Rank (the stored rank; points are the fraction, decision 10)
  * @returns {TaintEffects}
  */
-export function taintEffects(rank) {
+export function getTaintEffects(rank) {
   const level = Math.max(0, Math.min(4, rank));
   const deadly = level >= 4;
   return {
@@ -56,7 +56,7 @@ export function isLost(rank, highestRing) {
  * @param {{air: number, earth: number, fire: number, water: number, void: {rank: number}}} rings - Prepared Rings
  * @returns {number}
  */
-export function highestRing(rings) {
+export function getHighestRing(rings) {
   return Math.max(rings.air, rings.earth, rings.fire, rings.water, rings.void.rank);
 }
 
@@ -69,8 +69,10 @@ export function highestRing(rings) {
  * @param {number} highestRing
  * @returns {number}
  */
-export function voidPointsMax(voidRing, rank, highestRing) {
-  return isLost(rank, highestRing) ? 0 : Math.max(0, voidRing - taintEffects(rank).voidPointsLost);
+export function getMaxVoidPoints(voidRing, rank, highestRing) {
+  return isLost(rank, highestRing)
+    ? 0
+    : Math.max(0, voidRing - getTaintEffects(rank).voidPointsLost);
 }
 
 /**
@@ -85,7 +87,7 @@ export function voidPointsMax(voidRing, rank, highestRing) {
  * @returns {boolean}
  */
 export function canEmbraceTaint({ rank, highestRing, kind, trait }) {
-  return physicalRoll(kind, trait) && rank >= 1 && !isLost(rank, highestRing);
+  return isPhysicalRoll(kind, trait) && rank >= 1 && !isLost(rank, highestRing);
 }
 
 /**
@@ -100,8 +102,8 @@ export function canEmbraceTaint({ rank, highestRing, kind, trait }) {
  * @param {string} [spec.trait] - The Trait in the roll
  * @returns {number}
  */
-export function lostBonus({ rank, highestRing, kind, trait }) {
-  return physicalRoll(kind, trait) && isLost(rank, highestRing) ? rank : 0;
+export function getLostBonus({ rank, highestRing, kind, trait }) {
+  return isPhysicalRoll(kind, trait) && isLost(rank, highestRing) ? rank : 0;
 }
 
 /**
@@ -111,6 +113,6 @@ export function lostBonus({ rank, highestRing, kind, trait }) {
  * @param {string} [trait]
  * @returns {boolean}
  */
-function physicalRoll(kind, trait) {
+function isPhysicalRoll(kind, trait) {
   return kind !== "damage" && PHYSICAL_TRAITS.includes(trait);
 }

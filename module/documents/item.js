@@ -18,9 +18,9 @@
 
 import { SYS_ID } from "../config/constants.js";
 import { CHAT_CARD_TEMPLATES, DEFAULT_ICONS } from "./item/constants/item-types.js";
-import { handleItemPreCreate, handleItemOnCreate } from "./item/lifecycle/item-creation.js";
-import { forgetGrant, syncGrants, ungrant } from "./item/lifecycle/grants.js";
-import { handleItemPreUpdate } from "./item/lifecycle/item-updates.js";
+import { onItemPreCreate, onItemCreate } from "./item/lifecycle/item-creation.js";
+import { updateGrantRecords, applyGrants, deleteGrantedItems } from "./item/lifecycle/grants.js";
+import { onItemPreUpdate } from "./item/lifecycle/item-updates.js";
 import { prepareItemBaseData } from "./item/preparation/base-data.js";
 import { prepareItemDerivedData } from "./item/preparation/derived-data.js";
 import { renderItemChatCard } from "./item/integration/chat-cards.js";
@@ -48,7 +48,7 @@ export default class L5R4Item extends Item {
    */
   async _preCreate(data, options, userId) {
     await super._preCreate(data, options, userId);
-    handleItemPreCreate(this, data);
+    onItemPreCreate(this, data);
   }
 
   /**
@@ -64,9 +64,9 @@ export default class L5R4Item extends Item {
   async _onCreate(data, options, userId) {
     super._onCreate(data, options, userId);
     if (userId === game.user.id && this.actor) {
-      syncGrants(this.actor);
+      applyGrants(this.actor);
     }
-    await handleItemOnCreate(this, data);
+    await onItemCreate(this, data);
   }
 
   /**
@@ -77,7 +77,7 @@ export default class L5R4Item extends Item {
   _onUpdate(changed, options, userId) {
     super._onUpdate(changed, options, userId);
     if (userId === game.user.id && this.actor) {
-      syncGrants(this.actor);
+      applyGrants(this.actor);
     }
   }
 
@@ -92,10 +92,10 @@ export default class L5R4Item extends Item {
       return;
     }
     if (this.getFlag(SYS_ID, "grants")?.length) {
-      ungrant(this.actor, this);
+      deleteGrantedItems(this.actor, this);
     }
     if (this.getFlag(SYS_ID, "grantedBy")) {
-      forgetGrant(this.actor, this);
+      updateGrantRecords(this.actor, this);
     }
     // An activated kata or kiho ends with its item (module/services/effects/activation.js)
     const activations = this.actor.effects
@@ -118,7 +118,7 @@ export default class L5R4Item extends Item {
    */
   async _preUpdate(changes, options, userId) {
     await super._preUpdate(changes, options, userId);
-    await handleItemPreUpdate(this, changes);
+    await onItemPreUpdate(this, changes);
   }
 
   /**

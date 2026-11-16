@@ -5,7 +5,7 @@
  * that covers the distance between the tokens.
  */
 
-import { isJB2AAvailable, isSequencerAvailable } from "./asset-library.js";
+import { isJb2aAvailable, isSequencerAvailable } from "./asset-library.js";
 
 /**
  * Arrow animation base path for physical white arrows.
@@ -53,9 +53,9 @@ const KATANA_VARIANTS = Object.freeze([
  * @param {Token} targetToken - The token being attacked
  * @returns {Promise<void>}
  */
-export async function playMeleeAttack(attackerToken, targetToken) {
+export async function startMeleeAnimation(attackerToken, targetToken) {
   // Early return: Check module availability
-  if (!isSequencerAvailable() || !isJB2AAvailable()) {
+  if (!isSequencerAvailable() || !isJb2aAvailable()) {
     return;
   }
 
@@ -104,9 +104,9 @@ export async function playMeleeAttack(attackerToken, targetToken) {
  * @param {Token} targetToken - The token being attacked
  * @returns {Promise<void>}
  */
-export async function playArrowAttack(attackerToken, targetToken) {
+export async function startArrowAnimation(attackerToken, targetToken) {
   // Early return: Check module availability
-  if (!isSequencerAvailable() || !isJB2AAvailable()) {
+  if (!isSequencerAvailable() || !isJb2aAvailable()) {
     return;
   }
 
@@ -118,8 +118,8 @@ export async function playArrowAttack(attackerToken, targetToken) {
 
   try {
     // Calculate distance and select appropriate animation
-    const distance = calculateDistance(attackerToken, targetToken);
-    const arrowPath = selectArrowAnimation(distance);
+    const distance = getTokenDistance(attackerToken, targetToken);
+    const arrowPath = getArrowAnimation(distance);
 
     // Create and play Sequencer animation
     const sequence = new Sequence();
@@ -181,7 +181,7 @@ export function isBowWeapon(weapon) {
  * @param {Item} weapon - The weapon being used
  * @returns {Promise<void>}
  */
-export async function handleAttackRoll(attacker, target, weapon) {
+export async function startAttackAnimation(attacker, target, weapon) {
   if (!weapon) {
     return;
   }
@@ -201,10 +201,10 @@ export async function handleAttackRoll(attacker, target, weapon) {
   // Check weapon type and play appropriate animation
   if (isBowWeapon(weapon)) {
     // Ranged attack: Play arrow animation
-    await playArrowAttack(attackerToken, targetToken);
+    await startArrowAnimation(attackerToken, targetToken);
   } else if (weapon.type === "weapon") {
     // Melee attack: Play katana slash animation
-    await playMeleeAttack(attackerToken, targetToken);
+    await startMeleeAnimation(attackerToken, targetToken);
   }
 }
 
@@ -218,7 +218,7 @@ export async function handleAttackRoll(attacker, target, weapon) {
  * @param {Token} targetToken - The target token
  * @returns {number} Distance in grid units (feet)
  */
-function calculateDistance(sourceToken, targetToken) {
+function getTokenDistance(sourceToken, targetToken) {
   if (!sourceToken || !targetToken) {
     return 0;
   }
@@ -250,7 +250,7 @@ function calculateDistance(sourceToken, targetToken) {
  * @param {number} distance - Actual distance in feet
  * @returns {string} Full JB2A arrow animation path
  */
-function selectArrowAnimation(distance) {
+function getArrowAnimation(distance) {
   // Find the closest distance variant that's >= actual distance
   let selectedDistance = ARROW_DISTANCES[ARROW_DISTANCES.length - 1]; // Default to 90ft
 

@@ -78,11 +78,11 @@ export function F(key, data) {
  * @param {{key: string, data?: object}} phrase
  * @returns {string}
  */
-export function phraseText(phrase) {
+export function formatPhrase(phrase) {
   const data = Object.fromEntries(
     Object.entries(phrase.data ?? {}).map(([name, value]) => [
       name,
-      value && typeof value === "object" ? phraseText(value) : value
+      value && typeof value === "object" ? formatPhrase(value) : value
     ])
   );
   return F(phrase.key, data);

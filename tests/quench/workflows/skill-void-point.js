@@ -21,7 +21,7 @@
 import { SYS_ID } from "../../../module/config/constants.js";
 import { createTestPC } from "../../fixtures/actor-fixtures.js";
 import { createSkillData } from "../../fixtures/item-fixtures.js";
-import { SkillRoll } from "../../../module/services/dice/rolls/skill-roll.js";
+import { rollSkill } from "../../../module/services/dice/rolls/skill-roll.js";
 import { spendVoidPoint } from "../../../module/services/dice/resources/void-points.js";
 
 /**
@@ -449,11 +449,11 @@ export function registerSkillVoidPointTests(quench) {
           assert.isTrue(voidResult.success, "Void point spent");
 
           // ACT - Execute skill roll with void bonuses
-          const rollResult = await SkillRoll({
+          const rollResult = await rollSkill({
             actor,
             skillName: "kenjutsu",
             skillRank: 5,
-            actorTrait: 4,
+            traitRank: 4,
             skillTrait: "agi",
             rollBonus: voidResult.rollBonus, // +1
             keepBonus: voidResult.keepBonus, // +1

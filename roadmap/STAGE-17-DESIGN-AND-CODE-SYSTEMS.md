@@ -424,6 +424,14 @@ Code wave, part 1 (D1: per-file JSDoc, doc format, module shape, import and memb
 - Citations: every page number sits on a `game-rules/<file>.md, p.N` line; four functions gained a citation read from game-rules/ (spell slots p.163, Void Points p.78, Armor TN p.82, casting above School Rank p.164); one range narrowed from pp.86-88 to pp.86-87, the pages of `38_maneuvers.md` its maneuvers sit on. No book text (scanned the added comment lines for quoted runs).
 - Left for part 2: identifier names (`l5r4/naming`, glossary identifiers), `max-params`, `new-cap`, presentation in JavaScript (`no-restricted-syntax`), layer imports and globals, and 9 `module-shape` / 2 `import-order` hits whose fix renames or moves a side-effect import.
 
+Code wave, part 2 (D2: identifier names), each by decision 17:
+
+- `l5r4/naming` flagged the two mixins though naming.md names them `<Name>Mixin`; fixed with a failing fixture first.
+- 480 renames, proposed per folder and applied by one scope-aware codemod (espree and eslint-scope: a binding and its references, never a property that shares the name): verb-first function names, `#name` for private members, acronyms as words (`armorTn`, `castTn`), glossary stems (`roll` / `keep` for a pool), and action handlers as `static #on<Action>`, which core calls with `this` bound to the app instance (`application.mjs:1984`). No fixed name changed: `game.system.api.rollItem` / `rollTrait`, stored fields, query names, chat-card actions.
+- Names that change for code outside the system (for CHANGELOG.MD): a Skill's prepared `system.rollDice` / `rollKeep` (and the item-level `keepDice`) are `system.roll` / `keep`, a spell's `system.castTN` is `castTn`; `L5R4Combat.resolveInitiativeBonuses` / `events` are `askInitiativeBonuses` / `EVENTS`; the roll services are functions (`rollSkill`, `rollTrait`, `rollRing`, `rollPool`, `rollWeaponDamage`, `rollSpellCast`, `rollMahoCast`) with options `roll`, `keep`, `traitRank`, `ringKey`, `unskilled`; the sheets' `data-system-ring` is `data-ring-key`. None is stored in world data.
+- Left for review: `logError`, `warnVoidLimit`, `exportItemFolder`, `settleStarts` need verbs naming.md does not list (log, warn, export, wait); `freeRaisesToTN` mirrors a stored message field; `TRAITS` / `RINGS` in rule-summary.js are constants flagged as state because a bare `new Set` is not frozen (wrap them, as `STANCE_IDS` is).
+- Full Quench 1708 passed; the one failure was core's `sounds/dice.wav` load error in `sheets-and-apps`, which passed on rerun (35 of 35).
+
 ### Progress (handoff, 2026-11-15)
 
 | Step | State |

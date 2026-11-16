@@ -2,12 +2,12 @@ import { readFileSync } from "node:fs";
 import { describe, expect, it } from "vitest";
 import { RULE_KEYS } from "../../../module/config/rule-keys.js";
 import {
-  poolText,
-  ruleSummary,
-  rulesSummary,
-  selectorPhrase,
-  signed,
-  sourceCitation,
+  formatPool,
+  buildRuleSummary,
+  buildRulesSummary,
+  buildSelectorPhrase,
+  formatSigned,
+  buildSourceCitation,
   SUMMARY_KEYS
 } from "../../../module/utils/rule-summary.js";
 
@@ -71,7 +71,7 @@ const SAMPLES = [
   { key: "GrantItem", uuid: "Compendium.l5r4-enhanced.skills.Item.abc", rank: 2 }
 ];
 
-describe("ruleSummary", () => {
+describe("buildRuleSummary", () => {
   it("should have a summary key for every rule key, each in lang/en.json", () => {
     for (const key of RULE_KEYS) {
       expect(SUMMARY_KEYS[key], key).toBe(`l5r4.ui.ruleSummary.${key}`);
@@ -82,7 +82,7 @@ describe("ruleSummary", () => {
   it("should cover every rule key with a sample, and every key a sample uses is in lang/en.json", () => {
     expect(new Set(SAMPLES.map(rule => rule.key))).toEqual(new Set(RULE_KEYS));
     for (const rule of SAMPLES) {
-      const keys = ruleSummary(rule).flatMap(keysOf);
+      const keys = buildRuleSummary(rule).flatMap(keysOf);
       expect(keys.length, rule.key).toBeGreaterThan(0);
       for (const key of keys.filter(k => k.startsWith("l5r4."))) {
         expect(hasKey(key), `${rule.key}: ${key}`).toBe(true);
@@ -91,7 +91,7 @@ describe("ruleSummary", () => {
   });
 
   it("should write a modifier's pool and the rolls it names", () => {
-    const [line, range, optional] = ruleSummary(SAMPLES[0]);
+    const [line, range, optional] = buildRuleSummary(SAMPLES[0]);
     expect(line).toEqual({
       key: "l5r4.ui.ruleSummary.RollModifier",
       data: {
@@ -108,25 +108,25 @@ describe("ruleSummary", () => {
 
   it("should say an ActionCost limited to one attack range is limited to it", () => {
     const rule = { key: "ActionCost", selector: "attack", action: "simple", range: "melee" };
-    expect(ruleSummary(rule).map(line => line.key)).toEqual([
+    expect(buildRuleSummary(rule).map(line => line.key)).toEqual([
       "l5r4.ui.ruleSummary.ActionCost",
       "l5r4.ui.ruleSummary.range.melee"
     ]);
-    expect(ruleSummary({ ...rule, range: null })).toHaveLength(1);
+    expect(buildRuleSummary({ ...rule, range: null })).toHaveLength(1);
   });
 
   it("should name a Trait through its own key and a condition through its status name", () => {
-    expect(selectorPhrase("trait:ref").data.name.key).toBe("l5r4.ui.mechanics.traits.ref");
-    expect(ruleSummary(SAMPLES[16])[0].data.condition.key).toBe("l5r4.ui.statusEffects.dazed");
+    expect(buildSelectorPhrase("trait:ref").data.name.key).toBe("l5r4.ui.mechanics.traits.ref");
+    expect(buildRuleSummary(SAMPLES[16])[0].data.condition.key).toBe("l5r4.ui.statusEffects.dazed");
   });
 
   it("should name a granted item through the resolver it is given", () => {
-    const [line] = ruleSummary(SAMPLES.at(-1), { itemName: () => "Kenjutsu" });
+    const [line] = buildRuleSummary(SAMPLES.at(-1), { itemName: () => "Kenjutsu" });
     expect(line.data).toEqual({ item: "Kenjutsu", rank: 2 });
   });
 
   it("should say when a rule has a predicate", () => {
-    const [line] = ruleSummary({
+    const [line] = buildRuleSummary({
       key: "RollModifier",
       selector: "attack",
       roll: 1,
@@ -138,37 +138,37 @@ describe("ruleSummary", () => {
   });
 
   it("should give a line, not an error, for an unknown or broken rule", () => {
-    expect(ruleSummary({ key: "Nope" })).toEqual([
+    expect(buildRuleSummary({ key: "Nope" })).toEqual([
       { key: "l5r4.ui.ruleSummary.unknown", data: { key: "Nope" } }
     ]);
-    expect(ruleSummary(null)[0].key).toBe("l5r4.ui.ruleSummary.unknown");
-    expect(ruleSummary({ key: "TNModifier" })[0].data.value).toBe("+0");
+    expect(buildRuleSummary(null)[0].key).toBe("l5r4.ui.ruleSummary.unknown");
+    expect(buildRuleSummary({ key: "TNModifier" })[0].data.value).toBe("+0");
   });
 
   it("should join the lines of a rule list, and take a missing list as none", () => {
-    expect(rulesSummary([SAMPLES[1], SAMPLES[5]])).toHaveLength(2);
-    expect(rulesSummary(undefined)).toEqual([]);
+    expect(buildRulesSummary([SAMPLES[1], SAMPLES[5]])).toHaveLength(2);
+    expect(buildRulesSummary(undefined)).toEqual([]);
   });
 });
 
-describe("The signed and poolText helpers", () => {
+describe("The formatSigned and formatPool helpers", () => {
   it("should sign numbers and keep formulas as written", () => {
-    expect(signed(2)).toBe("+2");
-    expect(signed(-1)).toBe("-1");
-    expect(signed("@rings.air")).toBe("@rings.air");
+    expect(formatSigned(2)).toBe("+2");
+    expect(formatSigned(-1)).toBe("-1");
+    expect(formatSigned("@rings.air")).toBe("@rings.air");
   });
 
   it("should write a pool as dice and a flat bonus", () => {
-    expect(poolText({ roll: 1 })).toBe("+1k0");
-    expect(poolText({ keep: 1, total: 5 })).toBe("+0k1+5");
-    expect(poolText({ total: -5 })).toBe("-5");
-    expect(poolText({})).toBe("+0");
+    expect(formatPool({ roll: 1 })).toBe("+1k0");
+    expect(formatPool({ keep: 1, total: 5 })).toBe("+0k1+5");
+    expect(formatPool({ total: -5 })).toBe("-5");
+    expect(formatPool({})).toBe("+0");
   });
 });
 
-describe("sourceCitation", () => {
+describe("buildSourceCitation", () => {
   it("should cite the book and printed page", () => {
-    expect(sourceCitation({ book: "core", page: 204 })).toEqual({
+    expect(buildSourceCitation({ book: "core", page: 204 })).toEqual({
       key: "l5r4.ui.ruleSummary.citation",
       data: { book: { key: "l5r4.ui.sources.core", data: {} }, page: 204 }
     });
@@ -176,8 +176,8 @@ describe("sourceCitation", () => {
   });
 
   it("should be null for an item that cites nothing", () => {
-    expect(sourceCitation({ book: "", page: 0 })).toBeNull();
-    expect(sourceCitation({ book: "core", page: 0 })).toBeNull();
-    expect(sourceCitation(undefined)).toBeNull();
+    expect(buildSourceCitation({ book: "", page: 0 })).toBeNull();
+    expect(buildSourceCitation({ book: "core", page: 0 })).toBeNull();
+    expect(buildSourceCitation(undefined)).toBeNull();
   });
 });

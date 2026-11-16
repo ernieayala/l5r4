@@ -18,14 +18,14 @@ import { SYS_ID } from "../../config/constants.js";
 import { T } from "../../utils/localization.js";
 import { toInt } from "../../utils/type-coercion.js";
 import { applyEffect, effectsOf } from "./apply.js";
-import { promptConcentration, rollFullDefense } from "./prompts.js";
+import { postConcentrationPrompt, rollFullDefense } from "./prompts.js";
 
 /**
  * Put Prone on an actor that is Down and not dead, and take the automatic Prone off one that is not Down.
  * @param {Actor} actor
  * @returns {Promise<void>}
  */
-export async function syncProne(actor) {
+export async function updateProne(actor) {
   const automatic = effectsOf(actor, "prone").filter(e => e.getFlag(SYS_ID, "autoApplied"));
   if (isDown(actor)) {
     if (!actor.statuses.has("prone") && !actor.statuses.has("dead")) {
@@ -79,7 +79,7 @@ export function registerTokenEffects() {
 }
 
 /** Register the hooks, once during system init. */
-export function initializeEffectAutomation() {
+export function registerEffectAutomation() {
   Hooks.once("ready", registerTokenEffects);
   Hooks.on("preUpdateActor", onPreUpdateActor);
   Hooks.on("updateActor", onUpdateActor);
@@ -127,13 +127,13 @@ async function onUpdateActor(actor, changes, options) {
   if (!foundry.utils.hasProperty(changes, "system.suffered") && !changes.system?.wounds) {
     return;
   }
-  await syncProne(actor);
+  await updateProne(actor);
 
   const before = options[`${SYS_ID}SufferedBefore`];
   const taken = before === undefined ? 0 : toInt(actor._source.system.suffered) - before;
   if (taken > toInt(actor.system.rings.earth)) {
     for (const effect of effectsOf(actor, "concentration")) {
-      await promptConcentration(actor, effect);
+      await postConcentrationPrompt(actor, effect);
     }
   }
 }

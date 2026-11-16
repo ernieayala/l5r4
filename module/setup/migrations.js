@@ -9,12 +9,12 @@
  * failure is logged and the rest still runs; a marker flag on each document makes a second run skip it.
  */
 import { SYS_ID } from "../config/constants.js";
-import { hasBeenMigrated, markAsMigrated } from "./migrations/utils/helpers.js";
+import { hasBeenMigrated, updateMigratedVersion } from "./migrations/utils/helpers.js";
 import { applySchemaMapToDocs } from "./migrations/schema/apply.js";
 import { migrateLegacyNpcWounds } from "./migrations/actors/npc-wounds.js";
 import { migrateNpcInitiative } from "./migrations/actors/npc-initiative.js";
 import { migrateActorEmbeddedItems } from "./migrations/actors/embedded-items.js";
-import { cleanupLegacyFields } from "./migrations/actors/cleanup.js";
+import { deleteLegacyFields } from "./migrations/actors/cleanup.js";
 import { migrateEffectFreeTraitBase } from "./migrations/actors/xp-free-trait-base.js";
 import { migrateStatusEffectRules } from "./migrations/actors/status-effect-rules.js";
 import { migrateUnlinkedTokens } from "./migrations/actors/unlinked-tokens.js";
@@ -23,10 +23,10 @@ import { migrateSkillDefaults } from "./migrations/items/skill-defaults.js";
 import { migrateEmphasisStringToArray } from "./migrations/items/emphasis.js";
 import { migrateArmorTypes } from "./migrations/items/armor-types.js";
 import { migrateFreeRaisesDefaults } from "./migrations/items/free-raises.js";
-import { normalizeItems } from "./migrations/items/normalize.js";
+import { migrateWeaponSizes } from "./migrations/items/normalize.js";
 import { migrateItemRules } from "./migrations/items/item-rules.js";
 import {
-  runIconPathMigration,
+  migrateIconPaths,
   migrateCompendiumIconPaths,
   migrateEmbeddedItemIcons
 } from "./migrations/icons/icon-paths.js";
@@ -73,7 +73,7 @@ import {
  * @param {string} toVersion - New system version to mark documents with after migration
  * @returns {Promise<void>}
  */
-export async function runMigrations(fromVersion, toVersion) {
+export async function migrateWorld(fromVersion, toVersion) {
   if (!game.user?.isGM) {
     return;
   }
@@ -100,11 +100,11 @@ export async function runMigrations(fromVersion, toVersion) {
 
   await migrateEmbeddedItemIcons(unmigratedItems, "world-icon-migration");
 
-  await normalizeItems(unmigratedItems, "world-items-norm");
+  await migrateWeaponSizes(unmigratedItems, "world-items-norm");
 
   await migrateItemRules(unmigratedItems, "world-item-rules");
 
-  await cleanupLegacyFields(unmigratedActors, "world-actors-cleanup");
+  await deleteLegacyFields(unmigratedActors, "world-actors-cleanup");
 
   for (const actor of unmigratedActors) {
     await migrateActorEmbeddedItems(actor, "actor");
@@ -123,7 +123,7 @@ export async function runMigrations(fromVersion, toVersion) {
 
   // Mark all migrated documents with current version to prevent re-migration
   for (const doc of [...unmigratedActors, ...unmigratedItems]) {
-    await markAsMigrated(doc, toVersion);
+    await updateMigratedVersion(doc, toVersion);
   }
 
   for (const pack of game.packs) {
@@ -163,7 +163,7 @@ export async function runMigrations(fromVersion, toVersion) {
       await migrateArmorTypes(unmigratedDocs, `pack-armor-types:${pack.collection}`);
       await migrateFreeRaisesDefaults(unmigratedDocs, `pack-free-raises:${pack.collection}`);
       await migrateEmbeddedItemIcons(unmigratedDocs, `pack-icon-migration:${pack.collection}`);
-      await normalizeItems(unmigratedDocs, `pack-norm:${pack.collection}`);
+      await migrateWeaponSizes(unmigratedDocs, `pack-norm:${pack.collection}`);
       await migrateItemRules(unmigratedDocs, `pack-item-rules:${pack.collection}`);
 
       if (docType === "Actor") {
@@ -179,7 +179,7 @@ export async function runMigrations(fromVersion, toVersion) {
 
       // Mark compendium documents as migrated
       for (const doc of unmigratedDocs) {
-        await markAsMigrated(doc, toVersion);
+        await updateMigratedVersion(doc, toVersion);
       }
     } catch (e) {
       console.warn(`${SYS_ID}`, "Schema remap pack failed", { pack: pack.collection, error: e });
@@ -187,7 +187,7 @@ export async function runMigrations(fromVersion, toVersion) {
   }
 
   try {
-    await runIconPathMigration();
+    await migrateIconPaths();
     await migrateCompendiumIconPaths();
   } catch (err) {
     console.warn(`${SYS_ID} | Migration failed`, { fromVersion, toVersion, error: err });
@@ -195,4 +195,4 @@ export async function runMigrations(fromVersion, toVersion) {
 }
 
 // Re-export icon migration for external use
-export { runIconPathMigration } from "./migrations/icons/icon-paths.js";
+export { migrateIconPaths } from "./migrations/icons/icon-paths.js";

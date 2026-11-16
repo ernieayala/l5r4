@@ -16,6 +16,6 @@ export const FEAR_RANKS = Object.freeze({ min: 1, max: 10 });
  * @param {number} rank - Fear Rank
  * @returns {number}
  */
-export function fearTN(rank) {
+export function getFearTn(rank) {
   return 5 + 5 * rank;
 }

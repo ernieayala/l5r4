@@ -1,7 +1,11 @@
 import { describe, expect, it } from "vitest";
-import { openChoices, unmetPrerequisites, withSelections } from "../../../module/utils/purchase.js";
+import {
+  openChoices,
+  getUnmetPrerequisites,
+  buildRulesWithSelections
+} from "../../../module/utils/purchase.js";
 
-describe("unmetPrerequisites", () => {
+describe("getUnmetPrerequisites", () => {
   const kenjutsu3 = {
     key: "Prerequisite",
     label: "Kenjutsu 3",
@@ -9,16 +13,16 @@ describe("unmetPrerequisites", () => {
   };
 
   it("should list the requirements the buyer's options do not meet", () => {
-    expect(unmetPrerequisites([kenjutsu3], new Set(["skill:kenjutsu:2"]))).toEqual([
+    expect(getUnmetPrerequisites([kenjutsu3], new Set(["skill:kenjutsu:2"]))).toEqual([
       { label: "Kenjutsu 3", requires: kenjutsu3.requires }
     ]);
-    expect(unmetPrerequisites([kenjutsu3], new Set(["skill:kenjutsu:3"]))).toEqual([]);
+    expect(getUnmetPrerequisites([kenjutsu3], new Set(["skill:kenjutsu:3"]))).toEqual([]);
   });
 
   it("should check a prerequisite only when its own predicate holds", () => {
     const forNonCrane = { ...kenjutsu3, predicate: [{ not: "clan:crane" }] };
-    expect(unmetPrerequisites([forNonCrane], new Set(["clan:crane"]))).toEqual([]);
-    expect(unmetPrerequisites([forNonCrane], new Set())).toHaveLength(1);
+    expect(getUnmetPrerequisites([forNonCrane], new Set(["clan:crane"]))).toEqual([]);
+    expect(getUnmetPrerequisites([forNonCrane], new Set())).toHaveLength(1);
   });
 
   it("should combine requirements with or, and skip rules without a requires list", () => {
@@ -26,9 +30,9 @@ describe("unmetPrerequisites", () => {
       key: "Prerequisite",
       requires: [{ or: ["school:kakita bushi", "school:bayushi bushi"] }]
     };
-    expect(unmetPrerequisites([either], new Set(["school:kakita bushi"]))).toEqual([]);
+    expect(getUnmetPrerequisites([either], new Set(["school:kakita bushi"]))).toEqual([]);
     expect(
-      unmetPrerequisites([{ key: "Prerequisite", requires: "nope" }, null], new Set())
+      getUnmetPrerequisites([{ key: "Prerequisite", requires: "nope" }, null], new Set())
     ).toEqual([]);
   });
 });
@@ -65,10 +69,10 @@ describe("openChoices", () => {
   });
 });
 
-describe("withSelections", () => {
+describe("buildRulesWithSelections", () => {
   it("should store selections by rule index in a copy", () => {
     const rules = [{ key: "ChoiceSet", flag: "a" }, { key: "Note" }];
-    const chosen = withSelections(rules, { 0: "kenjutsu" });
+    const chosen = buildRulesWithSelections(rules, { 0: "kenjutsu" });
     expect(chosen[0].selection).toBe("kenjutsu");
     expect(rules[0].selection).toBeUndefined();
     expect(chosen[1]).toBe(rules[1]);

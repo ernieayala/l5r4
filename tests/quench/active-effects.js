@@ -3,8 +3,8 @@ import { STATUS_EFFECTS } from "../../module/config/status-effects.js";
 import { applyEffect } from "../../module/services/effects/apply.js";
 import { spendVoidPoint } from "../../module/services/dice/resources/void-points.js";
 import { spendElementalSlot } from "../../module/services/dice/resources/spell-slots.js";
-import { SpellCastRoll } from "../../module/services/dice/rolls/spell-cast-roll.js";
-import { MahoCastRoll } from "../../module/services/dice/rolls/maho-cast-roll.js";
+import { rollSpellCast } from "../../module/services/dice/rolls/spell-cast-roll.js";
+import { rollMahoCast } from "../../module/services/dice/rolls/maho-cast-roll.js";
 import { applyLongRest } from "../../module/services/rest.js";
 import { VoidPointsHandler } from "../../module/sheets/handlers/void-points-handler.js";
 import { PcAdjustmentHandler } from "../../module/sheets/handlers/pc-adjustment-handler.js";
@@ -203,7 +203,7 @@ export function registerActiveEffectsTests(quench) {
           const [spell] = await actor.createEmbeddedDocuments("Item", [
             { name: "Quench spell", type: "spell", system: { ring: "fire", mastery: 1 } }
           ]);
-          const message = await SpellCastRoll({ actor, spell, showDialog: false });
+          const message = await rollSpellCast({ actor, spell, showDialog: false });
           assert.ok(message, "cast posted");
           assert.equal(actor._source.system.spellSlots.fire, 1, "stored 2 - 1");
         });
@@ -221,7 +221,7 @@ export function registerActiveEffectsTests(quench) {
           const [spell] = await actor.createEmbeddedDocuments("Item", [
             { name: "Quench maho", type: "spell", system: { ring: "fire", mastery: 1, maho: true } }
           ]);
-          const message = await MahoCastRoll({ actor, spell, showDialog: false });
+          const message = await rollMahoCast({ actor, spell, showDialog: false });
           assert.ok(message, "cast posted");
           assert.equal(actor._source.system.suffered, 2, "stored 0 + blood cost 2 (Mastery 1 x 2)");
           assert.equal(actor._source.system.shadowTaint.points, 1, "stored 0 + Taint 1");
@@ -244,7 +244,7 @@ export function registerActiveEffectsTests(quench) {
           await actor.createEmbeddedDocuments("ActiveEffect", [
             addEffect({ "system.rings.void.value": 1 })
           ]);
-          await VoidPointsHandler.adjust({ actor, element: null }, null, -1);
+          await VoidPointsHandler.updateVoidPoints({ actor, element: null }, null, -1);
           assert.equal(actor._source.system.rings.void.value, 1, "stored 2 - 1");
         });
 
@@ -256,7 +256,7 @@ export function registerActiveEffectsTests(quench) {
           await actor.createEmbeddedDocuments("ActiveEffect", [
             addEffect({ "system.spellSlots.fire": 1 })
           ]);
-          await PcAdjustmentHandler.adjustSpellSlot(
+          await PcAdjustmentHandler.updateSpellSlot(
             { actor },
             null,
             { dataset: { path: "system.spellSlots.fire" } },
@@ -270,7 +270,7 @@ export function registerActiveEffectsTests(quench) {
           await actor.createEmbeddedDocuments("ActiveEffect", [
             addEffect({ "system.honor.rank": 1 })
           ]);
-          await PcAdjustmentHandler.adjustRankPoints(
+          await PcAdjustmentHandler.updateRankPoints(
             { actor },
             { shiftKey: true },
             { dataset: { key: "honor" } },
@@ -317,7 +317,7 @@ export function registerActiveEffectsTests(quench) {
           await setUp("Active effects: armor void");
           await combat.startCombat();
           assert.equal(game.combat?.id, combat.id, "the handler reads game.combat");
-          await PcActionsHandler.handleToggleArmorVoid({ actor }, null, { checked: true });
+          await PcActionsHandler.updateArmorVoid({ actor }, null, { checked: true });
           assert.equal(
             actor.effects.filter(e => e.getFlag("l5r4-enhanced", "effectId") === "voidArmor")
               .length,

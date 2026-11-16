@@ -16,11 +16,11 @@
 
 import { CHAT_TEMPLATES } from "../../config/templates.js";
 import { T, F } from "../../utils/localization.js";
-import { contest } from "../../utils/check.js";
+import { getContestResult } from "../../utils/check.js";
 import { getEffectiveTrait } from "../../utils/mechanics.js";
 import { rollCheck } from "../dice/check/roll-check.js";
 import { applyEffectAnywhere, effectsOf } from "../effects/apply.js";
-import { defineFlow, mayActFor, skillRequest, startFlow } from "./flow.js";
+import { registerFlow, canActFor, buildSkillRequest, startFlow } from "./flow.js";
 
 /**
  * The grapple statuses both sides carry.
@@ -78,7 +78,7 @@ function sidesOf(state) {
  * @param {Actor[]} sides
  * @returns {Promise<void>}
  */
-async function release(sides) {
+async function endGrapple(sides) {
   for (const actor of sides) {
     for (const effect of effectsOf(actor, GRAPPLED)) {
       await effect.delete();
@@ -96,7 +96,7 @@ async function release(sides) {
 function rollControl(state, i) {
   const [actor, opponent] = i === 0 ? sidesOf(state) : sidesOf(state).reverse();
   return rollCheck({
-    ...skillRequest(actor, i === 0 ? state.skill : "jiujutsu", "str"),
+    ...buildSkillRequest(actor, i === 0 ? state.skill : "jiujutsu", "str"),
     kind: "skill",
     label: `${T("l5r4.ui.combat.grapple.control")}: ${actor.name}`,
     target: opponent
@@ -126,7 +126,7 @@ function rollHit(state) {
   });
 }
 
-defineFlow("grapple", {
+registerFlow("grapple", {
   /**
    * A button on the grapple card, on the clicking client.
    * @param {ChatMessage} _card
@@ -170,14 +170,16 @@ defineFlow("grapple", {
       const roll = game.messages.get(String(data.rollId));
       if (
         ![0, 1].includes(i) ||
-        !mayActFor(user, sides[i]) ||
+        !canActFor(user, sides[i]) ||
         roll?.system.actorUuid !== sides[i].uuid
       ) {
         throw new Error("Not this user's side or roll");
       }
       state.rolls[i] = roll.system.outcome.total;
       if (state.rolls.every(total => total !== null)) {
-        const result = contest(state.rolls.map((total, side) => ({ id: String(side), total })));
+        const result = getContestResult(
+          state.rolls.map((total, side) => ({ id: String(side), total }))
+        );
         if (result.tie) {
           state.log.push(T("l5r4.ui.check.contestTie"));
         } else {
@@ -194,7 +196,7 @@ defineFlow("grapple", {
     }
     const controller = sides[state.control];
     const other = sides[1 - state.control];
-    if (!mayActFor(user, controller)) {
+    if (!canActFor(user, controller)) {
       throw new Error("Only the side in control acts");
     }
     if (data.action === "hit") {
@@ -209,14 +211,14 @@ defineFlow("grapple", {
         })
       );
     } else if (data.action === "throw") {
-      await release(sides);
+      await endGrapple(sides);
       if (!other.statuses.has("prone")) {
         await applyEffectAnywhere(other, "prone");
       }
       state.log.push(F("l5r4.ui.combat.grapple.thrown", { name: other.name }));
       state.over = true;
     } else if (data.action === "break") {
-      await release(sides);
+      await endGrapple(sides);
       state.log.push(F("l5r4.ui.combat.grapple.broken", { name: controller.name }));
       state.over = true;
     } else if (data.action === "pass") {

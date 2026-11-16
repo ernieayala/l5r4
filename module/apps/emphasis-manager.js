@@ -32,9 +32,9 @@ export default class EmphasisManagerApplication extends foundry.applications.api
       height: 600
     },
     actions: {
-      "add-emphasis": EmphasisManagerApplication.prototype._onAddCustom,
-      "delete-emphasis": EmphasisManagerApplication.prototype._onDeleteCustom,
-      "edit-emphasis": EmphasisManagerApplication.prototype._onEditCustom
+      "add-emphasis": EmphasisManagerApplication.#onAddEmphasis,
+      "delete-emphasis": EmphasisManagerApplication.#onDeleteEmphasis,
+      "edit-emphasis": EmphasisManagerApplication.#onEditEmphasis
     },
     form: {
       handler: EmphasisManagerApplication.prototype._onSubmit,
@@ -178,10 +178,11 @@ export default class EmphasisManagerApplication extends foundry.applications.api
    * Handle add custom emphasis action.
    * Displays dialog for entering new emphasis name, validates, and saves to world settings.
    *
+   * @this {EmphasisManagerApplication}
    * @param {Event} _event - The click event (unused)
-   * @param {HTMLElement} _target - The clicked element (unused)
+   * @param {HTMLElement} _element - The clicked element (unused)
    */
-  async _onAddCustom(_event, _target) {
+  static async #onAddEmphasis(_event, _element) {
     const content = await foundry.applications.handlebars.renderTemplate(
       TEMPLATE("dialogs/custom-emphasis-dialog.hbs")
     );
@@ -203,7 +204,7 @@ export default class EmphasisManagerApplication extends foundry.applications.api
     const trimmedName = name.trim();
 
     try {
-      await saveWorldCustomEmphasis(trimmedName);
+      await createWorldCustomEmphasis(trimmedName);
     } catch {
       ui.notifications?.error(T("l5r4.apps.emphasisManager.errors.saveFailed"));
       return;
@@ -218,11 +219,12 @@ export default class EmphasisManagerApplication extends foundry.applications.api
    * Handle delete custom emphasis action.
    * Displays confirmation dialog and removes emphasis from world settings.
    *
+   * @this {EmphasisManagerApplication}
    * @param {Event} _event - The click event (unused)
-   * @param {HTMLElement} target - The clicked element with data-emphasis-name attribute
+   * @param {HTMLElement} element - The clicked element with data-emphasis-name attribute
    */
-  async _onDeleteCustom(_event, target) {
-    const emphasisName = target.dataset.emphasisName;
+  static async #onDeleteEmphasis(_event, element) {
+    const emphasisName = element.dataset.emphasisName;
 
     if (!emphasisName) {
       console.warn(`${SYS_ID}`, "No emphasis name provided for deletion");
@@ -250,11 +252,12 @@ export default class EmphasisManagerApplication extends foundry.applications.api
    * Handle edit custom emphasis action.
    * Displays dialog for entering new name, validates, and updates in world settings.
    *
+   * @this {EmphasisManagerApplication}
    * @param {Event} _event - The click event (unused)
-   * @param {HTMLElement} target - The clicked element with data-emphasis-name attribute
+   * @param {HTMLElement} element - The clicked element with data-emphasis-name attribute
    */
-  async _onEditCustom(_event, target) {
-    const oldName = target.dataset.emphasisName;
+  static async #onEditEmphasis(_event, element) {
+    const oldName = element.dataset.emphasisName;
 
     if (!oldName) {
       console.warn(`${SYS_ID}`, "No emphasis name provided for editing");
@@ -317,7 +320,7 @@ function getWorldCustomEmphases() {
  * @param {string} emphasisName - The emphasis name to save
  * @throws {Error} If validation fails or emphasis already exists
  */
-async function saveWorldCustomEmphasis(emphasisName) {
+async function createWorldCustomEmphasis(emphasisName) {
   const validation = validateEmphasisName(emphasisName);
   if (!validation.valid) {
     throw new Error(validation.error);

@@ -14,7 +14,7 @@ import {
 import { migratePcSource } from "../migrate-source.js";
 import { preparePcData } from "../../documents/actor/preparation/pc-preparation.js";
 import {
-  calculateInsightRank,
+  getInsightRank,
   preparePcExperience
 } from "../../documents/actor/calculations/xp-system.js";
 import ActorData from "./base-data.js";
@@ -60,7 +60,7 @@ export default class PcData extends ActorData {
   prepareDerivedData() {
     super.prepareDerivedData();
     const actor = this.parent;
-    preparePcData(actor, this, actor._finalizeWoundPenalties.bind(actor), calculateInsightRank);
+    preparePcData(actor, this, actor._finalizeWoundPenalties.bind(actor), getInsightRank);
     preparePcExperience(actor, this);
   }
 

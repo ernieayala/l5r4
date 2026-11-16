@@ -10,7 +10,7 @@
  */
 
 import { SYS_ID } from "../../config/constants.js";
-import { periodKey, usesSpent } from "../../utils/effects.js";
+import { getPeriodKey, getUsesSpent } from "../../utils/effects.js";
 
 /**
  * Void Points a character may normally spend per Round.
@@ -24,11 +24,11 @@ const VOID_PER_ROUND = 1;
  * @param {string} per
  * @returns {string|null}
  */
-export function currentPeriod(actor, per) {
+export function currentPeriodOf(actor, per) {
   const combat =
     game.combats.find(c => c.started && c.getCombatantsByActor(actor).length > 0) ?? null;
   const { secondsPerMinute, minutesPerHour, hoursPerDay } = game.time.calendar.days;
-  return periodKey(per, {
+  return getPeriodKey(per, {
     combatId: combat?.id ?? null,
     round: combat?.round ?? 0,
     turn: combat?.turn ?? null,
@@ -42,7 +42,7 @@ export function currentPeriod(actor, per) {
  * @param {Actor} actor
  * @returns {number}
  */
-export function voidLimit(actor) {
+export function voidLimitOf(actor) {
   return VOID_PER_ROUND + (actor.resources?.void?.max ?? 0);
 }
 
@@ -51,8 +51,8 @@ export function voidLimit(actor) {
  * @param {Actor} actor
  * @returns {number}
  */
-export function voidSpent(actor) {
-  return usesSpent(actor.getFlag(SYS_ID, "uses")?.void, currentPeriod(actor, "round"));
+export function voidSpentOf(actor) {
+  return getUsesSpent(actor.getFlag(SYS_ID, "uses")?.void, currentPeriodOf(actor, "round"));
 }
 
 /**
@@ -60,8 +60,8 @@ export function voidSpent(actor) {
  * @param {Actor} actor
  * @returns {boolean}
  */
-export function voidOverLimit(actor) {
-  return voidSpent(actor) >= voidLimit(actor);
+export function isVoidOverLimit(actor) {
+  return voidSpentOf(actor) >= voidLimitOf(actor);
 }
 
 /**
@@ -70,12 +70,12 @@ export function voidOverLimit(actor) {
  * @param {Actor} actor
  * @returns {object}
  */
-export function voidUseUpdate(actor) {
-  const key = currentPeriod(actor, "round");
+export function buildVoidUseUpdate(actor) {
+  const key = currentPeriodOf(actor, "round");
   if (key === null) {
     return {};
   }
-  return { [`flags.${SYS_ID}.uses.void`]: { key, count: voidSpent(actor) + 1 } };
+  return { [`flags.${SYS_ID}.uses.void`]: { key, count: voidSpentOf(actor) + 1 } };
 }
 
 /**
@@ -84,7 +84,7 @@ export function voidUseUpdate(actor) {
  * @param {Actor} actor
  */
 export function warnVoidLimit(actor) {
-  if (voidOverLimit(actor)) {
+  if (isVoidOverLimit(actor)) {
     ui.notifications?.warn(game.i18n.localize("l5r4.ui.effects.voidLimit", { name: actor.name }));
   }
 }

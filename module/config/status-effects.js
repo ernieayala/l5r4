@@ -14,7 +14,7 @@
  * game-rules/38_maneuvers.md, p.86
  */
 
-import { iconPath } from "./icons.js";
+import { getIconPath } from "./icons.js";
 
 /**
  * Until the start of the Turn of the combatant whose Turn it was when the effect began (Guard).
@@ -30,13 +30,13 @@ export const STATUS_EFFECTS = Object.freeze([
   {
     id: "attackStance",
     name: "l5r4.ui.mechanics.stances.attack",
-    img: iconPath("attack-stance.webp"),
+    img: getIconPath("attack-stance.webp"),
     system: { group: "stance" }
   },
   {
     id: "fullAttackStance",
     name: "l5r4.ui.mechanics.stances.fullAttack",
-    img: iconPath("full-attack-stance.webp"),
+    img: getIconPath("full-attack-stance.webp"),
     // +2k1 to attack rolls, Armor TN -10; no ranged attacks in this stance, so the bonus is melee only
     // game-rules/36_stances.md, p.84
     system: {
@@ -50,7 +50,7 @@ export const STATUS_EFFECTS = Object.freeze([
   {
     id: "defenseStance",
     name: "l5r4.ui.mechanics.stances.defense",
-    img: iconPath("defence-stance.webp"),
+    img: getIconPath("defence-stance.webp"),
     // Air Ring plus Defense Skill Rank to Armor TN
     // game-rules/36_stances.md, p.84
     system: {
@@ -61,14 +61,14 @@ export const STATUS_EFFECTS = Object.freeze([
   {
     id: "fullDefenseStance",
     name: "l5r4.ui.mechanics.stances.fullDefense",
-    img: iconPath("full-defense-stance.webp"),
+    img: getIconPath("full-defense-stance.webp"),
     // The Defense / Reflexes roll gives its own effect until the next Turn (services/effects/prompts.js)
     system: { group: "stance" }
   },
   {
     id: "centerStance",
     name: "l5r4.ui.mechanics.stances.center",
-    img: iconPath("centered-stance.webp"),
+    img: getIconPath("centered-stance.webp"),
     // Its bonus comes the next Round, through the "centered" effect (documents/combat.js)
     system: { group: "stance" }
   },
@@ -76,7 +76,7 @@ export const STATUS_EFFECTS = Object.freeze([
   {
     id: "blinded",
     name: "l5r4.ui.statusEffects.blinded",
-    img: iconPath("blinded.webp"),
+    img: getIconPath("blinded.webp"),
     // -3k3 ranged and -1k1 melee attacks; base Armor TN Reflexes + 5; Water Ring 2 lower for movement
     // game-rules/41_conditional_effects.md, p.89
     system: {
@@ -91,12 +91,12 @@ export const STATUS_EFFECTS = Object.freeze([
   {
     id: "concentration",
     name: "l5r4.ui.statusEffects.concentration",
-    img: iconPath("concentration.webp")
+    img: getIconPath("concentration.webp")
   },
   {
     id: "dazed",
     name: "l5r4.ui.statusEffects.dazed",
-    img: iconPath("dazed.webp"),
+    img: getIconPath("dazed.webp"),
     // -3k0 to all actions, not to damage (Ernie's ruling); Earth Ring roll in the Reactions stage at TN 20, 5 lower
     // after each failure
     // game-rules/41_conditional_effects.md, p.89
@@ -107,28 +107,28 @@ export const STATUS_EFFECTS = Object.freeze([
       ]
     }
   },
-  { id: "dead", name: "l5r4.ui.statusEffects.dead", img: iconPath("dead.webp") },
-  { id: "entangled", name: "l5r4.ui.statusEffects.entangled", img: iconPath("entangled.webp") },
+  { id: "dead", name: "l5r4.ui.statusEffects.dead", img: getIconPath("dead.webp") },
+  { id: "entangled", name: "l5r4.ui.statusEffects.entangled", img: getIconPath("entangled.webp") },
   {
     id: "fasting",
     name: "l5r4.ui.statusEffects.fasting",
-    img: iconPath("fasting.webp"),
+    img: getIconPath("fasting.webp"),
     // +5 TN per level to Skill, physical Trait, and Spell Casting Rolls; the GM sets the level
     // game-rules/41_conditional_effects.md, p.89
-    system: { level: 1, rules: physicalTnRules() }
+    system: { level: 1, rules: buildPhysicalTnRules() }
   },
   {
     id: "fatigued",
     name: "l5r4.ui.statusEffects.fatigued",
-    img: iconPath("fatigue.webp"),
+    img: getIconPath("fatigue.webp"),
     // +5 TN per level to Skill, physical Trait, and Spell Casting Rolls
     // game-rules/41_conditional_effects.md, p.89
-    system: { level: 1, rules: physicalTnRules() }
+    system: { level: 1, rules: buildPhysicalTnRules() }
   },
   {
     id: "feared",
     name: "l5r4.ui.statusEffects.feared",
-    img: iconPath("fear.webp"),
+    img: getIconPath("fear.webp"),
     // -Xk0 to all rolls, X the Fear Rank, until the end of the encounter (STAGE-09 decision 4)
     // game-rules/42_fear.md, p.90
     duration: { expiry: "encounterEnd" },
@@ -137,7 +137,7 @@ export const STATUS_EFFECTS = Object.freeze([
   {
     id: "grappled",
     name: "l5r4.ui.statusEffects.grappled",
-    img: iconPath("grappled.webp"),
+    img: getIconPath("grappled.webp"),
     // Armor TN 5 plus armor (STAGE-09 decision 3)
     // game-rules/41_conditional_effects.md, p.89
     system: { rules: [{ key: "ArmorTN", mode: "total", value: 5 }] }
@@ -145,7 +145,7 @@ export const STATUS_EFFECTS = Object.freeze([
   {
     id: "guarded",
     name: "l5r4.ui.statusEffects.guarded",
-    img: iconPath("guarded.webp"),
+    img: getIconPath("guarded.webp"),
     // +10 Armor TN until the guard's next Turn
     // game-rules/38_maneuvers.md, p.86
     duration: UNTIL_NEXT_TURN,
@@ -154,7 +154,7 @@ export const STATUS_EFFECTS = Object.freeze([
   {
     id: "guarding",
     name: "l5r4.ui.statusEffects.guarding",
-    img: iconPath("guarding.webp"),
+    img: getIconPath("guarding.webp"),
     // -5 Armor TN until the guard's next Turn
     // game-rules/38_maneuvers.md, p.86
     duration: UNTIL_NEXT_TURN,
@@ -163,7 +163,7 @@ export const STATUS_EFFECTS = Object.freeze([
   {
     id: "mounted",
     name: "l5r4.ui.statusEffects.mounted",
-    img: iconPath("mounted.webp"),
+    img: getIconPath("mounted.webp"),
     // +1k0 on attacks against an unmounted target
     // game-rules/41_conditional_effects.md, p.89
     system: {
@@ -180,7 +180,7 @@ export const STATUS_EFFECTS = Object.freeze([
   {
     id: "prone",
     name: "l5r4.ui.statusEffects.prone",
-    img: iconPath("prone.webp"),
+    img: getIconPath("prone.webp"),
     // -10 Armor TN against melee attacks; -2k0 to attacks with small and medium weapons, and no attacks with large
     // ones, which the card notes
     // game-rules/41_conditional_effects.md, p.89
@@ -205,7 +205,7 @@ export const STATUS_EFFECTS = Object.freeze([
   {
     id: "stunned",
     name: "l5r4.ui.statusEffects.stunned",
-    img: iconPath("stunned.webp"),
+    img: getIconPath("stunned.webp"),
     // Armor TN 5 plus armor; Earth Ring roll at TN 20 in the Reactions stage, or it ends after the next Round
     // game-rules/41_conditional_effects.md, p.89
     system: {
@@ -236,7 +236,7 @@ export const SYSTEM_EFFECTS = Object.freeze({
   // game-rules/36_stances.md, p.84
   centered: {
     name: "l5r4.ui.effects.centered",
-    img: iconPath("centered-stance.webp"),
+    img: getIconPath("centered-stance.webp"),
     duration: { value: 1, units: "rounds", expiry: "roundEnd" },
     system: {
       rules: [
@@ -256,14 +256,14 @@ export const SYSTEM_EFFECTS = Object.freeze({
   // game-rules/36_stances.md, p.84
   fullDefense: {
     name: "l5r4.ui.effects.fullDefense",
-    img: iconPath("full-defense-stance.webp"),
+    img: getIconPath("full-defense-stance.webp"),
     duration: UNTIL_NEXT_TURN
   },
   // +10 Armor TN for the Round, declared at its start
   // game-rules/25_rings_and_traits.md, p.78
   voidArmor: {
     name: "l5r4.ui.effects.voidArmor",
-    img: iconPath("void.webp"),
+    img: getIconPath("void.webp"),
     duration: { value: 0, units: "rounds", expiry: "roundEnd" },
     system: { rules: [{ key: "ArmorTN", value: 10 }] }
   }
@@ -290,7 +290,7 @@ export const STANCE_LIMITS = Object.freeze({
  * game-rules/41_conditional_effects.md, p.89
  * @returns {object[]} The TNModifier rules
  */
-function physicalTnRules() {
+function buildPhysicalTnRules() {
   const value = "5 * @level";
   return [
     ...["skill", "attack", "spell"].map(selector => ({ key: "TNModifier", selector, value })),

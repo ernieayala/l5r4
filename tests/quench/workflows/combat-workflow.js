@@ -10,8 +10,8 @@
 import { SYS_ID } from "../../../module/config/constants.js";
 import { createTestPC, createTestNPC } from "../../fixtures/actor-fixtures.js";
 import { createWeaponData, createSkillData } from "../../fixtures/item-fixtures.js";
-import { SkillRoll } from "../../../module/services/dice/rolls/skill-roll.js";
-import { WeaponRoll } from "../../../module/services/dice/rolls/weapon-roll.js";
+import { rollSkill } from "../../../module/services/dice/rolls/skill-roll.js";
+import { rollWeaponDamage } from "../../../module/services/dice/rolls/weapon-roll.js";
 
 /**
  * Register combat workflow tests with Quench
@@ -81,13 +81,13 @@ export function registerCombatWorkflowTests(quench) {
           const skillTrait = skillItem?.system?.trait ?? "agi";
           const traitValue = attacker.system.traits[skillTrait] ?? 2;
 
-          // ACT - Use REAL attack service (SkillRoll for weapon attacks)
-          const attackMessage = await SkillRoll({
+          // ACT - Use REAL attack service (rollSkill for weapon attacks)
+          const attackMessage = await rollSkill({
             actor: attacker,
             skillRank,
             skillName,
             skillTrait,
-            actorTrait: traitValue,
+            traitRank: traitValue,
             woundPenalty: 0,
             askForOptions: false, // Match setting to bypass dialog
             rollType: "attack"
@@ -106,10 +106,10 @@ export function registerCombatWorkflowTests(quench) {
             const diceRoll = weapon.system.derivedDamageRoll ?? weapon.system.damageRoll ?? 0;
             const diceKeep = weapon.system.derivedDamageKeep ?? weapon.system.damageKeep ?? 0;
 
-            const damageMessage = await WeaponRoll({
+            const damageMessage = await rollWeaponDamage({
               actor: attacker,
-              diceRoll,
-              diceKeep,
+              roll: diceRoll,
+              keep: diceKeep,
               weaponName: weapon.name,
               askForOptions: false // Match setting to bypass dialog (XOR logic)
             });
@@ -117,7 +117,7 @@ export function registerCombatWorkflowTests(quench) {
             // ASSERT damage roll executed
             assert.exists(damageMessage, "Damage roll chat message created");
             assert.isString(damageMessage.content, "Chat message has content");
-            // Note: WeaponRoll uses ChatMessage.create() which doesn't attach Roll object
+            // Note: rollWeaponDamage uses ChatMessage.create() which doesn't attach Roll object
             // So we verify the service executed successfully by checking message creation
           }
         });
@@ -152,12 +152,12 @@ export function registerCombatWorkflowTests(quench) {
           const traitValue = weakAttacker.system.traits[skillTrait] ?? 1;
 
           // ACT - Attempt attack (likely to miss with low dice)
-          const attackMessage = await SkillRoll({
+          const attackMessage = await rollSkill({
             actor: weakAttacker,
             skillRank,
             skillName,
             skillTrait,
-            actorTrait: traitValue,
+            traitRank: traitValue,
             woundPenalty: 0,
             askForOptions: false, // Match setting to bypass dialog
             rollType: "attack"
@@ -199,10 +199,10 @@ export function registerCombatWorkflowTests(quench) {
           const diceRoll = weapon.system.derivedDamageRoll ?? weapon.system.damageRoll ?? 0;
           const diceKeep = weapon.system.derivedDamageKeep ?? weapon.system.damageKeep ?? 0;
 
-          const damageMessage = await WeaponRoll({
+          const damageMessage = await rollWeaponDamage({
             actor: strongAttacker,
-            diceRoll,
-            diceKeep,
+            roll: diceRoll,
+            keep: diceKeep,
             weaponName: weapon.name,
             askForOptions: false
           });

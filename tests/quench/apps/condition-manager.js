@@ -15,7 +15,7 @@
  * @module tests/quench/apps/condition-manager
  */
 
-import { statusRules } from "../../../module/utils/rule-engine.js";
+import { getStatusRules } from "../../../module/utils/rule-engine.js";
 import { SYS_ID } from "../../../module/config/constants.js";
 import { STATUS_EFFECTS } from "../../../module/config/status-effects.js";
 import { createTestPC } from "../../fixtures/actor-fixtures.js";
@@ -328,7 +328,7 @@ export function registerConditionManagerTests(quench) {
               {
                 name: "Defense Stance",
                 img: `systems/${SYS_ID}/assets/icons/defence-stance.webp`,
-                system: { rules: statusRules("defenseStance") },
+                system: { rules: getStatusRules("defenseStance") },
                 statuses: ["defenseStance"]
               },
               {

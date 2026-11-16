@@ -1,6 +1,6 @@
 import { SYS_ID } from "../../module/config/constants.js";
 import { StanceHandler } from "../../module/sheets/handlers/stance-handler.js";
-import { SkillRoll } from "../../module/services/dice/rolls/skill-roll.js";
+import { rollSkill } from "../../module/services/dice/rolls/skill-roll.js";
 import { createTestPC } from "../fixtures/actor-fixtures.js";
 import { createSkillData } from "../fixtures/item-fixtures.js";
 import { autoAnswerRolls, cleanTest, settleChatNotifications, waitFor } from "./helpers.js";
@@ -62,13 +62,13 @@ export function registerRegressionsTests(quench) {
 
       /** Pick a stance on the sheet's stance select, as the sheet's handler receives it. */
       const pick = (actor, stanceId) =>
-        StanceHandler.changeStance({ actor }, null, { value: stanceId });
+        StanceHandler.applyStance({ actor }, null, { value: stanceId });
 
       /** A Kenjutsu / Agility attack with no dialog. */
       const kenjutsuAttack = async actor => {
-        const message = await SkillRoll({
+        const message = await rollSkill({
           actor,
-          actorTrait: actor.system.traits.agi,
+          traitRank: actor.system.traits.agi,
           skillRank: 2,
           skillName: "Kenjutsu",
           skillTrait: "agi",

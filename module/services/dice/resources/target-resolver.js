@@ -20,12 +20,12 @@ import { T } from "../../../utils/localization.js";
  * - Target found but Armor TN is 0 or invalid
  *
  * @typedef {object} EmptyTarget
- * @property {number} autoTN - Always 0 (no auto-populated Target Number)
+ * @property {number} autoTn - Always 0 (no auto-populated Target Number)
  * @property {string} targetInfo - Empty string (no target description text)
  * @property {null} targetData - No target metadata
  */
 const EMPTY_TARGET = Object.freeze({
-  autoTN: 0,
+  autoTn: 0,
   targetInfo: "",
   targetData: null
 });
@@ -34,11 +34,11 @@ const EMPTY_TARGET = Object.freeze({
  * Single target resolution result with Armor TN.
  *
  * @typedef {object} SingleTargetResult
- * @property {number} autoTN - Target's Armor TN to auto-populate attack roll TN
+ * @property {number} autoTn - Target's Armor TN to auto-populate attack roll TN
  * @property {string} targetInfo - Formatted string for UI display (e.g., " vs Hida Yakamo")
  * @property {object} targetData - Target metadata for chat message rendering
  * @property {string} targetData.name - Target actor's display name
- * @property {number} targetData.armorTN - Target's Armor TN value
+ * @property {number} targetData.armorTn - Target's Armor TN value
  * @property {boolean} targetData.single - Flag indicating single target (true)
  * @property {string} targetData.vsText - Localized "vs" text
  * @property {L5R4Actor} targetData.actor - Reference to target actor document
@@ -48,7 +48,7 @@ const EMPTY_TARGET = Object.freeze({
  * Multiple target resolution result.
  *
  * @typedef {object} MultipleTargetResult
- * @property {number} autoTN - Always 0 (cannot auto-populate with multiple targets)
+ * @property {number} autoTn - Always 0 (cannot auto-populate with multiple targets)
  * @property {string} targetInfo - Formatted string indicating multiple targets
  * @property {object} targetData - Multi-target metadata
  * @property {boolean} targetData.multiple - Flag indicating multiple targets (true)
@@ -81,7 +81,7 @@ const EMPTY_TARGET = Object.freeze({
  * @param {string} rollType - Type of roll being made ("attack", "skill", "spell", etc.)
  * @returns {EmptyTarget|SingleTargetResult|MultipleTargetResult} Target resolution result
  */
-export function resolveTargets(actor, rollType) {
+export function getTargets(actor, rollType) {
   if (rollType !== "attack" || !actor) {
     return EMPTY_TARGET;
   }
@@ -90,15 +90,15 @@ export function resolveTargets(actor, rollType) {
 
   if (targetedTokens.length === 1) {
     const targetActor = targetedTokens[0].actor;
-    const armorTN = resolveArmorTN(targetActor);
+    const armorTn = armorTnOf(targetActor);
 
-    if (armorTN > 0) {
+    if (armorTn > 0) {
       return {
-        autoTN: armorTN,
+        autoTn: armorTn,
         targetInfo: ` ${T("l5r4.ui.combat.vs")} ${targetActor.name}`,
         targetData: {
           name: targetActor.name,
-          armorTN: armorTN,
+          armorTn,
           single: true,
           vsText: T("l5r4.ui.combat.vs"),
           actor: targetActor
@@ -109,7 +109,7 @@ export function resolveTargets(actor, rollType) {
 
   if (targetedTokens.length > 1) {
     return {
-      autoTN: 0,
+      autoTn: 0,
       targetInfo: ` (${T("l5r4.ui.combat.multipleTargets")})`,
       targetData: {
         multiple: true,
@@ -130,7 +130,7 @@ export function resolveTargets(actor, rollType) {
  * @param {object|number|*} value - Value to extract from (may be object, number, or invalid)
  * @returns {number|null} Numeric value if found, null otherwise
  */
-function extractNumericValue(value) {
+function currentValueOf(value) {
   if (value?.current !== undefined) {
     return value.current;
   }
@@ -166,23 +166,23 @@ function extractNumericValue(value) {
  *
  * Foundry Integration:
  * - Accesses actor.system using optional chaining for safety
- * - Uses extractNumericValue() to handle both object and raw number formats
+ * - Uses currentValueOf() to handle both object and raw number formats
  * - Coerces final result via toInt() to ensure valid integer (0 if invalid)
  *
  * @param {L5R4Actor} targetActor - Target actor document to extract Armor TN from
  * @returns {number} Target's Armor TN as integer, or 0 if not found/invalid
  */
-function resolveArmorTN(targetActor) {
+function armorTnOf(targetActor) {
   if (!targetActor) {
     return 0;
   }
 
-  const armorTN =
-    extractNumericValue(targetActor?.system?.armorTn) ||
-    extractNumericValue(targetActor?.system?.wounds?.armorTn) ||
-    extractNumericValue(targetActor?.system?._derived?.armorTn) ||
+  const armorTn =
+    currentValueOf(targetActor?.system?.armorTn) ||
+    currentValueOf(targetActor?.system?.wounds?.armorTn) ||
+    currentValueOf(targetActor?.system?._derived?.armorTn) ||
     targetActor?.system?.armor?.tn ||
     targetActor?.system?.armor?.armorTn;
 
-  return toInt(armorTN);
+  return toInt(armorTn);
 }

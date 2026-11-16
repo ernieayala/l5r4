@@ -21,7 +21,7 @@ const COMPONENTS = Object.freeze(["roll", "keep", "total"]);
  * @param {RollModifierValue[]} modifiers
  * @returns {{roll: number, keep: number, total: number}}
  */
-export function stackModifiers(modifiers) {
+export function getStackedModifiers(modifiers) {
   const result = { roll: 0, keep: 0, total: 0 };
   const typed = new Map();
   for (const modifier of modifiers) {

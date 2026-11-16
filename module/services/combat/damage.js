@@ -16,13 +16,13 @@ import { F, T } from "../../utils/localization.js";
 import { toInt } from "../../utils/type-coercion.js";
 import {
   MANEUVER_RAISES,
-  feintBonus,
+  getFeintBonus,
   isDead,
-  voidReduction,
-  woundsTaken
+  getVoidReduction,
+  getWoundsTaken
 } from "../../utils/damage.js";
 import { rollCheck } from "../dice/check/roll-check.js";
-import { voidUseUpdate, warnVoidLimit } from "../effects/uses.js";
+import { buildVoidUseUpdate, warnVoidLimit } from "../effects/uses.js";
 
 /** Name of the GM query that carries a player's damage action. */
 const DAMAGE_QUERY = `${SYS_ID}.damage`;
@@ -76,7 +76,7 @@ export async function rollDamageFromAttack(message, { askForOptions = true } = {
   // the attacker's wound penalty and other Raises do not shrink it
   // game-rules/38_maneuvers.md, p.86
   const feint = maneuvers.feint
-    ? feintBonus(
+    ? getFeintBonus(
         attack.outcome.total - (attack.tn.armor + TN_PER_RAISE * MANEUVER_RAISES.feint),
         actor.system.insightRank
       )
@@ -149,7 +149,7 @@ export function bindDamageCards(message, html) {
 
 /** Register the GM side of damage actions. */
 export function registerDamageQueries() {
-  CONFIG.queries[DAMAGE_QUERY] = (request, { user }) => runDamageAction(request, user);
+  CONFIG.queries[DAMAGE_QUERY] = (request, { user }) => applyDamageAction(request, user);
 }
 
 /**
@@ -176,7 +176,7 @@ function defensesOf(actor) {
  */
 async function applyToActor(damageMessage, actor) {
   const damage = damageMessage.system;
-  const result = woundsTaken({
+  const result = getWoundsTaken({
     damage: damage.outcome.total,
     tags: damage.sources,
     ignoreReduction: damage.ignoreReduction,
@@ -222,12 +222,12 @@ async function postResult(actor, result, existing) {
     notes.push(T("l5r4.ui.combat.invulnerableNote"));
   }
   if (result.voidSpent) {
-    notes.push(F("l5r4.ui.combat.voidNote", { wounds: voidReduction(result.wounds) }));
+    notes.push(F("l5r4.ui.combat.voidNote", { wounds: getVoidReduction(result.wounds) }));
   }
   if (result.killed) {
     notes.push(T("l5r4.ui.combat.killedNote"));
   }
-  const taken = result.wounds - (result.voidSpent ? voidReduction(result.wounds) : 0);
+  const taken = result.wounds - (result.voidSpent ? getVoidReduction(result.wounds) : 0);
   const content = await foundry.applications.handlebars.renderTemplate(
     CHAT_TEMPLATES.damageResult,
     {
@@ -255,7 +255,7 @@ async function postResult(actor, result, existing) {
  * @param {ChatMessage} card - A damage result card
  * @returns {Promise<void>}
  */
-async function reduceWithVoid(card) {
+async function spendVoidPointOnDamage(card) {
   const result = card.getFlag(SYS_ID, "damageResult");
   const actor = await fromUuid(result.actorUuid);
   if (result.voidSpent || result.undone || toInt(actor.system.rings.void.value) <= 0) {
@@ -266,8 +266,8 @@ async function reduceWithVoid(card) {
   const stored = actor._source.system;
   await actor.update({
     "system.rings.void.value": stored.rings.void.value - 1,
-    "system.suffered": Math.max(0, stored.suffered - voidReduction(result.wounds)),
-    ...voidUseUpdate(actor)
+    "system.suffered": Math.max(0, stored.suffered - getVoidReduction(result.wounds)),
+    ...buildVoidUseUpdate(actor)
   });
   await postResult(actor, { ...result, voidSpent: true }, card);
 }
@@ -277,14 +277,14 @@ async function reduceWithVoid(card) {
  * @param {ChatMessage} card - A damage result card
  * @returns {Promise<void>}
  */
-async function undoResult(card) {
+async function applyDamageUndo(card) {
   const result = card.getFlag(SYS_ID, "damageResult");
   if (result.undone) {
     return;
   }
   const actor = await fromUuid(result.actorUuid);
   const stored = actor._source.system;
-  const taken = result.wounds - (result.voidSpent ? voidReduction(result.wounds) : 0);
+  const taken = result.wounds - (result.voidSpent ? getVoidReduction(result.wounds) : 0);
   await actor.update({
     "system.suffered": Math.max(0, stored.suffered - taken),
     ...(result.voidSpent ? { "system.rings.void.value": stored.rings.void.value + 1 } : {})
@@ -301,7 +301,7 @@ async function undoResult(card) {
  * @param {User} user - The requesting user
  * @returns {Promise<void>}
  */
-async function runDamageAction({ action, messageId, actorUuid }, user) {
+async function applyDamageAction({ action, messageId, actorUuid }, user) {
   const message = game.messages.get(String(messageId));
   if (!message) {
     throw new Error(`No message ${messageId}`);
@@ -331,14 +331,14 @@ async function runDamageAction({ action, messageId, actorUuid }, user) {
     if (!user.isGM && !actor.testUserPermission(user, "OWNER")) {
       throw new Error("Only the damaged actor's owner spends its Void Point");
     }
-    await reduceWithVoid(message);
+    await spendVoidPointOnDamage(message);
   } else if (action === "undo") {
     const damage = game.messages.get(result.damageMessageId);
     const roller = damage ? fromUuidSync(damage.system.actorUuid) : null;
     if (!user.isGM && !roller?.testUserPermission(user, "OWNER")) {
       throw new Error("Only the roller or a GM undoes this damage");
     }
-    await undoResult(message);
+    await applyDamageUndo(message);
   }
 }
 
@@ -349,7 +349,7 @@ async function runDamageAction({ action, messageId, actorUuid }, user) {
  */
 async function requestDamageAction(request) {
   if (game.user.isGM) {
-    return runDamageAction(request, game.user);
+    return applyDamageAction(request, game.user);
   }
   const gm = game.users.activeGM;
   if (!gm) {

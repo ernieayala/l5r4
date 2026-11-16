@@ -19,7 +19,7 @@ export const APPLY_EFFECT_QUERY = `${SYS_ID}.applyEffect`;
  * @property {object[]} [rules]      Rules in place of the status's
  * @property {string} [origin]       UUID of what caused the effect
  * @property {object} [start]        Duration start fields (core fills the rest)
- * @property {string} [turnOf]       UUID of the actor whose Turn the duration counts from (ownTurnStart)
+ * @property {string} [turnOf]       UUID of the actor whose Turn the duration counts from (ownTurnStartOf)
  * @property {object} [flags]        Extra `flags.l5r4-enhanced` data
  */
 
@@ -30,7 +30,11 @@ export const APPLY_EFFECT_QUERY = `${SYS_ID}.applyEffect`;
  * @param {EffectOptions} [options]
  * @returns {Promise<object>}
  */
-export async function effectData(actor, id, { level, name, rules, origin, start, flags } = {}) {
+export async function buildEffectData(
+  actor,
+  id,
+  { level, name, rules, origin, start, flags } = {}
+) {
   let data;
   if (CONFIG.statusEffects[id]) {
     const effect = await foundry.documents.ActiveEffect.implementation.fromStatusEffect(id, {
@@ -72,9 +76,9 @@ export async function effectData(actor, id, { level, name, rules, origin, start,
  * @returns {Promise<ActiveEffect|undefined>}
  */
 export async function applyEffect(actor, id, { turnOf, ...options } = {}) {
-  const start = turnOf ? ownTurnStart(await fromUuid(turnOf)) : options.start;
+  const start = turnOf ? ownTurnStartOf(await fromUuid(turnOf)) : options.start;
   const [effect] = await actor.createEmbeddedDocuments("ActiveEffect", [
-    await effectData(actor, id, { ...options, start })
+    await buildEffectData(actor, id, { ...options, start })
   ]);
   return effect;
 }
@@ -116,7 +120,7 @@ export function effectsOf(actor, id) {
  * @param {Actor} actor
  * @returns {object|undefined}
  */
-export function ownTurnStart(actor) {
+export function ownTurnStartOf(actor) {
   const combat = game.combat?.started ? game.combat : null;
   const combatant = combat?.getCombatantsByActor(actor)[0];
   if (!combatant) {

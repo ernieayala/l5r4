@@ -13,7 +13,7 @@
  * @param {number} min - Lowest TN
  * @returns {number}
  */
-export function nextSaveTn(tn, step, min) {
+export function getNextSaveTn(tn, step, min) {
   return Math.max(min, tn + step);
 }
 
@@ -33,7 +33,7 @@ export const USE_PERIODS = Object.freeze(["turn", "round", "skirmish", "day"]);
  * @param {number} [now.secondsPerDay]
  * @returns {string|null}
  */
-export function periodKey(
+export function getPeriodKey(
   per,
   { combatId = null, round = 0, turn = null, worldTime = 0, secondsPerDay = 86400 }
 ) {
@@ -60,7 +60,7 @@ export function periodKey(
  * @param {string|null} key - The current period's key
  * @returns {number}
  */
-export function usesSpent(stored, key) {
+export function getUsesSpent(stored, key) {
   return key !== null && stored?.key === key ? Number(stored.count) || 0 : 0;
 }
 
@@ -95,8 +95,8 @@ export function usesSpent(stored, key) {
  * @param {function(object[]): {total: number}} spec.stack - Stacking for "add" rules (modifier-stacking.js)
  * @returns {{current: number, vs: {melee: number, ranged: number}, base: number}}
  */
-export function resolveArmorTn({ base, armor, other, rules, stack }) {
-  const lowest = mode => {
+export function getArmorTn({ base, armor, other, rules, stack }) {
+  const getLowest = mode => {
     const values = rules.filter(r => r.mode === mode).map(r => r.value);
     return values.length ? Math.min(...values) : null;
   };
@@ -108,11 +108,11 @@ export function resolveArmorTn({ base, armor, other, rules, stack }) {
     melee: adds.filter(r => r.range === "melee").reduce((sum, r) => sum + r.value, 0),
     ranged: adds.filter(r => r.range === "ranged").reduce((sum, r) => sum + r.value, 0)
   };
-  const total = lowest("total");
+  const total = getLowest("total");
   if (total !== null) {
     return { current: Math.max(5, total + armor), vs: { melee: 0, ranged: 0 }, base: total };
   }
-  const replaced = lowest("base");
+  const replaced = getLowest("base");
   const effectiveBase = replaced === null ? base : Math.min(base, replaced);
   return { current: Math.max(5, effectiveBase + armor + other + general), vs, base: effectiveBase };
 }

@@ -8,7 +8,7 @@
  */
 
 import { T } from "../../../utils/localization.js";
-import { voidUseUpdate, warnVoidLimit } from "../../effects/uses.js";
+import { buildVoidUseUpdate, warnVoidLimit } from "../../effects/uses.js";
 
 /**
  * In-memory locks for preventing concurrent Void Point spending on the same actor.
@@ -54,7 +54,7 @@ const actorLocks = new Map();
  * @param {L5R4Actor} [providedActor] - Explicitly provided actor (optional)
  * @returns {L5R4Actor|null} Resolved actor, or null if no actor found
  */
-export function resolveActor(providedActor) {
+export function getRollActor(providedActor) {
   // Priority 1: Explicit actor from caller (GM override, direct item roll)
   if (providedActor) {
     return providedActor;
@@ -79,7 +79,7 @@ export function resolveActor(providedActor) {
  * Validate actor has available Void Points to spend.
  *
  * Checks two conditions:
- * 1. **Actor Exists**: Non-null actor provided (resolveActor may return null)
+ * 1. **Actor Exists**: Non-null actor provided (getRollActor may return null)
  * 2. **Void Available**: Current Void Point pool > 0 (actor.system.rings.void.value)
  *
  * Returns validation result with:
@@ -100,7 +100,7 @@ export function resolveActor(providedActor) {
  * @returns {ValidationResult} Validation result with status, current pool, and error message
  */
 export function validateVoidPoints(actor) {
-  // Validation 1: Actor must exist (resolveActor may return null)
+  // Validation 1: Actor must exist (getRollActor may return null)
   if (!actor) {
     return {
       valid: false,
@@ -130,7 +130,7 @@ export function validateVoidPoints(actor) {
 /**
  * Spend a Void Point and return its +1k1: one more die rolled and one more kept, so a 3k2 roll becomes 4k3.
  *
- * The actor resolves through resolveActor, so the parameter may be left out. Inside the actor's lock the pool is
+ * The actor resolves through getRollActor, so the parameter may be left out. Inside the actor's lock the pool is
  * checked, then decremented by 1 through `actor.update` with `diff: true`. The one-per-round limit is the callers'
  * to enforce, as are the techniques and spells that lift it.
  *
@@ -143,7 +143,7 @@ export function validateVoidPoints(actor) {
  */
 export async function spendVoidPoint(actor) {
   // Step 1: Resolve actor using fallback chain (supports optional actor)
-  const resolvedActor = resolveActor(actor);
+  const resolvedActor = getRollActor(actor);
 
   // Early validation: actor must exist before acquiring lock
   if (!resolvedActor) {
@@ -156,7 +156,7 @@ export async function spendVoidPoint(actor) {
   }
 
   // Step 2: Execute spending with exclusive lock to prevent race conditions
-  return withLock(resolvedActor.id, async () => {
+  return updateUnderLock(resolvedActor.id, async () => {
     // Step 3: Validate Void Point availability (inside lock)
     const validation = validateVoidPoints(resolvedActor);
 
@@ -177,7 +177,7 @@ export async function spendVoidPoint(actor) {
     await resolvedActor.update(
       {
         "system.rings.void.value": resolvedActor._source.system.rings.void.value - 1,
-        ...voidUseUpdate(resolvedActor)
+        ...buildVoidUseUpdate(resolvedActor)
       },
       { diff: true }
     );
@@ -204,7 +204,7 @@ export async function spendVoidPoint(actor) {
  * @param {Function} fn - Async function to execute with lock held
  * @returns {Promise<*>} Result of the function execution
  */
-async function withLock(actorId, fn) {
+async function updateUnderLock(actorId, fn) {
   // Spin-lock: wait until actor is unlocked
   while (actorLocks.get(actorId)) {
     await new Promise(resolve => setTimeout(resolve, 10));

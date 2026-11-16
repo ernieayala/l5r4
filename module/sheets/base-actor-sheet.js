@@ -5,12 +5,12 @@
  * class in module/sheets/handlers/. Clicks go to _onAction, right-clicks to _onActionContext, and changes to
  * _onActionChange, which the subclasses override; handlers receive the context from _getHandlerContext().
  */
-import { iconPath } from "../config/icons.js";
+import { getIconPath } from "../config/icons.js";
 import { on } from "../utils/dom.js";
 import { KeyboardBehaviorMixin } from "../mixins/keyboard-behavior-mixin.js";
 import { VoidPointsHandler } from "./handlers/void-points-handler.js";
 import { DragDropHandler } from "./handlers/drag-drop-handler.js";
-import { ItemCRUDHandler } from "./handlers/item-crud-handler.js";
+import { ItemCrudHandler } from "./handlers/item-crud-handler.js";
 import { RollHandler } from "./handlers/roll-handler.js";
 import { SortHandler } from "./handlers/sort-handler.js";
 import { TraitHandler } from "./handlers/trait-handler.js";
@@ -124,7 +124,7 @@ export class BaseActorSheet extends KeyboardBehaviorMixin(
         img.dataset.errorHandled = "true";
         img.addEventListener("error", () => {
           const defaultImage =
-            this.actor.type === "npc" ? iconPath("npc.webp") : iconPath("pc.webp");
+            this.actor.type === "npc" ? getIconPath("npc.webp") : getIconPath("pc.webp");
           img.src = defaultImage;
         });
       }
@@ -197,7 +197,7 @@ export class BaseActorSheet extends KeyboardBehaviorMixin(
    * @returns {Promise<void>}
    */
   async _onVoidPointsAdjust(event, element, delta) {
-    return VoidPointsHandler.adjust(this._getHandlerContext(), event, delta);
+    return VoidPointsHandler.updateVoidPoints(this._getHandlerContext(), event, delta);
   }
 
   /**
@@ -209,7 +209,7 @@ export class BaseActorSheet extends KeyboardBehaviorMixin(
    * @param {HTMLElement} root - Sheet root element containing void-points-dots
    */
   _paintVoidPointsDots(root) {
-    VoidPointsHandler.paint(root, this.actor);
+    VoidPointsHandler.updateVoidDots(root, this.actor);
   }
 
   /* ---------------------------------- */
@@ -226,7 +226,7 @@ export class BaseActorSheet extends KeyboardBehaviorMixin(
   async _onDragStart(event) {
     const target = event.currentTarget;
     const key = target.classList.contains("ring-roll")
-      ? target.dataset.systemRing
+      ? target.dataset.ringKey
       : target.classList.contains("l5r4-button") && target.classList.contains("-roll")
         ? target.closest(".l5r4-trait")?.querySelector(".l5r4-rank-control.-trait")?.dataset.trait
         : null;
@@ -255,7 +255,7 @@ export class BaseActorSheet extends KeyboardBehaviorMixin(
    * @override
    */
   async _onDrop(event) {
-    return DragDropHandler.handleDrop(this._getHandlerContext(), event);
+    return DragDropHandler.onDrop(this._getHandlerContext(), event);
   }
 
   /**
@@ -269,7 +269,7 @@ export class BaseActorSheet extends KeyboardBehaviorMixin(
    * @returns {Promise<void>}
    */
   async _onDropItem(event, data) {
-    return DragDropHandler.handleItemDrop(this._getHandlerContext(), event, data);
+    return DragDropHandler.onItemDrop(this._getHandlerContext(), event, data);
   }
 
   /**
@@ -282,7 +282,7 @@ export class BaseActorSheet extends KeyboardBehaviorMixin(
    * @returns {Promise<void>}
    */
   async _onDropActor(event, data) {
-    return DragDropHandler.handleActorDrop(this._getHandlerContext(), event, data);
+    return DragDropHandler.onActorDrop(this._getHandlerContext(), event, data);
   }
 
   /* ---------------------------------- */
@@ -310,7 +310,7 @@ export class BaseActorSheet extends KeyboardBehaviorMixin(
   /**
    * Creates a new item on the actor.
    *
-   * Delegates to ItemCRUDHandler to handle item creation from templates
+   * Delegates to ItemCrudHandler to handle item creation from templates
    * or defaults. Item type is determined from element's data attributes.
    *
    * @param {Event} event - DOM event triggering item creation
@@ -318,13 +318,13 @@ export class BaseActorSheet extends KeyboardBehaviorMixin(
    * @returns {Promise<void>}
    */
   async _onItemCreate(event, element) {
-    return ItemCRUDHandler.create(this._getHandlerContext(), event, element);
+    return ItemCrudHandler.create(this._getHandlerContext(), event, element);
   }
 
   /**
    * Opens the item sheet for editing an embedded item.
    *
-   * Delegates to ItemCRUDHandler to show the item's configuration sheet.
+   * Delegates to ItemCrudHandler to show the item's configuration sheet.
    * Item ID is extracted from element's data attributes.
    *
    * @param {Event} event - DOM event triggering item edit
@@ -332,13 +332,13 @@ export class BaseActorSheet extends KeyboardBehaviorMixin(
    * @returns {void}
    */
   _onItemEdit(event, element) {
-    return ItemCRUDHandler.edit(this._getHandlerContext(), event, element);
+    return ItemCrudHandler.openItemSheet(this._getHandlerContext(), event, element);
   }
 
   /**
    * Deletes an embedded item from the actor.
    *
-   * Delegates to ItemCRUDHandler to handle deletion with confirmation.
+   * Delegates to ItemCrudHandler to handle deletion with confirmation.
    * Item ID is extracted from element's data attributes.
    *
    * @param {Event} event - DOM event triggering item deletion
@@ -346,13 +346,13 @@ export class BaseActorSheet extends KeyboardBehaviorMixin(
    * @returns {Promise<void>}
    */
   async _onItemDelete(event, element) {
-    return ItemCRUDHandler.deleteItem(this._getHandlerContext(), event, element);
+    return ItemCrudHandler.deleteItem(this._getHandlerContext(), event, element);
   }
 
   /**
    * Toggles expansion state of an item in the sheet's item list.
    *
-   * Delegates to ItemCRUDHandler to show/hide extended item details.
+   * Delegates to ItemCrudHandler to show/hide extended item details.
    * Uses data attributes or local state to track expansion.
    *
    * @param {Event} event - DOM event triggering item expansion toggle
@@ -360,13 +360,13 @@ export class BaseActorSheet extends KeyboardBehaviorMixin(
    * @returns {void}
    */
   _onItemExpand(event, element) {
-    return ItemCRUDHandler.expand(this._getHandlerContext(), event, element);
+    return ItemCrudHandler.updateItemExpanded(this._getHandlerContext(), event, element);
   }
 
   /**
    * Handles inline editing of item properties in the sheet.
    *
-   * Delegates to ItemCRUDHandler for updating item properties in place
+   * Delegates to ItemCrudHandler for updating item properties in place
    * from form fields in the sheet without opening the full item sheet.
    *
    * @param {Event} event - DOM change event from inline edit field
@@ -374,13 +374,13 @@ export class BaseActorSheet extends KeyboardBehaviorMixin(
    * @returns {Promise<void>}
    */
   async _onInlineItemEdit(event, element) {
-    return ItemCRUDHandler.inlineEdit(this._getHandlerContext(), event, element);
+    return ItemCrudHandler.updateItemField(this._getHandlerContext(), event, element);
   }
 
   /**
    * Posts an item's header information to chat.
    *
-   * Delegates to ItemCRUDHandler to create a chat message displaying
+   * Delegates to ItemCrudHandler to create a chat message displaying
    * the item's name, type, and basic information. Useful for showing
    * weapons, spells, or equipment to other players.
    *
@@ -389,7 +389,7 @@ export class BaseActorSheet extends KeyboardBehaviorMixin(
    * @returns {Promise<void>}
    */
   async _onItemHeaderToChat(ev, el) {
-    return ItemCRUDHandler.toChat(this._getHandlerContext(), ev, el);
+    return ItemCrudHandler.toChat(this._getHandlerContext(), ev, el);
   }
 
   /* ---------------------------------- */
@@ -411,7 +411,7 @@ export class BaseActorSheet extends KeyboardBehaviorMixin(
    * @returns {Promise<ChatMessage|null|undefined>} The roll's chat message
    */
   _onSkillRoll(event, element) {
-    return RollHandler.skillRoll(this._getHandlerContext(), event, element);
+    return RollHandler.rollClickedSkill(this._getHandlerContext(), event, element);
   }
 
   /**
@@ -429,7 +429,7 @@ export class BaseActorSheet extends KeyboardBehaviorMixin(
    * @returns {Promise<ChatMessage|null|undefined>} The roll's chat message
    */
   _onAttackRoll(event, element) {
-    return RollHandler.attackRoll(this._getHandlerContext(), event, element);
+    return RollHandler.rollNpcAttack(this._getHandlerContext(), event, element);
   }
 
   /**
@@ -443,7 +443,7 @@ export class BaseActorSheet extends KeyboardBehaviorMixin(
    * @returns {Promise<ChatMessage|null|undefined>} The roll's chat message
    */
   _onWeaponAttackRoll(event, element) {
-    return RollHandler.weaponAttackRoll(this._getHandlerContext(), event, element);
+    return RollHandler.rollClickedWeaponAttack(this._getHandlerContext(), event, element);
   }
 
   /**
@@ -460,7 +460,7 @@ export class BaseActorSheet extends KeyboardBehaviorMixin(
    * @returns {Promise<ChatMessage|null|undefined>} The roll's chat message
    */
   _onDamageRoll(event, element) {
-    return RollHandler.damageRoll(this._getHandlerContext(), event, element);
+    return RollHandler.rollNpcDamage(this._getHandlerContext(), event, element);
   }
 
   /**
@@ -478,7 +478,7 @@ export class BaseActorSheet extends KeyboardBehaviorMixin(
    * @returns {Promise<ChatMessage|null|undefined>} The roll's chat message
    */
   _onTraitRoll(event, element) {
-    return RollHandler.traitRoll(this._getHandlerContext(), event, element);
+    return RollHandler.rollClickedTrait(this._getHandlerContext(), event, element);
   }
 
   /**
@@ -505,7 +505,7 @@ export class BaseActorSheet extends KeyboardBehaviorMixin(
    * @returns {Promise<void>}
    */
   async _onTraitAdjust(event, element, delta) {
-    return TraitHandler.adjust(this._getHandlerContext(), event, element, delta);
+    return TraitHandler.updateTraitRank(this._getHandlerContext(), event, element, delta);
   }
 
   /* Sorting System -------------------------------------------------------- */
@@ -521,7 +521,7 @@ export class BaseActorSheet extends KeyboardBehaviorMixin(
    * @param {string[]} allowedKeys - Array of sortable field names
    */
   _initializeSortIndicators(root, scope, allowedKeys) {
-    SortHandler.initializeIndicators(root, this.actor.id, scope, allowedKeys);
+    SortHandler.updateSortIndicators(root, this.actor.id, scope, allowedKeys);
   }
 
   /**
@@ -535,7 +535,7 @@ export class BaseActorSheet extends KeyboardBehaviorMixin(
    * @returns {Promise<void>}
    */
   async _onUnifiedSortClick(event, element) {
-    return SortHandler.handleClick(
+    return SortHandler.updateSortPref(
       this.actor.id,
       event,
       element,

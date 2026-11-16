@@ -6,7 +6,7 @@
  */
 
 import { describe, it, expect } from "vitest";
-import { toInt, clamp } from "../../../module/utils/type-coercion.js";
+import { toInt, getClamped } from "../../../module/utils/type-coercion.js";
 
 describe("toInt", () => {
   describe("Valid numeric inputs", () => {
@@ -307,7 +307,7 @@ describe("clamp", () => {
       const max = 10;
 
       // ACT
-      const result = clamp(value, min, max);
+      const result = getClamped(value, min, max);
 
       // ASSERT
       expect(result).toBe(5);
@@ -320,7 +320,7 @@ describe("clamp", () => {
       const max = 10;
 
       // ACT
-      const result = clamp(value, min, max);
+      const result = getClamped(value, min, max);
 
       // ASSERT
       expect(result).toBe(1);
@@ -333,7 +333,7 @@ describe("clamp", () => {
       const max = 10;
 
       // ACT
-      const result = clamp(value, min, max);
+      const result = getClamped(value, min, max);
 
       // ASSERT
       expect(result).toBe(10);
@@ -348,7 +348,7 @@ describe("clamp", () => {
       const max = 10;
 
       // ACT
-      const result = clamp(value, min, max);
+      const result = getClamped(value, min, max);
 
       // ASSERT
       expect(result).toBe(1);
@@ -361,7 +361,7 @@ describe("clamp", () => {
       const max = 10;
 
       // ACT
-      const result = clamp(value, min, max);
+      const result = getClamped(value, min, max);
 
       // ASSERT
       expect(result).toBe(10);
@@ -374,7 +374,7 @@ describe("clamp", () => {
       const max = 10;
 
       // ACT
-      const result = clamp(value, min, max);
+      const result = getClamped(value, min, max);
 
       // ASSERT
       expect(result).toBe(1);
@@ -389,7 +389,7 @@ describe("clamp", () => {
       const max = "10";
 
       // ACT
-      const result = clamp(value, min, max);
+      const result = getClamped(value, min, max);
 
       // ASSERT
       expect(result).toBe(5);
@@ -402,7 +402,7 @@ describe("clamp", () => {
       const max = 10;
 
       // ACT
-      const result = clamp(value, min, max);
+      const result = getClamped(value, min, max);
 
       // ASSERT
       expect(result).toBe(5);
@@ -417,7 +417,7 @@ describe("clamp", () => {
       const max = -1;
 
       // ACT
-      const result = clamp(value, min, max);
+      const result = getClamped(value, min, max);
 
       // ASSERT
       expect(result).toBe(-5);
@@ -430,7 +430,7 @@ describe("clamp", () => {
       const max = -1;
 
       // ACT
-      const result = clamp(value, min, max);
+      const result = getClamped(value, min, max);
 
       // ASSERT
       expect(result).toBe(-10);
@@ -443,7 +443,7 @@ describe("clamp", () => {
       const max = -1;
 
       // ACT
-      const result = clamp(value, min, max);
+      const result = getClamped(value, min, max);
 
       // ASSERT
       expect(result).toBe(-1);
@@ -458,7 +458,7 @@ describe("clamp", () => {
       const max = 10;
 
       // ACT
-      const result = clamp(value, min, max);
+      const result = getClamped(value, min, max);
 
       // ASSERT
       expect(result).toBe(5.7);
@@ -471,7 +471,7 @@ describe("clamp", () => {
       const max = 9.9;
 
       // ACT
-      const result = clamp(value, min, max);
+      const result = getClamped(value, min, max);
 
       // ASSERT
       expect(result).toBe(5.5);
@@ -486,7 +486,7 @@ describe("clamp", () => {
       const max = 10;
 
       // ACT
-      const result = clamp(value, min, max);
+      const result = getClamped(value, min, max);
 
       // ASSERT
       // Number(null) = 0, which is below min of 1, so clamped to 1
@@ -500,7 +500,7 @@ describe("clamp", () => {
       const max = 10;
 
       // ACT
-      const result = clamp(value, min, max);
+      const result = getClamped(value, min, max);
 
       // ASSERT
       expect(result).toBe(0);
@@ -513,7 +513,7 @@ describe("clamp", () => {
       const max = 10;
 
       // ACT
-      const result = clamp(value, min, max);
+      const result = getClamped(value, min, max);
 
       // ASSERT
       expect(result).toBe(0);
@@ -526,7 +526,7 @@ describe("clamp", () => {
       const max = 10;
 
       // ACT
-      const result = clamp(value, min, max);
+      const result = getClamped(value, min, max);
 
       // ASSERT
       expect(result).toBe(0);
@@ -539,7 +539,7 @@ describe("clamp", () => {
       const max = NaN;
 
       // ACT
-      const result = clamp(value, min, max);
+      const result = getClamped(value, min, max);
 
       // ASSERT
       expect(result).toBe(0);
@@ -552,7 +552,7 @@ describe("clamp", () => {
       const max = NaN;
 
       // ACT
-      const result = clamp(value, min, max);
+      const result = getClamped(value, min, max);
 
       // ASSERT
       expect(result).toBe(0);
@@ -565,7 +565,7 @@ describe("clamp", () => {
       const max = 10;
 
       // ACT
-      const result = clamp(value, min, max);
+      const result = getClamped(value, min, max);
 
       // ASSERT
       expect(result).toBe(0);
@@ -580,7 +580,7 @@ describe("clamp", () => {
       const max = 10;
 
       // ACT
-      const result = clamp(value, min, max);
+      const result = getClamped(value, min, max);
 
       // ASSERT
       expect(result).toBe(10);
@@ -593,7 +593,7 @@ describe("clamp", () => {
       const max = 10;
 
       // ACT
-      const result = clamp(value, min, max);
+      const result = getClamped(value, min, max);
 
       // ASSERT
       expect(result).toBe(1);
@@ -608,7 +608,7 @@ describe("clamp", () => {
       const max = 10;
 
       // ACT
-      const result = clamp(value, min, max);
+      const result = getClamped(value, min, max);
 
       // ASSERT
       expect(result).toBe(5);
@@ -621,7 +621,7 @@ describe("clamp", () => {
       const max = 10;
 
       // ACT
-      const result = clamp(value, min, max);
+      const result = getClamped(value, min, max);
 
       // ASSERT
       expect(result).toBe(0);

@@ -14,7 +14,7 @@ import { toInt } from "../../../utils/type-coercion.js";
  * @param {string} ringKey
  * @returns {{ringName: string, elementalSlots: number, voidSlots: number, slot: string}}
  */
-export function slotDialogData(actor, ringKey) {
+export function getSlotDialogData(actor, ringKey) {
   const elementalSlots = toInt(actor.system.spellSlots[ringKey]);
   const voidSlots = toInt(actor.system.spellSlots.void);
   return {
@@ -32,7 +32,7 @@ export function slotDialogData(actor, ringKey) {
  * @param {string} choice - "elemental", "void", or "none" (dialog input)
  * @returns {{path: string|null, label: string}|null} null, after a warning, when the chosen pool is empty
  */
-export function planSlot(actor, ringKey, choice) {
+export function getSlotToSpend(actor, ringKey, choice) {
   if (choice !== "elemental" && choice !== "void") {
     return { path: null, label: "" };
   }

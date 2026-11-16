@@ -13,7 +13,7 @@
  *
  */
 
-import { statusRules } from "../../../module/utils/rule-engine.js";
+import { getStatusRules } from "../../../module/utils/rule-engine.js";
 import { SYS_ID } from "../../../module/config/constants.js";
 import { createTestPC } from "../../fixtures/actor-fixtures.js";
 import { createWeaponData } from "../../fixtures/item-fixtures.js";
@@ -218,7 +218,7 @@ export function registerAttackEdgeCaseTests(quench) {
           await actor.createEmbeddedDocuments("ActiveEffect", [
             {
               name: "Defense Stance",
-              system: { rules: statusRules("defenseStance") },
+              system: { rules: getStatusRules("defenseStance") },
               statuses: ["defenseStance"],
               disabled: false
             }

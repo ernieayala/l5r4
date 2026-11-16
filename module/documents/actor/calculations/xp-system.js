@@ -12,7 +12,7 @@ import {
   getCreationFreeBonus,
   getCreationFreeBonusSources
 } from "../../../utils/xp-calculations.js";
-import { costPricer, xpEntries, xpTotals } from "../../../utils/xp-ledger.js";
+import { getCostPricer, getXpEntries, getXpTotals } from "../../../utils/xp-ledger.js";
 
 /**
  * The Insight Rank of a total of Insight points: Rank 1 below 150, Rank 2 from 150, then one Rank more for every 25
@@ -20,7 +20,7 @@ import { costPricer, xpEntries, xpTotals } from "../../../utils/xp-ledger.js";
  * @param {number} insight - Total Insight points
  * @returns {number} Insight Rank (1-10+)
  */
-export function calculateInsightRank(insight) {
+export function getInsightRank(insight) {
   // Thresholds for Ranks 2-5
   const t = [150, 175, 200, 225];
   let rank = 1;
@@ -49,17 +49,17 @@ export function calculateInsightRank(insight) {
  * @param {object} sys - Actor's system data
  */
 export function preparePcExperience(actor, sys) {
-  const build = xpBuild(actor);
-  const price = costPricer({
+  const build = xpBuildOf(actor);
+  const price = getCostPricer({
     costs: actor.ruleBag.costs,
     options: actor.rollOptions,
     rollData: actor.getRollData(),
     report: (source, message) =>
       console.warn(`${SYS_ID} | Cost rule on "${source}" (${actor.name}) skipped: ${message}`)
   });
-  const entries = xpEntries(build, price);
+  const entries = getXpEntries(build, price);
   // The entries stay on the prepared data for the XP manager's history (module/services/xp/calculator.js)
-  sys._xp = { ...xpTotals(build, entries), entries };
+  sys._xp = { ...getXpTotals(build, entries), entries };
 }
 
 /**
@@ -72,7 +72,7 @@ export function preparePcExperience(actor, sys) {
  * @param {Actor} actor - The PC actor being updated
  * @param {object} changed - Object containing changed properties
  */
-export function trackXpExpenditure(actor, changed) {
+export function updateXpFlags(actor, changed) {
   try {
     if (actor.type !== "pc") {
       return;
@@ -133,7 +133,7 @@ export function trackXpExpenditure(actor, changed) {
  * @param {Actor} actor
  * @returns {import("../../../utils/xp-ledger.js").XpBuild}
  */
-function xpBuild(actor) {
+function xpBuildOf(actor) {
   const flags = actor.flags?.[SYS_ID] ?? {};
   const xpManual = Array.isArray(flags.xpManual) ? flags.xpManual : [];
   const traitDiscounts = flags.traitDiscounts ?? {};

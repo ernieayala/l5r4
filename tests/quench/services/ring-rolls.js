@@ -7,7 +7,7 @@
  * - Ring values range from 2-10
  *
  * NOTE: These tests verify MECHANICS (ring roll calculations), not the service layer.
- * The RingRoll service shows dialogs and cannot be reliably tested in Quench.
+ * The rollRing service shows dialogs and cannot be reliably tested in Quench.
  *
  * @see module/services/dice/rolls/ring-roll.js
  */

@@ -10,8 +10,8 @@
 import { BAG_KINDS } from "../config/rule-keys.js";
 import { STATUS_EFFECTS } from "../config/status-effects.js";
 import { testPredicate } from "./predicate.js";
-import { resolveValue } from "./rule-values.js";
-import { stackModifiers } from "./modifier-stacking.js";
+import { getRuleValue } from "./rule-values.js";
+import { getStackedModifiers } from "./modifier-stacking.js";
 
 /**
  * @typedef {object} RuleEntry
@@ -61,7 +61,7 @@ export function parseRulesJson(text) {
  * @param {string} statusId
  * @returns {object[]} Empty for a status without rules.
  */
-export function statusRules(statusId) {
+export function getStatusRules(statusId) {
   return structuredClone(
     STATUS_EFFECTS.find(status => status.id === statusId)?.system?.rules ?? []
   );
@@ -74,7 +74,7 @@ export function statusRules(statusId) {
  * @param {Set<string>} options - Read and extended in place.
  * @returns {Set<string>} The same set.
  */
-export function addRuleRollOptions(entries, options) {
+export function applyRollOptionRules(entries, options) {
   for (const { rule } of entries) {
     if (rule.key !== "RollOption" || !testPredicate(rule.predicate, options)) {
       continue;
@@ -94,11 +94,11 @@ export function addRuleRollOptions(entries, options) {
  * @param {Set<string>} options
  * @returns {{adjustments: Record<string, number>, errors: RuleError[]}}
  */
-export function traitAdjustments(entries, rollData, options) {
+export function getTraitAdjustments(entries, rollData, options) {
   const adjustments = {};
   const errors = [];
-  const value = valueResolver(rollData);
-  forEachRule(entries, ["TraitAdjust"], options, errors, (rule, entry) => {
+  const value = getValueResolver(rollData);
+  applyMatchingRules(entries, ["TraitAdjust"], options, errors, (rule, entry) => {
     adjustments[rule.trait] = (adjustments[rule.trait] ?? 0) + value(rule.value, entry);
   });
   return { adjustments, errors };
@@ -112,7 +112,7 @@ export function traitAdjustments(entries, rollData, options) {
  * @param {string} trait
  * @returns {number}
  */
-export function traitAdjustTotal(rules, trait) {
+export function getTraitAdjustTotal(rules, trait) {
   let total = 0;
   for (const rule of rules ?? []) {
     const value = Number(rule?.value);
@@ -149,12 +149,12 @@ export function traitAdjustTotal(rules, trait) {
  * @param {Set<string>} options
  * @returns {DerivedRuleOutputs}
  */
-export function derivedRuleOutputs(entries, rollData, options) {
+export function getDerivedRuleOutputs(entries, rollData, options) {
   const errors = [];
-  const value = valueResolver(rollData);
+  const value = getValueResolver(rollData);
 
   const armor = [];
-  forEachRule(entries, ["ArmorTN"], options, errors, (rule, entry) => {
+  applyMatchingRules(entries, ["ArmorTN"], options, errors, (rule, entry) => {
     armor.push({
       mode: rule.mode,
       value: value(rule.value, entry),
@@ -165,7 +165,7 @@ export function derivedRuleOutputs(entries, rollData, options) {
 
   let reduction = 0;
   const reductionParts = [];
-  forEachRule(entries, ["Reduction"], options, errors, (rule, entry) => {
+  applyMatchingRules(entries, ["Reduction"], options, errors, (rule, entry) => {
     const part = value(rule.value, entry);
     reduction += part;
     reductionParts.push({ value: part, except: [...rule.except] });
@@ -174,21 +174,21 @@ export function derivedRuleOutputs(entries, rollData, options) {
   // Creature defenses; several of one kind act as the first
   // game-rules/99_creatures.md, p.319-320
   const defenses = { invulnerable: null, spirit: null };
-  forEachRule(entries, ["Invulnerability"], options, errors, rule => {
+  applyMatchingRules(entries, ["Invulnerability"], options, errors, rule => {
     defenses.invulnerable ??= { harmedBy: [...rule.harmedBy], only: [...rule.only] };
   });
-  forEachRule(entries, ["Spirit"], options, errors, rule => {
+  applyMatchingRules(entries, ["Spirit"], options, errors, rule => {
     defenses.spirit ??= { harmedBy: [...rule.harmedBy] };
   });
 
   let movementWater = 0;
-  forEachRule(entries, ["Movement"], options, errors, (rule, entry) => {
+  applyMatchingRules(entries, ["Movement"], options, errors, (rule, entry) => {
     movementWater += value(rule.water, entry);
   });
 
   let woundsPerRank = 0;
   let woundPenalty = 0;
-  forEachRule(entries, ["Wounds"], options, errors, (rule, entry) => {
+  applyMatchingRules(entries, ["Wounds"], options, errors, (rule, entry) => {
     // Resolve both before adding either, so a bad formula changes neither total.
     const [perRank, penalty] = [value(rule.perRank, entry), value(rule.penalty, entry)];
     woundsPerRank += perRank;
@@ -196,7 +196,7 @@ export function derivedRuleOutputs(entries, rollData, options) {
   });
 
   const initiative = { roll: 0, keep: 0, total: 0 };
-  forEachRule(entries, ["Initiative"], options, errors, (rule, entry) => {
+  applyMatchingRules(entries, ["Initiative"], options, errors, (rule, entry) => {
     const [roll, keep, total] = [
       value(rule.roll, entry),
       value(rule.keep, entry),
@@ -208,13 +208,13 @@ export function derivedRuleOutputs(entries, rollData, options) {
   });
 
   const immunities = new Set();
-  forEachRule(entries, ["ConditionImmunity"], options, errors, rule => {
+  applyMatchingRules(entries, ["ConditionImmunity"], options, errors, rule => {
     immunities.add(rule.condition);
   });
 
   // A save belongs to the effect it ends; an item's rule has no effect to end and is skipped
   const saves = [];
-  forEachRule(entries, ["PeriodicSave"], options, errors, (rule, entry) => {
+  applyMatchingRules(entries, ["PeriodicSave"], options, errors, (rule, entry) => {
     if (entry.effectUuid) {
       const { event, roll, tn, step, min, onFailure } = rule;
       saves.push({
@@ -231,14 +231,14 @@ export function derivedRuleOutputs(entries, rollData, options) {
   });
 
   const resources = {};
-  forEachRule(entries, ["Resource"], options, errors, (rule, entry) => {
+  applyMatchingRules(entries, ["Resource"], options, errors, (rule, entry) => {
     const max = value(rule.max, entry);
     resources[rule.slug] ??= { max: 0, per: rule.per };
     resources[rule.slug].max += max;
   });
 
   const ledger = [];
-  forEachRule(entries, ["Ledger"], options, errors, (rule, entry) => {
+  applyMatchingRules(entries, ["Ledger"], options, errors, (rule, entry) => {
     ledger.push({
       track: rule.track,
       direction: rule.direction,
@@ -248,9 +248,9 @@ export function derivedRuleOutputs(entries, rollData, options) {
   });
 
   const bag = Object.fromEntries(Object.values(BAG_KINDS).map(kind => [kind, {}]));
-  forEachRule(entries, Object.keys(BAG_KINDS), null, errors, (rule, entry) => {
+  applyMatchingRules(entries, Object.keys(BAG_KINDS), null, errors, (rule, entry) => {
     // Resolve first, so a rule whose value fails leaves no trace in the bag
-    const output = bagEntry(rule, entry, v => value(v, entry));
+    const output = buildBagEntry(rule, entry, v => value(v, entry));
     (bag[BAG_KINDS[rule.key]][rule.selector] ??= []).push(output);
   });
 
@@ -282,7 +282,7 @@ export function derivedRuleOutputs(entries, rollData, options) {
  * @param {string|null} [weaponId=null] - The weapon the roll is made with
  * @returns {object[]}
  */
-export function bagEntries(bag, kind, selectors, options, weaponId = null) {
+export function getBagEntries(bag, kind, selectors, options, weaponId = null) {
   const byKind = bag?.[kind] ?? {};
   return selectors
     .flatMap(selector => byKind[selector] ?? [])
@@ -300,9 +300,9 @@ export function bagEntries(bag, kind, selectors, options, weaponId = null) {
  * @param {string|null} [weaponId=null] - The weapon the formula is for
  * @returns {{roll: number, keep: number, total: number}}
  */
-export function selectorBonus(bag, selectors, options, weaponId = null) {
-  return stackModifiers(
-    bagEntries(bag, "rollModifiers", selectors, options, weaponId).filter(
+export function getSelectorBonus(bag, selectors, options, weaponId = null) {
+  return getStackedModifiers(
+    getBagEntries(bag, "rollModifiers", selectors, options, weaponId).filter(
       e => !e.optional && !e.range
     )
   );
@@ -313,9 +313,9 @@ export function selectorBonus(bag, selectors, options, weaponId = null) {
  * @param {object} rollData
  * @returns {function(*, RuleEntry): number}
  */
-function valueResolver(rollData) {
+function getValueResolver(rollData) {
   return (value, entry) =>
-    resolveValue(
+    getRuleValue(
       value,
       entry?.level === undefined ? rollData : { ...rollData, level: entry.level }
     );
@@ -329,7 +329,7 @@ function valueResolver(rollData) {
  * @param {RuleError[]} errors
  * @param {function(object, RuleEntry): void} fn
  */
-function forEachRule(entries, keys, options, errors, fn) {
+function applyMatchingRules(entries, keys, options, errors, fn) {
   for (const entry of entries) {
     const { rule } = entry;
     if (!keys.includes(rule.key) || (options && !testPredicate(rule.predicate, options))) {
@@ -351,7 +351,7 @@ function forEachRule(entries, keys, options, errors, fn) {
  * @param {function(*): number} value
  * @returns {object}
  */
-function bagEntry(rule, entry, value) {
+function buildBagEntry(rule, entry, value) {
   const base = {
     label: rule.label || entry.source,
     source: entry.source,

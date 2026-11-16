@@ -5,7 +5,7 @@
  */
 
 import { registerAnimationHooks } from "./hooks.js";
-import { isSequencerAvailable, isJB2AAvailable } from "./asset-library.js";
+import { isSequencerAvailable, isJb2aAvailable } from "./asset-library.js";
 
 /**
  * Initialize the animation system.
@@ -15,10 +15,10 @@ import { isSequencerAvailable, isJB2AAvailable } from "./asset-library.js";
  *
  * @returns {void}
  */
-export function initializeAnimations() {
+export function registerAnimations() {
   // Check module availability
   const hasSequencer = isSequencerAvailable();
-  const hasJB2A = isJB2AAvailable();
+  const hasJb2a = isJb2aAvailable();
 
   if (!hasSequencer) {
     console.warn(
@@ -27,7 +27,7 @@ export function initializeAnimations() {
     );
   }
 
-  if (!hasJB2A) {
+  if (!hasJb2a) {
     console.warn(
       "L5R4 | JB2A module not found. Visual animations disabled. " +
         "Install JB2A (free) from: https://foundryvtt.com/packages/JB2A_DnD5e"
@@ -35,7 +35,7 @@ export function initializeAnimations() {
   }
 
   // Only register hooks if both modules are available
-  if (!hasSequencer || !hasJB2A) {
+  if (!hasSequencer || !hasJb2a) {
     return;
   }
 

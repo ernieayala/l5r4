@@ -7,9 +7,9 @@
  */
 import { SYS_ID } from "../config/constants.js";
 import { F, T } from "../utils/localization.js";
-import { effectEnd, usesLeft } from "../utils/effect-duration.js";
-import { usesSpent } from "../utils/effects.js";
-import { currentPeriod } from "../services/effects/uses.js";
+import { getEffectEnd, getUsesLeft } from "../utils/effect-duration.js";
+import { getUsesSpent } from "../utils/effects.js";
+import { currentPeriodOf } from "../services/effects/uses.js";
 
 const { ApplicationV2, HandlebarsApplicationMixin } = foundry.applications.api;
 
@@ -52,7 +52,9 @@ export default class EffectPanel extends HandlebarsApplicationMixin(ApplicationV
     const context = await super._prepareContext(options);
     const actor = this.actor;
     context.actor = actor;
-    context.effects = actor ? actor.appliedEffects.map(effect => this.#row(actor, effect)) : [];
+    context.effects = actor
+      ? actor.appliedEffects.map(effect => this.#buildRow(actor, effect))
+      : [];
     context.empty = actor
       ? F("l5r4.apps.effectPanel.none", { name: actor.name })
       : T("l5r4.apps.effectPanel.noActor");
@@ -63,7 +65,7 @@ export default class EffectPanel extends HandlebarsApplicationMixin(ApplicationV
    * Open the panel, or close it when it is open.
    * @returns {Promise<EffectPanel>} The panel, once rendered or closed
    */
-  static toggle() {
+  static openOrClose() {
     if (panel?.rendered) {
       return panel.close();
     }
@@ -72,7 +74,7 @@ export default class EffectPanel extends HandlebarsApplicationMixin(ApplicationV
   }
 
   /** Redraw the open panel. */
-  static refresh() {
+  static renderIfOpen() {
     if (panel?.rendered) {
       panel.render();
     }
@@ -108,25 +110,25 @@ export default class EffectPanel extends HandlebarsApplicationMixin(ApplicationV
    * @param {ActiveEffect} effect
    * @returns {object}
    */
-  #row(actor, effect) {
-    const phrases = [effectEnd(effect.duration)];
+  #buildRow(actor, effect) {
+    const phrases = [getEffectEnd(effect.duration)];
     for (const rule of effect.system.rules ?? []) {
       if (rule.key === "Resource" && Number.isFinite(Number(rule.max))) {
-        const spent = usesSpent(
+        const spent = getUsesSpent(
           actor.getFlag(SYS_ID, "uses")?.[rule.slug],
-          currentPeriod(actor, rule.per)
+          currentPeriodOf(actor, rule.per)
         );
-        phrases.push(usesLeft(Number(rule.max), spent));
+        phrases.push(getUsesLeft(Number(rule.max), spent));
       }
     }
-    const source = this.#source(effect);
+    const source = this.#sourceOf(effect);
     return {
       uuid: effect.uuid,
       name: effect.name,
       img: effect.img,
       source: source?.name ?? "",
       sourceUuid: source?.uuid ?? effect.uuid,
-      lasts: phrases.map(({ key, data }) => F(key, localizedData(data))).join("; "),
+      lasts: phrases.map(({ key, data }) => F(key, formatPhraseData(data))).join("; "),
       canRemove: effect.parent === actor && effect.isOwner
     };
   }
@@ -136,7 +138,7 @@ export default class EffectPanel extends HandlebarsApplicationMixin(ApplicationV
    * @param {ActiveEffect} effect
    * @returns {foundry.abstract.Document|null}
    */
-  #source(effect) {
+  #sourceOf(effect) {
     if (effect.parent?.documentName === "Item") {
       return effect.parent;
     }
@@ -145,7 +147,7 @@ export default class EffectPanel extends HandlebarsApplicationMixin(ApplicationV
 }
 
 /** Register the panel's button and the hooks that redraw it, once during init. */
-export function initializeEffectPanel() {
+export function registerEffectPanel() {
   Hooks.on("getSceneControlButtons", onGetSceneControlButtons);
   for (const hook of [
     "controlToken",
@@ -155,7 +157,7 @@ export function initializeEffectPanel() {
     "updateActor",
     "updateCombat"
   ]) {
-    Hooks.on(hook, () => EffectPanel.refresh());
+    Hooks.on(hook, () => EffectPanel.renderIfOpen());
   }
 }
 
@@ -164,7 +166,7 @@ export function initializeEffectPanel() {
  * @param {object} data
  * @returns {object}
  */
-function localizedData(data) {
+function formatPhraseData(data) {
   return data.event ? { ...data, event: T(data.event) } : data;
 }
 
@@ -183,6 +185,6 @@ function onGetSceneControlButtons(controls) {
     title: "l5r4.apps.effectPanel.title",
     icon: "fa-solid fa-hourglass-half",
     button: true,
-    onChange: () => EffectPanel.toggle()
+    onChange: () => EffectPanel.openOrClose()
   };
 }

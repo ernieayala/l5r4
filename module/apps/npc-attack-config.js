@@ -30,7 +30,7 @@ export default class NpcAttackConfigApplication extends foundry.applications.api
       height: "auto"
     },
     actions: {
-      "save-attack": NpcAttackConfigApplication.prototype._onSave
+      "save-attack": NpcAttackConfigApplication.#onSaveAttack
     },
     form: {
       handler: NpcAttackConfigApplication.prototype._onSubmit,
@@ -188,10 +188,11 @@ export default class NpcAttackConfigApplication extends foundry.applications.api
   /**
    * Handle save button action by triggering form submission.
    *
+   * @this {NpcAttackConfigApplication}
    * @param {Event} _event - The click event (unused)
-   * @param {HTMLElement} _target - The clicked element (unused)
+   * @param {HTMLElement} _element - The clicked element (unused)
    */
-  async _onSave(_event, _target) {
+  static async #onSaveAttack(_event, _element) {
     this.element.requestSubmit();
   }
 }

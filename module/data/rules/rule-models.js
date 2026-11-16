@@ -29,7 +29,7 @@ import RuleData, { selectorField, typeField, valueField } from "./rule-data.js";
 export class RollModifierRule extends RuleData {
   /** @override */
   static defineSchema() {
-    const { BooleanField } = fields();
+    const { BooleanField } = getDataFields();
     return {
       ...super.defineSchema(),
       selector: selectorField(),
@@ -59,12 +59,12 @@ export class TNModifierRule extends RuleData {
 
 /**
  * A change to Armor TN: added, a replacement base, or a replacement total (module/utils/effects.js,
- * resolveArmorTn). An added change with `range` counts only against attacks of that range.
+ * getArmorTn). An added change with `range` counts only against attacks of that range.
  */
 export class ArmorTNRule extends RuleData {
   /** @override */
   static defineSchema() {
-    const { StringField } = fields();
+    const { StringField } = getDataFields();
     return {
       ...super.defineSchema(),
       value: valueField(0),
@@ -97,7 +97,11 @@ export class DamageSourceRule extends RuleData {
   static defineSchema() {
     return {
       ...super.defineSchema(),
-      selector: new (fields().StringField)({ required: true, blank: false, initial: "damage" }),
+      selector: new (getDataFields().StringField)({
+        required: true,
+        blank: false,
+        initial: "damage"
+      }),
       tags: tagsField(),
       ignoreReduction: valueField(0)
     };
@@ -164,7 +168,7 @@ export class FreeRaiseRule extends RuleData {
 export class DiceRuleRule extends RuleData {
   /** @override */
   static defineSchema() {
-    const { BooleanField, NumberField } = fields();
+    const { BooleanField, NumberField } = getDataFields();
     return {
       ...super.defineSchema(),
       selector: selectorField(),
@@ -186,7 +190,7 @@ export class DiceRuleRule extends RuleData {
 export class SubstituteRule extends RuleData {
   /** @override */
   static defineSchema() {
-    const { StringField } = fields();
+    const { StringField } = getDataFields();
     return {
       ...super.defineSchema(),
       selector: selectorField(),
@@ -200,7 +204,7 @@ export class SubstituteRule extends RuleData {
 export class TraitAdjustRule extends RuleData {
   /** @override */
   static defineSchema() {
-    const { StringField } = fields();
+    const { StringField } = getDataFields();
     return {
       ...super.defineSchema(),
       trait: new StringField({ required: true, blank: false, choices: ADJUSTABLE_TRAITS }),
@@ -213,7 +217,7 @@ export class TraitAdjustRule extends RuleData {
 export class NoteRule extends RuleData {
   /** @override */
   static defineSchema() {
-    const { StringField } = fields();
+    const { StringField } = getDataFields();
     return {
       ...super.defineSchema(),
       selector: selectorField(),
@@ -229,7 +233,7 @@ export class NoteRule extends RuleData {
 export class RollOptionRule extends RuleData {
   /** @override */
   static defineSchema() {
-    const { BooleanField, StringField } = fields();
+    const { BooleanField, StringField } = getDataFields();
     return {
       ...super.defineSchema(),
       option: new StringField({ required: true, blank: false }),
@@ -257,7 +261,7 @@ export class MovementRule extends RuleData {
 export class ApplyConditionRule extends RuleData {
   /** @override */
   static defineSchema() {
-    const { NumberField, StringField } = fields();
+    const { NumberField, StringField } = getDataFields();
     return {
       ...super.defineSchema(),
       selector: selectorField(),
@@ -278,7 +282,7 @@ export class ApplyConditionRule extends RuleData {
 export class ConditionImmunityRule extends RuleData {
   /** @override */
   static defineSchema() {
-    const { StringField } = fields();
+    const { StringField } = getDataFields();
     return {
       ...super.defineSchema(),
       condition: new StringField({ required: true, blank: false })
@@ -295,7 +299,7 @@ export class ConditionImmunityRule extends RuleData {
 export class PeriodicSaveRule extends RuleData {
   /** @override */
   static defineSchema() {
-    const { NumberField, StringField } = fields();
+    const { NumberField, StringField } = getDataFields();
     return {
       ...super.defineSchema(),
       event: new StringField({ required: true, initial: "roundEnd", choices: SAVE_EVENTS }),
@@ -322,7 +326,7 @@ export class PeriodicSaveRule extends RuleData {
 export class ResourceRule extends RuleData {
   /** @override */
   static defineSchema() {
-    const { StringField } = fields();
+    const { StringField } = getDataFields();
     return {
       ...super.defineSchema(),
       slug: new StringField({ required: true, blank: false }),
@@ -360,7 +364,7 @@ export class OpponentModifierRule extends RuleData {
 export class RaiseRuleRule extends RuleData {
   /** @override */
   static defineSchema() {
-    const { StringField } = fields();
+    const { StringField } = getDataFields();
     return {
       ...super.defineSchema(),
       selector: selectorField(),
@@ -398,7 +402,7 @@ export class UnskilledAsRule extends RuleData {
 export class ActionCostRule extends RuleData {
   /** @override */
   static defineSchema() {
-    const { StringField } = fields();
+    const { StringField } = getDataFields();
     return {
       ...super.defineSchema(),
       selector: selectorField(),
@@ -433,7 +437,7 @@ export class CostRule extends RuleData {
 export class LedgerRule extends RuleData {
   /** @override */
   static defineSchema() {
-    const { StringField } = fields();
+    const { StringField } = getDataFields();
     return {
       ...super.defineSchema(),
       track: new StringField({ required: true, initial: "honor", choices: LEDGER_TRACKS }),
@@ -450,7 +454,7 @@ export class LedgerRule extends RuleData {
 export class PrerequisiteRule extends RuleData {
   /** @override */
   static defineSchema() {
-    const { ArrayField, AnyField } = fields();
+    const { ArrayField, AnyField } = getDataFields();
     return {
       ...super.defineSchema(),
       requires: new ArrayField(new AnyField({ serializable: true, nullable: false }))
@@ -466,7 +470,7 @@ export class PrerequisiteRule extends RuleData {
 export class ChoiceSetRule extends RuleData {
   /** @override */
   static defineSchema() {
-    const { ArrayField, SchemaField, StringField } = fields();
+    const { ArrayField, SchemaField, StringField } = getDataFields();
     return {
       ...super.defineSchema(),
       flag: new StringField({
@@ -505,7 +509,7 @@ export class ChoiceSetRule extends RuleData {
 export class GrantItemRule extends RuleData {
   /** @override */
   static defineSchema() {
-    const { NumberField, StringField } = fields();
+    const { NumberField, StringField } = getDataFields();
     return {
       ...super.defineSchema(),
       uuid: new StringField({ required: true, blank: false }),
@@ -577,14 +581,14 @@ export function createRule(source) {
   return new Model(foundry.utils.deepClone(source), { strict: true });
 }
 
-const fields = () => foundry.data.fields;
+const getDataFields = () => foundry.data.fields;
 
 /**
  * An attack range a rule is limited to, or null for every roll.
  * @returns {foundry.data.fields.StringField}
  */
 function rangeField() {
-  return new (fields().StringField)({
+  return new (getDataFields().StringField)({
     required: true,
     nullable: true,
     initial: null,
@@ -598,6 +602,6 @@ function rangeField() {
  * @returns {foundry.data.fields.ArrayField}
  */
 function tagsField(initial = []) {
-  const { ArrayField, StringField } = fields();
+  const { ArrayField, StringField } = getDataFields();
   return new ArrayField(new StringField({ required: true, blank: false }), { initial });
 }

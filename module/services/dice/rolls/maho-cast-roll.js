@@ -14,9 +14,9 @@
 import { DIALOG_TEMPLATES } from "../../../config/templates.js";
 import { F, T } from "../../../utils/localization.js";
 import { toInt } from "../../../utils/type-coercion.js";
-import { ringRank } from "../../../utils/mechanics.js";
+import { ringRankOf } from "../../../utils/mechanics.js";
 import { rollCheck } from "../check/roll-check.js";
-import { recordTrackChange } from "../../ledger.js";
+import { applyTrackChange } from "../../ledger.js";
 
 /**
  * Casts a maho spell.
@@ -27,9 +27,9 @@ import { recordTrackChange } from "../../ledger.js";
  * @param {boolean} [options.showDialog=true] - Show the roll dialog
  * @returns {Promise<ChatMessage|null>} The posted message, or null when cancelled
  */
-export async function MahoCastRoll({ actor, spell, showDialog = true } = {}) {
+export async function rollMahoCast({ actor, spell, showDialog = true } = {}) {
   const ring = String(spell.system.ring).toLowerCase();
-  const ringValue = ringRank(actor, ring);
+  const rank = ringRankOf(actor, ring);
   const mastery = Math.max(1, toInt(spell.system.mastery));
   // Master of Blood: the item carries a RollOption rule with this option
   const masterOfBlood = actor.rollOptions.has("master-of-blood");
@@ -39,7 +39,7 @@ export async function MahoCastRoll({ actor, spell, showDialog = true } = {}) {
     actor,
     kind: "maho",
     label: `${T("l5r4.magic.maho.casting")}: ${spell.name}`,
-    base: { roll: ringValue + actor.system.insightRank, keep: ringValue },
+    base: { roll: rank + actor.system.insightRank, keep: rank },
     ring,
     tn: 5 + 5 * mastery,
     askForOptions: showDialog,
@@ -73,7 +73,7 @@ export async function MahoCastRoll({ actor, spell, showDialog = true } = {}) {
       const taint = masterOfBlood ? Math.max(base - toInt(actor.system.rings.earth), 1) : base;
       // Through the ledger, so ten points become a Taint Rank and the change is logged
       // game-rules/89_shadowlands_taint.md, p.275
-      await recordTrackChange(actor, "taint", taint, T("l5r4.magic.maho.taintGained"));
+      await applyTrackChange(actor, "taint", taint, T("l5r4.magic.maho.taintGained"));
       ui.notifications?.warn(F("l5r4.magic.maho.taintGainedNotification", { taint }));
       return { labelSuffix: ` [${T("l5r4.magic.maho.taintGained")}: ${taint}]` };
     }

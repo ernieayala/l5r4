@@ -15,7 +15,7 @@
  */
 export default class L5R4Die extends foundry.dice.terms.Die {
   /** @override */
-  static MODIFIERS = { ...super.MODIFIERS, xa: "explodeAdd" };
+  static MODIFIERS = { ...super.MODIFIERS, xa: "rollExplosions" };
 
   /**
    * Explode each active die into its own total: while the last result meets the target, roll again and add.
@@ -24,7 +24,7 @@ export default class L5R4Die extends foundry.dice.terms.Die {
    * @param {string} modifier - The matched modifier query
    * @returns {Promise<false|void>} False if the modifier was unmatched
    */
-  async explodeAdd(modifier) {
+  async rollExplosions(modifier) {
     const match = modifier.match(/xa([<>=]+)?([0-9]+)?/i);
     if (!match) {
       return false;

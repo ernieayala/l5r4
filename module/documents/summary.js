@@ -4,19 +4,19 @@
  * for its sheet, its chat card, and the compendium browser.
  */
 
-import { phraseText } from "../utils/localization.js";
-import { rulesSummary, sourceCitation } from "../utils/rule-summary.js";
+import { formatPhrase } from "../utils/localization.js";
+import { buildRulesSummary, buildSourceCitation } from "../utils/rule-summary.js";
 
 /**
  * What a document's rules do, one line each, and the book and page it cites.
  * @param {{rules?: object[], source?: {book: string, page: number}}} system
  * @returns {{lines: string[], citation: string|null}}
  */
-export function summaryText(system) {
-  const citation = sourceCitation(system?.source);
+export function summaryOf(system) {
+  const citation = buildSourceCitation(system?.source);
   return {
-    lines: rulesSummary(system?.rules, { itemName }).map(phraseText),
-    citation: citation ? phraseText(citation) : null
+    lines: buildRulesSummary(system?.rules, { itemName: itemNameOf }).map(formatPhrase),
+    citation: citation ? formatPhrase(citation) : null
   };
 }
 
@@ -25,6 +25,6 @@ export function summaryText(system) {
  * @param {string} uuid
  * @returns {string}
  */
-function itemName(uuid) {
+function itemNameOf(uuid) {
   return fromUuidSync(uuid, { strict: false })?.name ?? uuid;
 }

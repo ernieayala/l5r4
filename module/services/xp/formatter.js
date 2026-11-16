@@ -7,13 +7,13 @@
  * 6 × the new rank, a Skill its new rank, an Emphasis 2, an item its listed cost, a spell its Mastery Level.
  */
 
-import { getSortPref, sortWithPref } from "../../utils/sorting.js";
+import { getSortPref, applySortPref } from "../../utils/sorting.js";
 
 /**
  * Column extractors for sortable XP entry fields.
  *
  * Defines how to extract sortable values from formatted entries for user-driven sorting.
- * Used with sortWithPref from utils/sorting.js to enable column-click sorting in sheets.
+ * Used with applySortPref from utils/sorting.js to enable column-click sorting in sheets.
  *
  * @typedef {object} SortColumnExtractors
  * @property {Function} note - Extracts note text (string sort)
@@ -132,7 +132,7 @@ export function formatXpEntries(entries, options = {}) {
 
   if (sort && actorId) {
     const pref = sortPref || getSortPref(actorId, scope, ["note", "cost", "type"], "note");
-    formatted = sortWithPref(formatted, SORT_COLUMNS, pref);
+    formatted = applySortPref(formatted, SORT_COLUMNS, pref);
   } else {
     formatted.sort((a, b) => (a.ts || 0) - (b.ts || 0));
   }

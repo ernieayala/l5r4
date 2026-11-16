@@ -1,12 +1,12 @@
 import { SYS_ID } from "../../module/config/constants.js";
-import { SkillRoll } from "../../module/services/dice/rolls/skill-roll.js";
-import { TraitRoll } from "../../module/services/dice/rolls/trait-roll.js";
+import { rollSkill } from "../../module/services/dice/rolls/skill-roll.js";
+import { rollTrait } from "../../module/services/dice/rolls/trait-roll.js";
 import { applyEffect, effectsOf } from "../../module/services/effects/apply.js";
 import { onPromptClick } from "../../module/services/effects/prompts.js";
-import { registerTokenEffects, syncProne } from "../../module/services/effects/automation.js";
-import { voidOverLimit, voidSpent } from "../../module/services/effects/uses.js";
+import { registerTokenEffects, updateProne } from "../../module/services/effects/automation.js";
+import { isVoidOverLimit, voidSpentOf } from "../../module/services/effects/uses.js";
 import { spendVoidPoint } from "../../module/services/dice/resources/void-points.js";
-import { collectCheck } from "../../module/services/dice/check/collect.js";
+import { getCheckContext } from "../../module/services/dice/check/collect.js";
 import { createTestNPC, createTestPC } from "../fixtures/actor-fixtures.js";
 import { autoAnswerRolls, createDrawnToken, settleChatNotifications, waitFor } from "./helpers.js";
 
@@ -154,7 +154,7 @@ export function registerEffectsTests(quench) {
           );
           assert.lengthOf(effectsOf(actor, "centered"), 1);
 
-          const bonus = collectCheck(actor, { kind: "skill" }).modifiers.find(m => m.consumes);
+          const bonus = getCheckContext(actor, { kind: "skill" }).modifiers.find(m => m.consumes);
           assert.deepInclude(bonus, { roll: 1, keep: 1, total: 3, enabled: false });
 
           await actor.toggleStatusEffect("attackStance", { active: true });
@@ -166,7 +166,7 @@ export function registerEffectsTests(quench) {
         it("should end the Center Stance bonus when it is used", async () => {
           const actor = track(await createTestPC({ name: "Effects centered use" }));
           await applyEffect(actor, "centered");
-          const index = collectCheck(actor, { kind: "trait", trait: "ref" }).modifiers.findIndex(
+          const index = getCheckContext(actor, { kind: "trait", trait: "ref" }).modifiers.findIndex(
             m => m.consumes
           );
           // Answer this dialog by hand: tick the Center bonus, then roll
@@ -179,7 +179,7 @@ export function registerEffectsTests(quench) {
                 resolve();
               })
             );
-            const message = await TraitRoll({ actor, traitName: "ref", traitRank: 2 });
+            const message = await rollTrait({ actor, traitName: "ref", traitRank: 2 });
             await answered;
             assert.deepInclude(message.system.pool, { roll: 3, keep: 3 }, "2k2 plus 1k1");
           } finally {
@@ -278,10 +278,10 @@ export function registerEffectsTests(quench) {
           const token = await createDrawnToken({ actorId: target.id, x: 100, y: 100 });
           try {
             canvas.tokens.setTargets([token.id]);
-            const message = await SkillRoll({
+            const message = await rollSkill({
               actor: attacker,
               skillName: "Kenjutsu",
-              actorTrait: 10,
+              traitRank: 10,
               skillRank: 10,
               skillTrait: "agi",
               rollType: "attack",
@@ -311,7 +311,7 @@ export function registerEffectsTests(quench) {
           const combat = await startCombat([actor, 10]);
           await applyEffect(actor, "feared", { level: 2 });
           assert.equal(
-            collectCheck(actor, { kind: "skill" }).modifiers[0].roll,
+            getCheckContext(actor, { kind: "skill" }).modifiers[0].roll,
             -2,
             "Fear 2: -2k0"
           );
@@ -381,7 +381,7 @@ export function registerEffectsTests(quench) {
         it("should leave a Prone the GM applied by hand", async () => {
           const actor = track(await createTestPC({ name: "Effects prone manual" }));
           await actor.toggleStatusEffect("prone", { active: true });
-          await syncProne(actor);
+          await updateProne(actor);
           assert.isTrue(actor.statuses.has("prone"));
         });
       });
@@ -421,10 +421,10 @@ export function registerEffectsTests(quench) {
             })
           );
           await startCombat([actor, 10]);
-          assert.isFalse(voidOverLimit(actor));
+          assert.isFalse(isVoidOverLimit(actor));
           await spendVoidPoint(actor);
-          assert.equal(voidSpent(actor), 1);
-          assert.isTrue(voidOverLimit(actor), "the dialog warns");
+          assert.equal(voidSpentOf(actor), 1);
+          assert.isTrue(isVoidOverLimit(actor), "the dialog warns");
           await spendVoidPoint(actor);
           assert.equal(actor.system.rings.void.value, 1, "never blocked");
         });
@@ -445,7 +445,7 @@ export function registerEffectsTests(quench) {
           ]);
           await startCombat([actor, 10]);
           await spendVoidPoint(actor);
-          assert.isFalse(voidOverLimit(actor));
+          assert.isFalse(isVoidOverLimit(actor));
         });
       });
     },

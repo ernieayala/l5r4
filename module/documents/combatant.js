@@ -5,7 +5,7 @@
 
 import { SYS_ID } from "../config/constants.js";
 import { toInt } from "../utils/type-coercion.js";
-import { initiativeFormula } from "../utils/initiative.js";
+import { getInitiativeFormula } from "../utils/initiative.js";
 
 /**
  * The Combatant document class the system sets as `CONFIG.Combatant.documentClass`.
@@ -29,7 +29,7 @@ export default class L5R4Combatant extends foundry.documents.Combatant {
     // The prepared pool, modifiers included: an NPC's stored pool or formula is already in it (npc-preparation.js)
     const initiative = actor.system.initiative;
     const { roll, keep } = initiative;
-    return initiativeFormula(
+    return getInitiativeFormula(
       { roll, keep, bonus: toInt(initiative.totalMod) + bonus },
       { littleTruths: game.settings.get(SYS_ID, "LtException") }
     );

@@ -85,7 +85,7 @@ export async function migrateEmphasisStringToArray(docs, label) {
 
       for (const parsedName of parsedNames) {
         // Try to find official match
-        const officialMatch = findOfficialEmphasisMatch(parsedName);
+        const officialMatch = getOfficialEmphasis(parsedName);
 
         const emphasisName = officialMatch || parsedName.trim();
 
@@ -101,7 +101,7 @@ export async function migrateEmphasisStringToArray(docs, label) {
 
         // If no official match, create as custom emphasis
         if (!officialMatch) {
-          await addCustomEmphasisToWorld(emphasisName);
+          await updateWorldCustomEmphases(emphasisName);
 
           // Track for logging
           if (!customEmphasisNames.includes(emphasisName)) {
@@ -153,7 +153,7 @@ export async function migrateEmphasisStringToArray(docs, label) {
  * @param {string} name - Emphasis name to match
  * @returns {string|null} Matched official emphasis name or null
  */
-function findOfficialEmphasisMatch(name) {
+function getOfficialEmphasis(name) {
   if (!name) {
     return null;
   }
@@ -208,7 +208,7 @@ function getWorldCustomEmphases() {
  * @param {string} emphasisName - Name of custom emphasis to add
  * @returns {Promise<void>}
  */
-async function addCustomEmphasisToWorld(emphasisName) {
+async function updateWorldCustomEmphases(emphasisName) {
   const current = getWorldCustomEmphases();
   if (!current.includes(emphasisName)) {
     current.push(emphasisName);

@@ -1,11 +1,11 @@
 import { describe, expect, it } from "vitest";
 import { BROWSER_FILTERS, BROWSER_TABS } from "../../../module/config/browser.js";
 import {
-  browserIndexFields,
-  entryNumbers,
-  filterEntries,
-  filterOptions,
-  valueAt
+  getBrowserIndexFields,
+  getEntryNumbers,
+  getFilteredEntries,
+  getFilterOptions,
+  getValueAt
 } from "../../../module/utils/browser-filter.js";
 
 const tab = id => BROWSER_TABS.find(t => t.id === id);
@@ -50,9 +50,9 @@ const SPELLS = [
   }
 ];
 
-describe("filterEntries", () => {
+describe("getFilteredEntries", () => {
   it("should keep the tab's types, sorted by name", () => {
-    expect(names(filterEntries(SPELLS, tab("spells")))).toEqual([
+    expect(names(getFilteredEntries(SPELLS, tab("spells")))).toEqual([
       "Ashigaru's Blood",
       "Fires of Purity",
       "Fury of Osano-wo",
@@ -62,27 +62,29 @@ describe("filterEntries", () => {
 
   it("should filter by each filter alone", () => {
     const spells = tab("spells");
-    expect(names(filterEntries(SPELLS, spells, { choices: { ring: "earth" } }))).toEqual([
+    expect(names(getFilteredEntries(SPELLS, spells, { choices: { ring: "earth" } }))).toEqual([
       "Jade Strike"
     ]);
-    expect(names(filterEntries(SPELLS, spells, { choices: { mastery: "2" } }))).toEqual([
+    expect(names(getFilteredEntries(SPELLS, spells, { choices: { mastery: "2" } }))).toEqual([
       "Fires of Purity",
       "Fury of Osano-wo"
     ]);
-    expect(names(filterEntries(SPELLS, spells, { choices: { keyword: "battle" } }))).toEqual([
+    expect(names(getFilteredEntries(SPELLS, spells, { choices: { keyword: "battle" } }))).toEqual([
       "Fury of Osano-wo"
     ]);
-    expect(names(filterEntries(SPELLS, spells, { choices: { maho: "true" } }))).toEqual([
+    expect(names(getFilteredEntries(SPELLS, spells, { choices: { maho: "true" } }))).toEqual([
       "Ashigaru's Blood"
     ]);
-    expect(names(filterEntries(SPELLS, spells, { choices: { page: "170" } }))).toEqual([
+    expect(names(getFilteredEntries(SPELLS, spells, { choices: { page: "170" } }))).toEqual([
       "Jade Strike"
     ]);
-    expect(names(filterEntries(SPELLS, spells, { search: "FURY" }))).toEqual(["Fury of Osano-wo"]);
+    expect(names(getFilteredEntries(SPELLS, spells, { search: "FURY" }))).toEqual([
+      "Fury of Osano-wo"
+    ]);
   });
 
   it("should filter by several at once: Fire, Mastery Level 2, not maho", () => {
-    const shown = filterEntries(SPELLS, tab("spells"), {
+    const shown = getFilteredEntries(SPELLS, tab("spells"), {
       choices: { ring: "fire", mastery: "2", maho: "false" },
       search: "of"
     });
@@ -90,34 +92,34 @@ describe("filterEntries", () => {
   });
 
   it("should treat a blank choice as no filter", () => {
-    expect(filterEntries(SPELLS, tab("spells"), { choices: { ring: "", maho: "" } })).toHaveLength(
-      4
-    );
+    expect(
+      getFilteredEntries(SPELLS, tab("spells"), { choices: { ring: "", maho: "" } })
+    ).toHaveLength(4);
   });
 });
 
-describe("filterOptions", () => {
+describe("getFilterOptions", () => {
   it("should offer the distinct values present, numbers in numeric order", () => {
     const spells = SPELLS.filter(entry => entry.type === "spell");
-    expect(filterOptions(spells, "ring")).toEqual(["earth", "fire"]);
-    expect(filterOptions(spells, "mastery")).toEqual(["1", "2"]);
-    expect(filterOptions(spells, "folder")).toEqual(["Earth", "Fire", "Maho"]);
-    expect(filterOptions([{ system: { cost: 10 } }, { system: { cost: 2 } }], "cost")).toEqual([
+    expect(getFilterOptions(spells, "ring")).toEqual(["earth", "fire"]);
+    expect(getFilterOptions(spells, "mastery")).toEqual(["1", "2"]);
+    expect(getFilterOptions(spells, "folder")).toEqual(["Earth", "Fire", "Maho"]);
+    expect(getFilterOptions([{ system: { cost: 10 } }, { system: { cost: 2 } }], "cost")).toEqual([
       "2",
       "10"
     ]);
   });
 });
 
-describe("browserIndexFields", () => {
+describe("getBrowserIndexFields", () => {
   it("should list each filter's system field and a row's numbers once, and none of core's", () => {
-    const fields = browserIndexFields("Item");
+    const fields = getBrowserIndexFields("Item");
     expect(fields).toContain("system.ring");
     expect(fields).toContain("system.source.page");
     expect(fields).toContain("system.damageRoll");
     expect(fields).not.toContain("type");
     expect(new Set(fields).size).toBe(fields.length);
-    expect(browserIndexFields("Actor")).toEqual(["system.source.page", "system.source.book"]);
+    expect(getBrowserIndexFields("Actor")).toEqual(["system.source.page", "system.source.book"]);
   });
 
   it("should know every filter a tab names", () => {
@@ -129,29 +131,29 @@ describe("browserIndexFields", () => {
   });
 });
 
-describe("The entryNumbers and valueAt helpers", () => {
+describe("The getEntryNumbers and getValueAt helpers", () => {
   it("should give a weapon's DR and armor's numbers, and nothing for a bow or a spell", () => {
-    expect(entryNumbers(SPELLS[4])).toEqual({
+    expect(getEntryNumbers(SPELLS[4])).toEqual({
       key: "l5r4.apps.compendiumBrowser.numbers.weapon",
       data: { pool: "3k2" }
     });
-    expect(entryNumbers({ type: "armor", system: { bonus: 5, reduction: 3 } }).data).toEqual({
+    expect(getEntryNumbers({ type: "armor", system: { bonus: 5, reduction: 3 } }).data).toEqual({
       bonus: 5,
       reduction: 3
     });
-    expect(entryNumbers({ type: "weapon", system: { isBow: true } })).toBeNull();
-    expect(entryNumbers(SPELLS[1])).toEqual({
+    expect(getEntryNumbers({ type: "weapon", system: { isBow: true } })).toBeNull();
+    expect(getEntryNumbers(SPELLS[1])).toEqual({
       key: "l5r4.apps.compendiumBrowser.numbers.spell",
       data: { ring: { key: "l5r4.ui.mechanics.rings.fire", data: {} }, mastery: 2 }
     });
-    expect(entryNumbers({ type: "spell", system: { ring: "all", mastery: 1 } }).data.ring.key).toBe(
-      "l5r4.ui.common.all"
-    );
-    expect(entryNumbers({ type: "commonItem", system: {} })).toBeNull();
+    expect(
+      getEntryNumbers({ type: "spell", system: { ring: "all", mastery: 1 } }).data.ring.key
+    ).toBe("l5r4.ui.common.all");
+    expect(getEntryNumbers({ type: "commonItem", system: {} })).toBeNull();
   });
 
   it("should read a dotted path and give undefined past a missing step", () => {
-    expect(valueAt(SPELLS[0], "system.source.page")).toBe(170);
-    expect(valueAt(SPELLS[0], "system.nothing.here")).toBeUndefined();
+    expect(getValueAt(SPELLS[0], "system.source.page")).toBe(170);
+    expect(getValueAt(SPELLS[0], "system.nothing.here")).toBeUndefined();
   });
 });

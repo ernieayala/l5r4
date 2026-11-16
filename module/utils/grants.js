@@ -34,7 +34,7 @@ import { hasOpenChoice } from "./choices.js";
  * @param {number} schoolRank
  * @returns {GrantRule[]}
  */
-export function pendingGrants(rules, records, schoolRank) {
+export function getPendingGrants(rules, records, schoolRank) {
   return rules.filter(
     rule =>
       !records.some(record => record.uuid === rule.uuid) &&
@@ -52,7 +52,7 @@ export function pendingGrants(rules, records, schoolRank) {
  * @param {GrantRule} rule
  * @returns {{update: object, record: {freeRanks: number, emphasis: string, freeEmphasis: number}}}
  */
-export function grantSkill(system, rule) {
+export function buildGrantedSkill(system, rule) {
   const trained = system.trainedEmphases.filter(Boolean);
   const addEmphasis = Boolean(rule.emphasis) && !trained.includes(rule.emphasis);
   return {
@@ -78,7 +78,7 @@ export function grantSkill(system, rule) {
  * @param {GrantRecord} record
  * @returns {{delete: true}|{update: object}}
  */
-export function ungrantSkill(system, record) {
+export function buildUngrantedSkill(system, record) {
   const trained = system.trainedEmphases.filter(Boolean);
   const bought = system.rank > system.freeRanks || trained.length > system.freeEmphasis;
   if (record.created && !bought) {

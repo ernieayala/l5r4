@@ -11,14 +11,14 @@
 import { T } from "../../../utils/localization.js";
 import { toInt } from "../../../utils/type-coercion.js";
 import { rollCheck } from "../check/roll-check.js";
-import { resolveActor } from "../resources/void-points.js";
+import { getRollActor } from "../resources/void-points.js";
 
 /**
  * Rolls weapon damage.
  *
  * @param {object} options
- * @param {number} [options.diceRoll=null] - Rolled dice, Strength included
- * @param {number} [options.diceKeep=null] - Kept dice
+ * @param {number} [options.roll=null] - Rolled dice, Strength included
+ * @param {number} [options.keep=null] - Kept dice
  * @param {string} [options.weaponName=null] - Weapon name for the label
  * @param {string} [options.description=null] - Note appended to the label
  * @param {boolean} [options.askForOptions=true] - Show the roll dialog
@@ -27,9 +27,9 @@ import { resolveActor } from "../resources/void-points.js";
  * @param {L5R4Actor} [options.actor=null] - The roller
  * @returns {Promise<ChatMessage|null>} The posted message, or null when cancelled
  */
-export async function WeaponRoll({
-  diceRoll = null,
-  diceKeep = null,
+export async function rollWeaponDamage({
+  roll = null,
+  keep = null,
   weaponName = null,
   description = null,
   askForOptions = true,
@@ -43,10 +43,10 @@ export async function WeaponRoll({
     label += ` (${description})`;
   }
   return rollCheck({
-    actor: resolveActor(actor),
+    actor: getRollActor(actor),
     kind: "damage",
     label,
-    base: { roll: toInt(diceRoll), keep: toInt(diceKeep) },
+    base: { roll: toInt(roll), keep: toInt(keep) },
     weapon,
     explode: weapon ? weapon.system.damageExplode : 10,
     modifiers: raises ? [{ label: T("l5r4.ui.check.increasedDamage"), roll: raises }] : [],

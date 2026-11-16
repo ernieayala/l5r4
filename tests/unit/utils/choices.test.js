@@ -1,15 +1,15 @@
 import { describe, expect, it } from "vitest";
 import {
-  answeredRules,
+  getAnsweredRules,
   applyChoices,
-  choiceSelections,
+  getChoiceSelections,
   hasOpenChoice
 } from "../../../module/utils/choices.js";
 
-describe("choiceSelections", () => {
+describe("getChoiceSelections", () => {
   it("should read each ChoiceSet's selection by flag, and leave out open ones", () => {
     expect(
-      choiceSelections([
+      getChoiceSelections([
         { key: "ChoiceSet", flag: "weapon", selection: "kenjutsu" },
         { key: "ChoiceSet", flag: "trait", selection: null },
         { key: "Note", flag: "nope", selection: "x" },
@@ -43,9 +43,9 @@ describe("applyChoices", () => {
   });
 });
 
-describe("answeredRules", () => {
+describe("getAnsweredRules", () => {
   it("should answer an open choice from its list or its options, and keep a choice already made", () => {
-    const [, trait, , ring, , raise] = answeredRules([
+    const [, trait, , ring, , raise] = getAnsweredRules([
       { key: "ChoiceSet", flag: "trait", list: "traits", selection: null },
       { key: "TraitAdjust", trait: "{choice:trait}", value: -1 },
       { key: "ChoiceSet", flag: "ring", list: "rings" },
@@ -59,7 +59,7 @@ describe("answeredRules", () => {
   });
 
   it("should leave a skills choice open, its uuid being free text", () => {
-    const [, grant] = answeredRules([
+    const [, grant] = getAnsweredRules([
       { key: "ChoiceSet", flag: "extra", list: "skills" },
       { key: "GrantItem", uuid: "{choice:extra}" }
     ]);

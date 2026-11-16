@@ -8,7 +8,7 @@
  */
 
 import { SYS_ID } from "../../config/constants.js";
-import { STANCE_IDS, stanceConflicts } from "../../utils/stances.js";
+import { STANCE_IDS, getStanceConflicts } from "../../utils/stances.js";
 import { applyEffect } from "../../services/effects/apply.js";
 
 /**
@@ -38,7 +38,7 @@ export class StanceHandler {
    *
    * Error Handling:
    * - Warns users without ownership permission
-   * - Delegates async error handling to _addStance and _removeAllStances.
+   * - Delegates async error handling to #applyStanceEffect and #deleteStances.
    *
    * @param {object} context - Sheet render context containing actor reference
    * @param {Actor} context.actor - The L5R4 actor document being modified
@@ -47,7 +47,7 @@ export class StanceHandler {
    * @param {string} element.value - The stance ID (e.g., "fullAttackStance") or empty string
    * @returns {Promise<void>}
    */
-  static async changeStance(context, event, element) {
+  static async applyStance(context, event, element) {
     event?.preventDefault?.();
 
     const actor = context.actor;
@@ -59,13 +59,13 @@ export class StanceHandler {
     // The select's value is user input: only the five stances, or "" for none
     const stanceId = STANCE_IDS.has(element?.value) ? element.value : "";
     if (!stanceId) {
-      await this._removeAllStances(actor);
+      await this.#deleteStances(actor);
       return;
     }
     // A condition may rule the stance out: warn, and leave the choice to the player
     // game-rules/36_stances.md, p.84
     // game-rules/41_conditional_effects.md, p.89
-    for (const status of stanceConflicts(stanceId, actor.statuses)) {
+    for (const status of getStanceConflicts(stanceId, actor.statuses)) {
       ui.notifications?.warn(
         game.i18n.localize("l5r4.ui.effects.stanceNotAllowed", {
           condition: game.i18n.localize(CONFIG.statusEffects[status].name),
@@ -74,7 +74,7 @@ export class StanceHandler {
       );
     }
     // The new stance's group ends the old one (module/documents/active-effect.js)
-    await this._addStance(actor, stanceId);
+    await this.#applyStanceEffect(actor, stanceId);
   }
 
   /**
@@ -102,7 +102,7 @@ export class StanceHandler {
    * @param {Event} [event] - The DOM event that triggered the toggle (optional)
    * @returns {Promise<void>}
    */
-  static async toggleMovementType(context, event) {
+  static async updateMovementType(context, event) {
     event?.preventDefault?.();
 
     const actor = context.actor;
@@ -130,7 +130,7 @@ export class StanceHandler {
    * @param {string} stanceId - Stance identifier (e.g., "attackStance", "fullDefenseStance")
    * @returns {Promise<void>}
    */
-  static async _addStance(actor, stanceId) {
+  static async #applyStanceEffect(actor, stanceId) {
     try {
       await applyEffect(actor, stanceId);
     } catch (err) {
@@ -145,7 +145,7 @@ export class StanceHandler {
    * @param {Actor} actor - The L5R4 actor document to remove stances from
    * @returns {Promise<void>}
    */
-  static async _removeAllStances(actor) {
+  static async #deleteStances(actor) {
     try {
       const effectsToRemove = actor.effects
         .filter(effect => [...effect.statuses].some(id => STANCE_IDS.has(id)))

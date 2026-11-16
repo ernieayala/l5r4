@@ -10,7 +10,7 @@
 import { describe, it, expect } from "vitest";
 import {
   ARMOR_TYPES,
-  getArmorTNPenalty,
+  getArmorTnPenalty,
   getArmorPenaltyDescription
 } from "../../../module/utils/armor-penalties.js";
 
@@ -29,7 +29,7 @@ describe("ARMOR_TYPES", () => {
   });
 });
 
-describe("getArmorTNPenalty", () => {
+describe("getArmorTnPenalty", () => {
   describe("Ashigaru armor", () => {
     it("should return 0 penalty for ashigaru armor", () => {
       const actor = {
@@ -44,7 +44,7 @@ describe("getArmorTNPenalty", () => {
         ]
       };
 
-      const penalty = getArmorTNPenalty(actor, "athletics", "agi");
+      const penalty = getArmorTnPenalty(actor, "athletics", "agi");
       expect(penalty).toBe(0);
     });
 
@@ -61,9 +61,9 @@ describe("getArmorTNPenalty", () => {
         ]
       };
 
-      expect(getArmorTNPenalty(actor, "athletics", "str")).toBe(0);
-      expect(getArmorTNPenalty(actor, "stealth", "agi")).toBe(0);
-      expect(getArmorTNPenalty(actor, "kenjutsu", "agi")).toBe(0);
+      expect(getArmorTnPenalty(actor, "athletics", "str")).toBe(0);
+      expect(getArmorTnPenalty(actor, "stealth", "agi")).toBe(0);
+      expect(getArmorTnPenalty(actor, "kenjutsu", "agi")).toBe(0);
     });
   });
 
@@ -81,7 +81,7 @@ describe("getArmorTNPenalty", () => {
         ]
       };
 
-      const penalty = getArmorTNPenalty(actor, "athletics", "str");
+      const penalty = getArmorTnPenalty(actor, "athletics", "str");
       expect(penalty).toBe(5);
     });
 
@@ -98,7 +98,7 @@ describe("getArmorTNPenalty", () => {
         ]
       };
 
-      const penalty = getArmorTNPenalty(actor, "stealth", "agi");
+      const penalty = getArmorTnPenalty(actor, "stealth", "agi");
       expect(penalty).toBe(5);
     });
 
@@ -115,7 +115,7 @@ describe("getArmorTNPenalty", () => {
         ]
       };
 
-      const penalty = getArmorTNPenalty(actor, "kenjutsu", "agi");
+      const penalty = getArmorTnPenalty(actor, "kenjutsu", "agi");
       expect(penalty).toBe(0);
     });
 
@@ -132,7 +132,7 @@ describe("getArmorTNPenalty", () => {
         ]
       };
 
-      const penalty = getArmorTNPenalty(actor, "investigation", "per");
+      const penalty = getArmorTnPenalty(actor, "investigation", "per");
       expect(penalty).toBe(0);
     });
 
@@ -149,8 +149,8 @@ describe("getArmorTNPenalty", () => {
         ]
       };
 
-      expect(getArmorTNPenalty(actor, "ATHLETICS", "str")).toBe(5);
-      expect(getArmorTNPenalty(actor, "Athletics", "str")).toBe(5);
+      expect(getArmorTnPenalty(actor, "ATHLETICS", "str")).toBe(5);
+      expect(getArmorTnPenalty(actor, "Athletics", "str")).toBe(5);
     });
   });
 
@@ -168,7 +168,7 @@ describe("getArmorTNPenalty", () => {
         ]
       };
 
-      const penalty = getArmorTNPenalty(actor, "kenjutsu", "agi");
+      const penalty = getArmorTnPenalty(actor, "kenjutsu", "agi");
       expect(penalty).toBe(5);
     });
 
@@ -185,7 +185,7 @@ describe("getArmorTNPenalty", () => {
         ]
       };
 
-      const penalty = getArmorTNPenalty(actor, "kyujutsu", "ref");
+      const penalty = getArmorTnPenalty(actor, "kyujutsu", "ref");
       expect(penalty).toBe(5);
     });
 
@@ -202,7 +202,7 @@ describe("getArmorTNPenalty", () => {
         ]
       };
 
-      const penalty = getArmorTNPenalty(actor, "jiujutsu", "str");
+      const penalty = getArmorTnPenalty(actor, "jiujutsu", "str");
       expect(penalty).toBe(0);
     });
 
@@ -219,7 +219,7 @@ describe("getArmorTNPenalty", () => {
         ]
       };
 
-      const penalty = getArmorTNPenalty(actor, "investigation", "per");
+      const penalty = getArmorTnPenalty(actor, "investigation", "per");
       expect(penalty).toBe(0);
     });
 
@@ -237,15 +237,15 @@ describe("getArmorTNPenalty", () => {
       };
 
       // Heavy armor penalizes traits, not skills
-      const penalty = getArmorTNPenalty(actor, "athletics", "str");
+      const penalty = getArmorTnPenalty(actor, "athletics", "str");
       expect(penalty).toBe(0); // No penalty for STR trait
     });
 
     // game-rules/73_armor.md, p.198
     it("should leave a plain Agility or Reflexes Trait roll alone: the penalty is on Skill Rolls", () => {
       const actor = { items: [{ type: "armor", system: { equipped: true, armorType: "heavy" } }] };
-      expect(getArmorTNPenalty(actor, null, "agi")).toBe(0);
-      expect(getArmorTNPenalty(actor, null, "ref")).toBe(0);
+      expect(getArmorTnPenalty(actor, null, "agi")).toBe(0);
+      expect(getArmorTnPenalty(actor, null, "ref")).toBe(0);
     });
   });
 
@@ -263,7 +263,7 @@ describe("getArmorTNPenalty", () => {
         ]
       };
 
-      const penalty = getArmorTNPenalty(actor, "kenjutsu", "agi");
+      const penalty = getArmorTnPenalty(actor, "kenjutsu", "agi");
       expect(penalty).toBe(5);
     });
 
@@ -280,7 +280,7 @@ describe("getArmorTNPenalty", () => {
         ]
       };
 
-      const penalty = getArmorTNPenalty(actor, "kyujutsu", "ref");
+      const penalty = getArmorTnPenalty(actor, "kyujutsu", "ref");
       expect(penalty).toBe(5);
     });
 
@@ -307,7 +307,7 @@ describe("getArmorTNPenalty", () => {
         ]
       };
 
-      const penalty = getArmorTNPenalty(actor, "kenjutsu", "agi");
+      const penalty = getArmorTnPenalty(actor, "kenjutsu", "agi");
       expect(penalty).toBe(0);
     });
 
@@ -324,7 +324,7 @@ describe("getArmorTNPenalty", () => {
         ]
       };
 
-      const penalty = getArmorTNPenalty(actor, "jiujutsu", "str");
+      const penalty = getArmorTnPenalty(actor, "jiujutsu", "str");
       expect(penalty).toBe(0);
     });
   });
@@ -343,7 +343,7 @@ describe("getArmorTNPenalty", () => {
         ]
       };
 
-      const penalty = getArmorTNPenalty(actor, "kenjutsu", "agi");
+      const penalty = getArmorTnPenalty(actor, "kenjutsu", "agi");
       expect(penalty).toBe(0);
     });
 
@@ -367,7 +367,7 @@ describe("getArmorTNPenalty", () => {
         ]
       };
 
-      const penalty = getArmorTNPenalty(actor, "athletics", "str");
+      const penalty = getArmorTnPenalty(actor, "athletics", "str");
       expect(penalty).toBe(5); // Only light armor penalty
     });
   });
@@ -393,7 +393,7 @@ describe("getArmorTNPenalty", () => {
         ]
       };
 
-      const penalty = getArmorTNPenalty(actor, "athletics", "str");
+      const penalty = getArmorTnPenalty(actor, "athletics", "str");
       expect(penalty).toBe(5); // Highest penalty
     });
 
@@ -417,25 +417,25 @@ describe("getArmorTNPenalty", () => {
         ]
       };
 
-      const penalty = getArmorTNPenalty(actor, "athletics", "str");
+      const penalty = getArmorTnPenalty(actor, "athletics", "str");
       expect(penalty).toBe(5); // Max penalty, not 10
     });
   });
 
   describe("Edge cases", () => {
     it("should return 0 for null actor", () => {
-      const penalty = getArmorTNPenalty(null, "athletics", "agi");
+      const penalty = getArmorTnPenalty(null, "athletics", "agi");
       expect(penalty).toBe(0);
     });
 
     it("should return 0 for undefined actor", () => {
-      const penalty = getArmorTNPenalty(undefined, "athletics", "agi");
+      const penalty = getArmorTnPenalty(undefined, "athletics", "agi");
       expect(penalty).toBe(0);
     });
 
     it("should return 0 for actor without items", () => {
       const actor = {};
-      const penalty = getArmorTNPenalty(actor, "athletics", "agi");
+      const penalty = getArmorTnPenalty(actor, "athletics", "agi");
       expect(penalty).toBe(0);
     });
 
@@ -443,7 +443,7 @@ describe("getArmorTNPenalty", () => {
       const actor = {
         items: []
       };
-      const penalty = getArmorTNPenalty(actor, "athletics", "agi");
+      const penalty = getArmorTnPenalty(actor, "athletics", "agi");
       expect(penalty).toBe(0);
     });
 
@@ -460,7 +460,7 @@ describe("getArmorTNPenalty", () => {
         ]
       };
 
-      const penalty = getArmorTNPenalty(actor, null, "str");
+      const penalty = getArmorTnPenalty(actor, null, "str");
       expect(penalty).toBe(0); // No skill to match
     });
 
@@ -477,7 +477,7 @@ describe("getArmorTNPenalty", () => {
         ]
       };
 
-      const penalty = getArmorTNPenalty(actor, "kenjutsu", null);
+      const penalty = getArmorTnPenalty(actor, "kenjutsu", null);
       expect(penalty).toBe(0); // No trait to match
     });
 
@@ -495,7 +495,7 @@ describe("getArmorTNPenalty", () => {
       };
 
       // Unknown types default to light armor behavior
-      const penalty = getArmorTNPenalty(actor, "athletics", "str");
+      const penalty = getArmorTnPenalty(actor, "athletics", "str");
       expect(penalty).toBe(5);
     });
 
@@ -512,7 +512,7 @@ describe("getArmorTNPenalty", () => {
       };
 
       // Defaults to light armor behavior
-      const penalty = getArmorTNPenalty(actor, "athletics", "str");
+      const penalty = getArmorTnPenalty(actor, "athletics", "str");
       expect(penalty).toBe(5);
     });
 
@@ -525,7 +525,7 @@ describe("getArmorTNPenalty", () => {
         ]
       };
 
-      const penalty = getArmorTNPenalty(actor, "athletics", "agi");
+      const penalty = getArmorTnPenalty(actor, "athletics", "agi");
       expect(penalty).toBe(0); // Not equipped
     });
 
@@ -548,7 +548,7 @@ describe("getArmorTNPenalty", () => {
         ]
       };
 
-      const penalty = getArmorTNPenalty(actor, "athletics", "str");
+      const penalty = getArmorTnPenalty(actor, "athletics", "str");
       expect(penalty).toBe(5); // Only counts armor
     });
 
@@ -566,7 +566,7 @@ describe("getArmorTNPenalty", () => {
         ]
       };
 
-      const penalty = getArmorTNPenalty(actor, "athletics", "str");
+      const penalty = getArmorTnPenalty(actor, "athletics", "str");
       expect(penalty).toBe(5);
     });
   });
@@ -595,7 +595,7 @@ describe("getArmorTNPenalty", () => {
         ]
       };
 
-      const penalty = getArmorTNPenalty(actor, "kenjutsu", "agi");
+      const penalty = getArmorTnPenalty(actor, "kenjutsu", "agi");
       expect(penalty).toBe(0); // Mounted = no penalty
     });
 
@@ -622,7 +622,7 @@ describe("getArmorTNPenalty", () => {
         ]
       };
 
-      const penalty = getArmorTNPenalty(actor, "kenjutsu", "agi");
+      const penalty = getArmorTnPenalty(actor, "kenjutsu", "agi");
       expect(penalty).toBe(0); // Mounted = no penalty
     });
 
@@ -642,7 +642,7 @@ describe("getArmorTNPenalty", () => {
         }
       };
 
-      const penalty = getArmorTNPenalty(actor, "kenjutsu", "agi");
+      const penalty = getArmorTnPenalty(actor, "kenjutsu", "agi");
       expect(penalty).toBe(0); // Mounted = no penalty
     });
 
@@ -669,7 +669,7 @@ describe("getArmorTNPenalty", () => {
         ]
       };
 
-      const penalty = getArmorTNPenalty(actor, "kenjutsu", "agi");
+      const penalty = getArmorTnPenalty(actor, "kenjutsu", "agi");
       expect(penalty).toBe(5); // Not mounted (effect disabled)
     });
   });

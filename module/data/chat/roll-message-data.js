@@ -13,7 +13,7 @@ export default class RollMessageData extends foundry.abstract.TypeDataModel {
   /** @override */
   static defineSchema() {
     const { ArrayField, NumberField, SchemaField } = foundry.data.fields;
-    const modifier = () =>
+    const modifierField = () =>
       new SchemaField({
         label: stringField(),
         roll: numberField(0),
@@ -39,7 +39,7 @@ export default class RollMessageData extends foundry.abstract.TypeDataModel {
         rerollOnes: booleanField(false),
         unskilled: booleanField(false)
       }),
-      modifiers: new ArrayField(modifier()),
+      modifiers: new ArrayField(modifierField()),
       voidPoint: booleanField(false),
       emphasis: stringField(),
       tn: new SchemaField({

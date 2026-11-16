@@ -12,7 +12,7 @@ import { BROWSER_FILTERS, BROWSER_ROW_FIELDS, BROWSER_TABS } from "../config/bro
  * @param {string} path
  * @returns {*}
  */
-export function valueAt(object, path) {
+export function getValueAt(object, path) {
   return path.split(".").reduce((value, key) => (value == null ? undefined : value[key]), object);
 }
 
@@ -22,7 +22,7 @@ export function valueAt(object, path) {
  * @param {"Item"|"Actor"} documentName
  * @returns {string[]}
  */
-export function browserIndexFields(documentName) {
+export function getBrowserIndexFields(documentName) {
   const ids = BROWSER_TABS.filter(tab => tab.documentName === documentName).flatMap(
     tab => tab.filters
   );
@@ -36,7 +36,7 @@ export function browserIndexFields(documentName) {
  * @param {object} entry
  * @returns {{key: string, data: object}|null}
  */
-export function entryNumbers(entry) {
+export function getEntryNumbers(entry) {
   const system = entry.system ?? {};
   if (entry.type === "armor") {
     return {
@@ -67,11 +67,11 @@ export function entryNumbers(entry) {
  * @param {string} filterId
  * @returns {string[]}
  */
-export function filterOptions(entries, filterId) {
+export function getFilterOptions(entries, filterId) {
   const filter = BROWSER_FILTERS[filterId];
   const values = new Set();
   for (const entry of entries) {
-    const value = valueAt(entry, filter.path);
+    const value = getValueAt(entry, filter.path);
     if (value !== undefined && value !== null && value !== "") {
       values.add(String(value));
     }
@@ -87,12 +87,14 @@ export function filterOptions(entries, filterId) {
  * @param {{search?: string, choices?: Record<string, string>}} state
  * @returns {object[]}
  */
-export function filterEntries(entries, tab, { search = "", choices = {} } = {}) {
+export function getFilteredEntries(entries, tab, { search = "", choices = {} } = {}) {
   const needle = search.toLowerCase().trim();
   return entries
     .filter(entry => tab.types.includes(entry.type))
     .filter(entry => !needle || entry.name.toLowerCase().includes(needle))
-    .filter(entry => tab.filters.every(id => passes(entry, BROWSER_FILTERS[id], choices[id])))
+    .filter(entry =>
+      tab.filters.every(id => isFilterMatch(entry, BROWSER_FILTERS[id], choices[id]))
+    )
     .sort((a, b) => a.name.localeCompare(b.name));
 }
 
@@ -103,11 +105,11 @@ export function filterEntries(entries, tab, { search = "", choices = {} } = {}) 
  * @param {string} choice
  * @returns {boolean}
  */
-function passes(entry, filter, choice) {
+function isFilterMatch(entry, filter, choice) {
   if (choice === undefined || choice === null || choice === "") {
     return true;
   }
-  const value = valueAt(entry, filter.path);
+  const value = getValueAt(entry, filter.path);
   switch (filter.kind) {
     case "contains":
       return String(value ?? "")

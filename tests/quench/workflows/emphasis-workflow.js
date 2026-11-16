@@ -27,7 +27,7 @@
 import { SYS_ID } from "../../../module/config/constants.js";
 import { createTestPC } from "../../fixtures/actor-fixtures.js";
 import { createSkillData } from "../../fixtures/item-fixtures.js";
-import { SkillRoll } from "../../../module/services/dice/rolls/skill-roll.js";
+import { rollSkill } from "../../../module/services/dice/rolls/skill-roll.js";
 
 /**
  * Register emphasis workflow integration tests
@@ -118,11 +118,11 @@ export function registerEmphasisWorkflowTests(quench) {
           // Set actor trait for roll
           await actor.update({ "system.traits.agility": 3 });
 
-          const rollResult = await SkillRoll({
+          const rollResult = await rollSkill({
             actor,
             skillName: "kenjutsu",
             skillRank: 3,
-            actorTrait: 3,
+            traitRank: 3,
             skillTrait: "agi",
             askForOptions: false
           });
@@ -152,11 +152,11 @@ export function registerEmphasisWorkflowTests(quench) {
           // Set actor trait for roll
           await actor.update({ "system.traits.agility": 3 });
 
-          const rollResult = await SkillRoll({
+          const rollResult = await rollSkill({
             actor,
             skillName: "kenjutsu",
             skillRank: 3,
-            actorTrait: 3,
+            traitRank: 3,
             skillTrait: "agi",
             askForOptions: false
           });
@@ -526,11 +526,11 @@ export function registerEmphasisWorkflowTests(quench) {
           // Set actor trait for roll
           await actor.update({ "system.traits.agility": 3 });
 
-          const rollResult = await SkillRoll({
+          const rollResult = await rollSkill({
             actor,
             skillName: "kenjutsu",
             skillRank: 0, // Unskilled
-            actorTrait: 3,
+            traitRank: 3,
             skillTrait: "agi",
             askForOptions: false
           });
@@ -667,11 +667,11 @@ export function registerEmphasisWorkflowTests(quench) {
           });
 
           // ACT - Roll with emphasis enabled
-          const rollResult = await SkillRoll({
+          const rollResult = await rollSkill({
             actor,
             skillName: "kenjutsu",
             skillRank: 3,
-            actorTrait: 3,
+            traitRank: 3,
             skillTrait: "agi",
             askForOptions: false
           });
@@ -708,11 +708,11 @@ export function registerEmphasisWorkflowTests(quench) {
           });
 
           // ACT - Roll without emphasis
-          const rollResult = await SkillRoll({
+          const rollResult = await rollSkill({
             actor,
             skillName: "kenjutsu",
             skillRank: 3,
-            actorTrait: 3,
+            traitRank: 3,
             skillTrait: "agi",
             askForOptions: false
           });

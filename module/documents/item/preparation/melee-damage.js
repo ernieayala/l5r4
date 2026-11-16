@@ -25,7 +25,7 @@ import { toInt } from "../../../utils/type-coercion.js";
  * @param {L5R4Actor|null} [actor=null] - Optional actor wielding the weapon (for Strength)
  * @returns {MeleeDamageResult} Damage roll components for formula construction
  */
-export function calculateMeleeDamage(sys, actor = null) {
+export function getMeleeDamage(sys, actor = null) {
   const weaponRoll = toInt(sys.damageRoll);
   const weaponKeep = toInt(sys.damageKeep);
   // Thrown weapons such as shuriken and tsubute add no Strength

@@ -12,7 +12,7 @@
 
 import { SYS_ID } from "../../config/constants.js";
 import { applyChoices } from "../../utils/choices.js";
-import { highestSchoolRank } from "../../utils/mechanics.js";
+import { getHighestSchoolRank } from "../../utils/mechanics.js";
 
 /** Item types activated rather than applied while owned. */
 export const ACTIVATED_TYPES = Object.freeze(["kata", "kiho", "tattoo"]);
@@ -32,7 +32,7 @@ export function activationOf(actor, item) {
  * @param {Actor} actor
  * @returns {string[]}
  */
-export function activeItemIds(actor) {
+export function activeItemIdsOf(actor) {
   return actor.effects.map(effect => effect.getFlag(SYS_ID, "activatedFrom")).filter(Boolean);
 }
 
@@ -42,7 +42,7 @@ export function activeItemIds(actor) {
  * @param {Item} item
  * @returns {Promise<void>}
  */
-export async function toggleActivation(actor, item) {
+export async function updateActivation(actor, item) {
   if (!ACTIVATED_TYPES.includes(item.type) || item.system.passive) {
     return;
   }
@@ -86,6 +86,6 @@ function groupOf(item) {
  * @returns {object}
  */
 function durationOf(actor, item) {
-  const rank = item.type === "tattoo" ? highestSchoolRank(actor) : 0;
+  const rank = item.type === "tattoo" ? getHighestSchoolRank(actor) : 0;
   return rank ? { duration: { value: 2 * rank, units: "rounds" } } : {};
 }

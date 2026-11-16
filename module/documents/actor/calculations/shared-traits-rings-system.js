@@ -16,7 +16,7 @@ import { logError } from "../../../utils/error-logging.js";
  * @param {Record<string, number>} t - Trait ranks by key
  * @returns {{air: number, earth: number, fire: number, water: number}}
  */
-export function ringsFromTraits(t) {
+export function ringsOf(t) {
   return {
     air: Math.min(t.ref, t.awa),
     earth: Math.min(t.sta, t.wil),
@@ -55,7 +55,7 @@ export function prepareTraitsAndRings(sys) {
     // Calculate Ring values using L5R4 formula: min(trait1, trait2)
     // This ensures a character must balance both traits to increase a Ring
     sys.rings = {
-      ...ringsFromTraits(t),
+      ...ringsOf(t),
       void: {
         rank: existingVoidRank,
         // Current Void Points (spent during play)

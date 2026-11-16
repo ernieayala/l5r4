@@ -7,7 +7,7 @@
 
 import { SYS_ID } from "../../config/constants.js";
 import { toInt } from "../../utils/type-coercion.js";
-import { setSectionCollapsed } from "../../utils/section-state.js";
+import { updateSectionCollapsed } from "../../utils/section-state.js";
 import * as Chat from "../../services/chat.js";
 
 /**
@@ -15,7 +15,7 @@ import * as Chat from "../../services/chat.js";
  * Provides methods for creating, editing, deleting, expanding, and posting items to chat.
  * Integrates with Foundry's embedded document system and sheet rendering.
  */
-export class ItemCRUDHandler {
+export class ItemCrudHandler {
   /**
    * Resolves the target element from either an explicit element or event target.
    * Defensive helper for handlers that may receive element or event.
@@ -24,7 +24,7 @@ export class ItemCRUDHandler {
    * @param {Event} event - Event containing currentTarget
    * @returns {HTMLElement} The resolved element
    */
-  static _getElement(element, event) {
+  static #getElement(element, event) {
     return element || event.currentTarget;
   }
 
@@ -35,7 +35,7 @@ export class ItemCRUDHandler {
    * @param {HTMLElement} element - Starting element for traversal
    * @returns {HTMLElement|null} The item row element or null if not found
    */
-  static _getItemRow(element) {
+  static #getItemRow(element) {
     return element?.closest?.(".item");
   }
 
@@ -46,7 +46,7 @@ export class ItemCRUDHandler {
    * @param {HTMLElement} row - Item row element
    * @returns {string|undefined} The item ID or undefined if not found
    */
-  static _getItemId(row) {
+  static #getItemId(row) {
     return row?.dataset?.itemId || row?.dataset?.documentId || row?.dataset?.id;
   }
 
@@ -61,12 +61,12 @@ export class ItemCRUDHandler {
    * @param {HTMLElement} element - Clicked element (used to detect section)
    * @returns {Promise<Item[]>} Created item documents (empty if cancelled)
    *
-   * @see detectSectionItemType
+   * @see getSectionItemType
    */
   static async create(context, event, element) {
     event.preventDefault();
 
-    const preferredType = this.detectSectionItemType(element);
+    const preferredType = this.getSectionItemType(element);
 
     const result = await Chat.getUnifiedItemOptions(context.actor.type, preferredType);
 
@@ -102,7 +102,7 @@ export class ItemCRUDHandler {
    * @param {HTMLElement} element - Element within a sheet section
    * @returns {string|null} Item type string or null if section not recognized
    */
-  static detectSectionItemType(element) {
+  static getSectionItemType(element) {
     const section = element?.closest?.("[data-scope]");
     const scope = section?.dataset?.scope;
 
@@ -136,11 +136,11 @@ export class ItemCRUDHandler {
    * @param {Event} event - Click event (prevented)
    * @param {HTMLElement} element - Clicked element or event target
    */
-  static edit(context, event, element) {
+  static openItemSheet(context, event, element) {
     event.preventDefault();
-    const el = this._getElement(element, event);
-    const row = this._getItemRow(el);
-    const id = this._getItemId(row);
+    const el = this.#getElement(element, event);
+    const row = this.#getItemRow(el);
+    const id = this.#getItemId(row);
     context.actor.items.get(id)?.sheet?.render(true);
   }
 
@@ -157,9 +157,9 @@ export class ItemCRUDHandler {
    */
   static async deleteItem(context, event, element) {
     event.preventDefault();
-    const el = this._getElement(element, event);
-    const row = this._getItemRow(el);
-    const id = this._getItemId(row);
+    const el = this.#getElement(element, event);
+    const row = this.#getItemRow(el);
+    const id = this.#getItemId(row);
 
     if (!id) {
       return;
@@ -188,7 +188,7 @@ export class ItemCRUDHandler {
     try {
       await context.actor.deleteEmbeddedDocuments("Item", [id]);
     } catch (err) {
-      console.warn(`${SYS_ID} ItemCRUDHandler: deleteEmbeddedDocuments failed`, { err });
+      console.warn(`${SYS_ID} ItemCrudHandler: deleteEmbeddedDocuments failed`, { err });
     }
   }
 
@@ -200,9 +200,9 @@ export class ItemCRUDHandler {
    * @param {Event} event - Click event (prevented)
    * @param {HTMLElement} element - Clicked element containing the chevron icon
    */
-  static expand(context, event, element) {
+  static updateItemExpanded(context, event, element) {
     event?.preventDefault?.();
-    const row = this._getItemRow(element);
+    const row = this.#getItemRow(element);
     if (!row) {
       return;
     }
@@ -226,7 +226,7 @@ export class ItemCRUDHandler {
    * - Finds parent .section-title element
    * - Toggles "is-collapsed" class for immediate CSS-driven visibility
    * - Swaps chevron icon direction (fa-angle-down ↔ fa-angle-up)
-   * - Persists state to user flags via setSectionCollapsed()
+   * - Persists state to user flags via updateSectionCollapsed()
    *
    * **Persistence:**
    * State is stored per-user, per-actor, per-section in user flags. This allows
@@ -239,7 +239,7 @@ export class ItemCRUDHandler {
    * @param {HTMLElement} element - Clicked element (searches up for .section-title)
    * @returns {Promise<void>}
    */
-  static async toggleSection(context, event, element) {
+  static async updateSectionCollapsed(context, event, element) {
     event?.preventDefault?.();
 
     // Find parent section title container
@@ -266,7 +266,7 @@ export class ItemCRUDHandler {
 
     // Persist state to user flags if we have a valid scope
     if (scope && context.actor) {
-      await setSectionCollapsed(context.actor.id, scope, isNowCollapsed);
+      await updateSectionCollapsed(context.actor.id, scope, isNowCollapsed);
     }
   }
 
@@ -291,12 +291,12 @@ export class ItemCRUDHandler {
    * @param {HTMLElement} element - Input element with data-field and data-dtype attributes
    * @returns {Promise<Item|undefined>} Updated item document or undefined if validation fails
    */
-  static async inlineEdit(context, event, element) {
+  static async updateItemField(context, event, element) {
     event.preventDefault();
     event.stopPropagation(); // Prevent Foundry's submitOnChange form handler from firing
-    const el = this._getElement(element, event);
-    const row = this._getItemRow(el);
-    const id = this._getItemId(row);
+    const el = this.#getElement(element, event);
+    const row = this.#getItemRow(el);
+    const id = this.#getItemId(row);
     const field = el.dataset.field;
     if (!id || !field) {
       return;
@@ -347,7 +347,7 @@ export class ItemCRUDHandler {
       const skillRow = row;
       const rollButtons = skillRow.querySelectorAll('[data-action="roll-skill"]');
       rollButtons.forEach(button => {
-        const formula = `${item.system.rollDice}k${item.system.rollKeep}`;
+        const formula = `${item.system.roll}k${item.system.keep}`;
         button.textContent = formula;
 
         // Also update the mask span if it exists
@@ -378,8 +378,8 @@ export class ItemCRUDHandler {
   static async toChat(context, event, element) {
     event.preventDefault();
 
-    const row = this._getItemRow(element);
-    const id = this._getItemId(row);
+    const row = this.#getItemRow(element);
+    const id = this.#getItemId(row);
     if (!id) {
       return;
     }
@@ -390,7 +390,7 @@ export class ItemCRUDHandler {
     try {
       await item.roll();
     } catch (err) {
-      console.warn(`${SYS_ID} ItemCRUDHandler: item.roll() failed`, { err, id });
+      console.warn(`${SYS_ID} ItemCrudHandler: item.roll() failed`, { err, id });
     }
   }
 }

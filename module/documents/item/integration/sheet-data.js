@@ -36,7 +36,7 @@ import { NPC_NUMBER_WOUND_LVLS } from "../../../config/game-mechanics.js";
  * @property {object} config.actionTypes - Action timing keys (simple, complex, free)
  * @property {object} config.kihoTypes - Kiho category keys (internal, karmic, martial, mystic)
  * @property {object} config.advantageTypes - Advantage/disadvantage type keys (physical, mental, social, material, spiritual, ancestor)
- * @property {object} config.npcNumberWoundLvls - NPC rank to wound level count mapping (1-8)
+ * @property {object} config.npcNumberWoundLevels - NPC rank to wound level count mapping (1-8)
  */
 
 /**
@@ -45,7 +45,7 @@ import { NPC_NUMBER_WOUND_LVLS } from "../../../config/game-mechanics.js";
  * @param {SheetContext} data - Mutable sheet context object from Foundry's data preparation
  * @returns {SheetContext} The same data object with injected config property (for chaining)
  */
-export function enhanceItemSheetData(data) {
+export function prepareItemSheetOptions(data) {
   data.config = {
     arrows: ARROWS,
     armorTypes: ARMOR_TYPES,
@@ -59,7 +59,7 @@ export function enhanceItemSheetData(data) {
     actionTypes: ACTION_TYPES,
     kihoTypes: KIHO_TYPES,
     advantageTypes: ADVANTAGE_TYPES,
-    npcNumberWoundLvls: NPC_NUMBER_WOUND_LVLS
+    npcNumberWoundLevels: NPC_NUMBER_WOUND_LVLS
   };
   return data;
 }

@@ -10,7 +10,7 @@
  * game-rules/33_wounds.md, p.82
  */
 
-import { stackModifiers } from "./modifier-stacking.js";
+import { getStackedModifiers } from "./modifier-stacking.js";
 import { applyTenDiceRule } from "./ten-dice.js";
 
 /**
@@ -69,7 +69,7 @@ export function buildPool({
   keepOverride = null,
   littleTruths = false
 }) {
-  const added = stackModifiers(modifiers.filter(modifier => modifier.enabled !== false));
+  const added = getStackedModifiers(modifiers.filter(modifier => modifier.enabled !== false));
   let rolled = roll + added.roll;
   let kept = keep + added.keep;
   const flat = bonus + added.total;
@@ -82,8 +82,8 @@ export function buildPool({
   }
   const ten = applyTenDiceRule(rolled, kept, flat, { littleTruths });
   return {
-    roll: ten.diceRoll,
-    keep: ten.diceKeep,
+    roll: ten.roll,
+    keep: ten.keep,
     bonus: ten.bonus,
     explode: unskilled ? null : explode,
     rerollOnes
@@ -97,7 +97,7 @@ export function buildPool({
  * @param {number|null} explode
  * @returns {string} "xa10", "xa>=9", or ""
  */
-export function explodeModifier(explode) {
+export function getExplodeModifier(explode) {
   if (explode === null) {
     return "";
   }
@@ -113,10 +113,10 @@ export function explodeModifier(explode) {
  * @param {CheckPool} pool
  * @returns {string} Such as "7d10xa10k3+0", "5d10r1xa>=9k2+2", or "3d10k3-1"
  */
-export function poolFormula({ roll, keep, bonus, explode, rerollOnes }) {
+export function getPoolFormula({ roll, keep, bonus, explode, rerollOnes }) {
   const reroll = rerollOnes ? "r1" : "";
   const flat = bonus >= 0 ? `+${bonus}` : `${bonus}`;
-  return `${roll}d10${reroll}${explodeModifier(explode)}k${keep}${flat}`;
+  return `${roll}d10${reroll}${getExplodeModifier(explode)}k${keep}${flat}`;
 }
 
 /**
@@ -127,7 +127,7 @@ export function poolFormula({ roll, keep, bonus, explode, rerollOnes }) {
  * @param {boolean} [unskilled=false]
  * @returns {number}
  */
-export function maxRaises(voidRing, unskilled = false) {
+export function getMaxRaises(voidRing, unskilled = false) {
   return unskilled ? 0 : Math.max(0, voidRing);
 }
 
@@ -145,13 +145,7 @@ export function maxRaises(voidRing, unskilled = false) {
  * @param {number[]} [spec.modifiers=[]] - Other TN changes (conditions, armor, rules)
  * @returns {number|null} The TN, never below 0; null when the roll has no TN
  */
-export function targetNumber({
-  base,
-  raises = 0,
-  freeRaisesToTN = 0,
-  woundPenalty = 0,
-  modifiers = []
-}) {
+export function getTn({ base, raises = 0, freeRaisesToTN = 0, woundPenalty = 0, modifiers = [] }) {
   if (base <= 0 && raises <= 0) {
     return null;
   }
@@ -167,7 +161,7 @@ export function targetNumber({
  * @param {number|null} tn
  * @returns {{success: boolean, margin: number}|null} null when the roll has no TN
  */
-export function evaluateCheck(total, tn) {
+export function getCheckResult(total, tn) {
   if (tn === null) {
     return null;
   }
@@ -183,7 +177,7 @@ export function evaluateCheck(total, tn) {
  * @param {Array<{id: string, total: number, raises?: number}>} entries
  * @returns {{winner: string|null, tie: boolean, scores: Record<string, number>}}
  */
-export function contest(entries) {
+export function getContestResult(entries) {
   const scores = Object.fromEntries(entries.map(e => [e.id, e.total - 5 * (e.raises ?? 0)]));
   const best = Math.max(...Object.values(scores));
   const leaders = entries.filter(e => scores[e.id] === best);

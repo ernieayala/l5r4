@@ -1,13 +1,13 @@
 import { describe, expect, it } from "vitest";
 import {
-  addRuleRollOptions,
-  bagEntries,
-  derivedRuleOutputs,
+  applyRollOptionRules,
+  getBagEntries,
+  getDerivedRuleOutputs,
   parseRulesJson,
-  selectorBonus,
-  statusRules,
-  traitAdjustTotal,
-  traitAdjustments
+  getSelectorBonus,
+  getStatusRules,
+  getTraitAdjustTotal,
+  getTraitAdjustments
 } from "../../../module/utils/rule-engine.js";
 
 /** A rule as its DataModel leaves it: every field present, defaults filled. */
@@ -21,9 +21,9 @@ const rollData = {
 };
 
 // TraitAdjust rules
-describe("traitAdjustments", () => {
+describe("getTraitAdjustments", () => {
   it("should sum numbers and formulas per Trait, the Void Ring included", () => {
-    const { adjustments, errors } = traitAdjustments(
+    const { adjustments, errors } = getTraitAdjustments(
       [
         entry(rule("TraitAdjust", { trait: "str", value: 1 })),
         entry(rule("TraitAdjust", { trait: "str", value: "floor(@honor.rank / 2)" })),
@@ -37,7 +37,7 @@ describe("traitAdjustments", () => {
   });
 
   it("should skip a rule whose predicate fails and ignore other keys", () => {
-    const { adjustments } = traitAdjustments(
+    const { adjustments } = getTraitAdjustments(
       [
         entry(rule("TraitAdjust", { trait: "agi", value: 1, predicate: ["status:prone"] })),
         entry(rule("ArmorTN", { value: 5, type: "untyped" }))
@@ -49,7 +49,7 @@ describe("traitAdjustments", () => {
   });
 
   it("should report a formula that does not resolve and keep the other rules", () => {
-    const { adjustments, errors } = traitAdjustments(
+    const { adjustments, errors } = getTraitAdjustments(
       [
         entry(rule("TraitAdjust", { trait: "str", value: "nope(1)" }), "Bad Family"),
         entry(rule("TraitAdjust", { trait: "str", value: 1 }))
@@ -63,7 +63,7 @@ describe("traitAdjustments", () => {
   });
 });
 
-describe("traitAdjustTotal", () => {
+describe("getTraitAdjustTotal", () => {
   it("should sum numeric TraitAdjust values for one Trait", () => {
     const rules = [
       { key: "TraitAdjust", trait: "str", value: 1 },
@@ -71,21 +71,21 @@ describe("traitAdjustTotal", () => {
       { key: "TraitAdjust", trait: "agi", value: 1 },
       { key: "RollModifier", trait: "str", value: 5 }
     ];
-    expect(traitAdjustTotal(rules, "str")).toBe(3);
+    expect(getTraitAdjustTotal(rules, "str")).toBe(3);
   });
 
   it("should skip a formula and anything that is not a rule", () => {
     expect(
-      traitAdjustTotal([{ key: "TraitAdjust", trait: "str", value: "@rings.air" }, null], "str")
+      getTraitAdjustTotal([{ key: "TraitAdjust", trait: "str", value: "@rings.air" }, null], "str")
     ).toBe(0);
-    expect(traitAdjustTotal(undefined, "str")).toBe(0);
+    expect(getTraitAdjustTotal(undefined, "str")).toBe(0);
   });
 });
 
 // RollOption rules
-describe("addRuleRollOptions", () => {
+describe("applyRollOptionRules", () => {
   it("should add an option, a toggle only when on, and let later predicates see earlier options", () => {
-    const options = addRuleRollOptions(
+    const options = applyRollOptionRules(
       [
         entry(rule("RollOption", { option: "master-of-blood", toggleable: false, value: false })),
         entry(rule("RollOption", { option: "higher-ground", toggleable: true, value: false })),
@@ -105,15 +105,15 @@ describe("addRuleRollOptions", () => {
   });
 });
 
-describe("derivedRuleOutputs", () => {
+describe("getDerivedRuleOutputs", () => {
   const out = rules =>
-    derivedRuleOutputs(
+    getDerivedRuleOutputs(
       rules.map(r => entry(r)),
       rollData,
       new Set(["status:defenseStance"])
     );
 
-  it("should resolve each ArmorTN rule's value with its mode, type, and range for resolveArmorTn", () => {
+  it("should resolve each ArmorTN rule's value with its mode, type, and range for getArmorTn", () => {
     const result = out([
       rule("ArmorTN", {
         value: "@rings.air + @skills.defense.rank",
@@ -154,7 +154,7 @@ describe("derivedRuleOutputs", () => {
       effectUuid: "Actor.a.ActiveEffect.f",
       level: 3
     };
-    const [modifier] = derivedRuleOutputs([fear], rollData, new Set()).bag.rollModifiers.any;
+    const [modifier] = getDerivedRuleOutputs([fear], rollData, new Set()).bag.rollModifiers.any;
     expect(modifier.roll).toBe(-3);
   });
 
@@ -179,7 +179,7 @@ describe("derivedRuleOutputs", () => {
       min: 5,
       onFailure: "retry"
     });
-    const result = derivedRuleOutputs(
+    const result = getDerivedRuleOutputs(
       [
         { rule: save, source: "Dazed", effectUuid: "Actor.a.ActiveEffect.d" },
         { rule: save, source: "Some item" }
@@ -228,7 +228,7 @@ describe("derivedRuleOutputs", () => {
     expect(result.reduction).toBe(0);
   });
 
-  it("should fill the RollModifier bag by selector, which selectorBonus stacks for a sheet formula", () => {
+  it("should fill the RollModifier bag by selector, which getSelectorBonus stacks for a sheet formula", () => {
     const result = out([
       rule("RollModifier", {
         selector: "skill:kenjutsu",
@@ -249,17 +249,17 @@ describe("derivedRuleOutputs", () => {
       rule("RollModifier", { selector: "attack", roll: 1, keep: 0, total: 0, type: "untyped" })
     ]);
     const options = new Set();
-    expect(selectorBonus(result.bag, ["skill:kenjutsu"], options)).toEqual({
+    expect(getSelectorBonus(result.bag, ["skill:kenjutsu"], options)).toEqual({
       roll: 2,
       keep: 1,
       total: 2
     });
-    expect(selectorBonus(result.bag, ["skill:kenjutsu", "trait:ref"], options)).toEqual({
+    expect(getSelectorBonus(result.bag, ["skill:kenjutsu", "trait:ref"], options)).toEqual({
       roll: 2,
       keep: 2,
       total: 2
     });
-    expect(selectorBonus(result.bag, ["ring:fire"], options)).toEqual({
+    expect(getSelectorBonus(result.bag, ["ring:fire"], options)).toEqual({
       roll: 2,
       keep: 0,
       total: 0
@@ -285,8 +285,8 @@ describe("derivedRuleOutputs", () => {
       })
     ]);
     expect(result.bag.rollModifiers["skill:kenjutsu"]).toHaveLength(1);
-    expect(selectorBonus(result.bag, ["skill:kenjutsu"], new Set()).roll).toBe(0);
-    expect(selectorBonus(result.bag, ["skill:kenjutsu"], new Set(["target"])).roll).toBe(1);
+    expect(getSelectorBonus(result.bag, ["skill:kenjutsu"], new Set()).roll).toBe(0);
+    expect(getSelectorBonus(result.bag, ["skill:kenjutsu"], new Set(["target"])).roll).toBe(1);
   });
 
   it("should hold optional and range-limited RollModifiers for the dialog, not the sheet formula", () => {
@@ -298,7 +298,7 @@ describe("derivedRuleOutputs", () => {
       optional: false,
       consumes: false
     };
-    const result = derivedRuleOutputs(
+    const result = getDerivedRuleOutputs(
       [
         entry(rule("RollModifier", { ...base, roll: 2, range: null })),
         entry(rule("RollModifier", { ...base, roll: -1, range: "melee" })),
@@ -321,7 +321,7 @@ describe("derivedRuleOutputs", () => {
       rollData,
       new Set()
     );
-    expect(selectorBonus(result.bag, ["attack"], new Set()).roll).toBe(2);
+    expect(getSelectorBonus(result.bag, ["attack"], new Set()).roll).toBe(2);
     const [, melee, centered, item] = result.bag.rollModifiers.attack;
     expect(melee.range).toBe("melee");
     expect(centered).toMatchObject({ optional: true, consumes: "E" });
@@ -369,7 +369,7 @@ describe("derivedRuleOutputs", () => {
 
   // roadmap/STAGE-11
   it("should fill the OpponentModifier, RaiseRule, UnskilledAs, ActionCost, and Cost bag kinds", () => {
-    const result = derivedRuleOutputs(
+    const result = getDerivedRuleOutputs(
       [
         entry(
           rule("OpponentModifier", {
@@ -431,7 +431,7 @@ describe("derivedRuleOutputs", () => {
   });
 });
 
-describe("bagEntries", () => {
+describe("getBagEntries", () => {
   const bag = {
     rollModifiers: {
       attack: [
@@ -444,23 +444,25 @@ describe("bagEntries", () => {
 
   it("should return the selectors' entries whose predicates hold", () => {
     expect(
-      bagEntries(bag, "rollModifiers", ["attack"], new Set(["target"])).map(e => e.roll)
+      getBagEntries(bag, "rollModifiers", ["attack"], new Set(["target"])).map(e => e.roll)
     ).toEqual([1, 2]);
     expect(
-      bagEntries(
+      getBagEntries(
         bag,
         "rollModifiers",
         ["attack"],
         new Set(["target", "target:status:mounted"])
       ).map(e => e.roll)
     ).toEqual([2]);
-    expect(bagEntries(bag, "rollModifiers", ["attack"], new Set()).map(e => e.roll)).toEqual([2]);
+    expect(getBagEntries(bag, "rollModifiers", ["attack"], new Set()).map(e => e.roll)).toEqual([
+      2
+    ]);
   });
 
   it("should return nothing for a missing kind, selector, or bag", () => {
-    expect(bagEntries(bag, "notes", ["attack"], new Set())).toEqual([]);
-    expect(bagEntries(bag, "rollModifiers", ["spell"], new Set())).toEqual([]);
-    expect(bagEntries(undefined, "rollModifiers", ["attack"], new Set())).toEqual([]);
+    expect(getBagEntries(bag, "notes", ["attack"], new Set())).toEqual([]);
+    expect(getBagEntries(bag, "rollModifiers", ["spell"], new Set())).toEqual([]);
+    expect(getBagEntries(undefined, "rollModifiers", ["attack"], new Set())).toEqual([]);
   });
 });
 
@@ -486,19 +488,19 @@ describe("parseRulesJson", () => {
   });
 });
 
-describe("statusRules", () => {
+describe("getStatusRules", () => {
   it("should copy a status's rules, and none for a status without them", () => {
-    expect(statusRules("defenseStance")).toEqual([
+    expect(getStatusRules("defenseStance")).toEqual([
       { key: "ArmorTN", value: "@rings.air + @skills.defense.rank" }
     ]);
-    expect(statusRules("mounted")[0]).toMatchObject({
+    expect(getStatusRules("mounted")[0]).toMatchObject({
       key: "RollModifier",
       selector: "attack",
       roll: 1
     });
     // Prone: -10 Armor TN against melee, -2k0 to attacks with small and medium weapons, a note for large
     // game-rules/41_conditional_effects.md, p.89
-    expect(statusRules("prone")).toEqual([
+    expect(getStatusRules("prone")).toEqual([
       { key: "ArmorTN", value: -10, range: "melee" },
       {
         key: "RollModifier",
@@ -513,11 +515,11 @@ describe("statusRules", () => {
         predicate: ["weapon:size:large"]
       }
     ]);
-    expect(statusRules("attackStance")).toEqual([]);
+    expect(getStatusRules("attackStance")).toEqual([]);
   });
 
   it("should return a copy, so editing it leaves the config alone", () => {
-    statusRules("defenseStance")[0].value = 99;
-    expect(statusRules("defenseStance")[0].value).toBe("@rings.air + @skills.defense.rank");
+    getStatusRules("defenseStance")[0].value = 99;
+    expect(getStatusRules("defenseStance")[0].value).toBe("@rings.air + @skills.defense.rank");
   });
 });

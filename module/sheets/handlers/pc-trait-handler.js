@@ -8,7 +8,7 @@
  */
 
 import { SYS_ID } from "../../config/constants.js";
-import { clamp } from "../../utils/type-coercion.js";
+import { getClamped } from "../../utils/type-coercion.js";
 import { FamilyBonusService } from "../../services/family-bonus.js";
 import { RollHandler } from "./roll-handler.js";
 
@@ -47,7 +47,7 @@ export class PcTraitHandler {
    * Handles trait rank click - rolls trait or adjusts rank based on Shift key.
    *
    * **Without Shift Key:**
-   * Performs a trait roll (XkX where X = trait rank) via RollHandler.traitRoll().
+   * Performs a trait roll (XkX where X = trait rank) via RollHandler.rollClickedTrait().
    * A click on the trait rank rolls the trait.
    *
    * **With Shift Key:**
@@ -97,7 +97,7 @@ export class PcTraitHandler {
    * @param {number} delta - Direction of adjustment: positive = increase, negative = decrease
    * @returns {Promise<void>}
    */
-  static async adjust(context, event, element, delta) {
+  static async updateTraitRank(context, event, element, delta) {
     event?.preventDefault?.();
     event?.stopPropagation?.();
 
@@ -110,7 +110,7 @@ export class PcTraitHandler {
 
     // If shift key NOT pressed, perform trait roll instead of adjustment
     if (!event?.shiftKey) {
-      return RollHandler.traitRoll(context, event, element);
+      return RollHandler.rollClickedTrait(context, event, element);
     }
 
     // Read current base trait value (pending changes in _source take precedence)
@@ -133,7 +133,7 @@ export class PcTraitHandler {
 
     // Calculate desired and clamped effective trait values
     const wantEff = effNow + (delta > 0 ? 1 : -1);
-    const nextEff = clamp(wantEff, effMin, effMax);
+    const nextEff = getClamped(wantEff, effMin, effMax);
 
     // No-op if already at boundary
     if (nextEff === effNow) {
@@ -159,8 +159,8 @@ export class PcTraitHandler {
   /**
    * Increases a PC's trait value by 1 without requiring Shift key.
    *
-   * Delegates to base TraitHandler.increase() which handles the shift key bypass.
-   * The base handler will call back to this class's adjust() method which properly
+   * Delegates to base TraitHandler.updateTraitRankUp() which handles the shift key bypass.
+   * The base handler will call back to this class's updateTraitRank() method which properly
    * handles family bonuses for PCs.
    *
    * @param {object} context - Sheet render context with actor reference
@@ -168,20 +168,20 @@ export class PcTraitHandler {
    * @param {HTMLElement} element - Target element with data-trait attribute
    * @returns {Promise<void>}
    */
-  static async increase(context, event, element) {
-    // Delegate to base TraitHandler which will call back to our adjust() method
+  static async updateTraitRankUp(context, event, element) {
+    // Delegate to base TraitHandler which will call back to our updateTraitRank() method
     // Base handler creates modified event with shiftKey=true
     event?.preventDefault?.();
     event?.stopPropagation?.();
     const modifiedEvent = event ? { ...event, shiftKey: true } : { shiftKey: true };
-    return this.adjust(context, modifiedEvent, element, +1);
+    return this.updateTraitRank(context, modifiedEvent, element, +1);
   }
 
   /**
    * Decreases a PC's trait value by 1 without requiring Shift key.
    *
-   * Delegates to base TraitHandler.decrease() which handles the shift key bypass.
-   * The base handler will call back to this class's adjust() method which properly
+   * Delegates to base TraitHandler.updateTraitRankDown() which handles the shift key bypass.
+   * The base handler will call back to this class's updateTraitRank() method which properly
    * handles family bonuses for PCs.
    *
    * @param {object} context - Sheet render context with actor reference
@@ -189,13 +189,13 @@ export class PcTraitHandler {
    * @param {HTMLElement} element - Target element with data-trait attribute
    * @returns {Promise<void>}
    */
-  static async decrease(context, event, element) {
-    // Delegate to base TraitHandler which will call back to our adjust() method
+  static async updateTraitRankDown(context, event, element) {
+    // Delegate to base TraitHandler which will call back to our updateTraitRank() method
     // Base handler creates modified event with shiftKey=true
     event?.preventDefault?.();
     event?.stopPropagation?.();
     const modifiedEvent = event ? { ...event, shiftKey: true } : { shiftKey: true };
-    return this.adjust(context, modifiedEvent, element, -1);
+    return this.updateTraitRank(context, modifiedEvent, element, -1);
   }
 
   /**
@@ -215,7 +215,7 @@ export class PcTraitHandler {
    * - Subtracts bonus: 3 - 1 = 2 (WRONG!)
    * - Result: Character loses a trait point
    *
-   * This bug occurred in Issue #1 when convertSubmitData was called on every form
+   * This bug occurred in Issue #1 when toBaseTraitData was called on every form
    * submission even though traits weren't in the form.
    *
    * **Purpose (if traits become form inputs):**
@@ -255,7 +255,7 @@ export class PcTraitHandler {
    * @param {object} [submitData.system.traits] - Trait values from form (must be effective values!)
    * @returns {object} Modified submitData with base trait values for storage
    */
-  static convertSubmitData(actor, submitData) {
+  static toBaseTraitData(actor, submitData) {
     const t = submitData?.system?.traits;
     if (!t || typeof t !== "object") {
       return submitData;

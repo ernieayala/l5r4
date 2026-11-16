@@ -8,7 +8,7 @@
  */
 
 import { T } from "../../../utils/localization.js";
-import { resolveActor } from "./void-points.js";
+import { getRollActor } from "./void-points.js";
 
 /**
  * In-memory locks for preventing concurrent spell slot spending on the same actor.
@@ -126,7 +126,7 @@ export function validateSpellSlot(actor, ringKey, isVoidSlot = false) {
  * @returns {Promise<SpellSlotSpendResult>} Result with success status and chat label
  */
 export async function spendElementalSlot(actor, ringKey) {
-  return _spendSlot(actor, ringKey, false);
+  return spendSpellSlot(actor, ringKey, false);
 }
 
 /**
@@ -146,7 +146,7 @@ export async function spendElementalSlot(actor, ringKey) {
  * @returns {Promise<SpellSlotSpendResult>} Result with success status and chat label
  */
 export async function spendVoidSlot(actor) {
-  return _spendSlot(actor, "void", true);
+  return spendSpellSlot(actor, "void", true);
 }
 
 /**
@@ -161,7 +161,7 @@ export async function spendVoidSlot(actor) {
  * @param {Function} fn - Async function to execute with lock held
  * @returns {Promise<*>} Result of the function execution
  */
-async function withLock(actorId, fn) {
+async function updateUnderLock(actorId, fn) {
   // Spin-lock: wait until actor is unlocked
   while (actorLocks.get(actorId)) {
     await new Promise(resolve => setTimeout(resolve, 10));
@@ -192,8 +192,8 @@ async function withLock(actorId, fn) {
  * @param {boolean} isVoidSlot - Whether spending a Void bonus slot (true) or elemental slot (false)
  * @returns {Promise<SpellSlotSpendResult>} Result with success status and chat label
  */
-async function _spendSlot(actor, ringKey, isVoidSlot) {
-  const resolvedActor = resolveActor(actor);
+async function spendSpellSlot(actor, ringKey, isVoidSlot) {
+  const resolvedActor = getRollActor(actor);
 
   // Early validation: actor must exist before acquiring lock
   if (!resolvedActor) {
@@ -205,7 +205,7 @@ async function _spendSlot(actor, ringKey, isVoidSlot) {
   }
 
   // Execute spending with exclusive lock to prevent race conditions
-  return withLock(resolvedActor.id, async () => {
+  return updateUnderLock(resolvedActor.id, async () => {
     const validation = validateSpellSlot(resolvedActor, ringKey, isVoidSlot);
 
     if (!validation.valid) {

@@ -15,7 +15,7 @@
 
 import { toInt, toString } from "./type-coercion.js";
 import { logError } from "./error-logging.js";
-import { selectorBonus } from "./rule-engine.js";
+import { getSelectorBonus } from "./rule-engine.js";
 
 /**
  * Valid L5R4 trait abbreviations.
@@ -64,7 +64,7 @@ const ENGLISH_TRAIT_LABELS = Object.freeze({
  * @param {string} [keys.ring] - Ring key
  * @returns {{roll: number, keep: number, total: number}}
  */
-export function displayRollBonus(actor, { skill, trait, ring }) {
+export function getFormulaBonus(actor, { skill, trait, ring }) {
   const sum = { roll: 0, keep: 0, total: 0 };
   const selectors = [];
   for (const [category, name] of [
@@ -81,7 +81,7 @@ export function displayRollBonus(actor, { skill, trait, ring }) {
     sum.keep += toInt(effect.keep);
     sum.total += toInt(effect.total);
   }
-  const rules = selectorBonus(actor.ruleBag, selectors, actor.rollOptions);
+  const rules = getSelectorBonus(actor.ruleBag, selectors, actor.rollOptions);
   return {
     roll: sum.roll + rules.roll,
     keep: sum.keep + rules.keep,
@@ -102,7 +102,7 @@ export function displayRollBonus(actor, { skill, trait, ring }) {
  * @param {*} raw - Raw trait identifier
  * @returns {string} Normalized trait key ("agi", "str", etc.) or empty string
  */
-export function normalizeTraitKey(raw) {
+export function toTraitKey(raw) {
   if (raw == null) {
     return "";
   }
@@ -186,7 +186,7 @@ export function getEffectiveTrait(actor, traitKey) {
  * @param {string} ring - "air", "earth", "fire", "water", or "void"
  * @returns {number}
  */
-export function ringRank(actor, ring) {
+export function ringRankOf(actor, ring) {
   return ring === "void" ? toInt(actor.system.rings.void.rank) : toInt(actor.system.rings[ring]);
 }
 
@@ -197,7 +197,7 @@ export function ringRank(actor, ring) {
  * @param {object} actor
  * @returns {number}
  */
-export function highestSchoolRank(actor) {
+export function getHighestSchoolRank(actor) {
   const ranks = actor.items
     .filter(item => item.type === "school")
     .map(item => item.system.schoolRank);
@@ -213,7 +213,7 @@ export function highestSchoolRank(actor) {
  * @param {object} actor
  * @returns {number}
  */
-export function castingSchoolRank(actor) {
+export function getCastingSchoolRank(actor) {
   const school = actor.items.find(item => item.type === "school" && item.system.shugenja);
   return school ? school.system.schoolRank : actor.system.insightRank;
 }
@@ -226,12 +226,12 @@ export function castingSchoolRank(actor) {
  * "Attack" gives 5 dice rolled, 3 kept, the actor's Agility as the trait bonus, and that label.
  * @param {Element} el - DOM element with data attributes
  * @param {object} actor - Foundry actor document
- * @returns {{diceRoll: number, diceKeep: number, traitBonus: number, label: string, description: string}} The
+ * @returns {{roll: number, keep: number, traitBonus: number, label: string, description: string}} The
  *   dice to roll and keep, the Trait value when a trait is named, and the roll's label and description
  */
-export function extractRollParams(el, actor) {
-  const diceRoll = toInt(el.dataset.roll, 0);
-  const diceKeep = toInt(el.dataset.keep, 0);
+export function getRollParams(el, actor) {
+  const roll = toInt(el.dataset.roll, 0);
+  const keep = toInt(el.dataset.keep, 0);
   const label = toString(el.dataset.label);
   const description = toString(el.dataset.description);
 
@@ -240,8 +240,8 @@ export function extractRollParams(el, actor) {
   const traitBonus = hasTrait ? getEffectiveTrait(actor, traitKey) : 0;
 
   return {
-    diceRoll,
-    diceKeep,
+    roll,
+    keep,
     traitBonus,
     label,
     description
@@ -321,7 +321,7 @@ export function getAffinityDeficiencyModifier(actor, ringKey) {
  * @returns {{skillRank: number, traitValue: number, rollBonus: number, keepBonus: number, description: string}}
  *   The Skill rank (0 if unskilled), the Trait value, the dice to roll and keep, and a description
  */
-export function resolveWeaponSkillTrait(actor, weapon) {
+export function getWeaponSkillTrait(actor, weapon) {
   if (!weapon || !actor) {
     return {
       skillRank: 0,
@@ -357,7 +357,7 @@ export function resolveWeaponSkillTrait(actor, weapon) {
     const skillName = toString(skill.name, "Unknown Skill");
 
     // The same Skill and Trait bonuses the roll pipeline starts from, so the shown formula matches the roll
-    const bonus = displayRollBonus(actor, { skill: skillName.toLowerCase(), trait: skillTrait });
+    const bonus = getFormulaBonus(actor, { skill: skillName.toLowerCase(), trait: skillTrait });
     const skillBonusRoll = bonus.roll;
     const skillBonusKeep = bonus.keep;
 

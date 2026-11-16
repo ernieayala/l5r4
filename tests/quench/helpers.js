@@ -1,5 +1,5 @@
-import { buildPool, parseRollAndKeep, poolFormula } from "../../module/utils/check.js";
-import { collectCheck } from "../../module/services/dice/check/collect.js";
+import { buildPool, parseRollAndKeep, getPoolFormula } from "../../module/utils/check.js";
+import { getCheckContext } from "../../module/services/dice/check/collect.js";
 
 /**
  * Answer the next check dialog: set its fields, then click Roll.
@@ -141,7 +141,7 @@ export async function settleFullDefense(actor) {
  * @returns {{roll: number, keep: number, total: number, tn: number}}
  */
 export function checkEffects(actor, kind, { range = "melee", target = null, ...spec } = {}) {
-  const ctx = collectCheck(actor, { kind, target, ...spec });
+  const ctx = getCheckContext(actor, { kind, target, ...spec });
   const inRange = m => !m.range || m.range === range;
   const modifiers = ctx.modifiers.filter(m => m.enabled && inRange(m));
   const sum = key => modifiers.reduce((total, m) => total + m[key], 0);
@@ -155,7 +155,7 @@ export function checkEffects(actor, kind, { range = "melee", target = null, ...s
 
 /**
  * The Foundry formula the roll pipeline builds for a pool already under the Ten Dice Rule
- * (module/utils/check.js poolFormula), from rolled dice, kept dice, and a bonus.
+ * (module/utils/check.js getPoolFormula), from rolled dice, kept dice, and a bonus.
  * @param {number} roll
  * @param {number} keep
  * @param {number} bonus
@@ -168,7 +168,7 @@ export function buildFormula(
   bonus,
   { emphasis = false, unskilled = false, explode = 10 } = {}
 ) {
-  return poolFormula({
+  return getPoolFormula({
     roll,
     keep,
     bonus,

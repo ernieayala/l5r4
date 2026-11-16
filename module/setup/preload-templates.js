@@ -24,7 +24,7 @@ import { SYS_ID } from "../config/constants.js";
  * @throws {Error} If Foundry template system is not available (called too early)
  * @throws {Error} If template loading fails (invalid paths, missing files)
  */
-export async function preloadTemplates() {
+export async function registerTemplates() {
   const templatePaths = [
     // Item Sheet - Main Tab Partials
     `systems/${SYS_ID}/templates/item/_partials/_header.hbs`,
@@ -164,7 +164,7 @@ export async function preloadTemplates() {
   if (!globalThis.foundry?.applications?.handlebars?.loadTemplates) {
     const error = new Error(
       "Foundry VTT template system not available. " +
-        "Ensure preloadTemplates() is called after Foundry initialization."
+        "Ensure registerTemplates() is called after Foundry initialization."
     );
     console.warn("L5R4 | Template preloading failed", { error, templatePaths });
     throw error;

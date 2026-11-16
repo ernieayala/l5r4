@@ -7,7 +7,11 @@
 
 import { toInt } from "../../../utils/type-coercion.js";
 import { DEFAULT_ICONS } from "../constants/item-types.js";
-import { logSkillCreationXp, logAdvantageXp, logDisadvantageXp } from "./xp-tracking.js";
+import {
+  updateXpAfterSkillCreate,
+  updateXpAfterAdvantage,
+  updateXpAfterDisadvantage
+} from "./xp-tracking.js";
 
 /**
  * Prepare an item's source before creation: an item with no image or core's bag icon takes its type's default icon
@@ -20,7 +24,7 @@ import { logSkillCreationXp, logAdvantageXp, logDisadvantageXp } from "./xp-trac
  * @param {number} [data.system.cost] - XP cost for advantages/disadvantages
  * @returns {void} Modifies item in-place via updateSource()
  */
-export function handleItemPreCreate(item, data) {
+export function onItemPreCreate(item, data) {
   // Assign L5R4-specific default icon if using Foundry's generic icon
   const isUnsetOrBag = !item.img || item.img === "icons/svg/item-bag.svg";
   if (isUnsetOrBag) {
@@ -48,7 +52,7 @@ export function handleItemPreCreate(item, data) {
  * @param {object} _data - The creation data object passed to Item.create()
  * @returns {Promise<void>} Resolves when XP tracking is complete
  */
-export async function handleItemOnCreate(item, _data) {
+export async function onItemCreate(item, _data) {
   // Only track XP for actor-owned skills, advantages, and disadvantages
   // Orphan items (no actor) and non-XP item types are ignored
   if (!item.actor || !["skill", "advantage", "disadvantage"].includes(item.type)) {
@@ -58,13 +62,13 @@ export async function handleItemOnCreate(item, _data) {
   const sys = item.system ?? {};
 
   if (item.type === "skill") {
-    await logSkillCreationXp(item, sys);
+    await updateXpAfterSkillCreate(item, sys);
   } else {
     const cost = toInt(sys.cost, 0);
     if (item.type === "advantage") {
-      await logAdvantageXp(item, cost);
+      await updateXpAfterAdvantage(item, cost);
     } else {
-      await logDisadvantageXp(item, cost);
+      await updateXpAfterDisadvantage(item, cost);
     }
   }
 }

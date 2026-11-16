@@ -15,7 +15,7 @@ import { SYS_ID } from "../config/constants.js";
 import { F, T } from "../utils/localization.js";
 import { toInt } from "../utils/type-coercion.js";
 import { getEffectiveTrait } from "../utils/mechanics.js";
-import { fearTN } from "../utils/fear.js";
+import { getFearTn } from "../utils/fear.js";
 import { rollCheck } from "./dice/check/roll-check.js";
 import { applyEffectAnywhere } from "./effects/apply.js";
 
@@ -45,7 +45,7 @@ let fearTestInProgress = false;
  * @returns {Promise<ChatMessage|null>}
  */
 export function testFearRank({ character, fearRank }) {
-  return executeFearTest({ character, tn: fearTN(fearRank), fearRank });
+  return rollFearTest({ character, tn: getFearTn(fearRank), fearRank });
 }
 
 /**
@@ -75,7 +75,7 @@ export async function testFear({ npc, character } = {}) {
 
   const targetInfo = ` ${F("l5r4.ui.mechanics.fear.testAgainst", { name: npc.name })}`;
 
-  return executeFearTest({ character, tn, fearRank, targetInfo });
+  return rollFearTest({ character, tn, fearRank, targetInfo });
 }
 
 /**
@@ -113,7 +113,7 @@ export async function testFearMultiple({ npc, characters } = {}) {
  * @param {L5R4Actor} options.npc - The creature triggering Fear
  * @returns {Promise<void>}
  */
-export async function handleFearClick({ npc } = {}) {
+export async function onFearClick({ npc } = {}) {
   if (!npc || fearTestInProgress) {
     return;
   }
@@ -142,7 +142,7 @@ export async function handleFearClick({ npc } = {}) {
  * @param {FearTestOptions} options - Fear test configuration
  * @returns {Promise<ChatMessage|null>} The roll's message, or null when the character cannot roll
  */
-async function executeFearTest({ character, tn, fearRank, targetInfo = "" } = {}) {
+async function rollFearTest({ character, tn, fearRank, targetInfo = "" } = {}) {
   const willpower = getEffectiveTrait(character, "wil");
   if (willpower <= 0) {
     ui.notifications?.warn(F("l5r4.ui.mechanics.fear.noWillpower", { name: character.name }));

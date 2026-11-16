@@ -4,7 +4,7 @@
  * can use them: `eq`, `and`, `or`, and `includes` for conditionals, `coalesce` for the first value that is set,
  * `iconPath` for icon paths, `math` for arithmetic and comparisons, and `concat` and `join` for strings.
  */
-import { iconPath } from "../config/icons.js";
+import { getIconPath } from "../config/icons.js";
 
 /**
  * Registers all custom Handlebars helpers for the L5R4 Enhanced system.
@@ -86,12 +86,12 @@ export function registerHandlebarsHelpers() {
   /**
    * Icon path resolution helper.
    * Normalizes icon references to full Foundry-compatible paths.
-   * Delegates to the iconPath utility function from config/icons module.
+   * Delegates to the getIconPath utility function from config/icons module.
    * @param {string} n - Icon filename, path, URL, or data URI
    * @returns {string} Normalized icon path for Foundry resource loading
-   * @see {@link module:config/icons~iconPath}
+   * @see {@link module:config/icons~getIconPath}
    */
-  Handlebars.registerHelper("iconPath", n => iconPath(n));
+  Handlebars.registerHelper("iconPath", n => getIconPath(n));
 
   /**
    * Mathematical operations and comparisons helper.
@@ -117,9 +117,9 @@ export function registerHandlebarsHelpers() {
    */
   Handlebars.registerHelper("math", function (L, op, R) {
     // Convert values to numbers: booleans become 0 (false) or 1 (true), null/undefined become 0
-    const n = v => (v === true || v === false ? (v ? 1 : 0) : Number(v ?? 0));
-    const a = n(L),
-      b = n(R);
+    const toOperand = v => (v === true || v === false ? (v ? 1 : 0) : Number(v ?? 0));
+    const a = toOperand(L),
+      b = toOperand(R);
 
     switch (op) {
       case "+":

@@ -7,9 +7,9 @@
 
 import { SYS_ID } from "../config/constants.js";
 import { RULE_KEYS } from "../config/rule-keys.js";
-import { answeredRules } from "../utils/choices.js";
+import { getAnsweredRules } from "../utils/choices.js";
 import { parseRulesJson } from "../utils/rule-engine.js";
-import { describeRule, newRule, ruleFromForm } from "../documents/rule-fields.js";
+import { buildRuleView, buildNewRule, parseRuleForm } from "../documents/rule-fields.js";
 
 /** The editor's template, rendered inside each sheet's Rules tab. */
 export const RULES_EDITOR_TEMPLATE = `systems/${SYS_ID}/templates/rules/_partials/_editor.hbs`;
@@ -21,13 +21,13 @@ export const RULES_EDITOR_TEMPLATE = `systems/${SYS_ID}/templates/rules/_partial
  * @param {boolean} editable
  * @returns {object}
  */
-export function rulesEditorContext(rules, mode, editable) {
-  const answered = answeredRules(rules);
+export function buildRulesEditorContext(rules, mode, editable) {
+  const answered = getAnsweredRules(rules);
   return {
     rulesMode: mode,
     rulesEditable: editable,
     ruleKeys: Object.fromEntries(RULE_KEYS.map(key => [key, key])),
-    rules: rules.map((rule, index) => ({ index, ...describeRule(rule, answered[index]) })),
+    rules: rules.map((rule, index) => ({ index, ...buildRuleView(rule, answered[index]) })),
     rulesJson: JSON.stringify(rules, null, 2)
   };
 }
@@ -40,7 +40,7 @@ export function rulesEditorContext(rules, mode, editable) {
  * @param {object[]} stored - The document's stored rules, which the fields are read over
  * @returns {object} The same data
  */
-export function readRulesForm(data, stored) {
+export function parseRulesForm(data, stored) {
   if ("rulesJson" in data) {
     const { rules, error, detail } = parseRulesJson(String(data.rulesJson));
     delete data.rulesJson;
@@ -53,7 +53,9 @@ export function readRulesForm(data, stored) {
     const values = data.rules;
     delete data.rules;
     data.system ??= {};
-    data.system.rules = stored.map((rule, i) => (values[i] ? ruleFromForm(rule, values[i]) : rule));
+    data.system.rules = stored.map((rule, i) =>
+      values[i] ? parseRuleForm(rule, values[i]) : rule
+    );
   }
   return data;
 }
@@ -73,7 +75,7 @@ export const RULES_EDITOR_ACTIONS = Object.freeze({
   async "create-rule"(_event, target) {
     const key = target.closest("[data-rules-editor]").querySelector("[data-rule-key]").value;
     if (RULE_KEYS.includes(key)) {
-      await changeRules(this, rules => [...rules, newRule(key)]);
+      await updateRules(this, rules => [...rules, buildNewRule(key)]);
     }
   },
 
@@ -84,12 +86,12 @@ export const RULES_EDITOR_ACTIONS = Object.freeze({
    */
   async "delete-rule"(_event, target) {
     const index = Number(target.closest("[data-rule-index]").dataset.ruleIndex);
-    await changeRules(this, rules => rules.filter((_rule, i) => i !== index));
+    await updateRules(this, rules => rules.filter((_rule, i) => i !== index));
   },
 
   /** Switch between the forms and the JSON, keeping what the form holds. */
   async "toggle-rules-view"() {
-    await changeRules(this, rules => rules);
+    await updateRules(this, rules => rules);
     this.rulesMode = this.rulesMode === "json" ? "form" : "json";
     await this.render();
   }
@@ -101,7 +103,7 @@ export const RULES_EDITOR_ACTIONS = Object.freeze({
  * @param {function(object[]): object[]} change - From the current rules to the new ones
  * @returns {Promise<void>}
  */
-async function changeRules(sheet, change) {
+async function updateRules(sheet, change) {
   try {
     const data = sheet._processFormData(
       null,

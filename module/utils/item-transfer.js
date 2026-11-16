@@ -18,7 +18,7 @@ export const TRANSFER_VERSION = 1;
  * @param {{system: string, core: string}} versions
  * @returns {object}
  */
-export function transferPayload(folderName, items, versions) {
+export function buildTransferPayload(folderName, items, versions) {
   return {
     format: TRANSFER_FORMAT,
     version: TRANSFER_VERSION,
@@ -34,7 +34,7 @@ export function transferPayload(folderName, items, versions) {
  * @param {string} text
  * @returns {{folder: string, items: object[]}|{error: "invalidJson"|"notExport"}}
  */
-export function readTransfer(text) {
+export function parseTransfer(text) {
   let data;
   try {
     data = JSON.parse(text);
@@ -60,7 +60,7 @@ export function readTransfer(text) {
  * @param {Record<string, string>} uuidsById - Old id to new uuid
  * @returns {object[]}
  */
-export function remapItemUuids(rules, uuidsById) {
+export function buildRemappedRules(rules, uuidsById) {
   const text = JSON.stringify(rules ?? []).replace(
     /(?<![\w.])Item\.([A-Za-z0-9]{16})\b/g,
     (whole, id) => uuidsById[id] ?? whole

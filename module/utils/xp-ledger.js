@@ -13,8 +13,8 @@ import {
   TRAIT_XP_MULTIPLIER,
   VOID_XP_MULTIPLIER
 } from "../config/game-mechanics.js";
-import { bagEntries } from "./rule-engine.js";
-import { resolveValue } from "./rule-values.js";
+import { getBagEntries } from "./rule-engine.js";
+import { getRuleValue } from "./rule-values.js";
 
 /**
  * A Trait as XP prices it; its Family and School bonus raises the price of each rank.
@@ -82,17 +82,17 @@ import { resolveValue } from "./rule-values.js";
  * @param {function(string, string): void} [spec.report] - Called with the rule's source and the error
  * @returns {function(string[], number, string|null=): number}  (selectors, base price, item id) => price
  */
-export function costPricer({ costs, options, rollData, report = () => {} }) {
+export function getCostPricer({ costs, options, rollData, report = () => {} }) {
   const bag = { costs };
   return (selectors, base, itemId = null) => {
     const rules = [
-      ...bagEntries(bag, "costs", selectors, options),
-      ...bagEntries(bag, "costs", ["self"], options).filter(rule => rule.itemId === itemId)
+      ...getBagEntries(bag, "costs", selectors, options),
+      ...getBagEntries(bag, "costs", ["self"], options).filter(rule => rule.itemId === itemId)
     ];
     let price = base;
     for (const rule of rules) {
       try {
-        price = resolveValue(rule.value, { ...rollData, cost: price });
+        price = getRuleValue(rule.value, { ...rollData, cost: price });
       } catch (err) {
         report(rule.source, err.message);
       }
@@ -108,10 +108,10 @@ export function costPricer({ costs, options, rollData, report = () => {} }) {
  * Each step is priced by `price` before it is added.
  * game-rules/48_character_creation_expanded.md, p.103
  * @param {XpBuild} build
- * @param {function(string[], number, string|null=): number} [price] - From costPricer; none leaves prices alone
+ * @param {function(string[], number, string|null=): number} [price] - From getCostPricer; none leaves prices alone
  * @returns {XpEntry[]}
  */
-export function xpEntries(build, price = (_selectors, base) => base) {
+export function getXpEntries(build, price = (_selectors, base) => base) {
   const entries = [];
 
   for (const trait of build.traits) {
@@ -187,20 +187,20 @@ export function xpEntries(build, price = (_selectors, base) => base) {
  * @param {XpEntry[]} entries
  * @returns {{total: number, spent: number, available: number, breakdown: object}}
  */
-export function xpTotals(build, entries) {
-  const sum = type => entries.filter(e => e.type === type).reduce((s, e) => s + e.delta, 0);
-  const disadvantages = Math.min(build.disadvantageCap, -sum("disadvantage"));
+export function getXpTotals(build, entries) {
+  const getTypeSum = type => entries.filter(e => e.type === type).reduce((s, e) => s + e.delta, 0);
+  const disadvantages = Math.min(build.disadvantageCap, -getTypeSum("disadvantage"));
   const breakdown = {
     base: build.base,
     manual: build.manual,
     disadvantagesGranted: disadvantages,
-    traits: sum("trait"),
-    void: sum("void"),
-    skills: sum("skill") + sum("emphasis"),
-    advantages: sum("advantage"),
-    kata: sum("kata"),
-    kiho: sum("kiho"),
-    spells: sum("spell")
+    traits: getTypeSum("trait"),
+    void: getTypeSum("void"),
+    skills: getTypeSum("skill") + getTypeSum("emphasis"),
+    advantages: getTypeSum("advantage"),
+    kata: getTypeSum("kata"),
+    kiho: getTypeSum("kiho"),
+    spells: getTypeSum("spell")
   };
   const total = build.base + disadvantages + build.manual;
   const spent =

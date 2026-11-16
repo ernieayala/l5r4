@@ -49,14 +49,14 @@ vi.mock("../../../../module/utils/sorting.js", () => ({
     key: defaultKey,
     dir: "asc"
   })),
-  sortWithPref: vi.fn((list, _columns, _pref) => {
+  applySortPref: vi.fn((list, _columns, _pref) => {
     // Returns the list as-is for most tests
     // Individual tests can override this behavior
     return list;
   })
 }));
 
-import { getSortPref, sortWithPref } from "../../../../module/utils/sorting.js";
+import { getSortPref, applySortPref } from "../../../../module/utils/sorting.js";
 
 /**
  * Helper: Create a mock XP entry
@@ -749,7 +749,7 @@ describe("formatXpEntries", () => {
       );
     });
 
-    it("should call sortWithPref when sort option is enabled", () => {
+    it("should call applySortPref when sort option is enabled", () => {
       // ARRANGE
       const entries = [createXpEntry({ delta: 10 })];
       const options = { sort: true, actorId: "actor-123" };
@@ -758,7 +758,7 @@ describe("formatXpEntries", () => {
       formatXpEntries(entries, options);
 
       // ASSERT
-      expect(sortWithPref).toHaveBeenCalled();
+      expect(applySortPref).toHaveBeenCalled();
     });
 
     it("should use custom scope when provided", () => {
@@ -789,7 +789,7 @@ describe("formatXpEntries", () => {
 
       // ASSERT
       expect(getSortPref).not.toHaveBeenCalled();
-      expect(sortWithPref).toHaveBeenCalledWith(expect.any(Array), expect.any(Object), customPref);
+      expect(applySortPref).toHaveBeenCalledWith(expect.any(Array), expect.any(Object), customPref);
     });
 
     it("should not call sort utilities when sort is false", () => {
@@ -802,7 +802,7 @@ describe("formatXpEntries", () => {
 
       // ASSERT
       expect(getSortPref).not.toHaveBeenCalled();
-      expect(sortWithPref).not.toHaveBeenCalled();
+      expect(applySortPref).not.toHaveBeenCalled();
     });
 
     it("should not call sort utilities when actorId is missing", () => {
@@ -815,7 +815,7 @@ describe("formatXpEntries", () => {
 
       // ASSERT
       expect(getSortPref).not.toHaveBeenCalled();
-      expect(sortWithPref).not.toHaveBeenCalled();
+      expect(applySortPref).not.toHaveBeenCalled();
     });
 
     it("should fall back to timestamp sorting when sort enabled but no actorId", () => {

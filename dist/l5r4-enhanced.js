@@ -29,17 +29,17 @@ import L5R4Actor from "../module/documents/actor.js";
 import L5R4Combat from "../module/documents/combat.js";
 import L5R4Combatant from "../module/documents/combatant.js";
 import L5R4Item from "../module/documents/item.js";
-import { resolveVoidInitiative } from "../module/services/initiative.js";
+import { spendInitiativeVoidPoints } from "../module/services/initiative.js";
 import L5R4Die from "../module/services/dice/roll-keep-die.js";
 import { registerEffectQueries } from "../module/services/effects/apply.js";
 import { registerPromptQueries } from "../module/services/effects/prompts.js";
-import { combatEvents, registerCombatQueries } from "../module/services/effects/combat-events.js";
+import { COMBAT_EVENTS, registerCombatQueries } from "../module/services/effects/combat-events.js";
 import L5R4ItemSheet from "../module/sheets/item-sheet.js";
 import L5R4PcSheet from "../module/sheets/pc-sheet.js";
 import L5R4NpcSheet from "../module/sheets/npc-sheet.js";
 import L5R4ActiveEffectConfig from "../module/sheets/active-effect-config.js";
-import { preloadTemplates } from "../module/setup/preload-templates.js";
-import { runMigrations } from "../module/setup/migrations.js";
+import { registerTemplates } from "../module/setup/preload-templates.js";
+import { migrateWorld } from "../module/setup/migrations.js";
 import { registerSettings } from "../module/setup/register-settings.js";
 import { registerHandlebarsHelpers } from "../module/setup/register-handlebars.js";
 import { registerEnrichers } from "../module/setup/enrichers.js";
@@ -77,8 +77,8 @@ Hooks.once("init", async () => {
   // combatant with no actor. Scores are whole numbers.
   CONFIG.Combat.initiative = { formula: "1d10", decimals: 0 };
   // Documents do not import services, so the Void Point prompt and the effect services reach L5R4Combat here
-  L5R4Combat.resolveInitiativeBonuses = resolveVoidInitiative;
-  L5R4Combat.events = combatEvents;
+  L5R4Combat.askInitiativeBonuses = spendInitiativeVoidPoints;
+  L5R4Combat.EVENTS = COMBAT_EVENTS;
 
   // What a player's client asks the active GM to do: apply a condition to an actor the player does not own, end a
   // Concentration, settle Center Stance when a player ends the Round
@@ -162,7 +162,7 @@ Hooks.once("init", async () => {
     label: "l5r4.ui.rules.effectSheet"
   });
 
-  preloadTemplates();
+  registerTemplates();
   registerHandlebarsHelpers();
 
   // Text links: @Check, @Damage, @Condition, @Fear in journals, item descriptions, and chat (roadmap/STAGE-14)
@@ -216,9 +216,9 @@ Hooks.once("ready", async () => {
           forced: forceFlag,
           versionChanged: newer 
         });
-        await runMigrations(last, currentVersion);
+        await migrateWorld(last, currentVersion);
       } catch (e) {
-        console.warn(`${SYS_ID}`, "runMigrations failed", e);
+        console.warn(`${SYS_ID}`, "migrateWorld failed", e);
       } finally {
         try {
           await game.settings.set(SYS_ID, "lastMigratedVersion", currentVersion);

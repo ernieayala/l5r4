@@ -5,7 +5,7 @@
  */
 
 /**
- * Raises each maneuver costs. Called Shot and Knockdown vary; see maneuverCost.
+ * Raises each maneuver costs. Called Shot and Knockdown vary; see getManeuverCost.
  * game-rules/38_maneuvers.md, p.86-87
  */
 export const MANEUVER_RAISES = Object.freeze({ disarm: 3, extraAttack: 5, feint: 2 });
@@ -29,24 +29,24 @@ export const SACRED = Object.freeze(["jade", "crystal", "obsidian"]);
 /**
  * Raises the chosen maneuvers cost: Called Shot 1-4, Disarm 3, Extra Attack 5, Feint 2, Knockdown 2 (4
  * against a four-legged opponent). A RaiseRule changes one maneuver's cost, never below 0 (roadmap/STAGE-11).
- * Increased Damage is whatever declared Raises are left (see allocateRaises). Feint and Knockdown cost 4; a Feint
+ * Increased Damage is whatever declared Raises are left (see getRaiseAllocation). Feint and Knockdown cost 4; a Feint
  * with a -1 adjustment costs 1.
  * game-rules/38_maneuvers.md, p.86-87
  * @param {Maneuvers} maneuvers
  * @param {Record<string, number>} [adjust={}] - Change to each maneuver's cost, by maneuver key
  * @returns {number}
  */
-export function maneuverCost(maneuvers, adjust = {}) {
-  const priced = (key, base) => Math.max(0, base + (adjust[key] ?? 0));
+export function getManeuverCost(maneuvers, adjust = {}) {
+  const getAdjustedCost = (key, base) => Math.max(0, base + (adjust[key] ?? 0));
   const calledShot = Math.max(0, Math.min(4, Number(maneuvers.calledShot) || 0));
-  let cost = calledShot ? priced("calledShot", calledShot) : 0;
+  let cost = calledShot ? getAdjustedCost("calledShot", calledShot) : 0;
   for (const key of ["disarm", "extraAttack", "feint"]) {
     if (maneuvers[key]) {
-      cost += priced(key, MANEUVER_RAISES[key]);
+      cost += getAdjustedCost(key, MANEUVER_RAISES[key]);
     }
   }
   if (maneuvers.knockdown) {
-    cost += priced("knockdown", maneuvers.fourLegged ? 4 : 2);
+    cost += getAdjustedCost("knockdown", maneuvers.fourLegged ? 4 : 2);
   }
   return cost;
 }
@@ -61,10 +61,10 @@ export function maneuverCost(maneuvers, adjust = {}) {
  * @param {object} spec - The attack's Raises and the maneuvers' cost
  * @param {number} spec.raises - Declared Raises
  * @param {number} spec.freeRaises - Free Raises not spent on the TN
- * @param {number} spec.cost - maneuverCost of the chosen maneuvers
+ * @param {number} spec.cost - getManeuverCost of the chosen maneuvers
  * @returns {{affordable: boolean, increasedDamage: number}}
  */
-export function allocateRaises({ raises, freeRaises, cost }) {
+export function getRaiseAllocation({ raises, freeRaises, cost }) {
   const fromDeclared = Math.max(0, cost - freeRaises);
   return {
     affordable: fromDeclared <= raises,
@@ -81,7 +81,7 @@ export function allocateRaises({ raises, freeRaises, cost }) {
  * @param {number} insightRank
  * @returns {number}
  */
-export function feintBonus(margin, insightRank) {
+export function getFeintBonus(margin, insightRank) {
   return Math.max(0, Math.min(Math.floor(Math.max(0, margin) / 2), 5 * insightRank));
 }
 
@@ -111,7 +111,7 @@ export function feintBonus(margin, insightRank) {
  * @param {Defenses} [spec.defenses={}]
  * @returns {{wounds: number, reduction: number, spirit: boolean, invulnerable: boolean}}
  */
-export function woundsTaken({ damage, tags = [], ignoreReduction = 0, defenses = {} }) {
+export function getWoundsTaken({ damage, tags = [], ignoreReduction = 0, defenses = {} }) {
   const has = list => list.some(tag => tags.includes(tag));
   const reduction = Math.max(
     0,
@@ -142,7 +142,7 @@ export function woundsTaken({ damage, tags = [], ignoreReduction = 0, defenses =
  * @param {number} wounds - Wounds applied from that source
  * @returns {number}
  */
-export function voidReduction(wounds) {
+export function getVoidReduction(wounds) {
   return Math.min(10, Math.max(0, wounds));
 }
 

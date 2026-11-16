@@ -22,7 +22,7 @@
  */
 
 import { SYS_ID } from "../../../module/config/constants.js";
-import { SkillRoll } from "../../../module/services/dice/rolls/skill-roll.js";
+import { rollSkill } from "../../../module/services/dice/rolls/skill-roll.js";
 import { createTestPC } from "../../fixtures/actor-fixtures.js";
 import { createSkillData } from "../../fixtures/item-fixtures.js";
 
@@ -65,10 +65,10 @@ export function registerChatCardContentValidationTests(quench) {
           const traitValue = actor.system.traits[skill.system.trait];
 
           // ACT - Execute roll
-          const message = await SkillRoll({
+          const message = await rollSkill({
             actor,
             skillRank,
-            actorTrait: traitValue,
+            traitRank: traitValue,
             skillName: "kenjutsu",
             skillTrait: "agi",
             askForOptions: false
@@ -89,10 +89,10 @@ export function registerChatCardContentValidationTests(quench) {
           const traitValue = actor.system.traits[skill.system.trait];
 
           // ACT
-          const message = await SkillRoll({
+          const message = await rollSkill({
             actor,
             skillRank,
-            actorTrait: traitValue,
+            traitRank: traitValue,
             skillName: "kenjutsu",
             skillTrait: "agi",
             askForOptions: false
@@ -113,10 +113,10 @@ export function registerChatCardContentValidationTests(quench) {
           const traitValue = 4;
 
           // ACT
-          const message = await SkillRoll({
+          const message = await rollSkill({
             actor,
             skillRank,
-            actorTrait: traitValue,
+            traitRank: traitValue,
             skillName: "kenjutsu",
             skillTrait: "agi",
             askForOptions: false
@@ -140,10 +140,10 @@ export function registerChatCardContentValidationTests(quench) {
           const traitValue = actor.system.traits[skill.system.trait];
 
           // ACT
-          const message = await SkillRoll({
+          const message = await rollSkill({
             actor,
             skillRank,
-            actorTrait: traitValue,
+            traitRank: traitValue,
             skillName: "kenjutsu",
             skillTrait: "agi",
             askForOptions: false
@@ -189,10 +189,10 @@ export function registerChatCardContentValidationTests(quench) {
           const traitValue = 4;
 
           // ACT - Execute roll with emphasis (simulated via dialog result)
-          const message = await SkillRoll({
+          const message = await rollSkill({
             actor,
             skillRank,
-            actorTrait: traitValue,
+            traitRank: traitValue,
             skillName: "kenjutsu",
             skillTrait: "agi",
             askForOptions: false,
@@ -221,10 +221,10 @@ export function registerChatCardContentValidationTests(quench) {
           const traitValue = 4;
 
           // ACT
-          const message = await SkillRoll({
+          const message = await rollSkill({
             actor,
             skillRank,
-            actorTrait: traitValue,
+            traitRank: traitValue,
             skillName: "kenjutsu",
             skillTrait: "agi",
             woundPenalty,
@@ -250,10 +250,10 @@ export function registerChatCardContentValidationTests(quench) {
           const totalBonus = 5;
 
           // ACT
-          const message = await SkillRoll({
+          const message = await rollSkill({
             actor,
             skillRank,
-            actorTrait: traitValue,
+            traitRank: traitValue,
             skillName: "kenjutsu",
             skillTrait: "agi",
             rollBonus,
@@ -306,10 +306,10 @@ export function registerChatCardContentValidationTests(quench) {
           const traitValue = 4;
 
           // ACT - Cannot directly set TN without dialog, but verify structure
-          const message = await SkillRoll({
+          const message = await rollSkill({
             actor,
             skillRank,
-            actorTrait: traitValue,
+            traitRank: traitValue,
             skillName: "kenjutsu",
             skillTrait: "agi",
             askForOptions: false
@@ -385,10 +385,10 @@ export function registerChatCardContentValidationTests(quench) {
           const traitValue = 3;
 
           // ACT
-          const message = await SkillRoll({
+          const message = await rollSkill({
             actor,
             skillRank,
-            actorTrait: traitValue,
+            traitRank: traitValue,
             skillName: "kenjutsu",
             skillTrait: "agi",
             askForOptions: false
@@ -409,10 +409,10 @@ export function registerChatCardContentValidationTests(quench) {
           const traitValue = 3;
 
           // ACT
-          const message = await SkillRoll({
+          const message = await rollSkill({
             actor,
             skillRank,
-            actorTrait: traitValue,
+            traitRank: traitValue,
             skillName: "kenjutsu",
             skillTrait: "agi",
             askForOptions: false
@@ -466,10 +466,10 @@ export function registerChatCardContentValidationTests(quench) {
           const totalBonus = 3;
 
           // ACT
-          const message = await SkillRoll({
+          const message = await rollSkill({
             actor,
             skillRank,
-            actorTrait: traitValue,
+            traitRank: traitValue,
             skillName: "kenjutsu",
             skillTrait: "agi",
             woundPenalty,
@@ -500,10 +500,10 @@ export function registerChatCardContentValidationTests(quench) {
           const traitValue = 4;
 
           // ACT
-          const message = await SkillRoll({
+          const message = await rollSkill({
             actor,
             skillRank,
-            actorTrait: traitValue,
+            traitRank: traitValue,
             skillName: "kenjutsu",
             skillTrait: "agi",
             rollBonus: 0,
@@ -531,10 +531,10 @@ export function registerChatCardContentValidationTests(quench) {
           const totalBonus = -5; // Penalty
 
           // ACT
-          const message = await SkillRoll({
+          const message = await rollSkill({
             actor,
             skillRank,
-            actorTrait: traitValue,
+            traitRank: traitValue,
             skillName: "kenjutsu",
             skillTrait: "agi",
             rollBonus,
@@ -582,10 +582,10 @@ export function registerChatCardContentValidationTests(quench) {
           const traitValue = 2;
 
           // ACT
-          const message = await SkillRoll({
+          const message = await rollSkill({
             actor,
             skillRank,
-            actorTrait: traitValue,
+            traitRank: traitValue,
             skillName: "kenjutsu",
             skillTrait: "agi",
             askForOptions: false
@@ -607,10 +607,10 @@ export function registerChatCardContentValidationTests(quench) {
           const traitValue = 6;
 
           // ACT
-          const message = await SkillRoll({
+          const message = await rollSkill({
             actor,
             skillRank,
-            actorTrait: traitValue,
+            traitRank: traitValue,
             skillName: "kenjutsu",
             skillTrait: "agi",
             askForOptions: false
@@ -632,10 +632,10 @@ export function registerChatCardContentValidationTests(quench) {
           const traitValue = 4;
 
           // ACT
-          const message = await SkillRoll({
+          const message = await rollSkill({
             actor,
             skillRank,
-            actorTrait: traitValue,
+            traitRank: traitValue,
             skillName: "kenjutsu",
             skillTrait: "agi",
             askForOptions: false
@@ -682,10 +682,10 @@ export function registerChatCardContentValidationTests(quench) {
           const traitValue = actor.system.traits[skill.system.trait];
 
           // ACT
-          const message = await SkillRoll({
+          const message = await rollSkill({
             actor,
             skillRank,
-            actorTrait: traitValue,
+            traitRank: traitValue,
             skillName: "kenjutsu",
             skillTrait: "agi",
             askForOptions: false
@@ -708,10 +708,10 @@ export function registerChatCardContentValidationTests(quench) {
           const traitValue = 4;
 
           // ACT
-          const message = await SkillRoll({
+          const message = await rollSkill({
             actor,
             skillRank,
-            actorTrait: traitValue,
+            traitRank: traitValue,
             skillName: null, // Missing
             skillTrait: "agi",
             askForOptions: false
@@ -733,10 +733,10 @@ export function registerChatCardContentValidationTests(quench) {
           const traitValue = 4;
 
           // ACT
-          const message = await SkillRoll({
+          const message = await rollSkill({
             actor,
             skillRank,
-            actorTrait: traitValue,
+            traitRank: traitValue,
             skillName: "kenjutsu",
             skillTrait: null, // Missing
             askForOptions: false

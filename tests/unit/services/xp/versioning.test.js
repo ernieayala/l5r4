@@ -1,5 +1,5 @@
 import { describe, it, expect } from "vitest";
-import { calculateXpDataVersion } from "../../../../module/services/xp/versioning.js";
+import { getXpDataVersion } from "../../../../module/services/xp/versioning.js";
 
 /**
  * Create a mock actor with XP-relevant data
@@ -60,7 +60,7 @@ function createMockItem(type, config = {}) {
   };
 }
 
-describe("calculateXpDataVersion", () => {
+describe("getXpDataVersion", () => {
   describe("Deterministic hashing", () => {
     it("should return same hash for identical actor data", () => {
       // ARRANGE
@@ -74,8 +74,8 @@ describe("calculateXpDataVersion", () => {
       });
 
       // ACT
-      const hash1 = calculateXpDataVersion(actor1);
-      const hash2 = calculateXpDataVersion(actor2);
+      const hash1 = getXpDataVersion(actor1);
+      const hash2 = getXpDataVersion(actor2);
 
       // ASSERT
       expect(hash1).toBe(hash2);
@@ -87,9 +87,9 @@ describe("calculateXpDataVersion", () => {
       const actor = createMockActor();
 
       // ACT
-      const hash1 = calculateXpDataVersion(actor);
-      const hash2 = calculateXpDataVersion(actor);
-      const hash3 = calculateXpDataVersion(actor);
+      const hash1 = getXpDataVersion(actor);
+      const hash2 = getXpDataVersion(actor);
+      const hash3 = getXpDataVersion(actor);
 
       // ASSERT
       expect(hash1).toBe(hash2);
@@ -101,7 +101,7 @@ describe("calculateXpDataVersion", () => {
       const actor = createMockActor();
 
       // ACT
-      const hash = calculateXpDataVersion(actor);
+      const hash = getXpDataVersion(actor);
 
       // ASSERT
       expect(hash).toBeGreaterThan(0);
@@ -120,8 +120,8 @@ describe("calculateXpDataVersion", () => {
       });
 
       // ACT
-      const hash1 = calculateXpDataVersion(actor1);
-      const hash2 = calculateXpDataVersion(actor2);
+      const hash1 = getXpDataVersion(actor1);
+      const hash2 = getXpDataVersion(actor2);
 
       // ASSERT
       expect(hash1).not.toBe(hash2);
@@ -135,9 +135,9 @@ describe("calculateXpDataVersion", () => {
       const actor3 = createMockActor({ traits: { ...baseTraits, sta: 4 } });
 
       // ACT
-      const hash1 = calculateXpDataVersion(actor1);
-      const hash2 = calculateXpDataVersion(actor2);
-      const hash3 = calculateXpDataVersion(actor3);
+      const hash1 = getXpDataVersion(actor1);
+      const hash2 = getXpDataVersion(actor2);
+      const hash3 = getXpDataVersion(actor3);
 
       // ASSERT
       expect(hash1).not.toBe(hash2);
@@ -153,8 +153,8 @@ describe("calculateXpDataVersion", () => {
       const actor2 = createMockActor({ voidRank: 3 });
 
       // ACT
-      const hash1 = calculateXpDataVersion(actor1);
-      const hash2 = calculateXpDataVersion(actor2);
+      const hash1 = getXpDataVersion(actor1);
+      const hash2 = getXpDataVersion(actor2);
 
       // ASSERT
       expect(hash1).not.toBe(hash2);
@@ -167,9 +167,9 @@ describe("calculateXpDataVersion", () => {
       const actor3 = createMockActor({ voidRank: 3 });
 
       // ACT
-      const hash1 = calculateXpDataVersion(actor1);
-      const hash2 = calculateXpDataVersion(actor2);
-      const hash3 = calculateXpDataVersion(actor3);
+      const hash1 = getXpDataVersion(actor1);
+      const hash2 = getXpDataVersion(actor2);
+      const hash3 = getXpDataVersion(actor3);
 
       // ASSERT
       expect(hash1).not.toBe(hash2);
@@ -187,8 +187,8 @@ describe("calculateXpDataVersion", () => {
       });
 
       // ACT
-      const hash1 = calculateXpDataVersion(actor1);
-      const hash2 = calculateXpDataVersion(actor2);
+      const hash1 = getXpDataVersion(actor1);
+      const hash2 = getXpDataVersion(actor2);
 
       // ASSERT
       expect(hash1).not.toBe(hash2);
@@ -204,8 +204,8 @@ describe("calculateXpDataVersion", () => {
       });
 
       // ACT
-      const hash1 = calculateXpDataVersion(actor1);
-      const hash2 = calculateXpDataVersion(actor2);
+      const hash1 = getXpDataVersion(actor1);
+      const hash2 = getXpDataVersion(actor2);
 
       // ASSERT
       expect(hash1).not.toBe(hash2);
@@ -221,8 +221,8 @@ describe("calculateXpDataVersion", () => {
       });
 
       // ACT
-      const hash1 = calculateXpDataVersion(actor1);
-      const hash2 = calculateXpDataVersion(actor2);
+      const hash1 = getXpDataVersion(actor1);
+      const hash2 = getXpDataVersion(actor2);
 
       // ASSERT
       expect(hash1).not.toBe(hash2);
@@ -238,8 +238,8 @@ describe("calculateXpDataVersion", () => {
       });
 
       // ACT
-      const hash1 = calculateXpDataVersion(actor1);
-      const hash2 = calculateXpDataVersion(actor2);
+      const hash1 = getXpDataVersion(actor1);
+      const hash2 = getXpDataVersion(actor2);
 
       // ASSERT
       expect(hash1).not.toBe(hash2);
@@ -255,8 +255,8 @@ describe("calculateXpDataVersion", () => {
       });
 
       // ACT
-      const hash1 = calculateXpDataVersion(actor1);
-      const hash2 = calculateXpDataVersion(actor2);
+      const hash1 = getXpDataVersion(actor1);
+      const hash2 = getXpDataVersion(actor2);
 
       // ASSERT
       expect(hash1).not.toBe(hash2);
@@ -272,8 +272,8 @@ describe("calculateXpDataVersion", () => {
       });
 
       // ACT
-      const hash1 = calculateXpDataVersion(actor1);
-      const hash2 = calculateXpDataVersion(actor2);
+      const hash1 = getXpDataVersion(actor1);
+      const hash2 = getXpDataVersion(actor2);
 
       // ASSERT
       expect(hash1).not.toBe(hash2);
@@ -287,8 +287,8 @@ describe("calculateXpDataVersion", () => {
       });
 
       // ACT
-      const hash1 = calculateXpDataVersion(actor1);
-      const hash2 = calculateXpDataVersion(actor2);
+      const hash1 = getXpDataVersion(actor1);
+      const hash2 = getXpDataVersion(actor2);
 
       // ASSERT
       expect(hash1).not.toBe(hash2);
@@ -302,8 +302,8 @@ describe("calculateXpDataVersion", () => {
       });
 
       // ACT
-      const hash1 = calculateXpDataVersion(actor1);
-      const hash2 = calculateXpDataVersion(actor2);
+      const hash1 = getXpDataVersion(actor1);
+      const hash2 = getXpDataVersion(actor2);
 
       // ASSERT
       expect(hash1).not.toBe(hash2);
@@ -317,8 +317,8 @@ describe("calculateXpDataVersion", () => {
       });
 
       // ACT
-      const hash1 = calculateXpDataVersion(actor1);
-      const hash2 = calculateXpDataVersion(actor2);
+      const hash1 = getXpDataVersion(actor1);
+      const hash2 = getXpDataVersion(actor2);
 
       // ASSERT
       expect(hash1).not.toBe(hash2);
@@ -334,8 +334,8 @@ describe("calculateXpDataVersion", () => {
       });
 
       // ACT
-      const hash1 = calculateXpDataVersion(actor1);
-      const hash2 = calculateXpDataVersion(actor2);
+      const hash1 = getXpDataVersion(actor1);
+      const hash2 = getXpDataVersion(actor2);
 
       // ASSERT
       expect(hash1).not.toBe(hash2);
@@ -358,8 +358,8 @@ describe("calculateXpDataVersion", () => {
       });
 
       // ACT
-      const hash1 = calculateXpDataVersion(actor1);
-      const hash2 = calculateXpDataVersion(actor2);
+      const hash1 = getXpDataVersion(actor1);
+      const hash2 = getXpDataVersion(actor2);
 
       // ASSERT
       expect(hash1).not.toBe(hash2);
@@ -372,7 +372,7 @@ describe("calculateXpDataVersion", () => {
       const actor = null;
 
       // ACT
-      const hash = calculateXpDataVersion(actor);
+      const hash = getXpDataVersion(actor);
 
       // ASSERT
       expect(hash).toBeGreaterThan(0);
@@ -384,7 +384,7 @@ describe("calculateXpDataVersion", () => {
       const actor = undefined;
 
       // ACT
-      const hash = calculateXpDataVersion(actor);
+      const hash = getXpDataVersion(actor);
 
       // ASSERT
       expect(hash).toBeGreaterThan(0);
@@ -396,7 +396,7 @@ describe("calculateXpDataVersion", () => {
       const actor = { items: [] };
 
       // ACT
-      const hash = calculateXpDataVersion(actor);
+      const hash = getXpDataVersion(actor);
 
       // ASSERT
       expect(hash).toBeGreaterThan(0);
@@ -412,7 +412,7 @@ describe("calculateXpDataVersion", () => {
       };
 
       // ACT
-      const hash = calculateXpDataVersion(actor);
+      const hash = getXpDataVersion(actor);
 
       // ASSERT
       expect(hash).toBeGreaterThan(0);
@@ -426,7 +426,7 @@ describe("calculateXpDataVersion", () => {
       };
 
       // ACT
-      const hash = calculateXpDataVersion(actor);
+      const hash = getXpDataVersion(actor);
 
       // ASSERT
       expect(hash).toBeGreaterThan(0);
@@ -442,7 +442,7 @@ describe("calculateXpDataVersion", () => {
       };
 
       // ACT
-      const hash = calculateXpDataVersion(actor);
+      const hash = getXpDataVersion(actor);
 
       // ASSERT
       expect(hash).toBeGreaterThan(0);
@@ -455,7 +455,7 @@ describe("calculateXpDataVersion", () => {
       const actor = { system: {}, items: [] };
 
       // ACT
-      const hash = calculateXpDataVersion(actor);
+      const hash = getXpDataVersion(actor);
 
       // ASSERT
       expect(hash).toBeGreaterThan(0);
@@ -466,7 +466,7 @@ describe("calculateXpDataVersion", () => {
       const actor = createMockActor({ traits: {} });
 
       // ACT
-      const hash = calculateXpDataVersion(actor);
+      const hash = getXpDataVersion(actor);
 
       // ASSERT
       expect(hash).toBeGreaterThan(0);
@@ -477,7 +477,7 @@ describe("calculateXpDataVersion", () => {
       const actor = createMockActor({ skills: [], items: [] });
 
       // ACT
-      const hash = calculateXpDataVersion(actor);
+      const hash = getXpDataVersion(actor);
 
       // ASSERT
       expect(hash).toBeGreaterThan(0);
@@ -492,7 +492,7 @@ describe("calculateXpDataVersion", () => {
       });
 
       // ACT
-      const hash = calculateXpDataVersion(actor);
+      const hash = getXpDataVersion(actor);
 
       // ASSERT
       expect(hash).toBeGreaterThan(0);
@@ -505,7 +505,7 @@ describe("calculateXpDataVersion", () => {
       });
 
       // ACT
-      const hash = calculateXpDataVersion(actor);
+      const hash = getXpDataVersion(actor);
 
       // ASSERT
       expect(hash).toBeGreaterThan(0);
@@ -518,7 +518,7 @@ describe("calculateXpDataVersion", () => {
       });
 
       // ACT
-      const hash = calculateXpDataVersion(actor);
+      const hash = getXpDataVersion(actor);
 
       // ASSERT
       expect(hash).toBeGreaterThan(0);
@@ -533,7 +533,7 @@ describe("calculateXpDataVersion", () => {
       });
 
       // ACT
-      const hash = calculateXpDataVersion(actor);
+      const hash = getXpDataVersion(actor);
 
       // ASSERT
       expect(hash).toBeGreaterThan(0);
@@ -546,7 +546,7 @@ describe("calculateXpDataVersion", () => {
       });
 
       // ACT
-      const hash = calculateXpDataVersion(actor);
+      const hash = getXpDataVersion(actor);
 
       // ASSERT
       expect(hash).toBeGreaterThan(0);
@@ -565,8 +565,8 @@ describe("calculateXpDataVersion", () => {
       });
 
       // ACT
-      const hash1 = calculateXpDataVersion(actorWithWeapon);
-      const hash2 = calculateXpDataVersion(actorWithoutWeapon);
+      const hash1 = getXpDataVersion(actorWithWeapon);
+      const hash2 = getXpDataVersion(actorWithoutWeapon);
 
       // ASSERT
       expect(hash1).toBe(hash2);
@@ -603,8 +603,8 @@ describe("calculateXpDataVersion", () => {
       });
 
       // ACT
-      const hash1 = calculateXpDataVersion(baseActor);
-      const hash2 = calculateXpDataVersion(modifiedActor);
+      const hash1 = getXpDataVersion(baseActor);
+      const hash2 = getXpDataVersion(modifiedActor);
 
       // ASSERT
       expect(hash1).not.toBe(hash2);
@@ -651,8 +651,8 @@ describe("calculateXpDataVersion", () => {
       });
 
       // ACT
-      const hash1 = calculateXpDataVersion(actor1);
-      const hash2 = calculateXpDataVersion(actor2);
+      const hash1 = getXpDataVersion(actor1);
+      const hash2 = getXpDataVersion(actor2);
 
       // ASSERT
       expect(hash1).toBe(hash2);

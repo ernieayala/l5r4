@@ -8,7 +8,7 @@
 
 import { SYS_ID } from "../config/constants.js";
 import { F, T } from "../utils/localization.js";
-import { readTransfer, remapItemUuids, transferPayload } from "../utils/item-transfer.js";
+import { parseTransfer, buildRemappedRules, buildTransferPayload } from "../utils/item-transfer.js";
 
 /**
  * The export file's content for the items in a folder and its subfolders, ids kept so rules can be rewritten on
@@ -16,10 +16,13 @@ import { readTransfer, remapItemUuids, transferPayload } from "../utils/item-tra
  * @param {Folder} folder - An Item folder
  * @returns {object}
  */
-export function folderTransfer(folder) {
+export function buildFolderTransfer(folder) {
   const folders = [folder, ...folder.getSubfolders(true)];
   const items = folders.flatMap(f => f.contents).map(item => item.toObject());
-  return transferPayload(folder.name, items, { system: game.system.version, core: game.version });
+  return buildTransferPayload(folder.name, items, {
+    system: game.system.version,
+    core: game.version
+  });
 }
 
 /**
@@ -28,7 +31,7 @@ export function folderTransfer(folder) {
  * @returns {object} The exported content
  */
 export function exportItemFolder(folder) {
-  const payload = folderTransfer(folder);
+  const payload = buildFolderTransfer(folder);
   const items = payload.items;
   foundry.utils.saveDataToFile(
     JSON.stringify(payload, null, 2),
@@ -47,8 +50,8 @@ export function exportItemFolder(folder) {
  * @param {Folder|null} parent
  * @returns {Promise<Item[]>} The imported items
  */
-export async function importItems(text, parent) {
-  const transfer = readTransfer(text);
+export async function createImportedItems(text, parent) {
+  const transfer = parseTransfer(text);
   if (transfer.error) {
     ui.notifications?.error(T(`l5r4.ui.transfer.${transfer.error}`));
     return [];
@@ -81,7 +84,7 @@ export async function importItems(text, parent) {
   await Item.implementation.updateDocuments(
     created.map(item => ({
       _id: item.id,
-      "system.rules": remapItemUuids(item._source.system.rules, uuidsById),
+      "system.rules": buildRemappedRules(item._source.system.rules, uuidsById),
       [`flags.${SYS_ID}.importedFrom`]: new foundry.data.operators.ForcedDeletion()
     }))
   );
@@ -92,7 +95,7 @@ export async function importItems(text, parent) {
 }
 
 /** Register the folder menu entries, once during system init. */
-export function initializeItemTransfer() {
+export function registerItemTransfer() {
   Hooks.on("getFolderContextOptions", onGetFolderContextOptions);
 }
 
@@ -101,7 +104,7 @@ export function initializeItemTransfer() {
  * @param {Folder} parent
  * @returns {Promise<void>}
  */
-async function importItemsDialog(parent) {
+async function askItemImport(parent) {
   const content = await foundry.applications.handlebars.renderTemplate(
     "templates/apps/import-data.hbs",
     { hint1: T("l5r4.ui.transfer.importHint"), hint2: "" }
@@ -117,7 +120,7 @@ async function importItemsDialog(parent) {
     rejectClose: false
   });
   if (file) {
-    await importItems(await foundry.utils.readTextFromFile(file), parent);
+    await createImportedItems(await foundry.utils.readTextFromFile(file), parent);
   }
 }
 
@@ -142,7 +145,7 @@ function onGetFolderContextOptions(app, entries) {
       label: "l5r4.ui.transfer.import",
       icon: "fa-solid fa-file-import",
       visible: () => game.user.isGM,
-      onClick: (_event, header) => importItemsDialog(folderOf(header))
+      onClick: (_event, header) => askItemImport(folderOf(header))
     }
   );
 }

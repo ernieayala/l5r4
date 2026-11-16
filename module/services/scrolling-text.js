@@ -10,7 +10,11 @@
 import { SYS_ID } from "../config/constants.js";
 import { T } from "../utils/localization.js";
 import { toInt } from "../utils/type-coercion.js";
-import { FLOATING_RESOURCES, floatingChanges, floatingText } from "../utils/floating-text.js";
+import {
+  FLOATING_RESOURCES,
+  getFloatingChanges,
+  formatFloatingText
+} from "../utils/floating-text.js";
 
 /** Update option carrying the values before the update. */
 const BEFORE_OPTION = `${SYS_ID}FloatingBefore`;
@@ -22,7 +26,7 @@ const COLORS = Object.freeze({
 });
 
 /** Register the floating numbers' hooks, once during init. */
-export function initializeScrollingText() {
+export function registerScrollingText() {
   Hooks.on("preUpdateActor", onPreUpdateActor);
   Hooks.on("updateActor", onUpdateActor);
 }
@@ -32,7 +36,7 @@ export function initializeScrollingText() {
  * @param {Actor} actor
  * @returns {Record<string, number>}
  */
-function resourceValues(actor) {
+function resourceValuesOf(actor) {
   return Object.fromEntries(
     FLOATING_RESOURCES.map(({ id, path }) => [
       id,
@@ -48,7 +52,7 @@ function resourceValues(actor) {
  * @param {object} options
  */
 function onPreUpdateActor(actor, _changes, options) {
-  options[BEFORE_OPTION] = resourceValues(actor);
+  options[BEFORE_OPTION] = resourceValuesOf(actor);
 }
 
 /**
@@ -62,7 +66,7 @@ function onUpdateActor(actor, _changes, options) {
   if (!before || !canvas?.ready || !game.settings.get(SYS_ID, "floatingNumbers")) {
     return;
   }
-  const changes = floatingChanges(before, resourceValues(actor));
+  const changes = getFloatingChanges(before, resourceValuesOf(actor));
   if (!changes.length) {
     return;
   }
@@ -74,7 +78,7 @@ function onUpdateActor(actor, _changes, options) {
       const nameKey = FLOATING_RESOURCES.find(resource => resource.id === id).nameKey;
       canvas.interface.createScrollingText(
         { x: token.center.x, y: token.center.y - i * 0.3 * token.h },
-        floatingText(delta, T(nameKey)),
+        formatFloatingText(delta, T(nameKey)),
         {
           anchor: CONST.TEXT_ANCHOR_POINTS.CENTER,
           direction: CONST.TEXT_ANCHOR_POINTS.TOP,

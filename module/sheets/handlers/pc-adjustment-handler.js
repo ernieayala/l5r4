@@ -9,7 +9,7 @@
 import { SYS_ID } from "../../config/constants.js";
 import { RANK_TRACK_RANGE } from "../../config/game-mechanics.js";
 import { applyRankPointsDelta } from "../../utils/advancement.js";
-import { clamp } from "../../utils/type-coercion.js";
+import { getClamped } from "../../utils/type-coercion.js";
 
 /**
  * Handler class for PC character sheet adjustments.
@@ -46,7 +46,7 @@ export class PcAdjustmentHandler {
    * @param {number} delta - Direction of adjustment (+1 or -1)
    * @returns {Promise<void>}
    */
-  static async adjustVoidRing(context, event, element, delta) {
+  static async updateVoidRing(context, event, element, delta) {
     event?.preventDefault?.();
 
     // Safety: require Shift key to prevent accidental adjustment
@@ -65,7 +65,7 @@ export class PcAdjustmentHandler {
     const max = 9; // L5R4 maximum for all Rings/Traits
 
     // Calculate next value: delta sign determines direction
-    const next = clamp(cur + (delta > 0 ? 1 : -1), min, max);
+    const next = getClamped(cur + (delta > 0 ? 1 : -1), min, max);
     if (next === cur) {
       return;
     } // No-op if already at boundary
@@ -101,7 +101,7 @@ export class PcAdjustmentHandler {
    * @param {number} delta - Amount to adjust (e.g. +1 or -1)
    * @returns {Promise<void>}
    */
-  static async adjustSpellSlot(context, event, element, delta) {
+  static async updateSpellSlot(context, event, element, delta) {
     try {
       const path = element?.dataset?.path || "";
 
@@ -116,7 +116,7 @@ export class PcAdjustmentHandler {
       const current = foundry.utils.getProperty(context.actor._source, path);
 
       // Apply delta with bounds [0, 9] matching Ring rank maximum
-      const next = clamp(current + (delta || 0), 0, 9);
+      const next = getClamped(current + (delta || 0), 0, 9);
       if (next === current) {
         return;
       } // No-op if already at boundary
@@ -159,7 +159,7 @@ export class PcAdjustmentHandler {
    * @param {number} baseDelta - Base adjustment amount (e.g. ±1.0 or ±0.1)
    * @returns {Promise<void>}
    */
-  static async adjustRankPoints(context, event, element, baseDelta) {
+  static async updateRankPoints(context, event, element, baseDelta) {
     try {
       // Safety: require Shift key to prevent accidental adjustment
       if (!event?.shiftKey) {

@@ -9,23 +9,23 @@ import { SYS_ID } from "../config/constants.js";
 import { TEMPLATE } from "../config/templates.js";
 import { ACTION_TYPES, STANCES } from "../config/localization.js";
 import { NPC_SORT_KEYS } from "../config/sort-keys.js";
-import { clamp } from "../utils/type-coercion.js";
+import { getClamped } from "../utils/type-coercion.js";
 import { T } from "../utils/localization.js";
 import { on } from "../utils/dom.js";
-import { getSortPref, sortWithPref } from "../utils/sorting.js";
+import { getSortPref, applySortPref } from "../utils/sorting.js";
 import { getSectionCollapsedMap } from "../utils/section-state.js";
-import { activeStance } from "../utils/stances.js";
-import { enhanceItemSheetData } from "../documents/item/integration/sheet-data.js";
-import { summaryText } from "../documents/summary.js";
+import { getActiveStance } from "../utils/stances.js";
+import { prepareItemSheetOptions } from "../documents/item/integration/sheet-data.js";
+import { summaryOf } from "../documents/summary.js";
 import * as Fear from "../services/fear.js";
 import { applyLongRest } from "../services/rest.js";
-import { SpellCastRoll } from "../services/dice/rolls/spell-cast-roll.js";
-import { MahoCastRoll } from "../services/dice/rolls/maho-cast-roll.js";
+import { rollSpellCast } from "../services/dice/rolls/spell-cast-roll.js";
+import { rollMahoCast } from "../services/dice/rolls/maho-cast-roll.js";
 import NpcAttackConfigApplication from "../apps/npc-attack-config.js";
 import { BaseActorSheet } from "./base-actor-sheet.js";
 import { RollHandler } from "./handlers/roll-handler.js";
 import { AppLauncherHandler } from "./handlers/app-launcher-handler.js";
-import { ItemCRUDHandler } from "./handlers/item-crud-handler.js";
+import { ItemCrudHandler } from "./handlers/item-crud-handler.js";
 import { StanceHandler } from "./handlers/stance-handler.js";
 import { TraitHandler } from "./handlers/trait-handler.js";
 
@@ -109,9 +109,9 @@ export default class L5R4NpcSheet extends BaseActorSheet {
     const actorObj = this.actor;
 
     const all = this.actor.items.contents;
-    const byType = t => all.filter(i => i.type === t);
+    const getItemsOfType = t => all.filter(i => i.type === t);
 
-    const currentStance = activeStance(actorObj.statuses);
+    const currentStance = getActiveStance(actorObj.statuses);
 
     // Prepare sortable skills list with user preference
     const skills = (() => {
@@ -131,7 +131,7 @@ export default class L5R4NpcSheet extends BaseActorSheet {
           const loc = key ? game.i18n?.localize?.(key) : "";
           return String(loc && loc !== key ? loc : (it?.system?.trait ?? ""));
         },
-        roll: it => Number(it?.system?.rollDice ?? it?.system?.rank ?? 0) || 0,
+        roll: it => Number(it?.system?.roll ?? it?.system?.rank ?? 0) || 0,
         emphasis: it => {
           const trained = Array.isArray(it?.system?.trainedEmphases)
             ? it.system.trainedEmphases
@@ -141,7 +141,7 @@ export default class L5R4NpcSheet extends BaseActorSheet {
       };
       const allowedKeys = this._getAllowedSortKeys("skills");
       const pref = getSortPref(actorObj.id, "skills", allowedKeys, "name");
-      return sortWithPref(byType("skill"), cols, pref, game.i18n?.lang);
+      return applySortPref(getItemsOfType("skill"), cols, pref, game.i18n?.lang);
     })();
 
     const collapsedSections = getSectionCollapsedMap(actorObj.id, [
@@ -172,7 +172,7 @@ export default class L5R4NpcSheet extends BaseActorSheet {
       attacks,
       firstEmptyAttack: attacks.find(slot => slot.empty)?.key ?? null,
       // The book page a creature from the packs cites (roadmap/STAGE-15)
-      summary: summaryText(actorObj.system),
+      summary: summaryOf(actorObj.system),
 
       // Show Void Points section only if NPC has Void Ring >= 1
       showNpcVoidPoints: (actorObj.system?.rings?.void?.rank ?? 0) >= 1,
@@ -180,14 +180,14 @@ export default class L5R4NpcSheet extends BaseActorSheet {
       traitsEff: foundry.utils.duplicate(this.actor.system?._derived?.traitsEff ?? {}),
 
       skills,
-      weapons: byType("weapon"),
-      bows: byType("bow"),
-      armors: byType("armor"),
-      spells: byType("spell"),
+      weapons: getItemsOfType("weapon"),
+      bows: getItemsOfType("bow"),
+      armors: getItemsOfType("armor"),
+      spells: getItemsOfType("spell"),
       items: all.filter(i => i.type === "item" || i.type === "commonItem")
     };
 
-    enhanceItemSheetData(context);
+    prepareItemSheetOptions(context);
     context.config.stances = STANCES;
     return context;
   }
@@ -235,7 +235,7 @@ export default class L5R4NpcSheet extends BaseActorSheet {
       case "expand-item":
         return this._onItemExpand(event, element);
       case "expand-section":
-        return ItemCRUDHandler.toggleSection(this._getHandlerContext(), event, element);
+        return ItemCrudHandler.updateSectionCollapsed(this._getHandlerContext(), event, element);
       case "post-item":
         return this._onItemHeaderToChat(event, element);
       case "sort-items":
@@ -256,7 +256,7 @@ export default class L5R4NpcSheet extends BaseActorSheet {
           -1
         );
       case "roll-ring":
-        return RollHandler.npcRingRoll(this._getHandlerContext(), event, element);
+        return RollHandler.rollClickedNpcRing(this._getHandlerContext(), event, element);
       case "roll-skill":
         return this._onSkillRoll(event, element);
       case "roll-trait":
@@ -274,13 +274,13 @@ export default class L5R4NpcSheet extends BaseActorSheet {
       case "adjust-trait":
         return this._onTraitAdjust(event, element, +1);
       case "increase-trait":
-        return TraitHandler.increase(this._getHandlerContext(), event, element);
+        return TraitHandler.updateTraitRankUp(this._getHandlerContext(), event, element);
       case "decrease-trait":
-        return TraitHandler.decrease(this._getHandlerContext(), event, element);
+        return TraitHandler.updateTraitRankDown(this._getHandlerContext(), event, element);
       case "adjust-void-points":
         return this._onVoidPointsAdjust(event, element, +1);
       case "toggle-movement-type":
-        return StanceHandler.toggleMovementType(this._getHandlerContext(), event);
+        return StanceHandler.updateMovementType(this._getHandlerContext(), event);
       case "open-condition-manager":
         return AppLauncherHandler.openConditionManager(this._getHandlerContext(), event, element);
       case "open-combat-config":
@@ -344,7 +344,7 @@ export default class L5R4NpcSheet extends BaseActorSheet {
       return this._onInlineItemEdit(event, element);
     }
     if (action === "apply-stance") {
-      return StanceHandler.changeStance(this._getHandlerContext(), event, element);
+      return StanceHandler.applyStance(this._getHandlerContext(), event, element);
     }
   }
 
@@ -386,7 +386,7 @@ export default class L5R4NpcSheet extends BaseActorSheet {
       ) || 0;
     const min = 0;
     const max = 9;
-    const next = clamp(cur + (delta > 0 ? 1 : -1), min, max);
+    const next = getClamped(cur + (delta > 0 ? 1 : -1), min, max);
     if (next === cur) {
       return;
     }
@@ -462,9 +462,7 @@ export default class L5R4NpcSheet extends BaseActorSheet {
 
     this._initializeSortIndicators(root, "skills", this._getAllowedSortKeys("skills"));
 
-    on(root, ".simple-roll", "click", ev =>
-      RollHandler.npcSimpleRoll(this._getHandlerContext(), ev)
-    );
+    on(root, ".simple-roll", "click", ev => RollHandler.rollNpcPool(this._getHandlerContext(), ev));
 
     on(root, "[data-edit='img']", "click", ev => this._onEditImage(ev, ev.currentTarget));
   }
@@ -534,7 +532,7 @@ export default class L5R4NpcSheet extends BaseActorSheet {
       return;
     }
 
-    await Fear.handleFearClick({ npc: this.actor });
+    await Fear.onFearClick({ npc: this.actor });
   }
 
   /**
@@ -556,7 +554,7 @@ export default class L5R4NpcSheet extends BaseActorSheet {
    * **Implementation:**
    * Extracts spell data from .item row, shows simplified dialog (wound penalty,
    * void, modifiers, raises only), then executes spell casting with all automatic
-   * detection and slot management handled by SpellCastRoll service. Dialog always
+   * detection and slot management handled by rollSpellCast service. Dialog always
    * appears to give user control over modifiers and raises before casting.
    *
    * @param {Event} event - Click event
@@ -573,7 +571,7 @@ export default class L5R4NpcSheet extends BaseActorSheet {
     }
 
     // Route to maho casting if spell is blood magic
-    const cast = spell.system?.maho ? MahoCastRoll : SpellCastRoll;
+    const cast = spell.system?.maho ? rollMahoCast : rollSpellCast;
     return cast({ actor: this.actor, spell, showDialog: !event.shiftKey });
   }
 

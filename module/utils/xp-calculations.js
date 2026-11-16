@@ -7,7 +7,7 @@
 
 import { SYS_ID } from "../config/constants.js";
 import { toNumber, toString } from "./type-coercion.js";
-import { traitAdjustTotal } from "./rule-engine.js";
+import { getTraitAdjustTotal } from "./rule-engine.js";
 
 /**
  * Gets the creation bonus for a trait, split by where it comes from. A Family rule giving +1 Strength gives
@@ -57,7 +57,7 @@ function getCreationBonusInternal(actor, trait) {
     // Track processed documents to prevent duplicates
     const seen = new Set();
 
-    const addFromDoc = doc => {
+    const applyDocBonus = doc => {
       if (!doc) {
         return;
       }
@@ -71,7 +71,7 @@ function getCreationBonusInternal(actor, trait) {
       }
 
       // A TraitAdjust rule replaces the legacy fields
-      const fromRules = traitAdjustTotal(doc.system?.rules, trait);
+      const fromRules = getTraitAdjustTotal(doc.system?.rules, trait);
       if (fromRules !== 0) {
         rules += fromRules;
         return;
@@ -91,7 +91,7 @@ function getCreationBonusInternal(actor, trait) {
       if (!uuid || !globalThis.fromUuidSync) {
         continue;
       }
-      addFromDoc(globalThis.fromUuidSync(uuid));
+      applyDocBonus(globalThis.fromUuidSync(uuid));
     }
 
     // Check owned Family/School items
@@ -100,7 +100,7 @@ function getCreationBonusInternal(actor, trait) {
         continue;
       }
       if (it.type === "family" || it.type === "school") {
-        addFromDoc(it);
+        applyDocBonus(it);
       }
     }
 

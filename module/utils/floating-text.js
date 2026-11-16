@@ -17,7 +17,7 @@ export const FLOATING_RESOURCES = Object.freeze([
  * @param {Record<string, number>} after - Values by resource id
  * @returns {Array<{id: string, delta: number}>}  One entry per resource that changed, in FLOATING_RESOURCES order
  */
-export function floatingChanges(before, after) {
+export function getFloatingChanges(before, after) {
   return FLOATING_RESOURCES.map(({ id }) => ({
     id,
     delta: (after[id] ?? 0) - (before[id] ?? 0)
@@ -30,6 +30,6 @@ export function floatingChanges(before, after) {
  * @param {string} name - The resource's localized name
  * @returns {string}
  */
-export function floatingText(delta, name) {
+export function formatFloatingText(delta, name) {
   return `${delta > 0 ? "+" : "−"}${Math.abs(delta)} ${name}`;
 }

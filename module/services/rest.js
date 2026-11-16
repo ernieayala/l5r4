@@ -107,7 +107,7 @@ export async function applyLongRest(actor) {
   const hasSpells = actor.items?.some(item => item.type === "spell") ?? false;
 
   // Post chat message with rest summary
-  await _postRestMessage({
+  await postRestMessage({
     actor,
     healingApplied,
     healRate,
@@ -149,7 +149,7 @@ export async function applyLongRest(actor) {
  * @param {boolean} data.spellSlotsRestored - Whether spell slots were restored
  * @returns {Promise<ChatMessage|null>} Created chat message, or null if failed
  */
-async function _postRestMessage({
+async function postRestMessage({
   actor,
   healingApplied,
   healRate,

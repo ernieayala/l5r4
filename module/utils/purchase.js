@@ -15,7 +15,7 @@ import { testPredicate } from "./predicate.js";
  * @param {Set<string>} options - The buyer's roll options
  * @returns {Array<{label: string, requires: Array}>}
  */
-export function unmetPrerequisites(rules, options) {
+export function getUnmetPrerequisites(rules, options) {
   return (rules ?? [])
     .filter(rule => rule?.key === "Prerequisite" && Array.isArray(rule.requires))
     .filter(rule => testPredicate(Array.isArray(rule.predicate) ? rule.predicate : [], options))
@@ -65,7 +65,7 @@ export function openChoices(rules) {
  * @param {Record<number, string>} selections - Selection by rule index
  * @returns {object[]} A copy
  */
-export function withSelections(rules, selections) {
+export function buildRulesWithSelections(rules, selections) {
   return rules.map((rule, index) =>
     index in selections ? { ...rule, selection: selections[index] } : rule
   );

@@ -2,7 +2,7 @@
  * @module sheets/handlers/bio-item-handler
  * @description Opens and clears the clan, family, and school items linked from L5R4 character sheets. Each character
  * has one clan, one family, and one school (Character Creation Steps 1-3); a dropped one replaces the old through
- * module/services/purchase.js (addItem), which also sets the links this handler reads. Clearing the family also
+ * module/services/purchase.js (createPurchasedItem), which also sets the links this handler reads. Clearing the family also
  * takes the family name off the character's display name.
  */
 
@@ -66,7 +66,7 @@ export class BioItemHandler {
    * @param {string} bioType - The bio type to clear: "clan", "family", or "school"
    * @returns {Promise<void>}
    */
-  static async clear(actor, bioType) {
+  static async deleteBioItem(actor, bioType) {
     try {
       const updates = {};
 
@@ -78,7 +78,7 @@ export class BioItemHandler {
         const fam = actor.getFlag(SYS_ID, "familyName");
         let name = actor.name || "";
         if (fam) {
-          name = this.extractBaseName(name, fam);
+          name = this.getBaseName(name, fam);
         }
 
         // Delete embedded family item before clearing flags
@@ -123,7 +123,7 @@ export class BioItemHandler {
    * @param {string} fam - The family name to remove
    * @returns {string} The personal name with family prefix removed, or original if no match
    */
-  static extractBaseName(current, fam) {
+  static getBaseName(current, fam) {
     const famPrefix = (String(fam) + " ").toLowerCase();
     const s = String(current ?? "");
 

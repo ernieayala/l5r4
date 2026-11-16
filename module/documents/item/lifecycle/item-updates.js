@@ -7,10 +7,10 @@
 
 import { toInt } from "../../../utils/type-coercion.js";
 import {
-  logSkillRankXp,
-  logEmphasisXp,
-  logCostChangeXp,
-  resetCalculatedXp
+  updateXpAfterSkillRank,
+  updateXpAfterEmphasis,
+  updateXpAfterCostChange,
+  updateXpHistoryReset
 } from "./xp-tracking.js";
 
 /**
@@ -29,7 +29,7 @@ import {
  * @param {boolean} [changes.system.school] - Whether skill is a school skill
  * @returns {Promise<void>} Resolves when validation and XP tracking complete
  */
-export async function handleItemPreUpdate(item, changes) {
+export async function onItemPreUpdate(item, changes) {
   if (item.type === "advantage" && changes?.system?.cost !== undefined) {
     changes.system.cost = Math.max(0, toInt(changes.system.cost, 0));
   }
@@ -49,7 +49,7 @@ export async function handleItemPreUpdate(item, changes) {
       changes.system.freeEmphasis !== item.system?.freeEmphasis;
 
     if (freeRanksChanged || freeEmphasisChanged) {
-      await resetCalculatedXp(item.actor);
+      await updateXpHistoryReset(item.actor);
       return;
     }
   }
@@ -59,10 +59,10 @@ export async function handleItemPreUpdate(item, changes) {
   }
 
   if (item.type === "skill") {
-    await trackSkillRankIncrease(item, changes);
-    await trackEmphasisAdditions(item, changes);
+    await updateSkillRankXp(item, changes);
+    await updateEmphasisXp(item, changes);
   } else if (item.type === "advantage" || item.type === "disadvantage") {
-    await trackCostChange(item, changes);
+    await updateCostXp(item, changes);
   }
 }
 
@@ -85,9 +85,9 @@ function isSchoolSkill(item, changes) {
  * @param {object} changes - Delta changes object from preUpdate hook
  * @param {number} [changes.system.rank] - New skill rank (if being changed)
  * @returns {Promise<void>} Resolves when XP logging completes
- * @see {@link module:documents/item/lifecycle/xp-tracking.logSkillRankXp}
+ * @see {@link module:documents/item/lifecycle/xp-tracking.updateXpAfterSkillRank}
  */
-async function trackSkillRankIncrease(item, changes) {
+async function updateSkillRankXp(item, changes) {
   const oldRank = toInt(item.system?.rank);
   const newRank = toInt(changes?.system?.rank ?? oldRank);
   const rankIncreased = Number.isFinite(newRank) && newRank > oldRank;
@@ -96,7 +96,7 @@ async function trackSkillRankIncrease(item, changes) {
     const newFreeRanks = changes?.system?.freeRanks ?? item.system?.freeRanks;
     const freeRanks = isSchoolSkill(item, changes) ? Math.max(0, parseInt(newFreeRanks) || 0) : 0;
 
-    await logSkillRankXp(item, oldRank, newRank, freeRanks);
+    await updateXpAfterSkillRank(item, oldRank, newRank, freeRanks);
   }
 }
 
@@ -107,7 +107,7 @@ async function trackSkillRankIncrease(item, changes) {
  * @param {object} changes - Delta changes object from preUpdate hook
  * @returns {Promise<void>}
  */
-async function trackEmphasisAdditions(item, changes) {
+async function updateEmphasisXp(item, changes) {
   if (!item.actor) {
     return;
   }
@@ -121,21 +121,21 @@ async function trackEmphasisAdditions(item, changes) {
   }
 
   const freeEmphasis = toInt(item.system?.freeEmphasis, 0);
-  await logEmphasisXp(item, oldEmphases, newEmphases, freeEmphasis);
+  await updateXpAfterEmphasis(item, oldEmphases, newEmphases, freeEmphasis);
 }
 
 /**
  * Track a change to an Advantage's or Disadvantage's cost, such as a ranked Advantage bought up. The cost is the
- * one `handleItemPreUpdate` clamped.
+ * one `onItemPreUpdate` clamped.
  * @param {Item} item - The advantage or disadvantage item being updated
  * @param {object} changes - Delta changes object from preUpdate hook
  * @param {number} [changes.system.cost] - New cost value (if being changed)
  * @returns {Promise<void>} Resolves when XP logging completes
- * @see {@link module:documents/item/lifecycle/xp-tracking.logCostChangeXp}
+ * @see {@link module:documents/item/lifecycle/xp-tracking.updateXpAfterCostChange}
  */
-async function trackCostChange(item, changes) {
+async function updateCostXp(item, changes) {
   const oldCost = toInt(item.system?.cost, 0);
   const newCost = toInt(changes?.system?.cost ?? oldCost, 0);
 
-  await logCostChangeXp(item, oldCost, newCost);
+  await updateXpAfterCostChange(item, oldCost, newCost);
 }

@@ -19,20 +19,20 @@
  */
 
 import { SYS_ID } from "../config/constants.js";
-import { iconPath } from "../config/icons.js";
+import { getIconPath } from "../config/icons.js";
 import { WOUND_LEVEL_ORDER } from "../config/game-mechanics.js";
 import { toInt } from "../utils/type-coercion.js";
 import { rollDataKey } from "../utils/rule-values.js";
-import { highestSchoolRank } from "../utils/mechanics.js";
+import { getHighestSchoolRank } from "../utils/mechanics.js";
 import {
-  calculateWoundPenalties,
-  initializeWoundState,
-  findCurrentWoundLevel,
-  determineCurrentWoundLevel
+  prepareWoundPenalties,
+  prepareWoundState,
+  prepareCurrentWoundLevel,
+  prepareCurrentWoundLevelByMode
 } from "./actor/calculations/wound-system.js";
-import { trackXpExpenditure } from "./actor/calculations/xp-system.js";
-import { syncGrants } from "./item/lifecycle/grants.js";
-import { addWoundRollOption, applyInitialRules } from "./actor/rules.js";
+import { updateXpFlags } from "./actor/calculations/xp-system.js";
+import { applyGrants } from "./item/lifecycle/grants.js";
+import { prepareWoundRollOption, applyInitialRules } from "./actor/rules.js";
 
 /**
  * Actor document for L5R4 Enhanced system.
@@ -68,7 +68,7 @@ export default class L5R4Actor extends Actor {
       });
 
       if (!data.img) {
-        this.updateSource({ img: iconPath("pc.webp") });
+        this.updateSource({ img: getIconPath("pc.webp") });
       }
 
       // Initialize XP tracking flags for character advancement
@@ -107,7 +107,7 @@ export default class L5R4Actor extends Actor {
       const updates = {};
 
       if (!data.img) {
-        updates.img = iconPath("npc.webp");
+        updates.img = getIconPath("npc.webp");
       }
 
       if (!data.system?.woundMode) {
@@ -209,7 +209,7 @@ export default class L5R4Actor extends Actor {
     }
 
     // The School Rank a Technique scales with, as @school.rank
-    data.school = { rank: highestSchoolRank(this) };
+    data.school = { rank: getHighestSchoolRank(this) };
 
     return data;
   }
@@ -226,7 +226,7 @@ export default class L5R4Actor extends Actor {
    */
   async _preUpdate(changed, options, user) {
     await super._preUpdate(changed, options, user);
-    trackXpExpenditure(this, changed, options);
+    updateXpFlags(this, changed, options);
   }
 
   /**
@@ -237,7 +237,7 @@ export default class L5R4Actor extends Actor {
   _onUpdate(changed, options, userId) {
     super._onUpdate(changed, options, userId);
     if (userId === game.user.id) {
-      syncGrants(this);
+      applyGrants(this);
     }
   }
 
@@ -252,24 +252,24 @@ export default class L5R4Actor extends Actor {
    * @returns {object} Current wound level object with penalty value
    */
   _finalizeWoundPenalties(sys, order, woundMode) {
-    initializeWoundState(sys, sys.suffered);
+    prepareWoundState(sys, sys.suffered);
 
     // Cap suffered wounds at Out threshold to prevent overflow
     const outMax = toInt(sys.woundLevels?.out?.value) || 0;
     const sCapped = Math.min(toInt(sys.suffered), outMax || toInt(sys.suffered));
 
     const current = woundMode
-      ? determineCurrentWoundLevel(sys, order, sCapped, woundMode)
-      : findCurrentWoundLevel(sys, order, sCapped);
+      ? prepareCurrentWoundLevelByMode(sys, order, sCapped, woundMode)
+      : prepareCurrentWoundLevel(sys, order, sCapped);
 
     // Apply wound penalty modifiers from effects and conditions
     sys.woundsPenaltyMod = toInt(sys.woundsPenaltyMod);
-    calculateWoundPenalties(sys);
+    prepareWoundPenalties(sys);
 
     if (!woundMode) {
       sys.currentWoundLevel = current;
     }
-    addWoundRollOption(this, sys, current);
+    prepareWoundRollOption(this, sys, current);
 
     // Calculate effective penalty (base penalty + modifiers, minimum 0)
     const curEffPenalty = Math.max(0, toInt(current.penalty) + toInt(sys.woundsPenaltyMod));

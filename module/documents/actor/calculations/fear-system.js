@@ -6,7 +6,7 @@
 
 import { toInt } from "../../../utils/type-coercion.js";
 import { logError } from "../../../utils/error-logging.js";
-import { fearTN } from "../../../utils/fear.js";
+import { getFearTn } from "../../../utils/fear.js";
 
 /**
  * Prepare an actor's Fear data: `sys.fear.rank` as an integer, `sys.fear.active` when the rank is above 0, and
@@ -36,5 +36,5 @@ export function prepareFear(sys) {
 
   // Fear TN: 5 + 5 × Rank
   // game-rules/42_fear.md, p.90
-  sys.fear.tn = rank > 0 ? fearTN(rank) : 0;
+  sys.fear.tn = rank > 0 ? getFearTn(rank) : 0;
 }

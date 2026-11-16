@@ -63,7 +63,7 @@ export function parseLink(type, params, label = "") {
   const base = { type, label: (label ?? "").trim() };
   let parsed;
   if (type === "Check") {
-    const values = keyValues(params);
+    const values = parseKeyValues(params);
     parsed = values ? parseCheck(values) : { ok: false, error: "l5r4.ui.links.errors.syntax" };
   } else if (type === "Damage") {
     parsed = parseDamage(params);
@@ -82,7 +82,7 @@ export function parseLink(type, params, label = "") {
  * @param {string} text
  * @returns {number|null}
  */
-function whole(text) {
+function parseWhole(text) {
   return WHOLE.test(text) ? Number(text) : null;
 }
 
@@ -91,7 +91,7 @@ function whole(text) {
  * @param {string} params
  * @returns {Record<string, string>|null}  null when a part has no `=`
  */
-function keyValues(params) {
+function parseKeyValues(params) {
   const out = {};
   for (const part of params.split("|")) {
     const [key, ...rest] = part.split("=");
@@ -109,35 +109,35 @@ function keyValues(params) {
  * @returns {Omit<LinkSpec, "type"|"label">}
  */
 function parseCheck(values) {
-  const fail = error => ({ ok: false, error });
+  const buildFailure = error => ({ ok: false, error });
   const known = new Set(["skill", "trait", "ring", "tn"]);
   if (Object.keys(values).some(key => !known.has(key))) {
-    return fail("l5r4.ui.links.errors.unknownKey");
+    return buildFailure("l5r4.ui.links.errors.unknownKey");
   }
   const skill = values.skill ?? "";
   const trait = (values.trait ?? "").toLowerCase();
   const ring = (values.ring ?? "").toLowerCase();
   if (trait && ring) {
-    return fail("l5r4.ui.links.errors.traitAndRing");
+    return buildFailure("l5r4.ui.links.errors.traitAndRing");
   }
   if (!skill && !trait && !ring) {
-    return fail("l5r4.ui.links.errors.nothingToRoll");
+    return buildFailure("l5r4.ui.links.errors.nothingToRoll");
   }
   if (skill && ring) {
-    return fail("l5r4.ui.links.errors.skillWithRing");
+    return buildFailure("l5r4.ui.links.errors.skillWithRing");
   }
   // A Skill may be rolled with the Void Ring in place of a Trait (#7)
   if (trait && !TRAIT_KEYS.includes(trait) && !(skill && trait === "void")) {
-    return fail("l5r4.ui.links.errors.trait");
+    return buildFailure("l5r4.ui.links.errors.trait");
   }
   if (ring && !RING_KEYS.includes(ring)) {
-    return fail("l5r4.ui.links.errors.ring");
+    return buildFailure("l5r4.ui.links.errors.ring");
   }
   let tn = null;
   if (values.tn !== undefined) {
-    tn = whole(values.tn);
+    tn = parseWhole(values.tn);
     if (tn === null || tn < 1 || tn > MAX_LINK_TN) {
-      return fail("l5r4.ui.links.errors.tn");
+      return buildFailure("l5r4.ui.links.errors.tn");
     }
   }
   return { ok: true, skill, trait, ring, tn };
@@ -177,7 +177,7 @@ function parseCondition(params) {
  * @returns {Omit<LinkSpec, "type"|"label">}
  */
 function parseFear(params) {
-  const rank = whole(params.trim());
+  const rank = parseWhole(params.trim());
   return rank !== null && rank >= FEAR_RANKS.min && rank <= FEAR_RANKS.max
     ? { ok: true, rank }
     : { ok: false, error: "l5r4.ui.links.errors.fear" };

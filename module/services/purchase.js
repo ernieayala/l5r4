@@ -4,20 +4,20 @@
  * may add it anyway, and each open ChoiceSet asks its question; the answers are stored in the item's rules
  * (module/utils/choices.js). A character's Clan, Family, or School replaces the one it had. Grants follow on creation
  * (module/documents/item/lifecycle/grants.js). A drop on a sheet and the compendium browser's Add both go through
- * `addItem`.
+ * `createPurchasedItem`.
  */
 
 import { SYS_ID } from "../config/constants.js";
 import { CHOICE_LIST_VALUES } from "../config/rule-keys.js";
 import { F, T } from "../utils/localization.js";
-import { openChoices, unmetPrerequisites, withSelections } from "../utils/purchase.js";
+import { openChoices, getUnmetPrerequisites, buildRulesWithSelections } from "../utils/purchase.js";
 
 /**
  * Item types a new one replaces the old of (character creation Steps 1-3); a School asks first (askSchool).
  * game-rules/48_character_creation_expanded.md, p.102
  * @type {ReadonlySet<string>}
  */
-const BIO_TYPES = new Set(["clan", "family", "school"]);
+const bioTypes = new Set(["clan", "family", "school"]);
 
 /**
  * Check an item's prerequisites against the actor and ask its open choices. A player cannot add an item whose
@@ -28,7 +28,7 @@ const BIO_TYPES = new Set(["clan", "family", "school"]);
  */
 export async function preparePurchase(actor, data) {
   const rules = Array.isArray(data.system?.rules) ? data.system.rules : [];
-  const unmet = unmetPrerequisites(rules, actor.rollOptions);
+  const unmet = getUnmetPrerequisites(rules, actor.rollOptions);
   if (unmet.length) {
     const list = unmet.map(p => p.label || JSON.stringify(p.requires)).join("; ");
     if (!game.user.isGM) {
@@ -57,7 +57,10 @@ export async function preparePurchase(actor, data) {
   if (!Object.keys(selections).length) {
     return data;
   }
-  return { ...data, system: { ...data.system, rules: withSelections(rules, selections) } };
+  return {
+    ...data,
+    system: { ...data.system, rules: buildRulesWithSelections(rules, selections) }
+  };
 }
 
 /**
@@ -68,7 +71,7 @@ export async function preparePurchase(actor, data) {
  * @param {object} source - The item's source data, as `item.toObject()` gives it
  * @returns {Promise<Item|null>} The new item, or null when it is not added
  */
-export async function addItem(actor, source) {
+export async function createPurchasedItem(actor, source) {
   if (!actor.isOwner) {
     ui.notifications?.warn(T("l5r4.ui.notifications.noPermission"));
     return null;
@@ -77,7 +80,7 @@ export async function addItem(actor, source) {
   if (!data) {
     return null;
   }
-  let replaces = actor.type === "pc" && BIO_TYPES.has(data.type);
+  let replaces = actor.type === "pc" && bioTypes.has(data.type);
   const schools = actor.items.filter(item => item.type === "school");
   if (replaces && data.type === "school" && schools.length) {
     const answer = await askSchool(actor, data.name, schools);
@@ -94,7 +97,7 @@ export async function addItem(actor, source) {
   }
   const [created] = await actor.createEmbeddedDocuments("Item", [data]);
   if (replaces) {
-    await actor.update(bioLinks(data.type, created));
+    await actor.update(buildBioLinks(data.type, created));
   }
   return created;
 }
@@ -105,7 +108,7 @@ export async function addItem(actor, source) {
  * @param {import("../utils/purchase.js").OpenChoice} choice
  * @returns {Promise<Array<{value: string, label: string}>>}
  */
-async function choiceOptions(choice) {
+async function getChoiceOptions(choice) {
   if (choice.list === "traits") {
     return CHOICE_LIST_VALUES.traits.map(key => ({
       value: key,
@@ -119,14 +122,14 @@ async function choiceOptions(choice) {
     }));
   }
   if (choice.list === "skills") {
-    const keep = type => choice.filter.length === 0 || choice.filter.includes(type);
+    const isAllowedType = type => choice.filter.length === 0 || choice.filter.includes(type);
     const options = game.items
-      .filter(item => item.type === "skill" && keep(item.system.type))
+      .filter(item => item.type === "skill" && isAllowedType(item.system.type))
       .map(item => ({ value: item.uuid, label: item.name }));
     for (const pack of game.packs.filter(p => p.documentName === "Item")) {
       const index = await pack.getIndex({ fields: ["type", "system.type"] });
       for (const entry of index) {
-        if (entry.type === "skill" && keep(entry.system?.type)) {
+        if (entry.type === "skill" && isAllowedType(entry.system?.type)) {
           options.push({ value: entry.uuid, label: `${entry.name} (${pack.title})` });
         }
       }
@@ -143,7 +146,7 @@ async function choiceOptions(choice) {
  * @returns {Promise<string|null>} The selection, or null when the buyer cancels
  */
 async function askChoice(itemName, choice) {
-  const options = await choiceOptions(choice);
+  const options = await getChoiceOptions(choice);
   if (!options.length) {
     ui.notifications?.warn(F("l5r4.ui.purchase.noOptions", { name: itemName }));
     return null;
@@ -173,7 +176,7 @@ async function askChoice(itemName, choice) {
  * @param {Item} item - The new item
  * @returns {object}
  */
-function bioLinks(type, item) {
+function buildBioLinks(type, item) {
   if (type === "family") {
     return {
       [`flags.${SYS_ID}.familyItemUuid`]: item.uuid,

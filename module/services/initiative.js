@@ -4,12 +4,12 @@
  * by 10. A PC marks the intent on the sheet (`system.initiative.useVoid`); when Initiative is rolled, the player
  * confirms, and the +10 goes to that roll only.
  *
- * L5R4Combat calls `resolveVoidInitiative` before rolling (wired at init in the entry module). The Initiative pool
+ * L5R4Combat calls `spendInitiativeVoidPoints` before rolling (wired at init in the entry module). The Initiative pool
  * itself is rolled by L5R4Combatant.
  * game-rules/25_rings_and_traits.md, p.78
  */
 
-import { voidUseUpdate, warnVoidLimit } from "./effects/uses.js";
+import { buildVoidUseUpdate, warnVoidLimit } from "./effects/uses.js";
 
 /**
  * Initiative bonus for a Void Point.
@@ -24,7 +24,7 @@ const VOID_INITIATIVE_BONUS = 10;
  * @param {foundry.documents.Combatant[]} combatants - The combatants about to roll
  * @returns {Promise<Map<string, number>>} The +10 by combatant id, for each one that spent a Void Point
  */
-export async function resolveVoidInitiative(combatants) {
+export async function spendInitiativeVoidPoints(combatants) {
   const bonuses = new Map();
   for (const combatant of combatants) {
     const actor = combatant.actor;
@@ -53,7 +53,7 @@ export async function resolveVoidInitiative(combatants) {
     await actor.update({
       "system.rings.void.value": actor._source.system.rings.void.value - 1,
       "system.initiative.useVoid": false,
-      ...voidUseUpdate(actor)
+      ...buildVoidUseUpdate(actor)
     });
     ui.notifications?.info(`${actor.name} spent Void Point for initiative (+10)`);
     bonuses.set(combatant.id, VOID_INITIATIVE_BONUS);

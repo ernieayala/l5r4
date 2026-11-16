@@ -10,9 +10,9 @@
 
 import { SYS_ID } from "../../config/constants.js";
 import { F, T } from "../../utils/localization.js";
-import { contest } from "../../utils/check.js";
+import { getContestResult } from "../../utils/check.js";
 import { getEffectiveTrait } from "../../utils/mechanics.js";
-import { TraitRoll } from "../dice/rolls/trait-roll.js";
+import { rollTrait } from "../dice/rolls/trait-roll.js";
 import { applyEffectAnywhere } from "../effects/apply.js";
 
 /**
@@ -27,10 +27,10 @@ export async function rollContest(attack) {
   };
   let rolled = false;
   for (const [side, actor] of Object.entries(sides)) {
-    if (!actor?.isOwner || contestRolls(attack.id)[side]) {
+    if (!actor?.isOwner || contestRollsOf(attack.id)[side]) {
       continue;
     }
-    const message = await TraitRoll({
+    const message = await rollTrait({
       actor,
       traitName: "str",
       traitRank: getEffectiveTrait(actor, "str")
@@ -45,7 +45,7 @@ export async function rollContest(attack) {
     ui.notifications?.info(T("l5r4.ui.combat.contestWaiting"));
     return;
   }
-  await settleContest(attack, sides);
+  await postContestResult(attack, sides);
 }
 
 /**
@@ -54,12 +54,12 @@ export async function rollContest(attack) {
  * @param {{attacker: Actor, target: Actor}} sides
  * @returns {Promise<void>}
  */
-async function settleContest(attack, sides) {
-  const rolls = contestRolls(attack.id);
+async function postContestResult(attack, sides) {
+  const rolls = contestRollsOf(attack.id);
   if (!rolls.attacker || !rolls.target) {
     return;
   }
-  const result = contest([
+  const result = getContestResult([
     { id: "attacker", total: rolls.attacker.system.outcome.total },
     { id: "target", total: rolls.target.system.outcome.total }
   ]);
@@ -98,7 +98,7 @@ async function settleContest(attack, sides) {
  * @param {string} attackId
  * @returns {{attacker?: ChatMessage, target?: ChatMessage}}
  */
-function contestRolls(attackId) {
+function contestRollsOf(attackId) {
   const rolls = {};
   for (const message of game.messages.contents) {
     const mark = message.getFlag(SYS_ID, "contest");

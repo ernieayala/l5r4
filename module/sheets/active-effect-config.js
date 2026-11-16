@@ -6,7 +6,7 @@
  */
 
 import { SYS_ID } from "../config/constants.js";
-import { RULES_EDITOR_ACTIONS, readRulesForm, rulesEditorContext } from "./rules-editor.js";
+import { RULES_EDITOR_ACTIONS, parseRulesForm, buildRulesEditorContext } from "./rules-editor.js";
 
 const { ActiveEffectConfig } = foundry.applications.sheets;
 const { footer, ...BEFORE_FOOTER } = ActiveEffectConfig.PARTS;
@@ -50,7 +50,7 @@ export default class L5R4ActiveEffectConfig extends ActiveEffectConfig {
     if (partId === "rules") {
       Object.assign(
         partContext,
-        rulesEditorContext(this.document._source.system.rules, this.rulesMode, this.isEditable)
+        buildRulesEditorContext(this.document._source.system.rules, this.rulesMode, this.isEditable)
       );
     }
     return partContext;
@@ -58,7 +58,7 @@ export default class L5R4ActiveEffectConfig extends ActiveEffectConfig {
 
   /** @override */
   _processFormData(event, form, formData) {
-    return readRulesForm(
+    return parseRulesForm(
       super._processFormData(event, form, formData),
       this.document._source.system.rules
     );

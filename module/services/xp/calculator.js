@@ -24,7 +24,7 @@ import { SYS_ID } from "../../config/constants.js";
  * @param {Array<object>} retroactiveSpent - Newly calculated XP entries from buildXpHistory
  * @returns {Array<object>} Merged array with manual entries preserved and auto entries updated
  */
-export function mergeXpHistory(existingSpent, retroactiveSpent) {
+export function buildMergedXpHistory(existingSpent, retroactiveSpent) {
   // Separate manual entries (no autoCalculated flag or explicitly false)
   const manualEntries = existingSpent.filter(entry => entry.autoCalculated !== true);
 
@@ -58,7 +58,7 @@ export async function buildXpHistory(actor) {
     const spent = [];
     // The ledger lists purchases in a fixed order; synthetic timestamps keep that order in the history
     entries.forEach((entry, i) => {
-      const record = historyRecord(entry);
+      const record = historyRecordOf(entry);
       if (record) {
         spent.push({
           id: foundry.utils.randomID(),
@@ -81,7 +81,7 @@ export async function buildXpHistory(actor) {
  * @param {import("../../utils/xp-ledger.js").XpEntry} entry
  * @returns {object|null}
  */
-function historyRecord(entry) {
+function historyRecordOf(entry) {
   const { type, name, delta, from, to } = entry;
   switch (type) {
     case "trait": {

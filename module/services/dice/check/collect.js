@@ -11,8 +11,8 @@
 import { BOW_IN_MELEE_PENALTY } from "../../../config/game-mechanics.js";
 import { T } from "../../../utils/localization.js";
 import { toInt } from "../../../utils/type-coercion.js";
-import { bagEntries } from "../../../utils/rule-engine.js";
-import { getArmorTNPenalty } from "../../../utils/armor-penalties.js";
+import { getBagEntries } from "../../../utils/rule-engine.js";
+import { getArmorTnPenalty } from "../../../utils/armor-penalties.js";
 
 /**
  * @typedef {object} CheckModifier
@@ -26,7 +26,7 @@ import { getArmorTNPenalty } from "../../../utils/armor-penalties.js";
  */
 
 /**
- * Everything collectCheck gathers for one check.
+ * Everything getCheckContext gathers for one check.
  * game-rules/99_creatures.md, p.319-320
  * @typedef {object} CheckContext
  * @property {CheckModifier[]} modifiers
@@ -58,7 +58,7 @@ import { getArmorTNPenalty } from "../../../utils/armor-penalties.js";
  * @param {{type: string, social: boolean, school: boolean}} [spec.skillData] - The Skill item's data
  * @returns {string[]}
  */
-export function checkSelectors({ kind, skill, trait, ring, skillData }) {
+export function buildCheckSelectors({ kind, skill, trait, ring, skillData }) {
   const selectors = ["any", kind];
   if (kind === "maho") {
     selectors.push("spell");
@@ -99,7 +99,7 @@ export function checkSelectors({ kind, skill, trait, ring, skillData }) {
  * @param {Item|null} [weapon=null]
  * @returns {Set<string>}
  */
-export function checkOptions(actor, kind, target, weapon = null) {
+export function buildCheckOptions(actor, kind, target, weapon = null) {
   const options = new Set(actor.rollOptions);
   options.add(`check:${kind}`);
   if (weapon) {
@@ -136,16 +136,16 @@ export function checkOptions(actor, kind, target, weapon = null) {
  * @param {Item|null} [spec.weapon] - The weapon of an attack or damage roll: its own rules apply
  * @returns {CheckContext}
  */
-export function collectCheck(actor, { kind, skill, trait, ring, target = null, weapon = null }) {
+export function getCheckContext(actor, { kind, skill, trait, ring, target = null, weapon = null }) {
   const skillItem = skill
     ? actor.items.find(i => i.type === "skill" && i.name.toLowerCase().trim() === skill)
     : null;
-  const selectors = checkSelectors({ kind, skill, trait, ring, skillData: skillItem?.system });
-  const options = checkOptions(actor, kind, target, weapon);
-  const entries = bagKind =>
-    bagEntries(actor.ruleBag, bagKind, selectors, options, weapon?.id ?? null);
+  const selectors = buildCheckSelectors({ kind, skill, trait, ring, skillData: skillItem?.system });
+  const options = buildCheckOptions(actor, kind, target, weapon);
+  const entriesOf = bagKind =>
+    getBagEntries(actor.ruleBag, bagKind, selectors, options, weapon?.id ?? null);
 
-  const asModifier = (entry, label = entry.label) => ({
+  const toModifier = (entry, label = entry.label) => ({
     label,
     roll: entry.roll,
     keep: entry.keep,
@@ -155,12 +155,12 @@ export function collectCheck(actor, { kind, skill, trait, ring, target = null, w
     ...(entry.range ? { range: entry.range } : {}),
     consumes: entry.consumes ?? null
   });
-  const modifiers = entries("rollModifiers").map(entry => asModifier(entry));
+  const modifiers = entriesOf("rollModifiers").map(entry => toModifier(entry));
   // The target's OpponentModifier rules, tested from its side: its options, with the roller as its target
   if (target?.ruleBag) {
-    const theirs = checkOptions(target, kind, actor);
-    for (const entry of bagEntries(target.ruleBag, "opponentModifiers", selectors, theirs)) {
-      modifiers.push(asModifier(entry, `${entry.label} (${target.name})`));
+    const theirs = buildCheckOptions(target, kind, actor);
+    for (const entry of getBagEntries(target.ruleBag, "opponentModifiers", selectors, theirs)) {
+      modifiers.push(toModifier(entry, `${entry.label} (${target.name})`));
     }
   }
 
@@ -182,7 +182,7 @@ export function collectCheck(actor, { kind, skill, trait, ring, target = null, w
     }
   }
 
-  const tnModifiers = entries("tnModifiers").map(entry => ({
+  const tnModifiers = entriesOf("tnModifiers").map(entry => ({
     label: entry.label,
     value: entry.value,
     ...(entry.type ? { type: entry.type } : {})
@@ -202,7 +202,7 @@ export function collectCheck(actor, { kind, skill, trait, ring, target = null, w
     }
   }
   if (kind !== "damage") {
-    const armor = getArmorTNPenalty(actor, skill ?? null, trait ?? null);
+    const armor = getArmorTnPenalty(actor, skill ?? null, trait ?? null);
     if (armor) {
       tnModifiers.push({ label: T("l5r4.ui.check.armor"), value: armor });
     }
@@ -234,17 +234,17 @@ export function collectCheck(actor, { kind, skill, trait, ring, target = null, w
   }
 
   const freeRaises =
-    kind === "damage" ? 0 : entries("freeRaises").reduce((sum, entry) => sum + entry.value, 0);
+    kind === "damage" ? 0 : entriesOf("freeRaises").reduce((sum, entry) => sum + entry.value, 0);
 
-  const diceRules = entries("diceRules");
+  const diceRules = entriesOf("diceRules");
   const thresholds = diceRules.map(rule => rule.explode).filter(value => value !== null);
 
-  const raiseRules = entries("raiseRules");
+  const raiseRules = entriesOf("raiseRules");
   const maneuverCosts = {};
   for (const rule of raiseRules.filter(r => r.maneuver)) {
     maneuverCosts[rule.maneuver] = (maneuverCosts[rule.maneuver] ?? 0) + rule.cost;
   }
-  const unskilledAs = entries("unskilledAs").map(entry => entry.rank);
+  const unskilledAs = entriesOf("unskilledAs").map(entry => entry.rank);
 
   return {
     modifiers,
@@ -252,19 +252,19 @@ export function collectCheck(actor, { kind, skill, trait, ring, target = null, w
     freeRaises,
     explode: thresholds.length ? Math.min(...thresholds) : null,
     rerollOnes: diceRules.some(rule => rule.rerollOnes),
-    substitutes: entries("substitutes").map(entry => ({
+    substitutes: entriesOf("substitutes").map(entry => ({
       label: entry.label,
       replace: entry.replace,
       with: entry.with
     })),
-    notes: entries("notes").map(entry => entry.text),
-    applyConditions: entries("applyConditions").map(entry => ({
+    notes: entriesOf("notes").map(entry => entry.text),
+    applyConditions: entriesOf("applyConditions").map(entry => ({
       label: entry.label,
       condition: entry.condition,
       level: entry.level
     })),
-    damageSources: [...new Set(entries("damageSources").flatMap(entry => entry.tags))],
-    ignoreReduction: entries("damageSources").reduce(
+    damageSources: [...new Set(entriesOf("damageSources").flatMap(entry => entry.tags))],
+    ignoreReduction: entriesOf("damageSources").reduce(
       (sum, entry) => sum + entry.ignoreReduction,
       0
     ),
@@ -274,7 +274,7 @@ export function collectCheck(actor, { kind, skill, trait, ring, target = null, w
       maneuverCosts
     },
     unskilledAs: unskilledAs.length ? Math.max(...unskilledAs) : 0,
-    actions: entries("actionCosts").map(entry => ({
+    actions: entriesOf("actionCosts").map(entry => ({
       label: entry.label,
       action: entry.action,
       ...(entry.range ? { range: entry.range } : {})

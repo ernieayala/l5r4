@@ -81,8 +81,8 @@ export function registerPcSheetTests(quench) {
           await new Promise(resolve => setTimeout(resolve, 100));
 
           const element = sheet.element;
-          // Rings use data-system-ring attribute
-          const ringElements = element.querySelectorAll("[data-system-ring]");
+          // Rings use data-ring-key attribute
+          const ringElements = element.querySelectorAll("[data-ring-key]");
 
           assert.isAtLeast(ringElements.length, 1, "Ring elements found");
         });

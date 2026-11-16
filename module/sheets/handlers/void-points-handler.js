@@ -5,7 +5,7 @@
  */
 
 import { SYS_ID } from "../../config/constants.js";
-import { clamp } from "../../utils/type-coercion.js";
+import { getClamped } from "../../utils/type-coercion.js";
 
 /**
  * Handles Void Point adjustments and visual representation updates.
@@ -16,7 +16,7 @@ import { clamp } from "../../utils/type-coercion.js";
  *
  * Usage pattern:
  * - Called from sheet event handlers when void dot is clicked
- * - Provides both state management (adjust) and rendering (paint)
+ * - Provides both state management (updateVoidPoints) and rendering (updateVoidDots)
  *
  * @class VoidPointsHandler
  */
@@ -38,20 +38,20 @@ export class VoidPointsHandler {
    * @param {number} delta - Amount to adjust (+1 to spend, -1 to regain)
    * @returns {Promise<void>}
    */
-  static async adjust(context, event, delta) {
+  static async updateVoidPoints(context, event, delta) {
     event?.preventDefault?.();
 
     // The stored value, not the prepared one, so an Active Effect on Void Points is never written into
     // storage (B6)
     const cur = context.actor._source.system.rings.void.value;
-    const next = clamp(cur + delta, 0, 9); // Max 9 Void Points (system constraint)
+    const next = getClamped(cur + delta, 0, 9); // Max 9 Void Points (system constraint)
     if (next === cur) {
       return;
     }
 
     try {
       // diff:true minimizes update payload, render:false prevents automatic sheet redraw
-      // since we manually update the UI via paint() below
+      // since we manually update the UI via updateVoidDots() below
       await context.actor.update(
         { "system.rings.void.value": next },
         { diff: true, render: false }
@@ -59,7 +59,7 @@ export class VoidPointsHandler {
 
       // CRITICAL: After update, actor.system has been refreshed by prepareDerivedData
       // Now paint the UI with the updated actor data
-      this.paint(context.element, context.actor);
+      this.updateVoidDots(context.element, context.actor);
     } catch (err) {
       console.warn(`${SYS_ID} VoidPointsHandler: failed to update void points`, { err });
     }
@@ -78,7 +78,7 @@ export class VoidPointsHandler {
    * @param {L5R4Actor} actor - Actor document containing current Void Point data
    * @returns {void}
    */
-  static paint(root, actor) {
+  static updateVoidDots(root, actor) {
     // querySelector used here to find specific UI component container by class
     // Alternative would require data-attribute on container, but class selector is
     // semantically correct for styling-related component queries
@@ -89,7 +89,7 @@ export class VoidPointsHandler {
       return;
     }
 
-    const cur = this._getVoidValue(actor);
+    const cur = this.#getVoidPoints(actor);
     // querySelectorAll used to find all dot elements within the container
     // Data attributes used for dot index values (data-idx)
     node.querySelectorAll(".void-dot").forEach(d => {
@@ -108,7 +108,7 @@ export class VoidPointsHandler {
    * @param {L5R4Actor} actor - Actor document to read Void Points from
    * @returns {number} Current Void Point value (0 if data is missing/invalid)
    */
-  static _getVoidValue(actor) {
+  static #getVoidPoints(actor) {
     return Number(actor.system?.rings?.void?.value ?? 0) || 0;
   }
 }

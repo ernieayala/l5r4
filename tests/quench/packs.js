@@ -1,15 +1,15 @@
 import { SYS_ID } from "../../module/config/constants.js";
 import { createRule } from "../../module/data/rules/rule-models.js";
-import { collectCheck } from "../../module/services/dice/check/collect.js";
+import { getCheckContext } from "../../module/services/dice/check/collect.js";
 import { DragDropHandler } from "../../module/sheets/handlers/drag-drop-handler.js";
-import { getArmorTNPenalty } from "../../module/utils/armor-penalties.js";
+import { getArmorTnPenalty } from "../../module/utils/armor-penalties.js";
 import CompendiumBrowser from "../../module/apps/compendium-browser.js";
 import { PcRollHandler } from "../../module/sheets/handlers/pc-roll-handler.js";
-import { answeredRules } from "../../module/utils/choices.js";
+import { getAnsweredRules } from "../../module/utils/choices.js";
 import { rollCheck } from "../../module/services/dice/check/roll-check.js";
-import { grantsSettled } from "../../module/documents/item/lifecycle/grants.js";
-import { activationOf, toggleActivation } from "../../module/services/effects/activation.js";
-import { woundsTaken } from "../../module/utils/damage.js";
+import { grantQueueOf } from "../../module/documents/item/lifecycle/grants.js";
+import { activationOf, updateActivation } from "../../module/services/effects/activation.js";
+import { getWoundsTaken } from "../../module/utils/damage.js";
 import { createShugenja, createTestPC } from "../fixtures/actor-fixtures.js";
 import { cleanTest, settleChatNotifications, waitFor } from "./helpers.js";
 
@@ -102,8 +102,8 @@ export function registerPacksTests(quench) {
         const stop = answerPurchase(picks, confirm, school);
         try {
           const source = await entry(pack, name);
-          const item = await DragDropHandler.handleItemDrop({ actor }, null, { uuid: source.uuid });
-          await grantsSettled(actor);
+          const item = await DragDropHandler.onItemDrop({ actor }, null, { uuid: source.uuid });
+          await grantQueueOf(actor);
           return item;
         } finally {
           stop();
@@ -131,7 +131,7 @@ export function registerPacksTests(quench) {
       /**
        * The rule keys a document carries that the actor's rule list lacks: each rule, its choices answered, reaches
        * `actor.rules` under the document's name unless validation skipped it (module/documents/actor/rules.js,
-       * collectRules). Counted per key, so a second rule of one key needs its own entry.
+       * rulesOf). Counted per key, so a second rule of one key needs its own entry.
        * @param {Actor} actor
        * @param {{name: string, system: {rules: object[]}}} doc  An owned item or an applied effect
        * @returns {string[]}
@@ -151,7 +151,7 @@ export function registerPacksTests(quench) {
         if (item.type === "armor") {
           await item.update({ "system.equipped": true });
         } else if (!item.system.rulesActive && ["kata", "kiho", "tattoo"].includes(item.type)) {
-          await toggleActivation(actor, item);
+          await updateActivation(actor, item);
         }
       };
 
@@ -188,7 +188,7 @@ export function registerPacksTests(quench) {
                 assert.equal(doc.system.description ?? "", "", `${doc.name}: description`);
                 // The actor fills a choice in before it validates (module/documents/actor/rules.js), so each rule is
                 // checked as it reads once each ChoiceSet has an answer
-                for (const rule of answeredRules(doc.system.rules)) {
+                for (const rule of getAnsweredRules(doc.system.rules)) {
                   assert.doesNotThrow(
                     () => createRule(rule),
                     undefined,
@@ -219,7 +219,7 @@ export function registerPacksTests(quench) {
                 );
                 const dropped = [];
                 for (const index of pack.index) {
-                  const item = await DragDropHandler.handleItemDrop({ actor }, null, {
+                  const item = await DragDropHandler.onItemDrop({ actor }, null, {
                     uuid: index.uuid
                   });
                   assert.ok(item, `${pack.metadata.name}: ${index.name}`);
@@ -230,7 +230,7 @@ export function registerPacksTests(quench) {
                   dropped.push(item);
                 }
                 // Schools grant in the background; the actor is deleted only once that work is done
-                await grantsSettled(actor);
+                await grantQueueOf(actor);
                 // A Clan or Family replaces the one before it; everything else stays
                 // game-rules/48_character_creation_expanded.md, p.102
                 for (const item of dropped.filter(i => !["clan", "family"].includes(i.type))) {
@@ -266,7 +266,7 @@ export function registerPacksTests(quench) {
             await item.update({ "system.equipped": true });
             assert.equal(actor.system.armorTn.bonus, 10);
             assert.equal(actor.system.armorTn.reduction, 5);
-            assert.equal(getArmorTNPenalty(actor, "kenjutsu", "agi"), 5);
+            assert.equal(getArmorTnPenalty(actor, "kenjutsu", "agi"), 5);
           })
         );
 
@@ -277,8 +277,8 @@ export function registerPacksTests(quench) {
             const { actor, item } = await holding("armor", "Light Armor");
             await item.update({ "system.equipped": true });
             assert.equal(actor.system.armorTn.bonus, 5);
-            assert.equal(getArmorTNPenalty(actor, "athletics"), 5);
-            assert.equal(getArmorTNPenalty(actor, "kenjutsu", "agi"), 0);
+            assert.equal(getArmorTnPenalty(actor, "athletics"), 5);
+            assert.equal(getArmorTnPenalty(actor, "kenjutsu", "agi"), 0);
           })
         );
 
@@ -336,7 +336,7 @@ export function registerPacksTests(quench) {
           const { actor, item: skill } = await holding("skills", skillName);
           await skill.update({ "system.rank": rank });
           const weapon = weaponName
-            ? await DragDropHandler.handleItemDrop({ actor }, null, {
+            ? await DragDropHandler.onItemDrop({ actor }, null, {
                 uuid: (await entry("weapons", weaponName)).uuid
               })
             : null;
@@ -348,7 +348,7 @@ export function registerPacksTests(quench) {
           "should give Kenjutsu 3 +1k0 on a sword's damage, not a spear's, and explode on 9 at Kenjutsu 7",
           clean(async () => {
             const { actor, skill, weapon } = await skilled("Kenjutsu", 2, "Katana");
-            const damage = w => collectCheck(actor, { kind: "damage", weapon: w });
+            const damage = w => getCheckContext(actor, { kind: "damage", weapon: w });
             assert.notOk(
               damage(weapon).modifiers.some(m => m.roll === 1),
               "rank 2"
@@ -358,7 +358,7 @@ export function registerPacksTests(quench) {
               damage(weapon).modifiers.some(m => m.roll === 1),
               "rank 3"
             );
-            const spear = await DragDropHandler.handleItemDrop({ actor }, null, {
+            const spear = await DragDropHandler.onItemDrop({ actor }, null, {
               uuid: (await entry("weapons", "Yari")).uuid
             });
             assert.notOk(
@@ -376,9 +376,9 @@ export function registerPacksTests(quench) {
           "should ignore 2 Reduction at Heavy Weapons 3, and make Knockdown cheaper at 5",
           clean(async () => {
             const { actor, skill, weapon } = await skilled("Heavy Weapons", 3, "Tetsubo");
-            assert.equal(collectCheck(actor, { kind: "damage", weapon }).ignoreReduction, 2);
+            assert.equal(getCheckContext(actor, { kind: "damage", weapon }).ignoreReduction, 2);
             const attack = () =>
-              collectCheck(actor, { kind: "attack", skill: "heavy weapons", weapon }).raises
+              getCheckContext(actor, { kind: "attack", skill: "heavy weapons", weapon }).raises
                 .maneuverCosts.knockdown ?? 0;
             assert.equal(attack(), 0, "rank 3");
             await skill.update({ "system.rank": 5 });
@@ -391,11 +391,11 @@ export function registerPacksTests(quench) {
           "should make Disarm cheaper at Knives 5 with a sai, not with a tanto",
           clean(async () => {
             const { actor, weapon: sai } = await skilled("Knives", 5, "Sai");
-            const tanto = await DragDropHandler.handleItemDrop({ actor }, null, {
+            const tanto = await DragDropHandler.onItemDrop({ actor }, null, {
               uuid: (await entry("weapons", "Tanto")).uuid
             });
             const disarm = w =>
-              collectCheck(actor, { kind: "attack", skill: "knives", weapon: w }).raises
+              getCheckContext(actor, { kind: "attack", skill: "knives", weapon: w }).raises
                 .maneuverCosts.disarm ?? 0;
             assert.equal(disarm(sai), -1);
             assert.equal(disarm(tanto), 0);
@@ -407,7 +407,7 @@ export function registerPacksTests(quench) {
           "should give Spellcraft 5 +1k0 on Spell Casting Rolls",
           clean(async () => {
             const { actor, skill } = await skilled("Spellcraft", 4);
-            const spell = () => collectCheck(actor, { kind: "spell", ring: "fire" }).modifiers;
+            const spell = () => getCheckContext(actor, { kind: "spell", ring: "fire" }).modifiers;
             assert.notOk(
               spell().some(m => m.roll === 1),
               "rank 4"
@@ -453,7 +453,7 @@ export function registerPacksTests(quench) {
           "should give Hunting 5 an optional +1k0 on Stealth, off until the roller ticks it",
           clean(async () => {
             const { actor } = await skilled("Hunting", 5);
-            const modifier = collectCheck(actor, {
+            const modifier = getCheckContext(actor, {
               kind: "skill",
               skill: "stealth"
             }).modifiers.find(m => m.roll === 1);
@@ -468,7 +468,7 @@ export function registerPacksTests(quench) {
           clean(async () => {
             const { actor } = await skilled("Investigation", 10);
             assert.equal(
-              collectCheck(actor, { kind: "skill", skill: "investigation" }).freeRaises,
+              getCheckContext(actor, { kind: "skill", skill: "investigation" }).freeRaises,
               1
             );
           })
@@ -482,7 +482,7 @@ export function registerPacksTests(quench) {
       describe("Expected effects: Advantages and Disadvantages", () => {
         /** The sum of an actor's modifiers named `label` on a check. */
         const fromRule = (actor, spec, label) =>
-          collectCheck(actor, spec)
+          getCheckContext(actor, spec)
             .modifiers.filter(m => m.label === label)
             .reduce((sum, m) => ({ roll: sum.roll + m.roll, keep: sum.keep + m.keep }), {
               roll: 0,
@@ -542,7 +542,7 @@ export function registerPacksTests(quench) {
             const { actor } = await holding("advantages", "Friend of the Elements", {
               picks: ["water"]
             });
-            const freeRaises = spec => collectCheck(actor, spec).freeRaises;
+            const freeRaises = spec => getCheckContext(actor, spec).freeRaises;
             assert.equal(freeRaises({ kind: "trait", trait: "str" }), 1);
             assert.equal(freeRaises({ kind: "trait", trait: "ref" }), 0);
             assert.equal(freeRaises({ kind: "skill", skill: "athletics", trait: "str" }), 0);
@@ -572,8 +572,14 @@ export function registerPacksTests(quench) {
               const skill = await drop(actor, "skills", name);
               await skill.update({ "system.rank": 0 });
             }
-            assert.equal(collectCheck(actor, { kind: "skill", skill: "stealth" }).unskilledAs, 1);
-            assert.equal(collectCheck(actor, { kind: "skill", skill: "courtier" }).unskilledAs, 0);
+            assert.equal(
+              getCheckContext(actor, { kind: "skill", skill: "stealth" }).unskilledAs,
+              1
+            );
+            assert.equal(
+              getCheckContext(actor, { kind: "skill", skill: "courtier" }).unskilledAs,
+              0
+            );
           })
         );
 
@@ -741,10 +747,10 @@ export function registerPacksTests(quench) {
           console.error = (...args) => logged.push(args.map(String).join(" "));
           const stop = answerPurchase();
           try {
-            await DragDropHandler.handleItemDrop({ actor }, null, { uuid: source.uuid });
+            await DragDropHandler.onItemDrop({ actor }, null, { uuid: source.uuid });
             // The School's Skills and Technique are still being granted when the character goes
             await actor.delete();
-            await grantsSettled(actor);
+            await grantQueueOf(actor);
           } finally {
             stop();
             console.error = original;
@@ -795,7 +801,7 @@ export function registerPacksTests(quench) {
             const actions = name =>
               (async () => {
                 const weapon = await drop(actor, "weapons", name);
-                return collectCheck(actor, { kind: "attack", weapon }).actions;
+                return getCheckContext(actor, { kind: "attack", weapon }).actions;
               })();
             assert.deepEqual(
               (await actions("Katana")).map(a => a.action),
@@ -836,7 +842,7 @@ export function registerPacksTests(quench) {
             await actor.createEmbeddedDocuments("Item", [
               { name: "Packs School", type: "school", system: { rank: 3 } }
             ]);
-            const unaware = collectCheck(actor, { kind: "attack" }).modifiers.find(m =>
+            const unaware = getCheckContext(actor, { kind: "attack" }).modifiers.find(m =>
               m.label.includes("unaware")
             );
             assert.equal(unaware.roll, 3);
@@ -866,11 +872,11 @@ export function registerPacksTests(quench) {
             // game-rules/32_attack_and_defense.md, p.82
             const before = actor.system.armorTn.current;
             assert.equal(before, 15, "owned, not active: no bonus");
-            await toggleActivation(actor, item);
+            await updateActivation(actor, item);
             assert.equal(actor.system.armorTn.current - before, 9);
             const effect = activationOf(actor, item);
             assert.deepInclude(effect._source.duration, { value: 4, units: "rounds" });
-            await toggleActivation(actor, item);
+            await updateActivation(actor, item);
             assert.equal(actor.system.armorTn.current, before, "ended");
           })
         );
@@ -881,8 +887,8 @@ export function registerPacksTests(quench) {
           clean(async () => {
             const { actor, item: bamboo } = await ranked("tattoos", "Bamboo", 1);
             const crab = await drop(actor, "tattoos", "Crab");
-            await toggleActivation(actor, bamboo);
-            await toggleActivation(actor, crab);
+            await updateActivation(actor, bamboo);
+            await updateActivation(actor, crab);
             assert.notOk(activationOf(actor, bamboo), "Bamboo ended");
             assert.ok(activationOf(actor, crab));
             assert.equal(actor.system.armorTn.reduction, actor.system.rings.earth);
@@ -895,7 +901,7 @@ export function registerPacksTests(quench) {
           clean(async () => {
             const { actor, item } = await holding("tattoos", "Mantis");
             assert.isTrue(item.system.passive);
-            await toggleActivation(actor, item);
+            await updateActivation(actor, item);
             assert.notOk(activationOf(actor, item), "a passive tattoo is not activated");
             await actor.toggleStatusEffect("feared", { active: true });
             assert.isFalse(actor.statuses.has("feared"));
@@ -911,7 +917,7 @@ export function registerPacksTests(quench) {
             const { actor, item } = await holding("kata", "Striking as Air", {
               traits: { ref: 3, awa: 3 }
             });
-            await toggleActivation(actor, item);
+            await updateActivation(actor, item);
             const base = actor.system.armorTn.current;
             await actor.toggleStatusEffect("defenseStance", { active: true });
             const defense = actor.items.find(i => i.name === "Defense")?.system.rank ?? 0;
@@ -927,7 +933,7 @@ export function registerPacksTests(quench) {
           clean(async () => {
             const { actor, item } = await holding("kiho", "Soul of the Four Winds");
             const before = actor.system.armorTn.current;
-            await toggleActivation(actor, item);
+            await updateActivation(actor, item);
             assert.equal(
               actor.system.armorTn.current - before,
               actor.system.insight.rank + actor.system.rings.air
@@ -994,9 +1000,9 @@ export function registerPacksTests(quench) {
               spirit: oni.damageDefenses.spirit
             };
             assert.equal(reduction, 24);
-            assert.equal(woundsTaken({ damage: 40, defenses }).wounds, 1, "a steel blade");
+            assert.equal(getWoundsTaken({ damage: 40, defenses }).wounds, 1, "a steel blade");
             assert.equal(
-              woundsTaken({ damage: 40, tags: ["jade"], defenses }).wounds,
+              getWoundsTaken({ damage: 40, tags: ["jade"], defenses }).wounds,
               28,
               "a jade blade"
             );
@@ -1055,10 +1061,10 @@ export function registerPacksTests(quench) {
             const [fire] = await spells(s => s.ring === "fire" && s.mastery === 1 && !s.maho);
             assert.ok(fire, "a Fire spell of Mastery Level 1");
             const actor = track(await createShugenja({ name: "Compendium packs: caster" }));
-            const spell = await DragDropHandler.handleItemDrop({ actor }, null, {
+            const spell = await DragDropHandler.onItemDrop({ actor }, null, {
               uuid: fire.uuid
             });
-            const message = await PcRollHandler.castSpell(actor, spell, false);
+            const message = await PcRollHandler.rollSpellCast(actor, spell, false);
             posted.push(message);
             assert.equal(message.system.tn.base, 10);
             assert.equal(message.system.kind, "spell");
@@ -1225,7 +1231,7 @@ export function registerPacksTests(quench) {
               const data = JSON.parse(transfer.getData("text/plain"));
               assert.equal(data.type, "Item");
               const actor = track(await createTestPC({ name: "Compendium packs: dragger" }));
-              const item = await DragDropHandler.handleItemDrop({ actor }, null, data);
+              const item = await DragDropHandler.onItemDrop({ actor }, null, data);
               assert.equal(item.name, "Light Armor");
             } finally {
               await app.close({ animate: false });

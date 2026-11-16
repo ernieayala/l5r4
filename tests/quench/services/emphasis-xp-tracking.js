@@ -250,10 +250,9 @@ export function registerEmphasisXpTrackingTests(quench) {
           );
 
           // Import here to avoid circular dependency issues
-          const { calculateXpDataVersion } =
-            await import("../../../module/services/xp/versioning.js");
+          const { getXpDataVersion } = await import("../../../module/services/xp/versioning.js");
 
-          const version1 = calculateXpDataVersion(actor);
+          const version1 = getXpDataVersion(actor);
           assert.isNumber(version1, "Version should be a number");
 
           // Add another emphasis
@@ -261,7 +260,7 @@ export function registerEmphasisXpTrackingTests(quench) {
             "system.trainedEmphases": ["Katana", "Wakizashi"]
           });
 
-          const version2 = calculateXpDataVersion(actor);
+          const version2 = getXpDataVersion(actor);
           assert.notEqual(version1, version2, "Version should change when trainedEmphases changes");
 
           await skill?.delete();
@@ -280,10 +279,9 @@ export function registerEmphasisXpTrackingTests(quench) {
             { parent: actor }
           );
 
-          const { calculateXpDataVersion } =
-            await import("../../../module/services/xp/versioning.js");
+          const { getXpDataVersion } = await import("../../../module/services/xp/versioning.js");
 
-          const version = calculateXpDataVersion(actor);
+          const version = getXpDataVersion(actor);
           assert.isNumber(version, "Should handle empty array without error");
 
           await skill?.delete();
@@ -301,10 +299,9 @@ export function registerEmphasisXpTrackingTests(quench) {
             { parent: actor }
           );
 
-          const { calculateXpDataVersion } =
-            await import("../../../module/services/xp/versioning.js");
+          const { getXpDataVersion } = await import("../../../module/services/xp/versioning.js");
 
-          const version = calculateXpDataVersion(actor);
+          const version = getXpDataVersion(actor);
           assert.isNumber(version, "Should handle undefined without error");
 
           await skill?.delete();

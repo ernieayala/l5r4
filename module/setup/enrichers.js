@@ -8,7 +8,7 @@
 import { LINK_TEMPLATES } from "../config/templates.js";
 import { T } from "../utils/localization.js";
 import { LINK_PATTERN, parseLink } from "../utils/link-syntax.js";
-import { linkText, runLink } from "../services/links.js";
+import { formatLinkText, onLinkClick } from "../services/links.js";
 import { postCheckRequest } from "../services/check-request.js";
 
 /** The enricher's id, which core writes on the wrapper element. */
@@ -27,7 +27,7 @@ export function registerEnrichers() {
   CONFIG.TextEditor.enrichers.push({
     id: ENRICHER_ID,
     pattern: LINK_PATTERN,
-    enricher: enrichLink,
+    enricher: renderLink,
     onRender: onRenderLink
   });
 }
@@ -37,7 +37,7 @@ export function registerEnrichers() {
  * @param {RegExpMatchArray} match - [whole, type, params, label]
  * @returns {Promise<HTMLElement>}
  */
-async function enrichLink(match) {
+async function renderLink(match) {
   const [source, type, params, label = ""] = match;
   const spec = parseLink(type, params, label);
   const html = await foundry.applications.handlebars.renderTemplate(LINK_TEMPLATES.inlineLink, {
@@ -46,7 +46,7 @@ async function enrichLink(match) {
     params,
     label: spec.label,
     icon: ICONS[type],
-    text: spec.ok ? linkText(spec) : "",
+    text: spec.ok ? formatLinkText(spec) : "",
     source,
     reason: spec.ok ? "" : T(spec.error)
   });
@@ -108,7 +108,7 @@ function onRenderLink(element, { signal }) {
     () => {
       const spec = specOf(link);
       if (spec.ok) {
-        runLink(spec);
+        onLinkClick(spec);
       }
     },
     signal

@@ -1,5 +1,9 @@
 import { describe, expect, it } from "vitest";
-import { grantSkill, pendingGrants, ungrantSkill } from "../../../module/utils/grants.js";
+import {
+  buildGrantedSkill,
+  getPendingGrants,
+  buildUngrantedSkill
+} from "../../../module/utils/grants.js";
 
 const rule = (uuid, rank = 0, extra = {}) => ({ uuid, rank, skillRank: 1, emphasis: "", ...extra });
 const record = (uuid, extra = {}) => ({
@@ -19,7 +23,7 @@ const skill = (extra = {}) => ({
   ...extra
 });
 
-describe("pendingGrants", () => {
+describe("getPendingGrants", () => {
   // A School's Skills at once, its Techniques by School Rank
   // game-rules/48_character_creation_expanded.md, p.102
   // game-rules/49_improving_your_character.md, p.104
@@ -32,27 +36,27 @@ describe("pendingGrants", () => {
   ];
 
   it("should grant what the School Rank has reached and is not recorded", () => {
-    expect(pendingGrants(school, [], 1).map(r => r.uuid)).toEqual([
+    expect(getPendingGrants(school, [], 1).map(r => r.uuid)).toEqual([
       "Item.kenjutsu",
       "Item.technique1"
     ]);
     const granted = [record("Item.kenjutsu"), record("Item.technique1")];
-    expect(pendingGrants(school, granted, 2).map(r => r.uuid)).toEqual(["Item.technique2"]);
+    expect(getPendingGrants(school, granted, 2).map(r => r.uuid)).toEqual(["Item.technique2"]);
   });
 
   it("should not grant again what the owner removed", () => {
-    expect(pendingGrants([rule("Item.a")], [record("Item.a", { itemId: null })], 5)).toEqual([]);
+    expect(getPendingGrants([rule("Item.a")], [record("Item.a", { itemId: null })], 5)).toEqual([]);
   });
 
   it("should wait for an open choice", () => {
-    expect(pendingGrants([rule("{choice:extra}")], [], 5)).toEqual([]);
+    expect(getPendingGrants([rule("{choice:extra}")], [], 5)).toEqual([]);
   });
 });
 
-describe("grantSkill", () => {
+describe("buildGrantedSkill", () => {
   // game-rules/48_character_creation_expanded.md, p.102
   it("should make a Skill a School Skill with its free rank and Emphasis", () => {
-    expect(grantSkill(skill(), rule("u", 0, { emphasis: "Void Recovery" }))).toEqual({
+    expect(buildGrantedSkill(skill(), rule("u", 0, { emphasis: "Void Recovery" }))).toEqual({
       update: {
         rank: 1,
         freeRanks: 1,
@@ -65,7 +69,7 @@ describe("grantSkill", () => {
   });
 
   it("should keep a higher rank, and not repeat an Emphasis already trained", () => {
-    const { update, record: rec } = grantSkill(
+    const { update, record: rec } = buildGrantedSkill(
       skill({ rank: 3, trainedEmphases: ["Katana"] }),
       rule("u", 0, { emphasis: "Katana" })
     );
@@ -75,13 +79,15 @@ describe("grantSkill", () => {
 });
 
 // roadmap/STAGE-11 decision 7
-describe("ungrantSkill", () => {
+describe("buildUngrantedSkill", () => {
   it("should delete a granted Skill nothing was bought on", () => {
-    expect(ungrantSkill(skill({ rank: 1, freeRanks: 1 }), record("u"))).toEqual({ delete: true });
+    expect(buildUngrantedSkill(skill({ rank: 1, freeRanks: 1 }), record("u"))).toEqual({
+      delete: true
+    });
   });
 
   it("should keep a Skill with bought ranks, without the free rank", () => {
-    expect(ungrantSkill(skill({ rank: 3, freeRanks: 1 }), record("u"))).toEqual({
+    expect(buildUngrantedSkill(skill({ rank: 3, freeRanks: 1 }), record("u"))).toEqual({
       update: { freeRanks: 0, school: false, trainedEmphases: [], freeEmphasis: 0 }
     });
   });
@@ -94,7 +100,7 @@ describe("ungrantSkill", () => {
       freeEmphasis: 1
     });
     expect(
-      ungrantSkill(granted, record("u", { emphasis: "Void Recovery", freeEmphasis: 1 }))
+      buildUngrantedSkill(granted, record("u", { emphasis: "Void Recovery", freeEmphasis: 1 }))
     ).toEqual({
       update: { freeRanks: 0, school: false, trainedEmphases: ["Breath"], freeEmphasis: 0 }
     });
@@ -102,7 +108,7 @@ describe("ungrantSkill", () => {
 
   it("should never delete a Skill the character had before the grant", () => {
     expect(
-      ungrantSkill(skill({ rank: 1, freeRanks: 1 }), record("u", { created: false }))
+      buildUngrantedSkill(skill({ rank: 1, freeRanks: 1 }), record("u", { created: false }))
     ).toMatchObject({ update: { freeRanks: 0 } });
   });
 });

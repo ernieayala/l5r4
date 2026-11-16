@@ -7,7 +7,7 @@
 import { T } from "../../utils/localization.js";
 import { applyLongRest } from "../../services/rest.js";
 import { applyEffect, effectsOf } from "../../services/effects/apply.js";
-import { voidUseUpdate, warnVoidLimit } from "../../services/effects/uses.js";
+import { buildVoidUseUpdate, warnVoidLimit } from "../../services/effects/uses.js";
 
 /**
  * Handler class for PC-specific action operations.
@@ -39,7 +39,7 @@ export class PcActionsHandler {
    * @param {HTMLElement} _element - Button element (unused)
    * @returns {Promise<void>}
    */
-  static async handleApplyHealing(context, event, _element) {
+  static async applyHealing(context, event, _element) {
     event?.preventDefault?.();
     return applyLongRest(context.actor);
   }
@@ -70,7 +70,7 @@ export class PcActionsHandler {
    * @param {HTMLElement} element - Checkbox element
    * @returns {Promise<void>}
    */
-  static async handleToggleArmorVoid(context, event, element) {
+  static async updateArmorVoid(context, event, element) {
     event?.preventDefault?.();
     const actor = context.actor;
 
@@ -126,7 +126,7 @@ export class PcActionsHandler {
     warnVoidLimit(actor);
     await actor.update({
       "system.rings.void.value": actor._source.system.rings.void.value - 1,
-      ...voidUseUpdate(actor)
+      ...buildVoidUseUpdate(actor)
     });
     await applyEffect(actor, "voidArmor");
 
@@ -156,7 +156,7 @@ export class PcActionsHandler {
    * @param {HTMLElement} element - Checkbox element
    * @returns {Promise<void>}
    */
-  static async handleToggleInitiativeVoid(context, event, element) {
+  static async updateInitiativeVoid(context, event, element) {
     event?.preventDefault?.();
     const checked = element.checked;
 

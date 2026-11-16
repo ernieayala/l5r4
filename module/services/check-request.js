@@ -8,8 +8,8 @@
 import { CHAT_TEMPLATES } from "../config/templates.js";
 import { T } from "../utils/localization.js";
 import { rollCheck } from "./dice/check/roll-check.js";
-import { resolveActor } from "./dice/resources/void-points.js";
-import { checkRequestFor, linkText } from "./links.js";
+import { getRollActor } from "./dice/resources/void-points.js";
+import { checkRequestOf, formatLinkText } from "./links.js";
 
 /**
  * Post a request card for a Check link. GMs only.
@@ -31,7 +31,7 @@ export async function postCheckRequest(spec) {
   const content = await foundry.applications.handlebars.renderTemplate(
     CHAT_TEMPLATES.checkRequest,
     {
-      text: linkText(spec),
+      text: formatLinkText(spec),
       tn: spec.tn
     }
   );
@@ -57,12 +57,12 @@ export function bindCheckRequestCard(message, html) {
     .querySelector("[data-action='check-request-roll']")
     ?.addEventListener("click", async event => {
       event.preventDefault();
-      const actor = resolveActor();
+      const actor = getRollActor();
       if (!actor) {
         ui.notifications?.warn(T("l5r4.ui.links.noActor"));
         return;
       }
-      const request = checkRequestFor(actor, message.system);
+      const request = checkRequestOf(actor, message.system);
       if (request) {
         await rollCheck(request);
       }

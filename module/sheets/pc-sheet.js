@@ -11,13 +11,13 @@ import { TEMPLATE } from "../config/templates.js";
 import { STANCES } from "../config/localization.js";
 import { PC_SORT_KEYS } from "../config/sort-keys.js";
 import { on } from "../utils/dom.js";
-import { enhanceItemSheetData } from "../documents/item/integration/sheet-data.js";
+import { prepareItemSheetOptions } from "../documents/item/integration/sheet-data.js";
 import { effectsOf } from "../services/effects/apply.js";
 import { openLedgerDialog } from "../services/ledger.js";
-import { activeItemIds, toggleActivation } from "../services/effects/activation.js";
+import { activeItemIdsOf, updateActivation } from "../services/effects/activation.js";
 import { BaseActorSheet } from "./base-actor-sheet.js";
 import { AppLauncherHandler } from "./handlers/app-launcher-handler.js";
-import { ItemCRUDHandler } from "./handlers/item-crud-handler.js";
+import { ItemCrudHandler } from "./handlers/item-crud-handler.js";
 import { PcAdjustmentHandler } from "./handlers/pc-adjustment-handler.js";
 import { PcTraitHandler } from "./handlers/pc-trait-handler.js";
 import { PcContextBuilder } from "./handlers/pc-context-builder.js";
@@ -86,7 +86,7 @@ export default class L5R4PcSheet extends BaseActorSheet {
    *
    * @type {HTMLElement|null}
    */
-  _boundExtraRoot = null;
+  #boundExtraRoot = null;
 
   /**
    * Prepares template context data for PC sheet rendering.
@@ -146,10 +146,10 @@ export default class L5R4PcSheet extends BaseActorSheet {
     } = sortedItems;
 
     const masteries = PcContextBuilder.buildMasteryList(skills);
-    const traitsEff = PcContextBuilder.extractEffectiveTraits(actorObj);
-    const bioItems = PcContextBuilder.extractBioItems(all);
-    const currentStance = PcContextBuilder.extractStance(actorObj);
-    const collapsedSections = PcContextBuilder.extractCollapsedSections(actorObj.id);
+    const traitsEff = PcContextBuilder.getEffectiveTraits(actorObj);
+    const bioItems = PcContextBuilder.getBioItems(all);
+    const currentStance = PcContextBuilder.getStance(actorObj);
+    const collapsedSections = PcContextBuilder.getCollapsedSections(actorObj.id);
 
     const context = {
       ...base,
@@ -163,7 +163,7 @@ export default class L5R4PcSheet extends BaseActorSheet {
       traitsEff,
       currentStance,
       voidArmor: effectsOf(actorObj, "voidArmor").length > 0,
-      activeItemIds: activeItemIds(actorObj),
+      activeItemIds: activeItemIdsOf(actorObj),
       collapsedSections,
       // Lazy getter: Defers expensive sorting until template accesses property
       get advDisList() {
@@ -184,7 +184,7 @@ export default class L5R4PcSheet extends BaseActorSheet {
       masteries
     };
 
-    enhanceItemSheetData(context);
+    prepareItemSheetOptions(context);
     context.config.stances = STANCES;
     return context;
   }
@@ -214,7 +214,7 @@ export default class L5R4PcSheet extends BaseActorSheet {
   _onAction(action, event, element) {
     switch (action) {
       case "apply-healing":
-        return PcActionsHandler.handleApplyHealing(this._getHandlerContext(), event, element);
+        return PcActionsHandler.applyHealing(this._getHandlerContext(), event, element);
       case "update-item-field":
         return this._onInlineItemEdit(event, element);
       case "post-item":
@@ -230,63 +230,59 @@ export default class L5R4PcSheet extends BaseActorSheet {
       case "sort-items":
         return this._onUnifiedSortClick(event, element);
       case "adjust-void-ring":
-        return PcAdjustmentHandler.adjustVoidRing(this._getHandlerContext(), event, element, +1);
+        return PcAdjustmentHandler.updateVoidRing(this._getHandlerContext(), event, element, +1);
       // The arrows step the Void Ring without Shift, like the Trait arrows (issue #30)
       case "increase-void-ring":
-        return PcAdjustmentHandler.adjustVoidRing(
+        return PcAdjustmentHandler.updateVoidRing(
           this._getHandlerContext(),
           { preventDefault: () => event.preventDefault(), shiftKey: true },
           element,
           +1
         );
       case "decrease-void-ring":
-        return PcAdjustmentHandler.adjustVoidRing(
+        return PcAdjustmentHandler.updateVoidRing(
           this._getHandlerContext(),
           { preventDefault: () => event.preventDefault(), shiftKey: true },
           element,
           -1
         );
       case "roll-ring":
-        return PcRollHandler.handleRingRoll(this._getHandlerContext(), event, element);
+        return PcRollHandler.rollClickedRing(this._getHandlerContext(), event, element);
       case "roll-skill":
         return this._onSkillRoll(event, element);
       case "roll-trait":
         return this._onTraitRoll(event, element);
       case "roll-weapon-damage":
-        return PcRollHandler.handleWeaponRoll(this._getHandlerContext(), event, element);
+        return PcRollHandler.rollWeaponDamage(this._getHandlerContext(), event, element);
       case "roll-weapon-attack":
         return this._onWeaponAttackRoll(event, element);
       case "cast-spell":
-        return PcRollHandler.handleCastSpell(this._getHandlerContext(), event, element);
+        return PcRollHandler.rollClickedSpellCast(this._getHandlerContext(), event, element);
       case "adjust-rank-points":
-        return PcAdjustmentHandler.adjustRankPoints(
+        return PcAdjustmentHandler.updateRankPoints(
           this._getHandlerContext(),
           event,
           element,
           +0.1
         );
       case "expand-section":
-        return ItemCRUDHandler.toggleSection(this._getHandlerContext(), event, element);
+        return ItemCrudHandler.updateSectionCollapsed(this._getHandlerContext(), event, element);
       case "adjust-spell-slot":
-        return PcAdjustmentHandler.adjustSpellSlot(this._getHandlerContext(), event, element, +1);
+        return PcAdjustmentHandler.updateSpellSlot(this._getHandlerContext(), event, element, +1);
       case "adjust-trait":
-        return PcTraitHandler.adjust(this._getHandlerContext(), event, element, +1);
+        return PcTraitHandler.updateTraitRank(this._getHandlerContext(), event, element, +1);
       case "increase-trait":
-        return PcTraitHandler.increase(this._getHandlerContext(), event, element);
+        return PcTraitHandler.updateTraitRankUp(this._getHandlerContext(), event, element);
       case "decrease-trait":
-        return PcTraitHandler.decrease(this._getHandlerContext(), event, element);
+        return PcTraitHandler.updateTraitRankDown(this._getHandlerContext(), event, element);
       case "adjust-void-points":
         return this._onVoidPointsAdjust(event, element, +1);
       case "toggle-armor-void":
-        return PcActionsHandler.handleToggleArmorVoid(this._getHandlerContext(), event, element);
+        return PcActionsHandler.updateArmorVoid(this._getHandlerContext(), event, element);
       case "toggle-initiative-void":
-        return PcActionsHandler.handleToggleInitiativeVoid(
-          this._getHandlerContext(),
-          event,
-          element
-        );
+        return PcActionsHandler.updateInitiativeVoid(this._getHandlerContext(), event, element);
       case "toggle-movement-type":
-        return StanceHandler.toggleMovementType(this._getHandlerContext(), event);
+        return StanceHandler.updateMovementType(this._getHandlerContext(), event);
       case "open-condition-manager":
         return AppLauncherHandler.openConditionManager(this._getHandlerContext(), event, element);
       case "open-combat-config":
@@ -303,7 +299,7 @@ export default class L5R4PcSheet extends BaseActorSheet {
         return openLedgerDialog(this.actor);
       case "toggle-activation": {
         const item = this.actor.items.get(element.closest("[data-item-id]")?.dataset.itemId);
-        return item ? toggleActivation(this.actor, item) : undefined;
+        return item ? updateActivation(this.actor, item) : undefined;
       }
       case "recalculate-sheet":
         return this._onRecalcSheet(event, element);
@@ -335,18 +331,18 @@ export default class L5R4PcSheet extends BaseActorSheet {
   _onActionContext(action, event, element) {
     switch (action) {
       case "adjust-void-ring":
-        return PcAdjustmentHandler.adjustVoidRing(this._getHandlerContext(), event, element, -1);
+        return PcAdjustmentHandler.updateVoidRing(this._getHandlerContext(), event, element, -1);
       case "adjust-rank-points":
-        return PcAdjustmentHandler.adjustRankPoints(
+        return PcAdjustmentHandler.updateRankPoints(
           this._getHandlerContext(),
           event,
           element,
           -0.1
         );
       case "adjust-spell-slot":
-        return PcAdjustmentHandler.adjustSpellSlot(this._getHandlerContext(), event, element, -1);
+        return PcAdjustmentHandler.updateSpellSlot(this._getHandlerContext(), event, element, -1);
       case "adjust-trait":
-        return PcTraitHandler.adjust(this._getHandlerContext(), event, element, -1);
+        return PcTraitHandler.updateTraitRank(this._getHandlerContext(), event, element, -1);
       case "adjust-void-points":
         return this._onVoidPointsAdjust(event, element, -1);
     }
@@ -374,7 +370,7 @@ export default class L5R4PcSheet extends BaseActorSheet {
       return this._onInlineItemEdit(event, element);
     }
     if (action === "apply-stance") {
-      return StanceHandler.changeStance(this._getHandlerContext(), event, element);
+      return StanceHandler.applyStance(this._getHandlerContext(), event, element);
     }
   }
 
@@ -504,7 +500,7 @@ export default class L5R4PcSheet extends BaseActorSheet {
    * 2. Binds image edit click handler (non-delegated)
    *
    * **Guard Logic:**
-   * Tracks _boundExtraRoot to prevent duplicate event binding on re-renders.
+   * Tracks #boundExtraRoot to prevent duplicate event binding on re-renders.
    * Only binds events if actor is owned by current user.
    *
    * @param {object} context - Template context from _prepareContext
@@ -519,10 +515,10 @@ export default class L5R4PcSheet extends BaseActorSheet {
     this._paintVoidPointsDots(root);
 
     // Guard: Only bind non-delegated events once per root element
-    if (this._boundExtraRoot === root) {
+    if (this.#boundExtraRoot === root) {
       return;
     }
-    this._boundExtraRoot = root;
+    this.#boundExtraRoot = root;
     if (!this.actor.isOwner) {
       return;
     }

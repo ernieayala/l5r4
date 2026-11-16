@@ -39,7 +39,7 @@ export default class NpcData extends ActorData {
   /** @override */
   static defineSchema() {
     const { SchemaField } = foundry.data.fields;
-    const attack = (roll, keep) =>
+    const attackField = (roll, keep) =>
       new SchemaField({
         name: stringField(),
         roll: numberField(roll),
@@ -47,7 +47,7 @@ export default class NpcData extends ActorData {
         modifier: numberField(0),
         type: stringField()
       });
-    const damage = (roll, keep) =>
+    const damageField = (roll, keep) =>
       new SchemaField({
         roll: numberField(roll),
         keep: numberField(keep),
@@ -56,12 +56,12 @@ export default class NpcData extends ActorData {
       });
     return {
       ...super.defineSchema(),
-      attack1: attack(2, 2),
-      attack2: attack(2, 2),
-      attack3: attack(0, 0),
-      damage1: damage(2, 2),
-      damage2: damage(2, 2),
-      damage3: damage(0, 0),
+      attack1: attackField(2, 2),
+      attack2: attackField(2, 2),
+      attack3: attackField(0, 0),
+      damage1: damageField(2, 2),
+      damage2: damageField(2, 2),
+      damage3: damageField(0, 0),
       armor: new SchemaField({ armorTn: numberField(10), reduction: numberField(0) }),
       nrWoundLvls: numberField(3),
       woundMode: stringField("manual"),

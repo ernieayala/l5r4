@@ -48,12 +48,12 @@ export const ARMOR_TYPES = Object.freeze({
  * @param {string|null} [traitName=null] - Name of trait being rolled (e.g., "agi", "ref")
  * @returns {number} TN penalty (0 or 5)
  */
-export function getArmorTNPenalty(actor, skillName = null, traitName = null) {
+export function getArmorTnPenalty(actor, skillName = null, traitName = null) {
   if (!actor?.items) {
     return 0;
   }
 
-  const isMounted = _isCharacterMounted(actor);
+  const isMounted = isCharacterMounted(actor);
   const skill = skillName ? String(skillName).toLowerCase() : null;
   const trait = traitName ? String(traitName).toLowerCase() : null;
 
@@ -72,7 +72,7 @@ export function getArmorTNPenalty(actor, skillName = null, traitName = null) {
     }
 
     const armorType = String(armorData.armorType ?? "light").toLowerCase();
-    const penalty = _calculateSingleArmorPenalty(armorType, skill, trait, isMounted);
+    const penalty = getSingleArmorPenalty(armorType, skill, trait, isMounted);
     maxPenalty = Math.max(maxPenalty, penalty);
   }
 
@@ -91,12 +91,12 @@ export function getArmorTNPenalty(actor, skillName = null, traitName = null) {
  * @returns {string|null} Description like "Heavy Armor: +5 TN" or null
  */
 export function getArmorPenaltyDescription(actor, skillName = null, traitName = null) {
-  const penalty = getArmorTNPenalty(actor, skillName, traitName);
+  const penalty = getArmorTnPenalty(actor, skillName, traitName);
   if (penalty === 0) {
     return null;
   }
 
-  const isMounted = _isCharacterMounted(actor);
+  const isMounted = isCharacterMounted(actor);
   const skill = skillName ? String(skillName).toLowerCase() : null;
   const trait = traitName ? String(traitName).toLowerCase() : null;
 
@@ -111,7 +111,7 @@ export function getArmorPenaltyDescription(actor, skillName = null, traitName = 
     }
 
     const armorType = String(armorData.armorType ?? "light").toLowerCase();
-    const itemPenalty = _calculateSingleArmorPenalty(armorType, skill, trait, isMounted);
+    const itemPenalty = getSingleArmorPenalty(armorType, skill, trait, isMounted);
 
     // Return description for first armor that applies a penalty
     if (itemPenalty > 0) {
@@ -132,7 +132,7 @@ export function getArmorPenaltyDescription(actor, skillName = null, traitName = 
  * @param {boolean} isMounted - Whether character is mounted
  * @returns {number} TN penalty (0 or 5)
  */
-function _calculateSingleArmorPenalty(armorType, skillName, traitName, isMounted) {
+function getSingleArmorPenalty(armorType, skillName, traitName, isMounted) {
   switch (armorType) {
     case ARMOR_TYPES.ASHIGARU:
       // Ashigaru armor has no penalties
@@ -181,7 +181,7 @@ function _calculateSingleArmorPenalty(armorType, skillName, traitName, isMounted
  * @param {object} actor - Foundry actor document
  * @returns {boolean} True if character is mounted
  */
-function _isCharacterMounted(actor) {
+function isCharacterMounted(actor) {
   if (!actor) {
     return false;
   }

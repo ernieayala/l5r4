@@ -6,9 +6,9 @@
  */
 
 import { toInt } from "../../utils/type-coercion.js";
-import { WeaponRoll } from "../../services/dice/rolls/weapon-roll.js";
-import { SpellCastRoll } from "../../services/dice/rolls/spell-cast-roll.js";
-import { MahoCastRoll } from "../../services/dice/rolls/maho-cast-roll.js";
+import { rollWeaponDamage } from "../../services/dice/rolls/weapon-roll.js";
+import { rollSpellCast } from "../../services/dice/rolls/spell-cast-roll.js";
+import { rollMahoCast } from "../../services/dice/rolls/maho-cast-roll.js";
 import { RollHandler } from "./roll-handler.js";
 
 /** Handler class for PC-specific roll actions. */
@@ -18,13 +18,13 @@ export class PcRollHandler {
    * game-rules/29_types_of_rolls.md, p.80
    * @param {object} context - Sheet context with `actor`
    * @param {Event} event - Click event
-   * @param {HTMLElement} element - Element with data-system-ring and data-ring-rank
+   * @param {HTMLElement} element - Element with data-ring-key and data-ring-rank
    * @returns {Promise<ChatMessage|null>}
    */
-  static async handleRingRoll(context, event, element) {
+  static async rollClickedRing(context, event, element) {
     event?.preventDefault?.();
-    const systemRing = String(element.dataset?.systemRing || "void").toLowerCase();
-    return RollHandler.rollRing(context.actor, systemRing, !event.shiftKey);
+    const ringKey = String(element.dataset?.ringKey || "void").toLowerCase();
+    return RollHandler.rollRing(context.actor, ringKey, !event.shiftKey);
   }
 
   /**
@@ -35,13 +35,13 @@ export class PcRollHandler {
    * @param {HTMLElement} element - Element inside the spell row
    * @returns {Promise<ChatMessage|null|undefined>}
    */
-  static async handleCastSpell(context, event, element) {
+  static async rollClickedSpellCast(context, event, element) {
     event?.preventDefault?.();
-    const spell = rowItem(context.actor, element);
+    const spell = getRowItem(context.actor, element);
     if (!spell || spell.type !== "spell") {
       return undefined;
     }
-    return PcRollHandler.castSpell(context.actor, spell, !event?.shiftKey);
+    return PcRollHandler.rollSpellCast(context.actor, spell, !event?.shiftKey);
   }
 
   /**
@@ -52,8 +52,8 @@ export class PcRollHandler {
    * @param {boolean} showDialog
    * @returns {Promise<ChatMessage|null>}
    */
-  static castSpell(actor, spell, showDialog) {
-    const cast = spell.system.maho ? MahoCastRoll : SpellCastRoll;
+  static rollSpellCast(actor, spell, showDialog) {
+    const cast = spell.system.maho ? rollMahoCast : rollSpellCast;
     return cast({ actor, spell, showDialog });
   }
 
@@ -64,15 +64,15 @@ export class PcRollHandler {
    * @param {HTMLElement} element - Element inside the weapon row
    * @returns {Promise<ChatMessage|null|undefined>}
    */
-  static async handleWeaponRoll(context, event, element) {
+  static async rollWeaponDamage(context, event, element) {
     event?.preventDefault?.();
-    const weapon = rowItem(context.actor, element);
+    const weapon = getRowItem(context.actor, element);
     if (!weapon) {
       return undefined;
     }
-    return WeaponRoll({
-      diceRoll: toInt(weapon.system.derivedDamageRoll ?? weapon.system.damageRoll),
-      diceKeep: toInt(weapon.system.derivedDamageKeep ?? weapon.system.damageKeep),
+    return rollWeaponDamage({
+      roll: toInt(weapon.system.derivedDamageRoll ?? weapon.system.damageRoll),
+      keep: toInt(weapon.system.derivedDamageKeep ?? weapon.system.damageKeep),
       weaponName: weapon.name,
       weapon,
       askForOptions: !event.shiftKey,
@@ -87,7 +87,7 @@ export class PcRollHandler {
  * @param {HTMLElement} element
  * @returns {Item|null}
  */
-function rowItem(actor, element) {
+function getRowItem(actor, element) {
   const row = element.closest(".item");
   const id = row?.dataset?.itemId || row?.dataset?.documentId || row?.dataset?.id;
   return id ? actor.items.get(id) : null;

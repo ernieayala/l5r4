@@ -25,7 +25,7 @@ import { toInt } from "../../../utils/type-coercion.js";
  * @param {L5R4Actor|null} [actor=null] - Optional actor wielding the bow (for character Strength)
  * @returns {BowDamageResult} Damage roll components for formula construction
  */
-export function calculateBowDamage(sys, actor = null) {
+export function getBowDamage(sys, actor = null) {
   const actorStr = actor ? toInt(actor.system?.traits?.str) : toInt(sys.str);
   const bowStr = toInt(sys.str);
 

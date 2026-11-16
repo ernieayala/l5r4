@@ -12,11 +12,11 @@
  */
 
 import { SYS_ID } from "../../../module/config/constants.js";
-import { TraitRoll } from "../../../module/services/dice/rolls/trait-roll.js";
-import { SpellCastRoll } from "../../../module/services/dice/rolls/spell-cast-roll.js";
-import { RingRoll } from "../../../module/services/dice/rolls/ring-roll.js";
-import { MahoCastRoll } from "../../../module/services/dice/rolls/maho-cast-roll.js";
-import { SkillRoll } from "../../../module/services/dice/rolls/skill-roll.js";
+import { rollTrait } from "../../../module/services/dice/rolls/trait-roll.js";
+import { rollSpellCast } from "../../../module/services/dice/rolls/spell-cast-roll.js";
+import { rollRing } from "../../../module/services/dice/rolls/ring-roll.js";
+import { rollMahoCast } from "../../../module/services/dice/rolls/maho-cast-roll.js";
+import { rollSkill } from "../../../module/services/dice/rolls/skill-roll.js";
 import { createTestPC } from "../../fixtures/actor-fixtures.js";
 import { checkEffects, settleChatNotifications } from "../helpers.js";
 
@@ -109,7 +109,7 @@ export function registerStatusEffectsAllRollsTests(quench) {
           it("should roll a 4k4 Trait roll as 1k1", async () => {
             await add("dazed");
             const message = keep(
-              await TraitRoll({ traitRank: 4, traitName: "sta", askForOptions: false, actor })
+              await rollTrait({ traitRank: 4, traitName: "sta", askForOptions: false, actor })
             );
             assert.deepInclude(message.system.pool, { roll: 1, keep: 1 });
           });
@@ -117,10 +117,10 @@ export function registerStatusEffectsAllRollsTests(quench) {
           it("should roll a 4k4 Ring roll as 1k1", async () => {
             await add("dazed");
             const message = keep(
-              await RingRoll({
+              await rollRing({
                 ringRank: 4,
                 ringName: "Water",
-                systemRing: "water",
+                ringKey: "water",
                 askForOptions: false,
                 actor
               })
@@ -131,10 +131,10 @@ export function registerStatusEffectsAllRollsTests(quench) {
           it("should roll a 9k4 Skill roll as 6k4", async () => {
             await add("dazed");
             const message = keep(
-              await SkillRoll({
+              await rollSkill({
                 actor,
                 skillRank: 5,
-                actorTrait: 4,
+                traitRank: 4,
                 skillName: "kenjutsu",
                 skillTrait: "agi",
                 askForOptions: false
@@ -146,10 +146,10 @@ export function registerStatusEffectsAllRollsTests(quench) {
           it("should roll a 9k4 attack roll as 6k4", async () => {
             await add("dazed");
             const message = keep(
-              await SkillRoll({
+              await rollSkill({
                 actor,
                 skillRank: 5,
-                actorTrait: 4,
+                traitRank: 4,
                 skillName: "kenjutsu",
                 skillTrait: "agi",
                 rollType: "attack",
@@ -161,14 +161,14 @@ export function registerStatusEffectsAllRollsTests(quench) {
 
           it("should roll a Spell Casting Roll of Fire 4 + School Rank 3 = 7k4 as 4k4", async () => {
             await add("dazed");
-            const message = keep(await SpellCastRoll({ actor, spell, showDialog: false }));
+            const message = keep(await rollSpellCast({ actor, spell, showDialog: false }));
             assert.deepInclude(message.system.pool, { roll: 4, keep: 4 });
           });
 
           it("should give maho casting the penalty too", async () => {
             await add("dazed");
             const message = keep(
-              await MahoCastRoll({ actor, spell: mahoSpell, showDialog: false })
+              await rollMahoCast({ actor, spell: mahoSpell, showDialog: false })
             );
             assert.isTrue(
               message.system.modifiers.some(m => m.roll === -3),
@@ -181,7 +181,7 @@ export function registerStatusEffectsAllRollsTests(quench) {
           it("should raise a physical Trait roll's TN by 5", async () => {
             await add("fatigued");
             const answered = answerWithTn(15);
-            const message = keep(await TraitRoll({ traitRank: 4, traitName: "sta", actor }));
+            const message = keep(await rollTrait({ traitRank: 4, traitName: "sta", actor }));
             await answered;
             assert.equal(message.system.tn.effective, 20);
           });
@@ -193,7 +193,7 @@ export function registerStatusEffectsAllRollsTests(quench) {
 
           it("should raise a Spell Casting Roll's TN by 5: 5 + 5 × 2 + 5 = 20", async () => {
             await add("fatigued");
-            const message = keep(await SpellCastRoll({ actor, spell, showDialog: false }));
+            const message = keep(await rollSpellCast({ actor, spell, showDialog: false }));
             assert.equal(message.system.tn.effective, 20);
           });
 
@@ -213,7 +213,7 @@ export function registerStatusEffectsAllRollsTests(quench) {
           it("should roll a Dazed and Fatigued physical Trait roll as 1k1 at TN + 5", async () => {
             await add("dazed", "fatigued");
             const answered = answerWithTn(15);
-            const message = keep(await TraitRoll({ traitRank: 4, traitName: "sta", actor }));
+            const message = keep(await rollTrait({ traitRank: 4, traitName: "sta", actor }));
             await answered;
             assert.deepInclude(message.system.pool, { roll: 1, keep: 1 });
             assert.equal(message.system.tn.effective, 20);
@@ -243,7 +243,7 @@ export function registerStatusEffectsAllRollsTests(quench) {
             const [dazed] = await add("dazed");
             await dazed.delete();
             const message = keep(
-              await TraitRoll({ traitRank: 4, traitName: "sta", askForOptions: false, actor })
+              await rollTrait({ traitRank: 4, traitName: "sta", askForOptions: false, actor })
             );
             assert.deepInclude(message.system.pool, { roll: 4, keep: 4 });
           });
@@ -251,7 +251,7 @@ export function registerStatusEffectsAllRollsTests(quench) {
           it("should restore the spell's TN when Fatigued is removed", async () => {
             const [fatigued] = await add("fatigued");
             await fatigued.delete();
-            const message = keep(await SpellCastRoll({ actor, spell, showDialog: false }));
+            const message = keep(await rollSpellCast({ actor, spell, showDialog: false }));
             assert.equal(message.system.tn.effective, 15);
           });
         });
@@ -262,7 +262,7 @@ export function registerStatusEffectsAllRollsTests(quench) {
               { name: "Dazed", statuses: ["dazed"], disabled: true }
             ]);
             const message = keep(
-              await TraitRoll({ traitRank: 4, traitName: "sta", askForOptions: false, actor })
+              await rollTrait({ traitRank: 4, traitName: "sta", askForOptions: false, actor })
             );
             assert.deepInclude(message.system.pool, { roll: 4, keep: 4 });
           });
@@ -271,10 +271,10 @@ export function registerStatusEffectsAllRollsTests(quench) {
           it("should leave the 1k1 minimum when penalties pass the whole pool", async () => {
             await add("dazed", "blinded", "prone");
             const message = keep(
-              await SkillRoll({
+              await rollSkill({
                 actor,
                 skillRank: 0,
-                actorTrait: 4,
+                traitRank: 4,
                 skillName: "jiujutsu",
                 skillTrait: "agi",
                 rollType: "attack",

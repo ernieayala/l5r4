@@ -15,7 +15,7 @@ import { SYS_ID } from "../../../config/constants.js";
  * @param {string} label - Migration context label for console logging
  * @returns {Promise<void>}
  */
-export async function normalizeItems(docs, label) {
+export async function migrateWeaponSizes(docs, label) {
   for (const doc of docs) {
     try {
       if (doc.documentName !== "Item") {

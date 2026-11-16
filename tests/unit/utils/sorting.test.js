@@ -8,7 +8,7 @@
  */
 
 import { describe, it, expect, beforeEach, vi } from "vitest";
-import { getSortPref, setSortPref, sortWithPref } from "../../../module/utils/sorting.js";
+import { getSortPref, updateSortPref, applySortPref } from "../../../module/utils/sorting.js";
 
 describe("getSortPref", () => {
   beforeEach(() => {
@@ -105,7 +105,7 @@ describe("getSortPref", () => {
   });
 });
 
-describe("setSortPref", () => {
+describe("updateSortPref", () => {
   beforeEach(() => {
     global.game = {
       user: {
@@ -117,7 +117,7 @@ describe("setSortPref", () => {
 
   describe("Setting and toggle behavior", () => {
     it("should set preference with ascending direction", async () => {
-      await setSortPref("actor123", "skills", "rank");
+      await updateSortPref("actor123", "skills", "rank");
 
       expect(global.game.user.setFlag).toHaveBeenCalledWith(
         "l5r4-enhanced",
@@ -137,7 +137,7 @@ describe("setSortPref", () => {
         }
       }));
 
-      await setSortPref("actor123", "skills", "rank");
+      await updateSortPref("actor123", "skills", "rank");
 
       expect(global.game.user.setFlag).toHaveBeenCalledWith(
         "l5r4-enhanced",
@@ -157,7 +157,7 @@ describe("setSortPref", () => {
         }
       }));
 
-      await setSortPref("actor123", "skills", "name");
+      await updateSortPref("actor123", "skills", "name");
 
       expect(global.game.user.setFlag).toHaveBeenCalledWith(
         "l5r4-enhanced",
@@ -177,7 +177,7 @@ describe("setSortPref", () => {
         }
       }));
 
-      await setSortPref("actor123", "skills", "rank");
+      await updateSortPref("actor123", "skills", "rank");
 
       expect(global.game.user.setFlag).toHaveBeenCalledWith(
         "l5r4-enhanced",
@@ -195,7 +195,7 @@ describe("setSortPref", () => {
   });
 });
 
-describe("sortWithPref", () => {
+describe("applySortPref", () => {
   describe("Basic sorting", () => {
     it("should sort by name ascending", () => {
       const items = [{ name: "Charlie" }, { name: "Alice" }, { name: "Bob" }];
@@ -206,7 +206,7 @@ describe("sortWithPref", () => {
 
       const pref = { key: "name", dir: "asc" };
 
-      const result = sortWithPref(items, columns, pref);
+      const result = applySortPref(items, columns, pref);
 
       expect(result[0].name).toBe("Alice");
       expect(result[1].name).toBe("Bob");
@@ -222,7 +222,7 @@ describe("sortWithPref", () => {
 
       const pref = { key: "name", dir: "desc" };
 
-      const result = sortWithPref(items, columns, pref);
+      const result = applySortPref(items, columns, pref);
 
       expect(result[0].name).toBe("Charlie");
       expect(result[1].name).toBe("Bob");
@@ -238,7 +238,7 @@ describe("sortWithPref", () => {
 
       const pref = { key: "rank", dir: "asc" };
 
-      const result = sortWithPref(items, columns, pref);
+      const result = applySortPref(items, columns, pref);
 
       expect(result[0].rank).toBe(1);
       expect(result[1].rank).toBe(2);
@@ -261,7 +261,7 @@ describe("sortWithPref", () => {
 
       const pref = { key: "rank", dir: "asc" };
 
-      const result = sortWithPref(items, columns, pref);
+      const result = applySortPref(items, columns, pref);
 
       expect(result[0].name).toBe("Alice");
       expect(result[1].name).toBe("Bob");
@@ -282,7 +282,7 @@ describe("sortWithPref", () => {
 
       const pref = { key: "rank", dir: "desc" };
 
-      const result = sortWithPref(items, columns, pref);
+      const result = applySortPref(items, columns, pref);
 
       expect(result[0].rank).toBe(3);
       expect(result[1].rank).toBe(2);
@@ -296,7 +296,7 @@ describe("sortWithPref", () => {
       const columns = { name: i => i.name };
       const pref = { key: "name", dir: "asc" };
 
-      const result = sortWithPref(items, columns, pref);
+      const result = applySortPref(items, columns, pref);
 
       expect(result).toEqual([]);
     });
@@ -310,7 +310,7 @@ describe("sortWithPref", () => {
 
       const pref = { key: "rank", dir: "asc" };
 
-      const result = sortWithPref(items, columns, pref);
+      const result = applySortPref(items, columns, pref);
 
       expect(result[0].rank).toBeNull();
       expect(result[1].rank).toBe(1);
@@ -323,7 +323,7 @@ describe("sortWithPref", () => {
       const columns = { name: i => i.name };
       const pref = { key: "name", dir: "asc" };
 
-      const result = sortWithPref(items, columns, pref);
+      const result = applySortPref(items, columns, pref);
 
       expect(result).toBe(items);
       expect(items[0].name).toBe("Alice");

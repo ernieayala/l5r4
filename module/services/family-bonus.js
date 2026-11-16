@@ -7,7 +7,7 @@
  */
 
 import { SYS_ID } from "../config/constants.js";
-import { traitAdjustTotal } from "../utils/rule-engine.js";
+import { getTraitAdjustTotal } from "../utils/rule-engine.js";
 
 /**
  * Service for managing family trait bonuses applied to L5R4 actors.
@@ -32,7 +32,7 @@ export class FamilyBonusService {
    * Used as the default/fallback when no family item exists.
    * @returns {Record<string, number>} Map of trait keys to zero values
    */
-  static _createZeroMap() {
+  static #buildZeroMap() {
     const map = {};
     for (const key of this.VALID_TRAIT_KEYS) {
       map[key] = 0;
@@ -70,7 +70,7 @@ export class FamilyBonusService {
       }
 
       // A negative total would be a penalty, not a family bonus
-      return Math.max(0, traitAdjustTotal(familyItem.system.rules, traitKey));
+      return Math.max(0, getTraitAdjustTotal(familyItem.system.rules, traitKey));
     } catch (err) {
       console.warn(`${SYS_ID} FamilyBonusService: Failed to get bonus for trait`, {
         actorId: actor?.id,
@@ -96,12 +96,12 @@ export class FamilyBonusService {
     try {
       const familyItem = this.getFamilyItem(actor);
       if (!familyItem) {
-        return this._createZeroMap();
+        return this.#buildZeroMap();
       }
 
-      const bonusMap = this._createZeroMap();
+      const bonusMap = this.#buildZeroMap();
       for (const traitKey of this.VALID_TRAIT_KEYS) {
-        bonusMap[traitKey] = Math.max(0, traitAdjustTotal(familyItem.system.rules, traitKey));
+        bonusMap[traitKey] = Math.max(0, getTraitAdjustTotal(familyItem.system.rules, traitKey));
       }
       return bonusMap;
     } catch (err) {
@@ -109,7 +109,7 @@ export class FamilyBonusService {
         actorId: actor?.id,
         err
       });
-      return this._createZeroMap();
+      return this.#buildZeroMap();
     }
   }
 

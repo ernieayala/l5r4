@@ -43,7 +43,7 @@ export function getSectionCollapsed(actorId, scope) {
  * @param {boolean} isCollapsed - True to collapse, false to expand
  * @returns {Promise<void>}
  */
-export async function setSectionCollapsed(actorId, scope, isCollapsed) {
+export async function updateSectionCollapsed(actorId, scope, isCollapsed) {
   try {
     // Read current state from user flags
     const map = (await game.user?.getFlag(SYS_ID, "collapsedSections")) ?? {};

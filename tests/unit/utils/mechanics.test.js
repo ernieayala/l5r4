@@ -9,14 +9,14 @@
 
 import { describe, it, expect, vi } from "vitest";
 import {
-  normalizeTraitKey,
+  toTraitKey,
   getEffectiveTrait,
-  extractRollParams,
+  getRollParams,
   getAffinityDeficiencyModifier,
-  resolveWeaponSkillTrait,
-  ringRank,
-  castingSchoolRank,
-  highestSchoolRank
+  getWeaponSkillTrait,
+  ringRankOf,
+  getCastingSchoolRank,
+  getHighestSchoolRank
 } from "../../../module/utils/mechanics.js";
 
 /**
@@ -35,62 +35,62 @@ const prepared = actor => ({
   }
 });
 
-describe("normalizeTraitKey", () => {
+describe("toTraitKey", () => {
   describe("Direct abbreviations", () => {
     it("should accept sta lowercase", () => {
-      expect(normalizeTraitKey("sta")).toBe("sta");
+      expect(toTraitKey("sta")).toBe("sta");
     });
 
     it("should accept sta uppercase", () => {
-      expect(normalizeTraitKey("STA")).toBe("sta");
+      expect(toTraitKey("STA")).toBe("sta");
     });
 
     it("should accept sta mixed case", () => {
-      expect(normalizeTraitKey("StA")).toBe("sta");
+      expect(toTraitKey("StA")).toBe("sta");
     });
 
     it("should accept all valid trait abbreviations", () => {
       const traits = ["sta", "wil", "str", "per", "ref", "awa", "agi", "int", "void"];
       traits.forEach(trait => {
-        expect(normalizeTraitKey(trait)).toBe(trait);
+        expect(toTraitKey(trait)).toBe(trait);
       });
     });
   });
 
   describe("Keys in i18n format", () => {
     it("should parse l5r4.ui.mechanics.traits.sta", () => {
-      expect(normalizeTraitKey("l5r4.ui.mechanics.traits.sta")).toBe("sta");
+      expect(toTraitKey("l5r4.ui.mechanics.traits.sta")).toBe("sta");
     });
 
     it("should parse l5r4.ui.mechanics.traits.REF", () => {
-      expect(normalizeTraitKey("l5r4.ui.mechanics.traits.REF")).toBe("ref");
+      expect(toTraitKey("l5r4.ui.mechanics.traits.REF")).toBe("ref");
     });
 
     it("should parse void ring i18n key", () => {
-      expect(normalizeTraitKey("l5r4.ui.mechanics.rings.void")).toBe("void");
+      expect(toTraitKey("l5r4.ui.mechanics.rings.void")).toBe("void");
     });
 
     it("should parse void ring i18n key case insensitive", () => {
-      expect(normalizeTraitKey("L5R4.UI.MECHANICS.RINGS.VOID")).toBe("void");
+      expect(toTraitKey("L5R4.UI.MECHANICS.RINGS.VOID")).toBe("void");
     });
   });
 
   describe("English full names", () => {
     it("should convert stamina to sta", () => {
-      expect(normalizeTraitKey("stamina")).toBe("sta");
+      expect(toTraitKey("stamina")).toBe("sta");
     });
 
     it("should convert willpower to wil", () => {
-      expect(normalizeTraitKey("willpower")).toBe("wil");
+      expect(toTraitKey("willpower")).toBe("wil");
     });
 
     it("should convert reflexes to ref", () => {
-      expect(normalizeTraitKey("reflexes")).toBe("ref");
+      expect(toTraitKey("reflexes")).toBe("ref");
     });
 
     it("should handle case insensitive English names", () => {
-      expect(normalizeTraitKey("STAMINA")).toBe("sta");
-      expect(normalizeTraitKey("Reflexes")).toBe("ref");
+      expect(toTraitKey("STAMINA")).toBe("sta");
+      expect(toTraitKey("Reflexes")).toBe("ref");
     });
 
     it("should convert all English trait names", () => {
@@ -107,65 +107,65 @@ describe("normalizeTraitKey", () => {
       };
 
       Object.entries(mapping).forEach(([english, abbr]) => {
-        expect(normalizeTraitKey(english)).toBe(abbr);
+        expect(toTraitKey(english)).toBe(abbr);
       });
     });
   });
 
   describe("Edge cases", () => {
     it("should return empty string for null", () => {
-      expect(normalizeTraitKey(null)).toBe("");
+      expect(toTraitKey(null)).toBe("");
     });
 
     it("should return empty string for undefined", () => {
-      expect(normalizeTraitKey(undefined)).toBe("");
+      expect(toTraitKey(undefined)).toBe("");
     });
 
     it("should return empty string for symbol", () => {
-      expect(normalizeTraitKey(Symbol("test"))).toBe("");
+      expect(toTraitKey(Symbol("test"))).toBe("");
     });
 
     it("should return empty string for invalid trait", () => {
-      expect(normalizeTraitKey("invalid")).toBe("");
+      expect(toTraitKey("invalid")).toBe("");
     });
 
     it("should return empty string for number", () => {
-      expect(normalizeTraitKey(123)).toBe("");
+      expect(toTraitKey(123)).toBe("");
     });
 
     it("should handle whitespace", () => {
-      expect(normalizeTraitKey("  sta  ")).toBe("sta");
+      expect(toTraitKey("  sta  ")).toBe("sta");
     });
 
     it("should return empty string for empty string", () => {
-      expect(normalizeTraitKey("")).toBe("");
+      expect(toTraitKey("")).toBe("");
     });
   });
 
   describe("Reverse lookup through i18n", () => {
     it("should handle missing game.i18n gracefully", () => {
       // Should not throw when game.i18n is undefined
-      expect(() => normalizeTraitKey("test")).not.toThrow();
+      expect(() => toTraitKey("test")).not.toThrow();
     });
   });
 });
 
 // game-rules/25_rings_and_traits.md, p.76
-describe("ringRank", () => {
+describe("ringRankOf", () => {
   const actor = { system: { rings: { fire: 3, void: { rank: 4, value: 2, max: 4 } } } };
 
   it("should read an Elemental Ring", () => {
-    expect(ringRank(actor, "fire")).toBe(3);
+    expect(ringRankOf(actor, "fire")).toBe(3);
   });
 
   // game-rules/66_magic_and_spell_casting.md, p.163
   it("should read the Void Ring's rank, so a Void spell rolls its Ring", () => {
-    expect(ringRank(actor, "void")).toBe(4);
+    expect(ringRankOf(actor, "void")).toBe(4);
   });
 });
 
 // game-rules/49_improving_your_character.md, p.104
-describe("highestSchoolRank", () => {
+describe("getHighestSchoolRank", () => {
   const character = (...ranks) => ({
     items: [
       { type: "skill", system: {} },
@@ -174,18 +174,18 @@ describe("highestSchoolRank", () => {
   });
 
   it("should be the highest rank among the character's Schools", () => {
-    expect(highestSchoolRank(character(2, 4, 1))).toBe(4);
+    expect(getHighestSchoolRank(character(2, 4, 1))).toBe(4);
   });
 
   it("should be 0 for a character with no School", () => {
-    expect(highestSchoolRank(character())).toBe(0);
+    expect(getHighestSchoolRank(character())).toBe(0);
   });
 });
 
 // game-rules/29_types_of_rolls.md, p.80
 // game-rules/49_improving_your_character.md, p.104-105
 // game-rules/66_magic_and_spell_casting.md, p.163
-describe("castingSchoolRank", () => {
+describe("getCastingSchoolRank", () => {
   const caster = schools => ({
     system: { insightRank: 4 },
     items: schools.map(system => ({ type: "school", system }))
@@ -196,12 +196,12 @@ describe("castingSchoolRank", () => {
       { shugenja: false, schoolRank: 3 },
       { shugenja: true, schoolRank: 1 }
     ]);
-    expect(castingSchoolRank(actor)).toBe(1);
+    expect(getCastingSchoolRank(actor)).toBe(1);
   });
 
   it("should use the Insight Rank otherwise, the School Rank of a single School", () => {
-    expect(castingSchoolRank(caster([{ shugenja: false, schoolRank: 4 }]))).toBe(4);
-    expect(castingSchoolRank(caster([]))).toBe(4);
+    expect(getCastingSchoolRank(caster([{ shugenja: false, schoolRank: 4 }]))).toBe(4);
+    expect(getCastingSchoolRank(caster([]))).toBe(4);
   });
 });
 
@@ -311,7 +311,7 @@ describe("getEffectiveTrait", () => {
   });
 });
 
-describe("extractRollParams", () => {
+describe("getRollParams", () => {
   describe("Basic extraction", () => {
     it("should extract roll and keep values", () => {
       const el = {
@@ -322,10 +322,10 @@ describe("extractRollParams", () => {
       };
 
       const actor = {};
-      const result = extractRollParams(el, actor);
+      const result = getRollParams(el, actor);
 
-      expect(result.diceRoll).toBe(5);
-      expect(result.diceKeep).toBe(3);
+      expect(result.roll).toBe(5);
+      expect(result.keep).toBe(3);
     });
 
     it("should extract label and description", () => {
@@ -339,7 +339,7 @@ describe("extractRollParams", () => {
       };
 
       const actor = {};
-      const result = extractRollParams(el, actor);
+      const result = getRollParams(el, actor);
 
       expect(result.label).toBe("Kenjutsu");
       expect(result.description).toBe("Katana attack");
@@ -354,7 +354,7 @@ describe("extractRollParams", () => {
       };
 
       const actor = {};
-      const result = extractRollParams(el, actor);
+      const result = getRollParams(el, actor);
 
       expect(result.label).toBe("");
       expect(result.description).toBe("");
@@ -379,7 +379,7 @@ describe("extractRollParams", () => {
         }
       };
 
-      const result = extractRollParams(el, actor);
+      const result = getRollParams(el, actor);
       expect(result.traitBonus).toBe(4);
     });
 
@@ -392,7 +392,7 @@ describe("extractRollParams", () => {
       };
 
       const actor = {};
-      const result = extractRollParams(el, actor);
+      const result = getRollParams(el, actor);
       expect(result.traitBonus).toBe(0);
     });
 
@@ -406,7 +406,7 @@ describe("extractRollParams", () => {
       };
 
       const actor = {};
-      const result = extractRollParams(el, actor);
+      const result = getRollParams(el, actor);
       expect(result.traitBonus).toBe(0);
     });
   });
@@ -418,10 +418,10 @@ describe("extractRollParams", () => {
       };
 
       const actor = {};
-      const result = extractRollParams(el, actor);
+      const result = getRollParams(el, actor);
 
-      expect(result.diceRoll).toBe(0);
-      expect(result.diceKeep).toBe(0);
+      expect(result.roll).toBe(0);
+      expect(result.keep).toBe(0);
       expect(result.traitBonus).toBe(0);
     });
 
@@ -434,10 +434,10 @@ describe("extractRollParams", () => {
       };
 
       const actor = {};
-      const result = extractRollParams(el, actor);
+      const result = getRollParams(el, actor);
 
-      expect(result.diceRoll).toBe(7);
-      expect(result.diceKeep).toBe(4);
+      expect(result.roll).toBe(7);
+      expect(result.keep).toBe(4);
     });
 
     it("should handle invalid numeric strings", () => {
@@ -449,10 +449,10 @@ describe("extractRollParams", () => {
       };
 
       const actor = {};
-      const result = extractRollParams(el, actor);
+      const result = getRollParams(el, actor);
 
-      expect(result.diceRoll).toBe(0);
-      expect(result.diceKeep).toBe(0);
+      expect(result.roll).toBe(0);
+      expect(result.keep).toBe(0);
     });
   });
 });
@@ -657,7 +657,7 @@ describe("getAffinityDeficiencyModifier", () => {
   });
 });
 
-describe("resolveWeaponSkillTrait", () => {
+describe("getWeaponSkillTrait", () => {
   describe("Skilled weapon use", () => {
     it("should resolve skill + trait for skilled attack", () => {
       const actor = {
@@ -688,7 +688,7 @@ describe("resolveWeaponSkillTrait", () => {
         }
       };
 
-      const result = resolveWeaponSkillTrait(prepared(actor), weapon);
+      const result = getWeaponSkillTrait(prepared(actor), weapon);
 
       expect(result.skillRank).toBe(4);
       expect(result.traitValue).toBe(3);
@@ -724,7 +724,7 @@ describe("resolveWeaponSkillTrait", () => {
         }
       };
 
-      const result = resolveWeaponSkillTrait(prepared(actor), weapon);
+      const result = getWeaponSkillTrait(prepared(actor), weapon);
       expect(result.skillRank).toBe(2);
     });
   });
@@ -758,7 +758,7 @@ describe("resolveWeaponSkillTrait", () => {
         }
       };
 
-      const result = resolveWeaponSkillTrait(prepared(actor), weapon);
+      const result = getWeaponSkillTrait(prepared(actor), weapon);
 
       expect(result.skillRank).toBe(0);
       expect(result.traitValue).toBe(3);
@@ -786,7 +786,7 @@ describe("resolveWeaponSkillTrait", () => {
         }
       };
 
-      const result = resolveWeaponSkillTrait(prepared(actor), weapon);
+      const result = getWeaponSkillTrait(prepared(actor), weapon);
 
       expect(result.skillRank).toBe(0);
       expect(result.traitValue).toBe(3);
@@ -813,7 +813,7 @@ describe("resolveWeaponSkillTrait", () => {
         }
       };
 
-      const result = resolveWeaponSkillTrait(prepared(actor), weapon);
+      const result = getWeaponSkillTrait(prepared(actor), weapon);
 
       expect(result.traitValue).toBe(4);
       expect(result.description).toContain("AGI");
@@ -849,7 +849,7 @@ describe("resolveWeaponSkillTrait", () => {
       const actor = buildActorWithSkillBonus(4, 2, 0);
       const weapon = { system: { associatedSkill: "Kenjutsu", fallbackTrait: "agi" } };
 
-      const result = resolveWeaponSkillTrait(prepared(actor), weapon);
+      const result = getWeaponSkillTrait(prepared(actor), weapon);
 
       expect(result.rollBonus).toBe(9);
       expect(result.keepBonus).toBe(3);
@@ -860,7 +860,7 @@ describe("resolveWeaponSkillTrait", () => {
       const actor = buildActorWithSkillBonus(4, 0, 1);
       const weapon = { system: { associatedSkill: "Kenjutsu", fallbackTrait: "agi" } };
 
-      const result = resolveWeaponSkillTrait(prepared(actor), weapon);
+      const result = getWeaponSkillTrait(prepared(actor), weapon);
 
       expect(result.rollBonus).toBe(7);
       expect(result.keepBonus).toBe(4);
@@ -871,7 +871,7 @@ describe("resolveWeaponSkillTrait", () => {
       const actor = buildActorWithSkillBonus(4, -1, -1);
       const weapon = { system: { associatedSkill: "Kenjutsu", fallbackTrait: "agi" } };
 
-      const result = resolveWeaponSkillTrait(prepared(actor), weapon);
+      const result = getWeaponSkillTrait(prepared(actor), weapon);
 
       expect(result.rollBonus).toBe(6);
       expect(result.keepBonus).toBe(2);
@@ -882,7 +882,7 @@ describe("resolveWeaponSkillTrait", () => {
       const actor = buildActorWithSkillBonus(0, 1, 0);
       const weapon = { system: { associatedSkill: "Kenjutsu", fallbackTrait: "agi" } };
 
-      const result = resolveWeaponSkillTrait(prepared(actor), weapon);
+      const result = getWeaponSkillTrait(prepared(actor), weapon);
 
       expect(result.skillRank).toBe(0);
       expect(result.rollBonus).toBe(4);
@@ -906,7 +906,7 @@ describe("resolveWeaponSkillTrait", () => {
       };
       const weapon = { system: { associatedSkill: "Kenjutsu", fallbackTrait: "agi" } };
 
-      const result = resolveWeaponSkillTrait(prepared(actor), weapon);
+      const result = getWeaponSkillTrait(prepared(actor), weapon);
 
       expect(result.rollBonus).toBe(7);
       expect(result.keepBonus).toBe(3);
@@ -916,7 +916,7 @@ describe("resolveWeaponSkillTrait", () => {
   describe("Edge cases", () => {
     it("should handle null weapon", () => {
       const actor = {};
-      const result = resolveWeaponSkillTrait(actor, null);
+      const result = getWeaponSkillTrait(actor, null);
 
       expect(result.skillRank).toBe(0);
       expect(result.traitValue).toBe(0);
@@ -927,7 +927,7 @@ describe("resolveWeaponSkillTrait", () => {
 
     it("should handle null actor", () => {
       const weapon = {};
-      const result = resolveWeaponSkillTrait(null, weapon);
+      const result = getWeaponSkillTrait(null, weapon);
 
       expect(result.description).toBe("No weapon/actor");
     });
@@ -945,7 +945,7 @@ describe("resolveWeaponSkillTrait", () => {
       };
 
       const weapon = {};
-      const result = resolveWeaponSkillTrait(prepared(actor), weapon);
+      const result = getWeaponSkillTrait(prepared(actor), weapon);
 
       // Should use default fallback (agi)
       expect(result.traitValue).toBe(3);
@@ -967,7 +967,7 @@ describe("resolveWeaponSkillTrait", () => {
         }
       };
 
-      const result = resolveWeaponSkillTrait(prepared(actor), weapon);
+      const result = getWeaponSkillTrait(prepared(actor), weapon);
 
       // Should fall back to trait roll
       expect(result.traitValue).toBe(5);
@@ -993,7 +993,7 @@ describe("resolveWeaponSkillTrait", () => {
         }
       };
 
-      const result = resolveWeaponSkillTrait(prepared(actor), weapon);
+      const result = getWeaponSkillTrait(prepared(actor), weapon);
       expect(result.traitValue).toBe(3);
     });
 
@@ -1016,7 +1016,7 @@ describe("resolveWeaponSkillTrait", () => {
         }
       };
 
-      const result = resolveWeaponSkillTrait(prepared(actor), weapon);
+      const result = getWeaponSkillTrait(prepared(actor), weapon);
       expect(result.traitValue).toBe(3);
     });
   });

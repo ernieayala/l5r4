@@ -17,7 +17,7 @@ import { toInt } from "./type-coercion.js";
  * @param {object} source - ActiveEffect source data
  * @returns {object|null}  Update data, with `_id` when the source has one; null when nothing changes
  */
-export function statusEffectUpdate(source) {
+export function buildStatusEffectUpdate(source) {
   const statuses = (source.statuses ?? [])
     .map(id => STATUS_EFFECTS.find(s => s.id === id))
     .filter(Boolean);

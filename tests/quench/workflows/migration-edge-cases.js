@@ -14,9 +14,12 @@
  */
 
 import { SYS_ID, MIGRATION_FLAG, PATHS } from "../../../module/config/constants.js";
-import { runIconPathMigration } from "../../../module/setup/migrations/icons/icon-paths.js";
+import { migrateIconPaths } from "../../../module/setup/migrations/icons/icon-paths.js";
 import { createTestPC, createTestNPC } from "../../fixtures/actor-fixtures.js";
-import { hasBeenMigrated, markAsMigrated } from "../../../module/setup/migrations/utils/helpers.js";
+import {
+  hasBeenMigrated,
+  updateMigratedVersion
+} from "../../../module/setup/migrations/utils/helpers.js";
 
 /**
  * Register migration edge case tests
@@ -54,7 +57,7 @@ export function registerMigrationEdgeCaseTests(quench) {
           assert.notExists(initialFlag, "No migration flag initially");
 
           // ACT - Mark as migrated to version 1.0.0
-          await markAsMigrated(actor, "1.0.0");
+          await updateMigratedVersion(actor, "1.0.0");
 
           // ASSERT
           const migratedFlag = actor.getFlag(SYS_ID, MIGRATION_FLAG);
@@ -64,7 +67,7 @@ export function registerMigrationEdgeCaseTests(quench) {
 
         it("should detect already-migrated documents", async () => {
           // ARRANGE - Mark as migrated to 1.0.0
-          await markAsMigrated(actor, "1.0.0");
+          await updateMigratedVersion(actor, "1.0.0");
 
           // ACT - Check if migrated
           const isMigrated = hasBeenMigrated(actor, "1.0.0");
@@ -75,7 +78,7 @@ export function registerMigrationEdgeCaseTests(quench) {
 
         it("should skip re-migration of already-migrated documents", async () => {
           // ARRANGE - Mark as migrated
-          await markAsMigrated(actor, "1.0.0");
+          await updateMigratedVersion(actor, "1.0.0");
           const originalData = foundry.utils.deepClone(actor.system);
 
           // ACT - Check if should skip
@@ -88,15 +91,15 @@ export function registerMigrationEdgeCaseTests(quench) {
 
         it("should handle repeated migrations without data corruption", async () => {
           // ARRANGE - Migrate multiple times
-          await markAsMigrated(actor, "1.0.0");
+          await updateMigratedVersion(actor, "1.0.0");
           const afterFirst = actor.getFlag(SYS_ID, MIGRATION_FLAG);
 
           // ACT - Migrate again to same version
-          await markAsMigrated(actor, "1.0.0");
+          await updateMigratedVersion(actor, "1.0.0");
           const afterSecond = actor.getFlag(SYS_ID, MIGRATION_FLAG);
 
           // ACT - Migrate to newer version
-          await markAsMigrated(actor, "1.1.0");
+          await updateMigratedVersion(actor, "1.1.0");
           const afterThird = actor.getFlag(SYS_ID, MIGRATION_FLAG);
 
           // ASSERT
@@ -112,9 +115,9 @@ export function registerMigrationEdgeCaseTests(quench) {
           const originalStamina = actor.system.traits.sta;
 
           // ACT - Migrate multiple times
-          await markAsMigrated(actor, "1.0.0");
-          await markAsMigrated(actor, "1.1.0");
-          await markAsMigrated(actor, "1.2.0");
+          await updateMigratedVersion(actor, "1.0.0");
+          await updateMigratedVersion(actor, "1.1.0");
+          await updateMigratedVersion(actor, "1.2.0");
 
           // ASSERT - Critical data unchanged
           assert.equal(actor.name, originalName, "Name preserved");
@@ -124,7 +127,7 @@ export function registerMigrationEdgeCaseTests(quench) {
 
         it("should handle migration version comparison correctly", async () => {
           // ARRANGE - Mark as 1.0.0
-          await markAsMigrated(actor, "1.0.0");
+          await updateMigratedVersion(actor, "1.0.0");
 
           // ACT & ASSERT - Version comparisons
           assert.isTrue(hasBeenMigrated(actor, "1.0.0"), "Same version detected");
@@ -148,9 +151,9 @@ export function registerMigrationEdgeCaseTests(quench) {
         it("should handle concurrent migration attempts", async () => {
           // ARRANGE - Attempt to mark as migrated concurrently
           const promises = [
-            markAsMigrated(actor, "1.0.0"),
-            markAsMigrated(actor, "1.0.0"),
-            markAsMigrated(actor, "1.0.0")
+            updateMigratedVersion(actor, "1.0.0"),
+            updateMigratedVersion(actor, "1.0.0"),
+            updateMigratedVersion(actor, "1.0.0")
           ];
 
           // ACT - Race condition
@@ -185,7 +188,7 @@ export function registerMigrationEdgeCaseTests(quench) {
           await actor.update({ img: customIcon });
 
           // ACT - Simulate migration
-          await markAsMigrated(actor, "1.0.0");
+          await updateMigratedVersion(actor, "1.0.0");
 
           // ASSERT
           assert.equal(actor.img, customIcon, "Custom icon preserved");
@@ -197,7 +200,7 @@ export function registerMigrationEdgeCaseTests(quench) {
           await actor.update({ img: userIcon });
 
           // ACT - Simulate migration
-          await markAsMigrated(actor, "1.0.0");
+          await updateMigratedVersion(actor, "1.0.0");
 
           // ASSERT
           assert.equal(actor.img, userIcon, "User icon preserved");
@@ -214,7 +217,7 @@ export function registerMigrationEdgeCaseTests(quench) {
           });
 
           // ACT - Simulate migration
-          await markAsMigrated(actor, "1.0.0");
+          await updateMigratedVersion(actor, "1.0.0");
 
           // ASSERT
           assert.equal(actor.img, actorIcon, "Actor icon preserved");
@@ -226,7 +229,7 @@ export function registerMigrationEdgeCaseTests(quench) {
           await actor.update({ img: null });
 
           // ACT - Simulate migration
-          await markAsMigrated(actor, "1.0.0");
+          await updateMigratedVersion(actor, "1.0.0");
 
           // ASSERT - Should not crash
           const migratedFlag = actor.getFlag(SYS_ID, MIGRATION_FLAG);
@@ -239,9 +242,9 @@ export function registerMigrationEdgeCaseTests(quench) {
           await actor.update({ img: customIcon });
 
           // ACT - Multiple migrations
-          await markAsMigrated(actor, "1.0.0");
-          await markAsMigrated(actor, "1.1.0");
-          await markAsMigrated(actor, "1.2.0");
+          await updateMigratedVersion(actor, "1.0.0");
+          await updateMigratedVersion(actor, "1.1.0");
+          await updateMigratedVersion(actor, "1.2.0");
 
           // ASSERT
           assert.equal(actor.img, customIcon, "Icon preserved across migrations");
@@ -258,10 +261,10 @@ export function registerMigrationEdgeCaseTests(quench) {
           const saved = game.settings.get(SYS_ID, "runMigration");
           try {
             await game.settings.set(SYS_ID, "runMigration", false);
-            await runIconPathMigration();
+            await migrateIconPaths();
             assert.equal(actor.img, legacy, "off: left alone");
             await game.settings.set(SYS_ID, "runMigration", true);
-            await runIconPathMigration();
+            await migrateIconPaths();
             assert.equal(
               actor.img,
               `${PATHS.icons}/attack-stance.webp`,
@@ -380,7 +383,7 @@ export function registerMigrationEdgeCaseTests(quench) {
 
         it("should handle invalid version format", async () => {
           // ARRANGE - Mark with valid version
-          await markAsMigrated(actor, "1.0.0");
+          await updateMigratedVersion(actor, "1.0.0");
 
           // ACT - Check with invalid format
           hasBeenMigrated(actor, "invalid-version");
@@ -392,7 +395,7 @@ export function registerMigrationEdgeCaseTests(quench) {
         it("should handle long version strings", async () => {
           // ARRANGE - Mark with long version
           const longVersion = "1.0.0-beta.1+build.12345.abcdef";
-          await markAsMigrated(actor, longVersion);
+          await updateMigratedVersion(actor, longVersion);
 
           // ACT
           const isMigrated = hasBeenMigrated(actor, longVersion);
@@ -428,7 +431,7 @@ export function registerMigrationEdgeCaseTests(quench) {
           assert.equal(originalMode, "formula", "NPC in formula mode");
 
           // ACT - Simulate migration
-          await markAsMigrated(npc, "1.0.0");
+          await updateMigratedVersion(npc, "1.0.0");
 
           // ASSERT
           assert.equal(npc.system.woundMode, originalMode, "Wound mode preserved");
@@ -442,7 +445,7 @@ export function registerMigrationEdgeCaseTests(quench) {
           });
 
           // ACT - Simulate migration
-          await markAsMigrated(npc, "1.0.0");
+          await updateMigratedVersion(npc, "1.0.0");
 
           // ASSERT
           assert.equal(npc.system.woundMode, "manual", "Manual mode preserved");
@@ -454,7 +457,7 @@ export function registerMigrationEdgeCaseTests(quench) {
           await npc.update({ "system.woundsMultiplier": 3 });
 
           // ACT - Simulate migration
-          await markAsMigrated(npc, "1.0.0");
+          await updateMigratedVersion(npc, "1.0.0");
 
           // ASSERT
           assert.equal(npc.system.woundsMultiplier, 3, "Multiplier preserved");
@@ -488,7 +491,7 @@ export function registerMigrationEdgeCaseTests(quench) {
           assert.equal(itemCount, 2, "Two items added");
 
           // ACT - Simulate migration
-          await markAsMigrated(actor, "1.0.0");
+          await updateMigratedVersion(actor, "1.0.0");
 
           // ASSERT
           assert.equal(actor.items.size, itemCount, "Item count preserved");
@@ -516,7 +519,7 @@ export function registerMigrationEdgeCaseTests(quench) {
           ]);
 
           // ACT - Simulate migration
-          await markAsMigrated(actor, "1.0.0");
+          await updateMigratedVersion(actor, "1.0.0");
 
           // ASSERT
           const item = actor.items.find(i => i.name === "Custom Skill");

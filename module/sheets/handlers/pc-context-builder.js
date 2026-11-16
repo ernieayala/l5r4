@@ -6,9 +6,9 @@
  * templates and never changes a document.
  */
 
-import { getSortPref, sortWithPref } from "../../utils/sorting.js";
+import { getSortPref, applySortPref } from "../../utils/sorting.js";
 import { toInt } from "../../utils/type-coercion.js";
-import { activeStance } from "../../utils/stances.js";
+import { getActiveStance } from "../../utils/stances.js";
 import { getSectionCollapsedMap } from "../../utils/section-state.js";
 
 /**
@@ -31,12 +31,12 @@ export class PcContextBuilder {
    * - **type**: Localized type (Physical, Mental, Social, Spiritual, Material)
    * - **cost**: Experience point cost (positive for advantages, negative for disadvantages)
    *
-   * Used by both `_sortGeneric()` and `buildAdvDisList()` to maintain consistent
+   * Used by both `#getSortedItems()` and `buildAdvDisList()` to maintain consistent
    * sorting behavior across advantages, disadvantages, and combined lists.
    *
    * @type {{[key: string]: Function}}
    */
-  static _advDisCols = {
+  static #advDisCols = {
     name: it => String(it?.name ?? ""),
     type: it =>
       String(game.i18n?.localize?.(`l5r4.character.advantages.${it?.system?.type ?? ""}`) ?? ""),
@@ -61,27 +61,27 @@ export class PcContextBuilder {
    *   skills, spells, weapons, and bows carry their pre-calculated formulas
    */
   static buildSortedItems(actor, allItems) {
-    const byType = t => allItems.filter(i => i.type === t);
+    const getItemsOfType = t => allItems.filter(i => i.type === t);
 
-    const skills = this._sortSkills(actor, byType("skill"));
+    const skills = this.#getSortedSkills(actor, getItemsOfType("skill"));
 
-    const spells = this._sortSpells(actor, byType("spell"));
+    const spells = this.#getSortedSpells(actor, getItemsOfType("spell"));
 
-    const advantages = this._sortGeneric(
+    const advantages = this.#getSortedItems(
       actor,
-      byType("advantage"),
+      getItemsOfType("advantage"),
       "advantages",
-      this._advDisCols
+      this.#advDisCols
     );
 
-    const disadvantages = this._sortGeneric(
+    const disadvantages = this.#getSortedItems(
       actor,
-      byType("disadvantage"),
+      getItemsOfType("disadvantage"),
       "disadvantages",
-      this._advDisCols
+      this.#advDisCols
     );
 
-    const items = this._sortGeneric(
+    const items = this.#getSortedItems(
       actor,
       allItems.filter(i => i.type === "item" || i.type === "commonItem"),
       "items",
@@ -90,36 +90,36 @@ export class PcContextBuilder {
       }
     );
 
-    const katas = this._sortGeneric(actor, byType("kata"), "katas", {
+    const katas = this.#getSortedItems(actor, getItemsOfType("kata"), "katas", {
       name: it => String(it?.name ?? ""),
       ring: it => String(it?.system?.ring ?? ""),
       mastery: it => Number(it?.system?.mastery ?? 0) || 0
     });
 
-    const kihos = this._sortGeneric(actor, byType("kiho"), "kihos", {
+    const kihos = this.#getSortedItems(actor, getItemsOfType("kiho"), "kihos", {
       name: it => String(it?.name ?? ""),
       ring: it => String(it?.system?.ring ?? ""),
       mastery: it => Number(it?.system?.mastery ?? 0) || 0,
       type: it => String(it?.system?.type ?? "")
     });
 
-    const tattoos = this._sortGeneric(actor, byType("tattoo"), "tattoos", {
+    const tattoos = this.#getSortedItems(actor, getItemsOfType("tattoo"), "tattoos", {
       name: it => String(it?.name ?? "")
     });
 
-    const techniques = this._sortGeneric(actor, byType("technique"), "techniques", {
+    const techniques = this.#getSortedItems(actor, getItemsOfType("technique"), "techniques", {
       name: it => String(it?.name ?? "")
     });
 
-    const armors = this._sortGeneric(actor, byType("armor"), "armors", {
+    const armors = this.#getSortedItems(actor, getItemsOfType("armor"), "armors", {
       name: it => String(it?.name ?? ""),
       bonus: it => Number(it?.system?.bonus ?? 0) || 0,
       reduction: it => Number(it?.system?.reduction ?? 0) || 0,
       equipped: it => (it?.system?.equipped ? 1 : 0)
     });
 
-    const weapons = this._sortWeapons(actor, byType("weapon"));
-    const bows = this._sortWeapons(actor, byType("bow"));
+    const weapons = this.#getSortedWeapons(actor, getItemsOfType("weapon"));
+    const bows = this.#getSortedWeapons(actor, getItemsOfType("bow"));
 
     return {
       skills,
@@ -140,7 +140,7 @@ export class PcContextBuilder {
   /**
    * Sort skills by user preference.
    *
-   * Sorts skill items using user-stored preferences. Roll formulas (rollDice, rollKeep,
+   * Sorts skill items using user-stored preferences. Roll formulas (roll, keep,
    * rollFormula) are pre-calculated in Actor.prepareDerivedData() - this method only sorts.
    *
    * Sorting columns:
@@ -154,7 +154,7 @@ export class PcContextBuilder {
    * @param {Item[]} skillItems - Array of skill items (formulas already calculated)
    * @returns {Item[]} Sorted skills
    */
-  static _sortSkills(actor, skillItems) {
+  static #getSortedSkills(actor, skillItems) {
     // Define sortable columns with extractor functions
     const cols = {
       name: it => String(it?.name ?? ""),
@@ -172,7 +172,7 @@ export class PcContextBuilder {
         const loc = key ? game.i18n?.localize?.(key) : "";
         return String(loc && loc !== key ? loc : (it?.system?.trait ?? ""));
       },
-      roll: it => Number(it?.system?.rollDice ?? 0) || 0,
+      roll: it => Number(it?.system?.roll ?? 0) || 0,
       emphasis: it => {
         const trained = Array.isArray(it?.system?.trainedEmphases) ? it.system.trainedEmphases : [];
         return trained.join(", ");
@@ -180,14 +180,14 @@ export class PcContextBuilder {
     };
 
     const pref = getSortPref(actor.id, "skills", Object.keys(cols), "name");
-    return sortWithPref(skillItems, cols, pref, game.i18n?.lang);
+    return applySortPref(skillItems, cols, pref, game.i18n?.lang);
   }
 
   /**
    * Sort spells by user preference.
    *
    * Sorts spell items using user-stored preferences. Casting formulas (castRoll, castKeep,
-   * castFormula, castTN) are pre-calculated in Actor.prepareDerivedData() - this method only sorts.
+   * castFormula, castTn) are pre-calculated in Actor.prepareDerivedData() - this method only sorts.
    *
    * Sorting columns:
    * - **name**: Spell name
@@ -201,7 +201,7 @@ export class PcContextBuilder {
    * @param {Item[]} spellItems - Array of spell items (formulas already calculated)
    * @returns {Item[]} Sorted spells
    */
-  static _sortSpells(actor, spellItems) {
+  static #getSortedSpells(actor, spellItems) {
     // Define sortable columns with extractor functions
     const cols = {
       name: it => String(it?.name ?? ""),
@@ -213,7 +213,7 @@ export class PcContextBuilder {
     };
 
     const pref = getSortPref(actor.id, "spells", Object.keys(cols), "name");
-    return sortWithPref(spellItems, cols, pref, game.i18n?.lang);
+    return applySortPref(spellItems, cols, pref, game.i18n?.lang);
   }
 
   /**
@@ -232,7 +232,7 @@ export class PcContextBuilder {
    * @param {Item[]} weaponItems - Array of weapon items (formulas already calculated)
    * @returns {Item[]} Sorted weapons
    */
-  static _sortWeapons(actor, weaponItems) {
+  static #getSortedWeapons(actor, weaponItems) {
     const cols = {
       name: it => String(it?.name ?? ""),
       damage: it => toInt(it?.system?.damageRoll) * 10 + toInt(it?.system?.damageKeep),
@@ -240,7 +240,7 @@ export class PcContextBuilder {
     };
 
     const pref = getSortPref(actor.id, "weapons", Object.keys(cols), "name");
-    return sortWithPref(weaponItems, cols, pref, game.i18n?.lang);
+    return applySortPref(weaponItems, cols, pref, game.i18n?.lang);
   }
 
   /**
@@ -264,9 +264,9 @@ export class PcContextBuilder {
    * @param {{[key: string]: Function}} cols - Column extractor functions for sorting
    * @returns {Item[]} Sorted items
    */
-  static _sortGeneric(actor, items, scope, cols) {
+  static #getSortedItems(actor, items, scope, cols) {
     const pref = getSortPref(actor.id, scope, Object.keys(cols), "name");
-    return sortWithPref(items, cols, pref, game.i18n?.lang);
+    return applySortPref(items, cols, pref, game.i18n?.lang);
   }
 
   /**
@@ -316,7 +316,7 @@ export class PcContextBuilder {
    * display. Adds an "item" column extractor to distinguish between the two types
    * ("advantage" vs "disadvantage") for filtering or styling in templates.
    *
-   * Uses the shared `_advDisCols` extractors with an additional type discriminator.
+   * Uses the shared `#advDisCols` extractors with an additional type discriminator.
    *
    * @param {Actor} actor - L5R4 Actor document (used for preference scope)
    * @param {Item[]} advantages - Array of advantage items
@@ -326,12 +326,12 @@ export class PcContextBuilder {
   static buildAdvDisList(actor, advantages, disadvantages) {
     const list = [...advantages, ...disadvantages];
     const cols = {
-      ...this._advDisCols,
+      ...this.#advDisCols,
       item: it => String(it.type ?? "")
     };
 
     const pref = getSortPref(actor.id, "advDis", Object.keys(cols), "name");
-    return sortWithPref(list, cols, pref, game.i18n?.lang);
+    return applySortPref(list, cols, pref, game.i18n?.lang);
   }
 
   /**
@@ -348,12 +348,12 @@ export class PcContextBuilder {
    * @returns {{clan: Item|null, family: Item|null, school: Item|null}} Bio items by type, null where the
    *   actor has none
    */
-  static extractBioItems(allItems) {
-    const byType = t => allItems.filter(i => i.type === t);
+  static getBioItems(allItems) {
+    const getItemsOfType = t => allItems.filter(i => i.type === t);
     return {
-      clan: byType("clan")[0] ?? null,
-      family: byType("family")[0] ?? null,
-      school: byType("school")[0] ?? null
+      clan: getItemsOfType("clan")[0] ?? null,
+      family: getItemsOfType("family")[0] ?? null,
+      school: getItemsOfType("school")[0] ?? null
     };
   }
 
@@ -363,8 +363,8 @@ export class PcContextBuilder {
    * @param {Actor} actor - L5R4 Actor document
    * @returns {string} Current stance identifier (empty if none)
    */
-  static extractStance(actor) {
-    return activeStance(actor.statuses);
+  static getStance(actor) {
+    return getActiveStance(actor.statuses);
   }
 
   /**
@@ -390,7 +390,7 @@ export class PcContextBuilder {
    * @param {Actor} actor - L5R4 Actor document
    * @returns {object} Effective trait values (sta, wil, str, per, ref, awa, agi, int)
    */
-  static extractEffectiveTraits(actor) {
+  static getEffectiveTraits(actor) {
     const traitsEff = foundry.utils.duplicate(
       actor.system?._derived?.traitsEff ?? actor.system?.derived?.traitsEff ?? {}
     );
@@ -415,7 +415,7 @@ export class PcContextBuilder {
    * @param {string} actorId - Actor document ID
    * @returns {object} Map of section keys to collapsed boolean state
    */
-  static extractCollapsedSections(actorId) {
+  static getCollapsedSections(actorId) {
     return getSectionCollapsedMap(actorId, [
       "skills",
       "weapons",

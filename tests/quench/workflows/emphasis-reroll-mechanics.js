@@ -23,7 +23,7 @@
 import { SYS_ID } from "../../../module/config/constants.js";
 import { createTestPC } from "../../fixtures/actor-fixtures.js";
 import { createSkillData } from "../../fixtures/item-fixtures.js";
-import { SkillRoll } from "../../../module/services/dice/rolls/skill-roll.js";
+import { rollSkill } from "../../../module/services/dice/rolls/skill-roll.js";
 
 /**
  * Register emphasis re-roll mechanics tests
@@ -71,11 +71,11 @@ export function registerEmphasisRerollMechanicsTests(quench) {
           // If re-roll is infinite, this will hang
           const startTime = Date.now();
 
-          const rollResult = await SkillRoll({
+          const rollResult = await rollSkill({
             actor,
             skillName: "kenjutsu",
             skillRank: 3,
-            actorTrait: 3,
+            traitRank: 3,
             skillTrait: "agi",
             askForOptions: false
           });
@@ -119,11 +119,11 @@ export function registerEmphasisRerollMechanicsTests(quench) {
 
           // ACT - Roll with high dice count (more chance of 1s)
           // 10k5 with emphasis - if all 10 dice are 1s, all should re-roll ONCE
-          const rollResult = await SkillRoll({
+          const rollResult = await rollSkill({
             actor,
             skillName: "kenjutsu",
             skillRank: 5,
-            actorTrait: 5,
+            traitRank: 5,
             skillTrait: "agi",
             askForOptions: false
           });
@@ -158,11 +158,11 @@ export function registerEmphasisRerollMechanicsTests(quench) {
           // ACT - Multiple rolls to test consistency
           const rolls = [];
           for (let i = 0; i < 5; i++) {
-            const rollResult = await SkillRoll({
+            const rollResult = await rollSkill({
               actor,
               skillName: "kenjutsu",
               skillRank: 3,
-              actorTrait: 3,
+              traitRank: 3,
               skillTrait: "agi",
               askForOptions: false
             });
@@ -215,11 +215,11 @@ export function registerEmphasisRerollMechanicsTests(quench) {
           // ACT - Roll unskilled with emphasis
           // Per L5R4 rules, you cannot have emphasis on unskilled skills
           // But if data allows it, system should handle gracefully
-          const rollResult = await SkillRoll({
+          const rollResult = await rollSkill({
             actor,
             skillName: "kenjutsu",
             skillRank: 0,
-            actorTrait: 3,
+            traitRank: 3,
             skillTrait: "agi",
             askForOptions: false
           });
@@ -251,11 +251,11 @@ export function registerEmphasisRerollMechanicsTests(quench) {
           await actor.update({ "system.traits.agility": 3 });
 
           // ACT
-          const rollResult = await SkillRoll({
+          const rollResult = await rollSkill({
             actor,
             skillName: "kenjutsu",
             skillRank: 0,
-            actorTrait: 3,
+            traitRank: 3,
             skillTrait: "agi",
             askForOptions: false
           });
@@ -306,11 +306,11 @@ export function registerEmphasisRerollMechanicsTests(quench) {
 
           // ACT - Roll with multiple emphases available
           // Only ONE emphasis should apply per roll (player choice or first)
-          const rollResult = await SkillRoll({
+          const rollResult = await rollSkill({
             actor,
             skillName: "kenjutsu",
             skillRank: 3,
-            actorTrait: 3,
+            traitRank: 3,
             skillTrait: "agi",
             askForOptions: false
           });
@@ -346,11 +346,11 @@ export function registerEmphasisRerollMechanicsTests(quench) {
           await actor.update({ "system.traits.agility": 5 });
 
           // ACT - Roll with max emphases
-          const rollResult = await SkillRoll({
+          const rollResult = await rollSkill({
             actor,
             skillName: "kenjutsu",
             skillRank: 5,
-            actorTrait: 5,
+            traitRank: 5,
             skillTrait: "agi",
             askForOptions: false
           });
@@ -389,11 +389,11 @@ export function registerEmphasisRerollMechanicsTests(quench) {
           // ACT - Multiple rolls to verify consistency
           const rolls = [];
           for (let i = 0; i < 3; i++) {
-            const rollResult = await SkillRoll({
+            const rollResult = await rollSkill({
               actor,
               skillName: "kenjutsu",
               skillRank: 2,
-              actorTrait: 3,
+              traitRank: 3,
               skillTrait: "agi",
               askForOptions: false
             });
@@ -447,11 +447,11 @@ export function registerEmphasisRerollMechanicsTests(quench) {
           const rollPromises = [];
           for (let i = 0; i < 5; i++) {
             rollPromises.push(
-              SkillRoll({
+              rollSkill({
                 actor,
                 skillName: "kenjutsu",
                 skillRank: 3,
-                actorTrait: 3,
+                traitRank: 3,
                 skillTrait: "agi",
                 askForOptions: false
               })

@@ -69,7 +69,7 @@ export const BAG_KINDS = Object.freeze({
 });
 
 /**
- * Maneuvers whose Raise cost a RaiseRule can change (module/utils/damage.js, maneuverCost).
+ * Maneuvers whose Raise cost a RaiseRule can change (module/utils/damage.js, getManeuverCost).
  * game-rules/38_maneuvers.md, p.86-87
  * @type {ReadonlyArray<string>}
  */
@@ -126,7 +126,7 @@ export const CHOICE_LIST_VALUES = Object.freeze({
 export const ATTACK_RANGES = Object.freeze(["melee", "ranged"]);
 
 /**
- * How an ArmorTN rule changes the Armor TN (module/utils/effects.js, resolveArmorTn).
+ * How an ArmorTN rule changes the Armor TN (module/utils/effects.js, getArmorTn).
  * @type {ReadonlyArray<string>}
  */
 export const ARMOR_TN_MODES = Object.freeze(["add", "base", "total"]);

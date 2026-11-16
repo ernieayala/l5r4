@@ -34,10 +34,10 @@ export function migrateCommonActorSource(source) {
  * @param {object} source - PC system source (mutated).
  */
 export function migratePcSource(source) {
-  renameKey(source, "armor_tn", "armorTn");
-  renameKey(source, "shadow_taint", "shadowTaint");
+  migrateKey(source, "armor_tn", "armorTn");
+  migrateKey(source, "shadow_taint", "shadowTaint");
   for (const name of ["roll", "keep", "total"]) {
-    renameKey(source.initiative, `${name}_mod`, `${name}Mod`);
+    migrateKey(source.initiative, `${name}_mod`, `${name}Mod`);
   }
   // A Void Point on Armor TN is an effect that ends with its Round (STAGE-09); a 3.2.1 actor's marker for one
   // lasted at most that Round and is dropped
@@ -54,7 +54,7 @@ export function migratePcSource(source) {
  * @param {object} source - NPC system source (mutated).
  */
 export function migrateNpcSource(source) {
-  renameKey(source.armor, "armor_tn", "armorTn");
+  migrateKey(source.armor, "armor_tn", "armorTn");
 
   const legacy = source.wound_lvl ?? (source.manualWoundLevels ? undefined : source.woundLevels);
   delete source.wound_lvl;
@@ -89,14 +89,14 @@ export function migrateKeywordsSource(source) {
  * @param {object} source - Skill system source (mutated).
  */
 export function migrateSkillSource(source) {
-  renameKey(source, "mastery_3", "mastery3");
-  renameKey(source, "mastery_5", "mastery5");
-  renameKey(source, "mastery_7", "mastery7");
+  migrateKey(source, "mastery_3", "mastery3");
+  migrateKey(source, "mastery_5", "mastery5");
+  migrateKey(source, "mastery_7", "mastery7");
   delete source.insight_bonus;
   delete source.insightBonus;
-  renameKey(source, "roll_bonus", "rollBonus");
-  renameKey(source, "keep_bonus", "keepBonus");
-  renameKey(source, "total_bonus", "totalBonus");
+  migrateKey(source, "roll_bonus", "rollBonus");
+  migrateKey(source, "keep_bonus", "keepBonus");
+  migrateKey(source, "total_bonus", "totalBonus");
 }
 
 /**
@@ -118,8 +118,8 @@ export function migrateWeaponSource(source) {
  * @param {object} source - Armor system source (mutated).
  */
 export function migrateArmorSource(source) {
-  renameKey(source, "equiped", "equipped");
-  renameKey(source, "specialRues", "specialRules");
+  migrateKey(source, "equiped", "equipped");
+  migrateKey(source, "specialRues", "specialRules");
 }
 
 /**
@@ -129,7 +129,7 @@ export function migrateArmorSource(source) {
  * @param {string} from
  * @param {string} to
  */
-function renameKey(object, from, to) {
+function migrateKey(object, from, to) {
   if (!object || !(from in object)) {
     return;
   }

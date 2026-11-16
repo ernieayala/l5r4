@@ -11,7 +11,7 @@ import {
   DEFAULT_WOUND_PENALTIES,
   DEFAULT_WOUND_THRESHOLDS
 } from "../../../config/game-mechanics.js";
-import { toInt, clamp } from "../../../utils/type-coercion.js";
+import { toInt, getClamped } from "../../../utils/type-coercion.js";
 import { logError } from "../../../utils/error-logging.js";
 
 /**
@@ -21,7 +21,7 @@ import { logError } from "../../../utils/error-logging.js";
  * @returns {string[]} Array of wound level keys to use
  */
 export function getWoundLevelsForCount(nrWoundLvls) {
-  const count = clamp(nrWoundLvls ?? 3, 1, 8);
+  const count = getClamped(nrWoundLvls ?? 3, 1, 8);
 
   // Two levels tracked: Healthy and Out
   if (count === 1) {
@@ -44,10 +44,10 @@ export function getWoundLevelsForCount(nrWoundLvls) {
  * Healthy.
  * @param {object} sys - Actor's system data
  */
-export function calculateWoundPenalties(sys) {
+export function prepareWoundPenalties(sys) {
   const penaltyMod = toInt(sys.woundsPenaltyMod);
   for (const [key, lvl] of Object.entries(sys.woundLevels ?? {})) {
-    lvl.penaltyEff = effectiveWoundPenalty(key, lvl.penalty, penaltyMod);
+    lvl.penaltyEff = getEffectiveWoundPenalty(key, lvl.penalty, penaltyMod);
   }
 }
 
@@ -57,7 +57,7 @@ export function calculateWoundPenalties(sys) {
  * @param {object} sys - Actor's system data
  * @param {number} suffered - Total wounds suffered
  */
-export function initializeWoundState(sys, suffered) {
+export function prepareWoundState(sys, suffered) {
   sys.wounds = sys.wounds || {};
   const outMax = toInt(sys.woundLevels.out?.value) || 0;
 
@@ -83,7 +83,7 @@ export function initializeWoundState(sys, suffered) {
  * @param {number} sCapped - Suffered wounds (capped to max)
  * @returns {object} The current wound level object
  */
-export function findCurrentWoundLevel(sys, levelsToCheck, sCapped) {
+export function prepareCurrentWoundLevel(sys, levelsToCheck, sCapped) {
   let current = sys.woundLevels.healthy;
   let lastVal = -1;
 
@@ -189,7 +189,7 @@ export function prepareNpcFormulaWounds(sys, order) {
 
       if (activeOrder.includes(key)) {
         // Active level: calculate threshold
-        lvl.value = calculateWoundThreshold(key, earth, mult, add, prev);
+        lvl.value = getWoundThreshold(key, earth, mult, add, prev);
         prev = lvl.value;
         lvl.isActive = true;
         lvl.isVisible = true;
@@ -239,14 +239,14 @@ export function prepareNpcFormulaWounds(sys, order) {
  * @param {string} woundMode - "manual" or "formula"
  * @returns {object} The current wound level object
  */
-export function determineCurrentWoundLevel(sys, order, sCapped, woundMode) {
+export function prepareCurrentWoundLevelByMode(sys, order, sCapped, woundMode) {
   // Filter levels based on mode
   const levelsToCheck =
     woundMode === "manual"
       ? order.filter(key => sys.manualWoundLevels?.[key]?.active === true)
       : order;
 
-  return findCurrentWoundLevel(sys, levelsToCheck, sCapped);
+  return prepareCurrentWoundLevel(sys, levelsToCheck, sCapped);
 }
 
 /**
@@ -270,7 +270,7 @@ export function prepareHealRate(sys, insightRank) {
  * @param {string[]} order - Ordered array of wound level keys
  */
 export function prepareVisibleWoundLevels(sys, order) {
-  const nrWoundLvls = clamp(toInt(sys.nrWoundLvls) || 3, 1, 8);
+  const nrWoundLvls = getClamped(toInt(sys.nrWoundLvls) || 3, 1, 8);
   const isManualMode = sys.woundMode === "manual";
 
   const baseVisibleOrder = getWoundLevelsForCount(nrWoundLvls);
@@ -305,11 +305,11 @@ export function prepareVisibleWoundLevels(sys, order) {
 
     let prev = 0;
     for (const key of baseVisibleOrder) {
-      const value = calculateWoundThreshold(key, earth, mult, add, prev);
+      const value = getWoundThreshold(key, earth, mult, add, prev);
       prev = value;
 
       const basePenalty = toInt(DEFAULT_WOUND_PENALTIES?.[key]) || 0;
-      const penaltyEff = effectiveWoundPenalty(key, basePenalty, penaltyMod);
+      const penaltyEff = getEffectiveWoundPenalty(key, basePenalty, penaltyMod);
 
       sys.visibleWoundLevels[key] = {
         value,
@@ -323,7 +323,7 @@ export function prepareVisibleWoundLevels(sys, order) {
     const outMax = toInt(sys.visibleWoundLevels.out?.value) || 0;
     const sCapped = Math.min(toInt(sys.suffered), outMax || toInt(sys.suffered));
 
-    findCurrentWoundLevel({ woundLevels: sys.visibleWoundLevels }, baseVisibleOrder, sCapped);
+    prepareCurrentWoundLevel({ woundLevels: sys.visibleWoundLevels }, baseVisibleOrder, sCapped);
   }
 }
 
@@ -336,7 +336,7 @@ export function prepareVisibleWoundLevels(sys, order) {
  * @param {number} mod - The actor's wound penalty modifier
  * @returns {number}
  */
-function effectiveWoundPenalty(key, penalty, mod) {
+function getEffectiveWoundPenalty(key, penalty, mod) {
   return key === "healthy" ? 0 : Math.max(0, toInt(penalty) + mod);
 }
 
@@ -350,6 +350,6 @@ function effectiveWoundPenalty(key, penalty, mod) {
  * @param {number} prev - Previous level's threshold
  * @returns {number} Calculated wound threshold
  */
-function calculateWoundThreshold(key, earth, mult, add, prev) {
+function getWoundThreshold(key, earth, mult, add, prev) {
   return key === "healthy" ? 5 * earth + add : earth * mult + prev + add;
 }

@@ -1,8 +1,8 @@
 import { SYS_ID } from "../../module/config/constants.js";
 import { F, T } from "../../module/utils/localization.js";
 import { rollCheck } from "../../module/services/dice/check/roll-check.js";
-import { collectCheck } from "../../module/services/dice/check/collect.js";
-import { SimpleRoll } from "../../module/services/dice/rolls/simple-roll.js";
+import { getCheckContext } from "../../module/services/dice/check/collect.js";
+import { rollPool } from "../../module/services/dice/rolls/simple-roll.js";
 import { rollDamageFromAttack, applyDamage } from "../../module/services/combat/damage.js";
 import { rollContest } from "../../module/services/combat/contest.js";
 import { startGrapple } from "../../module/services/combat/grapple.js";
@@ -316,10 +316,10 @@ export function registerCombatTests(quench) {
           "should scope a weapon's DamageSource to that weapon",
           clean(async () => {
             const { actor } = await attacker([{ key: "DamageSource", tags: ["jade"] }]);
-            const unarmed = await SimpleRoll({
+            const unarmed = await rollPool({
               actor,
-              diceRoll: 3,
-              diceKeep: 1,
+              roll: 3,
+              keep: 1,
               rollName: "Unarmed",
               rollType: "damage",
               askForOptions: false
@@ -892,7 +892,7 @@ export function registerCombatTests(quench) {
               }).then(async message => (await answered, message));
             };
             const label = T("l5r4.equipment.weapons.meleeRange");
-            const index = collectCheck(actor, {
+            const index = getCheckContext(actor, {
               kind: "attack",
               weapon: bow,
               target
@@ -1011,10 +1011,10 @@ export function registerCombatTests(quench) {
           "should store an NPC attack's stat block damage for the damage button",
           clean(async () => {
             const npc = track(await createTestNPC({ name: "Combat bandit" }));
-            const hit = await SimpleRoll({
+            const hit = await rollPool({
               actor: npc,
-              diceRoll: 6,
-              diceKeep: 4,
+              roll: 6,
+              keep: 4,
               rollName: "Yari",
               rollType: "attack",
               askForOptions: false,

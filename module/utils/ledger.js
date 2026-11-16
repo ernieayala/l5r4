@@ -8,7 +8,7 @@
  * game-rules/89_shadowlands_taint.md, p.274
  */
 
-import { resolveValue } from "./rule-values.js";
+import { getRuleValue } from "./rule-values.js";
 
 /**
  * @typedef {object} LedgerRuleOutput
@@ -29,7 +29,7 @@ import { resolveValue } from "./rule-values.js";
  * @param {object} [spec.rollData={}] - The actor's roll data, for formulas
  * @returns {{points: number, errors: Array<{source: string, message: string}>}}
  */
-export function ledgerChange({ track, points, rules, rollData = {} }) {
+export function getLedgerChange({ track, points, rules, rollData = {} }) {
   const errors = [];
   if (!points) {
     return { points: 0, errors };
@@ -38,7 +38,7 @@ export function ledgerChange({ track, points, rules, rollData = {} }) {
   let size = Math.abs(points);
   for (const rule of rules.filter(r => r.track === track && r.direction === direction)) {
     try {
-      size = resolveValue(rule.value, { ...rollData, points: size });
+      size = getRuleValue(rule.value, { ...rollData, points: size });
     } catch (err) {
       errors.push({ source: rule.source, message: err.message });
     }

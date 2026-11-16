@@ -28,7 +28,7 @@ import { SYS_ID } from "../../config/constants.js";
  *
  * @see buildXpHistory in xp-calculator.js which uses this version to detect changes
  */
-export function calculateXpDataVersion(actor) {
+export function getXpDataVersion(actor) {
   try {
     const sys = actor?.system ?? {};
     const items = actor?.items ?? [];
@@ -93,15 +93,15 @@ export function calculateXpDataVersion(actor) {
  * @returns {Promise<boolean>} True if retroactive XP update is needed, false otherwise.
  *                             Returns true on error to ensure data consistency.
  *
- * @see calculateXpDataVersion for version generation logic
+ * @see getXpDataVersion for version generation logic
  * @see buildXpHistory in xp-calculator.js which rebuilds the history when needed
  */
-export async function needsRetroactiveUpdate(actor) {
+export async function isRetroactiveUpdateDue(actor) {
   try {
     // Retrieve stored version from actor flags (Foundry flag system)
     const flags = actor.flags?.[SYS_ID] ?? {};
     const lastUpdateVersion = flags.xpRetroactiveVersion || 0;
-    const currentVersion = calculateXpDataVersion(actor);
+    const currentVersion = getXpDataVersion(actor);
 
     // Check if recalculation needed
     const isFirstRun = lastUpdateVersion === 0;

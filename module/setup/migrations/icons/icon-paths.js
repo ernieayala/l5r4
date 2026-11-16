@@ -24,7 +24,7 @@ const dirCache = new Map();
  * prototype token images for actors. Only runs if GM and migration setting enabled.
  * Displays notification with count of updated documents when complete.
  *
- * Idempotency: Icon migration is called from runMigrations() which filters out already-migrated
+ * Idempotency: Icon migration is called from migrateWorld() which filters out already-migrated
  * documents, so this function only processes documents that haven't been migrated yet. This
  * prevents overwriting custom icons when forceMigration is triggered.
  *
@@ -32,7 +32,7 @@ const dirCache = new Map();
  *
  * @returns {Promise<void>}
  */
-export async function runIconPathMigration() {
+export async function migrateIconPaths() {
   if (!game.user?.isGM) {
     return;
   }
@@ -46,14 +46,14 @@ export async function runIconPathMigration() {
   for (const a of game.actors.contents) {
     const updates = {};
 
-    const nextImg = await computeNewIconPath(a.img);
+    const nextImg = await getMappedIconPath(a.img);
     if (nextImg && nextImg !== a.img) {
       updates.img = nextImg;
     }
 
     const tokenImg = a.prototypeToken?.texture?.src;
     if (tokenImg) {
-      const nextToken = await computeNewIconPath(tokenImg);
+      const nextToken = await getMappedIconPath(tokenImg);
       if (nextToken && nextToken !== tokenImg) {
         updates["prototypeToken.texture.src"] = nextToken;
       }
@@ -180,7 +180,7 @@ export async function migrateCompendiumIconPaths() {
       if (docName === "Actor") {
         const tokenImg = doc.prototypeToken?.texture?.src;
         if (tokenImg) {
-          const nextToken = await computeNewIconPath(tokenImg);
+          const nextToken = await getMappedIconPath(tokenImg);
           if (nextToken && nextToken !== tokenImg) {
             updates["prototypeToken.texture.src"] = nextToken;
           }
@@ -229,7 +229,7 @@ export async function migrateCompendiumIconPaths() {
  * @param {string} dirPath - Directory path to list (relative to Foundry Data)
  * @returns {Promise<Set<string>>} Set of filenames in the directory
  */
-async function listDir(dirPath) {
+async function getDirFiles(dirPath) {
   if (dirCache.has(dirPath)) {
     return dirCache.get(dirPath);
   }
@@ -261,7 +261,7 @@ async function listDir(dirPath) {
  * @param {string} img - Current image path to evaluate
  * @returns {Promise<string|null>} New icon path if migration needed and file exists, null otherwise
  */
-async function computeNewIconPath(img) {
+async function getMappedIconPath(img) {
   if (typeof img !== "string" || !img.startsWith(PATHS.icons + "/")) {
     return null;
   }
@@ -275,7 +275,7 @@ async function computeNewIconPath(img) {
   const lastSlash = targetPath.lastIndexOf("/");
   const dir = targetPath.slice(0, lastSlash);
   const base = targetPath.slice(lastSlash + 1);
-  const files = await listDir(dir);
+  const files = await getDirFiles(dir);
   return files.has(base) ? targetPath : null;
 }
 
@@ -297,7 +297,7 @@ async function computeNewIconPath(img) {
  * @returns {Promise<string|null>} New icon path if update needed, null otherwise
  */
 async function getUpdatedIconPath(doc, docType) {
-  let nextImg = await computeNewIconPath(doc.img);
+  let nextImg = await getMappedIconPath(doc.img);
 
   // Special handling for Items: assign type-appropriate default icons
   if (docType === "Item") {

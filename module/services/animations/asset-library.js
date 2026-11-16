@@ -212,7 +212,7 @@ export function getConditionAnimation(conditionId) {
  *
  * @returns {boolean} True if JB2A is available
  */
-export function isJB2AAvailable() {
+export function isJb2aAvailable() {
   return JB2A_MODULE_IDS.some(id => game.modules.get(id)?.active);
 }
 

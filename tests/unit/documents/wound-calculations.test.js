@@ -16,9 +16,9 @@
 import { describe, it, expect } from "vitest";
 import {
   getWoundLevelsForCount,
-  calculateWoundPenalties,
-  initializeWoundState,
-  findCurrentWoundLevel,
+  prepareWoundPenalties,
+  prepareWoundState,
+  prepareCurrentWoundLevel,
   prepareNpcFormulaWounds,
   prepareNpcManualWounds
 } from "../../../module/documents/actor/calculations/wound-system.js";
@@ -167,7 +167,7 @@ describe("getWoundLevelsForCount", () => {
   });
 });
 
-describe("calculateWoundPenalties", () => {
+describe("prepareWoundPenalties", () => {
   describe("Valid inputs", () => {
     // game-rules/33_wounds.md, p.82
     // #32
@@ -183,7 +183,7 @@ describe("calculateWoundPenalties", () => {
       };
 
       // ACT
-      calculateWoundPenalties(sys);
+      prepareWoundPenalties(sys);
 
       // ASSERT
       expect(sys.woundLevels.healthy.penaltyEff).toBe(0); // Healthy carries no penalty
@@ -201,7 +201,7 @@ describe("calculateWoundPenalties", () => {
       };
 
       // ACT
-      calculateWoundPenalties(sys);
+      prepareWoundPenalties(sys);
 
       // ASSERT
       expect(sys.woundLevels.nicked.penaltyEff).toBe(3);
@@ -217,7 +217,7 @@ describe("calculateWoundPenalties", () => {
       };
 
       // ACT
-      calculateWoundPenalties(sys);
+      prepareWoundPenalties(sys);
 
       // ASSERT
       expect(sys.woundLevels.nicked.penaltyEff).toBe(0); // max(0, 3 + (-10)) = 0
@@ -234,7 +234,7 @@ describe("calculateWoundPenalties", () => {
       };
 
       // ACT
-      calculateWoundPenalties(sys);
+      prepareWoundPenalties(sys);
 
       // ASSERT
       expect(sys.woundLevels.healthy.penaltyEff).toBe(0); // max(0, 0 + (-3)) = 0
@@ -253,7 +253,7 @@ describe("calculateWoundPenalties", () => {
       };
 
       // ACT
-      calculateWoundPenalties(sys);
+      prepareWoundPenalties(sys);
 
       // ASSERT
       expect(sys.woundLevels.nicked.penaltyEff).toBe(3);
@@ -267,7 +267,7 @@ describe("calculateWoundPenalties", () => {
       };
 
       // ACT & ASSERT
-      expect(() => calculateWoundPenalties(sys)).not.toThrow();
+      expect(() => prepareWoundPenalties(sys)).not.toThrow();
     });
 
     it("should handle null penalty in wound level", () => {
@@ -280,7 +280,7 @@ describe("calculateWoundPenalties", () => {
       };
 
       // ACT
-      calculateWoundPenalties(sys);
+      prepareWoundPenalties(sys);
 
       // ASSERT
       expect(sys.woundLevels.nicked.penaltyEff).toBe(5);
@@ -288,7 +288,7 @@ describe("calculateWoundPenalties", () => {
   });
 });
 
-describe("initializeWoundState", () => {
+describe("prepareWoundState", () => {
   describe("Formula mode", () => {
     it("should set wounds.max from out threshold", () => {
       // ARRANGE
@@ -302,7 +302,7 @@ describe("initializeWoundState", () => {
       const suffered = 0;
 
       // ACT
-      initializeWoundState(sys, suffered);
+      prepareWoundState(sys, suffered);
 
       // ASSERT
       expect(sys.wounds.max).toBe(40);
@@ -321,7 +321,7 @@ describe("initializeWoundState", () => {
       const suffered = 15;
 
       // ACT
-      initializeWoundState(sys, suffered);
+      prepareWoundState(sys, suffered);
 
       // ASSERT
       expect(sys.wounds.max).toBe(40);
@@ -340,7 +340,7 @@ describe("initializeWoundState", () => {
       const suffered = 50;
 
       // ACT
-      initializeWoundState(sys, suffered);
+      prepareWoundState(sys, suffered);
 
       // ASSERT
       expect(sys.wounds.value).toBe(0); // Clamped to 0
@@ -360,7 +360,7 @@ describe("initializeWoundState", () => {
       const suffered = 10;
 
       // ACT
-      initializeWoundState(sys, suffered);
+      prepareWoundState(sys, suffered);
 
       // ASSERT
       expect(sys.wounds.max).toBe(60); // User override
@@ -379,7 +379,7 @@ describe("initializeWoundState", () => {
       const suffered = 0;
 
       // ACT
-      initializeWoundState(sys, suffered);
+      prepareWoundState(sys, suffered);
 
       // ASSERT
       expect(sys.wounds.max).toBe(40); // Fallback to out
@@ -399,7 +399,7 @@ describe("initializeWoundState", () => {
       const suffered = null;
 
       // ACT
-      initializeWoundState(sys, suffered);
+      prepareWoundState(sys, suffered);
 
       // ASSERT
       expect(sys.wounds.value).toBe(40);
@@ -415,7 +415,7 @@ describe("initializeWoundState", () => {
       const suffered = 0;
 
       // ACT
-      initializeWoundState(sys, suffered);
+      prepareWoundState(sys, suffered);
 
       // ASSERT
       expect(sys.wounds.max).toBe(0);
@@ -432,7 +432,7 @@ describe("initializeWoundState", () => {
       const suffered = 0;
 
       // ACT
-      initializeWoundState(sys, suffered);
+      prepareWoundState(sys, suffered);
 
       // ASSERT
       expect(sys.wounds).toBeDefined();
@@ -441,7 +441,7 @@ describe("initializeWoundState", () => {
   });
 });
 
-describe("findCurrentWoundLevel", () => {
+describe("prepareCurrentWoundLevel", () => {
   describe("Valid inputs", () => {
     it("should find healthy level when no damage", () => {
       // ARRANGE
@@ -456,7 +456,7 @@ describe("findCurrentWoundLevel", () => {
       const sCapped = 0;
 
       // ACT
-      const result = findCurrentWoundLevel(sys, levelsToCheck, sCapped);
+      const result = prepareCurrentWoundLevel(sys, levelsToCheck, sCapped);
 
       // ASSERT
       expect(result).toBe(sys.woundLevels.healthy);
@@ -477,7 +477,7 @@ describe("findCurrentWoundLevel", () => {
       const sCapped = 16;
 
       // ACT
-      const result = findCurrentWoundLevel(sys, levelsToCheck, sCapped);
+      const result = prepareCurrentWoundLevel(sys, levelsToCheck, sCapped);
 
       // ASSERT
       expect(result).toBe(sys.woundLevels.nicked);
@@ -497,7 +497,7 @@ describe("findCurrentWoundLevel", () => {
       const sCapped = 40;
 
       // ACT
-      const result = findCurrentWoundLevel(sys, levelsToCheck, sCapped);
+      const result = prepareCurrentWoundLevel(sys, levelsToCheck, sCapped);
 
       // ASSERT
       expect(result).toBe(sys.woundLevels.out);
@@ -517,7 +517,7 @@ describe("findCurrentWoundLevel", () => {
       const sCapped = 0;
 
       // ACT
-      const result = findCurrentWoundLevel(sys, levelsToCheck, sCapped);
+      const result = prepareCurrentWoundLevel(sys, levelsToCheck, sCapped);
 
       // ASSERT
       expect(result).toBe(sys.woundLevels.healthy);
@@ -535,7 +535,7 @@ describe("findCurrentWoundLevel", () => {
       const sCapped = 20;
 
       // ACT
-      const result = findCurrentWoundLevel(sys, levelsToCheck, sCapped);
+      const result = prepareCurrentWoundLevel(sys, levelsToCheck, sCapped);
 
       // ASSERT
       expect(result).toBe(sys.woundLevels.out);
@@ -552,7 +552,7 @@ describe("findCurrentWoundLevel", () => {
       const sCapped = -10;
 
       // ACT
-      const result = findCurrentWoundLevel(sys, levelsToCheck, sCapped);
+      const result = prepareCurrentWoundLevel(sys, levelsToCheck, sCapped);
 
       // ASSERT
       expect(result).toBe(sys.woundLevels.healthy);

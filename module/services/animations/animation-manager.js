@@ -10,7 +10,7 @@ import { SYS_ID } from "../../config/constants.js";
 import {
   getStanceAnimation,
   getConditionAnimation,
-  isJB2AAvailable,
+  isJb2aAvailable,
   isSequencerAvailable
 } from "./asset-library.js";
 
@@ -28,7 +28,7 @@ const LOAD_WAIT_MS = 5000;
  * Play animation for a stance or condition.
  *
  * Creates a persistent visual effect attached to the actor's token(s).
- * Effect persists until explicitly removed via removeAnimation().
+ * Effect persists until explicitly removed via deleteAnimation().
  *
  * Defensive Coding:
  * - Returns early if Sequencer or JB2A not available
@@ -46,9 +46,9 @@ const LOAD_WAIT_MS = 5000;
  * @param {boolean} [isStance=false] - True if this is a stance, false if condition
  * @returns {Promise<void>}
  */
-export async function playAnimation(actor, statusId, isStance = false) {
+export async function startAnimation(actor, statusId, isStance = false) {
   // Early return: Check module availability
-  if (!isSequencerAvailable() || !isJB2AAvailable()) {
+  if (!isSequencerAvailable() || !isJb2aAvailable()) {
     return;
   }
 
@@ -119,7 +119,7 @@ export async function playAnimation(actor, statusId, isStance = false) {
 /**
  * Remove animation for a stance or condition.
  *
- * Ends the persistent visual effect created by playAnimation().
+ * Ends the persistent visual effect created by startAnimation().
  * Uses Sequencer's effect name pattern matching to find and end effects.
  *
  * Defensive Coding:
@@ -132,7 +132,7 @@ export async function playAnimation(actor, statusId, isStance = false) {
  * @param {string} statusId - The stance or condition ID
  * @returns {Promise<void>}
  */
-export async function removeAnimation(actor, statusId) {
+export async function deleteAnimation(actor, statusId) {
   // Early return: Check module availability
   if (!isSequencerAvailable()) {
     return;
@@ -169,7 +169,7 @@ export async function removeAnimation(actor, statusId) {
  * @param {Actor} actor - The actor to remove all animations from
  * @returns {Promise<void>}
  */
-export async function removeAllAnimations(actor) {
+export async function deleteAllAnimations(actor) {
   // Early return: Check module availability
   if (!isSequencerAvailable()) {
     return;
@@ -210,9 +210,9 @@ async function settleStarts(matches, pattern) {
     [...starting].filter(([name]) => matches(name)).map(([, start]) => start)
   );
   const end = Date.now() + LOAD_WAIT_MS;
-  const loading = () =>
+  const isLoading = () =>
     Sequencer.EffectManager.getEffects({ name: pattern }).some(effect => !effect.ready);
-  while (loading() && Date.now() < end) {
+  while (isLoading() && Date.now() < end) {
     await new Promise(resolve => setTimeout(resolve, 50));
   }
 }

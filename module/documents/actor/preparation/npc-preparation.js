@@ -8,7 +8,7 @@
 
 import { NPC_INSIGHT_RANK, WOUND_LEVEL_ORDER } from "../../../config/game-mechanics.js";
 import { toInt } from "../../../utils/type-coercion.js";
-import { initiativeDice } from "../../../utils/initiative.js";
+import { getInitiativePool } from "../../../utils/initiative.js";
 import {
   prepareTraitsAndRings,
   prepareMovement
@@ -19,7 +19,7 @@ import {
   prepareNpcFormulaWounds,
   prepareVisibleWoundLevels
 } from "../calculations/wound-system.js";
-import { enrichActorItems } from "../calculations/item-enrichment-system.js";
+import { prepareItemFormulas } from "../calculations/item-enrichment-system.js";
 import { applyArmorRules, applyDerivedRules } from "../rules.js";
 
 /**
@@ -47,7 +47,7 @@ export function prepareNpcData(actor, sys, finalizeWoundPenaltiesFn) {
   const sourceRoll = toInt(actor._source.system.initiative.roll);
   const sourceKeep = toInt(actor._source.system.initiative.keep);
   const custom = sourceRoll > 0 && sourceKeep > 0;
-  const formula = initiativeDice({
+  const formula = getInitiativePool({
     insightRank: NPC_INSIGHT_RANK,
     reflexes: toInt(sys._derived.traitsEff.ref)
   });
@@ -91,5 +91,5 @@ export function prepareNpcData(actor, sys, finalizeWoundPenaltiesFn) {
   prepareVisibleWoundLevels(sys, order);
 
   // Enrich embedded items with calculated data
-  enrichActorItems(actor);
+  prepareItemFormulas(actor);
 }

@@ -36,14 +36,14 @@ export function DebouncedFieldMixin(Base) {
      *
      * @type {Function}
      */
-    _updateDebounced;
+    updateDebounced;
 
     /**
      * Initialize debounced update function.
      * Must be called in subclass constructor after super().
      */
     _initializeDebouncing() {
-      this._updateDebounced = foundry.utils.debounce(
+      this.updateDebounced = foundry.utils.debounce(
         this._updateActor.bind(this),
         DEBOUNCE_DELAY_MS
       );
@@ -104,9 +104,9 @@ export function DebouncedFieldMixin(Base) {
           // Validation failed - subclass should handle notification
           return;
         }
-        this._updateDebounced(field, validatedValue);
+        this.updateDebounced(field, validatedValue);
       } else {
-        this._updateDebounced(field, value);
+        this.updateDebounced(field, value);
       }
     }
 
@@ -143,8 +143,8 @@ export function DebouncedFieldMixin(Base) {
      * @returns {Promise<void>}
      */
     async close(options = {}) {
-      if (this._updateDebounced && typeof this._updateDebounced.flush === "function") {
-        await this._updateDebounced.flush();
+      if (this.updateDebounced && typeof this.updateDebounced.flush === "function") {
+        await this.updateDebounced.flush();
       }
       return super.close(options);
     }

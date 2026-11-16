@@ -14,14 +14,14 @@ import { DIALOG_TEMPLATES } from "../../../config/templates.js";
 import { F, T } from "../../../utils/localization.js";
 import { toInt } from "../../../utils/type-coercion.js";
 import {
-  castingSchoolRank,
+  getCastingSchoolRank,
   getAffinityDeficiencyModifier,
-  ringRank
+  ringRankOf
 } from "../../../utils/mechanics.js";
 import { rollCheck } from "../check/roll-check.js";
-import { planSlot, slotDialogData, spendSlot } from "../check/spell-slots.js";
+import { getSlotToSpend, getSlotDialogData, spendSlot } from "../check/spell-slots.js";
 import { applyEffect, effectsOf } from "../../effects/apply.js";
-import { gmMayAllow } from "../../gm-allow.js";
+import { askGmAllow } from "../../gm-allow.js";
 
 /**
  * The elements a universal spell is cast in.
@@ -38,15 +38,15 @@ const UNIVERSAL_ELEMENTS = Object.freeze(["air", "earth", "fire", "water"]);
  * @param {boolean} [options.showDialog=true] - Show the roll dialog
  * @returns {Promise<ChatMessage|null>} The posted message, or null when cancelled or casting is blocked
  */
-export async function SpellCastRoll({ actor, spell, showDialog = true } = {}) {
+export async function rollSpellCast({ actor, spell, showDialog = true } = {}) {
   const spellRing = String(spell.system.ring).toLowerCase();
-  const ring = spellRing === "all" ? await chooseElement(spell) : spellRing;
+  const ring = spellRing === "all" ? await askElement(spell) : spellRing;
   if (!ring) {
     return null;
   }
-  const ringValue = ringRank(actor, ring);
+  const rank = ringRankOf(actor, ring);
   const shift = getAffinityDeficiencyModifier(actor, ring);
-  const schoolRank = castingSchoolRank(actor) + shift;
+  const schoolRank = getCastingSchoolRank(actor) + shift;
   if (schoolRank <= 0) {
     ui.notifications?.warn(
       shift < 0
@@ -58,10 +58,10 @@ export async function SpellCastRoll({ actor, spell, showDialog = true } = {}) {
     return null;
   }
   const mastery = Math.max(1, toInt(spell.system.mastery));
-  if (mastery > schoolRank && !(await castAboveRank(actor, spell, mastery, schoolRank))) {
+  if (mastery > schoolRank && !(await canCastAboveRank(actor, spell, mastery, schoolRank))) {
     return null;
   }
-  const slots = slotDialogData(actor, ring);
+  const slots = getSlotDialogData(actor, ring);
   let slotPath = null;
   let label = `${T("l5r4.ui.mechanics.rolls.spellCasting")}: ${spell.name}`;
   if (shift) {
@@ -72,13 +72,13 @@ export async function SpellCastRoll({ actor, spell, showDialog = true } = {}) {
     actor,
     kind: "spell",
     label,
-    base: { roll: ringValue + schoolRank, keep: ringValue },
+    base: { roll: rank + schoolRank, keep: rank },
     ring,
     tn: 5 + 5 * mastery,
     askForOptions: showDialog,
     extras: { template: DIALOG_TEMPLATES.checkSpell, data: slots },
     prepare: async choices => {
-      const slot = planSlot(actor, ring, choices.slot ?? slots.slot);
+      const slot = getSlotToSpend(actor, ring, choices.slot ?? slots.slot);
       if (!slot) {
         return null;
       }
@@ -88,7 +88,7 @@ export async function SpellCastRoll({ actor, spell, showDialog = true } = {}) {
     after: async message => {
       await spendSlot(actor, slotPath);
       if (message.system.outcome.success && isConcentration(spell)) {
-        await beginConcentration(actor, spell);
+        await startConcentration(actor, spell);
       }
     }
   });
@@ -99,7 +99,7 @@ export async function SpellCastRoll({ actor, spell, showDialog = true } = {}) {
  * @param {Item} spell
  * @returns {Promise<string|null>} The element, or null when the caster cancels
  */
-async function chooseElement(spell) {
+async function askElement(spell) {
   const select = foundry.applications.fields.createSelectInput({
     name: "element",
     options: UNIVERSAL_ELEMENTS.map(value => ({
@@ -128,8 +128,8 @@ async function chooseElement(spell) {
  * @param {number} limit - The caster's School Rank in the spell's element
  * @returns {Promise<boolean>} Whether the cast goes ahead
  */
-function castAboveRank(actor, spell, mastery, limit) {
-  return gmMayAllow({
+function canCastAboveRank(actor, spell, mastery, limit) {
+  return askGmAllow({
     title: spell.name,
     reason: F("l5r4.magic.spells.aboveSchoolRank", {
       spell: spell.name,
@@ -160,7 +160,7 @@ function isConcentration(spell) {
  * @param {Item} spell
  * @returns {Promise<void>}
  */
-async function beginConcentration(actor, spell) {
+async function startConcentration(actor, spell) {
   const old = effectsOf(actor, "concentration").filter(e => e.origin === spell.uuid);
   for (const effect of old) {
     await effect.delete();

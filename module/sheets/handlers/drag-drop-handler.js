@@ -6,7 +6,7 @@
  * drop returns false.
  */
 import { SYS_ID } from "../../config/constants.js";
-import { addItem } from "../../services/purchase.js";
+import { createPurchasedItem } from "../../services/purchase.js";
 
 /**
  * Handler context object provided by actor sheets.
@@ -36,18 +36,18 @@ export class DragDropHandler {
    * @param {DragEvent} event - Browser drag event from Foundry
    * @returns {Promise<Document|Document[]|false>} Created documents or false if unsupported/failed
    */
-  static async handleDrop(context, event) {
+  static async onDrop(context, event) {
     const data = foundry.applications.ux.TextEditor.getDragEventData(event);
     if (!data) {
       return false;
     }
 
     if (data.type === "Item") {
-      return this.handleItemDrop(context, event, data);
+      return this.onItemDrop(context, event, data);
     }
 
     if (data.type === "Actor") {
-      return this.handleActorDrop(context, event, data);
+      return this.onActorDrop(context, event, data);
     }
 
     return false;
@@ -58,7 +58,7 @@ export class DragDropHandler {
    *
    * Resolves the item by UUID and adds a copy of it to the actor through the purchase service, which checks its
    * prerequisites, asks its choices, and replaces a character's Clan, Family, or School
-   * (module/services/purchase.js, addItem).
+   * (module/services/purchase.js, createPurchasedItem).
    *
    * UUID resolution and adding are wrapped in try-catch for defensive error handling.
    *
@@ -68,7 +68,7 @@ export class DragDropHandler {
    * @param {string} data.uuid - Universal unique identifier for the source item
    * @returns {Promise<Item|false>} The created item, or false when nothing was added
    */
-  static async handleItemDrop(context, event, data) {
+  static async onItemDrop(context, event, data) {
     if (!context.actor.isOwner) {
       return false;
     }
@@ -85,7 +85,7 @@ export class DragDropHandler {
         return false;
       }
 
-      return (await addItem(context.actor, item.toObject())) ?? false;
+      return (await createPurchasedItem(context.actor, item.toObject())) ?? false;
     } catch (err) {
       console.warn(`${SYS_ID} DragDropHandler: Failed to drop item`, { err, data });
       return false;
@@ -103,7 +103,7 @@ export class DragDropHandler {
    * @param {object} _data - Parsed drag data (unused)
    * @returns {Promise<false>} Always returns false (not implemented)
    */
-  static async handleActorDrop(_context, _event, _data) {
+  static async onActorDrop(_context, _event, _data) {
     // Stub: Actor drops not currently supported
     return false;
   }

@@ -14,7 +14,7 @@
  */
 
 import { F } from "../utils/localization.js";
-import { statusEffectUpdate } from "../utils/status-data.js";
+import { buildStatusEffectUpdate } from "../utils/status-data.js";
 
 /**
  * The ActiveEffect document class the system sets as `CONFIG.ActiveEffect.documentClass`.
@@ -30,7 +30,7 @@ export default class L5R4ActiveEffect extends foundry.documents.ActiveEffect {
     if (allowed === false) {
       return false;
     }
-    const update = statusEffectUpdate(this._source);
+    const update = buildStatusEffectUpdate(this._source);
     if (update) {
       this.updateSource(update);
     }
@@ -95,7 +95,7 @@ export default class L5R4ActiveEffect extends foundry.documents.ActiveEffect {
     }
     const queues = L5R4ActiveEffect.#groupQueues;
     const previous = queues.get(actor.uuid) ?? Promise.resolve();
-    const next = previous.then(() => L5R4ActiveEffect.#keepNewest(actor, group));
+    const next = previous.then(() => L5R4ActiveEffect.#deleteOlderGroupEffects(actor, group));
     queues.set(actor.uuid, next);
     next.finally(() => {
       if (queues.get(actor.uuid) === next) {
@@ -110,12 +110,12 @@ export default class L5R4ActiveEffect extends foundry.documents.ActiveEffect {
    * @param {string} group
    * @returns {Promise<void>}
    */
-  static async #keepNewest(actor, group) {
+  static async #deleteOlderGroupEffects(actor, group) {
     const members = actor.effects.filter(effect => effect.system.group === group);
-    const age = effect => [effect._stats.createdTime ?? 0, effect.id];
+    const ageOf = effect => [effect._stats.createdTime ?? 0, effect.id];
     const newest = members.reduce((best, effect) => {
-      const [time, id] = age(effect);
-      const [bestTime, bestId] = age(best);
+      const [time, id] = ageOf(effect);
+      const [bestTime, bestId] = ageOf(best);
       return time > bestTime || (time === bestTime && id > bestId) ? effect : best;
     }, members[0]);
     const stale = members.filter(effect => effect !== newest).map(effect => effect.id);

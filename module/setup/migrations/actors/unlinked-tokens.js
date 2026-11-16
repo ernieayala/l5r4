@@ -3,7 +3,7 @@
  * @description Gives unlinked tokens' own items and effects the migrations world actors get.
  */
 import { SYS_ID } from "../../../config/constants.js";
-import { statusEffectUpdate } from "../../../utils/status-data.js";
+import { buildStatusEffectUpdate } from "../../../utils/status-data.js";
 import { migrateEmbeddedItems } from "./embedded-items.js";
 
 /**
@@ -25,7 +25,7 @@ export async function migrateUnlinkedTokens(tokens, label) {
       const items = actor.items.filter(item => token.delta.items.has(item.id));
       await migrateEmbeddedItems(items, `${label}:${token.uuid}`);
       const updates = token.delta.effects
-        .map(effect => statusEffectUpdate(effect._source))
+        .map(effect => buildStatusEffectUpdate(effect._source))
         .filter(Boolean);
       if (updates.length > 0) {
         await actor.updateEmbeddedDocuments("ActiveEffect", updates, { render: false });

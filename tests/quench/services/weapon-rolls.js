@@ -9,7 +9,7 @@
  * - Combined modifiers
  *
  * NOTE: These tests verify MECHANICS (damage calculations), not the service layer.
- * The WeaponRoll service shows dialogs and cannot be reliably tested in Quench.
+ * The rollWeaponDamage service shows dialogs and cannot be reliably tested in Quench.
  *
  * @see module/services/dice/rolls/weapon-roll.js
  */

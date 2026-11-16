@@ -1,6 +1,6 @@
 import { SYS_ID } from "../../module/config/constants.js";
 import { PcActionsHandler } from "../../module/sheets/handlers/pc-actions-handler.js";
-import { SkillRoll } from "../../module/services/dice/rolls/skill-roll.js";
+import { rollSkill } from "../../module/services/dice/rolls/skill-roll.js";
 import { FamilyBonusService } from "../../module/services/family-bonus.js";
 import { buildXpHistory } from "../../module/services/xp/calculator.js";
 import { createTestNPC, createTestPC } from "../fixtures/actor-fixtures.js";
@@ -94,10 +94,10 @@ export function registerDeprecationsTests(quench) {
           const actor = await createTestPC({ name: "Deprecated API: roller" });
           created.push(actor);
           await actor.createEmbeddedDocuments("Item", [createSkillData("Kenjutsu", 3, "agi")]);
-          await SkillRoll({
+          await rollSkill({
             actor,
             skillName: "kenjutsu",
-            actorTrait: 2,
+            traitRank: 2,
             skillRank: 3,
             skillTrait: "agi",
             askForOptions: false
@@ -186,7 +186,7 @@ export function registerDeprecationsTests(quench) {
           await combat.startCombat();
 
           let answered = answerNextDialog("yes");
-          await PcActionsHandler.handleToggleArmorVoid({ actor }, null, { checked: true });
+          await PcActionsHandler.updateArmorVoid({ actor }, null, { checked: true });
           await answered;
           assert.equal(
             actor.effects.filter(e => e.getFlag("l5r4-enhanced", "effectId") === "voidArmor")

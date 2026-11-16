@@ -147,7 +147,7 @@
           "configureAttack": "Configure an NPC attack",
           "contested": "Contested Roll",
           "convertCoin": "Convert to a larger or smaller coin",
-          "currentWoundRank": "Current Wound Rank",
+          "currentWoundLevel": "Current Wound Rank",
           "damageLink": "Damage link",
           "delete": "Remove a document or entry",
           "edit": "Edit",

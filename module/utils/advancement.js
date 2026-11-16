@@ -9,7 +9,7 @@
  * Example: Rank 3, 5 points = 3.5 in decimal form
  */
 
-import { clamp, toNumber } from "./type-coercion.js";
+import { getClamped, toNumber } from "./type-coercion.js";
 
 /**
  * Converts rank-points object to decimal value.
@@ -19,7 +19,7 @@ import { clamp, toNumber } from "./type-coercion.js";
  * @param {number} rp.points - The points value (0-9)
  * @returns {number} Decimal representation (e.g., rank 3 + 5 points = 3.5)
  */
-export function rankPointsToValue(rp) {
+export function toDecimalRank(rp) {
   const r = toNumber(rp?.rank, 0);
   const p = toNumber(rp?.points, 0);
   return r + p / 10;
@@ -35,10 +35,10 @@ export function rankPointsToValue(rp) {
  * @returns {{rank: number, points: number, value: number}} The rank (0-10), the points (0-9), and the
  *   normalized decimal value
  */
-export function valueToRankPoints(value, minRank = 0, maxRank = 10) {
+export function toRankPoints(value, minRank = 0, maxRank = 10) {
   const min = toNumber(minRank, 0);
   const max = toNumber(maxRank, 10);
-  const v = clamp(toNumber(value, 0), min, max);
+  const v = getClamped(toNumber(value, 0), min, max);
 
   // At maximum rank, always return max rank with 0 points
   if (v === max) {
@@ -77,7 +77,7 @@ export function valueToRankPoints(value, minRank = 0, maxRank = 10) {
  * @returns {{rank: number, points: number, value: number}} The new rank, points, and decimal value
  */
 export function applyRankPointsDelta(rp, delta, minRank = 0, maxRank = 10) {
-  const now = rankPointsToValue(rp);
+  const now = toDecimalRank(rp);
   const next = now + toNumber(delta, 0);
-  return valueToRankPoints(next, minRank, maxRank);
+  return toRankPoints(next, minRank, maxRank);
 }
