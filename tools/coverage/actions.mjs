@@ -62,9 +62,9 @@ export function testsName(tests, action) {
  * Join the actions with the tests.
  * @param {object} data
  * @param {{action: string, source: string}[]} data.actions
- * @param {string} data.tests  The Quench batches' text
- * @param {string[]} data.everyAction  The click-through's coverage list
- * @param {Record<string, string>} data.accepted  Untested actions accepted, with the reason
+ * @param {string} data.tests - The Quench batches' text
+ * @param {string[]} data.everyAction - The click-through's coverage list
+ * @param {Record<string, string>} data.accepted - Untested actions accepted, with the reason
  * @returns {{count: number, untested: object[], accepted: string[], stale: string[]}}
  */
 export function auditActions({ actions, tests, everyAction, accepted }) {

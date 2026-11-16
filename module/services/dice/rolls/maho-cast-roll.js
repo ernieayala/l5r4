@@ -1,16 +1,14 @@
 /**
- * Maho Casting Roll Service
- *
- * Blood magic through the roll pipeline (module/services/dice/check/roll-check.js), Core Rulebook pp.267-268
- * (`game-rules/88_maho.md`):
- * - Casting Roll: (Insight Rank + Ring)k(Ring) against TN 5 + 5 × Mastery Level (p.267)
- * - Blood cost: 2 × Mastery Level Wounds, paid before the roll whatever its result (p.268)
- * - One Free Raise per additional full blood cost paid (p.268)
- * - Taint on a successful cast: Mastery Level - 1, at least 1 (p.268)
- * - Master of Blood (its RollOption): 1 Wound less, Taint reduced by the Earth Ring, at least 1 (p.280)
- * - No spell slot
- *
  * @module services/dice/rolls/maho-cast-roll
+ * @description Blood magic through the roll pipeline (module/services/dice/check/roll-check.js):
+ * - Casting Roll: (Insight Rank + Ring)k(Ring) against TN 5 + 5 × Mastery Level
+ * - Blood cost: 2 × Mastery Level Wounds, paid before the roll whatever its result
+ * - One Free Raise per additional full blood cost paid
+ * - Taint on a successful cast: Mastery Level - 1, at least 1
+ * - Master of Blood (its RollOption): 1 Wound less, Taint reduced by the Earth Ring, at least 1
+ * - No spell slot
+ * game-rules/88_maho.md, p.267-268
+ * game-rules/89_shadowlands_taint.md, p.280
  */
 
 import { DIALOG_TEMPLATES } from "../../../config/templates.js";
@@ -23,7 +21,7 @@ import { recordTrackChange } from "../../ledger.js";
 /**
  * Casts a maho spell.
  *
- * @param {Object} options
+ * @param {object} options
  * @param {L5R4Actor} options.actor - The caster
  * @param {Item} options.spell - The maho spell item
  * @param {boolean} [options.showDialog=true] - Show the roll dialog
@@ -73,7 +71,8 @@ export async function MahoCastRoll({ actor, spell, showDialog = true } = {}) {
       }
       const base = Math.max(mastery - 1, 1);
       const taint = masterOfBlood ? Math.max(base - toInt(actor.system.rings.earth), 1) : base;
-      // Through the ledger, so ten points become a Taint Rank (p.275) and the change is logged
+      // Through the ledger, so ten points become a Taint Rank and the change is logged
+      // game-rules/89_shadowlands_taint.md, p.275
       await recordTrackChange(actor, "taint", taint, T("l5r4.magic.maho.taintGained"));
       ui.notifications?.warn(F("l5r4.magic.maho.taintGainedNotification", { taint }));
       return { labelSuffix: ` [${T("l5r4.magic.maho.taintGained")}: ${taint}]` };

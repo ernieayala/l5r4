@@ -1,45 +1,12 @@
 /**
- * Debounced Field Mixin
- *
- * Provides debounced field change handling for ApplicationV2 forms with real-time updates.
- * Prevents excessive actor updates during rapid user input by debouncing field changes.
- *
- * Key Features:
- * - Automatic debounced update setup in constructor
- * - Field change listener attachment in _onRender
- * - Type coercion for checkbox and number fields
- * - Flush pending updates on close
- * - Optional field validation hook
- *
- * Usage:
- * ```javascript
- * import { DebouncedFieldMixin } from "../mixins/debounced-field-mixin.js";
- *
- * export default class MyApp extends DebouncedFieldMixin(
- *   foundry.applications.api.HandlebarsApplicationMixin(
- *     foundry.applications.api.ApplicationV2
- *   )
- * ) {
- *   // Implement required method
- *   async _updateActor(field, value) {
- *     await this.actor.update({ [`system.${field}`]: value });
- *   }
- *
- *   // Optional: Add validation
- *   _validateFieldValue(field, value) {
- *     if (field === "myField" && value < 0) return null;
- *     return value;
- *   }
- * }
- * ```
- *
  * @module mixins/debounced-field-mixin
+ * @description Debounced field saving for ApplicationV2 forms that update an actor while the user types, so rapid
+ * input makes one update instead of many. The class calls `_initializeDebouncing()` in its constructor after
+ * `super()` and implements `_updateActor(field, value)`; it may override `_validateFieldValue(field, value)`, which
+ * returns null to reject a value. The mixin listens for `change` on every `[data-action="update-field"]` field in
+ * `_onRender`, coerces checkbox and number values, and flushes a pending update on close.
  */
-
-// Config imports
 import { SYS_ID } from "../config/constants.js";
-
-// Utils imports
 import { toInt } from "../utils/type-coercion.js";
 
 /**
@@ -53,10 +20,10 @@ export const DEBOUNCE_DELAY_MS = 300;
  * Mixin that adds debounced field change handling to ApplicationV2 classes.
  *
  * Classes using this mixin must implement:
- * - `_updateActor(field, value)` - Method to update the actor with new field value
+ * - `_updateActor(field, value)` - Method to update the actor with new field value.
  *
  * Classes can optionally implement:
- * - `_validateFieldValue(field, value)` - Method to validate field values before update
+ * - `_validateFieldValue(field, value)` - Method to validate field values before update.
  *
  * @param {class} Base - The base class to extend
  * @returns {class} Extended class with debounced field functionality
@@ -68,15 +35,12 @@ export function DebouncedFieldMixin(Base) {
      * Waits DEBOUNCE_DELAY_MS after last change before executing update.
      *
      * @type {Function}
-     * @private
      */
     _updateDebounced;
 
     /**
      * Initialize debounced update function.
      * Must be called in subclass constructor after super().
-     *
-     * @protected
      */
     _initializeDebouncing() {
       this._updateDebounced = foundry.utils.debounce(
@@ -91,7 +55,7 @@ export function DebouncedFieldMixin(Base) {
      *
      * @param {object} context - Render context
      * @param {object} options - Render options
-     * @protected
+     * @override
      */
     _onRender(context, options) {
       super._onRender?.(context, options);
@@ -116,7 +80,6 @@ export function DebouncedFieldMixin(Base) {
      *
      * @param {Event} event - The change event
      * @param {HTMLElement} element - The form field element that changed
-     * @private
      */
     async _onFieldChange(event, element) {
       const field = element.name;
@@ -154,7 +117,6 @@ export function DebouncedFieldMixin(Base) {
      * @param {string} _field - The field name to update
      * @param {*} _value - The new value for the field
      * @abstract
-     * @protected
      */
     async _updateActor(_field, _value) {
       throw new Error(`${this.constructor.name} must implement _updateActor(field, value)`);
@@ -167,7 +129,6 @@ export function DebouncedFieldMixin(Base) {
      * @param {string} field - The field name being validated
      * @param {*} value - The value to validate
      * @returns {*|null} Validated value or null if invalid
-     * @protected
      */
     _validateFieldValue(field, value) {
       // Default: no validation, return value as-is

@@ -1,16 +1,19 @@
 /**
  * @module services/combat/duel
- * @description The iaijutsu duel as a guided card (Core Rulebook pp.87-88):
+ * @description The iaijutsu duel as a guided card:
  * - Assessment: each duelist rolls Iaijutsu / Awareness at TN 10 + the opponent's Insight Rank × 5; a success
  *   learns one fact about the opponent plus one per Raise, which the card leaves to the players and GM to name;
- *   beating the opponent's total by 10 or more gives +1k1 on Focus (+2k2 at Iaijutsu 7, p.140). Either duelist may
- *   concede here.
- * - Focus: a Contested Iaijutsu / Void roll (+5 at Iaijutsu 5, p.140); beating the opponent by 5 or more wins the
- *   first strike, with a Free Raise on the strike per further 5; otherwise the strike is kharmic (simultaneous).
+ *   beating the opponent's total by 10 or more gives +1k1 on Focus (+2k2 at Iaijutsu 7, a Mastery Ability). Either
+ *   duelist may concede here.
+ * - Focus: a Contested Iaijutsu / Void roll (+5 at Iaijutsu 5, a Mastery Ability); beating the opponent by 5 or
+ *   more wins the first strike, with a Free Raise on the strike per further 5; otherwise the strike is kharmic
+ *   (simultaneous).
  * - Strike: Iaijutsu / Reflexes attacks against the opponent's Armor TN, posted as attacks, so damage follows
  *   through the attack card.
  *
  * The GM starts a duel from the token controls with one token selected and one targeted.
+ * game-rules/39_iaijutsu_dueling.md, p.87-88
+ * game-rules/60_bugei_skills.md, p.140
  */
 
 import { CHAT_TEMPLATES } from "../../config/templates.js";
@@ -19,17 +22,67 @@ import { toInt } from "../../utils/type-coercion.js";
 import { rollCheck } from "../dice/check/roll-check.js";
 import { defineFlow, mayActFor, skillRequest, startFlow } from "./flow.js";
 
-/** Assessment margin that wins +1k1 on Focus (p.87). */
+/**
+ * Assessment margin that wins +1k1 on Focus.
+ * game-rules/39_iaijutsu_dueling.md, p.87
+ */
 const ASSESSMENT_EDGE = 10;
 
-/** Focus margin that wins the first strike, and each further step a Free Raise (p.87). */
+/**
+ * Focus margin that wins the first strike, and each further step a Free Raise.
+ * game-rules/39_iaijutsu_dueling.md, p.87
+ */
 const FOCUS_STEP = 5;
 
 /**
- * What a duelist's Iaijutsu Mastery Abilities add (p.140): from Rank 5 a Free Raise on Focus, counted as +5 since
- * Focus has no TN (Ernie's ruling, 2026-11-14); from Rank 7 the Assessment edge is +2k2 instead of +1k1.
+ * Start a duel between two actors (on the GM). A Dazed character cannot fight an iaijutsu duel.
+ * game-rules/41_conditional_effects.md, p.89
+ * @param {Actor} first
+ * @param {Actor} second
+ * @returns {Promise<ChatMessage|null>} null when a duelist is Dazed
+ */
+export function startDuel(first, second) {
+  const dazed = [first, second].find(actor => actor.statuses.has("dazed"));
+  if (dazed) {
+    ui.notifications?.warn(F("l5r4.ui.combat.duel.dazed", { name: dazed.name }));
+    return null;
+  }
+  return startFlow(
+    "duel",
+    {
+      duelists: [first.uuid, second.uuid],
+      stage: "assessment",
+      rolls: { assessment: [null, null], focus: [null, null], strike: [null, null] },
+      focusBonus: null,
+      facts: null,
+      firstStrike: null,
+      freeRaises: 0,
+      conceded: null
+    },
+    first
+  );
+}
+
+/**
+ * The GM's "Iaijutsu duel" control: the selected token's actor against the targeted token's actor.
+ * @returns {Promise<void>}
+ */
+export async function duelFromCanvas() {
+  const first = canvas.tokens.controlled[0]?.actor;
+  const second = [...game.user.targets][0]?.actor;
+  if (!first || !second || first === second) {
+    ui.notifications?.warn(T("l5r4.ui.combat.duel.pick"));
+    return;
+  }
+  await startDuel(first, second);
+}
+
+/**
+ * What a duelist's Iaijutsu Mastery Abilities add: from Rank 5 a Free Raise on Focus, counted as +5 since Focus has
+ * no TN (Ernie's ruling); from Rank 7 the Assessment edge is +2k2 instead of +1k1.
+ * game-rules/60_bugei_skills.md, p.140
  * @param {Actor} actor
- * @returns {{focusTotal: number, edge: number}}  Flat bonus on Focus; rolled and kept dice the edge gives
+ * @returns {{focusTotal: number, edge: number}} Flat bonus on Focus; rolled and kept dice the edge gives
  */
 function iaijutsuMastery(actor) {
   const skill = actor.items.find(i => i.type === "skill" && i.name.toLowerCase() === "iaijutsu");
@@ -41,10 +94,10 @@ function iaijutsuMastery(actor) {
  * Roll a duel stage for a duelist: Iaijutsu with the stage's Trait or Ring.
  * @param {Actor} actor
  * @param {object} spec
- * @param {string} spec.stage         assessment, focus, or strike
+ * @param {string} spec.stage - assessment, focus, or strike
  * @param {Actor} spec.opponent
- * @param {number} [spec.focusBonus]  +1k1 won at Assessment
- * @param {number} [spec.freeRaises]  Free Raises won at Focus
+ * @param {number} [spec.focusBonus] - +1k1 won at Assessment
+ * @param {number} [spec.freeRaises] - Free Raises won at Focus
  * @returns {Promise<ChatMessage|null>}
  */
 function rollStage(actor, { stage, opponent, focusBonus = 0, freeRaises = 0 }) {
@@ -272,45 +325,3 @@ defineFlow("duel", {
     });
   }
 });
-
-/**
- * Start a duel between two actors (on the GM). A Dazed character cannot fight an iaijutsu duel (p.89).
- * @param {Actor} first
- * @param {Actor} second
- * @returns {Promise<ChatMessage|null>} null when a duelist is Dazed
- */
-export function startDuel(first, second) {
-  const dazed = [first, second].find(actor => actor.statuses.has("dazed"));
-  if (dazed) {
-    ui.notifications?.warn(F("l5r4.ui.combat.duel.dazed", { name: dazed.name }));
-    return null;
-  }
-  return startFlow(
-    "duel",
-    {
-      duelists: [first.uuid, second.uuid],
-      stage: "assessment",
-      rolls: { assessment: [null, null], focus: [null, null], strike: [null, null] },
-      focusBonus: null,
-      facts: null,
-      firstStrike: null,
-      freeRaises: 0,
-      conceded: null
-    },
-    first
-  );
-}
-
-/**
- * The GM's "Iaijutsu duel" control: the selected token's actor against the targeted token's actor.
- * @returns {Promise<void>}
- */
-export async function duelFromCanvas() {
-  const first = canvas.tokens.controlled[0]?.actor;
-  const second = [...game.user.targets][0]?.actor;
-  if (!first || !second || first === second) {
-    ui.notifications?.warn(T("l5r4.ui.combat.duel.pick"));
-    return;
-  }
-  await startDuel(first, second);
-}

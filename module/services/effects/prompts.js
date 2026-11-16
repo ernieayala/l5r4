@@ -4,15 +4,18 @@
  * posts them on combat events (module/services/effects/combat-events.js) or after damage; the owner clicks, rolls
  * through the roll dialog with every choice it offers, and the result is applied.
  *
- * - `save`: a PeriodicSave (Dazed and Stunned in the Reactions stage, p.89). Success ends the effect; a failure
- *   lowers the next TN (Dazed, decision 5) or ends the effect after the next Round (Stunned).
- * - `fullDefense`: the Defense / Reflexes roll of Full Defense (p.84), half of it (rounded up) to Armor TN until the
- *   next Turn.
- * - `concentration`: the Willpower roll when a concentrating caster takes more Wounds than the Earth Ring (p.166);
- *   failure ends the Concentration and the effects it holds up.
+ * - `save`: a PeriodicSave (Dazed and Stunned in the Reactions stage). Success ends the effect; a failure lowers
+ *   the next TN (Dazed, decision 5) or ends the effect after the next Round (Stunned).
+ * - `fullDefense`: the Defense / Reflexes roll of Full Defense, half of it (rounded up) to Armor TN until the next
+ *   Turn.
+ * - `concentration`: the Willpower roll when a concentrating caster takes more Wounds than the Earth Ring; failure
+ *   ends the Concentration and the effects it holds up.
  *
  * The card's request is stored in its message's flags, which only its author (the GM) can change; the button
  * reads them back and never the card's HTML.
+ * game-rules/41_conditional_effects.md, p.89
+ * game-rules/36_stances.md, p.84
+ * game-rules/67_universal_spells.md, p.166
  */
 
 import { SYS_ID } from "../../config/constants.js";
@@ -25,34 +28,8 @@ import { rollCheck } from "../dice/check/roll-check.js";
 import { SkillRoll } from "../dice/rolls/skill-roll.js";
 import { applyEffect, ownTurnStart } from "./apply.js";
 
-/**
- * Post a prompt card for an actor.
- * @param {Actor} actor
- * @param {object} request  Stored in the message flags; `kind` names the handler
- * @param {{title: string, text?: string, button: string}} card
- * @returns {Promise<ChatMessage>}
- */
-async function postPrompt(actor, request, card) {
-  const content = await foundry.applications.handlebars.renderTemplate(
-    CHAT_TEMPLATES.effectPrompt,
-    card
-  );
-  return ChatMessage.create({
-    speaker: ChatMessage.getSpeaker({ actor }),
-    content,
-    flags: { [SYS_ID]: { prompt: { actorUuid: actor.uuid, ...request } } }
-  });
-}
-
-/**
- * Label of a save's roll: the Ring or Trait name.
- * @param {string} roll  "ring:earth" or "trait:wil"
- * @returns {string}
- */
-function rollLabel(roll) {
-  const [type, key] = roll.split(":");
-  return T(type === "ring" ? `l5r4.ui.mechanics.rings.${key}` : `l5r4.ui.mechanics.traits.${key}`);
-}
+/** Name of the GM query that ends a Concentration for a player. */
+const END_CONCENTRATION_QUERY = `${SYS_ID}.endConcentration`;
 
 /**
  * Post a card for each PeriodicSave of the actor's effects that rolls on this event.
@@ -80,7 +57,9 @@ export async function promptSaves(actor, event) {
 }
 
 /**
- * Post the Full Defense card: the stance is declared again at the start of the Turn (p.82, p.84).
+ * Post the Full Defense card: the stance is declared again at the start of the Turn.
+ * game-rules/31_combat_round.md, p.82
+ * game-rules/36_stances.md, p.84
  * @param {Actor} actor
  * @returns {Promise<ChatMessage>}
  */
@@ -97,9 +76,10 @@ export function promptFullDefense(actor) {
 }
 
 /**
- * Post the Concentration check: Willpower at TN 20 + 5 per Mastery Level of the spell (p.166).
+ * Post the Concentration check: Willpower at TN 20 + 5 per Mastery Level of the spell.
+ * game-rules/67_universal_spells.md, p.166
  * @param {Actor} actor
- * @param {ActiveEffect} effect  The Concentration effect; its level is the spell's Mastery Level
+ * @param {ActiveEffect} effect - The Concentration effect; its level is the spell's Mastery Level
  * @returns {Promise<ChatMessage>}
  */
 export function promptConcentration(actor, effect) {
@@ -116,32 +96,9 @@ export function promptConcentration(actor, effect) {
 }
 
 /**
- * Roll a Ring or a Trait against a TN through the roll pipeline.
- * @param {Actor} actor
- * @param {string} roll  "ring:<ring>" or "trait:<trait>"
- * @param {number} tn
- * @param {string} label
- * @returns {Promise<ChatMessage|null>}
- */
-function rollAgainst(actor, roll, tn, label) {
-  const [type, key] = roll.split(":");
-  const rank =
-    type === "ring"
-      ? toInt(key === "void" ? actor.system.rings.void.rank : actor.system.rings[key])
-      : getEffectiveTrait(actor, key);
-  return rollCheck({
-    actor,
-    kind: type,
-    label,
-    base: { roll: rank, keep: rank },
-    [type]: key,
-    tn
-  });
-}
-
-/**
- * Roll a Full Defense: Defense / Reflexes, and half the total, rounded up, to Armor TN until the next Turn
- * (p.84). The bonus replaces any earlier one.
+ * Roll a Full Defense: Defense / Reflexes, and half the total, rounded up, to Armor TN until the next Turn. The
+ * bonus replaces any earlier one.
+ * game-rules/36_stances.md, p.84
  * @param {Actor} actor
  * @returns {Promise<ChatMessage|null>}
  */
@@ -169,9 +126,6 @@ export async function rollFullDefense(actor) {
   });
   return message;
 }
-
-/** Name of the GM query that ends a Concentration for a player. */
-const END_CONCENTRATION_QUERY = `${SYS_ID}.endConcentration`;
 
 /**
  * End a Concentration and every effect it holds up: effects whose origin is the Concentration effect, on any actor
@@ -267,5 +221,58 @@ export function bindPromptCard(message, html) {
   html.querySelector("[data-action='effect-prompt']")?.addEventListener("click", event => {
     event.preventDefault();
     onPromptClick(message);
+  });
+}
+
+/**
+ * Post a prompt card for an actor.
+ * @param {Actor} actor
+ * @param {object} request - Stored in the message flags; `kind` names the handler
+ * @param {{title: string, text?: string, button: string}} card
+ * @returns {Promise<ChatMessage>}
+ */
+async function postPrompt(actor, request, card) {
+  const content = await foundry.applications.handlebars.renderTemplate(
+    CHAT_TEMPLATES.effectPrompt,
+    card
+  );
+  return ChatMessage.create({
+    speaker: ChatMessage.getSpeaker({ actor }),
+    content,
+    flags: { [SYS_ID]: { prompt: { actorUuid: actor.uuid, ...request } } }
+  });
+}
+
+/**
+ * Label of a save's roll: the Ring or Trait name.
+ * @param {string} roll - "ring:earth" or "trait:wil"
+ * @returns {string}
+ */
+function rollLabel(roll) {
+  const [type, key] = roll.split(":");
+  return T(type === "ring" ? `l5r4.ui.mechanics.rings.${key}` : `l5r4.ui.mechanics.traits.${key}`);
+}
+
+/**
+ * Roll a Ring or a Trait against a TN through the roll pipeline.
+ * @param {Actor} actor
+ * @param {string} roll - "ring:<ring>" or "trait:<trait>"
+ * @param {number} tn
+ * @param {string} label
+ * @returns {Promise<ChatMessage|null>}
+ */
+function rollAgainst(actor, roll, tn, label) {
+  const [type, key] = roll.split(":");
+  const rank =
+    type === "ring"
+      ? toInt(key === "void" ? actor.system.rings.void.rank : actor.system.rings[key])
+      : getEffectiveTrait(actor, key);
+  return rollCheck({
+    actor,
+    kind: type,
+    label,
+    base: { roll: rank, keep: rank },
+    [type]: key,
+    tn
   });
 }

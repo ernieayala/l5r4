@@ -1,14 +1,13 @@
 /**
- * Spell Cast Roll Service
- *
- * A Spell Casting Roll for a spell item (pp.80, 163-164, `game-rules/66_magic_and_spell_casting.md`) through the
- * roll pipeline (module/services/dice/check/roll-check.js): (Ring + School Rank)k(Ring), the School Rank plus 1
- * for the school's Affinity or minus 1 for its Deficiency, TN 5 + 5 × Mastery Level, and a spell slot spent once
- * the roll is made. A universal spell is cast in the element the caster picks (pp.164-165); a spell above the
- * caster's School Rank in its element cannot be cast, though a GM may allow it (p.164). A successful cast of a
- * Concentration spell starts a Concentration (p.166).
- *
  * @module services/dice/rolls/spell-cast-roll
+ * @description A Spell Casting Roll for a spell item through the roll pipeline
+ * (module/services/dice/check/roll-check.js): (Ring + School Rank)k(Ring), the School Rank plus 1 for the school's
+ * Affinity or minus 1 for its Deficiency, TN 5 + 5 × Mastery Level, and a spell slot spent once the roll is made. A
+ * universal spell is cast in the element the caster picks; a spell above the caster's School Rank in its element
+ * cannot be cast, though a GM may allow it. A successful cast of a Concentration spell starts a Concentration.
+ * game-rules/29_types_of_rolls.md, p.80
+ * game-rules/66_magic_and_spell_casting.md, p.163-164
+ * game-rules/67_universal_spells.md, p.164-166
  */
 
 import { DIALOG_TEMPLATES } from "../../../config/templates.js";
@@ -24,55 +23,16 @@ import { planSlot, slotDialogData, spendSlot } from "../check/spell-slots.js";
 import { applyEffect, effectsOf } from "../../effects/apply.js";
 import { gmMayAllow } from "../../gm-allow.js";
 
-/** The elements a universal spell is cast in (pp.164-165). */
+/**
+ * The elements a universal spell is cast in.
+ * game-rules/67_universal_spells.md, p.164-165
+ */
 const UNIVERSAL_ELEMENTS = Object.freeze(["air", "earth", "fire", "water"]);
-
-/**
- * Ask which element to cast a universal spell in.
- * @param {Item} spell
- * @returns {Promise<string|null>} The element, or null when the caster cancels
- */
-async function chooseElement(spell) {
-  const select = foundry.applications.fields.createSelectInput({
-    name: "element",
-    options: UNIVERSAL_ELEMENTS.map(value => ({
-      value,
-      label: T(`l5r4.ui.mechanics.rings.${value}`)
-    }))
-  });
-  return foundry.applications.api.DialogV2.prompt({
-    window: { title: spell.name },
-    content: `<div class="form-group"><label>${foundry.utils.escapeHTML(
-      F("l5r4.magic.spells.chooseElement", { spell: spell.name })
-    )}</label>${select.outerHTML}</div>`,
-    ok: { callback: (_event, button) => button.form.elements.element.value || null },
-    rejectClose: false,
-    modal: true
-  });
-}
-
-/**
- * A spell above the caster's School Rank in its element cannot be cast (p.164). A player is told so; a GM is asked
- * whether to cast it anyway (Ernie's ruling, 2026-11-14).
- * @returns {Promise<boolean>} Whether the cast goes ahead
- */
-function castAboveRank(actor, spell, mastery, limit) {
-  return gmMayAllow({
-    title: spell.name,
-    reason: F("l5r4.magic.spells.aboveSchoolRank", {
-      spell: spell.name,
-      mastery,
-      name: actor.name,
-      limit
-    }),
-    ask: T("l5r4.magic.spells.aboveSchoolRankGM")
-  });
-}
 
 /**
  * Casts a spell.
  *
- * @param {Object} options
+ * @param {object} options
  * @param {L5R4Actor} options.actor - The caster
  * @param {Item} options.spell - The spell item
  * @param {boolean} [options.showDialog=true] - Show the roll dialog
@@ -135,7 +95,55 @@ export async function SpellCastRoll({ actor, spell, showDialog = true } = {}) {
 }
 
 /**
- * Whether a spell's Duration is Concentration (p.166), read from its duration text.
+ * Ask which element to cast a universal spell in.
+ * @param {Item} spell
+ * @returns {Promise<string|null>} The element, or null when the caster cancels
+ */
+async function chooseElement(spell) {
+  const select = foundry.applications.fields.createSelectInput({
+    name: "element",
+    options: UNIVERSAL_ELEMENTS.map(value => ({
+      value,
+      label: T(`l5r4.ui.mechanics.rings.${value}`)
+    }))
+  });
+  return foundry.applications.api.DialogV2.prompt({
+    window: { title: spell.name },
+    content: `<div class="form-group"><label>${foundry.utils.escapeHTML(
+      F("l5r4.magic.spells.chooseElement", { spell: spell.name })
+    )}</label>${select.outerHTML}</div>`,
+    ok: { callback: (_event, button) => button.form.elements.element.value || null },
+    rejectClose: false,
+    modal: true
+  });
+}
+
+/**
+ * Whether a spell above the caster's School Rank in its element goes ahead: the book forbids the cast; a player is
+ * told so, and a GM is asked whether to cast it anyway (Ernie's ruling).
+ * game-rules/66_magic_and_spell_casting.md, p.164
+ * @param {Actor} actor - The caster
+ * @param {Item} spell - The spell
+ * @param {number} mastery - The spell's Mastery Level
+ * @param {number} limit - The caster's School Rank in the spell's element
+ * @returns {Promise<boolean>} Whether the cast goes ahead
+ */
+function castAboveRank(actor, spell, mastery, limit) {
+  return gmMayAllow({
+    title: spell.name,
+    reason: F("l5r4.magic.spells.aboveSchoolRank", {
+      spell: spell.name,
+      mastery,
+      name: actor.name,
+      limit
+    }),
+    ask: T("l5r4.magic.spells.aboveSchoolRankGM")
+  });
+}
+
+/**
+ * Whether a spell's Duration is Concentration, read from its duration text.
+ * game-rules/67_universal_spells.md, p.166
  * @param {Item} spell
  * @returns {boolean}
  */
@@ -145,8 +153,9 @@ function isConcentration(spell) {
 
 /**
  * Start a Concentration on the caster for the cast spell: a "concentration" effect whose level is the spell's
- * Mastery Level, for the Willpower check when damaged (p.166). Effects that last while it lasts take it as origin.
- * A new Concentration on the same spell replaces the old one.
+ * Mastery Level, for the Willpower check when damaged. Effects that last while it lasts take it as origin. A new
+ * Concentration on the same spell replaces the old one.
+ * game-rules/67_universal_spells.md, p.166
  * @param {Actor} actor
  * @param {Item} spell
  * @returns {Promise<void>}

@@ -20,8 +20,8 @@ export function registeredSettings(text) {
  * Join the settings with the tests.
  * @param {object} data
  * @param {string[]} data.settings
- * @param {string} data.tests  The Quench batches' text
- * @param {Record<string, string>} data.accepted  Untested settings accepted, with the reason
+ * @param {string} data.tests - The Quench batches' text
+ * @param {Record<string, string>} data.accepted - Untested settings accepted, with the reason
  * @returns {{count: number, untested: string[], accepted: string[], stale: string[]}}
  */
 export function auditSettings({ settings, tests, accepted }) {

@@ -1,11 +1,8 @@
 /**
- * Simple Roll Service
- *
- * A roll from a pool the caller already knows, through the roll pipeline
+ * @module services/dice/rolls/simple-roll
+ * @description A roll from a pool the caller already knows, through the roll pipeline
  * (module/services/dice/check/roll-check.js): NPC attacks and damage from the stat block, an unskilled weapon attack,
  * an NPC Trait or Ring Roll, or a plain XkY roll.
- *
- * @module services/dice/rolls/simple-roll
  */
 
 import { T } from "../../../utils/localization.js";
@@ -18,10 +15,10 @@ import { resolveActor } from "../resources/void-points.js";
  * Executes a roll from a known pool.
  *
  * Pool source, in order: diceRoll/diceKeep when both are given, else traitRank (a Trait Roll), else ringRank (a
- * Ring Roll).
+ * Ring Roll). With `untrained` the roll is an Unskilled Roll.
+ * game-rules/30_skill_rolls_expanded.md, p.80
  *
- * @async
- * @param {Object} params
+ * @param {object} params
  * @param {string|null} [params.rollName=null] - Name for a plain roll's label
  * @param {number|null} [params.diceRoll=null] - Rolled dice
  * @param {number|null} [params.diceKeep=null] - Kept dice
@@ -32,7 +29,7 @@ import { resolveActor } from "../resources/void-points.js";
  * @param {number} [params.modifier=0] - Flat bonus from the stat block, listed as a modifier
  * @param {string|null} [params.rollType=null] - "attack", "damage", or null
  * @param {L5R4Actor|null} [params.actor=null] - The roller
- * @param {boolean} [params.untrained=false] - An Unskilled Roll (p.80)
+ * @param {boolean} [params.untrained=false] - An Unskilled Roll
  * @param {string|null} [params.weaponId=null] - The attacking weapon's item id
  * @param {boolean} [params.isBow=false] - The attack starts as ranged
  * @param {string|null} [params.skillName=null] - Skill the attack would use, for armor penalties and rules

@@ -1,8 +1,8 @@
 /**
- * @module armor-penalties
+ * @module utils/armor-penalties
  * @description Calculates armor TN penalties for L5R4 combat and skill rolls.
  *
- * L5R4 armor types impose different penalties (Core Rulebook p.198, `game-rules/73_armor.md`):
+ * L5R4 armor types impose different penalties:
  * - Ashigaru: No penalties
  * - Light: Penalizes Athletics and Stealth skills
  * - Heavy: Penalizes Skill Rolls using Agility or Reflexes
@@ -10,13 +10,20 @@
  *
  * All penalties are +5 TN when applicable.
  * When wearing multiple armors, only the highest penalty applies.
+ * game-rules/73_armor.md, p.198
  */
 
 import { ARMOR_TN_PENALTY } from "../config/game-mechanics.js";
 
 /**
+ * Skills that receive TN penalties when wearing light armor.
+ * @constant {Set<string>}
+ */
+const LIGHT_ARMOR_PENALIZED_SKILLS = Object.freeze(new Set(["athletics", "stealth"]));
+
+/**
  * Armor type constants for L5R4 armor system.
- * @constant {Object}
+ * @constant {object}
  * @property {string} ASHIGARU - Ashigaru armor (no penalties)
  * @property {string} LIGHT - Light armor (penalizes Athletics/Stealth)
  * @property {string} HEAVY - Heavy armor (penalizes Agility/Reflexes)
@@ -30,28 +37,16 @@ export const ARMOR_TYPES = Object.freeze({
 });
 
 /**
- * Skills that receive TN penalties when wearing light armor.
- * @constant {Set<string>}
- * @private
- */
-const LIGHT_ARMOR_PENALIZED_SKILLS = Object.freeze(new Set(["athletics", "stealth"]));
-
-/**
  * Calculates total armor TN penalty for an actor.
  *
  * Checks all equipped armor and returns the highest applicable penalty.
  * Penalties depend on armor type, skill being used, trait being rolled,
- * and whether the character is mounted.
- *
- * @param {Object} actor - Foundry actor document
+ * and whether the character is mounted. Athletics in light armor gives 5, an Agility Skill Roll in heavy
+ * armor gives 5, and an Agility roll in riding armor while mounted gives 0.
+ * @param {object} actor - Foundry actor document
  * @param {string|null} [skillName=null] - Name of skill being rolled (e.g., "athletics")
  * @param {string|null} [traitName=null] - Name of trait being rolled (e.g., "agi", "ref")
  * @returns {number} TN penalty (0 or 5)
- *
- * @example
- * getArmorTNPenalty(actor, "athletics") // Returns 5 if wearing light armor
- * getArmorTNPenalty(actor, null, "agi") // Returns 5 if wearing heavy armor
- * getArmorTNPenalty(actor, null, "agi") // Returns 0 if mounted and wearing riding armor
  */
 export function getArmorTNPenalty(actor, skillName = null, traitName = null) {
   if (!actor?.items) {
@@ -85,106 +80,15 @@ export function getArmorTNPenalty(actor, skillName = null, traitName = null) {
 }
 
 /**
- * Calculates TN penalty for a single piece of armor.
- *
- * @param {string} armorType - Type of armor (from ARMOR_TYPES)
- * @param {string|null} skillName - Skill being rolled (lowercase)
- * @param {string|null} traitName - Trait being rolled (lowercase)
- * @param {boolean} isMounted - Whether character is mounted
- * @returns {number} TN penalty (0 or 5)
- * @private
- */
-function _calculateSingleArmorPenalty(armorType, skillName, traitName, isMounted) {
-  switch (armorType) {
-    case ARMOR_TYPES.ASHIGARU:
-      // Ashigaru armor has no penalties
-      return 0;
-
-    case ARMOR_TYPES.LIGHT:
-      // Light armor penalizes Athletics and Stealth skills
-      if (skillName && LIGHT_ARMOR_PENALIZED_SKILLS.has(skillName)) {
-        return ARMOR_TN_PENALTY;
-      }
-      return 0;
-
-    case ARMOR_TYPES.HEAVY:
-      // Heavy armor penalizes Skill Rolls using Agility or Reflexes; a plain Trait roll is not one (p.198)
-      if (skillName && (traitName === "agi" || traitName === "ref")) {
-        return ARMOR_TN_PENALTY;
-      }
-      return 0;
-
-    case ARMOR_TYPES.RIDING:
-      // Riding armor has no penalty when mounted
-      if (isMounted) {
-        return 0;
-      }
-      // On foot, every roll using Agility or Reflexes, Trait rolls included (p.198)
-      if (traitName === "agi" || traitName === "ref") {
-        return ARMOR_TN_PENALTY;
-      }
-      return 0;
-
-    default:
-      // Unknown armor types default to light armor behavior
-      if (skillName && LIGHT_ARMOR_PENALIZED_SKILLS.has(skillName)) {
-        return ARMOR_TN_PENALTY;
-      }
-      return 0;
-  }
-}
-
-/**
- * Checks if character has mounted status effect.
- *
- * Checks both Foundry v10+ statuses collection and legacy effect flags.
- *
- * @param {Object} actor - Foundry actor document
- * @returns {boolean} True if character is mounted
- * @private
- */
-function _isCharacterMounted(actor) {
-  if (!actor) {
-    return false;
-  }
-
-  // Check active effects for mounted status (legacy method)
-  if (actor.effects) {
-    for (const effect of actor.effects) {
-      if (!effect || effect.disabled) {
-        continue;
-      }
-      // Check both v10+ statuses and legacy flags
-      const statusId = effect.statuses?.values?.()?.next?.()?.value ?? effect.flags?.core?.statusId;
-      if (statusId === "mounted") {
-        return true;
-      }
-    }
-  }
-
-  // Check statuses collection (v10+ method)
-  if (actor.statuses?.has?.("mounted")) {
-    return true;
-  }
-
-  return false;
-}
-
-/**
  * Gets human-readable description of armor penalty.
  *
  * Returns formatted string showing which armor is causing the penalty.
- * Returns null if no penalty applies.
- *
- * @param {Object} actor - Foundry actor document
+ * Returns null if no penalty applies: Athletics in light armor gives "Light Armor: +5 TN", and an actor
+ * with no penalty gives null.
+ * @param {object} actor - Foundry actor document
  * @param {string|null} [skillName=null] - Name of skill being rolled
  * @param {string|null} [traitName=null] - Name of trait being rolled
  * @returns {string|null} Description like "Heavy Armor: +5 TN" or null
- *
- * @example
- * getArmorPenaltyDescription(actor, "athletics") // "Light Armor: +5 TN"
- * getArmorPenaltyDescription(actor, null, "agi") // "Heavy Armor: +5 TN"
- * getArmorPenaltyDescription(actor) // null (no penalty)
  */
 export function getArmorPenaltyDescription(actor, skillName = null, traitName = null) {
   const penalty = getArmorTNPenalty(actor, skillName, traitName);
@@ -217,4 +121,89 @@ export function getArmorPenaltyDescription(actor, skillName = null, traitName = 
   }
 
   return null;
+}
+
+/**
+ * Calculates TN penalty for a single piece of armor.
+ * game-rules/73_armor.md, p.198
+ * @param {string} armorType - Type of armor (from ARMOR_TYPES)
+ * @param {string|null} skillName - Skill being rolled (lowercase)
+ * @param {string|null} traitName - Trait being rolled (lowercase)
+ * @param {boolean} isMounted - Whether character is mounted
+ * @returns {number} TN penalty (0 or 5)
+ */
+function _calculateSingleArmorPenalty(armorType, skillName, traitName, isMounted) {
+  switch (armorType) {
+    case ARMOR_TYPES.ASHIGARU:
+      // Ashigaru armor has no penalties
+      return 0;
+
+    case ARMOR_TYPES.LIGHT:
+      // Light armor penalizes Athletics and Stealth skills
+      if (skillName && LIGHT_ARMOR_PENALIZED_SKILLS.has(skillName)) {
+        return ARMOR_TN_PENALTY;
+      }
+      return 0;
+
+    case ARMOR_TYPES.HEAVY:
+      // Heavy armor penalizes Skill Rolls using Agility or Reflexes; a plain Trait roll is not one
+      // game-rules/73_armor.md, p.198
+      if (skillName && (traitName === "agi" || traitName === "ref")) {
+        return ARMOR_TN_PENALTY;
+      }
+      return 0;
+
+    case ARMOR_TYPES.RIDING:
+      // Riding armor has no penalty when mounted
+      if (isMounted) {
+        return 0;
+      }
+      // On foot, every roll using Agility or Reflexes, Trait rolls included
+      // game-rules/73_armor.md, p.198
+      if (traitName === "agi" || traitName === "ref") {
+        return ARMOR_TN_PENALTY;
+      }
+      return 0;
+
+    default:
+      // Unknown armor types default to light armor behavior
+      if (skillName && LIGHT_ARMOR_PENALIZED_SKILLS.has(skillName)) {
+        return ARMOR_TN_PENALTY;
+      }
+      return 0;
+  }
+}
+
+/**
+ * Checks if character has mounted status effect.
+ *
+ * Checks both Foundry v10+ statuses collection and legacy effect flags.
+ * @param {object} actor - Foundry actor document
+ * @returns {boolean} True if character is mounted
+ */
+function _isCharacterMounted(actor) {
+  if (!actor) {
+    return false;
+  }
+
+  // Check active effects for mounted status (legacy method)
+  if (actor.effects) {
+    for (const effect of actor.effects) {
+      if (!effect || effect.disabled) {
+        continue;
+      }
+      // Check both v10+ statuses and legacy flags
+      const statusId = effect.statuses?.values?.()?.next?.()?.value ?? effect.flags?.core?.statusId;
+      if (statusId === "mounted") {
+        return true;
+      }
+    }
+  }
+
+  // Check statuses collection (v10+ method)
+  if (actor.statuses?.has?.("mounted")) {
+    return true;
+  }
+
+  return false;
 }

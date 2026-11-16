@@ -1,47 +1,31 @@
 /**
  * @module config/game-mechanics
- * @description Core L5R4 game mechanics constants and modifiers.
- *
- * Defines XP costs, combat modifiers, and other mechanical values from the
- * Legend of the Five Rings 4th Edition rulebook. These constants ensure
- * consistent application of game rules across the system.
- *
- * All values are frozen to prevent runtime modification and maintain
- * mechanical integrity.
+ * @description Core L5R4 game mechanics constants and modifiers: XP costs, combat modifiers, and other mechanical
+ * values from the Legend of the Five Rings 4th Edition rulebook, so every part of the system applies the same
+ * numbers. Object and array values are frozen.
  */
-
-const freeze = Object.freeze;
 
 /**
  * XP multiplier for increasing Ring/Trait ranks.
- * Cost = new rank × TRAIT_XP_MULTIPLIER
+ * Cost = new rank × TRAIT_XP_MULTIPLIER, so raising Agility from 3 to 4 costs 16 XP.
  * @type {number}
  * @constant
- * @example
- * // Cost to raise Agility from 3 to 4
- * const cost = 4 * TRAIT_XP_MULTIPLIER; // 16 XP
  */
 export const TRAIT_XP_MULTIPLIER = 4;
 
 /**
  * XP multiplier for increasing Void Ring rank.
- * Cost = new rank × VOID_XP_MULTIPLIER
+ * Cost = new rank × VOID_XP_MULTIPLIER, so raising Void from 2 to 3 costs 18 XP.
  * @type {number}
  * @constant
- * @example
- * // Cost to raise Void from 2 to 3
- * const cost = 3 * VOID_XP_MULTIPLIER; // 18 XP
  */
 export const VOID_XP_MULTIPLIER = 6;
 
 /**
  * XP multiplier for increasing Skill ranks.
- * Cost = new rank × SKILL_XP_MULTIPLIER
+ * Cost = new rank × SKILL_XP_MULTIPLIER, so raising Kenjutsu from 4 to 5 costs 5 XP.
  * @type {number}
  * @constant
- * @example
- * // Cost to raise Kenjutsu from 4 to 5
- * const cost = 5 * SKILL_XP_MULTIPLIER; // 5 XP
  */
 export const SKILL_XP_MULTIPLIER = 1;
 
@@ -54,30 +38,24 @@ export const EMPHASIS_XP_COST = 2;
 
 /**
  * TN penalty per point of armor reduction.
- * Armor reduces TN by this amount per point of reduction value.
+ * Armor reduces TN by this amount per point of reduction value: Light Armor (reduction 3) reduces TN by 15.
  * @type {number}
  * @constant
- * @example
- * // Light Armor (reduction 3) reduces TN by 15
- * const tnReduction = 3 * ARMOR_TN_PENALTY; // 15
  */
 export const ARMOR_TN_PENALTY = 5;
 
 /**
- * What riding armor adds to its Armor TN bonus while its wearer is mounted: its +4 is +12 on horseback (Core
- * Rulebook p.198, `game-rules/73_armor.md`).
+ * What riding armor adds to its Armor TN bonus while its wearer is mounted: its +4 is +12 on horseback.
+ * game-rules/73_armor.md, p.198
  * @type {number}
  */
 export const RIDING_ARMOR_MOUNTED_BONUS = 8;
 
 /**
  * TN increase per Raise called on a roll.
- * Each Raise increases the TN by this amount.
+ * Each Raise increases the TN by this amount: 2 Raises on a TN 15 attack make it TN 25.
  * @type {number}
  * @constant
- * @example
- * // Calling 2 Raises on TN 15 attack
- * const finalTN = 15 + (2 * TN_PER_RAISE); // TN 25
  */
 export const TN_PER_RAISE = 5;
 
@@ -91,26 +69,16 @@ export const MAX_RAISES = 20;
 
 /**
  * Arrow type modifiers for damage rolls.
- * Each arrow type modifies the rolled (r) and kept (k) dice.
- *
+ * Each arrow type modifies the rolled (r) and kept (k) dice: a 3k2 bow with flesh-cutter arrows rolls 5k5.
  * @type {Readonly<{armor: {r: number, k: number}, flesh: {r: number, k: number}, humming: {r: number, k: number}, rope: {r: number, k: number}, willow: {r: number, k: number}}>}
  * @constant
- *
- * @property {Object} armor - Armor-piercing arrows (+1r, +1k)
- * @property {Object} flesh - Flesh-cutter arrows (+2r, +3k)
- * @property {Object} humming - Humming-bulb arrows (+0r, +1k)
- * @property {Object} rope - Rope-cutter arrows (+1r, +1k)
- * @property {Object} willow - Willow-leaf arrows (+2r, +2k)
- *
- * @example
- * // Apply flesh-cutter arrow bonus to damage
- * const baseDamage = { rolled: 3, kept: 2 };
- * const withArrow = {
- *   rolled: baseDamage.rolled + ARROW_MODS.flesh.r,
- *   kept: baseDamage.kept + ARROW_MODS.flesh.k
- * }; // 5r5k
+ * @property {object} armor - Armor-piercing arrows (+1r, +1k)
+ * @property {object} flesh - Flesh-cutter arrows (+2r, +3k)
+ * @property {object} humming - Humming-bulb arrows (+0r, +1k)
+ * @property {object} rope - Rope-cutter arrows (+1r, +1k)
+ * @property {object} willow - Willow-leaf arrows (+2r, +2k)
  */
-export const ARROW_MODS = freeze({
+export const ARROW_MODS = Object.freeze({
   armor: { r: 1, k: 1 },
   flesh: { r: 2, k: 3 },
   humming: { r: 0, k: 1 },
@@ -119,44 +87,56 @@ export const ARROW_MODS = freeze({
 });
 
 /**
- * How many times an arrow counts the armor bonus in its target's Armor TN (Core Rulebook p.199, Table 3.1): an
- * Armor Piercing arrow ignores it, a Flesh Cutter doubles it. Arrows not listed count it once.
+ * How many times an arrow counts the armor bonus in its target's Armor TN (Table 3.1): an Armor Piercing arrow
+ * ignores it, a Flesh Cutter doubles it. Arrows not listed count it once.
+ * game-rules/74_weapons.md, p.199
  * @type {Readonly<Record<string, number>>}
  */
-export const ARROW_ARMOR_FACTOR = freeze({ armor: 0, flesh: 2 });
+export const ARROW_ARMOR_FACTOR = Object.freeze({ armor: 0, flesh: 2 });
 
-/** Change to the total of a bow attack on a target in melee range with the archer (p.199). */
+/**
+ * Change to the total of a bow attack on a target in melee range with the archer.
+ * game-rules/74_weapons.md, p.199
+ */
 export const BOW_IN_MELEE_PENALTY = -10;
 
 /**
  * NPC wound level configuration by rank.
- * Maps NPC rank (1-8) to number of wound levels.
+ * Maps NPC rank (1-8) to number of wound levels: a rank 3 NPC has 3.
  * Higher rank NPCs have more wound levels before dying.
- *
  * @type {Readonly<{1: number, 2: number, 3: number, 4: number, 5: number, 6: number, 7: number, 8: number}>}
  * @constant
- *
- * @example
- * // Rank 3 NPC has 3 wound levels
- * const woundLevels = NPC_NUMBER_WOUND_LVLS[3]; // 3
  */
-export const NPC_NUMBER_WOUND_LVLS = freeze({ 1: 1, 2: 2, 3: 3, 4: 4, 5: 5, 6: 6, 7: 7, 8: 8 });
-
-/**
- * The lowest and highest rank of each rank-and-points track, by its field: 0-10 (p.90), Status from -10 for the
- * Status of geisha, ninja, and others below the samurai caste (pp.94-95; Ernie's ruling, 2026-11-14).
- * @type {Readonly<Record<string, [number, number]>>}
- */
-export const RANK_TRACK_RANGE = freeze({
-  honor: freeze([0, 10]),
-  glory: freeze([0, 10]),
-  status: freeze([-10, 10]),
-  shadowTaint: freeze([0, 10])
+export const NPC_NUMBER_WOUND_LVLS = Object.freeze({
+  1: 1,
+  2: 2,
+  3: 3,
+  4: 4,
+  5: 5,
+  6: 6,
+  7: 7,
+  8: 8
 });
 
 /**
- * The Insight Rank an NPC counts as where a rule needs one: NPCs have no Insight, so the Initiative pool (p.81) and
- * healing (p.84) use Rank 1 (Ernie's ruling, 2026-11-14).
+ * The lowest and highest rank of each rank-and-points track, by its field: 0-10, Status from -10 for the Status of
+ * geisha, ninja, and others below the samurai caste (Ernie's ruling).
+ * game-rules/43_honor.md, p.90
+ * game-rules/45_status.md, p.94-95
+ * @type {Readonly<Record<string, [number, number]>>}
+ */
+export const RANK_TRACK_RANGE = Object.freeze({
+  honor: Object.freeze([0, 10]),
+  glory: Object.freeze([0, 10]),
+  status: Object.freeze([-10, 10]),
+  shadowTaint: Object.freeze([0, 10])
+});
+
+/**
+ * The Insight Rank an NPC counts as where a rule needs one: NPCs have no Insight, so the Initiative pool and
+ * healing use Rank 1 (Ernie's ruling).
+ * game-rules/31_combat_round.md, p.81
+ * game-rules/35_healing_wounds.md, p.84
  * @type {number}
  */
 export const NPC_INSIGHT_RANK = 1;
@@ -165,17 +145,10 @@ export const NPC_INSIGHT_RANK = 1;
  * Canonical wound level progression order for L5R4 characters.
  * Defines the 8 wound levels from Healthy to Out in ascending severity.
  * Used to iterate wound levels in correct sequence during damage calculations.
- *
  * @type {ReadonlyArray<string>}
  * @constant
- *
- * @example
- * // Iterate through wound levels
- * for (const level of WOUND_LEVEL_ORDER) {
- *   console.log(level); // "healthy", "nicked", "grazed", ...
- * }
  */
-export const WOUND_LEVEL_ORDER = freeze([
+export const WOUND_LEVEL_ORDER = Object.freeze([
   "healthy",
   "nicked",
   "grazed",
@@ -189,15 +162,10 @@ export const WOUND_LEVEL_ORDER = freeze([
 /**
  * Default TN penalties for each wound level per L5R4 Combat and Wounds rules.
  * Each wound level increases the Target Number of all rolls by the specified amount.
- *
  * @type {Readonly<{healthy: number, nicked: number, grazed: number, hurt: number, injured: number, crippled: number, down: number, out: number}>}
  * @constant
- *
- * @example
- * // Get penalty for Hurt level
- * const penalty = DEFAULT_WOUND_PENALTIES.hurt; // 10
  */
-export const DEFAULT_WOUND_PENALTIES = freeze({
+export const DEFAULT_WOUND_PENALTIES = Object.freeze({
   healthy: 0,
   nicked: 3,
   grazed: 5,
@@ -212,15 +180,10 @@ export const DEFAULT_WOUND_PENALTIES = freeze({
  * Default wound threshold values for manual wound level configuration.
  * Fallback values for NPCs in manual mode or actor initialization.
  * Based on Earth Ring 3 with standard multipliers.
- *
  * @type {Readonly<{healthy: number, nicked: number, grazed: number, hurt: number, injured: number, crippled: number, down: number, out: number}>}
  * @constant
- *
- * @example
- * // Get default threshold for Injured level
- * const threshold = DEFAULT_WOUND_THRESHOLDS.injured; // 35
  */
-export const DEFAULT_WOUND_THRESHOLDS = freeze({
+export const DEFAULT_WOUND_THRESHOLDS = Object.freeze({
   healthy: 15,
   nicked: 20,
   grazed: 25,

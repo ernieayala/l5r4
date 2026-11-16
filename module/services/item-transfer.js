@@ -2,7 +2,8 @@
  * @module services/item-transfer
  * @description Export a folder of Items, with their rules and effects, to one JSON file, and import such a file into
  * a new folder (roadmap/STAGE-11 decision 4). Rules that name an item in the same file name its imported copy. Items
- * from an older core version go through core's import migration (client/documents/abstract/client-document.mjs:1025).
+ * from an older core version go through core's import migration
+ * [src: client/documents/abstract/client-document.mjs:1025].
  */
 
 import { SYS_ID } from "../config/constants.js";
@@ -12,7 +13,7 @@ import { readTransfer, remapItemUuids, transferPayload } from "../utils/item-tra
 /**
  * The export file's content for the items in a folder and its subfolders, ids kept so rules can be rewritten on
  * import.
- * @param {Folder} folder  An Item folder
+ * @param {Folder} folder - An Item folder
  * @returns {object}
  */
 export function folderTransfer(folder) {
@@ -23,7 +24,7 @@ export function folderTransfer(folder) {
 
 /**
  * Export the items in a folder and its subfolders to a JSON file the browser saves.
- * @param {Folder} folder  An Item folder
+ * @param {Folder} folder - An Item folder
  * @returns {object} The exported content
  */
 export function exportItemFolder(folder) {
@@ -42,7 +43,7 @@ export function exportItemFolder(folder) {
 
 /**
  * Import an export file's items into a new folder inside `parent`, named after the exported folder.
- * @param {string} text  The file's content
+ * @param {string} text - The file's content
  * @param {Folder|null} parent
  * @returns {Promise<Item[]>} The imported items
  */
@@ -90,6 +91,11 @@ export async function importItems(text, parent) {
   return created;
 }
 
+/** Register the folder menu entries, once during system init. */
+export function initializeItemTransfer() {
+  Hooks.on("getFolderContextOptions", onGetFolderContextOptions);
+}
+
 /**
  * Ask for an export file and import it into a new folder inside `parent`.
  * @param {Folder} parent
@@ -118,7 +124,7 @@ async function importItemsDialog(parent) {
 /**
  * Add "Export items" and "Import items" to the context menu of Item folders, for the GM.
  * @param {foundry.applications.sidebar.DocumentDirectory} app
- * @param {object[]} entries  The folder context menu's entries, extended in place
+ * @param {object[]} entries - The folder context menu's entries, extended in place
  */
 function onGetFolderContextOptions(app, entries) {
   if (app.documentName !== "Item") {
@@ -139,9 +145,4 @@ function onGetFolderContextOptions(app, entries) {
       onClick: (_event, header) => importItemsDialog(folderOf(header))
     }
   );
-}
-
-/** Register the folder menu entries, once during system init. */
-export function initializeItemTransfer() {
-  Hooks.on("getFolderContextOptions", onGetFolderContextOptions);
 }

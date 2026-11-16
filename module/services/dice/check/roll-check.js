@@ -5,9 +5,18 @@
  * (AUTOMATION.md §4), spends a Void Point, builds the pool with the Ten Dice Rule last, rolls, compares with the
  * TN, and posts a `roll` ChatMessage holding the whole context.
  *
- * Rules: Roll & Keep p.75, Ten Dice Rule and exploding dice p.77, Void Points p.78 (never on damage), Raises and
- * Free Raises p.79, Unskilled Rolls p.80, wound penalties on the TN p.82 (decision 2), the Honor Roll p.92,
- * Emphases p.133, Embracing the Taint p.279.
+ * The rules it applies: Roll & Keep, the Ten Dice Rule and exploding dice, Void Points (never on damage), Raises and
+ * Free Raises, Unskilled Rolls, wound penalties on the TN (roadmap/STAGE-08 decision 2), the Honor Roll, Emphases,
+ * and Embracing the Taint.
+ * game-rules/23_roll_and_keep.md, p.75
+ * game-rules/25_rings_and_traits.md, p.78
+ * game-rules/26_special_dice_rules.md, p.77
+ * game-rules/28_raises.md, p.79
+ * game-rules/30_skill_rolls_expanded.md, p.80
+ * game-rules/33_wounds.md, p.82
+ * game-rules/43_honor.md, p.92
+ * game-rules/58_skills_overview.md, p.133
+ * game-rules/89_shadowlands_taint.md, p.279
  */
 
 import { SYS_ID } from "../../../config/constants.js";
@@ -16,7 +25,6 @@ import { ARROW_ARMOR_FACTOR } from "../../../config/game-mechanics.js";
 import { F, T } from "../../../utils/localization.js";
 import { toInt } from "../../../utils/type-coercion.js";
 import { getEffectiveTrait } from "../../../utils/mechanics.js";
-import { gmMayAllow } from "../../gm-allow.js";
 import { stackModifiers } from "../../../utils/modifier-stacking.js";
 import {
   buildPool,
@@ -27,13 +35,22 @@ import {
 } from "../../../utils/check.js";
 import { allocateRaises, maneuverCost } from "../../../utils/damage.js";
 import { canEmbraceTaint, highestRing, lostBonus } from "../../../utils/taint.js";
+import { gmMayAllow } from "../../gm-allow.js";
 import { spendVoidPoint } from "../resources/void-points.js";
 import { resolveTargets } from "../resources/target-resolver.js";
-import { collectCheck } from "./collect.js";
 import { voidOverLimit } from "../../effects/uses.js";
 import { recordTrackChange } from "../../ledger.js";
+import { collectCheck } from "./collect.js";
 
 /**
+ * Roll kinds the Honor Roll can re-roll: Skill, Trait, Ring, and Spell Casting rolls.
+ * game-rules/43_honor.md, p.92
+ */
+const HONOR_ROLL_KINDS = new Set(["skill", "attack", "trait", "ring", "spell", "maho"]);
+
+/**
+ * What a caller asks the pipeline to roll.
+ * game-rules/30_skill_rolls_expanded.md, p.80
  * @typedef {object} CheckRequest
  * @property {Actor} actor
  * @property {string} kind               skill, trait, ring, spell, maho, attack, damage, or roll
@@ -42,7 +59,7 @@ import { recordTrackChange } from "../../ledger.js";
  * @property {string} [skill]            Skill name in lower case, for selectors
  * @property {string} [trait]            Trait key in the pool, for selectors and substitutions
  * @property {string} [ring]             Ring key, for selectors
- * @property {boolean} [unskilled=false] An Unskilled Roll (p.80)
+ * @property {boolean} [unskilled=false] An Unskilled Roll
  * @property {string[]} [emphases=[]]    Trained Emphases offered
  * @property {number} [tn]               Default TN; an attack defaults to a single target's Armor TN
  * @property {number} [explode=10]       Explode threshold (a weapon's "Explodes on")
@@ -72,118 +89,6 @@ import { recordTrackChange } from "../../ledger.js";
  */
 
 /**
- * "+2k1 +5"-style text for a modifier.
- * @param {{roll?: number, keep?: number, total?: number}} modifier
- * @returns {string}
- */
-function modifierText({ roll = 0, keep = 0, total = 0 }) {
-  const parts = [];
-  if (roll || keep) {
-    parts.push(`${roll >= 0 ? "+" : ""}${roll}k${keep}`);
-  }
-  if (total) {
-    parts.push(`${total > 0 ? "+" : ""}${total}`);
-  }
-  return parts.join(" ");
-}
-
-/**
- * The actor's Void Points to spend and its Void Ring.
- * @param {Actor} actor
- * @returns {{points: number, ring: number}}
- */
-function voidOf(actor) {
-  return {
-    points: toInt(actor.system.rings.void.value),
-    ring: toInt(actor.system.rings.void.rank)
-  };
-}
-
-/**
- * The damage pool an attack stores for its damage button: the caller's (a stat block's damage), or the weapon's
- * prepared pool, Strength or the bow and arrow included (pp.82, 199). None for other rolls.
- * @param {CheckRequest} request
- * @returns {{label: string, roll: number, keep: number, bonus: number, explode: number}|null}
- */
-function attackDamage(request) {
-  if (request.kind !== "attack") {
-    return null;
-  }
-  if (request.damage) {
-    return { bonus: 0, explode: 10, ...request.damage };
-  }
-  const weapon = request.weapon;
-  if (!weapon) {
-    return null;
-  }
-  return {
-    label: weapon.name,
-    roll: toInt(weapon.system.derivedDamageRoll ?? weapon.system.damageRoll),
-    keep: toInt(weapon.system.derivedDamageKeep ?? weapon.system.damageKeep),
-    bonus: 0,
-    explode: weapon.system.damageExplode
-  };
-}
-
-/**
- * An attack's maneuvers from the dialog's choices, bounded (user input). Without Raises allowed (an Unskilled
- * attack, p.80) only Grapple, which costs none, remains.
- * @param {object} choice  `maneuver.*` fields of the dialog
- * @param {boolean} raisesAllowed
- * @returns {object}
- */
-function readManeuvers(choice, raisesAllowed) {
-  const pick = key => raisesAllowed && Boolean(choice[key]);
-  return {
-    calledShot: raisesAllowed ? Math.min(4, Math.max(0, toInt(choice.calledShot))) : 0,
-    location: raisesAllowed ? String(choice.location ?? "").trim() : "",
-    disarm: pick("disarm"),
-    extraAttack: pick("extraAttack"),
-    feint: pick("feint"),
-    knockdown: pick("knockdown"),
-    fourLegged: pick("fourLegged"),
-    grapple: Boolean(choice.grapple),
-    increasedDamage: 0
-  };
-}
-
-/**
- * Read the dialog's form into choices.
- * @param {HTMLFormElement} form
- * @returns {object}
- */
-function readForm(form) {
-  return foundry.utils.expandObject(new foundry.applications.ux.FormDataExtended(form).object);
-}
-
-/**
- * Show the check dialog.
- * @param {CheckRequest} request
- * @param {object} context  Dialog template context
- * @returns {Promise<object|null>} The form's values, or null when the roller closes the dialog
- */
-async function askChoices(request, context) {
-  const extras = request.extras
-    ? await foundry.applications.handlebars.renderTemplate(
-        request.extras.template,
-        request.extras.data
-      )
-    : "";
-  const content = await foundry.applications.handlebars.renderTemplate(DIALOG_TEMPLATES.check, {
-    ...context,
-    extras
-  });
-  return foundry.applications.api.DialogV2.prompt({
-    window: { title: request.label },
-    position: { width: 420 },
-    content,
-    ok: { label: T("l5r4.ui.common.roll"), callback: (_event, button) => readForm(button.form) },
-    rejectClose: false,
-    modal: true
-  });
-}
-
-/**
  * Roll a check through the pipeline and post its card.
  *
  * @param {CheckRequest} request
@@ -192,7 +97,8 @@ async function askChoices(request, context) {
 export async function rollCheck(request) {
   const { actor, kind } = request;
   const isDamage = kind === "damage";
-  // A weapon needing more Strength than its wielder has cannot be used, though the GM may allow it (p.199)
+  // A weapon needing more Strength than its wielder has cannot be used, though the GM may allow it
+  // game-rules/74_weapons.md, p.199
   const minStrength = kind === "attack" ? toInt(request.weapon?.system.minStrength) : 0;
   const strength = getEffectiveTrait(actor, "str");
   if (
@@ -219,7 +125,8 @@ export async function rollCheck(request) {
     target,
     weapon: request.weapon ?? null
   });
-  // An Unskilled Roll in a Skill an UnskilledAs rule covers counts as that many ranks, so it is not Unskilled (p.80)
+  // An Unskilled Roll in a Skill an UnskilledAs rule covers counts as that many ranks, so it is not Unskilled
+  // game-rules/30_skill_rolls_expanded.md, p.80
   const countsAs = request.unskilled ? ctx.unskilledAs : 0;
   const unskilled = Boolean(request.unskilled) && !countsAs;
   const basePool = countsAs
@@ -230,8 +137,9 @@ export async function rollCheck(request) {
     ...(request.modifiers ?? []).map(m => ({ roll: 0, keep: 0, total: 0, enabled: true, ...m }))
   ];
   const voidState = voidOf(actor);
-  // The Raises a roll allows, Unskilled or not (pp.79-80); RaiseRule rules move the Void Ring cap and may require
-  // Raises
+  // The Raises a roll allows, Unskilled or not; RaiseRule rules move the Void Ring cap and may require Raises
+  // game-rules/28_raises.md, p.79
+  // game-rules/30_skill_rolls_expanded.md, p.80
   const raiseLimits = isUnskilled => {
     const allowed = !isDamage && !isUnskilled;
     const max = allowed ? Math.max(0, maxRaises(voidState.ring, isUnskilled) + ctx.raises.cap) : 0;
@@ -242,7 +150,8 @@ export async function rollCheck(request) {
       free: allowed ? ctx.freeRaises : 0
     };
   };
-  // A Void Point can raise a Skill from 0 to 1 for the roll, which is then not Unskilled (p.78)
+  // A Void Point can raise a Skill from 0 to 1 for the roll, which is then not Unskilled
+  // game-rules/25_rings_and_traits.md, p.78
   const voidSkillAllowed = unskilled && !isDamage;
   const offered = raiseLimits(unskilled && !voidSkillAllowed);
   const taint = {
@@ -252,7 +161,8 @@ export async function rollCheck(request) {
     trait: request.trait
   };
   const embraceAllowed = canEmbraceTaint(taint);
-  // A Lost character adds the Taint Rank to every physical Trait roll, always (p.279)
+  // A Lost character adds the Taint Rank to every physical Trait roll, always
+  // game-rules/89_shadowlands_taint.md, p.279
   const lost = lostBonus(taint);
   if (lost) {
     modifiers.push({
@@ -329,7 +239,8 @@ export async function rollCheck(request) {
       enabled: true
     });
   }
-  // Embracing the Taint: +1k1 for a point of Taint (p.279)
+  // Embracing the Taint: +1k1 for a point of Taint
+  // game-rules/89_shadowlands_taint.md, p.279
   const embrace = embraceAllowed && Boolean(choices.embraceTaint);
   if (embrace) {
     applied.push({ label: T("l5r4.ui.taint.embrace"), roll: 1, keep: 1, total: 0, enabled: true });
@@ -346,7 +257,8 @@ export async function rollCheck(request) {
     }
   });
 
-  // A Void Point spent on the Skill's rank: it rolls as Rank 1, not Unskilled (p.78)
+  // A Void Point spent on the Skill's rank: it rolls as Rank 1, not Unskilled
+  // game-rules/25_rings_and_traits.md, p.78
   const voidSkill = voidSkillAllowed && Boolean(choices.voidSkill);
   if (voidSkill) {
     applied.push({
@@ -380,10 +292,12 @@ export async function rollCheck(request) {
   }
   applied.push(...(prepared.modifiers ?? []));
   // Free Raises from the roll's own preparation (a duel's Focus, maho blood) obey the same rule: none on an Unskilled
-  // Roll (p.80)
+  // Roll
+  // game-rules/30_skill_rolls_expanded.md, p.80
   const totalFreeRaises = raisesAllowed ? freeRaises + toInt(prepared.freeRaises) : 0;
 
-  // An attack's maneuvers, paid for out of its Raises (pp.86-87); dialog values are user input
+  // An attack's maneuvers, paid for out of its Raises; dialog values are user input
+  // game-rules/38_maneuvers.md, p.86-87
   const maneuvers = kind === "attack" ? readManeuvers(choices.maneuver ?? {}, raisesAllowed) : null;
   if (maneuvers) {
     const cost = maneuverCost(maneuvers, ctx.raises.maneuverCosts);
@@ -402,7 +316,8 @@ export async function rollCheck(request) {
     tnBase = prepared.tn;
   }
 
-  // Each Void Point use is its own point (p.78)
+  // Each Void Point use is its own point
+  // game-rules/25_rings_and_traits.md, p.78
   for (let i = 0; i < Number(voidPoint) + Number(voidSkill); i++) {
     const spent = await spendVoidPoint(actor);
     if (!spent.success) {
@@ -417,7 +332,8 @@ export async function rollCheck(request) {
     modifiers: applied,
     voidPoint,
     unskilled: rolledUnskilled,
-    // A weapon whose dice never explode stays so (p.202); otherwise the lowest threshold wins
+    // A weapon whose dice never explode stays so; otherwise the lowest threshold wins
+    // game-rules/74_weapons.md, p.202
     explode: request.explode === null ? null : Math.min(request.explode ?? 10, ctx.explode ?? 10),
     rerollOnes: Boolean(emphasis) || ctx.rerollOnes,
     keepOverride,
@@ -435,7 +351,8 @@ export async function rollCheck(request) {
     : ctx.tnModifiers
         .filter(m => !m.range || m.range === range)
         .map(({ label: l, value, type, fromTarget }) => ({ label: l, value, type, fromTarget }));
-  // An attack starting a grapple ignores the armor in the target's Armor TN (p.88)
+  // An attack starting a grapple ignores the armor in the target's Armor TN
+  // game-rules/40_grappling.md, p.88
   const armorBonus = toInt(target?.system.armorTn?.bonus);
   if (maneuvers?.grapple && armorBonus) {
     tnModifiers.push({
@@ -444,7 +361,8 @@ export async function rollCheck(request) {
       fromTarget: true
     });
   }
-  // An Armor Piercing arrow ignores the armor in the target's Armor TN, a Flesh Cutter doubles it (p.199)
+  // An Armor Piercing arrow ignores the armor in the target's Armor TN, a Flesh Cutter doubles it
+  // game-rules/74_weapons.md, p.199
   const arrow =
     kind === "attack" && request.weapon?.system.isBow ? request.weapon.system.arrow : null;
   const arrowFactor = ARROW_ARMOR_FACTOR[arrow];
@@ -509,7 +427,8 @@ export async function rollCheck(request) {
       woundPenalty: tn === null || !applyWound ? 0 : woundPenalty,
       modifiers: tn === null ? [] : tnModifiers,
       // The target's Armor TN against this attack: the base and the target's own changes, without the attacker's
-      // Raises, wound penalty, or other TN changes (the Feint bonus reads it, p.86)
+      // Raises, wound penalty, or other TN changes (the Feint bonus reads it)
+      // game-rules/38_maneuvers.md, p.86
       armor:
         kind === "attack" && tn !== null
           ? tnBase + tnModifiers.filter(m => m.fromTarget).reduce((sum, m) => sum + m.value, 0)
@@ -548,7 +467,8 @@ export async function rollCheck(request) {
     content
   });
 
-  // A used modifier that `consumes` ends its effect (Center Stance's bonus, p.84)
+  // A used modifier that `consumes` ends its effect (Center Stance's bonus)
+  // game-rules/36_stances.md, p.84
   const consumed = new Set(applied.filter(m => m.enabled && m.consumes).map(m => m.consumes));
   for (const uuid of consumed) {
     await (await fromUuid(uuid))?.delete();
@@ -561,8 +481,173 @@ export async function rollCheck(request) {
 }
 
 /**
- * The lines a hit's maneuvers add to its card (pp.86-88): what each did, and the Contested Strength roll Knockdown
- * and Disarm call for. A Called Shot's effect is the GM's (STAGE-10 decision 1).
+ * Whether a check's card offers the optional Honor Roll (roadmap/STAGE-11 decision 3): the world setting is on and
+ * the roll failed, and it is not itself an Honor Roll. Whether the roller still has it this session is checked on the
+ * click (module/services/dice/check/chat-actions.js, honorRoll).
+ * game-rules/43_honor.md, p.92
+ * @param {object} system - RollMessageData source
+ * @returns {boolean}
+ */
+export function offersHonorRoll(system) {
+  return (
+    game.settings.get(SYS_ID, "honorRoll") &&
+    system.outcome.success === false &&
+    HONOR_ROLL_KINDS.has(system.kind) &&
+    !system.honorRollOf
+  );
+}
+
+/**
+ * Render a check's card from its stored context.
+ * @param {object} system - RollMessageData source
+ * @param {Roll} roll
+ * @param {{actorId?: string}} [extra] - The roller's id
+ * @returns {Promise<string>}
+ */
+export async function renderCheckCard(system, roll, { actorId = "" } = {}) {
+  const success = system.outcome.success;
+  const isAttack = system.kind === "attack";
+  const hit = isAttack && success === true;
+  const maneuvers = system.maneuvers ?? {};
+  const missed = isAttack ? "l5r4.ui.mechanics.rolls.missed" : "l5r4.ui.mechanics.rolls.failure";
+  return foundry.applications.handlebars.renderTemplate(CHAT_TEMPLATES.checkCard, {
+    ...system,
+    tn: system.tn.effective === null ? null : system.tn,
+    freeRaisesLeft: system.tn.freeRaises - system.tn.freeRaisesToTN,
+    outcomeText: T(success ? "l5r4.ui.mechanics.rolls.success" : missed),
+    appliedModifiers: system.modifiers
+      .filter(m => m.enabled && (m.roll || m.keep || m.total))
+      .map(m => ({ label: m.label, text: modifierText(m) })),
+    roll: await roll.render(),
+    damageButton: hit && !maneuvers.grapple ? (system.damage?.label ?? "") : "",
+    maneuverNotes: hit ? maneuverNotes(maneuvers) : [],
+    contest: hit && Boolean(system.target?.uuid) && (maneuvers.knockdown || maneuvers.disarm),
+    grappleButton: hit && Boolean(system.target?.uuid) && maneuvers.grapple,
+    applyTarget: system.kind === "damage" ? system.target?.name : "",
+    honorRoll: offersHonorRoll(system),
+    actorId
+  });
+}
+
+/**
+ * The "+2k1 +5"-style text for a modifier.
+ * @param {{roll?: number, keep?: number, total?: number}} modifier
+ * @returns {string}
+ */
+function modifierText({ roll = 0, keep = 0, total = 0 }) {
+  const parts = [];
+  if (roll || keep) {
+    parts.push(`${roll >= 0 ? "+" : ""}${roll}k${keep}`);
+  }
+  if (total) {
+    parts.push(`${total > 0 ? "+" : ""}${total}`);
+  }
+  return parts.join(" ");
+}
+
+/**
+ * The actor's Void Points to spend and its Void Ring.
+ * @param {Actor} actor
+ * @returns {{points: number, ring: number}}
+ */
+function voidOf(actor) {
+  return {
+    points: toInt(actor.system.rings.void.value),
+    ring: toInt(actor.system.rings.void.rank)
+  };
+}
+
+/**
+ * The damage pool an attack stores for its damage button: the caller's (a stat block's damage), or the weapon's
+ * prepared pool, Strength or the bow and arrow included. None for other rolls.
+ * game-rules/32_attack_and_defense.md, p.82
+ * game-rules/74_weapons.md, p.199
+ * @param {CheckRequest} request
+ * @returns {{label: string, roll: number, keep: number, bonus: number, explode: number}|null}
+ */
+function attackDamage(request) {
+  if (request.kind !== "attack") {
+    return null;
+  }
+  if (request.damage) {
+    return { bonus: 0, explode: 10, ...request.damage };
+  }
+  const weapon = request.weapon;
+  if (!weapon) {
+    return null;
+  }
+  return {
+    label: weapon.name,
+    roll: toInt(weapon.system.derivedDamageRoll ?? weapon.system.damageRoll),
+    keep: toInt(weapon.system.derivedDamageKeep ?? weapon.system.damageKeep),
+    bonus: 0,
+    explode: weapon.system.damageExplode
+  };
+}
+
+/**
+ * An attack's maneuvers from the dialog's choices, bounded (user input). Without Raises allowed (an Unskilled
+ * attack) only Grapple, which costs none, remains.
+ * game-rules/30_skill_rolls_expanded.md, p.80
+ * @param {object} choice - `maneuver.*` fields of the dialog
+ * @param {boolean} raisesAllowed
+ * @returns {object}
+ */
+function readManeuvers(choice, raisesAllowed) {
+  const pick = key => raisesAllowed && Boolean(choice[key]);
+  return {
+    calledShot: raisesAllowed ? Math.min(4, Math.max(0, toInt(choice.calledShot))) : 0,
+    location: raisesAllowed ? String(choice.location ?? "").trim() : "",
+    disarm: pick("disarm"),
+    extraAttack: pick("extraAttack"),
+    feint: pick("feint"),
+    knockdown: pick("knockdown"),
+    fourLegged: pick("fourLegged"),
+    grapple: Boolean(choice.grapple),
+    increasedDamage: 0
+  };
+}
+
+/**
+ * Read the dialog's form into choices.
+ * @param {HTMLFormElement} form
+ * @returns {object}
+ */
+function readForm(form) {
+  return foundry.utils.expandObject(new foundry.applications.ux.FormDataExtended(form).object);
+}
+
+/**
+ * Show the check dialog.
+ * @param {CheckRequest} request
+ * @param {object} context - Dialog template context
+ * @returns {Promise<object|null>} The form's values, or null when the roller closes the dialog
+ */
+async function askChoices(request, context) {
+  const extras = request.extras
+    ? await foundry.applications.handlebars.renderTemplate(
+        request.extras.template,
+        request.extras.data
+      )
+    : "";
+  const content = await foundry.applications.handlebars.renderTemplate(DIALOG_TEMPLATES.check, {
+    ...context,
+    extras
+  });
+  return foundry.applications.api.DialogV2.prompt({
+    window: { title: request.label },
+    position: { width: 420 },
+    content,
+    ok: { label: T("l5r4.ui.common.roll"), callback: (_event, button) => readForm(button.form) },
+    rejectClose: false,
+    modal: true
+  });
+}
+
+/**
+ * The lines a hit's maneuvers add to its card: what each did, and the Contested Strength roll Knockdown and Disarm
+ * call for. A Called Shot's effect is the GM's (STAGE-10 decision 1).
+ * game-rules/38_maneuvers.md, p.86-87
  * @param {object} maneuvers
  * @returns {string[]}
  */
@@ -592,55 +677,4 @@ function maneuverNotes(maneuvers) {
     notes.push(T("l5r4.ui.combat.extraAttackNote"));
   }
   return notes;
-}
-
-/** Roll kinds the Honor Roll can re-roll: Skill, Trait, Ring, and Spell Casting rolls (p.92). */
-const HONOR_ROLL_KINDS = new Set(["skill", "attack", "trait", "ring", "spell", "maho"]);
-
-/**
- * Whether a check's card offers the optional Honor Roll (p.92; roadmap/STAGE-11 decision 3): the world setting is on
- * and the roll failed, and it is not itself an Honor Roll. Whether the roller still has it this session is checked on
- * the click (module/services/dice/check/chat-actions.js, honorRoll).
- * @param {object} system  RollMessageData source
- * @returns {boolean}
- */
-export function offersHonorRoll(system) {
-  return (
-    game.settings.get(SYS_ID, "honorRoll") &&
-    system.outcome.success === false &&
-    HONOR_ROLL_KINDS.has(system.kind) &&
-    !system.honorRollOf
-  );
-}
-
-/**
- * Render a check's card from its stored context.
- * @param {object} system  RollMessageData source
- * @param {Roll} roll
- * @param {{actorId?: string}} [extra]  The roller's id
- * @returns {Promise<string>}
- */
-export async function renderCheckCard(system, roll, { actorId = "" } = {}) {
-  const success = system.outcome.success;
-  const isAttack = system.kind === "attack";
-  const hit = isAttack && success === true;
-  const maneuvers = system.maneuvers ?? {};
-  const missed = isAttack ? "l5r4.ui.mechanics.rolls.missed" : "l5r4.ui.mechanics.rolls.failure";
-  return foundry.applications.handlebars.renderTemplate(CHAT_TEMPLATES.checkCard, {
-    ...system,
-    tn: system.tn.effective === null ? null : system.tn,
-    freeRaisesLeft: system.tn.freeRaises - system.tn.freeRaisesToTN,
-    outcomeText: T(success ? "l5r4.ui.mechanics.rolls.success" : missed),
-    appliedModifiers: system.modifiers
-      .filter(m => m.enabled && (m.roll || m.keep || m.total))
-      .map(m => ({ label: m.label, text: modifierText(m) })),
-    roll: await roll.render(),
-    damageButton: hit && !maneuvers.grapple ? (system.damage?.label ?? "") : "",
-    maneuverNotes: hit ? maneuverNotes(maneuvers) : [],
-    contest: hit && Boolean(system.target?.uuid) && (maneuvers.knockdown || maneuvers.disarm),
-    grappleButton: hit && Boolean(system.target?.uuid) && maneuvers.grapple,
-    applyTarget: system.kind === "damage" ? system.target?.name : "",
-    honorRoll: offersHonorRoll(system),
-    actorId
-  });
 }

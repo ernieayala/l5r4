@@ -1,11 +1,17 @@
+/**
+ * @module data/item/skill-data
+ * @description The data model of the `skill` Item subtype.
+ */
+
 import { booleanField, numberField, stringField } from "../fields.js";
 import { migrateSkillSource } from "../migrate-source.js";
 import ItemData from "./base-data.js";
 
 /**
  * Data model for the `skill` Item subtype: rank, Trait, skill type, Emphases, Mastery text, School skill and free
- * ranks for XP, whether it is a Social Skill (p.134; roadmap/STAGE-11 decision 9), and roll bonuses. `emphasis` is
- * the pre-array Emphasis text, kept for module/setup/migrations/items/emphasis.js.
+ * ranks for XP, whether it is a Social Skill (roadmap/STAGE-11 decision 9), and roll bonuses. `emphasis` is the
+ * pre-array Emphasis text, kept for module/setup/migrations/items/emphasis.js.
+ * game-rules/58_skills_overview.md, p.134
  */
 export default class SkillData extends ItemData {
   /** @override */
@@ -34,11 +40,17 @@ export default class SkillData extends ItemData {
     };
   }
 
+  /** @override */
+  static migrateData(source) {
+    migrateSkillSource(source);
+    return super.migrateData(source);
+  }
+
   /**
    * Rules the skill brings by its own fields: the roll, keep, and total bonus fields, which the skill sheet edits
    * and Active Effects on the skill change, act as one RollModifier on this skill's rolls; Rank 10 is the Mastery
-   * Ability every Skill has, a Free Raise on all rolls made with it (Core Rulebook p.133,
-   * `game-rules/58_skills_overview.md`).
+   * Ability every Skill has, a Free Raise on all rolls made with it.
+   * game-rules/58_skills_overview.md, p.133
    * @override
    */
   get ownedRules() {
@@ -52,11 +64,5 @@ export default class SkillData extends ItemData {
       own.push({ key: "FreeRaise", selector, value: 1 });
     }
     return own.length ? [...this.rules, ...own] : this.rules;
-  }
-
-  /** @override */
-  static migrateData(source) {
-    migrateSkillSource(source);
-    return super.migrateData(source);
   }
 }

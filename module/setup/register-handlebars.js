@@ -1,25 +1,9 @@
 /**
- * Handlebars Helper Registration
- * Registers custom Handlebars helpers for template rendering in the L5R4 Enhanced system.
- * These helpers provide utility functions for templates including logic operations,
- * mathematical calculations, string manipulation, and icon path resolution.
- *
- * Foundry VTT Requirements:
- * - Requires Foundry v13+ (uses global Handlebars object)
- * - Must be called during system initialization (setup hook)
- * - Helpers are globally available in all Handlebars templates (.hbs files)
- *
- * Registered Helpers:
- * - eq, and, or: Logical comparison operators for template conditionals
- * - coalesce: Returns first non-null value from arguments
- * - iconPath: Resolves icon paths using system icon configuration
- * - math: Performs arithmetic and comparison operations in templates
- * - concat: Concatenates string arguments
- *
  * @module setup/register-handlebars
- * @requires Foundry VTT v13+
+ * @description Registers the system's Handlebars helpers on the global `Handlebars` during `init`, so every template
+ * can use them: `eq`, `and`, `or`, and `includes` for conditionals, `coalesce` for the first value that is set,
+ * `iconPath` for icon paths, `math` for arithmetic and comparisons, and `concat` and `join` for strings.
  */
-
 import { iconPath } from "../config/icons.js";
 
 /**
@@ -35,11 +19,9 @@ import { iconPath } from "../config/icons.js";
  * - Icon path resolution (iconPath)
  *
  * Usage: Call this function once in the system's init or setup hook.
- * After registration, helpers are available in templates like:
- * {{#if (eq value "expected")}}...{{/if}}
- * {{math attribute "+" bonus}}
+ * After registration, helpers are available in templates, as in `{{#if (eq value "expected")}}` and
+ * `{{math attribute "+" bonus}}`.
  *
- * @function registerHandlebarsHelpers
  * @returns {void}
  */
 export function registerHandlebarsHelpers() {

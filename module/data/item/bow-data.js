@@ -1,3 +1,8 @@
+/**
+ * @module data/item/bow-data
+ * @description The data model of the legacy `bow` Item subtype.
+ */
+
 import WeaponData from "./weapon-data.js";
 
 /**

@@ -1,16 +1,13 @@
 /**
- * Hook handler for spell memorization XP tracking
- *
- * Triggers XP recalculation when spell memorization status changes.
- * Per L5R4 rules, memorizing a spell costs XP equal to its mastery level.
- *
  * @module hooks/spell-memorization
+ * @description Marks a character's XP history for rebuilding when one of its spells is memorized or forgotten,
+ * because a memorized spell costs XP equal to its Mastery Level.
+ * game-rules/66_magic_and_spell_casting.md, p.164
  */
-
 import { SYS_ID } from "../config/constants.js";
 
 /**
- * Register spell memorization hooks
+ * Register spell memorization hooks.
  *
  * Listens for spell memorized field changes and triggers XP recalculation.
  */

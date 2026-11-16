@@ -1,10 +1,7 @@
 /**
- * Settings Menus Registration
- * Registers the buttons the system adds to Configure Settings, each opening a window.
- *
  * @module setup/settings/menus
+ * @description Registers the buttons the system adds to Configure Settings, each opening a window.
  */
-
 import { SYS_ID } from "../../config/constants.js";
 import DesignGalleryApplication from "../../apps/design-gallery.js";
 
@@ -14,9 +11,8 @@ import DesignGalleryApplication from "../../apps/design-gallery.js";
  * - `designGallery`: opens the design gallery (roadmap/STAGE-17 Deliverable 2). GMs only (`restricted`), as the
  *   gallery is a tool for building the system, not for play.
  *
- * Foundry API: `game.settings.registerMenu` with an ApplicationV2 `type` [src: client/helpers/client-settings.mjs:166-194]
+ * Foundry API: `game.settings.registerMenu` with an ApplicationV2 `type` [src: client/helpers/client-settings.mjs:166-194].
  *
- * @function registerMenus
  * @returns {void}
  */
 export function registerMenus() {

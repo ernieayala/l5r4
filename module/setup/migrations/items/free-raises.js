@@ -1,10 +1,7 @@
 /**
- * Free Raises Field Migration
- * Ensures all items with itemDescription template have freeRaises field.
- *
  * @module setup/migrations/items/free-raises
+ * @description Ensures every item with the itemDescription template has the freeRaises field.
  */
-
 import { SYS_ID } from "../../../config/constants.js";
 
 /**

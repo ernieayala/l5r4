@@ -1,38 +1,20 @@
 /**
- * Source-data migrations the data models run in `migrateData`.
+ * @module data/migrate-source
+ * @description Source-data migrations the data models run in `migrateData`.
  *
- * A schema drops stored keys it does not define (common/data/fields.mjs:1143-1146), so legacy shapes are
+ * A schema drops stored keys it does not define [src: common/data/fields.mjs:1143-1146], so legacy shapes are
  * reshaped here, on raw source, before cleaning. The ready-hook migrations in module/setup/migrations/ read
  * documents after that cleaning and so never see these keys (roadmap/STAGE-02-DATA-MODELS.md decision 7).
  * Pure functions on plain objects; `source` may be a full source or an update delta.
- *
- * @module data/migrate-source
  */
 
 import { TRAIT_KEYS } from "../config/reference-data.js";
 import { WOUND_LEVEL_ORDER } from "../config/game-mechanics.js";
 
 /**
- * Move `object[from]` to `object[to]` when the target is empty, then drop `from`. Matches the 3.2.1
- * schema-map rule: an existing target value wins (module/setup/migrations/schema/apply.js).
- * @param {object} object  Mutated.
- * @param {string} from
- * @param {string} to
- */
-function renameKey(object, from, to) {
-  if (!object || !(from in object)) {
-    return;
-  }
-  if (object[to] === undefined || object[to] === "") {
-    object[to] = object[from];
-  }
-  delete object[from];
-}
-
-/**
  * Traits stored as `{rank}` by older versions become plain numbers
  * (module/documents/actor/calculations/shared-traits-rings-system.js reads both shapes).
- * @param {object} source  Actor system source (mutated).
+ * @param {object} source - Actor system source (mutated).
  */
 export function migrateCommonActorSource(source) {
   const traits = source.traits;
@@ -49,7 +31,7 @@ export function migrateCommonActorSource(source) {
 
 /**
  * PC snake_case keys from before 3.0 (module/setup/migrations/schema/map.js).
- * @param {object} source  PC system source (mutated).
+ * @param {object} source - PC system source (mutated).
  */
 export function migratePcSource(source) {
   renameKey(source, "armor_tn", "armorTn");
@@ -69,7 +51,7 @@ export function migratePcSource(source) {
  * NPC Armor TN key and legacy wound levels. `wound_lvl` (pre-3.0), or a stored `woundLevels` with no
  * `manualWoundLevels`, becomes `manualWoundLevels`: values as integers, penalties as positive TN increases,
  * a level active when its threshold is above 0 (module/setup/migrations/actors/npc-wounds.js).
- * @param {object} source  NPC system source (mutated).
+ * @param {object} source - NPC system source (mutated).
  */
 export function migrateNpcSource(source) {
   renameKey(source.armor, "armor_tn", "armorTn");
@@ -92,7 +74,7 @@ export function migrateNpcSource(source) {
 /**
  * A `keywords` array (the 3.2.1 default) becomes the comma-separated text the item sheet edits
  * (roadmap/STAGE-02-DATA-MODELS.md decision 8).
- * @param {object} source  Item system source (mutated).
+ * @param {object} source - Item system source (mutated).
  */
 export function migrateKeywordsSource(source) {
   if (Array.isArray(source.keywords)) {
@@ -102,8 +84,9 @@ export function migrateKeywordsSource(source) {
 
 /**
  * Skill snake_case keys from before 3.0 (module/setup/migrations/schema/map.js). The Insight bonus field is
- * dropped: Insight comes from Rings and Skill ranks only (p.104), and nothing ever counted it (#75).
- * @param {object} source  Skill system source (mutated).
+ * dropped: Insight comes from Rings and Skill ranks only, and nothing ever counted it (#75).
+ * game-rules/49_improving_your_character.md, p.104
+ * @param {object} source - Skill system source (mutated).
  */
 export function migrateSkillSource(source) {
   renameKey(source, "mastery_3", "mastery3");
@@ -117,9 +100,10 @@ export function migrateSkillSource(source) {
 }
 
 /**
- * A weapon's Explodes On kept to a whole face from 2 to 10, so an exploding die always stops (p.77). 0, blank, or
- * a value that is not a number reads as 10, which is how 3.2.1 rolled it (`|| 10`).
- * @param {object} source  Weapon system source (mutated).
+ * A weapon's Explodes On kept to a whole face from 2 to 10, so an exploding die always stops. 0, blank, or a value
+ * that is not a number reads as 10, which is how 3.2.1 rolled it (`|| 10`).
+ * game-rules/26_special_dice_rules.md, p.77
+ * @param {object} source - Weapon system source (mutated).
  */
 export function migrateWeaponSource(source) {
   if (!("explodesOn" in source)) {
@@ -131,9 +115,26 @@ export function migrateWeaponSource(source) {
 
 /**
  * Armor misspellings from before 3.0 (module/setup/migrations/schema/map.js).
- * @param {object} source  Armor system source (mutated).
+ * @param {object} source - Armor system source (mutated).
  */
 export function migrateArmorSource(source) {
   renameKey(source, "equiped", "equipped");
   renameKey(source, "specialRues", "specialRules");
+}
+
+/**
+ * Move `object[from]` to `object[to]` when the target is empty, then drop `from`. Matches the 3.2.1
+ * schema-map rule: an existing target value wins (module/setup/migrations/schema/apply.js).
+ * @param {object} object - Mutated.
+ * @param {string} from
+ * @param {string} to
+ */
+function renameKey(object, from, to) {
+  if (!object || !(from in object)) {
+    return;
+  }
+  if (object[to] === undefined || object[to] === "") {
+    object[to] = object[from];
+  }
+  delete object[from];
 }

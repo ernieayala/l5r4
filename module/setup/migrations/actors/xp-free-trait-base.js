@@ -1,10 +1,7 @@
 /**
- * Free Trait Rank Flag Migration
- * Clears free stored Trait ranks that were marked for a rule-based creation bonus.
- *
  * @module setup/migrations/actors/xp-free-trait-base
+ * @description Clears free stored Trait ranks that were marked for a rule-based creation bonus.
  */
-
 import { SYS_ID } from "../../../config/constants.js";
 import { getCreationFreeBonusSources } from "../../../utils/xp-calculations.js";
 
@@ -15,9 +12,9 @@ import { getCreationFreeBonusSources } from "../../../utils/xp-calculations.js";
  * The flag marks a stored rank as the free Family/School rank. That holds for the legacy `trait`/`bonus` fields,
  * which the player stores as a rank, but a rule bonus adds on top of the stored rank: with the flag set, XP skips
  * the first bought rank and prices the later ones without the bonus. Clearing it prices every stored rank at
- * 4 × the Trait's new rank with the bonus (Core Rulebook p.103). Setting the value to 0 reads the same as an
- * absent key in the XP code, and running again changes nothing.
- *
+ * 4 × the Trait's new rank with the bonus. Setting the value to 0 reads the same as an absent key in the XP code,
+ * and running again changes nothing.
+ * game-rules/48_character_creation_expanded.md, p.103
  * @param {Document[]} docs - Actor documents to scan
  * @param {string} label - Migration context label for console logging
  * @returns {Promise<void>}

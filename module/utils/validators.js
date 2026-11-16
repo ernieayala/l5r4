@@ -1,5 +1,5 @@
 /**
- * @module validators
+ * @module utils/validators
  * @description Input validation utilities for L5R4 system.
  *
  * Provides validation functions that return structured results:
@@ -8,9 +8,9 @@
  * Used to validate user input before processing or storing.
  */
 
-import { toNumber } from "./type-coercion.js";
 import { MAX_EMPHASIS_LENGTH, MIN_EMPHASIS_LENGTH } from "../config/reference-data.js";
 import { MAX_RAISES } from "../config/game-mechanics.js";
+import { toNumber } from "./type-coercion.js";
 
 /**
  * Allowed characters for emphasis names.
@@ -30,16 +30,9 @@ const EMPHASIS_NAME_PATTERN = /^[a-zA-Z0-9\s\-']+$/;
  * - Length: 1-100 characters (after trimming)
  * - Characters: letters, numbers, spaces, hyphens, apostrophes only
  *
+ * So "Katana" and "Notice" are valid; "" and "Invalid@Name" are not, each with its error.
  * @param {string} emphasisName - Emphasis name to validate
- * @returns {Object} Validation result
- * @returns {boolean} return.valid - True if valid
- * @returns {string} [return.error] - Error message if invalid
- *
- * @example
- * validateEmphasisName("Katana") // { valid: true }
- * validateEmphasisName("Notice") // { valid: true }
- * validateEmphasisName("") // { valid: false, error: "..." }
- * validateEmphasisName("Invalid@Name") // { valid: false, error: "Invalid characters..." }
+ * @returns {{valid: boolean, error?: string}} Validation result: whether it is valid, and the error message if not
  */
 export function validateEmphasisName(emphasisName) {
   // Type check
@@ -73,7 +66,7 @@ export function validateEmphasisName(emphasisName) {
  * Validates attack Raises match between claim and stored value.
  *
  * In L5R4, players declare Raises before rolling. This validator ensures
- * the Raises claimed in chat/damage application match what was actually
+ * the Raises claimed in chat/damage application match the Raises
  * declared during the attack roll.
  *
  * Validation rules:
@@ -81,17 +74,12 @@ export function validateEmphasisName(emphasisName) {
  * - Range: 0-20 (reasonable maximum)
  * - Values must match exactly (prevents cheating)
  *
+ * So 2 claimed against 2 stored is valid with 2 sanitized; 3 against 2 is a mismatch; 25 against 25 is out of
+ * range.
  * @param {number} claimedRaises - Raises claimed for damage/effect
  * @param {number} storedRaises - Raises from original attack roll
- * @returns {Object} Validation result
- * @returns {boolean} return.valid - True if valid
- * @returns {string} [return.error] - Error message if invalid
- * @returns {number} [return.sanitized] - Validated Raises value if valid
- *
- * @example
- * validateAttackRaises(2, 2) // { valid: true, sanitized: 2 }
- * validateAttackRaises(3, 2) // { valid: false, error: "...mismatch..." }
- * validateAttackRaises(25, 25) // { valid: false, error: "...out of valid range..." }
+ * @returns {{valid: boolean, error?: string, sanitized?: number}} Validation result: whether it is valid, the
+ *   error message if not, and the validated Raises value if it is
  */
 export function validateAttackRaises(claimedRaises, storedRaises) {
   const claimed = toNumber(claimedRaises);

@@ -1,10 +1,7 @@
 /**
- * Item Data Normalization
- * Ensures consistent data types and formats for weapon/bow items.
- *
  * @module setup/migrations/items/normalize
+ * @description Ensures consistent data types and formats for weapon and bow items.
  */
-
 import { SYS_ID } from "../../../config/constants.js";
 
 /**

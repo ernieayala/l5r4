@@ -12,7 +12,7 @@ import { pagesOf } from "./citations.mjs";
 
 /**
  * The pages one rule file marks, each with the headings printed on it.
- * @param {string} file  Its name in game-rules/
+ * @param {string} file - Its name in game-rules/
  * @param {string} markdown
  * @returns {{file: string, page: number, headings: string[]}[]}
  */
@@ -35,7 +35,7 @@ export function pageUnits(file, markdown) {
 /**
  * Join the units with the manifest's rule entries.
  * @param {{file: string, page: number}[]} units
- * @param {object[]} rules  The manifest's rule entries
+ * @param {object[]} rules - The manifest's rule entries
  * @returns {{unclassified: object[], stale: string[], counts: Record<string, number>}}
  *   `counts` gives the units holding each status; a page with two entries counts under both.
  */

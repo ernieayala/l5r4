@@ -1,21 +1,9 @@
 /**
- * World Settings Registration
- * Registers world-scoped (GM-controlled) game settings for the L5R4 Enhanced system.
- * These settings affect game mechanics, automation, and rule interpretations.
- *
- * Foundry VTT Integration:
- * - Uses game.settings.register() API with "world" scope
- * - Settings are GM-only and persist with the world data
- * - config:true exposes settings in Configure Game Settings dialog
- *
- * Game Mechanics Affected:
- * - Little Truths spell conversion exception
- * - NPC wound threshold calculation method
- *
  * @module setup/settings/world
- * @requires Foundry VTT v13+
+ * @description Registers the world-scoped settings, which the GM controls and the world stores for every user: rule
+ * options (the Little Truths exception, the optional Honor Roll) and hidden values the system keeps (custom
+ * Emphases, the current game session).
  */
-
 import { SYS_ID } from "../../config/constants.js";
 
 /**
@@ -23,18 +11,11 @@ import { SYS_ID } from "../../config/constants.js";
  * Called during system initialization to set up configurable game rules and automation options.
  *
  * Settings Registered:
- * - LtException: Little Truths spell conversion rule
- * - customEmphases: world custom Emphases (hidden)
- * - honorRoll: the optional Honor Roll
- * - session: the current game session's number (hidden)
+ * - LtException: Little Truths spell conversion rule.
+ * - customEmphases: world custom Emphases (hidden).
+ * - honorRoll: the optional Honor Roll.
+ * - session: the current game session's number (hidden).
  *
- * Foundry API:
- * All settings use game.settings.register() with:
- * - scope: "world" (GM-only, affects all players)
- * - config: true (appears in Configure Game Settings)
- * - Localized name/hint from lang files
- *
- * @function registerWorldSettings
  * @returns {void}
  */
 export function registerWorldSettings() {
@@ -62,7 +43,8 @@ export function registerWorldSettings() {
     default: []
   });
 
-  // The optional Honor Roll (Core Rulebook p.92), off unless the GM turns it on (roadmap/STAGE-11 decision 3)
+  // The optional Honor Roll, off unless the GM turns it on (roadmap/STAGE-11 decision 3)
+  // game-rules/43_honor.md, p.92
   game.settings.register(SYS_ID, "honorRoll", {
     config: true,
     scope: "world",

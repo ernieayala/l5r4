@@ -1,21 +1,9 @@
 /**
- * XP Data Versioning Service
- *
- * Provides change detection and versioning for character XP-related data to determine
- * when retroactive XP history recalculation is needed. Uses content-based hashing to
- * generate version identifiers from traits, skills, void rank, and purchased items.
- *
- * This supports the L5R4 character advancement system where XP costs are calculated
- * based on trait ranks, skill ranks, void rank, and purchased advantages/disadvantages/
- * kata/kiho. When any of these values change, the XP history must be rebuilt to reflect
- * the new costs.
- *
- * Foundry VTT APIs used:
- * - Actor document flags for version tracking (flags[SYS_ID].xpRetroactiveVersion)
- * - Actor.items collection for skills and purchasable items
- * - Actor.system for traits and rings data
- *
  * @module services/xp/versioning
+ * @description Change detection for a character's XP data: a content hash of the Traits, Skills, Void rank, and
+ * purchased advantages, disadvantages, kata, and kiho, compared with the version stored in
+ * `flags[SYS_ID].xpRetroactiveVersion`, tells the XP manager when to rebuild the XP history so it shows the current
+ * costs.
  */
 
 import { SYS_ID } from "../../config/constants.js";

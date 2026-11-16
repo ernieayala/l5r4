@@ -1,3 +1,8 @@
+/**
+ * @module data/item/disadvantage-data
+ * @description The data model of the `disadvantage` Item subtype.
+ */
+
 import { numberField, stringField } from "../fields.js";
 import ItemData from "./base-data.js";
 

@@ -7,15 +7,19 @@ import { SYS_ID } from "../config/constants.js";
 import { toInt } from "../utils/type-coercion.js";
 import { initiativeFormula } from "../utils/initiative.js";
 
+/**
+ * The Combatant document class the system sets as `CONFIG.Combatant.documentClass`.
+ */
 export default class L5R4Combatant extends foundry.documents.Combatant {
   /**
-   * The Initiative formula: the actor's prepared pool (Insight Rank + Reflexes, keep Reflexes, p.81) plus its flat
-   * modifier, under the Ten Dice Rule (p.77). Core calls this with no argument when no explicit formula is given
-   * (client/documents/combatant.mjs:138-142); L5R4Combat passes the Void Point +10 for one roll.
-   *
+   * The Initiative formula: the actor's prepared pool (Insight Rank + Reflexes, keep Reflexes) plus its flat
+   * modifier, under the Ten Dice Rule. Core calls this with no argument when no explicit formula is given
+   * [src: client/documents/combatant.mjs:138-142]; L5R4Combat passes the Void Point +10 for one roll.
+   * game-rules/31_combat_round.md, p.81
+   * game-rules/26_special_dice_rules.md, p.77
    * @override
-   * @param {number} [bonus=0]  Flat bonus for this roll only
-   * @returns {string}
+   * @param {number} [bonus=0] - Flat bonus for this roll only
+   * @returns {string} The roll formula
    */
   _getInitiativeFormula(bonus = 0) {
     const actor = this.actor;

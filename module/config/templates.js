@@ -1,48 +1,22 @@
 /**
- * @file Handlebars template path configurations
  * @module config/templates
- *
- * Provides template path resolution utilities and pre-configured template paths.
- * All templates are Handlebars (.hbs) files used for rendering UI components.
- *
- * Architectural Decision: Centralized template paths prevent hardcoded strings
- * throughout the codebase and provide compile-time validation of template paths.
- * The TEMPLATE function includes defensive validation to catch errors early.
- *
- * @see {@link https://foundryvtt.com/api/v14/functions/foundry.applications.handlebars.renderTemplate.html|Foundry renderTemplate}
+ * @description Template path resolution and the pre-configured paths of the Handlebars (.hbs) templates the system
+ * renders. One place for the paths keeps literal template strings out of the code, and TEMPLATE rejects a bad path
+ * where it is built instead of where it is rendered.
  */
 
 import { PATHS } from "./constants.js";
 
-const freeze = Object.freeze;
-
 /**
- * Resolves a relative template path to a full system template path.
- * Includes defensive validation to ensure path is valid before use.
- *
+ * Resolve a relative template path to a full system template path: "chat/check.hbs" becomes
+ * "systems/l5r4-enhanced/templates/chat/check.hbs".
+ * Validates the path before use: a non-string throws a TypeError, an empty string an Error.
  * @param {string} relPath - Relative path from templates directory (e.g., "chat/check.hbs")
  * @returns {string} Full template path suitable for Foundry's renderTemplate
  * @throws {TypeError} If relPath is not a string
  * @throws {Error} If relPath is empty
- *
- * @example
- * // Basic usage:
- * const path = TEMPLATE("chat/check.hbs");
- * // Returns: "systems/l5r4-enhanced/templates/chat/check.hbs"
- *
- * @example
- * // Use with Foundry's renderTemplate:
- * const html = await foundry.applications.handlebars.renderTemplate(TEMPLATE("chat/weapon-chat.hbs"), data);
- *
- * @example
- * // Validation - throws TypeError:
- * TEMPLATE(123); // TypeError: TEMPLATE expects string, got number
- *
- * @example
- * // Validation - throws Error:
- * TEMPLATE(""); // Error: TEMPLATE requires non-empty path
  */
-export const TEMPLATE = relPath => {
+export function TEMPLATE(relPath) {
   // Validate parameter type
   if (typeof relPath !== "string") {
     throw new TypeError(`TEMPLATE expects string, got ${typeof relPath}`);
@@ -54,13 +28,14 @@ export const TEMPLATE = relPath => {
   }
 
   return `${PATHS.templates}/${relPath}`;
-};
+}
 
 /**
- * Pre-configured template paths for chat message rendering.
+ * Pre-configured template paths for chat message rendering, passed to
+ * `foundry.applications.handlebars.renderTemplate(CHAT_TEMPLATES.healing, data)`.
  * Used by chat message handlers to display roll results and actions.
  *
- * @type {Object<string, string>}
+ * @type {Readonly<Record<string, string>>}
  * @constant
  * @property {string} checkCard - A roll from the roll pipeline (`roll` ChatMessage subtype)
  * @property {string} weaponCard - Weapon attack roll display
@@ -70,12 +45,8 @@ export const TEMPLATE = relPath => {
  * @property {string} healing - Healing action results
  * @property {string} checkRequest - A GM's request for a roll (module/services/check-request.js)
  * @property {string} itemSummary - An item card's rule lines and book citation (module/utils/rule-summary.js)
- *
- * @example
- * const html = await foundry.applications.handlebars.renderTemplate(CHAT_TEMPLATES.healing, data);
- * ChatMessage.create({ content: html });
  */
-export const CHAT_TEMPLATES = freeze({
+export const CHAT_TEMPLATES = Object.freeze({
   checkCard: TEMPLATE("chat/check.hbs"),
   weaponCard: TEMPLATE("chat/weapon-chat.hbs"),
   effectPrompt: TEMPLATE("chat/effect-prompt.hbs"),
@@ -88,11 +59,11 @@ export const CHAT_TEMPLATES = freeze({
 
 /**
  * Template paths for text links (module/setup/enrichers.js).
- * @type {Object<string, string>}
+ * @type {Readonly<Record<string, string>>}
  * @constant
  * @property {string} inlineLink - A Check, Damage, Condition, or Fear link, or a broken one
  */
-export const LINK_TEMPLATES = freeze({
+export const LINK_TEMPLATES = Object.freeze({
   inlineLink: TEMPLATE("links/inline-link.hbs")
 });
 
@@ -100,7 +71,7 @@ export const LINK_TEMPLATES = freeze({
  * Pre-configured template paths for dialog rendering.
  * Used by dialog handlers to display user input forms.
  *
- * @type {Object<string, string>}
+ * @type {Readonly<Record<string, string>>}
  * @constant
  * @property {string} check - The roll pipeline's dialog
  * @property {string} checkRing - Its Ring Roll extras (casting a spell)
@@ -109,7 +80,7 @@ export const LINK_TEMPLATES = freeze({
  * @property {string} unifiedItemCreate - Universal item creation dialog
  * @property {string} ledger - A change to Honor, Glory, Status, or Taint, with the actor's ledger
  */
-export const DIALOG_TEMPLATES = freeze({
+export const DIALOG_TEMPLATES = Object.freeze({
   check: TEMPLATE("dialogs/check-dialog.hbs"),
   checkRing: TEMPLATE("dialogs/check-extras/ring.hbs"),
   checkSpell: TEMPLATE("dialogs/check-extras/spell.hbs"),

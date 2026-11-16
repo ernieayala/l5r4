@@ -1,32 +1,10 @@
 /**
- * PC Actions Handler
- *
- * Handles character action operations for PC sheets including healing/rest and
- * Void Point spending mechanics. Delegates to services for complex operations.
- *
- * **Responsibilities:**
- * - Natural healing/rest application
- * - Void Point armor TN boost (combat-only, turn-based)
- * - Void Point initiative boost (pre-roll flag)
- *
- * **Game Rules Integration:**
- * - Natural Healing: (Stamina × 2) + Insight Rank per night
- * - Void for Armor TN: +10 TN for 1 round, must be on actor's turn
- * - Void for Initiative: +10 initiative, spent when rolled
- *
- * **Foundry API:**
- * - Uses Actor.update() for state changes
- * - Integrates with game.combat for turn/round tracking
- * - Uses DialogV2.confirm() for user confirmation
- * - Posts ui.notifications for user feedback
- *
  * @module sheets/handlers/pc-actions-handler
+ * @description PC sheet actions for natural healing and Void Point spending, delegating to services: a night's rest
+ * heals (Stamina × 2) + Insight Rank Wounds; Void for Armor TN gives +10 for one Round and only on the actor's turn
+ * in combat, after a DialogV2 confirmation; Void for Initiative sets a flag the initiative roll spends for +10.
  */
-
-// Utils
 import { T } from "../../utils/localization.js";
-
-// Services
 import { applyLongRest } from "../../services/rest.js";
 import { applyEffect, effectsOf } from "../../services/effects/apply.js";
 import { voidUseUpdate, warnVoidLimit } from "../../services/effects/uses.js";
@@ -55,7 +33,7 @@ export class PcActionsHandler {
    * - Posts chat message with healing summary
    * - Handles edge cases (already at full health, invalid heal rate)
    *
-   * @param {Object} context - Handler context from actor sheet
+   * @param {object} context - Handler context from actor sheet
    * @param {Actor} context.actor - The actor document
    * @param {Event} event - Click event on healing button
    * @param {HTMLElement} _element - Button element (unused)
@@ -71,7 +49,7 @@ export class PcActionsHandler {
    *
    * **Game Rules Context:**
    * Per core rules:
-   * - Spend Void at beginning of round for +10 Armor TN for 1 round (p.78)
+   * - Spend Void at beginning of round for +10 Armor TN for 1 round
    * - Only works if in combat on the actor's turn
    * - Void Point is spent immediately when activated
    *
@@ -84,8 +62,9 @@ export class PcActionsHandler {
    * **Implementation:**
    * On activation the Void Point is spent and the "voidArmor" effect (+10 Armor TN) is created; core's effect
    * registry ends it at the end of the Round (module/config/status-effects.js). Unticking ends the effect early.
+   * game-rules/25_rings_and_traits.md, p.78
    *
-   * @param {Object} context - Handler context from actor sheet
+   * @param {object} context - Handler context from actor sheet
    * @param {Actor} context.actor - The actor document
    * @param {Event} event - Checkbox change event
    * @param {HTMLElement} element - Checkbox element
@@ -141,8 +120,9 @@ export class PcActionsHandler {
       return;
     }
 
-    // Spend the Void Point, then +10 Armor TN as an effect ending with the Round (p.78). The write starts from the
+    // Spend the Void Point, then +10 Armor TN as an effect ending with the Round. The write starts from the
     // stored value, so an Active Effect on Void Points is never written into storage (B6).
+    // game-rules/25_rings_and_traits.md, p.78
     warnVoidLimit(actor);
     await actor.update({
       "system.rings.void.value": actor._source.system.rings.void.value - 1,
@@ -170,7 +150,7 @@ export class PcActionsHandler {
    * Unlike armor Void (which requires combat and turn validation), this flag
    * can be set anytime before initiative is rolled.
    *
-   * @param {Object} context - Handler context from actor sheet
+   * @param {object} context - Handler context from actor sheet
    * @param {Actor} context.actor - The actor document
    * @param {Event} event - Checkbox change event
    * @param {HTMLElement} element - Checkbox element

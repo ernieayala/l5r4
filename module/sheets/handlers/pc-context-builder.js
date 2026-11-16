@@ -1,24 +1,9 @@
 /**
- * Player Character Context Builder for ActorSheetV2
- *
- * Prepares sorted item collections for PC character sheet rendering.
- * Handles item sorting, mastery ability extraction, and user-scoped sort preference management.
- *
- * This module serves as the data organization layer between Actor documents and
- * ActorSheetV2 templates. All methods are static utilities called from the sheet's
- * `_prepareContext()` method to shape data for Handlebars templates.
- *
- * L5R4 Game Rules Implemented:
- * - **Mastery Abilities**: Extracted at ranks 3, 5, 7
- *
- * Foundry VTT Integration:
- * - Designed for ActorSheetV2 context preparation pattern (Foundry v13+)
- * - Uses Actor.items embedded collection for item lookups
- * - Integrates with user flag-based sort preferences via sorting utilities
- * - Produces plain objects suitable for Handlebars template consumption
- *
  * @module sheets/handlers/pc-context-builder
- * @see {@link https://foundryvtt.com/api/v13/classes/foundry.applications.sheets.ActorSheetV2.html|ActorSheetV2}
+ * @description Shapes a PC's items for the character sheet's `_prepareContext()`: sorts each item type by the
+ * user's stored sort preference, lists the Mastery Abilities a skill's rank unlocks (ranks 3, 5, 7), and reads the
+ * bio items, stance, effective Traits, and collapsed sections. It returns plain objects for the Handlebars
+ * templates and never changes a document.
  */
 
 import { getSortPref, sortWithPref } from "../../utils/sorting.js";
@@ -49,8 +34,7 @@ export class PcContextBuilder {
    * Used by both `_sortGeneric()` and `buildAdvDisList()` to maintain consistent
    * sorting behavior across advantages, disadvantages, and combined lists.
    *
-   * @type {Object.<string, Function>}
-   * @private
+   * @type {{[key: string]: Function}}
    */
   static _advDisCols = {
     name: it => String(it?.name ?? ""),
@@ -72,19 +56,9 @@ export class PcContextBuilder {
    *
    * @param {Actor} actor - L5R4 Actor document
    * @param {Item[]} allItems - Array of all items from actor.items (any types)
-   * @returns {Object} Sorted item collections by type
-   * @returns {Item[]} returns.skills - Sorted skills (formulas pre-calculated)
-   * @returns {Item[]} returns.spells - Sorted spells (formulas pre-calculated)
-   * @returns {Item[]} returns.advantages - Sorted advantages
-   * @returns {Item[]} returns.disadvantages - Sorted disadvantages
-   * @returns {Item[]} returns.items - Sorted items/commonItems
-   * @returns {Item[]} returns.katas - Sorted katas
-   * @returns {Item[]} returns.kihos - Sorted kihos
-   * @returns {Item[]} returns.tattoos - Sorted tattoos
-   * @returns {Item[]} returns.techniques - Sorted techniques
-   * @returns {Item[]} returns.armors - Sorted armors
-   * @returns {Item[]} returns.weapons - Sorted weapons (formulas pre-calculated)
-   * @returns {Item[]} returns.bows - Sorted bows (formulas pre-calculated)
+   * @returns {{[type: string]: Item[]}} Sorted item collections by type: skills, spells, advantages,
+   *   disadvantages, items (items and commonItems), katas, kihos, tattoos, techniques, armors, weapons, and bows;
+   *   skills, spells, weapons, and bows carry their pre-calculated formulas
    */
   static buildSortedItems(actor, allItems) {
     const byType = t => allItems.filter(i => i.type === t);
@@ -174,12 +148,11 @@ export class PcContextBuilder {
    * - **rank**: Skill rank (0-10)
    * - **trait**: Localized trait name for display
    * - **roll**: Total rolled dice count (pre-calculated)
-   * - **emphasis**: Emphasis text
+   * - **emphasis**: Emphasis text.
    *
    * @param {Actor} actor - L5R4 Actor document
    * @param {Item[]} skillItems - Array of skill items (formulas already calculated)
    * @returns {Item[]} Sorted skills
-   * @private
    */
   static _sortSkills(actor, skillItems) {
     // Define sortable columns with extractor functions
@@ -222,12 +195,11 @@ export class PcContextBuilder {
    * - **mastery**: Mastery Level (1-6)
    * - **range**: Range text
    * - **aoe**: Area of Effect text
-   * - **duration**: Duration text
+   * - **duration**: Duration text.
    *
    * @param {Actor} actor - L5R4 Actor document
    * @param {Item[]} spellItems - Array of spell items (formulas already calculated)
    * @returns {Item[]} Sorted spells
-   * @private
    */
   static _sortSpells(actor, spellItems) {
     // Define sortable columns with extractor functions
@@ -259,7 +231,6 @@ export class PcContextBuilder {
    * @param {Actor} actor - L5R4 Actor document
    * @param {Item[]} weaponItems - Array of weapon items (formulas already calculated)
    * @returns {Item[]} Sorted weapons
-   * @private
    */
   static _sortWeapons(actor, weaponItems) {
     const cols = {
@@ -285,14 +256,13 @@ export class PcContextBuilder {
    * - Kihos
    * - Tattoos
    * - Techniques
-   * - Armors
+   * - Armors.
    *
    * @param {Actor} actor - L5R4 Actor document (used for preference scope)
    * @param {Item[]} items - Array of items to sort
    * @param {string} scope - Sort preference scope key (e.g., "advantages")
-   * @param {Object.<string, Function>} cols - Column extractor functions for sorting
+   * @param {{[key: string]: Function}} cols - Column extractor functions for sorting
    * @returns {Item[]} Sorted items
-   * @private
    */
   static _sortGeneric(actor, items, scope, cols) {
     const pref = getSortPref(actor.id, scope, Object.keys(cols), "name");
@@ -304,21 +274,20 @@ export class PcContextBuilder {
    *
    * L5R4 Mastery Ability Rules:
    * Skills grant Mastery Abilities at ranks 3, 5, and 7. These are special benefits
-   * that enhance skill usage (e.g., "You may make ranged attacks while mounted").
+   * that enhance skill usage.
    *
    * This method scans all skills and extracts unlocked masteries (where character's
    * rank meets or exceeds the mastery rank). Returns a flat list suitable for
    * display in a "Mastery Abilities" section of the character sheet.
    *
    * Note: Rank 9 masteries are not checked as they are rare and not present in
-   * most skill definitions. The Rank 10 Mastery (a Free Raise, p.133) is a rule the skill carries
+   * most skill definitions. The Rank 10 Mastery (a Free Raise) is a rule the skill carries
    * (module/data/item/skill-data.js ownedRules) and is not displayed via this list.
+   * game-rules/58_skills_overview.md, p.133
    *
    * @param {Item[]} skills - Array of skill items (must have system.rank and system.masteryX properties)
-   * @returns {Object[]} Array of unlocked mastery ability objects
-   * @returns {string} returns[]._id - Source skill item ID
-   * @returns {string} returns[].name - Display name (e.g., "Kenjutsu 5")
-   * @returns {string} returns[].mastery - Mastery ability description text
+   * @returns {{_id: string, name: string, mastery: string}[]} The unlocked mastery abilities: the source skill
+   *   item ID, the display name (e.g., "Kenjutsu 5"), and the mastery ability text
    */
   static buildMasteryList(skills) {
     const masteries = [];
@@ -376,10 +345,8 @@ export class PcContextBuilder {
    * Characters can only have one of each bio item type at a time.
    *
    * @param {Item[]} allItems - Array of all items from actor.items
-   * @returns {Object} Bio items by type
-   * @returns {Item|null} returns.clan - Clan item or null
-   * @returns {Item|null} returns.family - Family item or null
-   * @returns {Item|null} returns.school - School item or null
+   * @returns {{clan: Item|null, family: Item|null, school: Item|null}} Bio items by type, null where the
+   *   actor has none
    */
   static extractBioItems(allItems) {
     const byType = t => allItems.filter(i => i.type === t);
@@ -421,7 +388,7 @@ export class PcContextBuilder {
    * stored in system._derived.traitsEff or system.derived.traitsEff.
    *
    * @param {Actor} actor - L5R4 Actor document
-   * @returns {Object} Effective trait values (sta, wil, str, per, ref, awa, agi, int)
+   * @returns {object} Effective trait values (sta, wil, str, per, ref, awa, agi, int)
    */
   static extractEffectiveTraits(actor) {
     const traitsEff = foundry.utils.duplicate(
@@ -446,7 +413,7 @@ export class PcContextBuilder {
    * sections for each character sheet.
    *
    * @param {string} actorId - Actor document ID
-   * @returns {Object} Map of section keys to collapsed boolean state
+   * @returns {object} Map of section keys to collapsed boolean state
    */
   static extractCollapsedSections(actorId) {
     return getSectionCollapsedMap(actorId, [

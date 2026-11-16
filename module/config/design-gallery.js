@@ -8,19 +8,196 @@
  * builds the real context does. A sample's `context` names a base context below; its `with` is merged over it.
  */
 
-const freeze = Object.freeze;
-
 /** The system's template root, as the samples name it. */
 const T = "systems/l5r4-enhanced/templates";
 
 /** Sample document text: a sentence long enough to wrap. */
-const DESCRIPTION = freeze({ i18n: "l5r4.apps.designGallery.sample.description" });
+const DESCRIPTION = Object.freeze({ i18n: "l5r4.apps.designGallery.sample.description" });
+
+/** Wound Ranks at Earth 2, with the current rank set by each sample. */
+const WOUND_LEVELS = Object.freeze({
+  healthy: { value: 10, penalty: 0, penaltyEff: 0, current: true },
+  nicked: { value: 14, penalty: 3, penaltyEff: 3, current: false },
+  grazed: { value: 18, penalty: 5, penaltyEff: 5, current: false },
+  hurt: { value: 22, penalty: 10, penaltyEff: 10, current: false },
+  injured: { value: 26, penalty: 15, penaltyEff: 15, current: false },
+  crippled: { value: 30, penalty: 20, penaltyEff: 20, current: false },
+  down: { value: 34, penalty: 40, penaltyEff: 40, current: false },
+  out: { value: 38, penalty: 40, penaltyEff: 40, current: false }
+});
+
+/** One row per Item subtype, in the shape the sheet's sorted lists give the section partials. */
+const ROWS = Object.freeze({
+  skills: [
+    {
+      id: "gallerySkill1",
+      name: "Kenjutsu",
+      type: "skill",
+      system: {
+        rank: 3,
+        trait: "agi",
+        school: true,
+        rollDice: 7,
+        rollKeep: 4,
+        trainedEmphases: ["Katana"],
+        description: DESCRIPTION
+      }
+    },
+    {
+      id: "gallerySkill2",
+      name: { i18n: "l5r4.apps.designGallery.sample.longName" },
+      type: "skill",
+      system: { rank: 1, trait: "awa", rollDice: 4, rollKeep: 3, trainedEmphases: [] }
+    }
+  ],
+  weapons: [
+    {
+      id: "galleryWeapon1",
+      name: "Katana",
+      type: "weapon",
+      attackFormula: "7k4",
+      system: { damageRoll: 3, damageKeep: 2, description: DESCRIPTION }
+    },
+    {
+      id: "galleryWeapon2",
+      name: "Yumi",
+      type: "weapon",
+      attackFormula: "6k3",
+      system: { damageRoll: 2, damageKeep: 2, isBow: true, arrow: "willow" }
+    }
+  ],
+  armors: [
+    {
+      id: "galleryArmor1",
+      name: "Light Armor",
+      type: "armor",
+      system: { bonus: 5, reduction: 3, equipped: true, description: DESCRIPTION }
+    }
+  ],
+  items: [{ id: "galleryItem1", name: "Traveling pack", type: "commonItem", system: {} }],
+  spells: [
+    {
+      id: "gallerySpell1",
+      name: "Path to Inner Peace",
+      type: "spell",
+      system: { ring: "water", mastery: 1, castFormula: "5k3", description: DESCRIPTION }
+    }
+  ],
+  techniques: [
+    {
+      id: "galleryTechnique1",
+      name: "Way of the Crane",
+      type: "technique",
+      system: { rank: 1, description: DESCRIPTION }
+    }
+  ],
+  kihos: [
+    {
+      id: "galleryKiho1",
+      name: "Cleansing Spirit",
+      type: "kiho",
+      system: { ring: "water", mastery: 2, type: "internal" }
+    }
+  ],
+  katas: [
+    {
+      id: "galleryKata1",
+      name: "Striking as Air",
+      type: "kata",
+      system: { ring: "air", mastery: 3, description: DESCRIPTION }
+    },
+    {
+      id: "galleryKata2",
+      name: "Striking as Fire",
+      type: "kata",
+      system: { ring: "fire", mastery: 3 }
+    }
+  ],
+  tattoos: [
+    {
+      id: "galleryTattoo1",
+      name: "Bamboo",
+      type: "tattoo",
+      system: { effect: { i18n: "l5r4.apps.designGallery.sample.tattooEffect" } }
+    }
+  ],
+  advantages: [
+    {
+      id: "galleryAdvantage1",
+      name: "Quick",
+      type: "advantage",
+      system: { type: "physical", cost: 6, description: DESCRIPTION }
+    }
+  ],
+  disadvantages: [
+    {
+      id: "galleryDisadvantage1",
+      name: "Proud",
+      type: "disadvantage",
+      system: { type: "mental", cost: 2 }
+    }
+  ]
+});
+
+/** A check card's context, shared by its variants. */
+const CHECK = Object.freeze({
+  kind: "skill",
+  label: "Kenjutsu",
+  target: { name: "" },
+  appliedModifiers: [{ label: { i18n: "l5r4.apps.designGallery.sample.modifier" }, text: "+1k0" }],
+  tn: { effective: 20, raises: 1, freeRaisesToTN: 0, woundPenalty: 3 },
+  outcome: { success: true },
+  outcomeText: { i18n: "l5r4.ui.mechanics.rolls.success" },
+  notes: [],
+  maneuverNotes: [],
+  sources: [],
+  conditions: []
+});
+
+/** The check dialog's context with every part the roll can offer. */
+const DIALOG = Object.freeze({
+  pool: "7k4",
+  modifiers: [
+    {
+      label: { i18n: "l5r4.apps.designGallery.sample.modifier" },
+      text: "+1k0",
+      enabled: true,
+      range: ""
+    },
+    {
+      label: { i18n: "l5r4.apps.designGallery.sample.modifierOff" },
+      text: "+0k1",
+      enabled: false,
+      range: "melee"
+    }
+  ],
+  substitutes: [
+    { label: { i18n: "l5r4.apps.designGallery.sample.substitute" }, text: "Agility → Reflexes" }
+  ],
+  hasTN: true,
+  tn: 20,
+  tnModifiers: [{ label: { i18n: "l5r4.apps.designGallery.sample.modifier" }, value: 5 }],
+  woundPenalty: 3,
+  raisesAllowed: true,
+  maxRaises: 2,
+  minRaises: 0,
+  freeRaises: 1,
+  voidAllowed: true,
+  voidPoints: 2,
+  voidOverLimit: true,
+  emphases: ["Katana"],
+  isAttack: true,
+  ranged: false,
+  socialResistance: true,
+  honorRank: 6,
+  embraceTaint: true
+});
 
 /**
  * The reference surface each theme's contrast is measured on (docs/design-system/foundations/color.md, Contrast):
  * core paints the surface, so the token is never declared and these values stand in for it.
  */
-export const GALLERY_SURFACE = freeze({
+export const GALLERY_SURFACE = Object.freeze({
   token: "--l5r4-color-surface",
   light: "#d5d3c6",
   dark: "#23222b"
@@ -31,7 +208,7 @@ export const GALLERY_SURFACE = freeze({
  * (its pairing in color.md, else the surface); `over` is what a translucent value composites over; `minimum` is the
  * pairing's ratio; `image` marks a token that holds an image, not a color.
  */
-export const GALLERY_COLORS = freeze([
+export const GALLERY_COLORS = Object.freeze([
   {
     group: "l5r4.apps.designGallery.color.core",
     tokens: [
@@ -210,7 +387,7 @@ export const GALLERY_COLORS = freeze([
 ]);
 
 /** The faces and the type scale (foundations/typography.md); `core` is the core variable each is built on. */
-export const GALLERY_TYPE = freeze({
+export const GALLERY_TYPE = Object.freeze({
   faces: [
     { token: "--l5r4-font-body", core: "--font-body" },
     { token: "--l5r4-font-display", core: "--font-h1" },
@@ -232,7 +409,7 @@ export const GALLERY_TYPE = freeze({
  * The space scale, semantic spacing, and size scale (foundations/space-and-size.md, iconography.md). `bar` names the
  * modifier the gallery stylesheet draws the token's bar with.
  */
-export const GALLERY_SPACE = freeze({
+export const GALLERY_SPACE = Object.freeze({
   steps: [
     { token: "--l5r4-space-4", bar: "space-4", core: "--spacer-4" },
     { token: "--l5r4-space-8", bar: "space-8", core: "--spacer-8" },
@@ -273,7 +450,7 @@ export const GALLERY_SPACE = freeze({
  * Frames, motion, layers, and states (foundations/frames.md, motion.md, layers.md, states.md). `frame` names the
  * modifier the gallery stylesheet draws a frame sample with.
  */
-export const GALLERY_FRAMES = freeze({
+export const GALLERY_FRAMES = Object.freeze({
   frames: [
     { token: "--l5r4-border-width-thin", frame: "border-width-thin" },
     { token: "--l5r4-border-width-thick", frame: "border-width-thick" },
@@ -304,7 +481,7 @@ export const GALLERY_FRAMES = freeze({
 });
 
 /** One icon per meaning (foundations/iconography.md rule 3), in the table's order. */
-export const GALLERY_ICONS = freeze([
+export const GALLERY_ICONS = Object.freeze([
   { meaning: "l5r4.apps.designGallery.icons.add", icons: ["fa-plus"] },
   { meaning: "l5r4.apps.designGallery.icons.subtract", icons: ["fa-minus"] },
   { meaning: "l5r4.apps.designGallery.icons.edit", icons: ["fa-pen-to-square"] },
@@ -360,133 +537,8 @@ export const GALLERY_ICONS = freeze([
   { meaning: "l5r4.apps.designGallery.icons.loading", icons: ["fa-spinner fa-spin"] }
 ]);
 
-/** Wound Ranks at Earth 2, with the current rank set by each sample. */
-const WOUND_LEVELS = freeze({
-  healthy: { value: 10, penalty: 0, penaltyEff: 0, current: true },
-  nicked: { value: 14, penalty: 3, penaltyEff: 3, current: false },
-  grazed: { value: 18, penalty: 5, penaltyEff: 5, current: false },
-  hurt: { value: 22, penalty: 10, penaltyEff: 10, current: false },
-  injured: { value: 26, penalty: 15, penaltyEff: 15, current: false },
-  crippled: { value: 30, penalty: 20, penaltyEff: 20, current: false },
-  down: { value: 34, penalty: 40, penaltyEff: 40, current: false },
-  out: { value: 38, penalty: 40, penaltyEff: 40, current: false }
-});
-
-/** One row per Item subtype, in the shape the sheet's sorted lists give the section partials. */
-const ROWS = freeze({
-  skills: [
-    {
-      id: "gallerySkill1",
-      name: "Kenjutsu",
-      type: "skill",
-      system: {
-        rank: 3,
-        trait: "agi",
-        school: true,
-        rollDice: 7,
-        rollKeep: 4,
-        trainedEmphases: ["Katana"],
-        description: DESCRIPTION
-      }
-    },
-    {
-      id: "gallerySkill2",
-      name: { i18n: "l5r4.apps.designGallery.sample.longName" },
-      type: "skill",
-      system: { rank: 1, trait: "awa", rollDice: 4, rollKeep: 3, trainedEmphases: [] }
-    }
-  ],
-  weapons: [
-    {
-      id: "galleryWeapon1",
-      name: "Katana",
-      type: "weapon",
-      attackFormula: "7k4",
-      system: { damageRoll: 3, damageKeep: 2, description: DESCRIPTION }
-    },
-    {
-      id: "galleryWeapon2",
-      name: "Yumi",
-      type: "weapon",
-      attackFormula: "6k3",
-      system: { damageRoll: 2, damageKeep: 2, isBow: true, arrow: "willow" }
-    }
-  ],
-  armors: [
-    {
-      id: "galleryArmor1",
-      name: "Light Armor",
-      type: "armor",
-      system: { bonus: 5, reduction: 3, equipped: true, description: DESCRIPTION }
-    }
-  ],
-  items: [{ id: "galleryItem1", name: "Traveling pack", type: "commonItem", system: {} }],
-  spells: [
-    {
-      id: "gallerySpell1",
-      name: "Path to Inner Peace",
-      type: "spell",
-      system: { ring: "water", mastery: 1, castFormula: "5k3", description: DESCRIPTION }
-    }
-  ],
-  techniques: [
-    {
-      id: "galleryTechnique1",
-      name: "Way of the Crane",
-      type: "technique",
-      system: { rank: 1, description: DESCRIPTION }
-    }
-  ],
-  kihos: [
-    {
-      id: "galleryKiho1",
-      name: "Cleansing Spirit",
-      type: "kiho",
-      system: { ring: "water", mastery: 2, type: "internal" }
-    }
-  ],
-  katas: [
-    {
-      id: "galleryKata1",
-      name: "Striking as Air",
-      type: "kata",
-      system: { ring: "air", mastery: 3, description: DESCRIPTION }
-    },
-    {
-      id: "galleryKata2",
-      name: "Striking as Fire",
-      type: "kata",
-      system: { ring: "fire", mastery: 3 }
-    }
-  ],
-  tattoos: [
-    {
-      id: "galleryTattoo1",
-      name: "Bamboo",
-      type: "tattoo",
-      system: { effect: { i18n: "l5r4.apps.designGallery.sample.tattooEffect" } }
-    }
-  ],
-  advantages: [
-    {
-      id: "galleryAdvantage1",
-      name: "Quick",
-      type: "advantage",
-      system: { type: "physical", cost: 6, description: DESCRIPTION }
-    }
-  ],
-  disadvantages: [
-    {
-      id: "galleryDisadvantage1",
-      name: "Proud",
-      type: "disadvantage",
-      system: { type: "mental", cost: 2 }
-    }
-  ]
-});
-
 /** The base contexts the samples render from, shaped as the sheets' and services' own contexts. */
-export const GALLERY_CONTEXTS = freeze({
+export const GALLERY_CONTEXTS = Object.freeze({
   pc: {
     actor: {
       name: { i18n: "l5r4.apps.designGallery.sample.pcName" },
@@ -612,7 +664,7 @@ export const GALLERY_CONTEXTS = freeze({
 });
 
 /** Evaluated rolls in core's stored shape, so a dice row renders the same dice every time. */
-export const GALLERY_ROLLS = freeze({
+export const GALLERY_ROLLS = Object.freeze({
   skilled: {
     class: "Roll",
     options: {},
@@ -697,60 +749,6 @@ export const GALLERY_ROLLS = freeze({
   }
 });
 
-/** A check card's context, shared by its variants. */
-const CHECK = freeze({
-  kind: "skill",
-  label: "Kenjutsu",
-  target: { name: "" },
-  appliedModifiers: [{ label: { i18n: "l5r4.apps.designGallery.sample.modifier" }, text: "+1k0" }],
-  tn: { effective: 20, raises: 1, freeRaisesToTN: 0, woundPenalty: 3 },
-  outcome: { success: true },
-  outcomeText: { i18n: "l5r4.ui.mechanics.rolls.success" },
-  notes: [],
-  maneuverNotes: [],
-  sources: [],
-  conditions: []
-});
-
-/** The check dialog's context with every part the roll can offer. */
-const DIALOG = freeze({
-  pool: "7k4",
-  modifiers: [
-    {
-      label: { i18n: "l5r4.apps.designGallery.sample.modifier" },
-      text: "+1k0",
-      enabled: true,
-      range: ""
-    },
-    {
-      label: { i18n: "l5r4.apps.designGallery.sample.modifierOff" },
-      text: "+0k1",
-      enabled: false,
-      range: "melee"
-    }
-  ],
-  substitutes: [
-    { label: { i18n: "l5r4.apps.designGallery.sample.substitute" }, text: "Agility → Reflexes" }
-  ],
-  hasTN: true,
-  tn: 20,
-  tnModifiers: [{ label: { i18n: "l5r4.apps.designGallery.sample.modifier" }, value: 5 }],
-  woundPenalty: 3,
-  raisesAllowed: true,
-  maxRaises: 2,
-  minRaises: 0,
-  freeRaises: 1,
-  voidAllowed: true,
-  voidPoints: 2,
-  voidOverLimit: true,
-  emphases: ["Katana"],
-  isAttack: true,
-  ranged: false,
-  socialResistance: true,
-  honorRank: 6,
-  embraceTaint: true
-});
-
 /**
  * Every component page in docs/design-system/components/, in the README's order. Each sample renders `partial`
  * with its context in a frame `scope` picks: `pc`, `npc`, and `item` are the sheets' own style scope, `chat` a chat
@@ -758,7 +756,7 @@ const DIALOG = freeze({
  * the page draws with today; `seeAlso` names pages whose samples show this component too; `notes` say what the
  * gallery cannot show and why.
  */
-export const GALLERY_COMPONENTS = freeze([
+export const GALLERY_COMPONENTS = Object.freeze([
   {
     page: "button",
     partials: [
@@ -2128,7 +2126,7 @@ export const GALLERY_COMPONENTS = freeze([
 ]);
 
 /** One sample of each pattern (docs/design-system/patterns/): a sheet section, a chat card, a dialog, a panel row. */
-export const GALLERY_PATTERNS = freeze([
+export const GALLERY_PATTERNS = Object.freeze([
   {
     page: "sheets",
     label: "l5r4.apps.designGallery.patterns.sheetSection",

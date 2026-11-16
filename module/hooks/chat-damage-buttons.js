@@ -1,36 +1,80 @@
 /**
- * Chat Damage Buttons Handler
- *
- * Handles clicks on Apply Wounds and Reduce with Void buttons in damage roll chat cards.
- * Applies damage to selected tokens with optional Void Point reduction.
- *
- * L5R4 Void Point Damage Reduction:
- * - Spending a Void Point reduces incoming damage by 10
- * - Can reduce damage to 0 minimum
- * - Must be declared before damage is applied
- *
- * L5R4 Armor Reduction:
- * - Armor reduces incoming damage by its Reduction value
- * - Applied automatically from equipped armor
- * - Stacks with Void Point reduction (Void first, then armor)
- * - Can reduce damage to 0 minimum
- *
  * @module hooks/chat-damage-buttons
- * @requires Foundry v13+
+ * @description The Apply Wounds and Reduce with Void buttons on damage cards that carry their damage in the HTML.
+ * Either button applies the damage to the first selected token. Reduce with Void first spends one of the target's
+ * Void Points for 10 fewer Wounds, declared before the damage is applied. The equipped armor's Reduction then lowers
+ * what is left. Neither step takes the damage below 0.
+ * game-rules/25_rings_and_traits.md, p.78
+ * game-rules/73_armor.md, p.198
  */
-
 import { T, F } from "../utils/localization.js";
 import { voidUseUpdate, warnVoidLimit } from "../services/effects/uses.js";
 
 /**
- * Applies wounds to the first selected token
- *
- * Automatically applies armor reduction per L5R4 Equipment rules:
- * "[book text removed; Core Rulebook p.198]."
- *
+ * Registers chat message hook to handle damage button clicks on damage cards posted by 3.x, which carry their
+ * damage in the HTML. A `roll` message's damage goes through module/services/combat/damage.js.
+ */
+export function registerChatDamageButtons() {
+  Hooks.on("renderChatMessageHTML", (message, html) => {
+    if (message.type === "roll") {
+      return;
+    }
+    // renderChatMessageHTML passes an HTMLElement, not jQuery
+    const element = html;
+
+    // Apply wounds button
+    const applyButton = element.querySelector("[data-action='apply-wounds']");
+    if (applyButton) {
+      let isProcessing = false;
+      applyButton.addEventListener("click", async event => {
+        event.preventDefault();
+
+        // Debounce protection: prevent multiple simultaneous clicks
+        if (isProcessing) {
+          return;
+        }
+        isProcessing = true;
+
+        try {
+          const damage = parseInt(event.currentTarget.dataset.damage) || 0;
+          await applyWoundsToToken(damage);
+        } finally {
+          isProcessing = false;
+        }
+      });
+    }
+
+    // Reduce with void button
+    const reduceButton = element.querySelector("[data-action='reduce-wounds-void']");
+    if (reduceButton) {
+      let isProcessing = false;
+      reduceButton.addEventListener("click", async event => {
+        event.preventDefault();
+
+        // Debounce protection: prevent multiple simultaneous clicks
+        if (isProcessing) {
+          return;
+        }
+        isProcessing = true;
+
+        try {
+          const button = event.currentTarget;
+          const damage = parseInt(button.dataset.damage) || 0;
+          const actorId = button.dataset.actorId;
+          await reduceAndApplyWounds(damage, actorId);
+        } finally {
+          isProcessing = false;
+        }
+      });
+    }
+  });
+}
+
+/**
+ * Applies wounds to the first selected token, less the Reduction of the armor the actor wears.
+ * game-rules/73_armor.md, p.198
  * @param {number} damage - Amount of damage to apply before armor reduction
  * @returns {Promise<void>}
- * @async
  */
 async function applyWoundsToToken(damage) {
   const tokens = canvas.tokens?.controlled ?? [];
@@ -86,17 +130,14 @@ async function applyWoundsToToken(damage) {
 }
 
 /**
- * Reduces damage with Void Point then applies wounds to selected token
+ * Reduces damage with Void Point then applies wounds to selected token.
  *
- * Applies both Void Point reduction (-10) and armor reduction per L5R4 rules:
- * 1. Void Point reduces damage by 10
- * 2. Armor Reduction then reduces remaining damage
- * 3. Final damage applied (minimum 0)
- *
+ * The Void Point removes 10 Wounds first, then the armor's Reduction lowers the rest; the final damage is at least 0.
+ * game-rules/25_rings_and_traits.md, p.78
+ * game-rules/73_armor.md, p.198
  * @param {number} damage - Original damage amount
- * @param {string} actorId - ID of actor who can spend void
+ * @param {string} _actorId - ID of actor who can spend void
  * @returns {Promise<void>}
- * @async
  */
 async function reduceAndApplyWounds(damage, _actorId) {
   const tokens = canvas.tokens?.controlled ?? [];
@@ -164,64 +205,4 @@ async function reduceAndApplyWounds(damage, _actorId) {
       })
     );
   }
-}
-
-/**
- * Registers chat message hook to handle damage button clicks on damage cards posted by 3.x, which carry their
- * damage in the HTML. A `roll` message's damage goes through module/services/combat/damage.js.
- */
-export function registerChatDamageButtons() {
-  Hooks.on("renderChatMessageHTML", (message, html) => {
-    if (message.type === "roll") {
-      return;
-    }
-    // renderChatMessageHTML passes an HTMLElement, not jQuery
-    const element = html;
-
-    // Apply wounds button
-    const applyButton = element.querySelector("[data-action='apply-wounds']");
-    if (applyButton) {
-      let isProcessing = false;
-      applyButton.addEventListener("click", async event => {
-        event.preventDefault();
-
-        // Debounce protection: prevent multiple simultaneous clicks
-        if (isProcessing) {
-          return;
-        }
-        isProcessing = true;
-
-        try {
-          const damage = parseInt(event.currentTarget.dataset.damage) || 0;
-          await applyWoundsToToken(damage);
-        } finally {
-          isProcessing = false;
-        }
-      });
-    }
-
-    // Reduce with void button
-    const reduceButton = element.querySelector("[data-action='reduce-wounds-void']");
-    if (reduceButton) {
-      let isProcessing = false;
-      reduceButton.addEventListener("click", async event => {
-        event.preventDefault();
-
-        // Debounce protection: prevent multiple simultaneous clicks
-        if (isProcessing) {
-          return;
-        }
-        isProcessing = true;
-
-        try {
-          const button = event.currentTarget;
-          const damage = parseInt(button.dataset.damage) || 0;
-          const actorId = button.dataset.actorId;
-          await reduceAndApplyWounds(damage, actorId);
-        } finally {
-          isProcessing = false;
-        }
-      });
-    }
-  });
 }

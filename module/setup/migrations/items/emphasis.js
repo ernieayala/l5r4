@@ -1,85 +1,9 @@
 /**
- * Emphasis String to Array Migration
- * Converts legacy emphasis string format to split availableEmphases/trainedEmphases structure.
- *
  * @module setup/migrations/items/emphasis
+ * @description Converts the legacy Emphasis string to the split availableEmphases and trainedEmphases structure.
  */
-
 import { SYS_ID } from "../../../config/constants.js";
 import { OFFICIAL_EMPHASES } from "../../../config/reference-data.js";
-
-/**
- * Find best matching official emphasis for a given name.
- * Tries exact match (case-insensitive), then close matches.
- *
- * @param {string} name - Emphasis name to match
- * @returns {string|null} Matched official emphasis name or null
- * @private
- */
-function findOfficialEmphasisMatch(name) {
-  if (!name) {
-    return null;
-  }
-
-  const normalized = name.trim();
-  const lower = normalized.toLowerCase();
-
-  // Try exact case-insensitive match
-  for (const official of OFFICIAL_EMPHASES) {
-    if (official.toLowerCase() === lower) {
-      return official;
-    }
-  }
-
-  // Try close matches (singular/plural, common variations)
-  for (const official of OFFICIAL_EMPHASES) {
-    const officialLower = official.toLowerCase();
-
-    // Check if one is singular and other is plural
-    // e.g., "Dog" matches "Dogs", "Horse" matches "Horses"
-    if (officialLower === lower + "s" || officialLower + "s" === lower) {
-      return official;
-    }
-
-    // Check if normalized name is contained in official (for compound names)
-    // e.g., "Riding Horse" might match "Gaijin Riding Horse"
-    if (officialLower.includes(lower) || lower.includes(officialLower)) {
-      return official;
-    }
-  }
-
-  return null;
-}
-
-/**
- * Get world-level custom emphases from settings.
- *
- * @returns {string[]} Array of custom emphasis names
- * @private
- */
-function getWorldCustomEmphases() {
-  try {
-    const setting = game.settings.get("l5r4-enhanced", "customEmphases");
-    return Array.isArray(setting) ? setting : [];
-  } catch {
-    return [];
-  }
-}
-
-/**
- * Add custom emphasis to world settings if it doesn't exist.
- *
- * @param {string} emphasisName - Name of custom emphasis to add
- * @returns {Promise<void>}
- * @private
- */
-async function addCustomEmphasisToWorld(emphasisName) {
-  const current = getWorldCustomEmphases();
-  if (!current.includes(emphasisName)) {
-    current.push(emphasisName);
-    await game.settings.set("l5r4-enhanced", "customEmphases", current);
-  }
-}
 
 /**
  * Migrates legacy emphasis string format to new split structure.
@@ -219,5 +143,75 @@ export async function migrateEmphasisStringToArray(docs, label) {
         )}`
       );
     }
+  }
+}
+
+/**
+ * Find best matching official emphasis for a given name.
+ * Tries exact match (case-insensitive), then close matches.
+ *
+ * @param {string} name - Emphasis name to match
+ * @returns {string|null} Matched official emphasis name or null
+ */
+function findOfficialEmphasisMatch(name) {
+  if (!name) {
+    return null;
+  }
+
+  const normalized = name.trim();
+  const lower = normalized.toLowerCase();
+
+  // Try exact case-insensitive match
+  for (const official of OFFICIAL_EMPHASES) {
+    if (official.toLowerCase() === lower) {
+      return official;
+    }
+  }
+
+  // Try close matches (singular/plural, common variations)
+  for (const official of OFFICIAL_EMPHASES) {
+    const officialLower = official.toLowerCase();
+
+    // Check if one is singular and other is plural
+    // e.g., "Dog" matches "Dogs", "Horse" matches "Horses"
+    if (officialLower === lower + "s" || officialLower + "s" === lower) {
+      return official;
+    }
+
+    // Check if normalized name is contained in official (for compound names)
+    // e.g., "Riding Horse" might match "Gaijin Riding Horse"
+    if (officialLower.includes(lower) || lower.includes(officialLower)) {
+      return official;
+    }
+  }
+
+  return null;
+}
+
+/**
+ * Get world-level custom emphases from settings.
+ *
+ * @returns {string[]} Array of custom emphasis names
+ */
+function getWorldCustomEmphases() {
+  try {
+    const setting = game.settings.get("l5r4-enhanced", "customEmphases");
+    return Array.isArray(setting) ? setting : [];
+  } catch {
+    return [];
+  }
+}
+
+/**
+ * Add custom emphasis to world settings if it doesn't exist.
+ *
+ * @param {string} emphasisName - Name of custom emphasis to add
+ * @returns {Promise<void>}
+ */
+async function addCustomEmphasisToWorld(emphasisName) {
+  const current = getWorldCustomEmphases();
+  if (!current.includes(emphasisName)) {
+    current.push(emphasisName);
+    await game.settings.set("l5r4-enhanced", "customEmphases", current);
   }
 }

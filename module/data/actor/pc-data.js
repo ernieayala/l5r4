@@ -1,3 +1,8 @@
+/**
+ * @module data/actor/pc-data
+ * @description The data model of the `pc` Actor subtype.
+ */
+
 import {
   booleanField,
   coinsField,
@@ -51,19 +56,20 @@ export default class PcData extends ActorData {
     return super.migrateData(source);
   }
 
-  /**
-   * The Insight Rank rules read (p.104): the prepared rank.
-   * @type {number}
-   */
-  get insightRank() {
-    return this.insight.rank;
-  }
-
   /** @override */
   prepareDerivedData() {
     super.prepareDerivedData();
     const actor = this.parent;
     preparePcData(actor, this, actor._finalizeWoundPenalties.bind(actor), calculateInsightRank);
     preparePcExperience(actor, this);
+  }
+
+  /**
+   * The Insight Rank rules read: the prepared rank.
+   * game-rules/49_improving_your_character.md, p.104
+   * @type {number}
+   */
+  get insightRank() {
+    return this.insight.rank;
   }
 }

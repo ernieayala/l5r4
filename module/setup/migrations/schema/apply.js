@@ -1,10 +1,7 @@
 /**
- * Schema Field Remapping Migrations
- * Handles transformation of legacy field names to current schema (e.g., snake_case → camelCase).
- *
  * @module setup/migrations/schema/apply
+ * @description Renames legacy field names to the current schema (snake_case to camelCase).
  */
-
 import { SYS_ID } from "../../../config/constants.js";
 import { getByPath, setByPath, deleteByPath } from "../utils/helpers.js";
 import { SCHEMA_MAP } from "./map.js";
@@ -20,11 +17,11 @@ import { SCHEMA_MAP } from "./map.js";
  * so this function only processes documents that haven't been migrated yet. This prevents
  * overwriting manually-corrected field names when forceMigration is triggered.
  *
- * Schema Map Example:
- * - { docType: "Actor", type: "npc", from: "system.armor.armor_tn", to: "system.armor.armorTn" }
+ * A SCHEMA_MAP entry such as `{ docType: "Actor", type: "npc", from: "system.armor.armor_tn", to:
+ * "system.armor.armorTn" }` moves the value at `from` to `to`.
  *
  * @param {Document} doc - Actor or Item document to evaluate
- * @returns {Object|null} Update object with transformed fields, or null if no changes needed
+ * @returns {object|null} Update object with transformed fields, or null if no changes needed
  */
 export function buildSchemaUpdate(doc) {
   const { documentName: docType } = doc; // "Actor" | "Item"

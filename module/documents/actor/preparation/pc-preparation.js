@@ -1,36 +1,12 @@
 /**
- * @file PC Actor Data Preparation
  * @module documents/actor/preparation/pc-preparation
- *
- * Handles derived data calculation for PC actors in the L5R4 system.
- * Coordinates trait/ring calculations, initiative, armor TN, wounds, insight,
- * and healing rates in the correct dependency order.
- *
- * Key responsibilities:
- * - Calculate PC initiative (Insight Rank + Reflexes formula)
- * - Calculate armor TN from base + equipped armor items
- * - Process wound thresholds using Earth Ring formulas
- * - Calculate insight points and rank from rings/skills
- * - Calculate healing rates from Stamina
- * - Apply ArmorTN rules from stances, conditions, and other effects
- *
- * Architecture: Pure calculation functions that mutate sys object in place.
- * Foundry API: Uses actor.items collection and actor flags for armor stacking.
- *
- * PC-specific differences from NPCs:
- * - Initiative uses Insight Rank + Reflexes (not custom values)
- * - Armor TN calculated from base (5*Ref+5) + equipped armor
- * - Wound thresholds calculated from Earth Ring formulas
- * - Insight calculated from rings and skill ranks
- * - Healing rate calculated from Stamina + Insight Rank
+ * @description Prepares a PC's derived data in dependency order: Traits and Rings, Insight, the rules that need
+ * them, Armor TN from its base (Reflexes × 5 + 5) and the equipped armor with its rules, movement, Wound Ranks from
+ * the Earth Ring, Initiative (Insight Rank + Reflexes), healing, and the owned items' formulas. Modifies the actor's
+ * system data in place; reads the actor's items and its armor-stacking flag.
  */
 
 import { SYS_ID } from "../../../config/constants.js";
-
-import { toInt } from "../../../utils/type-coercion.js";
-import { logError } from "../../../utils/error-logging.js";
-import { initiativeDice } from "../../../utils/initiative.js";
-
 import {
   WOUND_LEVEL_ORDER,
   DEFAULT_WOUND_PENALTIES,
@@ -38,6 +14,9 @@ import {
   RIDING_ARMOR_MOUNTED_BONUS
 } from "../../../config/game-mechanics.js";
 import { TRAIT_KEYS } from "../../../config/reference-data.js";
+import { toInt } from "../../../utils/type-coercion.js";
+import { logError } from "../../../utils/error-logging.js";
+import { initiativeDice } from "../../../utils/initiative.js";
 import { getCreationFreeBonusSources } from "../../../utils/xp-calculations.js";
 import {
   prepareTraitsAndRings,
@@ -47,43 +26,6 @@ import {
 import { prepareHealRate } from "../calculations/wound-system.js";
 import { enrichActorItems } from "../calculations/item-enrichment-system.js";
 import { applyArmorRules, applyDerivedRules } from "../rules.js";
-
-/**
- * Calculate Insight points and, unless the GM sets it by hand, Insight Rank (p.104): the Rings times ten plus every
- * Skill rank. The Rings come from the stored ranks plus the Family and School TraitAdjust bonuses, so an effect that
- * raises a Trait for a while (a kata, a spell) never changes the Insight Rank.
- *
- * @param {Actor} actor
- * @param {object} sys  Prepared system data
- * @param {Function} calculateInsightRankFn  Insight Rank from points
- */
-function prepareInsight(actor, sys, calculateInsightRankFn) {
-  const stored = actor._source.system;
-  const owned = key => toInt(stored.traits[key]) + getCreationFreeBonusSources(actor, key).rules;
-  const rings = ringsFromTraits(Object.fromEntries(TRAIT_KEYS.map(key => [key, owned(key)])));
-  const voidRank = toInt(stored.rings.void.rank) + getCreationFreeBonusSources(actor, "void").rules;
-  const ringsTotal = rings.air + rings.earth + rings.fire + rings.water + voidRank;
-
-  let skillTotal = 0;
-  for (const it of actor.items) {
-    if (it.type === "skill") {
-      skillTotal += toInt(it._source.system.rank);
-    }
-  }
-
-  sys.insight = sys.insight || {};
-  sys.insight.points = ringsTotal * 10 + skillTotal * 1;
-
-  // Default to auto-calculate insight rank from points
-  if (sys.insight.autoCalculate === undefined) {
-    sys.insight.autoCalculate = true;
-  }
-
-  // Calculate insight rank from points using school progression table
-  if (sys.insight.autoCalculate) {
-    sys.insight.rank = calculateInsightRankFn(sys.insight.points);
-  }
-}
 
 /**
  * Prepares derived data for PC actors.
@@ -98,10 +40,6 @@ function prepareInsight(actor, sys, calculateInsightRankFn) {
  * @param {Function} calculateInsightRankFn - Callback to calculate insight rank from points
  *
  * @returns {void} Mutates sys object in place
- *
- * @example
- * // Called from Actor.prepareData()
- * preparePcData(this, this.system, finalizeWoundPenalties, calculateInsightRank);
  */
 export function preparePcData(actor, sys, finalizeWoundPenaltiesFn, calculateInsightRankFn) {
   // Extract school name from equipped school item
@@ -121,7 +59,8 @@ export function preparePcData(actor, sys, finalizeWoundPenaltiesFn, calculateIns
   prepareTraitsAndRings(sys);
 
   // Insight needs only Rings and Skill ranks; it comes before the rules so predicates can test Insight and School
-  // Rank (p.104)
+  // Rank
+  // game-rules/49_improving_your_character.md, p.104
   prepareInsight(actor, sys, calculateInsightRankFn);
 
   // Rules that need Traits and Rings, before the values their outputs feed (Initiative, Wounds, roll bonuses)
@@ -156,7 +95,8 @@ export function preparePcData(actor, sys, finalizeWoundPenaltiesFn, calculateIns
     if (!a?.equipped) {
       continue;
     }
-    // Riding armor's +4 is +12 on horseback (p.198): 8 more than its entered bonus while mounted
+    // Riding armor's +4 is +12 on horseback: 8 more than its entered bonus while mounted
+    // game-rules/73_armor.md, p.198
     const b =
       toInt(a.bonus) + (mounted && a.armorType === "riding" ? RIDING_ARMOR_MOUNTED_BONUS : 0);
     const r = toInt(a.reduction);
@@ -225,7 +165,8 @@ export function preparePcData(actor, sys, finalizeWoundPenaltiesFn, calculateIns
   // Apply wound penalties to traits/rings
   finalizeWoundPenaltiesFn(sys, order);
 
-  // Initiative pool: Insight Rank + Reflexes, keep Reflexes (p.81). Calculated once the Insight Rank above is final.
+  // Initiative pool: Insight Rank + Reflexes, keep Reflexes. Calculated once the Insight Rank above is final.
+  // game-rules/31_combat_round.md, p.81
   sys.initiative = sys.initiative || {};
   Object.assign(
     sys.initiative,
@@ -241,4 +182,41 @@ export function preparePcData(actor, sys, finalizeWoundPenaltiesFn, calculateIns
 
   // Enrich embedded items with calculated data
   enrichActorItems(actor);
+}
+
+/**
+ * Calculate Insight points and, unless the GM sets it by hand, Insight Rank: the Rings times ten plus every Skill
+ * rank. The Rings come from the stored ranks plus the Family and School TraitAdjust bonuses, so an effect that
+ * raises a Trait for a while (a kata, a spell) never changes the Insight Rank.
+ * game-rules/49_improving_your_character.md, p.104
+ * @param {Actor} actor
+ * @param {object} sys - Prepared system data
+ * @param {Function} calculateInsightRankFn - Insight Rank from points
+ */
+function prepareInsight(actor, sys, calculateInsightRankFn) {
+  const stored = actor._source.system;
+  const owned = key => toInt(stored.traits[key]) + getCreationFreeBonusSources(actor, key).rules;
+  const rings = ringsFromTraits(Object.fromEntries(TRAIT_KEYS.map(key => [key, owned(key)])));
+  const voidRank = toInt(stored.rings.void.rank) + getCreationFreeBonusSources(actor, "void").rules;
+  const ringsTotal = rings.air + rings.earth + rings.fire + rings.water + voidRank;
+
+  let skillTotal = 0;
+  for (const it of actor.items) {
+    if (it.type === "skill") {
+      skillTotal += toInt(it._source.system.rank);
+    }
+  }
+
+  sys.insight = sys.insight || {};
+  sys.insight.points = ringsTotal * 10 + skillTotal * 1;
+
+  // Default to auto-calculate insight rank from points
+  if (sys.insight.autoCalculate === undefined) {
+    sys.insight.autoCalculate = true;
+  }
+
+  // Calculate insight rank from points using school progression table
+  if (sys.insight.autoCalculate) {
+    sys.insight.rank = calculateInsightRankFn(sys.insight.points);
+  }
 }

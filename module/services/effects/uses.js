@@ -1,17 +1,21 @@
 /**
  * @module services/effects/uses
  * @description Use counters per turn, round, skirmish, or day (Resource rules; module/utils/effects.js). The one
- * built in is the Void Point: normally one per Round (Core Rulebook p.78). Spending past the limit warns and is
- * never blocked (STAGE-09 decision 6); Resource rules with the slug "void" raise the limit.
+ * built in is the Void Point: normally one per Round. Spending past the limit warns and is never blocked (STAGE-09
+ * decision 6); Resource rules with the slug "void" raise the limit.
  *
  * A counter lives in the actor's `flags.l5r4-enhanced.uses.<slug>` as `{key, count}`, the key naming its period,
  * so it resets when the period changes with nothing to clear.
+ * game-rules/25_rings_and_traits.md, p.78
  */
 
 import { SYS_ID } from "../../config/constants.js";
 import { periodKey, usesSpent } from "../../utils/effects.js";
 
-/** Void Points a character may normally spend per Round (p.78). */
+/**
+ * Void Points a character may normally spend per Round.
+ * game-rules/25_rings_and_traits.md, p.78
+ */
 const VOID_PER_ROUND = 1;
 
 /**
@@ -75,7 +79,8 @@ export function voidUseUpdate(actor) {
 }
 
 /**
- * Warn when a Void Point spent now passes the Round's limit (p.78); the spending goes ahead.
+ * Warn when a Void Point spent now passes the Round's limit; the spending goes ahead.
+ * game-rules/25_rings_and_traits.md, p.78
  * @param {Actor} actor
  */
 export function warnVoidLimit(actor) {

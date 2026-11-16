@@ -1,17 +1,10 @@
 /**
- * Roll Handler Module
- *
- * Sheet actions that start rolls. Each handler reads what to roll from the sheet (an item row or data-* attributes)
- * and hands it to a roll service; the roll pipeline (module/services/dice/check/) gathers every modifier, so
- * handlers add none (AUTOMATION.md B1-B3). A normal click shows the roll dialog; Shift-click skips it.
- *
  * @module sheets/handlers/roll-handler
+ * @description Sheet actions that start rolls. Each handler reads what to roll from the sheet (an item row or data-*
+ * attributes) and hands it to a roll service; the roll pipeline (module/services/dice/check/) gathers every
+ * modifier, so handlers add none (AUTOMATION.md B1-B3). A normal click shows the roll dialog; Shift-click skips it.
  */
 
-import { SkillRoll } from "../../services/dice/rolls/skill-roll.js";
-import { SimpleRoll } from "../../services/dice/rolls/simple-roll.js";
-import { TraitRoll } from "../../services/dice/rolls/trait-roll.js";
-import { RingRoll } from "../../services/dice/rolls/ring-roll.js";
 import {
   normalizeTraitKey,
   getEffectiveTrait,
@@ -21,6 +14,10 @@ import {
 } from "../../utils/mechanics.js";
 import { toInt } from "../../utils/type-coercion.js";
 import { T } from "../../utils/localization.js";
+import { SkillRoll } from "../../services/dice/rolls/skill-roll.js";
+import { SimpleRoll } from "../../services/dice/rolls/simple-roll.js";
+import { TraitRoll } from "../../services/dice/rolls/trait-roll.js";
+import { RingRoll } from "../../services/dice/rolls/ring-roll.js";
 
 /**
  * Static roll actions for actor sheets.
@@ -31,7 +28,6 @@ export class RollHandler {
   /**
    * Rolls in progress, keyed "actorId-rollType-itemId" or "actorId-rollType".
    * @type {Set<string>}
-   * @private
    */
   static _rollInProgress = new Set();
 
@@ -40,7 +36,6 @@ export class RollHandler {
    * @param {HTMLElement|null} element
    * @param {Event} event
    * @returns {HTMLElement}
-   * @private
    */
   static _getElement(element, event) {
     return element || event.currentTarget;
@@ -51,7 +46,6 @@ export class RollHandler {
    * @param {string} key - Roll key
    * @param {function(): Promise<*>} roll
    * @returns {Promise<*>}
-   * @private
    */
   static async _once(key, roll) {
     if (RollHandler._rollInProgress.has(key)) {
@@ -66,8 +60,9 @@ export class RollHandler {
   }
 
   /**
-   * Roll a Skill from its row: (Skill + Trait)k(Trait) (p.79).
-   * @param {Object} context - Sheet context with `actor`
+   * Roll a Skill from its row: (Skill + Trait)k(Trait).
+   * game-rules/29_types_of_rolls.md, p.79
+   * @param {object} context - Sheet context with `actor`
    * @param {Event} event - Click event
    * @param {HTMLElement} element - The clicked element inside the skill row
    * @returns {Promise<ChatMessage|null|undefined>}
@@ -83,11 +78,12 @@ export class RollHandler {
   }
 
   /**
-   * Roll a Skill item: (Skill + Trait)k(Trait) with its own Trait (p.79). The sheet's row and a hotbar macro both
+   * Roll a Skill item: (Skill + Trait)k(Trait) with its own Trait. The sheet's row and a hotbar macro both
    * roll through here.
+   * game-rules/29_types_of_rolls.md, p.79
    * @param {Actor} actor
-   * @param {Item} item  A skill the actor owns
-   * @param {boolean} askForOptions  Show the roll dialog
+   * @param {Item} item - A skill the actor owns
+   * @param {boolean} askForOptions - Show the roll dialog
    * @returns {Promise<ChatMessage|null|undefined>}
    */
   static rollSkill(actor, item, askForOptions) {
@@ -110,7 +106,7 @@ export class RollHandler {
 
   /**
    * Roll an NPC attack from data-roll / data-keep (plus data-trait and data-modifier).
-   * @param {Object} context - Sheet context with `actor`
+   * @param {object} context - Sheet context with `actor`
    * @param {Event} event - Click event
    * @param {HTMLElement} element - The clicked element
    * @returns {Promise<ChatMessage|null|undefined>}
@@ -146,8 +142,9 @@ export class RollHandler {
 
   /**
    * Attack with a weapon from its row: its associated Skill with that Skill's Trait, or the fallback Trait alone as
-   * an Unskilled Roll when the character lacks the Skill (p.80).
-   * @param {Object} context - Sheet context with `actor`
+   * an Unskilled Roll when the character lacks the Skill.
+   * game-rules/30_skill_rolls_expanded.md, p.80
+   * @param {object} context - Sheet context with `actor`
    * @param {Event} event - Click event
    * @param {HTMLElement} element - The clicked element inside the weapon row
    * @returns {Promise<ChatMessage|null|undefined>}
@@ -166,11 +163,12 @@ export class RollHandler {
 
   /**
    * Attack with a weapon item: its associated Skill with that Skill's Trait, or the fallback Trait alone as an
-   * Unskilled Roll when the character lacks the Skill (p.80). The sheet's row and a hotbar macro both attack through
+   * Unskilled Roll when the character lacks the Skill. The sheet's row and a hotbar macro both attack through
    * here.
+   * game-rules/30_skill_rolls_expanded.md, p.80
    * @param {Actor} actor
-   * @param {Item} weapon  A weapon or bow the actor owns
-   * @param {boolean} askForOptions  Show the roll dialog
+   * @param {Item} weapon - A weapon or bow the actor owns
+   * @param {boolean} askForOptions - Show the roll dialog
    * @returns {Promise<ChatMessage|null|undefined>}
    */
   static rollWeaponAttack(actor, weapon, askForOptions) {
@@ -214,7 +212,7 @@ export class RollHandler {
 
   /**
    * Roll NPC damage from data-roll / data-keep (plus data-trait and data-modifier).
-   * @param {Object} context - Sheet context with `actor`
+   * @param {object} context - Sheet context with `actor`
    * @param {Event} event - Click event
    * @param {HTMLElement} element - The clicked element
    * @returns {Promise<ChatMessage|null|undefined>}
@@ -237,8 +235,9 @@ export class RollHandler {
   }
 
   /**
-   * Roll a Trait (p.80): roll and keep its rank.
-   * @param {Object} context - Sheet context with `actor`
+   * Roll a Trait: roll and keep its rank.
+   * game-rules/29_types_of_rolls.md, p.80
+   * @param {object} context - Sheet context with `actor`
    * @param {Event} event - Click event
    * @param {HTMLElement} element - The clicked element inside the trait block
    * @returns {Promise<ChatMessage|null|undefined>}
@@ -256,11 +255,12 @@ export class RollHandler {
   }
 
   /**
-   * Roll a Trait by key: roll and keep its rank (p.80). An NPC's goes through its stat-block roll. The sheet and a
+   * Roll a Trait by key: roll and keep its rank. An NPC's goes through its stat-block roll. The sheet and a
    * hotbar macro both roll through here.
+   * game-rules/29_types_of_rolls.md, p.80
    * @param {Actor} actor
    * @param {string} traitKey
-   * @param {boolean} askForOptions  Show the roll dialog
+   * @param {boolean} askForOptions - Show the roll dialog
    * @returns {Promise<ChatMessage|null|undefined>}
    */
   static rollTrait(actor, traitKey, askForOptions) {
@@ -273,8 +273,9 @@ export class RollHandler {
   }
 
   /**
-   * Roll an NPC Ring (p.80) from data-system-ring and data-ring-rank.
-   * @param {Object} context - Sheet context with `actor`
+   * Roll an NPC Ring from data-system-ring and data-ring-rank.
+   * game-rules/29_types_of_rolls.md, p.80
+   * @param {object} context - Sheet context with `actor`
    * @param {Event} event - Click event
    * @param {HTMLElement} element - The clicked element
    * @returns {Promise<ChatMessage|null|undefined>}
@@ -286,11 +287,12 @@ export class RollHandler {
   }
 
   /**
-   * Roll a Ring by key: roll and keep its rank (p.80). A PC's dialog can make it a Spell Casting Roll; an NPC's goes
+   * Roll a Ring by key: roll and keep its rank. A PC's dialog can make it a Spell Casting Roll; an NPC's goes
    * through its stat-block roll. Both sheets and a hotbar macro roll through here.
+   * game-rules/29_types_of_rolls.md, p.80
    * @param {Actor} actor
-   * @param {string} ring  air, earth, fire, water, or void
-   * @param {boolean} askForOptions  Show the roll dialog
+   * @param {string} ring - air, earth, fire, water, or void
+   * @param {boolean} askForOptions - Show the roll dialog
    * @returns {Promise<ChatMessage|null|undefined>}
    */
   static rollRing(actor, ring, askForOptions) {
@@ -306,7 +308,7 @@ export class RollHandler {
   /**
    * Roll an XkY pool from the clicked element's data-roll, data-keep, data-rolllabel, data-trait, and
    * data-rolltype ("attack", "damage", or a plain roll).
-   * @param {Object} context - Sheet context with `actor`
+   * @param {object} context - Sheet context with `actor`
    * @param {Event} event - Click event
    * @returns {Promise<ChatMessage|null|undefined>}
    */

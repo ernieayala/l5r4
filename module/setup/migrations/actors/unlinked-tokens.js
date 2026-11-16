@@ -1,10 +1,7 @@
 /**
- * Unlinked Token Migration
- * Gives unlinked tokens' own items and effects the migrations world actors get.
- *
  * @module setup/migrations/actors/unlinked-tokens
+ * @description Gives unlinked tokens' own items and effects the migrations world actors get.
  */
-
 import { SYS_ID } from "../../../config/constants.js";
 import { statusEffectUpdate } from "../../../utils/status-data.js";
 import { migrateEmbeddedItems } from "./embedded-items.js";

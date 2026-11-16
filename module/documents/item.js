@@ -14,8 +14,6 @@
  * - Delegates lifecycle hooks to specialized modules (item-creation, item-updates)
  * - Uses preparation modules for data calculation (base-data, derived-data)
  * - Chat card rendering for rolling items to chat
- *
- * @requires Foundry VTT v11+
  */
 
 import { SYS_ID } from "../config/constants.js";
@@ -32,10 +30,10 @@ import { renderItemChatCard } from "./item/integration/chat-cards.js";
  * Implements L5R4 item types and chat card rendering.
  */
 export default class L5R4Item extends Item {
-  /** @type {Object<string, string>} Map of item types to chat card template paths */
+  /** @type {Record<string, string>} Map of item types to chat card template paths */
   static CHAT_CARD_TEMPLATES = CHAT_CARD_TEMPLATES;
 
-  /** @type {Object<string, string>} Map of item types to default icon paths */
+  /** @type {Record<string, string>} Map of item types to default icon paths */
   static DEFAULT_ICONS = DEFAULT_ICONS;
 
   /**

@@ -2,10 +2,11 @@
  * @module services/combat/damage
  * @description From a hit to Wounds (roadmap/STAGE-10): damage rolled from the attack's stored context, applied to
  * the attack's target (or selected tokens) through Reduction, Spirit, and Invulnerability, with a result card that
- * offers the target's owner a Void Point for 10 fewer Wounds (p.78; decision 5) and lets the damage be undone.
+ * offers the target's owner a Void Point for 10 fewer Wounds (decision 5) and lets the damage be undone.
  *
  * Applying, reducing, and undoing change an actor the user may not own; a player's request runs on the active GM
  * (`CONFIG.queries`), which posts the result card, so every card's flags are the GM's to change.
+ * game-rules/25_rings_and_traits.md, p.78
  */
 
 import { SYS_ID } from "../../config/constants.js";
@@ -26,13 +27,18 @@ import { voidUseUpdate, warnVoidLimit } from "../effects/uses.js";
 /** Name of the GM query that carries a player's damage action. */
 const DAMAGE_QUERY = `${SYS_ID}.damage`;
 
-/** Disarm damage, without Strength (p.86). */
+/**
+ * Disarm damage, without Strength.
+ * game-rules/38_maneuvers.md, p.86
+ */
 const DISARM_DAMAGE = Object.freeze({ roll: 2, keep: 1 });
 
 /**
- * Roll damage for a hit from its attack message (pp.82, 86-87): the damage pool stored at the attack, Increased
- * Damage +1k0 per Raise left, the Feint bonus, 2k1 for a Disarm, the weapon's own rules, and the attack's target.
- * @param {ChatMessage} message  A `roll` message of kind "attack" that hit
+ * Roll damage for a hit from its attack message: the damage pool stored at the attack, Increased Damage +1k0 per
+ * Raise left, the Feint bonus, 2k1 for a Disarm, the weapon's own rules, and the attack's target.
+ * game-rules/32_attack_and_defense.md, p.82
+ * game-rules/38_maneuvers.md, p.86-87
+ * @param {ChatMessage} message - A `roll` message of kind "attack" that hit
  * @param {{askForOptions?: boolean}} [options]
  * @returns {Promise<ChatMessage|null>}
  */
@@ -66,8 +72,9 @@ export async function rollDamageFromAttack(message, { askForOptions = true } = {
   if (maneuvers.increasedDamage) {
     modifiers.push({ label: T("l5r4.ui.check.increasedDamage"), roll: maneuvers.increasedDamage });
   }
-  // Feint: half what the attack beat the target's Armor TN by, the Feint's own 2 Raises counted (p.86; Ernie's
-  // ruling, 2026-11-14): the attacker's wound penalty and other Raises do not shrink it
+  // Feint: half what the attack beat the target's Armor TN by, the Feint's own 2 Raises counted (Ernie's ruling):
+  // the attacker's wound penalty and other Raises do not shrink it
+  // game-rules/38_maneuvers.md, p.86
   const feint = maneuvers.feint
     ? feintBonus(
         attack.outcome.total - (attack.tn.armor + TN_PER_RAISE * MANEUVER_RAISES.feint),
@@ -90,6 +97,59 @@ export async function rollDamageFromAttack(message, { askForOptions = true } = {
     attackOf: message.id,
     askForOptions
   });
+}
+
+/**
+ * Apply a damage roll to actors: the attack's target, or the selected tokens' actors.
+ * @param {ChatMessage} message - A `roll` message of kind "damage"
+ * @param {Actor[]} actors
+ * @returns {Promise<void>}
+ */
+export async function applyDamage(message, actors) {
+  if (actors.length === 0) {
+    ui.notifications?.warn(T("l5r4.ui.mechanics.wounds.noTokenSelected"));
+    return;
+  }
+  for (const actor of actors) {
+    await requestDamageAction({ action: "apply", messageId: message.id, actorUuid: actor.uuid });
+  }
+}
+
+/**
+ * Wire a damage card's Apply buttons and a result card's Void and Undo buttons.
+ * @param {ChatMessage} message
+ * @param {HTMLElement} html
+ */
+export function bindDamageCards(message, html) {
+  const on = (action, handler) =>
+    html.querySelector(`[data-action='${action}']`)?.addEventListener("click", event => {
+      event.preventDefault();
+      handler(event);
+    });
+  if (message.type === "roll" && message.system.kind === "damage") {
+    on("damage-apply-target", async () => {
+      const target = await fromUuid(message.system.target.uuid);
+      await applyDamage(message, target ? [target] : []);
+    });
+    on("damage-apply-selected", () =>
+      applyDamage(message, [...new Set(canvas.tokens.controlled.map(t => t.actor).filter(Boolean))])
+    );
+  }
+  const result = message.getFlag(SYS_ID, "damageResult");
+  if (result) {
+    const actor = fromUuidSync(result.actorUuid);
+    const voidButton = html.querySelector("[data-action='damage-void']");
+    if (voidButton && !actor?.isOwner) {
+      voidButton.remove();
+    }
+    on("damage-void", () => requestDamageAction({ action: "void", messageId: message.id }));
+    on("damage-undo", () => requestDamageAction({ action: "undo", messageId: message.id }));
+  }
+}
+
+/** Register the GM side of damage actions. */
+export function registerDamageQueries() {
+  CONFIG.queries[DAMAGE_QUERY] = (request, { user }) => runDamageAction(request, user);
 }
 
 /**
@@ -146,8 +206,8 @@ async function applyToActor(damageMessage, actor) {
 /**
  * Post or update a damage result card.
  * @param {Actor} actor
- * @param {object} result  The card's flags
- * @param {ChatMessage} [existing]  The card to update instead of posting a new one
+ * @param {object} result - The card's flags
+ * @param {ChatMessage} [existing] - The card to update instead of posting a new one
  * @returns {Promise<ChatMessage>}
  */
 async function postResult(actor, result, existing) {
@@ -190,8 +250,9 @@ async function postResult(actor, result, existing) {
 }
 
 /**
- * Spend the damaged actor's Void Point for 10 fewer Wounds from this damage (p.78).
- * @param {ChatMessage} card  A damage result card
+ * Spend the damaged actor's Void Point for 10 fewer Wounds from this damage.
+ * game-rules/25_rings_and_traits.md, p.78
+ * @param {ChatMessage} card - A damage result card
  * @returns {Promise<void>}
  */
 async function reduceWithVoid(card) {
@@ -213,7 +274,7 @@ async function reduceWithVoid(card) {
 
 /**
  * Undo a damage result: take its Wounds back off, return a Void Point spent on it, and lift a Dead status it gave.
- * @param {ChatMessage} card  A damage result card
+ * @param {ChatMessage} card - A damage result card
  * @returns {Promise<void>}
  */
 async function undoResult(card) {
@@ -237,7 +298,7 @@ async function undoResult(card) {
 /**
  * Run a damage action as the GM: what the requesting user may do is checked here.
  * @param {{action: string, messageId: string, actorUuid?: string}} request
- * @param {User} user  The requesting user
+ * @param {User} user - The requesting user
  * @returns {Promise<void>}
  */
 async function runDamageAction({ action, messageId, actorUuid }, user) {
@@ -296,57 +357,4 @@ async function requestDamageAction(request) {
     return undefined;
   }
   return gm.query(DAMAGE_QUERY, request);
-}
-
-/**
- * Apply a damage roll to actors: the attack's target, or the selected tokens' actors.
- * @param {ChatMessage} message  A `roll` message of kind "damage"
- * @param {Actor[]} actors
- * @returns {Promise<void>}
- */
-export async function applyDamage(message, actors) {
-  if (actors.length === 0) {
-    ui.notifications?.warn(T("l5r4.ui.mechanics.wounds.noTokenSelected"));
-    return;
-  }
-  for (const actor of actors) {
-    await requestDamageAction({ action: "apply", messageId: message.id, actorUuid: actor.uuid });
-  }
-}
-
-/**
- * Wire a damage card's Apply buttons and a result card's Void and Undo buttons.
- * @param {ChatMessage} message
- * @param {HTMLElement} html
- */
-export function bindDamageCards(message, html) {
-  const on = (action, handler) =>
-    html.querySelector(`[data-action='${action}']`)?.addEventListener("click", event => {
-      event.preventDefault();
-      handler(event);
-    });
-  if (message.type === "roll" && message.system.kind === "damage") {
-    on("damage-apply-target", async () => {
-      const target = await fromUuid(message.system.target.uuid);
-      await applyDamage(message, target ? [target] : []);
-    });
-    on("damage-apply-selected", () =>
-      applyDamage(message, [...new Set(canvas.tokens.controlled.map(t => t.actor).filter(Boolean))])
-    );
-  }
-  const result = message.getFlag(SYS_ID, "damageResult");
-  if (result) {
-    const actor = fromUuidSync(result.actorUuid);
-    const voidButton = html.querySelector("[data-action='damage-void']");
-    if (voidButton && !actor?.isOwner) {
-      voidButton.remove();
-    }
-    on("damage-void", () => requestDamageAction({ action: "void", messageId: message.id }));
-    on("damage-undo", () => requestDamageAction({ action: "undo", messageId: message.id }));
-  }
-}
-
-/** Register the GM side of damage actions. */
-export function registerDamageQueries() {
-  CONFIG.queries[DAMAGE_QUERY] = (request, { user }) => runDamageAction(request, user);
 }

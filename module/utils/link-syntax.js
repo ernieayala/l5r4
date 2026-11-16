@@ -1,5 +1,5 @@
 /**
- * @module link-syntax
+ * @module utils/link-syntax
  * @description The text links a journal, item description, or chat message can carry (roadmap/STAGE-14), parsed and
  * checked without touching Foundry:
  *
@@ -7,16 +7,22 @@
  *   item is), Trait, or Ring roll with an optional TN; a Skill takes a Trait, `void` included, or uses its own
  * - `@Damage[3k2]`, `@Damage[3k2+5]`: a damage roll from a Roll & Keep pool
  * - `@Condition[dazed]`: a status effect, by its id
- * - `@Fear[2]`: a Fear test at that Rank (1-10, p.90)
+ * - `@Fear[2]`: a Fear test at that Rank (1-10)
  *
  * Each may end with `{label}`. Trait, Ring, and condition names are config keys, so a link reads the same in every
  * language (STAGE-14 decision 1). A link that does not parse carries the localization key of its reason.
+ * game-rules/42_fear.md, p.90
  */
 
 import { TRAIT_KEYS } from "../config/reference-data.js";
 import { RING_LABELS } from "../config/localization.js";
 import { STATUS_EFFECTS } from "../config/status-effects.js";
 import { FEAR_RANKS } from "./fear.js";
+
+const RING_KEYS = Object.freeze(Object.keys(RING_LABELS));
+const CONDITION_IDS = Object.freeze(STATUS_EFFECTS.map(status => status.id));
+const WHOLE = /^\d+$/;
+const POOL = /^(\d+)k(\d+)(?:([+-])(\d+))?$/i;
 
 /** The link forms, for the enricher. */
 export const LINK_TYPES = Object.freeze(["Check", "Damage", "Condition", "Fear"]);
@@ -29,11 +35,6 @@ export const MAX_LINK_TN = 999;
 
 /** The most dice a Damage link's pool may roll or keep before the Ten Dice Rule. */
 export const MAX_LINK_DICE = 30;
-
-const RING_KEYS = Object.freeze(Object.keys(RING_LABELS));
-const CONDITION_IDS = Object.freeze(STATUS_EFFECTS.map(status => status.id));
-const WHOLE = /^\d+$/;
-const POOL = /^(\d+)k(\d+)(?:([+-])(\d+))?$/i;
 
 /**
  * @typedef {object} LinkSpec
@@ -49,6 +50,32 @@ const POOL = /^(\d+)k(\d+)(?:([+-])(\d+))?$/i;
  * @property {string} [condition]  Condition: the status id
  * @property {number} [rank]  Fear
  */
+
+/**
+ * Parse one link's parts, as LINK_PATTERN captures them. "Check" with "skill=Kenjutsu|trait=agi|tn=20" gives an
+ * ok spec with that Skill, Trait, and TN; "Fear" with "11" fails with the fear error key.
+ * @param {string} type - Check, Damage, Condition, or Fear
+ * @param {string} params - The text between the brackets
+ * @param {string} [label] - The text between the braces
+ * @returns {LinkSpec}
+ */
+export function parseLink(type, params, label = "") {
+  const base = { type, label: (label ?? "").trim() };
+  let parsed;
+  if (type === "Check") {
+    const values = keyValues(params);
+    parsed = values ? parseCheck(values) : { ok: false, error: "l5r4.ui.links.errors.syntax" };
+  } else if (type === "Damage") {
+    parsed = parseDamage(params);
+  } else if (type === "Condition") {
+    parsed = parseCondition(params);
+  } else if (type === "Fear") {
+    parsed = parseFear(params);
+  } else {
+    parsed = { ok: false, error: "l5r4.ui.links.errors.syntax" };
+  }
+  return { ...base, ...parsed };
+}
 
 /**
  * A whole number from link text, or null when the text is not one.
@@ -77,6 +104,7 @@ function keyValues(params) {
 }
 
 /**
+ * Check a Check link's keys and values.
  * @param {Record<string, string>} values
  * @returns {Omit<LinkSpec, "type"|"label">}
  */
@@ -116,6 +144,7 @@ function parseCheck(values) {
 }
 
 /**
+ * Check a Damage link's Roll & Keep pool.
  * @param {string} params
  * @returns {Omit<LinkSpec, "type"|"label">}
  */
@@ -131,6 +160,7 @@ function parseDamage(params) {
 }
 
 /**
+ * Check a Condition link's status id.
  * @param {string} params
  * @returns {Omit<LinkSpec, "type"|"label">}
  */
@@ -142,6 +172,7 @@ function parseCondition(params) {
 }
 
 /**
+ * Check a Fear link's Rank.
  * @param {string} params
  * @returns {Omit<LinkSpec, "type"|"label">}
  */
@@ -150,34 +181,4 @@ function parseFear(params) {
   return rank !== null && rank >= FEAR_RANKS.min && rank <= FEAR_RANKS.max
     ? { ok: true, rank }
     : { ok: false, error: "l5r4.ui.links.errors.fear" };
-}
-
-/**
- * Parse one link's parts, as LINK_PATTERN captures them.
- * @param {string} type    Check, Damage, Condition, or Fear
- * @param {string} params  The text between the brackets
- * @param {string} [label] The text between the braces
- * @returns {LinkSpec}
- *
- * @example
- * parseLink("Check", "skill=Kenjutsu|trait=agi|tn=20");
- * // { ok: true, type: "Check", label: "", skill: "Kenjutsu", trait: "agi", ring: "", tn: 20 }
- * parseLink("Fear", "11"); // { ok: false, type: "Fear", label: "", error: "l5r4.ui.links.errors.fear" }
- */
-export function parseLink(type, params, label = "") {
-  const base = { type, label: (label ?? "").trim() };
-  let parsed;
-  if (type === "Check") {
-    const values = keyValues(params);
-    parsed = values ? parseCheck(values) : { ok: false, error: "l5r4.ui.links.errors.syntax" };
-  } else if (type === "Damage") {
-    parsed = parseDamage(params);
-  } else if (type === "Condition") {
-    parsed = parseCondition(params);
-  } else if (type === "Fear") {
-    parsed = parseFear(params);
-  } else {
-    parsed = { ok: false, error: "l5r4.ui.links.errors.syntax" };
-  }
-  return { ...base, ...parsed };
 }

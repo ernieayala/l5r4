@@ -417,6 +417,13 @@ SCSS wave (C3), part 2, one owner for every SCSS file, each by decision 17:
 - For review: on a sheet the viewer cannot edit, core disables the roll faces, which now fill with `--l5r4-color-action` on hover where core's disabled button colors showed before; states.md's disabled opacity would need a new rule.
 - Left: the roll-button move to `_button.scss` (the window scope keeps `styles/one-component` the same either way); core variables color.md does not map (`--table-header-text-color`, `--input-border-color`); the window-scope `block-class` and `one-component` hits logged above. Docs that now trail the code: color.md C4, space-and-size.md's indent row and some line references, motion.md's "Now" rows, iconography.md's `size-icon-sm` reference.
 
+Code wave, part 1 (D1: per-file JSDoc, doc format, module shape, import and member order), each by decision 17:
+
+- No behavior change, checked per partition by comparing each file's non-comment code with HEAD: code moved (helpers below the exports, constants above them, class members into the order foundry-patterns.md gives, named imports into modules.md's order) and five kinds of code edit only: `Object.freeze` on module constants nothing writes to, `export const X = () =>` to `export function X()` where the body uses no `this`, unused `catch` bindings dropped, `else` after a `return` removed, and action handlers' second parameter named `element` as member-order's handler shape wants.
+- Imports with load-time side effects kept their order relative to what they depend on; the entry file's services and setup imports moved ahead of the sheets and hooks they feed.
+- Citations: every page number sits on a `game-rules/<file>.md, p.N` line; four functions gained a citation read from game-rules/ (spell slots p.163, Void Points p.78, Armor TN p.82, casting above School Rank p.164); one range narrowed from pp.86-88 to pp.86-87, the pages of `38_maneuvers.md` its maneuvers sit on. No book text (scanned the added comment lines for quoted runs).
+- Left for part 2: identifier names (`l5r4/naming`, glossary identifiers), `max-params`, `new-cap`, presentation in JavaScript (`no-restricted-syntax`), layer imports and globals, and 9 `module-shape` / 2 `import-order` hits whose fix renames or moves a side-effect import.
+
 ### Progress (handoff, 2026-11-15)
 
 | Step | State |

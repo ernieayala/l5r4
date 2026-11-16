@@ -2,8 +2,10 @@
  * @module services/dice/check/chat-actions
  * @description What a `roll` message can do after it posts, rebuilt from its stored context
  * (module/data/chat/roll-message-data.js), never from the card's HTML: roll the attack's damage, put an offered
- * condition on the target, re-roll keeping the better total, make the optional Honor Roll (p.92), and settle a
- * Contested Roll (p.80) against the previous roll by someone else.
+ * condition on the target, re-roll keeping the better total, make the optional Honor Roll, and settle a Contested
+ * Roll against the previous roll by someone else.
+ * game-rules/29_types_of_rolls.md, p.80
+ * game-rules/43_honor.md, p.92
  */
 
 import { SYS_ID } from "../../../config/constants.js";
@@ -17,30 +19,8 @@ import { recordTrackChange } from "../../ledger.js";
 import { offersHonorRoll, renderCheckCard } from "./roll-check.js";
 
 /**
- * The actor a roll message belongs to, resolved from its stored UUID.
- * @param {ChatMessage} message
- * @returns {Actor|null}
- */
-function rollActor(message) {
-  return fromUuidSync(message.system.actorUuid) ?? null;
-}
-
-/**
- * Whether the current user may act for the roll's actor.
- * @param {Actor|null} actor
- * @returns {boolean}
- */
-function mayAct(actor) {
-  if (actor?.isOwner || game.user.isGM) {
-    return true;
-  }
-  ui.notifications?.warn(T("l5r4.ui.notifications.noPermissionDamage"));
-  return false;
-}
-
-/**
  * Roll damage for a hit from its attack's stored context (module/services/combat/damage.js).
- * @param {ChatMessage} message  A `roll` message of kind "attack"
+ * @param {ChatMessage} message - A `roll` message of kind "attack"
  * @param {{askForOptions?: boolean}} [options]
  * @returns {Promise<ChatMessage|null>}
  */
@@ -51,7 +31,7 @@ export function rollDamageFromMessage(message, options = {}) {
 /**
  * Re-roll a check with the same pool and keep the better total, as an ability that grants a re-roll allows. No
  * Void Point is spent again; the TN and Raises stand.
- * @param {ChatMessage} message  A `roll` message
+ * @param {ChatMessage} message - A `roll` message
  * @returns {Promise<ChatMessage|null>}
  */
 export async function rerollKeepBetter(message) {
@@ -84,10 +64,12 @@ export async function rerollKeepBetter(message) {
 }
 
 /**
- * The optional Honor Roll (p.92; roadmap/STAGE-11 decision 3): once per session, the owner of a failed roll re-rolls
- * it at the same TN with Honor Rank in rolled and kept dice instead of the original dice, the Ten Dice Rule last.
- * Taint Level 4 takes 2k2 from it (p.278). Failing it costs a full Rank of Honor, through the ledger.
- * @param {ChatMessage} message  A failed `roll` message
+ * The optional Honor Roll (roadmap/STAGE-11 decision 3): once per session, the owner of a failed roll re-rolls it
+ * at the same TN with Honor Rank in rolled and kept dice instead of the original dice, the Ten Dice Rule last.
+ * Taint Level 4 takes 2k2 from it. Failing it costs a full Rank of Honor, through the ledger.
+ * game-rules/43_honor.md, p.92
+ * game-rules/89_shadowlands_taint.md, p.278
+ * @param {ChatMessage} message - A failed `roll` message
  * @returns {Promise<ChatMessage|null>}
  */
 export async function honorRoll(message) {
@@ -166,8 +148,9 @@ export function previousOpponentRoll(message) {
 }
 
 /**
- * Settle a Contested Roll between two roll messages (p.80): the higher total wins; Raises declared on either must
- * beat the other by 5 each; a tie is re-rolled.
+ * Settle a Contested Roll between two roll messages: the higher total wins; Raises declared on either must beat the
+ * other by 5 each; a tie is re-rolled.
+ * game-rules/29_types_of_rolls.md, p.80
  * @param {ChatMessage} message
  * @param {ChatMessage} opponent
  * @returns {Promise<ChatMessage>}
@@ -201,8 +184,8 @@ export async function contestRolls(message, opponent) {
  * Put a condition the roll's ApplyCondition rules offer on its target. The roll must have succeeded; the condition
  * comes from the stored context by index, never from the card. A target the user does not own gets it through the
  * active GM.
- * @param {ChatMessage} message  A `roll` message
- * @param {number} index         Index into `system.conditions`
+ * @param {ChatMessage} message - A `roll` message
+ * @param {number} index - Index into `system.conditions`
  * @returns {Promise<void>}
  */
 export async function applyConditionFromMessage(message, index) {
@@ -250,7 +233,7 @@ export function bindCheckCard(message, html) {
  * Context menu entries for `roll` messages: re-roll keeping the better total, and contest the previous roll by
  * someone else.
  * @param {HTMLElement} _app
- * @param {object[]} options  Entries of the chat log's context menu, extended in place
+ * @param {object[]} options - Entries of the chat log's context menu, extended in place
  */
 export function addCheckContextOptions(_app, options) {
   const messageOf = li => game.messages.get(li.dataset.messageId);
@@ -277,4 +260,26 @@ export function addCheckContextOptions(_app, options) {
       }
     }
   );
+}
+
+/**
+ * The actor a roll message belongs to, resolved from its stored UUID.
+ * @param {ChatMessage} message
+ * @returns {Actor|null}
+ */
+function rollActor(message) {
+  return fromUuidSync(message.system.actorUuid) ?? null;
+}
+
+/**
+ * Whether the current user may act for the roll's actor.
+ * @param {Actor|null} actor
+ * @returns {boolean}
+ */
+function mayAct(actor) {
+  if (actor?.isOwner || game.user.isGM) {
+    return true;
+  }
+  ui.notifications?.warn(T("l5r4.ui.notifications.noPermissionDamage"));
+  return false;
 }

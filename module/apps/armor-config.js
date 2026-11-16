@@ -1,37 +1,17 @@
 /**
- * Armor Configuration Application
- *
- * Provides a form interface for configuring actor armor values including TN modifiers,
- * reduction modifiers, and armor stacking behavior.
- *
- * Key Responsibilities:
- * - **Armor TN Configuration**: Manage armor TN bonus and modifiers
- * - **Reduction Configuration**: Manage armor reduction values
- * - **Stacking Behavior**: Toggle armor stacking flag for multiple armor items
- *
- * Foundry VTT Integration:
- * - Extends ApplicationV2 with HandlebarsApplicationMixin
- * - Uses data-action delegation for event handling
- * - Implements debounced updates for real-time field changes
- *
- * Architectural Notes:
- * - **Uses DebouncedFieldMixin**: Real-time numeric updates needed for TN/reduction values
- * - **Actor-based constructor**: Standard pattern for actor configuration dialogs
- * - **closeOnSubmit: false**: Keeps dialog open for multiple adjustments during setup
- *
  * @module apps/armor-config
+ * @description A form window for one actor's armor values: the Armor TN modifier, the reduction modifier, and
+ * whether armor items stack. DebouncedFieldMixin saves each field as it changes, because the TN and reduction values
+ * update while the user types; the window stays open after submit so the user can make several adjustments.
  */
-
-// Config imports
 import { SYS_ID } from "../config/constants.js";
-
-// Utils imports
 import { T } from "../utils/localization.js";
 import { logError } from "../utils/error-logging.js";
-
-// Mixins
 import { DebouncedFieldMixin } from "../mixins/debounced-field-mixin.js";
 
+/**
+ * The armor configuration window for one actor.
+ */
 export default class ArmorConfigApplication extends DebouncedFieldMixin(
   foundry.applications.api.HandlebarsApplicationMixin(foundry.applications.api.ApplicationV2)
 ) {
@@ -98,7 +78,7 @@ export default class ArmorConfigApplication extends DebouncedFieldMixin(
    *
    * @param {object} _options - Render options (unused)
    * @returns {Promise<object>} Context object with actor, system data, and allowArmorStacking flag
-   * @private
+   * @override
    */
   async _prepareContext(_options) {
     if (!this.actor) {
@@ -127,7 +107,6 @@ export default class ArmorConfigApplication extends DebouncedFieldMixin(
    * Returns safe default values to prevent rendering failures.
    *
    * @returns {object} Fallback context with default values
-   * @private
    */
   _getFallbackContext() {
     return {
@@ -148,7 +127,6 @@ export default class ArmorConfigApplication extends DebouncedFieldMixin(
    *
    * @param {string} field - The field name to update
    * @param {*} value - The new value for the field
-   * @private
    */
   async _updateActor(field, value) {
     try {
@@ -187,7 +165,6 @@ export default class ArmorConfigApplication extends DebouncedFieldMixin(
    * @param {Event} event - The submit event
    * @param {HTMLFormElement} _form - The form element (unused)
    * @param {FormData} _formData - The form data (unused)
-   * @private
    */
   async _onSubmitForm(event, _form, _formData) {
     if (event) {

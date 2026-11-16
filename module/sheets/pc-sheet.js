@@ -1,58 +1,20 @@
 /**
- * L5R4 PC Character Sheet (Application v2)
- *
- * Primary character sheet for player characters in the Legend of the Five Rings 4th Edition
- * system. Extends BaseActorSheet to provide PC-specific UI, event handling, and context
- * preparation for character management.
- *
- * **Architecture:**
- * Uses handler delegation pattern where UI interactions route to specialized handler classes:
- * - PcAdjustmentHandler: Void Ring, spell slots, rank/points adjustments
- * - PcTraitHandler: Trait rank adjustments with Shift+Click safety
- * - AppLauncherHandler: XP Manager and Wound Configuration dialogs
- * - StanceHandler: Stance changes (Attack, Defense, Full Attack, Full Defense, Center)
- * - PcContextBuilder: Sorted item lists with roll formulas and mastery abilities
- *
- * **Game Mechanics Implemented:**
- * - Ring Rolls: XkX formula where X = Ring rank (raw ability checks)
- * - Skill Rolls: (Skill + Trait)k(Trait) via RollHandler in base class
- * - Weapon Attacks: (Skill + Agility)k(Agility) vs Armor TN (Reflexes × 5 + 5 + armor)
- * - Weapon Damage: (Weapon DR + Strength)k(Keep) with exploding d10s
- * - Full Attack Stance: +2k1 attack bonus, -10 Armor TN (Fire Ring stance)
- * - Void Points: Equal to Void Ring, spent for +1k1 roll bonus or damage reduction
- * - Void Ring Advancement: Unique ring with no traits, costs 6×next rank XP
- * - Mastery Abilities: Displayed at skill ranks 3, 5, 7 per core rules
- *
- * **Foundry Integration:**
- * - Extends ActorSheetV2 (Foundry v13+ Application v2 architecture)
- * - Uses HandlebarsApplicationMixin with PARTS configuration
- * - Overrides _renderHTML for limited/full template selection
- * - Implements event delegation via data-action attributes
- * - Limited view rendering for non-owner players (pc-limited.hbs template)
- * - Integrates with enhanceItemSheetData for unified item context
- *
- * **Foundry APIs:** ActorSheetV2, HandlebarsApplicationMixin, TextEditor.enrichHTML
- * **Requires:** Foundry v13+
- *
- * @extends {BaseActorSheet}
+ * @module sheets/pc-sheet
+ * @description The player character sheet. On top of BaseActorSheet it routes the PC's actions to the PC handlers
+ * (PcAdjustmentHandler for the Void Ring, spell slots, and rank tracks; PcTraitHandler for Traits; AppLauncherHandler
+ * for the configuration windows; StanceHandler; PcRollHandler; PcActionsHandler), builds the sorted item lists and
+ * Mastery Abilities through PcContextBuilder, enriches the notes with TextEditor.enrichHTML, and shows a limited view
+ * (pc-limited.hbs) to a player who does not own the character.
  */
-
-// Config
 import { SYS_ID } from "../config/constants.js";
 import { TEMPLATE } from "../config/templates.js";
 import { STANCES } from "../config/localization.js";
 import { PC_SORT_KEYS } from "../config/sort-keys.js";
-
-// Utils
 import { on } from "../utils/dom.js";
+import { enhanceItemSheetData } from "../documents/item/integration/sheet-data.js";
 import { effectsOf } from "../services/effects/apply.js";
 import { openLedgerDialog } from "../services/ledger.js";
 import { activeItemIds, toggleActivation } from "../services/effects/activation.js";
-
-// Documents
-import { enhanceItemSheetData } from "../documents/item/integration/sheet-data.js";
-
-// Local
 import { BaseActorSheet } from "./base-actor-sheet.js";
 import { AppLauncherHandler } from "./handlers/app-launcher-handler.js";
 import { ItemCRUDHandler } from "./handlers/item-crud-handler.js";
@@ -86,30 +48,26 @@ const { TextEditor } = foundry.applications.ux;
  * Limited template: `templates/actor/pc-limited.hbs`
  *
  * @class
+ * @augments {BaseActorSheet}
  */
 export default class L5R4PcSheet extends BaseActorSheet {
   /**
-   * Tracks bound root element for extra event listeners.
+   * PC-specific options, merged over BaseActorSheet's by ApplicationV2: the "pc" class and an 870px width for the
+   * PC columns.
    *
-   * Used to prevent duplicate binding of non-delegated event listeners
-   * (image edit click) during re-renders.
-   *
-   * @type {HTMLElement|null}
-   * @private
+   * @type {object}
    */
-  _boundExtraRoot = null;
+  static DEFAULT_OPTIONS = {
+    classes: ["pc"],
+    position: { width: 870 }
+  };
 
   /**
    * Application v2 part configuration.
    *
-   * Defines sheet structure for Foundry v13 Application v2 architecture.
    * Single-part sheet with scrollable content area and auto-submit forms.
    *
-   * **Foundry v13 Pattern:**
-   * Static PARTS object replaces deprecated _getPartTemplates().
-   *
-   * @static
-   * @type {Object}
+   * @type {object}
    */
   static PARTS = {
     form: {
@@ -119,6 +77,117 @@ export default class L5R4PcSheet extends BaseActorSheet {
       scrollable: [".scrollable-content"]
     }
   };
+
+  /**
+   * Tracks bound root element for extra event listeners.
+   *
+   * Used to prevent duplicate binding of non-delegated event listeners
+   * (image edit click) during re-renders.
+   *
+   * @type {HTMLElement|null}
+   */
+  _boundExtraRoot = null;
+
+  /**
+   * Prepares template context data for PC sheet rendering.
+   *
+   * Builds comprehensive context object with:
+   * - Enriched HTML (notes with @UUID, inline rolls)
+   * - Sorted item collections (skills, spells, weapons, etc.) with roll formulas
+   * - Bio items (clan, family, school)
+   * - Effective traits (includes wound penalties)
+   * - Stance and mounted status
+   * - Mastery abilities list
+   * - Lazy-loaded advantage/disadvantage combined list
+   *
+   * **Performance Optimization:**
+   * Uses lazy getter for advDisList to defer expensive sorting until template
+   * accesses the property. Avoids unnecessary computation when rendering
+   * non-default tabs.
+   *
+   * **Game Mechanics:**
+   * Effective traits from _derived include wound penalties per the Wound Penalty
+   * system (Nicked: +3 TN, Grazed: +5 TN, Hurt: +10 TN, etc.). These feed into
+   * skill and weapon roll formulas calculated by PcContextBuilder.
+   *
+   * @param {object} _options - Render options from Application v2 (unused)
+   * @returns {Promise<object>} Template context with all sheet data
+   * @override
+   */
+  async _prepareContext(_options) {
+    const base = await super._prepareContext(_options);
+    const actorObj = this.document;
+    const system = foundry.utils.deepClone(actorObj.system ?? {});
+    if (typeof system.notes !== "string") {
+      system.notes = String(system.notes ?? "");
+    }
+    const enrichedNotes = await TextEditor.enrichHTML(system.notes ?? "", {
+      async: true,
+      secrets: this.isEditable,
+      documents: true,
+      links: true
+    });
+
+    const all = actorObj.items.contents ?? actorObj.items;
+    const sortedItems = PcContextBuilder.buildSortedItems(actorObj, all);
+    const {
+      skills,
+      spells,
+      advantages,
+      disadvantages,
+      items,
+      katas,
+      kihos,
+      tattoos,
+      techniques,
+      armors,
+      weapons,
+      bows
+    } = sortedItems;
+
+    const masteries = PcContextBuilder.buildMasteryList(skills);
+    const traitsEff = PcContextBuilder.extractEffectiveTraits(actorObj);
+    const bioItems = PcContextBuilder.extractBioItems(all);
+    const currentStance = PcContextBuilder.extractStance(actorObj);
+    const collapsedSections = PcContextBuilder.extractCollapsedSections(actorObj.id);
+
+    const context = {
+      ...base,
+      actor: this.actor,
+      system,
+      bioClan: bioItems.clan,
+      bioFamily: bioItems.family,
+      bioSchool: bioItems.school,
+      editable: this.isEditable,
+      enriched: { notes: enrichedNotes },
+      traitsEff,
+      currentStance,
+      voidArmor: effectsOf(actorObj, "voidArmor").length > 0,
+      activeItemIds: activeItemIds(actorObj),
+      collapsedSections,
+      // Lazy getter: Defers expensive sorting until template accesses property
+      get advDisList() {
+        return PcContextBuilder.buildAdvDisList(actorObj, advantages, disadvantages);
+      },
+      armors,
+      bows,
+      advantages,
+      disadvantages,
+      items,
+      katas,
+      kihos,
+      skills,
+      spells,
+      tattoos,
+      techniques,
+      weapons,
+      masteries
+    };
+
+    enhanceItemSheetData(context);
+    context.config.stances = STANCES;
+    return context;
+  }
 
   /**
    * Routes click events to appropriate action handlers.
@@ -140,7 +209,6 @@ export default class L5R4PcSheet extends BaseActorSheet {
    * @param {string} action - The data-action attribute value from clicked element
    * @param {Event} event - The click event
    * @param {HTMLElement} element - The clicked element with data-action attribute
-   * @protected
    * @override
    */
   _onAction(action, event, element) {
@@ -262,7 +330,6 @@ export default class L5R4PcSheet extends BaseActorSheet {
    * @param {string} action - The data-action attribute value from right-clicked element
    * @param {Event} event - The contextmenu event
    * @param {HTMLElement} element - The right-clicked element
-   * @protected
    * @override
    */
   _onActionContext(action, event, element) {
@@ -300,7 +367,6 @@ export default class L5R4PcSheet extends BaseActorSheet {
    * @param {string} action - The data-action attribute value from changed element
    * @param {Event} event - The change event
    * @param {HTMLElement} element - The form element that changed
-   * @protected
    * @override
    */
   _onActionChange(action, event, element) {
@@ -329,12 +395,11 @@ export default class L5R4PcSheet extends BaseActorSheet {
    * **Use Cases:**
    * - Special NPCs with non-standard rank progression
    * - Testing specific rank values
-   * - Temporary rank adjustments for story purposes
+   * - Temporary rank adjustments for story purposes.
    *
    * @param {Event} event - Click event on rank label
    * @param {HTMLElement} _element - Rank label element (unused)
    * @returns {Promise<void>}
-   * @private
    */
   async _onToggleRankMode(event, _element) {
     event?.preventDefault?.();
@@ -379,12 +444,11 @@ export default class L5R4PcSheet extends BaseActorSheet {
    * - Testing trait/ring calculations after rest
    * - Verifying wound threshold updates
    * - Debugging derived data issues
-   * - Forcing refresh after manual data edits
+   * - Forcing refresh after manual data edits.
    *
    * @param {Event} event - Click event on name label
    * @param {HTMLElement} _element - Name label element (unused)
    * @returns {Promise<void>}
-   * @private
    */
   async _onRecalcSheet(event, _element) {
     event?.preventDefault?.();
@@ -394,7 +458,7 @@ export default class L5R4PcSheet extends BaseActorSheet {
       return;
     }
 
-    // Rebuild from source and prepare once (client/documents/abstract/client-document.mjs:60-67)
+    // Rebuild from source and prepare once [src: client/documents/abstract/client-document.mjs:60-67]
     this.actor.reset();
 
     // Re-render sheet to show updated values
@@ -415,11 +479,9 @@ export default class L5R4PcSheet extends BaseActorSheet {
    * Custom _renderHTML implementation for Application v2 to support conditional
    * template selection. Returns object with named part keys matching PARTS config.
    *
-   * @param {Object} context - Template context from _prepareContext
-   * @param {Object} _options - Render options (unused)
-   * @returns {Promise<Object>} Object with 'form' property containing rendered HTML element
-   * @protected
-   * @async
+   * @param {object} context - Template context from _prepareContext
+   * @param {object} _options - Render options (unused)
+   * @returns {Promise<object>} Object with 'form' property containing rendered HTML element
    * @override
    */
   async _renderHTML(context, _options) {
@@ -429,132 +491,9 @@ export default class L5R4PcSheet extends BaseActorSheet {
     const host = document.createElement("div");
     host.innerHTML = html;
     // querySelector used here for template host parsing (temporary DOM, not live application)
-    // This is a Foundry v13 pattern for extracting form element from rendered template string
+    // to extract the form element from the rendered template string
     const form = host.querySelector("form") || host.firstElementChild || host;
     return { form };
-  }
-
-  /* ---------------------------------- */
-  /* Options / Tabs                      */
-  /* ---------------------------------- */
-
-  /**
-   * PC-specific options, merged over BaseActorSheet's by ApplicationV2: the "pc" class and an 870px width for the
-   * PC columns.
-   *
-   * @static
-   * @type {Object}
-   */
-  static DEFAULT_OPTIONS = {
-    classes: ["pc"],
-    position: { width: 870 }
-  };
-
-  /* ---------------------------------- */
-  /* Data Prep                           */
-  /* ---------------------------------- */
-
-  /**
-   * Prepares template context data for PC sheet rendering.
-   *
-   * Builds comprehensive context object with:
-   * - Enriched HTML (notes with @UUID, inline rolls)
-   * - Sorted item collections (skills, spells, weapons, etc.) with roll formulas
-   * - Bio items (clan, family, school)
-   * - Effective traits (includes wound penalties)
-   * - Stance and mounted status
-   * - Mastery abilities list
-   * - Lazy-loaded advantage/disadvantage combined list
-   *
-   * **Performance Optimization:**
-   * Uses lazy getter for advDisList to defer expensive sorting until template
-   * accesses the property. Avoids unnecessary computation when rendering
-   * non-default tabs.
-   *
-   * **Game Mechanics:**
-   * Effective traits from _derived include wound penalties per the Wound Penalty
-   * system (Nicked: +3 TN, Grazed: +5 TN, Hurt: +10 TN, etc.). These feed into
-   * skill and weapon roll formulas calculated by PcContextBuilder.
-   *
-   * @param {Object} _options - Render options from Application v2 (unused)
-   * @returns {Promise<Object>} Template context with all sheet data
-   * @protected
-   * @async
-   * @override
-   */
-  async _prepareContext(_options) {
-    const base = await super._prepareContext(_options);
-    const actorObj = this.document;
-    const system = foundry.utils.deepClone(actorObj.system ?? {});
-    if (typeof system.notes !== "string") {
-      system.notes = String(system.notes ?? "");
-    }
-    const enrichedNotes = await TextEditor.enrichHTML(system.notes ?? "", {
-      async: true,
-      secrets: this.isEditable,
-      documents: true,
-      links: true
-    });
-
-    const all = actorObj.items.contents ?? actorObj.items;
-    const sortedItems = PcContextBuilder.buildSortedItems(actorObj, all);
-    const {
-      skills,
-      spells,
-      advantages,
-      disadvantages,
-      items,
-      katas,
-      kihos,
-      tattoos,
-      techniques,
-      armors,
-      weapons,
-      bows
-    } = sortedItems;
-
-    const masteries = PcContextBuilder.buildMasteryList(skills);
-    const traitsEff = PcContextBuilder.extractEffectiveTraits(actorObj);
-    const bioItems = PcContextBuilder.extractBioItems(all);
-    const currentStance = PcContextBuilder.extractStance(actorObj);
-    const collapsedSections = PcContextBuilder.extractCollapsedSections(actorObj.id);
-
-    const context = {
-      ...base,
-      actor: this.actor,
-      system,
-      bioClan: bioItems.clan,
-      bioFamily: bioItems.family,
-      bioSchool: bioItems.school,
-      editable: this.isEditable,
-      enriched: { notes: enrichedNotes },
-      traitsEff,
-      currentStance,
-      voidArmor: effectsOf(actorObj, "voidArmor").length > 0,
-      activeItemIds: activeItemIds(actorObj),
-      collapsedSections,
-      // Lazy getter: Defers expensive sorting until template accesses property
-      get advDisList() {
-        return PcContextBuilder.buildAdvDisList(actorObj, advantages, disadvantages);
-      },
-      armors,
-      bows,
-      advantages,
-      disadvantages,
-      items,
-      katas,
-      kihos,
-      skills,
-      spells,
-      tattoos,
-      techniques,
-      weapons,
-      masteries
-    };
-
-    enhanceItemSheetData(context);
-    context.config.stances = STANCES;
-    return context;
   }
 
   /**
@@ -568,11 +507,9 @@ export default class L5R4PcSheet extends BaseActorSheet {
    * Tracks _boundExtraRoot to prevent duplicate event binding on re-renders.
    * Only binds events if actor is owned by current user.
    *
-   * @param {Object} context - Template context from _prepareContext
-   * @param {Object} options - Render options from Application v2
+   * @param {object} context - Template context from _prepareContext
+   * @param {object} options - Render options from Application v2
    * @returns {Promise<void>}
-   * @protected
-   * @async
    * @override
    */
   async _onRender(context, options) {
@@ -601,7 +538,6 @@ export default class L5R4PcSheet extends BaseActorSheet {
    *
    * @param {string} scope - Sort scope identifier matching item type or list name
    * @returns {string[]} Array of allowed sort column keys
-   * @protected
    * @override
    */
   _getAllowedSortKeys(scope) {

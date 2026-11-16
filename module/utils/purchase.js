@@ -1,5 +1,5 @@
 /**
- * @module purchase
+ * @module utils/purchase
  * @description What an item asks of its buyer before it is added to an actor (roadmap/STAGE-11): its Prerequisite
  * rules and its ChoiceSet rules. Rules are stored user JSON, so each reader checks the shape it needs and skips a
  * rule that does not have it.
@@ -10,16 +10,10 @@ import { testPredicate } from "./predicate.js";
 
 /**
  * The Prerequisite rules an actor does not meet: each rule whose own predicate holds (when it applies) and whose
- * `requires` does not.
- * @param {object[]} rules     An item's raw `system.rules`
- * @param {Set<string>} options  The buyer's roll options
+ * `requires` does not. A "Kenjutsu 3" Prerequisite is unmet for a buyer with Kenjutsu 2.
+ * @param {object[]} rules - An item's raw `system.rules`
+ * @param {Set<string>} options - The buyer's roll options
  * @returns {Array<{label: string, requires: Array}>}
- *
- * @example
- * unmetPrerequisites(
- *   [{ key: "Prerequisite", label: "Kenjutsu 3", requires: [{ gte: ["skill:kenjutsu", 3] }] }],
- *   new Set(["skill:kenjutsu:2"])
- * ); // [{ label: "Kenjutsu 3", requires: [...] }]
  */
 export function unmetPrerequisites(rules, options) {
   return (rules ?? [])
@@ -41,7 +35,7 @@ export function unmetPrerequisites(rules, options) {
 
 /**
  * The ChoiceSet rules of an item that have no selection yet.
- * @param {object[]} rules  An item's raw `system.rules`
+ * @param {object[]} rules - An item's raw `system.rules`
  * @returns {OpenChoice[]}
  */
 export function openChoices(rules) {
@@ -68,7 +62,7 @@ export function openChoices(rules) {
 /**
  * An item's rules with selections stored in their ChoiceSet rules.
  * @param {object[]} rules
- * @param {Record<number, string>} selections  Selection by rule index
+ * @param {Record<number, string>} selections - Selection by rule index
  * @returns {object[]} A copy
  */
 export function withSelections(rules, selections) {

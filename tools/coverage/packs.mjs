@@ -20,9 +20,9 @@ export const RULE_CHECKS = Object.freeze({
 /**
  * Join the pack entries with the packs batch and the manifest.
  * @param {object} data
- * @param {{name: string, documentType: string, entries: object[]}[]} data.sources  The pack sources
- * @param {string} data.tests  tests/quench/packs.js
- * @param {object[]} data.rules  The manifest's rule entries
+ * @param {{name: string, documentType: string, entries: object[]}[]} data.sources - The pack sources
+ * @param {string} data.tests - The text of tests/quench/packs.js
+ * @param {object[]} data.rules - The manifest's rule entries
  * @returns {{counts: Record<string, number>, unchecked: string[], undecided: string[]}}
  */
 export function auditPacks({ sources, tests, rules }) {

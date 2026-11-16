@@ -17,14 +17,6 @@ import { STATUS_EFFECTS } from "../config/status-effects.js";
  * @property {Record<string, string|number|Phrase>} data
  */
 
-/**
- * The summary key of each rule key.
- * @type {Readonly<Record<string, string>>}
- */
-export const SUMMARY_KEYS = Object.freeze(
-  Object.fromEntries(RULE_KEYS.map(key => [key, `l5r4.ui.ruleSummary.${key}`]))
-);
-
 /** Trait keys, each named by `l5r4.ui.mechanics.traits.<key>`. */
 const TRAITS = new Set(["sta", "wil", "str", "per", "ref", "awa", "agi", "int"]);
 
@@ -32,12 +24,12 @@ const TRAITS = new Set(["sta", "wil", "str", "per", "ref", "awa", "agi", "int"])
 const RINGS = new Set(["air", "earth", "fire", "water", "void"]);
 
 /**
- * A phrase.
- * @param {string} key
- * @param {Record<string, string|number|Phrase>} [data={}]
- * @returns {Phrase}
+ * The summary key of each rule key.
+ * @type {Readonly<Record<string, string>>}
  */
-const phrase = (key, data = {}) => ({ key, data });
+export const SUMMARY_KEYS = Object.freeze(
+  Object.fromEntries(RULE_KEYS.map(key => [key, `l5r4.ui.ruleSummary.${key}`]))
+);
 
 /**
  * A rule value with its sign: "+2", "-1", or a formula as written.
@@ -63,31 +55,6 @@ export function poolText({ roll = 0, keep = 0, total = 0 }) {
 }
 
 /**
- * The name of a Trait, a Ring, or a Skill as a phrase; a Skill name is the item's, as the selector writes it.
- * @param {string} kind   trait, ring, or skill
- * @param {string} value
- * @returns {Phrase}
- */
-function namePhrase(kind, value) {
-  if (kind === "trait" && TRAITS.has(value)) {
-    return phrase(`l5r4.ui.mechanics.traits.${value}`);
-  }
-  if (kind === "ring" && RINGS.has(value)) {
-    return phrase(`l5r4.ui.mechanics.rings.${value}`);
-  }
-  return phrase("l5r4.ui.ruleSummary.text", { text: titleCase(value) });
-}
-
-/**
- * Title Case for a lower-case Skill or tag name.
- * @param {string} text
- * @returns {string}
- */
-function titleCase(text) {
-  return String(text).replace(/(^|[\s:-])([a-z])/g, (_m, sep, ch) => sep + ch.toUpperCase());
-}
-
-/**
  * The rolls a selector names (ACTIVE_EFFECTS.md **Selectors**), as a phrase.
  * @param {string} selector
  * @returns {Phrase}
@@ -108,6 +75,87 @@ export function selectorPhrase(selector) {
     return phrase(`l5r4.ui.ruleSummary.selector.${kind}`, { name: titleCase(value) });
   }
   return phrase("l5r4.ui.ruleSummary.text", { text });
+}
+
+/**
+ * The summary lines of one rule from `system.rules`. A rule is user-authored data, so one with an unknown key or
+ * missing fields still gives a line rather than throwing. A rule with a predicate says so on its first line. A
+ * RollModifier of one rolled die on attacks gives one RollModifier line with the bonus "+1k0" and the attack
+ * selector's phrase.
+ * @param {object} rule
+ * @param {object} [options]
+ * @param {function(string): string} [options.itemName] - The name of the item a GrantItem's uuid names
+ * @returns {Phrase[]}
+ */
+export function ruleSummary(rule, { itemName = uuid => uuid } = {}) {
+  if (!rule || typeof rule !== "object" || !RULE_KEYS.includes(rule.key)) {
+    return [phrase("l5r4.ui.ruleSummary.unknown", { key: String(rule?.key ?? "") })];
+  }
+  const lines = linesOf(rule, itemName);
+  const predicate = Array.isArray(rule.predicate) ? rule.predicate : [];
+  if (lines.length && predicate.length) {
+    lines[0] = phrase("l5r4.ui.ruleSummary.when", {
+      rule: lines[0],
+      when: predicateText(predicate)
+    });
+  }
+  return lines;
+}
+
+/**
+ * The summary lines of every rule in a list.
+ * @param {object[]} rules - `system.rules`
+ * @param {object} [options] - As ruleSummary's
+ * @returns {Phrase[]}
+ */
+export function rulesSummary(rules, options) {
+  return (Array.isArray(rules) ? rules : []).flatMap(rule => ruleSummary(rule, options));
+}
+
+/**
+ * The citation of `system.source`: the book's name and the page number. Null when the item cites no book.
+ * @param {{book?: string, page?: number}} source
+ * @returns {Phrase|null}
+ */
+export function sourceCitation(source) {
+  const book = SOURCE_BOOKS[source?.book];
+  if (!book || !(source.page > 0)) {
+    return null;
+  }
+  return phrase("l5r4.ui.ruleSummary.citation", { book: phrase(book), page: source.page });
+}
+
+/**
+ * A phrase.
+ * @param {string} key
+ * @param {Record<string, string|number|Phrase>} [data={}]
+ * @returns {Phrase}
+ */
+const phrase = (key, data = {}) => ({ key, data });
+
+/**
+ * The name of a Trait, a Ring, or a Skill as a phrase; a Skill name is the item's, as the selector writes it.
+ * @param {string} kind - trait, ring, or skill
+ * @param {string} value
+ * @returns {Phrase}
+ */
+function namePhrase(kind, value) {
+  if (kind === "trait" && TRAITS.has(value)) {
+    return phrase(`l5r4.ui.mechanics.traits.${value}`);
+  }
+  if (kind === "ring" && RINGS.has(value)) {
+    return phrase(`l5r4.ui.mechanics.rings.${value}`);
+  }
+  return phrase("l5r4.ui.ruleSummary.text", { text: titleCase(value) });
+}
+
+/**
+ * Title Case for a lower-case Skill or tag name.
+ * @param {string} text
+ * @returns {string}
+ */
+function titleCase(text) {
+  return String(text).replace(/(^|[\s:-])([a-z])/g, (_m, sep, ch) => sep + ch.toUpperCase());
 }
 
 /**
@@ -158,7 +206,7 @@ function pricedPhrase(selector) {
 /**
  * The lines of one rule, before any predicate is added.
  * @param {object} rule
- * @param {function(string): string} itemName  The name of the item a uuid names
+ * @param {function(string): string} itemName - The name of the item a uuid names
  * @returns {Phrase[]}
  */
 function linesOf(rule, itemName) {
@@ -311,54 +359,4 @@ function linesOf(rule, itemName) {
     default:
       return [phrase("l5r4.ui.ruleSummary.unknown", { key: String(key ?? "") })];
   }
-}
-
-/**
- * The summary lines of one rule from `system.rules`. A rule is user-authored data, so one with an unknown key or
- * missing fields still gives a line rather than throwing. A rule with a predicate says so on its first line.
- * @param {object} rule
- * @param {object} [options]
- * @param {function(string): string} [options.itemName]  The name of the item a GrantItem's uuid names
- * @returns {Phrase[]}
- *
- * @example
- * ruleSummary({ key: "RollModifier", selector: "attack", roll: 1 });
- * // [{ key: "l5r4.ui.ruleSummary.RollModifier", data: { bonus: "+1k0", rolls: { key: "...selector.attack" } } }]
- */
-export function ruleSummary(rule, { itemName = uuid => uuid } = {}) {
-  if (!rule || typeof rule !== "object" || !RULE_KEYS.includes(rule.key)) {
-    return [phrase("l5r4.ui.ruleSummary.unknown", { key: String(rule?.key ?? "") })];
-  }
-  const lines = linesOf(rule, itemName);
-  const predicate = Array.isArray(rule.predicate) ? rule.predicate : [];
-  if (lines.length && predicate.length) {
-    lines[0] = phrase("l5r4.ui.ruleSummary.when", {
-      rule: lines[0],
-      when: predicateText(predicate)
-    });
-  }
-  return lines;
-}
-
-/**
- * The summary lines of every rule in a list.
- * @param {object[]} rules  `system.rules`
- * @param {object} [options]  As ruleSummary's
- * @returns {Phrase[]}
- */
-export function rulesSummary(rules, options) {
-  return (Array.isArray(rules) ? rules : []).flatMap(rule => ruleSummary(rule, options));
-}
-
-/**
- * The citation of `system.source`: "Core Rulebook p.103". Null when the item cites no book.
- * @param {{book?: string, page?: number}} source
- * @returns {Phrase|null}
- */
-export function sourceCitation(source) {
-  const book = SOURCE_BOOKS[source?.book];
-  if (!book || !(source.page > 0)) {
-    return null;
-  }
-  return phrase("l5r4.ui.ruleSummary.citation", { book: phrase(book), page: source.page });
 }

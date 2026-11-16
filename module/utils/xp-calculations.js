@@ -1,12 +1,39 @@
 /**
- * @module xp-calculations
- * @description Character creation bonuses from Family and School items (p.102), read from their TraitAdjust rules
+ * @module utils/xp-calculations
+ * @description Character creation bonuses from Family and School items, read from their TraitAdjust rules
  * or, for an item without one, from the legacy `trait`/`bonus` fields. XP prices are module/utils/xp-ledger.js.
+ * game-rules/48_character_creation_expanded.md, p.102
  */
 
 import { SYS_ID } from "../config/constants.js";
 import { toNumber, toString } from "./type-coercion.js";
 import { traitAdjustTotal } from "./rule-engine.js";
+
+/**
+ * Gets the creation bonus for a trait, split by where it comes from. A Family rule giving +1 Strength gives
+ * `{ rules: 1, legacy: 0 }` for "str".
+ * @param {object} actor - Foundry actor document
+ * @param {string} key - Trait key ("sta", "str", "ref", "agi", etc.)
+ * @returns {{rules: number, legacy: number}} Bonus from Family/School TraitAdjust rules, which add on top of the
+ *   stored rank, and from the legacy `trait`/`bonus` fields, which the player stores as a rank
+ */
+export function getCreationFreeBonusSources(actor, key) {
+  return getCreationBonusInternal(actor, key);
+}
+
+/**
+ * Gets creation bonus for a specific trait.
+ *
+ * Sums bonuses from Family and School items that affect the trait.
+ * Supports both TraitAdjust rules and the legacy bonus fields. A Family giving +1 Strength gives 1 for "str".
+ * @param {object} actor - Foundry actor document
+ * @param {string} key - Trait key ("sta", "str", "ref", "agi", etc.)
+ * @returns {number} Total creation bonus for trait
+ */
+export function getCreationFreeBonus(actor, key) {
+  const { rules, legacy } = getCreationFreeBonusSources(actor, key);
+  return rules + legacy;
+}
 
 /**
  * Internal helper to calculate creation bonuses from Family/School.
@@ -19,11 +46,9 @@ import { traitAdjustTotal } from "./rule-engine.js";
  *
  * The two sources are summed apart because they reach the Trait differently: a rule adds on top of the
  * stored rank, while the legacy fields are never applied, so the player stores the bonus rank themselves.
- *
- * @param {Object} actor - Foundry actor document
+ * @param {object} actor - Foundry actor document
  * @param {string} trait - Trait key, or "void" for the Void Ring
  * @returns {{rules: number, legacy: number}} Bonus from TraitAdjust rules and from the legacy fields
- * @private
  */
 function getCreationBonusInternal(actor, trait) {
   try {
@@ -84,37 +109,4 @@ function getCreationBonusInternal(actor, trait) {
     // Return 0 on any error
     return { rules: 0, legacy: 0 };
   }
-}
-
-/**
- * Gets the creation bonus for a trait, split by where it comes from.
- *
- * @param {Object} actor - Foundry actor document
- * @param {string} key - Trait key ("sta", "str", "ref", "agi", etc.)
- * @returns {{rules: number, legacy: number}} Bonus from Family/School TraitAdjust rules, which add on top of the
- *   stored rank, and from the legacy `trait`/`bonus` fields, which the player stores as a rank
- *
- * @example
- * getCreationFreeBonusSources(actor, "str") // { rules: 1, legacy: 0 } (Family rule gives +1 Strength)
- */
-export function getCreationFreeBonusSources(actor, key) {
-  return getCreationBonusInternal(actor, key);
-}
-
-/**
- * Gets creation bonus for a specific trait.
- *
- * Sums bonuses from Family and School items that affect the trait.
- * Supports both TraitAdjust rules and the legacy bonus fields.
- *
- * @param {Object} actor - Foundry actor document
- * @param {string} key - Trait key ("sta", "str", "ref", "agi", etc.)
- * @returns {number} Total creation bonus for trait
- *
- * @example
- * getCreationFreeBonus(actor, "str") // 1 (if Family gives +1 Strength)
- */
-export function getCreationFreeBonus(actor, key) {
-  const { rules, legacy } = getCreationFreeBonusSources(actor, key);
-  return rules + legacy;
 }

@@ -1,27 +1,28 @@
 /**
- * Initiative Void Point prompt
- *
- * A character may spend a Void Point to raise their Initiative Score by 10 (Core Rulebook p.78,
- * `game-rules/25_rings_and_traits.md`). A PC marks the intent on the sheet (`system.initiative.useVoid`); when
- * Initiative is rolled, the player confirms, and the +10 goes to that roll only.
+ * @module services/initiative
+ * @description The Initiative Void Point prompt. A character may spend a Void Point to raise their Initiative Score
+ * by 10. A PC marks the intent on the sheet (`system.initiative.useVoid`); when Initiative is rolled, the player
+ * confirms, and the +10 goes to that roll only.
  *
  * L5R4Combat calls `resolveVoidInitiative` before rolling (wired at init in the entry module). The Initiative pool
  * itself is rolled by L5R4Combatant.
- *
- * @module services/initiative
+ * game-rules/25_rings_and_traits.md, p.78
  */
 
 import { voidUseUpdate, warnVoidLimit } from "./effects/uses.js";
 
-/** Initiative bonus for a Void Point (p.78). */
+/**
+ * Initiative bonus for a Void Point.
+ * game-rules/25_rings_and_traits.md, p.78
+ */
 const VOID_INITIATIVE_BONUS = 10;
 
 /**
  * Prompts each PC combatant that marked a Void Point for Initiative, spends the Void Point on a yes, and clears the
  * mark either way.
  *
- * @param {foundry.documents.Combatant[]} combatants  The combatants about to roll
- * @returns {Promise<Map<string, number>>}  The +10 by combatant id, for each one that spent a Void Point
+ * @param {foundry.documents.Combatant[]} combatants - The combatants about to roll
+ * @returns {Promise<Map<string, number>>} The +10 by combatant id, for each one that spent a Void Point
  */
 export async function resolveVoidInitiative(combatants) {
   const bonuses = new Map();

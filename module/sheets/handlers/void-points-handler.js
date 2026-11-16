@@ -1,15 +1,7 @@
 /**
- * Void Points Handler
- *
- * Manages adjustment and UI updates for character Void Points in the L5R4 system.
- * Void Points represent moments of enlightened insight that characters can spend to
- * enhance rolls or activate abilities. Each character has Void Points equal to their
- * Void Ring rank, which refresh daily after rest.
- *
- * Foundry APIs: Actor#update, querySelector, classList
- * Requires: Foundry v13+
- *
- * @module VoidPointsHandler
+ * @module sheets/handlers/void-points-handler
+ * @description Adjusts a character's current Void Points from the sheet's void dots and repaints the dots. A
+ * character has Void Points equal to the Void Ring rank, spent to improve rolls and regained with rest.
  */
 
 import { SYS_ID } from "../../config/constants.js";
@@ -39,13 +31,12 @@ export class VoidPointsHandler {
    * Game Rules: Characters have Void Points equal to their Void Ring (max 10 in rules,
    * but clamped to 9 here). Void Points refresh daily after rest.
    *
-   * @param {Object} context - Sheet context containing actor and element references
+   * @param {object} context - Sheet context containing actor and element references
    * @param {L5R4Actor} context.actor - The actor document to update
    * @param {HTMLElement} context.element - Root sheet element for UI updates
    * @param {Event} [event] - Optional DOM event to prevent default behavior
    * @param {number} delta - Amount to adjust (+1 to spend, -1 to regain)
    * @returns {Promise<void>}
-   * @async
    */
   static async adjust(context, event, delta) {
     event?.preventDefault?.();
@@ -86,7 +77,6 @@ export class VoidPointsHandler {
    * @param {HTMLElement} root - Root element to query for void point dots
    * @param {L5R4Actor} actor - Actor document containing current Void Point data
    * @returns {void}
-   * @static
    */
   static paint(root, actor) {
     // querySelector used here to find specific UI component container by class
@@ -117,8 +107,6 @@ export class VoidPointsHandler {
    *
    * @param {L5R4Actor} actor - Actor document to read Void Points from
    * @returns {number} Current Void Point value (0 if data is missing/invalid)
-   * @private
-   * @static
    */
   static _getVoidValue(actor) {
     return Number(actor.system?.rings?.void?.value ?? 0) || 0;

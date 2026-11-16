@@ -1,3 +1,8 @@
+/**
+ * @module data/item/base-data
+ * @description The data model every Item subtype extends.
+ */
+
 import { htmlField, numberField, sourceField } from "../fields.js";
 
 /**

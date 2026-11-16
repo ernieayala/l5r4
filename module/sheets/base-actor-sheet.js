@@ -1,52 +1,12 @@
 /**
- * Base Actor Sheet
- *
- * Abstract base class for all L5R4 actor sheets (PC and NPC). Provides shared
- * functionality including event delegation, handler orchestration, Void Points
- * management, drag-and-drop, item CRUD operations, and roll handling.
- *
- * **Architecture:**
- * Uses a handler delegation pattern where UI interactions are routed to specialized
- * handler classes (VoidPointsHandler, ItemCRUDHandler, RollHandler, etc.). This
- * separation keeps the sheet focused on rendering and event routing while handlers
- * encapsulate business logic.
- *
- * **Foundry Integration:**
- * - Extends ActorSheetV2 (Foundry v13+ Application v2 architecture)
- * - Uses HandlebarsApplicationMixin for template rendering
- * - Implements event delegation pattern via data-action attributes
- * - Leverages _onRender and _prepareContext lifecycle hooks
- *
- * **Event Delegation:**
- * All user interactions are handled through delegated events on [data-action] elements.
- * Actions are routed to _onAction (click), _onActionContext (right-click), or
- * _onActionChange (change) methods, which subclasses override to implement behavior.
- *
- * **Handler Pattern:**
- * Handlers receive a context object from _getHandlerContext() containing the actor,
- * sheet element, and sheet class name. This allows handlers to operate independently
- * while maintaining access to necessary sheet state.
- *
- * **Game Mechanics:**
- * Implements trait adjustment (Shift+Click) with bounds checking (ranks 1-10),
- * Void Points management, and delegates skill/attack/damage rolls to RollHandler.
- *
- * **Foundry APIs:** ActorSheetV2, HandlebarsApplicationMixin, Actor#update
- * **Requires:** Foundry v13+
- *
- * @abstract
- * @extends {foundry.applications.sheets.ActorSheetV2}
- * @mixes HandlebarsApplicationMixin
- * @mixes KeyboardBehaviorMixin
+ * @module sheets/base-actor-sheet
+ * @description The base class of the PC and NPC actor sheets: event delegation on [data-action] elements, Void
+ * Points, drag and drop, item create/edit/delete, rolls, Trait adjustment, and sorting, each routed to a handler
+ * class in module/sheets/handlers/. Clicks go to _onAction, right-clicks to _onActionContext, and changes to
+ * _onActionChange, which the subclasses override; handlers receive the context from _getHandlerContext().
  */
-
-// Config
 import { iconPath } from "../config/icons.js";
-
-// Utils
 import { on } from "../utils/dom.js";
-
-// Local
 import { KeyboardBehaviorMixin } from "../mixins/keyboard-behavior-mixin.js";
 import { VoidPointsHandler } from "./handlers/void-points-handler.js";
 import { DragDropHandler } from "./handlers/drag-drop-handler.js";
@@ -59,16 +19,22 @@ import { TRAIT_DRAG_TYPE } from "./ui/macros.js";
 
 const { HandlebarsApplicationMixin } = foundry.applications.api;
 
+/**
+ * The shared base of the L5R4 actor sheets.
+ * @abstract
+ * @augments {foundry.applications.sheets.ActorSheetV2}
+ * @mixes HandlebarsApplicationMixin
+ * @mixes KeyboardBehaviorMixin
+ */
 export class BaseActorSheet extends KeyboardBehaviorMixin(
   HandlebarsApplicationMixin(foundry.applications.sheets.ActorSheetV2)
 ) {
   /**
    * This class's own options: the "l5r4" class and saving each field as it changes. ApplicationV2 merges every
-   * class's DEFAULT_OPTIONS up the chain and concatenates arrays (client/applications/api/application.mjs:437-484),
+   * class's DEFAULT_OPTIONS up the chain and concatenates arrays [src: client/applications/api/application.mjs:437-484],
    * so a class lists only its own entries; copying the parent's in would repeat them.
    *
-   * @static
-   * @type {Object}
+   * @type {object}
    */
   static DEFAULT_OPTIONS = {
     classes: ["l5r4"],
@@ -78,9 +44,8 @@ export class BaseActorSheet extends KeyboardBehaviorMixin(
   /**
    * Lifecycle hook called when the sheet is rendered into the DOM.
    *
-   * Sets up event delegation for all user interactions via [data-action] attributes,
-   * implementing the Foundry v13 Application v2 event delegation pattern. Ensures
-   * event handlers are only bound once per root element to prevent duplicate listeners.
+   * Sets up event delegation for all user interactions via [data-action] attributes.
+   * Ensures event handlers are only bound once per root element to prevent duplicate listeners.
    *
    * **Event Delegation:**
    * - click: Routes to _onAction(action, event, element)
@@ -95,11 +60,9 @@ export class BaseActorSheet extends KeyboardBehaviorMixin(
    * Called automatically by Foundry after template rendering. Always call
    * super._onRender first to ensure parent class setup completes.
    *
-   * @param {Object} context - Template context data prepared by _prepareContext
-   * @param {Object} options - Rendering options passed to the sheet
+   * @param {object} context - Template context data prepared by _prepareContext
+   * @param {object} options - Rendering options passed to the sheet
    * @returns {Promise<void>}
-   * @protected
-   * @async
    * @override
    */
   async _onRender(context, options) {
@@ -153,7 +116,6 @@ export class BaseActorSheet extends KeyboardBehaviorMixin(
    * marking each image with dataset.errorHandled after first attachment.
    *
    * @param {HTMLElement} root - Sheet root element to query for actor images
-   * @private
    */
   _setupImageErrorHandling(root) {
     const actorImages = root.querySelectorAll("[data-actor-image]");
@@ -175,14 +137,11 @@ export class BaseActorSheet extends KeyboardBehaviorMixin(
    * Subclasses override this method to implement action routing via switch
    * statements. Called by the delegated click handler in _onRender.
    *
-   * **Foundry v13 Pattern:**
-   * Part of Application v2 event delegation architecture. Actions are
-   * identified by data-action attribute values on interactive elements.
+   * Actions are identified by data-action attribute values on interactive elements.
    *
    * @param {string} _action - The data-action attribute value
    * @param {Event} _ev - The click event
    * @param {HTMLElement} _el - The element that was clicked
-   * @protected
    */
   _onAction(_action, _ev, _el) {
     // Extension point for subclasses
@@ -197,7 +156,6 @@ export class BaseActorSheet extends KeyboardBehaviorMixin(
    * @param {string} _action - The data-action attribute value
    * @param {Event} _ev - The contextmenu event
    * @param {HTMLElement} _el - The element that was right-clicked
-   * @protected
    */
   _onActionContext(_action, _ev, _el) {
     // Extension point for subclasses
@@ -212,32 +170,9 @@ export class BaseActorSheet extends KeyboardBehaviorMixin(
    * @param {string} _action - The data-action attribute value
    * @param {Event} _ev - The change event
    * @param {HTMLElement} _el - The form element that changed
-   * @protected
    */
   _onActionChange(_action, _ev, _el) {
     // Extension point for subclasses
-  }
-
-  /**
-   * Closes the sheet and performs cleanup.
-   *
-   * Clears the bound root element reference to allow fresh event binding
-   * if the sheet is reopened. Delegates to parent class for standard
-   * Foundry close behavior (save position, remove from DOM, etc.).
-   *
-   * **Foundry Lifecycle:**
-   * Called when user closes sheet or by Application API. Always call
-   * super.close to ensure proper cleanup chain execution.
-   *
-   * @param {Object} [options={}] - Options passed to Application.close
-   * @returns {Promise<void>}
-   * @async
-   * @override
-   */
-  async close(options = {}) {
-    // Clear bound root to allow fresh event delegation on reopen
-    this._boundRoot = null;
-    return super.close(options);
   }
 
   /* ---------------------------------- */
@@ -260,8 +195,6 @@ export class BaseActorSheet extends KeyboardBehaviorMixin(
    * @param {HTMLElement} element - Element that was interacted with
    * @param {number} delta - Amount to adjust (+1 to spend, -1 to regain)
    * @returns {Promise<void>}
-   * @protected
-   * @async
    */
   async _onVoidPointsAdjust(event, element, delta) {
     return VoidPointsHandler.adjust(this._getHandlerContext(), event, delta);
@@ -274,7 +207,6 @@ export class BaseActorSheet extends KeyboardBehaviorMixin(
    * the actor's current Void Point value.
    *
    * @param {HTMLElement} root - Sheet root element containing void-points-dots
-   * @protected
    */
   _paintVoidPointsDots(root) {
     VoidPointsHandler.paint(root, this.actor);
@@ -289,7 +221,6 @@ export class BaseActorSheet extends KeyboardBehaviorMixin(
    * row is core's Item drag data.
    * @param {DragEvent} event
    * @returns {Promise<void>}
-   * @protected
    * @override
    */
   async _onDragStart(event) {
@@ -321,8 +252,6 @@ export class BaseActorSheet extends KeyboardBehaviorMixin(
    *
    * @param {DragEvent} event - The drop event from Foundry's drag-drop system
    * @returns {Promise<void>}
-   * @protected
-   * @async
    * @override
    */
   async _onDrop(event) {
@@ -336,10 +265,8 @@ export class BaseActorSheet extends KeyboardBehaviorMixin(
    * items to inventory, equipment slots, etc.).
    *
    * @param {DragEvent} event - The drop event
-   * @param {Object} data - Dropped item data from Foundry drag-drop system
+   * @param {object} data - Dropped item data from Foundry drag-drop system
    * @returns {Promise<void>}
-   * @protected
-   * @async
    */
   async _onDropItem(event, data) {
     return DragDropHandler.handleItemDrop(this._getHandlerContext(), event, data);
@@ -351,10 +278,8 @@ export class BaseActorSheet extends KeyboardBehaviorMixin(
    * Delegates to DragDropHandler for actor-specific drop logic.
    *
    * @param {DragEvent} event - The drop event
-   * @param {Object} data - Dropped actor data from Foundry drag-drop system
+   * @param {object} data - Dropped actor data from Foundry drag-drop system
    * @returns {Promise<void>}
-   * @protected
-   * @async
    */
   async _onDropActor(event, data) {
     return DragDropHandler.handleActorDrop(this._getHandlerContext(), event, data);
@@ -372,8 +297,6 @@ export class BaseActorSheet extends KeyboardBehaviorMixin(
    *
    * @param {Event} event - DOM event triggering the image edit
    * @returns {Promise<void>}
-   * @protected
-   * @async
    */
   async _onEditImage(event) {
     event?.preventDefault?.();
@@ -393,8 +316,6 @@ export class BaseActorSheet extends KeyboardBehaviorMixin(
    * @param {Event} event - DOM event triggering item creation
    * @param {HTMLElement} element - Element containing item type in data attributes
    * @returns {Promise<void>}
-   * @protected
-   * @async
    */
   async _onItemCreate(event, element) {
     return ItemCRUDHandler.create(this._getHandlerContext(), event, element);
@@ -408,7 +329,7 @@ export class BaseActorSheet extends KeyboardBehaviorMixin(
    *
    * @param {Event} event - DOM event triggering item edit
    * @param {HTMLElement} element - Element containing item ID in data attributes
-   * @protected
+   * @returns {void}
    */
   _onItemEdit(event, element) {
     return ItemCRUDHandler.edit(this._getHandlerContext(), event, element);
@@ -423,8 +344,6 @@ export class BaseActorSheet extends KeyboardBehaviorMixin(
    * @param {Event} event - DOM event triggering item deletion
    * @param {HTMLElement} element - Element containing item ID in data attributes
    * @returns {Promise<void>}
-   * @protected
-   * @async
    */
   async _onItemDelete(event, element) {
     return ItemCRUDHandler.deleteItem(this._getHandlerContext(), event, element);
@@ -438,7 +357,7 @@ export class BaseActorSheet extends KeyboardBehaviorMixin(
    *
    * @param {Event} event - DOM event triggering item expansion toggle
    * @param {HTMLElement} element - Element containing item ID in data attributes
-   * @protected
+   * @returns {void}
    */
   _onItemExpand(event, element) {
     return ItemCRUDHandler.expand(this._getHandlerContext(), event, element);
@@ -453,8 +372,6 @@ export class BaseActorSheet extends KeyboardBehaviorMixin(
    * @param {Event} event - DOM change event from inline edit field
    * @param {HTMLElement} element - Form element containing new value
    * @returns {Promise<void>}
-   * @protected
-   * @async
    */
   async _onInlineItemEdit(event, element) {
     return ItemCRUDHandler.inlineEdit(this._getHandlerContext(), event, element);
@@ -470,8 +387,6 @@ export class BaseActorSheet extends KeyboardBehaviorMixin(
    * @param {Event} ev - DOM event triggering chat post
    * @param {HTMLElement} el - Element containing item ID in data attributes
    * @returns {Promise<void>}
-   * @protected
-   * @async
    */
   async _onItemHeaderToChat(ev, el) {
     return ItemCRUDHandler.toChat(this._getHandlerContext(), ev, el);
@@ -493,7 +408,7 @@ export class BaseActorSheet extends KeyboardBehaviorMixin(
    *
    * @param {Event} event - DOM event triggering the roll
    * @param {HTMLElement} element - Element containing skill/trait info in data attributes
-   * @protected
+   * @returns {Promise<ChatMessage|null|undefined>} The roll's chat message
    */
   _onSkillRoll(event, element) {
     return RollHandler.skillRoll(this._getHandlerContext(), event, element);
@@ -511,7 +426,7 @@ export class BaseActorSheet extends KeyboardBehaviorMixin(
    *
    * @param {Event} event - DOM event triggering the roll
    * @param {HTMLElement} element - Element containing attack info in data attributes
-   * @protected
+   * @returns {Promise<ChatMessage|null|undefined>} The roll's chat message
    */
   _onAttackRoll(event, element) {
     return RollHandler.attackRoll(this._getHandlerContext(), event, element);
@@ -525,7 +440,7 @@ export class BaseActorSheet extends KeyboardBehaviorMixin(
    *
    * @param {Event} event - DOM event triggering the roll
    * @param {HTMLElement} element - Element containing weapon item ID in data attributes
-   * @protected
+   * @returns {Promise<ChatMessage|null|undefined>} The roll's chat message
    */
   _onWeaponAttackRoll(event, element) {
     return RollHandler.weaponAttackRoll(this._getHandlerContext(), event, element);
@@ -542,7 +457,7 @@ export class BaseActorSheet extends KeyboardBehaviorMixin(
    *
    * @param {Event} event - DOM event triggering the roll
    * @param {HTMLElement} element - Element containing weapon/damage info in data attributes
-   * @protected
+   * @returns {Promise<ChatMessage|null|undefined>} The roll's chat message
    */
   _onDamageRoll(event, element) {
     return RollHandler.damageRoll(this._getHandlerContext(), event, element);
@@ -560,7 +475,7 @@ export class BaseActorSheet extends KeyboardBehaviorMixin(
    *
    * @param {Event} event - DOM event triggering the roll
    * @param {HTMLElement} element - Element containing trait info in data attributes
-   * @protected
+   * @returns {Promise<ChatMessage|null|undefined>} The roll's chat message
    */
   _onTraitRoll(event, element) {
     return RollHandler.traitRoll(this._getHandlerContext(), event, element);
@@ -588,8 +503,6 @@ export class BaseActorSheet extends KeyboardBehaviorMixin(
    * @param {HTMLElement} element - Element with data-trait attribute
    * @param {number} delta - Direction to adjust (+1 to increase, -1 to decrease)
    * @returns {Promise<void>}
-   * @protected
-   * @async
    */
   async _onTraitAdjust(event, element, delta) {
     return TraitHandler.adjust(this._getHandlerContext(), event, element, delta);
@@ -606,7 +519,6 @@ export class BaseActorSheet extends KeyboardBehaviorMixin(
    * @param {HTMLElement} root - Sheet root element
    * @param {string} scope - Sort scope identifier (e.g., "skills", "items")
    * @param {string[]} allowedKeys - Array of sortable field names
-   * @protected
    */
   _initializeSortIndicators(root, scope, allowedKeys) {
     SortHandler.initializeIndicators(root, this.actor.id, scope, allowedKeys);
@@ -621,8 +533,6 @@ export class BaseActorSheet extends KeyboardBehaviorMixin(
    * @param {Event} event - DOM click event on sort header
    * @param {HTMLElement} element - Sort header element with data attributes
    * @returns {Promise<void>}
-   * @protected
-   * @async
    */
   async _onUnifiedSortClick(event, element) {
     return SortHandler.handleClick(
@@ -642,7 +552,6 @@ export class BaseActorSheet extends KeyboardBehaviorMixin(
    *
    * @param {string} _scope - Sort scope identifier (e.g., "skills", "items")
    * @returns {string[]} Array of allowed sort field names
-   * @protected
    */
   _getAllowedSortKeys(_scope) {
     return ["name"];
@@ -662,11 +571,8 @@ export class BaseActorSheet extends KeyboardBehaviorMixin(
    * Handlers should only access sheet state through this context, not by
    * storing sheet references.
    *
-   * @returns {Object} Handler context
-   * @returns {L5R4Actor} returns.actor - The actor document
-   * @returns {HTMLElement} returns.element - The sheet's root element
-   * @returns {string} returns.sheetClassName - Class name for logging/debugging
-   * @protected
+   * @returns {{actor: L5R4Actor, element: HTMLElement, sheetClassName: string}} Handler context: the actor
+   *   document, the sheet's root element, and the class name for logging
    */
   _getHandlerContext() {
     return {
@@ -674,5 +580,26 @@ export class BaseActorSheet extends KeyboardBehaviorMixin(
       element: this.element,
       sheetClassName: this.constructor.name
     };
+  }
+
+  /**
+   * Closes the sheet and performs cleanup.
+   *
+   * Clears the bound root element reference to allow fresh event binding
+   * if the sheet is reopened. Delegates to parent class for standard
+   * Foundry close behavior (save position, remove from DOM, etc.).
+   *
+   * **Foundry Lifecycle:**
+   * Called when user closes sheet or by Application API. Always call
+   * super.close to ensure proper cleanup chain execution.
+   *
+   * @param {object} [options={}] - Options passed to Application.close
+   * @returns {Promise<void>}
+   * @override
+   */
+  async close(options = {}) {
+    // Clear bound root to allow fresh event delegation on reopen
+    this._boundRoot = null;
+    return super.close(options);
   }
 }

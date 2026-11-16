@@ -1,5 +1,5 @@
 /**
- * @module section-state
+ * @module utils/section-state
  * @description Manages collapsed/expanded state for actor sheet sections.
  *
  * Persists UI state in Foundry user flags so sections remember their
@@ -16,13 +16,9 @@ import { logError } from "./error-logging.js";
  * Gets collapsed state for a specific actor sheet section.
  *
  * Reads from Foundry user flags. Returns false if not set (expanded by default).
- *
  * @param {string} actorId - Actor document ID
  * @param {string} scope - Section identifier (e.g., "skills", "inventory", "techniques")
  * @returns {boolean} True if section is collapsed, false if expanded
- *
- * @example
- * getSectionCollapsed("actor123", "skills") // true if skills section collapsed
  */
 export function getSectionCollapsed(actorId, scope) {
   try {
@@ -42,15 +38,10 @@ export function getSectionCollapsed(actorId, scope) {
  *
  * Persists to Foundry user flags. Updates are per-user, so each user
  * can have different collapsed sections.
- *
  * @param {string} actorId - Actor document ID
  * @param {string} scope - Section identifier (e.g., "skills", "inventory")
  * @param {boolean} isCollapsed - True to collapse, false to expand
  * @returns {Promise<void>}
- *
- * @example
- * await setSectionCollapsed("actor123", "skills", true) // Collapse skills section
- * await setSectionCollapsed("actor123", "inventory", false) // Expand inventory section
  */
 export async function setSectionCollapsed(actorId, scope, isCollapsed) {
   try {
@@ -74,15 +65,11 @@ export async function setSectionCollapsed(actorId, scope, isCollapsed) {
  * Gets collapsed state for multiple sections at once.
  *
  * Convenience function to get state for all sections in one call.
- * Returns object mapping scope names to collapsed state.
- *
+ * Returns object mapping scope names to collapsed state, such as
+ * `{ skills: true, inventory: false, techniques: false }`.
  * @param {string} actorId - Actor document ID
  * @param {string[]} scopes - Array of section identifiers
- * @returns {Object.<string, boolean>} Map of scope to collapsed state
- *
- * @example
- * getSectionCollapsedMap("actor123", ["skills", "inventory", "techniques"])
- * // { skills: true, inventory: false, techniques: false }
+ * @returns {Record<string, boolean>} Map of scope to collapsed state
  */
 export function getSectionCollapsedMap(actorId, scopes) {
   const result = {};

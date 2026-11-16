@@ -1,11 +1,9 @@
 /**
- * Ring Roll Service
- *
- * A Ring Roll (p.80) through the roll pipeline (module/services/dice/check/roll-check.js): roll and keep the Ring.
- * The dialog can turn it into a Spell Casting Roll without a spell item (p.80): the School Rank, plus 1 with an
- * Affinity or minus 1 with a Deficiency, joins the rolled dice, and a spell slot is spent once the roll is made.
- *
  * @module services/dice/rolls/ring-roll
+ * @description A Ring Roll through the roll pipeline (module/services/dice/check/roll-check.js): roll and keep the
+ * Ring. The dialog can turn it into a Spell Casting Roll without a spell item: the School Rank, plus 1 with an
+ * Affinity or minus 1 with a Deficiency, joins the rolled dice, and a spell slot is spent once the roll is made.
+ * game-rules/29_types_of_rolls.md, p.80
  */
 
 import { DIALOG_TEMPLATES } from "../../../config/templates.js";
@@ -19,7 +17,7 @@ import { resolveActor } from "../resources/void-points.js";
 /**
  * Executes a Ring Roll, or a Spell Casting Roll when the dialog asks for one.
  *
- * @param {Object} options
+ * @param {object} options
  * @param {number} [options.ringRank=null] - The Ring's rank
  * @param {string} [options.ringName=null] - Display name of the Ring
  * @param {string} [options.systemRing=null] - Ring key ("fire", "void", ...)

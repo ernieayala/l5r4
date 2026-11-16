@@ -1,7 +1,8 @@
 /**
  * @module services/session
  * @description Game sessions for once-per-session abilities (roadmap/STAGE-11 decision 3): the GM's "New session"
- * token control starts a new one, which gives every character its optional Honor Roll back (p.92).
+ * token control starts a new one, which gives every character its optional Honor Roll back.
+ * game-rules/43_honor.md, p.92
  */
 
 import { SYS_ID } from "../config/constants.js";
@@ -23,6 +24,11 @@ export async function startNewSession() {
   await ChatMessage.create({ content: `<p>${T("l5r4.ui.session.started")}</p>` });
 }
 
+/** Register the session control, once during system init. */
+export function initializeSessions() {
+  Hooks.on("getSceneControlButtons", onGetSceneControlButtons);
+}
+
 /**
  * Add the GM's "New session" button to the token controls.
  * @param {Record<string, object>} controls
@@ -40,9 +46,4 @@ function onGetSceneControlButtons(controls) {
     button: true,
     onChange: () => startNewSession()
   };
-}
-
-/** Register the session control, once during system init. */
-export function initializeSessions() {
-  Hooks.on("getSceneControlButtons", onGetSceneControlButtons);
 }

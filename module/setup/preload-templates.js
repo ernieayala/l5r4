@@ -1,21 +1,9 @@
 /**
- * Template Preloader Module
- * Preloads all Handlebars templates used by the L5R4 Enhanced system for improved performance.
- * Must be called during Foundry's "init" hook after document classes are configured
- * but before sheets are rendered.
- *
- * This module uses Foundry VTT's template caching system to load all HBS templates
- * into memory at system initialization, preventing template loading delays during gameplay.
- *
- * Foundry VTT Integration:
- * - Uses foundry.applications.handlebars.loadTemplates API (Foundry v13+)
- * - Called during "init" hook Phase 6 (after document registration, before services)
- * - Validates Foundry template system availability before loading
- *
  * @module setup/preload-templates
- * @requires Foundry VTT v13+
+ * @description Loads every Handlebars template and partial the system renders into core's template cache with
+ * `foundry.applications.handlebars.loadTemplates`, during `init` after the document classes and sheets register, so
+ * no template loads mid-game.
  */
-
 import { SYS_ID } from "../config/constants.js";
 
 /**
@@ -30,11 +18,8 @@ import { SYS_ID } from "../config/constants.js";
  * to load templates.
  *
  * Side Effects:
- * - Logs success message with template count to console
- * - Logs warning to console if template loading fails
+ * - Logs warning to console if template loading fails.
  *
- * @async
- * @function preloadTemplates
  * @returns {Promise<void>} Resolves when all templates are loaded
  * @throws {Error} If Foundry template system is not available (called too early)
  * @throws {Error} If template loading fails (invalid paths, missing files)

@@ -14,7 +14,7 @@ const PAGE_LIST = String.raw`\d+(?:-\d+)?(?:, \d+(?:-\d+)?)*`;
 /** A whole citation line. */
 const CITATION_LINE = new RegExp(String.raw`^game-rules/\d+_[a-z0-9_]+\.md, p\.${PAGE_LIST}$`);
 
-/** A page number anywhere: `p.82`, `pp.86-87`, `Core Rulebook p.92`. */
+/** A page number anywhere: `p.` or `pp.` and a digit, as in a citation line, a parenthesis, or "Core Rulebook". */
 const PAGE_REFERENCE = /\bpp?\.\s?\d/;
 
 /** A path into Foundry's installed source. */
@@ -72,6 +72,11 @@ export default {
     }
   },
 
+  /**
+   * The rule's visitors for one file.
+   * @param {object} context - ESLint's rule context
+   * @returns {object} The visitors, by node type
+   */
   create(context) {
     const { header = false } = context.options[0] ?? {};
     const file = relative(context.cwd, context.filename).replaceAll("\\", "/");

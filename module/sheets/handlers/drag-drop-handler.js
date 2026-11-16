@@ -1,35 +1,17 @@
 /**
- * Drag and Drop Handler
- *
- * Centralized handler for drag-drop operations on L5R4 actor sheets.
- * Routes dropped documents to appropriate handlers and manages item embedding.
- *
- * Responsibilities:
- * - Parse Foundry drag events using TextEditor.getDragEventData
- * - Route Item and Actor drops to specialized handlers
- * - Resolve document UUIDs and embed items on actors
- * - Provide defensive error handling for failed drops
- *
- * Integration:
- * - Used by BaseActorSheet via _onDrop, _onDropItem, _onDropActor hooks
- * - Receives context object with actor and element references
- * - Returns created documents or false on failure/unsupported drops
- *
- * Foundry APIs:
- * - foundry.applications.ux.TextEditor.getDragEventData() (v13+)
- * - fromUuid() for document resolution
- * - Actor.createEmbeddedDocuments() for item embedding
- *
- * @module DragDropHandler
- * @requires Foundry VTT v13+
+ * @module sheets/handlers/drag-drop-handler
+ * @description Handles documents dropped on L5R4 actor sheets: parses the drag event with
+ * foundry.applications.ux.TextEditor.getDragEventData, routes Item and Actor drops, resolves the dropped UUID, and
+ * adds items through the purchase service. BaseActorSheet calls it from its drop overrides; a failed or unsupported
+ * drop returns false.
  */
 import { SYS_ID } from "../../config/constants.js";
 import { addItem } from "../../services/purchase.js";
 
 /**
- * Handler context object provided by actor sheets
+ * Handler context object provided by actor sheets.
  *
- * @typedef {Object} HandlerContext
+ * @typedef {object} HandlerContext
  * @property {L5R4Actor} actor - The actor document being modified
  * @property {HTMLElement} element - The sheet's root DOM element
  */
@@ -53,8 +35,6 @@ export class DragDropHandler {
    * @param {HandlerContext} context - Sheet context with actor and element
    * @param {DragEvent} event - Browser drag event from Foundry
    * @returns {Promise<Document|Document[]|false>} Created documents or false if unsupported/failed
-   *
-   * @see https://foundryvtt.com/api/foundry.applications.ux.TextEditor.html#getDragEventData
    */
   static async handleDrop(context, event) {
     const data = foundry.applications.ux.TextEditor.getDragEventData(event);
@@ -84,7 +64,7 @@ export class DragDropHandler {
    *
    * @param {HandlerContext} context - Sheet context with actor reference
    * @param {DragEvent} event - Browser drag event (unused but required by signature)
-   * @param {Object} data - Parsed drag data from getDragEventData
+   * @param {object} data - Parsed drag data from getDragEventData
    * @param {string} data.uuid - Universal unique identifier for the source item
    * @returns {Promise<Item|false>} The created item, or false when nothing was added
    */
@@ -118,9 +98,9 @@ export class DragDropHandler {
    * Currently a stub that rejects all actor drops. This may be expanded
    * in the future to support features like followers, mounts, or contacts.
    *
-   * @param {HandlerContext} context - Sheet context (unused)
-   * @param {DragEvent} event - Browser drag event (unused)
-   * @param {Object} data - Parsed drag data (unused)
+   * @param {HandlerContext} _context - Sheet context (unused)
+   * @param {DragEvent} _event - Browser drag event (unused)
+   * @param {object} _data - Parsed drag data (unused)
    * @returns {Promise<false>} Always returns false (not implemented)
    */
   static async handleActorDrop(_context, _event, _data) {

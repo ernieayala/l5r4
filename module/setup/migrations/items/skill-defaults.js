@@ -1,10 +1,7 @@
 /**
- * Skill Default Values Migration
- * Ensures skill items have required default values for advancement tracking.
- *
  * @module setup/migrations/items/skill-defaults
+ * @description Ensures skill items have the default values advancement tracking needs.
  */
-
 import { SYS_ID } from "../../../config/constants.js";
 
 /**

@@ -1,24 +1,9 @@
 /**
- * Central Hook Registration
- *
- * Centralizes all Foundry VTT hook registrations for the L5R4 Enhanced system.
- * Provides a single point of reference for all active hooks, making it easier to:
- * - Audit what hooks are registered
- * - Debug hook execution order
- * - Test hook interactions
- * - Maintain hook-related code
- *
- * Hook Categories:
- * - Animation System: Visual effects for stances and conditions
- * - Chat Integration: Damage buttons, inline roll parsing, effect prompt cards
- * - Effects: Full Defense roll, Prone from Wounds, Concentration checks
- * - Spell System: Memorization XP tracking
- *
  * @module hooks/register-all
+ * @description The one place the system's Foundry hooks are registered (CLAUDE.md Layers): services, apps, and
+ * sheets export their handlers and init functions, and this file wires them, so every active hook and its order can
+ * be read and audited here.
  */
-
-import { registerChatDamageButtons } from "./chat-damage-buttons.js";
-import { registerSpellMemorizationHooks } from "./spell-memorization.js";
 import { initializeChatService } from "../services/chat.js";
 import { initializeAnimations } from "../services/animations/initialize.js";
 import { initializeEffectAutomation } from "../services/effects/automation.js";
@@ -27,26 +12,17 @@ import { initializeCombat } from "../services/combat/index.js";
 import { initializeSessions } from "../services/session.js";
 import { initializeItemTransfer } from "../services/item-transfer.js";
 import { bindCheckRequestCard } from "../services/check-request.js";
-import { initializeEffectPanel } from "../apps/effect-panel.js";
-import { onHotbarDrop, registerMacroApi } from "../sheets/ui/macros.js";
 import { initializeScrollingText } from "../services/scrolling-text.js";
+import { initializeEffectPanel } from "../apps/effect-panel.js";
 import { initializeCompendiumBrowser } from "../apps/compendium-browser.js";
+import { onHotbarDrop, registerMacroApi } from "../sheets/ui/macros.js";
+import { registerChatDamageButtons } from "./chat-damage-buttons.js";
+import { registerSpellMemorizationHooks } from "./spell-memorization.js";
 
 /**
- * Register all system hooks
+ * Register all system hooks, once during `init` in the system entry point.
  *
- * Calls all hook registration functions in a centralized location.
- * This function should be called during the 'init' hook in the system entry point.
- *
- * Hook Registration Order:
- * 1. Animation System - Visual effects for stances and conditions (ActiveEffect lifecycle)
- * 2. Effect automation - Full Defense roll, Prone from Wounds, Concentration checks
- * 3. Chat Service - Chat message rendering, inline roll parsing
- * 4. Effect prompt cards - Save, Full Defense, and Concentration buttons
- * 5. Chat Damage Buttons - Damage button click handlers in chat cards
- * 6. Spell Memorization - Item update hook for spell memorization XP tracking
- *
- * @function registerAllHooks
+ * Each feature registers in the order below; the comment above each call names what it adds.
  * @returns {void}
  */
 export function registerAllHooks() {

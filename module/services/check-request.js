@@ -13,7 +13,7 @@ import { checkRequestFor, linkText } from "./links.js";
 
 /**
  * Post a request card for a Check link. GMs only.
- * @param {import("../utils/link-syntax.js").LinkSpec} spec  A Check link that parsed
+ * @param {import("../utils/link-syntax.js").LinkSpec} spec - A Check link that parsed
  * @returns {Promise<ChatMessage|null>}
  */
 export async function postCheckRequest(spec) {

@@ -1,25 +1,13 @@
 /**
- * Schema Migration Map
- *
- * Defines property path migrations for converting legacy snake_case field names
- * to camelCase throughout the L5R4 system. Used by the migration system to
- * automatically update Actor and Item documents during system upgrades.
- *
- * Each entry specifies:
- * - docType: "Actor" or "Item"
- * - type: Specific document type or "*" for all types
- * - from: Legacy property path (snake_case)
- * - to: New property path (camelCase)
- *
- * Applied via buildSchemaUpdate() in migrations.js during Foundry's system
- * initialization lifecycle when schema version changes are detected.
- *
- * @see module/setup/migrations.js#buildSchemaUpdate
- * @see https://foundryvtt.com/article/versioning/
+ * @module setup/migrations/schema/map
+ * @description The property paths the schema migration renames from legacy snake_case to camelCase on Actor and
+ * Item documents. Each entry names the document (`docType`), the subtype or "*" for all (`type`), the legacy path
+ * (`from`), and the new path (`to`); `buildSchemaUpdate` in `module/setup/migrations/schema/apply.js` applies them
+ * when the system version changes.
  */
 
 /**
- * @typedef {Object} SchemaMigrationRule
+ * @typedef {object} SchemaMigrationRule
  * @property {"Actor"|"Item"} docType - Foundry document type to migrate
  * @property {string} type - Document subtype or "*" for all subtypes
  * @property {string} from - Source property path (legacy snake_case format)
@@ -42,7 +30,7 @@
  * @type {SchemaMigrationRule[]}
  * @constant
  */
-export const SCHEMA_MAP = [
+export const SCHEMA_MAP = Object.freeze([
   // Universal Actor properties (apply to all actor types)
   { docType: "Actor", type: "*", from: "system.wounds.heal_rate", to: "system.wounds.healRate" },
   { docType: "Actor", type: "*", from: "system.wound_lvl", to: "system.woundLevels" },
@@ -84,4 +72,4 @@ export const SCHEMA_MAP = [
   // Armor properties
   { docType: "Item", type: "armor", from: "system.equiped", to: "system.equipped" },
   { docType: "Item", type: "armor", from: "system.specialRues", to: "system.specialRules" }
-];
+]);

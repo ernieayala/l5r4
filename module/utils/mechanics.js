@@ -1,5 +1,5 @@
 /**
- * @module mechanics
+ * @module utils/mechanics
  * @description Core L5R4 game mechanics calculations.
  *
  * Handles:
@@ -18,12 +18,47 @@ import { logError } from "./error-logging.js";
 import { selectorBonus } from "./rule-engine.js";
 
 /**
+ * Valid L5R4 trait abbreviations.
+ * Physical: sta (Stamina), str (Strength), ref (Reflexes), agi (Agility)
+ * Mental: wil (Willpower), per (Perception), awa (Awareness), int (Intelligence)
+ * Void: void (Void Ring)
+ * @constant {string[]}
+ */
+const KNOWN_TRAITS = Object.freeze([
+  "sta",
+  "wil",
+  "str",
+  "per",
+  "ref",
+  "awa",
+  "agi",
+  "int",
+  "void"
+]);
+
+/**
+ * Maps English trait names to abbreviations.
+ * Used for normalizing trait references from various sources.
+ * @constant {Record<string, string>}
+ */
+const ENGLISH_TRAIT_LABELS = Object.freeze({
+  stamina: "sta",
+  willpower: "wil",
+  strength: "str",
+  perception: "per",
+  reflexes: "ref",
+  awareness: "awa",
+  agility: "agi",
+  intelligence: "int",
+  void: "void"
+});
+
+/**
  * The roll, keep, and total bonus a sheet formula shows for a Skill, Trait, or Ring: Active Effect values in
  * `system.bonuses` plus the RollModifier rules whose predicates hold for the actor. The roll dialog lists the same
  * sources one by one, with the situational ones (a target, a stance) as well.
- *
- * @param {Object} actor - Prepared actor document
- * @param {Object} keys
+ * @param {object} actor - Prepared actor document
+ * @param {object} keys - The Skill, Trait, and Ring the formula names
  * @param {string} [keys.skill] - Skill name in lower case
  * @param {string} [keys.trait] - Trait key
  * @param {string} [keys.ring] - Ring key
@@ -55,32 +90,6 @@ export function displayRollBonus(actor, { skill, trait, ring }) {
 }
 
 /**
- * Valid L5R4 trait abbreviations.
- * Physical: sta (Stamina), str (Strength), ref (Reflexes), agi (Agility)
- * Mental: wil (Willpower), per (Perception), awa (Awareness), int (Intelligence)
- * Void: void (Void Ring)
- * @constant {string[]}
- */
-const KNOWN_TRAITS = ["sta", "wil", "str", "per", "ref", "awa", "agi", "int", "void"];
-
-/**
- * Maps English trait names to abbreviations.
- * Used for normalizing trait references from various sources.
- * @constant {Object.<string, string>}
- */
-const ENGLISH_TRAIT_LABELS = {
-  stamina: "sta",
-  willpower: "wil",
-  strength: "str",
-  perception: "per",
-  reflexes: "ref",
-  awareness: "awa",
-  agility: "agi",
-  intelligence: "int",
-  void: "void"
-};
-
-/**
  * Normalizes trait key to standard abbreviation.
  *
  * Handles multiple input formats:
@@ -89,12 +98,9 @@ const ENGLISH_TRAIT_LABELS = {
  * - Localization keys: "l5r4.ui.mechanics.traits.agi"
  * - Localized labels: "Agilité" (French) -> "agi"
  *
+ * So "agility" gives "agi", and "l5r4.ui.mechanics.traits.str" gives "str".
  * @param {*} raw - Raw trait identifier
  * @returns {string} Normalized trait key ("agi", "str", etc.) or empty string
- *
- * @example
- * normalizeTraitKey("agility") // "agi"
- * normalizeTraitKey("l5r4.ui.mechanics.traits.str") // "str"
  */
 export function normalizeTraitKey(raw) {
   if (raw == null) {
@@ -136,7 +142,7 @@ export function normalizeTraitKey(raw) {
         return key;
       }
     }
-  } catch (_) {
+  } catch {
     // Ignore i18n errors
   }
 
@@ -149,14 +155,9 @@ export function normalizeTraitKey(raw) {
  *
  * Checks derived traits (with modifiers applied) first, then base traits.
  * Void is stored on its own in rings.void.rank.
- *
- * @param {Object} actor - Foundry actor document
+ * @param {object} actor - Foundry actor document
  * @param {string} traitKey - Trait abbreviation ("agi", "str", "void", etc.)
  * @returns {number} Effective trait value
- *
- * @example
- * getEffectiveTrait(actor, "agi") // 3
- * getEffectiveTrait(actor, "void") // 2
  */
 export function getEffectiveTrait(actor, traitKey) {
   if (!actor?.system) {
@@ -179,10 +180,10 @@ export function getEffectiveTrait(actor, traitKey) {
 }
 
 /**
- * A Ring's value (p.76, `game-rules/25_rings_and_traits.md`): the Void Ring's rank, or an Elemental Ring.
- *
- * @param {Object} actor
- * @param {string} ring  "air", "earth", "fire", "water", or "void"
+ * A Ring's value: the Void Ring's rank, or an Elemental Ring.
+ * game-rules/25_rings_and_traits.md, p.76
+ * @param {object} actor
+ * @param {string} ring - "air", "earth", "fire", "water", or "void"
  * @returns {number}
  */
 export function ringRank(actor, ring) {
@@ -190,10 +191,10 @@ export function ringRank(actor, ring) {
 }
 
 /**
- * The highest rank among the actor's Schools (p.104), 0 with none: the School Rank a Technique scales with. The
+ * The highest rank among the actor's Schools, 0 with none: the School Rank a Technique scales with. The
  * `school-rank` roll option and `@school.rank` in rule formulas both read it.
- *
- * @param {Object} actor
+ * game-rules/49_improving_your_character.md, p.104
+ * @param {object} actor
  * @returns {number}
  */
 export function highestSchoolRank(actor) {
@@ -204,11 +205,12 @@ export function highestSchoolRank(actor) {
 }
 
 /**
- * The School Rank a shugenja casts with (pp.80, 163, `game-rules/66_magic_and_spell_casting.md`): the rank of the
- * School marked as the shugenja School, or the Insight Rank, which is the School Rank of a character with one
- * School (p.104).
- *
- * @param {Object} actor
+ * The School Rank a shugenja casts with: the rank of the School marked as the shugenja School, or the Insight
+ * Rank, which is the School Rank of a character with one School.
+ * game-rules/29_types_of_rolls.md, p.80
+ * game-rules/49_improving_your_character.md, p.104
+ * game-rules/66_magic_and_spell_casting.md, p.163
+ * @param {object} actor
  * @returns {number}
  */
 export function castingSchoolRank(actor) {
@@ -220,21 +222,12 @@ export function castingSchoolRank(actor) {
  * Extracts roll parameters from DOM element data attributes.
  *
  * Reads data-roll, data-keep, data-trait, data-label, data-description.
- * If trait is present, looks up trait value from actor.
- *
+ * If trait is present, looks up trait value from actor. A button with roll 5, keep 3, trait "agi", and label
+ * "Attack" gives 5 dice rolled, 3 kept, the actor's Agility as the trait bonus, and that label.
  * @param {Element} el - DOM element with data attributes
- * @param {Object} actor - Foundry actor document
- * @returns {Object} Roll parameters
- * @returns {number} return.diceRoll - Number of dice to roll
- * @returns {number} return.diceKeep - Number of dice to keep
- * @returns {number} return.traitBonus - Trait value if trait specified
- * @returns {string} return.label - Roll label
- * @returns {string} return.description - Roll description
- *
- * @example
- * // Element: <button data-roll="5" data-keep="3" data-trait="agi" data-label="Attack">
- * extractRollParams(button, actor)
- * // { diceRoll: 5, diceKeep: 3, traitBonus: 3, label: "Attack", description: "" }
+ * @param {object} actor - Foundry actor document
+ * @returns {{diceRoll: number, diceKeep: number, traitBonus: number, label: string, description: string}} The
+ *   dice to roll and keep, the Trait value when a trait is named, and the roll's label and description
  */
 export function extractRollParams(el, actor) {
   const diceRoll = toInt(el.dataset.roll, 0);
@@ -260,14 +253,9 @@ export function extractRollParams(el, actor) {
  *
  * Shugenja have affinity (+1k0) or deficiency (-1k0) with specific rings.
  * If character has both affinity and deficiency for same ring, they cancel.
- *
- * @param {Object} actor - Foundry actor document
+ * @param {object} actor - Foundry actor document
  * @param {string} ringKey - Ring element ("fire", "water", "air", "earth", "void")
  * @returns {number} Modifier: 1 (affinity), -1 (deficiency), or 0 (none/cancel)
- *
- * @example
- * getAffinityDeficiencyModifier(actor, "fire") // 1 if has Fire affinity
- * getAffinityDeficiencyModifier(actor, "water") // -1 if has Water deficiency
  */
 export function getAffinityDeficiencyModifier(actor, ringKey) {
   if (!actor || !ringKey) {
@@ -326,25 +314,12 @@ export function getAffinityDeficiencyModifier(actor, ringKey) {
  *
  * L5R4 unskilled rolls: Roll and Keep both equal trait value.
  * Skilled rolls: Roll = skill rank + trait, Keep = trait.
- *
- * @param {Object} actor - Foundry actor document
- * @param {Object} weapon - Weapon item document
- * @returns {Object} Weapon roll parameters
- * @returns {number} return.skillRank - Skill rank (0 if unskilled)
- * @returns {number} return.traitValue - Trait value
- * @returns {number} return.rollBonus - Dice to roll
- * @returns {number} return.keepBonus - Dice to keep
- * @returns {string} return.description - Human-readable description
- *
- * @example
- * // Skilled: Kenjutsu 3, Agility 3
- * resolveWeaponSkillTrait(actor, katana)
- * // { skillRank: 3, traitValue: 3, rollBonus: 6, keepBonus: 3, description: "Kenjutsu (3) + AGI (3)" }
- *
- * @example
- * // Unskilled: No Kenjutsu, Agility 3
- * resolveWeaponSkillTrait(actor, katana)
- * // { skillRank: 0, traitValue: 3, rollBonus: 3, keepBonus: 3, description: "AGI (3) [Unskilled]" }
+ * With Kenjutsu 3 and Agility 3 a katana rolls 6 and keeps 3, described "Kenjutsu (3) + AGI (3)"; without
+ * Kenjutsu it rolls and keeps 3, described "AGI (3) [Unskilled]".
+ * @param {object} actor - Foundry actor document
+ * @param {object} weapon - Weapon item document
+ * @returns {{skillRank: number, traitValue: number, rollBonus: number, keepBonus: number, description: string}}
+ *   The Skill rank (0 if unskilled), the Trait value, the dice to roll and keep, and a description
  */
 export function resolveWeaponSkillTrait(actor, weapon) {
   if (!weapon || !actor) {
@@ -405,16 +380,16 @@ export function resolveWeaponSkillTrait(actor, weapon) {
       keepBonus: traitValue + skillBonusKeep,
       description: `${skillName} (${skillRank}) + ${skillTrait.toUpperCase()} (${traitValue})`
     };
-  } else {
-    // No skill found - use fallback trait (unskilled)
-    const traitValue = getEffectiveTrait(actor, fallbackTrait);
-
-    return {
-      skillRank: 0,
-      traitValue,
-      rollBonus: traitValue,
-      keepBonus: traitValue,
-      description: `${fallbackTrait.toUpperCase()} (${traitValue}) [Unskilled]`
-    };
   }
+
+  // No skill found - use fallback trait (unskilled)
+  const traitValue = getEffectiveTrait(actor, fallbackTrait);
+
+  return {
+    skillRank: 0,
+    traitValue,
+    rollBonus: traitValue,
+    keepBonus: traitValue,
+    description: `${fallbackTrait.toUpperCase()} (${traitValue}) [Unskilled]`
+  };
 }

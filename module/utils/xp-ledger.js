@@ -1,8 +1,10 @@
 /**
- * @module xp-ledger
+ * @module utils/xp-ledger
  * @description A character's XP, itemized: what each Trait rank, Void rank, Skill rank, Emphasis, and item cost, and
- * what Disadvantages gave (Core Rulebook pp.102-103, 145). Cost rules change prices (roadmap/STAGE-11): the sheet's
- * totals and the XP manager's history both read these entries.
+ * what Disadvantages gave. Cost rules change prices (roadmap/STAGE-11): the sheet's totals and the XP manager's
+ * history both read these entries.
+ * game-rules/48_character_creation_expanded.md, p.102-103
+ * game-rules/63_advantages_and_disadvantages.md, p.145
  */
 
 import {
@@ -15,20 +17,24 @@ import { bagEntries } from "./rule-engine.js";
 import { resolveValue } from "./rule-values.js";
 
 /**
+ * A Trait as XP prices it; its Family and School bonus raises the price of each rank.
+ * game-rules/48_character_creation_expanded.md, p.103
  * @typedef {object} XpTrait
  * @property {string} key
  * @property {number} stored    The stored rank, a rule's bonus not included
  * @property {number} freeBase  Free ranks a legacy Family or School bonus marked as stored (flags.xpFreeTraitBase)
- * @property {number} bonus     Family and School bonus that raises the price of each rank (p.103)
+ * @property {number} bonus     Family and School bonus that raises the price of each rank
  * @property {number} discount  Flat change to each step (flags.traitDiscounts)
  */
 
 /**
+ * A Skill as XP prices it; the ranks a School gave are free.
+ * game-rules/48_character_creation_expanded.md, p.102
  * @typedef {object} XpSkill
  * @property {string} name
  * @property {string} type       high, bugei, merchant, low
  * @property {number} rank
- * @property {number} freeRanks  Ranks a School gave (p.102)
+ * @property {number} freeRanks  Ranks a School gave
  * @property {string[]} emphases Trained Emphases
  * @property {number} freeEmphasis
  */
@@ -42,10 +48,13 @@ import { resolveValue } from "./rule-values.js";
  */
 
 /**
+ * What a character's XP is built from: starting XP is 40, and Disadvantages give at most 10.
+ * game-rules/48_character_creation_expanded.md, p.102
+ * game-rules/63_advantages_and_disadvantages.md, p.145
  * @typedef {object} XpBuild
- * @property {number} base          Starting XP (40, p.102)
+ * @property {number} base          Starting XP (40)
  * @property {number} manual        XP the GM awarded
- * @property {number} disadvantageCap  Most XP Disadvantages give (10, p.145)
+ * @property {number} disadvantageCap  Most XP Disadvantages give (10)
  * @property {XpTrait[]} traits
  * @property {{stored: number, freeBase: number, bonus: number, discount: number}} void  As a Trait (XpTrait)
  * @property {XpSkill[]} skills
@@ -66,12 +75,11 @@ import { resolveValue } from "./rule-values.js";
  * A price function from Cost rules: each rule matching one of the selectors, or `self` for the item being priced,
  * whose predicate holds, sets a new price from `@cost` in turn (rule order is priority order). A price is never below
  * 0. A rule whose formula fails is skipped and reported.
- *
  * @param {object} spec
- * @param {Record<string, object[]>} spec.costs  The actor's Cost bag (`ruleBag.costs`)
- * @param {Set<string>} spec.options             The actor's roll options
- * @param {object} spec.rollData                 The actor's roll data
- * @param {function(string, string): void} [spec.report]  Called with the rule's source and the error
+ * @param {Record<string, object[]>} spec.costs - The actor's Cost bag (`ruleBag.costs`)
+ * @param {Set<string>} spec.options - The actor's roll options
+ * @param {object} spec.rollData - The actor's roll data
+ * @param {function(string, string): void} [spec.report] - Called with the rule's source and the error
  * @returns {function(string[], number, string|null=): number}  (selectors, base price, item id) => price
  */
 export function costPricer({ costs, options, rollData, report = () => {} }) {
@@ -94,13 +102,13 @@ export function costPricer({ costs, options, rollData, report = () => {} }) {
 }
 
 /**
- * Itemize a character's XP. A Trait rank costs four times the new rank, its Family and School bonus included (p.103);
+ * Itemize a character's XP. A Trait rank costs four times the new rank, its Family and School bonus included;
  * the Void Ring six times the new rank, its bonus included too; a Skill rank the new rank, above the ranks a School
  * gave; an Emphasis 2; an Advantage its cost; a kata, kiho, or memorized spell its Mastery Level (`cost` as gathered).
  * Each step is priced by `price` before it is added.
- *
+ * game-rules/48_character_creation_expanded.md, p.103
  * @param {XpBuild} build
- * @param {function(string[], number, string|null=): number} [price]  From costPricer; none leaves prices alone
+ * @param {function(string[], number, string|null=): number} [price] - From costPricer; none leaves prices alone
  * @returns {XpEntry[]}
  */
 export function xpEntries(build, price = (_selectors, base) => base) {
@@ -120,7 +128,8 @@ export function xpEntries(build, price = (_selectors, base) => base) {
     }
   }
 
-  // The Void Ring's Family or School bonus raises each rank's price as a Trait's does (p.103; #44)
+  // The Void Ring's Family or School bonus raises each rank's price as a Trait's does (#44)
+  // game-rules/48_character_creation_expanded.md, p.103
   const voidBonus = build.void.freeBase > 0 ? 0 : build.void.bonus;
   for (let r = 2 + build.void.freeBase + 1; r <= build.void.stored; r++) {
     const base = Math.max(0, VOID_XP_MULTIPLIER * (r + voidBonus) + build.void.discount);
@@ -170,15 +179,13 @@ export function xpEntries(build, price = (_selectors, base) => base) {
 }
 
 /**
- * Total a character's XP from its entries: earned (base, awards, and Disadvantages up to the cap, p.145), spent, and
- * spent by category.
- *
+ * Total a character's XP from its entries: earned (base, awards, and Disadvantages up to the cap), spent, and
+ * spent by category. The book's sample character, Shiba Gyukaro, earns 40 + 6 from Doubt and Idealistic and spends all 46.
+ * game-rules/48_character_creation_expanded.md, p.103-104
+ * game-rules/63_advantages_and_disadvantages.md, p.145
  * @param {XpBuild} build
  * @param {XpEntry[]} entries
  * @returns {{total: number, spent: number, available: number, breakdown: object}}
- *
- * @example
- * // Shiba Gyukaro (pp.103-104): 40 + 6 from Doubt and Idealistic, all 46 spent
  */
 export function xpTotals(build, entries) {
   const sum = type => entries.filter(e => e.type === type).reduce((s, e) => s + e.delta, 0);

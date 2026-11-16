@@ -1,3 +1,8 @@
+/**
+ * @module data/item/technique-data
+ * @description The data model of the `technique` Item subtype.
+ */
+
 import { booleanField, numberField, stringField } from "../fields.js";
 import ItemData from "./base-data.js";
 

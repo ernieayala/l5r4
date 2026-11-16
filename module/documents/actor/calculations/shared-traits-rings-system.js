@@ -1,25 +1,9 @@
 /**
- * @module shared-traits-rings
- * @description Prepares trait and Ring values for L5R4 actors.
- *
- * L5R4 Ring System:
- * - Characters have 8 traits grouped into 4 elemental Rings + Void
- * - Each Ring = minimum of its two associated traits
- * - Air: Reflexes & Awareness
- * - Earth: Stamina & Willpower
- * - Fire: Agility & Intelligence
- * - Water: Strength & Perception
- * - Void: bought on its own, with no Traits; tracks current/max values
- *
- * Architecture:
- * - Normalizes trait values to integers
- * - Calculates Ring values from trait pairs
- * - Preserves Void Ring state (current/max points)
- * - Stores effective trait values in sys._derived.traitsEff
- *
- * Foundry Integration:
- * - Called during actor data preparation
- * - Modifies sys.rings and sys._derived in place
+ * @module documents/actor/calculations/shared-traits-rings-system
+ * @description Prepares an actor's effective Traits, Rings, and movement during actor data preparation, for PCs and
+ * NPCs alike. Each Elemental Ring is the lower of its two Traits; the Void Ring is bought on its own and keeps its
+ * rank and its current and maximum Void Points. Modifies `sys.rings`, `sys._derived`, and `sys.movement` in place.
+ * game-rules/25_rings_and_traits.md, p.76
  */
 
 import { TRAIT_KEYS } from "../../../config/reference-data.js";
@@ -27,8 +11,9 @@ import { toInt } from "../../../utils/type-coercion.js";
 import { logError } from "../../../utils/error-logging.js";
 
 /**
- * The four Elemental Rings from Traits: each the lower of its two Traits (p.76).
- * @param {Record<string, number>} t  Trait ranks by key
+ * The four Elemental Rings from Traits: each the lower of its two Traits.
+ * game-rules/25_rings_and_traits.md, p.76
+ * @param {Record<string, number>} t - Trait ranks by key
  * @returns {{air: number, earth: number, fire: number, water: number}}
  */
 export function ringsFromTraits(t) {
@@ -41,40 +26,10 @@ export function ringsFromTraits(t) {
 }
 
 /**
- * Prepares trait and Ring values for an actor using L5R4 rules.
- *
- * @param {Object} sys - Actor's system data object to modify
- *
- * @description
- * Calculates Ring values from traits using L5R4 core mechanics:
- *
- * Ring Calculation:
- * - Each Ring = minimum of its two associated traits
- * - Air = min(Reflexes, Awareness)
- * - Earth = min(Stamina, Willpower)
- * - Fire = min(Agility, Intelligence)
- * - Water = min(Strength, Perception)
- * - Void = bought on its own, not calculated
- *
- * Trait Normalization:
- * - Handles both object format (v.rank) and direct values
- * - Converts all values to integers
- * - Stores in sys._derived.traitsEff for consistent access
- *
- * Void Ring Special Handling:
- * - Preserves existing rank (purchased with XP)
- * - Tracks current value (spent Void Points)
- * - Tracks max value (total available Void Points)
- * - Falls back to rank if value/max not set
- *
- * Modifies sys with:
- * - _derived.traitsEff: Normalized trait values
- * - rings: Calculated Ring values (Air/Earth/Fire/Water/Void)
- *
- * @example
- * // Actor with Reflexes 3, Awareness 4
- * prepareTraitsAndRings(actor.system);
- * // actor.system.rings.air = 3 (minimum of 3 and 4)
+ * Prepare the effective Traits as integers in `sys._derived.traitsEff` (a Trait stored as `{rank}` or as a number)
+ * and the Rings in `sys.rings`. The Void Ring keeps its rank, and its current and maximum Void Points fall back to
+ * the rank when unset. A failure is logged and leaves every Trait and Ring at 2, so preparation goes on.
+ * @param {object} sys - Actor's system data object to modify
  */
 export function prepareTraitsAndRings(sys) {
   try {
@@ -135,43 +90,12 @@ export function prepareTraitsAndRings(sys) {
 }
 
 /**
- * Calculate movement distances per L5R4 combat rules.
- *
- * @param {Object} sys - Actor's system data object to modify
- *
- * @description
- * Calculates movement distances based on Water Ring per L5R4 combat rules:
- * - Free Action: Water Ring × 5 feet
- * - Simple Action: Water Ring × 10 feet
- * - Maximum per Round: Water Ring × 20 feet (hard limit)
- *
- * Movement rules:
- * - A Movement rule changes the Water Ring for movement only, as Blinded's -2 (p.89), through
- *   sys.movementWater (module/documents/actor/rules.js)
- * - Minimum effective Water Ring is 1 per L5R4 rules
- *
- * Custom Modifiers:
- * - multiplier: Multiplies Water Ring (for mounts, special abilities)
- * - modifier: Flat modifier added to all movement distances
- *
- * Modifies sys.movement with:
- * - freeAction: Distance for Free Action movement
- * - simpleAction: Distance for Simple Action movement
- * - maximum: Maximum distance per round
- *
- * @example
- * // Actor with Water Ring 3, no penalties
- * prepareMovement(actor.system);
- * // actor.system.movement.freeAction = 15 (3 × 5)
- * // actor.system.movement.simpleAction = 30 (3 × 10)
- * // actor.system.movement.maximum = 60 (3 × 20)
- *
- * @example
- * // Actor with Water Ring 4, Blinded condition (-2)
- * actor.system.movementWater = -2;
- * prepareMovement(actor.system);
- * // Effective Water = max(1, 4 + (-2)) = 2
- * // actor.system.movement.freeAction = 10 (2 × 5)
+ * Prepare `sys.movement`: the Free Action, Simple Action, and per-Round distances, 5, 10, and 20 feet per point of
+ * Water, times the movement multiplier, plus the flat movement modifier. A Movement rule changes the Water used for
+ * movement only, as Blinded's -2 does, through `sys.movementWater` (module/documents/actor/rules.js); that Water is
+ * never below 1.
+ * game-rules/41_conditional_effects.md, p.89
+ * @param {object} sys - Actor's system data object to modify
  */
 export function prepareMovement(sys) {
   const baseWater = toInt(sys.rings.water);

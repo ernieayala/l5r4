@@ -1,3 +1,8 @@
+/**
+ * @module data/actor/base-data
+ * @description The data model both Actor subtypes extend: the stored inputs a `pc` and an `npc` share.
+ */
+
 import { TRAIT_KEYS } from "../../config/reference-data.js";
 import { booleanField, htmlField, numberField, rankPointsField } from "../fields.js";
 import { migrateCommonActorSource } from "../migrate-source.js";
@@ -9,7 +14,7 @@ import { migrateCommonActorSource } from "../migrate-source.js";
  * computed during preparation and never stored (roadmap/STAGE-02-DATA-MODELS.md decision 4). Defaults equal the
  * 3.2.1 template.json defaults (decision 1). Subclasses run the subtype's preparation in `prepareDerivedData`,
  * which core calls after the "initial" Active Effect phase and before Actor#prepareDerivedData
- * (client/documents/abstract/client-document.mjs:313-320).
+ * [src: client/documents/abstract/client-document.mjs:313-320].
  */
 export default class ActorData extends foundry.abstract.TypeDataModel {
   /**
@@ -54,10 +59,15 @@ export default class ActorData extends foundry.abstract.TypeDataModel {
     };
   }
 
+  /** @override */
+  static migrateData(source) {
+    migrateCommonActorSource(source);
+    return super.migrateData(source);
+  }
+
   /**
    * Initiative fields stored for the subtype; the modifiers and the Void choice are shared.
-   * @returns {Record<string, foundry.data.fields.DataField>}
-   * @protected
+   * @returns {Record<string, foundry.data.fields.DataField>} The fields, by name
    */
   static _initiativeFields() {
     return {
@@ -66,11 +76,5 @@ export default class ActorData extends foundry.abstract.TypeDataModel {
       totalMod: numberField(0),
       useVoid: booleanField(false)
     };
-  }
-
-  /** @override */
-  static migrateData(source) {
-    migrateCommonActorSource(source);
-    return super.migrateData(source);
   }
 }

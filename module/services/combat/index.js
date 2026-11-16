@@ -1,5 +1,5 @@
 /**
- * @module services/combat
+ * @module services/combat/index
  * @description Wires the combat loop (roadmap/STAGE-10): the attack card's Contested Strength and grapple buttons,
  * damage and result cards, flow cards (duel, grapple), the GM queries behind them, and the token controls for a
  * duel and Guard.
@@ -12,6 +12,16 @@ import { rollContest } from "./contest.js";
 import { startGrapple } from "./grapple.js";
 import { duelFromCanvas } from "./duel.js";
 import { guardFromCanvas } from "./guard.js";
+
+/** Register the combat loop's hooks and GM queries, once during system init. */
+export function initializeCombat() {
+  registerDamageQueries();
+  registerFlowQueries();
+  Hooks.on("renderChatMessageHTML", bindAttackCard);
+  Hooks.on("renderChatMessageHTML", bindDamageCards);
+  Hooks.on("renderChatMessageHTML", bindFlowCards);
+  Hooks.on("getSceneControlButtons", onGetSceneControlButtons);
+}
 
 /**
  * Wire an attack card's Contested Strength (Knockdown, Disarm) and grapple buttons.
@@ -58,14 +68,4 @@ function onGetSceneControlButtons(controls) {
     button: true,
     onChange: () => guardFromCanvas()
   };
-}
-
-/** Register the combat loop's hooks and GM queries, once during system init. */
-export function initializeCombat() {
-  registerDamageQueries();
-  registerFlowQueries();
-  Hooks.on("renderChatMessageHTML", bindAttackCard);
-  Hooks.on("renderChatMessageHTML", bindDamageCards);
-  Hooks.on("renderChatMessageHTML", bindFlowCards);
-  Hooks.on("getSceneControlButtons", onGetSceneControlButtons);
 }

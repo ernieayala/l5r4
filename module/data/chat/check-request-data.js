@@ -1,3 +1,8 @@
+/**
+ * @module data/chat/check-request-data
+ * @description The data model of the `checkRequest` ChatMessage subtype.
+ */
+
 import { stringField } from "../fields.js";
 
 /**

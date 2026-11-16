@@ -1,5 +1,5 @@
 /**
- * @module modifier-stacking
+ * @module utils/modifier-stacking
  * @description Stacking for roll modifiers from rules. Untyped modifiers all add up. Modifiers sharing a type
  * (for example two "armor" bonuses) do not stack: per component, the largest bonus and the largest penalty of
  * that type apply.
@@ -13,16 +13,13 @@
  * @property {string} [type="untyped"]
  */
 
-const COMPONENTS = ["roll", "keep", "total"];
+const COMPONENTS = Object.freeze(["roll", "keep", "total"]);
 
 /**
- * Sum modifiers into one roll/keep/total bonus under the stacking rules.
+ * Sum modifiers into one roll/keep/total bonus under the stacking rules. Two untyped +1 rolled dice give 2 rolled
+ * dice; two "armor" bonuses of 2 and 3 give a total of 3.
  * @param {RollModifierValue[]} modifiers
  * @returns {{roll: number, keep: number, total: number}}
- *
- * @example
- * stackModifiers([{ roll: 1 }, { roll: 1 }]); // { roll: 2, keep: 0, total: 0 }
- * stackModifiers([{ total: 2, type: "armor" }, { total: 3, type: "armor" }]); // { roll: 0, keep: 0, total: 3 }
  */
 export function stackModifiers(modifiers) {
   const result = { roll: 0, keep: 0, total: 0 };

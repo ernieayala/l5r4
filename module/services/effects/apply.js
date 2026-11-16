@@ -111,7 +111,7 @@ export function effectsOf(actor, id) {
 
 /**
  * The start of an effect timed from the actor's own Turn, so "until his next Turn" counts from his combatant
- * whoever is acting now: core's start data (client/documents/active-effect.mjs:960-971) with the actor's
+ * whoever is acting now: core's start data [src: client/documents/active-effect.mjs:960-971] with the actor's
  * combatant. Undefined outside combat, leaving core's own start; a partial start makes core drop the effect.
  * @param {Actor} actor
  * @returns {object|undefined}

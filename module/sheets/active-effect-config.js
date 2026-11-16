@@ -11,6 +11,9 @@ import { RULES_EDITOR_ACTIONS, readRulesForm, rulesEditorContext } from "./rules
 const { ActiveEffectConfig } = foundry.applications.sheets;
 const { footer, ...BEFORE_FOOTER } = ActiveEffectConfig.PARTS;
 
+/**
+ * Core's Active Effect sheet with the Rules tab added before its footer.
+ */
 export default class L5R4ActiveEffectConfig extends ActiveEffectConfig {
   /** @override */
   static DEFAULT_OPTIONS = {

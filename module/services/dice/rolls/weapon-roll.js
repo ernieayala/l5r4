@@ -1,12 +1,11 @@
 /**
- * Weapon Damage Roll Service
- *
- * A damage roll (p.80) through the roll pipeline (module/services/dice/check/roll-check.js): the weapon's DR with
- * Strength already in its rolled dice (item/preparation/derived-data.js), +1k0 per Raise the attack spent on
- * Increased Damage, damage rules and stance damage bonuses, dice exploding on the weapon's "Explodes on" value
- * (#37). No Void Point on damage (p.78).
- *
  * @module services/dice/rolls/weapon-roll
+ * @description A damage roll through the roll pipeline (module/services/dice/check/roll-check.js): the weapon's DR
+ * with Strength already in its rolled dice (item/preparation/derived-data.js), +1k0 per Raise the attack spent on
+ * Increased Damage, damage rules and stance damage bonuses, dice exploding on the weapon's "Explodes on" value
+ * (#37). No Void Point on damage.
+ * game-rules/25_rings_and_traits.md, p.78
+ * game-rules/29_types_of_rolls.md, p.80
  */
 
 import { T } from "../../../utils/localization.js";
@@ -17,7 +16,7 @@ import { resolveActor } from "../resources/void-points.js";
 /**
  * Rolls weapon damage.
  *
- * @param {Object} options
+ * @param {object} options
  * @param {number} [options.diceRoll=null] - Rolled dice, Strength included
  * @param {number} [options.diceKeep=null] - Kept dice
  * @param {string} [options.weaponName=null] - Weapon name for the label

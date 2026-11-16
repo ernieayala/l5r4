@@ -1,36 +1,11 @@
 /**
- * L5R4 Enhanced System Bootstrap
- * Main entry point for Legend of the Five Rings 4th Edition system initialization.
- * Coordinates system registration with Foundry VTT v13+ using Application v2 architecture.
- * 
- * **Initialization Sequence:**
- * 1. Register system settings for data preparation
- * 2. Configure document classes (Actor, Item, Combat, Combatant) with L5R4 implementations
- * 3. Build CONFIG.l5r4 namespace with game data (rings, traits, stances, status effects)
- * 4. Wire the Initiative Void Point prompt into L5R4Combat
- * 5. Register Application v2 sheets for all actor and item types
- * 6. Preload Handlebars templates and register custom helpers
- * 7. Initialize services (stance management, chat integration)
- * 8. Dynamically load Quench integration tests if module active
- * 9. Execute data migrations on version changes
- * 
- * **L5R4 Game Mechanics Integration:**
- * - Initiative rolls use Insight Rank and Reflexes (Insight/Reflexes keep Reflexes)
- * - Status effects implement mutually exclusive stance system (Attack, Full Attack, Defense, Full Defense, Center)
- * - Wound penalties apply TN increases per wound rank (Nicked +3, Grazed +5, Hurt +10, etc.)
- * - Combat stances affect Armor TN calculations and available actions per turn
- * 
- * **Foundry VTT Integration:**
- * - Requires Foundry VTT v13+ for Application v2 sheet system
- * - Uses DocumentSheetConfig for sheet registration (replaces deprecated ActorSheet.register)
- * - Leverages Foundry's hook system for lifecycle management
- * - Integrates with CONFIG.statusEffects for token HUD display
- * 
  * @module l5r4-enhanced
- * @requires Foundry VTT v13+
- * @see {@link https://foundryvtt.com/api/|Foundry VTT v13 API Documentation}
+ * @description The system's entry module, the one place that wires the system into Foundry. During `init` it
+ * registers the settings, the document classes, the Roll & Keep die, the CONFIG values, the GM queries, the data
+ * models, CONFIG.l5r4 and the status effects, the sheets, the templates and Handlebars helpers, the text enrichers,
+ * and every hook. When Quench is active it loads the test batches; during `ready` a GM runs the data migrations
+ * when the system version changed.
  */
-
 import { SYS_ID } from "../module/config/constants.js";
 import { 
   ARROWS, 
@@ -54,6 +29,11 @@ import L5R4Actor from "../module/documents/actor.js";
 import L5R4Combat from "../module/documents/combat.js";
 import L5R4Combatant from "../module/documents/combatant.js";
 import L5R4Item from "../module/documents/item.js";
+import { resolveVoidInitiative } from "../module/services/initiative.js";
+import L5R4Die from "../module/services/dice/roll-keep-die.js";
+import { registerEffectQueries } from "../module/services/effects/apply.js";
+import { registerPromptQueries } from "../module/services/effects/prompts.js";
+import { combatEvents, registerCombatQueries } from "../module/services/effects/combat-events.js";
 import L5R4ItemSheet from "../module/sheets/item-sheet.js";
 import L5R4PcSheet from "../module/sheets/pc-sheet.js";
 import L5R4NpcSheet from "../module/sheets/npc-sheet.js";
@@ -62,13 +42,8 @@ import { preloadTemplates } from "../module/setup/preload-templates.js";
 import { runMigrations } from "../module/setup/migrations.js";
 import { registerSettings } from "../module/setup/register-settings.js";
 import { registerHandlebarsHelpers } from "../module/setup/register-handlebars.js";
-import { resolveVoidInitiative } from "../module/services/initiative.js";
-import L5R4Die from "../module/services/dice/roll-keep-die.js";
-import { registerEffectQueries } from "../module/services/effects/apply.js";
-import { registerPromptQueries } from "../module/services/effects/prompts.js";
-import { combatEvents, registerCombatQueries } from "../module/services/effects/combat-events.js";
-import { registerAllHooks } from "../module/hooks/register-all.js";
 import { registerEnrichers } from "../module/setup/enrichers.js";
+import { registerAllHooks } from "../module/hooks/register-all.js";
 
 
 /**
@@ -76,8 +51,7 @@ import { registerEnrichers } from "../module/setup/enrichers.js";
  * Executes during Foundry's initialization phase before world data loads.
  * Registers all system configuration, document classes, sheets, and services.
  * This hook fires once per session when Foundry starts.
- * 
- * @async
+ *
  * @listens Hooks#init
  */
 Hooks.once("init", async () => {
@@ -91,7 +65,8 @@ Hooks.once("init", async () => {
   CONFIG.Combat.documentClass = L5R4Combat;
   CONFIG.Combatant.documentClass = L5R4Combatant;
 
-  // The d10 that explodes each die into its own total before the keep (p.77; module/services/dice/roll-keep-die.js)
+  // The d10 that explodes each die into its own total before the keep (module/services/dice/roll-keep-die.js)
+  // game-rules/26_special_dice_rules.md, p.77
   CONFIG.Dice.terms.d = L5R4Die;
 
   // Expired effects are deleted; Fear ends on the system's encounterEnd event (module/config/expiry-events.js)
@@ -135,8 +110,8 @@ Hooks.once("init", async () => {
     statusEffects: STATUS_EFFECTS
   };
 
-  // CONFIG.statusEffects is an array also keyed by id (client/config.mjs:1690-1718); assigning the whole property
-  // goes through a setter deprecated in v14 (client/client.mjs:29-39). Replace core's entries with the system's.
+  // CONFIG.statusEffects is an array also keyed by id [src: client/config.mjs:1690-1718]; assigning the whole property
+  // goes through a setter deprecated in v14 [src: client/client.mjs:29-39]. Replace core's entries with the system's.
   CONFIG.statusEffects.length = 0;
   for (const status of STATUS_EFFECTS) {
     CONFIG.statusEffects[status.id] = status;
@@ -145,7 +120,7 @@ Hooks.once("init", async () => {
   CONFIG.l5r4.TRAIT_CHOICES = CONFIG.l5r4.traits;
 
   // Core 14.370 registers no Actor or Item sheet, so these are the only ones and nothing is unregistered
-  // (client/applications/sheets/_module.mjs:83-128).
+  // [src: client/applications/sheets/_module.mjs:83-128].
   const { DocumentSheetConfig } = foundry.applications.apps;
   const { Item, Actor } = foundry.documents;
 
@@ -220,8 +195,7 @@ Hooks.once("quenchReady", async quench => {
  * Compares system.version against lastMigratedVersion setting to detect updates.
  * Respects runMigration and forceMigration settings for migration control.
  * Updates lastMigratedVersion on completion and clears forceMigration flag.
- * 
- * @async
+ *
  * @listens Hooks#ready
  */
 Hooks.once("ready", async () => {
@@ -251,7 +225,7 @@ Hooks.once("ready", async () => {
           if (forceFlag) {
             await game.settings.set(SYS_ID, "forceMigration", false);
           }
-        } catch (_e) {}
+        } catch {}
       }
     }
   }

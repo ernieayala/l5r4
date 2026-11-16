@@ -1,25 +1,14 @@
 /**
- * @file NPC Actor Data Preparation
  * @module documents/actor/preparation/npc-preparation
- *
- * Handles derived data calculation for NPC actors in the L5R4 system.
- * Coordinates trait/ring calculations, initiative, wounds, stance automation,
- * and condition effects in the correct dependency order.
- *
- * Key responsibilities:
- * - Calculate NPC initiative (custom or formula-based)
- * - Process wound levels (manual or formula mode)
- * - Apply ArmorTN rules from stances, conditions, and other effects
- * - Enrich embedded items
- *
- * Architecture: Pure calculation functions that mutate sys object in place.
- * Foundry API: Uses actor._source for detecting custom initiative values.
+ * @description Prepares an NPC's derived data in dependency order: Traits and Rings, the rules that need them,
+ * Initiative (the GM's stored pool or the formula), Armor TN with its rules, Wound Ranks in manual or formula mode,
+ * healing, movement, and the owned items' formulas. Modifies the actor's system data in place; reads
+ * `actor._source` to tell a stored Initiative pool from a prepared one.
  */
 
+import { NPC_INSIGHT_RANK, WOUND_LEVEL_ORDER } from "../../../config/game-mechanics.js";
 import { toInt } from "../../../utils/type-coercion.js";
 import { initiativeDice } from "../../../utils/initiative.js";
-
-import { NPC_INSIGHT_RANK, WOUND_LEVEL_ORDER } from "../../../config/game-mechanics.js";
 import {
   prepareTraitsAndRings,
   prepareMovement
@@ -44,10 +33,6 @@ import { applyArmorRules, applyDerivedRules } from "../rules.js";
  * @param {Function} finalizeWoundPenaltiesFn - Callback to finalize wound penalties
  *
  * @returns {void} Mutates sys object in place
- *
- * @example
- * // Called from Actor.prepareData()
- * prepareNpcData(this, this.system, finalizeWoundPenalties);
  */
 export function prepareNpcData(actor, sys, finalizeWoundPenaltiesFn) {
   // Calculate base traits and rings first (required for initiative)
@@ -56,8 +41,9 @@ export function prepareNpcData(actor, sys, finalizeWoundPenaltiesFn) {
   // Rules that need Traits and Rings, before the values their outputs feed (Initiative, Wounds, roll bonuses)
   applyDerivedRules(actor, sys);
 
-  // Initiative pool (p.81): the GM's stored pool when both its numbers are above 0, otherwise Insight Rank +
-  // Reflexes, keep Reflexes, an NPC counting as Insight Rank 1; then the modifiers, rules included
+  // Initiative pool: the GM's stored pool when both its numbers are above 0, otherwise Insight Rank + Reflexes,
+  // keep Reflexes, an NPC counting as Insight Rank 1 (Ernie's ruling); then the modifiers, rules included
+  // game-rules/31_combat_round.md, p.81
   const sourceRoll = toInt(actor._source.system.initiative.roll);
   const sourceKeep = toInt(actor._source.system.initiative.keep);
   const custom = sourceRoll > 0 && sourceKeep > 0;

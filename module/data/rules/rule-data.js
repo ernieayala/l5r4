@@ -1,3 +1,8 @@
+/**
+ * @module data/rules/rule-data
+ * @description The base DataModel of every rule key, and the field factories the rule models share.
+ */
+
 import { RULE_KEYS } from "../../config/rule-keys.js";
 
 /**

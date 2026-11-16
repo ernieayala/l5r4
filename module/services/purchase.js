@@ -13,6 +13,93 @@ import { F, T } from "../utils/localization.js";
 import { openChoices, unmetPrerequisites, withSelections } from "../utils/purchase.js";
 
 /**
+ * Item types a new one replaces the old of (character creation Steps 1-3); a School asks first (askSchool).
+ * game-rules/48_character_creation_expanded.md, p.102
+ * @type {ReadonlySet<string>}
+ */
+const BIO_TYPES = new Set(["clan", "family", "school"]);
+
+/**
+ * Check an item's prerequisites against the actor and ask its open choices. A player cannot add an item whose
+ * prerequisites they do not meet; a GM is asked whether to add it anyway.
+ * @param {Actor} actor
+ * @param {object} data - The item's source data, about to be created on the actor
+ * @returns {Promise<object|null>} The data with its choices made, or null when the item is not to be added
+ */
+export async function preparePurchase(actor, data) {
+  const rules = Array.isArray(data.system?.rules) ? data.system.rules : [];
+  const unmet = unmetPrerequisites(rules, actor.rollOptions);
+  if (unmet.length) {
+    const list = unmet.map(p => p.label || JSON.stringify(p.requires)).join("; ");
+    if (!game.user.isGM) {
+      ui.notifications?.warn(F("l5r4.ui.purchase.unmet", { name: data.name, list }));
+      return null;
+    }
+    const bypass = await foundry.applications.api.DialogV2.confirm({
+      window: { title: T("l5r4.ui.purchase.unmetTitle") },
+      content: `<p>${foundry.utils.escapeHTML(
+        F("l5r4.ui.purchase.unmet", { name: data.name, list })
+      )}</p><p>${T("l5r4.ui.purchase.addAnyway")}</p>`
+    });
+    if (!bypass) {
+      return null;
+    }
+  }
+
+  const selections = {};
+  for (const choice of openChoices(rules)) {
+    const selection = await askChoice(data.name, choice);
+    if (selection === null) {
+      return null;
+    }
+    selections[choice.index] = selection;
+  }
+  if (!Object.keys(selections).length) {
+    return data;
+  }
+  return { ...data, system: { ...data.system, rules: withSelections(rules, selections) } };
+}
+
+/**
+ * Add an item to an actor: its prerequisites and choices first (preparePurchase), then, for a character's Clan or
+ * Family, the old one removed and the character's links pointed at the new one. A School asks first, when the
+ * character has one, whether it replaces it or is added beside it.
+ * @param {Actor} actor
+ * @param {object} source - The item's source data, as `item.toObject()` gives it
+ * @returns {Promise<Item|null>} The new item, or null when it is not added
+ */
+export async function addItem(actor, source) {
+  if (!actor.isOwner) {
+    ui.notifications?.warn(T("l5r4.ui.notifications.noPermission"));
+    return null;
+  }
+  const data = await preparePurchase(actor, source);
+  if (!data) {
+    return null;
+  }
+  let replaces = actor.type === "pc" && BIO_TYPES.has(data.type);
+  const schools = actor.items.filter(item => item.type === "school");
+  if (replaces && data.type === "school" && schools.length) {
+    const answer = await askSchool(actor, data.name, schools);
+    if (!answer) {
+      return null;
+    }
+    replaces = answer === "replace";
+  }
+  if (replaces) {
+    const prior = actor.items.filter(item => item.type === data.type).map(item => item.id);
+    if (prior.length) {
+      await actor.deleteEmbeddedDocuments("Item", prior);
+    }
+  }
+  const [created] = await actor.createEmbeddedDocuments("Item", [data]);
+  if (replaces) {
+    await actor.update(bioLinks(data.type, created));
+  }
+  return created;
+}
+
+/**
  * The options of a choice: its own, or a built-in list. The skills list holds every Skill item in the world and in
  * Item compendiums, by uuid, kept to the filter's Skill types.
  * @param {import("../utils/purchase.js").OpenChoice} choice
@@ -81,56 +168,9 @@ async function askChoice(itemName, choice) {
 }
 
 /**
- * Check an item's prerequisites against the actor and ask its open choices. A player cannot add an item whose
- * prerequisites they do not meet; a GM is asked whether to add it anyway.
- * @param {Actor} actor
- * @param {object} data  The item's source data, about to be created on the actor
- * @returns {Promise<object|null>} The data with its choices made, or null when the item is not to be added
- */
-export async function preparePurchase(actor, data) {
-  const rules = Array.isArray(data.system?.rules) ? data.system.rules : [];
-  const unmet = unmetPrerequisites(rules, actor.rollOptions);
-  if (unmet.length) {
-    const list = unmet.map(p => p.label || JSON.stringify(p.requires)).join("; ");
-    if (!game.user.isGM) {
-      ui.notifications?.warn(F("l5r4.ui.purchase.unmet", { name: data.name, list }));
-      return null;
-    }
-    const bypass = await foundry.applications.api.DialogV2.confirm({
-      window: { title: T("l5r4.ui.purchase.unmetTitle") },
-      content: `<p>${foundry.utils.escapeHTML(
-        F("l5r4.ui.purchase.unmet", { name: data.name, list })
-      )}</p><p>${T("l5r4.ui.purchase.addAnyway")}</p>`
-    });
-    if (!bypass) {
-      return null;
-    }
-  }
-
-  const selections = {};
-  for (const choice of openChoices(rules)) {
-    const selection = await askChoice(data.name, choice);
-    if (selection === null) {
-      return null;
-    }
-    selections[choice.index] = selection;
-  }
-  if (!Object.keys(selections).length) {
-    return data;
-  }
-  return { ...data, system: { ...data.system, rules: withSelections(rules, selections) } };
-}
-
-/**
- * Item types a new one replaces the old of (character creation Steps 1-3, p.102); a School asks first (askSchool).
- * @type {ReadonlySet<string>}
- */
-const BIO_TYPES = new Set(["clan", "family", "school"]);
-
-/**
  * The character fields and flags that point at its Clan, Family, or School item.
- * @param {string} type  clan, family, or school
- * @param {Item} item    The new item
+ * @param {string} type - clan, family, or school
+ * @param {Item} item - The new item
  * @returns {object}
  */
 function bioLinks(type, item) {
@@ -148,10 +188,12 @@ function bioLinks(type, item) {
 
 /**
  * Ask whether a School joins the character's Schools or replaces them. A character may hold more than one: an
- * Advanced School (pp.245-247) and the Multiple Schools Advantage (p.151) add one.
+ * Advanced School and the Multiple Schools Advantage add one.
+ * game-rules/84_advanced_schools_and_alternate_paths.md, p.245-247
+ * game-rules/64_advantages.md, p.151
  * @param {Actor} actor
- * @param {string} name     The new School's name
- * @param {Item[]} schools  The character's Schools
+ * @param {string} name - The new School's name
+ * @param {Item[]} schools - The character's Schools
  * @returns {Promise<"replace"|"add"|null>} null when the dialog is closed
  */
 function askSchool(actor, name, schools) {
@@ -169,43 +211,4 @@ function askSchool(actor, name, schools) {
       { action: "replace", label: T("l5r4.ui.purchase.schoolReplace") }
     ]
   });
-}
-
-/**
- * Add an item to an actor: its prerequisites and choices first (preparePurchase), then, for a character's Clan or
- * Family, the old one removed and the character's links pointed at the new one. A School asks first, when the
- * character has one, whether it replaces it or is added beside it.
- * @param {Actor} actor
- * @param {object} source  The item's source data, as `item.toObject()` gives it
- * @returns {Promise<Item|null>} The new item, or null when it is not added
- */
-export async function addItem(actor, source) {
-  if (!actor.isOwner) {
-    ui.notifications?.warn(T("l5r4.ui.notifications.noPermission"));
-    return null;
-  }
-  const data = await preparePurchase(actor, source);
-  if (!data) {
-    return null;
-  }
-  let replaces = actor.type === "pc" && BIO_TYPES.has(data.type);
-  const schools = actor.items.filter(item => item.type === "school");
-  if (replaces && data.type === "school" && schools.length) {
-    const answer = await askSchool(actor, data.name, schools);
-    if (!answer) {
-      return null;
-    }
-    replaces = answer === "replace";
-  }
-  if (replaces) {
-    const prior = actor.items.filter(item => item.type === data.type).map(item => item.id);
-    if (prior.length) {
-      await actor.deleteEmbeddedDocuments("Item", prior);
-    }
-  }
-  const [created] = await actor.createEmbeddedDocuments("Item", [data]);
-  if (replaces) {
-    await actor.update(bioLinks(data.type, created));
-  }
-  return created;
 }

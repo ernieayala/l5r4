@@ -1,19 +1,9 @@
 /**
- * Bio Item Handler
- *
- * Opens and clears the clan, family, and school items linked from L5R4 character sheets. Each character has one
- * clan, one family, and one school (Character Creation Steps 1-3); a dropped one replaces the old through
- * module/services/purchase.js (addItem), which also sets the links this handler reads.
- *
- * Responsibilities:
- * - Manage family name integration into character display name
- * - Provide bio item sheet access and clearing operations
- *
- * Foundry APIs:
- * - Actor.deleteEmbeddedDocuments
- * - Actor.update, Actor.getFlag
- * - fromUuid (requires Foundry v10+)
- * - sheet.render
+ * @module sheets/handlers/bio-item-handler
+ * @description Opens and clears the clan, family, and school items linked from L5R4 character sheets. Each character
+ * has one clan, one family, and one school (Character Creation Steps 1-3); a dropped one replaces the old through
+ * module/services/purchase.js (addItem), which also sets the links this handler reads. Clearing the family also
+ * takes the family name off the character's display name.
  */
 
 import { SYS_ID } from "../../config/constants.js";
@@ -127,7 +117,7 @@ export class BioItemHandler {
    * 1. Normalize family name to lowercase with trailing space ("kakita ")
    * 2. Check if current name starts with family prefix (case-insensitive)
    * 3. If match: return substring after prefix, trimmed
-   * 4. If no match: return original name unchanged
+   * 4. If no match: return original name unchanged.
    *
    * @param {string} current - The current character name (may include family prefix)
    * @param {string} fam - The family name to remove

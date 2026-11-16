@@ -1,8 +1,6 @@
 /**
- * Legacy Icon Filename Mapping
- * Maps old PNG icon filenames to new WebP format for migration.
- *
  * @module setup/migrations/icons/icon-map
+ * @description Maps old PNG icon filenames to new WebP format for migration.
  */
 
 /**
@@ -12,7 +10,7 @@
  * Used during system asset migration to update document icons without breaking existing
  * actor/item references. Frozen to prevent runtime modification.
  *
- * @type {Object<string, string>}
+ * @type {Record<string, string>}
  * @constant
  */
 export const ICON_MIGRATION_MAP = Object.freeze({

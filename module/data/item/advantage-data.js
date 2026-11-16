@@ -1,3 +1,8 @@
+/**
+ * @module data/item/advantage-data
+ * @description The data model of the `advantage` Item subtype.
+ */
+
 import { htmlField, numberField, stringField } from "../fields.js";
 import ItemData from "./base-data.js";
 

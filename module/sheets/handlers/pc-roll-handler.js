@@ -1,11 +1,8 @@
 /**
- * PC Roll Handler
- *
- * PC sheet actions for Ring rolls, spell casting, and weapon damage. Each reads what to roll from the sheet and
- * hands it to a roll service; the roll pipeline (module/services/dice/check/) gathers every modifier. A normal
- * click shows the roll dialog; Shift-click skips it.
- *
  * @module sheets/handlers/pc-roll-handler
+ * @description PC sheet actions for Ring rolls, spell casting, and weapon damage. Each reads what to roll from the
+ * sheet and hands it to a roll service; the roll pipeline (module/services/dice/check/) gathers every modifier. A
+ * normal click shows the roll dialog; Shift-click skips it.
  */
 
 import { toInt } from "../../utils/type-coercion.js";
@@ -14,23 +11,12 @@ import { SpellCastRoll } from "../../services/dice/rolls/spell-cast-roll.js";
 import { MahoCastRoll } from "../../services/dice/rolls/maho-cast-roll.js";
 import { RollHandler } from "./roll-handler.js";
 
-/**
- * The item of the row the element sits in.
- * @param {Actor} actor
- * @param {HTMLElement} element
- * @returns {Item|null}
- */
-function rowItem(actor, element) {
-  const row = element.closest(".item");
-  const id = row?.dataset?.itemId || row?.dataset?.documentId || row?.dataset?.id;
-  return id ? actor.items.get(id) : null;
-}
-
 /** Handler class for PC-specific roll actions. */
 export class PcRollHandler {
   /**
-   * Roll a Ring (p.80); the dialog can make it a Spell Casting Roll.
-   * @param {Object} context - Sheet context with `actor`
+   * Roll a Ring; the dialog can make it a Spell Casting Roll.
+   * game-rules/29_types_of_rolls.md, p.80
+   * @param {object} context - Sheet context with `actor`
    * @param {Event} event - Click event
    * @param {HTMLElement} element - Element with data-system-ring and data-ring-rank
    * @returns {Promise<ChatMessage|null>}
@@ -44,7 +30,7 @@ export class PcRollHandler {
   /**
    * Cast the spell of the clicked row: a maho spell through the maho roll, any other through the Spell Casting
    * Roll.
-   * @param {Object} context - Sheet context with `actor`
+   * @param {object} context - Sheet context with `actor`
    * @param {Event} event - Click event
    * @param {HTMLElement} element - Element inside the spell row
    * @returns {Promise<ChatMessage|null|undefined>}
@@ -62,7 +48,7 @@ export class PcRollHandler {
    * Cast a spell item: a maho spell through the maho roll, any other through the Spell Casting Roll. The sheet's row
    * and a hotbar macro both cast through here.
    * @param {Actor} actor
-   * @param {Item} spell  A spell the actor owns
+   * @param {Item} spell - A spell the actor owns
    * @param {boolean} showDialog
    * @returns {Promise<ChatMessage|null>}
    */
@@ -73,7 +59,7 @@ export class PcRollHandler {
 
   /**
    * Roll damage for the clicked weapon: its DR with Strength included (item/preparation/derived-data.js).
-   * @param {Object} context - Sheet context with `actor`
+   * @param {object} context - Sheet context with `actor`
    * @param {Event} event - Click event
    * @param {HTMLElement} element - Element inside the weapon row
    * @returns {Promise<ChatMessage|null|undefined>}
@@ -93,4 +79,16 @@ export class PcRollHandler {
       actor: context.actor
     });
   }
+}
+
+/**
+ * The item of the row the element sits in.
+ * @param {Actor} actor
+ * @param {HTMLElement} element
+ * @returns {Item|null}
+ */
+function rowItem(actor, element) {
+  const row = element.closest(".item");
+  const id = row?.dataset?.itemId || row?.dataset?.documentId || row?.dataset?.id;
+  return id ? actor.items.get(id) : null;
 }

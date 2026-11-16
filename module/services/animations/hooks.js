@@ -1,28 +1,9 @@
 /**
- * Animation System Hooks
- *
- * Integrates visual animations with L5R4 stance and condition lifecycle.
- * Listens for ActiveEffect changes and triggers appropriate animations.
- *
- * Key Responsibilities:
- * - Detect when stances/conditions are applied (play animation)
- * - Detect when stances/conditions are removed (cleanup animation)
- * - Detect when stances/conditions are enabled/disabled (toggle animation)
- * - Integrate with existing effect-lifecycle.js hooks
- *
- * Integration Strategy:
- * - Hooks into same ActiveEffect events as effect-lifecycle.js
- * - Runs after effect-lifecycle.js completes (deferred via queueMicrotask)
- * - Does not modify game mechanics (a visual layer only)
- * - Gracefully degrades if Sequencer/JB2A not available
- *
- * Hook Execution Order:
- * 1. The effect's rules and services/effects/ handle game mechanics (one stance at a time, Full Defense roll)
- * 2. Actor.prepareDerivedData() recalculates stats
- * 3. Animation hooks trigger visual effects (this module)
- *
  * @module services/animations/hooks
- * @requires Foundry VTT v13+
+ * @description Hook handlers that play, toggle, and end stance and condition animations as Active Effects are
+ * created, enabled or disabled, and deleted, end every animation when an actor is deleted, and play the attack
+ * animation for a hit. Each runs after the effect's own rules and the actor's derived data (deferred with
+ * queueMicrotask), changes no game mechanic, and does nothing without Sequencer and JB2A.
  */
 
 import { STANCE_IDS } from "../../utils/stances.js";
@@ -31,40 +12,13 @@ import { getConditionAnimation, getStanceAnimation } from "./asset-library.js";
 import { handleAttackRoll } from "./attack-animations.js";
 
 /**
- * The statuses of an effect that have an animation (module/services/animations/asset-library.js), each marked
- * stance or not.
- *
- * @param {ActiveEffect} effect
- * @returns {Array<{statusId: string, isStance: boolean}>}
- * @private
- */
-function animatedStatuses(effect) {
-  return [...effect.statuses]
-    .filter(statusId => getStanceAnimation(statusId) || getConditionAnimation(statusId))
-    .map(statusId => ({ statusId, isStance: STANCE_IDS.has(statusId) }));
-}
-
-/**
- * Whether this client plays the animation for a change: only the user who made it. Every client runs these hooks,
- * and Sequencer sends each effect to every connected client, so playing it everywhere would show it once per
- * client.
- *
- * @param {string} userId - The user who made the change
- * @returns {boolean}
- * @private
- */
-function playsHere(userId) {
-  return userId === game.user.id;
-}
-
-/**
  * Hook handler for ActiveEffect create event.
  *
  * Triggers animations when stances or conditions are applied to an actor.
  * Deferred via queueMicrotask to ensure effect is fully applied before animation.
  *
  * @param {ActiveEffect} effect - The newly created effect
- * @param {object} options - Creation options
+ * @param {object} _options - Creation options
  * @param {string} userId - User who created the effect
  * @returns {void}
  */
@@ -89,11 +43,11 @@ export function onCreateActiveEffectAnimation(effect, _options, userId) {
  *
  * Handles animation toggling when effects are enabled/disabled.
  * - Disabled → Enabled: Play animation
- * - Enabled → Disabled: Remove animation
+ * - Enabled → Disabled: Remove animation.
  *
  * @param {ActiveEffect} effect - The updated effect
  * @param {object} changes - Changed fields
- * @param {object} options - Update options
+ * @param {object} _options - Update options
  * @param {string} userId - User who updated the effect
  * @returns {void}
  */
@@ -130,7 +84,7 @@ export function onUpdateActiveEffectAnimation(effect, changes, _options, userId)
  * Cleans up animations when stances or conditions are removed from an actor.
  *
  * @param {ActiveEffect} effect - The deleted effect
- * @param {object} options - Deletion options
+ * @param {object} _options - Deletion options
  * @param {string} userId - User who deleted the effect
  * @returns {void}
  */
@@ -157,7 +111,7 @@ export function onDeleteActiveEffectAnimation(effect, _options, userId) {
  * Prevents orphaned Sequencer effects.
  *
  * @param {Actor} actor - The deleted actor
- * @param {object} options - Deletion options
+ * @param {object} _options - Deletion options
  * @param {string} userId - User who deleted the actor
  * @returns {void}
  */
@@ -216,4 +170,29 @@ export function registerAnimationHooks() {
   Hooks.on("deleteActiveEffect", onDeleteActiveEffectAnimation);
   Hooks.on("deleteActor", onDeleteActorAnimation);
   Hooks.on("createChatMessage", onCreateChatMessageAnimation);
+}
+
+/**
+ * The statuses of an effect that have an animation (module/services/animations/asset-library.js), each marked
+ * stance or not.
+ *
+ * @param {ActiveEffect} effect
+ * @returns {Array<{statusId: string, isStance: boolean}>}
+ */
+function animatedStatuses(effect) {
+  return [...effect.statuses]
+    .filter(statusId => getStanceAnimation(statusId) || getConditionAnimation(statusId))
+    .map(statusId => ({ statusId, isStance: STANCE_IDS.has(statusId) }));
+}
+
+/**
+ * Whether this client plays the animation for a change: only the user who made it. Every client runs these hooks,
+ * and Sequencer sends each effect to every connected client, so playing it everywhere would show it once per
+ * client.
+ *
+ * @param {string} userId - The user who made the change
+ * @returns {boolean}
+ */
+function playsHere(userId) {
+  return userId === game.user.id;
 }

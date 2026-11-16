@@ -1,46 +1,21 @@
 /**
- * Wound Configuration Application
- *
- * Provides a form interface for configuring actor wound tracking including wound
- * calculation mode, multipliers, modifiers, and NPC wound level settings.
- *
- * Key Responsibilities:
- * - **Wound Mode Selection**: Toggle between manual and formula-based wound calculation
- * - **Multiplier Configuration**: Set wound multiplier for formula-based calculation
- * - **Modifier Management**: Configure wound and penalty modifiers
- * - **NPC Wound Levels**: Set number of wound levels for NPC actors
- *
- * Foundry VTT Integration:
- * - Extends ApplicationV2 with HandlebarsApplicationMixin
- * - Uses data-action delegation for event handling
- * - Implements debounced updates for real-time field changes
- * - Validates field values before applying updates
- *
- * Architectural Notes:
- * - **Uses DebouncedFieldMixin**: Real-time numeric updates with validation for multipliers/modifiers
- * - **Custom validation**: Overrides _validateFieldValue() to enforce wound calculation constraints
- * - **Actor-based constructor**: Standard pattern for actor configuration dialogs
- * - **closeOnSubmit: false**: Keeps dialog open for multiple adjustments during character setup
- *
  * @module apps/wound-config
+ * @description A form window for one actor's wound tracking: manual or formula Wounds, the Earth multiplier, the
+ * Wound and penalty modifiers, and an NPC's number of Wound Ranks. DebouncedFieldMixin saves each field as it
+ * changes, and `_validateFieldValue` rejects a value outside the allowed range first; the window stays open after
+ * submit so the user can make several adjustments.
  */
-
-// Config imports
 import { SYS_ID } from "../config/constants.js";
 import { NPC_NUMBER_WOUND_LVLS } from "../config/game-mechanics.js";
-
-// Utils imports
 import { T } from "../utils/localization.js";
 import { logError } from "../utils/error-logging.js";
-
-// Mixins
 import { DebouncedFieldMixin } from "../mixins/debounced-field-mixin.js";
 
 /**
  * Valid wound calculation modes.
  * @constant {string[]}
  */
-const VALID_WOUND_MODES = ["manual", "formula"];
+const VALID_WOUND_MODES = Object.freeze(["manual", "formula"]);
 
 /**
  * Minimum allowed wound multiplier for formula-based calculation.
@@ -66,6 +41,9 @@ const MIN_NPC_WOUND_LEVELS = 1;
  */
 const MAX_NPC_WOUND_LEVELS = 8;
 
+/**
+ * The wound configuration window for one actor.
+ */
 export default class WoundConfigApplication extends DebouncedFieldMixin(
   foundry.applications.api.HandlebarsApplicationMixin(foundry.applications.api.ApplicationV2)
 ) {
@@ -134,7 +112,7 @@ export default class WoundConfigApplication extends DebouncedFieldMixin(
    *
    * @param {object} _options - Render options (unused)
    * @returns {Promise<object>} Context object with wound configuration data
-   * @private
+   * @override
    */
   async _prepareContext(_options) {
     if (!this.actor) {
@@ -174,7 +152,6 @@ export default class WoundConfigApplication extends DebouncedFieldMixin(
    * Returns safe default values to prevent rendering failures.
    *
    * @returns {object} Fallback context with default values
-   * @private
    */
   _getFallbackContext() {
     return {
@@ -201,7 +178,6 @@ export default class WoundConfigApplication extends DebouncedFieldMixin(
    *
    * @param {Event} event - The change event
    * @param {HTMLElement} element - The select element with new mode value
-   * @private
    */
   async _onWoundModeChange(event, element) {
     const newMode = element.value;
@@ -230,7 +206,7 @@ export default class WoundConfigApplication extends DebouncedFieldMixin(
    *
    * @param {Event} event - The change event
    * @param {HTMLElement} element - The form field element that changed
-   * @private
+   * @override
    */
   async _onFieldChange(event, element) {
     const field = element.name;
@@ -266,7 +242,7 @@ export default class WoundConfigApplication extends DebouncedFieldMixin(
    * @param {string} field - The field name being validated
    * @param {*} value - The value to validate
    * @returns {*|null} Validated value or null if invalid
-   * @protected
+   * @override
    */
   _validateFieldValue(field, value) {
     switch (field) {
@@ -323,7 +299,6 @@ export default class WoundConfigApplication extends DebouncedFieldMixin(
    *
    * @param {string} field - The field name to update
    * @param {*} value - The new value for the field
-   * @private
    */
   async _updateActor(field, value) {
     try {
@@ -357,7 +332,6 @@ export default class WoundConfigApplication extends DebouncedFieldMixin(
    * @param {Event} event - The submit event
    * @param {HTMLFormElement} _form - The form element (unused)
    * @param {FormData} _formData - The form data (unused)
-   * @private
    */
   async _onSubmitForm(event, _form, _formData) {
     if (event) {

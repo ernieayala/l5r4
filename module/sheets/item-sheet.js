@@ -1,42 +1,16 @@
 /**
- * L5R4 Item Sheet (Application v2)
- *
- * Foundry VTT v13 item sheet implementation for Legend of the Five Rings 4th Edition items.
- * Handles rendering and user interaction for all item types: weapons, armor, skills, spells,
- * techniques, advantages, disadvantages, and equipment.
- *
- * Responsibilities:
- * - Render item editing forms using type-specific templates
- * - Prepare context data for Handlebars template rendering
- * - Enrich HTML content (description, special rules, effects) with Foundry links and secrets
- * - Configure dynamic sheet dimensions based on item type
- * - Integrate ActiveEffect management via ItemEffectsHandler
- * - For weapons owned by characters: populate skill dropdown from parent actor
- *
- * Architecture:
- * - Extends ItemSheetV2 (Foundry v13 Application v2 pattern)
- * - Uses HandlebarsApplicationMixin for template rendering
- * - Delegates ActiveEffect operations to ItemEffectsHandler
- * - Calls enhanceItemSheetData() to inject L5R4 config (rings, traits, etc.)
- * - Implements submitOnChange for real-time form updates
- *
- * Foundry Integration:
- * - Application v2 lifecycle: _initializeApplicationOptions, _prepareContext, _onRender
- * - Uses TextEditor.enrichHTML for description/rules enrichment
- * - Follows Application v2 event delegation pattern (delegated in handlers)
- * - PARTS defines root form template with type-specific partials
- *
  * @module sheets/item-sheet
- * @requires Foundry VTT v13+
- * @see {@link https://foundryvtt.com/api/v13/classes/foundry.applications.sheets.ItemSheetV2.html|ItemSheetV2}
- * @see {@link https://foundryvtt.com/article/v13-application/|Application v2 Migration Guide}
+ * @description The item sheet for every L5R4 item type: a tabbed form (details, modifiers, description, effects,
+ * rules) that saves each field as it changes. It enriches the description, special rules, demands, and effect
+ * text with TextEditor.enrichHTML, adds the L5R4 config through enhanceItemSheetData(), manages the item's Active
+ * Effects through ItemEffectsHandler, and for a weapon a PC owns lists that PC's skills to associate with it.
  */
 
 import { SYS_ID } from "../config/constants.js";
 import { enhanceItemSheetData } from "../documents/item/integration/sheet-data.js";
 import { summaryText } from "../documents/summary.js";
-import { ItemEffectsHandler } from "./handlers/item-effects-handler.js";
 import EmphasisManager from "../apps/emphasis-manager.js";
+import { ItemEffectsHandler } from "./handlers/item-effects-handler.js";
 import { RULES_EDITOR_ACTIONS, readRulesForm, rulesEditorContext } from "./rules-editor.js";
 
 const { HandlebarsApplicationMixin } = foundry.applications.api;
@@ -54,7 +28,7 @@ const { TextEditor } = foundry.applications.ux;
  * This ensures adequate space for all L5R4 item properties without overwhelming
  * smaller screens. Future adjustments can target specific types if needed.
  *
- * @type {Object<string, number>}
+ * @type {{[type: string]: number}}
  * @constant
  */
 const WIDTH_BY_TYPE = Object.freeze({
@@ -70,42 +44,6 @@ const WIDTH_BY_TYPE = Object.freeze({
   tattoo: 640,
   commonItem: 640
 });
-
-/**
- * Get sheet width for a given item type.
- *
- * @param {string} type - Item type (advantage, weapon, spell, etc.)
- * @returns {number} Width in pixels (defaults to 640 if type not found)
- */
-const widthFor = type => WIDTH_BY_TYPE[type] ?? 640;
-
-/**
- * Convert string to title case (first letter of each word capitalized).
- *
- * Used as fallback for localization when i18n key is missing.
- * Handles null/undefined by converting to empty string first.
- *
- * @param {string|null|undefined} str - String to convert
- * @returns {string} Title-cased string
- */
-const titleCase = str =>
-  String(str ?? "")
-    .toLowerCase()
-    .replace(/\b[a-z]/g, m => m.toUpperCase());
-
-/**
- * Get localized label for an item type.
- *
- * Attempts to resolve i18n key `TYPES.Item.{type}` from game.i18n.
- * Falls back to title-cased type name if translation not found.
- *
- * @param {string} type - Item type key
- * @returns {string} Localized type label or fallback
- */
-const typeLabel = type => {
-  const key = `TYPES.Item.${type}`;
-  return game.i18n.has?.(key) ? game.i18n.localize(key) : titleCase(type);
-};
 
 /* ------------------------------------------ */
 /* Sheet                                      */
@@ -127,7 +65,7 @@ const typeLabel = type => {
  * - Weapon skill integration when owned by PC actors
  * - ActiveEffect CRUD operations via ItemEffectsHandler
  *
- * @extends {ItemSheetV2}
+ * @augments {ItemSheetV2}
  * @mixes HandlebarsApplicationMixin
  */
 export default class L5R4ItemSheet extends HandlebarsApplicationMixin(ItemSheetV2) {
@@ -136,7 +74,6 @@ export default class L5R4ItemSheet extends HandlebarsApplicationMixin(ItemSheetV
    * entries are not repeated here). submitOnChange saves each field as it changes.
    *
    * @type {ApplicationConfiguration}
-   * @static
    */
   static DEFAULT_OPTIONS = {
     id: "l5r4-item",
@@ -151,12 +88,6 @@ export default class L5R4ItemSheet extends HandlebarsApplicationMixin(ItemSheetV
   };
 
   /**
-   * The Rules tab's view: a form per rule, or the JSON (module/sheets/rules-editor.js).
-   * @type {"form"|"json"}
-   */
-  rulesMode = "form";
-
-  /**
    * Application template parts configuration.
    *
    * Defines multi-tab sheet structure with separate parts for each tab section.
@@ -168,8 +99,7 @@ export default class L5R4ItemSheet extends HandlebarsApplicationMixin(ItemSheetV
    * - description: Long-form text content and special rules (universal)
    * - effects: Active Effects management (universal)
    *
-   * @type {Object<string, ApplicationPart>}
-   * @static
+   * @type {{[part: string]: ApplicationPart}}
    */
   static PARTS = {
     ...(super.PARTS ?? {}),
@@ -207,9 +137,14 @@ export default class L5R4ItemSheet extends HandlebarsApplicationMixin(ItemSheetV
    * Foundry Application v2 uses these to preserve scroll position during re-renders.
    *
    * @type {string[]}
-   * @static
    */
   static SCROLLABLE = [".sheet-content", ".editor"];
+
+  /**
+   * The Rules tab's view: a form per rule, or the JSON (module/sheets/rules-editor.js).
+   * @type {"form"|"json"}
+   */
+  rulesMode = "form";
 
   /**
    * Current active tab ID.
@@ -236,7 +171,7 @@ export default class L5R4ItemSheet extends HandlebarsApplicationMixin(ItemSheetV
    * Dynamic sheet title including item name and localized type.
    *
    * Format: "{Item Name} [{Type Label}]"
-   * Example: "Katana [Weapon]", "Crab Hands [Advantage]"
+   * Example: "Katana [Weapon]", "Crab Hands [Advantage]".
    *
    * @type {string}
    * @readonly
@@ -244,42 +179,6 @@ export default class L5R4ItemSheet extends HandlebarsApplicationMixin(ItemSheetV
   get title() {
     const name = this.item?.name || game.i18n.localize("DOCUMENT.Item");
     return `${name} [${typeLabel(this.item?.type)}]`;
-  }
-
-  /**
-   * Initialize application-specific options on first render.
-   *
-   * Foundry Application v2 lifecycle method called once during sheet initialization.
-   * Configures unique ID, position, and width based on item type.
-   *
-   * ID Generation:
-   * - Format: `l5r4-item-{uuid|id|randomID}`
-   * - Uses UUID for uniqueness across worlds, falls back to ID or random
-   *
-   * Width Configuration:
-   * - Reads from WIDTH_BY_TYPE constant (all currently 640px)
-   * - Only sets if not explicitly provided in options
-   *
-   * @param {ApplicationConfiguration} options - Initial options object
-   * @returns {ApplicationConfiguration} Modified options with L5R4 customizations
-   * @override
-   * @see {@link https://foundryvtt.com/api/v13/classes/foundry.applications.api.ApplicationV2.html#_initializeApplicationOptions|ApplicationV2._initializeApplicationOptions}
-   */
-  _initializeApplicationOptions(options) {
-    options = super._initializeApplicationOptions(options);
-
-    const doc = options.document ?? this.document;
-    const uid = doc?.uuid ?? doc?.id ?? foundry.utils.randomID();
-
-    options.id = `l5r4-item-${uid}`;
-    options.uniqueId = `item-${uid}`;
-
-    options.position ??= {};
-    if (!options.position.width) {
-      options.position.width = widthFor(doc?.type ?? "item");
-    }
-
-    return options;
   }
 
   /**
@@ -306,11 +205,10 @@ export default class L5R4ItemSheet extends HandlebarsApplicationMixin(ItemSheetV
    * - Includes "None" option + all skill names from parent actor
    * - Enables skill association for weapon attacks (e.g., "Kenjutsu", "Kyujutsu")
    *
-   * @param {Object} context - Base context from parent class
+   * @param {object} context - Base context from parent class
    * @param {ApplicationRenderOptions} options - Render options
-   * @returns {Promise<Object>} Enhanced context with L5R4 data
+   * @returns {Promise<object>} Enhanced context with L5R4 data
    * @override
-   * @see {@link https://foundryvtt.com/api/v13/classes/foundry.applications.api.ApplicationV2.html#_prepareContext|ApplicationV2._prepareContext}
    */
   async _prepareContext(context, options) {
     context = await super._prepareContext(context, options);
@@ -399,17 +297,51 @@ export default class L5R4ItemSheet extends HandlebarsApplicationMixin(ItemSheetV
   }
 
   /**
+   * Initialize application-specific options on first render.
+   *
+   * Foundry Application v2 lifecycle method called once during sheet initialization.
+   * Configures unique ID, position, and width based on item type.
+   *
+   * ID Generation:
+   * - Format: `l5r4-item-{uuid|id|randomID}`
+   * - Uses UUID for uniqueness across worlds, falls back to ID or random
+   *
+   * Width Configuration:
+   * - Reads from WIDTH_BY_TYPE constant (all currently 640px)
+   * - Only sets if not explicitly provided in options.
+   *
+   * @param {ApplicationConfiguration} options - Initial options object
+   * @returns {ApplicationConfiguration} Modified options with L5R4 customizations
+   * @override
+   */
+  _initializeApplicationOptions(options) {
+    options = super._initializeApplicationOptions(options);
+
+    const doc = options.document ?? this.document;
+    const uid = doc?.uuid ?? doc?.id ?? foundry.utils.randomID();
+
+    options.id = `l5r4-item-${uid}`;
+    options.uniqueId = `item-${uid}`;
+
+    options.position ??= {};
+    if (!options.position.width) {
+      options.position.width = widthFor(doc?.type ?? "item");
+    }
+
+    return options;
+  }
+
+  /**
    * Determine which tabs are available for a given item type.
    *
    * Tab structure varies by item type:
    * - Details: Always shown (unless item type has no detail fields like family/clan)
    * - Modifiers: Only for items with mechanical bonuses (weapon, armor, skill)
    * - Description: Always shown
-   * - Active Effects: Always shown
+   * - Active Effects: Always shown.
    *
    * @param {string} itemType - Item type (weapon, spell, advantage, etc.)
    * @returns {string[]} Array of available tab IDs
-   * @private
    */
   _getAvailableTabs(itemType) {
     // Items that have modifier/bonus fields
@@ -460,7 +392,6 @@ export default class L5R4ItemSheet extends HandlebarsApplicationMixin(ItemSheetV
    *
    * @param {Event} event - Click event from tab navigation
    * @param {HTMLElement} target - Clicked tab element with data-tab attribute
-   * @private
    */
   _onChangeTab(event, target) {
     const tabId = target.dataset.tab;
@@ -482,9 +413,8 @@ export default class L5R4ItemSheet extends HandlebarsApplicationMixin(ItemSheetV
    * EmphasisManager handles emphasis selection, custom emphasis addition,
    * and XP tracking for trained emphases.
    *
-   * @param {Event} event - Click event from button
-   * @param {HTMLElement} target - Button element with data-action="open-emphasis-manager"
-   * @private
+   * @param {Event} _event - Click event from button
+   * @param {HTMLElement} _target - Button element with data-action="open-emphasis-manager"
    */
   async _onManageEmphases(_event, _target) {
     if (this.item.type !== "skill") {
@@ -511,13 +441,12 @@ export default class L5R4ItemSheet extends HandlebarsApplicationMixin(ItemSheetV
    * - .effect-create: Create new effect and open config
    * - .effect-edit: Open effect configuration sheet
    * - .effect-toggle: Enable/disable effect
-   * - .effect-delete: Remove effect from item
+   * - .effect-delete: Remove effect from item.
    *
-   * @param {Object} context - Rendered context data
+   * @param {object} context - Rendered context data
    * @param {ApplicationRenderOptions} options - Render options
    * @returns {Promise<void>}
    * @override
-   * @see {@link https://foundryvtt.com/api/v13/classes/foundry.applications.api.ApplicationV2.html#_onRender|ApplicationV2._onRender}
    */
   async _onRender(context, options) {
     await super._onRender?.(context, options);
@@ -529,3 +458,39 @@ export default class L5R4ItemSheet extends HandlebarsApplicationMixin(ItemSheetV
     ItemEffectsHandler.bind({ item: this.item, element: root });
   }
 }
+
+/**
+ * Get sheet width for a given item type.
+ *
+ * @param {string} type - Item type (advantage, weapon, spell, etc.)
+ * @returns {number} Width in pixels (defaults to 640 if type not found)
+ */
+const widthFor = type => WIDTH_BY_TYPE[type] ?? 640;
+
+/**
+ * Convert string to title case (first letter of each word capitalized).
+ *
+ * Used as fallback for localization when i18n key is missing.
+ * Handles null/undefined by converting to empty string first.
+ *
+ * @param {string|null|undefined} str - String to convert
+ * @returns {string} Title-cased string
+ */
+const titleCase = str =>
+  String(str ?? "")
+    .toLowerCase()
+    .replace(/\b[a-z]/g, m => m.toUpperCase());
+
+/**
+ * Get localized label for an item type.
+ *
+ * Attempts to resolve i18n key `TYPES.Item.{type}` from game.i18n.
+ * Falls back to title-cased type name if translation not found.
+ *
+ * @param {string} type - Item type key
+ * @returns {string} Localized type label or fallback
+ */
+const typeLabel = type => {
+  const key = `TYPES.Item.${type}`;
+  return game.i18n.has?.(key) ? game.i18n.localize(key) : titleCase(type);
+};

@@ -1,14 +1,17 @@
 /**
  * @module services/effects/automation
  * @description Effect automation driven by document hooks:
- * - taking the Full Defense Stance asks its owner for the Defense / Reflexes roll (p.84);
+ * - taking the Full Defense Stance asks its owner for the Defense / Reflexes roll;
  * - Prone follows the Wound Rank: put on at Down or Out, taken off again when the character rises above Down
  *   (B10). It runs on the active GM only, so one client makes each change;
  * - a concentrating caster who takes more Wounds than his Earth Ring in one update is asked for the Willpower
- *   roll (p.166);
- * - the GM's "End encounter" button ends Fear outside combat (p.90; STAGE-09 decision 4);
+ *   roll;
+ * - the GM's "End encounter" button ends Fear outside combat (STAGE-09 decision 4);
  * - unlinked tokens whose actors were built before core's effect registry existed have their timed effects
  *   registered, so they still expire (#45).
+ * game-rules/36_stances.md, p.84
+ * game-rules/67_universal_spells.md, p.166
+ * game-rules/42_fear.md, p.90
  */
 
 import { SYS_ID } from "../../config/constants.js";
@@ -16,20 +19,6 @@ import { T } from "../../utils/localization.js";
 import { toInt } from "../../utils/type-coercion.js";
 import { applyEffect, effectsOf } from "./apply.js";
 import { promptConcentration, rollFullDefense } from "./prompts.js";
-
-/**
- * Whether the actor is at Down or Out, or past its last Wound Rank.
- * @param {Actor} actor
- * @returns {boolean}
- */
-function isDown(actor) {
-  const levels = actor.system.woundLevels ?? {};
-  return (
-    toInt(actor.system.wounds?.value) <= 0 ||
-    levels.down?.current === true ||
-    levels.out?.current === true
-  );
-}
 
 /**
  * Put Prone on an actor that is Down and not dead, and take the automatic Prone off one that is not Down.
@@ -51,6 +40,65 @@ export async function syncProne(actor) {
       automatic.map(e => e.id)
     );
   }
+}
+
+/**
+ * End the encounter outside combat: every effect lasting until the encounter ends (Fear) ends, after the GM
+ * confirms. A combat ending does the same for its combatants (module/documents/combat.js; STAGE-09 decision 4).
+ * game-rules/42_fear.md, p.90
+ * @returns {Promise<void>}
+ */
+export async function endEncounter() {
+  const confirmed = await foundry.applications.api.DialogV2.confirm({
+    window: { title: T("l5r4.ui.effects.endEncounter") },
+    content: `<p>${T("l5r4.ui.effects.endEncounterConfirm")}</p>`
+  });
+  if (confirmed) {
+    await foundry.documents.ActiveEffect.registry.refresh("encounterEnd", {});
+  }
+}
+
+/**
+ * Register the timed effects of every unlinked token whose actor is already built. Core prepares world documents
+ * before it creates its effect registry [src: client/game.mjs:914-922], and a Combatant's preparation builds its
+ * token's actor [src: client/documents/combatant.mjs:160-182]. Core registers a token actor's effects when the actor
+ * is built only once the registry exists [src: client/documents/token.mjs:318-321], and the registry's own start
+ * covers world actors only [src: client/helpers/active-effect-registry.mjs:29-39], so a combatant token's Fear would
+ * never end. This does what core does for a new scene's tokens [src: client/documents/scene.mjs:1066-1070]; the
+ * registry keeps only effects that can expire, so registering twice changes nothing.
+ */
+export function registerTokenEffects() {
+  for (const scene of game.scenes) {
+    for (const token of scene.tokens) {
+      const actor = token.delta?.syntheticActor;
+      if (actor) {
+        foundry.documents.ActiveEffect.registry.addFromParent(actor);
+      }
+    }
+  }
+}
+
+/** Register the hooks, once during system init. */
+export function initializeEffectAutomation() {
+  Hooks.once("ready", registerTokenEffects);
+  Hooks.on("preUpdateActor", onPreUpdateActor);
+  Hooks.on("updateActor", onUpdateActor);
+  Hooks.on("createActiveEffect", onCreateActiveEffect);
+  Hooks.on("getSceneControlButtons", onGetSceneControlButtons);
+}
+
+/**
+ * Whether the actor is at Down or Out, or past its last Wound Rank.
+ * @param {Actor} actor
+ * @returns {boolean}
+ */
+function isDown(actor) {
+  const levels = actor.system.woundLevels ?? {};
+  return (
+    toInt(actor.system.wounds?.value) <= 0 ||
+    levels.down?.current === true ||
+    levels.out?.current === true
+  );
 }
 
 /**
@@ -107,21 +155,6 @@ function onCreateActiveEffect(effect, _options, userId) {
 }
 
 /**
- * End the encounter outside combat: every effect lasting until the encounter ends (Fear, p.90) ends, after the GM
- * confirms. A combat ending does the same for its combatants (module/documents/combat.js; STAGE-09 decision 4).
- * @returns {Promise<void>}
- */
-export async function endEncounter() {
-  const confirmed = await foundry.applications.api.DialogV2.confirm({
-    window: { title: T("l5r4.ui.effects.endEncounter") },
-    content: `<p>${T("l5r4.ui.effects.endEncounterConfirm")}</p>`
-  });
-  if (confirmed) {
-    await foundry.documents.ActiveEffect.registry.refresh("encounterEnd", {});
-  }
-}
-
-/**
  * Add the GM's "End encounter" button to the token controls.
  * @param {Record<string, object>} controls
  */
@@ -138,33 +171,4 @@ function onGetSceneControlButtons(controls) {
     button: true,
     onChange: () => endEncounter()
   };
-}
-
-/**
- * Register the timed effects of every unlinked token whose actor is already built. Core prepares world documents
- * before it creates its effect registry (client/game.mjs:914-922), and a Combatant's preparation builds its token's
- * actor (client/documents/combatant.mjs:160-182). Core registers a token actor's effects when the actor is built
- * only once the registry exists (client/documents/token.mjs:318-321), and the registry's own start covers world
- * actors only (client/helpers/active-effect-registry.mjs:29-39), so a combatant token's Fear would never end.
- * This does what core does for a new scene's tokens (client/documents/scene.mjs:1066-1070); the registry keeps
- * only effects that can expire, so registering twice changes nothing.
- */
-export function registerTokenEffects() {
-  for (const scene of game.scenes) {
-    for (const token of scene.tokens) {
-      const actor = token.delta?.syntheticActor;
-      if (actor) {
-        foundry.documents.ActiveEffect.registry.addFromParent(actor);
-      }
-    }
-  }
-}
-
-/** Register the hooks, once during system init. */
-export function initializeEffectAutomation() {
-  Hooks.once("ready", registerTokenEffects);
-  Hooks.on("preUpdateActor", onPreUpdateActor);
-  Hooks.on("updateActor", onUpdateActor);
-  Hooks.on("createActiveEffect", onCreateActiveEffect);
-  Hooks.on("getSceneControlButtons", onGetSceneControlButtons);
 }

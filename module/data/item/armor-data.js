@@ -1,3 +1,8 @@
+/**
+ * @module data/item/armor-data
+ * @description The data model of the `armor` Item subtype.
+ */
+
 import { booleanField, numberField, stringField } from "../fields.js";
 import { migrateArmorSource } from "../migrate-source.js";
 import EquipmentData from "./equipment-data.js";
@@ -15,17 +20,17 @@ export default class ArmorData extends EquipmentData {
     };
   }
 
+  /** @override */
+  static migrateData(source) {
+    migrateArmorSource(source);
+    return super.migrateData(source);
+  }
+
   /**
    * Armor's rules apply only while it is worn.
    * @override
    */
   get rulesActive() {
     return this.equipped;
-  }
-
-  /** @override */
-  static migrateData(source) {
-    migrateArmorSource(source);
-    return super.migrateData(source);
   }
 }

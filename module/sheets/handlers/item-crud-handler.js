@@ -1,21 +1,8 @@
 /**
- * Item CRUD Handler
- *
- * Handles Create, Read, Update, and Delete operations for embedded Item documents
- * on Actor sheets. Uses Foundry v13 Application v2 event delegation pattern.
- *
- * All methods are static and designed to be called from actor sheet event handlers
- * with a context object containing { actor, element, sheetClassName }.
- *
- * Relevant Foundry APIs:
- * - Actor.createEmbeddedDocuments() - Creates embedded Items
- * - Actor.deleteEmbeddedDocuments() - Deletes embedded Items
- * - Actor.items.get() - Retrieves Item by ID
- * - Item.sheet.render() - Opens Item sheet
- * - Item.roll() - Posts Item to chat
- *
- * @see {@link https://foundryvtt.com/api/v13/classes/client.Actor.html}
- * @see {@link https://foundryvtt.com/api/v13/classes/client.Item.html}
+ * @module sheets/handlers/item-crud-handler
+ * @description Creates, opens, edits inline, deletes, expands, and posts to chat the embedded Item documents on actor
+ * sheets, and toggles a sheet section's collapsed state. Every method is static and takes the sheet's handler
+ * context ({ actor, element, sheetClassName }).
  */
 
 import { SYS_ID } from "../../config/constants.js";
@@ -36,7 +23,6 @@ export class ItemCRUDHandler {
    * @param {HTMLElement} element - Explicitly passed element
    * @param {Event} event - Event containing currentTarget
    * @returns {HTMLElement} The resolved element
-   * @private
    */
   static _getElement(element, event) {
     return element || event.currentTarget;
@@ -48,7 +34,6 @@ export class ItemCRUDHandler {
    *
    * @param {HTMLElement} element - Starting element for traversal
    * @returns {HTMLElement|null} The item row element or null if not found
-   * @private
    */
   static _getItemRow(element) {
     return element?.closest?.(".item");
@@ -60,7 +45,6 @@ export class ItemCRUDHandler {
    *
    * @param {HTMLElement} row - Item row element
    * @returns {string|undefined} The item ID or undefined if not found
-   * @private
    */
   static _getItemId(row) {
     return row?.dataset?.itemId || row?.dataset?.documentId || row?.dataset?.id;
@@ -71,7 +55,7 @@ export class ItemCRUDHandler {
    * Prompts user for item type and name via unified dialog.
    * Auto-detects preferred item type based on the clicked section's data-scope attribute.
    *
-   * @param {Object} context - Handler context from actor sheet
+   * @param {object} context -Handler context from actor sheet
    * @param {Actor} context.actor - The actor document
    * @param {Event} event - Click event (prevented)
    * @param {HTMLElement} element - Clicked element (used to detect section)
@@ -147,7 +131,7 @@ export class ItemCRUDHandler {
    * Opens the item sheet for editing.
    * Locates the item by traversing DOM to find item row and extract ID.
    *
-   * @param {Object} context - Handler context from actor sheet
+   * @param {object} context -Handler context from actor sheet
    * @param {Actor} context.actor - The actor document
    * @param {Event} event - Click event (prevented)
    * @param {HTMLElement} element - Clicked element or event target
@@ -165,7 +149,7 @@ export class ItemCRUDHandler {
    * Shows confirmation dialog unless Shift key is held.
    * Silently catches and logs errors to prevent sheet breakage on failed deletion.
    *
-   * @param {Object} context - Handler context from actor sheet
+   * @param {object} context -Handler context from actor sheet
    * @param {Actor} context.actor - The actor document
    * @param {Event} event - Click event (prevented)
    * @param {HTMLElement} element - Clicked element or event target
@@ -188,7 +172,7 @@ export class ItemCRUDHandler {
 
     // Skip confirmation if Shift key is held
     if (!event.shiftKey) {
-      // No is the default button (client/applications/api/dialog.mjs:346-354); closing the dialog resolves null
+      // No is the default button [src: client/applications/api/dialog.mjs:346-354]; closing the dialog resolves null
       const confirmed = await foundry.applications.api.DialogV2.confirm({
         window: { title: "l5r4.ui.dialogs.deleteItem.title" },
         content: `<p>${game.i18n.localize("l5r4.ui.dialogs.deleteItem.content", {
@@ -212,7 +196,7 @@ export class ItemCRUDHandler {
    * Toggles the expanded/collapsed state of an item row.
    * Adds/removes "is-expanded" CSS class and rotates chevron icon between down/up.
    *
-   * @param {Object} context - Handler context from actor sheet (unused)
+   * @param {object} context -Handler context from actor sheet (unused)
    * @param {Event} event - Click event (prevented)
    * @param {HTMLElement} element - Clicked element containing the chevron icon
    */
@@ -250,11 +234,10 @@ export class ItemCRUDHandler {
    *
    * **No Game Rules:** A UI convenience only.
    *
-   * @param {Object} context - Sheet render context with actor reference
+   * @param {object} context -Sheet render context with actor reference
    * @param {Event} event - DOM click event
    * @param {HTMLElement} element - Clicked element (searches up for .section-title)
    * @returns {Promise<void>}
-   * @async
    */
   static async toggleSection(context, event, element) {
     event?.preventDefault?.();
@@ -300,9 +283,9 @@ export class ItemCRUDHandler {
    * - "Integer" → Converts to integer (default 0)
    * - "Number" → Converts to float (default 0)
    * - "Boolean" → Converts to boolean (accepts "true", "1", "on", "yes")
-   * - Default → Converts to string
+   * - Default → Converts to string.
    *
-   * @param {Object} context - Handler context from actor sheet
+   * @param {object} context -Handler context from actor sheet
    * @param {Actor} context.actor - The actor document
    * @param {Event} event - Change event (prevented)
    * @param {HTMLElement} element - Input element with data-field and data-dtype attributes
@@ -386,7 +369,7 @@ export class ItemCRUDHandler {
    * Posts an item to chat by calling its roll() method.
    * Silently catches and logs errors to prevent sheet breakage on failed rolls.
    *
-   * @param {Object} context - Handler context from actor sheet
+   * @param {object} context -Handler context from actor sheet
    * @param {Actor} context.actor - The actor document
    * @param {Event} event - Click event (prevented)
    * @param {HTMLElement} element - Clicked element or event target

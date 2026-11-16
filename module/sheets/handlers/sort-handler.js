@@ -1,22 +1,8 @@
 /**
- * Sort Handler for Item Lists
- *
- * Manages user-initiated column sorting for actor item lists (skills, weapons, techniques, etc.).
- * Handles click events on sortable column headers, updates visual indicators (active column, direction),
- * persists preferences via user flags, and triggers sheet re-renders.
- *
- * Integration with Foundry VTT v13+:
- * - Uses Application v2 event delegation pattern (event handlers receive event + target element)
- * - Manipulates DOM directly for visual indicator updates (classList, data attributes)
- * - Integrates with user flag system via sorting.js utilities (getSortPref, setSortPref)
- *
- * Visual Indicator Convention:
- * - `.l5r4-sort-header-button` elements receive `.is-active` class when they're the active sort column
- * - `data-dir="asc"|"desc"` attribute shows current sort direction on active column
- * - Relies on CSS to render direction arrows based on these attributes
- *
  * @module sheets/handlers/sort-handler
- * @requires Foundry VTT v13+ (Application v2 event patterns, User.flags API)
+ * @description Column sorting for actor item lists (skills, weapons, techniques, and the rest): a click on a sortable
+ * column header stores the user's preference in user flags (getSortPref, setSortPref), marks the active column with
+ * `.is-active` and its direction with `data-dir="asc"|"desc"` for the CSS arrows, and re-renders the sheet.
  */
 
 import { SYS_ID } from "../../config/constants.js";
@@ -36,7 +22,6 @@ import { getSortPref, setSortPref } from "../../utils/sorting.js";
  * 4. Sheet re-renders with newly sorted item list
  *
  * @class SortHandler
- * @static
  */
 export class SortHandler {
   /**
@@ -49,7 +34,6 @@ export class SortHandler {
    * @param {HTMLElement} header - The `.l5r4-sort-header` container element
    * @param {string} activeKey - The data-sortby value of the active column
    * @param {"asc"|"desc"} direction - Current sort direction for the active column
-   * @private
    */
   static _updateVisualIndicators(header, activeKey, direction) {
     header.querySelectorAll(".l5r4-sort-header-button").forEach(a => {
@@ -79,7 +63,6 @@ export class SortHandler {
    * @param {string} actorId - The actor's UUID or ID for preference lookup
    * @param {string} scope - Sort scope identifier (e.g., "skills", "weapons", "techniques")
    * @param {string[]} allowedKeys - Valid sort keys for this scope (security whitelist)
-   * @static
    */
   static initializeIndicators(root, actorId, scope, allowedKeys) {
     try {
@@ -115,7 +98,7 @@ export class SortHandler {
    * Error handling:
    * - Invalid sort keys are rejected with a warning (doesn't crash the sheet)
    * - Missing DOM elements handled gracefully with fallbacks
-   * - Errors are logged but don't prevent re-render
+   * - Errors are logged but don't prevent re-render.
    *
    * @param {string} actorId - The actor's UUID or ID for preference storage
    * @param {Event} event - The DOM click event (preventDefault called automatically)
@@ -123,8 +106,6 @@ export class SortHandler {
    * @param {Function} getAllowedKeys - Callback to get valid keys for a scope: (scope) => string[]
    * @param {Function} renderSheet - Callback to trigger sheet re-render after sort change
    * @returns {Promise<void>}
-   * @async
-   * @static
    */
   static async handleClick(actorId, event, element, getAllowedKeys, renderSheet) {
     event.preventDefault();

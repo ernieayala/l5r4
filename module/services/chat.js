@@ -1,16 +1,10 @@
 /**
- * Chat Service
- *
- * Chat-side features: the item creation dialog, roll card actions, and inline Roll & Keep notation.
- *
- * - **Item Creation Dialog**: Unified dialog for creating actor items (skills, advantages, equipment, etc.)
- * - **Roll cards**: a `roll` message's damage button and context menu entries come from
- *   module/services/dice/check/chat-actions.js; cards posted before 4.0.0 keep their own damage button here
- * - **Inline Roll & Keep**: [[XkY]] in a chat message rolls through the same pool code as a check (B9)
- *
- * Call initializeChatService() from the system init hook to register the hooks.
- *
  * @module services/chat
+ * @description Chat-side features: the dialog that creates an actor's items, roll card actions, and inline Roll &
+ * Keep notation. A `roll` message's damage button and context menu entries come from
+ * module/services/dice/check/chat-actions.js; cards posted before 4.0.0 keep their own damage button here. [[XkY]]
+ * in a chat message rolls through the same pool code as a check (B9). initializeChatService() registers the hooks
+ * from the system init hook.
  */
 
 import { SYS_ID } from "../config/constants.js";
@@ -26,7 +20,7 @@ const DIALOG = foundry.applications.api.DialogV2;
 
 /**
  * Item creation result object
- * @typedef {Object} ItemCreateResult
+ * @typedef {object} ItemCreateResult
  * @property {string} [name] - Name of the item to create (only present if not cancelled)
  * @property {string} [type] - Item type identifier (only present if not cancelled)
  * @property {boolean} [cancelled] - True if dialog was cancelled or invalid input provided
@@ -47,13 +41,11 @@ const DIALOG = foundry.applications.api.DialogV2;
  * Validation:
  * - Item name is required (empty names return {cancelled: true})
  * - Item type defaults to "commonItem" if not provided
- * - Form element access uses fallback pattern: button.form ?? dialog.form
+ * - Form element access uses fallback pattern: button.form ?? dialog.form.
  *
  * @param {string} actorType - Actor type ("pc" or "npc") to determine available item types
  * @param {string|null} [preferredType=null] - Item type to pre-select in dialog (e.g., "skill", "advantage")
  * @returns {Promise<ItemCreateResult>} Object with {name, type} on success, {cancelled: true} on cancellation
- *
- * @async
  */
 export async function getUnifiedItemOptions(actorType, preferredType = null) {
   const showCharacterItems = actorType === "pc";
@@ -112,11 +104,25 @@ export function initializeChatService() {
 }
 
 /**
+ * The Foundry formula for one inline Roll & Keep token, through the same pool code as a check: the Ten Dice Rule,
+ * explosions, Unskilled ("u") and Emphasis ("e") prefixes (module/utils/check.js parseRollAndKeep).
+ * @param {string} token
+ * @returns {string|null} null when the token is not Roll & Keep notation
+ */
+export function inlineFormula(token) {
+  const parsed = parseRollAndKeep(token);
+  if (!parsed) {
+    return null;
+  }
+  return poolFormula(
+    buildPool({ ...parsed, littleTruths: game.settings.get(SYS_ID, "LtException") })
+  );
+}
+
+/**
  * The damage button of attack cards posted before 4.0.0, which carried the weapon's dice in data attributes and
  * the attack's Raises in `flags.l5r4-enhanced.attackRaises`. The card's attributes are untrusted: dice are clamped
  * and Raises must match the flag. A `roll` message's button is wired by chat-actions.js instead.
- *
- * @private
  */
 function registerLegacyDamageButtonHook() {
   Hooks.on("renderChatMessageHTML", (message, html) => {
@@ -168,27 +174,9 @@ function registerLegacyDamageButtonHook() {
 }
 
 /**
- * The Foundry formula for one inline Roll & Keep token, through the same pool code as a check: the Ten Dice Rule,
- * explosions, Unskilled ("u") and Emphasis ("e") prefixes (module/utils/check.js parseRollAndKeep).
- * @param {string} token
- * @returns {string|null} null when the token is not Roll & Keep notation
- */
-export function inlineFormula(token) {
-  const parsed = parseRollAndKeep(token);
-  if (!parsed) {
-    return null;
-  }
-  return poolFormula(
-    buildPool({ ...parsed, littleTruths: game.settings.get(SYS_ID, "LtException") })
-  );
-}
-
-/**
  * Turn Roll & Keep notation in an outgoing chat message into Foundry rolls. A message that is one [[XkY]] becomes
  * a /roll; [[XkY]] inside text becomes an inline roll. Foundry's own roll commands pass through, and so does any
  * [[...]] that is not Roll & Keep notation.
- *
- * @private
  */
 function registerInlineRollParsingHook() {
   Hooks.on("chatMessage", (chatlog, message) => {

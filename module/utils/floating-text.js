@@ -1,5 +1,5 @@
 /**
- * @module floating-text
+ * @module utils/floating-text
  * @description The Wounds and Void Points an actor update changed, as the numbers floated over its tokens
  * (roadmap/STAGE-14). The text carries the sign and the resource's name, so its meaning never rests on color.
  */
@@ -11,13 +11,11 @@ export const FLOATING_RESOURCES = Object.freeze([
 ]);
 
 /**
- * The changed resources between two states.
- * @param {Record<string, number>} before  Values by resource id
- * @param {Record<string, number>} after   Values by resource id
+ * The changed resources between two states: Wounds from 3 to 10 with Void unchanged gives
+ * `[{ id: "wounds", delta: 7 }]`.
+ * @param {Record<string, number>} before - Values by resource id
+ * @param {Record<string, number>} after - Values by resource id
  * @returns {Array<{id: string, delta: number}>}  One entry per resource that changed, in FLOATING_RESOURCES order
- *
- * @example
- * floatingChanges({ wounds: 3, void: 2 }, { wounds: 10, void: 2 }); // [{ id: "wounds", delta: 7 }]
  */
 export function floatingChanges(before, after) {
   return FLOATING_RESOURCES.map(({ id }) => ({
@@ -27,14 +25,10 @@ export function floatingChanges(before, after) {
 }
 
 /**
- * The text for one change: its sign, size, and the resource's name.
+ * The text for one change: its sign, size, and the resource's name, such as "+7 Wounds" or "−1 Void Points".
  * @param {number} delta
- * @param {string} name  The resource's localized name
+ * @param {string} name - The resource's localized name
  * @returns {string}
- *
- * @example
- * floatingText(7, "Wounds"); // "+7 Wounds"
- * floatingText(-1, "Void Points"); // "−1 Void Points"
  */
 export function floatingText(delta, name) {
   return `${delta > 0 ? "+" : "−"}${Math.abs(delta)} ${name}`;

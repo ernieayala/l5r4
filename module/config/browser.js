@@ -15,8 +15,6 @@ import {
   TRAITS
 } from "./localization.js";
 
-const freeze = Object.freeze;
-
 /**
  * @typedef {object} BrowserFilter
  * @property {string} path    The index field it reads; `folderName` is the entry's folder in its pack
@@ -31,7 +29,7 @@ const freeze = Object.freeze;
  * Every filter, by id.
  * @type {Readonly<Record<string, BrowserFilter>>}
  */
-export const BROWSER_FILTERS = freeze({
+export const BROWSER_FILTERS = Object.freeze({
   type: {
     path: "type",
     kind: "select",
@@ -123,7 +121,7 @@ export const BROWSER_FILTERS = freeze({
  * The tabs, in order.
  * @type {ReadonlyArray<BrowserTab>}
  */
-export const BROWSER_TABS = freeze([
+export const BROWSER_TABS = Object.freeze([
   {
     id: "schools",
     documentName: "Item",
@@ -170,8 +168,8 @@ export const BROWSER_TABS = freeze([
  * Reduction.
  * @type {Readonly<Record<string, ReadonlyArray<string>>>}
  */
-export const BROWSER_ROW_FIELDS = freeze({
-  Item: freeze([
+export const BROWSER_ROW_FIELDS = Object.freeze({
+  Item: Object.freeze([
     "system.source.book",
     "system.damageRoll",
     "system.damageKeep",
@@ -179,5 +177,5 @@ export const BROWSER_ROW_FIELDS = freeze({
     "system.bonus",
     "system.reduction"
   ]),
-  Actor: freeze(["system.source.book"])
+  Actor: Object.freeze(["system.source.book"])
 });

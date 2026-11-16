@@ -1,46 +1,23 @@
 /**
- * XP Manager Application
- *
- * Provides a comprehensive interface for managing character experience points including
- * manual XP entries, automatic XP spending tracking, and disadvantage cap management.
- *
- * Key Responsibilities:
- * - **Manual XP Management**: Add and delete manual XP entries with notes
- * - **XP Spending Tracking**: Display automatic XP spending from character purchases
- * - **Sorting**: Sort XP entries by date, amount, or type
- * - **Disadvantage Cap**: Configure disadvantage XP cap for character creation
- * - **Retroactive Updates**: Handle XP data versioning and migrations
- *
- * Foundry VTT Integration:
- * - Extends ApplicationV2 with HandlebarsApplicationMixin
- * - Uses actor flags for XP data storage
- * - Uses data-action delegation for event handling
- * - Integrates with XP calculation services
- *
- * Architectural Notes:
- * - **No DebouncedFieldMixin**: Complex manual entry system with discrete add/delete actions
- * - **Actor-based constructor**: Standard pattern for actor configuration dialogs
- * - **No form submission**: Multiple action buttons for different operations (add, delete, sort, recalculate)
- * - **Sorting integration**: Uses persistent sort preferences via getSortPref/setSortPref utilities
- *
  * @module apps/xp-manager
+ * @description A window over one character's experience points: manual XP entries with notes, the XP spent on
+ * purchases (rebuilt from the actor's items when their version changes), sorting with the saved sort preference, and
+ * the Disadvantage XP cap. It uses no DebouncedFieldMixin and no form submission: each button (add, delete, sort,
+ * recalculate) is one action that writes the actor's flags.
  */
-
-// Config imports
 import { SYS_ID } from "../config/constants.js";
 import { TEMPLATE } from "../config/templates.js";
-
-// Utils imports
 import { T } from "../utils/localization.js";
 import { toInt } from "../utils/type-coercion.js";
 import { getSortPref, setSortPref } from "../utils/sorting.js";
 import { logError } from "../utils/error-logging.js";
-
-// Services imports
 import { buildXpHistory } from "../services/xp/calculator.js";
 import { formatXpEntries } from "../services/xp/formatter.js";
 import { needsRetroactiveUpdate, calculateXpDataVersion } from "../services/xp/versioning.js";
 
+/**
+ * The XP manager window for one actor.
+ */
 export default class XpManagerApplication extends foundry.applications.api.HandlebarsApplicationMixin(
   foundry.applications.api.ApplicationV2
 ) {
@@ -102,64 +79,13 @@ export default class XpManagerApplication extends foundry.applications.api.Handl
   }
 
   /**
-   * Retrieve actor flags for the system.
-   *
-   * @returns {object} Actor flags object or empty object if unavailable
-   * @private
-   */
-  _getFlags() {
-    return this.actor.flags?.[SYS_ID] ?? {};
-  }
-
-  /**
-   * Retrieve manual XP entries from actor flags.
-   *
-   * @param {boolean} [duplicate=false] - Whether to return a deep copy
-   * @returns {Array} Array of manual XP entries
-   * @private
-   */
-  _getXpManual(duplicate = false) {
-    const flags = this._getFlags();
-    const manual = Array.isArray(flags.xpManual) ? flags.xpManual : [];
-    return duplicate ? foundry.utils.duplicate(manual) : manual;
-  }
-
-  /**
-   * Retrieve cached XP spending entries from actor flags.
-   *
-   * @returns {Array} Array of XP spending entries
-   * @private
-   */
-  _getXpSpent() {
-    const flags = this._getFlags();
-    return Array.isArray(flags.xpSpentCache) ? flags.xpSpentCache : [];
-  }
-
-  /**
-   * Calculate total XP delta from array of entries.
-   * Sums delta values, ignoring invalid entries.
-   *
-   * @param {Array} entries - Array of XP entries with delta properties
-   * @returns {number} Total XP delta
-   * @private
-   */
-  _calculateTotal(entries) {
-    return entries.reduce((s, e) => {
-      if (!e || typeof e !== "object") {
-        return s;
-      }
-      return s + (Number.isFinite(+e.delta) ? +e.delta : 0);
-    }, 0);
-  }
-
-  /**
    * Prepare context data for rendering the XP manager.
    * Retrieves XP data, manual entries, spending history, and disadvantage cap.
    * Performs retroactive updates if needed.
    *
    * @param {object} _options - Render options (unused)
    * @returns {Promise<object>} Context object with XP data and entries
-   * @private
+   * @override
    */
   async _prepareContext(_options) {
     if (!this.actor) {
@@ -228,7 +154,6 @@ export default class XpManagerApplication extends foundry.applications.api.Handl
    * Returns safe default values to prevent rendering failures.
    *
    * @returns {object} Fallback context with default values
-   * @private
    */
   _getFallbackContext() {
     return {
@@ -258,13 +183,59 @@ export default class XpManagerApplication extends foundry.applications.api.Handl
   }
 
   /**
+   * Retrieve actor flags for the system.
+   *
+   * @returns {object} Actor flags object or empty object if unavailable
+   */
+  _getFlags() {
+    return this.actor.flags?.[SYS_ID] ?? {};
+  }
+
+  /**
+   * Retrieve manual XP entries from actor flags.
+   *
+   * @param {boolean} [duplicate=false] - Whether to return a deep copy
+   * @returns {Array} Array of manual XP entries
+   */
+  _getXpManual(duplicate = false) {
+    const flags = this._getFlags();
+    const manual = Array.isArray(flags.xpManual) ? flags.xpManual : [];
+    return duplicate ? foundry.utils.duplicate(manual) : manual;
+  }
+
+  /**
+   * Retrieve cached XP spending entries from actor flags.
+   *
+   * @returns {Array} Array of XP spending entries
+   */
+  _getXpSpent() {
+    const flags = this._getFlags();
+    return Array.isArray(flags.xpSpentCache) ? flags.xpSpentCache : [];
+  }
+
+  /**
+   * Calculate total XP delta from array of entries.
+   * Sums delta values, ignoring invalid entries.
+   *
+   * @param {Array} entries - Array of XP entries with delta properties
+   * @returns {number} Total XP delta
+   */
+  _calculateTotal(entries) {
+    return entries.reduce((s, e) => {
+      if (!e || typeof e !== "object") {
+        return s;
+      }
+      return s + (Number.isFinite(+e.delta) ? +e.delta : 0);
+    }, 0);
+  }
+
+  /**
    * Handle add XP action.
    * Extracts amount and note from form, creates new manual XP entry,
    * and clears form fields after successful addition.
    *
    * @param {Event} event - The click event
    * @param {HTMLElement} _target - The clicked element (unused)
-   * @private
    */
   async _onAddXp(event, _target) {
     event.preventDefault();
@@ -313,7 +284,6 @@ export default class XpManagerApplication extends foundry.applications.api.Handl
    *
    * @param {Event} event - The click event
    * @param {HTMLElement} target - The clicked element with data-entry-id attribute
-   * @private
    */
   async _onDeleteEntry(event, target) {
     event.preventDefault();
@@ -345,7 +315,6 @@ export default class XpManagerApplication extends foundry.applications.api.Handl
    *
    * @param {Event} event - The click event
    * @param {HTMLElement} target - The clicked sort header with data-sortby attribute
-   * @private
    */
   async _onSortClick(event, target) {
     event.preventDefault();
@@ -386,7 +355,6 @@ export default class XpManagerApplication extends foundry.applications.api.Handl
    *
    * @param {Event} event - The click event
    * @param {HTMLElement} _target - The clicked element (unused)
-   * @private
    */
   async _onRecalculateXpPurchase(event, _target) {
     event.preventDefault();
@@ -412,7 +380,6 @@ export default class XpManagerApplication extends foundry.applications.api.Handl
    *
    * @param {Event} event - The click event
    * @param {HTMLElement} _target - The clicked element (unused)
-   * @private
    */
   async _onChangeDisadvantageCap(event, _target) {
     event.preventDefault();
@@ -461,8 +428,6 @@ export default class XpManagerApplication extends foundry.applications.api.Handl
    * Perform retroactive XP update.
    * Rebuilds XP spending history from actor items and updates version flag.
    * Only updates cache if spending history has changed.
-   *
-   * @private
    */
   async _performRetroactiveUpdate() {
     try {
@@ -471,7 +436,7 @@ export default class XpManagerApplication extends foundry.applications.api.Handl
       const retroactiveSpent = await buildXpHistory(this.actor);
       const existingCache = this._getXpSpent();
 
-      // Only update cache if spending history has actually changed
+      // Write the cache only when the spending history differs
       // This prevents unnecessary flag updates and re-renders
       const changed = JSON.stringify(existingCache) !== JSON.stringify(retroactiveSpent);
       if (changed) {

@@ -1,10 +1,7 @@
 /**
- * Bow to Weapon Type Migration
- * Converts legacy "bow" item type to unified "weapon" type with isBow flag.
- *
  * @module setup/migrations/items/bow-to-weapon
+ * @description Converts the legacy "bow" item type to the unified "weapon" type with the isBow flag.
  */
-
 import { SYS_ID } from "../../../config/constants.js";
 
 /**
@@ -22,7 +19,7 @@ import { SYS_ID } from "../../../config/constants.js";
  * Migration Details:
  * - Sets damageKeep: 0 (bows calculate damage differently than melee weapons)
  * - Preserves bow mechanics: str (tension rating), range, arrow type
- * - Carries forward explodesOn (typically 10 for standard dice)
+ * - Carries forward explodesOn (10 for standard dice)
  * - Maintains skill/trait associations for attack rolls
  *
  * Uses diff: false because changing document type requires full replacement, not incremental

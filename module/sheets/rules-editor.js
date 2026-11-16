@@ -7,16 +7,16 @@
 
 import { SYS_ID } from "../config/constants.js";
 import { RULE_KEYS } from "../config/rule-keys.js";
-import { describeRule, newRule, ruleFromForm } from "../documents/rule-fields.js";
 import { answeredRules } from "../utils/choices.js";
 import { parseRulesJson } from "../utils/rule-engine.js";
+import { describeRule, newRule, ruleFromForm } from "../documents/rule-fields.js";
 
 /** The editor's template, rendered inside each sheet's Rules tab. */
 export const RULES_EDITOR_TEMPLATE = `systems/${SYS_ID}/templates/rules/_partials/_editor.hbs`;
 
 /**
  * The editor's template context.
- * @param {object[]} rules  The document's stored `system.rules`
+ * @param {object[]} rules - The document's stored `system.rules`
  * @param {"form"|"json"} mode
  * @param {boolean} editable
  * @returns {object}
@@ -34,10 +34,10 @@ export function rulesEditorContext(rules, mode, editable) {
 
 /**
  * Turn the editor's submitted fields, or its JSON, into `system.rules` in a sheet's processed form data. Text that
- * does not parse throws, which ApplicationV2 shows as an error and saves nothing (client/applications/api/
- * application.mjs:2159-2175).
- * @param {object} data      The sheet's processed (expanded) form data, changed in place
- * @param {object[]} stored  The document's stored rules, which the fields are read over
+ * does not parse throws, which ApplicationV2 shows as an error and saves nothing
+ * [src: client/applications/api/application.mjs:2159-2175].
+ * @param {object} data - The sheet's processed (expanded) form data, changed in place
+ * @param {object[]} stored - The document's stored rules, which the fields are read over
  * @returns {object} The same data
  */
 export function readRulesForm(data, stored) {
@@ -59,9 +59,46 @@ export function readRulesForm(data, stored) {
 }
 
 /**
+ * The editor's actions, for a sheet's DEFAULT_OPTIONS.actions. Each runs with the sheet as `this`; the sheet keeps
+ * its view in `rulesMode`. Frozen: ApplicationV2 deep-clones DEFAULT_OPTIONS before merging them
+ * [src: client/applications/api/application.mjs:471-484], and each sheet spreads or clones this object.
+ * @type {Record<string, function(this: DocumentSheetV2, PointerEvent, HTMLElement): Promise<void>>}
+ */
+export const RULES_EDITOR_ACTIONS = Object.freeze({
+  /**
+   * Add a rule of the key the editor's select names.
+   * @param {PointerEvent} _event - The click
+   * @param {HTMLElement} target - The clicked button inside the editor
+   */
+  async "create-rule"(_event, target) {
+    const key = target.closest("[data-rules-editor]").querySelector("[data-rule-key]").value;
+    if (RULE_KEYS.includes(key)) {
+      await changeRules(this, rules => [...rules, newRule(key)]);
+    }
+  },
+
+  /**
+   * Remove the rule whose card holds the button.
+   * @param {PointerEvent} _event - The click
+   * @param {HTMLElement} target - The clicked button inside the rule's card
+   */
+  async "delete-rule"(_event, target) {
+    const index = Number(target.closest("[data-rule-index]").dataset.ruleIndex);
+    await changeRules(this, rules => rules.filter((_rule, i) => i !== index));
+  },
+
+  /** Switch between the forms and the JSON, keeping what the form holds. */
+  async "toggle-rules-view"() {
+    await changeRules(this, rules => rules);
+    this.rulesMode = this.rulesMode === "json" ? "form" : "json";
+    await this.render();
+  }
+});
+
+/**
  * Save the sheet's form with its rules changed: what the form holds is taken in first.
  * @param {DocumentSheetV2} sheet
- * @param {function(object[]): object[]} change  From the current rules to the new ones
+ * @param {function(object[]): object[]} change - From the current rules to the new ones
  * @returns {Promise<void>}
  */
 async function changeRules(sheet, change) {
@@ -77,31 +114,3 @@ async function changeRules(sheet, change) {
     ui.notifications?.error(err.message);
   }
 }
-
-/**
- * The editor's actions, for a sheet's DEFAULT_OPTIONS.actions. Each runs with the sheet as `this`; the sheet keeps
- * its view in `rulesMode`.
- * @type {Record<string, function(this: DocumentSheetV2, PointerEvent, HTMLElement): Promise<void>>}
- */
-export const RULES_EDITOR_ACTIONS = {
-  /** Add a rule of the key the editor's select names. */
-  async "create-rule"(_event, target) {
-    const key = target.closest("[data-rules-editor]").querySelector("[data-rule-key]").value;
-    if (RULE_KEYS.includes(key)) {
-      await changeRules(this, rules => [...rules, newRule(key)]);
-    }
-  },
-
-  /** Remove the rule whose card holds the button. */
-  async "delete-rule"(_event, target) {
-    const index = Number(target.closest("[data-rule-index]").dataset.ruleIndex);
-    await changeRules(this, rules => rules.filter((_rule, i) => i !== index));
-  },
-
-  /** Switch between the forms and the JSON, keeping what the form holds. */
-  async "toggle-rules-view"() {
-    await changeRules(this, rules => rules);
-    this.rulesMode = this.rulesMode === "json" ? "form" : "json";
-    await this.render();
-  }
-};

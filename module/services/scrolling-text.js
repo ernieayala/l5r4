@@ -4,7 +4,7 @@
  * change, the change floats over each of its tokens on every client that has the `floatingNumbers` setting on. The
  * client making the update records the values before it in the update's options, which reach every client's
  * `updateActor`; each compares them with the prepared values after. A token this user cannot see shows nothing, as
- * core's own status text does (client/documents/active-effect.mjs:1039-1055).
+ * core's own status text does [src: client/documents/active-effect.mjs:1039-1055].
  */
 
 import { SYS_ID } from "../config/constants.js";
@@ -20,6 +20,12 @@ const COLORS = Object.freeze({
   wounds: { up: 0xff6b5a, down: 0x7bd88f },
   void: { up: 0x9ecbff, down: 0xc9b8ff }
 });
+
+/** Register the floating numbers' hooks, once during init. */
+export function initializeScrollingText() {
+  Hooks.on("preUpdateActor", onPreUpdateActor);
+  Hooks.on("updateActor", onUpdateActor);
+}
 
 /**
  * The shown resources' prepared values.
@@ -82,10 +88,4 @@ function onUpdateActor(actor, _changes, options) {
       );
     });
   }
-}
-
-/** Register the floating numbers' hooks, once during init. */
-export function initializeScrollingText() {
-  Hooks.on("preUpdateActor", onPreUpdateActor);
-  Hooks.on("updateActor", onUpdateActor);
 }

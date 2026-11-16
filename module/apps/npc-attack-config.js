@@ -1,36 +1,18 @@
 /**
- * NPC Attack Configuration Application
- *
- * Provides a form interface for configuring NPC attack and damage data including
- * roll/keep values, modifiers, and action types.
- *
- * Key Responsibilities:
- * - **Attack Configuration**: Manage attack name, roll/keep dice, modifier, and type
- * - **Damage Configuration**: Manage damage roll/keep dice, modifier, and type
- * - **Form Submission**: Update actor system data with configured values
- *
- * Foundry VTT Integration:
- * - Extends ApplicationV2 with HandlebarsApplicationMixin
- * - Uses data-action delegation for event handling
- * - Closes on successful form submission
- *
- * Architectural Notes:
- * - **No DebouncedFieldMixin**: Traditional form submission pattern, saves on button click
- * - **Multi-parameter constructor**: Requires both `actor` and `attackKey` (e.g., "attack1")
- *   to identify which of the NPC's multiple attacks is being configured
- * - **closeOnSubmit: true**: One-time configuration, closes after saving attack data
- *
  * @module apps/npc-attack-config
+ * @description A form window for one NPC attack slot and its damage: the attack's name, roll and keep dice, modifier,
+ * and action type, and the damage's dice, modifier, and type. It uses no DebouncedFieldMixin: the values save
+ * together when the user clicks save, and the window closes then. The constructor takes the actor and the attack key
+ * (`attack1`), because an NPC has several attack slots.
  */
-
-// Config imports
 import { SYS_ID } from "../config/constants.js";
 import { ACTION_TYPES } from "../config/localization.js";
-
-// Utils imports
 import { T } from "../utils/localization.js";
 import { logError } from "../utils/error-logging.js";
 
+/**
+ * The attack configuration window for one NPC attack slot.
+ */
 export default class NpcAttackConfigApplication extends foundry.applications.api.HandlebarsApplicationMixin(
   foundry.applications.api.ApplicationV2
 ) {
@@ -108,7 +90,7 @@ export default class NpcAttackConfigApplication extends foundry.applications.api
    *
    * @param {object} _options - Render options (unused)
    * @returns {Promise<object>} Context object with attack and damage data
-   * @private
+   * @override
    */
   async _prepareContext(_options) {
     if (!this.actor) {
@@ -158,7 +140,6 @@ export default class NpcAttackConfigApplication extends foundry.applications.api
    * Returns safe default values to prevent rendering failures.
    *
    * @returns {object} Fallback context with default values
-   * @private
    */
   _getFallbackContext() {
     return {
@@ -179,7 +160,6 @@ export default class NpcAttackConfigApplication extends foundry.applications.api
    * @param {Event} _event - The submit event (unused)
    * @param {HTMLFormElement} _form - The form element (unused)
    * @param {FormDataExtended} formData - The form data
-   * @private
    */
   async _onSubmit(_event, _form, formData) {
     // Expand flat form data into nested object structure
@@ -210,7 +190,6 @@ export default class NpcAttackConfigApplication extends foundry.applications.api
    *
    * @param {Event} _event - The click event (unused)
    * @param {HTMLElement} _target - The clicked element (unused)
-   * @private
    */
   async _onSave(_event, _target) {
     this.element.requestSubmit();

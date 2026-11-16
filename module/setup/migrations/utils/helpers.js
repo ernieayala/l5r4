@@ -1,21 +1,18 @@
 /**
- * Migration Helper Utilities
- * Provides shared utility functions for data migration operations including path manipulation,
- * wound level data normalization, and migration marker management for idempotency.
- *
  * @module setup/migrations/utils/helpers
+ * @description Shared helpers for the data migration steps: dot-path reads and writes, Wound Rank data
+ * normalization, and the per-document migration marker that makes a second run skip a document.
  */
-
 import { SYS_ID, MIGRATION_FLAG } from "../../../config/constants.js";
 
 /**
  * Retrieves a nested property value from an object using dot notation path.
  *
- * Safely traverses nested object structure to retrieve deeply nested values without
- * throwing errors if intermediate properties are missing. Used by schema migration
+ * Walks the nested object structure and returns undefined, without throwing, when an
+ * intermediate property is missing. Used by schema migration
  * functions to read legacy field locations before transformation.
  *
- * @param {Object} obj - Source object to traverse
+ * @param {object} obj - Source object to traverse
  * @param {string} path - Dot-delimited property path (e.g., "system.armor.armor_tn")
  * @returns {*} The value at the specified path, or undefined if path doesn't exist
  */
@@ -24,7 +21,7 @@ export function getByPath(obj, path) {
     return path
       .split(".")
       .reduce((acc, key) => (acc !== undefined && acc !== null ? acc[key] : undefined), obj);
-  } catch (_e) {
+  } catch {
     return undefined;
   }
 }
@@ -32,11 +29,11 @@ export function getByPath(obj, path) {
 /**
  * Sets a nested property value on an object using dot notation path.
  *
- * Creates intermediate objects as needed when traversing the path. Mutates the original
- * object directly. Used by schema migrations to write transformed values to new field
+ * Creates intermediate objects as needed when traversing the path, and mutates the
+ * original object. Used by schema migrations to write transformed values to new field
  * locations while building update payloads.
  *
- * @param {Object} obj - Target object to modify (mutated in place)
+ * @param {object} obj - Target object to modify (mutated in place)
  * @param {string} path - Dot-delimited property path (e.g., "system.armor.armorTn")
  * @param {*} value - Value to assign at the target path
  * @returns {void}
@@ -61,7 +58,7 @@ export function setByPath(obj, path, value) {
  * gracefully without throwing errors. Used by schema migrations to clean up legacy
  * field names after copying their values to new locations.
  *
- * @param {Object} obj - Target object to modify (mutated in place)
+ * @param {object} obj - Target object to modify (mutated in place)
  * @param {string} path - Dot-delimited property path (e.g., "system.armor.armor_tn")
  * @returns {void}
  */
@@ -90,9 +87,9 @@ export function deleteByPath(obj, path) {
  * L5R4 Wound Penalties:
  * - Nicked: +3 TN, Grazed: +5 TN, Hurt: +10 TN, Injured: +15 TN
  * - Crippled: +20 TN, Down: +40 TN
- * - Penalties increase the TN of all rolls, making actions harder
+ * - Penalties increase the TN of all rolls, making actions harder.
  *
- * @param {Object} woundData - Wound level data object with penalty/value properties (mutated)
+ * @param {object} woundData - Wound level data object with penalty/value properties (mutated)
  * @returns {boolean} True if any normalization changes were made, false otherwise
  */
 export function normalizeWoundLevelData(woundData) {
@@ -148,7 +145,6 @@ export function hasBeenMigrated(doc, targetVersion) {
  * @param {Document} doc - Actor or Item document to mark as migrated
  * @param {string} version - System version to mark (e.g., "1.2.3")
  * @returns {Promise<void>}
- * @async
  */
 export async function markAsMigrated(doc, version) {
   try {

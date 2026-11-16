@@ -1,20 +1,7 @@
 /**
- * Image Editor UI Utility
- *
- * Provides image selection functionality for actor documents using Foundry's
- * FilePicker API. Handles file selection, validation, and actor document updates.
- *
- * Responsibilities:
- * - Opens Foundry FilePicker for image selection
- * - Manages FilePicker positioning relative to trigger element
- * - Handles async actor.img updates with error recovery
- *
- * Foundry APIs:
- * - foundry.applications.apps.FilePicker - File browser and selector
- * - Actor#update() - Document update method
- *
  * @module sheets/ui/image-editor
- * @requires Foundry v13+
+ * @description Picks a new actor image with foundry.applications.apps.FilePicker, opened beside the element that
+ * triggered it, and writes the chosen path to the actor's img; a failed update is logged, not thrown.
  */
 
 import { SYS_ID } from "../../config/constants.js";
@@ -24,7 +11,7 @@ import { SYS_ID } from "../../config/constants.js";
  *
  * Creates and displays a FilePicker configured for image selection. When the user
  * selects a file, automatically updates the actor's image property. The FilePicker
- * is positioned relative to the provided position (typically the triggering element).
+ * opens at an offset from the given position, the triggering element's in practice.
  *
  * Position Offset Strategy:
  * - Adds 40px vertical offset to avoid covering the trigger element
@@ -33,10 +20,10 @@ import { SYS_ID } from "../../config/constants.js";
  * Error Handling:
  * - Actor update failures are logged but do not throw
  * - FilePicker errors bubble to caller
- * - Non-blocking: UI remains functional after update failures
+ * - Non-blocking: UI remains functional after update failures.
  *
  * @param {L5R4Actor} actor - The actor document whose image will be updated
- * @param {Object} position - Positioning data for the FilePicker dialog
+ * @param {object} position - Positioning data for the FilePicker dialog
  * @param {number} position.top - Top coordinate in pixels
  * @param {number} position.left - Left coordinate in pixels
  * @returns {Promise<string|false>} Promise resolving to selected file path,

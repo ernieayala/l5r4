@@ -1,3 +1,8 @@
+/**
+ * @module data/item/equipment-data
+ * @description The data model physical equipment Item subtypes extend.
+ */
+
 import { booleanField, coinsField, stringField } from "../fields.js";
 import { migrateKeywordsSource } from "../migrate-source.js";
 import ItemData from "./base-data.js";

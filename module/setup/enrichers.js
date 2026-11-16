@@ -3,9 +3,8 @@
  * @description Registers the text links (roadmap/STAGE-14) as core text enrichers, so `@Check[...]`, `@Damage[...]`,
  * `@Condition[...]`, and `@Fear[...]` render as links in any journal, item description, or chat message. A link that
  * does not parse renders broken, with its reason. Core wraps each in `<enriched-content>` and calls `onRender` when
- * it joins the page (client/applications/elements/enriched-content.mjs:39-53).
+ * it joins the page [src: client/applications/elements/enriched-content.mjs:39-53].
  */
-
 import { LINK_TEMPLATES } from "../config/templates.js";
 import { T } from "../utils/localization.js";
 import { LINK_PATTERN, parseLink } from "../utils/link-syntax.js";
@@ -23,9 +22,19 @@ const ICONS = Object.freeze({
   Fear: "fa-solid fa-ghost"
 });
 
+/** Register the text links with core's enricher list, once during init. */
+export function registerEnrichers() {
+  CONFIG.TextEditor.enrichers.push({
+    id: ENRICHER_ID,
+    pattern: LINK_PATTERN,
+    enricher: enrichLink,
+    onRender: onRenderLink
+  });
+}
+
 /**
  * Render one link found in text.
- * @param {RegExpMatchArray} match  [whole, type, params, label]
+ * @param {RegExpMatchArray} match - [whole, type, params, label]
  * @returns {Promise<HTMLElement>}
  */
 async function enrichLink(match) {
@@ -86,7 +95,7 @@ function onActivate(link, action, signal) {
 
 /**
  * Wire a rendered link. A GM's Check link gets a second button that posts a request card.
- * @param {HTMLElement} element  The `<enriched-content>` wrapper
+ * @param {HTMLElement} element - The `<enriched-content>` wrapper
  * @param {{signal: AbortSignal}} options
  */
 function onRenderLink(element, { signal }) {
@@ -128,14 +137,4 @@ function onRenderLink(element, { signal }) {
       signal
     );
   }
-}
-
-/** Register the text links with core's enricher list, once during init. */
-export function registerEnrichers() {
-  CONFIG.TextEditor.enrichers.push({
-    id: ENRICHER_ID,
-    pattern: LINK_PATTERN,
-    enricher: enrichLink,
-    onRender: onRenderLink
-  });
 }

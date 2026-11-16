@@ -1,10 +1,8 @@
 /**
- * Status Effect Rules Migration
- * Gives status effects created before the rule engine the rules, group, and level their status now carries.
- *
  * @module setup/migrations/actors/status-effect-rules
+ * @description Gives status effects created before the rule engine the rules, group, and level their status now
+ * carries.
  */
-
 import { SYS_ID } from "../../../config/constants.js";
 import { statusEffectUpdate } from "../../../utils/status-data.js";
 

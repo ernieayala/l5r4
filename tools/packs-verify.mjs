@@ -21,7 +21,11 @@ const RULES = "game-rules";
 const SOURCES = "src/packs";
 const RUN = 6;
 
-/** Lower-case words, apostrophes kept, everything else a break. */
+/**
+ * Lower-case words, apostrophes kept, everything else a break.
+ * @param {string} text - The text to split
+ * @returns {string[]} The words in order
+ */
 const words = text =>
   String(text)
     .toLowerCase()
@@ -57,6 +61,8 @@ for (const text of files) {
  * plural) wins over one that holds it among other words ("Aiguchi & Tanto"), so "Yari" is not read from "Nage-yari".
  * The search starts at the marker of the page the entry cites, so a short name such as "Bo" finds its own entry and
  * not a word in an earlier heading.
+ * @param {string} name - The entry's name
+ * @param {number} page - The printed page the entry cites
  * @returns {{heading: string, text: string}|null}
  */
 function block(name, page) {
@@ -84,7 +90,11 @@ function block(name, page) {
   return null;
 }
 
-/** Every string in a value, nested ones included. */
+/**
+ * Every string in a value, nested ones included.
+ * @param {*} value - A string, an object or array of values, or anything else
+ * @returns {string[]} The strings found
+ */
 function strings(value) {
   if (typeof value === "string") {
     return [value];
@@ -95,10 +105,17 @@ function strings(value) {
   return [];
 }
 
-/** The base name of an entry: the part before any parenthesis. */
+/**
+ * The base name of an entry: the part before any parenthesis.
+ * @param {string} name - The entry's name
+ * @returns {string} The name without its parenthesis
+ */
 const baseName = name => name.replace(/\s*\(.*\)\s*$/, "");
 
-/** The Advantage and Disadvantage subtypes a heading prints (p.146). */
+/**
+ * The Advantage and Disadvantage subtypes a heading prints.
+ * game-rules/63_advantages_and_disadvantages.md, p.146
+ */
 const SUBTYPES = new Set(["physical", "mental", "social", "material", "spiritual"]);
 
 /** A Trait or the Void Ring as the book names it in a Skill heading, to its key. */
@@ -114,7 +131,10 @@ const TRAIT_WORDS = {
   void: "void"
 };
 
-/** A kiho Type as the book prints it (p.261), to the value `system.type` stores (module/config/localization.js). */
+/**
+ * A kiho Type as the book prints it, to the value `system.type` stores (module/config/localization.js).
+ * game-rules/87_kiho.md, p.261
+ */
 const KIHO_TYPE_WORDS = {
   internal: "internal",
   kharmic: "karmic",
@@ -125,10 +145,18 @@ const KIHO_TYPE_WORDS = {
 /** Rank words a Technique heading may print, as "RANK THREE:". */
 const RANK_WORDS = { one: 1, two: 2, three: 3, four: 4, five: 5 };
 
-/** The Trait a printed "+1 Strength" names, as its key; a Void bonus is "void". */
+/**
+ * The Trait a printed "+1 Strength" names, as its key; a Void bonus is "void".
+ * @param {string} text - A heading or Benefit line
+ * @returns {string|undefined} The Trait key, or undefined when the text names none
+ */
 const bonusTrait = text => TRAIT_WORDS[words(text.match(/\+1\s+([A-Za-z]+)/)?.[1] ?? "")[0]];
 
-/** The TraitAdjust rule of an entry, as "str +1". */
+/**
+ * The TraitAdjust rule of an entry, as "str +1".
+ * @param {object} system - The entry's `system` data
+ * @returns {string} The Trait and bonus, or "none"
+ */
 const traitAdjust = system => {
   const rule = (system.rules ?? []).find(r => r.key === "TraitAdjust");
   return rule ? `${rule.trait} +${rule.value}` : "none";
@@ -137,6 +165,8 @@ const traitAdjust = system => {
 /**
  * Every heading that holds `name` among its words, from the cited page's marker on, with the text under it. A
  * School prints its name twice, over its story and over its numbers, so a check picks the block it needs.
+ * @param {string} name - The entry's name
+ * @param {number} page - The printed page the entry cites
  * @returns {Array<{heading: string, text: string}>}
  */
 function blocksNamed(name, page) {
@@ -165,6 +195,8 @@ function blocksNamed(name, page) {
 /**
  * A creature's text: from the heading naming it to the next heading that is not one of its Ring and Trait lines
  * ("AIR: 1 EARTH: 2 ...", "REFLEXES 3 - AGILITY 3 ..."), searching from its cited page's marker or the one before.
+ * @param {string} name - The creature's name
+ * @param {number} page - The printed page the entry cites
  * @returns {string|null}
  */
 function creatureText(name, page) {
@@ -193,7 +225,11 @@ const sources = [
     .map(file => path.join(SOURCES, file)),
   ...process.argv.slice(2)
 ].map(file => JSON.parse(readFileSync(file, "utf8")));
-/** A reference's entry, "@entry[techniques/Name]", from the sources. */
+/**
+ * A reference's entry, "@entry[techniques/Name]", from the sources.
+ * @param {string} text - A string holding a reference
+ * @returns {object|undefined} The entry it names, or undefined when none matches
+ */
 const referenced = text => {
   const [, pack, name] = String(text).match(/@entry\[([a-z]+)\/([^\]]+)\]/) ?? [];
   return sources

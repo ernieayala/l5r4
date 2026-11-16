@@ -16,14 +16,14 @@
  *   which call the preparation modules (pc-preparation, npc-preparation)
  * - Wound system uses calculation modules for complex penalty logic
  * - XP tracking uses flags for persistent character advancement data
- *
- * @requires Foundry VTT v11+
  */
 
 import { SYS_ID } from "../config/constants.js";
 import { iconPath } from "../config/icons.js";
-import { toInt } from "../utils/type-coercion.js";
 import { WOUND_LEVEL_ORDER } from "../config/game-mechanics.js";
+import { toInt } from "../utils/type-coercion.js";
+import { rollDataKey } from "../utils/rule-values.js";
+import { highestSchoolRank } from "../utils/mechanics.js";
 import {
   calculateWoundPenalties,
   initializeWoundState,
@@ -33,8 +33,6 @@ import {
 import { trackXpExpenditure } from "./actor/calculations/xp-system.js";
 import { syncGrants } from "./item/lifecycle/grants.js";
 import { addWoundRollOption, applyInitialRules } from "./actor/rules.js";
-import { rollDataKey } from "../utils/rule-values.js";
-import { highestSchoolRank } from "../utils/mechanics.js";
 
 /**
  * Actor document for L5R4 Enhanced system.
@@ -252,7 +250,6 @@ export default class L5R4Actor extends Actor {
    * @param {string[]} order - Ordered wound level keys
    * @param {string} [woundMode] - Optional wound mode override for NPCs
    * @returns {object} Current wound level object with penalty value
-   * @private
    */
   _finalizeWoundPenalties(sys, order, woundMode) {
     initializeWoundState(sys, sys.suffered);

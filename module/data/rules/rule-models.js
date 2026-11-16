@@ -20,25 +20,11 @@ import {
 import { USE_PERIODS } from "../../utils/effects.js";
 import RuleData, { selectorField, typeField, valueField } from "./rule-data.js";
 
-const fields = () => foundry.data.fields;
-
-/**
- * An attack range a rule is limited to, or null for every roll.
- * @returns {foundry.data.fields.StringField}
- */
-function rangeField() {
-  return new (fields().StringField)({
-    required: true,
-    nullable: true,
-    initial: null,
-    choices: ATTACK_RANGES
-  });
-}
-
 /**
  * +XkY or +N on rolls matching `selector`. With `range`, only attacks of that range. An `optional` modifier is
- * offered unticked, for a bonus the roller places on one roll of their choice (Center Stance, p.84); with
- * `consumes`, rolling with it ticked ends the Active Effect that carries it.
+ * offered unticked, for a bonus the roller places on one roll of their choice (Center Stance); with `consumes`,
+ * rolling with it ticked ends the Active Effect that carries it.
+ * game-rules/36_stances.md, p.84
  */
 export class RollModifierRule extends RuleData {
   /** @override */
@@ -91,7 +77,8 @@ export class ArmorTNRule extends RuleData {
 
 /**
  * Reduction added to the actor's. `except` lists damage sources it does not reduce, for a creature with less
- * Reduction against jade (p.318).
+ * Reduction against jade.
+ * game-rules/99_creatures.md, p.318
  */
 export class ReductionRule extends RuleData {
   /** @override */
@@ -101,8 +88,9 @@ export class ReductionRule extends RuleData {
 }
 
 /**
- * Damage sources (pp.319-320): tags such as "jade", "crystal", "obsidian", "spell", "nemuranai" on the damage of
- * rolls matching `selector`, and Reduction those rolls ignore.
+ * Damage sources: tags such as "jade", "crystal", "obsidian", "spell", "nemuranai" on the damage of rolls matching
+ * `selector`, and Reduction those rolls ignore.
+ * game-rules/99_creatures.md, p.319-320
  */
 export class DamageSourceRule extends RuleData {
   /** @override */
@@ -117,8 +105,9 @@ export class DamageSourceRule extends RuleData {
 }
 
 /**
- * Invulnerability (p.319): damage from a source not in `harmedBy` is one Wound. With `only`, the rule covers
- * damage from those sources alone (partial Invulnerability); a shorter `harmedBy` is Superior Invulnerability.
+ * Invulnerability: damage from a source not in `harmedBy` is one Wound. With `only`, the rule covers damage from
+ * those sources alone (partial Invulnerability); a shorter `harmedBy` is Superior Invulnerability.
+ * game-rules/99_creatures.md, p.319
  */
 export class InvulnerabilityRule extends RuleData {
   /** @override */
@@ -131,22 +120,15 @@ export class InvulnerabilityRule extends RuleData {
   }
 }
 
-/** Spirit (p.320): damage from a source not in `harmedBy` is halved. */
+/**
+ * Spirit: damage from a source not in `harmedBy` is halved.
+ * game-rules/99_creatures.md, p.320
+ */
 export class SpiritRule extends RuleData {
   /** @override */
   static defineSchema() {
     return { ...super.defineSchema(), harmedBy: tagsField(["jade", "crystal", "obsidian"]) };
   }
-}
-
-/**
- * A list of damage-source tags.
- * @param {string[]} [initial=[]]
- * @returns {foundry.data.fields.ArrayField}
- */
-function tagsField(initial = []) {
-  const { ArrayField, StringField } = fields();
-  return new ArrayField(new StringField({ required: true, blank: false }), { initial });
 }
 
 /** Wounds added to each Wound Rank, and a change to every Wound Rank's TN penalty. */
@@ -257,7 +239,10 @@ export class RollOptionRule extends RuleData {
   }
 }
 
-/** Ranks added to the Water Ring for movement only, as Blinded's -2 (p.89). */
+/**
+ * Ranks added to the Water Ring for movement only, as Blinded's -2.
+ * game-rules/41_conditional_effects.md, p.89
+ */
 export class MovementRule extends RuleData {
   /** @override */
   static defineSchema() {
@@ -303,8 +288,9 @@ export class ConditionImmunityRule extends RuleData {
 
 /**
  * A roll that ends the Active Effect carrying it: rolled on `event` by the affected actor's owner against `tn`
- * (Dazed and Stunned in the Reactions stage, p.89). After a failure the TN moves by `step`, never past `min`;
+ * (Dazed and Stunned in the Reactions stage). After a failure the TN moves by `step`, never past `min`;
  * `onFailure` says what else a failure does.
+ * game-rules/41_conditional_effects.md, p.89
  */
 export class PeriodicSaveRule extends RuleData {
   /** @override */
@@ -330,7 +316,8 @@ export class PeriodicSaveRule extends RuleData {
 
 /**
  * Uses of a limited resource per period: adds `max` uses of `slug` each `per`. The slug "void" raises the
- * once-per-Round Void Point limit (p.78; STAGE-09 decision 6).
+ * once-per-Round Void Point limit (STAGE-09 decision 6).
+ * game-rules/25_rings_and_traits.md, p.78
  */
 export class ResourceRule extends RuleData {
   /** @override */
@@ -365,8 +352,10 @@ export class OpponentModifierRule extends RuleData {
 }
 
 /**
- * Raises on rolls matching `selector` (p.79; maneuvers pp.86-87): `cost` changes what `maneuver` costs, `cap` changes
- * how many Raises may be declared, and `minimum` is how many must be.
+ * Raises on rolls matching `selector`, and the maneuvers they buy: `cost` changes what `maneuver` costs, `cap`
+ * changes how many Raises may be declared, and `minimum` is how many must be.
+ * game-rules/28_raises.md, p.79
+ * game-rules/38_maneuvers.md, p.86-87
  */
 export class RaiseRuleRule extends RuleData {
   /** @override */
@@ -390,7 +379,8 @@ export class RaiseRuleRule extends RuleData {
 
 /**
  * Skill rolls matching `selector` with no ranks count as `rank` ranks: the dice roll and explode, and Raises are
- * allowed (Unskilled Rolls, p.80).
+ * allowed (Unskilled Rolls).
+ * game-rules/30_skill_rolls_expanded.md, p.80
  */
 export class UnskilledAsRule extends RuleData {
   /** @override */
@@ -400,8 +390,10 @@ export class UnskilledAsRule extends RuleData {
 }
 
 /**
- * The action a roll matching `selector` takes (p.85), shown on its card; the system does not enforce it. `range`
- * limits it to attacks of that range, as a Technique's "melee attacks as a Simple Action" (p.212).
+ * The action a roll matching `selector` takes, shown on its card; the system does not enforce it. `range` limits it
+ * to attacks of that range, as a Technique that makes melee attacks a Simple Action.
+ * game-rules/37_actions.md, p.85
+ * game-rules/76_spider_clan.md, p.212
  */
 export class ActionCostRule extends RuleData {
   /** @override */
@@ -417,10 +409,11 @@ export class ActionCostRule extends RuleData {
 }
 
 /**
- * The XP price of what `selector` names (pp.102-103): `trait:<trait>`, `ring:void`, `skill:<skill>`,
+ * The XP price of what `selector` names: `trait:<trait>`, `ring:void`, `skill:<skill>`,
  * `skill-type:<type>`, `emphasis`, `item:<type>` for every item of a type, or `self` for the item carrying the rule.
  * `value` is the new price, a formula over the base price `@cost`, so "@cost - 1" is a discount of 1. A Trait, Ring,
  * or Skill is priced one rank at a time.
+ * game-rules/48_character_creation_expanded.md, p.102-103
  */
 export class CostRule extends RuleData {
   /** @override */
@@ -430,8 +423,12 @@ export class CostRule extends RuleData {
 }
 
 /**
- * A change to the gains or losses of Honor, Glory, Status, or Taint (pp.90-95, 274). `value` is the new size of each
- * change in points, a formula over its size `@points`: "@points + 1" gains one more, "0" ignores the change.
+ * A change to the gains or losses of Honor, Glory, Status, or Taint. `value` is the new size of each change in
+ * points, a formula over its size `@points`: "@points + 1" gains one more, "0" ignores the change.
+ * game-rules/43_honor.md, p.90-92
+ * game-rules/44_glory.md, p.93
+ * game-rules/45_status.md, p.93-95
+ * game-rules/89_shadowlands_taint.md, p.274
  */
 export class LedgerRule extends RuleData {
   /** @override */
@@ -500,9 +497,10 @@ export class ChoiceSetRule extends RuleData {
 }
 
 /**
- * An item given with this one: a School's Skills and Techniques (p.102). `uuid` names the item to copy; it may use
+ * An item given with this one: a School's Skills and Techniques. `uuid` names the item to copy; it may use
  * a `{choice:<flag>}`. `rank` is the School Rank it waits for (0 at once). A granted Skill comes with `skillRank` free
  * ranks and, when set, a free `emphasis`.
+ * game-rules/48_character_creation_expanded.md, p.102
  */
 export class GrantItemRule extends RuleData {
   /** @override */
@@ -567,7 +565,7 @@ if (RULE_KEYS.some(key => !RULE_MODELS[key])) {
 /**
  * Validate one stored rule. The model is built from a copy: a DataModel cleans the source it is given in place, which
  * would write every default into the stored rule.
- * @param {object} source  An entry of `system.rules`.
+ * @param {object} source - An entry of `system.rules`.
  * @returns {RuleData}
  * @throws {Error} When the key is unknown or a field fails validation.
  */
@@ -577,4 +575,29 @@ export function createRule(source) {
     throw new Error(`Unknown rule key "${source?.key}"`);
   }
   return new Model(foundry.utils.deepClone(source), { strict: true });
+}
+
+const fields = () => foundry.data.fields;
+
+/**
+ * An attack range a rule is limited to, or null for every roll.
+ * @returns {foundry.data.fields.StringField}
+ */
+function rangeField() {
+  return new (fields().StringField)({
+    required: true,
+    nullable: true,
+    initial: null,
+    choices: ATTACK_RANGES
+  });
+}
+
+/**
+ * A list of damage-source tags.
+ * @param {string[]} [initial=[]]
+ * @returns {foundry.data.fields.ArrayField}
+ */
+function tagsField(initial = []) {
+  const { ArrayField, StringField } = fields();
+  return new ArrayField(new StringField({ required: true, blank: false }), { initial });
 }

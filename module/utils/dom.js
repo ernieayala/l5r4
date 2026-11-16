@@ -1,5 +1,5 @@
 /**
- * @module dom
+ * @module utils/dom
  * @description DOM manipulation utilities for event delegation.
  *
  * Provides event delegation helpers that attach listeners to parent elements
@@ -16,28 +16,15 @@ import { logError } from "./error-logging.js";
  *
  * Uses event delegation pattern: attaches listener to parent (root) element
  * and handles events from matching child elements. The handler is called only
- * when the event target or its ancestors match the selector.
- *
+ * when the event target or its ancestors match the selector, such as clicks on `[data-action="roll"]` buttons
+ * or changes on `select[data-field]` elements.
  * @param {Element|Document} root - Parent element to attach listener to
  * @param {string} selector - CSS selector for target elements (use data attributes)
  * @param {string} type - Event type (e.g., "click", "change", "submit")
  * @param {Function} handler - Event handler function (ev, el) => void
- * @param {Object} [options={}] - Event listener options
+ * @param {object} [options={}] - Event listener options
  * @param {boolean} [options.capture=false] - Use capture phase
  * @returns {void}
- *
- * @example
- * // Listen for clicks on buttons with data-action attribute
- * on(document, '[data-action="roll"]', 'click', (ev, el) => {
- *   console.log('Roll button clicked', el);
- * });
- *
- * @example
- * // Listen for changes on select elements
- * on(form, 'select[data-field]', 'change', (ev, el) => {
- *   const field = el.dataset.field;
- *   console.log(`Field ${field} changed to ${el.value}`);
- * });
  */
 export function on(root, selector, type, handler, options = {}) {
   // Defensive validation: ensure root is valid EventTarget

@@ -1,5 +1,5 @@
 /**
- * @module rule-engine
+ * @module utils/rule-engine
  * @description What each rule key produces, as pure functions over validated rule data, the actor's roll data,
  * and its roll options (roadmap/AUTOMATION.md §1, §3). module/documents/actor/rules.js collects the rules and
  * writes these outputs onto the prepared actor.
@@ -24,19 +24,6 @@ import { stackModifiers } from "./modifier-stacking.js";
  */
 
 /**
- * A resolver for one entry's values: its formulas see the actor's roll data plus `@level`.
- * @param {object} rollData
- * @returns {function(*, RuleEntry): number}
- */
-function valueResolver(rollData) {
-  return (value, entry) =>
-    resolveValue(
-      value,
-      entry?.level === undefined ? rollData : { ...rollData, level: entry.level }
-    );
-}
-
-/**
  * @typedef {object} RuleError
  * @property {string} source
  * @property {string} key
@@ -44,36 +31,11 @@ function valueResolver(rollData) {
  */
 
 /**
- * Run `fn` for each rule with one of `keys` whose predicate holds, collecting value errors.
- * @param {RuleEntry[]} entries
- * @param {string[]} keys
- * @param {Set<string>|null} options  null runs every rule, leaving predicates to be tested later.
- * @param {RuleError[]} errors
- * @param {function(object, RuleEntry): void} fn
- */
-function forEachRule(entries, keys, options, errors, fn) {
-  for (const entry of entries) {
-    const { rule } = entry;
-    if (!keys.includes(rule.key) || (options && !testPredicate(rule.predicate, options))) {
-      continue;
-    }
-    try {
-      fn(rule, entry);
-    } catch (err) {
-      errors.push({ source: entry.source, key: rule.key, message: err.message });
-    }
-  }
-}
-
-/**
  * Parse the rules a user typed as JSON. The engine validates each rule's fields; this checks the shape: a list of
- * objects, each with a string `key`.
+ * objects, each with a string `key`. A list with one Note rule gives `{ rules }`; "{" gives an "invalidJson" error
+ * with the parser's message.
  * @param {string} text
  * @returns {{rules?: object[], error?: "invalidJson"|"notList", detail?: string}}
- *
- * @example
- * parseRulesJson('[{"key": "Note", "selector": "attack", "text": "Hi"}]'); // { rules: [...] }
- * parseRulesJson("{"); // { error: "invalidJson", detail: "..." }
  */
 export function parseRulesJson(text) {
   let rules;
@@ -109,7 +71,7 @@ export function statusRules(statusId) {
  * Roll options added by RollOption rules: an option without a toggle is always on; a toggle is on when its
  * `value` is true. Rules are read in order, so a RollOption's predicate sees the options added before it.
  * @param {RuleEntry[]} entries
- * @param {Set<string>} options  Read and extended in place.
+ * @param {Set<string>} options - Read and extended in place.
  * @returns {Set<string>} The same set.
  */
 export function addRuleRollOptions(entries, options) {
@@ -144,8 +106,9 @@ export function traitAdjustments(entries, rollData, options) {
 
 /**
  * Sum of the numeric TraitAdjust values for one Trait on one document's rules, without predicates or formulas:
- * the Family and School bonus that XP and the Trait arrows read (Core Rulebook p.103).
- * @param {object[]} [rules]  Raw `system.rules` of one Item, stored data that may hold anything.
+ * the Family and School bonus that XP and the Trait arrows read.
+ * game-rules/48_character_creation_expanded.md, p.103
+ * @param {object[]} [rules] - Raw `system.rules` of one Item, stored data that may hold anything.
  * @param {string} trait
  * @returns {number}
  */
@@ -208,7 +171,8 @@ export function derivedRuleOutputs(entries, rollData, options) {
     reductionParts.push({ value: part, except: [...rule.except] });
   });
 
-  // Creature defenses (pp.319-320); several of one kind act as the first
+  // Creature defenses; several of one kind act as the first
+  // game-rules/99_creatures.md, p.319-320
   const defenses = { invulnerable: null, spirit: null };
   forEachRule(entries, ["Invulnerability"], options, errors, rule => {
     defenses.invulnerable ??= { harmedBy: [...rule.harmedBy], only: [...rule.only] };
@@ -309,6 +273,77 @@ export function derivedRuleOutputs(entries, rollData, options) {
 }
 
 /**
+ * Bag entries of one kind for any of the selectors, whose predicates hold for the options. An entry from a weapon
+ * counts only for a roll made with that weapon.
+ * @param {Record<string, Record<string, object[]>>} bag
+ * @param {string} kind - A BAG_KINDS value.
+ * @param {string[]} selectors
+ * @param {Set<string>} options
+ * @param {string|null} [weaponId=null] - The weapon the roll is made with
+ * @returns {object[]}
+ */
+export function bagEntries(bag, kind, selectors, options, weaponId = null) {
+  const byKind = bag?.[kind] ?? {};
+  return selectors
+    .flatMap(selector => byKind[selector] ?? [])
+    .filter(entry => !entry.weaponId || entry.weaponId === weaponId)
+    .filter(entry => testPredicate(entry.predicate, options));
+}
+
+/**
+ * The roll, keep, and total bonus the RollModifier rules give rolls with any of the selectors, stacked: what a
+ * sheet shows in a formula such as a Skill's "7k3", before the roll dialog adds its situational choices. Optional
+ * modifiers and those limited to one attack range wait for the dialog.
+ * @param {Record<string, Record<string, object[]>>} bag
+ * @param {string[]} selectors
+ * @param {Set<string>} options
+ * @param {string|null} [weaponId=null] - The weapon the formula is for
+ * @returns {{roll: number, keep: number, total: number}}
+ */
+export function selectorBonus(bag, selectors, options, weaponId = null) {
+  return stackModifiers(
+    bagEntries(bag, "rollModifiers", selectors, options, weaponId).filter(
+      e => !e.optional && !e.range
+    )
+  );
+}
+
+/**
+ * A resolver for one entry's values: its formulas see the actor's roll data plus `@level`.
+ * @param {object} rollData
+ * @returns {function(*, RuleEntry): number}
+ */
+function valueResolver(rollData) {
+  return (value, entry) =>
+    resolveValue(
+      value,
+      entry?.level === undefined ? rollData : { ...rollData, level: entry.level }
+    );
+}
+
+/**
+ * Run `fn` for each rule with one of `keys` whose predicate holds, collecting value errors.
+ * @param {RuleEntry[]} entries
+ * @param {string[]} keys
+ * @param {Set<string>|null} options - null runs every rule, leaving predicates to be tested later.
+ * @param {RuleError[]} errors
+ * @param {function(object, RuleEntry): void} fn
+ */
+function forEachRule(entries, keys, options, errors, fn) {
+  for (const entry of entries) {
+    const { rule } = entry;
+    if (!keys.includes(rule.key) || (options && !testPredicate(rule.predicate, options))) {
+      continue;
+    }
+    try {
+      fn(rule, entry);
+    } catch (err) {
+      errors.push({ source: entry.source, key: rule.key, message: err.message });
+    }
+  }
+}
+
+/**
  * The bag entry for one rule: its resolved numbers, predicate (tested again when a roll reads it, with the
  * target's options), and label.
  * @param {object} rule
@@ -368,40 +403,4 @@ function bagEntry(rule, entry, value) {
       return { ...base, tags: [...rule.tags], ignoreReduction: value(rule.ignoreReduction) };
   }
   throw new Error(`No bag entry for ${rule.key}`);
-}
-
-/**
- * Bag entries of one kind for any of the selectors, whose predicates hold for the options. An entry from a weapon
- * counts only for a roll made with that weapon.
- * @param {Record<string, Record<string, object[]>>} bag
- * @param {string} kind  A BAG_KINDS value.
- * @param {string[]} selectors
- * @param {Set<string>} options
- * @param {string|null} [weaponId=null]  The weapon the roll is made with
- * @returns {object[]}
- */
-export function bagEntries(bag, kind, selectors, options, weaponId = null) {
-  const byKind = bag?.[kind] ?? {};
-  return selectors
-    .flatMap(selector => byKind[selector] ?? [])
-    .filter(entry => !entry.weaponId || entry.weaponId === weaponId)
-    .filter(entry => testPredicate(entry.predicate, options));
-}
-
-/**
- * The roll, keep, and total bonus the RollModifier rules give rolls with any of the selectors, stacked: what a
- * sheet shows in a formula such as a Skill's "7k3", before the roll dialog adds its situational choices. Optional
- * modifiers and those limited to one attack range wait for the dialog.
- * @param {Record<string, Record<string, object[]>>} bag
- * @param {string[]} selectors
- * @param {Set<string>} options
- * @param {string|null} [weaponId=null]  The weapon the formula is for
- * @returns {{roll: number, keep: number, total: number}}
- */
-export function selectorBonus(bag, selectors, options, weaponId = null) {
-  return stackModifiers(
-    bagEntries(bag, "rollModifiers", selectors, options, weaponId).filter(
-      e => !e.optional && !e.range
-    )
-  );
 }

@@ -1,3 +1,8 @@
+/**
+ * @module data/chat/roll-message-data
+ * @description The data model of the `roll` ChatMessage subtype.
+ */
+
 import { booleanField, numberField, stringField } from "../fields.js";
 
 /**
@@ -22,7 +27,8 @@ export default class RollMessageData extends foundry.abstract.TypeDataModel {
       // skill, trait, ring, spell, maho, attack, damage, or roll (a plain XkY roll)
       kind: stringField("roll"),
       label: stringField(),
-      // The Skill rolled, in lower case; a grapple's control rolls use the Skill that started it (p.89)
+      // The Skill rolled, in lower case; a grapple's control rolls use the Skill that started it
+      // game-rules/40_grappling.md, p.89
       skill: stringField(),
       // The pool after modifiers, Void, and the Ten Dice Rule; explode is null for an Unskilled Roll.
       pool: new SchemaField({
@@ -66,9 +72,11 @@ export default class RollMessageData extends foundry.abstract.TypeDataModel {
       ),
       // The message this one re-rolled, keeping the better total
       rerollOf: stringField(),
-      // The failed roll this Honor Roll (p.92) re-rolled
+      // The failed roll this Honor Roll re-rolled
+      // game-rules/43_honor.md, p.92
       honorRollOf: stringField(),
-      // An attack's maneuvers (pp.86-87); increasedDamage is the declared Raises left for +1k0 each
+      // An attack's maneuvers; increasedDamage is the declared Raises left for +1k0 each
+      // game-rules/38_maneuvers.md, p.86-87
       maneuvers: new SchemaField({
         calledShot: numberField(0),
         location: stringField(),
@@ -89,7 +97,8 @@ export default class RollMessageData extends foundry.abstract.TypeDataModel {
         bonus: numberField(0),
         explode: new NumberField({ required: true, nullable: true, initial: 10 })
       }),
-      // A damage roll's sources (jade, spell, ...) and the Reduction it ignores (pp.319-320)
+      // A damage roll's sources (jade, spell, ...) and the Reduction it ignores
+      // game-rules/99_creatures.md, p.319-320
       sources: new ArrayField(stringField()),
       ignoreReduction: numberField(0),
       // The attack a damage roll belongs to

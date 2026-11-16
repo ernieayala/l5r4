@@ -1,10 +1,10 @@
 /**
  * @module tools/coverage/citations
  * @description The citation check (roadmap/STAGE-16, CI). Reads the page citations in `module/` and `tests/`
- * (CLAUDE.md **CITE THE RULE**: `p.82`, `pp.86-87`, `pp.82, 198-199`) and the page of each pack entry in
- * `src/packs/`, and joins them with the manifest's rule entries. It fails on a malformed entry, an `automated` entry whose code cites none of its pages or whose code or
- * test paths do not exist, a `manual` or `out` entry with no decision in an existing file, and a citation to a page
- * no entry covers. It needs only the repo, not `game-rules/` (decision 3).
+ * (CLAUDE.md **CITE THE RULE**: `p.` or `pp.` and a page list such as `82`, `86-87`, `82, 198-199`) and the page
+ * of each pack entry in `src/packs/`, and joins them with the manifest's rule entries. It fails on a malformed entry,
+ * an `automated` entry whose code cites none of its pages or whose code or test paths do not exist, a `manual` or
+ * `out` entry with no decision in an existing file, and a citation to a page no entry covers. It needs only the repo, not `game-rules/` (decision 3).
  */
 
 import { existsSync, readdirSync, readFileSync } from "node:fs";
@@ -108,9 +108,9 @@ export function entryProblems(entry, exists) {
 /**
  * Join the manifest's rule entries with the citations in code and tests.
  * @param {object} data
- * @param {object[]} data.rules  The manifest's rule entries
- * @param {{path: string, text: string}[]} data.code  Source files under module/, and the pack sources
- * @param {{path: string, text: string}[]} data.tests  Source files under tests/
+ * @param {object[]} data.rules - The manifest's rule entries
+ * @param {{path: string, text: string}[]} data.code - Source files under module/, and the pack sources
+ * @param {{path: string, text: string}[]} data.tests - Source files under tests/
  * @param {(path: string) => boolean} data.exists
  * @returns {{invalid: string[], uncited: string[], uncovered: string[], counts: Record<string, number>}}
  */
@@ -143,8 +143,8 @@ export function auditCitations({ rules, code, tests, exists }) {
  * Every file under a directory of the repo whose name matches, with its text.
  * @param {string} repo
  * @param {string} dir
- * @param {string[]} [skip]  Path prefixes left out
- * @param {RegExp} [pattern]  File names kept; .js and .mjs by default
+ * @param {string[]} [skip] - Path prefixes left out
+ * @param {RegExp} [pattern] - File names kept; .js and .mjs by default
  * @returns {{path: string, text: string}[]}
  */
 export function sourcesIn(repo, dir, skip = [], pattern = /\.m?js$/) {
@@ -157,7 +157,7 @@ export function sourcesIn(repo, dir, skip = [], pattern = /\.m?js$/) {
 
 /**
  * Read the manifest and the repo, and run the audit.
- * @param {string} repo  The repo root
+ * @param {string} repo - The repo root
  * @param {object} manifest
  * @returns {ReturnType<typeof auditCitations>}
  */

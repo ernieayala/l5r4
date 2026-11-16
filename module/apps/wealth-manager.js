@@ -1,35 +1,17 @@
 /**
- * Wealth Manager Application
- *
- * Provides an interface for managing actor wealth including adding, removing,
- * and converting between currency denominations (koku, bu, zeni).
- *
- * Key Responsibilities:
- * - **Add Money**: Increase wealth in specified denomination
- * - **Remove Money**: Decrease wealth with validation for sufficient funds
- * - **Currency Conversion**: Convert between denominations (10 zeni = 1 bu, 5 bu = 1 koku)
- *
- * Foundry VTT Integration:
- * - Extends ApplicationV2 with HandlebarsApplicationMixin
- * - Uses data-action delegation for event handling
- * - Updates actor system wealth data
- *
- * Architectural Notes:
- * - **No DebouncedFieldMixin**: Button-driven discrete transactions, not real-time updates
- * - **Actor-based constructor**: Standard pattern for actor configuration dialogs
- * - **No form submission**: Each button triggers immediate discrete action (add/remove/convert)
- *
  * @module apps/wealth-manager
+ * @description A window that adds, removes, and converts an actor's koku, bu, and zeni (10 zeni to 1 bu, 5 bu to 1
+ * koku). It uses no DebouncedFieldMixin and no form submission: each button is one transaction that updates the
+ * actor's wealth at once.
  */
-
-// Config imports
 import { SYS_ID } from "../config/constants.js";
-
-// Utils imports
 import { T } from "../utils/localization.js";
 import { toInt } from "../utils/type-coercion.js";
 import { logError } from "../utils/error-logging.js";
 
+/**
+ * The wealth manager window for one actor.
+ */
 export default class WealthManagerApplication extends foundry.applications.api.HandlebarsApplicationMixin(
   foundry.applications.api.ApplicationV2
 ) {
@@ -90,27 +72,12 @@ export default class WealthManagerApplication extends foundry.applications.api.H
   }
 
   /**
-   * Retrieve current wealth values from actor system data.
-   * Ensures all denominations return valid integers.
-   *
-   * @returns {object} Wealth object with koku, bu, and zeni properties
-   * @private
-   */
-  _getWealth() {
-    return {
-      koku: toInt(this.actor.system?.wealth?.koku, 0),
-      bu: toInt(this.actor.system?.wealth?.bu, 0),
-      zeni: toInt(this.actor.system?.wealth?.zeni, 0)
-    };
-  }
-
-  /**
    * Prepare context data for rendering the wealth manager.
    * Retrieves current wealth values from actor.
    *
    * @param {object} _options - Render options (unused)
    * @returns {Promise<object>} Context object with wealth data
-   * @private
+   * @override
    */
   async _prepareContext(_options) {
     if (!this.actor) {
@@ -137,11 +104,24 @@ export default class WealthManagerApplication extends foundry.applications.api.H
    * Returns safe default values to prevent rendering failures.
    *
    * @returns {object} Fallback context with default values
-   * @private
    */
   _getFallbackContext() {
     return {
       wealth: { koku: 0, bu: 0, zeni: 0 }
+    };
+  }
+
+  /**
+   * Retrieve current wealth values from actor system data.
+   * Ensures all denominations return valid integers.
+   *
+   * @returns {object} Wealth object with koku, bu, and zeni properties
+   */
+  _getWealth() {
+    return {
+      koku: toInt(this.actor.system?.wealth?.koku, 0),
+      bu: toInt(this.actor.system?.wealth?.bu, 0),
+      zeni: toInt(this.actor.system?.wealth?.zeni, 0)
     };
   }
 
@@ -152,7 +132,6 @@ export default class WealthManagerApplication extends foundry.applications.api.H
    *
    * @param {Event} event - The click event
    * @param {HTMLElement} _target - The clicked element (unused)
-   * @private
    */
   async _onAddMoney(event, _target) {
     event.preventDefault();
@@ -190,7 +169,6 @@ export default class WealthManagerApplication extends foundry.applications.api.H
    *
    * @param {Event} event - The click event
    * @param {HTMLElement} _target - The clicked element (unused)
-   * @private
    */
   async _onRemoveMoney(event, _target) {
     event.preventDefault();
@@ -234,7 +212,6 @@ export default class WealthManagerApplication extends foundry.applications.api.H
    *
    * @param {Event} event - The click event
    * @param {HTMLElement} target - The clicked element with data-from attribute
-   * @private
    */
   async _onConvertUp(event, target) {
     event.preventDefault();
@@ -280,7 +257,6 @@ export default class WealthManagerApplication extends foundry.applications.api.H
    *
    * @param {Event} event - The click event
    * @param {HTMLElement} target - The clicked element with data-from attribute
-   * @private
    */
   async _onConvertDown(event, target) {
     event.preventDefault();

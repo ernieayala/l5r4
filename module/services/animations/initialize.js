@@ -1,22 +1,7 @@
 /**
- * Animation System Initialization
- *
- * Registers animation hooks during system initialization.
- * Entry point for the L5R4 visual animation system.
- *
- * Key Responsibilities:
- * - Register animation hooks on 'init' hook
- * - Check for required modules (Sequencer, JB2A)
- * - Log initialization status
- * - Provide graceful degradation messaging
- *
- * Integration:
- * - Called by main system initialization (l5r4-enhanced.js or hooks/register-all.js)
- * - Runs during Foundry 'init' hook (before game is ready)
- * - Does not block system initialization if modules missing
- *
  * @module services/animations/initialize
- * @requires Foundry VTT v13+
+ * @description Starts the visual animation system: registers the animation hooks when Sequencer and JB2A are both
+ * active, and otherwise warns which module is missing and leaves the system running without animations.
  */
 
 import { registerAnimationHooks } from "./hooks.js";

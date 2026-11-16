@@ -1,25 +1,8 @@
 /**
- * Item Sheet Data Enhancement
- *
- * Provides a utility function to augment Foundry VTT sheet context objects with
- * L5R4-specific configuration data needed by Handlebars templates for rendering
- * item sheets and embedded item lists in actor sheets.
- *
- * This module follows the Application v2 data preparation pattern where sheet classes
- * call this function within their `_prepareContext()` methods to inject localized
- * dropdown options, form selectors, and other UI configuration data.
- *
- * Usage Pattern:
- * - ItemSheetV2: Called in `_prepareContext()` to prepare item editing forms
- * - ActorSheetV2: Called in `_prepareContext()` for embedded item rendering
- *
- * Foundry VTT Integration:
- * - Follows Application v2 context preparation lifecycle (Foundry v13+)
- * - Mutates context object in-place following Foundry's data preparation convention
- * - Config objects reference frozen localization constants from config/localization.js
- *
  * @module documents/item/integration/sheet-data
- * @requires Foundry VTT v13+
+ * @description Adds the option lists item sheets and the actor sheets' item lists render (Rings, Traits, Skill
+ * types, and the like) to a sheet's context. The item and actor sheets call it from `_prepareContext()`; the lists
+ * are the frozen constants of config/localization.js.
  */
 
 import {
@@ -39,47 +22,26 @@ import {
 import { NPC_NUMBER_WOUND_LVLS } from "../../../config/game-mechanics.js";
 
 /**
- * @typedef {Object} SheetContext
- * @property {Object} config - Configuration data for template rendering
- * @property {Object} config.arrows - Arrow type localization keys (armor, flesh, humming, rope, willow)
- * @property {Object} config.armorTypes - Armor type localization keys (ashigaru, light, heavy, riding)
- * @property {Object} config.sizes - Weapon size localization keys (small, medium, large)
- * @property {Object} config.rings - Five Rings localization keys (fire, water, air, earth, void)
- * @property {Object} config.ringsWithNone - Five Rings with empty option for dropdowns
- * @property {Object} config.spellRings - Spell Ring keys including "all" for universal spells
- * @property {Object} config.traits - Skill trait keys with Void Ring option (sta, wil, str, per, ref, awa, agi, int, void)
- * @property {Object} config.npcTraits - NPC trait keys (same as traits, semantic alias)
- * @property {Object} config.skillTypes - Skill category keys (high, bugei, merch, low)
- * @property {Object} config.actionTypes - Action timing keys (simple, complex, free)
- * @property {Object} config.kihoTypes - Kiho category keys (internal, karmic, martial, mystic)
- * @property {Object} config.advantageTypes - Advantage/disadvantage type keys (physical, mental, social, material, spiritual, ancestor)
- * @property {Object} config.npcNumberWoundLvls - NPC rank to wound level count mapping (1-8)
+ * @typedef {object} SheetContext
+ * @property {object} config - Configuration data for template rendering
+ * @property {object} config.arrows - Arrow type localization keys (armor, flesh, humming, rope, willow)
+ * @property {object} config.armorTypes - Armor type localization keys (ashigaru, light, heavy, riding)
+ * @property {object} config.sizes - Weapon size localization keys (small, medium, large)
+ * @property {object} config.rings - Five Rings localization keys (fire, water, air, earth, void)
+ * @property {object} config.ringsWithNone - Five Rings with empty option for dropdowns
+ * @property {object} config.spellRings - Spell Ring keys including "all" for universal spells
+ * @property {object} config.traits - Skill trait keys with Void Ring option (sta, wil, str, per, ref, awa, agi, int, void)
+ * @property {object} config.npcTraits - NPC trait keys (same as traits, semantic alias)
+ * @property {object} config.skillTypes - Skill category keys (high, bugei, merch, low)
+ * @property {object} config.actionTypes - Action timing keys (simple, complex, free)
+ * @property {object} config.kihoTypes - Kiho category keys (internal, karmic, martial, mystic)
+ * @property {object} config.advantageTypes - Advantage/disadvantage type keys (physical, mental, social, material, spiritual, ancestor)
+ * @property {object} config.npcNumberWoundLvls - NPC rank to wound level count mapping (1-8)
  */
 
 /**
- * Augments sheet context with L5R4 configuration data for template rendering.
- *
- * Injects a `config` property containing localized dropdown options and form selector
- * data used by item sheet templates and embedded item lists. Each config property maps
- * to frozen localization constants that reference i18n keys for Handlebars {{selectOptions}}
- * and similar helpers.
- *
- * This function mutates the provided data object in-place following Foundry's convention
- * for sheet context preparation. The config data enables templates to render:
- * - Arrow type selectors (weapon sheets)
- * - Weapon size dropdowns (weapon sheets)
- * - Ring selectors (spell/kiho sheets)
- * - Trait dropdowns (skill roll dialogs)
- * - Skill type categories (skill sheets)
- * - Action type selectors (technique/kata sheets)
- * - Advantage/disadvantage type filters (advantage/disadvantage sheets)
- * - NPC wound level configuration (NPC sheets)
- *
- * Foundry Integration:
- * - Called within `_prepareContext()` methods of ItemSheetV2 and ActorSheetV2 classes
- * - Mutates context object per Application v2 data preparation pattern
- * - All config values reference frozen constants for immutability and performance
- *
+ * Set `data.config` to the option lists the item templates render with `{{selectOptions}}`: arrows, armor types,
+ * weapon sizes, Rings, Traits, Skill, action, kiho, and Advantage types, and the NPC Wound Rank counts.
  * @param {SheetContext} data - Mutable sheet context object from Foundry's data preparation
  * @returns {SheetContext} The same data object with injected config property (for chaining)
  */

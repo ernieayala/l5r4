@@ -1,69 +1,27 @@
 /**
- * L5R4 NPC Actor Sheet
- *
- * Provides character sheet interface for NPC actors in the Legend of the Five Rings
- * 4th Edition system. Handles display and interaction for non-player characters including
- * creatures, adversaries, and supporting cast.
- *
- * **Architecture:**
- * Extends BaseActorSheet to inherit common actor sheet functionality (Void Points,
- * item CRUD, roll handling, drag-drop). Adds NPC-specific features including Fear tests,
- * simplified skill display, and limited view for non-GM players.
- *
- * **NPC-Specific Features:**
- * - Fear Test button for creatures with Fear ability (see game rules)
- * - Optional Void Points display controlled by system setting
- * - Simplified trait adjustment (Shift+Click on ranks)
- * - Limited view for players without ownership
- * - Direct Void Ring rank editing (bypasses trait calculation used for PCs)
- *
- * **Foundry Integration:**
- * - Extends BaseActorSheet (which extends ActorSheetV2)
- * - Uses Application v2 event delegation pattern (Foundry v13+)
- * - Uses HandlebarsApplicationMixin with PARTS configuration
- * - Overrides _renderHTML for limited/full template selection
- * - Supports both full (GM/owner) and limited (observer) views
- *
- * **Game Mechanics:**
- * Implements L5R4 rules for NPC combat stats, skill checks, fear tests, and
- * Void Ring adjustment, skill rolls, and combat actions. NPCs may have simplified
- * stat blocks compared to PCs and don't require trait-to-ring calculations.
- *
- * **Foundry APIs:** ActorSheetV2, HandlebarsApplicationMixin, Actor#update
- * **Requires:** Foundry v13+
- *
- * @extends {BaseActorSheet}
- * @mixes HandlebarsApplicationMixin
+ * @module sheets/npc-sheet
+ * @description The NPC actor sheet, for creatures, adversaries, and supporting cast. On top of BaseActorSheet it
+ * adds the Fear test, the NPC's three attack slots, direct Void Ring editing (an NPC's Rings are not derived from
+ * its Traits), Void Points shown only when the Void Ring is 1 or more, and a limited view (npc-limited.hbs) for a
+ * player who does not own the NPC.
  */
-
-// Config
 import { SYS_ID } from "../config/constants.js";
 import { TEMPLATE } from "../config/templates.js";
 import { ACTION_TYPES, STANCES } from "../config/localization.js";
 import { NPC_SORT_KEYS } from "../config/sort-keys.js";
-
-// Utils
 import { clamp } from "../utils/type-coercion.js";
 import { T } from "../utils/localization.js";
 import { on } from "../utils/dom.js";
 import { getSortPref, sortWithPref } from "../utils/sorting.js";
 import { getSectionCollapsedMap } from "../utils/section-state.js";
-
-// Documents
+import { activeStance } from "../utils/stances.js";
 import { enhanceItemSheetData } from "../documents/item/integration/sheet-data.js";
 import { summaryText } from "../documents/summary.js";
-
-// Services
 import * as Fear from "../services/fear.js";
 import { applyLongRest } from "../services/rest.js";
-import { activeStance } from "../utils/stances.js";
 import { SpellCastRoll } from "../services/dice/rolls/spell-cast-roll.js";
 import { MahoCastRoll } from "../services/dice/rolls/maho-cast-roll.js";
-
-// Apps
 import NpcAttackConfigApplication from "../apps/npc-attack-config.js";
-
-// Local
 import { BaseActorSheet } from "./base-actor-sheet.js";
 import { RollHandler } from "./handlers/roll-handler.js";
 import { AppLauncherHandler } from "./handlers/app-launcher-handler.js";
@@ -85,21 +43,31 @@ import { TraitHandler } from "./handlers/trait-handler.js";
  * - Optional Void Points display (controlled by system setting)
  * - Simplified item lists (no advancement hints)
  *
- * @extends {BaseActorSheet}
+ * @augments {BaseActorSheet}
  */
 export default class L5R4NpcSheet extends BaseActorSheet {
   /**
+   * NPC-specific options, merged over BaseActorSheet's by ApplicationV2: the "npc" class and an 840px width for
+   * the stat block.
+   *
+   * @type {object}
+   * @override
+   */
+  static DEFAULT_OPTIONS = {
+    classes: ["npc"],
+    position: { width: 840 }
+  };
+
+  /**
    * Template part configuration for the NPC sheet.
    *
-   * Defines the Handlebars template structure using Foundry v13 PARTS pattern.
    * Supports switching between full and limited views based on ownership.
    *
    * **Template Variants:**
    * - Full view (npc.hbs): Complete stat block for GM/owners
    * - Limited view (npc-limited.hbs): Restricted info for observers
    *
-   * @static
-   * @type {Object}
+   * @type {object}
    */
   static PARTS = {
     form: {
@@ -109,262 +77,6 @@ export default class L5R4NpcSheet extends BaseActorSheet {
       scrollable: [".scrollable-content"]
     }
   };
-
-  /**
-   * NPC-specific options, merged over BaseActorSheet's by ApplicationV2: the "npc" class and an 840px width for
-   * the stat block.
-   *
-   * @static
-   * @type {Object}
-   * @override
-   */
-  static DEFAULT_OPTIONS = {
-    classes: ["npc"],
-    position: { width: 840 }
-  };
-
-  /**
-   * Routes click events on [data-action] elements to appropriate handlers.
-   *
-   * Implements event delegation pattern for all user interactions on the sheet.
-   * Actions are identified by data-action attribute values on interactive elements.
-   *
-   * **Supported Actions:**
-   * - update-item-field: Update item properties in the sheet
-   * - create-item, delete-item, edit-item, expand-item, post-item: Item CRUD operations
-   * - expand-section: Collapse or expand an item list section
-   * - sort-items: Change sort field/direction for item lists
-   * - adjust-void-ring: Adjust Void Ring rank (Shift+Click, NPC-specific)
-   * - roll-ring/skill/trait/attack/damage/weapon-attack: Initiate dice rolls
-   * - test-fear: Trigger Fear test for selected tokens
-   * - adjust-trait: Adjust trait ranks (Shift+Click)
-   * - adjust-void-points: Spend/regain Void Points
-   * - open-combat-config: Open combat configuration dialog (initiative/movement)
-   * - open-wound-config: Open wound threshold configuration dialog
-   *
-   * **Implementation Note:**
-   * Most actions delegate to BaseActorSheet or specialized handlers. NPC-specific
-   * actions include adjust-void-ring (direct Void Ring editing) and test-fear.
-   *
-   * @param {string} action - The data-action attribute value from the clicked element
-   * @param {Event} event - The click event
-   * @param {HTMLElement} element - The element that was clicked
-   * @protected
-   * @override
-   */
-  _onAction(action, event, element) {
-    switch (action) {
-      case "apply-healing":
-        return this._onApplyHealing(event, element);
-      case "update-item-field":
-        return this._onInlineItemEdit(event, element);
-      case "create-item":
-        return this._onItemCreate(event, element);
-      case "delete-item":
-        return this._onItemDelete(event, element);
-      case "edit-item":
-        return this._onItemEdit(event, element);
-      case "expand-item":
-        return this._onItemExpand(event, element);
-      case "expand-section":
-        return ItemCRUDHandler.toggleSection(this._getHandlerContext(), event, element);
-      case "post-item":
-        return this._onItemHeaderToChat(event, element);
-      case "sort-items":
-        return this._onUnifiedSortClick(event, element);
-      case "adjust-void-ring":
-        return this._onVoidAdjust(event, element, +1);
-      // The arrows step the Void Ring without Shift, like the Trait arrows (issue #30)
-      case "increase-void-ring":
-        return this._onVoidAdjust(
-          { preventDefault: () => event.preventDefault(), shiftKey: true },
-          element,
-          +1
-        );
-      case "decrease-void-ring":
-        return this._onVoidAdjust(
-          { preventDefault: () => event.preventDefault(), shiftKey: true },
-          element,
-          -1
-        );
-      case "roll-ring":
-        return RollHandler.npcRingRoll(this._getHandlerContext(), event, element);
-      case "roll-skill":
-        return this._onSkillRoll(event, element);
-      case "roll-trait":
-        return this._onTraitRoll(event, element);
-      case "roll-attack":
-        return this._onAttackRoll(event, element);
-      case "roll-damage":
-        return this._onDamageRoll(event, element);
-      case "roll-weapon-attack":
-        return this._onWeaponAttackRoll(event, element);
-      case "cast-spell":
-        return this._onCastSpell(event, element);
-      case "test-fear":
-        return this._onFearTest(event, element);
-      case "adjust-trait":
-        return this._onTraitAdjust(event, element, +1);
-      case "increase-trait":
-        return TraitHandler.increase(this._getHandlerContext(), event, element);
-      case "decrease-trait":
-        return TraitHandler.decrease(this._getHandlerContext(), event, element);
-      case "adjust-void-points":
-        return this._onVoidPointsAdjust(event, element, +1);
-      case "toggle-movement-type":
-        return StanceHandler.toggleMovementType(this._getHandlerContext(), event);
-      case "open-condition-manager":
-        return AppLauncherHandler.openConditionManager(this._getHandlerContext(), event, element);
-      case "open-combat-config":
-        return AppLauncherHandler.openCombatConfig(this._getHandlerContext(), event, element);
-      case "open-wound-config":
-        return AppLauncherHandler.openWoundConfig(this._getHandlerContext(), event, element);
-      case "edit-attack":
-      case "add-attack":
-        return this._onEditAttack(event, element);
-      case "delete-attack":
-        return this._onDeleteAttack(event, element);
-    }
-  }
-
-  /**
-   * Routes right-click (contextmenu) events on [data-action] elements.
-   *
-   * Handles reverse operations for rank adjustment actions (decrement instead of
-   * increment). Falls back to _onAction for actions that don't have context variants.
-   *
-   * **Context-Specific Actions:**
-   * - adjust-trait: Decrement trait (Shift+Right-Click)
-   * - adjust-void-ring: Decrement Void Ring (Shift+Right-Click, NPC-specific)
-   * - adjust-void-points: Regain Void Point (Right-Click)
-   *
-   * @param {string} action - The data-action attribute value
-   * @param {Event} event - The contextmenu event
-   * @param {HTMLElement} element - The element that was right-clicked
-   * @protected
-   * @override
-   */
-  _onActionContext(action, event, element) {
-    switch (action) {
-      case "adjust-trait":
-        return this._onTraitAdjust(event, element, -1);
-      case "adjust-void-ring":
-        return this._onVoidAdjust(event, element, -1);
-      case "adjust-void-points":
-        return this._onVoidPointsAdjust(event, element, -1);
-      default:
-        return this._onAction(action, event, element);
-    }
-  }
-
-  /**
-   * Routes change events on [data-action] form elements.
-   *
-   * Handles form field changes for inline editing and stance changes.
-   * Only processes actions that require change event handling.
-   *
-   * **Supported Actions:**
-   * - update-item-field: Update item properties from form fields
-   * - apply-stance: Update character's combat stance
-   *
-   * @param {string} action - The data-action attribute value
-   * @param {Event} event - The change event
-   * @param {HTMLElement} element - The form element that changed
-   * @protected
-   * @override
-   */
-  _onActionChange(action, event, element) {
-    if (action === "update-item-field") {
-      return this._onInlineItemEdit(event, element);
-    }
-    if (action === "apply-stance") {
-      return StanceHandler.changeStance(this._getHandlerContext(), event, element);
-    }
-  }
-
-  /**
-   * Adjusts NPC's Void Ring rank by the specified delta.
-   *
-   * NPCs have direct Void Ring editing unlike PCs where Rings are derived from traits.
-   * This allows GMs to quickly adjust NPC power levels and Void Point pools.
-   *
-   * **Safety Mechanism:**
-   * Requires Shift key to prevent accidental adjustments. Works with KeyboardBehaviorMixin
-   * to show visual cursor feedback when Shift is held.
-   *
-   * **Game Rules:**
-   * Void Ring determines Void Points available (equal to Void Ring rank). Most creatures
-   * don't have Void Rings, but some intelligent NPCs and supernatural beings do.
-   *
-   * **Implementation Note:**
-   * Clamps to 0-9 range. Standard character range is 1-10 per core rules, but 0 is
-   * allowed for flexibility (creatures without Void). Max of 9 instead of 10 may be
-   * implementation choice for UI consistency.
-   *
-   * @param {Event} event - DOM event (must have shiftKey = true to execute)
-   * @param {HTMLElement} element - Element containing Void Ring data
-   * @param {number} delta - Direction to adjust (+1 to increase, -1 to decrease)
-   * @returns {Promise<void>}
-   * @protected
-   * @async
-   */
-  async _onVoidAdjust(event, element, delta) {
-    event?.preventDefault?.();
-
-    // Safety check: require Shift key to prevent accidental adjustments
-    if (!event?.shiftKey) {
-      return;
-    }
-
-    const cur =
-      Number(
-        this.actor._source?.system?.rings?.void?.rank ?? this.actor.system?.rings?.void?.rank ?? 0
-      ) || 0;
-    const min = 0;
-    const max = 9;
-    const next = clamp(cur + (delta > 0 ? 1 : -1), min, max);
-    if (next === cur) {
-      return;
-    }
-    try {
-      await this.actor.update({ "system.rings.void.rank": next }, { diff: true });
-    } catch (err) {
-      console.warn(`${SYS_ID} NPC Sheet: failed to update void rank`, { err });
-    }
-  }
-
-  /**
-   * Renders the sheet's HTML based on ownership level.
-   *
-   * Non-GM users without ownership see a limited view showing only basic information
-   * (name, image, basic stats). GMs and owners see the full NPC stat block.
-   *
-   * **View Selection:**
-   * - Limited view (npc-limited.hbs): Non-GM observers
-   * - Full view (npc.hbs): GM or actor owners
-   *
-   * **Foundry Pattern:**
-   * Overrides ActorSheetV2._renderHTML to implement custom template selection.
-   * Returns object with 'form' property containing the rendered element.
-   *
-   * @param {Object} context - Template context data from _prepareContext
-   * @param {Object} _options - Rendering options (unused)
-   * @returns {Promise<{form: HTMLElement}>} Object containing rendered form element
-   * @protected
-   * @async
-   * @override
-   */
-  async _renderHTML(context, _options) {
-    const isLimited = !game.user.isGM && this.actor.limited;
-    const path = isLimited ? TEMPLATE("actor/npc-limited.hbs") : TEMPLATE("actor/npc.hbs");
-    const html = await foundry.applications.handlebars.renderTemplate(path, context);
-    const host = document.createElement("div");
-    host.innerHTML = html;
-    // querySelector used here for template host parsing (temporary DOM, not live application)
-    // This is a Foundry v13 pattern for extracting form element from rendered template string
-    const form = host.querySelector("form") || host.firstElementChild || host;
-    return { form };
-  }
 
   /**
    * Prepares template context data for rendering the NPC sheet.
@@ -388,10 +100,8 @@ export default class L5R4NpcSheet extends BaseActorSheet {
    * Called automatically before rendering. Always call super._prepareContext first to
    * inherit base context (editable, limited, owner flags, config data).
    *
-   * @param {Object} options - Rendering options
-   * @returns {Promise<Object>} Complete context object for template rendering
-   * @protected
-   * @async
+   * @param {object} options - Rendering options
+   * @returns {Promise<object>} Complete context object for template rendering
    * @override
    */
   async _prepareContext(options) {
@@ -483,6 +193,242 @@ export default class L5R4NpcSheet extends BaseActorSheet {
   }
 
   /**
+   * Routes click events on [data-action] elements to appropriate handlers.
+   *
+   * Implements event delegation pattern for all user interactions on the sheet.
+   * Actions are identified by data-action attribute values on interactive elements.
+   *
+   * **Supported Actions:**
+   * - update-item-field: Update item properties in the sheet
+   * - create-item, delete-item, edit-item, expand-item, post-item: Item CRUD operations
+   * - expand-section: Collapse or expand an item list section
+   * - sort-items: Change sort field/direction for item lists
+   * - adjust-void-ring: Adjust Void Ring rank (Shift+Click, NPC-specific)
+   * - roll-ring/skill/trait/attack/damage/weapon-attack: Initiate dice rolls
+   * - test-fear: Trigger Fear test for selected tokens
+   * - adjust-trait: Adjust trait ranks (Shift+Click)
+   * - adjust-void-points: Spend/regain Void Points
+   * - open-combat-config: Open combat configuration dialog (initiative/movement)
+   * - open-wound-config: Open wound threshold configuration dialog
+   *
+   * **Implementation Note:**
+   * Most actions delegate to BaseActorSheet or specialized handlers. NPC-specific
+   * actions include adjust-void-ring (direct Void Ring editing) and test-fear.
+   *
+   * @param {string} action - The data-action attribute value from the clicked element
+   * @param {Event} event - The click event
+   * @param {HTMLElement} element - The element that was clicked
+   * @override
+   */
+  _onAction(action, event, element) {
+    switch (action) {
+      case "apply-healing":
+        return this._onApplyHealing(event, element);
+      case "update-item-field":
+        return this._onInlineItemEdit(event, element);
+      case "create-item":
+        return this._onItemCreate(event, element);
+      case "delete-item":
+        return this._onItemDelete(event, element);
+      case "edit-item":
+        return this._onItemEdit(event, element);
+      case "expand-item":
+        return this._onItemExpand(event, element);
+      case "expand-section":
+        return ItemCRUDHandler.toggleSection(this._getHandlerContext(), event, element);
+      case "post-item":
+        return this._onItemHeaderToChat(event, element);
+      case "sort-items":
+        return this._onUnifiedSortClick(event, element);
+      case "adjust-void-ring":
+        return this._onVoidAdjust(event, element, +1);
+      // The arrows step the Void Ring without Shift, like the Trait arrows (issue #30)
+      case "increase-void-ring":
+        return this._onVoidAdjust(
+          { preventDefault: () => event.preventDefault(), shiftKey: true },
+          element,
+          +1
+        );
+      case "decrease-void-ring":
+        return this._onVoidAdjust(
+          { preventDefault: () => event.preventDefault(), shiftKey: true },
+          element,
+          -1
+        );
+      case "roll-ring":
+        return RollHandler.npcRingRoll(this._getHandlerContext(), event, element);
+      case "roll-skill":
+        return this._onSkillRoll(event, element);
+      case "roll-trait":
+        return this._onTraitRoll(event, element);
+      case "roll-attack":
+        return this._onAttackRoll(event, element);
+      case "roll-damage":
+        return this._onDamageRoll(event, element);
+      case "roll-weapon-attack":
+        return this._onWeaponAttackRoll(event, element);
+      case "cast-spell":
+        return this._onCastSpell(event, element);
+      case "test-fear":
+        return this._onFearTest(event, element);
+      case "adjust-trait":
+        return this._onTraitAdjust(event, element, +1);
+      case "increase-trait":
+        return TraitHandler.increase(this._getHandlerContext(), event, element);
+      case "decrease-trait":
+        return TraitHandler.decrease(this._getHandlerContext(), event, element);
+      case "adjust-void-points":
+        return this._onVoidPointsAdjust(event, element, +1);
+      case "toggle-movement-type":
+        return StanceHandler.toggleMovementType(this._getHandlerContext(), event);
+      case "open-condition-manager":
+        return AppLauncherHandler.openConditionManager(this._getHandlerContext(), event, element);
+      case "open-combat-config":
+        return AppLauncherHandler.openCombatConfig(this._getHandlerContext(), event, element);
+      case "open-wound-config":
+        return AppLauncherHandler.openWoundConfig(this._getHandlerContext(), event, element);
+      case "edit-attack":
+      case "add-attack":
+        return this._onEditAttack(event, element);
+      case "delete-attack":
+        return this._onDeleteAttack(event, element);
+    }
+  }
+
+  /**
+   * Routes right-click (contextmenu) events on [data-action] elements.
+   *
+   * Handles reverse operations for rank adjustment actions (decrement instead of
+   * increment). Falls back to _onAction for actions that don't have context variants.
+   *
+   * **Context-Specific Actions:**
+   * - adjust-trait: Decrement trait (Shift+Right-Click)
+   * - adjust-void-ring: Decrement Void Ring (Shift+Right-Click, NPC-specific)
+   * - adjust-void-points: Regain Void Point (Right-Click)
+   *
+   * @param {string} action - The data-action attribute value
+   * @param {Event} event - The contextmenu event
+   * @param {HTMLElement} element - The element that was right-clicked
+   * @override
+   */
+  _onActionContext(action, event, element) {
+    switch (action) {
+      case "adjust-trait":
+        return this._onTraitAdjust(event, element, -1);
+      case "adjust-void-ring":
+        return this._onVoidAdjust(event, element, -1);
+      case "adjust-void-points":
+        return this._onVoidPointsAdjust(event, element, -1);
+      default:
+        return this._onAction(action, event, element);
+    }
+  }
+
+  /**
+   * Routes change events on [data-action] form elements.
+   *
+   * Handles form field changes for inline editing and stance changes.
+   * Only processes actions that require change event handling.
+   *
+   * **Supported Actions:**
+   * - update-item-field: Update item properties from form fields
+   * - apply-stance: Update character's combat stance.
+   *
+   * @param {string} action - The data-action attribute value
+   * @param {Event} event - The change event
+   * @param {HTMLElement} element - The form element that changed
+   * @override
+   */
+  _onActionChange(action, event, element) {
+    if (action === "update-item-field") {
+      return this._onInlineItemEdit(event, element);
+    }
+    if (action === "apply-stance") {
+      return StanceHandler.changeStance(this._getHandlerContext(), event, element);
+    }
+  }
+
+  /**
+   * Adjusts NPC's Void Ring rank by the specified delta.
+   *
+   * NPCs have direct Void Ring editing unlike PCs where Rings are derived from traits.
+   * This allows GMs to quickly adjust NPC power levels and Void Point pools.
+   *
+   * **Safety Mechanism:**
+   * Requires Shift key to prevent accidental adjustments. Works with KeyboardBehaviorMixin
+   * to show visual cursor feedback when Shift is held.
+   *
+   * **Game Rules:**
+   * Void Ring determines Void Points available (equal to Void Ring rank). Most creatures
+   * don't have Void Rings, but some intelligent NPCs and supernatural beings do.
+   *
+   * **Implementation Note:**
+   * Clamps to 0-9 range. Standard character range is 1-10 per core rules, but 0 is
+   * allowed for flexibility (creatures without Void). Max of 9 instead of 10 may be
+   * implementation choice for UI consistency.
+   *
+   * @param {Event} event - DOM event (must have shiftKey = true to execute)
+   * @param {HTMLElement} element - Element containing Void Ring data
+   * @param {number} delta - Direction to adjust (+1 to increase, -1 to decrease)
+   * @returns {Promise<void>}
+   */
+  async _onVoidAdjust(event, element, delta) {
+    event?.preventDefault?.();
+
+    // Safety check: require Shift key to prevent accidental adjustments
+    if (!event?.shiftKey) {
+      return;
+    }
+
+    const cur =
+      Number(
+        this.actor._source?.system?.rings?.void?.rank ?? this.actor.system?.rings?.void?.rank ?? 0
+      ) || 0;
+    const min = 0;
+    const max = 9;
+    const next = clamp(cur + (delta > 0 ? 1 : -1), min, max);
+    if (next === cur) {
+      return;
+    }
+    try {
+      await this.actor.update({ "system.rings.void.rank": next }, { diff: true });
+    } catch (err) {
+      console.warn(`${SYS_ID} NPC Sheet: failed to update void rank`, { err });
+    }
+  }
+
+  /**
+   * Renders the sheet's HTML based on ownership level.
+   *
+   * Non-GM users without ownership see a limited view showing only basic information
+   * (name, image, basic stats). GMs and owners see the full NPC stat block.
+   *
+   * **View Selection:**
+   * - Limited view (npc-limited.hbs): Non-GM observers
+   * - Full view (npc.hbs): GM or actor owners
+   *
+   * **Foundry Pattern:**
+   * Overrides ActorSheetV2._renderHTML to implement custom template selection.
+   * Returns object with 'form' property containing the rendered element.
+   *
+   * @param {object} context - Template context data from _prepareContext
+   * @param {object} _options - Rendering options (unused)
+   * @returns {Promise<{form: HTMLElement}>} Object containing rendered form element
+   * @override
+   */
+  async _renderHTML(context, _options) {
+    const isLimited = !game.user.isGM && this.actor.limited;
+    const path = isLimited ? TEMPLATE("actor/npc-limited.hbs") : TEMPLATE("actor/npc.hbs");
+    const html = await foundry.applications.handlebars.renderTemplate(path, context);
+    const host = document.createElement("div");
+    host.innerHTML = html;
+    // querySelector used here for template host parsing (temporary DOM, not live application)
+    // to extract the form element from the rendered template string
+    const form = host.querySelector("form") || host.firstElementChild || host;
+    return { form };
+  }
+
+  /**
    * Post-render lifecycle hook for setting up interactive UI elements.
    *
    * Initializes UI components that require DOM access:
@@ -499,11 +445,9 @@ export default class L5R4NpcSheet extends BaseActorSheet {
    * Called automatically after template rendering. Always call super._onRender first
    * to ensure parent class setup (event delegation, image error handling) completes.
    *
-   * @param {Object} context - Template context data used for rendering
-   * @param {Object} options - Rendering options
+   * @param {object} context - Template context data used for rendering
+   * @param {object} options - Rendering options
    * @returns {Promise<void>}
-   * @protected
-   * @async
    * @override
    */
   async _onRender(context, options) {
@@ -533,7 +477,6 @@ export default class L5R4NpcSheet extends BaseActorSheet {
    *
    * @param {string} scope - Sort scope identifier (e.g., "skills", "weapons")
    * @returns {string[]} Array of allowed column keys for sorting
-   * @protected
    * @override
    */
   _getAllowedSortKeys(scope) {
@@ -551,10 +494,8 @@ export default class L5R4NpcSheet extends BaseActorSheet {
    * Delegates to healing service which handles calculation, actor update, and chat output.
    *
    * @param {Event} event - Click event on healing button
-   * @param {HTMLElement} element - Button element (unused)
+   * @param {HTMLElement} _element - Button element (unused)
    * @returns {Promise<void>}
-   * @protected
-   * @async
    */
   async _onApplyHealing(event, _element) {
     event?.preventDefault?.();
@@ -582,10 +523,8 @@ export default class L5R4NpcSheet extends BaseActorSheet {
    * Delegates to Fear service which handles roll mechanics and chat output.
    *
    * @param {Event} event - DOM event triggering the Fear test
-   * @param {HTMLElement} element - Element that was clicked
+   * @param {HTMLElement} _element - Element that was clicked
    * @returns {Promise<void>}
-   * @protected
-   * @async
    */
   async _onFearTest(event, _element) {
     event?.preventDefault?.();
@@ -622,7 +561,7 @@ export default class L5R4NpcSheet extends BaseActorSheet {
    *
    * @param {Event} event - Click event
    * @param {HTMLElement} element - Element with data-item-id for spell lookup
-   * @protected
+   * @returns {Promise<ChatMessage|null>|undefined} The cast's chat message, or undefined when the row holds no spell
    */
   _onCastSpell(event, element) {
     event.preventDefault();
@@ -647,8 +586,6 @@ export default class L5R4NpcSheet extends BaseActorSheet {
    * @param {Event} event - Click event
    * @param {HTMLElement} element - Element with data-attack-key attribute
    * @returns {Promise<void>}
-   * @protected
-   * @async
    */
   async _onEditAttack(event, element) {
     event?.preventDefault?.();
@@ -671,8 +608,6 @@ export default class L5R4NpcSheet extends BaseActorSheet {
    * @param {Event} event - Click event
    * @param {HTMLElement} element - Element with data-attack-key attribute
    * @returns {Promise<void>}
-   * @protected
-   * @async
    */
   async _onDeleteAttack(event, element) {
     event?.preventDefault?.();
@@ -712,9 +647,8 @@ export default class L5R4NpcSheet extends BaseActorSheet {
    * @param {Event} event - Form submission event
    * @param {HTMLFormElement} form - The form element being submitted
    * @param {FormData} formData - Raw form data from the browser
-   * @param {Object} [updateData={}] - Additional update data from parent classes
-   * @returns {Object} Validated and coerced data ready for actor.update()
-   * @protected
+   * @param {object} [updateData={}] - Additional update data from parent classes
+   * @returns {object} Validated and coerced data ready for actor.update()
    * @override
    */
   _prepareSubmitData(event, form, formData, updateData = {}) {

@@ -5,7 +5,6 @@
  * remove an effect the user owns. A token-controls button opens and closes it; it redraws when control changes and
  * when effects or the actor change.
  */
-
 import { SYS_ID } from "../config/constants.js";
 import { F, T } from "../utils/localization.js";
 import { effectEnd, usesLeft } from "../utils/effect-duration.js";
@@ -17,6 +16,9 @@ const { ApplicationV2, HandlebarsApplicationMixin } = foundry.applications.api;
 /** The panel, once opened. */
 let panel = null;
 
+/**
+ * The effect panel window, one per client.
+ */
 export default class EffectPanel extends HandlebarsApplicationMixin(ApplicationV2) {
   static DEFAULT_OPTIONS = {
     id: `${SYS_ID}-effect-panel`,
@@ -55,6 +57,49 @@ export default class EffectPanel extends HandlebarsApplicationMixin(ApplicationV
       ? F("l5r4.apps.effectPanel.none", { name: actor.name })
       : T("l5r4.apps.effectPanel.noActor");
     return context;
+  }
+
+  /**
+   * Open the panel, or close it when it is open.
+   * @returns {Promise<EffectPanel>} The panel, once rendered or closed
+   */
+  static toggle() {
+    if (panel?.rendered) {
+      return panel.close();
+    }
+    panel ??= new EffectPanel();
+    return panel.render({ force: true });
+  }
+
+  /** Redraw the open panel. */
+  static refresh() {
+    if (panel?.rendered) {
+      panel.render();
+    }
+  }
+
+  /**
+   * Open an effect's source sheet, or the effect's own when it has none.
+   * @this {EffectPanel}
+   * @param {PointerEvent} _event
+   * @param {HTMLElement} element
+   */
+  static async #onOpenSource(_event, element) {
+    const doc = await fromUuid(element.closest("[data-uuid]").dataset.sourceUuid);
+    doc?.sheet?.render({ force: true });
+  }
+
+  /**
+   * Remove an effect the user owns.
+   * @this {EffectPanel}
+   * @param {PointerEvent} _event
+   * @param {HTMLElement} element
+   */
+  static async #onDeleteEffect(_event, element) {
+    const effect = await fromUuid(element.closest("[data-uuid]").dataset.uuid);
+    if (effect?.isOwner) {
+      await effect.delete();
+    }
   }
 
   /**
@@ -97,45 +142,20 @@ export default class EffectPanel extends HandlebarsApplicationMixin(ApplicationV
     }
     return effect.origin ? (fromUuidSync(effect.origin, { strict: false }) ?? null) : null;
   }
+}
 
-  /**
-   * Open an effect's source sheet, or the effect's own when it has none.
-   * @this {EffectPanel}
-   * @param {PointerEvent} _event
-   * @param {HTMLElement} target
-   */
-  static async #onOpenSource(_event, target) {
-    const doc = await fromUuid(target.closest("[data-uuid]").dataset.sourceUuid);
-    doc?.sheet?.render({ force: true });
-  }
-
-  /**
-   * Remove an effect the user owns.
-   * @this {EffectPanel}
-   * @param {PointerEvent} _event
-   * @param {HTMLElement} target
-   */
-  static async #onDeleteEffect(_event, target) {
-    const effect = await fromUuid(target.closest("[data-uuid]").dataset.uuid);
-    if (effect?.isOwner) {
-      await effect.delete();
-    }
-  }
-
-  /** Open the panel, or close it when it is open. */
-  static toggle() {
-    if (panel?.rendered) {
-      return panel.close();
-    }
-    panel ??= new EffectPanel();
-    return panel.render({ force: true });
-  }
-
-  /** Redraw the open panel. */
-  static refresh() {
-    if (panel?.rendered) {
-      panel.render();
-    }
+/** Register the panel's button and the hooks that redraw it, once during init. */
+export function initializeEffectPanel() {
+  Hooks.on("getSceneControlButtons", onGetSceneControlButtons);
+  for (const hook of [
+    "controlToken",
+    "createActiveEffect",
+    "updateActiveEffect",
+    "deleteActiveEffect",
+    "updateActor",
+    "updateCombat"
+  ]) {
+    Hooks.on(hook, () => EffectPanel.refresh());
   }
 }
 
@@ -165,19 +185,4 @@ function onGetSceneControlButtons(controls) {
     button: true,
     onChange: () => EffectPanel.toggle()
   };
-}
-
-/** Register the panel's button and the hooks that redraw it, once during init. */
-export function initializeEffectPanel() {
-  Hooks.on("getSceneControlButtons", onGetSceneControlButtons);
-  for (const hook of [
-    "controlToken",
-    "createActiveEffect",
-    "updateActiveEffect",
-    "deleteActiveEffect",
-    "updateActor",
-    "updateCombat"
-  ]) {
-    Hooks.on(hook, () => EffectPanel.refresh());
-  }
 }

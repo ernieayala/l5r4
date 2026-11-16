@@ -1,5 +1,5 @@
 /**
- * @module item-transfer
+ * @module utils/item-transfer
  * @description The file format for moving a folder of items with their rules between worlds (roadmap/STAGE-11
  * decision 4), and the rewrite that makes rules naming an item in the same file name its imported copy. No content
  * ships with the system (AUTOMATION.md §5): GMs move their own items.
@@ -14,7 +14,7 @@ export const TRANSFER_VERSION = 1;
 /**
  * An export file's content for a folder's items.
  * @param {string} folderName
- * @param {object[]} items  Item sources, ids kept so rules can be rewritten on import
+ * @param {object[]} items - Item sources, ids kept so rules can be rewritten on import
  * @param {{system: string, core: string}} versions
  * @returns {object}
  */
@@ -54,14 +54,11 @@ export function readTransfer(text) {
 
 /**
  * Rewrite item uuids in rules: each world uuid `Item.<old id>` of an item in the file becomes the uuid of its imported
- * copy. A uuid inside another (an actor's `Actor.<id>.Item.<id>`) is left alone.
+ * copy. A uuid inside another (an actor's `Actor.<id>.Item.<id>`) is left alone. A GrantItem naming
+ * `Item.aaaaaaaaaaaaaaaa`, with that id mapped to `Item.bbbbbbbbbbbbbbbb`, comes back naming the new uuid.
  * @param {object[]} rules
- * @param {Record<string, string>} uuidsById  Old id to new uuid
+ * @param {Record<string, string>} uuidsById - Old id to new uuid
  * @returns {object[]}
- *
- * @example
- * remapItemUuids([{ key: "GrantItem", uuid: "Item.aaaaaaaaaaaaaaaa" }], { aaaaaaaaaaaaaaaa: "Item.bbbbbbbbbbbbbbbb" });
- * // [{ key: "GrantItem", uuid: "Item.bbbbbbbbbbbbbbbb" }]
  */
 export function remapItemUuids(rules, uuidsById) {
   const text = JSON.stringify(rules ?? []).replace(

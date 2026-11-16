@@ -1,3 +1,8 @@
+/**
+ * @module data/item/spell-data
+ * @description The data model of the `spell` Item subtype.
+ */
+
 import { booleanField, numberField, stringField } from "../fields.js";
 import { migrateKeywordsSource } from "../migrate-source.js";
 import ItemData from "./base-data.js";

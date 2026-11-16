@@ -1,3 +1,8 @@
+/**
+ * @module data/actor/npc-data
+ * @description The data model of the `npc` Actor subtype.
+ */
+
 import { NPC_INSIGHT_RANK, WOUND_LEVEL_ORDER } from "../../config/game-mechanics.js";
 import { booleanField, numberField, sourceField, spellSlotsField, stringField } from "../fields.js";
 import { migrateNpcSource } from "../migrate-source.js";
@@ -7,9 +12,9 @@ import ActorData from "./base-data.js";
 
 /**
  * 3.2.1 defaults for an NPC's manual wound levels: threshold, TN penalty, and whether the level is in use.
- * @type {Record<string, [number, number, boolean]>}
+ * @type {Readonly<Record<string, [number, number, boolean]>>}
  */
-const MANUAL_WOUND_DEFAULTS = {
+const MANUAL_WOUND_DEFAULTS = Object.freeze({
   healthy: [15, 0, true],
   nicked: [20, 3, true],
   grazed: [25, 5, false],
@@ -18,7 +23,7 @@ const MANUAL_WOUND_DEFAULTS = {
   crippled: [40, 20, false],
   down: [43, 40, false],
   out: [45, 40, true]
-};
+});
 
 /**
  * Data model for the `npc` Actor subtype.
@@ -30,11 +35,6 @@ const MANUAL_WOUND_DEFAULTS = {
  */
 export default class NpcData extends ActorData {
   static VOID_RANK = 0;
-
-  /** @override */
-  static _initiativeFields() {
-    return { roll: numberField(0), keep: numberField(0), ...super._initiativeFields() };
-  }
 
   /** @override */
   static defineSchema() {
@@ -93,6 +93,14 @@ export default class NpcData extends ActorData {
     return super.migrateData(source);
   }
 
+  /** @override */
+  prepareDerivedData() {
+    super.prepareDerivedData();
+    const actor = this.parent;
+    prepareNpcData(actor, this, actor._finalizeWoundPenalties.bind(actor));
+    prepareFear(this);
+  }
+
   /**
    * The Insight Rank rules read: NPCs have no Insight and count as Rank 1 (NPC_INSIGHT_RANK).
    * @type {number}
@@ -102,10 +110,7 @@ export default class NpcData extends ActorData {
   }
 
   /** @override */
-  prepareDerivedData() {
-    super.prepareDerivedData();
-    const actor = this.parent;
-    prepareNpcData(actor, this, actor._finalizeWoundPenalties.bind(actor));
-    prepareFear(this);
+  static _initiativeFields() {
+    return { roll: numberField(0), keep: numberField(0), ...super._initiativeFields() };
   }
 }

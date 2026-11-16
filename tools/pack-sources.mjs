@@ -40,7 +40,7 @@ export const SUMMARY_MAX = 120;
 
 /**
  * A 16-character document id that stays the same from build to build.
- * @param {...string} parts  The pack name, then the document's name and kind
+ * @param {...string} parts - The pack name, then the document's name and kind
  * @returns {string}
  */
 export function stableId(...parts) {
@@ -113,7 +113,7 @@ export function noteText(name, page) {
 
 /**
  * Whether a printed page lies in one of the source's page ranges.
- * @param {number[][]} ranges  [first, last] pairs
+ * @param {number[][]} ranges - [first, last] pairs
  * @param {number} page
  * @returns {boolean}
  */
@@ -199,10 +199,11 @@ const REFERENCE_ONLY = /^@entry\[([a-z]+)\/([^\]]+)\]$/;
 
 /**
  * An Actor entry's embedded item: a copy of another pack's entry, named by reference in `from`, with the entry's own
- * `system` values laid over it, as a creature's Skill at its rank (p.318).
- * @param {object[]} sources  Every pack source, to find the referenced entry in
- * @param {object} source     The Actor pack's source
- * @param {object} owner      The Actor entry
+ * `system` values laid over it, as a creature's Skill at its rank.
+ * game-rules/99_creatures.md, p.318
+ * @param {object[]} sources - Every pack source, to find the referenced entry in
+ * @param {object} source - The Actor pack's source
+ * @param {object} owner - The Actor entry
  * @param {string} ownerId
  * @param {{from: string, system?: object}} spec
  * @returns {object}
@@ -235,9 +236,10 @@ function embeddedItem(sources, source, owner, ownerId, spec) {
 
 /**
  * An entry's embedded Active Effect, carrying rules the engine applies while the effect is on the document, as a
- * creature's special abilities (pp.319-320).
+ * creature's special abilities.
+ * game-rules/99_creatures.md, p.319-320
  * @param {object} source
- * @param {object} owner     The entry
+ * @param {object} owner - The entry
  * @param {string} ownerId
  * @param {{name: string, img?: string, rules: object[]}} effect
  * @returns {object}
@@ -264,7 +266,7 @@ function embeddedEffect(source, owner, ownerId, effect) {
  * The documents of a pack source: its folders, then its entries. An entry's `effects` become embedded Active Effects;
  * an Actor entry's `items` become embedded copies of the entries they name.
  * @param {object} source
- * @param {object[]} [sources]  Every pack source, for an Actor entry's embedded items
+ * @param {object[]} [sources] - Every pack source, for an Actor entry's embedded items
  * @returns {{documents: object[], coverage: Record<string, string>}}
  * @throws {Error} When the source has problems (sourceProblems)
  */

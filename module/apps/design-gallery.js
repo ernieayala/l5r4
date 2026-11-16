@@ -21,8 +21,8 @@ import {
   GALLERY_SURFACE,
   GALLERY_TYPE
 } from "../config/design-gallery.js";
-import { enhanceItemSheetData } from "../documents/item/integration/sheet-data.js";
 import { F, T } from "../utils/localization.js";
+import { enhanceItemSheetData } from "../documents/item/integration/sheet-data.js";
 
 const { ApplicationV2, DialogV2, HandlebarsApplicationMixin } = foundry.applications.api;
 const { renderTemplate } = foundry.applications.handlebars;
@@ -35,6 +35,9 @@ const COLOR_ENTRIES = new Map(
   GALLERY_COLORS.flatMap(group => group.tokens).map(entry => [entry.token, entry])
 );
 
+/**
+ * The design gallery window, one per client.
+ */
 export default class DesignGalleryApplication extends HandlebarsApplicationMixin(ApplicationV2) {
   static DEFAULT_OPTIONS = {
     id: `${SYS_ID}-design-gallery`,
@@ -59,17 +62,6 @@ export default class DesignGalleryApplication extends HandlebarsApplicationMixin
     patterns: { template: `${TEMPLATES}/patterns.hbs` }
   };
 
-  /**
-   * GMs only: the settings menu is restricted, and the window refuses anyone else who opens it another way.
-   * @override
-   */
-  _canRender(options) {
-    if (!game.user.isGM) {
-      throw new Error(T("l5r4.apps.designGallery.gmOnly"));
-    }
-    return super._canRender(options);
-  }
-
   /** @override */
   async _prepareContext(options) {
     const context = await super._prepareContext(options);
@@ -87,6 +79,17 @@ export default class DesignGalleryApplication extends HandlebarsApplicationMixin
         }))
       )
     });
+  }
+
+  /**
+   * GMs only: the settings menu is restricted, and the window refuses anyone else who opens it another way.
+   * @override
+   */
+  _canRender(options) {
+    if (!game.user.isGM) {
+      throw new Error(T("l5r4.apps.designGallery.gmOnly"));
+    }
+    return super._canRender(options);
   }
 
   /**
@@ -139,7 +142,7 @@ export default class DesignGalleryApplication extends HandlebarsApplicationMixin
    * Show or hide a dice row's dice, as the chat log does.
    * @this {DesignGalleryApplication}
    * @param {PointerEvent} _event
-   * @param {HTMLElement} element  The dice row
+   * @param {HTMLElement} element - The dice row
    */
   static #onExpandRoll(_event, element) {
     element.classList.toggle("expanded");
@@ -147,7 +150,7 @@ export default class DesignGalleryApplication extends HandlebarsApplicationMixin
 
   /**
    * A component entry with its samples rendered.
-   * @param {object} entry  A GALLERY_COMPONENTS entry
+   * @param {object} entry - A GALLERY_COMPONENTS entry
    * @returns {Promise<object>}
    */
   async #entry(entry) {

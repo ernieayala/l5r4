@@ -1,32 +1,9 @@
 /**
- * Animation Manager for L5R4 Visual Effects
- *
- * Orchestrates visual animations for stances and status effects using Sequencer and JB2A.
- * Manages animation lifecycle (play, persist, cleanup) and provides graceful degradation
- * when required modules are not installed.
- *
- * Key Responsibilities:
- * - Play animations when stances/conditions are applied
- * - Clean up animations when stances/conditions are removed
- * - Manage persistent effects (auras that remain active)
- * - Handle module availability (Sequencer, JB2A)
- * - Provide defensive error handling
- *
- * Architecture Integration:
- * - Called by hooks.js when ActiveEffects change
- * - Uses asset-library.js for animation configuration
- * - Integrates with Sequencer module API
- * - Works with existing stance/condition system (no game mechanic changes)
- *
- * Sequencer Integration:
- * - Uses Sequence API for effect playback
- * - Stores effect IDs for cleanup via Sequencer.EffectManager
- * - Attaches effects to tokens for proper positioning
- *
  * @module services/animations/animation-manager
- * @requires Foundry VTT v13+
- * @requires Sequencer module (optional, graceful degradation)
- * @requires JB2A module (optional, graceful degradation)
+ * @description Plays, persists, and ends the Sequencer and JB2A animations for stances and conditions, and does
+ * nothing when either module is missing. hooks.js calls it when Active Effects change; asset-library.js supplies the
+ * animation settings. Each effect is attached to a token and named so Sequencer.EffectManager can end it later. No
+ * game mechanic depends on it.
  */
 
 import { SYS_ID } from "../../config/constants.js";
@@ -46,26 +23,6 @@ const starting = new Map();
 
 /** Longest wait for a started effect to finish loading before it is ended anyway. */
 const LOAD_WAIT_MS = 5000;
-
-/**
- * Wait until the named animations have started and Sequencer has finished loading them. Sequencer 4.2.3 loads an
- * effect's video after `play()` resolves, then sets the sprite's volume without checking whether the effect was ended
- * meanwhile, so ending one that is still loading throws inside Sequencer (`PersistentCanvasEffect._createSprite`).
- * @param {function(string): boolean} matches  Which effect names to wait for
- * @param {string} pattern  The Sequencer name pattern for the same effects
- * @returns {Promise<void>}
- */
-async function settleStarts(matches, pattern) {
-  await Promise.allSettled(
-    [...starting].filter(([name]) => matches(name)).map(([, start]) => start)
-  );
-  const end = Date.now() + LOAD_WAIT_MS;
-  const loading = () =>
-    Sequencer.EffectManager.getEffects({ name: pattern }).some(effect => !effect.ready);
-  while (loading() && Date.now() < end) {
-    await new Promise(resolve => setTimeout(resolve, 50));
-  }
-}
 
 /**
  * Play animation for a stance or condition.
@@ -88,10 +45,6 @@ async function settleStarts(matches, pattern) {
  * @param {string} statusId - The stance or condition ID (e.g., "fullAttackStance", "blinded")
  * @param {boolean} [isStance=false] - True if this is a stance, false if condition
  * @returns {Promise<void>}
- *
- * @example
- * await playAnimation(actor, "fullAttackStance", true);
- * await playAnimation(actor, "blinded", false);
  */
 export async function playAnimation(actor, statusId, isStance = false) {
   // Early return: Check module availability
@@ -178,10 +131,6 @@ export async function playAnimation(actor, statusId, isStance = false) {
  * @param {Actor} actor - The actor to remove animation from
  * @param {string} statusId - The stance or condition ID
  * @returns {Promise<void>}
- *
- * @example
- * await removeAnimation(actor, "fullAttackStance");
- * await removeAnimation(actor, "blinded");
  */
 export async function removeAnimation(actor, statusId) {
   // Early return: Check module availability
@@ -219,9 +168,6 @@ export async function removeAnimation(actor, statusId) {
  *
  * @param {Actor} actor - The actor to remove all animations from
  * @returns {Promise<void>}
- *
- * @example
- * await removeAllAnimations(actor);
  */
 export async function removeAllAnimations(actor) {
   // Early return: Check module availability
@@ -248,5 +194,25 @@ export async function removeAllAnimations(actor) {
     } catch (error) {
       console.warn(`L5R4 | Failed to remove all animations for ${actor.name}:`, error);
     }
+  }
+}
+
+/**
+ * Wait until the named animations have started and Sequencer has finished loading them. Sequencer 4.2.3 loads an
+ * effect's video after `play()` resolves, then sets the sprite's volume without checking whether the effect was ended
+ * meanwhile, so ending one that is still loading throws inside Sequencer (`PersistentCanvasEffect._createSprite`).
+ * @param {function(string): boolean} matches - Which effect names to wait for
+ * @param {string} pattern - The Sequencer name pattern for the same effects
+ * @returns {Promise<void>}
+ */
+async function settleStarts(matches, pattern) {
+  await Promise.allSettled(
+    [...starting].filter(([name]) => matches(name)).map(([, start]) => start)
+  );
+  const end = Date.now() + LOAD_WAIT_MS;
+  const loading = () =>
+    Sequencer.EffectManager.getEffects({ name: pattern }).some(effect => !effect.ready);
+  while (loading() && Date.now() < end) {
+    await new Promise(resolve => setTimeout(resolve, 50));
   }
 }

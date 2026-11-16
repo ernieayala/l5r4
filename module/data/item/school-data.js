@@ -1,10 +1,18 @@
+/**
+ * @module data/item/school-data
+ * @description The data model of the `school` Item subtype.
+ */
+
 import { booleanField, numberField } from "../fields.js";
 import CreationBonusData from "./creation-bonus-data.js";
 
 /**
  * Data model for the `school` Item subtype. `rank` is a School Rank set by hand, for a character with Multiple
- * Schools (p.105); 0 follows the owner's Insight Rank, as a single School does (p.104; roadmap/STAGE-11 decision 2).
- * `shugenja` marks the School whose Rank a Spell Casting Roll adds (pp.80, 163).
+ * Schools; 0 follows the owner's Insight Rank, as a single School does (roadmap/STAGE-11 decision 2).
+ * `shugenja` marks the School whose Rank a Spell Casting Roll adds.
+ * game-rules/49_improving_your_character.md, p.104-105
+ * game-rules/29_types_of_rolls.md, p.80
+ * game-rules/66_magic_and_spell_casting.md, p.163
  */
 export default class SchoolData extends CreationBonusData {
   /** @override */

@@ -4,10 +4,12 @@
  * and computes no rule itself.
  *
  * - Check: opens the roll dialog for the acting character through the roll pipeline, filled from the link and
- *   still editable (decision 2). A Skill the character lacks rolls Unskilled with the link's Trait (p.80).
+ *   still editable (decision 2). A Skill the character lacks rolls Unskilled with the link's Trait.
  * - Damage: rolls a damage card the damage card's Apply buttons apply (module/services/combat/damage.js).
  * - Condition: applies the status to the targeted tokens, else the controlled ones.
- * - Fear: a Fear test (p.90) for those tokens.
+ * - Fear: a Fear test for those tokens.
+ * game-rules/30_skill_rolls_expanded.md, p.80
+ * game-rules/42_fear.md, p.90
  */
 
 import { F, T } from "../utils/localization.js";
@@ -20,17 +22,8 @@ import { applyEffectAnywhere } from "./effects/apply.js";
 import { testFearRank } from "./fear.js";
 
 /**
- * The localized name of a Trait key or the Void Ring.
- * @param {string} trait
- * @returns {string}
- */
-function traitName(trait) {
-  return T(trait === "void" ? "l5r4.ui.mechanics.rings.void" : `l5r4.ui.mechanics.traits.${trait}`);
-}
-
-/**
  * The text a link shows when it has no `{label}`.
- * @param {import("../utils/link-syntax.js").LinkSpec} spec  A link that parsed
+ * @param {import("../utils/link-syntax.js").LinkSpec} spec - A link that parsed
  * @returns {string}
  */
 export function linkText(spec) {
@@ -87,16 +80,6 @@ export function checkRequestFor(actor, spec) {
 }
 
 /**
- * The actors a Condition or Fear link acts on: the targeted tokens', else the controlled tokens'.
- * @returns {Actor[]}
- */
-function linkTargets() {
-  const targeted = [...game.user.targets].map(token => token.actor);
-  const tokens = targeted.length ? targeted : canvas.tokens.controlled.map(token => token.actor);
-  return [...new Set(tokens.filter(Boolean))];
-}
-
-/**
  * Run a link that parsed.
  * @param {import("../utils/link-syntax.js").LinkSpec} spec
  * @returns {Promise<unknown>}
@@ -133,4 +116,23 @@ export async function runLink(spec) {
     }
   }
   return null;
+}
+
+/**
+ * The localized name of a Trait key or the Void Ring.
+ * @param {string} trait
+ * @returns {string}
+ */
+function traitName(trait) {
+  return T(trait === "void" ? "l5r4.ui.mechanics.rings.void" : `l5r4.ui.mechanics.traits.${trait}`);
+}
+
+/**
+ * The actors a Condition or Fear link acts on: the targeted tokens', else the controlled tokens'.
+ * @returns {Actor[]}
+ */
+function linkTargets() {
+  const targeted = [...game.user.targets].map(token => token.actor);
+  const tokens = targeted.length ? targeted : canvas.tokens.controlled.map(token => token.actor);
+  return [...new Set(tokens.filter(Boolean))];
 }

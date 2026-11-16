@@ -53,6 +53,11 @@ export default {
     }
   },
 
+  /**
+   * The rule's visitors for one file.
+   * @param {object} context - ESLint's rule context
+   * @returns {object} The visitors, by node type
+   */
   create(context) {
     const file = relative(context.cwd, context.filename).replaceAll("\\", "/");
     const nameOf = group =>

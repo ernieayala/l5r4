@@ -1,11 +1,8 @@
 /**
- * Client Settings Registration
- * Registers client-scoped settings for the L5R4 Enhanced system: per-user preferences stored in the browser.
- * Roll dialogs follow the click: a click shows the dialog, Shift-click skips it.
- *
  * @module setup/settings/client
+ * @description Registers the client-scoped settings for the L5R4 Enhanced system: per-user preferences stored in the
+ * browser. Roll dialogs follow the click: a click shows the dialog, Shift-click skips it.
  */
-
 import { SYS_ID } from "../../config/constants.js";
 
 /**
@@ -14,7 +11,6 @@ import { SYS_ID } from "../../config/constants.js";
  * - `floatingNumbers`: Wound and Void Point changes float over tokens (module/services/scrolling-text.js), on by
  *   default. Core's "Scrolling Status Text" setting turns all scrolling text off as well.
  *
- * @function registerClientSettings
  * @returns {void}
  */
 export function registerClientSettings() {

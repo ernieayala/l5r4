@@ -1,10 +1,7 @@
 /**
- * Embedded Item Migration
- * Migrates all embedded items within actor documents.
- *
  * @module setup/migrations/actors/embedded-items
+ * @description Runs every item migration step on the items embedded in an actor.
  */
-
 import { applySchemaMapToDocs } from "../schema/apply.js";
 import { migrateBowsToWeapons } from "../items/bow-to-weapon.js";
 import { migrateSkillDefaults } from "../items/skill-defaults.js";

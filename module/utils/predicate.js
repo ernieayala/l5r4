@@ -1,5 +1,5 @@
 /**
- * @module predicate
+ * @module utils/predicate
  * @description Predicates for the rule engine: when a rule applies, tested against a set of roll-option strings
  * such as "stance:defenseStance", "condition:prone", "ring:fire:3", or "target:unmounted" (roadmap/AUTOMATION.md
  * §1).
@@ -13,13 +13,25 @@
  *   `{ gte: ["ring:fire", 3] }` against "ring:fire:3".
  */
 
-const COMPARISONS = {
+const COMPARISONS = Object.freeze({
   gte: (a, b) => a >= b,
   gt: (a, b) => a > b,
   lte: (a, b) => a <= b,
   lt: (a, b) => a < b,
   eq: (a, b) => a === b
-};
+});
+
+/**
+ * Whether every term of a predicate holds for the options. An empty predicate always holds. A present option
+ * holds, `{ not: "target:mounted" }` holds against no options, and `{ gte: ["ring:fire", 3] }` fails against
+ * "ring:fire:2".
+ * @param {Array<string|object>} predicate
+ * @param {Set<string>} options
+ * @returns {boolean}
+ */
+export function testPredicate(predicate, options) {
+  return (predicate ?? []).every(term => testTerm(term, options));
+}
 
 /**
  * Whether one term holds for the options.
@@ -56,19 +68,4 @@ function testTerm(term, options) {
     }
   }
   return false;
-}
-
-/**
- * Whether every term of a predicate holds for the options. An empty predicate always holds.
- * @param {Array<string|object>} predicate
- * @param {Set<string>} options
- * @returns {boolean}
- *
- * @example
- * testPredicate(["stance:defenseStance"], new Set(["stance:defenseStance"])); // true
- * testPredicate([{ not: "target:mounted" }], new Set()); // true
- * testPredicate([{ gte: ["ring:fire", 3] }], new Set(["ring:fire:2"])); // false
- */
-export function testPredicate(predicate, options) {
-  return (predicate ?? []).every(term => testTerm(term, options));
 }

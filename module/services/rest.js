@@ -1,20 +1,8 @@
 /**
- * Long Rest Service
- *
- * Handles long rest recovery mechanics for L5R4 system:
- * - Characters heal (Stamina × 2) + Insight Rank wounds per night of rest
- * - Spell slots restore to maximum
- * - Void Points restore to maximum
- * - Removes Fatigued condition
- * - Provides chat feedback on recovery
- *
- * Architecture Notes:
- * - Services layer: Handles side effects (actor updates, chat messages)
- * - Can import: utils, config (NOT documents per architecture rules)
- * - Pure business logic with Foundry API integration
- *
  * @module services/rest
- * @requires Foundry v13+
+ * @description A long rest for one character: heals (Stamina × 2) + Insight Rank Wounds for the night, restores
+ * spell slots and Void Points to their maximum, removes the Fatigued condition, and posts a chat card with the
+ * result.
  */
 
 import { SYS_ID } from "../config/constants.js";
@@ -34,13 +22,8 @@ import { toInt } from "../utils/type-coercion.js";
  *
  * This represents one night's rest (8 hours).
  *
- * @async
  * @param {L5R4Actor} actor - The actor taking a long rest
  * @returns {Promise<void>}
- *
- * @example
- * import { applyLongRest } from "./services/rest.js";
- * await applyLongRest(actor);
  */
 export async function applyLongRest(actor) {
   if (!actor) {
@@ -76,7 +59,8 @@ export async function applyLongRest(actor) {
   // Check if character is fasting (blocks void recovery per L5R4 rules)
   const isFasting = actor.effects?.some(e => e.statuses?.has("fasting")) ?? false;
 
-  // Restore Void Points to maximum (unless fasting): the Void Ring, less a point at Taint Level 4 (p.278)
+  // Restore Void Points to maximum (unless fasting): the Void Ring, less a point at Taint Level 4
+  // game-rules/89_shadowlands_taint.md, p.278
   // Note: Only PCs have rings.void.value property; NPCs only have rings.void.rank
   const voidMax = toInt(rings.void?.max ?? 0);
   const hasVoidValue = rings.void && "value" in rings.void;
@@ -151,13 +135,11 @@ export async function applyLongRest(actor) {
  * Posts to chat with default visibility (respects Foundry's whisper/blind settings).
  * GMs can use chat controls to adjust visibility after posting.
  *
- * @async
- * @private
- * @param {Object} data - Rest message data
+ * @param {object} data - Rest message data
  * @param {L5R4Actor} data.actor - The actor who rested
  * @param {number} data.healingApplied - Amount of wounds healed
  * @param {number} data.healRate - Character's heal rate per rest
- * @param {number} data.previousSuffered - Suffered wounds before healing
+ * @param {number} data._previousSuffered - Suffered wounds before healing; not read
  * @param {number} data.newSuffered - Suffered wounds after healing
  * @param {number} data.newCurrentWounds - Current wounds after healing (max - suffered)
  * @param {number} data.maxWounds - Maximum wounds (total HP)

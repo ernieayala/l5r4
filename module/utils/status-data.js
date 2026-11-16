@@ -1,5 +1,5 @@
 /**
- * @module status-data
+ * @module utils/status-data
  * @description The data a status gives the effect carrying it (module/config/status-effects.js): its rules, its
  * exclusive group, and its level. An effect made with only a status id (an older world's effect, a macro, another
  * module) gets them from here, so the status means the same wherever the effect came from.
@@ -14,8 +14,7 @@ import { toInt } from "./type-coercion.js";
  * (a 3.2.1 Fear effect kept its Rank in `flags.<id>.fearRank`), and the event that ends it (Fear ends with the
  * encounter). A timed duration is left out: it counts from a start, which an older effect does not have. Fields
  * already set stay as they are, so applying it again changes nothing.
- *
- * @param {object} source  ActiveEffect source data
+ * @param {object} source - ActiveEffect source data
  * @returns {object|null}  Update data, with `_id` when the source has one; null when nothing changes
  */
 export function statusEffectUpdate(source) {

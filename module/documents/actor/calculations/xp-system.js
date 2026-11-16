@@ -1,5 +1,5 @@
 /**
- * @module xp-system
+ * @module documents/actor/calculations/xp-system
  * @description A PC's XP and Insight Rank. The XP arithmetic is module/utils/xp-ledger.js: this module gathers what
  * it prices from the actor (stored ranks, Skills, items, the 3.2.1 XP flags) and its Cost rules (roadmap/STAGE-11),
  * and keeps the legacy free-rank flag current when a Trait is raised.
@@ -15,28 +15,10 @@ import {
 import { costPricer, xpEntries, xpTotals } from "../../../utils/xp-ledger.js";
 
 /**
- * Calculates Insight Rank from total Insight points.
- *
+ * The Insight Rank of a total of Insight points: Rank 1 below 150, Rank 2 from 150, then one Rank more for every 25
+ * points.
  * @param {number} insight - Total Insight points
  * @returns {number} Insight Rank (1-10+)
- *
- * @description
- * L5R4 Insight Rank thresholds:
- * - Rank 1: 0-149 Insight
- * - Rank 2: 150-174 Insight
- * - Rank 3: 175-199 Insight
- * - Rank 4: 200-224 Insight
- * - Rank 5: 225-249 Insight
- * - Rank 6+: Every 25 Insight above 225
- *
- * Insight Rank determines:
- * - School Rank (techniques available)
- * - Character power level
- * - Mastery abilities
- *
- * @example
- * calculateInsightRank(180); // Returns 3
- * calculateInsightRank(250); // Returns 6
  */
 export function calculateInsightRank(insight) {
   // Thresholds for Ranks 2-5
@@ -59,11 +41,12 @@ export function calculateInsightRank(insight) {
 }
 
 /**
- * Price a PC's XP (pp.102-103, 145) and store `sys._xp`: total, spent, available, the breakdown by category, and
- * the itemized entries.
- *
+ * Price a PC's XP and store `sys._xp`: total, spent, available, the breakdown by category, and the itemized
+ * entries.
+ * game-rules/48_character_creation_expanded.md, p.102-103
+ * game-rules/63_advantages_and_disadvantages.md, p.145
  * @param {Actor} actor - The PC actor
- * @param {Object} sys - Actor's system data
+ * @param {object} sys - Actor's system data
  */
 export function preparePcExperience(actor, sys) {
   const build = xpBuild(actor);
@@ -77,6 +60,71 @@ export function preparePcExperience(actor, sys) {
   const entries = xpEntries(build, price);
   // The entries stay on the prepared data for the XP manager's history (module/services/xp/calculator.js)
   sys._xp = { ...xpTotals(build, entries), entries };
+}
+
+/**
+ * Mark the free ranks a legacy Family or School bonus gives when an update raises a Trait or the Void Ring, and
+ * reset the retroactive XP version so the XP history is rebuilt. A legacy bonus (`system.trait`/`bonus`) is not
+ * applied to the Trait, so the player stores it as ranks: the raises to ranks 3 up to 2 + the bonus are free, and
+ * `xpFreeTraitBase` counts them. A TraitAdjust rule bonus adds on top of the stored rank and never marks a free
+ * rank. Only a PC is tracked.
+ * game-rules/48_character_creation_expanded.md, p.102-103
+ * @param {Actor} actor - The PC actor being updated
+ * @param {object} changed - Object containing changed properties
+ */
+export function trackXpExpenditure(actor, changed) {
+  try {
+    if (actor.type !== "pc") {
+      return;
+    }
+
+    const oldSys = actor._source.system;
+    const freeTraitBase = actor.flags?.[SYS_ID]?.xpFreeTraitBase ?? {};
+
+    // Raised Traits, and the Void Ring, which a Family or School can raise as well
+    // game-rules/48_character_creation_expanded.md, p.102
+    const raised = Object.entries(changed?.system?.traits ?? {}).map(([key, value]) => [
+      key,
+      value,
+      oldSys.traits[key]
+    ]);
+    if (changed?.system?.rings?.void?.rank !== undefined) {
+      raised.push(["void", changed.system.rings.void.rank, oldSys.rings.void.rank]);
+    }
+
+    for (const [k, v, old] of raised) {
+      const newBase = toInt(v);
+      const oldBase = toInt(old);
+      if (!Number.isFinite(newBase) || newBase <= oldBase) {
+        continue;
+      }
+      // Only the legacy fields are a stored rank. A TraitAdjust rule adds on top of the stored rank, so every
+      // stored rank is bought and costs its multiple of the new rank with the bonus.
+      // game-rules/48_character_creation_expanded.md, p.103
+      const legacyBonus = toInt(getCreationFreeBonusSources(actor, k).legacy);
+      const freeBase = toInt(freeTraitBase[k] ?? 0);
+
+      // The ranks from 3 up to 2 + the legacy bonus are free, each marked as it is reached: a Family and a School
+      // raising the same Trait give two
+      // game-rules/48_character_creation_expanded.md, p.102
+      let free = freeBase;
+      for (let r = oldBase + 1; r <= newBase; r++) {
+        if (free < legacyBonus && r === 3 + free) {
+          free++;
+        }
+      }
+      if (free !== freeBase) {
+        foundry.utils.setProperty(changed, `flags.${SYS_ID}.xpFreeTraitBase.${k}`, free);
+      }
+    }
+
+    // Reset retroactive version to recalculate XP
+    if (changed?.system?.traits || changed?.system?.rings?.void) {
+      foundry.utils.setProperty(changed, `flags.${SYS_ID}.xpRetroactiveVersion`, 0);
+    }
+  } catch (err) {
+    logError("Free bonus tracking failed", err);
+  }
 }
 
 /**
@@ -100,7 +148,10 @@ function xpBuild(actor) {
       ["kata", "kiho"].includes(item.type) ||
       (item.type === "spell" && item.system.memorized === true)
     ) {
-      // A kata, a kiho, and a memorized spell cost their Mastery Level (pp.164, 231, 259; #43)
+      // A kata, a kiho, and a memorized spell cost their Mastery Level (#43)
+      // game-rules/66_magic_and_spell_casting.md, p.164
+      // game-rules/80_brotherhood_of_shinsei.md, p.231
+      // game-rules/86_kata.md, p.259
       items.push({
         id: item.id,
         type: item.type,
@@ -139,78 +190,4 @@ function xpBuild(actor) {
       })),
     items
   };
-}
-
-/**
- * Tracks XP expenditure and applies free bonuses during actor updates.
- *
- * @param {Actor} actor - The PC actor being updated
- * @param {Object} changed - Object containing changed properties
- *
- * @description
- * Monitors Trait and Void increases to apply free bonuses:
- * - When a Trait or the Void Ring reaches each rank its legacy bonus covers (3, and 4 for a +2)
- * - If character has unused free bonus from creation
- * - Automatically applies free bonus to save XP
- *
- * Free Bonus System:
- * - Characters get free +1 to certain traits at creation
- * - A legacy Family/School bonus (`system.trait`/`bonus`) is not applied to the Trait, so the player stores
- *   it as ranks: the raises to ranks 3 up to 2 + the bonus are free
- * - A TraitAdjust rule bonus adds on top of the stored rank and never marks a free rank
- * - Tracked in xpFreeTraitBase flag
- * - Retroactive version flag prevents double-application
- *
- * Only runs for PC actors during updates.
- */
-export function trackXpExpenditure(actor, changed) {
-  try {
-    if (actor.type !== "pc") {
-      return;
-    }
-
-    const oldSys = actor._source.system;
-    const freeTraitBase = actor.flags?.[SYS_ID]?.xpFreeTraitBase ?? {};
-
-    // Raised Traits, and the Void Ring, which a Family or School can raise as well (p.102)
-    const raised = Object.entries(changed?.system?.traits ?? {}).map(([key, value]) => [
-      key,
-      value,
-      oldSys.traits[key]
-    ]);
-    if (changed?.system?.rings?.void?.rank !== undefined) {
-      raised.push(["void", changed.system.rings.void.rank, oldSys.rings.void.rank]);
-    }
-
-    for (const [k, v, old] of raised) {
-      const newBase = toInt(v);
-      const oldBase = toInt(old);
-      if (!Number.isFinite(newBase) || newBase <= oldBase) {
-        continue;
-      }
-      // Only the legacy fields are a stored rank. A TraitAdjust rule adds on top of the stored rank, so every
-      // stored rank is bought and costs its multiple of the new rank with the bonus (Core Rulebook p.103).
-      const legacyBonus = toInt(getCreationFreeBonusSources(actor, k).legacy);
-      const freeBase = toInt(freeTraitBase[k] ?? 0);
-
-      // The ranks from 3 up to 2 + the legacy bonus are free, each marked as it is reached: a Family and a School
-      // raising the same Trait give two (p.102)
-      let free = freeBase;
-      for (let r = oldBase + 1; r <= newBase; r++) {
-        if (free < legacyBonus && r === 3 + free) {
-          free++;
-        }
-      }
-      if (free !== freeBase) {
-        foundry.utils.setProperty(changed, `flags.${SYS_ID}.xpFreeTraitBase.${k}`, free);
-      }
-    }
-
-    // Reset retroactive version to recalculate XP
-    if (changed?.system?.traits || changed?.system?.rings?.void) {
-      foundry.utils.setProperty(changed, `flags.${SYS_ID}.xpRetroactiveVersion`, 0);
-    }
-  } catch (err) {
-    logError("Free bonus tracking failed", err);
-  }
 }

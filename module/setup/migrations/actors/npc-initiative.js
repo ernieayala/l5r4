@@ -1,10 +1,7 @@
 /**
- * NPC Initiative Migration
- * Lets NPCs stored with the old default pool roll the Initiative formula.
- *
  * @module setup/migrations/actors/npc-initiative
+ * @description Lets NPCs stored with the old default pool roll the Initiative formula.
  */
-
 import { SYS_ID } from "../../../config/constants.js";
 
 /** The Initiative pool 3.2.1 stored on every new NPC, which then overrode the formula (#30). */
@@ -12,9 +9,9 @@ const OLD_DEFAULT = Object.freeze({ roll: 2, keep: 2 });
 
 /**
  * An NPC whose stored Initiative pool is exactly the old default 2k2 gets 0k0, which rolls Insight Rank 1 +
- * Reflexes, keep Reflexes (p.81; Ernie's ruling, 2026-11-14). A 2k2 a GM entered on purpose cannot be told apart and
- * is reset too. Runs once, with the version's other world migrations.
- *
+ * Reflexes, keep Reflexes (Ernie's ruling). A 2k2 a GM entered on purpose cannot be told apart and is reset too.
+ * Runs once, with the version's other world migrations.
+ * game-rules/31_combat_round.md, p.81
  * @param {Document[]} docs - Actor documents to scan; PCs are skipped
  * @param {string} label - Migration context label for console logging
  * @returns {Promise<void>}

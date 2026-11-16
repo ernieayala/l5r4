@@ -1,10 +1,7 @@
 /**
- * Legacy Field Cleanup
- * Removes legacy field names after successful migration to new schema.
- *
  * @module setup/migrations/actors/cleanup
+ * @description Removes legacy field names from actors after the migration to the new schema.
  */
-
 import { SYS_ID } from "../../../config/constants.js";
 import { getByPath, setByPath } from "../utils/helpers.js";
 

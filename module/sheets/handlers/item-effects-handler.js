@@ -1,26 +1,9 @@
 /**
- * Item Active Effects Handler
- *
- * Manages CRUD operations for ActiveEffects embedded on Item documents in Foundry VTT.
- * Implements event delegation pattern for Item sheets using Application v2 architecture.
- *
- * ActiveEffects in Foundry VTT modify document properties through attribute changes.
- * When embedded on Items with transfer:true, effects apply to the owning Actor.
- * This is commonly used for equipped armor, weapons with special properties, or
- * advantages/disadvantages that modify character statistics.
- *
- * Responsibilities:
- * - Bind delegated event listeners for effect UI actions (.effect-create, .effect-edit, etc.)
- * - Create new ActiveEffect documents with sensible defaults
- * - Open Foundry's ActiveEffectConfig sheet for editing
- * - Toggle effect enabled/disabled state
- * - Delete effects with race condition protection
- *
- * Requires Foundry VTT v13+ for foundry.applications.sheets.ActiveEffectConfig API.
- *
  * @module sheets/handlers/item-effects-handler
- * @see {@link https://foundryvtt.com/api/v13/classes/client.ActiveEffect.html|ActiveEffect}
- * @see {@link https://foundryvtt.com/api/v13/classes/foundry.applications.sheets.ActiveEffectConfig.html|ActiveEffectConfig}
+ * @description Creates, opens, toggles, and deletes the ActiveEffects embedded on an Item, through listeners
+ * delegated from the Item sheet's root. An effect created with transfer: true applies to the Item's owning Actor;
+ * editing opens foundry.applications.sheets.ActiveEffectConfig, and a busy flag keeps a double click from deleting
+ * twice.
  */
 import { on } from "../../utils/dom.js";
 
@@ -47,7 +30,7 @@ export class ItemEffectsHandler {
    * Idempotent: Uses data-effects-bound flag to prevent duplicate bindings.
    * Safe to call multiple times (e.g., during sheet re-renders).
    *
-   * @param {Object} context - Sheet context object
+   * @param {object} context - Sheet context object
    * @param {Item} context.item - The Item document containing effects
    * @param {HTMLElement} context.element - Sheet root element for event delegation
    * @returns {void}
@@ -93,10 +76,10 @@ export class ItemEffectsHandler {
    * Automatically opens Foundry's ActiveEffectConfig sheet for immediate editing.
    * If creation fails, displays error notification and logs to console.
    *
-   * @param {Object} context - Sheet context object
+   * @param {object} context - Sheet context object
    * @param {Item} context.item - The Item document to add the effect to
    * @param {Event} event - Click event from .effect-create button
-   * @param {HTMLElement} targetElement - Button that triggered the event
+   * @param {HTMLElement} _targetElement - Button that triggered the event
    * @returns {Promise<void>}
    */
   static async create(context, event, _targetElement) {
@@ -136,7 +119,7 @@ export class ItemEffectsHandler {
    *
    * Silently fails if element lacks data-effect-id or effect is not found.
    *
-   * @param {Object} context - Sheet context object
+   * @param {object} context - Sheet context object
    * @param {Item} context.item - The Item document containing the effect
    * @param {Event} event - Click event from .effect-edit button
    * @param {HTMLElement} targetElement - Button that triggered the event
@@ -168,7 +151,7 @@ export class ItemEffectsHandler {
    *
    * If update fails, displays error notification and logs to console.
    *
-   * @param {Object} context - Sheet context object
+   * @param {object} context - Sheet context object
    * @param {Item} context.item - The Item document containing the effect
    * @param {Event} event - Click event from .effect-toggle button
    * @param {HTMLElement} targetElement - Button that triggered the event
@@ -207,9 +190,9 @@ export class ItemEffectsHandler {
    * Error handling:
    * - Silently ignores "does not exist" errors (effect already deleted elsewhere)
    * - Logs other errors to console and shows user notification
-   * - Always clears busy flag to prevent UI lockup
+   * - Always clears busy flag to prevent UI lockup.
    *
-   * @param {Object} context - Sheet context object
+   * @param {object} context - Sheet context object
    * @param {Item} context.item - The Item document containing the effect
    * @param {Event} event - Click event from .effect-delete button
    * @param {HTMLElement} targetElement - Button that triggered the event

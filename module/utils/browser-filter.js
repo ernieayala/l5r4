@@ -81,6 +81,22 @@ export function filterOptions(entries, filterId) {
 }
 
 /**
+ * The entries a tab shows: its types, the name search, and every filter's choice, sorted by name.
+ * @param {object[]} entries
+ * @param {BrowserTab} tab
+ * @param {{search?: string, choices?: Record<string, string>}} state
+ * @returns {object[]}
+ */
+export function filterEntries(entries, tab, { search = "", choices = {} } = {}) {
+  const needle = search.toLowerCase().trim();
+  return entries
+    .filter(entry => tab.types.includes(entry.type))
+    .filter(entry => !needle || entry.name.toLowerCase().includes(needle))
+    .filter(entry => tab.filters.every(id => passes(entry, BROWSER_FILTERS[id], choices[id])))
+    .sort((a, b) => a.name.localeCompare(b.name));
+}
+
+/**
  * Whether an entry passes one filter. A blank choice passes everything.
  * @param {object} entry
  * @param {BrowserFilter} filter
@@ -102,20 +118,4 @@ function passes(entry, filter, choice) {
     default:
       return String(value ?? "") === String(choice);
   }
-}
-
-/**
- * The entries a tab shows: its types, the name search, and every filter's choice, sorted by name.
- * @param {object[]} entries
- * @param {BrowserTab} tab
- * @param {{search?: string, choices?: Record<string, string>}} state
- * @returns {object[]}
- */
-export function filterEntries(entries, tab, { search = "", choices = {} } = {}) {
-  const needle = search.toLowerCase().trim();
-  return entries
-    .filter(entry => tab.types.includes(entry.type))
-    .filter(entry => !needle || entry.name.toLowerCase().includes(needle))
-    .filter(entry => tab.filters.every(id => passes(entry, BROWSER_FILTERS[id], choices[id])))
-    .sort((a, b) => a.name.localeCompare(b.name));
 }

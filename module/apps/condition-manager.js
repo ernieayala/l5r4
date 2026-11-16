@@ -1,69 +1,20 @@
 /**
- * Condition Manager Application
- *
- * Provides an interface for managing actor status conditions and effects.
- * Filters out stance effects and displays only non-stance conditions.
- *
- * Key Responsibilities:
- * - **Condition Display**: Show all available non-stance conditions
- * - **Condition Toggle**: Enable/disable conditions via multi-checkbox interface
- * - **Effect Management**: Create and delete ActiveEffect documents for conditions
- *
- * Foundry VTT Integration:
- * - Extends ApplicationV2 with HandlebarsApplicationMixin
- * - Uses ActiveEffect documents for condition tracking
- * - Refreshes tokens when conditions change
- *
- * Architectural Notes:
- * - **No DebouncedFieldMixin**: Uses custom multi-checkbox component with batched updates
- * - **Actor-based constructor**: Standard pattern for actor configuration dialogs
- * - **No form submission**: Multi-checkbox component handles change events itself
- *
  * @module apps/condition-manager
+ * @description A window that toggles an actor's status conditions, every status effect except the stances, as
+ * ActiveEffect documents, and refreshes the actor's tokens when one changes. It uses no DebouncedFieldMixin and no
+ * form submission: the multi-checkbox element reports its own change events, and one change adds or removes every
+ * condition that differs.
  */
-
-// Config imports
 import { SYS_ID } from "../config/constants.js";
 import { STATUS_EFFECTS } from "../config/status-effects.js";
-
-// Utils imports
 import { T } from "../utils/localization.js";
 import { logError } from "../utils/error-logging.js";
 import { STANCE_IDS } from "../utils/stances.js";
-
-// Services imports
 import { applyEffect } from "../services/effects/apply.js";
 
 /**
- * Get all active non-stance conditions from an actor.
- * Filters out disabled effects and stance effects.
- *
- * @param {Actor} actor - The actor to check for conditions
- * @returns {Set<string>} Set of active condition IDs
+ * The condition manager window for one actor.
  */
-function getActiveConditions(actor) {
-  const conditions = new Set();
-
-  if (!actor?.effects) {
-    return conditions;
-  }
-
-  for (const effect of actor.effects) {
-    if (effect.disabled) {
-      continue;
-    }
-
-    const statuses = effect.statuses || new Set();
-    for (const statusId of statuses) {
-      if (!STANCE_IDS.has(statusId)) {
-        conditions.add(statusId);
-      }
-    }
-  }
-
-  return conditions;
-}
-
 export default class ConditionManager extends foundry.applications.api.HandlebarsApplicationMixin(
   foundry.applications.api.ApplicationV2
 ) {
@@ -123,7 +74,7 @@ export default class ConditionManager extends foundry.applications.api.Handlebar
    *
    * @param {object} _options - Render options (unused)
    * @returns {Promise<object>} Context object with actor and condition list
-   * @private
+   * @override
    */
   async _prepareContext(_options) {
     if (!this.actor) {
@@ -164,7 +115,6 @@ export default class ConditionManager extends foundry.applications.api.Handlebar
    * Returns safe default values to prevent rendering failures.
    *
    * @returns {object} Fallback context with default values
-   * @private
    */
   _getFallbackContext() {
     return {
@@ -193,7 +143,7 @@ export default class ConditionManager extends foundry.applications.api.Handlebar
    *
    * @param {object} context - Render context
    * @param {object} options - Render options
-   * @private
+   * @override
    */
   _onRender(context, options) {
     super._onRender(context, options);
@@ -225,7 +175,6 @@ export default class ConditionManager extends foundry.applications.api.Handlebar
    * Refresh all active tokens for an actor to display updated condition icons.
    *
    * @param {Actor} actor - The actor whose tokens should be refreshed
-   * @private
    */
   _refreshTokens(actor) {
     const tokens = actor.getActiveTokens();
@@ -241,7 +190,6 @@ export default class ConditionManager extends foundry.applications.api.Handlebar
    * and deletes ActiveEffect documents for removed conditions.
    *
    * @param {Event} event - The change event from multi-checkbox component
-   * @private
    */
   async _onCheckboxChange(event) {
     const multiCheckbox = event.target;
@@ -295,4 +243,34 @@ export default class ConditionManager extends foundry.applications.api.Handlebar
       ui.notifications?.error(T("l5r4.apps.conditionManager.errors.updateFailed"));
     }
   }
+}
+
+/**
+ * Get all active non-stance conditions from an actor.
+ * Filters out disabled effects and stance effects.
+ *
+ * @param {Actor} actor - The actor to check for conditions
+ * @returns {Set<string>} Set of active condition IDs
+ */
+function getActiveConditions(actor) {
+  const conditions = new Set();
+
+  if (!actor?.effects) {
+    return conditions;
+  }
+
+  for (const effect of actor.effects) {
+    if (effect.disabled) {
+      continue;
+    }
+
+    const statuses = effect.statuses || new Set();
+    for (const statusId of statuses) {
+      if (!STANCE_IDS.has(statusId)) {
+        conditions.add(statusId);
+      }
+    }
+  }
+
+  return conditions;
 }

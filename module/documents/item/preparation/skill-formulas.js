@@ -1,39 +1,19 @@
 /**
- * Skill Formula Calculator
- *
- * Calculates the dice contribution of a skill item for L5R4 roll formulas.
- * Skills in L5R4 add rolled dice to trait-based rolls following the pattern:
- * (Skill + Trait)k(Trait). This function computes the skill's contribution only.
- *
- * For example, a character with Kenjutsu 4 and Agility 3 rolls 7k3:
- * - Skill contributes: 4 rolled dice (from this function)
- * - Trait contributes: 3 rolled dice AND 3 kept dice (added during actual roll)
- * - Final formula: (4 + 3)k3 = 7k3
- *
- * API: Uses Foundry item.system structure for skill-type items
+ * @module documents/item/preparation/skill-formulas
+ * @description A Skill item's share of a Skill Roll: its rank in rolled dice. The Trait the roll pairs it with adds
+ * its own rank to the rolled dice and sets the kept dice when the roll is made, so Kenjutsu 4 with Agility 3 rolls
+ * (4 + 3)k3 = 7k3.
  */
 
 import { toInt } from "../../../utils/type-coercion.js";
 
 /**
- * Calculates the dice formula contribution for a skill item.
- *
- * In L5R4, skills contribute additional rolled dice to trait-based rolls.
- * The skill rank determines how many rolled dice are added, while the
- * associated trait determines kept dice. This function returns only the
- * skill's contribution (rolled dice), with keepDice always 0 since skills
- * alone cannot make complete rolls.
- *
- * Per L5R4 core rules: "[book text removed; Core Rulebook p.79]."
- *
- * @param {Object} sys - The skill item's system data from item.system
+ * A Skill's share of a roll: as many rolled dice as its rank (at least 0) and no kept dice, since the Trait sets
+ * those. A rank that cannot be read gives 0k0 with a warning.
+ * @param {object} sys - The skill item's system data from item.system
  * @param {number} sys.rank - The character's rank in this skill (0-10)
- * @returns {Object} Dice formula components for the skill
- * @returns {number} .rollDice - Number of dice the skill contributes to rolls (equals rank)
- * @returns {number} .keepDice - Always 0 (skills don't determine kept dice)
- * @returns {string} .rollFormula - String representation "Xk0" for display purposes
- *
- * @throws {Error} If sys.rank cannot be coerced to an integer
+ * @returns {{rollDice: number, keepDice: number, rollFormula: string}} The rolled dice (the rank), the kept dice
+ *   (always 0), and the "Xk0" formula for display
  */
 export function calculateSkillFormula(sys) {
   try {

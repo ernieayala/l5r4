@@ -8,11 +8,11 @@
  * modifier keeps its label so the dialog lists it with a toggle and the card shows it.
  */
 
+import { BOW_IN_MELEE_PENALTY } from "../../../config/game-mechanics.js";
 import { T } from "../../../utils/localization.js";
 import { toInt } from "../../../utils/type-coercion.js";
 import { bagEntries } from "../../../utils/rule-engine.js";
 import { getArmorTNPenalty } from "../../../utils/armor-penalties.js";
-import { BOW_IN_MELEE_PENALTY } from "../../../config/game-mechanics.js";
 
 /**
  * @typedef {object} CheckModifier
@@ -26,6 +26,8 @@ import { BOW_IN_MELEE_PENALTY } from "../../../config/game-mechanics.js";
  */
 
 /**
+ * Everything collectCheck gathers for one check.
+ * game-rules/99_creatures.md, p.319-320
  * @typedef {object} CheckContext
  * @property {CheckModifier[]} modifiers
  * @property {Array<{label: string, value: number, range?: string, fromTarget?: boolean}>} tnModifiers  A change
@@ -36,7 +38,7 @@ import { BOW_IN_MELEE_PENALTY } from "../../../config/game-mechanics.js";
  * @property {Array<{label: string, replace: string, with: string}>} substitutes
  * @property {string[]} notes
  * @property {Array<{label: string, condition: string, level: number|null}>} applyConditions  Offered on success
- * @property {string[]} damageSources    Damage-source tags from DamageSource rules (pp.319-320)
+ * @property {string[]} damageSources    Damage-source tags from DamageSource rules
  * @property {number} ignoreReduction    Reduction the damage ignores
  * @property {{cap: number, minimum: number, maneuverCosts: Record<string, number>}} raises  RaiseRule rules: the
  *   change to the Raise cap, the Raises that must be declared, and the change to each maneuver's cost
@@ -49,11 +51,11 @@ import { BOW_IN_MELEE_PENALTY } from "../../../config/game-mechanics.js";
  * The selectors a check reads rules for: "any" (every roll), its kind, and what it rolls. A Skill's item adds its type
  * (`skill-type:<type>`) and tags (`skill-tag:social`, `skill-tag:school`; roadmap/STAGE-11 decision 9).
  * @param {object} spec
- * @param {string} spec.kind      skill, trait, ring, spell, maho, attack, damage, or roll
- * @param {string} [spec.skill]   Skill name in lower case
- * @param {string} [spec.trait]   Trait key
- * @param {string} [spec.ring]    Ring key
- * @param {{type: string, social: boolean, school: boolean}} [spec.skillData]  The Skill item's data
+ * @param {string} spec.kind - skill, trait, ring, spell, maho, attack, damage, or roll
+ * @param {string} [spec.skill] - Skill name in lower case
+ * @param {string} [spec.trait] - Trait key
+ * @param {string} [spec.ring] - Ring key
+ * @param {{type: string, social: boolean, school: boolean}} [spec.skillData] - The Skill item's data
  * @returns {string[]}
  */
 export function checkSelectors({ kind, skill, trait, ring, skillData }) {
@@ -84,10 +86,13 @@ export function checkSelectors({ kind, skill, trait, ring, skillData }) {
 
 /**
  * The roll options a check's predicates test: the actor's, `check:<kind>`; with a weapon `weapon:size:<size>`
- * (Prone forbids large weapons, p.89), `weapon:skill:<skill>`, `weapon:name:<name>`, and `weapon:keyword:<keyword>`
- * for each of its comma-separated keywords, in lower case, so a Weapon Skill's Mastery Abilities reach the damage
- * of its own weapons (pp.140-143) and a Technique its Samurai weapons (p.106); and with a target, `target` plus the
- * target's options prefixed `target:`.
+ * (Prone forbids large weapons), `weapon:skill:<skill>`, `weapon:name:<name>`, and `weapon:keyword:<keyword>` for
+ * each of its comma-separated keywords, in lower case, so a Weapon Skill's Mastery Abilities reach the damage of its
+ * own weapons and a Technique its Samurai weapons; and with a target, `target` plus the target's options prefixed
+ * `target:`.
+ * game-rules/41_conditional_effects.md, p.89
+ * game-rules/50_crab_schools.md, p.106
+ * game-rules/60_bugei_skills.md, p.140-143
  * @param {Actor} actor
  * @param {string} kind
  * @param {Actor|null} target
@@ -128,7 +133,7 @@ export function checkOptions(actor, kind, target, weapon = null) {
  * @param {string} [spec.trait]
  * @param {string} [spec.ring]
  * @param {Actor|null} [spec.target]
- * @param {Item|null} [spec.weapon]  The weapon of an attack or damage roll: its own rules apply
+ * @param {Item|null} [spec.weapon] - The weapon of an attack or damage roll: its own rules apply
  * @returns {CheckContext}
  */
 export function collectCheck(actor, { kind, skill, trait, ring, target = null, weapon = null }) {
@@ -182,7 +187,8 @@ export function collectCheck(actor, { kind, skill, trait, ring, target = null, w
     value: entry.value,
     ...(entry.type ? { type: entry.type } : {})
   }));
-  // The target's Armor TN changes that count only against one attack range (Prone against melee, p.89)
+  // The target's Armor TN changes that count only against one attack range (Prone against melee)
+  // game-rules/41_conditional_effects.md, p.89
   if (kind === "attack" && target) {
     for (const [range, value] of Object.entries(target.system.armorTn?.vs ?? {})) {
       if (value) {
@@ -202,7 +208,8 @@ export function collectCheck(actor, { kind, skill, trait, ring, target = null, w
     }
   }
   if (kind === "attack" && weapon) {
-    // A weapon's own TN change mounted or on foot, as the dai-kyu's and the han-kyu's (p.199)
+    // A weapon's own TN change mounted or on foot, as the dai-kyu's and the han-kyu's
+    // game-rules/74_weapons.md, p.199
     const mounted = actor.statuses.has("mounted");
     const value = mounted ? weapon.system.tnMounted : weapon.system.tnOnFoot;
     if (value) {
@@ -211,7 +218,8 @@ export function collectCheck(actor, { kind, skill, trait, ring, target = null, w
         value
       });
     }
-    // A bow shot at a target in melee range is -10 (p.199); the roller judges the range, so it starts unticked
+    // A bow shot at a target in melee range is -10; the roller judges the range, so it starts unticked
+    // game-rules/74_weapons.md, p.199
     if (weapon.system.isBow) {
       modifiers.push({
         label: T("l5r4.equipment.weapons.meleeRange"),

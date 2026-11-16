@@ -1,8 +1,13 @@
 /**
- * @module check
+ * @module utils/check
  * @description The arithmetic of a Roll & Keep check, as pure functions the roll pipeline
- * (module/services/dice/check/) calls: the dice pool (p.75, p.77), its Foundry formula, the TN with Raises, Free
- * Raises, and wound penalties (pp.79, 82), success, contested rolls (p.80), and inline Roll & Keep notation.
+ * (module/services/dice/check/) calls: the dice pool, its Foundry formula, the TN with Raises, Free
+ * Raises, and wound penalties, success, contested rolls, and inline Roll & Keep notation.
+ * game-rules/23_roll_and_keep.md, p.75
+ * game-rules/26_special_dice_rules.md, p.77
+ * game-rules/28_raises.md, p.79
+ * game-rules/29_types_of_rolls.md, p.80
+ * game-rules/33_wounds.md, p.82
  */
 
 import { stackModifiers } from "./modifier-stacking.js";
@@ -18,35 +23,39 @@ import { applyTenDiceRule } from "./ten-dice.js";
  */
 
 /**
+ * A check's dice pool after the Ten Dice Rule; `rerollOnes` is an Emphasis.
+ * game-rules/58_skills_overview.md, p.133
  * @typedef {object} CheckPool
  * @property {number} roll         Rolled dice after the Ten Dice Rule
  * @property {number} keep         Kept dice after the Ten Dice Rule
  * @property {number} bonus        Flat bonus, including what the Ten Dice Rule converted
  * @property {number|null} explode Dice explode on this face or higher; null when they never explode
- * @property {boolean} rerollOnes  1s are re-rolled once (Emphasis, p.133)
+ * @property {boolean} rerollOnes  1s are re-rolled once (Emphasis)
  */
 
 /**
  * Build the dice pool for a check: the base pool plus enabled modifiers, stacked as the sheet stacks them, and a
- * Void Point (+1k1, p.78), then the Ten Dice Rule last (p.77), which also keeps no more dice than are rolled
- * (p.89). Unskilled dice never explode (p.80).
- *
- * @param {object} spec
- * @param {number} spec.roll                Base rolled dice
- * @param {number} spec.keep                Base kept dice
- * @param {number} [spec.bonus=0]           Base flat bonus
- * @param {PoolModifier[]} [spec.modifiers] Modifiers to add
- * @param {boolean} [spec.voidPoint=false]  A Void Point spent on the roll
- * @param {boolean} [spec.unskilled=false]  An Unskilled Roll
- * @param {number} [spec.explode=10]        Explode threshold before the unskilled rule
- * @param {boolean} [spec.rerollOnes=false] Re-roll 1s once
- * @param {number|null} [spec.keepOverride] Keep fewer dice than the pool allows (p.75); ignored when not lower
- * @param {boolean} [spec.littleTruths=false] The Little Truths Ten Dice exception (see applyTenDiceRule)
- * @returns {CheckPool}
- *
- * @example
- * // Kyujutsu 4 + Reflexes 3 (p.79): 7k3
- * buildPool({ roll: 7, keep: 3 }); // { roll: 7, keep: 3, bonus: 0, explode: 10, rerollOnes: false }
+ * Void Point (+1k1), then the Ten Dice Rule last, which also keeps no more dice than are rolled. Unskilled dice
+ * never explode. A Skill of 4 with a Trait of 3 builds 7k3: `{ roll: 7, keep: 3, bonus: 0, explode: 10,
+ * rerollOnes: false }`. A keep override keeps fewer dice than the pool allows.
+ * game-rules/23_roll_and_keep.md, p.75
+ * game-rules/25_rings_and_traits.md, p.78
+ * game-rules/26_special_dice_rules.md, p.77
+ * game-rules/27_skills_in_rolls.md, p.79
+ * game-rules/30_skill_rolls_expanded.md, p.80
+ * game-rules/41_conditional_effects.md, p.89
+ * @param {object} spec - The pool's parts
+ * @param {number} spec.roll - Base rolled dice
+ * @param {number} spec.keep - Base kept dice
+ * @param {number} [spec.bonus=0] - Base flat bonus
+ * @param {PoolModifier[]} [spec.modifiers] - Modifiers to add
+ * @param {boolean} [spec.voidPoint=false] - A Void Point spent on the roll
+ * @param {boolean} [spec.unskilled=false] - An Unskilled Roll
+ * @param {number} [spec.explode=10] - Explode threshold before the unskilled rule
+ * @param {boolean} [spec.rerollOnes=false] - Re-roll 1s once
+ * @param {number|null} [spec.keepOverride] - Keep fewer dice than the pool allows; ignored when not lower
+ * @param {boolean} [spec.littleTruths=false] - The Little Truths Ten Dice exception (see applyTenDiceRule)
+ * @returns {CheckPool} The pool
  */
 export function buildPool({
   roll,
@@ -83,8 +92,8 @@ export function buildPool({
 
 /**
  * The Roll & Keep explosion modifier (module/services/dice/roll-keep-die.js): every die that meets `explode`
- * rolls again into its own total, before the keep (p.77). Empty when the dice do not explode.
- *
+ * rolls again into its own total, before the keep. Empty when the dice do not explode.
+ * game-rules/26_special_dice_rules.md, p.77
  * @param {number|null} explode
  * @returns {string} "xa10", "xa>=9", or ""
  */
@@ -96,9 +105,11 @@ export function explodeModifier(explode) {
 }
 
 /**
- * The Foundry Roll formula for a pool: d10s, 1s re-rolled once (p.133), each die exploding into its own total
- * (p.77), the highest kept (p.75), the flat bonus.
- *
+ * The Foundry Roll formula for a pool: d10s, 1s re-rolled once, each die exploding into its own total, the
+ * highest kept, the flat bonus.
+ * game-rules/23_roll_and_keep.md, p.75
+ * game-rules/26_special_dice_rules.md, p.77
+ * game-rules/58_skills_overview.md, p.133
  * @param {CheckPool} pool
  * @returns {string} Such as "7d10xa10k3+0", "5d10r1xa>=9k2+2", or "3d10k3-1"
  */
@@ -109,8 +120,9 @@ export function poolFormula({ roll, keep, bonus, explode, rerollOnes }) {
 }
 
 /**
- * The most Raises a roll allows: the Void Ring (p.79), none on an Unskilled Roll (p.80).
- *
+ * The most Raises a roll allows: the Void Ring, none on an Unskilled Roll.
+ * game-rules/28_raises.md, p.79
+ * game-rules/30_skill_rolls_expanded.md, p.80
  * @param {number} voidRing
  * @param {boolean} [unskilled=false]
  * @returns {number}
@@ -120,20 +132,18 @@ export function maxRaises(voidRing, unskilled = false) {
 }
 
 /**
- * The TN a roll must meet. Each declared Raise adds 5; each Free Raise the roller spends on the TN takes 5 off
- * (p.79); the Wound Rank's penalty is added (p.82); TN modifiers add. A roll with no TN given (0) and no Raises has
- * none.
- *
- * @param {object} spec
- * @param {number} spec.base                   TN set by the GM, a spell, or a target's Armor TN
- * @param {number} [spec.raises=0]             Declared Raises
- * @param {number} [spec.freeRaisesToTN=0]     Free Raises spent to lower the TN
- * @param {number} [spec.woundPenalty=0]       The current Wound Rank's TN penalty
- * @param {number[]} [spec.modifiers=[]]       Other TN changes (conditions, armor, rules)
+ * The TN a roll must meet. Each declared Raise adds 5; each Free Raise the roller spends on the TN takes 5 off;
+ * the Wound Rank's penalty is added; TN modifiers add. A roll with no TN given (0) and no Raises has none. A base
+ * of 20 with two Raises and a wound penalty of 3 is 33.
+ * game-rules/28_raises.md, p.79
+ * game-rules/33_wounds.md, p.82
+ * @param {object} spec - The TN's parts
+ * @param {number} spec.base - TN set by the GM, a spell, or a target's Armor TN
+ * @param {number} [spec.raises=0] - Declared Raises
+ * @param {number} [spec.freeRaisesToTN=0] - Free Raises spent to lower the TN
+ * @param {number} [spec.woundPenalty=0] - The current Wound Rank's TN penalty
+ * @param {number[]} [spec.modifiers=[]] - Other TN changes (conditions, armor, rules)
  * @returns {number|null} The TN, never below 0; null when the roll has no TN
- *
- * @example
- * targetNumber({ base: 20, raises: 2, woundPenalty: 3 }); // 33
  */
 export function targetNumber({
   base,
@@ -150,8 +160,9 @@ export function targetNumber({
 }
 
 /**
- * Compare a total with the TN (p.75): meeting it succeeds. A roll that misses its raised TN fails (p.79).
- *
+ * Compare a total with the TN: meeting it succeeds. A roll that misses its raised TN fails.
+ * game-rules/23_roll_and_keep.md, p.75
+ * game-rules/28_raises.md, p.79
  * @param {number} total
  * @param {number|null} tn
  * @returns {{success: boolean, margin: number}|null} null when the roll has no TN
@@ -164,19 +175,13 @@ export function evaluateCheck(total, tn) {
 }
 
 /**
- * Resolve a Contested Roll (p.80, `game-rules/30_skill_rolls_expanded.md`): the highest result wins. A roller who
- * declared Raises must beat each opponent by 5 per Raise or fail, so each total counts as total - 5 × Raises. A
- * margin of exactly 5 per Raise is enough (Ernie's ruling, 2026-11-14): a raiser level with the best count wins.
- * Any other equal best counts are a tie, which is re-rolled.
- *
+ * Resolve a Contested Roll: the highest result wins. A roller who declared Raises must beat each opponent by 5 per
+ * Raise or fail, so each total counts as total - 5 × Raises. A margin of exactly 5 per Raise is enough (Ernie's
+ * ruling, 2026-11-14): a raiser level with the best count wins. Any other equal best counts are a tie, which is
+ * re-rolled. So 22 with one Raise counts as 17: it loses to 18 and beats 17, a margin of exactly 5.
+ * game-rules/29_types_of_rolls.md, p.80
  * @param {Array<{id: string, total: number, raises?: number}>} entries
  * @returns {{winner: string|null, tie: boolean, scores: Record<string, number>}}
- *
- * @example
- * // 22 with one Raise counts as 17, short of 18
- * contest([{ id: "a", total: 22, raises: 1 }, { id: "b", total: 18 }]); // { winner: "b", tie: false, ... }
- * // ...and level with 17, which is a margin of exactly 5
- * contest([{ id: "a", total: 22, raises: 1 }, { id: "b", total: 17 }]); // { winner: "a", tie: false, ... }
  */
 export function contest(entries) {
   const scores = Object.fromEntries(entries.map(e => [e.id, e.total - 5 * (e.raises ?? 0)]));

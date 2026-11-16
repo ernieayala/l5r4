@@ -1,35 +1,24 @@
 /**
- * Trait Handler
- *
- * Handles trait rank adjustments and trait rolls on actor sheets.
- * Enforces L5R4 trait rank rules (0-10 range) and delegates roll
- * operations to RollHandler.
- *
- * **Responsibilities:**
- * - Validate and update trait ranks
- * - Clamp trait values to legal range (0-10)
- * - Delegate trait rolls to RollHandler
- * - Handle shift-key safety mechanism for rank adjustments
- *
- * **Game Rules:**
- * Traits (Stamina, Willpower, Strength, Perception, Agility, Intelligence,
- * Reflexes, Awareness) have ranks from 1-10. Normal humans start at rank 2.
- * Advancement cost = 4 × new rank XP (e.g., 2→3 costs 12 XP).
- *
  * @module sheets/handlers/trait-handler
+ * @description Trait rank adjustments and Trait rolls on actor sheets. A Shift+Click on a Trait's rank moves it by
+ * one, clamped to 0-10; a plain click rolls the Trait through RollHandler. The increase and decrease buttons adjust
+ * without Shift. Traits rank 1-10, a human starts at 2, and a rank costs 4 × the new rank in XP.
  */
 
 import { SYS_ID } from "../../config/constants.js";
 import { clamp } from "../../utils/type-coercion.js";
 import { RollHandler } from "./roll-handler.js";
 
+/**
+ * Trait rank adjustments and Trait rolls for actor sheets.
+ */
 export class TraitHandler {
   /**
    * Handles trait rank click - rolls trait or adjusts rank based on Shift key.
    *
    * **Without Shift Key:**
    * Performs a trait roll (XkX where X = trait rank) via RollHandler.traitRoll().
-   * This allows quick trait rolls by clicking directly on the trait rank.
+   * A click on the trait rank rolls the trait.
    *
    * **With Shift Key:**
    * Increments or decrements the specified trait rank, clamping to valid
@@ -43,7 +32,7 @@ export class TraitHandler {
    * Rank adjustment only executes if Shift key is held. Works in conjunction with
    * KeyboardBehaviorMixin which provides visual cursor feedback.
    *
-   * @param {Object} context - Handler context from sheet
+   * @param {object} context - Handler context from sheet
    * @param {L5R4Actor} context.actor - The actor document
    * @param {HTMLElement} context.element - The sheet's root element
    * @param {string} context.sheetClassName - Class name for logging
@@ -51,7 +40,6 @@ export class TraitHandler {
    * @param {HTMLElement} element - Element with data-trait attribute
    * @param {number} delta - Direction to adjust (+1 to increase, -1 to decrease)
    * @returns {Promise<void>}
-   * @async
    */
   static async adjust(context, event, element, delta) {
     event?.preventDefault?.();
@@ -102,11 +90,10 @@ export class TraitHandler {
    * Creates a modified event with shiftKey=true to bypass the shift check in
    * adjust(), then delegates to adjust() with delta=+1.
    *
-   * @param {Object} context - Handler context from sheet
+   * @param {object} context - Handler context from sheet
    * @param {Event} event - DOM event from button click
    * @param {HTMLElement} element - Element with data-trait attribute
    * @returns {Promise<void>}
-   * @async
    */
   static async increase(context, event, element) {
     event?.preventDefault?.();
@@ -131,11 +118,10 @@ export class TraitHandler {
    * Creates a modified event with shiftKey=true to bypass the shift check in
    * adjust(), then delegates to adjust() with delta=-1.
    *
-   * @param {Object} context - Handler context from sheet
+   * @param {object} context - Handler context from sheet
    * @param {Event} event - DOM event from button click
    * @param {HTMLElement} element - Element with data-trait attribute
    * @returns {Promise<void>}
-   * @async
    */
   static async decrease(context, event, element) {
     event?.preventDefault?.();

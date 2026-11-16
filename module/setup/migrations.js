@@ -1,59 +1,16 @@
 /**
- * L5R4 System Data Migrations
- *
- * Main orchestration module for system data migrations. Coordinates all migration steps
- * when the system version changes, ensuring backward compatibility with legacy data.
- *
- * Handles schema transformations and data migrations across system versions. Migrates both
- * world documents (actors, items) and compendium packs when the system is updated, ensuring
- * backward compatibility with legacy data structures from earlier system versions.
- *
- * Key Responsibilities:
- * - **Schema Migrations**: Transform legacy field names (snake_case → camelCase)
- * - **Type Migrations**: Convert deprecated item types (bow → weapon with isBow flag)
- * - **Wound System**: Migrate NPC wound modes, multipliers, and legacy wound_lvl structures
- * - **Icon Paths**: Update old .png icon paths to new .webp asset structure
- * - **Default Values**: Backfill missing fields with proper defaults
- * - **Data Normalization**: Ensure type consistency (strings → numbers, case normalization)
- *
- * Migration Lifecycle:
- * - Triggered by system version change via game.settings
- * - Runs once per version bump during Foundry ready hook
- * - Processes world actors/items first, then unlocked compendiums
- * - Includes embedded items within actors (equipment, skills, etc.)
- *
- * L5R4 Game Mechanics Migrated:
- * - **Wound Levels**: 8-rank system (Healthy → Out) with progressive TN penalties
- * - **Earth Multipliers**: Configurable lethality (×2 default, ×3/×4/×5 heroic)
- * - **Armor TN**: Legacy armor_tn → armorTn per (Reflexes × 5 + 5 + bonus) formula
- * - **Skill Defaults**: freeRanks and freeEmphasis for advancement tracking
- *
- * Foundry VTT Integration:
- * - Uses Document.update() with render: false for bulk performance (requires v13+)
- * - Accesses _source for pre-derived raw data when needed
- * - Handles FilePicker API differences between Foundry versions
- * - Respects compendium locked state (skips locked packs)
- * - Uses diff: false for type changes (full replacement required)
- *
- * Safety Notes:
- * - All migrations wrapped in try/catch to prevent cascade failures
- * - Logs failures to console with document context for manual review
- * - Non-destructive: preserves data when target fields already populated
- * - Idempotent: safe to run multiple times on same data
- *
  * @module setup/migrations
- * @see {@link https://foundryvtt.com/api/v13/classes/foundry.documents.BaseActor.html#update|Document.update API}
+ * @description The world data migration that runs once per system version, from the `ready` hook, for a GM. It runs
+ * each step in `module/setup/migrations/` over the world's actors and items, the actors' embedded items, unlinked
+ * tokens' actor deltas, and every unlocked Actor and Item compendium: legacy field names remapped to the schema
+ * (snake_case to camelCase), bows converted to weapons, NPC wounds and Initiative, missing defaults backfilled,
+ * values normalized, item mechanics moved into rules, and icon paths moved from .png to .webp. Steps update with
+ * `render: false`, read `_source`, keep a field that already holds a value, and catch per document or pack, so a
+ * failure is logged and the rest still runs; a marker flag on each document makes a second run skip it.
  */
-
 import { SYS_ID } from "../config/constants.js";
-
-// Migration utilities
 import { hasBeenMigrated, markAsMigrated } from "./migrations/utils/helpers.js";
-
-// Schema migrations
 import { applySchemaMapToDocs } from "./migrations/schema/apply.js";
-
-// Actor migrations
 import { migrateLegacyNpcWounds } from "./migrations/actors/npc-wounds.js";
 import { migrateNpcInitiative } from "./migrations/actors/npc-initiative.js";
 import { migrateActorEmbeddedItems } from "./migrations/actors/embedded-items.js";
@@ -61,8 +18,6 @@ import { cleanupLegacyFields } from "./migrations/actors/cleanup.js";
 import { migrateEffectFreeTraitBase } from "./migrations/actors/xp-free-trait-base.js";
 import { migrateStatusEffectRules } from "./migrations/actors/status-effect-rules.js";
 import { migrateUnlinkedTokens } from "./migrations/actors/unlinked-tokens.js";
-
-// Item migrations
 import { migrateBowsToWeapons } from "./migrations/items/bow-to-weapon.js";
 import { migrateSkillDefaults } from "./migrations/items/skill-defaults.js";
 import { migrateEmphasisStringToArray } from "./migrations/items/emphasis.js";
@@ -70,8 +25,6 @@ import { migrateArmorTypes } from "./migrations/items/armor-types.js";
 import { migrateFreeRaisesDefaults } from "./migrations/items/free-raises.js";
 import { normalizeItems } from "./migrations/items/normalize.js";
 import { migrateItemRules } from "./migrations/items/item-rules.js";
-
-// Icon migrations
 import {
   runIconPathMigration,
   migrateCompendiumIconPaths,
@@ -114,13 +67,11 @@ import {
  * - Called from system ready hook when version mismatch detected
  * - Uses game.actors.contents and game.items.contents for world documents
  * - Uses game.packs to iterate compendium packs
- * - Checks pack.metadata.locked to respect pack permissions
+ * - Checks pack.metadata.locked to respect pack permissions.
  *
- * @param {string} fromVersion - Previous system version (unused but kept for API compatibility)
+ * @param {string} fromVersion - Previous system version, logged when the icon migration fails
  * @param {string} toVersion - New system version to mark documents with after migration
  * @returns {Promise<void>}
- * @async
- * @export
  */
 export async function runMigrations(fromVersion, toVersion) {
   if (!game.user?.isGM) {

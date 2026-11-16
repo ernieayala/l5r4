@@ -1,7 +1,9 @@
 /**
- * @module stances
- * @description Stance lookups over an actor's statuses (Core Rulebook p.84): which stance is active, and which
- * conditions rule a stance out (p.84, p.89).
+ * @module utils/stances
+ * @description Stance lookups over an actor's statuses: which stance is active, and which conditions rule a stance
+ * out.
+ * game-rules/36_stances.md, p.84
+ * game-rules/41_conditional_effects.md, p.89
  */
 
 import { STANCE_LIMITS, STATUS_EFFECTS } from "../config/status-effects.js";
@@ -24,14 +26,13 @@ export function activeStance(statuses) {
 }
 
 /**
- * The statuses that rule a stance out: Dazed allows only Defense and Full Defense, Prone only Attack and Defense
- * (p.89); Fatigued and Mounted forbid Full Attack (pp.84, 89).
+ * The statuses that rule a stance out: Dazed allows only Defense and Full Defense, Prone only Attack and Defense;
+ * Fatigued and Mounted forbid Full Attack. So Full Attack while mounted conflicts with "mounted".
+ * game-rules/36_stances.md, p.84
+ * game-rules/41_conditional_effects.md, p.89
  * @param {string} stanceId
  * @param {Iterable<string>} statuses
  * @returns {string[]}
- *
- * @example
- * stanceConflicts("fullAttackStance", ["mounted"]); // ["mounted"]
  */
 export function stanceConflicts(stanceId, statuses) {
   return [...statuses].filter(status => STANCE_LIMITS[status]?.includes(stanceId));

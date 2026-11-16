@@ -1,24 +1,8 @@
 /**
- * Application Launcher Handler
- *
- * Delegates actor sheet actions to launch specialized applications (Wound Config, XP Manager).
- * Implements singleton window management to prevent duplicate application instances per actor.
- *
- * Foundry VTT Integration:
- * - Uses Foundry v13+ Application v2 singleton pattern via ui.windows registry
- * - Integrates with event delegation system (receives context, event, element from sheets)
- * - Leverages bringToTop() for window focus management
- * - Uses foundry.utils.mergeObject pattern in target applications
- *
- * Responsibilities:
- * - Check for existing application instances before creating new ones
- * - Create and render new application instances when none exist
- * - Focus existing instances if already open (prevent duplicates)
- * - Handle errors gracefully with console warnings and user notifications
- *
  * @module sheets/handlers/app-launcher-handler
- * @requires Foundry VTT v13+
- * @see {@link https://foundryvtt.com/api/v13/classes/foundry.applications.api.ApplicationV2.html|Application v2 Documentation}
+ * @description Opens the actor's configuration windows (armor, combat, conditions, wounds, XP, wealth) from sheet
+ * actions, one window per actor: an open window for the same actor is focused through the ui.windows registry
+ * instead of opening a second one. A failure logs a warning and shows the user a notification.
  * @see module:apps/wound-config for wound mechanics configuration UI
  * @see module:apps/xp-manager for XP tracking and advancement UI
  */
@@ -48,10 +32,10 @@ export class AppLauncherHandler {
    * Opens the Armor Configuration application for the actor.
    * Implements singleton pattern: if an instance exists for this actor, focuses it instead of creating a new one.
    *
-   * @param {Object} context - Sheet rendering context
+   * @param {object} context - Sheet rendering context
    * @param {L5R4Actor} context.actor - The actor whose armor configuration to open
    * @param {Event} [event] - DOM event to prevent default behavior on
-   * @param {HTMLElement} [element] - Target element (unused)
+   * @param {HTMLElement} [_element] - Target element (unused)
    * @returns {Promise<void>}
    * @throws {Error} Logs warning and shows user notification on failure
    *
@@ -84,10 +68,10 @@ export class AppLauncherHandler {
    * Opens the Combat Configuration application for the actor.
    * Implements singleton pattern: if an instance exists for this actor, focuses it instead of creating a new one.
    *
-   * @param {Object} context - Sheet rendering context
+   * @param {object} context - Sheet rendering context
    * @param {L5R4Actor} context.actor - The actor whose combat configuration to open
    * @param {Event} [event] - DOM event to prevent default behavior on
-   * @param {HTMLElement} [element] - Target element (unused)
+   * @param {HTMLElement} [_element] - Target element (unused)
    * @returns {Promise<void>}
    * @throws {Error} Logs warning and shows user notification on failure
    *
@@ -123,10 +107,10 @@ export class AppLauncherHandler {
    * Opens the Condition Manager application for the actor.
    * Implements singleton pattern: if an instance exists for this actor, focuses it instead of creating a new one.
    *
-   * @param {Object} context - Sheet rendering context
+   * @param {object} context - Sheet rendering context
    * @param {L5R4Actor} context.actor - The actor whose conditions to manage
    * @param {Event} [event] - DOM event to prevent default behavior on
-   * @param {HTMLElement} [element] - Target element (unused)
+   * @param {HTMLElement} [_element] - Target element (unused)
    * @returns {Promise<void>}
    * @throws {Error} Logs warning and shows user notification on failure
    *
@@ -159,10 +143,10 @@ export class AppLauncherHandler {
    * Opens the Wound Configuration application for the actor.
    * Implements singleton pattern: if an instance exists for this actor, focuses it instead of creating a new one.
    *
-   * @param {Object} context - Sheet rendering context
+   * @param {object} context - Sheet rendering context
    * @param {L5R4Actor} context.actor - The actor whose wound configuration to open
    * @param {Event} [event] - DOM event to prevent default behavior on
-   * @param {HTMLElement} [element] - Target element (unused)
+   * @param {HTMLElement} [_element] - Target element (unused)
    * @returns {Promise<void>}
    * @throws {Error} Logs warning and shows user notification on failure
    *
@@ -198,10 +182,10 @@ export class AppLauncherHandler {
    * Opens the XP Manager application for the actor.
    * Implements singleton pattern: if an instance exists for this actor, focuses it instead of creating a new one.
    *
-   * @param {Object} context - Sheet rendering context
+   * @param {object} context - Sheet rendering context
    * @param {L5R4Actor} context.actor - The actor whose XP to manage
    * @param {Event} [event] - DOM event to prevent default behavior on
-   * @param {HTMLElement} [element] - Target element (unused)
+   * @param {HTMLElement} [_element] - Target element (unused)
    * @returns {Promise<void>}
    * @throws {Error} Logs warning and shows user notification on failure
    *
@@ -237,10 +221,10 @@ export class AppLauncherHandler {
    * Opens the Wealth Manager application for the actor.
    * Implements singleton pattern: if an instance exists for this actor, focuses it instead of creating a new one.
    *
-   * @param {Object} context - Sheet rendering context
+   * @param {object} context - Sheet rendering context
    * @param {L5R4Actor} context.actor - The actor whose wealth to manage
    * @param {Event} [event] - DOM event to prevent default behavior on
-   * @param {HTMLElement} [element] - Target element (unused)
+   * @param {HTMLElement} [_element] - Target element (unused)
    * @returns {Promise<void>}
    * @throws {Error} Logs warning and shows user notification on failure
    *

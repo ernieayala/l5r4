@@ -1,31 +1,15 @@
 /**
- * Stance Handler
- *
- * UI event handler for L5R4 combat stance transitions in character sheets.
- * Manages the application and removal of stance Active Effects when players
- * change their character's combat stance via the sheet dropdown.
- *
- * Key Responsibilities:
- * - **Stance Transitions**: Apply new stance effects, remove conflicting stances
- * - **Permission Validation**: Ensure user has ownership before stance changes
- * - **Error Recovery**: Handle failed effect operations with user notifications
- *
- * L5R4 Game Rules Context:
- * Implements the L5R4 stance system where characters may adopt one of five combat
- * stances (Attack, Full Attack, Defense, Full Defense, Center). Only one stance
- * may be active at a time per core rules. Stances affect available actions,
- * attack bonuses, and defensive capabilities.
- *
- * Foundry VTT Integration:
- * - A stance is its status effect (module/config/status-effects.js), created through the effects service
- * - The stances share the exclusive group "stance", so the new one ends the old (module/documents/active-effect.js)
- *
  * @module sheets/handlers/stance-handler
+ * @description Changes a character's combat stance from the sheet's stance dropdown, for an owner only. A character
+ * holds one of five stances (Attack, Full Attack, Defense, Full Defense, Center) at a time. A stance is its status
+ * effect (module/config/status-effects.js), created through the effects service; the stances share the exclusive
+ * group "stance", so the new one ends the old (module/documents/active-effect.js). A failed change shows the user a
+ * notification.
  */
 
+import { SYS_ID } from "../../config/constants.js";
 import { STANCE_IDS, stanceConflicts } from "../../utils/stances.js";
 import { applyEffect } from "../../services/effects/apply.js";
-import { SYS_ID } from "../../config/constants.js";
 
 /**
  * Handles combat stance changes triggered from actor sheets.
@@ -54,9 +38,9 @@ export class StanceHandler {
    *
    * Error Handling:
    * - Warns users without ownership permission
-   * - Delegates async error handling to _addStance and _removeAllStances
+   * - Delegates async error handling to _addStance and _removeAllStances.
    *
-   * @param {Object} context - Sheet render context containing actor reference
+   * @param {object} context - Sheet render context containing actor reference
    * @param {Actor} context.actor - The L5R4 actor document being modified
    * @param {Event} [event] - The DOM event that triggered the change (optional)
    * @param {HTMLElement} element - The select element containing the chosen stance value
@@ -78,7 +62,9 @@ export class StanceHandler {
       await this._removeAllStances(actor);
       return;
     }
-    // A condition may rule the stance out (p.84, p.89): warn, and leave the choice to the player
+    // A condition may rule the stance out: warn, and leave the choice to the player
+    // game-rules/36_stances.md, p.84
+    // game-rules/41_conditional_effects.md, p.89
     for (const status of stanceConflicts(stanceId, actor.statuses)) {
       ui.notifications?.warn(
         game.i18n.localize("l5r4.ui.effects.stanceNotAllowed", {
@@ -109,9 +95,9 @@ export class StanceHandler {
    *
    * Error Handling:
    * - Warns users without ownership permission
-   * - Catches async errors from actor.update and shows user notification
+   * - Catches async errors from actor.update and shows user notification.
    *
-   * @param {Object} context - Sheet render context containing actor reference
+   * @param {object} context - Sheet render context containing actor reference
    * @param {Actor} context.actor - The L5R4 actor document being modified
    * @param {Event} [event] - The DOM event that triggered the toggle (optional)
    * @returns {Promise<void>}
@@ -143,7 +129,6 @@ export class StanceHandler {
    * @param {Actor} actor - The L5R4 actor document to apply the stance to
    * @param {string} stanceId - Stance identifier (e.g., "attackStance", "fullDefenseStance")
    * @returns {Promise<void>}
-   * @private
    */
   static async _addStance(actor, stanceId) {
     try {
@@ -159,7 +144,6 @@ export class StanceHandler {
    *
    * @param {Actor} actor - The L5R4 actor document to remove stances from
    * @returns {Promise<void>}
-   * @private
    */
   static async _removeAllStances(actor) {
     try {

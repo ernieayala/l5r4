@@ -1,3 +1,8 @@
+/**
+ * @module data/index
+ * @description The registry of the system's data models, by Document name and subtype, that `init` registers.
+ */
+
 import NpcData from "./actor/npc-data.js";
 import PcData from "./actor/pc-data.js";
 import EffectData from "./effect/effect-data.js";
@@ -23,7 +28,7 @@ import CheckRequestData from "./chat/check-request-data.js";
  * Data model class per subtype, keyed by Document name. `init` registers them in `CONFIG.<Document>.dataModels`;
  * tests/manifest.test.js checks them against system.json `documentTypes`.
  */
-export const DATA_MODELS = {
+export const DATA_MODELS = Object.freeze({
   Actor: {
     pc: PcData,
     npc: NpcData
@@ -49,15 +54,15 @@ export const DATA_MODELS = {
     roll: RollMessageData,
     checkRequest: CheckRequestData
   }
-};
+});
 
 /**
  * Data model class per core type (`metadata.coreTypes`), keyed by Document name. `init` registers them in
  * `CONFIG.<Document>.dataModels` like DATA_MODELS, but they are never declared in `documentTypes`, where a core type
- * invalidates the whole field (common/packages/sub-types.mjs:45-47).
+ * invalidates the whole field [src: common/packages/sub-types.mjs:45-47].
  */
-export const CORE_TYPE_DATA_MODELS = {
+export const CORE_TYPE_DATA_MODELS = Object.freeze({
   ActiveEffect: {
     base: EffectData
   }
-};
+});

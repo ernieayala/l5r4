@@ -1,15 +1,64 @@
 /**
- * Item Rules Migration
- * Moves 3.2.1 item mechanics into `system.rules` (roadmap/STAGE-07-RULE-ENGINE.md, Conversions).
- *
  * @module setup/migrations/items/item-rules
+ * @description Moves 3.2.1 item mechanics into `system.rules` (roadmap/STAGE-07-RULE-ENGINE.md, Conversions).
  */
-
 import { SYS_ID } from "../../../config/constants.js";
 
 const TRAIT_CHANGE = /^system\.traits\.(sta|wil|str|per|ref|awa|agi|int)$/;
 const VOID_CHANGE_KEYS = new Set(["system.rings.void.rank", "system.rings.void.value"]);
 const MASTER_OF_BLOOD = "master-of-blood";
+
+/**
+ * The rules a Master of Blood advantage carries: the RollOption the maho roll reads for its lower blood cost and
+ * Taint, and +10 to the TN of every spell that is not maho.
+ * game-rules/89_shadowlands_taint.md, p.280
+ * @type {ReadonlyArray<object>}
+ */
+const MASTER_OF_BLOOD_RULES = Object.freeze([
+  { key: "RollOption", option: MASTER_OF_BLOOD },
+  {
+    key: "TNModifier",
+    selector: "spell",
+    value: 10,
+    predicate: [{ not: "check:maho" }]
+  }
+]);
+
+/**
+ * Moves item mechanics into rules: Family and School Trait bonus effects become TraitAdjust rules, a Master of
+ * Blood advantage gets its rules, and any item's Free Raises become a FreeRaise rule. Running again changes nothing.
+ *
+ * @param {Document[]} docs - Documents to scan; non-Items are skipped
+ * @param {string} label - Migration context label for console logging
+ * @returns {Promise<void>}
+ */
+export async function migrateItemRules(docs, label) {
+  let migrated = 0;
+  for (const item of docs) {
+    if (item.documentName !== "Item") {
+      continue;
+    }
+    try {
+      let changed = await convertFreeRaises(item);
+      if (item.type === "family" || item.type === "school") {
+        changed = (await convertCreationBonusEffects(item)) || changed;
+      } else if (item.type === "advantage" && item.name.toLowerCase().includes("master of blood")) {
+        changed = (await addMasterOfBloodRules(item)) || changed;
+      }
+      migrated += Number(changed);
+    } catch (err) {
+      console.warn(`${SYS_ID}`, "Failed to move item mechanics into rules", {
+        label,
+        id: item.id,
+        name: item.name,
+        err
+      });
+    }
+  }
+  if (migrated > 0) {
+    console.warn(`${SYS_ID} | Moved the mechanics of ${migrated} items into rules (${label})`);
+  }
+}
 
 /**
  * The Trait an "add" change raises, "void" for the Void Ring, or null when the change is something else.
@@ -80,21 +129,6 @@ async function convertCreationBonusEffects(item) {
 }
 
 /**
- * The rules a Master of Blood advantage carries (p.280, `game-rules/89_shadowlands_taint.md`): the RollOption the
- * maho roll reads for its lower blood cost and Taint, and +10 to the TN of every spell that is not maho.
- * @type {ReadonlyArray<object>}
- */
-const MASTER_OF_BLOOD_RULES = Object.freeze([
-  { key: "RollOption", option: MASTER_OF_BLOOD },
-  {
-    key: "TNModifier",
-    selector: "spell",
-    value: 10,
-    predicate: [{ not: "check:maho" }]
-  }
-]);
-
-/**
  * Master of Blood: 3.2.1 recognized the advantage by name; it now carries its rules. Each is added when the item
  * lacks a rule of its key, so running again changes nothing.
  * @param {Item} item
@@ -118,8 +152,8 @@ async function addMasterOfBloodRules(item) {
 
 /**
  * An item's `freeRaises` value, which 3.2.1 added to every roll its owner made, becomes a FreeRaise rule on "any"
- * roll, which the GM can see and narrow in the rules editor (Ernie's ruling, 2026-11-14). The field is set to 0, so
- * running again changes nothing.
+ * roll, which the GM can see and narrow in the rules editor (Ernie's ruling). The field is set to 0, so running
+ * again changes nothing.
  * @param {Item} item
  * @returns {Promise<boolean>} Whether the item changed.
  */
@@ -136,40 +170,4 @@ async function convertFreeRaises(item) {
     { render: false }
   );
   return true;
-}
-
-/**
- * Moves item mechanics into rules: Family and School Trait bonus effects become TraitAdjust rules, a Master of
- * Blood advantage gets its rules, and any item's Free Raises become a FreeRaise rule. Running again changes nothing.
- *
- * @param {Document[]} docs - Documents to scan; non-Items are skipped
- * @param {string} label - Migration context label for console logging
- * @returns {Promise<void>}
- */
-export async function migrateItemRules(docs, label) {
-  let migrated = 0;
-  for (const item of docs) {
-    if (item.documentName !== "Item") {
-      continue;
-    }
-    try {
-      let changed = await convertFreeRaises(item);
-      if (item.type === "family" || item.type === "school") {
-        changed = (await convertCreationBonusEffects(item)) || changed;
-      } else if (item.type === "advantage" && item.name.toLowerCase().includes("master of blood")) {
-        changed = (await addMasterOfBloodRules(item)) || changed;
-      }
-      migrated += Number(changed);
-    } catch (err) {
-      console.warn(`${SYS_ID}`, "Failed to move item mechanics into rules", {
-        label,
-        id: item.id,
-        name: item.name,
-        err
-      });
-    }
-  }
-  if (migrated > 0) {
-    console.warn(`${SYS_ID} | Moved the mechanics of ${migrated} items into rules (${label})`);
-  }
 }

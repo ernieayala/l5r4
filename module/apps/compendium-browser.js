@@ -5,7 +5,6 @@
  * page it cites. A row drags onto a sheet; Add puts the item on the user's character or the controlled token's actor
  * through the same path a drop takes (module/services/purchase.js, addItem); the GM imports a creature with Import.
  */
-
 import { BROWSER_FILTERS, BROWSER_TABS } from "../config/browser.js";
 import { SYS_ID } from "../config/constants.js";
 import {
@@ -25,21 +24,8 @@ const { ApplicationV2, HandlebarsApplicationMixin } = foundry.applications.api;
 let browser = null;
 
 /**
- * The label of a select filter's value.
- * @param {import("../config/browser.js").BrowserFilter} filter
- * @param {string} value
- * @returns {string}
+ * The compendium browser window, one per client.
  */
-function optionLabel(filter, value) {
-  if (filter.labels?.[value]) {
-    return T(filter.labels[value]);
-  }
-  if (filter.labelPrefix) {
-    return T(`${filter.labelPrefix}${value}`);
-  }
-  return value;
-}
-
 export default class CompendiumBrowser extends HandlebarsApplicationMixin(ApplicationV2) {
   static DEFAULT_OPTIONS = {
     id: `${SYS_ID}-compendium-browser`,
@@ -83,39 +69,12 @@ export default class CompendiumBrowser extends HandlebarsApplicationMixin(Applic
    */
   #entries = {};
 
-  /** The open tab. */
+  /**
+   * The open tab.
+   * @returns {object} The tab's entry in BROWSER_TABS
+   */
   get currentTab() {
     return BROWSER_TABS.find(tab => tab.id === this.tab);
-  }
-
-  /**
-   * Read the index of every pack of this document type the user can see.
-   * @param {"Item"|"Actor"} documentName
-   * @returns {Promise<object[]>}
-   */
-  async #load(documentName) {
-    if (!this.#entries[documentName]) {
-      const fields = browserIndexFields(documentName);
-      const rows = [];
-      for (const pack of game.packs.filter(p => p.documentName === documentName && p.visible)) {
-        const index = await pack.getIndex({ fields });
-        for (const entry of index) {
-          rows.push({
-            uuid: entry.uuid,
-            id: entry._id,
-            pack: pack.collection,
-            packTitle: pack.title,
-            name: entry.name,
-            type: entry.type,
-            img: entry.img,
-            folderName: pack.folders.get(entry.folder)?.name ?? "",
-            system: entry.system ?? {}
-          });
-        }
-      }
-      this.#entries[documentName] = rows;
-    }
-    return this.#entries[documentName];
   }
 
   /** @override */
@@ -193,8 +152,8 @@ export default class CompendiumBrowser extends HandlebarsApplicationMixin(Applic
             JSON.stringify({ type: row.dataset.documentName, uuid: row.dataset.uuid })
           );
           // Core cancels a drag that reaches the document from an element without draggable="true", such as the
-          // row's icon or name (client/game.mjs:2239-2245); its own DragDrop stops the event the same way
-          // (client/applications/ux/drag-drop.mjs:136)
+          // row's icon or name [src: client/game.mjs:2239-2245]; its own DragDrop stops the event the same way
+          // [src: client/applications/ux/drag-drop.mjs:136]
           event.stopPropagation();
         });
       }
@@ -211,13 +170,22 @@ export default class CompendiumBrowser extends HandlebarsApplicationMixin(Applic
   }
 
   /**
+   * Open the browser, or bring it to the front.
+   * @returns {Promise<CompendiumBrowser>} The rendered browser
+   */
+  static open() {
+    browser ??= new CompendiumBrowser();
+    return browser.render({ force: true });
+  }
+
+  /**
    * Show another tab, with no filter chosen.
    * @this {CompendiumBrowser}
    * @param {PointerEvent} _event
-   * @param {HTMLElement} target
+   * @param {HTMLElement} element
    */
-  static async #onSelectTab(_event, target) {
-    this.tab = target.dataset.tab;
+  static async #onSelectTab(_event, element) {
+    this.tab = element.dataset.tab;
     this.choices = {};
     await this.render();
   }
@@ -236,15 +204,15 @@ export default class CompendiumBrowser extends HandlebarsApplicationMixin(Applic
    * Add an item to the user's character or the controlled token's actor.
    * @this {CompendiumBrowser}
    * @param {PointerEvent} _event
-   * @param {HTMLElement} target
+   * @param {HTMLElement} element
    */
-  static async #onAddEntry(_event, target) {
+  static async #onAddEntry(_event, element) {
     const actor = resolveActor();
     if (!actor) {
       ui.notifications?.warn(T("l5r4.apps.compendiumBrowser.noActor"));
       return;
     }
-    const item = await fromUuid(target.closest("[data-uuid]").dataset.uuid);
+    const item = await fromUuid(element.closest("[data-uuid]").dataset.uuid);
     if (item) {
       await addItem(actor, item.toObject());
     }
@@ -254,13 +222,13 @@ export default class CompendiumBrowser extends HandlebarsApplicationMixin(Applic
    * Import a creature into the world. GMs only.
    * @this {CompendiumBrowser}
    * @param {PointerEvent} _event
-   * @param {HTMLElement} target
+   * @param {HTMLElement} element
    */
-  static async #onImportEntry(_event, target) {
+  static async #onImportEntry(_event, element) {
     if (!game.user.isGM) {
       return;
     }
-    const row = target.closest("[data-uuid]");
+    const row = element.closest("[data-uuid]");
     const pack = game.packs.get(row.dataset.pack);
     await game.actors.importFromCompendium(pack, row.dataset.id);
   }
@@ -269,18 +237,71 @@ export default class CompendiumBrowser extends HandlebarsApplicationMixin(Applic
    * Open an entry's sheet.
    * @this {CompendiumBrowser}
    * @param {PointerEvent} _event
-   * @param {HTMLElement} target
+   * @param {HTMLElement} element
    */
-  static async #onOpenEntry(_event, target) {
-    const doc = await fromUuid(target.closest("[data-uuid]").dataset.uuid);
+  static async #onOpenEntry(_event, element) {
+    const doc = await fromUuid(element.closest("[data-uuid]").dataset.uuid);
     doc?.sheet?.render({ force: true });
   }
 
-  /** Open the browser, or bring it to the front. */
-  static open() {
-    browser ??= new CompendiumBrowser();
-    return browser.render({ force: true });
+  /**
+   * Read the index of every pack of this document type the user can see.
+   * @param {"Item"|"Actor"} documentName
+   * @returns {Promise<object[]>}
+   */
+  async #load(documentName) {
+    if (!this.#entries[documentName]) {
+      const fields = browserIndexFields(documentName);
+      const rows = [];
+      for (const pack of game.packs.filter(p => p.documentName === documentName && p.visible)) {
+        const index = await pack.getIndex({ fields });
+        for (const entry of index) {
+          rows.push({
+            uuid: entry.uuid,
+            id: entry._id,
+            pack: pack.collection,
+            packTitle: pack.title,
+            name: entry.name,
+            type: entry.type,
+            img: entry.img,
+            folderName: pack.folders.get(entry.folder)?.name ?? "",
+            system: entry.system ?? {}
+          });
+        }
+      }
+      this.#entries[documentName] = rows;
+    }
+    return this.#entries[documentName];
   }
+}
+
+/** Register the browser's button and its index fields, once during init. */
+export function initializeCompendiumBrowser() {
+  for (const documentName of ["Item", "Actor"]) {
+    const config = CONFIG[documentName];
+    // Core starts each list empty [src: client/config.mjs:151, :479], and a pack index reads it
+    // [src: client/documents/collections/compendium-collection.mjs:263]
+    config.compendiumIndexFields = [
+      ...new Set([...config.compendiumIndexFields, ...browserIndexFields(documentName)])
+    ];
+  }
+  Hooks.on("renderCompendiumDirectory", onRenderCompendiumDirectory);
+}
+
+/**
+ * The label of a select filter's value.
+ * @param {import("../config/browser.js").BrowserFilter} filter
+ * @param {string} value
+ * @returns {string}
+ */
+function optionLabel(filter, value) {
+  if (filter.labels?.[value]) {
+    return T(filter.labels[value]);
+  }
+  if (filter.labelPrefix) {
+    return T(`${filter.labelPrefix}${value}`);
+  }
+  return value;
 }
 
 /**
@@ -300,16 +321,4 @@ function onRenderCompendiumDirectory(_app, element) {
   button.innerHTML = `<i class="fa-solid fa-book-atlas" inert></i><span>${T("l5r4.apps.compendiumBrowser.open")}</span>`;
   button.addEventListener("click", () => CompendiumBrowser.open());
   actions.append(button);
-}
-
-/** Register the browser's button and its index fields, once during init. */
-export function initializeCompendiumBrowser() {
-  for (const documentName of ["Item", "Actor"]) {
-    const config = CONFIG[documentName];
-    // Core starts each list empty (client/config.mjs), and a pack index reads it (compendium-collection.mjs:263)
-    config.compendiumIndexFields = [
-      ...new Set([...config.compendiumIndexFields, ...browserIndexFields(documentName)])
-    ];
-  }
-  Hooks.on("renderCompendiumDirectory", onRenderCompendiumDirectory);
 }

@@ -10,7 +10,7 @@ import { settingsReport } from "../tools/coverage/settings.mjs";
 /** A made-up repo: one rule file of three pages, a module, templates, Quench batches, and a pack. */
 const fixture = fileURLToPath(new URL("fixtures/coverage/", import.meta.url));
 
-/** The fixture's manifest: p.1 automated, p.2 left to the table, p.3 unclassified. */
+/** The fixture's manifest: page 1 automated, page 2 left to the table, page 3 unclassified. */
 const manifest = (changes = {}) => ({
   rules: [
     {
@@ -68,7 +68,7 @@ describe("coverage audit (roadmap/STAGE-16)", () => {
   it("fails a citation to a page no manifest entry covers", () => {
     const { uncovered, uncited } = citationsReport(fixture, manifest());
     expect(uncited).toEqual([]);
-    expect(uncovered).toContain("module/rule.js:2 cites p.9");
+    expect(uncovered).toContain("module/rule.js:3 cites p.9");
     // A pack entry's page is a citation too
     expect(uncovered).toContain("src/packs/things.json:0 cites p.3");
   });

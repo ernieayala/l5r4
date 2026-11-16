@@ -1,68 +1,13 @@
 /**
- * XP Entry Formatter Service
- *
- * Formats raw XP history entries from xp-calculator for human-readable display in sheets.
- * Handles localization, progression labeling (e.g., "Reflexes 2→3"), item naming, and
- * optional sorting by user preference.
- *
- * Responsibilities:
- * - Localize entry types (traits, skills, advantages, etc.)
- * - Format progression notation for rank increases
- * - Apply fallback labels for legacy/malformed entries
- * - Sort entries by timestamp or user preference
- *
- * Game Mechanics:
- * - Traits: Cost 4 × new rank (e.g., Reflexes 2→3 = 12 XP)
- * - Void: Cost 6 × new rank (e.g., Void 2→3 = 18 XP)
- * - Skills: Cost equals next rank (e.g., 2→3 = 3 XP)
- * - Emphasis: 2 XP each
- * - Advantages/Disadvantages/Kata/Kiho: Listed cost from item
- * - Spells: Mastery level when memorized
- *
- * Foundry Integration:
- * - Uses game.i18n.localize() for all user-facing strings
- * - Requires Foundry v13+
- * - Integrates with sorting.js for user sort preferences
- *
  * @module services/xp/formatter
- * @requires Foundry VTT v13+
- * @see module:services/xp/calculator for raw entry generation
+ * @description Formats the XP history entries services/xp/calculator.js builds for display in the XP manager: a
+ * localized category per entry type, progression notation for rank increases ("Reflexes 2→3"), item names, fallback
+ * labels for older or malformed entries, and sorting by timestamp or the user's column preference
+ * (module/utils/sorting.js). The costs themselves come from the XP ledger: a Trait 4 × the new rank, the Void Ring
+ * 6 × the new rank, a Skill its new rank, an Emphasis 2, an item its listed cost, a spell its Mastery Level.
  */
 
 import { getSortPref, sortWithPref } from "../../utils/sorting.js";
-
-/**
- * Formats a rank progression for display.
- *
- * Creates a human-readable progression string showing rank changes.
- * If fromValue is undefined (new skill/trait), displays only the toValue.
- *
- * @param {string} label - The trait/skill name (localized)
- * @param {number} [fromValue] - Starting rank (undefined for new acquisitions)
- * @param {number} toValue - Ending rank
- * @returns {string} Formatted progression (e.g., "Kenjutsu 1→2" or "Iaijutsu 1")
- * @private
- */
-function formatProgression(label, fromValue, toValue) {
-  return fromValue !== undefined ? `${label} ${fromValue}→${toValue}` : `${label} ${toValue}`;
-}
-
-/**
- * Extracts display name for item-based entries (advantages, disadvantages, kata, kiho).
- *
- * Tries itemName first, then note field, then fallback if neither exists.
- * Handles cases where entries may have incomplete data from older versions.
- *
- * @param {Object} entry - Raw XP entry from calculator
- * @param {string} [entry.itemName] - Item name from actor.items
- * @param {string} [entry.note] - Legacy note field
- * @param {string} fallback - Fallback label if both fields missing
- * @returns {string} Display name for the entry
- * @private
- */
-function formatItemEntry(entry, fallback) {
-  return entry.itemName || entry.note || fallback;
-}
 
 /**
  * Column extractors for sortable XP entry fields.
@@ -70,19 +15,18 @@ function formatItemEntry(entry, fallback) {
  * Defines how to extract sortable values from formatted entries for user-driven sorting.
  * Used with sortWithPref from utils/sorting.js to enable column-click sorting in sheets.
  *
- * @typedef {Object} SortColumnExtractors
+ * @typedef {object} SortColumnExtractors
  * @property {Function} note - Extracts note text (string sort)
  * @property {Function} cost - Extracts absolute XP cost (numeric sort, ignores sign for gains/losses)
  * @property {Function} type - Extracts entry type category (string sort)
  *
  * @type {SortColumnExtractors}
- * @private
  */
-const SORT_COLUMNS = {
+const SORT_COLUMNS = Object.freeze({
   note: e => e.note || "",
   cost: e => Math.abs(Number.isFinite(+e.delta) ? +e.delta : 0),
   type: e => e.type || ""
-};
+});
 
 /**
  * Formats raw XP history entries for display in character sheets.
@@ -102,19 +46,16 @@ const SORT_COLUMNS = {
  * Lines 60-76 handle legacy entries that may contain raw i18n keys instead of
  * proper type identifiers. This ensures backward compatibility with older character data.
  *
- * @param {Array<Object>} entries - Raw XP entries from xp-calculator.buildXpHistory()
- * @param {Object} [options={}] - Formatting options
+ * @param {Array<object>} entries - Raw XP entries from xp-calculator.buildXpHistory()
+ * @param {object} [options={}] - Formatting options
  * @param {boolean} [options.sort=false] - Enable user preference sorting (requires actorId)
  * @param {string|null} [options.actorId=null] - Actor ID for retrieving sort preferences
  * @param {string} [options.scope="xp-purchases"] - Sort scope identifier
- * @param {Object|null} [options.sortPref=null] - Override sort preference (bypasses stored preference)
- * @returns {Array<Object>} Formatted entries ready for template rendering
- * @returns {string} return.id - Unique entry identifier
- * @returns {string} return.deltaFormatted - XP cost with sign ("+12", "-3")
- * @returns {string} return.note - Human-readable description
- * @returns {string} return.type - Localized category label
- * @returns {number} return.delta - Raw XP cost (positive for expenditures, negative for gains)
- * @returns {number} return.ts - Timestamp for chronological sorting
+ * @param {object|null} [options.sortPref=null] - Override sort preference (bypasses stored preference)
+ * @returns {Array<{id: string, deltaFormatted: string, note: string, type: string, delta: number, ts: number}>}
+ *   Formatted entries ready for template rendering: the entry id, the XP cost with its sign ("+12", "-3"), a
+ *   human-readable description, the localized category label, the raw XP cost (positive for expenditures,
+ *   negative for gains), and the timestamp for chronological sorting
  */
 export function formatXpEntries(entries, options = {}) {
   const { sort = false, actorId = null, scope = "xp-purchases", sortPref = null } = options || {};
@@ -197,4 +138,35 @@ export function formatXpEntries(entries, options = {}) {
   }
 
   return formatted;
+}
+
+/**
+ * Formats a rank progression for display.
+ *
+ * Creates a human-readable progression string showing rank changes.
+ * If fromValue is undefined (new skill/trait), displays only the toValue.
+ *
+ * @param {string} label - The trait/skill name (localized)
+ * @param {number} [fromValue] - Starting rank (undefined for new acquisitions)
+ * @param {number} toValue - Ending rank
+ * @returns {string} Formatted progression (e.g., "Kenjutsu 1→2" or "Iaijutsu 1")
+ */
+function formatProgression(label, fromValue, toValue) {
+  return fromValue !== undefined ? `${label} ${fromValue}→${toValue}` : `${label} ${toValue}`;
+}
+
+/**
+ * Extracts display name for item-based entries (advantages, disadvantages, kata, kiho).
+ *
+ * Tries itemName first, then note field, then fallback if neither exists.
+ * Handles cases where entries may have incomplete data from older versions.
+ *
+ * @param {object} entry - Raw XP entry from calculator
+ * @param {string} [entry.itemName] - Item name from actor.items
+ * @param {string} [entry.note] - Legacy note field
+ * @param {string} fallback - Fallback label if both fields missing
+ * @returns {string} Display name for the entry
+ */
+function formatItemEntry(entry, fallback) {
+  return entry.itemName || entry.note || fallback;
 }

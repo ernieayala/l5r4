@@ -1,16 +1,17 @@
 /**
  * @module services/combat/grapple
- * @description A grapple as a guided card (Core Rulebook pp.88-89). A hit with the Grapple maneuver (Jiujutsu /
- * Agility, ignoring armor in the Armor TN) starts it from the attack card: both sides are Grappled and the attacker
- * is in control. Control is re-rolled as a Contested Skill / Strength Roll, where the attacker uses the Skill the
- * grapple began with (Jiujutsu, or a weapon's Skill, p.89) and the defender Jiujutsu. The one in control may:
- * - Hit: unarmed damage (Strength k1, p.80), or the weapon's damage for a weapon grapple, as a damage roll against
- *   the other side;
+ * @description A grapple as a guided card. A hit with the Grapple maneuver (Jiujutsu / Agility, ignoring armor in
+ * the Armor TN) starts it from the attack card: both sides are Grappled and the attacker is in control. Control is
+ * re-rolled as a Contested Skill / Strength Roll, where the attacker uses the Skill the grapple began with
+ * (Jiujutsu, or a weapon's Skill) and the defender Jiujutsu. The one in control may:
+ * - Hit: unarmed damage (Strength k1), or the weapon's damage for a weapon grapple, as a damage roll against the
+ *   other side;
  * - Throw: the other side falls Prone and the grapple ends;
  * - Break: the grapple ends;
  * - Pass: keep control.
- * A weapon grappler who loses control gives the opponent two Free Raises for a Disarm next Turn (p.89); the card
- * says so.
+ * A weapon grappler who loses control gives the opponent two Free Raises for a Disarm next Turn; the card says so.
+ * game-rules/40_grappling.md, p.88-89
+ * game-rules/29_types_of_rolls.md, p.80
  */
 
 import { CHAT_TEMPLATES } from "../../config/templates.js";
@@ -21,8 +22,47 @@ import { rollCheck } from "../dice/check/roll-check.js";
 import { applyEffectAnywhere, effectsOf } from "../effects/apply.js";
 import { defineFlow, mayActFor, skillRequest, startFlow } from "./flow.js";
 
-/** The grapple statuses both sides carry (p.89). */
+/**
+ * The grapple statuses both sides carry.
+ * game-rules/40_grappling.md, p.89
+ */
 const GRAPPLED = "grappled";
+
+/**
+ * Start a grapple from a hit with the Grapple maneuver: both sides become Grappled, the attacker in control.
+ * @param {ChatMessage} attack - The attack message
+ * @returns {Promise<ChatMessage|null>}
+ */
+export async function startGrapple(attack) {
+  const attacker = fromUuidSync(attack.system.actorUuid);
+  const target = fromUuidSync(attack.system.target.uuid);
+  if (!attacker?.isOwner || !target) {
+    ui.notifications?.warn(T("l5r4.ui.notifications.noPermission"));
+    return null;
+  }
+  for (const actor of [attacker, target]) {
+    if (!actor.statuses.has(GRAPPLED)) {
+      await applyEffectAnywhere(actor, GRAPPLED);
+    }
+  }
+  // A grapple begun with a Weapon Skill is a weapon grapple; an "Unarmed" item rolled with Jiujutsu is not
+  // game-rules/40_grappling.md, p.89
+  const skill = attack.system.skill || "jiujutsu";
+  const weapon = skill !== "jiujutsu" && attack.system.weaponUuid ? attack.system.damage : null;
+  return startFlow(
+    "grapple",
+    {
+      sides: [attacker.uuid, target.uuid],
+      skill,
+      weapon: weapon?.label ? { ...weapon } : null,
+      control: 0,
+      rolls: [null, null],
+      log: [F("l5r4.ui.combat.grapple.inControl", { name: attacker.name })],
+      over: false
+    },
+    attacker
+  );
+}
 
 /**
  * The two sides of a grapple.
@@ -47,7 +87,8 @@ async function release(sides) {
 }
 
 /**
- * Roll a side's control roll (p.88).
+ * Roll a side's control roll.
+ * game-rules/40_grappling.md, p.88
  * @param {object} state
  * @param {number} i
  * @returns {Promise<ChatMessage|null>}
@@ -63,8 +104,9 @@ function rollControl(state, i) {
 }
 
 /**
- * Roll the controller's Hit: unarmed damage (Strength k1, p.80) or the grappling weapon's damage (p.89), with no
- * Raises (p.88).
+ * Roll the controller's Hit: unarmed damage (Strength k1) or the grappling weapon's damage, with no Raises.
+ * game-rules/29_types_of_rolls.md, p.80
+ * game-rules/40_grappling.md, p.88-89
  * @param {object} state
  * @returns {Promise<ChatMessage|null>}
  */
@@ -218,38 +260,3 @@ defineFlow("grapple", {
     });
   }
 });
-
-/**
- * Start a grapple from a hit with the Grapple maneuver: both sides become Grappled, the attacker in control.
- * @param {ChatMessage} attack  The attack message
- * @returns {Promise<ChatMessage|null>}
- */
-export async function startGrapple(attack) {
-  const attacker = fromUuidSync(attack.system.actorUuid);
-  const target = fromUuidSync(attack.system.target.uuid);
-  if (!attacker?.isOwner || !target) {
-    ui.notifications?.warn(T("l5r4.ui.notifications.noPermission"));
-    return null;
-  }
-  for (const actor of [attacker, target]) {
-    if (!actor.statuses.has(GRAPPLED)) {
-      await applyEffectAnywhere(actor, GRAPPLED);
-    }
-  }
-  // A grapple begun with a Weapon Skill is a weapon grapple (p.89); an "Unarmed" item rolled with Jiujutsu is not
-  const skill = attack.system.skill || "jiujutsu";
-  const weapon = skill !== "jiujutsu" && attack.system.weaponUuid ? attack.system.damage : null;
-  return startFlow(
-    "grapple",
-    {
-      sides: [attacker.uuid, target.uuid],
-      skill,
-      weapon: weapon?.label ? { ...weapon } : null,
-      control: 0,
-      rolls: [null, null],
-      log: [F("l5r4.ui.combat.grapple.inControl", { name: attacker.name })],
-      over: false
-    },
-    attacker
-  );
-}

@@ -1,10 +1,7 @@
 /**
- * Legacy NPC Wound System Migration
- * Migrates legacy NPC wound structures to current schema with manual/formula modes.
- *
  * @module setup/migrations/actors/npc-wounds
+ * @description Migrates legacy NPC wound structures to the current schema with manual and formula modes.
  */
-
 import { SYS_ID } from "../../../config/constants.js";
 import { normalizeWoundLevelData } from "../utils/helpers.js";
 

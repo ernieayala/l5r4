@@ -29,7 +29,8 @@ export function answerCheckDialog(values = {}) {
 
 /**
  * Answer every roll dialog that opens with its defaults until the returned function is called: for batches whose
- * actions open the roll dialog as a side effect (taking the Full Defense Stance rolls Defense / Reflexes, p.84).
+ * actions open the roll dialog as a side effect (taking the Full Defense Stance rolls Defense / Reflexes).
+ * game-rules/36_stances.md, p.84
  * @returns {function(): void}  Stops answering
  */
 export function autoAnswerRolls() {
@@ -40,8 +41,9 @@ export function autoAnswerRolls() {
 }
 
 /**
- * For a batch whose actions roll as a side effect (taking the Full Defense Stance, p.84): answer each roll dialog
- * with its defaults while the batch runs, and delete the messages it posts afterwards.
+ * For a batch whose actions roll as a side effect (taking the Full Defense Stance): answer each roll dialog with its
+ * defaults while the batch runs, and delete the messages it posts afterwards.
+ * game-rules/36_stances.md, p.84
  * @param {{before: Function, after: Function}} context  The batch's Quench context
  */
 export function guardRolls({ before, after }) {
@@ -67,7 +69,7 @@ export function guardRolls({ before, after }) {
 
 /**
  * Wait until a condition holds. Core runs combat turn events from `Combat#_onUpdate` without awaiting them
- * (client/documents/combat.mjs:658-673), so what they do (effect expiry, save cards) lands after `nextTurn()`
+ * [src: client/documents/combat.mjs:658-673], so what they do (effect expiry, save cards) lands after `nextTurn()`
  * resolves.
  * @param {function(): boolean} condition
  * @param {number} [timeout=5000]  Milliseconds before giving up
@@ -191,7 +193,7 @@ const UPDATE_TIMEOUT_MS = 5000;
 
 /**
  * Core shows a new message as a pop-up card: it adds the card hidden, waits for a spacer animation, then looks the
- * card up again to reveal it (client/applications/sidebar/tabs/chat.mjs:1288-1327). A message deleted before the
+ * card up again to reveal it [src: client/applications/sidebar/tabs/chat.mjs:1288-1327]. A message deleted before the
  * reveal takes its card with it, and the lookup rejects inside whatever test runs then. The animation waits for
  * frames, which Chrome stops while its window is covered, so settleChatNotifications finishes the spacer animations
  * itself rather than waiting for them. The system never deletes messages; tests that clean up their messages do.
@@ -275,7 +277,7 @@ export function watchConsole(levels) {
  * leaves a promise rejection or an error unhandled (an async click handler that throws reaches neither console
  * method). Info and warning notifications are the system telling the user why an action did nothing, so they are
  * not echoed to the console during the test; core echoes a notification only once it is displayed, which can be
- * after the test ends (client/applications/ui/notifications.mjs:278-281). The body runs with Mocha's test
+ * after the test ends [src: client/applications/ui/notifications.mjs:278-281]. The body runs with Mocha's test
  * context, so it can call `this.timeout()`.
  * @param {object} assert  Chai assert from the Quench context.
  * @returns {(body: () => Promise<void>) => () => Promise<void>}

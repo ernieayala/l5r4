@@ -1,5 +1,5 @@
 /**
- * @module grants
+ * @module utils/grants
  * @description Items given with another (GrantItem rules, roadmap/STAGE-11 decisions 2 and 7): which grants are due,
  * how a granted Skill changes, and what removing the giver does to it. The giver keeps a list of records, one per
  * granted uuid, in `flags.l5r4-enhanced.grants` (a list, since a uuid's dots would split a flag key); the granted
@@ -44,16 +44,13 @@ export function pendingGrants(rules, records, schoolRank) {
 }
 
 /**
- * A Skill's data once a grant gives it free ranks and an Emphasis: a School Skill (p.102), at least `skillRank`
- * ranks, those ranks free, and the Emphasis trained and free.
+ * A Skill's data once a grant gives it free ranks and an Emphasis: a School Skill, at least `skillRank`
+ * ranks, those ranks free, and the Emphasis trained and free. A rank 0 Skill granted 1 rank and the Emphasis
+ * "Void Recovery" becomes rank 1 with 1 free rank, a School Skill, with that Emphasis trained and free.
+ * game-rules/48_character_creation_expanded.md, p.102
  * @param {{rank: number, freeRanks: number, trainedEmphases: string[], freeEmphasis: number}} system
  * @param {GrantRule} rule
  * @returns {{update: object, record: {freeRanks: number, emphasis: string, freeEmphasis: number}}}
- *
- * @example
- * grantSkill({ rank: 0, freeRanks: 0, trainedEmphases: [], freeEmphasis: 0 },
- *   { skillRank: 1, emphasis: "Void Recovery" }).update;
- * // { rank: 1, freeRanks: 1, school: true, trainedEmphases: ["Void Recovery"], freeEmphasis: 1 }
  */
 export function grantSkill(system, rule) {
   const trained = system.trainedEmphases.filter(Boolean);

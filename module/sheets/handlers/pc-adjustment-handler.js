@@ -1,30 +1,9 @@
 /**
- * PC Character Sheet Adjustment Handler
- *
- * Handles user-driven adjustments to PC character attributes via sheet UI interactions.
- * Implements Application v2 event delegation pattern for Foundry VTT v13+.
- *
- * **Responsibilities:**
- * - Void Ring rank adjustments (0-9 per core rules)
- * - Spell slot adjustments per element (0-9, equal to Ring rank)
- * - Rank/points advancement system (skills, traits, honor, glory, status)
- *
- * **User Interaction Patterns:**
- * - **Shift+Click**: Required for Void Ring and rank/points adjustments (safety mechanism)
- * - **Ctrl+Shift+Click**: Single point adjustment for rank/points (±1 point vs ±1 rank)
- * - **Click**: Direct adjustment for spell slots and UI toggles
- *
- * **Game Rules Integration:**
- * - Void Ring produces Void Points equal to rank
- * - Spell slots per element equal Ring rank
- * - Rank/points system per advancement rules
- *
- * **Foundry API:**
- * - Actor.update() with diff option for efficient updates
- * - foundry.utils.getProperty() for safe nested property access
- * - Application v2 event delegation via dataset attributes
- *
  * @module sheets/handlers/pc-adjustment-handler
+ * @description PC sheet adjustments: the Void Ring rank (0-9), spell slots per element (0-9), and the rank and
+ * points tracks (Honor, Glory, Status, and the like). Shift+Click is required for the Void Ring and the rank tracks
+ * so a stray click changes nothing; Ctrl+Shift+Click moves a track by one point instead of one rank; spell slots
+ * change on a plain click.
  */
 
 import { SYS_ID } from "../../config/constants.js";
@@ -61,7 +40,7 @@ export class PcAdjustmentHandler {
    * Reads from _source first (pending changes) before falling back to system data.
    * Uses diff:true option for efficient Foundry update.
    *
-   * @param {Object} context - Sheet render context with actor reference
+   * @param {object} context - Sheet render context with actor reference
    * @param {Event} event - DOM event (must have shiftKey = true)
    * @param {HTMLElement} element - Target element from event delegation
    * @param {number} delta - Direction of adjustment (+1 or -1)
@@ -116,7 +95,7 @@ export class PcAdjustmentHandler {
    * Path validation via regex to prevent invalid property updates.
    * No shift key required (direct adjustment pattern).
    *
-   * @param {Object} context - Sheet render context with actor reference
+   * @param {object} context - Sheet render context with actor reference
    * @param {Event} event - DOM event (not required for this adjustment)
    * @param {HTMLElement} element - Target element with dataset.path attribute
    * @param {number} delta - Amount to adjust (e.g. +1 or -1)
@@ -174,7 +153,7 @@ export class PcAdjustmentHandler {
    * Uses applyRankPointsDelta utility for overflow/underflow handling.
    * Supports fractional deltas: baseDelta=1.0 → ±10 points, baseDelta=0.1 → ±1 point.
    *
-   * @param {Object} context - Sheet render context with actor reference
+   * @param {object} context - Sheet render context with actor reference
    * @param {Event} event - DOM event (requires shiftKey; ctrlKey changes step size)
    * @param {HTMLElement} element - Target element with dataset.key attribute
    * @param {number} baseDelta - Base adjustment amount (e.g. ±1.0 or ±0.1)
@@ -203,7 +182,8 @@ export class PcAdjustmentHandler {
       // Ctrl key switches between point adjustment (±1) and rank adjustment (±10)
       const step = event?.ctrlKey ? (baseDelta > 0 ? +1 : -1) : baseDelta;
 
-      // Apply delta with overflow/underflow handling, within the track's range (Status reaches -10, pp.94-95)
+      // Apply delta with overflow/underflow handling, within the track's range (Status reaches -10)
+      // game-rules/45_status.md, p.94-95
       const next = applyRankPointsDelta(cur, step, ...(RANK_TRACK_RANGE[key] ?? [0, 10]));
 
       const update = {};

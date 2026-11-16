@@ -29,7 +29,7 @@ export function slotDialogData(actor, ringKey) {
  * The slot a choice spends, checked against what is left.
  * @param {Actor} actor
  * @param {string} ringKey
- * @param {string} choice  "elemental", "void", or "none" (dialog input)
+ * @param {string} choice - "elemental", "void", or "none" (dialog input)
  * @returns {{path: string|null, label: string}|null} null, after a warning, when the chosen pool is empty
  */
 export function planSlot(actor, ringKey, choice) {

@@ -56,11 +56,12 @@ export function ledgerEntries(actor) {
 
 /**
  * Gain or lose points on a track: the Ledger rules size the change, the stored rank and points move (ten points to a
- * rank, p.90, within the track's range: RANK_TRACK_RANGE), and the change is logged.
+ * rank, within the track's range: RANK_TRACK_RANGE), and the change is logged.
+ * game-rules/43_honor.md, p.90
  *
  * @param {Actor} actor
- * @param {string} track   honor, glory, status, or taint
- * @param {number} points  Positive gains, negative loses
+ * @param {string} track - honor, glory, status, or taint
+ * @param {number} points - Positive gains, negative loses
  * @param {string} reason
  * @returns {Promise<LedgerEntry>}
  */

@@ -1,8 +1,9 @@
 /**
  * @module services/combat/guard
- * @description The Guard action (p.87): the guard names one character within 5 feet; until the guard's next Turn
- * that character has +10 Armor TN and the guard -5 (the "guarded" and "guarding" statuses). Not in the Full Attack
+ * @description The Guard action: the guard names one character within 5 feet; until the guard's next Turn that
+ * character has +10 Armor TN and the guard -5 (the "guarded" and "guarding" statuses). Not in the Full Attack
  * Stance. Whether the ward stays within 5 feet is the table's call.
+ * game-rules/38_maneuvers.md, p.87
  */
 
 import { T } from "../../utils/localization.js";
@@ -10,7 +11,7 @@ import { applyEffectAnywhere } from "../effects/apply.js";
 
 /**
  * Guard a character: both statuses count from the guard's Turn.
- * @param {Actor} protector  The guard
+ * @param {Actor} protector - The guard
  * @param {Actor} ward
  * @returns {Promise<boolean>} Whether the guard was set
  */

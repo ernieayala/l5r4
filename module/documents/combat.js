@@ -1,17 +1,27 @@
 /**
  * @module documents/combat
  * @description The system's Combat:
- * - before an Initiative roll, each combatant's player may spend a Void Point for +10 (Core Rulebook p.78), which
- *   applies to that roll only;
- * - turn and round events reach the effect services: saves rolled in the Reactions stage (p.82, p.89), Full Defense
- *   declared again each Turn (p.84), Concentration upkeep (p.166);
- * - before each new Round, Center Stance gives its next-Round bonus and +10 Initiative for that Round (p.84);
- * - when the combat ends, Fear and other effects lasting the encounter end with it (p.90; STAGE-09 decision 4).
+ * - before an Initiative roll, each combatant's player may spend a Void Point for +10, which applies to that roll
+ *   only;
+ * - turn and round events reach the effect services: saves rolled in the Reactions stage, Full Defense declared
+ *   again each Turn, Concentration upkeep;
+ * - before each new Round, Center Stance gives its next-Round bonus and +10 Initiative for that Round;
+ * - when the combat ends, Fear and other effects lasting the encounter end with it (STAGE-09 decision 4).
  *
  * Core announces turnStart, turnEnd, roundStart, and roundEnd to the Active Effect registry itself
- * (client/documents/combat.mjs:1011-1109), after these overrides run, and only on the active GM.
+ * [src: client/documents/combat.mjs:1011-1109], after these overrides run, and only on the active GM.
+ *
+ * game-rules/25_rings_and_traits.md, p.78
+ * game-rules/31_combat_round.md, p.82
+ * game-rules/41_conditional_effects.md, p.89
+ * game-rules/36_stances.md, p.84
+ * game-rules/67_universal_spells.md, p.166
+ * game-rules/42_fear.md, p.90
  */
 
+/**
+ * The Combat document class the system sets as `CONFIG.Combat.documentClass`.
+ */
 export default class L5R4Combat extends foundry.documents.Combat {
   /**
    * Resolves per-roll Initiative bonuses before the roll, by combatant id. Documents do not import services, so
@@ -37,7 +47,7 @@ export default class L5R4Combat extends foundry.documents.Combat {
 
   /**
    * Rolls Initiative, giving each combatant with a bonus a formula of its own. Core rolls every id with one formula
-   * (client/documents/combat.mjs:388-441), so those combatants roll in calls of their own.
+   * [src: client/documents/combat.mjs:388-441], so those combatants roll in calls of their own.
    * @override
    */
   async rollInitiative(ids, options = {}) {

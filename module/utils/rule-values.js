@@ -1,18 +1,50 @@
 /**
- * @module rule-values
+ * @module utils/rule-values
  * @description A rule's value: a number, or a formula over the actor's roll data such as
  * "@rings.air + @skills.defense.rank" or "floor(@honor.rank / 2)". Formulas allow numbers, `@` paths, + - * /,
  * parentheses, and floor, ceil, round, min, max, abs. They are parsed here, never passed to eval.
  */
 
-const FUNCTIONS = {
+const FUNCTIONS = Object.freeze({
   floor: Math.floor,
   ceil: Math.ceil,
   round: Math.round,
   min: Math.min,
   max: Math.max,
   abs: Math.abs
-};
+});
+
+/**
+ * The roll-data key for a named thing, so a formula can reach it: lower case, runs of other characters as "_".
+ * "Tea Ceremony" becomes "tea_ceremony".
+ * @param {string} name
+ * @returns {string}
+ */
+export function rollDataKey(name) {
+  return String(name)
+    .toLowerCase()
+    .replace(/[^\p{L}\p{N}]+/gu, "_")
+    .replace(/^_|_$/g, "");
+}
+
+/**
+ * Resolve a rule value to a number. A missing @ path counts as 0, as an absent Skill has rank 0. The number 3
+ * resolves to 3; "@rings.air + @skills.defense.rank" with Air 3 and Defense 2 resolves to 5.
+ * @param {number|string} value - A number or a formula.
+ * @param {object} rollData - The actor's roll data.
+ * @returns {number}
+ * @throws {Error} When the formula does not parse.
+ */
+export function resolveValue(value, rollData) {
+  if (typeof value === "number") {
+    return value;
+  }
+  const text = String(value ?? "").trim();
+  if (!text) {
+    return 0;
+  }
+  return evaluate(text, rollData ?? {});
+}
 
 /**
  * Read a dot path from an object.
@@ -109,41 +141,4 @@ function evaluate(formula, rollData) {
     throw new Error(`Unexpected "${tokens[i]}" in "${formula}"`);
   }
   return value;
-}
-
-/**
- * The roll-data key for a named thing, so a formula can reach it: lower case, runs of other characters as "_".
- * @param {string} name
- * @returns {string}
- *
- * @example
- * rollDataKey("Tea Ceremony"); // "tea_ceremony"
- */
-export function rollDataKey(name) {
-  return String(name)
-    .toLowerCase()
-    .replace(/[^\p{L}\p{N}]+/gu, "_")
-    .replace(/^_|_$/g, "");
-}
-
-/**
- * Resolve a rule value to a number. A missing @ path counts as 0, as an absent Skill has rank 0.
- * @param {number|string} value  A number or a formula.
- * @param {object} rollData  The actor's roll data.
- * @returns {number}
- * @throws {Error} When the formula does not parse.
- *
- * @example
- * resolveValue(3, {}); // 3
- * resolveValue("@rings.air + @skills.defense.rank", { rings: { air: 3 }, skills: { defense: { rank: 2 } } }); // 5
- */
-export function resolveValue(value, rollData) {
-  if (typeof value === "number") {
-    return value;
-  }
-  const text = String(value ?? "").trim();
-  if (!text) {
-    return 0;
-  }
-  return evaluate(text, rollData ?? {});
 }

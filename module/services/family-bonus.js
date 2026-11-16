@@ -1,21 +1,9 @@
 /**
- * Family Bonus Service
- *
- * Manages the application of family trait bonuses to L5R4 characters.
- * In L5R4, each family grants a +1 bonus to one specific Trait (e.g., Hida: +1 Strength,
- * Yasuki: +1 Awareness), allowing that Trait to start at 3 instead of the default 2.
- *
- * The family Item carries the bonus as a TraitAdjust rule in `system.rules`; the rule engine applies it to the
- * Trait, and this service reads it back for the Trait arrows.
- *
- * Responsibilities:
- * - Retrieve family Item from actor flags
- * - Calculate trait bonuses from the family Item's TraitAdjust rules
- * - Provide individual trait bonuses or complete bonus maps
- * - Validate trait keys and family items
- *
- * Related Foundry APIs: Actor flags, fromUuidSync
- * Related Game Rules: Character Creation Step 2 (Family Selection)
+ * @module services/family-bonus
+ * @description Reads a character's family Trait bonus: each family grants +1 to one Trait (Hida Strength, Yasuki
+ * Awareness), so that Trait starts at 3 instead of 2 (Character Creation Step 2, Family Selection). The family Item,
+ * found through the actor's flags, carries the bonus as a TraitAdjust rule in `system.rules`; the rule engine applies
+ * it to the Trait, and this service reads it back, one Trait or all eight, for the Trait arrows.
  */
 
 import { SYS_ID } from "../config/constants.js";
@@ -42,8 +30,7 @@ export class FamilyBonusService {
   /**
    * Creates a zero-initialized map for all trait bonuses.
    * Used as the default/fallback when no family item exists.
-   * @returns {Object.<string, number>} Map of trait keys to zero values
-   * @private
+   * @returns {Record<string, number>} Map of trait keys to zero values
    */
   static _createZeroMap() {
     const map = {};
@@ -103,7 +90,7 @@ export class FamilyBonusService {
    * bonuses for multiple traits.
    *
    * @param {L5R4Actor} actor - The actor to retrieve family bonuses for
-   * @returns {Object.<string, number>} Map of trait keys to their bonus values (0 if none)
+   * @returns {Record<string, number>} Map of trait keys to their bonus values (0 if none)
    */
   static getBonusMap(actor) {
     try {
@@ -192,7 +179,7 @@ export class FamilyBonusService {
   static getFamilyName(actor) {
     try {
       return actor.getFlag?.(SYS_ID, "familyName") ?? null;
-    } catch (err) {
+    } catch {
       return null;
     }
   }

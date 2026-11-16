@@ -1,3 +1,8 @@
+/**
+ * @module data/item/creation-bonus-data
+ * @description The data model the `family` and `school` Item subtypes extend.
+ */
+
 import { numberField, stringField } from "../fields.js";
 import ItemData from "./base-data.js";
 

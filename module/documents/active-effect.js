@@ -5,14 +5,20 @@
  *
  * - An effect made with only a status id gets the status's rules, group, level, and ending event
  *   (module/utils/status-data.js).
- * - Gaining an effect with a `system.group` ends the actor's other effects of that group: one stance at a time
- *   (Core Rulebook p.84), one Kata at a time (p.259). Creations started together settle on the newest.
+ * - Gaining an effect with a `system.group` ends the actor's other effects of that group: one stance at a time,
+ *   one Kata at a time. Creations started together settle on the newest.
  * - A status the actor is immune to (ConditionImmunity rules) is not created.
+ *
+ * game-rules/36_stances.md, p.84
+ * game-rules/86_kata.md, p.259
  */
 
 import { F } from "../utils/localization.js";
 import { statusEffectUpdate } from "../utils/status-data.js";
 
+/**
+ * The ActiveEffect document class the system sets as `CONFIG.ActiveEffect.documentClass`.
+ */
 export default class L5R4ActiveEffect extends foundry.documents.ActiveEffect {
   /**
    * An effect created with a status but none of its data (a macro, another module, `{statuses: ["prone"]}`) takes

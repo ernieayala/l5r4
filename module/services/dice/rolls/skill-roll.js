@@ -1,12 +1,12 @@
 /**
- * Skill Roll Service
- *
- * A Skill Roll (p.79) or a weapon attack with its Skill, through the roll pipeline
- * (module/services/dice/check/roll-check.js): (Skill + Trait)k(Trait), an Unskilled Roll at rank 0 (p.80), an
- * Emphasis offered from the Skill's trained Emphases (p.133). The pipeline gathers every modifier once, so callers
- * pass only what the sheet does not hold.
- *
  * @module services/dice/rolls/skill-roll
+ * @description A Skill Roll or a weapon attack with its Skill, through the roll pipeline
+ * (module/services/dice/check/roll-check.js): (Skill + Trait)k(Trait), an Unskilled Roll at rank 0, an Emphasis
+ * offered from the Skill's trained Emphases. The pipeline gathers every modifier once, so callers pass only what the
+ * sheet does not hold.
+ * game-rules/29_types_of_rolls.md, p.79
+ * game-rules/30_skill_rolls_expanded.md, p.80
+ * game-rules/58_skills_overview.md, p.133
  */
 
 import { T } from "../../../utils/localization.js";
@@ -27,8 +27,7 @@ export function skillLabel(skillName) {
 /**
  * Executes a Skill Roll or a Skill attack.
  *
- * @async
- * @param {Object} options
+ * @param {object} options
  * @param {number|null} [options.actorTrait=null] - The Trait's effective rank (kept dice)
  * @param {number|null} [options.skillRank=null] - Skill rank (rolled dice); 0 is an Unskilled Roll
  * @param {string|null} [options.skillName=null] - Skill name, for its item, Emphases, and rules

@@ -1,11 +1,10 @@
 /**
- * Field factories shared by the data models.
+ * @module data/fields
+ * @description Field factories shared by the data models.
  *
  * Fields are as permissive as template.json was: no integer, min, or choices constraints, so data stored by
  * 3.2.1 validates unchanged (roadmap/STAGE-02-DATA-MODELS.md decision 1). A stored value a field cannot cast
- * falls back to the field's initial value when the document loads (common/abstract/data.mjs:79-83).
- *
- * @module data/fields
+ * falls back to the field's initial value when the document loads [src: common/abstract/data.mjs:79-83].
  */
 
 /**
@@ -57,7 +56,7 @@ export function coinsField() {
 
 /**
  * A rank with points toward the next one (Honor, Glory, Status, Shadowlands Taint).
- * @param {number} rank  Initial rank.
+ * @param {number} rank - Initial rank.
  * @returns {foundry.data.fields.SchemaField}
  */
 export function rankPointsField(rank) {

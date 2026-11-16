@@ -1,23 +1,101 @@
 /**
  * @module documents/item/lifecycle/grants
- * @description GrantItem rules on an actor's items (roadmap/STAGE-11 decisions 2 and 7; Core Rulebook pp.102, 104):
- * a School's Skills come with it, its Techniques as the School Rank reaches them, and removing the School takes back
- * what it gave. The user who changed the actor or item does the work, so one client makes each change; changes to one
- * actor run one after another.
+ * @description GrantItem rules on an actor's items (roadmap/STAGE-11 decisions 2 and 7): a School's Skills come with
+ * it, its Techniques as the School Rank reaches them, and removing the School takes back what it gave. The user who
+ * changed the actor or item does the work, so one client makes each change; changes to one actor run one after
+ * another.
+ * game-rules/48_character_creation_expanded.md, p.102
+ * game-rules/49_improving_your_character.md, p.104
  */
 
 import { SYS_ID } from "../../../config/constants.js";
-import { createRule } from "../../../data/rules/rule-models.js";
 import { applyChoices } from "../../../utils/choices.js";
 import { grantSkill, pendingGrants, ungrantSkill } from "../../../utils/grants.js";
 import { F } from "../../../utils/localization.js";
 import { toInt } from "../../../utils/type-coercion.js";
+import { createRule } from "../../../data/rules/rule-models.js";
 
 /**
  * Grant work waiting per actor UUID, so one client's grants for an actor never overlap.
  * @type {Map<string, Promise<void>>}
  */
 const queues = new Map();
+
+/**
+ * Once the actor's grant work queued so far has run.
+ * @param {Actor} actor
+ * @returns {Promise<void>}
+ */
+export function grantsSettled(actor) {
+  return queues.get(actor.uuid) ?? Promise.resolve();
+}
+
+/**
+ * Grant whatever is due on the actor, after its earlier grant work.
+ * @param {Actor} actor
+ * @returns {Promise<void>}
+ */
+export function syncGrants(actor) {
+  return queued(actor, () => grantDue(actor));
+}
+
+/**
+ * Take back what a deleted giver granted (decision 7): delete each granted item, except a Skill with ranks or
+ * Emphases bought on top, which loses only what the grant gave.
+ * @param {Actor} actor
+ * @param {Item} giver - The deleted item, its flags still readable
+ * @returns {Promise<void>}
+ */
+export function ungrant(actor, giver) {
+  return queued(actor, async () => {
+    const deletes = [];
+    const updates = [];
+    for (const record of recordsOf(giver)) {
+      const target = record.itemId ? actor.items.get(record.itemId) : null;
+      if (!target) {
+        continue;
+      }
+      const plan =
+        target.type === "skill"
+          ? ungrantSkill(target._source.system, record)
+          : { delete: record.created };
+      if (plan.delete) {
+        deletes.push(target.id);
+      } else if (plan.update) {
+        updates.push({
+          _id: target.id,
+          system: plan.update,
+          [`flags.${SYS_ID}.grantedBy`]: new foundry.data.operators.ForcedDeletion()
+        });
+      }
+    }
+    if (updates.length) {
+      await actor.updateEmbeddedDocuments("Item", updates);
+    }
+    if (deletes.length) {
+      await actor.deleteEmbeddedDocuments("Item", deletes);
+    }
+  });
+}
+
+/**
+ * Note on its giver that a granted item was removed, so it is not granted again.
+ * @param {Actor} actor
+ * @param {Item} granted - The deleted item
+ * @returns {Promise<void>}
+ */
+export function forgetGrant(actor, granted) {
+  return queued(actor, async () => {
+    const giver = actor.items.get(granted.getFlag(SYS_ID, "grantedBy"));
+    if (!giver) {
+      return;
+    }
+    const records = recordsOf(giver).map(record =>
+      record.itemId === granted.id ? { ...record, itemId: null } : record
+    );
+    await giver.setFlag(SYS_ID, "grants", records);
+  });
+}
 
 /**
  * Run a task after the actor's earlier grant work.
@@ -168,80 +246,4 @@ async function grantDue(actor) {
       await giver.setFlag(SYS_ID, "grants", records);
     }
   }
-}
-
-/**
- * Once the actor's grant work queued so far has run.
- * @param {Actor} actor
- * @returns {Promise<void>}
- */
-export function grantsSettled(actor) {
-  return queues.get(actor.uuid) ?? Promise.resolve();
-}
-
-/**
- * Grant whatever is due on the actor, after its earlier grant work.
- * @param {Actor} actor
- * @returns {Promise<void>}
- */
-export function syncGrants(actor) {
-  return queued(actor, () => grantDue(actor));
-}
-
-/**
- * Take back what a deleted giver granted (decision 7): delete each granted item, except a Skill with ranks or
- * Emphases bought on top, which loses only what the grant gave.
- * @param {Actor} actor
- * @param {Item} giver  The deleted item, its flags still readable
- * @returns {Promise<void>}
- */
-export function ungrant(actor, giver) {
-  return queued(actor, async () => {
-    const deletes = [];
-    const updates = [];
-    for (const record of recordsOf(giver)) {
-      const target = record.itemId ? actor.items.get(record.itemId) : null;
-      if (!target) {
-        continue;
-      }
-      const plan =
-        target.type === "skill"
-          ? ungrantSkill(target._source.system, record)
-          : { delete: record.created };
-      if (plan.delete) {
-        deletes.push(target.id);
-      } else if (plan.update) {
-        updates.push({
-          _id: target.id,
-          system: plan.update,
-          [`flags.${SYS_ID}.grantedBy`]: new foundry.data.operators.ForcedDeletion()
-        });
-      }
-    }
-    if (updates.length) {
-      await actor.updateEmbeddedDocuments("Item", updates);
-    }
-    if (deletes.length) {
-      await actor.deleteEmbeddedDocuments("Item", deletes);
-    }
-  });
-}
-
-/**
- * Note on its giver that a granted item was removed, so it is not granted again.
- * @param {Actor} actor
- * @param {Item} granted  The deleted item
- * @returns {Promise<void>}
- */
-export function forgetGrant(actor, granted) {
-  return queued(actor, async () => {
-    const giver = actor.items.get(granted.getFlag(SYS_ID, "grantedBy"));
-    if (!giver) {
-      return;
-    }
-    const records = recordsOf(giver).map(record =>
-      record.itemId === granted.id ? { ...record, itemId: null } : record
-    );
-    await giver.setFlag(SYS_ID, "grants", records);
-  });
 }

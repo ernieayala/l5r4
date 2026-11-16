@@ -1,12 +1,9 @@
 /**
- * XP History Service
- *
- * The XP manager's purchase history: one record per entry of the character's XP ledger
+ * @module services/xp/calculator
+ * @description The XP manager's purchase history: one record per entry of the character's XP ledger
  * (module/utils/xp-ledger.js), which preparation leaves in `system._xp.entries`. The history therefore lists exactly
  * what the sheet's XP total charges, Cost rules included (roadmap/STAGE-11). Timestamps are synthetic: the history is
  * rebuilt from the character as it is, not logged as purchases happen.
- *
- * @module services/xp/calculator
  */
 
 import { SYS_ID } from "../../config/constants.js";
@@ -21,11 +18,11 @@ import { SYS_ID } from "../../config/constants.js";
  * 1. Separate existing entries into manual and auto-calculated
  * 2. Replace all auto-calculated entries with new retroactive calculation
  * 3. Preserve all manual entries (GM corrections, custom adjustments)
- * 4. Merge and sort by timestamp
+ * 4. Merge and sort by timestamp.
  *
- * @param {Array<Object>} existingSpent - Current xpSpent array from actor flags
- * @param {Array<Object>} retroactiveSpent - Newly calculated XP entries from buildXpHistory
- * @returns {Array<Object>} Merged array with manual entries preserved and auto entries updated
+ * @param {Array<object>} existingSpent - Current xpSpent array from actor flags
+ * @param {Array<object>} retroactiveSpent - Newly calculated XP entries from buildXpHistory
+ * @returns {Array<object>} Merged array with manual entries preserved and auto entries updated
  */
 export function mergeXpHistory(existingSpent, retroactiveSpent) {
   // Separate manual entries (no autoCalculated flag or explicitly false)
@@ -50,7 +47,7 @@ export function mergeXpHistory(existingSpent, retroactiveSpent) {
  * Build a PC's XP purchase history from its prepared XP ledger, in ledger order.
  *
  * @param {Actor} actor - A prepared PC
- * @returns {Promise<Array<Object>>} History records: id, delta (XP spent; negative for a Disadvantage), note, type,
+ * @returns {Promise<Array<object>>} History records: id, delta (XP spent; negative for a Disadvantage), note, type,
  *   ts, and per type traitLabel, skillName, emphasis, itemName, fromValue, toValue. Empty on an error, so the XP
  *   manager still opens.
  */

@@ -1,33 +1,10 @@
 /**
- * Target Resolver Service
- *
- * Resolves attack targeting information from Foundry VTT token selection system.
- * Extracts Armor TN from targeted actors to auto-populate Target Numbers for
- * attack rolls in the L5R4 combat system.
- *
- * Key Responsibilities:
- * - **Token Target Detection**: Query Foundry's game.user.targets for selected tokens
- * - **Armor TN Extraction**: Defensively extract Armor TN from actor data models
- * - **Single Target Optimization**: Auto-populate TN when one target selected
- * - **Multi-Target Handling**: Detect multiple targets (cannot auto-populate TN)
- * - **Schema Compatibility**: Support multiple data paths for migrations
- *
- * L5R4 Game Mechanics:
- * Attack rolls in L5R4 are compared against the target's Armor TN. If the attack
- * roll meets or exceeds the Armor TN, the attack hits. Armor TN is calculated as:
- * (Reflexes × 5) + 5 + armor bonus + stance modifiers
- *
- * This module resolves the already-calculated Armor TN from targeted actors. The
- * actual Armor TN calculation happens in the actor document's prepareDerivedData.
- *
- * Foundry VTT Integration:
- * - Uses game.user.targets (v10+) for player's current token selection
- * - Accesses token.actor to retrieve Actor document from Token
- * - Reads actor.system properties via optional chaining for safety
- * - Handles multiple schema paths for backward compatibility
- *
  * @module services/dice/resources/target-resolver
- * @see {@link https://foundryvtt.com/api/v13/classes/client.User.html#targets|Foundry User Targeting API}
+ * @description An attack's target from the user's targeted tokens (`game.user.targets`). An attack hits when its
+ * roll meets the target's Armor TN, so with one target that Armor TN becomes the attack's default TN; with several,
+ * none does, since each has its own. The Armor TN is prepared on the actor (Reflexes × 5 + 5, plus armor and
+ * stances); this file only reads it, through optional chaining, from the paths an actor may hold it in.
+ * game-rules/32_attack_and_defense.md, p.82
  */
 
 import { toInt } from "../../../utils/type-coercion.js";
@@ -42,24 +19,24 @@ import { T } from "../../../utils/localization.js";
  * - No tokens targeted by user
  * - Target found but Armor TN is 0 or invalid
  *
- * @typedef {Object} EmptyTarget
+ * @typedef {object} EmptyTarget
  * @property {number} autoTN - Always 0 (no auto-populated Target Number)
  * @property {string} targetInfo - Empty string (no target description text)
  * @property {null} targetData - No target metadata
  */
-const EMPTY_TARGET = {
+const EMPTY_TARGET = Object.freeze({
   autoTN: 0,
   targetInfo: "",
   targetData: null
-};
+});
 
 /**
  * Single target resolution result with Armor TN.
  *
- * @typedef {Object} SingleTargetResult
+ * @typedef {object} SingleTargetResult
  * @property {number} autoTN - Target's Armor TN to auto-populate attack roll TN
  * @property {string} targetInfo - Formatted string for UI display (e.g., " vs Hida Yakamo")
- * @property {Object} targetData - Target metadata for chat message rendering
+ * @property {object} targetData - Target metadata for chat message rendering
  * @property {string} targetData.name - Target actor's display name
  * @property {number} targetData.armorTN - Target's Armor TN value
  * @property {boolean} targetData.single - Flag indicating single target (true)
@@ -70,10 +47,10 @@ const EMPTY_TARGET = {
 /**
  * Multiple target resolution result.
  *
- * @typedef {Object} MultipleTargetResult
+ * @typedef {object} MultipleTargetResult
  * @property {number} autoTN - Always 0 (cannot auto-populate with multiple targets)
  * @property {string} targetInfo - Formatted string indicating multiple targets
- * @property {Object} targetData - Multi-target metadata
+ * @property {object} targetData - Multi-target metadata
  * @property {boolean} targetData.multiple - Flag indicating multiple targets (true)
  * @property {number} targetData.count - Number of tokens targeted
  * @property {string} targetData.multipleText - Localized multiple targets text
@@ -146,24 +123,12 @@ export function resolveTargets(actor, rollType) {
 }
 
 /**
- * Extract numeric value from flexible actor data structures.
+ * Read a number from a value that may be a `{current, max}` object or a bare number.
+ * An object gives its `current` (25 for `{ current: 25, max: 30 }`), a number gives itself (25), and anything else
+ * (null, undefined, a string) gives null, so a path the actor does not hold reads as no value.
  *
- * Handles two common data patterns in Foundry actor systems:
- *
- * 1. **Value Objects**: { current: 25, max: 30 } → extracts current
- * 2. **Raw Numbers**: 25 → returns directly
- * 3. **Invalid/Missing**: null, undefined, strings → returns null
- *
- * Used for defensive property access when actor schema may vary across
- * versions or when accessing optional properties that may not exist.
- *
- * Foundry Pattern:
- * Many Foundry systems store attributes as objects with current/max values
- * (e.g., HP: {current: 15, max: 20}). This helper normalizes access.
- *
- * @param {Object|number|*} value - Value to extract from (may be object, number, or invalid)
+ * @param {object|number|*} value - Value to extract from (may be object, number, or invalid)
  * @returns {number|null} Numeric value if found, null otherwise
- * @private
  */
 function extractNumericValue(value) {
   if (value?.current !== undefined) {
@@ -206,7 +171,6 @@ function extractNumericValue(value) {
  *
  * @param {L5R4Actor} targetActor - Target actor document to extract Armor TN from
  * @returns {number} Target's Armor TN as integer, or 0 if not found/invalid
- * @private
  */
 function resolveArmorTN(targetActor) {
   if (!targetActor) {

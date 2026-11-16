@@ -1,7 +1,11 @@
 /**
- * @module ledger
+ * @module utils/ledger
  * @description The size of a change to Honor, Glory, Status, or Taint after the actor's Ledger rules
- * (roadmap/STAGE-11; pp.90-95, 274). Each track counts points, ten to a rank.
+ * (roadmap/STAGE-11). Each track counts points, ten to a rank.
+ * game-rules/43_honor.md, p.90-92
+ * game-rules/44_glory.md, p.93
+ * game-rules/45_status.md, p.93-95
+ * game-rules/89_shadowlands_taint.md, p.274
  */
 
 import { resolveValue } from "./rule-values.js";
@@ -16,19 +20,14 @@ import { resolveValue } from "./rule-values.js";
 
 /**
  * Size a change with the Ledger rules for its track and direction, applied in order: each sees the size the rules
- * before it left as `@points`. A size below 0 counts as 0. A rule whose formula fails is skipped and reported.
- *
+ * before it left as `@points`. A size below 0 counts as 0. A rule whose formula fails is skipped and reported. An
+ * Honor loss of 4 under a loss rule of `@points * 2` comes to -8.
  * @param {object} spec
  * @param {string} spec.track
- * @param {number} spec.points         The change asked for: positive gains, negative loses
+ * @param {number} spec.points - The change asked for: positive gains, negative loses
  * @param {LedgerRuleOutput[]} spec.rules
- * @param {object} [spec.rollData={}]  The actor's roll data, for formulas
+ * @param {object} [spec.rollData={}] - The actor's roll data, for formulas
  * @returns {{points: number, errors: Array<{source: string, message: string}>}}
- *
- * @example
- * ledgerChange({ track: "honor", points: -4, rules: [
- *   { track: "honor", direction: "loss", value: "@points * 2", source: "Sworn" }
- * ] }).points; // -8
  */
 export function ledgerChange({ track, points, rules, rollData = {} }) {
   const errors = [];

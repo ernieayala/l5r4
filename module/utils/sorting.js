@@ -1,5 +1,5 @@
 /**
- * @module sorting
+ * @module utils/sorting
  * @description Manages sorting preferences and multi-column sorting for actor sheet lists.
  *
  * Persists user's sort preferences (column and direction) in Foundry user flags.
@@ -16,18 +16,12 @@ import { SYS_ID } from "../config/constants.js";
  *
  * Reads from Foundry user flags. Validates key against allowed keys.
  * Returns default if no preference set or key is invalid.
- *
  * @param {string} actorId - Actor document ID
  * @param {string} scope - Scope identifier (e.g., "skills", "inventory")
  * @param {string[]} allowedKeys - Valid column keys for this scope
  * @param {string} [defaultKey="name"] - Default column key if none set
- * @returns {Object} Sort preference
- * @returns {string} return.key - Column key to sort by
- * @returns {string} return.dir - Sort direction: "asc" or "desc"
- *
- * @example
- * getSortPref("actor123", "skills", ["name", "rank", "trait"])
- * // { key: "rank", dir: "desc" }
+ * @returns {{key: string, dir: string}} Sort preference: the column key to sort by and the direction, "asc" or
+ *   "desc"
  */
 export function getSortPref(actorId, scope, allowedKeys, defaultKey = "name") {
   // Validate key against allowed keys
@@ -47,27 +41,14 @@ export function getSortPref(actorId, scope, allowedKeys, defaultKey = "name") {
  * - If clicking same column: toggles asc/desc
  * - If clicking different column: resets to asc
  *
+ * A first click on "rank" sorts it ascending, a second click descending, and a click on "name" then sorts
+ * that ascending.
  * @param {string} actorId - Actor document ID
  * @param {string} scope - Scope identifier (e.g., "skills", "inventory")
  * @param {string} key - Column key to sort by
- * @param {Object} [opts={}] - Options
- * @param {Object} [opts.toggleFrom] - Override previous preference for toggle logic
+ * @param {object} [opts={}] - Options
+ * @param {object} [opts.toggleFrom] - Override previous preference for toggle logic
  * @returns {Promise<void>}
- *
- * @example
- * // First click on "rank" column
- * await setSortPref("actor123", "skills", "rank")
- * // Sets: { key: "rank", dir: "asc" }
- *
- * @example
- * // Second click on "rank" column (toggles direction)
- * await setSortPref("actor123", "skills", "rank")
- * // Sets: { key: "rank", dir: "desc" }
- *
- * @example
- * // Click on "name" column (different column, resets to asc)
- * await setSortPref("actor123", "skills", "name")
- * // Sets: { key: "name", dir: "asc" }
  */
 export async function setSortPref(actorId, scope, key, opts = {}) {
   const map = (await game.user.getFlag(SYS_ID, "sortByActor")) ?? {};
@@ -84,24 +65,15 @@ export async function setSortPref(actorId, scope, key, opts = {}) {
  *
  * Primary column (from pref) uses specified direction (asc/desc).
  * Secondary columns (all others) use ascending for tiebreaking.
- * Supports both string (locale-aware) and numeric comparison.
- *
+ * Supports both string (locale-aware) and numeric comparison. Kenjutsu 3 and Athletics 2 sorted by rank,
+ * descending, keep Kenjutsu first.
  * @param {Array} list - Array of items to sort
- * @param {Object.<string, Function>} columns - Map of column key to extractor function
- * @param {Object} pref - Sort preference
+ * @param {Record<string, Function>} columns - Map of column key to extractor function
+ * @param {object} pref - Sort preference
  * @param {string} pref.key - Primary column key
  * @param {string} pref.dir - Sort direction: "asc" or "desc"
  * @param {string} [locale=game.i18n?.lang] - Locale for string comparison
  * @returns {Array} Sorted array (mutates original)
- *
- * @example
- * const items = [{ name: "Kenjutsu", rank: 3 }, { name: "Athletics", rank: 2 }];
- * const columns = {
- *   name: item => item.name,
- *   rank: item => item.rank
- * };
- * sortWithPref(items, columns, { key: "rank", dir: "desc" });
- * // Result: [{ name: "Kenjutsu", rank: 3 }, { name: "Athletics", rank: 2 }]
  */
 export function sortWithPref(list, columns, pref, locale = game.i18n?.lang) {
   const primary = pref.key;
