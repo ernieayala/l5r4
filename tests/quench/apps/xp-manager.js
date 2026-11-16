@@ -332,6 +332,53 @@ export function registerXpManagerTests(quench) {
         });
       });
 
+      describe("XP manager Disadvantage cap prompt", () => {
+        let actor, dialog;
+
+        beforeEach(async () => {
+          actor = await createTestPC({ name: "XP manager: cap test" });
+          await actor.createEmbeddedDocuments("Item", [
+            { name: "Cap Doubt", type: "disadvantage", system: { cost: 4 } }
+          ]);
+          await actor.setFlag(SYS_ID, "disadvantageCap", 7);
+          dialog = new XpManagerApplication(actor);
+          await dialog.render(true);
+        });
+
+        afterEach(async () => {
+          if (dialog?.rendered) {
+            await dialog.close({ animate: false });
+          }
+          if (actor) {
+            await actor.delete();
+          }
+        });
+
+        it("should ask through the cap dialog template, its field at the current cap", async () => {
+          const opened = new Promise(resolve => Hooks.once("renderDialogV2", resolve));
+          dialog.element.querySelector('[data-action="change-disadvantage-cap"]').click();
+          const prompt = await Promise.race([
+            opened,
+            new Promise(resolve => setTimeout(() => resolve(null), 5000))
+          ]);
+          try {
+            assert.exists(prompt, "a dialog opens");
+            const input = prompt.element.querySelector("input[name='disadvantageCap']");
+            const content = input.parentElement;
+            assert.isTrue(
+              content.classList.contains("l5r4-disadvantage-cap-dialog"),
+              "the content is templates/dialogs/disadvantage-cap-dialog.hbs"
+            );
+            assert.equal(input.value, "7");
+            assert.equal(content.querySelector("label").htmlFor, input.id, "the label names it");
+            assert.notExists(prompt.element.querySelector("form form"), "no nested form");
+          } finally {
+            await prompt?.close();
+          }
+          assert.equal(actor.getFlag(SYS_ID, "disadvantageCap"), 7, "closing changes nothing");
+        });
+      });
+
       describe("XP manager for PCs only", () => {
         let npc;
 

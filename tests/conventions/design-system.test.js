@@ -10,8 +10,8 @@ import {
 
 const { basename } = posix;
 
-/** The gallery's own files: its fixture data and its templates (Stage 17 Deliverable 2). */
-const GALLERY_CONFIG = "module/config/design-gallery.js";
+/** The gallery's own files: its fixture data, one file per section, and its templates (Stage 17 Deliverable 2). */
+const GALLERY_CONFIG = "module/config/design-gallery";
 const GALLERY_TEMPLATES = "templates/apps/design-gallery";
 
 /** A path a design-system page names: under `templates/` or `scss/`, with an optional `:line` suffix. */
@@ -64,10 +64,7 @@ function componentPagesOf(tree) {
  * @returns {string} The gallery's files joined
  */
 function galleryOf(tree) {
-  return [
-    ...tree.files(GALLERY_CONFIG.replace(/\/[^/]+$/, ""), /design-gallery\.js$/),
-    ...tree.files(GALLERY_TEMPLATES)
-  ]
+  return [...tree.files(GALLERY_CONFIG, /\.js$/), ...tree.files(GALLERY_TEMPLATES)]
     .map(path => tree.text(path))
     .join("\n");
 }

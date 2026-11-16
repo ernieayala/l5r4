@@ -3,24 +3,22 @@
  * @description The living design gallery (roadmap/STAGE-17 Deliverable 2, decision 7): a GM-only window, opened from
  * the system's settings menu, that shows the design system's foundations as the stylesheet has them in the current
  * theme, every component page rendered by the system's own templates from fixture data
- * (module/config/design-gallery.js), and one sample of each pattern. A token the stylesheet does not declare yet
+ * (module/config/design-gallery/, one file per section), and one sample of each pattern. A token the stylesheet does not declare yet
  * shows as not defined, so the gallery shows today's state.
  */
 
 import { SYS_ID } from "../config/constants.js";
 import { STANCES } from "../config/localization.js";
+import { GALLERY_COLORS, GALLERY_SURFACE } from "../config/design-gallery/colors.js";
+import { GALLERY_COMPONENTS } from "../config/design-gallery/components.js";
+import { GALLERY_CONTEXTS, GALLERY_ROLLS } from "../config/design-gallery/contexts.js";
 import {
-  GALLERY_COLORS,
-  GALLERY_COMPONENTS,
-  GALLERY_CONTEXTS,
   GALLERY_FRAMES,
   GALLERY_ICONS,
-  GALLERY_PATTERNS,
-  GALLERY_ROLLS,
   GALLERY_SPACE,
-  GALLERY_SURFACE,
   GALLERY_TYPE
-} from "../config/design-gallery.js";
+} from "../config/design-gallery/foundations.js";
+import { GALLERY_PATTERNS } from "../config/design-gallery/patterns.js";
 import { F, T } from "../utils/localization.js";
 import { prepareItemSheetOptions } from "../documents/item/integration/sheet-data.js";
 

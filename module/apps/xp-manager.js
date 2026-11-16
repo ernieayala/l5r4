@@ -11,6 +11,7 @@ import { T } from "../utils/localization.js";
 import { toInt } from "../utils/type-coercion.js";
 import { logError } from "../utils/error-logging.js";
 import { getSortPref, updateSortPref } from "../services/sort-preferences.js";
+import { askDisadvantageCap } from "../services/xp/disadvantage-cap.js";
 import { formatXpEntries } from "../services/xp/formatter.js";
 import { isRetroactiveUpdateDue, updateXpHistory, xpSpentOf } from "../services/xp/versioning.js";
 
@@ -375,7 +376,7 @@ export default class XpManagerApplication extends foundry.applications.api.Handl
 
   /**
    * Handle change disadvantage cap action.
-   * Displays dialog for entering new disadvantage XP cap value.
+   * Asks for the new Disadvantage XP cap (askDisadvantageCap) and stores it.
    *
    * @this {XpManagerApplication}
    * @param {Event} event - The click event
@@ -387,29 +388,10 @@ export default class XpManagerApplication extends foundry.applications.api.Handl
     const flags = this._getFlags();
     const currentCap = Number.isFinite(+flags.disadvantageCap) ? Number(flags.disadvantageCap) : 10;
 
-    const content = await foundry.applications.handlebars.renderTemplate(
-      `systems/${SYS_ID}/templates/dialogs/disadvantage-cap-dialog.hbs`,
-      { currentCap }
-    );
-
     try {
-      const newCap = await foundry.applications.api.DialogV2.prompt({
-        window: { title: T("l5r4.apps.xpManager.disadvantageCapTitle") },
-        content,
-        ok: {
-          label: T("l5r4.ui.common.ok"),
-          callback: (_e, b, d) => {
-            const form = b.form ?? d.form;
-            const input = form?.querySelector("[data-field='disadvantage-cap']");
-            return input ? toInt(input.value, null) : null;
-          }
-        },
-        cancel: { label: T("l5r4.ui.common.cancel") },
-        rejectClose: false,
-        modal: true
-      });
+      const newCap = await askDisadvantageCap(currentCap);
 
-      if (newCap !== null && Number.isFinite(newCap) && newCap >= 0) {
+      if (newCap !== null) {
         await this.actor.setFlag(SYS_ID, "disadvantageCap", newCap);
         if (this.rendered) {
           this.render();

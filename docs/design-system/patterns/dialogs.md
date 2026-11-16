@@ -5,16 +5,16 @@ with a route that needs no drag, and confirmations, destructive ones included. E
 `foundry.applications.api.DialogV2` (CLAUDE.md **Foundry Integration**); the system writes its content and buttons,
 and core draws the window, the footer, and the keyboard handling.
 
-| Item       | Detail                                                                                                                                                                                                                         |
-| ---------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------ |
-| API        | `DialogV2.prompt`, `DialogV2.confirm`, `DialogV2.wait`, `DialogV2.input` (`resources/app/client/applications/api/dialog.mjs:346-405`)                                                                                          |
-| Templates  | `templates/dialogs/check-dialog.hbs` with `check-extras/ring.hbs`, `spell.hbs`, `slot.hbs`, `maho.hbs`; `ledger-dialog.hbs`, `unified-item-create-dialog.hbs`, `custom-emphasis-dialog.hbs`, `disadvantage-cap-dialog.hbs`     |
-| Paths      | `DIALOG_TEMPLATES` in `module/config/templates.js:112-120`                                                                                                                                                                     |
-| Callers    | `ask*` functions in services (`docs/code-system/naming.md`, verb vocabulary): `askChoices` (`module/services/dice/check/roll-check.js:165-184`), `askChoice` and `askSchool` (`module/services/purchase.js:58-81`, `:157-172`) |
-| SCSS       | `scss/components/_check-dialog.scss:5-28` today (`l5r4-check-dialog`); `scss/components/_check-dialog.scss` and `scss/components/_ledger-dialog.scss`                                                                          |
-| Tokens     | `--l5r4-space-gap-tight`, `--l5r4-space-gap`, `--l5r4-font-code`, `--l5r4-font-size-meta`, `--l5r4-color-warning`, `--l5r4-color-text`, `--l5r4-state-disabled-opacity`                                                        |
-| Components | Check dialog, ledger dialog, form field, button                                                                                                                                                                                |
-| Checks     | ESLint `no-restricted-syntax` (no global `Dialog`, no HTML strings), `tests/conventions/templates.test.js`, `tests/conventions/names.test.js`, `tests/lang.test.js`; "review" where no tool can judge                          |
+| Item       | Detail                                                                                                                                                                                                                                                                                          |
+| ---------- | ----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| API        | `DialogV2.prompt`, `DialogV2.confirm`, `DialogV2.wait`, `DialogV2.input` (`resources/app/client/applications/api/dialog.mjs:346-405`)                                                                                                                                                           |
+| Templates  | `templates/dialogs/check-dialog.hbs` with `check-extras/ring.hbs`, `spell.hbs`, `slot.hbs`, `maho.hbs`; `ledger-dialog.hbs`, `unified-item-create-dialog.hbs`, `custom-emphasis-dialog.hbs`, `disadvantage-cap-dialog.hbs`                                                                      |
+| Paths      | `DIALOG_TEMPLATES` in `module/config/templates.js:112-120`                                                                                                                                                                                                                                      |
+| Callers    | `ask*` functions in services (`docs/code-system/naming.md`, verb vocabulary): `askChoices` (`module/services/dice/check/roll-check.js:165-184`), `askChoice` and `askSchool` (`module/services/purchase.js:58-81`, `:157-172`), `askDisadvantageCap` (`module/services/xp/disadvantage-cap.js`) |
+| SCSS       | `scss/components/_check-dialog.scss:5-28` today (`l5r4-check-dialog`); `scss/components/_check-dialog.scss` and `scss/components/_ledger-dialog.scss`                                                                                                                                           |
+| Tokens     | `--l5r4-space-gap-tight`, `--l5r4-space-gap`, `--l5r4-font-code`, `--l5r4-font-size-meta`, `--l5r4-color-warning`, `--l5r4-color-text`, `--l5r4-state-disabled-opacity`                                                                                                                         |
+| Components | Check dialog, ledger dialog, form field, button                                                                                                                                                                                                                                                 |
+| Checks     | ESLint `no-restricted-syntax` (no global `Dialog`, no HTML strings), `tests/conventions/templates.test.js`, `tests/conventions/names.test.js`, `tests/lang.test.js`; "review" where no tool can judge                                                                                           |
 
 ## Anatomy
 
@@ -79,13 +79,16 @@ HTML strings; `DialogV2` content is a template; no global `Dialog`) and `tests/c
 `-dialog.hbs` suffix).
 
 Conforming, `module/services/dice/check/roll-check.js:172-183`: `renderTemplate(DIALOG_TEMPLATES.check, ...)` passed
-as `content`.
+as `content`. Conforming, `askDisadvantageCap` in `module/services/xp/disadvantage-cap.js`:
+`R(DIALOG_TEMPLATES.disadvantageCap, { currentCap })` passed as `content`, the template with no `<form>` and its label
+linked to the field by `for`; the XP manager's `#onChangeDisadvantageCap` (`module/apps/xp-manager.js`) calls it and
+stores the answer.
 
 Non-conforming, `module/sheets/handlers/item-crud-handler.js:191-196`: `` content: `<p>${...}</p>` ``; the same at
 `module/services/purchase.js:71-73`, `:101-103`, `:160-166`, `module/services/gm-allow.js:21-24`,
 `module/sheets/handlers/npc-actions-handler.js:679-682`, and
-`module/sheets/handlers/pc-actions-handler.js:134-136`. `templates/dialogs/disadvantage-cap-dialog.hbs:1` and
-`unified-item-create-dialog.hbs:1` open their own `<form>`.
+`module/sheets/handlers/pc-actions-handler.js:134-136`. `templates/dialogs/unified-item-create-dialog.hbs:1` opens its
+own `<form>`.
 
 ### 2. Buttons name the action
 
