@@ -129,14 +129,9 @@ export function registerSheetsAndAppsTests(quench) {
       let hookId;
       let pc;
       let npc;
-      let diceSound;
 
       before(async function () {
         this.timeout(SURFACE_TIMEOUT_MS);
-        // Core gives each roll message the dice sound [src: client/documents/chat-message.mjs:540]; the click-through posts
-        // a burst of rolls, and Chrome at times fails to load that many audio elements, an error core logs
-        diceSound = CONFIG.sounds.dice;
-        CONFIG.sounds.dice = null;
         await settleChatNotifications();
         baseline = new Set(
           [...foundry.applications.instances.values()].filter(app => app.rendered)
@@ -166,7 +161,6 @@ export function registerSheetsAndAppsTests(quench) {
 
       after(async function () {
         this.timeout(SURFACE_TIMEOUT_MS);
-        CONFIG.sounds.dice = diceSound;
         Hooks.off("createChatMessage", hookId);
         await settleChatNotifications();
         for (const message of messages) {
@@ -254,7 +248,9 @@ export function registerSheetsAndAppsTests(quench) {
 
         it(
           "should step the Void Ring with its arrows on both sheets",
-          clean(async () => {
+          clean(async function () {
+            // Two sheets, each rendered and saved twice: over Mocha's 2-second default in a full run
+            this.timeout(SURFACE_TIMEOUT_MS);
             for (const actor of [pc, npc]) {
               await actor.update({ "system.rings.void.rank": 2 });
               const sheet = actor.sheet;

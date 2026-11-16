@@ -19,7 +19,7 @@
  * @see https://github.com/Ethaks/FVTT-Quench
  */
 
-import { revealChatPopupsAtOnce } from "./helpers.js";
+import { revealChatPopupsAtOnce, withDiceSoundMuted } from "./helpers.js";
 import { registerActorTests } from "./documents/actor.js";
 import { registerActorWoundsTests } from "./documents/actor-wounds.js";
 import { registerActorXpTests } from "./documents/actor-xp.js";
@@ -117,121 +117,122 @@ import { registerDesignGalleryTests } from "./design-gallery.js";
  */
 export async function registerQuenchTests(quench) {
   revealChatPopupsAtOnce();
-  registerSmokeTests(quench);
-  registerDeprecationsTests(quench);
-  registerDataModelsTests(quench);
-  registerActiveEffectsTests(quench);
-  registerSheetsAndAppsTests(quench);
-  registerRulesTests(quench);
-  registerRollPipelineTests(quench);
-  registerCombatTests(quench);
-  registerAuthoringTests(quench);
-  registerEffectsTests(quench);
-  registerAnimationsTests(quench);
-  registerWorldUpgradeTests(quench);
-  registerRegressionsTests(quench);
-  registerTableToolsTests(quench);
-  registerHookWiringTests(quench);
-  registerPacksTests(quench);
-  registerDesignGalleryTests(quench);
-  registerActorTests(quench);
-  registerActorWoundsTests(quench);
-  registerActorXpTests(quench);
-  registerItemTests(quench);
-  registerSkillRollFormulaTests(quench);
-  registerCombatModifiersTests(quench);
+  const api = withDiceSoundMuted(quench);
+  registerSmokeTests(api);
+  registerDeprecationsTests(api);
+  registerDataModelsTests(api);
+  registerActiveEffectsTests(api);
+  registerSheetsAndAppsTests(api);
+  registerRulesTests(api);
+  registerRollPipelineTests(api);
+  registerCombatTests(api);
+  registerAuthoringTests(api);
+  registerEffectsTests(api);
+  registerAnimationsTests(api);
+  registerWorldUpgradeTests(api);
+  registerRegressionsTests(api);
+  registerTableToolsTests(api);
+  registerHookWiringTests(api);
+  registerPacksTests(api);
+  registerDesignGalleryTests(api);
+  registerActorTests(api);
+  registerActorWoundsTests(api);
+  registerActorXpTests(api);
+  registerItemTests(api);
+  registerSkillRollFormulaTests(api);
+  registerCombatModifiersTests(api);
 
   // Register service tests (Phase 1: Critical Rolls)
-  registerSkillRollTests(quench);
-  registerSkillTraitSwitchingTests(quench);
-  registerWeaponRollTests(quench);
-  registerAttackRollEmphasisTests(quench);
-  registerAttackRollVoidTests(quench);
-  registerInitiativeTests(quench);
-  registerChatCardContentValidationTests(quench);
+  registerSkillRollTests(api);
+  registerSkillTraitSwitchingTests(api);
+  registerWeaponRollTests(api);
+  registerAttackRollEmphasisTests(api);
+  registerAttackRollVoidTests(api);
+  registerInitiativeTests(api);
+  registerChatCardContentValidationTests(api);
 
   // Register service tests (Phase 2: Extended Rolls)
-  registerSpellCastRollTests(quench);
-  registerSpellRollVoidTests(quench);
-  registerRingRollTests(quench);
-  registerTraitRollTests(quench);
-  registerNpcRollTests(quench);
+  registerSpellCastRollTests(api);
+  registerSpellRollVoidTests(api);
+  registerRingRollTests(api);
+  registerTraitRollTests(api);
+  registerNpcRollTests(api);
 
   // Register service tests (Phase 3: Combat Systems)
-  registerFearTests(quench);
-  registerStanceTests(quench);
+  registerFearTests(api);
+  registerStanceTests(api);
 
   // Register service tests (Phase 4: Support Systems)
-  registerRestTests(quench);
-  registerFamilyBonusTests(quench);
-  registerXpServiceTests(quench);
-  registerEmphasisXpTrackingTests(quench);
+  registerRestTests(api);
+  registerFamilyBonusTests(api);
+  registerXpServiceTests(api);
+  registerEmphasisXpTrackingTests(api);
 
   // Register Phase 4: Resource Management Tests
-  registerVoidPointsTests(quench);
-  registerSpellSlotsTests(quench);
+  registerVoidPointsTests(api);
+  registerSpellSlotsTests(api);
 
   // Register sheet tests (Phase 5: User Interface)
-  registerPcSheetTests(quench);
-  registerNpcSheetTests(quench);
-  registerItemSheetTests(quench);
-  registerWoundConfigTests(quench);
-  registerXpManagerTests(quench);
-  registerEmphasisManagerTests(quench);
-  registerNpcAttackConfigTests(quench);
-  registerWealthManagerTests(quench);
-  registerConditionManagerTests(quench);
+  registerPcSheetTests(api);
+  registerNpcSheetTests(api);
+  registerItemSheetTests(api);
+  registerWoundConfigTests(api);
+  registerXpManagerTests(api);
+  registerEmphasisManagerTests(api);
+  registerNpcAttackConfigTests(api);
+  registerWealthManagerTests(api);
+  registerConditionManagerTests(api);
 
   // Register workflow tests (Phase 6: Complete Workflows)
-  registerCombatWorkflowTests(quench);
-  registerMeleeDamageStrengthTests(quench);
-  registerAdvancementWorkflowTests(quench);
-  registerSpellCastingWorkflowTests(quench);
-  registerTraitFamilyBonusTests(quench);
-  registerArmorTnCalculationTests(quench);
-  registerDiceRollingWorkflowTests(quench);
-  registerStanceSwitchingWorkflowTests(quench);
-  registerInitiativeWorkflowTests(quench);
-  registerItemManagementWorkflowTests(quench);
-  registerStatusEffectsWorkflowTests(quench);
-  registerStatusEffectsAllRollsTests(quench);
-  registerFearWorkflowTests(quench);
-  registerRestRecoveryWorkflowTests(quench);
-  registerNpcWorkflowTests(quench);
-  registerChatSystemWorkflowTests(quench);
-  registerEmphasisWorkflowTests(quench);
-  registerEmphasisRerollMechanicsTests(quench);
-  registerSkillVoidPointTests(quench);
-  registerSkillStanceCombinationTests(quench);
+  registerCombatWorkflowTests(api);
+  registerMeleeDamageStrengthTests(api);
+  registerAdvancementWorkflowTests(api);
+  registerSpellCastingWorkflowTests(api);
+  registerTraitFamilyBonusTests(api);
+  registerArmorTnCalculationTests(api);
+  registerDiceRollingWorkflowTests(api);
+  registerStanceSwitchingWorkflowTests(api);
+  registerInitiativeWorkflowTests(api);
+  registerItemManagementWorkflowTests(api);
+  registerStatusEffectsWorkflowTests(api);
+  registerStatusEffectsAllRollsTests(api);
+  registerFearWorkflowTests(api);
+  registerRestRecoveryWorkflowTests(api);
+  registerNpcWorkflowTests(api);
+  registerChatSystemWorkflowTests(api);
+  registerEmphasisWorkflowTests(api);
+  registerEmphasisRerollMechanicsTests(api);
+  registerSkillVoidPointTests(api);
+  registerSkillStanceCombinationTests(api);
 
   // Register race condition tests (Phase 7: Critical Bug Prevention)
-  registerActorCreationRaceConditionTests(quench);
-  registerInitiativeRaceConditionTests(quench);
-  registerDamageRaceConditionTests(quench);
-  registerXpRaceConditionTests(quench);
-  registerSkillAdvancementRaceConditionTests(quench);
-  registerItemCreationRaceConditionTests(quench);
+  registerActorCreationRaceConditionTests(api);
+  registerInitiativeRaceConditionTests(api);
+  registerDamageRaceConditionTests(api);
+  registerXpRaceConditionTests(api);
+  registerSkillAdvancementRaceConditionTests(api);
+  registerItemCreationRaceConditionTests(api);
 
   // Register edge case tests (Phase 8: Edge Case Coverage)
-  registerAttackEdgeCaseTests(quench);
-  registerSpellSlotsEdgeCaseTests(quench);
-  registerStanceEdgeCaseTests(quench);
-  registerConditionsEdgeCaseTests(quench);
+  registerAttackEdgeCaseTests(api);
+  registerSpellSlotsEdgeCaseTests(api);
+  registerStanceEdgeCaseTests(api);
+  registerConditionsEdgeCaseTests(api);
 
   // Register Phase 3: Character Advancement edge case tests
-  registerXpTrackingEdgeCaseTests(quench);
-  registerSkillAdvancementEdgeCaseTests(quench);
+  registerXpTrackingEdgeCaseTests(api);
+  registerSkillAdvancementEdgeCaseTests(api);
 
   // Register Phase 7: Migration & Config edge case tests
-  registerMigrationEdgeCaseTests(quench);
-  registerWoundConfigEdgeCaseTests(quench);
+  registerMigrationEdgeCaseTests(api);
+  registerWoundConfigEdgeCaseTests(api);
 
   // Register Phase 2 Priority #5: Wound Penalty + All Roll Types
-  registerWoundPenaltyAllRollsTests(quench);
+  registerWoundPenaltyAllRollsTests(api);
 
   // Register Phase 2 Priority #6: Multiple Modifier Combinations
-  registerMultipleModifierCombinationTests(quench);
+  registerMultipleModifierCombinationTests(api);
 
   // Register Stance Effect Preservation Tests (Bug Fix Verification)
-  registerStanceEffectPreservationTests(quench);
+  registerStanceEffectPreservationTests(api);
 }

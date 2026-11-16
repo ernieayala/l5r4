@@ -228,6 +228,38 @@ export function revealChatPopupsAtOnce() {
 }
 
 /**
+ * The Quench API with each batch muted: from its first hook to its last, core's dice sound is off, so no roll message
+ * starts loading audio during a run. Chrome fails about one in a hundred concurrent loads of the same file with a
+ * media "Format error", which core logs and the clean-console checks would fail on, in whichever batch is running
+ * when the load fails. No test checks sound. Core reads `CONFIG.sounds.dice` when it builds each message
+ * (`ChatMessage#_preCreate`, `Roll#toMessage`), so the mute reaches every roll.
+ * @param {object} quench - The Quench API object
+ * @returns {object} The same API, whose `registerBatch` mutes the batch it registers
+ */
+export function withDiceSoundMuted(quench) {
+  return Object.create(quench, {
+    registerBatch: {
+      value: (key, fn, options) =>
+        quench.registerBatch(
+          key,
+          context => {
+            let diceSound;
+            context.before(() => {
+              diceSound = CONFIG.sounds.dice;
+              CONFIG.sounds.dice = null;
+            });
+            fn(context);
+            context.after(() => {
+              CONFIG.sounds.dice = diceSound;
+            });
+          },
+          options
+        )
+    }
+  });
+}
+
+/**
  * Reveal every chat pop-up card that has started, so a message deleted now does not reject in a later test, and a
  * rejection from an earlier batch lands before this one starts. Finishing a spacer's animation resolves the promise
  * core awaits whether or not the browser is drawing frames.
