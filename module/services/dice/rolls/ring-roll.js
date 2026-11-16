@@ -2,7 +2,7 @@
  * @module services/dice/rolls/ring-roll
  * @description A Ring Roll through the roll pipeline (module/services/dice/check/roll-check.js): roll and keep the
  * Ring. The dialog can turn it into a Spell Casting Roll without a spell item: the School Rank, plus 1 with an
- * Affinity or minus 1 with a Deficiency, joins the rolled dice, and a spell slot is spent once the roll is made.
+ * Affinity or minus 1 with a Deficiency, joins the rolled dice, and a spell slot is spent before the roll.
  * game-rules/29_types_of_rolls.md, p.80
  */
 
@@ -15,7 +15,7 @@ import {
 } from "../../../utils/spell-casting.js";
 import { formatLabelWithSuffix, formatShiftedLabel } from "../check/message-data.js";
 import { rollCheck } from "../check/roll-check.js";
-import { getSlotToSpend, getSlotDialogData, spendSlot } from "../check/spell-slots.js";
+import { getSlotDialogData, spendChosenSlot, updateReturnedSlot } from "../check/spell-slots.js";
 import { getRollActor } from "../resources/void-points.js";
 
 /**
@@ -57,12 +57,13 @@ export async function rollRing({
 }
 
 /**
- * The Ring Roll's hooks for a Spell Casting Roll the dialog asks for: before the roll, the School Rank and the slot
- * are checked and the School Rank joins the rolled dice; once the roll is made, the slot is spent.
+ * The Ring Roll's hooks for a Spell Casting Roll the dialog asks for: before the roll, the School Rank is checked,
+ * the slot is spent (Ernie's ruling), and the School Rank joins the rolled dice; a cast that stops before it rolls
+ * gives the slot back.
  * game-rules/66_magic_and_spell_casting.md, p.163-164
  * @param {L5R4Actor} roller - The roller
  * @param {{ring: string, ringName: string}} ringData - The Ring's key and display name
- * @returns {{prepare: Function, after: Function}} rollCheck's `prepare` and `after`
+ * @returns {{prepare: Function, cancel: Function}} rollCheck's `prepare` and `cancel`
  */
 function buildCastingHooks(roller, { ring, ringName }) {
   let slotPath = null;
@@ -75,14 +76,14 @@ function buildCastingHooks(roller, { ring, ringName }) {
       if (!ranks) {
         return null;
       }
-      const slot = getSlotToSpend(roller, ring, choices.slot);
+      const slot = await spendChosenSlot(roller, ring, choices.slot);
       if (!slot) {
         return null;
       }
       slotPath = slot.path;
       return buildCastingTerms(ranks, slot);
     },
-    after: () => spendSlot(roller, slotPath)
+    cancel: () => updateReturnedSlot(roller, slotPath)
   };
 }
 

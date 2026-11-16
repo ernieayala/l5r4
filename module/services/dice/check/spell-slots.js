@@ -1,10 +1,10 @@
 /**
  * @module services/dice/check/spell-slots
  * @description Spell slots for a Spell Casting Roll: whether the caster and the Ring can cast, the slot the dialog's
- * choice spends (an elemental slot of the spell's Ring, a Void slot, or none), and spending it once the roll is made.
- * A shugenja holds one slot per rank of each elemental Ring, plus Void slots that cast in any element. The spend runs
- * under a per-actor lock and checks the count again inside it, so two casts that overlap cannot both spend the last
- * slot.
+ * choice spends (an elemental slot of the spell's Ring, a Void slot, or none), taking it before the roll, and giving it
+ * back when the cast stops before it rolls (Ernie's ruling: the slot is spent before the roll). A shugenja holds one
+ * slot per rank of each elemental Ring, plus Void slots that cast in any element. The spend runs under a per-actor
+ * lock and checks the count again inside it, so two casts that overlap cannot both spend the last slot.
  * game-rules/66_magic_and_spell_casting.md, p.163
  */
 
@@ -93,20 +93,37 @@ export function getSlotStatus(actor, ringKey, choice) {
 }
 
 /**
- * The slot a choice spends, checked against what is left.
- * @param {Actor} actor
- * @param {string} ringKey
+ * Spend the slot a choice names, before the roll: the choice is checked, then the slot is spent under the caster's
+ * lock, so a cast that overlapped another is refused before it rolls once the other took the last slot.
+ * game-rules/66_magic_and_spell_casting.md, p.163
+ * @param {Actor} actor - The caster
+ * @param {string} ringKey - The Ring the spell is cast in
  * @param {string} choice - "elemental", "void", or "none" (dialog input)
- * @returns {{path: string|null, label: string}|null} The slot's path and its label suffix ("" for none); null,
- *   after a warning, when the cast cannot spend the chosen slot
+ * @returns {Promise<{path: string|null, label: string}|null>} The slot spent (a null path for none) and its label
+ *   suffix; null, after a warning, when the cast cannot spend the chosen slot
  */
-export function getSlotToSpend(actor, ringKey, choice) {
-  const slot = getSlotStatus(actor, ringKey, choice);
-  if (!slot.valid) {
-    ui.notifications?.warn(slot.message);
+export async function spendChosenSlot(actor, ringKey, choice) {
+  const slot = getSlotToSpend(actor, ringKey, choice);
+  if (!slot || (slot.path && !(await spendSlot(actor, slot.path)).success)) {
     return null;
   }
-  return { path: slot.path, label: slot.label };
+  return slot;
+}
+
+/**
+ * Give back a slot a cast took, when the cast stops before it rolls: writes the stored count plus one under the
+ * caster's lock, so an Active Effect on slots is never written into storage (AUTOMATION.md B6).
+ * @param {Actor} actor - The caster
+ * @param {string|null} path - The slot's path; null gives back nothing
+ * @returns {Promise<void>}
+ */
+export async function updateReturnedSlot(actor, path) {
+  if (!path) {
+    return;
+  }
+  await updateUnderLock(actor.id, () =>
+    actor.update({ [path]: foundry.utils.getProperty(actor._source, path) + 1 })
+  );
 }
 
 /**
@@ -132,6 +149,23 @@ export async function spendSlot(actor, path) {
     await actor.update({ [path]: foundry.utils.getProperty(actor._source, path) - 1 });
     return { success: true, message: null };
   });
+}
+
+/**
+ * The slot a choice spends, checked against what is left.
+ * @param {Actor} actor
+ * @param {string} ringKey
+ * @param {string} choice - "elemental", "void", or "none" (dialog input)
+ * @returns {{path: string|null, label: string}|null} The slot's path and its label suffix ("" for none); null,
+ *   after a warning, when the cast cannot spend the chosen slot
+ */
+function getSlotToSpend(actor, ringKey, choice) {
+  const slot = getSlotStatus(actor, ringKey, choice);
+  if (!slot.valid) {
+    ui.notifications?.warn(slot.message);
+    return null;
+  }
+  return { path: slot.path, label: slot.label };
 }
 
 /**

@@ -2,7 +2,7 @@
  * @module services/dice/rolls/spell-cast-roll
  * @description A Spell Casting Roll for a spell item through the roll pipeline
  * (module/services/dice/check/roll-check.js): (Ring + School Rank)k(Ring), the School Rank plus 1 for the school's
- * Affinity or minus 1 for its Deficiency, TN 5 + 5 × Mastery Level, and a spell slot spent once the roll is made. A
+ * Affinity or minus 1 for its Deficiency, TN 5 + 5 × Mastery Level, and a spell slot spent before the roll. A
  * universal spell is cast in the element the caster picks; a spell above the caster's School Rank in its element
  * cannot be cast, though a GM may allow it. A successful cast of a Concentration spell starts a Concentration.
  * game-rules/29_types_of_rolls.md, p.80
@@ -22,9 +22,9 @@ import { formatShiftedLabel } from "../check/message-data.js";
 import { rollCheck } from "../check/roll-check.js";
 import {
   getCastingRefusal,
-  getSlotToSpend,
   getSlotDialogData,
-  spendSlot
+  spendChosenSlot,
+  updateReturnedSlot
 } from "../check/spell-slots.js";
 import { applyEffect, effectsOf } from "../../effects/apply.js";
 import { askGmAllow } from "../../gm-allow.js";
@@ -124,27 +124,28 @@ function formatCastingLabel(spell, shift) {
 }
 
 /**
- * The cast's roll hooks: before the roll, the slot the dialog picks is checked and named on the card; once the roll
- * is made, that slot is spent whatever the result, and a successful Concentration spell starts its Concentration.
+ * The cast's roll hooks: before the roll, the slot the dialog picks is spent whatever the result and named on the
+ * card (Ernie's ruling); a cast that stops before it rolls gives the slot back; once the roll is made, a successful
+ * Concentration spell starts its Concentration.
  * game-rules/66_magic_and_spell_casting.md, p.163
  * @param {Actor} actor - The caster
  * @param {Item} spell - The spell
  * @param {{ring: string, slots: object}} slotData - The element and the slot dialog's data
- * @returns {{prepare: Function, after: Function}} rollCheck's `prepare` and `after`
+ * @returns {{prepare: Function, cancel: Function, after: Function}} rollCheck's `prepare`, `cancel`, and `after`
  */
 function buildSlotHooks(actor, spell, { ring, slots }) {
   let slotPath = null;
   return {
     prepare: async choices => {
-      const slot = getSlotToSpend(actor, ring, choices.slot ?? slots.slot);
+      const slot = await spendChosenSlot(actor, ring, choices.slot ?? slots.slot);
       if (!slot) {
         return null;
       }
       slotPath = slot.path;
       return { labelSuffix: slot.label };
     },
+    cancel: () => updateReturnedSlot(actor, slotPath),
     after: async message => {
-      await spendSlot(actor, slotPath);
       if (message.system.outcome.success && isConcentration(spell)) {
         await startConcentration(actor, spell);
       }
@@ -161,6 +162,7 @@ async function askElement(spell) {
   return foundry.applications.api.DialogV2.prompt({
     window: { title: spell.name },
     content: await foundry.applications.handlebars.renderTemplate(DIALOG_TEMPLATES.choice, {
+      formId: foundry.utils.randomID(),
       label: F("l5r4.magic.spells.chooseElement", { spell: spell.name }),
       name: "element",
       options: UNIVERSAL_ELEMENTS.map(value => ({

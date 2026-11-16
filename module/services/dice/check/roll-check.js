@@ -70,6 +70,8 @@ import {
  * @property {{template: string, data: object}} [extras] Extra dialog fields for the caller
  * @property {function(object): Promise<object|null>} [prepare] Runs on the dialog's choices before the roll; may
  *   add `labelSuffix`, `modifiers`, `freeRaises`, or return null to stop
+ * @property {function(): Promise<void>} [cancel] Runs when the check stops after `prepare` went through and before
+ *   the roll (a spell slot `prepare` took is given back)
  * @property {function({success: boolean|null, total: number}): Promise<{labelSuffix?: string}>} [beforePost]
  *   Runs once the roll is evaluated, before the card posts (a spell's Taint)
  * @property {function(ChatMessage, object): Promise<void>} [after] Runs on the posted message
@@ -87,7 +89,7 @@ import {
 /**
  * Roll a check through the pipeline and post its card. The steps run in order: ask for the check's terms, spend its
  * Void Points, roll its pool, and post its card; then a used modifier that consumes its effect ends it, and the
- * request's `after` runs on the message.
+ * request's `after` runs on the message. A check that stops after the request's `prepare` runs its `cancel`.
  *
  * @param {CheckRequest} request
  * @returns {Promise<ChatMessage|null>} The posted message, or null when the roller cancels or the roll cannot be made
@@ -99,6 +101,7 @@ export async function rollCheck(request) {
   }
   const { check, choices, terms } = asked;
   if (!(await spendCheckVoidPoints(check.actor, terms))) {
+    await request.cancel?.();
     return null;
   }
   const rolled = await rollCheckPool(check, terms);
@@ -137,6 +140,7 @@ async function askCheck(request) {
   if (payment && !payment.affordable) {
     const { cost } = payment;
     ui.notifications?.warn(F("l5r4.ui.combat.notEnoughRaises", { cost, raises: terms.raises }));
+    await request.cancel?.();
     return null;
   }
   terms.maneuvers = payment?.maneuvers ?? null;

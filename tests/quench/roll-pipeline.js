@@ -254,7 +254,8 @@ export function registerRollPipelineTests(quench) {
                   rollSpellCast({ actor, spell, showDialog: false })
                 ])
               );
-              result.filter(Boolean).forEach(keep);
+              const posted = result.filter(Boolean);
+              posted.forEach(keep);
               const key = slot === "Void" ? "void" : "fire";
               const refused = game.i18n.localize("l5r4.ui.notifications.noSpellSlots");
               assert.equal(
@@ -262,11 +263,50 @@ export function registerRollPipelineTests(quench) {
                 1,
                 "the other cast is refused"
               );
+              assert.equal(posted.length, 1, "the refused cast never rolls or posts a card");
               assert.equal(actor._source.system.spellSlots[key], 0, "one slot spent");
               assert.isAtLeast(actor.system.spellSlots[key], 0, "never negative");
             })
           );
         }
+
+        // game-rules/66_magic_and_spell_casting.md, p.163
+        // game-rules/25_rings_and_traits.md, p.78
+        it(
+          "should give the slot back when the cast stops after taking it",
+          clean(async () => {
+            const { actor } = await swordsman();
+            await actor.update({
+              "system.spellSlots": { fire: 1, void: 0 },
+              "system.rings.void.value": 1
+            });
+            const [spell] = await actor.createEmbeddedDocuments("Item", [
+              { name: "Quench Spell", type: "spell", system: { ring: "fire", mastery: 1 } }
+            ]);
+            const answered = new Promise(resolve =>
+              Hooks.once("renderDialogV2", async app => {
+                app.element.querySelector("[name=void]").checked = true;
+                // The Void Point is gone before the roll spends it, so its spend fails after the slot is taken
+                await actor.update({ "system.rings.void.value": 0 });
+                app.element.querySelector('[data-action="ok"]').click();
+                resolve();
+              })
+            );
+            const { result, warnings } = await withWarnings(async () => {
+              const cast = rollSpellCast({ actor, spell });
+              await answered;
+              return cast;
+            });
+            if (result) {
+              keep(result);
+            }
+            assert.isNull(result, "no cast");
+            assert.deepEqual(warnings, [
+              game.i18n.localize("l5r4.ui.mechanics.rings.voidPointsEmpty")
+            ]);
+            assert.equal(actor._source.system.spellSlots.fire, 1, "the slot is given back");
+          })
+        );
 
         it(
           "should refuse a spell of an unknown Ring, naming the Ring",
@@ -336,14 +376,24 @@ export function registerRollPipelineTests(quench) {
             const picked = new Promise(resolve =>
               Hooks.once("renderDialogV2", app => {
                 const labels = buttonLabelsOf(app);
-                app.element.querySelector("[name=element]").value = "water";
+                const select = app.element.querySelector("[name=element]");
+                // The select's accessible name: the text of the labels linked to it by `for`
+                const name = [...select.labels].map(label => label.textContent.trim()).join(" ");
+                select.value = "water";
                 app.element.querySelector('[data-action="ok"]').click();
-                resolve(labels);
+                resolve({ labels, name });
               })
             );
             const slots = { ...actor._source.system.spellSlots };
             const message = keep(await rollSpellCast({ actor, spell, showDialog: false }));
-            assert.equal((await picked).ok, game.i18n.localize("l5r4.magic.spells.castInElement"));
+            const { labels, name } = await picked;
+            assert.equal(labels.ok, game.i18n.localize("l5r4.magic.spells.castInElement"));
+            // docs/design-system/patterns/dialogs.md, rule 4
+            assert.equal(
+              name,
+              game.i18n.localize("l5r4.magic.spells.chooseElement", { spell: spell.name }),
+              "the select is named by its label"
+            );
             const water = actor.system.rings.water;
             assert.equal(poolOf(message), `${water + actor.system.insight.rank}k${water}`);
             assert.equal(
