@@ -50,6 +50,7 @@
           "advantages": "Преимущества",
           "base": "База",
           "cap": "лимит",
+          "capHint": "Нажмите, чтобы изменить максимальный опыт, полученный от недостатков.",
           "disadvantagesGrant": "Недостатки",
           "kata": "Ката",
           "kiho": "Кихо",
@@ -59,7 +60,6 @@
           "traits": "Черты",
           "void": "Пустота"
         },
-        "changeDisadvantageCap": "Нажмите, чтобы изменить максимальный опыт, полученный от недостатков",
         "disadvantageCapLabel": "Макс. Опыт",
         "fallbackLabels": {
           "skillCreated": "Навык Создан",
@@ -378,7 +378,7 @@
           "ringRoll": "Бросок Кольца",
           "skillRoll": "Бросок Навыка",
           "socialResistance": "Социальное Сопротивление",
-          "socialResistanceHint": "Сопротивление Запугиванию или Искушению",
+          "socialResistanceHint": "Сопротивление Запугиванию или Искушению.",
           "spellCasting": "Бросок Заклинания",
           "success": "Успех",
           "traitRoll": "Бросок Черты",

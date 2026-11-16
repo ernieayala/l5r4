@@ -4,13 +4,7 @@
     {{> "systems/l5r4-enhanced/templates/actor/_partials/_unified-item-create.hbs"}}
     {{> "systems/l5r4-enhanced/templates/actor/_partials/_expand.hbs" collapsed=collapsedSections.advantages}}
   </div>
-  <section class="l5r4-item-row-list -advantage l5r4-sort-header" data-sort-header data-scope="advantages">
-    <div class="l5r4-item-row">
-      <button type="button" class="l5r4-sort-header-button" data-action="sort-items" data-sortby="name">{{localize "l5r4.ui.common.name"}}</button>
-      <button type="button" class="l5r4-sort-header-button" data-action="sort-items" data-sortby="type">{{localize "l5r4.ui.common.type"}}</button>
-      <button type="button" class="l5r4-sort-header-button" data-action="sort-items" data-sortby="cost">{{localize "l5r4.ui.common.cost"}}</button>
-    </div>
-  </section>
+  {{> "systems/l5r4-enhanced/templates/actor/_partials/_sort-header.hbs" scope="advantages" type="advantage" columns=@root.sortColumns.advantages}}
   <section class="l5r4-item-row-list -advantage">
     {{#each advantages as |item id|}}
       {{> "systems/l5r4-enhanced/templates/cards/advantage-disadvantage.hbs"

@@ -21,48 +21,14 @@
         <button type="button" class="inline-control icon flex0" data-action="add-attack" data-attack-key="{{firstEmptyAttack}}" data-tooltip="{{localize "l5r4.ui.dialogs.addAttack"}}" aria-label="{{localize "l5r4.ui.dialogs.addAttack"}}"><i class="fa-solid fa-plus" inert></i></button>
       {{/if}}
     </div>
-    <section class="l5r4-item-row-list -attacks l5r4-sort-header" data-sort-header>
-      <div class="l5r4-item-row">
-        <span>{{localize "l5r4.ui.common.name"}}</span>
-        <span>{{localize "l5r4.ui.mechanics.combat.attack"}}</span>
-        <span>{{localize "l5r4.ui.common.damage"}}</span>
-        <span>{{localize "l5r4.ui.common.action"}}</span>
-        <span>{{localize "l5r4.ui.common.type"}}</span>
-        <span></span>
-      </div>
-    </section>
+    {{> "systems/l5r4-enhanced/templates/actor/_partials/_sort-header.hbs" type="attacks" columns=@root.sortColumns.npcAttacks}}
     <section class="l5r4-item-row-list -attacks">
       {{#each attacks}}
         {{#unless empty}}
           <div class="l5r4-item-row -attacks -expandable" data-attack-section="{{key}}">
             <h4 class="l5r4-item-row-name flexrow -gap-sm" data-attack-title>{{#if attack.name}}{{attack.name}}{{else}}{{localize "l5r4.ui.mechanics.combat.attack"}} {{num}}{{/if}}</h4>
-            <div class="l5r4-button -roll">
-              <span class="l5r4-button-under">{{attack.roll}}k{{attack.keep}}{{#if attack.modifier}}{{numberFormat attack.modifier decimals=0 sign=true}}{{/if}}</span>
-              <button type="button" class="l5r4-button-face"
-                 data-action="roll-attack"
-                 data-attack-num="{{num}}"
-                 data-roll="{{attack.roll}}"
-                 data-keep="{{attack.keep}}"
-                 data-modifier="{{attack.modifier}}"
-                 data-description="{{actionLabel}}"
-                 data-label="{{#if attack.name}}{{attack.name}}{{else}}{{localize "l5r4.ui.mechanics.combat.attack"}} {{num}}{{/if}}"
-                 data-tooltip="{{localize "l5r4.ui.mechanics.combat.attack"}}">
-                {{attack.roll}}k{{attack.keep}}{{#if attack.modifier}}{{numberFormat attack.modifier decimals=0 sign=true}}{{/if}}
-              </button>
-            </div>
-            <div class="l5r4-button -roll">
-              <span class="l5r4-button-under">{{damage.roll}}k{{damage.keep}}{{#if damage.modifier}}{{numberFormat damage.modifier decimals=0 sign=true}}{{/if}}</span>
-              <button type="button" class="l5r4-button-face"
-                 data-action="roll-damage"
-                 data-roll="{{damage.roll}}"
-                 data-keep="{{damage.keep}}"
-                 data-modifier="{{damage.modifier}}"
-                 data-description="{{damage.type}}"
-                 data-label="{{localize "l5r4.ui.common.damage"}} {{num}}"
-                 data-tooltip="{{localize "l5r4.ui.mechanics.rolls.damageRoll"}}">
-                {{damage.roll}}k{{damage.keep}}{{#if damage.modifier}}{{numberFormat damage.modifier decimals=0 sign=true}}{{/if}}
-              </button>
-            </div>
+            {{> "systems/l5r4-enhanced/templates/cards/_partials/_roll-button.hbs" action="roll-attack" pool=attackPool tooltip=(localize "l5r4.ui.mechanics.combat.attack") data=(object attack-num=num roll=attack.roll keep=attack.keep modifier=attack.modifier description=actionLabel label=attackLabel)}}
+            {{> "systems/l5r4-enhanced/templates/cards/_partials/_roll-button.hbs" action="roll-damage" pool=damagePool tooltip=(localize "l5r4.ui.mechanics.rolls.damageRoll") data=(object roll=damage.roll keep=damage.keep modifier=damage.modifier description=damage.type label=damageLabel)}}
             <div>
               {{actionLabel}}
             </div>

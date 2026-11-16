@@ -2,7 +2,7 @@
   {{!-- Active Effects Management --}}
   <div>
     {{#if editable}}
-      <button type="button" data-effect-create>
+      <button type="button" data-action="create-effect">
         <i class="fa-solid fa-plus" inert></i> {{localize "l5r4.ui.common.new"}}
       </button>
     {{/if}}
@@ -15,11 +15,11 @@
             {{#if e.disabled}}<em>({{localize "l5r4.ui.common.disabled"}})</em>{{/if}}
           </div>
           <div class="flexrow -gap-md flex0 l5r4-inline-control">
-            <a data-effect-edit data-tooltip="{{localize "l5r4.ui.common.edit"}}" aria-label="{{localize "l5r4.ui.common.edit"}}"><i class="fa-solid fa-pen-to-square" inert></i></a>
-            <a data-effect-toggle data-tooltip="{{localize "l5r4.ui.common.toggle"}}" aria-label="{{localize "l5r4.ui.common.toggle"}}">
+            <button type="button" class="l5r4-effect-list-button" data-action="edit-effect" data-tooltip="{{localize "l5r4.ui.common.edit"}}" aria-label="{{localize "l5r4.ui.common.edit"}}"><i class="fa-solid fa-pen-to-square" inert></i></button>
+            <button type="button" class="l5r4-effect-list-button" data-action="toggle-effect" aria-pressed="{{#if e.disabled}}false{{else}}true{{/if}}" data-tooltip="{{localize "l5r4.ui.common.toggle"}}" aria-label="{{localize "l5r4.ui.common.toggle"}}">
               <i class="fa-solid {{#if e.disabled}}fa-toggle-off{{else}}fa-toggle-on{{/if}}" inert></i>
-            </a>
-            <a data-effect-delete data-tooltip="{{localize "l5r4.ui.common.delete"}}" aria-label="{{localize "l5r4.ui.common.delete"}}"><i class="fa-solid fa-trash" inert></i></a>
+            </button>
+            <button type="button" class="l5r4-effect-list-button" data-action="delete-effect" data-tooltip="{{localize "l5r4.ui.common.delete"}}" aria-label="{{localize "l5r4.ui.common.delete"}}"><i class="fa-solid fa-trash" inert></i></button>
           </div>
         </li>
       {{/each}}

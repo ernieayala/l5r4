@@ -1,6 +1,8 @@
 /**
  * Chat Messages
- * Styling for chat message content and L5R4-specific chat elements
+ * Styling for chat message content and L5R4-specific chat elements. Each rule sits under a fixed chat-card class
+ * (docs/code-system/naming.md, Fixed names); the posted item card's `item` root also roots every sheet item row, so its
+ * rules alone keep core's message wrapper as their scope
  */
 
 .message-content {
@@ -20,12 +22,12 @@
       margin: 0;
     }
   }
+}
 
-  .l5r4-roll {
-    display: flex;
-    flex-direction: column;
-    gap: var(--l5r4-space-gap-tight);
-  }
+.l5r4-roll {
+  display: flex;
+  flex-direction: column;
+  gap: var(--l5r4-space-gap-tight);
 
   .l5r4-damage-button,
   .l5r4-check-damage {
@@ -39,24 +41,28 @@
     margin: 0;
     padding: 0;
   }
+}
 
+// Flow cards (duel, grapple) and damage results: one full-width button per row, so long labels stay readable
+.l5r4-flow-card,
+.l5r4-damage-result {
+  display: flex;
+  flex-direction: column;
+  gap: var(--l5r4-space-gap-tight);
+}
+
+.l5r4-roll,
+.l5r4-flow-card,
+.l5r4-damage-result {
   .check-note {
     font-style: italic;
   }
+}
 
-  // Flow cards (duel, grapple) and damage results: one full-width button per row, so long labels stay readable
-  .l5r4-flow-card,
-  .l5r4-damage-result {
-    display: flex;
-    flex-direction: column;
-    gap: var(--l5r4-space-gap-tight);
-  }
+.l5r4-flow-card .flow-actions {
+  flex-direction: column;
+}
 
-  .flow-actions {
-    flex-direction: column;
-  }
-
-  .l5r4-damage-result.-undone {
-    opacity: 0.7;
-  }
+.l5r4-damage-result.-undone {
+  opacity: 0.7;
 }

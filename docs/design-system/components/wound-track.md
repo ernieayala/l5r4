@@ -59,11 +59,16 @@ Columns: Wound Rank, penalty, threshold, current. Rank names come from `l5r4.ui.
 | `--l5r4-color-line`, `--l5r4-border-width-thin` | Row lines              |
 | `--l5r4-color-text`                             | Cell text              |
 | `--l5r4-font-label`, `--l5r4-font-size-label`   | Column heads           |
-| `--l5r4-size-target`                            | Row height             |
 | `--l5r4-space-4`                                | Cell padding           |
 
-Numbers in the penalty and threshold columns use tabular figures (`foundations/typography.md` T5). The row height
-reads `--l5r4-size-target` (24 px), the nearest size to today's 25 px (`foundations/space-and-size.md`).
+Numbers in the penalty and threshold columns use tabular figures (`foundations/typography.md` T5).
+
+Two exceptions Ernie kept, each for its look (Stage 17 decision 9; `foundations/space-and-size.md`):
+
+| Exception                                                                                                                 | Why                                                                      |
+| ------------------------------------------------------------------------------------------------------------------------- | ------------------------------------------------------------------------ |
+| Rows are 25 px high, a literal in place of `--l5r4-size-target` (24 px)                                                   | The token would take 1 px off each of the eight rows, 8 px off the track |
+| The wound configuration window's manual table keeps its own look, outside the grid's frame (`scss/components/_grid.scss`) | The frame would make each row 3 px shorter and its text 2 px larger      |
 
 ## Keyboard and screen reader
 

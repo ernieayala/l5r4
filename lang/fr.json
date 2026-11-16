@@ -50,6 +50,7 @@
           "advantages": "Avantages",
           "base": "Base",
           "cap": "limite",
+          "capHint": "Cliquez pour modifier l'EXP maximum gagnée des désavantages.",
           "disadvantagesGrant": "Désavantages",
           "kata": "Kata",
           "kiho": "Kiho",
@@ -59,7 +60,6 @@
           "traits": "Traits",
           "void": "Vide"
         },
-        "changeDisadvantageCap": "Cliquez pour modifier l'EXP maximum gagnée des désavantages",
         "disadvantageCapLabel": "EXP Maximum",
         "fallbackLabels": {
           "skillCreated": "Compétence Créée",
@@ -374,7 +374,7 @@
           "ringRoll": "Jet d'Anneau",
           "skillRoll": "Jet de Compétence",
           "socialResistance": "Résistance Sociale",
-          "socialResistanceHint": "Résister à l'Intimidation ou la Tentation",
+          "socialResistanceHint": "Résister à l'Intimidation ou la Tentation.",
           "spellCasting": "Jet de Lancement de Sort",
           "success": "Succès",
           "traitRoll": "Jet de Trait",

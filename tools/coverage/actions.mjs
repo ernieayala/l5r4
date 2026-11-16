@@ -12,12 +12,15 @@ import { pathToFileURL } from "node:url";
 import { sourcesIn } from "./citations.mjs";
 
 /**
- * The literal actions a template names.
+ * The literal actions a template names: each `data-action` attribute, and each `action` hash argument of a partial
+ * include, which the partial writes into its own `data-action="{{action}}"` (the roll button, button.md B4).
  * @param {string} text
  * @returns {string[]}
  */
 export function templateActions(text) {
-  return [...text.matchAll(/data-action="([A-Za-z][\w-]*)"/g)].map(([, action]) => action);
+  return [
+    ...text.matchAll(/data-action="([A-Za-z][\w-]*)"|\{\{#?>[^}]*?\saction="([A-Za-z][\w-]*)"/g)
+  ].map(([, attribute, argument]) => attribute ?? argument);
 }
 
 /**

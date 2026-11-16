@@ -3,9 +3,9 @@
  * Two-column label and value grid of the sheet sidebar blocks (components/grid.md)
  */
 
-// The wound configuration window's Wound Ranks table keeps the look it had: framing it as a grid makes each row 3px
-// shorter and its text 2px larger, a size change Stage 17 decision 9 does not take. For review: grid.md and
-// wound-track.md style it as on the sheet. `:where()` keeps the exception from raising the rule's specificity
+// The wound configuration window's Wound Ranks table keeps the look it had, an exception Ernie kept (wound-track.md):
+// framing it as a grid makes each row 3px shorter and its text 2px larger, a size change Stage 17 decision 9 does not
+// take. `:where()` keeps the exception from raising the rule's specificity
 .l5r4-grid:not(:where(.l5r4-wound-config .l5r4-grid)) {
   border: var(--l5r4-border-width-thin) solid var(--l5r4-color-line);
   border-block-end: none;

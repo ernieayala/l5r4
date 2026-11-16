@@ -8,6 +8,8 @@
  * builds the real context does. A sample's `context` names a base context below; its `with` is merged over it.
  */
 
+import { SORT_COLUMNS } from "./sort-keys.js";
+
 /** The system's template root, as the samples name it. */
 const T = "systems/l5r4-enhanced/templates";
 
@@ -39,6 +41,7 @@ const ROWS = Object.freeze({
         school: true,
         roll: 7,
         keep: 4,
+        rollFormula: "7k4",
         trainedEmphases: ["Katana"],
         description: DESCRIPTION
       }
@@ -47,7 +50,7 @@ const ROWS = Object.freeze({
       id: "gallerySkill2",
       name: { i18n: "l5r4.apps.designGallery.sample.longName" },
       type: "skill",
-      system: { rank: 1, trait: "awa", roll: 4, keep: 3, trainedEmphases: [] }
+      system: { rank: 1, trait: "awa", roll: 4, keep: 3, rollFormula: "4k3", trainedEmphases: [] }
     }
   ],
   weapons: [
@@ -56,14 +59,25 @@ const ROWS = Object.freeze({
       name: "Katana",
       type: "weapon",
       attackFormula: "7k4",
-      system: { damageRoll: 3, damageKeep: 2, description: DESCRIPTION }
+      system: {
+        damageRoll: 3,
+        damageKeep: 2,
+        derivedDamageFormula: "3k2",
+        description: DESCRIPTION
+      }
     },
     {
       id: "galleryWeapon2",
       name: "Yumi",
       type: "weapon",
       attackFormula: "6k3",
-      system: { damageRoll: 2, damageKeep: 2, isBow: true, arrow: "willow" }
+      system: {
+        damageRoll: 2,
+        damageKeep: 2,
+        derivedDamageFormula: "2k2",
+        isBow: true,
+        arrow: "willow"
+      }
     }
   ],
   armors: [
@@ -524,7 +538,7 @@ export const GALLERY_ICONS = Object.freeze([
     meaning: "l5r4.apps.designGallery.icons.transferFolder",
     icons: ["fa-file-export", "fa-file-import"]
   },
-  { meaning: "l5r4.apps.designGallery.icons.openBrowser", icons: ["fa-book-atlas"] },
+  { meaning: "l5r4.apps.designGallery.icons.openBrowser", icons: ["fa-books"] },
   { meaning: "l5r4.apps.designGallery.icons.openEffectPanel", icons: ["fa-hourglass-half"] },
   { meaning: "l5r4.apps.designGallery.icons.configureAttack", icons: ["fa-swords"] },
   { meaning: "l5r4.apps.designGallery.icons.startDuel", icons: ["fa-khanda"] },
@@ -572,6 +586,7 @@ export const GALLERY_CONTEXTS = Object.freeze({
     currentStance: "attackStance",
     voidArmor: false,
     collapsedSections: {},
+    sortColumns: SORT_COLUMNS,
     activeItemIds: [],
     enriched: { notes: "" },
     skills: [],
@@ -618,6 +633,7 @@ export const GALLERY_CONTEXTS = Object.freeze({
     traitsEff: { sta: 3, wil: 3, ref: 2, awa: 2, str: 3, per: 2, agi: 3, int: 3 },
     currentStance: "",
     collapsedSections: {},
+    sortColumns: SORT_COLUMNS,
     enriched: { notes: "" },
     firstEmptyAttack: "attack3",
     attacks: [
@@ -626,14 +642,22 @@ export const GALLERY_CONTEXTS = Object.freeze({
         num: 1,
         attack: { name: "Claws", roll: 6, keep: 3, modifier: 0, type: "simple" },
         damage: { roll: 4, keep: 2, modifier: 2 },
-        actionLabel: "Simple"
+        actionLabel: "Simple",
+        attackPool: "6k3",
+        damagePool: "4k2+2",
+        attackLabel: "Claws",
+        damageLabel: { i18n: "l5r4.ui.common.damage" }
       },
       {
         key: "attack2",
         num: 2,
         attack: { name: "", roll: 5, keep: 2, modifier: 0, type: "complex" },
         damage: { roll: 3, keep: 2, modifier: 0 },
-        actionLabel: "Complex"
+        actionLabel: "Complex",
+        attackPool: "5k2",
+        damagePool: "3k2",
+        attackLabel: { i18n: "l5r4.ui.mechanics.combat.attack" },
+        damageLabel: { i18n: "l5r4.ui.common.damage" }
       }
     ],
     skills: ROWS.skills
@@ -761,11 +785,22 @@ export const GALLERY_COMPONENTS = Object.freeze([
     page: "button",
     partials: [
       `${T}/actor/_partials/_fear.hbs`,
+      `${T}/cards/_partials/_roll-button.hbs`,
       `${T}/actor/_partials/_skill-section.hbs`,
       `${T}/cards/skill.hbs`
     ],
     scss: ["scss/components/_button.scss", "scss/features/_traits-rings.scss"],
     samples: [
+      {
+        partial: `${T}/cards/_partials/_roll-button.hbs`,
+        scope: "pc",
+        context: "plain",
+        with: {
+          action: "roll-skill",
+          pool: "7k4",
+          tooltip: { i18n: "l5r4.ui.mechanics.rolls.skillRoll" }
+        }
+      },
       {
         label: "l5r4.apps.designGallery.samples.coreButton",
         partial: `${T}/actor/_partials/_fear.hbs`,
@@ -1114,9 +1149,22 @@ export const GALLERY_COMPONENTS = Object.freeze([
   },
   {
     page: "sort-header",
-    partials: [`${T}/actor/_partials/_spell-section.hbs`],
+    partials: [`${T}/actor/_partials/_sort-header.hbs`, `${T}/actor/_partials/_spell-section.hbs`],
     scss: ["scss/components/_item-row.scss"],
     samples: [
+      {
+        partial: `${T}/actor/_partials/_sort-header.hbs`,
+        scope: "pc",
+        context: "pc",
+        with: { scope: "skills", type: "skill", columns: SORT_COLUMNS.skills }
+      },
+      {
+        label: "l5r4.apps.designGallery.samples.plainHeader",
+        partial: `${T}/actor/_partials/_sort-header.hbs`,
+        scope: "npc",
+        context: "npc",
+        with: { type: "attacks", columns: SORT_COLUMNS.npcAttacks }
+      },
       {
         label: "l5r4.apps.designGallery.samples.sortHeader",
         partial: `${T}/actor/_partials/_spell-section.hbs`,

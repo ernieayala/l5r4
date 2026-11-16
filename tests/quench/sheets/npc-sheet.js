@@ -38,8 +38,10 @@ export function registerNpcSheetTests(quench) {
             name: "Test NPC",
             system: {
               nrWoundLvls: 3,
-              attack1: { roll: 5, keep: 3, dmgRoll: 3, dmgKeep: 2 },
-              attack2: { roll: 4, keep: 2, dmgRoll: 2, dmgKeep: 2 }
+              attack1: { roll: 5, keep: 3 },
+              damage1: { roll: 3, keep: 2 },
+              attack2: { roll: 4, keep: 2 },
+              damage2: { roll: 2, keep: 2 }
             }
           });
           sheet = actor.sheet;
@@ -102,9 +104,12 @@ export function registerNpcSheetTests(quench) {
           actor = await createTestNPC({
             name: "NPC sheet: combat NPC",
             system: {
-              attack1: { roll: 6, keep: 4, dmgRoll: 4, dmgKeep: 2 },
-              attack2: { roll: 5, keep: 3, dmgRoll: 3, dmgKeep: 2 },
-              attack3: { roll: 7, keep: 5, dmgRoll: 5, dmgKeep: 3 }
+              attack1: { roll: 6, keep: 4 },
+              damage1: { roll: 4, keep: 2 },
+              attack2: { roll: 5, keep: 3 },
+              damage2: { roll: 3, keep: 2 },
+              attack3: { roll: 7, keep: 5 },
+              damage3: { roll: 5, keep: 3 }
             }
           });
           sheet = actor.sheet;
@@ -374,8 +379,7 @@ export function registerNpcSheetTests(quench) {
                 roll: 5,
                 keep: 3,
                 modifier: 2,
-                type: "Slashing",
-                action: "Simple"
+                type: "simple"
               },
               damage1: {
                 roll: 3,
@@ -536,11 +540,12 @@ export function registerNpcSheetTests(quench) {
           await sheet.render(true);
           const column = () =>
             sheet.element.querySelector(
-              "[data-sort-header][data-scope='skills'] [data-sortby='rank']"
+              "[data-sort-header][data-scope='skills'] [data-sort-by='rank']"
             );
           try {
             column().click();
             assert.isTrue(await waitFor(() => column()?.dataset.dir === "asc"), "rank ascending");
+            assert.equal(column().getAttribute("aria-pressed"), "true", "rank pressed");
           } finally {
             await game.user.unsetFlag(SYS_ID, `sortByActor.${actor.id}`);
           }

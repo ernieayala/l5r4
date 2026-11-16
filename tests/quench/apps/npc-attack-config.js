@@ -37,8 +37,7 @@ export function registerNpcAttackConfigTests(quench) {
                 roll: 5,
                 keep: 3,
                 modifier: 2,
-                type: "Slashing",
-                action: "Simple"
+                type: "simple"
               },
               damage1: {
                 roll: 3,
@@ -154,8 +153,7 @@ export function registerNpcAttackConfigTests(quench) {
                 roll: 4,
                 keep: 2,
                 modifier: 0,
-                type: "Slashing",
-                action: "Simple"
+                type: "simple"
               },
               damage2: {
                 roll: 2,
@@ -224,8 +222,7 @@ export function registerNpcAttackConfigTests(quench) {
                 roll: 4,
                 keep: 3,
                 modifier: 1,
-                type: "Piercing",
-                action: "Simple"
+                type: "simple"
               },
               damage3: {
                 roll: 3,

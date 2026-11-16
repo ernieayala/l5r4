@@ -79,6 +79,12 @@ describe("Coverage audit", () => {
       "edit-item"
     ]);
     expect(
+      templateActions(
+        '{{> "systems/l5r4-enhanced/templates/cards/_partials/_roll-button.hbs" pool=x action="roll-skill"}}' +
+          '<button type="button" data-action="{{action}}"></button>'
+      )
+    ).toEqual(["roll-skill"]);
+    expect(
       optionActions("actions: { a: f, 'b-c': g, async d() { return { e: 1 }; }, ...h }")
     ).toEqual(["a", "b-c", "d"]);
   });

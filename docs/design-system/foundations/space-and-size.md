@@ -122,11 +122,16 @@ as core sets it.
 
 Literal sizes that leave the scale:
 
-| Read at                               | Literal                                   | Result                                                                                                                                                               |
-| ------------------------------------- | ----------------------------------------- | -------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| `scss/features/_wound-track.scss:39`  | `min-height: 25px` on a Wound track row   | Stays a literal: `--l5r4-size-target` (24 px) takes 1 px off each of the eight rows, 8 px off the track, a size change Stage 17 decision 9 does not take. For review |
-| `scss/components/_section.scss:38`    | `max-width: 46px` on section title fields | Stays a literal: one component                                                                                                                                       |
-| `scss/components/_form-field.scss:24` | `min-width: 20px`                         | Stays a literal: one component                                                                                                                                       |
+| Read at                               | Literal                                   | Result                                                                                                                                                         |
+| ------------------------------------- | ----------------------------------------- | -------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| `scss/features/_wound-track.scss:39`  | `min-height: 25px` on a Wound track row   | A documented exception: Ernie kept the look. `--l5r4-size-target` (24 px) would take 1 px off each of the eight rows, 8 px off the track (Stage 17 decision 9) |
+| `scss/components/_section.scss:38`    | `max-width: 46px` on section title fields | Stays a literal: one component                                                                                                                                 |
+| `scss/components/_form-field.scss:24` | `min-width: 20px`                         | Stays a literal: one component                                                                                                                                 |
+
+The wound configuration window's manual Wound Ranks table is the second documented exception: it keeps its own look
+in place of the grid's frame, which Ernie kept because the frame would make each row 3 px shorter and its text 2 px
+larger (Stage 17 decision 9). `scss/components/_grid.scss` leaves that table out of the grid rule with
+`:not(:where(.l5r4-wound-config .l5r4-grid))`; `components/wound-track.md` records both exceptions.
 
 Renamed for `CHANGELOG.MD`: `--controls` becomes `--l5r4-size-column-controls`.
 

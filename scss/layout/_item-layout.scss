@@ -48,6 +48,22 @@
   .l5r4-inline-control {
     flex-wrap: nowrap;
   }
+
+  // A <button> laid out as the bare link it replaced: everything undoes core's button face
+  .l5r4-effect-list-button {
+    background: none;
+    border: none;
+    border-radius: 0;
+    color: inherit;
+    display: block;
+    font: inherit;
+    height: auto;
+    line-height: inherit;
+    min-height: 0;
+    padding: 0;
+    text-align: start;
+    transition: none;
+  }
 }
 
 // A subtype partial's root draws no box, so each of its fields stays a flex item of the tab, spaced by the tab's gap

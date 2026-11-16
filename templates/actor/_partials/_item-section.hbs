@@ -26,11 +26,7 @@
     {{> "systems/l5r4-enhanced/templates/actor/_partials/_expand.hbs" collapsed=collapsedSections.items}}
   </div>
   {{#if items.length}}
-    <section class="l5r4-item-row-list -commonItem l5r4-sort-header" data-sort-header data-scope="items">
-      <div class="l5r4-item-row">
-        <button type="button" class="l5r4-sort-header-button" data-action="sort-items" data-sortby="name">{{localize "l5r4.ui.common.name"}}</button>
-      </div>
-    </section>
+    {{> "systems/l5r4-enhanced/templates/actor/_partials/_sort-header.hbs" scope="items" type="commonItem" columns=@root.sortColumns.items}}
     <section class="l5r4-item-row-list -commonItem">
       {{#each items as |item id|}}
         {{> "systems/l5r4-enhanced/templates/cards/commonItem.hbs"

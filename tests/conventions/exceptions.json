@@ -1,3 +1,4 @@
 {
-  "module/data/rules/rule-models.js": "One registry of every rule model, split by nothing but size"
+  "module/data/rules/rule-models.js": "One registry of every rule model, split by nothing but size",
+  "module/sheets/item-sheet.js": "One sheet class: its options, context, and action handlers, which core calls as the class's own static #on<Action> members (naming.md, Action handler), so they cannot move out"
 }

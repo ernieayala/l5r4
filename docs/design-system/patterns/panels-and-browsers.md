@@ -122,7 +122,7 @@ class). Enforced by review and `tests/conventions/templates.test.js` (system cla
 | Condition manager        | `condition-manager`                                  | `l5r4-condition-manager`             | `fa-solid fa-heart-pulse`    | Same                     |
 | NPC attack configuration | `npc-attack-config`                                  | `l5r4-npc-attack-config`             | `fas fa-swords`              | `fa-solid fa-swords`     |
 | Effect panel             | `l5r4-effect-panel`                                  | Same                                 | `fa-solid fa-hourglass-half` | Same                     |
-| Compendium browser       | `l5r4-compendium-browser`; elements `l5r4-browser-*` | Elements `l5r4-compendium-browser-*` | `fa-solid fa-book-open`      | `fa-solid fa-book-atlas` |
+| Compendium browser       | `l5r4-compendium-browser`; elements `l5r4-browser-*` | Elements `l5r4-compendium-browser-*` | `fa-solid fa-book-open`      | `fa-solid fa-books`      |
 
 Conforming, `module/apps/effect-panel.js:21-34`.
 

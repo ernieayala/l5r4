@@ -7,6 +7,7 @@
  * 6 × the new rank, a Skill its new rank, an Emphasis 2, an item its listed cost, a spell its Mastery Level.
  */
 
+import { SORT_KEYS } from "../../config/sort-keys.js";
 import { applySortPref } from "../../utils/sorting.js";
 import { getSortPref } from "../sort-preferences.js";
 
@@ -134,7 +135,7 @@ export function formatXpEntries(entries, options = {}) {
   if (sort && actorId) {
     const pref =
       sortPref ||
-      getSortPref(actorId, scope, { allowedKeys: ["note", "cost", "type"], defaultKey: "note" });
+      getSortPref(actorId, scope, { allowedKeys: SORT_KEYS["xp-purchases"], defaultKey: "note" });
     formatted = applySortPref(formatted, SORT_COLUMNS, { pref, locale: game.i18n?.lang });
   } else {
     formatted.sort((a, b) => (a.ts || 0) - (b.ts || 0));

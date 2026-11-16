@@ -19,6 +19,7 @@ export const EVERY_ACTION = Object.freeze([
   "change-tab",
   "convert-down",
   "convert-up",
+  "create-effect",
   "create-item",
   "decrease-trait",
   "decrease-void-ring",

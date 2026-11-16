@@ -4,11 +4,7 @@
     {{> "systems/l5r4-enhanced/templates/actor/_partials/_unified-item-create.hbs"}}
     {{> "systems/l5r4-enhanced/templates/actor/_partials/_expand.hbs" collapsed=collapsedSections.tattoos}}
   </div>
-  <section class="l5r4-item-row-list -tattoo l5r4-sort-header" data-sort-header data-scope="tattoos">
-    <div class="l5r4-item-row">
-      <button type="button" class="l5r4-sort-header-button" data-action="sort-items" data-sortby="name">{{localize "l5r4.ui.common.name"}}</button>
-    </div>
-  </section>
+  {{> "systems/l5r4-enhanced/templates/actor/_partials/_sort-header.hbs" scope="tattoos" type="tattoo" columns=@root.sortColumns.tattoos}}
   <section class="l5r4-item-row-list -tattoo">
     {{#each tattoos as |tattoo id|}}
       {{> "systems/l5r4-enhanced/templates/cards/tattoo.hbs" system=tattoo.system inSheet=true docId=tattoo.id active=(includes @root.activeItemIds tattoo.id)}}

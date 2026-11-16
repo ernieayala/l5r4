@@ -6,6 +6,7 @@
  * templates and never changes a document.
  */
 
+import { SORT_KEYS } from "../config/sort-keys.js";
 import { applySortPref } from "../utils/sorting.js";
 import { toInt } from "../utils/type-coercion.js";
 import { getActiveStance } from "../utils/stances.js";
@@ -194,7 +195,7 @@ export class PcContextBuilder {
     };
 
     const pref = getSortPref(actor.id, "skills", {
-      allowedKeys: Object.keys(cols),
+      allowedKeys: SORT_KEYS.skills,
       defaultKey: "name"
     });
     return applySortPref(skillItems, cols, { pref, locale: game.i18n?.lang });
@@ -209,10 +210,7 @@ export class PcContextBuilder {
    * Sorting columns:
    * - **name**: Spell name
    * - **ring**: Element (air, earth, fire, water, void)
-   * - **mastery**: Mastery Level (1-6)
-   * - **range**: Range text
-   * - **aoe**: Area of Effect text
-   * - **duration**: Duration text.
+   * - **mastery**: Mastery Level (1-6).
    *
    * @param {Actor} actor - L5R4 Actor document
    * @param {Item[]} spellItems - Array of spell items (formulas already calculated)
@@ -223,14 +221,11 @@ export class PcContextBuilder {
     const cols = {
       name: it => String(it?.name ?? ""),
       ring: it => String(it?.system?.ring ?? ""),
-      mastery: it => Number(it?.system?.mastery ?? 0) || 0,
-      range: it => String(it?.system?.range ?? ""),
-      aoe: it => String(it?.system?.aoe ?? ""),
-      duration: it => String(it?.system?.duration ?? "")
+      mastery: it => Number(it?.system?.mastery ?? 0) || 0
     };
 
     const pref = getSortPref(actor.id, "spells", {
-      allowedKeys: Object.keys(cols),
+      allowedKeys: SORT_KEYS.spells,
       defaultKey: "name"
     });
     return applySortPref(spellItems, cols, { pref, locale: game.i18n?.lang });
@@ -245,8 +240,7 @@ export class PcContextBuilder {
    *
    * Sorting columns:
    * - **name**: Weapon name
-   * - **damage**: Composite value (damageRoll × 10 + damageKeep) for numeric sorting
-   * - **size**: Weapon size (S, M, L)
+   * - **damage**: Composite value (damageRoll × 10 + damageKeep) for numeric sorting.
    *
    * @param {Actor} actor - L5R4 Actor document
    * @param {Item[]} weaponItems - Array of weapon items (formulas already calculated)
@@ -255,12 +249,11 @@ export class PcContextBuilder {
   static #getSortedWeapons(actor, weaponItems) {
     const cols = {
       name: it => String(it?.name ?? ""),
-      damage: it => toInt(it?.system?.damageRoll) * 10 + toInt(it?.system?.damageKeep),
-      size: it => String(it?.system?.size ?? "")
+      damage: it => toInt(it?.system?.damageRoll) * 10 + toInt(it?.system?.damageKeep)
     };
 
     const pref = getSortPref(actor.id, "weapons", {
-      allowedKeys: Object.keys(cols),
+      allowedKeys: SORT_KEYS.weapons,
       defaultKey: "name"
     });
     return applySortPref(weaponItems, cols, { pref, locale: game.i18n?.lang });
@@ -290,7 +283,7 @@ export class PcContextBuilder {
    */
   static #getSortedItems(actor, items, { scope, cols }) {
     const pref = getSortPref(actor.id, scope, {
-      allowedKeys: Object.keys(cols),
+      allowedKeys: SORT_KEYS[scope],
       defaultKey: "name"
     });
     return applySortPref(items, cols, { pref, locale: game.i18n?.lang });

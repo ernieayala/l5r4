@@ -33,7 +33,7 @@ export default class CompendiumBrowser extends HandlebarsApplicationMixin(Applic
     classes: ["l5r4", "l5r4-compendium-browser"],
     window: {
       title: "l5r4.apps.compendiumBrowser.title",
-      icon: "fa-solid fa-book-atlas",
+      icon: "fa-solid fa-books",
       resizable: true
     },
     position: { width: 760, height: 660 },

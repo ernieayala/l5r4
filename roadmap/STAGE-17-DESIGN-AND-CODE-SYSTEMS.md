@@ -487,7 +487,7 @@ Templates wave (E), one owner for templates, SCSS, and the selectors they break,
 | `<field>Hint` keys with no sibling field | Paired with the field each describes and renamed, or the suffix dropped where it hints no single field |
 | `socialResistanceDescription`, `disadvantageCapTooltip` | Renamed to `*Hint` keys, the English tooltip gaining its final period |
 | Quench fixtures with `attack.type: "Slashing"` and an `action` field | Fixtures write only schema fields with valid values |
-| PC and NPC derived data | Runs in `L5R4Actor.prepareDerivedData`, in place of the `prepareSubtypeData` seam; Quench tests call `actor.prepareData()`, the full cycle, never `prepareDerivedData()` alone |
+| PC and NPC derived data | Runs in `L5R4Actor.prepareDerivedData`, in place of the `prepareSubtypeData` seam. A document is re-prepared with `reset()`, as core does: a bare `prepareData()` adds rule bonuses and core "add" effects again, since it does not rebuild from the stored data. Quench tests call `actor.reset()` |
 | Immunity notice from `L5R4ActiveEffect` | A system hook (`l5r4-enhanced.immuneStatus`) the hooks module wires to the notice; `L5R4Combat.askInitiativeBonuses` stays a slot, since it returns a value. foundry-patterns.md records both |
 | Code citations in `docs/` | A file and a symbol, never a line number; a convention test fails when the symbol is not in the file |
 | Roll button partial (button.md B4) | `tools/coverage` reads a `data-action` passed to a partial as a hash argument; one `_roll-button.hbs` serves every card |
@@ -495,6 +495,11 @@ Templates wave (E), one owner for templates, SCSS, and the selectors they break,
 | Fixed classes outside their component's file | `styles/one-component` exempts naming.md's fixed chat-card classes; `l5r4-citation` and `l5r4-rule-lines` join that list |
 | `_text-section.hbs` root | Takes an `l5r4-` class; new cards carry it, no style depends on it |
 | Item sheet effect controls | Native buttons with `data-action`, routed through the sheet's actions, `aria-pressed` on the toggle |
+| Bare `prepareData()` in tests (167 in 19 files) | Each test read and converted to `reset()` (values a test set in memory are written through `update()`); an ESLint rule with fixtures flags `.prepareData()` and `.prepareDerivedData()` calls in `module/`, `dist/`, and `tests/` |
+| NPC Skills header sorting by roll and Emphasis | Kept as a fix: one source of sort keys makes the heads work; a Quench test and a CHANGELOG line |
+| Roll button under-label | `inert`, as button.md says, so a screen reader reads the pool once |
+| NPC attack row's Type column | Shows the attack's stored action type, localized; its own commit with a failing test first |
+| `ui.common.mastery` / `masteryHint` | Moved together to a field group, with readers and translations, so the label and hint checks both hold |
 | Markdown line breaks | One line per paragraph: Prettier `proseWrap: "never"` for `*.md`, one reflow of `docs/`, `roadmap/`, and the root Markdown files |
 
 ### Progress (handoff, 2026-11-15)

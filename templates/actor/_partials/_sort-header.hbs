@@ -1,0 +1,18 @@
+{{!-- The column header row over an item list (sort-header.md). Parameters: type (the list's -<type> column set, as
+item-row.md names it), columns (the list's heads from SORT_COLUMNS, module/config/sort-keys.js: a head with a key
+sorts and is a button, one with only a label is plain text, an empty one is the spacer over the controls column),
+scope (the list's sort scope, its data-scope; left out for a list whose heads do not sort). The sort handler marks
+the sorted head (module/sheets/handlers/sort-handler.js). --}}
+<section class="l5r4-item-row-list -{{type}} l5r4-sort-header" data-sort-header{{#if scope}} data-scope="{{scope}}"{{/if}}>
+  <div class="l5r4-item-row">
+    {{#each columns}}
+      {{#if key}}
+        <button type="button" class="l5r4-sort-header-button" data-action="sort-items" data-sort-by="{{key}}" aria-pressed="false">{{localize label}}</button>
+      {{else if label}}
+        <span>{{localize label}}</span>
+      {{else}}
+        <span></span>
+      {{/if}}
+    {{/each}}
+  </div>
+</section>

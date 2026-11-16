@@ -63,7 +63,7 @@ const WIDTH_BY_TYPE = Object.freeze({
  * - Real-time form updates via submitOnChange
  * - HTML enrichment for description, specialRules, demands, effect fields
  * - Weapon skill integration when owned by PC actors
- * - ActiveEffect CRUD operations via ItemEffectsHandler
+ * - ActiveEffect CRUD operations: the effect actions call ItemEffectsHandler
  *
  * @augments {ItemSheetV2}
  * @mixes HandlebarsApplicationMixin
@@ -83,6 +83,10 @@ export default class L5R4ItemSheet extends HandlebarsApplicationMixin(ItemSheetV
     actions: {
       "change-tab": L5R4ItemSheet.#onChangeTab,
       "open-emphasis-manager": L5R4ItemSheet.#onOpenEmphasisManager,
+      "create-effect": L5R4ItemSheet.#onCreateEffect,
+      "edit-effect": L5R4ItemSheet.#onEditEffect,
+      "toggle-effect": L5R4ItemSheet.#onToggleEffect,
+      "delete-effect": L5R4ItemSheet.#onDeleteEffect,
       ...RULES_EDITOR_ACTIONS
     }
   };
@@ -384,16 +388,9 @@ export default class L5R4ItemSheet extends HandlebarsApplicationMixin(ItemSheetV
   }
 
   /**
-   * Post-render lifecycle hook for DOM manipulation and event binding.
+   * Post-render lifecycle hook for DOM manipulation.
    *
    * Foundry Application v2 lifecycle method called after HTML is inserted into DOM.
-   * Delegates ActiveEffect UI operations to ItemEffectsHandler for event delegation.
-   *
-   * ItemEffectsHandler binds delegated click handlers for:
-   * - [data-effect-create]: Create new effect and open config
-   * - [data-effect-edit]: Open effect configuration sheet
-   * - [data-effect-toggle]: Enable/disable effect
-   * - [data-effect-delete]: Remove effect from item.
    *
    * @param {object} context - Rendered context data
    * @param {ApplicationRenderOptions} options - Render options
@@ -407,7 +404,6 @@ export default class L5R4ItemSheet extends HandlebarsApplicationMixin(ItemSheetV
       return;
     }
 
-    ItemEffectsHandler.bind({ item: this.item, element: root });
     // A tab writes nothing, so a viewer core disabled the form for still changes tabs (components/tabs.md)
     root.querySelectorAll("[data-action='change-tab']").forEach(tab => (tab.disabled = false));
   }
@@ -459,6 +455,53 @@ export default class L5R4ItemSheet extends HandlebarsApplicationMixin(ItemSheetV
     manager.addEventListener("close", () => {
       this.render(false);
     });
+  }
+
+  /**
+   * Create an Active Effect on the item and open its configuration (ItemEffectsHandler.create).
+   *
+   * @this {L5R4ItemSheet}
+   * @param {Event} event - Click event
+   * @param {HTMLElement} element - The create-effect button
+   * @returns {Promise<void>}
+   */
+  static #onCreateEffect(event, element) {
+    return ItemEffectsHandler.create({ item: this.item }, event, element);
+  }
+
+  /**
+   * Open the configuration of the effect in the clicked row (ItemEffectsHandler.openEffectSheet).
+   *
+   * @this {L5R4ItemSheet}
+   * @param {Event} event - Click event
+   * @param {HTMLElement} element - The edit-effect button inside the row's [data-effect-id]
+   */
+  static #onEditEffect(event, element) {
+    ItemEffectsHandler.openEffectSheet({ item: this.item }, event, element);
+  }
+
+  /**
+   * Turn the effect in the clicked row on or off (ItemEffectsHandler.updateEffectDisabled).
+   *
+   * @this {L5R4ItemSheet}
+   * @param {Event} event - Click event
+   * @param {HTMLElement} element - The toggle-effect button inside the row's [data-effect-id]
+   * @returns {Promise<void>}
+   */
+  static #onToggleEffect(event, element) {
+    return ItemEffectsHandler.updateEffectDisabled({ item: this.item }, event, element);
+  }
+
+  /**
+   * Remove the effect in the clicked row (ItemEffectsHandler.deleteEffect).
+   *
+   * @this {L5R4ItemSheet}
+   * @param {Event} event - Click event
+   * @param {HTMLElement} element - The delete-effect button inside the row's [data-effect-id]
+   * @returns {Promise<void>}
+   */
+  static #onDeleteEffect(event, element) {
+    return ItemEffectsHandler.deleteEffect({ item: this.item }, event, element);
   }
 }
 

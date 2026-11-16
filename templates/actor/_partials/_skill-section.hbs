@@ -4,16 +4,7 @@
     {{> "systems/l5r4-enhanced/templates/actor/_partials/_unified-item-create.hbs"}}
     {{> "systems/l5r4-enhanced/templates/actor/_partials/_expand.hbs" collapsed=collapsedSections.skills}}
   </div>
-  <section class="l5r4-item-row-list -skill l5r4-sort-header" data-sort-header data-scope="skills">
-    <div class="l5r4-item-row">
-      <button type="button" class="l5r4-sort-header-button" data-action="sort-items" data-sortby="name">{{localize "l5r4.ui.common.name"}}</button>
-      <button type="button" class="l5r4-sort-header-button" data-action="sort-items" data-sortby="rank">{{localize "l5r4.ui.common.rank"}}</button>
-      <button type="button" class="l5r4-sort-header-button" data-action="sort-items" data-sortby="trait">{{localize "l5r4.character.skills.properties.trait"}}</button>
-      <button type="button" class="l5r4-sort-header-button" data-action="sort-items" data-sortby="roll">{{localize "l5r4.ui.common.roll"}}</button>
-      <button type="button" class="l5r4-sort-header-button" data-action="sort-items" data-sortby="emphasis">{{localize "l5r4.character.skills.properties.emphasis"}}</button>
-      <span></span>
-    </div>
-  </section>
+  {{> "systems/l5r4-enhanced/templates/actor/_partials/_sort-header.hbs" scope="skills" type="skill" columns=@root.sortColumns.skills}}
   <section class="l5r4-item-row-list -skill">
     {{#each skills as |skill id|}}
       {{> "systems/l5r4-enhanced/templates/cards/skill.hbs"

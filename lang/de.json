@@ -50,6 +50,7 @@
           "advantages": "Vorteile",
           "base": "Basis",
           "cap": "Limit",
+          "capHint": "Klicken, um die maximalen durch Nachteile erhaltenen EP zu ändern.",
           "disadvantagesGrant": "Nachteile",
           "kata": "Kata",
           "kiho": "Kiho",
@@ -59,7 +60,6 @@
           "traits": "Eigenschaften",
           "void": "Leere"
         },
-        "changeDisadvantageCap": "Klicken, um die maximalen durch Nachteile erhaltenen EP zu ändern",
         "disadvantageCapLabel": "Max. EP",
         "fallbackLabels": {
           "skillCreated": "Fertigkeit Erstellt",
@@ -374,7 +374,7 @@
           "ringRoll": "Ringwurf",
           "skillRoll": "Fertigkeitswurf",
           "socialResistance": "Sozialer Widerstand",
-          "socialResistanceHint": "Einschüchterung oder Versuchung widerstehen",
+          "socialResistanceHint": "Einschüchterung oder Versuchung widerstehen.",
           "spellCasting": "Zauberspruch Wurf",
           "success": "Erfolg",
           "traitRoll": "Eigenschaftswurf",

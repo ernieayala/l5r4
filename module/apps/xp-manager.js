@@ -6,6 +6,7 @@
  * recalculate) is one action that writes the actor's flags.
  */
 import { SYS_ID } from "../config/constants.js";
+import { SORT_COLUMNS, SORT_KEYS } from "../config/sort-keys.js";
 import { T } from "../utils/localization.js";
 import { toInt } from "../utils/type-coercion.js";
 import { logError } from "../utils/error-logging.js";
@@ -138,7 +139,8 @@ export default class XpManagerApplication extends foundry.applications.api.Handl
         manualEntries,
         spentEntries,
         manualTotal,
-        spentTotal
+        spentTotal,
+        sortColumns: SORT_COLUMNS
       };
     } catch (err) {
       logError("Failed to prepare XP manager context", err, {
@@ -177,7 +179,8 @@ export default class XpManagerApplication extends foundry.applications.api.Handl
       manualEntries: [],
       spentEntries: [],
       manualTotal: 0,
-      spentTotal: 0
+      spentTotal: 0,
+      sortColumns: SORT_COLUMNS
     };
   }
 
@@ -342,11 +345,11 @@ export default class XpManagerApplication extends foundry.applications.api.Handl
   /**
    * Handle sort column click action.
    * Toggles sort direction and updates sort preferences for XP entries.
-   * Allowed sort keys: note, cost, type.
+   * Allowed sort keys: the purchases header's (SORT_KEYS["xp-purchases"]: note, cost, type).
    *
    * @this {XpManagerApplication}
    * @param {Event} event - The click event
-   * @param {HTMLElement} element - The clicked sort header with data-sortby attribute
+   * @param {HTMLElement} element - The clicked sort header with data-sort-by attribute
    */
   static async #onSortItems(event, element) {
     event.preventDefault();
@@ -354,8 +357,8 @@ export default class XpManagerApplication extends foundry.applications.api.Handl
 
     const header = element.closest("[data-sort-header]");
     const scope = header?.dataset?.scope || "xp-purchases";
-    const key = element.dataset.sortby || "note";
-    const allowed = ["note", "cost", "type"];
+    const key = element.dataset.sortBy || "note";
+    const allowed = SORT_KEYS["xp-purchases"];
 
     if (!allowed.includes(key)) {
       return;
@@ -367,6 +370,7 @@ export default class XpManagerApplication extends foundry.applications.api.Handl
     if (header) {
       header.querySelectorAll("[data-action='sort-items']").forEach(a => {
         a.classList.toggle("is-active", a === element);
+        a.setAttribute("aria-pressed", String(a === element));
         if (a !== element) {
           a.removeAttribute("data-dir");
         }

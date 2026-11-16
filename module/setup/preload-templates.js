@@ -104,6 +104,7 @@ export async function registerTemplates() {
     `systems/${SYS_ID}/templates/actor/_partials/_wound-track.hbs`,
     `systems/${SYS_ID}/templates/actor/_partials/_note-section.hbs`,
     `systems/${SYS_ID}/templates/actor/_partials/_limited.hbs`,
+    `systems/${SYS_ID}/templates/actor/_partials/_sort-header.hbs`,
 
     // Actor Partials - Item Sections
     `systems/${SYS_ID}/templates/actor/_partials/_skill-section.hbs`,
@@ -140,6 +141,7 @@ export async function registerTemplates() {
     `systems/${SYS_ID}/templates/cards/_partials/_detail-text.hbs`,
     `systems/${SYS_ID}/templates/cards/_partials/_text-section.hbs`,
     `systems/${SYS_ID}/templates/cards/_partials/_bio-row.hbs`,
+    `systems/${SYS_ID}/templates/cards/_partials/_roll-button.hbs`,
 
     // Chat Message Templates
     `systems/${SYS_ID}/templates/chat/check.hbs`,

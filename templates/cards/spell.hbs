@@ -8,10 +8,7 @@
     <div class="l5r4-item-row-cell">{{localize (concat "l5r4.ui.mechanics.rings." system.ring)}}</div>
     <div class="l5r4-item-row-cell">{{system.mastery}}</div>
     <div class="l5r4-item-row-cell">
-      <div class="l5r4-button -roll">
-        <span class="l5r4-button-under">{{system.castFormula}}</span>
-        <button type="button" class="l5r4-button-face" data-action="cast-spell" data-tooltip="{{localize "l5r4.ui.mechanics.rolls.spellCasting"}}">{{system.castFormula}}</button>
-      </div>
+      {{> "systems/l5r4-enhanced/templates/cards/_partials/_roll-button.hbs" action="cast-spell" pool=system.castFormula tooltip=(localize "l5r4.ui.mechanics.rolls.spellCasting")}}
     </div>
     {{> "systems/l5r4-enhanced/templates/cards/_partials/_controls.hbs"}}
     {{#if (or system.description system.specialRules system.aoe system.duration)}}

@@ -18,16 +18,16 @@ parts, the rule lines and the citation, also show on the item sheet and the NPC 
 
 Every class on a posted item card is a fixed name ([naming.md](../../code-system/naming.md#fixed-names)).
 
-| Part          | Markup                                                                                     | Shows                                                                                |
-| ------------- | ------------------------------------------------------------------------------------------ | ------------------------------------------------------------------------------------ |
-| Flavor        | Core's message flavor                                                                      | `[<subtype label>]` from `TYPES.Item.<subtype>` (`chat-cards.js:61-70`)              |
-| Card root     | `div.item.-<subtype>` (`-expandable` when it has text), `data-item-id`, `data-document-id` | One item                                                                             |
-| Name          | `h4.title.flexrow.-gap-sm`                                                                 | The item's name                                                                      |
-| Fields        | `<p><strong>{{localize label}}:</strong> value</p>`, one per field                         | The subtype's fields                                                                 |
-| Text sections | `h5` heading, then `<p>` with the item's rich text                                         | Rules summary, Mastery Abilities, description: the item's own fields                 |
-| Summary root  | `div.l5r4-item-summary`, rendered only with lines or a citation                            | A thin line above, then the parts below                                              |
-| Rule lines    | `ul.l5r4-rule-lines`, one `li` each                                                        | What each rule does, in the system's words                                           |
-| Citation      | `p.l5r4-citation`                                                                          | The source book and printed page, `l5r4.ui.ruleSummary.citation` ("{book} p.{page}") |
+| Part          | Markup                                                                                                                                                                       | Shows                                                                                |
+| ------------- | ---------------------------------------------------------------------------------------------------------------------------------------------------------------------------- | ------------------------------------------------------------------------------------ |
+| Flavor        | Core's message flavor                                                                                                                                                        | `[<subtype label>]` from `TYPES.Item.<subtype>` (`chat-cards.js:61-70`)              |
+| Card root     | `div.item.-<subtype>` (`-expandable` when it has text), `data-item-id`, `data-document-id`                                                                                   | One item                                                                             |
+| Name          | `h4.title.flexrow.-gap-sm`                                                                                                                                                   | The item's name                                                                      |
+| Fields        | `<p><strong>{{localize label}}:</strong> value</p>`, one per field                                                                                                           | The subtype's fields                                                                 |
+| Text sections | `h5.l5r4-item-summary-heading`, then `<p>` with the item's rich text. Cards posted before the class hold a bare `h5`; the heading's style reads the element, never the class | Rules summary, Mastery Abilities, description: the item's own fields                 |
+| Summary root  | `div.l5r4-item-summary`, rendered only with lines or a citation                                                                                                              | A thin line above, then the parts below                                              |
+| Rule lines    | `ul.l5r4-rule-lines`, one `li` each                                                                                                                                          | What each rule does, in the system's words                                           |
+| Citation      | `p.l5r4-citation`                                                                                                                                                            | The source book and printed page, `l5r4.ui.ruleSummary.citation` ("{book} p.{page}") |
 
 ## Variants
 

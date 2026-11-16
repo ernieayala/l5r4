@@ -5,6 +5,7 @@
  * class in module/sheets/handlers/. Clicks go to _onAction, right-clicks to _onActionContext, and changes to
  * _onActionChange, which the subclasses override; handlers receive the context from _getHandlerContext().
  */
+import { SORT_COLUMNS, SORT_KEYS } from "../config/sort-keys.js";
 import { getIconPath } from "../utils/icons.js";
 import { on } from "../utils/dom.js";
 import { KeyboardBehaviorMixin } from "../mixins/keyboard-behavior-mixin.js";
@@ -41,6 +42,20 @@ export class BaseActorSheet extends KeyboardBehaviorMixin(
     classes: ["l5r4", "l5r4-actor-sheet"],
     form: { submitOnChange: true }
   };
+
+  /**
+   * Adds the sort header columns of every list (module/config/sort-keys.js), which the section partials pass to
+   * templates/actor/_partials/_sort-header.hbs.
+   *
+   * @param {object} options - Rendering options
+   * @returns {Promise<object>} The context, with `sortColumns`
+   * @override
+   */
+  async _prepareContext(options) {
+    const context = await super._prepareContext(options);
+    context.sortColumns = SORT_COLUMNS;
+    return context;
+  }
 
   /**
    * Lifecycle hook called when the sheet is rendered into the DOM.
@@ -549,16 +564,14 @@ export class BaseActorSheet extends KeyboardBehaviorMixin(
   }
 
   /**
-   * Returns allowed sort keys for a given scope.
+   * Returns the sort keys a list accepts: its sort header's keys (module/config/sort-keys.js), so a stored or
+   * clicked key is one the header offers.
    *
-   * Extension point for subclasses to define sortable fields per list type.
-   * Base implementation only allows sorting by "name".
-   *
-   * @param {string} _scope - Sort scope identifier (e.g., "skills", "items")
-   * @returns {string[]} Array of allowed sort field names
+   * @param {string} scope - Sort scope identifier (e.g., "skills", "items"), read from the header's data-scope
+   * @returns {readonly string[]} The list's sort keys; "name" alone for a scope the config does not name
    */
-  _getAllowedSortKeys(_scope) {
-    return ["name"];
+  _getAllowedSortKeys(scope) {
+    return SORT_KEYS[scope] ?? ["name"];
   }
 
   /* Helper Methods -------------------------------------------------------- */

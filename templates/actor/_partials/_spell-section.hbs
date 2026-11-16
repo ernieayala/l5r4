@@ -12,15 +12,7 @@
     {{> "systems/l5r4-enhanced/templates/actor/_partials/_unified-item-create.hbs"}}
     {{> "systems/l5r4-enhanced/templates/actor/_partials/_expand.hbs" collapsed=collapsedSections.spells}}
   </div>
-  <section class="l5r4-item-row-list -spell l5r4-sort-header" data-sort-header data-scope="spells">
-    <div class="l5r4-item-row">
-      <button type="button" class="l5r4-sort-header-button" data-action="sort-items" data-sortby="name">{{localize "l5r4.ui.common.name"}}</button>
-      <button type="button" class="l5r4-sort-header-button" data-action="sort-items" data-sortby="ring">{{localize "l5r4.ui.common.ring"}}</button>
-      <button type="button" class="l5r4-sort-header-button" data-action="sort-items" data-sortby="mastery">{{localize "l5r4.ui.common.mastery"}}</button>
-      <span>{{localize "l5r4.magic.spells.cast"}}</span>
-      <span></span>
-    </div>
-  </section>
+  {{> "systems/l5r4-enhanced/templates/actor/_partials/_sort-header.hbs" scope="spells" type="spell" columns=@root.sortColumns.spells}}
   <section class="l5r4-item-row-list -spell">
     {{#each spells as |spell id|}}
       {{> "systems/l5r4-enhanced/templates/cards/spell.hbs" system=spell.system inSheet=true docId=spell.id}}

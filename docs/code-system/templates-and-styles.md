@@ -40,8 +40,10 @@ each, in place of `templates/actor/_partials/_traits-rings.hbs` and `_trait.hbs`
 A partial whose output posts to chat (`templates/cards/_partials/_text-section.hbs`) is included at the line's start:
 core compiles partials with `preventIndent` [src: client/applications/handlebars.mjs:41], which writes the include's
 indent once before the partial's output, so an indented include would add spaces to stored messages, and to nothing
-when the partial renders empty. Its own lines carry the card's indentation. Its heading carries no class, as posted
-cards always had, so the `templates/root-class` check counts it.
+when the partial renders empty. Its own lines carry the card's indentation. Its heading carries
+`l5r4-item-summary-heading`, a fixed chat-card class from the cards that carry it on; cards posted before it hold a
+bare `<h5>`, so no style reads the class and both look the same. The roll button (`templates/cards/_partials/_roll-button.hbs`)
+renders only in a card's in-sheet branch, which no message stores.
 
 ### Structure
 
@@ -186,9 +188,14 @@ A sheet window's own rules sit under the block class its sheet class adds to the
 for code outside the system; no system rule reads them.
 
 Fixed chat-card classes keep their names and their rules, so they sit outside a file's block: `scss/components/_chat-card.scss`
-styles posted cards, which share no `l5r4-` root, and `scss/components/_item-summary-card.scss` styles `l5r4-citation`
-and `l5r4-rule-lines`, which posted messages store (`naming.md` **Fixed names**) and so carry no `l5r4-item-summary-`
-element name.
+styles posted cards, which share no `l5r4-` root, each rule under its fixed root class (`l5r4-roll`, `l5r4-flow-card`,
+`l5r4-damage-result`), and `scss/components/_item-summary-card.scss` styles `l5r4-citation` and `l5r4-rule-lines`,
+which posted messages store (`naming.md` **Fixed names**) and so carry no `l5r4-item-summary-` element name.
+`tests/conventions/styles.test.js` (`styles/one-component`) reads naming.md's chat card class list and exempts a
+selector that starts with one. Core's message wrapper `message-content` is a core class, not a fixed chat-card class,
+so the exemption does not cover it, and core classes are styled only inside a system block. One rule keeps it as its
+scope: the posted item card's root `item` also roots every sheet item row, so `.message-content .item` is what tells
+the posted card apart; that rule is the one `styles/block-class` and `styles/one-component` count in the file.
 
 Conforming, modeled on `scss/apps/_effect-panel.scss:20-31`, with the tokens
 `docs/design-system/foundations/space-and-size.md` declares:

@@ -27,19 +27,20 @@ export class SortHandler {
   /**
    * Updates visual indicators for sortable column headers.
    *
-   * Applies `.is-active` class to the currently active sort column and sets
+   * Applies `.is-active` class and `aria-pressed="true"` to the currently active sort column and sets
    * its `data-dir` attribute to show sort direction. Removes indicators from
    * all other columns. CSS uses these attributes to render direction arrows.
    *
    * @param {HTMLElement} header - The `.l5r4-sort-header` container element
-   * @param {string} activeKey - The data-sortby value of the active column
+   * @param {string} activeKey - The data-sort-by value of the active column
    * @param {"asc"|"desc"} direction - Current sort direction for the active column
    */
   static #updateHeaderIndicators(header, activeKey, direction) {
     header.querySelectorAll("[data-action='sort-items']").forEach(a => {
-      const sortKey = a.dataset.sortby;
+      const sortKey = a.dataset.sortBy;
       const isActive = sortKey === activeKey;
       a.classList.toggle("is-active", isActive);
+      a.setAttribute("aria-pressed", String(isActive));
 
       if (isActive) {
         a.setAttribute("data-dir", direction);
@@ -115,7 +116,7 @@ export class SortHandler {
       const el = element || event.currentTarget;
       const header = el.closest("[data-sort-header]");
       const scope = header?.dataset?.scope || "items";
-      const key = el.dataset.sortby || "name";
+      const key = el.dataset.sortBy || "name";
 
       const allowed = getAllowedKeys?.(scope) ?? ["name"];
 

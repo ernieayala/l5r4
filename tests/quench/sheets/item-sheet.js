@@ -21,6 +21,7 @@ import {
   createArmorData,
   createSpellData
 } from "../../fixtures/item-fixtures.js";
+import { cleanTest, waitFor } from "../helpers.js";
 
 /**
  * Register item sheet tests
@@ -319,6 +320,94 @@ export function registerItemSheetTests(quench) {
           const deletedItem = game.items.get(itemId);
           assert.isUndefined(deletedItem, "Item deleted from world");
         });
+      });
+
+      describe("Item sheet effects", () => {
+        const clean = cleanTest(assert);
+        let item, sheet;
+
+        /** The open configuration windows of an effect. */
+        const configsOf = effect =>
+          [...foundry.applications.instances.values()].filter(
+            app =>
+              app instanceof foundry.applications.sheets.ActiveEffectConfig &&
+              app.document === effect
+          );
+
+        /** The control a selector finds in an effect's row, in the sheet as rendered now. */
+        const control = (selector, effect) =>
+          sheet.element.querySelector(`[data-effect-id="${effect.id}"] ${selector}`);
+
+        beforeEach(async () => {
+          item = await Item.create({ name: "Item sheet: effects", type: "advantage" });
+          await item.createEmbeddedDocuments("ActiveEffect", [
+            { name: "Item sheet: effect", disabled: false, transfer: true }
+          ]);
+          sheet = item.sheet;
+          await sheet.render(true);
+          sheet.element.querySelector("[data-action='change-tab'][data-tab='effects']").click();
+          await waitFor(() => sheet.element.querySelector("[data-action='create-effect']"));
+        });
+
+        afterEach(async () => {
+          for (const effect of item?.effects ?? []) {
+            for (const app of configsOf(effect)) {
+              await app.close({ animate: false });
+            }
+          }
+          if (sheet?.rendered) {
+            await sheet.close({ animate: false });
+          }
+          await item?.delete();
+        });
+
+        it(
+          "should create an effect and open its configuration",
+          clean(async () => {
+            sheet.element.querySelector('[data-action="create-effect"]').click();
+            assert.isTrue(await waitFor(() => item.effects.size === 2), "a second effect");
+            const created = item.effects.find(effect => effect.name !== "Item sheet: effect");
+            assert.isTrue(
+              await waitFor(() => configsOf(created).some(app => app.rendered)),
+              "its configuration opens"
+            );
+          })
+        );
+
+        it(
+          "should open an effect's configuration from its edit control",
+          clean(async () => {
+            const [effect] = item.effects;
+            control('[data-action="edit-effect"]', effect).click();
+            assert.isTrue(await waitFor(() => configsOf(effect).some(app => app.rendered)));
+          })
+        );
+
+        it(
+          "should turn an effect off and back on from its pressed toggle",
+          clean(async () => {
+            const [effect] = item.effects;
+            const toggle = () => control('[data-action="toggle-effect"]', effect);
+            assert.equal(toggle().getAttribute("aria-pressed"), "true");
+            toggle().click();
+            assert.isTrue(await waitFor(() => effect.disabled), "turned off");
+            assert.isTrue(
+              await waitFor(() => toggle()?.getAttribute("aria-pressed") === "false"),
+              "not pressed once off"
+            );
+            toggle().click();
+            assert.isTrue(await waitFor(() => !effect.disabled), "turned back on");
+          })
+        );
+
+        it(
+          "should remove an effect from its delete control",
+          clean(async () => {
+            const [effect] = item.effects;
+            control('[data-action="delete-effect"]', effect).click();
+            assert.isTrue(await waitFor(() => item.effects.size === 0));
+          })
+        );
       });
 
       describe("Embedded item sheet", () => {

@@ -1,5 +1,11 @@
 import { posix } from "node:path";
-import { parseScss, registerConventionSuite } from "../../tools/conventions/shared.mjs";
+import {
+  codeSpansOf,
+  getRepoTree,
+  parseScss,
+  registerConventionSuite,
+  tableAfter
+} from "../../tools/conventions/shared.mjs";
 
 const { basename } = posix;
 
@@ -121,6 +127,29 @@ function blockOf(path) {
 }
 
 /**
+ * The fixed chat-card classes: posted messages store them, so they keep their names and rules and sit outside a
+ * file's block (docs/code-system/naming.md, Fixed names; templates-and-styles.md, Stylesheets).
+ * @returns {string[]} The class names, without the dot
+ */
+function fixedCardClassesOf() {
+  const row = tableAfter(getRepoTree().text("docs/code-system/naming.md"), "Fixed names").find(
+    entry => entry.Kind === "Chat card classes"
+  );
+  return codeSpansOf(row.Names);
+}
+
+/**
+ * Whether a selector starts with a fixed chat-card class.
+ * @param {string} selector - One selector of a list
+ * @param {string[]} fixed - The fixed chat-card classes
+ * @returns {boolean} True when its first compound names one
+ */
+function isFixedCardSelector(selector, fixed) {
+  const first = /^\.(-?[_a-zA-Z][\w-]*)/.exec(selector)?.[1];
+  return Boolean(first) && fixed.includes(first);
+}
+
+/**
  * Whether a selector is an at-rule prelude rather than a style rule.
  * @param {string} prelude - The block prelude
  * @returns {boolean} True for `@media`, `@keyframes`, and the rest
@@ -144,8 +173,9 @@ const RULES = {
           )
       ),
 
-  "styles/one-component": tree =>
-    sheetsOf(tree)
+  "styles/one-component": tree => {
+    const fixed = fixedCardClassesOf();
+    return sheetsOf(tree)
       .filter(({ path }) => /^scss\/(components|apps)\//.test(path))
       .flatMap(({ path, blocks }) => {
         const block = blockOf(path);
@@ -153,10 +183,12 @@ const RULES = {
           .filter(({ chain }) => chain.length === 1 && !isAtRule(chain[0]))
           .flatMap(({ chain, line }) =>
             splitTop(chain[0], /,/)
+              .filter(selector => !isFixedCardSelector(selector, fixed))
               .filter(selector => !new RegExp(`^\\.${block}(?![\\w])|^\\.${block}-`).test(selector))
               .map(selector => `${path}:${line}: "${selector}" is not the file's block .${block}`)
           );
-      }),
+      });
+  },
 
   "styles/empty-file": tree =>
     sheetsOf(tree)

@@ -4,36 +4,37 @@ The column header row above an item list. Each sortable column head is a button:
 that column ascending, a second press on the same column sorts descending, and the choice is stored per user, actor,
 and list.
 
-| Item        | Detail                                                                                                                                                                                                                        |
-| ----------- | ----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| Partial     | Inline in each section partial (`_skills-section.hbs:7-16`, `_weapon-section.hbs:7-14`, `_spell-section.hbs:55-63`, ...) and the XP manager (`xp-manager.hbs:120-132`). `templates/actor/_partials/_sort-header.hbs` (target) |
-| Parameters  | `scope` (the list's key, `skills`), `type` (the row subtype for the columns), `columns` (array of `{ key, label }`, `key` empty for a column that does not sort), all new with the partial                                    |
-| SCSS        | `scss/components/_sort-header.scss` (target), holding `_item-lists.scss:14-25`                                                                                                                                                |
-| Block class | `l5r4-sort-header`, on the header list                                                                                                                                                                                        |
-| Handler     | `SortHandler.handleClick` and `initializeIndicators` (`module/sheets/handlers/sort-handler.js:84-160`); keys allowed per scope in `module/config/sort-keys.js`                                                                |
-| Shows in    | Every list section that has columns; the XP manager's purchases list                                                                                                                                                          |
-| Gallery     | A header with no sort, sorted ascending, sorted descending, a column head focused, a long column label                                                                                                                        |
+| Item        | Detail                                                                                                                                                                                                                                                                                  |
+| ----------- | --------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| Partial     | `templates/actor/_partials/_sort-header.hbs`, included by every section partial, the NPC attacks (`_stats-npc.hbs`), and the XP manager's ledger and purchases (`templates/apps/xp-manager.hbs`)                                                                                        |
+| Parameters  | `scope` (the list's sort scope, its `data-scope`, `skills`; left out for a header that does not sort), `type` (the row subtype for the columns), `columns` (the list's heads: an array of `{ key, label }`, `key` left out for a head that does not sort, both left out for the spacer) |
+| Columns     | `SORT_COLUMNS` in `module/config/sort-keys.js`, one entry per list; the sheets and the XP manager pass it as `sortColumns`. `SORT_KEYS` holds each list's keys, read from the same entries, and the sort code checks a clicked or stored key against it                                 |
+| SCSS        | `scss/components/_sort-header.scss` (target), holding `_item-lists.scss:14-25`                                                                                                                                                                                                          |
+| Block class | `l5r4-sort-header`, on the header list                                                                                                                                                                                                                                                  |
+| Handler     | `SortHandler.updateSortPref` and `updateSortIndicators` (`module/sheets/handlers/sort-handler.js`), the XP manager's `sort-items` action (`module/apps/xp-manager.js`); keys allowed per scope in `SORT_KEYS` (`module/config/sort-keys.js`)                                            |
+| Shows in    | Every list section that has columns; the XP manager's purchases list                                                                                                                                                                                                                    |
+| Gallery     | A header with no sort, sorted ascending, sorted descending, a column head focused, a long column label                                                                                                                                                                                  |
 
 ## Anatomy
 
-| Part        | Element                                                                                        | Class                                            | Class now                                                     |
-| ----------- | ---------------------------------------------------------------------------------------------- | ------------------------------------------------ | ------------------------------------------------------------- |
-| Header list | `<section data-scope>`                                                                         | `l5r4-sort-header l5r4-item-row-list -<subtype>` | `item-list -<subtype> -header` (`_skills-section.hbs:7`)      |
-| Header row  | `<div>`                                                                                        | `l5r4-item-row`                                  | `item`                                                        |
-| Column head | `<button type="button" data-action="sort-items" data-sort-by aria-pressed>`                    | `l5r4-sort-header-button`                        | `a.item-sort-by` with `data-sortby` (`_skills-section.hbs:9`) |
-| Direction   | `<i class="fa-solid fa-sort-up" inert>` or `fa-sort-down`, after the label, active column only | core Font Awesome                                | `is-active` and `data-dir` with no style                      |
-| Plain head  | `<span>` for a column that does not sort                                                       | `l5r4-sort-header-label`                         | `<span>` (`_spell-section.hbs:60`)                            |
-| Spacer      | `<span>` over the controls column                                                              | none                                             | `<span></span>` (`_skills-section.hbs:14`)                    |
+| Part        | Element                                                                                        | Class                                            | Class now                                                |
+| ----------- | ---------------------------------------------------------------------------------------------- | ------------------------------------------------ | -------------------------------------------------------- |
+| Header list | `<section data-scope>`                                                                         | `l5r4-sort-header l5r4-item-row-list -<subtype>` | `item-list -<subtype> -header` (`_skills-section.hbs:7`) |
+| Header row  | `<div>`                                                                                        | `l5r4-item-row`                                  | `item`                                                   |
+| Column head | `<button type="button" data-action="sort-items" data-sort-by aria-pressed>`                    | `l5r4-sort-header-button`                        | `a.item-sort-by` with `data-sortby`                      |
+| Direction   | `<i class="fa-solid fa-sort-up" inert>` or `fa-sort-down`, after the label, active column only | core Font Awesome                                | `is-active` and `data-dir` with no style                 |
+| Plain head  | `<span>` for a column that does not sort                                                       | `l5r4-sort-header-label`                         | `<span>` (`_spell-section.hbs:60`)                       |
+| Spacer      | `<span>` over the controls column                                                              | none                                             | `<span></span>` (`_skills-section.hbs:14`)               |
 
 The header is an item list of one row, so its columns line up with the rows below through the same `-<subtype>`
 column set (`item-row.md`).
 
 ## Variants
 
-| Variant  | Selects it                            | Used at                                                                    |
-| -------- | ------------------------------------- | -------------------------------------------------------------------------- |
-| Sortable | Column heads are buttons              | Skills, weapons, spells, techniques, items, XP purchases                   |
-| Plain    | Every head a `l5r4-sort-header-label` | NPC attacks (`_stats-npc.hbs:216-225`), XP ledger (`xp-manager.hbs:81-87`) |
+| Variant  | Selects it                            | Used at                                                                      |
+| -------- | ------------------------------------- | ---------------------------------------------------------------------------- |
+| Sortable | Column heads are buttons              | Skills, weapons, spells, techniques, items, XP purchases                     |
+| Plain    | Every head a `l5r4-sort-header-label` | NPC attacks (`SORT_COLUMNS.npcAttacks`), XP ledger (`SORT_COLUMNS.xpLedger`) |
 
 ## States
 
@@ -46,7 +47,9 @@ column set (`item-row.md`).
 | Read-only     | Core disables the heads on a sheet the viewer cannot edit; that viewer has no actions bound today (`button.md` B8) | Core's `disabled`                                                                   |
 
 The render sets the stored sort on the active head; `initializeIndicators` only repeats it after the handler stores a
-new one, so the first paint already shows it.
+new one, so the first paint already shows it. Today the partial renders every head `aria-pressed="false"`, and the
+handler sets `aria-pressed`, `is-active`, and `data-dir` on the sorted head after a click (the NPC sheet repeats it on
+render for its Skills).
 
 ## Tokens
 
@@ -86,14 +89,14 @@ in `data-tooltip`. Labels are the column's name in one or two words.
 | H5  | The handler finds the header by `[data-scope]`, never by `.item-list.-header`                                          | ESLint `no-restricted-syntax`                                                          |
 | H6  | The header is one partial; sections pass their columns                                                                 | `tests/conventions/templates.test.js` (markup used twice)                              |
 
-| #   | Conforming                                                                                                                            | Non-conforming                                                                                                              |
-| --- | ------------------------------------------------------------------------------------------------------------------------------------- | --------------------------------------------------------------------------------------------------------------------------- |
-| H1  | `<button type="button" class="l5r4-sort-header-button" data-action="sort-items" data-sort-by="name" aria-pressed="true">` (modeled)   | `<a class="item-sort-by" data-action="item-sort-by" data-sortby="name">` (`templates/actor/_partials/_skill-section.hbs:9`) |
-| H2  | Bold label and `fa-sort-up` on the sorted head (modeled)                                                                              | `is-active` and `data-dir` set by `sort-handler.js:58-63` with no style anywhere in `scss/`: the sort is invisible          |
-| H3  | `data-sort-by="mastery"` (modeled on `_spell-section.hbs:59`)                                                                         | `data-sortby` run together (`templates/actor/_partials/_skill-section.hbs:9`)                                               |
-| H4  | One key per column                                                                                                                    | Attack and Damage both `data-sortby="damage"` (`templates/actor/_partials/_weapon-section.hbs:10-11`)                       |
-| H5  | `root.querySelector('[data-scope="skills"]')` (modeled on `sort-handler.js:88`)                                                       | `root.querySelector(\`.item-list.-header[data-scope="${scope}"]\`)` (`module/sheets/handlers/sort-handler.js:88`)           |
-| H6  | `{{> "systems/l5r4-enhanced/templates/actor/_partials/_sort-header.hbs" scope="skills" type="skill" columns=skillColumns}}` (modeled) | The header written out in 11 section partials and the XP manager                                                            |
+| #   | Conforming                                                                                                                                                                                                                              | Non-conforming                                                                                                     |
+| --- | --------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- | ------------------------------------------------------------------------------------------------------------------ |
+| H1  | `<button type="button" class="l5r4-sort-header-button" data-action="sort-items" data-sort-by="{{key}}" aria-pressed="false">` (`templates/actor/_partials/_sort-header.hbs`); the handler sets `aria-pressed="true"` on the sorted head | `<a class="item-sort-by" data-action="item-sort-by" data-sortby="name">` (modeled)                                 |
+| H2  | Bold label and `fa-sort-up` on the sorted head (modeled)                                                                                                                                                                                | `is-active` and `data-dir` set by `sort-handler.js:58-63` with no style anywhere in `scss/`: the sort is invisible |
+| H3  | `{ key: "mastery", label: "l5r4.ui.common.mastery" }` in `SORT_COLUMNS.spells` (`module/config/sort-keys.js`), rendered as `data-sort-by="mastery"`                                                                                     | `data-sortby` run together (modeled)                                                                               |
+| H4  | One key per column                                                                                                                                                                                                                      | Attack and Damage both `key: "damage"` (`SORT_COLUMNS.weapons`, `module/config/sort-keys.js`)                      |
+| H5  | `root.querySelector('[data-scope="skills"]')` (modeled on `sort-handler.js:88`)                                                                                                                                                         | `root.querySelector(\`.item-list.-header[data-scope="${scope}"]\`)` (`module/sheets/handlers/sort-handler.js:88`)  |
+| H6  | `{{> "systems/l5r4-enhanced/templates/actor/_partials/_sort-header.hbs" scope="skills" type="skill" columns=@root.sortColumns.skills}}` (`templates/actor/_partials/_skill-section.hbs`)                                                | The header written out in a section partial (modeled)                                                              |
 
 H4's fix gives Attack its own key, which sorts by a different value than today: a behavior change, filed as its own
 issue (Stage 17 decision 10).

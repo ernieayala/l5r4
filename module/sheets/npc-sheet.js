@@ -8,7 +8,6 @@
 import { SYS_ID } from "../config/constants.js";
 import { DIALOG_TEMPLATES } from "../config/templates.js";
 import { ACTION_TYPES, STANCES } from "../config/localization.js";
-import { NPC_SORT_KEYS } from "../config/sort-keys.js";
 import { getClamped } from "../utils/type-coercion.js";
 import { T } from "../utils/localization.js";
 import { on } from "../utils/dom.js";
@@ -161,7 +160,18 @@ export default class L5R4NpcSheet extends BaseActorSheet {
       const damage = actorObj.system[`damage${num}`];
       const empty = !attack.name && !attack.roll && !attack.keep && !damage.roll && !damage.keep;
       const actionLabel = attack.type in ACTION_TYPES ? T(ACTION_TYPES[attack.type]) : attack.type;
-      return { num, key: `attack${num}`, attack, damage, empty, actionLabel };
+      return {
+        num,
+        key: `attack${num}`,
+        attack,
+        damage,
+        empty,
+        actionLabel,
+        attackPool: formatAttackPool(attack),
+        damagePool: formatAttackPool(damage),
+        attackLabel: attack.name || `${T("l5r4.ui.mechanics.combat.attack")} ${num}`,
+        damageLabel: `${T("l5r4.ui.common.damage")} ${num}`
+      };
     });
 
     const context = {
@@ -474,20 +484,6 @@ export default class L5R4NpcSheet extends BaseActorSheet {
   }
 
   /**
-   * Returns allowed sort field names for a given scope.
-   *
-   * Defines which columns can be used for sorting in each item list.
-   * Currently only skills list supports sorting by multiple fields.
-   *
-   * @param {string} scope - Sort scope identifier (e.g., "skills", "weapons")
-   * @returns {string[]} Array of allowed column keys for sorting
-   * @override
-   */
-  _getAllowedSortKeys(scope) {
-    return NPC_SORT_KEYS[scope] ?? ["name"];
-  }
-
-  /**
    * Applies natural healing to the NPC.
    *
    * **Game Rules Context:**
@@ -665,4 +661,15 @@ export default class L5R4NpcSheet extends BaseActorSheet {
     }
     return submit;
   }
+}
+
+/**
+ * An attack or damage slot's pool as its roll button shows it: "5k3", with a nonzero modifier signed after it
+ * ("5k3+2", "3k2-1"), written as core's numberFormat helper writes a signed whole number.
+ * @param {{roll: number, keep: number, modifier: number}} slot - The stored attack or damage slot
+ * @returns {string}
+ */
+function formatAttackPool({ roll, keep, modifier }) {
+  const bonus = modifier ? `${modifier >= 0 ? "+" : ""}${modifier.toFixed(0)}` : "";
+  return `${roll}k${keep}${bonus}`;
 }

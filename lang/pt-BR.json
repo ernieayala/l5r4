@@ -50,6 +50,7 @@
           "advantages": "Vantagens",
           "base": "Base",
           "cap": "limite",
+          "capHint": "Clique para alterar o XP máximo ganho de desvantagens.",
           "disadvantagesGrant": "Desvantagens",
           "kata": "Kata",
           "kiho": "Kiho",
@@ -59,7 +60,6 @@
           "traits": "Atributos",
           "void": "Vazio"
         },
-        "changeDisadvantageCap": "Clique para alterar o XP máximo ganho de desvantagens",
         "disadvantageCapLabel": "XP Máximo",
         "fallbackLabels": {
           "skillCreated": "Perícia Criada",
@@ -374,7 +374,7 @@
           "ringRoll": "Rolagem de Anel",
           "skillRoll": "Rolagem de Perícia",
           "socialResistance": "Resistência Social",
-          "socialResistanceHint": "Resistindo Intimidação ou Tentação",
+          "socialResistanceHint": "Resistindo Intimidação ou Tentação.",
           "spellCasting": "Rolagem de Conjuração",
           "success": "Sucesso",
           "traitRoll": "Rolagem de Atributo",

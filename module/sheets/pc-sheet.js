@@ -8,7 +8,6 @@
  */
 import { SYS_ID } from "../config/constants.js";
 import { STANCES } from "../config/localization.js";
-import { PC_SORT_KEYS } from "../config/sort-keys.js";
 import { on } from "../utils/dom.js";
 import { F } from "../utils/localization.js";
 import { prepareItemSheetOptions } from "../documents/item/integration/sheet-data.js";
@@ -528,19 +527,5 @@ export default class L5R4PcSheet extends BaseActorSheet {
       selector: "[data-edit='img']",
       handler: ev => this._onEditImage(ev, ev.currentTarget)
     });
-  }
-
-  /**
-   * Returns allowed sort column keys for a given item list scope.
-   *
-   * Delegates to PC_SORT_KEYS configuration for sortable columns.
-   * See config/sort-keys.js for complete list of supported columns by type.
-   *
-   * @param {string} scope - Sort scope identifier matching item type or list name
-   * @returns {string[]} Array of allowed sort column keys
-   * @override
-   */
-  _getAllowedSortKeys(scope) {
-    return PC_SORT_KEYS[scope] ?? ["name"];
   }
 }

@@ -50,6 +50,7 @@
           "advantages": "Ventajas",
           "base": "Base",
           "cap": "límite",
+          "capHint": "Clic para cambiar la EXP máxima obtenida de desventajas.",
           "disadvantagesGrant": "Desventajas",
           "kata": "Kata",
           "kiho": "Kiho",
@@ -59,7 +60,6 @@
           "traits": "Atributos",
           "void": "Vacío"
         },
-        "changeDisadvantageCap": "Clic para cambiar la EXP máxima obtenida de desventajas",
         "disadvantageCapLabel": "EXP Máximo",
         "fallbackLabels": {
           "skillCreated": "Habilidad Creada",
@@ -374,7 +374,7 @@
           "ringRoll": "Tirada de Anillo",
           "skillRoll": "Tirada de Habilidad",
           "socialResistance": "Resistencia Social",
-          "socialResistanceHint": "Resistiendo Intimidación o Tentación",
+          "socialResistanceHint": "Resistiendo Intimidación o Tentación.",
           "spellCasting": "Tirada de Lanzar Hechizo",
           "success": "Éxito",
           "traitRoll": "Tirada de Atributo",
