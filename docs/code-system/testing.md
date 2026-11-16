@@ -35,8 +35,8 @@ Game terms inside names keep the book's capitals (Void Point, Free Raise, Insigh
 
 Picked by majority: alphabetical imports (29 of 42 files), no header (30 of 42), `global.<Name>` stubs (3 of 4).
 
-Conforming, `tests/unit/utils/check.test.js:1-14`: `buildPool` from `module/utils/check.js`, in
-`tests/unit/utils/check.test.js`.
+Conforming: `tests/unit/utils/check.test.js` imports `buildPool` from `module/utils/check.js`, the file its path
+mirrors.
 
 Not conforming (modeled): a test that copies the function it checks into the test file and imports no module file;
 a test of `module/services/xp/formatter.js` filed as `formatter.test.js` straight under `tests/unit/services/`,
@@ -71,19 +71,21 @@ export function registerFearTests(quench) {
 }
 ```
 
-Conforming id, `tests/quench/services/fear.js:25`. Conforming display name, `tests/quench/rules.js:884`:
-`"L5R4: Rule engine"`.
+Conforming id, `registerFearTests` (`tests/quench/services/fear.js`). Conforming display name, `registerRulesTests`
+(`tests/quench/rules.js`): `"L5R4: Rule engine"`.
 
-| Not conforming                                 | Where                                                   | Why                                                        |
-| ---------------------------------------------- | ------------------------------------------------------- | ---------------------------------------------------------- |
-| `` `${SYS_ID}.workflows.armorTNCalculation` `` | `tests/quench/workflows/armor-tn-calculation.js:32`     | camelCase segment; the file stem is `armor-tn-calculation` |
-| `"l5r4-enhanced.wealth-manager"`               | `tests/quench/apps/wealth-manager.js:17`                | Literal id, and the `apps` segment missing                 |
-| `` `${SYS_ID}.resources.void-points` ``        | `tests/quench/services/void-points.js:31`               | `resources` matches no folder                              |
-| `` `${SYS_ID}.services.rolls.skill` ``         | `tests/quench/services/skill-rolls.js:26`               | The last segment is not the file stem                      |
-| `"L5R4: Fear System Tests"`                    | `tests/quench/services/fear.js:278`                     | Title Case and a "Tests" suffix                            |
-| `"L5R4: Combat loop (Stage 10)"`               | `tests/quench/combat.js:1003`                           | A stage number in parentheses                              |
-| `"L5R4: Rest & Healing Tests"`                 | `tests/quench/services/rest.js:272`                     | `&` for a join                                             |
-| `"L5R4 Enhanced: ..."`                         | `tests/quench/workflows/status-effects-workflow.js:228` | The prefix is `L5R4:`                                      |
+Not conforming (modeled):
+
+| Not conforming                                 | Why                                                        |
+| ---------------------------------------------- | ---------------------------------------------------------- |
+| `` `${SYS_ID}.workflows.armorTNCalculation` `` | camelCase segment; the file stem is `armor-tn-calculation` |
+| `"l5r4-enhanced.wealth-manager"`               | Literal id, and the `apps` segment missing                 |
+| `` `${SYS_ID}.resources.void-points` ``        | `resources` matches no folder                              |
+| `` `${SYS_ID}.services.rolls.skill` ``         | The last segment is not the file stem                      |
+| `"L5R4: Fear System Tests"`                    | Title Case and a "Tests" suffix                            |
+| `"L5R4: Combat loop (Stage 10)"`               | A stage number in parentheses                              |
+| `"L5R4: Rest & Healing Tests"`                 | `&` for a join                                             |
+| `"L5R4 Enhanced: ..."`                         | The prefix is `L5R4:`                                      |
 
 ## `describe` and `it`
 
@@ -104,66 +106,66 @@ Sentence case for Quench `describe` names is Stage 17 decision 16, against the Q
 against 64 sentence case), so they match the display names. The Vitest top-level identifier form is that area's majority (about 100 of 122 top-level
 `describe` names). Picked by majority: arrow callbacks (1399 of 1429), literal timeouts (55 of 76).
 
-Conforming, `tests/quench/services/fear.js:30`:
+Conforming, in `Fear TN calculation` (`tests/quench/services/fear.js`):
 
 ```js
 it("should calculate TN for Fear Rank 1", () => {
 ```
 
-Not conforming:
+Not conforming (modeled):
 
-| Name                                                                              | Where                                                    | Why                                                      |
-| --------------------------------------------------------------------------------- | -------------------------------------------------------- | -------------------------------------------------------- |
-| `"rolls Skill + Trait and keeps the Trait (p.79: Kyujutsu 4, Reflexes 3 is 7k3)"` | `tests/unit/utils/check.test.js:15`                      | No "should"; a citation and a worked example in the name |
-| `"12k4 becomes 10k5"`                                                             | `tests/unit/utils/ten-dice.test.js:6`                    | Not readable after "it"                                  |
-| A 114-character name ending "(Ernie's ruling)"                                    | `tests/quench/combat.js:384`                             | Over 100 characters, a note in parentheses               |
-| `"should handle negative modifiers"` twice                                        | `tests/quench/documents/combat-modifiers.js:206`, `:303` | Not unique                                               |
+| Name                                                                              | Why                                                      |
+| --------------------------------------------------------------------------------- | -------------------------------------------------------- |
+| `"rolls Skill + Trait and keeps the Trait (p.79: Kyujutsu 4, Reflexes 3 is 7k3)"` | No "should"; a citation and a worked example in the name |
+| `"12k4 becomes 10k5"`                                                             | Not readable after "it"                                  |
+| A 114-character name ending "(Ernie's ruling)"                                    | Over 100 characters, a note in parentheses               |
+| `"should handle negative modifiers"` twice in one `describe`                      | Not unique                                               |
 
 ## Citations
 
 A test of a rule cites the rule on a comment line above the `it` or `describe`, in the format of `documentation.md`
 **Citations**. An issue a test pins is cited the same way.
 
-Conforming, modeled on `tests/unit/utils/check.test.js:58`:
+Conforming, `should apply the Ten Dice Rule after every modifier` (`tests/unit/utils/check.test.js`):
 
 ```js
 // game-rules/26_special_dice_rules.md, p.77
 it("should apply the Ten Dice Rule after every modifier", () => {
 ```
 
-Not conforming, `tests/unit/utils/check.test.js:49`: `it("adds a Void Point as +1k1 (p.78)", ...)`.
+Not conforming (modeled): `it("adds a Void Point as +1k1 (p.78)", ...)`.
 
 ## Book examples
 
 Every worked example the book prints for a rule the code implements is a test (CLAUDE.md **Game Rule Integration**),
 grouped in one `describe` per example.
 
-Conforming, modeled on `tests/unit/utils/ten-dice.test.js:5-6`:
+Conforming, `Book example: the Ten Dice Rule (p.77)` (`tests/unit/utils/ten-dice.test.js`):
 
 ```js
 describe("Book example: the Ten Dice Rule (p.77)", () => {
   it("should turn 12k4 into 10k5", () => {
 ```
 
-Not conforming, `tests/unit/utils/ten-dice.test.js:5`: `describe("the book's examples (Core Rulebook p.77)")`.
+Not conforming (modeled): `describe("the book's examples (Core Rulebook p.77)")`.
 
 ## Fixtures and cleanup
 
-| Rule                                                                                                                                                                                          | Check  |
-| --------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- | ------ |
-| Actors come from `createTestPC` / `createTestNPC` (`tests/fixtures/actor-fixtures.js`), items from `tests/fixtures/item-fixtures.js`                                                          | review |
-| A document's name starts with the feature in the batch's display name: `"Rule engine: shugenja"`                                                                                              | review |
-| A test that touches the world runs inside `cleanTest(assert)` (`tests/quench/helpers.js:258`), which fails it on a console error or warning, an error notification, or an unhandled rejection | review |
-| Every document a test creates is tracked and deleted in `afterEach` or `after`, never at the end of the test body                                                                             | review |
-| Chat messages are deleted after `settleChatNotifications()` (`tests/quench/helpers.js:208`)                                                                                                   | review |
-| Roll dialogs are answered through `answerCheckDialog`, `autoAnswerRolls`, or `guardRolls` (`tests/quench/helpers.js`), not a per-file copy                                                    | review |
-| A full Quench run leaves no world document it made                                                                                                                                            | review |
-| A new test fails without the change it covers (CLAUDE.md **Testing and the Gate**)                                                                                                            | review |
+| Rule                                                                                                                                                                              | Check  |
+| --------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- | ------ |
+| Actors come from `createTestPC` / `createTestNPC` (`tests/fixtures/actor-fixtures.js`), items from `tests/fixtures/item-fixtures.js`                                              | review |
+| A document's name starts with the feature in the batch's display name: `"Rule engine: shugenja"`                                                                                  | review |
+| A test that touches the world runs inside `cleanTest` (`tests/quench/helpers.js`), which fails it on a console error or warning, an error notification, or an unhandled rejection | review |
+| Every document a test creates is tracked and deleted in `afterEach` or `after`, never at the end of the test body                                                                 | review |
+| Chat messages are deleted after `settleChatNotifications()` (`tests/quench/helpers.js`)                                                                                           | review |
+| Roll dialogs are answered through `answerCheckDialog`, `autoAnswerRolls`, or `guardRolls` (`tests/quench/helpers.js`), not a per-file copy                                        | review |
+| A full Quench run leaves no world document it made                                                                                                                                | review |
+| A new test fails without the change it covers (CLAUDE.md **Testing and the Gate**)                                                                                                | review |
 
 Picked by majority: the fixture factories (66 files against 4 calling `Actor.create`), the `helpers.js` dialog
 answerers (36 uses against 8 local copies).
 
-Conforming, `tests/quench/rules.js:112-121`: `cleanTest`, a tracked list, and an `afterEach` that deletes it.
+Conforming, `registerRulesTests` (`tests/quench/rules.js`): `cleanTest`, a tracked list, and an `afterEach` that deletes it.
 
 ```js
 const clean = cleanTest(assert);
@@ -177,5 +179,5 @@ afterEach(async () => {
 });
 ```
 
-Not conforming, `tests/quench/workflows/melee-damage-strength.js:77`: the actor is deleted at the end of the test body,
-so a failed assertion leaves it in the world.
+Not conforming, `should add Strength to katana damage` (`tests/quench/workflows/melee-damage-strength.js`): the actor is
+deleted at the end of the test body, so a failed assertion leaves it in the world.

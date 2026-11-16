@@ -14,8 +14,8 @@ const { basename } = posix;
 const GALLERY_CONFIG = "module/config/design-gallery";
 const GALLERY_TEMPLATES = "templates/apps/design-gallery";
 
-/** A path a design-system page names: under `templates/` or `scss/`, with an optional `:line` suffix. */
-const DOC_PATH = /^((?:templates|scss)\/[\w./-]*)(?::[\d, -]+)?$/;
+/** A path a design-system page names: under `templates/` or `scss/` (docs/code-system/documentation.md, Citations in docs). */
+const DOC_PATH = /^((?:templates|scss)\/[\w./-]*)$/;
 
 /** Font Awesome classes that set a style, size, or animation, not an icon. */
 const FA_UTILITY =

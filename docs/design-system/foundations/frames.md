@@ -7,22 +7,24 @@ are color.md's role tokens; this page sets the widths, corners, and depth around
 
 Declared in `scss/base/_variables.scss`, on `:root` unless the table says otherwise.
 
-| Token                       | Value                                                                                        | Use                                                                           | Replaces                                                                                                               |
-| --------------------------- | -------------------------------------------------------------------------------------------- | ----------------------------------------------------------------------------- | ---------------------------------------------------------------------------------------------------------------------- |
-| `--l5r4-border-width-thin`  | `1px`                                                                                        | Every frame and grid line                                                     | The 1px widths in `_grids.scss`, `_wounds.scss`, `_item-lists.scss`, `_ranks.scss`, `_traits-rings.scss`, and the rest |
-| `--l5r4-border-width-thick` | `2px`                                                                                        | A Ring rank face and a Void Point dot                                         | `scss/features/_traits-rings.scss:100`, `:148`, `:573`                                                                 |
-| `--l5r4-border-width-band`  | `32px`                                                                                       | The Ring color band on the outer side of each Trait row; one grid column wide | `scss/features/_traits-rings.scss:313`, `:332`, `:351`, `:370`                                                         |
-| `--l5r4-radius-sm`          | `4px`                                                                                        | A chip or a card inside content: text links, rule cards                       | `3px` at `scss/components/_inline-link.scss:9`; `4px` at `_rules-editor.scss:30`, `_item-layout.scss:62`               |
-| `--l5r4-radius-round`       | `50%`                                                                                        | Ring medallions, spell slot images, Void Point dots                           | `_traits-rings.scss:80`, `:101`, `:149`, `:168`, `:260`, `:574`; `_sections.scss:48`, `:56`                            |
-| `--l5r4-shadow-raised`      | `0 0 2px 1px var(--l5r4-color-shadow)`                                                       | `box-shadow` on a raised element                                              | `scss/features/_traits-rings.scss:150`                                                                                 |
-| `--l5r4-shadow-drop`        | `drop-shadow(0 0 3px var(--l5r4-color-shadow))`                                              | `filter` on a raised image with a transparent edge (the Ring images)          | `scss/features/_traits-rings.scss:169`                                                                                 |
-| `--l5r4-shadow-text-halo`   | `1px 1px 1px var(--l5r4-color-shadow-strong), -1px -1px 1px var(--l5r4-color-shadow-strong)` | `text-shadow` that keeps a number legible over an image                       | `scss/components/_section.scss:64-66` (spell slot count)                                                               |
+| Token                       | Value                                                                                        | Use                                                                           | Read at                                                                                                                                                                         |
+| --------------------------- | -------------------------------------------------------------------------------------------- | ----------------------------------------------------------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| `--l5r4-border-width-thin`  | `1px`                                                                                        | Every frame and grid line                                                     | `scss/components/_grid.scss`, `scss/features/_wound-track.scss`, `scss/components/_item-row.scss`, `scss/features/_traits-rings.scss`, and the rest                             |
+| `--l5r4-border-width-thick` | `2px`                                                                                        | A Ring rank face and a Void Point dot                                         | The `&::before` backdrop of `.l5r4-ring-rank`, `.l5r4-ring-rank-face`, and `.l5r4-void-point` (`scss/features/_traits-rings.scss`)                                              |
+| `--l5r4-border-width-band`  | `32px`                                                                                       | The Ring color band on the outer side of each Trait row; one grid column wide | The four Ring rules from `.l5r4-trait.-earth.-stamina` to `.l5r4-trait.-air.-reflexes` (`scss/features/_traits-rings.scss`)                                                     |
+| `--l5r4-radius-sm`          | `4px`                                                                                        | A chip or a card inside content: text links, rule cards                       | `.l5r4-inline-link` (`scss/components/_inline-link.scss`), `.l5r4-rules-editor-card` (`scss/components/_rules-editor.scss`)                                                     |
+| `--l5r4-radius-round`       | `50%`                                                                                        | Ring medallions, spell slot images, Void Point dots                           | `.l5r4-ring-rank`, its backdrop and face, `.l5r4-ring-image`, and `.l5r4-void-point` (`scss/features/_traits-rings.scss`); `.l5r4-spell-slot` (`scss/components/_section.scss`) |
+| `--l5r4-shadow-raised`      | `0 0 2px 1px var(--l5r4-color-shadow)`                                                       | `box-shadow` on a raised element                                              | `.l5r4-ring-rank-face` (`scss/features/_traits-rings.scss`)                                                                                                                     |
+| `--l5r4-shadow-drop`        | `drop-shadow(0 0 3px var(--l5r4-color-shadow))`                                              | `filter` on a raised image with a transparent edge (the Ring images)          | `.l5r4-ring-image` (`scss/features/_traits-rings.scss`)                                                                                                                         |
+| `--l5r4-shadow-text-halo`   | `1px 1px 1px var(--l5r4-color-shadow-strong), -1px -1px 1px var(--l5r4-color-shadow-strong)` | `text-shadow` that keeps a number legible over an image                       | `.l5r4-spell-slot-count` (`scss/components/_section.scss`)                                                                                                                      |
 
 A shadow's color is one of color.md's shadow roles, `--l5r4-color-shadow` (black at 50%) or
 `--l5r4-color-shadow-strong` (black); frames.md sets only the offsets and blur around it.
 
 A square corner is `border-radius: 0` and needs no token: the mask buttons and the Trait roll button set it to clear
-core's `4px` button corner (`_button.scss:11`, `:33`; `_rank-control.scss:68`; `_traits-rings.scss:217`, `:242`).
+core's `4px` button corner (`.l5r4-button.-roll` and `.l5r4-button-face` (`scss/components/_button.scss`);
+`.l5r4-rank-control-value` (`scss/components/_rank-control.scss`); the Trait roll's
+`.l5r4-button-face` (`scss/features/_traits-rings.scss`)).
 
 The parchment backdrop behind each Ring rank medallion reads two color.md tokens, set per theme on each themed element:
 `--l5r4-image-ring-rank-backdrop` (core's `ui/parchment.jpg` in light, `none` in dark) and
@@ -46,7 +48,7 @@ A border reads `--l5r4-border-width-thin` (or `-thick`, `-band` for their one jo
 No hex, `rgb()`, or named color in a border. Enforced by `tests/conventions/styles.test.js` (no literal colors outside
 `base/`) and Stylelint `color-named: "never"` and `color-no-hex` in `.stylelintrc.json`.
 
-Conforming, modeled on `scss/components/_grid.scss:9`:
+Conforming, modeled on `.l5r4-grid` (`scss/components/_grid.scss`):
 
 ```scss
 .l5r4-grid {
@@ -54,7 +56,7 @@ Conforming, modeled on `scss/components/_grid.scss:9`:
 }
 ```
 
-Non-conforming, `scss/features/_traits-rings.scss:30-31` and `:573`:
+Non-conforming (modeled): a step arrow and a Void Point dot with literal widths and colors.
 
 ```scss
 border: 1px solid black;
@@ -65,21 +67,21 @@ border: 2px solid #666;
 
 ### 2. A frame line and a divider are different jobs
 
-A frame line draws a box or a grid cell: `--l5r4-color-line` at the thin width. `_grids.scss`, `_wounds.scss`, and
-`_item-lists.scss` draw it today with core's `--table-header-border-color`, the most used line color, which color.md
-builds the line role on. A divider separates
-two stacked blocks with no box around them (a heading's underline, the end of a prose editor) and uses core's
+A frame line draws a box or a grid cell: `--l5r4-color-line` at the thin width, which color.md builds on core's
+`--table-header-border-color`. `scss/components/_grid.scss`, `scss/features/_wound-track.scss`, and
+`scss/components/_item-row.scss` draw it. A divider separates two stacked blocks with no box around them (a heading's underline, the end of a prose editor) and uses core's
 `--sidebar-separator` whole, which core sets per theme (`1px solid` in dark, `2px groove` in light; `foundry2.css:685`,
 `:2056`). Enforced by review.
 
-Conforming, `scss/components/_chat-card.scss:14` and `scss/layout/_item-layout.scss:42`:
+Conforming, the posted item card's `h5` under `.message-content` (`scss/components/_chat-card.scss`) and
+`prose-mirror` (`scss/layout/_item-layout.scss`):
 
 ```scss
 border-block-end: var(--sidebar-separator);
 ```
 
-Non-conforming, `scss/apps/_xp-manager.scss:11` and `:22`: dividers drawn as `1px solid var(--color-border)`, a third
-line color for the same job.
+Non-conforming, the `h3` and breakdown rows of `.l5r4-xp-manager` (`scss/apps/_xp-manager.scss`): dividers drawn as a
+thin line in `--l5r4-color-divider`, a third line color for the same job.
 
 ### 3. Borders use logical sides
 
@@ -87,13 +89,13 @@ Write `border-block-start`, `border-block-end`, `border-inline-start`, `border-i
 side-specific declarations use today. Enforced by Stylelint `property-disallowed-list` (`border-top`, `border-right`,
 `border-bottom`, `border-left`) in `.stylelintrc.json`.
 
-Conforming, modeled on `scss/features/_wound-track.scss:19`:
+Conforming, the rows of `.l5r4-grid .l5r4-wound-track` (`scss/features/_wound-track.scss`):
 
 ```scss
 border-block-end: var(--l5r4-border-width-thin) solid var(--l5r4-color-line);
 ```
 
-Non-conforming, `scss/components/_item-summary-card.scss:18`:
+Non-conforming (modeled):
 
 ```scss
 border-top: 1px solid var(--color-border-light-tertiary);
@@ -104,7 +106,7 @@ border-top: 1px solid var(--color-border-light-tertiary);
 A corner is `0`, `--l5r4-radius-sm`, or `--l5r4-radius-round`. A window's corner is core's. Enforced by
 `tests/conventions/styles.test.js` (`border-radius` reads a radius token or is `0`).
 
-Conforming, modeled on `scss/components/_rules-editor.scss:30`:
+Conforming, `.l5r4-rules-editor-card` (`scss/components/_rules-editor.scss`):
 
 ```scss
 .l5r4-rules-editor-card {
@@ -112,7 +114,7 @@ Conforming, modeled on `scss/components/_rules-editor.scss:30`:
 }
 ```
 
-Non-conforming, `scss/components/_inline-link.scss:9`:
+Non-conforming (modeled):
 
 ```scss
 .l5r4-link {
@@ -127,7 +129,7 @@ an image reads `--l5r4-shadow-text-halo`. The system never adds a shadow to a wi
 take core's elevation. Enforced by `tests/conventions/styles.test.js` (no literal colors outside `base/`, which catches
 a literal shadow) and review for the level.
 
-Conforming, modeled on `scss/features/_traits-rings.scss:150`:
+Conforming, `.l5r4-ring-rank-face` (`scss/features/_traits-rings.scss`):
 
 ```scss
 .l5r4-ring-rank-face {
@@ -135,7 +137,7 @@ Conforming, modeled on `scss/features/_traits-rings.scss:150`:
 }
 ```
 
-Non-conforming, `scss/features/_traits-rings.scss:169`:
+Non-conforming (modeled):
 
 ```scss
 filter: drop-shadow(0 0 3px rgb(0 0 0 / 50%));
@@ -149,7 +151,7 @@ place it draws parchment is behind each Ring rank medallion, through the two bac
 core's own `ui/parchment.jpg` and switch with the nearest themed ancestor. Enforced by review; the gallery shows the
 Rings in both themes.
 
-Conforming, modeled on `scss/features/_traits-rings.scss:95-105`: the medallion's `::before` reads
+Conforming, the `&::before` of `.l5r4-ring-rank` (`scss/features/_traits-rings.scss`): it reads
 `--l5r4-image-ring-rank-backdrop` and `--l5r4-color-ring-rank-backdrop`.
 
 Non-conforming: a copy of the parchment image in `assets/`, or `background-image` set on `.window-content`.
@@ -157,12 +159,12 @@ Non-conforming: a copy of the parchment image in `assets/`, or `background-image
 ### 7. The brush frame marks the sheet header only
 
 The brush-stroke border (`assets/borders/brush-08-gray.svg`, a `border-image` at `opacity: 0.25` on the header's
-`::before`, `scss/features/_pc-info.scss:13-24`) is the system's one frame ornament. It frames the PC and NPC sheet
+`::before`, in `.l5r4-pc-info` (`scss/features/_pc-info.scss`)) is the system's one frame ornament. It frames the PC and NPC sheet
 header and nothing else, and sits behind the header's content through `--l5r4-layer-behind` (layers.md). Its path is
 an SCSS variable in `base/_variables.scss`, as the Ring image paths are. Enforced by review.
 
 Conforming: the header block in `templates/actor/_partials/_stats.hbs` and `_stats-npc.hbs`, framed by
-`.pc-info::before`.
+`.l5r4-pc-info::before`.
 
 Non-conforming: the brush border on an item row or a chat card, where it competes with the content.
 
@@ -179,16 +181,17 @@ A frame shows these states with the states.md tokens and nothing else:
 A state never removes or thickens a frame line, so the layout does not shift. Enforced by review, with the gallery
 showing each frame in each state.
 
-Conforming, `scss/apps/_compendium-browser.scss:40-43`: the selected tab adds an outline, which takes no space.
+Conforming, `.l5r4-tabs-tab` (`scss/apps/_compendium-browser.scss`): the selected tab adds an outline, which takes no
+space.
 
 Non-conforming: a selected row that gains `border: 2px solid`, which moves its neighbors by a pixel.
 
 ## Partials and files
 
-| Item   | Where                                                                                                                                                                                              |
-| ------ | -------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| Tokens | `scss/base/_variables.scss`                                                                                                                                                                        |
-| Users  | `scss/components/_grid.scss`, `_item-lists.scss`, `_sections.scss`, `_effect-panel.scss`, `_rules-editor.scss`; `scss/features/_traits-rings.scss`, `_wounds.scss`, `_ranks.scss`, `_pc-info.scss` |
-| Assets | `assets/borders/brush-08-gray.svg`; core's `ui/parchment.jpg`                                                                                                                                      |
-| Color  | Line and surface roles in color.md                                                                                                                                                                 |
-| States | states.md                                                                                                                                                                                          |
+| Item   | Where                                                                                                                                                                                                                      |
+| ------ | -------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| Tokens | `scss/base/_variables.scss`                                                                                                                                                                                                |
+| Users  | `scss/components/_grid.scss`, `_item-row.scss`, `_section.scss`, `_inline-link.scss`, `_rules-editor.scss`, `_button.scss`, `_rank-control.scss`; `scss/features/_traits-rings.scss`, `_wound-track.scss`, `_pc-info.scss` |
+| Assets | `assets/borders/brush-08-gray.svg`; core's `ui/parchment.jpg`                                                                                                                                                              |
+| Color  | Line and surface roles in color.md                                                                                                                                                                                         |
+| States | states.md                                                                                                                                                                                                                  |

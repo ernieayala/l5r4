@@ -7,29 +7,29 @@ header. The same template, without `inSheet`, is the item card posted to chat.
 | Item        | Detail                                                                                                                                                                                                                                                                                                                                                                                                                                                     |
 | ----------- | ---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
 | Partial     | `templates/cards/<subtype>.hbs` with `inSheet=true` (one per Item subtype, `advantage-disadvantage.hbs` for both); NPC attack rows inline in `_stats-npc.hbs`. Shared parts: the details cell `templates/cards/_partials/_details.hbs` (`rules`, `description`), its paragraphs `templates/cards/_partials/_detail-text.hbs` for a row with lines of its own (Skill, spell), and the Clan, Family, and School row `templates/cards/_partials/_bio-row.hbs` |
-| Parameters  | `name`, `type`, `system`, `docId`, `inSheet` (all rows); `ranged` (weapons: `weapon.system.isBow`). Example: `_skills-section.hbs:19-24`                                                                                                                                                                                                                                                                                                                   |
+| Parameters  | `name`, `type`, `system`, `docId`, `inSheet` (all rows); `ranged` (weapons: `weapon.system.isBow`). Example: `systems/l5r4-enhanced/templates/cards/skill.hbs` (`templates/actor/_partials/_skill-section.hbs`)                                                                                                                                                                                                                                            |
 | SCSS        | `scss/components/_item-row.scss`, the rename of `scss/components/_item-row.scss`                                                                                                                                                                                                                                                                                                                                                                           |
 | Block class | `l5r4-item-row` on the row, beside its fixed classes; `l5r4-item-row-list` on the list                                                                                                                                                                                                                                                                                                                                                                     |
-| Shows in    | Every list section of the PC and NPC sheets, the bio section, the XP manager's ledgers (`templates/apps/xp-manager.hbs:81-140`)                                                                                                                                                                                                                                                                                                                            |
+| Shows in    | Every list section of the PC and NPC sheets, the bio section, the XP manager's ledgers (`l5r4-item-row-list -xp` (`templates/apps/xp-manager.hbs`))                                                                                                                                                                                                                                                                                                        |
 | Game terms  | Skill, Skill Rank, Emphasis (`game-rules/58_skills_overview.md, p.133`); Mastery Level (`game-rules/66_magic_and_spell_casting.md, p.163`)                                                                                                                                                                                                                                                                                                                 |
 | Gallery     | One row per subtype, closed and open, hovered and focused, with a long name, with and without details; an empty list                                                                                                                                                                                                                                                                                                                                       |
 
 ## Anatomy
 
-| Part        | Element                                                  | Class                                                                | Class now                                                           |
-| ----------- | -------------------------------------------------------- | -------------------------------------------------------------------- | ------------------------------------------------------------------- |
-| List        | `<section>`                                              | `l5r4-item-row-list -<subtype>`                                      | `item-list -<subtype>` (`_skills-section.hbs:17`)                   |
-| Row         | `<div data-item-id data-document-id>`                    | `l5r4-item-row item -<subtype>` + `-expandable` + core's `draggable` | `item -<subtype> -expandable draggable` (`cards/skill.hbs:1-3`)     |
-| Name        | `<h4>`                                                   | `flexrow -gap-sm title` (fixed)                                      | same                                                                |
-| Badge       | `<img alt>` after the name, on a Skill the School grants | `l5r4-item-row-badge`                                                | `img.flex0` with `width="16px" height="16px"` (`cards/skill.hbs:8`) |
-| Number cell | `<div>`                                                  | `l5r4-item-row-cell`                                                 | bare `<div>` (`cards/skill.hbs:15`)                                 |
-| Field cell  | `<div>` holding a row select (`form-field.md`)           | `l5r4-item-row-cell`                                                 | bare `<div>` (`cards/skill.hbs:16-20`)                              |
-| Roll cell   | The roll button (`button.md`)                            | `l5r4-button -roll`                                                  | `button-mask-container`                                             |
-| Emphases    | `<div>`                                                  | `l5r4-item-row-emphases`                                             | `emphasis-display` (`cards/skill.hbs:25`)                           |
-| Controls    | The inline control cluster (`inline-control.md`)         | `l5r4-inline-control -reveal`                                        | `controls`                                                          |
-| Details     | `<div>` spanning every column, second grid row           | `l5r4-item-row-details`                                              | `expanded-text` (`cards/skill.hbs:34`)                              |
+| Part        | Element                                                  | Class                                                                | Class now                                                                           |
+| ----------- | -------------------------------------------------------- | -------------------------------------------------------------------- | ----------------------------------------------------------------------------------- |
+| List        | `<section>`                                              | `l5r4-item-row-list -<subtype>`                                      | same: `l5r4-item-row-list -skill` (`templates/actor/_partials/_skill-section.hbs`)  |
+| Row         | `<div data-item-id data-document-id>`                    | `l5r4-item-row item -<subtype>` + `-expandable` + core's `draggable` | same: `item l5r4-item-row -{{type}}` (`templates/cards/skill.hbs`)                  |
+| Name        | `<h4>`                                                   | `flexrow -gap-sm title` (fixed)                                      | same                                                                                |
+| Badge       | `<img alt>` after the name, on a Skill the School grants | `l5r4-item-row-badge`                                                | `l5r4-item-row-badge flex0` (`templates/cards/skill.hbs`)                           |
+| Number cell | `<div>`                                                  | `l5r4-item-row-cell`                                                 | bare `<div>`: `<div>{{system.rank}}</div>` (`templates/cards/skill.hbs`)            |
+| Field cell  | `<div>` holding a row select (`form-field.md`)           | `l5r4-item-row-cell`                                                 | bare `<div>` around `data-action="update-item-field"` (`templates/cards/skill.hbs`) |
+| Roll cell   | The roll button (`button.md`)                            | `l5r4-button -roll`                                                  | `button-mask-container`                                                             |
+| Emphases    | `<div>`                                                  | `l5r4-item-row-emphases`                                             | same: `l5r4-item-row-emphases` (`templates/cards/skill.hbs`)                        |
+| Controls    | The inline control cluster (`inline-control.md`)         | `l5r4-inline-control -reveal`                                        | `controls`                                                                          |
+| Details     | `<div>` spanning every column, second grid row           | `l5r4-item-row-details`                                              | same: `l5r4-item-row-details` (`templates/cards/skill.hbs`)                         |
 
-Columns per subtype, from `_item-lists.scss:29-124`, read the size tokens:
+Columns per subtype, from `.l5r4-item-row-list` (`scss/components/_item-row.scss`), read the size tokens:
 
 | Subtype                             | Columns                                                                                |
 | ----------------------------------- | -------------------------------------------------------------------------------------- |
@@ -93,7 +93,7 @@ Contrast: `text` on `row-alt` is 8.51:1 light and 9.35:1 dark (`foundations/colo
 
 ## Long text
 
-A name wraps inside its column (`text-wrap: revert`, `_item-lists.scss:173`) and the row grows; numbers never wrap.
+A name wraps inside its column (`text-wrap: revert` on the row's `.title` (`scss/components/_item-row.scss`)) and the row grows; numbers never wrap.
 Emphases join with ", " and wrap inside their column. The details cell spans every column and wraps as prose. When
 a window is made narrower the `1fr` columns shrink first; fixed columns keep their width.
 
@@ -109,15 +109,15 @@ a window is made narrower the `1fr` columns shrink first; fixed columns keep the
 | R6  | Every `<img>` has `alt`: the badge names what it marks                                                                          | `tests/conventions/templates.test.js`; review for the value               |
 | R7  | Column widths read size tokens; a width only one subtype uses is still a column token, because the columns are one scale        | `tests/conventions/styles.test.js`                                        |
 
-| #   | Conforming                                                                                                                                        | Non-conforming                                                                                                             |
-| --- | ------------------------------------------------------------------------------------------------------------------------------------------------- | -------------------------------------------------------------------------------------------------------------------------- |
-| R1  | `.l5r4-item-row-list > .l5r4-item-row:nth-of-type(even) { background-color: var(--l5r4-color-row-alt); }` (modeled on `_item-lists.scss:126-128`) | `.l5r4.pc .item { display: grid; ... }` (`scss/components/_item-row.scss:131-136`), which any `.item` in the sheet matches |
-| R2  | `<div class="l5r4-item-row item -{{type}}{{#if expandable}} -expandable{{/if}}" data-item-id=... data-document-id=...>` (modeled)                 | Renaming `item` to `l5r4-item-row`, which unstyles every item card already posted                                          |
-| R3  | `element.closest("[data-item-id]")` (`module/sheets/pc-sheet.js:246`)                                                                             | `element?.closest?.(".item")` (`module/sheets/handlers/item-crud-handler.js:53`)                                           |
-| R4  | `item-list -commonItem` with rows `item -commonItem` (`_item-section.hbs:32`, `cards/commonItem.hbs:1`)                                           | `&.-advantages` (`scss/components/_item-row.scss:29`), which no template uses: the lists say `-advantage`                  |
-| R5  | `.l5r4-item-row-badge { block-size: 16px; inline-size: 16px; }` (modeled)                                                                         | `<img class="flex0" width="16px" height="16px" ...>` (`templates/cards/skill.hbs:8`)                                       |
-| R6  | `<img class="l5r4-item-row-badge" src=... alt="{{localize "l5r4.ui.common.school"}}" />` (modeled)                                                | The same image with no `alt` (`templates/cards/skill.hbs:8`)                                                               |
-| R7  | `grid-template-columns: 1fr var(--l5r4-size-column-80) var(--l5r4-size-column-80) var(--l5r4-size-column-controls);`                              | `grid-template-columns: 1fr 80px 80px var(--controls);` (`scss/components/_item-row.scss:43`)                              |
+| #   | Conforming                                                                                                                                                   | Non-conforming                                                                            |
+| --- | ------------------------------------------------------------------------------------------------------------------------------------------------------------ | ----------------------------------------------------------------------------------------- |
+| R1  | The even-row rule `> .l5r4-item-row:nth-of-type(even)` (`scss/components/_item-row.scss`), inside `.l5r4-item-row-list`                                      | `.l5r4.pc .item { display: grid; ... }` (modeled), which any `.item` in the sheet matches |
+| R2  | `<div class="l5r4-item-row item -{{type}}{{#if expandable}} -expandable{{/if}}" data-item-id=... data-document-id=...>` (modeled)                            | Renaming `item` to `l5r4-item-row`, which unstyles every item card already posted         |
+| R3  | `element?.closest?.("[data-item-id]")` in `ItemCrudHandler.#getItemRow` (`module/sheets/handlers/item-crud-handler.js`)                                      | `element?.closest?.(".item")` (modeled)                                                   |
+| R4  | `l5r4-item-row-list -commonItem` (`templates/actor/_partials/_item-section.hbs`) with rows `item l5r4-item-row -{{type}}` (`templates/cards/commonItem.hbs`) | `&.-advantages` (modeled), which no template uses: the lists say `-advantage`             |
+| R5  | `.l5r4-item-row-badge { block-size: 16px; inline-size: 16px; }` (modeled)                                                                                    | `<img class="flex0" width="16px" height="16px" ...>` (modeled)                            |
+| R6  | `<img class="l5r4-item-row-badge" src=... alt="{{localize "l5r4.ui.common.school"}}" />` (modeled)                                                           | The same image with no `alt` (modeled)                                                    |
+| R7  | `grid-template-columns: 1fr var(--l5r4-size-column-80) var(--l5r4-size-column-80) var(--l5r4-size-column-controls);`                                         | `grid-template-columns: 1fr 80px 80px var(--controls);` (modeled)                         |
 
 ## Do and don't
 
@@ -129,15 +129,15 @@ a window is made narrower the `1fr` columns shrink first; fixed columns keep the
 
 ## Names
 
-| Current                                                                                                                                        | Target                           | Why                             |
-| ---------------------------------------------------------------------------------------------------------------------------------------------- | -------------------------------- | ------------------------------- |
-| `item-list`                                                                                                                                    | `l5r4-item-row-list`             | Decision 15                     |
-| `expanded-text`                                                                                                                                | `l5r4-item-row-details`          | Decision 15                     |
-| `emphasis-display`                                                                                                                             | `l5r4-item-row-emphases`         | Decision 15                     |
-| `--controls`                                                                                                                                   | `--l5r4-size-column-controls`    | `foundations/space-and-size.md` |
-| `item -attacks` (NPC attack row)                                                                                                               | `l5r4-item-row -attacks`         | Not posted, so not fixed        |
-| `scss/components/_item-row.scss`                                                                                                               | `scss/components/_item-row.scss` | The file takes its block's name |
-| Dead: `-advantages`, `.expanded-text.-npc`, `.title a[data-action="item-chat"]` (`_item-lists.scss:29-33`, `:159-161`, `:175-180`, `:203-211`) | Removed                          | They match no template          |
+| Current                                                                         | Target                           | Why                             |
+| ------------------------------------------------------------------------------- | -------------------------------- | ------------------------------- |
+| `item-list`                                                                     | `l5r4-item-row-list`             | Decision 15                     |
+| `expanded-text`                                                                 | `l5r4-item-row-details`          | Decision 15                     |
+| `emphasis-display`                                                              | `l5r4-item-row-emphases`         | Decision 15                     |
+| `--controls`                                                                    | `--l5r4-size-column-controls`    | `foundations/space-and-size.md` |
+| `item -attacks` (NPC attack row)                                                | `l5r4-item-row -attacks`         | Not posted, so not fixed        |
+| `scss/components/_item-row.scss`                                                | `scss/components/_item-row.scss` | The file takes its block's name |
+| Dead: `-advantages`, `.expanded-text.-npc`, `.title a[data-action="item-chat"]` | Removed                          | They match no template          |
 
 Fixed (Stage 17 decision 2), because posted item cards store them: the root's `item`, `-<subtype>`, `-expandable`,
 `-bio`; the name's `title`, `flexrow`, `-gap-sm`; `data-item-id`, `data-document-id`; the template files

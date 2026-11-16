@@ -42,7 +42,7 @@ repeat nothing. `async` is in the signature. `@requires` names a Foundry version
 Picked by majority where the code split: the hyphen form of `@param` (454 lines, against about 230 two-space lines;
 about 330 more have no description), `{object}` (131 of 243 object types).
 
-Conforming, modeled on `module/services/effects/apply.js:67-74` (the file's block has no `@param` descriptions):
+Conforming, modeled on `applyEffect` (`module/services/effects/apply.js`), whose block has no `@param` descriptions:
 
 ```js
 /**
@@ -55,8 +55,7 @@ Conforming, modeled on `module/services/effects/apply.js:67-74` (the file's bloc
 export async function applyEffect(actor, id, { turnOf, ...options } = {}) {
 ```
 
-Not conforming, `module/sheets/base-actor-sheet.js:65-73`: a static field documented with `@static` and `{Object}`,
-which the template drops.
+Not conforming (modeled): a static field documented with `@static` and `{Object}`, which the template drops.
 
 ```js
 /**
@@ -84,7 +83,7 @@ Picked as the largest single form: `@module` plus `@description` (74 files in `u
 every `tools/*.mjs` file; the other 145 `module/` files split across four prose-title forms). The `@module` value is the
 path form (76 files) over the bare name (38).
 
-Conforming, `module/apps/effect-panel.js:1-7`:
+Conforming, the file header of `module/apps/effect-panel.js`:
 
 ```js
 /**
@@ -94,8 +93,7 @@ Conforming, `module/apps/effect-panel.js:1-7`:
  */
 ```
 
-Not conforming, `module/setup/settings/world.js:1-17`: a prose title, section lists, `@module` last, and
-`@requires Foundry VTT v13+`.
+Not conforming (modeled): a prose title, section lists, `@module` last, and `@requires Foundry VTT v13+`.
 
 Test files follow `testing.md` **Files**.
 
@@ -120,7 +118,7 @@ Stage 16's citation parser (`tools/coverage/citations.mjs`) reads the page list 
 `src/packs/` keeps its `Core Rulebook p.N` citation (`roadmap/STAGE-15-COMPENDIUM-PACKS.md` **Content policy**); the
 rule does not apply there. Tests put the citation on a comment line above the test (`testing.md` **Citations**).
 
-Conforming, `module/data/actor/pc-data.js:61-66`:
+Conforming, `PcData#insightRank` (`module/data/actor/pc-data.js`):
 
 ```js
 /**
@@ -139,6 +137,51 @@ Not conforming (modeled): the page sits inside the sentence and names no file.
  */
 ```
 
+## Citations in docs
+
+A page in `docs/` cites the repo's code by the symbol it means and the file that holds it, never by a line number:
+lines move with every edit, and a check can find a symbol (Stage 17, Ernie's rulings, "Code citations in `docs/`").
+
+```text
+`<symbol>` (`<path>`)
+```
+
+| Code               | Symbol                                                                           | Example                                                                                          |
+| ------------------ | -------------------------------------------------------------------------------- | ------------------------------------------------------------------------------------------------ |
+| JavaScript         | A function, class, or exported constant                                          | `` `applyEffect` (`module/services/effects/apply.js`) ``                                         |
+| JavaScript         | A method or member: `Class#method`, `Class.staticMember`                         | `` `PcData#insightRank` (`module/data/actor/pc-data.js`) ``                                      |
+| Template           | A `data-action` value, a class, or a `{{> partial}}` path, as the file writes it | `` `data-action="create-item"` (`templates/actor/_partials/_unified-item-create.hbs`) ``         |
+| SCSS               | A selector as the file writes it                                                 | `` `.l5r4-section-title` (`scss/components/_section.scss`) ``                                    |
+| JSON               | A key path                                                                       | `` `l5r4.apps.armorConfig.title` (`lang/en.json`) ``                                             |
+| Markdown           | A heading or a phrase of the page                                                | `` `Citations in docs` (`docs/code-system/documentation.md`) ``                                  |
+| A whole file       | No symbol: the path alone                                                        | `` `module/apps/effect-panel.js` ``                                                              |
+| A part of a symbol | The symbol, and words for the part                                               | the PC skip in `` `migrateNpcInitiative` (`module/setup/migrations/actors/npc-initiative.js`) `` |
+
+| Rule                                                                                                                                 | Check                                                     |
+| ------------------------------------------------------------------------------------------------------------------------------------ | --------------------------------------------------------- |
+| A repo path is never followed by `:<line>`, and a bare `:<line>` span never continues one                                            | `docs/citation-line` (`tests/conventions/docs.test.js`)   |
+| The symbol occurs in the file: in JavaScript each name of it as an identifier or member, in JSON as a key path, elsewhere as written | `docs/citation-symbol` (`tests/conventions/docs.test.js`) |
+| The symbol is what the sentence means, read from the current code                                                                    | review                                                    |
+| An example the code no longer holds is marked "(modeled)", or "modeled on" the current code it varies, cited by symbol               | review                                                    |
+| Foundry's installed source keeps its lines, as `[src: <path>:<line>]` (**Comments**): 14.370 is pinned and does not drift            | review                                                    |
+
+A citation quoted as an example, as in the tables above, sits in a double-backtick span or a fenced block; the checks
+skip both.
+
+Conforming: the sentence names the part of the function it means.
+
+```markdown
+The first check in the loop of `migrateNpcInitiative` (`module/setup/migrations/actors/npc-initiative.js`) skips every
+actor that is not an NPC.
+```
+
+Not conforming (modeled): a line range, which points at other code after the next edit above it.
+
+```markdown
+The first check in the loop (`module/setup/migrations/actors/npc-initiative.js:22-24`) skips every actor that is not an
+NPC.
+```
+
 ## Comments
 
 | Rule                                                                                                                         | Check                                 |
@@ -155,26 +198,26 @@ Not conforming (modeled): the page sits inside the sentence and names no file.
 
 A roadmap reference that only says when code was written (`(roadmap/STAGE-14)` in a file header) is history.
 
-Conforming, modeled on `module/setup/settings/world.js:65` (its inline `Core Rulebook p.92` moves to a citation
-line): the reference explains why the setting starts off.
+Conforming, the `honorRoll` setting in `registerWorldSettings` (`module/setup/settings/world.js`): the reference
+explains why the setting starts off.
 
 ```js
 // The optional Honor Roll, off unless the GM turns it on (roadmap/STAGE-11 decision 3)
 ```
 
-Not conforming, `module/sheets/base-actor-sheet.js:66-68`: a parenthetical source path. The block at `:80-83` also
-names "the Foundry v13 Application v2 event delegation pattern", which is history.
+Not conforming (modeled): a parenthetical source path.
 
 ```js
  * ... ApplicationV2 merges every class's DEFAULT_OPTIONS up the chain and concatenates arrays
  * (client/applications/api/application.mjs:437-484), ...
 ```
 
-Conforming form of the same reference:
+Conforming form of the same reference, in the JSDoc of `BaseActorSheet.DEFAULT_OPTIONS`
+(`module/sheets/base-actor-sheet.js`):
 
 ```js
-// ApplicationV2 merges every class's DEFAULT_OPTIONS up the chain and concatenates arrays
-// [src: client/applications/api/application.mjs:437-484], so a class lists only its own entries.
+ * ... ApplicationV2 merges every class's DEFAULT_OPTIONS up the chain and concatenates arrays
+ * [src: client/applications/api/application.mjs:437-484], so a class lists only its own entries; ...
 ```
 
 Conforming deviation, modeled on the NPC Initiative ruling in CLAUDE.md **Domain Invariants**: the code site states
@@ -185,8 +228,11 @@ what the code does where the book is silent, and its basis.
 // game-rules/31_combat_round.md, p.81
 ```
 
-Not conforming, `module/setup/migrations/actors/npc-initiative.js:10`: an issue number and the old version stand in
-for the reason, and `:15` dates the ruling.
+Not conforming (modeled): an issue number and the old version stand in for the reason, and a date stamps the ruling.
+
+```js
+// Fixed in 3.2.1 (#30); ruling of 2025-06-01.
+```
 
 ## Where documentation lives
 

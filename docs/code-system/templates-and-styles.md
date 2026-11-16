@@ -30,9 +30,11 @@ check; "review" means no tool can check it.
 | No empty folders                                                                                                    | `tests/conventions/names.test.js`               |
 
 Fixed template names (Stage 17 decision 2): `templates/item/_type-details/<subtype>.hbs`,
-`templates/item/_type-modifiers/<subtype>.hbs`, and `templates/cards/<subtype>.hbs`. The code builds their paths from
-the stored subtype (`module/config/item-types.js:15-31`, `templates/item/_partials/_tab-details.hbs:3`,
-`templates/item/_partials/_tab-modifiers.hbs:3`), so a rename breaks every item of that type.
+`templates/item/_type-modifiers/<subtype>.hbs`, and `templates/cards/<subtype>.hbs`. The code reaches them from the
+stored subtype: `CHAT_CARD_TEMPLATES` (`module/config/item-types.js`) maps each subtype to its card, and the
+`(concat ...)` includes of `_type-details/` (`templates/item/_partials/_tab-details.hbs`) and `_type-modifiers/`
+(`templates/item/_partials/_tab-modifiers.hbs`) join the subtype into the path, so a rename breaks every item of that
+type.
 
 Not conforming (modeled): the Ring and Trait block written out in both actor sheets, its Trait row eight times in
 each, in place of `templates/actor/_partials/_traits-rings.hbs` and `_trait.hbs`.
@@ -76,7 +78,7 @@ takes keyboard focus), and `data-tooltip` with `aria-label` on icon-only control
 majority: `{{!-- --}}` comments (29 of 39), literal partial paths (80 of 84), `{{name}}` spacing (1133 of 1147), double
 quotes inside attributes (111 of 142), `data-type` (63 of 73).
 
-Conforming, modeled on `templates/apps/effect-panel.hbs:13-16` (decision 15 renames its action to kebab-case):
+Conforming, the `data-action="open-source"` (`templates/apps/effect-panel.hbs`) button, one attribute per line:
 
 <!-- prettier-ignore -->
 ```hbs
@@ -91,8 +93,7 @@ Conforming, modeled on `templates/apps/effect-panel.hbs:13-16` (decision 15 rena
 </button>
 ```
 
-Not conforming, `templates/actor/_partials/_expand.hbs:1`: an `<a>` with no `href`, no accessible name, bare classes,
-and `fas`.
+Not conforming (modeled): an `<a>` with no `href`, no accessible name, bare classes, and `fas`.
 
 <!-- prettier-ignore -->
 ```hbs
@@ -115,13 +116,13 @@ and `fas`.
 The rules apply to `module/`, `dist/l5r4-enhanced.js`, and `tests/quench/`: a test that selects by class breaks when a
 class is renamed.
 
-Conforming, `module/services/check-request.js:31-37` and `:57`: the card renders from a template, and its button is
-found by `[data-action='check-request-roll']`.
+Conforming: `postCheckRequest` (`module/services/check-request.js`) renders the card from a template, and
+`bindCheckRequestCard` (`module/services/check-request.js`) finds its button by `[data-action='check-request-roll']`.
 
-Not conforming, `module/sheets/handlers/item-crud-handler.js:193`: dialog content as `` `<p>${...}</p>` ``.
+Not conforming (modeled): dialog content as `` `<p>${...}</p>` ``.
 `root.style.setProperty("--conditional-cursor", ...)` (modeled): a style write where the Shift-held state is the
-`is-shift-held` class (`module/mixins/keyboard-behavior-mixin.js:129`).
-`module/sheets/handlers/roll-handler.js:157`: `closest(".item")`.
+`is-shift-held` class that `_updateConditionalCursor` (`module/mixins/keyboard-behavior-mixin.js`) toggles.
+`closest(".item")` (modeled): a selector by class.
 
 ## Stylesheets
 
@@ -197,7 +198,7 @@ so the exemption does not cover it, and core classes are styled only inside a sy
 scope: the posted item card's root `item` also roots every sheet item row, so `.message-content .item` is what tells
 the posted card apart; that rule is the one `styles/block-class` and `styles/one-component` count in the file.
 
-Conforming, modeled on `scss/apps/_effect-panel.scss:20-31`, with the tokens
+Conforming, modeled on `.l5r4-effect-panel-row` (`scss/apps/_effect-panel.scss`), with the tokens
 `docs/design-system/foundations/space-and-size.md` declares:
 
 ```scss

@@ -7,7 +7,7 @@ that fits one kind never appears as another.
 | Item       | Detail                                                                                                                                                                                                                                                                                        |
 | ---------- | --------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
 | APIs       | Core's `ui.notifications.info`, `warn`, `error`; `canvas.interface.createScrollingText` for floating numbers                                                                                                                                                                                  |
-| Code       | Notifications across `module/` (15 `info`, 68 `warn`, 29 `error` calls); floating numbers in `module/services/scrolling-text.js` and `module/utils/floating-text.js`                                                                                                                          |
+| Code       | Notifications across `module/`; floating numbers in `module/services/scrolling-text.js` and `module/utils/floating-text.js`                                                                                                                                                                   |
 | Copy       | `content/voice.md`: Notifications, Hints and sentences, Tooltips; keys per `content/localization.md`                                                                                                                                                                                          |
 | Tokens     | `--l5r4-color-warning`, `--l5r4-color-danger`, `--l5r4-color-text`, `--l5r4-state-disabled-opacity`, `--l5r4-font-size-meta`; the floating number colors `--l5r4-color-float-wounds-up`, `-down`, `--l5r4-color-float-void-up`, `-down`, `--l5r4-color-float-stroke` (`foundations/color.md`) |
 | Components | Floating number; the empty, warning, invalid, and disabled states of every component (`foundations/states.md`)                                                                                                                                                                                |
@@ -32,11 +32,11 @@ notification.
 
 ### Levels
 
-| Level   | Words                                                                                                      | Example key                                 |
-| ------- | ---------------------------------------------------------------------------------------------------------- | ------------------------------------------- |
-| `info`  | What happened, naming the character: "Applied {amount} Wounds to {name}" (the value writes "wounds" today) | `l5r4.ui.mechanics.wounds.woundsApplied`    |
-| `warn`  | What is missing or not allowed, then what to do                                                            | `l5r4.ui.mechanics.wounds.noTokenSelected`  |
-| `error` | "Failed to <verb> <object>" (`content/voice.md`, Notifications)                                            | `l5r4.apps.armorConfig.errors.updateFailed` |
+| Level   | Words                                                                    | Example key                                 |
+| ------- | ------------------------------------------------------------------------ | ------------------------------------------- |
+| `info`  | What happened, naming the character: "Applied {amount} Wounds to {name}" | `l5r4.ui.mechanics.wounds.applied`          |
+| `warn`  | What is missing or not allowed, then what to do                          | `l5r4.ui.mechanics.wounds.noTokenSelected`  |
+| `error` | "Failed to <verb> <object>" (`content/voice.md`, Notifications)          | `l5r4.apps.armorConfig.errors.updateFailed` |
 
 ### Rules
 
@@ -46,16 +46,13 @@ Every notification is an i18n key passed through `T(key)` or `F(key, data)`, nev
 Enforced by ESLint `no-restricted-syntax` (no string or template literal passed to `ui.notifications.*`) and
 `tests/lang.test.js` (every key passed to `ui.notifications.*` exists).
 
-Conforming, `module/services/combat/damage.js:309`:
+Conforming, `applyDamage` (`module/services/combat/damage.js`):
 
 ```js
 ui.notifications?.warn(T("l5r4.ui.mechanics.wounds.noTokenSelected"));
 ```
 
-Non-conforming, eleven literals: `module/services/combat/legacy-damage.js:48` and `:114` ("Token has no actor"),
-`module/services/initiative.js:36` and `:57`, `module/sheets/handlers/pc-actions-handler.js:112`, `:120`, `:153`,
-`module/sheets/handlers/app-launcher-handler.js:79`, `module/sheets/handlers/stance-handler.js:135`,
-`module/sheets/pc-sheet.js:369` and `:413`.
+Non-conforming, modeled: `ui.notifications.warn("Token has no actor")`, a literal no translation reaches.
 
 #### 2. One sentence, no trailing period, the character by name
 
@@ -63,11 +60,11 @@ A notification is one sentence with no trailing period (Stage 17 decision 15). A
 what to do, joined with a colon. It names the character with `{name}`. Enforced by `tests/lang.test.js` (a value passed
 to `ui.notifications.*` does not end with a period) and review for the shape.
 
-Conforming: "No Void Points available to reduce damage" (`l5r4.ui.mechanics.wounds.noVoidPoints`).
+Conforming: "No Void Points available to reduce damage" (`l5r4.ui.mechanics.wounds.noVoidPoints`); "No token
+selected: select a token to apply Wounds" (`l5r4.ui.mechanics.wounds.noTokenSelected`).
 
-Non-conforming: "No token selected. Select a token to apply wounds." (`l5r4.ui.mechanics.wounds.noTokenSelected`):
-two sentences, a trailing period, and the game term in lowercase. Write "No token selected: select a token to apply
-Wounds". "{name} has already spent a Void Point this Round." (`l5r4.ui.effects.voidLimit`) drops its period.
+Non-conforming, modeled: "No token selected. Select a token to apply wounds.": two sentences, a trailing period, and
+the game term in lowercase.
 
 #### 3. The level matches who can fix it
 
@@ -75,21 +72,22 @@ Wounds". "{name} has already spent a Void Point this Round." (`l5r4.ui.effects.v
 they cannot; `info` for a finished action. A permission refusal is a warning. An error also logs its cause to the
 console with the system's prefix, so the GM can report it. Enforced by review.
 
-Conforming, `module/services/combat/flow.js:108-112`: no active GM is a warning, `l5r4.ui.effects.noGM`, and the step
-is not sent.
+Conforming, `requestStep` (`module/services/combat/flow.js`): no active GM is a warning, `l5r4.ui.effects.noGM`, and
+the step is not sent.
 
-Non-conforming, `module/sheets/handlers/item-effects-handler.js:252`: the error notification shows `err.message`, core's
-English text, in place of the system's key, and falls back to the key only when the error has no message.
+Non-conforming, `ItemEffectsHandler.#deleteItemEffect` (`module/sheets/handlers/item-effects-handler.js`): the error
+notification shows `err.message`, core's English text, in place of the system's key, and falls back to the key only
+when the error has no message.
 
 #### 4. A notification never carries the result
 
 A roll's outcome, the Wounds a damage roll dealt, and every step a player chose go on a chat card, which everyone at the
 table sees and which stays. A notification is for the one user who acted. Enforced by review.
 
-Conforming, `module/services/combat/damage.js:153-190`: the damage result is a card.
+Conforming, `postResult` (`module/services/combat/damage.js`): the damage result is a card.
 
-Non-conforming, `module/services/combat/legacy-damage.js:69-86`: Wounds applied from a card posted before 4.0.0 show only as
-an `info` notification to the user who clicked. Those cards are fixed, so this path stays; no new path does this.
+Non-conforming, `applyWoundsToToken` (`module/services/combat/legacy-damage.js`): Wounds applied from a card posted
+before 4.0.0 show only as an `info` notification to the user who clicked. Those cards are fixed, so this path stays; no new path does this.
 
 ## Inline warnings
 
@@ -99,7 +97,7 @@ A warning about a choice sits beside the choice, in the warning look: a line led
 (see **Disabled with a reason**). Enforced by review and `tests/conventions/contrast.test.js` (the warning pairing in
 `foundations/color.md`).
 
-Conforming, modeled on `templates/dialogs/check-dialog.hbs:75`:
+Conforming, modeled on the Round-limit line, `{{#if voidOverLimit}}` (`templates/dialogs/check-dialog.hbs`):
 
 ```hbs
 {{#if voidOverLimit}}
@@ -110,9 +108,9 @@ Conforming, modeled on `templates/dialogs/check-dialog.hbs:75`:
 {{/if}}
 ```
 
-Non-conforming, `templates/dialogs/check-dialog.hbs:75`: the same text in `p.hint`, which reads as help;
-`templates/dialogs/check-extras/maho.hbs:3-8`: `p.warning-text`, a class no stylesheet defines, with three keys joined
-by `<br />`.
+Non-conforming, `{{#if voidOverLimit}}` (`templates/dialogs/check-dialog.hbs`): the same text in `p.hint`, which
+reads as help; `l5r4-check-dialog-warning` (`templates/dialogs/check-extras/maho.hbs`): a class no stylesheet defines,
+with no icon and no `role="note"`, on three keys joined by `<br />`.
 
 ## Empty states
 
@@ -120,20 +118,21 @@ One italic line in the list's place says what is missing and, where there is one
 (`foundations/states.md` rule 9). The line is a sentence and ends with a period (`content/voice.md`, Hints and
 sentences). On a sheet, a list section with no entries is left out instead (`patterns/sheets.md` rule 4).
 
-| Place              | Key                                  | Value now                                                    |
-| ------------------ | ------------------------------------ | ------------------------------------------------------------ |
-| Effect panel       | `l5r4.ui.effectPanel.none`           | "No effects on {name}."                                      |
-| Effect panel       | `l5r4.ui.effectPanel.noActor`        | "Select a token, or assign a character, to see its effects." |
-| Compendium browser | `l5r4.ui.browser.none`               | "Nothing matches."                                           |
-| Rules editor       | `l5r4.ui.rules.none`                 | "No rules."                                                  |
-| Emphasis manager   | `l5r4.ui.emphasisManager.noEmphases` | "No emphases in list": write "No Emphases in this list."     |
-| XP manager         | None                                 | Nothing renders (`templates/apps/xp-manager.hbs:89`, `:134`) |
+| Place              | Key                                    | Value now                                                                                                                |
+| ------------------ | -------------------------------------- | ------------------------------------------------------------------------------------------------------------------------ |
+| Effect panel       | `l5r4.apps.effectPanel.none`           | "No effects on {name}."                                                                                                  |
+| Effect panel       | `l5r4.apps.effectPanel.noActor`        | "Select a token, or assign a character, to see its effects."                                                             |
+| Compendium browser | `l5r4.apps.compendiumBrowser.none`     | "Nothing matches."                                                                                                       |
+| Rules editor       | `l5r4.ui.rules.none`                   | "No rules."                                                                                                              |
+| Emphasis manager   | `l5r4.apps.emphasisManager.noEmphases` | "No Emphases in this list."                                                                                              |
+| XP manager         | None                                   | Nothing renders: `{{#if manualEntries}}` and `{{#if spentEntries}}` (`templates/apps/xp-manager.hbs`) have no `{{else}}` |
 
 Enforced by review; `tests/lang.test.js` checks the period on keys used as sentences.
 
-Conforming, `templates/apps/effect-panel.hbs:26-28`.
+Conforming, `l5r4-effect-panel-empty` (`templates/apps/effect-panel.hbs`).
 
-Non-conforming, `templates/apps/emphasis-manager.hbs:50`: a bare `<p>` with no empty look.
+Non-conforming, the `{{else}}` of `{{#if emphasisList.length}}` (`templates/apps/emphasis-manager.hbs`): a bare `<p>`
+with no empty look.
 
 ## Disabled with a reason
 
@@ -142,37 +141,38 @@ Points left", "Not your turn". The reason is its own key under the feature's gro
 (`content/voice.md`, Tooltips). A control the user can never use is left out (`patterns/chat-cards.md` rule 4,
 `patterns/panels-and-browsers.md`, States). Enforced by review; the gallery shows each disabled state with its tooltip.
 
-Conforming: `foundations/states.md` rule 5 (`check-dialog.hbs:66` with `l5r4.ui.check.noVoidPoints`).
+Conforming, modeled: `foundations/states.md` rule 5, the Void Point box with its reason in a
+`l5r4.ui.check.noVoidPoints` key.
 
-Non-conforming, `templates/dialogs/check-dialog.hbs:66` and `:71` today: the Void Point boxes disable at zero with no
-reason.
+Non-conforming, `name="void"` and `name="voidSkill"` (`templates/dialogs/check-dialog.hbs`): the Void Point boxes
+disable at zero with no reason.
 
 ## Floating numbers
 
 When an actor's Wounds or Void Points change, the change floats over each of its tokens on every client with the
-`floatingNumbers` setting on (`module/services/scrolling-text.js:54-85`).
+`floatingNumbers` setting on: `onUpdateActorScrollingText` (`module/services/scrolling-text.js`).
 
-| Part       | Detail                                                                                                                                                          |
-| ---------- | --------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| Text       | The sign, the amount, and the resource's name: "+7 Wounds", "−1 Void Points" (`module/utils/floating-text.js:39-41`), names from `l5r4.ui.floating.*`           |
-| Color      | By resource and direction (`scrolling-text.js:19-22`); the text alone carries the meaning, so the color is never needed to read it                              |
-| Stroke     | 4 px black (`--l5r4-color-float-stroke`); every fill meets 3:1 against it (`foundations/color.md`, Contrast)                                                    |
-| Size       | 28 px (`scrolling-text.js:76`)                                                                                                                                  |
-| Position   | The token's center; a second change in one update sits 0.3 token heights higher (`scrolling-text.js:70`)                                                        |
-| Motion     | Core's scrolling text: rises two token heights with jitter (`scrolling-text.js:73-80`); under reduced motion it stays in place (`foundations/motion.md` rule 5) |
-| Visibility | Only over tokens the viewer can see; never over a secret token (`scrolling-text.js:64`)                                                                         |
-| Settings   | Off with the system's `floatingNumbers` client setting or core's `scrollingStatusText` (`foundations/motion.md` rule 5)                                         |
+| Part       | Detail                                                                                                                                                                                          |
+| ---------- | ----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| Text       | The sign, the amount, and the resource's name: "+7 Wounds", "−1 Void Points", from `formatFloatingText` (`module/utils/floating-text.js`); names from `l5r4.ui.floating.*`                      |
+| Color      | By resource and direction, `COLORS` (`module/services/scrolling-text.js`); the text alone carries the meaning, so the color is never needed to read it                                          |
+| Stroke     | 4 px black (`--l5r4-color-float-stroke`); every fill meets 3:1 against it (`foundations/color.md`, Contrast)                                                                                    |
+| Size       | 28 px, the `fontSize` of `startScrollingText` (`module/services/scrolling-text.js`)                                                                                                             |
+| Position   | The token's center; a second change in one update sits 0.3 token heights higher, `startScrollingText` (`module/services/scrolling-text.js`)                                                     |
+| Motion     | Core's scrolling text: rises two token heights with jitter, `startScrollingText` (`module/services/scrolling-text.js`); under reduced motion it stays in place (`foundations/motion.md` rule 5) |
+| Visibility | Only over tokens the viewer can see; never over a secret token, the token check in `onUpdateActorScrollingText` (`module/services/scrolling-text.js`)                                           |
+| Settings   | Off with the system's `floatingNumbers` client setting or core's `scrollingStatusText` (`foundations/motion.md` rule 5)                                                                         |
 
 Rules:
 
-| #   | Rule                                                                                                                              | Enforced by                                                                                  |
-| --- | --------------------------------------------------------------------------------------------------------------------------------- | -------------------------------------------------------------------------------------------- |
-| F1  | The text names the resource and carries its sign; color only repeats it                                                           | Vitest `tests/unit/utils/floating-text.test.js`; review                                      |
-| F2  | The colors are the four floating tokens' values, kept equal to `COLORS` in `scrolling-text.js`, since canvas text cannot read CSS | `tests/conventions/contrast.test.js` (the pairings); review that `COLORS` matches            |
-| F3  | A floating number repeats a change the sheet and chat already show; it never carries a result on its own                          | Review                                                                                       |
-| F4  | No floating number for a token the viewer cannot see                                                                              | Review; the "Floating numbers" cases in `tests/quench/table-tools.js:321-350` cover the text |
+| #   | Rule                                                                                                                              | Enforced by                                                                         |
+| --- | --------------------------------------------------------------------------------------------------------------------------------- | ----------------------------------------------------------------------------------- |
+| F1  | The text names the resource and carries its sign; color only repeats it                                                           | Vitest `tests/unit/utils/floating-text.test.js`; review                             |
+| F2  | The colors are the four floating tokens' values, kept equal to `COLORS` in `scrolling-text.js`, since canvas text cannot read CSS | `tests/conventions/contrast.test.js` (the pairings); review that `COLORS` matches   |
+| F3  | A floating number repeats a change the sheet and chat already show; it never carries a result on its own                          | Review                                                                              |
+| F4  | No floating number for a token the viewer cannot see                                                                              | Review; the `Floating numbers` (`tests/quench/table-tools.js`) cases cover the text |
 
-Conforming, `module/utils/floating-text.js:39-41`: `floatingText(7, "Wounds")` gives "+7 Wounds".
+Conforming, `formatFloatingText` (`module/utils/floating-text.js`): `formatFloatingText(7, "Wounds")` gives "+7 Wounds".
 
 Non-conforming, modeled: a red "7" with no sign and no name, which reads the same as a heal to a viewer who cannot tell
 the colors apart.

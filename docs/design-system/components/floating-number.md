@@ -4,27 +4,27 @@ The change to a character's Wounds or Void Points, drawn as text that floats up 
 such as "+7 Wounds" or "−1 Void Points". It confirms a change the sheet and the chat card already show. Core draws it;
 the system picks the text, the color, and the size.
 
-| Item           | Detail                                                                                                                                                                      |
-| -------------- | --------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| Service        | `module/services/scrolling-text.js`: `onPreUpdateActor` records the values before an update in its options, `onUpdateActor` compares them after, on every client (`:44-85`) |
-| Text           | `floatingChanges` and `floatingText` (`module/utils/floating-text.js:22-41`), resources in `FLOATING_RESOURCES` (`:8-11`)                                                   |
-| Drawn by       | Core's `canvas.interface.createScrollingText` (`scrolling-text.js:69-82`)                                                                                                   |
-| Settings       | The system's client setting `floatingNumbers` (a fixed key, `module/setup/settings/client.js:21-28`), and core's `scrollingStatusText`                                      |
-| Template, SCSS | None: canvas text reads no template and no CSS                                                                                                                              |
-| Vitest         | `tests/unit/utils/floating-text.test.js`                                                                                                                                    |
-| Quench         | `l5r4-enhanced.table-tools`                                                                                                                                                 |
+| Item           | Detail                                                                                                                                                                                     |
+| -------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------ |
+| Service        | `module/services/scrolling-text.js`: `onPreUpdateActorScrollingText` records the values before an update in its options, `onUpdateActorScrollingText` compares them after, on every client |
+| Text           | `getFloatingChanges` and `formatFloatingText` (`module/utils/floating-text.js`), resources in `FLOATING_RESOURCES` (`module/utils/floating-text.js`)                                       |
+| Drawn by       | Core's `canvas.interface.createScrollingText`, called by `startScrollingText` (`module/services/scrolling-text.js`)                                                                        |
+| Settings       | The system's client setting `floatingNumbers` (a fixed key, registered in `registerClientSettings` (`module/setup/settings/client.js`)), and core's `scrollingStatusText`                  |
+| Template, SCSS | None: canvas text reads no template and no CSS                                                                                                                                             |
+| Vitest         | `tests/unit/utils/floating-text.test.js`                                                                                                                                                   |
+| Quench         | `l5r4-enhanced.table-tools`                                                                                                                                                                |
 
 ## Anatomy
 
-| Part     | Value                                                                                  | Source                    |
-| -------- | -------------------------------------------------------------------------------------- | ------------------------- |
-| Sign     | `+` for a gain, `−` (U+2212) for a loss                                                | `floating-text.js:40`     |
-| Amount   | The change's size                                                                      | `floating-text.js:40`     |
-| Name     | `l5r4.ui.floating.wounds` "Wounds", `l5r4.ui.floating.void` "Void Points"              | `floating-text.js:9-10`   |
-| Fill     | Per resource and direction, `COLORS` (`scrolling-text.js:19-22`)                       | color.md, domain roles    |
-| Stroke   | Black, 4 px                                                                            | `scrolling-text.js:78-79` |
-| Size     | 28 px                                                                                  | `scrolling-text.js:76`    |
-| Position | The token's center; a second change in the same update starts 0.3 token heights higher | `scrolling-text.js:70`    |
+| Part     | Value                                                                                  | Source                                                     |
+| -------- | -------------------------------------------------------------------------------------- | ---------------------------------------------------------- |
+| Sign     | `+` for a gain, `−` (U+2212) for a loss                                                | `formatFloatingText` (`module/utils/floating-text.js`)     |
+| Amount   | The change's size                                                                      | `formatFloatingText` (`module/utils/floating-text.js`)     |
+| Name     | `l5r4.ui.floating.wounds` "Wounds", `l5r4.ui.floating.void` "Void Points"              | `FLOATING_RESOURCES` (`module/utils/floating-text.js`)     |
+| Fill     | Per resource and direction, `COLORS` (`module/services/scrolling-text.js`)             | color.md, domain roles                                     |
+| Stroke   | Black, 4 px                                                                            | `startScrollingText` (`module/services/scrolling-text.js`) |
+| Size     | 28 px                                                                                  | `startScrollingText` (`module/services/scrolling-text.js`) |
+| Position | The token's center; a second change in the same update starts 0.3 token heights higher | `startScrollingText` (`module/services/scrolling-text.js`) |
 
 ## Variants
 
@@ -37,26 +37,26 @@ the system picks the text, the color, and the size.
 
 ## States
 
-| State                           | Result                                                                                                                                                 |
-| ------------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------ |
-| Change to Wounds or Void Points | One number per changed resource, over every visible token of the actor                                                                                 |
-| No change                       | Nothing                                                                                                                                                |
-| Token hidden or secret          | Nothing for that token (`scrolling-text.js:64-66`), as core's own status text                                                                          |
-| Setting off                     | Nothing on that client: `floatingNumbers` off, or core's `scrollingStatusText` off                                                                     |
-| Canvas not ready                | Nothing (`scrolling-text.js:56`)                                                                                                                       |
-| Reduced motion                  | Target: the number fades in and out where it appears, `distance: 0`, `jitter: 0` (motion.md rule 5). Now it travels two token heights with jitter 0.25 |
+| State                           | Result                                                                                                                                         |
+| ------------------------------- | ---------------------------------------------------------------------------------------------------------------------------------------------- |
+| Change to Wounds or Void Points | One number per changed resource, over every visible token of the actor                                                                         |
+| No change                       | Nothing                                                                                                                                        |
+| Token hidden or secret          | Nothing for that token (the visibility check in `onUpdateActorScrollingText` (`module/services/scrolling-text.js`)), as core's own status text |
+| Setting off                     | Nothing on that client: `floatingNumbers` off, or core's `scrollingStatusText` off                                                             |
+| Canvas not ready                | Nothing (the guard at the top of `onUpdateActorScrollingText` (`module/services/scrolling-text.js`))                                           |
+| Reduced motion                  | The number fades in and out where it appears, `distance: 0`, `jitter: 0` (motion.md rule 5)                                                    |
 
 ## Parameters
 
-| Option                      | Value now                                        |
-| --------------------------- | ------------------------------------------------ |
-| `anchor`                    | `CONST.TEXT_ANCHOR_POINTS.CENTER`                |
-| `direction`                 | `CONST.TEXT_ANCHOR_POINTS.TOP`                   |
-| `distance`                  | `2 * token.h`; `0` under reduced motion (target) |
-| `fontSize`                  | `28`                                             |
-| `fill`                      | `COLORS[id][up or down]`                         |
-| `stroke`, `strokeThickness` | `0x000000`, `4`                                  |
-| `jitter`                    | `0.25`; `0` under reduced motion (target)        |
+| Option                      | Value now                               |
+| --------------------------- | --------------------------------------- |
+| `anchor`                    | `CONST.TEXT_ANCHOR_POINTS.CENTER`       |
+| `direction`                 | `CONST.TEXT_ANCHOR_POINTS.TOP`          |
+| `distance`                  | `2 * token.h`; `0` under reduced motion |
+| `fontSize`                  | `28`                                    |
+| `fill`                      | `COLORS[id][up or down]`                |
+| `stroke`, `strokeThickness` | `0x000000`, `4`                         |
+| `jitter`                    | `0.25`; `0` under reduced motion        |
 
 ## Tokens
 
@@ -76,16 +76,16 @@ line, centered on the token.
 
 ## Rules
 
-| #   | Rule                                                                                     | Enforced by                                                    | Conforming                                                                                      | Non-conforming                                                                            |
-| --- | ---------------------------------------------------------------------------------------- | -------------------------------------------------------------- | ----------------------------------------------------------------------------------------------- | ----------------------------------------------------------------------------------------- |
-| FN1 | The text carries the sign and the resource's name; color never carries the meaning alone | `tests/unit/utils/floating-text.test.js`                       | `floatingText(7, "Wounds")` is "+7 Wounds" (`floating-text.js:36`)                              | A bare red "7" (modeled)                                                                  |
-| FN2 | Each fill meets 3:1 against the stroke                                                   | `tests/conventions/contrast.test.js`                           | `green-200` on black, 12.06:1 (color.md)                                                        | A dark red fill on the black stroke (modeled)                                             |
-| FN3 | A token the user cannot see shows nothing                                                | Quench `l5r4-enhanced.table-tools`                             | `if (!token.visible \|\| token.document.isSecret) continue` (`scrolling-text.js:64-66`)         | Floating a GM-hidden token's Wounds to every player (modeled)                             |
-| FN4 | Motion checks `prefers-reduced-motion` when it plays and drops the travel                | Review, and the Quench case the change adds (motion.md rule 5) | motion.md rule 5 conforming example                                                             | `distance: 2 * token.h` and `jitter: 0.25` for every user (`scrolling-text.js:75`, `:80`) |
-| FN5 | Both settings can turn it off; the system adds no third switch                           | Review                                                         | `game.settings.get(SYS_ID, "floatingNumbers")` (`scrolling-text.js:56`), core's setting in core | A per-actor flag that hides the numbers (modeled)                                         |
+| #   | Rule                                                                                     | Enforced by                                           | Conforming                                                                                                                                   | Non-conforming                                                      |
+| --- | ---------------------------------------------------------------------------------------- | ----------------------------------------------------- | -------------------------------------------------------------------------------------------------------------------------------------------- | ------------------------------------------------------------------- |
+| FN1 | The text carries the sign and the resource's name; color never carries the meaning alone | `tests/unit/utils/floating-text.test.js`              | `formatFloatingText(7, "Wounds")` is "+7 Wounds", from `formatFloatingText` (`module/utils/floating-text.js`)                                | A bare red "7" (modeled)                                            |
+| FN2 | Each fill meets 3:1 against the stroke                                                   | `tests/conventions/contrast.test.js`                  | `green-200` on black, 12.06:1 (color.md)                                                                                                     | A dark red fill on the black stroke (modeled)                       |
+| FN3 | A token the user cannot see shows nothing                                                | Quench `l5r4-enhanced.table-tools`                    | The `token.visible` and `token.document.isSecret` check in `onUpdateActorScrollingText` (`module/services/scrolling-text.js`)                | Floating a GM-hidden token's Wounds to every player (modeled)       |
+| FN4 | Motion checks `prefers-reduced-motion` when it plays and drops the travel                | Quench `l5r4-enhanced.table-tools` (motion.md rule 5) | `distance: reduced ? 0 : 2 * token.h` in `startScrollingText` (`module/services/scrolling-text.js`)                                          | `distance: 2 * token.h` and `jitter: 0.25` for every user (modeled) |
+| FN5 | Both settings can turn it off; the system adds no third switch                           | Review                                                | `game.settings.get(SYS_ID, "floatingNumbers")` in `onUpdateActorScrollingText` (`module/services/scrolling-text.js`), core's setting in core | A per-actor flag that hides the numbers (modeled)                   |
 
-FN4 is Stage 17 decision 16. It changes what those clients see, so it ships with a failing Quench case first
-(`foundations/motion.md` rule 5).
+FN4 is Stage 17 decision 16 (`foundations/motion.md` rule 5). The Quench case "should float the number in place,
+without travel or jitter, under reduced motion" covers it.
 
 ## Do and don't
 

@@ -5,32 +5,32 @@ Raises, outcome, results per target, action buttons, parts only some viewers see
 A posted card's HTML is stored in its message, so its classes and `data-action` names are fixed (Stage 17 decision 2).
 This page lists them and the rules that keep new cards and old ones looking the same.
 
-| Item       | Detail                                                                                                                                                                                                                                                                                                                                           |
-| ---------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------ |
-| Templates  | `templates/chat/check.hbs`, `check-request.hbs`, `damage-result.hbs`, `effect-prompt.hbs`, `flow-card.hbs`, `healing.hbs`, `item-summary.hbs`, `weapon.hbs`; item cards `templates/cards/<subtype>.hbs` with `inSheet` false                                                                                                                     |
-| Paths      | `CHAT_TEMPLATES` in `module/config/templates.js:78-87`                                                                                                                                                                                                                                                                                           |
-| Posted by  | `rollCheck` (`module/services/dice/check/roll-check.js:543-549`), `postCheckRequest` (`module/services/check-request.js:19-44`), damage results (`module/services/combat/damage.js:153-190`), effect prompts (`module/services/effects/prompts.js:35-45`), flow cards (`module/services/combat/flow.js:70-76`), rest (`module/services/rest.js`) |
-| Wired by   | `bind<Card>Card(message, html)` on `renderChatMessageHTML` (`docs/code-system/foundry-patterns.md`, Chat cards)                                                                                                                                                                                                                                  |
-| SCSS       | `scss/components/_chat-card.scss` today; target one file per card component in `scss/components/` (rule 6)                                                                                                                                                                                                                                       |
-| Tokens     | `--l5r4-space-gap-tight`, `--l5r4-space-gap`, `--l5r4-font-size-meta`, `--l5r4-color-text`, `--l5r4-color-line-muted`, `--l5r4-state-disabled-opacity`                                                                                                                                                                                           |
-| Components | Chat card, dice row, check card, request card, damage result, effect prompt, flow card, item summary card, button                                                                                                                                                                                                                                |
-| Checks     | `tests/conventions/actions.test.js` (fixed names exempt by name), `tests/conventions/templates.test.js`, `tests/conventions/styles.test.js`, ESLint `no-restricted-syntax`; "review" where no tool can judge                                                                                                                                     |
+| Item       | Detail                                                                                                                                                                                                                                                                                                                                                                       |
+| ---------- | ---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| Templates  | `templates/chat/check.hbs`, `check-request.hbs`, `contest.hbs`, `damage-result.hbs`, `effect-prompt.hbs`, `flow.hbs`, `healing.hbs`, `item-summary.hbs`, `note.hbs`, `weapon.hbs`; item cards `templates/cards/<subtype>.hbs` with `inSheet` false                                                                                                                           |
+| Paths      | `CHAT_TEMPLATES` (`module/config/templates.js`)                                                                                                                                                                                                                                                                                                                              |
+| Posted by  | `rollCheck`, through `postCheck` (`module/services/dice/check/roll-check.js`); `postCheckRequest` (`module/services/check-request.js`); damage results, `postResult` (`module/services/combat/damage.js`); effect prompts, `postPrompt` (`module/services/effects/prompts.js`); flow cards, `startFlow` (`module/services/combat/flow.js`); rest (`module/services/rest.js`) |
+| Wired by   | `bind<Card>Card(message, html)` on `renderChatMessageHTML` (`docs/code-system/foundry-patterns.md`, Chat cards)                                                                                                                                                                                                                                                              |
+| SCSS       | `scss/components/_chat-card.scss` today; target one file per card component in `scss/components/` (rule 6)                                                                                                                                                                                                                                                                   |
+| Tokens     | `--l5r4-space-gap-tight`, `--l5r4-space-gap`, `--l5r4-font-size-meta`, `--l5r4-color-text`, `--l5r4-color-line-muted`, `--l5r4-state-disabled-opacity`                                                                                                                                                                                                                       |
+| Components | Chat card, dice row, check card, request card, damage result, effect prompt, flow card, item summary card, button                                                                                                                                                                                                                                                            |
+| Checks     | `tests/conventions/actions.test.js` (fixed names exempt by name), `tests/conventions/templates.test.js`, `tests/conventions/styles.test.js`, ESLint `no-restricted-syntax`; "review" where no tool can judge                                                                                                                                                                 |
 
 ## Anatomy
 
 Every card has the parts below in this order. A part with nothing to show renders nothing.
 
-| #   | Part              | Markup                                                                                                                  | Notes                                                                                                                         |
-| --- | ----------------- | ----------------------------------------------------------------------------------------------------------------------- | ----------------------------------------------------------------------------------------------------------------------------- |
-| 1   | Speaker           | Core's message header, from `speaker: ChatMessage.getSpeaker({ actor })`                                                | The actor who rolled or is affected; the GM's name on a request card (`check-request.js:42`). The card never repeats it       |
-| 2   | Root              | `<div class="chat-card l5r4-<card>">`                                                                                   | One root per card                                                                                                             |
-| 3   | Title             | `div.dice-flavor`                                                                                                       | What happened: the roll's label and its target (`check-card.hbs:2-4`), the result (`damage-result.hbs:2`), the flow and stage |
-| 4   | Applied modifiers | `ul.check-applied`, one `li` per modifier with its label and pool change                                                | `meta` size (`scss/components/_chat-card.scss:36-41`)                                                                         |
-| 5   | Dice row          | `{{{roll}}}`: core's `roll.render()` (`card.js:637`)                                                                    | Core's formula, dice, and total; see **Dice row**                                                                             |
-| 6   | TN and outcome    | `div.l5r4-tn-result`: outcome, TN, then Raises, Free Raises spent on the TN, and the Wound penalty in parentheses       | Only when the roll had a TN (`check-card.hbs:11-21`)                                                                          |
-| 7   | Free Raises left  | `div.check-free-raises`                                                                                                 | Only when some remain                                                                                                         |
-| 8   | Notes             | `div.check-note`, one per note                                                                                          | Rule notes, maneuver notes, damage sources; italic                                                                            |
-| 9   | Actions           | One `<button type="button">` per action, grouped in `div.damage-actions`, `div.check-conditions`, or `div.flow-actions` | See **Actions**                                                                                                               |
+| #   | Part              | Markup                                                                                                                  | Notes                                                                                                                                                                          |
+| --- | ----------------- | ----------------------------------------------------------------------------------------------------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------ |
+| 1   | Speaker           | Core's message header, from `speaker: ChatMessage.getSpeaker({ actor })`                                                | The actor who rolled or is affected; the GM's name on a request card (`postCheckRequest` (`module/services/check-request.js`)). The card never repeats it                      |
+| 2   | Root              | `<div class="chat-card l5r4-<card>">`                                                                                   | One root per card                                                                                                                                                              |
+| 3   | Title             | `div.dice-flavor`                                                                                                       | What happened: the roll's label and its target, `dice-flavor` (`templates/chat/check.hbs`); the result, `dice-flavor` (`templates/chat/damage-result.hbs`); the flow and stage |
+| 4   | Applied modifiers | `ul.check-applied`, one `li` per modifier with its label and pool change                                                | `meta` size, `.check-applied` (`scss/components/_chat-card.scss`)                                                                                                              |
+| 5   | Dice row          | `{{{roll}}}`: core's `roll.render()`, in `renderCheckCard` (`module/services/dice/check/card.js`)                       | Core's formula, dice, and total; see **Dice row**                                                                                                                              |
+| 6   | TN and outcome    | `div.l5r4-tn-result`: outcome, TN, then Raises, Free Raises spent on the TN, and the Wound penalty in parentheses       | Only when the roll had a TN: `{{#if tn}}` around `l5r4-tn-result` (`templates/chat/check.hbs`)                                                                                 |
+| 7   | Free Raises left  | `div.check-free-raises`                                                                                                 | Only when some remain                                                                                                                                                          |
+| 8   | Notes             | `div.check-note`, one per note                                                                                          | Rule notes, maneuver notes, damage sources; italic                                                                                                                             |
+| 9   | Actions           | One `<button type="button">` per action, grouped in `div.damage-actions`, `div.check-conditions`, or `div.flow-actions` | See **Actions**                                                                                                                                                                |
 
 The item summary card (`item-summary.hbs`) is the one card without a `chat-card` root: it posts the rule lines and
 citation beside an item card, under `div.l5r4-item-summary`.
@@ -41,33 +41,33 @@ The dice row is core's roll template (`resources/app/templates/dice/roll.hbs`) w
 (`resources/app/templates/dice/tooltip.hbs`). The system adds no markup to it and restyles nothing in it but one mark
 on dropped dice (`components/dice-row.md` DR5). Line numbers below are in those core files.
 
-| Part          | Core shows                                                                                                                       | Source                                                                  |
-| ------------- | -------------------------------------------------------------------------------------------------------------------------------- | ----------------------------------------------------------------------- |
-| Formula       | The pool as core's formula (`dice-formula`)                                                                                      | `resources/app/templates/dice/roll.hbs:5`                               |
-| Total         | `h4.dice-total`                                                                                                                  | `roll.hbs:7`                                                            |
-| Dice          | One `li.roll.die.d10` per die in the tooltip, opened by core's `expandRoll` action                                               | `tooltip.hbs:18-20`, `roll.hbs:1`                                       |
-| Dropped dice  | `discarded`: faded to `opacity(0.4)`; the system adds a line through the number, a mark that is not color (Stage 17 decision 16) | `public/css/foundry2.css:5726-5730`; `components/dice-row.md` DR5       |
-| Exploded dice | `exploded`: an icon before the number. `L5R4Die` adds each explosion into its die, so the number is the die's total              | `foundry2.css:5731-5734`, `module/services/dice/roll-keep-die.js:41-49` |
+| Part          | Core shows                                                                                                                       | Source                                                                                       |
+| ------------- | -------------------------------------------------------------------------------------------------------------------------------- | -------------------------------------------------------------------------------------------- |
+| Formula       | The pool as core's formula (`dice-formula`)                                                                                      | [src: templates/dice/roll.hbs:6]                                                             |
+| Total         | `h4.dice-total`                                                                                                                  | [src: templates/dice/roll.hbs:8]                                                             |
+| Dice          | One `li.roll.die.d10` per die in the tooltip, opened by core's `expandRoll` action                                               | [src: templates/dice/tooltip.hbs:18-20], [src: templates/dice/roll.hbs:1]                    |
+| Dropped dice  | `discarded`: faded to `opacity(0.4)`; the system adds a line through the number, a mark that is not color (Stage 17 decision 16) | `public/css/foundry2.css:5726-5730`; `components/dice-row.md` DR5                            |
+| Exploded dice | `exploded`: an icon before the number. `L5R4Die` adds each explosion into its die, so the number is the die's total              | `foundry2.css:5731-5734`, `L5R4Die#rollExplosions` (`module/services/dice/roll-keep-die.js`) |
 
 ## Actions
 
-| Card          | Button                          | `data-action`                                       | Shown when                                    | Who may use it                                                                |
-| ------------- | ------------------------------- | --------------------------------------------------- | --------------------------------------------- | ----------------------------------------------------------------------------- |
-| Check card    | Contested Strength roll         | `combat-contest`                                    | A hit with Knockdown or Disarm on a target    | Each side's owner rolls that side (`module/services/combat/contest.js:41-48`) |
-| Check card    | Grapple                         | `grapple-start`                                     | A hit that declared a grapple                 | The attacker's owner (`module/services/combat/grapple.js:227-231`)            |
-| Check card    | Apply to the target             | `damage-apply-target`                               | A damage roll with a target                   | The roller or the GM, through the GM's client                                 |
-| Check card    | Apply to selected               | `damage-apply-selected`                             | Every damage roll                             | As above                                                                      |
-| Check card    | Apply a condition to the target | `apply-condition` with `data-index`                 | A success whose rules offer a condition       | The roller or the GM                                                          |
-| Check card    | Damage roll                     | `check-damage`                                      | A hit that is not a grapple                   | The roller or the GM; Shift skips the dialog                                  |
-| Check card    | Honor Roll                      | `honor-roll`                                        | A failed roll the Honor Roll setting covers   | The actor's owner, once per session                                           |
-| Damage result | Reduce with Void                | `damage-void`                                       | Wounds taken, no Void Point spent, not undone | The damaged actor's owner; removed for others                                 |
-| Damage result | Undo                            | `damage-undo`                                       | Not undone                                    | The roller or the GM                                                          |
-| Effect prompt | Roll                            | `effect-prompt`                                     | Always                                        | The actor's owner                                                             |
-| Flow card     | Each step of a duel or grapple  | `data-flow-action` with `data-duelist`, `data-side` | The flow's state offers it                    | Checked on the GM's client per step                                           |
-| Request card  | Roll with my character          | `check-request-roll`                                | Always                                        | Any user with a character or a controlled token                               |
+| Card          | Button                          | `data-action`                                       | Shown when                                    | Who may use it                                                                          |
+| ------------- | ------------------------------- | --------------------------------------------------- | --------------------------------------------- | --------------------------------------------------------------------------------------- |
+| Check card    | Contested Strength roll         | `combat-contest`                                    | A hit with Knockdown or Disarm on a target    | Each side's owner rolls that side (`rollContest` (`module/services/combat/contest.js`)) |
+| Check card    | Grapple                         | `grapple-start`                                     | A hit that declared a grapple                 | The attacker's owner (`startGrapple` (`module/services/combat/grapple.js`))             |
+| Check card    | Apply to the target             | `damage-apply-target`                               | A damage roll with a target                   | The roller or the GM, through the GM's client                                           |
+| Check card    | Apply to selected               | `damage-apply-selected`                             | Every damage roll                             | As above                                                                                |
+| Check card    | Apply a condition to the target | `apply-condition` with `data-index`                 | A success whose rules offer a condition       | The roller or the GM                                                                    |
+| Check card    | Damage roll                     | `check-damage`                                      | A hit that is not a grapple                   | The roller or the GM; Shift skips the dialog                                            |
+| Check card    | Honor Roll                      | `honor-roll`                                        | A failed roll the Honor Roll setting covers   | The actor's owner, once per session                                                     |
+| Damage result | Reduce with Void                | `damage-void`                                       | Wounds taken, no Void Point spent, not undone | The damaged actor's owner; removed for others                                           |
+| Damage result | Undo                            | `damage-undo`                                       | Not undone                                    | The roller or the GM                                                                    |
+| Effect prompt | Roll                            | `effect-prompt`                                     | Always                                        | The actor's owner                                                                       |
+| Flow card     | Each step of a duel or grapple  | `data-flow-action` with `data-duelist`, `data-side` | The flow's state offers it                    | Checked on the GM's client per step                                                     |
+| Request card  | Roll with my character          | `check-request-roll`                                | Always                                        | Any user with a character or a controlled token                                         |
 
 The check card's context menu adds "re-roll and keep the better" (the message's author) and "contest the previous
-roll" (`module/services/dice/check/chat-actions.js:255-280`). Those entries are core's context menu, not card markup.
+roll" (`onGetChatMessageContextOptions` (`module/services/dice/check/chat-actions.js`)). Those entries are core's context menu, not card markup.
 
 ## Fixed names
 
@@ -80,7 +80,7 @@ with the reason is in `docs/code-system/naming.md`, Fixed names.
 | Card modifiers              | `-undone`, `-gap-sm`; on posted item cards `item`, `title`, `-bio`, `-expandable`, `-<subtype>`                                                                                                                                                                                                                                                                                                                                                                                                                             |
 | Card actions                | `apply-wounds`, `reduce-wounds-void`, `check-damage`, `apply-condition`, `honor-roll`, `combat-contest`, `grapple-start`, `damage-apply-target`, `damage-apply-selected`, `damage-void`, `damage-undo`, `effect-prompt`, `check-request-roll`                                                                                                                                                                                                                                                                               |
 | Flow actions and attributes | `data-flow-action` values `control`, `hit`, `throw`, `break`, `pass`, `roll`, `concede`; `data-side`, `data-duelist`, `data-index`, `data-item-id`, `data-document-id`, `data-document-type`                                                                                                                                                                                                                                                                                                                                |
-| Cards posted before 4.0.0   | `data-attack-raises`, `data-damage-roll`, `data-damage-keep`, `data-weapon-name`, `data-weapon-id`, `data-actor-id`, `data-damage` on `l5r4-damage-button`, `apply-wounds`, and `reduce-wounds-void` (`module/services/chat.js:121-168`, `module/services/combat/legacy-damage.js:174-227`)                                                                                                                                                                                                                                 |
+| Cards posted before 4.0.0   | `data-attack-raises`, `data-damage-roll`, `data-damage-keep`, `data-weapon-name`, `data-weapon-id`, `data-actor-id`, `data-damage` on `l5r4-damage-button`, `apply-wounds`, and `reduce-wounds-void` (`validateLegacyDamageClick` (`module/services/chat.js`), `bindLegacyDamageCard` (`module/services/combat/legacy-damage.js`))                                                                                                                                                                                          |
 
 `dice-flavor`, `flexrow`, and the icon classes inside a posted card are core's or stored; a card written today uses
 `fa-solid` (`foundations/iconography.md` rule 1), and an older card's `fas` still renders.
@@ -95,32 +95,32 @@ fixed name. A new card takes `chat-card` and its own `l5r4-<card>` root, and keb
 (`docs/code-system/naming.md`). Enforced by `tests/conventions/actions.test.js` and
 `tests/conventions/templates.test.js`, both exempting the names above.
 
-Conforming, `templates/chat/damage-result.hbs:1`: `chat-card l5r4-damage-result` with the fixed `-undone` state.
+Conforming, `templates/chat/damage-result.hbs`: `chat-card l5r4-damage-result` with the fixed `-undone` state.
 
-Non-conforming, modeled: renaming `damage-void` to `reduce-with-void` in `damage-result.hbs:8`. Every card posted
-before the change loses its button binding, because `bindDamageCards` looks it up by name
-(`module/services/combat/damage.js:340-345`).
+Non-conforming, modeled: renaming `damage-void` to `reduce-with-void` in `templates/chat/damage-result.hbs`. Every card
+posted before the change loses its button binding, because `bindDamageCards` (`module/services/combat/damage.js`)
+looks it up by name.
 
 ### 2. Behavior reads the message, never the card
 
 A button finds its data in `message.system` or the message's flags (the check card's context, the damage result's
 `flags.l5r4-enhanced.damageResult`, the prompt's `flags.l5r4-enhanced.prompt`), never in attributes parsed from the
 card's HTML, which a user can edit. Cards posted before 4.0.0 carry their dice in attributes; that path validates every
-value (`module/services/chat.js:115-168`). Enforced by review (`docs/code-system/foundry-patterns.md`, Chat cards,
+value (`validateLegacyDamageClick` (`module/services/chat.js`)). Enforced by review (`docs/code-system/foundry-patterns.md`, Chat cards,
 step 4).
 
-Conforming, `module/services/dice/check/chat-actions.js:208-222`: the condition comes from
+Conforming, `applyConditionFromMessage` (`module/services/dice/check/chat-actions.js`): the condition comes from
 `message.system.conditions[index]`; the button carries only the index.
 
-Non-conforming, `module/services/combat/legacy-damage.js:196`: `parseInt(event.currentTarget.dataset.damage)` takes the
-Wounds to apply from the card. It serves only pre-4.0.0 cards; no new card does this.
+Non-conforming, `bindLegacyDamageCard` (`module/services/combat/legacy-damage.js`):
+`parseInt(event.currentTarget.dataset.damage)` takes the Wounds to apply from the card. It serves only pre-4.0.0 cards; no new card does this.
 
 ### 3. One card, one template, no markup in JavaScript
 
 Every card renders from a template in `templates/chat/` listed in `CHAT_TEMPLATES`. No card is built from an HTML
 string. Enforced by ESLint `no-restricted-syntax` (no HTML strings) and review.
 
-Conforming, `module/services/check-request.js:31-37`.
+Conforming, `postCheckRequest` (`module/services/check-request.js`): it renders `CHAT_TEMPLATES.checkRequest`.
 
 Conforming, `templates/chat/contest.hbs`: the contest card, rendered with the classes posted cards already store.
 Non-conforming (modeled): a card built as a template literal or a `<p>` string in JavaScript.
@@ -133,7 +133,7 @@ is never a dead control. Where only the click can tell (permission resolved on t
 limit), the button stays, and a refused click shows a warning notification (`patterns/feedback.md`). No card part is
 hidden by color, opacity, or a GM-only class. Enforced by review and each card's Quench batch.
 
-Conforming, `module/services/combat/damage.js:339-343`: `damage-void` is removed when the viewer does not own the
+Conforming, `bindDamageCards` (`module/services/combat/damage.js`): `damage-void` is removed when the viewer does not own the
 damaged actor.
 
 Non-conforming, modeled: a Reduce with Void button greyed out for non-owners, which still takes a click and does
@@ -147,8 +147,8 @@ posted with `ChatMessage.create` (damage results, prompts, flow cards, request c
 (`client/documents/chat-message.mjs:552-555`). A whispered card is the same template; core marks it as whispered in
 its header. The system adds no whisper styling and no card that is GM-only by markup. Enforced by review.
 
-Conforming, `module/services/dice/check/roll-check.js:544-549`: `toMessage` with no `messageMode`, so the user's mode
-applies.
+Conforming, `postCheck` (`module/services/dice/check/roll-check.js`): `toMessage` with no `messageMode`, so the user's
+mode applies.
 
 Non-conforming, modeled: a card that hides its total with a CSS class for players, while the total stays in the
 message's HTML for anyone to read.
@@ -159,11 +159,11 @@ Each card component has one file in `scss/components/`, named for its page: `_ch
 column layout, buttons one per row), `_check-card.scss`, `_damage-result.scss`, `_flow-card.scss`,
 `_request-card.scss`, `_item-summary-card.scss`, all targets. The selectors start at the card's fixed root class
 (`l5r4-check`, `l5r4-check-request`, `l5r4-item-summary`, ...); none reaches into core's dice row except the
-dropped-dice mark in `_check-card.scss` (`components/dice-row.md` DR5). `scss/components/_chat-card.scss` goes, and the check
-dialog's rules in it (`:64-87`) move to `scss/components/_check-dialog.scss`. Enforced by `tests/conventions/names.test.js` (the entry is the only top-level
+dropped-dice mark in `_check-card.scss` (`components/dice-row.md` DR5). `scss/components/_chat-card.scss` goes; the check
+dialog's rules live in `scss/components/_check-dialog.scss`. Enforced by `tests/conventions/names.test.js` (the entry is the only top-level
 file) and `tests/conventions/styles.test.js` (one component per file).
 
-Conforming, modeled on `scss/components/_chat-card.scss:48-61`:
+Conforming, modeled on `.l5r4-damage-result` (`scss/components/_chat-card.scss`):
 
 ```scss
 .l5r4-damage-result {
@@ -177,8 +177,8 @@ Conforming, modeled on `scss/components/_chat-card.scss:48-61`:
 }
 ```
 
-Non-conforming, `scss/components/_request-card.scss:6-8`: the request card's rule in the effect panel's file, and
-`scss/components/_chat-card.scss:59-61`: the undone card at a literal `opacity: 0.7`.
+Non-conforming, `.l5r4-damage-result.-undone` (`scss/components/_chat-card.scss`): the undone card at a literal
+`opacity: 0.7`.
 
 ### 7. One key per line of card text
 
@@ -187,25 +187,26 @@ with a verb and names its object (`content/voice.md`, Buttons). Copy is not a fi
 cards only (`content/voice.md`, Fixed names). Enforced by review (`docs/code-system/templates-and-styles.md`, one key
 per label) and `tests/lang.test.js` for the letter case.
 
-Conforming, `templates/chat/check.hbs:54`:
+Conforming, `data-action="apply-condition"` (`templates/chat/check.hbs`):
 
 ```hbs
 {{localize "l5r4.ui.effects.applyTo" effect=label target=../target.name}}
 ```
 
-Non-conforming, `templates/chat/check.hbs:42`: `{{localize "l5r4.ui.combat.applyTo"}} {{applyTarget}}` joins
-"Apply to" and a name; `:13-19` builds the TN line from five keys and literal parentheses.
+Non-conforming, `data-action="damage-apply-target"` (`templates/chat/check.hbs`):
+`{{localize "l5r4.ui.combat.applyTo"}} {{applyTarget}}` joins "Apply to" and a name; `l5r4-tn-result`
+(`templates/chat/check.hbs`) builds the TN line from five keys and literal parentheses.
 
 ## States
 
-| State   | Look                                                                                                  | Carried by                                                           |
-| ------- | ----------------------------------------------------------------------------------------------------- | -------------------------------------------------------------------- |
-| Success | The outcome word in the TN line                                                                       | Text: "Success" (`l5r4.ui.mechanics.rolls.success`)                  |
-| Failure | The outcome word: "Failure", or "Missed" on an attack                                                 | Text (`card.js:628`, `:633`)                                         |
-| No TN   | No TN line; the total stands alone                                                                    | `tn` null (`card.js:631`)                                            |
-| Undone  | The whole card at the disabled opacity, its buttons gone, an "Undone." note                           | The fixed `-undone` class and the note (`damage-result.hbs:1-12`)    |
-| Updated | The card's content replaced in place: a damage result after Void or Undo, a flow card after each step | `message.update({ content })` (`damage.js:185-187`, `flow.js:92-95`) |
-| Busy    | A button whose action waits on the GM disables until it returns (`foundations/states.md`, Loading)    | `disabled`, `aria-busy`                                              |
+| State   | Look                                                                                                  | Carried by                                                                                                                             |
+| ------- | ----------------------------------------------------------------------------------------------------- | -------------------------------------------------------------------------------------------------------------------------------------- |
+| Success | The outcome word in the TN line                                                                       | Text: "Success" (`l5r4.ui.mechanics.rolls.success`)                                                                                    |
+| Failure | The outcome word: "Failure", or "Missed" on an attack                                                 | Text: `outcomeText` in `renderCheckCard` (`module/services/dice/check/card.js`)                                                        |
+| No TN   | No TN line; the total stands alone                                                                    | `tn` null, in `renderCheckCard` (`module/services/dice/check/card.js`)                                                                 |
+| Undone  | The whole card at the disabled opacity, its buttons gone, an "Undone." note                           | The fixed `-undone` class and the note (`templates/chat/damage-result.hbs`)                                                            |
+| Updated | The card's content replaced in place: a damage result after Void or Undo, a flow card after each step | `update` with the new `content`: `postResult` (`module/services/combat/damage.js`), `applyFlowStep` (`module/services/combat/flow.js`) |
+| Busy    | A button whose action waits on the GM disables until it returns (`foundations/states.md`, Loading)    | `disabled`, `aria-busy`                                                                                                                |
 
 A state never rests on color: the outcome is a word, the undone card says so.
 
@@ -216,18 +217,18 @@ A state never rests on color: the outcome is a word, the undone card says so.
 | Controls    | Every action is a `<button type="button">` with a visible label (all card buttons today)                  |
 | Order       | Title, modifiers, dice, outcome, notes, then the buttons, so a reader hears the result before the choices |
 | Dice detail | Core's `expandRoll` opens the dice tooltip; the system adds no other disclosure                           |
-| Icons       | `inert` (`templates/chat/check-request.hbs:5`); the label carries the meaning                             |
+| Icons       | `inert` (`templates/chat/check-request.hbs`); the label carries the meaning                               |
 | New cards   | Core announces nothing for a new message; the card's first line, the title, says what happened in words   |
 
 ## Long text
 
-| Element       | Behavior                                                                                                                                                           |
-| ------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------ |
-| Title         | Wraps; a long label or target name takes a second line                                                                                                             |
-| Buttons       | Full width, one per row, so a long label wraps and the button keeps its height (`scss/components/_chat-card.scss:47-57`; `foundations/space-and-size.md`, Density) |
-| Notes         | Wrap                                                                                                                                                               |
-| Modifier list | One line per modifier; a long source name wraps inside its line                                                                                                    |
-| Dice          | Core's: a pool past one line of dice wraps in the tooltip                                                                                                          |
+| Element       | Behavior                                                                                                                                                                                       |
+| ------------- | ---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| Title         | Wraps; a long label or target name takes a second line                                                                                                                                         |
+| Buttons       | Full width, one per row, so a long label wraps and the button keeps its height (`.l5r4-flow-card .flow-actions` (`scss/components/_chat-card.scss`); `foundations/space-and-size.md`, Density) |
+| Notes         | Wrap                                                                                                                                                                                           |
+| Modifier list | One line per modifier; a long source name wraps inside its line                                                                                                                                |
+| Dice          | Core's: a pool past one line of dice wraps in the tooltip                                                                                                                                      |
 
 ## Do and don't
 

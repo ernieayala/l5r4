@@ -35,14 +35,14 @@ in backticks, one space, then `(target)` with nothing else inside the parenthese
 
 The design system's other pages use the same form. `tests/conventions/design-system.test.js` reads every backticked
 path that starts `templates/` or `scss/` in `docs/design-system/`: one followed by ` (target)` must not exist yet, and
-every other must exist, its `:line` suffix aside; a path holding a `<placeholder>` or `*` is skipped. Core's files are
+every other must exist; a path holding a `<placeholder>` or `*` is skipped. Core's files are
 written from `resources/app/` (`resources/app/templates/dice/roll.hbs`), so the check skips them too. The fix pass creates each target
 and registers a new partial in `PRELOAD_TEMPLATES` (`module/config/templates.js`); once a target exists, its page drops the marker.
 
 ### One name for block, file, and page
 
 Block, file, and page share one name: `scss/components/_<name>.scss` styles `.l5r4-<name>` and is documented in
-`components/<name>.md` (`tests/conventions/design-system.test.js`). A window's file sits in `scss/apps/` instead, named
+`components/<name>.md`, which `tests/conventions/design-system.test.js` checks. A window's file sits in `scss/apps/` instead, named
 as its `module/apps/` file (`effect-panel.md`, `compendium-browser.md`;
 `docs/code-system/templates-and-styles.md`, Folders). A chat card whose root class is a fixed name keeps that class as
 its block, and its file takes the page's name: `_request-card.scss` styles `.l5r4-check-request`, `_check-card.scss`

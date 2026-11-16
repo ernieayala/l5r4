@@ -3,28 +3,28 @@
 The NPC sidebar block for a creature's Fear: its Fear Rank as a number the GM types, and, when the rank is above 0, a
 button that rolls Fear for the selected tokens.
 
-| Item        | Detail                                                                                                                                         |
-| ----------- | ---------------------------------------------------------------------------------------------------------------------------------------------- |
-| Partial     | `templates/actor/_partials/_fear.hbs`                                                                                                          |
-| Parameters  | The sheet context: `system.fear.rank`                                                                                                          |
-| SCSS        | None of its own: `section.md`, `grid.md`, and `button.md` draw it                                                                              |
-| Block class | `l5r4-fear` on the section                                                                                                                     |
-| Shows in    | NPC sidebar (`npc.hbs:9`)                                                                                                                      |
-| Handler     | `NpcActionsHandler.testFear` (`module/sheets/handlers/npc-actions-handler.js:582-591`), then `handleFearClick` (`module/services/fear.js:162`) |
-| Game terms  | Fear, Fear Rank (`game-rules/42_fear.md, p.90`)                                                                                                |
-| Gallery     | Rank 0 (no button), rank 3, rank 10; the button hovered and focused                                                                            |
+| Item        | Detail                                                                                                                         |
+| ----------- | ------------------------------------------------------------------------------------------------------------------------------ |
+| Partial     | `templates/actor/_partials/_fear.hbs`                                                                                          |
+| Parameters  | The sheet context: `system.fear.rank`                                                                                          |
+| SCSS        | None of its own: `section.md`, `grid.md`, and `button.md` draw it                                                              |
+| Block class | `l5r4-fear` on the section                                                                                                     |
+| Shows in    | NPC sidebar (`templates/actor/npc.hbs`)                                                                                        |
+| Handler     | `NpcActionsHandler.testFear` (`module/sheets/handlers/npc-actions-handler.js`), then `onFearClick` (`module/services/fear.js`) |
+| Game terms  | Fear, Fear Rank (`game-rules/42_fear.md, p.90`)                                                                                |
+| Gallery     | Rank 0 (no button), rank 3, rank 10; the button hovered and focused                                                            |
 
 ## Anatomy
 
-| Part       | Element                                                                                        | Class                         | Class now                                |
-| ---------- | ---------------------------------------------------------------------------------------------- | ----------------------------- | ---------------------------------------- |
-| Section    | `<section>`                                                                                    | `l5r4-section l5r4-fear`      | `fear` (`_fear.hbs:1`)                   |
-| Title bar  | Compact section title, "Fear Rank"                                                             | `l5r4-section-title -compact` | `section-title` with `h4.title.-compact` |
-| Grid       | One row: "Rank" and the input                                                                  | `l5r4-grid`                   | `grid` (`_fear.hbs:6`)                   |
-| Rank input | `<input type="number" name="system.fear.rank" min="0" max="10" data-type="Number" aria-label>` | none                          | same, no name (`_fear.hbs:9-16`)         |
-| Fear test  | Core `<button type="button" data-action="test-fear" data-fear-rank data-tooltip>`              | `l5r4-fear-test`              | `a.button.fear-test` (`_fear.hbs:20-27`) |
+| Part       | Element                                                                                        | Class                         | Class now                                                                                                       |
+| ---------- | ---------------------------------------------------------------------------------------------- | ----------------------------- | --------------------------------------------------------------------------------------------------------------- |
+| Section    | `<section>`                                                                                    | `l5r4-section l5r4-fear`      | the target                                                                                                      |
+| Title bar  | Compact section title, "Fear Rank"                                                             | `l5r4-section-title -compact` | `l5r4-section-title` with `h4.l5r4-section-heading.-compact`                                                    |
+| Grid       | One row: "Rank" and the input                                                                  | `l5r4-grid`                   | the target                                                                                                      |
+| Rank input | `<input type="number" name="system.fear.rank" min="0" max="10" data-type="Number" aria-label>` | none                          | same, no `aria-label`: `name="system.fear.rank"` (`templates/actor/_partials/_fear.hbs`)                        |
+| Fear test  | Core `<button type="button" data-action="test-fear" data-fear-rank data-tooltip>`              | `l5r4-fear-test`              | the target, with core's `button` class: `class="button l5r4-fear-test"` (`templates/actor/_partials/_fear.hbs`) |
 
-The test button's label reads "Fear {rank}" (`l5r4.ui.mechanics.fear.fearLabel`), so the rank it rolls is on the button.
+The test button's label reads "Fear {rank}" (`l5r4.ui.mechanics.fear.label`), so the rank it rolls is on the button.
 
 ## Variants
 
@@ -35,13 +35,13 @@ The test button's label reads "Fear {rank}" (`l5r4.ui.mechanics.fear.fearLabel`)
 
 ## States
 
-| State         | Look                                                                                                                              | Markup            |
-| ------------- | --------------------------------------------------------------------------------------------------------------------------------- | ----------------- |
-| Rest          | Grid and core button rest looks                                                                                                   |                   |
-| Hover         | Core's button hover                                                                                                               | `:hover`          |
-| Focus-visible | Core's focus ring on the button; core's field outline on the input                                                                | `:focus-visible`  |
-| No target     | The button stays enabled; a press with no token selected warns `l5r4.ui.mechanics.fear.noTargets` (`module/services/fear.js:175`) | None              |
-| Read-only     | Core disables the input and the button on a sheet the viewer cannot edit (`button.md` B8)                                         | Core's `disabled` |
+| State         | Look                                                                                                                                             | Markup            |
+| ------------- | ------------------------------------------------------------------------------------------------------------------------------------------------ | ----------------- |
+| Rest          | Grid and core button rest looks                                                                                                                  |                   |
+| Hover         | Core's button hover                                                                                                                              | `:hover`          |
+| Focus-visible | Core's focus ring on the button; core's field outline on the input                                                                               | `:focus-visible`  |
+| No target     | The button stays enabled; a press with no token selected warns `l5r4.ui.mechanics.fear.noTargets` from `onFearClick` (`module/services/fear.js`) | None              |
+| Read-only     | Core disables the input and the button on a sheet the viewer cannot edit (`button.md` B8)                                                        | Core's `disabled` |
 
 ## Tokens
 
@@ -69,12 +69,12 @@ The button label is short ("Fear 3") and wraps inside the button if a translatio
 | R3  | The rank input names itself with the label cell's key             | Review, in the gallery                                                                      |
 | R4  | The section heading and the grid label do not repeat each other   | Review                                                                                      |
 
-| #   | Conforming                                                                                                                  | Non-conforming                                                                                           |
-| --- | --------------------------------------------------------------------------------------------------------------------------- | -------------------------------------------------------------------------------------------------------- |
-| R1  | `<button type="button" class="l5r4-fear-test" data-action="test-fear" data-fear-rank="{{system.fear.rank}}" ...>` (modeled) | `<a class="button fear-test" data-action="test-fear" ...>` (`templates/actor/_partials/_fear.hbs:20-25`) |
-| R2  | "Roll Fear for the selected tokens" (modeled)                                                                               | "Click to test Fear against selected characters" (`lang/en.json:555`)                                    |
-| R3  | `aria-label="{{localize "l5r4.ui.mechanics.fear.fearRank"}}"` on the input (modeled)                                        | The input with no name (`templates/actor/_partials/_fear.hbs:9-16`)                                      |
-| R4  | Heading "Fear", grid label "Fear Rank" (modeled)                                                                            | Heading "Fear Rank" over a grid label "Rank" (`_fear.hbs:3`, `:7`)                                       |
+| #   | Conforming                                                                                                                  | Non-conforming                                                                                                                                  |
+| --- | --------------------------------------------------------------------------------------------------------------------------- | ----------------------------------------------------------------------------------------------------------------------------------------------- |
+| R1  | `<button type="button" class="l5r4-fear-test" data-action="test-fear" data-fear-rank="{{system.fear.rank}}" ...>` (modeled) | `<a class="button fear-test" data-action="test-fear" ...>` (modeled)                                                                            |
+| R2  | "Roll Fear for the selected tokens": `l5r4.ui.mechanics.fear.rollForSelected` (`lang/en.json`)                              | "Click to test Fear against selected characters" (modeled)                                                                                      |
+| R3  | `aria-label="{{localize "l5r4.ui.mechanics.fear.rank"}}"` on the input (modeled)                                            | The input, `name="system.fear.rank"` (`templates/actor/_partials/_fear.hbs`), with no `aria-label`                                              |
+| R4  | Heading "Fear", grid label "Fear Rank" (modeled)                                                                            | Heading "Fear Rank" over a grid label "Rank": `l5r4.ui.mechanics.fear.rank`, then `l5r4.ui.common.rank` (`templates/actor/_partials/_fear.hbs`) |
 
 ## Do and don't
 

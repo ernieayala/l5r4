@@ -27,12 +27,12 @@ another window, the sidebar, or a tooltip.
 Declared on `:root` in `scss/base/_variables.scss`. The values are the ones the code uses now, so the order on screen
 stays the same.
 
-| Token                    | Value | Use                                                                                   | Replaces                                                                                      |
-| ------------------------ | ----- | ------------------------------------------------------------------------------------- | --------------------------------------------------------------------------------------------- |
-| `--l5r4-layer-behind`    | -1    | A decorative backdrop drawn behind its block's content: the brush frame of the header | `scss/features/_pc-info.scss:23`                                                              |
-| `--l5r4-layer-raised`    | 1     | The face of a Ring rank medallion, above the medallion's own parchment `::before`     | `scss/features/_traits-rings.scss:156`                                                        |
-| `--l5r4-layer-medallion` | 10    | A Ring rank medallion where it overlaps its Ring image                                | `scss/features/_traits-rings.scss:91`, `:274` (`.void-points-amount`, which no template uses) |
-| `--l5r4-layer-control`   | 11    | Rank step arrows, which slide out over the medallion and the Trait row                | `scss/features/_traits-rings.scss:45`                                                         |
+| Token                    | Value | Use                                                                                   | Read at                                                                 |
+| ------------------------ | ----- | ------------------------------------------------------------------------------------- | ----------------------------------------------------------------------- |
+| `--l5r4-layer-behind`    | -1    | A decorative backdrop drawn behind its block's content: the brush frame of the header | The `&::before` of `.l5r4-pc-info` (`scss/features/_pc-info.scss`)      |
+| `--l5r4-layer-raised`    | 1     | The face of a Ring rank medallion, above the medallion's own parchment `::before`     | `.l5r4-ring-rank-face` (`scss/features/_traits-rings.scss`)             |
+| `--l5r4-layer-medallion` | 10    | A Ring rank medallion where it overlaps its Ring image                                | `.l5r4-ring-rank` (`scss/features/_traits-rings.scss`)                  |
+| `--l5r4-layer-control`   | 11    | Rank step arrows, which slide out over the medallion and the Trait row                | The arrows of `@mixin rank-arrows` (`scss/features/_traits-rings.scss`) |
 
 ## Rules
 
@@ -40,7 +40,7 @@ stays the same.
 
 Enforced by `tests/conventions/styles.test.js` (no literal `z-index` outside `base/`; every token used is declared).
 
-Conforming, modeled on `scss/features/_traits-rings.scss:91`:
+Conforming, modeled on `.l5r4-ring-rank` (`scss/features/_traits-rings.scss`):
 
 ```scss
 .l5r4-ring-rank {
@@ -49,7 +49,7 @@ Conforming, modeled on `scss/features/_traits-rings.scss:91`:
 }
 ```
 
-Non-conforming, `scss/features/_traits-rings.scss:45`:
+Non-conforming (modeled):
 
 ```scss
 .trait-increase,
@@ -62,13 +62,13 @@ Non-conforming, `scss/features/_traits-rings.scss:45`:
 
 The effect panel, the compendium browser, the managers, and every dialog are ApplicationV2 windows: core gives them
 `--z-index-window` and brings the focused one to the front. Floating numbers go through
-`canvas.interface.createScrollingText` (`module/services/scrolling-text.js:69`) and status animations through
+`canvas.interface.createScrollingText` in `startScrollingText` (`module/services/scrolling-text.js`) and status animations through
 Sequencer; both draw on the canvas, which has no CSS stacking. The system sets no `z-index` on a window root, a
 tooltip, or a chat message. Enforced by `tests/conventions/styles.test.js` (rule 1: any `z-index` reads a layer token,
 and every layer token sits below 30) and review for the selector it lands on.
 
-Conforming, `module/apps/effect-panel.js:22-27`: the panel's `DEFAULT_OPTIONS` set an id, classes, and a window icon,
-and no stacking.
+Conforming, `EffectPanel.DEFAULT_OPTIONS` (`module/apps/effect-panel.js`): the panel's options set an id, classes, a
+window icon, and a position, and no stacking.
 
 Non-conforming, modeled on a window root:
 
@@ -104,11 +104,12 @@ Non-conforming:
 ### 4. A layer token stays inside its component's stacking context
 
 `--l5r4-layer-behind` puts a backdrop behind content only while its block creates no stacking context of its own:
-`.pc-info` is `position: relative` with no `z-index` (`scss/features/_pc-info.scss:11`). Giving such a block a
+`.l5r4-pc-info` (`scss/features/_pc-info.scss`) is `position: relative` with no `z-index`. Giving such a block a
 `z-index`, `isolation`, `opacity` below 1, or a `transform` moves the backdrop in front of the block's background and
 changes the look. Enforced by review; the gallery shows the header in both themes.
 
-Conforming, `scss/features/_pc-info.scss:8-24`: the block is `position: relative`; only its `::before` takes a layer.
+Conforming, `.l5r4-pc-info` (`scss/features/_pc-info.scss`): the block is `position: relative`; only its `::before`
+takes a layer.
 
 Non-conforming:
 

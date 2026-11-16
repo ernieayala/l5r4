@@ -3,29 +3,27 @@
 The top of the item sheet: the item's image, its name as an editable field, and, for an item from the system's
 compendiums, the book citation it carries in place of the book's text.
 
-| Item        | Detail                                                                                                         |
-| ----------- | -------------------------------------------------------------------------------------------------------------- |
-| Partial     | `templates/item/_partials/_header.hbs`, the item sheet's `header` part (`module/sheets/item-sheet.js:176-178`) |
-| Parameters  | `item` (the document), `summary.citation` (from `summaryText`, `module/sheets/item-sheet.js:352`)              |
-| SCSS        | `scss/components/_item-header.scss` (target), holding `layout/_item-layout.scss:20-26`                         |
-| Block class | `l5r4-item-header`                                                                                             |
-| Shows in    | The item sheet, every subtype                                                                                  |
-| Gallery     | A header with and without a citation, with a long name, on an editable and a read-only sheet                   |
+| Item        | Detail                                                                                                                                    |
+| ----------- | ----------------------------------------------------------------------------------------------------------------------------------------- |
+| Partial     | `templates/item/_partials/_header.hbs`, the `header` part of `L5R4ItemSheet.PARTS` (`module/sheets/item-sheet.js`)                        |
+| Parameters  | `item` (the document), `summary.citation` (from `summaryOf` (`module/documents/summary.js`), which `L5R4ItemSheet#_prepareContext` calls) |
+| SCSS        | `scss/components/_item-header.scss` (target), holding `.l5r4-item-header` (`scss/layout/_item-layout.scss`)                               |
+| Block class | `l5r4-item-header`                                                                                                                        |
+| Shows in    | The item sheet, every subtype                                                                                                             |
+| Gallery     | A header with and without a citation, with a long name, on an editable and a read-only sheet                                              |
 
 ## Anatomy
 
-| Part     | Element                                                     | Class                              | Class now                                                                        |
-| -------- | ----------------------------------------------------------- | ---------------------------------- | -------------------------------------------------------------------------------- |
-| Header   | `<header>`                                                  | `l5r4-item-header flexrow -gap-md` | `sheet-header flexrow -gap-md` (`_header.hbs:1`)                                 |
-| Image    | `<img data-action="editImage" data-edit="img" alt>`         | `l5r4-item-header-image`           | `img.flex0.profile` with `height="64" width="64"` and no `alt` (`_header.hbs:2`) |
-| Fields   | `<div>`                                                     | `l5r4-item-header-fields`          | `header-fields`                                                                  |
-| Name     | `<h1>` holding `<input type="text" name="name" aria-label>` | `l5r4-item-header-name`            | `h1.document-name`                                                               |
-| Citation | `<p>`                                                       | `l5r4-citation` (fixed)            | same (`_header.hbs:8`)                                                           |
+| Part     | Element                                                     | Class                              | Class now                                                      |
+| -------- | ----------------------------------------------------------- | ---------------------------------- | -------------------------------------------------------------- |
+| Header   | `<header>`                                                  | `l5r4-item-header flexrow -gap-md` | the target                                                     |
+| Image    | `<img data-action="editImage" data-edit="img" alt>`         | `l5r4-item-header-image`           | the target                                                     |
+| Fields   | `<div>`                                                     | `l5r4-item-header-fields`          | the target                                                     |
+| Name     | `<h1>` holding `<input type="text" name="name" aria-label>` | `l5r4-item-header-name`            | the target; the input has no `aria-label`                      |
+| Citation | `<p>`                                                       | `l5r4-citation` (fixed)            | same: `l5r4-citation` (`templates/item/_partials/_header.hbs`) |
 
-The image uses core's `editImage` action, as core's own sheets do (`resources/app/templates/sheets/base-sheet.hbs:4`):
-core opens the file picker and saves on change (`client/applications/api/document-sheet.mjs:376-394`). Today the item
-sheet's image has no click handler, so E1 gives it one it lacks: a behavior change, filed as its own issue and fixed in
-its own change (Stage 17 decision 10).
+The image uses core's `editImage` action, as core's own sheets do [src: templates/sheets/base-sheet.hbs:4]:
+core opens the file picker and saves on change (`client/applications/api/document-sheet.mjs:376-394`).
 
 ## Variants
 
@@ -36,13 +34,13 @@ its own change (Stage 17 decision 10).
 
 ## States
 
-| State         | Look                                                                                                   | Markup                                             |
-| ------------- | ------------------------------------------------------------------------------------------------------ | -------------------------------------------------- |
-| Rest          | Image at 64 by 64 px; name in core's `h1` face inside the input                                        |                                                    |
-| Hover (image) | Core's pointer cursor                                                                                  | `:hover`                                           |
-| Focus-visible | The name input shows core's field outline                                                              | `:focus`                                           |
-| Read-only     | Core disables the name input and adds its `disabled` class to the image (`document-sheet.mjs:224-226`) | Core's `disabled`                                  |
-| Empty name    | The input shows its placeholder                                                                        | `placeholder="{{localize "l5r4.ui.common.name"}}"` |
+| State         | Look                                                                                                                           | Markup                                             |
+| ------------- | ------------------------------------------------------------------------------------------------------------------------------ | -------------------------------------------------- |
+| Rest          | Image at 64 by 64 px; name in core's `h1` face inside the input                                                                |                                                    |
+| Hover (image) | Core's pointer cursor                                                                                                          | `:hover`                                           |
+| Focus-visible | The name input shows core's field outline                                                                                      | `:focus`                                           |
+| Read-only     | Core disables the name input and adds its `disabled` class to the image (`client/applications/api/document-sheet.mjs:224-226`) | Core's `disabled`                                  |
+| Empty name    | The input shows its placeholder                                                                                                | `placeholder="{{localize "l5r4.ui.common.name"}}"` |
 
 ## Tokens
 
@@ -79,13 +77,13 @@ The name input is one line and scrolls inside itself; the full name shows in the
 | E4  | The citation keeps its fixed class `l5r4-citation`, which posted item summary cards also use                               | `tests/conventions/templates.test.js` (fixed-name exempt list)               |
 | E5  | Styles sit under `.l5r4-item-header`, not under the sheet's `.l5r4.item`                                                   | `tests/conventions/styles.test.js`                                           |
 
-| #   | Conforming                                                                                                                         | Non-conforming                                                                                                                                                                                |
-| --- | ---------------------------------------------------------------------------------------------------------------------------------- | --------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| E1  | `<img src="{{source.img}}" data-action="editImage" data-edit="img" alt="...">` (`resources/app/templates/sheets/base-sheet.hbs:4`) | `<img class="flex0 profile" src="{{item.img}}" data-edit="img" ...>` (`templates/item/_partials/_header.hbs:2`): no action, and no handler in `module/sheets/item-sheet.js` reads `data-edit` |
-| E2  | `<img ... alt="{{item.name}}">` (modeled)                                                                                          | `<img ... title="{{item.name}}">` with `title` and no `alt` (`templates/item/_partials/_header.hbs:2`)                                                                                        |
-| E3  | `.l5r4-item-header-image { block-size: 64px; inline-size: 64px; }` (modeled)                                                       | `height="64" width="64"` (`templates/item/_partials/_header.hbs:2`)                                                                                                                           |
-| E4  | `<p class="l5r4-citation">{{summary.citation}}</p>` (`templates/item/_partials/_header.hbs:8`)                                     | Renaming it `l5r4-item-header-citation`, which unstyles the citation in posted cards                                                                                                          |
-| E5  | `.l5r4-item-header-name { margin: 0; }` (modeled on `layout/_item-layout.scss:20-22`)                                              | `.l5r4.item .header-fields > h1 { margin: 0; }` (`scss/layout/_item-layout.scss:20-26`)                                                                                                       |
+| #   | Conforming                                                                                                                                      | Non-conforming                                                                                                              |
+| --- | ----------------------------------------------------------------------------------------------------------------------------------------------- | --------------------------------------------------------------------------------------------------------------------------- |
+| E1  | `<img src="{{source.img}}" data-action="editImage" data-edit="img" alt="...">` [src: templates/sheets/base-sheet.hbs:4]                         | `<img class="flex0 profile" src="{{item.img}}" data-edit="img" ...>` (modeled): no action, and no handler reads `data-edit` |
+| E2  | `<img ... alt="{{item.name}}">` (modeled)                                                                                                       | `<img ... title="{{item.name}}">` with `title` and no `alt` (modeled)                                                       |
+| E3  | `.l5r4-item-header-image { block-size: 64px; inline-size: 64px; }` (modeled)                                                                    | `height="64" width="64"` (modeled)                                                                                          |
+| E4  | `<p class="l5r4-citation" data-citation>{{summary.citation}}</p>`, the `l5r4-citation` (`templates/item/_partials/_header.hbs`) paragraph       | Renaming it `l5r4-item-header-citation`, which unstyles the citation in posted cards                                        |
+| E5  | `.l5r4-item-header-name { margin: 0; }`, modeled on `.l5r4-item-header-fields > h1` (`scss/layout/_item-layout.scss`) under `.l5r4-item-header` | `.l5r4.item .header-fields > h1 { margin: 0; }` (modeled)                                                                   |
 
 ## Do and don't
 

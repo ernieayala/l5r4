@@ -31,8 +31,8 @@ is `l5r4/no-bare-prepare` (**Preparation order**); `l5r4/joined-title` holds a w
 Check: `l5r4/member-order`. Picked by majority where the code split: `DEFAULT_OPTIONS` first (13 of 15 classes),
 constructor and getters before `_prepareContext`.
 
-Conforming, modeled on `module/apps/effect-panel.js:20-140` (the file puts `#row` and `#source` before the actions and
-`toggle` / `refresh` after them; this order moves both, and the class takes its `naming.md` name):
+Conforming, modeled on `EffectPanel` (`module/apps/effect-panel.js`), which keeps this order; the block shows a few
+of its members under shorter names, and gives the class its `naming.md` name:
 
 ```js
 export default class EffectPanelApplication extends HandlebarsApplicationMixin(ApplicationV2) {
@@ -62,8 +62,8 @@ export default class EffectPanelApplication extends HandlebarsApplicationMixin(A
 }
 ```
 
-Not conforming, `module/sheets/pc-sheet.js:116` and `:457`: `PARTS` comes before `DEFAULT_OPTIONS`, and
-`DEFAULT_OPTIONS` comes after the action methods.
+Not conforming (modeled): `PARTS` comes before `DEFAULT_OPTIONS`, and `DEFAULT_OPTIONS` comes after the action
+methods.
 
 ### Window shape
 
@@ -84,11 +84,10 @@ Not conforming, `module/sheets/pc-sheet.js:116` and `:457`: `PARTS` comes before
 Picked by majority: the literal template path (125 uses) over `TEMPLATE()` (22), the unprefixed actor-window id (7 of
 10 apps), the inline mixin (8 of 12), `render(true)` (13 of 17 forced renders, against 4 `render({ force: true })`).
 
-Conforming, `module/apps/effect-panel.js:21-38` (with `classes` as above and the actions renamed to kebab-case,
-Stage 17 decision 15).
+Conforming, `EffectPanel.DEFAULT_OPTIONS` (`module/apps/effect-panel.js`).
 
-Not conforming, `module/apps/xp-manager.js:49`: the root class `xp-modal-dialog` matches neither the file nor the
-`l5r4-` prefix.
+Not conforming, `EffectPanel.openOrClose` (`module/apps/effect-panel.js`): it opens the panel with
+`render({ force: true })`, not `render(true)`.
 
 A template part renders one root element, or core throws [src: client/applications/api/handlebars-application.mjs:172].
 
@@ -108,7 +107,8 @@ A handler is the system's own method, not a Foundry override, so it takes `#`, n
 Picked by majority: `(event, element)` as parameter names (63 handlers against 23 with `target`), `DEFAULT_OPTIONS.actions`
 over own delegation (9 dispatch sites against 8 using delegation or class selectors).
 
-Conforming, modeled on `module/apps/effect-panel.js:30-33` and `:118-123`:
+Conforming, modeled on the `actions` of `EffectPanel.DEFAULT_OPTIONS` and on `EffectPanel.#onDeleteEffect`
+(`module/apps/effect-panel.js`):
 
 ```js
 static DEFAULT_OPTIONS = {
@@ -127,16 +127,17 @@ static DEFAULT_OPTIONS = {
 static async #onDeleteEffect(_event, element) {
 ```
 
-Not conforming, `module/apps/xp-manager.js:60-65`: handlers bound as `XpManagerApplication.prototype._onAddXp`, a
-`_name` on a method that is not a Foundry override.
+Not conforming (modeled): handlers bound as `XpManagerApplication.prototype._onAddXp`, a `_name` on a method that is
+not a Foundry override.
 
 #### Actor-sheet exception
 
 The PC and NPC sheets keep their own `data-action` routing (Stage 17 decision 16): `BaseActorSheet._onRender` returns
 before binding anything when the user does not own the actor, then routes `click`, `contextmenu`, and `change` on
-`[data-action]` to `_onAction`, `_onActionContext`, and `_onActionChange` (`module/sheets/base-actor-sheet.js:129-146`,
-`:647`). `_onAction` looks the action up in the sheet class's `CLICK_ACTIONS` table: the actions both sheets share in
-`BaseActorSheet.CLICK_ACTIONS` (`:56`), spread into each sheet's own table with its own actions. The right-click and
+`[data-action]` to `_onAction`, `_onActionContext`, and `_onActionChange` (`BaseActorSheet#_onRender` and
+`BaseActorSheet.#bindActionEvents` (`module/sheets/base-actor-sheet.js`)). `_onAction` looks the action up in the sheet
+class's `CLICK_ACTIONS` table: the actions both sheets share in `BaseActorSheet.CLICK_ACTIONS`
+(`module/sheets/base-actor-sheet.js`), spread into each sheet's own table with its own actions. The right-click and
 change routes stay `switch` statements. A viewer who does not own the actor gets no handler at all, and the
 right-click steps (Trait ranks, Void Points, spell slots) go through the same routing as the left-click ones. No
 other class adds routing of its own. `tests/conventions/actions.test.js` takes these two sheets' `CLICK_ACTIONS` keys
@@ -161,10 +162,10 @@ Picked by majority: `onSubmitForm` (3 of 5 form handlers).
 | Lifecycle overrides keep core's names and parameters: `_preCreate(data, options, user)`          | review |
 | Data preparation lives in `module/documents/<document>/` helpers; the class calls them           | review |
 
-Conforming, `module/documents/combatant.js:10`: `L5R4Combatant extends foundry.documents.Combatant`.
+Conforming, `L5R4Combatant` (`module/documents/combatant.js`): `L5R4Combatant extends foundry.documents.Combatant`.
 
-Not conforming, `module/documents/actor.js:43`: `extends Actor`, the global. `module/documents/item.js:51` names the
-third `_preCreate` parameter `userId`; core passes a `User`.
+Not conforming, `L5R4Actor` (`module/documents/actor.js`): `extends Actor`, the global. `L5R4Item#_preCreate`
+(`module/documents/item.js`) names its third parameter `userId`; core passes a `User`.
 
 ### Preparation order
 
@@ -200,7 +201,8 @@ A hook handler's return value is ignored, so anything the document waits for or 
 ## Data models
 
 One `foundry.abstract.TypeDataModel` per subtype in `module/data/<document>/`, registered in `DATA_MODELS`
-(`module/data/models.js:31`) and assigned to `CONFIG.<Document>.dataModels` during `init` (`dist/l5r4-enhanced.js:97`).
+(`module/data/models.js`) and assigned to `CONFIG.<Document>.dataModels` during `init` by `registerDataModels`
+(`dist/l5r4-enhanced.js`).
 A core type such as the ActiveEffect `base` goes in `CORE_TYPE_DATA_MODELS` and never in `system.json` `documentTypes`
 [src: common/packages/sub-types.mjs:45-47].
 
@@ -278,10 +280,10 @@ nothing.
 Adding a rule key touches, in order: `RULE_KEYS`, the model class and its `RULE_MODELS` entry, the output in
 `rule-engine.js`, a Vitest case in `tests/unit/utils/rule-engine.test.js`, and the rules editor's field list.
 
-Conforming, `module/data/rules/rule-models.js:61-72` (`TNModifierRule`).
+Conforming, `TNModifierRule` (`module/data/rules/rule-models.js`).
 
-Not conforming, `module/data/rules/rule-models.js:55-56`: `new BooleanField({ initial: false })` written inline where
-`fields.js` has `booleanField(false)`.
+Not conforming, `RollModifierRule` (`module/data/rules/rule-models.js`): `new BooleanField({ initial: false })` written
+inline where `fields.js` has `booleanField(false)`.
 
 ## GM queries
 
@@ -297,10 +299,10 @@ A player's client asks the active GM to change a document the player does not ow
 | Payloads are JSON-serializable: UUIDs and plain values, never documents (§10.5)                                                                                      | review                               |
 | Query names are fixed (Stage 17 decision 2)                                                                                                                          | review                               |
 
-Conforming, `module/services/effects/apply.js:13`, `:82-100`, and `:128-146`: `APPLY_EFFECT_QUERY`, the owner-or-GM
-caller, and `registerEffectQueries` checking the actor and effect id before it applies anything.
+Conforming, `module/services/effects/apply.js`: `APPLY_EFFECT_QUERY`, the owner-or-GM caller `applyEffectAnywhere`,
+and `registerEffectQueries` checking the actor and effect id before it applies anything.
 
-Not conforming, `module/services/effects/prompts.js:184`: `endConcentration` calls `activeGM?.query` inline inside a
+Not conforming, `endConcentration` (`module/services/effects/prompts.js`) calls `activeGM?.query` inline inside a
 domain verb instead of a `request*` caller.
 
 ## Chat cards
@@ -319,10 +321,11 @@ Hooks register in one place (Stage 17 decision 16, CLAUDE.md **Layers**): a serv
 `module/hooks/register-all.js` wires it with `Hooks.on`. No service, sheet, or app calls `Hooks.on` itself. Picked by
 majority: `bind<Name>Card` (4 binders) over `bind<Name>Cards` (2).
 
-Conforming, `module/services/check-request.js:19-70` with `module/hooks/register-all.js:66`.
+Conforming, `postCheckRequest` and `bindCheckRequestCard` (`module/services/check-request.js`), wired by
+`registerChatCardHooks` (`module/hooks/register-all.js`).
 
-Not conforming, `module/services/session.js:23`: `ChatMessage.create` with no `speaker`. Not conforming,
-`module/services/chat.js:110`: the service registers its own `Hooks.on`.
+Not conforming, `startNewSession` (`module/services/session.js`): `ChatMessage.create` with no `speaker`. Not
+conforming (modeled): a service that registers its own `Hooks.on`.
 
 ## Settings
 
@@ -337,33 +340,33 @@ Not conforming, `module/services/session.js:23`: `ChatMessage.create` with no `s
 | Setting keys are fixed, `LtException` included (Stage 17 decision 2)                                                                                                                                                          | review |
 | Each register call has one comment saying what the setting changes and why it defaults as it does                                                                                                                             | review |
 
-Conforming, `module/setup/settings/world.js:66-73` (`honorRoll`).
+Conforming, the `honorRoll` call in `registerWorldSettings` (`module/setup/settings/world.js`).
 
-Not conforming, `module/setup/settings/world.js:41-52`: a three-line comment restating the setting, and a hint key
-named `.label`.
+Not conforming, the `customEmphases` call in `registerWorldSettings` (`module/setup/settings/world.js`): a four-line
+comment restating the setting.
 
 ## Migrations
 
 Two kinds, each with one job.
 
-| Kind         | Where                                                              | Runs                                                                               | Shape                                                     |
-| ------------ | ------------------------------------------------------------------ | ---------------------------------------------------------------------------------- | --------------------------------------------------------- |
-| Source shape | `module/data/migrate-source.js`, called from `migrateData`         | Each time stored data is read; changes nothing on disk                             | `migrate<Shape>Source(source)`, changes `source` in place |
-| World data   | `module/setup/migrations/<actors\|items\|icons\|schema>/<name>.js` | Once per version, from `runMigrations` in `module/setup/migrations.js`, in `ready` | `async migrate<What>(docs, label)`                        |
+| Kind         | Where                                                              | Runs                                                                              | Shape                                                     |
+| ------------ | ------------------------------------------------------------------ | --------------------------------------------------------------------------------- | --------------------------------------------------------- |
+| Source shape | `module/data/migrate-source.js`, called from `migrateData`         | Each time stored data is read; changes nothing on disk                            | `migrate<Shape>Source(source)`, changes `source` in place |
+| World data   | `module/setup/migrations/<actors\|items\|icons\|schema>/<name>.js` | Once per version, from `migrateWorld` in `module/setup/migrations.js`, in `ready` | `async migrate<What>(docs, label)`                        |
 
 | Rule                                                                                                                         | Check                                                                     |
 | ---------------------------------------------------------------------------------------------------------------------------- | ------------------------------------------------------------------------- |
 | A schema change ships with its migration in the same change (CLAUDE.md **Change Control**)                                   | review                                                                    |
 | A world step reads `document._source`, skips documents it does not match, and updates with `{ render: false }`               | review                                                                    |
-| A world step runs for world documents and for each pack, both listed in `runMigrations`                                      | review                                                                    |
+| A world step runs for world documents and for each pack, listed in both `migrateWorldDocuments` and `migratePackDocuments`   | review                                                                    |
 | Stored world data is a trust boundary: a step may guard and catch per document, and logs one count line                      | review                                                                    |
 | History words that describe the old stored shape are allowed in migration code (`documentation.md` **Comments**)             | review                                                                    |
 | Old stored keys a migration reads are fixed names                                                                            | review                                                                    |
 | Each step has a Vitest case for the shape it changes and runs in the `world-upgrade` Quench batch in the 3.2.1 fixture world | `tests/unit/data/migrate-source.test.js`, `tests/quench/world-upgrade.js` |
 
-Conforming, `module/setup/migrations/actors/npc-initiative.js:22-45`.
+Conforming, `migrateNpcInitiative` (`module/setup/migrations/actors/npc-initiative.js`).
 
-Not conforming, `module/setup/migrations.js:119`: a parameter documented as "unused but kept for API compatibility".
+Not conforming (modeled): a parameter documented as "unused but kept for API compatibility".
 
 ## Registration in `init`
 
@@ -374,10 +377,10 @@ hooks (`registerAllHooks`).
 | Rule                                                                                                                                                                                 | Check  |
 | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------ | ------ |
 | Sheets register with `foundry.applications.apps.DocumentSheetConfig.registerSheet(..., { types, makeDefault: true })`; core 14.370 registers none, so nothing is unregistered (§4.6) | review |
-| `CONFIG.statusEffects` entries are replaced in place, never by assigning the property (`dist/l5r4-enhanced.js:138-143`)                                                              | review |
+| `CONFIG.statusEffects` entries are replaced in place, never by assigning the property (`registerSystemConfig` (`dist/l5r4-enhanced.js`))                                             | review |
 | An async call in `init` is awaited, or its errors are caught where it runs                                                                                                           | review |
 
-Conforming, `dist/l5r4-enhanced.js:175-182` (the PC and NPC sheets).
+Conforming, `registerSheets` (`dist/l5r4-enhanced.js`) (the PC and NPC sheets).
 
-Not conforming, `dist/l5r4-enhanced.js:190`: `preloadTemplates()` is async and not awaited, so a failure becomes an
-unhandled rejection.
+Not conforming, `registerTemplates` (`dist/l5r4-enhanced.js`): `registerTemplates()` is async and the `init` hook
+does not await it, so a failure becomes an unhandled rejection.

@@ -10,6 +10,8 @@
   "design-system/gallery-entry": 0,
   "design-system/icon-meaning": 0,
   "design-system/partial-page": 0,
+  "docs/citation-line": 0,
+  "docs/citation-symbol": 0,
   "eslint/jsdoc/check-param-names": 0,
   "eslint/jsdoc/check-tag-names": 0,
   "eslint/jsdoc/check-types": 0,

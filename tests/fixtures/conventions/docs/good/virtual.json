@@ -1,0 +1,8 @@
+{
+  "files": {
+    "docs/code-system/page.md": "# Page\n\nThe guard clauses at the top of `getWoundThreshold` (`module/utils/wounds.js`) return early. The whole file is `module/utils/wounds.js`.\n`WoundTrack#draw` (`module/utils/wounds.js`) draws `.l5r4-wound-track` (`scss/components/_wound-track.scss`) titled `l5r4.wounds.title` (`lang/en.json`).\nCore's stylesheet sets it (`foundry2.css:4126-4130`, `:4140`), and core reads it [src: client/dice/roll.mjs:933] (`client/applications/api/dialog.mjs:346-405`), in its frame (`resources/app/templates/app-window.html:1`).\nA file the tree lacks is doc-path's job: `anything` (`templates/gone.hbs`).\n\n| Form | Example |\n| ---- | ------- |\n| Non-conforming | `` `module/utils/wounds.js:12` ``, `` `:14` ``, `` `getMissing` (`module/utils/wounds.js`) `` |\n\n```text\nmodule/utils/wounds.js:12\n`module/utils/wounds.js:12`\n`getMissing` (`module/utils/wounds.js`)\n```\n",
+    "module/utils/wounds.js": "export class WoundTrack {\n  draw() {}\n}\n\nexport function getWoundThreshold(earth) {\n  return earth * 5;\n}\n",
+    "scss/components/_wound-track.scss": ".l5r4-wound-track {\n  display: grid;\n}\n",
+    "lang/en.json": "{\n  \"l5r4\": {\n    \"wounds\": {\n      \"title\": \"Wounds\"\n    }\n  }\n}\n"
+  }
+}

@@ -8,7 +8,7 @@ own page in `components/`; this page sets how they fit together and the rules th
 | ---------- | --------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
 | Classes    | `L5R4PcSheet` (`module/sheets/pc-sheet.js`), `L5R4NpcSheet` (`module/sheets/npc-sheet.js`), both over `BaseActorSheet` (`module/sheets/base-actor-sheet.js`); `L5R4ItemSheet` (`module/sheets/item-sheet.js`)                                                                                             |
 | Templates  | `templates/actor/pc.hbs`, `npc.hbs`, `pc-limited.hbs`, `npc-limited.hbs`, and `templates/actor/_partials/`; the item sheet's parts in `templates/item/_partials/`, with `templates/item/_type-details/<subtype>.hbs` and `_type-modifiers/<subtype>.hbs`                                                  |
-| Partials   | Registered by path in `PRELOAD_TEMPLATES` (`module/config/templates.js:96-251`)                                                                                                                                                                                                                           |
+| Partials   | Registered by path in `PRELOAD_TEMPLATES` (`module/config/templates.js`)                                                                                                                                                                                                                                  |
 | SCSS       | `scss/sheets/_actor-sheet.scss`, `_item-sheet.scss` (the window); `scss/layout/_actor-layout.scss`, `_sidebar.scss`, `_item-layout.scss` (grids); `scss/features/_pc-info.scss` (header); `scss/components/_section.scss`, `_item-row.scss`, `_form-field.scss`, `_grid.scss` (blocks)                    |
 | Tokens     | `--l5r4-space-section`, `--l5r4-space-card`, `--l5r4-space-gap`, `--l5r4-space-gap-tight`; `--l5r4-size-portrait`, `--l5r4-size-column-*`; `--l5r4-color-header`, `--l5r4-color-text-on-header`, `--l5r4-color-panel`, `--l5r4-color-row-alt`, `--l5r4-color-line`, `--l5r4-color-text`; `--l5r4-state-*` |
 | Components | Section and section title, expand control, sort header, item row and item list, tabs, item header, Ring and Trait block, rank control, Void Point dots, Wound track, Initiative block, Armor TN block, Fear block, spell slots, button, icon button, inline control, form field                           |
@@ -19,48 +19,49 @@ own page in `components/`; this page sets how they fit together and the rules th
 ### PC sheet
 
 `pc.hbs` is one `<form>` with two columns: the main column (`_stats.hbs`) and the sidebar. Width 870 px
-(`module/sheets/pc-sheet.js:459`).
+(`L5R4PcSheet.DEFAULT_OPTIONS` (`module/sheets/pc-sheet.js`)).
 
-| Region   | Holds                                                                                                                                                            | Partial                                                                 |
-| -------- | ---------------------------------------------------------------------------------------------------------------------------------------------------------------- | ----------------------------------------------------------------------- |
-| Header   | Name (an input), Clan, School, Insight Rank, XP spent of total with the XP manager control, Insight; framed by the brush border (`foundations/frames.md` rule 7) | `templates/actor/_partials/_stats.hbs:2-45`                             |
-| Rings    | The five Ring medallions, the eight Traits with their rank controls, the Void Ring rank, and the Void Point dots                                                 | `_stats.hbs:46-234`                                                     |
-| Sections | Skills, Weapons, Armor, Items, Spells, Techniques, Kiho, Kata, Tattoos, Advantages, Disadvantages, Bio, Notes, in that order                                     | `_stats.hbs:237-290`, one `_<noun>-section.hbs` each                    |
-| Sidebar  | Portrait, then Honor, Glory, Status, and Taint, then Initiative and stances, Armor TN, and the Wound track                                                       | `pc.hbs:4-12`: `_ranks.hbs`, `_combat.hbs`, `_armor.hbs`, `_wounds.hbs` |
+| Region   | Holds                                                                                                                                                            | Partial                                                                                                   |
+| -------- | ---------------------------------------------------------------------------------------------------------------------------------------------------------------- | --------------------------------------------------------------------------------------------------------- |
+| Header   | Name (an input), Clan, School, Insight Rank, XP spent of total with the XP manager control, Insight; framed by the brush border (`foundations/frames.md` rule 7) | `l5r4-pc-info` (`templates/actor/_partials/_stats.hbs`)                                                   |
+| Rings    | The five Ring medallions, the eight Traits with their rank controls, the Void Ring rank, and the Void Point dots                                                 | `templates/actor/_partials/_traits-rings.hbs`, included by `_stats.hbs`                                   |
+| Sections | Skills, Weapons, Armor, Items, Spells, Techniques, Kiho, Kata, Tattoos, Advantages, Disadvantages, Bio, Notes, in that order                                     | `templates/actor/_partials/_stats.hbs`, one `_<noun>-section.hbs` each                                    |
+| Sidebar  | Portrait, then Honor, Glory, Status, and Taint, then Initiative and stances, Armor TN, and the Wound track                                                       | `l5r4-sheet-sidebar` (`templates/actor/pc.hbs`): `_ranks.hbs`, `_combat.hbs`, `_armor.hbs`, `_wounds.hbs` |
 
 ### NPC sheet
 
-`npc.hbs` keeps the PC sheet's two columns at 840 px (`module/sheets/npc-sheet.js:121`).
+`npc.hbs` keeps the PC sheet's two columns at 840 px (`L5R4NpcSheet.DEFAULT_OPTIONS` (`module/sheets/npc-sheet.js`)).
 
-| Region   | Differs from the PC sheet                                                                           | Partial                                                                 |
-| -------- | --------------------------------------------------------------------------------------------------- | ----------------------------------------------------------------------- |
-| Header   | Name and, for a pack creature, its book citation (`l5r4-citation`); no Clan, School, Insight, or XP | `_stats-npc.hbs:1-13`                                                   |
-| Rings    | The same block; Void Point dots only when `showNpcVoidPoints` is set                                | `_stats-npc.hbs:14-203`                                                 |
-| Sections | Attacks (up to three, from `system.attack1` to `attack3`), Skills, Notes. Skills always renders     | `_stats-npc.hbs:205-297`                                                |
-| Sidebar  | Portrait, Initiative and stances, Armor TN, Wound track, Fear. No rank blocks                       | `npc.hbs:4-10`: `_combat.hbs`, `_armor.hbs`, `_wounds.hbs`, `_fear.hbs` |
+| Region   | Differs from the PC sheet                                                                           | Partial                                                                                                                                  |
+| -------- | --------------------------------------------------------------------------------------------------- | ---------------------------------------------------------------------------------------------------------------------------------------- |
+| Header   | Name and, for a pack creature, its book citation (`l5r4-citation`); no Clan, School, Insight, or XP | `l5r4-pc-info` (`templates/actor/_partials/_stats-npc.hbs`)                                                                              |
+| Rings    | The same block; Void Point dots only when `showNpcVoidPoints` is set                                | `templates/actor/_partials/_traits-rings.hbs` with `showVoidPoints=@root.showNpcVoidPoints` (`templates/actor/_partials/_stats-npc.hbs`) |
+| Sections | Attacks (up to three, from `system.attack1` to `attack3`), Skills, Notes. Skills always renders     | `templates/actor/_partials/_stats-npc.hbs`                                                                                               |
+| Sidebar  | Portrait, Initiative and stances, Armor TN, Wound track, Fear. No rank blocks                       | `l5r4-sheet-sidebar` (`templates/actor/npc.hbs`): `_combat.hbs`, `_armor.hbs`, `_wounds.hbs`, `_fear.hbs`                                |
 
 ### Item sheet
 
 The item sheet is the one tabbed sheet. Its parts render in order: header, tab strip, then one part per tab
-(`module/sheets/item-sheet.js:174-200`). Width 640 px for every subtype (`item-sheet.js:80`).
+(`L5R4ItemSheet.PARTS` (`module/sheets/item-sheet.js`)). Width 640 px for every subtype (`WIDTH_BY_TYPE`
+(`module/sheets/item-sheet.js`)).
 
-| Part        | Holds                                                                                                                                                       | Partial                                                       |
-| ----------- | ----------------------------------------------------------------------------------------------------------------------------------------------------------- | ------------------------------------------------------------- |
-| Header      | Image, name input, book citation                                                                                                                            | `templates/item/_partials/_header.hbs`                        |
-| Tabs        | One tab per available part: Details (not on a Clan or Family), Modifiers (Weapon, Armor, Skill only), Description, Effects, Rules (`item-sheet.js:414-436`) | `_tabs.hbs`                                                   |
-| Details     | The subtype's fields, then keywords, nemuranai, and price for physical items                                                                                | `_tab-details.hbs`, `_type-details/<subtype>.hbs`             |
-| Modifiers   | The subtype's bonus fields                                                                                                                                  | `_tab-modifiers.hbs`, `_type-modifiers/<subtype>.hbs`         |
-| Description | Rule summary lines, description, special rules                                                                                                              | `_tab-description.hbs`                                        |
-| Effects     | The item's Active Effects with edit, toggle, and delete controls                                                                                            | `_tab-effects.hbs`                                            |
-| Rules       | The rules editor (`patterns/panels-and-browsers.md`)                                                                                                        | `_tab-rules.hbs` over `templates/rules/_partials/_editor.hbs` |
+| Part        | Holds                                                                                                                                                                                                 | Partial                                                       |
+| ----------- | ----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- | ------------------------------------------------------------- |
+| Header      | Image, name input, book citation                                                                                                                                                                      | `templates/item/_partials/_header.hbs`                        |
+| Tabs        | One tab per available part: Details (not on a Clan or Family), Modifiers (Weapon, Armor, Skill only), Description, Effects, Rules (`L5R4ItemSheet#_getAvailableTabs` (`module/sheets/item-sheet.js`)) | `_tabs.hbs`                                                   |
+| Details     | The subtype's fields, then keywords, nemuranai, and price for physical items                                                                                                                          | `_tab-details.hbs`, `_type-details/<subtype>.hbs`             |
+| Modifiers   | The subtype's bonus fields                                                                                                                                                                            | `_tab-modifiers.hbs`, `_type-modifiers/<subtype>.hbs`         |
+| Description | Rule summary lines, description, special rules                                                                                                                                                        | `_tab-description.hbs`                                        |
+| Effects     | The item's Active Effects with edit, toggle, and delete controls                                                                                                                                      | `_tab-effects.hbs`                                            |
+| Rules       | The rules editor (`patterns/panels-and-browsers.md`)                                                                                                                                                  | `_tab-rules.hbs` over `templates/rules/_partials/_editor.hbs` |
 
 ### Views
 
-| View     | Who sees it                                                                            | What renders                                                                                                                                                                                                                                                                                                         |
-| -------- | -------------------------------------------------------------------------------------- | -------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| Owner    | The GM and the actor's owners                                                          | The full sheet, every control live                                                                                                                                                                                                                                                                                   |
-| Observer | A player with Observer permission                                                      | The full template. The sheet is not editable (`isEditable` false), so core disables every input (`foundations/states.md`, Read-only); notes and descriptions render as enriched text in place of the editor (`_stats.hbs:275-288`, `_tab-description.hbs:14-25`); the Effects tab hides "New" (`_tab-effects.hbs:4`) |
-| Limited  | A player with Limited permission, never the GM (`pc-sheet.js:435`, `npc-sheet.js:353`) | `pc-limited.hbs` or `npc-limited.hbs`: the name as a heading and the portrait. Nothing else                                                                                                                                                                                                                          |
+| View     | Who sees it                                                                                                                                                         | What renders                                                                                                                                                                                                                                                                                                                                                                                                                                            |
+| -------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| Owner    | The GM and the actor's owners                                                                                                                                       | The full sheet, every control live                                                                                                                                                                                                                                                                                                                                                                                                                      |
+| Observer | A player with Observer permission                                                                                                                                   | The full template. The sheet is not editable (`isEditable` false), so core disables every input (`foundations/states.md`, Read-only); notes and descriptions render as enriched text in place of the editor (`templates/actor/_partials/_note-section.hbs`, the `{{#if editable}}` branch of `templates/item/_partials/_tab-description.hbs`); the Effects tab hides "New", `data-action="create-effect"` (`templates/item/_partials/_tab-effects.hbs`) |
+| Limited  | A player with Limited permission, never the GM (`L5R4PcSheet#_renderHTML` (`module/sheets/pc-sheet.js`), `L5R4NpcSheet#_renderHTML` (`module/sheets/npc-sheet.js`)) | `pc-limited.hbs` or `npc-limited.hbs`: the name as a heading and the portrait. Nothing else                                                                                                                                                                                                                                                                                                                                                             |
 
 The item sheet has no Limited template; core gives it Observer behavior.
 
@@ -68,16 +69,16 @@ The item sheet has no Limited template; core gives it Observer behavior.
 
 A section is the unit of the main column: a title row, an optional sort header, and a list of item rows.
 
-| Part        | Markup now                                                                                                                               | Target class                                                                |
-| ----------- | ---------------------------------------------------------------------------------------------------------------------------------------- | --------------------------------------------------------------------------- |
-| Section     | `<section class="flexcol -gap-sm">`                                                                                                      | `l5r4-section`                                                              |
-| Title row   | `div.flexrow.-gap-sm.section-title` with `data-scope="<section>"` and `is-collapsed` when collapsed (`_skills-section.hbs:2`)            | `l5r4-section-title`                                                        |
-| Title text  | `h4.title`                                                                                                                               | `l5r4-section-heading` (`components/section.md`)                            |
-| Add control | `_unified-item-create.hbs`: opens the item creation dialog with the section's type preselected                                           | Core's `inline-control icon` (`components/icon-button.md`)                  |
-| Expand      | `_expand.hbs`: collapses the section; the state persists per actor and scope                                                             | `l5r4-expand-control` (`components/expand-control.md`)                      |
-| Extras      | Fields that belong to the section's title: wealth on Items (`_item-section.hbs:4-22`), spell slots on Spells (`_spell-section.hbs:4-51`) | Their own component classes                                                 |
-| Sort header | `section.item-list.-<type>.-header` with one `a.item-sort-by[data-action="item-sort-by"][data-sortby]` per column                        | `l5r4-sort-header l5r4-item-row-list -<type>` (`components/sort-header.md`) |
-| List        | `section.item-list.-<type>` holding one card per item (`templates/cards/<subtype>.hbs` with `inSheet=true`)                              | `l5r4-item-row-list -<type>` (`components/item-row.md`)                     |
+| Part        | Markup now                                                                                                                                                                                                            | Target class                                                                |
+| ----------- | --------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- | --------------------------------------------------------------------------- |
+| Section     | `<section class="flexcol -gap-sm">`                                                                                                                                                                                   | `l5r4-section`                                                              |
+| Title row   | `div.flexrow.-gap-sm.l5r4-section-title` with `data-scope="<section>"` and `is-collapsed` when collapsed (`templates/actor/_partials/_skill-section.hbs`)                                                             | `l5r4-section-title`                                                        |
+| Title text  | `h4.title`                                                                                                                                                                                                            | `l5r4-section-heading` (`components/section.md`)                            |
+| Add control | `_unified-item-create.hbs`: opens the item creation dialog with the section's type preselected                                                                                                                        | Core's `inline-control icon` (`components/icon-button.md`)                  |
+| Expand      | `_expand.hbs`: collapses the section; the state persists per actor and scope                                                                                                                                          | `l5r4-expand-control` (`components/expand-control.md`)                      |
+| Extras      | Fields that belong to the section's title: wealth on Items, `l5r4-wealth` (`templates/actor/_partials/_item-section.hbs`); spell slots on Spells, `l5r4-spell-slots` (`templates/actor/_partials/_spell-section.hbs`) | Their own component classes                                                 |
+| Sort header | `section.item-list.-<type>.-header` with one `a.item-sort-by[data-action="item-sort-by"][data-sortby]` per column                                                                                                     | `l5r4-sort-header l5r4-item-row-list -<type>` (`components/sort-header.md`) |
+| List        | `section.item-list.-<type>` holding one card per item (`templates/cards/<subtype>.hbs` with `inSheet=true`)                                                                                                           | `l5r4-item-row-list -<type>` (`components/item-row.md`)                     |
 
 `flexrow`, `flexcol`, `flex0`, and `flex1` are core classes and keep their names. The item card templates also post to
 chat, so the classes they put on posted cards (`item`, `title`, `-<subtype>`, `-bio`, `-expandable`) are fixed
@@ -86,13 +87,13 @@ chat, so the classes they put on posted cards (`item`, `title`, `-<subtype>`, `-
 
 ### Variants
 
-| Variant                  | Where                                                                                      | Difference                                                         |
-| ------------------------ | ------------------------------------------------------------------------------------------ | ------------------------------------------------------------------ |
-| List section             | Skills, Weapons, Armor, Spells, Techniques, Kiho, Kata, Tattoos, Advantages, Disadvantages | Title row, sort header, list                                       |
-| List section with extras | Items (wealth), Spells (spell slots)                                                       | Extras sit in the title row between the label and the controls     |
-| Bio                      | `_bio.hbs`                                                                                 | Clan, Family, and School cards; no sort header, no add control     |
-| Notes                    | `_stats.hbs:270-290`, `_stats-npc.hbs:279-297`                                             | Title row with no controls over the notes editor                   |
-| Attacks (NPC)            | `_stats-npc.hbs:205-277`                                                                   | Add control only while an attack slot is free (`firstEmptyAttack`) |
+| Variant                  | Where                                                                                        | Difference                                                         |
+| ------------------------ | -------------------------------------------------------------------------------------------- | ------------------------------------------------------------------ |
+| List section             | Skills, Weapons, Armor, Spells, Techniques, Kiho, Kata, Tattoos, Advantages, Disadvantages   | Title row, sort header, list                                       |
+| List section with extras | Items (wealth), Spells (spell slots)                                                         | Extras sit in the title row between the label and the controls     |
+| Bio                      | `_bio.hbs`                                                                                   | Clan, Family, and School cards; no sort header, no add control     |
+| Notes                    | `templates/actor/_partials/_note-section.hbs`, included by `_stats.hbs` and `_stats-npc.hbs` | Title row with no controls over the notes editor                   |
+| Attacks (NPC)            | `data-action="add-attack"` (`templates/actor/_partials/_stats-npc.hbs`)                      | Add control only while an attack slot is free (`firstEmptyAttack`) |
 
 ### States
 
@@ -122,7 +123,7 @@ block for extras.
 
 Enforced by `tests/conventions/templates.test.js` (markup used twice is a registered partial).
 
-Conforming, modeled on `templates/actor/_partials/_item-section.hbs:2-25`:
+Conforming, modeled on the title row of `templates/actor/_partials/_item-section.hbs`:
 
 ```hbs
 {{#> "systems/l5r4-enhanced/templates/actor/_partials/_section-title.hbs"
@@ -134,8 +135,8 @@ Conforming, modeled on `templates/actor/_partials/_item-section.hbs:2-25`:
 {{/"systems/l5r4-enhanced/templates/actor/_partials/_section-title.hbs"}}
 ```
 
-Non-conforming, `templates/actor/_partials/_skill-section.hbs:2-6` and `_weapon-section.hbs:2-6`: the same five lines
-copied into twelve section partials.
+Non-conforming, the `l5r4-section-title` row of `templates/actor/_partials/_skill-section.hbs` and of
+`templates/actor/_partials/_weapon-section.hbs`: the same five lines copied into twelve section partials.
 
 ### 2. The expand control states its state
 
@@ -148,7 +149,7 @@ expand toggle carries `aria-expanded`; icon-only buttons carry an accessible nam
 
 Conforming: `foundations/states.md` rule 4.
 
-Non-conforming, `templates/actor/_partials/_expand.hbs:1`:
+Non-conforming (modeled):
 
 <!-- prettier-ignore -->
 ```hbs
@@ -161,11 +162,11 @@ Each sortable column head is a `<button type="button" data-action="sort-items" d
 the column's name. The head of the sorted column carries `aria-pressed="true"`, its label in bold, and the direction
 icon after it, `fa-sort-up` or `fa-sort-down` (`foundations/iconography.md` rule 3); the others carry
 `aria-pressed="false"`. A column that does not sort is a `<span>`. The sort persists per actor and scope
-(`module/sheets/handlers/sort-handler.js:144-150`). `components/sort-header.md` holds the anatomy. Enforced by
+(`SortHandler.updateSortPref` (`module/sheets/handlers/sort-handler.js`)). `components/sort-header.md` holds the anatomy. Enforced by
 `tests/conventions/templates.test.js` (interactive elements are native controls; a toggle carries `aria-pressed`),
 `tests/conventions/actions.test.js`, and review for the visible state.
 
-Conforming, modeled on `templates/actor/_partials/_skill-section.hbs:9`:
+Conforming, modeled on `templates/actor/_partials/_sort-header.hbs`:
 
 ```hbs
 <button type="button" class="l5r4-sort-header-button" data-action="sort-items" data-sort-by="name"
@@ -175,23 +176,24 @@ Conforming, modeled on `templates/actor/_partials/_skill-section.hbs:9`:
 </button>
 ```
 
-Non-conforming, `_skills-section.hbs:9` with `sort-handler.js:54-66`: an `<a>` with no `href` cannot take focus, and
-the `is-active` class and `data-dir` attribute the handler sets have no style, so the sorted column looks like the
-rest. `_weapon-section.hbs:10-11` gives the Attack and Damage heads the same key, `damage`.
+Non-conforming, `SortHandler.#updateHeaderIndicators` (`module/sheets/handlers/sort-handler.js`): the `is-active`
+class and `data-dir` attribute it sets have no style, so the sorted column looks like the rest.
+`SORT_COLUMNS` (`module/config/sort-keys.js`) gives the weapon list's Attack and Damage heads the same key, `damage`.
 
 ### 4. An empty list section is left out
 
-A list section renders only when its list has an entry (`_stats.hbs:237-267`, 11 of the 13 sections). A section with
+A list section renders only when its list has an entry (the `{{#if skills.length}}` guard and its siblings in
+`templates/actor/_partials/_stats.hbs`). A section with
 fields of its own (Items with wealth, Bio, Notes, the NPC's Attacks and Skills) always renders; when its list is empty
 it shows one italic line in the list's place (`foundations/states.md` rule 9), worded as `patterns/feedback.md` sets.
 The sort header renders only over a list with entries. Picked by majority (11 of 13). Enforced by review; the gallery
 shows each section empty and full.
 
-Conforming, `templates/actor/_partials/_item-section.hbs:26-40`: the header and list render inside
+Conforming, `templates/actor/_partials/_item-section.hbs`: the header and list render inside
 `{{#if items.length}}`.
 
-Non-conforming, `templates/actor/_partials/_bio.hbs:6-28`: a character with no Clan, Family, or School shows the Bio
-title over an empty list.
+Non-conforming, the `l5r4-item-row-list -bio` list (`templates/actor/_partials/_bio.hbs`): a character with no Clan,
+Family, or School shows the Bio title over an empty list.
 
 ### 5. A Limited view shows the name and the portrait only
 
@@ -200,7 +202,7 @@ one partial, since `pc-limited.hbs` and `npc-limited.hbs` are the same eight lin
 Enforced by `tests/conventions/templates.test.js` (markup used twice is a registered partial) and review for what a
 Limited user sees.
 
-Conforming, `templates/actor/pc-limited.hbs:2-7`, moved into one partial that both Limited templates include, with the
+Conforming, `templates/actor/_partials/_limited.hbs`, the one partial both Limited templates include, with the
 portrait's `alt` set to the actor's name.
 
 Non-conforming: a Limited view that shows a Ring, a Wound total, or a Skill.
@@ -212,7 +214,7 @@ the read-only look and the system adds no second one. Controls that write (add, 
 stay where they are; the sheet refuses the write. A rich text field renders as enriched text, never as an empty
 editor. Enforced by review and the sheet Quench batches.
 
-Conforming, `templates/actor/_partials/_stats.hbs:275-288`: the notes render in `prose-mirror` when `editable`, as
+Conforming, `templates/actor/_partials/_note-section.hbs`: the notes render in `prose-mirror` when `editable`, as
 enriched text otherwise.
 
 Non-conforming: a value an Observer sees only by hovering, or a control removed for Observers so the row shifts.
@@ -241,7 +243,7 @@ classes item cards post to chat stay as they are. A component's styles sit under
 | `sheet-header` (item sheet)  | `l5r4-item-header`        |
 | `section-container`          | `l5r4-section-body`       |
 
-Conforming, `scss/apps/_effect-panel.scss:6-60`: every rule sits under `.l5r4-effect-panel`.
+Conforming, `.l5r4-effect-panel` (`scss/apps/_effect-panel.scss`): every rule of the file sits under it.
 
 Non-conforming (modeled): a section rule scoped under `.l5r4.pc` and `.l5r4.npc`, so a window outside the sheet copies
 its look. The window's own rules sit under the window's block class, `l5r4-actor-sheet` or `l5r4-item-sheet`
@@ -255,7 +257,7 @@ renames `changeTab`). Each tab control is a `<button type="button" role="tab">` 
 focus and states which part shows (`components/tabs.md`, sheet variant). Enforced by
 `tests/conventions/actions.test.js` and `tests/conventions/templates.test.js`.
 
-Conforming, modeled on `templates/item/_partials/_tabs.hbs:3`:
+Conforming, from `templates/item/_partials/_tabs.hbs`:
 
 ```hbs
 <button type="button" role="tab" class="l5r4-tabs-tab{{#if tab.active}} active{{/if}}" data-action="change-tab"
@@ -264,7 +266,7 @@ Conforming, modeled on `templates/item/_partials/_tabs.hbs:3`:
 
 Non-conforming (modeled): `<a class="item {{tab.cssClass}}" data-action="changeTab">`. Core disables every button of
 a sheet the viewer cannot edit, so the item sheet enables its tab buttons again after each render
-(`module/sheets/item-sheet.js`, `_onRender`): a tab writes nothing. Core's ApplicationV2 also offers `static TABS` with
+(`L5R4ItemSheet#_onRender` (`module/sheets/item-sheet.js`)): a tab writes nothing. Core's ApplicationV2 also offers `static TABS` with
 its own `tab` action; moving the item sheet onto it is a `docs/code-system/foundry-patterns.md` question, decided in
 review.
 
@@ -301,14 +303,14 @@ a `{{!-- --}}` comment at the partial's top (`docs/code-system/templates-and-sty
 
 ## Long text
 
-| Element                 | Behavior                                                                                                           |
-| ----------------------- | ------------------------------------------------------------------------------------------------------------------ |
-| Actor and item name     | An input: a long name scrolls inside it. The Limited heading wraps                                                 |
-| Section title           | One line (`foundations/typography.md`, Wrapping); a label that cannot fit at the sheet's default width is too long |
-| Item row name           | Wraps (`scss/components/_item-row.scss:197`); the row grows, its controls stay at the end                          |
-| Clan, School            | Text in the header field; wraps inside its box                                                                     |
-| Emphases on a Skill row | Joined with ", " and wraps (`templates/cards/skill.hbs:25-31`)                                                     |
-| Notes and descriptions  | Core's editor; the section grows                                                                                   |
+| Element                 | Behavior                                                                                                                     |
+| ----------------------- | ---------------------------------------------------------------------------------------------------------------------------- |
+| Actor and item name     | An input: a long name scrolls inside it. The Limited heading wraps                                                           |
+| Section title           | One line (`foundations/typography.md`, Wrapping); a label that cannot fit at the sheet's default width is too long           |
+| Item row name           | Wraps: the `.title` rule in `.l5r4-item-row` (`scss/components/_item-row.scss`); the row grows, its controls stay at the end |
+| Clan, School            | Text in the header field; wraps inside its box                                                                               |
+| Emphases on a Skill row | Joined with ", " and wraps: `l5r4-item-row-emphases` (`templates/cards/skill.hbs`)                                           |
+| Notes and descriptions  | Core's editor; the section grows                                                                                             |
 
 ## Do and don't
 

@@ -22,9 +22,9 @@ A file holds these parts, in this order:
 | The parts appear in the order above                             | `l5r4/module-shape` (`tools/eslint/`) |
 | An unexported helper sits below every export, never between two | `l5r4/module-shape` (`tools/eslint/`) |
 
-| Conforming                                                                                                                     | Non-conforming                                                                                                                                                                                                                    |
-| ------------------------------------------------------------------------------------------------------------------------------ | --------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| `module/services/effects/apply.js`: imports at 8-10, the `APPLY_EFFECT_QUERY` constant at 13, then only exports from 33 to 132 | `module/services/combat/damage.js`: exports at 39, 307, 322, 350 with the private `defensesOf`, `applyToActor`, `postResult`, `reduceWithVoid`, `undoResult`, `runDamageAction`, and `requestDamageAction` between them (101-289) |
+| Conforming                                                                                                                                                                                | Non-conforming                                 |
+| ----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- | ---------------------------------------------- |
+| `module/services/effects/apply.js`: the imports, the `APPLY_EFFECT_QUERY` constant, the exports from `buildEffectData` to `registerEffectQueries`, then the private `buildBaseEffectData` | A private helper between two exports (modeled) |
 
 ## Imports
 
@@ -35,20 +35,20 @@ nothing from that layer.
 
 | Group       | Paths                                                                    | Example                                                                                                                |
 | ----------- | ------------------------------------------------------------------------ | ---------------------------------------------------------------------------------------------------------------------- |
-| 1 Config    | `module/config/`                                                         | `import { SYS_ID } from "../../config/constants.js";` (`module/services/combat/damage.js:11`)                          |
-| 2 Utils     | `module/utils/`                                                          | `import { toInt } from "../../utils/type-coercion.js";` (`module/services/combat/damage.js:15`)                        |
-| 3 Data      | `module/data/`                                                           | `import { createRule } from "../../data/rules/rule-models.js";` (`module/documents/actor/rules.js:20`)                 |
-| 4 Documents | `module/documents/`                                                      | `import { enhanceItemSheetData } from "../documents/item/integration/sheet-data.js";` (`module/sheets/pc-sheet.js:55`) |
-| 5 Services  | `module/services/`                                                       | `import { rollCheck } from "../dice/check/roll-check.js";` (`module/services/combat/damage-roll.js:23`)                |
-| 6 Mixins    | `module/mixins/`                                                         | `import { DebouncedFieldMixin } from "../mixins/debounced-field-mixin.js";` (`module/apps/armor-config.js:33`)         |
-| 7 Apps      | `module/apps/`                                                           | `import EffectPanel from "../apps/effect-panel.js";` (`module/hooks/register-all.js:40`)                               |
-| 8 Sheets    | `module/sheets/`                                                         | `import L5R4ItemSheet from "../module/sheets/item-sheet.js";` (`dist/l5r4-enhanced.js:57`)                             |
-| 9 Setup     | `module/setup/`                                                          | `import { runMigrations } from "../module/setup/migrations.js";` (`dist/l5r4-enhanced.js:62`)                          |
-| 10 Hooks    | `module/hooks/`                                                          | `import { registerAllHooks } from "../module/hooks/register-all.js";` (`dist/l5r4-enhanced.js:70`)                     |
-| 11 Local    | A path that starts with `./`: the file's folder and the folders below it | `import { renderCheckCard } from "./card.js";` (`module/services/dice/check/roll-check.js:32`)                         |
+| 1 Config    | `module/config/`                                                         | `import { SYS_ID } from "../../config/constants.js";` (`module/services/combat/damage.js`)                             |
+| 2 Utils     | `module/utils/`                                                          | `import { toInt } from "../../utils/type-coercion.js";` (`module/services/combat/damage.js`)                           |
+| 3 Data      | `module/data/`                                                           | `import { createRule } from "../../data/rules/rule-models.js";` (`module/documents/actor/rules.js`)                    |
+| 4 Documents | `module/documents/`                                                      | `import { prepareItemSheetOptions } from "../documents/item/integration/sheet-data.js";` (`module/sheets/pc-sheet.js`) |
+| 5 Services  | `module/services/`                                                       | `import { rollCheck } from "../dice/check/roll-check.js";` (`module/services/combat/damage-roll.js`)                   |
+| 6 Mixins    | `module/mixins/`                                                         | `import { DebouncedFieldMixin } from "../mixins/debounced-field-mixin.js";` (`module/apps/armor-config.js`)            |
+| 7 Apps      | `module/apps/`                                                           | `import EffectPanel from "../apps/effect-panel.js";` (`module/hooks/register-all.js`)                                  |
+| 8 Sheets    | `module/sheets/`                                                         | `import L5R4ItemSheet from "../module/sheets/item-sheet.js";` (`dist/l5r4-enhanced.js`)                                |
+| 9 Setup     | `module/setup/`                                                          | `import { migrateWorld } from "../module/setup/migrations.js";` (`dist/l5r4-enhanced.js`)                              |
+| 10 Hooks    | `module/hooks/`                                                          | `import { registerAllHooks } from "../module/hooks/register-all.js";` (`dist/l5r4-enhanced.js`)                        |
+| 11 Local    | A path that starts with `./`: the file's folder and the folders below it | `import { renderCheckCard } from "./card.js";` (`module/services/dice/check/roll-check.js`)                            |
 
 A path that starts with `../` goes in the group of the layer it reaches, even inside the file's own layer:
-`module/services/combat/damage-roll.js:23` lists `../dice/check/roll-check.js` under Services.
+`module/services/combat/damage-roll.js` imports `rollCheck` from `../dice/check/roll-check.js` in the Services group.
 
 Which layer may import which is CLAUDE.md **Layers**; this page sets only the order.
 
@@ -65,13 +65,13 @@ Which layer may import which is CLAUDE.md **Layers**; this page sets only the or
 | Utils read no Foundry global, except `module/utils/localization.js`, which is the `T` / `F` / `R` API over `game.i18n` that `docs/design-system/content/localization.md` names                                                             | ESLint `no-restricted-globals` per directory, with that file exempt   |
 | No file imports itself in a cycle                                                                                                                                                                                                          | `npm run deps:circular`                                               |
 
-| Rule           | Conforming                                                                                | Non-conforming                                                                                                                                            |
-| -------------- | ----------------------------------------------------------------------------------------- | --------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| Group order    | `module/services/combat/damage.js:11-24`: config, utils, then services                    | `module/services/dice/check/collect.js:15`: the config import `game-mechanics.js` after four utils imports                                                |
-| Group order    | `module/utils/status-data.js:8-10`                                                        | `module/documents/actor/rules.js:20-33`: the data import first, then utils, then the config import last                                                   |
-| One block      | `module/services/combat/damage.js:11-24`: no labels, no blank lines                       | `module/sheets/pc-sheet.js:42-57`: `// Config`, `// Utils`, `// Documents`, and `// Local` labels with blank lines, and services imports under `// Utils` |
-| Static imports | `module/services/rest.js:9` imports `config/templates.js` statically                      | A module loaded with `await import()` inside a function (modeled)                                                                                         |
-| Layers         | `module/services/dice/check/roll-check.js:22-40` imports config, utils, and services only | A service that imports a sheet or an app (modeled)                                                                                                        |
+| Rule           | Conforming                                                                               | Non-conforming                                                                               |
+| -------------- | ---------------------------------------------------------------------------------------- | -------------------------------------------------------------------------------------------- |
+| Group order    | The imports of `module/services/combat/damage.js`: config, utils, then services          | A config import after four utils imports (modeled)                                           |
+| Group order    | The imports of `module/documents/actor/rules.js`: config, utils, data, then local        | The data import first, then utils, then the config import last (modeled)                     |
+| One block      | The imports of `module/services/combat/damage.js`: no labels, no blank lines             | `// Config`, `// Utils`, and `// Local` labels with blank lines between the groups (modeled) |
+| Static imports | `module/services/rest.js` imports `CHAT_TEMPLATES` from `config/templates.js` statically | A module loaded with `await import()` inside a function (modeled)                            |
+| Layers         | `module/services/dice/check/roll-check.js` imports config, utils, and services only      | A service that imports a sheet or an app (modeled)                                           |
 
 ## Constants
 
@@ -83,12 +83,12 @@ Which layer may import which is CLAUDE.md **Layers**; this page sets only the or
 | A number the rules define lives in `module/config/` and is imported, never written as a literal. Majority: 69 rule constants in `module/config/` against 22 in `module/utils/` and `module/services/`  | review                                                                                  |
 | `module/config/` holds values only: no functions (CLAUDE.md **Layers**)                                                                                                                                | `l5r4/module-shape` (`tools/eslint/`)                                                   |
 
-| Rule            | Conforming                                                                                               | Non-conforming                                                                                      |
-| --------------- | -------------------------------------------------------------------------------------------------------- | --------------------------------------------------------------------------------------------------- |
-| Frozen constant | `module/services/combat/damage-roll.js:30`: `const DISARM_DAMAGE = Object.freeze({ roll: 2, keep: 1 });` | `module/config/sort-keys.js:44`: an exported constant object left unfrozen                          |
-| Module state    | `module/services/dice/resources/void-points.js:18`: `actorLocks`                                         | `module/services/combat/flow.js:52`: the `FLOWS` registry, filled at run time by `defineFlow`       |
-| Rule numbers    | `module/services/combat/damage.js:13` imports `TN_PER_RAISE`                                             | `module/utils/check.js:149`: the literal `5` per Raise beside the `TN_PER_RAISE` constant           |
-| Values only     | `module/config/rule-keys.js:77`: `MANEUVERS`                                                             | A function exported from `module/config/` (modeled); `getIconPath` lives in `module/utils/icons.js` |
+| Rule            | Conforming                                                                                                              | Non-conforming                                                                                                                 |
+| --------------- | ----------------------------------------------------------------------------------------------------------------------- | ------------------------------------------------------------------------------------------------------------------------------ |
+| Frozen constant | `DISARM_DAMAGE` (`module/services/combat/damage-roll.js`): `const DISARM_DAMAGE = Object.freeze({ roll: 2, keep: 1 });` | An exported constant object left unfrozen (modeled)                                                                            |
+| Module state    | `actorLocks` (`module/services/dice/resources/void-points.js`)                                                          | A registry filled at run time and named `FLOWS` (modeled)                                                                      |
+| Rule numbers    | `module/services/combat/damage-roll.js` imports `TN_PER_RAISE`                                                          | `getTn` (`module/utils/check.js`): the literal `5` per Raise where `TN_PER_RAISE` (`module/config/game-mechanics.js`) holds it |
+| Values only     | `MANEUVERS` (`module/config/rule-keys.js`)                                                                              | A function exported from `module/config/` (modeled); `getIconPath` (`module/utils/icons.js`) lives in Utils                    |
 
 ## Exports
 
@@ -107,13 +107,13 @@ default exports in `module/data/` and `module/documents/`, data models with thei
 | Every export has a caller in `module/` or `dist/l5r4-enhanced.js`; an export that only tests import is dead code | review                                |
 | A file that only re-exports another file does not exist                                                          | `tests/conventions/names.test.js`     |
 
-| Rule                | Conforming                                                                                                                           | Non-conforming                                                                                                                    |
-| ------------------- | ------------------------------------------------------------------------------------------------------------------------------------ | --------------------------------------------------------------------------------------------------------------------------------- |
-| Default export      | `module/documents/actor.js:43` (`L5R4Actor`), `module/apps/xp-manager.js:44`, `module/services/dice/roll-keep-die.js:14` (`L5R4Die`) | A default export beside named exports (modeled); `module/sheets/base-actor-sheet.js:29`: the sheets' base class as a named export |
-| Default import name | `dist/l5r4-enhanced.js:53`: `import L5R4Actor from "../module/documents/actor.js";`                                                  | A default import under a name other than the class's own (modeled)                                                                |
-| `export function`   | `module/utils/check.js:51`: `export function buildPool`                                                                              | `module/utils/localization.js:51`, `77`, `137`: `T`, `F`, `R` as arrow constants                                                  |
-| Used exports        | `module/services/effects/apply.js:108` (`effectsOf`)                                                                                 | `module/services/xp/calculator.js:27`: `buildMergedXpHistory` has no caller                                                       |
-| No re-export files  | `module/setup/settings/register-all.js` registers the settings itself                                                                | A one-line file that re-exports another file (modeled)                                                                            |
+| Rule                | Conforming                                                                                                                                           | Non-conforming                                                                                                                                    |
+| ------------------- | ---------------------------------------------------------------------------------------------------------------------------------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------- |
+| Default export      | `L5R4Actor` (`module/documents/actor.js`), `XpManagerApplication` (`module/apps/xp-manager.js`), `L5R4Die` (`module/services/dice/roll-keep-die.js`) | A default export beside named exports (modeled); `BaseActorSheet` (`module/sheets/base-actor-sheet.js`): the sheets' base class as a named export |
+| Default import name | `import L5R4Actor from "../module/documents/actor.js";` (`dist/l5r4-enhanced.js`)                                                                    | A default import under a name other than the class's own (modeled)                                                                                |
+| `export function`   | `buildPool` (`module/utils/check.js`): `export function buildPool`                                                                                   | A util exported as an arrow constant, `export const T = key => ...` (modeled)                                                                     |
+| Used exports        | `effectsOf` (`module/services/effects/apply.js`)                                                                                                     | `buildMergedXpHistory` (`module/services/xp/calculator.js`) has no caller                                                                         |
+| No re-export files  | `module/setup/settings/register-all.js` registers the settings itself                                                                                | A one-line file that re-exports another file (modeled)                                                                                            |
 
 ## One responsibility per file
 
@@ -124,10 +124,10 @@ A file does one job its layer owns. A second job, not a line count, is the reaso
 | One job per file, named by the file name                          | review      |
 | The same logic lives in one file; a second copy imports the first | review      |
 
-| Conforming                                                                                                     | Non-conforming                                                                                                                      |
-| -------------------------------------------------------------------------------------------------------------- | ----------------------------------------------------------------------------------------------------------------------------------- |
-| `module/services/effects/apply.js`: applies status effects and registers the GM query that does it for players | A file in `module/hooks/` that applies Wounds, spends Void Points, and posts notifications itself, which is Services work (modeled) |
-| `module/services/dice/resources/void-points.js`: one `updateUnderLock`                                         | `module/services/dice/resources/spell-slots.js:164`: `updateUnderLock` copied from `void-points.js:207` with its own lock map       |
+| Conforming                                                                                                     | Non-conforming                                                                                                                                                       |
+| -------------------------------------------------------------------------------------------------------------- | -------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| `module/services/effects/apply.js`: applies status effects and registers the GM query that does it for players | A file in `module/hooks/` that applies Wounds, spends Void Points, and posts notifications itself, which is Services work (modeled)                                  |
+| `module/services/dice/resources/void-points.js`: one `updateUnderLock`                                         | `updateUnderLock` (`module/services/dice/check/spell-slots.js`): a copy of `updateUnderLock` (`module/services/dice/resources/void-points.js`) with its own lock map |
 
 ## Size
 
@@ -172,7 +172,7 @@ them (Stage 17 decision 16).
 
 | Rule                | Conforming                                                                                              | Non-conforming                                            |
 | ------------------- | ------------------------------------------------------------------------------------------------------- | --------------------------------------------------------- |
-| Feature folder      | `module/services/xp/`: `xp-calculator.js`, `xp-formatter.js`, `xp-versioning.js`                        | none found                                                |
+| Feature folder      | `module/services/xp/`: `calculator.js`, `disadvantage-cap.js`, `formatter.js`, `versioning.js`          | none found                                                |
 | No entry file       | `module/services/effects/automation.js` exports its handlers; `module/hooks/register-all.js` wires them | An `index.js` that registers a feature's hooks (modeled)  |
 | Constants in Config | `module/config/rule-keys.js`, `module/config/item-types.js`                                             | A `constants/` folder under `module/documents/` (modeled) |
 

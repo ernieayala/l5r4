@@ -13,33 +13,32 @@ reaches the five translations. [voice.md](voice.md) covers how the values read.
 | Tokens and partials | None                                                                                                                                                                                                           |
 | Checks              | `tests/lang.test.js`, `tests/conventions/templates.test.js`; "review" where a pattern cannot judge                                                                                                             |
 
-Line numbers below are `lang/en.json` unless a file is named.
-
 ## Key paths
 
 **Rule.** Every key sits under `l5r4.` as `l5r4.<area>.<group>.<key>`, with at most one subgroup between group and key
-(depth 4 or 5; 792 of 841 leaves today). A plural group adds one level (**Plurals**). The one group outside `l5r4.` is
-`TYPES`, which core requires for subtype labels. Settings and status effect names sit under `l5r4.` with the rest (798
-of 841 leaves are there already).
+(depth 4 or 5; 1094 of the 1096 leaves under `l5r4.` today, the two others at depth 6 in
+`l5r4.ui.mechanics.stances.errors` (`lang/en.json`)). A plural group adds one level (**Plurals**). The one group outside
+`l5r4.` is `TYPES`, which core requires for subtype labels. Settings and status effect names sit under `l5r4.` with the
+rest.
 
-| Area        | Holds                                                                                                                                                                     | Example                                            |
-| ----------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------- | -------------------------------------------------- |
-| `apps`      | One group per window in `module/apps/`, named after the file in camelCase (`armor-config.js` is `apps.armorConfig`): its `title`, labels, and `errors`                    | `l5r4.apps.armorConfig.errors.updateFailed` (`:7`) |
-| `ui`        | Strings shared across features, one group per feature: `common`, `tabs`, `check`, `effects`, `rules`, `ruleSummary`, `links`, `combat`, `mechanics`, `statusEffects`, ... | `l5r4.ui.effects.voidLimit` (`:189`)               |
-| `character` | Labels for actor data: Skills, ranks, experience, Skill types, Advantage types                                                                                            | `l5r4.character.ranks.statusRank` (`:864`)         |
-| `equipment` | Weapon and armor labels and option lists                                                                                                                                  | `l5r4.equipment.armor.types.light` (`:959`)        |
-| `magic`     | Spell, maho, and kiho labels and option lists                                                                                                                             | `l5r4.magic.spells.affinity` (`:977`)              |
-| `system`    | `settings`, `migration`, and system-wide `errors`                                                                                                                         | `l5r4.system.errors.createEffect` (`:1021`)        |
-| `world`     | Campaign data: currency names                                                                                                                                             | `l5r4.world.wealth.koku` (`:1027`)                 |
+| Area        | Holds                                                                                                                                                                     | Example                                                      |
+| ----------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------- | ------------------------------------------------------------ |
+| `apps`      | One group per window in `module/apps/`, named after the file in camelCase (`armor-config.js` is `apps.armorConfig`): its `title`, labels, and `errors`                    | `l5r4.apps.armorConfig.errors.updateFailed` (`lang/en.json`) |
+| `ui`        | Strings shared across features, one group per feature: `common`, `tabs`, `check`, `effects`, `rules`, `ruleSummary`, `links`, `combat`, `mechanics`, `statusEffects`, ... | `l5r4.ui.effects.voidLimit` (`lang/en.json`)                 |
+| `character` | Labels for actor data: Skills, ranks, experience, Skill types, Advantage types                                                                                            | `l5r4.character.ranks.statusRank` (`lang/en.json`)           |
+| `equipment` | Weapon and armor labels and option lists                                                                                                                                  | `l5r4.equipment.armor.types.light` (`lang/en.json`)          |
+| `magic`     | Spell, maho, and kiho labels and option lists                                                                                                                             | `l5r4.magic.spells.affinity` (`lang/en.json`)                |
+| `system`    | `settings`, `migration`, and system-wide `errors`                                                                                                                         | `l5r4.system.errors.createEffect` (`lang/en.json`)           |
+| `world`     | Campaign data: currency names                                                                                                                                             | `l5r4.world.wealth.koku` (`lang/en.json`)                    |
 
-|                | Example                                                                                                                                                               | Source         |
-| -------------- | --------------------------------------------------------------------------------------------------------------------------------------------------------------------- | -------------- |
-| Conforming     | `l5r4.apps.wealthManager.errors.insufficientFunds`                                                                                                                    | `:42`          |
-| Conforming     | `TYPES.Item.commonItem` (core reads it)                                                                                                                               | `:1081`        |
-| Non-conforming | `SETTINGS.floatingNumbers.hint` (write `l5r4.system.settings.floatingNumbers.hint`)                                                                                   | `:1040`        |
-| Non-conforming | `EFFECT.blinded` (write `l5r4.ui.statusEffects.blinded`)                                                                                                              | `:1056`        |
-| Non-conforming | `l5r4.ui.wealthManager.addMoney`: a window's strings outside `apps` (write `l5r4.apps.wealthManager.addMoney`)                                                        | `:704`         |
-| Non-conforming | `l5r4.ui.browser.*` and `l5r4.ui.effectPanel.*` are the strings of `compendium-browser.js` and `effect-panel.js` (write `apps.compendiumBrowser`, `apps.effectPanel`) | `:298`, `:374` |
+|                | Example                                                                                                                                                              | Source                                                                                              |
+| -------------- | -------------------------------------------------------------------------------------------------------------------------------------------------------------------- | --------------------------------------------------------------------------------------------------- |
+| Conforming     | `l5r4.apps.wealthManager.errors.insufficientFunds`                                                                                                                   | `l5r4.apps.wealthManager.errors.insufficientFunds` (`lang/en.json`)                                 |
+| Conforming     | `TYPES.Item.commonItem` (core reads it)                                                                                                                              | `TYPES.Item.commonItem` (`lang/en.json`)                                                            |
+| Non-conforming | `SETTINGS.floatingNumbers.hint` (write `l5r4.system.settings.floatingNumbers.hint`)                                                                                  | modeled on `l5r4.system.settings.floatingNumbers.hint` (`lang/en.json`)                             |
+| Non-conforming | `EFFECT.blinded` (write `l5r4.ui.statusEffects.blinded`)                                                                                                             | modeled on `l5r4.ui.statusEffects.blinded` (`lang/en.json`)                                         |
+| Non-conforming | `l5r4.ui.wealthManager.addMoney`: a window's strings outside `apps` (write `l5r4.apps.wealthManager.addMoney`)                                                       | modeled on `l5r4.apps.wealthManager.addMoney` (`lang/en.json`)                                      |
+| Non-conforming | `l5r4.ui.browser.*` and `l5r4.ui.effectPanel.*` as the strings of `compendium-browser.js` and `effect-panel.js` (write `apps.compendiumBrowser`, `apps.effectPanel`) | modeled on `l5r4.apps.compendiumBrowser` (`lang/en.json`), `l5r4.apps.effectPanel` (`lang/en.json`) |
 
 `apps.<app>` is the majority home for a window's strings (23 keys to 18 under `ui.<app>`).
 
@@ -52,13 +51,13 @@ above, and its depth is 4 or 5 (6 inside a plural group).
 parent's stem. A segment that mirrors a fixed name keeps that name's spelling, PascalCase and kebab-case included (see
 **Fixed names**).
 
-|                | Example                                                                                                                | Source                         |
-| -------------- | ---------------------------------------------------------------------------------------------------------------------- | ------------------------------ |
-| Conforming     | `l5r4.ui.mechanics.wounds.armorTnBase`                                                                                 | `:501`                         |
-| Conforming     | `l5r4.ui.ruleSummary.TNModifier` (mirrors the rule key)                                                                | `:207`                         |
-| Non-conforming | `freeRaisesToTN`, `checkTN` (write `freeRaisesToTn`, `checkTn`)                                                        | `:141`, `:351`                 |
-| Non-conforming | `wounds.wounds`, `fear.fearRank` (write `wounds.label`, `fear.rank`)                                                   | `:499`, `:552`                 |
-| Non-conforming | `common.init`, `common.mod`, `sheets.bio`, `spells.aoe` (write `initiative`, `modifier`, `background`, `areaOfEffect`) | `:571`, `:573`, `:717`, `:973` |
+|                | Example                                                                                                                | Source                                                                                                                                                                                               |
+| -------------- | ---------------------------------------------------------------------------------------------------------------------- | ---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| Conforming     | `l5r4.ui.mechanics.wounds.armorTnBase`                                                                                 | `l5r4.ui.mechanics.wounds.armorTnBase` (`lang/en.json`)                                                                                                                                              |
+| Conforming     | `l5r4.ui.ruleSummary.TNModifier` (mirrors the rule key)                                                                | `l5r4.ui.ruleSummary.TNModifier` (`lang/en.json`)                                                                                                                                                    |
+| Non-conforming | `freeRaisesToTN`, `checkTN` (write `freeRaisesToTn`, `checkTn`)                                                        | modeled on `l5r4.ui.check.freeRaisesToTn` (`lang/en.json`), `l5r4.ui.links.checkTn` (`lang/en.json`)                                                                                                 |
+| Non-conforming | `wounds.wounds`, `fear.fearRank` (write `wounds.label`, `fear.rank`)                                                   | modeled on `l5r4.ui.mechanics.wounds.label` (`lang/en.json`), `l5r4.ui.mechanics.fear.rank` (`lang/en.json`)                                                                                         |
+| Non-conforming | `common.init`, `common.mod`, `sheets.bio`, `spells.aoe` (write `initiative`, `modifier`, `background`, `areaOfEffect`) | modeled on `l5r4.ui.common.initiative` (`lang/en.json`), `l5r4.ui.common.modifier` (`lang/en.json`), `l5r4.ui.sheets.background` (`lang/en.json`), `l5r4.magic.spells.areaOfEffect` (`lang/en.json`) |
 
 **Check.** `tests/lang.test.js`: every segment matches `^[a-z][a-zA-Z0-9]*$`, contains no `TN`, and does not start with
 its parent's name, unless it is on the fixed-name list.
@@ -67,14 +66,14 @@ its parent's name, unless it is on the fixed-name list.
 
 **Rule.** These names mean one thing wherever they appear. Each is the majority form of its split.
 
-| Name          | Holds                                                    | Majority                                               | Conforming                                                                           | Non-conforming                                                                                                               |
-| ------------- | -------------------------------------------------------- | ------------------------------------------------------ | ------------------------------------------------------------------------------------ | ---------------------------------------------------------------------------------------------------------------------------- |
-| `title`       | A window or dialog title                                 | 25 of 25 titles                                        | `apps.armorConfig.title` (`:5`)                                                      | `ui.combat.configuration` (`:606`): a second copy of `apps.combatConfig.title`                                               |
-| `errors`      | A feature's failure and refusal messages                 | 8 groups to 1 `error` and 7 `ui.notifications.*Failed` | `apps.wealthManager.errors` (`:38`)                                                  | `ui.links.error` (`:360`); `ui.notifications.wealthManagerFailed` (`:759`, write `apps.wealthManager.errors.openFailed`)     |
-| `<field>Hint` | Help for one field, beside the field's key               | 14, the most-used of seven forms                       | `ui.check.voidSkill` with `voidSkillHint`; `experience.breakdown.cap` with `capHint` | `ui.emphasisManager.help` (`:698`); `stances.fullDefenseDescription` (`:549`); `experience.disadvantageCapTooltip` (modeled) |
-| `hint`        | Help for a whole window, section, or setting             | Core's setting field name                              | `ui.rules.hint` (`:193`); `floatingNumbers.hint` (`:1040`)                           | `SETTINGS.LtException.label` holding the hint (`:1036`; same at `:1048`, `:1052`)                                            |
-| `name`        | A setting's name                                         | Core's setting field name                              | `honorRoll.name` (`:1043`)                                                           |                                                                                                                              |
-| `common`      | Labels shared by many features: Cancel, Save, Edit, Roll | `ui.common` 38 keys to `ui.label` 11                   | `ui.common.cancel` (`:567`)                                                          | `ui.label.cancel` (`:114`)                                                                                                   |
+| Name          | Holds                                                    | Majority                                               | Conforming                                                                                          | Non-conforming                                                                                                    |
+| ------------- | -------------------------------------------------------- | ------------------------------------------------------ | --------------------------------------------------------------------------------------------------- | ----------------------------------------------------------------------------------------------------------------- |
+| `title`       | A window or dialog title                                 | 25 of 25 titles                                        | `l5r4.apps.armorConfig.title` (`lang/en.json`)                                                      | `ui.combat.configuration`: a second copy of `apps.combatConfig.title` (modeled)                                   |
+| `errors`      | A feature's failure and refusal messages                 | 8 groups to 1 `error` and 7 `ui.notifications.*Failed` | `l5r4.apps.wealthManager.errors` (`lang/en.json`)                                                   | `ui.links.error`; `ui.notifications.wealthManagerFailed` (write `apps.wealthManager.errors.openFailed`) (modeled) |
+| `<field>Hint` | Help for one field, beside the field's key               | 14, the most-used of seven forms                       | `ui.check.voidSkill` with `voidSkillHint`; `experience.breakdown.cap` with `capHint`                | `ui.emphasisManager.help`; `stances.fullDefenseDescription`; `experience.disadvantageCapTooltip` (modeled)        |
+| `hint`        | Help for a whole window, section, or setting             | Core's setting field name                              | `l5r4.ui.rules.hint` (`lang/en.json`); `l5r4.system.settings.floatingNumbers.hint` (`lang/en.json`) | `SETTINGS.LtException.label` holding the hint (modeled)                                                           |
+| `name`        | A setting's name                                         | Core's setting field name                              | `l5r4.system.settings.honorRoll.name` (`lang/en.json`)                                              |                                                                                                                   |
+| `common`      | Labels shared by many features: Cancel, Save, Edit, Roll | `ui.common` 38 keys to `ui.label` 11                   | `l5r4.ui.common.cancel` (`lang/en.json`)                                                            | `ui.label.cancel` (modeled)                                                                                       |
 
 An icon-only control's tooltip reads the control's label key ([voice.md](voice.md#tooltips)); there is no separate
 tooltip key.
@@ -88,14 +87,14 @@ tooltip key.
 keep two keys, because a translation may need two words. A sentence is one key with placeholders, never fragments
 joined in code or in a template.
 
-|                | Example                                                                                   | Source                                                          |
-| -------------- | ----------------------------------------------------------------------------------------- | --------------------------------------------------------------- |
-| Conforming     | "{name} takes {wounds} Wounds from {damage} damage" as one key                            | `:643`                                                          |
-| Non-conforming | `ui.emphasisManager.addCustom` repeats `apps.emphasisManager.addCustom`                   | `:696`, `:24`                                                   |
-| Non-conforming | `ui.mechanics.wounds.woundConfiguration` repeats `apps.woundConfig.title`                 | `:512`, `:47`                                                   |
-| Conforming     | `F("l5r4.ui.check.damageLabel", { weapon: spec.label })`: "Damage for {weapon}"           | `module/services/combat/damage-roll.js`, `rollDamageFromAttack` |
-| Non-conforming | `` `${T("l5r4.ui.check.damageFor")} ${spec.label}` `` joins a fragment to a name          | modeled                                                         |
-| Non-conforming | `({{localize "l5r4.ui.check.of"}} {{freeRaises}})` builds a phrase from the fragment "of" | `templates/dialogs/check-dialog.hbs:55`                         |
+|                | Example                                                                                   | Source                                                            |
+| -------------- | ----------------------------------------------------------------------------------------- | ----------------------------------------------------------------- |
+| Conforming     | "{name} takes {wounds} Wounds from {damage} damage" as one key                            | `l5r4.ui.combat.resultTitle` (`lang/en.json`)                     |
+| Non-conforming | `ui.emphasisManager.addCustom` repeats `apps.emphasisManager.addCustom`                   | modeled on `l5r4.apps.emphasisManager.addCustom` (`lang/en.json`) |
+| Non-conforming | `ui.mechanics.wounds.woundConfiguration` repeats `apps.woundConfig.title`                 | modeled on `l5r4.apps.woundConfig.title` (`lang/en.json`)         |
+| Conforming     | `F("l5r4.ui.check.damageLabel", { weapon: spec.label })`: "Damage for {weapon}"           | `rollDamageFromAttack` (`module/services/combat/damage-roll.js`)  |
+| Non-conforming | `` `${T("l5r4.ui.check.damageFor")} ${spec.label}` `` joins a fragment to a name          | modeled                                                           |
+| Non-conforming | `({{localize "l5r4.ui.check.of"}} {{freeRaises}})` builds a phrase from the fragment "of" | `l5r4.ui.check.of` (`templates/dialogs/check-dialog.hbs`)         |
 
 ### Duplicate trees
 
@@ -104,18 +103,18 @@ the constants in `module/config/localization.js` point at the winners. Basis: al
 winning trees and none carries `l5r4.mechanics`, and templates read the winners in about 150 places against 33 lines
 in one config file.
 
-| Meaning                  | Wins                                                           | Removed                                                                               |
-| ------------------------ | -------------------------------------------------------------- | ------------------------------------------------------------------------------------- |
-| Ring names               | `l5r4.ui.mechanics.rings` (`:449`)                             | `l5r4.mechanics.rings` (`:77`)                                                        |
-| Trait names              | `l5r4.ui.mechanics.traits` (`:461`)                            | `l5r4.mechanics.traits` (`:99`)                                                       |
-| Stance names             | `l5r4.ui.mechanics.stances` (`:543`)                           | `l5r4.mechanics.stances` (`:92`)                                                      |
-| Skill types              | `l5r4.character.skillTypes` (`:847`)                           | `l5r4.mechanics.skills.types` (`:85`)                                                 |
-| Advantage types          | `l5r4.character.advantages` (`:853`)                           | `l5r4.mechanics.advantages.types` (`:60`)                                             |
-| Kiho types               | `l5r4.magic.kiho` (`:1007`)                                    | `l5r4.mechanics.magic.kiho` (`:70`)                                                   |
-| Shared labels            | `l5r4.ui.common` (`:565`), which takes `add`, `all`, `complex` | `l5r4.ui.label` (`:111`): its 8 copies go                                             |
-| Emphasis Manager strings | `l5r4.apps.emphasisManager` (`:22`)                            | `l5r4.ui.emphasisManager` (`:694`)                                                    |
-| Wealth Manager strings   | `l5r4.apps.wealthManager` (`:36`)                              | `l5r4.ui.wealthManager` (`:701`)                                                      |
-| Window titles            | `l5r4.apps.<app>.title`                                        | `ui.combat.configuration` (`:606`), `ui.mechanics.wounds.woundConfiguration` (`:512`) |
+| Meaning                  | Wins                                                                   | Removed                                                             |
+| ------------------------ | ---------------------------------------------------------------------- | ------------------------------------------------------------------- |
+| Ring names               | `l5r4.ui.mechanics.rings` (`lang/en.json`)                             | `l5r4.mechanics.rings`                                              |
+| Trait names              | `l5r4.ui.mechanics.traits` (`lang/en.json`)                            | `l5r4.mechanics.traits`                                             |
+| Stance names             | `l5r4.ui.mechanics.stances` (`lang/en.json`)                           | `l5r4.mechanics.stances`                                            |
+| Skill types              | `l5r4.character.skillTypes` (`lang/en.json`)                           | `l5r4.mechanics.skills.types`                                       |
+| Advantage types          | `l5r4.character.advantages` (`lang/en.json`)                           | `l5r4.mechanics.advantages.types`                                   |
+| Kiho types               | `l5r4.magic.kiho` (`lang/en.json`)                                     | `l5r4.mechanics.magic.kiho`                                         |
+| Shared labels            | `l5r4.ui.common` (`lang/en.json`), which takes `add`, `all`, `complex` | `l5r4.ui.label`: its 8 copies go                                    |
+| Emphasis Manager strings | `l5r4.apps.emphasisManager` (`lang/en.json`)                           | `l5r4.ui.emphasisManager`                                           |
+| Wealth Manager strings   | `l5r4.apps.wealthManager` (`lang/en.json`)                             | `l5r4.ui.wealthManager`                                             |
+| Window titles            | `l5r4.apps.<app>.title`                                                | `ui.combat.configuration`, `ui.mechanics.wounds.woundConfiguration` |
 
 **Check.** `tests/lang.test.js`: the removed trees above do not exist. ESLint `l5r4/joined-copy` (`tools/eslint/`)
 fails a localized string in `module/` or `dist/` joined to other text with `+` or in a template literal, and
@@ -131,14 +130,14 @@ and for fragments joined in templates.
 placeholder with no data [src: client/helpers/localization.mjs:444]. A translation uses the same placeholders as the
 English value.
 
-|                | Example                                                                  | Source                           |
-| -------------- | ------------------------------------------------------------------------ | -------------------------------- |
-| Conforming     | "{roll} roll against TN {tn}."                                           | `:185`                           |
-| Conforming     | `F("l5r4.ui.purchase.unmet", { name: data.name, list })`                 | `module/services/purchase.js:96` |
-| Non-conforming | `{character}` for the actor (write `{name}`)                             | `:560`                           |
-| Non-conforming | `F("l5r4.ui.mechanics.fear.noWillpower", { character: character.name })` | `module/services/fear.js:45`     |
+|                | Example                                                                  | Source                                                           |
+| -------------- | ------------------------------------------------------------------------ | ---------------------------------------------------------------- |
+| Conforming     | "{roll} roll against TN {tn}."                                           | `l5r4.ui.effects.saveText` (`lang/en.json`)                      |
+| Conforming     | `F("l5r4.ui.purchase.unmet", { name: data.name, list })`                 | `canAddItem` (`module/services/purchase.js`)                     |
+| Non-conforming | `{character}` for the actor (write `{name}`)                             | modeled on `l5r4.ui.mechanics.fear.noWillpower` (`lang/en.json`) |
+| Non-conforming | `F("l5r4.ui.mechanics.fear.noWillpower", { character: character.name })` | modeled                                                          |
 
-All 129 values with placeholders use camelCase or one lowercase word.
+All 188 values with placeholders use camelCase or one lowercase word.
 
 **Check.** `tests/lang.test.js`: every placeholder matches `^\{[a-z][a-zA-Z0-9]*\}$`, and each translation value holds
 the same set of placeholders as its `en.json` value. Review that code passes each one.
@@ -150,31 +149,32 @@ the same set of placeholders as its `en.json` value. Review that code passes eac
 a translation adds the categories its language needs (`ru` uses `one`, `few`, `many`, `other`). Core uses the same
 shape (`SUPPORT.UnavailableDocuments` [src: public/lang/en.json:3978], read at
 [src: client/applications/sidebar/document-directory.mjs:422]). A value that reads the same for every count, such as
-"Entries: {count}" (`:303`), stays one leaf.
+"Entries: {count}" (`l5r4.apps.compendiumBrowser.count` (`lang/en.json`)), stays one leaf.
 
-|                | Example                                                                                                     | Source            |
-| -------------- | ----------------------------------------------------------------------------------------------------------- | ----------------- |
-| Conforming     | `"exported": { "one": "Exported 1 item from {folder}.", "other": "Exported {count} items from {folder}." }` | modeled on `:442` |
-| Non-conforming | "Exported {count} items from {folder}." as one leaf (reads "1 items")                                       | `:442`            |
-| Non-conforming | "Updated {count} world image path(s)."                                                                      | `:1016`           |
+|                | Example                                                                                                                             | Source                                                           |
+| -------------- | ----------------------------------------------------------------------------------------------------------------------------------- | ---------------------------------------------------------------- |
+| Conforming     | `"iconsUpdated": { "one": "Migration: updated {count} world image path", "other": "Migration: updated {count} world image paths" }` | `l5r4.system.migration.iconsUpdated` (`lang/en.json`)            |
+| Conforming     | `"exported": { "one": "Exported 1 item from {folder}", "other": "Exported {count} items from {folder}" }`                           | modeled on `l5r4.ui.transfer.exported` (`lang/en.json`)          |
+| Non-conforming | "Exported {count} items from {folder}" as one leaf (reads "1 items")                                                                | `l5r4.ui.transfer.exported` (`lang/en.json`)                     |
+| Non-conforming | "Updated {count} world image path(s)."                                                                                              | modeled on `l5r4.system.migration.iconsUpdated` (`lang/en.json`) |
 
 **Check.** `tests/lang.test.js`: no value contains `(s)`; a group with a `one` leaf has an `other` leaf; a translation's
 plural category that `en.json` leaves out is accepted under a group with `one` and `other`, and its placeholders match
-`other`'s. The existing
-unused-key check accepts the built key `` `${prefix}.${category}` `` (`tests/lang.test.js:49-74`).
+`other`'s. The existing unused-key check, `should hold no key the system never uses` (`tests/lang.test.js`), accepts
+the built key `` `${prefix}.${category}` ``.
 
 ## Key order
 
 **Rule.** The keys of every group, leaves and subgroups together, are sorted with `a.localeCompare(b, "en")`. Each
-translation keeps the same order as `en.json` for the keys it has. Sorting is the rule for every group (32 groups are
-sorted today, 96 are not).
+translation keeps the same order as `en.json` for the keys it has. Sorting is the rule for every group (all 134 groups
+of `en.json` are sorted today).
 
-|                | Example                                                      | Source       |
-| -------------- | ------------------------------------------------------------ | ------------ |
-| Conforming     | `EFFECT`: `blinded`, `concentration`, `dazed`, ... `stunned` | `:1055-1069` |
-| Conforming     | `TYPES.Item`: `advantage`, `armor`, `bow`, ... `weapon`      | `:1076-1091` |
-| Non-conforming | `ui.label`: `save`, then `simple`, `complex`, `free`         | `:119-122`   |
-| Non-conforming | `ui.common`: `roll`, `cancel`, `ok`, `none`, ...             | `:566-569`   |
+|                | Example                                                                | Source                                       |
+| -------------- | ---------------------------------------------------------------------- | -------------------------------------------- |
+| Conforming     | `ui.statusEffects`: `blinded`, `concentration`, `dazed`, ... `stunned` | `l5r4.ui.statusEffects` (`lang/en.json`)     |
+| Conforming     | `TYPES.Item`: `advantage`, `armor`, `bow`, ... `weapon`                | `TYPES.Item` (`lang/en.json`)                |
+| Non-conforming | `ui.label`: `save`, then `simple`, `complex`, `free`                   | modeled                                      |
+| Non-conforming | `ui.common`: `roll`, `cancel`, `ok`, `none`, ...                       | modeled on `l5r4.ui.common` (`lang/en.json`) |
 
 **Check.** `tests/lang.test.js`: each group's keys equal their sorted copy, in `en.json` and in each translation.
 
@@ -183,13 +183,14 @@ sorted today, 96 are not).
 **Rule.** A key built in code ends in a segment that mirrors a fixed name or a Config key: a Trait or Ring key, a rule
 key, a tab id. Its group exists in `en.json`, and every value in it is reachable from the code that builds it.
 
-|                | Example                                                                        | Source                        |
-| -------------- | ------------------------------------------------------------------------------ | ----------------------------- |
-| Conforming     | ``T(`l5r4.ui.mechanics.traits.${trait}`)`` where `trait` is a stored Trait key | `module/services/links.js:28` |
-| Non-conforming | A built key whose last segment is user text, such as an item name              | modeled                       |
+|                | Example                                                                        | Source                                         |
+| -------------- | ------------------------------------------------------------------------------ | ---------------------------------------------- |
+| Conforming     | ``T(`l5r4.ui.mechanics.traits.${trait}`)`` where `trait` is a stored Trait key | `formatTraitName` (`module/services/links.js`) |
+| Non-conforming | A built key whose last segment is user text, such as an item name              | modeled                                        |
 
-**Check.** `tests/lang.test.js`: the group under every template-literal key exists (`tests/lang.test.js:76-83`), and
-no key goes unused (`tests/lang.test.js:49-74`).
+**Check.** `tests/lang.test.js`: the group under every template-literal key exists
+(`should define the group under every key built from a template literal` (`tests/lang.test.js`)), and no key goes
+unused (`should hold no key the system never uses` (`tests/lang.test.js`)).
 
 ## How a key change reaches the translations
 
@@ -206,11 +207,11 @@ no key goes unused (`tests/lang.test.js:49-74`).
 
 A translation omits a key it has not translated instead of copying the English text (review).
 
-|                | Example                                                                                                                                                                         | Source                    |
-| -------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- | ------------------------- |
-| Conforming     | `ui.mechanics.rings.fire` exists at the same path in `en.json` and every translation                                                                                            | `:451`, `lang/de.json:13` |
-| Non-conforming | A top-level `conditions` group of `*.restrictions` keys that `en.json` does not have, in all five translations                                                                  | `lang/de.json:488`        |
-| Non-conforming | `ui.wealthManager.insufficientFunds` and `insufficientForConversion` left behind after `en.json` moved them to `apps.wealthManager.errors` (`:41-42`), in all five translations | `lang/de.json:190-191`    |
+|                | Example                                                                                                                                                             | Source                                                                                           |
+| -------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------- | ------------------------------------------------------------------------------------------------ |
+| Conforming     | `ui.mechanics.rings.fire` exists at the same path in `en.json` and every translation                                                                                | `l5r4.ui.mechanics.rings.fire` (`lang/en.json`), `l5r4.ui.mechanics.rings.fire` (`lang/de.json`) |
+| Non-conforming | A top-level `conditions` group of `*.restrictions` keys that `en.json` does not have, in all five translations                                                      | modeled                                                                                          |
+| Non-conforming | `ui.wealthManager.insufficientFunds` and `insufficientForConversion` left behind in all five translations after `en.json` moved them to `apps.wealthManager.errors` | modeled on `l5r4.apps.wealthManager.errors` (`lang/en.json`)                                     |
 
 **Check.** `tests/lang.test.js`: every key in a translation exists in `en.json` with the same type (string or group),
 with the same placeholders, and in the same order. A key renamed in `en.json` but not in a translation fails.
@@ -220,12 +221,12 @@ with the same placeholders, and in the same order. A key renamed in `en.json` bu
 i18n keys are not stored, so any key may change (decision 2). These segments mirror stored or external names and keep
 their spelling:
 
-| Segment                                                                                                                                                                                                                                                  | Where                                                                             | Why it is fixed                                                               |
-| -------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- | --------------------------------------------------------------------------------- | ----------------------------------------------------------------------------- |
-| `TYPES.<Document>.<subtype>`: `Actor` `pc`, `npc`; `Item` `advantage`, `armor`, `bow`, `clan`, `commonItem`, `disadvantage`, `family`, `kata`, `kiho`, `school`, `skill`, `spell`, `tattoo`, `technique`, `weapon`; `ChatMessage` `roll`, `checkRequest` | `:1071`                                                                           | Core reads the labels at this path; the subtypes are stored on every document |
-| Setting keys `LtException`, `floatingNumbers`, `honorRoll`, `runMigration`, `forceMigration`                                                                                                                                                             | `l5r4.system.settings.<key>`                                                      | Setting keys are stored in world and client settings                          |
-| Status effect ids `blinded`, `concentration`, `dazed`, `dead`, `entangled`, `fasting`, `fatigued`, `feared`, `grappled`, `guarded`, `guarding`, `mounted`, `prone`, `stunned`                                                                            | `l5r4.ui.statusEffects.<id>`                                                      | Ids are stored in each effect's `statuses`                                    |
-| Rule keys (`RollModifier`, `TNModifier`, `ArmorTN`, ... `GrantItem`)                                                                                                                                                                                     | `l5r4.ui.ruleSummary.<key>` (`:206-234`), built in `module/utils/rule-summary.js` | Rule keys are stored in `system.rules`                                        |
-| Rule selector kinds `any`, `skill`, `trait`, `ring`, `attack`, `damage`, `spell`, `maho`, `skill-type`, `skill-tag`                                                                                                                                      | `l5r4.ui.ruleSummary.selector.<kind>` (`:254-266`)                                | Stored in `system.rules`                                                      |
-| Rule field values: `range` `melee`, `ranged`; `armorTn` `base`, `total`; `per` `turn`, `round`, `skirmish`, `day`; `maneuver`, `action`, `direction` values                                                                                              | `l5r4.ui.ruleSummary.<field>.<value>` (`:246-288`)                                | Stored in `system.rules`                                                      |
-| Trait keys `sta`, `wil`, `str`, `per`, `ref`, `awa`, `agi`, `int`; Ring keys `air`, `earth`, `fire`, `water`, `void`; Advantage, kiho, and Skill `system.type` values; currency `koku`, `bu`, `zeni`                                                     | The option-list groups                                                            | `system` field names and values stored on actors and items                    |
+| Segment                                                                                                                                                                                                                                                  | Where                                                                | Why it is fixed                                                               |
+| -------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- | -------------------------------------------------------------------- | ----------------------------------------------------------------------------- |
+| `TYPES.<Document>.<subtype>`: `Actor` `pc`, `npc`; `Item` `advantage`, `armor`, `bow`, `clan`, `commonItem`, `disadvantage`, `family`, `kata`, `kiho`, `school`, `skill`, `spell`, `tattoo`, `technique`, `weapon`; `ChatMessage` `roll`, `checkRequest` | `TYPES` (`lang/en.json`)                                             | Core reads the labels at this path; the subtypes are stored on every document |
+| Setting keys `LtException`, `floatingNumbers`, `honorRoll`, `runMigration`, `forceMigration`                                                                                                                                                             | `l5r4.system.settings.<key>`                                         | Setting keys are stored in world and client settings                          |
+| Status effect ids `blinded`, `concentration`, `dazed`, `dead`, `entangled`, `fasting`, `fatigued`, `feared`, `grappled`, `guarded`, `guarding`, `mounted`, `prone`, `stunned`                                                                            | `l5r4.ui.statusEffects.<id>`                                         | Ids are stored in each effect's `statuses`                                    |
+| Rule keys (`RollModifier`, `TNModifier`, `ArmorTN`, ... `GrantItem`)                                                                                                                                                                                     | `l5r4.ui.ruleSummary.<key>`, built in `module/utils/rule-summary.js` | Rule keys are stored in `system.rules`                                        |
+| Rule selector kinds `any`, `skill`, `trait`, `ring`, `attack`, `damage`, `spell`, `maho`, `skill-type`, `skill-tag`                                                                                                                                      | `l5r4.ui.ruleSummary.selector.<kind>`                                | Stored in `system.rules`                                                      |
+| Rule field values: `range` `melee`, `ranged`; `armorTn` `base`, `total`; `per` `turn`, `round`, `skirmish`, `day`; `maneuver`, `action`, `direction` values                                                                                              | `l5r4.ui.ruleSummary.<field>.<value>`                                | Stored in `system.rules`                                                      |
+| Trait keys `sta`, `wil`, `str`, `per`, `ref`, `awa`, `agi`, `int`; Ring keys `air`, `earth`, `fire`, `water`, `void`; Advantage, kiho, and Skill `system.type` values; currency `koku`, `bu`, `zeni`                                                     | The option-list groups                                               | `system` field names and values stored on actors and items                    |

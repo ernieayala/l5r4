@@ -11,7 +11,7 @@ stray click changes nothing; the up and down arrows on a Trait or the Void Ring 
 | SCSS        | `scss/components/_rank-control.scss`: the track and its value button. The `rank-arrows` mixin and the Trait and Void Ring variants sit in `scss/features/_traits-rings.scss`, under `.l5r4-traits-rings`. The 2 by 2 track layout is in `scss/features/_ranks.scss`                                                                           |
 | Block class | `l5r4-rank-control`                                                                                                                                                                                                                                                                                                                           |
 | Handlers    | Trait: `PcTraitHandler.updateTraitRank`, `.updateTraitRankUp`, `.updateTraitRankDown` (`module/sheets/handlers/pc-trait-handler.js`). Void Ring, on both sheets: `TraitHandler.updateVoidRing` (`module/sheets/handlers/trait-handler.js`). Track: `PcAdjustmentHandler.updateRankPoints` (`module/sheets/handlers/pc-adjustment-handler.js`) |
-| Shows in    | Trait rows and the Void Ring (`ring-trait-block.md`); the PC sidebar's rank tracks (`_ranks.hbs`)                                                                                                                                                                                                                                             |
+| Shows in    | Trait rows and the Void Ring (`ring-trait-block.md`); the PC sidebar's rank tracks (`templates/actor/_partials/_ranks.hbs`)                                                                                                                                                                                                                   |
 | Game terms  | Trait, Void Ring (`game-rules/25_rings_and_traits.md`, pp.76-78); Honor Rank (`game-rules/43_honor.md, p.90`), Glory Rank (`game-rules/44_glory.md, p.93`), Status Rank (`game-rules/45_status.md, p.95`), Taint Rank (`game-rules/89_shadowlands_taint.md, p.277`)                                                                           |
 | Gallery     | Each variant at rest, hovered, focused, at its lowest and highest value                                                                                                                                                                                                                                                                       |
 
@@ -19,25 +19,25 @@ stray click changes nothing; the up and down arrows on a Trait or the Void Ring 
 
 Trait and Void Ring:
 
-| Part       | Element                                                                                           | Class                                 | Class now                               |
-| ---------- | ------------------------------------------------------------------------------------------------- | ------------------------------------- | --------------------------------------- |
-| Control    | `<div>`                                                                                           | `l5r4-rank-control -trait` or `-void` | the target                              |
-| Up arrow   | `<button type="button" data-action="increase-trait" data-tooltip aria-label>` + `fa-chevron-up`   | `l5r4-rank-control-arrow -up`         | `a.trait-increase` (`_stats.hbs:61-63`) |
-| Value      | `<button type="button" data-action="adjust-trait" data-tooltip>` holding the number               | `l5r4-rank-control-value`             | the target                              |
-| Down arrow | `<button type="button" data-action="decrease-trait" data-tooltip aria-label>` + `fa-chevron-down` | `l5r4-rank-control-arrow -down`       | `a.trait-decrease` (`_stats.hbs:65-67`) |
+| Part       | Element                                                                                           | Class                                 | Class now  |
+| ---------- | ------------------------------------------------------------------------------------------------- | ------------------------------------- | ---------- |
+| Control    | `<div>`                                                                                           | `l5r4-rank-control -trait` or `-void` | the target |
+| Up arrow   | `<button type="button" data-action="increase-trait" data-tooltip aria-label>` + `fa-chevron-up`   | `l5r4-rank-control-arrow -up`         | the target |
+| Value      | `<button type="button" data-action="adjust-trait" data-tooltip>` holding the number               | `l5r4-rank-control-value`             | the target |
+| Down arrow | `<button type="button" data-action="decrease-trait" data-tooltip aria-label>` + `fa-chevron-down` | `l5r4-rank-control-arrow -down`       | the target |
 
 The three buttons are siblings because a button cannot hold another. The Void Ring's actions are `adjust-void-ring`,
 `increase-void-ring`, `decrease-void-ring`.
 
 Rank track:
 
-| Part        | Element                                                                         | Class                      | Class now                                                |
-| ----------- | ------------------------------------------------------------------------------- | -------------------------- | -------------------------------------------------------- |
-| Track       | `<div>`                                                                         | `l5r4-rank-control -track` | `rank-name-container` (`_ranks.hbs:2`)                   |
-| Under-label | `<div inert>` with the label and `rank.points`                                  | `l5r4-rank-control-under`  | `mas` (`_ranks.hbs:3-6`)                                 |
-| Face        | `<button type="button" data-action="adjust-rank-points" data-key data-tooltip>` | `l5r4-rank-control-value`  | `div.rank-name[data-action=rp-step]` (`_ranks.hbs:7-15`) |
-| Label       | `<span>` inside the face                                                        | `l5r4-rank-control-label`  | `span:first-child`                                       |
-| Number      | `<span>` inside the face: `{{rank}}.{{points}}`                                 | `l5r4-rank-control-number` | second `span`                                            |
+| Part        | Element                                                                         | Class                      | Class now                   |
+| ----------- | ------------------------------------------------------------------------------- | -------------------------- | --------------------------- |
+| Track       | `<div>`                                                                         | `l5r4-rank-control -track` | the target                  |
+| Under-label | `<div inert>` with the label and `rank.points`                                  | `l5r4-rank-control-under`  | the target, without `inert` |
+| Face        | `<button type="button" data-action="adjust-rank-points" data-key data-tooltip>` | `l5r4-rank-control-value`  | the target                  |
+| Label       | `<span>` inside the face                                                        | `l5r4-rank-control-label`  | `span:first-child`          |
+| Number      | `<span>` inside the face: `{{rank}}.{{points}}`                                 | `l5r4-rank-control-number` | second `span`               |
 
 ## Variants
 
@@ -47,7 +47,7 @@ Rank track:
 | Void    | `l5r4-rank-control -void`  | Inside the Void Ring's rank disc; arrows as the Trait's                               | Shift+click: +1. Shift+right-click: -1. Arrows: +1 and -1                    |
 | Track   | `l5r4-rank-control -track` | Label over `rank.points` on the header color, the nature sprite on hover              | Shift+click: +1 point. Shift+right-click: -1 point. Ctrl adds: a whole rank  |
 
-The pointer gestures are today's (`module/sheets/pc-sheet.js:200-218`, `:279-294`); the page keeps them.
+The pointer gestures are today's (`L5R4PcSheet.CLICK_ACTIONS` and `L5R4PcSheet#_onActionContext` (`module/sheets/pc-sheet.js`)); the page keeps them.
 
 ## States
 
@@ -111,15 +111,15 @@ its 64 px block; a translation that does not fit wraps to two lines inside the b
 | Q6  | `z-index` reads `--l5r4-layer-control`; durations read the motion tokens                                                                                                | `tests/conventions/styles.test.js`                                      |
 | Q7  | The arrows keep their size, 16 px tall: they exist today, so the 24 px minimum does not apply (Stage 17 decision 16). A new rank control meets it                       | Review, in the gallery (`foundations/space-and-size.md` S5)             |
 
-| #   | Conforming                                                                                                                                                                                 | Non-conforming                                                                                                  |
-| --- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------ | --------------------------------------------------------------------------------------------------------------- |
-| Q1  | `<div class="l5r4-rank-control -trait"><button ... -up>...</button><button class="l5r4-rank-control-value" ...>3</button><button ... -down>...</button></div>` (modeled)                   | `<span class="trait-rank" data-action="trait-rank" role="button">` holding two `<a data-action>` (modeled)      |
-| Q2  | `&:hover, &:focus-within { .l5r4-rank-control-arrow { opacity: 1; } }` (modeled)                                                                                                           | `@mixin rank-arrows { &:hover { ... } }` alone (`scss/features/_traits-rings.scss:10-24`)                       |
-| Q3  | `data-tooltip` and `aria-label` both `{{localize "l5r4.ui.hints.increaseTrait" trait=label}}` on the up arrow (modeled)                                                                    | `<a class="trait-increase" data-action="trait-increase" data-trait="sta">` with no name (modeled)               |
-| Q4  | `fa-chevron-up` on the Trait arrows (`templates/actor/_partials/_rank-control.hbs`)                                                                                                        | `fa-chevron-down` on the expand control (`templates/actor/_partials/_expand.hbs:1`)                             |
-| Q5  | `{{> "systems/l5r4-enhanced/templates/actor/_partials/_rank-track.hbs" track="honor" label="l5r4.character.ranks.honorRank" rank=system.honor.rank points=system.honor.points}}` (modeled) | The track's label and number written twice in each of four blocks (`templates/actor/_partials/_ranks.hbs:2-61`) |
-| Q6  | `z-index: var(--l5r4-layer-control);` (`foundations/layers.md`)                                                                                                                            | `z-index: 11;` (`scss/features/_traits-rings.scss:45`)                                                          |
-| Q7  | The arrows at `--l5r4-size-stepper`, 16 px, as today (`scss/features/_traits-rings.scss:35`)                                                                                               | Arrows grown to 24 px, which changes how the Trait row looks (modeled)                                          |
+| #   | Conforming                                                                                                                                                                                 | Non-conforming                                                                                             |
+| --- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------ | ---------------------------------------------------------------------------------------------------------- |
+| Q1  | `<div class="l5r4-rank-control -trait"><button ... -up>...</button><button class="l5r4-rank-control-value" ...>3</button><button ... -down>...</button></div>` (modeled)                   | `<span class="trait-rank" data-action="trait-rank" role="button">` holding two `<a data-action>` (modeled) |
+| Q2  | `&:hover, &:focus-within { .l5r4-rank-control-arrow { opacity: 1; } }` (modeled)                                                                                                           | `@mixin rank-arrows { &:hover { ... } }` alone (modeled)                                                   |
+| Q3  | `data-tooltip` and `aria-label` both `{{localize "l5r4.ui.hints.increaseTrait" trait=label}}` on the up arrow (modeled)                                                                    | `<a class="trait-increase" data-action="trait-increase" data-trait="sta">` with no name (modeled)          |
+| Q4  | `fa-chevron-up` on the Trait arrows (`templates/actor/_partials/_rank-control.hbs`)                                                                                                        | `fa-chevron-down` on the expand control (modeled)                                                          |
+| Q5  | `{{> "systems/l5r4-enhanced/templates/actor/_partials/_rank-track.hbs" track="honor" label="l5r4.character.ranks.honorRank" rank=system.honor.rank points=system.honor.points}}` (modeled) | The track's label and number written twice in each of four blocks (modeled)                                |
+| Q6  | `z-index: var(--l5r4-layer-control);` (`foundations/layers.md`)                                                                                                                            | `z-index: 11;` (modeled)                                                                                   |
+| Q7  | The arrows at `--l5r4-size-stepper`, 16 px, as today: `@mixin rank-arrows` (`scss/features/_traits-rings.scss`)                                                                            | Arrows grown to 24 px, which changes how the Trait row looks (modeled)                                     |
 
 ## Do and don't
 

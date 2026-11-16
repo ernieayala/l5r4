@@ -530,7 +530,7 @@ Rulings applied (parts 13 and 14 and their follow-ups), each with the gate and a
 | Translations of a title that became one key | Seeded in each translation as "<its own title>: {name}", what its users see today |
 | `bio-item-handler.js` | Deleted: no template ever emitted its actions; bio rows route through `BaseActorSheet.CLICK_ACTIONS` |
 | A check label's "Void!" | "{label} [Void]", matching "[Unskilled]" (the voice rules forbid a closing "!") |
-| `spendElementalSlot`, `spendVoidSlot`, `validateSpellSlot` with no caller in `module/` | Confirm the casting dialog's path covers what they do; delete them and point Quench at the live path, or give them the real caller |
+| `spendElementalSlot`, `spendVoidSlot`, `validateSpellSlot` with no caller in `module/` | The live casting path lacked their per-actor lock and spend-time recheck (two overlapping casts could spend one slot twice or reach -1), and their own refusals for an unknown Ring and a missing actor. Fixed in its own commit with failing Quench tests first: the live spend locks and rechecks, and refuses those cases with the existing messages; then the three old functions go and their race assertions move to the live path |
 | Citations of core's installed source | `[src: path:line]` keeps its line: the source is pinned to 14.370; rechecked when the target version moves |
 | `ui.common.mastery` / `masteryHint` | Moved together to a field group, with readers and translations, so the label and hint checks both hold |
 | Markdown line breaks | One line per paragraph: Prettier `proseWrap: "never"` for `*.md`, one reflow of `docs/`, `roadmap/`, and the root Markdown files |

@@ -9,9 +9,9 @@ places it among the panels.
 | ---------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
 | Window     | `module/apps/effect-panel.js`, class `EffectPanel`; target `EffectPanelApplication` ([naming.md](../../code-system/naming.md#classes)). `HandlebarsApplicationMixin(ApplicationV2)`, id `l5r4-enhanced-effect-panel`, classes `l5r4 l5r4-effect-panel`, icon `fa-solid fa-hourglass-half`, resizable, 320 px wide at top 80, left 120 |
 | Template   | `templates/apps/effect-panel.hbs`, the one part `effects`                                                                                                                                                                                                                                                                             |
-| Opened by  | The token-controls tool `l5r4-enhanced-effects` (`effect-panel.js:155-168`), which calls `EffectPanel.toggle()`                                                                                                                                                                                                                       |
-| Redraws on | `controlToken`, `createActiveEffect`, `updateActiveEffect`, `deleteActiveEffect`, `updateActor`, `updateCombat` (`effect-panel.js:173-182`)                                                                                                                                                                                           |
-| SCSS       | Now `scss/apps/_effect-panel.scss:6-60`, beside the inline link and the request card. `scss/apps/_effect-panel.scss`: a window's styles go in `apps/`, named as its `module/apps/` file ([templates-and-styles.md](../../code-system/templates-and-styles.md#folders))                                                                |
+| Opened by  | The token-controls tool `l5r4-enhanced-effects`, added by `EffectPanel.onGetSceneControlButtons` (`module/apps/effect-panel.js`), which calls `EffectPanel.openOrClose()`                                                                                                                                                             |
+| Redraws on | `controlToken`, `createActiveEffect`, `updateActiveEffect`, `deleteActiveEffect`, `updateActor`, `updateCombat` (`EFFECT_PANEL_REDRAWS` (`module/hooks/register-all.js`)), each calling `EffectPanel.renderIfOpen`                                                                                                                    |
+| SCSS       | `scss/apps/_effect-panel.scss`: a window's styles go in `apps/`, named as its `module/apps/` file ([templates-and-styles.md](../../code-system/templates-and-styles.md#folders))                                                                                                                                                      |
 | Copy       | Now `l5r4.ui.effectPanel.*`; target `l5r4.apps.effectPanel.*` ([localization.md](../content/localization.md#key-paths))                                                                                                                                                                                                               |
 | Quench     | `l5r4-enhanced.table-tools`                                                                                                                                                                                                                                                                                                           |
 
@@ -41,13 +41,13 @@ places it among the panels.
 
 ## Variants
 
-| Variant                         | Shows                                                                          |
-| ------------------------------- | ------------------------------------------------------------------------------ |
-| Actor with effects              | Actor heading, one row per applied effect                                      |
-| Actor with none                 | Actor heading, the empty line `l5r4.ui.effectPanel.none` with the actor's name |
-| No actor                        | The empty line `l5r4.ui.effectPanel.noActor`                                   |
-| Effect on an item, or not owned | No remove button (`canRemove`, `effect-panel.js:85`)                           |
-| Effect with uses                | "lasts" adds the uses left after the duration (`effect-panel.js:67-76`)        |
+| Variant                         | Shows                                                                                                  |
+| ------------------------------- | ------------------------------------------------------------------------------------------------------ |
+| Actor with effects              | Actor heading, one row per applied effect                                                              |
+| Actor with none                 | Actor heading, the empty line `l5r4.ui.effectPanel.none` with the actor's name                         |
+| No actor                        | The empty line `l5r4.ui.effectPanel.noActor`                                                           |
+| Effect on an item, or not owned | No remove button (`canRemove`, set by `EffectPanel#buildRow` (`module/apps/effect-panel.js`))          |
+| Effect with uses                | "lasts" adds the uses left after the duration (`EffectPanel#buildRow` (`module/apps/effect-panel.js`)) |
 
 ## States
 
@@ -61,7 +61,7 @@ places it among the panels.
 
 ## Parameters
 
-Context from `_prepareContext` (`effect-panel.js:49-58`):
+Context from `EffectPanel#_prepareContext` (`module/apps/effect-panel.js`):
 
 | Name      | Type                                                          | Meaning                  |
 | --------- | ------------------------------------------------------------- | ------------------------ |
@@ -71,14 +71,14 @@ Context from `_prepareContext` (`effect-panel.js:49-58`):
 
 ## Tokens
 
-| Token                                                       | Property                        | Part                                      |
-| ----------------------------------------------------------- | ------------------------------- | ----------------------------------------- |
-| `--l5r4-space-gap`                                          | `margin-block-end`              | Actor heading (`_effect-panel.scss:8-10`) |
-| `--l5r4-space-gap-tight`                                    | `gap`                           | List (`:15`)                              |
-| `--l5r4-space-gap`                                          | `gap`                           | Row (`:24`)                               |
-| `--l5r4-size-item-icon`                                     | `flex-basis`, `width`, `height` | Icon (`:29-31`)                           |
-| `--l5r4-font-size-meta`                                     | `font-size`                     | Source, lasts (`:45-48`)                  |
-| `--l5r4-space-control-block`, `--l5r4-space-control-inline` | `padding`                       | Buttons (`:53`, `0.25rem 0.4rem` now)     |
+| Token                                                       | Property                        | Part                                                                                              |
+| ----------------------------------------------------------- | ------------------------------- | ------------------------------------------------------------------------------------------------- |
+| `--l5r4-space-gap`                                          | `margin-block-end`              | Actor heading (`.l5r4-effect-panel-actor` (`scss/apps/_effect-panel.scss`), `--l5r4-space-8` now) |
+| `--l5r4-space-gap-tight`                                    | `gap`                           | List (`.l5r4-effect-panel-list` (`scss/apps/_effect-panel.scss`))                                 |
+| `--l5r4-space-gap`                                          | `gap`                           | Row (`.l5r4-effect-panel-row` (`scss/apps/_effect-panel.scss`))                                   |
+| `--l5r4-size-item-icon`                                     | `flex-basis`, `width`, `height` | Icon (`.l5r4-effect-panel-icon` (`scss/apps/_effect-panel.scss`))                                 |
+| `--l5r4-font-size-meta`                                     | `font-size`                     | Source, lasts (`.l5r4-effect-panel-lasts` (`scss/apps/_effect-panel.scss`))                       |
+| `--l5r4-space-control-block`, `--l5r4-space-control-inline` | `padding`                       | Buttons (`.l5r4-effect-panel-button` (`scss/apps/_effect-panel.scss`))                            |
 
 ## Keyboard and screen reader
 
@@ -91,19 +91,19 @@ Context from `_prepareContext` (`effect-panel.js:49-58`):
 
 ## Long text
 
-The text column has `min-width: 0` and wraps (`_effect-panel.scss:34-39`), so a long effect or source name wraps
+The text column has `min-width: 0` and wraps (`.l5r4-effect-panel-text` (`scss/apps/_effect-panel.scss`)), so a long effect or source name wraps
 beside its icon and the buttons keep their place. The window is resizable.
 
 ## Rules
 
-| #   | Rule                                                                                    | Enforced by                                                    | Conforming                                                                                                | Non-conforming                                                                     |
-| --- | --------------------------------------------------------------------------------------- | -------------------------------------------------------------- | --------------------------------------------------------------------------------------------------------- | ---------------------------------------------------------------------------------- |
-| EF1 | Actions are kebab-case                                                                  | `tests/conventions/actions.test.js`                            | `data-action="open-source"`                                                                               | `data-action="removeEffect"` (`effect-panel.hbs:18`)                               |
-| EF2 | Delete shows `fa-trash`, the delete icon everywhere                                     | `tests/conventions/design-system.test.js` (icon table), review | `<i class="fa-solid fa-trash" inert></i>` (modeled on `templates/rules/_partials/_editor.hbs:21`)         | `<i class="fa-solid fa-xmark" inert></i>` for a delete (`effect-panel.hbs:20`)     |
-| EF3 | An icon-only button carries `data-tooltip` and `aria-label` from one key, never `title` | `tests/conventions/templates.test.js`                          | `data-tooltip` and `aria-label` both `l5r4.apps.effectPanel.openSource` (templates-and-styles.md example) | `title="…"` alone on an icon button (modeled)                                      |
-| EF4 | Remove shows only where the user may remove                                             | Quench `l5r4-enhanced.table-tools`                             | `{{#if canRemove}}` (`effect-panel.hbs:17`), checked again on click (`effect-panel.js:120`)               | A remove button on an item's effect that refuses on click (modeled)                |
-| EF5 | The window's styles live in their own file under `scss/apps/`, and nothing else does    | `tests/conventions/styles.test.js` (one component per file)    | `.l5r4-effect-panel` alone in `scss/apps/_effect-panel.scss`                                              | `.l5r4-link` and `.l5r4-check-request` in `scss/components/_inline-link.scss:6-30` |
-| EF6 | Spacing and sizes read tokens                                                           | `tests/conventions/styles.test.js`                             | `padding: var(--l5r4-space-control-block) var(--l5r4-space-control-inline);`                              | `padding: 0.25rem 0.4rem;` (`_effect-panel.scss:53`)                               |
+| #   | Rule                                                                                    | Enforced by                                                    | Conforming                                                                                                                                      | Non-conforming                                                                      |
+| --- | --------------------------------------------------------------------------------------- | -------------------------------------------------------------- | ----------------------------------------------------------------------------------------------------------------------------------------------- | ----------------------------------------------------------------------------------- |
+| EF1 | Actions are kebab-case                                                                  | `tests/conventions/actions.test.js`                            | `data-action="open-source"`                                                                                                                     | `data-action="removeEffect"` (modeled)                                              |
+| EF2 | Delete shows `fa-trash`, the delete icon everywhere                                     | `tests/conventions/design-system.test.js` (icon table), review | `<i class="fa-solid fa-trash" inert></i>` (`templates/apps/effect-panel.hbs`)                                                                   | `<i class="fa-solid fa-xmark" inert></i>` for a delete (modeled)                    |
+| EF3 | An icon-only button carries `data-tooltip` and `aria-label` from one key, never `title` | `tests/conventions/templates.test.js`                          | `data-tooltip` and `aria-label` both `l5r4.apps.effectPanel.openSource` (templates-and-styles.md example)                                       | `title="…"` alone on an icon button (modeled)                                       |
+| EF4 | Remove shows only where the user may remove                                             | Quench `l5r4-enhanced.table-tools`                             | `{{#if canRemove}}` (`templates/apps/effect-panel.hbs`), checked again on click (`EffectPanel.#onDeleteEffect` (`module/apps/effect-panel.js`)) | A remove button on an item's effect that refuses on click (modeled)                 |
+| EF5 | The window's styles live in their own file under `scss/apps/`, and nothing else does    | `tests/conventions/styles.test.js` (one component per file)    | `.l5r4-effect-panel` alone in `scss/apps/_effect-panel.scss`                                                                                    | The inline link's and the request card's rules in the effect panel's file (modeled) |
+| EF6 | Spacing and sizes read tokens                                                           | `tests/conventions/styles.test.js`                             | `padding: var(--l5r4-space-control-block) var(--l5r4-space-control-inline);` (`scss/apps/_effect-panel.scss`)                                   | `padding: 0.25rem 0.4rem;` (modeled)                                                |
 
 ## Do and don't
 

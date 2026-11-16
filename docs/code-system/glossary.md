@@ -19,14 +19,14 @@ book (CLAUDE.md **Licensed material**). Every page below was looked up in `game-
 
 ### Examples
 
-| Rule          | Conforming                                                                             | Non-conforming                                                       |
-| ------------- | -------------------------------------------------------------------------------------- | -------------------------------------------------------------------- |
-| One stem      | `armorTn` in `module/data/actor/pc-data.js:38`                                         | `armorTN` in `module/services/dice/resources/target-resolver.js:116` |
-| One stem      | `{ roll, keep }` in `module/utils/check.js:51`                                         | `diceRoll`, `diceKeep` in `module/utils/ten-dice.js:38`              |
-| One stem      | `unskilled` in `module/services/dice/rolls/trait-roll.js:32`                           | `untrained` in `module/services/dice/rolls/simple-roll.js:56`        |
-| Banned phrase | `"Shadowlands Taint"` at `l5r4.ui.taint.label`                                         | `"Shadowland Taint"` at `l5r4.character.ranks.shadowRank`            |
-| Book capitals | `"Spend a Void Point (+1k1)"` at `l5r4.ui.check.void`                                  | `"void point"` in the value at `lang/en.json:755`                    |
-| Book capitals | `"Spell slot"` at `l5r4.ui.check.spellSlot` (the book writes spell slot in lower case) | `"Spell Slots"` at `l5r4.ui.sheets.spellSlots`                       |
+| Rule          | Conforming                                                                             | Non-conforming                      |
+| ------------- | -------------------------------------------------------------------------------------- | ----------------------------------- |
+| One stem      | `armorTn` in `PcData.defineSchema` (`module/data/actor/pc-data.js`)                    | `armorTN` (modeled)                 |
+| One stem      | `{ roll, keep }` in the pool `buildPool` (`module/utils/check.js`) returns             | `diceRoll`, `diceKeep` (modeled)    |
+| One stem      | `unskilled` in `rollTrait` (`module/services/dice/rolls/trait-roll.js`)                | `untrained` (modeled)               |
+| Banned phrase | `"Shadowlands Taint"` at `l5r4.ui.taint.label`                                         | `"Shadowland Taint"` (modeled)      |
+| Book capitals | `"Spend a Void Point (+1k1)"` at `l5r4.ui.check.void`                                  | `"void point"` in a value (modeled) |
+| Book capitals | `"Spell slot"` at `l5r4.ui.check.spellSlot` (the book writes spell slot in lower case) | `"Spell Slots"` (modeled)           |
 
 ## Column format
 

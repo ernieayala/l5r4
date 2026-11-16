@@ -8,9 +8,9 @@ leave to the roller (TN, Raises, Free Raises, Void Points, Emphasis, maneuvers, 
 | --------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------ |
 | Template  | `templates/dialogs/check-dialog.hbs`, `DIALOG_TEMPLATES.check`                                                                                                                                               |
 | Extras    | `templates/dialogs/check-extras/ring.hbs`, `spell.hbs`, `maho.hbs`, `slot.hbs` (`DIALOG_TEMPLATES.checkRing`, `checkSpell`, `checkMaho`, `checkSlot`), rendered by the caller and inserted as `{{{extras}}}` |
-| Opened by | `askChoices(request, context)` (`module/services/dice/check/roll-check.js:165-184`): width 420, modal, title the roll's label, one button `l5r4.ui.common.roll`; closing returns null and nothing rolls      |
-| Read by   | `readForm(form)` (`roll-check.js:155-157`), then every value coerced and bounded as user input (`roll-check.js:303-375`)                                                                                     |
-| SCSS      | Now `scss/components/_check-dialog.scss:5-28`, in the chat file. `scss/components/_check-dialog.scss`, styling `.l5r4-check-dialog`                                                                          |
+| Opened by | `askChoices` (`module/services/dice/check/roll-check.js`): width 420, modal, title the roll's label, one button `l5r4.ui.common.roll`; closing returns null and nothing rolls                                |
+| Read by   | `formDataOf` (`module/services/dice/check/roll-check.js`), then every value coerced and bounded as user input (`buildChosenTerms` (`module/services/dice/check/terms.js`))                                   |
+| SCSS      | `scss/components/_check-dialog.scss`, styling `.l5r4-check-dialog`                                                                                                                                           |
 | Quench    | `l5r4-enhanced.roll-pipeline`                                                                                                                                                                                |
 
 ## Anatomy
@@ -35,7 +35,7 @@ The dialog is not a posted card, so every class may change. Targets follow `l5r4
 
 ## Variants
 
-Each part renders only when the roll offers it (`roll-check.js:274-297`).
+Each part renders only when the roll offers it (`buildDialogContext` (`module/services/dice/check/terms.js`)).
 
 | Variant              | Adds                                                                                   |
 | -------------------- | -------------------------------------------------------------------------------------- |
@@ -54,18 +54,18 @@ Each part renders only when the roll offers it (`roll-check.js:274-297`).
 
 ## States
 
-| State                               | Look                                                                                                          | Markup                                                                  |
-| ----------------------------------- | ------------------------------------------------------------------------------------------------------------- | ----------------------------------------------------------------------- |
-| Modifier on or off                  | Native checkbox                                                                                               | `{{checked enabled}}`                                                   |
-| No Void Points                      | Void toggles disabled, with the reason in `data-tooltip` (states.md rule 5, key `l5r4.ui.check.noVoidPoints`) | `{{disabled (not voidPoints)}}`; the reason is the target, none today   |
-| Void Point already spent this Round | Warning line: `fa-triangle-exclamation`, bold label, warning color (states.md Warning)                        | Target. Now a `p.hint` (`check-dialog.hbs:75`)                          |
-| Maho                                | Warning line, as above                                                                                        | Target. Now `p.warning-text`, which no stylesheet styles (`maho.hbs:3`) |
-| Out of range                        | The number field's `min` and `max` stop the spinner; the pipeline bounds whatever is typed                    | `min`, `max` on Raises, Free Raises, Keep only                          |
-| Not enough Raises                   | Warning notification `l5r4.ui.combat.notEnoughRaises`; nothing rolls                                          | `roll-check.js:395-397`                                                 |
+| State                               | Look                                                                                                          | Markup                                                                                                          |
+| ----------------------------------- | ------------------------------------------------------------------------------------------------------------- | --------------------------------------------------------------------------------------------------------------- |
+| Modifier on or off                  | Native checkbox                                                                                               | `{{checked enabled}}`                                                                                           |
+| No Void Points                      | Void toggles disabled, with the reason in `data-tooltip` (states.md rule 5, key `l5r4.ui.check.noVoidPoints`) | `{{disabled (not voidPoints)}}`; the reason is the target, none today                                           |
+| Void Point already spent this Round | Warning line: `fa-triangle-exclamation`, bold label, warning color (states.md Warning)                        | Target. Now a `p.hint` holding `l5r4.ui.effects.voidSpentThisRound` (`templates/dialogs/check-dialog.hbs`)      |
+| Maho                                | Warning line, as above                                                                                        | Target. Now `l5r4-check-dialog-warning` (`templates/dialogs/check-extras/maho.hbs`), which no stylesheet styles |
+| Out of range                        | The number field's `min` and `max` stop the spinner; the pipeline bounds whatever is typed                    | `min`, `max` on Raises, Free Raises, Keep only                                                                  |
+| Not enough Raises                   | Warning notification `l5r4.ui.combat.notEnoughRaises`; nothing rolls                                          | `askCheck` (`module/services/dice/check/roll-check.js`)                                                         |
 
 ## Parameters
 
-Context from `rollCheck` (`roll-check.js:274-297`):
+Context from `buildDialogContext` (`module/services/dice/check/terms.js`):
 
 | Name                                                    | Type                                          | Meaning                                       |
 | ------------------------------------------------------- | --------------------------------------------- | --------------------------------------------- |
@@ -82,18 +82,18 @@ Context from `rollCheck` (`roll-check.js:274-297`):
 | `embraceTaint`                                          | boolean                                       | Taint toggle                                  |
 | `extras`                                                | HTML string                                   | The caller's extras template                  |
 
-Form field names are read back by `readForm` and are not stored, so they follow camelCase with the `Tn` stem
+Form field names are read back by `formDataOf` and are not stored, so they follow camelCase with the `Tn` stem
 (`freeRaisesToTn`). The stored field they fill, `tn.freeRaisesToTN` on the `roll` message, is a fixed name.
 
 ## Tokens
 
-| Token                    | Property      | Part                                       |
-| ------------------------ | ------------- | ------------------------------------------ |
-| `--l5r4-space-gap-tight` | `gap`         | Each group's rows (`_chat.scss:66-72`)     |
-| `--l5r4-space-gap`       | `gap`         | Inside a modifier row (`_chat.scss:74-78`) |
-| `--l5r4-font-code`       | `font-family` | Modifier value (`_chat.scss:84-86`)        |
-| `--l5r4-color-warning`   | `color`       | Warning line's icon (target)               |
-| `--l5r4-color-text`      | `color`       | Warning line's words (target)              |
+| Token                    | Property      | Part                                                                                         |
+| ------------------------ | ------------- | -------------------------------------------------------------------------------------------- |
+| `--l5r4-space-gap-tight` | `gap`         | Each group's rows (`.l5r4-check-dialog-group` (`scss/components/_check-dialog.scss`))        |
+| `--l5r4-space-gap`       | `gap`         | Inside a modifier row (`.l5r4-check-dialog-modifier` (`scss/components/_check-dialog.scss`)) |
+| `--l5r4-font-code`       | `font-family` | Modifier value (`.l5r4-check-dialog-modifier-value` (`scss/components/_check-dialog.scss`))  |
+| `--l5r4-color-warning`   | `color`       | Warning line's icon (target)                                                                 |
+| `--l5r4-color-text`      | `color`       | Warning line's words (target)                                                                |
 
 T5 in typography.md asks for tabular figures in the pool and the modifier values.
 
@@ -115,16 +115,16 @@ tallest. Review checks that case in the gallery.
 
 ## Rules
 
-| #   | Rule                                                                                 | Enforced by                                                                | Conforming                                                                                                                | Non-conforming                                                                                                                |
-| --- | ------------------------------------------------------------------------------------ | -------------------------------------------------------------------------- | ------------------------------------------------------------------------------------------------------------------------- | ----------------------------------------------------------------------------------------------------------------------------- |
-| CD1 | Every choice the rules leave to the roller is a control here, never decided for them | Review (CLAUDE.md **AUTOMATE MATH, KEEP CHOICES**)                         | The Void Point is a toggle the roller sets (`check-dialog.hbs:63-67`)                                                     | Spending a Void Point whenever one is left (modeled)                                                                          |
-| CD2 | Every value read back is bounded as user input                                       | Review; Quench `l5r4-enhanced.roll-pipeline`                               | `Math.min(Math.max(minimum, toInt(choices.raises ?? minimum)), maximum)` (`roll-check.js:367-369`)                        | Using `choices.raises` as typed (modeled)                                                                                     |
-| CD3 | One key per label; a range or count is a placeholder, never a fragment               | `tests/lang.test.js`, review                                               | One key "Raises (maximum {max}, minimum {min})" (modeled)                                                                 | `{{localize "…raises"}} ({{localize "l5r4.ui.check.max"}} {{maxRaises}}…)` from fragments, with "max" (`check-dialog.hbs:49`) |
-| CD4 | A label is one key: never two keys joined                                            | Review ([localization.md](../content/localization.md#one-key-per-meaning)) | `{{localize "l5r4.ui.check.keepFewer"}}` (`check-dialog.hbs:170`)                                                         | `{{localize "l5r4.ui.common.roll"}} {{localize "l5r4.ui.common.mod"}}` (`check-dialog.hbs:158`)                               |
-| CD5 | A warning is a warning line, not a hint                                              | Review (states.md rule 7)                                                  | `<p class="l5r4-check-dialog-warning" role="note"><i class="fa-solid fa-triangle-exclamation" inert></i> …</p>` (modeled) | `<p class="hint">{{localize "l5r4.ui.effects.voidSpentThisRound"}}</p>` (`check-dialog.hbs:75`)                               |
-| CD6 | A disabled toggle says why                                                           | Review (states.md rule 5)                                                  | `data-tooltip="{{localize "l5r4.ui.check.noVoidPoints"}}"` when disabled (states.md, modeled)                             | `{{disabled (not voidPoints)}}` alone (`check-dialog.hbs:66`)                                                                 |
-| CD7 | The dialog's styles live in its own file under `.l5r4-check-dialog`                  | `tests/conventions/styles.test.js` (one component per file)                | `scss/components/_check-dialog.scss`                                                                                      | The rules at the end of `scss/components/_check-dialog.scss:5-28`                                                             |
-| CD8 | Every field has an accessible name                                                   | Quench `l5r4-enhanced.design-gallery`, review                              | `<label class="check-modifier"><input type="checkbox" …/>…</label>` (`check-dialog.hbs:8-12`)                             | `<label>…TN</label><input type="number" name="tn" />` with no `for` (`check-dialog.hbs:32-33`)                                |
+| #   | Rule                                                                                 | Enforced by                                                                | Conforming                                                                                                                 | Non-conforming                                                                                                                                                                |
+| --- | ------------------------------------------------------------------------------------ | -------------------------------------------------------------------------- | -------------------------------------------------------------------------------------------------------------------------- | ----------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| CD1 | Every choice the rules leave to the roller is a control here, never decided for them | Review (CLAUDE.md **AUTOMATE MATH, KEEP CHOICES**)                         | The Void Point is a toggle the roller sets (`name="void"` (`templates/dialogs/check-dialog.hbs`))                          | Spending a Void Point whenever one is left (modeled)                                                                                                                          |
+| CD2 | Every value read back is bounded as user input                                       | Review; Quench `l5r4-enhanced.roll-pipeline`                               | `Math.min(Math.max(min, toInt(choices.raises ?? min)), max)` in `buildChosenTerms` (`module/services/dice/check/terms.js`) | Using `choices.raises` as typed (modeled)                                                                                                                                     |
+| CD3 | One key per label; a range or count is a placeholder, never a fragment               | `tests/lang.test.js`, review                                               | One key "Raises (maximum {max}, minimum {min})" (modeled)                                                                  | `{{localize "…raises"}} ({{localize "l5r4.ui.check.max"}} {{maxRaises}}…)` from fragments, with "max", in the label of `name="raises"` (`templates/dialogs/check-dialog.hbs`) |
+| CD4 | A label is one key: never two keys joined                                            | Review ([localization.md](../content/localization.md#one-key-per-meaning)) | `{{localize "l5r4.ui.check.keepFewer"}}` (`templates/dialogs/check-dialog.hbs`)                                            | `{{localize "l5r4.ui.common.roll"}} {{localize "l5r4.ui.common.modifier"}}` (`templates/dialogs/check-dialog.hbs`)                                                            |
+| CD5 | A warning is a warning line, not a hint                                              | Review (states.md rule 7)                                                  | `<p class="l5r4-check-dialog-warning" role="note"><i class="fa-solid fa-triangle-exclamation" inert></i> …</p>` (modeled)  | `<p class="hint">{{localize "l5r4.ui.effects.voidSpentThisRound"}}</p>` (`templates/dialogs/check-dialog.hbs`)                                                                |
+| CD6 | A disabled toggle says why                                                           | Review (states.md rule 5)                                                  | `data-tooltip="{{localize "l5r4.ui.check.noVoidPoints"}}"` when disabled (states.md, modeled)                              | `{{disabled (not voidPoints)}}` alone (`templates/dialogs/check-dialog.hbs`)                                                                                                  |
+| CD7 | The dialog's styles live in its own file under `.l5r4-check-dialog`                  | `tests/conventions/styles.test.js` (one component per file)                | `scss/components/_check-dialog.scss`                                                                                       | The dialog's rules at the end of the chat card stylesheet (modeled)                                                                                                           |
+| CD8 | Every field has an accessible name                                                   | Quench `l5r4-enhanced.design-gallery`, review                              | A modifier's checkbox inside its `<label class="l5r4-check-dialog-modifier">` (`templates/dialogs/check-dialog.hbs`)       | The TN's `<label>` with no `for`, beside `name="tn"` (`templates/dialogs/check-dialog.hbs`)                                                                                   |
 
 ## Do and don't
 
