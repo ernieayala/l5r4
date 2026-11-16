@@ -100,6 +100,26 @@ const AREAS = Object.freeze(["apps", "ui", "character", "equipment", "magic", "s
 /** The Intl plural categories a plural group holds (localization.md, Plurals). */
 const PLURAL_CATEGORIES = Object.freeze(["zero", "one", "two", "few", "many", "other"]);
 
+/**
+ * The English a translation's key answers to. A plural category `en.json` leaves out (a translation adds the
+ * categories its language needs, localization.md Plurals) answers to its group's `other`, when that group is a plural
+ * group with `one` and `other`.
+ * @param {object} en - The parsed `en.json`
+ * @param {string} key - The translation's key
+ * @returns {unknown} The English value, or undefined when there is none
+ */
+function englishFor(en, key) {
+  const english = lookup(en, key);
+  const segments = key.split(".");
+  if (english !== undefined || !PLURAL_CATEGORIES.includes(segments.at(-1))) {
+    return english;
+  }
+  const group = lookup(en, segments.slice(0, -1).join("."));
+  return typeof group?.one === "string" && typeof group?.other === "string"
+    ? group.other
+    : undefined;
+}
+
 /** The abbreviations copy may write (docs/design-system/content/voice.md, Abbreviations), and the system's name. */
 const ABBREVIATIONS = Object.freeze(["TN", "XP", "NPC", "PC", "GM", "DR", "L5R4", "XkY"]);
 
@@ -431,7 +451,7 @@ const COPY_RULES = {
       }
       return [...leavesOf(parsed), ...groupsOf(parsed).filter(({ key }) => key)]
         .filter(({ key, group }) => {
-          const english = lookup(en, key);
+          const english = englishFor(en, key);
           return group ? typeof english !== "object" : typeof english !== "string";
         })
         .map(({ key }) => `lang/${code}.json ${key}: not in lang/en.json with the same type`);
@@ -445,7 +465,7 @@ const COPY_RULES = {
       return parsed
         ? leavesOf(parsed)
             .filter(({ key, value }) => {
-              const english = lookup(en, key);
+              const english = englishFor(en, key);
               const set = text => [...new Set(placeholdersOf(text))].join();
               return typeof english === "string" && set(english) !== set(value);
             })

@@ -3,6 +3,8 @@
     "ui": {
       "check": {
         "exported": {
+          "few": "{count} Gegenstände aus {folder} exportiert.",
+          "many": "{count} Gegenstände aus {folder} exportiert.",
           "one": "1 Gegenstand aus {folder} exportiert.",
           "other": "{count} Gegenstände aus {folder} exportiert."
         },

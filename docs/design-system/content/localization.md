@@ -154,7 +154,9 @@ shape (`SUPPORT.UnavailableDocuments` [src: public/lang/en.json:3978], read at
 | Non-conforming | "Exported {count} items from {folder}." as one leaf (reads "1 items")                                       | `:442`            |
 | Non-conforming | "Updated {count} world image path(s)."                                                                      | `:1016`           |
 
-**Check.** `tests/lang.test.js`: no value contains `(s)`; a group with a `one` leaf has an `other` leaf. The existing
+**Check.** `tests/lang.test.js`: no value contains `(s)`; a group with a `one` leaf has an `other` leaf; a translation's
+plural category that `en.json` leaves out is accepted under a group with `one` and `other`, and its placeholders match
+`other`'s. The existing
 unused-key check accepts the built key `` `${prefix}.${category}` `` (`tests/lang.test.js:49-74`).
 
 ## Key order
