@@ -92,6 +92,12 @@
 
 .l5r4-section-body {
   padding: 0 var(--l5r4-space-8);
+
+  // Core's <prose-mirror> builds this container itself; the Notes editor keeps room to write in
+  /* stylelint-disable-next-line selector-class-pattern -- Core's prose-mirror class */
+  .editor-container {
+    min-height: 300px;
+  }
 }
 
 .l5r4-section-heading {

@@ -158,7 +158,7 @@ export default class DesignGalleryApplication extends HandlebarsApplicationMixin
   /**
    * One sample: its partial rendered from its context, with its frame and label.
    * @param {object} sample
-   * @returns {Promise<{label: string, partial: string, scope: string, html: string}>}
+   * @returns {Promise<{label: string, partial: string, scope: string, within: string[], html: string}>}
    */
   async #renderSample(sample) {
     const context = this.#contextOf(sample);
@@ -175,6 +175,7 @@ export default class DesignGalleryApplication extends HandlebarsApplicationMixin
       label: sample.label,
       partial: sample.partial,
       scope: sample.scope,
+      within: sample.within,
       html: await renderTemplate(sample.partial, context)
     };
   }

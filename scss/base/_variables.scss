@@ -53,6 +53,9 @@
   --l5r4-space-12: 0.75rem;
   --l5r4-space-16: 1rem;
   --l5r4-space-gap-tight: var(--l5r4-space-4);
+
+  // Off the scale on purpose: an item row's four controls fit the 102px controls column (space-and-size.md)
+  --l5r4-space-gap-controls: 0.125rem;
   --l5r4-space-gap: var(--l5r4-space-8);
   --l5r4-space-control-block: var(--l5r4-space-4);
   --l5r4-space-control-inline: var(--l5r4-space-8);

@@ -39,7 +39,7 @@ Each part renders only when the roll offers it (`buildDialogContext` (`module/se
 | Every roll | Pool; manual roll, keep, and total modifiers; Keep only |
 | With modifiers | The modifiers fieldset; substitutions when a Substitute rule applies |
 | Not damage | TN, TN changes as a hint, wound penalty toggle, Void Point toggle |
-| Raises allowed | Raises with their range, Free Raises spent on the TN (`game-rules/28_raises.md, p.79`) |
+| Raises allowed | Raises, with their range as a hint under the field; Free Raises spent on the TN, with what they do and how many as a hint (`game-rules/28_raises.md, p.79`) |
 | Unskilled Roll | The Unskilled hint in place of Raises; the Void Point to count as Rank 1 |
 | Trained Emphases | Emphasis select (`game-rules/58_skills_overview.md, p.133`) |
 | Attack | Ranged toggle; maneuvers when Raises are allowed, Grapple always |
@@ -113,7 +113,7 @@ Modifier labels take the row's free space and wrap (`.l5r4-check-dialog-modifier
 | --- | --- | --- | --- | --- |
 | CD1 | Every choice the rules leave to the roller is a control here, never decided for them | Review (CLAUDE.md **AUTOMATE MATH, KEEP CHOICES**) | The Void Point is a toggle the roller sets (`name="void"` (`templates/dialogs/check-dialog.hbs`)) | Spending a Void Point whenever one is left (modeled) |
 | CD2 | Every value read back is bounded as user input | Review; Quench `l5r4-enhanced.roll-pipeline` | `Math.min(Math.max(min, toInt(choices.raises ?? min)), max)` in `buildChosenTerms` (`module/services/dice/check/terms.js`) | Using `choices.raises` as typed (modeled) |
-| CD3 | One key per label; a range or count is a placeholder, never a fragment | `tests/lang.test.js`, review | One key "Raises (maximum {max}, minimum {min})" (modeled) | `{{localize "…raises"}} ({{localize "l5r4.ui.check.max"}} {{maxRaises}}…)` from fragments, with "max", in the label of `name="raises"` (`templates/dialogs/check-dialog.hbs`) |
+| CD3 | One key per label; a range or count is a placeholder, never a fragment | `tests/lang.test.js`, review | The label "Raises" and, under the field, the hint `{{localize "l5r4.ui.mechanics.rolls.raisesHint" max=maxRaises}}`, "Up to {max}." (`name="raises"` (`templates/dialogs/check-dialog.hbs`)), so the label keeps one line | `{{localize "…raises"}} ({{localize "l5r4.ui.check.max"}} {{maxRaises}}…)` from fragments, with "max", in the label (modeled) |
 | CD4 | A label is one key: never two keys joined | Review ([localization.md](../content/localization.md#one-key-per-meaning)) | `{{localize "l5r4.ui.check.keepFewer"}}` (`templates/dialogs/check-dialog.hbs`) | `{{localize "l5r4.ui.common.roll"}} {{localize "l5r4.ui.common.modifier"}}` (`templates/dialogs/check-dialog.hbs`) |
 | CD5 | A warning is a warning line, not a hint | Review (states.md rule 7) | `<p class="l5r4-check-dialog-warning" role="note"><i class="fa-solid fa-triangle-exclamation" inert></i> …</p>` (modeled) | `<p class="hint">{{localize "l5r4.ui.effects.voidSpentThisRound"}}</p>` (`templates/dialogs/check-dialog.hbs`) |
 | CD6 | A disabled toggle says why | Review (states.md rule 5) | `data-tooltip="{{localize "l5r4.ui.check.noVoidPoints"}}"` when disabled (states.md, modeled) | `{{disabled (not voidPoints)}}` alone (`templates/dialogs/check-dialog.hbs`) |

@@ -202,7 +202,10 @@
       @include title-row;
     }
 
+    // The row's control cluster keeps its 2px gap so four buttons fit the 102px controls column; it departs from
+    // -gap-xs (components/inline-control.md, Long text)
     .l5r4-inline-control {
+      gap: var(--l5r4-space-gap-controls);
       justify-content: flex-end;
     }
 

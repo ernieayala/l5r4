@@ -79,7 +79,7 @@ An icon-only control's tooltip reads the control's label key ([voice.md](voice.m
 | Non-conforming | `ui.mechanics.wounds.woundConfiguration` repeats `apps.woundConfig.title` | modeled on `l5r4.apps.woundConfig.title` (`lang/en.json`) |
 | Conforming | `F("l5r4.ui.check.damageLabel", { weapon: spec.label })`: "Damage for {weapon}" | `rollDamageFromAttack` (`module/services/combat/damage-roll.js`) |
 | Non-conforming | `` `${T("l5r4.ui.check.damageFor")} ${spec.label}` `` joins a fragment to a name | modeled |
-| Non-conforming | `({{localize "l5r4.ui.check.of"}} {{freeRaises}})` builds a phrase from the fragment "of" | `l5r4.ui.check.of` (`templates/dialogs/check-dialog.hbs`) |
+| Non-conforming | `({{localize "l5r4.ui.check.of"}} {{freeRaises}})` builds a phrase from the fragment "of" | modeled |
 
 ### Duplicate trees
 

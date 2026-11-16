@@ -45,15 +45,19 @@
 
   {{#if raisesAllowed}}
     <div class="form-group">
-      <label>
-        {{localize "l5r4.ui.mechanics.rolls.raises"}} ({{localize "l5r4.ui.check.max"}} {{maxRaises}}{{#if minRaises}}, {{localize "l5r4.ui.check.min"}} {{minRaises}}{{/if}})
-      </label>
+      <label>{{localize "l5r4.ui.mechanics.rolls.raises"}}</label>
       <input type="number" name="raises" value="{{minRaises}}" min="{{minRaises}}" max="{{maxRaises}}" />
+      {{#if minRaises}}
+        <p class="hint">{{localize "l5r4.ui.mechanics.rolls.raisesHintWithMinimum" min=minRaises max=maxRaises}}</p>
+      {{else}}
+        <p class="hint">{{localize "l5r4.ui.mechanics.rolls.raisesHint" max=maxRaises}}</p>
+      {{/if}}
     </div>
     {{#if freeRaises}}
       <div class="form-group">
-        <label>{{localize "l5r4.ui.check.freeRaisesToTn"}} ({{localize "l5r4.ui.check.of"}} {{freeRaises}})</label>
+        <label>{{localize "l5r4.ui.mechanics.rolls.freeRaises"}}</label>
         <input type="number" name="freeRaisesToTn" value="0" min="0" max="{{freeRaises}}" />
+        <p class="hint">{{localize "l5r4.ui.mechanics.rolls.freeRaisesHint" max=freeRaises}}</p>
       </div>
     {{/if}}
   {{else if unskilled}}

@@ -54,7 +54,8 @@ Order: the activation toggle in its own cell (when the item has one), then the c
 | Token | Use |
 | --- | --- |
 | `--l5r4-color-accent` | Activation on |
-| `--l5r4-space-gap-tight` | Gap between buttons (`-gap-xs`) |
+| `--l5r4-space-gap-tight` | Gap between buttons (`-gap-xs`), outside item rows |
+| `--l5r4-space-gap-controls` | Gap between buttons in an item row (2 px) |
 | `--l5r4-state-focus-outline`, `--l5r4-state-focus-shadow` | Focus ring |
 | `--l5r4-state-disabled-opacity` | Disabled, where core's does not apply |
 
@@ -69,7 +70,7 @@ Order: the activation toggle in its own cell (when the item has one), then the c
 
 ## Long text
 
-No visible text. The cluster has a fixed column (`--l5r4-size-column-controls`, 102 px) in the item row grid, which holds four 24 px buttons and their gaps. The activation toggle is its own cell before the cluster (`{{> "systems/l5r4-enhanced/templates/cards/_partials/_activate.hbs"}}` (`templates/cards/kata.hbs`)); the gallery checks at the sheet's default width that the kata, kiho, and tattoo rows keep it on the row's first line.
+No visible text. The cluster has a fixed column (`--l5r4-size-column-controls`, 102 px) in the item row grid, which holds four 24 px buttons and their gaps. In an item row the cluster departs from `-gap-xs`: it reads `--l5r4-space-gap-controls`, 2 px, since `-gap-xs` (4 px) would make the four buttons 108 px wide and wrap them (`foundations/space-and-size.md`, literal sizes that leave the scale). The activation toggle is its own cell before the cluster (`{{> "systems/l5r4-enhanced/templates/cards/_partials/_activate.hbs"}}` (`templates/cards/kata.hbs`)); the gallery checks at the sheet's default width that the kata, kiho, and tattoo rows keep it on the row's first line.
 
 ## Rules
 

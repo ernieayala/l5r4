@@ -157,6 +157,11 @@
         line-height: 1;
         min-height: 0;
         padding: 0;
+
+        // The disc's raised shadow would replace the glow of core's focus ring (foundations/states.md)
+        &:focus-visible {
+          box-shadow: var(--l5r4-state-focus-shadow);
+        }
       }
     }
 

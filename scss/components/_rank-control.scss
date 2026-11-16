@@ -29,52 +29,54 @@
   overflow: hidden;
   position: relative;
 
-  .l5r4-rank-control-under {
-    align-items: center;
-    color: var(--l5r4-color-text);
-    display: flex;
-    flex-direction: column;
-    font-weight: bold;
-    gap: var(--l5r4-space-4);
-    height: 100%;
-    justify-content: center;
-    line-height: 1;
-    pointer-events: none;
-    position: absolute;
-    text-align: center;
-    width: 100%;
-  }
-
-  // A <button>: `font` and `min-height` undo core's button face, so the value reads as before. Besides the hover and
-  // press looks, core's focus ring (`box-shadow`, `outline`) eases in
+  // The under-label shows through the face's translucent header color and through the sprite, so it takes the
+  // face's box and type: the two copies of the label and number line up exactly. The inline padding keeps a label
+  // off the frame
+  .l5r4-rank-control-under,
   .l5r4-rank-control-value {
     align-items: center;
-    background: var(--l5r4-color-header);
-    border: none;
-    border-radius: 0;
-    color: var(--l5r4-color-text-on-header);
-    cursor: pointer;
     display: flex;
     flex-direction: column;
-    font: inherit;
+    font-family: inherit;
     font-size: var(--l5r4-font-size-label);
     font-weight: bold;
     gap: var(--l5r4-space-4);
     height: 100%;
     justify-content: center;
     line-height: 1;
+    padding: var(--l5r4-space-4);
+    text-align: center;
+    width: 100%;
+
+    span:first-child {
+      font-family: var(--l5r4-font-label);
+      font-size: var(--l5r4-font-size-title);
+    }
+  }
+
+  .l5r4-rank-control-under {
+    color: var(--l5r4-color-text);
+    pointer-events: none;
+    position: absolute;
+  }
+
+  // A <button>: `min-height` and the shared rule's type undo core's button face. Besides the hover and press looks,
+  // core's focus ring (`box-shadow`, `outline`) eases in
+  .l5r4-rank-control-value {
+    background: var(--l5r4-color-header);
+    border: none;
+    border-radius: 0;
+    color: var(--l5r4-color-text-on-header);
+    cursor: pointer;
     mask: url("../assets/animation/nature-sprite.webp");
     mask-position: 0 0;
     mask-size: 2300% 100%;
     min-height: 0;
-    padding: var(--l5r4-space-4) 0;
-    text-align: center;
     transition:
       box-shadow var(--l5r4-duration-fast) var(--l5r4-easing-standard),
       filter var(--l5r4-duration-fast) var(--l5r4-easing-standard),
       outline var(--l5r4-duration-fast) var(--l5r4-easing-standard),
       transform var(--l5r4-duration-fast) var(--l5r4-easing-standard);
-    width: 100%;
 
     &:hover {
       animation: mask-forward-nature var(--l5r4-duration-sprite) steps($nature-sprite-steps)
@@ -85,12 +87,6 @@
     &:active {
       filter: var(--l5r4-state-pressed-filter);
       transform: var(--l5r4-state-pressed-transform);
-    }
-
-    span:first-child {
-      font-family: var(--l5r4-font-label);
-      font-size: var(--l5r4-font-size-title);
-      font-weight: bold;
     }
   }
 }

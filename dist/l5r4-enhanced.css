@@ -54,6 +54,7 @@
   --l5r4-space-12: 0.75rem;
   --l5r4-space-16: 1rem;
   --l5r4-space-gap-tight: var(--l5r4-space-4);
+  --l5r4-space-gap-controls: 0.125rem;
   --l5r4-space-gap: var(--l5r4-space-8);
   --l5r4-space-control-block: var(--l5r4-space-4);
   --l5r4-space-control-inline: var(--l5r4-space-8);
@@ -570,6 +571,10 @@ body > * {
 
 .l5r4-section-body {
   padding: 0 var(--l5r4-space-8);
+  /* stylelint-disable-next-line selector-class-pattern -- Core's prose-mirror class */
+}
+.l5r4-section-body .editor-container {
+  min-height: 300px;
 }
 
 .l5r4-section-heading {
@@ -703,6 +708,7 @@ body > * {
   min-height: var(--input-height);
 }
 .l5r4-item-row-list .l5r4-item-row .l5r4-inline-control {
+  gap: var(--l5r4-space-gap-controls);
   justify-content: flex-end;
 }
 .l5r4-item-row-list .l5r4-item-row .inline-control {
@@ -747,45 +753,43 @@ body > * {
   overflow: hidden;
   position: relative;
 }
-.l5r4-rank-control.-track .l5r4-rank-control-under {
-  align-items: center;
-  color: var(--l5r4-color-text);
-  display: flex;
-  flex-direction: column;
-  font-weight: bold;
-  gap: var(--l5r4-space-4);
-  height: 100%;
-  justify-content: center;
-  line-height: 1;
-  pointer-events: none;
-  position: absolute;
-  text-align: center;
-  width: 100%;
-}
+.l5r4-rank-control.-track .l5r4-rank-control-under,
 .l5r4-rank-control.-track .l5r4-rank-control-value {
   align-items: center;
-  background: var(--l5r4-color-header);
-  border: none;
-  border-radius: 0;
-  color: var(--l5r4-color-text-on-header);
-  cursor: pointer;
   display: flex;
   flex-direction: column;
-  font: inherit;
+  font-family: inherit;
   font-size: var(--l5r4-font-size-label);
   font-weight: bold;
   gap: var(--l5r4-space-4);
   height: 100%;
   justify-content: center;
   line-height: 1;
+  padding: var(--l5r4-space-4);
+  text-align: center;
+  width: 100%;
+}
+.l5r4-rank-control.-track .l5r4-rank-control-under span:first-child,
+.l5r4-rank-control.-track .l5r4-rank-control-value span:first-child {
+  font-family: var(--l5r4-font-label);
+  font-size: var(--l5r4-font-size-title);
+}
+.l5r4-rank-control.-track .l5r4-rank-control-under {
+  color: var(--l5r4-color-text);
+  pointer-events: none;
+  position: absolute;
+}
+.l5r4-rank-control.-track .l5r4-rank-control-value {
+  background: var(--l5r4-color-header);
+  border: none;
+  border-radius: 0;
+  color: var(--l5r4-color-text-on-header);
+  cursor: pointer;
   mask: url("../assets/animation/nature-sprite.webp");
   mask-position: 0 0;
   mask-size: 2300% 100%;
   min-height: 0;
-  padding: var(--l5r4-space-4) 0;
-  text-align: center;
   transition: box-shadow var(--l5r4-duration-fast) var(--l5r4-easing-standard), filter var(--l5r4-duration-fast) var(--l5r4-easing-standard), outline var(--l5r4-duration-fast) var(--l5r4-easing-standard), transform var(--l5r4-duration-fast) var(--l5r4-easing-standard);
-  width: 100%;
 }
 .l5r4-rank-control.-track .l5r4-rank-control-value:hover {
   animation: mask-forward-nature var(--l5r4-duration-sprite) steps(22) forwards;
@@ -794,11 +798,6 @@ body > * {
 .l5r4-rank-control.-track .l5r4-rank-control-value:active {
   filter: var(--l5r4-state-pressed-filter);
   transform: var(--l5r4-state-pressed-transform);
-}
-.l5r4-rank-control.-track .l5r4-rank-control-value span:first-child {
-  font-family: var(--l5r4-font-label);
-  font-size: var(--l5r4-font-size-title);
-  font-weight: bold;
 }
 
 /**
@@ -1307,6 +1306,9 @@ body > * {
   line-height: 1;
   min-height: 0;
   padding: 0;
+}
+.l5r4-traits-rings .l5r4-ring-rank.-void .l5r4-ring-rank-face:focus-visible {
+  box-shadow: var(--l5r4-state-focus-shadow);
 }
 .l5r4-traits-rings .l5r4-ring-rank .l5r4-ring-rank-face {
   align-items: center;

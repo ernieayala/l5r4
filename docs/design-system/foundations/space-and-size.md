@@ -58,6 +58,7 @@ The `-gap-*` classes keep their names; `-gap-sm` sits inside posted chat cards, 
 | Token | Value | Job | Read at |
 | --- | --- | --- | --- |
 | `--l5r4-space-gap-tight` | `--l5r4-space-4` | Between stacked rows: list rows, card rows, dialog rows | `.l5r4-item-row-list` (`scss/components/_item-row.scss`), `.l5r4-roll` and `.l5r4-flow-card` (`scss/components/_chat-card.scss`), `.l5r4-check-dialog-group` (`scss/components/_check-dialog.scss`), `.l5r4-effect-panel-list` (`scss/apps/_effect-panel.scss`), `.l5r4-compendium-browser-results` (`scss/apps/_compendium-browser.scss`) |
+| `--l5r4-space-gap-controls` | `0.125rem` (2 px), off the scale | Between the buttons of an item row's control cluster, so four 24 px buttons fit `--l5r4-size-column-controls` | The cluster rule of `.l5r4-item-row` (`scss/components/_item-row.scss`) |
 | `--l5r4-space-gap` | `--l5r4-space-8` | Between parts of one row: icon and text, toggle and label, label and value | `.l5r4-effect-panel-row` (`scss/apps/_effect-panel.scss`), `.l5r4-compendium-browser-row` (`scss/apps/_compendium-browser.scss`), `.l5r4-check-dialog-modifier` (`scss/components/_check-dialog.scss`), `.l5r4-xp-manager-breakdown` (`scss/apps/_xp-manager.scss`) |
 | `--l5r4-space-control-block` | `--l5r4-space-4` | Block padding inside a compact button or tab | `.l5r4-effect-panel-button` (`scss/apps/_effect-panel.scss`), `.l5r4-tabs-tab` and `.l5r4-compendium-browser-button` (`scss/apps/_compendium-browser.scss`) |
 | `--l5r4-space-control-inline` | `--l5r4-space-8` | Inline padding inside a compact button or tab | As above |
@@ -103,6 +104,7 @@ Literal sizes that leave the scale:
 | Read at | Literal | Result |
 | --- | --- | --- |
 | The rows of `.l5r4-grid .l5r4-wound-track` (`scss/features/_wound-track.scss`) | `min-height: 25px` on a Wound track row | A documented exception: Ernie kept the look. `--l5r4-size-target` (24 px) would take 1 px off each of the eight rows, 8 px off the track (Stage 17 decision 9) |
+| The control cluster of `.l5r4-item-row` (`scss/components/_item-row.scss`) | `gap: var(--l5r4-space-gap-controls)`, 2 px | A documented exception: Ernie kept the look. `-gap-xs` (4 px) makes four 24 px buttons 108 px wide, so the cluster wraps in the 102 px controls column and each row with an expand control grows from 32 px to 52 px |
 | `.l5r4-section-title` (`scss/components/_section.scss`) | `max-width: 46px` on section title fields | Stays a literal: one component |
 | `.l5r4-form-field-value` (`scss/components/_form-field.scss`) | `min-width: 20px` | Stays a literal: one component |
 

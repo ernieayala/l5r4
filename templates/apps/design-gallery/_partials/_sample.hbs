@@ -1,11 +1,21 @@
 {{!-- One gallery sample. Parameters: label (i18n key, optional), partial (the template that rendered html),
 scope, html. The scope wraps the sample in the block class the sheet window carries (pc and npc: the actor sheet's,
 item: the item sheet's), core's chat message for cards, or the window's root class for the effect panel and the
-compendium browser, so sheet-wide rules reach it as they do in the sheet. --}}
+compendium browser, so sheet-wide rules reach it as they do in the sheet. within (optional, actor scopes): one or
+two classes of the blocks a part of a sheet block sits in, outermost first, so the rules its parent scopes reach it
+as they do in the sheet (a Trait row in the Ring and Trait block, a Wound track in its grid). --}}
 <figure class="l5r4-design-gallery-sample" data-gallery-partial="{{partial}}">
   {{#if label}}<figcaption>{{localize label}}</figcaption>{{/if}}
   {{#if (or (eq scope "pc") (eq scope "npc"))}}
-    <div class="l5r4-actor-sheet">{{{html}}}</div>
+    <div class="l5r4-actor-sheet">
+      {{#if within.[1]}}
+        <div class="{{within.[0]}}"><div class="{{within.[1]}}">{{{html}}}</div></div>
+      {{else if within}}
+        <div class="{{within.[0]}}">{{{html}}}</div>
+      {{else}}
+        {{{html}}}
+      {{/if}}
+    </div>
   {{else if (eq scope "item")}}
     <div class="l5r4-item-sheet">{{{html}}}</div>
   {{else if (eq scope "chat")}}

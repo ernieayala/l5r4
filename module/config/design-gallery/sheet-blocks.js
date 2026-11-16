@@ -32,12 +32,14 @@ export const GALLERY_SHEET_BLOCKS = Object.freeze([
       {
         partial: `${T}/actor/_partials/_ring.hbs`,
         scope: "pc",
+        within: ["l5r4-traits-rings"],
         context: "pc",
         with: { ring: "earth", rank: 1 }
       },
       {
         partial: `${T}/actor/_partials/_trait.hbs`,
         scope: "pc",
+        within: ["l5r4-traits-rings"],
         context: "pc",
         with: { trait: "sta", name: "stamina", ring: "earth", rank: 1 }
       },
@@ -69,12 +71,14 @@ export const GALLERY_SHEET_BLOCKS = Object.freeze([
       {
         partial: `${T}/actor/_partials/_rank-control.hbs`,
         scope: "pc",
+        within: ["l5r4-traits-rings", "l5r4-trait -earth -stamina"],
         context: "pc",
         with: { variant: "trait", trait: "sta", value: 1 }
       },
       {
         partial: `${T}/actor/_partials/_rank-control.hbs`,
         scope: "pc",
+        within: ["l5r4-traits-rings"],
         context: "pc",
         with: { variant: "void", value: 2 }
       },
@@ -103,6 +107,7 @@ export const GALLERY_SHEET_BLOCKS = Object.freeze([
       {
         partial: `${T}/actor/_partials/_void-points.hbs`,
         scope: "pc",
+        within: ["l5r4-traits-rings"],
         context: "pc",
         with: { value: 1 }
       }
@@ -118,6 +123,7 @@ export const GALLERY_SHEET_BLOCKS = Object.freeze([
       {
         partial: `${T}/actor/_partials/_wound-track.hbs`,
         scope: "pc",
+        within: ["l5r4-grid"],
         context: "pc",
         with: { levels: WOUND_LEVELS }
       },
@@ -272,6 +278,7 @@ export const GALLERY_SHEET_BLOCKS = Object.freeze([
       {
         partial: `${T}/actor/_partials/_spell-slot.hbs`,
         scope: "pc",
+        within: ["l5r4-section-title", "flexrow -gap-sm l5r4-spell-slots"],
         context: "pc",
         with: { ring: "water", count: 0 }
       },
