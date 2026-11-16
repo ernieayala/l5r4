@@ -80,7 +80,7 @@ export function registerSkillVoidPointTests(quench) {
           assert.equal(voidResult.keepBonus, 1, "Void grants +1 kept die");
 
           // Verify actor's void pool decreased
-          await actor.prepareDerivedData();
+          actor.reset();
           const currentVoid = actor.system.rings.void.value;
           assert.equal(currentVoid, 2, "Void points decreased from 3 to 2");
         });
@@ -108,7 +108,7 @@ export function registerSkillVoidPointTests(quench) {
         it("should prevent void spending when no void points available", async () => {
           // ARRANGE - Deplete void points
           await actor.update({ "system.rings.void.value": 0 });
-          await actor.prepareDerivedData();
+          actor.reset();
 
           assert.equal(actor.system.rings.void.value, 0, "Actor has 0 void points");
 
@@ -131,21 +131,21 @@ export function registerSkillVoidPointTests(quench) {
           const firstSpend = await spendVoidPoint(actor);
           assert.isTrue(firstSpend.success, "First spend succeeds");
 
-          await actor.prepareDerivedData();
+          actor.reset();
           assert.equal(actor.system.rings.void.value, 2, "Void reduced to 2");
 
           // Spend second void point
           const secondSpend = await spendVoidPoint(actor);
           assert.isTrue(secondSpend.success, "Second spend succeeds");
 
-          await actor.prepareDerivedData();
+          actor.reset();
           assert.equal(actor.system.rings.void.value, 1, "Void reduced to 1");
 
           // Spend third void point
           const thirdSpend = await spendVoidPoint(actor);
           assert.isTrue(thirdSpend.success, "Third spend succeeds");
 
-          await actor.prepareDerivedData();
+          actor.reset();
           assert.equal(actor.system.rings.void.value, 0, "Void depleted to 0");
 
           // ASSERT - Fourth spend should fail
@@ -300,7 +300,7 @@ export function registerSkillVoidPointTests(quench) {
           assert.equal(voidResult.rollBonus, 1, "+1 rolled die");
           assert.equal(voidResult.keepBonus, 1, "+1 kept die");
 
-          await actor.prepareDerivedData();
+          actor.reset();
           assert.equal(actor.system.rings.void.value, 1, "Void decreased to 1");
         });
       });
@@ -465,7 +465,7 @@ export function registerSkillVoidPointTests(quench) {
           assert.isTrue(rollResult instanceof ChatMessage, "Chat message created");
 
           // Verify void was consumed
-          await actor.prepareDerivedData();
+          actor.reset();
           const finalVoid = actor.system.rings.void.value;
           assert.equal(finalVoid, initialVoid - 1, "Void point consumed");
         });

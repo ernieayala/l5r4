@@ -43,3 +43,11 @@ export const PATHS = Object.freeze({
  * @constant
  */
 export const MIGRATION_FLAG = "migratedVersion";
+
+/**
+ * The system hook L5R4ActiveEffect fires with `(actor, effect)` for each effect it drops because the actor is immune
+ * to the effect's status; module/hooks/register-all.js wires the notice to it.
+ * @type {string}
+ * @constant
+ */
+export const IMMUNE_STATUS_HOOK = `${SYS_ID}.immuneStatus`;

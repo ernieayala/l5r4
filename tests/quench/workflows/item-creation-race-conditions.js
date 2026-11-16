@@ -8,7 +8,7 @@
  * - Rapid item creation race condition (Promise.all)
  * - 100+ items on actor (performance test)
  * - Concurrent item creation and deletion
- * - prepareDerivedData performance with many items
+ * - Re-preparation (reset) performance with many items
  *
  */
 
@@ -85,7 +85,7 @@ export function registerItemCreationRaceConditionTests(quench) {
           assert.equal(skills.length, 10, "All 10 skills created");
 
           // Verify XP calculation with 10 skills
-          await actor.prepareDerivedData();
+          actor.reset();
           const xpBreakdown = actor.system._xp?.breakdown;
           assert.exists(xpBreakdown, "XP calculated");
           assert.isNumber(xpBreakdown.skills, "Skill XP is number");
@@ -188,7 +188,7 @@ export function registerItemCreationRaceConditionTests(quench) {
           }
         });
 
-        it("should handle prepareDerivedData performance with 100+ items", async function () {
+        it("should handle reset performance with 100+ items", async function () {
           // ARRANGE - Create 100 skills (worst case for XP calculation)
           const skillData = Array.from({ length: 100 }, (_, i) =>
             createSkillData({ name: `Skill ${i}`, rank: (i % 10) + 1 })
@@ -196,13 +196,13 @@ export function registerItemCreationRaceConditionTests(quench) {
 
           await actor.createEmbeddedDocuments("Item", skillData);
 
-          // ACT - Measure prepareDerivedData performance
+          // ACT - Measure reset performance: the stored data rebuilt, then the full preparation
           const startTime = Date.now();
-          actor.prepareData();
+          actor.reset();
           const prepTime = Date.now() - startTime;
 
           // ASSERT - Should complete in reasonable time (< 100ms target)
-          console.log(`L5R4 | prepareDerivedData with 100 items: ${prepTime}ms`);
+          console.log(`L5R4 | reset with 100 items: ${prepTime}ms`);
 
           // Verify XP calculated correctly
           const xpBreakdown = actor.system._xp?.breakdown;
@@ -212,7 +212,7 @@ export function registerItemCreationRaceConditionTests(quench) {
           // Performance assertion (may need adjustment based on system)
           // Target: < 100ms for 100 items
           if (prepTime > 100) {
-            console.warn(`L5R4 | prepareDerivedData took ${prepTime}ms (target: <100ms)`);
+            console.warn(`L5R4 | reset took ${prepTime}ms (target: <100ms)`);
           }
         });
 
@@ -234,7 +234,7 @@ export function registerItemCreationRaceConditionTests(quench) {
           assert.equal(actor.items.size, 50, "All 50 items created in batches");
 
           // Verify data integrity
-          await actor.prepareDerivedData();
+          actor.reset();
           const xpBreakdown = actor.system._xp?.breakdown;
           assert.isNumber(xpBreakdown.skills, "XP calculated for 50 items");
         });
@@ -276,7 +276,7 @@ export function registerItemCreationRaceConditionTests(quench) {
           assert.equal(actor.items.size, 2, "Concurrent operations completed");
 
           // Verify data integrity
-          await actor.prepareDerivedData();
+          actor.reset();
           const xpBreakdown = actor.system._xp?.breakdown;
           assert.isNumber(xpBreakdown.skills, "XP calculated after concurrent ops");
         });
@@ -305,7 +305,7 @@ export function registerItemCreationRaceConditionTests(quench) {
           assert.equal(actor.items.size, 2, "2 items remain after rapid add/remove");
 
           // Verify XP integrity
-          await actor.prepareDerivedData();
+          actor.reset();
           const xpBreakdown = actor.system._xp?.breakdown;
           assert.isNumber(xpBreakdown.skills, "XP calculated correctly");
         });
@@ -351,7 +351,7 @@ export function registerItemCreationRaceConditionTests(quench) {
           }
 
           // Verify XP recalculated
-          await actor.prepareDerivedData();
+          actor.reset();
           const xpBreakdown = actor.system._xp?.breakdown;
           assert.isNumber(xpBreakdown.skills, "XP recalculated");
         });
@@ -374,7 +374,7 @@ export function registerItemCreationRaceConditionTests(quench) {
           assert.isNumber(updated.system.rank, "Rank is number");
 
           // Verify no corruption
-          await actor.prepareDerivedData();
+          actor.reset();
           const xpBreakdown = actor.system._xp?.breakdown;
           assert.isNumber(xpBreakdown.skills, "XP calculated");
         });

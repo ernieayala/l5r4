@@ -7,25 +7,20 @@
  *   (module/utils/status-data.js).
  * - Gaining an effect with a `system.group` ends the actor's other effects of that group: one stance at a time,
  *   one Kata at a time. Creations started together settle on the newest.
- * - A status the actor is immune to (ConditionImmunity rules) is not created.
+ * - A status the actor is immune to (ConditionImmunity rules) is not created; the `l5r4-enhanced.immuneStatus` hook
+ *   fires for it.
  *
  * game-rules/36_stances.md, p.84
  * game-rules/86_kata.md, p.259
  */
 
+import { IMMUNE_STATUS_HOOK } from "../config/constants.js";
 import { buildStatusEffectUpdate } from "../utils/status-data.js";
 
 /**
  * The ActiveEffect document class the system sets as `CONFIG.ActiveEffect.documentClass`.
  */
 export default class L5R4ActiveEffect extends foundry.documents.ActiveEffect {
-  /**
-   * Tells the user an effect was not created because the actor is immune to its status. Documents show no UI
-   * (CLAUDE.md Layers), so the entry module sets the effect services' notice here.
-   * @type {function(Actor, ActiveEffect): void}
-   */
-  static onImmuneStatus = () => {};
-
   /**
    * An effect created with a status but none of its data (a macro, another module, `{statuses: ["prone"]}`) takes
    * the status's rules, group, level, and ending event, so a status means the same however its effect is made.
@@ -44,7 +39,9 @@ export default class L5R4ActiveEffect extends foundry.documents.ActiveEffect {
 
   /**
    * Drop effects the actor is immune to, then end the actor's effects that share a group with a new one. Runs once
-   * for the requesting client and is awaited before the creation, so two stances never apply together.
+   * for the requesting client and is awaited before the creation, so two stances never apply together. Each dropped
+   * effect fires the `l5r4-enhanced.immuneStatus` hook with the actor and the effect; documents show no UI
+   * (CLAUDE.md Layers), so module/hooks/register-all.js wires the notice to it.
    * @override
    */
   static async _preCreateOperation(documents, operation, user) {
@@ -61,7 +58,7 @@ export default class L5R4ActiveEffect extends foundry.documents.ActiveEffect {
     for (let i = documents.length - 1; i >= 0; i--) {
       const blocked = [...documents[i].statuses].find(status => immune.has(status));
       if (blocked) {
-        this.onImmuneStatus(actor, documents[i]);
+        Hooks.callAll(IMMUNE_STATUS_HOOK, actor, documents[i]);
         documents.splice(i, 1);
       }
     }

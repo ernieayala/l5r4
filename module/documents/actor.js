@@ -12,7 +12,7 @@
  *
  * Architecture:
  * - Uses Foundry's data preparation lifecycle (prepareBaseData → prepareDerivedData)
- * - Type-specific derived data: prepareSubtypeData(), which the subtype data models (module/data/actor/) call
+ * - Type-specific derived data: prepareDerivedData() runs the PC's or the NPC's preparation
  * - Wound system uses calculation modules for complex penalty logic
  * - XP tracking uses flags for persistent character advancement data
  */
@@ -123,8 +123,8 @@ export default class L5R4Actor extends Actor {
 
   /**
    * Initialize base actor data structures.
-   * Ensures all required system properties exist and propagates trait values from source.
-   * Called before Active Effects are applied.
+   * Ensures all required system properties exist; `_initialize` has already built the system data from the stored
+   * data. Called before Active Effects are applied.
    *
    * @returns {void}
    * @override
@@ -133,18 +133,6 @@ export default class L5R4Actor extends Actor {
     super.prepareBaseData();
 
     const sys = this.system ?? {};
-
-    // Propagate trait values from source to ensure they're available before Active Effects
-    // This prevents traits from being overwritten by effect application
-    if (this._source?.system?.traits) {
-      sys.traits = sys.traits ?? {};
-      const sourceTr = this._source.system.traits;
-      for (const key of ["sta", "wil", "str", "per", "ref", "awa", "agi", "int"]) {
-        if (sourceTr[key] !== undefined) {
-          sys.traits[key] = sourceTr[key];
-        }
-      }
-    }
 
     sys.initiative = sys.initiative ?? {};
     sys.armorTn = sys.armorTn ?? {};
@@ -173,6 +161,18 @@ export default class L5R4Actor extends Actor {
     if (phase === "initial") {
       applyInitialRules(this);
     }
+  }
+
+  /**
+   * Run the subtype's preparation (pc-preparation, npc-preparation). Core calls this after the "initial" Active Effect
+   * phase and the system model's own `prepareDerivedData`, and before the "final" phase
+   * [src: client/documents/abstract/client-document.mjs:313-320] [src: client/documents/actor.mjs:428-474].
+   * @returns {void}
+   * @override
+   */
+  prepareDerivedData() {
+    super.prepareDerivedData();
+    (this.type === "pc" ? preparePcData : prepareNpcData)(this, this.system);
   }
 
   /**
@@ -240,15 +240,6 @@ export default class L5R4Actor extends Actor {
     if (userId === game.user.id) {
       applyGrants(this);
     }
-  }
-
-  /**
-   * Run the subtype's preparation (pc-preparation, npc-preparation). The subtype's data model calls this at the end
-   * of its `prepareDerivedData`, since data models import no document code (CLAUDE.md Layers).
-   * @returns {void}
-   */
-  prepareSubtypeData() {
-    (this.type === "pc" ? preparePcData : prepareNpcData)(this, this.system);
   }
 
   /**

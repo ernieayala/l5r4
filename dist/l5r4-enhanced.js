@@ -31,7 +31,7 @@ import L5R4Combatant from "../module/documents/combatant.js";
 import L5R4Item from "../module/documents/item.js";
 import { spendInitiativeVoidPoints } from "../module/services/initiative.js";
 import L5R4Die from "../module/services/dice/roll-keep-die.js";
-import { onImmuneStatus, registerEffectQueries } from "../module/services/effects/apply.js";
+import { registerEffectQueries } from "../module/services/effects/apply.js";
 import { registerPromptQueries } from "../module/services/effects/prompts.js";
 import { COMBAT_EVENTS, registerCombatQueries } from "../module/services/effects/combat-events.js";
 import { registerDamageQueries } from "../module/services/combat/damage.js";
@@ -76,11 +76,9 @@ Hooks.once("init", async () => {
   // Initiative is the Roll & Keep pool rolled by L5R4Combatant; core's formula is only the fallback for a
   // combatant with no actor. Scores are whole numbers.
   CONFIG.Combat.initiative = { formula: "1d10", decimals: 0 };
-  // Documents do not import services, so the Void Point prompt and the effect services reach L5R4Combat here, and
-  // the immunity notice reaches L5R4ActiveEffect
+  // Documents do not import services, so the Void Point prompt and the effect services reach L5R4Combat here
   L5R4Combat.askInitiativeBonuses = spendInitiativeVoidPoints;
   L5R4Combat.EVENTS = COMBAT_EVENTS;
-  L5R4ActiveEffect.onImmuneStatus = onImmuneStatus;
 
   // What a player's client asks the active GM to do: apply a condition to an actor the player does not own, end a
   // Concentration, settle Center Stance when a player ends the Round, apply or undo damage, run a combat flow step

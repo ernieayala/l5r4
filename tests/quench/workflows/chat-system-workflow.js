@@ -245,8 +245,8 @@ export function registerChatSystemWorkflowTests(quench) {
             }
           ]);
 
-          // Force prepareDerivedData to recalculate armor
-          defender.prepareDerivedData();
+          // Re-prepare from the stored data to recalculate armor
+          defender.reset();
 
           const damage = 15;
           const armorReduction = defender.system.armorTn.reduction;
@@ -297,7 +297,7 @@ export function registerChatSystemWorkflowTests(quench) {
             }
           ]);
 
-          defender.prepareDerivedData();
+          defender.reset();
 
           const damage = 20;
           const initialVoid = defender.system.rings.void.value;

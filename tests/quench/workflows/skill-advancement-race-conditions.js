@@ -79,7 +79,7 @@ export function registerSkillAdvancementRaceConditionTests(quench) {
           }
 
           // Verify XP calculation still works
-          await actor.prepareDerivedData();
+          actor.reset();
           const xpBreakdown = actor.system._xp?.breakdown;
           assert.exists(xpBreakdown, "XP calculated after race");
           assert.isNumber(xpBreakdown.skills, "Skill XP is number");
@@ -109,7 +109,7 @@ export function registerSkillAdvancementRaceConditionTests(quench) {
           );
 
           // Verify XP recalculated correctly
-          await actor.prepareDerivedData();
+          actor.reset();
           const xpBreakdown = actor.system._xp?.breakdown;
           assert.isNumber(xpBreakdown.skills, "XP recalculated");
         });
@@ -126,7 +126,7 @@ export function registerSkillAdvancementRaceConditionTests(quench) {
           assert.equal(updatedSkill.system.trainedEmphases.length, 5, "All 5 emphases added");
 
           // Verify XP for 5 emphases
-          await actor.prepareDerivedData();
+          actor.reset();
           const xpBreakdown = actor.system._xp?.breakdown;
 
           // 5 emphases × 2 XP = 10 XP (plus skill ranks)
@@ -152,7 +152,7 @@ export function registerSkillAdvancementRaceConditionTests(quench) {
           );
 
           // Verify XP still calculates (even with rule violation)
-          await actor.prepareDerivedData();
+          actor.reset();
           const xpBreakdown = actor.system._xp?.breakdown;
           assert.isNumber(xpBreakdown.skills, "XP calculated despite rule violation");
         });
@@ -190,12 +190,12 @@ export function registerSkillAdvancementRaceConditionTests(quench) {
 
         it("should handle skill rank decrease", async () => {
           // ARRANGE - Skill at rank 5
-          await actor.prepareDerivedData();
+          actor.reset();
           const initialXP = actor.system._xp?.breakdown?.skills;
 
           // ACT - Decrease rank to 3
           await skill.update({ "system.rank": 3 });
-          await actor.prepareDerivedData();
+          actor.reset();
 
           // ASSERT - XP should be recalculated (lower)
           const finalXP = actor.system._xp?.breakdown?.skills;
@@ -217,7 +217,7 @@ export function registerSkillAdvancementRaceConditionTests(quench) {
           assert.equal(updatedSkill.system.rank, 4, "Final rank correct");
 
           // Verify XP calculated correctly
-          await actor.prepareDerivedData();
+          actor.reset();
           const xpBreakdown = actor.system._xp?.breakdown;
           assert.isNumber(xpBreakdown.skills, "XP recalculated");
         });
@@ -242,7 +242,7 @@ export function registerSkillAdvancementRaceConditionTests(quench) {
           );
 
           // Verify XP still calculates
-          await actor.prepareDerivedData();
+          actor.reset();
           const xpBreakdown = actor.system._xp?.breakdown;
           assert.isNumber(xpBreakdown.skills, "XP calculated despite violation");
         });
@@ -252,7 +252,7 @@ export function registerSkillAdvancementRaceConditionTests(quench) {
           await skill.update({ "system.rank": 0 });
 
           // ACT
-          await actor.prepareDerivedData();
+          actor.reset();
 
           // ASSERT
           const updatedSkill = actor.items.get(skill.id);
@@ -300,7 +300,7 @@ export function registerSkillAdvancementRaceConditionTests(quench) {
           });
 
           // ACT
-          await actor.prepareDerivedData();
+          actor.reset();
 
           // ASSERT
           const xpBreakdown = actor.system._xp?.breakdown;
@@ -317,7 +317,7 @@ export function registerSkillAdvancementRaceConditionTests(quench) {
           // ACT
           for (const freeCount of freeEmphasisStates) {
             await skill.update({ "system.freeEmphasis": freeCount });
-            await actor.prepareDerivedData();
+            actor.reset();
           }
 
           // ASSERT
@@ -379,7 +379,7 @@ export function registerSkillAdvancementRaceConditionTests(quench) {
           }
 
           // Verify XP calculated for all skills
-          await actor.prepareDerivedData();
+          actor.reset();
           const xpBreakdown = actor.system._xp?.breakdown;
           assert.isNumber(xpBreakdown.skills, "Total skill XP calculated");
         });
@@ -404,7 +404,7 @@ export function registerSkillAdvancementRaceConditionTests(quench) {
           assert.equal(finalCount, initialCount - 1, "Skill removed");
 
           // Verify XP still calculates
-          await actor.prepareDerivedData();
+          actor.reset();
           const xpBreakdown = actor.system._xp?.breakdown;
           assert.isNumber(xpBreakdown.skills, "XP calculated after removal");
         });

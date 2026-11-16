@@ -1,10 +1,10 @@
 /**
  * Actor documents: creation with default and custom Traits, the XP flags, derived Initiative, Armor TN,
- * Wound levels, and Insight, and derived data recalculated on update.
+ * Wound levels, and Insight, and derived data recalculated on update and on each reset.
  */
 
 import { SYS_ID } from "../../../module/config/constants.js";
-import { createTestPC } from "../../fixtures/actor-fixtures.js";
+import { createTestNPC, createTestPC } from "../../fixtures/actor-fixtures.js";
 
 /**
  * Register the batch.
@@ -177,6 +177,130 @@ export function registerActorTests(quench) {
           await actor.update({ "system.suffered": 10 });
 
           assert.equal(actor.system.suffered, 10, "Suffered wounds recorded");
+        });
+      });
+
+      // L5R4Actor.prepareDerivedData runs the PC and NPC preparation between core's "initial" and "final" Active
+      // Effect phases (docs/code-system/foundry-patterns.md, Preparation order)
+      describe("Preparation in core's cycle", () => {
+        const actors = [];
+        const track = created => (actors.push(created), created);
+
+        afterEach(async () => {
+          for (const created of actors.splice(0)) {
+            await created.delete();
+          }
+        });
+
+        it("should derive a PC's Rings, Armor TN, and Insight when an update prepares it", async () => {
+          const pc = track(await createTestPC({ name: "Preparation: update" }));
+          await pc.update({
+            "system.traits.ref": 3,
+            "system.traits.awa": 4,
+            "system.traits.sta": 3,
+            "system.traits.wil": 3
+          });
+          assert.equal(pc.system.rings.air, 3, "Air = lower of Reflexes 3 and Awareness 4");
+          assert.equal(pc.system.rings.earth, 3, "Earth = lower of Stamina 3 and Willpower 3");
+          assert.equal(pc.system.armorTn.base, 20, "Reflexes 3 x 5 + 5");
+          assert.equal(
+            pc.system.insight.points,
+            120,
+            "(Air 3 + Earth 3 + Fire 2 + Water 2 + Void 2) x 10"
+          );
+        });
+
+        it("should rebuild a PC's and an NPC's values from the stored data in reset", async () => {
+          const pc = track(
+            await createTestPC({ name: "Preparation: PC", system: { traits: { ref: 3 } } })
+          );
+          const npc = track(await createTestNPC({ name: "Preparation: NPC" }));
+          // Wipe the prepared values and change a stored one in memory only: reset rebuilds the system data from
+          // _source, then prepares it
+          pc.system.traits.ref = 9;
+          pc.system.rings.air = 0;
+          pc.system.armorTn.base = 0;
+          pc.system.insight.points = 0;
+          npc.system.initiative.roll = 0;
+          pc.reset();
+          npc.reset();
+          assert.equal(pc.system.traits.ref, 3, "the stored Reflexes");
+          assert.equal(pc.system.rings.air, 2, "Air = lower of Reflexes 3 and Awareness 2");
+          assert.equal(pc.system.armorTn.base, 20, "Reflexes 3 x 5 + 5");
+          assert.equal(pc.system.insight.points, 100, "five Rings at 2, x 10");
+          // An NPC counts as Insight Rank 1 (Ernie's ruling): (1 + Reflexes 2)k2
+          assert.equal(npc.system.initiative.roll, 3);
+          assert.equal(npc.system.initiative.keep, 2);
+        });
+
+        // Fails if preparation adds into anything a reset keeps: the stored data, the items, or module state
+        it("should give the same values when reset runs again", async () => {
+          const pc = track(await createTestPC({ name: "Preparation: again" }));
+          await pc.createEmbeddedDocuments("Item", [
+            {
+              name: "Preparation rules",
+              type: "advantage",
+              system: {
+                rules: [
+                  { key: "TraitAdjust", trait: "void", value: 1 },
+                  { key: "Initiative", roll: 1, keep: 1, total: 2 },
+                  { key: "Wounds", perRank: 3, penalty: 1 }
+                ]
+              }
+            }
+          ]);
+          await pc.createEmbeddedDocuments("ActiveEffect", [
+            {
+              name: "Preparation change",
+              system: { changes: [{ key: "system.armorTn.mod", type: "add", value: "5" }] }
+            }
+          ]);
+          const prepared = () => ({
+            voidRank: pc.system.rings.void.rank,
+            initiativeRoll: pc.system.initiative.roll,
+            initiativeKeep: pc.system.initiative.keep,
+            initiativeTotal: pc.system.initiative.totalMod,
+            healthy: pc.system.woundLevels.healthy.value,
+            nickedPenalty: pc.system.woundLevels.nicked.penaltyEff,
+            armorTn: pc.system.armorTn.current
+          });
+          const expected = {
+            voidRank: 3,
+            // Insight Rank 1 + Reflexes 2 + 1, keep Reflexes 2 + 1
+            initiativeRoll: 4,
+            initiativeKeep: 3,
+            initiativeTotal: 2,
+            // Earth 2 x 5 + 3
+            healthy: 13,
+            // Nicked +3, plus 1
+            nickedPenalty: 4,
+            // Reflexes 2 x 5 + 5, plus 5
+            armorTn: 20
+          };
+          assert.deepEqual(prepared(), expected, "after the creations");
+          pc.reset();
+          pc.reset();
+          assert.deepEqual(prepared(), expected, "after two more resets");
+        });
+
+        it("should prepare derived values after the initial effect phase and before the final one", async () => {
+          const pc = track(await createTestPC({ name: "Preparation: phases" }));
+          await pc.createEmbeddedDocuments("ActiveEffect", [
+            {
+              name: "Preparation phases",
+              system: {
+                changes: [
+                  { key: "system.traits.ref", type: "add", value: "1", phase: "initial" },
+                  { key: "system.armorTn.current", type: "override", value: "99", phase: "final" }
+                ]
+              }
+            }
+          ]);
+          for (const when of ["after the creation", "after reset"]) {
+            assert.equal(pc.system.armorTn.base, 20, `${when}: Reflexes 3 from the initial phase`);
+            assert.equal(pc.system.armorTn.current, 99, `${when}: the final phase comes last`);
+            pc.reset();
+          }
         });
       });
     },

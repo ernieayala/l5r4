@@ -140,17 +140,17 @@ export function getMaxRaises(voidRing, unskilled = false) {
  * @param {object} spec - The TN's parts
  * @param {number} spec.base - TN set by the GM, a spell, or a target's Armor TN
  * @param {number} [spec.raises=0] - Declared Raises
- * @param {number} [spec.freeRaisesToTN=0] - Free Raises spent to lower the TN
+ * @param {number} [spec.freeRaisesToTn=0] - Free Raises spent to lower the TN
  * @param {number} [spec.woundPenalty=0] - The current Wound Rank's TN penalty
  * @param {number[]} [spec.modifiers=[]] - Other TN changes (conditions, armor, rules)
  * @returns {number|null} The TN, never below 0; null when the roll has no TN
  */
-export function getTn({ base, raises = 0, freeRaisesToTN = 0, woundPenalty = 0, modifiers = [] }) {
+export function getTn({ base, raises = 0, freeRaisesToTn = 0, woundPenalty = 0, modifiers = [] }) {
   if (base <= 0 && raises <= 0) {
     return null;
   }
   const extra = modifiers.reduce((sum, value) => sum + value, 0);
-  return Math.max(0, base + raises * 5 - freeRaisesToTN * 5 + woundPenalty + extra);
+  return Math.max(0, base + raises * 5 - freeRaisesToTn * 5 + woundPenalty + extra);
 }
 
 /**

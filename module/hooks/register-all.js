@@ -4,6 +4,7 @@
  * sheets export their handlers and init functions, and this file wires them, so every active hook and its order can
  * be read and audited here.
  */
+import { IMMUNE_STATUS_HOOK } from "../config/constants.js";
 import {
   onCreateActiveEffectAnimation,
   onCreateChatMessageAnimation,
@@ -19,6 +20,7 @@ import {
   onUpdateActorWounds,
   registerTokenEffects
 } from "../services/effects/automation.js";
+import { onImmuneStatus } from "../services/effects/apply.js";
 import { bindLegacyAttackCard, onChatMessage } from "../services/chat.js";
 import {
   bindCheckCard,
@@ -70,13 +72,14 @@ export function registerAllHooks() {
     Hooks.on("createChatMessage", onCreateChatMessageAnimation);
   }
 
-  // Effects: timed effects of unlinked tokens, Prone from Wounds, Concentration checks, the Full Defense roll, and
-  // the GM's "End encounter" control
+  // Effects: timed effects of unlinked tokens, Prone from Wounds, Concentration checks, the Full Defense roll, the
+  // GM's "End encounter" control, and the notice for an effect dropped because the actor is immune to its status
   Hooks.once("ready", registerTokenEffects);
   Hooks.on("preUpdateActor", onPreUpdateActorWounds);
   Hooks.on("updateActor", onUpdateActorWounds);
   Hooks.on("createActiveEffect", onCreateActiveEffectFullDefense);
   Hooks.on("getSceneControlButtons", onGetSceneControlButtonsEncounter);
+  Hooks.on(IMMUNE_STATUS_HOOK, onImmuneStatus);
 
   // Chat integration: the damage button of cards posted before 4.0.0, inline Roll & Keep notation, and the roll
   // card's buttons and context menu entries

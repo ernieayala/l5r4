@@ -281,7 +281,7 @@ export async function rollCheck(request) {
   const raises = raisesAllowed
     ? Math.min(Math.max(minimum, toInt(choices.raises ?? minimum)), maximum)
     : 0;
-  const freeRaisesToTN = Math.min(Math.max(0, toInt(choices.freeRaisesToTN)), freeRaises);
+  const freeRaisesToTn = Math.min(Math.max(0, toInt(choices.freeRaisesToTn)), freeRaises);
   const voidPoint = !isDamage && Boolean(choices.void);
   const emphasis = emphases.includes(choices.emphasis) ? choices.emphasis : "";
   const keepOverride = toInt(choices.keep) > 0 ? toInt(choices.keep) : null;
@@ -306,7 +306,7 @@ export async function rollCheck(request) {
     const cost = getManeuverCost(maneuvers, ctx.raises.maneuverCosts);
     const { affordable, increasedDamage } = getRaiseAllocation({
       raises,
-      freeRaises: totalFreeRaises - freeRaisesToTN,
+      freeRaises: totalFreeRaises - freeRaisesToTn,
       cost
     });
     if (!affordable) {
@@ -381,7 +381,7 @@ export async function rollCheck(request) {
     : getTn({
         base: tnBase,
         raises,
-        freeRaisesToTN,
+        freeRaisesToTn,
         woundPenalty: applyWound ? woundPenalty : 0,
         // TN changes of one type do not stack, as on the sheet (module/utils/modifier-stacking.js)
         modifiers: [
@@ -428,7 +428,8 @@ export async function rollCheck(request) {
       base: tnBase,
       raises,
       freeRaises: totalFreeRaises,
-      freeRaisesToTN,
+      // The key is stored in posted roll messages (RollMessageData), so it keeps its name
+      freeRaisesToTN: freeRaisesToTn,
       woundPenalty: tn === null || !applyWound ? 0 : woundPenalty,
       modifiers: tn === null ? [] : tnModifiers,
       // The target's Armor TN against this attack: the base and the target's own changes, without the attacker's

@@ -55,7 +55,7 @@ export function registerEmphasisXpTrackingTests(quench) {
             { parent: actor }
           );
 
-          await actor.prepareDerivedData();
+          actor.reset();
 
           const xpBreakdown = actor.system._xp?.breakdown;
           assert.exists(xpBreakdown, "XP breakdown should exist");
@@ -86,7 +86,7 @@ export function registerEmphasisXpTrackingTests(quench) {
             { parent: actor }
           );
 
-          await actor.prepareDerivedData();
+          actor.reset();
 
           const xpBreakdown = actor.system._xp?.breakdown;
           // Only skill ranks: (2 × 3) / 2 = 3 XP
@@ -112,7 +112,7 @@ export function registerEmphasisXpTrackingTests(quench) {
             { parent: actor }
           );
 
-          await actor.prepareDerivedData();
+          actor.reset();
 
           const xpBreakdown = actor.system._xp?.breakdown;
           // Only skill ranks: 1 XP
@@ -138,7 +138,7 @@ export function registerEmphasisXpTrackingTests(quench) {
             { parent: actor }
           );
 
-          await actor.prepareDerivedData();
+          actor.reset();
 
           const xpBreakdown = actor.system._xp?.breakdown;
           // 3 emphases - 1 free = 2 paid × 2 XP = 4 XP
@@ -167,7 +167,7 @@ export function registerEmphasisXpTrackingTests(quench) {
             { parent: actor }
           );
 
-          await actor.prepareDerivedData();
+          actor.reset();
 
           const xpBreakdown = actor.system._xp?.breakdown;
           // 1 emphasis - 2 free = 0 paid × 2 XP = 0 XP (Math.max prevents negative)
@@ -207,7 +207,7 @@ export function registerEmphasisXpTrackingTests(quench) {
             { parent: actor }
           );
 
-          await actor.prepareDerivedData();
+          actor.reset();
 
           const xpBreakdown = actor.system._xp?.breakdown;
           // Skill 1: 6 XP ranks + 4 XP emphases = 10 XP

@@ -91,13 +91,6 @@ export default class NpcData extends ActorData {
     return super.migrateData(source);
   }
 
-  /** @override */
-  prepareDerivedData() {
-    super.prepareDerivedData();
-    // The NPC's preparation is document code (module/documents/actor/preparation/), which the actor runs
-    this.parent.prepareSubtypeData();
-  }
-
   /**
    * The Insight Rank rules read: NPCs have no Insight and count as Rank 1 (NPC_INSIGHT_RANK).
    * @type {number}

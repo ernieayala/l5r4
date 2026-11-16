@@ -37,8 +37,8 @@ export function registerMeleeDamageStrengthTests(quench) {
           const weapon = actor.items.find(i => i.type === "weapon");
           assert.exists(weapon, "Weapon exists on actor");
 
-          // Force prepareDerivedData to ensure calculations run
-          weapon.prepareDerivedData();
+          // Re-prepare from the stored data to ensure calculations run
+          weapon.reset();
 
           // ASSERT - Verify Strength is added to damage
           // Expected: Katana 3k2 + Strength 3 = 6k2
@@ -85,17 +85,17 @@ export function registerMeleeDamageStrengthTests(quench) {
 
           // ACT & ASSERT - Check each weapon
           const katana = actor.items.find(i => i.name === "Katana");
-          katana.prepareDerivedData();
+          katana.reset();
           assert.equal(katana.system.derivedDamageRoll, 7, "Katana: 3 + 4 = 7");
           assert.equal(katana.system.derivedDamageKeep, 2, "Katana keep: 2");
 
           const tetsubo = actor.items.find(i => i.name === "Tetsubo");
-          tetsubo.prepareDerivedData();
+          tetsubo.reset();
           assert.equal(tetsubo.system.derivedDamageRoll, 9, "Tetsubo: 5 + 4 = 9");
           assert.equal(tetsubo.system.derivedDamageKeep, 2, "Tetsubo keep: 2");
 
           const tanto = actor.items.find(i => i.name === "Tanto");
-          tanto.prepareDerivedData();
+          tanto.reset();
           assert.equal(tanto.system.derivedDamageRoll, 5, "Tanto: 1 + 4 = 5");
           assert.equal(tanto.system.derivedDamageKeep, 1, "Tanto keep: 1");
 
@@ -117,7 +117,7 @@ export function registerMeleeDamageStrengthTests(quench) {
 
           // ACT
           const weapon = actor.items.find(i => i.type === "weapon");
-          weapon.prepareDerivedData();
+          weapon.reset();
 
           // ASSERT - Should use base weapon damage only
           assert.equal(
@@ -145,7 +145,7 @@ export function registerMeleeDamageStrengthTests(quench) {
 
           // ACT
           const weapon = actor.items.find(i => i.type === "weapon");
-          weapon.prepareDerivedData();
+          weapon.reset();
 
           // ASSERT
           assert.equal(
@@ -172,14 +172,14 @@ export function registerMeleeDamageStrengthTests(quench) {
           await actor.createEmbeddedDocuments("Item", [createWeaponData("Katana", 3, 2)]);
 
           const weapon = actor.items.find(i => i.type === "weapon");
-          weapon.prepareDerivedData();
+          weapon.reset();
 
           // ASSERT - Initial state
           assert.equal(weapon.system.derivedDamageRoll, 5, "Initial: 3 + 2 = 5");
 
           // ACT - Increase Strength
           await actor.update({ "system.traits.str": 4 });
-          weapon.prepareDerivedData();
+          weapon.reset();
 
           // ASSERT - After Strength increase
           assert.equal(weapon.system.derivedDamageRoll, 7, "After update: 3 + 4 = 7");
@@ -201,7 +201,7 @@ export function registerMeleeDamageStrengthTests(quench) {
           });
 
           // ACT
-          weapon.prepareDerivedData();
+          weapon.reset();
 
           // ASSERT - Should use base damage without Strength
           assert.equal(
@@ -231,7 +231,7 @@ export function registerMeleeDamageStrengthTests(quench) {
 
           // ACT
           const weapon = actor.items.find(i => i.type === "weapon");
-          weapon.prepareDerivedData();
+          weapon.reset();
 
           // ASSERT - Should handle gracefully, treating as 0 Strength
           assert.exists(weapon.system.derivedDamageRoll, "derivedDamageRoll exists");
@@ -260,7 +260,7 @@ export function registerMeleeDamageStrengthTests(quench) {
 
           // ACT
           const weapon = actor.items.find(i => i.type === "weapon");
-          weapon.prepareDerivedData();
+          weapon.reset();
 
           // ASSERT - Should still calculate (3 + (-2) = 1)
           assert.equal(

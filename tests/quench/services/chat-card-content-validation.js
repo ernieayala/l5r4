@@ -215,7 +215,7 @@ export function registerChatCardContentValidationTests(quench) {
         it("should display wound penalty in chat card", async () => {
           // ARRANGE - Wounded character
           await actor.update({ "system.suffered": 20 });
-          actor.prepareDerivedData();
+          actor.reset();
           const woundPenalty = actor.system.woundPenalty || 0;
           const skillRank = 5;
           const traitValue = 4;
@@ -457,7 +457,7 @@ export function registerChatCardContentValidationTests(quench) {
 
         it("should display all modifiers when multiple are active", async () => {
           // ARRANGE - Roll with multiple bonuses and wound penalty
-          actor.prepareDerivedData();
+          actor.reset();
           const woundPenalty = actor.system.woundPenalty || 0;
           const skillRank = 5;
           const traitValue = 4;

@@ -1,4 +1,5 @@
 import { SYS_ID } from "../../module/config/constants.js";
+import { F } from "../../module/utils/localization.js";
 import { rollSkill } from "../../module/services/dice/rolls/skill-roll.js";
 import { rollTrait } from "../../module/services/dice/rolls/trait-roll.js";
 import { applyEffect, effectsOf } from "../../module/services/effects/apply.js";
@@ -261,8 +262,22 @@ export function registerEffectsTests(quench) {
               system: { rules: [{ key: "ConditionImmunity", condition: "feared" }] }
             }
           ]);
-          await actor.toggleStatusEffect("feared", { active: true });
+          // The notice comes through the l5r4-enhanced.immuneStatus hook (module/hooks/register-all.js)
+          const notices = [];
+          const info = ui.notifications.info;
+          ui.notifications.info = message => notices.push(message);
+          try {
+            await actor.toggleStatusEffect("feared", { active: true });
+          } finally {
+            ui.notifications.info = info;
+          }
           assert.isFalse(actor.statuses.has("feared"));
+          assert.deepEqual(notices, [
+            F("l5r4.ui.effects.immune", {
+              name: actor.name,
+              effect: game.i18n.localize(CONFIG.statusEffects.feared.name)
+            })
+          ]);
         });
 
         it("should offer a hit's ApplyCondition rule's condition on the target", async () => {

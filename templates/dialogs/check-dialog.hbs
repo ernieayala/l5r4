@@ -53,11 +53,11 @@
     {{#if freeRaises}}
       <div class="form-group">
         <label>{{localize "l5r4.ui.check.freeRaisesToTn"}} ({{localize "l5r4.ui.check.of"}} {{freeRaises}})</label>
-        <input type="number" name="freeRaisesToTN" value="0" min="0" max="{{freeRaises}}" />
+        <input type="number" name="freeRaisesToTn" value="0" min="0" max="{{freeRaises}}" />
       </div>
     {{/if}}
   {{else if unskilled}}
-    <p class="hint">{{localize "l5r4.ui.check.unskilledHint"}}</p>
+    <p class="hint">{{localize "l5r4.ui.check.unskilled"}}</p>
   {{/if}}
 
   {{#if voidAllowed}}

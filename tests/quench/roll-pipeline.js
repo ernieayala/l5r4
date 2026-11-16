@@ -760,7 +760,7 @@ export function registerRollPipelineTests(quench) {
                 system: { rules: [{ key: "FreeRaise", selector: "any", value: 2 }] }
               }
             ]);
-            const answered = answerCheckDialog({ tn: 20, freeRaisesToTN: 1 });
+            const answered = answerCheckDialog({ tn: 20, freeRaisesToTn: 1 });
             const message = keep(
               await rollSkill({
                 actor,

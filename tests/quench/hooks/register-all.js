@@ -1,12 +1,12 @@
 /**
  * The hooks module/hooks/register-all.js wires during init: each handler services and apps export is registered on
- * its hook, handlers on one hook run in the order the token controls and chat cards rely on, and the entry module's
- * GM queries and document seams are in place. The Sequencer and JB2A animation hooks are wired only when both
+ * its hook (the system's own `l5r4-enhanced.immuneStatus` among them), handlers on one hook run in the order the
+ * token controls and chat cards rely on, and the entry module's GM queries are in place. The Sequencer and JB2A animation hooks are wired only when both
  * modules are active. `ready` has fired before a batch runs, so the once-only `registerTokenEffects` is not visible
  * here; the effects batch (tests/quench/effects.js) calls it.
  */
 
-import { SYS_ID } from "../../../module/config/constants.js";
+import { IMMUNE_STATUS_HOOK, SYS_ID } from "../../../module/config/constants.js";
 import { getBrowserIndexFields } from "../../../module/utils/browser-filter.js";
 import L5R4ActiveEffect from "../../../module/documents/active-effect.js";
 import {
@@ -98,8 +98,9 @@ export function registerHookWiringTests(quench) {
           }
         });
 
-        it("should give the immunity notice to the ActiveEffect document class", () => {
-          assert.strictEqual(L5R4ActiveEffect.onImmuneStatus, onImmuneStatus);
+        it("should wire the immunity notice to the system's immuneStatus hook", () => {
+          assertWiredInOrder(IMMUNE_STATUS_HOOK, [onImmuneStatus]);
+          assert.notProperty(L5R4ActiveEffect, "onImmuneStatus", "no slot on the document class");
         });
 
         it("should wire the animation hooks only when Sequencer and JB2A are both active", () => {

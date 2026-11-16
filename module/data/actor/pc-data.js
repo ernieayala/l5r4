@@ -51,13 +51,6 @@ export default class PcData extends ActorData {
     return super.migrateData(source);
   }
 
-  /** @override */
-  prepareDerivedData() {
-    super.prepareDerivedData();
-    // The PC's preparation is document code (module/documents/actor/preparation/), which the actor runs
-    this.parent.prepareSubtypeData();
-  }
-
   /**
    * The Insight Rank rules read: the prepared rank.
    * game-rules/49_improving_your_character.md, p.104

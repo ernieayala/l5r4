@@ -148,7 +148,7 @@ describe("getTn", () => {
 
   // game-rules/28_raises.md, p.79
   it("should take 5 off per Free Raise spent on the TN", () => {
-    expect(getTn({ base: 20, freeRaisesToTN: 1 })).toBe(15);
+    expect(getTn({ base: 20, freeRaisesToTn: 1 })).toBe(15);
   });
 
   // Nicked is +3
@@ -159,7 +159,7 @@ describe("getTn", () => {
 
   it("should add other TN modifiers and never go below 0", () => {
     expect(getTn({ base: 10, modifiers: [5, -2] })).toBe(13);
-    expect(getTn({ base: 5, freeRaisesToTN: 3 })).toBe(0);
+    expect(getTn({ base: 5, freeRaisesToTn: 3 })).toBe(0);
   });
 
   it("should give no TN to a roll with no TN and no Raises", () => {

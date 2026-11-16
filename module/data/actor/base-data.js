@@ -12,9 +12,8 @@ import { migrateCommonActorSource } from "../migrate-source.js";
  *
  * Derived values (Rings from Traits, wound thresholds and rank, Armor TN, Initiative pool, Insight points) are
  * computed during preparation and never stored (roadmap/STAGE-02-DATA-MODELS.md decision 4). Defaults equal the
- * 3.2.1 template.json defaults (decision 1). Subclasses run the subtype's preparation in `prepareDerivedData`,
- * which core calls after the "initial" Active Effect phase and before Actor#prepareDerivedData
- * [src: client/documents/abstract/client-document.mjs:313-320].
+ * 3.2.1 template.json defaults (decision 1). L5R4Actor#prepareDerivedData computes them (module/documents/actor.js),
+ * since the preparation reads the actor's items and effects.
  */
 export default class ActorData extends foundry.abstract.TypeDataModel {
   /**

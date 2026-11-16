@@ -75,7 +75,7 @@ export function registerTraitFamilyBonusTests(quench) {
           await actor.setFlag(SYS_ID, "familyName", "Hida");
 
           // Trigger derived data preparation to apply Active Effects
-          actor.prepareDerivedData();
+          actor.reset();
 
           sheet = actor.sheet;
         });
@@ -219,7 +219,7 @@ export function registerTraitFamilyBonusTests(quench) {
 
           await actor.setFlag(SYS_ID, "familyItemUuid", familyItem.uuid);
           await actor.setFlag(SYS_ID, "familyName", "Yasuki");
-          actor.prepareDerivedData();
+          actor.reset();
         });
 
         afterEach(async () => {
@@ -308,7 +308,7 @@ export function registerTraitFamilyBonusTests(quench) {
           familyItem = embeddedFamily;
 
           await actor.setFlag(SYS_ID, "familyItemUuid", familyItem.uuid);
-          actor.prepareDerivedData();
+          actor.reset();
         });
 
         afterEach(async () => {
@@ -480,7 +480,7 @@ export function registerTraitFamilyBonusTests(quench) {
           await actor.setFlag(SYS_ID, "familyItemUuid", family1.uuid);
           await actor.setFlag(SYS_ID, "familyName", "Hida");
 
-          actor.prepareDerivedData();
+          actor.reset();
         });
 
         afterEach(async () => {
@@ -546,7 +546,7 @@ export function registerTraitFamilyBonusTests(quench) {
             }
           ]);
 
-          actor.prepareDerivedData();
+          actor.reset();
           await new Promise(resolve => setTimeout(resolve, 100));
 
           // Strength should now have TWO bonuses: base 2 + Hida 1 + Test 1 = 4
@@ -608,7 +608,7 @@ export function registerTraitFamilyBonusTests(quench) {
           await actor.setFlag(SYS_ID, "familyItemUuid", familyItem.uuid);
           await actor.setFlag(SYS_ID, "familyName", "Broken");
 
-          actor.prepareDerivedData();
+          actor.reset();
         });
 
         afterEach(async () => {
@@ -713,7 +713,7 @@ export function registerTraitFamilyBonusTests(quench) {
           familyItem = embeddedFamily;
 
           await actor.setFlag(SYS_ID, "familyItemUuid", familyItem.uuid);
-          actor.prepareDerivedData();
+          actor.reset();
         });
 
         afterEach(async () => {
@@ -785,7 +785,7 @@ export function registerTraitFamilyBonusTests(quench) {
           familyItem = embeddedFamily;
 
           await actor.setFlag(SYS_ID, "familyItemUuid", familyItem.uuid);
-          actor.prepareDerivedData();
+          actor.reset();
         });
 
         afterEach(async () => {

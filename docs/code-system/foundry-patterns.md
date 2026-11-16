@@ -162,6 +162,37 @@ Conforming, `module/documents/combatant.js:10`: `L5R4Combatant extends foundry.d
 Not conforming, `module/documents/actor.js:43`: `extends Actor`, the global. `module/documents/item.js:51` names the
 third `_preCreate` parameter `userId`; core passes a `User`.
 
+### Preparation order
+
+Core prepares a document once per initialization. `reset()` (`common/abstract/data.mjs`, `DataModel#reset`) calls
+`_initialize`, which builds the system data from `_source`; `ClientDocumentMixin#_initialize`
+(`client/documents/abstract/client-document.mjs`) then calls `_safePrepareData`, and `prepareData` runs
+`system.prepareBaseData`, `prepareBaseData`, `prepareEmbeddedDocuments` (the items, then the "initial" Active Effect
+phase, `Actor#prepareEmbeddedDocuments`), `system.prepareDerivedData`, `prepareDerivedData`, and last the "final"
+phase (`Actor#prepareData`, `client/documents/actor.mjs`). Core re-prepares an actor the same way, with `this.reset()`
+(`Actor#_onCreateDescendantDocuments`).
+
+A bare `prepareData()` resets nothing: `Actor#applyActiveEffects` applies each change onto the current value, and
+the rules add their outputs onto prepared values (`applyDerivedRules`, `module/documents/actor/rules.js`), so a second
+call adds them twice. Core does not make it idempotent, and the system does not either.
+
+| Rule                                                                                                                                                                                                               | Check                                  |
+| ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------ | -------------------------------------- |
+| A PC's or NPC's derived data runs in `L5R4Actor.prepareDerivedData` (`module/documents/actor.js`), which calls the subtype's preparation in `module/documents/actor/preparation/`; the data models compute nothing | review                                 |
+| A document is re-prepared with `document.reset()`, never a bare `prepareData()` and never `prepareDerivedData()` alone; tests included                                                                             | Quench `l5r4-enhanced.documents.actor` |
+| Preparation never writes into `_source`, the items, or module state, so a second `reset()` gives the same values                                                                                                   | Quench `l5r4-enhanced.documents.actor` |
+
+### Documents and services
+
+Documents import no service (CLAUDE.md **Layers**). Two shapes carry what a document needs from one:
+
+| Need                                 | Shape                                                                                                                                                                               | Example                                                                                                                                                                          |
+| ------------------------------------ | ----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- | -------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| A one-way event the document reports | A system hook: the document calls `Hooks.callAll("l5r4-enhanced.<event>", ...)` with the name from `module/config/`, and `module/hooks/register-all.js` wires the service's handler | `L5R4ActiveEffect._preCreateOperation` fires `IMMUNE_STATUS_HOOK` (`module/config/constants.js`); `registerAllHooks` wires `onImmuneStatus` (`module/services/effects/apply.js`) |
+| A value the document needs back      | A static slot on the document class that `dist/l5r4-enhanced.js` fills during `init`                                                                                                | `L5R4Combat.askInitiativeBonuses = spendInitiativeVoidPoints` (`module/documents/combat.js`, `module/services/initiative.js`)                                                    |
+
+A hook handler's return value is ignored, so anything the document waits for or reads back is a slot.
+
 ## Data models
 
 One `foundry.abstract.TypeDataModel` per subtype in `module/data/<document>/`, registered in `DATA_MODELS`
@@ -197,7 +228,7 @@ Check: `l5r4/member-order`.
 
 Picked by majority: the `fields.js` helpers (190 fields) over inline `new StringField(...)` (15).
 
-Conforming, `module/data/actor/pc-data.js:23-69`:
+Conforming, `module/data/actor/pc-data.js` (`PcData`); its derived data is the actor's (**Preparation order**):
 
 ```js
 export default class PcData extends ActorData {
@@ -214,11 +245,6 @@ export default class PcData extends ActorData {
     return super.migrateData(source);
   }
 
-  /** @override */
-  prepareDerivedData() {
-    /* ... */
-  }
-
   get insightRank() {
     /* ... */
   }
@@ -226,8 +252,8 @@ export default class PcData extends ActorData {
 ```
 
 Not conforming (modeled): a getter that sits before `migrateData`. Not conforming,
-`module/data/actor/base-data.js:72`: `_initiativeFields` is the system's own method with a `_` prefix; a subclass
-overrides it (`npc-data.js:110`), so it is public and unprefixed.
+`module/data/actor/base-data.js` (`ActorData._initiativeFields`): the system's own method with a `_` prefix; a
+subclass overrides it (`module/data/actor/npc-data.js`, `NpcData._initiativeFields`), so it is public and unprefixed.
 
 ## Rule models
 

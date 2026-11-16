@@ -99,7 +99,7 @@ export function registerEmphasisWorkflowTests(quench) {
           );
 
           // Step 4: Verify XP tracking
-          await actor.prepareDerivedData();
+          actor.reset();
 
           const xpBreakdown = actor.system._xp?.breakdown;
           assert.exists(xpBreakdown, "XP breakdown exists");
@@ -191,7 +191,7 @@ export function registerEmphasisWorkflowTests(quench) {
           );
 
           // ACT
-          await actor.prepareDerivedData();
+          actor.reset();
 
           // ASSERT
           const xpBreakdown = actor.system._xp?.breakdown;
@@ -244,7 +244,7 @@ export function registerEmphasisWorkflowTests(quench) {
           assert.equal(updatedSkill.system.trainedEmphases.length, 5, "Exactly 5 emphases trained");
 
           // Verify XP calculation
-          await actor.prepareDerivedData();
+          actor.reset();
           const xpBreakdown = actor.system._xp?.breakdown;
 
           // 5 emphases × 2 XP = 10 XP
@@ -446,7 +446,7 @@ export function registerEmphasisWorkflowTests(quench) {
           );
 
           // Verify XP still calculates
-          await actor.prepareDerivedData();
+          actor.reset();
           const xpBreakdown = actor.system._xp?.breakdown;
           assert.exists(xpBreakdown, "XP calculation handles edge case");
         });
@@ -467,7 +467,7 @@ export function registerEmphasisWorkflowTests(quench) {
             { parent: actor }
           );
 
-          await actor.prepareDerivedData();
+          actor.reset();
           const initialXP = actor.system._xp?.breakdown?.skills;
 
           // ACT - Remove one trained emphasis
@@ -475,7 +475,7 @@ export function registerEmphasisWorkflowTests(quench) {
             "system.trainedEmphases": ["Katana"] // Removed Wakizashi
           });
 
-          await actor.prepareDerivedData();
+          actor.reset();
 
           // ASSERT
           const updatedSkill = actor.items.get(skill.id);
@@ -507,7 +507,7 @@ export function registerEmphasisWorkflowTests(quench) {
           );
 
           // ACT
-          await actor.prepareDerivedData();
+          actor.reset();
 
           // ASSERT
           const xpBreakdown = actor.system._xp?.breakdown;
@@ -571,7 +571,7 @@ export function registerEmphasisWorkflowTests(quench) {
           );
 
           // ACT
-          await actor.prepareDerivedData();
+          actor.reset();
 
           // ASSERT
           const xpBreakdown = actor.system._xp?.breakdown;
@@ -607,7 +607,7 @@ export function registerEmphasisWorkflowTests(quench) {
             { parent: actor }
           );
 
-          await actor.prepareDerivedData();
+          actor.reset();
           const initialXP = actor.system._xp?.breakdown?.skills ?? 0;
 
           // ACT - Train emphasis (should recalculate XP)
@@ -615,7 +615,7 @@ export function registerEmphasisWorkflowTests(quench) {
             "system.trainedEmphases": ["Katana"]
           });
 
-          await actor.prepareDerivedData();
+          actor.reset();
 
           // ASSERT
           const finalXP = actor.system._xp?.breakdown?.skills ?? 0;

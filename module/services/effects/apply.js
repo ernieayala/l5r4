@@ -131,7 +131,7 @@ export function ownTurnStartOf(actor) {
 
 /**
  * Tell the user an effect was not created because the actor is immune to its status (ConditionImmunity rules).
- * L5R4ActiveEffect calls it from `_preCreateOperation`, which the entry module wires.
+ * Handles the `l5r4-enhanced.immuneStatus` hook L5R4ActiveEffect fires from `_preCreateOperation`.
  * @param {Actor} actor
  * @param {ActiveEffect} effect - The effect that was dropped
  */

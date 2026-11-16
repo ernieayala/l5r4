@@ -55,7 +55,7 @@ export function registerArmorTnCalculationTests(quench) {
           });
 
           // ACT
-          actor.prepareDerivedData();
+          actor.reset();
 
           // ASSERT
           const baseTN = actor.system.armorTn.base;
@@ -71,7 +71,7 @@ export function registerArmorTnCalculationTests(quench) {
           });
 
           // ACT
-          actor.prepareDerivedData();
+          actor.reset();
 
           // ASSERT
           const baseTN = actor.system.armorTn.base;
@@ -90,7 +90,7 @@ export function registerArmorTnCalculationTests(quench) {
           });
 
           // ACT
-          actor.prepareDerivedData();
+          actor.reset();
 
           // ASSERT
           // Verify traitsEff exists and is numeric
@@ -163,7 +163,7 @@ export function registerArmorTnCalculationTests(quench) {
           ]);
 
           // ACT
-          actor.prepareDerivedData();
+          actor.reset();
 
           // ASSERT: Prone's -10 counts only against melee attacks, which read it from armorTn.vs
           // game-rules/41_conditional_effects.md, p.89
@@ -190,7 +190,7 @@ export function registerArmorTnCalculationTests(quench) {
           ]);
 
           // ACT
-          actor.prepareDerivedData();
+          actor.reset();
 
           // ASSERT
           const current = actor.system.armorTn.current;
@@ -271,7 +271,7 @@ export function registerArmorTnCalculationTests(quench) {
           });
 
           // ACT
-          actor.prepareDerivedData();
+          actor.reset();
 
           // ASSERT
           const current = actor.system.armorTn.current;
@@ -329,7 +329,7 @@ export function registerArmorTnCalculationTests(quench) {
           });
 
           // ACT
-          actor.prepareDerivedData();
+          actor.reset();
 
           // ASSERT
           const current = actor.system.armorTn.current;
@@ -346,7 +346,7 @@ export function registerArmorTnCalculationTests(quench) {
           });
 
           // ACT
-          actor.prepareDerivedData();
+          actor.reset();
 
           // ASSERT
           assert.exists(actor.system._derived, "_derived exists");
