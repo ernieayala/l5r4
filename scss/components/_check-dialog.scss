@@ -7,13 +7,13 @@
   .l5r4-check-dialog-group {
     display: flex;
     flex-direction: column;
-    gap: var(--l5r4-space-4);
+    gap: var(--l5r4-space-gap-tight);
   }
 
   .l5r4-check-dialog-modifier {
     align-items: center;
     display: flex;
-    gap: var(--l5r4-space-8);
+    gap: var(--l5r4-space-gap);
   }
 
   .l5r4-check-dialog-modifier-label {
@@ -21,6 +21,6 @@
   }
 
   .l5r4-check-dialog-modifier-value {
-    font-family: var(--font-monospace);
+    font-family: var(--l5r4-font-code);
   }
 }

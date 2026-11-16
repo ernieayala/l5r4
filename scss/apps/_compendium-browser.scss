@@ -34,7 +34,7 @@
 
   .l5r4-tabs-tab {
     flex: 0 0 auto;
-    padding: var(--l5r4-space-4) var(--l5r4-space-8);
+    padding: var(--l5r4-space-control-block) var(--l5r4-space-control-inline);
     width: auto;
 
     // Selected (states.md): bold with the selected outline in place of core's active ring, so focus shows its own
@@ -60,7 +60,7 @@
     display: flex;
     flex: 0 1 9rem;
     flex-direction: column;
-    font-size: var(--font-size-12);
+    font-size: var(--l5r4-font-size-meta);
     gap: var(--l5r4-space-4);
   }
 
@@ -74,7 +74,7 @@
   }
 
   .l5r4-compendium-browser-count {
-    font-size: var(--font-size-12);
+    font-size: var(--l5r4-font-size-meta);
     margin: 0;
   }
 
@@ -82,7 +82,7 @@
     display: flex;
     flex: 1;
     flex-direction: column;
-    gap: var(--l5r4-space-4);
+    gap: var(--l5r4-space-gap-tight);
     list-style: none;
     margin: 0;
     overflow-y: auto;
@@ -93,7 +93,7 @@
     align-items: center;
     cursor: grab;
     display: flex;
-    gap: var(--l5r4-space-8);
+    gap: var(--l5r4-space-gap);
   }
 
   .l5r4-compendium-browser-icon {
@@ -128,12 +128,12 @@
 
   .l5r4-compendium-browser-details,
   .l5r4-compendium-browser-source {
-    font-size: var(--font-size-12);
+    font-size: var(--l5r4-font-size-meta);
   }
 
   .l5r4-compendium-browser-button {
     flex: 0 0 auto;
-    padding: var(--l5r4-space-4) var(--l5r4-space-8);
+    padding: var(--l5r4-space-control-block) var(--l5r4-space-control-inline);
     width: auto;
   }
 

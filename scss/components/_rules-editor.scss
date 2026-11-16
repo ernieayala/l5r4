@@ -1,7 +1,6 @@
 /**
  * Rules Editor
- * The rules editor on item and Active Effect sheets (module/sheets/rules-editor.js), and the ledger link under the
- * ranks on a PC sheet.
+ * The rules editor on item and Active Effect sheets (module/sheets/rules-editor.js)
  */
 
 .l5r4-rules-editor {
@@ -19,17 +18,17 @@
   }
 
   .l5r4-rules-editor-json {
-    font-family: var(--font-monospace);
+    font-family: var(--l5r4-font-code);
     min-height: 16rem;
     resize: vertical;
     width: 100%;
   }
 
   .l5r4-rules-editor-card {
-    border: 1px solid var(--color-border-dark-tertiary);
+    border: var(--l5r4-border-width-thin) solid var(--l5r4-color-line-muted);
     border-radius: var(--l5r4-radius-sm);
     margin: 0;
-    padding: var(--l5r4-space-8);
+    padding: var(--l5r4-space-card);
 
     legend {
       align-items: center;
@@ -55,13 +54,13 @@
   }
 
   .l5r4-rules-editor-error {
-    color: var(--color-level-error);
-    font-size: var(--font-size-12);
+    color: var(--l5r4-color-danger);
+    font-size: var(--l5r4-font-size-meta);
     margin: 0 0 var(--l5r4-space-4);
   }
 
   .l5r4-rules-editor-field textarea {
-    font-family: var(--font-monospace);
+    font-family: var(--l5r4-font-code);
     min-height: 2.5rem;
     resize: vertical;
   }
@@ -69,9 +68,4 @@
   .l5r4-rules-editor-add select {
     flex: 1;
   }
-}
-
-.l5r4.pc .l5r4-ranks .l5r4-ranks-ledger {
-  grid-column: 1 / -1;
-  text-align: center;
 }

@@ -36,7 +36,7 @@
     color: inherit;
     display: flex;
     font-family: inherit;
-    font-size: 10px;
+    font-size: var(--l5r4-size-icon-sm);
     height: 16px;
     justify-content: center;
     left: -2px;
@@ -47,10 +47,10 @@
     position: absolute;
     right: -1px;
     transition:
-      opacity 150ms ease-out,
-      top 150ms ease-out,
-      bottom 150ms ease-out;
-    z-index: 11;
+      opacity var(--l5r4-duration-fast) var(--l5r4-easing-standard),
+      top var(--l5r4-duration-fast) var(--l5r4-easing-standard),
+      bottom var(--l5r4-duration-fast) var(--l5r4-easing-standard);
+    z-index: var(--l5r4-layer-control);
   }
 
   .l5r4-rank-control-arrow.-up {
@@ -83,20 +83,20 @@
     }
 
     .l5r4-ring-rank {
-      background-color: var(--content-link-background);
-      border: var(--l5r4-border-width-thin) solid var(--table-header-border-color);
+      background-color: var(--l5r4-color-ring-rank-face);
+      border: var(--l5r4-border-width-thin) solid var(--l5r4-color-line);
       border-radius: var(--l5r4-radius-round);
-      color: var(--color-text-primary);
+      color: var(--l5r4-color-text);
       display: grid;
-      font-family: var(--font-h1);
-      font-size: 29px;
+      font-family: var(--l5r4-font-display);
+      font-size: var(--l5r4-font-size-medallion);
       font-weight: bold;
       height: 32px;
       margin: 0;
       place-content: center center;
       position: relative;
       width: 32px;
-      z-index: 10;
+      z-index: var(--l5r4-layer-medallion);
 
       // The backdrop comes from custom properties set per theme (below), so the nearest themed ancestor decides it:
       // a light sheet inside a dark interface matches both .theme-light and .theme-dark as ancestors (issue #30)
@@ -114,28 +114,28 @@
 
       &.-fire {
         span {
-          background-color: color-mix(in srgb, var(--l5r4-color-ring-fire) 10%, transparent);
+          background-color: var(--l5r4-color-ring-fire-tint);
           border-color: var(--l5r4-color-ring-fire);
         }
       }
 
       &.-earth {
         span {
-          background-color: color-mix(in srgb, var(--l5r4-color-ring-earth) 10%, transparent);
+          background-color: var(--l5r4-color-ring-earth-tint);
           border-color: var(--l5r4-color-ring-earth);
         }
       }
 
       &.-air {
         span {
-          background-color: color-mix(in srgb, var(--l5r4-color-ring-air) 10%, transparent);
+          background-color: var(--l5r4-color-ring-air-tint);
           border-color: var(--l5r4-color-ring-air);
         }
       }
 
       &.-water {
         span {
-          background-color: color-mix(in srgb, var(--l5r4-color-ring-water) 10%, transparent);
+          background-color: var(--l5r4-color-ring-water-tint);
           border-color: var(--l5r4-color-ring-water);
         }
       }
@@ -144,7 +144,7 @@
         cursor: pointer;
 
         span {
-          background-color: color-mix(in srgb, var(--l5r4-color-ring-void) 10%, transparent);
+          background-color: var(--l5r4-color-ring-void-tint);
           border-color: var(--l5r4-color-ring-void);
         }
 
@@ -161,7 +161,7 @@
         justify-content: center;
         line-height: 1;
         position: absolute;
-        z-index: 1;
+        z-index: var(--l5r4-layer-raised);
       }
     }
 
@@ -188,7 +188,7 @@
         filter: var(--l5r4-shadow-drop);
         height: 96px;
         position: relative;
-        transition: all 150ms ease-out;
+        transition: transform var(--l5r4-duration-fast) var(--l5r4-easing-standard);
         width: 96px;
       }
     }
@@ -218,11 +218,10 @@
         height: 100%;
         overflow: hidden;
         position: relative;
-        transition: all 150ms ease-out;
 
         .l5r4-button-under {
           align-items: center;
-          color: var(--color-text-primary);
+          color: var(--l5r4-color-text);
           display: flex;
           font-weight: bold;
           height: 100%;
@@ -239,7 +238,7 @@
           align-items: center;
           border: none;
           border-radius: 0;
-          color: #fff;
+          color: var(--l5r4-color-ring-text);
           cursor: pointer;
           display: flex;
           font: inherit;
@@ -264,8 +263,8 @@
         align-items: center;
         cursor: pointer;
         display: flex;
-        font-family: var(--font-h3);
-        font-size: 22px;
+        font-family: var(--l5r4-font-number);
+        font-size: var(--l5r4-font-size-rank);
         font-weight: bold;
         grid-area: rank;
         height: 28px;
@@ -306,9 +305,9 @@
       border-inline-end: var(--l5r4-border-width-band) solid var(--l5r4-color-ring-earth);
 
       .l5r4-rank-control.-trait {
-        background-color: color-mix(in srgb, var(--l5r4-color-ring-earth) 90%, transparent);
+        background-color: var(--l5r4-color-ring-earth-fill);
         border: var(--l5r4-border-width-thin) solid var(--l5r4-color-ring-earth);
-        color: #fff;
+        color: var(--l5r4-color-ring-text);
       }
 
       .l5r4-button.-roll {
@@ -325,9 +324,9 @@
       border-inline-end: var(--l5r4-border-width-band) solid var(--l5r4-color-ring-water);
 
       .l5r4-rank-control.-trait {
-        background-color: color-mix(in srgb, var(--l5r4-color-ring-water) 90%, transparent);
+        background-color: var(--l5r4-color-ring-water-fill);
         border: var(--l5r4-border-width-thin) solid var(--l5r4-color-ring-water);
-        color: #fff;
+        color: var(--l5r4-color-ring-text);
       }
 
       .l5r4-button.-roll {
@@ -344,9 +343,9 @@
       border-inline-start: var(--l5r4-border-width-band) solid var(--l5r4-color-ring-fire);
 
       .l5r4-rank-control.-trait {
-        background-color: color-mix(in srgb, var(--l5r4-color-ring-fire) 90%, transparent);
+        background-color: var(--l5r4-color-ring-fire-fill);
         border: var(--l5r4-border-width-thin) solid var(--l5r4-color-ring-fire);
-        color: #fff;
+        color: var(--l5r4-color-ring-text);
       }
 
       .l5r4-button.-roll {
@@ -363,9 +362,9 @@
       border-inline-start: var(--l5r4-border-width-band) solid var(--l5r4-color-ring-air);
 
       .l5r4-rank-control.-trait {
-        background-color: color-mix(in srgb, var(--l5r4-color-ring-air) 90%, transparent);
+        background-color: var(--l5r4-color-ring-air-fill);
         border: var(--l5r4-border-width-thin) solid var(--l5r4-color-ring-air);
-        color: #fff;
+        color: var(--l5r4-color-ring-text);
       }
 
       .l5r4-button.-roll {
@@ -571,22 +570,22 @@
 
     // Core stops pointer events on a button's children; each dot keeps its own hover
     .void-dot {
-      border: var(--l5r4-border-width-thick) solid #666;
+      border: var(--l5r4-border-width-thick) solid var(--l5r4-color-void-point);
       border-radius: var(--l5r4-radius-round);
       height: 12px;
       pointer-events: auto;
       width: 12px;
 
       &:hover {
-        border-color: #888;
+        border-color: var(--l5r4-color-void-point-hover);
         transform: scale(1.2);
       }
 
       &.is-filled {
-        background-color: #666;
+        background-color: var(--l5r4-color-void-point);
 
         &:hover {
-          background-color: #888;
+          background-color: var(--l5r4-color-void-point-hover);
         }
       }
     }

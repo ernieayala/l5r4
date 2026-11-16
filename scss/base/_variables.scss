@@ -10,27 +10,58 @@
   --l5r4-palette-amber-500: #ab6600;
   --l5r4-palette-black: #000;
   --l5r4-palette-blue-600: #405984;
+  --l5r4-palette-brick-500: #ba4d34;
   --l5r4-palette-brown-700: #594839;
+  --l5r4-palette-gray-400: #888;
+  --l5r4-palette-gray-500: #717171;
   --l5r4-palette-mauve-500: #7d6862;
+  --l5r4-palette-red-400: #fc452b;
+  --l5r4-palette-red-600: #ba0104;
   --l5r4-palette-rust-600: #ab4913;
   --l5r4-palette-slate-500: #64798d;
+  --l5r4-palette-white: #fff;
 
   // Domain and role colors built on the palette (foundations/color.md)
+  --l5r4-color-action: var(--l5r4-palette-brick-500);
   --l5r4-color-ring-air: var(--l5r4-palette-slate-500);
   --l5r4-color-ring-earth: var(--l5r4-palette-brown-700);
   --l5r4-color-ring-fire: var(--l5r4-palette-rust-600);
   --l5r4-color-ring-void: var(--l5r4-palette-mauve-500);
   --l5r4-color-ring-water: var(--l5r4-palette-blue-600);
+  --l5r4-color-ring-text: var(--l5r4-palette-white);
+  --l5r4-color-scrim: color-mix(in srgb, var(--l5r4-palette-black) 40%, transparent);
   --l5r4-color-shadow: color-mix(in srgb, var(--l5r4-palette-black) 50%, transparent);
   --l5r4-color-shadow-strong: var(--l5r4-palette-black);
 
-  // Space scale (foundations/space-and-size.md)
+  // Ring fills (Trait rank backgrounds) and tints (Ring rank discs); the Void Ring has no Traits, so no fill
+  --l5r4-color-ring-air-fill: color-mix(in srgb, var(--l5r4-color-ring-air) 90%, transparent);
+  --l5r4-color-ring-earth-fill: color-mix(in srgb, var(--l5r4-color-ring-earth) 90%, transparent);
+  --l5r4-color-ring-fire-fill: color-mix(in srgb, var(--l5r4-color-ring-fire) 90%, transparent);
+  --l5r4-color-ring-water-fill: color-mix(in srgb, var(--l5r4-color-ring-water) 90%, transparent);
+  --l5r4-color-ring-air-tint: color-mix(in srgb, var(--l5r4-color-ring-air) 10%, transparent);
+  --l5r4-color-ring-earth-tint: color-mix(in srgb, var(--l5r4-color-ring-earth) 10%, transparent);
+  --l5r4-color-ring-fire-tint: color-mix(in srgb, var(--l5r4-color-ring-fire) 10%, transparent);
+  --l5r4-color-ring-void-tint: color-mix(in srgb, var(--l5r4-color-ring-void) 10%, transparent);
+  --l5r4-color-ring-water-tint: color-mix(in srgb, var(--l5r4-color-ring-water) 10%, transparent);
+
+  // Type scale steps that are no core size variable (foundations/typography.md)
+  --l5r4-font-size-rank: 1.375rem;
+
+  // Space scale and semantic spacing (foundations/space-and-size.md)
   --l5r4-space-4: 0.25rem;
   --l5r4-space-8: 0.5rem;
   --l5r4-space-12: 0.75rem;
+  --l5r4-space-16: 1rem;
+  --l5r4-space-gap-tight: var(--l5r4-space-4);
+  --l5r4-space-gap: var(--l5r4-space-8);
+  --l5r4-space-control-block: var(--l5r4-space-4);
+  --l5r4-space-control-inline: var(--l5r4-space-8);
+  --l5r4-space-card: var(--l5r4-space-8);
+  --l5r4-space-section: var(--l5r4-space-16);
 
-  // Size scale (foundations/space-and-size.md)
+  // Size scale (foundations/space-and-size.md) and icon glyph sizes (foundations/iconography.md)
   --l5r4-size-column-controls: 102px;
+  --l5r4-size-icon-sm: 0.625rem;
 
   // Frames (foundations/frames.md)
   --l5r4-border-width-thin: 1px;
@@ -43,8 +74,16 @@
   --l5r4-shadow-text-halo:
     1px 1px 1px var(--l5r4-color-shadow-strong), -1px -1px 1px var(--l5r4-color-shadow-strong);
 
+  // Layers inside a window's stacking context, all below core's --z-index-app (foundations/layers.md)
+  --l5r4-layer-behind: -1;
+  --l5r4-layer-raised: 1;
+  --l5r4-layer-medallion: 10;
+  --l5r4-layer-control: 11;
+
   // Motion (foundations/motion.md); every duration is zeroed in the reduced-motion block below
+  --l5r4-duration-fast: 150ms;
   --l5r4-duration-sprite: 500ms;
+  --l5r4-easing-standard: ease-out;
 
   // States (foundations/states.md)
   --l5r4-state-hover-filter: brightness(1.1);
@@ -53,31 +92,66 @@
 }
 
 // Per-theme roles. Set on each themed element, so a sheet's own theme overrides the interface's. Tokens built from
-// these sit here too: a var() resolves where the token is declared.
-.theme-light {
-  --l5r4-color-accent: var(--l5r4-palette-amber-500);
-  --l5r4-color-ring-rank-backdrop: transparent;
-  --l5r4-image-ring-rank-backdrop: url("../../../ui/parchment.jpg");
+// these sit here too: a var() resolves where the token is declared. This block holds the tokens whose value reads
+// the same in both themes; the two blocks after it hold the ones that differ.
+.theme-light,
+.theme-dark {
+  --l5r4-color-action-text: var(--color-light-1);
+  --l5r4-color-divider: var(--color-border);
+  --l5r4-color-header: var(--color-header-background);
+  --l5r4-color-line: var(--table-header-border-color);
+  --l5r4-color-line-muted: var(--content-link-border-color);
+  --l5r4-color-panel: var(--table-header-bg-color);
+  --l5r4-color-ring-rank-face: var(--content-link-background);
+  --l5r4-color-row-alt: var(--table-row-color-even);
+  --l5r4-color-text: var(--color-text-primary);
+  --l5r4-color-text-on-header: var(--color-light-1);
+  --l5r4-font-code: var(--font-monospace);
+  --l5r4-font-display: var(--font-h1);
+  --l5r4-font-label: var(--font-h4);
+  --l5r4-font-number: var(--font-h3);
+  --l5r4-font-size-body: var(--font-size-14);
+  --l5r4-font-size-label: var(--font-size-16);
+  --l5r4-font-size-medallion: var(--font-size-28);
+  --l5r4-font-size-meta: var(--font-size-12);
+  --l5r4-font-size-title: var(--font-size-18);
   --l5r4-state-focus-color: var(--color-warm-2);
   --l5r4-state-focus-outline: 1px solid var(--l5r4-state-focus-color);
   --l5r4-state-focus-shadow: 0 0 4px var(--l5r4-state-focus-color);
   --l5r4-state-selected-outline: 1px solid var(--l5r4-color-accent);
 }
 
+.theme-light {
+  --l5r4-color-accent: var(--l5r4-palette-amber-500);
+  --l5r4-color-danger: var(--l5r4-palette-red-600);
+  --l5r4-color-ring-rank-backdrop: transparent;
+  --l5r4-color-void-point: var(--color-dark-6);
+  --l5r4-color-void-point-hover: var(--l5r4-palette-gray-500);
+  --l5r4-image-ring-rank-backdrop: url("../../../ui/parchment.jpg");
+}
+
 .theme-dark {
   --l5r4-color-accent: var(--color-text-accent);
+  --l5r4-color-danger: var(--l5r4-palette-red-400);
   --l5r4-color-ring-rank-backdrop: var(--color-cool-5-90);
+  --l5r4-color-void-point: var(--l5r4-palette-gray-500);
+  --l5r4-color-void-point-hover: var(--l5r4-palette-gray-400);
   --l5r4-image-ring-rank-backdrop: none;
-  --l5r4-state-focus-color: var(--color-warm-2);
-  --l5r4-state-focus-outline: 1px solid var(--l5r4-state-focus-color);
-  --l5r4-state-focus-shadow: 0 0 4px var(--l5r4-state-focus-color);
-  --l5r4-state-selected-outline: 1px solid var(--l5r4-color-accent);
+}
+
+// Core sets --color-header-background and --color-border on each window (`.application`), not on the themed element,
+// so a window with no theme of its own resolves these here, in the window's content, which inherits them
+// (foundations/color.md rule C4)
+.window-content {
+  --l5r4-color-divider: var(--color-border);
+  --l5r4-color-header: var(--color-header-background);
 }
 
 // The one reduced-motion rule (foundations/motion.md rule 3): a transition switches at once, and a sprite animation
 // with `forwards` runs for 0ms and holds its last frame
 @media (prefers-reduced-motion: reduce) {
   :root {
+    --l5r4-duration-fast: 0ms;
     --l5r4-duration-sprite: 0ms;
   }
 }

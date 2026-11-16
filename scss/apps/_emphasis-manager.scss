@@ -6,11 +6,11 @@
 .l5r4-emphasis-manager-body {
   display: flex;
   flex-direction: column;
-  gap: 1rem;
+  gap: var(--l5r4-space-section);
   height: 100%;
 
   .l5r4-emphasis-manager-list {
-    border: 1px solid var(--table-header-border-color);
+    border: var(--l5r4-border-width-thin) solid var(--l5r4-color-line);
     flex: 1;
     overflow-y: auto;
 
@@ -29,7 +29,7 @@
         margin: 0;
 
         &:nth-of-type(even) {
-          background-color: var(--table-row-color-even);
+          background-color: var(--l5r4-color-row-alt);
         }
 
         label {

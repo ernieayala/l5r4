@@ -1,6 +1,6 @@
 /**
  * Ranks
- * Honor, Glory, Status, and Shadow/Taint rank displays
+ * Honor, Glory, Status, and Shadow/Taint rank displays, and the ledger link under them on a PC sheet
  * Note: Animation styles are in components/_animations.scss
  */
 
@@ -13,20 +13,23 @@
     grid-template-rows: 1fr 1fr;
   }
 
-  // A <button>: `font` and `min-height` undo core's button face, so the value reads as before
+  // A <button>: `font` and `min-height` undo core's button face, so the value reads as before. Its colors and border
+  // come from the rank block rule in components/_animations.scss. Besides the hover and press looks, core's focus
+  // ring (`box-shadow`, `outline`) eases in
   .l5r4-rank-control-value {
-    background: var(--table-header-bg-color);
-    border: var(--l5r4-border-width-thin) solid var(--table-header-border-color);
-    color: var(--table-header-text-color);
     cursor: pointer;
     display: flex;
     font: inherit;
-    font-size: var(--font-size-16);
+    font-size: var(--l5r4-font-size-label);
     line-height: 1;
     min-height: 0;
     padding: var(--l5r4-space-4) 0;
     text-align: center;
-    transition: all 150ms ease-out;
+    transition:
+      box-shadow var(--l5r4-duration-fast) var(--l5r4-easing-standard),
+      filter var(--l5r4-duration-fast) var(--l5r4-easing-standard),
+      outline var(--l5r4-duration-fast) var(--l5r4-easing-standard),
+      transform var(--l5r4-duration-fast) var(--l5r4-easing-standard);
 
     &:hover {
       filter: var(--l5r4-state-hover-filter);
@@ -38,9 +41,14 @@
     }
 
     span:first-child {
-      font-family: var(--font-h4);
-      font-size: var(--font-size-18);
+      font-family: var(--l5r4-font-label);
+      font-size: var(--l5r4-font-size-title);
       font-weight: bold;
     }
   }
+}
+
+.l5r4.pc .l5r4-ranks .l5r4-ranks-ledger {
+  grid-column: 1 / -1;
+  text-align: center;
 }

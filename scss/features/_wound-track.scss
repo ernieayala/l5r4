@@ -15,12 +15,12 @@
 
     > span {
       align-items: center;
-      background: var(--table-header-bg-color);
-      border-block-end: var(--l5r4-border-width-thin) solid var(--table-header-border-color);
+      background: var(--l5r4-color-panel);
+      border-block-end: var(--l5r4-border-width-thin) solid var(--l5r4-color-line);
       border-inline-end: none;
       display: inline-flex;
-      font-family: var(--font-h4);
-      font-size: var(--font-size-16);
+      font-family: var(--l5r4-font-label);
+      font-size: var(--l5r4-font-size-label);
       height: 100%;
       justify-content: center;
       padding: var(--l5r4-space-4);
@@ -32,11 +32,12 @@
 
     > div {
       align-items: center;
-      border-block-end: var(--l5r4-border-width-thin) solid var(--table-header-border-color);
+      border-block-end: var(--l5r4-border-width-thin) solid var(--l5r4-color-line);
       display: inline-flex;
       justify-content: center;
       min-height: 25px;
-      // No block padding: the row's min-height sets its height, as it did with the old 0.1rem
+
+      // No block padding: the row's min-height sets its height
       padding: 0 var(--l5r4-space-4);
 
       &:nth-child(4n + 1) {

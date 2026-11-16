@@ -10,15 +10,14 @@
 .l5r4.pc,
 .l5r4.npc {
   .l5r4-button.-roll {
-    border: var(--l5r4-border-width-thin) solid var(--color-header-background);
+    border: var(--l5r4-border-width-thin) solid var(--l5r4-color-header);
     border-radius: 0;
     overflow: hidden;
     position: relative;
-    transition: all 150ms ease-out;
 
     .l5r4-button-under {
       align-items: center;
-      color: var(--color-text-primary);
+      color: var(--l5r4-color-text);
       display: flex;
       font-weight: bold;
       height: 100%;
@@ -31,10 +30,10 @@
 
     // The face is a <button>; this rule overrides core's button look with the sprite
     .l5r4-button-face {
-      background: var(--button-hover-background-color);
+      background: var(--l5r4-color-action);
       border: none;
       border-radius: 0;
-      color: var(--button-hover-text-color);
+      color: var(--l5r4-color-action-text);
       cursor: pointer;
       display: inline-flex;
       font-weight: bold;
@@ -52,15 +51,14 @@
   }
 
   .l5r4-rank-control.-track {
-    border: var(--l5r4-border-width-thin) solid var(--color-header-background);
+    border: var(--l5r4-border-width-thin) solid var(--l5r4-color-header);
     height: 64px;
     overflow: hidden;
     position: relative;
-    transition: all 150ms ease-out;
 
     .l5r4-rank-control-under {
       align-items: center;
-      color: var(--color-text-primary);
+      color: var(--l5r4-color-text);
       display: flex;
       flex-direction: column;
       font-weight: bold;
@@ -76,10 +74,10 @@
 
     .l5r4-rank-control-value {
       align-items: center;
-      background: var(--color-header-background);
+      background: var(--l5r4-color-header);
       border: none;
       border-radius: 0;
-      color: var(--color-light-1);
+      color: var(--l5r4-color-text-on-header);
       cursor: pointer;
       display: flex;
       flex-direction: column;
