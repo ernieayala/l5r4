@@ -70,6 +70,8 @@ function onUpdateActor(actor, _changes, options) {
   if (!changes.length) {
     return;
   }
+  // Under reduced motion the number appears and fades where it is, with no travel (motion.md rule 5)
+  const reduced = window.matchMedia("(prefers-reduced-motion: reduce)").matches;
   for (const token of actor.getActiveTokens(true)) {
     if (!token.visible || token.document.isSecret) {
       continue;
@@ -82,12 +84,12 @@ function onUpdateActor(actor, _changes, options) {
         {
           anchor: CONST.TEXT_ANCHOR_POINTS.CENTER,
           direction: CONST.TEXT_ANCHOR_POINTS.TOP,
-          distance: 2 * token.h,
+          distance: reduced ? 0 : 2 * token.h,
           fontSize: 28,
           fill: COLORS[id][delta > 0 ? "up" : "down"],
           stroke: 0x000000,
           strokeThickness: 4,
-          jitter: 0.25
+          jitter: reduced ? 0 : 0.25
         }
       );
     });

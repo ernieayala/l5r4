@@ -357,6 +357,38 @@ export function registerTableToolsTests(quench) {
             }
           })
         );
+
+        // docs/design-system/foundations/motion.md rule 5
+        it(
+          "should float the number in place, without travel or jitter, under reduced motion",
+          clean(async function () {
+            this.timeout(10_000);
+            const { actor } = await actingPC();
+            const options = [];
+            const scrolling = canvas.interface.createScrollingText;
+            canvas.interface.createScrollingText = (origin, text, opts) => {
+              options.push(opts);
+              return Promise.resolve();
+            };
+            const matchMedia = window.matchMedia;
+            const setting = game.settings.get(SYS_ID, "floatingNumbers");
+            try {
+              await game.settings.set(SYS_ID, "floatingNumbers", true);
+              window.matchMedia = query => ({
+                ...matchMedia.call(window, query),
+                matches: query.includes("prefers-reduced-motion: reduce")
+              });
+              await actor.update({ "system.suffered": 3 });
+              assert.isNotEmpty(options);
+              assert.equal(options[0].distance, 0, "no travel");
+              assert.equal(options[0].jitter, 0, "no jitter");
+            } finally {
+              window.matchMedia = matchMedia;
+              canvas.interface.createScrollingText = scrolling;
+              await game.settings.set(SYS_ID, "floatingNumbers", setting);
+            }
+          })
+        );
       });
     },
     { displayName: "L5R4: Table tools" }
