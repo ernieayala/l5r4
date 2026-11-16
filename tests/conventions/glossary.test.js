@@ -4,6 +4,7 @@ import {
   escapeRegExp,
   getRepoTree,
   lineOf,
+  parseJs,
   registerConventionSuite,
   tableAfter
 } from "../../tools/conventions/shared.mjs";
@@ -118,15 +119,35 @@ function schemaFieldsOf() {
 }
 
 /**
- * The identifiers of a source text, comments left out.
+ * A text with the given ranges blanked, newlines kept, so offsets and line numbers stay where they were.
+ * @param {string} text - The text
+ * @param {[number, number][]} ranges - Start and end offsets
+ * @returns {string} The text with each range blanked
+ */
+function blanked(text, ranges) {
+  let out = text;
+  for (const [start, end] of ranges) {
+    out = out.slice(0, start) + out.slice(start, end).replace(/[^\n]/g, " ") + out.slice(end);
+  }
+  return out;
+}
+
+/**
+ * The identifiers of a source text, comments left out and string contents kept (a data path such as
+ * "system.woundLvl" names a field). JavaScript comments come from the parser, since a pattern cannot tell a `/*` in a
+ * line comment, or a `//` in a string, from a comment; a template's comments are Handlebars comments only.
  * @param {string} text - JavaScript or a template
+ * @param {string} path - The file's path, which tells the two apart
  * @returns {{name: string, index: number}[]} Each identifier and its offset
  */
-function identifiersOf(text) {
-  const code = text
-    .replace(/\/\*[\s\S]*?\*\//g, comment => comment.replace(/[^\n]/g, " "))
-    .replace(/\/\/[^\n]*/g, comment => " ".repeat(comment.length))
-    .replace(/\{\{!--[\s\S]*?--\}\}/g, comment => comment.replace(/[^\n]/g, " "));
+function identifiersOf(text, path) {
+  const comments = path.endsWith(".hbs")
+    ? [...text.matchAll(/\{\{!--[\s\S]*?--\}\}|\{\{![\s\S]*?\}\}/g)].map(match => [
+        match.index,
+        match.index + match[0].length
+      ])
+    : (parseJs(text)?.comments ?? []).map(comment => comment.range);
+  const code = blanked(text, comments);
   return [...code.matchAll(/[A-Za-z_$][\w$]*/g)].map(match => ({
     name: match[0],
     index: match.index
@@ -196,7 +217,7 @@ const RULES = {
       ...tree.files("templates", /\.hbs$/)
     ].flatMap(path => {
       const text = tree.text(path);
-      return identifiersOf(text).flatMap(({ name, index }) => {
+      return identifiersOf(text, path).flatMap(({ name, index }) => {
         const banned = isFixed(name) ? null : bannedIn(name);
         return banned
           ? [`${path}:${lineOf(text, index)}: ${name} uses the banned stem ${banned}`]
@@ -242,5 +263,31 @@ describe("Glossary stems", () => {
     expect(bannedIn("fearTN")).toBe("TN");
     expect(bannedIn("saveTn")).toBeNull();
     expect(bannedIn("tnBase")).toBeNull();
+  });
+});
+
+describe("Glossary identifiers", () => {
+  it("should read the code after a line comment that holds a block-comment opener", () => {
+    const names = identifiersOf("// lang/*.json\nconst woundLvls = 1;\n/* end */\n", "a.js").map(
+      ({ name }) => name
+    );
+    expect(names).toContain("woundLvls");
+    expect(names).not.toContain("lang");
+  });
+
+  it("should read the code after a string that holds //", () => {
+    const names = identifiersOf('const url = "https://x"; const woundLvls = 1;\n', "a.js").map(
+      ({ name }) => name
+    );
+    expect(names).toContain("woundLvls");
+  });
+
+  it("should leave a template's comments out and keep its text", () => {
+    const names = identifiersOf(
+      '{{!-- woundLvls --}}<a href="https://x">armorTN</a>\n',
+      "a.hbs"
+    ).map(({ name }) => name);
+    expect(names).not.toContain("woundLvls");
+    expect(names).toContain("armorTN");
   });
 });
