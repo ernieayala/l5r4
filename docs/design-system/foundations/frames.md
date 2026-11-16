@@ -22,12 +22,12 @@ A shadow's color is one of color.md's shadow roles, `--l5r4-color-shadow` (black
 `--l5r4-color-shadow-strong` (black); frames.md sets only the offsets and blur around it.
 
 A square corner is `border-radius: 0` and needs no token: the mask buttons and the Trait roll button set it to clear
-core's `4px` button corner (`_animations.scss:14`, `:35`, `:78`; `_traits-rings.scss:196`, `:222`).
+core's `4px` button corner (`_button.scss:11`, `:33`; `_rank-control.scss:68`; `_traits-rings.scss:217`, `:242`).
 
 The parchment backdrop behind each Ring rank medallion reads two color.md tokens, set per theme on each themed element:
 `--l5r4-image-ring-rank-backdrop` (core's `ui/parchment.jpg` in light, `none` in dark) and
 `--l5r4-color-ring-rank-backdrop` (`transparent` in light, `--color-cool-5-90` in dark). color.md lists their values
-and their rename from `--l5r4-ring-rank-backdrop-image` and `--l5r4-ring-rank-backdrop-color`.
+and their old names.
 
 ## Elevation
 

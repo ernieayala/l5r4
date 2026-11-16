@@ -4,15 +4,15 @@ The card the roll pipeline posts for every Skill, Trait, Ring, spell, attack, an
 modifiers that applied, the dice, the outcome against the TN, the notes the roll's rules add, and the buttons for what
 comes next. It is a [chat card](chat-card.md) on a `roll` ChatMessage, whose `system` holds the whole roll context.
 
-| Item         | Detail                                                                                                                                                                                             |
-| ------------ | -------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| Template     | `templates/chat/check.hbs`, `CHAT_TEMPLATES.checkCard`, renamed `templates/chat/check.hbs`: chat templates take no `-card` suffix ([naming.md](../../code-system/naming.md#templates-and-actions)) |
-| Rendered by  | `renderCheckCard(system, roll, { actorId })` (`module/services/dice/check/roll-check.js:623-646`)                                                                                                  |
-| Posted by    | `rollCheck` with `roll.toMessage({ type: "roll", system, speaker, content })` (`roll-check.js:543-549`)                                                                                            |
-| Wired by     | `bindCheckCard` (`module/services/dice/check/chat-actions.js:229-247`), `bindAttackCard` and `bindDamageCards` (`module/services/combat/index.js:67-68`)                                           |
-| Context menu | Re-roll and keep the better, Contested Roll (`chat-actions.js:255-280`)                                                                                                                            |
-| SCSS         | Now `scss/components/_chat-card.scss:24-45`; `scss/components/_check-card.scss` (target), under the fixed root `.l5r4-check`, which also holds the dropped-dice mark ([dice row](dice-row.md))     |
-| Quench       | `l5r4-enhanced.roll-pipeline`, `l5r4-enhanced.combat`                                                                                                                                              |
+| Item         | Detail                                                                                                                                                                                               |
+| ------------ | ---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| Template     | `templates/chat/check.hbs`, `CHAT_TEMPLATES.checkCard`; chat templates take no `-card` suffix ([naming.md](../../code-system/naming.md#templates-and-actions))                                       |
+| Rendered by  | `renderCheckCard(system, roll, { actorId })` (`module/services/dice/check/roll-check.js:623-646`)                                                                                                    |
+| Posted by    | `rollCheck` with `roll.toMessage({ type: "roll", system, speaker, content })` (`roll-check.js:543-549`)                                                                                              |
+| Wired by     | `bindCheckCard` (`module/services/dice/check/chat-actions.js:218-236`), `bindAttackCard` (`module/services/combat/attack-card.js:15`) and `bindDamageCards` (`module/services/combat/damage.js:123`) |
+| Context menu | Re-roll and keep the better, Contested Roll (`chat-actions.js:244-269`)                                                                                                                              |
+| SCSS         | Now `scss/components/_chat-card.scss:24-45`; `scss/components/_check-card.scss` (target), under the fixed root `.l5r4-check`, which also holds the dropped-dice mark ([dice row](dice-row.md))       |
+| Quench       | `l5r4-enhanced.roll-pipeline`, `l5r4-enhanced.combat`                                                                                                                                                |
 
 ## Anatomy
 
@@ -31,13 +31,13 @@ All classes on this card are fixed names ([chat card](chat-card.md#fixed-names))
 
 | Button                      | Action                          | Shown when                                                                                                 | Runs                                                    |
 | --------------------------- | ------------------------------- | ---------------------------------------------------------------------------------------------------------- | ------------------------------------------------------- |
-| Roll Contested Strength     | `combat-contest`                | A hit with a target and Knockdown or Disarm                                                                | `module/services/combat/index.js:25`                    |
-| Start grapple with {target} | `grapple-start`                 | A hit with a target and the Grapple maneuver                                                               | `module/services/combat/index.js:29`                    |
-| Apply to {target}           | `damage-apply-target`           | A damage roll with a target                                                                                | `module/services/combat/damage.js:329-332`              |
-| Apply to selected           | `damage-apply-selected`         | Every damage roll                                                                                          | `damage.js:333-335`                                     |
-| {effect} on {target}        | `apply-condition`, `data-index` | A success with ApplyCondition rules, one button per condition                                              | `chat-actions.js:237-242`                               |
-| Damage roll ({weapon})      | `check-damage`                  | A hit that is not a grapple                                                                                | `chat-actions.js:233-236`; Shift+click skips the dialog |
-| Honor Roll                  | `honor-roll`                    | A failed Skill, Trait, Ring, or spell roll with the Honor Roll setting on (`game-rules/43_honor.md, p.92`) | `chat-actions.js:243-246`                               |
+| Roll Contested Strength     | `combat-contest`                | A hit with a target and Knockdown or Disarm                                                                | `module/services/combat/attack-card.js:19`              |
+| Start grapple with {target} | `grapple-start`                 | A hit with a target and the Grapple maneuver                                                               | `module/services/combat/attack-card.js:23`              |
+| Apply to {target}           | `damage-apply-target`           | A damage roll with a target                                                                                | `module/services/combat/damage.js:130-133`              |
+| Apply to selected           | `damage-apply-selected`         | Every damage roll                                                                                          | `damage.js:134-136`                                     |
+| {effect} on {target}        | `apply-condition`, `data-index` | A success with ApplyCondition rules, one button per condition                                              | `chat-actions.js:225-230`                               |
+| Damage roll ({weapon})      | `check-damage`                  | A hit that is not a grapple                                                                                | `chat-actions.js:221-224`; Shift+click skips the dialog |
+| Honor Roll                  | `honor-roll`                    | A failed Skill, Trait, Ring, or spell roll with the Honor Roll setting on (`game-rules/43_honor.md, p.92`) | `chat-actions.js:231-234`                               |
 
 ## Variants
 

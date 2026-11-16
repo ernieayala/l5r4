@@ -8,7 +8,7 @@ rules a card around it follows.
 | Item        | Detail                                                                                                                                                                                               |
 | ----------- | ---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
 | Template    | Core's `resources/app/templates/dice/roll.hbs` and `resources/app/templates/dice/tooltip.hbs`, rendered by `Roll#render()`                                                                           |
-| Inserted at | `{{{roll}}}` in `templates/chat/check.hbs:10`, from `roll: await roll.render()` (`module/services/dice/check/roll-check.js:637`); `templates/chat/weapon-chat.hbs:2` on cards posted before 4.0.0    |
+| Inserted at | `{{{roll}}}` in `templates/chat/check.hbs:10`, from `roll: await roll.render()` (`module/services/dice/check/roll-check.js:637`); `templates/chat/weapon.hbs:2` on cards posted before 4.0.0         |
 | Die         | `L5R4Die` (`module/services/dice/roll-keep-die.js:14`), registered as `CONFIG.Dice.terms.d`                                                                                                          |
 | Formula     | `poolFormula` (`module/utils/check.js:105-109`): `<roll>d10[r1][xa<n>]k<keep><±bonus>`                                                                                                               |
 | SCSS        | Core's `.dice-roll` and `.dice-tooltip` rules (`foundry2.css:5597-5738`). The dropped-dice mark (DR5) sits in `scss/components/_check-card.scss` (target), under the card's fixed root `.l5r4-check` |

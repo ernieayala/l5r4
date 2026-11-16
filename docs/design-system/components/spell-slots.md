@@ -45,7 +45,7 @@ Order on the sheet: Water, Air, Fire, Earth, Void, as today.
 | At 0 or 9     | Nothing changes and the press does nothing, as today                                     | None              |
 | Read-only     | Core disables the button on a sheet the viewer cannot edit (`button.md` B8)              | Core's `disabled` |
 
-The cursor reads core's pointer, not the Shift-held cursor (`--conditional-cursor`), because a slot steps without Shift.
+The cursor is the default and turns to the pointer while Shift is held (`is-shift-held`, `scss/components/_section.scss`), though a slot steps without Shift.
 
 ## Tokens
 

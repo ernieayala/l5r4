@@ -39,7 +39,8 @@ Conforming, `tests/unit/utils/check.test.js:1-14`: `buildPool` from `module/util
 `tests/unit/utils/check.test.js`.
 
 Not conforming (modeled): a test that copies the function it checks into the test file and imports no module file;
-`tests/unit/services/formatter.test.js` for `module/services/xp/formatter.js`, which drops the `xp/` folder.
+a test of `module/services/xp/formatter.js` filed as `formatter.test.js` straight under `tests/unit/services/`,
+which drops the `xp/` folder.
 
 ### Quench
 

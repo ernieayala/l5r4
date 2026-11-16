@@ -9,7 +9,7 @@ own page in `components/`; this page sets how they fit together and the rules th
 | Classes    | `L5R4PcSheet` (`module/sheets/pc-sheet.js`), `L5R4NpcSheet` (`module/sheets/npc-sheet.js`), both over `BaseActorSheet` (`module/sheets/base-actor-sheet.js`); `L5R4ItemSheet` (`module/sheets/item-sheet.js`)                                                                                             |
 | Templates  | `templates/actor/pc.hbs`, `npc.hbs`, `pc-limited.hbs`, `npc-limited.hbs`, and `templates/actor/_partials/`; the item sheet's parts in `templates/item/_partials/`, with `templates/item/_type-details/<subtype>.hbs` and `_type-modifiers/<subtype>.hbs`                                                  |
 | Partials   | Registered by path in `module/setup/preload-templates.js:43-174`                                                                                                                                                                                                                                          |
-| SCSS       | `scss/layout/_actor-layout.scss`, `_sidebar.scss`, `_item-layout.scss` (grids); `scss/features/_pc-info.scss` (header); `scss/components/_section.scss`, `_item-lists.scss`, `_forms.scss`, `_grids.scss` (blocks)                                                                                        |
+| SCSS       | `scss/sheets/_actor-sheet.scss`, `_item-sheet.scss` (the window); `scss/layout/_actor-layout.scss`, `_sidebar.scss`, `_item-layout.scss` (grids); `scss/features/_pc-info.scss` (header); `scss/components/_section.scss`, `_item-row.scss`, `_form-field.scss`, `_grid.scss` (blocks)                    |
 | Tokens     | `--l5r4-space-section`, `--l5r4-space-card`, `--l5r4-space-gap`, `--l5r4-space-gap-tight`; `--l5r4-size-portrait`, `--l5r4-size-column-*`; `--l5r4-color-header`, `--l5r4-color-text-on-header`, `--l5r4-color-panel`, `--l5r4-color-row-alt`, `--l5r4-color-line`, `--l5r4-color-text`; `--l5r4-state-*` |
 | Components | Section and section title, expand control, sort header, item row and item list, tabs, item header, Ring and Trait block, rank control, Void Point dots, Wound track, Initiative block, Armor TN block, Fear block, spell slots, button, icon button, inline control, form field                           |
 | Checks     | `tests/conventions/templates.test.js`, `tests/conventions/actions.test.js`, `tests/conventions/styles.test.js`, Stylelint, the `l5r4-enhanced.design-gallery` Quench batch; "review" where no tool can judge                                                                                              |
@@ -243,8 +243,10 @@ classes item cards post to chat stay as they are. A component's styles sit under
 
 Conforming, `scss/apps/_effect-panel.scss:6-60`: every rule sits under `.l5r4-effect-panel`.
 
-Non-conforming, `scss/components/_section.scss` and `_item-lists.scss`: rules scoped under `.l5r4.pc` and `.l5r4.npc`,
-so the XP manager copies `.title` (`scss/apps/_xp-manager.scss:39-46`) to get the same look.
+Non-conforming (modeled): a section rule scoped under `.l5r4.pc` and `.l5r4.npc`, so a window outside the sheet copies
+its look. Under the window scope today, for want of an `l5r4-` class on the element: `scss/sheets/_actor-sheet.scss`,
+`scss/sheets/_item-sheet.scss`, and `scss/features/_traits-rings.scss` (`docs/code-system/templates-and-styles.md`,
+Rules and selectors).
 
 ### 8. Tabs use core's tab markup with a kebab-case action
 
@@ -302,7 +304,7 @@ a `{{!-- --}}` comment at the partial's top (`docs/code-system/templates-and-sty
 | ----------------------- | ------------------------------------------------------------------------------------------------------------------ |
 | Actor and item name     | An input: a long name scrolls inside it. The Limited heading wraps                                                 |
 | Section title           | One line (`foundations/typography.md`, Wrapping); a label that cannot fit at the sheet's default width is too long |
-| Item row name           | Wraps (`scss/components/_item-row.scss:173`); the row grows, its controls stay at the end                          |
+| Item row name           | Wraps (`scss/components/_item-row.scss:197`); the row grows, its controls stay at the end                          |
 | Clan, School            | Text in the header field; wraps inside its box                                                                     |
 | Emphases on a Skill row | Joined with ", " and wraps (`templates/cards/skill.hbs:25-31`)                                                     |
 | Notes and descriptions  | Core's editor; the section grows                                                                                   |

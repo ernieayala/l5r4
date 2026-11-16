@@ -432,6 +432,34 @@ Code wave, part 2 (D2: identifier names), each by decision 17:
 - Left for review: `logError`, `warnVoidLimit`, `exportItemFolder`, `settleStarts` need verbs naming.md does not list (log, warn, export, wait); `freeRaisesToTN` mirrors a stored message field; `TRAITS` / `RINGS` in rule-summary.js are constants flagged as state because a bare `new Set` is not frozen (wrap them, as `STANCE_IDS` is).
 - Full Quench 1708 passed; the one failure was core's `sounds/dice.wav` load error in `sheets-and-apps`, which passed on rerun (35 of 35).
 
+Tests wave (`a4712fb`): the five batches registered inside `tests/quench/index.js` have their own files; unit tests mirror their module; the Insight Rank cases test `getInsightRank` in place of a copy of it; the smoke test (it tested Vitest) and two fixtures nothing imported are removed. tests/ checks at 0.
+
+Code wave, part 3 (D3a: presentation in JavaScript, `87d8db9`), each by decision 17:
+
+- Markup built in JavaScript renders from templates: `templates/dialogs/confirm-dialog.hbs`, `choice-dialog.hbs`, `remove-emphasis-dialog.hbs`, `templates/chat/note.hbs`, `contest.hbs`, `templates/apps/compendium-browser-open.hbs`, each with an `l5r4-` root class. `l5r4-chat-note` is stored in posted messages, so it joins naming.md's fixed chat-card classes.
+- Selectors read `data-*`: `data-sort-header`, `data-trait-block`, `data-section-title`, `data-link-request` added to the templates. The Shift-held cursor is an `is-shift-held` state class in place of a `.style` write. Names inserted into markup are now escaped.
+- Notification literals became keys in the voice rules' form ("Failed to open armor configuration", "{name} spent a Void Point: Armor TN +10 for 1 Round"); a rule model's validation message names its form in words in place of `<ring>` placeholders, which the HTML-string check read as markup.
+- core's compendium sidebar header carries no `data-*`, so `.header-actions` stays with a disable comment naming core's template; templates-and-styles.md gains that row.
+- `sheets-and-apps` mutes core's dice sound for the batch: its burst of roll messages made Chrome fail to load the audio, an error core logs, which failed the batch's clean-console check about one run in two. Core plays a message's sound only when it has one (`chat.mjs:1094`). Full Quench before the change: 1720 passed, 1 failed (that error); the batch after it: 35 of 35.
+
+Code wave, part 4 (D3b: structure), each by decision 17:
+
+- Hooks: every `Hooks.on` / `Hooks.once` outside `module/hooks/` became an exported handler wired in `module/hooks/register-all.js`, with its hook name, `on` or `once`, and order kept (checked by running HEAD's and the new `registerAllHooks` against stubbed globals and comparing the hook and handler sequences). The animation hooks stay conditional on Sequencer and JB2A; the damage and flow GM queries register in the entry file's `init` beside the other queries. New batch `l5r4-enhanced.hooks.register-all` fails when a handler is missing or out of order.
+- Options objects for functions over three parameters; a caller-fixed arity (core hook, `_prepareSubmitData`, the sheet handlers' `(context, event, element, delta)`) keeps its shape with a disable comment naming the caller.
+- Layers: data models no longer import documents (`L5R4Actor.prepareSubtypeData()` runs the PC or NPC preparation, in the same order); `active-effect.js` reaches the UI through an `onImmuneStatus` seam the entry file sets; section state and sort preferences moved to `module/services/`. `module/utils/localization.js` reads `game.i18n` by design (localization.md names it the API), recorded in modules.md and exempted in `eslint.config.mjs`.
+- Module shape: `module/config/` holds values only (`TEMPLATE()` removed; `getIconPath` in `module/utils/icons.js`; `PHYSICAL_TN_RULES` a frozen value, identical config snapshot before and after); no barrels or entry files; `weapon-chat.hbs` is `weapon.hbs`; the three `console.log` banners in the entry file are gone.
+- The Quench loader in `quenchReady` stays a dynamic import, since the release zip ships without `tests/`; modules.md records it.
+- For review: sheets import app classes (8, `app-launcher-handler.js`, `item-sheet.js`, `npc-sheet.js`), which CLAUDE.md Layers does not list. The docs name no resolution; a registry the entry file fills, or a docs change allowing it, is Ernie's call.
+
+SCSS wave (C3), part 3, one owner, by decision 17:
+
+- Component rules sit under their own block class, not `.l5r4.pc` / `.l5r4.npc` / `.l5r4.item`; window rules moved to `scss/sheets/`. Core's CSS loads in cascade layers below the system's, so lower specificity loses nothing to core; three orderings inside the system's own CSS were fixed (row rules under the list, since a row's card root also posts to chat; the even-row color after the row rule; the sheet field reset in `:where()`). A computed-style snapshot of 6,109 elements per theme (PC, NPC, weapon and skill sheets, XP manager, gallery; the PC's other windows; the chat log) matched before and after, except the docs-mandated change below.
+- Visible, by the docs: disabled roll faces read `--l5r4-state-disabled-opacity` (0.75) and skip the hover sprite (states.md Disabled). Item-row controls and rank arrows show on `:focus-within`, so after a mouse click they stay shown until focus leaves the row.
+- Size tokens declared with their readers (portrait, medallion, ring-rank, trait-rank, item-icon, rank-block, void-point, stepper, target, column widths); `--conditional-cursor` replaced by `cursor: pointer` under `.is-shift-held`; two unused keyframes removed.
+- Not taken (decision 9): Wound track rows keep 25px (the 24px target token would take 8px off the track); the wound configuration window's manual table keeps its look (`:not(:where(...))` on the grid rule) where the grid's frame would change row height and text size.
+- Left: `_chat-card.scss` styles posted cards that share no `l5r4-` root; the window and `traits-rings` scopes wait on template classes (the templates wave); class-pattern hits on core and fixed classes.
+- The spell slots' cursor stays the default and turns to the pointer with Shift held, as the code had it; spell-slots.md said the pointer always. For review.
+
 ### Progress (handoff, 2026-11-15)
 
 | Step | State |
@@ -456,7 +484,7 @@ Code wave, part 2 (D2: identifier names), each by decision 17:
 | Wave C (templates, part 1) | C1 (attributes: inert icons, alt text, `data-tooltip` + `aria-label` in place of `title`, comments, localized text, `aria-expanded`) and C2 (native `<button>` controls, `l5r4-` block classes, their SCSS) by file partition; `lang/` keys sorted in all six files. Decisions under **Template wave** above. Baseline total 5457 → 4447, 44 → 54 rules strict; `templates/` title-attribute, icon-inert, img-alt, icon-button-name, html-comment, literal-text, expand-aria, inline-style, modifier-without-block at 0, `lang/key-order` at 0. Full Quench 1709 passed, 0 failed: the gallery's accessible-name and focus tests pass in both themes for the first time. Still in templates: repeated-markup 84, action-element 21, class-prefix 38, root-class 2 |
 | Next | Waves for templates/SCSS/copy and for `module/` code, each with the baseline lowered and the gate and Quench after; then switch checks to strict; Ernie's visual sign-off. Baselines are lowered with scratchpad `lower-baseline.mjs` (runs the checks with `--silent=false`, never raises a count) |
 | Exceptions for Ernie | 14 files over their size limit are in the baseline without a reason; `tests/conventions/exceptions.json` holds one (`module/data/rules/rule-models.js`). Each needs a reason or a split (decision 3) |
-| Found on the way | #76: the item sheet image opened no file picker; fixed in the working tree (`data-action="editImage"`, a `sheets-and-apps` test that failed first), its own commit. `templates/chat/weapon-chat.hbs` is preloaded but never rendered: dead, removed in the fix waves. `damage-result.hbs` and `flow-card.hbs` are not preloaded, which costs only a first-render fetch |
+| Found on the way | #76: the item sheet image opened no file picker; fixed in the working tree (`data-action="editImage"`, a `sheets-and-apps` test that failed first), its own commit. `templates/chat/weapon.hbs` (was `weapon-chat.hbs`) is rendered only by the design gallery, as the weapon card posted before 4.0.0. `damage-result.hbs` and `flow-card.hbs` are not preloaded, which costs only a first-render fetch |
 | Gate after the npm update | Green: Vitest 932, ESLint 0 errors, Stylelint, Prettier, build:css, deps:circular, `coverage:check` 0 gaps |
 
 ### Still open

@@ -41,7 +41,7 @@ nothing from that layer.
 | 4 Documents | `module/documents/`                                                      | `import { enhanceItemSheetData } from "../documents/item/integration/sheet-data.js";` (`module/sheets/pc-sheet.js:55`) |
 | 5 Services  | `module/services/`                                                       | `import { rollCheck } from "../dice/check/roll-check.js";` (`module/services/combat/damage.js:23`)                     |
 | 6 Mixins    | `module/mixins/`                                                         | `import { DebouncedFieldMixin } from "../mixins/debounced-field-mixin.js";` (`module/apps/armor-config.js:33`)         |
-| 7 Apps      | `module/apps/`                                                           | `import { initializeEffectPanel } from "../apps/effect-panel.js";` (`module/hooks/register-all.js:30`)                 |
+| 7 Apps      | `module/apps/`                                                           | `import EffectPanel from "../apps/effect-panel.js";` (`module/hooks/register-all.js:40`)                               |
 | 8 Sheets    | `module/sheets/`                                                         | `import L5R4ItemSheet from "../module/sheets/item-sheet.js";` (`dist/l5r4-enhanced.js:57`)                             |
 | 9 Setup     | `module/setup/`                                                          | `import { runMigrations } from "../module/setup/migrations.js";` (`dist/l5r4-enhanced.js:62`)                          |
 | 10 Hooks    | `module/hooks/`                                                          | `import { registerAllHooks } from "../module/hooks/register-all.js";` (`dist/l5r4-enhanced.js:70`)                     |
@@ -54,22 +54,24 @@ Which layer may import which is CLAUDE.md **Layers**; this page sets only the or
 
 ### Rules
 
-| Rule                                                                                                                                                                                                        | Enforced by                                                           |
-| ----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- | --------------------------------------------------------------------- |
-| Groups appear in the order of the table above                                                                                                                                                               | `l5r4/import-order` (`tools/eslint/`)                                 |
-| One block: no comment labels and no blank lines between groups. Area majority: 51 of 55 files in `module/data/` and `module/documents/` and 21 of 34 in `module/sheets/` and `module/apps/` write no labels | `l5r4/import-order` (`tools/eslint/`)                                 |
-| Each import names the file itself with its `.js` extension; no folder barrels                                                                                                                               | `l5r4/import-order` (`tools/eslint/`)                                 |
-| Imports are static. No `await import()` inside a function                                                                                                                                                   | ESLint core `no-restricted-syntax` (`ImportExpression`)               |
-| A file imports only the layers CLAUDE.md **Layers** allows it                                                                                                                                               | ESLint `no-restricted-imports` per directory, `npm run deps:circular` |
-| No file imports itself in a cycle                                                                                                                                                                           | `npm run deps:circular`                                               |
+| Rule                                                                                                                                                                                                                                       | Enforced by                                                           |
+| ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------ | --------------------------------------------------------------------- |
+| Groups appear in the order of the table above                                                                                                                                                                                              | `l5r4/import-order` (`tools/eslint/`)                                 |
+| One block: no comment labels and no blank lines between groups. Area majority: 51 of 55 files in `module/data/` and `module/documents/` and 21 of 34 in `module/sheets/` and `module/apps/` write no labels                                | `l5r4/import-order` (`tools/eslint/`)                                 |
+| Each import names the file itself with its `.js` extension; no folder barrels                                                                                                                                                              | `l5r4/import-order` (`tools/eslint/`)                                 |
+| Imports are static. No `await import()` inside a function                                                                                                                                                                                  | ESLint core `no-restricted-syntax` (`ImportExpression`)               |
+| One exception: the entry file loads `tests/quench/index.js` with `await import()` in `quenchReady`, since the release zip ships without `tests/`; the line carries an `eslint-disable-next-line no-restricted-syntax` comment that says so | review                                                                |
+| A file imports only the layers CLAUDE.md **Layers** allows it                                                                                                                                                                              | ESLint `no-restricted-imports` per directory, `npm run deps:circular` |
+| Utils read no Foundry global, except `module/utils/localization.js`, which is the `T` / `F` / `R` API over `game.i18n` that `docs/design-system/content/localization.md` names                                                             | ESLint `no-restricted-globals` per directory, with that file exempt   |
+| No file imports itself in a cycle                                                                                                                                                                                                          | `npm run deps:circular`                                               |
 
-| Rule           | Conforming                                                                                    | Non-conforming                                                                                                                                            |
-| -------------- | --------------------------------------------------------------------------------------------- | --------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| Group order    | `module/services/combat/damage.js:11-24`: config, utils, then services                        | `module/services/dice/check/collect.js:15`: the config import `game-mechanics.js` after four utils imports                                                |
-| Group order    | `module/utils/status-data.js:8-10`                                                            | `module/documents/actor/rules.js:20-33`: the data import first, then utils, then the config import last                                                   |
-| One block      | `module/services/combat/damage.js:11-24`: no labels, no blank lines                           | `module/sheets/pc-sheet.js:42-57`: `// Config`, `// Utils`, `// Documents`, and `// Local` labels with blank lines, and services imports under `// Utils` |
-| Static imports | `module/sheets/handlers/pc-context-builder.js:27` imports `utils/section-state.js` statically | `module/services/rest.js:213` loads `config/templates.js` with `await import()`                                                                           |
-| Layers         | `module/services/dice/check/roll-check.js:13-34` imports config, utils, and services only     | `module/sheets/handlers/app-launcher-handler.js:27-32`: a sheet handler imports apps                                                                      |
+| Rule           | Conforming                                                                                | Non-conforming                                                                                                                                            |
+| -------------- | ----------------------------------------------------------------------------------------- | --------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| Group order    | `module/services/combat/damage.js:11-24`: config, utils, then services                    | `module/services/dice/check/collect.js:15`: the config import `game-mechanics.js` after four utils imports                                                |
+| Group order    | `module/utils/status-data.js:8-10`                                                        | `module/documents/actor/rules.js:20-33`: the data import first, then utils, then the config import last                                                   |
+| One block      | `module/services/combat/damage.js:11-24`: no labels, no blank lines                       | `module/sheets/pc-sheet.js:42-57`: `// Config`, `// Utils`, `// Documents`, and `// Local` labels with blank lines, and services imports under `// Utils` |
+| Static imports | `module/services/rest.js:9` imports `config/templates.js` statically                      | A module loaded with `await import()` inside a function (modeled)                                                                                         |
+| Layers         | `module/services/dice/check/roll-check.js:13-34` imports config, utils, and services only | `module/sheets/handlers/app-launcher-handler.js:27-32`: a sheet handler imports apps                                                                      |
 
 ## Constants
 
@@ -81,12 +83,12 @@ Which layer may import which is CLAUDE.md **Layers**; this page sets only the or
 | A number the rules define lives in `module/config/` and is imported, never written as a literal. Majority: 69 rule constants in `module/config/` against 22 in `module/utils/` and `module/services/`  | review                                                                                  |
 | `module/config/` holds values only: no functions (CLAUDE.md **Layers**)                                                                                                                                | `l5r4/module-shape` (`tools/eslint/`)                                                   |
 
-| Rule            | Conforming                                                                                          | Non-conforming                                                                                                                                                     |
-| --------------- | --------------------------------------------------------------------------------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------ |
-| Frozen constant | `module/services/combat/damage.js:30`: `const DISARM_DAMAGE = Object.freeze({ roll: 2, keep: 1 });` | `module/config/sort-keys.js:44`: an exported constant object left unfrozen                                                                                         |
-| Module state    | `module/services/dice/resources/void-manager.js:52`: `actorLocks`                                   | `module/services/combat/flow.js:52`: the `FLOWS` registry, filled at run time by `defineFlow`                                                                      |
-| Rule numbers    | `module/services/combat/damage.js:13` imports `TN_PER_RAISE`                                        | `module/utils/check.js:149`: the literal `5` per Raise beside the `TN_PER_RAISE` constant                                                                          |
-| Values only     | `module/config/rule-keys.js:77`: `MANEUVERS`                                                        | `module/config/status-effects.js:26` (`physicalTnRules`), `module/config/icons.js:52` (`iconPath`), and `module/config/templates.js:45` (`TEMPLATE`) are functions |
+| Rule            | Conforming                                                                                          | Non-conforming                                                                                      |
+| --------------- | --------------------------------------------------------------------------------------------------- | --------------------------------------------------------------------------------------------------- |
+| Frozen constant | `module/services/combat/damage.js:30`: `const DISARM_DAMAGE = Object.freeze({ roll: 2, keep: 1 });` | `module/config/sort-keys.js:44`: an exported constant object left unfrozen                          |
+| Module state    | `module/services/dice/resources/void-points.js:18`: `actorLocks`                                    | `module/services/combat/flow.js:52`: the `FLOWS` registry, filled at run time by `defineFlow`       |
+| Rule numbers    | `module/services/combat/damage.js:13` imports `TN_PER_RAISE`                                        | `module/utils/check.js:149`: the literal `5` per Raise beside the `TN_PER_RAISE` constant           |
+| Values only     | `module/config/rule-keys.js:77`: `MANEUVERS`                                                        | A function exported from `module/config/` (modeled); `getIconPath` lives in `module/utils/icons.js` |
 
 ## Exports
 
@@ -105,13 +107,13 @@ default exports in `module/data/` and `module/documents/`, data models with thei
 | Every export has a caller in `module/` or `dist/l5r4-enhanced.js`; an export that only tests import is dead code | review                                |
 | A file that only re-exports another file does not exist                                                          | `tests/conventions/names.test.js`     |
 
-| Rule                | Conforming                                                                                                                           | Non-conforming                                                                                                                                                              |
-| ------------------- | ------------------------------------------------------------------------------------------------------------------------------------ | --------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| Default export      | `module/documents/actor.js:43` (`L5R4Actor`), `module/apps/xp-manager.js:44`, `module/services/dice/roll-keep-die.js:14` (`L5R4Die`) | `module/data/rules/RuleData.js`: a default export at 9 beside named exports at 29, 45, 53; `module/sheets/base-actor-sheet.js:62`: the sheets' base class as a named export |
-| Default import name | `dist/l5r4-enhanced.js:53`: `import L5R4Actor from "../module/documents/actor.js";`                                                  | `module/sheets/item-sheet.js:39` imports `EmphasisManagerApplication` as `EmphasisManager`                                                                                  |
-| `export function`   | `module/utils/check.js:51`: `export function buildPool`                                                                              | `module/utils/localization.js:51`, `77`, `137`: `T`, `F`, `R` as arrow constants                                                                                            |
-| Used exports        | `module/services/effects/apply.js:108` (`effectsOf`)                                                                                 | `module/services/xp/xp-calculator.js:30`: `mergeXpHistory` has no caller                                                                                                    |
-| No re-export files  | `module/setup/settings/register-all.js` registers the settings itself                                                                | `module/setup/register-settings.js:10`: a one-line re-export of `settings/register-all.js`                                                                                  |
+| Rule                | Conforming                                                                                                                           | Non-conforming                                                                                                                    |
+| ------------------- | ------------------------------------------------------------------------------------------------------------------------------------ | --------------------------------------------------------------------------------------------------------------------------------- |
+| Default export      | `module/documents/actor.js:43` (`L5R4Actor`), `module/apps/xp-manager.js:44`, `module/services/dice/roll-keep-die.js:14` (`L5R4Die`) | A default export beside named exports (modeled); `module/sheets/base-actor-sheet.js:29`: the sheets' base class as a named export |
+| Default import name | `dist/l5r4-enhanced.js:53`: `import L5R4Actor from "../module/documents/actor.js";`                                                  | A default import under a name other than the class's own (modeled)                                                                |
+| `export function`   | `module/utils/check.js:51`: `export function buildPool`                                                                              | `module/utils/localization.js:51`, `77`, `137`: `T`, `F`, `R` as arrow constants                                                  |
+| Used exports        | `module/services/effects/apply.js:108` (`effectsOf`)                                                                                 | `module/services/xp/calculator.js:27`: `buildMergedXpHistory` has no caller                                                       |
+| No re-export files  | `module/setup/settings/register-all.js` registers the settings itself                                                                | A one-line file that re-exports another file (modeled)                                                                            |
 
 ## One responsibility per file
 
@@ -125,7 +127,7 @@ A file does one job its layer owns. A second job, not a line count, is the reaso
 | Conforming                                                                                                     | Non-conforming                                                                                                                                          |
 | -------------------------------------------------------------------------------------------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------- |
 | `module/services/effects/apply.js`: applies status effects and registers the GM query that does it for players | `module/hooks/chat-damage-buttons.js:36-168`: hook routing and applying Wounds, spending Void Points, and posting notifications, which is Services work |
-| `module/services/dice/resources/void-manager.js`: one `withLock`                                               | `module/services/dice/resources/spell-slot-manager.js:49`: `withLock` copied from `void-manager.js:67` with its own lock map                            |
+| `module/services/dice/resources/void-points.js`: one `updateUnderLock`                                         | `module/services/dice/resources/spell-slots.js:164`: `updateUnderLock` copied from `void-points.js:207` with its own lock map                           |
 
 ## Size
 
@@ -165,27 +167,25 @@ name the outliers and nothing else.
 | A folder holds files; an empty folder does not exist                                                        | `tests/conventions/names.test.js` |
 | Constants live in `module/config/`, never in a `constants/` folder of another layer                         | `tests/conventions/names.test.js` |
 
-Entry files are split in `module/services/`: three folders have none, `combat/` has `index.js`, `animations/` has
-`initialize.js`. The majority (none) is the rule.
+No feature folder has an entry file: a service exports its hook handlers and `module/hooks/register-all.js` wires
+them (Stage 17 decision 16).
 
-| Rule                | Conforming                                                                       | Non-conforming                                                                                             |
-| ------------------- | -------------------------------------------------------------------------------- | ---------------------------------------------------------------------------------------------------------- |
-| Feature folder      | `module/services/xp/`: `xp-calculator.js`, `xp-formatter.js`, `xp-versioning.js` | none found                                                                                                 |
-| No entry file       | `module/services/effects/automation.js:164` registers the effects feature        | `module/services/combat/index.js`, `module/services/animations/initialize.js`                              |
-| Constants in Config | `module/config/rule-keys.js`                                                     | `module/documents/item/constants/item-types.js:92`: `CHAT_CARD_TEMPLATES` and `DEFAULT_ICONS` in documents |
+| Rule                | Conforming                                                                                              | Non-conforming                                            |
+| ------------------- | ------------------------------------------------------------------------------------------------------- | --------------------------------------------------------- |
+| Feature folder      | `module/services/xp/`: `xp-calculator.js`, `xp-formatter.js`, `xp-versioning.js`                        | none found                                                |
+| No entry file       | `module/services/effects/automation.js` exports its handlers; `module/hooks/register-all.js` wires them | An `index.js` that registers a feature's hooks (modeled)  |
+| Constants in Config | `module/config/rule-keys.js`, `module/config/item-types.js`                                             | A `constants/` folder under `module/documents/` (modeled) |
 
 ## Mixins
 
 A mixin is a function that takes a class and returns a subclass. Every mixin lives in `module/mixins/<name>-mixin.js`
-and exports `<Name>Mixin`, whichever layer uses it. The code splits one to one (`module/mixins/` and
-`module/sheets/mixins/`); `module/mixins/` is the pick because the other mixin's own `@module` tag
-(`mixins/keyboard-behavior`, `module/sheets/mixins/keyboard-behavior.js:28`) already names that folder.
+and exports `<Name>Mixin`, whichever layer uses it.
 
 | Rule                                                        | Enforced by                           |
 | ----------------------------------------------------------- | ------------------------------------- |
 | Mixin files live in `module/mixins/` and end in `-mixin.js` | `tests/conventions/names.test.js`     |
 | A mixin's import goes in the Mixins group                   | `l5r4/import-order` (`tools/eslint/`) |
 
-| Conforming                               | Non-conforming                              |
-| ---------------------------------------- | ------------------------------------------- |
-| `module/mixins/debounced-field-mixin.js` | `module/sheets/mixins/keyboard-behavior.js` |
+| Conforming                                                                           | Non-conforming                                      |
+| ------------------------------------------------------------------------------------ | --------------------------------------------------- |
+| `module/mixins/debounced-field-mixin.js`, `module/mixins/keyboard-behavior-mixin.js` | A mixin in a layer's own `mixins/` folder (modeled) |

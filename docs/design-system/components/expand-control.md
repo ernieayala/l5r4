@@ -23,10 +23,10 @@ renders again.
 
 ## Variants
 
-| Variant | Selects it                                    | Controls                               | State stored                                                           |
-| ------- | --------------------------------------------- | -------------------------------------- | ---------------------------------------------------------------------- |
-| Section | `data-action="expand-section"` in a title bar | The section's body                     | User flag per actor and `data-scope` (`module/utils/section-state.js`) |
-| Row     | `data-action="expand-item"` in a row          | The row's `l5r4-item-row-details` cell | None: the next render shows the row closed                             |
+| Variant | Selects it                                    | Controls                               | State stored                                                              |
+| ------- | --------------------------------------------- | -------------------------------------- | ------------------------------------------------------------------------- |
+| Section | `data-action="expand-section"` in a title bar | The section's body                     | User flag per actor and `data-scope` (`module/services/section-state.js`) |
+| Row     | `data-action="expand-item"` in a row          | The row's `l5r4-item-row-details` cell | None: the next render shows the row closed                                |
 
 A row with no details renders no expand control (the row lacks `-expandable`). Today the control renders on every row
 and CSS hides it (`_item-lists.scss:149-153`, `:192-194`); the target renders it only where it does something.

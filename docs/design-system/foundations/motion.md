@@ -8,11 +8,11 @@ What may move, how long it takes, and what it does when the user asks the system
 Declared on `:root` in `scss/base/_variables.scss`. Each duration token is set to `0ms` in the one reduced-motion block
 (rule 3).
 
-| Token                    | Value      | Use                                                                    | Replaces                                                                                                                       |
-| ------------------------ | ---------- | ---------------------------------------------------------------------- | ------------------------------------------------------------------------------------------------------------------------------ |
-| `--l5r4-duration-fast`   | `150ms`    | Hover and press feedback, rank step arrows sliding out                 | The nine `150ms` literals (`_ranks.scss:26`, `_traits-rings.scss:42-44`, `:172`, `:202`, `:272`, `_animations.scss:17`, `:56`) |
-| `--l5r4-duration-sprite` | `500ms`    | One pass of a brush-stroke sprite mask on a roll button or a rank name | `$mask-animation-duration` (`base/_variables.scss:34`) and the literal `0.5s` at `_traits-rings.scss:236`                      |
-| `--l5r4-easing-standard` | `ease-out` | Every transition                                                       | The `ease-out` keyword in every transition today                                                                               |
+| Token                    | Value      | Use                                                                     | Read at                                                                                                            |
+| ------------------------ | ---------- | ----------------------------------------------------------------------- | ------------------------------------------------------------------------------------------------------------------ |
+| `--l5r4-duration-fast`   | `150ms`    | Hover and press feedback, rank step arrows sliding out                  | `scss/components/_rank-control.scss:20-24`, `scss/features/_traits-rings.scss:49-52`, `:193`                       |
+| `--l5r4-duration-sprite` | `500ms`    | One pass of a brush-stroke sprite mask on a roll button or a rank block | `scss/components/_button.scss:45`, `scss/components/_rank-control.scss:83`, `scss/features/_traits-rings.scss:260` |
+| `--l5r4-easing-standard` | `ease-out` | Every transition                                                        | Each transition that reads `--l5r4-duration-fast`                                                                  |
 
 A sprite's timing function is `steps(N)`, where N is the sprite file's frame count less one: 29 for
 `assets/animation/urban-sprite.webp` (mask size `3000%`), 22 for `assets/animation/nature-sprite.webp` (mask size
@@ -21,28 +21,26 @@ token.
 
 ## What may animate
 
-| Motion                                  | Where                                                                                  | Now                                                                       | Reduced motion                                                                                  |
-| --------------------------------------- | -------------------------------------------------------------------------------------- | ------------------------------------------------------------------------- | ----------------------------------------------------------------------------------------------- |
-| Rank name hover and press               | `scss/features/_ranks.scss:26-35`                                                      | `all 150ms ease-out`: brightness, press scale                             | Instant: the hover and pressed looks (states.md) apply with no transition                       |
-| Rank step arrows slide out              | `scss/features/_traits-rings.scss:41-44`                                               | opacity, top, bottom, `150ms ease-out`                                    | Instant: the arrows appear at their open position                                               |
-| Ring image hover                        | `scss/features/_traits-rings.scss:163-173`                                             | `all 150ms ease-out` to `scale(1.1)`                                      | Instant                                                                                         |
-| Trait roll button                       | `scss/features/_traits-rings.scss:202`                                                 | `all 150ms ease-out`                                                      | Instant                                                                                         |
-| Trait roll sprite (urban)               | `scss/features/_traits-rings.scss:235-237`                                             | `mask-reverse-urban 0.5s steps(29) forwards`                              | The animation runs for `0ms` and holds its last frame, so the hovered look shows at once        |
-| Mask button and its sprite (urban)      | `scss/components/_animations.scss:17`, `:45-47`                                        | `all 150ms ease-out`; `mask-reverse-urban` sprite                         | Instant; sprite holds its last frame                                                            |
-| Rank name container and sprite (nature) | `scss/components/_animations.scss:56`, `:92-94`                                        | `all 150ms ease-out`; `mask-forward-nature` sprite                        | Instant; sprite holds its last frame                                                            |
-| Floating Wound and Void Point numbers   | `module/services/scrolling-text.js:69-82`                                              | Core's `createScrollingText`: 2000 ms, rises 2 token heights, jitter 0.25 | Target: `distance: 0` and `jitter: 0`, so the number fades in and out where it appears (rule 5) |
-| Stance and condition loops              | `module/services/animations/asset-library.js:54-204`, played by `animation-manager.js` | Sequencer persistent effects, when Sequencer and JB2A are active          | Target: not played; the token's status icon carries the state (rule 5)                          |
-| Attack animations                       | `module/services/animations/attack-animations.js`                                      | Sequencer one-shot on a hit                                               | Target: not played; the chat card carries the result (rule 5)                                   |
-| Loading spinner                         | Core's `fa-spin` (states.md, Loading)                                                  | Font Awesome spin                                                         | Font Awesome's own reduced-motion rule stops it (`public/fonts/fontawesome/css/all.min.css`)    |
+| Motion                                | Where                                                                                  | Now                                                                                                                        | Reduced motion                                                                               |
+| ------------------------------------- | -------------------------------------------------------------------------------------- | -------------------------------------------------------------------------------------------------------------------------- | -------------------------------------------------------------------------------------------- |
+| Rank block hover and press            | `scss/components/_rank-control.scss:20-33`                                             | `box-shadow`, `filter`, `outline`, `transform` over `--l5r4-duration-fast`: the hover and pressed looks, core's focus ring | Instant: the hover and pressed looks (states.md) apply with no transition                    |
+| Rank step arrows slide out            | `scss/features/_traits-rings.scss:49-52`                                               | `opacity`, `top`, `bottom` over `--l5r4-duration-fast`                                                                     | Instant: the arrows appear at their open position                                            |
+| Ring image hover                      | `scss/features/_traits-rings.scss:184-193`                                             | `transform` to `scale(1.1)` over `--l5r4-duration-fast`                                                                    | Instant                                                                                      |
+| Trait roll sprite (urban)             | `scss/features/_traits-rings.scss:259-262`                                             | `mask-reverse-urban` over `--l5r4-duration-sprite`, `forwards`; none on a disabled face                                    | The animation runs for `0ms` and holds its last frame, so the hovered look shows at once     |
+| Roll button sprite (urban)            | `scss/components/_button.scss:44-46`                                                   | `mask-reverse-urban` over `--l5r4-duration-sprite`, `forwards`; none on a disabled face                                    | As the Trait roll sprite                                                                     |
+| Rank block sprite (nature)            | `scss/components/_rank-control.scss:82-85`                                             | `mask-forward-nature` over `--l5r4-duration-sprite`, `forwards`                                                            | As the Trait roll sprite                                                                     |
+| Floating Wound and Void Point numbers | `module/services/scrolling-text.js:53-72`                                              | Core's `createScrollingText`: 2000 ms, rises 2 token heights, jitter 0.25                                                  | `distance: 0` and `jitter: 0`, so the number fades in and out where it appears (rule 5)      |
+| Stance and condition loops            | `module/services/animations/asset-library.js:54-204`, played by `status-animations.js` | Sequencer persistent effects, when Sequencer and JB2A are active                                                           | Target: not played; the token's status icon carries the state (rule 5)                       |
+| Attack animations                     | `module/services/animations/attack-animations.js`                                      | Sequencer one-shot on a hit                                                                                                | Target: not played; the chat card carries the result (rule 5)                                |
+| Loading spinner                       | Core's `fa-spin` (states.md, Loading)                                                  | Font Awesome spin                                                                                                          | Font Awesome's own reduced-motion rule stops it (`public/fonts/fontawesome/css/all.min.css`) |
 
-Two declarations in the inventory animate nothing a template renders: `.void-points-amount`
-(`_traits-rings.scss:272`) and `.clear-btn` (`_forms.scss:51`, `250ms`). The keyframes `mask-forward-urban`
-(`_animations.scss:100`) and `mask-reverse-nature` (`:130`) are never used. These are removed with their selectors, so
-no token exists for `250ms`.
+The keyframes in `scss/components/_animations.scss` are the two the sprites play, `mask-reverse-urban` and
+`mask-forward-nature`. No duration other than the two tokens exists.
 
-What does not animate: section and item expand and collapse (`_sections.scss:16-20`, `_item-lists.scss:155-163`)
-switch at once, and inline item controls appear at once on hover (`_item-lists.scss:190` sets `transition: none` over
-core's `transition: 0.5s` on every button, `foundry2.css:4101`). Both stay instant.
+What does not animate: section and item expand and collapse (`scss/components/_section.scss:22-26`,
+`scss/components/_item-row.scss:171-181`) switch at once, and inline item controls appear at once on hover
+(`scss/components/_item-row.scss:209` sets `transition: none` over core's `transition: 0.5s` on every button,
+`foundry2.css:4101`). Both stay instant.
 
 ## Rules
 
@@ -52,17 +50,17 @@ A `transition` or `animation` names its duration and easing with the tokens abov
 `tests/conventions/styles.test.js` (no literal duration or easing keyword outside `base/`; `steps()` allowed with an
 SCSS frame-count variable).
 
-Conforming, modeled on `scss/features/_ranks.scss:26`:
+Conforming, modeled on `scss/components/_rank-control.scss:20-24`:
 
 ```scss
-.l5r4-rank-name {
+.l5r4-rank-control-value {
   transition:
     filter var(--l5r4-duration-fast) var(--l5r4-easing-standard),
     transform var(--l5r4-duration-fast) var(--l5r4-easing-standard);
 }
 ```
 
-Non-conforming, `scss/features/_traits-rings.scss:236`:
+Non-conforming (modeled):
 
 ```scss
 &:hover {
@@ -72,12 +70,11 @@ Non-conforming, `scss/features/_traits-rings.scss:236`:
 
 ### 2. A transition names its properties
 
-`transition: all` also animates layout properties a later change adds. Six declarations use it today
-(`_ranks.scss:26`, `_traits-rings.scss:172`, `:202`, `:272`, `_animations.scss:17`, `:56`). Enforced by Stylelint
+`transition: all` also animates layout properties a later change adds. Enforced by Stylelint
 `declaration-property-value-disallowed-list` (`transition: /\ball\b/`, `transition-property: all`) in
 `.stylelintrc.json`.
 
-Conforming, modeled on `scss/features/_traits-rings.scss:41-44`, which names its three properties:
+Conforming, `scss/features/_traits-rings.scss:49-52`, which names its three properties:
 
 ```scss
 transition:
@@ -86,7 +83,7 @@ transition:
   bottom var(--l5r4-duration-fast) var(--l5r4-easing-standard);
 ```
 
-Non-conforming, `scss/features/_traits-rings.scss:172`:
+Non-conforming (modeled):
 
 ```scss
 transition: all 150ms ease-out;
@@ -111,8 +108,8 @@ Conforming:
 }
 ```
 
-Non-conforming, `scss/components/_animations.scss:45-47` today: the sprite runs at full length for every user, with no
-reduced-motion rule anywhere in `scss/`.
+Non-conforming (modeled): a component's own `@media (prefers-reduced-motion: reduce)` block that stops one sprite,
+leaving the others at full length.
 
 ### 4. Motion only confirms a state that also shows without it
 
@@ -136,7 +133,7 @@ scales the text from 0.6 to 1 (`interface.mjs:211-221`); core owns that and the 
 changes what those clients show, so it ships with a failing Quench case first. Enforced by review and that Quench
 case.
 
-Conforming, modeled on `module/services/scrolling-text.js:69-82`:
+Conforming, modeled on `module/services/scrolling-text.js:53-72`:
 
 ```js
 const reduced = window.matchMedia("(prefers-reduced-motion: reduce)").matches;
@@ -156,6 +153,6 @@ border for the whole encounter.
 | ------------- | ---------------------------------------------------------------------------------------------------------------------------- |
 | Tokens        | `scss/base/_variables.scss`                                                                                                  |
 | Sprites       | `assets/animation/urban-sprite.webp`, `assets/animation/nature-sprite.webp`; keyframes in `scss/components/_animations.scss` |
-| CSS users     | `scss/features/_ranks.scss`, `scss/features/_traits-rings.scss`, `scss/components/_animations.scss`                          |
+| CSS users     | `scss/components/_button.scss`, `scss/components/_rank-control.scss`, `scss/features/_traits-rings.scss`                     |
 | Canvas motion | `module/services/scrolling-text.js`, `module/services/animations/`                                                           |
 | Markup        | `templates/actor/_partials/_stats.hbs`, `_stats-npc.hbs`, `_ranks.hbs`                                                       |

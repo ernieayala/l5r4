@@ -21,7 +21,7 @@ book (CLAUDE.md **Licensed material**). Every page below was looked up in `game-
 
 | Rule          | Conforming                                                                             | Non-conforming                                                       |
 | ------------- | -------------------------------------------------------------------------------------- | -------------------------------------------------------------------- |
-| One stem      | `armorTn` in `module/data/actor/PcData.js:38`                                          | `armorTN` in `module/services/dice/resources/target-resolver.js:116` |
+| One stem      | `armorTn` in `module/data/actor/pc-data.js:38`                                         | `armorTN` in `module/services/dice/resources/target-resolver.js:116` |
 | One stem      | `{ roll, keep }` in `module/utils/check.js:51`                                         | `diceRoll`, `diceKeep` in `module/utils/ten-dice.js:38`              |
 | One stem      | `unskilled` in `module/services/dice/rolls/trait-roll.js:32`                           | `untrained` in `module/services/dice/rolls/simple-roll.js:56`        |
 | Banned phrase | `"Shadowlands Taint"` at `l5r4.ui.taint.label`                                         | `"Shadowland Taint"` at `l5r4.character.ranks.shadowRank`            |

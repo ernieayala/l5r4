@@ -120,7 +120,7 @@ Stage 16's citation parser (`tools/coverage/citations.mjs`) reads the page list 
 `src/packs/` keeps its `Core Rulebook p.N` citation (`roadmap/STAGE-15-COMPENDIUM-PACKS.md` **Content policy**); the
 rule does not apply there. Tests put the citation on a comment line above the test (`testing.md` **Citations**).
 
-Conforming, modeled on `module/data/actor/PcData.js:54-57`:
+Conforming, `module/data/actor/pc-data.js:61-66`:
 
 ```js
 /**
@@ -131,7 +131,7 @@ Conforming, modeled on `module/data/actor/PcData.js:54-57`:
 get insightRank() {
 ```
 
-Not conforming, `module/data/actor/PcData.js:55`: the page sits inside the sentence and names no file.
+Not conforming (modeled): the page sits inside the sentence and names no file.
 
 ```js
 /**

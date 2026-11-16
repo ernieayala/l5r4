@@ -31,7 +31,8 @@ check; "review" means no tool can check it.
 
 Fixed template names (Stage 17 decision 2): `templates/item/_type-details/<subtype>.hbs`,
 `templates/item/_type-modifiers/<subtype>.hbs`, and `templates/cards/<subtype>.hbs`. The code builds their paths from
-the stored subtype (`module/documents/item/constants/item-types.js:93-107`), so a rename breaks every item of that type.
+the stored subtype (`module/config/item-types.js:15-31`, `templates/item/_partials/_tab-details.hbs:3`,
+`templates/item/_partials/_tab-modifiers.hbs:3`), so a rename breaks every item of that type.
 
 Not conforming, `templates/actor/_partials/_stats-npc.hbs`: 225 of its 292 lines repeat `_stats.hbs`, and the Trait
 block repeats eight times in each file instead of one partial.
@@ -110,7 +111,8 @@ Conforming, `module/services/check-request.js:31-37` and `:57`: the card renders
 found by `[data-action='check-request-roll']`.
 
 Not conforming, `module/sheets/handlers/item-crud-handler.js:193`: dialog content as `` `<p>${...}</p>` ``.
-`module/sheets/mixins/keyboard-behavior.js:153`: `root.style.setProperty("--conditional-cursor", ...)`.
+`root.style.setProperty("--conditional-cursor", ...)` (modeled): a style write where the Shift-held state is the
+`is-shift-held` class (`module/mixins/keyboard-behavior-mixin.js:129`).
 `module/sheets/handlers/roll-handler.js:157`: `closest(".item")`.
 
 ## Stylesheets
@@ -137,9 +139,8 @@ Not conforming, `module/sheets/handlers/item-crud-handler.js:193`: dialog conten
 
 Picked by majority: window styles in `apps/` (3 of 6 window files), Title Case file titles (18 of 20 multi-word).
 
-Not conforming, `scss/_chat.scss`: a top-level partial that also holds the check dialog (`:64-87`).
-`scss/components/_effect-panel.scss`: three components in one file (the panel, text links at `:63-83`, the request
-card at `:85-87`). `scss/features/_armor.scss`: a file with only comments.
+Not conforming (modeled): a top-level `scss/_chat.scss` that also holds the check dialog; one file holding a panel,
+text links, and a request card; a file with only comments.
 
 ### Rules and selectors
 
@@ -164,11 +165,23 @@ card at `:85-87`). `scss/features/_armor.scss`: a file with only comments.
 Stage 17 decision 15 sets the token pattern and the space scale. Token names per step are in
 `docs/design-system/foundations/space-and-size.md`. Picked by majority: logical properties (32 of 35 side
 declarations), `bold` (13 of 18), unspaced grid lines (48 of 51), custom properties before nested rules. The block-class
-scope departs from the majority (12 files scope under the sheet classes `.l5r4.pc` / `.l5r4.npc`) because the design
-gallery renders each component outside a sheet (Stage 17 decision 7).
+scope departs from the sheet-class scope the stylesheets started with because the design gallery renders each
+component outside a sheet (Stage 17 decision 7).
 
-Conforming, modeled on `scss/components/_effect-panel.scss:21-31`, with its `gap: 0.5rem` and 32 px icon as the
-tokens `docs/design-system/foundations/space-and-size.md` declares:
+A component rule that must not reach every copy of its block names the block that contains it: item rows sit under
+`.l5r4-item-row-list`, because a row's card root also posts to chat; the Wound track under `.l5r4-grid`, so it
+overrides the grid's cell rules. A reset that every component should override is wrapped in `:where()`, which gives it
+no class weight (`scss/sheets/_actor-sheet.scss`). Core's CSS sits in cascade layers below the system's, so a system
+rule beats core's at any specificity; specificity only orders the system's own rules.
+
+Left under the window scope, each for want of an `l5r4-` class on the element: `scss/sheets/_actor-sheet.scss` and
+`_item-sheet.scss` (the sheet window carries only `l5r4 pc`, `l5r4 npc`, `l5r4 sheet item`);
+`scss/features/_traits-rings.scss` (its root is `traits-rings`); `scss/components/_chat-card.scss` (posted cards share
+no `l5r4-` root). `scss/components/_item-summary-card.scss` styles `l5r4-citation` and `l5r4-rule-lines`, which carry
+no `l5r4-item-summary-` element name.
+
+Conforming, modeled on `scss/apps/_effect-panel.scss:20-31`, with the tokens
+`docs/design-system/foundations/space-and-size.md` declares:
 
 ```scss
 .l5r4-effect-panel-row {
@@ -183,8 +196,7 @@ tokens `docs/design-system/foundations/space-and-size.md` declares:
 }
 ```
 
-Not conforming, modeled on `scss/features/_traits-rings.scss:572-573`: a hex literal with no theme variant on a bare
-class.
+Not conforming (modeled): a hex literal with no theme variant on a bare class.
 
 ```scss
 .void-dot {
@@ -192,7 +204,7 @@ class.
 }
 ```
 
-Not conforming, `scss/components/_item-lists.scss:175`: `a[data-action="item-chat"]` styles a behavior attribute.
+Not conforming (modeled): `a[data-action="post-item"]` styles a behavior attribute.
 
 ### Where a new style goes
 
@@ -203,6 +215,7 @@ Not conforming, `scss/components/_item-lists.scss:175`: `a[data-action="item-cha
 | One game feature's block on a sheet               | `scss/features/_<feature>.scss`                  |
 | One window                                        | `scss/apps/_<module-apps-file-name>.scss`        |
 | A sheet's grid                                    | `scss/layout/_<sheet>-layout.scss`               |
+| One sheet as a whole (its window, a field reset)  | `scss/sheets/_<sheet>-sheet.scss`                |
 | A new file                                        | Its folder, plus one `@use` in the entry's group |
 
 A new component also gets a page in `docs/design-system/components/` and a gallery entry

@@ -4,13 +4,13 @@ A label and the value it names: an input the viewer types into, a select, a chec
 and shows as text. Core's `form-group` draws fields in dialogs, apps, and the item sheet; the system adds the compact
 inline field of the PC and NPC header, the read-only value box, and the select inside an item row.
 
-| Item        | Detail                                                                                                                                                                                 |
-| ----------- | -------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| Partial     | None: a field is two or three elements, written where it shows                                                                                                                         |
-| SCSS        | `scss/components/_form-field.scss`, holding `_forms.scss:17-31`. The bare-input reset at `_forms.scss:8-15` moves to `scss/sheets/_actor-sheet.scss`, which holds only comments today  |
-| Block class | `l5r4-form-field` on the inline field. Core's `form-group`, `form-fields`, `<label>` stay as core names them                                                                           |
-| Shows in    | The PC and NPC header (`_stats.hbs:5-43`, `_stats-npc.hbs:4-9`), item sheet tabs, apps, dialogs, item rows (`cards/skill.hbs:17`, `cards/weapon.hbs:15`), grid value cells (`grid.md`) |
-| Gallery     | Each variant with a short and a long label, in every state below, light and dark                                                                                                       |
+| Item        | Detail                                                                                                                                                                                           |
+| ----------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------ |
+| Partial     | None: a field is two or three elements, written where it shows                                                                                                                                   |
+| SCSS        | `scss/components/_form-field.scss`: the header label and the value box. The sheets' bare-input reset is in `scss/sheets/_actor-sheet.scss`, at no class weight, so a component's field rule wins |
+| Block class | `l5r4-form-field` on the inline field. Core's `form-group`, `form-fields`, `<label>` stay as core names them                                                                                     |
+| Shows in    | The PC and NPC header (`_stats.hbs:5-43`, `_stats-npc.hbs:4-9`), item sheet tabs, apps, dialogs, item rows (`cards/skill.hbs:17`, `cards/weapon.hbs:15`), grid value cells (`grid.md`)           |
+| Gallery     | Each variant with a short and a long label, in every state below, light and dark                                                                                                                 |
 
 ## Anatomy
 
@@ -101,7 +101,7 @@ full in the open list.
 | F3  | `<span class="flex0">{{system._xp.spent}}/{{system._xp.total}}</span>` (`templates/actor/_partials/_stats.hbs:34`)                                                                     | `<input type="number" value="{{system.wounds.max}}" disabled />` (`templates/actor/_partials/_wounds.hbs:35-40`)                          |
 | F4  | `data-type="Number"` (`templates/actor/_partials/_wounds.hbs:25`)                                                                                                                      | `data-dtype="String"` (`templates/cards/skill.hbs:17`)                                                                                    |
 | F5  | `name="woundMode"` (`templates/apps/wound-config.hbs:7`)                                                                                                                               | `name="add-amount"` (`templates/apps/wealth-manager.hbs:25`)                                                                              |
-| F6  | `input, select { border: none; }` with no `outline` rule (`scss/components/_form-field.scss:8-15`)                                                                                     | `input { outline: none; }` in a sheet reset (modeled)                                                                                     |
+| F6  | `input, select { border: none; }` with no `outline` rule (`scss/sheets/_actor-sheet.scss:30-38`)                                                                                       | `input { outline: none; }` in a sheet reset (modeled)                                                                                     |
 | F7  | `<span>{{localize "l5r4.world.wealth.koku"}}:</span>` (`templates/actor/_partials/_item-section.hbs:5`)                                                                                | A value "Koku:" in `lang/en.json` (modeled)                                                                                               |
 
 Picked by majority: `data-type` (63 of 73), camelCase field names outside `system` (57 of 64), the colon typed in the

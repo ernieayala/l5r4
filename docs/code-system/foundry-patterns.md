@@ -165,7 +165,7 @@ third `_preCreate` parameter `userId`; core passes a `User`.
 ## Data models
 
 One `foundry.abstract.TypeDataModel` per subtype in `module/data/<document>/`, registered in `DATA_MODELS`
-(`module/data/index.js:26`) and assigned to `CONFIG.<Document>.dataModels` during `init` (`dist/l5r4-enhanced.js:116-120`).
+(`module/data/models.js:31`) and assigned to `CONFIG.<Document>.dataModels` during `init` (`dist/l5r4-enhanced.js:97`).
 A core type such as the ActiveEffect `base` goes in `CORE_TYPE_DATA_MODELS` and never in `system.json` `documentTypes`
 [src: common/packages/sub-types.mjs:45-47].
 
@@ -197,7 +197,7 @@ Check: `l5r4/member-order`.
 
 Picked by majority: the `fields.js` helpers (190 fields) over inline `new StringField(...)` (15).
 
-Conforming, `module/data/actor/PcData.js:23-69`, with the getter moved after `prepareDerivedData`:
+Conforming, `module/data/actor/pc-data.js:23-69`:
 
 ```js
 export default class PcData extends ActorData {
@@ -225,9 +225,9 @@ export default class PcData extends ActorData {
 }
 ```
 
-Not conforming, `module/data/item/SkillData.js:37`: the `ownedRules` getter sits before `migrateData`. Not conforming,
-`module/data/actor/ActorData.js:62`: `_initiativeFields` is the system's own method with a `_` prefix; a subclass
-overrides it (`NpcData.js:34`), so it is public and unprefixed.
+Not conforming (modeled): a getter that sits before `migrateData`. Not conforming,
+`module/data/actor/base-data.js:72`: `_initiativeFields` is the system's own method with a `_` prefix; a subclass
+overrides it (`npc-data.js:110`), so it is public and unprefixed.
 
 ## Rule models
 
