@@ -67,7 +67,7 @@ export function registerXpRaceConditionTests(quench) {
           await Promise.all(updatePromises);
 
           // ASSERT - Last write wins, verify no corruption
-          actor.prepareData();
+          actor.reset();
 
           const xpBreakdown = actor.system._xp?.breakdown;
           assert.exists(xpBreakdown, "XP breakdown exists");
@@ -90,7 +90,7 @@ export function registerXpRaceConditionTests(quench) {
           }
 
           // ASSERT
-          actor.prepareData();
+          actor.reset();
 
           const finalStamina = actor.system.traits.sta;
           assert.equal(finalStamina, 5, "Final value correct");
@@ -122,7 +122,7 @@ export function registerXpRaceConditionTests(quench) {
           await Promise.all(updatePromises);
 
           // ASSERT
-          actor.prepareData();
+          actor.reset();
 
           // Verify all traits are valid numbers
           const traits = actor.system.traits;
@@ -168,7 +168,7 @@ export function registerXpRaceConditionTests(quench) {
           await actor.update({ "system.traits.sta": 4 });
 
           // ASSERT
-          actor.prepareData();
+          actor.reset();
 
           const xpBreakdown = actor.system._xp?.breakdown;
           assert.exists(xpBreakdown, "XP breakdown exists");
@@ -188,7 +188,7 @@ export function registerXpRaceConditionTests(quench) {
           }
 
           // ASSERT
-          actor.prepareData();
+          actor.reset();
 
           const finalStamina = actor.system.traits.sta;
           assert.equal(finalStamina, 3, "Final value correct");
@@ -223,7 +223,7 @@ export function registerXpRaceConditionTests(quench) {
           await actor.setFlag(SYS_ID, "xpManual", [{ delta: -10, note: "Disadvantage" }]);
 
           // ACT
-          actor.prepareData();
+          actor.reset();
 
           // ASSERT
           const xpManual = actor.getFlag(SYS_ID, "xpManual");
@@ -297,11 +297,11 @@ export function registerXpRaceConditionTests(quench) {
 
         it("should recalculate XP when free ranks change", async () => {
           // ARRANGE
-          actor.prepareData();
+          actor.reset();
 
           // ACT - Add free rank (should reduce calculated XP)
           await actor.setFlag(SYS_ID, "freeRanks", { sta: 1 });
-          actor.prepareData();
+          actor.reset();
 
           // ASSERT
           const finalXPBreakdown = actor.system._xp?.breakdown?.traits;
@@ -319,7 +319,7 @@ export function registerXpRaceConditionTests(quench) {
           // ACT
           for (const freeRanks of freeRankStates) {
             await actor.setFlag(SYS_ID, "freeRanks", freeRanks);
-            actor.prepareData();
+            actor.reset();
           }
 
           // ASSERT - Verify no corruption
@@ -360,7 +360,7 @@ export function registerXpRaceConditionTests(quench) {
           await Promise.all(updatePromises);
 
           // ASSERT
-          actor.prepareData();
+          actor.reset();
 
           const rings = actor.system.rings;
           assert.isNumber(rings.earth, "Earth is number");
@@ -381,7 +381,7 @@ export function registerXpRaceConditionTests(quench) {
           await actor.update({ "system.rings.void.rank": 3 });
 
           // ASSERT
-          actor.prepareData();
+          actor.reset();
 
           const finalVoid = actor.system.rings.void.rank;
           assert.equal(finalVoid, 3, "Void increased");
@@ -403,7 +403,7 @@ export function registerXpRaceConditionTests(quench) {
           }
 
           // ASSERT
-          actor.prepareData();
+          actor.reset();
 
           const finalVoid = actor.system.rings.void.rank;
           assert.equal(finalVoid, 4, "Final Void rank correct");

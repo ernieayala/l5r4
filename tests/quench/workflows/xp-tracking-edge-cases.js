@@ -179,7 +179,7 @@ export function registerXpTrackingEdgeCaseTests(quench) {
           await Promise.all(updatePromises);
 
           // ASSERT - Ring should recalculate correctly
-          actor.prepareData();
+          actor.reset();
           const earthRing = actor.system.rings.earth;
 
           assert.isNumber(earthRing, "Earth ring is number");

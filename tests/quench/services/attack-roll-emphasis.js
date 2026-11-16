@@ -279,7 +279,7 @@ export function registerAttackRollEmphasisTests(quench) {
             }
           ]);
 
-          actor.prepareData();
+          actor.reset();
 
           // Full Attack gives +2k1 to attack rolls
           const stanceRollBonus = 2;
@@ -318,7 +318,7 @@ export function registerAttackRollEmphasisTests(quench) {
           ]);
 
           // ACT
-          actor.prepareData();
+          actor.reset();
 
           // ASSERT - Full Attack reduces Armor TN by 10
           const fullAttackTN = actor.system.armorTn.current;
@@ -384,7 +384,7 @@ export function registerAttackRollEmphasisTests(quench) {
             }
           ]);
 
-          actor.prepareData();
+          actor.reset();
 
           // ACT - Calculate with all modifiers
           const skillRank = 5;

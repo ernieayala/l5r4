@@ -75,14 +75,14 @@ export function registerRestRecoveryWorkflowTests(quench) {
 
           const initialWounds = 20;
           await actor.update({ "system.suffered": initialWounds });
-          actor.prepareData();
+          actor.reset();
 
           const beforeSuffered = actor.system.suffered;
           assert.equal(beforeSuffered, initialWounds, "Character is wounded");
 
           // ACT - Apply long rest
           await applyLongRest(actor);
-          actor.prepareData();
+          actor.reset();
 
           // ASSERT - Wounds healed by heal rate
           const afterSuffered = actor.system.suffered;
@@ -104,7 +104,7 @@ export function registerRestRecoveryWorkflowTests(quench) {
             "system.spellSlots.water": 0,
             "system.spellSlots.void": 0
           });
-          actor.prepareData();
+          actor.reset();
 
           // Verify slots are depleted
           assert.isBelow(actor.system.spellSlots.air, rings.air, "Air slots depleted");
@@ -112,7 +112,7 @@ export function registerRestRecoveryWorkflowTests(quench) {
 
           // ACT - Apply long rest
           await applyLongRest(actor);
-          actor.prepareData();
+          actor.reset();
 
           // ASSERT - All spell slots restored to ring values
           assert.equal(actor.system.spellSlots.air, rings.air, "Air slots restored to Air Ring");
@@ -142,13 +142,13 @@ export function registerRestRecoveryWorkflowTests(quench) {
           // ARRANGE - Deplete void points
           const voidMax = actor.system.rings.void.rank;
           await actor.update({ "system.rings.void.value": 0 });
-          actor.prepareData();
+          actor.reset();
 
           assert.equal(actor.system.rings.void.value, 0, "Void Points depleted");
 
           // ACT - Apply long rest
           await applyLongRest(actor);
-          actor.prepareData();
+          actor.reset();
 
           // ASSERT - Void Points restored
           assert.equal(actor.system.rings.void.value, voidMax, "Void Points restored to maximum");
@@ -163,14 +163,14 @@ export function registerRestRecoveryWorkflowTests(quench) {
               statuses: ["fatigued"]
             }
           ]);
-          actor.prepareData();
+          actor.reset();
 
           const fatigued = actor.effects.find(e => e.statuses?.has("fatigued"));
           assert.exists(fatigued, "Fatigued condition applied");
 
           // ACT - Apply long rest
           await applyLongRest(actor);
-          actor.prepareData();
+          actor.reset();
 
           // ASSERT - Fatigued condition removed
           const afterFatigued = actor.effects.find(e => e.statuses?.has("fatigued"));
@@ -193,14 +193,14 @@ export function registerRestRecoveryWorkflowTests(quench) {
               statuses: ["fatigued"]
             }
           ]);
-          actor.prepareData();
+          actor.reset();
 
           const initialSuffered = actor.system.suffered;
           const healRate = actor.system.wounds.healRate;
 
           // ACT - Apply long rest
           await applyLongRest(actor);
-          actor.prepareData();
+          actor.reset();
 
           // ASSERT - All recovery happened
           const afterSuffered = actor.system.suffered;
@@ -228,11 +228,11 @@ export function registerRestRecoveryWorkflowTests(quench) {
           const healRate = actor.system.wounds.healRate;
           const lightWounds = Math.floor(healRate / 2);
           await actor.update({ "system.suffered": lightWounds });
-          actor.prepareData();
+          actor.reset();
 
           // ACT - Apply long rest
           await applyLongRest(actor);
-          actor.prepareData();
+          actor.reset();
 
           // ASSERT - Fully healed, not negative
           assert.equal(actor.system.suffered, 0, "Cannot heal below 0");
@@ -245,13 +245,13 @@ export function registerRestRecoveryWorkflowTests(quench) {
             "system.suffered": 0,
             "system.rings.void.value": actor.system.rings.void.rank
           });
-          actor.prepareData();
+          actor.reset();
 
           const voidBefore = actor.system.rings.void.value;
 
           // ACT - Apply long rest
           await applyLongRest(actor);
-          actor.prepareData();
+          actor.reset();
 
           // ASSERT - No negative effects, stays at max
           assert.equal(actor.system.suffered, 0, "Stays at 0 suffered");
@@ -266,14 +266,14 @@ export function registerRestRecoveryWorkflowTests(quench) {
 
           // Wound the character
           await actor.update({ "system.suffered": 10 });
-          actor.prepareData();
+          actor.reset();
 
           // Store original heal rate
           const originalHealRate = actor.system.wounds.healRate;
 
           // ACT - Apply long rest with normal heal rate
           await applyLongRest(actor);
-          actor.prepareData();
+          actor.reset();
 
           // ASSERT - Healed by heal rate amount
           const expectedSuffered = Math.max(0, 10 - originalHealRate);
@@ -319,7 +319,7 @@ export function registerRestRecoveryWorkflowTests(quench) {
           // ARRANGE - Heavily wounded character (35 wounds)
           const initialWounds = 35;
           await actor.update({ "system.suffered": initialWounds });
-          actor.prepareData();
+          actor.reset();
 
           const healRate = actor.system.wounds.healRate;
           assert.equal(healRate, 8, "Heal rate is 8 per rest");
@@ -333,7 +333,7 @@ export function registerRestRecoveryWorkflowTests(quench) {
 
           while (currentSuffered > 0 && restCount < maxRests) {
             await applyLongRest(actor);
-            actor.prepareData();
+            actor.reset();
 
             currentSuffered = actor.system.suffered;
             woundHistory.push(currentSuffered);
@@ -355,7 +355,7 @@ export function registerRestRecoveryWorkflowTests(quench) {
         it("should maintain consistent heal rate across multiple rests", async () => {
           // ARRANGE - Moderately wounded
           await actor.update({ "system.suffered": 30 });
-          actor.prepareData();
+          actor.reset();
 
           const healRate = actor.system.wounds.healRate;
 
@@ -363,7 +363,7 @@ export function registerRestRecoveryWorkflowTests(quench) {
           for (let i = 0; i < 3; i++) {
             const beforeRest = actor.system.suffered;
             await applyLongRest(actor);
-            actor.prepareData();
+            actor.reset();
 
             const afterRest = actor.system.suffered;
             const actualHealing = beforeRest - afterRest;
@@ -381,7 +381,7 @@ export function registerRestRecoveryWorkflowTests(quench) {
           const earth = actor.system.rings.earth;
           const injuredThreshold = earth * 10; // Injured = Earth×10
           await actor.update({ "system.suffered": injuredThreshold + 5 });
-          actor.prepareData();
+          actor.reset();
 
           // Verify starting at Injured (check woundLevels for current marker)
           const beforeLevels = actor.system.woundLevels;
@@ -390,7 +390,7 @@ export function registerRestRecoveryWorkflowTests(quench) {
 
           // ACT - Rest multiple times
           await applyLongRest(actor);
-          actor.prepareData();
+          actor.reset();
 
           // ASSERT - Wound level improved (not at Injured anymore)
           const afterLevels = actor.system.woundLevels;
@@ -430,7 +430,7 @@ export function registerRestRecoveryWorkflowTests(quench) {
           // ARRANGE - Deplete void points
           const _voidMax = actor.system.rings.void.rank;
           await actor.update({ "system.rings.void.value": 0 });
-          actor.prepareData();
+          actor.reset();
 
           assert.equal(actor.system.rings.void.value, 0, "Void depleted");
 
@@ -442,14 +442,14 @@ export function registerRestRecoveryWorkflowTests(quench) {
               statuses: ["fasting"]
             }
           ]);
-          actor.prepareData();
+          actor.reset();
 
           const fastingEffect = actor.effects.find(e => e.statuses?.has("fasting"));
           assert.exists(fastingEffect, "Fasting condition applied");
 
           // ACT - Take long rest while fasting
           await applyLongRest(actor);
-          actor.prepareData();
+          actor.reset();
 
           // ASSERT - Void should NOT recover
           const voidAfterRest = actor.system.rings.void.value;
@@ -480,14 +480,14 @@ export function registerRestRecoveryWorkflowTests(quench) {
               statuses: ["fasting"]
             }
           ]);
-          actor.prepareData();
+          actor.reset();
 
           const beforeSuffered = actor.system.suffered;
           const healRate = actor.system.wounds.healRate;
 
           // ACT - Rest while fasting
           await applyLongRest(actor);
-          actor.prepareData();
+          actor.reset();
 
           // ASSERT - Wounds still heal (fasting only blocks void)
           const afterSuffered = actor.system.suffered;
@@ -511,11 +511,11 @@ export function registerRestRecoveryWorkflowTests(quench) {
               statuses: ["fasting"]
             }
           ]);
-          actor.prepareData();
+          actor.reset();
 
           // ACT - Rest while fasting
           await applyLongRest(actor);
-          actor.prepareData();
+          actor.reset();
 
           // ASSERT - Spell slots restore (fasting only blocks void)
           assert.equal(
@@ -536,22 +536,22 @@ export function registerRestRecoveryWorkflowTests(quench) {
               statuses: ["fasting"]
             }
           ]);
-          actor.prepareData();
+          actor.reset();
 
           // Rest while fasting (void should not recover)
           await applyLongRest(actor);
-          actor.prepareData();
+          actor.reset();
 
           // TODO: When implemented, this should be 0
           // assert.equal(actor.system.rings.void.value, 0, "Void still 0 while fasting");
 
           // ACT - Remove fasting (break fast)
           await actor.deleteEmbeddedDocuments("ActiveEffect", [fastingEffect[0].id]);
-          actor.prepareData();
+          actor.reset();
 
           // Rest after breaking fast
           await applyLongRest(actor);
-          actor.prepareData();
+          actor.reset();
 
           // ASSERT - Void now recovers
           assert.equal(
@@ -565,7 +565,7 @@ export function registerRestRecoveryWorkflowTests(quench) {
           // ARRANGE - Start with void depleted
           const voidMax = actor.system.rings.void.rank;
           await actor.update({ "system.rings.void.value": 0 });
-          actor.prepareData();
+          actor.reset();
 
           // Cycle 1: Fast and rest (no void recovery)
           const fasting = await actor.createEmbeddedDocuments("ActiveEffect", [
@@ -576,7 +576,7 @@ export function registerRestRecoveryWorkflowTests(quench) {
             }
           ]);
           await applyLongRest(actor);
-          actor.prepareData();
+          actor.reset();
 
           // TODO: When implemented
           // assert.equal(actor.system.rings.void.value, 0, "Cycle 1: Void blocked");
@@ -584,7 +584,7 @@ export function registerRestRecoveryWorkflowTests(quench) {
           // Cycle 2: Break fast and rest (void recovers)
           await actor.deleteEmbeddedDocuments("ActiveEffect", [fasting[0].id]);
           await applyLongRest(actor);
-          actor.prepareData();
+          actor.reset();
           assert.equal(actor.system.rings.void.value, voidMax, "Cycle 2: Void restored");
 
           // Cycle 3: Fast again and rest (void stays at max but wouldn't recover if depleted)
@@ -597,7 +597,7 @@ export function registerRestRecoveryWorkflowTests(quench) {
             }
           ]);
           await applyLongRest(actor);
-          actor.prepareData();
+          actor.reset();
 
           // TODO: When implemented
           // assert.equal(actor.system.rings.void.value, 1, "Cycle 3: Void blocked again");
@@ -625,11 +625,11 @@ export function registerRestRecoveryWorkflowTests(quench) {
             "system.rings.void.rank": 0,
             "system.rings.void.value": 0
           });
-          actor.prepareData();
+          actor.reset();
 
           // ACT - Apply long rest
           await applyLongRest(actor);
-          actor.prepareData();
+          actor.reset();
 
           // ASSERT - No errors, void stays 0
           assert.equal(actor.system.rings.void.value, 0, "Void stays at 0");
@@ -644,11 +644,11 @@ export function registerRestRecoveryWorkflowTests(quench) {
             "system.spellSlots.water": 0,
             "system.spellSlots.void": 0
           });
-          actor.prepareData();
+          actor.reset();
 
           // ACT - Apply long rest
           await applyLongRest(actor);
-          actor.prepareData();
+          actor.reset();
 
           // ASSERT - No errors, slots restored to ring values
           assert.equal(actor.system.spellSlots.air, actor.system.rings.air, "Air slots = Air ring");
@@ -661,7 +661,7 @@ export function registerRestRecoveryWorkflowTests(quench) {
 
           // ACT - Apply long rest
           await applyLongRest(actor);
-          actor.prepareData();
+          actor.reset();
 
           // ASSERT - No errors
           const stillNotFatigued = actor.effects.some(e => e.statuses?.has("fatigued"));
@@ -679,11 +679,11 @@ export function registerRestRecoveryWorkflowTests(quench) {
             "system.spellSlots.water": actor.system.rings.water,
             "system.spellSlots.void": actor.system.rings.void.rank
           });
-          actor.prepareData();
+          actor.reset();
 
           // ACT - Apply long rest
           await applyLongRest(actor);
-          actor.prepareData();
+          actor.reset();
 
           // ASSERT - Values stay at maximum, no overflow
           assert.equal(actor.system.suffered, 0, "Suffered stays 0");

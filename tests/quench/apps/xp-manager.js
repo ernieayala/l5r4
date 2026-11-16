@@ -153,8 +153,8 @@ export function registerXpManagerTests(quench) {
           // Re-fetch actor to get recalculated derived data
           actor = game.actors.get(actor.id);
 
-          // Force prepareDerivedData to recalculate XP
-          actor.prepareData();
+          // Re-prepare from the stored data to recalculate XP
+          actor.reset();
 
           dialog = new XpManagerApplication(actor);
           await dialog.render(true);
@@ -226,8 +226,8 @@ export function registerXpManagerTests(quench) {
           // Re-fetch actor to get recalculated derived data
           actor = game.actors.get(actor.id);
 
-          // Force prepareDerivedData to recalculate XP
-          actor.prepareData();
+          // Re-prepare from the stored data to recalculate XP
+          actor.reset();
 
           dialog = new XpManagerApplication(actor);
           await dialog.render(true);

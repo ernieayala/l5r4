@@ -198,7 +198,7 @@ export function registerSkillStanceCombinationTests(quench) {
           ]);
 
           // Force actor data preparation after effect creation
-          actor.prepareData();
+          actor.reset();
 
           const skillRank = weaponSkill.system.rank;
           const traitValue = actor.system.traits[weaponSkill.system.trait];
@@ -367,7 +367,7 @@ export function registerSkillStanceCombinationTests(quench) {
           ]);
 
           // Force actor data preparation to apply stance effects
-          actor.prepareData();
+          actor.reset();
 
           // Defense Stance: +Air Ring + Defense Skill to Armor TN
           // Air Ring = 3, Defense Skill = 0 (untrained)

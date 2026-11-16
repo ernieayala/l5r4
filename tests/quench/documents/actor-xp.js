@@ -106,7 +106,7 @@ export function registerActorXpTests(quench) {
           ]);
 
           // Force re-preparation
-          actor.prepareData();
+          actor.reset();
 
           const insight = actor.system.insight.points;
           assert.isAtLeast(insight, 150, "Insight at least 150");

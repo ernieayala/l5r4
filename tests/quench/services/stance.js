@@ -354,7 +354,7 @@ export function registerStanceTests(quench) {
           }
 
           // Force data preparation
-          actor.prepareData();
+          actor.reset();
         });
 
         afterEach(async () => {
@@ -376,7 +376,7 @@ export function registerStanceTests(quench) {
           const baseTN = 20;
 
           // Initial state: No stance
-          actor.prepareData();
+          actor.reset();
           assert.equal(actor.system.armorTn.current, baseTN, "Base TN = 20");
 
           // Apply Full Attack stance: -10 to TN
@@ -388,7 +388,7 @@ export function registerStanceTests(quench) {
             }
           ]);
 
-          actor.prepareData();
+          actor.reset();
           assert.equal(actor.system.armorTn.current, 10, "Full Attack: TN reduced to 10 (20-10)");
 
           // Switch to Defense stance: Should REPLACE, not stack
@@ -413,7 +413,7 @@ export function registerStanceTests(quench) {
             }
           ]);
 
-          actor.prepareData();
+          actor.reset();
 
           // Verify only ONE stance effect exists
           const activeStances = actor.effects.filter(
@@ -464,7 +464,7 @@ export function registerStanceTests(quench) {
               }
             ]);
 
-            actor.prepareData();
+            actor.reset();
 
             const activeStances = actor.effects.filter(e => !e.disabled);
             assert.isAtMost(

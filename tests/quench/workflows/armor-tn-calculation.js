@@ -127,7 +127,7 @@ export function registerArmorTnCalculationTests(quench) {
             })
           ]);
 
-          // ACT - Foundry automatically calls prepareDerivedData after item creation
+          // ACT - Core re-prepares the actor with reset() after item creation
           // No manual call needed
 
           // ASSERT
@@ -221,7 +221,7 @@ export function registerArmorTnCalculationTests(quench) {
             }
           ]);
 
-          // ACT - Foundry automatically calls prepareDerivedData after effect creation
+          // ACT - Core re-prepares the actor with reset() after effect creation
           // No manual call needed
 
           // ASSERT
@@ -253,7 +253,7 @@ export function registerArmorTnCalculationTests(quench) {
             }
           ]);
 
-          // ACT - Foundry automatically calls prepareDerivedData after effect creation
+          // ACT - Core re-prepares the actor with reset() after effect creation
           // No manual call needed
 
           // ASSERT

@@ -594,13 +594,15 @@ export function registerNpcWorkflowTests(quench) {
           npc = await createTestNPC({
             name: "NPC workflows: asymmetric NPC",
             system: {
-              attack1: { roll: 10, keep: 5, dmgRoll: 8, dmgKeep: 3 }
+              attack1: { roll: 10, keep: 5 },
+              damage1: { roll: 8, keep: 3 }
             }
           });
 
           // ASSERT
           assert.equal(npc.system.attack1.roll, 10, "Rolls 10 dice");
           assert.equal(npc.system.attack1.keep, 5, "Keeps 5 dice");
+          assert.deepInclude(npc.system.damage1, { roll: 8, keep: 3 }, "Damage 8k3");
           assert.isAbove(
             npc.system.attack1.roll,
             npc.system.attack1.keep,
@@ -613,13 +615,15 @@ export function registerNpcWorkflowTests(quench) {
           npc = await createTestNPC({
             name: "NPC workflows: symmetric NPC",
             system: {
-              attack1: { roll: 6, keep: 6, dmgRoll: 4, dmgKeep: 4 }
+              attack1: { roll: 6, keep: 6 },
+              damage1: { roll: 4, keep: 4 }
             }
           });
 
           // ASSERT
           assert.equal(npc.system.attack1.roll, 6, "Rolls 6 dice");
           assert.equal(npc.system.attack1.keep, 6, "Keeps 6 dice");
+          assert.deepInclude(npc.system.damage1, { roll: 4, keep: 4 }, "Damage 4k4");
           assert.equal(npc.system.attack1.roll, npc.system.attack1.keep, "Symmetric pool (6k6)");
         });
 
@@ -628,13 +632,15 @@ export function registerNpcWorkflowTests(quench) {
           npc = await createTestNPC({
             name: "NPC workflows: min dice NPC",
             system: {
-              attack1: { roll: 1, keep: 1, dmgRoll: 1, dmgKeep: 1 }
+              attack1: { roll: 1, keep: 1 },
+              damage1: { roll: 1, keep: 1 }
             }
           });
 
           // ASSERT
           assert.equal(npc.system.attack1.roll, 1, "Minimum roll: 1 die");
           assert.equal(npc.system.attack1.keep, 1, "Minimum keep: 1 die");
+          assert.deepInclude(npc.system.damage1, { roll: 1, keep: 1 }, "Minimum damage: 1k1");
         });
 
         it("should handle maximum dice pools", async () => {
@@ -642,13 +648,15 @@ export function registerNpcWorkflowTests(quench) {
           npc = await createTestNPC({
             name: "NPC workflows: max dice NPC",
             system: {
-              attack1: { roll: 10, keep: 10, dmgRoll: 10, dmgKeep: 10 }
+              attack1: { roll: 10, keep: 10 },
+              damage1: { roll: 10, keep: 10 }
             }
           });
 
           // ASSERT
           assert.equal(npc.system.attack1.roll, 10, "Maximum roll: 10 dice");
           assert.equal(npc.system.attack1.keep, 10, "Maximum keep: 10 dice");
+          assert.deepInclude(npc.system.damage1, { roll: 10, keep: 10 }, "Maximum damage: 10k10");
         });
       });
 
@@ -670,8 +678,10 @@ export function registerNpcWorkflowTests(quench) {
               nrWoundLvls: 4,
               woundMode: "formula",
               woundsMultiplier: 2,
-              attack1: { roll: 6, keep: 4, dmgRoll: 4, dmgKeep: 2 },
-              attack2: { roll: 5, keep: 3, dmgRoll: 3, dmgKeep: 2 },
+              attack1: { roll: 6, keep: 4, type: "simple" },
+              attack2: { roll: 5, keep: 3, type: "complex" },
+              damage1: { roll: 4, keep: 2 },
+              damage2: { roll: 3, keep: 2 },
               fear: { rank: 3 }
             }
           });
@@ -680,8 +690,18 @@ export function registerNpcWorkflowTests(quench) {
           assert.equal(npc.system.rings.earth, 4, "Earth Ring calculated");
           assert.equal(npc.system.nrWoundLvls, 4, "4 wound levels");
           assert.equal(npc.system.woundMode, "formula", "Formula wound mode");
-          assert.exists(npc.system.attack1, "Attack1 configured");
-          assert.exists(npc.system.attack2, "Attack2 configured");
+          assert.deepInclude(
+            npc.system.attack1,
+            { roll: 6, keep: 4, type: "simple" },
+            "Attack1 6k4"
+          );
+          assert.deepInclude(
+            npc.system.attack2,
+            { roll: 5, keep: 3, type: "complex" },
+            "Attack2 5k3"
+          );
+          assert.deepInclude(npc.system.damage1, { roll: 4, keep: 2 }, "Damage1 4k2");
+          assert.deepInclude(npc.system.damage2, { roll: 3, keep: 2 }, "Damage2 3k2");
           assert.equal(npc.system.fear.rank, 3, "Fear rank set");
         });
 

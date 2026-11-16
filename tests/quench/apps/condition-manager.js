@@ -71,7 +71,7 @@ export function registerConditionManagerTests(quench) {
             if (effectIds.length > 0) {
               await actor.deleteEmbeddedDocuments("ActiveEffect", effectIds);
             }
-            actor.prepareData();
+            actor.reset();
           }
         });
 

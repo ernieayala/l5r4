@@ -313,7 +313,7 @@ export function registerAttackRollVoidTests(quench) {
             }
           ]);
 
-          actor.prepareData();
+          actor.reset();
 
           // ACT - Calculate with void and stance
           const skillRank = 5;
@@ -389,7 +389,7 @@ export function registerAttackRollVoidTests(quench) {
             }
           ]);
 
-          actor.prepareData();
+          actor.reset();
 
           // ACT - Calculate with all modifiers
           const skillRank = 5;

@@ -5,8 +5,9 @@ cards, settings, migrations, and registration. API facts come from `roadmap/FOUN
 14.370 source; check a new API with `/foundry-api` before using it. Each rule names its check; "review" means no tool
 can check it.
 
-The member-order checks are the local ESLint rule `l5r4/member-order` in `tools/eslint/`. Names (verbs, `_name`
-versus `#name`, `data-action` casing) are in `naming.md`.
+The member-order checks are the local ESLint rule `l5r4/member-order` in `tools/eslint/`, and the preparation check
+is `l5r4/no-bare-prepare` (**Preparation order**). Names (verbs, `_name` versus `#name`, `data-action` casing) are in
+`naming.md`.
 
 ## ApplicationV2 windows and sheets
 
@@ -176,11 +177,11 @@ A bare `prepareData()` resets nothing: `Actor#applyActiveEffects` applies each c
 the rules add their outputs onto prepared values (`applyDerivedRules`, `module/documents/actor/rules.js`), so a second
 call adds them twice. Core does not make it idempotent, and the system does not either.
 
-| Rule                                                                                                                                                                                                               | Check                                  |
-| ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------ | -------------------------------------- |
-| A PC's or NPC's derived data runs in `L5R4Actor.prepareDerivedData` (`module/documents/actor.js`), which calls the subtype's preparation in `module/documents/actor/preparation/`; the data models compute nothing | review                                 |
-| A document is re-prepared with `document.reset()`, never a bare `prepareData()` and never `prepareDerivedData()` alone; tests included                                                                             | Quench `l5r4-enhanced.documents.actor` |
-| Preparation never writes into `_source`, the items, or module state, so a second `reset()` gives the same values                                                                                                   | Quench `l5r4-enhanced.documents.actor` |
+| Rule                                                                                                                                                                                                               | Check                                                                                         |
+| ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------ | --------------------------------------------------------------------------------------------- |
+| A PC's or NPC's derived data runs in `L5R4Actor.prepareDerivedData` (`module/documents/actor.js`), which calls the subtype's preparation in `module/documents/actor/preparation/`; the data models compute nothing | review                                                                                        |
+| A document is re-prepared with `document.reset()`, never a bare `prepareData()` and never `prepareDerivedData()` alone; tests included. An override calls core's method of its own name through `super`            | `l5r4/no-bare-prepare` (`module/`, `dist/`, `tests/`), Quench `l5r4-enhanced.documents.actor` |
+| Preparation never writes into `_source`, the items, or module state, so a second `reset()` gives the same values                                                                                                   | Quench `l5r4-enhanced.documents.actor`                                                        |
 
 ### Documents and services
 

@@ -9,6 +9,7 @@ import importOrder from "./import-order.mjs";
 import memberOrder from "./member-order.mjs";
 import moduleShape from "./module-shape.mjs";
 import naming from "./naming.mjs";
+import noBarePrepare from "./no-bare-prepare.mjs";
 
 /** The plugin object ESLint's flat config takes. */
 const PLUGIN = Object.freeze({
@@ -18,7 +19,8 @@ const PLUGIN = Object.freeze({
     "import-order": importOrder,
     "member-order": memberOrder,
     "module-shape": moduleShape,
-    naming
+    naming,
+    "no-bare-prepare": noBarePrepare
   }
 });
 

@@ -16,6 +16,7 @@ const VIOLATING = Object.freeze([
   { rule: "l5r4/module-shape", file: "module-shape.js", as: "module/services/example.js" },
   { rule: "l5r4/member-order", file: "member-order.js", as: "module/apps/example.js" },
   { rule: "l5r4/doc-format", file: "doc-format.js", as: "module/services/example.js" },
+  { rule: "l5r4/no-bare-prepare", file: "no-bare-prepare.js", as: "tests/quench/example.js" },
   { rule: "no-restricted-imports", file: "layer-import.js", as: "module/utils/example.js" },
   { rule: "no-restricted-globals", file: "layer-global.js", as: "module/utils/example.js" },
   {
@@ -61,7 +62,8 @@ const CONFORMING = Object.freeze([
   { file: "good-service.js", as: "module/services/example.js" },
   { file: "good-app.js", as: "module/apps/example.js" },
   { file: "good-util.js", as: "module/utils/example.js" },
-  { file: "good-mixin.js", as: "module/mixins/example-mixin.js" }
+  { file: "good-mixin.js", as: "module/mixins/example-mixin.js" },
+  { file: "good-document.js", as: "module/documents/example.js" }
 ]);
 
 const eslint = new ESLint({ cwd: REPO });

@@ -109,7 +109,7 @@ export function registerInitiativeTests(quench) {
             { name: "Skill5", type: "skill", system: { rank: 10 } }
           ]);
 
-          actor.prepareData();
+          actor.reset();
 
           const newRoll = actor.system.initiative.roll;
           assert.isAbove(newRoll, oldRoll, "Initiative roll increased with insight");
@@ -410,7 +410,7 @@ export function registerInitiativeTests(quench) {
             { name: "Skill3", type: "skill", system: { rank: 10 } }
           ]);
 
-          actor.prepareData();
+          actor.reset();
 
           // ACT
           const [combatant] = await combat.createEmbeddedDocuments("Combatant", [
@@ -510,7 +510,7 @@ export function registerInitiativeTests(quench) {
             { name: "Skill8", type: "skill", system: { rank: 10 } }
           ]);
 
-          actor.prepareData();
+          actor.reset();
 
           const roll = actor.system.initiative.roll;
           const keep = actor.system.initiative.keep;

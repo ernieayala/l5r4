@@ -64,7 +64,7 @@ export function registerStanceEffectPreservationTests(quench) {
 
         it("should preserve Active Effect changes when hydrating stance effect", async () => {
           // ARRANGE - Ensure actor is fully prepared
-          actor.prepareData();
+          actor.reset();
 
           // Create Full Attack stance effect with a trait change
           // (simulating what might happen via token status icon or programmatic creation)
@@ -138,7 +138,7 @@ export function registerStanceEffectPreservationTests(quench) {
 
         it("should not modify traits when changing between stances", async () => {
           // ARRANGE - Ensure actor is fully prepared and record initial trait values
-          actor.prepareData();
+          actor.reset();
           const initialTraits = {
             ref: actor.system.traits.ref,
             awa: actor.system.traits.awa,
@@ -165,7 +165,7 @@ export function registerStanceEffectPreservationTests(quench) {
             }
           ]);
 
-          actor.prepareData();
+          actor.reset();
           let currentTraits = {
             ref: actor.system.traits.ref,
             awa: actor.system.traits.awa,
@@ -198,7 +198,7 @@ export function registerStanceEffectPreservationTests(quench) {
             }
           ]);
 
-          actor.prepareData();
+          actor.reset();
           currentTraits = {
             ref: actor.system.traits.ref,
             awa: actor.system.traits.awa,
@@ -230,7 +230,7 @@ export function registerStanceEffectPreservationTests(quench) {
             }
           ]);
 
-          actor.prepareData();
+          actor.reset();
           currentTraits = {
             ref: actor.system.traits.ref,
             awa: actor.system.traits.awa,
@@ -248,7 +248,7 @@ export function registerStanceEffectPreservationTests(quench) {
 
         it("should preserve multiple changes on a single effect", async () => {
           // ARRANGE - Ensure actor is fully prepared
-          actor.prepareData();
+          actor.reset();
 
           // Create effect with multiple trait modifications
           const effectData = {

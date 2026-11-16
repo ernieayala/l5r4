@@ -63,7 +63,7 @@ export function registerStanceEdgeCaseTests(quench) {
             }
           ]);
 
-          actor.prepareData();
+          actor.reset();
           const firstTN = actor.system.armorTn.current;
           const baseArmorTN = actor.system.traits.ref * 5 + 5;
           assert.isBelow(firstTN, baseArmorTN, "Full Attack reduces TN");
@@ -80,7 +80,7 @@ export function registerStanceEdgeCaseTests(quench) {
           ]);
 
           // ASSERT - Should replace, not stack
-          actor.prepareData();
+          actor.reset();
           const finalTN = actor.system.armorTn.current;
           assert.isAbove(finalTN, baseArmorTN, "Defense increases TN");
         });
@@ -108,7 +108,7 @@ export function registerStanceEdgeCaseTests(quench) {
           }
 
           // ASSERT - Last stance should be active
-          actor.prepareData();
+          actor.reset();
           const armorTN = actor.system.armorTn.current;
           assert.isNumber(armorTN, "Armor TN calculated");
         });
@@ -137,7 +137,7 @@ export function registerStanceEdgeCaseTests(quench) {
           await Promise.all(createPromises);
 
           // ASSERT - Both effects created (system allows multiple, but only one should apply)
-          actor.prepareData();
+          actor.reset();
           const armorTN = actor.system.armorTn.current;
 
           assert.isNumber(armorTN, "Armor TN calculated");
@@ -155,7 +155,7 @@ export function registerStanceEdgeCaseTests(quench) {
           ]);
 
           // ACT
-          actor.prepareData();
+          actor.reset();
 
           // ASSERT - Invalid stance ID should be ignored
           const armorTN = actor.system.armorTn.current;
@@ -175,7 +175,7 @@ export function registerStanceEdgeCaseTests(quench) {
           }
 
           // ACT
-          actor.prepareData();
+          actor.reset();
 
           // ASSERT - Should have base Armor TN with no stance modifiers
           const armorTN = actor.system.armorTn.current;
@@ -295,13 +295,13 @@ export function registerStanceEdgeCaseTests(quench) {
             }
           ]);
 
-          actor.prepareData();
+          actor.reset();
           const initialTN = actor.system.armorTn.current;
           const baseArmorTN = actor.system.traits.ref * 5 + 5;
           assert.isBelow(initialTN, baseArmorTN, "Full Attack active");
 
           // ACT - Simulate turn passing (no stance change)
-          actor.prepareData();
+          actor.reset();
 
           // ASSERT - Stance should persist
           const persistedTN = actor.system.armorTn.current;
@@ -322,7 +322,7 @@ export function registerStanceEdgeCaseTests(quench) {
           await effect[0].delete();
 
           // ASSERT - Armor TN should return to base
-          actor.prepareData();
+          actor.reset();
           const armorTN = actor.system.armorTn.current;
           const baseArmorTN = actor.system.traits.ref * 5 + 5;
 
@@ -339,7 +339,7 @@ export function registerStanceEdgeCaseTests(quench) {
               disabled: false
             }
           ]);
-          actor.prepareData();
+          actor.reset();
           const defenseTN = actor.system.armorTn.current;
           const baseArmorTN = actor.system.traits.ref * 5 + 5;
 
@@ -352,7 +352,7 @@ export function registerStanceEdgeCaseTests(quench) {
               disabled: false
             }
           ]);
-          actor.prepareData();
+          actor.reset();
 
           // ASSERT
           const attackTN = actor.system.armorTn.current;
@@ -387,7 +387,7 @@ export function registerStanceEdgeCaseTests(quench) {
           // This test documents expected behavior if basic Attack stance exists
 
           // ACT
-          actor.prepareData();
+          actor.reset();
 
           // ASSERT - Base TN with no stance
           const armorTN = actor.system.armorTn.current;
@@ -410,7 +410,7 @@ export function registerStanceEdgeCaseTests(quench) {
           ]);
 
           // ACT
-          actor.prepareData();
+          actor.reset();
 
           // ASSERT
           const armorTN = actor.system.armorTn.current;
@@ -430,7 +430,7 @@ export function registerStanceEdgeCaseTests(quench) {
           }
 
           // ACT
-          actor.prepareData();
+          actor.reset();
 
           // ASSERT
           const armorTN = actor.system.armorTn.current;
@@ -453,7 +453,7 @@ export function registerStanceEdgeCaseTests(quench) {
           ]);
 
           // ACT
-          actor.prepareData();
+          actor.reset();
 
           // ASSERT
           const armorTN = actor.system.armorTn.current;

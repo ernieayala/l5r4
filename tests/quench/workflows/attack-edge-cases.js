@@ -161,7 +161,7 @@ export function registerAttackEdgeCaseTests(quench) {
           ]);
 
           // ACT
-          actor.prepareData();
+          actor.reset();
 
           // ASSERT - Verify Armor TN penalty (-10)
           const baseArmorTN = actor.system.traits.ref * 5 + 5; // 20
@@ -177,7 +177,7 @@ export function registerAttackEdgeCaseTests(quench) {
           await actor.update({ "system.traits.ref": 1 });
 
           // Get base TN first
-          actor.prepareData();
+          actor.reset();
           const baseArmorTN = actor.system.armorTn.current; // (1 * 5) + 5 = 10
 
           // Now apply Full Attack
@@ -190,7 +190,7 @@ export function registerAttackEdgeCaseTests(quench) {
           ]);
 
           // ACT
-          actor.prepareData();
+          actor.reset();
 
           // ASSERT
           const armorTN = actor.system.armorTn.current;
@@ -210,7 +210,7 @@ export function registerAttackEdgeCaseTests(quench) {
               disabled: false
             }
           ]);
-          actor.prepareData();
+          actor.reset();
           const fullAttackTN = actor.system.armorTn.current;
 
           // ACT - Switch to Defense
@@ -223,7 +223,7 @@ export function registerAttackEdgeCaseTests(quench) {
               disabled: false
             }
           ]);
-          actor.prepareData();
+          actor.reset();
 
           // ASSERT
           const defenseTN = actor.system.armorTn.current;
@@ -275,8 +275,8 @@ export function registerAttackEdgeCaseTests(quench) {
 
         it("should handle attack with multiple targets selected", async () => {
           // ARRANGE - Two targets with different Armor TNs
-          target1.prepareData();
-          target2.prepareData();
+          target1.reset();
+          target2.reset();
 
           const tn1 = target1.system.armorTn.current;
           const tn2 = target2.system.armorTn.current;
@@ -305,7 +305,7 @@ export function registerAttackEdgeCaseTests(quench) {
           });
 
           // ACT
-          brokenTarget.prepareData();
+          brokenTarget.reset();
 
           // ASSERT - Should not crash
           const armorTN = brokenTarget.system.armorTn?.current;
@@ -325,7 +325,7 @@ export function registerAttackEdgeCaseTests(quench) {
           });
 
           // ACT
-          emptyTarget.prepareData();
+          emptyTarget.reset();
 
           // ASSERT - Should not crash
           assert.exists(emptyTarget.system, "System data exists");

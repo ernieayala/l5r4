@@ -52,7 +52,7 @@ export function registerWoundConfigEdgeCaseTests(quench) {
           await actor.update({ "system.woundsMultiplier": 99 });
 
           // ACT
-          actor.prepareData();
+          actor.reset();
 
           // ASSERT - System should handle gracefully
           assert.equal(actor.system.woundsMultiplier, 99, "Extreme multiplier set");
@@ -68,7 +68,7 @@ export function registerWoundConfigEdgeCaseTests(quench) {
           await actor.update({ "system.woundsMultiplier": 0 });
 
           // ACT
-          actor.prepareData();
+          actor.reset();
 
           // ASSERT - System should handle gracefully
           assert.equal(actor.system.woundsMultiplier, 0, "Zero multiplier set");
@@ -83,7 +83,7 @@ export function registerWoundConfigEdgeCaseTests(quench) {
           await actor.update({ "system.woundsMultiplier": -2 });
 
           // ACT
-          actor.prepareData();
+          actor.reset();
 
           // ASSERT - System should handle gracefully
           assert.equal(actor.system.woundsMultiplier, -2, "Negative multiplier set");
@@ -98,7 +98,7 @@ export function registerWoundConfigEdgeCaseTests(quench) {
           await actor.update({ "system.woundsMultiplier": 2.5 });
 
           // ACT
-          actor.prepareData();
+          actor.reset();
 
           // ASSERT
           assert.equal(actor.system.woundsMultiplier, 2.5, "Fractional multiplier set");
@@ -111,7 +111,7 @@ export function registerWoundConfigEdgeCaseTests(quench) {
           await actor.update({ "system.woundsMultiplier": 1 });
 
           // ACT
-          actor.prepareData();
+          actor.reset();
 
           // ASSERT
           assert.equal(actor.system.woundsMultiplier, 1, "Multiplier is 1");
@@ -133,7 +133,7 @@ export function registerWoundConfigEdgeCaseTests(quench) {
 
           // ACT - Change to multiplier 4
           await actor.update({ "system.woundsMultiplier": 4 });
-          actor.prepareData();
+          actor.reset();
 
           // ASSERT - Out threshold should change
           const newOut = actor.system.woundLevels.out.value;
@@ -259,7 +259,7 @@ export function registerWoundConfigEdgeCaseTests(quench) {
           await actor.update({ "system.woundsPenaltyMod": -5 });
 
           // ACT
-          actor.prepareData();
+          actor.reset();
 
           // ASSERT
           assert.equal(actor.system.woundsPenaltyMod, -5, "Negative modifier set");
@@ -273,7 +273,7 @@ export function registerWoundConfigEdgeCaseTests(quench) {
           await actor.update({ "system.woundsPenaltyMod": 0 });
 
           // ACT
-          actor.prepareData();
+          actor.reset();
 
           // ASSERT
           assert.equal(actor.system.woundsPenaltyMod, 0, "Zero modifier");
@@ -291,7 +291,7 @@ export function registerWoundConfigEdgeCaseTests(quench) {
           await actor.update({ "system.woundsPenaltyMod": 10 });
 
           // ACT
-          actor.prepareData();
+          actor.reset();
 
           // ASSERT
           assert.equal(actor.system.woundsPenaltyMod, 10, "Positive modifier set");
@@ -307,7 +307,7 @@ export function registerWoundConfigEdgeCaseTests(quench) {
           await actor.update({ "system.woundsPenaltyMod": -99 });
 
           // ACT
-          actor.prepareData();
+          actor.reset();
 
           // ASSERT - Should handle gracefully
           assert.equal(actor.system.woundsPenaltyMod, -99, "Extreme negative set");
@@ -322,7 +322,7 @@ export function registerWoundConfigEdgeCaseTests(quench) {
           await actor.update({ "system.woundsPenaltyMod": 99 });
 
           // ACT
-          actor.prepareData();
+          actor.reset();
 
           // ASSERT
           assert.equal(actor.system.woundsPenaltyMod, 99, "Extreme positive set");
@@ -335,12 +335,12 @@ export function registerWoundConfigEdgeCaseTests(quench) {
 
         it("should recalculate penalties when modifier changes", async () => {
           // ARRANGE - Start with 0 modifier
-          actor.prepareData();
+          actor.reset();
           const basePenalty = actor.system.woundLevels.nicked.penaltyEff;
 
           // ACT - Add positive modifier
           await actor.update({ "system.woundsPenaltyMod": 5 });
-          actor.prepareData();
+          actor.reset();
 
           // ASSERT
           const newPenalty = actor.system.woundLevels.nicked.penaltyEff;
@@ -372,7 +372,7 @@ export function registerWoundConfigEdgeCaseTests(quench) {
           await npc.update({ "system.wounds.max": 0 });
 
           // ACT
-          npc.prepareData();
+          npc.reset();
 
           // ASSERT - System falls back to formula when max <= 0
           assert.equal(npc.system.woundMode, "manual", "Manual mode active");
@@ -386,7 +386,7 @@ export function registerWoundConfigEdgeCaseTests(quench) {
           await npc.update({ "system.wounds.max": -10 });
 
           // ACT
-          npc.prepareData();
+          npc.reset();
 
           // ASSERT - System falls back to formula when max <= 0
           assert.equal(npc.system.woundMode, "manual", "Manual mode active");
@@ -400,7 +400,7 @@ export function registerWoundConfigEdgeCaseTests(quench) {
           await npc.update({ "system.wounds.max": 9999 });
 
           // ACT
-          npc.prepareData();
+          npc.reset();
 
           // ASSERT
           assert.equal(npc.system.wounds.max, 9999, "Extreme max set");
@@ -417,7 +417,7 @@ export function registerWoundConfigEdgeCaseTests(quench) {
             "system.traits.sta": 4,
             "system.traits.wil": 4
           });
-          npc.prepareData();
+          npc.reset();
 
           // ASSERT
           assert.equal(npc.system.woundMode, "formula", "Formula mode active");
@@ -443,7 +443,7 @@ export function registerWoundConfigEdgeCaseTests(quench) {
           await npc.update({ "system.woundMode": "invalid" });
 
           // ACT
-          npc.prepareData();
+          npc.reset();
 
           // ASSERT - Should handle gracefully (might default to manual or formula)
           assert.exists(npc.system.woundMode, "Wound mode exists");
@@ -473,7 +473,7 @@ export function registerWoundConfigEdgeCaseTests(quench) {
           await npc.update({ "system.nrWoundLvls": 1 });
 
           // ACT
-          npc.prepareData();
+          npc.reset();
 
           // ASSERT
           assert.equal(npc.system.nrWoundLvls, 1, "One wound level");
@@ -484,7 +484,7 @@ export function registerWoundConfigEdgeCaseTests(quench) {
           await npc.update({ "system.nrWoundLvls": 15 });
 
           // ACT
-          npc.prepareData();
+          npc.reset();
 
           // ASSERT
           assert.equal(npc.system.nrWoundLvls, 15, "15 wound levels");
@@ -495,7 +495,7 @@ export function registerWoundConfigEdgeCaseTests(quench) {
           await npc.update({ "system.nrWoundLvls": 0 });
 
           // ACT
-          npc.prepareData();
+          npc.reset();
 
           // ASSERT - Should handle gracefully
           assert.equal(npc.system.nrWoundLvls, 0, "Zero wound levels");
@@ -506,7 +506,7 @@ export function registerWoundConfigEdgeCaseTests(quench) {
           await npc.update({ "system.nrWoundLvls": -5 });
 
           // ACT
-          npc.prepareData();
+          npc.reset();
 
           // ASSERT - Should handle gracefully
           assert.equal(npc.system.nrWoundLvls, -5, "Negative wound levels set");
@@ -517,7 +517,7 @@ export function registerWoundConfigEdgeCaseTests(quench) {
           await npc.update({ "system.nrWoundLvls": 8 });
 
           // ACT
-          npc.prepareData();
+          npc.reset();
 
           // ASSERT
           assert.equal(npc.system.nrWoundLvls, 8, "Standard 8 levels");
@@ -580,7 +580,7 @@ export function registerWoundConfigEdgeCaseTests(quench) {
           await Promise.all(promises);
 
           // ASSERT - Last write wins, no corruption
-          actor.prepareData();
+          actor.reset();
           assert.exists(actor.system, "System data intact");
           assert.exists(actor.system.woundLevels, "Wound levels calculated");
         });

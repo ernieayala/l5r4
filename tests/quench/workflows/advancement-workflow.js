@@ -54,7 +54,7 @@ export function registerAdvancementWorkflowTests(quench) {
           await skill.update({ "system.rank": 2 });
 
           // Force actor to recalculate derived data
-          character.prepareData();
+          character.reset();
 
           // ASSERT
           const updatedSkill = character.items.get(skill.id);
@@ -82,7 +82,7 @@ export function registerAdvancementWorkflowTests(quench) {
             await skill.update({ "system.rank": skill.system.rank + 1 });
           }
 
-          character.prepareData();
+          character.reset();
 
           // ASSERT
           const finalInsight = character.system.insight.points;
@@ -211,7 +211,7 @@ export function registerAdvancementWorkflowTests(quench) {
           }
 
           await character.createEmbeddedDocuments("Item", skillsNeeded);
-          character.prepareData();
+          character.reset();
 
           // ASSERT
           const newPoints = character.system.insight.points;
@@ -264,7 +264,7 @@ export function registerAdvancementWorkflowTests(quench) {
             "system.traits.agi": 4
           });
 
-          character.prepareData();
+          character.reset();
 
           // ASSERT
           const final = {

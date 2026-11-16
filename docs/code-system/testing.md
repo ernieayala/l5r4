@@ -53,6 +53,7 @@ which drops the `xp/` folder.
 | The file opens with a block comment saying what the batch covers, before the imports; no `@fileoverview`                                                                                                                                                          | review                            |
 | Flags and settings are read with `SYS_ID`, never the literal `"l5r4-enhanced"`                                                                                                                                                                                    | review                            |
 | Controls are found by `[data-action]`, `[data-*]`, or `[name]`, never by class (`templates-and-styles.md`)                                                                                                                                                        | ESLint `no-restricted-syntax`     |
+| A document is re-prepared with `document.reset()`, never a bare `prepareData()` or `prepareDerivedData()`, so the test reads values prepared from stored data (`foundry-patterns.md` **Preparation order**)                                                       | `l5r4/no-bare-prepare`            |
 
 Picked by majority: `register<Feature>Tests` (66 of 82 files), a header block before the imports (56 of 85 files).
 

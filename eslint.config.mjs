@@ -302,6 +302,11 @@ export default [
     files: ["module/**/*.js"],
     rules: { "l5r4/member-order": "warn" }
   },
+  {
+    // docs/code-system/foundry-patterns.md, Preparation order: re-prepare with reset(), tests included
+    files: [...SYSTEM, "tests/**/*.js"],
+    rules: { "l5r4/no-bare-prepare": "error" }
+  },
   // Layer boundaries, beside npm run deps:circular (CLAUDE.md Layers)
   {
     files: ["module/config/**/*.js"],

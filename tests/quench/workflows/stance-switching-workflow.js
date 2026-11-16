@@ -59,7 +59,7 @@ export function registerStanceSwitchingWorkflowTests(quench) {
             }
           ]);
 
-          actor.prepareData();
+          actor.reset();
         });
 
         afterEach(async () => {
@@ -75,7 +75,7 @@ export function registerStanceSwitchingWorkflowTests(quench) {
             }
           }
 
-          actor.prepareData();
+          actor.reset();
         });
 
         after(async () => {
@@ -97,7 +97,7 @@ export function registerStanceSwitchingWorkflowTests(quench) {
             }
           ]);
 
-          actor.prepareData();
+          actor.reset();
 
           // ASSERT
           assert.equal(actor.system.armorTn.current, 10, "Full Attack reduces TN by 10");
@@ -119,7 +119,7 @@ export function registerStanceSwitchingWorkflowTests(quench) {
             }
           ]);
 
-          actor.prepareData();
+          actor.reset();
           assert.equal(actor.system.armorTn.current, 10, "Full Attack active");
 
           // ACT - Switch to Defense stance
@@ -135,7 +135,7 @@ export function registerStanceSwitchingWorkflowTests(quench) {
           // Wait for hook processing (preCreate hook deletes conflicting stance)
           await new Promise(resolve => setTimeout(resolve, 50));
 
-          actor.prepareData();
+          actor.reset();
 
           // ASSERT - Only Defense stance should be active
           const activeStances = actor.effects.filter(e => {
@@ -181,7 +181,7 @@ export function registerStanceSwitchingWorkflowTests(quench) {
             // Wait for hook processing (preCreate hook deletes conflicting stance)
             await new Promise(resolve => setTimeout(resolve, 50));
 
-            actor.prepareData();
+            actor.reset();
 
             const activeStances = actor.effects.filter(
               e => !e.disabled && Array.from(e.statuses || []).some(id => STANCE_IDS.has(id))
@@ -222,7 +222,7 @@ export function registerStanceSwitchingWorkflowTests(quench) {
             }
           });
 
-          actor.prepareData();
+          actor.reset();
         });
 
         afterEach(async () => {
@@ -241,7 +241,7 @@ export function registerStanceSwitchingWorkflowTests(quench) {
           } catch {
             // Ignore if flag doesn't exist
           }
-          actor.prepareData();
+          actor.reset();
         });
 
         after(async () => {
@@ -263,7 +263,7 @@ export function registerStanceSwitchingWorkflowTests(quench) {
             }
           ]);
 
-          actor.prepareData();
+          actor.reset();
 
           // ASSERT - No immediate TN change (Center doesn't modify defense)
           assert.equal(actor.system.armorTn.current, baseTN, "Center stance: TN unchanged");
@@ -308,7 +308,7 @@ export function registerStanceSwitchingWorkflowTests(quench) {
             }
           ]);
 
-          actor.prepareData();
+          actor.reset();
           assert.exists(
             actor.effects.find(e => e.statuses?.has("centerStance")),
             "Center stance active"
@@ -326,7 +326,7 @@ export function registerStanceSwitchingWorkflowTests(quench) {
           // Wait for hook processing (preCreate hook deletes conflicting stance)
           await new Promise(resolve => setTimeout(resolve, 50));
 
-          actor.prepareData();
+          actor.reset();
 
           // ASSERT - Center stance removed, Full Attack active
           const centerStance = actor.effects.find(
@@ -433,7 +433,7 @@ export function registerStanceSwitchingWorkflowTests(quench) {
             }
           });
 
-          actor.prepareData();
+          actor.reset();
         });
 
         afterEach(async () => {
@@ -447,7 +447,7 @@ export function registerStanceSwitchingWorkflowTests(quench) {
               await actor.deleteEmbeddedDocuments("ActiveEffect", validIds);
             }
           }
-          actor.prepareData();
+          actor.reset();
         });
 
         after(async () => {
@@ -468,7 +468,7 @@ export function registerStanceSwitchingWorkflowTests(quench) {
             }
           ]);
 
-          actor.prepareData();
+          actor.reset();
 
           // ASSERT
           const stance = actor.effects.find(e => e.statuses?.has("fullAttackStance"));
@@ -486,7 +486,7 @@ export function registerStanceSwitchingWorkflowTests(quench) {
             }
           ]);
 
-          actor.prepareData();
+          actor.reset();
 
           // ASSERT - Prone condition active
           const proneEffect = actor.effects.find(e => e.statuses?.has("prone"));
@@ -508,7 +508,7 @@ export function registerStanceSwitchingWorkflowTests(quench) {
             }
           ]);
 
-          actor.prepareData();
+          actor.reset();
 
           // ASSERT - Stunned condition active
           const stunnedEffect = actor.effects.find(e => e.statuses?.has("stunned"));
@@ -528,7 +528,7 @@ export function registerStanceSwitchingWorkflowTests(quench) {
             }
           ]);
 
-          actor.prepareData();
+          actor.reset();
 
           // ASSERT - Entangled condition active
           const entangledEffect = actor.effects.find(e => e.statuses?.has("entangled"));
@@ -557,7 +557,7 @@ export function registerStanceSwitchingWorkflowTests(quench) {
             }
           ]);
 
-          actor.prepareData();
+          actor.reset();
 
           // ASSERT - Both effects active
           const proneEffect = actor.effects.find(e => e.statuses?.has("prone"));
@@ -567,7 +567,7 @@ export function registerStanceSwitchingWorkflowTests(quench) {
           assert.exists(stanceEffect, "Full Attack stance applied");
 
           // TN should stack: Base 20 - Prone 10 - Full Attack 10 = 0 (min 5)
-          // Note: Actual stacking logic handled in prepareDerivedData
+          // Note: the actor's derived data (L5R4Actor.prepareDerivedData) does the stacking
         });
 
         it("should maintain stance when conditions are added", async function () {
@@ -590,7 +590,7 @@ export function registerStanceSwitchingWorkflowTests(quench) {
             }
           ]);
 
-          actor.prepareData();
+          actor.reset();
 
           // ASSERT - Both effects active
           const defenseStance = actor.effects.find(e => e.statuses?.has("defenseStance"));
@@ -600,7 +600,7 @@ export function registerStanceSwitchingWorkflowTests(quench) {
           assert.exists(stunnedEffect, "Stunned condition applied");
 
           // Note: Game rules for how conditions interact with stances
-          // are handled in prepareDerivedData calculations
+          // are handled in the actor's derived data (L5R4Actor.prepareDerivedData)
         });
       });
     },

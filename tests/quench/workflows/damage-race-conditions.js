@@ -131,7 +131,7 @@ export function registerDamageRaceConditionTests(quench) {
 
         it("should handle wound level transitions during rapid damage", async () => {
           // ARRANGE - Get wound thresholds
-          actor.prepareData(); // Ensure wound levels calculated
+          actor.reset(); // Ensure wound levels calculated
           const healthyMax = actor.system.woundLevels.healthy.value;
           const nickedMax = actor.system.woundLevels.nicked?.value || healthyMax + 3;
           const grazedMax = actor.system.woundLevels.grazed?.value || nickedMax + 3;
@@ -266,7 +266,7 @@ export function registerDamageRaceConditionTests(quench) {
           await actor.update({ "system.armorTn.mod": -5 });
 
           // ACT - Calculate Armor TN
-          actor.prepareData();
+          actor.reset();
 
           // ASSERT
           const armorTN = actor.system.armorTn.current;
@@ -281,7 +281,7 @@ export function registerDamageRaceConditionTests(quench) {
           await actor.update({ "system.armorTn.mod": 0 });
 
           // ACT
-          actor.prepareData();
+          actor.reset();
 
           // ASSERT
           const armorTN = actor.system.armorTn.current;
@@ -295,7 +295,7 @@ export function registerDamageRaceConditionTests(quench) {
           await actor.update({ "system.armorTn.mod": 999 });
 
           // ACT
-          actor.prepareData();
+          actor.reset();
 
           // ASSERT
           const armorTN = actor.system.armorTn.current;
@@ -328,12 +328,12 @@ export function registerDamageRaceConditionTests(quench) {
 
         it("should apply Prone when reaching Down wound level", async () => {
           // ARRANGE
-          actor.prepareData(); // Ensure wound levels calculated
+          actor.reset(); // Ensure wound levels calculated
           const downThreshold = actor.system.woundLevels.down.value;
 
           // ACT - Apply damage to reach Down (must be > crippled but <= down)
           await actor.update({ "system.suffered": downThreshold });
-          actor.prepareData(); // Recalculate wound levels
+          actor.reset(); // Recalculate wound levels
 
           // ASSERT
           const isDown = actor.system.woundLevels.down.current;
@@ -345,7 +345,7 @@ export function registerDamageRaceConditionTests(quench) {
 
         it("should handle rapid damage crossing Down threshold", async () => {
           // ARRANGE
-          actor.prepareData(); // Ensure wound levels calculated
+          actor.reset(); // Ensure wound levels calculated
           const downThreshold = actor.system.woundLevels.down.value;
           const crippledThreshold = actor.system.woundLevels.crippled?.value || 0;
 
@@ -361,7 +361,7 @@ export function registerDamageRaceConditionTests(quench) {
           }
 
           // ASSERT
-          actor.prepareData(); // Recalculate wound levels
+          actor.reset(); // Recalculate wound levels
           const finalWounds = actor.system.suffered;
           assert.equal(finalWounds, downThreshold, "At Down threshold");
 

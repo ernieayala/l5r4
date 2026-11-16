@@ -76,7 +76,7 @@ export function registerMultipleModifierCombinationTests(quench) {
             }
           ]);
 
-          actor.prepareData();
+          actor.reset();
 
           // ACT - Calculate with all three modifiers
           const skillRank = 5;
@@ -138,7 +138,7 @@ export function registerMultipleModifierCombinationTests(quench) {
             }
           ]);
 
-          actor.prepareData();
+          actor.reset();
 
           // ACT - Calculate with Center stance
           const skillRank = 5;
@@ -208,7 +208,7 @@ export function registerMultipleModifierCombinationTests(quench) {
             }
           ]);
 
-          actor.prepareData();
+          actor.reset();
 
           // ACT - Calculate with ALL modifiers
           const skillRank = 5;
@@ -274,7 +274,7 @@ export function registerMultipleModifierCombinationTests(quench) {
             }
           ]);
 
-          actor.prepareData();
+          actor.reset();
 
           // ACT - Calculate attack with wound penalty
           const baseRolled = 9;
@@ -307,7 +307,7 @@ export function registerMultipleModifierCombinationTests(quench) {
             }
           ]);
 
-          actor.prepareData();
+          actor.reset();
 
           // ACT - Declare maximum raises (skill rank = max raises)
           const skillRank = 5;
@@ -408,7 +408,7 @@ export function registerMultipleModifierCombinationTests(quench) {
             }
           ]);
 
-          actor.prepareData();
+          actor.reset();
 
           // ACT - Calculate with Center
           const fireRing = 3;
