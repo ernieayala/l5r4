@@ -39,7 +39,7 @@ export const SORT_COLUMNS = Object.freeze({
   spells: Object.freeze([
     { key: "name", label: "l5r4.ui.common.name" },
     { key: "ring", label: "l5r4.ui.common.ring" },
-    { key: "mastery", label: "l5r4.ui.common.mastery" },
+    { key: "mastery", label: "l5r4.ui.sheets.mastery" },
     { label: "l5r4.magic.spells.cast" },
     {}
   ]),
@@ -47,13 +47,13 @@ export const SORT_COLUMNS = Object.freeze({
   katas: Object.freeze([
     { key: "name", label: "l5r4.ui.common.name" },
     { key: "ring", label: "l5r4.ui.common.ring" },
-    { key: "mastery", label: "l5r4.ui.common.mastery" },
+    { key: "mastery", label: "l5r4.ui.sheets.mastery" },
     {}
   ]),
   kihos: Object.freeze([
     { key: "name", label: "l5r4.ui.common.name" },
     { key: "ring", label: "l5r4.ui.common.ring" },
-    { key: "mastery", label: "l5r4.ui.common.mastery" },
+    { key: "mastery", label: "l5r4.ui.sheets.mastery" },
     { key: "type", label: "l5r4.ui.common.type" },
     {}
   ]),
