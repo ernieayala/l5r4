@@ -120,7 +120,7 @@ export async function rollFullDefense(actor) {
     actor.effects.filter(e => e.getFlag(SYS_ID, "effectId") === "fullDefense").map(e => e.id)
   );
   await applyEffect(actor, "fullDefense", {
-    name: `${T("l5r4.ui.effects.fullDefense")} (+${bonus})`,
+    name: F("l5r4.ui.effects.fullDefenseBonus", { bonus }),
     rules: [{ key: "ArmorTN", value: bonus }],
     start: ownTurnStartOf(actor)
   });

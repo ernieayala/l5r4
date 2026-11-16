@@ -525,6 +525,12 @@ Rulings applied (parts 13 and 14 and their follow-ups), each with the gate and a
 | Mixins under the function-length rule | Method bodies in named module functions, as split |
 | Duplicated coercion and attack defaults | `WoundConfig` reuses the mixin's coercion and `NpcAttackConfig`'s fallback reuses the field builders, each checked against HEAD (any input where they differ is reported first) |
 | Titles joined from a key and a name | One key per title with `{name}` placeholders; a check flags a localized string joined into a title |
+| `-0` in field coercion | The debounced-field mixin's coercion writes 0 for -0; WoundConfig reuses it, one copy |
+| Localized strings joined into labels (47 sites) | A second rule for any localized string joined with other text, entering as a ratchet; each label becomes one key with placeholders, ending strict |
+| Translations of a title that became one key | Seeded in each translation as "<its own title>: {name}", what its users see today |
+| `bio-item-handler.js` | Deleted: no template ever emitted its actions; bio rows route through `BaseActorSheet.CLICK_ACTIONS` |
+| A check label's "Void!" | "{label} [Void]", matching "[Unskilled]" (the voice rules forbid a closing "!") |
+| `spendElementalSlot`, `spendVoidSlot`, `validateSpellSlot` with no caller in `module/` | Confirm the casting dialog's path covers what they do; delete them and point Quench at the live path, or give them the real caller |
 | Citations of core's installed source | `[src: path:line]` keeps its line: the source is pinned to 14.370; rechecked when the target version moves |
 | `ui.common.mastery` / `masteryHint` | Moved together to a field group, with readers and translations, so the label and hint checks both hold |
 | Markdown line breaks | One line per paragraph: Prettier `proseWrap: "never"` for `*.md`, one reflow of `docs/`, `roadmap/`, and the root Markdown files |

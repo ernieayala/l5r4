@@ -13,6 +13,7 @@ import {
   getCastingSchoolRank,
   getAffinityDeficiencyModifier
 } from "../../../utils/spell-casting.js";
+import { formatLabelWithSuffix, formatShiftedLabel } from "../check/message-data.js";
 import { rollCheck } from "../check/roll-check.js";
 import { getSlotToSpend, getSlotDialogData, spendSlot } from "../check/spell-slots.js";
 import { getRollActor } from "../resources/void-points.js";
@@ -43,7 +44,7 @@ export async function rollRing({
   return rollCheck({
     actor: roller,
     kind: "ring",
-    label: `${T("l5r4.ui.mechanics.rolls.ringRoll")}: ${ringName}`,
+    label: F("l5r4.ui.mechanics.rolls.ringRollLabel", { element: ringName }),
     base: { roll: rank, keep: rank },
     ring,
     askForOptions,
@@ -116,7 +117,7 @@ function validateCastingRank(roller, choices, { ringName }) {
  * @returns {{modifiers: object[], labelSuffix: string}} rollCheck's `prepare` result
  */
 function buildCastingTerms({ schoolRank, shift }, slot) {
-  const kindLabel = shift > 0 ? "affinity" : shift < 0 ? "deficiency" : null;
+  const casting = formatShiftedLabel(T("l5r4.ui.mechanics.rolls.castingSuffix"), shift);
   return {
     modifiers: [
       {
@@ -127,9 +128,6 @@ function buildCastingTerms({ schoolRank, shift }, slot) {
         enabled: true
       }
     ],
-    labelSuffix:
-      ` (${T("l5r4.ui.mechanics.rolls.spellCasting")})` +
-      (kindLabel ? ` [${T(`l5r4.magic.spells.${kindLabel}`)}]` : "") +
-      slot.label
+    labelSuffix: formatLabelWithSuffix(casting, slot.label)
   };
 }

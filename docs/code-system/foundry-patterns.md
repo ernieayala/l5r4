@@ -6,8 +6,8 @@ cards, settings, migrations, and registration. API facts come from `roadmap/FOUN
 can check it.
 
 The member-order checks are the local ESLint rule `l5r4/member-order` in `tools/eslint/`, and the preparation check
-is `l5r4/no-bare-prepare` (**Preparation order**). Names (verbs, `_name` versus `#name`, `data-action` casing) are in
-`naming.md`.
+is `l5r4/no-bare-prepare` (**Preparation order**); `l5r4/joined-title` holds a window title to one key
+(**Window shape**). Names (verbs, `_name` versus `#name`, `data-action` casing) are in `naming.md`.
 
 ## ApplicationV2 windows and sheets
 
@@ -67,18 +67,19 @@ Not conforming, `module/sheets/pc-sheet.js:116` and `:457`: `PARTS` comes before
 
 ### Window shape
 
-| Rule                                                                                                                      | Check  |
-| ------------------------------------------------------------------------------------------------------------------------- | ------ |
-| `classes` starts `["l5r4", "l5r4-<file-name>"]`                                                                           | review |
-| `window.title` is an i18n key ending `.title`; core localizes it                                                          | review |
-| `window.icon` is a `fa-solid fa-*` class                                                                                  | review |
-| One part per template; the template path is `` `systems/${SYS_ID}/templates/apps/<file-name>.hbs` `` for an app           | review |
-| An app opened for one actor takes the actor as the constructor's first argument and throws without it                     | review |
-| An app opened for one actor sets `id` to `` `<file-name>-${actor.id}` ``, so one window opens per actor                   | review |
-| The base is written inline: `foundry.applications.api.HandlebarsApplicationMixin(foundry.applications.api.ApplicationV2)` | review |
-| `render(true)` opens a window; `render()` redraws one already open. A boolean is the `force` option (§4.3)                | review |
-| No manual `render()` after `document.update()`; the sheet re-renders itself (CLAUDE.md **Foundry Integration**)           | review |
-| `_onRender` is idempotent: it may run again on the same element (14.365 detach and reattach, §4.3)                        | review |
+| Rule                                                                                                                       | Check               |
+| -------------------------------------------------------------------------------------------------------------------------- | ------------------- |
+| `classes` starts `["l5r4", "l5r4-<file-name>"]`                                                                            | review              |
+| `window.title` is an i18n key ending `.title`; core localizes it                                                           | review              |
+| A window for one document overrides `title` with one `.titleFor` key and its placeholders, never `.title` joined to a name | `l5r4/joined-title` |
+| `window.icon` is a `fa-solid fa-*` class                                                                                   | review              |
+| One part per template; the template path is `` `systems/${SYS_ID}/templates/apps/<file-name>.hbs` `` for an app            | review              |
+| An app opened for one actor takes the actor as the constructor's first argument and throws without it                      | review              |
+| An app opened for one actor sets `id` to `` `<file-name>-${actor.id}` ``, so one window opens per actor                    | review              |
+| The base is written inline: `foundry.applications.api.HandlebarsApplicationMixin(foundry.applications.api.ApplicationV2)`  | review              |
+| `render(true)` opens a window; `render()` redraws one already open. A boolean is the `force` option (§4.3)                 | review              |
+| No manual `render()` after `document.update()`; the sheet re-renders itself (CLAUDE.md **Foundry Integration**)            | review              |
+| `_onRender` is idempotent: it may run again on the same element (14.365 detach and reattach, §4.3)                         | review              |
 
 Picked by majority: the literal template path (125 uses) over `TEMPLATE()` (22), the unprefixed actor-window id (7 of
 10 apps), the inline mixin (8 of 12), `render(true)` (13 of 17 forced renders, against 4 `render({ force: true })`).

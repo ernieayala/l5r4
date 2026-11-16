@@ -413,6 +413,11 @@ export function registerEffectsTests(quench) {
           await actor.update({ "system.suffered": downAt });
           assert.isTrue(await waitFor(() => actor.statuses.has("prone")), "Prone at Down");
           assert.lengthOf(effectsOf(actor, "prone"), 1, "applied once");
+          assert.equal(
+            effectsOf(actor, "prone")[0].name,
+            game.i18n.localize("l5r4.ui.effects.autoProne"),
+            "named as automatic in one key"
+          );
           await actor.update({ "system.suffered": 0 });
           assert.isTrue(await waitFor(() => !actor.statuses.has("prone")), "removed when healed");
         });

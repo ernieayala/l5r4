@@ -5,7 +5,7 @@
  * update while the user types; the window stays open after submit so the user can make several adjustments.
  */
 import { SYS_ID } from "../config/constants.js";
-import { T } from "../utils/localization.js";
+import { F, T } from "../utils/localization.js";
 import { logError } from "../utils/error-logging.js";
 import { DebouncedFieldMixin } from "../mixins/debounced-field-mixin.js";
 
@@ -68,8 +68,9 @@ export default class ArmorConfigApplication extends DebouncedFieldMixin(
    * @returns {string} Localized title with actor name
    */
   get title() {
-    const baseTitle = T("l5r4.apps.armorConfig.title");
-    return `${baseTitle}: ${this.actor?.name ?? T("l5r4.ui.common.unknown")}`;
+    return F("l5r4.apps.armorConfig.titleFor", {
+      name: this.actor?.name ?? T("l5r4.ui.common.unknown")
+    });
   }
 
   /**

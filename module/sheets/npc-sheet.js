@@ -7,7 +7,7 @@
  */
 import { SYS_ID } from "../config/constants.js";
 import { ACTION_TYPES, STANCES } from "../config/localization.js";
-import { T } from "../utils/localization.js";
+import { F, T } from "../utils/localization.js";
 import { on } from "../utils/dom.js";
 import { applySortPref } from "../utils/sorting.js";
 import { getActiveStance } from "../utils/stances.js";
@@ -404,8 +404,8 @@ function buildAttackSlots(system) {
       actionLabel,
       attackPool: formatAttackPool(attack),
       damagePool: formatAttackPool(damage),
-      attackLabel: attack.name || `${T("l5r4.ui.mechanics.combat.attack")} ${num}`,
-      damageLabel: `${T("l5r4.ui.common.damage")} ${num}`
+      attackLabel: attack.name || F("l5r4.ui.mechanics.combat.attackSlot", { slot: num }),
+      damageLabel: F("l5r4.ui.mechanics.combat.damageSlot", { slot: num })
     };
   });
 }

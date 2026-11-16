@@ -9,7 +9,7 @@
  */
 
 import { BOW_IN_MELEE_PENALTY } from "../../../config/game-mechanics.js";
-import { T } from "../../../utils/localization.js";
+import { F, T } from "../../../utils/localization.js";
 import { toInt } from "../../../utils/type-coercion.js";
 import { getBagEntries } from "../../../utils/rule-bag.js";
 import { getArmorTnPenalty } from "../../../utils/armor-penalties.js";
@@ -264,7 +264,7 @@ function getEffectBonusModifiers(actor, spec) {
     }
     return [
       {
-        label: `${T("l5r4.ui.check.effects")} (${name})`,
+        label: F("l5r4.ui.check.effectsFor", { key: name }),
         roll: toInt(bonus.roll),
         keep: toInt(bonus.keep),
         total: toInt(bonus.total),
@@ -314,7 +314,10 @@ function getTargetRangeTnModifiers(target) {
   return Object.entries(target.system.armorTn?.vs ?? {})
     .filter(([, value]) => value)
     .map(([range, value]) => ({
-      label: `${target.name} (${T(`l5r4.ui.check.range.${range}`)})`,
+      label: F("l5r4.ui.check.rangeFor", {
+        target: target.name,
+        range: T(`l5r4.ui.check.range.${range}`)
+      }),
       value,
       range,
       fromTarget: true
@@ -335,7 +338,7 @@ function getWeaponTnModifiers(actor, weapon) {
     return [];
   }
   const where = T(`l5r4.equipment.weapons.${mounted ? "tnMounted" : "tnOnFoot"}`);
-  return [{ label: `${weapon.name} (${where})`, value }];
+  return [{ label: F("l5r4.ui.check.weaponTn", { weapon: weapon.name, where }), value }];
 }
 
 /**

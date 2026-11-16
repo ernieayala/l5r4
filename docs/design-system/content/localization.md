@@ -88,13 +88,14 @@ tooltip key.
 keep two keys, because a translation may need two words. A sentence is one key with placeholders, never fragments
 joined in code or in a template.
 
-|                | Example                                                                                   | Source                                                                                |
-| -------------- | ----------------------------------------------------------------------------------------- | ------------------------------------------------------------------------------------- |
-| Conforming     | "{name} takes {wounds} Wounds from {damage} damage" as one key                            | `:643`                                                                                |
-| Non-conforming | `ui.emphasisManager.addCustom` repeats `apps.emphasisManager.addCustom`                   | `:696`, `:24`                                                                         |
-| Non-conforming | `ui.mechanics.wounds.woundConfiguration` repeats `apps.woundConfig.title`                 | `:512`, `:47`                                                                         |
-| Non-conforming | `` `${T("l5r4.ui.check.damageFor")} ${spec.label}` `` joins a fragment to a name          | `module/services/combat/damage.js:84`, `module/services/dice/rolls/weapon-roll.js:42` |
-| Non-conforming | `({{localize "l5r4.ui.check.of"}} {{freeRaises}})` builds a phrase from the fragment "of" | `templates/dialogs/check-dialog.hbs:55`                                               |
+|                | Example                                                                                   | Source                                                          |
+| -------------- | ----------------------------------------------------------------------------------------- | --------------------------------------------------------------- |
+| Conforming     | "{name} takes {wounds} Wounds from {damage} damage" as one key                            | `:643`                                                          |
+| Non-conforming | `ui.emphasisManager.addCustom` repeats `apps.emphasisManager.addCustom`                   | `:696`, `:24`                                                   |
+| Non-conforming | `ui.mechanics.wounds.woundConfiguration` repeats `apps.woundConfig.title`                 | `:512`, `:47`                                                   |
+| Conforming     | `F("l5r4.ui.check.damageLabel", { weapon: spec.label })`: "Damage for {weapon}"           | `module/services/combat/damage-roll.js`, `rollDamageFromAttack` |
+| Non-conforming | `` `${T("l5r4.ui.check.damageFor")} ${spec.label}` `` joins a fragment to a name          | modeled                                                         |
+| Non-conforming | `({{localize "l5r4.ui.check.of"}} {{freeRaises}})` builds a phrase from the fragment "of" | `templates/dialogs/check-dialog.hbs:55`                         |
 
 ### Duplicate trees
 
@@ -116,8 +117,11 @@ in one config file.
 | Wealth Manager strings   | `l5r4.apps.wealthManager` (`:36`)                              | `l5r4.ui.wealthManager` (`:701`)                                                      |
 | Window titles            | `l5r4.apps.<app>.title`                                        | `ui.combat.configuration` (`:606`), `ui.mechanics.wounds.woundConfiguration` (`:512`) |
 
-**Check.** `tests/lang.test.js`: the removed trees above do not exist. Review for other repeated values (two meanings
-may share a word) and for fragments.
+**Check.** `tests/lang.test.js`: the removed trees above do not exist. ESLint `l5r4/joined-copy` (`tools/eslint/`)
+fails a localized string in `module/` or `dist/` joined to other text with `+` or in a template literal, and
+`l5r4/joined-title` names the same fault in a window, dialog, or card title. A suffix added to a label goes through
+`l5r4.ui.check.labelWithSuffix` ("{label} {suffix}"). Review for other repeated values (two meanings may share a word)
+and for fragments joined in templates.
 
 ## Interpolation
 

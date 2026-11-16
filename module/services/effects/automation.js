@@ -31,7 +31,7 @@ export async function updateProne(actor) {
   if (isDown(actor)) {
     if (!actor.statuses.has("prone") && !actor.statuses.has("dead")) {
       await applyEffect(actor, "prone", {
-        name: `${T("l5r4.ui.common.auto")}: ${T("l5r4.ui.statusEffects.prone")}`,
+        name: T("l5r4.ui.effects.autoProne"),
         flags: { autoApplied: true }
       });
     }

@@ -6,7 +6,7 @@
  * game-rules/29_types_of_rolls.md, p.80
  */
 
-import { T } from "../../../utils/localization.js";
+import { F, T } from "../../../utils/localization.js";
 import { toInt } from "../../../utils/type-coercion.js";
 import { toTraitKey } from "../../../utils/trait-keys.js";
 import { rollCheck } from "../check/roll-check.js";
@@ -40,7 +40,7 @@ export async function rollTrait({
   return rollCheck({
     actor: roller,
     kind: "trait",
-    label: `${name} ${T("l5r4.ui.common.roll")}`,
+    label: F("l5r4.ui.mechanics.rolls.traitRollLabel", { traitName: name }),
     base: { roll: rank, keep: rank },
     trait,
     unskilled,

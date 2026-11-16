@@ -125,6 +125,11 @@ export function registerSheetsAndAppsTests(quench) {
     context => {
       const { describe, it, before, after, assert } = context;
       const clean = cleanTest(assert);
+      /** A window's title is its one title key, filled (docs/design-system/content/localization.md). */
+      const assertTitle = (app, key, data) => {
+        assert.isTrue(game.i18n.has(key), `${key} is defined`);
+        assert.equal(app.title, game.i18n.localize(key, data));
+      };
       const created = [];
       const messages = [];
       let baseline;
@@ -203,6 +208,10 @@ export function registerSheetsAndAppsTests(quench) {
               created.push(item);
               const sheet = item.sheet;
               await sheet.render({ force: true });
+              assertTitle(sheet, "l5r4.ui.sheets.itemTitle", {
+                item: `Sheets ${type}`,
+                type: game.i18n.localize(`TYPES.Item.${type}`)
+              });
               await changeThroughSheet(sheet, 'input[name="name"]', `Renamed ${type}`);
               assert.equal(item.name, `Renamed ${type}`);
               await runEveryAction(sheet, baseline);
@@ -379,10 +388,10 @@ export function registerSheetsAndAppsTests(quench) {
           "should save a combat config field and run every action",
           clean(async function () {
             this.timeout(SURFACE_TIMEOUT_MS);
-            await exercise(
-              new CombatConfigApplication(pc),
-              changeField(pc, "initiative.totalMod", "4")
-            );
+            await exercise(new CombatConfigApplication(pc), async app => {
+              assertTitle(app, "l5r4.apps.combatConfig.titleFor", { name: pc.name });
+              await changeField(pc, "initiative.totalMod", "4")(app);
+            });
             assert.equal(pc.system.initiative.totalMod, 4);
           })
         );
@@ -391,7 +400,10 @@ export function registerSheetsAndAppsTests(quench) {
           "should save an armor config field and run every action",
           clean(async function () {
             this.timeout(SURFACE_TIMEOUT_MS);
-            await exercise(new ArmorConfigApplication(pc), changeField(pc, "armorTn.mod", "3"));
+            await exercise(new ArmorConfigApplication(pc), async app => {
+              assertTitle(app, "l5r4.apps.armorConfig.titleFor", { name: pc.name });
+              await changeField(pc, "armorTn.mod", "3")(app);
+            });
             assert.equal(pc.system.armorTn.mod, 3);
           })
         );
@@ -400,7 +412,10 @@ export function registerSheetsAndAppsTests(quench) {
           "should save a wound config field and run every action",
           clean(async function () {
             this.timeout(SURFACE_TIMEOUT_MS);
-            await exercise(new WoundConfigApplication(pc), changeField(pc, "woundsMod", "2"));
+            await exercise(new WoundConfigApplication(pc), async app => {
+              assertTitle(app, "l5r4.apps.woundConfig.titleFor", { name: pc.name });
+              await changeField(pc, "woundsMod", "2")(app);
+            });
             assert.equal(pc.system.woundsMod, 2);
           })
         );
@@ -410,6 +425,7 @@ export function registerSheetsAndAppsTests(quench) {
           clean(async function () {
             this.timeout(SURFACE_TIMEOUT_MS);
             await exercise(new ConditionManager(pc), async app => {
+              assertTitle(app, "l5r4.apps.conditionManager.titleFor", { name: pc.name });
               const checkboxes = app.element.querySelector("multi-checkbox");
               const applied = new Promise(resolve => Hooks.once("createActiveEffect", resolve));
               checkboxes.value = ["blinded"];
@@ -426,6 +442,7 @@ export function registerSheetsAndAppsTests(quench) {
             this.timeout(SURFACE_TIMEOUT_MS);
             const koku = pc.system.wealth.koku;
             await exercise(new WealthManagerApplication(pc), async app => {
+              assertTitle(app, "l5r4.apps.wealthManager.titleFor", { name: pc.name });
               const saved = nextUpdate(pc);
               app.element.querySelector('[name="add-amount"]').value = "5";
               app.element.querySelector('[name="add-denomination"]').value = "koku";
@@ -441,6 +458,7 @@ export function registerSheetsAndAppsTests(quench) {
           clean(async function () {
             this.timeout(SURFACE_TIMEOUT_MS);
             await exercise(new XpManagerApplication(pc), async app => {
+              assertTitle(app, "l5r4.apps.xpManager.titleFor", { name: pc.name });
               const saved = nextUpdate(pc);
               app.element.querySelector('[name="xp-amount"]').value = "10";
               app.element.querySelector('[name="xp-note"]').value = "Sheets award";
@@ -458,6 +476,7 @@ export function registerSheetsAndAppsTests(quench) {
             this.timeout(SURFACE_TIMEOUT_MS);
             const app = new NpcAttackConfigApplication(npc, "attack1");
             await app.render({ force: true });
+            assertTitle(app, "l5r4.apps.npcAttackConfig.titleFor", { slot: "1" });
             const saved = nextUpdate(npc);
             app.element.querySelector('[name="attack1.name"]').value = "Claw";
             app.element.querySelector('[data-action="save-attack"]').click();
@@ -475,6 +494,7 @@ export function registerSheetsAndAppsTests(quench) {
             const skill = pc.items.getName("Kenjutsu");
             const app = new EmphasisManagerApplication({ item: skill });
             await app.render({ force: true });
+            assertTitle(app, "l5r4.apps.emphasisManager.titleFor", { item: skill.name });
             const box = app.element.querySelector('input[type="checkbox"][name^="emphasis."]');
             const emphasis = box.name.slice("emphasis.".length);
             box.checked = !(skill.system.availableEmphases ?? []).includes(emphasis);
@@ -496,6 +516,24 @@ export function registerSheetsAndAppsTests(quench) {
               resolve();
             })
           );
+
+        it(
+          "should title the ledger dialog with the character's name in one key",
+          clean(async function () {
+            this.timeout(SURFACE_TIMEOUT_MS);
+            const sheet = pc.sheet;
+            await sheet.render({ force: true });
+            let title = "";
+            const closed = answerDialog(async dialog => {
+              title = dialog.title;
+              await dialog.close({ animate: false });
+            });
+            sheet.element.querySelector('[data-action="open-ledger"]').click();
+            await closed;
+            await sheet.close({ animate: false });
+            assertTitle({ title }, "l5r4.ui.ledger.titleFor", { name: pc.name });
+          })
+        );
 
         it(
           "should switch the wound mode in the NPC wound config",

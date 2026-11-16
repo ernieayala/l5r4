@@ -70,8 +70,11 @@ export function registerNpcAttackConfigTests(quench) {
         it("should have correct title", async () => {
           await editor.render(true);
 
-          const title = editor.title;
-          assert.include(title, "1", "Title includes attack number");
+          assert.equal(
+            editor.title,
+            game.i18n.localize("l5r4.apps.npcAttackConfig.titleFor", { slot: "1" }),
+            "one title key with the attack's slot"
+          );
         });
 
         it("should display attack name field", async () => {

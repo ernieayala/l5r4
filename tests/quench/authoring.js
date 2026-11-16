@@ -255,7 +255,9 @@ export function registerAuthoringTests(quench) {
             const actor = track(await createTestPC({ name: "Character options: chooser" }));
             await actor.createEmbeddedDocuments("Item", [createSkillData("Kenjutsu", 2)]);
             const labelled = new Promise(resolve =>
-              Hooks.once("renderDialogV2", app => resolve(buttonLabelsOf(app)))
+              Hooks.once("renderDialogV2", app =>
+                resolve({ ...buttonLabelsOf(app), title: app.title })
+              )
             );
             const answered = answerCheckDialog({ selection: "kenjutsu" });
             const data = await preparePurchase(actor, {
@@ -276,10 +278,19 @@ export function registerAuthoringTests(quench) {
               }
             });
             await answered;
+            const shown = await labelled;
             assert.equal(
-              (await labelled).ok,
+              shown.ok,
               game.i18n.localize("l5r4.ui.purchase.makeChoice"),
               "the button names the choice"
+            );
+            assert.equal(
+              shown.title,
+              game.i18n.localize("l5r4.ui.purchase.choiceTitle", {
+                item: "Quench Weapon Focus",
+                prompt: game.i18n.localize("l5r4.ui.purchase.choose")
+              }),
+              "the title is one key naming the item and the question"
             );
             assert.equal(data.system.rules[0].selection, "kenjutsu");
             await actor.createEmbeddedDocuments("Item", [data]);

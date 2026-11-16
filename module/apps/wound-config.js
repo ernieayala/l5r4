@@ -7,9 +7,9 @@
  */
 import { SYS_ID } from "../config/constants.js";
 import { NPC_NUMBER_WOUND_LEVELS } from "../config/game-mechanics.js";
-import { T } from "../utils/localization.js";
+import { F, T } from "../utils/localization.js";
 import { logError } from "../utils/error-logging.js";
-import { DebouncedFieldMixin } from "../mixins/debounced-field-mixin.js";
+import { DebouncedFieldMixin, toFieldValue } from "../mixins/debounced-field-mixin.js";
 
 /**
  * Valid wound calculation modes.
@@ -102,8 +102,9 @@ export default class WoundConfigApplication extends DebouncedFieldMixin(
    * @returns {string} Localized title with actor name
    */
   get title() {
-    const baseTitle = T("l5r4.apps.woundConfig.title");
-    return `${baseTitle}: ${this.actor?.name ?? T("l5r4.ui.common.unknown")}`;
+    return F("l5r4.apps.woundConfig.titleFor", {
+      name: this.actor?.name ?? T("l5r4.ui.common.unknown")
+    });
   }
 
   /**
@@ -182,14 +183,7 @@ export default class WoundConfigApplication extends DebouncedFieldMixin(
    */
   async _onFieldChange(event, element) {
     const field = element.name;
-
-    // Type coercion (inherited from mixin logic)
-    const value =
-      element.type === "checkbox"
-        ? element.checked
-        : element.type === "number" || element.dataset.type === "Number"
-          ? parseInt(element.value, 10) || 0
-          : element.value;
+    const value = toFieldValue(element);
 
     if (!field) {
       console.warn(`${SYS_ID}`, "Field change event with no field name");

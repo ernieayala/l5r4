@@ -11,6 +11,12 @@ Versioning: [Semantic Versioning](https://semver.org/spec/v2.0.0.html)
 
 ### Changed
 
+Wording. Dialog buttons name their action ("Set cap", "Allow", "Start session", "Spend Void Point", "Remove") in
+place of OK and Yes/No, and the XP manager's add button reads "Add XP". Window and card titles that pair a name with a
+label are one translatable phrase each; a translation that had translated the wound configuration title keeps it. A
+check made with a Void Point is labelled "[Void]" in place of "Void!". A spent spell slot reads "[Use spell slot
+Fire]" or "[Use Void spell slot]", and an empty Void slot reads "Void spell slots: 0".
+
 CSS custom properties renamed. The Ring colors now hold whole colors instead of RGB triplets: read them as
 `var(--l5r4-color-ring-water)`, not `rgb(var(--water-ring-color))`.
 

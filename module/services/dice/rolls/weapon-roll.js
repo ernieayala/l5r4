@@ -8,7 +8,7 @@
  * game-rules/29_types_of_rolls.md, p.80
  */
 
-import { T } from "../../../utils/localization.js";
+import { F, T } from "../../../utils/localization.js";
 import { toInt } from "../../../utils/type-coercion.js";
 import { rollCheck } from "../check/roll-check.js";
 import { getRollActor } from "../resources/void-points.js";
@@ -38,7 +38,7 @@ export async function rollWeaponDamage({
   actor = null
 } = {}) {
   const raises = Math.max(0, toInt(attackRaises));
-  let label = `${T("l5r4.ui.check.damageFor")} ${weaponName}`;
+  let label = F("l5r4.ui.check.damageLabel", { weapon: weaponName });
   if (description) {
     label += ` (${description})`;
   }

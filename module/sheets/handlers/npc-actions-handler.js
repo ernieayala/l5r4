@@ -96,7 +96,9 @@ export class NpcActionsHandler {
     if (!event.shiftKey) {
       const name =
         attack.name ||
-        `${game.i18n.localize("l5r4.ui.mechanics.combat.attack")} ${attackKey.replace("attack", "")}`;
+        game.i18n.localize("l5r4.ui.mechanics.combat.attackSlot", {
+          slot: attackKey.replace("attack", "")
+        });
       const confirmed = await foundry.applications.api.DialogV2.confirm({
         window: { title: "l5r4.ui.dialogs.deleteAttack.title" },
         content: await foundry.applications.handlebars.renderTemplate(DIALOG_TEMPLATES.confirm, {

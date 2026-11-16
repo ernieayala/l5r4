@@ -13,7 +13,7 @@ import {
 } from "../../utils/mechanics.js";
 import { toTraitKey } from "../../utils/trait-keys.js";
 import { toInt } from "../../utils/type-coercion.js";
-import { T } from "../../utils/localization.js";
+import { F, T } from "../../utils/localization.js";
 import { rollSkill } from "../../services/dice/rolls/skill-roll.js";
 import { rollPool } from "../../services/dice/rolls/simple-roll.js";
 import { rollTrait } from "../../services/dice/rolls/trait-roll.js";
@@ -390,7 +390,7 @@ export class RollHandler {
     return rollPool({
       roll: traitValue,
       keep: traitValue,
-      rollName: `${weapon.name} ${T("l5r4.ui.mechanics.rolls.attackRoll")}`,
+      rollName: F("l5r4.ui.mechanics.rolls.weaponAttackRoll", { weapon: weapon.name }),
       askForOptions,
       rollType: "attack",
       actor,

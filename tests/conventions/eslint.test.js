@@ -17,6 +17,8 @@ const VIOLATING = Object.freeze([
   { rule: "l5r4/member-order", file: "member-order.js", as: "module/apps/example.js" },
   { rule: "l5r4/doc-format", file: "doc-format.js", as: "module/services/example.js" },
   { rule: "l5r4/no-bare-prepare", file: "no-bare-prepare.js", as: "tests/quench/example.js" },
+  { rule: "l5r4/joined-title", file: "joined-title.js", as: "module/apps/example.js" },
+  { rule: "l5r4/joined-copy", file: "joined-copy.js", as: "module/services/example.js" },
   { rule: "no-restricted-imports", file: "layer-import.js", as: "module/utils/example.js" },
   { rule: "no-restricted-globals", file: "layer-global.js", as: "module/utils/example.js" },
   {

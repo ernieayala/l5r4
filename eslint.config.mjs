@@ -269,6 +269,10 @@ export default [
       "l5r4/import-order": "warn",
       "l5r4/module-shape": "warn",
       "l5r4/doc-format": ["warn", { header: true }],
+      // docs/design-system/content/localization.md, One key per meaning: copy, titles included, is one key with
+      // placeholders
+      "l5r4/joined-title": "error",
+      "l5r4/joined-copy": "error",
       camelcase: ["error", { properties: "never", ignoreImports: true, ignoreGlobals: true }],
       "new-cap": [
         "warn",

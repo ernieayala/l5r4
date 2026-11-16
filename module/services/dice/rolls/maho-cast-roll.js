@@ -38,7 +38,7 @@ export async function rollMahoCast({ actor, spell, showDialog = true } = {}) {
   return rollCheck({
     actor,
     kind: "maho",
-    label: `${T("l5r4.magic.maho.casting")}: ${spell.name}`,
+    label: F("l5r4.magic.maho.castingLabel", { spell: spell.name }),
     base: { roll: rank + actor.system.insightRank, keep: rank },
     ring,
     tn: 5 + 5 * mastery,
@@ -76,7 +76,7 @@ async function spendBloodCost(actor, choices, { bloodCost }) {
   }
   return {
     freeRaises,
-    labelSuffix: ` [${T("l5r4.magic.maho.bloodCost")}: ${total}]`
+    labelSuffix: F("l5r4.magic.maho.bloodSuffix", { total })
   };
 }
 
@@ -102,5 +102,5 @@ async function applyMahoTaint(actor, { success, mastery, masterOfBlood }) {
     reason: T("l5r4.magic.maho.taintGained")
   });
   ui.notifications?.warn(F("l5r4.magic.maho.taintGainedNotification", { taint }));
-  return { labelSuffix: ` [${T("l5r4.magic.maho.taintGained")}: ${taint}]` };
+  return { labelSuffix: F("l5r4.magic.maho.taintSuffix", { taint }) };
 }

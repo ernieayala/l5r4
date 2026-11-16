@@ -8,7 +8,7 @@
  */
 
 import { TN_PER_RAISE } from "../../config/game-mechanics.js";
-import { T } from "../../utils/localization.js";
+import { F, T } from "../../utils/localization.js";
 import { toInt } from "../../utils/type-coercion.js";
 import { MANEUVER_RAISES, getFeintBonus } from "../../utils/damage.js";
 import { rollCheck } from "../dice/check/roll-check.js";
@@ -44,7 +44,7 @@ export async function rollDamageFromAttack(message, { askForOptions = true } = {
   return rollCheck({
     actor,
     kind: "damage",
-    label: `${T("l5r4.ui.check.damageFor")} ${spec.label}`,
+    label: F("l5r4.ui.check.damageLabel", { weapon: spec.label }),
     base,
     weapon,
     explode: spec.explode ?? null,

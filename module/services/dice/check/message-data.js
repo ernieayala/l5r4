@@ -62,18 +62,40 @@ export function buildCheckLabel(base, terms) {
   const { rolledUnskilled, emphasis, voidPoint, labelSuffix } = terms;
   let label = base;
   if (rolledUnskilled) {
-    label += ` [${T("l5r4.ui.mechanics.rolls.unskilled")}]`;
+    label = F("l5r4.ui.mechanics.rolls.unskilledLabel", { label });
   }
   if (emphasis) {
-    label += ` (${T("l5r4.ui.mechanics.rolls.emphasis")}: ${emphasis})`;
+    label = F("l5r4.ui.mechanics.rolls.emphasisLabel", { label, emphasisName: emphasis });
   }
   if (voidPoint) {
-    label += ` ${T("l5r4.ui.mechanics.rings.void")}!`;
+    label = F("l5r4.ui.mechanics.rolls.voidLabel", { label });
   }
-  if (labelSuffix) {
-    label += labelSuffix;
+  return formatLabelWithSuffix(label, labelSuffix);
+}
+
+/**
+ * A label with a suffix after it, such as a spell slot's "[Use spell slot Fire]"; the label alone without one.
+ * @param {string} label - The localized label
+ * @param {string|undefined} suffix - The localized suffix
+ * @returns {string}
+ */
+export function formatLabelWithSuffix(label, suffix) {
+  return suffix ? F("l5r4.ui.check.labelWithSuffix", { label, suffix }) : label;
+}
+
+/**
+ * A Spell Casting Roll's label marked with the Affinity or Deficiency that shifts its School Rank.
+ * game-rules/66_magic_and_spell_casting.md, p.164
+ * @param {string} label - The localized label
+ * @param {number} shift - +1 for an Affinity, -1 for a Deficiency, 0 for neither
+ * @returns {string}
+ */
+export function formatShiftedLabel(label, shift) {
+  if (!shift) {
+    return label;
   }
-  return label;
+  const tag = shift > 0 ? "l5r4.magic.spells.affinityTag" : "l5r4.magic.spells.deficiencyTag";
+  return formatLabelWithSuffix(label, T(tag));
 }
 
 /**

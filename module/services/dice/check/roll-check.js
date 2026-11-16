@@ -30,7 +30,12 @@ import { askGmAllow } from "../../gm-allow.js";
 import { spendVoidPoint } from "../resources/void-points.js";
 import { applyTrackChange } from "../../ledger.js";
 import { renderCheckCard } from "./card.js";
-import { buildCheckLabel, buildCheckSystem, buildTnModifiers } from "./message-data.js";
+import {
+  formatLabelWithSuffix,
+  buildCheckLabel,
+  buildCheckSystem,
+  buildTnModifiers
+} from "./message-data.js";
 import {
   buildCheck,
   buildChosenTerms,
@@ -245,7 +250,7 @@ async function postCheck(check, terms, { pool, roll }) {
   let label = buildCheckLabel(request.label, terms);
   if (request.beforePost) {
     const post = await request.beforePost({ success: outcome?.success ?? null, total: roll.total });
-    label += post?.labelSuffix ?? "";
+    label = formatLabelWithSuffix(label, post?.labelSuffix);
   }
   const system = buildCheckSystem(check, terms, { pool, roll, tn, tnModifiers, outcome, label });
   const content = await renderCheckCard(system, roll, { actorId: actor.id });

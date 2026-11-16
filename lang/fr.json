@@ -32,7 +32,8 @@
         "removeMoney": "Retirer de l'Argent"
       },
       "woundConfig": {
-        "title": "Configuration des Blessures"
+        "title": "Configuration des Blessures",
+        "titleFor": "Configuration des Blessures: {name}"
       }
     },
     "character": {
@@ -214,23 +215,28 @@
       "maho": {
         "additionalBlood": "Sang Supplémentaire",
         "additionalBloodBonus": "Chaque quantité supplémentaire de coût en sang accorde +1 Relance Gratuite",
-        "bloodCost": "Sang",
         "bloodRequired": "Coût en Sang Requis",
         "bloodSource": {
           "label": "Source de Sang",
           "other": "Autre",
           "self": "Soi-même"
         },
+        "bloodSuffix": "[Sang: {total}]",
         "casting": "Lancement de Maho",
+        "castingLabel": "Lancement de Maho: {spell}",
         "taintGained": "Corruption Gagnée",
         "taintGainedNotification": "Gagné {taint} points de Corruption des Terres de l'Ombre en lançant du maho",
+        "taintSuffix": "[Corruption Gagnée: {taint}]",
         "warningTitle": "Magie de Sang - Maho Interdit"
       },
       "spells": {
         "affinity": "Affinité",
+        "affinityTag": "[Affinité]",
         "areaOfEffect": "Zone d'Effet",
         "cast": "Lancer",
+        "concentrationName": "Concentration: {spell}",
         "deficiency": "Déficience",
+        "deficiencyTag": "[Déficience]",
         "duration": "Durée",
         "maho": "Maho",
         "memorized": "Mémorisé",
@@ -238,8 +244,10 @@
         "range": "Portée",
         "restored": "restaurés",
         "slotsRestored": "Tous les emplacements de sort restaurés au maximum",
+        "slotSuffix": "[Utiliser Emplacement de Sort {element}]",
         "useSpellSlot": "Utiliser Emplacement de Sort",
-        "voidSlot": "Utiliser Emplacement de Sort de Vide"
+        "voidSlot": "Utiliser Emplacement de Sort de Vide",
+        "voidSlotSuffix": "[Utiliser Emplacement de Sort de Vide]"
       }
     },
     "system": {
@@ -283,7 +291,6 @@
         "action": "Action",
         "active": "Actif",
         "armor": "Armure",
-        "auto": "Auto",
         "bonus": "Bonus",
         "cancel": "Annuler",
         "clan": "Clan",
@@ -322,6 +329,9 @@
           "title": "Supprimer l'Objet ?"
         }
       },
+      "effects": {
+        "autoProne": "Auto: À Terre"
+      },
       "hints": {
         "leftClickPlusRightClickMinus": "Shift+Clic gauche : +1, Shift+Clic droit : -1",
         "leftRightToAdjust": "Gauche et Droite pour Ajuster",
@@ -332,19 +342,21 @@
       "mechanics": {
         "combat": {
           "attack": "Attaque",
+          "attackSlot": "Attaque {slot}",
+          "damageSlot": "Dégâts {slot}",
           "woundPenalty": "Pénalité de Blessure"
         },
         "fear": {
-          "catastrophicFailure": "ÉCHEC CATASTROPHIQUE ! Le personnage fuit ou se recroqueville de terreur.",
+          "catastrophicSuffix": "— Pénalité : -{penalty}k0 à tous les jets ÉCHEC CATASTROPHIQUE ! Le personnage fuit ou se recroqueville de terreur.",
           "effectName": "Peur {rank}",
           "label": "Peur {rank}",
           "noFear": "Ce PNJ n'a pas d'effet de Peur configuré",
           "noTargets": "Aucun pion sélectionné pour le test de Peur",
           "noWillpower": "{name} n'a pas de trait Volonté",
-          "penaltyApplied": "Pénalité : -{penalty}k0 à tous les jets",
+          "penaltySuffix": "— Pénalité : -{penalty}k0 à tous les jets",
           "rank": "Rang de Peur",
           "rollForSelected": "Cliquez pour tester la Peur contre les personnages sélectionnés",
-          "testAgainst": "vs {name}",
+          "testLabel": "Test de Peur {rank} vs {name}",
           "testResult": "Test de Peur {rank}"
         },
         "rings": {
@@ -356,27 +368,37 @@
           "void": "Vide",
           "voidInitBoost": "Utiliser Vide",
           "voidPoints": "Points de Vide",
+          "voidPointsEmpty": "Points de Vide: 0",
           "voidTnBoost": "Utiliser Vide",
           "water": "Eau"
         },
         "rolls": {
           "attackRoll": "Jet d'Attaque",
+          "castingSuffix": "(Jet de Lancement de Sort)",
           "damageRoll": "Jet de Dégâts",
           "emphasis": "Emphase",
+          "emphasisLabel": "{label} (Emphase: {emphasisName})",
           "explodesOn": "Explose Sur",
           "failure": "Échec",
           "freeRaises": "Relances Gratuites",
           "missed": "Raté",
+          "namedRoll": "Lancer: {roll}",
           "raise": "Relance",
           "raises": "Relances",
           "ringRoll": "Jet d'Anneau",
+          "ringRollLabel": "Jet d'Anneau: {element}",
           "skillRoll": "Jet de Compétence",
+          "skillRollLabel": "Jet de Compétence: {skillName} / {traitName}",
           "socialResistance": "Résistance Sociale",
           "socialResistanceHint": "Résister à l'Intimidation ou la Tentation.",
           "spellCasting": "Jet de Lancement de Sort",
+          "spellCastingLabel": "Jet de Lancement de Sort: {spell}",
           "success": "Succès",
           "traitRoll": "Jet de Trait",
-          "unskilled": "Sans Compétence"
+          "traitRollLabel": "{traitName} Lancer",
+          "unskilledLabel": "{label} [Sans Compétence]",
+          "voidLabel": "{label} [Vide]",
+          "weaponAttackRoll": "{weapon} Jet d'Attaque"
         },
         "stances": {
           "attack": "Posture d'Attaque",

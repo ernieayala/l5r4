@@ -32,7 +32,8 @@
         "removeMoney": "Remover Dinheiro"
       },
       "woundConfig": {
-        "title": "Configuração de Ferimentos"
+        "title": "Configuração de Ferimentos",
+        "titleFor": "Configuração de Ferimentos: {name}"
       }
     },
     "character": {
@@ -214,23 +215,28 @@
       "maho": {
         "additionalBlood": "Sangue Adicional",
         "additionalBloodBonus": "Cada custo de sangue adicional concede +1 Aumento Grátis",
-        "bloodCost": "Sangue",
         "bloodRequired": "Custo de Sangue Necessário",
         "bloodSource": {
           "label": "Fonte de Sangue",
           "other": "Outro",
           "self": "Próprio"
         },
+        "bloodSuffix": "[Sangue: {total}]",
         "casting": "Conjuração de Maho",
+        "castingLabel": "Conjuração de Maho: {spell}",
         "taintGained": "Corrupção Ganha",
         "taintGainedNotification": "Ganhou {taint} pontos de Corrupção das Terras Sombrias ao conjurar maho",
+        "taintSuffix": "[Corrupção Ganha: {taint}]",
         "warningTitle": "Magia de Sangue - Maho Proibido"
       },
       "spells": {
         "affinity": "Afinidade",
+        "affinityTag": "[Afinidade]",
         "areaOfEffect": "Área de Efeito",
         "cast": "Conjurar",
+        "concentrationName": "Concentração: {spell}",
         "deficiency": "Deficiência",
+        "deficiencyTag": "[Deficiência]",
         "duration": "Duração",
         "maho": "Maho",
         "memorized": "Memorizada",
@@ -238,8 +244,10 @@
         "range": "Alcance",
         "restored": "restaurados",
         "slotsRestored": "Todos os espaços de magia restaurados ao máximo",
+        "slotSuffix": "[Usar Espaço de Magia {element}]",
         "useSpellSlot": "Usar Espaço de Magia",
-        "voidSlot": "Usar Espaço de Magia de Vazio"
+        "voidSlot": "Usar Espaço de Magia de Vazio",
+        "voidSlotSuffix": "[Usar Espaço de Magia de Vazio]"
       }
     },
     "system": {
@@ -283,7 +291,6 @@
         "action": "Ação",
         "active": "Ativo",
         "armor": "Armadura",
-        "auto": "Auto",
         "bonus": "Bônus",
         "cancel": "Cancelar",
         "clan": "Clã",
@@ -322,6 +329,9 @@
           "title": "Excluir Item?"
         }
       },
+      "effects": {
+        "autoProne": "Auto: Caído"
+      },
       "hints": {
         "leftClickPlusRightClickMinus": "Shift+Clique esquerdo: +1, Shift+Clique direito: -1",
         "leftRightToAdjust": "Esquerda e Direita para Ajustar",
@@ -332,19 +342,21 @@
       "mechanics": {
         "combat": {
           "attack": "Ataque",
+          "attackSlot": "Ataque {slot}",
+          "damageSlot": "Dano {slot}",
           "woundPenalty": "Penalidade de Ferimento"
         },
         "fear": {
-          "catastrophicFailure": "FALHA CATASTRÓFICA! O personagem foge ou se encolhe aterrorizado.",
+          "catastrophicSuffix": "— Penalidade: -{penalty}k0 em todas as rolagens FALHA CATASTRÓFICA! O personagem foge ou se encolhe aterrorizado.",
           "effectName": "Medo {rank}",
           "label": "Medo {rank}",
           "noFear": "Este NPC não tem efeito de Medo configurado",
           "noTargets": "Nenhum token selecionado para teste de Medo",
           "noWillpower": "{name} não tem atributo Vontade",
-          "penaltyApplied": "Penalidade: -{penalty}k0 em todas as rolagens",
+          "penaltySuffix": "— Penalidade: -{penalty}k0 em todas as rolagens",
           "rank": "Grau de Medo",
           "rollForSelected": "Clique para testar Medo contra personagens selecionados",
-          "testAgainst": "vs {name}",
+          "testLabel": "Teste de Medo {rank} vs {name}",
           "testResult": "Teste de Medo {rank}"
         },
         "rings": {
@@ -356,27 +368,37 @@
           "void": "Vazio",
           "voidInitBoost": "Usar Vazio",
           "voidPoints": "Pontos de Vazio",
+          "voidPointsEmpty": "Pontos de Vazio: 0",
           "voidTnBoost": "Usar Vazio",
           "water": "Água"
         },
         "rolls": {
           "attackRoll": "Rolagem de Ataque",
+          "castingSuffix": "(Rolagem de Conjuração)",
           "damageRoll": "Rolagem de Dano",
           "emphasis": "Ênfase",
+          "emphasisLabel": "{label} (Ênfase: {emphasisName})",
           "explodesOn": "Explode Em",
           "failure": "Falha",
           "freeRaises": "Aumentos Grátis",
           "missed": "Errou",
+          "namedRoll": "Rolar: {roll}",
           "raise": "Aumento",
           "raises": "Aumentos",
           "ringRoll": "Rolagem de Anel",
+          "ringRollLabel": "Rolagem de Anel: {element}",
           "skillRoll": "Rolagem de Perícia",
+          "skillRollLabel": "Rolagem de Perícia: {skillName} / {traitName}",
           "socialResistance": "Resistência Social",
           "socialResistanceHint": "Resistindo Intimidação ou Tentação.",
           "spellCasting": "Rolagem de Conjuração",
+          "spellCastingLabel": "Rolagem de Conjuração: {spell}",
           "success": "Sucesso",
           "traitRoll": "Rolagem de Atributo",
-          "unskilled": "Sem Perícia"
+          "traitRollLabel": "{traitName} Rolar",
+          "unskilledLabel": "{label} [Sem Perícia]",
+          "voidLabel": "{label} [Vazio]",
+          "weaponAttackRoll": "{weapon} Rolagem de Ataque"
         },
         "stances": {
           "attack": "Postura de Ataque",

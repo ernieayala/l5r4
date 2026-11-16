@@ -115,6 +115,23 @@ export function DebouncedFieldMixin(Base) {
 }
 
 /**
+ * A form field's value by its type: a checkbox's checked state, a number field's integer, or the text. A field
+ * reading "-0" (or "-0.5") saves 0, never -0.
+ * @param {HTMLInputElement} element - The form field
+ * @returns {boolean|number|string} The value to save
+ */
+export function toFieldValue(element) {
+  if (element.type === "checkbox") {
+    return element.checked;
+  }
+  if (element.type === "number" || element.dataset.type === "Number") {
+    // -0 is falsy, so it becomes 0
+    return toInt(element.value, 0) || 0;
+  }
+  return element.value;
+}
+
+/**
  * Listen for `change` on every `[data-action="update-field"]` field of the rendered window.
  * @param {ApplicationV2} app - A window with the mixin
  */
@@ -158,19 +175,4 @@ function updateFieldValue(app, element) {
   } else {
     app.updateDebounced(field, value);
   }
-}
-
-/**
- * A form field's value by its type: a checkbox's checked state, a number field's integer, or the text.
- * @param {HTMLInputElement} element
- * @returns {boolean|number|string}
- */
-function toFieldValue(element) {
-  if (element.type === "checkbox") {
-    return element.checked;
-  }
-  if (element.type === "number" || element.dataset.type === "Number") {
-    return toInt(element.value, 0);
-  }
-  return element.value;
 }

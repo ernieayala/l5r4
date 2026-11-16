@@ -37,7 +37,7 @@ window shape, one row shape, and one rule for how each saves.
 | Part   | Rule                                                                                                                              |
 | ------ | --------------------------------------------------------------------------------------------------------------------------------- |
 | Frame  | Core's: title bar, close control, resize handle where `resizable`, the window elevation (`foundations/frames.md`, Elevation)      |
-| Title  | `window.title`, an i18n key ending `.title`; a window for one actor appends the actor's name                                      |
+| Title  | `window.title`, an i18n key ending `.title`; a window for one actor shows its `.titleFor` key, the actor's name as `{name}`       |
 | Icon   | `window.icon`, the window's icon from `foundations/iconography.md` rule 3, `fa-solid`                                             |
 | Root   | `classes: ["l5r4", "l5r4-<file-name>"]`; `id` `<file-name>-${actor.id}` for a window opened for one actor, so one opens per actor |
 | Body   | Core's `standard-form` with `form-group` rows for fields, `h3` headings between groups                                            |
@@ -268,7 +268,7 @@ Non-conforming, `templates/apps/xp-manager.hbs:7`: `<input type="text" disabled 
 | Browser tabs         | One line each; the strip wraps when the window is narrow (`_compendium-browser.scss:30-34`)                         |
 | Rule field values    | JSON fields are `textarea`s that grow by hand (`resize: vertical`, `_rules-editor.scss:49-53`)                      |
 | Manager labels       | `form-group` labels wrap; the field keeps its width                                                                 |
-| Window title         | Core's title bar: the actor's name appended after the window's name                                                 |
+| Window title         | Core's title bar: the window's `.titleFor` key, the actor's name after the window's name                            |
 
 ## Do and don't
 

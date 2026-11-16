@@ -32,7 +32,8 @@
         "removeMoney": "Убрать Деньги"
       },
       "woundConfig": {
-        "title": "Настройка Ран"
+        "title": "Настройка Ран",
+        "titleFor": "Настройка Ран: {name}"
       }
     },
     "character": {
@@ -214,23 +215,28 @@
       "maho": {
         "additionalBlood": "Дополнительная Кровь",
         "additionalBloodBonus": "Каждая дополнительная кровавая цена даёт +1 Бесплатное Повышение",
-        "bloodCost": "Кровь",
         "bloodRequired": "Требуется Кровавая Цена",
         "bloodSource": {
           "label": "Источник Крови",
           "other": "Другого",
           "self": "Себя"
         },
+        "bloodSuffix": "[Кровь: {total}]",
         "casting": "Сотворение Махо",
+        "castingLabel": "Сотворение Махо: {spell}",
         "taintGained": "Получена Порча",
         "taintGainedNotification": "Получено {taint} очков Порчи Земель Теней от сотворения махо",
+        "taintSuffix": "[Получена Порча: {taint}]",
         "warningTitle": "Кровавая Магия - Запретное Махо"
       },
       "spells": {
         "affinity": "Родство",
+        "affinityTag": "[Родство]",
         "areaOfEffect": "Область Действия",
         "cast": "Сотворить",
+        "concentrationName": "Концентрация: {spell}",
         "deficiency": "Недостаток",
+        "deficiencyTag": "[Недостаток]",
         "duration": "Длительность",
         "maho": "Махо",
         "memorized": "Выучено",
@@ -238,8 +244,10 @@
         "range": "Дальность",
         "restored": "восстановлено",
         "slotsRestored": "Все ячейки заклинаний восстановлены до максимума",
+        "slotSuffix": "[Использовать Ячейку Заклинания {element}]",
         "useSpellSlot": "Использовать Ячейку Заклинания",
-        "voidSlot": "Использовать Ячейку Заклинания Пустоты"
+        "voidSlot": "Использовать Ячейку Заклинания Пустоты",
+        "voidSlotSuffix": "[Использовать Ячейку Заклинания Пустоты]"
       }
     },
     "system": {
@@ -287,7 +295,6 @@
         "action": "Действие",
         "active": "Активный",
         "armor": "Доспех",
-        "auto": "Авто",
         "bonus": "Бонус",
         "cancel": "Отмена",
         "clan": "Клан",
@@ -326,6 +333,9 @@
           "title": "Удалить Предмет?"
         }
       },
+      "effects": {
+        "autoProne": "Авто: Повержен"
+      },
       "hints": {
         "leftClickPlusRightClickMinus": "Shift+Левый клик: +1, Shift+Правый клик: -1",
         "leftRightToAdjust": "Влево и Вправо для Настройки",
@@ -336,19 +346,21 @@
       "mechanics": {
         "combat": {
           "attack": "Атака",
+          "attackSlot": "Атака {slot}",
+          "damageSlot": "Урон {slot}",
           "woundPenalty": "Штраф от Ран"
         },
         "fear": {
-          "catastrophicFailure": "КАТАСТРОФИЧЕСКИЙ ПРОВАЛ! Персонаж убегает или съёживается в ужасе.",
+          "catastrophicSuffix": "— Штраф: -{penalty}к0 ко всем броскам КАТАСТРОФИЧЕСКИЙ ПРОВАЛ! Персонаж убегает или съёживается в ужасе.",
           "effectName": "Страх {rank}",
           "label": "Страх {rank}",
           "noFear": "У этого НПС не настроен эффект Страха",
           "noTargets": "Не выбраны токены для проверки Страха",
           "noWillpower": "У {name} нет черты Воля",
-          "penaltyApplied": "Штраф: -{penalty}к0 ко всем броскам",
+          "penaltySuffix": "— Штраф: -{penalty}к0 ко всем броскам",
           "rank": "Ранг Страха",
           "rollForSelected": "Нажмите, чтобы проверить Страх против выбранных персонажей",
-          "testAgainst": "против {name}",
+          "testLabel": "Проверка Страха {rank} против {name}",
           "testResult": "Проверка Страха {rank}"
         },
         "rings": {
@@ -360,27 +372,37 @@
           "void": "Пустота",
           "voidInitBoost": "Использовать Пустоту",
           "voidPoints": "Очки Пустоты",
+          "voidPointsEmpty": "Очки Пустоты: 0",
           "voidTnBoost": "Использовать Пустоту",
           "water": "Вода"
         },
         "rolls": {
           "attackRoll": "Бросок Атаки",
+          "castingSuffix": "(Бросок Заклинания)",
           "damageRoll": "Бросок Урона",
           "emphasis": "Акцент",
+          "emphasisLabel": "{label} (Акцент: {emphasisName})",
           "explodesOn": "Взрывается На",
           "failure": "Неудача",
           "freeRaises": "Бесплатные Повышения",
           "missed": "Промах",
+          "namedRoll": "Бросить: {roll}",
           "raise": "Повышение",
           "raises": "Повышения",
           "ringRoll": "Бросок Кольца",
+          "ringRollLabel": "Бросок Кольца: {element}",
           "skillRoll": "Бросок Навыка",
+          "skillRollLabel": "Бросок Навыка: {skillName} / {traitName}",
           "socialResistance": "Социальное Сопротивление",
           "socialResistanceHint": "Сопротивление Запугиванию или Искушению.",
           "spellCasting": "Бросок Заклинания",
+          "spellCastingLabel": "Бросок Заклинания: {spell}",
           "success": "Успех",
           "traitRoll": "Бросок Черты",
-          "unskilled": "Без Навыка"
+          "traitRollLabel": "{traitName} Бросить",
+          "unskilledLabel": "{label} [Без Навыка]",
+          "voidLabel": "{label} [Пустота]",
+          "weaponAttackRoll": "{weapon} Бросок Атаки"
         },
         "stances": {
           "attack": "Атакующая Стойка",

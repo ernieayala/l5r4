@@ -123,6 +123,34 @@ function iaijutsuMasteryOf(actor) {
  */
 function rollStage(actor, { stage, opponent, focusBonus = 0, freeRaises = 0 }) {
   const trait = { assessment: "awa", focus: "void", strike: "ref" }[stage];
+  const request = {
+    ...buildSkillRequest(actor, "iaijutsu", trait),
+    kind: stage === "strike" ? "attack" : "skill",
+    label: F("l5r4.ui.combat.duel.rollLabel", {
+      stage: T(`l5r4.ui.combat.duel.${stage}`),
+      name: actor.name
+    }),
+    target: opponent,
+    modifiers: buildStageModifiers(actor, { stage, focusBonus })
+  };
+  if (stage === "assessment") {
+    request.tn = 10 + 5 * opponent.system.insightRank;
+  } else if (stage === "strike") {
+    request.tn = toInt(opponent.system.armorTn.current);
+    request.weapon = duelWeaponOf(actor);
+    request.prepare = async () => ({ freeRaises });
+  }
+  return rollCheck(request);
+}
+
+/**
+ * A duel stage's modifiers from the duelist's Iaijutsu: the +1k1 edge won at Assessment, and the Focus bonus of
+ * Iaijutsu Mastery.
+ * @param {Actor} actor
+ * @param {{stage: string, focusBonus: number}} roll - The stage, and whether Assessment won the edge
+ * @returns {object[]}
+ */
+function buildStageModifiers(actor, { stage, focusBonus }) {
   const mastery = iaijutsuMasteryOf(actor);
   const modifiers = [];
   if (focusBonus) {
@@ -135,21 +163,7 @@ function rollStage(actor, { stage, opponent, focusBonus = 0, freeRaises = 0 }) {
   if (stage === "focus" && mastery.focusTotal) {
     modifiers.push({ label: T("l5r4.ui.combat.duel.focusMastery"), total: mastery.focusTotal });
   }
-  const request = {
-    ...buildSkillRequest(actor, "iaijutsu", trait),
-    kind: stage === "strike" ? "attack" : "skill",
-    label: `${T(`l5r4.ui.combat.duel.${stage}`)}: ${actor.name}`,
-    target: opponent,
-    modifiers
-  };
-  if (stage === "assessment") {
-    request.tn = 10 + 5 * opponent.system.insightRank;
-  } else if (stage === "strike") {
-    request.tn = toInt(opponent.system.armorTn.current);
-    request.weapon = duelWeaponOf(actor);
-    request.prepare = async () => ({ freeRaises });
-  }
-  return rollCheck(request);
+  return modifiers;
 }
 
 /**

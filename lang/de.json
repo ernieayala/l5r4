@@ -32,7 +32,8 @@
         "removeMoney": "Geld Entfernen"
       },
       "woundConfig": {
-        "title": "Wundenkonfiguration"
+        "title": "Wundenkonfiguration",
+        "titleFor": "Wundenkonfiguration: {name}"
       }
     },
     "character": {
@@ -214,23 +215,28 @@
       "maho": {
         "additionalBlood": "Zusätzliches Blut",
         "additionalBloodBonus": "Jede zusätzliche Blutkostenmenge gewährt +1 Freie Erhöhung",
-        "bloodCost": "Blut",
         "bloodRequired": "Blutkosten Erforderlich",
         "bloodSource": {
           "label": "Blutquelle",
           "other": "Andere",
           "self": "Selbst"
         },
+        "bloodSuffix": "[Blut: {total}]",
         "casting": "Maho Wirken",
+        "castingLabel": "Maho Wirken: {spell}",
         "taintGained": "Verderben Erhalten",
         "taintGainedNotification": "{taint} Punkte Schattenland-Verderben durch Maho-Wirken erhalten",
+        "taintSuffix": "[Verderben Erhalten: {taint}]",
         "warningTitle": "Blutmagie - Verbotenes Maho"
       },
       "spells": {
         "affinity": "Affinität",
+        "affinityTag": "[Affinität]",
         "areaOfEffect": "Wirkungsbereich",
         "cast": "Wirken",
+        "concentrationName": "Konzentration: {spell}",
         "deficiency": "Mangel",
+        "deficiencyTag": "[Mangel]",
         "duration": "Dauer",
         "maho": "Maho",
         "memorized": "Gelernt",
@@ -238,8 +244,10 @@
         "range": "Reichweite",
         "restored": "wiederhergestellt",
         "slotsRestored": "Alle Zauberplätze auf Maximum wiederhergestellt",
+        "slotSuffix": "[Zauberplatz Verwenden {element}]",
         "useSpellSlot": "Zauberplatz Verwenden",
-        "voidSlot": "Leere-Zauberplatz Verwenden"
+        "voidSlot": "Leere-Zauberplatz Verwenden",
+        "voidSlotSuffix": "[Leere-Zauberplatz Verwenden]"
       }
     },
     "system": {
@@ -283,7 +291,6 @@
         "action": "Aktion",
         "active": "Aktiv",
         "armor": "Rüstung",
-        "auto": "Auto",
         "bonus": "Bonus",
         "cancel": "Abbrechen",
         "clan": "Klan",
@@ -322,6 +329,9 @@
           "title": "Gegenstand Löschen?"
         }
       },
+      "effects": {
+        "autoProne": "Auto: Am Boden"
+      },
       "hints": {
         "leftClickPlusRightClickMinus": "Shift+Linksklick: +1, Shift+Rechtsklick: -1",
         "leftRightToAdjust": "Links und Rechts zum Anpassen",
@@ -332,19 +342,21 @@
       "mechanics": {
         "combat": {
           "attack": "Angriff",
+          "attackSlot": "Angriff {slot}",
+          "damageSlot": "Schaden {slot}",
           "woundPenalty": "Wundenstrafe"
         },
         "fear": {
-          "catastrophicFailure": "KATASTROPHALER FEHLSCHLAG! Charakter flieht oder kauert sich hilflos zusammen.",
+          "catastrophicSuffix": "— Strafe: -{penalty}k0 auf alle Würfe KATASTROPHALER FEHLSCHLAG! Charakter flieht oder kauert sich hilflos zusammen.",
           "effectName": "Furcht {rank}",
           "label": "Furcht {rank}",
           "noFear": "Dieser NSC hat keinen Furchteffekt konfiguriert",
           "noTargets": "Keine Spielsteine für Furchttest ausgewählt",
           "noWillpower": "{name} hat keine Willenskraft-Eigenschaft",
-          "penaltyApplied": "Strafe: -{penalty}k0 auf alle Würfe",
+          "penaltySuffix": "— Strafe: -{penalty}k0 auf alle Würfe",
           "rank": "Furchtrang",
           "rollForSelected": "Klicken, um Furcht gegen ausgewählte Charaktere zu testen",
-          "testAgainst": "vs {name}",
+          "testLabel": "Furcht {rank} Test vs {name}",
           "testResult": "Furcht {rank} Test"
         },
         "rings": {
@@ -356,27 +368,37 @@
           "void": "Leere",
           "voidInitBoost": "Leere Nutzen",
           "voidPoints": "Leere-Punkte",
+          "voidPointsEmpty": "Leere-Punkte: 0",
           "voidTnBoost": "Leere Nutzen",
           "water": "Wasser"
         },
         "rolls": {
           "attackRoll": "Angriffswurf",
+          "castingSuffix": "(Zauberspruch Wurf)",
           "damageRoll": "Schadenswurf",
           "emphasis": "Schwerpunkt",
+          "emphasisLabel": "{label} (Schwerpunkt: {emphasisName})",
           "explodesOn": "Explodiert Bei",
           "failure": "Fehlschlag",
           "freeRaises": "Freie Erhöhungen",
           "missed": "Verfehlt",
+          "namedRoll": "Würfeln: {roll}",
           "raise": "Erhöhung",
           "raises": "Erhöhungen",
           "ringRoll": "Ringwurf",
+          "ringRollLabel": "Ringwurf: {element}",
           "skillRoll": "Fertigkeitswurf",
+          "skillRollLabel": "Fertigkeitswurf: {skillName} / {traitName}",
           "socialResistance": "Sozialer Widerstand",
           "socialResistanceHint": "Einschüchterung oder Versuchung widerstehen.",
           "spellCasting": "Zauberspruch Wurf",
+          "spellCastingLabel": "Zauberspruch Wurf: {spell}",
           "success": "Erfolg",
           "traitRoll": "Eigenschaftswurf",
-          "unskilled": "Ungeübt"
+          "traitRollLabel": "{traitName} Würfeln",
+          "unskilledLabel": "{label} [Ungeübt]",
+          "voidLabel": "{label} [Leere]",
+          "weaponAttackRoll": "{weapon} Angriffswurf"
         },
         "stances": {
           "attack": "Angriffshaltung",

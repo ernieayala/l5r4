@@ -98,7 +98,7 @@ function rollControl(state, i) {
   return rollCheck({
     ...buildSkillRequest(actor, i === 0 ? state.skill : "jiujutsu", "str"),
     kind: "skill",
-    label: `${T("l5r4.ui.combat.grapple.control")}: ${actor.name}`,
+    label: F("l5r4.ui.combat.grapple.controlLabel", { name: actor.name }),
     target: opponent
   });
 }
@@ -117,7 +117,9 @@ function rollHit(state) {
   return rollCheck({
     actor,
     kind: "damage",
-    label: `${T("l5r4.ui.combat.grapple.hit")}: ${weapon?.label ?? T("l5r4.ui.combat.unarmed")}`,
+    label: F("l5r4.ui.combat.grapple.hitLabel", {
+      weapon: weapon?.label ?? T("l5r4.ui.combat.unarmed")
+    }),
     base: weapon
       ? { roll: weapon.roll, keep: weapon.keep, bonus: weapon.bonus }
       : { roll: strength, keep: 1 },
@@ -284,7 +286,7 @@ registerFlow("grapple", {
       }
     }
     return foundry.applications.handlebars.renderTemplate(CHAT_TEMPLATES.flowCard, {
-      title: `${T("l5r4.ui.combat.grapple.title")}: ${names.join(" / ")}`,
+      title: F("l5r4.ui.combat.grapple.titleFor", { name: names[0], target: names[1] }),
       stage: state.over
         ? T("l5r4.ui.combat.grapple.over")
         : F("l5r4.ui.combat.grapple.inControl", { name: names[state.control] }),

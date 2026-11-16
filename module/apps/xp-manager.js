@@ -7,7 +7,7 @@
  */
 import { SYS_ID } from "../config/constants.js";
 import { SORT_COLUMNS, SORT_KEYS } from "../config/sort-keys.js";
-import { T } from "../utils/localization.js";
+import { F, T } from "../utils/localization.js";
 import { toInt } from "../utils/type-coercion.js";
 import { logError } from "../utils/error-logging.js";
 import { getSortPref, updateSortPref } from "../services/sort-preferences.js";
@@ -74,8 +74,9 @@ export default class XpManagerApplication extends foundry.applications.api.Handl
    * @returns {string} Localized title with actor name
    */
   get title() {
-    const baseTitle = T("l5r4.apps.xpManager.title");
-    return `${baseTitle}: ${this.actor?.name ?? T("l5r4.ui.common.unknown")}`;
+    return F("l5r4.apps.xpManager.titleFor", {
+      name: this.actor?.name ?? T("l5r4.ui.common.unknown")
+    });
   }
 
   /**

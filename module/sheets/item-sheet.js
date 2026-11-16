@@ -7,6 +7,7 @@
  */
 
 import { SYS_ID } from "../config/constants.js";
+import { F } from "../utils/localization.js";
 import { prepareItemSheetOptions } from "../documents/item/integration/sheet-data.js";
 import { summaryOf } from "../documents/summary.js";
 import EmphasisManagerApplication from "../apps/emphasis-manager.js";
@@ -187,8 +188,10 @@ export default class L5R4ItemSheet extends HandlebarsApplicationMixin(ItemSheetV
    * @readonly
    */
   get title() {
-    const name = this.item?.name || game.i18n.localize("DOCUMENT.Item");
-    return `${name} [${getTypeLabel(this.item?.type)}]`;
+    return F("l5r4.ui.sheets.itemTitle", {
+      item: this.item?.name || game.i18n.localize("DOCUMENT.Item"),
+      type: getTypeLabel(this.item?.type)
+    });
   }
 
   /**

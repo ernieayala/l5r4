@@ -30,7 +30,8 @@ export function getSlotDialogData(actor, ringKey) {
  * @param {Actor} actor
  * @param {string} ringKey
  * @param {string} choice - "elemental", "void", or "none" (dialog input)
- * @returns {{path: string|null, label: string}|null} null, after a warning, when the chosen pool is empty
+ * @returns {{path: string|null, label: string}|null} The slot's path and its label suffix ("" for none); null,
+ *   after a warning, when the chosen pool is empty
  */
 export function getSlotToSpend(actor, ringKey, choice) {
   if (choice !== "elemental" && choice !== "void") {
@@ -50,9 +51,9 @@ export function getSlotToSpend(actor, ringKey, choice) {
   }
   const label =
     choice === "void"
-      ? T("l5r4.magic.spells.voidSlot")
-      : `${T("l5r4.magic.spells.useSpellSlot")} ${T(`l5r4.ui.mechanics.rings.${ringKey}`)}`;
-  return { path: `system.spellSlots.${key}`, label: ` [${label}]` };
+      ? T("l5r4.magic.spells.voidSlotSuffix")
+      : F("l5r4.magic.spells.slotSuffix", { element: T(`l5r4.ui.mechanics.rings.${ringKey}`) });
+  return { path: `system.spellSlots.${key}`, label };
 }
 
 /**

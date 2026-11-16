@@ -325,6 +325,14 @@ export function registerRollPipelineTests(quench) {
             assert.equal(message.system.kind, "maho");
             assert.equal(actor._source.system.suffered, 4, "blood cost 2 plus 2 extra");
             assert.equal(message.system.tn.freeRaises, 1);
+            const blooded = game.i18n.localize("l5r4.ui.check.labelWithSuffix", {
+              label: game.i18n.localize("l5r4.magic.maho.castingLabel", { spell: spell.name }),
+              suffix: game.i18n.localize("l5r4.magic.maho.bloodSuffix", { total: 4 })
+            });
+            assert.isTrue(
+              message.system.label.startsWith(blooded),
+              "the label names the blood paid"
+            );
           })
         );
 
@@ -858,6 +866,10 @@ export function registerRollPipelineTests(quench) {
             );
             const second = keep(await rollAgainKeepBetter(first));
             assert.equal(second.system.rerollOf, first.id);
+            assert.equal(
+              second.system.label,
+              game.i18n.localize("l5r4.ui.check.rerolledLabel", { label: first.system.label })
+            );
             assert.isAtLeast(second.system.outcome.total, first.system.outcome.total);
             assert.equal(poolOf(second), poolOf(first));
           })

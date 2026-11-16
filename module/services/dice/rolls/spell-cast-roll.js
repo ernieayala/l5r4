@@ -18,6 +18,7 @@ import {
   getCastingSchoolRank,
   getAffinityDeficiencyModifier
 } from "../../../utils/spell-casting.js";
+import { formatShiftedLabel } from "../check/message-data.js";
 import { rollCheck } from "../check/roll-check.js";
 import { getSlotToSpend, getSlotDialogData, spendSlot } from "../check/spell-slots.js";
 import { applyEffect, effectsOf } from "../../effects/apply.js";
@@ -106,11 +107,10 @@ async function validateCastingRanks(actor, spell, ring) {
  * @returns {string}
  */
 function formatCastingLabel(spell, shift) {
-  const label = `${T("l5r4.ui.mechanics.rolls.spellCasting")}: ${spell.name}`;
-  if (!shift) {
-    return label;
-  }
-  return `${label} [${T(`l5r4.magic.spells.${shift > 0 ? "affinity" : "deficiency"}`)}]`;
+  return formatShiftedLabel(
+    F("l5r4.ui.mechanics.rolls.spellCastingLabel", { spell: spell.name }),
+    shift
+  );
 }
 
 /**
@@ -216,7 +216,7 @@ async function startConcentration(actor, spell) {
     await effect.delete();
   }
   await applyEffect(actor, "concentration", {
-    name: `${T("l5r4.ui.statusEffects.concentration")}: ${spell.name}`,
+    name: F("l5r4.magic.spells.concentrationName", { spell: spell.name }),
     level: Math.max(1, toInt(spell.system.mastery)),
     origin: spell.uuid
   });

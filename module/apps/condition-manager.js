@@ -7,7 +7,7 @@
  */
 import { SYS_ID } from "../config/constants.js";
 import { STATUS_EFFECTS } from "../config/status-effects.js";
-import { T } from "../utils/localization.js";
+import { F, T } from "../utils/localization.js";
 import { logError } from "../utils/error-logging.js";
 import { STANCE_IDS } from "../utils/stances.js";
 import { applyEffect } from "../services/effects/apply.js";
@@ -64,8 +64,9 @@ export default class ConditionManager extends foundry.applications.api.Handlebar
    * @returns {string} Localized title with actor name
    */
   get title() {
-    const baseTitle = T("l5r4.apps.conditionManager.title");
-    return `${baseTitle}: ${this.actor?.name ?? T("l5r4.ui.common.unknown")}`;
+    return F("l5r4.apps.conditionManager.titleFor", {
+      name: this.actor?.name ?? T("l5r4.ui.common.unknown")
+    });
   }
 
   /**

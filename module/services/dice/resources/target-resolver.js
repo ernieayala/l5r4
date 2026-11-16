@@ -21,12 +21,10 @@ import { T } from "../../../utils/localization.js";
  *
  * @typedef {object} EmptyTarget
  * @property {number} autoTn - Always 0 (no auto-populated Target Number)
- * @property {string} targetInfo - Empty string (no target description text)
  * @property {null} targetData - No target metadata
  */
 const EMPTY_TARGET = Object.freeze({
   autoTn: 0,
-  targetInfo: "",
   targetData: null
 });
 
@@ -35,7 +33,6 @@ const EMPTY_TARGET = Object.freeze({
  *
  * @typedef {object} SingleTargetResult
  * @property {number} autoTn - Target's Armor TN to auto-populate attack roll TN
- * @property {string} targetInfo - Formatted string for UI display (e.g., " vs Hida Yakamo")
  * @property {object} targetData - Target metadata for chat message rendering
  * @property {string} targetData.name - Target actor's display name
  * @property {number} targetData.armorTn - Target's Armor TN value
@@ -49,7 +46,6 @@ const EMPTY_TARGET = Object.freeze({
  *
  * @typedef {object} MultipleTargetResult
  * @property {number} autoTn - Always 0 (cannot auto-populate with multiple targets)
- * @property {string} targetInfo - Formatted string indicating multiple targets
  * @property {object} targetData - Multi-target metadata
  * @property {boolean} targetData.multiple - Flag indicating multiple targets (true)
  * @property {number} targetData.count - Number of tokens targeted
@@ -113,7 +109,6 @@ export function getTargets(actor, rollType) {
 function buildSingleTarget(targetActor, armorTn) {
   return {
     autoTn: armorTn,
-    targetInfo: ` ${T("l5r4.ui.combat.vs")} ${targetActor.name}`,
     targetData: {
       name: targetActor.name,
       armorTn,
@@ -132,7 +127,6 @@ function buildSingleTarget(targetActor, armorTn) {
 function buildMultipleTargets(count) {
   return {
     autoTn: 0,
-    targetInfo: ` (${T("l5r4.ui.combat.multipleTargets")})`,
     targetData: {
       multiple: true,
       count,

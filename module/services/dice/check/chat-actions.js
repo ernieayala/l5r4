@@ -52,7 +52,7 @@ export async function rollAgainKeepBetter(message) {
   const outcome = getCheckResult(kept.total, source.tn.effective);
   const system = {
     ...source,
-    label: `${source.label} (${T("l5r4.ui.check.rerolledKeptBetter")})`,
+    label: F("l5r4.ui.check.rerolledLabel", { label: source.label }),
     outcome: {
       total: kept.total,
       success: outcome?.success ?? null,
@@ -293,7 +293,7 @@ function buildHonorPool(actor, honor) {
 async function postHonorRoll(message, roll, { source, pool, modifiers, outcome, actor }) {
   const system = {
     ...source,
-    label: `${source.label} (${T("l5r4.ui.honorRoll.button")})`,
+    label: F("l5r4.ui.honorRoll.rollLabel", { label: source.label }),
     pool: { ...pool, unskilled: false },
     modifiers: modifiers.map(m => ({ ...m, enabled: true })),
     voidPoint: false,

@@ -33,7 +33,7 @@ let fearTestInProgress = false;
  * @property {L5R4Actor} character - The character making the Fear test
  * @property {number} tn - Target number to resist the Fear effect
  * @property {number} fearRank - Fear Rank of the effect (1-10)
- * @property {string} [targetInfo=""] - Descriptive text about the Fear source
+ * @property {string} label - The card's label, naming the creature when there is one
  */
 
 /**
@@ -45,7 +45,12 @@ let fearTestInProgress = false;
  * @returns {Promise<ChatMessage|null>}
  */
 export function testFearRank({ character, fearRank }) {
-  return rollFearTest({ character, tn: getFearTn(fearRank), fearRank });
+  return rollFearTest({
+    character,
+    tn: getFearTn(fearRank),
+    fearRank,
+    label: F("l5r4.ui.mechanics.fear.testResult", { rank: fearRank })
+  });
 }
 
 /**
@@ -73,9 +78,9 @@ export async function testFear({ npc, character } = {}) {
     return null;
   }
 
-  const targetInfo = ` ${F("l5r4.ui.mechanics.fear.testAgainst", { name: npc.name })}`;
+  const label = F("l5r4.ui.mechanics.fear.testLabel", { rank: fearRank, name: npc.name });
 
-  return rollFearTest({ character, tn, fearRank, targetInfo });
+  return rollFearTest({ character, tn, fearRank, label });
 }
 
 /**
@@ -142,7 +147,7 @@ export async function onFearClick({ npc } = {}) {
  * @param {FearTestOptions} options - Fear test configuration
  * @returns {Promise<ChatMessage|null>} The roll's message, or null when the character cannot roll
  */
-async function rollFearTest({ character, tn, fearRank, targetInfo = "" } = {}) {
+async function rollFearTest({ character, tn, fearRank, label } = {}) {
   const willpower = getEffectiveTrait(character, "wil");
   if (willpower <= 0) {
     ui.notifications?.warn(F("l5r4.ui.mechanics.fear.noWillpower", { name: character.name }));
@@ -153,7 +158,7 @@ async function rollFearTest({ character, tn, fearRank, targetInfo = "" } = {}) {
   return rollCheck({
     actor: character,
     kind: "trait",
-    label: `${F("l5r4.ui.mechanics.fear.testResult", { rank: fearRank })}${targetInfo}`,
+    label,
     base: { roll: willpower, keep: willpower },
     trait: "wil",
     tn,
@@ -182,9 +187,9 @@ function buildFearLabel({ success, total }, { tn, fearRank }) {
   if (success) {
     return {};
   }
-  let suffix = ` — ${F("l5r4.ui.mechanics.fear.penaltyApplied", { penalty: fearRank })}`;
-  if (total - tn <= -CATASTROPHIC_MARGIN) {
-    suffix += ` ${T("l5r4.ui.mechanics.fear.catastrophicFailure")}`;
-  }
-  return { labelSuffix: suffix };
+  const key =
+    total - tn <= -CATASTROPHIC_MARGIN
+      ? "l5r4.ui.mechanics.fear.catastrophicSuffix"
+      : "l5r4.ui.mechanics.fear.penaltySuffix";
+  return { labelSuffix: F(key, { penalty: fearRank }) };
 }

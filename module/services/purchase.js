@@ -183,7 +183,7 @@ async function askChoice(itemName, choice) {
   }
   const prompt = choice.prompt || T("l5r4.ui.purchase.choose");
   return foundry.applications.api.DialogV2.prompt({
-    window: { title: `${itemName}: ${prompt}` },
+    window: { title: F("l5r4.ui.purchase.choiceTitle", { item: itemName, prompt }) },
     content: await R(DIALOG_TEMPLATES.choice, {
       label: prompt,
       name: "selection",

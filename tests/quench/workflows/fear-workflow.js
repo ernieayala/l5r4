@@ -155,6 +155,15 @@ export function registerFearWorkflowTests(quench) {
 
             assert.exists(chatMessage, "Chat message created");
             assert.equal(chatMessage.speaker.actor, pcMediumWillpower.id, "Correct speaker");
+            assert.isTrue(
+              chatMessage.system.label.startsWith(
+                game.i18n.localize("l5r4.ui.mechanics.fear.testLabel", {
+                  rank: npcWithFear.system.fear.rank,
+                  name: npcWithFear.name
+                })
+              ),
+              "the label names the Fear Rank and the creature in one key"
+            );
           });
 
           it("should include Honor bonus in Fear test", () => {

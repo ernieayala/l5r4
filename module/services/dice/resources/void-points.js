@@ -116,7 +116,7 @@ export function validateVoidPoints(actor) {
     return {
       valid: false,
       current: 0,
-      message: `${T("l5r4.ui.mechanics.rings.voidPoints")}: 0`
+      message: T("l5r4.ui.mechanics.rings.voidPointsEmpty")
     };
   }
 

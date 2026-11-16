@@ -7,7 +7,7 @@
  * game-rules/66_magic_and_spell_casting.md, p.163
  */
 
-import { T } from "../../../utils/localization.js";
+import { F, T } from "../../../utils/localization.js";
 import { getRollActor } from "./void-points.js";
 
 /**
@@ -41,7 +41,7 @@ const VALID_RINGS = Object.freeze(["water", "air", "fire", "earth", "void"]);
  *
  * @typedef {object} SpellSlotSpendResult
  * @property {boolean} success - Whether the slot was successfully spent
- * @property {string} label - Display label for chat message (e.g., " [Fire Slot]")
+ * @property {string} label - Display label for chat message (e.g., "[Use spell slot Fire]")
  * @property {string|null} message - Localized error message if failed, null if successful
  */
 
@@ -80,7 +80,12 @@ export function validateSpellSlot(actor, ringKey, isVoidSlot = false) {
   const current = Number(foundry.utils.getProperty(actor, path) ?? 0) || 0;
 
   if (current <= 0) {
-    return buildSlotRefusal(`${formatSlotRingLabel(normalizedRing, { isVoidSlot })}: 0`, path);
+    return buildSlotRefusal(
+      F("l5r4.magic.spells.slotsEmpty", {
+        element: formatSlotRingLabel(normalizedRing, { isVoidSlot })
+      }),
+      path
+    );
   }
 
   return {
@@ -100,7 +105,7 @@ export function validateSpellSlot(actor, ringKey, isVoidSlot = false) {
  * Example: A shugenja with Fire 3 has 3 Fire spell slots per day.
  *
  * The slot is decremented from `system.spellSlots.{ring}` on the actor.
- * Returns a chat label (e.g., " [Fire Slot]") for display in roll messages.
+ * Returns a chat label (e.g., "[Use spell slot Fire]") for display in roll messages.
  * game-rules/66_magic_and_spell_casting.md, p.163
  *
  * @param {L5R4Actor} actor - The actor casting the spell
@@ -121,7 +126,7 @@ export async function spendElementalSlot(actor, ringKey) {
  * Example: A shugenja with Void 2 has 2 bonus slots usable for any element.
  *
  * The slot is decremented from `system.spellSlots.void` on the actor.
- * Returns a chat label (e.g., " [Void Void Slot]") for display in roll messages.
+ * Returns a chat label ("[Use Void spell slot]") for display in roll messages.
  * game-rules/66_magic_and_spell_casting.md, p.163
  *
  * @param {L5R4Actor} actor - The actor casting the spell
@@ -235,23 +240,23 @@ function buildSlotRefusal(message, path) {
  */
 function formatSlotRingLabel(normalizedRing, { isVoidSlot }) {
   return isVoidSlot
-    ? `${game.i18n.localize("l5r4.ui.mechanics.rings.void")} ${game.i18n.localize(
-        "l5r4.magic.spells.voidSlot"
-      )}`
+    ? T("l5r4.magic.spells.voidSlots")
     : game.i18n.localize(`l5r4.ui.mechanics.rings.${normalizedRing}`) || normalizedRing;
 }
 
 /**
- * The chat label of a spent slot, such as " [Fire Slot]".
+ * The chat label of a spent slot, the same suffix the roll dialog's slot choice puts on its card
+ * (module/services/dice/check/spell-slots.js): "[Use spell slot Fire]" or "[Use Void spell slot]".
  * @param {string} ringKey - Ring identifier for the slot type
  * @param {object} options
  * @param {boolean} options.isVoidSlot - Whether the slot is a Void bonus slot
  * @returns {string}
  */
 function formatSlotLabel(ringKey, { isVoidSlot }) {
+  if (isVoidSlot) {
+    return T("l5r4.magic.spells.voidSlotSuffix");
+  }
   const ringDisplay =
     game.i18n.localize(`l5r4.ui.mechanics.rings.${String(ringKey).toLowerCase()}`) || ringKey;
-  return isVoidSlot
-    ? ` [${ringDisplay} ${game.i18n.localize("l5r4.magic.spells.voidSlot") || "Slot"}]`
-    : ` [${ringDisplay} Slot]`;
+  return F("l5r4.magic.spells.slotSuffix", { element: ringDisplay });
 }

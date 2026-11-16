@@ -11,7 +11,7 @@ import { DIALOG_TEMPLATES } from "../config/templates.js";
 import { RANK_TRACK_RANGE } from "../config/game-mechanics.js";
 import { applyRankPointsDelta } from "../utils/advancement.js";
 import { getLedgerChange } from "../utils/ledger.js";
-import { T } from "../utils/localization.js";
+import { F, T } from "../utils/localization.js";
 import { toInt } from "../utils/type-coercion.js";
 
 /** Entries the ledger dialog lists, newest first. */
@@ -106,7 +106,7 @@ export async function applyTrackChange(actor, track, { points, reason }) {
 export async function openLedgerDialog(actor) {
   const content = await renderLedgerContent(actor);
   const choice = await foundry.applications.api.DialogV2.prompt({
-    window: { title: `${T("l5r4.ui.ledger.title")}: ${actor.name}` },
+    window: { title: F("l5r4.ui.ledger.titleFor", { name: actor.name }) },
     position: { width: 440 },
     content,
     ok: {

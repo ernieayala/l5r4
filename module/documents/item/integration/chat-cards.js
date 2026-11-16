@@ -6,7 +6,7 @@
 
 import { CHAT_CARD_TEMPLATES } from "../../../config/item-types.js";
 import { CHAT_TEMPLATES } from "../../../config/templates.js";
-import { R } from "../../../utils/localization.js";
+import { F, R } from "../../../utils/localization.js";
 import { summaryOf } from "../../summary.js";
 
 /**
@@ -49,7 +49,7 @@ export async function renderItemChatCard(item) {
   return ChatMessage.create(
     {
       speaker: ChatMessage.getSpeaker({ actor: item.actor }),
-      flavor: `[${typeLabel}]`,
+      flavor: F("l5r4.ui.sheets.itemFlavor", { type: typeLabel }),
       content: html
     },
     { messageMode: game.settings.get("core", "messageMode") }

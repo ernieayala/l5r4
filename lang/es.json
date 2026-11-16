@@ -32,7 +32,8 @@
         "removeMoney": "Quitar Dinero"
       },
       "woundConfig": {
-        "title": "Configuración de Heridas"
+        "title": "Configuración de Heridas",
+        "titleFor": "Configuración de Heridas: {name}"
       }
     },
     "character": {
@@ -214,23 +215,28 @@
       "maho": {
         "additionalBlood": "Sangre Adicional",
         "additionalBloodBonus": "Cada cantidad adicional de costo de sangre otorga +1 Incremento Gratis",
-        "bloodCost": "Sangre",
         "bloodRequired": "Costo de Sangre Requerido",
         "bloodSource": {
           "label": "Fuente de Sangre",
           "other": "Otro",
           "self": "Propio"
         },
+        "bloodSuffix": "[Sangre: {total}]",
         "casting": "Lanzamiento de Maho",
+        "castingLabel": "Lanzamiento de Maho: {spell}",
         "taintGained": "Corrupción Obtenida",
         "taintGainedNotification": "Obtenido {taint} puntos de Corrupción de las Tierras de Sombra por lanzar maho",
+        "taintSuffix": "[Corrupción Obtenida: {taint}]",
         "warningTitle": "Magia de Sangre - Maho Prohibido"
       },
       "spells": {
         "affinity": "Afinidad",
+        "affinityTag": "[Afinidad]",
         "areaOfEffect": "Área de Efecto",
         "cast": "Lanzar",
+        "concentrationName": "Concentración: {spell}",
         "deficiency": "Deficiencia",
+        "deficiencyTag": "[Deficiencia]",
         "duration": "Duración",
         "maho": "Maho",
         "memorized": "Memorizado",
@@ -238,8 +244,10 @@
         "range": "Alcance",
         "restored": "restaurados",
         "slotsRestored": "Todos los espacios de hechizo restaurados al máximo",
+        "slotSuffix": "[Usar Espacio de Hechizo {element}]",
         "useSpellSlot": "Usar Espacio de Hechizo",
-        "voidSlot": "Usar Espacio de Hechizo de Vacío"
+        "voidSlot": "Usar Espacio de Hechizo de Vacío",
+        "voidSlotSuffix": "[Usar Espacio de Hechizo de Vacío]"
       }
     },
     "system": {
@@ -283,7 +291,6 @@
         "action": "Acción",
         "active": "Activo",
         "armor": "Armadura",
-        "auto": "Auto",
         "bonus": "Bonificación",
         "cancel": "Cancelar",
         "clan": "Clan",
@@ -322,6 +329,9 @@
           "title": "¿Eliminar Objeto?"
         }
       },
+      "effects": {
+        "autoProne": "Auto: Postrado"
+      },
       "hints": {
         "leftClickPlusRightClickMinus": "Shift+Clic izquierdo: +1, Shift+Clic derecho: -1",
         "leftRightToAdjust": "Izquierda y Derecha para Ajustar",
@@ -332,19 +342,21 @@
       "mechanics": {
         "combat": {
           "attack": "Ataque",
+          "attackSlot": "Ataque {slot}",
+          "damageSlot": "Daño {slot}",
           "woundPenalty": "Penalización por Heridas"
         },
         "fear": {
-          "catastrophicFailure": "¡FALLO CATASTRÓFICO! El personaje huye o se encoge aterrorizado.",
+          "catastrophicSuffix": "— Penalización: -{penalty}k0 a todas las tiradas ¡FALLO CATASTRÓFICO! El personaje huye o se encoge aterrorizado.",
           "effectName": "Miedo {rank}",
           "label": "Miedo {rank}",
           "noFear": "Este PNJ no tiene efecto de Miedo configurado",
           "noTargets": "No hay fichas seleccionadas para la prueba de Miedo",
           "noWillpower": "{name} no tiene el atributo Voluntad",
-          "penaltyApplied": "Penalización: -{penalty}k0 a todas las tiradas",
+          "penaltySuffix": "— Penalización: -{penalty}k0 a todas las tiradas",
           "rank": "Rango de Miedo",
           "rollForSelected": "Clic para probar Miedo contra personajes seleccionados",
-          "testAgainst": "vs {name}",
+          "testLabel": "Prueba de Miedo {rank} vs {name}",
           "testResult": "Prueba de Miedo {rank}"
         },
         "rings": {
@@ -356,27 +368,37 @@
           "void": "Vacío",
           "voidInitBoost": "Usar Vacío",
           "voidPoints": "Puntos de Vacío",
+          "voidPointsEmpty": "Puntos de Vacío: 0",
           "voidTnBoost": "Usar Vacío",
           "water": "Agua"
         },
         "rolls": {
           "attackRoll": "Tirada de Ataque",
+          "castingSuffix": "(Tirada de Lanzar Hechizo)",
           "damageRoll": "Tirada de Daño",
           "emphasis": "Énfasis",
+          "emphasisLabel": "{label} (Énfasis: {emphasisName})",
           "explodesOn": "Explota En",
           "failure": "Fracaso",
           "freeRaises": "Incrementos Gratis",
           "missed": "Fallado",
+          "namedRoll": "Tirar: {roll}",
           "raise": "Incremento",
           "raises": "Incrementos",
           "ringRoll": "Tirada de Anillo",
+          "ringRollLabel": "Tirada de Anillo: {element}",
           "skillRoll": "Tirada de Habilidad",
+          "skillRollLabel": "Tirada de Habilidad: {skillName} / {traitName}",
           "socialResistance": "Resistencia Social",
           "socialResistanceHint": "Resistiendo Intimidación o Tentación.",
           "spellCasting": "Tirada de Lanzar Hechizo",
+          "spellCastingLabel": "Tirada de Lanzar Hechizo: {spell}",
           "success": "Éxito",
           "traitRoll": "Tirada de Atributo",
-          "unskilled": "Sin Habilidad"
+          "traitRollLabel": "{traitName} Tirar",
+          "unskilledLabel": "{label} [Sin Habilidad]",
+          "voidLabel": "{label} [Vacío]",
+          "weaponAttackRoll": "{weapon} Tirada de Ataque"
         },
         "stances": {
           "attack": "Postura de Ataque",

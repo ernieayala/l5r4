@@ -10,7 +10,7 @@
 import { SYS_ID } from "../../config/constants.js";
 import { TRAIT_KEYS } from "../../config/reference-data.js";
 import { RING_LABELS } from "../../config/localization.js";
-import { T } from "../../utils/localization.js";
+import { F, T } from "../../utils/localization.js";
 import { updateActivation } from "../../services/effects/activation.js";
 import { RollHandler } from "../handlers/roll-handler.js";
 
@@ -150,7 +150,7 @@ async function buildMacroData(data) {
     const label = T(isTrait ? `l5r4.ui.mechanics.traits.${key}` : `l5r4.ui.mechanics.rings.${key}`);
     return {
       key: `trait:${actor.uuid}:${key}`,
-      name: `${actor.name}: ${label}`,
+      name: F("l5r4.ui.macros.traitMacro", { name: actor.name, traitName: label }),
       img: actor.img,
       command: `await game.system.api.rollTrait(${JSON.stringify(actor.uuid)}, ${JSON.stringify(key)});`
     };

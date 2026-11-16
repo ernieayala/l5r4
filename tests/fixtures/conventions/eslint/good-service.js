@@ -4,6 +4,7 @@
  */
 
 import { SYS_ID } from "../config/constants.js";
+import { F, T } from "../utils/localization.js";
 import { toInt } from "../utils/type-coercion.js";
 
 /** The flag the example reads. */
@@ -23,4 +24,15 @@ export function getExampleFlag(actor, { fallback = 0 } = {}) {
     return fallback;
   }
   return toInt(value);
+}
+
+/**
+ * The label of an actor's Ring Roll: one key, with the Ring's localized name as a placeholder's value.
+ * @param {Actor} actor - The roller
+ * @param {string} ringKey - The Ring's key
+ * @returns {string} The localized label
+ */
+export function getRingRollLabel(actor, ringKey) {
+  const element = T(`l5r4.ui.mechanics.rings.${ringKey}`);
+  return F("l5r4.ui.mechanics.rolls.ringRollLabel", { name: actor.name, element });
 }

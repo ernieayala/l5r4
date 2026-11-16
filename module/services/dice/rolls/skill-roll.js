@@ -9,7 +9,7 @@
  * game-rules/58_skills_overview.md, p.133
  */
 
-import { T } from "../../../utils/localization.js";
+import { F, T } from "../../../utils/localization.js";
 import { toInt } from "../../../utils/type-coercion.js";
 import { rollCheck } from "../check/roll-check.js";
 import { getRollActor } from "../resources/void-points.js";
@@ -115,7 +115,10 @@ function formatSkillRollLabel(skillName, skillTrait) {
       ? "l5r4.ui.mechanics.rings.void"
       : `l5r4.ui.mechanics.traits.${skillTrait}`
   );
-  return `${T("l5r4.ui.mechanics.rolls.skillRoll")}: ${formatSkillLabel(skillName)} / ${traitLabel}`;
+  return F("l5r4.ui.mechanics.rolls.skillRollLabel", {
+    skillName: formatSkillLabel(skillName),
+    traitName: traitLabel
+  });
 }
 
 /**

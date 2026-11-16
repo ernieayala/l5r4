@@ -610,6 +610,14 @@ export function registerCombatTests(quench) {
             const { actor } = await attacker();
             const target = await defender();
             const card = await startGrapple(await grappleAttack(actor, target));
+            assert.include(
+              card.content,
+              game.i18n.localize("l5r4.ui.combat.grapple.titleFor", {
+                name: actor.name,
+                target: target.name
+              }),
+              "the card's title names both sides in one key"
+            );
             const stop = autoAnswerRolls();
             try {
               await click(card, "[data-flow-action='hit']");

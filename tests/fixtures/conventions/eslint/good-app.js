@@ -4,6 +4,7 @@
  */
 
 import { SYS_ID } from "../config/constants.js";
+import { F, T } from "../utils/localization.js";
 
 /**
  * A window listing one actor's effects.
@@ -17,6 +18,16 @@ export default class ExampleApplication extends foundry.applications.api.Handleb
   };
 
   static PARTS = { body: { template: `systems/${SYS_ID}/templates/apps/example.hbs` } };
+
+  /**
+   * The window's title: one key, with the actor's name as its placeholder.
+   * @returns {string} The localized title
+   */
+  get title() {
+    return F("l5r4.apps.example.titleFor", {
+      name: this.actor?.name ?? T("l5r4.ui.common.unknown")
+    });
+  }
 
   /** @override */
   async _prepareContext(options) {

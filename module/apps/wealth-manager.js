@@ -5,7 +5,7 @@
  * actor's wealth at once.
  */
 import { SYS_ID } from "../config/constants.js";
-import { T } from "../utils/localization.js";
+import { F, T } from "../utils/localization.js";
 import { toInt } from "../utils/type-coercion.js";
 import { logError } from "../utils/error-logging.js";
 
@@ -67,8 +67,9 @@ export default class WealthManagerApplication extends foundry.applications.api.H
    * @returns {string} Localized title with actor name
    */
   get title() {
-    const baseTitle = T("l5r4.apps.wealthManager.title");
-    return `${baseTitle}: ${this.actor?.name ?? T("l5r4.ui.common.unknown")}`;
+    return F("l5r4.apps.wealthManager.titleFor", {
+      name: this.actor?.name ?? T("l5r4.ui.common.unknown")
+    });
   }
 
   /**

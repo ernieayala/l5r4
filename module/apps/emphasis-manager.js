@@ -8,7 +8,7 @@
 import { SYS_ID } from "../config/constants.js";
 import { OFFICIAL_EMPHASES } from "../config/reference-data.js";
 import { DIALOG_TEMPLATES } from "../config/templates.js";
-import { T } from "../utils/localization.js";
+import { F, T } from "../utils/localization.js";
 import { validateEmphasisName } from "../utils/validators.js";
 import { logError } from "../utils/error-logging.js";
 
@@ -75,8 +75,9 @@ export default class EmphasisManagerApplication extends foundry.applications.api
    * @returns {string} Localized title with skill name
    */
   get title() {
-    const baseTitle = T("l5r4.apps.emphasisManager.title");
-    return `${baseTitle}: ${this.item?.name ?? T("l5r4.ui.common.unknown")}`;
+    return F("l5r4.apps.emphasisManager.titleFor", {
+      item: this.item?.name ?? T("l5r4.ui.common.unknown")
+    });
   }
 
   /**

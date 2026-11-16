@@ -7,7 +7,7 @@
  */
 import { SYS_ID } from "../config/constants.js";
 import { ACTION_TYPES } from "../config/localization.js";
-import { T } from "../utils/localization.js";
+import { F, T } from "../utils/localization.js";
 import { logError } from "../utils/error-logging.js";
 
 /**
@@ -80,8 +80,9 @@ export default class NpcAttackConfigApplication extends foundry.applications.api
    * @returns {string} Localized title with attack number
    */
   get title() {
-    const attackNum = this.attackKey?.replace("attack", "") ?? "";
-    return `${T("l5r4.apps.npcAttackConfig.title")} ${attackNum}`;
+    return F("l5r4.apps.npcAttackConfig.titleFor", {
+      slot: this.attackKey?.replace("attack", "") ?? ""
+    });
   }
 
   /**
@@ -136,8 +137,8 @@ export default class NpcAttackConfigApplication extends foundry.applications.api
       attackKey: this.attackKey,
       damageKey: this.damageKey,
       attackNum: this.attackKey?.replace("attack", "") ?? "1",
-      attack: { name: "", roll: 2, keep: 2, modifier: 0, type: "" },
-      damage: { roll: 2, keep: 2, modifier: 0, type: "" },
+      attack: buildAttackFields({}),
+      damage: buildDamageFields({}),
       config: { actionTypes: ACTION_TYPES }
     };
   }

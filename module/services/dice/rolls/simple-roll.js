@@ -5,7 +5,7 @@
  * an NPC Trait or Ring Roll, or a plain XkY roll.
  */
 
-import { T } from "../../../utils/localization.js";
+import { F, T } from "../../../utils/localization.js";
 import { toInt } from "../../../utils/type-coercion.js";
 import { toTraitKey } from "../../../utils/trait-keys.js";
 import { rollCheck } from "../check/roll-check.js";
@@ -87,15 +87,17 @@ function buildPoolSource(
   const ringKey = ringName ? String(ringName).toLowerCase() : null;
   const kind = rollType === "attack" || rollType === "damage" ? rollType : "roll";
   if (roll !== null && keep !== null) {
-    const label = `${T("l5r4.ui.common.roll")}: ${String(rollName ?? "")}`;
+    const label = F("l5r4.ui.mechanics.rolls.namedRoll", { roll: String(rollName ?? "") });
     return { base: { roll: toInt(roll), keep: toInt(keep) }, label, kind, traitKey, ringKey };
   }
   if (traitKey) {
-    const label = `${T(`l5r4.ui.mechanics.traits.${traitKey}`)} ${T("l5r4.ui.common.roll")}`;
+    const traitName = T(`l5r4.ui.mechanics.traits.${traitKey}`);
+    const label = F("l5r4.ui.mechanics.rolls.traitRollLabel", { traitName });
     const base = { roll: toInt(traitRank), keep: toInt(traitRank) };
     return { base, label, kind: rollType ? kind : "trait", traitKey, ringKey };
   }
-  const label = `${T("l5r4.ui.mechanics.rolls.ringRoll")}: ${T(`l5r4.ui.mechanics.rings.${ringKey}`)}`;
+  const element = T(`l5r4.ui.mechanics.rings.${ringKey}`);
+  const label = F("l5r4.ui.mechanics.rolls.ringRollLabel", { element });
   const base = { roll: toInt(ringRank), keep: toInt(ringRank) };
   return { base, label, kind: rollType ? kind : "ring", traitKey, ringKey };
 }

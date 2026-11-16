@@ -6,6 +6,8 @@
 
 import docFormat from "./doc-format.mjs";
 import importOrder from "./import-order.mjs";
+import joinedCopy from "./joined-copy.mjs";
+import joinedTitle from "./joined-title.mjs";
 import memberOrder from "./member-order.mjs";
 import moduleShape from "./module-shape.mjs";
 import naming from "./naming.mjs";
@@ -17,6 +19,8 @@ const PLUGIN = Object.freeze({
   rules: {
     "doc-format": docFormat,
     "import-order": importOrder,
+    "joined-copy": joinedCopy,
+    "joined-title": joinedTitle,
     "member-order": memberOrder,
     "module-shape": moduleShape,
     naming,
