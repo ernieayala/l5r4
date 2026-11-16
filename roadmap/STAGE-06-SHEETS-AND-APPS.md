@@ -1,13 +1,11 @@
 # Stage 6: Sheets and apps
 
-**Goal:** the PC, NPC, and item sheets and the eight apps render, save, and run their actions on 14.370
-with no console errors or compatibility warnings, as they did on 13.
-**Needs:** 2, 3, 4.
+**Goal:** the PC, NPC, and item sheets and the eight apps render, save, and run their actions on 14.370 with no console errors or compatibility warnings, as they did on 13. **Needs:** 2, 3, 4.
 
 ## Foundry v14 APIs
 
 | Need | API (section of FOUNDRY-V14-REFERENCE.md) |
-|------|-------------------------------------------|
+| --- | --- |
 | `DEFAULT_OPTIONS` (`form`, `actions`, `window.controls`), `PARTS`, tabs | §4.2, §4.3, §4.4 |
 | Header controls | §4.2 (`window.controls`, `_getFrameButtons`) |
 | Drag and drop on ActorSheetV2 | §4.5 |
@@ -16,7 +14,7 @@ with no console errors or compatibility warnings, as they did on 13.
 ## Audit
 
 | Where | Finding |
-|-------|---------|
+| --- | --- |
 | `module/sheets/base-actor-sheet.js:87`, `module/sheets/pc-sheet.js:119`, `:500` | `form.submitOnClose`: an AppV1 option (`client/appv1/api/form-application-v1.mjs:16`), ignored by ApplicationV2 on 13 and 14. No field relies on it: with `submitOnChange`, a typed field saves as focus leaves it, which closing the sheet does |
 | `module/sheets/base-actor-sheet.js:196-` | `_getHeaderControls` removed duplicates the sheets themselves caused: each `DEFAULT_OPTIONS` spread `super.DEFAULT_OPTIONS`, and ApplicationV2 already merges every class's options and concatenates arrays (`client/applications/api/application.mjs:437-484`), so `window.controls` held the Token entries three times |
 | `module/documents/item.js:130-133` | `L5R4Item#getData` calls `super.getData`, which `Item` does not have; nothing calls it (the sheets call `enhanceItemSheetData` themselves). Remove |
@@ -44,6 +42,6 @@ with no console errors or compatibility warnings, as they did on 13.
 
 ## Out of scope
 
-| Item | Stage |
-|------|-------|
+| Item                                     | Stage       |
+| ---------------------------------------- | ----------- |
 | Visual redesign, new accessibility rules | Not planned |

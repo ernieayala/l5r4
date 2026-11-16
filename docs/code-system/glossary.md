@@ -1,193 +1,176 @@
 # Glossary
 
-One row per game concept the code uses: the book's term, where it is in `game-rules/`, the identifier stem, the i18n
-key, the UI label, and the synonyms nobody writes. Terms and printed page numbers only; the rules themselves are in the
-book (CLAUDE.md **Licensed material**). Every page below was looked up in `game-rules/` with `/rule`.
+One row per game concept the code uses: the book's term, where it is in `game-rules/`, the identifier stem, the i18n key, the UI label, and the synonyms nobody writes. Terms and printed page numbers only; the rules themselves are in the book (CLAUDE.md **Licensed material**). Every page below was looked up in `game-rules/` with `/rule`.
 
 `tests/conventions/glossary.test.js` reads the table under **Terms**.
 
 ## Rules
 
-| Rule                                                                                                                                                                   | Enforced by                                                             |
-| ---------------------------------------------------------------------------------------------------------------------------------------------------------------------- | ----------------------------------------------------------------------- |
-| One concept, one stem. New code builds identifiers from the **Stem** column                                                                                            | `tests/conventions/glossary.test.js` (banned stems), review (new stems) |
-| A banned identifier never appears in `module/`, `dist/l5r4-enhanced.js`, `templates/`, or an i18n key path, except as a fixed name (**Fixed names the check exempts**) | `tests/conventions/glossary.test.js`                                    |
-| A banned phrase never appears in a `lang/en.json` value                                                                                                                | `tests/conventions/glossary.test.js`                                    |
-| Copy writes the **Term** with the book's capitals, in every position of a sentence                                                                                     | `tests/conventions/glossary.test.js`                                    |
-| The UI shows the **Label** under the **Key**; a second key holding the same label is a duplicate (`docs/design-system/content/localization.md`)                        | `tests/lang.test.js` (extend), review                                   |
-| A new game concept gets a row here, with its page from `/rule`, before code uses it                                                                                    | review                                                                  |
+| Rule | Enforced by |
+| --- | --- |
+| One concept, one stem. New code builds identifiers from the **Stem** column | `tests/conventions/glossary.test.js` (banned stems), review (new stems) |
+| A banned identifier never appears in `module/`, `dist/l5r4-enhanced.js`, `templates/`, or an i18n key path, except as a fixed name (**Fixed names the check exempts**) | `tests/conventions/glossary.test.js` |
+| A banned phrase never appears in a `lang/en.json` value | `tests/conventions/glossary.test.js` |
+| Copy writes the **Term** with the book's capitals, in every position of a sentence | `tests/conventions/glossary.test.js` |
+| The UI shows the **Label** under the **Key**; a second key holding the same label is a duplicate (`docs/design-system/content/localization.md`) | review |
+| Each **Key** cell is `none` or a `lang/en.json` key path that holds a string | `tests/conventions/glossary.test.js` |
+| A new game concept gets a row here, with its page from `/rule`, before code uses it | review |
 
 ### Examples
 
-| Rule          | Conforming                                                                             | Non-conforming                      |
-| ------------- | -------------------------------------------------------------------------------------- | ----------------------------------- |
-| One stem      | `armorTn` in `PcData.defineSchema` (`module/data/actor/pc-data.js`)                    | `armorTN` (modeled)                 |
-| One stem      | `{ roll, keep }` in the pool `buildPool` (`module/utils/check.js`) returns             | `diceRoll`, `diceKeep` (modeled)    |
-| One stem      | `unskilled` in `rollTrait` (`module/services/dice/rolls/trait-roll.js`)                | `untrained` (modeled)               |
-| Banned phrase | `"Shadowlands Taint"` at `l5r4.ui.taint.label`                                         | `"Shadowland Taint"` (modeled)      |
-| Book capitals | `"Spend a Void Point (+1k1)"` at `l5r4.ui.check.void`                                  | `"void point"` in a value (modeled) |
-| Book capitals | `"Spell slot"` at `l5r4.ui.check.spellSlot` (the book writes spell slot in lower case) | `"Spell Slots"` (modeled)           |
+| Rule | Conforming | Non-conforming |
+| --- | --- | --- |
+| One stem | `armorTn` in `PcData.defineSchema` (`module/data/actor/pc-data.js`) | `armorTN` (modeled) |
+| One stem | `{ roll, keep }` in the pool `buildPool` (`module/utils/check.js`) returns | `diceRoll`, `diceKeep` (modeled) |
+| One stem | `unskilled` in `rollTrait` (`module/services/dice/rolls/trait-roll.js`) | `untrained` (modeled) |
+| Banned phrase | `"Shadowlands Taint"` at `l5r4.ui.taint.label` | `"Shadowland Taint"` (modeled) |
+| Book capitals | `"Spend a Void Point (+1k1)"` at `l5r4.ui.check.void` | `"void point"` in a value (modeled) |
+| Book capitals | `"Spell slot"` at `l5r4.ui.check.spellSlot` (the book writes spell slot in lower case) | `"Spell Slots"` (modeled) |
 
 ## Column format
 
 The check parses the **Terms** table by these rules.
 
-| Column | Holds                                                                                                                                                                                                                                                                 |
-| ------ | --------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| Term   | The book's spelling and capitals, singular. Copy writes it exactly so                                                                                                                                                                                                 |
-| Pages  | `game-rules/<file>.md, p.<pages>`, the citation format of `docs/code-system/documentation.md`. Several sources are separated by `; `                                                                                                                                  |
-| Stem   | Identifier stems in backticks, separated by `, `. The first is the stem for new code. Inside a longer name the stem is capitalized as a camelCase word (`tn` becomes `Tn` in `saveTn`)                                                                                |
-| Key    | One `lang/en.json` key path in backticks, or `none` when no key holds the bare term yet                                                                                                                                                                               |
-| Label  | The text the UI shows for the term, in sentence case with the book's capitals (`docs/design-system/content/voice.md`)                                                                                                                                                 |
+| Column | Holds |
+| --- | --- |
+| Term | The book's spelling and capitals, singular. Copy writes it exactly so |
+| Pages | `game-rules/<file>.md, p.<pages>`, the citation format of `docs/code-system/documentation.md`. Several sources are separated by `; ` |
+| Stem | Identifier stems in backticks, separated by `, `. The first is the stem for new code. Inside a longer name the stem is capitalized as a camelCase word (`tn` becomes `Tn` in `saveTn`) |
+| Key | One `lang/en.json` key path in backticks, or `none` when no key holds the bare term |
+| Label | The text the UI shows for the term, in sentence case with the book's capitals (`docs/design-system/content/voice.md`) |
 | Banned | Banned identifiers in backticks and banned copy phrases in double quotes, separated by `, `, or `none`. A banned identifier matches as a whole camelCase word: `TN` matches `fearTN` and `defaultTN`. A banned phrase also matches its plural. Fixed names are exempt |
 
 ## Terms
 
-| Term                | Pages                                                                                                         | Stem                                   | Key                                         | Label               | Banned                                                                               |
-| ------------------- | ------------------------------------------------------------------------------------------------------------- | -------------------------------------- | ------------------------------------------- | ------------------- | ------------------------------------------------------------------------------------ |
-| Ring                | `game-rules/25_rings_and_traits.md, p.76`                                                                     | `ring`, `ringKey`, `ringRank`          | `l5r4.ui.common.ring`                       | Ring                | `systemRing`, `ringValue`                                                            |
-| Void Ring           | `game-rules/25_rings_and_traits.md, p.78`                                                                     | `voidRing`                             | `l5r4.ui.mechanics.rings.void`              | Void                | none                                                                                 |
-| Trait               | `game-rules/25_rings_and_traits.md, p.76`                                                                     | `trait`, `traitKey`, `traitRank`       | `l5r4.character.skills.properties.trait`    | Trait               | `actorTrait`                                                                         |
-| Void Point          | `game-rules/25_rings_and_traits.md, p.78`                                                                     | `voidPoints`, `voidPoint`              | `l5r4.ui.mechanics.rings.voidPoints`        | Void Points         | "void point", "Void point"                                                           |
-| TN                  | `game-rules/24_target_numbers.md, p.76`                                                                       | `tn`                                   | `l5r4.ui.common.tn`                         | TN                  | `targetNumber`, `TN`                                                                 |
-| Armor TN            | `game-rules/32_attack_and_defense.md, p.82`                                                                   | `armorTn`                              | `l5r4.ui.mechanics.wounds.armorTn`          | Armor TN            | `armorTN`, "armor TN"                                                                |
-| Raise               | `game-rules/28_raises.md, p.79`                                                                               | `raises`                               | `l5r4.ui.mechanics.rolls.raises`            | Raises              | none                                                                                 |
-| Free Raise          | `game-rules/28_raises.md, p.79`                                                                               | `freeRaises`                           | `l5r4.ui.mechanics.rolls.freeRaises`        | Free Raises         | "free raise", "free Raise"                                                           |
-| Roll & Keep         | `game-rules/23_roll_and_keep.md, p.75`                                                                        | `pool`, `roll`, `keep`                 | `l5r4.ui.check.pool`                        | Pool                | `diceRoll`, `diceKeep`, `rollDice`, `keepDice`, `rollKeep`, `rollBonus`, `keepBonus` |
-| Exploding Dice      | `game-rules/26_special_dice_rules.md, p.77`                                                                   | `explode`                              | `l5r4.ui.mechanics.rolls.explodesOn`        | Explodes on         | none                                                                                 |
-| Ten Dice Rule       | `game-rules/26_special_dice_rules.md, p.77`                                                                   | `tenDice`                              | none                                        | Ten Dice Rule       | none                                                                                 |
-| Skill               | `game-rules/58_skills_overview.md, p.133`                                                                     | `skill`                                | `TYPES.Item.skill`                          | Skill               | none                                                                                 |
-| Skill Rank          | `game-rules/30_skill_rolls_expanded.md, p.81; game-rules/49_improving_your_character.md, p.104`               | `skillRank`                            | `l5r4.ui.common.rank`                       | Rank                | none                                                                                 |
-| Emphasis            | `game-rules/58_skills_overview.md, p.133`                                                                     | `emphasis`, `emphases`                 | `l5r4.ui.mechanics.rolls.emphasis`          | Emphasis            | none                                                                                 |
-| Mastery Ability     | `game-rules/58_skills_overview.md, p.133`                                                                     | `mastery`                              | `l5r4.character.skills.properties.mastery3` | Rank 3 Mastery      | none                                                                                 |
-| Skill Roll          | `game-rules/29_types_of_rolls.md, p.79`                                                                       | `skillRoll`                            | `l5r4.ui.mechanics.rolls.skillRoll`         | Skill Roll          | "Skill roll"                                                                         |
-| Trait Roll          | `game-rules/29_types_of_rolls.md, p.79`                                                                       | `traitRoll`                            | `l5r4.ui.mechanics.rolls.traitRoll`         | Trait Roll          | "Trait roll"                                                                         |
-| Ring Roll           | `game-rules/29_types_of_rolls.md, p.80`                                                                       | `ringRoll`                             | `l5r4.ui.mechanics.rolls.ringRoll`          | Ring Roll           | "Ring roll"                                                                          |
-| Spell Casting Roll  | `game-rules/29_types_of_rolls.md, p.80; game-rules/66_magic_and_spell_casting.md, p.163`                      | `spellCast`                            | `l5r4.ui.mechanics.rolls.spellCasting`      | Spell Casting Roll  | "Spell Casting roll"                                                                 |
-| damage roll         | `game-rules/29_types_of_rolls.md, p.80`                                                                       | `damage`                               | `l5r4.ui.mechanics.rolls.damageRoll`        | Damage roll         | none                                                                                 |
-| Contested Roll      | `game-rules/29_types_of_rolls.md, p.80`                                                                       | `contest`                              | `l5r4.ui.check.contest`                     | Contested Roll      | "Contested roll"                                                                     |
-| Unskilled Roll      | `game-rules/30_skill_rolls_expanded.md, p.80`                                                                 | `unskilled`                            | none                                        | Unskilled           | `untrained`                                                                          |
-| Initiative          | `game-rules/31_combat_round.md, p.81`                                                                         | `initiative`                           | `l5r4.ui.common.init`                       | Initiative          | none                                                                                 |
-| Free Action         | `game-rules/37_actions.md, p.85`                                                                              | `free`                                 | `l5r4.ui.check.actions.free`                | Free Action         | none                                                                                 |
-| Simple Action       | `game-rules/37_actions.md, p.85`                                                                              | `simple`                               | `l5r4.ui.check.actions.simple`              | Simple Action       | none                                                                                 |
-| Complex Action      | `game-rules/37_actions.md, p.85`                                                                              | `complex`                              | `l5r4.ui.check.actions.complex`             | Complex Action      | none                                                                                 |
-| Wound               | `game-rules/33_wounds.md, p.82`                                                                               | `wounds`, `suffered`                   | `l5r4.ui.mechanics.wounds.wounds`           | Wounds              | none                                                                                 |
-| Wound Rank          | `game-rules/33_wounds.md, p.82; game-rules/34_ambush_falling_drowning.md, p.84`                               | `woundLevel`                           | `l5r4.ui.sheets.woundLevels`                | Wound Ranks         | `woundRank`, `WoundLvls`, "Wound Level"                                              |
-| Healthy             | `game-rules/33_wounds.md, p.82`                                                                               | `healthy`                              | `l5r4.ui.mechanics.wounds.healthy`          | Healthy             | none                                                                                 |
-| Nicked              | `game-rules/33_wounds.md, p.82`                                                                               | `nicked`                               | `l5r4.ui.mechanics.wounds.nicked`           | Nicked              | none                                                                                 |
-| Grazed              | `game-rules/33_wounds.md, p.82`                                                                               | `grazed`                               | `l5r4.ui.mechanics.wounds.grazed`           | Grazed              | none                                                                                 |
-| Hurt                | `game-rules/33_wounds.md, p.82`                                                                               | `hurt`                                 | `l5r4.ui.mechanics.wounds.hurt`             | Hurt                | none                                                                                 |
-| Injured             | `game-rules/33_wounds.md, p.82`                                                                               | `injured`                              | `l5r4.ui.mechanics.wounds.injured`          | Injured             | none                                                                                 |
-| Crippled            | `game-rules/33_wounds.md, p.82`                                                                               | `crippled`                             | `l5r4.ui.mechanics.wounds.crippled`         | Crippled            | none                                                                                 |
-| Down                | `game-rules/33_wounds.md, p.82`                                                                               | `down`                                 | `l5r4.ui.mechanics.wounds.down`             | Down                | none                                                                                 |
-| Out                 | `game-rules/33_wounds.md, p.82`                                                                               | `out`                                  | `l5r4.ui.mechanics.wounds.out`              | Out                 | none                                                                                 |
-| Reduction           | `game-rules/73_armor.md, p.198`                                                                               | `reduction`                            | `l5r4.equipment.armor.reduction`            | Reduction           | none                                                                                 |
-| Stance              | `game-rules/36_stances.md, p.84`                                                                              | `stance`, `stanceId`                   | none                                        | Stance              | none                                                                                 |
-| Attack Stance       | `game-rules/36_stances.md, p.84`                                                                              | `attackStance`                         | `l5r4.mechanics.stances.attack`             | Attack Stance       | none                                                                                 |
-| Full Attack Stance  | `game-rules/36_stances.md, p.84`                                                                              | `fullAttackStance`                     | `l5r4.mechanics.stances.fullAttack`         | Full Attack Stance  | none                                                                                 |
-| Defense Stance      | `game-rules/36_stances.md, p.84`                                                                              | `defenseStance`                        | `l5r4.mechanics.stances.defense`            | Defense Stance      | none                                                                                 |
-| Full Defense Stance | `game-rules/36_stances.md, p.84`                                                                              | `fullDefenseStance`                    | `l5r4.mechanics.stances.fullDefense`        | Full Defense Stance | none                                                                                 |
-| Center Stance       | `game-rules/36_stances.md, p.84`                                                                              | `centerStance`                         | `l5r4.mechanics.stances.center`             | Center Stance       | none                                                                                 |
-| Called Shot         | `game-rules/38_maneuvers.md, p.86`                                                                            | `calledShot`                           | `l5r4.ui.ruleSummary.maneuver.calledShot`   | Called Shot         | none                                                                                 |
-| Disarm              | `game-rules/38_maneuvers.md, p.86`                                                                            | `disarm`                               | `l5r4.ui.ruleSummary.maneuver.disarm`       | Disarm              | none                                                                                 |
-| Extra Attack        | `game-rules/38_maneuvers.md, p.86`                                                                            | `extraAttack`                          | `l5r4.ui.ruleSummary.maneuver.extraAttack`  | Extra Attack        | none                                                                                 |
-| Feint               | `game-rules/38_maneuvers.md, p.86`                                                                            | `feint`                                | `l5r4.ui.ruleSummary.maneuver.feint`        | Feint               | none                                                                                 |
-| Guard               | `game-rules/38_maneuvers.md, p.86`                                                                            | `guard`                                | none                                        | Guard               | none                                                                                 |
-| Increased Damage    | `game-rules/38_maneuvers.md, p.87`                                                                            | `increasedDamage`                      | none                                        | Increased Damage    | none                                                                                 |
-| Knockdown           | `game-rules/38_maneuvers.md, p.87`                                                                            | `knockdown`                            | `l5r4.ui.ruleSummary.maneuver.knockdown`    | Knockdown           | none                                                                                 |
-| Iaijutsu Dueling    | `game-rules/39_iaijutsu_dueling.md, p.87`                                                                     | `duel`                                 | `l5r4.ui.combat.duel.title`                 | Iaijutsu duel       | none                                                                                 |
-| Grappling           | `game-rules/40_grappling.md, p.88`                                                                            | `grapple`                              | `l5r4.ui.combat.grapple.title`              | Grapple             | none                                                                                 |
-| condition           | `game-rules/41_conditional_effects.md, p.89`                                                                  | `condition`, `conditionId`, `statusId` | `l5r4.ui.common.conditions`                 | Conditions          | none                                                                                 |
-| Blinded             | `game-rules/41_conditional_effects.md, p.89`                                                                  | `blinded`                              | `EFFECT.blinded`                            | Blinded             | none                                                                                 |
-| Dazed               | `game-rules/41_conditional_effects.md, p.89`                                                                  | `dazed`                                | `EFFECT.dazed`                              | Dazed               | none                                                                                 |
-| Entangled           | `game-rules/41_conditional_effects.md, p.89`                                                                  | `entangled`                            | `EFFECT.entangled`                          | Entangled           | none                                                                                 |
-| Fatigued            | `game-rules/41_conditional_effects.md, p.89`                                                                  | `fatigued`                             | `EFFECT.fatigued`                           | Fatigued            | none                                                                                 |
-| Grappled            | `game-rules/41_conditional_effects.md, p.89`                                                                  | `grappled`                             | `EFFECT.grappled`                           | Grappled            | none                                                                                 |
-| Mounted             | `game-rules/41_conditional_effects.md, p.89`                                                                  | `mounted`                              | `EFFECT.mounted`                            | Mounted/Higher      | none                                                                                 |
-| Prone               | `game-rules/41_conditional_effects.md, p.89`                                                                  | `prone`                                | `EFFECT.prone`                              | Prone               | none                                                                                 |
-| Stunned             | `game-rules/41_conditional_effects.md, p.89`                                                                  | `stunned`                              | `EFFECT.stunned`                            | Stunned             | none                                                                                 |
-| Fear                | `game-rules/42_fear.md, p.90`                                                                                 | `fear`                                 | `l5r4.ui.mechanics.fear.fearLabel`          | Fear {rank}         | none                                                                                 |
-| Fear Rank           | `game-rules/42_fear.md, p.90`                                                                                 | `fearRank`                             | `l5r4.ui.mechanics.fear.fearRank`           | Fear Rank           | none                                                                                 |
-| Honor               | `game-rules/43_honor.md, p.90`                                                                                | `honor`                                | `l5r4.ui.ledger.tracks.honor`               | Honor               | none                                                                                 |
-| Honor Rank          | `game-rules/43_honor.md, p.90`                                                                                | `honorRank`                            | `l5r4.character.ranks.honorRank`            | Honor Rank          | none                                                                                 |
-| Honor Roll          | `game-rules/43_honor.md, p.92`                                                                                | `honorRoll`                            | `l5r4.ui.honorRoll.button`                  | Honor Roll          | none                                                                                 |
-| Glory               | `game-rules/44_glory.md, p.93`                                                                                | `glory`                                | `l5r4.ui.ledger.tracks.glory`               | Glory               | none                                                                                 |
-| Glory Rank          | `game-rules/44_glory.md, p.93`                                                                                | `gloryRank`                            | `l5r4.character.ranks.gloryRank`            | Glory Rank          | none                                                                                 |
-| Status              | `game-rules/45_status.md, p.93`                                                                               | `status`                               | `l5r4.ui.ledger.tracks.status`              | Status              | none                                                                                 |
-| Status Rank         | `game-rules/45_status.md, p.95`                                                                               | `statusRank`                           | `l5r4.character.ranks.statusRank`           | Status Rank         | none                                                                                 |
-| Clan                | `game-rules/47_character_creation_summary.md, p.99`                                                           | `clan`                                 | `TYPES.Item.clan`                           | Clan                | none                                                                                 |
-| family              | `game-rules/48_character_creation_expanded.md, p.100`                                                         | `family`                               | `TYPES.Item.family`                         | Family              | none                                                                                 |
-| School              | `game-rules/47_character_creation_summary.md, p.99`                                                           | `school`                               | `TYPES.Item.school`                         | School              | none                                                                                 |
-| Technique           | `game-rules/49_improving_your_character.md, p.104`                                                            | `technique`                            | `TYPES.Item.technique`                      | Technique           | none                                                                                 |
-| Insight             | `game-rules/49_improving_your_character.md, p.104`                                                            | `insight`                              | `l5r4.ui.common.insight`                    | Insight             | none                                                                                 |
-| Insight Rank        | `game-rules/49_improving_your_character.md, p.104`                                                            | `insightRank`                          | none                                        | Insight Rank        | "insight rank"                                                                       |
-| School Rank         | `game-rules/49_improving_your_character.md, p.104; game-rules/66_magic_and_spell_casting.md, p.163`           | `schoolRank`                           | `l5r4.ui.check.schoolRank`                  | School Rank         | "school rank"                                                                        |
-| Experience Points   | `game-rules/48_character_creation_expanded.md, p.103; game-rules/94_experience_points.md, p.300`              | `xp`                                   | `l5r4.ui.common.xp`                         | XP                  | none                                                                                 |
-| Advantage           | `game-rules/63_advantages_and_disadvantages.md, p.145`                                                        | `advantage`                            | `TYPES.Item.advantage`                      | Advantage           | none                                                                                 |
-| Disadvantage        | `game-rules/63_advantages_and_disadvantages.md, p.145`                                                        | `disadvantage`                         | `TYPES.Item.disadvantage`                   | Disadvantage        | none                                                                                 |
-| Spell               | `game-rules/66_magic_and_spell_casting.md, p.163`                                                             | `spell`                                | `TYPES.Item.spell`                          | Spell               | none                                                                                 |
-| Mastery Level       | `game-rules/66_magic_and_spell_casting.md, p.163; game-rules/86_kata.md, p.259; game-rules/87_kiho.md, p.261` | `masteryLevel`                         | `l5r4.ui.browser.filters.mastery`           | Mastery Level       | none                                                                                 |
-| spell slot          | `game-rules/66_magic_and_spell_casting.md, p.163`                                                             | `spellSlots`, `slot`                   | `l5r4.ui.check.spellSlot`                   | Spell slot          | "Spell Slot"                                                                         |
-| Affinity            | `game-rules/66_magic_and_spell_casting.md, p.164`                                                             | `affinity`                             | `l5r4.magic.spells.affinity`                | Affinity            | none                                                                                 |
-| Deficiency          | `game-rules/66_magic_and_spell_casting.md, p.164`                                                             | `deficiency`                           | `l5r4.magic.spells.deficiency`              | Deficiency          | none                                                                                 |
-| koku                | `game-rules/74_weapons.md, p.199`                                                                             | `koku`                                 | `l5r4.world.wealth.koku`                    | Koku                | none                                                                                 |
-| bu                  | `game-rules/74_weapons.md, p.199`                                                                             | `bu`                                   | `l5r4.world.wealth.bu`                      | Bu                  | none                                                                                 |
-| zeni                | `game-rules/74_weapons.md, p.199`                                                                             | `zeni`                                 | `l5r4.world.wealth.zeni`                    | Zeni                | none                                                                                 |
-| tattoo              | `game-rules/52_dragon_schools.md, p.115`                                                                      | `tattoo`                               | `TYPES.Item.tattoo`                         | Tattoo              | none                                                                                 |
-| Kata                | `game-rules/86_kata.md, p.259`                                                                                | `kata`                                 | `TYPES.Item.kata`                           | Kata                | none                                                                                 |
-| Kiho                | `game-rules/87_kiho.md, p.261`                                                                                | `kiho`                                 | `TYPES.Item.kiho`                           | Kiho                | none                                                                                 |
-| maho                | `game-rules/88_maho.md, p.267`                                                                                | `maho`                                 | `l5r4.magic.spells.maho`                    | Maho                | none                                                                                 |
-| Shadowlands Taint   | `game-rules/89_shadowlands_taint.md, p.274`                                                                   | `taint`, `shadowTaint`                 | `l5r4.ui.taint.label`                       | Shadowlands Taint   | `shadowRank`, "Shadowland Taint"                                                     |
-| Taint Rank          | `game-rules/89_shadowlands_taint.md, p.277`                                                                   | `taintRank`                            | none                                        | Taint Rank          | none                                                                                 |
-| Lost                | `game-rules/89_shadowlands_taint.md, p.279`                                                                   | `lost`                                 | `l5r4.ui.taint.lost`                        | Lost (Taint Rank)   | none                                                                                 |
+| Term | Pages | Stem | Key | Label | Banned |
+| --- | --- | --- | --- | --- | --- |
+| Ring | `game-rules/25_rings_and_traits.md, p.76` | `ring`, `ringKey`, `ringRank` | `l5r4.ui.common.ring` | Ring | `systemRing`, `ringValue` |
+| Void Ring | `game-rules/25_rings_and_traits.md, p.78` | `voidRing` | `l5r4.ui.mechanics.rings.void` | Void | none |
+| Trait | `game-rules/25_rings_and_traits.md, p.76` | `trait`, `traitKey`, `traitRank` | `l5r4.character.skills.properties.trait` | Trait | `actorTrait` |
+| Void Point | `game-rules/25_rings_and_traits.md, p.78` | `voidPoints`, `voidPoint` | `l5r4.ui.mechanics.rings.voidPoints` | Void Points | "void point", "Void point" |
+| TN | `game-rules/24_target_numbers.md, p.76` | `tn` | `l5r4.ui.common.tn` | TN | `targetNumber`, `TN` |
+| Armor TN | `game-rules/32_attack_and_defense.md, p.82` | `armorTn` | `l5r4.ui.mechanics.wounds.armorTn` | Armor TN | `armorTN`, "armor TN" |
+| Raise | `game-rules/28_raises.md, p.79` | `raises` | `l5r4.ui.mechanics.rolls.raises` | Raises | none |
+| Free Raise | `game-rules/28_raises.md, p.79` | `freeRaises` | `l5r4.ui.mechanics.rolls.freeRaises` | Free Raises | "free raise", "free Raise" |
+| Roll & Keep | `game-rules/23_roll_and_keep.md, p.75` | `pool`, `roll`, `keep` | `l5r4.ui.check.pool` | Pool | `diceRoll`, `diceKeep`, `rollDice`, `keepDice`, `rollKeep`, `rollBonus`, `keepBonus` |
+| Exploding Dice | `game-rules/26_special_dice_rules.md, p.77` | `explode` | `l5r4.ui.mechanics.rolls.explodesOn` | Explodes on | none |
+| Ten Dice Rule | `game-rules/26_special_dice_rules.md, p.77` | `tenDice` | none | Ten Dice Rule | none |
+| Skill | `game-rules/58_skills_overview.md, p.133` | `skill` | `TYPES.Item.skill` | Skill | none |
+| Skill Rank | `game-rules/30_skill_rolls_expanded.md, p.81; game-rules/49_improving_your_character.md, p.104` | `skillRank` | `l5r4.ui.common.rank` | Rank | none |
+| Emphasis | `game-rules/58_skills_overview.md, p.133` | `emphasis`, `emphases` | `l5r4.ui.mechanics.rolls.emphasis` | Emphasis | none |
+| Mastery Ability | `game-rules/58_skills_overview.md, p.133` | `mastery` | `l5r4.character.skills.properties.mastery3` | Rank 3 Mastery | none |
+| Skill Roll | `game-rules/29_types_of_rolls.md, p.79` | `skillRoll` | `l5r4.ui.mechanics.rolls.skillRoll` | Skill Roll | "Skill roll" |
+| Trait Roll | `game-rules/29_types_of_rolls.md, p.79` | `traitRoll` | `l5r4.ui.mechanics.rolls.traitRoll` | Trait Roll | "Trait roll" |
+| Ring Roll | `game-rules/29_types_of_rolls.md, p.80` | `ringRoll` | `l5r4.ui.mechanics.rolls.ringRoll` | Ring Roll | "Ring roll" |
+| Spell Casting Roll | `game-rules/29_types_of_rolls.md, p.80; game-rules/66_magic_and_spell_casting.md, p.163` | `spellCast` | `l5r4.ui.mechanics.rolls.spellCasting` | Spell Casting Roll | "Spell Casting roll" |
+| damage roll | `game-rules/29_types_of_rolls.md, p.80` | `damage` | `l5r4.ui.mechanics.rolls.damageRoll` | Damage roll | none |
+| Contested Roll | `game-rules/29_types_of_rolls.md, p.80` | `contest` | `l5r4.ui.check.contest` | Contested Roll | "Contested roll" |
+| Unskilled Roll | `game-rules/30_skill_rolls_expanded.md, p.80` | `unskilled` | none | Unskilled | `untrained` |
+| Initiative | `game-rules/31_combat_round.md, p.81` | `initiative` | `l5r4.ui.common.initiative` | Initiative | none |
+| Free Action | `game-rules/37_actions.md, p.85` | `free` | `l5r4.ui.check.actions.free` | Free Action | none |
+| Simple Action | `game-rules/37_actions.md, p.85` | `simple` | `l5r4.ui.check.actions.simple` | Simple Action | none |
+| Complex Action | `game-rules/37_actions.md, p.85` | `complex` | `l5r4.ui.check.actions.complex` | Complex Action | none |
+| Wound | `game-rules/33_wounds.md, p.82` | `wounds`, `suffered` | `l5r4.ui.mechanics.wounds.label` | Wounds | none |
+| Wound Rank | `game-rules/33_wounds.md, p.82; game-rules/34_ambush_falling_drowning.md, p.84` | `woundLevel` | `l5r4.ui.sheets.woundLevels` | Wound Ranks | `woundRank`, `WoundLvls`, "Wound Level" |
+| Healthy | `game-rules/33_wounds.md, p.82` | `healthy` | `l5r4.ui.mechanics.wounds.healthy` | Healthy | none |
+| Nicked | `game-rules/33_wounds.md, p.82` | `nicked` | `l5r4.ui.mechanics.wounds.nicked` | Nicked | none |
+| Grazed | `game-rules/33_wounds.md, p.82` | `grazed` | `l5r4.ui.mechanics.wounds.grazed` | Grazed | none |
+| Hurt | `game-rules/33_wounds.md, p.82` | `hurt` | `l5r4.ui.mechanics.wounds.hurt` | Hurt | none |
+| Injured | `game-rules/33_wounds.md, p.82` | `injured` | `l5r4.ui.mechanics.wounds.injured` | Injured | none |
+| Crippled | `game-rules/33_wounds.md, p.82` | `crippled` | `l5r4.ui.mechanics.wounds.crippled` | Crippled | none |
+| Down | `game-rules/33_wounds.md, p.82` | `down` | `l5r4.ui.mechanics.wounds.down` | Down | none |
+| Out | `game-rules/33_wounds.md, p.82` | `out` | `l5r4.ui.mechanics.wounds.out` | Out | none |
+| Reduction | `game-rules/73_armor.md, p.198` | `reduction` | `l5r4.equipment.armor.reduction` | Reduction | none |
+| Stance | `game-rules/36_stances.md, p.84` | `stance`, `stanceId` | none | Stance | none |
+| Attack Stance | `game-rules/36_stances.md, p.84` | `attackStance` | `l5r4.ui.mechanics.stances.attack` | Attack Stance | none |
+| Full Attack Stance | `game-rules/36_stances.md, p.84` | `fullAttackStance` | `l5r4.ui.mechanics.stances.fullAttack` | Full Attack Stance | none |
+| Defense Stance | `game-rules/36_stances.md, p.84` | `defenseStance` | `l5r4.ui.mechanics.stances.defense` | Defense Stance | none |
+| Full Defense Stance | `game-rules/36_stances.md, p.84` | `fullDefenseStance` | `l5r4.ui.mechanics.stances.fullDefense` | Full Defense Stance | none |
+| Center Stance | `game-rules/36_stances.md, p.84` | `centerStance` | `l5r4.ui.mechanics.stances.center` | Center Stance | none |
+| Called Shot | `game-rules/38_maneuvers.md, p.86` | `calledShot` | `l5r4.ui.ruleSummary.maneuver.calledShot` | Called Shot | none |
+| Disarm | `game-rules/38_maneuvers.md, p.86` | `disarm` | `l5r4.ui.ruleSummary.maneuver.disarm` | Disarm | none |
+| Extra Attack | `game-rules/38_maneuvers.md, p.86` | `extraAttack` | `l5r4.ui.ruleSummary.maneuver.extraAttack` | Extra Attack | none |
+| Feint | `game-rules/38_maneuvers.md, p.86` | `feint` | `l5r4.ui.ruleSummary.maneuver.feint` | Feint | none |
+| Guard | `game-rules/38_maneuvers.md, p.86` | `guard` | none | Guard | none |
+| Increased Damage | `game-rules/38_maneuvers.md, p.87` | `increasedDamage` | none | Increased Damage | none |
+| Knockdown | `game-rules/38_maneuvers.md, p.87` | `knockdown` | `l5r4.ui.ruleSummary.maneuver.knockdown` | Knockdown | none |
+| Iaijutsu Dueling | `game-rules/39_iaijutsu_dueling.md, p.87` | `duel` | `l5r4.ui.combat.duel.title` | Iaijutsu duel | none |
+| Grappling | `game-rules/40_grappling.md, p.88` | `grapple` | `l5r4.ui.combat.grapple.title` | Grapple | none |
+| condition | `game-rules/41_conditional_effects.md, p.89` | `condition`, `conditionId`, `statusId` | `l5r4.ui.common.conditions` | Conditions | none |
+| Blinded | `game-rules/41_conditional_effects.md, p.89` | `blinded` | `l5r4.ui.statusEffects.blinded` | Blinded | none |
+| Dazed | `game-rules/41_conditional_effects.md, p.89` | `dazed` | `l5r4.ui.statusEffects.dazed` | Dazed | none |
+| Entangled | `game-rules/41_conditional_effects.md, p.89` | `entangled` | `l5r4.ui.statusEffects.entangled` | Entangled | none |
+| Fatigued | `game-rules/41_conditional_effects.md, p.89` | `fatigued` | `l5r4.ui.statusEffects.fatigued` | Fatigued | none |
+| Grappled | `game-rules/41_conditional_effects.md, p.89` | `grappled` | `l5r4.ui.statusEffects.grappled` | Grappled | none |
+| Mounted | `game-rules/41_conditional_effects.md, p.89` | `mounted` | `l5r4.ui.statusEffects.mounted` | Mounted/Higher | none |
+| Prone | `game-rules/41_conditional_effects.md, p.89` | `prone` | `l5r4.ui.statusEffects.prone` | Prone | none |
+| Stunned | `game-rules/41_conditional_effects.md, p.89` | `stunned` | `l5r4.ui.statusEffects.stunned` | Stunned | none |
+| Fear | `game-rules/42_fear.md, p.90` | `fear` | `l5r4.ui.mechanics.fear.label` | Fear {rank} | none |
+| Fear Rank | `game-rules/42_fear.md, p.90` | `fearRank` | `l5r4.ui.mechanics.fear.rank` | Fear Rank | none |
+| Honor | `game-rules/43_honor.md, p.90` | `honor` | `l5r4.ui.ledger.tracks.honor` | Honor | none |
+| Honor Rank | `game-rules/43_honor.md, p.90` | `honorRank` | `l5r4.character.ranks.honorRank` | Honor Rank | none |
+| Honor Roll | `game-rules/43_honor.md, p.92` | `honorRoll` | `l5r4.ui.honorRoll.button` | Honor Roll | none |
+| Glory | `game-rules/44_glory.md, p.93` | `glory` | `l5r4.ui.ledger.tracks.glory` | Glory | none |
+| Glory Rank | `game-rules/44_glory.md, p.93` | `gloryRank` | `l5r4.character.ranks.gloryRank` | Glory Rank | none |
+| Status | `game-rules/45_status.md, p.93` | `status` | `l5r4.ui.ledger.tracks.status` | Status | none |
+| Status Rank | `game-rules/45_status.md, p.95` | `statusRank` | `l5r4.character.ranks.statusRank` | Status Rank | none |
+| Clan | `game-rules/47_character_creation_summary.md, p.99` | `clan` | `TYPES.Item.clan` | Clan | none |
+| family | `game-rules/48_character_creation_expanded.md, p.100` | `family` | `TYPES.Item.family` | Family | none |
+| School | `game-rules/47_character_creation_summary.md, p.99` | `school` | `TYPES.Item.school` | School | none |
+| Technique | `game-rules/49_improving_your_character.md, p.104` | `technique` | `TYPES.Item.technique` | Technique | none |
+| Insight | `game-rules/49_improving_your_character.md, p.104` | `insight` | `l5r4.ui.common.insight` | Insight | none |
+| Insight Rank | `game-rules/49_improving_your_character.md, p.104` | `insightRank` | none | Insight Rank | "insight rank" |
+| School Rank | `game-rules/49_improving_your_character.md, p.104; game-rules/66_magic_and_spell_casting.md, p.163` | `schoolRank` | `l5r4.ui.check.schoolRank` | School Rank | "school rank" |
+| Experience Points | `game-rules/48_character_creation_expanded.md, p.103; game-rules/94_experience_points.md, p.300` | `xp` | `l5r4.ui.common.xp` | XP | none |
+| Advantage | `game-rules/63_advantages_and_disadvantages.md, p.145` | `advantage` | `TYPES.Item.advantage` | Advantage | none |
+| Disadvantage | `game-rules/63_advantages_and_disadvantages.md, p.145` | `disadvantage` | `TYPES.Item.disadvantage` | Disadvantage | none |
+| Spell | `game-rules/66_magic_and_spell_casting.md, p.163` | `spell` | `TYPES.Item.spell` | Spell | none |
+| Mastery Level | `game-rules/66_magic_and_spell_casting.md, p.163; game-rules/86_kata.md, p.259; game-rules/87_kiho.md, p.261` | `masteryLevel` | `l5r4.apps.compendiumBrowser.filters.mastery` | Mastery Level | none |
+| spell slot | `game-rules/66_magic_and_spell_casting.md, p.163` | `spellSlots`, `slot` | `l5r4.ui.check.spellSlot` | Spell slot | "Spell Slot" |
+| Affinity | `game-rules/66_magic_and_spell_casting.md, p.164` | `affinity` | `l5r4.magic.spells.affinity` | Affinity | none |
+| Deficiency | `game-rules/66_magic_and_spell_casting.md, p.164` | `deficiency` | `l5r4.magic.spells.deficiency` | Deficiency | none |
+| koku | `game-rules/74_weapons.md, p.199` | `koku` | `l5r4.world.wealth.koku` | Koku | none |
+| bu | `game-rules/74_weapons.md, p.199` | `bu` | `l5r4.world.wealth.bu` | Bu | none |
+| zeni | `game-rules/74_weapons.md, p.199` | `zeni` | `l5r4.world.wealth.zeni` | Zeni | none |
+| tattoo | `game-rules/52_dragon_schools.md, p.115` | `tattoo` | `TYPES.Item.tattoo` | Tattoo | none |
+| Kata | `game-rules/86_kata.md, p.259` | `kata` | `TYPES.Item.kata` | Kata | none |
+| Kiho | `game-rules/87_kiho.md, p.261` | `kiho` | `TYPES.Item.kiho` | Kiho | none |
+| maho | `game-rules/88_maho.md, p.267` | `maho` | `l5r4.magic.spells.maho` | Maho | none |
+| Shadowlands Taint | `game-rules/89_shadowlands_taint.md, p.274` | `taint`, `shadowTaint` | `l5r4.ui.taint.label` | Shadowlands Taint | `shadowRank`, "Shadowland Taint" |
+| Taint Rank | `game-rules/89_shadowlands_taint.md, p.277` | `taintRank` | none | Taint Rank | none |
+| Lost | `game-rules/89_shadowlands_taint.md, p.279` | `lost` | `l5r4.ui.taint.lost` | Lost (Taint Rank) | none |
 
-A term the book writes in lower case (damage roll, condition, family, spell slot, koku, bu, zeni, tattoo, maho) is
-lower case inside a sentence and takes a capital only as the first word of a label.
-
-## Labels that differ from lang/en.json
-
-Six keys hold a value other than the **Label**; the copy partition changes each value to the label. The Honor Rank and
-Glory Rank labels are Stage 17 decision 16; XP is `docs/design-system/content/voice.md` **Abbreviations**.
-
-| Key                                  | Value now         | Label       |
-| ------------------------------------ | ----------------- | ----------- |
-| `l5r4.ui.common.xp`                  | Experience Points | XP          |
-| `l5r4.ui.mechanics.rolls.explodesOn` | Explodes On       | Explodes on |
-| `l5r4.ui.mechanics.rolls.damageRoll` | Damage Roll       | Damage roll |
-| `l5r4.ui.sheets.woundLevels`         | Wound Levels      | Wound Ranks |
-| `l5r4.character.ranks.honorRank`     | Honor             | Honor Rank  |
-| `l5r4.character.ranks.gloryRank`     | Glory             | Glory Rank  |
+A term the book writes in lower case (damage roll, condition, family, spell slot, koku, bu, zeni, tattoo, maho) is lower case inside a sentence and takes a capital only as the first word of a label.
 
 ## Picks behind the stems
 
-| Concept            | Pick                                                                                                             | Basis                                                                                        |
-| ------------------ | ---------------------------------------------------------------------------------------------------------------- | -------------------------------------------------------------------------------------------- |
-| Armor TN           | `armorTn`; `getArmorTNPenalty` becomes `getArmorTnPenalty`                                                       | Decision 15                                                                                  |
-| TN                 | `tn`, `Tn` inside a name (`saveTn`, `tnBase`)                                                                    | Decision 15                                                                                  |
-| Roll & Keep        | A pool is `{ roll, keep }`; a pool change is a second `{ roll, keep }` object, never `rollBonus` and `keepBonus` | Decision 15                                                                                  |
-| Wound Rank         | `woundLevel` in code, after the stored `woundLevels` field; "Wound Rank" in copy                                 | Decision 15                                                                                  |
-| Game terms in copy | The book's capitals: Void Point, Free Raise, Insight Rank, School Rank, Trait, Ring, Skill, Wound                | Decision 15                                                                                  |
-| Unskilled Roll     | `unskilled`                                                                                                      | Services majority: 12 against 3 `untrained`                                                  |
-| Trait rank         | `traitRank`                                                                                                      | Services majority: 6 against 3 `actorTrait`                                                  |
-| Ring key and rank  | `ringKey` for a key, `ringRank` for a rank                                                                       | Services majority: `ringKey` 19; `ringValue` (6) and `systemRing` (2) are the minority forms |
-| Taint key segment  | `taint`, after `l5r4.ui.taint` and the ledger track `taint`                                                      | The only other form is `shadowRank` (1 key)                                                  |
+| Concept | Pick | Basis |
+| --- | --- | --- |
+| Armor TN | `armorTn`, `Tn` inside a name (`getArmorTnPenalty`) | Decision 15 |
+| TN | `tn`, `Tn` inside a name (`saveTn`, `tnBase`) | Decision 15 |
+| Roll & Keep | A pool is `{ roll, keep }`; a pool change is a second `{ roll, keep }` object, never `rollBonus` and `keepBonus` | Decision 15 |
+| Wound Rank | `woundLevel` in code, after the stored `woundLevels` field; "Wound Rank" in copy | Decision 15 |
+| Game terms in copy | The book's capitals: Void Point, Free Raise, Insight Rank, School Rank, Trait, Ring, Skill, Wound | Decision 15 |
+| Unskilled Roll | `unskilled` | Services majority, over `untrained` |
+| Trait rank | `traitRank` | Services majority, over `actorTrait` |
+| Ring key and rank | `ringKey` for a key, `ringRank` for a rank | Services majority, over `ringValue` and `systemRing` |
+| Taint key segment | `taint`, after `l5r4.ui.taint` and the ledger track `taint` | The one other form, `shadowRank`, is banned (**Terms**) |
 
 ## Fixed names the check exempts
 
-Decision 2 fixes every name stored in world data or used outside the system. These keep their spelling even where it
-breaks a stem above, because a rename would strand saved actors, items, chat messages, or macros.
+Decision 2 fixes every name stored in world data or used outside the system. These keep their spelling even where it breaks a stem above, because a rename would strand saved actors, items, chat messages, or macros.
 
-| Fixed name                                                                               | Kind                                          | Breaks                                      |
-| ---------------------------------------------------------------------------------------- | --------------------------------------------- | ------------------------------------------- |
-| `nrWoundLvls`, `woundLevels`, `manualWoundLevels`, `visibleManualWoundLevels`            | Actor `system` fields                         | `WoundLvls`                                 |
-| `freeRaisesToTN`                                                                         | `roll` chat message field `tn.freeRaisesToTN` | `TN`                                        |
-| `TNModifier`, `ArmorTN`                                                                  | Rule keys in `system.rules`                   | `TN`                                        |
-| `damageRoll`, `damageKeep`, `derivedDamageRoll`, `derivedDamageKeep`                     | Item `system` fields                          | Roll & Keep stems                           |
-| `initiative.roll`, `initiative.keep`, `initiative.rollMod`, `initiative.keepMod`         | Actor `system` fields                         | none; listed so a rename never touches them |
-| `attack1-3.roll`, `attack1-3.keep`, `damage1-3.roll`, `damage1-3.keep`                   | NPC `system` fields                           | none; listed so a rename never touches them |
-| `shadowTaint.rank`                                                                       | Actor `system` field                          | `taintRank` is the stem for new code        |
-| `rings.void.value`, `rings.void.rank`                                                    | Actor `system` fields                         | none; the value is the Void Point count     |
-| `l5r4.ui.ruleSummary.ArmorTN`, `l5r4.ui.ruleSummary.TNModifier`                          | i18n keys that mirror rule keys               | `TN`                                        |
-| `fullAttackStance`, `fullDefenseStance`, `attackStance`, `defenseStance`, `centerStance` | Status effect ids                             | none                                        |
+| Fixed name | Kind | Breaks |
+| --- | --- | --- |
+| `nrWoundLvls`, `woundLevels`, `manualWoundLevels`, `visibleManualWoundLevels` | Actor `system` fields | `WoundLvls` |
+| `freeRaisesToTN` | `roll` chat message field `tn.freeRaisesToTN` | `TN` |
+| `TNModifier`, `ArmorTN` | Rule keys in `system.rules` | `TN` |
+| `damageRoll`, `damageKeep`, `derivedDamageRoll`, `derivedDamageKeep` | Item `system` fields | Roll & Keep stems |
+| `initiative.roll`, `initiative.keep`, `initiative.rollMod`, `initiative.keepMod` | Actor `system` fields | none; listed so a rename never touches them |
+| `attack1-3.roll`, `attack1-3.keep`, `damage1-3.roll`, `damage1-3.keep` | NPC `system` fields | none; listed so a rename never touches them |
+| `shadowTaint.rank` | Actor `system` field | `taintRank` is the stem for new code |
+| `rings.void.value`, `rings.void.rank` | Actor `system` fields | none; the value is the Void Point count |
+| `l5r4.ui.ruleSummary.ArmorTN`, `l5r4.ui.ruleSummary.TNModifier` | i18n keys that mirror rule keys | `TN` |
+| `fullAttackStance`, `fullDefenseStance`, `attackStance`, `defenseStance`, `centerStance` | Status effect ids | none |
 
 `docs/code-system/naming.md` lists every fixed name; this table lists the ones that collide with a glossary stem.

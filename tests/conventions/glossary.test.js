@@ -12,6 +12,9 @@ import {
 /** The single-word terms whose capitals copy keeps everywhere (Stage 17 decision 15, Game terms in copy). */
 const CAPITALIZED_WORDS = Object.freeze(["Trait", "Ring", "Skill", "Wound"]);
 
+/** The glossary page, in the repo and in a fixture tree. */
+const GLOSSARY = "docs/code-system/glossary.md";
+
 /** The glossary, parsed once. */
 let glossary = null;
 
@@ -21,7 +24,7 @@ let glossary = null;
  */
 function glossaryOf() {
   if (!glossary) {
-    const page = getRepoTree().text("docs/code-system/glossary.md");
+    const page = getRepoTree().text(GLOSSARY);
     const terms = tableAfter(page, "Terms");
     glossary = {
       terms,
@@ -251,7 +254,19 @@ const RULES = {
           written => `lang/en.json ${key}: "${written}" is written "${term}"`
         )
       )
-    )
+    ),
+
+  "glossary/term-key": tree => {
+    const english = new Set(englishOf(tree).map(({ key }) => key));
+    return tableAfter(tree.text(GLOSSARY), "Terms")
+      .filter(row => {
+        const [key] = codeSpansOf(row.Key);
+        return row.Key !== "none" && !(row.Key === `\`${key}\`` && english.has(key));
+      })
+      .map(
+        row => `${GLOSSARY} ${row.Term}: the Key ${row.Key} is neither none nor a lang/en.json key`
+      );
+  }
 };
 
 registerConventionSuite("Glossary", RULES, "glossary");

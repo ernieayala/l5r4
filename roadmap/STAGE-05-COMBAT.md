@@ -1,12 +1,11 @@
 # Stage 5: Combat and Initiative
 
-**Goal:** Initiative rolls Insight Rank + Reflexes keep Reflexes with the Ten Dice Rule (`game-rules/31_combat_round.md`, p.81; `26_special_dice_rules.md`, p.77) through `Combat` and `Combatant` subclasses, and the Void Point prompt for +10 Initiative (`25_rings_and_traits.md`, p.78) works as in 3.2.1.
-**Needs:** 2, 4.
+**Goal:** Initiative rolls Insight Rank + Reflexes keep Reflexes with the Ten Dice Rule (`game-rules/31_combat_round.md`, p.81; `26_special_dice_rules.md`, p.77) through `Combat` and `Combatant` subclasses, and the Void Point prompt for +10 Initiative (`25_rings_and_traits.md`, p.78) works as in 3.2.1. **Needs:** 2, 4.
 
 ## Foundry v14 APIs
 
 | Need | API (section of FOUNDRY-V14-REFERENCE.md) |
-|------|-------------------------------------------|
+| --- | --- |
 | `Combat#rollInitiative(ids, {formula, messageMode, messageOptions, updateTurn})`, `Combatant#getInitiativeRoll` | §7.1 |
 | Document class registration `CONFIG.Combat.documentClass`, `CONFIG.Combatant.documentClass` | §7.1, §10.1 |
 | `rollMode` in `messageOptions` still handled for compatibility | `client/documents/combat.mjs:392` |
@@ -15,7 +14,7 @@
 ## Audit
 
 | Where | Finding |
-|-------|---------|
+| --- | --- |
 | `module/services/initiative.js:45-48` | Sets `CONFIG.Combat.initiative` |
 | `module/services/initiative.js:52-98` | Replaces `Combat.prototype.rollInitiative` to prompt for Void (`DialogV2.confirm` since Stage 4) |
 | `module/services/initiative.js:104-212` | Replaces `Combatant.prototype.getInitiativeRoll` with the Roll & Keep formula and the Ten Dice Rule conversion |
@@ -27,7 +26,7 @@
 ## Deliverables
 
 | Layer | Change |
-|-------|--------|
+| --- | --- |
 | Documents | `module/documents/combat.js` (`L5R4Combat`) and `combatant.js` (`L5R4Combatant`), registered in `init`. The Combatant overrides `_getInitiativeFormula`; the Combat rolls a combatant with a Void bonus in a call of its own with that formula (core rolls every id with one formula) |
 | Documents | PC preparation builds the Initiative pool after the Insight Rank is recomputed (B4) |
 | Utils | `module/utils/ten-dice.js` (`applyTenDiceRule`, the rule `ten-dice-rule.js` used to hold, now its wrapper) and `module/utils/initiative.js` (`initiativeDice`, `initiativeFormula`), with Vitest cases |
@@ -49,6 +48,6 @@
 
 ## Out of scope
 
-| Item | Stage |
-|------|-------|
+| Item                      | Stage       |
+| ------------------------- | ----------- |
 | Combat tracker UI changes | Not planned |

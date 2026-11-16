@@ -1,14 +1,11 @@
 # Stage 3: Active Effects V2
 
-**Goal:** every Active Effect the system creates or reads uses the v14 shape (`system.changes`, string
-`type`, `phase`), Trait changes reach the values derived from them, and stances and conditions behave as in
-3.2.1.
-**Needs:** 2.
+**Goal:** every Active Effect the system creates or reads uses the v14 shape (`system.changes`, string `type`, `phase`), Trait changes reach the values derived from them, and stances and conditions behave as in 3.2.1. **Needs:** 2.
 
 ## Foundry v14 APIs
 
 | Need | API (section of FOUNDRY-V14-REFERENCE.md) |
-|------|-------------------------------------------|
+| --- | --- |
 | `system.changes`, `type`, `phase`, `priority` | §6.1 |
 | Applying changes; `DataField#applyChange` validates against the schema | §6.2 |
 | Phases `"initial"` / `"final"` and where each runs | §3.2 |
@@ -20,7 +17,7 @@
 `rg -n "\.changes\b|changes:|ACTIVE_EFFECT_MODES|\.mode\b" module`
 
 | Where | Finding |
-|-------|---------|
+| --- | --- |
 | `module/utils/xp-calculations.js:140-145` | Reads `eff.changes` |
 | `module/utils/xp-calculations.js:212`, `:236` | Compares `ch.mode` with `CONST.ACTIVE_EFFECT_MODES.ADD` |
 | `module/services/family-bonus-service.js:90-97`, `:140-147` | Reads `effect.changes` and `change.mode` |
@@ -30,12 +27,10 @@
 | `dist/l5r4-enhanced.js:96` | `CONFIG.statusEffects = STATUS_EFFECTS` (array); the setter is marked deprecated in 14.370 (`client/client.mjs:29-39`) |
 | `ACTIVE_EFFECTS.md` | User guide to effect keys and modes; update to `type` names, and drop the keys that change nothing: item keys, `system.xp`, Insight in auto mode, Free Raises lowering the TN (AUTOMATION.md B12) |
 
-`rg -n "^\s*icon:" module/services module/sheets/handlers module/apps/condition-manager.js`: 14.370 drops an
-Active Effect's `icon` without a warning (no shim or `migrateData` in `common/documents/active-effect.mjs`), so
-the effect gets `DEFAULT_ICON` (`icons/svg/aura.svg`). Effects stored by 3.2.1 already use `img`.
+`rg -n "^\s*icon:" module/services module/sheets/handlers module/apps/condition-manager.js`: 14.370 drops an Active Effect's `icon` without a warning (no shim or `migrateData` in `common/documents/active-effect.mjs`), so the effect gets `DEFAULT_ICON` (`icons/svg/aura.svg`). Effects stored by 3.2.1 already use `img`.
 
 | Where | Finding |
-|-------|---------|
+| --- | --- |
 | `module/services/fear.js:92` | Fear effect created with `icon` |
 | `module/services/wound-prone-automation.js:153` | Prone effect created with `icon` |
 | `module/services/stance/core/effect-templates.js:59`, `:88`, `:116`, `:143`, `:175` | Stance templates use `icon` |
@@ -48,7 +43,7 @@ the effect gets `DEFAULT_ICON` (`icons/svg/aura.svg`). Effects stored by 3.2.1 a
 ## Deliverables
 
 | Layer | Change |
-|-------|--------|
+| --- | --- |
 | Data | A model for core's `base` ActiveEffect type extending `foundry.data.ActiveEffectTypeDataModel`, assigned to `CONFIG.ActiveEffect.dataModels.base` and not declared in `system.json` (a core type there invalidates `documentTypes`, FOUNDRY-V14-REFERENCE.md §2.2), adding `rules` (an `ArrayField` of `ObjectField`, default empty) for Stage 7 (X6) |
 | Utils, Services | Read `effect.system.changes` and `change.type === "add"`; create effects with `system.changes` |
 | Services, Sheets | B6 (AUTOMATION.md §2): read-then-write sites take the stored value from `_source`, not the prepared one, so an effect bonus is never written into storage (`chat-damage-buttons.js:63-66, 124-143`, `void-manager.js:191, 275`, `spell-cast-roll.js:120-121, 252`, `maho-cast-roll.js:111, 206-207`, `initiative.js:70-82`, `pc-actions-handler.js:175`, `void-points-handler.js:23, 63`, `spell-slot-manager.js`, `pc-adjustment-handler.js`, `rest.js:52`). Availability checks keep reading the prepared value |
@@ -72,6 +67,6 @@ the effect gets `DEFAULT_ICON` (`icons/svg/aura.svg`). Effects stored by 3.2.1 a
 
 ## Out of scope
 
-| Item | Stage |
-|------|-------|
-| Effect duration and expiry automation beyond what 3.2.1 does | 9 |
+| Item                                                         | Stage |
+| ------------------------------------------------------------ | ----- |
+| Effect duration and expiry automation beyond what 3.2.1 does | 9     |

@@ -1,20 +1,11 @@
 # L5R4 Enhanced on Foundry VTT v14: Roadmap
 
-4.0.0 moves `l5r4-enhanced` 3.2.1 (Foundry 13) to Foundry 14.370, adds pf2e-style automation, and checks the
-rules against the Core Rulebook. Stages 1-6 port: each changes how the code talks to Foundry, never what a rule
-computes. Stages 7-11 build the automation (rules carried as data on items and effects, one roll pipeline,
-durations and conditions, the damage loop, rule authoring; design in `AUTOMATION.md`). Stage 12 migrates
-3.2.1 worlds into the new data, Stage 13 audits every automated rule against the book, Stage 14 adds table tools
-(text links, request cards, effect panel, macros), Stage 15 ships compendium packs of the book's content (names,
-numbers, rules, and page citations, never its text) with a browser, Stage 16 makes the audit a repeatable coverage
-check in the gate, Stage 17 writes a design system and a code system, enforces them with checks in the gate, and
-brings the repo into line through a multi-agent review-and-fix pass, Stage 18 plays the system through the real UI
-with GM and player clients, Stage 19 releases.
+4.0.0 moves `l5r4-enhanced` 3.2.1 (Foundry 13) to Foundry 14.370, adds pf2e-style automation, and checks the rules against the Core Rulebook. Stages 1-6 port: each changes how the code talks to Foundry, never what a rule computes. Stages 7-11 build the automation (rules carried as data on items and effects, one roll pipeline, durations and conditions, the damage loop, rule authoring; design in `AUTOMATION.md`). Stage 12 migrates 3.2.1 worlds into the new data, Stage 13 audits every automated rule against the book, Stage 14 adds table tools (text links, request cards, effect panel, macros), Stage 15 ships compendium packs of the book's content (names, numbers, rules, and page citations, never its text) with a browser, Stage 16 makes the audit a repeatable coverage check in the gate, Stage 17 writes a design system and a code system, enforces them with checks in the gate, and brings the repo into line through a multi-agent review-and-fix pass, Stage 18 plays the system through the real UI with GM and player clients, Stage 19 releases.
 
 ## How to read this roadmap
 
 | Rule | Detail |
-|------|--------|
+| --- | --- |
 | Foundry APIs come from the reference | `FOUNDRY-V14-REFERENCE.md` holds the v14 APIs with sources; the installed 14.370 source wins over it |
 | Rules come from the book | A stage that touches a formula names its `game-rules/` file and printed page; it never restates the rule |
 | Audits are snapshots | Each stage's **Audit** lists the call sites found on 2026-11-10, with the grep that found them. Re-run the grep when the stage starts |
@@ -26,15 +17,12 @@ Working rules, architecture layers, and the gate live in `CLAUDE.md`.
 
 ## Already in place
 
-The test and tooling setup the stages rely on: ESLint 10 flat config, Vitest 5 (Node environment),
-Stylelint 17, Prettier 3, madge, Husky with lint-staged, the `gate.yml` workflow on Node 24, Quench batches
-in `tests/quench/`, the transcribed rulebook in `game-rules/` (local, gitignored), and the `/rule`,
-`/foundry-api`, `/stage` skills (local).
+The test and tooling setup the stages rely on: ESLint 10 flat config, Vitest 5 (Node environment), Stylelint 17, Prettier 3, madge, Husky with lint-staged, the `gate.yml` workflow on Node 24, Quench batches in `tests/quench/`, the transcribed rulebook in `game-rules/` (local, gitignored), and the `/rule`, `/foundry-api`, `/stage` skills (local).
 
 ## Stages
 
 | # | File | Goal | Needs |
-|---|------|------|-------|
+| --- | --- | --- | --- |
 | 1 | `STAGE-01-LOAD-ON-V14.md` | The v13 code loads in 14.370 from a v14 manifest; a Quench smoke batch and a deprecation inventory run | none |
 | 2 | `STAGE-02-DATA-MODELS.md` | `template.json` replaced by one `TypeDataModel` per subtype, with migrations for stored world data | 1 |
 | 3 | `STAGE-03-ACTIVE-EFFECTS.md` | Active Effects V2: `system.changes`, string change `type`, phases, status effect registration | 2 |
@@ -55,15 +43,14 @@ in `tests/quench/`, the transcribed rulebook in `game-rules/` (local, gitignored
 | 18 | `STAGE-18-PLAYTEST.md` | An original scenario played through Claude in Chrome by a GM and players on their own clients; findings fixed at the root | 16, 17 |
 | 19 | `STAGE-19-RELEASE.md` | Docs, translations, release workflows with an allowlisted zip and a tested manifest rewrite, a book-text sweep, and the 4.0.0 release | 1-18 |
 
-Stage 4 needs only Stage 1, so it can run before Stage 2 or 3 if Ernie prefers. Stage 2's data models carry
-`system.rules` from the start so Stage 7 does not reshape them (Stage 2 Decision 2).
+Stage 4 needs only Stage 1, so it can run before Stage 2 or 3 if Ernie prefers. Stage 2's data models carry `system.rules` from the start so Stage 7 does not reshape them (Stage 2 Decision 2).
 
 ## GitHub issues and pull requests
 
 Reviewed 2026-11-12 (`gh issue list --state all`, `gh pr list --state all`). Each open item has a stage.
 
 | Item | What | Where it is handled |
-|------|------|---------------------|
+| --- | --- | --- |
 | #38 | NPC formula wound mode: `woundLevels` overwritten by manual thresholds | Stage 13 |
 | #40 | NPC long rest heals no Wounds: `wounds.healRate` computed for PCs only | Stage 13 |
 | #43 | Kata and kiho XP read the `cost` field, not the Mastery Level (pp.259, 231) | Stage 13 |
@@ -85,11 +72,10 @@ Reviewed 2026-11-12 (`gh issue list --state all`, `gh pr list --state all`). Eac
 
 ## Not planned
 
-Out of 4.0.0, each recorded by the stage that set it aside. The coverage manifest marks the pages of these
-topics `out` (Stage 16).
+Out of 4.0.0, each recorded by the stage that set it aside. The coverage manifest marks the pages of these topics `out` (Stage 16).
 
 | Item | Recorded in |
-|------|-------------|
+| --- | --- |
 | Mass battle (pp.236-241) | Stages 10, 13, 15, 18 |
 | A 3rd Edition rules option (#33) | Stage 13 |
 | Shadowlands Powers and Mutations as items (pp.274-284); the GM picks them | Stage 15 |
@@ -104,7 +90,7 @@ topics `out` (Stage 16).
 ## Cross-stage decisions
 
 | Id | Decision | Basis |
-|----|----------|-------|
+| --- | --- | --- |
 | X1 | The system id stays `l5r4-enhanced`. Worlds, flags (`flags.l5r4-enhanced.*`), and template paths depend on it | Existing worlds |
 | X2 | 4.0.0 requires Foundry 14.370 (`compatibility.minimum` `"14.370"`, `verified` `"14.370"`, `maximum` `"14"`). Foundry 13 users stay on 3.2.1 | Ernie, 2026-11-10 |
 | X3 | Stages 1-6 keep behavior. A rule bug found during them becomes a GitHub issue with the printed page, fixed in the automation stage that rebuilds that code (7-11) or in Stage 13 | CLAUDE.md **PORT KEEPS BEHAVIOR**; Ernie, 2026-11-12 |
@@ -117,26 +103,31 @@ topics `out` (Stage 16).
 ```markdown
 # Stage N: Name
 
-**Goal:** one sentence: what works when this stage is done.
-**Needs:** the stages that must be complete.
+**Goal:** one sentence: what works when this stage is done. **Needs:** the stages that must be complete.
 
 ## Foundry v14 APIs
+
 | Need | API (section of FOUNDRY-V14-REFERENCE.md, or installed source line) |
 
 ## Audit
+
 The call sites to change, as `file:line`, with the grep that finds them.
 
 ## Deliverables
+
 Grouped by layer. Each item says what changes.
 
 ## Acceptance
+
 - Vitest: what the tests cover.
 - Quench: which batches run, and what they check.
 - Manual: what Ernie clicks through in Foundry.
 
 ## Decisions
+
 Answered questions, one numbered line each, with the basis. Open ones go under "### Still open".
 
 ## Out of scope
+
 What a later stage covers.
 ```

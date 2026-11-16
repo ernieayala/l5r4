@@ -1,28 +1,23 @@
 # Stage 13: Rules audit
 
-**Goal:** every mechanic the system automates matches the Core Rulebook: each rule is read in the book, its
-worked examples run as Vitest cases against the system's own functions, and every mismatch is fixed.
-**Needs:** 2-12. It runs last so it covers the mechanics Stages 7-11 add as well as the ones 3.2.1 had.
+**Goal:** every mechanic the system automates matches the Core Rulebook: each rule is read in the book, its worked examples run as Vitest cases against the system's own functions, and every mismatch is fixed. **Needs:** 2-12. It runs last so it covers the mechanics Stages 7-11 add as well as the ones 3.2.1 had.
 
-Stages 1-6 keep 3.2.1's behavior (X3). Stages 7-11 build new automation and read each rule they touch with
-`/rule` as they go; this stage checks the whole system against the book once more and fixes what disagrees.
-The rows below list the 3.2.1 mechanics; add a row for each rule key and condition Stages 7-11 add.
+Stages 1-6 keep 3.2.1's behavior (X3). Stages 7-11 build new automation and read each rule they touch with `/rule` as they go; this stage checks the whole system against the book once more and fixes what disagrees. The rows below list the 3.2.1 mechanics; add a row for each rule key and condition Stages 7-11 add.
 
 ## Sources
 
 | Need | Source |
-|------|--------|
+| --- | --- |
 | The rule | The Core Rulebook PDF, then `game-rules/` (CLAUDE.md **THE BOOK IS THE SOURCE**); read each with `/rule` |
 | Where the code applies it | The Audit table below; re-run `rg -n "<mechanic>" module` when the stage starts |
 | Which values reach the player | Quench batches in `tests/quench/` |
 
 ## Audit
 
-Pages are the printed pages holding the paragraphs each row's code depends on, located with `/rule` on
-2026-11-12 (page markers in `game-rules/`, plus the book's index in `105_index.md`).
+Pages are the printed pages holding the paragraphs each row's code depends on, located with `/rule` on 2026-11-12 (page markers in `game-rules/`, plus the book's index in `105_index.md`).
 
 | Mechanic | `game-rules/` | Pages | Code |
-|----------|---------------|-------|------|
+| --- | --- | --- | --- |
 | Roll & Keep, exploding dice, Ten Dice Rule | `23_roll_and_keep.md`, `26_special_dice_rules.md` | 75, 77 | `module/utils/check.js`, `module/utils/ten-dice.js`, `module/services/dice/roll-keep-die.js` |
 | Target Numbers, Raises, Free Raises | `24_target_numbers.md`, `28_raises.md` | 76, 79 | `module/utils/check.js` (`targetNumber`, `maxRaises`, `contest`), `module/services/dice/check/roll-check.js`, FreeRaise rules through `module/services/dice/check/collect.js` |
 | Rings from Traits; Void Points | `25_rings_and_traits.md` | 76 (Rings), 78 (Void) | `module/documents/actor/calculations/shared-traits-rings.js`, `module/services/dice/resources/void-manager.js` |
@@ -45,19 +40,18 @@ Pages are the printed pages holding the paragraphs each row's code depends on, l
 ### Open rule bugs
 
 | Issue | Finding | Row |
-|-------|---------|-----|
+| --- | --- | --- |
 | #29 | A Strength raised by an Active Effect does not reach weapon damage; a second effect point on Strength is charged as XP | Attack/damage; Family and School bonuses; XP |
 | #37 | A weapon's "Explodes on" value is ignored on damage rolls (fixed by Stage 8's dice rules; checked here) | Roll & Keep; damage |
 | #38 | NPC formula wound mode: `woundLevels` overwritten by the manual thresholds | Wound Ranks |
 | #30 (part) | NPC Initiative stays 2k2 whatever its Reflexes | Initiative |
 
-The rest of #30 (light-theme Ring values, Void arrows, PC portrait, removable NPC attacks) is sheet work in
-Stage 6. #33 (a 3rd Edition rules option) is a feature request.
+The rest of #30 (light-theme Ring values, Void arrows, PC portrait, removable NPC attacks) is sheet work in Stage 6. #33 (a 3rd Edition rules option) is a feature request.
 
 ## Deliverables
 
 | Layer | Change |
-|-------|--------|
+| --- | --- |
 | Tests | For each Audit row: every worked example on its pages as a Vitest case through the system's function, in `tests/unit/` mirroring `module/`; the case fails before its fix |
 | Utils, Services, Documents | Fixes for each mismatch, in the layer that owns the rule (CLAUDE.md **Layers**) |
 | JSDoc | Rule code names its printed page and `game-rules/` file (CLAUDE.md **CITE THE RULE**) |
@@ -72,24 +66,19 @@ Stage 6. #33 (a 3rd Edition rules option) is a feature request.
 
 - Vitest: book-example cases for every Audit row pass; each fix's case fails on the code before it.
 - Quench: the full suite passes, including `documents.actor.wounds` (#38).
-- Issues #29, #37, #38, #40, #41, #42, #43, #44, #45, and the Initiative part of #30 are closed, each by the
-  commit with its fix or, for those fixed in earlier stages, with its named test passing.
+- Issues #29, #37, #38, #40, #41, #42, #43, #44, #45, and the Initiative part of #30 are closed, each by the commit with its fix or, for those fixed in earlier stages, with its named test passing.
 - No finding under **Still open** is left without an issue or a decision.
-- Manual: on a sample PC and NPC, Ernie runs a skill roll, an attack with damage, a spell, and a round of
-  Initiative, and compares each to the book.
+- Manual: on a sample PC and NPC, Ernie runs a skill roll, an attack with damage, a spell, and a round of Initiative, and compares each to the book.
 
 ## Decisions
 
-1. The audit runs after the port and the automation stages and before 4.0.0, so 4.0.0 ships v14 support,
-   automation, and checked rules together (Ernie, 2026-11-12).
-2. Where the book leaves a choice to the player or GM, the fix keeps it (CLAUDE.md **AUTOMATE MATH, KEEP
-   CHOICES**); where Foundry cannot model a rule, the deviation is Ernie's call and is recorded at the code
-   site.
+1. The audit runs after the port and the automation stages and before 4.0.0, so 4.0.0 ships v14 support, automation, and checked rules together (Ernie, 2026-11-12).
+2. Where the book leaves a choice to the player or GM, the fix keeps it (CLAUDE.md **AUTOMATE MATH, KEEP CHOICES**); where Foundry cannot model a rule, the deviation is Ernie's call and is recorded at the code site.
 
 3. Ernie's rulings, 2026-11-14:
 
    | Question | Ruling |
-   |----------|--------|
+   | --- | --- |
    | Exploding dice | A custom die (`L5R4Die`, modifier `xa`) adds each explosion to its die before dice are kept, as the book does |
    | Contested roll with Raises | The raiser wins by 5 or more per Raise; short of that the raiser loses |
    | Kiho XP | Price = Mastery Level; the GM marks free kiho and the higher non-Brotherhood prices with Cost rules; the `cost` field is dropped |
@@ -107,26 +96,18 @@ Stage 6. #33 (a 3rd Edition rules option) is a feature request.
    | Item `freeRaises` | A 3.2.1 value becomes a FreeRaise rule on any roll, which the GM can narrow |
    | Bows | Weapon fields for minimum Strength and the attack TN mounted and on foot; an unticked "target in melee range" -10 on bow attacks |
 
-4. Defaults taken without a ruling, each open to change: one Void Point pool; a Concentration check per update;
-   Master of Blood's Free Raise priced from the reduced cost; maho applies the wound penalty before its blood; no
-   slot for maho; Glory and Status rank up on their own; Honor Roll loss through Ledger rules; multiple Schools'
-   ranks set by hand; Monk Void as TraitAdjust; Out keeps its +40; armor stacking keeps the highest; NPC armor stays
-   inside its Armor TN; the 1k1 floor stays; no conversion on the Full Defense roll; Disarm with Raises left over
-   unchanged; Fear and Dazed reach the Initiative pool; the Little Truths exception adds 2 only to a pool the Ten Dice
-   Rule converted, as its setting label says.
+4. Defaults taken without a ruling, each open to change: one Void Point pool; a Concentration check per update; Master of Blood's Free Raise priced from the reduced cost; maho applies the wound penalty before its blood; no slot for maho; Glory and Status rank up on their own; Honor Roll loss through Ledger rules; multiple Schools' ranks set by hand; Monk Void as TraitAdjust; Out keeps its +40; armor stacking keeps the highest; NPC armor stays inside its Armor TN; the 1k1 floor stays; no conversion on the Full Defense roll; Disarm with Raises left over unchanged; Fear and Dazed reach the Initiative pool; the Little Truths exception adds 2 only to a pool the Ten Dice Rule converted, as its setting label says.
 
 ### Still open
 
-- The book questions in AUTOMATION.md §6 (Q1-Q11) and the `game-rules/` transcription gaps listed there. Its
-  Status column (Stage 16) says where each stands: Q2, Q3, Q4, and Q8 are answered; the rest stay with the
-  table and block no stage.
+- The book questions in AUTOMATION.md §6 (Q1-Q11) and the `game-rules/` transcription gaps listed there. Its Status column (Stage 16) says where each stands: Q2, Q3, Q4, and Q8 are answered; the rest stay with the table and block no stage.
 
 ## Out of scope
 
-| Item | Stage |
-|------|-------|
-| Sheet and UI parts of #30 | 6 |
-| A repeatable coverage report and its gate check | 16 |
-| Play through the real UI with player clients | 18 |
-| A 3rd Edition rules option (#33) | Not planned |
-| Mass battle (pp.236-241) | Not planned |
+| Item                                            | Stage       |
+| ----------------------------------------------- | ----------- |
+| Sheet and UI parts of #30                       | 6           |
+| A repeatable coverage report and its gate check | 16          |
+| Play through the real UI with player clients    | 18          |
+| A 3rd Edition rules option (#33)                | Not planned |
+| Mass battle (pp.236-241)                        | Not planned |

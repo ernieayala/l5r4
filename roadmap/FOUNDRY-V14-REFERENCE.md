@@ -1,12 +1,9 @@
 # Foundry VTT v14 System Development Reference (for `l5r4-enhanced`)
 
-Sources, as of Foundry 14.370 (2026-11-02): official release notes and knowledge base, the v14 API docs, and the
-source of three systems that target v14: `foundryvtt/crucible` (official, `minimum: 14.370`),
-`MetaMorphic-Digital/draw-steel` branch `1.2.x` (`minimum: "14.370"`), and `foundryvtt/dnd5e` master
-(`minimum: "14.367"`). This file is checked against the installed 14.370 source
-(`C:\Program Files\Foundry Virtual Tabletop\resources\app`) except where marked UNVERIFIED.
+Sources, as of Foundry 14.370 (2026-11-02): official release notes and knowledge base, the v14 API docs, and the source of three systems that target v14: `foundryvtt/crucible` (official, `minimum: 14.370`), `MetaMorphic-Digital/draw-steel` branch `1.2.x` (`minimum: "14.370"`), and `foundryvtt/dnd5e` master (`minimum: "14.367"`). This file is checked against the installed 14.370 source (`C:\Program Files\Foundry Virtual Tabletop\resources\app`) except where marked UNVERIFIED.
 
 Conventions:
+
 - Every claim carries a source tag `[Sn]` or `[src: path:line]`. The list of sources is at the end.
 - `[src: ...]` = a file in the installed 14.370 app directory (`client/`, `common/`, `dist/`, `node_modules/`). `dist/` files are minified, so they are cited by file and identifier instead of line.
 - **UNVERIFIED** = not confirmed by a fetched page or the installed source. The reason is given at the item.
@@ -19,7 +16,7 @@ Conventions:
 ### 1.1 Current build
 
 | Fact | Source |
-|---|---|
+| --- | --- |
 | Latest release: **14.370**, "Full", **Stable**, dated **November 02, 2026**. It is also the top entry on the releases page | [S1], [S2] |
 | 14.370 is "Version 14, Stable 12" | [S2] |
 | The API docs at `/api/v14/` document "version 14.370 Stable" | [S20] |
@@ -31,7 +28,7 @@ Conventions:
 ### 1.2 Removals in v14
 
 | Removed | Notes | Source |
-|---|---|---|
+| --- | --- | --- |
 | A large set of APIs deprecated in **V12** | Full list in issue #13436 (about 200 items: `ApplicationV2#bringToTop` -> `bringToFront`, Handlebars helpers `colorPicker` and `select`, the `nameAttr` parameter of `selectOptions`, `ActiveEffect#label`, `ChatMessage#user`, `Scene#fogExploration`, `TileDocument#z`, `Math.clamped`, `System#template`, many former globals including the dice term classes) | [S4], [S21] |
 | `CONFIG.ActiveEffect.legacyTransferral` | Deprecated in V11 | [S4] |
 | **Measured Templates** (`MeasuredTemplate` Document type) | Absorbed by Scene Regions ("template Regions") | [S5], [S9], [S3] |
@@ -40,12 +37,12 @@ Conventions:
 | `RegExp.escape` polyfill | Native implementation used | [S8] |
 | `TokenDocument#attachments` | Replaced by `RegionDocument#attachment.token` | [S6], [S9] |
 | `PlaceablesLayer.SORT_ORDER` | Unused | [S13] |
-| Deprecation windows **extended to V16** (not removed): `FormApplication#filepickers`, `#_activateFilePicker`, `#_getFilePickerOptions`, `#_onSelectFile`, `filePicker` helper | | [S21] |
+| Deprecation windows **extended to V16** (not removed): `FormApplication#filepickers`, `#_activateFilePicker`, `#_getFilePickerOptions`, `#_onSelectFile`, `filePicker` helper |  | [S21] |
 
 ### 1.3 Breaking changes that matter to a new system
 
 | Change | Source |
-|---|---|
+| --- | --- |
 | **`template.json` entered its deprecation period.** System types must have no schema or a schema from a `TypeDataModel` | [S5] |
 | **`ActiveEffect#changes` moved to `ActiveEffect#system#changes`** | [S6] |
 | `EffectChangeData#mode` (number) is now a string **`type`**; `EffectChangeData#value` is stored as the JSON-parsed value of what was entered | [S5] |
@@ -78,7 +75,7 @@ Conventions:
 ### 1.4 New deprecations (still working in v14)
 
 | Deprecated | Replacement | Source |
-|---|---|---|
+| --- | --- | --- |
 | `Roll#toMessage` `rollMode` option, `Roll._mapLegacyRollMode` | `messageMode` (keys of `CONFIG.ChatMessage.modes`). Draw Steel's own shim logs `{since: 14, until: 16}` | [S8], [S26], [S33] |
 | `foundry.prosemirror.defaultPlugins` | `foundry.applications.ux.ProseMirrorEditor.buildDefaultPlugins()` | [S5] |
 | `layerClass` on canvas-document `CONFIG` entries | (to be removed) | [S5] |
@@ -86,9 +83,9 @@ Conventions:
 | `PlaceableObject#clear` | protected `_clear` | [S9] |
 | `Tile.createPreview` | none | [S9] |
 | `TokenFindMovementPathOptions#ignoreWalls/#ignoreCost/#history` | `#constrainOptions` | [S10] |
-| `ImageHelper#createThumbnail` return `properties`, `src`, `texture` | | [S7] |
-| `Region#testPoint` | | [S14] |
-| `Actor#getDependentTokens` will default to `concreteOnly` in V15 | | [S12] |
+| `ImageHelper#createThumbnail` return `properties`, `src`, `texture` |  | [S7] |
+| `Region#testPoint` |  | [S14] |
+| `Actor#getDependentTokens` will default to `concreteOnly` in V15 |  | [S12] |
 
 ### 1.5 New v14 features a system can use
 
@@ -121,7 +118,7 @@ Conventions:
 From `PackageManifestData` [S27] and `_SystemManifestData` [S28]:
 
 | Field | Required | Type / meaning |
-|---|---|---|
+| --- | --- | --- |
 | `id` | **Yes** | Lower-case, no spaces or special characters. Must match the folder name [S27], [S18] |
 | `title` | **Yes** | Human-readable title |
 | `version` | **Yes** | Plain dot-separated numbers, no leading "v"; compared with `isNewerVersion` |
@@ -185,8 +182,19 @@ Assembled from the fields above; values are placeholders.
   "styles": [{ "src": "styles/<system>.css", "layer": "system" }],
   "languages": [{ "lang": "en", "name": "English", "path": "lang/en.json" }],
   "documentTypes": {
-    "Actor": { "character": { "htmlFields": ["biography"] }, "npc": { "htmlFields": ["description"] } },
-    "Item": { "weapon": {}, "armor": {}, "shield": {}, "accessory": {}, "class": {}, "skill": {}, "spell": {} },
+    "Actor": {
+      "character": { "htmlFields": ["biography"] },
+      "npc": { "htmlFields": ["description"] }
+    },
+    "Item": {
+      "weapon": {},
+      "armor": {},
+      "shield": {},
+      "accessory": {},
+      "class": {},
+      "skill": {},
+      "spell": {}
+    },
     "ChatMessage": { "check": {} }
   },
   "packs": [],
@@ -195,7 +203,9 @@ Assembled from the fields above; values are placeholders.
   "primaryTokenAttribute": "resources.hp",
   "secondaryTokenAttribute": "resources.mp",
   "media": [],
-  "url": "...", "manifest": "...", "download": "..."
+  "url": "...",
+  "manifest": "...",
+  "download": "..."
 }
 ```
 
@@ -264,7 +274,7 @@ L5R4 mapping: Active Effect changes to Traits use `phase: "initial"`, so the Rin
 ### 4.1 Classes and namespaces (v14)
 
 | Use | Namespace | Source |
-|---|---|---|
+| --- | --- | --- |
 | `ApplicationV2`, `DocumentSheetV2`, `DialogV2`, `CategoryBrowser`, `HandlebarsApplicationMixin` | `foundry.applications.api` | [S23] |
 | `ActorSheetV2`, `ItemSheetV2`, `ActiveEffectConfig`, `CombatantConfig`, `TokenConfig`, ... | `foundry.applications.sheets` | [S25b] |
 | `DocumentSheetConfig` | `foundry.applications.apps` | [S24] |
@@ -278,7 +288,9 @@ Standard base, as Crucible does it [S52]:
 
 ```js
 const { api, sheets } = foundry.applications;
-export default class FUActorSheet extends api.HandlebarsApplicationMixin(sheets.ActorSheetV2) { /* ... */ }
+export default class FUActorSheet extends api.HandlebarsApplicationMixin(sheets.ActorSheetV2) {
+  /* ... */
+}
 ```
 
 ### 4.2 `DEFAULT_OPTIONS`
@@ -302,8 +314,7 @@ export default class FUActorSheet extends api.HandlebarsApplicationMixin(sheets.
   - `classes` (string[]): CSS classes for the part's top-level element.
   - `templates` (string[]): extra templates (partials) the part needs; preloaded with `template` [src: ...handlebars-application.mjs:101-103].
   - `scrollable` (string[]): selectors whose scroll position persists across re-render; `""` is the part root.
-  - `forms` (`Record<selector, ApplicationFormConfiguration>`): forms inside the part and their submission handlers.
-  Crucible and Draw Steel use `template`, `templates`, `scrollable`, `root` [S52], [S58].
+  - `forms` (`Record<selector, ApplicationFormConfiguration>`): forms inside the part and their submission handlers. Crucible and Draw Steel use `template`, `templates`, `scrollable`, `root` [S52], [S58].
 - `_configureRenderParts(options)` returns a deep clone of PARTS you can prune per render [S57], [S58].
 - `_preparePartContext(partId, context, options)` prepares per-part context [S57].
 - `_attachPartListeners(partId, htmlElement, options)` attaches listeners per part [S57].
@@ -336,7 +347,7 @@ export default class FUActorSheet extends api.HandlebarsApplicationMixin(sheets.
 A sheet is a live form over one Document, inside a window Foundry draws. Mock-ups and templates follow this list.
 
 | Part | Behavior | Source |
-|---|---|---|
+| --- | --- | --- |
 | Window frame | Foundry renders it: header with icon, title `"<type label>: <name>"`, kebab button opening the `window.controls` menu, frame buttons, close button; then `.window-content`; a resize handle when `window.resizable`. Dragging the header moves the window. The system styles the frame; it never draws its own | [src: client/applications/api/application.mjs:851-863], [src: client/applications/api/document-sheet.mjs:80-85] |
 | Header menu and buttons | DocumentSheetV2: Configure Sheet, Ownership (GM), Copy UUID (left-click UUID, right-click ID, draggable), Import (compendium copies). ActorSheetV2 adds Token / Prototype Token and show portrait / token art | [src: client/applications/api/document-sheet.mjs:51-63, :171-184], [src: client/applications/sheets/actor-sheet.mjs:20-56] |
 | Fields | The window element is a `<form>`. Each stored value is an input named by its path (`name`, `system.hp.value`); with `submitOnChange` a change validates against the schema and calls `document.update()`, and the sheet re-renders | [src: client/applications/api/document-sheet.mjs:31, :457-537] |
@@ -353,6 +364,7 @@ A sheet is a live form over one Document, inside a window Foundry draws. Mock-up
 | Tabs | `static TABS` plus `data-tab` / `data-group` sections; each tab is a PART, so one tab re-renders alone | §4.3, §4.4; Crucible `templates/sheets/actor/main.hbs:1-8` |
 
 PF2e 8.7.0's actor and item sheets still extend the AppV1 `foundry.appv1.sheets.ActorSheet` / `ItemSheet` (`pf2e.mjs:17213`, `:50353`); only one sheet uses `ActorSheetV2`, rendered with Svelte (`pf2e.mjs:54952`). Read PF2e for what a full sheet offers; read core, Crucible, and Draw Steel for how AppV2 builds it.
+
 - Options observed: `types`, `makeDefault`, `label` (i18n key) [S33], [S38]. 14.369 fixed invalid entries for undefined types [S17].
 - dnd5e and Crucible unregister the core AppV1 sheets with `unregisterSheet(Actor, "core", foundry.appv1.sheets.ActorSheet)` and `(Item, "core", foundry.appv1.sheets.ItemSheet)` [S30], [S38]. 14.370 registers no core Actor or Item sheet (see 1.6) [src: client/applications/sheets/_module.mjs:83-128], so these calls remove nothing. Register the system sheets with `makeDefault: true` and skip the unregister.
 
@@ -476,7 +488,7 @@ L5R4 Initiative is individual, so side alternation is not needed. Draw Steel 1.2
 - `_sortCombatants(a, b)` sorts by disposition first (players, neutral, hostile), then initiative, name, id.
 - `endTurn()` sets `turn: null` so no combatant is active between activations; a tracker action "activates" the combatant a player picks, decrementing its count and setting `turn` to its index.
 - `_canChangeRound(user)` limited to GM.
-- `_manageTurnEvents()` is overridden because core "does not proc turn events when going in 'reverse' order ... *does* proc turn events of 'skipped' tokens" (core issue #13983). The override calls `_onEndTurn`, `_onEndRound`, `_onStartRound`, `_onStartTurn`, `ActiveEffect.registry.refresh(...)`, and region events itself.
+- `_manageTurnEvents()` is overridden because core "does not proc turn events when going in 'reverse' order ... _does_ proc turn events of 'skipped' tokens" (core issue #13983). The override calls `_onEndTurn`, `_onEndRound`, `_onStartRound`, `_onStartTurn`, `ActiveEffect.registry.refresh(...)`, and region events itself.
 - `ActiveEffect.getEffectStart(combat)` overridden because the source combatant's turn does not determine durations.
 - Initiative to decide who goes first is a separate roll posted with `roll.toMessage({flavor}, {messageMode: "public"})`.
 
@@ -536,15 +548,8 @@ For L5R4, a `Combatant` subclass overriding `getInitiativeRoll` replaces patchin
 
 - `game.settings.register(namespace, key, {name, hint, scope: "world"|"user"|"client", config, type, default, choices, requiresReload, onChange})`; `registerMenu(namespace, key, {..., restricted})`; `get(ns, key, {document})`; `set(ns, key, value, {document})` [S86].
 - `type` must be a DataField instance, a DataModel, or a callable; anything else throws "Setting ... type must be a DataField, DataModel, or callable function" [src: client/helpers/client-settings.mjs:133-137]. A DataField `type` supplies the default from `getInitialValue()` and takes `label`/`hint` from the setting [src: ...client-settings.mjs:140-145]. A DataModel subclass as `type` is supported: its default becomes `{}` [src: ...client-settings.mjs:148] and stored values are built with `type.fromSource(value || {}, {strict: true})` [src: ...client-settings.mjs:349-350]. Draw Steel registers DataModel-typed settings (`data/settings/*.mjs`) [S87].
-- `registerMenu(namespace, key, {name, label, hint, icon, type, restricted})`: `type` must be a FormApplication or an
-  ApplicationV2 subclass, or it throws; `restricted: true` limits the button to GMs [src:
-  client/helpers/client-settings.mjs:166-194].
-- Core's icons: Font Awesome Pro 7.2.0 [src: public/fonts/fontawesome/css/all.min.css]; core's templates and client
-  write `fa-solid` 871 times, `fa-regular` 32, `fas` 20, `far` 3 (counted 2026-11-14). Core's theme colors are
-  variables in `public/css/foundry2.css`: palette steps (`--color-cool-*`, `--color-warm-*`, `--color-light-*`,
-  `--color-dark-*`) and roles (`--color-text-primary`, `--color-text-secondary`, `--color-text-subtle`,
-  `--color-text-emphatic`, `--color-border`, `--color-level-warning`, `--color-level-error`), set per `.theme-light` /
-  `.theme-dark`.
+- `registerMenu(namespace, key, {name, label, hint, icon, type, restricted})`: `type` must be a FormApplication or an ApplicationV2 subclass, or it throws; `restricted: true` limits the button to GMs [src: client/helpers/client-settings.mjs:166-194].
+- Core's icons: Font Awesome Pro 7.2.0 [src: public/fonts/fontawesome/css/all.min.css]; core's templates and client write `fa-solid` 871 times, `fa-regular` 32, `fas` 20, `far` 3 (counted 2026-11-14). Core's theme colors are variables in `public/css/foundry2.css`: palette steps (`--color-cool-*`, `--color-warm-*`, `--color-light-*`, `--color-dark-*`) and roles (`--color-text-primary`, `--color-text-secondary`, `--color-text-subtle`, `--color-text-emphatic`, `--color-border`, `--color-level-warning`, `--color-level-error`), set per `.theme-light` / `.theme-dark`.
 - `SettingsConfig` V2 `input` functions work (14.356 fix) [S9].
 - `game.settings.get` for a user-changeable setting is a trust boundary (project rule).
 
@@ -573,7 +578,7 @@ For L5R4, a `Combatant` subclass overriding `getInitiativeRoll` replaces patchin
 ## 11. Deprecated globals and replacements
 
 | Old | v14 replacement | Status in v14 | Source |
-|---|---|---|---|
+| --- | --- | --- | --- |
 | `renderTemplate`, `loadTemplates`, `getTemplate` | `foundry.applications.handlebars.renderTemplate` / `loadTemplates` / `getTemplate` | Namespaced functions documented [S89]. Globals resolve with a warning, `{since: 13, until: 15}` [src: client/client.mjs:223-225, :640] |
 | `Actors`, `Items`, `Journal` | `foundry.documents.collections.Actors` / `Items` / `Journal` | Namespaced classes documented [S90]. Globals resolve with a warning, `{since: 13, until: 15}` [src: client/client.mjs:585-591, :640] |
 | `ActorSheet`, `ItemSheet` | `foundry.applications.sheets.ActorSheetV2` / `ItemSheetV2` | The globals resolve, with a warning `{since: 13, until: 15}`, to the **AppV1** classes `foundry.appv1.sheets.ActorSheet` / `ItemSheet` [src: client/client.mjs:330-332, :640]. Do not confuse them with the V2 aliases `foundry.applications.sheets.ActorSheet` / `ItemSheet` (see 4.1) |
@@ -607,7 +612,7 @@ The v13-era global aliases are registered by `addBackwardsCompatibilityReference
 ## 13. Repo layout and tooling in current v14 systems
 
 | System | Language | Bundler | CSS | Lint | Types |
-|---|---|---|---|---|---|
+| --- | --- | --- | --- | --- | --- |
 | Crucible (official) | JS `.mjs` | Rollup for the release bundle (`esmodules.0` swapped to `crucible-compiled.mjs` in CI) | LESS (`lessc`) | ESLint 10 + `eslint-plugin-jsdoc` + `globals` | JSDoc | [S82], [S85] |
 | Draw Steel | JS `.mjs` | Rollup (`build:code`) | PostCSS via Rollup | ESLint 9 flat config, `@stylistic`, `@html-eslint` for `.hbs` | JSDoc + `jsconfig.json` paths to a symlinked Foundry `client`/`common` | [S98], [S36], [S99], [S100] |
 | dnd5e | JS `.mjs` | (not checked) | ships `dnd5e.css` | (not checked) | JSDoc | [S30] |
@@ -668,6 +673,7 @@ Items the installed 14.370 source cannot settle:
 ## Sources (every URL fetched)
 
 Release notes:
+
 - [S1] https://foundryvtt.com/releases/
 - [S2] https://foundryvtt.com/releases/14.370
 - [S3] https://foundryvtt.com/releases/14.359
@@ -694,6 +700,7 @@ Release notes:
 - https://foundryvtt.com/releases/13.333
 
 Knowledge base:
+
 - [S18] https://foundryvtt.com/article/system-development/
 - [S19] https://foundryvtt.com/article/system-data-models/
 - https://foundryvtt.com/article/manifest/ (404)
@@ -704,6 +711,7 @@ Knowledge base:
 - https://foundryvtt.com/article/package-submission/ (404)
 
 API docs v14:
+
 - [S20] https://foundryvtt.com/api/v14/
 - [S22] https://foundryvtt.com/api/v14/classes/foundry.appv1.sheets.ActorSheet.html
 - [S25a] https://foundryvtt.com/api/v14/classes/foundry.applications.sheets.ActorSheetV2.html
@@ -758,6 +766,7 @@ API docs v14:
 - [S89] https://foundryvtt.com/api/v14/modules/foundry.applications.handlebars.html
 
 GitHub (official / systems / tools):
+
 - [S21] https://github.com/foundryvtt/foundryvtt/issues/13436
 - [S30] https://raw.githubusercontent.com/foundryvtt/dnd5e/master/system.json and https://github.com/foundryvtt/dnd5e/blob/master/dnd5e.mjs (via `gh api`)
 - [S45] https://github.com/foundryvtt/dnd5e/blob/master/module/documents/actor/actor.mjs (via `gh api` / `gh search code`)
@@ -803,6 +812,7 @@ GitHub (official / systems / tools):
 - [S50] https://github.com/RevCivic/brp/pull/1
 
 Third-party / search only (not authoritative):
+
 - [S91] https://gitlab.com/fvtt-modiphius/foundryvtt-conan2d20/-/issues/466 (title only)
 - https://redlib.groet-infra.nl/r/SWN/duplicates/1v8okvr (502, not read)
 - [S49 search] WebSearch "foundryvtt api v14 ActiveEffect change phase ..." result snippets

@@ -1,14 +1,11 @@
 # Stage 1: Load on v14
 
-**Goal:** Foundry 14.370 lists and loads `l5r4-enhanced` from a v14 manifest, a GM can create every Actor
-and Item subtype and open its sheet, and Quench reports a smoke result and an inventory of the deprecated
-APIs the system still calls.
-**Needs:** none.
+**Goal:** Foundry 14.370 lists and loads `l5r4-enhanced` from a v14 manifest, a GM can create every Actor and Item subtype and open its sheet, and Quench reports a smoke result and an inventory of the deprecated APIs the system still calls. **Needs:** none.
 
 ## Foundry v14 APIs
 
 | Need | API (section of FOUNDRY-V14-REFERENCE.md) |
-|------|-------------------------------------------|
+| --- | --- |
 | Manifest `type`, `compatibility` strings, `styles` objects with `layer` | §2.1, §2.4 |
 | Sheet registration; core registers no Actor or Item sheet, so nothing to unregister | §1.6, §4.6 |
 | Compatibility logging mode for the inventory (`CONFIG.compatibility.mode`, `includePatterns`) | §11; `common/utils/logging.mjs:19-58` |
@@ -17,7 +14,7 @@ APIs the system still calls.
 ## Audit
 
 | Where | Change |
-|-------|--------|
+| --- | --- |
 | `system.json` | Add `"type": "system"`; `compatibility` to `"14.370"` / `"14.370"` / `"14"` (X2); `styles` to `[{ "src": "dist/l5r4-enhanced.css", "layer": "system" }]`; description no longer says v13 |
 | `dist/l5r4-enhanced.js:105`, `:128` | `try { DocumentSheetConfig.unregisterSheet(...core V2 sheet...) } catch {}`: nothing is registered in 14.370; remove |
 | `dist/l5r4-enhanced.js:117` | `"item"` is in the Item sheet's `types` but is not a declared subtype; remove |
@@ -27,12 +24,14 @@ APIs the system still calls.
 ## Deliverables
 
 ### Manifest and entry
+
 - `system.json` per the Audit. `template.json` stays until Stage 2; 14.370 still reads it, with a package warning.
 - `dist/l5r4-enhanced.js` per the Audit.
 
 ### Tests
+
 | File | Does |
-|------|------|
+| --- | --- |
 | `tests/manifest.test.js` (Vitest) | `compatibility.minimum` is `"14.370"`; every `styles` entry is the `build:css` output path; every `languages` path exists and parses; every `documentTypes` subtype has a `TYPES.<Document>.<type>` or system label key in `lang/en.json` |
 | `tests/lang.test.js` (Vitest) | Every `l5r4.` key written out in `module/`, `templates/`, and `dist/l5r4-enhanced.js` (comment lines excluded) exists in `lang/en.json`, and every template-literal key prefix names a group (pattern: fabula-ultima `tests/lang.test.js`). It found nine keys the code reads that `en.json` lacked (now added) and the Awareness trait label stored as `aw` instead of `awa` (renamed) |
 | `tests/quench/smoke.js` | Batch `l5r4-enhanced.smoke`, replacing the old smoke batch in `index.js` (its config checks are kept): config namespace and document classes; system id and version match `system.json`; the stylesheet is imported in layer `system`; each Actor and Item subtype creates, opens its system sheet (the only one offered, and the default), and saves a rename through the sheet. Fails on any console error during a test |
@@ -40,6 +39,7 @@ APIs the system still calls.
 | `tests/quench/helpers.js` | `watchConsole`, `cleanTest` (fails on console errors), `nextUpdate`, `changeThroughSheet` (pattern: fabula-ultima `tests/quench/helpers.js`); later stages add what their batches need |
 
 ### Local install
+
 Link the repo with the junction command in `CLAUDE.md` (**Testing and the Gate**).
 
 ## Acceptance
@@ -54,7 +54,7 @@ Link the repo with the junction command in `CLAUDE.md` (**Testing and the Gate**
 ## Baseline on 14.370 (2026-11-12)
 
 | Check | Result |
-|-------|--------|
+| --- | --- |
 | Game Systems listing | Verified compatibility badge; one package warning, the expected `template.json` deprecation |
 | World load | No errors from `l5r4-enhanced`; Sequencer and JB2A "module not found" warnings |
 | `smoke`, `deprecations` | 42/42; the deprecation inventory is empty for the paths it exercises (AppV1 `Dialog.confirm` sits on paths it does not reach; `game.i18n.format` is a silent alias in 14.370) |
@@ -70,8 +70,8 @@ Link the repo with the junction command in `CLAUDE.md` (**Testing and the Gate**
 
 ## Out of scope
 
-| Item | Stage |
-|------|-------|
-| Removing `template.json`, data models | 2 |
-| Fixing deprecated calls the inventory lists | 2-6 |
-| Switching the smoke batch to `FAILURE` mode | 19 |
+| Item                                        | Stage |
+| ------------------------------------------- | ----- |
+| Removing `template.json`, data models       | 2     |
+| Fixing deprecated calls the inventory lists | 2-6   |
+| Switching the smoke batch to `FAILURE` mode | 19    |

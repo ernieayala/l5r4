@@ -2,6 +2,7 @@
   "files": {
     "module/utils/armor-penalties.js": "export function getArmorTNPenalty(diceRoll, diceKeep) {\n  return diceRoll + diceKeep;\n}\n",
     "templates/actor/_partials/_armor.hbs": "<span class=\"l5r4-armor-tn\">{{system.armorTN}}</span>\n",
-    "lang/en.json": "{ \"l5r4\": { \"ui\": { \"links\": { \"checkTN\": \"No actor available for void point spending\", \"taint\": \"Shadowland Taint\", \"roll\": \"Make a Skill roll\" } } } }\n"
+    "lang/en.json": "{ \"l5r4\": { \"ui\": { \"links\": { \"checkTN\": \"No actor available for void point spending\", \"taint\": \"Shadowland Taint\", \"roll\": \"Make a Skill roll\" } } } }\n",
+    "docs/code-system/glossary.md": "# Glossary\n\n## Terms\n\n| Term | Key |\n| ---- | --- |\n| Prone | `EFFECT.prone` |\n| Shadowlands Taint | `l5r4.ui.links` |\n| Stance | n/a |\n"
   }
 }

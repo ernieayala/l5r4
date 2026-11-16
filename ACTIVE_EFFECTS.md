@@ -34,45 +34,45 @@ Rules on an item apply while the item is on the character. Armor's rules apply o
 
 ### Fields every rule has
 
-| Field | Meaning | Default |
-|-------|---------|---------|
-| `key` | The rule key (table below) | required |
-| `label` | Text shown for the rule; the item's name when blank | `""` |
-| `priority` | Order among rules; lower runs first | `100` |
-| `predicate` | When the rule applies (see **Predicates**) | always |
+| Field       | Meaning                                             | Default  |
+| ----------- | --------------------------------------------------- | -------- |
+| `key`       | The rule key (table below)                          | required |
+| `label`     | Text shown for the rule; the item's name when blank | `""`     |
+| `priority`  | Order among rules; lower runs first                 | `100`    |
+| `predicate` | When the rule applies (see **Predicates**)          | always   |
 
 ### Rule keys
 
-Values marked *n/f* take a number or a formula (see **Formulas**).
+Values marked _n/f_ take a number or a formula (see **Formulas**).
 
 | Key | Fields | What it does |
-|-----|--------|--------------|
-| `TraitAdjust` | `trait` (`sta`, `wil`, `str`, `per`, `ref`, `awa`, `agi`, `int`, or `void`), `value` *n/f* | Raises or lowers a Trait or the Void Ring. Rings, Armor TN, wounds, Initiative, and damage use the new value |
-| `RollModifier` | `selector`, `roll`, `keep`, `total` *n/f*, `type`, `range`, `optional`, `consumes` | Adds rolled dice, kept dice, and a flat bonus to the rolls the selector names. `range` (`"melee"` or `"ranged"`) limits it to attacks of that range. An `optional` one starts unticked in the roll dialog, for a bonus the player puts on one roll of their choice; with `consumes`, rolling with it ticked ends the effect that carries it |
-| `ArmorTN` | `value` *n/f*, `type`, `mode`, `range` | Changes Armor TN. `mode` `"add"` (default) adds; `"base"` replaces the Reflexes × 5 + 5 base when lower, and armor and other changes still add; `"total"` sets the whole Armor TN to the value plus armor, and nothing else adds. The lowest `base` or `total` wins; the Armor TN never drops below 5. An `add` with `range` counts only against attacks of that range |
-| `Reduction` | `value` *n/f*, `except` | Adds to Reduction. `except` lists damage sources it does not stop, as `["jade"]` |
-| `DamageSource` | `selector` (default `damage`), `tags`, `ignoreReduction` *n/f* | Marks the selected damage rolls with sources (`jade`, `crystal`, `obsidian`, `spell`, `nemuranai`, or your own) and lets them ignore that much Reduction |
+| --- | --- | --- |
+| `TraitAdjust` | `trait` (`sta`, `wil`, `str`, `per`, `ref`, `awa`, `agi`, `int`, or `void`), `value` _n/f_ | Raises or lowers a Trait or the Void Ring. Rings, Armor TN, wounds, Initiative, and damage use the new value |
+| `RollModifier` | `selector`, `roll`, `keep`, `total` _n/f_, `type`, `range`, `optional`, `consumes` | Adds rolled dice, kept dice, and a flat bonus to the rolls the selector names. `range` (`"melee"` or `"ranged"`) limits it to attacks of that range. An `optional` one starts unticked in the roll dialog, for a bonus the player puts on one roll of their choice; with `consumes`, rolling with it ticked ends the effect that carries it |
+| `ArmorTN` | `value` _n/f_, `type`, `mode`, `range` | Changes Armor TN. `mode` `"add"` (default) adds; `"base"` replaces the Reflexes × 5 + 5 base when lower, and armor and other changes still add; `"total"` sets the whole Armor TN to the value plus armor, and nothing else adds. The lowest `base` or `total` wins; the Armor TN never drops below 5. An `add` with `range` counts only against attacks of that range |
+| `Reduction` | `value` _n/f_, `except` | Adds to Reduction. `except` lists damage sources it does not stop, as `["jade"]` |
+| `DamageSource` | `selector` (default `damage`), `tags`, `ignoreReduction` _n/f_ | Marks the selected damage rolls with sources (`jade`, `crystal`, `obsidian`, `spell`, `nemuranai`, or your own) and lets them ignore that much Reduction |
 | `Invulnerability` | `harmedBy`, `only` | Damage from a source not in `harmedBy` (default jade, crystal, obsidian, spell, nemuranai) deals one Wound after Reduction (p.319). With `only`, it covers damage from those sources alone |
 | `Spirit` | `harmedBy` | Damage from a source not in `harmedBy` (default jade, crystal, obsidian) is halved after Reduction, rounding down (p.320) |
-| `Wounds` | `perRank` *n/f*, `penalty` *n/f* | Adds Wounds to every Wound Rank, and adds to every Wound Rank's TN penalty |
-| `Initiative` | `roll`, `keep`, `total` *n/f* | Adds to Initiative |
+| `Wounds` | `perRank` _n/f_, `penalty` _n/f_ | Adds Wounds to every Wound Rank, and adds to every Wound Rank's TN penalty |
+| `Initiative` | `roll`, `keep`, `total` _n/f_ | Adds to Initiative |
 | `RollOption` | `option`, `toggleable`, `value` | Turns on a roll option other rules' predicates can test. With `"toggleable": true` it is on only while `"value"` is `true`, for situations the system cannot see (higher ground, a target within reach) |
-| `TNModifier` | `selector`, `value` *n/f*, `type` | A TN change on the selected rolls |
-| `FreeRaise` | `selector`, `value` *n/f* | Free Raises on the selected rolls |
+| `TNModifier` | `selector`, `value` _n/f_, `type` | A TN change on the selected rolls |
+| `FreeRaise` | `selector`, `value` _n/f_ | Free Raises on the selected rolls |
 | `DiceRule` | `selector`, `explode` (2-10), `rerollOnes` | Dice explode on `explode` or higher; `rerollOnes` re-rolls 1s once |
 | `Substitute` | `selector`, `replace`, `with` | Offers, in the roll dialog, one Trait in place of another, as `"replace": "trait:agi", "with": "trait:ref"`; off until the roller turns it on |
 | `Note` | `selector`, `text` | Text on the card of the selected rolls |
-| `Movement` | `water` *n/f* | Water Ring ranks for movement only |
+| `Movement` | `water` _n/f_ | Water Ring ranks for movement only |
 | `ApplyCondition` | `selector`, `condition`, `level` | A successful selected roll with a target shows a button that puts the status `condition` (at `level`, for a Fear Rank) on the target |
 | `ConditionImmunity` | `condition` | The character cannot gain that status |
 | `PeriodicSave` | `event`, `roll`, `tn`, `step`, `min`, `onFailure` | On an effect: on `event` (`roundEnd` is the Reactions stage; `turnStart`, `turnEnd`) the owner gets a card to roll `roll` (`"ring:earth"`, `"trait:wil"`) against `tn`; success ends the effect. A failure moves the TN by `step`, never past `min`; with `"onFailure": "endNextRound"` the effect ends at the end of the next Round instead |
-| `Resource` | `slug`, `max` *n/f*, `per` | `max` more uses of `slug` each `per` (`turn`, `round`, `skirmish`, `day`). The slug `void` raises the one-Void-Point-per-Round limit |
-| `OpponentModifier` | `selector`, `roll`, `keep`, `total` *n/f*, `type`, `range` | Like `RollModifier`, but on rolls other characters make with this one as their target. Its predicate tests this character's options, with the roller's prefixed `target:` |
-| `RaiseRule` | `selector`, `maneuver`, `cost` *n/f*, `cap` *n/f*, `minimum` *n/f* | On the selected rolls: `cost` changes what `maneuver` (`calledShot`, `disarm`, `extraAttack`, `feint`, `knockdown`) costs in Raises, never below 0; `cap` changes how many Raises may be declared (the Void Ring, p.79); `minimum` is how many must be |
-| `UnskilledAs` | `selector`, `rank` *n/f* | A Skill roll with no ranks in a selected Skill counts as `rank` ranks: the dice roll and explode, and Raises are allowed |
+| `Resource` | `slug`, `max` _n/f_, `per` | `max` more uses of `slug` each `per` (`turn`, `round`, `skirmish`, `day`). The slug `void` raises the one-Void-Point-per-Round limit |
+| `OpponentModifier` | `selector`, `roll`, `keep`, `total` _n/f_, `type`, `range` | Like `RollModifier`, but on rolls other characters make with this one as their target. Its predicate tests this character's options, with the roller's prefixed `target:` |
+| `RaiseRule` | `selector`, `maneuver`, `cost` _n/f_, `cap` _n/f_, `minimum` _n/f_ | On the selected rolls: `cost` changes what `maneuver` (`calledShot`, `disarm`, `extraAttack`, `feint`, `knockdown`) costs in Raises, never below 0; `cap` changes how many Raises may be declared (the Void Ring, p.79); `minimum` is how many must be |
+| `UnskilledAs` | `selector`, `rank` _n/f_ | A Skill roll with no ranks in a selected Skill counts as `rank` ranks: the dice roll and explode, and Raises are allowed |
 | `ActionCost` | `selector`, `action` (`free`, `simple`, `complex`), `range` | Names on the card of the selected rolls the action they take (p.85); with `range` (`"melee"` or `"ranged"`) only on attacks of that range. The system shows it and does not enforce it |
-| `Cost` | `selector`, `value` *n/f* | The XP price of what the selector names (see **XP prices**) |
-| `Ledger` | `track` (`honor`, `glory`, `status`, `taint`), `direction` (`gain`, `loss`), `value` *n/f* | Changes the size of each gain or loss of that track recorded in the ledger (see **The ledger**) |
+| `Cost` | `selector`, `value` _n/f_ | The XP price of what the selector names (see **XP prices**) |
+| `Ledger` | `track` (`honor`, `glory`, `status`, `taint`), `direction` (`gain`, `loss`), `value` _n/f_ | Changes the size of each gain or loss of that track recorded in the ledger (see **The ledger**) |
 | `Prerequisite` | `requires`, `label` | What a character needs before this item can be added: `requires` is a predicate, `label` explains it (see **Character options**) |
 | `ChoiceSet` | `flag`, `prompt`, `options` or `list`, `filter`, `selection` | A choice asked when the item is added; the item's other rules use the answer as `{choice:<flag>}` (see **Character options**) |
 | `GrantItem` | `uuid`, `rank`, `skillRank`, `emphasis` | An item given with this one: a School's Skills and Techniques (see **Character options**) |
@@ -80,7 +80,7 @@ Values marked *n/f* take a number or a formula (see **Formulas**).
 ### Selectors
 
 | Selector | Rolls |
-|----------|-------|
+| --- | --- |
 | `any` | Every roll |
 | `skill:<skill name in lower case>` | That Skill's rolls, as `skill:kenjutsu` or `skill:tea ceremony` |
 | `trait:<trait>` | Rolls of that Trait, as `trait:ref`, and Skill rolls that use it; add the predicate `["check:trait"]` for Trait rolls only |
@@ -105,7 +105,7 @@ Each roll posts a card holding everything it rolled with. A successful roll with
 A value can be a formula over the character's data, written as text: `"@rings.air + @skills.defense.rank"`, `"floor(@honor.rank / 2)"`. Formulas allow numbers, `@` paths, `+ - * /`, parentheses, and `floor`, `ceil`, `round`, `min`, `max`, `abs`.
 
 | Path | Value |
-|------|-------|
+| --- | --- |
 | `@rings.air`, `@rings.earth`, `@rings.fire`, `@rings.water` | Ring values |
 | `@rings.void.rank` | Void Ring |
 | `@traits.ref` (and the other Trait keys) | Traits |
@@ -124,7 +124,7 @@ A Family or School Trait bonus counts toward XP costs only as a plain number.
 A predicate is a list of conditions, all of which must hold:
 
 | Condition | Holds when |
-|-----------|-----------|
+| --- | --- |
 | `"status:prone"` | The character has that status. Stances are statuses: `status:defenseStance`, `status:fullAttackStance`, ... |
 | `"ring:fire:3"`, `"trait:ref:4"` | That Ring or Trait has that value |
 | `"wound:nicked"` | The character is at that Wound Rank |
@@ -172,8 +172,8 @@ gives +5, not +8.
 
 Every stance and condition is a status effect carrying its rules (see **Status effects**). Besides those:
 
-| Where | Rule |
-|-------|------|
+| Where                                                        | Rule                           |
+| ------------------------------------------------------------ | ------------------------------ |
 | A skill's Roll, Keep, and Total bonus fields (Modifiers tab) | A `RollModifier` on that skill |
 
 A world made with 3.2.1 is updated when it first loads: a Family or School Trait effect becomes a `TraitAdjust` rule, a Master of Blood advantage gets `{ "key": "RollOption", "option": "master-of-blood" }`, and stance and condition effects get their rules, and a Fear effect its Rank as its level. An advantage you name Master of Blood later needs that rule added by hand.
@@ -260,13 +260,13 @@ A choice can fill a field with fixed values too, as a Trait: `{ "key": "TraitAdj
 
 The XP Manager prices purchases as the book does (pp.102-103): a Trait rank four times the new rank, Family and School bonuses included; the Void Ring six times; a Skill rank the new rank, above the ranks a School gave; an Emphasis 2; an Advantage, kata, or kiho its cost; Disadvantages give up to 10. A `Cost` rule sets a new price with a formula over the base price `@cost`:
 
-| `selector` | Prices |
-|------------|--------|
-| `trait:<trait>`, `ring:void` | Each rank of that Trait or the Void Ring |
-| `skill:<skill>`, `skill-type:<type>` | Each rank of that Skill, or of Skills of that type |
-| `emphasis` | Each Emphasis |
-| `item:<type>` | Every `advantage`, `kata`, `kiho`, or memorized `spell` |
-| `self` | The item carrying the rule |
+| `selector`                           | Prices                                                  |
+| ------------------------------------ | ------------------------------------------------------- |
+| `trait:<trait>`, `ring:void`         | Each rank of that Trait or the Void Ring                |
+| `skill:<skill>`, `skill-type:<type>` | Each rank of that Skill, or of Skills of that type      |
+| `emphasis`                           | Each Emphasis                                           |
+| `item:<type>`                        | Every `advantage`, `kata`, `kiho`, or memorized `spell` |
+| `self`                               | The item carrying the rule                              |
 
 An Advantage that costs 1 less for a Crane character:
 
@@ -347,6 +347,7 @@ The **Free Raises** field on the item's Modifiers tab adds to every roll's Free 
 When you add an item with Active Effects to a character, the effects that apply to the actor change the character's values.
 
 **Key points:**
+
 - Effects live on items, which pass them to the character that owns them
 - Effects change the character only. A change aimed at an item's own fields (a skill's rank, a weapon's damage) does nothing
 - Effects can add, subtract, multiply, override, upgrade, or downgrade values
@@ -360,6 +361,7 @@ When you add an item with Active Effects to a character, the effects that apply 
 4. Set the effect name, then add changes on the **Changes** tab with the **+** button
 
 **Each effect can have multiple changes.** Each change needs:
+
 - **Attribute Key:** The value you're modifying (see below for all keys)
 - **Type:** How to apply the change (Add, Multiply, Override, etc.)
 - **Value:** The number or value to apply
@@ -367,14 +369,14 @@ When you add an item with Active Effects to a character, the effects that apply 
 
 ### Change types
 
-| Type | Stored as | What It Does | Example |
-|------|-----------|--------------|---------|
-| **Add** | `add` | Adds to existing value | +1 Strength |
-| **Subtract** | `subtract` | Subtracts from existing value | -1 Reflexes |
-| **Multiply** | `multiply` | Multiplies existing value | ×3 wound multiplier |
-| **Override** | `override` | Replaces the value | Set NPC Armor TN to 25 |
-| **Upgrade** | `upgrade` | Uses higher of old/new value | Take best of two bonuses |
-| **Downgrade** | `downgrade` | Uses lower of old/new value | Take worst of two penalties |
+| Type          | Stored as   | What It Does                  | Example                     |
+| ------------- | ----------- | ----------------------------- | --------------------------- |
+| **Add**       | `add`       | Adds to existing value        | +1 Strength                 |
+| **Subtract**  | `subtract`  | Subtracts from existing value | -1 Reflexes                 |
+| **Multiply**  | `multiply`  | Multiplies existing value     | ×3 wound multiplier         |
+| **Override**  | `override`  | Replaces the value            | Set NPC Armor TN to 25      |
+| **Upgrade**   | `upgrade`   | Uses higher of old/new value  | Take best of two bonuses    |
+| **Downgrade** | `downgrade` | Uses lower of old/new value   | Take worst of two penalties |
 
 ### Phases
 
@@ -389,78 +391,78 @@ A Trait change on a Family or School effect raises the Trait but is not counted 
 
 #### Traits
 
-| Attribute Key | Trait |
-|---------------|-------|
-| `system.traits.sta` | Stamina |
-| `system.traits.wil` | Willpower |
-| `system.traits.str` | Strength |
-| `system.traits.per` | Perception |
-| `system.traits.ref` | Reflexes |
-| `system.traits.awa` | Awareness |
-| `system.traits.agi` | Agility |
+| Attribute Key       | Trait        |
+| ------------------- | ------------ |
+| `system.traits.sta` | Stamina      |
+| `system.traits.wil` | Willpower    |
+| `system.traits.str` | Strength     |
+| `system.traits.per` | Perception   |
+| `system.traits.ref` | Reflexes     |
+| `system.traits.awa` | Awareness    |
+| `system.traits.agi` | Agility      |
 | `system.traits.int` | Intelligence |
 
 #### Rings
 
 **Void Ring only.** The elemental rings (Air, Earth, Fire, Water) are calculated from their Traits; change a Trait to change its Ring.
 
-| Attribute Key | Ring |
-|---------------|------|
-| `system.rings.void.rank` | Void Ring Rank |
+| Attribute Key             | Ring                |
+| ------------------------- | ------------------- |
+| `system.rings.void.rank`  | Void Ring Rank      |
 | `system.rings.void.value` | Current Void Points |
 
 Modifying `rank` changes maximum Void Points. Modifying `value` gives temporary extra points that don't restore on rest.
 
 #### Character attributes
 
-| Attribute Key | What It Is |
-|---------------|------------|
-| `system.honor.rank`, `system.honor.points` | Honor |
-| `system.glory.rank`, `system.glory.points` | Glory |
-| `system.status.rank`, `system.status.points` | Status |
+| Attribute Key                                          | What It Is        |
+| ------------------------------------------------------ | ----------------- |
+| `system.honor.rank`, `system.honor.points`             | Honor             |
+| `system.glory.rank`, `system.glory.points`             | Glory             |
+| `system.status.rank`, `system.status.points`           | Status            |
 | `system.shadowTaint.rank`, `system.shadowTaint.points` | Shadowlands Taint |
 
 #### Combat and defense
 
-| Attribute Key | What It Affects |
-|---------------|-----------------|
-| `system.initiative.rollMod` | Initiative roll dice |
-| `system.initiative.keepMod` | Initiative keep dice |
-| `system.initiative.totalMod` | Initiative flat bonus |
-| `system.armorTn.mod` | PC Armor TN modifier |
-| `system.armor.armorTn` | NPC Armor TN (override) |
-| `system.armor.reduction` | NPC Reduction (override) |
+| Attribute Key                | What It Affects          |
+| ---------------------------- | ------------------------ |
+| `system.initiative.rollMod`  | Initiative roll dice     |
+| `system.initiative.keepMod`  | Initiative keep dice     |
+| `system.initiative.totalMod` | Initiative flat bonus    |
+| `system.armorTn.mod`         | PC Armor TN modifier     |
+| `system.armor.armorTn`       | NPC Armor TN (override)  |
+| `system.armor.reduction`     | NPC Reduction (override) |
 
 PC Armor TN and Reduction come from worn armor items.
 
 #### Wounds
 
-| Attribute Key | What It Affects |
-|---------------|-----------------|
-| `system.wounds.mod` | Wound threshold modifier |
+| Attribute Key             | What It Affects                           |
+| ------------------------- | ----------------------------------------- |
+| `system.wounds.mod`       | Wound threshold modifier                  |
 | `system.woundsMultiplier` | Wound level multiplier (×3 instead of ×2) |
-| `system.woundsMod` | Wounds added to every level |
-| `system.woundsPenaltyMod` | Added to every level's TN penalty |
-| `system.suffered` | Current damage |
+| `system.woundsMod`        | Wounds added to every level               |
+| `system.woundsPenaltyMod` | Added to every level's TN penalty         |
+| `system.suffered`         | Current damage                            |
 
 #### Insight
 
-| Attribute Key | What It Affects |
-|---------------|-----------------|
+| Attribute Key         | What It Affects                                              |
+| --------------------- | ------------------------------------------------------------ |
 | `system.insight.rank` | Insight Rank, when the sheet's automatic Insight Rank is off |
 
 Insight points and, with automatic Insight Rank on, the Insight Rank are calculated from Rings and Skills after effects apply, so an effect on them changes nothing. XP comes from the XP Manager, not from an effect.
 
 #### Spell slots
 
-| Attribute Key | Element |
-|---------------|---------|
+| Attribute Key                                                 | Element                 |
+| ------------------------------------------------------------- | ----------------------- |
 | `system.spellSlots.air`, `.earth`, `.fire`, `.water`, `.void` | Spell slots per element |
 
 #### Wealth
 
-| Attribute Key | Currency |
-|---------------|----------|
+| Attribute Key                        | Currency       |
+| ------------------------------------ | -------------- |
 | `system.wealth.koku`, `.bu`, `.zeni` | Koku, bu, zeni |
 
 Modifying wealth through effects bypasses the Wealth Manager.
@@ -468,7 +470,7 @@ Modifying wealth through effects bypasses the Wealth Manager.
 #### Skill and Ring bonuses
 
 | Attribute Key | What It Affects |
-|---------------|-----------------|
+| --- | --- |
 | `system.bonuses.skill.<skill name>.roll`, `.keep`, `.total` | Rolls of that Skill (the skill's name in lower case) |
 | `system.bonuses.trait.<trait>.roll`, `.keep`, `.total` | Rolls of that Trait |
 | `system.bonuses.ring.<ring>.roll`, `.keep`, `.total` | Rolls of that Ring and spells of its element |
@@ -478,6 +480,7 @@ A `RollModifier` rule does the same with a predicate and a formula.
 ### Duration
 
 **Duration:** a value and a unit (seconds, rounds, turns, or a game-time unit), and an event that ends it, set on the effect's Duration tab. An effect that runs out is deleted.
+
 - **No value and no event** (default): the effect lasts as long as the item is on the character
 - **Rounds/Turns:** combat effects. The event says when they end: the start or end of a Turn (counted from the combatant whose Turn it was when the effect began), the start or end of a Round (the end is the Reactions stage, p.82), the start or end of the combat, or **End of the encounter**
 - **Minutes, hours, days:** they end when the GM advances world time; while world time stands still, nothing ends
@@ -497,7 +500,7 @@ An effect made by the system can carry two more values, which a macro sets throu
 **Status effects** are the stances and conditions shown on tokens. Apply them from the token's status menu, the Condition Manager, or the stance control on the sheet. Each carries its rules; an effect a macro makes with only a status id (`{ statuses: ["prone"] }`) gets them too.
 
 | Status | What it does (Core Rulebook) |
-|--------|------------------------------|
+| --- | --- |
 | Attack Stance | Nothing to calculate (p.84) |
 | Full Attack Stance | +2k1 to attacks, Armor TN -10 (p.84) |
 | Defense Stance | Armor TN + Air Ring + Defense rank (p.84) |

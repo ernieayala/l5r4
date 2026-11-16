@@ -1,39 +1,29 @@
 # Stage 18: Playtest
 
-**Goal:** Claude plays a short original scenario through Claude in Chrome with a GM and players, each seat on its
-own client and its own Foundry user, so every `automated` entry in the Stage 16 coverage manifest is used at the
-table through the real UI and real permissions; every problem found is fixed at its root with a test that fails
-first.
-**Needs:** 16 (the coverage manifest is the checklist of what play must use) and 17 (play uses the code and look
-the design and code systems pass left).
+**Goal:** Claude plays a short original scenario through Claude in Chrome with a GM and players, each seat on its own client and its own Foundry user, so every `automated` entry in the Stage 16 coverage manifest is used at the table through the real UI and real permissions; every problem found is fixed at its root with a test that fails first. **Needs:** 16 (the coverage manifest is the checklist of what play must use) and 17 (play uses the code and look the design and code systems pass left).
 
-Quench runs as the GM in one client. The paths that only a player meets (a player's roll asking the GM's client to
-write through `CONFIG.queries`, a player applying damage to a token they do not own, the Void Point prompt reaching
-its owner, permission-limited sheet views) have no multi-user test today: no Quench batch logs in as a player.
+Quench runs as the GM in one client. The paths that only a player meets (a player's roll asking the GM's client to write through `CONFIG.queries`, a player applying damage to a token they do not own, the Void Point prompt reaching its owner, permission-limited sheet views) have no multi-user test today: no Quench batch logs in as a player.
 
 ## Foundry v14 APIs
 
 | Need | API (section of FOUNDRY-V14-REFERENCE.md) |
-|------|-------------------------------------------|
+| --- | --- |
 | GM-side writes requested by players | `CONFIG.queries`, `User#query`, `game.user.isActiveGM` (§10.5); the system's queries in `module/services/combat/damage.js`, `combat/flow.js`, `effects/apply.js`, `effects/prompts.js`, `effects/combat-events.js` |
 | Ownership and limited views | Document ownership levels; sheet rendering for a non-owner (§4.7) |
 
 ## Setup
 
 | Seat | User | Client |
-|------|------|--------|
+| --- | --- | --- |
 | GM | The existing Gamemaster user | `http://127.0.0.1:30000` |
 | Players | Player users Ernie adds to the test world (count is Still open 1) | One client each, with its own cookie store |
 
-Foundry keeps one login per browser cookie store, and cookies are per host. Two seats can use two hosts
-(`127.0.0.1` and `localhost`); more need other loopback hosts, the machine name, or separate Chrome profiles through
-Claude in Chrome's browser switching. Procedure step 1 finds which works and records it here. Ernie can take any
-seat at any time.
+Foundry keeps one login per browser cookie store, and cookies are per host. Two seats can use two hosts (`127.0.0.1` and `localhost`); more need other loopback hosts, the machine name, or separate Chrome profiles through Claude in Chrome's browser switching. Procedure step 1 finds which works and records it here. Ernie can take any seat at any time.
 
 ## Deliverables
 
 | File | Does |
-|------|------|
+| --- | --- |
 | `tests/playtest/<scenario>/script.md` | The scenario as beats: each names its scene, the seat that acts, what it does, the expected result, and the manifest entries it uses. An original story, with characters and NPCs built from the Stage 15 pack entries through the browser and drops, plus one item the GM authors by hand in the rules editor; cites `game-rules/` files and pages, never quotes them |
 | `tests/playtest/<scenario>/coverage.md` | Every `automated` manifest entry with the beat that uses it. An entry with no beat blocks the run |
 | `tests/playtest/<scenario>/log-<date>.md` | Per session: beats played, deviations, console errors, findings with issue links. GIF recordings stay in the scratchpad and are linked from the findings, never committed |
@@ -42,7 +32,7 @@ seat at any time.
 ## Scenario shape
 
 | Session | Uses (`game-rules/`) |
-|---------|----------------------|
+| --- | --- |
 | 0: The party | Characters built from pack Clans, Families, Schools, Skills, Advantages, and Disadvantages, found in the compendium browser by each player on their own client; one Family the GM authors with the Stage 11 rules editor; starting XP spent through the XP manager; Insight Rank shown (`48`, `49`) |
 | 1: Court | Skill, Trait, and Ring rolls from each player's client with Raises, Free Raises, Void, and an Emphasis re-roll, started from the sheet, a hotbar macro, a Check link in a shared journal, and a GM request card; an Unskilled Roll; a contested roll; Honor, Glory, and Status changes (`23`-`30`, `43`-`45`, `58`) |
 | 2: The road | A skirmish: Initiative, each stance, attacks against Armor TN, damage applied by a player to an NPC they do not own, Wound Ranks and their penalties, a maneuver bought with Raises, Fear, a grapple, Mounted, Prone at Down, Void spent to reduce damage, undo of an applied card (`31`-`33`, `36`-`38`, `40`-`42`) |
@@ -52,12 +42,9 @@ seat at any time.
 
 1. Confirm the seats log in at once on separate cookie stores; record the method in **Setup**.
 2. Run `npm run coverage`; write the script so every `automated` entry has a beat.
-3. Play each session from the seats' own clients: a seat acts only through its client, so permissions are real.
-   Players never use the GM's client.
-4. Read each client's console after every beat (Claude in Chrome `read_console_messages`); any error or warning from
-   `l5r4-enhanced` is a finding.
-5. File each finding. Fix it at its root in the layer that owns it, with a Vitest or Quench test that fails first,
-   run the gate, and replay the beat.
+3. Play each session from the seats' own clients: a seat acts only through its client, so permissions are real. Players never use the GM's client.
+4. Read each client's console after every beat (Claude in Chrome `read_console_messages`); any error or warning from `l5r4-enhanced` is a finding.
+5. File each finding. Fix it at its root in the layer that owns it, with a Vitest or Quench test that fails first, run the gate, and replay the beat.
 6. Ernie reviews the log and findings after each session.
 
 ## Acceptance
@@ -66,18 +53,12 @@ seat at any time.
 - Sessions 0-3 played to the end with every beat's expected result met or filed.
 - `coverage.md` shows every `automated` manifest entry used.
 - Zero open `playtest` issues; zero console errors from `l5r4-enhanced` in the last full run.
-- Written here by the Stage 16 sweep, each left open by an earlier stage: a real mouse drag from the compendium
-  browser and from a compendium window onto a sheet (Claude in Chrome's drag reaches no drop target, so a person
-  makes this one gesture if the tool still cannot); the Active Effect sheet's phase dropdown, the Token HUD status
-  icons, and the subtype labels of the create-document dialog clicked through; and none of the intermittent console
-  errors Stages 6-13 saw once in full runs (`TypeError: Failed to fetch`, unhandled rejections from core's chat
-  pop-up, core `#postNotification` errors) in any seat's console.
+- Written here by the Stage 16 sweep, each left open by an earlier stage: a real mouse drag from the compendium browser and from a compendium window onto a sheet (Claude in Chrome's drag reaches no drop target, so a person makes this one gesture if the tool still cannot); the Active Effect sheet's phase dropdown, the Token HUD status icons, and the subtype labels of the create-document dialog clicked through; and none of the intermittent console errors Stages 6-13 saw once in full runs (`TypeError: Failed to fetch`, unhandled rejections from core's chat pop-up, core `#postNotification` errors) in any seat's console.
 - The gate passes after the fixes.
 
 ## Decisions
 
-1. The playtest is not Quench: it is played through the real UI with Claude in Chrome. A finding that can be
-   scripted becomes a Quench test when it is fixed. Basis: fabula-ultima `roadmap/STAGE-19-PLAYTEST.md` decision 2.
+1. The playtest is not Quench: it is played through the real UI with Claude in Chrome. A finding that can be scripted becomes a Quench test when it is fixed. Basis: fabula-ultima `roadmap/STAGE-19-PLAYTEST.md` decision 2.
 2. The script and logs are committed; recordings stay in the scratchpad.
 3. The scenario is rerun on each 4.0.0 release candidate before Stage 19 publishes.
 
@@ -88,9 +69,9 @@ seat at any time.
 
 ## Out of scope
 
-| Item | Stage |
-|------|-------|
-| Static coverage, open-question and out-of-scope sweeps | 16 |
-| Design system, code system, and consistency checks | 17 |
-| Release allowlist and book-text sweep | 19 |
-| Mass battle (pp.236-241) | Not planned |
+| Item                                                   | Stage       |
+| ------------------------------------------------------ | ----------- |
+| Static coverage, open-question and out-of-scope sweeps | 16          |
+| Design system, code system, and consistency checks     | 17          |
+| Release allowlist and book-text sweep                  | 19          |
+| Mass battle (pp.236-241)                               | Not planned |

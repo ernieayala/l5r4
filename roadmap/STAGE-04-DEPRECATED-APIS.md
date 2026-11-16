@@ -1,13 +1,11 @@
 # Stage 4: Deprecated APIs
 
-**Goal:** the system calls no API that 14.370 marks deprecated outside Active Effects and Combat, and the
-deprecated-globals list in `eslint.config.mjs` is empty.
-**Needs:** 1.
+**Goal:** the system calls no API that 14.370 marks deprecated outside Active Effects and Combat, and the deprecated-globals list in `eslint.config.mjs` is empty. **Needs:** 1.
 
 ## Foundry v14 APIs
 
 | Need | API (section of FOUNDRY-V14-REFERENCE.md, or installed source) |
-|------|---------------------------------------------------------------|
+| --- | --- |
 | Dialogs | `foundry.applications.api.DialogV2` (`confirm`, `prompt`, `wait`) §4.1 |
 | Message visibility | `messageMode`, `core.messageMode` setting; `core.rollMode` deprecated `{since: 14, until: 16}` (`client/game.mjs:1225-1244`) |
 | Localization | `game.i18n.localize(key, data)` §10.3 |
@@ -17,7 +15,7 @@ deprecated-globals list in `eslint.config.mjs` is empty.
 ## Audit
 
 | Grep | Sites |
-|------|-------|
+| --- | --- |
 | `rg -n "\bDialog\.confirm" module` | `module/sheets/handlers/item-crud-handler.js:190`, `module/sheets/handlers/pc-actions-handler.js:157`, `module/services/initiative.js:73` (Decision 2) |
 | `rg -n "rollMode" module` | `module/documents/item/integration/chat-cards.js:64` |
 | `rg -n "i18n\.format" module` | 25 sites: `module/utils/localization.js:91`, `rest.js`, `fear.js`, `xp/xp-calculator.js`, `wound-prone-automation.js`, `dice/rolls/ring-roll.js`, `spell-cast-roll.js`, `maho-cast-roll.js`, `dice/dialogs/spell-dialog.js`, `maho-dialog.js`, `dice/resources/spell-slot-manager.js`, `sheets/handlers/item-crud-handler.js:192`, `setup/migrations/icons/icon-paths.js:213`, `:334` |
@@ -44,7 +42,7 @@ deprecated-globals list in `eslint.config.mjs` is empty.
 
 ## Out of scope
 
-| Item | Stage |
-|------|-------|
-| Moving the Initiative patch into Combat classes | 5 |
-| Active Effect shape | 3 |
+| Item                                            | Stage |
+| ----------------------------------------------- | ----- |
+| Moving the Initiative patch into Combat classes | 5     |
+| Active Effect shape                             | 3     |

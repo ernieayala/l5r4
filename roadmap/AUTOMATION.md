@@ -1,10 +1,9 @@
 # Automation: gap analysis and rule vocabulary
 
-Reference for Stages 7-11. It compares what pf2e 8.7.0 automates with what `l5r4-enhanced` 3.2.1 automates,
-and lists the effect shapes the Core Rulebook needs. Sources, all read 2026-11-12:
+Reference for Stages 7-11. It compares what pf2e 8.7.0 automates with what `l5r4-enhanced` 3.2.1 automates, and lists the effect shapes the Core Rulebook needs. Sources, all read 2026-11-12:
 
 | Source | Where |
-|--------|-------|
+| --- | --- |
 | pf2e 8.7.0 (Foundry 14.370 verified) | `%LOCALAPPDATA%\FoundryVTT\Data\systems\pf2e\pf2e.mjs`; line numbers below are `pf2e.mjs` lines |
 | l5r4 3.2.1 code | `module/`, `dist/l5r4-enhanced.js`, `templates/`, `template.json` |
 | Core Rulebook | `game-rules/` (printed pages); paraphrased here, never quoted |
@@ -13,7 +12,7 @@ and lists the effect shapes the Core Rulebook needs. Sources, all read 2026-11-1
 ## 1. How pf2e automates
 
 | Idea | pf2e | Evidence |
-|------|------|----------|
+| --- | --- | --- |
 | Rules are data on items | Every item has `system.rules`, an array of `{key, ...}`; a registry maps 40 keys to `RuleElement` DataModel classes, built per owned item | `RuleElements.builtin` L45424-45466; `fromOwnedItem` L45474; base class L31674 |
 | Fixed hooks in data preparation | `onApplyActiveEffects` (end of `prepareEmbeddedDocuments`), `beforePrepareData` (in `prepareDerivedData`), `afterPrepareData`; sorted by `priority` | L33067-33178, L34641 |
 | A "synthetics" bag keyed by selector | Rule elements push modifiers, dice, notes, adjustments into `actor.synthetics[kind][selector]`; each statistic pulls by its domain list | L33025-33065, L39433-39494 |
@@ -27,20 +26,14 @@ and lists the effect shapes the Core Rulebook needs. Sources, all read 2026-11-1
 | Damage loop | `applyDamageFromMessage` to selected tokens with multipliers, IWR, temp HP, persistent damage, undo | L54496, L33224, L32160, L56601 |
 | Content | 100 packs, ~17,000 records carrying `system.rules` | `system.json`; pack scan |
 
-**Adapted for l5r4 on v14.** pf2e turns effects into items and projects Active Effects only for display
-(L31105). Foundry 14 gives Active Effects a typed `system` (`ActiveEffectTypeDataModel`) and core duration
-and expiry with custom expiry events (FOUNDRY-V14-REFERENCE.md §6.1, §6.3). l5r4 keeps stances, conditions,
-and timed effects as Active Effects with their rules in `system.rules`, and lets the core registry expire
-them. Items carry `system.rules` too; one engine reads both.
+**Adapted for l5r4 on v14.** pf2e turns effects into items and projects Active Effects only for display (L31105). Foundry 14 gives Active Effects a typed `system` (`ActiveEffectTypeDataModel`) and core duration and expiry with custom expiry events (FOUNDRY-V14-REFERENCE.md §6.1, §6.3). l5r4 keeps stances, conditions, and timed effects as Active Effects with their rules in `system.rules`, and lets the core registry expire them. Items carry `system.rules` too; one engine reads both.
 
 ## 2. What l5r4 automates today
 
-All mechanics are hard-coded services keyed by status id, item type, or item name; no item carries its own
-rules. Active Effects change only the owning actor, and the system reads them only through core application
-and three flags (`attackBonus`, `damageBonus`, `fearRank`).
+All mechanics are hard-coded services keyed by status id, item type, or item name; no item carries its own rules. Active Effects change only the owning actor, and the system reads them only through core application and three flags (`attackBonus`, `damageBonus`, `fearRank`).
 
 | Area | Automated | Missing |
-|------|-----------|---------|
+| --- | --- | --- |
 | Derived data | Rings, Armor TN, Reduction, wounds, Insight, initiative values, movement, Fear TN, XP totals, heal rate (`module/documents/actor/preparation/*.js`, `calculations/*.js`) | NPC Armor TN is manual; `final`-phase effects reach nothing |
 | Rolls | Skill, Trait, Ring, spell, maho, attack, damage, Full Defense, Fear; Ten Dice Rule; wound, stance, condition, armor, mounted modifiers (`module/services/dice/**`) | One shared pipeline; Emphasis from trained Emphases; Free Raises that change the TN; explode threshold; contested rolls; context stored on the message |
 | Damage | Attack card to damage card; Apply Wounds and Void reduction to the controlled token; Prone at Down/Out (`module/hooks/chat-damage-buttons.js`, `wound-prone-automation.js`) | Damage to the attack's target; Strength and arrow in the button's damage; NPC Apply buttons; undo; damage source tags |
@@ -48,11 +41,10 @@ and three flags (`attackBonus`, `damageBonus`, `fearRank`).
 | Items | Skill bonus fields, weapon and armor stats, spell mastery, XP costs, family and school Trait bonus | Rules on advantages, techniques, kata, kiho, tattoos, spells |
 | Resources | Void Points, spell slots, XP ledger, Honor/Glory/Status/Taint tracks | Per-round Void limit, use counters, ledger hooks |
 
-Probable bugs read from the code when the roadmap was written. Each is fixed in the stage named; B11's Insight
-bonus field, found by the Stage 16 sweep, was removed by #75:
+Probable bugs read from the code when the roadmap was written. Each is fixed in the stage named; B11's Insight bonus field, found by the Stage 16 sweep, was removed by #75:
 
 | # | Finding | Code | Stage |
-|---|---------|------|-------|
+| --- | --- | --- | --- |
 | B1 | Skill item bonus counted twice on skill rolls | `module/sheets/handlers/roll-handler.js:198-220`, `module/services/dice/rolls/skill-roll.js:142-149` | 8 (fixed) |
 | B2 | Skilled weapon attack: a skill keep bonus is added to rolled and kept dice more than once | `module/utils/mechanics.js:364`, `roll-handler.js:362` | 8 (fixed) |
 | B3 | Full Attack +2k1 applied twice on unskilled and NPC attacks | `roll-handler.js:264-273, 396-397`, `simple-roll.js:228-235` | 8 (fixed) |
@@ -68,13 +60,10 @@ bonus field, found by the Stage 16 sweep, was removed by #75:
 
 ## 3. Rule vocabulary for L5R 4e
 
-The shapes below recur across Advantages and Disadvantages (pp.146-162), School Techniques (pp.105-132,
-211-257), Mastery Abilities (pp.133-145), spells (pp.167-197), kata (pp.259-260), kiho (pp.261-267), maho and
-Taint (pp.267-284), ancestors (pp.241-244), equipment (pp.198-210), and creatures (pp.318-331). Counts are
-approximate and overlap. Each shape becomes a rule key in Stage 7; the keys are working names.
+The shapes below recur across Advantages and Disadvantages (pp.146-162), School Techniques (pp.105-132, 211-257), Mastery Abilities (pp.133-145), spells (pp.167-197), kata (pp.259-260), kiho (pp.261-267), maho and Taint (pp.267-284), ancestors (pp.241-244), equipment (pp.198-210), and creatures (pp.318-331). Counts are approximate and overlap. Each shape becomes a rule key in Stage 7; the keys are working names.
 
 | Rule key | Shape | Approx. uses |
-|----------|-------|--------------|
+| --- | --- | --- |
 | `RollModifier` | +XkY or +N on a selected roll; selector = roll type, Skill or Skill tag, Trait, Ring, weapon keyword or size, spell element or keyword; value may be a formula (Honor Rank, School Rank, Ring, Taint Rank) | 150+ |
 | `OpponentModifier` | Bonus to others' rolls against this actor | 20 |
 | `TNModifier` | TN change on own rolls, on others' rolls against this actor, or chosen ± by the player | 50 |
@@ -104,34 +93,21 @@ approximate and overlap. Each shape becomes a rule key in Stage 7; the keys are 
 
 CLAUDE.md **AUTOMATE MATH, KEEP CHOICES**. The engine prompts for these and never resolves them:
 
-- **Player:** which dice to keep (p.75); whether and how to spend a Void Point (p.78); declared Raises and spell
-  Raise allocation; which slot pool pays; stance; Center Stance's roll; delaying; grapple option; Guard
-  target; duel concession and Assessment facts; Emphasis claimed; Honor Roll; Embracing the Taint; maho blood
-  source; kiho, kata, and tattoo activation; every once-per-X ability; technique option switches; reactive
-  triggers; choices made at purchase.
-- **GM:** every TN, Skill/Trait pair, and situational modifier; retries; terrain; ambush; Fear calls;
-  Honor, Glory, Infamy, and Status awards; optional rules; in-play purchases; Disadvantage triggers;
-  situational predicates the system cannot see (higher ground, unaware target, faction); narrative outcomes;
-  magic answers and research; Taint exposure, mutations, Powers; mass battle choices; ancestor permission.
+- **Player:** which dice to keep (p.75); whether and how to spend a Void Point (p.78); declared Raises and spell Raise allocation; which slot pool pays; stance; Center Stance's roll; delaying; grapple option; Guard target; duel concession and Assessment facts; Emphasis claimed; Honor Roll; Embracing the Taint; maho blood source; kiho, kata, and tattoo activation; every once-per-X ability; technique option switches; reactive triggers; choices made at purchase.
+- **GM:** every TN, Skill/Trait pair, and situational modifier; retries; terrain; ambush; Fear calls; Honor, Glory, Infamy, and Status awards; optional rules; in-play purchases; Disadvantage triggers; situational predicates the system cannot see (higher ground, unaware target, faction); narrative outcomes; magic answers and research; Taint exposure, mutations, Powers; mass battle choices; ancestor permission.
 
 ## 5. Content and licensing
 
-pf2e ships its automation as compendium content under an open license. The L5R 4e Core Rulebook is not open
-content and this repository is public (CLAUDE.md **Licensed material**), so the system's packs carry the book's
-names, printed numbers, and mechanics as `system.rules`, with a "Core Rulebook p.N" citation in place of every
-description; no book text ships (Stage 15 **Content policy**). PR #25 ("Packs") contains rulebook text and cannot
-be merged.
+pf2e ships its automation as compendium content under an open license. The L5R 4e Core Rulebook is not open content and this repository is public (CLAUDE.md **Licensed material**), so the system's packs carry the book's names, printed numbers, and mechanics as `system.rules`, with a "Core Rulebook p.N" citation in place of every description; no book text ships (Stage 15 **Content policy**). PR #25 ("Packs") contains rulebook text and cannot be merged.
 
 ## 6. Book questions for Ernie
 
 Found while surveying; each needs a ruling before the stage that automates it (CLAUDE.md **Ask Ernie when**).
 
-Status as of Stage 16 (2026-11-14). "With the table" means the system computes nothing that depends on the answer:
-the pack entry records `partial` or `none` coverage with a summary (Stage 15 decision 9), so the GM reads the
-book. Such a question blocks no stage; it needs an answer only if a later change automates that rule.
+Status as of Stage 16 (2026-11-14). "With the table" means the system computes nothing that depends on the answer: the pack entry records `partial` or `none` coverage with a summary (Stage 15 decision 9), so the GM reads the book. Such a question blocks no stage; it needs an answer only if a later change automates that rule.
 
 | # | Question | Pages | Status |
-|---|----------|-------|--------|
+| --- | --- | --- | --- |
 | Q1 | Monk starting Status and Glory differ between two passages | 95, 231 | Open, with the table: no starting Status or Glory is set for monks (Stage 16 decision 6) |
 | Q2 | A fractional Honor (e.g. 6.5) as a roll input: rank 6? Rounding for half Honor | 90, 252 | Answered for roll inputs: the stored rank (Stage 11 decision 10). Halving Honor stays with the table |
 | Q3 | Does the Weakness Disadvantage lower the Ring derived from the weakened Trait? | 162 | Answered: yes; the entry's TraitAdjust lowers the Trait, and the Ring follows it (p.76) (Ernie, 2026-11-14) |
@@ -144,7 +120,4 @@ book. Such a question blocks no stage; it needs an answer only if a later change
 | Q10 | No Pure Breaths (maho) damage wording | 273 | Open, with the table: spells are `none` |
 | Q11 | The "Ninja" weapon keyword is used but not defined | 204 | Open, with the table: the Ninja-to entry is `partial` |
 
-Transcription gaps to fix in `game-rules/` against the PDF before a stage needs them: the Battle Table (p.240,
-mass battle, not planned) and the crafting tables (p.258, with the table). Pages with no marker (pp.51, 54,
-72-73, 96-97, 208-209, 282-283, 385-388) are full-page art with no text (checked 2026-11-14), and the Advantages after
-Silent are in `64_advantages.md`.
+Transcription gaps to fix in `game-rules/` against the PDF before a stage needs them: the Battle Table (p.240, mass battle, not planned) and the crafting tables (p.258, with the table). Pages with no marker (pp.51, 54, 72-73, 96-97, 208-209, 282-283, 385-388) are full-page art with no text (checked 2026-11-14), and the Advantages after Silent are in `64_advantages.md`.

@@ -1,25 +1,17 @@
 # Stage 17: Design System and Code System
 
-**Goal:** the project has two written systems: a **design system** for everything a user sees (foundations, components,
-patterns, copy) with a living gallery inside Foundry, and a **code system** for everything a developer writes (a naming
-dictionary, a domain glossary, code shapes, a test system). An automated check enforces each rule either system marks
-as checkable. A multi-agent review-and-fix pass then brings the whole repo into line without changing behavior.
-**Needs:** 1-16. The Stage 16 coverage report and a full Quench run give the behavior baseline this stage must keep;
-the Stage 18 playtest then plays the result.
+**Goal:** the project has two written systems: a **design system** for everything a user sees (foundations, components, patterns, copy) with a living gallery inside Foundry, and a **code system** for everything a developer writes (a naming dictionary, a domain glossary, code shapes, a test system). An automated check enforces each rule either system marks as checkable. A multi-agent review-and-fix pass then brings the whole repo into line without changing behavior. **Needs:** 1-16. The Stage 16 coverage report and a full Quench run give the behavior baseline this stage must keep; the Stage 18 playtest then plays the result.
 
 ## Rules implemented
 
-None. This stage changes no rule. Every fix keeps behavior, proven by the gate, `npm run coverage:check`, and the full
-Quench run staying green with the pre-stage pass count.
+None. This stage changes no rule. Every fix keeps behavior, proven by the gate, `npm run coverage:check`, and the full Quench run staying green with the pre-stage pass count.
 
 ## Why this stage exists
 
-Sixteen stages built by feature, on top of a 3.x codebase, left the repo agreeing with itself only in parts. Seen on
-2026-11-14 with Stage 15 in the working tree (counts from a read-only survey script over `module/`, `templates/`,
-`scss/`, `lang/en.json`, and `tests/`; re-run it when the stage starts):
+Sixteen stages built by feature, on top of a 3.x codebase, left the repo agreeing with itself only in parts. Seen on 2026-11-14 with Stage 15 in the working tree (counts from a read-only survey script over `module/`, `templates/`, `scss/`, `lang/en.json`, and `tests/`; re-run it when the stage starts):
 
 | Area | Inconsistency |
-|------|---------------|
+| --- | --- |
 | Written conventions | Naming rules sit in `CONTRIBUTING.md:219-227`, `DEVELOPER.md:321-333`, and `CLAUDE.md` **Presentation**, five lines each, covering files, classes, functions, and constants only. Both contributor docs tell readers to run `npm run madge:check`, which `package.json` does not define (the script is `deps:circular`) |
 | Quench batch ids | 87 batches in four schemes: `` `${SYS_ID}.kebab-case` `` (most), camelCase tails (`workflows.armorTNCalculation`, `services.familyBonus`, `workflows.traitFamilyBonus`), the id written out as `"l5r4-enhanced..."` instead of `SYS_ID` (4), and id segments that do not match the folder (`apps.emphasis-manager`, `apps.wound-config`, `apps.xp-manager` live in `tests/quench/sheets/`; `integration.*` and `resources.*` prefixes match no folder). `tests/quench/index.js` registers five batches inline beside the registration code |
 | Quench batch labels | "L5R4:" in most, "L5R4 Enhanced:" in two; Title Case in the older batches ("Actor Wound System Tests"), sentence case in the newer ("Character options and rule authoring"); 44 end in "Tests"; notes in parentheses ("(Stage 10)", "(Phase 5)", "(fixture world only)", "(trainedEmphases Array)", "(links, request cards, effect panel, macros, floating numbers)"); "&", "+", and "and" used for the same join |
@@ -43,7 +35,7 @@ Sixteen stages built by feature, on top of a 3.x codebase, left the repo agreein
 ## Foundry v14 APIs
 
 | Need | API (section of FOUNDRY-V14-REFERENCE.md) |
-|------|--------------------------------------------|
+| --- | --- |
 | Gallery window | `HandlebarsApplicationMixin(ApplicationV2)` (§4.1-4.4), as `module/apps/effect-panel.js` and `compendium-browser.js` use it |
 | Opening the gallery from settings | `game.settings.registerMenu` (§10.2). Not yet used in this repo: check it with `/foundry-api` first |
 | Action names | Keys of `DEFAULT_OPTIONS.actions`, values of `[data-action]` (§4.2) |
@@ -55,12 +47,10 @@ Sixteen stages built by feature, on top of a 3.x codebase, left the repo agreein
 
 ### 1. Design system (`docs/design-system/`)
 
-A user-facing rule set, one file per section. Every page states the rule, shows a conforming and a non-conforming
-example, names the tokens and partials involved, and names the check that enforces it, or says "review" when no check
-can.
+A user-facing rule set, one file per section. Every page states the rule, shows a conforming and a non-conforming example, names the tokens and partials involved, and names the check that enforces it, or says "review" when no check can.
 
 | File | Contents |
-|------|----------|
+| --- | --- |
 | `README.md` | Principles (the L5R look the system has now, built on core's themes; readable first; the book's terms as the UI's terms; every state visible without color alone; works in light and dark), how the tiers fit together, how to add a component |
 | `foundations/color.md` | Palette primitives named by hue and step, never by role, and role tokens built on them: surface, panel, line, text, muted text, accent, success, danger, info, and the domain roles (the five Rings, Wound Ranks, Void Points, Honor, Glory, Status, Taint, stance and condition colors). Each defined for both themes on top of core's variables. Every text/surface pairing with its contrast ratio in both themes (`tests/conventions/contrast.test.js`) |
 | `foundations/typography.md` | The faces the system uses (core's `--font-h1` to `--font-h4`, body, monospace) and their jobs; a named type scale with size, line height, letter case, and when to use each; numbers (tabular figures for XkY pools, TNs, and Wound totals), truncation, wrapping |
@@ -79,17 +69,12 @@ can.
 | `content/voice.md` | UI copy: one letter case for labels and buttons (decision 4), the book's capitalized game terms (Void Points, Armor TN, Wound Rank, Insight Rank, School Rank, Free Raise) exactly as the glossary spells them, button labels as verbs, notification sentence shape, numbers and XkY notation, allowed abbreviations (TN, XP, NPC, PC), tooltips |
 | `content/localization.md` | `lang/en.json` key structure (see the code system's naming), one key per meaning, interpolation names, plural forms, how a key rename reaches the five translations |
 
-Component inventory to document (from `scss/components/`, `scss/features/`, and the partials in `templates/`, completed
-by the survey): button, icon button, inline control, form field, grid, section and section title, expand control, item
-row and item list, sort header, tabs, item header, Ring and Trait block, rank control, Void Point dots, Wound track,
-Initiative block, Armor TN block, Fear block, spell slots, chat card, dice row, check card, request card, damage
-result, effect prompt, flow card, item summary card, check dialog, ledger dialog, rules editor, effect panel, compendium
-browser, inline link, floating number.
+Component inventory to document (from `scss/components/`, `scss/features/`, and the partials in `templates/`, completed by the survey): button, icon button, inline control, form field, grid, section and section title, expand control, item row and item list, sort header, tabs, item header, Ring and Trait block, rank control, Void Point dots, Wound track, Initiative block, Armor TN block, Fear block, spell slots, chat card, dice row, check card, request card, damage result, effect prompt, flow card, item summary card, check dialog, ledger dialog, rules editor, effect panel, compendium browser, inline link, floating number.
 
 ### 2. Living gallery (in Foundry)
 
 | File | Does |
-|------|------|
+| --- | --- |
 | `module/apps/design-gallery.js` | A GM-only ApplicationV2 window, opened from a settings menu button, rendering every component in every variant and state from fixture data, plus every foundation (swatches with contrast ratios in both themes, type scale, space scale, icons, frames) and one sample of each pattern (a sheet section, a chat card, a dialog, a panel row) |
 | `module/config/design-gallery/` | The fixture data, one file per gallery section plus `fixtures.js` and `contexts.js`: plain objects, no functions |
 | `templates/apps/design-gallery/*.hbs` | One part per section. Composes the real partials, never copies their markup, so the gallery shows what the system ships |
@@ -101,7 +86,7 @@ browser, inline link, floating number.
 ### 3. Code system (`docs/code-system/`)
 
 | File | Contents |
-|------|----------|
+| --- | --- |
 | `README.md` | How the parts fit; `CLAUDE.md`, `CONTRIBUTING.md`, and `DEVELOPER.md` keep one-line rules and point here for detail (decision 6) |
 | `naming.md` | The naming dictionary: one row per identifier kind with its pattern, examples, and counter-examples. Files and directories per layer; classes; functions with a fixed verb vocabulary (decision 4: which verbs mean create, read, change, remove, roll, post a card, ask the GM, open a dialog, and which predicate prefix means what); `_name` for Foundry's protected overrides versus `#name` for the system's own private members; action handlers; constants; Config keys; `system` field names; flags; setting keys; GM query names; `data-action` names; `game.system.api` names; i18n key paths; SCSS files, classes, and tokens (`--l5r4-{category}-{name}`); template files and partial names; Quench batch ids and display names; test file names. The fixed names (decision 2) listed with why each stays |
 | `glossary.md` | One row per game concept: the book's term and its `game-rules/` file and page (looked up with `/rule`, never from memory), the identifier stem in code, the i18n key, the UI label, and banned synonyms (for example, one stem for Armor TN, one for the target number, one pair for rolled and kept dice). Terms and page numbers only, never a definition from the book (CLAUDE.md **Licensed material**). Read by the glossary check |
@@ -116,7 +101,7 @@ browser, inline link, floating number.
 The test system (`testing.md`):
 
 | Rule | Detail |
-|------|--------|
+| --- | --- |
 | File layout | Vitest files mirror `module/`: `tests/unit/<path>.test.js` for `module/<path>.js`. Repo-level checks (`lang`, `manifest`, `packs`) in `tests/*.test.js`, convention checks in `tests/conventions/`. No empty folders |
 | Batch id | `l5r4-enhanced.<kebab-case>` built from `SYS_ID`, one batch per file, the file name the id's last segment, the folder its middle segments |
 | Batch display name | Required on every batch: `L5R4: <Feature in sentence case>`. No stage or phase numbers, no notes in parentheses, no "Tests" suffix, "and" for joins |
@@ -128,11 +113,10 @@ The test system (`testing.md`):
 
 ### 4. Checks
 
-Each check runs inside an existing gate script (`npm run test` or `npm run lint`), so CI needs no new step. Each check
-ships with a fixture it fails on. No check adds a dependency (decision 5).
+Each check runs inside an existing gate script (`npm run test` or `npm run lint`), so CI needs no new step. Each check ships with a fixture it fails on. No check adds a dependency (decision 5).
 
 | Check | Tool | Enforces |
-|-------|------|----------|
+| --- | --- | --- |
 | Names on disk | Vitest `tests/conventions/names.test.js` | `naming.md` file and directory rules, the `_` partial prefix in `scss/` and template `_partials/`, nesting depth, redundant prefixes, no empty folders |
 | File size | Vitest `tests/conventions/size.test.js` | Per-layer soft limits; an over-limit file needs a reason in `tests/conventions/exceptions.json` |
 | Layer boundaries | ESLint `no-restricted-imports` / `no-restricted-globals` per directory, beside `npm run deps:circular` | CLAUDE.md **Layers** and its import rules |
@@ -154,12 +138,10 @@ ships with a fixture it fails on. No check adds a dependency (decision 5).
 
 ### 5. Multi-agent review and fix pass
 
-Run with the Workflow tool, at the default workflow size (under 10 agents per workflow; decision 14), so a wave with
-more partitions than that runs as several workflows in turn. Parallelism is bounded by file ownership; the test-name
-and template work splits into many small disjoint partitions.
+Run with the Workflow tool, at the default workflow size (under 10 agents per workflow; decision 14), so a wave with more partitions than that runs as several workflows in turn. Parallelism is bounded by file ownership; the test-name and template work splits into many small disjoint partitions.
 
 | Wave | Agents | Writes | Output |
-|------|--------|--------|--------|
+| --- | --- | --- | --- |
 | 1 Survey | One read-only agent per area: each `module/` layer (`data`, `documents`, `services`, `sheets`, `apps`, `utils` with `config`, `setup` with `hooks`), `templates/`, `scss/`, `lang/`, `tests/quench/`, `tests/unit/` and repo tests, `tools/` with `scripts/` and the docs | Nothing | Conventions the code follows, with counts; every departure. Feeds the two systems' first drafts |
 | 2 Decide | The coordinator | `docs/` drafts | Split conventions listed for Ernie (decision 4) before any fix |
 | 3 Review | One read-only agent per area and dimension (naming, glossary, structure, documentation, presentation, copy, tests, accessibility), given the systems and the check output, not the survey's conclusions | Nothing | Findings with file, line, rule, and proposed fix |
@@ -170,7 +152,7 @@ and template work splits into many small disjoint partitions.
 | 8 Visual review | One agent per gallery section and sheet, comparing new captures with the pre-stage captures and the design system | Nothing | Visual findings fed back into wave 5 |
 
 | Ownership rule | Detail |
-|----------------|--------|
+| --- | --- |
 | Disjoint files | Each partition is a set of files no other partition touches in that wave |
 | Shared files have one owner | All six `lang/*.json` files (one owner, so a key rename reaches every translation), `scss/base/_variables.scss`, `scss/l5r4-enhanced.scss`, `module/config/`, `module/config/templates.js` with `module/setup/preload-templates.js`, `eslint.config.mjs`, `.stylelintrc.json`, `system.json`, `package.json`, `CLAUDE.md`, each `docs/` file, the Stage 16 coverage manifest. Others send change requests; the owner applies them next wave |
 | Cross-file moves are serial | A rename or move updates every import, template path, `DEFAULT_OPTIONS.actions` key, Quench `runEveryAction` list, and coverage manifest entry, so the coordinator makes them one at a time between waves, each followed by the gate |
@@ -180,7 +162,7 @@ and template work splits into many small disjoint partitions.
 ### 6. Run to green
 
 | Step | Result |
-|------|--------|
+| --- | --- |
 | Baseline | Before wave 1: gate output, `npm run coverage` report, full Quench pass count with Sequencer and JB2A active, and the pre-stage captures, recorded in the PR #39 checklist |
 | Checks in report mode | Each check lists violations without failing; first-run counts go in the PR #39 checklist |
 | Fix waves | Waves 3-8 repeat until every check reports zero or a recorded exception |
@@ -190,7 +172,7 @@ and template work splits into many small disjoint partitions.
 ## Automation boundary
 
 | Checked by the tools | Left to review or to Ernie |
-|----------------------|----------------------------|
+| --- | --- |
 | Names, sizes, layer imports, module and member order, deprecated APIs, JSDoc and citation format, template and SCSS structure, token use, contrast, glossary terms, copy rules a pattern can test, test names, design-system completeness, accessible names on icon-only controls | Whether a name is clear, whether a component looks right, whether two near-duplicates should merge, tone of copy, history in comments that the migrations need |
 | That fixes leave the gate, coverage, and Quench results unchanged | Every split convention (decision 4); every exception in `exceptions.json`; visual sign-off on the gallery and the sheets |
 
@@ -199,7 +181,7 @@ and template work splits into many small disjoint partitions.
 ### Vitest
 
 | Case | Source |
-|------|--------|
+| --- | --- |
 | Each check fails on its violating fixture and passes on a conforming one | Decision 1 |
 | `size.test.js`: an over-limit file listed in `exceptions.json` passes; removing the entry fails | Decision 3 |
 | `tests.test.js`: a batch without a display name, an `it` name in the wrong form, and a citation inside a name each fail | `testing.md` |
@@ -214,16 +196,13 @@ and template work splits into many small disjoint partitions.
 - [ ] Baseline recorded: gate, coverage report, Quench pass count, pre-stage captures.
 - [ ] Survey done; every split convention decided by Ernie.
 - [ ] `docs/design-system/` and `docs/code-system/` written; every component in the inventory has a page.
-- [ ] Gallery opens from settings and shows every component, state, and foundation in both themes;
-  `l5r4-enhanced.design-gallery` passes.
+- [ ] Gallery opens from settings and shows every component, state, and foundation in both themes; `l5r4-enhanced.design-gallery` passes.
 - [ ] Every check built with a failing fixture; first-run violation counts in the PR #39 checklist.
 - [ ] Every check at zero or a recorded exception, and enforcing in the gate; ESLint and Stylelint at zero warnings.
-- [ ] Every Quench batch has an id and display name per `testing.md`; no test name over the limit or carrying a
-  citation.
+- [ ] Every Quench batch has an id and display name per `testing.md`; no test name over the limit or carrying a citation.
 - [ ] `CONTRIBUTING.md`, `DEVELOPER.md`, and `CLAUDE.md` point to `docs/` and name no script `package.json` lacks.
 - [ ] Gate passes locally and in CI; `npm run coverage:check` shows zero gaps.
-- [ ] Full Quench run: pre-stage pass count plus the gallery batch, zero console errors from `l5r4-enhanced`;
-  `world-upgrade` passes in the fixture world.
+- [ ] Full Quench run: pre-stage pass count plus the gallery batch, zero console errors from `l5r4-enhanced`; `world-upgrade` passes in the fixture world.
 - [ ] Captures reviewed against the pre-stage captures; Ernie signs off the look.
 - [ ] No fixed name changed, or each change ships a migration Ernie approved.
 - [ ] `CHANGELOG.MD` lists every renamed CSS class, token, and `game.system.api` name a module or world CSS could use.
@@ -231,58 +210,32 @@ and template work splits into many small disjoint partitions.
 ## Decisions
 
 1. Every check is proven by a fixture it fails on (CLAUDE.md **Testing and the Gate**).
-2. Names stored in world data or used outside the system stay as they are: `system` fields, flags, setting keys
-   (`LtException` included), document and chat message subtypes (`commonItem`, `bow`, `roll`, `checkRequest`) and the
-   template files named after them, status effect ids, rule keys, pack ids and entry ids, GM query names, the
-   `game.system.api` names hotbar macros call, the text link syntax stored in journals (`@Check[...]` and the rest),
-   and the `data-action` names and CSS classes inside chat cards already posted, whose HTML is stored in the message.
-   The system id stays (X1). The code system records them as fixed names and the checks exempt them. Token names,
-   other CSS classes, file names, function names, i18n keys (carried to every translation), and test names are not
-   stored and may change.
-3. Soft limits stay soft: a file over its limit is allowed with a written reason. A split happens for a second
-   responsibility, not to meet a number.
-4. The systems describe what the code already does where it agrees with itself. Where it splits, Ernie picks before
-   the fix waves start. Known splits: `data-action` casing (kebab-case in about 200 uses, camelCase in 15 and in
-   core); template class scheme (`l5r4-` prefixed blocks versus bare words with dash modifiers); `it` names ("should
-   …" in 1766, a present-tense verb in the rest); label letter case (Title Case versus sentence case); the verb
-   vocabulary and predicate prefixes; the identifier stems for Armor TN, target number, and dice pools; token names
-   and the space scale.
-5. No new dependency without Ernie's approval (CLAUDE.md **Change Control**). Checks use ESLint core rules, local
-   rules in `tools/eslint/`, `eslint-plugin-jsdoc` (decision 14), Stylelint with its approved plugins, and Vitest.
-6. The systems live in `docs/`, not `roadmap/`: they describe the code that ships and carry no book text. `CLAUDE.md`,
-   `CONTRIBUTING.md`, and `DEVELOPER.md` keep one-line rules and point to `docs/` for detail; a rule's detail lives in
-   one place. `docs/` stays off the Stage 19 release allowlist.
-7. The gallery composes the real partials, so a component without a gallery entry or a page fails the gate. The
-   gallery ships, GM-only, from the settings menu.
-8. Test names: at most 100 characters, so names fit the Quench runner at its default width; the citation moves to a
-   comment above the test.
-9. The system has no mock-up to design toward, so the pre-stage captures are the visual reference: the pass unifies
-   tokens, spacing, states, and icons, and changes no layout or visual direction. Visual review is by eye against
-   committed captures (decision 14).
-10. The pass changes no behavior (CLAUDE.md **PORT KEEPS BEHAVIOR** applied to this stage). A finding that needs a
-    behavior change, or a rule bug a reviewer finds, becomes a GitHub issue with its printed page, fixed in its own
-    change with a failing test first.
-11. Agent count follows the ownership partitions. The coordinator alone runs the gate, applies shared-file requests,
-    and makes cross-file moves.
-12. A rule enforced as a warning enforces nothing, because the gate passes on warnings; once a rule's count is zero
-    it becomes an error. Basis: the 112 ESLint warnings the gate passes today.
-13. The stage runs after the Stage 16 coverage audit, so the coverage manifest and a full Quench run give the
-    behavior baseline, and before the Stage 18 playtest, so play exercises the result. Basis: Ernie, 2026-11-14.
+2. Names stored in world data or used outside the system stay as they are: `system` fields, flags, setting keys (`LtException` included), document and chat message subtypes (`commonItem`, `bow`, `roll`, `checkRequest`) and the template files named after them, status effect ids, rule keys, pack ids and entry ids, GM query names, the `game.system.api` names hotbar macros call, the text link syntax stored in journals (`@Check[...]` and the rest), and the `data-action` names and CSS classes inside chat cards already posted, whose HTML is stored in the message. The system id stays (X1). The code system records them as fixed names and the checks exempt them. Token names, other CSS classes, file names, function names, i18n keys (carried to every translation), and test names are not stored and may change.
+3. Soft limits stay soft: a file over its limit is allowed with a written reason. A split happens for a second responsibility, not to meet a number.
+4. The systems describe what the code already does where it agrees with itself. Where it splits, Ernie picks before the fix waves start. Known splits: `data-action` casing (kebab-case in about 200 uses, camelCase in 15 and in core); template class scheme (`l5r4-` prefixed blocks versus bare words with dash modifiers); `it` names ("should …" in 1766, a present-tense verb in the rest); label letter case (Title Case versus sentence case); the verb vocabulary and predicate prefixes; the identifier stems for Armor TN, target number, and dice pools; token names and the space scale.
+5. No new dependency without Ernie's approval (CLAUDE.md **Change Control**). Checks use ESLint core rules, local rules in `tools/eslint/`, `eslint-plugin-jsdoc` (decision 14), Stylelint with its approved plugins, and Vitest.
+6. The systems live in `docs/`, not `roadmap/`: they describe the code that ships and carry no book text. `CLAUDE.md`, `CONTRIBUTING.md`, and `DEVELOPER.md` keep one-line rules and point to `docs/` for detail; a rule's detail lives in one place. `docs/` stays off the Stage 19 release allowlist.
+7. The gallery composes the real partials, so a component without a gallery entry or a page fails the gate. The gallery ships, GM-only, from the settings menu.
+8. Test names: at most 100 characters, so names fit the Quench runner at its default width; the citation moves to a comment above the test.
+9. The system has no mock-up to design toward, so the pre-stage captures are the visual reference: the pass unifies tokens, spacing, states, and icons, and changes no layout or visual direction. Visual review is by eye against committed captures (decision 14).
+10. The pass changes no behavior (CLAUDE.md **PORT KEEPS BEHAVIOR** applied to this stage). A finding that needs a behavior change, or a rule bug a reviewer finds, becomes a GitHub issue with its printed page, fixed in its own change with a failing test first.
+11. Agent count follows the ownership partitions. The coordinator alone runs the gate, applies shared-file requests, and makes cross-file moves.
+12. A rule enforced as a warning enforces nothing, because the gate passes on warnings; once a rule's count is zero it becomes an error. Basis: the 112 ESLint warnings the gate passes today.
+13. The stage runs after the Stage 16 coverage audit, so the coverage manifest and a full Quench run give the behavior baseline, and before the Stage 18 playtest, so play exercises the result. Basis: Ernie, 2026-11-14.
 
 14. Ernie, 2026-11-14, on the questions this stage opened with:
 
     | Question | Answer |
-    |----------|--------|
+    | --- | --- |
     | `eslint-plugin-jsdoc` for the JSDoc and citation check | Approved as a dev dependency |
     | `@html-eslint/eslint-plugin` for templates | Not added: the Vitest scan (`tests/conventions/templates.test.js`) checks templates |
     | Workflow size | The default (under 10 agents per workflow); the pass runs in more waves |
     | `pixelmatch` and `pngjs` for visual diffs | Not added: captures are reviewed by eye against the committed pre-stage captures |
 
-15. Ernie, 2026-11-14, on the splits the wave 1 survey found (245 across nine areas; the rest follow each area's
-    majority, as the code system records):
+15. Ernie, 2026-11-14, on the splits the wave 1 survey found (245 across nine areas; the rest follow each area's majority, as the code system records):
 
     | Split | Pick |
-    |-------|------|
+    | --- | --- |
     | `data-action` casing | kebab-case everywhere; the 15 camelCase names (and their `DEFAULT_OPTIONS.actions` keys) are renamed |
     | Template CSS classes | Every system class carries `l5r4-`; classes inside posted chat cards stay as fixed names (decision 2) and keep their styles; renames listed in `CHANGELOG.MD` |
     | `it` names | "should …" |
@@ -295,7 +248,7 @@ and template work splits into many small disjoint partitions.
 16. Ernie, 2026-11-15, on what the docs drafts left open:
 
     | Question | Pick |
-    |----------|------|
+    | --- | --- |
     | Look changes the pass may make (decision 9) | Fix the seven text/surface pairings under their contrast minimum; map the six core variables that exist only in AppV1 windows (`--color-text-hyperlink`, `--color-border-highlight`, ...) to role tokens so their colors render; give dropped dice a mark that is not color alone. Hit areas keep their size: the 24 px minimum target applies to new controls only |
     | Clickable elements | Native `<button type="button">` in place of `<a>` with no `href`; in a locked compendium core then disables them |
     | Tooltips | `data-tooltip` plus `aria-label` on icon-only controls, in place of `title` |
@@ -308,16 +261,13 @@ and template work splits into many small disjoint partitions.
 17. Ernie, 2026-11-15, standing rules while he is away:
 
     | Situation | Rule |
-    |-----------|------|
+    | --- | --- |
     | A question the decisions do not settle (ambiguous rename, which convention wins) | Decide by the docs, then the majority form, then the smallest change; never change behavior or a fixed name; log it under **Decided while Ernie was away** below for his review |
     | Files over their size limit | Split only a file that plainly does two jobs (a pure refactor, gated and Quench-tested); otherwise its reason goes in `tests/conventions/exceptions.json` |
     | Checkpoints | Commit locally on `release/4.0.0` after each wave passes the gate and a full Quench run (#76 in its own commit first); do not push |
     | A fix that needs a behavior change, or a rule bug | Fix forward in its own commit with a failing test first, then continue |
 
-18. Ernie, 2026-11-15: Foundry is not a small-screen or mobile app, and the system follows core's minimum window
-    sizes. No layout, check, or capture targets a narrow width: the 420 px captures and every docs rule written
-    "at 420 px" go; sheets are judged at their default width. (Dialogs core opens at 420 px wide keep that width; it
-    is their size, not a narrow-screen target.)
+18. Ernie, 2026-11-15: Foundry is not a small-screen or mobile app, and the system follows core's minimum window sizes. No layout, check, or capture targets a narrow width: the 420 px captures and every docs rule written "at 420 px" go; sheets are judged at their default width. (Dialogs core opens at 420 px wide keep that width; it is their size, not a narrow-screen target.)
 
 ### Decided while Ernie was away
 
@@ -478,7 +428,7 @@ Rulings applied (parts 13 and 14 and their follow-ups), each with the gate and a
 ### Ernie's rulings on the review items (2026-11-15)
 
 | Item | Ruling |
-|------|--------|
+| --- | --- |
 | Sheets importing app classes | Allowed: sheets open the system's windows. CLAUDE.md Layers, DEVELOPER.md, modules.md, and the Sheets import rule in `eslint.config.mjs` say so |
 | Spell slot cursor | Default, pointer while Shift is held, as the code has it; spell-slots.md matches |
 | Controls on `:focus-within` | Kept, as states.md rule 3 says; controls stay shown after a click until focus leaves the row |
@@ -538,7 +488,7 @@ Rulings applied (parts 13 and 14 and their follow-ups), each with the gate and a
 ### Progress (handoff, 2026-11-15)
 
 | Step | State |
-|------|-------|
+| --- | --- |
 | Baseline | Gate green, `coverage:check` 0 gaps, full Quench 1693/0/20 (commit `2297a12`). Captures not taken yet: they come after the gallery, before wave 5. Save route: `upload_image` into an injected file input, then `FilePicker.upload` |
 | Foundry APIs | Checked; recorded in FOUNDRY-V14-REFERENCE.md §10.2 (`registerMenu`, Font Awesome 7.2.0 `fa-solid`, `foundry2.css` theme variables) |
 | `eslint-plugin-jsdoc` | Installed (`^65.4.7`); not yet configured in `eslint.config.mjs`. npm also updated 10 packages within range: run the gate before relying on it |
@@ -569,7 +519,7 @@ None.
 ## Out of scope
 
 | Item | Where |
-|------|-------|
+| --- | --- |
 | Behavior changes, rule fixes, new features | Their own issues, filed as findings (decision 10) |
 | Rule coverage and citation correctness | Stage 16 (this stage narrows the citation format only) |
 | Playing the system end to end | Stage 18 |
