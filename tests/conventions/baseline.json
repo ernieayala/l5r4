@@ -24,7 +24,7 @@
   "eslint/l5r4/import-order": 2,
   "eslint/l5r4/member-order": 0,
   "eslint/l5r4/module-shape": 9,
-  "eslint/l5r4/naming": 458,
+  "eslint/l5r4/naming": 456,
   "eslint/max-params": 35,
   "eslint/new-cap": 17,
   "eslint/no-console": 5,

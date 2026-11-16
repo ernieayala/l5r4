@@ -223,6 +223,10 @@ export default {
       if (method && inSubclass && FOUNDRY_OVERRIDES.includes(name)) {
         return;
       }
+      // A mixin returns a class, so it is named like one: `<Name>Mixin` (naming.md, Mixin file)
+      if (!method && /^[A-Z][a-zA-Z0-9]*Mixin$/.test(name)) {
+        return;
+      }
       if (!/^[a-z][a-zA-Z0-9]*$/.test(name)) {
         context.report({ node, messageId: "functionCase", data: { name } });
         return;

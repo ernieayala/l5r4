@@ -60,7 +60,8 @@ const VIOLATING = Object.freeze([
 const CONFORMING = Object.freeze([
   { file: "good-service.js", as: "module/services/example.js" },
   { file: "good-app.js", as: "module/apps/example.js" },
-  { file: "good-util.js", as: "module/utils/example.js" }
+  { file: "good-util.js", as: "module/utils/example.js" },
+  { file: "good-mixin.js", as: "module/mixins/example-mixin.js" }
 ]);
 
 const eslint = new ESLint({ cwd: REPO });
