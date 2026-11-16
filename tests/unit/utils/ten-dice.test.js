@@ -40,11 +40,11 @@ describe("applyTenDiceRule", () => {
   });
 
   it("should add the conversions to the bonus it is given", () => {
-    expect(applyTenDiceRule(10, 12, 3)).toEqual({ roll: 10, keep: 10, bonus: 7 });
+    expect(applyTenDiceRule(10, 12, { bonus: 3 })).toEqual({ roll: 10, keep: 10, bonus: 7 });
   });
 
   it("should leave a pool within the cap alone", () => {
-    expect(applyTenDiceRule(7, 3, -2)).toEqual({ roll: 7, keep: 3, bonus: -2 });
+    expect(applyTenDiceRule(7, 3, { bonus: -2 })).toEqual({ roll: 7, keep: 3, bonus: -2 });
   });
 
   it("should raise a pool below 1k1 to 1k1 and keep no more than it rolls", () => {
@@ -55,7 +55,7 @@ describe("applyTenDiceRule", () => {
   // The Little Truths exception, a house rule
   describe("littleTruths", () => {
     it("should add 2 when the kept dice end below ten", () => {
-      expect(applyTenDiceRule(12, 4, 0, { littleTruths: true })).toEqual({
+      expect(applyTenDiceRule(12, 4, { bonus: 0, littleTruths: true })).toEqual({
         roll: 10,
         keep: 5,
         bonus: 2
@@ -63,7 +63,7 @@ describe("applyTenDiceRule", () => {
     });
 
     it("should add nothing to a pool the rule did not convert", () => {
-      expect(applyTenDiceRule(3, 2, 0, { littleTruths: true })).toEqual({
+      expect(applyTenDiceRule(3, 2, { bonus: 0, littleTruths: true })).toEqual({
         roll: 3,
         keep: 2,
         bonus: 0
@@ -71,7 +71,7 @@ describe("applyTenDiceRule", () => {
     });
 
     it("should add nothing once the kept dice reach ten", () => {
-      expect(applyTenDiceRule(13, 9, 0, { littleTruths: true })).toEqual({
+      expect(applyTenDiceRule(13, 9, { bonus: 0, littleTruths: true })).toEqual({
         roll: 10,
         keep: 10,
         bonus: 2

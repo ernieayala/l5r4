@@ -6,7 +6,7 @@
  */
 
 import { SYS_ID } from "../../config/constants.js";
-import { getSortPref, updateSortPref } from "../../utils/sorting.js";
+import { getSortPref, updateSortPref } from "../../services/sort-preferences.js";
 
 /**
  * Static utility class for handling sortable column header interactions.
@@ -61,10 +61,11 @@ export class SortHandler {
    *
    * @param {HTMLElement} root - The sheet's root element (Application v2 pattern)
    * @param {string} actorId - The actor's UUID or ID for preference lookup
-   * @param {string} scope - Sort scope identifier (e.g., "skills", "weapons", "techniques")
-   * @param {string[]} allowedKeys - Valid sort keys for this scope (security whitelist)
+   * @param {object} options
+   * @param {string} options.scope - Sort scope identifier (e.g., "skills", "weapons", "techniques")
+   * @param {string[]} options.allowedKeys - Valid sort keys for this scope (security whitelist)
    */
-  static updateSortIndicators(root, actorId, scope, allowedKeys) {
+  static updateSortIndicators(root, actorId, { scope, allowedKeys }) {
     try {
       // querySelector used here to find header element by data-scope attribute
       // This is proper use of data attributes for behavior targeting
@@ -73,7 +74,7 @@ export class SortHandler {
         return;
       }
 
-      const pref = getSortPref(actorId, scope, allowedKeys, allowedKeys[0]);
+      const pref = getSortPref(actorId, scope, { allowedKeys, defaultKey: allowedKeys[0] });
       this.#updateHeaderIndicators(header, pref.key, pref.dir);
     } catch (err) {
       console.warn(`${SYS_ID}`, "Failed to initialize sort indicators", { err, scope });
@@ -98,14 +99,15 @@ export class SortHandler {
    * - Missing DOM elements handled gracefully with fallbacks
    * - Errors are logged but don't prevent re-render.
    *
-   * @param {string} actorId - The actor's UUID or ID for preference storage
    * @param {Event} event - The DOM click event (preventDefault called automatically)
    * @param {HTMLElement} element - The clicked `.l5r4-sort-header-button` element (Application v2 pattern)
-   * @param {Function} getAllowedKeys - Callback to get valid keys for a scope: (scope) => string[]
-   * @param {Function} renderSheet - Callback to trigger sheet re-render after sort change
+   * @param {object} options
+   * @param {string} options.actorId - The actor's UUID or ID for preference storage
+   * @param {Function} options.getAllowedKeys - Callback to get valid keys for a scope: (scope) => string[]
+   * @param {Function} options.renderSheet - Callback to trigger sheet re-render after sort change
    * @returns {Promise<void>}
    */
-  static async updateSortPref(actorId, event, element, getAllowedKeys, renderSheet) {
+  static async updateSortPref(event, element, { actorId, getAllowedKeys, renderSheet }) {
     event.preventDefault();
     event.stopPropagation();
 
@@ -122,11 +124,14 @@ export class SortHandler {
         return;
       }
 
-      const cur = getSortPref(actorId, scope, allowed, allowed[0]);
-      await updateSortPref(actorId, scope, key, { toggleFrom: cur });
+      const cur = getSortPref(actorId, scope, { allowedKeys: allowed, defaultKey: allowed[0] });
+      await updateSortPref(actorId, scope, { key, toggleFrom: cur });
 
       if (header) {
-        const newPref = getSortPref(actorId, scope, allowed, allowed[0]);
+        const newPref = getSortPref(actorId, scope, {
+          allowedKeys: allowed,
+          defaultKey: allowed[0]
+        });
         this.#updateHeaderIndicators(header, newPref.key, newPref.dir);
       }
 

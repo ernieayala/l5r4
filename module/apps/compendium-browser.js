@@ -179,6 +179,43 @@ export default class CompendiumBrowser extends HandlebarsApplicationMixin(Applic
     return browser.render({ force: true });
   }
 
+  /** Add the fields the browser reads to every Item and Actor pack index, once during init. */
+  static registerIndexFields() {
+    for (const documentName of ["Item", "Actor"]) {
+      const config = CONFIG[documentName];
+      // Core starts each list empty [src: client/config.mjs:151, :479], and a pack index reads it
+      // [src: client/documents/collections/compendium-collection.mjs:263]
+      config.compendiumIndexFields = [
+        ...new Set([...config.compendiumIndexFields, ...getBrowserIndexFields(documentName)])
+      ];
+    }
+  }
+
+  /**
+   * Add the browser's button to the Compendium sidebar's header. The header part re-renders on its own, so the
+   * button is added again whenever it is missing.
+   * @param {foundry.applications.sidebar.tabs.CompendiumDirectory} _app
+   * @param {HTMLElement} element
+   * @returns {Promise<void>}
+   */
+  static async onRenderCompendiumDirectory(_app, element) {
+    // Core's header shows its own buttons only to a GM, so its class is the one anchor every user has
+    // eslint-disable-next-line no-restricted-syntax -- core markup, templates/sidebar/tabs/compendiums.hbs:4
+    const actions = element.querySelector(".header-actions");
+    if (!actions || actions.querySelector("[data-l5r4-browser]")) {
+      return;
+    }
+    const button = foundry.utils.parseHTML(
+      await foundry.applications.handlebars.renderTemplate(APP_TEMPLATES.browserOpen)
+    );
+    // A second render of the header may have added the button while the template rendered
+    if (actions.querySelector("[data-l5r4-browser]")) {
+      return;
+    }
+    button.addEventListener("click", () => CompendiumBrowser.open());
+    actions.append(button);
+  }
+
   /**
    * Show another tab, with no filter chosen.
    * @this {CompendiumBrowser}
@@ -276,19 +313,6 @@ export default class CompendiumBrowser extends HandlebarsApplicationMixin(Applic
   }
 }
 
-/** Register the browser's button and its index fields, once during init. */
-export function registerCompendiumBrowser() {
-  for (const documentName of ["Item", "Actor"]) {
-    const config = CONFIG[documentName];
-    // Core starts each list empty [src: client/config.mjs:151, :479], and a pack index reads it
-    // [src: client/documents/collections/compendium-collection.mjs:263]
-    config.compendiumIndexFields = [
-      ...new Set([...config.compendiumIndexFields, ...getBrowserIndexFields(documentName)])
-    ];
-  }
-  Hooks.on("renderCompendiumDirectory", onRenderCompendiumDirectory);
-}
-
 /**
  * The label of a select filter's value.
  * @param {import("../config/browser.js").BrowserFilter} filter
@@ -303,29 +327,4 @@ function getOptionLabel(filter, value) {
     return T(`${filter.labelPrefix}${value}`);
   }
   return value;
-}
-
-/**
- * Add the browser's button to the Compendium sidebar's header. The header part re-renders on its own, so the button
- * is added again whenever it is missing.
- * @param {foundry.applications.sidebar.tabs.CompendiumDirectory} _app
- * @param {HTMLElement} element
- * @returns {Promise<void>}
- */
-async function onRenderCompendiumDirectory(_app, element) {
-  // Core's header shows its own buttons only to a GM, so its class is the one anchor every user has
-  // eslint-disable-next-line no-restricted-syntax -- core markup, templates/sidebar/tabs/compendiums.hbs:4
-  const actions = element.querySelector(".header-actions");
-  if (!actions || actions.querySelector("[data-l5r4-browser]")) {
-    return;
-  }
-  const button = foundry.utils.parseHTML(
-    await foundry.applications.handlebars.renderTemplate(APP_TEMPLATES.browserOpen)
-  );
-  // A second render of the header may have added the button while the template rendered
-  if (actions.querySelector("[data-l5r4-browser]")) {
-    return;
-  }
-  button.addEventListener("click", () => CompendiumBrowser.open());
-  actions.append(button);
 }

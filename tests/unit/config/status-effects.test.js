@@ -70,9 +70,9 @@ describe("Stances", () => {
   // Full Attack allows no ranged attacks
   it("should give Full Attack +2k1 to melee attacks only, and Armor TN -10", () => {
     const out = run(byId("fullAttackStance"));
-    expect(getBagEntries(out.bag, "rollModifiers", ["attack"], new Set())).toMatchObject([
-      { roll: 2, keep: 1, range: "melee" }
-    ]);
+    expect(
+      getBagEntries(out.bag, "rollModifiers", { selectors: ["attack"], options: new Set() })
+    ).toMatchObject([{ roll: 2, keep: 1, range: "melee" }]);
     expect(armorTn(out).current).toBe(15);
   });
 
@@ -98,7 +98,10 @@ describe("Stances", () => {
 describe("Conditions", () => {
   it("should give Blinded -3k3 ranged, -1k1 melee, base Armor TN Reflexes + 5, Water -2 to move", () => {
     const out = run(byId("blinded"));
-    const attacks = getBagEntries(out.bag, "rollModifiers", ["attack"], new Set());
+    const attacks = getBagEntries(out.bag, "rollModifiers", {
+      selectors: ["attack"],
+      options: new Set()
+    });
     expect(attacks.map(a => [a.roll, a.keep, a.range])).toEqual([
       [-3, -3, "ranged"],
       [-1, -1, "melee"]
@@ -109,8 +112,8 @@ describe("Conditions", () => {
 
   it("should give Dazed -3k0 except on damage; Earth save at TN 20, 5 lower per failure, never below 5", () => {
     const out = run(byId("dazed"));
-    expect(getSelectorBonus(out.bag, ["any"], new Set(["check:skill"])).roll).toBe(-3);
-    expect(getSelectorBonus(out.bag, ["any"], new Set(["check:damage"])).roll).toBe(0);
+    expect(getSelectorBonus(out.bag, ["any"], { options: new Set(["check:skill"]) }).roll).toBe(-3);
+    expect(getSelectorBonus(out.bag, ["any"], { options: new Set(["check:damage"]) }).roll).toBe(0);
     expect(out.saves[0]).toMatchObject({
       event: "roundEnd",
       roll: "ring:earth",
@@ -132,10 +135,14 @@ describe("Conditions", () => {
     expect(armorTn(out)).toMatchObject({ current: 25, vs: { melee: -10, ranged: 0 } });
     const medium = new Set(["weapon:size:medium"]);
     const large = new Set(["weapon:size:large"]);
-    expect(getSelectorBonus(out.bag, ["attack"], medium).roll).toBe(-2);
-    expect(getSelectorBonus(out.bag, ["attack"], large).roll).toBe(0);
-    expect(getBagEntries(out.bag, "notes", ["attack"], large)).toHaveLength(1);
-    expect(getBagEntries(out.bag, "notes", ["attack"], medium)).toHaveLength(0);
+    expect(getSelectorBonus(out.bag, ["attack"], { options: medium }).roll).toBe(-2);
+    expect(getSelectorBonus(out.bag, ["attack"], { options: large }).roll).toBe(0);
+    expect(getBagEntries(out.bag, "notes", { selectors: ["attack"], options: large })).toHaveLength(
+      1
+    );
+    expect(
+      getBagEntries(out.bag, "notes", { selectors: ["attack"], options: medium })
+    ).toHaveLength(0);
   });
 
   // Each roll takes the penalty once
@@ -144,12 +151,10 @@ describe("Conditions", () => {
       const out = run(byId(id), 2);
       // The selectors and options the roll pipeline gives each kind of roll (collect.js)
       const tn = (selectors, kind) =>
-        getBagEntries(
-          out.bag,
-          "tnModifiers",
-          ["any", kind, ...selectors],
-          new Set([`check:${kind}`])
-        ).map(e => e.value);
+        getBagEntries(out.bag, "tnModifiers", {
+          selectors: ["any", kind, ...selectors],
+          options: new Set([`check:${kind}`])
+        }).map(e => e.value);
       expect(tn(["skill:kenjutsu", "trait:agi"], "skill")).toEqual([10]);
       expect(tn(["skill:kenjutsu", "trait:agi"], "attack")).toEqual([10]);
       expect(tn(["trait:str"], "trait")).toEqual([10]);
@@ -170,7 +175,9 @@ describe("Conditions", () => {
 // game-rules/42_fear.md, p.90
 describe("Fear", () => {
   it("should give -Xk0 to every roll at Fear Rank X, ending with the encounter", () => {
-    expect(getSelectorBonus(run(byId("feared"), 3).bag, ["any"], new Set()).roll).toBe(-3);
+    expect(getSelectorBonus(run(byId("feared"), 3).bag, ["any"], { options: new Set() }).roll).toBe(
+      -3
+    );
     expect(byId("feared").duration).toEqual({ expiry: "encounterEnd" });
   });
 });

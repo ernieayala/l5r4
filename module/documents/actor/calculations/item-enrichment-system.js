@@ -128,7 +128,10 @@ function prepareSpellFormula(actor, spell) {
  */
 function prepareWeaponFormula(actor, weapon) {
   const weaponSkill = getWeaponSkillTrait(actor, weapon);
-  const attack = getSelectorBonus(actor.ruleBag, ["any", "attack"], actor.rollOptions, weapon.id);
+  const attack = getSelectorBonus(actor.ruleBag, ["any", "attack"], {
+    options: actor.rollOptions,
+    weaponId: weapon.id
+  });
   weapon.attackFormula = `${weaponSkill.rollBonus + attack.roll}k${weaponSkill.keepBonus + attack.keep}`;
 
   // Recompute damage now that the owner's Active Effects apply: item preparation ran before them (issue #29)

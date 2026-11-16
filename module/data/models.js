@@ -1,11 +1,11 @@
 /**
- * @module data/index
+ * @module data/models
  * @description The registry of the system's data models, by Document name and subtype, that `init` registers.
  */
 
 import NpcData from "./actor/npc-data.js";
 import PcData from "./actor/pc-data.js";
-import EffectData from "./effect/effect-data.js";
+import EffectData from "./effect/base-data.js";
 import AdvantageData from "./item/advantage-data.js";
 import ArmorData from "./item/armor-data.js";
 import BowData from "./item/bow-data.js";

@@ -1,10 +1,10 @@
 /**
- * @module config/icons
+ * @module utils/icons
  * @description Icon path resolution for the L5R4 system: one place turns an icon name into a full path, so no code
  * hardcodes the asset directory and it can move without touching the callers.
  */
 
-import { PATHS } from "./constants.js";
+import { PATHS } from "../config/constants.js";
 
 /**
  * Resolve an icon name or path to a full system icon path.

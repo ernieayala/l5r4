@@ -27,12 +27,12 @@
  * game-rules/41_conditional_effects.md, p.89
  * @param {number} roll - Rolled dice before the rule
  * @param {number} keep - Kept dice before the rule
- * @param {number} [bonus=0] - Flat bonus to add the conversions to
  * @param {object} [options]
+ * @param {number} [options.bonus=0] - Flat bonus to add the conversions to
  * @param {boolean} [options.littleTruths=false] - Apply the Little Truths exception
  * @returns {TenDiceResult}
  */
-export function applyTenDiceRule(roll, keep, bonus = 0, { littleTruths = false } = {}) {
+export function applyTenDiceRule(roll, keep, { bonus = 0, littleTruths = false } = {}) {
   // Penalties can shrink a pool below 1k1, but a roll needs at least one die rolled and kept
   if (roll < 1) {
     roll = 1;

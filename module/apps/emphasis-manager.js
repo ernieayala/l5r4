@@ -7,7 +7,7 @@
  */
 import { SYS_ID } from "../config/constants.js";
 import { OFFICIAL_EMPHASES } from "../config/reference-data.js";
-import { DIALOG_TEMPLATES, TEMPLATE } from "../config/templates.js";
+import { DIALOG_TEMPLATES } from "../config/templates.js";
 import { T } from "../utils/localization.js";
 import { validateEmphasisName } from "../utils/validators.js";
 import { logError } from "../utils/error-logging.js";
@@ -184,7 +184,7 @@ export default class EmphasisManagerApplication extends foundry.applications.api
    */
   static async #onAddEmphasis(_event, _element) {
     const content = await foundry.applications.handlebars.renderTemplate(
-      TEMPLATE("dialogs/custom-emphasis-dialog.hbs")
+      `systems/${SYS_ID}/templates/dialogs/custom-emphasis-dialog.hbs`
     );
 
     const name = await foundry.applications.api.DialogV2.prompt({
@@ -268,7 +268,7 @@ export default class EmphasisManagerApplication extends foundry.applications.api
     }
 
     const content = await foundry.applications.handlebars.renderTemplate(
-      TEMPLATE("dialogs/custom-emphasis-dialog.hbs"),
+      `systems/${SYS_ID}/templates/dialogs/custom-emphasis-dialog.hbs`,
       { currentName: oldName }
     );
 

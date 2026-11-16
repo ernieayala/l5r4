@@ -7,7 +7,6 @@
  * (pc-limited.hbs) to a player who does not own the character.
  */
 import { SYS_ID } from "../config/constants.js";
-import { TEMPLATE } from "../config/templates.js";
 import { STANCES } from "../config/localization.js";
 import { PC_SORT_KEYS } from "../config/sort-keys.js";
 import { on } from "../utils/dom.js";
@@ -21,7 +20,7 @@ import { AppLauncherHandler } from "./handlers/app-launcher-handler.js";
 import { ItemCrudHandler } from "./handlers/item-crud-handler.js";
 import { PcAdjustmentHandler } from "./handlers/pc-adjustment-handler.js";
 import { PcTraitHandler } from "./handlers/pc-trait-handler.js";
-import { PcContextBuilder } from "./handlers/pc-context-builder.js";
+import { PcContextBuilder } from "./pc-context-builder.js";
 import { PcRollHandler } from "./handlers/pc-roll-handler.js";
 import { PcActionsHandler } from "./handlers/pc-actions-handler.js";
 import { StanceHandler } from "./handlers/stance-handler.js";
@@ -485,7 +484,9 @@ export default class L5R4PcSheet extends BaseActorSheet {
    */
   async _renderHTML(context, _options) {
     const isLimited = !game.user.isGM && this.actor.limited;
-    const path = isLimited ? TEMPLATE("actor/pc-limited.hbs") : TEMPLATE("actor/pc.hbs");
+    const path = isLimited
+      ? `systems/${SYS_ID}/templates/actor/pc-limited.hbs`
+      : `systems/${SYS_ID}/templates/actor/pc.hbs`;
     const html = await foundry.applications.handlebars.renderTemplate(path, context);
     // Both templates render one <form> root
     const form = foundry.utils.parseHTML(html);
@@ -523,7 +524,10 @@ export default class L5R4PcSheet extends BaseActorSheet {
       return;
     }
 
-    on(root, "[data-edit='img']", "click", ev => this._onEditImage(ev, ev.currentTarget));
+    on(root, "click", {
+      selector: "[data-edit='img']",
+      handler: ev => this._onEditImage(ev, ev.currentTarget)
+    });
   }
 
   /**

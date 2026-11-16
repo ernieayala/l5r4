@@ -222,10 +222,10 @@ export default class DesignGalleryApplication extends HandlebarsApplicationMixin
         continue;
       }
       const entry = colorEntries.get(token);
-      const color = colorOf(token, styles, theme, probe);
+      const color = colorOf(token, { styles, theme, probe });
       chip?.setAttribute("fill", color ? `rgb(${color.slice(0, 3).join(" ")})` : "none");
       const against = entry.against ?? GALLERY_SURFACE.token;
-      const other = colorOf(against, styles, theme, probe);
+      const other = colorOf(against, { styles, theme, probe });
       if (entry.image || !color || !other) {
         ratioCell.textContent = T("l5r4.apps.designGallery.foundations.noRatio");
         continue;
@@ -304,22 +304,22 @@ function rawOf(token, styles, theme) {
  * A token's color as opaque RGB, translucent values composited over the token color.md puts under them
  * (foundations/color.md, Contrast), down to the surface.
  * @param {string} token
- * @param {CSSStyleDeclaration} styles
- * @param {"light"|"dark"} theme
- * @param {CanvasRenderingContext2D} probe
+ * @param {object} read
+ * @param {CSSStyleDeclaration} read.styles
+ * @param {"light"|"dark"} read.theme
+ * @param {CanvasRenderingContext2D} read.probe
  * @returns {number[]|null}  [r, g, b, a] with a = 1, or null when the token holds no color
  */
-function colorOf(token, styles, theme, probe) {
+function colorOf(token, { styles, theme, probe }) {
   const color = parseColor(rawOf(token, styles, theme), probe);
   if (!color || color[3] >= 1 || token === GALLERY_SURFACE.token) {
     return color;
   }
-  const under = colorOf(
-    colorEntries.get(token)?.over ?? GALLERY_SURFACE.token,
+  const under = colorOf(colorEntries.get(token)?.over ?? GALLERY_SURFACE.token, {
     styles,
     theme,
     probe
-  );
+  });
   if (!under) {
     return null;
   }

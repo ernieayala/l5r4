@@ -97,6 +97,7 @@ export class PcTraitHandler {
    * @param {number} delta - Direction of adjustment: positive = increase, negative = decrease
    * @returns {Promise<void>}
    */
+  // eslint-disable-next-line max-params -- the sheet handler shape (context, event, element, delta) the sheet's _onAction switch passes (functions.md)
   static async updateTraitRank(context, event, element, delta) {
     event?.preventDefault?.();
     event?.stopPropagation?.();

@@ -4,7 +4,7 @@
  * can use them: `eq`, `and`, `or`, and `includes` for conditionals, `coalesce` for the first value that is set,
  * `iconPath` for icon paths, `math` for arithmetic and comparisons, and `concat` and `join` for strings.
  */
-import { getIconPath } from "../config/icons.js";
+import { getIconPath } from "../utils/icons.js";
 
 /**
  * Registers all custom Handlebars helpers for the L5R4 Enhanced system.
@@ -86,10 +86,10 @@ export function registerHandlebarsHelpers() {
   /**
    * Icon path resolution helper.
    * Normalizes icon references to full Foundry-compatible paths.
-   * Delegates to the getIconPath utility function from config/icons module.
+   * Delegates to the getIconPath utility function from utils/icons module.
    * @param {string} n - Icon filename, path, URL, or data URI
    * @returns {string} Normalized icon path for Foundry resource loading
-   * @see {@link module:config/icons~getIconPath}
+   * @see {@link module:utils/icons~getIconPath}
    */
   Handlebars.registerHelper("iconPath", n => getIconPath(n));
 

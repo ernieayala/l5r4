@@ -132,7 +132,10 @@ export async function rollHonor(message) {
     content
   });
   if (!outcome.success) {
-    await applyTrackChange(actor, "honor", -10, T("l5r4.ui.honorRoll.failedReason"));
+    await applyTrackChange(actor, "honor", {
+      points: -10,
+      reason: T("l5r4.ui.honorRoll.failedReason")
+    });
   }
   return posted;
 }

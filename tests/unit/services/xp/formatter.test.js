@@ -43,20 +43,23 @@ global.game = {
   }
 };
 
-// Mock sorting utilities
-vi.mock("../../../../module/utils/sorting.js", () => ({
-  getSortPref: vi.fn((actorId, scope, allowedKeys, defaultKey) => ({
+// Mock the sort preference and sorting modules
+vi.mock("../../../../module/services/sort-preferences.js", () => ({
+  getSortPref: vi.fn((actorId, scope, { defaultKey }) => ({
     key: defaultKey,
     dir: "asc"
-  })),
-  applySortPref: vi.fn((list, _columns, _pref) => {
+  }))
+}));
+vi.mock("../../../../module/utils/sorting.js", () => ({
+  applySortPref: vi.fn((list, _columns, _options) => {
     // Returns the list as-is for most tests
     // Individual tests can override this behavior
     return list;
   })
 }));
 
-import { getSortPref, applySortPref } from "../../../../module/utils/sorting.js";
+import { getSortPref } from "../../../../module/services/sort-preferences.js";
+import { applySortPref } from "../../../../module/utils/sorting.js";
 
 /**
  * Helper: Create a mock XP entry
@@ -741,12 +744,10 @@ describe("formatXpEntries", () => {
       formatXpEntries(entries, options);
 
       // ASSERT
-      expect(getSortPref).toHaveBeenCalledWith(
-        "actor-123",
-        "xp-purchases",
-        ["note", "cost", "type"],
-        "note"
-      );
+      expect(getSortPref).toHaveBeenCalledWith("actor-123", "xp-purchases", {
+        allowedKeys: ["note", "cost", "type"],
+        defaultKey: "note"
+      });
     });
 
     it("should call applySortPref when sort option is enabled", () => {
@@ -770,12 +771,10 @@ describe("formatXpEntries", () => {
       formatXpEntries(entries, options);
 
       // ASSERT
-      expect(getSortPref).toHaveBeenCalledWith(
-        "actor-123",
-        "custom-scope",
-        ["note", "cost", "type"],
-        "note"
-      );
+      expect(getSortPref).toHaveBeenCalledWith("actor-123", "custom-scope", {
+        allowedKeys: ["note", "cost", "type"],
+        defaultKey: "note"
+      });
     });
 
     it("should use override sortPref when provided", () => {
@@ -789,7 +788,10 @@ describe("formatXpEntries", () => {
 
       // ASSERT
       expect(getSortPref).not.toHaveBeenCalled();
-      expect(applySortPref).toHaveBeenCalledWith(expect.any(Array), expect.any(Object), customPref);
+      expect(applySortPref).toHaveBeenCalledWith(expect.any(Array), expect.any(Object), {
+        pref: customPref,
+        locale: "en"
+      });
     });
 
     it("should not call sort utilities when sort is false", () => {

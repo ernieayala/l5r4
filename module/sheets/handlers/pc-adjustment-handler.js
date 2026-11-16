@@ -46,6 +46,7 @@ export class PcAdjustmentHandler {
    * @param {number} delta - Direction of adjustment (+1 or -1)
    * @returns {Promise<void>}
    */
+  // eslint-disable-next-line max-params -- the sheet handler shape (context, event, element, delta) the sheet's _onAction switch passes (functions.md)
   static async updateVoidRing(context, event, element, delta) {
     event?.preventDefault?.();
 
@@ -101,6 +102,7 @@ export class PcAdjustmentHandler {
    * @param {number} delta - Amount to adjust (e.g. +1 or -1)
    * @returns {Promise<void>}
    */
+  // eslint-disable-next-line max-params -- the sheet handler shape (context, event, element, delta) the sheet's _onAction switch passes (functions.md)
   static async updateSpellSlot(context, event, element, delta) {
     try {
       const path = element?.dataset?.path || "";
@@ -159,6 +161,7 @@ export class PcAdjustmentHandler {
    * @param {number} baseDelta - Base adjustment amount (e.g. ±1.0 or ±0.1)
    * @returns {Promise<void>}
    */
+  // eslint-disable-next-line max-params -- the sheet handler shape (context, event, element, delta) the sheet's _onAction switch passes (functions.md)
   static async updateRankPoints(context, event, element, baseDelta) {
     try {
       // Safety: require Shift key to prevent accidental adjustment
@@ -184,7 +187,8 @@ export class PcAdjustmentHandler {
 
       // Apply delta with overflow/underflow handling, within the track's range (Status reaches -10)
       // game-rules/45_status.md, p.94-95
-      const next = applyRankPointsDelta(cur, step, ...(RANK_TRACK_RANGE[key] ?? [0, 10]));
+      const [minRank, maxRank] = RANK_TRACK_RANGE[key] ?? [0, 10];
+      const next = applyRankPointsDelta(cur, step, { minRank, maxRank });
 
       const update = {};
       update[`system.${key}.rank`] = next.rank;

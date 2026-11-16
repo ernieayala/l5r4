@@ -5,8 +5,8 @@
  * owned Skill, Advantage, or Disadvantage, the owner's XP history marked for rebuilding (xp-tracking.js).
  */
 
+import { DEFAULT_ICONS } from "../../../config/item-types.js";
 import { toInt } from "../../../utils/type-coercion.js";
-import { DEFAULT_ICONS } from "../constants/item-types.js";
 import {
   updateXpAfterSkillCreate,
   updateXpAfterAdvantage,

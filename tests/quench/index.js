@@ -106,6 +106,7 @@ import { registerAnimationsTests } from "./animations.js";
 import { registerWorldUpgradeTests } from "./world-upgrade.js";
 import { registerRegressionsTests } from "./regressions.js";
 import { registerTableToolsTests } from "./table-tools.js";
+import { registerHookWiringTests } from "./hooks/register-all.js";
 import { registerPacksTests } from "./packs.js";
 import { registerDesignGalleryTests } from "./design-gallery.js";
 
@@ -130,6 +131,7 @@ export async function registerQuenchTests(quench) {
   registerWorldUpgradeTests(quench);
   registerRegressionsTests(quench);
   registerTableToolsTests(quench);
+  registerHookWiringTests(quench);
   registerPacksTests(quench);
   registerDesignGalleryTests(quench);
   registerActorTests(quench);

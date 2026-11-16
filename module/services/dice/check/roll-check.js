@@ -345,7 +345,7 @@ export async function rollCheck(request) {
   const roll = new foundry.dice.Roll(getPoolFormula(pool));
   await roll.evaluate();
   if (embrace) {
-    await applyTrackChange(actor, "taint", 1, T("l5r4.ui.taint.embraceReason"));
+    await applyTrackChange(actor, "taint", { points: 1, reason: T("l5r4.ui.taint.embraceReason") });
   }
 
   // A TN change for the other attack range drops out, as a modifier does

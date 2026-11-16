@@ -19,14 +19,14 @@ import { logError } from "./error-logging.js";
  * when the event target or its ancestors match the selector, such as clicks on `[data-action="roll"]` buttons
  * or changes on `select[data-field]` elements.
  * @param {Element|Document} root - Parent element to attach listener to
- * @param {string} selector - CSS selector for target elements (use data attributes)
  * @param {string} type - Event type (e.g., "click", "change", "submit")
- * @param {Function} handler - Event handler function (ev, el) => void
- * @param {object} [options={}] - Event listener options
- * @param {boolean} [options.capture=false] - Use capture phase
+ * @param {object} listener
+ * @param {string} listener.selector - CSS selector for target elements (use data attributes)
+ * @param {Function} listener.handler - Event handler function (ev, el) => void
+ * @param {boolean} [listener.capture=false] - Use capture phase
  * @returns {void}
  */
-export function on(root, selector, type, handler, options = {}) {
+export function on(root, type, { selector, handler, capture = false }) {
   // Defensive validation: ensure root is valid EventTarget
   if (!root?.addEventListener) {
     logError("on() requires valid EventTarget root", new TypeError("Invalid root"), { root });
@@ -46,8 +46,6 @@ export function on(root, selector, type, handler, options = {}) {
     });
     return;
   }
-
-  const useCapture = options.capture ?? false;
 
   root.addEventListener(
     type,
@@ -69,6 +67,6 @@ export function on(root, selector, type, handler, options = {}) {
         handler(ev, el);
       }
     },
-    useCapture
+    capture
   );
 }

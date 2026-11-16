@@ -6,6 +6,7 @@
  * game-rules/38_maneuvers.md, p.87
  */
 
+import { SYS_ID } from "../../config/constants.js";
 import { T } from "../../utils/localization.js";
 import { applyEffectAnywhere } from "../effects/apply.js";
 
@@ -37,4 +38,23 @@ export async function guardFromCanvas() {
     return;
   }
   await guard(guardActor, ward);
+}
+
+/**
+ * Add the "Guard" button to the token controls.
+ * @param {Record<string, object>} controls
+ */
+export function onGetSceneControlButtonsGuard(controls) {
+  if (!controls.tokens) {
+    return;
+  }
+  const tools = controls.tokens.tools;
+  tools[`${SYS_ID}-guard`] = {
+    name: `${SYS_ID}-guard`,
+    order: Object.keys(tools).length,
+    title: "l5r4.ui.combat.guard",
+    icon: "fa-solid fa-shield-halved",
+    button: true,
+    onChange: () => guardFromCanvas()
+  };
 }

@@ -367,28 +367,28 @@ describe("applyRankPointsDelta", () => {
   describe("Bounds enforcement", () => {
     it("should not exceed maxRank", () => {
       const current = { rank: 9, points: 0 };
-      const result = applyRankPointsDelta(current, 5.0, 0, 10);
+      const result = applyRankPointsDelta(current, 5.0, { minRank: 0, maxRank: 10 });
       expect(result.rank).toBe(10);
       expect(result.points).toBe(0);
     });
 
     it("should not go below minRank", () => {
       const current = { rank: 1, points: 0 };
-      const result = applyRankPointsDelta(current, -5.0, 0, 10);
+      const result = applyRankPointsDelta(current, -5.0, { minRank: 0, maxRank: 10 });
       expect(result.rank).toBe(0);
       expect(result.points).toBe(0);
     });
 
     it("should respect custom minRank", () => {
       const current = { rank: 3, points: 0 };
-      const result = applyRankPointsDelta(current, -5.0, 2, 10);
+      const result = applyRankPointsDelta(current, -5.0, { minRank: 2, maxRank: 10 });
       expect(result.rank).toBe(2);
       expect(result.points).toBe(0);
     });
 
     it("should respect custom maxRank", () => {
       const current = { rank: 4, points: 0 };
-      const result = applyRankPointsDelta(current, 5.0, 0, 5);
+      const result = applyRankPointsDelta(current, 5.0, { minRank: 0, maxRank: 5 });
       expect(result.rank).toBe(5);
       expect(result.points).toBe(0);
     });

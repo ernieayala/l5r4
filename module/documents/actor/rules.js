@@ -188,7 +188,9 @@ export function applyDerivedRules(actor, sys) {
   // game-rules/42_fear.md, p.90
   // game-rules/41_conditional_effects.md, p.89
   const initiativeOptions = new Set([...options, "check:initiative"]);
-  const onInitiative = getSelectorBonus(out.bag, ["any", "initiative"], initiativeOptions);
+  const onInitiative = getSelectorBonus(out.bag, ["any", "initiative"], {
+    options: initiativeOptions
+  });
   sys.initiative.rollMod += onInitiative.roll;
   sys.initiative.keepMod += onInitiative.keep;
   sys.initiative.totalMod += onInitiative.total;

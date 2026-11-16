@@ -154,13 +154,13 @@ registerFlow("grapple", {
 
   /**
    * Record a step on the GM.
-   * @param {ChatMessage} _card
    * @param {object} state
-   * @param {object} data
-   * @param {User} user
+   * @param {object} step
+   * @param {object} step.data - The step the clicking client sent
+   * @param {User} step.user - The requesting user
    * @returns {Promise<object>}
    */
-  async step(_card, state, data, user) {
+  async step(state, { data, user }) {
     const sides = sidesOf(state);
     if (state.over) {
       throw new Error("The grapple is over");

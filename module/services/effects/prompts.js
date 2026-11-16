@@ -182,7 +182,7 @@ export async function onPromptClick(message) {
     ui.notifications?.info(T("l5r4.ui.effects.alreadyEnded"));
     return;
   }
-  const rolled = await rollAgainst(actor, request.roll, request.tn, effect.name);
+  const rolled = await rollAgainst(actor, request.roll, { tn: request.tn, label: effect.name });
   const success = rolled?.system.outcome.success;
   if (success === undefined || success === null) {
     return;
@@ -257,11 +257,12 @@ function rollLabel(roll) {
  * Roll a Ring or a Trait against a TN through the roll pipeline.
  * @param {Actor} actor
  * @param {string} roll - "ring:<ring>" or "trait:<trait>"
- * @param {number} tn
- * @param {string} label
+ * @param {object} check
+ * @param {number} check.tn
+ * @param {string} check.label
  * @returns {Promise<ChatMessage|null>}
  */
-function rollAgainst(actor, roll, tn, label) {
+function rollAgainst(actor, roll, { tn, label }) {
   const [type, key] = roll.split(":");
   const rank =
     type === "ring"

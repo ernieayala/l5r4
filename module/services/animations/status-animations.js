@@ -1,5 +1,5 @@
 /**
- * @module services/animations/animation-manager
+ * @module services/animations/status-animations
  * @description Plays, persists, and ends the Sequencer and JB2A animations for stances and conditions, and does
  * nothing when either module is missing. hooks.js calls it when Active Effects change; asset-library.js supplies the
  * animation settings. Each effect is attached to a token and named so Sequencer.EffectManager can end it later. No

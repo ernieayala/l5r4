@@ -98,7 +98,7 @@ export function getTraitAdjustments(entries, rollData, options) {
   const adjustments = {};
   const errors = [];
   const value = getValueResolver(rollData);
-  applyMatchingRules(entries, ["TraitAdjust"], options, errors, (rule, entry) => {
+  applyMatchingRules({ entries, keys: ["TraitAdjust"], options, errors }, (rule, entry) => {
     adjustments[rule.trait] = (adjustments[rule.trait] ?? 0) + value(rule.value, entry);
   });
   return { adjustments, errors };
@@ -154,7 +154,7 @@ export function getDerivedRuleOutputs(entries, rollData, options) {
   const value = getValueResolver(rollData);
 
   const armor = [];
-  applyMatchingRules(entries, ["ArmorTN"], options, errors, (rule, entry) => {
+  applyMatchingRules({ entries, keys: ["ArmorTN"], options, errors }, (rule, entry) => {
     armor.push({
       mode: rule.mode,
       value: value(rule.value, entry),
@@ -165,7 +165,7 @@ export function getDerivedRuleOutputs(entries, rollData, options) {
 
   let reduction = 0;
   const reductionParts = [];
-  applyMatchingRules(entries, ["Reduction"], options, errors, (rule, entry) => {
+  applyMatchingRules({ entries, keys: ["Reduction"], options, errors }, (rule, entry) => {
     const part = value(rule.value, entry);
     reduction += part;
     reductionParts.push({ value: part, except: [...rule.except] });
@@ -174,21 +174,21 @@ export function getDerivedRuleOutputs(entries, rollData, options) {
   // Creature defenses; several of one kind act as the first
   // game-rules/99_creatures.md, p.319-320
   const defenses = { invulnerable: null, spirit: null };
-  applyMatchingRules(entries, ["Invulnerability"], options, errors, rule => {
+  applyMatchingRules({ entries, keys: ["Invulnerability"], options, errors }, rule => {
     defenses.invulnerable ??= { harmedBy: [...rule.harmedBy], only: [...rule.only] };
   });
-  applyMatchingRules(entries, ["Spirit"], options, errors, rule => {
+  applyMatchingRules({ entries, keys: ["Spirit"], options, errors }, rule => {
     defenses.spirit ??= { harmedBy: [...rule.harmedBy] };
   });
 
   let movementWater = 0;
-  applyMatchingRules(entries, ["Movement"], options, errors, (rule, entry) => {
+  applyMatchingRules({ entries, keys: ["Movement"], options, errors }, (rule, entry) => {
     movementWater += value(rule.water, entry);
   });
 
   let woundsPerRank = 0;
   let woundPenalty = 0;
-  applyMatchingRules(entries, ["Wounds"], options, errors, (rule, entry) => {
+  applyMatchingRules({ entries, keys: ["Wounds"], options, errors }, (rule, entry) => {
     // Resolve both before adding either, so a bad formula changes neither total.
     const [perRank, penalty] = [value(rule.perRank, entry), value(rule.penalty, entry)];
     woundsPerRank += perRank;
@@ -196,7 +196,7 @@ export function getDerivedRuleOutputs(entries, rollData, options) {
   });
 
   const initiative = { roll: 0, keep: 0, total: 0 };
-  applyMatchingRules(entries, ["Initiative"], options, errors, (rule, entry) => {
+  applyMatchingRules({ entries, keys: ["Initiative"], options, errors }, (rule, entry) => {
     const [roll, keep, total] = [
       value(rule.roll, entry),
       value(rule.keep, entry),
@@ -208,13 +208,13 @@ export function getDerivedRuleOutputs(entries, rollData, options) {
   });
 
   const immunities = new Set();
-  applyMatchingRules(entries, ["ConditionImmunity"], options, errors, rule => {
+  applyMatchingRules({ entries, keys: ["ConditionImmunity"], options, errors }, rule => {
     immunities.add(rule.condition);
   });
 
   // A save belongs to the effect it ends; an item's rule has no effect to end and is skipped
   const saves = [];
-  applyMatchingRules(entries, ["PeriodicSave"], options, errors, (rule, entry) => {
+  applyMatchingRules({ entries, keys: ["PeriodicSave"], options, errors }, (rule, entry) => {
     if (entry.effectUuid) {
       const { event, roll, tn, step, min, onFailure } = rule;
       saves.push({
@@ -231,14 +231,14 @@ export function getDerivedRuleOutputs(entries, rollData, options) {
   });
 
   const resources = {};
-  applyMatchingRules(entries, ["Resource"], options, errors, (rule, entry) => {
+  applyMatchingRules({ entries, keys: ["Resource"], options, errors }, (rule, entry) => {
     const max = value(rule.max, entry);
     resources[rule.slug] ??= { max: 0, per: rule.per };
     resources[rule.slug].max += max;
   });
 
   const ledger = [];
-  applyMatchingRules(entries, ["Ledger"], options, errors, (rule, entry) => {
+  applyMatchingRules({ entries, keys: ["Ledger"], options, errors }, (rule, entry) => {
     ledger.push({
       track: rule.track,
       direction: rule.direction,
@@ -248,11 +248,14 @@ export function getDerivedRuleOutputs(entries, rollData, options) {
   });
 
   const bag = Object.fromEntries(Object.values(BAG_KINDS).map(kind => [kind, {}]));
-  applyMatchingRules(entries, Object.keys(BAG_KINDS), null, errors, (rule, entry) => {
-    // Resolve first, so a rule whose value fails leaves no trace in the bag
-    const output = buildBagEntry(rule, entry, v => value(v, entry));
-    (bag[BAG_KINDS[rule.key]][rule.selector] ??= []).push(output);
-  });
+  applyMatchingRules(
+    { entries, keys: Object.keys(BAG_KINDS), options: null, errors },
+    (rule, entry) => {
+      // Resolve first, so a rule whose value fails leaves no trace in the bag
+      const output = buildBagEntry(rule, entry, v => value(v, entry));
+      (bag[BAG_KINDS[rule.key]][rule.selector] ??= []).push(output);
+    }
+  );
 
   return {
     armor,
@@ -277,12 +280,13 @@ export function getDerivedRuleOutputs(entries, rollData, options) {
  * counts only for a roll made with that weapon.
  * @param {Record<string, Record<string, object[]>>} bag
  * @param {string} kind - A BAG_KINDS value.
- * @param {string[]} selectors
- * @param {Set<string>} options
- * @param {string|null} [weaponId=null] - The weapon the roll is made with
+ * @param {object} match
+ * @param {string[]} match.selectors
+ * @param {Set<string>} match.options
+ * @param {string|null} [match.weaponId=null] - The weapon the roll is made with
  * @returns {object[]}
  */
-export function getBagEntries(bag, kind, selectors, options, weaponId = null) {
+export function getBagEntries(bag, kind, { selectors, options, weaponId = null }) {
   const byKind = bag?.[kind] ?? {};
   return selectors
     .flatMap(selector => byKind[selector] ?? [])
@@ -296,13 +300,14 @@ export function getBagEntries(bag, kind, selectors, options, weaponId = null) {
  * modifiers and those limited to one attack range wait for the dialog.
  * @param {Record<string, Record<string, object[]>>} bag
  * @param {string[]} selectors
- * @param {Set<string>} options
- * @param {string|null} [weaponId=null] - The weapon the formula is for
+ * @param {object} match
+ * @param {Set<string>} match.options
+ * @param {string|null} [match.weaponId=null] - The weapon the formula is for
  * @returns {{roll: number, keep: number, total: number}}
  */
-export function getSelectorBonus(bag, selectors, options, weaponId = null) {
+export function getSelectorBonus(bag, selectors, { options, weaponId = null }) {
   return getStackedModifiers(
-    getBagEntries(bag, "rollModifiers", selectors, options, weaponId).filter(
+    getBagEntries(bag, "rollModifiers", { selectors, options, weaponId }).filter(
       e => !e.optional && !e.range
     )
   );
@@ -323,13 +328,14 @@ function getValueResolver(rollData) {
 
 /**
  * Run `fn` for each rule with one of `keys` whose predicate holds, collecting value errors.
- * @param {RuleEntry[]} entries
- * @param {string[]} keys
- * @param {Set<string>|null} options - null runs every rule, leaving predicates to be tested later.
- * @param {RuleError[]} errors
+ * @param {object} match
+ * @param {RuleEntry[]} match.entries
+ * @param {string[]} match.keys
+ * @param {Set<string>|null} match.options - null runs every rule, leaving predicates to be tested later.
+ * @param {RuleError[]} match.errors - Extended in place
  * @param {function(object, RuleEntry): void} fn
  */
-function applyMatchingRules(entries, keys, options, errors, fn) {
+function applyMatchingRules({ entries, keys, options, errors }, fn) {
   for (const entry of entries) {
     const { rule } = entry;
     if (!keys.includes(rule.key) || (options && !testPredicate(rule.predicate, options))) {

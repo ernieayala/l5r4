@@ -129,7 +129,7 @@ export async function registerTemplates() {
     `systems/${SYS_ID}/templates/chat/check.hbs`,
     `systems/${SYS_ID}/templates/chat/effect-prompt.hbs`,
     `systems/${SYS_ID}/templates/chat/healing.hbs`,
-    `systems/${SYS_ID}/templates/chat/weapon-chat.hbs`,
+    `systems/${SYS_ID}/templates/chat/weapon.hbs`,
     `systems/${SYS_ID}/templates/chat/check-request.hbs`,
     `systems/${SYS_ID}/templates/chat/item-summary.hbs`,
 

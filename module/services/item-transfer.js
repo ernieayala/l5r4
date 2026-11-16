@@ -94,9 +94,30 @@ export async function createImportedItems(text, parent) {
   return created;
 }
 
-/** Register the folder menu entries, once during system init. */
-export function registerItemTransfer() {
-  Hooks.on("getFolderContextOptions", onGetFolderContextOptions);
+/**
+ * Add "Export items" and "Import items" to the context menu of Item folders, for the GM.
+ * @param {foundry.applications.sidebar.DocumentDirectory} app
+ * @param {object[]} entries - The folder context menu's entries, extended in place
+ */
+export function onGetFolderContextOptions(app, entries) {
+  if (app.documentName !== "Item") {
+    return;
+  }
+  const folderOf = header => fromUuidSync(header.closest("[data-folder-id]").dataset.uuid);
+  entries.push(
+    {
+      label: "l5r4.ui.transfer.export",
+      icon: "fa-solid fa-file-export",
+      visible: () => game.user.isGM,
+      onClick: (_event, header) => exportItemFolder(folderOf(header))
+    },
+    {
+      label: "l5r4.ui.transfer.import",
+      icon: "fa-solid fa-file-import",
+      visible: () => game.user.isGM,
+      onClick: (_event, header) => askItemImport(folderOf(header))
+    }
+  );
 }
 
 /**
@@ -122,30 +143,4 @@ async function askItemImport(parent) {
   if (file) {
     await createImportedItems(await foundry.utils.readTextFromFile(file), parent);
   }
-}
-
-/**
- * Add "Export items" and "Import items" to the context menu of Item folders, for the GM.
- * @param {foundry.applications.sidebar.DocumentDirectory} app
- * @param {object[]} entries - The folder context menu's entries, extended in place
- */
-function onGetFolderContextOptions(app, entries) {
-  if (app.documentName !== "Item") {
-    return;
-  }
-  const folderOf = header => fromUuidSync(header.closest("[data-folder-id]").dataset.uuid);
-  entries.push(
-    {
-      label: "l5r4.ui.transfer.export",
-      icon: "fa-solid fa-file-export",
-      visible: () => game.user.isGM,
-      onClick: (_event, header) => exportItemFolder(folderOf(header))
-    },
-    {
-      label: "l5r4.ui.transfer.import",
-      icon: "fa-solid fa-file-import",
-      visible: () => game.user.isGM,
-      onClick: (_event, header) => askItemImport(folderOf(header))
-    }
-  );
 }

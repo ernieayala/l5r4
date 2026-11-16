@@ -81,36 +81,13 @@ export function registerTokenEffects() {
   }
 }
 
-/** Register the hooks, once during system init. */
-export function registerEffectAutomation() {
-  Hooks.once("ready", registerTokenEffects);
-  Hooks.on("preUpdateActor", onPreUpdateActor);
-  Hooks.on("updateActor", onUpdateActor);
-  Hooks.on("createActiveEffect", onCreateActiveEffect);
-  Hooks.on("getSceneControlButtons", onGetSceneControlButtons);
-}
-
-/**
- * Whether the actor is at Down or Out, or past its last Wound Rank.
- * @param {Actor} actor
- * @returns {boolean}
- */
-function isDown(actor) {
-  const levels = actor.system.woundLevels ?? {};
-  return (
-    toInt(actor.system.wounds?.value) <= 0 ||
-    levels.down?.current === true ||
-    levels.out?.current === true
-  );
-}
-
 /**
  * Remember the stored Wounds before an update, to measure what one update inflicts.
  * @param {Actor} actor
  * @param {object} changes
  * @param {object} options
  */
-function onPreUpdateActor(actor, changes, options) {
+export function onPreUpdateActorWounds(actor, changes, options) {
   if (foundry.utils.hasProperty(changes, "system.suffered")) {
     options[`${SYS_ID}SufferedBefore`] = toInt(actor._source.system.suffered);
   }
@@ -123,7 +100,7 @@ function onPreUpdateActor(actor, changes, options) {
  * @param {object} options
  * @returns {Promise<void>}
  */
-async function onUpdateActor(actor, changes, options) {
+export async function onUpdateActorWounds(actor, changes, options) {
   if (!game.users.activeGM?.isSelf) {
     return;
   }
@@ -147,7 +124,7 @@ async function onUpdateActor(actor, changes, options) {
  * @param {object} _options
  * @param {string} userId
  */
-function onCreateActiveEffect(effect, _options, userId) {
+export function onCreateActiveEffectFullDefense(effect, _options, userId) {
   if (
     userId === game.user.id &&
     effect.parent?.documentName === "Actor" &&
@@ -161,7 +138,7 @@ function onCreateActiveEffect(effect, _options, userId) {
  * Add the GM's "End encounter" button to the token controls.
  * @param {Record<string, object>} controls
  */
-function onGetSceneControlButtons(controls) {
+export function onGetSceneControlButtonsEncounter(controls) {
   if (!controls.tokens) {
     return;
   }
@@ -174,4 +151,18 @@ function onGetSceneControlButtons(controls) {
     button: true,
     onChange: () => endEncounter()
   };
+}
+
+/**
+ * Whether the actor is at Down or Out, or past its last Wound Rank.
+ * @param {Actor} actor
+ * @returns {boolean}
+ */
+function isDown(actor) {
+  const levels = actor.system.woundLevels ?? {};
+  return (
+    toInt(actor.system.wounds?.value) <= 0 ||
+    levels.down?.current === true ||
+    levels.out?.current === true
+  );
 }

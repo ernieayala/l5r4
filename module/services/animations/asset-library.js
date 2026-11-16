@@ -1,7 +1,8 @@
 /**
  * @module services/animations/asset-library
  * @description Maps stance and condition ids to JB2A animation assets and their settings (scale, duration, opacity),
- * and reports whether JB2A and Sequencer are active. The free and Patreon JB2A collections both work; an id with no
+ * and reports whether JB2A and Sequencer are active (module/hooks/register-all.js wires the animation hooks only when
+ * both are). The free and Patreon JB2A collections both work; an id with no
  * asset plays no animation. Stances show persistent auras for the combat posture, conditions show subtle status
  * markers that do not block play, colored by Ring or effect type.
  * @see {@link https://library.jb2a.com/|JB2A Asset Library}
@@ -223,4 +224,31 @@ export function isJb2aAvailable() {
  */
 export function isSequencerAvailable() {
   return game.modules.get("sequencer")?.active ?? false;
+}
+
+/**
+ * Whether Sequencer and JB2A are both active, so the animation hooks are wired. Each missing module is named in a
+ * console warning, and the system runs without animations.
+ *
+ * @returns {boolean} True when both modules are active
+ */
+export function hasAnimationModules() {
+  const hasSequencer = isSequencerAvailable();
+  const hasJb2a = isJb2aAvailable();
+
+  if (!hasSequencer) {
+    console.warn(
+      "L5R4 | Sequencer module not found. Visual animations disabled. " +
+        "Install Sequencer from: https://foundryvtt.com/packages/sequencer"
+    );
+  }
+
+  if (!hasJb2a) {
+    console.warn(
+      "L5R4 | JB2A module not found. Visual animations disabled. " +
+        "Install JB2A (free) from: https://foundryvtt.com/packages/JB2A_DnD5e"
+    );
+  }
+
+  return hasSequencer && hasJb2a;
 }

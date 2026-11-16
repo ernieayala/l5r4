@@ -80,7 +80,7 @@ export function buildPool({
   if (keepOverride !== null && keepOverride !== undefined && keepOverride < kept) {
     kept = Math.max(0, keepOverride);
   }
-  const ten = applyTenDiceRule(rolled, kept, flat, { littleTruths });
+  const ten = applyTenDiceRule(rolled, kept, { bonus: flat, littleTruths });
   return {
     roll: ten.roll,
     keep: ten.keep,

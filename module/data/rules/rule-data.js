@@ -1,6 +1,7 @@
 /**
  * @module data/rules/rule-data
- * @description The base DataModel of every rule key, and the field factories the rule models share.
+ * @description The base DataModel of every rule key. The field factories the rule models share are in
+ * module/data/fields.js.
  */
 
 import { RULE_KEYS } from "../../config/rule-keys.js";
@@ -24,37 +25,4 @@ export default class RuleData extends foundry.abstract.DataModel {
       predicate: new ArrayField(new AnyField({ serializable: true, nullable: false }))
     };
   }
-}
-
-/**
- * A rule value: a number, or a formula over the actor's roll data (module/utils/rule-values.js).
- * @param {number} initial
- * @returns {foundry.data.fields.AnyField}
- */
-export function valueField(initial) {
-  return new foundry.data.fields.AnyField({
-    serializable: true,
-    nullable: false,
-    initial,
-    validate: value =>
-      (typeof value === "number" && Number.isFinite(value)) ||
-      (typeof value === "string" && value.trim() !== ""),
-    validationError: "must be a number or a formula"
-  });
-}
-
-/**
- * The roll a rule applies to, such as "skill:kenjutsu", "trait:ref", "ring:fire", "attack", or "damage".
- * @returns {foundry.data.fields.StringField}
- */
-export function selectorField() {
-  return new foundry.data.fields.StringField({ required: true, blank: false });
-}
-
-/**
- * The stacking type: modifiers sharing a type other than "untyped" do not add up (module/utils/modifier-stacking.js).
- * @returns {foundry.data.fields.StringField}
- */
-export function typeField() {
-  return new foundry.data.fields.StringField({ required: true, blank: false, initial: "untyped" });
 }

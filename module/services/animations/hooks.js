@@ -7,7 +7,7 @@
  */
 
 import { STANCE_IDS } from "../../utils/stances.js";
-import { startAnimation, deleteAnimation, deleteAllAnimations } from "./animation-manager.js";
+import { startAnimation, deleteAnimation, deleteAllAnimations } from "./status-animations.js";
 import { getConditionAnimation, getStanceAnimation } from "./asset-library.js";
 import { startAttackAnimation } from "./attack-animations.js";
 
@@ -51,6 +51,7 @@ export function onCreateActiveEffectAnimation(effect, _options, userId) {
  * @param {string} userId - User who updated the effect
  * @returns {void}
  */
+// eslint-disable-next-line max-params -- core's updateActiveEffect hook passes (effect, changes, options, userId)
 export function onUpdateActiveEffectAnimation(effect, changes, _options, userId) {
   // Early return: Only handle disabled state changes
   if (changes?.disabled === undefined) {
@@ -154,22 +155,6 @@ export function onCreateChatMessageAnimation(message, _options, userId) {
     }
     await startAttackAnimation(actor, targetActor, weapon);
   });
-}
-
-/**
- * Register all animation hooks.
- *
- * Called by initialize.js during system init.
- * Registers hooks for ActiveEffect and Actor lifecycle events.
- *
- * @returns {void}
- */
-export function registerAnimationHooks() {
-  Hooks.on("createActiveEffect", onCreateActiveEffectAnimation);
-  Hooks.on("updateActiveEffect", onUpdateActiveEffectAnimation);
-  Hooks.on("deleteActiveEffect", onDeleteActiveEffectAnimation);
-  Hooks.on("deleteActor", onDeleteActorAnimation);
-  Hooks.on("createChatMessage", onCreateChatMessageAnimation);
 }
 
 /**

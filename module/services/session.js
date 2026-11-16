@@ -27,16 +27,11 @@ export async function startNewSession() {
   });
 }
 
-/** Register the session control, once during system init. */
-export function registerSessions() {
-  Hooks.on("getSceneControlButtons", onGetSceneControlButtons);
-}
-
 /**
  * Add the GM's "New session" button to the token controls.
  * @param {Record<string, object>} controls
  */
-function onGetSceneControlButtons(controls) {
+export function onGetSceneControlButtonsSession(controls) {
   if (!controls.tokens) {
     return;
   }

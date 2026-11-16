@@ -1,6 +1,6 @@
 /**
  * @module data/fields
- * @description Field factories shared by the data models.
+ * @description Field factories shared by the data models and the rule models.
  *
  * Fields are as permissive as template.json was: no integer, min, or choices constraints, so data stored by
  * 3.2.1 validates unchanged (roadmap/STAGE-02-DATA-MODELS.md decision 1). A stored value a field cannot cast
@@ -84,4 +84,37 @@ export function spellSlotsField(initial) {
     air: numberField(initial),
     void: numberField(initial)
   });
+}
+
+/**
+ * A rule value: a number, or a formula over the actor's roll data (module/utils/rule-values.js).
+ * @param {number} initial
+ * @returns {foundry.data.fields.AnyField}
+ */
+export function valueField(initial) {
+  return new foundry.data.fields.AnyField({
+    serializable: true,
+    nullable: false,
+    initial,
+    validate: value =>
+      (typeof value === "number" && Number.isFinite(value)) ||
+      (typeof value === "string" && value.trim() !== ""),
+    validationError: "must be a number or a formula"
+  });
+}
+
+/**
+ * The roll a rule applies to, such as "skill:kenjutsu", "trait:ref", "ring:fire", "attack", or "damage".
+ * @returns {foundry.data.fields.StringField}
+ */
+export function selectorField() {
+  return new foundry.data.fields.StringField({ required: true, blank: false });
+}
+
+/**
+ * The stacking type: modifiers sharing a type other than "untyped" do not add up (module/utils/modifier-stacking.js).
+ * @returns {foundry.data.fields.StringField}
+ */
+export function typeField() {
+  return new foundry.data.fields.StringField({ required: true, blank: false, initial: "untyped" });
 }

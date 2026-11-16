@@ -1,5 +1,5 @@
 /**
- * @module data/effect/effect-data
+ * @module data/effect/base-data
  * @description The data model of core's `base` ActiveEffect type.
  */
 

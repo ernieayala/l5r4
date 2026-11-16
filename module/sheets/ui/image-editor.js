@@ -31,9 +31,10 @@ import { SYS_ID } from "../../config/constants.js";
  */
 export async function openImageEditor(actor, position) {
   const current = actor.img;
+  const FilePicker = foundry.applications.apps.FilePicker.implementation;
 
   // Configure FilePicker: image-only selection with callback-based update
-  const fp = new foundry.applications.apps.FilePicker.implementation({
+  const fp = new FilePicker({
     type: "image",
     current: current,
     callback: async path => {

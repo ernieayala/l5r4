@@ -18,7 +18,8 @@ import {
   SAVE_FAILURES
 } from "../../config/rule-keys.js";
 import { USE_PERIODS } from "../../utils/effects.js";
-import RuleData, { selectorField, typeField, valueField } from "./rule-data.js";
+import { selectorField, typeField, valueField } from "../fields.js";
+import RuleData from "./rule-data.js";
 
 /**
  * +XkY or +N on rolls matching `selector`. With `range`, only attacks of that range. An `optional` modifier is

@@ -18,7 +18,7 @@ beforeAll(async () => {
     abstract: { DataModel: class {}, TypeDataModel: class {} },
     data: { ActiveEffectTypeDataModel: class {} }
   };
-  ({ DATA_MODELS, CORE_TYPE_DATA_MODELS } = await import("../module/data/index.js"));
+  ({ DATA_MODELS, CORE_TYPE_DATA_MODELS } = await import("../module/data/models.js"));
   manifest = await readJson("system.json");
   lang = await readJson("lang/en.json");
   pkg = await readJson("package.json");

@@ -350,7 +350,7 @@ export function registerRollPipelineTests(quench) {
           "should let Status fall below 0",
           clean(async () => {
             const { actor } = await swordsman();
-            await applyTrackChange(actor, "status", -25, "Quench");
+            await applyTrackChange(actor, "status", { points: -25, reason: "Quench" });
             assert.deepInclude(
               actor._source.system.status,
               { rank: -2, points: 5 },

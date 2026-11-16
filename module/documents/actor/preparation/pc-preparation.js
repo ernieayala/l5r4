@@ -2,8 +2,8 @@
  * @module documents/actor/preparation/pc-preparation
  * @description Prepares a PC's derived data in dependency order: Traits and Rings, Insight, the rules that need
  * them, Armor TN from its base (Reflexes × 5 + 5) and the equipped armor with its rules, movement, Wound Ranks from
- * the Earth Ring, Initiative (Insight Rank + Reflexes), healing, and the owned items' formulas. Modifies the actor's
- * system data in place; reads the actor's items and its armor-stacking flag.
+ * the Earth Ring, Initiative (Insight Rank + Reflexes), healing, the owned items' formulas, and XP. Modifies the
+ * actor's system data in place; reads the actor's items and its armor-stacking flag.
  */
 
 import { SYS_ID } from "../../../config/constants.js";
@@ -25,23 +25,22 @@ import {
 } from "../calculations/shared-traits-rings-system.js";
 import { prepareHealRate } from "../calculations/wound-system.js";
 import { prepareItemFormulas } from "../calculations/item-enrichment-system.js";
+import { getInsightRank, preparePcExperience } from "../calculations/xp-system.js";
 import { applyArmorRules, applyDerivedRules } from "../rules.js";
 
 /**
  * Prepares derived data for PC actors.
  *
  * Calculates all derived values for PCs including traits, initiative, armor TN,
- * wounds, insight, and healing rates. Executes calculations in dependency order.
+ * wounds, insight, healing rates, and XP. Executes calculations in dependency order.
  * PC calculations differ from NPCs (see file header).
  *
  * @param {Actor} actor - The PC actor being prepared
  * @param {object} sys - The actor's system data object (mutated in place)
- * @param {Function} finalizeWoundPenaltiesFn - Callback to finalize wound penalties
- * @param {Function} calculateInsightRankFn - Callback to calculate insight rank from points
  *
  * @returns {void} Mutates sys object in place
  */
-export function preparePcData(actor, sys, finalizeWoundPenaltiesFn, calculateInsightRankFn) {
+export function preparePcData(actor, sys) {
   // Extract school name from equipped school item
   // Defensive: Handle both v10 (items.contents) and v11 (items) API
   try {
@@ -61,7 +60,7 @@ export function preparePcData(actor, sys, finalizeWoundPenaltiesFn, calculateIns
   // Insight needs only Rings and Skill ranks; it comes before the rules so predicates can test Insight and School
   // Rank
   // game-rules/49_improving_your_character.md, p.104
-  prepareInsight(actor, sys, calculateInsightRankFn);
+  prepareInsight(actor, sys, getInsightRank);
 
   // Rules that need Traits and Rings, before the values their outputs feed (Initiative, Wounds, roll bonuses)
   applyDerivedRules(actor, sys);
@@ -163,7 +162,7 @@ export function preparePcData(actor, sys, finalizeWoundPenaltiesFn, calculateIns
   }
 
   // Apply wound penalties to traits/rings
-  finalizeWoundPenaltiesFn(sys, order);
+  actor._finalizeWoundPenalties(sys, order);
 
   // Initiative pool: Insight Rank + Reflexes, keep Reflexes. Calculated once the Insight Rank above is final.
   // game-rules/31_combat_round.md, p.81
@@ -182,6 +181,8 @@ export function preparePcData(actor, sys, finalizeWoundPenaltiesFn, calculateIns
 
   // Enrich embedded items with calculated data
   prepareItemFormulas(actor);
+
+  preparePcExperience(actor, sys);
 }
 
 /**

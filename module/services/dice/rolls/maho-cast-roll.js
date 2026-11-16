@@ -73,7 +73,10 @@ export async function rollMahoCast({ actor, spell, showDialog = true } = {}) {
       const taint = masterOfBlood ? Math.max(base - toInt(actor.system.rings.earth), 1) : base;
       // Through the ledger, so ten points become a Taint Rank and the change is logged
       // game-rules/89_shadowlands_taint.md, p.275
-      await applyTrackChange(actor, "taint", taint, T("l5r4.magic.maho.taintGained"));
+      await applyTrackChange(actor, "taint", {
+        points: taint,
+        reason: T("l5r4.magic.maho.taintGained")
+      });
       ui.notifications?.warn(F("l5r4.magic.maho.taintGainedNotification", { taint }));
       return { labelSuffix: ` [${T("l5r4.magic.maho.taintGained")}: ${taint}]` };
     }

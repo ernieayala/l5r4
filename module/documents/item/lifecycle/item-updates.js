@@ -96,7 +96,7 @@ async function updateSkillRankXp(item, changes) {
     const newFreeRanks = changes?.system?.freeRanks ?? item.system?.freeRanks;
     const freeRanks = isSchoolSkill(item, changes) ? Math.max(0, parseInt(newFreeRanks) || 0) : 0;
 
-    await updateXpAfterSkillRank(item, oldRank, newRank, freeRanks);
+    await updateXpAfterSkillRank(item, { oldRank, newRank, freeRanks });
   }
 }
 
@@ -121,7 +121,7 @@ async function updateEmphasisXp(item, changes) {
   }
 
   const freeEmphasis = toInt(item.system?.freeEmphasis, 0);
-  await updateXpAfterEmphasis(item, oldEmphases, newEmphases, freeEmphasis);
+  await updateXpAfterEmphasis(item, { oldEmphases, newEmphases, freeEmphasis });
 }
 
 /**

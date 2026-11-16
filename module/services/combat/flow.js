@@ -17,8 +17,8 @@ const FLOW_QUERY = `${SYS_ID}.flow`;
  * @typedef {object} Flow
  * @property {function(ChatMessage, object, DOMStringMap): Promise<object|null>} click  On the clicking client: roll
  *   if the step needs it, and return the step to send, or null
- * @property {function(ChatMessage, object, object, User): Promise<object>} step  On the GM: check the user, return
- *   the new state
+ * @property {function(object, {card: ChatMessage, data: object, user: User}): Promise<object>} step  On the GM:
+ *   check the user, return the new state
  * @property {function(object): Promise<string>} render  The card's HTML for a state
  */
 
@@ -145,7 +145,7 @@ async function applyFlowStep({ messageId, data }, user) {
   if (!handler) {
     throw new Error(`Not a flow card: ${messageId}`);
   }
-  const state = await handler.step(card, foundry.utils.deepClone(flow.state), data, user);
+  const state = await handler.step(foundry.utils.deepClone(flow.state), { card, data, user });
   await card.update({
     content: await handler.render(state),
     [`flags.${SYS_ID}.flow.state`]: state

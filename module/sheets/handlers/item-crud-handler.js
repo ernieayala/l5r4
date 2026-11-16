@@ -8,8 +8,8 @@
 import { SYS_ID } from "../../config/constants.js";
 import { DIALOG_TEMPLATES } from "../../config/templates.js";
 import { toInt } from "../../utils/type-coercion.js";
-import { updateSectionCollapsed } from "../../utils/section-state.js";
 import * as Chat from "../../services/chat.js";
+import { updateSectionCollapsed } from "../../services/section-state.js";
 
 /**
  * Static utility class for handling item CRUD operations on actor sheets.

@@ -189,7 +189,7 @@ export function prepareNpcFormulaWounds(sys, order) {
 
       if (activeOrder.includes(key)) {
         // Active level: calculate threshold
-        lvl.value = getWoundThreshold(key, earth, mult, add, prev);
+        lvl.value = getWoundThreshold(key, { earth, mult, add, prev });
         prev = lvl.value;
         lvl.isActive = true;
         lvl.isVisible = true;
@@ -235,11 +235,12 @@ export function prepareNpcFormulaWounds(sys, order) {
  * formula mode.
  * @param {object} sys - Actor's system data
  * @param {string[]} order - Ordered array of wound level keys
- * @param {number} sCapped - Suffered wounds (capped to max)
- * @param {string} woundMode - "manual" or "formula"
+ * @param {object} wounds
+ * @param {number} wounds.sCapped - Suffered wounds (capped to max)
+ * @param {string} wounds.woundMode - "manual" or "formula"
  * @returns {object} The current wound level object
  */
-export function prepareCurrentWoundLevelByMode(sys, order, sCapped, woundMode) {
+export function prepareCurrentWoundLevelByMode(sys, order, { sCapped, woundMode }) {
   // Filter levels based on mode
   const levelsToCheck =
     woundMode === "manual"
@@ -305,7 +306,7 @@ export function prepareVisibleWoundLevels(sys, order) {
 
     let prev = 0;
     for (const key of baseVisibleOrder) {
-      const value = getWoundThreshold(key, earth, mult, add, prev);
+      const value = getWoundThreshold(key, { earth, mult, add, prev });
       prev = value;
 
       const basePenalty = toInt(DEFAULT_WOUND_PENALTIES?.[key]) || 0;
@@ -344,12 +345,13 @@ function getEffectiveWoundPenalty(key, penalty, mod) {
  * One Wound Rank's threshold: Healthy holds 5 × Earth, each later rank Earth × the multiplier more than the one
  * before it, each plus the flat modifier.
  * @param {string} key - Wound level key
- * @param {number} earth - Earth Ring value
- * @param {number} mult - Multiplier for subsequent levels
- * @param {number} add - Flat modifier to add
- * @param {number} prev - Previous level's threshold
+ * @param {object} terms
+ * @param {number} terms.earth - Earth Ring value
+ * @param {number} terms.mult - Multiplier for subsequent levels
+ * @param {number} terms.add - Flat modifier to add
+ * @param {number} terms.prev - Previous level's threshold
  * @returns {number} Calculated wound threshold
  */
-function getWoundThreshold(key, earth, mult, add, prev) {
+function getWoundThreshold(key, { earth, mult, add, prev }) {
   return key === "healthy" ? 5 * earth + add : earth * mult + prev + add;
 }

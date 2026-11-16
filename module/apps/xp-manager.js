@@ -6,11 +6,10 @@
  * recalculate) is one action that writes the actor's flags.
  */
 import { SYS_ID } from "../config/constants.js";
-import { TEMPLATE } from "../config/templates.js";
 import { T } from "../utils/localization.js";
 import { toInt } from "../utils/type-coercion.js";
-import { getSortPref, updateSortPref } from "../utils/sorting.js";
 import { logError } from "../utils/error-logging.js";
+import { getSortPref, updateSortPref } from "../services/sort-preferences.js";
 import { buildXpHistory } from "../services/xp/calculator.js";
 import { formatXpEntries } from "../services/xp/formatter.js";
 import { isRetroactiveUpdateDue, getXpDataVersion } from "../services/xp/versioning.js";
@@ -362,8 +361,8 @@ export default class XpManagerApplication extends foundry.applications.api.Handl
       return;
     }
 
-    const cur = getSortPref(this.actor.id, scope, allowed, "note");
-    await updateSortPref(this.actor.id, scope, key, { toggleFrom: cur });
+    const cur = getSortPref(this.actor.id, scope, { allowedKeys: allowed, defaultKey: "note" });
+    await updateSortPref(this.actor.id, scope, { key, toggleFrom: cur });
 
     if (header) {
       header.querySelectorAll("[data-action='sort-items']").forEach(a => {
@@ -373,7 +372,10 @@ export default class XpManagerApplication extends foundry.applications.api.Handl
         }
       });
 
-      const newPref = getSortPref(this.actor.id, scope, allowed, "note");
+      const newPref = getSortPref(this.actor.id, scope, {
+        allowedKeys: allowed,
+        defaultKey: "note"
+      });
       element.setAttribute("data-dir", newPref.dir);
     }
 
@@ -423,7 +425,7 @@ export default class XpManagerApplication extends foundry.applications.api.Handl
     const currentCap = Number.isFinite(+flags.disadvantageCap) ? Number(flags.disadvantageCap) : 10;
 
     const content = await foundry.applications.handlebars.renderTemplate(
-      TEMPLATE("dialogs/disadvantage-cap-dialog.hbs"),
+      `systems/${SYS_ID}/templates/dialogs/disadvantage-cap-dialog.hbs`,
       { currentCap }
     );
 

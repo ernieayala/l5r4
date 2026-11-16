@@ -12,15 +12,14 @@
  *
  * Architecture:
  * - Uses Foundry's data preparation lifecycle (prepareBaseData → prepareDerivedData)
- * - Type-specific derived data runs in the subtype data models (module/data/actor/pc-data.js, NpcData.js),
- *   which call the preparation modules (pc-preparation, npc-preparation)
+ * - Type-specific derived data: prepareSubtypeData(), which the subtype data models (module/data/actor/) call
  * - Wound system uses calculation modules for complex penalty logic
  * - XP tracking uses flags for persistent character advancement data
  */
 
 import { SYS_ID } from "../config/constants.js";
-import { getIconPath } from "../config/icons.js";
 import { WOUND_LEVEL_ORDER } from "../config/game-mechanics.js";
+import { getIconPath } from "../utils/icons.js";
 import { toInt } from "../utils/type-coercion.js";
 import { rollDataKey } from "../utils/rule-values.js";
 import { getHighestSchoolRank } from "../utils/mechanics.js";
@@ -31,6 +30,8 @@ import {
   prepareCurrentWoundLevelByMode
 } from "./actor/calculations/wound-system.js";
 import { updateXpFlags } from "./actor/calculations/xp-system.js";
+import { preparePcData } from "./actor/preparation/pc-preparation.js";
+import { prepareNpcData } from "./actor/preparation/npc-preparation.js";
 import { applyGrants } from "./item/lifecycle/grants.js";
 import { prepareWoundRollOption, applyInitialRules } from "./actor/rules.js";
 
@@ -242,6 +243,15 @@ export default class L5R4Actor extends Actor {
   }
 
   /**
+   * Run the subtype's preparation (pc-preparation, npc-preparation). The subtype's data model calls this at the end
+   * of its `prepareDerivedData`, since data models import no document code (CLAUDE.md Layers).
+   * @returns {void}
+   */
+  prepareSubtypeData() {
+    (this.type === "pc" ? preparePcData : prepareNpcData)(this, this.system);
+  }
+
+  /**
    * Calculate wound penalties and current wound level.
    * Determines wound state based on suffered wounds and wound level thresholds.
    * Applies wound penalty modifiers from effects and conditions.
@@ -259,7 +269,7 @@ export default class L5R4Actor extends Actor {
     const sCapped = Math.min(toInt(sys.suffered), outMax || toInt(sys.suffered));
 
     const current = woundMode
-      ? prepareCurrentWoundLevelByMode(sys, order, sCapped, woundMode)
+      ? prepareCurrentWoundLevelByMode(sys, order, { sCapped, woundMode })
       : prepareCurrentWoundLevel(sys, order, sCapped);
 
     // Apply wound penalty modifiers from effects and conditions

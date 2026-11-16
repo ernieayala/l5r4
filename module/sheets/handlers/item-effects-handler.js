@@ -46,20 +46,32 @@ export class ItemEffectsHandler {
     }
     root.dataset.effectsBound = "1";
 
-    on(root, ".effect-create", "click", async ev => {
-      await this.create(context, ev, ev.target);
+    on(root, "click", {
+      selector: ".effect-create",
+      handler: async ev => {
+        await this.create(context, ev, ev.target);
+      }
     });
 
-    on(root, ".effect-edit", "click", (ev, el) => {
-      this.openEffectSheet(context, ev, el);
+    on(root, "click", {
+      selector: ".effect-edit",
+      handler: (ev, el) => {
+        this.openEffectSheet(context, ev, el);
+      }
     });
 
-    on(root, ".effect-toggle", "click", async (ev, el) => {
-      await this.updateEffectDisabled(context, ev, el);
+    on(root, "click", {
+      selector: ".effect-toggle",
+      handler: async (ev, el) => {
+        await this.updateEffectDisabled(context, ev, el);
+      }
     });
 
-    on(root, ".effect-delete", "click", async (ev, el) => {
-      await this.deleteEffect(context, ev, el);
+    on(root, "click", {
+      selector: ".effect-delete",
+      handler: async (ev, el) => {
+        await this.deleteEffect(context, ev, el);
+      }
     });
   }
 

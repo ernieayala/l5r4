@@ -13,13 +13,19 @@
  * game-rules/86_kata.md, p.259
  */
 
-import { F } from "../utils/localization.js";
 import { buildStatusEffectUpdate } from "../utils/status-data.js";
 
 /**
  * The ActiveEffect document class the system sets as `CONFIG.ActiveEffect.documentClass`.
  */
 export default class L5R4ActiveEffect extends foundry.documents.ActiveEffect {
+  /**
+   * Tells the user an effect was not created because the actor is immune to its status. Documents show no UI
+   * (CLAUDE.md Layers), so the entry module sets the effect services' notice here.
+   * @type {function(Actor, ActiveEffect): void}
+   */
+  static onImmuneStatus = () => {};
+
   /**
    * An effect created with a status but none of its data (a macro, another module, `{statuses: ["prone"]}`) takes
    * the status's rules, group, level, and ending event, so a status means the same however its effect is made.
@@ -55,9 +61,7 @@ export default class L5R4ActiveEffect extends foundry.documents.ActiveEffect {
     for (let i = documents.length - 1; i >= 0; i--) {
       const blocked = [...documents[i].statuses].find(status => immune.has(status));
       if (blocked) {
-        ui.notifications?.info(
-          F("l5r4.ui.effects.immune", { name: actor.name, effect: documents[i].name })
-        );
+        this.onImmuneStatus(actor, documents[i]);
         documents.splice(i, 1);
       }
     }

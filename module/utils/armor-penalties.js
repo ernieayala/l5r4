@@ -72,7 +72,11 @@ export function getArmorTnPenalty(actor, skillName = null, traitName = null) {
     }
 
     const armorType = String(armorData.armorType ?? "light").toLowerCase();
-    const penalty = getSingleArmorPenalty(armorType, skill, trait, isMounted);
+    const penalty = getSingleArmorPenalty(armorType, {
+      skillName: skill,
+      traitName: trait,
+      isMounted
+    });
     maxPenalty = Math.max(maxPenalty, penalty);
   }
 
@@ -111,7 +115,11 @@ export function getArmorPenaltyDescription(actor, skillName = null, traitName = 
     }
 
     const armorType = String(armorData.armorType ?? "light").toLowerCase();
-    const itemPenalty = getSingleArmorPenalty(armorType, skill, trait, isMounted);
+    const itemPenalty = getSingleArmorPenalty(armorType, {
+      skillName: skill,
+      traitName: trait,
+      isMounted
+    });
 
     // Return description for first armor that applies a penalty
     if (itemPenalty > 0) {
@@ -127,12 +135,13 @@ export function getArmorPenaltyDescription(actor, skillName = null, traitName = 
  * Calculates TN penalty for a single piece of armor.
  * game-rules/73_armor.md, p.198
  * @param {string} armorType - Type of armor (from ARMOR_TYPES)
- * @param {string|null} skillName - Skill being rolled (lowercase)
- * @param {string|null} traitName - Trait being rolled (lowercase)
- * @param {boolean} isMounted - Whether character is mounted
+ * @param {object} roll
+ * @param {string|null} roll.skillName - Skill being rolled (lowercase)
+ * @param {string|null} roll.traitName - Trait being rolled (lowercase)
+ * @param {boolean} roll.isMounted - Whether character is mounted
  * @returns {number} TN penalty (0 or 5)
  */
-function getSingleArmorPenalty(armorType, skillName, traitName, isMounted) {
+function getSingleArmorPenalty(armorType, { skillName, traitName, isMounted }) {
   switch (armorType) {
     case ARMOR_TYPES.ASHIGARU:
       // Ashigaru armor has no penalties

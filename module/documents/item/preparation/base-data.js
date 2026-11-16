@@ -5,7 +5,7 @@
  * so the sheets' editors and templates never read null.
  */
 
-import { DEFAULT_ICONS } from "../constants/item-types.js";
+import { DEFAULT_ICONS } from "../../../config/item-types.js";
 
 /**
  * Prepare an item's base data. A bow gets Strength 0 and the Willow Leaf arrow when they are unset (bow-damage.js

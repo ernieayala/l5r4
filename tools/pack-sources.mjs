@@ -13,7 +13,7 @@
 
 import { createHash } from "node:crypto";
 import { SYS_ID } from "../module/config/constants.js";
-import { DEFAULT_ICONS } from "../module/documents/item/constants/item-types.js";
+import { DEFAULT_ICONS } from "../module/config/item-types.js";
 
 /** The book every pack cites (module/config/sources.js). */
 export const BOOK = "core";

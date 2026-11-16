@@ -9,7 +9,7 @@
 import { SYS_ID } from "../config/constants.js";
 import { prepareItemSheetOptions } from "../documents/item/integration/sheet-data.js";
 import { summaryOf } from "../documents/summary.js";
-import EmphasisManager from "../apps/emphasis-manager.js";
+import EmphasisManagerApplication from "../apps/emphasis-manager.js";
 import { ItemEffectsHandler } from "./handlers/item-effects-handler.js";
 import { RULES_EDITOR_ACTIONS, parseRulesForm, buildRulesEditorContext } from "./rules-editor.js";
 
@@ -451,7 +451,7 @@ export default class L5R4ItemSheet extends HandlebarsApplicationMixin(ItemSheetV
       return;
     }
 
-    const manager = new EmphasisManager({ item: this.item });
+    const manager = new EmphasisManagerApplication({ item: this.item });
     await manager.render(true);
 
     // Wait for dialog to close, then refresh this sheet

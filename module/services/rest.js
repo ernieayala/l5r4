@@ -6,6 +6,7 @@
  */
 
 import { SYS_ID } from "../config/constants.js";
+import { CHAT_TEMPLATES } from "../config/templates.js";
 import { toInt } from "../utils/type-coercion.js";
 
 /**
@@ -192,7 +193,6 @@ async function postRestMessage({
   // Render chat card from template
   let content;
   try {
-    const { CHAT_TEMPLATES } = await import("../config/templates.js");
     content = await foundry.applications.handlebars.renderTemplate(
       CHAT_TEMPLATES.healing,
       templateData

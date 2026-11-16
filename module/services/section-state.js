@@ -1,5 +1,5 @@
 /**
- * @module utils/section-state
+ * @module services/section-state
  * @description Manages collapsed/expanded state for actor sheet sections.
  *
  * Persists UI state in Foundry user flags so sections remember their
@@ -10,7 +10,7 @@
  */
 
 import { SYS_ID } from "../config/constants.js";
-import { logError } from "./error-logging.js";
+import { logError } from "../utils/error-logging.js";
 
 /**
  * Gets collapsed state for a specific actor sheet section.

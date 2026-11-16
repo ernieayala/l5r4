@@ -12,7 +12,7 @@ import { SYS_ID } from "../config/constants.js";
  * Listens for spell memorized field changes and triggers XP recalculation.
  */
 export function registerSpellMemorizationHooks() {
-  Hooks.on("updateItem", async (item, change, _options, _userId) => {
+  Hooks.on("updateItem", async (item, change) => {
     if (item.type !== "spell") {
       return;
     }

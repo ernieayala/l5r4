@@ -25,33 +25,13 @@ const COLORS = Object.freeze({
   void: { up: 0x9ecbff, down: 0xc9b8ff }
 });
 
-/** Register the floating numbers' hooks, once during init. */
-export function registerScrollingText() {
-  Hooks.on("preUpdateActor", onPreUpdateActor);
-  Hooks.on("updateActor", onUpdateActor);
-}
-
-/**
- * The shown resources' prepared values.
- * @param {Actor} actor
- * @returns {Record<string, number>}
- */
-function resourceValuesOf(actor) {
-  return Object.fromEntries(
-    FLOATING_RESOURCES.map(({ id, path }) => [
-      id,
-      toInt(foundry.utils.getProperty(actor.system, path))
-    ])
-  );
-}
-
 /**
  * Record the values before an update, on the client that makes it.
  * @param {Actor} actor
  * @param {object} _changes
  * @param {object} options
  */
-function onPreUpdateActor(actor, _changes, options) {
+export function onPreUpdateActorScrollingText(actor, _changes, options) {
   options[BEFORE_OPTION] = resourceValuesOf(actor);
 }
 
@@ -61,7 +41,7 @@ function onPreUpdateActor(actor, _changes, options) {
  * @param {object} _changes
  * @param {object} options
  */
-function onUpdateActor(actor, _changes, options) {
+export function onUpdateActorScrollingText(actor, _changes, options) {
   const before = options[BEFORE_OPTION];
   if (!before || !canvas?.ready || !game.settings.get(SYS_ID, "floatingNumbers")) {
     return;
@@ -94,4 +74,18 @@ function onUpdateActor(actor, _changes, options) {
       );
     });
   }
+}
+
+/**
+ * The shown resources' prepared values.
+ * @param {Actor} actor
+ * @returns {Record<string, number>}
+ */
+function resourceValuesOf(actor) {
+  return Object.fromEntries(
+    FLOATING_RESOURCES.map(({ id, path }) => [
+      id,
+      toInt(foundry.utils.getProperty(actor.system, path))
+    ])
+  );
 }

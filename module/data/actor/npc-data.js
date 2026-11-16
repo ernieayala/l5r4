@@ -6,8 +6,6 @@
 import { NPC_INSIGHT_RANK, WOUND_LEVEL_ORDER } from "../../config/game-mechanics.js";
 import { booleanField, numberField, sourceField, spellSlotsField, stringField } from "../fields.js";
 import { migrateNpcSource } from "../migrate-source.js";
-import { prepareNpcData } from "../../documents/actor/preparation/npc-preparation.js";
-import { prepareFear } from "../../documents/actor/calculations/fear-system.js";
 import ActorData from "./base-data.js";
 
 /**
@@ -96,9 +94,8 @@ export default class NpcData extends ActorData {
   /** @override */
   prepareDerivedData() {
     super.prepareDerivedData();
-    const actor = this.parent;
-    prepareNpcData(actor, this, actor._finalizeWoundPenalties.bind(actor));
-    prepareFear(this);
+    // The NPC's preparation is document code (module/documents/actor/preparation/), which the actor runs
+    this.parent.prepareSubtypeData();
   }
 
   /**

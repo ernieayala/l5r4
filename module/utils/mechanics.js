@@ -16,6 +16,7 @@
 import { toInt, toString } from "./type-coercion.js";
 import { logError } from "./error-logging.js";
 import { getSelectorBonus } from "./rule-engine.js";
+import { T } from "./localization.js";
 
 /**
  * Valid L5R4 trait abbreviations.
@@ -81,7 +82,7 @@ export function getFormulaBonus(actor, { skill, trait, ring }) {
     sum.keep += toInt(effect.keep);
     sum.total += toInt(effect.total);
   }
-  const rules = getSelectorBonus(actor.ruleBag, selectors, actor.rollOptions);
+  const rules = getSelectorBonus(actor.ruleBag, selectors, { options: actor.rollOptions });
   return {
     roll: sum.roll + rules.roll,
     keep: sum.keep + rules.keep,
@@ -137,7 +138,7 @@ export function toTraitKey(raw) {
     for (const key of KNOWN_TRAITS) {
       const labelKey =
         key === "void" ? "l5r4.ui.mechanics.rings.void" : `l5r4.ui.mechanics.traits.${key}`;
-      const label = game.i18n?.localize?.(labelKey) ?? "";
+      const label = T(labelKey);
       if (label && label.toLowerCase() === k.toLowerCase()) {
         return key;
       }

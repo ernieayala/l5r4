@@ -2,7 +2,7 @@
  * @module documents/actor/preparation/npc-preparation
  * @description Prepares an NPC's derived data in dependency order: Traits and Rings, the rules that need them,
  * Initiative (the GM's stored pool or the formula), Armor TN with its rules, Wound Ranks in manual or formula mode,
- * healing, movement, and the owned items' formulas. Modifies the actor's system data in place; reads
+ * healing, movement, the owned items' formulas, and Fear. Modifies the actor's system data in place; reads
  * `actor._source` to tell a stored Initiative pool from a prepared one.
  */
 
@@ -20,6 +20,7 @@ import {
   prepareVisibleWoundLevels
 } from "../calculations/wound-system.js";
 import { prepareItemFormulas } from "../calculations/item-enrichment-system.js";
+import { prepareFear } from "../calculations/fear-system.js";
 import { applyArmorRules, applyDerivedRules } from "../rules.js";
 
 /**
@@ -30,11 +31,10 @@ import { applyArmorRules, applyDerivedRules } from "../rules.js";
  *
  * @param {Actor} actor - The NPC actor being prepared
  * @param {object} sys - The actor's system data object (mutated in place)
- * @param {Function} finalizeWoundPenaltiesFn - Callback to finalize wound penalties
  *
  * @returns {void} Mutates sys object in place
  */
-export function prepareNpcData(actor, sys, finalizeWoundPenaltiesFn) {
+export function prepareNpcData(actor, sys) {
   // Calculate base traits and rings first (required for initiative)
   prepareTraitsAndRings(sys);
 
@@ -79,7 +79,7 @@ export function prepareNpcData(actor, sys, finalizeWoundPenaltiesFn) {
   }
 
   // Apply wound penalties to traits/rings
-  finalizeWoundPenaltiesFn(sys, order, woundMode);
+  actor._finalizeWoundPenalties(sys, order, woundMode);
 
   // Healing per night's rest, an NPC counting as Insight Rank 1 (#40)
   prepareHealRate(sys, NPC_INSIGHT_RANK);
@@ -92,4 +92,6 @@ export function prepareNpcData(actor, sys, finalizeWoundPenaltiesFn) {
 
   // Enrich embedded items with calculated data
   prepareItemFormulas(actor);
+
+  prepareFear(sys);
 }

@@ -32,12 +32,13 @@ export async function updateXpAfterSkillCreate(item, _sys) {
  * Triggers XP history recalculation by buildXpHistory() when the XP Manager is next opened.
  *
  * @param {L5R4Item} item - The skill item being updated
- * @param {number} _oldRank - The skill rank before the update (unused)
- * @param {number} _newRank - The skill rank after the update (unused)
- * @param {number} _freeRanks - Number of free ranks (unused)
+ * @param {object} _change - The rank change (unused)
+ * @param {number} _change.oldRank - The skill rank before the update
+ * @param {number} _change.newRank - The skill rank after the update
+ * @param {number} _change.freeRanks - Number of free ranks
  * @returns {Promise<boolean>} False for an unowned item, otherwise true
  */
-export async function updateXpAfterSkillRank(item, _oldRank, _newRank, _freeRanks) {
+export async function updateXpAfterSkillRank(item, _change) {
   if (!item.actor) {
     return false;
   }
@@ -51,12 +52,13 @@ export async function updateXpAfterSkillRank(item, _oldRank, _newRank, _freeRank
  * Triggers XP history recalculation by buildXpHistory() when the XP Manager is next opened.
  *
  * @param {L5R4Item} item - The skill item being updated
- * @param {string[]} _oldEmphases - Array of emphasis strings before update (unused)
- * @param {string[]} _newEmphases - Array of emphasis strings after update (unused)
- * @param {number} _freeEmphasis - Number of free emphases (unused)
+ * @param {object} _change - The Emphasis change (unused)
+ * @param {string[]} _change.oldEmphases - Array of emphasis strings before update
+ * @param {string[]} _change.newEmphases - Array of emphasis strings after update
+ * @param {number} _change.freeEmphasis - Number of free emphases
  * @returns {Promise<boolean>} False for an unowned item, otherwise true
  */
-export async function updateXpAfterEmphasis(item, _oldEmphases, _newEmphases, _freeEmphasis) {
+export async function updateXpAfterEmphasis(item, _change) {
   if (!item.actor) {
     return false;
   }

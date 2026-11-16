@@ -95,11 +95,12 @@ export function buildCheckSelectors({ kind, skill, trait, ring, skillData }) {
  * game-rules/60_bugei_skills.md, p.140-143
  * @param {Actor} actor
  * @param {string} kind
- * @param {Actor|null} target
- * @param {Item|null} [weapon=null]
+ * @param {object} [options]
+ * @param {Actor|null} [options.target=null]
+ * @param {Item|null} [options.weapon=null]
  * @returns {Set<string>}
  */
-export function buildCheckOptions(actor, kind, target, weapon = null) {
+export function buildCheckOptions(actor, kind, { target = null, weapon = null } = {}) {
   const options = new Set(actor.rollOptions);
   options.add(`check:${kind}`);
   if (weapon) {
@@ -141,9 +142,9 @@ export function getCheckContext(actor, { kind, skill, trait, ring, target = null
     ? actor.items.find(i => i.type === "skill" && i.name.toLowerCase().trim() === skill)
     : null;
   const selectors = buildCheckSelectors({ kind, skill, trait, ring, skillData: skillItem?.system });
-  const options = buildCheckOptions(actor, kind, target, weapon);
+  const options = buildCheckOptions(actor, kind, { target, weapon });
   const entriesOf = bagKind =>
-    getBagEntries(actor.ruleBag, bagKind, selectors, options, weapon?.id ?? null);
+    getBagEntries(actor.ruleBag, bagKind, { selectors, options, weaponId: weapon?.id ?? null });
 
   const toModifier = (entry, label = entry.label) => ({
     label,
@@ -158,8 +159,11 @@ export function getCheckContext(actor, { kind, skill, trait, ring, target = null
   const modifiers = entriesOf("rollModifiers").map(entry => toModifier(entry));
   // The target's OpponentModifier rules, tested from its side: its options, with the roller as its target
   if (target?.ruleBag) {
-    const theirs = buildCheckOptions(target, kind, actor);
-    for (const entry of getBagEntries(target.ruleBag, "opponentModifiers", selectors, theirs)) {
+    const theirs = buildCheckOptions(target, kind, { target: actor });
+    for (const entry of getBagEntries(target.ruleBag, "opponentModifiers", {
+      selectors,
+      options: theirs
+    })) {
       modifiers.push(toModifier(entry, `${entry.label} (${target.name})`));
     }
   }

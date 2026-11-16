@@ -3,7 +3,7 @@
  * @description A floating panel listing the effects on the controlled token's actor, else the user's character
  * (roadmap/STAGE-14): each effect's name, icon, source, and how long it lasts, with buttons to open its source and to
  * remove an effect the user owns. A token-controls button opens and closes it; it redraws when control changes and
- * when effects or the actor change.
+ * when effects or the actor change (module/hooks/register-all.js wires both).
  */
 import { SYS_ID } from "../config/constants.js";
 import { F, T } from "../utils/localization.js";
@@ -73,11 +73,30 @@ export default class EffectPanel extends HandlebarsApplicationMixin(ApplicationV
     return panel.render({ force: true });
   }
 
-  /** Redraw the open panel. */
+  /** Redraw the open panel. Hooks call it with their own arguments, which it ignores. */
   static renderIfOpen() {
     if (panel?.rendered) {
       panel.render();
     }
+  }
+
+  /**
+   * Add the panel's button to the token controls.
+   * @param {Record<string, object>} controls
+   */
+  static onGetSceneControlButtons(controls) {
+    if (!controls.tokens) {
+      return;
+    }
+    const tools = controls.tokens.tools;
+    tools[`${SYS_ID}-effects`] = {
+      name: `${SYS_ID}-effects`,
+      order: Object.keys(tools).length,
+      title: "l5r4.apps.effectPanel.title",
+      icon: "fa-solid fa-hourglass-half",
+      button: true,
+      onChange: () => EffectPanel.openOrClose()
+    };
   }
 
   /**
@@ -146,21 +165,6 @@ export default class EffectPanel extends HandlebarsApplicationMixin(ApplicationV
   }
 }
 
-/** Register the panel's button and the hooks that redraw it, once during init. */
-export function registerEffectPanel() {
-  Hooks.on("getSceneControlButtons", onGetSceneControlButtons);
-  for (const hook of [
-    "controlToken",
-    "createActiveEffect",
-    "updateActiveEffect",
-    "deleteActiveEffect",
-    "updateActor",
-    "updateCombat"
-  ]) {
-    Hooks.on(hook, () => EffectPanel.renderIfOpen());
-  }
-}
-
 /**
  * Localize the label keys inside a phrase's data (an expiry event's name).
  * @param {object} data
@@ -168,23 +172,4 @@ export function registerEffectPanel() {
  */
 function formatPhraseData(data) {
   return data.event ? { ...data, event: T(data.event) } : data;
-}
-
-/**
- * Add the panel's button to the token controls.
- * @param {Record<string, object>} controls
- */
-function onGetSceneControlButtons(controls) {
-  if (!controls.tokens) {
-    return;
-  }
-  const tools = controls.tokens.tools;
-  tools[`${SYS_ID}-effects`] = {
-    name: `${SYS_ID}-effects`,
-    order: Object.keys(tools).length,
-    title: "l5r4.apps.effectPanel.title",
-    icon: "fa-solid fa-hourglass-half",
-    button: true,
-    onChange: () => EffectPanel.openOrClose()
-  };
 }

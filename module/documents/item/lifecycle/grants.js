@@ -168,12 +168,13 @@ function recordsOf(giver) {
  * Give one granted item to the actor: a Skill it already has becomes a School Skill with the free ranks; anything
  * else is copied with its giver's id.
  * @param {Actor} actor
- * @param {Item} giver
- * @param {Item} source
  * @param {import("../../../utils/grants.js").GrantRule} rule
+ * @param {object} grant
+ * @param {Item} grant.giver - The item whose rule grants it
+ * @param {Item} grant.source - The item granted
  * @returns {Promise<import("../../../utils/grants.js").GrantRecord>}
  */
-async function createGrantedItem(actor, giver, source, rule) {
+async function createGrantedItem(actor, rule, { giver, source }) {
   const link = { [`flags.${SYS_ID}.grantedBy`]: giver.id };
   if (source.type === "skill") {
     const name = source.name.toLowerCase().trim();
@@ -230,7 +231,7 @@ async function createDueGrants(actor) {
         });
         continue;
       }
-      records.push(await createGrantedItem(actor, giver, source, rule));
+      records.push(await createGrantedItem(actor, rule, { giver, source }));
       if (rule.rank > 0) {
         await ChatMessage.create({
           speaker: ChatMessage.getSpeaker({ actor }),

@@ -3,11 +3,12 @@
  * @description Formats the XP history entries services/xp/calculator.js builds for display in the XP manager: a
  * localized category per entry type, progression notation for rank increases ("Reflexes 2→3"), item names, fallback
  * labels for older or malformed entries, and sorting by timestamp or the user's column preference
- * (module/utils/sorting.js). The costs themselves come from the XP ledger: a Trait 4 × the new rank, the Void Ring
+ * (module/services/sort-preferences.js, module/utils/sorting.js). The costs themselves come from the XP ledger: a Trait 4 × the new rank, the Void Ring
  * 6 × the new rank, a Skill its new rank, an Emphasis 2, an item its listed cost, a spell its Mastery Level.
  */
 
-import { getSortPref, applySortPref } from "../../utils/sorting.js";
+import { applySortPref } from "../../utils/sorting.js";
+import { getSortPref } from "../sort-preferences.js";
 
 /**
  * Column extractors for sortable XP entry fields.
@@ -131,8 +132,10 @@ export function formatXpEntries(entries, options = {}) {
   });
 
   if (sort && actorId) {
-    const pref = sortPref || getSortPref(actorId, scope, ["note", "cost", "type"], "note");
-    formatted = applySortPref(formatted, SORT_COLUMNS, pref);
+    const pref =
+      sortPref ||
+      getSortPref(actorId, scope, { allowedKeys: ["note", "cost", "type"], defaultKey: "note" });
+    formatted = applySortPref(formatted, SORT_COLUMNS, { pref, locale: game.i18n?.lang });
   } else {
     formatted.sort((a, b) => (a.ts || 0) - (b.ts || 0));
   }

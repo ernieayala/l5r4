@@ -16,6 +16,7 @@
  * game-rules/60_bugei_skills.md, p.140
  */
 
+import { SYS_ID } from "../../config/constants.js";
 import { CHAT_TEMPLATES } from "../../config/templates.js";
 import { F, T } from "../../utils/localization.js";
 import { toInt } from "../../utils/type-coercion.js";
@@ -75,6 +76,26 @@ export async function startDuelFromCanvas() {
     return;
   }
   await startDuel(first, second);
+}
+
+/**
+ * Add the GM's "Iaijutsu duel" button to the token controls.
+ * @param {Record<string, object>} controls
+ */
+export function onGetSceneControlButtonsDuel(controls) {
+  if (!controls.tokens) {
+    return;
+  }
+  const tools = controls.tokens.tools;
+  tools[`${SYS_ID}-duel`] = {
+    name: `${SYS_ID}-duel`,
+    order: Object.keys(tools).length,
+    title: "l5r4.ui.combat.duel.start",
+    icon: "fa-solid fa-khanda",
+    visible: game.user.isGM,
+    button: true,
+    onChange: () => startDuelFromCanvas()
+  };
 }
 
 /**
@@ -218,13 +239,13 @@ registerFlow("duel", {
 
   /**
    * Record a roll or a concession (on the GM). The roll is read from its own message.
-   * @param {ChatMessage} _card
    * @param {object} state
-   * @param {object} data
-   * @param {User} user
+   * @param {object} step
+   * @param {object} step.data - The step the clicking client sent
+   * @param {User} step.user - The requesting user
    * @returns {Promise<object>}
    */
-  async step(_card, state, data, user) {
+  async step(state, { data, user }) {
     const i = Number(data.duelist);
     const { actor } = sidesOf(state, i);
     if (![0, 1].includes(i) || !canActFor(user, actor) || state.stage === "done") {

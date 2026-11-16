@@ -23,7 +23,7 @@ import {
 import { NPC_NUMBER_WOUND_LVLS } from "../module/config/game-mechanics.js";
 import { STATUS_EFFECTS } from "../module/config/status-effects.js";
 import { EXPIRY_ACTION, EXPIRY_EVENTS } from "../module/config/expiry-events.js";
-import { CORE_TYPE_DATA_MODELS, DATA_MODELS } from "../module/data/index.js";
+import { CORE_TYPE_DATA_MODELS, DATA_MODELS } from "../module/data/models.js";
 import L5R4ActiveEffect from "../module/documents/active-effect.js";
 import L5R4Actor from "../module/documents/actor.js";
 import L5R4Combat from "../module/documents/combat.js";
@@ -31,16 +31,18 @@ import L5R4Combatant from "../module/documents/combatant.js";
 import L5R4Item from "../module/documents/item.js";
 import { spendInitiativeVoidPoints } from "../module/services/initiative.js";
 import L5R4Die from "../module/services/dice/roll-keep-die.js";
-import { registerEffectQueries } from "../module/services/effects/apply.js";
+import { onImmuneStatus, registerEffectQueries } from "../module/services/effects/apply.js";
 import { registerPromptQueries } from "../module/services/effects/prompts.js";
 import { COMBAT_EVENTS, registerCombatQueries } from "../module/services/effects/combat-events.js";
+import { registerDamageQueries } from "../module/services/combat/damage.js";
+import { registerFlowQueries } from "../module/services/combat/flow.js";
 import L5R4ItemSheet from "../module/sheets/item-sheet.js";
 import L5R4PcSheet from "../module/sheets/pc-sheet.js";
 import L5R4NpcSheet from "../module/sheets/npc-sheet.js";
 import L5R4ActiveEffectConfig from "../module/sheets/active-effect-config.js";
 import { registerTemplates } from "../module/setup/preload-templates.js";
 import { migrateWorld } from "../module/setup/migrations.js";
-import { registerSettings } from "../module/setup/register-settings.js";
+import { registerSettings } from "../module/setup/settings/register-all.js";
 import { registerHandlebarsHelpers } from "../module/setup/register-handlebars.js";
 import { registerEnrichers } from "../module/setup/enrichers.js";
 import { registerAllHooks } from "../module/hooks/register-all.js";
@@ -55,8 +57,6 @@ import { registerAllHooks } from "../module/hooks/register-all.js";
  * @listens Hooks#init
  */
 Hooks.once("init", async () => {
-  console.log(`${SYS_ID} | Initializing Legend of the Five Rings 4e`);
-
   registerSettings();
 
   CONFIG.Item.documentClass  = L5R4Item;
@@ -76,15 +76,19 @@ Hooks.once("init", async () => {
   // Initiative is the Roll & Keep pool rolled by L5R4Combatant; core's formula is only the fallback for a
   // combatant with no actor. Scores are whole numbers.
   CONFIG.Combat.initiative = { formula: "1d10", decimals: 0 };
-  // Documents do not import services, so the Void Point prompt and the effect services reach L5R4Combat here
+  // Documents do not import services, so the Void Point prompt and the effect services reach L5R4Combat here, and
+  // the immunity notice reaches L5R4ActiveEffect
   L5R4Combat.askInitiativeBonuses = spendInitiativeVoidPoints;
   L5R4Combat.EVENTS = COMBAT_EVENTS;
+  L5R4ActiveEffect.onImmuneStatus = onImmuneStatus;
 
   // What a player's client asks the active GM to do: apply a condition to an actor the player does not own, end a
-  // Concentration, settle Center Stance when a player ends the Round
+  // Concentration, settle Center Stance when a player ends the Round, apply or undo damage, run a combat flow step
   registerEffectQueries();
   registerPromptQueries();
   registerCombatQueries();
+  registerDamageQueries();
+  registerFlowQueries();
 
   // One data model per subtype declared in system.json documentTypes, plus models for core types, which are not
   // declared. Core labels each subtype with its TYPES.<Document>.<type> key from lang/*.json.
@@ -180,6 +184,7 @@ Hooks.once("init", async () => {
  * @listens Hooks#quenchReady
  */
 Hooks.once("quenchReady", async quench => {
+  // eslint-disable-next-line no-restricted-syntax -- the release zip leaves out tests/ (release.yml -x "tests/*"), so only a world with Quench loads it
   const { registerQuenchTests } = await import("../tests/quench/index.js");
   await registerQuenchTests(quench);
 });
@@ -199,8 +204,6 @@ Hooks.once("quenchReady", async quench => {
  * @listens Hooks#ready
  */
 Hooks.once("ready", async () => {
-  console.log(`${SYS_ID} | Ready`);
-
   if (game.user?.isGM) {
     const currentVersion = game.system?.version ?? "0.0.0";
     const last = game.settings.get(SYS_ID, "lastMigratedVersion") ?? "0.0.0";
@@ -210,12 +213,6 @@ Hooks.once("ready", async () => {
 
     if (runFlag && (newer || forceFlag)) {
       try {
-        console.log(`${SYS_ID}`, "Running migrations", { 
-          from: last, 
-          to: currentVersion, 
-          forced: forceFlag,
-          versionChanged: newer 
-        });
         await migrateWorld(last, currentVersion);
       } catch (e) {
         console.warn(`${SYS_ID}`, "migrateWorld failed", e);

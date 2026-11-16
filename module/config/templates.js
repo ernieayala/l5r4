@@ -1,34 +1,10 @@
 /**
  * @module config/templates
- * @description Template path resolution and the pre-configured paths of the Handlebars (.hbs) templates the system
- * renders. One place for the paths keeps literal template strings out of the code, and TEMPLATE rejects a bad path
- * where it is built instead of where it is rendered.
+ * @description The paths of the Handlebars (.hbs) templates the system renders for chat cards, text links, markup an
+ * app adds outside its window, and dialogs, each under the system's templates folder (`PATHS.templates`).
  */
 
 import { PATHS } from "./constants.js";
-
-/**
- * Resolve a relative template path to a full system template path: "chat/check.hbs" becomes
- * "systems/l5r4-enhanced/templates/chat/check.hbs".
- * Validates the path before use: a non-string throws a TypeError, an empty string an Error.
- * @param {string} relPath - Relative path from templates directory (e.g., "chat/check.hbs")
- * @returns {string} Full template path suitable for Foundry's renderTemplate
- * @throws {TypeError} If relPath is not a string
- * @throws {Error} If relPath is empty
- */
-export function TEMPLATE(relPath) {
-  // Validate parameter type
-  if (typeof relPath !== "string") {
-    throw new TypeError(`TEMPLATE expects string, got ${typeof relPath}`);
-  }
-
-  // Validate parameter is not empty
-  if (!relPath) {
-    throw new Error("TEMPLATE requires non-empty path");
-  }
-
-  return `${PATHS.templates}/${relPath}`;
-}
 
 /**
  * Pre-configured template paths for chat message rendering, passed to
@@ -49,16 +25,16 @@ export function TEMPLATE(relPath) {
  * @property {string} contest - A Contested Roll between two roll messages
  */
 export const CHAT_TEMPLATES = Object.freeze({
-  checkCard: TEMPLATE("chat/check.hbs"),
-  weaponCard: TEMPLATE("chat/weapon-chat.hbs"),
-  effectPrompt: TEMPLATE("chat/effect-prompt.hbs"),
-  damageResult: TEMPLATE("chat/damage-result.hbs"),
-  flowCard: TEMPLATE("chat/flow.hbs"),
-  healing: TEMPLATE("chat/healing.hbs"),
-  checkRequest: TEMPLATE("chat/check-request.hbs"),
-  itemSummary: TEMPLATE("chat/item-summary.hbs"),
-  note: TEMPLATE("chat/note.hbs"),
-  contest: TEMPLATE("chat/contest.hbs")
+  checkCard: `${PATHS.templates}/chat/check.hbs`,
+  weaponCard: `${PATHS.templates}/chat/weapon.hbs`,
+  effectPrompt: `${PATHS.templates}/chat/effect-prompt.hbs`,
+  damageResult: `${PATHS.templates}/chat/damage-result.hbs`,
+  flowCard: `${PATHS.templates}/chat/flow.hbs`,
+  healing: `${PATHS.templates}/chat/healing.hbs`,
+  checkRequest: `${PATHS.templates}/chat/check-request.hbs`,
+  itemSummary: `${PATHS.templates}/chat/item-summary.hbs`,
+  note: `${PATHS.templates}/chat/note.hbs`,
+  contest: `${PATHS.templates}/chat/contest.hbs`
 });
 
 /**
@@ -68,7 +44,7 @@ export const CHAT_TEMPLATES = Object.freeze({
  * @property {string} inlineLink - A Check, Damage, Condition, or Fear link, or a broken one
  */
 export const LINK_TEMPLATES = Object.freeze({
-  inlineLink: TEMPLATE("links/inline-link.hbs")
+  inlineLink: `${PATHS.templates}/links/inline-link.hbs`
 });
 
 /**
@@ -78,7 +54,7 @@ export const LINK_TEMPLATES = Object.freeze({
  * @property {string} browserOpen - The Compendium sidebar's Browse button (module/apps/compendium-browser.js)
  */
 export const APP_TEMPLATES = Object.freeze({
-  browserOpen: TEMPLATE("apps/compendium-browser-open.hbs")
+  browserOpen: `${PATHS.templates}/apps/compendium-browser-open.hbs`
 });
 
 /**
@@ -98,14 +74,14 @@ export const APP_TEMPLATES = Object.freeze({
  * @property {string} removeEmphasis - The question before a custom Emphasis is removed
  */
 export const DIALOG_TEMPLATES = Object.freeze({
-  check: TEMPLATE("dialogs/check-dialog.hbs"),
-  checkRing: TEMPLATE("dialogs/check-extras/ring.hbs"),
-  checkSpell: TEMPLATE("dialogs/check-extras/spell.hbs"),
-  checkMaho: TEMPLATE("dialogs/check-extras/maho.hbs"),
-  checkSlot: TEMPLATE("dialogs/check-extras/slot.hbs"),
-  unifiedItemCreate: TEMPLATE("dialogs/unified-item-create-dialog.hbs"),
-  ledger: TEMPLATE("dialogs/ledger-dialog.hbs"),
-  confirm: TEMPLATE("dialogs/confirm-dialog.hbs"),
-  choice: TEMPLATE("dialogs/choice-dialog.hbs"),
-  removeEmphasis: TEMPLATE("dialogs/remove-emphasis-dialog.hbs")
+  check: `${PATHS.templates}/dialogs/check-dialog.hbs`,
+  checkRing: `${PATHS.templates}/dialogs/check-extras/ring.hbs`,
+  checkSpell: `${PATHS.templates}/dialogs/check-extras/spell.hbs`,
+  checkMaho: `${PATHS.templates}/dialogs/check-extras/maho.hbs`,
+  checkSlot: `${PATHS.templates}/dialogs/check-extras/slot.hbs`,
+  unifiedItemCreate: `${PATHS.templates}/dialogs/unified-item-create-dialog.hbs`,
+  ledger: `${PATHS.templates}/dialogs/ledger-dialog.hbs`,
+  confirm: `${PATHS.templates}/dialogs/confirm-dialog.hbs`,
+  choice: `${PATHS.templates}/dialogs/choice-dialog.hbs`,
+  removeEmphasis: `${PATHS.templates}/dialogs/remove-emphasis-dialog.hbs`
 });

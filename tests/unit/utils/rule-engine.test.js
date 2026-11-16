@@ -249,17 +249,17 @@ describe("getDerivedRuleOutputs", () => {
       rule("RollModifier", { selector: "attack", roll: 1, keep: 0, total: 0, type: "untyped" })
     ]);
     const options = new Set();
-    expect(getSelectorBonus(result.bag, ["skill:kenjutsu"], options)).toEqual({
+    expect(getSelectorBonus(result.bag, ["skill:kenjutsu"], { options })).toEqual({
       roll: 2,
       keep: 1,
       total: 2
     });
-    expect(getSelectorBonus(result.bag, ["skill:kenjutsu", "trait:ref"], options)).toEqual({
+    expect(getSelectorBonus(result.bag, ["skill:kenjutsu", "trait:ref"], { options })).toEqual({
       roll: 2,
       keep: 2,
       total: 2
     });
-    expect(getSelectorBonus(result.bag, ["ring:fire"], options)).toEqual({
+    expect(getSelectorBonus(result.bag, ["ring:fire"], { options })).toEqual({
       roll: 2,
       keep: 0,
       total: 0
@@ -285,8 +285,10 @@ describe("getDerivedRuleOutputs", () => {
       })
     ]);
     expect(result.bag.rollModifiers["skill:kenjutsu"]).toHaveLength(1);
-    expect(getSelectorBonus(result.bag, ["skill:kenjutsu"], new Set()).roll).toBe(0);
-    expect(getSelectorBonus(result.bag, ["skill:kenjutsu"], new Set(["target"])).roll).toBe(1);
+    expect(getSelectorBonus(result.bag, ["skill:kenjutsu"], { options: new Set() }).roll).toBe(0);
+    expect(
+      getSelectorBonus(result.bag, ["skill:kenjutsu"], { options: new Set(["target"]) }).roll
+    ).toBe(1);
   });
 
   it("should hold optional and range-limited RollModifiers for the dialog, not the sheet formula", () => {
@@ -321,7 +323,7 @@ describe("getDerivedRuleOutputs", () => {
       rollData,
       new Set()
     );
-    expect(getSelectorBonus(result.bag, ["attack"], new Set()).roll).toBe(2);
+    expect(getSelectorBonus(result.bag, ["attack"], { options: new Set() }).roll).toBe(2);
     const [, melee, centered, item] = result.bag.rollModifiers.attack;
     expect(melee.range).toBe("melee");
     expect(centered).toMatchObject({ optional: true, consumes: "E" });
@@ -444,25 +446,32 @@ describe("getBagEntries", () => {
 
   it("should return the selectors' entries whose predicates hold", () => {
     expect(
-      getBagEntries(bag, "rollModifiers", ["attack"], new Set(["target"])).map(e => e.roll)
+      getBagEntries(bag, "rollModifiers", {
+        selectors: ["attack"],
+        options: new Set(["target"])
+      }).map(e => e.roll)
     ).toEqual([1, 2]);
     expect(
-      getBagEntries(
-        bag,
-        "rollModifiers",
-        ["attack"],
-        new Set(["target", "target:status:mounted"])
-      ).map(e => e.roll)
+      getBagEntries(bag, "rollModifiers", {
+        selectors: ["attack"],
+        options: new Set(["target", "target:status:mounted"])
+      }).map(e => e.roll)
     ).toEqual([2]);
-    expect(getBagEntries(bag, "rollModifiers", ["attack"], new Set()).map(e => e.roll)).toEqual([
-      2
-    ]);
+    expect(
+      getBagEntries(bag, "rollModifiers", { selectors: ["attack"], options: new Set() }).map(
+        e => e.roll
+      )
+    ).toEqual([2]);
   });
 
   it("should return nothing for a missing kind, selector, or bag", () => {
-    expect(getBagEntries(bag, "notes", ["attack"], new Set())).toEqual([]);
-    expect(getBagEntries(bag, "rollModifiers", ["spell"], new Set())).toEqual([]);
-    expect(getBagEntries(undefined, "rollModifiers", ["attack"], new Set())).toEqual([]);
+    expect(getBagEntries(bag, "notes", { selectors: ["attack"], options: new Set() })).toEqual([]);
+    expect(
+      getBagEntries(bag, "rollModifiers", { selectors: ["spell"], options: new Set() })
+    ).toEqual([]);
+    expect(
+      getBagEntries(undefined, "rollModifiers", { selectors: ["attack"], options: new Set() })
+    ).toEqual([]);
   });
 });
 

@@ -86,8 +86,10 @@ export function getCostPricer({ costs, options, rollData, report = () => {} }) {
   const bag = { costs };
   return (selectors, base, itemId = null) => {
     const rules = [
-      ...getBagEntries(bag, "costs", selectors, options),
-      ...getBagEntries(bag, "costs", ["self"], options).filter(rule => rule.itemId === itemId)
+      ...getBagEntries(bag, "costs", { selectors, options }),
+      ...getBagEntries(bag, "costs", { selectors: ["self"], options }).filter(
+        rule => rule.itemId === itemId
+      )
     ];
     let price = base;
     for (const rule of rules) {

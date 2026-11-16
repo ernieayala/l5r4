@@ -58,7 +58,10 @@ export async function rollSpellCast({ actor, spell, showDialog = true } = {}) {
     return null;
   }
   const mastery = Math.max(1, toInt(spell.system.mastery));
-  if (mastery > schoolRank && !(await canCastAboveRank(actor, spell, mastery, schoolRank))) {
+  if (
+    mastery > schoolRank &&
+    !(await canCastAboveRank(actor, spell, { mastery, limit: schoolRank }))
+  ) {
     return null;
   }
   const slots = getSlotDialogData(actor, ring);
@@ -122,11 +125,12 @@ async function askElement(spell) {
  * game-rules/66_magic_and_spell_casting.md, p.164
  * @param {Actor} actor - The caster
  * @param {Item} spell - The spell
- * @param {number} mastery - The spell's Mastery Level
- * @param {number} limit - The caster's School Rank in the spell's element
+ * @param {object} ranks
+ * @param {number} ranks.mastery - The spell's Mastery Level
+ * @param {number} ranks.limit - The caster's School Rank in the spell's element
  * @returns {Promise<boolean>} Whether the cast goes ahead
  */
-function canCastAboveRank(actor, spell, mastery, limit) {
+function canCastAboveRank(actor, spell, { mastery, limit }) {
   return askGmAllow({
     title: spell.name,
     reason: F("l5r4.magic.spells.aboveSchoolRank", {

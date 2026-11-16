@@ -314,12 +314,19 @@ export default [
   },
   {
     files: ["module/utils/**/*.js"],
+    // docs/code-system/modules.md: the localization API reads game.i18n by design
+    ignores: ["module/utils/localization.js"],
+    rules: {
+      "no-restricted-globals": ["warn", ...DEPRECATED_GLOBALS, ...FOUNDRY_GLOBAL_RESTRICTIONS]
+    }
+  },
+  {
+    files: ["module/utils/**/*.js"],
     rules: {
       "no-restricted-imports": layerImports(
         "(^|/)(data|documents|services|mixins|apps|sheets|setup|hooks)/",
         "Utils"
-      ),
-      "no-restricted-globals": ["warn", ...DEPRECATED_GLOBALS, ...FOUNDRY_GLOBAL_RESTRICTIONS]
+      )
     }
   },
   {

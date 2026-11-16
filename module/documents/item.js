@@ -17,7 +17,7 @@
  */
 
 import { SYS_ID } from "../config/constants.js";
-import { CHAT_CARD_TEMPLATES, DEFAULT_ICONS } from "./item/constants/item-types.js";
+import { CHAT_CARD_TEMPLATES, DEFAULT_ICONS } from "../config/item-types.js";
 import { onItemPreCreate, onItemCreate } from "./item/lifecycle/item-creation.js";
 import { updateGrantRecords, applyGrants, deleteGrantedItems } from "./item/lifecycle/grants.js";
 import { onItemPreUpdate } from "./item/lifecycle/item-updates.js";

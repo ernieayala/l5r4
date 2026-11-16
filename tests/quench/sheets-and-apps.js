@@ -132,7 +132,7 @@ export function registerSheetsAndAppsTests(quench) {
 
       before(async function () {
         this.timeout(SURFACE_TIMEOUT_MS);
-        // Core gives each roll message the dice sound (client/documents/chat-message.mjs:540); the click-through posts
+        // Core gives each roll message the dice sound [src: client/documents/chat-message.mjs:540]; the click-through posts
         // a burst of rolls, and Chrome at times fails to load that many audio elements, an error core logs
         diceSound = CONFIG.sounds.dice;
         CONFIG.sounds.dice = null;

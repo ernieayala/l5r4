@@ -5,7 +5,7 @@
  * class in module/sheets/handlers/. Clicks go to _onAction, right-clicks to _onActionContext, and changes to
  * _onActionChange, which the subclasses override; handlers receive the context from _getHandlerContext().
  */
-import { getIconPath } from "../config/icons.js";
+import { getIconPath } from "../utils/icons.js";
 import { on } from "../utils/dom.js";
 import { KeyboardBehaviorMixin } from "../mixins/keyboard-behavior-mixin.js";
 import { VoidPointsHandler } from "./handlers/void-points-handler.js";
@@ -77,26 +77,30 @@ export class BaseActorSheet extends KeyboardBehaviorMixin(
       return;
     }
 
-    on(root, "[data-action]", "click", (ev, el) => {
-      const action = el.getAttribute("data-action");
-      this._onAction(action, ev, el);
+    on(root, "click", {
+      selector: "[data-action]",
+      handler: (ev, el) => {
+        const action = el.getAttribute("data-action");
+        this._onAction(action, ev, el);
+      }
     });
 
-    on(
-      root,
-      "[data-action]",
-      "contextmenu",
-      (ev, el) => {
+    on(root, "contextmenu", {
+      selector: "[data-action]",
+      handler: (ev, el) => {
         ev.preventDefault();
         const action = el.getAttribute("data-action");
         this._onActionContext(action, ev, el);
       },
-      { capture: true }
-    );
+      capture: true
+    });
 
-    on(root, "[data-action]", "change", (ev, el) => {
-      const action = el.getAttribute("data-action");
-      this._onActionChange(action, ev, el);
+    on(root, "change", {
+      selector: "[data-action]",
+      handler: (ev, el) => {
+        const action = el.getAttribute("data-action");
+        this._onActionChange(action, ev, el);
+      }
     });
 
     this._setupImageErrorHandling(root);
@@ -522,7 +526,7 @@ export class BaseActorSheet extends KeyboardBehaviorMixin(
    * @param {string[]} allowedKeys - Array of sortable field names
    */
   _initializeSortIndicators(root, scope, allowedKeys) {
-    SortHandler.updateSortIndicators(root, this.actor.id, scope, allowedKeys);
+    SortHandler.updateSortIndicators(root, this.actor.id, { scope, allowedKeys });
   }
 
   /**
@@ -536,13 +540,11 @@ export class BaseActorSheet extends KeyboardBehaviorMixin(
    * @returns {Promise<void>}
    */
   async _onUnifiedSortClick(event, element) {
-    return SortHandler.updateSortPref(
-      this.actor.id,
-      event,
-      element,
-      scope => this._getAllowedSortKeys(scope),
-      () => this.render()
-    );
+    return SortHandler.updateSortPref(event, element, {
+      actorId: this.actor.id,
+      getAllowedKeys: scope => this._getAllowedSortKeys(scope),
+      renderSheet: () => this.render()
+    });
   }
 
   /**

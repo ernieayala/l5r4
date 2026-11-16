@@ -500,7 +500,7 @@ export function registerAuthoringTests(quench) {
                 }
               }
             ]);
-            await applyTrackChange(actor, "honor", -3, "Quench breach");
+            await applyTrackChange(actor, "honor", { points: -3, reason: "Quench breach" });
             assert.deepInclude(actor.system.honor, { rank: 1, points: 4 });
             const [entry] = ledgerEntriesOf(actor);
             assert.deepInclude(entry, {

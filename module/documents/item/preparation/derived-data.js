@@ -23,14 +23,12 @@ export function prepareItemDerivedData(item) {
   if (type === "skill") {
     // Ensure rank is non-negative integer for formula calculation
     const rank = Math.max(0, parseInt(sys.rank) || 0);
-    applyDiceFormula(
-      sys,
-      () => getSkillFormula(sys),
+    applyDiceFormula(sys, () => getSkillFormula(sys), {
       // Fallback: Safe {rank}k0 formula if calculation fails
-      { roll: rank, keep: 0, rollFormula: `${rank}k0` },
-      "Failed to compute skill roll formula",
+      fallback: { roll: rank, keep: 0, rollFormula: `${rank}k0` },
+      errorMsg: "Failed to compute skill roll formula",
       item
-    );
+    });
   }
 
   prepareWeaponDamage(item);
@@ -56,10 +54,12 @@ export function prepareWeaponDamage(item) {
       sys,
       // Actor reference needed to get actor's Strength for bow damage limit
       () => getBowDamage(sys, item.actor),
-      // Fallback: Default 0k0 prevents undefined values in damage rolls
-      { derivedDamageRoll: 0, derivedDamageKeep: 0, derivedDamageFormula: "0k0" },
-      "Failed to compute bow damage formula",
-      item
+      {
+        // Fallback: Default 0k0 prevents undefined values in damage rolls
+        fallback: { derivedDamageRoll: 0, derivedDamageKeep: 0, derivedDamageFormula: "0k0" },
+        errorMsg: "Failed to compute bow damage formula",
+        item
+      }
     );
   }
 
@@ -68,14 +68,16 @@ export function prepareWeaponDamage(item) {
       sys,
       // Actor reference needed to get actor's Strength for melee damage
       () => getMeleeDamage(sys, item.actor),
-      // Fallback: Use base weapon DR without Strength if calculation fails
       {
-        derivedDamageRoll: toInt(sys.damageRoll),
-        derivedDamageKeep: toInt(sys.damageKeep),
-        derivedDamageFormula: `${toInt(sys.damageRoll)}k${toInt(sys.damageKeep)}`
-      },
-      "Failed to compute melee damage formula",
-      item
+        // Fallback: Use base weapon DR without Strength if calculation fails
+        fallback: {
+          derivedDamageRoll: toInt(sys.damageRoll),
+          derivedDamageKeep: toInt(sys.damageKeep),
+          derivedDamageFormula: `${toInt(sys.damageRoll)}k${toInt(sys.damageKeep)}`
+        },
+        errorMsg: "Failed to compute melee damage formula",
+        item
+      }
     );
   }
 }
@@ -85,11 +87,12 @@ export function prepareWeaponDamage(item) {
  * calculation throws, so one bad item never stops data preparation.
  * @param {object} sys - The item's system data object (item.system)
  * @param {Function} calculator - Function that computes dice formula properties
- * @param {object} fallback - Safe default values if calculation fails
- * @param {string} errorMsg - Error message for console warning
- * @param {Item} item - The item being prepared (for error logging context)
+ * @param {object} options
+ * @param {object} options.fallback - Safe default values if calculation fails
+ * @param {string} options.errorMsg - Error message for console warning
+ * @param {Item} options.item - The item being prepared (for error logging context)
  */
-function applyDiceFormula(sys, calculator, fallback, errorMsg, item) {
+function applyDiceFormula(sys, calculator, { fallback, errorMsg, item }) {
   try {
     const result = calculator();
     Object.assign(sys, result);

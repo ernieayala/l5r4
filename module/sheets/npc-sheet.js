@@ -6,18 +6,19 @@
  * player who does not own the NPC.
  */
 import { SYS_ID } from "../config/constants.js";
-import { DIALOG_TEMPLATES, TEMPLATE } from "../config/templates.js";
+import { DIALOG_TEMPLATES } from "../config/templates.js";
 import { ACTION_TYPES, STANCES } from "../config/localization.js";
 import { NPC_SORT_KEYS } from "../config/sort-keys.js";
 import { getClamped } from "../utils/type-coercion.js";
 import { T } from "../utils/localization.js";
 import { on } from "../utils/dom.js";
-import { getSortPref, applySortPref } from "../utils/sorting.js";
-import { getSectionCollapsedMap } from "../utils/section-state.js";
+import { applySortPref } from "../utils/sorting.js";
 import { getActiveStance } from "../utils/stances.js";
 import { prepareItemSheetOptions } from "../documents/item/integration/sheet-data.js";
 import { summaryOf } from "../documents/summary.js";
 import * as Fear from "../services/fear.js";
+import { getSortPref } from "../services/sort-preferences.js";
+import { getSectionCollapsedMap } from "../services/section-state.js";
 import { applyLongRest } from "../services/rest.js";
 import { rollSpellCast } from "../services/dice/rolls/spell-cast-roll.js";
 import { rollMahoCast } from "../services/dice/rolls/maho-cast-roll.js";
@@ -140,8 +141,8 @@ export default class L5R4NpcSheet extends BaseActorSheet {
         }
       };
       const allowedKeys = this._getAllowedSortKeys("skills");
-      const pref = getSortPref(actorObj.id, "skills", allowedKeys, "name");
-      return applySortPref(getItemsOfType("skill"), cols, pref, game.i18n?.lang);
+      const pref = getSortPref(actorObj.id, "skills", { allowedKeys, defaultKey: "name" });
+      return applySortPref(getItemsOfType("skill"), cols, { pref, locale: game.i18n?.lang });
     })();
 
     const collapsedSections = getSectionCollapsedMap(actorObj.id, [
@@ -418,7 +419,9 @@ export default class L5R4NpcSheet extends BaseActorSheet {
    */
   async _renderHTML(context, _options) {
     const isLimited = !game.user.isGM && this.actor.limited;
-    const path = isLimited ? TEMPLATE("actor/npc-limited.hbs") : TEMPLATE("actor/npc.hbs");
+    const path = isLimited
+      ? `systems/${SYS_ID}/templates/actor/npc-limited.hbs`
+      : `systems/${SYS_ID}/templates/actor/npc.hbs`;
     const html = await foundry.applications.handlebars.renderTemplate(path, context);
     // Both templates render one <form> root
     const form = foundry.utils.parseHTML(html);
@@ -459,9 +462,15 @@ export default class L5R4NpcSheet extends BaseActorSheet {
 
     this._initializeSortIndicators(root, "skills", this._getAllowedSortKeys("skills"));
 
-    on(root, ".simple-roll", "click", ev => RollHandler.rollNpcPool(this._getHandlerContext(), ev));
+    on(root, "click", {
+      selector: ".simple-roll",
+      handler: ev => RollHandler.rollNpcPool(this._getHandlerContext(), ev)
+    });
 
-    on(root, "[data-edit='img']", "click", ev => this._onEditImage(ev, ev.currentTarget));
+    on(root, "click", {
+      selector: "[data-edit='img']",
+      handler: ev => this._onEditImage(ev, ev.currentTarget)
+    });
   }
 
   /**
@@ -648,6 +657,7 @@ export default class L5R4NpcSheet extends BaseActorSheet {
    * @returns {object} Validated and coerced data ready for actor.update()
    * @override
    */
+  // eslint-disable-next-line max-params -- core's DocumentSheetV2#_prepareSubmitData(event, form, formData, updateData) override
   _prepareSubmitData(event, form, formData, updateData = {}) {
     const submit = super._prepareSubmitData(event, form, formData, updateData);
     if (!String(submit.name ?? "").trim()) {

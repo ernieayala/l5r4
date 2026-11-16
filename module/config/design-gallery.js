@@ -1167,7 +1167,11 @@ export const GALLERY_COMPONENTS = Object.freeze([
   {
     page: "rank-control",
     partials: [`${T}/actor/_partials/_ranks.hbs`],
-    scss: ["scss/features/_ranks.scss", "scss/components/_animations.scss"],
+    scss: [
+      "scss/features/_ranks.scss",
+      "scss/components/_rank-control.scss",
+      "scss/components/_animations.scss"
+    ],
     samples: [
       {
         label: "l5r4.apps.designGallery.samples.rankTracks",
@@ -1354,7 +1358,7 @@ export const GALLERY_COMPONENTS = Object.freeze([
   },
   {
     page: "chat-card",
-    partials: [`${T}/chat/healing.hbs`, `${T}/chat/weapon-chat.hbs`],
+    partials: [`${T}/chat/healing.hbs`, `${T}/chat/weapon.hbs`],
     scss: ["scss/components/_chat-card.scss"],
     samples: [
       {
@@ -1379,7 +1383,7 @@ export const GALLERY_COMPONENTS = Object.freeze([
       },
       {
         label: "l5r4.apps.designGallery.samples.weaponCard",
-        partial: `${T}/chat/weapon-chat.hbs`,
+        partial: `${T}/chat/weapon.hbs`,
         scope: "chat",
         context: "plain",
         roll: "skilled",

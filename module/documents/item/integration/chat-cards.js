@@ -4,9 +4,9 @@
  * the owning actor as speaker, the type's localized label as flavor, and the message mode selected in the chat log.
  */
 
+import { CHAT_CARD_TEMPLATES } from "../../../config/item-types.js";
 import { CHAT_TEMPLATES } from "../../../config/templates.js";
 import { R } from "../../../utils/localization.js";
-import { CHAT_CARD_TEMPLATES } from "../constants/item-types.js";
 import { summaryOf } from "../../summary.js";
 
 /**

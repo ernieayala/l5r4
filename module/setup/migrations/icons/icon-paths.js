@@ -3,8 +3,8 @@
  * @description Updates legacy PNG icon paths to new WebP assets.
  */
 import { SYS_ID, PATHS } from "../../../config/constants.js";
+import { DEFAULT_ICONS } from "../../../config/item-types.js";
 import { pluralKeyOf } from "../../../utils/localization.js";
-import { DEFAULT_ICONS } from "../../../documents/item/constants/item-types.js";
 import { ICON_MIGRATION_MAP } from "./icon-map.js";
 
 /**

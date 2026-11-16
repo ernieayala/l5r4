@@ -7,7 +7,7 @@
 
 import { SYS_ID } from "../../config/constants.js";
 import { SYSTEM_EFFECTS } from "../../config/status-effects.js";
-import { T } from "../../utils/localization.js";
+import { F, T } from "../../utils/localization.js";
 
 /** Name of the GM query that applies an effect for a player (registered in registerEffectQueries). */
 export const APPLY_EFFECT_QUERY = `${SYS_ID}.applyEffect`;
@@ -127,6 +127,16 @@ export function ownTurnStartOf(actor) {
     return undefined;
   }
   return { ...foundry.documents.ActiveEffect.getEffectStart(combat), combatant: combatant.id };
+}
+
+/**
+ * Tell the user an effect was not created because the actor is immune to its status (ConditionImmunity rules).
+ * L5R4ActiveEffect calls it from `_preCreateOperation`, which the entry module wires.
+ * @param {Actor} actor
+ * @param {ActiveEffect} effect - The effect that was dropped
+ */
+export function onImmuneStatus(actor, effect) {
+  ui.notifications?.info(F("l5r4.ui.effects.immune", { name: actor.name, effect: effect.name }));
 }
 
 /**

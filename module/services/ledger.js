@@ -61,11 +61,12 @@ export function ledgerEntriesOf(actor) {
  *
  * @param {Actor} actor
  * @param {string} track - honor, glory, status, or taint
- * @param {number} points - Positive gains, negative loses
- * @param {string} reason
+ * @param {object} change
+ * @param {number} change.points - Positive gains, negative loses
+ * @param {string} change.reason
  * @returns {Promise<LedgerEntry>}
  */
-export async function applyTrackChange(actor, track, points, reason) {
+export async function applyTrackChange(actor, track, { points, reason }) {
   const field = TRACK_FIELDS[track];
   const sized = getLedgerChange({
     track,
@@ -77,7 +78,8 @@ export async function applyTrackChange(actor, track, points, reason) {
     console.warn(`${SYS_ID} | Ledger rule on "${source}" (${actor.name}) skipped: ${message}`);
   }
   const stored = actor._source.system[field];
-  const next = applyRankPointsDelta(stored, sized.points / 10, ...RANK_TRACK_RANGE[field]);
+  const [minRank, maxRank] = RANK_TRACK_RANGE[field];
+  const next = applyRankPointsDelta(stored, sized.points / 10, { minRank, maxRank });
   const entry = {
     id: foundry.utils.randomID(),
     track,
@@ -135,5 +137,8 @@ export async function openLedgerDialog(actor) {
   if (!choice || !ledgerTracksOf(actor).includes(choice.track) || !choice.points) {
     return null;
   }
-  return applyTrackChange(actor, choice.track, choice.points, choice.reason.trim());
+  return applyTrackChange(actor, choice.track, {
+    points: choice.points,
+    reason: choice.reason.trim()
+  });
 }

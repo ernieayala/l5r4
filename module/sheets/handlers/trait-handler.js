@@ -41,6 +41,7 @@ export class TraitHandler {
    * @param {number} delta - Direction to adjust (+1 to increase, -1 to decrease)
    * @returns {Promise<void>}
    */
+  // eslint-disable-next-line max-params -- the sheet handler shape (context, event, element, delta) the sheet's _onAction switch passes (functions.md)
   static async updateTraitRank(context, event, element, delta) {
     event?.preventDefault?.();
 

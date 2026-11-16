@@ -1,15 +1,16 @@
 /**
- * @module sheets/handlers/pc-context-builder
+ * @module sheets/pc-context-builder
  * @description Shapes a PC's items for the character sheet's `_prepareContext()`: sorts each item type by the
  * user's stored sort preference, lists the Mastery Abilities a skill's rank unlocks (ranks 3, 5, 7), and reads the
  * bio items, stance, effective Traits, and collapsed sections. It returns plain objects for the Handlebars
  * templates and never changes a document.
  */
 
-import { getSortPref, applySortPref } from "../../utils/sorting.js";
-import { toInt } from "../../utils/type-coercion.js";
-import { getActiveStance } from "../../utils/stances.js";
-import { getSectionCollapsedMap } from "../../utils/section-state.js";
+import { applySortPref } from "../utils/sorting.js";
+import { toInt } from "../utils/type-coercion.js";
+import { getActiveStance } from "../utils/stances.js";
+import { getSortPref } from "../services/sort-preferences.js";
+import { getSectionCollapsedMap } from "../services/section-state.js";
 
 /**
  * Static utility class for building sorted item contexts for PC sheets.
@@ -67,55 +68,68 @@ export class PcContextBuilder {
 
     const spells = this.#getSortedSpells(actor, getItemsOfType("spell"));
 
-    const advantages = this.#getSortedItems(
-      actor,
-      getItemsOfType("advantage"),
-      "advantages",
-      this.#advDisCols
-    );
+    const advantages = this.#getSortedItems(actor, getItemsOfType("advantage"), {
+      scope: "advantages",
+      cols: this.#advDisCols
+    });
 
-    const disadvantages = this.#getSortedItems(
-      actor,
-      getItemsOfType("disadvantage"),
-      "disadvantages",
-      this.#advDisCols
-    );
+    const disadvantages = this.#getSortedItems(actor, getItemsOfType("disadvantage"), {
+      scope: "disadvantages",
+      cols: this.#advDisCols
+    });
 
     const items = this.#getSortedItems(
       actor,
       allItems.filter(i => i.type === "item" || i.type === "commonItem"),
-      "items",
       {
-        name: it => String(it?.name ?? "")
+        scope: "items",
+        cols: {
+          name: it => String(it?.name ?? "")
+        }
       }
     );
 
-    const katas = this.#getSortedItems(actor, getItemsOfType("kata"), "katas", {
-      name: it => String(it?.name ?? ""),
-      ring: it => String(it?.system?.ring ?? ""),
-      mastery: it => Number(it?.system?.mastery ?? 0) || 0
+    const katas = this.#getSortedItems(actor, getItemsOfType("kata"), {
+      scope: "katas",
+      cols: {
+        name: it => String(it?.name ?? ""),
+        ring: it => String(it?.system?.ring ?? ""),
+        mastery: it => Number(it?.system?.mastery ?? 0) || 0
+      }
     });
 
-    const kihos = this.#getSortedItems(actor, getItemsOfType("kiho"), "kihos", {
-      name: it => String(it?.name ?? ""),
-      ring: it => String(it?.system?.ring ?? ""),
-      mastery: it => Number(it?.system?.mastery ?? 0) || 0,
-      type: it => String(it?.system?.type ?? "")
+    const kihos = this.#getSortedItems(actor, getItemsOfType("kiho"), {
+      scope: "kihos",
+      cols: {
+        name: it => String(it?.name ?? ""),
+        ring: it => String(it?.system?.ring ?? ""),
+        mastery: it => Number(it?.system?.mastery ?? 0) || 0,
+        type: it => String(it?.system?.type ?? "")
+      }
     });
 
-    const tattoos = this.#getSortedItems(actor, getItemsOfType("tattoo"), "tattoos", {
-      name: it => String(it?.name ?? "")
+    const tattoos = this.#getSortedItems(actor, getItemsOfType("tattoo"), {
+      scope: "tattoos",
+      cols: {
+        name: it => String(it?.name ?? "")
+      }
     });
 
-    const techniques = this.#getSortedItems(actor, getItemsOfType("technique"), "techniques", {
-      name: it => String(it?.name ?? "")
+    const techniques = this.#getSortedItems(actor, getItemsOfType("technique"), {
+      scope: "techniques",
+      cols: {
+        name: it => String(it?.name ?? "")
+      }
     });
 
-    const armors = this.#getSortedItems(actor, getItemsOfType("armor"), "armors", {
-      name: it => String(it?.name ?? ""),
-      bonus: it => Number(it?.system?.bonus ?? 0) || 0,
-      reduction: it => Number(it?.system?.reduction ?? 0) || 0,
-      equipped: it => (it?.system?.equipped ? 1 : 0)
+    const armors = this.#getSortedItems(actor, getItemsOfType("armor"), {
+      scope: "armors",
+      cols: {
+        name: it => String(it?.name ?? ""),
+        bonus: it => Number(it?.system?.bonus ?? 0) || 0,
+        reduction: it => Number(it?.system?.reduction ?? 0) || 0,
+        equipped: it => (it?.system?.equipped ? 1 : 0)
+      }
     });
 
     const weapons = this.#getSortedWeapons(actor, getItemsOfType("weapon"));
@@ -179,8 +193,11 @@ export class PcContextBuilder {
       }
     };
 
-    const pref = getSortPref(actor.id, "skills", Object.keys(cols), "name");
-    return applySortPref(skillItems, cols, pref, game.i18n?.lang);
+    const pref = getSortPref(actor.id, "skills", {
+      allowedKeys: Object.keys(cols),
+      defaultKey: "name"
+    });
+    return applySortPref(skillItems, cols, { pref, locale: game.i18n?.lang });
   }
 
   /**
@@ -212,8 +229,11 @@ export class PcContextBuilder {
       duration: it => String(it?.system?.duration ?? "")
     };
 
-    const pref = getSortPref(actor.id, "spells", Object.keys(cols), "name");
-    return applySortPref(spellItems, cols, pref, game.i18n?.lang);
+    const pref = getSortPref(actor.id, "spells", {
+      allowedKeys: Object.keys(cols),
+      defaultKey: "name"
+    });
+    return applySortPref(spellItems, cols, { pref, locale: game.i18n?.lang });
   }
 
   /**
@@ -239,8 +259,11 @@ export class PcContextBuilder {
       size: it => String(it?.system?.size ?? "")
     };
 
-    const pref = getSortPref(actor.id, "weapons", Object.keys(cols), "name");
-    return applySortPref(weaponItems, cols, pref, game.i18n?.lang);
+    const pref = getSortPref(actor.id, "weapons", {
+      allowedKeys: Object.keys(cols),
+      defaultKey: "name"
+    });
+    return applySortPref(weaponItems, cols, { pref, locale: game.i18n?.lang });
   }
 
   /**
@@ -260,13 +283,17 @@ export class PcContextBuilder {
    *
    * @param {Actor} actor - L5R4 Actor document (used for preference scope)
    * @param {Item[]} items - Array of items to sort
-   * @param {string} scope - Sort preference scope key (e.g., "advantages")
-   * @param {{[key: string]: Function}} cols - Column extractor functions for sorting
+   * @param {object} sort
+   * @param {string} sort.scope - Sort preference scope key (e.g., "advantages")
+   * @param {{[key: string]: Function}} sort.cols - Column extractor functions for sorting
    * @returns {Item[]} Sorted items
    */
-  static #getSortedItems(actor, items, scope, cols) {
-    const pref = getSortPref(actor.id, scope, Object.keys(cols), "name");
-    return applySortPref(items, cols, pref, game.i18n?.lang);
+  static #getSortedItems(actor, items, { scope, cols }) {
+    const pref = getSortPref(actor.id, scope, {
+      allowedKeys: Object.keys(cols),
+      defaultKey: "name"
+    });
+    return applySortPref(items, cols, { pref, locale: game.i18n?.lang });
   }
 
   /**
@@ -330,8 +357,11 @@ export class PcContextBuilder {
       item: it => String(it.type ?? "")
     };
 
-    const pref = getSortPref(actor.id, "advDis", Object.keys(cols), "name");
-    return applySortPref(list, cols, pref, game.i18n?.lang);
+    const pref = getSortPref(actor.id, "advDis", {
+      allowedKeys: Object.keys(cols),
+      defaultKey: "name"
+    });
+    return applySortPref(list, cols, { pref, locale: game.i18n?.lang });
   }
 
   /**

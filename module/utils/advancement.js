@@ -72,11 +72,12 @@ export function toRankPoints(value, minRank = 0, maxRank = 10) {
  * @param {number} rp.rank - Current rank value
  * @param {number} rp.points - Current points value
  * @param {number} delta - Amount to add (positive) or subtract (negative)
- * @param {number} [minRank=0] - Minimum allowed rank
- * @param {number} [maxRank=10] - Maximum allowed rank
+ * @param {object} [range]
+ * @param {number} [range.minRank=0] - Minimum allowed rank
+ * @param {number} [range.maxRank=10] - Maximum allowed rank
  * @returns {{rank: number, points: number, value: number}} The new rank, points, and decimal value
  */
-export function applyRankPointsDelta(rp, delta, minRank = 0, maxRank = 10) {
+export function applyRankPointsDelta(rp, delta, { minRank = 0, maxRank = 10 } = {}) {
   const now = toDecimalRank(rp);
   const next = now + toNumber(delta, 0);
   return toRankPoints(next, minRank, maxRank);

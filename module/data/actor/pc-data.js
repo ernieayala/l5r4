@@ -12,11 +12,6 @@ import {
   stringField
 } from "../fields.js";
 import { migratePcSource } from "../migrate-source.js";
-import { preparePcData } from "../../documents/actor/preparation/pc-preparation.js";
-import {
-  getInsightRank,
-  preparePcExperience
-} from "../../documents/actor/calculations/xp-system.js";
 import ActorData from "./base-data.js";
 
 /**
@@ -59,9 +54,8 @@ export default class PcData extends ActorData {
   /** @override */
   prepareDerivedData() {
     super.prepareDerivedData();
-    const actor = this.parent;
-    preparePcData(actor, this, actor._finalizeWoundPenalties.bind(actor), getInsightRank);
-    preparePcExperience(actor, this);
+    // The PC's preparation is document code (module/documents/actor/preparation/), which the actor runs
+    this.parent.prepareSubtypeData();
   }
 
   /**
