@@ -15,7 +15,7 @@
  * @see module/services/stance/
  */
 
-import { getStatusRules } from "../../../module/utils/rule-engine.js";
+import { getStatusRules } from "../../../module/utils/status-data.js";
 import { SYS_ID } from "../../../module/config/constants.js";
 import { STANCE_IDS } from "../../../module/utils/stances.js";
 import { createTestPC } from "../../fixtures/actor-fixtures.js";

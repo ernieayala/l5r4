@@ -1,14 +1,11 @@
 import { describe, expect, it } from "vitest";
 import {
   applyRollOptionRules,
-  getBagEntries,
   getDerivedRuleOutputs,
-  parseRulesJson,
-  getSelectorBonus,
-  getStatusRules,
   getTraitAdjustTotal,
   getTraitAdjustments
 } from "../../../module/utils/rule-engine.js";
+import { getSelectorBonus } from "../../../module/utils/rule-bag.js";
 
 /** A rule as its DataModel leaves it: every field present, defaults filled. */
 const rule = (key, fields = {}) => ({ key, label: "", priority: 100, predicate: [], ...fields });
@@ -430,105 +427,5 @@ describe("getDerivedRuleOutputs", () => {
     expect(result.woundPenalty).toBe(0);
     expect(result.bag.rollModifiers).toEqual({});
     expect(result.errors.map(e => e.key)).toEqual(["Wounds", "RollModifier"]);
-  });
-});
-
-describe("getBagEntries", () => {
-  const bag = {
-    rollModifiers: {
-      attack: [
-        { roll: 1, predicate: ["target", { not: "target:status:mounted" }] },
-        { roll: 2, predicate: [] }
-      ],
-      damage: [{ roll: 5, predicate: [] }]
-    }
-  };
-
-  it("should return the selectors' entries whose predicates hold", () => {
-    expect(
-      getBagEntries(bag, "rollModifiers", {
-        selectors: ["attack"],
-        options: new Set(["target"])
-      }).map(e => e.roll)
-    ).toEqual([1, 2]);
-    expect(
-      getBagEntries(bag, "rollModifiers", {
-        selectors: ["attack"],
-        options: new Set(["target", "target:status:mounted"])
-      }).map(e => e.roll)
-    ).toEqual([2]);
-    expect(
-      getBagEntries(bag, "rollModifiers", { selectors: ["attack"], options: new Set() }).map(
-        e => e.roll
-      )
-    ).toEqual([2]);
-  });
-
-  it("should return nothing for a missing kind, selector, or bag", () => {
-    expect(getBagEntries(bag, "notes", { selectors: ["attack"], options: new Set() })).toEqual([]);
-    expect(
-      getBagEntries(bag, "rollModifiers", { selectors: ["spell"], options: new Set() })
-    ).toEqual([]);
-    expect(
-      getBagEntries(undefined, "rollModifiers", { selectors: ["attack"], options: new Set() })
-    ).toEqual([]);
-  });
-});
-
-describe("parseRulesJson", () => {
-  it("should parse a list of rules, and blank text as no rules", () => {
-    expect(parseRulesJson('[{"key": "Note", "selector": "attack", "text": "Hi"}]')).toEqual({
-      rules: [{ key: "Note", selector: "attack", text: "Hi" }]
-    });
-    expect(parseRulesJson("  ")).toEqual({ rules: [] });
-  });
-
-  it("should report text that is not JSON", () => {
-    const { error, detail } = parseRulesJson("[{");
-    expect(error).toBe("invalidJson");
-    expect(detail).toBeTruthy();
-  });
-
-  it("should report JSON that is not a list of objects with a key", () => {
-    expect(parseRulesJson('{"key": "Note"}')).toEqual({ error: "notList" });
-    expect(parseRulesJson('[{"selector": "attack"}]')).toEqual({ error: "notList" });
-    expect(parseRulesJson("[null]")).toEqual({ error: "notList" });
-    expect(parseRulesJson("[[]]")).toEqual({ error: "notList" });
-  });
-});
-
-describe("getStatusRules", () => {
-  it("should copy a status's rules, and none for a status without them", () => {
-    expect(getStatusRules("defenseStance")).toEqual([
-      { key: "ArmorTN", value: "@rings.air + @skills.defense.rank" }
-    ]);
-    expect(getStatusRules("mounted")[0]).toMatchObject({
-      key: "RollModifier",
-      selector: "attack",
-      roll: 1
-    });
-    // Prone: -10 Armor TN against melee, -2k0 to attacks with small and medium weapons, a note for large
-    // game-rules/41_conditional_effects.md, p.89
-    expect(getStatusRules("prone")).toEqual([
-      { key: "ArmorTN", value: -10, range: "melee" },
-      {
-        key: "RollModifier",
-        selector: "attack",
-        roll: -2,
-        predicate: [{ not: "weapon:size:large" }]
-      },
-      {
-        key: "Note",
-        selector: "attack",
-        text: "l5r4.ui.effects.proneLargeWeapon",
-        predicate: ["weapon:size:large"]
-      }
-    ]);
-    expect(getStatusRules("attackStance")).toEqual([]);
-  });
-
-  it("should return a copy, so editing it leaves the config alone", () => {
-    getStatusRules("defenseStance")[0].value = 99;
-    expect(getStatusRules("defenseStance")[0].value).toBe("@rings.air + @skills.defense.rank");
   });
 });

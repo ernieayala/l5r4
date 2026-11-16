@@ -13,12 +13,12 @@ import {
   prepareTraitsAndRings,
   prepareMovement
 } from "../calculations/shared-traits-rings-system.js";
+import { prepareHealRate } from "../calculations/wound-system.js";
 import {
-  prepareHealRate,
   prepareNpcManualWounds,
   prepareNpcFormulaWounds,
   prepareVisibleWoundLevels
-} from "../calculations/wound-system.js";
+} from "../calculations/npc-wound-system.js";
 import { prepareItemFormulas } from "../calculations/item-enrichment-system.js";
 import { prepareFear } from "../calculations/fear-system.js";
 import { applyArmorRules, applyDerivedRules } from "../rules.js";

@@ -6,12 +6,12 @@
  */
 
 import {
-  toTraitKey,
   getEffectiveTrait,
   getRollParams,
   getWeaponSkillTrait,
   ringRankOf
 } from "../../utils/mechanics.js";
+import { toTraitKey } from "../../utils/trait-keys.js";
 import { toInt } from "../../utils/type-coercion.js";
 import { T } from "../../utils/localization.js";
 import { rollSkill } from "../../services/dice/rolls/skill-roll.js";

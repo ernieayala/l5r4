@@ -15,7 +15,7 @@ import {
   getFilterOptions
 } from "../utils/browser-filter.js";
 import { formatPhrase, T } from "../utils/localization.js";
-import { buildSourceCitation } from "../utils/rule-summary.js";
+import { buildSourceCitation } from "../utils/source-citation.js";
 import { createPurchasedItem } from "../services/purchase.js";
 import { getRollActor } from "../services/dice/resources/void-points.js";
 

@@ -11,7 +11,7 @@
 import { BOW_IN_MELEE_PENALTY } from "../../../config/game-mechanics.js";
 import { T } from "../../../utils/localization.js";
 import { toInt } from "../../../utils/type-coercion.js";
-import { getBagEntries } from "../../../utils/rule-engine.js";
+import { getBagEntries } from "../../../utils/rule-bag.js";
 import { getArmorTnPenalty } from "../../../utils/armor-penalties.js";
 
 /**

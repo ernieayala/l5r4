@@ -1,21 +1,18 @@
 /**
  * Unit Tests: mechanics.js
  *
- * Tests core L5R4 game mechanics utilities including trait normalization,
- * wound penalties, effective trait resolution, and weapon skill lookups.
+ * Tests core L5R4 game mechanics utilities including effective trait resolution,
+ * Ring and School ranks, roll parameters, and weapon skill lookups.
  *
  * Test Priority: Tier 1 (Critical - Core game calculations)
  */
 
 import { describe, it, expect, vi } from "vitest";
 import {
-  toTraitKey,
   getEffectiveTrait,
   getRollParams,
-  getAffinityDeficiencyModifier,
   getWeaponSkillTrait,
   ringRankOf,
-  getCastingSchoolRank,
   getHighestSchoolRank
 } from "../../../module/utils/mechanics.js";
 
@@ -33,121 +30,6 @@ const prepared = actor => ({
     ...actor.system,
     bonuses: { skill: {}, trait: {}, ring: {}, ...actor.system?.bonuses }
   }
-});
-
-describe("toTraitKey", () => {
-  describe("Direct abbreviations", () => {
-    it("should accept sta lowercase", () => {
-      expect(toTraitKey("sta")).toBe("sta");
-    });
-
-    it("should accept sta uppercase", () => {
-      expect(toTraitKey("STA")).toBe("sta");
-    });
-
-    it("should accept sta mixed case", () => {
-      expect(toTraitKey("StA")).toBe("sta");
-    });
-
-    it("should accept all valid trait abbreviations", () => {
-      const traits = ["sta", "wil", "str", "per", "ref", "awa", "agi", "int", "void"];
-      traits.forEach(trait => {
-        expect(toTraitKey(trait)).toBe(trait);
-      });
-    });
-  });
-
-  describe("Keys in i18n format", () => {
-    it("should parse l5r4.ui.mechanics.traits.sta", () => {
-      expect(toTraitKey("l5r4.ui.mechanics.traits.sta")).toBe("sta");
-    });
-
-    it("should parse l5r4.ui.mechanics.traits.REF", () => {
-      expect(toTraitKey("l5r4.ui.mechanics.traits.REF")).toBe("ref");
-    });
-
-    it("should parse void ring i18n key", () => {
-      expect(toTraitKey("l5r4.ui.mechanics.rings.void")).toBe("void");
-    });
-
-    it("should parse void ring i18n key case insensitive", () => {
-      expect(toTraitKey("L5R4.UI.MECHANICS.RINGS.VOID")).toBe("void");
-    });
-  });
-
-  describe("English full names", () => {
-    it("should convert stamina to sta", () => {
-      expect(toTraitKey("stamina")).toBe("sta");
-    });
-
-    it("should convert willpower to wil", () => {
-      expect(toTraitKey("willpower")).toBe("wil");
-    });
-
-    it("should convert reflexes to ref", () => {
-      expect(toTraitKey("reflexes")).toBe("ref");
-    });
-
-    it("should handle case insensitive English names", () => {
-      expect(toTraitKey("STAMINA")).toBe("sta");
-      expect(toTraitKey("Reflexes")).toBe("ref");
-    });
-
-    it("should convert all English trait names", () => {
-      const mapping = {
-        stamina: "sta",
-        willpower: "wil",
-        strength: "str",
-        perception: "per",
-        reflexes: "ref",
-        awareness: "awa",
-        agility: "agi",
-        intelligence: "int",
-        void: "void"
-      };
-
-      Object.entries(mapping).forEach(([english, abbr]) => {
-        expect(toTraitKey(english)).toBe(abbr);
-      });
-    });
-  });
-
-  describe("Edge cases", () => {
-    it("should return empty string for null", () => {
-      expect(toTraitKey(null)).toBe("");
-    });
-
-    it("should return empty string for undefined", () => {
-      expect(toTraitKey(undefined)).toBe("");
-    });
-
-    it("should return empty string for symbol", () => {
-      expect(toTraitKey(Symbol("test"))).toBe("");
-    });
-
-    it("should return empty string for invalid trait", () => {
-      expect(toTraitKey("invalid")).toBe("");
-    });
-
-    it("should return empty string for number", () => {
-      expect(toTraitKey(123)).toBe("");
-    });
-
-    it("should handle whitespace", () => {
-      expect(toTraitKey("  sta  ")).toBe("sta");
-    });
-
-    it("should return empty string for empty string", () => {
-      expect(toTraitKey("")).toBe("");
-    });
-  });
-
-  describe("Reverse lookup through i18n", () => {
-    it("should handle missing game.i18n gracefully", () => {
-      // Should not throw when game.i18n is undefined
-      expect(() => toTraitKey("test")).not.toThrow();
-    });
-  });
 });
 
 // game-rules/25_rings_and_traits.md, p.76
@@ -179,29 +61,6 @@ describe("getHighestSchoolRank", () => {
 
   it("should be 0 for a character with no School", () => {
     expect(getHighestSchoolRank(character())).toBe(0);
-  });
-});
-
-// game-rules/29_types_of_rolls.md, p.80
-// game-rules/49_improving_your_character.md, p.104-105
-// game-rules/66_magic_and_spell_casting.md, p.163
-describe("getCastingSchoolRank", () => {
-  const caster = schools => ({
-    system: { insightRank: 4 },
-    items: schools.map(system => ({ type: "school", system }))
-  });
-
-  it("should use the shugenja School's Rank when a character has more than one School", () => {
-    const actor = caster([
-      { shugenja: false, schoolRank: 3 },
-      { shugenja: true, schoolRank: 1 }
-    ]);
-    expect(getCastingSchoolRank(actor)).toBe(1);
-  });
-
-  it("should use the Insight Rank otherwise, the School Rank of a single School", () => {
-    expect(getCastingSchoolRank(caster([{ shugenja: false, schoolRank: 4 }]))).toBe(4);
-    expect(getCastingSchoolRank(caster([]))).toBe(4);
   });
 });
 
@@ -453,206 +312,6 @@ describe("getRollParams", () => {
 
       expect(result.roll).toBe(0);
       expect(result.keep).toBe(0);
-    });
-  });
-});
-
-describe("getAffinityDeficiencyModifier", () => {
-  describe("Affinity bonuses", () => {
-    it("should return +1 for affinity match", () => {
-      const actor = {
-        items: [
-          {
-            type: "technique",
-            system: {
-              shugenja: true,
-              affinity: "fire"
-            }
-          }
-        ]
-      };
-
-      const result = getAffinityDeficiencyModifier(actor, "fire");
-      expect(result).toBe(1);
-    });
-
-    it("should be case insensitive for affinity", () => {
-      const actor = {
-        items: [
-          {
-            type: "technique",
-            system: {
-              shugenja: true,
-              affinity: "FIRE"
-            }
-          }
-        ]
-      };
-
-      const result = getAffinityDeficiencyModifier(actor, "fire");
-      expect(result).toBe(1);
-    });
-
-    it("should return 0 for non-matching affinity", () => {
-      const actor = {
-        items: [
-          {
-            type: "technique",
-            system: {
-              shugenja: true,
-              affinity: "water"
-            }
-          }
-        ]
-      };
-
-      const result = getAffinityDeficiencyModifier(actor, "fire");
-      expect(result).toBe(0);
-    });
-  });
-
-  describe("Deficiency penalties", () => {
-    it("should return -1 for deficiency match", () => {
-      const actor = {
-        items: [
-          {
-            type: "technique",
-            system: {
-              shugenja: true,
-              deficiency: "air"
-            }
-          }
-        ]
-      };
-
-      const result = getAffinityDeficiencyModifier(actor, "air");
-      expect(result).toBe(-1);
-    });
-
-    it("should be case insensitive for deficiency", () => {
-      const actor = {
-        items: [
-          {
-            type: "technique",
-            system: {
-              shugenja: true,
-              deficiency: "AIR"
-            }
-          }
-        ]
-      };
-
-      const result = getAffinityDeficiencyModifier(actor, "air");
-      expect(result).toBe(-1);
-    });
-  });
-
-  describe("Conflict handling", () => {
-    it("should return 0 for affinity/deficiency conflict", () => {
-      const actor = {
-        items: [
-          {
-            type: "technique",
-            system: {
-              shugenja: true,
-              affinity: "earth",
-              deficiency: "earth"
-            }
-          }
-        ]
-      };
-
-      const result = getAffinityDeficiencyModifier(actor, "earth");
-      expect(result).toBe(0); // Conflict = no auto-select
-    });
-
-    it("should return 0 for multiple techniques with conflicting modifiers", () => {
-      const actor = {
-        items: [
-          {
-            type: "technique",
-            system: {
-              shugenja: true,
-              affinity: "void"
-            }
-          },
-          {
-            type: "technique",
-            system: {
-              shugenja: true,
-              deficiency: "void"
-            }
-          }
-        ]
-      };
-
-      const result = getAffinityDeficiencyModifier(actor, "void");
-      expect(result).toBe(0); // Conflict across techniques
-    });
-  });
-
-  describe("Edge cases", () => {
-    it("should return 0 for null actor", () => {
-      const result = getAffinityDeficiencyModifier(null, "fire");
-      expect(result).toBe(0);
-    });
-
-    it("should return 0 for undefined actor", () => {
-      const result = getAffinityDeficiencyModifier(undefined, "fire");
-      expect(result).toBe(0);
-    });
-
-    it("should return 0 for null ringKey", () => {
-      const actor = { items: [] };
-      const result = getAffinityDeficiencyModifier(actor, null);
-      expect(result).toBe(0);
-    });
-
-    it("should return 0 for empty ringKey", () => {
-      const actor = { items: [] };
-      const result = getAffinityDeficiencyModifier(actor, "");
-      expect(result).toBe(0);
-    });
-
-    it("should return 0 for no shugenja techniques", () => {
-      const actor = {
-        items: [
-          {
-            type: "technique",
-            system: {
-              shugenja: false
-            }
-          }
-        ]
-      };
-
-      const result = getAffinityDeficiencyModifier(actor, "fire");
-      expect(result).toBe(0);
-    });
-
-    it("should return 0 for actor without items", () => {
-      const actor = {};
-      const result = getAffinityDeficiencyModifier(actor, "fire");
-      expect(result).toBe(0);
-    });
-
-    it("should handle items.contents array", () => {
-      const actor = {
-        items: {
-          contents: [
-            {
-              type: "technique",
-              system: {
-                shugenja: true,
-                affinity: "water"
-              }
-            }
-          ]
-        }
-      };
-
-      const result = getAffinityDeficiencyModifier(actor, "water");
-      expect(result).toBe(1);
     });
   });
 });

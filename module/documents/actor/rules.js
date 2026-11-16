@@ -21,9 +21,9 @@ import { SYS_ID } from "../../config/constants.js";
 import {
   applyRollOptionRules,
   getDerivedRuleOutputs,
-  getSelectorBonus,
   getTraitAdjustments
 } from "../../utils/rule-engine.js";
+import { getSelectorBonus } from "../../utils/rule-bag.js";
 import { getArmorTn } from "../../utils/effects.js";
 import { applyChoices, hasOpenChoice } from "../../utils/choices.js";
 import { getHighestRing, getTaintEffects, getMaxVoidPoints } from "../../utils/taint.js";
@@ -57,7 +57,7 @@ export function rulesOf(actor) {
   const sources = [];
   for (const item of actor.items) {
     if (item.system.rulesActive) {
-      // A weapon's roll rules apply to rolls made with it (module/utils/rule-engine.js, getBagEntries)
+      // A weapon's roll rules apply to rolls made with it (module/utils/rule-bag.js, getBagEntries)
       const extra = item.type === "weapon" ? { weaponId: item.id } : {};
       sources.push(
         ...applyChoices(item.system.ownedRules)

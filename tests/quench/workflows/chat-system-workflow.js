@@ -16,13 +16,13 @@
  * Test Priority: Tier 3 (Supporting - Chat integration)
  *
  * @see module/services/chat.js
- * @see module/hooks/chat-damage-buttons.js
+ * @see module/services/combat/legacy-damage.js
  * @see module/utils/check.js
  * @see templates/chat/check.hbs
  */
 
 import { SYS_ID } from "../../../module/config/constants.js";
-import { renderCheckCard } from "../../../module/services/dice/check/roll-check.js";
+import { renderCheckCard } from "../../../module/services/dice/check/card.js";
 import { buildFormula, parseNotation } from "../helpers.js";
 import { createTestPC } from "../../fixtures/actor-fixtures.js";
 

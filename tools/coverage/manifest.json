@@ -262,7 +262,7 @@
         "module/sheets/handlers/roll-handler.js",
         "module/utils/check.js",
         "module/utils/damage.js",
-        "module/utils/mechanics.js"
+        "module/utils/spell-casting.js"
       ],
       "tests": [
         "tests/quench/combat.js",
@@ -270,7 +270,7 @@
         "tests/quench/table-tools.js",
         "tests/unit/utils/check.test.js",
         "tests/unit/utils/damage.test.js",
-        "tests/unit/utils/mechanics.test.js"
+        "tests/unit/utils/spell-casting.test.js"
       ]
     },
     {
@@ -296,13 +296,13 @@
         "module/sheets/handlers/pc-roll-handler.js",
         "module/sheets/handlers/roll-handler.js",
         "module/utils/check.js",
-        "module/utils/mechanics.js"
+        "module/utils/spell-casting.js"
       ],
       "tests": [
         "tests/quench/roll-pipeline.js",
         "tests/quench/table-tools.js",
         "tests/unit/utils/check.test.js",
-        "tests/unit/utils/mechanics.test.js"
+        "tests/unit/utils/spell-casting.test.js"
       ]
     },
     {
@@ -325,7 +325,7 @@
         "module/documents/combat.js",
         "module/documents/combatant.js",
         "module/documents/item/preparation/derived-data.js",
-        "module/services/combat/damage.js",
+        "module/services/combat/damage-roll.js",
         "module/services/dice/check/roll-check.js",
         "module/services/effects/combat-events.js",
         "module/services/effects/prompts.js",
@@ -364,7 +364,7 @@
         "module/documents/actor/calculations/wound-system.js",
         "module/documents/combat.js",
         "module/documents/item/preparation/derived-data.js",
-        "module/services/combat/damage.js",
+        "module/services/combat/damage-roll.js",
         "module/services/dice/check/roll-check.js",
         "module/services/effects/combat-events.js",
         "module/services/effects/prompts.js",
@@ -396,7 +396,7 @@
         "module/documents/actor/calculations/wound-system.js",
         "module/documents/combat.js",
         "module/documents/item/preparation/derived-data.js",
-        "module/services/combat/damage.js",
+        "module/services/combat/damage-roll.js",
         "module/services/dice/check/roll-check.js",
         "module/services/effects/combat-events.js",
         "module/services/effects/prompts.js",
@@ -579,9 +579,10 @@
         "module/data/chat/roll-message-data.js",
         "module/data/rules/rule-models.js",
         "module/services/combat/contest.js",
-        "module/services/combat/damage.js",
+        "module/services/combat/damage-roll.js",
         "module/services/combat/duel.js",
         "module/services/combat/guard.js",
+        "module/services/dice/check/card.js",
         "module/services/dice/check/roll-check.js",
         "module/utils/damage.js"
       ],
@@ -599,7 +600,7 @@
         "module/data/chat/roll-message-data.js",
         "module/data/rules/rule-models.js",
         "module/services/combat/contest.js",
-        "module/services/combat/damage.js",
+        "module/services/combat/damage-roll.js",
         "module/services/combat/duel.js",
         "module/services/combat/grapple.js",
         "module/services/combat/guard.js",
@@ -665,6 +666,7 @@
       "pages": "89",
       "status": "automated",
       "code": [
+        "module/config/game-mechanics.js",
         "module/config/rule-keys.js",
         "module/config/status-effects.js",
         "module/data/chat/roll-message-data.js",
@@ -702,6 +704,7 @@
         "tests/unit/utils/effects.test.js",
         "tests/unit/utils/rule-engine.test.js",
         "tests/unit/utils/stances.test.js",
+        "tests/unit/utils/status-data.test.js",
         "tests/unit/utils/ten-dice.test.js"
       ]
     },
@@ -754,8 +757,8 @@
         "module/documents/actor/calculations/fear-system.js",
         "module/documents/actor/rules.js",
         "module/documents/combat.js",
+        "module/services/dice/check/card.js",
         "module/services/dice/check/chat-actions.js",
-        "module/services/dice/check/roll-check.js",
         "module/services/effects/automation.js",
         "module/services/fear.js",
         "module/services/ledger.js",
@@ -890,6 +893,7 @@
         "module/documents/actor/preparation/pc-preparation.js",
         "module/documents/item/lifecycle/grants.js",
         "module/utils/mechanics.js",
+        "module/utils/spell-casting.js",
         "module/utils/xp-ledger.js",
         "src/packs/families.json"
       ],
@@ -901,6 +905,7 @@
         "tests/quench/services/initiative.js",
         "tests/unit/utils/grants.test.js",
         "tests/unit/utils/mechanics.test.js",
+        "tests/unit/utils/spell-casting.test.js",
         "tests/unit/utils/xp-ledger.test.js"
       ]
     },
@@ -918,7 +923,7 @@
       "tests": [
         "tests/packs.test.js",
         "tests/quench/packs.js",
-        "tests/unit/utils/mechanics.test.js"
+        "tests/unit/utils/spell-casting.test.js"
       ]
     },
     {
@@ -1257,7 +1262,7 @@
         "module/documents/actor/calculations/item-enrichment-system.js",
         "module/documents/actor/calculations/xp-system.js",
         "module/services/dice/rolls/spell-cast-roll.js",
-        "module/utils/mechanics.js",
+        "module/utils/spell-casting.js",
         "src/packs/spells.json"
       ],
       "tests": [
@@ -1265,7 +1270,8 @@
         "tests/quench/roll-pipeline.js",
         "tests/quench/workflows/spell-casting-workflow.js",
         "tests/quench/workflows/wound-penalty-all-rolls.js",
-        "tests/unit/utils/mechanics.test.js"
+        "tests/unit/utils/mechanics.test.js",
+        "tests/unit/utils/spell-casting.test.js"
       ]
     },
     {
@@ -1846,11 +1852,11 @@
       "status": "automated",
       "code": [
         "module/data/rules/rule-models.js",
-        "module/documents/actor/calculations/wound-system.js"
+        "module/documents/actor/calculations/npc-wound-system.js"
       ],
       "tests": [
         "tests/quench/packs.js",
-        "tests/unit/documents/actor/calculations/wound-system.test.js"
+        "tests/unit/documents/actor/calculations/npc-wound-system.test.js"
       ]
     },
     {
@@ -1860,7 +1866,7 @@
       "code": [
         "module/data/chat/roll-message-data.js",
         "module/data/rules/rule-models.js",
-        "module/documents/actor/calculations/wound-system.js",
+        "module/documents/actor/calculations/npc-wound-system.js",
         "module/services/dice/check/collect.js",
         "module/utils/damage.js",
         "module/utils/rule-engine.js",
@@ -1869,7 +1875,7 @@
       "tests": [
         "tests/quench/combat.js",
         "tests/quench/packs.js",
-        "tests/unit/documents/actor/calculations/wound-system.test.js",
+        "tests/unit/documents/actor/calculations/npc-wound-system.test.js",
         "tests/unit/utils/damage.test.js"
       ]
     },
@@ -1883,7 +1889,7 @@
       "tests": [
         "tests/packs.test.js",
         "tests/quench/packs.js",
-        "tests/unit/documents/actor/calculations/wound-system.test.js"
+        "tests/unit/documents/actor/calculations/npc-wound-system.test.js"
       ]
     },
     {

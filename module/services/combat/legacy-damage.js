@@ -1,73 +1,73 @@
 /**
- * @module hooks/chat-damage-buttons
- * @description The Apply Wounds and Reduce with Void buttons on damage cards that carry their damage in the HTML.
- * Either button applies the damage to the first selected token. Reduce with Void first spends one of the target's
- * Void Points for 10 fewer Wounds, declared before the damage is applied. The equipped armor's Reduction then lowers
- * what is left. Neither step takes the damage below 0.
+ * @module services/combat/legacy-damage
+ * @description The Apply Wounds and Reduce with Void buttons on damage cards posted before 4.0.0, which carry their
+ * damage in the HTML. Either button applies the damage to the first selected token. Reduce with Void first spends one
+ * of the target's Void Points for 10 fewer Wounds, declared before the damage is applied. The equipped armor's
+ * Reduction then lowers what is left. Neither step takes the damage below 0. A `roll` message's damage goes through
+ * module/services/combat/damage.js. module/hooks/register-all.js wires the binder.
  * game-rules/25_rings_and_traits.md, p.78
  * game-rules/73_armor.md, p.198
  */
-import { T, F } from "../utils/localization.js";
-import { buildVoidUseUpdate, warnVoidLimit } from "../services/effects/uses.js";
+import { T, F } from "../../utils/localization.js";
+import { buildVoidUseUpdate, warnVoidLimit } from "../effects/uses.js";
 
 /**
- * Registers chat message hook to handle damage button clicks on damage cards posted by 3.x, which carry their
- * damage in the HTML. A `roll` message's damage goes through module/services/combat/damage.js.
+ * Wire the damage buttons of a card posted before 4.0.0, which carries its damage in the HTML.
+ * @param {ChatMessage} message
+ * @param {HTMLElement} html
  */
-export function registerChatDamageButtons() {
-  Hooks.on("renderChatMessageHTML", (message, html) => {
-    if (message.type === "roll") {
-      return;
-    }
-    // renderChatMessageHTML passes an HTMLElement, not jQuery
-    const element = html;
+export function bindLegacyDamageCard(message, html) {
+  if (message.type === "roll") {
+    return;
+  }
+  // renderChatMessageHTML passes an HTMLElement, not jQuery
+  const element = html;
 
-    // Apply wounds button
-    const applyButton = element.querySelector("[data-action='apply-wounds']");
-    if (applyButton) {
-      let isProcessing = false;
-      applyButton.addEventListener("click", async event => {
-        event.preventDefault();
+  // Apply wounds button
+  const applyButton = element.querySelector("[data-action='apply-wounds']");
+  if (applyButton) {
+    let isProcessing = false;
+    applyButton.addEventListener("click", async event => {
+      event.preventDefault();
 
-        // Debounce protection: prevent multiple simultaneous clicks
-        if (isProcessing) {
-          return;
-        }
-        isProcessing = true;
+      // Debounce protection: prevent multiple simultaneous clicks
+      if (isProcessing) {
+        return;
+      }
+      isProcessing = true;
 
-        try {
-          const damage = parseInt(event.currentTarget.dataset.damage) || 0;
-          await applyWoundsToToken(damage);
-        } finally {
-          isProcessing = false;
-        }
-      });
-    }
+      try {
+        const damage = parseInt(event.currentTarget.dataset.damage) || 0;
+        await applyWoundsToToken(damage);
+      } finally {
+        isProcessing = false;
+      }
+    });
+  }
 
-    // Reduce with void button
-    const reduceButton = element.querySelector("[data-action='reduce-wounds-void']");
-    if (reduceButton) {
-      let isProcessing = false;
-      reduceButton.addEventListener("click", async event => {
-        event.preventDefault();
+  // Reduce with void button
+  const reduceButton = element.querySelector("[data-action='reduce-wounds-void']");
+  if (reduceButton) {
+    let isProcessing = false;
+    reduceButton.addEventListener("click", async event => {
+      event.preventDefault();
 
-        // Debounce protection: prevent multiple simultaneous clicks
-        if (isProcessing) {
-          return;
-        }
-        isProcessing = true;
+      // Debounce protection: prevent multiple simultaneous clicks
+      if (isProcessing) {
+        return;
+      }
+      isProcessing = true;
 
-        try {
-          const button = event.currentTarget;
-          const damage = parseInt(button.dataset.damage) || 0;
-          const actorId = button.dataset.actorId;
-          await applyWoundsWithVoid(damage, actorId);
-        } finally {
-          isProcessing = false;
-        }
-      });
-    }
-  });
+      try {
+        const button = event.currentTarget;
+        const damage = parseInt(button.dataset.damage) || 0;
+        const actorId = button.dataset.actorId;
+        await applyWoundsWithVoid(damage, actorId);
+      } finally {
+        isProcessing = false;
+      }
+    });
+  }
 }
 
 /**

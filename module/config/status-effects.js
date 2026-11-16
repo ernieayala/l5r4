@@ -288,17 +288,3 @@ export const SYSTEM_EFFECTS = Object.freeze({
     system: { rules: [{ key: "ArmorTN", value: 10 }] }
   }
 });
-
-/**
- * Stances a condition rules out: Dazed allows only Defense and Full Defense, Prone only Attack and Defense;
- * Fatigued and Mounted forbid Full Attack. The sheet warns and still lets the player choose.
- * game-rules/41_conditional_effects.md, p.89
- * game-rules/36_stances.md, p.84
- * @type {Readonly<Record<string, ReadonlyArray<string>>>}
- */
-export const STANCE_LIMITS = Object.freeze({
-  dazed: Object.freeze(["attackStance", "fullAttackStance", "centerStance"]),
-  prone: Object.freeze(["fullAttackStance", "fullDefenseStance", "centerStance"]),
-  fatigued: Object.freeze(["fullAttackStance"]),
-  mounted: Object.freeze(["fullAttackStance"])
-});

@@ -13,11 +13,11 @@
 import { DIALOG_TEMPLATES } from "../../../config/templates.js";
 import { F, T } from "../../../utils/localization.js";
 import { toInt } from "../../../utils/type-coercion.js";
+import { ringRankOf } from "../../../utils/mechanics.js";
 import {
   getCastingSchoolRank,
-  getAffinityDeficiencyModifier,
-  ringRankOf
-} from "../../../utils/mechanics.js";
+  getAffinityDeficiencyModifier
+} from "../../../utils/spell-casting.js";
 import { rollCheck } from "../check/roll-check.js";
 import { getSlotToSpend, getSlotDialogData, spendSlot } from "../check/spell-slots.js";
 import { applyEffect, effectsOf } from "../../effects/apply.js";

@@ -1,14 +1,13 @@
 /**
  * @module utils/rule-summary
  * @description One line per rule in `system.rules`, so the sheets and chat cards say what an item does without
- * written text (roadmap/STAGE-15, decision 1), and the "Core Rulebook p.N" citation of `system.source`.
+ * written text (roadmap/STAGE-15, decision 1).
  *
  * Each line is a phrase: a localization key and its data. A data value may itself be a phrase, which the caller
  * localizes first (module/utils/localization.js, formatPhrase). Nothing here reads Foundry globals.
  */
 
 import { RULE_KEYS } from "../config/rule-keys.js";
-import { SOURCE_BOOKS } from "../config/sources.js";
 import { STATUS_EFFECTS } from "../config/status-effects.js";
 
 /**
@@ -112,22 +111,6 @@ export function buildRuleSummary(rule, { itemName = uuid => uuid } = {}) {
  */
 export function buildRulesSummary(rules, options) {
   return (Array.isArray(rules) ? rules : []).flatMap(rule => buildRuleSummary(rule, options));
-}
-
-/**
- * The citation of `system.source`: the book's name and the page number. Null when the item cites no book.
- * @param {{book?: string, page?: number}} source
- * @returns {Phrase|null}
- */
-export function buildSourceCitation(source) {
-  const book = SOURCE_BOOKS[source?.book];
-  if (!book || !(source.page > 0)) {
-    return null;
-  }
-  return buildPhrase("l5r4.ui.ruleSummary.citation", {
-    book: buildPhrase(book),
-    page: source.page
-  });
 }
 
 /**

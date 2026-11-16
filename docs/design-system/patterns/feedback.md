@@ -52,7 +52,7 @@ Conforming, `module/services/combat/damage.js:309`:
 ui.notifications?.warn(T("l5r4.ui.mechanics.wounds.noTokenSelected"));
 ```
 
-Non-conforming, eleven literals: `module/hooks/chat-damage-buttons.js:48` and `:114` ("Token has no actor"),
+Non-conforming, eleven literals: `module/services/combat/legacy-damage.js:48` and `:114` ("Token has no actor"),
 `module/services/initiative.js:36` and `:57`, `module/sheets/handlers/pc-actions-handler.js:112`, `:120`, `:153`,
 `module/sheets/handlers/app-launcher-handler.js:79`, `module/sheets/handlers/stance-handler.js:135`,
 `module/sheets/pc-sheet.js:369` and `:413`.
@@ -88,7 +88,7 @@ table sees and which stays. A notification is for the one user who acted. Enforc
 
 Conforming, `module/services/combat/damage.js:153-190`: the damage result is a card.
 
-Non-conforming, `module/hooks/chat-damage-buttons.js:69-86`: Wounds applied from a card posted before 4.0.0 show only as
+Non-conforming, `module/services/combat/legacy-damage.js:69-86`: Wounds applied from a card posted before 4.0.0 show only as
 an `info` notification to the user who clicked. Those cards are fixed, so this path stays; no new path does this.
 
 ## Inline warnings

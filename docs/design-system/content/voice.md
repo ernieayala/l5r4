@@ -128,7 +128,7 @@ names the character with `{name}`, never "this actor".
 | Conforming     | "No Void Points available to reduce damage"                                                                      | `:541`                                                |
 | Non-conforming | "{name} has already spent a Void Point this Round." (drop the period)                                            | `:189`, shown by `module/services/effects/uses.js:83` |
 | Non-conforming | "No token selected. Select a token to apply wounds." (write "No token selected: select a token to apply Wounds") | `:540`                                                |
-| Non-conforming | A literal string: `ui.notifications?.warn("Token has no actor")`                                                 | `module/hooks/chat-damage-buttons.js:48`              |
+| Non-conforming | A literal string: `ui.notifications?.warn("Token has no actor")`                                                 | `module/services/combat/legacy-damage.js:48`          |
 
 **Check.** `tests/lang.test.js` collects the keys passed to `ui.notifications.*` in `module/` and fails a value that
 ends with a period. ESLint `no-restricted-syntax` (the presentation-in-JavaScript selectors in `eslint.config.mjs`)
@@ -190,16 +190,16 @@ is `XkY`: rolled dice, a lowercase `k`, kept dice, no spaces (`game-rules/26_spe
 modifier is signed (`+1k1`, `+0k1`); a flat bonus joins the pool with its sign and no space (`5k3+2`). Multiplication is
 `×`, a change is `→`, a range is "1 to 10", a ratio of current to maximum is `{current}/{max}`.
 
-|                | Example                                                 | Source                                           |
-| -------------- | ------------------------------------------------------- | ------------------------------------------------ |
-| Conforming     | "Spend a Void Point (+1k1)"                             | `:167`                                           |
-| Conforming     | "up to 5 × Insight Rank"                                | `:618`                                           |
-| Conforming     | "{label} {from}→{to}"                                   | `:884`                                           |
-| Conforming     | `signed(roll)` + `k` + `keep`, then the bonus: "+0k1+5" | `module/utils/rule-summary.js:55-60`             |
-| Non-conforming | "-{penalty}kO" (the letter O; write "-{penalty}k0")     | `:557`                                           |
-| Non-conforming | "x 2 +" (write "× 2 +")                                 | `:508`                                           |
-| Non-conforming | "gains two Free Raises" (write "gains 2 Free Raises")   | `:688`                                           |
-| Non-conforming | Parts joined with a space: "+1k1 +5"                    | `module/services/dice/check/roll-check.js:79-87` |
+|                | Example                                                 | Source                                     |
+| -------------- | ------------------------------------------------------- | ------------------------------------------ |
+| Conforming     | "Spend a Void Point (+1k1)"                             | `:167`                                     |
+| Conforming     | "up to 5 × Insight Rank"                                | `:618`                                     |
+| Conforming     | "{label} {from}→{to}"                                   | `:884`                                     |
+| Conforming     | `signed(roll)` + `k` + `keep`, then the bonus: "+0k1+5" | `module/utils/rule-summary.js:55-60`       |
+| Non-conforming | "-{penalty}kO" (the letter O; write "-{penalty}k0")     | `:557`                                     |
+| Non-conforming | "x 2 +" (write "× 2 +")                                 | `:508`                                     |
+| Non-conforming | "gains two Free Raises" (write "gains 2 Free Raises")   | `:688`                                     |
+| Non-conforming | Parts joined with a space: "+1k1 +5"                    | `module/services/dice/check/card.js:79-87` |
 
 `×` is the pick for multiplication (one value each way): the letter x reads as a variable beside `XkY`.
 

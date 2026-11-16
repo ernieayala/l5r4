@@ -20,12 +20,12 @@ import {
 } from "../../../utils/check.js";
 import { getTaintEffects } from "../../../utils/taint.js";
 import { applyEffectAnywhere } from "../../effects/apply.js";
-import { rollDamageFromAttack } from "../../combat/damage.js";
+import { rollDamageFromAttack } from "../../combat/damage-roll.js";
 import { applyTrackChange } from "../../ledger.js";
-import { isHonorRollOffered, renderCheckCard } from "./roll-check.js";
+import { isHonorRollOffered, renderCheckCard } from "./card.js";
 
 /**
- * Roll damage for a hit from its attack's stored context (module/services/combat/damage.js).
+ * Roll damage for a hit from its attack's stored context (module/services/combat/damage-roll.js).
  * @param {ChatMessage} message - A `roll` message of kind "attack"
  * @param {{askForOptions?: boolean}} [options]
  * @returns {Promise<ChatMessage|null>}

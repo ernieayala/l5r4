@@ -9,14 +9,16 @@ import { toInt } from "../../../utils/type-coercion.js";
 import { logError } from "../../../utils/error-logging.js";
 import { T } from "../../../utils/localization.js";
 import {
-  getCastingSchoolRank,
   getFormulaBonus,
-  getAffinityDeficiencyModifier,
   getEffectiveTrait,
   getWeaponSkillTrait,
   ringRankOf
 } from "../../../utils/mechanics.js";
-import { getSelectorBonus } from "../../../utils/rule-engine.js";
+import {
+  getCastingSchoolRank,
+  getAffinityDeficiencyModifier
+} from "../../../utils/spell-casting.js";
+import { getSelectorBonus } from "../../../utils/rule-bag.js";
 import { prepareWeaponDamage } from "../../item/preparation/derived-data.js";
 
 /**

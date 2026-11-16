@@ -83,7 +83,7 @@ as `content`.
 
 Non-conforming, `module/sheets/handlers/item-crud-handler.js:191-196`: `` content: `<p>${...}</p>` ``; the same at
 `module/services/purchase.js:71-73`, `:101-103`, `:160-166`, `module/services/gm-allow.js:21-24`,
-`module/sheets/npc-sheet.js:679-682`, and
+`module/sheets/handlers/npc-actions-handler.js:679-682`, and
 `module/sheets/handlers/pc-actions-handler.js:134-136`. `templates/dialogs/disadvantage-cap-dialog.hbs:1` and
 `unified-item-create-dialog.hbs:1` open their own `<form>`.
 
@@ -102,7 +102,7 @@ Non-conforming, `module/services/purchase.js:75`: the choice prompt's button is 
 ### 3. A destructive confirmation defaults to the safe button
 
 Removing an item, an NPC attack, or a custom Emphasis asks first, states what is lost, and focuses the button that
-keeps it (`item-crud-handler.js:191`, `module/sheets/npc-sheet.js:679`, `module/apps/emphasis-manager.js:333`).
+keeps it (`item-crud-handler.js:191`, `module/sheets/handlers/npc-actions-handler.js:679`, `module/apps/emphasis-manager.js:333`).
 Removing an Active Effect or a rule from the rules editor does not ask, as both effect controls and the rules editor
 do today (`module/apps/effect-panel.js:118-123`, `module/sheets/handlers/item-effects-handler.js:218-257`,
 `module/sheets/rules-editor.js:96-99`). The split follows each kind's code: every item, attack, and Emphasis removal

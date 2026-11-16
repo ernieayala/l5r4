@@ -303,7 +303,7 @@ export default class L5R4PcSheet extends BaseActorSheet {
       case "recalculate-sheet":
         return this._onRecalcSheet(event, element);
       case "toggle-rank-mode":
-        return this._onToggleRankMode(event, element);
+        return PcActionsHandler.updateRankMode(this._getHandlerContext(), event, element);
     }
   }
 
@@ -371,55 +371,6 @@ export default class L5R4PcSheet extends BaseActorSheet {
     if (action === "apply-stance") {
       return StanceHandler.applyStance(this._getHandlerContext(), event, element);
     }
-  }
-
-  /**
-   * Toggles Insight Rank calculation mode between automatic and manual.
-   *
-   * **GM-Only Feature:**
-   * Only GMs can toggle this setting. Shift+Click on the "Rank" label switches between:
-   * - Automatic: Rank calculated from Insight Points (default)
-   * - Manual: the GM types the rank value
-   *
-   * **What It Does:**
-   * 1. Checks for GM permission (non-GMs ignored)
-   * 2. Checks for Shift key (safety mechanism)
-   * 3. Toggles actor.system.insight.autoCalculate flag
-   * 4. Re-renders sheet to show input field or calculated value
-   *
-   * **Use Cases:**
-   * - Special NPCs with non-standard rank progression
-   * - Testing specific rank values
-   * - Temporary rank adjustments for story purposes.
-   *
-   * @param {Event} event - Click event on rank label
-   * @param {HTMLElement} _element - Rank label element (unused)
-   * @returns {Promise<void>}
-   */
-  async _onToggleRankMode(event, _element) {
-    event?.preventDefault?.();
-
-    // Only GMs can toggle rank mode
-    if (!game.user.isGM) {
-      return;
-    }
-
-    // Require Shift key to prevent accidental triggers
-    if (!event?.shiftKey) {
-      return;
-    }
-
-    // Toggle autoCalculate flag (default true if undefined)
-    const current = this.actor.system.insight?.autoCalculate ?? true;
-    await this.actor.update({
-      "system.insight.autoCalculate": !current
-    });
-
-    // Notify user of mode change
-    const key = !current
-      ? "l5r4.character.ranks.insightAutomatic"
-      : "l5r4.character.ranks.insightManual";
-    ui.notifications?.info(F(key, { name: this.actor.name }));
   }
 
   /**

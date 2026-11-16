@@ -6,7 +6,8 @@
  * game-rules/41_conditional_effects.md, p.89
  */
 
-import { STANCE_LIMITS, STATUS_EFFECTS } from "../config/status-effects.js";
+import { STANCE_LIMITS } from "../config/game-mechanics.js";
+import { STATUS_EFFECTS } from "../config/status-effects.js";
 
 /**
  * Ids of the five stances: the status effects in the "stance" group.

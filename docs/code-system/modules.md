@@ -39,7 +39,7 @@ nothing from that layer.
 | 2 Utils     | `module/utils/`                                                          | `import { toInt } from "../../utils/type-coercion.js";` (`module/services/combat/damage.js:15`)                        |
 | 3 Data      | `module/data/`                                                           | `import { createRule } from "../../data/rules/rule-models.js";` (`module/documents/actor/rules.js:20`)                 |
 | 4 Documents | `module/documents/`                                                      | `import { enhanceItemSheetData } from "../documents/item/integration/sheet-data.js";` (`module/sheets/pc-sheet.js:55`) |
-| 5 Services  | `module/services/`                                                       | `import { rollCheck } from "../dice/check/roll-check.js";` (`module/services/combat/damage.js:23`)                     |
+| 5 Services  | `module/services/`                                                       | `import { rollCheck } from "../dice/check/roll-check.js";` (`module/services/combat/damage-roll.js:23`)                |
 | 6 Mixins    | `module/mixins/`                                                         | `import { DebouncedFieldMixin } from "../mixins/debounced-field-mixin.js";` (`module/apps/armor-config.js:33`)         |
 | 7 Apps      | `module/apps/`                                                           | `import EffectPanel from "../apps/effect-panel.js";` (`module/hooks/register-all.js:40`)                               |
 | 8 Sheets    | `module/sheets/`                                                         | `import L5R4ItemSheet from "../module/sheets/item-sheet.js";` (`dist/l5r4-enhanced.js:57`)                             |
@@ -48,7 +48,7 @@ nothing from that layer.
 | 11 Local    | A path that starts with `./`: the file's folder and the folders below it | `import { collectCheck } from "./collect.js";` (`module/services/dice/check/roll-check.js:32`)                         |
 
 A path that starts with `../` goes in the group of the layer it reaches, even inside the file's own layer:
-`module/services/combat/damage.js:23` lists `../dice/check/roll-check.js` under Services.
+`module/services/combat/damage-roll.js:23` lists `../dice/check/roll-check.js` under Services.
 
 Which layer may import which is CLAUDE.md **Layers**; this page sets only the order.
 
@@ -83,12 +83,12 @@ Which layer may import which is CLAUDE.md **Layers**; this page sets only the or
 | A number the rules define lives in `module/config/` and is imported, never written as a literal. Majority: 69 rule constants in `module/config/` against 22 in `module/utils/` and `module/services/`  | review                                                                                  |
 | `module/config/` holds values only: no functions (CLAUDE.md **Layers**)                                                                                                                                | `l5r4/module-shape` (`tools/eslint/`)                                                   |
 
-| Rule            | Conforming                                                                                          | Non-conforming                                                                                      |
-| --------------- | --------------------------------------------------------------------------------------------------- | --------------------------------------------------------------------------------------------------- |
-| Frozen constant | `module/services/combat/damage.js:30`: `const DISARM_DAMAGE = Object.freeze({ roll: 2, keep: 1 });` | `module/config/sort-keys.js:44`: an exported constant object left unfrozen                          |
-| Module state    | `module/services/dice/resources/void-points.js:18`: `actorLocks`                                    | `module/services/combat/flow.js:52`: the `FLOWS` registry, filled at run time by `defineFlow`       |
-| Rule numbers    | `module/services/combat/damage.js:13` imports `TN_PER_RAISE`                                        | `module/utils/check.js:149`: the literal `5` per Raise beside the `TN_PER_RAISE` constant           |
-| Values only     | `module/config/rule-keys.js:77`: `MANEUVERS`                                                        | A function exported from `module/config/` (modeled); `getIconPath` lives in `module/utils/icons.js` |
+| Rule            | Conforming                                                                                               | Non-conforming                                                                                      |
+| --------------- | -------------------------------------------------------------------------------------------------------- | --------------------------------------------------------------------------------------------------- |
+| Frozen constant | `module/services/combat/damage-roll.js:30`: `const DISARM_DAMAGE = Object.freeze({ roll: 2, keep: 1 });` | `module/config/sort-keys.js:44`: an exported constant object left unfrozen                          |
+| Module state    | `module/services/dice/resources/void-points.js:18`: `actorLocks`                                         | `module/services/combat/flow.js:52`: the `FLOWS` registry, filled at run time by `defineFlow`       |
+| Rule numbers    | `module/services/combat/damage.js:13` imports `TN_PER_RAISE`                                             | `module/utils/check.js:149`: the literal `5` per Raise beside the `TN_PER_RAISE` constant           |
+| Values only     | `module/config/rule-keys.js:77`: `MANEUVERS`                                                             | A function exported from `module/config/` (modeled); `getIconPath` lives in `module/utils/icons.js` |
 
 ## Exports
 
@@ -124,10 +124,10 @@ A file does one job its layer owns. A second job, not a line count, is the reaso
 | One job per file, named by the file name                          | review      |
 | The same logic lives in one file; a second copy imports the first | review      |
 
-| Conforming                                                                                                     | Non-conforming                                                                                                                                          |
-| -------------------------------------------------------------------------------------------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| `module/services/effects/apply.js`: applies status effects and registers the GM query that does it for players | `module/hooks/chat-damage-buttons.js:36-168`: hook routing and applying Wounds, spending Void Points, and posting notifications, which is Services work |
-| `module/services/dice/resources/void-points.js`: one `updateUnderLock`                                         | `module/services/dice/resources/spell-slots.js:164`: `updateUnderLock` copied from `void-points.js:207` with its own lock map                           |
+| Conforming                                                                                                     | Non-conforming                                                                                                                      |
+| -------------------------------------------------------------------------------------------------------------- | ----------------------------------------------------------------------------------------------------------------------------------- |
+| `module/services/effects/apply.js`: applies status effects and registers the GM query that does it for players | A file in `module/hooks/` that applies Wounds, spends Void Points, and posts notifications itself, which is Services work (modeled) |
+| `module/services/dice/resources/void-points.js`: one `updateUnderLock`                                         | `module/services/dice/resources/spell-slots.js:164`: `updateUnderLock` copied from `void-points.js:207` with its own lock map       |
 
 ## Size
 
@@ -135,28 +135,28 @@ Each layer has a soft limit in lines. A file over its limit passes only with a w
 `tests/conventions/exceptions.json` (decision 3). The limits sit near each layer's 90th percentile today, so they
 name the outliers and nothing else.
 
-| Layer                   | Limit | Largest today                            | Over the limit today                                                              |
-| ----------------------- | ----- | ---------------------------------------- | --------------------------------------------------------------------------------- |
-| `module/config/`        | 300   | `localization.js` 277                    | none                                                                              |
-| `module/utils/`         | 300   | `mechanics.js` 420                       | `mechanics.js`, `rule-engine.js` 407, `rule-summary.js` 364                       |
-| `module/data/`          | 200   | `rules/rule-models.js` 580               | `rules/rule-models.js`                                                            |
-| `module/documents/`     | 300   | `actor/calculations/wound-system.js` 469 | `actor/calculations/wound-system.js`                                              |
-| `module/services/`      | 350   | `dice/check/roll-check.js` 646           | `dice/check/roll-check.js`, `combat/damage.js` 352                                |
-| `module/mixins/`        | 200   | `debounced-field-mixin.js` 191           | none                                                                              |
-| `module/apps/`          | 400   | `xp-manager.js` 491                      | `xp-manager.js`                                                                   |
-| `module/sheets/`        | 500   | `npc-sheet.js` 719                       | `npc-sheet.js`, `base-actor-sheet.js` 678, `pc-sheet.js` 619, `item-sheet.js` 531 |
-| `module/setup/`         | 250   | `migrations/icons/icon-paths.js` 334     | `migrations/icons/icon-paths.js`                                                  |
-| `module/hooks/`         | 150   | `chat-damage-buttons.js` 228             | `chat-damage-buttons.js`                                                          |
-| `dist/l5r4-enhanced.js` | 300   | 258                                      | none                                                                              |
+| Layer                   | Limit | Largest today                      | Over the limit today                       |
+| ----------------------- | ----- | ---------------------------------- | ------------------------------------------ |
+| `module/config/`        | 300   | `design-gallery.js` 2383           | `design-gallery.js`                        |
+| `module/utils/`         | 300   | `rule-summary.js` 374              | `rule-summary.js`, `rule-engine.js` 335    |
+| `module/data/`          | 200   | `rules/rule-models.js` 609         | `rules/rule-models.js`                     |
+| `module/documents/`     | 300   | `actor.js` 291                     | none                                       |
+| `module/services/`      | 350   | `dice/check/roll-check.js` 580     | `dice/check/roll-check.js`                 |
+| `module/mixins/`        | 200   | `keyboard-behavior-mixin.js` 156   | none                                       |
+| `module/apps/`          | 400   | `xp-manager.js` 426                | `xp-manager.js`                            |
+| `module/sheets/`        | 500   | `base-actor-sheet.js` 622          | `base-actor-sheet.js`, `item-sheet.js` 542 |
+| `module/setup/`         | 250   | `migrations/items/emphasis.js` 217 | none                                       |
+| `module/hooks/`         | 150   | `register-all.js` 134              | none                                       |
+| `dist/l5r4-enhanced.js` | 300   | 227                                | none                                       |
 
 | Rule                                                                                                                    | Enforced by                      |
 | ----------------------------------------------------------------------------------------------------------------------- | -------------------------------- |
 | A file over its layer's limit has an entry in `tests/conventions/exceptions.json` with the reason                       | `tests/conventions/size.test.js` |
 | The reason names one responsibility the file keeps whole (a registry of every rule model, a sheet's whole action table) | review                           |
 
-| Conforming                                                                                                                                   | Non-conforming                                                                                         |
-| -------------------------------------------------------------------------------------------------------------------------------------------- | ------------------------------------------------------------------------------------------------------ |
-| `module/data/rules/rule-models.js` at 580 lines with an `exceptions.json` entry: one registry of every rule model, split by nothing but size | `module/services/dice/check/roll-check.js` at 646 lines with no entry; `rollCheck` alone spans 192-561 |
+| Conforming                                                                                                                                   | Non-conforming                                                          |
+| -------------------------------------------------------------------------------------------------------------------------------------------- | ----------------------------------------------------------------------- |
+| `module/data/rules/rule-models.js` at 609 lines with an `exceptions.json` entry: one registry of every rule model, split by nothing but size | A file over its layer's limit with no `exceptions.json` entry (modeled) |
 
 ## Folders
 

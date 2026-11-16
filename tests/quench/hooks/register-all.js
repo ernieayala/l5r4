@@ -40,6 +40,7 @@ import {
 } from "../../../module/services/scrolling-text.js";
 import { bindAttackCard } from "../../../module/services/combat/attack-card.js";
 import { bindDamageCards } from "../../../module/services/combat/damage.js";
+import { bindLegacyDamageCard } from "../../../module/services/combat/legacy-damage.js";
 import { bindFlowCards } from "../../../module/services/combat/flow.js";
 import { onGetSceneControlButtonsDuel } from "../../../module/services/combat/duel.js";
 import { onGetSceneControlButtonsGuard } from "../../../module/services/combat/guard.js";
@@ -126,7 +127,8 @@ export function registerHookWiringTests(quench) {
             bindCheckRequestCard,
             bindAttackCard,
             bindDamageCards,
-            bindFlowCards
+            bindFlowCards,
+            bindLegacyDamageCard
           ]);
         });
 

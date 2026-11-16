@@ -5,7 +5,8 @@
  */
 
 import { formatPhrase } from "../utils/localization.js";
-import { buildRulesSummary, buildSourceCitation } from "../utils/rule-summary.js";
+import { buildRulesSummary } from "../utils/rule-summary.js";
+import { buildSourceCitation } from "../utils/source-citation.js";
 
 /**
  * What a document's rules do, one line each, and the book and page it cites.

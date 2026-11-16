@@ -8,7 +8,7 @@
 
 import { T } from "../../../utils/localization.js";
 import { toInt } from "../../../utils/type-coercion.js";
-import { toTraitKey } from "../../../utils/mechanics.js";
+import { toTraitKey } from "../../../utils/trait-keys.js";
 import { rollCheck } from "../check/roll-check.js";
 import { getRollActor } from "../resources/void-points.js";
 

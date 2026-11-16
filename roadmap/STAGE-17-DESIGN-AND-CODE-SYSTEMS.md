@@ -468,6 +468,13 @@ Templates wave (E), one owner for templates, SCSS, and the selectors they break,
 - Quench selects by `data-*`, `name`, or element everywhere; HTML in tests is built with DOM APIs.
 - Computed-style snapshots before and after (PC, NPC, weapon, skill, kata, kiho sheets per tab, XP, wealth, and wound windows, gallery, chat; both themes): the differences left are the converted buttons' own boxes (text in place), core's button transition and icon `pointer-events`, the Emphasis link's `inline-block`, and `display: contents` wrappers.
 
+Rulings applied (parts 13 and 14 and their follow-ups), each with the gate and a full Quench run (1741 passed, 0 failed):
+
+- Actor preparation runs in `L5R4Actor.prepareDerivedData`; every Quench re-preparation calls `reset()` (241 calls), and `l5r4/no-bare-prepare` fails a bare `prepareData()` / `prepareDerivedData()` outside an override's `super` call. Of the calls replaced, 62 had run core's empty `prepareDerivedData` and so tested nothing; no test set values in memory, so no assertion changed. New tests in `documents/actor.js` check derivation in the update and reset cycles and around both Active Effect phases.
+- The immunity notice is the system hook `l5r4-enhanced.immuneStatus`; `freeRaisesToTn` is a word, its stored message key unchanged.
+- One roll-button partial (coverage reads an action passed to a partial); one sort-header partial reading `SORT_COLUMNS`, which the sort code also reads, so the NPC Skills Roll and Emphasis heads sort (tests fail with the old key list); effect controls are buttons routed as actions; the roll button's under-label is `inert`; `fa-books` for the compendium browser; the mastery label and hint moved to `ui.sheets`; Hint keys paired with their fields.
+- The NPC attack row's empty Type column: the earlier ruling ("show the action type") rested on a misreading, since the Action column already shows it; Ernie's second ruling shows the damage type there.
+
 ### Ernie's rulings on the review items (2026-11-15)
 
 | Item | Ruling |
@@ -498,7 +505,14 @@ Templates wave (E), one owner for templates, SCSS, and the selectors they break,
 | Bare `prepareData()` in tests (167 in 19 files) | Each test read and converted to `reset()` (values a test set in memory are written through `update()`); an ESLint rule with fixtures flags `.prepareData()` and `.prepareDerivedData()` calls in `module/`, `dist/`, and `tests/` |
 | NPC Skills header sorting by roll and Emphasis | Kept as a fix: one source of sort keys makes the heads work; a Quench test and a CHANGELOG line |
 | Roll button under-label | `inert`, as button.md says, so a screen reader reads the pool once |
-| NPC attack row's Type column | Shows the attack's stored action type, localized; its own commit with a failing test first |
+| NPC attack row's Type column | Shows the attack's damage type (`damageN.type`), the field the attack config labels Type; the Action column already shows the action type. Its own commit, with a Quench test that fails first |
+| Handlers both sheets share | Named for what they do, not `Pc*`, in their own change |
+| Function size | functions.md gains a function-length rule with an ESLint check; `rollCheck` becomes named steps |
+| XP manager's Disadvantage-cap prompt | Asked from a service `ask*` function with a template, as dialogs.md says |
+| Wound threshold formula | One shared function in `wound-system.js`, which PC and NPC preparation both call |
+| `module/config/design-gallery.js` | One config file per gallery section plus a shared fixtures file |
+| `getStatusRules`, no caller in `module/` | Find what replaced it; delete it and point the tests at the live path, or give it a real caller |
+| Citations of core's installed source | `[src: path:line]` keeps its line: the source is pinned to 14.370; rechecked when the target version moves |
 | `ui.common.mastery` / `masteryHint` | Moved together to a field group, with readers and translations, so the label and hint checks both hold |
 | Markdown line breaks | One line per paragraph: Prettier `proseWrap: "never"` for `*.md`, one reflow of `docs/`, `roadmap/`, and the root Markdown files |
 

@@ -1,8 +1,9 @@
 /**
  * @module sheets/handlers/pc-actions-handler
- * @description PC sheet actions for natural healing and Void Point spending, delegating to services: a night's rest
- * heals (Stamina × 2) + Insight Rank Wounds; Void for Armor TN gives +10 for one Round and only on the actor's turn
- * in combat, after a DialogV2 confirmation; Void for Initiative sets a flag the initiative roll spends for +10.
+ * @description PC sheet actions for natural healing, Void Point spending, and the Insight Rank's mode, delegating to
+ * services: a night's rest heals (Stamina × 2) + Insight Rank Wounds; Void for Armor TN gives +10 for one Round and
+ * only on the actor's turn in combat, after a DialogV2 confirmation; Void for Initiative sets a flag the initiative
+ * roll spends for +10; a GM's Shift-click switches the Insight Rank between computed and typed.
  */
 import { DIALOG_TEMPLATES } from "../../config/templates.js";
 import { F, R, T } from "../../utils/localization.js";
@@ -165,5 +166,56 @@ export class PcActionsHandler {
 
     // Just toggle the flag - Void spending happens during initiative roll
     await context.actor.update({ "system.initiative.useVoid": checked });
+  }
+
+  /**
+   * Toggles Insight Rank calculation mode between automatic and manual.
+   *
+   * **GM-Only Feature:**
+   * Only GMs can toggle this setting. Shift+Click on the "Rank" label switches between:
+   * - Automatic: Rank calculated from Insight Points (default)
+   * - Manual: the GM types the rank value
+   *
+   * **What It Does:**
+   * 1. Checks for GM permission (non-GMs ignored)
+   * 2. Checks for Shift key (safety mechanism)
+   * 3. Toggles actor.system.insight.autoCalculate flag
+   * 4. Re-renders sheet to show input field or calculated value
+   *
+   * **Use Cases:**
+   * - Special NPCs with non-standard rank progression
+   * - Testing specific rank values
+   * - Temporary rank adjustments for story purposes.
+   *
+   * @param {object} context - Handler context from actor sheet
+   * @param {Actor} context.actor - The actor document
+   * @param {Event} event - Click event on rank label
+   * @param {HTMLElement} _element - Rank label element (unused)
+   * @returns {Promise<void>}
+   */
+  static async updateRankMode(context, event, _element) {
+    event?.preventDefault?.();
+
+    // Only GMs can toggle rank mode
+    if (!game.user.isGM) {
+      return;
+    }
+
+    // Require Shift key to prevent accidental triggers
+    if (!event?.shiftKey) {
+      return;
+    }
+
+    // Toggle autoCalculate flag (default true if undefined)
+    const current = context.actor.system.insight?.autoCalculate ?? true;
+    await context.actor.update({
+      "system.insight.autoCalculate": !current
+    });
+
+    // Notify user of mode change
+    const key = !current
+      ? "l5r4.character.ranks.insightAutomatic"
+      : "l5r4.character.ranks.insightManual";
+    ui.notifications?.info(F(key, { name: context.actor.name }));
   }
 }

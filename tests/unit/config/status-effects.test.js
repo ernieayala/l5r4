@@ -8,11 +8,8 @@
  */
 import { describe, expect, it } from "vitest";
 import { STATUS_EFFECTS, SYSTEM_EFFECTS } from "../../../module/config/status-effects.js";
-import {
-  getDerivedRuleOutputs,
-  getSelectorBonus,
-  getBagEntries
-} from "../../../module/utils/rule-engine.js";
+import { getDerivedRuleOutputs } from "../../../module/utils/rule-engine.js";
+import { getSelectorBonus, getBagEntries } from "../../../module/utils/rule-bag.js";
 import { getArmorTn } from "../../../module/utils/effects.js";
 import { getStackedModifiers } from "../../../module/utils/modifier-stacking.js";
 import { buildStatusEffectUpdate } from "../../../module/utils/status-data.js";

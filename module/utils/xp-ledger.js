@@ -13,7 +13,7 @@ import {
   TRAIT_XP_MULTIPLIER,
   VOID_XP_MULTIPLIER
 } from "../config/game-mechanics.js";
-import { getBagEntries } from "./rule-engine.js";
+import { getBagEntries } from "./rule-bag.js";
 import { getRuleValue } from "./rule-values.js";
 
 /**

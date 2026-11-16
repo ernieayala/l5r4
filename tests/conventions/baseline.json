@@ -78,7 +78,7 @@
   "names/template-folder": 0,
   "names/tool-script": 0,
   "names/vitest-file": 0,
-  "size/over-limit": 14,
+  "size/over-limit": 0,
   "size/stale-exception": 0,
   "stylelint/color-named": 0,
   "stylelint/color-no-hex": 0,

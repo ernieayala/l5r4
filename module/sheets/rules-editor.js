@@ -8,7 +8,7 @@
 import { SYS_ID } from "../config/constants.js";
 import { RULE_KEYS } from "../config/rule-keys.js";
 import { getAnsweredRules } from "../utils/choices.js";
-import { parseRulesJson } from "../utils/rule-engine.js";
+import { parseRulesJson } from "../utils/rule-json.js";
 import { buildRuleView, buildNewRule, parseRuleForm } from "../documents/rule-fields.js";
 
 /** The editor's template, rendered inside each sheet's Rules tab. */

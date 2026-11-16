@@ -26,9 +26,9 @@ import { getHighestSchoolRank } from "../utils/mechanics.js";
 import {
   prepareWoundPenalties,
   prepareWoundState,
-  prepareCurrentWoundLevel,
-  prepareCurrentWoundLevelByMode
+  prepareCurrentWoundLevel
 } from "./actor/calculations/wound-system.js";
+import { prepareCurrentWoundLevelByMode } from "./actor/calculations/npc-wound-system.js";
 import { updateXpFlags } from "./actor/calculations/xp-system.js";
 import { preparePcData } from "./actor/preparation/pc-preparation.js";
 import { prepareNpcData } from "./actor/preparation/npc-preparation.js";

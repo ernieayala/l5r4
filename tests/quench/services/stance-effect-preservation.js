@@ -16,7 +16,7 @@
  * @module tests/quench/services/stance-effect-preservation
  */
 
-import { getStatusRules } from "../../../module/utils/rule-engine.js";
+import { getStatusRules } from "../../../module/utils/status-data.js";
 import { SYS_ID } from "../../../module/config/constants.js";
 import { createTestPC } from "../../fixtures/actor-fixtures.js";
 import { guardRolls, settleFullDefense } from "../helpers.js";

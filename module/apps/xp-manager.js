@@ -11,9 +11,8 @@ import { T } from "../utils/localization.js";
 import { toInt } from "../utils/type-coercion.js";
 import { logError } from "../utils/error-logging.js";
 import { getSortPref, updateSortPref } from "../services/sort-preferences.js";
-import { buildXpHistory } from "../services/xp/calculator.js";
 import { formatXpEntries } from "../services/xp/formatter.js";
-import { isRetroactiveUpdateDue, getXpDataVersion } from "../services/xp/versioning.js";
+import { isRetroactiveUpdateDue, updateXpHistory, xpSpentOf } from "../services/xp/versioning.js";
 
 /**
  * The XP manager window for one actor.
@@ -95,12 +94,12 @@ export default class XpManagerApplication extends foundry.applications.api.Handl
 
     try {
       if (await isRetroactiveUpdateDue(this.actor)) {
-        await this._performRetroactiveUpdate();
+        await updateXpHistory(this.actor);
       }
       const sys = this.actor.system ?? {};
       const xp = sys?._xp ?? {};
       const manual = this._getXpManual();
-      const spent = this._getXpSpent();
+      const spent = xpSpentOf(this.actor);
 
       const manualEntries = formatXpEntries(manual, { sort: false });
       const spentEntries = formatXpEntries(spent, {
@@ -206,16 +205,6 @@ export default class XpManagerApplication extends foundry.applications.api.Handl
   }
 
   /**
-   * Retrieve cached XP spending entries from actor flags.
-   *
-   * @returns {Array} Array of XP spending entries
-   */
-  _getXpSpent() {
-    const flags = this._getFlags();
-    return Array.isArray(flags.xpSpentCache) ? flags.xpSpentCache : [];
-  }
-
-  /**
    * Calculate total XP delta from array of entries.
    * Sums delta values, ignoring invalid entries.
    *
@@ -229,36 +218,6 @@ export default class XpManagerApplication extends foundry.applications.api.Handl
       }
       return s + (Number.isFinite(+e.delta) ? +e.delta : 0);
     }, 0);
-  }
-
-  /**
-   * Perform retroactive XP update.
-   * Rebuilds XP spending history from actor items and updates version flag.
-   * Only updates cache if spending history has changed.
-   */
-  async _performRetroactiveUpdate() {
-    try {
-      // Rebuild XP spending history from current actor items
-      // This recalculates all XP costs based on current item data
-      const retroactiveSpent = await buildXpHistory(this.actor);
-      const existingCache = this._getXpSpent();
-
-      // Write the cache only when the spending history differs
-      // This prevents unnecessary flag updates and re-renders
-      const changed = JSON.stringify(existingCache) !== JSON.stringify(retroactiveSpent);
-      if (changed) {
-        await this.actor.setFlag(SYS_ID, "xpSpentCache", retroactiveSpent);
-      }
-
-      // Update version flag to prevent redundant recalculations
-      // Version is based on item count and modification timestamps
-      const currentVersion = getXpDataVersion(this.actor);
-      await this.actor.setFlag(SYS_ID, "xpRetroactiveVersion", currentVersion);
-    } catch (err) {
-      logError("Failed to perform retroactive XP update", err, {
-        actorId: this.actor?.id
-      });
-    }
   }
 
   /**
@@ -402,7 +361,7 @@ export default class XpManagerApplication extends foundry.applications.api.Handl
     try {
       await this.actor.setFlag(SYS_ID, "xpRetroactiveVersion", 0);
 
-      await this._performRetroactiveUpdate();
+      await updateXpHistory(this.actor);
 
       if (this.rendered) {
         this.render();

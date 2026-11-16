@@ -34,6 +34,7 @@ import {
 } from "../services/scrolling-text.js";
 import { bindAttackCard } from "../services/combat/attack-card.js";
 import { bindDamageCards } from "../services/combat/damage.js";
+import { bindLegacyDamageCard } from "../services/combat/legacy-damage.js";
 import { bindFlowCards } from "../services/combat/flow.js";
 import { onGetSceneControlButtonsDuel } from "../services/combat/duel.js";
 import { onGetSceneControlButtonsGuard } from "../services/combat/guard.js";
@@ -42,7 +43,6 @@ import { onGetFolderContextOptions } from "../services/item-transfer.js";
 import EffectPanel from "../apps/effect-panel.js";
 import CompendiumBrowser from "../apps/compendium-browser.js";
 import { onHotbarDrop, registerMacroApi } from "../sheets/ui/macros.js";
-import { registerChatDamageButtons } from "./chat-damage-buttons.js";
 import { registerSpellMemorizationHooks } from "./spell-memorization.js";
 
 /** The hooks after which the open effect panel redraws: control changes, and effects or the actor change. */
@@ -127,7 +127,7 @@ export function registerAllHooks() {
   Hooks.on("getFolderContextOptions", onGetFolderContextOptions);
 
   // Damage buttons on cards posted by 3.x
-  registerChatDamageButtons();
+  Hooks.on("renderChatMessageHTML", bindLegacyDamageCard);
 
   // Spell system: Memorization XP tracking
   registerSpellMemorizationHooks();

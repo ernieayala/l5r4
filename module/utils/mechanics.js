@@ -5,7 +5,6 @@
  * Handles:
  * - Trait and skill resolution for rolls
  * - Skill, Trait, and Ring bonuses shown in sheet formulas
- * - Shugenja affinity/deficiency modifiers
  * - Weapon skill resolution
  * - Roll parameter extraction from DOM elements
  *
@@ -14,45 +13,7 @@
  */
 
 import { toInt, toString } from "./type-coercion.js";
-import { logError } from "./error-logging.js";
-import { getSelectorBonus } from "./rule-engine.js";
-import { T } from "./localization.js";
-
-/**
- * Valid L5R4 trait abbreviations.
- * Physical: sta (Stamina), str (Strength), ref (Reflexes), agi (Agility)
- * Mental: wil (Willpower), per (Perception), awa (Awareness), int (Intelligence)
- * Void: void (Void Ring)
- * @constant {string[]}
- */
-const KNOWN_TRAITS = Object.freeze([
-  "sta",
-  "wil",
-  "str",
-  "per",
-  "ref",
-  "awa",
-  "agi",
-  "int",
-  "void"
-]);
-
-/**
- * Maps English trait names to abbreviations.
- * Used for normalizing trait references from various sources.
- * @constant {Record<string, string>}
- */
-const ENGLISH_TRAIT_LABELS = Object.freeze({
-  stamina: "sta",
-  willpower: "wil",
-  strength: "str",
-  perception: "per",
-  reflexes: "ref",
-  awareness: "awa",
-  agility: "agi",
-  intelligence: "int",
-  void: "void"
-});
+import { getSelectorBonus } from "./rule-bag.js";
 
 /**
  * The roll, keep, and total bonus a sheet formula shows for a Skill, Trait, or Ring: Active Effect values in
@@ -88,67 +49,6 @@ export function getFormulaBonus(actor, { skill, trait, ring }) {
     keep: sum.keep + rules.keep,
     total: sum.total + rules.total
   };
-}
-
-/**
- * Normalizes trait key to standard abbreviation.
- *
- * Handles multiple input formats:
- * - Abbreviations: "agi", "str", "void"
- * - English names: "agility", "strength"
- * - Localization keys: "l5r4.ui.mechanics.traits.agi"
- * - Localized labels: "Agilité" (French) -> "agi"
- *
- * So "agility" gives "agi", and "l5r4.ui.mechanics.traits.str" gives "str".
- * @param {*} raw - Raw trait identifier
- * @returns {string} Normalized trait key ("agi", "str", etc.) or empty string
- */
-export function toTraitKey(raw) {
-  if (raw == null) {
-    return "";
-  }
-  if (typeof raw === "symbol") {
-    return "";
-  }
-  const k = toString(raw).trim();
-
-  // Check for localization key format: "l5r4.ui.mechanics.traits.agi"
-  const m = /^l5r4\.ui\.mechanics\.traits\.(\w+)$/i.exec(k);
-  if (m && KNOWN_TRAITS.includes(m[1].toLowerCase())) {
-    return m[1].toLowerCase();
-  }
-
-  // Special case for void ring localization key
-  if (/^l5r4\.ui\.mechanics\.rings\.void$/i.test(k)) {
-    return "void";
-  }
-
-  // Check if already a valid abbreviation
-  if (KNOWN_TRAITS.includes(k.toLowerCase())) {
-    return k.toLowerCase();
-  }
-
-  // Check English trait names
-  if (ENGLISH_TRAIT_LABELS[k.toLowerCase()]) {
-    return ENGLISH_TRAIT_LABELS[k.toLowerCase()];
-  }
-
-  // Try matching against localized labels
-  try {
-    for (const key of KNOWN_TRAITS) {
-      const labelKey =
-        key === "void" ? "l5r4.ui.mechanics.rings.void" : `l5r4.ui.mechanics.traits.${key}`;
-      const label = T(labelKey);
-      if (label && label.toLowerCase() === k.toLowerCase()) {
-        return key;
-      }
-    }
-  } catch {
-    // Ignore i18n errors
-  }
-
-  // No match found
-  return "";
 }
 
 /**
@@ -206,20 +106,6 @@ export function getHighestSchoolRank(actor) {
 }
 
 /**
- * The School Rank a shugenja casts with: the rank of the School marked as the shugenja School, or the Insight
- * Rank, which is the School Rank of a character with one School.
- * game-rules/29_types_of_rolls.md, p.80
- * game-rules/49_improving_your_character.md, p.104
- * game-rules/66_magic_and_spell_casting.md, p.163
- * @param {object} actor
- * @returns {number}
- */
-export function getCastingSchoolRank(actor) {
-  const school = actor.items.find(item => item.type === "school" && item.system.shugenja);
-  return school ? school.system.schoolRank : actor.system.insightRank;
-}
-
-/**
  * Extracts roll parameters from DOM element data attributes.
  *
  * Reads data-roll, data-keep, data-trait, data-label, data-description.
@@ -247,64 +133,6 @@ export function getRollParams(el, actor) {
     label,
     description
   };
-}
-
-/**
- * Gets shugenja affinity/deficiency modifier for spell casting.
- *
- * Shugenja have affinity (+1k0) or deficiency (-1k0) with specific rings.
- * If character has both affinity and deficiency for same ring, they cancel.
- * @param {object} actor - Foundry actor document
- * @param {string} ringKey - Ring element ("fire", "water", "air", "earth", "void")
- * @returns {number} Modifier: 1 (affinity), -1 (deficiency), or 0 (none/cancel)
- */
-export function getAffinityDeficiencyModifier(actor, ringKey) {
-  if (!actor || !ringKey) {
-    return 0;
-  }
-
-  const normalizedRing = toString(ringKey).toLowerCase().trim();
-  if (!normalizedRing) {
-    return 0;
-  }
-
-  // Find all shugenja techniques (grant affinity/deficiency)
-  let shugenjaItems;
-  try {
-    const items = actor.items?.contents ?? actor.items ?? [];
-    shugenjaItems = Array.from(items).filter(
-      i => i.type === "technique" && i.system?.shugenja === true
-    );
-  } catch (err) {
-    logError("Failed to find technique items in getAffinityDeficiencyModifier", err);
-    return 0;
-  }
-
-  // Collect all modifiers (use Set to track unique values)
-  const modifiers = new Set();
-  for (const item of shugenjaItems) {
-    if (!item?.system) {
-      continue;
-    }
-
-    const affinity = toString(item.system.affinity).toLowerCase().trim();
-    if (affinity === normalizedRing) {
-      modifiers.add(1);
-    }
-
-    const deficiency = toString(item.system.deficiency).toLowerCase().trim();
-    if (deficiency === normalizedRing) {
-      modifiers.add(-1);
-    }
-  }
-
-  // If both affinity and deficiency present, they cancel out
-  if (modifiers.size > 1) {
-    return 0;
-  }
-
-  // Return single modifier if present, otherwise 0
-  return modifiers.size === 1 ? modifiers.values().next().value : 0;
 }
 
 /**

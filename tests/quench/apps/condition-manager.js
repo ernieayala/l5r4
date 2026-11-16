@@ -15,7 +15,7 @@
  * @module tests/quench/apps/condition-manager
  */
 
-import { getStatusRules } from "../../../module/utils/rule-engine.js";
+import { getStatusRules } from "../../../module/utils/status-data.js";
 import { SYS_ID } from "../../../module/config/constants.js";
 import { STATUS_EFFECTS } from "../../../module/config/status-effects.js";
 import { createTestPC } from "../../fixtures/actor-fixtures.js";

@@ -6,26 +6,23 @@
  * player who does not own the NPC.
  */
 import { SYS_ID } from "../config/constants.js";
-import { DIALOG_TEMPLATES } from "../config/templates.js";
 import { ACTION_TYPES, STANCES } from "../config/localization.js";
-import { getClamped } from "../utils/type-coercion.js";
 import { T } from "../utils/localization.js";
 import { on } from "../utils/dom.js";
 import { applySortPref } from "../utils/sorting.js";
 import { getActiveStance } from "../utils/stances.js";
 import { prepareItemSheetOptions } from "../documents/item/integration/sheet-data.js";
 import { summaryOf } from "../documents/summary.js";
-import * as Fear from "../services/fear.js";
 import { getSortPref } from "../services/sort-preferences.js";
 import { getSectionCollapsedMap } from "../services/section-state.js";
-import { applyLongRest } from "../services/rest.js";
-import { rollSpellCast } from "../services/dice/rolls/spell-cast-roll.js";
-import { rollMahoCast } from "../services/dice/rolls/maho-cast-roll.js";
-import NpcAttackConfigApplication from "../apps/npc-attack-config.js";
 import { BaseActorSheet } from "./base-actor-sheet.js";
 import { RollHandler } from "./handlers/roll-handler.js";
 import { AppLauncherHandler } from "./handlers/app-launcher-handler.js";
 import { ItemCrudHandler } from "./handlers/item-crud-handler.js";
+import { NpcActionsHandler } from "./handlers/npc-actions-handler.js";
+import { PcActionsHandler } from "./handlers/pc-actions-handler.js";
+import { PcAdjustmentHandler } from "./handlers/pc-adjustment-handler.js";
+import { PcRollHandler } from "./handlers/pc-roll-handler.js";
 import { StanceHandler } from "./handlers/stance-handler.js";
 import { TraitHandler } from "./handlers/trait-handler.js";
 
@@ -234,7 +231,7 @@ export default class L5R4NpcSheet extends BaseActorSheet {
   _onAction(action, event, element) {
     switch (action) {
       case "apply-healing":
-        return this._onApplyHealing(event, element);
+        return PcActionsHandler.applyHealing(this._getHandlerContext(), event, element);
       case "update-item-field":
         return this._onInlineItemEdit(event, element);
       case "create-item":
@@ -252,16 +249,18 @@ export default class L5R4NpcSheet extends BaseActorSheet {
       case "sort-items":
         return this._onUnifiedSortClick(event, element);
       case "adjust-void-ring":
-        return this._onVoidAdjust(event, element, +1);
+        return PcAdjustmentHandler.updateVoidRing(this._getHandlerContext(), event, element, +1);
       // The arrows step the Void Ring without Shift, like the Trait arrows (issue #30)
       case "increase-void-ring":
-        return this._onVoidAdjust(
+        return PcAdjustmentHandler.updateVoidRing(
+          this._getHandlerContext(),
           { preventDefault: () => event.preventDefault(), shiftKey: true },
           element,
           +1
         );
       case "decrease-void-ring":
-        return this._onVoidAdjust(
+        return PcAdjustmentHandler.updateVoidRing(
+          this._getHandlerContext(),
           { preventDefault: () => event.preventDefault(), shiftKey: true },
           element,
           -1
@@ -279,9 +278,9 @@ export default class L5R4NpcSheet extends BaseActorSheet {
       case "roll-weapon-attack":
         return this._onWeaponAttackRoll(event, element);
       case "cast-spell":
-        return this._onCastSpell(event, element);
+        return PcRollHandler.rollClickedSpellCast(this._getHandlerContext(), event, element);
       case "test-fear":
-        return this._onFearTest(event, element);
+        return NpcActionsHandler.testFear(this._getHandlerContext(), event, element);
       case "adjust-trait":
         return this._onTraitAdjust(event, element, +1);
       case "increase-trait":
@@ -300,9 +299,9 @@ export default class L5R4NpcSheet extends BaseActorSheet {
         return AppLauncherHandler.openWoundConfig(this._getHandlerContext(), event, element);
       case "edit-attack":
       case "add-attack":
-        return this._onEditAttack(event, element);
+        return NpcActionsHandler.openAttackConfig(this._getHandlerContext(), event, element);
       case "delete-attack":
-        return this._onDeleteAttack(event, element);
+        return NpcActionsHandler.deleteAttack(this._getHandlerContext(), event, element);
     }
   }
 
@@ -327,7 +326,7 @@ export default class L5R4NpcSheet extends BaseActorSheet {
       case "adjust-trait":
         return this._onTraitAdjust(event, element, -1);
       case "adjust-void-ring":
-        return this._onVoidAdjust(event, element, -1);
+        return PcAdjustmentHandler.updateVoidRing(this._getHandlerContext(), event, element, -1);
       case "adjust-void-points":
         return this._onVoidPointsAdjust(event, element, -1);
       default:
@@ -356,55 +355,6 @@ export default class L5R4NpcSheet extends BaseActorSheet {
     }
     if (action === "apply-stance") {
       return StanceHandler.applyStance(this._getHandlerContext(), event, element);
-    }
-  }
-
-  /**
-   * Adjusts NPC's Void Ring rank by the specified delta.
-   *
-   * NPCs have direct Void Ring editing unlike PCs where Rings are derived from traits.
-   * This allows GMs to quickly adjust NPC power levels and Void Point pools.
-   *
-   * **Safety Mechanism:**
-   * Requires Shift key to prevent accidental adjustments. Works with KeyboardBehaviorMixin
-   * to show visual cursor feedback when Shift is held.
-   *
-   * **Game Rules:**
-   * Void Ring determines Void Points available (equal to Void Ring rank). Most creatures
-   * don't have Void Rings, but some intelligent NPCs and supernatural beings do.
-   *
-   * **Implementation Note:**
-   * Clamps to 0-9 range. Standard character range is 1-10 per core rules, but 0 is
-   * allowed for flexibility (creatures without Void). Max of 9 instead of 10 may be
-   * implementation choice for UI consistency.
-   *
-   * @param {Event} event - DOM event (must have shiftKey = true to execute)
-   * @param {HTMLElement} element - Element containing Void Ring data
-   * @param {number} delta - Direction to adjust (+1 to increase, -1 to decrease)
-   * @returns {Promise<void>}
-   */
-  async _onVoidAdjust(event, element, delta) {
-    event?.preventDefault?.();
-
-    // Safety check: require Shift key to prevent accidental adjustments
-    if (!event?.shiftKey) {
-      return;
-    }
-
-    const cur =
-      Number(
-        this.actor._source?.system?.rings?.void?.rank ?? this.actor.system?.rings?.void?.rank ?? 0
-      ) || 0;
-    const min = 0;
-    const max = 9;
-    const next = getClamped(cur + (delta > 0 ? 1 : -1), min, max);
-    if (next === cur) {
-      return;
-    }
-    try {
-      await this.actor.update({ "system.rings.void.rank": next }, { diff: true });
-    } catch (err) {
-      console.warn(`${SYS_ID} NPC Sheet: failed to update void rank`, { err });
     }
   }
 
@@ -480,159 +430,6 @@ export default class L5R4NpcSheet extends BaseActorSheet {
     on(root, "click", {
       selector: "[data-edit='img']",
       handler: ev => this._onEditImage(ev, ev.currentTarget)
-    });
-  }
-
-  /**
-   * Applies natural healing to the NPC.
-   *
-   * **Game Rules Context:**
-   * NPCs heal (Stamina × 2) + Insight Rank wounds per night of rest, same as PCs.
-   * Healing cannot reduce suffered wounds below 0 (no over-healing).
-   *
-   * **Implementation:**
-   * Delegates to healing service which handles calculation, actor update, and chat output.
-   *
-   * @param {Event} event - Click event on healing button
-   * @param {HTMLElement} _element - Button element (unused)
-   * @returns {Promise<void>}
-   */
-  async _onApplyHealing(event, _element) {
-    event?.preventDefault?.();
-    await applyLongRest(this.actor);
-  }
-
-  /**
-   * Initiates a Fear resistance test against this NPC.
-   *
-   * Triggers Fear tests for all currently selected tokens (excluding the NPC itself).
-   * Selected characters make Raw Willpower rolls vs TN (5 + 5×Fear Rank), adding their
-   * Honor Rank to the roll.
-   *
-   * **Game Rules:**
-   * Creatures with Fear ability automatically inflict Fear at encounter start. Characters
-   * who fail the test suffer -Xk0 penalty to all rolls (X = Fear Rank) for the encounter.
-   * Catastrophic failure (fail by 15+) causes character to flee or cower.
-   *
-   * **Requirements:**
-   * - NPC must have Fear ability (fear.rank > 0)
-   * - At least one token must be selected on the canvas
-   * - Selected tokens must be different from the NPC
-   *
-   * **Implementation:**
-   * Delegates to Fear service which handles roll mechanics and chat output.
-   *
-   * @param {Event} event - DOM event triggering the Fear test
-   * @param {HTMLElement} _element - Element that was clicked
-   * @returns {Promise<void>}
-   */
-  async _onFearTest(event, _element) {
-    event?.preventDefault?.();
-
-    if (!this.actor.hasFear?.()) {
-      ui.notifications?.warn(game.i18n.localize("l5r4.ui.mechanics.fear.noFear"));
-      return;
-    }
-
-    await Fear.onFearClick({ npc: this.actor });
-  }
-
-  /**
-   * Initiates a spell casting roll for an NPC shugenja.
-   *
-   * **Game Rules Context:**
-   * Spell Casting rolls determine if a shugenja successfully invokes the kami:
-   * - Formula: (Ring + School Rank)k(Ring)
-   * - TN: 5 + (Mastery Level × 5)
-   * - Affinity: +1 effective School Rank (auto-detected)
-   * - Deficiency: -1 effective School Rank (auto-detected)
-   * - Spell slots consumed automatically (elemental or Void bonus slots)
-   *
-   * **Automatic Detection:**
-   * - Affinity/Deficiency: Detected from actor's school and applied automatically
-   * - Target Number: Calculated from spell's Mastery Level automatically
-   * - Spell Slots: Consumed automatically (elemental preferred, void fallback)
-   *
-   * **Implementation:**
-   * Extracts spell data from .item row, shows simplified dialog (wound penalty,
-   * void, modifiers, raises only), then executes spell casting with all automatic
-   * detection and slot management handled by rollSpellCast service. Dialog always
-   * appears to give user control over modifiers and raises before casting.
-   *
-   * @param {Event} event - Click event
-   * @param {HTMLElement} element - Element with data-item-id for spell lookup
-   * @returns {Promise<ChatMessage|null>|undefined} The cast's chat message, or undefined when the row holds no spell
-   */
-  _onCastSpell(event, element) {
-    event.preventDefault();
-    const row = element.closest("[data-item-id]");
-    const id = row?.dataset?.itemId || row?.dataset?.documentId || row?.dataset?.id;
-    const spell = id ? this.actor.items.get(id) : null;
-    if (!spell || spell.type !== "spell") {
-      return;
-    }
-
-    // Route to maho casting if spell is blood magic
-    const cast = spell.system?.maho ? rollMahoCast : rollSpellCast;
-    return cast({ actor: this.actor, spell, showDialog: !event.shiftKey });
-  }
-
-  /**
-   * Opens attack editor dialog for NPC attack configuration.
-   *
-   * Launches NpcAttackConfigApplication to edit attack and damage values
-   * for the specified attack slot (attack1-3). "Add Attack" opens it on the first empty slot.
-   *
-   * @param {Event} event - Click event
-   * @param {HTMLElement} element - Element with data-attack-key attribute
-   * @returns {Promise<void>}
-   */
-  async _onEditAttack(event, element) {
-    event?.preventDefault?.();
-
-    const attackKey = element.dataset.attackKey;
-    if (!attackKey) {
-      console.warn("L5R4 | No attack key found on element", element);
-      return;
-    }
-
-    const editor = new NpcAttackConfigApplication(this.actor, attackKey);
-
-    editor.render(true);
-  }
-
-  /**
-   * Removes an NPC attack by clearing its slot: the attack and its damage go back to empty, and the sheet hides
-   * the row. Asks first unless Shift is held, as deleting an item does.
-   *
-   * @param {Event} event - Click event
-   * @param {HTMLElement} element - Element with data-attack-key attribute
-   * @returns {Promise<void>}
-   */
-  async _onDeleteAttack(event, element) {
-    event?.preventDefault?.();
-    const attackKey = element.dataset.attackKey;
-    const damageKey = attackKey.replace("attack", "damage");
-    const attack = this.actor.system[attackKey];
-
-    if (!event.shiftKey) {
-      const name =
-        attack.name ||
-        `${game.i18n.localize("l5r4.ui.mechanics.combat.attack")} ${attackKey.replace("attack", "")}`;
-      const confirmed = await foundry.applications.api.DialogV2.confirm({
-        window: { title: "l5r4.ui.dialogs.deleteAttack.title" },
-        content: await foundry.applications.handlebars.renderTemplate(DIALOG_TEMPLATES.confirm, {
-          question: game.i18n.localize("l5r4.ui.dialogs.deleteAttack.content", { name })
-        })
-      });
-      if (!confirmed) {
-        return;
-      }
-    }
-
-    await this.actor.update({
-      [`system.${attackKey}`]: { name: "", roll: 0, keep: 0, modifier: 0, type: "" },
-      [`system.${damageKey}`]: { roll: 0, keep: 0, modifier: 0, type: "" }
     });
   }
 

@@ -3,16 +3,16 @@
 The NPC sidebar block for a creature's Fear: its Fear Rank as a number the GM types, and, when the rank is above 0, a
 button that rolls Fear for the selected tokens.
 
-| Item        | Detail                                                                                                       |
-| ----------- | ------------------------------------------------------------------------------------------------------------ |
-| Partial     | `templates/actor/_partials/_fear.hbs`                                                                        |
-| Parameters  | The sheet context: `system.fear.rank`                                                                        |
-| SCSS        | None of its own: `section.md`, `grid.md`, and `button.md` draw it                                            |
-| Block class | `l5r4-fear` on the section                                                                                   |
-| Shows in    | NPC sidebar (`npc.hbs:9`)                                                                                    |
-| Handler     | `_onFearTest` (`module/sheets/npc-sheet.js:582-591`), then `handleFearClick` (`module/services/fear.js:162`) |
-| Game terms  | Fear, Fear Rank (`game-rules/42_fear.md, p.90`)                                                              |
-| Gallery     | Rank 0 (no button), rank 3, rank 10; the button hovered and focused                                          |
+| Item        | Detail                                                                                                                                         |
+| ----------- | ---------------------------------------------------------------------------------------------------------------------------------------------- |
+| Partial     | `templates/actor/_partials/_fear.hbs`                                                                                                          |
+| Parameters  | The sheet context: `system.fear.rank`                                                                                                          |
+| SCSS        | None of its own: `section.md`, `grid.md`, and `button.md` draw it                                                                              |
+| Block class | `l5r4-fear` on the section                                                                                                                     |
+| Shows in    | NPC sidebar (`npc.hbs:9`)                                                                                                                      |
+| Handler     | `NpcActionsHandler.testFear` (`module/sheets/handlers/npc-actions-handler.js:582-591`), then `handleFearClick` (`module/services/fear.js:162`) |
+| Game terms  | Fear, Fear Rank (`game-rules/42_fear.md, p.90`)                                                                                                |
+| Gallery     | Rank 0 (no button), rank 3, rank 10; the button hovered and focused                                                                            |
 
 ## Anatomy
 

@@ -22,7 +22,7 @@
  * @see module/services/stance/rolls/attack-bonuses.js
  */
 
-import { getStatusRules } from "../../../module/utils/rule-engine.js";
+import { getStatusRules } from "../../../module/utils/status-data.js";
 import { SYS_ID } from "../../../module/config/constants.js";
 import { createTestPC } from "../../fixtures/actor-fixtures.js";
 import { createSkillData } from "../../fixtures/item-fixtures.js";

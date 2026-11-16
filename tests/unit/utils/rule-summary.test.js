@@ -7,7 +7,6 @@ import {
   buildRulesSummary,
   buildSelectorPhrase,
   formatSigned,
-  buildSourceCitation,
   SUMMARY_KEYS
 } from "../../../module/utils/rule-summary.js";
 
@@ -163,21 +162,5 @@ describe("The formatSigned and formatPool helpers", () => {
     expect(formatPool({ keep: 1, total: 5 })).toBe("+0k1+5");
     expect(formatPool({ total: -5 })).toBe("-5");
     expect(formatPool({})).toBe("+0");
-  });
-});
-
-describe("buildSourceCitation", () => {
-  it("should cite the book and printed page", () => {
-    expect(buildSourceCitation({ book: "core", page: 204 })).toEqual({
-      key: "l5r4.ui.ruleSummary.citation",
-      data: { book: { key: "l5r4.ui.sources.core", data: {} }, page: 204 }
-    });
-    expect(hasKey("l5r4.ui.sources.core")).toBe(true);
-  });
-
-  it("should be null for an item that cites nothing", () => {
-    expect(buildSourceCitation({ book: "", page: 0 })).toBeNull();
-    expect(buildSourceCitation({ book: "core", page: 0 })).toBeNull();
-    expect(buildSourceCitation(undefined)).toBeNull();
   });
 });

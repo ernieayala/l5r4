@@ -3,10 +3,12 @@
  * @description Change detection for a character's XP data: a content hash of the Traits, Skills, Void rank, and
  * purchased advantages, disadvantages, kata, and kiho, compared with the version stored in
  * `flags[SYS_ID].xpRetroactiveVersion`, tells the XP manager when to rebuild the XP history so it shows the current
- * costs.
+ * costs. The rebuild stores the history in `flags[SYS_ID].xpSpentCache` with the version it was built at.
  */
 
 import { SYS_ID } from "../../config/constants.js";
+import { logError } from "../../utils/error-logging.js";
+import { buildXpHistory } from "./calculator.js";
 
 /**
  * Calculates a hash-based version identifier for an actor's XP-relevant data.
@@ -111,5 +113,46 @@ export async function isRetroactiveUpdateDue(actor) {
   } catch (err) {
     console.warn(`${SYS_ID}`, "Failed to check retroactive XP update need", err);
     return true; // Fail-safe: trigger update on error to ensure data consistency
+  }
+}
+
+/**
+ * The XP history the XP manager last stored for an actor, empty before the first rebuild.
+ * @param {Actor} actor
+ * @returns {Array<object>} XP spending entries
+ */
+export function xpSpentOf(actor) {
+  const flags = actor.flags?.[SYS_ID] ?? {};
+  return Array.isArray(flags.xpSpentCache) ? flags.xpSpentCache : [];
+}
+
+/**
+ * Rebuild an actor's XP history from its items and store it with the current version. The history is written only
+ * when it changed, so an unchanged rebuild re-renders nothing; a failure is logged, and the XP manager still opens.
+ * @param {Actor} actor
+ * @returns {Promise<void>}
+ */
+export async function updateXpHistory(actor) {
+  try {
+    // Rebuild XP spending history from current actor items
+    // This recalculates all XP costs based on current item data
+    const retroactiveSpent = await buildXpHistory(actor);
+    const existingCache = xpSpentOf(actor);
+
+    // Write the cache only when the spending history differs
+    // This prevents unnecessary flag updates and re-renders
+    const changed = JSON.stringify(existingCache) !== JSON.stringify(retroactiveSpent);
+    if (changed) {
+      await actor.setFlag(SYS_ID, "xpSpentCache", retroactiveSpent);
+    }
+
+    // Update version flag to prevent redundant recalculations
+    // Version is based on item count and modification timestamps
+    const currentVersion = getXpDataVersion(actor);
+    await actor.setFlag(SYS_ID, "xpRetroactiveVersion", currentVersion);
+  } catch (err) {
+    logError("Failed to perform retroactive XP update", err, {
+      actorId: actor?.id
+    });
   }
 }

@@ -6,21 +6,20 @@
  * TN, and posts a `roll` ChatMessage holding the whole context.
  *
  * The rules it applies: Roll & Keep, the Ten Dice Rule and exploding dice, Void Points (never on damage), Raises and
- * Free Raises, Unskilled Rolls, wound penalties on the TN (roadmap/STAGE-08 decision 2), the Honor Roll, Emphases,
- * and Embracing the Taint.
+ * Free Raises, Unskilled Rolls, wound penalties on the TN (roadmap/STAGE-08 decision 2), Emphases, and Embracing
+ * the Taint. The posted card renders through card.js.
  * game-rules/23_roll_and_keep.md, p.75
  * game-rules/25_rings_and_traits.md, p.78
  * game-rules/26_special_dice_rules.md, p.77
  * game-rules/28_raises.md, p.79
  * game-rules/30_skill_rolls_expanded.md, p.80
  * game-rules/33_wounds.md, p.82
- * game-rules/43_honor.md, p.92
  * game-rules/58_skills_overview.md, p.133
  * game-rules/89_shadowlands_taint.md, p.279
  */
 
 import { SYS_ID } from "../../../config/constants.js";
-import { CHAT_TEMPLATES, DIALOG_TEMPLATES } from "../../../config/templates.js";
+import { DIALOG_TEMPLATES } from "../../../config/templates.js";
 import { ARROW_ARMOR_FACTOR } from "../../../config/game-mechanics.js";
 import { F, T } from "../../../utils/localization.js";
 import { toInt } from "../../../utils/type-coercion.js";
@@ -40,13 +39,8 @@ import { spendVoidPoint } from "../resources/void-points.js";
 import { getTargets } from "../resources/target-resolver.js";
 import { isVoidOverLimit } from "../../effects/uses.js";
 import { applyTrackChange } from "../../ledger.js";
+import { formatModifier, renderCheckCard } from "./card.js";
 import { getCheckContext } from "./collect.js";
-
-/**
- * Roll kinds the Honor Roll can re-roll: Skill, Trait, Ring, and Spell Casting rolls.
- * game-rules/43_honor.md, p.92
- */
-const honorRollKinds = new Set(["skill", "attack", "trait", "ring", "spell", "maho"]);
 
 /**
  * What a caller asks the pipeline to roll.
@@ -487,71 +481,6 @@ export async function rollCheck(request) {
 }
 
 /**
- * Whether a check's card offers the optional Honor Roll (roadmap/STAGE-11 decision 3): the world setting is on and
- * the roll failed, and it is not itself an Honor Roll. Whether the roller still has it this session is checked on the
- * click (module/services/dice/check/chat-actions.js, rollHonor).
- * game-rules/43_honor.md, p.92
- * @param {object} system - RollMessageData source
- * @returns {boolean}
- */
-export function isHonorRollOffered(system) {
-  return (
-    game.settings.get(SYS_ID, "honorRoll") &&
-    system.outcome.success === false &&
-    honorRollKinds.has(system.kind) &&
-    !system.honorRollOf
-  );
-}
-
-/**
- * Render a check's card from its stored context.
- * @param {object} system - RollMessageData source
- * @param {Roll} roll
- * @param {{actorId?: string}} [extra] - The roller's id
- * @returns {Promise<string>}
- */
-export async function renderCheckCard(system, roll, { actorId = "" } = {}) {
-  const success = system.outcome.success;
-  const isAttack = system.kind === "attack";
-  const hit = isAttack && success === true;
-  const maneuvers = system.maneuvers ?? {};
-  const missed = isAttack ? "l5r4.ui.mechanics.rolls.missed" : "l5r4.ui.mechanics.rolls.failure";
-  return foundry.applications.handlebars.renderTemplate(CHAT_TEMPLATES.checkCard, {
-    ...system,
-    tn: system.tn.effective === null ? null : system.tn,
-    freeRaisesLeft: system.tn.freeRaises - system.tn.freeRaisesToTN,
-    outcomeText: T(success ? "l5r4.ui.mechanics.rolls.success" : missed),
-    appliedModifiers: system.modifiers
-      .filter(m => m.enabled && (m.roll || m.keep || m.total))
-      .map(m => ({ label: m.label, text: formatModifier(m) })),
-    roll: await roll.render(),
-    damageButton: hit && !maneuvers.grapple ? (system.damage?.label ?? "") : "",
-    maneuverNotes: hit ? formatManeuverNotes(maneuvers) : [],
-    contest: hit && Boolean(system.target?.uuid) && (maneuvers.knockdown || maneuvers.disarm),
-    grappleButton: hit && Boolean(system.target?.uuid) && maneuvers.grapple,
-    applyTarget: system.kind === "damage" ? system.target?.name : "",
-    honorRoll: isHonorRollOffered(system),
-    actorId
-  });
-}
-
-/**
- * The "+2k1 +5"-style text for a modifier.
- * @param {{roll?: number, keep?: number, total?: number}} modifier
- * @returns {string}
- */
-function formatModifier({ roll = 0, keep = 0, total = 0 }) {
-  const parts = [];
-  if (roll || keep) {
-    parts.push(`${roll >= 0 ? "+" : ""}${roll}k${keep}`);
-  }
-  if (total) {
-    parts.push(`${total > 0 ? "+" : ""}${total}`);
-  }
-  return parts.join(" ");
-}
-
-/**
  * The actor's Void Points to spend and its Void Ring.
  * @param {Actor} actor
  * @returns {{points: number, ring: number}}
@@ -648,39 +577,4 @@ async function askChoices(request, context) {
     rejectClose: false,
     modal: true
   });
-}
-
-/**
- * The lines a hit's maneuvers add to its card: what each did, and the Contested Strength roll Knockdown and Disarm
- * call for. A Called Shot's effect is the GM's (STAGE-10 decision 1).
- * game-rules/38_maneuvers.md, p.86-87
- * @param {object} maneuvers
- * @returns {string[]}
- */
-function formatManeuverNotes(maneuvers) {
-  const notes = [];
-  if (maneuvers.calledShot) {
-    notes.push(
-      F("l5r4.ui.combat.calledShotNote", {
-        raises: maneuvers.calledShot,
-        location: maneuvers.location || T("l5r4.ui.combat.calledShotUnnamed")
-      })
-    );
-  }
-  if (maneuvers.feint) {
-    notes.push(T("l5r4.ui.combat.feintNote"));
-  }
-  if (maneuvers.increasedDamage) {
-    notes.push(F("l5r4.ui.combat.increasedDamageNote", { dice: maneuvers.increasedDamage }));
-  }
-  if (maneuvers.knockdown) {
-    notes.push(T("l5r4.ui.combat.knockdownNote"));
-  }
-  if (maneuvers.disarm) {
-    notes.push(T("l5r4.ui.combat.disarmNote"));
-  }
-  if (maneuvers.extraAttack) {
-    notes.push(T("l5r4.ui.combat.extraAttackNote"));
-  }
-  return notes;
 }

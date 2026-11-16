@@ -8,10 +8,8 @@
  */
 
 import { BAG_KINDS } from "../config/rule-keys.js";
-import { STATUS_EFFECTS } from "../config/status-effects.js";
 import { testPredicate } from "./predicate.js";
 import { getRuleValue } from "./rule-values.js";
-import { getStackedModifiers } from "./modifier-stacking.js";
 
 /**
  * @typedef {object} RuleEntry
@@ -29,43 +27,6 @@ import { getStackedModifiers } from "./modifier-stacking.js";
  * @property {string} key
  * @property {string} message
  */
-
-/**
- * Parse the rules a user typed as JSON. The engine validates each rule's fields; this checks the shape: a list of
- * objects, each with a string `key`. A list with one Note rule gives `{ rules }`; "{" gives an "invalidJson" error
- * with the parser's message.
- * @param {string} text
- * @returns {{rules?: object[], error?: "invalidJson"|"notList", detail?: string}}
- */
-export function parseRulesJson(text) {
-  let rules;
-  try {
-    rules = JSON.parse(text.trim() || "[]");
-  } catch (err) {
-    return { error: "invalidJson", detail: err.message };
-  }
-  const isRule = rule =>
-    rule !== null &&
-    typeof rule === "object" &&
-    !Array.isArray(rule) &&
-    typeof rule.key === "string";
-  if (!Array.isArray(rules) || !rules.every(isRule)) {
-    return { error: "notList" };
-  }
-  return { rules };
-}
-
-/**
- * A copy of the rules a status effect carries (module/config/status-effects.js), for every path that creates the
- * effect without ActiveEffect.fromStatusEffect.
- * @param {string} statusId
- * @returns {object[]} Empty for a status without rules.
- */
-export function getStatusRules(statusId) {
-  return structuredClone(
-    STATUS_EFFECTS.find(status => status.id === statusId)?.system?.rules ?? []
-  );
-}
 
 /**
  * Roll options added by RollOption rules: an option without a toggle is always on; a toggle is on when its
@@ -273,44 +234,6 @@ export function getDerivedRuleOutputs(entries, rollData, options) {
     bag,
     errors
   };
-}
-
-/**
- * Bag entries of one kind for any of the selectors, whose predicates hold for the options. An entry from a weapon
- * counts only for a roll made with that weapon.
- * @param {Record<string, Record<string, object[]>>} bag
- * @param {string} kind - A BAG_KINDS value.
- * @param {object} match
- * @param {string[]} match.selectors
- * @param {Set<string>} match.options
- * @param {string|null} [match.weaponId=null] - The weapon the roll is made with
- * @returns {object[]}
- */
-export function getBagEntries(bag, kind, { selectors, options, weaponId = null }) {
-  const byKind = bag?.[kind] ?? {};
-  return selectors
-    .flatMap(selector => byKind[selector] ?? [])
-    .filter(entry => !entry.weaponId || entry.weaponId === weaponId)
-    .filter(entry => testPredicate(entry.predicate, options));
-}
-
-/**
- * The roll, keep, and total bonus the RollModifier rules give rolls with any of the selectors, stacked: what a
- * sheet shows in a formula such as a Skill's "7k3", before the roll dialog adds its situational choices. Optional
- * modifiers and those limited to one attack range wait for the dialog.
- * @param {Record<string, Record<string, object[]>>} bag
- * @param {string[]} selectors
- * @param {object} match
- * @param {Set<string>} match.options
- * @param {string|null} [match.weaponId=null] - The weapon the formula is for
- * @returns {{roll: number, keep: number, total: number}}
- */
-export function getSelectorBonus(bag, selectors, { options, weaponId = null }) {
-  return getStackedModifiers(
-    getBagEntries(bag, "rollModifiers", { selectors, options, weaponId }).filter(
-      e => !e.optional && !e.range
-    )
-  );
 }
 
 /**
