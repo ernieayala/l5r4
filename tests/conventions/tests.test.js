@@ -98,6 +98,24 @@ function testCallsOf(text) {
 }
 
 /**
+ * Whether a `registerBatch` call forwards a batch it was handed: its id is a parameter of a function around it, as a
+ * wrapper of the Quench API passes on the id its caller gave. Such a call registers no batch of its own.
+ * @param {object} idNode - The call's first argument
+ * @param {object[]} ancestors - The nodes above the call
+ * @returns {boolean} True for a forwarding call
+ */
+function isForwardedBatch(idNode, ancestors) {
+  return (
+    idNode?.type === "Identifier" &&
+    ancestors.some(
+      node =>
+        /Function/.test(node.type) &&
+        node.params.some(param => param.type === "Identifier" && param.name === idNode.name)
+    )
+  );
+}
+
+/**
  * The Quench batches a file registers: each id as written, its display name, and its line.
  * @param {string} text - The Quench file
  * @returns {{id: string|null, literalId: boolean, displayName: string|null, line: number}[]} The batches
@@ -108,11 +126,12 @@ function batchesOf(text) {
     return [];
   }
   const batches = [];
-  walkAst(parsed.ast, node => {
+  walkAst(parsed.ast, (node, ancestors) => {
     if (
       node.type !== "CallExpression" ||
       node.callee.type !== "MemberExpression" ||
-      node.callee.property.name !== "registerBatch"
+      node.callee.property.name !== "registerBatch" ||
+      isForwardedBatch(node.arguments[0], ancestors)
     ) {
       return;
     }
